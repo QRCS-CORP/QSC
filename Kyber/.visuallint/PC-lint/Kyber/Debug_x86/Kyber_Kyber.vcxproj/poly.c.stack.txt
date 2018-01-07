@@ -1,0 +1,11 @@
+"poly_add",16,finite,56,"barrett_reduce", (external)
+"poly_compress",52,finite,92,"freeze", (external)
+"poly_decompress",12,finite,12,"no function",
+"poly_frombytes",12,finite,12,"no function",
+"poly_frommsg",20,finite,20,"no function",
+"poly_getnoise",304,finite,344,"shake256", (external)
+"poly_invntt",4,finite,44,"invntt", (external)
+"poly_ntt",4,finite,44,"ntt", (external)
+"poly_sub",16,finite,56,"barrett_reduce", (external)
+"poly_tobytes",32,finite,72,"freeze", (external)
+"poly_tomsg",20,finite,60,"freeze", (external)

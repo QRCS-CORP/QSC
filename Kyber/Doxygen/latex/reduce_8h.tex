@@ -1,0 +1,84 @@
+\hypertarget{reduce_8h}{}\section{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/reduce.h File Reference}
+\label{reduce_8h}\index{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/reduce.\+h@{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/reduce.\+h}}
+
+
+{\bfseries Kyber polynomial reduction functions} ~\newline
+This is an internal class.  
+
+
+{\ttfamily \#include $<$stdint.\+h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint16\+\_\+t \hyperlink{reduce_8h_a3bdd66af6b053264212d46cb4c22ffc0}{barrett\+\_\+reduce} (uint16\+\_\+t x)
+\begin{DoxyCompactList}\small\item\em Barrett reduction; given a 16-\/bit integer a, computes 16-\/bit integer congruent to a mod q in \{0,...,11768\}. \end{DoxyCompactList}\item 
+uint16\+\_\+t \hyperlink{reduce_8h_a4500fd795fd1c535cabba9a94307a6a5}{freeze} (uint16\+\_\+t x)
+\begin{DoxyCompactList}\small\item\em Full reduction; given a 16-\/bit integer a, computes unsigned integer a mod q. \end{DoxyCompactList}\item 
+uint16\+\_\+t \hyperlink{reduce_8h_a8c9ee0685391fd66fac1ade20c0465c3}{montgomery\+\_\+reduce} (uint32\+\_\+t x)
+\begin{DoxyCompactList}\small\item\em Montgomery reduction; given a 32-\/bit integer a, computes 16-\/bit integer congruent to a $\ast$ R$^\wedge$-\/1 mod q, where R=2$^\wedge$18 (see value of rlog). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+{\bfseries Kyber polynomial reduction functions} ~\newline
+This is an internal class. 
+
+\begin{DoxyDate}{Date}
+January 07, 2018 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\hypertarget{reduce_8h_a3bdd66af6b053264212d46cb4c22ffc0}{}\index{reduce.\+h@{reduce.\+h}!barrett\+\_\+reduce@{barrett\+\_\+reduce}}
+\index{barrett\+\_\+reduce@{barrett\+\_\+reduce}!reduce.\+h@{reduce.\+h}}
+\subsubsection[{barrett\+\_\+reduce}]{\setlength{\rightskip}{0pt plus 5cm}uint16\+\_\+t barrett\+\_\+reduce (
+\begin{DoxyParamCaption}
+\item[{uint16\+\_\+t}]{x}
+\end{DoxyParamCaption}
+)}\label{reduce_8h_a3bdd66af6b053264212d46cb4c22ffc0}
+
+
+Barrett reduction; given a 16-\/bit integer a, computes 16-\/bit integer congruent to a mod q in \{0,...,11768\}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Input unsigned integer to be reduced \\
+\hline
+\end{DoxyParams}
+\hypertarget{reduce_8h_a4500fd795fd1c535cabba9a94307a6a5}{}\index{reduce.\+h@{reduce.\+h}!freeze@{freeze}}
+\index{freeze@{freeze}!reduce.\+h@{reduce.\+h}}
+\subsubsection[{freeze}]{\setlength{\rightskip}{0pt plus 5cm}uint16\+\_\+t freeze (
+\begin{DoxyParamCaption}
+\item[{uint16\+\_\+t}]{x}
+\end{DoxyParamCaption}
+)}\label{reduce_8h_a4500fd795fd1c535cabba9a94307a6a5}
+
+
+Full reduction; given a 16-\/bit integer a, computes unsigned integer a mod q. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Input unsigned integer to be reduced \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+unsigned integer in \{0,...,q-\/1\} congruent to a modulo q 
+\end{DoxyReturn}
+\hypertarget{reduce_8h_a8c9ee0685391fd66fac1ade20c0465c3}{}\index{reduce.\+h@{reduce.\+h}!montgomery\+\_\+reduce@{montgomery\+\_\+reduce}}
+\index{montgomery\+\_\+reduce@{montgomery\+\_\+reduce}!reduce.\+h@{reduce.\+h}}
+\subsubsection[{montgomery\+\_\+reduce}]{\setlength{\rightskip}{0pt plus 5cm}uint16\+\_\+t montgomery\+\_\+reduce (
+\begin{DoxyParamCaption}
+\item[{uint32\+\_\+t}]{x}
+\end{DoxyParamCaption}
+)}\label{reduce_8h_a8c9ee0685391fd66fac1ade20c0465c3}
+
+
+Montgomery reduction; given a 32-\/bit integer a, computes 16-\/bit integer congruent to a $\ast$ R$^\wedge$-\/1 mod q, where R=2$^\wedge$18 (see value of rlog). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Input unsigned integer to be reduced; has to be in \{0,...,2281446912\} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+unsigned integer in \{0,...,2$^\wedge$13-\/1\} congruent to a $\ast$ R$^\wedge$-\/1 modulo q 
+\end{DoxyReturn}

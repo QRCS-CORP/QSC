@@ -5,7 +5,7 @@
 *
 * \author John Underhill
 * \date December 29, 2017
-* \remarks For usage examples, see sha3_test.h
+* \remarks For usage examples, see sha3_kat.h
 */
 
 #ifndef OQS_SHA3_H

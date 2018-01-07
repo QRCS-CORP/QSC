@@ -1,0 +1,6 @@
+
+--- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\indcpa.c (C)
+
+    
+#include <stdint.h>
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\indcpa.h(12): error 322: (Error -- Unable to open include file 'stdint.h')

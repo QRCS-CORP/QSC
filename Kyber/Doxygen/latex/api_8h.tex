@@ -1,0 +1,134 @@
+\hypertarget{api_8h}{}\section{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/api.h File Reference}
+\label{api_8h}\index{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/api.\+h@{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/api.\+h}}
+
+
+{\bfseries Kyber header definition} ~\newline
+Contains the public api for the Kyber implementation.  
+
+
+{\ttfamily \#include \char`\"{}params.\+h\char`\"{}}\\*
+{\ttfamily \#include $<$stdint.\+h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{api_8h_a15a0b213afe1dabb9286f9f92a05251e}{C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a7f9a2f9ae6937442f988816af97babb3}{K\+Y\+B\+E\+R\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{api_8h_ad3ae9ccc17354eeb4bfd498a1b76e938}{C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a7663b32715a32f12eb70420793753ce3}{K\+Y\+B\+E\+R\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{api_8h_a258382115ab5fef86c334e6dcc9069ac}{C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a356cca49fc302b0c34c18f4bbda6e5fe}{K\+Y\+B\+E\+R\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{api_8h_a091b7456f2796811d5ffbfccbfdabbfd}{C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a132bbc78e88ea5e14e93e0963dd5d0f9}{K\+Y\+B\+E\+R\+\_\+\+S\+Y\+M\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{api_8h_a4ee5ebe5981b4239b3b2adaa732cb1f1}{C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E}~\char`\"{}Kyber768\char`\"{}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int32\+\_\+t \hyperlink{api_8h_a83b910c83901777186892cc0fc47fd41}{crypto\+\_\+kem\+\_\+keypair} (uint8\+\_\+t $\ast$pk, uint8\+\_\+t $\ast$sk)
+\begin{DoxyCompactList}\small\item\em Generates public and private key for C\+C\+A-\/secure Kyber key encapsulation mechanism. \end{DoxyCompactList}\item 
+int32\+\_\+t \hyperlink{api_8h_a9e139a2bde0006e9c5ce4047d0c17884}{crypto\+\_\+kem\+\_\+enc} (uint8\+\_\+t $\ast$ct, uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$pk)
+\begin{DoxyCompactList}\small\item\em Generates cipher text and shared secret for given public key. \end{DoxyCompactList}\item 
+int32\+\_\+t \hyperlink{api_8h_a30443a36827114b04ee9d051811ac28f}{crypto\+\_\+kem\+\_\+dec} (uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$ct, const uint8\+\_\+t $\ast$sk)
+\begin{DoxyCompactList}\small\item\em Generates shared secret for given cipher text and private key. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+{\bfseries Kyber header definition} ~\newline
+Contains the public api for the Kyber implementation. 
+
+\begin{DoxyDate}{Date}
+January 04, 2018 
+\end{DoxyDate}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{api_8h_a4ee5ebe5981b4239b3b2adaa732cb1f1}{}\index{api.\+h@{api.\+h}!C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E@{C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E}}
+\index{C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E@{C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E}!api.\+h@{api.\+h}}
+\subsubsection[{C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E~\char`\"{}Kyber768\char`\"{}}\label{api_8h_a4ee5ebe5981b4239b3b2adaa732cb1f1}
+The Kyber implementation name \hypertarget{api_8h_a091b7456f2796811d5ffbfccbfdabbfd}{}\index{api.\+h@{api.\+h}!C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S}}
+\index{C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S}!api.\+h@{api.\+h}}
+\subsubsection[{C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S~{\bf K\+Y\+B\+E\+R\+\_\+\+S\+Y\+M\+B\+Y\+T\+E\+S}}\label{api_8h_a091b7456f2796811d5ffbfccbfdabbfd}
+The byte size of the shared symmetric key array \hypertarget{api_8h_a258382115ab5fef86c334e6dcc9069ac}{}\index{api.\+h@{api.\+h}!C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}}
+\index{C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}!api.\+h@{api.\+h}}
+\subsubsection[{C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S~{\bf K\+Y\+B\+E\+R\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}}\label{api_8h_a258382115ab5fef86c334e6dcc9069ac}
+The byte size of the cipher-\/text array \hypertarget{api_8h_ad3ae9ccc17354eeb4bfd498a1b76e938}{}\index{api.\+h@{api.\+h}!C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}}
+\index{C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}!api.\+h@{api.\+h}}
+\subsubsection[{C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S~{\bf K\+Y\+B\+E\+R\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}}\label{api_8h_ad3ae9ccc17354eeb4bfd498a1b76e938}
+The byte size of the public key array \hypertarget{api_8h_a15a0b213afe1dabb9286f9f92a05251e}{}\index{api.\+h@{api.\+h}!C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}}
+\index{C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S@{C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}!api.\+h@{api.\+h}}
+\subsubsection[{C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S~{\bf K\+Y\+B\+E\+R\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}}\label{api_8h_a15a0b213afe1dabb9286f9f92a05251e}
+The byte size of the secret key array 
+
+\subsection{Function Documentation}
+\hypertarget{api_8h_a30443a36827114b04ee9d051811ac28f}{}\index{api.\+h@{api.\+h}!crypto\+\_\+kem\+\_\+dec@{crypto\+\_\+kem\+\_\+dec}}
+\index{crypto\+\_\+kem\+\_\+dec@{crypto\+\_\+kem\+\_\+dec}!api.\+h@{api.\+h}}
+\subsubsection[{crypto\+\_\+kem\+\_\+dec}]{\setlength{\rightskip}{0pt plus 5cm}int32\+\_\+t crypto\+\_\+kem\+\_\+dec (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{ss, }
+\item[{const uint8\+\_\+t $\ast$}]{ct, }
+\item[{const uint8\+\_\+t $\ast$}]{sk}
+\end{DoxyParamCaption}
+)}\label{api_8h_a30443a36827114b04ee9d051811ac28f}
+
+
+Generates shared secret for given cipher text and private key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ss} & Pointer to output shared secret (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em ct} & Pointer to input cipher text (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em sk} & Pointer to input private key (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns zero for success 
+\end{DoxyReturn}
+\hypertarget{api_8h_a9e139a2bde0006e9c5ce4047d0c17884}{}\index{api.\+h@{api.\+h}!crypto\+\_\+kem\+\_\+enc@{crypto\+\_\+kem\+\_\+enc}}
+\index{crypto\+\_\+kem\+\_\+enc@{crypto\+\_\+kem\+\_\+enc}!api.\+h@{api.\+h}}
+\subsubsection[{crypto\+\_\+kem\+\_\+enc}]{\setlength{\rightskip}{0pt plus 5cm}int32\+\_\+t crypto\+\_\+kem\+\_\+enc (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{ct, }
+\item[{uint8\+\_\+t $\ast$}]{ss, }
+\item[{const uint8\+\_\+t $\ast$}]{pk}
+\end{DoxyParamCaption}
+)}\label{api_8h_a9e139a2bde0006e9c5ce4047d0c17884}
+
+
+Generates cipher text and shared secret for given public key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ct} & Pointer to output cipher text (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em ss} & Pointer to output shared secret (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em pk} & Pointer to input public key (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns zero for success 
+\end{DoxyReturn}
+\hypertarget{api_8h_a83b910c83901777186892cc0fc47fd41}{}\index{api.\+h@{api.\+h}!crypto\+\_\+kem\+\_\+keypair@{crypto\+\_\+kem\+\_\+keypair}}
+\index{crypto\+\_\+kem\+\_\+keypair@{crypto\+\_\+kem\+\_\+keypair}!api.\+h@{api.\+h}}
+\subsubsection[{crypto\+\_\+kem\+\_\+keypair}]{\setlength{\rightskip}{0pt plus 5cm}int32\+\_\+t crypto\+\_\+kem\+\_\+keypair (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{pk, }
+\item[{uint8\+\_\+t $\ast$}]{sk}
+\end{DoxyParamCaption}
+)}\label{api_8h_a83b910c83901777186892cc0fc47fd41}
+
+
+Generates public and private key for C\+C\+A-\/secure Kyber key encapsulation mechanism. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pk} & Pointer to output public key (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em sk} & Pointer to output private key (an already allocated array of C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns zero for success 
+\end{DoxyReturn}

@@ -1,0 +1,8 @@
+An implementation of Kyber based on the pq-crystals Kyber branch:
+https://github.com/pq-crystals/kyber
+
+Updated to Misra C 2004 compliance, with some changes and additions made.
+
+This software is released to the Public Domain
+
+John G. Underhill, January 07, 2018

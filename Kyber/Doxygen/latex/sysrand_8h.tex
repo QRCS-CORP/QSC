@@ -1,0 +1,73 @@
+\hypertarget{sysrand_8h}{}\section{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/sysrand.h File Reference}
+\label{sysrand_8h}\index{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/sysrand.\+h@{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/sysrand.\+h}}
+
+
+{\bfseries System random provider} ~\newline
+Provides access to either the Windows Crypt\+Gen\+Random provider or the /dev/urandom pool on posix systems.  
+
+
+{\ttfamily \#include $<$stdint.\+h$>$}\\*
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{sysrand_8h_a2655530e50570968a2a13b78978e3355}{R\+A\+N\+D\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+T\+A\+T\+U\+S} \{ \hyperlink{sysrand_8h_a2655530e50570968a2a13b78978e3355a59c335dc64a7b2d04fa8abf6e0f5e46e}{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+F\+A\+I\+L\+U\+R\+E} = 0, 
+\hyperlink{sysrand_8h_a2655530e50570968a2a13b78978e3355a909a523208f02b858cede1917af3794b}{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+S\+U\+C\+C\+E\+S\+S} = 1
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int32\+\_\+t \hyperlink{sysrand_8h_a79f005a6308933500edfa979f7a47022}{sysrand\+\_\+getbytes} (uint8\+\_\+t $\ast$buffer, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Get an array of pseudo-\/random bytes from the system entropy provider. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+{\bfseries System random provider} ~\newline
+Provides access to either the Windows Crypt\+Gen\+Random provider or the /dev/urandom pool on posix systems. 
+
+\begin{DoxyAuthor}{Author}
+John Underhill 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+January 06, 2018 
+\end{DoxyDate}
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{sysrand_8h_a2655530e50570968a2a13b78978e3355}{}\index{sysrand.\+h@{sysrand.\+h}!R\+A\+N\+D\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+T\+A\+T\+U\+S@{R\+A\+N\+D\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+T\+A\+T\+U\+S}}
+\index{R\+A\+N\+D\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+T\+A\+T\+U\+S@{R\+A\+N\+D\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+T\+A\+T\+U\+S}!sysrand.\+h@{sysrand.\+h}}
+\subsubsection[{R\+A\+N\+D\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+T\+A\+T\+U\+S}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf R\+A\+N\+D\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+T\+A\+T\+U\+S}}\label{sysrand_8h_a2655530e50570968a2a13b78978e3355}
+The random generation success state \begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+F\+A\+I\+L\+U\+R\+E@{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+F\+A\+I\+L\+U\+R\+E}!sysrand.\+h@{sysrand.\+h}}\index{sysrand.\+h@{sysrand.\+h}!R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+F\+A\+I\+L\+U\+R\+E@{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+F\+A\+I\+L\+U\+R\+E}}\item[{\em 
+\hypertarget{sysrand_8h_a2655530e50570968a2a13b78978e3355a59c335dc64a7b2d04fa8abf6e0f5e46e}{}R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+F\+A\+I\+L\+U\+R\+E\label{sysrand_8h_a2655530e50570968a2a13b78978e3355a59c335dc64a7b2d04fa8abf6e0f5e46e}
+}]signals generator failure \index{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+S\+U\+C\+C\+E\+S\+S@{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+S\+U\+C\+C\+E\+S\+S}!sysrand.\+h@{sysrand.\+h}}\index{sysrand.\+h@{sysrand.\+h}!R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+S\+U\+C\+C\+E\+S\+S@{R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+S\+U\+C\+C\+E\+S\+S}}\item[{\em 
+\hypertarget{sysrand_8h_a2655530e50570968a2a13b78978e3355a909a523208f02b858cede1917af3794b}{}R\+A\+N\+D\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+S\+U\+C\+C\+E\+S\+S\label{sysrand_8h_a2655530e50570968a2a13b78978e3355a909a523208f02b858cede1917af3794b}
+}]signals generator success \end{description}
+\end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{sysrand_8h_a79f005a6308933500edfa979f7a47022}{}\index{sysrand.\+h@{sysrand.\+h}!sysrand\+\_\+getbytes@{sysrand\+\_\+getbytes}}
+\index{sysrand\+\_\+getbytes@{sysrand\+\_\+getbytes}!sysrand.\+h@{sysrand.\+h}}
+\subsubsection[{sysrand\+\_\+getbytes}]{\setlength{\rightskip}{0pt plus 5cm}int32\+\_\+t sysrand\+\_\+getbytes (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{buffer, }
+\item[{size\+\_\+t}]{length}
+\end{DoxyParamCaption}
+)}\label{sysrand_8h_a79f005a6308933500edfa979f7a47022}
+
+
+Get an array of pseudo-\/random bytes from the system entropy provider. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to the output byte array \\
+\hline
+{\em length} & The number of bytes to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns one for success, zero for failure 
+\end{DoxyReturn}
