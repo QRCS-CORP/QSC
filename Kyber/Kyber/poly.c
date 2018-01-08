@@ -83,14 +83,14 @@ void poly_frombytes(poly* r, const uint8_t* a)
 
 	for (i = 0; i < KYBER_N / 8; i++)
 	{
-		r->coeffs[8 * i] = a[13 * i] | (((uint16_t)a[(13 * i) + 1] & 0x1F) << 8);
-		r->coeffs[(8 * i) + 1] = (a[(13 * i) + 1] >> 5) | (((uint16_t)a[(13 * i) + 2]) << 3) | (((uint16_t)a[(13 * i) + 3] & 0x03) << 11);
-		r->coeffs[(8 * i) + 2] = (a[(13 * i) + 3] >> 2) | (((uint16_t)a[(13 * i) + 4] & 0x7F) << 6);
-		r->coeffs[(8 * i) + 3] = (a[(13 * i) + 4] >> 7) | (((uint16_t)a[(13 * i) + 5]) << 1) | (((uint16_t)a[(13 * i) + 6] & 0x0F) << 9);
-		r->coeffs[(8 * i) + 4] = (a[(13 * i) + 6] >> 4) | (((uint16_t)a[(13 * i) + 7]) << 4) | (((uint16_t)a[(13 * i) + 8] & 0x01) << 12);
-		r->coeffs[(8 * i) + 5] = (a[(13 * i) + 8] >> 1) | (((uint16_t)a[(13 * i) + 9] & 0x3F) << 7);
-		r->coeffs[(8 * i) + 6] = (a[(13 * i) + 9] >> 6) | (((uint16_t)a[(13 * i) + 10]) << 2) | (((uint16_t)a[(13 * i) + 11] & 0x07) << 10);
-		r->coeffs[(8 * i) + 7] = (a[(13 * i) + 11] >> 3) | (((uint16_t)a[(13 * i) + 12]) << 5);
+		r->coeffs[8 * i] = (a[13 * i] | (((uint16_t)a[(13 * i) + 1] & 0x1F) << 8));
+		r->coeffs[(8 * i) + 1] = ((a[(13 * i) + 1] >> 5) | (((uint16_t)a[(13 * i) + 2]) << 3) | (((uint16_t)a[(13 * i) + 3] & 0x03) << 11));
+		r->coeffs[(8 * i) + 2] = ((a[(13 * i) + 3] >> 2) | (((uint16_t)a[(13 * i) + 4] & 0x7F) << 6));
+		r->coeffs[(8 * i) + 3] = ((a[(13 * i) + 4] >> 7) | (((uint16_t)a[(13 * i) + 5]) << 1) | (((uint16_t)a[(13 * i) + 6] & 0x0F) << 9));
+		r->coeffs[(8 * i) + 4] = ((a[(13 * i) + 6] >> 4) | (((uint16_t)a[(13 * i) + 7]) << 4) | (((uint16_t)a[(13 * i) + 8] & 0x01) << 12));
+		r->coeffs[(8 * i) + 5] = ((a[(13 * i) + 8] >> 1) | (((uint16_t)a[(13 * i) + 9] & 0x3F) << 7));
+		r->coeffs[(8 * i) + 6] = ((a[(13 * i) + 9] >> 6) | (((uint16_t)a[(13 * i) + 10]) << 2) | (((uint16_t)a[(13 * i) + 11] & 0x07) << 10));
+		r->coeffs[(8 * i) + 7] = ((a[(13 * i) + 11] >> 3) | (((uint16_t)a[(13 * i) + 12]) << 5));
 	}
 }
 
@@ -161,7 +161,7 @@ void poly_frommsg(poly* r, const uint8_t msg[KYBER_SYMBYTES])
 		for (j = 0; j < 8; j++)
 		{
 			mask = -((msg[i] >> j) & 1);
-			r->coeffs[(8 * i) + j] = mask & ((KYBER_Q + 1) / 2);
+			r->coeffs[(8 * i) + j] = (mask & ((KYBER_Q + 1) / 2));
 		}
 	}
 }

@@ -80,6 +80,8 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 
 #else
 
+	/* Performs rejection sampling on output of SHAKE-128 */
+
 	uint8_t extseed[KYBER_SYMBYTES + 2];
 
 	for (i = 0; i < KYBER_SYMBYTES; i++)
@@ -238,6 +240,7 @@ void indcpa_keypair(uint8_t* pk, uint8_t* sk)
 
 	polyvec_invntt(&pkpv);
 	polyvec_add(&pkpv, &pkpv, &e);
+
 	pack_sk(sk, &skpv);
 	pack_pk(pk, &pkpv, publicseed);
 }

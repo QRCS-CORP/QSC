@@ -25,7 +25,7 @@ int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 
 	sha3_compute256(sk + (KYBER_SECRETKEYBYTES - (2 * KYBER_SYMBYTES)), pk, KYBER_PUBLICKEYBYTES);
 
-	/* Value z for pseudo-random output on reject */
+	/* value z for pseudo-random output on reject */
 	rstat = sysrand_getbytes(sk + KYBER_SECRETKEYBYTES - KYBER_SYMBYTES, KYBER_SYMBYTES);
 	assert(rstat == RAND_STATUS_SUCCESS);
 
@@ -34,7 +34,7 @@ int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 
 int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 {
-	/* Will contain key, coins */
+	/* will contain key, coins */
 	uint8_t  kr[2 * KYBER_SYMBYTES];
 	uint8_t buf[2 * KYBER_SYMBYTES];
 	int32_t rstat;
@@ -42,9 +42,9 @@ int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	rstat = sysrand_getbytes(buf, KYBER_SYMBYTES);
 	assert(rstat == RAND_STATUS_SUCCESS);
 
-	/* Don't release system RNG output */
+	/* don't release system RNG output */
 	sha3_compute256(buf, buf, KYBER_SYMBYTES);
-	/* Multitarget countermeasure for coins + contributory KEM */
+	/* multitarget countermeasure for coins + contributory KEM */
 	sha3_compute256(buf + KYBER_SYMBYTES, pk, KYBER_PUBLICKEYBYTES);
 	sha3_compute512(kr, buf, 2 * KYBER_SYMBYTES);
 	/* coins are in kr+KYBER_SYMBYTES */
@@ -62,17 +62,17 @@ int32_t crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	const uint8_t* pk = sk + KYBER_INDCPA_SECRETKEYBYTES;
 	uint8_t buf[2 * KYBER_SYMBYTES];
 	uint8_t cmp[KYBER_CIPHERTEXTBYTES];
-	/* Will contain key, coins, qrom-hash */
+	/* will contain key, coins, qrom-hash */
 	uint8_t kr[2 * KYBER_SYMBYTES];
 	size_t i;
 	int32_t fail;
 
 	indcpa_dec(buf, ct, sk);
 
-	/* Multitarget countermeasure for coins + contributory KEM */
+	/* multitarget countermeasure for coins + contributory KEM */
 	for (i = 0; i < KYBER_SYMBYTES; i++)
 	{
-		/* Save hash by storing H(pk) in sk */
+		/* save hash by storing H(pk) in sk */
 		buf[KYBER_SYMBYTES + i] = sk[(KYBER_SECRETKEYBYTES - (2 * KYBER_SYMBYTES)) + i];
 	}
 
@@ -83,7 +83,7 @@ int32_t crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	fail = verify(ct, cmp, KYBER_CIPHERTEXTBYTES);
 	/* overwrite coins in kr with H(c)  */
 	sha3_compute256(kr + KYBER_SYMBYTES, ct, KYBER_CIPHERTEXTBYTES);
-	/* Overwrite pre-k with z on re-encryption failure */
+	/* overwrite pre-k with z on re-encryption failure */
 	cmov(kr, sk + KYBER_SECRETKEYBYTES - KYBER_SYMBYTES, KYBER_SYMBYTES, fail);
 	/* hash concatenation of pre-k and H(c) to k */
 	sha3_compute256(ss, kr, 2 * KYBER_SYMBYTES);
