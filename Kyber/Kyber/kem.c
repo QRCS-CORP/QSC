@@ -1,9 +1,8 @@
-#include "api.h"
+#include "kem.h"
 #include "indcpa.h"
 #include "sysrand.h"
 #include "sha3.h"
 #include "verify.h"
-#include <assert.h>
 
 int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 {
@@ -15,8 +14,7 @@ int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 	/* si = pk+sk+smb*2
 	   si= k2-1632, k3-2400, k4-3168
 	   pk= k2-736, k3-1088, k4-1440
-	   sk= k2-832, k3-1248, k4-1664 
-	*/
+	   sk= k2-832, k3-1248, k4-1664 */
 
 	for (i = 0; i < KYBER_INDCPA_PUBLICKEYBYTES; i++)
 	{
@@ -27,9 +25,8 @@ int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 
 	/* value z for pseudo-random output on reject */
 	rstat = sysrand_getbytes(sk + KYBER_SECRETKEYBYTES - KYBER_SYMBYTES, KYBER_SYMBYTES);
-	assert(rstat == RAND_STATUS_SUCCESS);
 
-	return 0;
+	return rstat;
 }
 
 int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
@@ -40,7 +37,6 @@ int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	int32_t rstat;
 
 	rstat = sysrand_getbytes(buf, KYBER_SYMBYTES);
-	assert(rstat == RAND_STATUS_SUCCESS);
 
 	/* don't release system RNG output */
 	sha3_compute256(buf, buf, KYBER_SYMBYTES);
@@ -54,7 +50,7 @@ int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	/* hash concatenation of pre-k and H(c) to k */
 	sha3_compute256(ss, kr, 2 * KYBER_SYMBYTES);
 
-	return 0;
+	return rstat;
 }
 
 int32_t crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
@@ -88,5 +84,5 @@ int32_t crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	/* hash concatenation of pre-k and H(c) to k */
 	sha3_compute256(ss, kr, 2 * KYBER_SYMBYTES);
 
-	return fail;
+	return (fail == 0) ? KYBER_CRYPTO_SUCCESS : KYBER_CRYPTO_FAILURE;
 }

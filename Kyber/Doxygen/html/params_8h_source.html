@@ -93,58 +93,62 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#ifndef PARAMS_H</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#define PARAMS_H</span></div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#ifndef KYBER_K</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="params_8h.html#a1e66e19d25aceeae49d1184a077f92db">   19</a></span>&#160;<span class="preprocessor">#   define KYBER_K 3</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
-<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="params_8h.html#a356aef01903d0ed3f30347d427fe7735">   27</a></span>&#160;<span class="preprocessor">#define MATRIX_GENERATOR_CSHAKE</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="params_8h.html#add4f22a10cc799b6846a517183c7f4cb">   33</a></span>&#160;<span class="preprocessor">#define KYBER_N 256</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="params_8h.html#a874d765cb6e25f657aec2f225d8505a6">   39</a></span>&#160;<span class="preprocessor">#define KYBER_Q 7681</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor">#if (KYBER_K == 2)</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="comment">/* Kyber512 */</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor">#   define KYBER_ETA 5</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="preprocessor">#elif (KYBER_K == 3) </span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="comment">/* Kyber768 */</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="params_8h.html#ac8c59c0803b7f85b57e4b585fce7076e">   50</a></span>&#160;<span class="preprocessor">#   define KYBER_ETA 4</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#elif (KYBER_K == 4) </span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="comment">/* Kyber1024 */</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#   define KYBER_ETA 3</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#   error &quot;KYBER_K must be in {2,3,4}&quot;</span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="params_8h.html#a132bbc78e88ea5e14e93e0963dd5d0f9">   62</a></span>&#160;<span class="preprocessor">#define KYBER_SYMBYTES 32</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
-<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="params_8h.html#af66bcd4f5c1ee3377ed637b38ed8f356">   68</a></span>&#160;<span class="preprocessor">#define KYBER_POLYBYTES 416</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
-<div class="line"><a name="l00074"></a><span class="lineno"><a class="line" href="params_8h.html#a51140554139d44ac9793c4d37dddb6c5">   74</a></span>&#160;<span class="preprocessor">#define KYBER_POLYCOMPRESSEDBYTES 96</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
-<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="params_8h.html#a173c9a0c50ab5c98875d52bae2de1858">   80</a></span>&#160;<span class="preprocessor">#define KYBER_POLYVECBYTES (KYBER_K * KYBER_POLYBYTES)</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
-<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="params_8h.html#a13592b90b6472cdf6d69416092fddb40">   86</a></span>&#160;<span class="preprocessor">#define KYBER_POLYVECCOMPRESSEDBYTES (KYBER_K * 352)</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
-<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="params_8h.html#afbda72968986f789dc91f6ca3368a628">   92</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_MSGBYTES KYBER_SYMBYTES</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
-<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="params_8h.html#a4c9f2345946a0d01dc2051b493c2bda4">   98</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_PUBLICKEYBYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_SYMBYTES)</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
-<div class="line"><a name="l00104"></a><span class="lineno"><a class="line" href="params_8h.html#a7258274ad7836627403880fe8dda0cfa">  104</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_SECRETKEYBYTES (KYBER_POLYVECBYTES)</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
-<div class="line"><a name="l00110"></a><span class="lineno"><a class="line" href="params_8h.html#a14d4b725309e5e2664245eedc25ef4c4">  110</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_BYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_POLYCOMPRESSEDBYTES)</span></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
-<div class="line"><a name="l00116"></a><span class="lineno"><a class="line" href="params_8h.html#a7663b32715a32f12eb70420793753ce3">  116</a></span>&#160;<span class="preprocessor">#define KYBER_PUBLICKEYBYTES (KYBER_INDCPA_PUBLICKEYBYTES)</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
-<div class="line"><a name="l00122"></a><span class="lineno"><a class="line" href="params_8h.html#a7f9a2f9ae6937442f988816af97babb3">  122</a></span>&#160;<span class="preprocessor">#define KYBER_SECRETKEYBYTES (KYBER_INDCPA_SECRETKEYBYTES +  KYBER_INDCPA_PUBLICKEYBYTES + (2 * KYBER_SYMBYTES))</span></div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00128"></a><span class="lineno"><a class="line" href="params_8h.html#a356cca49fc302b0c34c18f4bbda6e5fe">  128</a></span>&#160;<span class="preprocessor">#define KYBER_CIPHERTEXTBYTES KYBER_INDCPA_BYTES</span></div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment">/* Modifiable Constants */</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#ifndef KYBER_K</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="params_8h.html#a1e66e19d25aceeae49d1184a077f92db">   21</a></span>&#160;<span class="preprocessor">#   define KYBER_K 3</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="params_8h.html#a356aef01903d0ed3f30347d427fe7735">   29</a></span>&#160;<span class="preprocessor">#define MATRIX_GENERATOR_CSHAKE</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment">/* Internal Constants */</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="params_8h.html#add4f22a10cc799b6846a517183c7f4cb">   37</a></span>&#160;<span class="preprocessor">#define KYBER_N 256</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
+<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="params_8h.html#a874d765cb6e25f657aec2f225d8505a6">   43</a></span>&#160;<span class="preprocessor">#define KYBER_Q 7681</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#if (KYBER_K == 2)</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="comment">/* Kyber512 */</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#   define KYBER_ETA 5</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#elif (KYBER_K == 3) </span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="comment">/* Kyber768 */</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="params_8h.html#ac8c59c0803b7f85b57e4b585fce7076e">   54</a></span>&#160;<span class="preprocessor">#   define KYBER_ETA 4</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#elif (KYBER_K == 4) </span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="comment">/* Kyber1024 */</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#   define KYBER_ETA 3</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#   error &quot;KYBER_K must be in {2,3,4}&quot;</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
+<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="params_8h.html#a132bbc78e88ea5e14e93e0963dd5d0f9">   66</a></span>&#160;<span class="preprocessor">#define KYBER_SYMBYTES 32</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
+<div class="line"><a name="l00072"></a><span class="lineno"><a class="line" href="params_8h.html#af66bcd4f5c1ee3377ed637b38ed8f356">   72</a></span>&#160;<span class="preprocessor">#define KYBER_POLYBYTES 416</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;</div>
+<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="params_8h.html#a51140554139d44ac9793c4d37dddb6c5">   78</a></span>&#160;<span class="preprocessor">#define KYBER_POLYCOMPRESSEDBYTES 96</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;</div>
+<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="params_8h.html#a173c9a0c50ab5c98875d52bae2de1858">   84</a></span>&#160;<span class="preprocessor">#define KYBER_POLYVECBYTES (KYBER_K * KYBER_POLYBYTES)</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
+<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="params_8h.html#a13592b90b6472cdf6d69416092fddb40">   90</a></span>&#160;<span class="preprocessor">#define KYBER_POLYVECCOMPRESSEDBYTES (KYBER_K * 352)</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
+<div class="line"><a name="l00096"></a><span class="lineno"><a class="line" href="params_8h.html#afbda72968986f789dc91f6ca3368a628">   96</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_MSGBYTES KYBER_SYMBYTES</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
+<div class="line"><a name="l00102"></a><span class="lineno"><a class="line" href="params_8h.html#a4c9f2345946a0d01dc2051b493c2bda4">  102</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_PUBLICKEYBYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_SYMBYTES)</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;</div>
+<div class="line"><a name="l00108"></a><span class="lineno"><a class="line" href="params_8h.html#a7258274ad7836627403880fe8dda0cfa">  108</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_SECRETKEYBYTES (KYBER_POLYVECBYTES)</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;</div>
+<div class="line"><a name="l00114"></a><span class="lineno"><a class="line" href="params_8h.html#a14d4b725309e5e2664245eedc25ef4c4">  114</a></span>&#160;<span class="preprocessor">#define KYBER_INDCPA_BYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_POLYCOMPRESSEDBYTES)</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
+<div class="line"><a name="l00120"></a><span class="lineno"><a class="line" href="params_8h.html#a7663b32715a32f12eb70420793753ce3">  120</a></span>&#160;<span class="preprocessor">#define KYBER_PUBLICKEYBYTES (KYBER_INDCPA_PUBLICKEYBYTES)</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
+<div class="line"><a name="l00126"></a><span class="lineno"><a class="line" href="params_8h.html#a7f9a2f9ae6937442f988816af97babb3">  126</a></span>&#160;<span class="preprocessor">#define KYBER_SECRETKEYBYTES (KYBER_INDCPA_SECRETKEYBYTES +  KYBER_INDCPA_PUBLICKEYBYTES + (2 * KYBER_SYMBYTES))</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;</div>
+<div class="line"><a name="l00132"></a><span class="lineno"><a class="line" href="params_8h.html#a356cca49fc302b0c34c18f4bbda6e5fe">  132</a></span>&#160;<span class="preprocessor">#define KYBER_CIPHERTEXTBYTES KYBER_INDCPA_BYTES</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 7 2018 18:41:24 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jan 8 2018 17:54:45 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

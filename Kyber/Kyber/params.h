@@ -9,10 +9,12 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
+/* Modifiable Constants */
+
 /*!
 \def KYBER_K
 * The matrix dimension K
-* Change this for different security strengths. 
+* Change this for different security strengths. \n
 * Valid options are 2: minimal-102bit, 3: strong-128bit, or 4: paranoid-218bit.
 */
 #ifndef KYBER_K
@@ -21,10 +23,12 @@
 
 /*!
 \def MATRIX_GENERATOR_CSHAKE
-* Enable the simple cSHAKE-128 generator for public key polynomial generation.
+* Enable the simple cSHAKE-128 generator for polynomial generation.
 * If disabled, reverts to the SHAKE-128 generator.
 */
 #define MATRIX_GENERATOR_CSHAKE
+
+/* Internal Constants */
 
 /*!
 \def KYBER_N
@@ -87,19 +91,19 @@
 
 /*!
 \def KYBER_INDCPA_MSGBYTES
-*  message size in bytes
+*  The message size in bytes
 */
 #define KYBER_INDCPA_MSGBYTES KYBER_SYMBYTES
 
 /*!
 \def KYBER_INDCPA_PUBLICKEYBYTES
-* The INDCPA formatted public key size in bytes
+* The base INDCPA formatted public key size in bytes
 */
 #define KYBER_INDCPA_PUBLICKEYBYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_SYMBYTES)
 
 /*!
 \def KYBER_INDCPA_SECRETKEYBYTES
-* The INDCPA formatted secret key size in bytes
+* The base INDCPA formatted secret key size in bytes
 */
 #define KYBER_INDCPA_SECRETKEYBYTES (KYBER_POLYVECBYTES)
 
@@ -111,13 +115,13 @@
 
 /*!
 \def KYBER_PUBLICKEYBYTES
-* The public key base size in bytes
+* The public key size in bytes
 */
 #define KYBER_PUBLICKEYBYTES (KYBER_INDCPA_PUBLICKEYBYTES)
 
 /*!
 \def KYBER_SECRETKEYBYTES
-* The 32 bytes of additional space to save H(pk)
+* The secret key size in bytes
 */
 #define KYBER_SECRETKEYBYTES (KYBER_INDCPA_SECRETKEYBYTES +  KYBER_INDCPA_PUBLICKEYBYTES + (2 * KYBER_SYMBYTES))
 

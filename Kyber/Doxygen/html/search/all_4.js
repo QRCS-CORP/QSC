@@ -1,8 +1,26 @@
 var searchData=
 [
-  ['indcpa_2eh',['indcpa.h',['../indcpa_8h.html',1,'']]],
-  ['indcpa_5fdec',['indcpa_dec',['../indcpa_8h.html#a512fdb478a6fef48a9e11f97dfb6c847',1,'indcpa.c']]],
-  ['indcpa_5fenc',['indcpa_enc',['../indcpa_8h.html#a467719770e104707c670c16204a5e261',1,'indcpa.c']]],
-  ['indcpa_5fkeypair',['indcpa_keypair',['../indcpa_8h.html#adcb89ce108d4b377dbeb41ae17ee0e7d',1,'indcpa.c']]],
-  ['invntt',['invntt',['../ntt_8h.html#a66428052ca91188a4abf29a806fe5a4c',1,'ntt.c']]]
+  ['keccak_5fabsorb',['keccak_absorb',['../sha3_8h.html#a426231b1f95b8b10f44061d078630593',1,'sha3.c']]],
+  ['keccak_5fpermute',['keccak_permute',['../sha3_8h.html#a61e2076648ec5340198d9870a344c0c7',1,'sha3.c']]],
+  ['keccak_5fsqueezeblocks',['keccak_squeezeblocks',['../sha3_8h.html#acb7e98a6c872f34cd1b795b2e57a29a4',1,'sha3.c']]],
+  ['kem_2eh',['kem.h',['../kem_8h.html',1,'']]],
+  ['kyber_5fciphertextbytes',['KYBER_CIPHERTEXTBYTES',['../params_8h.html#a356cca49fc302b0c34c18f4bbda6e5fe',1,'params.h']]],
+  ['kyber_5fcrypto_5ffailure',['KYBER_CRYPTO_FAILURE',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865',1,'kem.h']]],
+  ['kyber_5fcrypto_5fstatus',['KYBER_CRYPTO_STATUS',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070',1,'kem.h']]],
+  ['kyber_5fcrypto_5fsuccess',['KYBER_CRYPTO_SUCCESS',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6',1,'kem.h']]],
+  ['kyber_5feta',['KYBER_ETA',['../params_8h.html#ac8c59c0803b7f85b57e4b585fce7076e',1,'params.h']]],
+  ['kyber_5findcpa_5fbytes',['KYBER_INDCPA_BYTES',['../params_8h.html#a14d4b725309e5e2664245eedc25ef4c4',1,'params.h']]],
+  ['kyber_5findcpa_5fmsgbytes',['KYBER_INDCPA_MSGBYTES',['../params_8h.html#afbda72968986f789dc91f6ca3368a628',1,'params.h']]],
+  ['kyber_5findcpa_5fpublickeybytes',['KYBER_INDCPA_PUBLICKEYBYTES',['../params_8h.html#a4c9f2345946a0d01dc2051b493c2bda4',1,'params.h']]],
+  ['kyber_5findcpa_5fsecretkeybytes',['KYBER_INDCPA_SECRETKEYBYTES',['../params_8h.html#a7258274ad7836627403880fe8dda0cfa',1,'params.h']]],
+  ['kyber_5fk',['KYBER_K',['../params_8h.html#a1e66e19d25aceeae49d1184a077f92db',1,'params.h']]],
+  ['kyber_5fn',['KYBER_N',['../params_8h.html#add4f22a10cc799b6846a517183c7f4cb',1,'params.h']]],
+  ['kyber_5fpolybytes',['KYBER_POLYBYTES',['../params_8h.html#af66bcd4f5c1ee3377ed637b38ed8f356',1,'params.h']]],
+  ['kyber_5fpolycompressedbytes',['KYBER_POLYCOMPRESSEDBYTES',['../params_8h.html#a51140554139d44ac9793c4d37dddb6c5',1,'params.h']]],
+  ['kyber_5fpolyvecbytes',['KYBER_POLYVECBYTES',['../params_8h.html#a173c9a0c50ab5c98875d52bae2de1858',1,'params.h']]],
+  ['kyber_5fpolyveccompressedbytes',['KYBER_POLYVECCOMPRESSEDBYTES',['../params_8h.html#a13592b90b6472cdf6d69416092fddb40',1,'params.h']]],
+  ['kyber_5fpublickeybytes',['KYBER_PUBLICKEYBYTES',['../params_8h.html#a7663b32715a32f12eb70420793753ce3',1,'params.h']]],
+  ['kyber_5fq',['KYBER_Q',['../params_8h.html#a874d765cb6e25f657aec2f225d8505a6',1,'params.h']]],
+  ['kyber_5fsecretkeybytes',['KYBER_SECRETKEYBYTES',['../params_8h.html#a7f9a2f9ae6937442f988816af97babb3',1,'params.h']]],
+  ['kyber_5fsymbytes',['KYBER_SYMBYTES',['../params_8h.html#a132bbc78e88ea5e14e93e0963dd5d0f9',1,'params.h']]]
 ];

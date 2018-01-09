@@ -22,7 +22,7 @@ uint16_t barrett_reduce(uint16_t x)
 {
 	uint32_t u;
 
-	/* note: newhope is: u = (((uint32_t)x * 5) >> 16); */
+	/* Note: newhope is: u = (((uint32_t)x * 5) >> 16); */
 	u = x >> 13;
 	u *= KYBER_Q;
 	x -= u;

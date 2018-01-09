@@ -2,6 +2,8 @@
 #include "params.h"
 #include "reduce.h"
 
+/* Note: ntt, invntt, unit tested against original, 01/08/2018 */
+
 static const uint16_t omegas_inv_bitrev_montgomery[KYBER_N / 2] =
 {
 	0x03DEU, 0x00FEU, 0x035EU, 0x13B7U, 0x19BAU, 0x15A2U, 0x1130U, 0x1BBFU,

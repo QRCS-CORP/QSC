@@ -10,7 +10,6 @@
 #define CBD_H
 
 #include "poly.h"
-/*lint !e537 */
 
 /**
 * \brief Given an array of uniformly random bytes, 

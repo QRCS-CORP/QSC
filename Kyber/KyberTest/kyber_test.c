@@ -7,7 +7,7 @@
 * \date January 06, 2018
 */
 
-#include "../Kyber/api.h"
+#include "../Kyber/kem.h"
 #include "../Kyber/poly.h"
 #include "../Kyber/sysrand.h"
 #include <stdio.h>
@@ -45,22 +45,38 @@ int32_t test_keys()
 	uint8_t pk[KYBER_PUBLICKEYBYTES];
 	uint8_t sendb[KYBER_CIPHERTEXTBYTES];
 	uint8_t sk_a[KYBER_SECRETKEYBYTES];
-	uint8_t state = KYBER_STATUS_SUCCESS;
+	uint8_t state;
 	size_t i;
+
+	state = KYBER_STATUS_SUCCESS;
 
 	for (i = 0; i < KYBER_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		crypto_kem_keypair(pk, sk_a);
+		if (crypto_kem_keypair(pk, sk_a) == KYBER_CRYPTO_FAILURE)
+		{
+			state = KYBER_STATUS_FAILURE;
+			return state;
+		}
+
 		/* bob derives a secret key and creates a response */
-		crypto_kem_enc(sendb, key_b, pk);
+		if (crypto_kem_enc(sendb, key_b, pk) == KYBER_CRYPTO_FAILURE)
+		{
+			state = KYBER_STATUS_FAILURE;
+			return state;
+		}
+
 		/* alice uses Bobs response to get her secret key */
-		crypto_kem_dec(key_a, sendb, sk_a);
+		if (crypto_kem_dec(key_a, sendb, sk_a) == KYBER_CRYPTO_FAILURE)
+		{
+			state = KYBER_STATUS_FAILURE;
+			return state;
+		}
 
 		if (memcmp(key_a, key_b, KYBER_SYMBYTES))
 		{
 			state = KYBER_STATUS_FAILURE;
-			break;
+			return state;
 		}
 	}
 

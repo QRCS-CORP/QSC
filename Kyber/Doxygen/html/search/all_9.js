@@ -1,7 +1,21 @@
 var searchData=
 [
-  ['rand_5fgeneration_5fstatus',['RAND_GENERATION_STATUS',['../sysrand_8h.html#a2655530e50570968a2a13b78978e3355',1,'sysrand.h']]],
-  ['rand_5fstatus_5ffailure',['RAND_STATUS_FAILURE',['../sysrand_8h.html#a2655530e50570968a2a13b78978e3355a59c335dc64a7b2d04fa8abf6e0f5e46e',1,'sysrand.h']]],
-  ['rand_5fstatus_5fsuccess',['RAND_STATUS_SUCCESS',['../sysrand_8h.html#a2655530e50570968a2a13b78978e3355a909a523208f02b858cede1917af3794b',1,'sysrand.h']]],
-  ['reduce_2eh',['reduce.h',['../reduce_8h.html',1,'']]]
+  ['sha3_2eh',['sha3.h',['../sha3_8h.html',1,'']]],
+  ['sha3_5f256_5frate',['SHA3_256_RATE',['../sha3_8h.html#ab9de5144a98915cf8c844aa43d034ce5',1,'sha3.h']]],
+  ['sha3_5f512_5frate',['SHA3_512_RATE',['../sha3_8h.html#a73007506dace85201de74725a3f5b7bb',1,'sha3.h']]],
+  ['sha3_5fcompute256',['sha3_compute256',['../sha3_8h.html#a1de1bcb16e5dcc59c15011a1d368946d',1,'sha3.c']]],
+  ['sha3_5fcompute512',['sha3_compute512',['../sha3_8h.html#a3cdd304e2b2d5e152f857e37bf0070e5',1,'sha3.c']]],
+  ['sha3_5fdomain',['SHA3_DOMAIN',['../sha3_8h.html#a2bc143c86f2470efb91f80cf42ce2065',1,'sha3.h']]],
+  ['sha3_5fstatesize',['SHA3_STATESIZE',['../sha3_8h.html#ab7c41f7d3fea656db9ecaccb26540e40',1,'sha3.h']]],
+  ['shake128',['shake128',['../sha3_8h.html#a566626a4b5f46f589b5aa5d2268b1810',1,'sha3.c']]],
+  ['shake128_5fabsorb',['shake128_absorb',['../sha3_8h.html#a87a6c0693f6c2b191c6ede67b0a7babe',1,'sha3.c']]],
+  ['shake128_5frate',['SHAKE128_RATE',['../sha3_8h.html#a049b154b3d12b0df19b2c986f458341d',1,'sha3.h']]],
+  ['shake128_5fsqueezeblocks',['shake128_squeezeblocks',['../sha3_8h.html#a46eb0fb7796b98d55ab50f8f4533bd18',1,'sha3.c']]],
+  ['shake256',['shake256',['../sha3_8h.html#af213db772421607a406ef5ed432c023d',1,'sha3.c']]],
+  ['shake256_5fabsorb',['shake256_absorb',['../sha3_8h.html#acceb5c0297868bf487675add5dc5e3c5',1,'sha3.c']]],
+  ['shake256_5frate',['SHAKE256_RATE',['../sha3_8h.html#a8cd7a41f6f7efca80d063e7521f5b7fa',1,'sha3.h']]],
+  ['shake256_5fsqueezeblocks',['shake256_squeezeblocks',['../sha3_8h.html#a684416786e9ad889f7cb456755f82d77',1,'sha3.c']]],
+  ['shake_5fdomain',['SHAKE_DOMAIN',['../sha3_8h.html#a34bc238ccfb4490eb8b0ac2bd579fff3',1,'sha3.h']]],
+  ['sysrand_2eh',['sysrand.h',['../sysrand_8h.html',1,'']]],
+  ['sysrand_5fgetbytes',['sysrand_getbytes',['../sysrand_8h.html#a79f005a6308933500edfa979f7a47022',1,'sysrand.c']]]
 ];

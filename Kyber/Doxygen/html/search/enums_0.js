@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['rand_5fgeneration_5fstatus',['RAND_GENERATION_STATUS',['../sysrand_8h.html#a2655530e50570968a2a13b78978e3355',1,'sysrand.h']]]
+  ['kyber_5fcrypto_5fstatus',['KYBER_CRYPTO_STATUS',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070',1,'kem.h']]]
 ];

@@ -4,6 +4,8 @@
 #include "reduce.h"
 #include "sha3.h"
 
+/* Note: compress, decompress, tobytes, frombytes, frommsg, tomsg, unit tested against original, 01/08/2018 */
+
 void poly_compress(uint8_t* r, const poly* a)
 {
 	uint32_t t[8];
@@ -160,7 +162,7 @@ void poly_frommsg(poly* r, const uint8_t msg[KYBER_SYMBYTES])
 	{
 		for (j = 0; j < 8; j++)
 		{
-			mask = -((msg[i] >> j) & 1);
+			mask = ~((msg[i] >> j) & 1) + 1;
 			r->coeffs[(8 * i) + j] = (mask & ((KYBER_Q + 1) / 2));
 		}
 	}

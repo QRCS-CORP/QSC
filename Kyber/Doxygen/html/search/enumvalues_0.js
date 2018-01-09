@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['rand_5fstatus_5ffailure',['RAND_STATUS_FAILURE',['../sysrand_8h.html#a2655530e50570968a2a13b78978e3355a59c335dc64a7b2d04fa8abf6e0f5e46e',1,'sysrand.h']]],
-  ['rand_5fstatus_5fsuccess',['RAND_STATUS_SUCCESS',['../sysrand_8h.html#a2655530e50570968a2a13b78978e3355a909a523208f02b858cede1917af3794b',1,'sysrand.h']]]
+  ['kyber_5fcrypto_5ffailure',['KYBER_CRYPTO_FAILURE',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865',1,'kem.h']]],
+  ['kyber_5fcrypto_5fsuccess',['KYBER_CRYPTO_SUCCESS',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6',1,'kem.h']]]
 ];

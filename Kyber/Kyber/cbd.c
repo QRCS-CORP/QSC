@@ -1,38 +1,40 @@
 #include "cbd.h"
 
+/* Note: cbd, in K{2,3,4} unit tested against original, 01/08/2018 */
+
 #if (KYBER_ETA == 3 || KYBER_ETA == 4)
 
-	static uint32_t lebytesto32(const uint8_t* a, size_t bytes)
+static uint32_t lebytesto32(const uint8_t* a, size_t bytes)
+{
+	size_t i;
+	uint32_t r;
+
+	r = a[0];
+
+	for (i = 1; i < bytes; i++)
 	{
-		size_t i;
-		uint32_t r;
-
-		r = a[0];
-
-		for (i = 1; i < bytes; i++)
-		{
-			r |= (uint32_t)a[i] << (8 * i);
-		}
-
-		return r;
+		r |= (uint32_t)a[i] << (8 * i);
 	}
+
+	return r;
+}
 
 #else
 
-	static uint64_t lebytesto64(const uint8_t* a, size_t bytes)
+static uint64_t lebytesto64(const uint8_t* a, size_t bytes)
+{
+	size_t i;
+	uint64_t r;
+
+	r = a[0];
+
+	for (i = 1; i < bytes; i++)
 	{
-		size_t i;
-		uint64_t r;
-
-		r = a[0];
-
-		for (i = 1; i < bytes; i++)
-		{
-			r |= (uint64_t)a[i] << (8 * i);
-		}
-
-		return r;
+		r |= (uint64_t)a[i] << (8 * i);
 	}
+
+	return r;
+}
 
 #endif
 

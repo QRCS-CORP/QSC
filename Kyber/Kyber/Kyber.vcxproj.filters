@@ -19,9 +19,6 @@
     <Text Include="License.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="api.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cbd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -50,6 +47,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sysrand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

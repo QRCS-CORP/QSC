@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['indcpa_2eh',['indcpa.h',['../indcpa_8h.html',1,'']]]
+  ['kem_2eh',['kem.h',['../kem_8h.html',1,'']]]
 ];
