@@ -1,15 +1,13 @@
 /**
 * \file kem.h
-* \brief <b>Kyber Key Encapsulation Mechanism definitions</b> \n
-* Contains the public api for the Kyber for CCA-secure KEM implementation.
+* \date January 10, 2018
 *
-* \date January 08, 2018
-* \remarks
-* A simple example of key-pair creation, encryption, and decryption
-* using the Kyber INDCPA secure api.
+* \brief <b>The Kyber KEM definitions</b> \n
+* Contains the primary public api for the Kyber CCA-secure Key Encapsulation Mechanism implementation.
 *
+* \para <b>Example</b> \n 
 * \code
-* 
+* // An example of key-pair creation, encryption, and decryption
 * uint8_t pk[KYBER_PUBLICKEYBYTES];
 * uint8_t sk[KYBER_SECRETKEYBYTES];
 * uint8_t key_a[KYBER_SYMBYTES];
@@ -23,6 +21,10 @@
 * // decrypt the cipher-text, and output alices shared key
 * crypto_kem_dec(key_a, sendb, sk);
 * \endcode
+*
+* \remarks Based entirely on the C reference branch of PQ-Crystals Kyber; including base code, comments, and api. \n
+* PQ-Crystals <a href="https://github.com/pq-crystals/kyber">Kyber</a>. \n
+* CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">a CCA-secure module-lattice-based KEM</a>. \n
 */
 
 #ifndef API_H

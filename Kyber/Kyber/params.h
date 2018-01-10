@@ -3,7 +3,7 @@
 * \brief <b>Kyber implementation parameters</b> \n
 * Contains the Kyber implementation constants.
 *
-* \date January 07, 2018
+* \date January 10, 2018
 */
 
 #ifndef PARAMS_H
@@ -23,12 +23,12 @@
 
 /*!
 \def MATRIX_GENERATOR_CSHAKE
-* Enable the simple cSHAKE-128 generator for polynomial generation.
-* If disabled, reverts to the SHAKE-128 generator.
+* Enable the simple cSHAKE generator for polynomial generation.
+* If disabled, reverts to the SHAKE generator.
 */
 #define MATRIX_GENERATOR_CSHAKE
 
-/* Internal Constants */
+/* Internal Constants: -Read Only */
 
 /*!
 \def KYBER_N
@@ -67,7 +67,7 @@
 
 /*!
 \def KYBER_POLYBYTES
-* The secret key base polynomial multiplier
+* The secret key base multiplier
 */
 #define KYBER_POLYBYTES 416
 
@@ -127,7 +127,7 @@
 
 /*!
 \def KYBER_CIPHERTEXTBYTES
-* The cipher-text base size in bytes
+* The cipher-text size in bytes
 */
 #define KYBER_CIPHERTEXTBYTES KYBER_INDCPA_BYTES
 

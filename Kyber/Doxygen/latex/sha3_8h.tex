@@ -33,37 +33,38 @@ Contains the public api and documentation for S\+H\+A3 digest and S\+H\+A\+K\+E 
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \hyperlink{sha3_8h_a1de1bcb16e5dcc59c15011a1d368946d}{sha3\+\_\+compute256} (uint8\+\_\+t $\ast$output, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_abd241c4f425729eea7671685b1438908}{sha3\+\_\+compute256} (uint8\+\_\+t $\ast$output, const uint8\+\_\+t $\ast$message, size\+\_\+t msglen)
 \begin{DoxyCompactList}\small\item\em Process a message with S\+H\+A3-\/256 and return the hash code in the output byte array. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_a3cdd304e2b2d5e152f857e37bf0070e5}{sha3\+\_\+compute512} (uint8\+\_\+t $\ast$output, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_a1fd14cb5e2fb04e8af7095453f797dda}{sha3\+\_\+compute512} (uint8\+\_\+t $\ast$output, const uint8\+\_\+t $\ast$message, size\+\_\+t msglen)
 \begin{DoxyCompactList}\small\item\em Process a message with S\+H\+A3-\/512 and return the hash code in the output byte array. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_a426231b1f95b8b10f44061d078630593}{keccak\+\_\+absorb} (uint64\+\_\+t $\ast$state, size\+\_\+t rate, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen, uint8\+\_\+t domain)
-\begin{DoxyCompactList}\small\item\em The Keccak absorb function. Absorb an input message array directly into the state. \end{DoxyCompactList}\item 
+void \hyperlink{sha3_8h_a9e913b5e84f88d9e3508cf7caecb0b1d}{sha3\+\_\+blockupdate} (uint64\+\_\+t $\ast$state, size\+\_\+t rate, const uint8\+\_\+t $\ast$message, size\+\_\+t msgoffset, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Update S\+H\+A3 with blocks of input. Absorbs (rate) block sized lengths of input message into the state. \end{DoxyCompactList}\item 
+void \hyperlink{sha3_8h_a1daa40a02f5cf2d38ea06c03ae5c7855}{sha3\+\_\+finalize} (uint64\+\_\+t $\ast$state, size\+\_\+t rate, const uint8\+\_\+t $\ast$message, size\+\_\+t msgoffset, size\+\_\+t msglen, uint8\+\_\+t $\ast$output)
+\begin{DoxyCompactList}\small\item\em Finalize the message state and returns the hash value in output. Absorb the last block of message and create the hash value. ~\newline
+Produces a 32 byte output code using S\+H\+A3\+\_\+256\+\_\+\+R\+A\+T\+E, 64 bytes with S\+H\+A3\+\_\+512\+\_\+\+R\+A\+T\+E. \end{DoxyCompactList}\item 
 void \hyperlink{sha3_8h_a61e2076648ec5340198d9870a344c0c7}{keccak\+\_\+permute} (uint64\+\_\+t $\ast$state)
 \begin{DoxyCompactList}\small\item\em The Keccak permute function. Permutes the state array, can be used in conjunction with the keccak\+\_\+absorb function. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_acb7e98a6c872f34cd1b795b2e57a29a4}{keccak\+\_\+squeezeblocks} (uint8\+\_\+t $\ast$output, size\+\_\+t nblocks, uint64\+\_\+t $\ast$state, size\+\_\+t rate)
-\begin{DoxyCompactList}\small\item\em The Keccak squeeze function. Permutes and extracts the state to an output byte array. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_a566626a4b5f46f589b5aa5d2268b1810}{shake128} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_af59141710a9b3a6a53d6704a684eaf62}{shake128} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em Seed a S\+H\+A\+K\+E-\/128 instance, and generate an array of pseudo-\/random bytes. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_a87a6c0693f6c2b191c6ede67b0a7babe}{shake128\+\_\+absorb} (uint64\+\_\+t $\ast$state, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_a67dfd6580a5a67ff74745526a54b3267}{shake128\+\_\+absorb} (uint64\+\_\+t $\ast$state, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em The S\+H\+A\+K\+E-\/128 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake128\+\_\+squeezeblocks function. \end{DoxyCompactList}\item 
 void \hyperlink{sha3_8h_a46eb0fb7796b98d55ab50f8f4533bd18}{shake128\+\_\+squeezeblocks} (uint8\+\_\+t $\ast$output, size\+\_\+t nblocks, uint64\+\_\+t $\ast$state)
 \begin{DoxyCompactList}\small\item\em The S\+H\+A\+K\+E-\/128 squeeze function. Permutes and extracts the state to an output byte array. Should be used in conjunction with the shake128\+\_\+absorb function. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_af213db772421607a406ef5ed432c023d}{shake256} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_a2bc90182e6cd59be9c6b339c79122c63}{shake256} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em Seed a S\+H\+A\+K\+E-\/256 instance, and generate an array of pseudo-\/random bytes. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_acceb5c0297868bf487675add5dc5e3c5}{shake256\+\_\+absorb} (uint64\+\_\+t $\ast$state, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_a3bd00d57f447fb89a87d35fdca953c44}{shake256\+\_\+absorb} (uint64\+\_\+t $\ast$state, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em The S\+H\+A\+K\+E-\/256 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake256\+\_\+squeezeblocks function. \end{DoxyCompactList}\item 
 void \hyperlink{sha3_8h_a684416786e9ad889f7cb456755f82d77}{shake256\+\_\+squeezeblocks} (uint8\+\_\+t $\ast$output, size\+\_\+t nblocks, uint64\+\_\+t $\ast$state)
 \begin{DoxyCompactList}\small\item\em The S\+H\+A\+K\+E-\/256 squeeze function. Permutes and extracts the state to an output byte array. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_aa270c2f36902a9b031d914bba5dada89}{cshake128\+\_\+simple} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_ac570db69e51ce4392ac5b20867c9da02}{cshake128\+\_\+simple} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em Seed a c\+S\+H\+A\+K\+E-\/128 instance and generate pseudo-\/random output. Permutes and extracts the state to an output byte array. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_a78c4314784475af731a6aed14f87a187}{cshake128\+\_\+simple\+\_\+absorb} (uint64\+\_\+t $\ast$state, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_ab57aa0457440d44c075181a6f8c67cc6}{cshake128\+\_\+simple\+\_\+absorb} (uint64\+\_\+t $\ast$state, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em The c\+S\+H\+A\+K\+E-\/128 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake128\+\_\+simple\+\_\+squeezeblocks function. \end{DoxyCompactList}\item 
 void \hyperlink{sha3_8h_ad220f31e891d12707f0cff5407bfc047}{cshake128\+\_\+simple\+\_\+squeezeblocks} (uint8\+\_\+t $\ast$output, size\+\_\+t nblocks, uint64\+\_\+t $\ast$state)
 \begin{DoxyCompactList}\small\item\em The c\+S\+H\+A\+K\+E-\/128 simple squeeze function. Permutes and extracts blocks of state to an output byte array. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_aa12f3a493d74d93d55cd64f48f72ecf7}{cshake256\+\_\+simple} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_a6fb307a35d9db876cfd3449119a3a4c7}{cshake256\+\_\+simple} (uint8\+\_\+t $\ast$output, size\+\_\+t outlen, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em Seed a c\+S\+H\+A\+K\+E-\/256 instance and generate pseudo-\/random output. Permutes and extracts the state to an output byte array. \end{DoxyCompactList}\item 
-void \hyperlink{sha3_8h_a3604ca14c573d1ba6c395c5d1fbaa2b6}{cshake256\+\_\+simple\+\_\+absorb} (uint64\+\_\+t $\ast$state, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$input, size\+\_\+t inplen)
+void \hyperlink{sha3_8h_a3f2fe92de03ab87df511d457eeff3def}{cshake256\+\_\+simple\+\_\+absorb} (uint64\+\_\+t $\ast$state, uint16\+\_\+t cstm, const uint8\+\_\+t $\ast$seed, size\+\_\+t seedlen)
 \begin{DoxyCompactList}\small\item\em The c\+S\+H\+A\+K\+E-\/256 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake256\+\_\+simple\+\_\+squeezeblocks function. \end{DoxyCompactList}\item 
 void \hyperlink{sha3_8h_ab2a2e75670d099467b846a6db007864d}{cshake256\+\_\+simple\+\_\+squeezeblocks} (uint8\+\_\+t $\ast$output, size\+\_\+t nblocks, uint64\+\_\+t $\ast$state)
 \begin{DoxyCompactList}\small\item\em The c\+S\+H\+A\+K\+E-\/256 simple squeeze function. Permutes and extracts blocks of state to an output byte array. \end{DoxyCompactList}\end{DoxyCompactItemize}
@@ -80,7 +81,7 @@ John Underhill
 December 29, 2017 
 \end{DoxyDate}
 \begin{DoxyRemark}{Remarks}
-For usage examples, see sha3kat.\+h 
+For usage examples, see sha3\+\_\+kat.\+h 
 \end{DoxyRemark}
 
 
@@ -118,17 +119,17 @@ The S\+H\+A\+K\+E-\/256 byte absorption rate \hypertarget{sha3_8h_a34bc238ccfb44
 The function domain code 
 
 \subsection{Function Documentation}
-\hypertarget{sha3_8h_aa270c2f36902a9b031d914bba5dada89}{}\index{sha3.\+h@{sha3.\+h}!cshake128\+\_\+simple@{cshake128\+\_\+simple}}
+\hypertarget{sha3_8h_ac570db69e51ce4392ac5b20867c9da02}{}\index{sha3.\+h@{sha3.\+h}!cshake128\+\_\+simple@{cshake128\+\_\+simple}}
 \index{cshake128\+\_\+simple@{cshake128\+\_\+simple}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{cshake128\+\_\+simple}]{\setlength{\rightskip}{0pt plus 5cm}void cshake128\+\_\+simple (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{output, }
 \item[{size\+\_\+t}]{outlen, }
 \item[{uint16\+\_\+t}]{cstm, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_aa270c2f36902a9b031d914bba5dada89}
+)}\label{sha3_8h_ac570db69e51ce4392ac5b20867c9da02}
 
 
 Seed a c\+S\+H\+A\+K\+E-\/128 instance and generate pseudo-\/random output. Permutes and extracts the state to an output byte array. 
@@ -144,21 +145,21 @@ This function has a counter period of 2$^\wedge$16.
 \hline
 {\em cstm} & The 16bit customization integer \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_a78c4314784475af731a6aed14f87a187}{}\index{sha3.\+h@{sha3.\+h}!cshake128\+\_\+simple\+\_\+absorb@{cshake128\+\_\+simple\+\_\+absorb}}
+\hypertarget{sha3_8h_ab57aa0457440d44c075181a6f8c67cc6}{}\index{sha3.\+h@{sha3.\+h}!cshake128\+\_\+simple\+\_\+absorb@{cshake128\+\_\+simple\+\_\+absorb}}
 \index{cshake128\+\_\+simple\+\_\+absorb@{cshake128\+\_\+simple\+\_\+absorb}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{cshake128\+\_\+simple\+\_\+absorb}]{\setlength{\rightskip}{0pt plus 5cm}void cshake128\+\_\+simple\+\_\+absorb (
 \begin{DoxyParamCaption}
 \item[{uint64\+\_\+t $\ast$}]{state, }
 \item[{uint16\+\_\+t}]{cstm, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_a78c4314784475af731a6aed14f87a187}
+)}\label{sha3_8h_ab57aa0457440d44c075181a6f8c67cc6}
 
 
 The c\+S\+H\+A\+K\+E-\/128 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake128\+\_\+simple\+\_\+squeezeblocks function. 
@@ -173,9 +174,9 @@ State must be initialized (and zeroed) by the caller.
 \hline
 {\em cstm} & The 16bit customization integer \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
 \hypertarget{sha3_8h_ad220f31e891d12707f0cff5407bfc047}{}\index{sha3.\+h@{sha3.\+h}!cshake128\+\_\+simple\+\_\+squeezeblocks@{cshake128\+\_\+simple\+\_\+squeezeblocks}}
@@ -203,17 +204,17 @@ Output array must be initialized to a multiple of the byte rate.
 {\em state} & The function state; must be pre-\/initialized \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_aa12f3a493d74d93d55cd64f48f72ecf7}{}\index{sha3.\+h@{sha3.\+h}!cshake256\+\_\+simple@{cshake256\+\_\+simple}}
+\hypertarget{sha3_8h_a6fb307a35d9db876cfd3449119a3a4c7}{}\index{sha3.\+h@{sha3.\+h}!cshake256\+\_\+simple@{cshake256\+\_\+simple}}
 \index{cshake256\+\_\+simple@{cshake256\+\_\+simple}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{cshake256\+\_\+simple}]{\setlength{\rightskip}{0pt plus 5cm}void cshake256\+\_\+simple (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{output, }
 \item[{size\+\_\+t}]{outlen, }
 \item[{uint16\+\_\+t}]{cstm, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_aa12f3a493d74d93d55cd64f48f72ecf7}
+)}\label{sha3_8h_a6fb307a35d9db876cfd3449119a3a4c7}
 
 
 Seed a c\+S\+H\+A\+K\+E-\/256 instance and generate pseudo-\/random output. Permutes and extracts the state to an output byte array. 
@@ -229,21 +230,21 @@ This function has a counter period of 2$^\wedge$16.
 \hline
 {\em cstm} & The 16bit customization integer \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_a3604ca14c573d1ba6c395c5d1fbaa2b6}{}\index{sha3.\+h@{sha3.\+h}!cshake256\+\_\+simple\+\_\+absorb@{cshake256\+\_\+simple\+\_\+absorb}}
+\hypertarget{sha3_8h_a3f2fe92de03ab87df511d457eeff3def}{}\index{sha3.\+h@{sha3.\+h}!cshake256\+\_\+simple\+\_\+absorb@{cshake256\+\_\+simple\+\_\+absorb}}
 \index{cshake256\+\_\+simple\+\_\+absorb@{cshake256\+\_\+simple\+\_\+absorb}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{cshake256\+\_\+simple\+\_\+absorb}]{\setlength{\rightskip}{0pt plus 5cm}void cshake256\+\_\+simple\+\_\+absorb (
 \begin{DoxyParamCaption}
 \item[{uint64\+\_\+t $\ast$}]{state, }
 \item[{uint16\+\_\+t}]{cstm, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_a3604ca14c573d1ba6c395c5d1fbaa2b6}
+)}\label{sha3_8h_a3f2fe92de03ab87df511d457eeff3def}
 
 
 The c\+S\+H\+A\+K\+E-\/256 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake256\+\_\+simple\+\_\+squeezeblocks function. 
@@ -258,9 +259,9 @@ State must be initialized (and zeroed) by the caller.
 \hline
 {\em cstm} & The 16bit customization integer \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
 \hypertarget{sha3_8h_ab2a2e75670d099467b846a6db007864d}{}\index{sha3.\+h@{sha3.\+h}!cshake256\+\_\+simple\+\_\+squeezeblocks@{cshake256\+\_\+simple\+\_\+squeezeblocks}}
@@ -288,38 +289,6 @@ Output array must be initialized to a multiple of the byte rate.
 {\em state} & The function state; must be pre-\/initialized \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_a426231b1f95b8b10f44061d078630593}{}\index{sha3.\+h@{sha3.\+h}!keccak\+\_\+absorb@{keccak\+\_\+absorb}}
-\index{keccak\+\_\+absorb@{keccak\+\_\+absorb}!sha3.\+h@{sha3.\+h}}
-\subsubsection[{keccak\+\_\+absorb}]{\setlength{\rightskip}{0pt plus 5cm}void keccak\+\_\+absorb (
-\begin{DoxyParamCaption}
-\item[{uint64\+\_\+t $\ast$}]{state, }
-\item[{size\+\_\+t}]{rate, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen, }
-\item[{uint8\+\_\+t}]{domain}
-\end{DoxyParamCaption}
-)}\label{sha3_8h_a426231b1f95b8b10f44061d078630593}
-
-
-The Keccak absorb function. Absorb an input message array directly into the state. 
-
-\begin{DoxyWarning}{Warning}
-Finalizes the message state, can not be used in consecutive calls. ~\newline
-State must be initialized (and zeroed) by the caller.
-\end{DoxyWarning}
-
-\begin{DoxyParams}{Parameters}
-{\em state} & The function state; must be initialized \\
-\hline
-{\em rate} & The rate of absorption, in bytes \\
-\hline
-{\em input} & The input message byte array \\
-\hline
-{\em inplen} & The number of message bytes to process \\
-\hline
-{\em domain} & The domain seperation code (S\+H\+A3=0x06, S\+H\+A\+K\+E=0x1\+F, c\+S\+H\+A\+K\+E=0x04) \\
-\hline
-\end{DoxyParams}
 \hypertarget{sha3_8h_a61e2076648ec5340198d9870a344c0c7}{}\index{sha3.\+h@{sha3.\+h}!keccak\+\_\+permute@{keccak\+\_\+permute}}
 \index{keccak\+\_\+permute@{keccak\+\_\+permute}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{keccak\+\_\+permute}]{\setlength{\rightskip}{0pt plus 5cm}void keccak\+\_\+permute (
@@ -336,43 +305,47 @@ The Keccak permute function. Permutes the state array, can be used in conjunctio
 {\em state} & The function state; must be initialized \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_acb7e98a6c872f34cd1b795b2e57a29a4}{}\index{sha3.\+h@{sha3.\+h}!keccak\+\_\+squeezeblocks@{keccak\+\_\+squeezeblocks}}
-\index{keccak\+\_\+squeezeblocks@{keccak\+\_\+squeezeblocks}!sha3.\+h@{sha3.\+h}}
-\subsubsection[{keccak\+\_\+squeezeblocks}]{\setlength{\rightskip}{0pt plus 5cm}void keccak\+\_\+squeezeblocks (
+\hypertarget{sha3_8h_a9e913b5e84f88d9e3508cf7caecb0b1d}{}\index{sha3.\+h@{sha3.\+h}!sha3\+\_\+blockupdate@{sha3\+\_\+blockupdate}}
+\index{sha3\+\_\+blockupdate@{sha3\+\_\+blockupdate}!sha3.\+h@{sha3.\+h}}
+\subsubsection[{sha3\+\_\+blockupdate}]{\setlength{\rightskip}{0pt plus 5cm}void sha3\+\_\+blockupdate (
 \begin{DoxyParamCaption}
-\item[{uint8\+\_\+t $\ast$}]{output, }
-\item[{size\+\_\+t}]{nblocks, }
 \item[{uint64\+\_\+t $\ast$}]{state, }
-\item[{size\+\_\+t}]{rate}
+\item[{size\+\_\+t}]{rate, }
+\item[{const uint8\+\_\+t $\ast$}]{message, }
+\item[{size\+\_\+t}]{msgoffset, }
+\item[{size\+\_\+t}]{msglen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_acb7e98a6c872f34cd1b795b2e57a29a4}
+)}\label{sha3_8h_a9e913b5e84f88d9e3508cf7caecb0b1d}
 
 
-The Keccak squeeze function. Permutes and extracts the state to an output byte array. 
+Update S\+H\+A3 with blocks of input. Absorbs (rate) block sized lengths of input message into the state. 
 
 \begin{DoxyWarning}{Warning}
-Output array must be initialized to a multiple of the byte rate.
+Message length must be a multiple of the rate size. ~\newline
+State must be initialized (and zeroed) by the caller.
 \end{DoxyWarning}
 
 \begin{DoxyParams}{Parameters}
-{\em output} & The output byte array \\
-\hline
-{\em nblocks} & The number of blocks to extract \\
-\hline
-{\em state} & The function state; must be pre-\/initialized \\
+{\em state} & The function state \\
 \hline
 {\em rate} & The rate of absorption, in bytes \\
 \hline
+{\em message} & The input message byte array \\
+\hline
+{\em msgoffset} & The current position within the input message byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_a1de1bcb16e5dcc59c15011a1d368946d}{}\index{sha3.\+h@{sha3.\+h}!sha3\+\_\+compute256@{sha3\+\_\+compute256}}
+\hypertarget{sha3_8h_abd241c4f425729eea7671685b1438908}{}\index{sha3.\+h@{sha3.\+h}!sha3\+\_\+compute256@{sha3\+\_\+compute256}}
 \index{sha3\+\_\+compute256@{sha3\+\_\+compute256}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{sha3\+\_\+compute256}]{\setlength{\rightskip}{0pt plus 5cm}void sha3\+\_\+compute256 (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{output, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{message, }
+\item[{size\+\_\+t}]{msglen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_a1de1bcb16e5dcc59c15011a1d368946d}
+)}\label{sha3_8h_abd241c4f425729eea7671685b1438908}
 
 
 Process a message with S\+H\+A3-\/256 and return the hash code in the output byte array. 
@@ -382,22 +355,22 @@ The output array must be at least 32 bytes in length.
 \end{DoxyWarning}
 
 \begin{DoxyParams}{Parameters}
-{\em output} & The output byte array \\
+{\em output} & The output byte array; receives the hash code \\
 \hline
-{\em input} & The message input byte array \\
+{\em message} & The message input byte array \\
 \hline
-{\em inplen} & The number of message bytes to process \\
+{\em msglen} & The number of message bytes to process \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_a3cdd304e2b2d5e152f857e37bf0070e5}{}\index{sha3.\+h@{sha3.\+h}!sha3\+\_\+compute512@{sha3\+\_\+compute512}}
+\hypertarget{sha3_8h_a1fd14cb5e2fb04e8af7095453f797dda}{}\index{sha3.\+h@{sha3.\+h}!sha3\+\_\+compute512@{sha3\+\_\+compute512}}
 \index{sha3\+\_\+compute512@{sha3\+\_\+compute512}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{sha3\+\_\+compute512}]{\setlength{\rightskip}{0pt plus 5cm}void sha3\+\_\+compute512 (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{output, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{message, }
+\item[{size\+\_\+t}]{msglen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_a3cdd304e2b2d5e152f857e37bf0070e5}
+)}\label{sha3_8h_a1fd14cb5e2fb04e8af7095453f797dda}
 
 
 Process a message with S\+H\+A3-\/512 and return the hash code in the output byte array. 
@@ -407,23 +380,59 @@ The output array must be at least 64 bytes in length.
 \end{DoxyWarning}
 
 \begin{DoxyParams}{Parameters}
-{\em output} & The output byte array \\
+{\em output} & The output byte array; receives the hash code \\
 \hline
-{\em input} & The message input byte array \\
+{\em message} & The message input byte array \\
 \hline
-{\em inplen} & The number of message bytes to process \\
+{\em msglen} & The number of message bytes to process \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_a566626a4b5f46f589b5aa5d2268b1810}{}\index{sha3.\+h@{sha3.\+h}!shake128@{shake128}}
+\hypertarget{sha3_8h_a1daa40a02f5cf2d38ea06c03ae5c7855}{}\index{sha3.\+h@{sha3.\+h}!sha3\+\_\+finalize@{sha3\+\_\+finalize}}
+\index{sha3\+\_\+finalize@{sha3\+\_\+finalize}!sha3.\+h@{sha3.\+h}}
+\subsubsection[{sha3\+\_\+finalize}]{\setlength{\rightskip}{0pt plus 5cm}void sha3\+\_\+finalize (
+\begin{DoxyParamCaption}
+\item[{uint64\+\_\+t $\ast$}]{state, }
+\item[{size\+\_\+t}]{rate, }
+\item[{const uint8\+\_\+t $\ast$}]{message, }
+\item[{size\+\_\+t}]{msgoffset, }
+\item[{size\+\_\+t}]{msglen, }
+\item[{uint8\+\_\+t $\ast$}]{output}
+\end{DoxyParamCaption}
+)}\label{sha3_8h_a1daa40a02f5cf2d38ea06c03ae5c7855}
+
+
+Finalize the message state and returns the hash value in output. Absorb the last block of message and create the hash value. ~\newline
+Produces a 32 byte output code using S\+H\+A3\+\_\+256\+\_\+\+R\+A\+T\+E, 64 bytes with S\+H\+A3\+\_\+512\+\_\+\+R\+A\+T\+E. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be sized correctly corresponding to the absorbtion rate ((200 -\/ rate) / 2). ~\newline
+Finalizes the message state, can not be used in consecutive calls.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & The function state; must be initialized \\
+\hline
+{\em rate} & The rate of absorption, in bytes \\
+\hline
+{\em message} & The input message byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+{\em msgoffset} & The current position within the input message byte array \\
+\hline
+{\em output} & The output byte array; receives the hash code \\
+\hline
+\end{DoxyParams}
+\hypertarget{sha3_8h_af59141710a9b3a6a53d6704a684eaf62}{}\index{sha3.\+h@{sha3.\+h}!shake128@{shake128}}
 \index{shake128@{shake128}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{shake128}]{\setlength{\rightskip}{0pt plus 5cm}void shake128 (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{output, }
 \item[{size\+\_\+t}]{outlen, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_a566626a4b5f46f589b5aa5d2268b1810}
+)}\label{sha3_8h_af59141710a9b3a6a53d6704a684eaf62}
 
 
 Seed a S\+H\+A\+K\+E-\/128 instance, and generate an array of pseudo-\/random bytes. 
@@ -437,20 +446,20 @@ The output array length must not be zero.
 \hline
 {\em outlen} & The number of output bytes to generate \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_a87a6c0693f6c2b191c6ede67b0a7babe}{}\index{sha3.\+h@{sha3.\+h}!shake128\+\_\+absorb@{shake128\+\_\+absorb}}
+\hypertarget{sha3_8h_a67dfd6580a5a67ff74745526a54b3267}{}\index{sha3.\+h@{sha3.\+h}!shake128\+\_\+absorb@{shake128\+\_\+absorb}}
 \index{shake128\+\_\+absorb@{shake128\+\_\+absorb}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{shake128\+\_\+absorb}]{\setlength{\rightskip}{0pt plus 5cm}void shake128\+\_\+absorb (
 \begin{DoxyParamCaption}
 \item[{uint64\+\_\+t $\ast$}]{state, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_a87a6c0693f6c2b191c6ede67b0a7babe}
+)}\label{sha3_8h_a67dfd6580a5a67ff74745526a54b3267}
 
 
 The S\+H\+A\+K\+E-\/128 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake128\+\_\+squeezeblocks function. 
@@ -463,9 +472,9 @@ State must be initialized (and zeroed) by the caller.
 \begin{DoxyParams}{Parameters}
 {\em state} & The function state; must be pre-\/initialized \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
 \hypertarget{sha3_8h_a46eb0fb7796b98d55ab50f8f4533bd18}{}\index{sha3.\+h@{sha3.\+h}!shake128\+\_\+squeezeblocks@{shake128\+\_\+squeezeblocks}}
@@ -493,16 +502,16 @@ Output array must be initialized to a multiple of the byte rate.
 {\em state} & The function state; must be pre-\/initialized \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_af213db772421607a406ef5ed432c023d}{}\index{sha3.\+h@{sha3.\+h}!shake256@{shake256}}
+\hypertarget{sha3_8h_a2bc90182e6cd59be9c6b339c79122c63}{}\index{sha3.\+h@{sha3.\+h}!shake256@{shake256}}
 \index{shake256@{shake256}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{shake256}]{\setlength{\rightskip}{0pt plus 5cm}void shake256 (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{output, }
 \item[{size\+\_\+t}]{outlen, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_af213db772421607a406ef5ed432c023d}
+)}\label{sha3_8h_a2bc90182e6cd59be9c6b339c79122c63}
 
 
 Seed a S\+H\+A\+K\+E-\/256 instance, and generate an array of pseudo-\/random bytes. 
@@ -516,20 +525,20 @@ The output array length must not be zero.
 \hline
 {\em outlen} & The number of output bytes to generate \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
-\hypertarget{sha3_8h_acceb5c0297868bf487675add5dc5e3c5}{}\index{sha3.\+h@{sha3.\+h}!shake256\+\_\+absorb@{shake256\+\_\+absorb}}
+\hypertarget{sha3_8h_a3bd00d57f447fb89a87d35fdca953c44}{}\index{sha3.\+h@{sha3.\+h}!shake256\+\_\+absorb@{shake256\+\_\+absorb}}
 \index{shake256\+\_\+absorb@{shake256\+\_\+absorb}!sha3.\+h@{sha3.\+h}}
 \subsubsection[{shake256\+\_\+absorb}]{\setlength{\rightskip}{0pt plus 5cm}void shake256\+\_\+absorb (
 \begin{DoxyParamCaption}
 \item[{uint64\+\_\+t $\ast$}]{state, }
-\item[{const uint8\+\_\+t $\ast$}]{input, }
-\item[{size\+\_\+t}]{inplen}
+\item[{const uint8\+\_\+t $\ast$}]{seed, }
+\item[{size\+\_\+t}]{seedlen}
 \end{DoxyParamCaption}
-)}\label{sha3_8h_acceb5c0297868bf487675add5dc5e3c5}
+)}\label{sha3_8h_a3bd00d57f447fb89a87d35fdca953c44}
 
 
 The S\+H\+A\+K\+E-\/256 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake256\+\_\+squeezeblocks function. 
@@ -542,9 +551,9 @@ State must be initialized (and zeroed) by the caller.
 \begin{DoxyParams}{Parameters}
 {\em state} & The function state; must be pre-\/initialized \\
 \hline
-{\em input} & The input seed byte array \\
+{\em seed} & The input seed byte array \\
 \hline
-{\em inplen} & The number of seed bytes to process \\
+{\em seedlen} & The number of seed bytes to process \\
 \hline
 \end{DoxyParams}
 \hypertarget{sha3_8h_a684416786e9ad889f7cb456755f82d77}{}\index{sha3.\+h@{sha3.\+h}!shake256\+\_\+squeezeblocks@{shake256\+\_\+squeezeblocks}}

@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['keccak_5fabsorb',['keccak_absorb',['../sha3_8h.html#a426231b1f95b8b10f44061d078630593',1,'sha3.c']]],
   ['keccak_5fpermute',['keccak_permute',['../sha3_8h.html#a61e2076648ec5340198d9870a344c0c7',1,'sha3.c']]],
-  ['keccak_5fsqueezeblocks',['keccak_squeezeblocks',['../sha3_8h.html#acb7e98a6c872f34cd1b795b2e57a29a4',1,'sha3.c']]],
   ['kem_2eh',['kem.h',['../kem_8h.html',1,'']]],
   ['kyber_5fciphertextbytes',['KYBER_CIPHERTEXTBYTES',['../params_8h.html#a356cca49fc302b0c34c18f4bbda6e5fe',1,'params.h']]],
   ['kyber_5fcrypto_5ffailure',['KYBER_CRYPTO_FAILURE',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865',1,'kem.h']]],

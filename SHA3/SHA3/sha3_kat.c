@@ -136,8 +136,9 @@ int32_t sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_256_RATE, msg0, 0, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+
+	/* if message is less than one full block, just call finalize */
+	sha3_finalize(state, SHA3_256_RATE, msg0, 0, 0, hash);
 
 	if (are_equal8(hash, exp0, 32) == SHA3_STATUS_FAILURE)
 	{
@@ -146,8 +147,7 @@ int32_t sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_256_RATE, msg24, 3, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+	sha3_finalize(state, SHA3_256_RATE, msg24, 0, 3, hash);
 
 	if (are_equal8(hash, exp24, 32) == SHA3_STATUS_FAILURE)
 	{
@@ -156,8 +156,7 @@ int32_t sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_256_RATE, msg448, 56, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+	sha3_finalize(state, SHA3_256_RATE, msg448, 0, 56, hash);
 
 	if (are_equal8(hash, exp448, 32) == SHA3_STATUS_FAILURE)
 	{
@@ -166,8 +165,14 @@ int32_t sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_256_RATE, msg1600, 200, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+	size_t offset;
+	offset = 0;
+
+	/* absorb a rate sized block */
+	sha3_blockupdate(state, SHA3_256_RATE, msg1600, offset, SHA3_256_RATE);
+	offset += SHA3_256_RATE;
+	/* finalize the message */
+	sha3_finalize(state, SHA3_256_RATE, msg1600, offset, 200 - offset, hash);
 
 	if (are_equal8(hash, exp1600, 32) == SHA3_STATUS_FAILURE)
 	{
@@ -267,8 +272,7 @@ int32_t sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_512_RATE, msg0, 0, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+	sha3_finalize(state, SHA3_512_RATE, msg0, 0, 0, hash);
 
 	if (are_equal8(hash, exp0, 64) == SHA3_STATUS_FAILURE)
 	{
@@ -277,8 +281,7 @@ int32_t sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_512_RATE, msg24, 3, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+	sha3_finalize(state, SHA3_512_RATE, msg24, 0, 3, hash);
 
 	if (are_equal8(hash, exp24, 64) == SHA3_STATUS_FAILURE)
 	{
@@ -287,8 +290,7 @@ int32_t sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_512_RATE, msg448, 56, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+	sha3_finalize(state, SHA3_512_RATE, msg448, 0, 56, hash);
 
 	if (are_equal8(hash, exp448, 64) == SHA3_STATUS_FAILURE)
 	{
@@ -297,8 +299,14 @@ int32_t sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	keccak_absorb(state, SHA3_512_RATE, msg1600, 200, SHA3_DOMAIN);
-	keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+	size_t offset;
+	offset = 0;
+
+	/* absorb a rate sized block */
+	sha3_blockupdate(state, SHA3_512_RATE, msg1600, offset, SHA3_512_RATE);
+	offset += SHA3_512_RATE;
+	/* finalize the message */
+	sha3_finalize(state, SHA3_512_RATE, msg1600, offset, 200 - offset, hash);
 
 	if (are_equal8(hash, exp1600, 64) == SHA3_STATUS_FAILURE)
 	{

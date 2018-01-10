@@ -125,54 +125,55 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a1de1bcb16e5dcc59c15011a1d368946d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a1de1bcb16e5dcc59c15011a1d368946d">sha3_compute256</a> (uint8_t *output, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:a1de1bcb16e5dcc59c15011a1d368946d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a message with SHA3-256 and return the hash code in the output byte array.  <a href="#a1de1bcb16e5dcc59c15011a1d368946d">More...</a><br /></td></tr>
-<tr class="separator:a1de1bcb16e5dcc59c15011a1d368946d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cdd304e2b2d5e152f857e37bf0070e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a3cdd304e2b2d5e152f857e37bf0070e5">sha3_compute512</a> (uint8_t *output, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:a3cdd304e2b2d5e152f857e37bf0070e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a message with SHA3-512 and return the hash code in the output byte array.  <a href="#a3cdd304e2b2d5e152f857e37bf0070e5">More...</a><br /></td></tr>
-<tr class="separator:a3cdd304e2b2d5e152f857e37bf0070e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a426231b1f95b8b10f44061d078630593"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a426231b1f95b8b10f44061d078630593">keccak_absorb</a> (uint64_t *state, size_t rate, const uint8_t *input, size_t inplen, uint8_t domain)</td></tr>
-<tr class="memdesc:a426231b1f95b8b10f44061d078630593"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Keccak absorb function. Absorb an input message array directly into the state.  <a href="#a426231b1f95b8b10f44061d078630593">More...</a><br /></td></tr>
-<tr class="separator:a426231b1f95b8b10f44061d078630593"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd241c4f425729eea7671685b1438908"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#abd241c4f425729eea7671685b1438908">sha3_compute256</a> (uint8_t *output, const uint8_t *message, size_t msglen)</td></tr>
+<tr class="memdesc:abd241c4f425729eea7671685b1438908"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a message with SHA3-256 and return the hash code in the output byte array.  <a href="#abd241c4f425729eea7671685b1438908">More...</a><br /></td></tr>
+<tr class="separator:abd241c4f425729eea7671685b1438908"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fd14cb5e2fb04e8af7095453f797dda"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a1fd14cb5e2fb04e8af7095453f797dda">sha3_compute512</a> (uint8_t *output, const uint8_t *message, size_t msglen)</td></tr>
+<tr class="memdesc:a1fd14cb5e2fb04e8af7095453f797dda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a message with SHA3-512 and return the hash code in the output byte array.  <a href="#a1fd14cb5e2fb04e8af7095453f797dda">More...</a><br /></td></tr>
+<tr class="separator:a1fd14cb5e2fb04e8af7095453f797dda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e913b5e84f88d9e3508cf7caecb0b1d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a9e913b5e84f88d9e3508cf7caecb0b1d">sha3_blockupdate</a> (uint64_t *state, size_t rate, const uint8_t *message, size_t msgoffset, size_t msglen)</td></tr>
+<tr class="memdesc:a9e913b5e84f88d9e3508cf7caecb0b1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update SHA3 with blocks of input. Absorbs (rate) block sized lengths of input message into the state.  <a href="#a9e913b5e84f88d9e3508cf7caecb0b1d">More...</a><br /></td></tr>
+<tr class="separator:a9e913b5e84f88d9e3508cf7caecb0b1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1daa40a02f5cf2d38ea06c03ae5c7855"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a1daa40a02f5cf2d38ea06c03ae5c7855">sha3_finalize</a> (uint64_t *state, size_t rate, const uint8_t *message, size_t msgoffset, size_t msglen, uint8_t *output)</td></tr>
+<tr class="memdesc:a1daa40a02f5cf2d38ea06c03ae5c7855"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finalize the message state and returns the hash value in output. Absorb the last block of message and create the hash value. <br />
+Produces a 32 byte output code using SHA3_256_RATE, 64 bytes with SHA3_512_RATE.  <a href="#a1daa40a02f5cf2d38ea06c03ae5c7855">More...</a><br /></td></tr>
+<tr class="separator:a1daa40a02f5cf2d38ea06c03ae5c7855"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61e2076648ec5340198d9870a344c0c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a61e2076648ec5340198d9870a344c0c7">keccak_permute</a> (uint64_t *state)</td></tr>
 <tr class="memdesc:a61e2076648ec5340198d9870a344c0c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Keccak permute function. Permutes the state array, can be used in conjunction with the keccak_absorb function.  <a href="#a61e2076648ec5340198d9870a344c0c7">More...</a><br /></td></tr>
 <tr class="separator:a61e2076648ec5340198d9870a344c0c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb7e98a6c872f34cd1b795b2e57a29a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#acb7e98a6c872f34cd1b795b2e57a29a4">keccak_squeezeblocks</a> (uint8_t *output, size_t nblocks, uint64_t *state, size_t rate)</td></tr>
-<tr class="memdesc:acb7e98a6c872f34cd1b795b2e57a29a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Keccak squeeze function. Permutes and extracts the state to an output byte array.  <a href="#acb7e98a6c872f34cd1b795b2e57a29a4">More...</a><br /></td></tr>
-<tr class="separator:acb7e98a6c872f34cd1b795b2e57a29a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a566626a4b5f46f589b5aa5d2268b1810"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a566626a4b5f46f589b5aa5d2268b1810">shake128</a> (uint8_t *output, size_t outlen, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:a566626a4b5f46f589b5aa5d2268b1810"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a SHAKE-128 instance, and generate an array of pseudo-random bytes.  <a href="#a566626a4b5f46f589b5aa5d2268b1810">More...</a><br /></td></tr>
-<tr class="separator:a566626a4b5f46f589b5aa5d2268b1810"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87a6c0693f6c2b191c6ede67b0a7babe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a87a6c0693f6c2b191c6ede67b0a7babe">shake128_absorb</a> (uint64_t *state, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:a87a6c0693f6c2b191c6ede67b0a7babe"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SHAKE-128 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake128_squeezeblocks function.  <a href="#a87a6c0693f6c2b191c6ede67b0a7babe">More...</a><br /></td></tr>
-<tr class="separator:a87a6c0693f6c2b191c6ede67b0a7babe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af59141710a9b3a6a53d6704a684eaf62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#af59141710a9b3a6a53d6704a684eaf62">shake128</a> (uint8_t *output, size_t outlen, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:af59141710a9b3a6a53d6704a684eaf62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a SHAKE-128 instance, and generate an array of pseudo-random bytes.  <a href="#af59141710a9b3a6a53d6704a684eaf62">More...</a><br /></td></tr>
+<tr class="separator:af59141710a9b3a6a53d6704a684eaf62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67dfd6580a5a67ff74745526a54b3267"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a67dfd6580a5a67ff74745526a54b3267">shake128_absorb</a> (uint64_t *state, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:a67dfd6580a5a67ff74745526a54b3267"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SHAKE-128 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake128_squeezeblocks function.  <a href="#a67dfd6580a5a67ff74745526a54b3267">More...</a><br /></td></tr>
+<tr class="separator:a67dfd6580a5a67ff74745526a54b3267"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46eb0fb7796b98d55ab50f8f4533bd18"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a46eb0fb7796b98d55ab50f8f4533bd18">shake128_squeezeblocks</a> (uint8_t *output, size_t nblocks, uint64_t *state)</td></tr>
 <tr class="memdesc:a46eb0fb7796b98d55ab50f8f4533bd18"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SHAKE-128 squeeze function. Permutes and extracts the state to an output byte array. Should be used in conjunction with the shake128_absorb function.  <a href="#a46eb0fb7796b98d55ab50f8f4533bd18">More...</a><br /></td></tr>
 <tr class="separator:a46eb0fb7796b98d55ab50f8f4533bd18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af213db772421607a406ef5ed432c023d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#af213db772421607a406ef5ed432c023d">shake256</a> (uint8_t *output, size_t outlen, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:af213db772421607a406ef5ed432c023d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a SHAKE-256 instance, and generate an array of pseudo-random bytes.  <a href="#af213db772421607a406ef5ed432c023d">More...</a><br /></td></tr>
-<tr class="separator:af213db772421607a406ef5ed432c023d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acceb5c0297868bf487675add5dc5e3c5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#acceb5c0297868bf487675add5dc5e3c5">shake256_absorb</a> (uint64_t *state, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:acceb5c0297868bf487675add5dc5e3c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SHAKE-256 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake256_squeezeblocks function.  <a href="#acceb5c0297868bf487675add5dc5e3c5">More...</a><br /></td></tr>
-<tr class="separator:acceb5c0297868bf487675add5dc5e3c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bc90182e6cd59be9c6b339c79122c63"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a2bc90182e6cd59be9c6b339c79122c63">shake256</a> (uint8_t *output, size_t outlen, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:a2bc90182e6cd59be9c6b339c79122c63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a SHAKE-256 instance, and generate an array of pseudo-random bytes.  <a href="#a2bc90182e6cd59be9c6b339c79122c63">More...</a><br /></td></tr>
+<tr class="separator:a2bc90182e6cd59be9c6b339c79122c63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bd00d57f447fb89a87d35fdca953c44"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a3bd00d57f447fb89a87d35fdca953c44">shake256_absorb</a> (uint64_t *state, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:a3bd00d57f447fb89a87d35fdca953c44"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SHAKE-256 absorb function. Absorb and finalize an input seed byte array. Should be used in conjunction with the shake256_squeezeblocks function.  <a href="#a3bd00d57f447fb89a87d35fdca953c44">More...</a><br /></td></tr>
+<tr class="separator:a3bd00d57f447fb89a87d35fdca953c44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a684416786e9ad889f7cb456755f82d77"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a684416786e9ad889f7cb456755f82d77">shake256_squeezeblocks</a> (uint8_t *output, size_t nblocks, uint64_t *state)</td></tr>
 <tr class="memdesc:a684416786e9ad889f7cb456755f82d77"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SHAKE-256 squeeze function. Permutes and extracts the state to an output byte array.  <a href="#a684416786e9ad889f7cb456755f82d77">More...</a><br /></td></tr>
 <tr class="separator:a684416786e9ad889f7cb456755f82d77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa270c2f36902a9b031d914bba5dada89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#aa270c2f36902a9b031d914bba5dada89">cshake128_simple</a> (uint8_t *output, size_t outlen, uint16_t cstm, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:aa270c2f36902a9b031d914bba5dada89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a cSHAKE-128 instance and generate pseudo-random output. Permutes and extracts the state to an output byte array.  <a href="#aa270c2f36902a9b031d914bba5dada89">More...</a><br /></td></tr>
-<tr class="separator:aa270c2f36902a9b031d914bba5dada89"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78c4314784475af731a6aed14f87a187"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a78c4314784475af731a6aed14f87a187">cshake128_simple_absorb</a> (uint64_t *state, uint16_t cstm, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:a78c4314784475af731a6aed14f87a187"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cSHAKE-128 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake128_simple_squeezeblocks function.  <a href="#a78c4314784475af731a6aed14f87a187">More...</a><br /></td></tr>
-<tr class="separator:a78c4314784475af731a6aed14f87a187"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac570db69e51ce4392ac5b20867c9da02"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#ac570db69e51ce4392ac5b20867c9da02">cshake128_simple</a> (uint8_t *output, size_t outlen, uint16_t cstm, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:ac570db69e51ce4392ac5b20867c9da02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a cSHAKE-128 instance and generate pseudo-random output. Permutes and extracts the state to an output byte array.  <a href="#ac570db69e51ce4392ac5b20867c9da02">More...</a><br /></td></tr>
+<tr class="separator:ac570db69e51ce4392ac5b20867c9da02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab57aa0457440d44c075181a6f8c67cc6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#ab57aa0457440d44c075181a6f8c67cc6">cshake128_simple_absorb</a> (uint64_t *state, uint16_t cstm, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:ab57aa0457440d44c075181a6f8c67cc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cSHAKE-128 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake128_simple_squeezeblocks function.  <a href="#ab57aa0457440d44c075181a6f8c67cc6">More...</a><br /></td></tr>
+<tr class="separator:ab57aa0457440d44c075181a6f8c67cc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad220f31e891d12707f0cff5407bfc047"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#ad220f31e891d12707f0cff5407bfc047">cshake128_simple_squeezeblocks</a> (uint8_t *output, size_t nblocks, uint64_t *state)</td></tr>
 <tr class="memdesc:ad220f31e891d12707f0cff5407bfc047"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cSHAKE-128 simple squeeze function. Permutes and extracts blocks of state to an output byte array.  <a href="#ad220f31e891d12707f0cff5407bfc047">More...</a><br /></td></tr>
 <tr class="separator:ad220f31e891d12707f0cff5407bfc047"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa12f3a493d74d93d55cd64f48f72ecf7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#aa12f3a493d74d93d55cd64f48f72ecf7">cshake256_simple</a> (uint8_t *output, size_t outlen, uint16_t cstm, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:aa12f3a493d74d93d55cd64f48f72ecf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a cSHAKE-256 instance and generate pseudo-random output. Permutes and extracts the state to an output byte array.  <a href="#aa12f3a493d74d93d55cd64f48f72ecf7">More...</a><br /></td></tr>
-<tr class="separator:aa12f3a493d74d93d55cd64f48f72ecf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3604ca14c573d1ba6c395c5d1fbaa2b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a3604ca14c573d1ba6c395c5d1fbaa2b6">cshake256_simple_absorb</a> (uint64_t *state, uint16_t cstm, const uint8_t *input, size_t inplen)</td></tr>
-<tr class="memdesc:a3604ca14c573d1ba6c395c5d1fbaa2b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cSHAKE-256 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake256_simple_squeezeblocks function.  <a href="#a3604ca14c573d1ba6c395c5d1fbaa2b6">More...</a><br /></td></tr>
-<tr class="separator:a3604ca14c573d1ba6c395c5d1fbaa2b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fb307a35d9db876cfd3449119a3a4c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a6fb307a35d9db876cfd3449119a3a4c7">cshake256_simple</a> (uint8_t *output, size_t outlen, uint16_t cstm, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:a6fb307a35d9db876cfd3449119a3a4c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed a cSHAKE-256 instance and generate pseudo-random output. Permutes and extracts the state to an output byte array.  <a href="#a6fb307a35d9db876cfd3449119a3a4c7">More...</a><br /></td></tr>
+<tr class="separator:a6fb307a35d9db876cfd3449119a3a4c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f2fe92de03ab87df511d457eeff3def"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#a3f2fe92de03ab87df511d457eeff3def">cshake256_simple_absorb</a> (uint64_t *state, uint16_t cstm, const uint8_t *seed, size_t seedlen)</td></tr>
+<tr class="memdesc:a3f2fe92de03ab87df511d457eeff3def"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cSHAKE-256 simple absorb function. Absorb and finalize an input seed directly into the state. Should be used in conjunction with the cshake256_simple_squeezeblocks function.  <a href="#a3f2fe92de03ab87df511d457eeff3def">More...</a><br /></td></tr>
+<tr class="separator:a3f2fe92de03ab87df511d457eeff3def"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2a2e75670d099467b846a6db007864d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sha3_8h.html#ab2a2e75670d099467b846a6db007864d">cshake256_simple_squeezeblocks</a> (uint8_t *output, size_t nblocks, uint64_t *state)</td></tr>
 <tr class="memdesc:ab2a2e75670d099467b846a6db007864d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cSHAKE-256 simple squeeze function. Permutes and extracts blocks of state to an output byte array.  <a href="#ab2a2e75670d099467b846a6db007864d">More...</a><br /></td></tr>
 <tr class="separator:ab2a2e75670d099467b846a6db007864d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,7 +183,7 @@ Functions</h2></td></tr>
 Contains the public api and documentation for SHA3 digest and SHAKE implementations. </p>
 <dl class="section author"><dt>Author</dt><dd>John Underhill </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>December 29, 2017 </dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>For usage examples, see sha3kat.h </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>For usage examples, see sha3_kat.h </dd></dl>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="a0ae81261cd90e1371b8f45cc65590769"></a>
 <div class="memitem">
@@ -315,7 +316,7 @@ Contains the public api and documentation for SHA3 digest and SHAKE implementati
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="aa270c2f36902a9b031d914bba5dada89"></a>
+<a class="anchor" id="ac570db69e51ce4392ac5b20867c9da02"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -341,13 +342,13 @@ Contains the public api and documentation for SHA3 digest and SHAKE implementati
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -364,15 +365,15 @@ Contains the public api and documentation for SHA3 digest and SHAKE implementati
     <tr><td class="paramname">output</td><td>The output byte array </td></tr>
     <tr><td class="paramname">outlen</td><td>The number of output bytes to generate </td></tr>
     <tr><td class="paramname">cstm</td><td>The 16bit customization integer </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a78c4314784475af731a6aed14f87a187"></a>
+<a class="anchor" id="ab57aa0457440d44c075181a6f8c67cc6"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -392,13 +393,13 @@ Contains the public api and documentation for SHA3 digest and SHAKE implementati
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -415,8 +416,8 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
   <table class="params">
     <tr><td class="paramname">state</td><td>The function state; must be pre-initialized </td></tr>
     <tr><td class="paramname">cstm</td><td>The 16bit customization integer </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
@@ -466,7 +467,7 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="aa12f3a493d74d93d55cd64f48f72ecf7"></a>
+<a class="anchor" id="a6fb307a35d9db876cfd3449119a3a4c7"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -492,13 +493,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -515,15 +516,15 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
     <tr><td class="paramname">output</td><td>The output byte array </td></tr>
     <tr><td class="paramname">outlen</td><td>The number of output bytes to generate </td></tr>
     <tr><td class="paramname">cstm</td><td>The 16bit customization integer </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a3604ca14c573d1ba6c395c5d1fbaa2b6"></a>
+<a class="anchor" id="a3f2fe92de03ab87df511d457eeff3def"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -543,13 +544,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -566,8 +567,8 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
   <table class="params">
     <tr><td class="paramname">state</td><td>The function state; must be pre-initialized </td></tr>
     <tr><td class="paramname">cstm</td><td>The 16bit customization integer </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
@@ -617,64 +618,6 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a426231b1f95b8b10f44061d078630593"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void keccak_absorb </td>
-          <td>(</td>
-          <td class="paramtype">uint64_t *&#160;</td>
-          <td class="paramname"><em>state</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>rate</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>domain</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>The Keccak absorb function. Absorb an input message array directly into the state. </p>
-<dl class="section warning"><dt>Warning</dt><dd>Finalizes the message state, can not be used in consecutive calls. <br />
-State must be initialized (and zeroed) by the caller.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">state</td><td>The function state; must be initialized </td></tr>
-    <tr><td class="paramname">rate</td><td>The rate of absorption, in bytes </td></tr>
-    <tr><td class="paramname">input</td><td>The input message byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of message bytes to process </td></tr>
-    <tr><td class="paramname">domain</td><td>The domain seperation code (SHA3=0x06, SHAKE=0x1F, cSHAKE=0x04) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a class="anchor" id="a61e2076648ec5340198d9870a344c0c7"></a>
 <div class="memitem">
 <div class="memproto">
@@ -699,25 +642,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="acb7e98a6c872f34cd1b795b2e57a29a4"></a>
+<a class="anchor" id="a9e913b5e84f88d9e3508cf7caecb0b1d"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void keccak_squeezeblocks </td>
+          <td class="memname">void sha3_blockupdate </td>
           <td>(</td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>nblocks</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">uint64_t *&#160;</td>
           <td class="paramname"><em>state</em>, </td>
         </tr>
@@ -725,7 +656,25 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>rate</em>&#160;</td>
+          <td class="paramname"><em>rate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>message</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>msgoffset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>msglen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -735,21 +684,23 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>The Keccak squeeze function. Permutes and extracts the state to an output byte array. </p>
-<dl class="section warning"><dt>Warning</dt><dd>Output array must be initialized to a multiple of the byte rate.</dd></dl>
+<p>Update SHA3 with blocks of input. Absorbs (rate) block sized lengths of input message into the state. </p>
+<dl class="section warning"><dt>Warning</dt><dd>Message length must be a multiple of the rate size. <br />
+State must be initialized (and zeroed) by the caller.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">output</td><td>The output byte array </td></tr>
-    <tr><td class="paramname">nblocks</td><td>The number of blocks to extract </td></tr>
-    <tr><td class="paramname">state</td><td>The function state; must be pre-initialized </td></tr>
+    <tr><td class="paramname">state</td><td>The function state </td></tr>
     <tr><td class="paramname">rate</td><td>The rate of absorption, in bytes </td></tr>
+    <tr><td class="paramname">message</td><td>The input message byte array </td></tr>
+    <tr><td class="paramname">msgoffset</td><td>The current position within the input message byte array </td></tr>
+    <tr><td class="paramname">msglen</td><td>The number of message bytes to process </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a1de1bcb16e5dcc59c15011a1d368946d"></a>
+<a class="anchor" id="abd241c4f425729eea7671685b1438908"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -763,13 +714,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>message</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>msglen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -783,16 +734,16 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>The output array must be at least 32 bytes in length.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">output</td><td>The output byte array </td></tr>
-    <tr><td class="paramname">input</td><td>The message input byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of message bytes to process </td></tr>
+    <tr><td class="paramname">output</td><td>The output byte array; receives the hash code </td></tr>
+    <tr><td class="paramname">message</td><td>The message input byte array </td></tr>
+    <tr><td class="paramname">msglen</td><td>The number of message bytes to process </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a3cdd304e2b2d5e152f857e37bf0070e5"></a>
+<a class="anchor" id="a1fd14cb5e2fb04e8af7095453f797dda"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -806,13 +757,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>message</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>msglen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -826,16 +777,82 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>The output array must be at least 64 bytes in length.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">output</td><td>The output byte array </td></tr>
-    <tr><td class="paramname">input</td><td>The message input byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of message bytes to process </td></tr>
+    <tr><td class="paramname">output</td><td>The output byte array; receives the hash code </td></tr>
+    <tr><td class="paramname">message</td><td>The message input byte array </td></tr>
+    <tr><td class="paramname">msglen</td><td>The number of message bytes to process </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a566626a4b5f46f589b5aa5d2268b1810"></a>
+<a class="anchor" id="a1daa40a02f5cf2d38ea06c03ae5c7855"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void sha3_finalize </td>
+          <td>(</td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>message</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>msgoffset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>msglen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Finalize the message state and returns the hash value in output. Absorb the last block of message and create the hash value. <br />
+Produces a 32 byte output code using SHA3_256_RATE, 64 bytes with SHA3_512_RATE. </p>
+<dl class="section warning"><dt>Warning</dt><dd>The output array must be sized correctly corresponding to the absorbtion rate ((200 - rate) / 2). <br />
+Finalizes the message state, can not be used in consecutive calls.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>The function state; must be initialized </td></tr>
+    <tr><td class="paramname">rate</td><td>The rate of absorption, in bytes </td></tr>
+    <tr><td class="paramname">message</td><td>The input message byte array </td></tr>
+    <tr><td class="paramname">msglen</td><td>The number of message bytes to process </td></tr>
+    <tr><td class="paramname">msgoffset</td><td>The current position within the input message byte array </td></tr>
+    <tr><td class="paramname">output</td><td>The output byte array; receives the hash code </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="af59141710a9b3a6a53d6704a684eaf62"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -855,13 +872,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -877,15 +894,15 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
   <table class="params">
     <tr><td class="paramname">output</td><td>The output byte array </td></tr>
     <tr><td class="paramname">outlen</td><td>The number of output bytes to generate </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a87a6c0693f6c2b191c6ede67b0a7babe"></a>
+<a class="anchor" id="a67dfd6580a5a67ff74745526a54b3267"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -899,13 +916,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -921,8 +938,8 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">state</td><td>The function state; must be pre-initialized </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
@@ -972,7 +989,7 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="af213db772421607a406ef5ed432c023d"></a>
+<a class="anchor" id="a2bc90182e6cd59be9c6b339c79122c63"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -992,13 +1009,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1014,15 +1031,15 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
   <table class="params">
     <tr><td class="paramname">output</td><td>The output byte array </td></tr>
     <tr><td class="paramname">outlen</td><td>The number of output bytes to generate </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="acceb5c0297868bf487675add5dc5e3c5"></a>
+<a class="anchor" id="a3bd00d57f447fb89a87d35fdca953c44"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1036,13 +1053,13 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>seed</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>inplen</em>&#160;</td>
+          <td class="paramname"><em>seedlen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1058,8 +1075,8 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">state</td><td>The function state; must be pre-initialized </td></tr>
-    <tr><td class="paramname">input</td><td>The input seed byte array </td></tr>
-    <tr><td class="paramname">inplen</td><td>The number of seed bytes to process </td></tr>
+    <tr><td class="paramname">seed</td><td>The input seed byte array </td></tr>
+    <tr><td class="paramname">seedlen</td><td>The number of seed bytes to process </td></tr>
   </table>
   </dd>
 </dl>
@@ -1112,7 +1129,7 @@ State must be initialized (and zeroed) by the caller.</dd></dl>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Jan 8 2018 17:54:45 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Jan 10 2018 18:29:03 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

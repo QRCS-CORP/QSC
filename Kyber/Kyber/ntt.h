@@ -3,7 +3,7 @@
 * \brief <b>Number Theoretic Transform</b> \n
 * This is an internal class.
 *
-* \date January 07, 2018
+* \date January 10, 2018
 */
 
 #ifndef NTT_H

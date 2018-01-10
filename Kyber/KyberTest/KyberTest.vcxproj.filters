@@ -18,5 +18,13 @@
     <ClCompile Include="kyber_test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sha3_kat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sha3_kat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

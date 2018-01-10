@@ -4,9 +4,10 @@
 * Contains the Kyber implementation wellness test functions.
 *
 * \author John Underhill
-* \date January 06, 2018
+* \date January 10, 2018
 */
 
+#include "sha3_kat.h"
 #include "../Kyber/kem.h"
 #include "../Kyber/poly.h"
 #include "../Kyber/sysrand.h"
@@ -35,6 +36,99 @@ char get_response()
 }
 
 /**
+* \brief Run the Kyber implementation stress and correctness tests tests
+*/
+void kyber_test_run()
+{
+	if (test_keys() == KYBER_STATUS_SUCCESS)
+	{
+		printf("Success! Passed key generation, encryption, and decryption stress test. \n");
+	}
+	else
+	{
+		printf("Failure! Failed the encryption stress tests. \n \n");
+	}
+
+	if (test_invalid_sk_a() == KYBER_STATUS_SUCCESS)
+	{
+		printf("Success! Passed secret key tamper test. \n");
+	}
+	else
+	{
+		printf("Failure! Failed secret key tamper test. \n");
+	}
+
+	if (test_invalid_ciphertext() == KYBER_STATUS_SUCCESS)
+	{
+		printf("Success! Passed cipher-text tamper test. \n");
+	}
+	else
+	{
+		printf("Failure! Failed cipher-text tamper test. \n");
+	}
+}
+
+/**
+* \brief Run the SHA3, SHAKE, and simple cSHAKE KAT tests
+*/
+void sha3_test_run()
+{
+	if (sha3_256_kat_test() == SHA3_STATUS_SUCCESS)
+	{
+		printf("Success! passed sha3-256 known answer tests \n");
+	}
+	else
+	{
+		printf("Failure! failed sha3-256 known answer tests \n");
+	}
+
+	if (sha3_512_kat_test() == SHA3_STATUS_SUCCESS)
+	{
+		printf("Success! passed sha3-512 known answer tests \n");
+	}
+	else
+	{
+		printf("Failure! failed sha3-512 known answer tests \n");
+	}
+
+	if (shake_128_kat_test() == SHA3_STATUS_SUCCESS)
+	{
+		printf("Success! passed shake-128 known answer tests \n");
+	}
+	else
+	{
+		printf("Failure! failed shake-128 known answer tests \n");
+	}
+
+	if (shake_256_kat_test() == SHA3_STATUS_SUCCESS)
+	{
+		printf("Success! passed shake-256 known answer tests \n");
+	}
+	else
+	{
+		printf("Failure! failed shake-256 known answer tests \n");
+	}
+
+	if (cshake_simple_128_kat_test() == SHA3_STATUS_SUCCESS)
+	{
+		printf("Success! passed simple cshake-128 known answer tests \n");
+	}
+	else
+	{
+		printf("Failure! failed simple cshake-128 known answer tests \n");
+	}
+
+	if (cshake_simple_256_kat_test() == SHA3_STATUS_SUCCESS)
+	{
+		printf("Success! passed simple cshake-256 simple known answer tests \n");
+	}
+	else
+	{
+		printf("Failure! failed simple cshake-256 simple known answer tests \n");
+	}
+}
+
+/**
 * \brief Stress test the key generation, encryption, and decryption functions in a 100 round loop.
 * \return Returns one (KYBER_STATUS_SUCCESS) for test success
 */
@@ -56,27 +150,27 @@ int32_t test_keys()
 		if (crypto_kem_keypair(pk, sk_a) == KYBER_CRYPTO_FAILURE)
 		{
 			state = KYBER_STATUS_FAILURE;
-			return state;
+			break;
 		}
 
 		/* bob derives a secret key and creates a response */
 		if (crypto_kem_enc(sendb, key_b, pk) == KYBER_CRYPTO_FAILURE)
 		{
 			state = KYBER_STATUS_FAILURE;
-			return state;
+			break;
 		}
 
 		/* alice uses Bobs response to get her secret key */
 		if (crypto_kem_dec(key_a, sendb, sk_a) == KYBER_CRYPTO_FAILURE)
 		{
 			state = KYBER_STATUS_FAILURE;
-			return state;
+			break;
 		}
 
 		if (memcmp(key_a, key_b, KYBER_SYMBYTES))
 		{
 			state = KYBER_STATUS_FAILURE;
-			return state;
+			break;
 		}
 	}
 
@@ -94,8 +188,10 @@ int32_t test_invalid_sk_a()
 	uint8_t key_b[KYBER_SYMBYTES];
 	uint8_t pk[KYBER_PUBLICKEYBYTES];
 	uint8_t sendb[KYBER_CIPHERTEXTBYTES];
-	uint8_t state = KYBER_STATUS_SUCCESS;
+	uint8_t state;
 	size_t i;
+
+	state = KYBER_STATUS_SUCCESS;
 
 	for (i = 0; i < KYBER_NTESTS; i++)
 	{
@@ -129,9 +225,11 @@ int32_t test_invalid_ciphertext()
 	uint8_t key_b[KYBER_SYMBYTES];
 	uint8_t pk[KYBER_PUBLICKEYBYTES];
 	uint8_t sendb[KYBER_CIPHERTEXTBYTES];
-	uint8_t state = KYBER_STATUS_SUCCESS;
+	uint8_t state;
 	size_t i;
 	size_t pos;
+
+	state = KYBER_STATUS_SUCCESS;
 
 	for (i = 0; i < KYBER_NTESTS; i++)
 	{
@@ -156,39 +254,19 @@ int32_t test_invalid_ciphertext()
 }
 
 /**
-* \brief Runs the Kyber tests
+* \brief Runs the SHA3 and Kyber tests
 */
 int main(void)
 {
-	printf("*** The Kyber implementations stress and validity tests *** \n");
+	printf("*** The SHA3 digest and SHAKE Known Answer Tests *** \n");
+	printf("\n");
+	sha3_test_run();
 	printf("\n");
 
-	if (test_keys() == KYBER_STATUS_SUCCESS)
-	{
-		printf("Success! Passed key generation, encryption, and decryption stress test. \n");
-	}
-	else
-	{
-		printf("Failure! Failed the encryption stress tests. \n \n");
-	}
-
-	if (test_invalid_sk_a() == KYBER_STATUS_SUCCESS)
-	{
-		printf("Success! Passed secret key tamper test. \n");
-	}
-	else
-	{
-		printf("Failure! Failed secret key tamper test. \n");
-	}
-
-	if (test_invalid_ciphertext() == KYBER_STATUS_SUCCESS)
-	{
-		printf("Success! Passed cipher-text tamper test. \n");
-	}
-	else
-	{
-		printf("Failure! Failed cipher-text tamper test. \n");
-	}
+	printf("*** The Kyber implementations stress and validity tests *** \n");
+	printf("\n");
+	kyber_test_run();
+	printf("\n");
 
 	printf("\n");
 	printf("Completed! Press any key to close..");

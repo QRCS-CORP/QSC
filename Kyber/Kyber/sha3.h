@@ -5,7 +5,7 @@
 *
 * \author John Underhill
 * \date December 29, 2017
-* \remarks For usage examples, see sha3kat.h
+* \remarks For usage examples, see sha3_kat.h
 */
 
 #ifndef SHA3_H
@@ -80,37 +80,54 @@
 *
 * \warning The output array must be at least 32 bytes in length.
 *
-* \param output The output byte array
-* \param input The message input byte array
-* \param inplen The number of message bytes to process
+* \param output The output byte array; receives the hash code
+* \param message The message input byte array
+* \param msglen The number of message bytes to process
 */
-void sha3_compute256(uint8_t* output, const uint8_t* input, size_t inplen);
+void sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen);
 
 /**
 * \brief Process a message with SHA3-512 and return the hash code in the output byte array.
 *
 * \warning The output array must be at least 64 bytes in length.
 *
-* \param output The output byte array
-* \param input The message input byte array
-* \param inplen The number of message bytes to process
+* \param output The output byte array; receives the hash code
+* \param message The message input byte array
+* \param msglen The number of message bytes to process
 */
-void sha3_compute512(uint8_t* output, const uint8_t* input, size_t inplen);
+void sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen);
 
 /**
-* \brief The Keccak absorb function.
-* Absorb an input message array directly into the state.
+* \brief Update SHA3 with blocks of input.
+* Absorbs (rate) block sized lengths of input message into the state.
 *
-* \warning Finalizes the message state, can not be used in consecutive calls. \n
+* \warning Message length must be a multiple of the rate size. \n
 * State must be initialized (and zeroed) by the caller.
+*
+* \param state The function state
+* \param rate The rate of absorption, in bytes
+* \param message The input message byte array
+* \param msgoffset The current position within the input message byte array
+* \param msglen The number of message bytes to process
+*/
+void sha3_blockupdate(uint64_t* state, size_t rate, const uint8_t* message, size_t msgoffset, size_t msglen);
+
+/**
+* \brief Finalize the message state and returns the hash value in output.
+* Absorb the last block of message and create the hash value. \n
+* Produces a 32 byte output code using SHA3_256_RATE, 64 bytes with SHA3_512_RATE.
+*
+* \warning The output array must be sized correctly corresponding to the absorbtion rate ((200 - rate) / 2). \n
+* Finalizes the message state, can not be used in consecutive calls.
 *
 * \param state The function state; must be initialized
 * \param rate The rate of absorption, in bytes
-* \param input The input message byte array
-* \param inplen The number of message bytes to process
-* \param domain The domain seperation code (SHA3=0x06, SHAKE=0x1F, cSHAKE=0x04)
+* \param message The input message byte array
+* \param msglen The number of message bytes to process
+* \param msgoffset The current position within the input message byte array
+* \param output The output byte array; receives the hash code
 */
-void keccak_absorb(uint64_t* state, size_t rate, const uint8_t* input, size_t inplen, uint8_t domain);
+void sha3_finalize(uint64_t* state, size_t rate, const uint8_t* message, size_t msgoffset, size_t msglen, uint8_t* output);
 
 /**
 * \brief The Keccak permute function.
@@ -119,19 +136,6 @@ void keccak_absorb(uint64_t* state, size_t rate, const uint8_t* input, size_t in
 * \param state The function state; must be initialized
 */
 void keccak_permute(uint64_t* state);
-
-/**
-* \brief The Keccak squeeze function.
-* Permutes and extracts the state to an output byte array.
-*
-* \warning Output array must be initialized to a multiple of the byte rate.
-*
-* \param output The output byte array
-* \param nblocks The number of blocks to extract
-* \param state The function state; must be pre-initialized
-* \param rate The rate of absorption, in bytes
-*/
-void keccak_squeezeblocks(uint8_t* output, size_t nblocks, uint64_t* state, size_t rate);
 
 /* SHAKE */
 
@@ -142,10 +146,10 @@ void keccak_squeezeblocks(uint8_t* output, size_t nblocks, uint64_t* state, size
 *
 * \param output The output byte array
 * \param outlen The number of output bytes to generate
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void shake128(uint8_t* output, size_t outlen, const uint8_t* input, size_t inplen);
+void shake128(uint8_t* output, size_t outlen, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The SHAKE-128 absorb function.
@@ -156,10 +160,10 @@ void shake128(uint8_t* output, size_t outlen, const uint8_t* input, size_t inple
 * State must be initialized (and zeroed) by the caller.
 *
 * \param state The function state; must be pre-initialized
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void shake128_absorb(uint64_t* state, const uint8_t* input, size_t inplen);
+void shake128_absorb(uint64_t* state, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The SHAKE-128 squeeze function.
@@ -181,10 +185,10 @@ void shake128_squeezeblocks(uint8_t* output, size_t nblocks, uint64_t* state);
 *
 * \param output The output byte array
 * \param outlen The number of output bytes to generate
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void shake256(uint8_t* output, size_t outlen, const uint8_t* input, size_t inplen);
+void shake256(uint8_t* output, size_t outlen, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The SHAKE-256 absorb function.
@@ -195,10 +199,10 @@ void shake256(uint8_t* output, size_t outlen, const uint8_t* input, size_t inple
 * State must be initialized (and zeroed) by the caller.
 *
 * \param state The function state; must be pre-initialized
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void shake256_absorb(uint64_t* state, const uint8_t* input, size_t inplen);
+void shake256_absorb(uint64_t* state, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The SHAKE-256 squeeze function.
@@ -223,10 +227,10 @@ void shake256_squeezeblocks(uint8_t* output, size_t nblocks, uint64_t* state);
 * \param output The output byte array
 * \param outlen The number of output bytes to generate
 * \param cstm The 16bit customization integer
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void cshake128_simple(uint8_t* output, size_t outlen, uint16_t cstm, const uint8_t* input, size_t inplen);
+void cshake128_simple(uint8_t* output, size_t outlen, uint16_t cstm, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The cSHAKE-128 simple absorb function.
@@ -238,10 +242,10 @@ void cshake128_simple(uint8_t* output, size_t outlen, uint16_t cstm, const uint8
 *
 * \param state The function state; must be pre-initialized
 * \param cstm The 16bit customization integer
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void cshake128_simple_absorb(uint64_t* state, uint16_t cstm, const uint8_t* input, size_t inplen);
+void cshake128_simple_absorb(uint64_t* state, uint16_t cstm, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The cSHAKE-128 simple squeeze function.
@@ -264,10 +268,10 @@ void cshake128_simple_squeezeblocks(uint8_t* output, size_t nblocks, uint64_t* s
 * \param output The output byte array
 * \param outlen The number of output bytes to generate
 * \param cstm The 16bit customization integer
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void cshake256_simple(uint8_t* output, size_t outlen, uint16_t cstm, const uint8_t* input, size_t inplen);
+void cshake256_simple(uint8_t* output, size_t outlen, uint16_t cstm, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The cSHAKE-256 simple absorb function.
@@ -279,10 +283,10 @@ void cshake256_simple(uint8_t* output, size_t outlen, uint16_t cstm, const uint8
 *
 * \param state The function state; must be pre-initialized
 * \param cstm The 16bit customization integer
-* \param input The input seed byte array
-* \param inplen The number of seed bytes to process
+* \param seed The input seed byte array
+* \param seedlen The number of seed bytes to process
 */
-void cshake256_simple_absorb(uint64_t* state, uint16_t cstm, const uint8_t* input, size_t inplen);
+void cshake256_simple_absorb(uint64_t* state, uint16_t cstm, const uint8_t* seed, size_t seedlen);
 
 /**
 * \brief The cSHAKE-256 simple squeeze function.

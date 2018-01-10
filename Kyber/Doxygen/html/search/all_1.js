@@ -13,12 +13,12 @@ var searchData=
   ['crypto_5fpublickeybytes',['CRYPTO_PUBLICKEYBYTES',['../kem_8h.html#ad3ae9ccc17354eeb4bfd498a1b76e938',1,'kem.h']]],
   ['crypto_5fsecretkeybytes',['CRYPTO_SECRETKEYBYTES',['../kem_8h.html#a15a0b213afe1dabb9286f9f92a05251e',1,'kem.h']]],
   ['cshake128_5frate',['CSHAKE128_RATE',['../sha3_8h.html#a0ae81261cd90e1371b8f45cc65590769',1,'sha3.h']]],
-  ['cshake128_5fsimple',['cshake128_simple',['../sha3_8h.html#aa270c2f36902a9b031d914bba5dada89',1,'sha3.c']]],
-  ['cshake128_5fsimple_5fabsorb',['cshake128_simple_absorb',['../sha3_8h.html#a78c4314784475af731a6aed14f87a187',1,'sha3.c']]],
+  ['cshake128_5fsimple',['cshake128_simple',['../sha3_8h.html#ac570db69e51ce4392ac5b20867c9da02',1,'sha3.c']]],
+  ['cshake128_5fsimple_5fabsorb',['cshake128_simple_absorb',['../sha3_8h.html#ab57aa0457440d44c075181a6f8c67cc6',1,'sha3.c']]],
   ['cshake128_5fsimple_5fsqueezeblocks',['cshake128_simple_squeezeblocks',['../sha3_8h.html#ad220f31e891d12707f0cff5407bfc047',1,'sha3.c']]],
   ['cshake256_5frate',['CSHAKE256_RATE',['../sha3_8h.html#a6aa4ab0aa1ddc7154962306f7f9056fd',1,'sha3.h']]],
-  ['cshake256_5fsimple',['cshake256_simple',['../sha3_8h.html#aa12f3a493d74d93d55cd64f48f72ecf7',1,'sha3.c']]],
-  ['cshake256_5fsimple_5fabsorb',['cshake256_simple_absorb',['../sha3_8h.html#a3604ca14c573d1ba6c395c5d1fbaa2b6',1,'sha3.c']]],
+  ['cshake256_5fsimple',['cshake256_simple',['../sha3_8h.html#a6fb307a35d9db876cfd3449119a3a4c7',1,'sha3.c']]],
+  ['cshake256_5fsimple_5fabsorb',['cshake256_simple_absorb',['../sha3_8h.html#a3f2fe92de03ab87df511d457eeff3def',1,'sha3.c']]],
   ['cshake256_5fsimple_5fsqueezeblocks',['cshake256_simple_squeezeblocks',['../sha3_8h.html#ab2a2e75670d099467b846a6db007864d',1,'sha3.c']]],
   ['cshake_5fdomain',['CSHAKE_DOMAIN',['../sha3_8h.html#ae8a57d32e6965b02abe4dc6171fee303',1,'sha3.h']]]
 ];

@@ -3,7 +3,7 @@
 * \brief <b>Centered Binomial Distribution</b> \n
 * This is an internal class.
 *
-* \date January 07, 2018
+* \date January 10, 2018
 */
 
 #ifndef CBD_H
@@ -17,7 +17,7 @@
 * a centered binomial distribution with parameter KYBER_ETA.
 *
 * \param r Pointer to output polynomial
-* \param buf pointer to input byte array
+* \param buf Pointer to input byte array
 */
 void cbd(poly* r, const uint8_t* buf);
 

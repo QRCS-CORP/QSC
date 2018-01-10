@@ -2,7 +2,7 @@
 
 #if defined(WINDOWS)
 #	include <windows.h>
-#	include <Wincrypt.h>
+#	include <wincrypt.h>
 #else
 #	include <sys/types.h> /* TODO: are all of these really needed? */
 #	include <sys/stat.h>

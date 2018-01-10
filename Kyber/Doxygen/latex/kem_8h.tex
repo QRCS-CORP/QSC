@@ -2,8 +2,8 @@
 \label{kem_8h}\index{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/kem.\+h@{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+Kyber/\+Kyber/kem.\+h}}
 
 
-{\bfseries Kyber Key Encapsulation Mechanism definitions} ~\newline
-Contains the public api for the Kyber for C\+C\+A-\/secure K\+E\+M implementation.  
+{\bfseries The Kyber K\+E\+M definitions} ~\newline
+Contains the primary public api for the Kyber C\+C\+A-\/secure Key Encapsulation Mechanism implementation.  
 
 
 {\ttfamily \#include \char`\"{}params.\+h\char`\"{}}\\*
@@ -40,17 +40,16 @@ int32\+\_\+t \hyperlink{kem_8h_a30443a36827114b04ee9d051811ac28f}{crypto\+\_\+ke
 
 
 \subsection{Detailed Description}
-{\bfseries Kyber Key Encapsulation Mechanism definitions} ~\newline
-Contains the public api for the Kyber for C\+C\+A-\/secure K\+E\+M implementation. 
+{\bfseries The Kyber K\+E\+M definitions} ~\newline
+Contains the primary public api for the Kyber C\+C\+A-\/secure Key Encapsulation Mechanism implementation. 
 
 \begin{DoxyDate}{Date}
-January 08, 2018 
+January 10, 2018
 \end{DoxyDate}
-\begin{DoxyRemark}{Remarks}
-A simple example of key-\/pair creation, encryption, and decryption using the Kyber I\+N\+D\+C\+P\+A secure api.
-\end{DoxyRemark}
-
+{\bfseries Example} ~\newline
+ 
 \begin{DoxyCode}
+\textcolor{comment}{// An example of key-pair creation, encryption, and decryption}
 uint8\_t pk[\hyperlink{params_8h_a7663b32715a32f12eb70420793753ce3}{KYBER\_PUBLICKEYBYTES}];
 uint8\_t sk[\hyperlink{params_8h_a7f9a2f9ae6937442f988816af97babb3}{KYBER\_SECRETKEYBYTES}];
 uint8\_t key\_a[\hyperlink{params_8h_a132bbc78e88ea5e14e93e0963dd5d0f9}{KYBER\_SYMBYTES}];
@@ -64,7 +63,15 @@ uint8\_t sendb[\hyperlink{params_8h_a356cca49fc302b0c34c18f4bbda6e5fe}{KYBER\_CI
 \textcolor{comment}{// decrypt the cipher-text, and output alices shared key}
 \hyperlink{kem_8h_a30443a36827114b04ee9d051811ac28f}{crypto\_kem\_dec}(key\_a, sendb, sk);
 \end{DoxyCode}
- 
+
+
+\begin{DoxyRemark}{Remarks}
+Based entirely on the C reference branch of P\+Q-\/\+Crystals Kyber; including base code, comments, and api. ~\newline
+P\+Q-\/\+Crystals \href{https://github.com/pq-crystals/kyber}{\tt Kyber}. ~\newline
+C\+R\+Y\+S\+T\+A\+L\+S -\/ Kyber\+: \href{http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf}{\tt a C\+C\+A-\/secure module-\/lattice-\/based K\+E\+M}. ~\newline
+
+\end{DoxyRemark}
+
 
 \subsection{Macro Definition Documentation}
 \hypertarget{kem_8h_a4ee5ebe5981b4239b3b2adaa732cb1f1}{}\index{kem.\+h@{kem.\+h}!C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E@{C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E}}

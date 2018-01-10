@@ -165,6 +165,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="kyber_test.c" />
+    <ClCompile Include="sha3_kat.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sha3_kat.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
