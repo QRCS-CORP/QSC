@@ -9,8 +9,8 @@
 #ifndef POLY_H
 #define POLY_H
 
+#include "common.h"
 #include "params.h"
-#include <stdint.h>
 
 /**
 * \struct poly

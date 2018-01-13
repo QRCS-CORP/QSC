@@ -4,10 +4,10 @@
 #include "sha3.h"
 #include "verify.h"
 
-int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
+kyber_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 {
 	size_t i;
-	int32_t rstat;
+	kyber_status rstat;
 
 	indcpa_keypair(pk, sk);
 
@@ -29,12 +29,12 @@ int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 	return rstat;
 }
 
-int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
+kyber_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 {
 	/* will contain key, coins */
 	uint8_t  kr[2 * KYBER_SYMBYTES];
 	uint8_t buf[2 * KYBER_SYMBYTES];
-	int32_t rstat;
+	kyber_status rstat;
 
 	rstat = sysrand_getbytes(buf, KYBER_SYMBYTES);
 
@@ -53,7 +53,7 @@ int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	return rstat;
 }
 
-int32_t crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
+kyber_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 {
 	const uint8_t* pk = sk + KYBER_INDCPA_SECRETKEYBYTES;
 	uint8_t buf[2 * KYBER_SYMBYTES];
@@ -84,5 +84,5 @@ int32_t crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	/* hash concatenation of pre-k and H(c) to k */
 	sha3_compute256(ss, kr, 2 * KYBER_SYMBYTES);
 
-	return (fail == 0) ? KYBER_CRYPTO_SUCCESS : KYBER_CRYPTO_FAILURE;
+	return (fail == 0) ? KYBER_STATE_SUCCESS : KYBER_ERROR_AUTHFAIL;
 }

@@ -93,7 +93,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#ifndef SHA3_H</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#define SHA3_H</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="common_8h.html">common.h</a>&quot;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
 <div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="sha3_8h.html#ae8a57d32e6965b02abe4dc6171fee303">   20</a></span>&#160;<span class="preprocessor">#define CSHAKE_DOMAIN 0x04</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
@@ -170,13 +170,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="sha3_8h_html_ac570db69e51ce4392ac5b20867c9da02"><div class="ttname"><a href="sha3_8h.html#ac570db69e51ce4392ac5b20867c9da02">cshake128_simple</a></div><div class="ttdeci">void cshake128_simple(uint8_t *output, size_t outlen, uint16_t cstm, const uint8_t *seed, size_t seedlen)</div><div class="ttdoc">Seed a cSHAKE-128 instance and generate pseudo-random output. Permutes and extracts the state to an o...</div><div class="ttdef"><b>Definition:</b> sha3.c:2489</div></div>
 <div class="ttc" id="sha3_8h_html_a684416786e9ad889f7cb456755f82d77"><div class="ttname"><a href="sha3_8h.html#a684416786e9ad889f7cb456755f82d77">shake256_squeezeblocks</a></div><div class="ttdeci">void shake256_squeezeblocks(uint8_t *output, size_t nblocks, uint64_t *state)</div><div class="ttdoc">The SHAKE-256 squeeze function. Permutes and extracts the state to an output byte array...</div><div class="ttdef"><b>Definition:</b> sha3.c:2482</div></div>
 <div class="ttc" id="sha3_8h_html_a1daa40a02f5cf2d38ea06c03ae5c7855"><div class="ttname"><a href="sha3_8h.html#a1daa40a02f5cf2d38ea06c03ae5c7855">sha3_finalize</a></div><div class="ttdeci">void sha3_finalize(uint64_t *state, size_t rate, const uint8_t *message, size_t msgoffset, size_t msglen, uint8_t *output)</div><div class="ttdoc">Finalize the message state and returns the hash value in output. Absorb the last block of message and...</div><div class="ttdef"><b>Definition:</b> sha3.c:2369</div></div>
+<div class="ttc" id="common_8h_html"><div class="ttname"><a href="common_8h.html">common.h</a></div><div class="ttdoc">Contains global includes and enumerations  This is an internal class. </div></div>
 <div class="ttc" id="sha3_8h_html_ab57aa0457440d44c075181a6f8c67cc6"><div class="ttname"><a href="sha3_8h.html#ab57aa0457440d44c075181a6f8c67cc6">cshake128_simple_absorb</a></div><div class="ttdeci">void cshake128_simple_absorb(uint64_t *state, uint16_t cstm, const uint8_t *seed, size_t seedlen)</div><div class="ttdoc">The cSHAKE-128 simple absorb function. Absorb and finalize an input seed directly into the state...</div><div class="ttdef"><b>Definition:</b> sha3.c:2518</div></div>
 <div class="ttc" id="sha3_8h_html_a1fd14cb5e2fb04e8af7095453f797dda"><div class="ttname"><a href="sha3_8h.html#a1fd14cb5e2fb04e8af7095453f797dda">sha3_compute512</a></div><div class="ttdeci">void sha3_compute512(uint8_t *output, const uint8_t *message, size_t msglen)</div><div class="ttdoc">Process a message with SHA3-512 and return the hash code in the output byte array. </div><div class="ttdef"><b>Definition:</b> sha3.c:2331</div></div>
 <div class="ttc" id="sha3_8h_html_a2bc90182e6cd59be9c6b339c79122c63"><div class="ttname"><a href="sha3_8h.html#a2bc90182e6cd59be9c6b339c79122c63">shake256</a></div><div class="ttdeci">void shake256(uint8_t *output, size_t outlen, const uint8_t *seed, size_t seedlen)</div><div class="ttdoc">Seed a SHAKE-256 instance, and generate an array of pseudo-random bytes. </div><div class="ttdef"><b>Definition:</b> sha3.c:2448</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jan 10 2018 18:29:03 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 13 2018 18:04:01 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

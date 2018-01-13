@@ -86,7 +86,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">sysrand.h File Reference</div>  </div>
@@ -96,57 +95,28 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p><b>System random provider</b> <br />
 Provides access to either the Windows CryptGenRandom provider or the /dev/urandom pool on posix systems.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;stdint.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="common_8h_source.html">common.h</a>&quot;</code><br />
 </div>
 <p><a href="sysrand_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:a2655530e50570968a2a13b78978e3355"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sysrand_8h.html#a2655530e50570968a2a13b78978e3355">RAND_GENERATION_STATUS</a> { <a class="el" href="sysrand_8h.html#a2655530e50570968a2a13b78978e3355a59c335dc64a7b2d04fa8abf6e0f5e46e">RAND_STATUS_FAILURE</a> = 0, 
-<a class="el" href="sysrand_8h.html#a2655530e50570968a2a13b78978e3355a909a523208f02b858cede1917af3794b">RAND_STATUS_SUCCESS</a> = 1
- }</td></tr>
-<tr class="separator:a2655530e50570968a2a13b78978e3355"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a79f005a6308933500edfa979f7a47022"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sysrand_8h.html#a79f005a6308933500edfa979f7a47022">sysrand_getbytes</a> (uint8_t *buffer, size_t length)</td></tr>
-<tr class="memdesc:a79f005a6308933500edfa979f7a47022"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an array of pseudo-random bytes from the system entropy provider.  <a href="#a79f005a6308933500edfa979f7a47022">More...</a><br /></td></tr>
-<tr class="separator:a79f005a6308933500edfa979f7a47022"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1b9222c1bdb05af37a1be25d3fcf4ca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sysrand_8h.html#af1b9222c1bdb05af37a1be25d3fcf4ca">sysrand_getbytes</a> (uint8_t *buffer, size_t length)</td></tr>
+<tr class="memdesc:af1b9222c1bdb05af37a1be25d3fcf4ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an array of pseudo-random bytes from the system entropy provider.  <a href="#af1b9222c1bdb05af37a1be25d3fcf4ca">More...</a><br /></td></tr>
+<tr class="separator:af1b9222c1bdb05af37a1be25d3fcf4ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><b>System random provider</b> <br />
 Provides access to either the Windows CryptGenRandom provider or the /dev/urandom pool on posix systems. </p>
 <dl class="section author"><dt>Author</dt><dd>John Underhill </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>January 06, 2018 </dd></dl>
-</div><h2 class="groupheader">Enumeration Type Documentation</h2>
-<a class="anchor" id="a2655530e50570968a2a13b78978e3355"></a>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="af1b9222c1bdb05af37a1be25d3fcf4ca"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="sysrand_8h.html#a2655530e50570968a2a13b78978e3355">RAND_GENERATION_STATUS</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>The random generation success state </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a2655530e50570968a2a13b78978e3355a59c335dc64a7b2d04fa8abf6e0f5e46e"></a>RAND_STATUS_FAILURE&#160;</td><td class="fielddoc">
-<p>signals generator failure </p>
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2655530e50570968a2a13b78978e3355a909a523208f02b858cede1917af3794b"></a>RAND_STATUS_SUCCESS&#160;</td><td class="fielddoc">
-<p>signals generator success </p>
-</td></tr>
-</table>
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a79f005a6308933500edfa979f7a47022"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int32_t sysrand_getbytes </td>
+          <td class="memname"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a> sysrand_getbytes </td>
           <td>(</td>
           <td class="paramtype">uint8_t *&#160;</td>
           <td class="paramname"><em>buffer</em>, </td>
@@ -180,7 +150,7 @@ Provides access to either the Windows CryptGenRandom provider or the /dev/urando
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jan 10 2018 18:29:03 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 13 2018 18:04:01 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

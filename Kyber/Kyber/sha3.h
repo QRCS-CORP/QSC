@@ -11,7 +11,7 @@
 #ifndef SHA3_H
 #define SHA3_H
 
-#include <stdint.h>
+#include "common.h"
 
 /*!
 \def CSHAKE_DOMAIN

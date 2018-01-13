@@ -1,0 +1,12 @@
+﻿  verify.c
+  sha3.c
+  reduce.c
+  sysrand.c
+  polyvec.c
+  poly.c
+  ntt.c
+  kem.c
+  indcpa.c
+  cbd.c
+  Generating Code...
+  Kyber.vcxproj -> C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\x64\Debug\Kyber.lib

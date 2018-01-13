@@ -1,6 +1,6 @@
 #include "sysrand.h"
 
-#if defined(WINDOWS)
+#ifdef WINDOWS
 #	include <windows.h>
 #	include <wincrypt.h>
 #else
@@ -14,9 +14,9 @@
 
 #endif
 
-int32_t sysrand_getbytes(uint8_t* buffer, size_t length)
+kyber_status sysrand_getbytes(uint8_t* buffer, size_t length)
 {
-	int32_t status = RAND_STATUS_SUCCESS;
+	kyber_status status = KYBER_STATE_SUCCESS;
 
 #if defined(WINDOWS)
 
@@ -26,12 +26,12 @@ int32_t sysrand_getbytes(uint8_t* buffer, size_t length)
 	{
 		if (!CryptGenRandom(hProvider, (DWORD)length, buffer))
 		{
-			status = RAND_STATUS_FAILURE;
+			status = KYBER_ERROR_RANDFAIL;
 		}
 	}
 	else
 	{
-		status = RAND_STATUS_FAILURE;
+		status = KYBER_ERROR_RANDFAIL;
 	}
 
 	if (hProvider != 0)
@@ -45,7 +45,7 @@ int32_t sysrand_getbytes(uint8_t* buffer, size_t length)
 
 	if (fd <= 0)
 	{
-		status = RAND_STATUS_FAILURE;
+		status = KYBER_ERROR_RANDFAIL;
 	}
 	else
 	{
@@ -53,7 +53,7 @@ int32_t sysrand_getbytes(uint8_t* buffer, size_t length)
 
 		if (r != length)
 		{
-			status = RAND_STATUS_FAILURE;
+			status = KYBER_ERROR_RANDFAIL;
 		}
 
 		close(fd);

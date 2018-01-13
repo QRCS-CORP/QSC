@@ -19,5 +19,5 @@ var searchData=
   ['shake256_5fsqueezeblocks',['shake256_squeezeblocks',['../sha3_8h.html#a684416786e9ad889f7cb456755f82d77',1,'sha3.c']]],
   ['shake_5fdomain',['SHAKE_DOMAIN',['../sha3_8h.html#a34bc238ccfb4490eb8b0ac2bd579fff3',1,'sha3.h']]],
   ['sysrand_2eh',['sysrand.h',['../sysrand_8h.html',1,'']]],
-  ['sysrand_5fgetbytes',['sysrand_getbytes',['../sysrand_8h.html#a79f005a6308933500edfa979f7a47022',1,'sysrand.c']]]
+  ['sysrand_5fgetbytes',['sysrand_getbytes',['../sysrand_8h.html#af1b9222c1bdb05af37a1be25d3fcf4ca',1,'sysrand.c']]]
 ];

@@ -9,7 +9,7 @@
 #ifndef NTT_H
 #define NTT_H
 
-#include <stdint.h>
+#include "common.h"
 
 /**
 * \brief Computes negacyclic number-theoretic transform (NTT) of

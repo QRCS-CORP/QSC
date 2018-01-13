@@ -213,7 +213,7 @@ void indcpa_keypair(uint8_t* pk, uint8_t* sk)
 	uint8_t nonce;
 
 	rstat = sysrand_getbytes(buf, KYBER_SYMBYTES);
-	assert(rstat == RAND_STATUS_SUCCESS);
+	assert(rstat == KYBER_STATE_SUCCESS);
 
 	sha3_compute512(buf, buf, KYBER_SYMBYTES);
 

@@ -9,7 +9,7 @@
 #ifndef VERIFY_H
 #define VERIFY_H
 
-#include <stdint.h>
+#include "common.h"
 
 /**
 * \brief Copy len bytes from x to r if b is 1;

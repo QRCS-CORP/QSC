@@ -87,7 +87,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a> &#124;
-<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">kem.h File Reference</div>  </div>
@@ -97,8 +96,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p><b>The Kyber KEM definitions</b> <br />
 Contains the primary public api for the Kyber CCA-secure Key Encapsulation Mechanism implementation.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="params_8h_source.html">params.h</a>&quot;</code><br />
-<code>#include &lt;stdint.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="common_8h_source.html">common.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="params_8h_source.html">params.h</a>&quot;</code><br />
 </div>
 <p><a href="kem_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -115,24 +114,17 @@ Macros</h2></td></tr>
 <tr class="memitem:a4ee5ebe5981b4239b3b2adaa732cb1f1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a4ee5ebe5981b4239b3b2adaa732cb1f1">CRYPTO_ALGNAME</a>&#160;&#160;&#160;&quot;Kyber768&quot;</td></tr>
 <tr class="separator:a4ee5ebe5981b4239b3b2adaa732cb1f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:a898acd8769eb32a213da5c8de25a7070"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a898acd8769eb32a213da5c8de25a7070">KYBER_CRYPTO_STATUS</a> { <a class="el" href="kem_8h.html#a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865">KYBER_CRYPTO_FAILURE</a> = 0, 
-<a class="el" href="kem_8h.html#a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6">KYBER_CRYPTO_SUCCESS</a> = 1
- }</td></tr>
-<tr class="separator:a898acd8769eb32a213da5c8de25a7070"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a83b910c83901777186892cc0fc47fd41"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a83b910c83901777186892cc0fc47fd41">crypto_kem_keypair</a> (uint8_t *pk, uint8_t *sk)</td></tr>
-<tr class="memdesc:a83b910c83901777186892cc0fc47fd41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism.  <a href="#a83b910c83901777186892cc0fc47fd41">More...</a><br /></td></tr>
-<tr class="separator:a83b910c83901777186892cc0fc47fd41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e139a2bde0006e9c5ce4047d0c17884"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a9e139a2bde0006e9c5ce4047d0c17884">crypto_kem_enc</a> (uint8_t *ct, uint8_t *ss, const uint8_t *pk)</td></tr>
-<tr class="memdesc:a9e139a2bde0006e9c5ce4047d0c17884"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates cipher text and shared secret for given public key.  <a href="#a9e139a2bde0006e9c5ce4047d0c17884">More...</a><br /></td></tr>
-<tr class="separator:a9e139a2bde0006e9c5ce4047d0c17884"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30443a36827114b04ee9d051811ac28f"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a30443a36827114b04ee9d051811ac28f">crypto_kem_dec</a> (uint8_t *ss, const uint8_t *ct, const uint8_t *sk)</td></tr>
-<tr class="memdesc:a30443a36827114b04ee9d051811ac28f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates shared secret for given cipher text and private key.  <a href="#a30443a36827114b04ee9d051811ac28f">More...</a><br /></td></tr>
-<tr class="separator:a30443a36827114b04ee9d051811ac28f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a409cabda1ed6810d2741c2aeb6ad9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a5a409cabda1ed6810d2741c2aeb6ad9c">crypto_kem_keypair</a> (uint8_t *pk, uint8_t *sk)</td></tr>
+<tr class="memdesc:a5a409cabda1ed6810d2741c2aeb6ad9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism.  <a href="#a5a409cabda1ed6810d2741c2aeb6ad9c">More...</a><br /></td></tr>
+<tr class="separator:a5a409cabda1ed6810d2741c2aeb6ad9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d6e177dcbf6e19eca7e419a37698db0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a0d6e177dcbf6e19eca7e419a37698db0">crypto_kem_enc</a> (uint8_t *ct, uint8_t *ss, const uint8_t *pk)</td></tr>
+<tr class="memdesc:a0d6e177dcbf6e19eca7e419a37698db0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates cipher text and shared secret for given public key.  <a href="#a0d6e177dcbf6e19eca7e419a37698db0">More...</a><br /></td></tr>
+<tr class="separator:a0d6e177dcbf6e19eca7e419a37698db0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a948a011947869ee5b6ab4a44d4e9e919"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="kem_8h.html#a948a011947869ee5b6ab4a44d4e9e919">crypto_kem_dec</a> (uint8_t *ss, const uint8_t *ct, const uint8_t *sk)</td></tr>
+<tr class="memdesc:a948a011947869ee5b6ab4a44d4e9e919"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates shared secret for given cipher text and private key.  <a href="#a948a011947869ee5b6ab4a44d4e9e919">More...</a><br /></td></tr>
+<tr class="separator:a948a011947869ee5b6ab4a44d4e9e919"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><b>The Kyber KEM definitions</b> <br />
@@ -147,11 +139,14 @@ Contains the primary public api for the Kyber CCA-secure Key Encapsulation Mecha
 <div class="line">uint8_t sendb[<a class="code" href="params_8h.html#a356cca49fc302b0c34c18f4bbda6e5fe">KYBER_CIPHERTEXTBYTES</a>];</div>
 <div class="line"></div>
 <div class="line"><span class="comment">// create the public and secret keys</span></div>
-<div class="line"><a class="code" href="kem_8h.html#a83b910c83901777186892cc0fc47fd41">crypto_kem_keypair</a>(pk, sk);</div>
+<div class="line"><a class="code" href="kem_8h.html#a5a409cabda1ed6810d2741c2aeb6ad9c">crypto_kem_keypair</a>(pk, sk);</div>
 <div class="line"><span class="comment">// output the cipher-text (sendb), and bobs shared key</span></div>
-<div class="line"><a class="code" href="kem_8h.html#a9e139a2bde0006e9c5ce4047d0c17884">crypto_kem_enc</a>(sendb, key_b, pk);</div>
+<div class="line"><a class="code" href="kem_8h.html#a0d6e177dcbf6e19eca7e419a37698db0">crypto_kem_enc</a>(sendb, key_b, pk);</div>
 <div class="line"><span class="comment">// decrypt the cipher-text, and output alices shared key</span></div>
-<div class="line"><a class="code" href="kem_8h.html#a30443a36827114b04ee9d051811ac28f">crypto_kem_dec</a>(key_a, sendb, sk);</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code" href="kem_8h.html#a948a011947869ee5b6ab4a44d4e9e919">crypto_kem_dec</a>(key_a, sendb, sk) == <a class="code" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06a47c4575cedc146a0bfd2fc65b940554e">KYBER_ERROR_AUTHFAIL</a>)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">// authentication failed, do something..</span></div>
+<div class="line">}</div>
 </div><!-- fragment --><dl class="section remark"><dt>Remarks</dt><dd>Based entirely on the C reference branch of PQ-Crystals Kyber; including base code, comments, and api. <br />
 PQ-Crystals <a href="https://github.com/pq-crystals/kyber">Kyber</a>. <br />
 CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">a CCA-secure module-lattice-based KEM</a>. <br />
@@ -222,35 +217,13 @@ CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.p
 
 </div>
 </div>
-<h2 class="groupheader">Enumeration Type Documentation</h2>
-<a class="anchor" id="a898acd8769eb32a213da5c8de25a7070"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="kem_8h.html#a898acd8769eb32a213da5c8de25a7070">KYBER_CRYPTO_STATUS</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>The KEMs function result state </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865"></a>KYBER_CRYPTO_FAILURE&#160;</td><td class="fielddoc">
-<p>signals operation failure </p>
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6"></a>KYBER_CRYPTO_SUCCESS&#160;</td><td class="fielddoc">
-<p>signals operation success </p>
-</td></tr>
-</table>
-
-</div>
-</div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a30443a36827114b04ee9d051811ac28f"></a>
+<a class="anchor" id="a948a011947869ee5b6ab4a44d4e9e919"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t crypto_kem_dec </td>
+          <td class="memname"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a> crypto_kem_dec </td>
           <td>(</td>
           <td class="paramtype">uint8_t *&#160;</td>
           <td class="paramname"><em>ss</em>, </td>
@@ -288,12 +261,12 @@ CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.p
 
 </div>
 </div>
-<a class="anchor" id="a9e139a2bde0006e9c5ce4047d0c17884"></a>
+<a class="anchor" id="a0d6e177dcbf6e19eca7e419a37698db0"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t crypto_kem_enc </td>
+          <td class="memname"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a> crypto_kem_enc </td>
           <td>(</td>
           <td class="paramtype">uint8_t *&#160;</td>
           <td class="paramname"><em>ct</em>, </td>
@@ -331,12 +304,12 @@ CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.p
 
 </div>
 </div>
-<a class="anchor" id="a83b910c83901777186892cc0fc47fd41"></a>
+<a class="anchor" id="a5a409cabda1ed6810d2741c2aeb6ad9c"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t crypto_kem_keypair </td>
+          <td class="memname"><a class="el" href="common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06">kyber_status</a> crypto_kem_keypair </td>
           <td>(</td>
           <td class="paramtype">uint8_t *&#160;</td>
           <td class="paramname"><em>pk</em>, </td>
@@ -370,7 +343,7 @@ CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.p
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jan 10 2018 18:29:03 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 13 2018 18:04:01 for Kyber by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

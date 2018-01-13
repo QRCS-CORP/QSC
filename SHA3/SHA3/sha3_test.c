@@ -25,7 +25,7 @@ char get_response()
 */
 void sha3_test_run()
 {
-	if (sha3_256_kat_test() == SHA3_STATUS_SUCCESS)
+	if (sha3_256_kat_test() == true)
 	{
 		printf("Success! passed sha3-256 known answer tests \n");
 	}
@@ -34,7 +34,7 @@ void sha3_test_run()
 		printf("Failure! failed sha3-256 known answer tests \n");
 	}
 
-	if (sha3_512_kat_test() == SHA3_STATUS_SUCCESS)
+	if (sha3_512_kat_test() == true)
 	{
 		printf("Success! passed sha3-512 known answer tests \n");
 	}
@@ -43,7 +43,7 @@ void sha3_test_run()
 		printf("Failure! failed sha3-512 known answer tests \n");
 	}
 
-	if (shake_128_kat_test() == SHA3_STATUS_SUCCESS)
+	if (shake_128_kat_test() == true)
 	{
 		printf("Success! passed shake-128 known answer tests \n");
 	}
@@ -52,7 +52,7 @@ void sha3_test_run()
 		printf("Failure! failed shake-128 known answer tests \n");
 	}
 
-	if (shake_256_kat_test() == SHA3_STATUS_SUCCESS)
+	if (shake_256_kat_test() == true)
 	{
 		printf("Success! passed shake-256 known answer tests \n");
 	}
@@ -61,7 +61,7 @@ void sha3_test_run()
 		printf("Failure! failed shake-256 known answer tests \n");
 	}
 
-	if (cshake_simple_128_kat_test() == SHA3_STATUS_SUCCESS)
+	if (cshake_simple_128_kat_test() == true)
 	{
 		printf("Success! passed simple cshake-128 known answer tests \n");
 	}
@@ -70,7 +70,7 @@ void sha3_test_run()
 		printf("Failure! failed simple cshake-128 known answer tests \n");
 	}
 
-	if (cshake_simple_256_kat_test() == SHA3_STATUS_SUCCESS)
+	if (cshake_simple_256_kat_test() == true)
 	{
 		printf("Success! passed simple cshake-256 simple known answer tests \n");
 	}

@@ -19,7 +19,10 @@
 * // output the cipher-text (sendb), and bobs shared key
 * crypto_kem_enc(sendb, key_b, pk);
 * // decrypt the cipher-text, and output alices shared key
-* crypto_kem_dec(key_a, sendb, sk);
+* if (crypto_kem_dec(key_a, sendb, sk) == KYBER_ERROR_AUTHFAIL)
+* {
+*     // authentication failed, do something..
+* }
 * \endcode
 *
 * \remarks Based entirely on the C reference branch of PQ-Crystals Kyber; including base code, comments, and api. \n
@@ -30,17 +33,8 @@
 #ifndef API_H
 #define API_H
 
+#include "common.h"
 #include "params.h"
-#include <stdint.h>
-
-/*! \enum KYBER_CRYPTO_STATUS
-* The KEMs function result state
-*/
-enum KYBER_CRYPTO_STATUS
-{
-	KYBER_CRYPTO_FAILURE = 0, /*!< signals operation failure */
-	KYBER_CRYPTO_SUCCESS = 1  /*!< signals operation success */
-};
 
 /*!
 \def CRYPTO_SECRETKEYBYTES
@@ -87,7 +81,7 @@ enum KYBER_CRYPTO_STATUS
 * \param sk Pointer to output private key (an already allocated array of CRYPTO_SECRETKEYBYTES bytes)
 * \return Returns one (KYBER_CRYPTO_SUCCESS) for success
 */
-int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
+kyber_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
 
 /**
 * \brief Generates cipher text and shared secret for given public key
@@ -97,7 +91,7 @@ int32_t crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
 * \param pk Pointer to input public key (an already allocated array of CRYPTO_PUBLICKEYBYTES bytes)
 * \return Returns one (KYBER_CRYPTO_SUCCESS) for success
 */
-int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
+kyber_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
 
 /**
 * \brief Generates shared secret for given cipher text and private key
@@ -107,6 +101,6 @@ int32_t crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
 * \param sk Pointer to input private key (an already allocated array of CRYPTO_SECRETKEYBYTES bytes)
 * \return Returns one (KYBER_CRYPTO_SUCCESS) for success
 */
-int32_t crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
+kyber_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
 
 #endif

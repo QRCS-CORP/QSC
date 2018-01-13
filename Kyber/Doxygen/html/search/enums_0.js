@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['kyber_5fcrypto_5fstatus',['KYBER_CRYPTO_STATUS',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070',1,'kem.h']]]
+  ['kyber_5fstatus',['kyber_status',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06',1,'common.h']]]
 ];

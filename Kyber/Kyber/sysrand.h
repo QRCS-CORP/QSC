@@ -11,16 +11,7 @@
 #ifndef SYSRAND_H
 #define SYSRAND_H
 
-#include <stdint.h>
-
-/*! \enum RAND_GENERATION_STATUS
-* The random generation success state
-*/
-enum RAND_GENERATION_STATUS
-{
-	RAND_STATUS_FAILURE = 0, /*!< signals generator failure */
-	RAND_STATUS_SUCCESS = 1  /*!< signals generator success */
-};
+#include "common.h"
 
 /**
 * \brief Get an array of pseudo-random bytes from the system entropy provider.
@@ -29,6 +20,6 @@ enum RAND_GENERATION_STATUS
 * \param length The number of bytes to copy
 * \return Returns one for success, zero for failure
 */
-int32_t sysrand_getbytes(uint8_t* buffer, size_t length);
+kyber_status sysrand_getbytes(uint8_t* buffer, size_t length);
 
 #endif

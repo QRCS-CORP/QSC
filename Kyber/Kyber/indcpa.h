@@ -9,7 +9,7 @@
 #ifndef INDCPA_H
 #define INDCPA_H
 
-#include <stdint.h>
+#include "common.h"
 
 /**
 * \brief Decryption function of the CPA-secure public-key encryption scheme underlying Kyber.

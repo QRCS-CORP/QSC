@@ -1,0 +1,5 @@
+﻿  sha3_kat.c
+  kyber_test.c
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'LIBCMTD' conflicts with use of other libs; use /NODEFAULTLIB:library
+  KyberTest.vcxproj -> C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\x64\Debug\KyberTest.exe

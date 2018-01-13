@@ -3,9 +3,10 @@ var searchData=
   ['keccak_5fpermute',['keccak_permute',['../sha3_8h.html#a61e2076648ec5340198d9870a344c0c7',1,'sha3.c']]],
   ['kem_2eh',['kem.h',['../kem_8h.html',1,'']]],
   ['kyber_5fciphertextbytes',['KYBER_CIPHERTEXTBYTES',['../params_8h.html#a356cca49fc302b0c34c18f4bbda6e5fe',1,'params.h']]],
-  ['kyber_5fcrypto_5ffailure',['KYBER_CRYPTO_FAILURE',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865',1,'kem.h']]],
-  ['kyber_5fcrypto_5fstatus',['KYBER_CRYPTO_STATUS',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070',1,'kem.h']]],
-  ['kyber_5fcrypto_5fsuccess',['KYBER_CRYPTO_SUCCESS',['../kem_8h.html#a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6',1,'kem.h']]],
+  ['kyber_5ferror_5fauthfail',['KYBER_ERROR_AUTHFAIL',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06a47c4575cedc146a0bfd2fc65b940554e',1,'common.h']]],
+  ['kyber_5ferror_5finternal',['KYBER_ERROR_INTERNAL',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06abebd5f721b2d6b23c2cbab7e74a8bc57',1,'common.h']]],
+  ['kyber_5ferror_5finvalid',['KYBER_ERROR_INVALID',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06a388d7dbd7452d523ffb1616015c0e7ea',1,'common.h']]],
+  ['kyber_5ferror_5frandfail',['KYBER_ERROR_RANDFAIL',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06a9bc85224abab5c2d5141b0fa924a7beb',1,'common.h']]],
   ['kyber_5feta',['KYBER_ETA',['../params_8h.html#ac8c59c0803b7f85b57e4b585fce7076e',1,'params.h']]],
   ['kyber_5findcpa_5fbytes',['KYBER_INDCPA_BYTES',['../params_8h.html#a14d4b725309e5e2664245eedc25ef4c4',1,'params.h']]],
   ['kyber_5findcpa_5fmsgbytes',['KYBER_INDCPA_MSGBYTES',['../params_8h.html#afbda72968986f789dc91f6ca3368a628',1,'params.h']]],
@@ -20,5 +21,8 @@ var searchData=
   ['kyber_5fpublickeybytes',['KYBER_PUBLICKEYBYTES',['../params_8h.html#a7663b32715a32f12eb70420793753ce3',1,'params.h']]],
   ['kyber_5fq',['KYBER_Q',['../params_8h.html#a874d765cb6e25f657aec2f225d8505a6',1,'params.h']]],
   ['kyber_5fsecretkeybytes',['KYBER_SECRETKEYBYTES',['../params_8h.html#a7f9a2f9ae6937442f988816af97babb3',1,'params.h']]],
+  ['kyber_5fstate_5ffailure',['KYBER_STATE_FAILURE',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06ad8c202d6015ef338ee497e5590c77f41',1,'common.h']]],
+  ['kyber_5fstate_5fsuccess',['KYBER_STATE_SUCCESS',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06aa7a118f574d7c290249b1d389bf6dee6',1,'common.h']]],
+  ['kyber_5fstatus',['kyber_status',['../common_8h.html#af39a7e584b7c6f6c7d5043cfa4664c06',1,'common.h']]],
   ['kyber_5fsymbytes',['KYBER_SYMBYTES',['../params_8h.html#a132bbc78e88ea5e14e93e0963dd5d0f9',1,'params.h']]]
 ];

@@ -6,8 +6,8 @@
 Contains the primary public api for the Kyber C\+C\+A-\/secure Key Encapsulation Mechanism implementation.  
 
 
+{\ttfamily \#include \char`\"{}common.\+h\char`\"{}}\\*
 {\ttfamily \#include \char`\"{}params.\+h\char`\"{}}\\*
-{\ttfamily \#include $<$stdint.\+h$>$}\\*
 \subsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
@@ -21,21 +21,14 @@ Contains the primary public api for the Kyber C\+C\+A-\/secure Key Encapsulation
 \item 
 \#define \hyperlink{kem_8h_a4ee5ebe5981b4239b3b2adaa732cb1f1}{C\+R\+Y\+P\+T\+O\+\_\+\+A\+L\+G\+N\+A\+M\+E}~\char`\"{}Kyber768\char`\"{}
 \end{DoxyCompactItemize}
-\subsection*{Enumerations}
-\begin{DoxyCompactItemize}
-\item 
-enum \hyperlink{kem_8h_a898acd8769eb32a213da5c8de25a7070}{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+T\+A\+T\+U\+S} \{ \hyperlink{kem_8h_a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865}{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+F\+A\+I\+L\+U\+R\+E} = 0, 
-\hyperlink{kem_8h_a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6}{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S} = 1
- \}
-\end{DoxyCompactItemize}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-int32\+\_\+t \hyperlink{kem_8h_a83b910c83901777186892cc0fc47fd41}{crypto\+\_\+kem\+\_\+keypair} (uint8\+\_\+t $\ast$pk, uint8\+\_\+t $\ast$sk)
+\hyperlink{common_8h_af39a7e584b7c6f6c7d5043cfa4664c06}{kyber\+\_\+status} \hyperlink{kem_8h_a5a409cabda1ed6810d2741c2aeb6ad9c}{crypto\+\_\+kem\+\_\+keypair} (uint8\+\_\+t $\ast$pk, uint8\+\_\+t $\ast$sk)
 \begin{DoxyCompactList}\small\item\em Generates public and private key for the C\+C\+A-\/\+Secure Kyber key encapsulation mechanism. \end{DoxyCompactList}\item 
-int32\+\_\+t \hyperlink{kem_8h_a9e139a2bde0006e9c5ce4047d0c17884}{crypto\+\_\+kem\+\_\+enc} (uint8\+\_\+t $\ast$ct, uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$pk)
+\hyperlink{common_8h_af39a7e584b7c6f6c7d5043cfa4664c06}{kyber\+\_\+status} \hyperlink{kem_8h_a0d6e177dcbf6e19eca7e419a37698db0}{crypto\+\_\+kem\+\_\+enc} (uint8\+\_\+t $\ast$ct, uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$pk)
 \begin{DoxyCompactList}\small\item\em Generates cipher text and shared secret for given public key. \end{DoxyCompactList}\item 
-int32\+\_\+t \hyperlink{kem_8h_a30443a36827114b04ee9d051811ac28f}{crypto\+\_\+kem\+\_\+dec} (uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$ct, const uint8\+\_\+t $\ast$sk)
+\hyperlink{common_8h_af39a7e584b7c6f6c7d5043cfa4664c06}{kyber\+\_\+status} \hyperlink{kem_8h_a948a011947869ee5b6ab4a44d4e9e919}{crypto\+\_\+kem\+\_\+dec} (uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$ct, const uint8\+\_\+t $\ast$sk)
 \begin{DoxyCompactList}\small\item\em Generates shared secret for given cipher text and private key. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
@@ -57,11 +50,14 @@ uint8\_t key\_b[\hyperlink{params_8h_a132bbc78e88ea5e14e93e0963dd5d0f9}{KYBER\_S
 uint8\_t sendb[\hyperlink{params_8h_a356cca49fc302b0c34c18f4bbda6e5fe}{KYBER\_CIPHERTEXTBYTES}];
 
 \textcolor{comment}{// create the public and secret keys}
-\hyperlink{kem_8h_a83b910c83901777186892cc0fc47fd41}{crypto\_kem\_keypair}(pk, sk);
+\hyperlink{kem_8h_a5a409cabda1ed6810d2741c2aeb6ad9c}{crypto\_kem\_keypair}(pk, sk);
 \textcolor{comment}{// output the cipher-text (sendb), and bobs shared key}
-\hyperlink{kem_8h_a9e139a2bde0006e9c5ce4047d0c17884}{crypto\_kem\_enc}(sendb, key\_b, pk);
+\hyperlink{kem_8h_a0d6e177dcbf6e19eca7e419a37698db0}{crypto\_kem\_enc}(sendb, key\_b, pk);
 \textcolor{comment}{// decrypt the cipher-text, and output alices shared key}
-\hyperlink{kem_8h_a30443a36827114b04ee9d051811ac28f}{crypto\_kem\_dec}(key\_a, sendb, sk);
+\textcolor{keywordflow}{if} (\hyperlink{kem_8h_a948a011947869ee5b6ab4a44d4e9e919}{crypto\_kem\_dec}(key\_a, sendb, sk) == \hyperlink{common_8h_af39a7e584b7c6f6c7d5043cfa4664c06a47c4575cedc146a0bfd2fc65b940554e}{KYBER\_ERROR\_AUTHFAIL})
+\{
+    \textcolor{comment}{// authentication failed, do something..}
+\}
 \end{DoxyCode}
 
 
@@ -91,31 +87,16 @@ The byte size of the public key array \hypertarget{kem_8h_a15a0b213afe1dabb9286f
 \subsubsection[{C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\+R\+Y\+P\+T\+O\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S~{\bf K\+Y\+B\+E\+R\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}}\label{kem_8h_a15a0b213afe1dabb9286f9f92a05251e}
 The byte size of the secret key array 
 
-\subsection{Enumeration Type Documentation}
-\hypertarget{kem_8h_a898acd8769eb32a213da5c8de25a7070}{}\index{kem.\+h@{kem.\+h}!K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+T\+A\+T\+U\+S@{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+T\+A\+T\+U\+S}}
-\index{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+T\+A\+T\+U\+S@{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+T\+A\+T\+U\+S}!kem.\+h@{kem.\+h}}
-\subsubsection[{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+T\+A\+T\+U\+S}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+T\+A\+T\+U\+S}}\label{kem_8h_a898acd8769eb32a213da5c8de25a7070}
-The K\+E\+Ms function result state \begin{Desc}
-\item[Enumerator]\par
-\begin{description}
-\index{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+F\+A\+I\+L\+U\+R\+E@{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+F\+A\+I\+L\+U\+R\+E}!kem.\+h@{kem.\+h}}\index{kem.\+h@{kem.\+h}!K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+F\+A\+I\+L\+U\+R\+E@{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+F\+A\+I\+L\+U\+R\+E}}\item[{\em 
-\hypertarget{kem_8h_a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865}{}K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+F\+A\+I\+L\+U\+R\+E\label{kem_8h_a898acd8769eb32a213da5c8de25a7070a651c766884032a90052d6c4312e2d865}
-}]signals operation failure \index{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S@{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S}!kem.\+h@{kem.\+h}}\index{kem.\+h@{kem.\+h}!K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S@{K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S}}\item[{\em 
-\hypertarget{kem_8h_a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6}{}K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S\label{kem_8h_a898acd8769eb32a213da5c8de25a7070a97848024e88d2735531fcc84f84d25f6}
-}]signals operation success \end{description}
-\end{Desc}
-
-
 \subsection{Function Documentation}
-\hypertarget{kem_8h_a30443a36827114b04ee9d051811ac28f}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+dec@{crypto\+\_\+kem\+\_\+dec}}
+\hypertarget{kem_8h_a948a011947869ee5b6ab4a44d4e9e919}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+dec@{crypto\+\_\+kem\+\_\+dec}}
 \index{crypto\+\_\+kem\+\_\+dec@{crypto\+\_\+kem\+\_\+dec}!kem.\+h@{kem.\+h}}
-\subsubsection[{crypto\+\_\+kem\+\_\+dec}]{\setlength{\rightskip}{0pt plus 5cm}int32\+\_\+t crypto\+\_\+kem\+\_\+dec (
+\subsubsection[{crypto\+\_\+kem\+\_\+dec}]{\setlength{\rightskip}{0pt plus 5cm}{\bf kyber\+\_\+status} crypto\+\_\+kem\+\_\+dec (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{ss, }
 \item[{const uint8\+\_\+t $\ast$}]{ct, }
 \item[{const uint8\+\_\+t $\ast$}]{sk}
 \end{DoxyParamCaption}
-)}\label{kem_8h_a30443a36827114b04ee9d051811ac28f}
+)}\label{kem_8h_a948a011947869ee5b6ab4a44d4e9e919}
 
 
 Generates shared secret for given cipher text and private key. 
@@ -132,15 +113,15 @@ Generates shared secret for given cipher text and private key.
 \begin{DoxyReturn}{Returns}
 Returns one (K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S) for success 
 \end{DoxyReturn}
-\hypertarget{kem_8h_a9e139a2bde0006e9c5ce4047d0c17884}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+enc@{crypto\+\_\+kem\+\_\+enc}}
+\hypertarget{kem_8h_a0d6e177dcbf6e19eca7e419a37698db0}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+enc@{crypto\+\_\+kem\+\_\+enc}}
 \index{crypto\+\_\+kem\+\_\+enc@{crypto\+\_\+kem\+\_\+enc}!kem.\+h@{kem.\+h}}
-\subsubsection[{crypto\+\_\+kem\+\_\+enc}]{\setlength{\rightskip}{0pt plus 5cm}int32\+\_\+t crypto\+\_\+kem\+\_\+enc (
+\subsubsection[{crypto\+\_\+kem\+\_\+enc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf kyber\+\_\+status} crypto\+\_\+kem\+\_\+enc (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{ct, }
 \item[{uint8\+\_\+t $\ast$}]{ss, }
 \item[{const uint8\+\_\+t $\ast$}]{pk}
 \end{DoxyParamCaption}
-)}\label{kem_8h_a9e139a2bde0006e9c5ce4047d0c17884}
+)}\label{kem_8h_a0d6e177dcbf6e19eca7e419a37698db0}
 
 
 Generates cipher text and shared secret for given public key. 
@@ -157,14 +138,14 @@ Generates cipher text and shared secret for given public key.
 \begin{DoxyReturn}{Returns}
 Returns one (K\+Y\+B\+E\+R\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S) for success 
 \end{DoxyReturn}
-\hypertarget{kem_8h_a83b910c83901777186892cc0fc47fd41}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+keypair@{crypto\+\_\+kem\+\_\+keypair}}
+\hypertarget{kem_8h_a5a409cabda1ed6810d2741c2aeb6ad9c}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+keypair@{crypto\+\_\+kem\+\_\+keypair}}
 \index{crypto\+\_\+kem\+\_\+keypair@{crypto\+\_\+kem\+\_\+keypair}!kem.\+h@{kem.\+h}}
-\subsubsection[{crypto\+\_\+kem\+\_\+keypair}]{\setlength{\rightskip}{0pt plus 5cm}int32\+\_\+t crypto\+\_\+kem\+\_\+keypair (
+\subsubsection[{crypto\+\_\+kem\+\_\+keypair}]{\setlength{\rightskip}{0pt plus 5cm}{\bf kyber\+\_\+status} crypto\+\_\+kem\+\_\+keypair (
 \begin{DoxyParamCaption}
 \item[{uint8\+\_\+t $\ast$}]{pk, }
 \item[{uint8\+\_\+t $\ast$}]{sk}
 \end{DoxyParamCaption}
-)}\label{kem_8h_a83b910c83901777186892cc0fc47fd41}
+)}\label{kem_8h_a5a409cabda1ed6810d2741c2aeb6ad9c}
 
 
 Generates public and private key for the C\+C\+A-\/\+Secure Kyber key encapsulation mechanism. 

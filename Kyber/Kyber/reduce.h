@@ -9,7 +9,7 @@
 #ifndef REDUCE_H
 #define REDUCE_H
 
-#include <stdint.h>
+#include "common.h"
 
 /**
 * \brief Barrett reduction; given a 16-bit integer a, computes
