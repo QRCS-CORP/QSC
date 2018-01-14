@@ -19,7 +19,7 @@
 * \brief Get a char from console input.
 * \return Returns one user input char
 */
-static char get_response()
+static int get_response()
 {
 	return getchar();
 }
@@ -259,7 +259,7 @@ int main(void)
 
 	printf("\n");
 	printf("Completed! Press any key to close..");
-	get_response();
+	int d = get_response();
 
 	return 0;
 }
