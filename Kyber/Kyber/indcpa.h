@@ -35,7 +35,8 @@ void indcpa_enc(uint8_t* c, const uint8_t* m, const uint8_t* pk, const uint8_t* 
 *
 * \param pk Pointer to output public key
 * \param sk Pointer to output private key
+* \return Returns one (KYBER_CRYPTO_SUCCESS) for success
 */
-void indcpa_keypair(uint8_t* pk, uint8_t* sk);
+kyber_status indcpa_keypair(uint8_t* pk, uint8_t* sk);
 
 #endif

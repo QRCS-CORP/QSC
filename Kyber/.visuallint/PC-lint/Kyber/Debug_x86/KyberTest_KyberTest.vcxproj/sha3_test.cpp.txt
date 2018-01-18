@@ -1,6 +1,0 @@
-
---- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\KyberTest\sha3_test.cpp (C++)
-
-    
-#include <typeinfo>
-C:\Program Files (x86)\PC-lint 9.0\co-msc110.h(30): error 322: (Error -- Unable to open include file 'typeinfo')

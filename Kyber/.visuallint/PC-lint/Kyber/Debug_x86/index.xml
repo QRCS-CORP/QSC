@@ -23,37 +23,20 @@
 			<Issues></Issues>
 		</Category>
 	</Categories>
-	<Solution AnalysisTool="PC-lint for C/C++ (NT) Vers. 9.00L, Copyright Gimpel Software 1985-2014" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber.sln" FileName="Kyber.sln" Configuration="Debug|x86" Status="Complete" AnalysisTime="" LastAnalysed="Sunday, January 07, 2018, 15:46:59">
-		<Issues Count="2">
-			<Categories ChartFileName="Kyber.sln_categories.png">
+	<Solution AnalysisTool="PC-lint for C/C++ (NT) Vers. 9.00L, Copyright Gimpel Software 1985-2014" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber.sln" FileName="Kyber.sln" Configuration="Debug|x86" Status="Complete" AnalysisTime="" LastAnalysed="Thursday, January 18, 2018, 17:39:40">
+		<Issues Count="0">
+			<Categories>
 				<Category Name="Elective Notes" Count="0" Percentage="0.00"/>
 				<Category Name="Informational" Count="0" Percentage="0.00"/>
-				<Category Name="Warnings" Count="2" Percentage="100.00"/>
+				<Category Name="Warnings" Count="0" Percentage="0.00"/>
 				<Category Name="Errors" Count="0" Percentage="0.00"/>
 				<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 				<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 			</Categories>
-			<Messages ChartFileName="Kyber.sln_issues.png">
-				<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="2" CategoryName="Warning" Count="2"/>
-			</Messages>
+			<Messages/>
 		</Issues>
 		<Projects>
-			<Project Name="Kyber" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\Kyber.vcxproj" FileName="Kyber.vcxproj" Configuration="Debug|Win32" Status="Complete" AnalysisTime="" LastAnalysed="Sunday, January 07, 2018, 15:46:58" resultsfile="Kyber_Kyber.vcxproj/index.html">
-				<Issues Count="2">
-					<Categories>
-						<Category Name="Elective Notes" Count="0" Percentage="0.00"/>
-						<Category Name="Informational" Count="0" Percentage="0.00"/>
-						<Category Name="Warnings" Count="2" Percentage="100.00"/>
-						<Category Name="Errors" Count="0" Percentage="0.00"/>
-						<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
-						<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
-					</Categories>
-					<Messages>
-						<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="2" CategoryName="Warning" Count="2"/>
-					</Messages>
-				</Issues>
-			</Project>
-			<Project Name="~AutoRecover.KyberTest.vcxproj" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\KyberTest\~AutoRecover.KyberTest.vcxproj" FileName="~AutoRecover.KyberTest.vcxproj" Configuration="Debug|Win32" Status="Empty" AnalysisTime="" LastAnalysed="" resultsfile="KyberTest_~AutoRecover.KyberTest.vcxproj/index.html">
+			<Project Name="Kyber" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\Kyber.vcxproj" FileName="Kyber.vcxproj" Configuration="Debug|Win32" Status="Complete" AnalysisTime="" LastAnalysed="Thursday, January 18, 2018, 17:26:42" resultsfile="Kyber_Kyber.vcxproj/index.html">
 				<Issues Count="0">
 					<Categories>
 						<Category Name="Elective Notes" Count="0" Percentage="0.00"/>
@@ -63,9 +46,20 @@
 						<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 						<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 					</Categories>
-					<Messages>
-						<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-					</Messages>
+					<Messages/>
+				</Issues>
+			</Project>
+			<Project Name="KyberTest" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\KyberTest\KyberTest.vcxproj" FileName="KyberTest.vcxproj" Configuration="Debug|Win32" Status="Complete" AnalysisTime="" LastAnalysed="Thursday, January 18, 2018, 17:39:40" resultsfile="KyberTest_KyberTest.vcxproj/index.html">
+				<Issues Count="0">
+					<Categories>
+						<Category Name="Elective Notes" Count="0" Percentage="0.00"/>
+						<Category Name="Informational" Count="0" Percentage="0.00"/>
+						<Category Name="Warnings" Count="0" Percentage="0.00"/>
+						<Category Name="Errors" Count="0" Percentage="0.00"/>
+						<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
+						<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
+					</Categories>
+					<Messages/>
 				</Issues>
 			</Project>
 		</Projects>

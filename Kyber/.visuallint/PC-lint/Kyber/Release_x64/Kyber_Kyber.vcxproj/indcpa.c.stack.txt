@@ -1,0 +1,11 @@
+"clear64",16,finite,16,"no function",
+"gen_matrix",920,finite,960,"cshake128_simple_absorb", (external)
+"indcpa_dec",4120,finite,4192,"unpack_ciphertext",
+"indcpa_enc",12361,finite,13329,"gen_matrix",
+"indcpa_keypair",9328,finite,10296,"gen_matrix",
+"pack_ciphertext",24,finite,64,"polyvec_compress", (external)
+"pack_pk",32,finite,72,"polyvec_compress", (external)
+"pack_sk",16,finite,56,"polyvec_tobytes", (external)
+"unpack_ciphertext",24,finite,64,"polyvec_decompress", (external)
+"unpack_pk",32,finite,72,"polyvec_decompress", (external)
+"unpack_sk",16,finite,56,"polyvec_frombytes", (external)

@@ -24,19 +24,17 @@
 	<User Name="John" Computer="DCN"/>
 	<Options ShowRules="0"/>
 	<Solution PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber.sln" FileName="Kyber.sln" Configuration="Debug|x86">
-		<Project Name="Kyber" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\Kyber.vcxproj" FileName="Kyber.vcxproj" Configuration="Debug|Win32" Status="Complete" AnalysisTime="" LastAnalysed="Sunday, January 07, 2018, 15:46:58" AnalysisTool="PC-lint for C/C++ (NT) Vers. 9.00L, Copyright Gimpel Software 1985-2014">
-			<Issues Count="2">
-				<Categories ChartFileName="Kyber.vcxproj_categories.png">
+		<Project Name="Kyber" PathName="C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\Kyber.vcxproj" FileName="Kyber.vcxproj" Configuration="Debug|Win32" Status="Complete" AnalysisTime="" LastAnalysed="Thursday, January 18, 2018, 17:26:42" AnalysisTool="PC-lint for C/C++ (NT) Vers. 9.00L, Copyright Gimpel Software 1985-2014">
+			<Issues Count="0">
+				<Categories>
 					<Category Name="Elective Notes" Count="0" Percentage="0.00"/>
 					<Category Name="Informational" Count="0" Percentage="0.00"/>
-					<Category Name="Warnings" Count="2" Percentage="100.00"/>
+					<Category Name="Warnings" Count="0" Percentage="0.00"/>
 					<Category Name="Errors" Count="0" Percentage="0.00"/>
 					<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 					<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 				</Categories>
-				<Messages ChartFileName="Kyber.vcxproj_issues.png">
-					<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="2" CategoryName="Warning" Count="2"/>
-				</Messages>
+				<Messages/>
 			</Issues>
 			<Files>
 				<File FileName="cbd.c" Status="Complete" resultsfile="cbd.c.html">
@@ -49,9 +47,7 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="indcpa.c" Status="Complete" resultsfile="indcpa.c.html">
@@ -64,9 +60,7 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="kem.c" Status="Complete" resultsfile="kem.c.html">
@@ -79,9 +73,7 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="ntt.c" Status="Complete" resultsfile="ntt.c.html">
@@ -94,39 +86,33 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="poly.c" Status="Complete" resultsfile="poly.c.html">
-					<Issues Count="1">
+					<Issues Count="0">
 						<Categories>
 							<Category Name="Elective Notes" Count="0" Percentage="0.00"/>
 							<Category Name="Informational" Count="0" Percentage="0.00"/>
-							<Category Name="Warnings" Count="1" Percentage="100.00"/>
+							<Category Name="Warnings" Count="0" Percentage="0.00"/>
 							<Category Name="Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="2" CategoryName="Warning" Count="1"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="polyvec.c" Status="Complete" resultsfile="polyvec.c.html">
-					<Issues Count="1">
+					<Issues Count="0">
 						<Categories>
 							<Category Name="Elective Notes" Count="0" Percentage="0.00"/>
 							<Category Name="Informational" Count="0" Percentage="0.00"/>
-							<Category Name="Warnings" Count="1" Percentage="100.00"/>
+							<Category Name="Warnings" Count="0" Percentage="0.00"/>
 							<Category Name="Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="2" CategoryName="Warning" Count="1"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="reduce.c" Status="Complete" resultsfile="reduce.c.html">
@@ -139,9 +125,7 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="sha3.c" Status="Complete" resultsfile="sha3.c.html">
@@ -154,9 +138,7 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="sysrand.c" Status="Complete" resultsfile="sysrand.c.html">
@@ -169,9 +151,7 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 				<File FileName="verify.c" Status="Complete" resultsfile="verify.c.html">
@@ -184,9 +164,7 @@
 							<Category Name="Internal Errors" Count="0" Percentage="0.00"/>
 							<Category Name="Fatal Errors" Count="0" Percentage="0.00"/>
 						</Categories>
-						<Messages>
-							<Message Message="537" MessageTitle="Repeated include file 'FileName'" Category="0" CategoryName="Warning" Count="0"/>
-						</Messages>
+						<Messages/>
 					</Issues>
 				</File>
 			</Files>

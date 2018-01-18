@@ -29,13 +29,12 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 	uint16_t i;
 	uint16_t j;
 	uint16_t val;
+	uint16_t dsep;
 
 	nblocks = 4;
 	pos = 0;
 
 #ifdef MATRIX_GENERATOR_CSHAKE
-
-	uint16_t dsep;
 
 	for (i = 0; i < KYBER_K; i++)
 	{
@@ -199,7 +198,7 @@ static void unpack_sk(polyvec* sk, const uint8_t* packedsk)
 	polyvec_frombytes(sk, packedsk);
 }
 
-void indcpa_keypair(uint8_t* pk, uint8_t* sk)
+kyber_status indcpa_keypair(uint8_t* pk, uint8_t* sk)
 {
 	polyvec a[KYBER_K];
 	uint8_t buf[KYBER_SYMBYTES + KYBER_SYMBYTES];
@@ -207,42 +206,49 @@ void indcpa_keypair(uint8_t* pk, uint8_t* sk)
 	polyvec pkpv; 
 	polyvec skpv;
 	size_t i;
-	int32_t rstat;
 	uint8_t* publicseed = buf;
 	uint8_t* noiseseed = buf + KYBER_SYMBYTES;
 	uint8_t nonce;
+	kyber_status status;
 
-	rstat = sysrand_getbytes(buf, KYBER_SYMBYTES);
-	assert(rstat == KYBER_STATE_SUCCESS);
+	status = KYBER_STATE_SUCCESS;
 
-	sha3_compute512(buf, buf, KYBER_SYMBYTES);
-
-	gen_matrix(a, publicseed, 0);
-	nonce = 0;
-
-	for (i = 0; i < KYBER_K; i++)
+	if (sysrand_getbytes(buf, KYBER_SYMBYTES) == KYBER_STATE_SUCCESS)
 	{
-		poly_getnoise(skpv.vec + i, noiseseed, nonce++);
+		sha3_compute512(buf, buf, KYBER_SYMBYTES);
+		gen_matrix(a, publicseed, 0);
+		nonce = 0;
+
+		for (i = 0; i < KYBER_K; i++)
+		{
+			poly_getnoise(skpv.vec + i, noiseseed, nonce++);
+		}
+
+		polyvec_ntt(&skpv);
+
+		for (i = 0; i < KYBER_K; i++)
+		{
+			poly_getnoise(e.vec + i, noiseseed, nonce++);
+		}
+
+		/* matrix-vector multiplication */
+		for (i = 0; i < KYBER_K; i++)
+		{
+			polyvec_pointwise_acc(&pkpv.vec[i], &skpv, a + i);
+		}
+
+		polyvec_invntt(&pkpv);
+		polyvec_add(&pkpv, &pkpv, &e);
+
+		pack_sk(sk, &skpv);
+		pack_pk(pk, &pkpv, publicseed);
+	}
+	else
+	{
+		status = KYBER_ERROR_RANDFAIL;
 	}
 
-	polyvec_ntt(&skpv);
-
-	for (i = 0; i < KYBER_K; i++)
-	{
-		poly_getnoise(e.vec + i, noiseseed, nonce++);
-	}
-
-	/* matrix-vector multiplication */
-	for (i = 0; i < KYBER_K; i++)
-	{
-		polyvec_pointwise_acc(&pkpv.vec[i], &skpv, a + i);
-	}
-
-	polyvec_invntt(&pkpv);
-	polyvec_add(&pkpv, &pkpv, &e);
-
-	pack_sk(sk, &skpv);
-	pack_pk(pk, &pkpv, publicseed);
+	return status;
 }
 
 void indcpa_enc(uint8_t* c, const uint8_t* m, const uint8_t* pk, const uint8_t* coins)

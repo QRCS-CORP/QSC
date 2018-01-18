@@ -1,6 +1,0 @@
-
---- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\polyvec.c (C)
-
-    
-#include <stdint.h>
-C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\poly.h(5): error 322: (Error -- Unable to open include file 'stdint.h')

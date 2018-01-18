@@ -21,8 +21,8 @@ typedef enum
 	KYBER_ERROR_AUTHFAIL = 2,	/*!< seed authentication failure */
 	KYBER_ERROR_RANDFAIL = 3,	/*!< system random failure */
 	KYBER_ERROR_INVALID = 4,	/*!< invalid parameter input */
-	KYBER_ERROR_INTERNAL = 5	/*!< anonymous internal failure  */
-}
-kyber_status;
+	KYBER_ERROR_INTERNAL = 5,	/*!< anonymous internal failure  */
+	KYBER_ERROR_KEYGEN = 6		/*!< key generation failure  */
+} kyber_status;
 
 #endif

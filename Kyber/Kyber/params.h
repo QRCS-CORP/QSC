@@ -28,23 +28,23 @@
 */
 #define MATRIX_GENERATOR_CSHAKE
 
-/* Internal Constants: -Read Only */
+/* Internal Constants: -Read Only- */
 
 /*!
 \def KYBER_N
-* The polynomial dimension N
+* Read Only: The polynomial dimension N
 */
 #define KYBER_N 256
 
 /*!
 \def KYBER_Q
-* The modulus prime factor Q
+* Read Only: The modulus prime factor Q
 */
 #define KYBER_Q 7681
 
 /*!
 \def KYBER_ETA
-* The binomial distribution factor
+* Read Only: The binomial distribution factor
 */
 #if (KYBER_K == 2)
 	/* Kyber512 */
@@ -61,73 +61,73 @@
 
 /*!
 \def KYBER_SYMBYTES
-* The size in bytes of shared key, hashes, and seeds
+* Read Only: The size in bytes of shared key, hashes, and seeds
 */
 #define KYBER_SYMBYTES 32
 
 /*!
 \def KYBER_POLYBYTES
-* The secret key base multiplier
+* Read Only: The secret key base multiplier
 */
 #define KYBER_POLYBYTES 416
 
 /*!
 \def KYBER_POLYCOMPRESSEDBYTES
-* The ciphertext compressed byte size
+* Read Only: The ciphertext compressed byte size
 */
 #define KYBER_POLYCOMPRESSEDBYTES 96
 
 /*!
 \def KYBER_POLYVECBYTES
-* The base size of the secret key
+* Read Only: The base size of the secret key
 */
 #define KYBER_POLYVECBYTES (KYBER_K * KYBER_POLYBYTES)
 
 /*!
 \def KYBER_POLYVECCOMPRESSEDBYTES
-* The base size of the public key
+* Read Only: The base size of the public key
 */
 #define KYBER_POLYVECCOMPRESSEDBYTES (KYBER_K * 352)
 
 /*!
 \def KYBER_INDCPA_MSGBYTES
-*  The message size in bytes
+*  Read Only: The message size in bytes
 */
 #define KYBER_INDCPA_MSGBYTES KYBER_SYMBYTES
 
 /*!
 \def KYBER_INDCPA_PUBLICKEYBYTES
-* The base INDCPA formatted public key size in bytes
+* Read Only: The base INDCPA formatted public key size in bytes
 */
 #define KYBER_INDCPA_PUBLICKEYBYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_SYMBYTES)
 
 /*!
 \def KYBER_INDCPA_SECRETKEYBYTES
-* The base INDCPA formatted secret key size in bytes
+* Read Only: The base INDCPA formatted secret key size in bytes
 */
 #define KYBER_INDCPA_SECRETKEYBYTES (KYBER_POLYVECBYTES)
 
 /*!
 \def KYBER_INDCPA_BYTES
-* The size of the INDCPA formatted output cipher-text
+* Read Only: The size of the INDCPA formatted output cipher-text
 */
 #define KYBER_INDCPA_BYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_POLYCOMPRESSEDBYTES)
 
 /*!
 \def KYBER_PUBLICKEYBYTES
-* The public key size in bytes
+* Read Only: The public key size in bytes
 */
 #define KYBER_PUBLICKEYBYTES (KYBER_INDCPA_PUBLICKEYBYTES)
 
 /*!
 \def KYBER_SECRETKEYBYTES
-* The secret key size in bytes
+* Read Only: The secret key size in bytes
 */
 #define KYBER_SECRETKEYBYTES (KYBER_INDCPA_SECRETKEYBYTES +  KYBER_INDCPA_PUBLICKEYBYTES + (2 * KYBER_SYMBYTES))
 
 /*!
 \def KYBER_CIPHERTEXTBYTES
-* The cipher-text size in bytes
+* Read Only: The cipher-text size in bytes
 */
 #define KYBER_CIPHERTEXTBYTES KYBER_INDCPA_BYTES
 

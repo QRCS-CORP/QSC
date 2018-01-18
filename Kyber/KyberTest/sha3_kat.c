@@ -1,5 +1,6 @@
 #include "sha3_kat.h"
 #include "../Kyber/sha3.h"
+#include <stdio.h>
 
 static bool are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 {
@@ -40,7 +41,7 @@ static void clear64(uint64_t* a, size_t count)
 	}
 }
 
-void hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
+static void hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 {
 	size_t  pos;
 	uint8_t  idx0;
@@ -56,26 +57,11 @@ void hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 
 	memset(output, 0, length);
 
-	for (pos = 0; pos < (length * 2) && pos < strlen(hexstr); pos += 2)
+	for (pos = 0; pos < (length * 2); pos += 2)
 	{
 		idx0 = ((uint8_t)hexstr[pos + 0] & 0x1F) ^ 0x10;
 		idx1 = ((uint8_t)hexstr[pos + 1] & 0x1F) ^ 0x10;
 		output[pos / 2] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
-	}
-}
-
-static void print_array8(const uint8_t* a, size_t count, size_t line)
-{
-	size_t i;
-
-	for (i = 0; i < count; ++i)
-	{
-		if (i != 0 && i % line == 0)
-		{
-			printf("\n");
-		}
-
-		printf("0x%02X, ", a[i]);
 	}
 }
 
@@ -85,11 +71,14 @@ bool sha3_256_kat_test()
 	uint8_t exp24[32];
 	uint8_t exp448[32];
 	uint8_t exp1600[32];
+	uint8_t hash[200];
 	uint8_t msg0[1];
 	uint8_t msg24[3];
 	uint8_t msg448[56];
 	uint8_t msg1600[200];
 	uint8_t output[32];
+	uint64_t state[25];
+	size_t offset;
 	bool status;
 
 	hex_to_bin("A7FFC6F8BF1ED76651C14756A061D662F580FF4DE43B49FA82D80A4B80F8434A", exp0, 32);
@@ -147,9 +136,6 @@ bool sha3_256_kat_test()
 
 	/* test long-form api */
 
-	uint64_t state[25];
-	uint8_t hash[200];
-
 	clear8(hash, 200);
 	clear64(state, 25);
 
@@ -181,7 +167,6 @@ bool sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	size_t offset;
 	offset = 0;
 
 	/* absorb a rate sized block */
@@ -204,11 +189,14 @@ bool sha3_512_kat_test()
 	uint8_t exp24[64];
 	uint8_t exp448[64];
 	uint8_t exp1600[64];
+	uint8_t hash[200];
 	uint8_t msg0[1];
 	uint8_t msg24[3];
 	uint8_t msg448[56];
 	uint8_t msg1600[200];
 	uint8_t output[64];
+	uint64_t state[25];
+	size_t offset;
 	bool status;
 
 	hex_to_bin("A69F73CCA23A9AC5C8B567DC185A756E97C982164FE25859E0D1DCC1475C80A6"
@@ -270,9 +258,6 @@ bool sha3_512_kat_test()
 
 	/* test long-form api */
 
-	uint64_t state[25];
-	uint8_t hash[200];
-
 	clear8(hash, 200);
 	clear64(state, 25);
 	sha3_finalize(state, SHA3_512_RATE, msg0, 0, 0, hash);
@@ -302,7 +287,6 @@ bool sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	size_t offset;
 	offset = 0;
 
 	/* absorb a rate sized block */
@@ -323,9 +307,11 @@ bool shake_128_kat_test()
 {
 	uint8_t exp0[512];
 	uint8_t exp1600[512];
+	uint8_t hash[SHAKE128_RATE * 4];
 	uint8_t msg0[1];
 	uint8_t msg1600[200];
 	uint8_t output[512];
+	uint64_t state[25];
 	bool status;
 
 	hex_to_bin("7F9C2BA4E88F827D616045507605853ED73B8093F6EFBC88EB1A6EACFA66EF26"
@@ -393,9 +379,6 @@ bool shake_128_kat_test()
 
 	/* test long-form api */
 
-	uint64_t state[25];
-	uint8_t hash[SHAKE128_RATE * 4];
-
 	clear8(hash, SHAKE128_RATE * 4);
 	clear64(state, 25);
 	shake128_absorb(state, msg1600, 200);
@@ -413,9 +396,11 @@ bool shake_256_kat_test()
 {
 	uint8_t exp0[512];
 	uint8_t exp1600[512];
+	uint8_t hash[SHAKE256_RATE * 4];
 	uint8_t msg0[1];
 	uint8_t msg1600[200];
 	uint8_t output[512];
+	uint64_t state[25];
 	bool status;
 
 	hex_to_bin("46B9DD2B0BA88D13233B3FEB743EEB243FCD52EA62B81B82B50C27646ED5762F"
@@ -483,9 +468,6 @@ bool shake_256_kat_test()
 
 	/* test long-form api */
 
-	uint64_t state[25];
-	uint8_t hash[SHAKE256_RATE * 4];
-
 	clear8(hash, SHAKE256_RATE * 4);
 	clear64(state, 25);
 	shake256_absorb(state, msg1600, 200);
@@ -503,9 +485,11 @@ bool cshake_simple_128_kat_test()
 {
 	uint8_t exp0[512];
 	uint8_t exp1600[512];
+	uint8_t hash[CSHAKE128_RATE * 4];
 	uint8_t msg0[1];
 	uint8_t msg1600[200];
 	uint8_t output[512];
+	uint64_t state[25];
 	bool status;
 
 	hex_to_bin("076CB8EE5DE4E1FFCE8680A70C5A1635BCA6C310A6BC82C67ABBB7C4B1386514"
@@ -573,9 +557,6 @@ bool cshake_simple_128_kat_test()
 
 	/* test long-form api */
 
-	uint64_t state[25];
-	uint8_t hash[CSHAKE128_RATE * 4];
-
 	clear8(hash, CSHAKE128_RATE * 4);
 	clear64(state, 25);
 	cshake128_simple_absorb(state, 1, msg1600, 200);
@@ -593,9 +574,11 @@ bool cshake_simple_256_kat_test()
 {
 	uint8_t exp0[512];
 	uint8_t exp1600[512];
+	uint8_t hash[CSHAKE256_RATE * 4];
 	uint8_t msg0[1];
 	uint8_t msg1600[200];
 	uint8_t output[512];
+	uint64_t state[25];
 	bool status;
 
 	hex_to_bin("2D706C4E24701AF4950286EA2C5491C92C1A2519ECE7B3326B1A6F25A86031A3"
@@ -662,9 +645,6 @@ bool cshake_simple_256_kat_test()
 	}
 
 	/* test long-form api */
-
-	uint64_t state[25];
-	uint8_t hash[CSHAKE256_RATE * 4];
 
 	clear8(hash, CSHAKE256_RATE * 4);
 	clear64(state, 25);

@@ -100,25 +100,30 @@ void ntt(uint16_t* p)
 {
 	uint32_t j;
 	uint32_t k;
-	uint32_t start;
-	int32_t level;
+	uint32_t zeta;
+	int16_t level;
+	uint16_t start;
 	uint16_t t;
-	uint16_t zeta;
+	uint16_t tpos;
 
+	j = 0;
 	k = 1;
 
 	for (level = 7; level >= 0; level--)
 	{
-		for (start = 0; start < KYBER_N; start = j + (1UL << level))
+		for (start = 0; start < KYBER_N; start = j + (1U << level))
 		{
-			zeta = zetas[k++];
-			for (j = start; j < start + (1UL << level); ++j)
+			zeta = zetas[k];
+			++k;
+
+			for (j = start; j < start + (1U << level); ++j)
 			{
-				t = montgomery_reduce((uint32_t)zeta * p[j + (1UL << level)]);
+				tpos = j + (1U << level);
+				t = montgomery_reduce(zeta * p[tpos]);
 
-				p[j + (1UL << level)] = barrett_reduce(p[j] + ((4 * KYBER_Q) - t));
+				p[tpos] = barrett_reduce(p[j] + ((4 * KYBER_Q) - t));
 
-				if (level & 1L)
+				if (level & 1U)
 				{
 					p[j] = p[j] + t;
 				}
@@ -133,42 +138,45 @@ void ntt(uint16_t* p)
 
 void invntt(uint16_t* p)
 {
+	uint16_t level;
+	uint16_t tmp;
+	uint16_t W;
 	uint32_t j;
 	uint32_t jTwiddle;
-	uint32_t level;
 	uint32_t start;
 	uint32_t t;
-	uint16_t temp;
-	uint16_t W;
+	uint16_t tpos;
 
 	for (level = 0; level < 8; level++)
 	{
-		for (start = 0; start < (1UL << level); start++)
+		for (start = 0; start < (1U << level); start++)
 		{
 			jTwiddle = 0;
 
-			for (j = start; j < KYBER_N - 1; j += 2 * (1UL << level))
+			for (j = start; j < KYBER_N - 1; j += 2 * (1U << level))
 			{
-				W = omegas_inv_bitrev_montgomery[jTwiddle++];
-				temp = p[j];
+				W = omegas_inv_bitrev_montgomery[jTwiddle];
+				++jTwiddle;
+				tmp = p[j];
+				tpos = j + (1U << level);
 
-				if (level & 1UL)
+				if (level & 1U)
 				{
-					p[j] = barrett_reduce((temp + p[j + (1UL << level)]));
+					p[j] = barrett_reduce(tmp + p[tpos]);
 				}
 				else
 				{
-					p[j] = (temp + p[j + (1 << level)]);
+					p[j] = (tmp + p[tpos]);
 				}
-
-				t = (W * ((uint32_t)temp + ((4 * KYBER_Q) - p[j + (1UL << level)])));
-				p[j + (1UL << level)] = montgomery_reduce(t);
+				 
+				t = (uint32_t)W * (tmp + ((4 * KYBER_Q) - p[tpos]));
+				p[tpos] = montgomery_reduce(t);
 			}
 		}
 	}
 
 	for (j = 0; j < KYBER_N; j++)
 	{
-		p[j] = montgomery_reduce((p[j] * psis_inv_montgomery[j]));
+		p[j] = montgomery_reduce((uint32_t)p[j] * psis_inv_montgomery[j]);
 	}
 }
