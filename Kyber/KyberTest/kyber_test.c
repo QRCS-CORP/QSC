@@ -21,7 +21,7 @@
 */
 static void get_response()
 {
-	getwchar();
+	getwchar_s();
 }
 
 /**

@@ -1,3 +1,4 @@
+/*lint -e537 */
 #include "polyvec.h"
 #include "cbd.h"
 #include "reduce.h"

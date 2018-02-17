@@ -1,3 +1,4 @@
+/*lint -e537 */
 #include "indcpa.h"
 #include "ntt.h"
 #include "polyvec.h"
@@ -58,7 +59,7 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 
 			while (ctr < KYBER_N)
 			{
-				val = (buf[pos] | ((uint16_t)buf[pos + 1] << 8)) & 0x1FFF;
+				val = (buf[pos] | ((uint16_t)buf[pos + 1] << 8)) & 0x1FFFU;
 
 				if (val < KYBER_Q)
 				{
@@ -112,7 +113,7 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 
 			while (ctr < KYBER_N)
 			{
-				val = ((buf[pos] | ((uint16_t)buf[pos + 1] << 8)) & 0x1FFF);
+				val = ((buf[pos] | ((uint16_t)buf[pos + 1] << 8)) & 0x1FFFU);
 
 				if (val < KYBER_Q)
 				{

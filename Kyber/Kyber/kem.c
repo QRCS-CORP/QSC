@@ -1,3 +1,4 @@
+/*lint -e537 */
 #include "kem.h"
 #include "indcpa.h"
 #include "sysrand.h"

@@ -1,0 +1,16 @@
+"coeff_freeze",6,finite,6,"no function",
+"flipabs",4,finite,18,"coeff_freeze",
+"hw",2,finite,2,"no function",
+"poly_add",16,finite,16,"no function",
+"poly_compress",52,finite,66,"coeff_freeze",
+"poly_decompress",16,finite,16,"no function",
+"poly_frombytes",12,finite,12,"no function",
+"poly_frommsg",20,finite,20,"no function",
+"poly_invntt",4,finite,44,"bitrev_vector", (external)
+"poly_mul_pointwise",18,finite,58,"montgomery_reduce", (external)
+"poly_ntt",4,finite,44,"mul_coefficients", (external)
+"poly_sample",182,finite,222,"shake256", (external)
+"poly_sub",16,finite,16,"no function",
+"poly_tobytes",20,finite,34,"coeff_freeze",
+"poly_tomsg",14,finite,40,"flipabs",
+"poly_uniform",426,finite,466,"shake128_absorb", (external)

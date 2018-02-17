@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['newhope_5falgname',['NEWHOPE_ALGNAME',['../kem_8h.html#a458dc01b62c59b8a2ededd9fe4176e5b',1,'kem.h']]],
+  ['newhope_5fccakem_5fciphertextbytes',['NEWHOPE_CCAKEM_CIPHERTEXTBYTES',['../params_8h.html#a5ed0348a6b2a498fe5d9c00679f4a684',1,'params.h']]],
+  ['newhope_5fccakem_5fpublickeybytes',['NEWHOPE_CCAKEM_PUBLICKEYBYTES',['../params_8h.html#a00692f50d39cbb9ea915d8765147f112',1,'params.h']]],
+  ['newhope_5fccakem_5fsecretkeybytes',['NEWHOPE_CCAKEM_SECRETKEYBYTES',['../params_8h.html#a93e9c980d156c2fd5663e912013ebf33',1,'params.h']]],
+  ['newhope_5fciphertextbytes',['NEWHOPE_CIPHERTEXTBYTES',['../kem_8h.html#aaebe8128e98160a42277f42a883c3c14',1,'kem.h']]],
+  ['newhope_5fcpapke_5fciphertextbytes',['NEWHOPE_CPAPKE_CIPHERTEXTBYTES',['../params_8h.html#ac92603d9b625c417224799d307350fa9',1,'params.h']]],
+  ['newhope_5fcpapke_5fpublickeybytes',['NEWHOPE_CPAPKE_PUBLICKEYBYTES',['../params_8h.html#a3800f388de64ab45e64be2791aae191c',1,'params.h']]],
+  ['newhope_5fcpapke_5fsecretkeybytes',['NEWHOPE_CPAPKE_SECRETKEYBYTES',['../params_8h.html#a75de39f105c19ce60d744acc17a8ac9f',1,'params.h']]],
+  ['newhope_5fk',['NEWHOPE_K',['../params_8h.html#a6c020f26d2cfb92be7f7bdb0558002cf',1,'params.h']]],
+  ['newhope_5fn',['NEWHOPE_N',['../params_8h.html#a51aac70d00ef1b6b73890aa1d3ac754b',1,'params.h']]],
+  ['newhope_5fpolybytes',['NEWHOPE_POLYBYTES',['../params_8h.html#ab2a8425e25af91f74bceb097c98f407a',1,'params.h']]],
+  ['newhope_5fpolycompressedbytes',['NEWHOPE_POLYCOMPRESSEDBYTES',['../params_8h.html#a8f5fe2baf2990d9d47da8783f4675542',1,'params.h']]],
+  ['newhope_5fpublickeybytes',['NEWHOPE_PUBLICKEYBYTES',['../kem_8h.html#a993007d55b54fd045ac83cd50a488caa',1,'kem.h']]],
+  ['newhope_5fq',['NEWHOPE_Q',['../params_8h.html#aa8687b8f6c70b2f77672ff0efaf8155b',1,'params.h']]],
+  ['newhope_5fsecretkeybytes',['NEWHOPE_SECRETKEYBYTES',['../kem_8h.html#a90ef95b82890b64c2ab8073967af735e',1,'kem.h']]],
+  ['newhope_5fsharedkey_5fbytes',['NEWHOPE_SHAREDKEY_BYTES',['../kem_8h.html#a5d55e11bcf96e8ce800bb7b099c488d4',1,'kem.h']]],
+  ['newhope_5fsymbytes',['NEWHOPE_SYMBYTES',['../params_8h.html#a64ed59a68920b233c9af8d6a285b9966',1,'params.h']]]
+];

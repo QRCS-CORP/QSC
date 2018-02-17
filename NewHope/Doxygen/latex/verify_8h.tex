@@ -1,0 +1,75 @@
+\hypertarget{verify_8h}{}\section{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/verify.h File Reference}
+\label{verify_8h}\index{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/verify.\+h@{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/verify.\+h}}
+
+
+{\bfseries Verification and conditional move api} ~\newline
+This is an internal class.  
+
+
+{\ttfamily \#include \char`\"{}common.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{verify_8h_ad411498ce443416a788a3d6786abd0ba}{cmov} (uint8\+\_\+t $\ast$r, const uint8\+\_\+t $\ast$x, size\+\_\+t length, uint8\+\_\+t b)
+\begin{DoxyCompactList}\small\item\em Copy len bytes from x to r if b is 1; don\textquotesingle{}t modify x if b is 0. Requires b to be in \{0,1\}. Assumes two\textquotesingle{}s complement representation of negative integers. Runs in constant time. \end{DoxyCompactList}\item 
+int \hyperlink{verify_8h_ae301800ad8840bc12e5f11691652101d}{verify} (const uint8\+\_\+t $\ast$a, const uint8\+\_\+t $\ast$b, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Compare two arrays for equality in constant time. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+{\bfseries Verification and conditional move api} ~\newline
+This is an internal class. 
+
+\begin{DoxyDate}{Date}
+February 16, 2018 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\hypertarget{verify_8h_ad411498ce443416a788a3d6786abd0ba}{}\index{verify.\+h@{verify.\+h}!cmov@{cmov}}
+\index{cmov@{cmov}!verify.\+h@{verify.\+h}}
+\subsubsection[{cmov}]{\setlength{\rightskip}{0pt plus 5cm}void cmov (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{r, }
+\item[{const uint8\+\_\+t $\ast$}]{x, }
+\item[{size\+\_\+t}]{length, }
+\item[{uint8\+\_\+t}]{b}
+\end{DoxyParamCaption}
+)}\label{verify_8h_ad411498ce443416a788a3d6786abd0ba}
+
+
+Copy len bytes from x to r if b is 1; don\textquotesingle{}t modify x if b is 0. Requires b to be in \{0,1\}. Assumes two\textquotesingle{}s complement representation of negative integers. Runs in constant time. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em r} & pointer to output byte array \\
+\hline
+{\em x} & pointer to input byte array \\
+\hline
+{\em length} & number of bytes to be copied \\
+\hline
+{\em b} & condition bit; has to be in \{0,1\} \\
+\hline
+\end{DoxyParams}
+\hypertarget{verify_8h_ae301800ad8840bc12e5f11691652101d}{}\index{verify.\+h@{verify.\+h}!verify@{verify}}
+\index{verify@{verify}!verify.\+h@{verify.\+h}}
+\subsubsection[{verify}]{\setlength{\rightskip}{0pt plus 5cm}int verify (
+\begin{DoxyParamCaption}
+\item[{const uint8\+\_\+t $\ast$}]{a, }
+\item[{const uint8\+\_\+t $\ast$}]{b, }
+\item[{size\+\_\+t}]{length}
+\end{DoxyParamCaption}
+)}\label{verify_8h_ae301800ad8840bc12e5f11691652101d}
+
+
+Compare two arrays for equality in constant time. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em a} & pointer to first byte array \\
+\hline
+{\em b} & pointer to second byte array \\
+\hline
+{\em length} & length of the byte arrays \\
+\hline
+\end{DoxyParams}

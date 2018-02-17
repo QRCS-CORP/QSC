@@ -1,3 +1,4 @@
+/*lint -e537 */
 #include "poly.h"
 #include "cbd.h"
 #include "ntt.h"
@@ -19,8 +20,11 @@ void poly_compress(uint8_t* r, const poly* a)
 	{
 		for (j = 0; j < 8; j++)
 		{
+			/*lint -save -e662 */
+			/*lint -save -e661 */
 			/* checked: lint-misra 661-662 'possible out-of-bounds', this is a false positive */
-			t[j] = ((((freeze(a->coeffs[i + j]) << 3) + (KYBER_Q / 2)) / KYBER_Q) & 7); /*lint !e662 !e661 */
+			t[j] = ((((freeze(a->coeffs[i + j]) << 3) + (KYBER_Q / 2)) / KYBER_Q) & 7);
+			/*lint -restore */
 		}
 
 		r[k] = t[0] | (t[1] << 3) | (t[2] << 6);
@@ -38,15 +42,18 @@ void poly_decompress(poly* r, const uint8_t* a)
 	for (i = 0; i < KYBER_N; i += 8)
 	{
 		/* checked: lint-misra 661-662 errors are all 'possible out-of-bounds' false positives */
+		/*lint -save -e662 */
+		/*lint -save -e661 */
 		r->coeffs[i] = ((((a[0] & 7) * KYBER_Q) + 4) >> 3);
-		r->coeffs[i + 1] = (((((a[0] >> 3) & 7) * KYBER_Q) + 4) >> 3); /*lint !e661 */
-		r->coeffs[i + 2] = (((((a[0] >> 6) | ((a[1] << 2) & 4)) * KYBER_Q) + 4) >> 3); /*lint !e662 !e661 */
-		r->coeffs[i + 3] = (((((a[1] >> 1) & 7) * KYBER_Q) + 4) >> 3); /*lint !e662 !e661 */
-		r->coeffs[i + 4] = (((((a[1] >> 4) & 7) * KYBER_Q) + 4) >> 3); /*lint !e662 !e661 */
-		r->coeffs[i + 5] = (((((a[1] >> 7) | ((a[2] << 1) & 6)) * KYBER_Q) + 4) >> 3); /*lint !e662 !e661 */
-		r->coeffs[i + 6] = (((((a[2] >> 2) & 7) * KYBER_Q) + 4) >> 3); /*lint !e662 !e661 */
-		r->coeffs[i + 7] = (((((a[2] >> 5)) * KYBER_Q) + 4) >> 3); /*lint !e662 !e661 */
-		a += 3; /*lint !e662 !e661 */
+		r->coeffs[i + 1] = (((((a[0] >> 3) & 7) * KYBER_Q) + 4) >> 3);
+		r->coeffs[i + 2] = (((((a[0] >> 6) | ((a[1] << 2) & 4)) * KYBER_Q) + 4) >> 3);
+		r->coeffs[i + 3] = (((((a[1] >> 1) & 7) * KYBER_Q) + 4) >> 3);
+		r->coeffs[i + 4] = (((((a[1] >> 4) & 7) * KYBER_Q) + 4) >> 3);
+		r->coeffs[i + 5] = (((((a[1] >> 7) | ((a[2] << 1) & 6)) * KYBER_Q) + 4) >> 3);
+		r->coeffs[i + 6] = (((((a[2] >> 2) & 7) * KYBER_Q) + 4) >> 3);
+		r->coeffs[i + 7] = (((((a[2] >> 5)) * KYBER_Q) + 4) >> 3);
+		a += 3; 
+		/*lint -restore */
 	}
 }
 

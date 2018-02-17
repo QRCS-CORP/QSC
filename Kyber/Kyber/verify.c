@@ -19,7 +19,7 @@ int32_t verify(const uint8_t* a, const uint8_t* b, size_t length)
 
 	r = 0;
 
-	for (i = 0; i < length; ++i)
+	for (i = 0; i < length; i++)
 	{
 		r |= (a[i] ^ b[i]);
 	}

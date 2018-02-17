@@ -1,3 +1,4 @@
+/*lint -e537 */
 #include "ntt.h"
 #include "params.h"
 #include "reduce.h"

@@ -1,0 +1,161 @@
+\hypertarget{kem_8h}{}\section{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/kem.h File Reference}
+\label{kem_8h}\index{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/kem.\+h@{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/kem.\+h}}
+
+
+{\bfseries The New\+Hope K\+E\+M definitions} ~\newline
+Contains the primary public api for the New\+Hope C\+C\+A-\/secure Key Encapsulation Mechanism implementation.  
+
+
+{\ttfamily \#include \char`\"{}common.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}params.\+h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{kem_8h_a90ef95b82890b64c2ab8073967af735e}{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a93e9c980d156c2fd5663e912013ebf33}{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+C\+A\+K\+E\+M\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{kem_8h_a993007d55b54fd045ac83cd50a488caa}{N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a00692f50d39cbb9ea915d8765147f112}{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+C\+A\+K\+E\+M\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{kem_8h_aaebe8128e98160a42277f42a883c3c14}{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a5ed0348a6b2a498fe5d9c00679f4a684}{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+C\+A\+K\+E\+M\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{kem_8h_a5d55e11bcf96e8ce800bb7b099c488d4}{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S}~\hyperlink{params_8h_a64ed59a68920b233c9af8d6a285b9966}{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+Y\+M\+B\+Y\+T\+E\+S}
+\item 
+\#define \hyperlink{kem_8h_a458dc01b62c59b8a2ededd9fe4176e5b}{N\+E\+W\+H\+O\+P\+E\+\_\+\+A\+L\+G\+N\+A\+M\+E}~\char`\"{}New\+Hope1024-\/C\+C\+A\+K\+E\+M\char`\"{}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{common_8h_aa5ced873147f30c6b17d908e14124375}{newhope\+\_\+status} \hyperlink{kem_8h_a997d3f320392606e54e076f5f57545cc}{crypto\+\_\+kem\+\_\+keypair} (uint8\+\_\+t $\ast$pk, uint8\+\_\+t $\ast$sk)
+\begin{DoxyCompactList}\small\item\em Generates public and private key for the C\+C\+A-\/\+Secure New\+Hope key encapsulation mechanism. \end{DoxyCompactList}\item 
+\hyperlink{common_8h_aa5ced873147f30c6b17d908e14124375}{newhope\+\_\+status} \hyperlink{kem_8h_aa8d21bc3cf4d45a5bd29dbd92efa645f}{crypto\+\_\+kem\+\_\+enc} (uint8\+\_\+t $\ast$ct, uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$pk)
+\begin{DoxyCompactList}\small\item\em Generates cipher text and shared secret for given public key. \end{DoxyCompactList}\item 
+\hyperlink{common_8h_aa5ced873147f30c6b17d908e14124375}{newhope\+\_\+status} \hyperlink{kem_8h_a89eb49fb0294f10a39175d6337109bef}{crypto\+\_\+kem\+\_\+dec} (uint8\+\_\+t $\ast$ss, const uint8\+\_\+t $\ast$ct, const uint8\+\_\+t $\ast$sk)
+\begin{DoxyCompactList}\small\item\em Generates shared secret for given cipher text and private key. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+{\bfseries The New\+Hope K\+E\+M definitions} ~\newline
+Contains the primary public api for the New\+Hope C\+C\+A-\/secure Key Encapsulation Mechanism implementation. 
+
+\begin{DoxyDate}{Date}
+February 16, 2018
+\end{DoxyDate}
+{\bfseries Example} ~\newline
+
+\begin{DoxyCode}
+\textcolor{comment}{// An example of key-pair creation, encryption, and decryption}
+uint8\_t pk[\hyperlink{kem_8h_a993007d55b54fd045ac83cd50a488caa}{NEWHOPE\_PUBLICKEYBYTES}];
+uint8\_t sk[\hyperlink{kem_8h_a90ef95b82890b64c2ab8073967af735e}{NEWHOPE\_SECRETKEYBYTES}];
+uint8\_t key\_a[\hyperlink{params_8h_a64ed59a68920b233c9af8d6a285b9966}{NEWHOPE\_SYMBYTES}];
+uint8\_t key\_b[\hyperlink{params_8h_a64ed59a68920b233c9af8d6a285b9966}{NEWHOPE\_SYMBYTES}];
+uint8\_t sendb[\hyperlink{kem_8h_aaebe8128e98160a42277f42a883c3c14}{NEWHOPE\_CIPHERTEXTBYTES}];
+
+\textcolor{comment}{// create the public and secret keys}
+\hyperlink{kem_8h_a997d3f320392606e54e076f5f57545cc}{crypto\_kem\_keypair}(pk, sk);
+\textcolor{comment}{// output the cipher-text (sendb), and bobs shared key}
+\hyperlink{kem_8h_aa8d21bc3cf4d45a5bd29dbd92efa645f}{crypto\_kem\_enc}(sendb, key\_b, pk);
+\textcolor{comment}{// decrypt the cipher-text, and output alices shared key}
+\textcolor{keywordflow}{if} (\hyperlink{kem_8h_a89eb49fb0294f10a39175d6337109bef}{crypto\_kem\_dec}(key\_a, sendb, sk) == \hyperlink{common_8h_aa5ced873147f30c6b17d908e14124375a9d9fb7ed1abd3418e6a49dc570d713bf}{NEWHOPE\_ERROR\_AUTHFAIL})
+\{
+    \textcolor{comment}{// authentication failed, do something..}
+\}
+\end{DoxyCode}
+
+
+\begin{DoxyRemark}{Remarks}
+Based entirely on the C reference branch of New\+Hope; including base code, comments, and api. ~\newline
+The New\+Hope\+: \href{https://eprint.iacr.org/2015/1092}{\tt key exchange} from the ring learning with errors problem. ~\newline
+A Simple, Provably \href{http://eprint.iacr.org/2012/688.pdf}{\tt Secure Key Exchange} Scheme Based on the Learning with Errors Problem. Github source code \href{https://github.com/tpoeppelmann/newhope}{\tt New\+Hope} repository. 
+\end{DoxyRemark}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{kem_8h_a458dc01b62c59b8a2ededd9fe4176e5b}{}\index{kem.\+h@{kem.\+h}!N\+E\+W\+H\+O\+P\+E\+\_\+\+A\+L\+G\+N\+A\+M\+E@{N\+E\+W\+H\+O\+P\+E\+\_\+\+A\+L\+G\+N\+A\+M\+E}}
+\index{N\+E\+W\+H\+O\+P\+E\+\_\+\+A\+L\+G\+N\+A\+M\+E@{N\+E\+W\+H\+O\+P\+E\+\_\+\+A\+L\+G\+N\+A\+M\+E}!kem.\+h@{kem.\+h}}
+\subsubsection[{N\+E\+W\+H\+O\+P\+E\+\_\+\+A\+L\+G\+N\+A\+M\+E}]{\setlength{\rightskip}{0pt plus 5cm}\#define N\+E\+W\+H\+O\+P\+E\+\_\+\+A\+L\+G\+N\+A\+M\+E~\char`\"{}New\+Hope1024-\/C\+C\+A\+K\+E\+M\char`\"{}}\label{kem_8h_a458dc01b62c59b8a2ededd9fe4176e5b}
+The New\+Hope implementation name \hypertarget{kem_8h_aaebe8128e98160a42277f42a883c3c14}{}\index{kem.\+h@{kem.\+h}!N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}}
+\index{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}!kem.\+h@{kem.\+h}}
+\subsubsection[{N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S~{\bf N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+C\+A\+K\+E\+M\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S}}\label{kem_8h_aaebe8128e98160a42277f42a883c3c14}
+The byte size of the cipher-\/text array \hypertarget{kem_8h_a993007d55b54fd045ac83cd50a488caa}{}\index{kem.\+h@{kem.\+h}!N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}}
+\index{N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}!kem.\+h@{kem.\+h}}
+\subsubsection[{N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S~{\bf N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+C\+A\+K\+E\+M\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S}}\label{kem_8h_a993007d55b54fd045ac83cd50a488caa}
+The byte size of the public key array \hypertarget{kem_8h_a90ef95b82890b64c2ab8073967af735e}{}\index{kem.\+h@{kem.\+h}!N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}}
+\index{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}!kem.\+h@{kem.\+h}}
+\subsubsection[{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S~{\bf N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+C\+A\+K\+E\+M\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S}}\label{kem_8h_a90ef95b82890b64c2ab8073967af735e}
+The byte size of the secret key array \hypertarget{kem_8h_a5d55e11bcf96e8ce800bb7b099c488d4}{}\index{kem.\+h@{kem.\+h}!N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S}}
+\index{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S@{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S}!kem.\+h@{kem.\+h}}
+\subsubsection[{N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S~{\bf N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+Y\+M\+B\+Y\+T\+E\+S}}\label{kem_8h_a5d55e11bcf96e8ce800bb7b099c488d4}
+The byte size of the shared symmetric key array 
+
+\subsection{Function Documentation}
+\hypertarget{kem_8h_a89eb49fb0294f10a39175d6337109bef}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+dec@{crypto\+\_\+kem\+\_\+dec}}
+\index{crypto\+\_\+kem\+\_\+dec@{crypto\+\_\+kem\+\_\+dec}!kem.\+h@{kem.\+h}}
+\subsubsection[{crypto\+\_\+kem\+\_\+dec}]{\setlength{\rightskip}{0pt plus 5cm}{\bf newhope\+\_\+status} crypto\+\_\+kem\+\_\+dec (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{ss, }
+\item[{const uint8\+\_\+t $\ast$}]{ct, }
+\item[{const uint8\+\_\+t $\ast$}]{sk}
+\end{DoxyParamCaption}
+)}\label{kem_8h_a89eb49fb0294f10a39175d6337109bef}
+
+
+Generates shared secret for given cipher text and private key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ss} & pointer to output shared secret (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+\_\+\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em ct} & pointer to input cipher text (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em sk} & pointer to input private key (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns one (N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S) for success 
+\end{DoxyReturn}
+\hypertarget{kem_8h_aa8d21bc3cf4d45a5bd29dbd92efa645f}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+enc@{crypto\+\_\+kem\+\_\+enc}}
+\index{crypto\+\_\+kem\+\_\+enc@{crypto\+\_\+kem\+\_\+enc}!kem.\+h@{kem.\+h}}
+\subsubsection[{crypto\+\_\+kem\+\_\+enc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf newhope\+\_\+status} crypto\+\_\+kem\+\_\+enc (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{ct, }
+\item[{uint8\+\_\+t $\ast$}]{ss, }
+\item[{const uint8\+\_\+t $\ast$}]{pk}
+\end{DoxyParamCaption}
+)}\label{kem_8h_aa8d21bc3cf4d45a5bd29dbd92efa645f}
+
+
+Generates cipher text and shared secret for given public key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ct} & Pointer to output cipher text (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+I\+P\+H\+E\+R\+T\+E\+X\+T\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em ss} & Pointer to output shared secret (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+H\+A\+R\+E\+D\+K\+E\+Y\+\_\+\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em pk} & Pointer to input public key (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns one (N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S) for success 
+\end{DoxyReturn}
+\hypertarget{kem_8h_a997d3f320392606e54e076f5f57545cc}{}\index{kem.\+h@{kem.\+h}!crypto\+\_\+kem\+\_\+keypair@{crypto\+\_\+kem\+\_\+keypair}}
+\index{crypto\+\_\+kem\+\_\+keypair@{crypto\+\_\+kem\+\_\+keypair}!kem.\+h@{kem.\+h}}
+\subsubsection[{crypto\+\_\+kem\+\_\+keypair}]{\setlength{\rightskip}{0pt plus 5cm}{\bf newhope\+\_\+status} crypto\+\_\+kem\+\_\+keypair (
+\begin{DoxyParamCaption}
+\item[{uint8\+\_\+t $\ast$}]{pk, }
+\item[{uint8\+\_\+t $\ast$}]{sk}
+\end{DoxyParamCaption}
+)}\label{kem_8h_a997d3f320392606e54e076f5f57545cc}
+
+
+Generates public and private key for the C\+C\+A-\/\+Secure New\+Hope key encapsulation mechanism. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pk} & Pointer to output public key (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+P\+U\+B\+L\+I\+C\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+{\em sk} & Pointer to output private key (an already allocated array of N\+E\+W\+H\+O\+P\+E\+\_\+\+S\+E\+C\+R\+E\+T\+K\+E\+Y\+B\+Y\+T\+E\+S bytes) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns one (N\+E\+W\+H\+O\+P\+E\+\_\+\+C\+R\+Y\+P\+T\+O\+\_\+\+S\+U\+C\+C\+E\+S\+S) for success 
+\end{DoxyReturn}

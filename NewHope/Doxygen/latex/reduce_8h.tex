@@ -1,0 +1,45 @@
+\hypertarget{reduce_8h}{}\section{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/reduce.h File Reference}
+\label{reduce_8h}\index{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/reduce.\+h@{C\+:/\+Users/\+John/\+Documents/\+Visual Studio 2015/\+Projects/\+Cryptography/\+New\+Hope/\+New\+Hope/\+New\+Hope/reduce.\+h}}
+
+
+{\bfseries Montgomery reduction api} ~\newline
+This is an internal class.  
+
+
+{\ttfamily \#include \char`\"{}common.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint16\+\_\+t \hyperlink{reduce_8h_a3ccd0cee127f5258af4b4312055218b4}{montgomery\+\_\+reduce} (uint32\+\_\+t a)
+\begin{DoxyCompactList}\small\item\em Montgomery reduction; given a 32-\/bit integer a, computes 16-\/bit integer congruent to a $\ast$ R$^\wedge$-\/1 mod q, where R=2$^\wedge$18 (see value of rlog) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+{\bfseries Montgomery reduction api} ~\newline
+This is an internal class. 
+
+\begin{DoxyDate}{Date}
+February 16, 2018 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\hypertarget{reduce_8h_a3ccd0cee127f5258af4b4312055218b4}{}\index{reduce.\+h@{reduce.\+h}!montgomery\+\_\+reduce@{montgomery\+\_\+reduce}}
+\index{montgomery\+\_\+reduce@{montgomery\+\_\+reduce}!reduce.\+h@{reduce.\+h}}
+\subsubsection[{montgomery\+\_\+reduce}]{\setlength{\rightskip}{0pt plus 5cm}uint16\+\_\+t montgomery\+\_\+reduce (
+\begin{DoxyParamCaption}
+\item[{uint32\+\_\+t}]{a}
+\end{DoxyParamCaption}
+)}\label{reduce_8h_a3ccd0cee127f5258af4b4312055218b4}
+
+
+Montgomery reduction; given a 32-\/bit integer a, computes 16-\/bit integer congruent to a $\ast$ R$^\wedge$-\/1 mod q, where R=2$^\wedge$18 (see value of rlog) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em a} & input unsigned integer to be reduced; has to be in \{0,...,1073491968\} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+unsigned integer in \{0,...,2$^\wedge$14-\/1\} congruent to a $\ast$ R$^\wedge$-\/1 modulo q 
+\end{DoxyReturn}
