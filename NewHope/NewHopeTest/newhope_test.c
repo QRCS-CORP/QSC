@@ -22,7 +22,7 @@
 */
 static void get_response()
 {
-	getwchar_s();
+	getwchar();
 }
 
 /**
