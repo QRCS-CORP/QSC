@@ -12,7 +12,7 @@ void cmov(uint8_t* r, const uint8_t* x, size_t length, uint8_t b)
 	}
 }
 
-int verify(const uint8_t *a, const uint8_t *b, size_t length)
+int32_t verify(const uint8_t *a, const uint8_t *b, size_t length)
 {
 	size_t i;
 	int32_t r;

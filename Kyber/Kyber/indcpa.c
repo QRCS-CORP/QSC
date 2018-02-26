@@ -54,8 +54,8 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 			}
 
 			clear64(state, SHA3_STATESIZE);
-			cshake128_simple_absorb(state, dsep, seed, KYBER_SYMBYTES);
-			cshake128_simple_squeezeblocks(buf, nblocks, state);
+			cshake128_simple_initialize(state, dsep, seed, KYBER_SYMBYTES);
+			cshake128_simple_squeezeblocks(state, buf, nblocks);
 
 			while (ctr < KYBER_N)
 			{
@@ -71,7 +71,7 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 				if (pos > SHAKE128_RATE * nblocks - 2)
 				{
 					nblocks = 1;
-					cshake128_simple_squeezeblocks(buf, nblocks, state);
+					cshake128_simple_squeezeblocks(state, buf, nblocks);
 					pos = 0;
 				}
 			}
@@ -108,8 +108,8 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 			}
 
 			clear64(state, SHA3_STATESIZE);
-			shake128_absorb(state, extseed, KYBER_SYMBYTES + 2);
-			shake128_squeezeblocks(buf, nblocks, state);
+			shake128_initialize(state, extseed, KYBER_SYMBYTES + 2);
+			shake128_squeezeblocks(state, buf, nblocks);
 
 			while (ctr < KYBER_N)
 			{
@@ -125,7 +125,7 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 				if (pos > SHAKE128_RATE * nblocks - 2)
 				{
 					nblocks = 1;
-					shake128_squeezeblocks(buf, nblocks, state);
+					shake128_squeezeblocks(state, buf, nblocks);
 					pos = 0;
 				}
 			}

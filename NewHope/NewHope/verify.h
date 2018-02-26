@@ -30,6 +30,6 @@ void cmov(uint8_t* r, const uint8_t* x, size_t length, uint8_t b);
 * \param b pointer to second byte array
 * \param length length of the byte arrays
 */
-int verify(const uint8_t* a, const uint8_t* b, size_t length);
+int32_t verify(const uint8_t* a, const uint8_t* b, size_t length);
 
 #endif

@@ -83,13 +83,13 @@ newhope_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 
 newhope_status crypto_kem_dec(uint8_t *ss, const uint8_t *ct, const uint8_t *sk)
 {
-	uint8_t ct_cmp[NEWHOPE_CCAKEM_CIPHERTEXTBYTES];
+	uint8_t ctcmp[NEWHOPE_CCAKEM_CIPHERTEXTBYTES];
 	uint8_t buf[2 * NEWHOPE_SYMBYTES];
 	/* Will contain key, coins, qrom-hash */
 	uint8_t kcoins[3 * NEWHOPE_SYMBYTES];
 	const uint8_t *pk = sk + NEWHOPE_CPAPKE_SECRETKEYBYTES;
 	size_t i;
-	int fail;
+	int32_t fail;
 
 	cpapke_dec(buf, ct, sk);
 
@@ -101,14 +101,14 @@ newhope_status crypto_kem_dec(uint8_t *ss, const uint8_t *ct, const uint8_t *sk)
 
 	shake256(kcoins, 3 * NEWHOPE_SYMBYTES, buf, 2 * NEWHOPE_SYMBYTES);
 	/* coins are in kcoins+NEWHOPE_SYMBYTES */
-	cpapke_enc(ct_cmp, buf, pk, kcoins + NEWHOPE_SYMBYTES);
+	cpapke_enc(ctcmp, buf, pk, kcoins + NEWHOPE_SYMBYTES);
 
 	for (i = 0; i < NEWHOPE_SYMBYTES; i++)
 	{
-		ct_cmp[i + NEWHOPE_CPAPKE_CIPHERTEXTBYTES] = kcoins[i + 2 * NEWHOPE_SYMBYTES];
+		ctcmp[i + NEWHOPE_CPAPKE_CIPHERTEXTBYTES] = kcoins[i + 2 * NEWHOPE_SYMBYTES];
 	}
 
-	fail = verify(ct, ct_cmp, NEWHOPE_CCAKEM_CIPHERTEXTBYTES);
+	fail = verify(ct, ctcmp, NEWHOPE_CCAKEM_CIPHERTEXTBYTES);
 	/* overwrite coins in kcoins with h(c) */
 	shake256(kcoins + NEWHOPE_SYMBYTES, NEWHOPE_SYMBYTES, ct, NEWHOPE_CCAKEM_CIPHERTEXTBYTES);
 	/* Overwrite pre-k with z on re-encryption failure */

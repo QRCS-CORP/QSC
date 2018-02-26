@@ -292,11 +292,11 @@ void poly_uniform(poly* a, const uint8_t* seed)
 		ctr = 0;
 		/* domain-separate the 16 independent calls */
 		extseed[NEWHOPE_SYMBYTES] = i;
-		shake128_absorb(state, extseed, NEWHOPE_SYMBYTES + 1);
+		shake128_initialize(state, extseed, NEWHOPE_SYMBYTES + 1);
 		/* Very unlikely to run more than once */
 		while (ctr < 64)
 		{
-			shake128_squeezeblocks(buf, 1, state);
+			shake128_squeezeblocks(state, buf, 1);
 			for (j = 0; j < SHAKE128_RATE && ctr < 64; j += 2)
 			{
 				val = (buf[j] | ((uint16_t)buf[j + 1] << 8));

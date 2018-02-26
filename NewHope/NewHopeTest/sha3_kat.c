@@ -1,5 +1,5 @@
 #include "sha3_kat.h"
-#include "../NewHope/sha3.h"
+#include "../Newhope/sha3.h"
 #include <stdio.h>
 
 static bool are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
@@ -140,7 +140,7 @@ bool sha3_256_kat_test()
 	clear64(state, 25);
 
 	/* if message is less than one full block, just call finalize */
-	sha3_finalize(state, SHA3_256_RATE, msg0, 0, 0, hash);
+	sha3_finalize(state, SHA3_256_RATE, msg0, 0, hash);
 
 	if (are_equal8(hash, exp0, 32) == false)
 	{
@@ -149,7 +149,7 @@ bool sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	sha3_finalize(state, SHA3_256_RATE, msg24, 0, 3, hash);
+	sha3_finalize(state, SHA3_256_RATE, msg24, 3, hash);
 
 	if (are_equal8(hash, exp24, 32) == false)
 	{
@@ -158,7 +158,7 @@ bool sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	sha3_finalize(state, SHA3_256_RATE, msg448, 0, 56, hash);
+	sha3_finalize(state, SHA3_256_RATE, msg448, 56, hash);
 
 	if (are_equal8(hash, exp448, 32) == false)
 	{
@@ -170,10 +170,9 @@ bool sha3_256_kat_test()
 	offset = 0;
 
 	/* absorb a rate sized block */
-	sha3_blockupdate(state, SHA3_256_RATE, msg1600, offset, SHA3_256_RATE);
-	offset += SHA3_256_RATE;
+	sha3_blockupdate(state, SHA3_256_RATE, msg1600, 1);
 	/* finalize the message */
-	sha3_finalize(state, SHA3_256_RATE, msg1600, offset, 200 - offset, hash);
+	sha3_finalize(state, SHA3_256_RATE, msg1600 + SHA3_256_RATE, 200 - SHA3_256_RATE, hash);
 
 	if (are_equal8(hash, exp1600, 32) == false)
 	{
@@ -260,7 +259,7 @@ bool sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	sha3_finalize(state, SHA3_512_RATE, msg0, 0, 0, hash);
+	sha3_finalize(state, SHA3_512_RATE, msg0, 0, hash);
 
 	if (are_equal8(hash, exp0, 64) == false)
 	{
@@ -269,7 +268,7 @@ bool sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	sha3_finalize(state, SHA3_512_RATE, msg24, 0, 3, hash);
+	sha3_finalize(state, SHA3_512_RATE, msg24, 3, hash);
 
 	if (are_equal8(hash, exp24, 64) == false)
 	{
@@ -278,7 +277,7 @@ bool sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	sha3_finalize(state, SHA3_512_RATE, msg448, 0, 56, hash);
+	sha3_finalize(state, SHA3_512_RATE, msg448, 56, hash);
 
 	if (are_equal8(hash, exp448, 64) == false)
 	{
@@ -290,10 +289,9 @@ bool sha3_512_kat_test()
 	offset = 0;
 
 	/* absorb a rate sized block */
-	sha3_blockupdate(state, SHA3_512_RATE, msg1600, offset, SHA3_512_RATE);
-	offset += SHA3_512_RATE;
+	sha3_blockupdate(state, SHA3_512_RATE, msg1600, 1);
 	/* finalize the message */
-	sha3_finalize(state, SHA3_512_RATE, msg1600, offset, 200 - offset, hash);
+	sha3_finalize(state, SHA3_512_RATE, msg1600 + SHA3_512_RATE, 200 - SHA3_512_RATE, hash);
 
 	if (are_equal8(hash, exp1600, 64) == false)
 	{
@@ -307,7 +305,7 @@ bool shake_128_kat_test()
 {
 	uint8_t exp0[512];
 	uint8_t exp1600[512];
-	uint8_t hash[SHAKE128_RATE * 4];
+	uint8_t hash[512];
 	uint8_t msg0[1];
 	uint8_t msg1600[200];
 	uint8_t output[512];
@@ -379,10 +377,10 @@ bool shake_128_kat_test()
 
 	/* test long-form api */
 
-	clear8(hash, SHAKE128_RATE * 4);
+	clear8(hash, 512);
 	clear64(state, 25);
-	shake128_absorb(state, msg1600, 200);
-	shake128_squeezeblocks(hash, 4, state);
+	shake128_initialize(state, msg1600, 200);
+	cshake128_finalize(state, hash, 512);
 
 	if (are_equal8(hash, exp1600, 512) == false)
 	{
@@ -396,7 +394,7 @@ bool shake_256_kat_test()
 {
 	uint8_t exp0[512];
 	uint8_t exp1600[512];
-	uint8_t hash[SHAKE256_RATE * 4];
+	uint8_t hash[512];
 	uint8_t msg0[1];
 	uint8_t msg1600[200];
 	uint8_t output[512];
@@ -468,12 +466,140 @@ bool shake_256_kat_test()
 
 	/* test long-form api */
 
-	clear8(hash, SHAKE256_RATE * 4);
+	clear8(hash, 512);
 	clear64(state, 25);
-	shake256_absorb(state, msg1600, 200);
-	shake256_squeezeblocks(hash, 4, state);
+	shake256_initialize(state, msg1600, 200);
+	cshake256_finalize(state, hash, 512);
 
 	if (are_equal8(hash, exp1600, 512) == false)
+	{
+		status = false;
+	}
+
+	return status;
+}
+
+bool cshake_128_kat_test()
+{
+	uint8_t cust[15];
+	uint8_t exp256a[32];
+	uint8_t exp256b[32];
+	uint8_t msg32[4];
+	uint8_t msg1600[200];
+	uint8_t name[1];
+	uint8_t output[32];
+	uint64_t state[25];
+	bool status;
+
+	hex_to_bin("456D61696C205369676E6174757265", cust, 15);
+
+	hex_to_bin("C1C36925B6409A04F1B504FCBCA9D82B4017277CB5ED2B2065FC1D3814D5AAF5", exp256a, 32);
+	hex_to_bin("C5221D50E4F822D96A2E8881A961420F294B7B24FE3D2094BAED2C6524CC166B", exp256b, 32);
+
+	hex_to_bin("00010203", msg32, 4);
+	hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
+		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
+		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
+		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
+		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
+		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
+		"C0C1C2C3C4C5C6C7", msg1600, 200);
+
+	status = true;
+
+	/* test compact api */
+
+	clear8(output, 32);
+	cshake128(output, 32, msg32, 4, name, 0, cust, 15);
+
+	if (are_equal8(output, exp256a, 32) == false)
+	{
+		status = false;
+	}
+
+	clear8(output, 32);
+	cshake128(output, 32, msg1600, 200, name, 0, cust, 15);
+
+	if (are_equal8(output, exp256b, 32) == false)
+	{
+		status = false;
+	}
+
+	/* test long-form api */
+
+	uint8_t hashb[CSHAKE128_RATE];
+	clear8(hashb, CSHAKE128_RATE);
+	clear64(state, 25);
+	cshake128_initialize(state, name, 0, cust, 15);
+	cshake128_update(state, msg1600, 200);
+	cshake128_squeezeblocks(state, hashb, 1);
+
+	if (are_equal8(hashb, exp256b, 32) == false)
+	{
+		status = false;
+	}
+
+	return status;
+}
+
+bool cshake_256_kat_test()
+{
+	uint8_t cust[15];
+	uint8_t exp512a[64];
+	uint8_t exp512b[64];
+	uint8_t msg32[4];
+	uint8_t msg1600[200];
+	uint8_t name[1];
+	uint8_t output[64];
+	uint64_t state[25];
+	bool status;
+
+	hex_to_bin("456D61696C205369676E6174757265", cust, 15);
+
+	hex_to_bin("D008828E2B80AC9D2218FFEE1D070C48B8E4C87BFF32C9699D5B6896EEE0EDD1"
+		"64020E2BE0560858D9C00C037E34A96937C561A74C412BB4C746469527281C8C", exp512a, 64);
+	hex_to_bin("07DC27B11E51FBAC75BC7B3C1D983E8B4B85FB1DEFAF218912AC864302730917"
+		"27F42B17ED1DF63E8EC118F04B23633C1DFB1574C8FB55CB45DA8E25AFB092BB", exp512b, 64);
+
+	hex_to_bin("00010203", msg32, 4);
+	hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
+		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
+		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
+		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
+		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
+		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
+		"C0C1C2C3C4C5C6C7", msg1600, 200);
+
+	status = true;
+
+	/* test compact api */
+
+	clear8(output, 64);
+	cshake256(output, 64, msg32, 4, name, 0, cust, 15);
+
+	if (are_equal8(output, exp512a, 64) == false)
+	{
+		status = false;
+	}
+
+	clear8(output, 64);
+	cshake256(output, 64, msg1600, 200, name, 0, cust, 15);
+
+	if (are_equal8(output, exp512b, 64) == false)
+	{
+		status = false;
+	}
+
+	/* test long-form api */
+
+	uint8_t hashb[CSHAKE256_RATE];
+	clear8(hashb, CSHAKE256_RATE);
+	clear64(state, 25);
+	cshake256_initialize(state, name, 0, cust, 15);
+	cshake256_update(state, msg1600, 200);
+	cshake256_squeezeblocks(state, hashb, 1);
+
+	if (are_equal8(hashb, exp512b, 64) == false)
 	{
 		status = false;
 	}
@@ -559,8 +685,8 @@ bool cshake_simple_128_kat_test()
 
 	clear8(hash, CSHAKE128_RATE * 4);
 	clear64(state, 25);
-	cshake128_simple_absorb(state, 1, msg1600, 200);
-	cshake128_simple_squeezeblocks(hash, 4, state);
+	cshake128_simple_initialize(state, 1, msg1600, 200);
+	cshake128_simple_squeezeblocks(state, hash, 4);
 
 	if (are_equal8(hash, exp1600, 512) == false)
 	{
@@ -648,10 +774,165 @@ bool cshake_simple_256_kat_test()
 
 	clear8(hash, CSHAKE256_RATE * 4);
 	clear64(state, 25);
-	cshake256_simple_absorb(state, 1, msg1600, 200);
-	cshake256_simple_squeezeblocks(hash, 4, state);
+	cshake256_simple_initialize(state, 1, msg1600, 200);
+	cshake256_simple_squeezeblocks(state, hash, 4);
 
 	if (are_equal8(hash, exp1600, 512) == false)
+	{
+		status = false;
+	}
+
+	return status;
+}
+
+bool kmac_128_kat_test()
+{
+	uint8_t cust0[1];
+	uint8_t cust168[21];
+	uint8_t exp256a[32];
+	uint8_t exp256b[32];
+	uint8_t exp256c[32];
+	uint8_t msg32[4];
+	uint8_t msg1600[200];
+	uint8_t key256[32];
+	uint8_t output[32];
+	uint64_t state[25];
+	bool status;
+
+	hex_to_bin("4D7920546167676564204170706C69636174696F6E", cust168, 21);
+
+	hex_to_bin("E5780B0D3EA6F7D3A429C5706AA43A00FADBD7D49628839E3187243F456EE14E", exp256a, 32);
+	hex_to_bin("3B1FBA963CD8B0B59E8C1A6D71888B7143651AF8BA0A7070C0979E2811324AA5", exp256b, 32);
+	hex_to_bin("1F5B4E6CCA02209E0DCB5CA635B89A15E271ECC760071DFD805FAA38F9729230", exp256c, 32);
+
+	hex_to_bin("404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F", key256, 32);
+
+	hex_to_bin("00010203", msg32, 4);
+	hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
+		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
+		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
+		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
+		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
+		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
+		"C0C1C2C3C4C5C6C7", msg1600, 200);
+
+	status = true;
+
+	/* test compact api */
+
+	clear8(output, 32);
+	kmac128(output, 32, msg32, 4, key256, 32, cust0, 0);
+
+	if (are_equal8(output, exp256a, 32) == false)
+	{
+		status = false;
+	}
+
+	clear8(output, 32);
+	kmac128(output, 32, msg32, 4, key256, 32, cust168, 21);
+
+	if (are_equal8(output, exp256b, 32) == false)
+	{
+		status = false;
+	}
+
+	clear8(output, 32);
+	kmac128(output, 32, msg1600, 200, key256, 32, cust168, 21);
+
+	if (are_equal8(output, exp256c, 32) == false)
+	{
+		status = false;
+	}
+
+	/* test long-form api */
+
+	clear64(state, 25);
+	clear8(output, 32);
+
+	kmac128_initialize(state, key256, 32, cust168, 21);
+	kmac128_blockupdate(state, msg1600, 1);
+	kmac128_finalize(state, output, 32, msg1600 + CSHAKE128_RATE, 200 - CSHAKE128_RATE);
+
+	if (are_equal8(output, exp256c, 32) == false)
+	{
+		status = false;
+	}
+
+	return status;
+}
+
+bool kmac_256_kat_test()
+{
+	uint8_t cust0[1];
+	uint8_t cust168[21];
+	uint8_t exp256a[64];
+	uint8_t exp256b[64];
+	uint8_t exp256c[64];
+	uint8_t msg32[4];
+	uint8_t msg1600[200];
+	uint8_t key256[32];
+	uint8_t output[64];
+	uint64_t state[25];
+	bool status;
+
+	hex_to_bin("4D7920546167676564204170706C69636174696F6E", cust168, 21);
+
+	hex_to_bin("20C570C31346F703C9AC36C61C03CB64C3970D0CFC787E9B79599D273A68D2F7"
+		"F69D4CC3DE9D104A351689F27CF6F5951F0103F33F4F24871024D9C27773A8DD", exp256a, 64);
+	hex_to_bin("75358CF39E41494E949707927CEE0AF20A3FF553904C86B08F21CC414BCFD691"
+		"589D27CF5E15369CBBFF8B9A4C2EB17800855D0235FF635DA82533EC6B759B69", exp256b, 64);
+	hex_to_bin("B58618F71F92E1D56C1B8C55DDD7CD188B97B4CA4D99831EB2699A837DA2E4D9"
+		"70FBACFDE50033AEA585F1A2708510C32D07880801BD182898FE476876FC8965", exp256c, 64);
+
+	hex_to_bin("404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F", key256, 32);
+
+	hex_to_bin("00010203", msg32, 4);
+	hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
+		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
+		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
+		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
+		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
+		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
+		"C0C1C2C3C4C5C6C7", msg1600, 200);
+
+	status = true;
+
+	/* test compact api */
+
+	clear8(output, 64);
+	kmac256(output, 64, msg32, 4, key256, 32, cust168, 21);
+
+	if (are_equal8(output, exp256a, 64) == false)
+	{
+		status = false;
+	}
+
+	clear8(output, 64);
+	kmac256(output, 64, msg1600, 200, key256, 32, cust0, 0);
+
+	if (are_equal8(output, exp256b, 64) == false)
+	{
+		status = false;
+	}
+
+	clear8(output, 64);
+	kmac256(output, 64, msg1600, 200, key256, 32, cust168, 21);
+
+	if (are_equal8(output, exp256c, 64) == false)
+	{
+		status = false;
+	}
+
+	/* test long-form api */
+
+	clear64(state, 25);
+	clear8(output, 64);
+
+	kmac256_initialize(state, key256, 32, cust168, 21);
+	kmac256_blockupdate(state, msg1600, 1);
+	kmac256_finalize(state, output, 64, msg1600 + CSHAKE256_RATE, 200 - CSHAKE256_RATE);
+
+	if (are_equal8(output, exp256c, 64) == false)
 	{
 		status = false;
 	}
