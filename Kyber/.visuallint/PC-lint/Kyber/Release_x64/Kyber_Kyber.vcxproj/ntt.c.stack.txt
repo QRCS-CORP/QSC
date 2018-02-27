@@ -1,2 +1,0 @@
-"invntt",34,finite,74,"barrett_reduce", (external)
-"ntt",28,finite,68,"montgomery_reduce", (external)
