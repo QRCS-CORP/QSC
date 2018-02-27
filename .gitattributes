@@ -1,2 +1,7 @@
 $ cat .gitattributes
 *.rb linguist-language=C
+Kyber/Doxygen/* linguist-documentation
+Kyber/Visual Lint Analysis/* linguist-documentation
+NewHope/Doxygen/* linguist-documentation
+NewHope/Visual Lint Analysis/* linguist-documentation
+SHA3/Doxygen/* linguist-documentation
