@@ -2973,15 +2973,7 @@ void kmac128_initialize(uint64_t* state, const uint8_t* key, size_t keylen, cons
 	}
 
 	offset += 4;
-
-	if (customlen == 0)
-	{
-		offset += left_encode(pad + offset, customlen);
-	}
-	else
-	{
-		offset += left_encode(pad + offset, CSHAKE128_RATE);
-	}
+	offset += left_encode(pad + offset, customlen * 8);
 
 	for (i = 0; i < customlen; i++)
 	{
@@ -3123,16 +3115,8 @@ void kmac256_initialize(uint64_t* state, const uint8_t* key, size_t keylen, cons
 	}
 
 	offset += 4;
+	offset += left_encode(pad + offset, customlen * 8);
 
-	if (customlen == 0)
-	{
-		offset += left_encode(pad + offset, customlen);
-	}
-	else
-	{
-		offset += left_encode(pad + offset, CSHAKE128_RATE); 
-	}													 
-													 
 	for (i = 0; i < customlen; i++)
 	{
 		pad[offset + i] = custom[i];

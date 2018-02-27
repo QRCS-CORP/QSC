@@ -2973,15 +2973,7 @@ void kmac128_initialize(uint64_t* state, const uint8_t* key, size_t keylen, cons
 	}
 
 	offset += 4;
-
-	if (customlen == 0)
-	{
-		offset += left_encode(pad + offset, customlen);
-	}
-	else
-	{
-		offset += left_encode(pad + offset, CSHAKE128_RATE);
-	}
+	offset += left_encode(pad + offset, customlen * 8);
 
 	for (i = 0; i < customlen; i++)
 	{
@@ -3123,19 +3115,7 @@ void kmac256_initialize(uint64_t* state, const uint8_t* key, size_t keylen, cons
 	}
 
 	offset += 4;
-
-	/*	Note: the CSHAKE128_RATE parameter (below) is to align with KATs, due to a *possible* mistake in the keccak implementation used by NIST,
-	this should be CSHAKE256_RATE (doesn't impact security in this implementation however), see cSHAKE_Initialize in (hint: look at the C file too):
-	https://github.com/gvanas/KeccakCodePackage/blob/712fabccd5d611459533d554814e00537742624c/Modes/SP800-185.inc */
-
-	if (customlen == 0)
-	{
-		offset += left_encode(pad + offset, customlen);
-	}
-	else
-	{
-		offset += left_encode(pad + offset, CSHAKE128_RATE);
-	}
+	offset += left_encode(pad + offset, customlen * 8);
 
 	for (i = 0; i < customlen; i++)
 	{
