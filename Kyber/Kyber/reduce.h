@@ -6,8 +6,8 @@
 * \date January 07, 2018
 */
 
-#ifndef REDUCE_H
-#define REDUCE_H
+#ifndef KYBER_REDUCE_H
+#define KYBER_REDUCE_H
 
 #include "common.h"
 

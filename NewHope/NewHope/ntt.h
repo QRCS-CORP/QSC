@@ -11,14 +11,14 @@
 
 #include "params.h"
 
-/** \brief powers of nth root of unity in Montgomery domain with R=2^18 in bit-reversed order */
-extern uint16_t omegas_bitrev_montgomery[NEWHOPE_N / 2];
-/** \brief inverses of powers of nth root of unity  in Montgomery domain with R=2^18 in bit-reversed order */
-extern uint16_t omegas_inv_bitrev_montgomery[NEWHOPE_N / 2];
-/** \brief powers of nth root of -1 in Montgomery domain with R=2^18 in bit-reversed order */
-extern uint16_t psis_bitrev_montgomery[NEWHOPE_N];
-/** \brief inverses of powers of nth  root of -1 divided by n in Montgomery domain with R=2^18 */
-extern uint16_t psis_inv_montgomery[NEWHOPE_N];
+/* powers of nth root of unity in Montgomery domain with R=2^18 in bit-reversed order */
+static uint16_t omegas_bitrev_montgomery[NEWHOPE_N / 2];
+/* inverses of powers of nth root of unity  in Montgomery domain with R=2^18 in bit-reversed order */
+static uint16_t omegas_inv_bitrev_montgomery[NEWHOPE_N / 2];
+/* powers of nth root of -1 in Montgomery domain with R=2^18 in bit-reversed order */
+static uint16_t psis_bitrev_montgomery[NEWHOPE_N];
+/* inverses of powers of nth  root of -1 divided by n in Montgomery domain with R=2^18 */
+static uint16_t psis_inv_montgomery[NEWHOPE_N];
 
 /**
 * \brief Permutes coefficients of a polynomial into bitreversed order

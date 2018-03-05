@@ -36,13 +36,13 @@ static void clear64(uint64_t* a, size_t count)
 	}
 }
 
-static uint32_t left_encode(uint8_t* buffer, uint32_t value)
+static size_t left_encode(uint8_t* buffer, size_t value)
 {
-	uint32_t i;
-	uint32_t n;
-	uint32_t v;
+	size_t i;
+	size_t n;
+	size_t v;
 
-	for (v = value, n = 0; v && (n < sizeof(uint32_t)); ++n, v >>= 8);
+	for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
 
 	if (n == 0)
 	{
@@ -56,7 +56,7 @@ static uint32_t left_encode(uint8_t* buffer, uint32_t value)
 
 	buffer[0] = (uint8_t)n;
 
-	return n + 1;
+	return (size_t)n + 1;
 }
 
 static uint64_t load64(const uint8_t* a)
@@ -72,11 +72,11 @@ static uint64_t load64(const uint8_t* a)
 	return r;
 }
 
-static uint32_t right_encode(uint8_t* buffer, uint32_t value)
+static size_t right_encode(uint8_t* buffer, size_t value)
 {
-	uint32_t i;
-	uint32_t n;
-	uint32_t v;
+	size_t i;
+	size_t n;
+	size_t v;
 
 	for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
 
@@ -92,7 +92,7 @@ static uint32_t right_encode(uint8_t* buffer, uint32_t value)
 
 	buffer[n] = (uint8_t)n;
 
-	return n + 1;
+	return (size_t)n + 1;
 }
 
 static uint64_t rotl64(const uint64_t x, uint32_t shift)
@@ -3028,7 +3028,7 @@ void kmac128_finalize(uint64_t* state, uint8_t* output, size_t outputlen, const 
 {
 	uint8_t buf[sizeof(size_t) + 1];
 	uint8_t pad[CSHAKE128_RATE];
-	uint32_t outbitlen;
+	size_t outbitlen;
 	size_t i;
 
 	clear8(pad, CSHAKE128_RATE);
@@ -3170,7 +3170,7 @@ void kmac256_finalize(uint64_t* state, uint8_t* output, size_t outputlen, const 
 {
 	uint8_t buf[sizeof(size_t) + 1];
 	uint8_t pad[CSHAKE256_RATE];
-	uint32_t outbitlen;
+	size_t outbitlen;
 	size_t i;
 
 	clear8(pad, CSHAKE256_RATE);

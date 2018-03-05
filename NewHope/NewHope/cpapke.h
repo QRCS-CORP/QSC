@@ -18,7 +18,7 @@
 * \param sk pointer to output private key
 * \return Returns one (NEWHOPE_CRYPTO_SUCCESS) for success
 */
-newhope_status cpapke_keypair(uint8_t* pk, uint8_t* sk);
+qcc_status cpapke_keypair(uint8_t* pk, uint8_t* sk);
 
 /**
 * \brief Encryption function of the CPA public-key encryption scheme underlying the NewHope KEMs

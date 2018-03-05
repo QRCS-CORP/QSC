@@ -6,8 +6,8 @@
 * \date January 07, 2018
 */
 
-#ifndef POLYVEC_H
-#define POLYVEC_H
+#ifndef KYBER_POLYVEC_H
+#define KYBER_POLYVEC_H
 
 #include "poly.h"
 

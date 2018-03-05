@@ -1,6 +1,7 @@
 #include "sha3_kat.h"
 #include "../sha3/sha3.h"
 #include <stdio.h>
+#include <string.h>
 
 static bool are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 {

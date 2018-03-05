@@ -6,8 +6,8 @@
 * \date January 10, 2018
 */
 
-#ifndef INDCPA_H
-#define INDCPA_H
+#ifndef KYBER_INDCPA_H
+#define KYBER_INDCPA_H
 
 #include "common.h"
 
@@ -24,7 +24,7 @@ void indcpa_dec(uint8_t* m, const uint8_t* c, const uint8_t* sk);
 * \brief Encryption function of the CPA-secure public-key encryption scheme underlying Kyber.
 *
 * \param c Pointer to output ciphertext
-* \param m Pointer to input message (of length KYBER_SYMBYTES bytes)
+* \param m Pointer to input message (of length KYBER_KEYBYTES bytes)
 * \param pk Pointer to input public key
 * \param coins Pointer to input random coins used as seed to deterministically generate all randomness
 */
@@ -37,6 +37,6 @@ void indcpa_enc(uint8_t* c, const uint8_t* m, const uint8_t* pk, const uint8_t* 
 * \param sk Pointer to output private key
 * \return Returns one (KYBER_CRYPTO_SUCCESS) for success
 */
-kyber_status indcpa_keypair(uint8_t* pk, uint8_t* sk);
+qcc_status indcpa_keypair(uint8_t* pk, uint8_t* sk);
 
 #endif

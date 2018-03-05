@@ -8,8 +8,8 @@
 * \date January 06, 2018
 */
 
-#ifndef NEWHOPE_SYSRAND_H
-#define NEWHOPE_SYSRAND_H
+#ifndef SYSRAND_H
+#define SYSRAND_H
 
 #include "common.h"
 
@@ -20,6 +20,6 @@
 * \param length The number of bytes to copy
 * \return Returns one for success, zero for failure
 */
-newhope_status sysrand_getbytes(uint8_t* buffer, size_t length);
+qcc_status sysrand_getbytes(uint8_t* buffer, size_t length);
 
 #endif

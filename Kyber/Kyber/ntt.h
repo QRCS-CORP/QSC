@@ -6,8 +6,8 @@
 * \date January 10, 2018
 */
 
-#ifndef NTT_H
-#define NTT_H
+#ifndef KYBER_NTT_H
+#define KYBER_NTT_H
 
 #include "common.h"
 

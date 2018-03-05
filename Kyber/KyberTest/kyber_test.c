@@ -126,8 +126,8 @@ void sha3_test_run()
 */
 bool test_keys()
 {
-	uint8_t key_a[KYBER_SYMBYTES];
-	uint8_t key_b[KYBER_SYMBYTES];
+	uint8_t key_a[KYBER_KEYBYTES];
+	uint8_t key_b[KYBER_KEYBYTES];
 	uint8_t pk[KYBER_PUBLICKEYBYTES];
 	uint8_t sendb[KYBER_CIPHERTEXTBYTES];
 	uint8_t sk_a[KYBER_SECRETKEYBYTES];
@@ -139,27 +139,27 @@ bool test_keys()
 	for (i = 0; i < KYBER_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk_a) != KYBER_STATE_SUCCESS)
+		if (crypto_kem_keypair(pk, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(sendb, key_b, pk) != KYBER_STATE_SUCCESS)
+		if (crypto_kem_enc(sendb, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice uses Bobs response to get her secret key */
-		if (crypto_kem_dec(key_a, sendb, sk_a) != KYBER_STATE_SUCCESS)
+		if (crypto_kem_dec(key_a, sendb, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
-		if (memcmp(key_a, key_b, KYBER_SYMBYTES) != 0)
+		if (memcmp(key_a, key_b, KYBER_KEYBYTES) != 0)
 		{
 			state = false;
 			break;
@@ -176,8 +176,8 @@ bool test_keys()
 bool test_invalid_sk_a()
 {
 	uint8_t sk_a[KYBER_SECRETKEYBYTES];
-	uint8_t key_a[KYBER_SYMBYTES];
-	uint8_t key_b[KYBER_SYMBYTES];
+	uint8_t key_a[KYBER_KEYBYTES];
+	uint8_t key_b[KYBER_KEYBYTES];
 	uint8_t pk[KYBER_PUBLICKEYBYTES];
 	uint8_t sendb[KYBER_CIPHERTEXTBYTES];
 	size_t i;
@@ -188,35 +188,35 @@ bool test_invalid_sk_a()
 	for (i = 0; i < KYBER_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk_a) != KYBER_STATE_SUCCESS)
+		if (crypto_kem_keypair(pk, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(sendb, key_b, pk) != KYBER_STATE_SUCCESS)
+		if (crypto_kem_enc(sendb, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* replace secret key with random values */
-		if (sysrand_getbytes(sk_a, KYBER_SECRETKEYBYTES) != KYBER_STATE_SUCCESS)
+		if (sysrand_getbytes(sk_a, KYBER_SECRETKEYBYTES) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* invalid secret key, should fail */
-		if (crypto_kem_dec(key_a, sendb, sk_a) == KYBER_STATE_SUCCESS)
+		if (crypto_kem_dec(key_a, sendb, sk_a) == QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* fail if equal */
-		if (memcmp(key_a, key_b, KYBER_SYMBYTES) == 0)
+		if (memcmp(key_a, key_b, KYBER_KEYBYTES) == 0)
 		{
 			state = false;
 			break;
@@ -233,8 +233,8 @@ bool test_invalid_sk_a()
 bool test_invalid_ciphertext()
 {
 	uint8_t sk_a[KYBER_SECRETKEYBYTES];
-	uint8_t key_a[KYBER_SYMBYTES];
-	uint8_t key_b[KYBER_SYMBYTES];
+	uint8_t key_a[KYBER_KEYBYTES];
+	uint8_t key_b[KYBER_KEYBYTES];
 	uint8_t pk[KYBER_PUBLICKEYBYTES];
 	uint8_t sendb[KYBER_CIPHERTEXTBYTES];
 	size_t i;
@@ -245,21 +245,21 @@ bool test_invalid_ciphertext()
 
 	for (i = 0; i < KYBER_NTESTS; i++)
 	{
-		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != KYBER_STATE_SUCCESS)
+		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk_a) != KYBER_STATE_SUCCESS)
+		if (crypto_kem_keypair(pk, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(sendb, key_b, pk) != KYBER_STATE_SUCCESS)
+		if (crypto_kem_enc(sendb, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -269,14 +269,14 @@ bool test_invalid_ciphertext()
 		sendb[pos % KYBER_CIPHERTEXTBYTES] ^= 23;
 
 		/* invalid ciphertext, auth should fail */
-		if (crypto_kem_dec(key_a, sendb, sk_a) == KYBER_STATE_SUCCESS)
+		if (crypto_kem_dec(key_a, sendb, sk_a) == QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* fail if equal */
-		if (memcmp(key_a, key_b, KYBER_SYMBYTES) == 0)
+		if (memcmp(key_a, key_b, KYBER_KEYBYTES) == 0)
 		{
 			state = false;
 			break;

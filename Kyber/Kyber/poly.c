@@ -109,20 +109,20 @@ void poly_getnoise(poly* r, const uint8_t* seed, uint8_t nonce)
 
 #ifdef MATRIX_GENERATOR_CSHAKE
 
-	cshake256_simple(buf, (KYBER_ETA * KYBER_N) / 4, nonce, seed, KYBER_SYMBYTES);
+	cshake256_simple(buf, (KYBER_ETA * KYBER_N) / 4, nonce, seed, KYBER_KEYBYTES);
 
 #else
 
-	uint8_t extseed[KYBER_SYMBYTES + 1];
+	uint8_t extseed[KYBER_KEYBYTES + 1];
 	size_t i;
 
-	for (i = 0; i < KYBER_SYMBYTES; i++)
+	for (i = 0; i < KYBER_KEYBYTES; i++)
 	{
 		extseed[i] = seed[i];
 	}
 
-	extseed[KYBER_SYMBYTES] = nonce;
-	shake256(buf, (KYBER_ETA * KYBER_N) / 4, extseed, KYBER_SYMBYTES + 1);
+	extseed[KYBER_KEYBYTES] = nonce;
+	shake256(buf, (KYBER_ETA * KYBER_N) / 4, extseed, KYBER_KEYBYTES + 1);
 
 #endif
 
@@ -159,13 +159,13 @@ void poly_sub(poly* r, const poly* a, const poly* b)
 	}
 }
 
-void poly_frommsg(poly* r, const uint8_t msg[KYBER_SYMBYTES])
+void poly_frommsg(poly* r, const uint8_t msg[KYBER_KEYBYTES])
 {
 	size_t i;
 	size_t j;
 	uint16_t mask;
 
-	for (i = 0; i < KYBER_SYMBYTES; i++)
+	for (i = 0; i < KYBER_KEYBYTES; i++)
 	{
 		for (j = 0; j < 8; j++)
 		{
@@ -175,13 +175,13 @@ void poly_frommsg(poly* r, const uint8_t msg[KYBER_SYMBYTES])
 	}
 }
 
-void poly_tomsg(uint8_t msg[KYBER_SYMBYTES], const poly* a)
+void poly_tomsg(uint8_t msg[KYBER_KEYBYTES], const poly* a)
 {
 	size_t i;
 	size_t j;
 	uint16_t t;
 
-	for (i = 0; i < KYBER_SYMBYTES; i++)
+	for (i = 0; i < KYBER_KEYBYTES; i++)
 	{
 		msg[i] = 0;
 

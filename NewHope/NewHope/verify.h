@@ -1,35 +1,27 @@
-/**
-* \file verify.h
-* \date February 16, 2018
-*
-* \brief <b>Verification and conditional move api</b> \n
-* This is an internal class.
-*/
-
 #ifndef NEWHOPE_VERIFY_H
 #define NEWHOPE_VERIFY_H
 
-#include "common.h"
+#include <stdio.h>
 
 /**
-* \brief Copy len bytes from x to r if b is 1; don't modify x if b is 0. Requires b to be in {0,1}.
-* Assumes two's complement representation of negative integers.
-* Runs in constant time.
+* \brief Compare two arrays for equality
 *
-* \param r pointer to output byte array
-* \param x pointer to input byte array
-* \param length number of bytes to be copied
-* \param b condition bit; has to be in {0,1}
+* \param a The first array
+* \param b The second array
+* \param len The number of bytes to compare
+* \return returns 0 for equal strings, 1 for non-equal strings
 */
-void cmov(uint8_t* r, const uint8_t* x, size_t length, uint8_t b);
+int32_t verify(const uint8_t* a, const uint8_t* b, size_t len);
 
+/* b = 1 means mov, b = 0 means don't mov*/
 /**
-* \brief Compare two arrays for equality in constant time
+* \brief Conditional move function
 *
-* \param a pointer to first byte array
-* \param b pointer to second byte array
-* \param length length of the byte arrays
+* \param r The return array
+* \param x The source array
+* \param len The number of bytes to move
+* \param The condition
 */
-int32_t verify(const uint8_t* a, const uint8_t* b, size_t length);
+void cmov(uint8_t* r, const uint8_t* x, size_t len, uint8_t b);
 
 #endif

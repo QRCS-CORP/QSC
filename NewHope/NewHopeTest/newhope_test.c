@@ -16,6 +16,19 @@
 
 #define NEWHOPE_NTESTS 100
 
+static void PrintHex16(const uint16_t* Data, size_t Length, size_t LineSize)
+{
+	for (size_t i = 0; i < Length; ++i)
+	{
+		if (i != 0 && i % LineSize == 0)
+		{
+			printf("\n");
+		}
+
+		printf("0x%04X, ", Data[i]);
+	}
+}
+
 /**
 * \brief Get a char from console input.
 * \return Returns one user input char
@@ -140,21 +153,21 @@ bool test_keys()
 	for (i = 0; i < NEWHOPE_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk_a) != NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_keypair(pk, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(sendb, key_b, pk) != NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_enc(sendb, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice uses Bobs response to get her secret key */
-		if (crypto_kem_dec(key_a, sendb, sk_a) != NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_dec(key_a, sendb, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -189,28 +202,28 @@ bool test_invalid_sk_a()
 	for (i = 0; i < NEWHOPE_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk_a) != NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_keypair(pk, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(sendb, key_b, pk) != NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_enc(sendb, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* replace secret key with random values */
-		if (sysrand_getbytes(sk_a, NEWHOPE_SECRETKEYBYTES) != NEWHOPE_STATE_SUCCESS)
+		if (sysrand_getbytes(sk_a, NEWHOPE_SECRETKEYBYTES) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* invalid secret key, should fail */
-		if (crypto_kem_dec(key_a, sendb, sk_a) == NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_dec(key_a, sendb, sk_a) == QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -246,21 +259,21 @@ bool test_invalid_ciphertext()
 
 	for (i = 0; i < NEWHOPE_NTESTS; i++)
 	{
-		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != NEWHOPE_STATE_SUCCESS)
+		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk_a) != NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_keypair(pk, sk_a) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(sendb, key_b, pk) != NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_enc(sendb, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -270,7 +283,7 @@ bool test_invalid_ciphertext()
 		sendb[pos % NEWHOPE_CIPHERTEXTBYTES] ^= 23;
 
 		/* invalid ciphertext, auth should fail */
-		if (crypto_kem_dec(key_a, sendb, sk_a) == NEWHOPE_STATE_SUCCESS)
+		if (crypto_kem_dec(key_a, sendb, sk_a) == QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;

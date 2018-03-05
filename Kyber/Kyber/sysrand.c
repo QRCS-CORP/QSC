@@ -14,9 +14,9 @@
 
 #endif
 
-kyber_status sysrand_getbytes(uint8_t* buffer, size_t length)
+qcc_status sysrand_getbytes(uint8_t* buffer, size_t length)
 {
-	kyber_status status = KYBER_STATE_SUCCESS;
+	qcc_status status = QCC_STATUS_SUCCESS;
 
 #if defined(WINDOWS)
 
@@ -26,12 +26,12 @@ kyber_status sysrand_getbytes(uint8_t* buffer, size_t length)
 	{
 		if (!CryptGenRandom(hProvider, (DWORD)length, buffer))
 		{
-			status = KYBER_ERROR_RANDFAIL;
+			status = QCC_STATUS_RANDFAIL;
 		}
 	}
 	else
 	{
-		status = KYBER_ERROR_RANDFAIL;
+		status = QCC_STATUS_RANDFAIL;
 	}
 
 	if (hProvider != 0)
@@ -45,7 +45,7 @@ kyber_status sysrand_getbytes(uint8_t* buffer, size_t length)
 
 	if (fd <= 0)
 	{
-		status = KYBER_ERROR_RANDFAIL;
+		status = QCC_STATUS_RANDFAIL;
 	}
 	else
 	{
@@ -53,7 +53,7 @@ kyber_status sysrand_getbytes(uint8_t* buffer, size_t length)
 
 		if (r != length)
 		{
-			status = KYBER_ERROR_RANDFAIL;
+			status = QCC_STATUS_RANDFAIL;
 		}
 
 		close(fd);

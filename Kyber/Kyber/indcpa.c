@@ -54,7 +54,7 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 			}
 
 			clear64(state, SHA3_STATESIZE);
-			cshake128_simple_initialize(state, dsep, seed, KYBER_SYMBYTES);
+			cshake128_simple_initialize(state, dsep, seed, KYBER_KEYBYTES);
 			cshake128_simple_squeezeblocks(state, buf, nblocks);
 
 			while (ctr < KYBER_N)
@@ -82,9 +82,9 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 
 	/* Performs rejection sampling on output of SHAKE-128 */
 
-	uint8_t extseed[KYBER_SYMBYTES + 2];
+	uint8_t extseed[KYBER_KEYBYTES + 2];
 
-	for (i = 0; i < KYBER_SYMBYTES; i++)
+	for (i = 0; i < KYBER_KEYBYTES; i++)
 	{
 		extseed[i] = seed[i];
 	}
@@ -98,17 +98,17 @@ static void gen_matrix(polyvec* a, const uint8_t* seed, uint8_t transposed)
 
 			if (transposed)
 			{
-				extseed[KYBER_SYMBYTES] = (uint8_t)i;
-				extseed[KYBER_SYMBYTES + 1] = (uint8_t)j;
+				extseed[KYBER_KEYBYTES] = (uint8_t)i;
+				extseed[KYBER_KEYBYTES + 1] = (uint8_t)j;
 			}
 			else
 			{
-				extseed[KYBER_SYMBYTES] = (uint8_t)j;
-				extseed[KYBER_SYMBYTES + 1] = (uint8_t)i;
+				extseed[KYBER_KEYBYTES] = (uint8_t)j;
+				extseed[KYBER_KEYBYTES + 1] = (uint8_t)i;
 			}
 
 			clear64(state, SHA3_STATESIZE);
-			shake128_initialize(state, extseed, KYBER_SYMBYTES + 2);
+			shake128_initialize(state, extseed, KYBER_KEYBYTES + 2);
 			shake128_squeezeblocks(state, buf, nblocks);
 
 			while (ctr < KYBER_N)
@@ -155,7 +155,7 @@ static void pack_pk(uint8_t* r, const polyvec* pk, const uint8_t* seed)
 
 	polyvec_compress(r, pk);
 
-	for (i = 0; i < KYBER_SYMBYTES; i++)
+	for (i = 0; i < KYBER_KEYBYTES; i++)
 	{
 		r[i + KYBER_POLYVECCOMPRESSEDBYTES] = seed[i];
 	}
@@ -186,7 +186,7 @@ static void unpack_pk(polyvec* pk, uint8_t* seed, const uint8_t* packedpk)
 
 	polyvec_decompress(pk, packedpk);
 
-	for (i = 0; i < KYBER_SYMBYTES; i++)
+	for (i = 0; i < KYBER_KEYBYTES; i++)
 	{
 		seed[i] = packedpk[i + KYBER_POLYVECCOMPRESSEDBYTES];
 	}
@@ -199,24 +199,24 @@ static void unpack_sk(polyvec* sk, const uint8_t* packedsk)
 	polyvec_frombytes(sk, packedsk);
 }
 
-kyber_status indcpa_keypair(uint8_t* pk, uint8_t* sk)
+qcc_status indcpa_keypair(uint8_t* pk, uint8_t* sk)
 {
 	polyvec a[KYBER_K];
-	uint8_t buf[KYBER_SYMBYTES + KYBER_SYMBYTES];
+	uint8_t buf[KYBER_KEYBYTES + KYBER_KEYBYTES];
 	polyvec e;
 	polyvec pkpv; 
 	polyvec skpv;
 	size_t i;
 	uint8_t* publicseed = buf;
-	uint8_t* noiseseed = buf + KYBER_SYMBYTES;
+	uint8_t* noiseseed = buf + KYBER_KEYBYTES;
 	uint8_t nonce;
-	kyber_status status;
+	qcc_status status;
 
-	status = KYBER_STATE_SUCCESS;
+	status = QCC_STATUS_SUCCESS;
 
-	if (sysrand_getbytes(buf, KYBER_SYMBYTES) == KYBER_STATE_SUCCESS)
+	if (sysrand_getbytes(buf, KYBER_KEYBYTES) == QCC_STATUS_SUCCESS)
 	{
-		sha3_compute512(buf, buf, KYBER_SYMBYTES);
+		sha3_compute512(buf, buf, KYBER_KEYBYTES);
 		gen_matrix(a, publicseed, 0);
 		nonce = 0;
 
@@ -246,7 +246,7 @@ kyber_status indcpa_keypair(uint8_t* pk, uint8_t* sk)
 	}
 	else
 	{
-		status = KYBER_ERROR_RANDFAIL;
+		status = QCC_STATUS_RANDFAIL;
 	}
 
 	return status;
@@ -255,7 +255,7 @@ kyber_status indcpa_keypair(uint8_t* pk, uint8_t* sk)
 void indcpa_enc(uint8_t* c, const uint8_t* m, const uint8_t* pk, const uint8_t* coins)
 {
 	polyvec at[KYBER_K];
-	uint8_t seed[KYBER_SYMBYTES];
+	uint8_t seed[KYBER_KEYBYTES];
 	polyvec bp;
 	polyvec ep;
 	polyvec pkpv;

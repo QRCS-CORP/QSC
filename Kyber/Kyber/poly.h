@@ -6,8 +6,8 @@
 * \date January 10, 2018
 */
 
-#ifndef POLY_H
-#define POLY_H
+#ifndef KYBER_POLY_H
+#define KYBER_POLY_H
 
 #include "common.h"
 #include "params.h"
@@ -65,7 +65,7 @@ void poly_frombytes(poly* r, const uint8_t* a);
 * \param r Pointer to output polynomial
 * \param msg Pointer to input message
 */
-void poly_frommsg(poly* r, const uint8_t msg[KYBER_SYMBYTES]);
+void poly_frommsg(poly* r, const uint8_t msg[KYBER_KEYBYTES]);
 
 /**
 * \brief Convert polynomial to 32-byte message.
@@ -73,7 +73,7 @@ void poly_frommsg(poly* r, const uint8_t msg[KYBER_SYMBYTES]);
 * \param msg Pointer to output message
 * \param a Pointer to input polynomial
 */
-void poly_tomsg(uint8_t msg[KYBER_SYMBYTES], const poly* a);
+void poly_tomsg(uint8_t msg[KYBER_KEYBYTES], const poly* a);
 
 /**
 * \brief Sample a polynomial deterministically from a seed and a nonce,

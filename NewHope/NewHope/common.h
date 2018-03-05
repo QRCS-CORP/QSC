@@ -6,8 +6,10 @@
 * \date February 16, 2018
 */
 
-#ifndef NEWHOPE_COMMON_H
-#define NEWHOPE_COMMON_H
+#ifndef QCC_COMMON_H
+#define QCC_COMMON_H
+
+#include <cstdbool>
 
 #if defined(WINDOWS)
 #	include <stdint.h>
@@ -15,18 +17,18 @@
 #	include "inttypes.h"
 #endif
 
-/*! \enum newhope_status
-* Contains Kyber state and error return codes
+/*! \enum qcc_status
+* Contains state and error return codes
 */
 typedef enum
 {
-	NEWHOPE_STATE_FAILURE = 0,	/*!< signals operation failure */
-	NEWHOPE_STATE_SUCCESS = 1,	/*!< signals operation success */
-	NEWHOPE_ERROR_AUTHFAIL = 2,	/*!< seed authentication failure */
-	NEWHOPE_ERROR_RANDFAIL = 3,	/*!< system random failure */
-	NEWHOPE_ERROR_INVALID = 4,	/*!< invalid parameter input */
-	NEWHOPE_ERROR_INTERNAL = 5,	/*!< anonymous internal failure  */
-	NEWHOPE_ERROR_KEYGEN = 6	/*!< key generation failure  */
-} newhope_status;
+	QCC_STATUS_FAILURE = 0,	/*!< signals operation failure */
+	QCC_STATUS_SUCCESS = 1,	/*!< signals operation success */
+	QCC_ERROR_AUTHFAIL = 2,	/*!< seed authentication failure */
+	QCC_ERROR_RANDFAIL = 3,	/*!< system random failure */
+	QCC_ERROR_INVALID = 4,	/*!< invalid parameter input */
+	QCC_ERROR_INTERNAL = 5,	/*!< anonymous internal failure  */
+	QCC_ERROR_KEYGEN = 6	/*!< key generation failure  */
+} qcc_status;
 
 #endif

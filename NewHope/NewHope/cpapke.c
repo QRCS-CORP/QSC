@@ -1,4 +1,3 @@
-/*lint -e537 */
 #include "kem.h"
 #include "poly.h"
 #include "sha3.h"
@@ -57,7 +56,7 @@ static void gen_a(poly* a, const uint8_t* seed)
 	poly_uniform(a, seed);
 }
 
-newhope_status cpapke_keypair(uint8_t* pk, uint8_t* sk)
+qcc_status cpapke_keypair(uint8_t* pk, uint8_t* sk)
 {
 	poly ahat;
 	poly ehat;
@@ -67,31 +66,24 @@ newhope_status cpapke_keypair(uint8_t* pk, uint8_t* sk)
 	uint8_t z[2 * NEWHOPE_SYMBYTES];
 	uint8_t *publicseed = z;
 	uint8_t *noiseseed = z + NEWHOPE_SYMBYTES;
-	newhope_status status;
+	qcc_status status;
 
-	if (sysrand_getbytes(z, NEWHOPE_SYMBYTES) == NEWHOPE_STATE_SUCCESS)
-	{
-		shake256(z, 2 * NEWHOPE_SYMBYTES, z, NEWHOPE_SYMBYTES);
+	status = sysrand_getbytes(z, NEWHOPE_SYMBYTES);
+	shake256(z, 2 * NEWHOPE_SYMBYTES, z, NEWHOPE_SYMBYTES);
 
-		gen_a(&ahat, publicseed);
+	gen_a(&ahat, publicseed);
 
-		poly_sample(&shat, noiseseed, 0);
-		poly_ntt(&shat);
+	poly_sample(&shat, noiseseed, 0);
+	poly_ntt(&shat);
 
-		poly_sample(&ehat, noiseseed, 1);
-		poly_ntt(&ehat);
+	poly_sample(&ehat, noiseseed, 1);
+	poly_ntt(&ehat);
 
-		poly_mul_pointwise(&ahatshat, &shat, &ahat);
-		poly_add(&bhat, &ehat, &ahatshat);
+	poly_mul_pointwise(&ahatshat, &shat, &ahat);
+	poly_add(&bhat, &ehat, &ahatshat);
 
-		poly_tobytes(sk, &shat);
-		encode_pk(pk, &bhat, publicseed);
-		status = NEWHOPE_STATE_SUCCESS;
-	}
-	else
-	{
-		status = NEWHOPE_ERROR_RANDFAIL;
-	}
+	poly_tobytes(sk, &shat);
+	encode_pk(pk, &bhat, publicseed);
 
 	return status;
 }

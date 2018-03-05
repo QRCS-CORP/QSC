@@ -1,4 +1,3 @@
-/*lint -e537 */
 #include "poly.h"
 #include "ntt.h"
 #include "reduce.h"
@@ -8,9 +7,9 @@ static uint16_t coeff_freeze(uint16_t x)
 {
 	/* Fully reduces an integer modulo q in constant time */
 
-	int16_t c;
 	uint16_t m;
 	uint16_t r;
+	int16_t c;
 
 	r = x % NEWHOPE_Q;
 	m = r - NEWHOPE_Q;
@@ -24,47 +23,54 @@ static uint16_t coeff_freeze(uint16_t x)
 static uint16_t flipabs(uint16_t x)
 {
 	/* Computes |(x mod q) - Q/2| */
-
-	int16_t m;
 	int16_t r;
+	int16_t m;
 
 	r = coeff_freeze(x);
 	r = r - (NEWHOPE_Q / 2);
-	m = (r >> 15);
+	m = r >> 15;
 
 	return (r + m) ^ m;
 }
 
-static uint8_t hw(uint8_t a)
-{
-	/* Compute the Hamming weight of a byte */
-
-	uint8_t i;
-	uint8_t r;
-
-	r = 0;
-
-	for (i = 0; i < 8; i++)
-	{
-		r += (a >> i) & 1;
-	}
-
-	return r;
-}
-
-void poly_add(poly* r, const poly* a, const poly* b)
+void poly_frombytes(poly* r, const uint8_t* a)
 {
 	size_t i;
 
-	for (i = 0; i < NEWHOPE_N; i++)
+	for (i = 0; i < NEWHOPE_N / 4; i++)
 	{
-		r->coeffs[i] = (a->coeffs[i] + b->coeffs[i]) % NEWHOPE_Q;
+		r->coeffs[4 * i + 0] = a[7 * i + 0] | (((uint16_t)a[7 * i + 1] & 0x3f) << 8);
+		r->coeffs[4 * i + 1] = (a[7 * i + 1] >> 6) | (((uint16_t)a[7 * i + 2]) << 2) | (((uint16_t)a[7 * i + 3] & 0x0f) << 10);
+		r->coeffs[4 * i + 2] = (a[7 * i + 3] >> 4) | (((uint16_t)a[7 * i + 4]) << 4) | (((uint16_t)a[7 * i + 5] & 0x03) << 12);
+		r->coeffs[4 * i + 3] = (a[7 * i + 5] >> 2) | (((uint16_t)a[7 * i + 6]) << 6);
 	}
 }
 
-/* checked: array bounds false positives */
-/*lint -save -e661 */
-/*lint -save -e662 */
+void poly_tobytes(uint8_t* r, const poly* p)
+{
+	size_t i;
+	uint16_t t0;
+	uint16_t t1;
+	uint16_t t2;
+	uint16_t t3;
+
+	for (i = 0; i < NEWHOPE_N / 4; i++)
+	{
+		t0 = coeff_freeze(p->coeffs[4 * i + 0]);
+		t1 = coeff_freeze(p->coeffs[4 * i + 1]);
+		t2 = coeff_freeze(p->coeffs[4 * i + 2]);
+		t3 = coeff_freeze(p->coeffs[4 * i + 3]);
+
+		r[7 * i + 0] = t0 & 0xff;
+		r[7 * i + 1] = (t0 >> 8) | (t1 << 6);
+		r[7 * i + 2] = (t1 >> 2);
+		r[7 * i + 3] = (t1 >> 10) | (t2 << 4);
+		r[7 * i + 4] = (t2 >> 4);
+		r[7 * i + 5] = (t2 >> 12) | (t3 << 2);
+		r[7 * i + 6] = (t3 >> 6);
+	}
+}
+
 void poly_compress(uint8_t* r, const poly* p)
 {
 	uint32_t t[8];
@@ -79,7 +85,7 @@ void poly_compress(uint8_t* r, const poly* p)
 		for (j = 0; j < 8; j++)
 		{
 			t[j] = coeff_freeze(p->coeffs[i + j]);
-			t[j] = (((t[j] << 3) + (NEWHOPE_Q / 2)) / NEWHOPE_Q) & 0x7;
+			t[j] = (((t[j] << 3) + NEWHOPE_Q / 2) / NEWHOPE_Q) & 0x7;
 		}
 
 		r[k] = t[0] | (t[1] << 3) | (t[2] << 6);
@@ -88,10 +94,7 @@ void poly_compress(uint8_t* r, const poly* p)
 		k += 3;
 	}
 }
-/*lint -restore */
 
-/* checked: array bounds false positives */
-/*lint -save -e662 */
 void poly_decompress(poly* r, const uint8_t* a)
 {
 	size_t i;
@@ -99,7 +102,7 @@ void poly_decompress(poly* r, const uint8_t* a)
 
 	for (i = 0; i < NEWHOPE_N; i += 8)
 	{
-		r->coeffs[i] = a[0] & 7;
+		r->coeffs[i + 0] = a[0] & 7;
 		r->coeffs[i + 1] = (a[0] >> 3) & 7;
 		r->coeffs[i + 2] = (a[0] >> 6) | ((a[1] << 2) & 4);
 		r->coeffs[i + 3] = (a[1] >> 1) & 7;
@@ -111,136 +114,29 @@ void poly_decompress(poly* r, const uint8_t* a)
 
 		for (j = 0; j < 8; j++)
 		{
-			r->coeffs[i + j] = ((((uint32_t)r->coeffs[i + j] * NEWHOPE_Q) + 4) >> 3);
+			r->coeffs[i + j] = ((uint32_t)r->coeffs[i + j] * NEWHOPE_Q + 4) >> 3;
 		}
-	}
-}
-/*lint -restore */
-
-void poly_frombytes(poly* r, const uint8_t* a)
-{
-	size_t i;
-
-	for (i = 0; i < NEWHOPE_N / 4; i++)
-	{
-		r->coeffs[(4 * i) + 0] = a[(7 * i) + 0] | (((uint16_t)a[7 * i + 1] & 0x3F) << 8);
-		r->coeffs[(4 * i) + 1] = (a[(7 * i) + 1] >> 6) | (((uint16_t)a[(7 * i) + 2]) << 2) | (((uint16_t)a[(7 * i) + 3] & 0x0F) << 10);
-		r->coeffs[(4 * i) + 2] = (a[(7 * i) + 3] >> 4) | (((uint16_t)a[(7 * i) + 4]) << 4) | (((uint16_t)a[(7 * i) + 5] & 0x03) << 12);
-		r->coeffs[(4 * i) + 3] = (a[(7 * i) + 5] >> 2) | (((uint16_t)a[(7 * i) + 6]) << 6);
 	}
 }
 
 void poly_frommsg(poly* r, const uint8_t* msg)
 {
+	uint32_t mask;
 	size_t i;
 	size_t j;
-	uint32_t mask;
 
 	for (i = 0; i < 32; i++)
 	{
 		for (j = 0; j < 8; j++)
 		{
 			mask = -((msg[i] >> j) & 1);
-			r->coeffs[(8 * i) + j] = mask & (NEWHOPE_Q / 2);
-			r->coeffs[(8 * i) + j + 256] = mask & (NEWHOPE_Q / 2);
+			r->coeffs[8 * i + j + 0] = mask & (NEWHOPE_Q / 2);
+			r->coeffs[8 * i + j + 256] = mask & (NEWHOPE_Q / 2);
 #if (NEWHOPE_N == 1024)
-			r->coeffs[(8 * i) + j + 512] = mask & (NEWHOPE_Q / 2);
-			r->coeffs[(8 * i) + j + 768] = mask & (NEWHOPE_Q / 2);
+			r->coeffs[8 * i + j + 512] = mask & (NEWHOPE_Q / 2);
+			r->coeffs[8 * i + j + 768] = mask & (NEWHOPE_Q / 2);
 #endif
 		}
-	}
-}
-
-void poly_invntt(poly* r)
-{
-	bitrev_vector(r->coeffs);
-	ntt((uint16_t*)r->coeffs, omegas_inv_bitrev_montgomery);
-	mul_coefficients(r->coeffs, psis_inv_montgomery);
-}
-
-void poly_mul_pointwise(poly* r, const poly* a, const poly* b)
-{
-	size_t i;
-	uint16_t t;
-
-	for (i = 0; i < NEWHOPE_N; i++)
-	{
-		/* t is now in Montgomery domain */
-		t = montgomery_reduce(3186 * b->coeffs[i]);
-		/* r->coeffs[i] is back in normal domain */
-		r->coeffs[i] = montgomery_reduce(a->coeffs[i] * t);
-	}
-}
-
-void poly_ntt(poly* r)
-{
-	mul_coefficients(r->coeffs, psis_bitrev_montgomery);
-	ntt((uint16_t*)r->coeffs, omegas_bitrev_montgomery);
-}
-
-void poly_sample(poly* r, const uint8_t* seed, uint8_t nonce)
-{
-	uint8_t buf[128];
-	uint8_t extseed[NEWHOPE_SYMBYTES + 2];
-	size_t i;
-	size_t j;
-	uint8_t a;
-	uint8_t b;
-
-	for (i = 0; i < NEWHOPE_SYMBYTES; i++)
-	{
-		extseed[i] = seed[i];
-	}
-
-	extseed[NEWHOPE_SYMBYTES] = nonce;
-
-	/* Generate noise in blocks of 64 coefficients */
-	for (i = 0; i < NEWHOPE_N / 64; i++)
-	{
-		extseed[NEWHOPE_SYMBYTES + 1] = i;
-		shake256(buf, 128, extseed, NEWHOPE_SYMBYTES + 2);
-
-		for (j = 0; j < 64; j++)
-		{
-			a = buf[2 * j];
-			b = buf[(2 * j) + 1];
-			r->coeffs[(64 * i) + j] = hw(a) + (NEWHOPE_Q - hw(b));
-		}
-	}
-}
-
-void poly_sub(poly* r, const poly* a, const poly* b)
-{
-	size_t i;
-
-	for (i = 0; i < NEWHOPE_N; i++)
-	{
-		r->coeffs[i] = (a->coeffs[i] + (3 * NEWHOPE_Q) - b->coeffs[i]) % NEWHOPE_Q;
-	}
-}
-
-void poly_tobytes(uint8_t* r, const poly* p)
-{
-	size_t i;
-	uint16_t t0;
-	uint16_t t1;
-	uint16_t t2;
-	uint16_t t3;
-
-	for (i = 0; i < NEWHOPE_N / 4; i++)
-	{
-		t0 = coeff_freeze(p->coeffs[(4 * i)]);
-		t1 = coeff_freeze(p->coeffs[(4 * i) + 1]);
-		t2 = coeff_freeze(p->coeffs[(4 * i) + 2]);
-		t3 = coeff_freeze(p->coeffs[(4 * i) + 3]);
-
-		r[(7 * i)] = t0 & 0xFF;
-		r[(7 * i) + 1] = (t0 >> 8) | (t1 << 6);
-		r[(7 * i) + 2] = (t1 >> 2);
-		r[(7 * i) + 3] = (t1 >> 10) | (t2 << 4);
-		r[(7 * i) + 4] = (t2 >> 4);
-		r[(7 * i) + 5] = (t2 >> 12) | (t3 << 2);
-		r[(7 * i) + 6] = (t3 >> 6);
 	}
 }
 
@@ -256,7 +152,7 @@ void poly_tomsg(uint8_t* msg, const poly* x)
 
 	for (i = 0; i < 256; i++)
 	{
-		t = flipabs(x->coeffs[i]);
+		t = flipabs(x->coeffs[i + 0]);
 		t += flipabs(x->coeffs[i + 256]);
 #if (NEWHOPE_N == 1024)
 		t += flipabs(x->coeffs[i + 512]);
@@ -291,7 +187,7 @@ void poly_uniform(poly* a, const uint8_t* seed)
 	{
 		ctr = 0;
 		/* domain-separate the 16 independent calls */
-		extseed[NEWHOPE_SYMBYTES] = i;
+		extseed[NEWHOPE_SYMBYTES] = (uint8_t)i;
 		shake128_initialize(state, extseed, NEWHOPE_SYMBYTES + 1);
 		/* Very unlikely to run more than once */
 		while (ctr < 64)
@@ -302,10 +198,105 @@ void poly_uniform(poly* a, const uint8_t* seed)
 				val = (buf[j] | ((uint16_t)buf[j + 1] << 8));
 				if (val < 5 * NEWHOPE_Q)
 				{
-					a->coeffs[(i * 64) + ctr] = val;
+					a->coeffs[i * 64 + ctr] = val;
 					ctr++;
 				}
 			}
 		}
 	}
 }
+
+static uint8_t hw(uint8_t a)
+{
+	/* Compute the Hamming weight of a byte */
+
+	uint8_t i;
+	uint8_t r;
+
+	r = 0;
+	for (i = 0; i < 8; i++)
+	{
+		r += (a >> i) & 1;
+	}
+
+	return r;
+}
+
+void poly_sample(poly* r, const uint8_t* seed, uint8_t nonce)
+{
+	uint8_t buf[128];
+	uint8_t extseed[NEWHOPE_SYMBYTES + 2];
+	size_t i;
+	size_t j;
+	uint8_t a;
+	uint8_t b;
+
+	for (i = 0; i < NEWHOPE_SYMBYTES; i++)
+	{
+		extseed[i] = seed[i];
+	}
+
+	extseed[NEWHOPE_SYMBYTES] = nonce;
+
+	/* Generate noise in blocks of 64 coefficients */
+	for (i = 0; i < NEWHOPE_N / 64; i++)
+	{
+		extseed[NEWHOPE_SYMBYTES + 1] = (uint8_t)i;
+		shake256(buf, 128, extseed, NEWHOPE_SYMBYTES + 2);
+
+		for (j = 0; j < 64; j++)
+		{
+			a = buf[2 * j];
+			b = buf[(2 * j) + 1];
+			r->coeffs[(64 * i) + j] = hw(a) + (NEWHOPE_Q - hw(b));
+		}
+	}
+}
+
+void poly_mul_pointwise(poly* r, const poly* a, const poly* b)
+{
+	size_t i;
+	uint16_t t;
+
+	for (i = 0; i < NEWHOPE_N; i++)
+	{
+		/* t is now in Montgomery domain */
+		t = montgomery_reduce(3186 * b->coeffs[i]);
+		/* r->coeffs[i] is back in normal domain */
+		r->coeffs[i] = montgomery_reduce(a->coeffs[i] * t);
+	}
+}
+
+void poly_add(poly* r, const poly* a, const poly* b)
+{
+	size_t i;
+
+	for (i = 0; i < NEWHOPE_N; i++)
+	{
+		r->coeffs[i] = (a->coeffs[i] + b->coeffs[i]) % NEWHOPE_Q;
+	}
+}
+
+void poly_sub(poly* r, const poly* a, const poly* b)
+{
+	size_t i;
+
+	for (i = 0; i < NEWHOPE_N; i++)
+	{
+		r->coeffs[i] = (a->coeffs[i] + 3 * NEWHOPE_Q - b->coeffs[i]) % NEWHOPE_Q;
+	}
+}
+
+void poly_ntt(poly* r)
+{
+	mul_coefficients(r->coeffs, psis_bitrev_montgomery);
+	ntt((uint16_t *)r->coeffs, omegas_bitrev_montgomery);
+}
+
+void poly_invntt(poly *r)
+{
+	bitrev_vector(r->coeffs);
+	ntt((uint16_t*)r->coeffs, omegas_inv_bitrev_montgomery);
+	mul_coefficients(r->coeffs, psis_inv_montgomery);
+}
+

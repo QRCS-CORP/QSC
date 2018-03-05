@@ -20,6 +20,6 @@
 * \param length The number of bytes to copy
 * \return Returns one for success, zero for failure
 */
-kyber_status sysrand_getbytes(uint8_t* buffer, size_t length);
+qcc_status sysrand_getbytes(uint8_t* buffer, size_t length);
 
 #endif

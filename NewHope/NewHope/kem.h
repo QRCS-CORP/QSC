@@ -5,7 +5,7 @@
 * \brief <b>The NewHope KEM definitions</b> \n
 * Contains the primary public api for the NewHope CCA-secure Key Encapsulation Mechanism implementation.
 *
-* <b>Example</b> \n
+* \para <b>Example</b> \n
 * \code
 * // An example of key-pair creation, encryption, and decryption
 * uint8_t pk[NEWHOPE_PUBLICKEYBYTES];
@@ -19,7 +19,7 @@
 * // output the cipher-text (sendb), and bobs shared key
 * crypto_kem_enc(sendb, key_b, pk);
 * // decrypt the cipher-text, and output alices shared key
-* if (crypto_kem_dec(key_a, sendb, sk) == NEWHOPE_ERROR_AUTHFAIL)
+* if (crypto_kem_dec(key_a, sendb, sk) == QCC_ERROR_AUTHFAIL)
 * {
 *     // authentication failed, do something..
 * }
@@ -78,7 +78,7 @@
 * \param sk Pointer to output private key (an already allocated array of NEWHOPE_SECRETKEYBYTES bytes)
 * \return Returns one (NEWHOPE_CRYPTO_SUCCESS) for success
 */
-newhope_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
+qcc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
 
 /**
 * \brief Generates cipher text and shared secret for given public key
@@ -88,7 +88,7 @@ newhope_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
 * \param pk Pointer to input public key (an already allocated array of NEWHOPE_PUBLICKEYBYTES bytes)
 * \return Returns one (NEWHOPE_CRYPTO_SUCCESS) for success
 */
-newhope_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
+qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
 
 /**
 * \brief Generates shared secret for given cipher text and private key
@@ -98,6 +98,6 @@ newhope_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
 * \param sk pointer to input private key (an already allocated array of NEWHOPE_SECRETKEYBYTES bytes)
 * \return Returns one (NEWHOPE_CRYPTO_SUCCESS) for success
 */
-newhope_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
+qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
 
 #endif

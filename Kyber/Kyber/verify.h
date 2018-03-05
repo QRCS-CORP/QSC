@@ -6,8 +6,8 @@
 * \date January 07, 2018
 */
 
-#ifndef VERIFY_H
-#define VERIFY_H
+#ifndef KYBER_VERIFY_H
+#define KYBER_VERIFY_H
 
 #include "common.h"
 

@@ -6,8 +6,8 @@
 * \date January 10, 2018
 */
 
-#ifndef CBD_H
-#define CBD_H
+#ifndef KYBER_CBD_H
+#define KYBER_CBD_H
 
 #include "poly.h"
 
