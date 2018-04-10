@@ -1,0 +1,2 @@
+"benes_compact",20,finite,68,"benes_helper",
+"benes_helper",40,finite,40,"no function",

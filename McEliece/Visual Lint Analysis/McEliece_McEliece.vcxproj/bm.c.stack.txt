@@ -1,0 +1,6 @@
+"bm",622,finite,742,"vec_reduce",
+"into_vec",8,finite,8,"no function",
+"mask_leq_64bit",24,finite,24,"no function",
+"mask_nonzero_64bit",8,finite,8,"no function",
+"vec_cmov",12,finite,12,"no function",
+"vec_reduce",112,finite,112,"no function",

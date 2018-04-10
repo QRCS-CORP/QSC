@@ -42,25 +42,19 @@ qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	uint8_t buf[2 * KYBER_KEYBYTES];
 	qcc_status status;
 
-	if (sysrand_getbytes(buf, KYBER_KEYBYTES) == QCC_STATUS_SUCCESS)
-	{
-		/* don't release system RNG output */
-		sha3_compute256(buf, buf, KYBER_KEYBYTES);
-		/* multitarget countermeasure for coins + contributory KEM */
-		sha3_compute256(buf + KYBER_KEYBYTES, pk, KYBER_PUBLICKEYBYTES);
-		sha3_compute512(kr, buf, 2 * KYBER_KEYBYTES);
-		/* coins are in kr+KYBER_KEYBYTES */
-		indcpa_enc(ct, buf, pk, kr + KYBER_KEYBYTES);
-		/* overwrite coins in kr with H(c) */
-		sha3_compute256(kr + KYBER_KEYBYTES, ct, KYBER_CIPHERTEXTBYTES);
-		/* hash concatenation of pre-k and H(c) to k */
-		sha3_compute256(ss, kr, 2 * KYBER_KEYBYTES);
-		status = QCC_STATUS_SUCCESS;
-	}
-	else
-	{
-		status = QCC_STATUS_RANDFAIL;
-	}
+	status = sysrand_getbytes(buf, KYBER_KEYBYTES) == QCC_STATUS_SUCCESS;
+	/* don't release system RNG output */
+	sha3_compute256(buf, buf, KYBER_KEYBYTES);
+	/* multitarget countermeasure for coins + contributory KEM */
+	sha3_compute256(buf + KYBER_KEYBYTES, pk, KYBER_PUBLICKEYBYTES);
+	sha3_compute512(kr, buf, 2 * KYBER_KEYBYTES);
+	/* coins are in kr+KYBER_KEYBYTES */
+	indcpa_enc(ct, buf, pk, kr + KYBER_KEYBYTES);
+	/* overwrite coins in kr with H(c) */
+	sha3_compute256(kr + KYBER_KEYBYTES, ct, KYBER_CIPHERTEXTBYTES);
+	/* hash concatenation of pre-k and H(c) to k */
+	sha3_compute256(ss, kr, 2 * KYBER_KEYBYTES);
+	status = QCC_STATUS_SUCCESS;
 
 	return status;
 }
@@ -90,21 +84,12 @@ qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	indcpa_enc(cmp, buf, pk, kr + KYBER_KEYBYTES);
 	/* verify the code */
 	fail = verify(ct, cmp, KYBER_CIPHERTEXTBYTES);
+	/* overwrite coins in kr with H(c) */
+	sha3_compute256(kr + KYBER_KEYBYTES, ct, KYBER_CIPHERTEXTBYTES);
+	/* hash concatenation of pre-k and H(c) to k */
+	sha3_compute256(ss, kr, 2 * KYBER_KEYBYTES);
+	/* overwrite pre-k with z on re-encryption failure */
+	cmov(kr, sk + KYBER_SECRETKEYBYTES - KYBER_KEYBYTES, KYBER_KEYBYTES, fail);
 
-	if (fail == 0)
-	{
-		/* overwrite coins in kr with H(c)  */
-		sha3_compute256(kr + KYBER_KEYBYTES, ct, KYBER_CIPHERTEXTBYTES);
-		/* hash concatenation of pre-k and H(c) to k */
-		sha3_compute256(ss, kr, 2 * KYBER_KEYBYTES);
-		status = QCC_STATUS_SUCCESS;
-	}
-	else
-	{
-		/* overwrite pre-k with z on re-encryption failure */
-		cmov(kr, sk + KYBER_SECRETKEYBYTES - KYBER_KEYBYTES, KYBER_KEYBYTES, fail);
-		status = QCC_STATUS_AUTHFAIL;
-	}
-
-	return status;
+	return (fail == 0) ? QCC_STATUS_SUCCESS : QCC_STATUS_AUTHFAIL;
 }

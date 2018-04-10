@@ -1,0 +1,8 @@
+"_wcstok",8,finite,8,"no function",
+"encrypt",16,finite,1240,"gen_e",
+"gen_e",1176,finite,1216,"sysrand_getbytes", (external)
+"memcpy_s",16,finite,16,"no function",
+"memmove_s",16,finite,16,"no function",
+"strnlen_s",4,finite,4,"no function",
+"syndrome",941,finite,981,"memcpy", (external)
+"wcsnlen_s",4,finite,4,"no function",

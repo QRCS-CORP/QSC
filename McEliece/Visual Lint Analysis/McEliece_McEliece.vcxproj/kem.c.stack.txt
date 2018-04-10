@@ -1,0 +1,3 @@
+"crypto_kem_dec",668,finite,708,"decrypt", (external)
+"crypto_kem_enc",668,finite,708,"encrypt", (external)
+"crypto_kem_keypair",12,finite,52,"sk_gen", (external)

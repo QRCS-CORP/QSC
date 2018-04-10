@@ -1,0 +1,6 @@
+"vec_add",16,finite,16,"no function",
+"vec_copy",12,finite,12,"no function",
+"vec_inv",200,finite,2080,"vec_mul",
+"vec_mul",1872,finite,1872,"no function",
+"vec_or",20,finite,20,"no function",
+"vec_sq",108,finite,108,"no function",

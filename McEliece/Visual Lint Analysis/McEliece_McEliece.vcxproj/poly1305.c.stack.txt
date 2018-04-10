@@ -1,0 +1,7 @@
+"poly1305_blockupdate",96,finite,136,"le8to32", (external)
+"poly1305_compute",108,finite,336,"poly1305_finalize",
+"poly1305_finalize",76,finite,220,"poly1305_blockupdate",
+"poly1305_initialize",8,finite,48,"le8to32", (external)
+"poly1305_reset",4,finite,44,"clear32", (external)
+"poly1305_update",16,finite,160,"poly1305_blockupdate",
+"poly1305_verify",28,finite,372,"poly1305_compute",
