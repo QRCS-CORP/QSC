@@ -7,7 +7,7 @@
 * \date April 7, 2018
 * \remarks For usage examples, see chacha_kat.h
 *
-* <b>Poly1305 Examples</b> \n
+* <b>ChaCha Example</b> \n
 * \code
 *
 * uint8_t key[32];
