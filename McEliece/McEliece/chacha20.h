@@ -10,6 +10,7 @@
 * <b>ChaCha Example</b> \n
 * \code
 *
+* // note: only an example, key and nonce must be random!
 * uint8_t key[32];
 * uint8_t nonce[CHACHA_NONCE_SIZE];
 * uint8_t msg[133];
