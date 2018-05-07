@@ -63,7 +63,7 @@ typedef enum
 typedef enum
 {
 	AES128 = 1,	/*!< standard AES128 implementation */
-	AES256 = 2
+	AES256 = 2	/*!< standard AES256 implementation */
 } cipher_type;
 
 /*!
