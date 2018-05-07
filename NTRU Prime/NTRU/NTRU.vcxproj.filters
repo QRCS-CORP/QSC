@@ -18,75 +18,39 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hide.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="modq.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="params.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rq.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sha3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="small.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sysrand.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rsx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="kem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="aesdrbg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="randomweightw.h">
+    <ClInclude Include="aes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="hide.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="randomweightw.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sha3.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="small.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sysrand.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rsx.c">
+    <ClCompile Include="aesdrbg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="kem.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sort.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rq.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="aesdrbg.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modq.c">
+    <ClCompile Include="aes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -14,9 +14,9 @@
 
 #endif
 
-qcc_status sysrand_getbytes(uint8_t* buffer, size_t length)
+mqc_status sysrand_getbytes(uint8_t* buffer, size_t length)
 {
-	qcc_status status = QCC_STATUS_SUCCESS;
+	mqc_status status = MQC_STATUS_SUCCESS;
 
 #if defined(WINDOWS)
 
@@ -26,12 +26,12 @@ qcc_status sysrand_getbytes(uint8_t* buffer, size_t length)
 	{
 		if (!CryptGenRandom(hProvider, (DWORD)length, buffer))
 		{
-			status = QCC_ERROR_RANDFAIL;
+			status = MQC_STATUS_RANDFAIL;
 		}
 	}
 	else
 	{
-		status = QCC_ERROR_RANDFAIL;
+		status = MQC_STATUS_RANDFAIL;
 	}
 
 	if (hProvider != 0)
@@ -45,7 +45,7 @@ qcc_status sysrand_getbytes(uint8_t* buffer, size_t length)
 
 	if (fd <= 0)
 	{
-		status = QCC_ERROR_RANDFAIL;
+		status = MQC_STATUS_RANDFAIL;
 	}
 	else
 	{
@@ -53,7 +53,7 @@ qcc_status sysrand_getbytes(uint8_t* buffer, size_t length)
 
 		if (r != length)
 		{
-			status = QCC_ERROR_RANDFAIL;
+			status = MQC_STATUS_RANDFAIL;
 		}
 
 		close(fd);

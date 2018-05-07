@@ -96,7 +96,7 @@ static void get_response()
 * \brief Test the AES implementation with vectors from Fips197 and
 * new vectors for the extended modes RSX256 and RSX512
 */
-void rsx_test_run()
+void aes_test_run()
 {
 	if (aes128_cbc_kat_test() == true)
 	{
@@ -132,24 +132,6 @@ void rsx_test_run()
 	else
 	{
 		printf_s("Failure! Failed the AES256 ECB KAT test. \n \n");
-	}
-
-	if (rsx256_ecb_kat_test() == true)
-	{
-		printf_s("Success! Passed the RSX256 ECB KAT test. \n");
-	}
-	else
-	{
-		printf_s("Failure! Failed the RSX256 ECB KAT test. \n \n");
-	}
-
-	if (rsx512_ecb_kat_test() == true)
-	{
-		printf_s("Success! Passed the RSX512 ECB KAT test. \n");
-	}
-	else
-	{
-		printf_s("Failure! Failed the RSX512 ECB KAT test. \n \n");
 	}
 }
 
@@ -268,21 +250,21 @@ bool test_keys()
 	for (i = 0; i < NTRU_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk) != QCC_STATUS_SUCCESS)
+		if (crypto_kem_keypair(pk, sk) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(ctxt, key_b, pk) != QCC_STATUS_SUCCESS)
+		if (crypto_kem_enc(ctxt, key_b, pk) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice uses Bobs response to get her secret key */
-		if (crypto_kem_dec(key_a, ctxt, sk) != QCC_STATUS_SUCCESS)
+		if (crypto_kem_dec(key_a, ctxt, sk) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -317,28 +299,28 @@ bool test_invalid_sk_a()
 	for (i = 0; i < NTRU_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk) != QCC_STATUS_SUCCESS)
+		if (crypto_kem_keypair(pk, sk) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(ctxt, key_b, pk) != QCC_STATUS_SUCCESS)
+		if (crypto_kem_enc(ctxt, key_b, pk) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* replace secret key with random values */
-		if (sysrand_getbytes(sk, NTRU_KEYBYTES) != QCC_STATUS_SUCCESS)
+		if (sysrand_getbytes(sk, NTRU_KEYBYTES) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* invalid secret key, should fail */
-		if (crypto_kem_dec(key_a, ctxt, sk) == QCC_STATUS_SUCCESS)
+		if (crypto_kem_dec(key_a, ctxt, sk) == MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -374,21 +356,21 @@ bool test_invalid_ciphertext()
 
 	for (i = 0; i < NTRU_NTESTS; i++)
 	{
-		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != QCC_STATUS_SUCCESS)
+		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk) != QCC_STATUS_SUCCESS)
+		if (crypto_kem_keypair(pk, sk) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(ctxt, key_b, pk) != QCC_STATUS_SUCCESS)
+		if (crypto_kem_enc(ctxt, key_b, pk) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -398,7 +380,7 @@ bool test_invalid_ciphertext()
 		ctxt[pos % NTRU_CIPHERTEXTBYTES] ^= 23;
 
 		/* invalid ciphertext, auth should fail */
-		if (crypto_kem_dec(key_a, ctxt, sk) == QCC_STATUS_SUCCESS)
+		if (crypto_kem_dec(key_a, ctxt, sk) == MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -476,7 +458,7 @@ int main(void)
 	{
 		printf_s("*** Test using the NIST SP800-38a Known Answer Tests *** \n");
 		printf_s("\n");
-		rsx_test_run();
+		aes_test_run();
 		printf_s("\n");
 	}
 

@@ -1,7 +1,7 @@
-#include "rsx.h"
+#include "aes.h"
 #include <string.h>
 
-#ifdef RSX_AESNI_ENABLED
+#ifdef AES_AESNI_ENABLED
 
 static void decrypt_block(uint8_t* output, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
 {
@@ -85,64 +85,6 @@ static void le32_to_bytes(const uint32_t value, uint8_t* output, size_t offset)
 	output[offset + 3] = (uint8_t)(value >> 24);
 }
 
-static size_t secure_expand(__m128i* output, size_t outlen, const uint8_t* input, size_t inplen)
-{
-	uint32_t tmpk;
-	size_t i;
-	size_t j;
-
-	switch (outlen)
-	{
-		case RSX256_ROUNDKEY_DIMENSION:
-		{
-			uint8_t rk[(RSX256_ROUNDKEY_DIMENSION * ROUNDKEY_ELEMENT_SIZE)];
-			shake256(rk, (RSX256_ROUNDKEY_DIMENSION * ROUNDKEY_ELEMENT_SIZE), input, inplen);
-
-
-			/* swap to le (required for kats) */
-			for (size_t i = 0; i < (RSX256_ROUNDKEY_DIMENSION * ROUNDKEY_ELEMENT_SIZE); i += 4)
-			{
-				tmpk = load_be32(rk, i);
-				le32_to_bytes(tmpk, rk, i);
-			}
-
-			/* load the round-key array */
-			for (size_t i = 0, j = 0; i < RSX256_ROUNDKEY_DIMENSION; i++, j += 16)
-			{
-				output[i] = _mm_loadu_si128((__m128i*)(rk + (i * 16)));
-			}
-
-			break;
-		}
-		case RSX512_ROUNDKEY_DIMENSION:
-		{
-			uint8_t rk[(RSX512_ROUNDKEY_DIMENSION * ROUNDKEY_ELEMENT_SIZE)];
-			shake256(rk, (RSX512_ROUNDKEY_DIMENSION * ROUNDKEY_ELEMENT_SIZE), input, inplen);
-
-			/* convert from be-le (required for C kats) */
-			for (size_t i = 0; i < (RSX512_ROUNDKEY_DIMENSION * ROUNDKEY_ELEMENT_SIZE); i += 4)
-			{
-				tmpk = load_be32(rk, i);
-				le32_to_bytes(tmpk, rk, i);
-			}
-
-			/* load the round-key array */
-			for (size_t i = 0, j = 0; i < RSX512_ROUNDKEY_DIMENSION; i++, j += 16)
-			{
-				output[i] = _mm_loadu_si128((__m128i*)(rk + (i * 16)));
-			}
-
-			break;
-		}
-		default:
-		{
-			outlen = 0;
-		}
-	}
-
-	return outlen;
-}
-
 static size_t standard_expand(__m128i* output, size_t outlen, const uint8_t* input, size_t inplen)
 {
 	// key in 32 bit words
@@ -201,43 +143,43 @@ static size_t standard_expand(__m128i* output, size_t outlen, const uint8_t* inp
 	return outlen;
 }
 
-void rsx_cbc_decrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
+void aes_cbc_decrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
 {
 	size_t i;
-	uint8_t tmpv[RSX_BLOCK_SIZE];
+	uint8_t tmpv[AES_BLOCK_SIZE];
 
-	memcpy(&tmpv[0], &input[0], RSX_BLOCK_SIZE);
+	memcpy(&tmpv[0], &input[0], AES_BLOCK_SIZE);
 	decrypt_block(output, input, roundkeys, rlen);
 
-	for (i = 0; i < RSX_BLOCK_SIZE; i++)
+	for (i = 0; i < AES_BLOCK_SIZE; i++)
 	{
 		output[i] ^= iv[i];
 
 	}
 
-	memcpy(&iv[0], &tmpv[0], RSX_BLOCK_SIZE);
+	memcpy(&iv[0], &tmpv[0], AES_BLOCK_SIZE);
 }
 
-void rsx_cbc_encrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
+void aes_cbc_encrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
 {
 	size_t i;
 
-	for (i = 0; i < RSX_BLOCK_SIZE; i++)
+	for (i = 0; i < AES_BLOCK_SIZE; i++)
 	{
 		iv[i] ^= input[i];
 	}
 
 	encrypt_block(output, iv, roundkeys, rlen);
-	memcpy(&iv[0], &output[0], RSX_BLOCK_SIZE);
+	memcpy(&iv[0], &output[0], AES_BLOCK_SIZE);
 }
 
-void rsx_ctr_transform(uint8_t* output, uint8_t* nonce, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
+void aes_ctr_transform(uint8_t* output, uint8_t* nonce, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
 {
 	size_t i;
 
 	encrypt_block(output, nonce, roundkeys, rlen);
 
-	for (i = 0; i < RSX_BLOCK_SIZE; i++)
+	for (i = 0; i < AES_BLOCK_SIZE; i++)
 	{
 		output[i] ^= input[i];
 	}
@@ -245,22 +187,22 @@ void rsx_ctr_transform(uint8_t* output, uint8_t* nonce, const uint8_t* input, co
 	increment_be8(nonce);
 }
 
-void rsx_ecb_decrypt(uint8_t* output, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
+void aes_ecb_decrypt(uint8_t* output, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
 {
 	decrypt_block(output, input, roundkeys, rlen);
 }
 
-void rsx_ecb_encrypt(uint8_t* output, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
+void aes_ecb_encrypt(uint8_t* output, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
 {
 	encrypt_block(output, input, roundkeys, rlen);
 }
 
-qcc_status rsx_initialize(__m128i* roundkeys, const uint8_t* inputkey, bool encryption, cipher_type cipher)
+mqc_status aes_initialize(__m128i* roundkeys, const uint8_t* inputkey, bool encryption, cipher_type cipher)
 {
 	size_t rlen;
-	qcc_status status;
+	mqc_status status;
 
-	status = QCC_STATUS_SUCCESS;
+	status = MQC_STATUS_SUCCESS;
 
 	switch (cipher)
 	{
@@ -274,20 +216,10 @@ qcc_status rsx_initialize(__m128i* roundkeys, const uint8_t* inputkey, bool encr
 		rlen = standard_expand(roundkeys, AES256_ROUNDKEY_DIMENSION, inputkey, AES256_KEY_SIZE);
 		break;
 	}
-	case RSX256:
-	{
-		rlen = secure_expand(roundkeys, RSX256_ROUNDKEY_DIMENSION, inputkey, RSX256_KEY_SIZE);
-		break;
-	}
-	case RSX512:
-	{
-		rlen = secure_expand(roundkeys, RSX512_ROUNDKEY_DIMENSION, inputkey, RSX512_KEY_SIZE);
-		break;
-	}
 	default:
 	{
 		rlen = 0;
-		status = QCC_ERROR_INVALID;
+		status = MQC_ERROR_INVALID;
 	}
 	}
 
@@ -824,7 +756,7 @@ static void increment_be8(uint8_t* output)
 	}
 }
 
-#if defined(RSX_PREFETCH_TABLES)
+#if defined(AES_PREFETCH_TABLES)
 static void prefetch_tables(bool encryption)
 {
 	size_t i;
@@ -880,13 +812,6 @@ static void prefetch_tables(bool encryption)
 	}
 }
 #endif
-
-static size_t secure_expand(uint32_t* output, size_t outlen, const uint8_t* input, size_t inplen)
-{
-	shake256((uint8_t*)output, outlen * sizeof(uint32_t), input, inplen);
-
-	return outlen;
-}
 
 static size_t standard_expand(uint32_t* output, const uint8_t* input, size_t inplen)
 {
@@ -944,43 +869,43 @@ static size_t standard_expand(uint32_t* output, const uint8_t* input, size_t inp
 
 /* Public API */
 
-void rsx_cbc_decrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
+void aes_cbc_decrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
 {
 	size_t i;
-	uint8_t tmpv[RSX_BLOCK_SIZE];
+	uint8_t tmpv[AES_BLOCK_SIZE];
 
-	memcpy(&tmpv[0], &input[0], RSX_BLOCK_SIZE);
+	memcpy(&tmpv[0], &input[0], AES_BLOCK_SIZE);
 	decrypt_block(output, input, roundkeys, rlen);
 
-	for (i = 0; i < RSX_BLOCK_SIZE; i++)
+	for (i = 0; i < AES_BLOCK_SIZE; i++)
 	{
 		output[i] ^= iv[i];
 
 	}
 
-	memcpy(&iv[0], &tmpv[0], RSX_BLOCK_SIZE);
+	memcpy(&iv[0], &tmpv[0], AES_BLOCK_SIZE);
 }
 
-void rsx_cbc_encrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
+void aes_cbc_encrypt(uint8_t* output, uint8_t* iv, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
 {
 	size_t i;
 
-	for (i = 0; i < RSX_BLOCK_SIZE; i++)
+	for (i = 0; i < AES_BLOCK_SIZE; i++)
 	{
 		iv[i] ^= input[i];
 	}
 
 	encrypt_block(output, iv, roundkeys, rlen);
-	memcpy(&iv[0], &output[0], RSX_BLOCK_SIZE);
+	memcpy(&iv[0], &output[0], AES_BLOCK_SIZE);
 }
 
-void rsx_ctr_transform(uint8_t* output, uint8_t* nonce, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
+void aes_ctr_transform(uint8_t* output, uint8_t* nonce, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
 {
 	size_t i;
 
 	encrypt_block(output, nonce, roundkeys, rlen);
 
-	for (i = 0; i < RSX_BLOCK_SIZE; i++)
+	for (i = 0; i < AES_BLOCK_SIZE; i++)
 	{
 		output[i] ^= input[i];
 	}
@@ -988,22 +913,22 @@ void rsx_ctr_transform(uint8_t* output, uint8_t* nonce, const uint8_t* input, co
 	increment_be8(nonce);
 }
 
-void rsx_ecb_decrypt(uint8_t* output, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
+void aes_ecb_decrypt(uint8_t* output, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
 {
 	decrypt_block(output, input, roundkeys, rlen);
 }
 
-void rsx_ecb_encrypt(uint8_t* output, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
+void aes_ecb_encrypt(uint8_t* output, const uint8_t* input, const uint32_t* roundkeys, size_t rlen)
 {
 	encrypt_block(output, input, roundkeys, rlen);
 }
 
-qcc_status rsx_initialize(uint32_t* roundkeys, const uint8_t* inputkey, bool encryption, cipher_type cipher)
+mqc_status aes_initialize(uint32_t* roundkeys, const uint8_t* inputkey, bool encryption, cipher_type cipher)
 {
 	size_t rlen;
-	qcc_status status;
+	mqc_status status;
 
-	status = QCC_STATUS_SUCCESS;
+	status = MQC_STATUS_SUCCESS;
 
 	switch (cipher)
 	{
@@ -1017,20 +942,10 @@ qcc_status rsx_initialize(uint32_t* roundkeys, const uint8_t* inputkey, bool enc
 		rlen = standard_expand(roundkeys, inputkey, AES256_KEY_SIZE);
 		break;
 	}
-	case RSX256:
-	{
-		rlen = secure_expand(roundkeys, RSX256_ROUNDKEY_DIMENSION, inputkey, RSX256_KEY_SIZE);
-		break;
-	}
-	case RSX512:
-	{
-		rlen = secure_expand(roundkeys, RSX512_ROUNDKEY_DIMENSION, inputkey, RSX512_KEY_SIZE);
-		break;
-	}
 	default:
 	{
 		rlen = 0;
-		status = QCC_ERROR_INVALID;
+		status = MQC_ERROR_INVALID;
 	}
 	}
 
@@ -1063,7 +978,7 @@ qcc_status rsx_initialize(uint32_t* roundkeys, const uint8_t* inputkey, bool enc
 		}
 	}
 
-#ifdef RSX_PREFETCH_TABLES
+#ifdef AES_PREFETCH_TABLES
 	prefetch_tables(encryption);
 #endif
 
