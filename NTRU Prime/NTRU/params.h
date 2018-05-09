@@ -8,10 +8,10 @@
 //#define NTRU_SPRIME_ENABLED
 
 /*!
-\def NTRU_KEYBYTES
+\def NTRU_SEED_SIZE
 * Read Only: The size of the shared key in bytes
 */
-#define NTRU_KEYBYTES 32
+#define NTRU_SEED_SIZE 32
 
 /*!
 \def NTRU_Q
@@ -32,30 +32,30 @@
 #define NTRU_P 761
 
 /*!
-\def NTRU_SMALLENCODE_LEN
+\def NTRU_SMALLENCODE_SIZE
 * Read Only: Small encoding length
 */
-#define NTRU_SMALLENCODE_LEN 191
+#define NTRU_SMALLENCODE_SIZE 191
 
 #if defined(NTRU_SPRIME_ENABLED)
 
 	/*!
-	\def NTRU_SECRETKEYBYTES
+	\def NTRU_PRIVATEKEY_SIZE
 	* Read Only: The secret key size in bytes
 	*/
-#	define NTRU_SECRETKEYBYTES 1600
+#	define NTRU_PRIVATEKEY_SIZE 1600
 
 	/*!
-	\def NTRU_PUBLICKEYBYTES
+	\def NTRU_PUBLICKEY_SIZE
 	* Read Only: The public key size in bytes
 	*/
-#	define NTRU_PUBLICKEYBYTES 1218
+#	define NTRU_PUBLICKEY_SIZE 1218
 
 	/*!
-	\def NTRU_CIPHERTEXTBYTES
+	\def NTRU_CIPHERTEXT_SIZE
 	* Read Only: The cipher-text size in bytes
 	*/
-#	define NTRU_CIPHERTEXTBYTES 1047
+#	define NTRU_CIPHERTEXT_SIZE 1047
 
 	/*!
 	\def NTRU_W
@@ -64,30 +64,30 @@
 #	define NTRU_W 286
 
 	/*!
-	\def NTRU_RQENCODE_LEN
+	\def NTRU_RQENCODE_SIZE
 	* Read Only: RQ encoding length
 	*/
-#	define NTRU_RQENCODE_LEN 1218
+#	define NTRU_RQENCODE_SIZE 1218
 
 #else
 
 	/*!
-	\def NTRU_SECRETKEYBYTES
+	\def NTRU_PRIVATEKEY_SIZE
 	* Read Only: The secret key size in bytes
 	*/
-#	define NTRU_SECRETKEYBYTES 1238
+#	define NTRU_PRIVATEKEY_SIZE 1238
 
 	/*!
-	\def NTRU_PUBLICKEYBYTES
+	\def NTRU_PUBLICKEY_SIZE
 	* Read Only: The public key size in bytes
 	*/
-#	define NTRU_PUBLICKEYBYTES 1047
+#	define NTRU_PUBLICKEY_SIZE 1047
 
 	/*!
-	\def NTRU_CIPHERTEXTBYTES
+	\def NTRU_CIPHERTEXT_SIZE
 	* Read Only: The cipher-text size in bytes
 	*/
-#	define NTRU_CIPHERTEXTBYTES 1175
+#	define NTRU_CIPHERTEXT_SIZE 1175
 
 	/*!
 	\def NTRU_W
@@ -96,10 +96,10 @@
 #	define NTRU_W 250
 
 	/*!
-	\def NTRU_RQENCODE_LEN
+	\def NTRU_RQENCODE_SIZE
 	* Read Only: RQ encoding length
 	*/
-#	define NTRU_RQENCODE_LEN 1015
+#	define NTRU_RQENCODE_SIZE 1015
 
 #endif
 #endif

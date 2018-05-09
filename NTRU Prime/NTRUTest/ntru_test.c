@@ -237,11 +237,11 @@ void sha3_test_run()
 */
 bool test_keys()
 {
-	uint8_t key_a[NTRU_KEYBYTES];
-	uint8_t key_b[NTRU_KEYBYTES];
-	uint8_t ctxt[NTRU_CIPHERTEXTBYTES];
-	uint8_t sk[NTRU_SECRETKEYBYTES];
-	uint8_t pk[NTRU_PUBLICKEYBYTES];
+	uint8_t key_a[NTRU_SEED_SIZE];
+	uint8_t key_b[NTRU_SEED_SIZE];
+	uint8_t ctxt[NTRU_CIPHERTEXT_SIZE];
+	uint8_t sk[NTRU_PRIVATEKEY_SIZE];
+	uint8_t pk[NTRU_PUBLICKEY_SIZE];
 	size_t i;
 	bool state;
 
@@ -270,7 +270,7 @@ bool test_keys()
 			break;
 		}
 
-		if (memcmp(key_a, key_b, NTRU_KEYBYTES) != 0)
+		if (memcmp(key_a, key_b, NTRU_SEED_SIZE) != 0)
 		{
 			state = false;
 			break;
@@ -286,11 +286,11 @@ bool test_keys()
 */
 bool test_invalid_sk_a()
 {
-	uint8_t key_a[NTRU_KEYBYTES];
-	uint8_t key_b[NTRU_KEYBYTES];
-	uint8_t ctxt[NTRU_CIPHERTEXTBYTES];
-	uint8_t sk[NTRU_SECRETKEYBYTES];
-	uint8_t pk[NTRU_PUBLICKEYBYTES];
+	uint8_t key_a[NTRU_SEED_SIZE];
+	uint8_t key_b[NTRU_SEED_SIZE];
+	uint8_t ctxt[NTRU_CIPHERTEXT_SIZE];
+	uint8_t sk[NTRU_PRIVATEKEY_SIZE];
+	uint8_t pk[NTRU_PUBLICKEY_SIZE];
 	size_t i;
 	bool state;
 
@@ -313,7 +313,7 @@ bool test_invalid_sk_a()
 		}
 
 		/* replace secret key with random values */
-		if (sysrand_getbytes(sk, NTRU_KEYBYTES) != MQC_STATUS_SUCCESS)
+		if (sysrand_getbytes(sk, NTRU_SEED_SIZE) != MQC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -327,7 +327,7 @@ bool test_invalid_sk_a()
 		}
 
 		/* fail if equal */
-		if (memcmp(key_a, key_b, NTRU_KEYBYTES) == 0)
+		if (memcmp(key_a, key_b, NTRU_SEED_SIZE) == 0)
 		{
 			state = false;
 			break;
@@ -343,11 +343,11 @@ bool test_invalid_sk_a()
 */
 bool test_invalid_ciphertext()
 {
-	uint8_t key_a[NTRU_KEYBYTES];
-	uint8_t key_b[NTRU_KEYBYTES];
-	uint8_t ctxt[NTRU_CIPHERTEXTBYTES];
-	uint8_t sk[NTRU_SECRETKEYBYTES];
-	uint8_t pk[NTRU_PUBLICKEYBYTES];
+	uint8_t key_a[NTRU_SEED_SIZE];
+	uint8_t key_b[NTRU_SEED_SIZE];
+	uint8_t ctxt[NTRU_CIPHERTEXT_SIZE];
+	uint8_t sk[NTRU_PRIVATEKEY_SIZE];
+	uint8_t pk[NTRU_PUBLICKEY_SIZE];
 	size_t i;
 	size_t pos;
 	bool state;
@@ -377,7 +377,7 @@ bool test_invalid_ciphertext()
 		}
 
 		/* change some byte in the ciphertext (i.e., encapsulated key) */
-		ctxt[pos % NTRU_CIPHERTEXTBYTES] ^= 23;
+		ctxt[pos % NTRU_CIPHERTEXT_SIZE] ^= 23;
 
 		/* invalid ciphertext, auth should fail */
 		if (crypto_kem_dec(key_a, ctxt, sk) == MQC_STATUS_SUCCESS)
@@ -387,7 +387,7 @@ bool test_invalid_ciphertext()
 		}
 
 		/* fail if equal */
-		if (memcmp(key_a, key_b, NTRU_KEYBYTES) == 0)
+		if (memcmp(key_a, key_b, NTRU_SEED_SIZE) == 0)
 		{
 			state = false;
 			break;

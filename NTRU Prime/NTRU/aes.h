@@ -91,12 +91,6 @@ typedef enum
 #define AES256_KEY_SIZE 32
 
 /*!
-\def AES512_KEY_SIZE
-* The size in bytes of the AES512 input cipher-key
-*/
-#define AES512_KEY_SIZE 64
-
-/*!
 \def AES128_ROUND_COUNT
 * The number of rijndael rounds used by AES128
 */

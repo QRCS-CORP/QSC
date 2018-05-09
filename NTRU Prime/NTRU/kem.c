@@ -985,15 +985,15 @@ mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	int8_t grecip[NTRU_P];
 	uint8_t hash[64];
 	int8_t r[NTRU_P];
-	uint8_t rstr[NTRU_SMALLENCODE_LEN];
+	uint8_t rstr[NTRU_SMALLENCODE_SIZE];
 	int8_t t3[NTRU_P];
 	size_t i;
 	int32_t result = 0;
 	int32_t weight;
 
 	small_decode(f, sk);
-	small_decode(grecip, sk + NTRU_SMALLENCODE_LEN);
-	rq_decode(h, sk + 2 * NTRU_SMALLENCODE_LEN);
+	small_decode(grecip, sk + NTRU_SMALLENCODE_SIZE);
+	rq_decode(h, sk + 2 * NTRU_SMALLENCODE_SIZE);
 	rq_decoderounded(c, ct + 32);
 	rq_mult(t, c, f);
 
@@ -1038,7 +1038,7 @@ mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	int16_t h[NTRU_P];
 	int16_t c[NTRU_P];
 	int8_t r[NTRU_P];
-	uint8_t rstr[NTRU_SMALLENCODE_LEN];
+	uint8_t rstr[NTRU_SMALLENCODE_SIZE];
 	uint8_t hash[64];
 
 	small_random_weightw(r);
@@ -1074,8 +1074,8 @@ mqc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 
 	rq_encode(pk, h);
 	small_encode(sk, f);
-	small_encode(sk + NTRU_SMALLENCODE_LEN, grecip);
-	memcpy(sk + 2 * NTRU_SMALLENCODE_LEN, pk, NTRU_RQENCODE_LEN);
+	small_encode(sk + NTRU_SMALLENCODE_SIZE, grecip);
+	memcpy(sk + 2 * NTRU_SMALLENCODE_SIZE, pk, NTRU_RQENCODE_SIZE);
 
 	return MQC_STATUS_SUCCESS;
 }
@@ -1207,7 +1207,7 @@ static int32_t verify(const uint8_t* x, const uint8_t* y)
 	uint32_t differentbits = 0;
 	size_t i;
 
-	for (i = 0; i < NTRU_CIPHERTEXTBYTES; ++i)
+	for (i = 0; i < NTRU_CIPHERTEXT_SIZE; ++i)
 	{
 		differentbits |= x[i] ^ y[i];
 	}
@@ -1250,7 +1250,7 @@ static void hide(uint8_t* cstr, uint8_t* k, const uint8_t* pk, const uint8_t* r)
 	cstr += 32;
 	memcpy(k, k34 + 32, 32);
 	rq_encoderounded(cstr, B);
-	cstr += NTRU_RQENCODE_LEN;
+	cstr += NTRU_RQENCODE_SIZE;
 
 	for (i = 0; i < 128; ++i)
 	{
@@ -1265,19 +1265,19 @@ mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	int16_t aB[NTRU_P];
 	int16_t C[256];
 	uint8_t r[32];
-	uint8_t checkcstr[NTRU_CIPHERTEXTBYTES];
+	uint8_t checkcstr[NTRU_CIPHERTEXT_SIZE];
 	uint8_t maybek[32];
 	size_t i;
 	uint32_t result;
 
 	small_decode(a, sk);
-	sk += NTRU_SMALLENCODE_LEN;
+	sk += NTRU_SMALLENCODE_SIZE;
 	rq_decoderounded(B, ct + 32);
 	rq_mult(aB, B, a);
 
 	for (i = 0; i < 128; ++i)
 	{
-		uint32_t x = ct[32 + NTRU_RQENCODE_LEN + i];
+		uint32_t x = ct[32 + NTRU_RQENCODE_SIZE + i];
 		C[2 * i] = (x & 15) * 287 - 2007;
 		C[2 * i + 1] = (x >> 4) * 287 - 2007;
 	}
@@ -1339,7 +1339,7 @@ mqc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 	rq_encoderounded(pk + 32, A);
 
 	small_encode(sk, a);
-	memcpy(sk + NTRU_SMALLENCODE_LEN, pk, NTRU_PUBLICKEYBYTES);
+	memcpy(sk + NTRU_SMALLENCODE_SIZE, pk, NTRU_PUBLICKEY_SIZE);
 
 	return ret;
 }

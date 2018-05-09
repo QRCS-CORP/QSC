@@ -9,11 +9,11 @@
 * \para <b>Example</b> \n
 * \code
 * // An example of key-pair creation, encryption, and decryption
-* uint8_t pk[NTRU_PUBLICKEYBYTES];
-* uint8_t sk[NTRU_SECRETKEYBYTES];
-* uint8_t key_a[NTRU_KEYBYTES];
-* uint8_t key_b[NTRU_KEYBYTES];
-* uint8_t sendb[NTRU_CIPHERTEXTBYTES];
+* uint8_t pk[NTRU_PUBLICKEY_SIZE];
+* uint8_t sk[NTRU_PRIVATEKEY_SIZE];
+* uint8_t key_a[NTRU_SEED_SIZE];
+* uint8_t key_b[NTRU_SEED_SIZE];
+* uint8_t sendb[NTRU_CIPHERTEXT_SIZE];
 *
 * // create the public and secret keys
 * crypto_kem_keypair(pk, sk);
@@ -43,8 +43,8 @@
 * \brief Generates shared secret for given cipher text and private key
 *
 * \param ss Pointer to output shared secret (an already allocated array of NTRU_SECRETBYTES bytes)
-* \param ct Pointer to input cipher text (an already allocated array of NTRU_CIPHERTEXTBYTES bytes)
-* \param sk Pointer to input private key (an already allocated array of NTRU_SECRETKEYBYTES bytes)
+* \param ct Pointer to input cipher text (an already allocated array of NTRU_CIPHERTEXT_SIZE bytes)
+* \param sk Pointer to input private key (an already allocated array of NTRU_PRIVATEKEY_SIZE bytes)
 * \return Returns one (MQC_STATUS_SUCCESS) for success
 */
 mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
@@ -52,9 +52,9 @@ mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
 /**
 * \brief Generates cipher text and shared secret for given public key
 *
-* \param ct Pointer to output cipher text (an already allocated array of NTRU_CIPHERTEXTBYTES bytes)
-* \param ss Pointer to output shared secret (an already allocated array of NTRU_KEYBYTES bytes)
-* \param pk Pointer to input public key (an already allocated array of NTRU_PUBLICKEYBYTES bytes)
+* \param ct Pointer to output cipher text (an already allocated array of NTRU_CIPHERTEXT_SIZE bytes)
+* \param ss Pointer to output shared secret (an already allocated array of NTRU_SEED_SIZE bytes)
+* \param pk Pointer to input public key (an already allocated array of NTRU_PUBLICKEY_SIZE bytes)
 * \return Returns one (MQC_STATUS_SUCCESS) for success
 */
 mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);

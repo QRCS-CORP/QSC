@@ -1,0 +1,10 @@
+"_wcstok",8,finite,8,"no function",
+"aes128_generate",228,finite,268,"aes_initialize", (external)
+"aes256_generate",292,finite,332,"aes_initialize", (external)
+"clear32",8,finite,8,"no function",
+"clear8",8,finite,8,"no function",
+"increment8",8,finite,8,"no function",
+"memcpy_s",16,finite,16,"no function",
+"memmove_s",16,finite,16,"no function",
+"strnlen_s",4,finite,4,"no function",
+"wcsnlen_s",4,finite,4,"no function",
