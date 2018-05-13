@@ -2665,7 +2665,7 @@ void cshake128_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 
 	for (i = 0; i < CSHAKE128_RATE / 8; i++)
 	{
-		state[i] = load64(pad + (i * 8));
+		state[i] ^= load64(pad + (i * 8));
 	}
 
 	/* transform the domain string */
@@ -2808,7 +2808,7 @@ void cshake256_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 
 	for (i = 0; i < CSHAKE256_RATE / 8; i++)
 	{
-		state[i] = load64(pad + (i * 8));
+		state[i] ^= load64(pad + (i * 8));
 	}
 
 	/* transform the domain string */
