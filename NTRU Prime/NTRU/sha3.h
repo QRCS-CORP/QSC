@@ -4,14 +4,13 @@
 * Contains the public api and documentation for SHA3 digest and SHAKE implementations.
 *
 * \author John Underhill
-* \date December 29, 2017
+* \date May 13, 2018
 * \remarks For usage examples, see sha3_kat.h
 */
 
 #ifndef SHA3_H
 #define SHA3_H
-//https://github.com/gvanas/KeccakCodePackage/blob/712fabccd5d611459533d554814e00537742624c/Modes/SP800-185.inc
-//https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/KMAC_samples.pdf
+
 #include "common.h"
 
 /*!

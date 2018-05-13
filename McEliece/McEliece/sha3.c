@@ -2627,7 +2627,7 @@ void cshake128_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE128_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);
@@ -2649,7 +2649,7 @@ void cshake128_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE128_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);
@@ -2770,7 +2770,7 @@ void cshake256_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE256_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);
@@ -2792,7 +2792,7 @@ void cshake256_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE256_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);
@@ -2955,14 +2955,9 @@ void kmac128(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 void kmac128_initialize(uint64_t* state, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
 {
 	uint8_t pad[CSHAKE128_RATE];
-	uint8_t name[4];
+	uint8_t name[] = { 75, 77, 65, 67 };
 	size_t offset;
 	size_t i;
-
-	name[0] = 75;
-	name[1] = 77;
-	name[2] = 65;
-	name[3] = 67;
 
 	clear64(state, SHA3_STATESIZE);
 	clear8(pad, CSHAKE128_RATE);
@@ -3102,14 +3097,9 @@ void kmac256(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 void kmac256_initialize(uint64_t* state, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
 {
 	uint8_t pad[CSHAKE256_RATE];
-	uint8_t name[4];
+	uint8_t name[] = { 75, 77, 65, 67 };
 	size_t offset;
 	size_t i;
-
-	name[0] = 75;
-	name[1] = 77;
-	name[2] = 65;
-	name[3] = 67;
 
 	clear64(state, SHA3_STATESIZE);
 	clear8(pad, CSHAKE256_RATE);

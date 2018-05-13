@@ -2627,7 +2627,7 @@ void cshake128_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE128_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);
@@ -2649,7 +2649,7 @@ void cshake128_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE128_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);
@@ -2770,7 +2770,7 @@ void cshake256_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE256_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);
@@ -2792,7 +2792,7 @@ void cshake256_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 			{
 				for (j = 0; j < CSHAKE256_RATE / 8; j++)
 				{
-					state[j] = load64(pad + (j * 8));
+					state[j] ^= load64(pad + (j * 8));
 				}
 
 				keccak_permute(state);

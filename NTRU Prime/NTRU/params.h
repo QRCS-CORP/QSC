@@ -3,9 +3,18 @@
 
 /*!
 \def NTRU_SPRIME_ENABLED
-* Added for testing, use as a pre-processor directive: enable the Rounded Quotient implementation of NTRU Prime, default is Rounded Product L-Prime
+* Enable the Rounded Quotient implementation of NTRU Prime, default is Rounded Product L-Prime
+* Added for testing, use as a pre-processor directive
 */
 //#define NTRU_SPRIME_ENABLED
+
+/*!
+\def NTRU_SPRIME_SIMPLE
+* Optional simplified form of S-Prime
+*/
+#if defined NTRU_SPRIME_ENABLED
+//#	define NTRU_SPRIME_SIMPLE
+#endif
 
 /*!
 \def NTRU_SEED_SIZE

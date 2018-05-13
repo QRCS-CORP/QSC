@@ -260,7 +260,7 @@ static void swap(void* x, void* y, size_t length, int32_t mask)
 	int8_t t;
 	int8_t xi;
 	int8_t yi;
-	size_t i;
+	int32_t i;
 
 	c = mask;
 
@@ -315,7 +315,7 @@ static void sort_int32(int32_t* x, int32_t n)
 	}
 }
 
-static int mod3_nonzero_mask(int8_t x)
+static int32_t mod3_nonzero_mask(int8_t x)
 {
 	/* -1 if x is nonzero, 0 otherwise */
 	return -x * x;
@@ -546,7 +546,9 @@ static void vectormod3_shift(int8_t* z, size_t length)
 	int32_t i;
 
 	for (i = length - 1; i > 0; --i)
+	{
 		z[i] = z[i - 1];
+	}
 
 	z[0] = 0;
 }
@@ -699,13 +701,15 @@ static int r3_recip(int8_t* r, const int8_t* s)
 	r,s are polys of degree <p
 	m is x^p-x-1
 	*/
-	const size_t LOOPS = 2 * NTRU_P + 1;
-	size_t loop;
+
+	const size_t ITRCNT = 2 * NTRU_P + 1;
+
 	int8_t f[NTRU_P + 1];
 	int8_t g[NTRU_P + 1];
 	int8_t u[2 * NTRU_P + 2];
 	int8_t v[2 * NTRU_P + 2];
 	size_t i;
+	size_t loop;
 	int32_t d = NTRU_P;
 	int32_t e = NTRU_P;
 	int32_t swapmask;
@@ -722,6 +726,7 @@ static int r3_recip(int8_t* r, const int8_t* s)
 
 	/* generalization: can initialize f to any polynomial m */
 	/* requirements: m has degree exactly p, nonzero constant coefficient */
+
 	for (i = 0; i < NTRU_P; ++i)
 	{
 		g[i] = s[i];
@@ -729,20 +734,21 @@ static int r3_recip(int8_t* r, const int8_t* s)
 
 	g[NTRU_P] = 0;
 
-	for (i = 0; i <= LOOPS; ++i)
+	for (i = 0; i <= ITRCNT; ++i)
 	{
 		u[i] = 0;
 	}
 
 	v[0] = 1;
 
-	for (i = 1; i <= LOOPS; ++i)
+	for (i = 1; i <= ITRCNT; ++i)
 	{
 		v[i] = 0;
 	}
 
 	loop = 0;
-	for (;;) 
+
+	while (loop < ITRCNT) 
 	{
 		/* e == -1 or d + e + loop <= 2*p */
 		/* f has degree p: i.e., f[p]!=0 */
@@ -756,18 +762,13 @@ static int r3_recip(int8_t* r, const int8_t* s)
 		/* v[i]==0 for i < p-e */
 		/* v[i]==0 for i < loop-p (so can look at just p+1 coefficients) */
 
-		if (loop >= LOOPS)
-		{
-			break;
-		}
-
 		c = mod3_quotient(g[NTRU_P], f[NTRU_P]);
 		vectormod3_minusproduct(g, NTRU_P + 1, g, f, c);
 		vectormod3_shift(g, NTRU_P + 1);
 
-#ifdef SIMPLER
-		vectormod3_minusproduct(v, LOOPS + 1, v, u, c);
-		vectormod3_shift(v, LOOPS + 1);
+#ifdef NTRU_SPRIME_SIMPLE
+		vectormod3_minusproduct(v, ITRCNT + 1, v, u, c);
+		vectormod3_shift(v, ITRCNT + 1);
 #else
 		if (loop < NTRU_P)
 		{
@@ -783,20 +784,21 @@ static int r3_recip(int8_t* r, const int8_t* s)
 
 		e -= 1;
 		++loop;
-		swapmask = smaller_mask(e, d) & mod3_nonzero_mask(g[NTRU_P]);
-		swap(&e, &d, sizeof e, swapmask);
-		swap(f, g, (NTRU_P + 1) * sizeof(int8_t), swapmask);
 
-#ifdef SIMPLER
-		swap(u, v, (LOOPS + 1) * sizeof(int8_t), swapmask);
+		swapmask = smaller_mask(e, d) & mod3_nonzero_mask(g[NTRU_P]);
+		swap(&e, &d, sizeof(int32_t), swapmask);
+		swap(f, g, NTRU_P + 1, swapmask);
+
+#ifdef NTRU_SPRIME_SIMPLE
+		swap(u, v, (ITRCNT + 1) * sizeof(int8_t), swapmask);
 #else
 		if (loop < NTRU_P)
 		{
-			swap(u, v, (loop + 1) * sizeof(int8_t), swapmask);
+			swap(u, v, loop + 1, swapmask);
 		}
 		else
 		{
-			swap(u + loop - NTRU_P, v + loop - NTRU_P, (NTRU_P + 1) * sizeof(int8_t), swapmask);
+			swap(u + loop - NTRU_P, v + loop - NTRU_P, NTRU_P + 1, swapmask);
 		}
 #endif
 	}
@@ -858,7 +860,7 @@ static int rq_recip3(int16_t* r, const int8_t* s)
 	r,s are polys of degree <p
 	m is x^p-x-1
 	*/
-	const size_t LOOPS = 2 * NTRU_P + 1;
+	const size_t ITRCNT = 2 * NTRU_P + 1;
 
 	size_t loop;
 	int16_t f[NTRU_P + 1];
@@ -882,24 +884,28 @@ static int rq_recip3(int16_t* r, const int8_t* s)
 
 	/* generalization: can initialize f to any polynomial m */
 	/* requirements: m has degree exactly p, nonzero constant coefficient */
-	for (i = 0; i < NTRU_P; ++i) g[i] = 3 * s[i];
+
+	for (i = 0; i < NTRU_P; ++i)
+	{
+		g[i] = 3 * s[i];
+	}
 	g[NTRU_P] = 0;
 
-	for (i = 0; i <= LOOPS; ++i)
+	for (i = 0; i <= ITRCNT; ++i)
 	{
 		u[i] = 0;
 	}
 
 	v[0] = 1;
 
-	for (i = 1; i <= LOOPS; ++i)
+	for (i = 1; i <= ITRCNT; ++i)
 	{
 		v[i] = 0;
 	}
 
 	loop = 0;
 
-	for (;;)
+	while (loop < ITRCNT)
 	{
 		/* e == -1 or d + e + loop <= 2*p */
 		/* f has degree p: i.e., f[p]!=0 */
@@ -912,18 +918,14 @@ static int rq_recip3(int16_t* r, const int8_t* s)
 		/* v has degree <=loop (so it fits in loop+1 coefficients) */
 		/* v[i]==0 for i < p-e */
 		/* v[i]==0 for i < loop-p (so can look at just p+1 coefficients) */
-		if (loop >= LOOPS)
-		{
-			break;
-		}
 
 		c = modq_quotient(g[NTRU_P], f[NTRU_P]);
 		vectormodq_minusproduct(g, NTRU_P + 1, g, f, c);
 		vectormodq_shift(g, NTRU_P + 1);
 
-#ifdef SIMPLER
-		vectormodq_minusproduct(v, LOOPS + 1, v, u, c);
-		vectormodq_shift(v, LOOPS + 1);
+#ifdef NTRU_SPRIME_SIMPLE
+		vectormodq_minusproduct(v, ITRCNT + 1, v, u, c);
+		vectormodq_shift(v, ITRCNT + 1);
 #else
 		if (loop < NTRU_P)
 		{
@@ -940,11 +942,11 @@ static int rq_recip3(int16_t* r, const int8_t* s)
 		e -= 1;
 		++loop;
 		swapmask = smaller_mask(e, d) & modq_nonzero_mask(g[NTRU_P]);
-		swap(&e, &d, sizeof e, swapmask);
+		swap(&e, &d, sizeof(int32_t), swapmask);
 		swap(f, g, (NTRU_P + 1) * sizeof(int16_t), swapmask);
 
-#ifdef SIMPLER
-		swap(u, v, (LOOPS + 1) * sizeof(int16_t), swapmask);
+#ifdef NTRU_SPRIME_SIMPLE
+		swap(u, v, (ITRCNT + 1) * sizeof(int16_t), swapmask);
 #else
 		if (loop < NTRU_P)
 		{
@@ -959,6 +961,7 @@ static int rq_recip3(int16_t* r, const int8_t* s)
 
 	c = modq_reciprocal(f[NTRU_P]);
 	vectormodq_product(r, NTRU_P, u + NTRU_P, c);
+
 	return smaller_mask(0, d);
 }
 
@@ -1097,8 +1100,8 @@ static int16_t modq_fromuint32(uint32_t a)
 static void rq_fromseed(int16_t* h, const uint8_t* K)
 {
 	uint32_t buf[NTRU_P];
-	size_t i;
 	uint8_t n[16];
+	size_t i;
 
 	for (i = 0; i < 16; i++)
 	{
@@ -1204,15 +1207,17 @@ static void small_random_weightw(int8_t* f)
 
 static int32_t verify(const uint8_t* x, const uint8_t* y)
 {
-	uint32_t differentbits = 0;
+	uint32_t diff;
 	size_t i;
+
+	diff = 0;
 
 	for (i = 0; i < NTRU_CIPHERTEXT_SIZE; ++i)
 	{
-		differentbits |= x[i] ^ y[i];
+		diff |= x[i] ^ y[i];
 	}
 
-	return (1 & ((differentbits - 1) >> 8)) - 1;
+	return (1 & ((diff - 1) >> 8)) - 1;
 }
 
 static void hide(uint8_t* cstr, uint8_t* k, const uint8_t* pk, const uint8_t* r)
@@ -1260,10 +1265,10 @@ static void hide(uint8_t* cstr, uint8_t* k, const uint8_t* pk, const uint8_t* r)
 
 mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 {
-	int8_t a[NTRU_P];
 	int16_t B[NTRU_P];
 	int16_t aB[NTRU_P];
 	int16_t C[256];
+	int8_t a[NTRU_P];
 	uint8_t r[32];
 	uint8_t checkcstr[NTRU_CIPHERTEXT_SIZE];
 	uint8_t maybek[32];
@@ -1321,10 +1326,10 @@ mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 
 mqc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 {
-	uint8_t K[32];
 	int16_t G[NTRU_P];
-	int8_t a[NTRU_P];
 	int16_t A[NTRU_P];
+	int8_t a[NTRU_P];
+	uint8_t K[32];
 	mqc_status ret;
 
 	ret = sysrand_getbytes(K, 32);
