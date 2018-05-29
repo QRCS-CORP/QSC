@@ -1,9 +1,0 @@
-NewHope - An implementation of RingLWE based on the [Public Domain] tpoeppelmann/newhope implementation
-https://github.com/tpoeppelmann/newhope 
-Written in February 2018 by John G.Underhill, owner@vtdev.com.
- 
-Updated to Misra C 2004 compliance, with some changes and additions made. 
-
-
-To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
-You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.

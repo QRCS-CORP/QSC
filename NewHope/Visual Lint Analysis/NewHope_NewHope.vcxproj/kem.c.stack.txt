@@ -1,3 +1,0 @@
-"crypto_kem_dec",2392,finite,2432,"cpapke_dec", (external)
-"crypto_kem_enc",180,finite,220,"sysrand_getbytes", (external)
-"crypto_kem_keypair",16,finite,56,"cpapke_keypair", (external)

@@ -1,0 +1,17 @@
+
+--- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\newhope_test.c (C)
+#include "common.h"
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.h(4): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\common.h')
+#include "common.h"
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\poly.h(12): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\common.h')
+#include "params.h"
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\poly.h(13): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\params.h')
+#include "common.h"
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\sysrand.h(14): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\common.h')
+#include "params.h"
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\ntt.h(12): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\..\NewHope\params.h')
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'main' is finite, requires 7841 bytes total stack in calling 'newhope_test_run'. See +stack for a full report. [MISRA 2004 Rule 16.2, required])
+ error 900: (Note -- Successful completion, 6 messages produced)

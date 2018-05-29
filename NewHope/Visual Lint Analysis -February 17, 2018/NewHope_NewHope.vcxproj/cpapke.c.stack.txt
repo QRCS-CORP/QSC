@@ -1,0 +1,8 @@
+"cpapke_dec",8204,finite,8264,"decode_c",
+"cpapke_enc",16432,finite,16496,"decode_pk",
+"cpapke_keypair",10324,finite,10388,"encode_pk",
+"decode_c",12,finite,52,"poly_frombytes", (external)
+"decode_pk",16,finite,56,"poly_frombytes", (external)
+"encode_c",12,finite,52,"poly_tobytes", (external)
+"encode_pk",16,finite,56,"poly_tobytes", (external)
+"gen_a",8,finite,48,"poly_uniform", (external)

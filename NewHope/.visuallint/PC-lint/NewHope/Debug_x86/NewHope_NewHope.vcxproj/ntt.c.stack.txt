@@ -1,0 +1,3 @@
+"bitrev_vector",10,finite,10,"no function",
+"mul_coefficients",12,finite,52,"montgomery_reduce", (external)
+"ntt",32,finite,72,"montgomery_reduce", (external)

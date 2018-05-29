@@ -1,0 +1,81 @@
+
+--- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c (C)
+typedef enum { false, true } bool;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\common.h(8): error 10: (Error -- Expecting identifier)
+    status = true;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(10): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+            status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(16): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+    status = true;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(101): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(110): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(118): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(126): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(134): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(147): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(156): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(165): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(180): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+    status = true;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(223): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(232): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(240): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(248): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(256): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(267): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(276): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(285): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(300): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+    status = true;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(360): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(369): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(377): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(389): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+    status = true;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(449): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(458): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(466): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(478): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+    status = true;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(538): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(547): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(555): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(567): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+    status = true;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(627): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(636): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(644): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+        status = false;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHopeTest\sha3_kat.c(656): error 64: (Error -- Type mismatch (assignment) (bool = bool) [MISRA 2004 Rule 1.2, required], [MISRA 2004 Rule 8.4, required], [MISRA 2012 Rule 1.3, required], [MISRA 2012 Rule 8.4, required])
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'cshake_simple_128_kat_test' is finite, requires 2682 bytes total stack in calling 'hex_to_bin'. See +stack for a full report. [MISRA 2004 Rule 16.2, required])
+ error 900: (Note -- Successful completion, 38 messages produced)

@@ -12,6 +12,15 @@
 #include "common.h"
 #include "params.h"
 
+/* powers of nth root of unity in Montgomery domain with R=2^18 in bit-reversed order */
+extern uint16_t omegas_bitrev_montgomery[];
+/* inverses of powers of nth root of unity  in Montgomery domain with R=2^18 in bit-reversed order */
+extern uint16_t omegas_inv_bitrev_montgomery[];
+/* powers of nth root of -1 in Montgomery domain with R=2^18 in bit-reversed order */
+extern uint16_t psis_bitrev_montgomery[];
+/* inverses of powers of nth  root of -1 divided by n in Montgomery domain with R=2^18 */
+extern uint16_t psis_inv_montgomery[];
+
  /**
  * \struct poly
  * \brief Contains an N sized array of 16bit coefficients. /n
