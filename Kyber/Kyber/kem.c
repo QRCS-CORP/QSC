@@ -22,6 +22,7 @@ qcc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 			sk[i + KYBER_INDCPA_SECRETKEYBYTES] = pk[i];
 		}
 
+		/* add the hash of the public key to the secret key */
 		sha3_compute256(sk + (KYBER_SECRETKEYBYTES - (2 * KYBER_KEYBYTES)), pk, KYBER_PUBLICKEYBYTES);
 
 		/* value z for pseudo-random output on reject */
@@ -42,7 +43,7 @@ qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	uint8_t buf[2 * KYBER_KEYBYTES];
 	qcc_status status;
 
-	status = sysrand_getbytes(buf, KYBER_KEYBYTES) == QCC_STATUS_SUCCESS;
+	status = sysrand_getbytes(buf, KYBER_KEYBYTES);
 	/* don't release system RNG output */
 	sha3_compute256(buf, buf, KYBER_KEYBYTES);
 	/* multitarget countermeasure for coins + contributory KEM */
@@ -54,7 +55,6 @@ qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	sha3_compute256(kr + KYBER_KEYBYTES, ct, KYBER_CIPHERTEXTBYTES);
 	/* hash concatenation of pre-k and H(c) to k */
 	sha3_compute256(ss, kr, 2 * KYBER_KEYBYTES);
-	status = QCC_STATUS_SUCCESS;
 
 	return status;
 }
@@ -68,7 +68,6 @@ qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	/* will contain key, coins, qrom-hash */
 	uint8_t kr[2 * KYBER_KEYBYTES];
 	size_t i;
-	qcc_status status;
 
 	indcpa_dec(buf, ct, sk);
 
@@ -86,10 +85,10 @@ qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	fail = verify(ct, cmp, KYBER_CIPHERTEXTBYTES);
 	/* overwrite coins in kr with H(c) */
 	sha3_compute256(kr + KYBER_KEYBYTES, ct, KYBER_CIPHERTEXTBYTES);
-	/* hash concatenation of pre-k and H(c) to k */
-	sha3_compute256(ss, kr, 2 * KYBER_KEYBYTES);
 	/* overwrite pre-k with z on re-encryption failure */
 	cmov(kr, sk + KYBER_SECRETKEYBYTES - KYBER_KEYBYTES, KYBER_KEYBYTES, fail);
+	/* hash concatenation of pre-k and H(c) to k */
+	sha3_compute256(ss, kr, 2 * KYBER_KEYBYTES);
 
 	return (fail == 0) ? QCC_STATUS_SUCCESS : QCC_STATUS_AUTHFAIL;
 }

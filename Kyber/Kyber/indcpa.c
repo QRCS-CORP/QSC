@@ -202,7 +202,7 @@ static void unpack_sk(polyvec* sk, const uint8_t* packedsk)
 qcc_status indcpa_keypair(uint8_t* pk, uint8_t* sk)
 {
 	polyvec a[KYBER_K];
-	uint8_t buf[KYBER_KEYBYTES + KYBER_KEYBYTES];
+	uint8_t buf[KYBER_KEYBYTES * 2];
 	polyvec e;
 	polyvec pkpv; 
 	polyvec skpv;
