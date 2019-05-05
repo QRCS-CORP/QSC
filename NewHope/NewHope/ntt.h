@@ -1,15 +1,12 @@
-/**
-* \file ntt.h
-* \date February 16, 2018
-*
-* \brief <b>Number Theoretic Transform api</b> \n
-* This is an internal class.
-*/
-
 #ifndef NEWHOPE_NTT_H
 #define NEWHOPE_NTT_H
 
-#include "params.h"
+#include <cstdbool>
+#include <stdint.h>
+
+/*extern uint16_t omegas_inv_bitrev_montgomery[];
+extern uint16_t gammas_bitrev_montgomery[];
+extern uint16_t gammas_inv_montgomery[];*/
 
 /**
 * \brief Permutes coefficients of a polynomial into bitreversed order
@@ -27,7 +24,7 @@ void bitrev_vector(uint16_t* poly);
 void mul_coefficients(uint16_t* poly, const uint16_t* factors);
 
 /**
-* \brief Computes number-theoretic transform (NTT) of a polynomial in place; 
+* \brief Computes number-theoretic transform (NTT) of a polynomial in place;
 * inputs assumed to be in bitreversed order, output in normal order
 *
 * \param poly pointer to input/output polynomial

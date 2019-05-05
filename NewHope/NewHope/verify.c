@@ -1,5 +1,4 @@
-#include <string.h>
-#include <stdint.h>
+#include "verify.h"
 
 int32_t verify(const uint8_t *a, const uint8_t *b, size_t len)
 {
@@ -13,7 +12,9 @@ int32_t verify(const uint8_t *a, const uint8_t *b, size_t len)
 		r |= a[i] ^ b[i];
 	}
 
-	r = (-r) >> 63;
+	/*lint -save -e704 */
+	r = (~r + 1) >> 63;
+	/*lint -restore */
 
 	return (int32_t)r;
 }
@@ -22,7 +23,8 @@ void cmov(uint8_t* r, const uint8_t* x, size_t length, uint8_t b)
 {
 	size_t i;
 
-	b = -b;
+	b = ~b + 1;
+
 	for (i = 0; i < length; i++)
 	{
 		r[i] ^= b & (x[i] ^ r[i]);

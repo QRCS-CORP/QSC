@@ -1,0 +1,39 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c (C)
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sysrand.h(14): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\util.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "gf.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\util.h(9): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h')
+#include <stdio.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(10): error 829: (Info -- A +headerwarn option was previously issued for header 'stdio.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+#include <string.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(11): error 829: (Info -- A +headerwarn option was previously issued for header 'string.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+    while (1)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(60): error 716: (Info -- while(1) ... )
+        sysrand_getbytes((uint8_t*)ind, sizeof(ind));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(62): error 928: (Note -- cast from pointer to pointer [MISRA C++ Rule 5-2-7])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(62): error 534: (Warning -- Ignoring return value of function 'sysrand_getbytes(unsigned char *, unsigned int)' (compare with line 23, file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sysrand.h) [MISRA C++ Rule 0-1-7], [MISRA C++ Rule 0-3-2])
+            row[SYS_N / 8 - PK_ROW_BYTES + j] = pk_ptr[j];
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(152): error 834: (Info -- Operator '-' followed by operator '+' is confusing.  Use parentheses. [MISRA C++ Rule 5-0-2])
+            row[j] = (row[j] << tail) | (row[j - 1] >> (8 - tail));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(157): error 701: (Info -- Shift left of signed quantity (int))
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(157): error 734: (Info -- Loss of precision (assignment) (31 bits to 8 bits))
+        s[i / 8] |= (b << (i % 8));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(173): error 734: (Info -- Loss of precision (assignment) (15 bits to 8 bits))
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(176): error 818: (Info -- Pointer parameter 'e' (line 127) could be declared as pointing to const [MISRA C++ Rule 7-1-2], --- Eff. C++ 3rd Ed. item 3)
+
+    --- Wrap-up for Module: C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c
+
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(201): error 766: (Info -- Header file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h' not used in module 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c')
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(201): error 766: (Info -- Header file 'C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h' not used in module 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c')
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c(201): error 766: (Info -- Header file 'C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h' not used in module 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\encrypt.c')
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'encrypt' is finite, requires 2400 bytes total stack in calling 'gen_e'. See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 18 messages produced)

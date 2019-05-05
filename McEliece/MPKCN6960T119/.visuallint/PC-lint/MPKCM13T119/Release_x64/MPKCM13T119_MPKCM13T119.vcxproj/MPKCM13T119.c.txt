@@ -1,0 +1,95 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c (C)
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sysrand.h(14): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\util.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include <string.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(5): error 829: (Info -- A +headerwarn option was previously issued for header 'string.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+#include <stdio.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(8): error 829: (Info -- A +headerwarn option was previously issued for header 'stdio.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+#include <stdlib.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(9): error 829: (Info -- A +headerwarn option was previously issued for header 'stdlib.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+bool test_operations()
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(31): error 970: (Note -- Use of modifier or type '_Bool' outside of a typedef [MISRA C++ Rule 3-9-2])
+    bool state;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(38): error 970: (Note -- Use of modifier or type '_Bool' outside of a typedef [MISRA C++ Rule 3-9-2])
+    pk = (uint8_t*)malloc(MCELIECE_PUBLICKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(41): error 747: (Info -- Significant prototype coercion (arg. no. 1) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(41): error 925: (Note -- cast from pointer to pointer [MISRA C++ Rule 5-2-8], [MISRA C++ Rule 5-2-9])
+    memset(pk, 0, MCELIECE_PUBLICKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(42): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+        clear8(keya, MCELIECE_KEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(47): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(keyb, MCELIECE_KEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(48): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(pk, MCELIECE_CIPHERTEXT_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(49): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(sendb, MCELIECE_CIPHERTEXT_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(50): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(sk, MCELIECE_SECRETKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(51): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        sysrand_getbytes(keyb, MCELIECE_KEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(54): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        if (memcmp(keya, keyb, MCELIECE_KEY_SIZE) != 0)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(77): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+bool test_invalid_publickey()
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(93): error 970: (Note -- Use of modifier or type '_Bool' outside of a typedef [MISRA C++ Rule 3-9-2])
+    bool state;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(100): error 970: (Note -- Use of modifier or type '_Bool' outside of a typedef [MISRA C++ Rule 3-9-2])
+    pk = (uint8_t*)malloc(MCELIECE_PUBLICKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(103): error 747: (Info -- Significant prototype coercion (arg. no. 1) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(103): error 925: (Note -- cast from pointer to pointer [MISRA C++ Rule 5-2-8], [MISRA C++ Rule 5-2-9])
+    memset(pk, 0, MCELIECE_PUBLICKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(104): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+        clear8(keya, MCELIECE_KEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(109): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(keyb, MCELIECE_KEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(110): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(pk, MCELIECE_PUBLICKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(111): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(sendb, MCELIECE_CIPHERTEXT_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(112): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(sk, MCELIECE_SECRETKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(113): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        sysrand_getbytes(pk, 10240);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(124): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        if (memcmp(keya, keyb, MCELIECE_KEY_SIZE) == 0)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(141): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+bool test_invalid_ciphertext()
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(157): error 970: (Note -- Use of modifier or type '_Bool' outside of a typedef [MISRA C++ Rule 3-9-2])
+    bool state;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(163): error 970: (Note -- Use of modifier or type '_Bool' outside of a typedef [MISRA C++ Rule 3-9-2])
+    pk = (uint8_t*)malloc(MCELIECE_PUBLICKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(168): error 747: (Info -- Significant prototype coercion (arg. no. 1) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(168): error 925: (Note -- cast from pointer to pointer [MISRA C++ Rule 5-2-8], [MISRA C++ Rule 5-2-9])
+    memset(pk, 0, MCELIECE_PUBLICKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(169): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+        clear8(keya, MCELIECE_KEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(174): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(keyb, MCELIECE_KEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(175): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(pk, MCELIECE_CIPHERTEXT_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(176): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(sendb, MCELIECE_CIPHERTEXT_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(177): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        clear8(sk, MCELIECE_SECRETKEY_SIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(178): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != MQC_STATUS_SUCCESS)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(180): error 928: (Note -- cast from pointer to pointer [MISRA C++ Rule 5-2-7])
+        sysrand_getbytes(sendb, 8);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(201): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        if (memcmp(keya, keyb, MCELIECE_KEY_SIZE) == 0)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(211): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+int main(void)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(259): error 970: (Note -- Use of modifier or type 'int' outside of a typedef [MISRA C++ Rule 3-9-2])
+}
+
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\MPKCM13T119.c(271): error 783: (Info -- Line does not end with new-line)
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'main' is finite, requires 14280 bytes total stack in calling 'mceliece_test_run'. See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 46 messages produced)

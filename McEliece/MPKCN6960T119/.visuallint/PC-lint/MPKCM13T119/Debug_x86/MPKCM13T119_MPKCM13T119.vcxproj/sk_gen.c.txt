@@ -1,0 +1,38 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c (C)
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sysrand.h(14): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\controlbits.h(9): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\util.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "gf.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\util.h(9): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h')
+#include "gf.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(10): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h')
+#include <stdio.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(11): error 829: (Info -- A +headerwarn option was previously issued for header 'stdio.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+#include <stdlib.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(12): error 829: (Info -- A +headerwarn option was previously issued for header 'stdlib.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+    while (1)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(150): error 716: (Info -- while(1) ... )
+        sysrand_getbytes((uint8_t*)a, sizeof(a));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(152): error 928: (Note -- cast from pointer to pointer [MISRA C++ Rule 5-2-7])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(152): error 534: (Warning -- Ignoring return value of function 'sysrand_getbytes(unsigned char *, unsigned int)' (compare with line 23, file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sysrand.h) [MISRA C++ Rule 0-1-7], [MISRA C++ Rule 0-3-2])
+    while (1)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(165): error 716: (Info -- while(1) ... )
+        sysrand_getbytes((uint8_t*)perm, sizeof(perm));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(167): error 928: (Note -- cast from pointer to pointer [MISRA C++ Rule 5-2-7])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(167): error 534: (Warning -- Ignoring return value of function 'sysrand_getbytes(unsigned char *, unsigned int)' (compare with line 23, file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sysrand.h) [MISRA C++ Rule 0-1-7], [MISRA C++ Rule 0-3-2])
+
+    --- Wrap-up for Module: C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c
+
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(185): error 766: (Info -- Header file 'C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h' not used in module 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c')
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c(185): error 766: (Info -- Header file 'C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdlib.h' not used in module 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sk_gen.c')
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'sk_part_gen' is finite, requires 98852 bytes total stack in calling 'perm_conversion'. See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 17 messages produced)

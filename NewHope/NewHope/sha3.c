@@ -14,6 +14,8 @@
 
 #include "sha3.h"
 
+/*lint -e747 */
+
 /* Internal */
 
 static void clear8(uint8_t* a, size_t count)
@@ -42,7 +44,10 @@ static size_t left_encode(uint8_t* buffer, size_t value)
 	size_t n;
 	size_t v;
 
-	for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
+	/* jgu checked false warning */
+	/*lint -save -e722 */
+	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8);
+	/*lint -restore */
 
 	if (n == 0)
 	{
@@ -78,7 +83,10 @@ static size_t right_encode(uint8_t* buffer, size_t value)
 	size_t n;
 	size_t v;
 
-	for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
+	/* jgu checked false warning */
+	/*lint -save -e722 */
+	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8);
+	/*lint -restore */
 
 	if (n == 0)
 	{
@@ -2468,7 +2476,7 @@ void sha3_finalize(uint64_t* state, size_t rate, const uint8_t* message, size_t 
 
 void shake128(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / SHAKE128_RATE;
+	const size_t nblocks = outputlen / SHAKE128_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[SHAKE128_RATE];
 	size_t i;
@@ -2503,7 +2511,7 @@ void shake128_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void shake256(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / SHAKE256_RATE;
+	const size_t nblocks = outputlen / SHAKE256_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[SHAKE256_RATE];
 	size_t i;
@@ -2540,7 +2548,7 @@ void shake256_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void cshake128(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
 {
-	size_t nblocks = outputlen / CSHAKE128_RATE;
+	const size_t nblocks = outputlen / CSHAKE128_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE128_RATE];
 	size_t i;
@@ -2603,7 +2611,10 @@ void cshake128_finalize(uint64_t* state, uint8_t* output, size_t outputlen)
 
 		for (i = 0; i < outputlen; i++)
 		{
+			/* jgu checked false warning */
+			/*lint -save -e771 */
 			output[i] = tmp[i];
+			/*lint -restore */
 		}
 	}
 }
@@ -2615,7 +2626,6 @@ void cshake128_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 	size_t j;
 	size_t offset;
 
-	offset = 0;
 	offset = left_encode(pad, CSHAKE128_RATE);
 	offset += left_encode(pad + offset, namelen * 8);
 
@@ -2684,7 +2694,7 @@ void cshake128_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void cshake256(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
 {
-	size_t nblocks = outputlen / CSHAKE256_RATE;
+	const size_t nblocks = outputlen / CSHAKE256_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE256_RATE];
 	size_t i;
@@ -2747,7 +2757,10 @@ void cshake256_finalize(uint64_t* state, uint8_t* output, size_t outputlen)
 
 		for (i = 0; i < outputlen; i++)
 		{
+			/* jgu checked false warning */
+			/*lint -save -e771 */
 			output[i] = tmp[i];
+			/*lint -restore */
 		}
 	}
 }
@@ -2829,7 +2842,7 @@ void cshake256_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void cshake128_simple(uint8_t* output, size_t outputlen, uint16_t custom, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / CSHAKE128_RATE;
+	const size_t nblocks = outputlen / CSHAKE128_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE128_RATE];
 	size_t i;
@@ -2884,7 +2897,7 @@ void cshake128_simple_squeezeblocks(uint64_t* state, uint8_t* output, size_t nbl
 
 void cshake256_simple(uint8_t* output, size_t outputlen, uint16_t custom, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / CSHAKE256_RATE;
+	const size_t nblocks = outputlen / CSHAKE256_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE256_RATE];
 	size_t i;
@@ -2943,7 +2956,7 @@ void kmac128(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 
 	if (messagelen > CSHAKE128_RATE)
 	{
-		size_t rndlen = (messagelen / CSHAKE128_RATE) * CSHAKE128_RATE;
+		const size_t rndlen = (messagelen / CSHAKE128_RATE) * CSHAKE128_RATE;
 		kmac128_blockupdate(state, message, rndlen / CSHAKE128_RATE);
 		messagelen = messagelen - rndlen;
 		message += rndlen;
@@ -2955,7 +2968,7 @@ void kmac128(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 void kmac128_initialize(uint64_t* state, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
 {
 	uint8_t pad[CSHAKE128_RATE];
-	uint8_t name[] = { 75, 77, 65, 67 };
+	const uint8_t name[] = { 75, 77, 65, 67 };
 	size_t offset;
 	size_t i;
 
@@ -3085,7 +3098,7 @@ void kmac256(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 
 	if (messagelen > CSHAKE256_RATE)
 	{
-		size_t rndlen = (messagelen / CSHAKE256_RATE) * CSHAKE256_RATE;
+		const size_t rndlen = (messagelen / CSHAKE256_RATE) * CSHAKE256_RATE;
 		kmac256_blockupdate(state, message, rndlen / CSHAKE256_RATE);
 		messagelen = messagelen - rndlen;
 		message += rndlen;
@@ -3097,7 +3110,7 @@ void kmac256(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 void kmac256_initialize(uint64_t* state, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
 {
 	uint8_t pad[CSHAKE256_RATE];
-	uint8_t name[] = { 75, 77, 65, 67 };
+	const uint8_t name[] = { 75, 77, 65, 67 };
 	size_t offset;
 	size_t i;
 

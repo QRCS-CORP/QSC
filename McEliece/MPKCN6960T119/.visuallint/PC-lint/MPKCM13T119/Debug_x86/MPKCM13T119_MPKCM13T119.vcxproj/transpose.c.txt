@@ -1,0 +1,14 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\transpose.c (C)
+        s = 1 << d;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\transpose.c(37): error 701: (Info -- Shift left of signed quantity (int))
+                out[j + 0] = x;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\transpose.c(45): error 835: (Info -- A zero has been given as right argument to operator '+')
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\transpose.c(52): error 818: (Info -- Pointer parameter 'in' (line 11) could be declared as pointing to const [MISRA C++ Rule 7-1-2], --- Eff. C++ 3rd Ed. item 3)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\transpose.c(52): error 953: (Note -- Variable 'masks' (line 20) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'transpose_64x64' is finite, requires 136 bytes total stack in calling 'no function'. See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 5 messages produced)

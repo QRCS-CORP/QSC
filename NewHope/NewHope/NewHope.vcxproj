@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D231D139-7F87-49A4-9A46-0472DD82C9DD}</ProjectGuid>
     <RootNamespace>NewHope</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -127,25 +127,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="common.h" />
-    <ClInclude Include="kem.h" />
+    <ClInclude Include="aes.h" />
     <ClInclude Include="cpapke.h" />
+    <ClInclude Include="kem.h" />
     <ClInclude Include="ntt.h" />
     <ClInclude Include="params.h" />
     <ClInclude Include="poly.h" />
     <ClInclude Include="reduce.h" />
+    <ClInclude Include="rng.h" />
     <ClInclude Include="sha3.h" />
     <ClInclude Include="sysrand.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="verify.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aes.c" />
     <ClCompile Include="cpapke.c" />
     <ClCompile Include="kem.c" />
     <ClCompile Include="ntt.c" />
     <ClCompile Include="poly.c" />
     <ClCompile Include="reduce.c" />
+    <ClCompile Include="rng.c" />
     <ClCompile Include="sha3.c" />
     <ClCompile Include="sysrand.c" />
+    <ClCompile Include="util.c" />
     <ClCompile Include="verify.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

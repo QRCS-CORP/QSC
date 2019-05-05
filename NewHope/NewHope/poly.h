@@ -1,35 +1,18 @@
-/**
-* \file poly.h
-* \date February 16, 2018
-*
-* \brief <b>NewHope polynomial api</b> \n
-* This is an internal class.
-*/
-
 #ifndef NEWHOPE_POLY_H
 #define NEWHOPE_POLY_H
 
-#include "common.h"
 #include "params.h"
+#include <stdint.h>
 
-/* powers of nth root of unity in Montgomery domain with R=2^18 in bit-reversed order */
-extern uint16_t omegas_bitrev_montgomery[];
-/* inverses of powers of nth root of unity  in Montgomery domain with R=2^18 in bit-reversed order */
-extern uint16_t omegas_inv_bitrev_montgomery[];
-/* powers of nth root of -1 in Montgomery domain with R=2^18 in bit-reversed order */
-extern uint16_t psis_bitrev_montgomery[];
-/* inverses of powers of nth  root of -1 divided by n in Montgomery domain with R=2^18 */
-extern uint16_t psis_inv_montgomery[];
-
- /**
- * \struct poly
- * \brief Contains an N sized array of 16bit coefficients. /n
- * Elements of R_q = Z_q[X] / (X^n + 1). /n
- * Represents polynomial coeffs[0] + X * coeffs[1] + X^2 * xoeffs[2] + ... + X^{n-1} * coeffs[n-1]
- *
- * \var poly::coeffs
- * The array of 16bit coefficients
- */
+/**
+* \struct poly
+* \brief Contains an N sized array of 16bit coefficients. /n
+* Elements of R_q = Z_q[X] / (X^n + 1). /n
+* Represents polynomial coeffs[0] + X * coeffs[1] + X^2 * xoeffs[2] + ... + X^{n-1} * coeffs[n-1]
+*
+* \var poly::coeffs
+* The array of 16bit coefficients
+*/
 typedef struct 
 {
   uint16_t coeffs[NEWHOPE_N];

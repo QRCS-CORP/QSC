@@ -1,0 +1,81 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c (C)
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\benes.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "gf.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\benes.h(9): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h')
+#include "gf.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\util.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "gf.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\util.h(9): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h')
+#include <string.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(10): error 829: (Info -- A +headerwarn option was previously issued for header 'string.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+#include <stdlib.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(11): error 829: (Info -- A +headerwarn option was previously issued for header 'stdlib.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+    mat = malloc(GFBITS * SYS_T * sizeof(uint8_t*));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 586: (Warning -- function 'malloc' is deprecated. [MISRA C++ Rule 18-4-1])
+        mat[i] = malloc(SYS_N / 8);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(35): error 586: (Warning -- function 'malloc' is deprecated. [MISRA C++ Rule 18-4-1])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(35): error 747: (Info -- Significant prototype coercion (arg. no. 1) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(35): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+        memset(mat[i], 0, SYS_N / 8);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(36): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(36): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+            mat[i][j] = 0;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(61): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                mat[i * GFBITS + k][j / 8] = b;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(89): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                mask = mat[row][i] ^ mat[k][i];
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(112): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                mask = mat[row][i] ^ mat[k][i];
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(112): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                    mat[row][c] ^= mat[k][c] & mask;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(119): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                    mat[row][c] ^= mat[k][c] & mask;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(119): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+            if (((mat[row][i] >> j) & 1) == 0)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(124): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                    mask = mat[k][i] >> j;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(134): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                        mat[k][c] ^= mat[row][c] & mask;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(140): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                        mat[k][c] ^= mat[row][c] & mask;
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(140): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                pk[k] = (mat[i][j] >> tail) | (mat[i][j + 1UL] << (8UL - tail));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(161): error 701: (Info -- Shift left of signed quantity (int))
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(161): error 734: (Info -- Loss of precision (assignment) (31 bits to 8 bits))
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(161): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+                pk[k] = (mat[i][j] >> tail) | (mat[i][j + 1UL] << (8UL - tail));
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(161): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+            pk[k] = (mat[i][j] >> tail);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(165): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+            free(mat[i]);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(171): error 586: (Warning -- function 'free' is deprecated. [MISRA C++ Rule 18-4-1])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(171): error 613: (Warning -- Possible use of null pointer 'mat' in left argument to operator '[' [Reference: file C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c: line 31])
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(31): error 831: (Info -- Reference cited in prior message)
+    free(mat);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\pk_gen.c(175): error 586: (Warning -- function 'free' is deprecated. [MISRA C++ Rule 18-4-1])
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'pk_gen' is finite, requires 28194 bytes total stack in calling 'malloc' (external). See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 49 messages produced)

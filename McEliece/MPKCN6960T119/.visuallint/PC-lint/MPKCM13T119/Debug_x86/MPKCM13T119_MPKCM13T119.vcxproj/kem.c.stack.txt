@@ -1,0 +1,8 @@
+"_wcstok",8,finite,8,"no function",
+"crypto_kem_dec",2028,finite,2068,"decrypt", (external)
+"crypto_kem_enc",1980,finite,2020,"encrypt", (external)
+"crypto_kem_keypair",12,finite,52,"sk_part_gen", (external)
+"memcpy_s",16,finite,16,"no function",
+"memmove_s",16,finite,16,"no function",
+"strnlen_s",8,finite,8,"no function",
+"wcsnlen_s",8,finite,8,"no function",

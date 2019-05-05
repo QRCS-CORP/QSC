@@ -1,0 +1,4 @@
+"encrypt",24,finite,2412,"gen_e",
+"gen_e",2340,finite,2380,"sysrand_getbytes", (external)
+"mov_forward",30,finite,30,"no function",
+"syndrome",925,finite,925,"no function",

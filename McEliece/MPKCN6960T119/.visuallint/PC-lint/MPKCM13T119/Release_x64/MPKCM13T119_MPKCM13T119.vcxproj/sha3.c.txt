@@ -1,0 +1,142 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c (C)
+    for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(45): error 722: (Info -- Suspicious use of ;)
+    for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(81): error 722: (Info -- Suspicious use of ;)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2383): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_absorb(state, SHA3_256_RATE, message, messagelen, SHA3_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2384): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, hash, 1, SHA3_256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2385): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2385): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2399): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_absorb(state, SHA3_512_RATE, message, messagelen, SHA3_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2400): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, hash, 1, SHA3_512_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2401): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2401): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2476): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        shake128_squeezeblocks(state, hash, 1);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2485): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2492): error 953: (Note -- Variable 'nblocks' (line 2471) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    keccak_absorb(state, SHAKE128_RATE, seed, seedlen, SHAKE_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2496): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, output, nblocks, SHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2501): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2511): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        shake256_squeezeblocks(state, hash, 1);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2520): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2527): error 953: (Note -- Variable 'nblocks' (line 2506) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    keccak_absorb(state, SHAKE256_RATE, seed, seedlen, SHAKE_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2531): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, output, nblocks, SHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2536): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2548): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        cshake128_squeezeblocks(state, hash, 1);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2567): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2574): error 953: (Note -- Variable 'nblocks' (line 2543) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+            output[i] = tmp[i];
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2606): error 771: (Info -- Symbol 'tmp' (line 2595) conceivably not initialized --- Eff. C++ 3rd Ed. item 4)
+    offset = left_encode(pad, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2619): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2619): error 838: (Info -- Previously assigned value to variable 'offset' has not been used [MISRA C++ Rule 0-1-9])
+    keccak_absorb(state, CSHAKE128_RATE, seed, seedlen, CSHAKE_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2677): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, output, nblocks, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2682): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2692): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        cshake256_squeezeblocks(state, hash, 1);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2711): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2718): error 953: (Note -- Variable 'nblocks' (line 2687) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+            output[i] = tmp[i];
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2750): error 771: (Info -- Symbol 'tmp' (line 2739) conceivably not initialized --- Eff. C++ 3rd Ed. item 4)
+    offset = left_encode(pad, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2762): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_absorb(state, CSHAKE256_RATE, seed, seedlen, CSHAKE_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2820): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, output, nblocks, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2825): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2837): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        cshake128_simple_squeezeblocks(state, hash, 1);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2846): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2853): error 953: (Note -- Variable 'nblocks' (line 2832) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    keccak_absorb(state, CSHAKE128_RATE, seed, seedlen, CSHAKE_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2877): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, output, nblocks, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2882): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2892): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        cshake256_simple_squeezeblocks(state, hash, 1);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2901): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2908): error 953: (Note -- Variable 'nblocks' (line 2887) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    keccak_absorb(state, CSHAKE256_RATE, seed, seedlen, CSHAKE_DOMAIN);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2928): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    keccak_squeezeblocks(state, output, nblocks, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2933): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    }
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2950): error 953: (Note -- Variable 'rndlen' (line 2946) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2962): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    clear8(pad, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2963): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    offset = left_encode(pad, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2967): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    offset += left_encode(pad + offset, 4 * 8);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2968): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    clear8(pad, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2992): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    offset = left_encode(pad, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(2993): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3007): error 953: (Note -- Variable 'name' (line 2958) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    clear8(pad, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3034): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        keccak_squeezeblocks(state, pad, 1, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3058): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3058): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+        keccak_squeezeblocks(state, pad, 1, CSHAKE128_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3071): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3071): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+    }
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3092): error 953: (Note -- Variable 'rndlen' (line 3088) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    clear64(state, SHA3_STATESIZE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3104): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    clear8(pad, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3105): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    offset = left_encode(pad, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3109): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    offset += left_encode(pad + offset, 4 * 8);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3110): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    clear8(pad, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3134): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+    offset = left_encode(pad, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3135): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3149): error 953: (Note -- Variable 'name' (line 3100) could be declared as const --- Eff. C++ 3rd Ed. item 3)
+    clear8(pad, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3176): error 747: (Info -- Significant prototype coercion (arg. no. 2) int to unsigned long long)
+        keccak_squeezeblocks(state, pad, 1, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3200): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3200): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+        keccak_squeezeblocks(state, pad, 1, CSHAKE256_RATE);
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3213): error 747: (Info -- Significant prototype coercion (arg. no. 3) int to unsigned long long)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\sha3.c(3213): error 747: (Info -- Significant prototype coercion (arg. no. 4) int to unsigned long long)
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'cshake128' is finite, requires 1252 bytes total stack in calling 'cshake128_update'. See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 72 messages produced)

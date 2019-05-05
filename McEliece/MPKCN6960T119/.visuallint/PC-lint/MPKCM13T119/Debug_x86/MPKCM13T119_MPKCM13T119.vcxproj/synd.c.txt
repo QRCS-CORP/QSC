@@ -1,0 +1,20 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\synd.c (C)
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\common.h')
+#include "gf.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.h(8): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\gf.h')
+#include <stdio.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\synd.c(10): error 829: (Info -- A +headerwarn option was previously issued for header 'stdio.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\synd.c(39): error 818: (Info -- Pointer parameter 'r' (line 14) could be declared as pointing to const [MISRA C++ Rule 7-1-2], --- Eff. C++ 3rd Ed. item 3)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\synd.c(39): error 818: (Info -- Pointer parameter 'L' (line 14) could be declared as pointing to const [MISRA C++ Rule 7-1-2], --- Eff. C++ 3rd Ed. item 3)
+
+    --- Wrap-up for Module: C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\synd.c
+
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\synd.c(41): error 766: (Info -- Header file 'C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h' not used in module 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\synd.c')
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'synd' is finite, requires 70 bytes total stack in calling 'eval' (external). See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 7 messages produced)

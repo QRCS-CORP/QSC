@@ -1,0 +1,17 @@
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.c (C)
+#include <stdio.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.c(8): error 829: (Info -- A +headerwarn option was previously issued for header 'stdio.h' [MISRA C++ Rule 18-0-1], [MISRA C++ Rule 18-0-4], [MISRA C++ Rule 18-7-1], [MISRA C++ Rule 27-0-1])
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.c(29): error 818: (Info -- Pointer parameter 'f' (line 12) could be declared as pointing to const [MISRA C++ Rule 7-1-2], --- Eff. C++ 3rd Ed. item 3)
+}
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.c(41): error 818: (Info -- Pointer parameter 'L' (line 33) could be declared as pointing to const [MISRA C++ Rule 7-1-2], --- Eff. C++ 3rd Ed. item 3)
+
+    --- Wrap-up for Module: C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.c
+
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.c(43): error 766: (Info -- Header file 'C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h' not used in module 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\MPKCM13T119\MPKCM13T119\root.c')
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'root' is finite, requires 78 bytes total stack in calling 'eval'. See +stack for a full report. [MISRA C++ Rule 7-5-4])
+ error 900: (Note -- Successful completion, 5 messages produced)

@@ -1,7 +1,7 @@
 #ifndef NEWHOPE_VERIFY_H
 #define NEWHOPE_VERIFY_H
 
-#include <stdio.h>
+#include <stdint.h>
 
 /**
 * \brief Compare two arrays for equality

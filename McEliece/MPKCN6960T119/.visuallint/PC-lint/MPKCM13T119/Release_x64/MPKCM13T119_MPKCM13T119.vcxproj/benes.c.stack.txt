@@ -1,0 +1,4 @@
+"apply_benes",3128,finite,3196,"layer_ex",
+"layer_ex",60,finite,60,"no function",
+"layer_in",60,finite,60,"no function",
+"support_gen",13346,finite,16550,"apply_benes",

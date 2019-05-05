@@ -23,7 +23,7 @@
     <ProjectGuid>{4CCA1176-CCAA-4824-BD7E-D6D39536ED9D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>NewHopeTest</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -152,11 +152,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="newhope_test.c" />
-    <ClCompile Include="sha3_kat.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
-    <ClInclude Include="sha3_kat.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NewHope\NewHope.vcxproj">
