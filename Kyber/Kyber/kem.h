@@ -8,11 +8,11 @@
 * \para <b>Example</b> \n 
 * \code
 * // An example of key-pair creation, encryption, and decryption
-* uint8_t pk[KYBER_PUBLICKEYBYTES];
-* uint8_t sk[KYBER_SECRETKEYBYTES];
+* uint8_t pk[KYBER_PUBLICKEY_SIZE];
+* uint8_t sk[KYBER_SECRETKEY_SIZE];
 * uint8_t key_a[KYBER_KEYBYTES];
 * uint8_t key_b[KYBER_KEYBYTES];
-* uint8_t sendb[KYBER_CIPHERTEXTBYTES];
+* uint8_t sendb[KYBER_CIPHERTEXT_SIZE];
 *
 * // create the public and secret keys
 * crypto_kem_keypair(pk, sk);
@@ -33,8 +33,14 @@
 #ifndef KYBER_KEM_H
 #define KYBER_KEM_H
 
-#include "common.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include "params.h"
+/* jgu -suppressing repeated include warning, using include guards */
+/*lint -e537 */
+/* jgu -suppressing boolean/int integral type warnings */
+/*lint -e970 */
+/*lint -e731 */
 
 /*!
 \def CRYPTO_ALGNAME
@@ -54,29 +60,29 @@
 * \brief Generates shared secret for given cipher text and private key
 *
 * \param ss Pointer to output shared secret (an already allocated array of KYBER_SECRET_BYTES bytes)
-* \param ct Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXTBYTES bytes)
-* \param sk Pointer to input private key (an already allocated array of KYBER_SECRETKEYBYTES bytes)
-* \return Returns one (KYBER_CRYPTO_SUCCESS) for success
+* \param ct Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param sk Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \return Returns true for success
 */
-qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
+bool crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
 
 /**
 * \brief Generates cipher text and shared secret for given public key
 *
-* \param ct Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXTBYTES bytes)
+* \param ct Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
 * \param ss Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk Pointer to input public key (an already allocated array of KYBER_PUBLICKEYBYTES bytes)
-* \return Returns one (KYBER_CRYPTO_SUCCESS) for success
+* \param pk Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \return Returns true for success
 */
-qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
+bool crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
 
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
 *
-* \param pk Pointer to output public key (an already allocated array of KYBER_PUBLICKEYBYTES bytes)
-* \param sk Pointer to output private key (an already allocated array of KYBER_SECRETKEYBYTES bytes)
-* \return Returns one (KYBER_CRYPTO_SUCCESS) for success
+* \param pk Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \return Returns true for success
 */
-qcc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
+bool crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
 
 #endif

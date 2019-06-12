@@ -1,0 +1,42 @@
+
+--- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c (C)
+    return getchar();
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(20): error 586: (Warning -- function 'getchar' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! passed sha3-256 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(30): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! failed sha3-256 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(34): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! passed sha3-512 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(39): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! failed sha3-512 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(43): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! passed shake-128 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(48): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! failed shake-128 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(52): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! passed shake-256 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(57): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! failed shake-256 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(61): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! passed simple cshake-128 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(66): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! failed simple cshake-128 known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(70): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! passed simple cshake-256 simple known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(75): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! failed simple cshake-256 simple known answer tests \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(79): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+    printf("*** Testing SHA3 digests, SHAKE, and cSHAKE implementations *** \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(85): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+    printf("\n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(88): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+    printf("Completed! Press any key to close..");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(89): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+    get_response();
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(90): error 534: (Warning -- Ignoring return value of function 'get_response(void)' (compare with line 18) [Encompasses MISRA 2004 Rule 16.10, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_test.c(18): error 830: (Info -- Location cited in prior message)
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'main' is finite, requires 48 bytes total stack in calling 'sha3_test_run'. See +stack for a full report. [MISRA 2004 Rule 16.2, required])
+ error 900: (Note -- Successful completion, 19 messages produced)

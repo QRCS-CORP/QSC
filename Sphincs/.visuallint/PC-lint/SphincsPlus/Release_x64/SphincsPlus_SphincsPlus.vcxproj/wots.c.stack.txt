@@ -1,0 +1,13 @@
+"_wcstok",16,finite,16,"no function",
+"base_w",45,finite,45,"no function",
+"chain_lengths",16,finite,105,"wots_checksum",
+"gen_chain",164,finite,204,"memcpy", (external)
+"memcpy_s",32,finite,32,"no function",
+"memmove_s",32,finite,32,"no function",
+"strnlen_s",8,finite,8,"no function",
+"wcsnlen_s",8,finite,8,"no function",
+"wots_checksum",28,finite,81,"base_w",
+"wots_gen_pk",36,finite,248,"gen_chain",
+"wots_gen_sk",24,finite,64,"set_hash_addr", (external)
+"wots_pk_from_sig",312,finite,524,"gen_chain",
+"wots_sign",312,finite,524,"gen_chain",

@@ -9,7 +9,9 @@
 #ifndef KYBER_INDCPA_H
 #define KYBER_INDCPA_H
 
-#include "common.h"
+#include <stdint.h>
+/* jgu -suppressing repeated include warning, using include guards */
+/*lint -e537 */
 
 /**
 * \brief Decryption function of the CPA-secure public-key encryption scheme underlying Kyber.
@@ -35,8 +37,8 @@ void indcpa_enc(uint8_t* c, const uint8_t* m, const uint8_t* pk, const uint8_t* 
 *
 * \param pk Pointer to output public key
 * \param sk Pointer to output private key
-* \return Returns one (KYBER_CRYPTO_SUCCESS) for success
+* \return Returns zero for success
 */
-qcc_status indcpa_keypair(uint8_t* pk, uint8_t* sk);
+int32_t indcpa_keypair(uint8_t* pk, uint8_t* sk);
 
 #endif

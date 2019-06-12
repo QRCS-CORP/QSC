@@ -1,3 +1,0 @@
-"butterflies",6248,finite,6288,"vec_mul", (external)
-"fft",8,finite,6304,"butterflies",
-"radix_conversions",576,finite,616,"vec_mul", (external)

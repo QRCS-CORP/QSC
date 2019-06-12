@@ -1,7 +1,0 @@
-
---- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHope\sysrand.c (C)
-
---- Global Wrap-up
-
- error 974: (Note -- Worst case function for stack usage: 'sysrand_getbytes' is finite, requires 52 bytes total stack in calling 'CryptAcquireContextA' (external). See +stack for a full report. [MISRA 2004 Rule 16.2, required])
- error 900: (Note -- Successful completion, 1 messages produced)

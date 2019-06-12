@@ -1,0 +1,9 @@
+"_wcstok",16,finite,16,"no function",
+"bytes_to_ull",24,finite,24,"no function",
+"compute_root",304,finite,344,"memcpy", (external)
+"memcpy_s",32,finite,32,"no function",
+"memmove_s",32,finite,32,"no function",
+"strnlen_s",8,finite,8,"no function",
+"treehash",268,non-deterministic,0,"no function",
+"ull_to_bytes",12,finite,12,"no function",
+"wcsnlen_s",8,finite,8,"no function",

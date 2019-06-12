@@ -1,7 +1,0 @@
-
---- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\NewHope\NewHope\NewHope\ntt.c (C)
-
---- Global Wrap-up
-
- error 974: (Note -- Worst case function for stack usage: 'ntt' is finite, requires 72 bytes total stack in calling 'montgomery_reduce' (external). See +stack for a full report. [MISRA 2004 Rule 16.2, required])
- error 900: (Note -- Successful completion, 1 messages produced)

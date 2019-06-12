@@ -4,14 +4,27 @@
 * Contains the public api and documentation for SHA3 digest and SHAKE implementations.
 *
 * \author John Underhill
-* \date May 13, 2018
+* \date May 07, 2019
 * \remarks For usage examples, see sha3_kat.h
 */
 
 #ifndef SHA3_H
 #define SHA3_H
 
-#include "common.h"
+#include <stdint.h>
+
+/*!
+\def KECCAK_COMPACT_PERMUTATION
+* define to use the compact form of the keccak permutation function
+* if undefined, functions use the constant time expanded keccak permutation
+*/
+//#define KECCAK_COMPACT_PERMUTATION
+
+/*!
+\def KECCAK_ROUNDS
+* the number of rounds in the compact keccak permutation
+*/
+#define KECCAK_ROUNDS 24
 
 /*!
 \def CSHAKE_DOMAIN
@@ -36,6 +49,18 @@
 * The SHA3 function domain code
 */
 #define SHA3_DOMAIN 0x06
+
+/*!
+\def SHA3_256_SIZE
+* The SHA-256 hash size in bytes
+*/
+#define SHA3_256_SIZE 32
+
+/*!
+\def SHA3_512_SIZE
+* The SHA-512 hash size in bytes
+*/
+#define SHA3_512_SIZE 64
 
 /*!
 \def SHA3_256_RATE

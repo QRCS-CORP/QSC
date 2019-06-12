@@ -250,21 +250,21 @@ bool test_keys()
 	for (i = 0; i < NTRU_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk) != MQC_STATUS_SUCCESS)
+		if (crypto_kem_keypair(pk, sk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(ctxt, key_b, pk) != MQC_STATUS_SUCCESS)
+		if (crypto_kem_enc(ctxt, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice uses Bobs response to get her secret key */
-		if (crypto_kem_dec(key_a, ctxt, sk) != MQC_STATUS_SUCCESS)
+		if (crypto_kem_dec(key_a, ctxt, sk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -299,28 +299,28 @@ bool test_invalid_sk_a()
 	for (i = 0; i < NTRU_NTESTS; i++)
 	{
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk) != MQC_STATUS_SUCCESS)
+		if (crypto_kem_keypair(pk, sk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(ctxt, key_b, pk) != MQC_STATUS_SUCCESS)
+		if (crypto_kem_enc(ctxt, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* replace secret key with random values */
-		if (sysrand_getbytes(sk, NTRU_SEED_SIZE) != MQC_STATUS_SUCCESS)
+		if (sysrand_getbytes(sk, NTRU_SEED_SIZE) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* invalid secret key, should fail */
-		if (crypto_kem_dec(key_a, ctxt, sk) == MQC_STATUS_SUCCESS)
+		if (crypto_kem_dec(key_a, ctxt, sk) == QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -356,21 +356,21 @@ bool test_invalid_ciphertext()
 
 	for (i = 0; i < NTRU_NTESTS; i++)
 	{
-		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != MQC_STATUS_SUCCESS)
+		if (sysrand_getbytes((uint8_t*)&pos, sizeof(size_t)) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* alice generates a public key */
-		if (crypto_kem_keypair(pk, sk) != MQC_STATUS_SUCCESS)
+		if (crypto_kem_keypair(pk, sk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
 		}
 
 		/* bob derives a secret key and creates a response */
-		if (crypto_kem_enc(ctxt, key_b, pk) != MQC_STATUS_SUCCESS)
+		if (crypto_kem_enc(ctxt, key_b, pk) != QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;
@@ -380,7 +380,7 @@ bool test_invalid_ciphertext()
 		ctxt[pos % NTRU_CIPHERTEXT_SIZE] ^= 23;
 
 		/* invalid ciphertext, auth should fail */
-		if (crypto_kem_dec(key_a, ctxt, sk) == MQC_STATUS_SUCCESS)
+		if (crypto_kem_dec(key_a, ctxt, sk) == QCC_STATUS_SUCCESS)
 		{
 			state = false;
 			break;

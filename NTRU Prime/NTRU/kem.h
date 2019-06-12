@@ -20,7 +20,7 @@
 * // output the cipher-text (sendb), and bob's shared key
 * crypto_kem_enc(sendb, key_b, pk);
 * // decrypt the cipher-text, and output alice's shared key
-* if (crypto_kem_dec(key_a, sendb, sk) != MQC_STATUS_SUCCESS)
+* if (crypto_kem_dec(key_a, sendb, sk) != QCC_STATUS_SUCCESS)
 * {
 *     // authentication failed, do something..
 * }
@@ -45,9 +45,9 @@
 * \param ss Pointer to output shared secret (an already allocated array of NTRU_SECRETBYTES bytes)
 * \param ct Pointer to input cipher text (an already allocated array of NTRU_CIPHERTEXT_SIZE bytes)
 * \param sk Pointer to input private key (an already allocated array of NTRU_PRIVATEKEY_SIZE bytes)
-* \return Returns one (MQC_STATUS_SUCCESS) for success
+* \return Returns one (QCC_STATUS_SUCCESS) for success
 */
-mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
+qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
 
 /**
 * \brief Generates cipher text and shared secret for given public key
@@ -55,9 +55,9 @@ mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk);
 * \param ct Pointer to output cipher text (an already allocated array of NTRU_CIPHERTEXT_SIZE bytes)
 * \param ss Pointer to output shared secret (an already allocated array of NTRU_SEED_SIZE bytes)
 * \param pk Pointer to input public key (an already allocated array of NTRU_PUBLICKEY_SIZE bytes)
-* \return Returns one (MQC_STATUS_SUCCESS) for success
+* \return Returns one (QCC_STATUS_SUCCESS) for success
 */
-mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
+qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
 
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
@@ -66,6 +66,6 @@ mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk);
 * \param sk Pointer to output private key (an already allocated array of KYBER_SECRETKEYBYTES bytes)
 * \return Returns one (KYBER_CRYPTO_SUCCESS) for success
 */
-mqc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
+qcc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk);
 
 #endif

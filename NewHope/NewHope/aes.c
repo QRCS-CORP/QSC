@@ -5,7 +5,6 @@
 /*lint -restore */
 
 /*lint -e747 */
-
 #ifdef AES_AESNI_ENABLED
 
 static void decrypt_block(uint8_t* output, const uint8_t* input, const __m128i* roundkeys, size_t rlen)
@@ -600,8 +599,11 @@ static uint32_t load_be32(const uint8_t* a, size_t offset)
 
 static uint32_t sub_byte(uint32_t rot)
 {
-	uint32_t value = rot & 0xFF;
-	uint32_t result = s_box[value];
+	uint32_t value;
+	uint32_t result;
+
+	value = rot & 0xFF;
+	result = s_box[value];
 	value = (rot >> 8) & 0xFF;
 	result |= ((uint32_t)s_box[value] << 8);
 	value = (rot >> 16) & 0xFF;
@@ -717,9 +719,9 @@ static void encrypt_block(uint8_t* output, const uint8_t* input, const uint32_t*
 	output[15] = (uint8_t)(s_box[(uint8_t)(y2)] ^ (uint8_t)(roundkeys[keyCtr]));
 }
 
-static void expand_rot(uint32_t* key, size_t keyindex, size_t keyoffset, size_t rconindex)
+static void expand_rot(uint32_t* key, uint32_t keyindex, uint32_t keyoffset, uint32_t rconindex)
 {
-	size_t subkey = keyindex - keyoffset;
+	uint32_t subkey = keyindex - keyoffset;
 	key[keyindex] = key[subkey] ^ sub_byte((uint32_t)(key[keyindex - 1] << 8) | (uint32_t)(key[keyindex - 1] >> 24) & 0xFF) ^ rcon[rconindex];
 	++keyindex;
 	++subkey;
@@ -732,9 +734,9 @@ static void expand_rot(uint32_t* key, size_t keyindex, size_t keyoffset, size_t 
 	key[keyindex] = key[subkey] ^ key[keyindex - 1];
 }
 
-static void expand_sub(uint32_t* key, size_t keyindex, size_t keyoffset)
+static void expand_sub(uint32_t* key, uint32_t keyindex, uint32_t keyoffset)
 {
-	size_t subkey = keyindex - keyoffset;
+	uint32_t subkey = keyindex - keyoffset;
 
 	key[keyindex] = sub_byte(key[keyindex - 1]) ^ key[subkey];
 	++keyindex;

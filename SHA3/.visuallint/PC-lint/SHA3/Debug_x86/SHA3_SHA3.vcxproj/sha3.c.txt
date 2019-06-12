@@ -1,0 +1,6 @@
+
+--- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3.c (C)
+
+    
+#include <stdint.h>
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3.h(14): error 322: (Error -- Unable to open include file 'stdint.h')

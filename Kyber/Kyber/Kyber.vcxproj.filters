@@ -19,9 +19,6 @@
     <Text Include="License.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cbd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="indcpa.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -43,23 +40,29 @@
     <ClInclude Include="verify.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sha3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sysrand.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="kem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rng.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sha3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="rng2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cbd.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="indcpa.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -78,14 +81,23 @@
     <ClCompile Include="verify.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sha3.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="kem.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sysrand.c">
+    <ClCompile Include="rng.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aes.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rng2.c">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,0 +1,4 @@
+"basemul",14,finite,66,"fqmul",
+"fqmul",4,finite,44,"montgomery_reduce", (external)
+"invntt",24,finite,76,"fqmul",
+"ntt",24,finite,76,"fqmul",

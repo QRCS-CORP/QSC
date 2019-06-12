@@ -1,0 +1,66 @@
+
+--- Module:   C:\Users\John\Documents\PC-Lint\policy1 (C)
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\RSXTest_vs150_Debug_x64.lnt(14): error 75: (Error -- too late to change sizes (option '-si4'))
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\RSXTest_vs150_Debug_x64.lnt(14): error 75: (Error -- too late to change sizes (option '-sp8'))
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\rsx_test.c (C)
+#include <cstdbool>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\common.h(4): error 7: (Error -- Unable to open include file 'cstdbool')
+#include <stdint.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\common.h(5): error 7: (Error -- Unable to open include file 'stdint.h')
+#include <string.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\common.h(6): error 7: (Error -- Unable to open include file 'string.h')
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(15): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\common.h')
+bool aes128_cbc_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(25): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool aes256_cbc_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(35): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool aes128_ctr_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(45): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool aes256_ctr_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(55): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool aes128_ecb_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(66): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool aes256_ecb_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(77): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool rsx256_ecb_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(87): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool rsx512_ecb_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\aes_kat.h(97): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+#include "common.h"
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(4): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\common.h')
+bool sha3_256_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(27): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool sha3_512_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(41): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool shake_128_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(54): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool shake_256_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(67): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool cshake_128_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(79): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool cshake_256_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(91): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool cshake_simple_128_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(103): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool cshake_simple_256_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(115): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool kmac_128_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(127): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+bool kmac_256_kat_test();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\sha3_kat.h(139): error 129: (Error -- declaration expected, identifier 'bool' ignored)
+#include <stdio.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\rsx_test.c(4): error 7: (Error -- Unable to open include file 'stdio.h')
+#include <intrin.h>
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\rsx_test.c(10): error 7: (Error -- Unable to open include file 'intrin.h')
+    getwchar();
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\rsx_test.c(75): error 586: (Warning -- function 'getwchar' is deprecated. [MISRA 2012 Rule 21.6, required])
+        printf("*** Testing SHA3 digests, SHAKE, and cSHAKE implementations *** \n");
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\rsx_test.c(278): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2012 Rule 21.6, required])
+        printf("\n");
+C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\RSX\RSX\rsx_test.c(280): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2012 Rule 21.6, required])
+
+--- Global Wrap-up
+
+ error 900: (Note -- Successful completion, 30 messages produced)

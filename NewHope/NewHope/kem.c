@@ -32,7 +32,7 @@ bool crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 	/* append the value s for pseudo-random output on reject */
 	ret = randombytes(sk, NEWHOPE_SYMBYTES);                                        
 
-	return ret == 0;
+	return (bool)(ret == 0);
 }
 
 bool crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
@@ -58,13 +58,13 @@ bool crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	{
 		ct[i + NEWHOPE_CPAPKE_CIPHERTEXTBYTES] = kcoinsd[i + 2 * NEWHOPE_SYMBYTES];
 	}
-
+	size_t x = NEWHOPE_CIPHERTEXT_SIZE;
 	/* overwrite coins in kcoinsd with h(c) */
 	shake256(kcoinsd + NEWHOPE_SYMBYTES, NEWHOPE_SYMBYTES, ct, NEWHOPE_CIPHERTEXT_SIZE);
 	/* hash concatenation of pre-k and h(c) to ss */
 	shake256(ss, NEWHOPE_SYMBYTES, kcoinsd, 2 * NEWHOPE_SYMBYTES);
 
-	return (ret == 0);
+	return (bool)(ret == 0);
 }
 
 bool crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
@@ -103,5 +103,5 @@ bool crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 	/* hash concatenation of pre-k and h(c) to k */
 	shake256(ss, NEWHOPE_SYMBYTES, kcoinsd, 2 * NEWHOPE_SYMBYTES);
 
-	return (fail == 0);
+	return (bool)(fail == 0);
 }

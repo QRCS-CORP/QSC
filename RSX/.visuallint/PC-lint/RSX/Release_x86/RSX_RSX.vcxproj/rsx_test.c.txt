@@ -1,0 +1,69 @@
+
+--- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c (C)
+#include "common.h"
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\aes_kat.h(15): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\common.h')
+#include "common.h"
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\sha3_kat.h(4): error 537: (Warning -- Repeated include file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\common.h')
+    return getchar();
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(76): error 586: (Warning -- function 'getchar' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the AES128 CBC KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(87): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the AES128 CBC KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(91): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the AES256 CBC KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(96): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the AES256 CBC KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(100): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the AES128 CTR KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(105): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the AES128 CTR KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(109): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the AES256 CTR KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(114): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the AES256 CTR KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(118): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the AES128 ECB KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(123): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the AES128 ECB KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(127): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the AES256 ECB KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(132): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the AES256 ECB KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(136): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the RSX256 ECB KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(141): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the RSX256 ECB KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(145): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Success! Passed the RSX512 ECB KAT test. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(150): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Failure! Failed the RSX512 ECB KAT test. \n \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(154): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("AES-NI is available on this system. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(165): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Add the RSX_AESNI_ENABLED flag to the preprocessor definitions to test AES-NI implementation. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(166): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("\n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(167): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("AES-NI was not detected on this system. \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(171): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("*** Test using the NIST SP800-38a Known Answer Tests *** \n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(182): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("\n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(183): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("\n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(185): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("\n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(187): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("Completed! Press any key to close..");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(188): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+    return 0;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(192): error 438: (Warning -- Last value assigned to variable 'ret' (defined at line 160) not used [MISRA C++ Rule 0-1-6], [MISRA C++ Rule 0-1-9])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(160): error 830: (Info -- Location cited in prior message)
+}
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(193): error 550: (Warning -- Symbol 'ret' (line 160) not accessed [MISRA C++ Rule 0-1-4])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\RSX\RSX\rsx_test.c(160): error 830: (Info -- Location cited in prior message)
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'main' is finite, requires 80 bytes total stack in calling 'has_aes_ni'. See +stack for a full report. [MISRA C++ Rule 7-5-4], [MISRA 2004 Rule 16.2, required])
+ error 900: (Note -- Successful completion, 33 messages produced)

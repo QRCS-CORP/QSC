@@ -3,13 +3,15 @@
 * \brief <b>Kyber constant-time functions</b> \n
 * This is an internal class.
 *
-* \date January 07, 2018
+* \date May 09, 2019
 */
 
 #ifndef KYBER_VERIFY_H
 #define KYBER_VERIFY_H
 
-#include "common.h"
+#include <stdint.h>
+/* jgu -suppressing repeated include warning, using include guards */
+/*lint -e537 */
 
 /**
 * \brief Copy len bytes from x to r if b is 1;

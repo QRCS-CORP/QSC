@@ -18,15 +18,27 @@
     <ClCompile Include="kyber_test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sha3_kat.c">
+    <ClCompile Include="test_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sysrand.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aes_kat.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sha3_kat.h">
+    <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common.h">
+    <ClInclude Include="test_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sysrand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aes_kat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

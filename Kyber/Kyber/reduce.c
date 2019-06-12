@@ -1,46 +1,38 @@
 #include "reduce.h"
 #include "params.h"
 
-/* inverse_mod(q,2^18) */
-static const uint32_t QINV = 7679;
-static const uint32_t RLOG = 18;
+/* jgu info notice checked and suppressed */
+/*lint -e702 */
 
-
-uint16_t montgomery_reduce(uint32_t x)
+int16_t montgomery_reduce(int32_t a)
 {
-	uint32_t u;
+	int32_t t;
+	int16_t u;
 
-	u = (x * QINV);
-	u &= ((1 << RLOG) - 1);
-	u *= KYBER_Q;
-	x = x + u;
+	u = (int16_t)(a * QINV);
+	t = (int32_t)(u * KYBER_Q);
+	t = a - t;
+	t >>= 16;
 
-	return x >> RLOG;
+	return (int16_t)t;
 }
 
-uint16_t barrett_reduce(uint16_t x)
+int16_t barrett_reduce(int16_t a) 
 {
-	uint32_t u;
+	const int32_t V = (1U << 26) / KYBER_Q + 1;
+	int32_t t;
 
-	/* Note: newhope is: u = (((uint32_t)x * 5) >> 16); */
-	u = x >> 13;
-	u *= KYBER_Q;
-	x -= u;
+	t = V * a;
+	t >>= 26;
+	t *= KYBER_Q;
 
-	return x;
+	return (int16_t)(a - t);
 }
 
-uint16_t freeze(uint16_t x)
+int16_t csubq(int16_t a) 
 {
-	uint16_t m;
-	uint16_t r;
-	int16_t c;
+	a -= KYBER_Q;
+	a += (a >> 15) & KYBER_Q;
 
-	r = barrett_reduce(x);
-	m = r - KYBER_Q;
-	c = m;
-	c >>= 15;
-	r = m ^ ((r ^ m) & c);
-
-	return r;
+	return a;
 }

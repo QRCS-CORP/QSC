@@ -1,5 +1,0 @@
-"gf_diff",4,finite,4,"no function",
-"gf_inv",6,finite,34,"gf_mul",
-"gf_mul",20,finite,20,"no function",
-"gf_mulm",268,finite,296,"gf_mul",
-"gf_sq",8,finite,8,"no function",

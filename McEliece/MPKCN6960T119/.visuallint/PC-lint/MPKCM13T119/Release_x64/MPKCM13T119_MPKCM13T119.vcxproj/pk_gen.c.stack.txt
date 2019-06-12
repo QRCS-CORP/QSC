@@ -1,6 +1,0 @@
-"_wcstok",16,finite,16,"no function",
-"memcpy_s",32,finite,32,"no function",
-"memmove_s",32,finite,32,"no function",
-"pk_gen",28154,finite,28194,"malloc", (external)
-"strnlen_s",16,finite,16,"no function",
-"wcsnlen_s",16,finite,16,"no function",

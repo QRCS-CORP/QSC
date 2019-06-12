@@ -1,5 +1,0 @@
-"get_response",0,finite,40,"getwchar", (external)
-"mceliece_test_run",0,finite,40,"printf_s", (external)
-"test_invalid_ciphertext",0,finite,40,"memset", (external)
-"test_invalid_secretkey",0,finite,40,"memset", (external)
-"test_operations",0,finite,40,"memset", (external)

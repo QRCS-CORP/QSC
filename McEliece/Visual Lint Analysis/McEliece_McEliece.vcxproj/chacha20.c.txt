@@ -1,7 +1,0 @@
-
---- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\McBits\McEliece\McEliece\chacha20.c (C)
-
---- Global Wrap-up
-
- error 974: (Note -- Worst case function for stack usage: 'chacha_transform' is finite, requires 216 bytes total stack in calling 'transform64'. See +stack for a full report. [MISRA 2004 Rule 16.2, required])
- error 900: (Note -- Successful completion, 1 messages produced)

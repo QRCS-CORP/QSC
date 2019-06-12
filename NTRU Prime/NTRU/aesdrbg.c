@@ -30,11 +30,11 @@ static void increment8(uint8_t* output)
 	}
 }
 
-mqc_status aes128_generate(uint8_t* output, size_t outlen, uint8_t* nonce, const uint8_t* key)
+qcc_status aes128_generate(uint8_t* output, size_t outlen, uint8_t* nonce, const uint8_t* key)
 {
 	uint8_t input[16];
 	size_t offset;
-	mqc_status status;
+	qcc_status status;
 
 #if defined(AES_AESNI_ENABLED)
 	__m128i rks[AES128_ROUNDKEY_DIMENSION];
@@ -67,11 +67,11 @@ mqc_status aes128_generate(uint8_t* output, size_t outlen, uint8_t* nonce, const
 	return status;
 }
 
-mqc_status aes256_generate(uint8_t* output, size_t outlen, uint8_t* nonce, const uint8_t* key)
+qcc_status aes256_generate(uint8_t* output, size_t outlen, uint8_t* nonce, const uint8_t* key)
 {
 	uint8_t input[16];
 	size_t offset;
-	mqc_status status;
+	qcc_status status;
 
 #if defined(AES_AESNI_ENABLED)
 	__m128i rks[AES256_ROUNDKEY_DIMENSION];

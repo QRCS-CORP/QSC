@@ -1,0 +1,3 @@
+"crypto_kem_dec",1308,finite,1348,"indcpa_dec", (external)
+"crypto_kem_enc",144,finite,184,"sysrand_getbytes", (external)
+"crypto_kem_keypair",16,finite,56,"indcpa_keypair", (external)

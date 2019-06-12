@@ -38,14 +38,15 @@
 #ifndef AES_H
 #define AES_H
 
-//#define AES_AESNI_ENABLED /* just for testing, use preprocessor */
-
-#include <cstdbool>
+#include <stdbool.h>
 #include <stdint.h>
-
-/* bogus integral type warnings */
+/* jgu -suppressing repeated include warning, using include guards */
+/*lint -e537 */
+/* jgu -suppressing boolean/int integral type warnings */
 /*lint -e970 */
 /*lint -e731 */
+
+//#define AES_AESNI_ENABLED /* just for testing, use preprocessor */
 
 #ifdef AES_AESNI_ENABLED
 #	include <wmmintrin.h>

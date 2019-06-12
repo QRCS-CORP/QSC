@@ -1,0 +1,16 @@
+"cbd",28,finite,68,"le8to32", (external)
+"poly_add",16,finite,16,"no function",
+"poly_basemul",16,finite,56,"basemul", (external)
+"poly_compress",28,finite,84,"poly_csubq",
+"poly_csubq",8,finite,48,"csubq", (external)
+"poly_decompress",12,finite,12,"no function",
+"poly_frombytes",12,finite,12,"no function",
+"poly_frommont",12,finite,52,"montgomery_reduce", (external)
+"poly_frommsg",18,finite,18,"no function",
+"poly_getnoise",176,finite,252,"cbd",
+"poly_invntt",4,finite,44,"invntt", (external)
+"poly_ntt",4,finite,60,"poly_reduce",
+"poly_reduce",8,finite,48,"barrett_reduce", (external)
+"poly_sub",16,finite,16,"no function",
+"poly_tobytes",16,finite,72,"poly_csubq",
+"poly_tomsg",18,finite,74,"poly_csubq",

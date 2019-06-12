@@ -1,0 +1,28 @@
+"_MallocaComputeSize",0,finite,0,"no function",
+"_MarkAllocaS",8,finite,8,"no function",
+"_freea",4,finite,4,"no function",
+"_mm_cvtpi16_ps",8,finite,8,"no function",
+"_mm_cvtpi32x2_ps",16,finite,16,"no function",
+"_mm_cvtpi8_ps",8,finite,8,"no function",
+"_mm_cvtps_pi16",16,finite,16,"no function",
+"_mm_cvtps_pi8",16,finite,16,"no function",
+"_mm_cvtpu16_ps",8,finite,8,"no function",
+"_mm_cvtpu8_ps",8,finite,8,"no function",
+"_wcstok",8,finite,8,"no function",
+"decrypt_block",40,finite,80,"_mm_loadu_si128", (external)
+"encrypt_block",40,finite,80,"_mm_loadu_si128", (external)
+"expand_rot",24,finite,64,"_mm_shuffle_epi32", (external)
+"expand_sub",24,finite,64,"_mm_aeskeygenassist_si128", (external)
+"increment_be8",8,finite,8,"no function",
+"memcpy_s",16,finite,16,"no function",
+"memmove_s",16,finite,16,"no function",
+"rsx_cbc_decrypt",36,finite,124,"decrypt_block",
+"rsx_cbc_encrypt",20,finite,108,"encrypt_block",
+"rsx_ctr_transform",20,finite,108,"encrypt_block",
+"rsx_ecb_decrypt",12,finite,100,"decrypt_block",
+"rsx_ecb_encrypt",12,finite,100,"encrypt_block",
+"rsx_initialize",48,finite,604,"secure_expand",
+"secure_expand",508,finite,548,"shake256", (external)
+"standard_expand",12,finite,84,"expand_rot",
+"strnlen_s",4,finite,4,"no function",
+"wcsnlen_s",4,finite,4,"no function",

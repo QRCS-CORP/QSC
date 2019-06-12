@@ -1,0 +1,222 @@
+
+--- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c (C)
+    for (size_t i = 0; i < count; ++i)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(24): error 520: (Warning -- Highest operation, symbol reference 'size_t', lacks side-effects)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(24): error 10: (Error -- Expecting ';')
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(24): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(24): error 574: (Warning -- Signed-unsigned mix with relational)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(24): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(24): error 52: (Error -- Expected an lvalue)
+        a[i] = 0;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(26): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(26): error 63: (Error -- Expected an lvalue)
+}
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(28): error 550: (Warning -- Symbol 'a' (line 22) not accessed)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(22): error 830: (Info -- Location cited in prior message)
+    for (size_t i = 0; i < count; ++i)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(32): error 520: (Warning -- Highest operation, symbol reference 'size_t', lacks side-effects)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(32): error 10: (Error -- Expecting ';')
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(32): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(32): error 574: (Warning -- Signed-unsigned mix with relational)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(32): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(32): error 52: (Error -- Expected an lvalue)
+        a[i] = 0;
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(34): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(34): error 63: (Error -- Expected an lvalue)
+}
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(36): error 550: (Warning -- Symbol 'a' (line 30) not accessed)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(30): error 830: (Info -- Location cited in prior message)
+    for (size_t i = 0; i < count; ++i)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(40): error 520: (Warning -- Highest operation, symbol reference 'size_t', lacks side-effects)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(40): error 10: (Error -- Expecting ';')
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(40): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(40): error 574: (Warning -- Signed-unsigned mix with relational)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(40): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(40): error 52: (Error -- Expected an lvalue)
+        if (i != 0 && i % line == 0)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(42): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(42): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(42): error 573: (Warning -- Signed-unsigned mix with divide)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(42): error 587: (Warning -- Predicate '==' can be pre-determined and always evaluates to True)
+            printf("\n");
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(44): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+        printf("0x%02X, ", a[i]);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(47): error 586: (Warning -- function 'printf' is deprecated. [MISRA 2004 Rule 20.9, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(47): error 40: (Error -- Undeclared identifier 'i' [MISRA 2004 Rule 1.2, required])
+    uint64_t state[25];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(128): error 522: (Warning -- Highest operation, symbol reference 'uint64_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(128): error 10: (Error -- Expecting ';')
+    uint8_t hash[200];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(129): error 522: (Warning -- Highest operation, symbol reference 'uint8_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(129): error 10: (Error -- Expecting ';')
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(131): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(132): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_256_RATE, msg0, 0, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(133): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(134): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(134): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp0, 32) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(136): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(141): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(142): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_256_RATE, msg24, 3, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(143): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(144): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(144): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp24, 32) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(146): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(151): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(152): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_256_RATE, msg448, 56, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(153): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(154): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(154): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp448, 32) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(156): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(161): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(162): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_256_RATE, msg1600, 200, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(163): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_256_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(164): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(164): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp1600, 32) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(166): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    uint64_t state[25];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(259): error 522: (Warning -- Highest operation, symbol reference 'uint64_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(259): error 10: (Error -- Expecting ';')
+    uint8_t hash[200];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(260): error 522: (Warning -- Highest operation, symbol reference 'uint8_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(260): error 10: (Error -- Expecting ';')
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(262): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(263): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_512_RATE, msg0, 0, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(264): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(265): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(265): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp0, 64) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(267): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(272): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(273): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_512_RATE, msg24, 3, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(274): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(275): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(275): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp24, 64) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(277): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(282): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(283): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_512_RATE, msg448, 56, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(284): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(285): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(285): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp448, 64) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(287): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear8(hash, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(292): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(293): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_absorb(state, SHA3_512_RATE, msg1600, 200, SHA3_DOMAIN);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(294): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    keccak_squeezeblocks(hash, 1, state, SHA3_512_RATE);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(295): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(295): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp1600, 64) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(297): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    uint64_t state[25];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(414): error 522: (Warning -- Highest operation, symbol reference 'uint64_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(414): error 10: (Error -- Expecting ';')
+    uint8_t hash[SHAKE128_RATE * 4];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(415): error 522: (Warning -- Highest operation, symbol reference 'uint8_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(415): error 10: (Error -- Expecting ';')
+    clear8(hash, SHAKE128_RATE * 4);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(417): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(418): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    shake128_absorb(state, msg1600, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(419): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    shake128_squeezeblocks(hash, 4, state);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(420): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(420): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp1600, 512) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(422): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    uint64_t state[25];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(539): error 522: (Warning -- Highest operation, symbol reference 'uint64_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(539): error 10: (Error -- Expecting ';')
+    uint8_t hash[SHAKE256_RATE * 4];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(540): error 522: (Warning -- Highest operation, symbol reference 'uint8_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(540): error 10: (Error -- Expecting ';')
+    clear8(hash, SHAKE256_RATE * 4);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(542): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(543): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    shake256_absorb(state, msg1600, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(544): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    shake256_squeezeblocks(hash, 4, state);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(545): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(545): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp1600, 512) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(547): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    uint64_t state[25];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(664): error 522: (Warning -- Highest operation, symbol reference 'uint64_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(664): error 10: (Error -- Expecting ';')
+    uint8_t hash[CSHAKE128_RATE * 4];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(665): error 522: (Warning -- Highest operation, symbol reference 'uint8_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(665): error 10: (Error -- Expecting ';')
+    clear8(hash, CSHAKE128_RATE * 4);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(667): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(668): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    cshake128_simple_absorb(state, 1, msg1600, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(669): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    cshake128_simple_squeezeblocks(hash, 4, state);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(670): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(670): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp1600, 512) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(672): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    uint64_t state[25];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(789): error 522: (Warning -- Highest operation, symbol reference 'uint64_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(789): error 10: (Error -- Expecting ';')
+    uint8_t hash[CSHAKE256_RATE * 4];
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(790): error 522: (Warning -- Highest operation, symbol reference 'uint8_t', lacks side-effects [MISRA 2004 Rule 14.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(790): error 10: (Error -- Expecting ';')
+    clear8(hash, CSHAKE256_RATE * 4);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(792): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+    clear64(state, 25);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(793): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    cshake256_simple_absorb(state, 1, msg1600, 200);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(794): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    cshake256_simple_squeezeblocks(hash, 4, state);
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(795): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(795): error 40: (Error -- Undeclared identifier 'state' [MISRA 2004 Rule 1.2, required])
+    if (are_equal8(hash, exp1600, 512) == SHA3_STATUS_FAILURE)
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(797): error 40: (Error -- Undeclared identifier 'hash' [MISRA 2004 Rule 1.2, required])
+
+    --- Wrap-up for Module: C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c
+
+C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c(38): error 528: (Warning -- Symbol 'print_array8(const uint8_t *, size_t, size_t)' (line 38, file C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\sha3_kat.c) not referenced)
+
+--- Global Wrap-up
+
+ error 974: (Note -- Worst case function for stack usage: 'cshake_simple_128_kat_test' is finite, requires 1781 bytes total stack in calling 'cshake128_simple' (external). See +stack for a full report. [MISRA 2004 Rule 16.2, required])
+ error 900: (Note -- Successful completion, 131 messages produced)

@@ -1,0 +1,10 @@
+C:\Users\John\Documents\PC-Lint\std.lnt  52  Warning 686: Option '-elib(*)' is
+    suspicious because of 'the likelihood of causing meaningless output';
+    receiving a syntax error in a library file most likely means something is
+    wrong with your Lint configuration
+
+--- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\Misc C\Sphincs\SphincsPlus\fors.c (C)
+
+--- Global Wrap-up
+
+ error 900: (Note -- Successful completion, 1 messages produced)

@@ -1,0 +1,9 @@
+"_wcstok",16,finite,16,"no function",
+"memcpy_s",32,finite,32,"no function",
+"memmove_s",32,finite,32,"no function",
+"sphincs_generate",628,finite,668,"set_layer_addr", (external)
+"sphincs_sign",800,finite,840,"initialize_hash_function", (external)
+"sphincs_verify",36560,finite,36600,"initialize_hash_function", (external)
+"strnlen_s",8,finite,8,"no function",
+"wcsnlen_s",8,finite,8,"no function",
+"wots_gen_leaf",6592,finite,6632,"set_type", (external)

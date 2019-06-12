@@ -28,7 +28,7 @@
 */
 #define MATRIX_GENERATOR_CSHAKE
 
-/* Internal Constants: -Read Only- */
+/* Don't change parameters below this line */
 
 /*!
 \def KYBER_N
@@ -40,42 +40,62 @@
 \def KYBER_Q
 * Read Only: The modulus prime factor Q
 */
-#define KYBER_Q 7681
+#define KYBER_Q 3329
 
 /*!
 \def KYBER_ETA
 * Read Only: The binomial distribution factor
 */
-#if (KYBER_K == 2)
-	/* Kyber512 */
-#	define KYBER_ETA 5
-#elif (KYBER_K == 3) 
-	/* Kyber768 */
-#	define KYBER_ETA 4
-#elif (KYBER_K == 4) 
-	/* Kyber1024 */
-#	define KYBER_ETA 3
-#else
-#	error "KYBER_K must be in {2,3,4}"
-#endif
+#define KYBER_ETA 2
 
 /*!
-\def KYBER_KEYBYTES
-* Read Only: The size in bytes of shared key, hashes, and seeds
+\def KYBER_SYMBYTES
+* Read Only: The size in bytes of hashes, and seeds
 */
-#define KYBER_KEYBYTES 32
+#define KYBER_SYMBYTES 32   /* size in bytes of hashes, and seeds */
+
+/*!
+\def KYBER_SHAREDSECRET_SIZE
+* Read Only: The byte size of the shared secret key
+*/
+#define KYBER_SHAREDSECRET_SIZE 32
 
 /*!
 \def KYBER_POLYBYTES
 * Read Only: The secret key base multiplier
 */
-#define KYBER_POLYBYTES 416
+#define KYBER_POLYBYTES 384
+
+
+/*!
+\def KYBER_POLYVECBYTES
+* Read Only: The base size of the compressed public key polynolial
+*/
+#if KYBER_K == 2
+#define KYBER_POLYVECBASEBYTES 320
+#elif KYBER_K == 3
+#define KYBER_POLYVECBASEBYTES 320
+#elif KYBER_K == 4
+#define KYBER_POLYVECBASEBYTES 352
+#endif
 
 /*!
 \def KYBER_POLYCOMPRESSEDBYTES
 * Read Only: The ciphertext compressed byte size
 */
+#if KYBER_K == 2
 #define KYBER_POLYCOMPRESSEDBYTES 96
+#elif KYBER_K == 3
+#define KYBER_POLYCOMPRESSEDBYTES 128
+#elif KYBER_K == 4
+#define KYBER_POLYCOMPRESSEDBYTES 160
+#endif
+
+/*!
+\def KYBER_POLYVECCOMPRESSEDBYTES
+* Read Only: The base size of the public key
+*/
+#define KYBER_POLYVECCOMPRESSEDBYTES (KYBER_K * KYBER_POLYVECBASEBYTES)
 
 /*!
 \def KYBER_POLYVECBYTES
@@ -84,26 +104,20 @@
 #define KYBER_POLYVECBYTES (KYBER_K * KYBER_POLYBYTES)
 
 /*!
-\def KYBER_POLYVECCOMPRESSEDBYTES
-* Read Only: The base size of the public key
-*/
-#define KYBER_POLYVECCOMPRESSEDBYTES (KYBER_K * 352)
-
-/*!
 \def KYBER_INDCPA_MSGBYTES
 *  Read Only: The message size in bytes
 */
-#define KYBER_INDCPA_MSGBYTES KYBER_KEYBYTES
+#define KYBER_INDCPA_MSGBYTES KYBER_SYMBYTES
 
 /*!
 \def KYBER_INDCPA_PUBLICKEYBYTES
 * Read Only: The base INDCPA formatted public key size in bytes
 */
-#define KYBER_INDCPA_PUBLICKEYBYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_KEYBYTES)
+#define KYBER_INDCPA_PUBLICKEYBYTES (KYBER_POLYVECBYTES + KYBER_SYMBYTES)
 
 /*!
 \def KYBER_INDCPA_SECRETKEYBYTES
-* Read Only: The base INDCPA formatted secret key size in bytes
+* Read Only: The base INDCPA formatted private key size in bytes
 */
 #define KYBER_INDCPA_SECRETKEYBYTES (KYBER_POLYVECBYTES)
 
@@ -114,21 +128,21 @@
 #define KYBER_INDCPA_BYTES (KYBER_POLYVECCOMPRESSEDBYTES + KYBER_POLYCOMPRESSEDBYTES)
 
 /*!
-\def KYBER_PUBLICKEYBYTES
+\def KYBER_PUBLICKEY_SIZE
 * Read Only: The public key size in bytes
 */
-#define KYBER_PUBLICKEYBYTES (KYBER_INDCPA_PUBLICKEYBYTES)
+#define KYBER_PUBLICKEY_SIZE (KYBER_INDCPA_PUBLICKEYBYTES)
 
 /*!
-\def KYBER_SECRETKEYBYTES
-* Read Only: The secret key size in bytes
+\def KYBER_INDCPA_SECRETKEYBYTES
+* Read Only: The base INDCPA formatted secret key size in bytes
 */
-#define KYBER_SECRETKEYBYTES (KYBER_INDCPA_SECRETKEYBYTES +  KYBER_INDCPA_PUBLICKEYBYTES + (2 * KYBER_KEYBYTES))
+#define KYBER_SECRETKEY_SIZE (KYBER_INDCPA_SECRETKEYBYTES +  KYBER_INDCPA_PUBLICKEYBYTES + 2 * KYBER_SYMBYTES)
 
 /*!
-\def KYBER_CIPHERTEXTBYTES
+\def KYBER_CIPHERTEXT_SIZE
 * Read Only: The cipher-text size in bytes
 */
-#define KYBER_CIPHERTEXTBYTES KYBER_INDCPA_BYTES
+#define KYBER_CIPHERTEXT_SIZE KYBER_INDCPA_BYTES
 
 #endif

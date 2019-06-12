@@ -1,0 +1,8 @@
+"polyvec_add",16,finite,56,"poly_add", (external)
+"polyvec_compress",36,finite,76,"freeze", (external)
+"polyvec_decompress",16,finite,16,"no function",
+"polyvec_frombytes",12,finite,52,"poly_frombytes", (external)
+"polyvec_invntt",8,finite,48,"poly_invntt", (external)
+"polyvec_ntt",8,finite,48,"poly_ntt", (external)
+"polyvec_pointwise_acc",22,finite,62,"montgomery_reduce", (external)
+"polyvec_tobytes",12,finite,52,"poly_tobytes", (external)

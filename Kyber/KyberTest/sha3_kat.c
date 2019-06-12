@@ -78,7 +78,6 @@ bool sha3_256_kat_test()
 	uint8_t msg1600[200];
 	uint8_t output[32];
 	uint64_t state[25];
-	size_t offset;
 	bool status;
 
 	hex_to_bin("A7FFC6F8BF1ED76651C14756A061D662F580FF4DE43B49FA82D80A4B80F8434A", exp0, 32);
@@ -167,7 +166,6 @@ bool sha3_256_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	offset = 0;
 
 	/* absorb a rate sized block */
 	sha3_blockupdate(state, SHA3_256_RATE, msg1600, 1);
@@ -195,7 +193,6 @@ bool sha3_512_kat_test()
 	uint8_t msg1600[200];
 	uint8_t output[64];
 	uint64_t state[25];
-	size_t offset;
 	bool status;
 
 	hex_to_bin("A69F73CCA23A9AC5C8B567DC185A756E97C982164FE25859E0D1DCC1475C80A6"
@@ -286,7 +283,6 @@ bool sha3_512_kat_test()
 
 	clear8(hash, 200);
 	clear64(state, 25);
-	offset = 0;
 
 	/* absorb a rate sized block */
 	sha3_blockupdate(state, SHA3_512_RATE, msg1600, 1);
@@ -491,6 +487,8 @@ bool cshake_128_kat_test()
 	uint64_t state[25];
 	bool status;
 
+	name[0] = 0;
+
 	hex_to_bin("456D61696C205369676E6174757265", cust, 15);
 
 	hex_to_bin("C1C36925B6409A04F1B504FCBCA9D82B4017277CB5ED2B2065FC1D3814D5AAF5", exp256a, 32);
@@ -553,6 +551,8 @@ bool cshake_256_kat_test()
 	uint8_t output[64];
 	uint64_t state[25];
 	bool status;
+
+	name[0] = 0;
 
 	hex_to_bin("456D61696C205369676E6174757265", cust, 15);
 
@@ -799,6 +799,8 @@ bool kmac_128_kat_test()
 	uint64_t state[25];
 	bool status;
 
+	cust0[0] = 0;
+
 	hex_to_bin("4D7920546167676564204170706C69636174696F6E", cust168, 21);
 
 	hex_to_bin("E5780B0D3EA6F7D3A429C5706AA43A00FADBD7D49628839E3187243F456EE14E", exp256a, 32);
@@ -874,6 +876,8 @@ bool kmac_256_kat_test()
 	uint8_t output[64];
 	uint64_t state[25];
 	bool status;
+
+	cust0[0] = 0;
 
 	hex_to_bin("4D7920546167676564204170706C69636174696F6E", cust168, 21);
 

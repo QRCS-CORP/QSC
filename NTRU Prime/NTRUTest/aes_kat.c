@@ -70,7 +70,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	state = true;
 
 	/* test encryption */
-	if (aes_initialize(rks, key, true, AES128) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES128) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -88,7 +88,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	memcpy(&ivc[0], &iv[0], 16);
 
 	/* test decryption */
-	if (aes_initialize(rks, key, false, AES128) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, false, AES128) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -122,7 +122,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	state = true;
 
 	/* test encryption */
-	if (aes_initialize(rks, key, true, AES256) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES256) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -140,7 +140,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	memcpy(&ivc[0], &iv[0], 16);
 
 	/* test decryption */
-	if (aes_initialize(rks, key, false, AES256) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, false, AES256) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -174,7 +174,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	state = true;
 
 	/* test encryption */
-	if (aes_initialize(rks, key, true, AES128) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES128) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -192,7 +192,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	memcpy(&ncc[0], &nonce[0], 16);
 
 	/* test decryption */
-	if (aes_initialize(rks, key, true, AES128) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES128) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -226,7 +226,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	state = true;
 
 	/* test encryption */
-	if (aes_initialize(rks, key, true, AES256) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES256) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -244,7 +244,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	memcpy(&ncc[0], &nonce[0], 16);
 
 	/* test decryption */
-	if (aes_initialize(rks, key, true, AES256) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES256) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -276,7 +276,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	state = true;
 
 	/* test encryption */
-	if (aes_initialize(rks, key, true, AES128) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES128) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -292,7 +292,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	}
 
 	/* test decryption */
-	if (aes_initialize(rks, key, false, AES128) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, false, AES128) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -324,7 +324,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	state = true;
 
 	/* test encryption */
-	if (aes_initialize(rks, key, true, AES256) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, true, AES256) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}
@@ -340,7 +340,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	}
 
 	/* test decryption */
-	if (aes_initialize(rks, key, false, AES256) != MQC_STATUS_SUCCESS)
+	if (aes_initialize(rks, key, false, AES256) != QCC_STATUS_SUCCESS)
 	{
 		state = false;
 	}

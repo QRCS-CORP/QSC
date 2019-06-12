@@ -3,13 +3,15 @@
 * \brief <b>Kyber polynomial vector functions</b> \n
 * This is an internal class.
 *
-* \date January 07, 2018
+* \date May 09, 2019
 */
 
 #ifndef KYBER_POLYVEC_H
 #define KYBER_POLYVEC_H
 
 #include "poly.h"
+/* jgu -suppressing repeated include warning, using include guards */
+/*lint -e537 */
 
 /**
 * \struct polyvec
@@ -29,7 +31,7 @@ typedef struct
 * \param r Pointer to output byte array
 * \param a Pointer to input vector of polynomials
 */
-void polyvec_compress(uint8_t* r, const polyvec* a);
+void polyvec_compress(uint8_t* r, polyvec* a);
 
 /**
 * \brief De-serialize and decompress vector of polynomials;
@@ -46,7 +48,7 @@ void polyvec_decompress(polyvec* r, const uint8_t* a);
 * \param r Pointer to output byte array
 * \param a Pointer to input vector of polynomials
 */
-void polyvec_tobytes(uint8_t* r, const polyvec* a);
+void polyvec_tobytes(uint8_t* r, polyvec* a);
 
 /**
 * \brief De-serialize vector of polynomials; inverse of polyvec_tobytes.
@@ -87,5 +89,21 @@ void polyvec_pointwise_acc(poly* r, const polyvec* a, const polyvec* b);
 * \param b Pointer to second input vector of polynomials
 */
 void polyvec_add(polyvec* r, const polyvec* a, const polyvec* b);
+
+/**
+* \brief Applies Barrett reduction to each coefficient
+*  of each element of a vector of polynomials
+*
+* \param r Pointer to in/output vector of polynomials
+*/
+void polyvec_reduce(polyvec* r);
+
+/**
+* \brief Applies conditional subtraction of q to each coefficient
+* of each element of a vector of polynomials.
+*
+* \param r Pointer to in/output vector of polynomials
+*/
+void polyvec_csubq(polyvec *r);
 
 #endif

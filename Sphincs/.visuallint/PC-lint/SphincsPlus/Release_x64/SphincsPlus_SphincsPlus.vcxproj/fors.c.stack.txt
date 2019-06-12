@@ -1,0 +1,11 @@
+"_wcstok",16,finite,16,"no function",
+"fors_gen_leaf",64,finite,272,"fors_sk_to_leaf",
+"fors_gen_sk",24,finite,64,"prf_addr", (external)
+"fors_pk_from_sig",2408,finite,2616,"fors_sk_to_leaf",
+"fors_sign",2924,finite,2996,"fors_gen_sk",
+"fors_sk_to_leaf",160,finite,200,"thash", (external)
+"memcpy_s",32,finite,32,"no function",
+"memmove_s",32,finite,32,"no function",
+"message_to_indices",40,finite,40,"no function",
+"strnlen_s",8,finite,8,"no function",
+"wcsnlen_s",8,finite,8,"no function",

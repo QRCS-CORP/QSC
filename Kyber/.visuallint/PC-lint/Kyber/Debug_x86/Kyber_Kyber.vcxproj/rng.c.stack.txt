@@ -1,0 +1,11 @@
+"_wcstok",8,finite,8,"no function",
+"aes256_ecb",252,finite,292,"aes_initialize", (external)
+"memcpy_s",16,finite,16,"no function",
+"memmove_s",16,finite,16,"no function",
+"randombytes",36,finite,416,"randombytes_update",
+"randombytes_init",64,finite,444,"randombytes_update",
+"randombytes_update",72,finite,372,"aes256_ecb",
+"seedexpander",24,finite,324,"aes256_ecb",
+"seedexpander_init",20,finite,60,"memcpy", (external)
+"strnlen_s",8,finite,8,"no function",
+"wcsnlen_s",8,finite,8,"no function",

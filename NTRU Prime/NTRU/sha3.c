@@ -14,6 +14,8 @@
 
 #include "sha3.h"
 
+/*lint -e747 */
+
 /* Internal */
 
 static void clear8(uint8_t* a, size_t count)
@@ -42,7 +44,10 @@ static size_t left_encode(uint8_t* buffer, size_t value)
 	size_t n;
 	size_t v;
 
-	for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
+	/* jgu checked false warning */
+	/*lint -save -e722 */
+	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8);
+	/*lint -restore */
 
 	if (n == 0)
 	{
@@ -78,7 +83,10 @@ static size_t right_encode(uint8_t* buffer, size_t value)
 	size_t n;
 	size_t v;
 
-	for (v = value, n = 0; v && (n < sizeof(size_t)); ++n, v >>= 8);
+	/* jgu checked false warning */
+	/*lint -save -e722 */
+	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8);
+	/*lint -restore */
 
 	if (n == 0)
 	{
@@ -110,6 +118,8 @@ static void store64(uint8_t* a, uint64_t x)
 		x >>= 8;
 	}
 }
+
+/* KECCAK */
 
 static void keccak_absorb(uint64_t* state, size_t rate, const uint8_t* input, size_t inplen, uint8_t domain)
 {
@@ -167,7 +177,350 @@ static void keccak_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblock
 	}
 }
 
-/* SHA3 */
+#ifdef KECCAK_COMPACT_PERMUTATION
+
+/* Keccak round constants */
+static const uint64_t KeccakF_RoundConstants[KECCAK_ROUNDS] =
+{
+	0x0000000000000001ULL,
+	0x0000000000008082ULL,
+	0x800000000000808aULL,
+	0x8000000080008000ULL,
+	0x000000000000808bULL,
+	0x0000000080000001ULL,
+	0x8000000080008081ULL,
+	0x8000000000008009ULL,
+	0x000000000000008aULL,
+	0x0000000000000088ULL,
+	0x0000000080008009ULL,
+	0x000000008000000aULL,
+	0x000000008000808bULL,
+	0x800000000000008bULL,
+	0x8000000000008089ULL,
+	0x8000000000008003ULL,
+	0x8000000000008002ULL,
+	0x8000000000000080ULL,
+	0x000000000000800aULL,
+	0x800000008000000aULL,
+	0x8000000080008081ULL,
+	0x8000000000008080ULL,
+	0x0000000080000001ULL,
+	0x8000000080008008ULL
+};
+
+void keccak_permute(uint64_t* state)
+{
+	uint64_t Aba; 
+	uint64_t Abe; 
+	uint64_t Abi; 
+	uint64_t Abo;
+	uint64_t Abu;
+	uint64_t Aga; 
+	uint64_t Age; 
+	uint64_t Agi; 
+	uint64_t Ago; 
+	uint64_t Agu;
+	uint64_t Aka;
+	uint64_t Ake; 
+	uint64_t Aki; 
+	uint64_t Ako; 
+	uint64_t Aku;
+	uint64_t Ama; 
+	uint64_t Ame; 
+	uint64_t Ami; 
+	uint64_t Amo; 
+	uint64_t Amu;
+	uint64_t Asa; 
+	uint64_t Ase;
+	uint64_t Asi;
+	uint64_t Aso; 
+	uint64_t Asu;
+	uint64_t BCa; 
+	uint64_t BCe; 
+	uint64_t BCi; 
+	uint64_t BCo; 
+	uint64_t BCu;
+	uint64_t Da;
+	uint64_t De; 
+	uint64_t Di; 
+	uint64_t Do; 
+	uint64_t Du;
+	uint64_t Eba; 
+	uint64_t Ebe; 
+	uint64_t Ebi; 
+	uint64_t Ebo;
+	uint64_t Ebu;
+	uint64_t Ega;
+	uint64_t Ege;
+	uint64_t Egi; 
+	uint64_t Ego; 
+	uint64_t Egu;
+	uint64_t Eka; 
+	uint64_t Eke; 
+	uint64_t Eki;
+	uint64_t Eko; 
+	uint64_t Eku;
+	uint64_t Ema; 
+	uint64_t Eme; 
+	uint64_t Emi; 
+	uint64_t Emo; 
+	uint64_t Emu;
+	uint64_t Esa; 
+	uint64_t Ese; 
+	uint64_t Esi;
+	uint64_t Eso; 
+	uint64_t Esu;
+	size_t i;
+
+	//copyFromState(A, state)
+	Aba = state[0];
+	Abe = state[1];
+	Abi = state[2];
+	Abo = state[3];
+	Abu = state[4];
+	Aga = state[5];
+	Age = state[6];
+	Agi = state[7];
+	Ago = state[8];
+	Agu = state[9];
+	Aka = state[10];
+	Ake = state[11];
+	Aki = state[12];
+	Ako = state[13];
+	Aku = state[14];
+	Ama = state[15];
+	Ame = state[16];
+	Ami = state[17];
+	Amo = state[18];
+	Amu = state[19];
+	Asa = state[20];
+	Ase = state[21];
+	Asi = state[22];
+	Aso = state[23];
+	Asu = state[24];
+
+	for (i = 0; i < KECCAK_ROUNDS; i += 2)
+	{
+		// prepareTheta
+		BCa = Aba ^ Aga^Aka^Ama^Asa;
+		BCe = Abe ^ Age^Ake^Ame^Ase;
+		BCi = Abi ^ Agi^Aki^Ami^Asi;
+		BCo = Abo ^ Ago^Ako^Amo^Aso;
+		BCu = Abu ^ Agu^Aku^Amu^Asu;
+
+		// thetaRhoPiChiIotaPrepareTheta
+		Da = BCu ^ rotl64(BCe, 1);
+		De = BCa ^ rotl64(BCi, 1);
+		Di = BCe ^ rotl64(BCo, 1);
+		Do = BCi ^ rotl64(BCu, 1);
+		Du = BCo ^ rotl64(BCa, 1);
+
+		Aba ^= Da;
+		BCa = Aba;
+		Age ^= De;
+		BCe = rotl64(Age, 44);
+		Aki ^= Di;
+		BCi = rotl64(Aki, 43);
+		Amo ^= Do;
+		BCo = rotl64(Amo, 21);
+		Asu ^= Du;
+		BCu = rotl64(Asu, 14);
+		Eba = BCa ^ ((~BCe)&  BCi);
+		Eba ^= KeccakF_RoundConstants[i];
+		Ebe = BCe ^ ((~BCi)&  BCo);
+		Ebi = BCi ^ ((~BCo)&  BCu);
+		Ebo = BCo ^ ((~BCu)&  BCa);
+		Ebu = BCu ^ ((~BCa)&  BCe);
+
+		Abo ^= Do;
+		BCa = rotl64(Abo, 28);
+		Agu ^= Du;
+		BCe = rotl64(Agu, 20);
+		Aka ^= Da;
+		BCi = rotl64(Aka, 3);
+		Ame ^= De;
+		BCo = rotl64(Ame, 45);
+		Asi ^= Di;
+		BCu = rotl64(Asi, 61);
+		Ega = BCa ^ ((~BCe)&  BCi);
+		Ege = BCe ^ ((~BCi)&  BCo);
+		Egi = BCi ^ ((~BCo)&  BCu);
+		Ego = BCo ^ ((~BCu)&  BCa);
+		Egu = BCu ^ ((~BCa)&  BCe);
+
+		Abe ^= De;
+		BCa = rotl64(Abe, 1);
+		Agi ^= Di;
+		BCe = rotl64(Agi, 6);
+		Ako ^= Do;
+		BCi = rotl64(Ako, 25);
+		Amu ^= Du;
+		BCo = rotl64(Amu, 8);
+		Asa ^= Da;
+		BCu = rotl64(Asa, 18);
+		Eka = BCa ^ ((~BCe)&  BCi);
+		Eke = BCe ^ ((~BCi)&  BCo);
+		Eki = BCi ^ ((~BCo)&  BCu);
+		Eko = BCo ^ ((~BCu)&  BCa);
+		Eku = BCu ^ ((~BCa)&  BCe);
+
+		Abu ^= Du;
+		BCa = rotl64(Abu, 27);
+		Aga ^= Da;
+		BCe = rotl64(Aga, 36);
+		Ake ^= De;
+		BCi = rotl64(Ake, 10);
+		Ami ^= Di;
+		BCo = rotl64(Ami, 15);
+		Aso ^= Do;
+		BCu = rotl64(Aso, 56);
+		Ema = BCa ^ ((~BCe)&  BCi);
+		Eme = BCe ^ ((~BCi)&  BCo);
+		Emi = BCi ^ ((~BCo)&  BCu);
+		Emo = BCo ^ ((~BCu)&  BCa);
+		Emu = BCu ^ ((~BCa)&  BCe);
+
+		Abi ^= Di;
+		BCa = rotl64(Abi, 62);
+		Ago ^= Do;
+		BCe = rotl64(Ago, 55);
+		Aku ^= Du;
+		BCi = rotl64(Aku, 39);
+		Ama ^= Da;
+		BCo = rotl64(Ama, 41);
+		Ase ^= De;
+		BCu = rotl64(Ase, 2);
+		Esa = BCa ^ ((~BCe)&  BCi);
+		Ese = BCe ^ ((~BCi)&  BCo);
+		Esi = BCi ^ ((~BCo)&  BCu);
+		Eso = BCo ^ ((~BCu)&  BCa);
+		Esu = BCu ^ ((~BCa)&  BCe);
+
+		// prepareTheta
+		BCa = Eba ^ Ega^Eka^Ema^Esa;
+		BCe = Ebe ^ Ege^Eke^Eme^Ese;
+		BCi = Ebi ^ Egi^Eki^Emi^Esi;
+		BCo = Ebo ^ Ego^Eko^Emo^Eso;
+		BCu = Ebu ^ Egu^Eku^Emu^Esu;
+
+		// thetaRhoPiChiIotaPrepareTheta
+		Da = BCu ^ rotl64(BCe, 1);
+		De = BCa ^ rotl64(BCi, 1);
+		Di = BCe ^ rotl64(BCo, 1);
+		Do = BCi ^ rotl64(BCu, 1);
+		Du = BCo ^ rotl64(BCa, 1);
+
+		Eba ^= Da;
+		BCa = Eba;
+		Ege ^= De;
+		BCe = rotl64(Ege, 44);
+		Eki ^= Di;
+		BCi = rotl64(Eki, 43);
+		Emo ^= Do;
+		BCo = rotl64(Emo, 21);
+		Esu ^= Du;
+		BCu = rotl64(Esu, 14);
+		Aba = BCa ^ ((~BCe)&  BCi);
+		Aba ^= KeccakF_RoundConstants[i + 1];
+		Abe = BCe ^ ((~BCi)&  BCo);
+		Abi = BCi ^ ((~BCo)&  BCu);
+		Abo = BCo ^ ((~BCu)&  BCa);
+		Abu = BCu ^ ((~BCa)&  BCe);
+
+		Ebo ^= Do;
+		BCa = rotl64(Ebo, 28);
+		Egu ^= Du;
+		BCe = rotl64(Egu, 20);
+		Eka ^= Da;
+		BCi = rotl64(Eka, 3);
+		Eme ^= De;
+		BCo = rotl64(Eme, 45);
+		Esi ^= Di;
+		BCu = rotl64(Esi, 61);
+		Aga = BCa ^ ((~BCe)&  BCi);
+		Age = BCe ^ ((~BCi)&  BCo);
+		Agi = BCi ^ ((~BCo)&  BCu);
+		Ago = BCo ^ ((~BCu)&  BCa);
+		Agu = BCu ^ ((~BCa)&  BCe);
+
+		Ebe ^= De;
+		BCa = rotl64(Ebe, 1);
+		Egi ^= Di;
+		BCe = rotl64(Egi, 6);
+		Eko ^= Do;
+		BCi = rotl64(Eko, 25);
+		Emu ^= Du;
+		BCo = rotl64(Emu, 8);
+		Esa ^= Da;
+		BCu = rotl64(Esa, 18);
+		Aka = BCa ^ ((~BCe)&  BCi);
+		Ake = BCe ^ ((~BCi)&  BCo);
+		Aki = BCi ^ ((~BCo)&  BCu);
+		Ako = BCo ^ ((~BCu)&  BCa);
+		Aku = BCu ^ ((~BCa)&  BCe);
+
+		Ebu ^= Du;
+		BCa = rotl64(Ebu, 27);
+		Ega ^= Da;
+		BCe = rotl64(Ega, 36);
+		Eke ^= De;
+		BCi = rotl64(Eke, 10);
+		Emi ^= Di;
+		BCo = rotl64(Emi, 15);
+		Eso ^= Do;
+		BCu = rotl64(Eso, 56);
+		Ama = BCa ^ ((~BCe)&  BCi);
+		Ame = BCe ^ ((~BCi)&  BCo);
+		Ami = BCi ^ ((~BCo)&  BCu);
+		Amo = BCo ^ ((~BCu)&  BCa);
+		Amu = BCu ^ ((~BCa)&  BCe);
+
+		Ebi ^= Di;
+		BCa = rotl64(Ebi, 62);
+		Ego ^= Do;
+		BCe = rotl64(Ego, 55);
+		Eku ^= Du;
+		BCi = rotl64(Eku, 39);
+		Ema ^= Da;
+		BCo = rotl64(Ema, 41);
+		Ese ^= De;
+		BCu = rotl64(Ese, 2);
+		Asa = BCa ^ ((~BCe)&  BCi);
+		Ase = BCe ^ ((~BCi)&  BCo);
+		Asi = BCi ^ ((~BCo)&  BCu);
+		Aso = BCo ^ ((~BCu)&  BCa);
+		Asu = BCu ^ ((~BCa)&  BCe);
+	}
+
+	// copy to state
+	state[0] = Aba;
+	state[1] = Abe;
+	state[2] = Abi;
+	state[3] = Abo;
+	state[4] = Abu;
+	state[5] = Aga;
+	state[6] = Age;
+	state[7] = Agi;
+	state[8] = Ago;
+	state[9] = Agu;
+	state[10] = Aka;
+	state[11] = Ake;
+	state[12] = Aki;
+	state[13] = Ako;
+	state[14] = Aku;
+	state[15] = Ama;
+	state[16] = Ame;
+	state[17] = Ami;
+	state[18] = Amo;
+	state[19] = Amu;
+	state[20] = Asa;
+	state[21] = Ase;
+	state[22] = Asi;
+	state[23] = Aso;
+	state[24] = Asu;
+}
+
+#else
 
 void keccak_permute(uint64_t* state)
 {
@@ -2374,6 +2727,10 @@ void keccak_permute(uint64_t* state)
 	state[24] = Asu;
 }
 
+#endif
+
+/* SHA3 */
+
 void sha3_compute256(uint8_t* output, const uint8_t* message, size_t messagelen)
 {
 	uint64_t state[SHA3_STATESIZE];
@@ -2468,7 +2825,7 @@ void sha3_finalize(uint64_t* state, size_t rate, const uint8_t* message, size_t 
 
 void shake128(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / SHAKE128_RATE;
+	const size_t nblocks = outputlen / SHAKE128_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[SHAKE128_RATE];
 	size_t i;
@@ -2503,7 +2860,7 @@ void shake128_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void shake256(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / SHAKE256_RATE;
+	const size_t nblocks = outputlen / SHAKE256_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[SHAKE256_RATE];
 	size_t i;
@@ -2540,7 +2897,7 @@ void shake256_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void cshake128(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
 {
-	size_t nblocks = outputlen / CSHAKE128_RATE;
+	const size_t nblocks = outputlen / CSHAKE128_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE128_RATE];
 	size_t i;
@@ -2603,7 +2960,10 @@ void cshake128_finalize(uint64_t* state, uint8_t* output, size_t outputlen)
 
 		for (i = 0; i < outputlen; i++)
 		{
+			/* jgu checked false warning */
+			/*lint -save -e771 */
 			output[i] = tmp[i];
+			/*lint -restore */
 		}
 	}
 }
@@ -2615,7 +2975,6 @@ void cshake128_initialize(uint64_t* state, const uint8_t* name, size_t namelen, 
 	size_t j;
 	size_t offset;
 
-	offset = 0;
 	offset = left_encode(pad, CSHAKE128_RATE);
 	offset += left_encode(pad + offset, namelen * 8);
 
@@ -2684,7 +3043,7 @@ void cshake128_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void cshake256(uint8_t* output, size_t outputlen, const uint8_t* seed, size_t seedlen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
 {
-	size_t nblocks = outputlen / CSHAKE256_RATE;
+	const size_t nblocks = outputlen / CSHAKE256_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE256_RATE];
 	size_t i;
@@ -2747,7 +3106,10 @@ void cshake256_finalize(uint64_t* state, uint8_t* output, size_t outputlen)
 
 		for (i = 0; i < outputlen; i++)
 		{
+			/* jgu checked false warning */
+			/*lint -save -e771 */
 			output[i] = tmp[i];
+			/*lint -restore */
 		}
 	}
 }
@@ -2829,7 +3191,7 @@ void cshake256_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks)
 
 void cshake128_simple(uint8_t* output, size_t outputlen, uint16_t custom, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / CSHAKE128_RATE;
+	const size_t nblocks = outputlen / CSHAKE128_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE128_RATE];
 	size_t i;
@@ -2867,7 +3229,7 @@ void cshake128_simple_initialize(uint64_t* state, uint16_t custom, const uint8_t
 	sep[4] = 0x01;			/* name */
 	sep[5] = 0x10;			/* custom len */
 	sep[6] = custom & 0xFF;	/* custom */
-	sep[7] = custom >> 8;		/* custom */
+	sep[7] = custom >> 8;	/* custom */
 
 	state[0] = load64(sep);
 
@@ -2884,7 +3246,7 @@ void cshake128_simple_squeezeblocks(uint64_t* state, uint8_t* output, size_t nbl
 
 void cshake256_simple(uint8_t* output, size_t outputlen, uint16_t custom, const uint8_t* seed, size_t seedlen)
 {
-	size_t nblocks = outputlen / CSHAKE256_RATE;
+	const size_t nblocks = outputlen / CSHAKE256_RATE;
 	uint64_t state[SHA3_STATESIZE];
 	uint8_t hash[CSHAKE256_RATE];
 	size_t i;
@@ -2943,7 +3305,7 @@ void kmac128(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 
 	if (messagelen > CSHAKE128_RATE)
 	{
-		size_t rndlen = (messagelen / CSHAKE128_RATE) * CSHAKE128_RATE;
+		const size_t rndlen = (messagelen / CSHAKE128_RATE) * CSHAKE128_RATE;
 		kmac128_blockupdate(state, message, rndlen / CSHAKE128_RATE);
 		messagelen = messagelen - rndlen;
 		message += rndlen;
@@ -2955,7 +3317,7 @@ void kmac128(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 void kmac128_initialize(uint64_t* state, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
 {
 	uint8_t pad[CSHAKE128_RATE];
-	uint8_t name[] = { 75, 77, 65, 67 };
+	const uint8_t name[] = { 75, 77, 65, 67 };
 	size_t offset;
 	size_t i;
 
@@ -3085,7 +3447,7 @@ void kmac256(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 
 	if (messagelen > CSHAKE256_RATE)
 	{
-		size_t rndlen = (messagelen / CSHAKE256_RATE) * CSHAKE256_RATE;
+		const size_t rndlen = (messagelen / CSHAKE256_RATE) * CSHAKE256_RATE;
 		kmac256_blockupdate(state, message, rndlen / CSHAKE256_RATE);
 		messagelen = messagelen - rndlen;
 		message += rndlen;
@@ -3097,7 +3459,7 @@ void kmac256(uint8_t* output, size_t outputlen, const uint8_t* message, size_t m
 void kmac256_initialize(uint64_t* state, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
 {
 	uint8_t pad[CSHAKE256_RATE];
-	uint8_t name[] = { 75, 77, 65, 67 };
+	const uint8_t name[] = { 75, 77, 65, 67 };
 	size_t offset;
 	size_t i;
 

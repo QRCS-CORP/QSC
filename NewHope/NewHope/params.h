@@ -18,7 +18,7 @@
 
 /*!
 \def NEWHOPE_SHAREDSECRET_SIZE
-* The byte size of the shared symmetric key array
+* The byte size of the shared secret key
 */
 #define NEWHOPE_SHAREDSECRET_SIZE NEWHOPE_SYMBYTES
 

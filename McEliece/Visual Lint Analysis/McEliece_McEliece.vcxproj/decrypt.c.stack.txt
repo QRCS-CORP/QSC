@@ -1,7 +1,0 @@
-"acc",24,finite,24,"no function",
-"decrypt",25864,finite,32272,"scaling",
-"preprocess",12,finite,52,"le8to64", (external)
-"scaling",6360,finite,6400,"le8to64", (external)
-"scaling_inv",20,finite,20,"no function",
-"syndrome_adjust",8,finite,8,"no function",
-"weight",80,finite,120,"transpose_8x64", (external)

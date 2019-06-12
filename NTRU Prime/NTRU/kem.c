@@ -978,7 +978,7 @@ static int32_t verify32(const uint8_t* x, const uint8_t* y)
 	return (1 & ((differentbits - 1) >> 8)) - 1;
 }
 
-mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
+qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 {
 	int16_t c[NTRU_P];
 	int16_t h[NTRU_P];
@@ -1033,10 +1033,10 @@ mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 		ss[i] = (hash[32 + i] & ~result);
 	}
 
-	return (result == 0) ? MQC_STATUS_SUCCESS : MQC_STATUS_FAILURE;
+	return (result == 0) ? QCC_STATUS_SUCCESS : QCC_STATUS_FAILURE;
 }
 
-mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
+qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 {
 	int16_t h[NTRU_P];
 	int16_t c[NTRU_P];
@@ -1054,10 +1054,10 @@ mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	memcpy(ct, hash, 32);
 	rq_encoderounded(ct + 32, c);
 
-	return MQC_STATUS_SUCCESS;
+	return QCC_STATUS_SUCCESS;
 }
 
-mqc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
+qcc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 {
 	int16_t f3recip[NTRU_P];
 	int16_t h[NTRU_P];
@@ -1080,7 +1080,7 @@ mqc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 	small_encode(sk + NTRU_SMALLENCODE_SIZE, grecip);
 	memcpy(sk + 2 * NTRU_SMALLENCODE_SIZE, pk, NTRU_RQENCODE_SIZE);
 
-	return MQC_STATUS_SUCCESS;
+	return QCC_STATUS_SUCCESS;
 }
 
 #else
@@ -1263,7 +1263,7 @@ static void hide(uint8_t* cstr, uint8_t* k, const uint8_t* pk, const uint8_t* r)
 	}
 }
 
-mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
+qcc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 {
 	int16_t B[NTRU_P];
 	int16_t aB[NTRU_P];
@@ -1310,13 +1310,13 @@ mqc_status crypto_kem_dec(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 		ss[i] = maybek[i] & ~result;
 	}
 
-	return (result == 0) ? MQC_STATUS_SUCCESS : MQC_STATUS_FAILURE;
+	return (result == 0) ? QCC_STATUS_SUCCESS : QCC_STATUS_FAILURE;
 }
 
-mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
+qcc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 {
 	uint8_t r[32];
-	mqc_status ret;
+	qcc_status ret;
 
 	ret = sysrand_getbytes(r, 32);
 	hide(ct, ss, pk, r);
@@ -1324,13 +1324,13 @@ mqc_status crypto_kem_enc(uint8_t* ct, uint8_t* ss, const uint8_t* pk)
 	return ret;
 }
 
-mqc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
+qcc_status crypto_kem_keypair(uint8_t* pk, uint8_t* sk)
 {
 	int16_t G[NTRU_P];
 	int16_t A[NTRU_P];
 	int8_t a[NTRU_P];
 	uint8_t K[32];
-	mqc_status ret;
+	qcc_status ret;
 
 	ret = sysrand_getbytes(K, 32);
 	rq_fromseed(G, K);

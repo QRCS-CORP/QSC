@@ -9,16 +9,24 @@
 #ifndef KYBER_NTT_H
 #define KYBER_NTT_H
 
-#include "common.h"
+#include "reduce.h"
+#include <stdint.h>
+/* jgu -suppressing repeated include warning, using include guards */
+/*lint -e537 */
+
+extern int16_t zetas[128];
+extern int16_t zetasinv[128];
 
 /**
-* \brief Computes negacyclic number-theoretic transform (NTT) of
-* a polynomial (vector of 256 coefficients) in place;
-* inputs assumed to be in normal order, output in bitreversed order.
+* \brief Multiplication of polynomials in Zq[X]/((X^2-zeta))
+* used for multiplication of elements in Rq in NTT domain.
 *
-* \param p Pointer to in/output polynomial
+* \param r pointer to the output polynomial
+* \param a pointer to the first factor
+* \param b pointer to the second factor
+* \param zeta integer defining the reduction polynomial
 */
-void ntt(uint16_t* p);
+void basemul(uint16_t r[2], const uint16_t a[2], const uint16_t b[2], int16_t zeta);
 
 /**
 * \brief Computes inverse of negacyclic number-theoretic transform (NTT) of
@@ -28,5 +36,14 @@ void ntt(uint16_t* p);
 * \param p Pointer to input/output polynomial
 */
 void invntt(uint16_t* p);
+
+/**
+* \brief Computes negacyclic number-theoretic transform (NTT) of
+* a polynomial (vector of 256 coefficients) in place;
+* inputs assumed to be in normal order, output in bitreversed order.
+*
+* \param p Pointer to in/output polynomial
+*/
+void ntt(uint16_t* p);
 
 #endif
