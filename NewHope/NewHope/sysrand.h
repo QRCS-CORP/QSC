@@ -1,29 +1,25 @@
 /**
 * \file sysrand.h
 * \brief <b>System random provider</b> \n
-* Provides access to either the Windows CryptGenRandom provider or 
+* Provides access to either the Windows CryptGenRandom provider or
 * the /dev/urandom pool on posix systems.
 *
 * \author John Underhill
-* \date January 06, 2018
+* \date June 05, 2019
 */
 
-#ifndef SYSRAND_H
-#define SYSRAND_H
+#ifndef QCX_SYSRAND_H
+#define QCX_SYSRAND_H
 
-#include <cstdbool>
-#include <stdint.h>
-
-/* bogus integral type warnings */
-/*lint -e970 */
+#include "common.h"
 
 /**
 * \brief Get an array of pseudo-random bytes from the system entropy provider.
 *
 * \param buffer Pointer to the output byte array
 * \param length The number of bytes to copy
-* \return Returns true for success
+* \return Returns one for success, zero for failure
 */
-bool sysrand_getbytes(uint8_t* buffer, size_t length);
+int32_t sysrand_getbytes(uint8_t* buffer, size_t length);
 
 #endif

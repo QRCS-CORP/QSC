@@ -1,8 +1,17 @@
 #include "sysrand.h"
 
-#ifdef MQC_OS_WINDOWS
+#ifndef WIN32
+#	if defined(_WIN64) || defined(_WIN32)
+#		define WIN32
+#	endif
+#endif
+
+#ifdef WIN32
+#	include <tchar.h>
 #	include <windows.h>
-#	include <wincrypt.h>
+#	include <Wincrypt.h>
+#	pragma comment(lib, "crypt32.lib")
+
 #else
 #	include <sys/types.h> /* TODO: are all of these really needed? */
 #	include <sys/stat.h>
@@ -11,32 +20,37 @@
 #	include <stdlib.h>
 #	include <stdio.h>
 #	include <unistd.h>
-
+#	ifndef O_NOCTTY
+#		define O_NOCTTY 0
+#	endif
+#	define CEX_SYSTEM_RNG_DEVICE "/dev/urandom"
 #endif
 
-mqc_status sysrand_getbytes(uint8_t* buffer, size_t length)
+int32_t sysrand_getbytes(uint8_t* buffer, size_t length)
 {
-	mqc_status status = MQC_STATUS_SUCCESS;
+	int32_t status;
 
-#if defined(MQC_OS_WINDOWS)
+	status = 0;
 
-	HCRYPTPROV hProvider = 0;
+#ifdef WIN32
 
-	if (CryptAcquireContext(&hProvider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+	HCRYPTPROV hprov;
+
+	if (CryptAcquireContextW(&hprov, 0, 0, PROV_RSA_FULL, (CRYPT_VERIFYCONTEXT | CRYPT_SILENT)))
 	{
-		if (!CryptGenRandom(hProvider, (DWORD)length, buffer))
+		if (!CryptGenRandom(hprov, (DWORD)length, buffer))
 		{
-			status = MQC_ERROR_RANDFAIL;
+			status = -1;
 		}
 	}
 	else
 	{
-		status = MQC_ERROR_RANDFAIL;
+		status = -1;
 	}
 
-	if (hProvider != 0)
+	if (hprov)
 	{
-		CryptReleaseContext(hProvider, 0);
+		CryptReleaseContext(hprov, 0);
 	}
 
 #else
@@ -45,7 +59,7 @@ mqc_status sysrand_getbytes(uint8_t* buffer, size_t length)
 
 	if (fd <= 0)
 	{
-		status = MQC_ERROR_RANDFAIL;
+		status = -1;
 	}
 	else
 	{
@@ -53,7 +67,7 @@ mqc_status sysrand_getbytes(uint8_t* buffer, size_t length)
 
 		if (r != length)
 		{
-			status = MQC_ERROR_RANDFAIL;
+			status = -1;
 		}
 
 		close(fd);

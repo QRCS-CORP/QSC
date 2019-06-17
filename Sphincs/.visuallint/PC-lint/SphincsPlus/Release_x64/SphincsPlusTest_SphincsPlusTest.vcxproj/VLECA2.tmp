@@ -1,7 +1,0 @@
-C:\Users\John\Documents\PC-Lint\std.lnt  52  Warning 686: Option '-elib(*)' is
-    suspicious because of 'the likelihood of causing meaningless output';
-    receiving a syntax error in a library file most likely means something is
-    wrong with your Lint configuration
-
---- Module:   C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\Misc C\Sphincs\SphincsPlusTest\testutils.cpp (C++)
-C:\Users\John\Documents\Libraries\Projects\Cryptography\C Projects\Misc C\Sphincs\SphincsPlusTest\testutils.cpp(0): error 1960: (Note -- Violates MISRA C++ 2008 Required Rule 16-0-6, unparenthesized macro parameter in definition of macro: '__identifier')

@@ -23,7 +23,7 @@
 * // returns the signed the message in smsg
 * dilithium_sign(smsg, &smsglen, msg, MSGLEN, sk);
 * // test the signature and return the message bytes in rmsg
-* if (dilithium_verify(rmsg, &rmsglen, smsg, smsglen, pk) != QSC_STATUS_SUCCESS)
+* if (dilithium_verify(rmsg, &rmsglen, smsg, smsglen, pk) != QCX_STATUS_SUCCESS)
 * {
 *     // authentication failed, do something..
 * }
@@ -40,8 +40,6 @@
 
 #include <stdint.h>
 #include "params.h"
-#include "poly.h"
-#include "polyvec.h"
 
 /**
 * \brief Generates a Dilithium public/private key-pair.
@@ -71,7 +69,7 @@ void dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message,
 * \param signedmsg The signed message
 * \param smsglen The signed message length
 * \param publickey The pubic verification key
-* \return Returns one (QSC_STATUS_SUCCESS) for success, QSC_ERROR_AUTHFAIL for authentication failure
+* \return Returns one (QCX_STATUS_SUCCESS) for success, QCX_ERROR_AUTHFAIL for authentication failure
 */
 int32_t dilithium_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 

@@ -1,5 +1,0 @@
-"sphincs_publickey_integrity",0,finite,40,"printf_s", (external)
-"sphincs_secretkey_integrity",0,finite,40,"printf_s", (external)
-"sphincs_stress_test",0,finite,40,"printf_s", (external)
-"sphincs_test",0,finite,40,"printf_s", (external)
-"test_signature_integrity",0,finite,40,"printf_s", (external)

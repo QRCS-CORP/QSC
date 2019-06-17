@@ -1,15 +1,15 @@
 /**
 * \file sysrand.h
 * \brief <b>System random provider</b> \n
-* Provides access to either the Windows CryptGenRandom provider or 
+* Provides access to either the Windows CryptGenRandom provider or
 * the /dev/urandom pool on posix systems.
 *
 * \author John Underhill
-* \date January 06, 2018
+* \date June 05, 2019
 */
 
-#ifndef MCELIECE_SYSRAND_H
-#define MCELIECE_SYSRAND_H
+#ifndef QCX_SYSRAND_H
+#define QCX_SYSRAND_H
 
 #include "common.h"
 
@@ -20,6 +20,6 @@
 * \param length The number of bytes to copy
 * \return Returns one for success, zero for failure
 */
-mqc_status sysrand_getbytes(uint8_t* buffer, size_t length);
+int32_t sysrand_getbytes(uint8_t* buffer, size_t length);
 
 #endif

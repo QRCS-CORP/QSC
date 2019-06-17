@@ -174,10 +174,10 @@ int32_t poly_chknorm(const poly* a, uint32_t B)
 * Returns number of sampled coefficients. Can be smaller than len if not enough
 * random bytes were given.
 **************************************************/
-static size_t rej_uniform(uint32_t* a, uint32_t len, const uint8_t* buf, size_t buflen)
+static uint32_t rej_uniform(uint32_t* a, uint32_t len, const uint8_t* buf, size_t buflen)
 {
-	size_t ctr;
 	size_t pos;
+	uint32_t ctr;
 	uint32_t t;
 
 	ctr = 0;
@@ -210,9 +210,9 @@ void poly_uniform(poly* a, const uint8_t seed[DILITHIUM_SEED_SIZE], uint16_t non
 	uint64_t state[SHA3_STATESIZE] = { 0 };
 	uint8_t tmps[DILITHIUM_SEED_SIZE + 2];
 	size_t buflen;
-	size_t ctr;
 	size_t i;
 	size_t off;
+	uint32_t ctr;
 
 	buflen = NBLKS * SHAKE128_RATE;
 
@@ -257,16 +257,16 @@ void poly_uniform(poly* a, const uint8_t seed[DILITHIUM_SEED_SIZE], uint16_t non
 * Returns number of sampled coefficients. Can be smaller than len if not enough
 * random bytes were given.
 **************************************************/
-static size_t rej_eta(uint32_t* a, uint32_t len, const uint8_t *buf, size_t buflen)
+static uint32_t rej_eta(uint32_t* a, uint32_t len, const uint8_t *buf, size_t buflen)
 {
 #if DILITHIUM_ETA > 7
 #error "rej_eta() assumes DILITHIUM_ETA <= 7"
 #endif
 
-	size_t ctr;
 	size_t pos;
 	uint32_t t0;
 	uint32_t t1;
+	uint32_t ctr;
 
 	ctr = 0;
 	pos = 0;
@@ -306,8 +306,8 @@ void poly_uniform_eta(poly* a, const uint8_t seed[DILITHIUM_SEED_SIZE], uint16_t
 	uint64_t state[SHA3_STATESIZE] = { 0 };
 	uint8_t tmps[DILITHIUM_SEED_SIZE + 2];
 	size_t buflen;
-	size_t ctr;
 	size_t i;
+	uint32_t ctr;
 
 	buflen = NBLKS * SHAKE128_RATE;
 
@@ -345,16 +345,16 @@ void poly_uniform_eta(poly* a, const uint8_t seed[DILITHIUM_SEED_SIZE], uint16_t
 * Returns number of sampled coefficients. Can be smaller than len if not enough
 * random bytes were given.
 **************************************************/
-static size_t rej_gamma1m1(uint32_t* a, uint32_t len, const uint8_t* buf, size_t buflen)
+static uint32_t rej_gamma1m1(uint32_t* a, uint32_t len, const uint8_t* buf, size_t buflen)
 {
 #if DILITHIUM_GAMMA1 > (1 << 19)
 #error "rej_gamma1m1() assumes DILITHIUM_GAMMA1 - 1 fits in 19 bits"
 #endif
 
-	size_t ctr;
 	size_t pos;
 	uint32_t t0;
 	uint32_t t1;
+	uint32_t ctr;
 
 	ctr = 0;
 	pos = 0;
@@ -395,9 +395,9 @@ void poly_uniform_gamma1m1(poly* a, const uint8_t seed[DILITHIUM_CRH_SIZE], uint
 	uint64_t state[SHA3_STATESIZE] = { 0 };
 	uint8_t tmps[DILITHIUM_CRH_SIZE + 2];
 	size_t buflen;
-	size_t ctr;
 	size_t i;
 	size_t off;
+	uint32_t ctr;
 
 	for (i = 0; i < DILITHIUM_CRH_SIZE; ++i)
 	{

@@ -4,7 +4,7 @@
 * Contains the Dilithium implementation KAT and wellness test functions.
 *
 * \author John Underhill
-* \date June 09, 2019
+* \date June 13, 2019
 */
 
 /* jgu -suppressing repeated include warning, using include guards */
@@ -29,14 +29,14 @@
 #ifdef _DEBUG
 #	define TEST_DILITHIUM_ITERATIONS 1
 #else
-#	define TEST_DILITHIUM_ITERATIONS 100
+#	define TEST_DILITHIUM_ITERATIONS 10
 #endif
 
 /**
-* \brief Generate a key-pair and verify the signature and message output verification.
-* \return Returns true on success of all tests
+* \brief Generate a key-pair and verify the signature and message verification.
+* \return Returns QCX_STATUS_SUCCESS on success of all tests
 */
-static bool dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg, size_t kmsglen, const uint8_t* ksig, size_t ksiglen)
+static int32_t dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg, size_t kmsglen, const uint8_t* ksig, size_t ksiglen)
 {
 	uint8_t* mout = (uint8_t*)malloc(ksiglen);
 	uint8_t* pk = (uint8_t*)malloc(DILITHIUM_PUBLICKEY_SIZE);
@@ -44,7 +44,7 @@ static bool dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg
 	uint8_t* sk = (uint8_t*)malloc(DILITHIUM_SECRETKEY_SIZE);
 	size_t msglen;
 	size_t siglen;
-	bool ret;
+	int32_t ret;
 
 	assert(mout != NULL && pk != NULL && sig != NULL && sk != NULL);
 
@@ -55,7 +55,7 @@ static bool dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg
 
 	msglen = 0;
 	siglen = 0;
-	ret = true;
+	ret = QCX_STATUS_SUCCESS;
 	randombytes_init(seed, NULL, 0);
 
 	/* Vector 0 */
@@ -66,24 +66,24 @@ static bool dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg
 	dilithium_sign(sig, &siglen, kmsg, kmsglen, sk);
 
 	/* compare the signature cipher-text to the expected output */
-	if (are_equal8(sig, ksig, ksiglen) != true)
+	if (are_equal8(sig, ksig, ksiglen) != QCX_STATUS_SUCCESS)
 	{
 		printf("signature ciphertext does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* verify the message using the public seed */
 	if (dilithium_verify(mout, &msglen, sig, siglen, pk) != 0)
 	{
 		printf("signature verification check failure!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* compare the two messages for equality */
-	if (are_equal8(kmsg, mout, kmsglen) != true)
+	if (are_equal8(kmsg, mout, kmsglen) != QCX_STATUS_SUCCESS)
 	{
 		printf("message does not equal to the original!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	if (mout != NULL)
@@ -123,7 +123,7 @@ static void get_response()
 
 /**
 * \brief Stress test the key generation, encryption, and decryption functions in a looping test.
-* \return Returns one (QSC_STATUS_SUCCESS) for test success
+* \return Returns one (QCX_STATUS_SUCCESS) for test success
 */
 int32_t dilithium_stress_test()
 {
@@ -132,10 +132,12 @@ int32_t dilithium_stress_test()
 	uint8_t sig[DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
 	uint8_t sk[DILITHIUM_SECRETKEY_SIZE];
 	uint8_t pk[DILITHIUM_PUBLICKEY_SIZE];
+	size_t i;
 	size_t msglen;
 	size_t siglen;
-	size_t i;
+	int32_t ret;
 
+	ret = QCX_STATUS_SUCCESS;
 	msglen = TEST_DILITHIUM_MLEN0;
 	siglen = DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0;
 
@@ -150,7 +152,8 @@ int32_t dilithium_stress_test()
 		if (siglen != DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0)
 		{
 			printf("dilithium_stress_test: signature length is incorrect. \n");
-			return QSC_STATUS_FAILURE;
+			ret = QCX_STATUS_FAILURE;
+			break;
 		}
 		else
 		{
@@ -158,10 +161,11 @@ int32_t dilithium_stress_test()
 		}
 
 		/* verify the signature in sig and copy msg to mout */
-		if (dilithium_verify(mout, &msglen, sig, siglen, pk) != QSC_STATUS_SUCCESS)
+		if (dilithium_verify(mout, &msglen, sig, siglen, pk) != QCX_STATUS_SUCCESS)
 		{
 			printf("dilithium_stress_test: Dilithium message verification has failed! \n");
-			return QSC_STATUS_FAILURE;
+			ret = QCX_STATUS_FAILURE;
+			break;
 		}
 		else
 		{
@@ -171,7 +175,8 @@ int32_t dilithium_stress_test()
 		if (msglen != TEST_DILITHIUM_MLEN0)
 		{
 			printf("dilithium_stress_test: message length is incorrect");
-			return QSC_STATUS_FAILURE;
+			ret = QCX_STATUS_FAILURE;
+			break;
 		}
 		else
 		{
@@ -179,12 +184,12 @@ int32_t dilithium_stress_test()
 		}
 	}
 
-	return QSC_STATUS_SUCCESS;
+	return ret;
 }
 
 /**
 * \brief Test the validity of a mutated public key
-* \return Returns one (QSC_STATUS_SUCCESS) for test success
+* \return Returns one (QCX_STATUS_SUCCESS) for test success
 */
 int32_t dilithium_publickey_integrity()
 {
@@ -195,7 +200,9 @@ int32_t dilithium_publickey_integrity()
 	uint8_t pk[DILITHIUM_PUBLICKEY_SIZE];
 	size_t msglen;
 	size_t siglen;
+	int32_t ret;
 
+	ret = QCX_STATUS_SUCCESS;
 	msglen = 0;
 	siglen = 0;
 
@@ -210,22 +217,22 @@ int32_t dilithium_publickey_integrity()
 	dilithium_sign(sig, &siglen, msg, TEST_DILITHIUM_MLEN0, sk);
 
 	/* verify signed message, if successful with altered public key, fail the test */
-	if (dilithium_verify(mout, &msglen, sig, siglen, pk) == QSC_STATUS_SUCCESS)
+	if (dilithium_verify(mout, &msglen, sig, siglen, pk) == QCX_STATUS_SUCCESS)
 	{
 		printf("dilithium_publickey_integrity: Dilithium message verification passed with altered public key, test failure! \n");
-		return QSC_STATUS_FAILURE;
+		ret = QCX_STATUS_FAILURE;
 	}
 	else
 	{
 		printf("dilithium_publickey_integrity: Dilithium message verification has failed using altered public key, test success. \n");
 	}
 
-	return QSC_STATUS_SUCCESS;
+	return ret;
 }
 
 /**
 * \brief Test the validity of a mutated secret key
-* \return Returns one (QSC_STATUS_SUCCESS) for test success
+* \return Returns one (QCX_STATUS_SUCCESS) for test success
 */
 int32_t dilithium_secretkey_integrity()
 {
@@ -237,7 +244,9 @@ int32_t dilithium_secretkey_integrity()
 	size_t i;
 	size_t msglen;
 	size_t siglen;
+	int32_t ret;
 
+	ret = QCX_STATUS_SUCCESS;
 	msglen = 0;
 	siglen = 0;
 
@@ -246,7 +255,7 @@ int32_t dilithium_secretkey_integrity()
 
 	/* flip bits in the private key */
 	printf("dilithium_secretkey_integrity: Flipping the bits in the secret key. \n");
-	for (i = 0; i < 128; ++i)
+	for (i = 0; i < 16; ++i)
 	{
 		sk[i] ^= 1;
 	}
@@ -255,17 +264,17 @@ int32_t dilithium_secretkey_integrity()
 	dilithium_sign(sig, &siglen, msg, TEST_DILITHIUM_MLEN0, sk);
 
 	/* verify signed message, if successful with altered public key, fail the test */
-	if (dilithium_verify(mout, &msglen, sig, siglen, pk) == QSC_STATUS_SUCCESS)
+	if (dilithium_verify(mout, &msglen, sig, siglen, pk) == QCX_STATUS_SUCCESS)
 	{
 		printf("dilithium_secretkey_integrity: Dilithium message verification passed with altered secret key, test failure! \n");
-		return QSC_STATUS_FAILURE;
+		ret = QCX_STATUS_FAILURE;
 	}
 	else
 	{
 		printf("dilithium_secretkey_integrity: Dilithium message verification has failed using altered secret key, test success. \n");
 	}
 
-	return QSC_STATUS_SUCCESS;
+	return ret;
 }
 
 /**
@@ -279,10 +288,12 @@ int32_t dilithium_signature_integrity()
 	uint8_t sig[DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
 	uint8_t sk[DILITHIUM_SECRETKEY_SIZE];
 	uint8_t pk[DILITHIUM_PUBLICKEY_SIZE];
+	size_t i;
 	size_t msglen;
 	size_t siglen;
-	int32_t i;
+	int32_t ret;
 
+	ret = QCX_STATUS_SUCCESS;
 	msglen = 0;
 	siglen = 0;
 
@@ -297,10 +308,10 @@ int32_t dilithium_signature_integrity()
 	sig[siglen - 1] ^= 1;
 
 	/* verify signed message, if successful with altered public key, fail the test */
-	if (dilithium_verify(mout, &msglen, sig, siglen, pk) == QSC_STATUS_SUCCESS)
+	if (dilithium_verify(mout, &msglen, sig, siglen, pk) == QCX_STATUS_SUCCESS)
 	{
 		printf("test_signature_integrity: Dilithium message verification passed with altered secret key, test failure! \n");
-		return QSC_STATUS_FAILURE;
+		ret = QCX_STATUS_FAILURE;
 	}
 	else
 	{
@@ -316,6 +327,7 @@ int32_t dilithium_signature_integrity()
 		{
 			printf("test_signature_integrity: flipping bit did not invalidate signature \n");
 			sig[i] ^= 1;
+			ret = QCX_STATUS_FAILURE;
 			break;
 		}
 
@@ -327,7 +339,7 @@ int32_t dilithium_signature_integrity()
 		printf("test_signature_integrity: Changing any signature hash invalidates signature. \n");
 	}
 
-	return QSC_STATUS_SUCCESS;
+	return ret;
 }
 
 /**
@@ -347,7 +359,9 @@ int32_t dilithium_kat_test()
 	uint8_t seed1[RNG_SEED_SIZE];
 	uint8_t seed2[RNG_SEED_SIZE];
 	uint8_t seed3[RNG_SEED_SIZE];
-	bool ret;
+	int32_t ret;
+
+	ret = QCX_STATUS_SUCCESS;
 
 	/* NIST PQ Round 2 DILITHIUM, first known answer test vector set */
 	hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed0, sizeof(seed0));
@@ -362,7 +376,7 @@ int32_t dilithium_kat_test()
 	hex_to_bin("58C094D217BC13EDFDBEA57EDBF3A536F8F69FED1D54648CE3D0CCB4847A5C9917C2E2BC4D5F620E937F0D329FCF8A16", seed3, sizeof(seed3));
 	hex_to_bin("2F7AF5B52A046471EFCD720C9384919BE05A61CDE8E8B01251C5AB885E820FD36ED9FF6FDF45783EC81A86728CBB74B426ADFF96123C08FAC2BC6C58A9C0DD71761292262C65F20DF47751F0831770A6BB7B3760BB7F5EFFFB6E11AC35F353A6F24400B80B287834E92C9CF0D3C949D6DCA31B0B94E0E3312E8BD02174B170C2CA9355FE", msg3, sizeof(msg3));
 
-#if DILITHIUM_MODE == 2
+#if QCX_DILITHIUM_MODE == 2
 	hex_to_bin("A785B7DB95D555880DBB8A49FD02E8D1891EB3396344C330AE81441F3CA8E275B58395CBF4E80DC3768480063C464764783C360EB289666D168C18C0D07C8BCA"
 		"53D29987E697CD6F2CF282C03F2A16C303411FAEB95068C7397476A34905341B658F89A0EC26B838E5331F92A23A460ECB6D231DAD5EC48E02B90D3248196342"
 		"BA254A0A7C26572C744D43001DC4A9CE797B033D37114E38716B607EC563546076BBA867F5BB45D9B8A8C9128E533C6A484B66ACFEFD57400BB13DA67E1DA170"
@@ -499,7 +513,7 @@ int32_t dilithium_kat_test()
 		"2A046471EFCD720C9384919BE05A61CDE8E8B01251C5AB885E820FD36ED9FF6FDF45783EC81A86728CBB74B426ADFF96123C08FAC2BC6C58A9C0DD7176129226"
 		"2C65F20DF47751F0831770A6BB7B3760BB7F5EFFFB6E11AC35F353A6F24400B80B287834E92C9CF0D3C949D6DCA31B0B94E0E3312E8BD02174B170C2CA9355FE", 
 		ksig3, sizeof(ksig3));
-#elif DILITHIUM_MODE == 3
+#elif QCX_DILITHIUM_MODE == 3
 	hex_to_bin("F21B63C5CB868F1932B5D92B34758845E0123E40F7987C10643C3420D352BB2CFFC0BC3B1ADBD774D150EE4580537B06057D115D12E6331A10D3B31A5ED370D7"
 		"368D566798B4C4E6725602B39AB1548F7772D985892A901907A8E9D6C6C1B55207ECD8A30F1E2965A171E121CD94D26F8447A89B2F3BC555CB87F9E22FB112DD"
 		"63A565B4E289B420099B24F5E4F8F3778D49CDAB369BA335B3609A0D40AE746B7749955DE80BA51779AC91EAC7E6595D1F82C263DAC3A5945C05D642A19BDEC0"
@@ -678,7 +692,7 @@ int32_t dilithium_kat_test()
 		"8082908895EF931570675A20082F7AF5B52A046471EFCD720C9384919BE05A61CDE8E8B01251C5AB885E820FD36ED9FF6FDF45783EC81A86728CBB74B426ADFF"
 		"96123C08FAC2BC6C58A9C0DD71761292262C65F20DF47751F0831770A6BB7B3760BB7F5EFFFB6E11AC35F353A6F24400B80B287834E92C9CF0D3C949D6DCA31B"
 		"0B94E0E3312E8BD02174B170C2CA9355FE", ksig3, sizeof(ksig3));
-#elif DILITHIUM_MODE == 4
+#elif QCX_DILITHIUM_MODE == 4
 	hex_to_bin("D78758C8992B2D0FC51A03D76B071796F915D6B2415F610758D188AC94048C530D81B2C1BC7B9519B3EB4F0CFA97DA66B8D14470711D1A851A52B372C2BEB4A3"
 		"FEA33A293BC18347D151477D197BD9397AB2741AA65E37C172EF29DDA2700ECFB9DF478FF94CAC216BDDD67E2A52A283312A2B09927BA1737FBDEC1385978371"
 		"A1A199543B8B369110EBE2B6DF441AEE27B5207CDD3AF2F77109F2A3DB89D300E27D9A484733F6085D21A3C4D7D27F243789FEBE361DE4829C20441CD1938ED9"
@@ -910,35 +924,33 @@ int32_t dilithium_kat_test()
 	printf("\n\n\n");
 	print_hex(ksig3, DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN3, 64);*/
 
-	ret = true;
-
 	/* compare the signature cipher-text and message-verification to the expected output */
 	/* Vector 0 */
-	if (dilithium_signature_compare(seed0, msg0, sizeof(msg0), ksig0, sizeof(ksig0))  != true)
+	if (dilithium_signature_compare(seed0, msg0, sizeof(msg0), ksig0, sizeof(ksig0)) != QCX_STATUS_SUCCESS)
 	{
 		printf("vector 0: signature ciphertext does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* Vector 1 */
-	if (dilithium_signature_compare(seed1, msg1, sizeof(msg1), ksig1, sizeof(ksig1)) != true)
+	if (dilithium_signature_compare(seed1, msg1, sizeof(msg1), ksig1, sizeof(ksig1)) != QCX_STATUS_SUCCESS)
 	{
 		printf("vector 1: signature ciphertext does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* Vector 2 */
-	if (dilithium_signature_compare(seed2, msg2, sizeof(msg2), ksig2, sizeof(ksig2)) != true)
+	if (dilithium_signature_compare(seed2, msg2, sizeof(msg2), ksig2, sizeof(ksig2)) != QCX_STATUS_SUCCESS)
 	{
 		printf("vector 2: signature ciphertext does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* Vector 3 */
-	if (dilithium_signature_compare(seed3, msg3, sizeof(msg3), ksig3, sizeof(ksig3)) != true)
+	if (dilithium_signature_compare(seed3, msg3, sizeof(msg3), ksig3, sizeof(ksig3)) != QCX_STATUS_SUCCESS)
 	{
 		printf("vector 3: signature ciphertext does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	return ret;
@@ -963,8 +975,9 @@ int32_t dilithium_integrity_test()
 	uint8_t ksig[DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
 	size_t msglen;
 	size_t siglen;
-	bool ret;
+	int32_t ret;
 
+	ret = QCX_STATUS_SUCCESS;
 	siglen = 0;
 	msglen = 0;
 
@@ -973,7 +986,7 @@ int32_t dilithium_integrity_test()
 	hex_to_bin("D81C4D8D734FCBFBEADE3D3F8A039FAA2A2C9957E835AD55B22E75BF57BB556AC8", kmsg, sizeof(kmsg));
 
 	/* Test vectors using the second answer set in the NIST PQ Round 2 KATs, implemented for each K-MODE */
-#if (DILITHIUM_MODE == 2)
+#if (QCX_DILITHIUM_MODE == 2)
 	hex_to_bin("7C9935A0B07694AA0C6D10E4DB6B1ADD2FD81A25CCB148032DCD739936737F2D10AC3B097F04F4C6C79F83DA5A6D4A313B532C9E18D47F36AA32DCFC6DFBCC9C"
 		"111288C9E4F73435E3E2A9C90D6864B47C8FADAAF24435F9F71F8F622177B0F817BC6FE1BD8109F1C501A99D877C8DA66A4DA0A22E447AEFF979BAD70D1406B3"
 		"8BAF1A2ACE6621F74EE3ECE12D80D128A689458F961805F742D262D1A8C578DE7FDB8FF6FAB267A9FD91F3171861A4B4BBD2726F48C32F3BB3B979AE8872218E"
@@ -1070,7 +1083,7 @@ int32_t dilithium_integrity_test()
 		"22292A3B52668788C5D8DFE3E8F7FC050E1B333C444F5153808AA1BABDC0D4D5DF3C40909597A0C9CED4EDF4F8213D41A5B8E8E9F90000000000000000000000"
 		"000000000000000000000000000000000F212D35824104160280DE0000A80E00020903CC088CA02A48040218E21228800400064282FE377C1B2A0C0BD81C4D8D"
 		"734FCBFBEADE3D3F8A039FAA2A2C9957E835AD55B22E75BF57BB556AC8", ksig, sizeof(ksig));
-#elif (DILITHIUM_MODE == 3)
+#elif (QCX_DILITHIUM_MODE == 3)
 	hex_to_bin("7C9935A0B07694AA0C6D10E4DB6B1ADD2FD81A25CCB148032DCD739936737F2D2F4F8FABA268F4304160EEAE093D9C539F7A9E872C5B92C85581253EBF8DF0CE"
 		"453A1012702FF50FD3C6D20E41A44F1A1F5C0393C7DECA45321ECB9EBDCA30329898D579C33756AAF76CE77D3543FD45945BF334766AF01926781F4034AB54AC"
 		"6F7E0B902D17C9C209016788386D13A5163E4D3A7278971F71011DA9E4147F59BFBA7185A1D91B6B90E357D44FD2F330E459971967C3567A9CE229B6F03B43F1"
@@ -1193,7 +1206,7 @@ int32_t dilithium_integrity_test()
 		"010616191C48496A6E929FA0B2CBD1D2E622232F353C4A51585A5C647291A3ACBDC1E5EAEE04132930315C6676ACD4D8DBE80D13182228343C42477C87909AA8"
 		"C8E5EE0215161935454650718690969CABBFC3CCD5E8E900000000000000000011253243570D1420A265006023101014006A50808010011830D0080452409500"
 		"0006C64243BADBDC8E1C015A0DD81C4D8D734FCBFBEADE3D3F8A039FAA2A2C9957E835AD55B22E75BF57BB556AC8", ksig, sizeof(ksig));
-#elif (DILITHIUM_MODE == 4)
+#elif (QCX_DILITHIUM_MODE == 4)
 	hex_to_bin("7C9935A0B07694AA0C6D10E4DB6B1ADD2FD81A25CCB148032DCD739936737F2D6859F64C663916795E9D42A628F7A11FB6CAD6BE5A229206F38EC3E87E7487C6"
 		"512745FED6D0B64F605507C043E25D103D19673493730473CDC0EF780A83F23A5C6C3875BC10B6A053B13AAD6FD7FF1ECF8F725F460181460C5C75E05052FEA0"
 		"DBC4992EE04322BB21AF25D784CBD434DF2A87AA486AE7057FA04287DA5FC0D0088C1682E09E47ABF30836C38242C8A4BA58FA4B7A172D3B0032516563FE46B7"
@@ -1345,48 +1358,47 @@ int32_t dilithium_integrity_test()
 	printf("\n\n");
 	print_hex(ksig, DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0, 64);*/
 
-	ret = true;
 	randombytes_init(seed, NULL, 0);
 
 	/* generate public and secret keys */
 	dilithium_generate(pk, sk);
 
 	/* compare the public key to the expected output */
-	if (are_equal8(pk, kpk, DILITHIUM_PUBLICKEY_SIZE) != true)
+	if (are_equal8(pk, kpk, DILITHIUM_PUBLICKEY_SIZE) != QCX_STATUS_SUCCESS)
 	{
 		printf("publickey does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* compare the secret key to the expected output */
-	if (are_equal8(sk, ksk, DILITHIUM_SECRETKEY_SIZE) != true)
+	if (are_equal8(sk, ksk, DILITHIUM_SECRETKEY_SIZE) != QCX_STATUS_SUCCESS)
 	{
 		printf("privatekey does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* sign the message */
 	dilithium_sign(sig, &siglen, kmsg, TEST_DILITHIUM_MLEN0, sk);
 
 	/* compare the signature cipher-text to the expected output */
-	if (are_equal8(sig, ksig, DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0) != true)
+	if (are_equal8(sig, ksig, DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0) != QCX_STATUS_SUCCESS)
 	{
 		printf("signature ciphertext does not align with the known answer!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* verify the message using the public key */
 	if (dilithium_verify(msg, &msglen, sig, siglen, pk) != 0)
 	{
 		printf("signature verification check failure!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	/* compare the two messages for equality */
-	if (are_equal8(msg, kmsg, TEST_DILITHIUM_MLEN0) != true)
+	if (are_equal8(msg, kmsg, TEST_DILITHIUM_MLEN0) != QCX_STATUS_SUCCESS)
 	{
 		printf("message does not equal to the original!");
-		ret = false;
+		ret = QCX_STATUS_FAILURE;
 	}
 
 	if (msg != NULL)
@@ -1407,65 +1419,59 @@ int32_t dilithium_integrity_test()
 */
 void dilithium_test_run()
 {
-	dilithium_integrity_test();
-	printf("*** The Dilithium implementations known answer, stress, and validity tests *** \n\n");
-
-	if (dilithium_kat_test() == true)
+	if (dilithium_kat_test() == QCX_STATUS_SUCCESS)
 	{
-		printf("Success! Passed Dilithium known answer test. \n\n");
+		printf("PASS! Passed Dilithium known answer tests. \n\n");
 	}
 	else
 	{
-		printf("Failure! Failed Dilithium known answer test. \n\n");
+		printf("FAIL! Failed Dilithium known answer test. \n\n");
 	}
 
-	if (dilithium_integrity_test() == true)
+	if (dilithium_integrity_test() == QCX_STATUS_SUCCESS)
 	{
-		printf("Success! Passed Dilithium public/private key, ciphertext and message known answer tests. \n\n");
+		printf("PASS! Passed Dilithium public/private key, ciphertext and message known answer tests. \n\n");
 	}
 	else
 	{
-		printf("Failure! Failed Dilithium known answer integrity tests. \n\n");
+		printf("FAIL! Failed Dilithium known answer integrity tests. \n\n");
 	}
 
-	if (dilithium_stress_test() != QSC_STATUS_SUCCESS)
-	{
-		printf("FAIL: The Dilithium stress test has failed! \n\n");
-	}
-	else
+	if (dilithium_stress_test() == QCX_STATUS_SUCCESS)
 	{
 		printf("PASS: The Dilithium stress test has succeeded! \n\n");
 	}
-
-	if (dilithium_publickey_integrity() != QSC_STATUS_SUCCESS)
-	{
-		printf("FAIL: The Dilithium altered public-key test has failed! \n\n");
-	}
 	else
+	{
+		printf("FAIL: The Dilithium stress test has failed! \n\n");
+	}
+
+	if (dilithium_publickey_integrity() == QCX_STATUS_SUCCESS)
 	{
 		printf("PASS: The Dilithium altered public-key test has succeeded! \n\n");
 	}
-
-	if (dilithium_secretkey_integrity() != QSC_STATUS_SUCCESS)
-	{
-		printf("FAIL: The Dilithium altered secret-key test has failed! \n\n");
-	}
 	else
+	{
+		printf("FAIL: The Dilithium altered public-key test has failed! \n\n");
+	}
+
+	if (dilithium_secretkey_integrity() == QCX_STATUS_SUCCESS)
 	{
 		printf("PASS: The Dilithium altered secret-key test has succeeded! \n\n");
 	}
-
-	if (dilithium_signature_integrity() != QSC_STATUS_SUCCESS)
-	{
-		printf("FAIL: The Dilithium altered signature test has failed! \n\n");
-	}
 	else
+	{
+		printf("FAIL: The Dilithium altered secret-key test has failed! \n\n");
+	}
+
+	if (dilithium_signature_integrity() == QCX_STATUS_SUCCESS)
 	{
 		printf("PASS: The Dilithium altered signature test has succeeded! \n\n");
 	}
-
-	printf("Completed! Press any key to close..");
-	get_response();
+	else
+	{
+		printf("FAIL: The Dilithium altered signature test has failed! \n\n");
+	}
 }
 
 /**
@@ -1473,8 +1479,7 @@ void dilithium_test_run()
 */
 int main(void)
 {
-	printf("*** The Dilithium implementations stress and validity tests *** \n");
-	printf("\n");
+	printf("*** The Dilithium implementations known answer, stress, and validity tests *** \n\n");
 	dilithium_test_run();
 	printf("\n");
 

@@ -35,11 +35,12 @@
 * To enable AES-NI, add AES_AESNI_ENABLED to the preprocessor definitions.
 */
 
-#ifndef AES_H
-#define AES_H
+#ifndef QCX_AES_H
+#define QCX_AES_H
 
+#include "common.h"
 #include <stdbool.h>
-#include <stdint.h>
+
 /* jgu -suppressing repeated include warning, using include guards */
 /*lint -e537 */
 /* jgu -suppressing boolean/int integral type warnings */
