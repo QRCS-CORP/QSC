@@ -9,7 +9,7 @@
 #ifndef QCC_COMMON_H
 #define QCC_COMMON_H
 
-#include <cstdbool>
+#include <stdbool.h>
 
 #if defined(WINDOWS)
 #	include <stdint.h>

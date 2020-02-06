@@ -1,3 +1,0 @@
-
-
- error 307: (Error -- Can't open indirect file 'C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\SHA3\SHA3\~AutoRecover.SHA3.vcxproj_vs100_Debug_Win32.lnt')

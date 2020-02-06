@@ -20,106 +20,110 @@ char get_response()
 	return getchar();
 }
 
-/**
-* \brief Run the SHA3, SHAKE, cSHAKE, simple cSHAKE, and KMAC KAT tests
-*/
-void sha3_test_run()
+
+/* shake, cshake, kmac, and sha3 tests */
+
+void test_cshake_kat()
 {
-	if (sha3_256_kat_test() == true)
-	{
-		printf_s("Success! passed sha3-256 known answer tests \n");
-	}
-	else
-	{
-		printf_s("Failure! failed sha3-256 known answer tests \n");
-	}
-
-	if (sha3_512_kat_test() == true)
-	{
-		printf_s("Success! passed sha3-512 known answer tests \n");
-	}
-	else
-	{
-		printf_s("Failure! failed sha3-512 known answer tests \n");
-	}
-
-	if (shake_128_kat_test() == true)
-	{
-		printf_s("Success! passed shake-128 known answer tests \n");
-	}
-	else
-	{
-		printf_s("Failure! failed shake-128 known answer tests \n");
-	}
-
-	if (shake_256_kat_test() == true)
-	{
-		printf_s("Success! passed shake-256 known answer tests \n");
-	}
-	else
-	{
-		printf_s("Failure! failed shake-256 known answer tests \n");
-	}
-
-	if (cshake_128_kat_test() == true)
-	{
-		printf_s("Success! passed cshake-128 known answer tests \n");
-	}
-	else
-	{
-		printf_s("Failure! failed cshake-128 known answer tests \n");
-	}
-
 	if (cshake_256_kat_test() == true)
 	{
-		printf_s("Success! passed cshake-256 known answer tests \n");
+		printf_s("Success! Passed the cSHAKE-256 KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! failed cshake-256 known answer tests \n");
+		printf_s("Failure! Failed the cSHAKE-256 KAT test. \n");
 	}
 
-	if (cshake_simple_128_kat_test() == true)
+	if (cshake_512_kat_test() == true)
 	{
-		printf_s("Success! passed simple cshake-128 known answer tests \n");
+		printf_s("Success! Passed the cSHAKE-512 KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! failed simple cshake-128 known answer tests \n");
+		printf_s("Failure! Failed the cSHAKE-512 KAT test. \n");
 	}
+}
 
-	if (cshake_simple_256_kat_test() == true)
-	{
-		printf_s("Success! passed simple cshake-256 known answer tests \n");
-	}
-	else
-	{
-		printf_s("Failure! failed simple cshake-256 known answer tests \n");
-	}
-
+void test_kmac_kat()
+{
 	if (kmac_128_kat_test() == true)
 	{
-		printf_s("Success! passed kmac-128 known answer tests \n");
+		printf_s("Success! Passed the KMAC-128 KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! failed kmac-128 known answer tests \n");
+		printf_s("Failure! Failed the KMAC-128 KAT test. \n");
 	}
 
 	if (kmac_256_kat_test() == true)
 	{
-		printf_s("Success! passed kmac-256 known answer tests \n");
+		printf_s("Success! Passed the KMAC-256 KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! failed kmac-256 known answer tests \n");
+		printf_s("Failure! Failed the KMAC-256 KAT test. \n");
+	}
+
+	if (kmac_512_kat_test() == true)
+	{
+		printf_s("Success! Passed the KMAC-512 KAT test. \n");
+	}
+	else
+	{
+		printf_s("Failure! Failed the KMAC-512 KAT test. \n");
+	}
+}
+
+void test_sha3_kat()
+{
+	if (sha3_256_kat_test() == true)
+	{
+		printf_s("Success! Passed the SHA3-256 KAT test. \n");
+	}
+	else
+	{
+		printf_s("Failure! Failed the SHA3-256 KAT test. \n");
+	}
+
+	if (sha3_512_kat_test() == true)
+	{
+		printf_s("Success! Passed the SHA3-512 KAT test. \n");
+	}
+	else
+	{
+		printf_s("Failure! Failed the SHA3-512 KAT test. \n");
+	}
+}
+
+void test_shake_kat()
+{
+	if (shake_256_kat_test() == true)
+	{
+		printf_s("Success! Passed the SHAKE-256 KAT test. \n");
+	}
+	else
+	{
+		printf_s("Failure! Failed the SHAKE-256 KAT test. \n");
+	}
+
+	if (shake_512_kat_test() == true)
+	{
+		printf_s("Success! Passed the SHAKE-512 KAT test. \n");
+	}
+	else
+	{
+		printf_s("Failure! Failed the SHAKE-512 KAT test. \n");
 	}
 }
 
 int main()
 {
-	printf("*** Testing SHA3 digests, SHAKE, and cSHAKE implementations *** \n");
-	sha3_test_run();
+	printf_s("*** Test SHAKE, cSHAKE, KMAC, and SHA3 implementations using the official KAT vetors. *** \n");
+	test_shake_kat();
+	test_cshake_kat();
+	test_kmac_kat();
+	test_sha3_kat();
+	printf_s("\n");
 
 	printf("\n");
 	printf("Completed! Press any key to close..");

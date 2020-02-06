@@ -24,6 +24,12 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="intutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="testutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -33,6 +39,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sha3_kat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intutils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="testutils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
