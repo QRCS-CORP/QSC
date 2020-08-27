@@ -1,3 +1,0 @@
-"barrett_reduce",4,finite,4,"no function",
-"freeze",6,finite,18,"barrett_reduce",
-"montgomery_reduce",4,finite,4,"no function",

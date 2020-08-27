@@ -1,3 +1,0 @@
-"barrett_reduce",12,finite,12,"no function",
-"csubq",2,finite,2,"no function",
-"montgomery_reduce",10,finite,10,"no function",

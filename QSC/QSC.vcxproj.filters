@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric">
+      <UniqueIdentifier>{c6f6b358-4e2a-43e6-8d8a-bd1b11e897c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher">
+      <UniqueIdentifier>{8815e87e-5fbe-49f4-b3e1-6bee49998737}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature">
+      <UniqueIdentifier>{b4ed6bf6-2e2a-4fce-af71-01bf5b54bf1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric">
+      <UniqueIdentifier>{2c1742e0-5e2b-4f5f-a10f-33c466423c90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher">
+      <UniqueIdentifier>{6f7924b4-7f6d-46ef-810e-01e6b1f0cf78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature">
+      <UniqueIdentifier>{d2d707fb-0b86-4340-8bab-d65d0789955b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DRBG">
+      <UniqueIdentifier>{b1f25f1e-d127-4ed5-925d-fb34fb3b9cb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DRBG">
+      <UniqueIdentifier>{4547faae-8aa0-486d-8afd-70fb698f67c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MAC">
+      <UniqueIdentifier>{456aed9a-c2ea-4ec9-a2cb-153bfb01319a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MAC">
+      <UniqueIdentifier>{850a1187-428c-4310-b332-bcc7de01d22c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Provider">
+      <UniqueIdentifier>{d49f9f40-93ff-4b50-8562-57b5214e8493}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Provider">
+      <UniqueIdentifier>{c3111329-8012-4f9e-9fbd-609a899b19ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Digest">
+      <UniqueIdentifier>{34688d53-f837-4cbd-8c70-9a4e65f446da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Cipher">
+      <UniqueIdentifier>{c8cb740d-ee9b-47cb-a014-2928bf3f9f48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PRNG">
+      <UniqueIdentifier>{aa614ec6-b747-45da-b845-d1eeac982e32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cipher">
+      <UniqueIdentifier>{6c19cd9d-29e9-4e9b-bd9e-239d91a9c31f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Digest">
+      <UniqueIdentifier>{0e24f0a6-00a9-4a65-a412-0ca5586ba369}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PRNG">
+      <UniqueIdentifier>{e3ca4d56-a899-47b6-a29d-f23dd155cee1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common">
+      <UniqueIdentifier>{3df04970-7fcf-4d37-af5d-6de62a9720cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{dcd78421-c52b-48b8-96fe-fd12fed608fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\McEliece">
+      <UniqueIdentifier>{e40d4c37-e638-42c3-908e-136dfc29cd7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\McEliece">
+      <UniqueIdentifier>{434c870e-cd48-4a82-ae56-dcb9aecdf590}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\SphincsPlus">
+      <UniqueIdentifier>{b7da58ae-62d5-46dc-82b5-72bd44b7e439}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\SphincsPlus">
+      <UniqueIdentifier>{b09220e9-ce36-44a3-9c26-551b225a36fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools">
+      <UniqueIdentifier>{a95ab942-0494-438a-917b-fbb883a06bb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools">
+      <UniqueIdentifier>{6278da86-d0a2-4e4b-a3f6-4cf1b704aafd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\Kyber">
+      <UniqueIdentifier>{a74007fc-ccac-446f-ae47-3f0f52843fd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\Dilithium">
+      <UniqueIdentifier>{e56b58b0-d54f-4621-b3fc-e357c4767415}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\Kyber">
+      <UniqueIdentifier>{dcc92ece-7260-4342-8141-4222548b99ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\Dilithium">
+      <UniqueIdentifier>{885cbb17-54ee-4ee3-be72-3ff6ee8e99c2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="common.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="mceliece.h">
+      <Filter>Header Files\Asymmetric\Cipher\McEliece</Filter>
+    </ClInclude>
+    <ClInclude Include="sha3.h">
+      <Filter>Header Files\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="poly1305.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="sha2.h">
+      <Filter>Header Files\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="intutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="memutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="intrinsics.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="rcs.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="mceliece_support.h">
+      <Filter>Header Files\Asymmetric\Cipher\McEliece</Filter>
+    </ClInclude>
+    <ClInclude Include="kyber.h">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber</Filter>
+    </ClInclude>
+    <ClInclude Include="kyber_support.h">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber</Filter>
+    </ClInclude>
+    <ClInclude Include="dilithium.h">
+      <Filter>Header Files\Asymmetric\Signature\Dilithium</Filter>
+    </ClInclude>
+    <ClInclude Include="dilithium_support.h">
+      <Filter>Header Files\Asymmetric\Signature\Dilithium</Filter>
+    </ClInclude>
+    <ClInclude Include="sphincsplus.h">
+      <Filter>Header Files\Asymmetric\Signature\SphincsPlus</Filter>
+    </ClInclude>
+    <ClInclude Include="sphincsplus_support.h">
+      <Filter>Header Files\Asymmetric\Signature\SphincsPlus</Filter>
+    </ClInclude>
+    <ClInclude Include="csg.h">
+      <Filter>Header Files\DRBG</Filter>
+    </ClInclude>
+    <ClInclude Include="rdp.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
+    <ClInclude Include="csp.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
+    <ClInclude Include="acp.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
+    <ClInclude Include="secmem.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="secrand.h">
+      <Filter>Header Files\PRNG</Filter>
+    </ClInclude>
+    <ClInclude Include="sysutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="csx.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="chacha.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sha3.c">
+      <Filter>Source Files\Digest</Filter>
+    </ClCompile>
+    <ClCompile Include="poly1305.c">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="sha2.c">
+      <Filter>Source Files\Digest</Filter>
+    </ClCompile>
+    <ClCompile Include="intutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="memutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="rcs.c">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="mceliece_support.c">
+      <Filter>Source Files\Asymmetric\Cipher\McEliece</Filter>
+    </ClCompile>
+    <ClCompile Include="mceliece.c">
+      <Filter>Source Files\Asymmetric\Cipher\McEliece</Filter>
+    </ClCompile>
+    <ClCompile Include="kyber.c">
+      <Filter>Source Files\Asymmetric\Cipher\Kyber</Filter>
+    </ClCompile>
+    <ClCompile Include="kyber_support.c">
+      <Filter>Source Files\Asymmetric\Cipher\Kyber</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithium_support.c">
+      <Filter>Source Files\Asymmetric\Signature\Dilithium</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithium.c">
+      <Filter>Source Files\Asymmetric\Signature\Dilithium</Filter>
+    </ClCompile>
+    <ClCompile Include="sphincsplus.c">
+      <Filter>Source Files\Asymmetric\Signature\SphincsPlus</Filter>
+    </ClCompile>
+    <ClCompile Include="sphincsplus_support.c">
+      <Filter>Source Files\Asymmetric\Signature\SphincsPlus</Filter>
+    </ClCompile>
+    <ClCompile Include="csg.c">
+      <Filter>Source Files\DRBG</Filter>
+    </ClCompile>
+    <ClCompile Include="rdp.c">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
+    <ClCompile Include="csp.c">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
+    <ClCompile Include="acp.c">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
+    <ClCompile Include="secmem.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="secrand.c">
+      <Filter>Source Files\PRNG</Filter>
+    </ClCompile>
+    <ClCompile Include="sysutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="csx.c">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="chacha.c">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

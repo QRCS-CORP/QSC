@@ -1,7 +1,0 @@
-
---- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\McBits\McEliece\McElieceTest\sha3kat.c (C)
-
---- Global Wrap-up
-
- error 974: (Note -- Worst case function for stack usage: 'cshake_simple_128_kat_test' is finite, requires 2657 bytes total stack in calling 'hex_to_bin' (external). See +stack for a full report. [MISRA 2004 Rule 16.2, required])
- error 900: (Note -- Successful completion, 1 messages produced)

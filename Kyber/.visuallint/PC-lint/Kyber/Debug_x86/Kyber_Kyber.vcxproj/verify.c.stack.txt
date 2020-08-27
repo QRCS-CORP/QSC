@@ -1,2 +1,0 @@
-"cmov",20,finite,20,"no function",
-"verify",20,finite,20,"no function",

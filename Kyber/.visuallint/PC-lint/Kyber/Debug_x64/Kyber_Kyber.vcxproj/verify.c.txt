@@ -1,7 +1,0 @@
-
---- Module:   C:\Users\John\Documents\Visual Studio 2015\Projects\Cryptography\Kyber\Kyber\verify.c (C)
-
---- Global Wrap-up
-
- error 974: (Note -- Worst case function for stack usage: 'verify' is finite, requires 28 bytes total stack in calling 'no function'. See +stack for a full report. [MISRA C++ Rule 7-5-4], [MISRA 2004 Rule 16.2, required])
- error 900: (Note -- Successful completion, 1 messages produced)
