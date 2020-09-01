@@ -4,121 +4,6 @@
 
 /* SHA2-256 */
 
-static const uint32_t sha256_iv[8] =
-{
-	0x6A09E667UL,
-	0xBB67AE85UL,
-	0x3C6EF372UL,
-	0xA54FF53AUL,
-	0x510E527FUL,
-	0x9B05688CUL,
-	0x1F83D9ABUL,
-	0x5BE0CD19UL
-};
-
-static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
-{
-	ctx->t += msglen;
-}
-
-void qsc_sha256_blockupdate(qsc_sha256_state* ctx, const uint8_t* message, size_t nblocks)
-{
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	size_t i;
-
-	for (i = 0; i < nblocks; ++i)
-	{
-		qsc_sha256_permute(ctx->state, message + (i * QSC_SHA2_256_RATE));
-		sha256_increase(ctx, QSC_SHA2_256_RATE);
-	}
-}
-
-void qsc_sha2_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
-{
-	assert(output != NULL);
-	assert(message != NULL);
-
-	qsc_sha256_state ctx;
-	size_t blocks;
-
-	qsc_sha256_initialize(&ctx);
-	blocks = msglen / QSC_SHA2_256_RATE;
-
-	if (msglen >= QSC_SHA2_256_RATE)
-	{
-		qsc_sha256_blockupdate(&ctx, message, blocks);
-		msglen -= blocks * QSC_SHA2_256_RATE;
-	}
-
-	qsc_sha256_finalize(&ctx, output, message + (blocks * QSC_SHA2_256_RATE), msglen);
-}
-
-void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output, const uint8_t* message, size_t msglen)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(message != NULL);
-
-	uint8_t pad[QSC_SHA2_256_RATE] = { 0 };
-	uint64_t bitLen;
-	size_t i;
-
-	for (i = 0; i < msglen; ++i)
-	{
-		pad[i] = message[i];
-	}
-
-	sha256_increase(ctx, msglen);
-	bitLen = (ctx->t << 3);
-
-	if (msglen == QSC_SHA2_256_RATE)
-	{
-		qsc_sha256_permute(ctx->state, pad);
-		msglen = 0;
-	}
-
-	pad[msglen] = 128;
-	++msglen;
-
-	/* padding */
-	if (msglen < QSC_SHA2_256_RATE)
-	{
-		qsc_intutils_clear8(pad + msglen, QSC_SHA2_256_RATE - msglen);
-	}
-
-	if (msglen > 56)
-	{
-		qsc_sha256_permute(ctx->state, pad);
-		qsc_intutils_clear8(pad, QSC_SHA2_256_RATE);
-	}
-
-	/* finalize state with counter and last compression */
-	qsc_intutils_be32to8(pad + 56, (uint32_t)(bitLen >> 32));
-	qsc_intutils_be32to8(pad + 60, (uint32_t)bitLen);
-	qsc_sha256_permute(ctx->state, pad);
-
-	for (i = 0; i < QSC_SHA2_256_HASH_SIZE; i += sizeof(uint32_t))
-	{
-		qsc_intutils_be32to8(output + i, ctx->state[i / sizeof(uint32_t)]);
-	}
-}
-
-void qsc_sha256_initialize(qsc_sha256_state* ctx)
-{
-	assert(ctx != NULL);
-
-	size_t i;
-
-	for (i = 0; i < QSC_SHA2_STATE_SIZE; ++i)
-	{
-		ctx->state[i] = sha256_iv[i];
-	}
-
-	ctx->t = 0;
-}
-
 #ifdef QSC_SHA2_SHANI_ENABLED
 void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 {
@@ -604,6 +489,120 @@ void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 }
 #endif
 
+static const uint32_t sha256_iv[8] =
+{
+	0x6A09E667UL,
+	0xBB67AE85UL,
+	0x3C6EF372UL,
+	0xA54FF53AUL,
+	0x510E527FUL,
+	0x9B05688CUL,
+	0x1F83D9ABUL,
+	0x5BE0CD19UL
+};
+
+static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
+{
+	ctx->t += msglen;
+}
+
+void qsc_sha256_blockupdate(qsc_sha256_state* ctx, const uint8_t* message, size_t nblocks)
+{
+	assert(ctx != NULL);
+	assert(message != NULL);
+
+	size_t i;
+
+	for (i = 0; i < nblocks; ++i)
+	{
+		qsc_sha256_permute(ctx->state, message + (i * QSC_SHA2_256_RATE));
+		sha256_increase(ctx, QSC_SHA2_256_RATE);
+	}
+}
+
+void qsc_sha2_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
+{
+	assert(output != NULL);
+	assert(message != NULL);
+
+	qsc_sha256_state ctx;
+	size_t blocks;
+
+	qsc_sha256_initialize(&ctx);
+	blocks = msglen / QSC_SHA2_256_RATE;
+
+	if (msglen >= QSC_SHA2_256_RATE)
+	{
+		qsc_sha256_blockupdate(&ctx, message, blocks);
+		msglen -= blocks * QSC_SHA2_256_RATE;
+	}
+
+	qsc_sha256_finalize(&ctx, output, message + (blocks * QSC_SHA2_256_RATE), msglen);
+}
+
+void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output, const uint8_t* message, size_t msglen)
+{
+	assert(ctx != NULL);
+	assert(output != NULL);
+
+	uint8_t pad[QSC_SHA2_256_RATE] = { 0 };
+	uint64_t bitLen;
+	size_t i;
+
+	for (i = 0; i < msglen; ++i)
+	{
+		pad[i] = message[i];
+	}
+
+	sha256_increase(ctx, msglen);
+	bitLen = (ctx->t << 3);
+
+	if (msglen == QSC_SHA2_256_RATE)
+	{
+		qsc_sha256_permute(ctx->state, pad);
+		msglen = 0;
+	}
+
+	pad[msglen] = 128;
+	++msglen;
+
+	/* padding */
+	if (msglen < QSC_SHA2_256_RATE)
+	{
+		qsc_intutils_clear8(pad + msglen, QSC_SHA2_256_RATE - msglen);
+	}
+
+	if (msglen > 56)
+	{
+		qsc_sha256_permute(ctx->state, pad);
+		qsc_intutils_clear8(pad, QSC_SHA2_256_RATE);
+	}
+
+	/* finalize state with counter and last compression */
+	qsc_intutils_be32to8(pad + 56, (uint32_t)(bitLen >> 32));
+	qsc_intutils_be32to8(pad + 60, (uint32_t)bitLen);
+	qsc_sha256_permute(ctx->state, pad);
+
+	for (i = 0; i < QSC_SHA2_256_HASH_SIZE; i += sizeof(uint32_t))
+	{
+		qsc_intutils_be32to8(output + i, ctx->state[i / sizeof(uint32_t)]);
+	}
+}
+
+void qsc_sha256_initialize(qsc_sha256_state* ctx)
+{
+	assert(ctx != NULL);
+
+	size_t i;
+
+	for (i = 0; i < QSC_SHA2_STATE_SIZE; ++i)
+	{
+		ctx->state[i] = sha256_iv[i];
+	}
+
+	ctx->t = 0;
+}
+
 /* SHA2-384 */
 
 static const uint64_t sha384_iv[8] =
@@ -667,7 +666,6 @@ void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output, const uint8_t* 
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(message != NULL);
 
 	uint8_t pad[QSC_SHA2_384_RATE] = { 0 };
 	uint64_t bitLen;
@@ -1164,7 +1162,6 @@ void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output, const uint8_t* 
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(message != NULL);
 
 	uint8_t pad[QSC_SHA2_512_RATE] = { 0 };
 	uint64_t bitLen;
@@ -1669,7 +1666,6 @@ void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output, const uint8_t
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(message != NULL);
 
 	uint8_t tmpv[QSC_SHA2_256_HASH_SIZE] = { 0 };
 	size_t oft;
@@ -1805,7 +1801,6 @@ void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output, const uint8_t
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(message != NULL);
 
 	uint8_t tmpv[QSC_SHA2_512_HASH_SIZE] = { 0 };
 	size_t oft;

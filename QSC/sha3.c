@@ -2730,7 +2730,6 @@ void qsc_sha3_blockupdate(qsc_keccak_state* ctx, size_t rate, const uint8_t* mes
 void qsc_sha3_finalize(qsc_keccak_state* ctx, size_t rate, const uint8_t* message, size_t msglen, uint8_t* output)
 {
 	assert(ctx != NULL);
-	assert(message != NULL);
 
 	uint8_t msg[QSC_SHA3_STATE_SIZE * sizeof(uint64_t)] = { 0 };
 	size_t i;
@@ -3323,7 +3322,6 @@ void qsc_kmac128_finalize(qsc_keccak_state* ctx, uint8_t* output, size_t outputl
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(message != NULL);
 
 	uint8_t buf[sizeof(size_t) + 1] = { 0 };
 	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
@@ -3506,7 +3504,6 @@ void qsc_kmac256_finalize(qsc_keccak_state* ctx, uint8_t* output, size_t outputl
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(message != NULL);
 
 	uint8_t buf[sizeof(size_t) + 1] = { 0 };
 	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
@@ -3690,7 +3687,6 @@ void qsc_kmac512_finalize(qsc_keccak_state* ctx, uint8_t* output, size_t outputl
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(message != NULL);
 
 	uint8_t buf[sizeof(size_t) + 1] = { 0 };
 	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
