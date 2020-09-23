@@ -1,5 +1,5 @@
 #include "mceliece.h"
-#include "mceliece_support.h"
+#include "mceliecebase.h"
 
 bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {
@@ -9,7 +9,7 @@ bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const 
 
 	bool res;
 
-	res = qsc_mceliece_kem_dec(secret, ciphertext, privatekey);
+	res = qsc_mceliece_kem_decapsulate(secret, ciphertext, privatekey);
 
 	return res;
 }

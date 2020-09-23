@@ -100,6 +100,16 @@ typedef struct
 } qsc_chacha_keyparams;
 
 /**
+* \brief Dispose of the ChaCha cipher state.
+*
+* \warning The dispose function must be called when disposing of the cipher.
+* This function destroys internal arrays and data
+*
+* \param ctx: [struct] The cipher state structure
+*/
+void qsc_chacha_dispose(qsc_chacha_state* ctx);
+
+/**
 * \brief Initialize the state with the secret key and nonce.
 *
 * \warning The key array must be either 16 or 32 bytes in length

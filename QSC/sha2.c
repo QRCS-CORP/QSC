@@ -1,8 +1,115 @@
 #include "sha2.h"
 #include "intutils.h"
 #include "intrinsics.h"
+#include "memutils.h"
+
+
+#define SHA2_256_ROUNDS_COUNT 64
+#define SHA2_384_ROUNDS_COUNT 80
+#define SHA2_512_ROUNDS_COUNT 80
 
 /* SHA2-256 */
+
+static const uint32_t sha256_iv[8] =
+{
+	0x6A09E667UL,
+	0xBB67AE85UL,
+	0x3C6EF372UL,
+	0xA54FF53AUL,
+	0x510E527FUL,
+	0x9B05688CUL,
+	0x1F83D9ABUL,
+	0x5BE0CD19UL
+};
+
+static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
+{
+	ctx->t += msglen;
+}
+
+QSC_SYSTEM_OPTIMIZE_IGNORE
+void qsc_sha256_dispose(qsc_sha256_state* ctx)
+{
+	if (ctx != NULL)
+	{
+		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		ctx->t = 0;
+		ctx->position = 0;
+	}
+}
+
+void qsc_sha2_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
+{
+	assert(output != NULL);
+	assert(message != NULL);
+
+	qsc_sha256_state ctx;
+
+	qsc_sha256_initialize(&ctx);
+	qsc_sha256_update(&ctx, message, msglen);
+	qsc_sha256_finalize(&ctx, output);
+}
+
+void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output)
+{
+	assert(ctx != NULL);
+	assert(output != NULL);
+
+	uint8_t pad[QSC_SHA2_256_RATE] = { 0 };
+	uint64_t bitLen;
+
+	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
+	sha256_increase(ctx, ctx->position);
+	bitLen = (ctx->t << 3);
+
+	if (ctx->position == QSC_SHA2_256_RATE)
+	{
+		qsc_sha256_permute(ctx->state, pad);
+		ctx->position = 0;
+	}
+
+	pad[ctx->position] = 128;
+	++ctx->position;
+
+	/* padding */
+	if (ctx->position < QSC_SHA2_256_RATE)
+	{
+		qsc_memutils_clear(pad + ctx->position, QSC_SHA2_256_RATE - ctx->position);
+	}
+
+	if (ctx->position > 56)
+	{
+		qsc_sha256_permute(ctx->state, pad);
+		qsc_memutils_clear(pad, QSC_SHA2_256_RATE);
+	}
+
+	/* finalize state with counter and last compression */
+	qsc_intutils_be32to8(pad + 56, (uint32_t)(bitLen >> 32));
+	qsc_intutils_be32to8(pad + 60, (uint32_t)bitLen);
+	qsc_sha256_permute(ctx->state, pad);
+
+#if defined(QSC_SYSTEM_IS_BIG_ENDIAN)
+	qsc_memutils_copy(output, (uint8_t*)ctx->state, QSC_SHA2_256_HASH_SIZE);
+#else
+	for (size_t i = 0; i < QSC_SHA2_256_HASH_SIZE; i += sizeof(uint32_t))
+	{
+		qsc_intutils_be32to8(output + i, ctx->state[i / sizeof(uint32_t)]);
+	}
+#endif
+
+	qsc_sha256_dispose(ctx);
+}
+
+void qsc_sha256_initialize(qsc_sha256_state* ctx)
+{
+	assert(ctx != NULL);
+
+	qsc_memutils_copy((uint8_t*)ctx->state, (uint8_t*)sha256_iv, sizeof(ctx->state));
+	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+	ctx->t = 0;
+	ctx->position = 0;
+}
 
 #ifdef QSC_SHA2_SHANI_ENABLED
 void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
@@ -489,132 +596,59 @@ void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 }
 #endif
 
-static const uint32_t sha256_iv[8] =
-{
-	0x6A09E667UL,
-	0xBB67AE85UL,
-	0x3C6EF372UL,
-	0xA54FF53AUL,
-	0x510E527FUL,
-	0x9B05688CUL,
-	0x1F83D9ABUL,
-	0x5BE0CD19UL
-};
-
-static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
-{
-	ctx->t += msglen;
-}
-
-void qsc_sha256_blockupdate(qsc_sha256_state* ctx, const uint8_t* message, size_t nblocks)
+void qsc_sha256_update(qsc_sha256_state* ctx, const uint8_t* message, size_t msglen)
 {
 	assert(ctx != NULL);
 	assert(message != NULL);
 
-	size_t i;
-
-	for (i = 0; i < nblocks; ++i)
+	if (msglen != 0)
 	{
-		qsc_sha256_permute(ctx->state, message + (i * QSC_SHA2_256_RATE));
-		sha256_increase(ctx, QSC_SHA2_256_RATE);
+		if (ctx->position != 0 && (ctx->position + msglen >= QSC_SHA2_256_RATE))
+		{
+			const size_t RMDLEN = QSC_SHA2_256_RATE - ctx->position;
+
+			if (RMDLEN != 0)
+			{
+				qsc_memutils_copy(ctx->buffer + ctx->position, message, RMDLEN);
+			}
+
+			qsc_sha256_permute(ctx->state, ctx->buffer);
+			sha256_increase(ctx, QSC_SHA2_256_RATE);
+			ctx->position = 0;
+			message += RMDLEN;
+			msglen -= RMDLEN;
+		}
+
+		/* sequential loop through blocks */
+		while (msglen >= QSC_SHA2_256_RATE)
+		{
+			qsc_sha256_permute(ctx->state, message);
+			sha256_increase(ctx, QSC_SHA2_256_RATE);
+			message += QSC_SHA2_256_RATE;
+			msglen -= QSC_SHA2_256_RATE;
+		}
+
+		/* store unaligned bytes */
+		if (msglen != 0)
+		{
+			qsc_memutils_copy(ctx->buffer + ctx->position, message, msglen);
+			ctx->position += msglen;
+		}
 	}
-}
-
-void qsc_sha2_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
-{
-	assert(output != NULL);
-	assert(message != NULL);
-
-	qsc_sha256_state ctx;
-	size_t blocks;
-
-	qsc_sha256_initialize(&ctx);
-	blocks = msglen / QSC_SHA2_256_RATE;
-
-	if (msglen >= QSC_SHA2_256_RATE)
-	{
-		qsc_sha256_blockupdate(&ctx, message, blocks);
-		msglen -= blocks * QSC_SHA2_256_RATE;
-	}
-
-	qsc_sha256_finalize(&ctx, output, message + (blocks * QSC_SHA2_256_RATE), msglen);
-}
-
-void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output, const uint8_t* message, size_t msglen)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
-	uint8_t pad[QSC_SHA2_256_RATE] = { 0 };
-	uint64_t bitLen;
-	size_t i;
-
-	for (i = 0; i < msglen; ++i)
-	{
-		pad[i] = message[i];
-	}
-
-	sha256_increase(ctx, msglen);
-	bitLen = (ctx->t << 3);
-
-	if (msglen == QSC_SHA2_256_RATE)
-	{
-		qsc_sha256_permute(ctx->state, pad);
-		msglen = 0;
-	}
-
-	pad[msglen] = 128;
-	++msglen;
-
-	/* padding */
-	if (msglen < QSC_SHA2_256_RATE)
-	{
-		qsc_intutils_clear8(pad + msglen, QSC_SHA2_256_RATE - msglen);
-	}
-
-	if (msglen > 56)
-	{
-		qsc_sha256_permute(ctx->state, pad);
-		qsc_intutils_clear8(pad, QSC_SHA2_256_RATE);
-	}
-
-	/* finalize state with counter and last compression */
-	qsc_intutils_be32to8(pad + 56, (uint32_t)(bitLen >> 32));
-	qsc_intutils_be32to8(pad + 60, (uint32_t)bitLen);
-	qsc_sha256_permute(ctx->state, pad);
-
-	for (i = 0; i < QSC_SHA2_256_HASH_SIZE; i += sizeof(uint32_t))
-	{
-		qsc_intutils_be32to8(output + i, ctx->state[i / sizeof(uint32_t)]);
-	}
-}
-
-void qsc_sha256_initialize(qsc_sha256_state* ctx)
-{
-	assert(ctx != NULL);
-
-	size_t i;
-
-	for (i = 0; i < QSC_SHA2_STATE_SIZE; ++i)
-	{
-		ctx->state[i] = sha256_iv[i];
-	}
-
-	ctx->t = 0;
 }
 
 /* SHA2-384 */
 
-static const uint64_t sha384_iv[8] =
+static const uint64_t sha512_iv[8] =
 {
-	0xCBBB9D5DC1059ED8ULL,
-	0x629A292A367CD507ULL,
-	0x9159015A3070DD17ULL,
-	0x152FECD8F70E5939ULL,
-	0x67332667FFC00B31ULL,
-	0x8EB44A8768581511ULL,
-	0xDB0C2E0D64F98FA7ULL,
-	0x47B5481DBEFA4FA4ULL
+	0x6A09E667F3BCC908ULL,
+	0xBB67AE8584CAA73BULL,
+	0x3C6EF372FE94F82BULL,
+	0xA54FF53A5F1D36F1ULL,
+	0x510E527FADE682D1ULL,
+	0x9B05688C2B3E6C1FULL,
+	0x1F83D9ABFB41BD6BULL,
+	0x5BE0CD19137E2179ULL
 };
 
 static void sha384_increase(qsc_sha384_state* ctx, size_t length)
@@ -634,484 +668,129 @@ void qsc_sha2_compute384(uint8_t* output, const uint8_t* message, size_t msglen)
 	assert(message != NULL);
 
 	qsc_sha384_state ctx;
-	size_t blocks;
 
 	qsc_sha384_initialize(&ctx);
-	blocks = msglen / QSC_SHA2_384_RATE;
-
-	if (msglen >= QSC_SHA2_384_RATE)
-	{
-		qsc_sha384_blockupdate(&ctx, message, blocks);
-		msglen -= blocks * QSC_SHA2_384_RATE;
-	}
-
-	qsc_sha384_finalize(&ctx, output, message + (blocks * QSC_SHA2_384_RATE), msglen);
+	qsc_sha384_update(&ctx, message, msglen);
+	qsc_sha384_finalize(&ctx, output);
 }
 
-void qsc_sha384_blockupdate(qsc_sha384_state* ctx, const uint8_t* message, size_t nblocks)
+QSC_SYSTEM_OPTIMIZE_IGNORE
+void qsc_sha384_dispose(qsc_sha384_state* ctx)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	size_t i;
-
-	for (i = 0; i < nblocks; ++i)
+	if (ctx != NULL)
 	{
-		qsc_sha384_permute(ctx->state, message + (i * QSC_SHA2_384_RATE));
-		sha384_increase(ctx, QSC_SHA2_384_RATE);
+		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		ctx->t[0] = 0;
+		ctx->t[1] = 0;
+		ctx->position = 0;
 	}
 }
+QSC_SYSTEM_OPTIMIZE_RESUME
 
-void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output, const uint8_t* message, size_t msglen)
+void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 
 	uint8_t pad[QSC_SHA2_384_RATE] = { 0 };
 	uint64_t bitLen;
-	size_t i;
 
-	sha384_increase(ctx, msglen);
+	sha384_increase(ctx, ctx->position);
 	bitLen = (ctx->t[0] << 3);
+	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
 
-	for (i = 0; i < msglen; ++i)
+	if (ctx->position == QSC_SHA2_384_RATE)
 	{
-		pad[i] = message[i];
+		qsc_sha512_permute(ctx->state, pad);
+		ctx->position = 0;
 	}
 
-	if (msglen == QSC_SHA2_384_RATE)
-	{
-		qsc_sha384_permute(ctx->state, pad);
-		msglen = 0;
-	}
-
-	pad[msglen] = 128;
-	++msglen;
+	pad[ctx->position] = 128;
+	++ctx->position;
 
 	/* padding */
-	if (msglen < QSC_SHA2_384_RATE)
+	if (ctx->position < QSC_SHA2_384_RATE)
 	{
-		qsc_intutils_clear8(pad + msglen, QSC_SHA2_384_RATE - msglen);
+		qsc_memutils_clear(pad + ctx->position, QSC_SHA2_384_RATE - ctx->position);
 	}
 
-	if (msglen > 112)
+	if (ctx->position > 112)
 	{
-		qsc_sha384_permute(ctx->state, pad);
-		qsc_intutils_clear8(pad, QSC_SHA2_384_RATE);
+		qsc_sha512_permute(ctx->state, pad);
+		qsc_memutils_clear(pad, QSC_SHA2_384_RATE);
 	}
 
 	/* finalize state with counter and last compression */
 	qsc_intutils_be64to8(pad + 112, ctx->t[1]);
 	qsc_intutils_be64to8(pad + 120, bitLen);
-	qsc_sha384_permute(ctx->state, pad);
+	qsc_sha512_permute(ctx->state, pad);
 
-	for (i = 0; i < QSC_SHA2_384_HASH_SIZE; i += 8)
+#if defined(QSC_SYSTEM_IS_BIG_ENDIAN)
+	qsc_memutils_copy(output, (uint8_t*)ctx->state, QSC_SHA2_384_HASH_SIZE);
+#else
+	for (size_t i = 0; i < QSC_SHA2_384_HASH_SIZE; i += 8)
 	{
 		qsc_intutils_be64to8(output + i, ctx->state[i / 8]);
 	}
+#endif
+
+	qsc_sha384_dispose(ctx);
 }
 
 void qsc_sha384_initialize(qsc_sha384_state* ctx)
 {
 	assert(ctx != NULL);
 
-	size_t i;
-
-	for (i = 0; i < QSC_SHA2_STATE_SIZE; ++i)
-	{
-		ctx->state[i] = sha384_iv[i];
-	}
-
+	qsc_memutils_copy((uint8_t*)ctx->state, (uint8_t*)sha512_iv, sizeof(ctx->state));
+	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
 	ctx->t[0] = 0;
 	ctx->t[1] = 0;
+	ctx->position = 0;
 }
 
-void qsc_sha384_permute(uint64_t* output, const uint8_t* message)
+void qsc_sha384_update(qsc_sha384_state* ctx, const uint8_t* message, size_t msglen)
 {
-	uint64_t a;
-	uint64_t b;
-	uint64_t c;
-	uint64_t d;
-	uint64_t e;
-	uint64_t f;
-	uint64_t g;
-	uint64_t h;
-	uint64_t r;
-	uint64_t w0;
-	uint64_t w1;
-	uint64_t w2;
-	uint64_t w3;
-	uint64_t w4;
-	uint64_t w5;
-	uint64_t w6;
-	uint64_t w7;
-	uint64_t w8;
-	uint64_t w9;
-	uint64_t w10;
-	uint64_t w11;
-	uint64_t w12;
-	uint64_t w13;
-	uint64_t w14;
-	uint64_t w15;
+	assert(ctx != NULL);
+	assert(message != NULL);
 
-	a = output[0];
-	b = output[1];
-	c = output[2];
-	d = output[3];
-	e = output[4];
-	f = output[5];
-	g = output[6];
-	h = output[7];
+	if (msglen != 0)
+	{
+		if (ctx->position != 0 && (ctx->position + msglen >= QSC_SHA2_384_RATE))
+		{
+			const size_t RMDLEN = QSC_SHA2_384_RATE - ctx->position;
 
-	w0 = qsc_intutils_be8to64(message);
-	w1 = qsc_intutils_be8to64(message + 8);
-	w2 = qsc_intutils_be8to64(message + 16);
-	w3 = qsc_intutils_be8to64(message + 24);
-	w4 = qsc_intutils_be8to64(message + 32);
-	w5 = qsc_intutils_be8to64(message + 40);
-	w6 = qsc_intutils_be8to64(message + 48);
-	w7 = qsc_intutils_be8to64(message + 56);
-	w8 = qsc_intutils_be8to64(message + 64);
-	w9 = qsc_intutils_be8to64(message + 72);
-	w10 = qsc_intutils_be8to64(message + 80);
-	w11 = qsc_intutils_be8to64(message + 88);
-	w12 = qsc_intutils_be8to64(message + 96);
-	w13 = qsc_intutils_be8to64(message + 104);
-	w14 = qsc_intutils_be8to64(message + 112);
-	w15 = qsc_intutils_be8to64(message + 120);
+			if (RMDLEN != 0)
+			{
+				qsc_memutils_copy(ctx->buffer + ctx->position, message, RMDLEN);
+			}
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w0 + 0x428a2f98d728ae22ULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w1 + 0x7137449123ef65cdULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w2 + 0xb5c0fbcfec4d3b2fULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w3 + 0xe9b5dba58189dbbcULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w4 + 0x3956c25bf348b538ULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w5 + 0x59f111f1b605d019ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w6 + 0x923f82a4af194f9bULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w7 + 0xab1c5ed5da6d8118ULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w8 + 0xd807aa98a3030242ULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w9 + 0x12835b0145706fbeULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w10 + 0x243185be4ee4b28cULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w11 + 0x550c7dc3d5ffb4e2ULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w12 + 0x72be5d74f27b896fULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w13 + 0x80deb1fe3b1696b1ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w14 + 0x9bdc06a725c71235ULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w15 + 0xc19bf174cf692694ULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
+			qsc_sha512_permute(ctx->state, ctx->buffer);
+			sha384_increase(ctx, QSC_SHA2_384_RATE);
+			ctx->position = 0;
+			message += RMDLEN;
+			msglen -= RMDLEN;
+		}
 
-	w0 += (((w14 << 45) | (w14 >> 19)) ^ ((w14 << 3) | (w14 >> 61)) ^ (w14 >> 6)) + w9 + (((w1 << 63) | (w1 >> 1)) ^ ((w1 << 56) | (w1 >> 8)) ^ (w1 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w0 + 0xe49b69c19ef14ad2ULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w1 += (((w15 << 45) | (w15 >> 19)) ^ ((w15 << 3) | (w15 >> 61)) ^ (w15 >> 6)) + w10 + (((w2 << 63) | (w2 >> 1)) ^ ((w2 << 56) | (w2 >> 8)) ^ (w2 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w1 + 0xefbe4786384f25e3ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w2 += (((w0 << 45) | (w0 >> 19)) ^ ((w0 << 3) | (w0 >> 61)) ^ (w0 >> 6)) + w11 + (((w3 << 63) | (w3 >> 1)) ^ ((w3 << 56) | (w3 >> 8)) ^ (w3 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w2 + 0x0fc19dc68b8cd5b5ULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w3 += (((w1 << 45) | (w1 >> 19)) ^ ((w1 << 3) | (w1 >> 61)) ^ (w1 >> 6)) + w12 + (((w4 << 63) | (w4 >> 1)) ^ ((w4 << 56) | (w4 >> 8)) ^ (w4 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w3 + 0x240ca1cc77ac9c65ULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w4 += (((w2 << 45) | (w2 >> 19)) ^ ((w2 << 3) | (w2 >> 61)) ^ (w2 >> 6)) + w13 + (((w5 << 63) | (w5 >> 1)) ^ ((w5 << 56) | (w5 >> 8)) ^ (w5 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w4 + 0x2de92c6f592b0275ULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w5 += (((w3 << 45) | (w3 >> 19)) ^ ((w3 << 3) | (w3 >> 61)) ^ (w3 >> 6)) + w14 + (((w6 << 63) | (w6 >> 1)) ^ ((w6 << 56) | (w6 >> 8)) ^ (w6 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w5 + 0x4a7484aa6ea6e483ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w6 += (((w4 << 45) | (w4 >> 19)) ^ ((w4 << 3) | (w4 >> 61)) ^ (w4 >> 6)) + w15 + (((w7 << 63) | (w7 >> 1)) ^ ((w7 << 56) | (w7 >> 8)) ^ (w7 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w6 + 0x5cb0a9dcbd41fbd4ULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w7 += (((w5 << 45) | (w5 >> 19)) ^ ((w5 << 3) | (w5 >> 61)) ^ (w5 >> 6)) + w0 + (((w8 << 63) | (w8 >> 1)) ^ ((w8 << 56) | (w8 >> 8)) ^ (w8 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w7 + 0x76f988da831153b5ULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-	w8 += (((w6 << 45) | (w6 >> 19)) ^ ((w6 << 3) | (w6 >> 61)) ^ (w6 >> 6)) + w1 + (((w9 << 63) | (w9 >> 1)) ^ ((w9 << 56) | (w9 >> 8)) ^ (w9 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w8 + 0x983e5152ee66dfabULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w9 += (((w7 << 45) | (w7 >> 19)) ^ ((w7 << 3) | (w7 >> 61)) ^ (w7 >> 6)) + w2 + (((w10 << 63) | (w10 >> 1)) ^ ((w10 << 56) | (w10 >> 8)) ^ (w10 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w9 + 0xa831c66d2db43210ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w10 += (((w8 << 45) | (w8 >> 19)) ^ ((w8 << 3) | (w8 >> 61)) ^ (w8 >> 6)) + w3 + (((w11 << 63) | (w11 >> 1)) ^ ((w11 << 56) | (w11 >> 8)) ^ (w11 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w10 + 0xb00327c898fb213fULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w11 += (((w9 << 45) | (w9 >> 19)) ^ ((w9 << 3) | (w9 >> 61)) ^ (w9 >> 6)) + w4 + (((w12 << 63) | (w12 >> 1)) ^ ((w12 << 56) | (w12 >> 8)) ^ (w12 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w11 + 0xbf597fc7beef0ee4ULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w12 += (((w10 << 45) | (w10 >> 19)) ^ ((w10 << 3) | (w10 >> 61)) ^ (w10 >> 6)) + w5 + (((w13 << 63) | (w13 >> 1)) ^ ((w13 << 56) | (w13 >> 8)) ^ (w13 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w12 + 0xc6e00bf33da88fc2ULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w13 += (((w11 << 45) | (w11 >> 19)) ^ ((w11 << 3) | (w11 >> 61)) ^ (w11 >> 6)) + w6 + (((w14 << 63) | (w14 >> 1)) ^ ((w14 << 56) | (w14 >> 8)) ^ (w14 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w13 + 0xd5a79147930aa725ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w14 += (((w12 << 45) | (w12 >> 19)) ^ ((w12 << 3) | (w12 >> 61)) ^ (w12 >> 6)) + w7 + (((w15 << 63) | (w15 >> 1)) ^ ((w15 << 56) | (w15 >> 8)) ^ (w15 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w14 + 0x06ca6351e003826fULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w15 += (((w13 << 45) | (w13 >> 19)) ^ ((w13 << 3) | (w13 >> 61)) ^ (w13 >> 6)) + w8 + (((w0 << 63) | (w0 >> 1)) ^ ((w0 << 56) | (w0 >> 8)) ^ (w0 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w15 + 0x142929670a0e6e70ULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
+		/* sequential loop through blocks */
+		while (msglen >= QSC_SHA2_384_RATE)
+		{
+			qsc_sha512_permute(ctx->state, message);
+			sha384_increase(ctx, QSC_SHA2_384_RATE);
+			message += QSC_SHA2_384_RATE;
+			msglen -= QSC_SHA2_384_RATE;
+		}
 
-	w0 += (((w14 << 45) | (w14 >> 19)) ^ ((w14 << 3) | (w14 >> 61)) ^ (w14 >> 6)) + w9 + (((w1 << 63) | (w1 >> 1)) ^ ((w1 << 56) | (w1 >> 8)) ^ (w1 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w0 + 0x27b70a8546d22ffcULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w1 += (((w15 << 45) | (w15 >> 19)) ^ ((w15 << 3) | (w15 >> 61)) ^ (w15 >> 6)) + w10 + (((w2 << 63) | (w2 >> 1)) ^ ((w2 << 56) | (w2 >> 8)) ^ (w2 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w1 + 0x2e1b21385c26c926ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w2 += (((w0 << 45) | (w0 >> 19)) ^ ((w0 << 3) | (w0 >> 61)) ^ (w0 >> 6)) + w11 + (((w3 << 63) | (w3 >> 1)) ^ ((w3 << 56) | (w3 >> 8)) ^ (w3 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w2 + 0x4d2c6dfc5ac42aedULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w3 += (((w1 << 45) | (w1 >> 19)) ^ ((w1 << 3) | (w1 >> 61)) ^ (w1 >> 6)) + w12 + (((w4 << 63) | (w4 >> 1)) ^ ((w4 << 56) | (w4 >> 8)) ^ (w4 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w3 + 0x53380d139d95b3dfULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w4 += (((w2 << 45) | (w2 >> 19)) ^ ((w2 << 3) | (w2 >> 61)) ^ (w2 >> 6)) + w13 + (((w5 << 63) | (w5 >> 1)) ^ ((w5 << 56) | (w5 >> 8)) ^ (w5 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w4 + 0x650a73548baf63deULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w5 += (((w3 << 45) | (w3 >> 19)) ^ ((w3 << 3) | (w3 >> 61)) ^ (w3 >> 6)) + w14 + (((w6 << 63) | (w6 >> 1)) ^ ((w6 << 56) | (w6 >> 8)) ^ (w6 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w5 + 0x766a0abb3c77b2a8ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w6 += (((w4 << 45) | (w4 >> 19)) ^ ((w4 << 3) | (w4 >> 61)) ^ (w4 >> 6)) + w15 + (((w7 << 63) | (w7 >> 1)) ^ ((w7 << 56) | (w7 >> 8)) ^ (w7 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w6 + 0x81c2c92e47edaee6ULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w7 += (((w5 << 45) | (w5 >> 19)) ^ ((w5 << 3) | (w5 >> 61)) ^ (w5 >> 6)) + w0 + (((w8 << 63) | (w8 >> 1)) ^ ((w8 << 56) | (w8 >> 8)) ^ (w8 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w7 + 0x92722c851482353bULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-	w8 += (((w6 << 45) | (w6 >> 19)) ^ ((w6 << 3) | (w6 >> 61)) ^ (w6 >> 6)) + w1 + (((w9 << 63) | (w9 >> 1)) ^ ((w9 << 56) | (w9 >> 8)) ^ (w9 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w8 + 0xa2bfe8a14cf10364ULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w9 += (((w7 << 45) | (w7 >> 19)) ^ ((w7 << 3) | (w7 >> 61)) ^ (w7 >> 6)) + w2 + (((w10 << 63) | (w10 >> 1)) ^ ((w10 << 56) | (w10 >> 8)) ^ (w10 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w9 + 0xa81a664bbc423001ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w10 += (((w8 << 45) | (w8 >> 19)) ^ ((w8 << 3) | (w8 >> 61)) ^ (w8 >> 6)) + w3 + (((w11 << 63) | (w11 >> 1)) ^ ((w11 << 56) | (w11 >> 8)) ^ (w11 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w10 + 0xc24b8b70d0f89791ULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w11 += (((w9 << 45) | (w9 >> 19)) ^ ((w9 << 3) | (w9 >> 61)) ^ (w9 >> 6)) + w4 + (((w12 << 63) | (w12 >> 1)) ^ ((w12 << 56) | (w12 >> 8)) ^ (w12 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w11 + 0xc76c51a30654be30ULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w12 += (((w10 << 45) | (w10 >> 19)) ^ ((w10 << 3) | (w10 >> 61)) ^ (w10 >> 6)) + w5 + (((w13 << 63) | (w13 >> 1)) ^ ((w13 << 56) | (w13 >> 8)) ^ (w13 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w12 + 0xd192e819d6ef5218ULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w13 += (((w11 << 45) | (w11 >> 19)) ^ ((w11 << 3) | (w11 >> 61)) ^ (w11 >> 6)) + w6 + (((w14 << 63) | (w14 >> 1)) ^ ((w14 << 56) | (w14 >> 8)) ^ (w14 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w13 + 0xd69906245565a910ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w14 += (((w12 << 45) | (w12 >> 19)) ^ ((w12 << 3) | (w12 >> 61)) ^ (w12 >> 6)) + w7 + (((w15 << 63) | (w15 >> 1)) ^ ((w15 << 56) | (w15 >> 8)) ^ (w15 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w14 + 0xf40e35855771202aULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w15 += (((w13 << 45) | (w13 >> 19)) ^ ((w13 << 3) | (w13 >> 61)) ^ (w13 >> 6)) + w8 + (((w0 << 63) | (w0 >> 1)) ^ ((w0 << 56) | (w0 >> 8)) ^ (w0 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w15 + 0x106aa07032bbd1b8ULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-
-	w0 += (((w14 << 45) | (w14 >> 19)) ^ ((w14 << 3) | (w14 >> 61)) ^ (w14 >> 6)) + w9 + (((w1 << 63) | (w1 >> 1)) ^ ((w1 << 56) | (w1 >> 8)) ^ (w1 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w0 + 0x19a4c116b8d2d0c8ULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w1 += (((w15 << 45) | (w15 >> 19)) ^ ((w15 << 3) | (w15 >> 61)) ^ (w15 >> 6)) + w10 + (((w2 << 63) | (w2 >> 1)) ^ ((w2 << 56) | (w2 >> 8)) ^ (w2 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w1 + 0x1e376c085141ab53ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w2 += (((w0 << 45) | (w0 >> 19)) ^ ((w0 << 3) | (w0 >> 61)) ^ (w0 >> 6)) + w11 + (((w3 << 63) | (w3 >> 1)) ^ ((w3 << 56) | (w3 >> 8)) ^ (w3 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w2 + 0x2748774cdf8eeb99ULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w3 += (((w1 << 45) | (w1 >> 19)) ^ ((w1 << 3) | (w1 >> 61)) ^ (w1 >> 6)) + w12 + (((w4 << 63) | (w4 >> 1)) ^ ((w4 << 56) | (w4 >> 8)) ^ (w4 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w3 + 0x34b0bcb5e19b48a8ULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w4 += (((w2 << 45) | (w2 >> 19)) ^ ((w2 << 3) | (w2 >> 61)) ^ (w2 >> 6)) + w13 + (((w5 << 63) | (w5 >> 1)) ^ ((w5 << 56) | (w5 >> 8)) ^ (w5 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w4 + 0x391c0cb3c5c95a63ULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w5 += (((w3 << 45) | (w3 >> 19)) ^ ((w3 << 3) | (w3 >> 61)) ^ (w3 >> 6)) + w14 + (((w6 << 63) | (w6 >> 1)) ^ ((w6 << 56) | (w6 >> 8)) ^ (w6 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w5 + 0x4ed8aa4ae3418acbULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w6 += (((w4 << 45) | (w4 >> 19)) ^ ((w4 << 3) | (w4 >> 61)) ^ (w4 >> 6)) + w15 + (((w7 << 63) | (w7 >> 1)) ^ ((w7 << 56) | (w7 >> 8)) ^ (w7 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w6 + 0x5b9cca4f7763e373ULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w7 += (((w5 << 45) | (w5 >> 19)) ^ ((w5 << 3) | (w5 >> 61)) ^ (w5 >> 6)) + w0 + (((w8 << 63) | (w8 >> 1)) ^ ((w8 << 56) | (w8 >> 8)) ^ (w8 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w7 + 0x682e6ff3d6b2b8a3ULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-	w8 += (((w6 << 45) | (w6 >> 19)) ^ ((w6 << 3) | (w6 >> 61)) ^ (w6 >> 6)) + w1 + (((w9 << 63) | (w9 >> 1)) ^ ((w9 << 56) | (w9 >> 8)) ^ (w9 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w8 + 0x748f82ee5defb2fcULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w9 += (((w7 << 45) | (w7 >> 19)) ^ ((w7 << 3) | (w7 >> 61)) ^ (w7 >> 6)) + w2 + (((w10 << 63) | (w10 >> 1)) ^ ((w10 << 56) | (w10 >> 8)) ^ (w10 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w9 + 0x78a5636f43172f60ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w10 += (((w8 << 45) | (w8 >> 19)) ^ ((w8 << 3) | (w8 >> 61)) ^ (w8 >> 6)) + w3 + (((w11 << 63) | (w11 >> 1)) ^ ((w11 << 56) | (w11 >> 8)) ^ (w11 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w10 + 0x84c87814a1f0ab72ULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w11 += (((w9 << 45) | (w9 >> 19)) ^ ((w9 << 3) | (w9 >> 61)) ^ (w9 >> 6)) + w4 + (((w12 << 63) | (w12 >> 1)) ^ ((w12 << 56) | (w12 >> 8)) ^ (w12 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w11 + 0x8cc702081a6439ecULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w12 += (((w10 << 45) | (w10 >> 19)) ^ ((w10 << 3) | (w10 >> 61)) ^ (w10 >> 6)) + w5 + (((w13 << 63) | (w13 >> 1)) ^ ((w13 << 56) | (w13 >> 8)) ^ (w13 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w12 + 0x90befffa23631e28ULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w13 += (((w11 << 45) | (w11 >> 19)) ^ ((w11 << 3) | (w11 >> 61)) ^ (w11 >> 6)) + w6 + (((w14 << 63) | (w14 >> 1)) ^ ((w14 << 56) | (w14 >> 8)) ^ (w14 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w13 + 0xa4506cebde82bde9ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w14 += (((w12 << 45) | (w12 >> 19)) ^ ((w12 << 3) | (w12 >> 61)) ^ (w12 >> 6)) + w7 + (((w15 << 63) | (w15 >> 1)) ^ ((w15 << 56) | (w15 >> 8)) ^ (w15 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w14 + 0xbef9a3f7b2c67915ULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w15 += (((w13 << 45) | (w13 >> 19)) ^ ((w13 << 3) | (w13 >> 61)) ^ (w13 >> 6)) + w8 + (((w0 << 63) | (w0 >> 1)) ^ ((w0 << 56) | (w0 >> 8)) ^ (w0 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w15 + 0xc67178f2e372532bULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-
-	w0 += (((w14 << 45) | (w14 >> 19)) ^ ((w14 << 3) | (w14 >> 61)) ^ (w14 >> 6)) + w9 + (((w1 << 63) | (w1 >> 1)) ^ ((w1 << 56) | (w1 >> 8)) ^ (w1 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w0 + 0xca273eceea26619cULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w1 += (((w15 << 45) | (w15 >> 19)) ^ ((w15 << 3) | (w15 >> 61)) ^ (w15 >> 6)) + w10 + (((w2 << 63) | (w2 >> 1)) ^ ((w2 << 56) | (w2 >> 8)) ^ (w2 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w1 + 0xd186b8c721c0c207ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w2 += (((w0 << 45) | (w0 >> 19)) ^ ((w0 << 3) | (w0 >> 61)) ^ (w0 >> 6)) + w11 + (((w3 << 63) | (w3 >> 1)) ^ ((w3 << 56) | (w3 >> 8)) ^ (w3 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w2 + 0xeada7dd6cde0eb1eULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w3 += (((w1 << 45) | (w1 >> 19)) ^ ((w1 << 3) | (w1 >> 61)) ^ (w1 >> 6)) + w12 + (((w4 << 63) | (w4 >> 1)) ^ ((w4 << 56) | (w4 >> 8)) ^ (w4 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w3 + 0xf57d4f7fee6ed178ULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w4 += (((w2 << 45) | (w2 >> 19)) ^ ((w2 << 3) | (w2 >> 61)) ^ (w2 >> 6)) + w13 + (((w5 << 63) | (w5 >> 1)) ^ ((w5 << 56) | (w5 >> 8)) ^ (w5 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w4 + 0x06f067aa72176fbaULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w5 += (((w3 << 45) | (w3 >> 19)) ^ ((w3 << 3) | (w3 >> 61)) ^ (w3 >> 6)) + w14 + (((w6 << 63) | (w6 >> 1)) ^ ((w6 << 56) | (w6 >> 8)) ^ (w6 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w5 + 0x0a637dc5a2c898a6ULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w6 += (((w4 << 45) | (w4 >> 19)) ^ ((w4 << 3) | (w4 >> 61)) ^ (w4 >> 6)) + w15 + (((w7 << 63) | (w7 >> 1)) ^ ((w7 << 56) | (w7 >> 8)) ^ (w7 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w6 + 0x113f9804bef90daeULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w7 += (((w5 << 45) | (w5 >> 19)) ^ ((w5 << 3) | (w5 >> 61)) ^ (w5 >> 6)) + w0 + (((w8 << 63) | (w8 >> 1)) ^ ((w8 << 56) | (w8 >> 8)) ^ (w8 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w7 + 0x1b710b35131c471bULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-	w8 += (((w6 << 45) | (w6 >> 19)) ^ ((w6 << 3) | (w6 >> 61)) ^ (w6 >> 6)) + w1 + (((w9 << 63) | (w9 >> 1)) ^ ((w9 << 56) | (w9 >> 8)) ^ (w9 >> 7));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + w8 + 0x28db77f523047d84ULL;
-	d += r;
-	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	w9 += (((w7 << 45) | (w7 >> 19)) ^ ((w7 << 3) | (w7 >> 61)) ^ (w7 >> 6)) + w2 + (((w10 << 63) | (w10 >> 1)) ^ ((w10 << 56) | (w10 >> 8)) ^ (w10 >> 7));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + w9 + 0x32caab7b40c72493ULL;
-	c += r;
-	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	w10 += (((w8 << 45) | (w8 >> 19)) ^ ((w8 << 3) | (w8 >> 61)) ^ (w8 >> 6)) + w3 + (((w11 << 63) | (w11 >> 1)) ^ ((w11 << 56) | (w11 >> 8)) ^ (w11 >> 7));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + w10 + 0x3c9ebe0a15c9bebcULL;
-	b += r;
-	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	w11 += (((w9 << 45) | (w9 >> 19)) ^ ((w9 << 3) | (w9 >> 61)) ^ (w9 >> 6)) + w4 + (((w12 << 63) | (w12 >> 1)) ^ ((w12 << 56) | (w12 >> 8)) ^ (w12 >> 7));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + w11 + 0x431d67c49c100d4cULL;
-	a += r;
-	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	w12 += (((w10 << 45) | (w10 >> 19)) ^ ((w10 << 3) | (w10 >> 61)) ^ (w10 >> 6)) + w5 + (((w13 << 63) | (w13 >> 1)) ^ ((w13 << 56) | (w13 >> 8)) ^ (w13 >> 7));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + w12 + 0x4cc5d4becb3e42b6ULL;
-	h += r;
-	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	w13 += (((w11 << 45) | (w11 >> 19)) ^ ((w11 << 3) | (w11 >> 61)) ^ (w11 >> 6)) + w6 + (((w14 << 63) | (w14 >> 1)) ^ ((w14 << 56) | (w14 >> 8)) ^ (w14 >> 7));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + w13 + 0x597f299cfc657e2aULL;
-	g += r;
-	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	w14 += (((w12 << 45) | (w12 >> 19)) ^ ((w12 << 3) | (w12 >> 61)) ^ (w12 >> 6)) + w7 + (((w15 << 63) | (w15 >> 1)) ^ ((w15 << 56) | (w15 >> 8)) ^ (w15 >> 7));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + w14 + 0x5fcb6fab3ad6faecULL;
-	f += r;
-	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	w15 += (((w13 << 45) | (w13 >> 19)) ^ ((w13 << 3) | (w13 >> 61)) ^ (w13 >> 6)) + w8 + (((w0 << 63) | (w0 >> 1)) ^ ((w0 << 56) | (w0 >> 8)) ^ (w0 >> 7));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + w15 + 0x6c44198c4a475817ULL;
-	e += r;
-	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-
-	output[0] += a;
-	output[1] += b;
-	output[2] += c;
-	output[3] += d;
-	output[4] += e;
-	output[5] += f;
-	output[6] += g;
-	output[7] += h;
+		/* store unaligned bytes */
+		if (msglen != 0)
+		{
+			qsc_memutils_copy(ctx->buffer + ctx->position, message, msglen);
+			ctx->position += msglen;
+		}
+	}
 }
 
 /* SHA2-512 */
-
-static const uint64_t sha512_iv[8] =
-{
-	0x6A09E667F3BCC908ULL,
-	0xBB67AE8584CAA73BULL,
-	0x3C6EF372FE94F82BULL,
-	0xA54FF53A5F1D36F1ULL,
-	0x510E527FADE682D1ULL,
-	0x9B05688C2B3E6C1FULL,
-	0x1F83D9ABFB41BD6BULL,
-	0x5BE0CD19137E2179ULL
-};
 
 static void sha512_increase(qsc_sha512_state* ctx, size_t length)
 {
@@ -1130,70 +809,57 @@ void qsc_sha2_compute512(uint8_t* output, const uint8_t* message, size_t msglen)
 	assert(message != NULL);
 
 	qsc_sha512_state ctx;
-	size_t blocks;
 
 	qsc_sha512_initialize(&ctx);
-	blocks = msglen / QSC_SHA2_512_RATE;
-
-	if (msglen >= QSC_SHA2_512_RATE)
-	{
-		qsc_sha512_blockupdate(&ctx, message, blocks);
-		msglen -= blocks * QSC_SHA2_512_RATE;
-	}
-
-	qsc_sha512_finalize(&ctx, output, message + (blocks * QSC_SHA2_512_RATE), msglen);
+	qsc_sha512_update(&ctx, message, msglen);
+	qsc_sha512_finalize(&ctx, output);
 }
 
-void qsc_sha512_blockupdate(qsc_sha512_state* ctx, const uint8_t* message, size_t nblocks)
+QSC_SYSTEM_OPTIMIZE_IGNORE
+void qsc_sha512_dispose(qsc_sha512_state* ctx)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	size_t i;
-
-	for (i = 0; i < nblocks; ++i)
+	if (ctx != NULL)
 	{
-		qsc_sha512_permute(ctx->state, message + (i * QSC_SHA2_512_RATE));
-		sha512_increase(ctx, QSC_SHA2_512_RATE);
+		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		ctx->t[0] = 0;
+		ctx->t[1] = 0;
+		ctx->position = 0;
 	}
 }
+QSC_SYSTEM_OPTIMIZE_RESUME
 
-void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output, const uint8_t* message, size_t msglen)
+void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 
 	uint8_t pad[QSC_SHA2_512_RATE] = { 0 };
 	uint64_t bitLen;
-	size_t i;
 
-	sha512_increase(ctx, msglen);
+	sha512_increase(ctx, ctx->position);
 	bitLen = (ctx->t[0] << 3);
+	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
 
-	for (i = 0; i < msglen; ++i)
-	{
-		pad[i] = message[i];
-	}
-
-	if (msglen == QSC_SHA2_512_RATE)
+	if (ctx->position == QSC_SHA2_512_RATE)
 	{
 		qsc_sha512_permute(ctx->state, pad);
-		msglen = 0;
+		ctx->position = 0;
 	}
 
-	pad[msglen] = 128;
-	++msglen;
+	pad[ctx->position] = 128;
+	++ctx->position;
 
 	/* padding */
-	if (msglen < QSC_SHA2_512_RATE)
+	if (ctx->position < QSC_SHA2_512_RATE)
 	{
-		qsc_intutils_clear8(pad + msglen, QSC_SHA2_512_RATE - msglen);
+		qsc_memutils_clear(pad + ctx->position, QSC_SHA2_512_RATE - ctx->position);
 	}
 
-	if (msglen > 112)
+	if (ctx->position > 112)
 	{
 		qsc_sha512_permute(ctx->state, pad);
-		qsc_intutils_clear8(pad, QSC_SHA2_512_RATE);
+		qsc_memutils_clear(pad, QSC_SHA2_512_RATE);
 	}
 
 	/* finalize state with counter and last compression */
@@ -1201,25 +867,27 @@ void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output, const uint8_t* 
 	qsc_intutils_be64to8(pad + 120, bitLen);
 	qsc_sha512_permute(ctx->state, pad);
 
-	for (i = 0; i < QSC_SHA2_512_HASH_SIZE; i += 8)
+#if defined(QSC_SYSTEM_IS_BIG_ENDIAN)
+	qsc_memutils_copy(output, (uint8_t*)ctx->state, QSC_SHA2_512_HASH_SIZE);
+#else
+	for (size_t i = 0; i < QSC_SHA2_512_HASH_SIZE; i += 8)
 	{
 		qsc_intutils_be64to8(output + i, ctx->state[i / 8]);
 	}
+#endif
+
+	qsc_sha512_dispose(ctx);
 }
 
 void qsc_sha512_initialize(qsc_sha512_state* ctx)
 {
 	assert(ctx != NULL);
 
-	size_t i;
-
-	for (i = 0; i < QSC_SHA2_STATE_SIZE; ++i)
-	{
-		ctx->state[i] = sha512_iv[i];
-	}
-
+	qsc_memutils_copy((uint8_t*)ctx->state, (uint8_t*)sha512_iv, sizeof(ctx->state));
+	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
 	ctx->t[0] = 0;
 	ctx->t[1] = 0;
+	ctx->position = 0;
 }
 
 void qsc_sha512_permute(uint64_t* output, const uint8_t* message)
@@ -1595,6 +1263,47 @@ void qsc_sha512_permute(uint64_t* output, const uint8_t* message)
 	output[7] += h;
 }
 
+void qsc_sha512_update(qsc_sha512_state* ctx, const uint8_t* message, size_t msglen)
+{
+	assert(ctx != NULL);
+	assert(message != NULL);
+
+	if (msglen != 0)
+	{
+		if (ctx->position != 0 && (ctx->position + msglen >= QSC_SHA2_512_RATE))
+		{
+			const size_t RMDLEN = QSC_SHA2_512_RATE - ctx->position;
+
+			if (RMDLEN != 0)
+			{
+				qsc_memutils_copy(ctx->buffer + ctx->position, message, RMDLEN);
+			}
+
+			qsc_sha512_permute(ctx->state, ctx->buffer);
+			sha512_increase(ctx, QSC_SHA2_512_RATE);
+			ctx->position = 0;
+			message += RMDLEN;
+			msglen -= RMDLEN;
+		}
+
+		/* sequential loop through blocks */
+		while (msglen >= QSC_SHA2_512_RATE)
+		{
+			qsc_sha512_permute(ctx->state, message);
+			sha512_increase(ctx, QSC_SHA2_512_RATE);
+			message += QSC_SHA2_512_RATE;
+			msglen -= QSC_SHA2_512_RATE;
+		}
+
+		/* store unaligned bytes */
+		if (msglen != 0)
+		{
+			qsc_memutils_copy(ctx->buffer + ctx->position, message, msglen);
+			ctx->position += msglen;
+		}
+	}
+}
+
 /* HMAC-256 */
 
 void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)
@@ -1603,86 +1312,38 @@ void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 	assert(message != NULL);
 	assert(key != NULL);
 
-	const uint8_t IPAD = 0x36;
-	const uint8_t OPAD = 0x5C;
-	uint8_t ipad[QSC_SHA2_256_RATE] = { 0 };
-	uint8_t opad[QSC_SHA2_256_RATE];
-	uint8_t tmpv[QSC_SHA2_256_HASH_SIZE];
-	qsc_sha256_state ctx;
-	size_t i;
+	qsc_hmac256_state ctx;
 
-	if (keylen > QSC_SHA2_256_RATE)
-	{
-		qsc_sha256_initialize(&ctx);
-
-		while (keylen > QSC_SHA2_256_RATE)
-		{
-			qsc_sha256_blockupdate(&ctx, key, 1);
-			keylen -= QSC_SHA2_256_RATE;
-		}
-
-		qsc_sha256_finalize(&ctx, ipad, key, keylen);
-	}
-	else
-	{
-		for (i = 0; i < keylen; ++i)
-		{
-			ipad[i] = key[i];
-		}
-	}
-
-	for (i = 0; i < QSC_SHA2_256_RATE; ++i)
-	{
-		opad[i] = ipad[i];
-		opad[i] ^= OPAD;
-		ipad[i] ^= IPAD;
-	}
-
-	qsc_sha256_initialize(&ctx);
-	qsc_sha256_blockupdate(&ctx, ipad, 1);
-
-	while (msglen >= QSC_SHA2_256_RATE)
-	{
-		qsc_sha256_blockupdate(&ctx, message, 1);
-		msglen -= QSC_SHA2_256_RATE;
-		message += QSC_SHA2_256_RATE;
-	}
-
-	qsc_sha256_finalize(&ctx, tmpv, message, msglen);
-	qsc_sha256_initialize(&ctx);
-	qsc_sha256_blockupdate(&ctx, opad, 1);
-	qsc_sha256_finalize(&ctx, output, tmpv, QSC_SHA2_256_HASH_SIZE);
+	qsc_hmac256_initialize(&ctx, key, keylen);
+	qsc_hmac256_update(&ctx, message, msglen);
+	qsc_hmac256_finalize(&ctx, output);
 }
 
-void qsc_hmac256_blockupdate(qsc_hmac256_state* ctx, const uint8_t* message, size_t nblocks)
+QSC_SYSTEM_OPTIMIZE_IGNORE
+void qsc_hmac256_dispose(qsc_hmac256_state* ctx)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	qsc_sha256_blockupdate(&ctx->pstate, message, nblocks);
+	if (ctx != NULL)
+	{
+		qsc_memutils_clear(ctx->ipad, sizeof(ctx->ipad));
+		qsc_memutils_clear(ctx->opad, sizeof(ctx->ipad));
+		qsc_sha256_dispose(&ctx->pstate);
+	}
 }
+QSC_SYSTEM_OPTIMIZE_RESUME
 
-void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output, const uint8_t* message, size_t msglen)
+void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 
 	uint8_t tmpv[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	size_t oft;
 
-	oft = 0;
-
-	while (msglen >= QSC_SHA2_256_RATE)
-	{
-		qsc_sha256_blockupdate(&ctx->pstate, message + oft, 1);
-		oft += QSC_SHA2_256_RATE;
-		msglen -= QSC_SHA2_256_RATE;
-	}
-
-	qsc_sha256_finalize(&ctx->pstate, tmpv, message + oft, msglen);
+	qsc_sha256_finalize(&ctx->pstate, tmpv);
 	qsc_sha256_initialize(&ctx->pstate);
-	qsc_sha256_blockupdate(&ctx->pstate, ctx->opad, 1);
-	qsc_sha256_finalize(&ctx->pstate, output, tmpv, QSC_SHA2_256_HASH_SIZE);
+	qsc_sha256_update(&ctx->pstate, ctx->opad, sizeof(ctx->opad));
+	qsc_sha256_update(&ctx->pstate, tmpv, sizeof(tmpv));
+	qsc_sha256_finalize(&ctx->pstate, output);
+	qsc_hmac256_dispose(ctx);
 }
 
 void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t keylen)
@@ -1692,42 +1353,34 @@ void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t k
 
 	const uint8_t IPAD = 0x36;
 	const uint8_t OPAD = 0x5C;
-	size_t i;
-	size_t oft;
 
-	oft = 0;
-	qsc_intutils_clear8(ctx->ipad, QSC_SHA2_256_RATE);
+	qsc_memutils_clear(ctx->ipad, QSC_SHA2_256_RATE);
 
 	if (keylen > QSC_SHA2_256_RATE)
 	{
 		qsc_sha256_initialize(&ctx->pstate);
-
-		while (keylen > QSC_SHA2_256_RATE)
-		{
-			qsc_sha256_blockupdate(&ctx->pstate, key + oft, 1);
-			oft += QSC_SHA2_256_RATE;
-			keylen -= QSC_SHA2_256_RATE;
-		}
-
-		qsc_sha256_finalize(&ctx->pstate, ctx->ipad, key + oft, keylen);
+		qsc_sha256_update(&ctx->pstate, key, keylen);
+		qsc_sha256_finalize(&ctx->pstate, ctx->ipad);
 	}
 	else
 	{
-		for (i = 0; i < keylen; ++i)
-		{
-			ctx->ipad[i] = key[i];
-		}
+		qsc_memutils_copy(ctx->ipad, key, keylen);
 	}
 
-	for (i = 0; i < QSC_SHA2_256_RATE; ++i)
-	{
-		ctx->opad[i] = ctx->ipad[i];
-		ctx->opad[i] ^= OPAD;
-		ctx->ipad[i] ^= IPAD;
-	}
+	qsc_memutils_copy(ctx->opad, ctx->ipad, QSC_SHA2_256_RATE);
+	qsc_memutils_xorv(ctx->opad, OPAD, QSC_SHA2_256_RATE);
+	qsc_memutils_xorv(ctx->ipad, IPAD, QSC_SHA2_256_RATE);
 
 	qsc_sha256_initialize(&ctx->pstate);
-	qsc_sha256_blockupdate(&ctx->pstate, ctx->ipad, 1);
+	qsc_sha256_update(&ctx->pstate, ctx->ipad, sizeof(ctx->ipad));
+}
+
+void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t msglen)
+{
+	assert(ctx != NULL);
+	assert(message != NULL);
+
+	qsc_sha256_update(&ctx->pstate, message, msglen);
 }
 
 /* HMAC-512 */
@@ -1738,86 +1391,38 @@ void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 	assert(message != NULL);
 	assert(key != NULL);
 
-	const uint8_t IPAD = 0x36;
-	const uint8_t OPAD = 0x5C;
-	uint8_t ipad[QSC_SHA2_512_RATE] = { 0 };
-	uint8_t opad[QSC_SHA2_512_RATE];
-	uint8_t tmpv[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	qsc_sha512_state ctx;
-	size_t i;
+	qsc_hmac512_state ctx;
 
-	if (keylen > QSC_SHA2_512_RATE)
-	{
-		qsc_sha512_initialize(&ctx);
-
-		while (keylen > QSC_SHA2_512_RATE)
-		{
-			qsc_sha512_blockupdate(&ctx, key, 1);
-			keylen -= QSC_SHA2_512_RATE;
-		}
-
-		qsc_sha512_finalize(&ctx, ipad, key, keylen);
-	}
-	else
-	{
-		for (i = 0; i < keylen; ++i)
-		{
-			ipad[i] = key[i];
-		}
-	}
-
-	for (i = 0; i < QSC_SHA2_512_RATE; ++i)
-	{
-		opad[i] = ipad[i];
-		opad[i] ^= OPAD;
-		ipad[i] ^= IPAD;
-	}
-
-	qsc_sha512_initialize(&ctx);
-	qsc_sha512_blockupdate(&ctx, ipad, 1);
-
-	while (msglen >= QSC_SHA2_512_RATE)
-	{
-		qsc_sha512_blockupdate(&ctx, message, 1);
-		msglen -= QSC_SHA2_512_RATE;
-		message += QSC_SHA2_512_RATE;
-	}
-
-	qsc_sha512_finalize(&ctx, tmpv, message, msglen);
-	qsc_sha512_initialize(&ctx);
-	qsc_sha512_blockupdate(&ctx, opad, 1);
-	qsc_sha512_finalize(&ctx, output, tmpv, QSC_SHA2_512_HASH_SIZE);
+	qsc_hmac512_initialize(&ctx, key, keylen);
+	qsc_hmac512_update(&ctx, message, msglen);
+	qsc_hmac512_finalize(&ctx, output);
 }
 
-void qsc_hmac512_blockupdate(qsc_hmac512_state* ctx, const uint8_t* message, size_t nblocks)
+QSC_SYSTEM_OPTIMIZE_IGNORE
+void qsc_hmac512_dispose(qsc_hmac512_state* ctx)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	qsc_sha512_blockupdate(&ctx->pstate, message, nblocks);
+	if (ctx != NULL)
+	{
+		qsc_memutils_clear(ctx->ipad, sizeof(ctx->ipad));
+		qsc_memutils_clear(ctx->opad, sizeof(ctx->ipad));
+		qsc_sha512_dispose(&ctx->pstate);
+	}
 }
+QSC_SYSTEM_OPTIMIZE_RESUME
 
-void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output, const uint8_t* message, size_t msglen)
+void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 
 	uint8_t tmpv[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	size_t oft;
 
-	oft = 0;
-
-	while (msglen >= QSC_SHA2_512_RATE)
-	{
-		qsc_sha512_blockupdate(&ctx->pstate, message + oft, 1);
-		oft += QSC_SHA2_512_RATE;
-		msglen -= QSC_SHA2_512_RATE;
-	}
-
-	qsc_sha512_finalize(&ctx->pstate, tmpv, message + oft, msglen);
+	qsc_sha512_finalize(&ctx->pstate, tmpv);
 	qsc_sha512_initialize(&ctx->pstate);
-	qsc_sha512_blockupdate(&ctx->pstate, ctx->opad, 1);
-	qsc_sha512_finalize(&ctx->pstate, output, tmpv, QSC_SHA2_512_HASH_SIZE);
+	qsc_sha512_update(&ctx->pstate, ctx->opad, sizeof(ctx->opad));
+	qsc_sha512_update(&ctx->pstate, tmpv, sizeof(tmpv));
+	qsc_sha512_finalize(&ctx->pstate, output);
+	qsc_hmac512_dispose(ctx);
 }
 
 void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t keylen)
@@ -1827,42 +1432,34 @@ void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t k
 
 	const uint8_t IPAD = 0x36;
 	const uint8_t OPAD = 0x5C;
-	size_t i;
-	size_t oft;
 
-	oft = 0;
-	qsc_intutils_clear8(ctx->ipad, QSC_SHA2_512_RATE);
+	qsc_memutils_clear(ctx->ipad, QSC_SHA2_512_RATE);
 
 	if (keylen > QSC_SHA2_512_RATE)
 	{
 		qsc_sha512_initialize(&ctx->pstate);
-
-		while (keylen > QSC_SHA2_512_RATE)
-		{
-			qsc_sha512_blockupdate(&ctx->pstate, key + oft, 1);
-			keylen -= QSC_SHA2_512_RATE;
-			oft += QSC_SHA2_512_RATE;
-		}
-
-		qsc_sha512_finalize(&ctx->pstate, ctx->ipad, key + oft, keylen);
+		qsc_sha512_update(&ctx->pstate, key, keylen);
+		qsc_sha512_finalize(&ctx->pstate, ctx->ipad);
 	}
 	else
 	{
-		for (i = 0; i < keylen; ++i)
-		{
-			ctx->ipad[i] = key[i];
-		}
+		qsc_memutils_copy(ctx->ipad, key, keylen);
 	}
 
-	for (i = 0; i < QSC_SHA2_512_RATE; ++i)
-	{
-		ctx->opad[i] = ctx->ipad[i];
-		ctx->opad[i] ^= OPAD;
-		ctx->ipad[i] ^= IPAD;
-	}
+	qsc_memutils_copy(ctx->opad, ctx->ipad, QSC_SHA2_512_RATE);
+	qsc_memutils_xorv(ctx->opad, OPAD, QSC_SHA2_512_RATE);
+	qsc_memutils_xorv(ctx->ipad, IPAD, QSC_SHA2_512_RATE);
 
 	qsc_sha512_initialize(&ctx->pstate);
-	qsc_sha512_blockupdate(&ctx->pstate, ctx->ipad, 1);
+	qsc_sha512_update(&ctx->pstate, ctx->ipad, sizeof(ctx->ipad));
+}
+
+void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t msglen)
+{
+	assert(ctx != NULL);
+	assert(message != NULL);
+
+	qsc_sha512_update(&ctx->pstate, message, msglen);
 }
 
 /* HKDF-256 */
@@ -1873,96 +1470,32 @@ void qsc_hkdf256_expand(uint8_t* output, size_t outlen, const uint8_t* key, size
 	assert(key != NULL);
 
 	qsc_hmac256_state ctx;
-	uint8_t msg[QSC_SHA2_256_RATE] = { 0 };
-	uint8_t otp[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	size_t ctr;
-	size_t i;
-	size_t ioft;
-	size_t mlen;
-	size_t rmd;
-	size_t slen;
-
-	ctr = 0;
-	slen = 0;
+	uint8_t buf[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	uint8_t ctr[1] = { 0 };
 
 	while (outlen != 0)
 	{
 		qsc_hmac256_initialize(&ctx, key, keylen);
-		mlen = infolen;
-		ioft = 0;
 
-		if (ctr != 0)
+		if (ctr[0] != 0)
 		{
-			for (i = 0; i < QSC_SHA2_256_HASH_SIZE; ++i)
-			{
-				msg[i] = otp[i];
-			}
-
-			slen = QSC_SHA2_256_HASH_SIZE;
-
-			if (infolen >= QSC_SHA2_256_HASH_SIZE)
-			{
-				for (i = 0; i < QSC_SHA2_256_HASH_SIZE; ++i)
-				{
-					msg[slen + i] = info[i];
-				}
-
-				qsc_hmac256_blockupdate(&ctx, msg, 1);
-				mlen -= QSC_SHA2_256_HASH_SIZE;
-				ioft += QSC_SHA2_256_HASH_SIZE;
-				slen = 0;
-			}
-
-			if (infolen > 0)
-			{
-				while (mlen >= QSC_SHA2_256_RATE)
-				{
-					qsc_hmac256_blockupdate(&ctx, info + ioft, 1);
-					ioft += QSC_SHA2_256_RATE;
-					mlen -= QSC_SHA2_256_RATE;
-				}
-
-				for (i = 0; i < mlen; ++i)
-				{
-					msg[slen + i] = info[ioft + i];
-				}
-			}
-
-			++ctr;
-			msg[slen + mlen] = (uint8_t)ctr;
-			qsc_hmac256_finalize(&ctx, otp, msg, slen + mlen + 1);
-		}
-		else
-		{
-			while (mlen >= QSC_SHA2_256_RATE)
-			{
-				qsc_hmac256_blockupdate(&ctx, info + ioft, 1);
-				ioft += QSC_SHA2_256_RATE;
-				mlen -= QSC_SHA2_256_RATE;
-			}
-
-			if (infolen > 0)
-			{
-				for (i = 0; i < mlen; ++i)
-				{
-					msg[i] = info[ioft + i];
-				}
-			}
-
-			++ctr;
-			msg[mlen] = (uint8_t)ctr;
-			qsc_hmac256_finalize(&ctx, otp, msg, mlen + 1);
+			qsc_hmac256_update(&ctx, buf, sizeof(buf));
 		}
 
-		rmd = qsc_intutils_min(outlen, (size_t)QSC_SHA2_256_HASH_SIZE);
-
-		for (i = 0; i < rmd; ++i)
+		if (infolen != 0)
 		{
-			output[i] = otp[i];
+			qsc_hmac256_update(&ctx, info, infolen);
 		}
 
-		outlen -= rmd;
-		output += rmd;
+		++ctr[0];
+		qsc_hmac256_update(&ctx, ctr, sizeof(ctr));
+		qsc_hmac256_finalize(&ctx, buf);
+
+		const size_t RMDLEN = qsc_intutils_min(outlen, (size_t)QSC_SHA2_256_HASH_SIZE);
+		qsc_memutils_copy(output, buf, RMDLEN);
+
+		outlen -= RMDLEN;
+		output += RMDLEN;
 	}
 }
 
@@ -1983,7 +1516,8 @@ void qsc_hkdf256_extract(uint8_t* output, size_t outlen, const uint8_t* key, siz
 		qsc_hmac256_initialize(&ctx, tmp, sizeof(tmp));
 	}
 
-	qsc_hmac256_finalize(&ctx, output, key, keylen);
+	qsc_hmac256_update(&ctx, key, keylen);
+	qsc_hmac256_finalize(&ctx, output);
 }
 
 /* HKDF-512 */
@@ -1994,96 +1528,32 @@ void qsc_hkdf512_expand(uint8_t* output, size_t outlen, const uint8_t* key, size
 	assert(key != NULL);
 
 	qsc_hmac512_state ctx;
-	uint8_t msg[QSC_SHA2_512_RATE] = { 0 };
-	uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	size_t ctr;
-	size_t i;
-	size_t ioft;
-	size_t mlen;
-	size_t rmd;
-	size_t slen;
-
-	ctr = 0;
-	slen = 0;
+	uint8_t buf[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	uint8_t ctr[1] = { 0 };
 
 	while (outlen != 0)
 	{
 		qsc_hmac512_initialize(&ctx, key, keylen);
-		mlen = infolen;
-		ioft = 0;
 
-		if (ctr != 0)
+		if (ctr[0] != 0)
 		{
-			for (i = 0; i < QSC_SHA2_512_HASH_SIZE; ++i)
-			{
-				msg[i] = otp[i];
-			}
-
-			slen = QSC_SHA2_512_HASH_SIZE;
-
-			if (infolen >= QSC_SHA2_512_HASH_SIZE)
-			{
-				for (i = 0; i < QSC_SHA2_512_HASH_SIZE; ++i)
-				{
-					msg[slen + i] = info[i];
-				}
-
-				qsc_hmac512_blockupdate(&ctx, msg, 1);
-				mlen -= QSC_SHA2_512_HASH_SIZE;
-				ioft += QSC_SHA2_512_HASH_SIZE;
-				slen = 0;
-			}
-
-			if (infolen > 0)
-			{
-				while (mlen >= QSC_SHA2_512_RATE)
-				{
-					qsc_hmac512_blockupdate(&ctx, info + ioft, 1);
-					ioft += QSC_SHA2_512_RATE;
-					mlen -= QSC_SHA2_512_RATE;
-				}
-
-				for (i = 0; i < mlen; ++i)
-				{
-					msg[slen + i] = info[ioft + i];
-				}
-			}
-
-			++ctr;
-			msg[slen + mlen] = (uint8_t)ctr;
-			qsc_hmac512_finalize(&ctx, otp, msg, slen + mlen + 1);
-		}
-		else
-		{
-			while (mlen >= QSC_SHA2_512_RATE)
-			{
-				qsc_hmac512_blockupdate(&ctx, info + ioft, 1);
-				ioft += QSC_SHA2_512_RATE;
-				mlen -= QSC_SHA2_512_RATE;
-			}
-
-			if (infolen > 0)
-			{
-				for (i = 0; i < mlen; ++i)
-				{
-					msg[i] = info[ioft + i];
-				}
-			}
-
-			++ctr;
-			msg[mlen] = (uint8_t)ctr;
-			qsc_hmac512_finalize(&ctx, otp, msg, mlen + 1);
+			qsc_hmac512_update(&ctx, buf, sizeof(buf));
 		}
 
-		rmd = qsc_intutils_min(outlen, (size_t)QSC_SHA2_512_HASH_SIZE);
-
-		for (i = 0; i < rmd; ++i)
+		if (infolen != 0)
 		{
-			output[i] = otp[i];
+			qsc_hmac512_update(&ctx, info, infolen);
 		}
 
-		outlen -= rmd;
-		output += rmd;
+		++ctr[0];
+		qsc_hmac512_update(&ctx, ctr, sizeof(ctr));
+		qsc_hmac512_finalize(&ctx, buf);
+
+		const size_t RMDLEN = qsc_intutils_min(outlen, (size_t)QSC_SHA2_512_HASH_SIZE);
+		qsc_memutils_copy(output, buf, RMDLEN);
+
+		outlen -= RMDLEN;
+		output += RMDLEN;
 	}
 }
 
@@ -2104,5 +1574,6 @@ void qsc_hkdf512_extract(uint8_t* output, size_t outlen, const uint8_t* key, siz
 		qsc_hmac512_initialize(&ctx, tmp, sizeof(tmp));
 	}
 
-	qsc_hmac512_finalize(&ctx, output, key, keylen);
+	qsc_hmac512_update(&ctx, key, keylen);
+	qsc_hmac512_finalize(&ctx, output);
 }

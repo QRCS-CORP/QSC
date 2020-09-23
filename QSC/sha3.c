@@ -1,20 +1,71 @@
 #include "sha3.h"
 #include "intutils.h"
+#include "memutils.h"
 
-/*lint -e747 */
+#define KECCAK_CSHAKE_DOMAIN_ID 0x04
+#define KECCAK_KMAC_DOMAIN_ID 0x04
+#define KECCAK_PERMUTATION_ROUNDS 24
+#define KECCAK_SHA3_DOMAIN_ID 0x06
+#define KECCAK_SHAKE_DOMAIN_ID 0x1F
+#define KECCAK_STATE_BYTE_SIZE 200
 
-/* internal */
+/* keccak */
 
-static size_t left_encode(uint8_t* buffer, size_t value)
+static void keccak_absorb(uint64_t* state, keccak_rate rate, const uint8_t* input, size_t inplen, uint8_t domain)
+{
+	uint8_t msg[QSC_KECCAK_STATE_BYTE_SIZE];
+
+	while (inplen >= (size_t)rate)
+	{
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+		qsc_memutils_xor((uint8_t*)state, input, rate);
+#else
+		for (size_t i = 0; i < rate / sizeof(uint64_t); ++i)
+		{
+			state[i] ^= qsc_intutils_le8to64(input + (sizeof(uint64_t) * i));
+		}
+#endif
+		qsc_keccak_permute(state);
+		inplen -= rate;
+		input += rate;
+	}
+
+	qsc_memutils_copy(msg, input, inplen);
+	msg[inplen] = domain;
+	qsc_memutils_clear(msg + inplen + 1, rate - inplen + 1);
+	msg[rate - 1] |= 128U;
+
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+	qsc_memutils_xor((uint8_t*)state, msg, rate);
+#else
+	for (size_t i = 0; i < rate / 8; ++i)
+	{
+		state[i] ^= qsc_intutils_le8to64(msg + (8 * i));
+	}
+#endif
+}
+
+static void keccak_fast_absorb(uint64_t* state, const uint8_t* input, size_t inplen)
+{
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+	qsc_memutils_xor((uint8_t*)state, input, inplen);
+#else
+	for (size_t i = 0; i < inplen / sizeof(uint64_t); ++i)
+	{
+		state[i] ^= qsc_intutils_le8to64(input + (sizeof(uint64_t) * i));
+	}
+#endif
+}
+
+static size_t keccak_left_encode(uint8_t* buffer, size_t value)
 {
 	size_t i;
 	size_t n;
 	size_t v;
 
-	/* jgu checked false warning */
-	/*lint -save -e722 */
-	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8) {};
-	/*lint -restore */
+	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8) 
+	{
+	}
 
 	if (n == 0)
 	{
@@ -31,16 +82,15 @@ static size_t left_encode(uint8_t* buffer, size_t value)
 	return (size_t)n + 1;
 }
 
-static size_t right_encode(uint8_t* buffer, size_t value)
+static size_t keccak_right_encode(uint8_t* buffer, size_t value)
 {
 	size_t i;
 	size_t n;
 	size_t v;
 
-	/* jgu checked false warning */
-	/*lint -save -e722 */
-	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8) {};
-	/*lint -restore */
+	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8) 
+	{
+	}
 
 	if (n == 0)
 	{
@@ -57,68 +107,70 @@ static size_t right_encode(uint8_t* buffer, size_t value)
 	return (size_t)n + 1;
 }
 
-/* keccak */
-
-static void keccak_absorb(uint64_t* state, size_t rate, const uint8_t* input, size_t inplen, uint8_t domain)
+static void keccak_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, keccak_rate rate)
 {
-	uint8_t msg[QSC_SHA3_STATE_SIZE * sizeof(uint64_t)];
-	size_t i;
-
-	while (inplen >= rate)
-	{
-		for (i = 0; i < rate / sizeof(uint64_t); ++i)
-		{
-			state[i] ^= qsc_intutils_le8to64(input + (sizeof(uint64_t) * i));
-		}
-
-		qsc_keccak_permute(state);
-
-		inplen -= rate;
-		input += rate;
-	}
-
-	for (i = 0; i < inplen; ++i)
-	{
-		msg[i] = input[i];
-	}
-
-	msg[inplen] = domain;
-
-	for (i = inplen + 1; i < rate; ++i)
-	{
-		msg[i] = 0;
-	}
-
-	msg[rate - 1] |= 128U;
-
-	for (i = 0; i < rate / 8; ++i)
-	{
-		state[i] ^= qsc_intutils_le8to64(msg + (8 * i));
-	}
-}
-
-static void keccak_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, size_t rate)
-{
-	size_t i;
-
 	while (nblocks > 0)
 	{
 		qsc_keccak_permute(state);
 
-		for (i = 0; i < (rate >> 3); ++i)
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+		qsc_memutils_copy(output, (uint8_t*)state, rate);
+#else
+		for (size_t i = 0; i < (rate >> 3); ++i)
 		{
 			qsc_intutils_le64to8(output + sizeof(uint64_t) * i, state[i]);
 		}
-
+#endif
 		output += rate;
 		nblocks--;
+	}
+}
+
+static void keccak_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen)
+{
+	assert(ctx != NULL);
+	assert(message != NULL);
+
+	if (msglen != 0)
+	{
+		if (ctx->position != 0 && (ctx->position + msglen >= (size_t)rate))
+		{
+			const size_t RMDLEN = rate - ctx->position;
+
+			if (RMDLEN != 0)
+			{
+				qsc_memutils_copy(ctx->buffer + ctx->position, message, RMDLEN);
+			}
+
+			keccak_fast_absorb(ctx->state, ctx->buffer, (size_t)rate);
+			qsc_keccak_permute(ctx->state);
+			ctx->position = 0;
+			message += RMDLEN;
+			msglen -= RMDLEN;
+		}
+
+		/* sequential loop through blocks */
+		while (msglen >= (size_t)rate)
+		{
+			keccak_fast_absorb(ctx->state, message, rate);
+			qsc_keccak_permute(ctx->state);
+			message += rate;
+			msglen -= rate;
+		}
+
+		/* store unaligned bytes */
+		if (msglen != 0)
+		{
+			qsc_memutils_copy(ctx->buffer + ctx->position, message, msglen);
+			ctx->position += msglen;
+		}
 	}
 }
 
 #ifdef QSC_KECCAK_COMPACT_PERMUTATION
 
 /* keccak round constants */
-static const uint64_t KeccakF_RoundConstants[QSC_KECCAK_PERMUTATION_ROUNDS] =
+static const uint64_t KeccakF_RoundConstants[KECCAK_PERMUTATION_ROUNDS] =
 {
 	0x0000000000000001ULL,
 	0x0000000000008082ULL,
@@ -237,7 +289,7 @@ void qsc_keccak_permute(uint64_t* state)
 	Aso = state[23];
 	Asu = state[24];
 
-	for (i = 0; i < QSC_KECCAK_PERMUTATION_ROUNDS; i += 2)
+	for (i = 0; i < KECCAK_PERMUTATION_ROUNDS; i += 2)
 	{
 		/* prepareTheta */
 		BCa = Aba ^ Aga^Aka^Ama^Asa;
@@ -2667,6 +2719,20 @@ void qsc_keccak_permute(uint64_t* state)
 
 #endif
 
+/* common */
+
+QSC_SYSTEM_OPTIMIZE_IGNORE
+void qsc_keccak_dispose(qsc_keccak_state* ctx)
+{
+	if (ctx != NULL)
+	{
+		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		ctx->position = 0;
+	}
+}
+QSC_SYSTEM_OPTIMIZE_RESUME
+
 /* sha3 */
 
 void qsc_sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
@@ -2674,18 +2740,14 @@ void qsc_sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
 	assert(output != NULL);
 	assert(message != NULL);
 
-	qsc_keccak_state state;
-	uint8_t hash[QSC_SHA3_256_RATE] = { 0 };
-	size_t i;
+	qsc_keccak_state ctx;
+	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
 
-	qsc_intutils_clear64(state.state, QSC_SHA3_STATE_SIZE);
-	keccak_absorb(state.state, QSC_SHA3_256_RATE, message, msglen, QSC_SHA3_DOMAIN_ID);
-	keccak_squeezeblocks(state.state, hash, 1, QSC_SHA3_256_RATE);
-
-	for (i = 0; i < QSC_SHA3_256_HASH_SIZE; ++i)
-	{
-		output[i] = hash[i];
-	}
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	keccak_absorb(ctx.state, keccak_rate_256, message, msglen, KECCAK_SHA3_DOMAIN_ID);
+	keccak_squeezeblocks(ctx.state, hash, 1, keccak_rate_256);
+	qsc_memutils_copy(output, hash, QSC_SHA3_256_HASH_SIZE);
+	qsc_keccak_dispose(&ctx);
 }
 
 void qsc_sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen)
@@ -2693,589 +2755,328 @@ void qsc_sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen)
 	assert(output != NULL);
 	assert(message != NULL);
 
-	qsc_keccak_state state;
-	uint8_t hash[QSC_SHA3_512_RATE] = { 0 };
-	size_t i;
+	qsc_keccak_state ctx;
+	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
 
-	qsc_intutils_clear64(state.state, QSC_SHA3_STATE_SIZE);
-	keccak_absorb(state.state, QSC_SHA3_512_RATE, message, msglen, QSC_SHA3_DOMAIN_ID);
-	keccak_squeezeblocks(state.state, hash, 1, QSC_SHA3_512_RATE);
-
-	for (i = 0; i < 64; ++i)
-	{
-		output[i] = hash[i];
-	}
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	keccak_absorb(ctx.state, keccak_rate_512, message, msglen, KECCAK_SHA3_DOMAIN_ID);
+	keccak_squeezeblocks(ctx.state, hash, 1, keccak_rate_512);
+	qsc_memutils_copy(output, hash, QSC_SHA3_512_HASH_SIZE);
+	qsc_keccak_dispose(&ctx);
 }
 
-void qsc_sha3_blockupdate(qsc_keccak_state* ctx, size_t rate, const uint8_t* message, size_t nblocks)
+void qsc_sha3_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output)
 {
 	assert(ctx != NULL);
-	assert(message != NULL);
+	assert(output != NULL);
 
-	size_t i;
+	size_t hlen;
 
-	while (nblocks > 0)
-	{
-		for (i = 0; i < rate / 8; ++i)
-		{
-			ctx->state[i] ^= qsc_intutils_le8to64(message + (sizeof(uint64_t) * i));
-		}
-
-		qsc_keccak_permute(ctx->state);
-		message += rate;
-		--nblocks;
-	}
-}
-
-void qsc_sha3_finalize(qsc_keccak_state* ctx, size_t rate, const uint8_t* message, size_t msglen, uint8_t* output)
-{
-	assert(ctx != NULL);
-
-	uint8_t msg[QSC_SHA3_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	size_t i;
-
-	if (msglen >= rate)
-	{
-		qsc_sha3_blockupdate(ctx, rate, message, msglen / rate);
-		message += (msglen / rate) * rate;
-		msglen = (msglen % rate);
-	}
-
-	for (i = 0; i < msglen; ++i)
-	{
-		msg[i] = message[i];
-	}
-
-	msg[msglen] = QSC_SHA3_DOMAIN_ID;
-	msg[rate - 1] |= 128U;
-
-	for (i = 0; i < rate / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(msg + (sizeof(uint64_t) * i));
-	}
-
+	hlen = (((QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)) - rate) / 2);
+	qsc_memutils_clear(ctx->buffer + ctx->position, sizeof(ctx->buffer) - ctx->position);
+	ctx->buffer[ctx->position] = KECCAK_SHA3_DOMAIN_ID;
+	ctx->buffer[rate - 1] |= 128U;
+	keccak_fast_absorb(ctx->state, ctx->buffer, rate);
 	qsc_keccak_permute(ctx->state);
-	msglen = ((((QSC_SHA3_STATE_SIZE * sizeof(uint64_t)) - rate) / 2) / 8);
 
-	for (i = 0; i < msglen; ++i)
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+	qsc_memutils_copy(output, (uint8_t*)ctx->state, hlen);
+#else
+
+	for (size_t i = 0; i < hlen / sizeof(uint64_t); ++i)
 	{
 		qsc_intutils_le64to8(output, ctx->state[i]);
-		output += 8;
+		output += sizeof(uint64_t);
 	}
+#endif
+
+	qsc_keccak_dispose(ctx);
 }
 
 void qsc_sha3_initialize(qsc_keccak_state* ctx)
 {
-	assert(ctx != NULL);
+	qsc_keccak_dispose(ctx);
+}
 
-	qsc_intutils_clear64(ctx->state, QSC_SHA3_STATE_SIZE);
+void qsc_sha3_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen)
+{
+	keccak_update(ctx, rate, message, msglen);
 }
 
 /* shake */
 
-void qsc_shake128_compute(uint8_t* output, size_t outputlen, const uint8_t* key, size_t keylen)
+void qsc_shake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen)
 {
 	assert(output != NULL);
 	assert(key != NULL);
 
-	const size_t nblocks = outputlen / QSC_SHAKE_128_RATE;
-	qsc_keccak_state state;
-	uint8_t hash[QSC_SHAKE_128_RATE] = { 0 };
-	size_t i;
-
-	qsc_intutils_clear64(state.state, QSC_SHA3_STATE_SIZE);
-	qsc_shake128_initialize(&state, key, keylen);
-	qsc_shake128_squeezeblocks(&state, output, nblocks);
-
-	output += (nblocks * QSC_SHAKE_128_RATE);
-	outputlen -= (nblocks * QSC_SHAKE_128_RATE);
-
-	if (outputlen != 0)
-	{
-		qsc_shake128_squeezeblocks(&state, hash, 1);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = hash[i];
-		}
-	}
-}
-
-void qsc_shake128_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	keccak_absorb(ctx->state, QSC_SHAKE_128_RATE, key, keylen, QSC_SHAKE_DOMAIN_ID);
-}
-
-void qsc_shake128_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
-	keccak_squeezeblocks(ctx->state, output, nblocks, QSC_SHAKE_128_RATE);
-}
-
-void qsc_shake256_compute(uint8_t* output, size_t outputlen, const uint8_t* key, size_t keylen)
-{
-	assert(output != NULL);
-	assert(key != NULL);
-
-	const size_t nblocks = outputlen / QSC_SHAKE_256_RATE;
+	const size_t nblocks = outlen / QSC_KECCAK_128_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_SHAKE_256_RATE] = { 0 };
-	size_t i;
+	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
 
-	qsc_intutils_clear64(ctx.state, QSC_SHA3_STATE_SIZE);
-	qsc_shake256_initialize(&ctx, key, keylen);
-	qsc_shake256_squeezeblocks(&ctx, output, nblocks);
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	qsc_shake_initialize(&ctx, keccak_rate_128, key, keylen);
+	qsc_shake_squeezeblocks(&ctx, keccak_rate_128, output, nblocks);
+	output += (nblocks * QSC_KECCAK_128_RATE);
+	outlen -= (nblocks * QSC_KECCAK_128_RATE);
 
-	output += (nblocks * QSC_SHAKE_256_RATE);
-	outputlen -= (nblocks * QSC_SHAKE_256_RATE);
-
-	if (outputlen != 0)
+	if (outlen != 0)
 	{
-		qsc_shake256_squeezeblocks(&ctx, hash, 1);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = hash[i];
-		}
+		qsc_shake_squeezeblocks(&ctx, keccak_rate_128, hash, 1);
+		qsc_memutils_copy(output, hash, outlen);
 	}
+
+	qsc_keccak_dispose(&ctx);
 }
 
-void qsc_shake256_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	keccak_absorb(ctx->state, QSC_SHAKE_256_RATE, key, keylen, QSC_SHAKE_DOMAIN_ID);
-}
-
-void qsc_shake256_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
-	keccak_squeezeblocks(ctx->state, output, nblocks, QSC_SHAKE_256_RATE);
-}
-
-void qsc_shake512_compute(uint8_t* output, size_t outputlen, const uint8_t* key, size_t keylen)
+void qsc_shake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen)
 {
 	assert(output != NULL);
 	assert(key != NULL);
 
-	const size_t nblocks = outputlen / QSC_SHAKE_512_RATE;
+	const size_t nblocks = outlen / QSC_KECCAK_256_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_SHAKE_512_RATE] = { 0 };
-	size_t i;
+	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
 
-	qsc_intutils_clear64(ctx.state, QSC_SHA3_STATE_SIZE);
-	qsc_shake512_initialize(&ctx, key, keylen);
-	qsc_shake512_squeezeblocks(&ctx, output, nblocks);
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	qsc_shake_initialize(&ctx, keccak_rate_256, key, keylen);
+	qsc_shake_squeezeblocks(&ctx, keccak_rate_256, output, nblocks);
+	output += (nblocks * QSC_KECCAK_256_RATE);
+	outlen -= (nblocks * QSC_KECCAK_256_RATE);
 
-	output += (nblocks * QSC_SHAKE_512_RATE);
-	outputlen -= (nblocks * QSC_SHAKE_512_RATE);
-
-	if (outputlen != 0)
+	if (outlen != 0)
 	{
-		qsc_shake512_squeezeblocks(&ctx, hash, 1);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = hash[i];
-		}
+		qsc_shake_squeezeblocks(&ctx, keccak_rate_256, hash, 1);
+		qsc_memutils_copy(output, hash, outlen);
 	}
+
+	qsc_keccak_dispose(&ctx);
 }
 
-void qsc_shake512_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen)
+void qsc_shake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen)
+{
+	assert(output != NULL);
+	assert(key != NULL);
+
+	const size_t nblocks = outlen / QSC_KECCAK_512_RATE;
+	qsc_keccak_state ctx;
+	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
+
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	qsc_shake_initialize(&ctx, keccak_rate_512, key, keylen);
+	qsc_shake_squeezeblocks(&ctx, keccak_rate_512, output, nblocks);
+	output += (nblocks * QSC_KECCAK_512_RATE);
+	outlen -= (nblocks * QSC_KECCAK_512_RATE);
+
+	if (outlen != 0)
+	{
+		qsc_shake_squeezeblocks(&ctx, keccak_rate_512, hash, 1);
+		qsc_memutils_copy(output, hash, outlen);
+	}
+
+	qsc_keccak_dispose(&ctx);
+}
+
+void qsc_shake_initialize(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen)
 {
 	assert(ctx != NULL);
 	assert(key != NULL);
 
-	keccak_absorb(ctx->state, QSC_SHAKE_512_RATE, key, keylen, QSC_SHAKE_DOMAIN_ID);
+	keccak_absorb(ctx->state, rate, key, keylen, KECCAK_SHAKE_DOMAIN_ID);
 }
 
-void qsc_shake512_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks)
+void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t nblocks)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 
-	keccak_squeezeblocks(ctx->state, output, nblocks, QSC_SHAKE_512_RATE);
+	keccak_squeezeblocks(ctx->state, output, nblocks, rate);
 }
 
 /* cshake */
 
-void qsc_cshake128_compute(uint8_t* output, size_t outputlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
+void qsc_cshake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
 {
 	assert(output != NULL);
 	assert(key != NULL);
 
-	const size_t nblocks = outputlen / QSC_CSHAKE_128_RATE;
+	const size_t nblocks = outlen / QSC_KECCAK_128_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_CSHAKE_128_RATE] = { 0 };
-	size_t i;
+	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
 
-	qsc_intutils_clear64(ctx.state, QSC_SHA3_STATE_SIZE);
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 
-	if (customlen + namelen != 0)
+	if (custlen + namelen != 0)
 	{
-		qsc_cshake128_initialize(&ctx, key, keylen, name, namelen, custom, customlen);
+		qsc_cshake_initialize(&ctx, keccak_rate_128, key, keylen, name, namelen, custom, custlen);
 	}
 	else
 	{
-		qsc_shake128_initialize(&ctx, key, keylen);
+		qsc_shake_initialize(&ctx, keccak_rate_128, key, keylen);
 	}
 
-	qsc_cshake128_squeezeblocks(&ctx, output, nblocks);
+	qsc_cshake_squeezeblocks(&ctx, keccak_rate_128, output, nblocks);
+	output += (nblocks * QSC_KECCAK_128_RATE);
+	outlen -= (nblocks * QSC_KECCAK_128_RATE);
 
-	output += (nblocks * QSC_CSHAKE_128_RATE);
-	outputlen -= (nblocks * QSC_CSHAKE_128_RATE);
-
-	if (outputlen != 0)
+	if (outlen != 0)
 	{
-		qsc_cshake128_squeezeblocks(&ctx, hash, 1);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = hash[i];
-		}
+		qsc_cshake_squeezeblocks(&ctx, keccak_rate_128, hash, 1);
+		qsc_memutils_copy(output, hash, outlen);
 	}
+
+	qsc_keccak_dispose(&ctx);
 }
 
-void qsc_cshake128_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
+void qsc_cshake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
+{
+	assert(output != NULL);
+	assert(key != NULL);
+
+	const size_t nblocks = outlen / QSC_KECCAK_256_RATE;
+	qsc_keccak_state ctx;
+	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
+
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+
+	if (custlen + namelen != 0)
+	{
+		qsc_cshake_initialize(&ctx, keccak_rate_256, key, keylen, name, namelen, custom, custlen);
+	}
+	else
+	{
+		qsc_shake_initialize(&ctx, keccak_rate_256, key, keylen);
+	}
+
+	qsc_cshake_squeezeblocks(&ctx, keccak_rate_256, output, nblocks);
+
+	output += (nblocks * QSC_KECCAK_256_RATE);
+	outlen -= (nblocks * QSC_KECCAK_256_RATE);
+
+	if (outlen != 0)
+	{
+		qsc_cshake_squeezeblocks(&ctx, keccak_rate_256, hash, 1);
+		qsc_memutils_copy(output, hash, outlen);
+	}
+
+	qsc_keccak_dispose(&ctx);
+}
+
+void qsc_cshake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
+{
+	assert(output != NULL);
+	assert(key != NULL);
+
+	const size_t nblocks = outlen / QSC_KECCAK_512_RATE;
+	qsc_keccak_state ctx;
+	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
+
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+
+	if (custlen + namelen != 0)
+	{
+		qsc_cshake_initialize(&ctx, keccak_rate_512, key, keylen, name, namelen, custom, custlen);
+	}
+	else
+	{
+		qsc_shake_initialize(&ctx, keccak_rate_512, key, keylen);
+	}
+
+	qsc_cshake_squeezeblocks(&ctx, keccak_rate_512, output, nblocks);
+	output += (nblocks * QSC_KECCAK_512_RATE);
+	outlen -= (nblocks * QSC_KECCAK_512_RATE);
+
+	if (outlen != 0)
+	{
+		qsc_cshake_squeezeblocks(&ctx, keccak_rate_512, hash, 1);
+		qsc_memutils_copy(output, hash, outlen);
+	}
+
+	qsc_keccak_dispose(&ctx);
+}
+
+void qsc_cshake_initialize(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
 {
 	assert(ctx != NULL);
 	assert(key != NULL);
 
-	uint8_t pad[QSC_SHAKE_STATE_SIZE * sizeof(uint64_t)] = { 0 };
+	uint8_t pad[KECCAK_STATE_BYTE_SIZE] = { 0 };
 	size_t i;
-	size_t j;
-	size_t offset;
+	size_t oft;
 
-	offset = left_encode(pad, QSC_CSHAKE_128_RATE);
-	offset += left_encode(pad + offset, namelen * 8);
+	oft = keccak_left_encode(pad, rate);
+	oft += keccak_left_encode(pad + oft, namelen * 8);
 
 	if (namelen != 0)
 	{
 		for (i = 0; i < namelen; ++i)
 		{
-			if (offset == QSC_CSHAKE_128_RATE)
+			if (oft == rate)
 			{
-				for (j = 0; j < QSC_CSHAKE_128_RATE / sizeof(uint64_t); ++j)
-				{
-					ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-				}
-
+				keccak_fast_absorb(ctx->state, pad, rate);
 				qsc_keccak_permute(ctx->state);
-				offset = 0;
+				oft = 0;
 			}
 
-			pad[offset] = name[i];
-			++offset;
+			pad[oft] = name[i];
+			++oft;
 		}
 	}
 
-	offset += left_encode(pad + offset, customlen * 8);
+	oft += keccak_left_encode(pad + oft, custlen * 8);
 
-	if (customlen != 0)
+	if (custlen != 0)
 	{
-		for (i = 0; i < customlen; ++i)
+		for (i = 0; i < custlen; ++i)
 		{
-			if (offset == QSC_CSHAKE_128_RATE)
+			if (oft == rate)
 			{
-				for (j = 0; j < QSC_CSHAKE_128_RATE / sizeof(uint64_t); ++j)
-				{
-					ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-				}
-
+				keccak_fast_absorb(ctx->state, pad, rate);
 				qsc_keccak_permute(ctx->state);
-				offset = 0;
+				oft = 0;
 			}
 
-			pad[offset] = custom[i];
-			++offset;
+			pad[oft] = custom[i];
+			++oft;
 		}
 	}
 
-	qsc_intutils_clear8(pad + offset, QSC_CSHAKE_128_RATE - offset);
-
-	for (i = 0; i < QSC_CSHAKE_128_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	/* transform the domain string */
+	qsc_memutils_clear(pad + oft, rate - oft);
+	keccak_fast_absorb(ctx->state, pad, rate);
 	qsc_keccak_permute(ctx->state);
 
 	/* initialize the key */
-	qsc_cshake128_update(ctx, key, keylen);
+	keccak_absorb(ctx->state, rate, key, keylen, KECCAK_CSHAKE_DOMAIN_ID);
 }
 
-void qsc_cshake128_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks)
+void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t nblocks)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 
-	keccak_squeezeblocks(ctx->state, output, nblocks, QSC_CSHAKE_128_RATE);
+	keccak_squeezeblocks(ctx->state, output, nblocks, (size_t)rate);
 }
 
-void qsc_cshake128_update(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen)
+void qsc_cshake_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	keccak_absorb(ctx->state, QSC_CSHAKE_128_RATE, key, keylen, QSC_CSHAKE_DOMAIN_ID);
-}
-
-void qsc_cshake256_compute(uint8_t* output, size_t outputlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
-{
-	assert(output != NULL);
-	assert(key != NULL);
-
-	const size_t nblocks = outputlen / QSC_CSHAKE_256_RATE;
-	qsc_keccak_state ctx;
-	uint8_t hash[QSC_CSHAKE_256_RATE] = { 0 };
-	size_t i;
-
-	qsc_intutils_clear64(ctx.state, QSC_SHA3_STATE_SIZE);
-
-	if (customlen + namelen != 0)
+	while (keylen >= (size_t)rate)
 	{
-		qsc_cshake256_initialize(&ctx, key, keylen, name, namelen, custom, customlen);
-	}
-	else
-	{
-		qsc_shake256_initialize(&ctx, key, keylen);
+		keccak_fast_absorb(ctx->state, key, keylen);
+		qsc_keccak_permute(ctx->state);
+		keylen -= rate;
+		key += rate;
 	}
 
-	qsc_cshake256_squeezeblocks(&ctx, output, nblocks);
-
-	output += (nblocks * QSC_CSHAKE_256_RATE);
-	outputlen -= (nblocks * QSC_CSHAKE_256_RATE);
-
-	if (outputlen != 0)
+	if (keylen != 0)
 	{
-		qsc_cshake256_squeezeblocks(&ctx, hash, 1);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = hash[i];
-		}
+		keccak_fast_absorb(ctx->state, key, keylen);
+		qsc_keccak_permute(ctx->state);
 	}
-}
-
-void qsc_cshake256_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	uint8_t pad[QSC_SHAKE_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	size_t i;
-	size_t j;
-	size_t offset;
-
-	offset = left_encode(pad, QSC_CSHAKE_256_RATE);
-	offset += left_encode(pad + offset, namelen * 8);
-
-	if (namelen != 0)
-	{
-		for (i = 0; i < namelen; ++i)
-		{
-			if (offset == QSC_CSHAKE_256_RATE)
-			{
-				for (j = 0; j < QSC_CSHAKE_256_RATE / sizeof(uint64_t); ++j)
-				{
-					ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-				}
-
-				qsc_keccak_permute(ctx->state);
-				offset = 0;
-			}
-
-			pad[offset] = name[i];
-			++offset;
-		}
-	}
-
-	offset += left_encode(pad + offset, customlen * 8);
-
-	if (customlen != 0)
-	{
-		for (i = 0; i < customlen; ++i)
-		{
-			if (offset == QSC_CSHAKE_256_RATE)
-			{
-				for (j = 0; j < QSC_CSHAKE_256_RATE / sizeof(uint64_t); ++j)
-				{
-					ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-				}
-
-				qsc_keccak_permute(ctx->state);
-				offset = 0;
-			}
-
-			pad[offset] = custom[i];
-			++offset;
-		}
-	}
-
-	qsc_intutils_clear8(pad + offset, QSC_CSHAKE_256_RATE - offset);
-
-	for (i = 0; i < QSC_CSHAKE_256_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	/* transform the domain string */
-	qsc_keccak_permute(ctx->state);
-
-	/* initialize the key */
-	qsc_cshake256_update(ctx, key, keylen);
-}
-
-void qsc_cshake256_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
-	keccak_squeezeblocks(ctx->state, output, nblocks, QSC_CSHAKE_256_RATE);
-}
-
-void qsc_cshake256_update(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	keccak_absorb(ctx->state, QSC_CSHAKE_256_RATE, key, keylen, QSC_CSHAKE_DOMAIN_ID);
-}
-
-void qsc_cshake512_compute(uint8_t* output, size_t outputlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
-{
-	assert(output != NULL);
-	assert(key != NULL);
-
-	const size_t nblocks = outputlen / QSC_CSHAKE_512_RATE;
-	qsc_keccak_state ctx;
-	uint8_t hash[QSC_CSHAKE_512_RATE] = { 0 };
-	size_t i;
-
-	qsc_intutils_clear64(ctx.state, QSC_SHA3_STATE_SIZE);
-
-	if (customlen + namelen != 0)
-	{
-		qsc_cshake512_initialize(&ctx, key, keylen, name, namelen, custom, customlen);
-	}
-	else
-	{
-		qsc_shake512_initialize(&ctx, key, keylen);
-	}
-
-	qsc_cshake512_squeezeblocks(&ctx, output, nblocks);
-
-	output += (nblocks * QSC_CSHAKE_512_RATE);
-	outputlen -= (nblocks * QSC_CSHAKE_512_RATE);
-
-	if (outputlen != 0)
-	{
-		qsc_cshake512_squeezeblocks(&ctx, hash, 1);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = hash[i];
-		}
-	}
-}
-
-void qsc_cshake512_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t customlen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	uint8_t pad[QSC_SHAKE_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	size_t i;
-	size_t j;
-	size_t offset;
-
-	offset = left_encode(pad, QSC_CSHAKE_512_RATE);
-	offset += left_encode(pad + offset, namelen * 8);
-
-	if (namelen != 0)
-	{
-		for (i = 0; i < namelen; ++i)
-		{
-			if (offset == QSC_CSHAKE_512_RATE)
-			{
-				for (j = 0; j < QSC_CSHAKE_512_RATE / sizeof(uint64_t); ++j)
-				{
-					ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-				}
-
-				qsc_keccak_permute(ctx->state);
-				offset = 0;
-			}
-
-			pad[offset] = name[i];
-			++offset;
-		}
-	}
-
-	offset += left_encode(pad + offset, customlen * 8);
-
-	if (customlen != 0)
-	{
-		for (i = 0; i < customlen; ++i)
-		{
-			if (offset == QSC_CSHAKE_512_RATE)
-			{
-				for (j = 0; j < QSC_CSHAKE_512_RATE / sizeof(uint64_t); ++j)
-				{
-					ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-				}
-
-				qsc_keccak_permute(ctx->state);
-				offset = 0;
-			}
-
-			pad[offset] = custom[i];
-			++offset;
-		}
-	}
-
-	qsc_intutils_clear8(pad + offset, QSC_CSHAKE_512_RATE - offset);
-
-	for (i = 0; i < QSC_CSHAKE_512_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	/* transform the domain string */
-	qsc_keccak_permute(ctx->state);
-
-	/* initialize the key */
-	qsc_cshake512_update(ctx, key, keylen);
-}
-
-void qsc_cshake512_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
-	keccak_squeezeblocks(ctx->state, output, nblocks, QSC_CSHAKE_512_RATE);
-}
-
-void qsc_cshake512_update(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	keccak_absorb(ctx->state, QSC_CSHAKE_512_RATE, key, keylen, QSC_CSHAKE_DOMAIN_ID);
 }
 
 /* kmac */
 
-void qsc_kmac128_compute(uint8_t* output, size_t outputlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
+void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
 	assert(output != NULL);
 	assert(message != NULL);
@@ -3283,181 +3084,13 @@ void qsc_kmac128_compute(uint8_t* output, size_t outputlen, const uint8_t* messa
 
 	qsc_keccak_state ctx;
 
-	qsc_intutils_clear64(ctx.state, QSC_KMAC_STATE_SIZE);
-	qsc_kmac128_initialize(&ctx, key, keylen, custom, customlen);
-
-	if (msglen >= QSC_KMAC_128_RATE)
-	{
-		const size_t rndlen = (msglen / QSC_KMAC_128_RATE) * QSC_KMAC_128_RATE;
-		qsc_kmac128_blockupdate(&ctx, message, rndlen / QSC_KMAC_128_RATE);
-		msglen -= rndlen;
-		message += rndlen;
-	}
-
-	qsc_kmac128_finalize(&ctx, output, outputlen, message, msglen);
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	qsc_kmac_initialize(&ctx, keccak_rate_128, key, keylen, custom, custlen);
+	qsc_kmac_update(&ctx, keccak_rate_128, message, msglen);
+	qsc_kmac_finalize(&ctx, keccak_rate_128, output, outlen);
 }
 
-void qsc_kmac128_blockupdate(qsc_keccak_state* ctx, const uint8_t* message, size_t nblocks)
-{
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	size_t i;
-
-	while (nblocks > 0)
-	{
-		for (i = 0; i < QSC_KMAC_128_RATE / sizeof(uint64_t); ++i)
-		{
-			ctx->state[i] ^= qsc_intutils_le8to64(message + (sizeof(uint64_t) * i));
-		}
-
-		qsc_keccak_permute(ctx->state);
-
-		--nblocks;
-		message += QSC_KMAC_128_RATE;
-	}
-}
-
-void qsc_kmac128_finalize(qsc_keccak_state* ctx, uint8_t* output, size_t outputlen, const uint8_t* message, size_t msglen)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
-	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	size_t outbitlen;
-	size_t i;
-
-	for (i = 0; i < msglen; ++i)
-	{
-		pad[i] = message[i];
-	}
-
-	outbitlen = right_encode(buf, outputlen * 8);
-
-	for (i = 0; i < outbitlen; ++i)
-	{
-		pad[msglen + i] = buf[i];
-	}
-
-	pad[msglen + outbitlen] = QSC_KMAC_DOMAIN_ID;
-	pad[QSC_KMAC_128_RATE - 1] |= 128U;
-
-	for (i = 0; i < QSC_KMAC_128_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	while (outputlen >= QSC_KMAC_128_RATE)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, QSC_KMAC_128_RATE);
-
-		for (i = 0; i < QSC_KMAC_128_RATE; ++i)
-		{
-			output[i] = pad[i];
-		}
-
-		output += QSC_KMAC_128_RATE;
-		outputlen -= QSC_KMAC_128_RATE;
-	}
-
-	if (outputlen > 0)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, QSC_KMAC_128_RATE);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = pad[i];
-		}
-	}
-}
-
-void qsc_kmac128_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
-	size_t offset;
-	size_t i;
-	size_t j;
-
-	qsc_intutils_clear64(ctx->state, QSC_KMAC_STATE_SIZE);
-
-	/* stage 1: name + custom */
-
-	offset = left_encode(pad, QSC_KMAC_128_RATE);
-	offset += left_encode(pad + offset, sizeof(name) * 8);
-
-	for (i = 0; i < sizeof(name); ++i)
-	{
-		pad[offset + i] = name[i];
-	}
-
-	offset += sizeof(name);
-	offset += left_encode(pad + offset, customlen * 8);
-
-	for (i = 0; i < customlen; ++i)
-	{
-		if (offset == QSC_KMAC_128_RATE)
-		{
-			for (j = 0; j < QSC_KMAC_128_RATE / sizeof(uint64_t); ++j)
-			{
-				ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-			}
-
-			qsc_keccak_permute(ctx->state);
-			offset = 0;
-		}
-
-		pad[offset] = custom[i];
-		++offset;
-	}
-
-	qsc_intutils_clear8(pad + offset, QSC_KMAC_128_RATE - offset);
-
-	for (i = 0; i < QSC_KMAC_128_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] = qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	qsc_keccak_permute(ctx->state);
-
-	/* stage 2: key */
-
-	qsc_intutils_clear8(pad, QSC_KMAC_128_RATE);
-	offset = left_encode(pad, QSC_KMAC_128_RATE);
-	offset += left_encode(pad + offset, keylen * 8);
-
-	for (i = 0; i < keylen; ++i)
-	{
-		if (offset == QSC_KMAC_128_RATE)
-		{
-			for (j = 0; j < QSC_KMAC_128_RATE / sizeof(uint64_t); ++j)
-			{
-				ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-			}
-
-			qsc_keccak_permute(ctx->state);
-			offset = 0;
-		}
-
-		pad[offset] = key[i];
-		++offset;
-	}
-
-	qsc_intutils_clear8(pad + offset, QSC_KMAC_128_RATE - offset);
-
-	for (i = 0; i < QSC_KMAC_128_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	qsc_keccak_permute(ctx->state);
-}
-
-void qsc_kmac256_compute(uint8_t* output, size_t outputlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
+void qsc_kmac256_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
 	assert(output != NULL);
 	assert(message != NULL);
@@ -3465,182 +3098,13 @@ void qsc_kmac256_compute(uint8_t* output, size_t outputlen, const uint8_t* messa
 
 	qsc_keccak_state ctx;
 
-	qsc_intutils_clear64(ctx.state, QSC_KMAC_STATE_SIZE);
-	qsc_kmac256_initialize(&ctx, key, keylen, custom, customlen);
-
-	if (msglen >= QSC_KMAC_256_RATE)
-	{
-		const size_t rndlen = (msglen / QSC_KMAC_256_RATE) * QSC_KMAC_256_RATE;
-		qsc_kmac256_blockupdate(&ctx, message, rndlen / QSC_KMAC_256_RATE);
-		msglen -= rndlen;
-		message += rndlen;
-	}
-
-	qsc_kmac256_finalize(&ctx, output, outputlen, message, msglen);
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	qsc_kmac_initialize(&ctx, keccak_rate_256, key, keylen, custom, custlen);
+	qsc_kmac_update(&ctx, keccak_rate_256, message, msglen);
+	qsc_kmac_finalize(&ctx, keccak_rate_256, output, outlen);
 }
 
-void qsc_kmac256_blockupdate(qsc_keccak_state* ctx, const uint8_t* message, size_t nblocks)
-{
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	size_t i;
-
-	while (nblocks > 0)
-	{
-		for (i = 0; i < QSC_KMAC_256_RATE / sizeof(uint64_t); ++i)
-		{
-			ctx->state[i] ^= qsc_intutils_le8to64(message + (sizeof(uint64_t) * i));
-		}
-
-		qsc_keccak_permute(ctx->state);
-
-		--nblocks;
-		message += QSC_KMAC_256_RATE;
-	}
-}
-
-void qsc_kmac256_finalize(qsc_keccak_state* ctx, uint8_t* output, size_t outputlen, const uint8_t* message, size_t msglen)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
-	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	size_t outbitlen;
-	size_t i;
-
-	for (i = 0; i < msglen; ++i)
-	{
-		pad[i] = message[i];
-	}
-
-	outbitlen = right_encode(buf, outputlen * 8);
-
-	for (i = 0; i < outbitlen; ++i)
-	{
-		pad[msglen + i] = buf[i];
-	}
-
-	pad[msglen + outbitlen] = QSC_KMAC_DOMAIN_ID;
-	pad[QSC_KMAC_256_RATE - 1] |= 128U;
-
-	for (i = 0; i < QSC_KMAC_256_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	while (outputlen >= QSC_KMAC_256_RATE)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, QSC_KMAC_256_RATE);
-
-		for (i = 0; i < QSC_KMAC_256_RATE; ++i)
-		{
-			output[i] = pad[i];
-		}
-
-		output += QSC_KMAC_256_RATE;
-		outputlen -= QSC_KMAC_256_RATE;
-	}
-
-	if (outputlen > 0)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, QSC_KMAC_256_RATE);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = pad[i];
-		}
-	}
-}
-
-void qsc_kmac256_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-
-	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
-	size_t offset;
-	size_t i;
-	size_t j;
-
-	qsc_intutils_clear64(ctx->state, QSC_KMAC_STATE_SIZE);
-	qsc_intutils_clear8(pad, QSC_KMAC_256_RATE);
-
-	/* stage 1: name + custom */
-
-	offset = left_encode(pad, QSC_KMAC_256_RATE);
-	offset += left_encode(pad + offset, sizeof(name) * 8);
-
-	for (i = 0; i < sizeof(name); ++i)
-	{
-		pad[offset + i] = name[i];
-	}
-
-	offset += sizeof(name);
-	offset += left_encode(pad + offset, customlen * 8);
-
-	for (i = 0; i < customlen; ++i)
-	{
-		if (offset == QSC_KMAC_256_RATE)
-		{
-			for (j = 0; j < QSC_KMAC_256_RATE / sizeof(uint64_t); ++j)
-			{
-				ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * 8));
-			}
-
-			qsc_keccak_permute(ctx->state);
-			offset = 0;
-		}
-
-		pad[offset] = custom[i];
-		++offset;
-	}
-
-	qsc_intutils_clear8(pad + offset, QSC_KMAC_256_RATE - offset);
-
-	for (i = 0; i < QSC_KMAC_256_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] = qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	qsc_keccak_permute(ctx->state);
-
-	/* stage 2: key */
-
-	qsc_intutils_clear8(pad, QSC_KMAC_256_RATE);
-	offset = left_encode(pad, QSC_KMAC_256_RATE);
-	offset += left_encode(pad + offset, keylen * 8);
-
-	for (i = 0; i < keylen; ++i)
-	{
-		if (offset == QSC_KMAC_256_RATE)
-		{
-			for (j = 0; j < QSC_KMAC_256_RATE / sizeof(uint64_t); ++j)
-			{
-				ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-			}
-
-			qsc_keccak_permute(ctx->state);
-			offset = 0;
-		}
-
-		pad[offset] = key[i];
-		++offset;
-	}
-
-	qsc_intutils_clear8(pad + offset, QSC_KMAC_256_RATE - offset);
-
-	for (i = 0; i < QSC_KMAC_256_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	qsc_keccak_permute(ctx->state);
-}
-
-void qsc_kmac512_compute(uint8_t* output, size_t outputlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
+void qsc_kmac512_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
 	assert(output != NULL);
 	assert(message != NULL);
@@ -3648,178 +3112,113 @@ void qsc_kmac512_compute(uint8_t* output, size_t outputlen, const uint8_t* messa
 
 	qsc_keccak_state ctx;
 
-	qsc_intutils_clear64(ctx.state, QSC_KMAC_STATE_SIZE);
-	qsc_kmac512_initialize(&ctx, key, keylen, custom, customlen);
-
-	if (msglen >= QSC_KMAC_512_RATE)
-	{
-		const size_t rndlen = (msglen / QSC_KMAC_512_RATE) * QSC_KMAC_512_RATE;
-		qsc_kmac512_blockupdate(&ctx, message, rndlen / QSC_KMAC_512_RATE);
-		msglen -= rndlen;
-		message += rndlen;
-	}
-
-	qsc_kmac512_finalize(&ctx, output, outputlen, message, msglen);
+	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
+	qsc_kmac_initialize(&ctx, keccak_rate_512, key, keylen, custom, custlen);
+	qsc_kmac_update(&ctx, keccak_rate_512, message, msglen);
+	qsc_kmac_finalize(&ctx, keccak_rate_512, output, outlen);
 }
 
-void qsc_kmac512_blockupdate(qsc_keccak_state* ctx, const uint8_t* message, size_t nblocks)
+void qsc_kmac_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t outlen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
-
-	size_t i;
-
-	while (nblocks > 0)
-	{
-		for (i = 0; i < QSC_KMAC_512_RATE / sizeof(uint64_t); ++i)
-		{
-			ctx->state[i] ^= qsc_intutils_le8to64(message + (sizeof(uint64_t) * i));
-		}
-
-		qsc_keccak_permute(ctx->state);
-
-		--nblocks;
-		message += QSC_KMAC_512_RATE;
-	}
-}
-
-void qsc_kmac512_finalize(qsc_keccak_state* ctx, uint8_t* output, size_t outputlen, const uint8_t* message, size_t msglen)
-{
-	assert(ctx != NULL);
-	assert(output != NULL);
-
 	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	size_t outbitlen;
-	size_t i;
+	uint8_t pad[KECCAK_STATE_BYTE_SIZE] = { 0 };
+	size_t bitlen;
 
-	qsc_intutils_clear8(pad, QSC_KMAC_512_RATE);
+	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
+	bitlen = keccak_right_encode(buf, outlen * 8);
+	qsc_memutils_copy(pad + ctx->position, buf, bitlen);
 
-	for (i = 0; i < msglen; ++i)
+	pad[ctx->position + bitlen] = KECCAK_KMAC_DOMAIN_ID;
+	pad[rate - 1] |= 128U;
+	keccak_fast_absorb(ctx->state, pad, rate);
+
+	while (outlen >= (size_t)rate)
 	{
-		pad[i] = message[i];
+		keccak_squeezeblocks(ctx->state, pad, 1, rate);
+		qsc_memutils_copy(output, pad, rate);
+		output += rate;
+		outlen -= rate;
 	}
 
-	outbitlen = right_encode(buf, outputlen * 8);
-
-	for (i = 0; i < outbitlen; ++i)
+	if (outlen > 0)
 	{
-		pad[msglen + i] = buf[i];
+		keccak_squeezeblocks(ctx->state, pad, 1, rate);
+		qsc_memutils_copy(output, pad, outlen);
 	}
 
-	pad[msglen + outbitlen] = QSC_KMAC_DOMAIN_ID;
-	pad[QSC_KMAC_512_RATE - 1] |= 128U;
-
-	for (i = 0; i < QSC_KMAC_512_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
-	while (outputlen >= QSC_KMAC_512_RATE)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, QSC_KMAC_512_RATE);
-
-		for (i = 0; i < QSC_KMAC_512_RATE; ++i)
-		{
-			output[i] = pad[i];
-		}
-
-		output += QSC_KMAC_512_RATE;
-		outputlen -= QSC_KMAC_512_RATE;
-	}
-
-	if (outputlen > 0)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, QSC_KMAC_512_RATE);
-
-		for (i = 0; i < outputlen; ++i)
-		{
-			output[i] = pad[i];
-		}
-	}
+	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+	ctx->position = 0;
 }
 
-void qsc_kmac512_initialize(qsc_keccak_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t customlen)
+void qsc_kmac_initialize(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
 	assert(ctx != NULL);
 	assert(key != NULL);
 
-	uint8_t pad[QSC_KMAC_STATE_SIZE * sizeof(uint64_t)] = { 0 };
+	uint8_t pad[QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)] = { 0 };
 	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
-	size_t offset;
+	size_t oft;
 	size_t i;
-	size_t j;
 
-	qsc_intutils_clear64(ctx->state, QSC_KMAC_STATE_SIZE);
+	qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+	ctx->position = 0;
 
 	/* stage 1: name + custom */
 
-	offset = left_encode(pad, QSC_KMAC_512_RATE);
-	offset += left_encode(pad + offset, sizeof(name) * 8);
+	oft = keccak_left_encode(pad, rate);
+	oft += keccak_left_encode(pad + oft, sizeof(name) * 8);
 
 	for (i = 0; i < sizeof(name); ++i)
 	{
-		pad[offset + i] = name[i];
+		pad[oft + i] = name[i];
 	}
 
-	offset += sizeof(name);
-	offset += left_encode(pad + offset, customlen * 8);
+	oft += sizeof(name);
+	oft += keccak_left_encode(pad + oft, custlen * 8);
 
-	for (i = 0; i < customlen; ++i)
+	for (i = 0; i < custlen; ++i)
 	{
-		if (offset == QSC_KMAC_512_RATE)
+		if (oft == rate)
 		{
-			for (j = 0; j < QSC_KMAC_512_RATE / sizeof(uint64_t); ++j)
-			{
-				ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-			}
-
+			keccak_fast_absorb(ctx->state, pad, rate);
 			qsc_keccak_permute(ctx->state);
-			offset = 0;
+			oft = 0;
 		}
 
-		pad[offset] = custom[i];
-		++offset;
+		pad[oft] = custom[i];
+		++oft;
 	}
 
-	qsc_intutils_clear8(pad + offset, QSC_KMAC_512_RATE - offset);
-
-	for (i = 0; i < QSC_KMAC_512_RATE / 8; ++i)
-	{
-		ctx->state[i] = qsc_intutils_le8to64(pad + (i * 8));
-	}
-
+	qsc_memutils_clear(pad + oft, rate - oft);
+	keccak_fast_absorb(ctx->state, pad, rate);
 	qsc_keccak_permute(ctx->state);
 
 	/* stage 2: key */
 
-	qsc_intutils_clear8(pad, QSC_KMAC_512_RATE);
-	offset = left_encode(pad, QSC_KMAC_512_RATE);
-	offset += left_encode(pad + offset, keylen * 8);
+	qsc_memutils_clear(pad, rate);
+	oft = keccak_left_encode(pad, rate);
+	oft += keccak_left_encode(pad + oft, keylen * 8);
 
 	for (i = 0; i < keylen; ++i)
 	{
-		if (offset == QSC_KMAC_512_RATE)
+		if (oft == rate)
 		{
-			for (j = 0; j < QSC_KMAC_512_RATE / sizeof(uint64_t); ++j)
-			{
-				ctx->state[j] ^= qsc_intutils_le8to64(pad + (j * sizeof(uint64_t)));
-			}
-
+			keccak_fast_absorb(ctx->state, pad, rate);
 			qsc_keccak_permute(ctx->state);
-			offset = 0;
+			oft = 0;
 		}
 
-		pad[offset] = key[i];
-		++offset;
+		pad[oft] = key[i];
+		++oft;
 	}
 
-	qsc_intutils_clear8(pad + offset, QSC_KMAC_512_RATE - offset);
-
-	for (i = 0; i < QSC_KMAC_512_RATE / sizeof(uint64_t); ++i)
-	{
-		ctx->state[i] ^= qsc_intutils_le8to64(pad + (i * sizeof(uint64_t)));
-	}
-
+	qsc_memutils_clear(pad + oft, rate - oft);
+	keccak_fast_absorb(ctx->state, pad, rate);
 	qsc_keccak_permute(ctx->state);
+}
+
+void qsc_kmac_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen)
+{
+	keccak_update(ctx, rate, message, msglen);
 }

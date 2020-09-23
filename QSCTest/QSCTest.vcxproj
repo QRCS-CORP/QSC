@@ -170,6 +170,8 @@
     <ClCompile Include="chacha_test.c" />
     <ClCompile Include="csx_test.c" />
     <ClCompile Include="dilithium_test.c" />
+    <ClCompile Include="ecdh_test.c" />
+    <ClCompile Include="ecdsa_test.c" />
     <ClCompile Include="filetools.c" />
     <ClCompile Include="kyber_test.c" />
     <ClCompile Include="mceliece_test.c" />
@@ -189,6 +191,8 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="csx_test.h" />
     <ClInclude Include="dilithium_test.h" />
+    <ClInclude Include="ecdh_test.h" />
+    <ClInclude Include="ecdsa_test.h" />
     <ClInclude Include="filetools.h" />
     <ClInclude Include="kyber_test.h" />
     <ClInclude Include="mceliece_test.h" />

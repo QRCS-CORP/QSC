@@ -7,8 +7,8 @@
 * \date August 25, 2020
 */
 
-#ifndef QSCTEST_CHACHA_KAT_H
-#define QSCTEST_CHACHA_KAT_H
+#ifndef QSCTEST_CHACHA_TEST_H
+#define QSCTEST_CHACHA_TEST_H
 
 #include "../QSC/common.h"
 

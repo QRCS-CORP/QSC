@@ -4,16 +4,19 @@
 Version 1.0
 QSC is a compact and self-contained post-quantum secure cryptographic library witten in C. It has been written to Misra secure coding standards, and has been designed to be easy to read, verify, and implement. The code is well structured, readable and commented, and thoroughly documented, and this solution contains a testing platform, which provides various test functions for every primitive contained in the library. 
 This library incorporates next-generation asymmetric and symmetric primitives, with a strong emphasis on true long-term security. The objective of this library is to provide a basis for future integration efforts, and as the foundation of a compact, high-security, post-quantum secure communications platform. This is currently a Windows/Intel library, however, much of the groundwork has been laid towards interoperability with different operating systems and hardware architectures (looking for volunteers). 
+Tested using the reference, AVX, AVX2, and AVX512 implementation.
 
 ## Contains
 ### Asymmetric Ciphers
 The Round-2 versions of the NIST PQ asymmetric ciphers and signature schemes (will be updated to Round 3 versions in the fall).
 * McEliece: The Niederreiter dual form of the McEliece public key crypto-system
 * Kyber: The Module-LWE Kyber public key crypto-system
+* ECDH: Elliptic Curve Diffie Hellman
 
 ### Asymmetric Signature Schemes
 * Sphincs+: The Sphincs Plus asymmetric signature scheme
 * Dilithium: the lattice based Dilithium asymmetric signature scheme
+* ECDSA: Elliptic Curve Digital Signature Algorithm (ED25519)
 
 ### Symmetric ciphers
 * ChaChaPoly20: The ChaCha stream cipher
@@ -41,6 +44,7 @@ The Round-2 versions of the NIST PQ asymmetric ciphers and signature schemes (wi
 * RDP: The Intel RDRAND provider
 
 ### Features
+* cpuid: tests available CPU feature sets
 * secmem: A secure locked-memory class
 * memutils: Intrinsics operations for common memory fuctions
 * AVX/AVX2/AVX512 intinsics integrated throughout

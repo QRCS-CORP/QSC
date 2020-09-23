@@ -33,19 +33,39 @@ void print_hex(const uint8_t* input, size_t inputlen, size_t linelen)
 	{
 		for (i = 0; i < linelen; ++i)
 		{
+#if defined(_MSC_VER)
 			printf_s("%02X", input[i]);
+#else
+			printf("%02X", input[i]);
+#endif
 		}
 
 		input += linelen;
 		inputlen -= linelen;
-		printf_s("\n");
+		print_safe("\n");
 	}
 
 	if (inputlen != 0)
 	{
 		for (i = 0; i < inputlen; ++i)
 		{
+#if defined(_MSC_VER)
 			printf_s("%02X", input[i]);
+#else
+			printf("%02X", input[i]);
+#endif
 		}
+	}
+}
+
+void print_safe(const char* input)
+{
+	if (input != NULL)
+	{
+#if defined(_MSC_VER)
+		printf_s(input);
+#else
+		printf(input);
+#endif
 	}
 }

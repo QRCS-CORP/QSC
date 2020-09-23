@@ -1,28 +1,9 @@
-/**
-* \file dilithium_test.c
-* \brief <b>Dilithium test functions</b> \n
-* Contains the Dilithium implementation KAT and wellness test functions.
-*
-* \author John Underhill
-* \date June 13, 2019
-*/
-
-/* jgu -suppressing repeated include warning, using include guards */
-/*lint -e537 */
-/* jgu -suppressing misra stdio header warning in example only */
-/*lint -e829 */
-
 #include "dilithium_test.h"
 #include "common.h"
-#include "testutils.h"
 #include "nistrng.h"
+#include "testutils.h"
 #include "../QSC/dilithium.h"
 #include "../QSC/intutils.h"
-
-#define TEST_DILITHIUM_MLEN0 33
-#define TEST_DILITHIUM_MLEN1 66
-#define TEST_DILITHIUM_MLEN2 99
-#define TEST_DILITHIUM_MLEN3 132
 
 static bool dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg, size_t kmsglen, const uint8_t* ksig, size_t ksiglen)
 {
@@ -56,21 +37,21 @@ static bool dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg
 	/* compare the signature cipher-text to the expected output */
 	if (qsc_intutils_are_equal8(sig, ksig, ksiglen) != true)
 	{
-		printf_s("signature ciphertext does not align with the known answer!");
+		print_safe("Failure! dilithium_signature_compare: output does not match the known answer -DC1 \n");
 		ret = false;
 	}
 
 	/* verify the message using the public seed */
 	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) != true)
 	{
-		printf_s("signature verification check failure!");
+		print_safe("Failure! dilithium_signature_compare: signature verification check failure -DC2 \n");
 		ret = false;
 	}
 
 	/* compare the two messages for equality */
 	if (qsc_intutils_are_equal8(kmsg, mout, kmsglen) != true)
 	{
-		printf_s("message does not equal to the original!");
+		print_safe("Failure! dilithium_signature_compare: message does not equal to the original -DC3 \n");
 		ret = false;
 	}
 
@@ -97,193 +78,20 @@ static bool dilithium_signature_compare(const uint8_t* seed, const uint8_t* kmsg
 	return ret;
 }
 
-bool dilithium_stress_test()
+bool qsctest_dilithium_kat_test()
 {
-	uint8_t msg[TEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE];
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE];
-	size_t i;
-	size_t msglen;
-	size_t siglen;
-	bool ret;
-
-	ret = true;
-	msglen = TEST_DILITHIUM_MLEN0;
-	siglen = QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0;
-
-	/* generate the key-pair */
-	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
-
-	for (i = 0; i < TEST_DILITHIUM_ITERATIONS; i++)
-	{
-		/* sign the message and return the signed version in sig */
-		qsc_dilithium_sign(sig, &siglen, msg, msglen, sk, qsctest_nistrng_prng_generate);
-
-		if (siglen != QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0)
-		{
-			printf_s("dilithium_stress_test: signature length is incorrect. \n");
-			ret = false;
-			break;
-		}
-
-		/* verify the signature in sig and copy msg to mout */
-		if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) != true)
-		{
-			printf_s("dilithium_stress_test: Dilithium message verification has failed! \n");
-			ret = false;
-			break;
-		}
-
-		if (msglen != TEST_DILITHIUM_MLEN0)
-		{
-			printf_s("dilithium_stress_test: message length is incorrect");
-			ret = false;
-			break;
-		}
-	}
-
-	return ret;
-}
-
-bool dilithium_publickey_integrity()
-{
-	uint8_t msg[TEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE];
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE];
-	size_t msglen;
-	size_t siglen;
-	bool ret;
-
-	ret = true;
-	msglen = 0;
-	siglen = 0;
-
-	/* generate the signature key-pair */
-	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
-
-	/* flip 1 bit in the public key */
-	pk[QSC_DILITHIUM_PUBLICKEY_SIZE - 1] ^= 1U;
-
-	/* process message and return signed message */
-	qsc_dilithium_sign(sig, &siglen, msg, TEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
-
-	/* verify signed message, if successful with altered public key, fail the test */
-	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
-	{
-		printf_s("dilithium_publickey_integrity: Dilithium message verification passed with altered public key, test failure! \n");
-		ret = false;
-	}
-
-	return ret;
-}
-
-bool dilithium_secretkey_integrity()
-{
-	uint8_t msg[TEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE];
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE];
-	size_t i;
-	size_t msglen;
-	size_t siglen;
-	bool ret;
-
-	ret = true;
-	msglen = 0;
-	siglen = 0;
-
-	/* generate the signature key-pair */
-	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
-
-	/* flip bits in the private key */
-	for (i = 0; i < 16; ++i)
-	{
-		sk[i] ^= 1U;
-	}
-
-	/* process message and return signed message */
-	qsc_dilithium_sign(sig, &siglen, msg, TEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
-
-	/* verify signed message, if successful with altered public key, fail the test */
-	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
-	{
-		printf_s("dilithium_secretkey_integrity: Dilithium message verification passed with altered secret key, test failure! \n");
-		ret = false;
-	}
-
-	return ret;
-}
-
-bool dilithium_signature_integrity()
-{
-	uint8_t msg[TEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE];
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE];
-	size_t i;
-	size_t msglen;
-	size_t siglen;
-	bool ret;
-
-	ret = true;
-	msglen = 0;
-	siglen = 0;
-
-	/* generate the signature key-pair */
-	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
-
-	/* process message and return signed message */
-	qsc_dilithium_sign(sig, &siglen, msg, TEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
-
-	/* flip 1 bit in the signed message */
-	sig[siglen - 1] ^= 1U;
-
-	/* verify signed message, if successful with altered public key, fail the test */
-	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
-	{
-		printf_s("test_signature_integrity: Dilithium message verification passed with altered secret key, test failure! \n");
-		ret = false;
-	}
-
-	/* flip one bit per hash; the signature is entirely hashes */
-	for (i = 0; i < (int32_t)(siglen - TEST_DILITHIUM_MLEN0); i += 100)
-	{
-		sig[i] ^= 1U;
-
-		if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
-		{
-			printf_s("test_signature_integrity: flipping bit did not invalidate signature \n");
-			sig[i] ^= 1U;
-			ret = false;
-			break;
-		}
-
-		sig[i] ^= 1U;
-	}
-
-	return ret;
-}
-
-bool dilithium_kat_test()
-{
-	uint8_t ksig0[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
-	uint8_t ksig1[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN1];
-	uint8_t ksig2[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN2];
-	uint8_t ksig3[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN3];
-	uint8_t msg0[TEST_DILITHIUM_MLEN0];
-	uint8_t msg1[TEST_DILITHIUM_MLEN1];
-	uint8_t msg2[TEST_DILITHIUM_MLEN2];
-	uint8_t msg3[TEST_DILITHIUM_MLEN3];
-	uint8_t seed0[QSCTEST_NIST_RNG_SEED_SIZE];
-	uint8_t seed1[QSCTEST_NIST_RNG_SEED_SIZE];
-	uint8_t seed2[QSCTEST_NIST_RNG_SEED_SIZE];
-	uint8_t seed3[QSCTEST_NIST_RNG_SEED_SIZE];
+	uint8_t ksig0[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t ksig1[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN1] = { 0 };
+	uint8_t ksig2[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN2] = { 0 };
+	uint8_t ksig3[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN3] = { 0 };
+	uint8_t msg0[QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t msg1[QSCTEST_DILITHIUM_MLEN1] = { 0 };
+	uint8_t msg2[QSCTEST_DILITHIUM_MLEN2] = { 0 };
+	uint8_t msg3[QSCTEST_DILITHIUM_MLEN3] = { 0 };
+	uint8_t seed0[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t seed1[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t seed2[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t seed3[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	bool ret;
 
 	ret = true;
@@ -293,13 +101,16 @@ bool dilithium_kat_test()
 	hex_to_bin("D81C4D8D734FCBFBEADE3D3F8A039FAA2A2C9957E835AD55B22E75BF57BB556AC8", msg0, sizeof(msg0));
 	/* the second vector */
 	hex_to_bin("64335BF29E5DE62842C941766BA129B0643B5E7121CA26CFC190EC7DC3543830557FDD5C03CF123A456D48EFEA43C868", seed1, sizeof(seed1));
-	hex_to_bin("225D5CE2CEAC61930A07503FB59F7C2F936A3E075481DA3CA299A80F8C5DF9223A073E7B90E02EBF98CA2227EBA38C1AB2568209E46DBA961869C6F83983B17DCD49", msg1, sizeof(msg1));
+	hex_to_bin("225D5CE2CEAC61930A07503FB59F7C2F936A3E075481DA3CA299A80F8C5DF9223A073E7B90E02EBF98CA2227EBA38C1AB2568209E46DBA961869C6F83983B17D"
+		"CD49", msg1, sizeof(msg1));
 	/* the third vector */
 	hex_to_bin("BFF58FDA9DB4C2D8BD02E4647868D4A2FA12500A65CA4C9F918B505707FA775951018D9149C97D443EA16B07DD68435B", seed2, sizeof(seed2));
-	hex_to_bin("2B8C4B0F29363EAEE469A7E33524538AA066AE98980EAA19D1F10593203DA2143B9E9E1973F7FF0E6C6AAA3C0B900E50D003412EFE96DEECE3046D8C46BC7709228789775ABDF56AED6416C90033780CB7A4984815DA1B14660DCF34AA34BF82CEBBCF", msg2, sizeof(msg2));
+	hex_to_bin("2B8C4B0F29363EAEE469A7E33524538AA066AE98980EAA19D1F10593203DA2143B9E9E1973F7FF0E6C6AAA3C0B900E50D003412EFE96DEECE3046D8C46BC7709"
+		"228789775ABDF56AED6416C90033780CB7A4984815DA1B14660DCF34AA34BF82CEBBCF", msg2, sizeof(msg2));
 	/* the fourth vector */
 	hex_to_bin("58C094D217BC13EDFDBEA57EDBF3A536F8F69FED1D54648CE3D0CCB4847A5C9917C2E2BC4D5F620E937F0D329FCF8A16", seed3, sizeof(seed3));
-	hex_to_bin("2F7AF5B52A046471EFCD720C9384919BE05A61CDE8E8B01251C5AB885E820FD36ED9FF6FDF45783EC81A86728CBB74B426ADFF96123C08FAC2BC6C58A9C0DD71761292262C65F20DF47751F0831770A6BB7B3760BB7F5EFFFB6E11AC35F353A6F24400B80B287834E92C9CF0D3C949D6DCA31B0B94E0E3312E8BD02174B170C2CA9355FE", msg3, sizeof(msg3));
+	hex_to_bin("2F7AF5B52A046471EFCD720C9384919BE05A61CDE8E8B01251C5AB885E820FD36ED9FF6FDF45783EC81A86728CBB74B426ADFF96123C08FAC2BC6C58A9C0DD71"
+		"761292262C65F20DF47751F0831770A6BB7B3760BB7F5EFFFB6E11AC35F353A6F24400B80B287834E92C9CF0D3C949D6DCA31B0B94E0E3312E8BD02174B170C2CA9355FE", msg3, sizeof(msg3));
 
 #if defined(QSC_DILITHIUM_S1N256Q8380417)
 	hex_to_bin("A785B7DB95D555880DBB8A49FD02E8D1891EB3396344C330AE81441F3CA8E275B58395CBF4E80DC3768480063C464764783C360EB289666D168C18C0D07C8BCA"
@@ -841,57 +652,49 @@ bool dilithium_kat_test()
 #	error invalid K param!
 #endif
 
-	/*print_hex(ksig0, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0, 64);
-	printf_s("\n\n\n");
-	print_hex(ksig1, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN1, 64);
-	printf_s("\n\n\n");
-	print_hex(ksig2, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN2, 64);
-	printf_s("\n\n\n");
-	print_hex(ksig3, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN3, 64);*/
-
 	/* compare the signature cipher-text and message-verification to the expected output */
-	/* Vector 0 */
+	/* vector 0 */
 	if (dilithium_signature_compare(seed0, msg0, sizeof(msg0), ksig0, sizeof(ksig0)) != true)
 	{
-		printf_s("vector 0: signature ciphertext does not align with the known answer!");
+		print_safe("Failure! qsctest_dilithium_kat_test: signature ciphertext does not align with the known answer -DK1 \n");
 		ret = false;
 	}
 
-	/* Vector 1 */
+	/* vector 1 */
 	if (dilithium_signature_compare(seed1, msg1, sizeof(msg1), ksig1, sizeof(ksig1)) != true)
 	{
-		printf_s("vector 1: signature ciphertext does not align with the known answer!");
+		print_safe("Failure! qsctest_dilithium_kat_test: signature ciphertext does not align with the known answer -DK2 \n");
 		ret = false;
 	}
 
-	/* Vector 2 */
+	/* vector 2 */
 	if (dilithium_signature_compare(seed2, msg2, sizeof(msg2), ksig2, sizeof(ksig2)) != true)
 	{
-		printf_s("vector 2: signature ciphertext does not align with the known answer!");
+		print_safe("Failure! qsctest_dilithium_kat_test: signature ciphertext does not align with the known answer -DK3 \n");
 		ret = false;
 	}
 
-	/* Vector 3 */
+	/* vector 3 */
 	if (dilithium_signature_compare(seed3, msg3, sizeof(msg3), ksig3, sizeof(ksig3)) != true)
 	{
-		printf_s("vector 3: signature ciphertext does not align with the known answer!");
+		print_safe("Failure! qsctest_dilithium_kat_test: signature ciphertext does not align with the known answer -DK4 \n");
 		ret = false;
 	}
 
 	return ret;
 }
 
-bool dilithium_integrity_test()
+bool qsctest_dilithium_operations_test()
 {
-	uint8_t* msg = (uint8_t*)malloc(QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0);
-	uint8_t kmsg[TEST_DILITHIUM_MLEN0];
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE];
-	uint8_t kpk[QSC_DILITHIUM_PUBLICKEY_SIZE];
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE];
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE];
-	uint8_t ksk[QSC_DILITHIUM_PRIVATEKEY_SIZE];
-	uint8_t* sig = (uint8_t*)malloc(QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0);
-	uint8_t ksig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0];
+	uint8_t* msg = (uint8_t*)malloc(QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0);
+	uint8_t kmsg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	uint8_t kpk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t ksk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t* sig = (uint8_t*)malloc(QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0);
+	uint8_t ksig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -1271,12 +1074,6 @@ bool dilithium_integrity_test()
 		"75BF57BB556AC8", ksig, sizeof(ksig));
 #endif
 
-	/*print_hex(kpk, QSC_DILITHIUM_PUBLICKEY_SIZE, 64);
-	printf_s("\n\n");
-	print_hex(ksk, QSC_DILITHIUM_PRIVATEKEY_SIZE, 64);
-	printf_s("\n\n");
-	print_hex(ksig, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0, 64);*/
-
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
 	/* generate public and secret keys */
@@ -1285,38 +1082,38 @@ bool dilithium_integrity_test()
 	/* compare the public key to the expected output */
 	if (qsc_intutils_are_equal8(pk, kpk, QSC_DILITHIUM_PUBLICKEY_SIZE) != true)
 	{
-		printf_s("publickey does not align with the known answer!");
+		print_safe("Failure! qsctest_dilithium_operations_test: public key does not align with the known answer -DF1 \n");
 		ret = false;
 	}
 
 	/* compare the secret key to the expected output */
 	if (qsc_intutils_are_equal8(sk, ksk, QSC_DILITHIUM_PRIVATEKEY_SIZE) != true)
 	{
-		printf_s("privatekey does not align with the known answer!");
+		print_safe("Failure! qsctest_dilithium_operations_test: private key does not align with the known answer -DF2 \n");
 		ret = false;
 	}
 
 	/* sign the message */
-	qsc_dilithium_sign(sig, &siglen, kmsg, TEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_dilithium_sign(sig, &siglen, kmsg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
 
 	/* compare the signature cipher-text to the expected output */
-	if (qsc_intutils_are_equal8(sig, ksig, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_DILITHIUM_MLEN0) != true)
+	if (qsc_intutils_are_equal8(sig, ksig, QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0) != true)
 	{
-		printf_s("signature ciphertext does not align with the known answer!");
+		print_safe("Failure! qsctest_dilithium_operations_test: ciphertext does not align with the known answer -DF3 \n");
 		ret = false;
 	}
 
 	/* verify the message using the public key */
 	if (qsc_dilithium_verify(msg, &msglen, sig, siglen, pk) != true)
 	{
-		printf_s("signature verification check failure!");
+		print_safe("Failure! qsctest_dilithium_operations_test: signature verification check failure -DF4 \n");
 		ret = false;
 	}
 
 	/* compare the two messages for equality */
-	if (qsc_intutils_are_equal8(msg, kmsg, TEST_DILITHIUM_MLEN0) != true)
+	if (qsc_intutils_are_equal8(msg, kmsg, QSCTEST_DILITHIUM_MLEN0) != true)
 	{
-		printf_s("message does not equal to the original!");
+		print_safe("Failure! qsctest_dilithium_operations_test: message does not equal to the original -DF5 \n");
 		ret = false;
 	}
 
@@ -1333,59 +1130,246 @@ bool dilithium_integrity_test()
 	return ret;
 }
 
+bool qsctest_dilithium_privatekey_integrity()
+{
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	size_t i;
+	size_t msglen;
+	size_t siglen;
+	bool ret;
+
+	ret = true;
+	msglen = 0;
+	siglen = 0;
+	hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
+	qsctest_nistrng_prng_initialize(seed, NULL, 0);
+
+	/* generate the signature key-pair */
+	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
+
+	/* flip bits in the private key */
+	for (i = 0; i < 16; ++i)
+	{
+		sk[i] ^= 1U;
+	}
+
+	/* process message and return signed message */
+	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+
+	/* verify signed message, if successful with altered public key, fail the test */
+	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
+	{
+		print_safe("Failure! qsctest_dilithium_privatekey_integrity: message verification passed with altered secret key -DS1 \n");
+		ret = false;
+	}
+
+	return ret;
+}
+
+bool qsctest_dilithium_publickey_integrity()
+{
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	size_t msglen;
+	size_t siglen;
+	bool ret;
+
+	ret = true;
+	msglen = 0;
+	siglen = 0;
+
+	hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
+	qsctest_nistrng_prng_initialize(seed, NULL, 0);
+
+	/* generate the signature key-pair */
+	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
+
+	/* flip 1 bit in the public key */
+	pk[QSC_DILITHIUM_PUBLICKEY_SIZE - 1] ^= 1U;
+
+	/* process message and return signed message */
+	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+
+	/* verify signed message, if successful with altered public key, fail the test */
+	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
+	{
+		print_safe("Failure! qsctest_dilithium_publickey_integrity: message verification passed with altered public key -DP1 \n");
+		ret = false;
+	}
+
+	return ret;
+}
+
+bool qsctest_dilithium_signature_integrity()
+{
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	size_t i;
+	size_t msglen;
+	size_t siglen;
+	bool ret;
+
+	ret = true;
+	msglen = 0;
+	siglen = 0;
+	hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
+	qsctest_nistrng_prng_initialize(seed, NULL, 0);
+
+	/* generate the signature key-pair */
+	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
+
+	/* process message and return signed message */
+	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+
+	/* flip 1 bit in the signed message */
+	sig[siglen - 1] ^= 1U;
+
+	/* verify signed message, if successful with altered public key, fail the test */
+	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
+	{
+		print_safe("Failure! qsctest_dilithium_signature_integrity: message verification passed with altered secret key -DI1 \n");
+		ret = false;
+	}
+
+	/* flip one bit per hash; the signature is entirely hashes */
+	for (i = 0; i < (int32_t)(siglen - QSCTEST_DILITHIUM_MLEN0); i += 100)
+	{
+		sig[i] ^= 1U;
+
+		if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
+		{
+			print_safe("Failure! qsctest_dilithium_signature_integrity: flipping bit did not invalidate signature -DI2 \n");
+			sig[i] ^= 1U;
+			ret = false;
+			break;
+		}
+
+		sig[i] ^= 1U;
+	}
+
+	return ret;
+}
+
+bool qsctest_dilithium_stress_test()
+{
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	size_t i;
+	size_t msglen;
+	size_t siglen;
+	bool ret;
+
+	ret = true;
+	msglen = QSCTEST_DILITHIUM_MLEN0;
+	siglen = QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0;
+
+	hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
+	qsctest_nistrng_prng_initialize(seed, NULL, 0);
+
+	/* generate the key-pair */
+	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
+
+	for (i = 0; i < QSCTEST_DILITHIUM_ITERATIONS; i++)
+	{
+		/* sign the message and return the signed version in sig */
+		qsc_dilithium_sign(sig, &siglen, msg, msglen, sk, qsctest_nistrng_prng_generate);
+
+		if (siglen != QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0)
+		{
+			print_safe("Failure! qsctest_dilithium_stress_test: signature length is incorrect -DS1 \n");
+			ret = false;
+			break;
+		}
+
+		/* verify the signature in sig and copy msg to mout */
+		if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) != true)
+		{
+			print_safe("Failure! qsctest_dilithium_stress_test: message verification has failed -DS2 \n");
+			ret = false;
+			break;
+		}
+
+		if (msglen != QSCTEST_DILITHIUM_MLEN0)
+		{
+			print_safe("Failure! qsctest_dilithium_stress_test: message length is incorrect -DS3 \n");
+			ret = false;
+			break;
+		}
+	}
+
+	return ret;
+}
+
 void qsctest_dilithium_run()
 {
-	if (dilithium_kat_test() == true)
+	if (qsctest_dilithium_kat_test() == true)
 	{
-		printf_s("Success! Passed Dilithium known answer tests. \n");
+		print_safe("Success! Passed Dilithium known answer tests. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed Dilithium known answer test. \n");
+		print_safe("Failure! Failed Dilithium known answer test. \n");
 	}
 
-	if (dilithium_integrity_test() == true)
+	if (qsctest_dilithium_operations_test() == true)
 	{
-		printf_s("Success! Passed Dilithium public/private key, ciphertext and message known answer tests. \n");
+		print_safe("Success! Passed Dilithium public key, private key, ciphertext, and message known answer tests. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed Dilithium known answer integrity tests. \n");
+		print_safe("Failure! Failed Dilithium known answer integrity tests. \n");
 	}
 
-	if (dilithium_stress_test() == true)
+	if (qsctest_dilithium_stress_test() == true)
 	{
-		printf_s("Success: The Dilithium stress test has succeeded! \n");
+		print_safe("Success! The Dilithium stress test has succeeded. \n");
 	}
 	else
 	{
-		printf_s("Failure! The Dilithium stress test has failed! \n");
+		print_safe("Failure! The Dilithium stress test has failed. \n");
 	}
 
-	if (dilithium_publickey_integrity() == true)
+	if (qsctest_dilithium_publickey_integrity() == true)
 	{
-		printf_s("Success! The Dilithium altered public-key test has succeeded! \n");
+		print_safe("Success! The Dilithium altered public-key test has succeeded. \n");
 	}
 	else
 	{
-		printf_s("Failure! The Dilithium altered public-key test has failed! \n");
+		print_safe("Failure! The Dilithium altered public-key test has failed. \n");
 	}
 
-	if (dilithium_secretkey_integrity() == true)
+	if (qsctest_dilithium_privatekey_integrity() == true)
 	{
-		printf_s("Success! The Dilithium altered secret-key test has succeeded! \n");
+		print_safe("Success! The Dilithium altered secret-key test has succeeded. \n");
 	}
 	else
 	{
-		printf_s("Failure! The Dilithium altered secret-key test has failed! \n");
+		print_safe("Failure! The Dilithium altered secret-key test has failed. \n");
 	}
 
-	if (dilithium_signature_integrity() == true)
+	if (qsctest_dilithium_signature_integrity() == true)
 	{
-		printf_s("Success! The Dilithium altered signature test has succeeded! \n");
+		print_safe("Success! The Dilithium altered signature test has succeeded. \n");
 	}
 	else
 	{
-		printf_s("Failure! The Dilithium altered signature test has failed! \n");
+		print_safe("Failure! The Dilithium altered signature test has failed. \n");
 	}
 }

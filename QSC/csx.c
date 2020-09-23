@@ -168,7 +168,7 @@ static void csx_permute_p1024c(qsc_csx_state* ctx, uint8_t* output)
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-static __m256i csx_rotl512(const __m512i x, size_t shift)
+static __m512i csx_rotl512(const __m512i x, size_t shift)
 {
 	return _mm512_or_si512(_mm512_slli_epi64(x, shift), _mm512_srli_epi64(x, 64 - shift));
 }
@@ -201,10 +201,10 @@ static void csx_permute_p8x1024h(qsc_csx_state* ctx, uint64_t counter[16], uint8
 {
 	const uint64_t* pstate = ctx->state;
 
-	__m512i x[16] = { _mm512_set1_epi64x(pstate[0]), _mm512_set1_epi64x(pstate[1]), _mm512_set1_epi64x(pstate[2]), _mm512_set1_epi64x(pstate[3]),
-		_mm512_set1_epi64x(pstate[4]), _mm512_set1_epi64x(pstate[5]), _mm512_set1_epi64x(pstate[6]), _mm512_set1_epi64x(pstate[7]),
-		_mm512_set1_epi64x(pstate[8]), _mm512_set1_epi64x(pstate[9]), _mm512_set1_epi64x(pstate[10]), _mm512_set1_epi64x(pstate[11]),
-		_mm512_loadu_si512((const __m512i*)counter[0]), _mm512_loadu_si512((const __m512i*)&counter[4]), _mm512_set1_epi64x(pstate[12]), _mm512_set1_epi64x(pstate[13]) };
+	__m512i x[16] = { _mm512_set1_epi64(pstate[0]), _mm512_set1_epi64(pstate[1]), _mm512_set1_epi64(pstate[2]), _mm512_set1_epi64(pstate[3]),
+		_mm512_set1_epi64(pstate[4]), _mm512_set1_epi64(pstate[5]), _mm512_set1_epi64(pstate[6]), _mm512_set1_epi64(pstate[7]),
+		_mm512_set1_epi64(pstate[8]), _mm512_set1_epi64(pstate[9]), _mm512_set1_epi64(pstate[10]), _mm512_set1_epi64(pstate[11]),
+		_mm512_loadu_si512((const __m512i*)&counter[0]), _mm512_loadu_si512((const __m512i*)&counter[8]), _mm512_set1_epi64(pstate[12]), _mm512_set1_epi64(pstate[13]) };
 
 	size_t ctr = CSX_ROUND_COUNT;
 
@@ -289,31 +289,31 @@ static void csx_permute_p8x1024h(qsc_csx_state* ctx, uint64_t counter[16], uint8
 		ctr -= 2;
 	}
 
-	x[0] = _mm512_add_epi64(x[0], _mm512_set1_epi64x(pstate[0]));
-	x[1] = _mm512_add_epi64(x[1], _mm512_set1_epi64x(pstate[1]));
-	x[2] = _mm512_add_epi64(x[2], _mm512_set1_epi64x(pstate[2]));
-	x[3] = _mm512_add_epi64(x[3], _mm512_set1_epi64x(pstate[3]));
-	x[4] = _mm512_add_epi64(x[4], _mm512_set1_epi64x(pstate[4]));
-	x[5] = _mm512_add_epi64(x[5], _mm512_set1_epi64x(pstate[5]));
-	x[6] = _mm512_add_epi64(x[6], _mm512_set1_epi64x(pstate[6]));
-	x[7] = _mm512_add_epi64(x[7], _mm512_set1_epi64x(pstate[7]));
-	x[8] = _mm512_add_epi64(x[8], _mm512_set1_epi64x(pstate[8]));
-	x[9] = _mm512_add_epi64(x[9], _mm512_set1_epi64x(pstate[9]));
-	x[10] = _mm512_add_epi64(x[10], _mm512_set1_epi64x(pstate[10]));
-	x[11] = _mm512_add_epi64(x[11], _mm512_set1_epi64x(pstate[11]));
-	x[12] = _mm512_add_epi64(x[12], _mm512_loadu_si512((const __m512i*)counter[0]));
-	x[13] = _mm512_add_epi64(x[13], _mm512_loadu_si512((const __m512i*)counter[4]));
-	x[14] = _mm512_add_epi64(x[14], _mm512_set1_epi64x(pstate[12]));
-	x[15] = _mm512_add_epi64(x[15], _mm512_set1_epi64x(pstate[13]));
+	x[0] = _mm512_add_epi64(x[0], _mm512_set1_epi64(pstate[0]));
+	x[1] = _mm512_add_epi64(x[1], _mm512_set1_epi64(pstate[1]));
+	x[2] = _mm512_add_epi64(x[2], _mm512_set1_epi64(pstate[2]));
+	x[3] = _mm512_add_epi64(x[3], _mm512_set1_epi64(pstate[3]));
+	x[4] = _mm512_add_epi64(x[4], _mm512_set1_epi64(pstate[4]));
+	x[5] = _mm512_add_epi64(x[5], _mm512_set1_epi64(pstate[5]));
+	x[6] = _mm512_add_epi64(x[6], _mm512_set1_epi64(pstate[6]));
+	x[7] = _mm512_add_epi64(x[7], _mm512_set1_epi64(pstate[7]));
+	x[8] = _mm512_add_epi64(x[8], _mm512_set1_epi64(pstate[8]));
+	x[9] = _mm512_add_epi64(x[9], _mm512_set1_epi64(pstate[9]));
+	x[10] = _mm512_add_epi64(x[10], _mm512_set1_epi64(pstate[10]));
+	x[11] = _mm512_add_epi64(x[11], _mm512_set1_epi64(pstate[11]));
+	x[12] = _mm512_add_epi64(x[12], _mm512_loadu_si512((const __m512i*)&counter[0]));
+	x[13] = _mm512_add_epi64(x[13], _mm512_loadu_si512((const __m512i*)&counter[8]));
+	x[14] = _mm512_add_epi64(x[14], _mm512_set1_epi64(pstate[12]));
+	x[15] = _mm512_add_epi64(x[15], _mm512_set1_epi64(pstate[13]));
 
-	csx_store_4xull1024(x, output);
+	csx_store_8xull1024(x, output);
 }
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
 static __m256i csx_rotl256(const __m256i x, size_t shift)
 {
-	return _mm256_or_si256(_mm256_slli_epi64(x, shift), _mm256_srli_epi64(x, 64 - shift));
+	return _mm256_or_si256(_mm256_slli_epi64(x, (int)shift), _mm256_srli_epi64(x, 64 - shift));
 }
 
 static void csx_store256(__m256i input, uint64_t* output)
@@ -629,17 +629,10 @@ static bool csx_finalize(qsc_csx_state* ctx, uint8_t* output, const uint8_t* inp
 		ctx->aadlen = 0;
 		mlen = CPTLEN;
 
-		/* process blocks of input */
-		if (mlen >= QSC_KMAC_512_RATE)
-		{
-			const size_t RNDLEN = (mlen / QSC_KMAC_512_RATE) * QSC_KMAC_512_RATE;
-			qsc_kmac512_blockupdate(&ctx->kstate, pmsg, RNDLEN / QSC_KMAC_512_RATE);
-			mlen -= RNDLEN;
-			poff += RNDLEN;
-		}
-
+		/* update the message */
+		qsc_kmac_update(&ctx->kstate, keccak_rate_512, pmsg, mlen);
 		/* finalize the mac and append code to output */
-		qsc_kmac512_finalize(&ctx->kstate, output, QSC_CSX_MAC_SIZE, pmsg + poff, mlen);
+		qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_CSX_MAC_SIZE);
 
 		qsc_intutils_clear8(pmsg, CPTLEN);
 		free(pmsg);
@@ -657,12 +650,11 @@ void qsc_csx_dispose(qsc_csx_state* ctx)
 	assert(ctx != NULL);
 
 	/* clear state */
-	if (ctx != (qsc_csx_state*)0)
+	if (ctx != NULL)
 	{
-		qsc_memutils_clear((uint8_t*)ctx->state, (QSC_CSX_STATE_SIZE * sizeof(uint64_t)));
-		qsc_memutils_clear((uint8_t*)ctx->nonce, QSC_CSX_NONCE_SIZE);
-		qsc_memutils_clear((uint8_t*)ctx->kstate.state, (QSC_KMAC_STATE_SIZE * sizeof(uint64_t)));
-
+		qsc_keccak_dispose(&ctx->kstate);
+		qsc_intutils_clear64(ctx->state, QSC_CSX_STATE_SIZE);
+		qsc_intutils_clear64(ctx->nonce, QSC_CSX_NONCE_SIZE);
 		ctx->aadlen = 0;
 		ctx->counter = 0;
 		ctx->encrypt = false;
@@ -676,13 +668,13 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	assert(keyparams->keylen == QSC_CSX_KEY_SIZE);
 
 	qsc_keccak_state kstate;
-	uint8_t buf[QSC_SHAKE_512_RATE] = { 0 };
+	uint8_t buf[QSC_KECCAK_512_RATE] = { 0 };
 	uint8_t cpk[QSC_CSX_KEY_SIZE] = { 0 };
 	uint8_t inf[CSX_NAME_LENGTH] = { 0 };
 	uint8_t mck[QSC_CSX_KEY_SIZE] = { 0 };
 
 	/* initialize the state */
-	qsc_memutils_clear((uint8_t*)kstate.state, QSC_SHAKE_STATE_SIZE * sizeof(uint64_t));
+	qsc_memutils_clear((uint8_t*)kstate.state, QSC_KECCAK_STATE_SIZE * sizeof(uint64_t));
 	ctx->counter = 0;
 	ctx->encrypt = encryption;
 	ctx->aad = NULL;
@@ -700,20 +692,20 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	}
 
 	/* initialize the cSHAKE generator */
-	qsc_cshake512_initialize(&kstate, keyparams->key, keyparams->keylen, inf, sizeof(inf), NULL, 0);
+	qsc_cshake_initialize(&kstate, keccak_rate_512, keyparams->key, keyparams->keylen, inf, sizeof(inf), NULL, 0);
 
 	/* extract the cipher key */
-	qsc_cshake512_squeezeblocks(&kstate, buf, 1);
+	qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, buf, 1);
 	qsc_memutils_copy(cpk, buf, QSC_CSX_KEY_SIZE);
 	csx_load(ctx, cpk, keyparams->nonce, csx_info);
 
 	/* extract the mac key */
-	qsc_cshake512_squeezeblocks(&kstate, buf, 1);
+	qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, buf, 1);
 	qsc_memutils_copy(mck, buf, sizeof(mck));
 
 	/* initialize the mac generator */
-	qsc_memutils_clear((uint8_t*)ctx->kstate.state, QSC_KMAC_STATE_SIZE * sizeof(uint64_t));
-	qsc_kmac512_initialize(&ctx->kstate, mck, sizeof(mck), NULL, 0/*, NULL, 0*/);
+	qsc_memutils_clear((uint8_t*)ctx->kstate.state, QSC_KECCAK_STATE_SIZE * sizeof(uint64_t));
+	qsc_kmac_initialize(&ctx->kstate, keccak_rate_512, mck, sizeof(mck), NULL, 0/*, NULL, 0*/);
 }
 
 void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t datalen)

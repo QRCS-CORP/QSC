@@ -1,5 +1,5 @@
 #include "kyber.h"
-#include "kyber_support.h"
+#include "kyberbase.h"
 
 bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {

@@ -56,7 +56,7 @@
 * An optional predictive resistance feature, enabled through the initialize function, injects random bytes into the generator at initialization and 1MB intervals,
 * creating a non-deterministic pseudo-random output. \n
 * Pseudo random bytes are cached internally, and the generator can be initialized and then reused without requiring re-initialization in an online configuration. \n
-* The generator can be updated with new seed material, which is absorbed into the Keccak state.</p>
+* The generator can be updated with new seed material, which is absorbed into the Keccak state.
 *
 * For additional usage examples, see csg_test.h. \n
 *
@@ -67,7 +67,6 @@
 * NIST: SHA3 Keccak Slides http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf
 * NIST: SHA3 Third-Round Report http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf
 * Team Keccak: Specifications summary https://keccak.team/keccak_specs_summary.html
-*
 */
 
 #ifndef QSC_BCG_H
@@ -83,7 +82,7 @@
 typedef struct
 {
     qsc_keccak_state kstate;
-    uint8_t cache[QSC_CSHAKE_256_RATE];
+    uint8_t cache[QSC_KECCAK_256_RATE];
     size_t bctr;
     size_t cpos;
     size_t crmd;
@@ -91,37 +90,49 @@ typedef struct
     bool pres;
 } qsc_csg_state;
 
+/**
+* \brief Dispose of the CSG cipher state.
+*
+* \warning The dispose function must be called when disposing of the cipher.
+* This function destroys the internal state of the cipher.
+*
+* \param ctx: [struct] The cipher state structure
+*/
+void qsc_csg_dispose(qsc_csg_state* ctx);
 
 /**
 * \brief Initialize the pseudo-random provider state with a seed and optional personalization string
 *
+* \param ctx: [struct] The function state
 * \param seed: [const] The random seed, 32 bytes of seed instantiates the 256-bit generator, 64 bytes the 512-bit generator
 * \param seedlen: The length of the input seed
 * \param info: [const] The optional personalization string
 * \param infolen: The length of the personalization string
 * \param predictive_resistance: Enable periodic random injection; enables non deterministic pseudo-random generation
 */
-void qsc_csg_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predictive_resistance);
+void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predictive_resistance);
 
 /**
 * \brief Generate pseudo-random bytes using the random provider.
 *
 * \warning Initialize must first be called before this function can be used.
 *
+* \param ctx: [struct] The function state
 * \param output: The pseudo-random output array
 * \param outlen: The requested number of bytes to generate
 * \return The number of bytes generated
 */
-void qsc_csg_generate(uint8_t* output, size_t outlen);
+void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t outlen);
 
 /**
 * \brief Update the random provider with new keying material
 *
 * \warning Initialize must first be called before this function can be used.
 *
+* \param ctx: [struct] The function state
 * \param seed: [const] The random update seed
 * \param seedlen: The length of the update seed
 */
-void qsc_csg_update(const uint8_t* seed, size_t seedlen);
+void qsc_csg_update(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen);
 
 #endif

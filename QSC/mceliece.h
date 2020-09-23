@@ -61,7 +61,7 @@
 * Source code: <a href="https://bench.cr.yp.to/supercop.html">SUPERCOP</a> McEliece implementation. \n
 * The authors: <a href="https://classic.mceliece.org/">McEliece website</a>. \n
 * Authors: Daniel J. Bernstein, Tung Chou, Tanja Lange, and Peter Schwabe. \n
-* Updated by John Underhill, May 10 2019. \n
+* Updated by John Underhill, May 10 2019.
 */
 
 #ifndef QSC_MCELIECE_H

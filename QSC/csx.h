@@ -85,18 +85,18 @@
 * \paragraph An [EXPERIMENTAL] vectorized, 64-bit, 40-round stream cipher [CSX512] implementation based on ChaCha.
 * This cipher uses KMAC-512 to authenticate the cipher-text stream in an encrypt-then-mac authentication configuration.
 * The CSX (authenticated Cipher Stream, ChaCha eXtended) cipher, is a hybrid of the ChaCha stream cipher, 
-* using 64-bit integers, a 1024-bit block and a 512-bit key. \n</p>
+* using 64-bit integers, a 1024-bit block and a 512-bit key. \n
 *
 * \section Mechanism Overview
 * \paragraph The pseudo-random bytes generator used by this cipher is the Keccak cSHAKE extended output function (XOF).
 * The cSHAKE XOF is implemented in the 512-bit form of that function, and used to expand the input cipher-key into the cipher and MAC keys.
-* CSX-512 uses a 512-bit input key, an a 16 byte nonce, and an optional tweak; the info parameter, up to 48 btes in length.</p>
+* CSX-512 uses a 512-bit input key, an a 16 byte nonce, and an optional tweak; the info parameter, up to 48 btes in length.
 *
 * \section Tweakable Cipher
 * \paragraph This is a 'tweakable cipher', the initialization parameters; qsc_csx_keyparams, include an info parameter that can be used as a secondary user input.
 * Internally, the info parameter is used to customize the cSHAKE output, using the cSHAKE 'custom' parameter to pre-initialize the SHAKE state.
 * The info parameter can be tweaked, with a user defined string 'info' in an qsc_csx_keyparams structure passed to the csx_intitialize(state,keyparams,encrypt).
-* This tweak can be used as a 'domain key', or to differentiate cipher-text output from other implementations, or as a secondary secret-key input.</p>
+* This tweak can be used as a 'domain key', or to differentiate cipher-text output from other implementations, or as a secondary secret-key input.
 *
 * \section Authentication
 * \paragraph CSX is an authenticated encryption with associated data (AEAD) stream cipher.
@@ -104,11 +104,11 @@
 * which is appended to the cipher-text output of an encryption call.
 * In decryption mode, before decryption is performed, an internal mac code is calculated, and compared to the code embedded in the cipher-text.
 * If authentication fails, the cipher-text is not decrypted, and the qsc_csx_transform(state,out,in,inlen) function returns a boolean false value.
-* The qsc_csx_set_associated(state,in,inlen) function can be used to add additional data to the MAC generators input, like packet-header data, or a custom code or counter.</p>
+* The qsc_csx_set_associated(state,in,inlen) function can be used to add additional data to the MAC generators input, like packet-header data, or a custom code or counter.
 
 * \section Implementation
 * The CSX-512, known answer vectors are taken from the CEX++ cryptographic library <a href="https://github.com/Steppenwolfe65/CEX">The CEX++ Cryptographic Library</a>. \n
-* See the documentation and the csx_test.h tests for usage examples.</p>
+* See the documentation and the csx_test.h tests for usage examples.
 */
 
 #ifndef QSC_CSX_H
@@ -185,8 +185,7 @@ typedef struct
 * \brief Dispose of the CSX cipher state.
 *
 * \warning The dispose function must be called when disposing of the cipher.
-* This function destroys internal arrays allocated on the heap,
-* and must be called before the state goes out of scope.
+* This function destroys the internal state of the cipher.
 *
 * \param ctx: [struct] The cipher state structure
 */

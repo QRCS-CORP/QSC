@@ -31,7 +31,7 @@
 * and replacing the differentially-weak native Rijndael key-schedule expansion function. \n
 * The cipher increases the number of mixing rounds from 14 used by AES-256, to 22 used by RHX-256, twice the best known classical computer attack.
 * The cipher also has a 512-bit key configuration, which uses 30 rounds of mixing. 
-* There are attacks now being proposed, that strongly indicate that larger key sizes will be necessary against future quantum-based attacks on symmetric ciphers.</p>
+* There are attacks now being proposed, that strongly indicate that larger key sizes will be necessary against future quantum-based attacks on symmetric ciphers.
 * 
 * <p>The default extension used by this cipher is the Keccak cSHAKE extended output function (XOF).
 * The fallback generator is HKDF(HMAC(SHA2)) Expand.
@@ -40,7 +40,7 @@
 * with the ciphers formal name now being 'eAES', or extended AES.
 * The cipher has four modes, AES128 and AES256, which are the standard AES configurations, and the two extended modes, RSX/RHX-256 and RSX/RHX-512.
 * In extended mode, the key schedules round-key expansion function has been replaced by cSHAKE or HKDF, and can now can safely produce a larger round-key array,
-* unlocking an increased number of mixing rounds, and preventing many serious forms of attack on the Rijndael cipher.</p>
+* unlocking an increased number of mixing rounds, and preventing many serious forms of attack on the Rijndael cipher.
 *
 * <p>This is a 'tweakable cipher', the initialization parameters qsc_rhx_keyparams, include an info parameter.
 * Internally, the info parameter is used to customize the SHAKE output, using the 'name' parameter to pre-initialize the cSHAKE state. 
@@ -48,7 +48,7 @@
 * The default value for this information parameter is the cipher name, the extension type H or S, the size of the extension generators security in bits, 
 * and the size of the key in bits, as a 16-bit Little Endian integer, ex. RHX using the SHAKE extension, and a 256-bit key would be: RHXS25610.
 * The info parameter can be tweaked, using a user defined string. This tweak can be used as a secondary 'domain key', 
-* or to differentiate cipher-text output from other implementations.</p>
+* or to differentiate cipher-text output from other implementations.
 * 
 * \section HBA
 * <p>The Hash Based Authentication mode (HBA), is an authenticated encryption with associated data (AEAD) cipher mode.
@@ -58,7 +58,7 @@
 * In decryption mode, before decryption is performed, an internal mac code is calculated, and compared to the code embedded in the cipher-text.
 * If authentication fails, the cipher-text is not decrypted, and the function returns a boolean false value.
 * The AAD parameter can be used to add additional data to the MAC generators input, like packet data, or a custom code.
-* The info parameter is a user-defined tweak array, and can be used as a secret secondary domain or group key.</p>
+* The info parameter is a user-defined tweak array, and can be used as a secret secondary domain or group key.
 
 * \section Implementation
 * <p>The base cipher, Rijndael, and the extended form of the cipher, can operate using one of the four provided cipher modes of operation: \n
@@ -72,7 +72,7 @@
 * The AES128 and AES256 implementations along with the ECB, CTR, and CBC modes are tested using vectors from NIST SP800-38a. \n
 * The RHX-256, RHX-512, and HBA known answer vectors are taken from the CEX++ cryptographic library;
 * <a href="https://github.com/Steppenwolfe65/CEX">The CEX++ Cryptographic Library</a>. \n
-* See the documentation and the rhx_test.c tests for usage examples.</p>
+* See the documentation and the rhx_test.c tests for usage examples.
 *
 * \ section Links
 * Towards post-quantum symmetric cryptography

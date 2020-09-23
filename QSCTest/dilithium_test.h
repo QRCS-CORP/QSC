@@ -1,8 +1,3 @@
-#ifndef QSCTEST_DILITHIUM_TEST_H
-#define QSCTEST_DILITHIUM_TEST_H
-
-#include "common.h"
-
 /**
 * \file dilithium_test.c
 * \brief <b>Dilithium test functions</b> \n
@@ -12,53 +7,26 @@
 * \date June 13, 2019
 */
 
-/* jgu -suppressing repeated include warning, using include guards */
-/*lint -e537 */
-/* jgu -suppressing misra stdio header warning in example only */
-/*lint -e829 */
+#ifndef QSCTEST_DILITHIUM_TEST_H
+#define QSCTEST_DILITHIUM_TEST_H
 
 #include "common.h"
 
+#define QSCTEST_DILITHIUM_MLEN0 33
+#define QSCTEST_DILITHIUM_MLEN1 66
+#define QSCTEST_DILITHIUM_MLEN2 99
+#define QSCTEST_DILITHIUM_MLEN3 132
+
 #ifdef _DEBUG
-#	define TEST_DILITHIUM_ITERATIONS 1
+#	define QSCTEST_DILITHIUM_ITERATIONS 1
 #else
-#	define TEST_DILITHIUM_ITERATIONS 10
+#	define QSCTEST_DILITHIUM_ITERATIONS 10
 #endif
-
-/**
-* \brief Get a char from console input.
-* \return Returns one user input char
-*/
-static void get_response();
-
-/**
-* \brief Stress test the key generation, encryption, and decryption functions in a looping test.
-* \return Returns true for test success
-*/
-bool dilithium_stress_test();
-
-/**
-* \brief Test the validity of a mutated public key
-* \return Returns true for test success
-*/
-bool dilithium_publickey_integrity();
-
-/**
-* \brief Test the validity of a mutated secret key
-* \return Returns true for test success
-*/
-bool dilithium_secretkey_integrity();
-
-/**
-* \brief Test the validity of a mutated signature
-* \return Returns one (NEWHOPE_STATUS_SUCCESS) for test success
-*/
-bool dilithium_signature_integrity();
 
 /**
 * \brief Test the first ten vectors of the NIST PQ Round 2 KAT tests
 */
-bool dilithium_kat_test();
+bool qsctest_dilithium_kat_test();
 
 /**
 * \brief Test the public and private keys, ciphertext and shared key
@@ -66,10 +34,34 @@ bool dilithium_kat_test();
 * tests the second vector in the NIST PQ Round 2, Kat file.
 * \return Returns true for test success
 */
-bool dilithium_integrity_test();
+bool qsctest_dilithium_operations_test();
 
 /**
-* \brief Run the Kyber implementation stress and correctness tests tests
+* \brief Test the validity of a mutated secret key
+* \return Returns true for test success
+*/
+bool qsctest_dilithium_privatekey_integrity();
+
+/**
+* \brief Test the validity of a mutated public key
+* \return Returns true for test success
+*/
+bool qsctest_dilithium_publickey_integrity();
+
+/**
+* \brief Test the validity of a mutated signature
+* \return Returns true for test success
+*/
+bool qsctest_dilithium_signature_integrity();
+
+/**
+* \brief Stress test the key generation, encryption, and decryption functions in a looping test.
+* \return Returns true for test success
+*/
+bool qsctest_dilithium_stress_test();
+
+/**
+* \brief Run the Dilithium implementation stress and correctness tests tests
 */
 void qsctest_dilithium_run();
 

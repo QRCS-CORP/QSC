@@ -1325,20 +1325,20 @@ static void hba_rhx256_genkeys(const qsc_rhx_keyparams* keyparams, uint8_t* cprk
 #ifdef QSC_RHX_SHAKE_EXTENSION
 
 	qsc_keccak_state kstate;
-	uint8_t sbuf[QSC_SHAKE_256_RATE] = { 0 };
+	uint8_t sbuf[QSC_KECCAK_256_RATE] = { 0 };
 
-	qsc_intutils_clear64(kstate.state, QSC_SHAKE_STATE_SIZE);
+	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 	/* initialize an instance of cSHAKE */
-	qsc_cshake256_initialize(&kstate, keyparams->key, keyparams->keylen, rhx256_hba_name, HBA_NAME_LENGTH, keyparams->info, keyparams->infolen);
+	qsc_cshake_initialize(&kstate, keccak_rate_256, keyparams->key, keyparams->keylen, rhx256_hba_name, HBA_NAME_LENGTH, keyparams->info, keyparams->infolen);
 
 	/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
-	qsc_cshake256_squeezeblocks(&kstate, sbuf, 1);
+	qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
 	memcpy(cprk, sbuf, keyparams->keylen);
-	qsc_cshake256_squeezeblocks(&kstate, sbuf, 1);
+	qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
 	memcpy(mack, sbuf, HBA256_MKEY_LENGTH);
 	/* clear the shake buffer */
-	qsc_intutils_clear64(kstate.state, QSC_SHAKE_STATE_SIZE);
+	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 #else
 
@@ -1365,22 +1365,22 @@ static void hba_rhx512_genkeys(const qsc_rhx_keyparams* keyparams, uint8_t* cprk
 {
 #ifdef QSC_RHX_SHAKE_EXTENSION
 
-	uint8_t sbuf[QSC_SHAKE_512_RATE] = { 0 };
+	uint8_t sbuf[QSC_KECCAK_512_RATE] = { 0 };
 	qsc_keccak_state kstate;
 
-	qsc_intutils_clear64(kstate.state, QSC_SHAKE_STATE_SIZE);
+	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 	/* initialize an instance of cSHAKE */
-	qsc_cshake512_initialize(&kstate, keyparams->key, keyparams->keylen, rhx512_hba_name, HBA_NAME_LENGTH, keyparams->info, keyparams->infolen);
+	qsc_cshake_initialize(&kstate, keccak_rate_512, keyparams->key, keyparams->keylen, rhx512_hba_name, HBA_NAME_LENGTH, keyparams->info, keyparams->infolen);
 	/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
-	qsc_cshake512_squeezeblocks(&kstate, sbuf, 1);
+	qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, sbuf, 1);
 	memcpy(cprk, sbuf, keyparams->keylen);
 
-	qsc_cshake512_squeezeblocks(&kstate, sbuf, 1);
+	qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, sbuf, 1);
 	memcpy(mack, sbuf, HBA512_MKEY_LENGTH);
 
 	/* clear the shake buffer */
-	qsc_intutils_clear64(kstate.state, QSC_SHAKE_STATE_SIZE);
+	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 #else
 

@@ -598,6 +598,11 @@ static void chacha_permute_p4x512h(chacha_avx_state* ctxw)
 
 #endif
 
+void qsc_chacha_dispose(qsc_chacha_state* ctx)
+{
+	memset(ctx->state, 0x00, sizeof(ctx->state));
+}
+
 void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chacha_keyparams* keyparams)
 {
 	assert(ctx != NULL);

@@ -1,8 +1,3 @@
-#ifndef QSCTEST_SHA3_KAT_H
-#define QSCTEST_SHA3_KAT_H
-
-#include "common.h"
-
 /**
 * \file sha3_test.h
 * \brief <b>SHA3 Known Answer Tests</b> \n
@@ -11,6 +6,11 @@
 * \author John Underhill
 * \date December 28, 2017
 */
+
+#ifndef QSCTEST_SHA3_TEST_H
+#define QSCTEST_SHA3_TEST_H
+
+#include "common.h"
 
 /**
 * \brief Tests the 256-bit version of the keccak message digest for correct operation,

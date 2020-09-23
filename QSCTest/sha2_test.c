@@ -2,9 +2,6 @@
 #include "testutils.h"
 #include "../QSC/intutils.h"
 #include "../QSC/sha2.h"
-
-/* jgu -suppressing misra stdio header warning in example only */
-/*lint -e829 */
 #include <stdio.h>
 
 bool qsctest_hkdf_256_kat() 
@@ -41,6 +38,7 @@ bool qsctest_hkdf_256_kat()
 
 	if (qsc_intutils_are_equal8(otp0, exp0, sizeof(otp0)) != true)
 	{
+		print_safe("Failure! hkdf_256_kat: output does not match the known answer -HK1 \n");
 		status = false;
 	}
 
@@ -48,6 +46,7 @@ bool qsctest_hkdf_256_kat()
 
 	if (qsc_intutils_are_equal8(otp1, exp1, sizeof(otp1)) != true)
 	{
+		print_safe("Failure! hkdf_256_kat: output does not match the known answer -HK2 \n");
 		status = false;
 	}
 
@@ -88,6 +87,7 @@ bool qsctest_hkdf_512_kat()
 
 	if (qsc_intutils_are_equal8(otp0, exp0, sizeof(otp0)) != true)
 	{
+		print_safe("Failure! hkdf_512_kat: output does not match the known answer -HK1 \n");
 		status = false;
 	}
 
@@ -95,6 +95,7 @@ bool qsctest_hkdf_512_kat()
 
 	if (qsc_intutils_are_equal8(otp1, exp1, sizeof(otp1)) != true)
 	{
+		print_safe("Failure! hkdf_512_kat: output does not match the known answer -HK2 \n");
 		status = false;
 	}
 
@@ -103,19 +104,22 @@ bool qsctest_hkdf_512_kat()
 
 bool qsctest_hmac_256_kat()
 {
-	uint8_t exp0[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp1[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp2[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp3[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	uint8_t exp0[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	uint8_t exp1[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	uint8_t exp2[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	uint8_t exp3[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	uint8_t exp4[QSC_HMAC_256_MAC_SIZE] = { 0 };
 	uint8_t key0[20] = { 0 };
 	uint8_t key1[20] = { 0 };
 	uint8_t key2[25] = { 0 };
 	uint8_t key3[131] = { 0 };
+	uint8_t key4[131] = { 0 };
 	uint8_t msg0[8] = { 0 };
 	uint8_t msg1[50] = { 0 };
 	uint8_t msg2[50] = { 0 };
 	uint8_t msg3[54] = { 0 };
-	uint8_t otp[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	uint8_t msg4[152] = { 0 };
+	uint8_t otp[QSC_HMAC_256_MAC_SIZE] = { 0 };
 	qsc_hmac256_state state;
 	bool status;
 
@@ -123,23 +127,25 @@ bool qsctest_hmac_256_kat()
 	hex_to_bin("773EA91E36800E46854DB8EBD09181A72959098B3EF8C122D9635514CED565FE", exp1, sizeof(exp1));
 	hex_to_bin("82558A389A443C0EA4CC819899F2083A85F0FAA3E578F8077A2E3FF46729665B", exp2, sizeof(exp2));
 	hex_to_bin("60E431591EE0B67F0D8A26AACBF5B77F8E0BC6213728C5140546040F0EE37F54", exp3, sizeof(exp3));
+	hex_to_bin("9B09FFA71B942FCB27635FBCD5B0E944BFDC63644F0713938A7F51535C3A35E2", exp4, sizeof(exp4));
 
 	hex_to_bin("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B", key0, sizeof(key0));
 	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", key1, sizeof(key1));
 	hex_to_bin("0102030405060708090A0B0C0D0E0F10111213141516171819", key2, sizeof(key2));
-	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		"AAAAAA", key3, sizeof(key3));
+	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			   "AAAAAA", key3, sizeof(key3));
+	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			   "AAAAAA", key4, sizeof(key4));
 
 	hex_to_bin("4869205468657265", msg0, sizeof(msg0));
-	hex_to_bin("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
-		"DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", msg1, sizeof(msg1));
-	hex_to_bin("CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD"
-		"CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", msg2, sizeof(msg2));
-	hex_to_bin("54657374205573696E67204C6172676572205468616E20426C6F636B2D53697A"
-		"65204B6579202D2048617368204B6579204669727374", msg3, sizeof(msg3));
+	hex_to_bin("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", msg1, sizeof(msg1));
+	hex_to_bin("CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", msg2, sizeof(msg2));
+	hex_to_bin("54657374205573696E67204C6172676572205468616E20426C6F636B2D53697A65204B6579202D2048617368204B6579204669727374", msg3, sizeof(msg3));
+	hex_to_bin("5468697320697320612074657374207573696E672061206C6172676572207468616E20626C6F636B2D73697A65206B657920616E642061206C61726765722074"
+				"68616E20626C6F636B2D73697A6520646174612E20546865206B6579206E6565647320746F20626520686173686564206265666F7265206265696E6720757365"
+				"642062792074686520484D414320616C676F726974686D2E", msg4, sizeof(msg4));
 
 	status = true;
 
@@ -149,6 +155,7 @@ bool qsctest_hmac_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK1 \n");
 		status = false;
 	}
 
@@ -157,6 +164,7 @@ bool qsctest_hmac_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK2 \n");
 		status = false;
 	}
 
@@ -165,6 +173,7 @@ bool qsctest_hmac_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK3 \n");
 		status = false;
 	}
 
@@ -173,18 +182,73 @@ bool qsctest_hmac_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
 	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK4 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac256_compute(otp, msg4, sizeof(msg4), key4, sizeof(key4));
+
+	if (qsc_intutils_are_equal8(otp, exp4, sizeof(exp4)) != true)
+	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK5 \n");
 		status = false;
 	}
 
 	/* test long-form api */
 
 	qsc_intutils_clear8(otp, sizeof(otp));
-	/* if message is less than one full block, just call finalize */
 	qsc_hmac256_initialize(&state, key0, sizeof(key0));
-	qsc_hmac256_finalize(&state, otp, msg0, sizeof(msg0));
+	qsc_hmac256_update(&state, msg0, sizeof(msg0));
+	qsc_hmac256_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK6 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac256_initialize(&state, key1, sizeof(key1));
+	qsc_hmac256_update(&state, msg1, sizeof(msg1));
+	qsc_hmac256_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
+	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK7 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac256_initialize(&state, key2, sizeof(key2));
+	qsc_hmac256_update(&state, msg2, sizeof(msg2));
+	qsc_hmac256_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
+	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK8 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac256_initialize(&state, key3, sizeof(key3));
+	qsc_hmac256_update(&state, msg3, sizeof(msg3));
+	qsc_hmac256_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
+	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK9 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac256_initialize(&state, key4, sizeof(key4));
+	qsc_hmac256_update(&state, msg4, sizeof(msg4));
+	qsc_hmac256_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp4, sizeof(exp4)) != true)
+	{
+		print_safe("Failure! hmac_256_kat: output does not match the known answer -MK10 \n");
 		status = false;
 	}
 
@@ -193,47 +257,48 @@ bool qsctest_hmac_256_kat()
 
 bool qsctest_hmac_512_kat()
 {
-	uint8_t exp0[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp1[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp2[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp3[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	uint8_t exp0[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	uint8_t exp1[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	uint8_t exp2[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	uint8_t exp3[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	uint8_t exp4[QSC_HMAC_512_MAC_SIZE] = { 0 };
 	uint8_t key0[20] = { 0 };
 	uint8_t key1[20] = { 0 };
 	uint8_t key2[25] = { 0 };
 	uint8_t key3[131] = { 0 };
+	uint8_t key4[131] = { 0 };
 	uint8_t msg0[8] = { 0 };
 	uint8_t msg1[50] = { 0 };
 	uint8_t msg2[50] = { 0 };
 	uint8_t msg3[54] = { 0 };
-	uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	uint8_t msg4[152] = { 0 };
+	uint8_t otp[QSC_HMAC_512_MAC_SIZE] = { 0 };
 	qsc_hmac512_state state;
 	bool status;
 
-
-	hex_to_bin("87AA7CDEA5EF619D4FF0B4241A1D6CB02379F4E2CE4EC2787AD0B30545E17CDE"
-		"DAA833B7D6B8A702038B274EAEA3F4E4BE9D914EEB61F1702E696C203A126854", exp0, sizeof(exp0));
-	hex_to_bin("FA73B0089D56A284EFB0F0756C890BE9B1B5DBDD8EE81A3655F83E33B2279D39"
-		"BF3E848279A722C806B485A47E67C807B946A337BEE8942674278859E13292FB", exp1, sizeof(exp1));
-	hex_to_bin("B0BA465637458C6990E5A8C5F61D4AF7E576D97FF94B872DE76F8050361EE3DB"
-		"A91CA5C11AA25EB4D679275CC5788063A5F19741120C4F2DE2ADEBEB10A298DD", exp2, sizeof(exp2));
-	hex_to_bin("80B24263C7C1A3EBB71493C1DD7BE8B49B46D1F41B4AEEC1121B013783F8F352"
-		"6B56D037E05F2598BD0FD2215D6A1E5295E64F73F63F0AEC8B915A985D786598", exp3, sizeof(exp3));
+	hex_to_bin("87AA7CDEA5EF619D4FF0B4241A1D6CB02379F4E2CE4EC2787AD0B30545E17CDEDAA833B7D6B8A702038B274EAEA3F4E4BE9D914EEB61F1702E696C203A126854", exp0, sizeof(exp0));
+	hex_to_bin("FA73B0089D56A284EFB0F0756C890BE9B1B5DBDD8EE81A3655F83E33B2279D39BF3E848279A722C806B485A47E67C807B946A337BEE8942674278859E13292FB", exp1, sizeof(exp1));
+	hex_to_bin("B0BA465637458C6990E5A8C5F61D4AF7E576D97FF94B872DE76F8050361EE3DBA91CA5C11AA25EB4D679275CC5788063A5F19741120C4F2DE2ADEBEB10A298DD", exp2, sizeof(exp2));
+	hex_to_bin("80B24263C7C1A3EBB71493C1DD7BE8B49B46D1F41B4AEEC1121B013783F8F3526B56D037E05F2598BD0FD2215D6A1E5295E64F73F63F0AEC8B915A985D786598", exp3, sizeof(exp3));
+	hex_to_bin("E37B6A775DC87DBAA4DFA9F96E5E3FFDDEBD71F8867289865DF5A32D20CDC944B6022CAC3C4982B10D5EEB55C3E4DE15134676FB6DE0446065C97440FA8C6A58", exp4, sizeof(exp4));
 
 	hex_to_bin("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B", key0, sizeof(key0));
 	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", key1, sizeof(key1));
 	hex_to_bin("0102030405060708090A0B0C0D0E0F10111213141516171819", key2, sizeof(key2));
-	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", key3, sizeof(key3));
+	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		"AAAAAA", key3, sizeof(key3));
+	hex_to_bin("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		"AAAAAA", key4, sizeof(key4));
 
 	hex_to_bin("4869205468657265", msg0, sizeof(msg0));
-	hex_to_bin("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
-		"DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", msg1, sizeof(msg1));
-	hex_to_bin("CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD"
-		"CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", msg2, sizeof(msg2));
-	hex_to_bin("54657374205573696E67204C6172676572205468616E20426C6F636B2D53697A"
-		"65204B6579202D2048617368204B6579204669727374", msg3, sizeof(msg3));
+	hex_to_bin("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", msg1, sizeof(msg1));
+	hex_to_bin("CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", msg2, sizeof(msg2));
+	hex_to_bin("54657374205573696E67204C6172676572205468616E20426C6F636B2D53697A65204B6579202D2048617368204B6579204669727374", msg3, sizeof(msg3));
+	hex_to_bin("5468697320697320612074657374207573696E672061206C6172676572207468616E20626C6F636B2D73697A65206B657920616E642061206C61726765722074"
+		"68616E20626C6F636B2D73697A6520646174612E20546865206B6579206E6565647320746F20626520686173686564206265666F7265206265696E6720757365"
+		"642062792074686520484D414320616C676F726974686D2E", msg4, sizeof(msg4));
 
 	status = true;
 
@@ -243,6 +308,7 @@ bool qsctest_hmac_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK1 \n");
 		status = false;
 	}
 
@@ -251,6 +317,7 @@ bool qsctest_hmac_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK2 \n");
 		status = false;
 	}
 
@@ -259,6 +326,7 @@ bool qsctest_hmac_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK3 \n");
 		status = false;
 	}
 
@@ -267,18 +335,73 @@ bool qsctest_hmac_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
 	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK4 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac512_compute(otp, msg4, sizeof(msg4), key4, sizeof(key4));
+
+	if (qsc_intutils_are_equal8(otp, exp4, sizeof(exp4)) != true)
+	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK5 \n");
 		status = false;
 	}
 
 	/* test long-form api */
 
 	qsc_intutils_clear8(otp, sizeof(otp));
-	/* if message is less than one full block, just call finalize */
 	qsc_hmac512_initialize(&state, key0, sizeof(key0));
-	qsc_hmac512_finalize(&state, otp, msg0, sizeof(msg0));
+	qsc_hmac512_update(&state, msg0, sizeof(msg0));
+	qsc_hmac512_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK6 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac512_initialize(&state, key1, sizeof(key1));
+	qsc_hmac512_update(&state, msg1, sizeof(msg1));
+	qsc_hmac512_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
+	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK7 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac512_initialize(&state, key2, sizeof(key2));
+	qsc_hmac512_update(&state, msg2, sizeof(msg2));
+	qsc_hmac512_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
+	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK8 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac512_initialize(&state, key3, sizeof(key3));
+	qsc_hmac512_update(&state, msg3, sizeof(msg3));
+	qsc_hmac512_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
+	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK9 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_hmac512_initialize(&state, key4, sizeof(key4));
+	qsc_hmac512_update(&state, msg4, sizeof(msg4));
+	qsc_hmac512_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp4, sizeof(exp4)) != true)
+	{
+		print_safe("Failure! hmac_512_kat: output does not match the known answer -MK10 \n");
 		status = false;
 	}
 
@@ -321,6 +444,7 @@ bool qsctest_sha2_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK1 \n");
 		status = false;
 	}
 
@@ -329,6 +453,7 @@ bool qsctest_sha2_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK2 \n");
 		status = false;
 	}
 
@@ -337,6 +462,7 @@ bool qsctest_sha2_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK3 \n");
 		status = false;
 	}
 
@@ -345,50 +471,58 @@ bool qsctest_sha2_256_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK4 \n");
 		status = false;
 	}
 
 	/* test long-form api */
 
 	qsc_intutils_clear8(otp, sizeof(otp));
-	/* if message is less than one full block, just call finalize */
+
 	qsc_sha256_initialize(&state);
-	qsc_sha256_finalize(&state, otp, msg0, 0);
+	qsc_sha256_update(&state, msg0, 0);
+	qsc_sha256_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK5 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha256_initialize(&state);
-	qsc_sha256_finalize(&state, otp, msg1, sizeof(msg1));
+	qsc_sha256_update(&state, msg1, sizeof(msg1));
+	qsc_sha256_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK6 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha256_initialize(&state);
-	qsc_sha256_finalize(&state, otp, msg2, sizeof(msg2));
+	qsc_sha256_update(&state, msg2, sizeof(msg2));
+	qsc_sha256_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK7 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha256_initialize(&state);
 
-	/* absorb a rate sized block */
-	qsc_sha256_blockupdate(&state, msg3, 1);
+	/* absorb a the message */
+	qsc_sha256_update(&state, msg3, sizeof(msg3));
 
-	/* finalize the message */
-	qsc_sha256_finalize(&state, otp, msg3 + QSC_SHA2_256_RATE, sizeof(msg3) - QSC_SHA2_256_RATE);
+	/* finalize the hash */
+	qsc_sha256_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp3, QSC_SHA2_256_HASH_SIZE) != true)
 	{
+		print_safe("Failure! sha2_256_kat: output does not match the known answer -SK8 \n");
 		status = false;
 	}
 
@@ -435,6 +569,7 @@ bool qsctest_sha2_384_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK1 \n");
 		status = false;
 	}
 
@@ -443,6 +578,7 @@ bool qsctest_sha2_384_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK2 \n");
 		status = false;
 	}
 
@@ -451,6 +587,7 @@ bool qsctest_sha2_384_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK3 \n");
 		status = false;
 	}
 
@@ -459,6 +596,7 @@ bool qsctest_sha2_384_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp3, sizeof(msg3)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK4 \n");
 		status = false;
 	}
 
@@ -467,39 +605,45 @@ bool qsctest_sha2_384_kat()
 	qsc_intutils_clear8(otp, sizeof(otp));
 	/* if message is less than one full block, just call finalize */
 	qsc_sha384_initialize(&state);
-	qsc_sha384_finalize(&state, otp, msg0, 0);
+	qsc_sha384_update(&state, msg0, 0);
+	qsc_sha384_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK5 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha384_initialize(&state);
-	qsc_sha384_finalize(&state, otp, msg1, sizeof(msg1));
+	qsc_sha384_update(&state, msg1, sizeof(msg1));
+	qsc_sha384_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK6 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha384_initialize(&state);
-	qsc_sha384_finalize(&state, otp, msg2, sizeof(msg2));
+	qsc_sha384_update(&state, msg2, sizeof(msg2));
+	qsc_sha384_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK7 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha384_initialize(&state);
-
-	/* finalize the message */
-	qsc_sha384_finalize(&state, otp, msg3, sizeof(msg3));
+	qsc_sha384_update(&state, msg3, sizeof(msg3));
+	qsc_sha384_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
 	{
+		print_safe("Failure! sha2_384_kat: output does not match the known answer -SK8 \n");
 		status = false;
 	}
 
@@ -546,6 +690,7 @@ bool qsctest_sha2_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK1 \n");
 		status = false;
 	}
 
@@ -554,6 +699,7 @@ bool qsctest_sha2_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK2 \n");
 		status = false;
 	}
 
@@ -562,6 +708,7 @@ bool qsctest_sha2_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK3 \n");
 		status = false;
 	}
 
@@ -570,47 +717,53 @@ bool qsctest_sha2_512_kat()
 
 	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK4 \n");
 		status = false;
 	}
 
 	/* test long-form api */
 
 	qsc_intutils_clear8(otp, sizeof(otp));
-	/* if message is less than one full block, just call finalize */
 	qsc_sha512_initialize(&state);
-	qsc_sha512_finalize(&state, otp, msg0, 0);
+	qsc_sha512_update(&state, msg0, 0);
+	qsc_sha512_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK5 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
-	qsc_sha512_initialize(&state);
-	qsc_sha512_finalize(&state, otp, msg1, sizeof(msg1));
+	qsc_sha512_initialize(&state); 
+	qsc_sha512_update(&state, msg1, sizeof(msg1));
+	qsc_sha512_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK6 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha512_initialize(&state);
-	qsc_sha512_finalize(&state, otp, msg2, sizeof(msg2));
+	qsc_sha512_update(&state, msg2, sizeof(msg2));
+	qsc_sha512_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK7 \n");
 		status = false;
 	}
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_sha512_initialize(&state);
-
-	/* finalize the message */
-	qsc_sha512_finalize(&state, otp, msg3, sizeof(msg3));
+	qsc_sha512_update(&state, msg3, sizeof(msg3));
+	qsc_sha512_finalize(&state, otp);
 
 	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
 	{
+		print_safe("Failure! sha2_512_kat: output does not match the known answer -SK8 \n");
 		status = false;
 	}
 
@@ -621,55 +774,55 @@ void qsctest_sha2_run()
 {
 	if (qsctest_sha2_256_kat() == true)
 	{
-		printf_s("Success! Passed the SHA2-256 KAT test. \n");
+		print_safe("Success! Passed the SHA2-256 KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the SHA2-256 KAT test. \n");
+		print_safe("Failure! Failed the SHA2-256 KAT test. \n");
 	}
 
 	if (qsctest_sha2_512_kat() == true)
 	{
-		printf_s("Success! Passed the SHA2-512 KAT test. \n");
+		print_safe("Success! Passed the SHA2-512 KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the SHA2-512 KAT test. \n");
+		print_safe("Failure! Failed the SHA2-512 KAT test. \n");
 	}
 
 	if (qsctest_hkdf_256_kat() == true)
 	{
-		printf_s("Success! Passed the HKDF-Expand(HMAC(SHA2-256)) KAT test. \n");
+		print_safe("Success! Passed the HKDF-Expand(HMAC(SHA2-256)) KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the HKDF-Expand(HMAC(SHA2-256)) KAT test. \n");
+		print_safe("Failure! Failed the HKDF-Expand(HMAC(SHA2-256)) KAT test. \n");
 	}
 
 	if (qsctest_hkdf_512_kat() == true)
 	{
-		printf_s("Success! Passed the HKDF-Expand(HMAC(SHA2-512)) KAT test. \n");
+		print_safe("Success! Passed the HKDF-Expand(HMAC(SHA2-512)) KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the HKDF-Expand(HMAC(SHA2-512)) test. \n");
+		print_safe("Failure! Failed the HKDF-Expand(HMAC(SHA2-512)) test. \n");
 	}
 
 	if (qsctest_hmac_256_kat() == true)
 	{
-		printf_s("Success! Passed the HMAC(SHA2-256) KAT test. \n");
+		print_safe("Success! Passed the HMAC(SHA2-256) KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the HMAC(SHA2-256) KAT test. \n");
+		print_safe("Failure! Failed the HMAC(SHA2-256) KAT test. \n");
 	}
 
 	if (qsctest_hmac_512_kat() == true)
 	{
-		printf_s("Success! Passed the HMAC(SHA2-512) KAT test. \n");
+		print_safe("Success! Passed the HMAC(SHA2-512) KAT test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the HMAC(SHA2-512) KAT test. \n");
+		print_safe("Failure! Failed the HMAC(SHA2-512) KAT test. \n");
 	}
 }

@@ -1,10 +1,3 @@
-#ifndef QSCTEST_SECRAND_TEST_H
-#define QSCTEST_SECRAND_TEST_H
-
-#include "common.h"
-
-#define QSC_SECRAND_SAMPLE_SIZE 65536
-
 /**
 * \file secrand_test.h
 * \brief <b>Entropy provider tests</b> \n
@@ -13,8 +6,15 @@
 * \date August 19, 2020
 */
 
+#ifndef QSCTEST_SECRAND_TEST_H
+#define QSCTEST_SECRAND_TEST_H
+
+#include "common.h"
+
+#define QSCTEST_SECRAND_SAMPLE_SIZE 65536
+
 /**
-* \brief Check the providers outpute uding mean, Chi square, ordered runs, and succesive zeroes tests
+* \brief Check the providers outpute using statistical mean, chi square, ordered runs, and succesive zeroes tests
 *
 * \param name: The providers name
 * \param sample: The random sample to be tested
@@ -22,10 +22,29 @@
 */
 void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t length);
 
+/**
+* \brief Evaluate the output of the acp provider
+*/
 void qsctest_secrand_acp_evaluate();
 
+/**
+* \brief Evaluate the output of the csg DRBG
+*/
 void qsctest_secrand_csg_evaluate();
 
+/**
+* \brief Evaluate the output of the csp provider
+*/
+void qsctest_secrand_csp_evaluate();
+
+/**
+* \brief Evaluate the output of the hcg DRBG
+*/
+void qsctest_secrand_hcg_evaluate();
+
+/**
+* \brief Evaluate the output of the rdp provider
+*/
 void qsctest_secrand_rdp_evaluate();
 
 /**

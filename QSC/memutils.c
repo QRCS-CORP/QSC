@@ -8,7 +8,7 @@
 #	include <malloc.h>
 #endif
 
-void qsc_memutils_prefetch_l1(void* address, size_t length)
+void qsc_memutils_prefetch_l1(char* address, size_t length)
 {
 #ifdef QSC_SYSTEM_AVX_INTRINSICS
 	_mm_prefetch((char*)address + length, _MM_HINT_T0);
@@ -18,14 +18,14 @@ void qsc_memutils_prefetch_l1(void* address, size_t length)
 
 	tmp = 0;
 
-	for (i = 0; i < length ++i)
+	for (i = 0; i < length; ++i)
 	{
-		tmp |= (char*)(address + i);
+		tmp |= address[i];
 	}
 #endif
 }
 
-void qsc_memutils_prefetch_l2(void* address, size_t length)
+void qsc_memutils_prefetch_l2(char* address, size_t length)
 {
 #ifdef QSC_SYSTEM_AVX_INTRINSICS
 	_mm_prefetch((char*)address + length, _MM_HINT_T1);
@@ -35,14 +35,14 @@ void qsc_memutils_prefetch_l2(void* address, size_t length)
 
 	tmp = 0;
 
-	for (i = 0; i < length ++i)
+	for (i = 0; i < length; ++i)
 	{
-		tmp |= (char*)(address + i);
+		tmp |= address[i];
 	}
 #endif
 }
 
-void qsc_memutils_prefetch_l3(void* address, size_t length)
+void qsc_memutils_prefetch_l3(char* address, size_t length)
 {
 #ifdef QSC_SYSTEM_AVX_INTRINSICS
 	_mm_prefetch((char*)address + length, _MM_HINT_T2);
@@ -52,9 +52,9 @@ void qsc_memutils_prefetch_l3(void* address, size_t length)
 
 	tmp = 0;
 
-	for (i = 0; i < length ++i)
+	for (i = 0; i < length; ++i)
 	{
-		tmp |= (char*)(address + i);
+		tmp |= address[i];
 	}
 #endif
 }
@@ -215,11 +215,11 @@ void qsc_memutils_copy(uint8_t* output, const uint8_t* input, size_t length)
 			while (pctr != ALNLEN)
 			{
 #if defined(QSC_SYSTEM_HAS_AVX512)
-				qsc_memutils_copy128(input + pctr, output + pctr);
+				qsc_memutils_copy512(input + pctr, output + pctr);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 				qsc_memutils_copy256(input + pctr, output + pctr);
 #elif defined(QSC_SYSTEM_HAS_AVX)
-				qsc_memutils_copy512(input + pctr, output + pctr);
+				qsc_memutils_copy128(input + pctr, output + pctr);
 #endif
 				pctr += SMDBLK;
 			}
@@ -378,6 +378,83 @@ void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size_t length)
 		for (i = pctr; i < length; ++i)
 		{
 			output[i] ^= input[i];
+		}
+	}
+}
+
+inline static void qsc_memutils_xorv128(const uint8_t value, uint8_t* output)
+{
+#if defined(QSC_SYSTEM_HAS_AVX)
+	__m128i v = _mm_set1_epi8(value);
+	_mm_storeu_si128((__m128i*)output, _mm_xor_si128(_mm_loadu_si128((const __m128i*) & v), _mm_loadu_si128((__m128i*)output)));
+#else
+	for (size_t i = 0; i < 16; ++i)
+	{
+		output[i] ^= value;
+	}
+#endif
+}
+
+inline static void qsc_memutils_xorv256(const uint8_t value, uint8_t* output)
+{
+#if defined(QSC_SYSTEM_HAS_AVX2)
+	__m256i v = _mm256_set1_epi8(value);
+	_mm256_storeu_si256((__m256i*)output, _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) & v), _mm256_loadu_si256((__m256i*)output)));
+#else
+	qsc_memutils_xorv128(value, output);
+	qsc_memutils_xorv128(value, output + 16);
+#endif
+}
+
+inline static void qsc_memutils_xorv512(const uint8_t value, uint8_t* output)
+{
+#if defined(QSC_SYSTEM_HAS_AVX512)
+	__m512i v = _mm512_set1_epi8(value);
+	_mm512_storeu_si512((__m512i*)output, _mm512_xor_si512(_mm512_loadu_si512((const __m512i*)&v), _mm512_loadu_si512((__m512i*)output)));
+#else
+	qsc_memutils_xorv256(value, output);
+	qsc_memutils_xorv256(value, output + 32);
+#endif
+}
+
+void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
+{
+	size_t pctr;
+
+	pctr = 0;
+
+#if defined(QSC_SYSTEM_AVX_INTRINSICS)
+#	if defined(QSC_SYSTEM_HAS_AVX512)
+	const size_t SMDBLK = 64;
+#	elif defined(QSC_SYSTEM_HAS_AVX2)
+	const size_t SMDBLK = 32;
+#	else
+	const size_t SMDBLK = 16;
+#	endif
+
+	if (length >= SMDBLK)
+	{
+		const size_t ALNLEN = length - (length % SMDBLK);
+
+		while (pctr != ALNLEN)
+		{
+#if defined(QSC_SYSTEM_HAS_AVX512)
+			qsc_memutils_xorv512(value, output + pctr);
+#elif defined(QSC_SYSTEM_HAS_AVX2)
+			qsc_memutils_xorv256(value, output + pctr);
+#elif defined(QSC_SYSTEM_HAS_AVX)
+			qsc_memutils_xorv128(value, output + pctr);
+#endif
+			pctr += SMDBLK;
+		}
+	}
+#endif
+
+	if (pctr != length)
+	{
+		for (size_t i = pctr; i < length; ++i)
+		{
+			output[i] ^= value;
 		}
 	}
 }

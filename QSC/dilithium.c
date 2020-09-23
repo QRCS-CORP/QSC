@@ -1,5 +1,5 @@
 #include "dilithium.h"
-#include "dilithium_support.h"
+#include "dilithiumbase.h"
 
 void qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
 {

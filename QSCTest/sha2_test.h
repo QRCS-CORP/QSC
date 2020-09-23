@@ -1,8 +1,3 @@
-#ifndef QSCTEST_SHA2_KAT_H
-#define QSCTEST_SHA2_KAT_H
-
-#include "common.h"
-
 /**
 * \file sha3_test.h
 * \brief <b>SHA2, HKDF, and HMAC, Known Answer Tests</b> \n
@@ -11,6 +6,11 @@
 * \author John Underhill
 * \date October 10, 2019
 */
+
+#ifndef QSCTEST_SHA2_TEST_H
+#define QSCTEST_SHA2_TEST_H
+
+#include "common.h"
 
 /**
 * \brief Tests the 256-bit version of the HFDF-Expand(HMAC(SHA2-256)) key derivation function for correct operation,

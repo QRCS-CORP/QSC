@@ -336,8 +336,11 @@ void qsc_secrand_initialize(uint8_t* seed, size_t seedlen, uint8_t* custom, size
 	assert(seed != NULL);
 	assert(seedlen == QSC_CSG256_SEED_SIZE || seedlen == QSC_CSG512_SEED_SIZE);
 
-	qsc_csg_initialize(seed, seedlen, custom, custlen, true);
-	qsc_csg_generate(secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+	/* initialize the underlying generator */
+	qsc_csg_initialize(&secrand_state.hstate, seed, seedlen, custom, custlen, true);
+
+	/* pre-fill the cache */
+	qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
 	secrand_state.cpos = 0;
 	secrand_state.init = true;
 }
@@ -371,7 +374,7 @@ void qsc_secrand_generate(uint8_t* output, size_t length)
 
 			while (length >= QSC_SECRAND_CACHE_SIZE)
 			{
-				qsc_csg_generate(secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+				qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
 				qsc_memutils_copy(output + poft, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
 				length -= QSC_SECRAND_CACHE_SIZE;
 				poft += QSC_SECRAND_CACHE_SIZE;
@@ -379,7 +382,7 @@ void qsc_secrand_generate(uint8_t* output, size_t length)
 
 			if (length != 0)
 			{
-				qsc_csg_generate(secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+				qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
 				qsc_memutils_copy(output + poft, secrand_state.cache, length);
 				secrand_state.cpos = length;
 			}

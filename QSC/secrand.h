@@ -51,6 +51,7 @@
 */
 typedef struct
 {
+    qsc_csg_state hstate;
     uint8_t cache[QSC_SECRAND_CACHE_SIZE];
     size_t cpos;
     bool init;

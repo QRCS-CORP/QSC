@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool qsctest_csx512_kat_test()
+bool qsctest_csx512_kat()
 {
-	uint8_t ad[20];
+	uint8_t ad[20] = { 0 };
 	uint8_t dec[128] = { 0 };
 	uint8_t enc1[128 + QSC_CSX_MAC_SIZE] = { 0 };
 	uint8_t enc2[128 + QSC_CSX_MAC_SIZE] = { 0 };
@@ -49,7 +49,7 @@ bool qsctest_csx512_kat_test()
 	/* initialize the state and create the round-keys */
 	qsc_csx_initialize(&state, &kp, true);
 
-	/* set associted data */
+	/* set associated data */
 	qsc_csx_set_associated(&state, ad, sizeof(ad));
 
 	/* test encryption */
@@ -57,10 +57,11 @@ bool qsctest_csx512_kat_test()
 
 	if (qsc_intutils_are_equal8(enc1, exp1, sizeof(exp1)) == false)
 	{
+		print_safe("Failure! csx512_kat: output does not match the expected answer -CK1 \n");
 		status = false;
 	}
 
-	/* set associted data */
+	/* set associated data */
 	qsc_csx_set_associated(&state, NULL, 0);
 
 	/* test encryption and mac chaining */
@@ -77,17 +78,19 @@ bool qsctest_csx512_kat_test()
 	/* initialize the state */
 	qsc_csx_initialize(&state, &kp, false);
 
-	/* set associted data */
+	/* set associated data */
 	qsc_csx_set_associated(&state, ad, sizeof(ad));
 
 	/* test decryption */
 	if (qsc_csx_transform(&state, dec, enc1, sizeof(dec)) == false)
 	{
+		print_safe("Failure! csx512_kat: output does not match the expected answer -CK2 \n");
 		status = false;
 	}
 
 	if (qsc_intutils_are_equal8(dec, msg, sizeof(dec)) == false)
 	{
+		print_safe("Failure! csx512_kat: output does not match the expected answer -CK3 \n");
 		status = false;
 	}
 
@@ -97,7 +100,7 @@ bool qsctest_csx512_kat_test()
 	return status;
 }
 
-bool qsctest_csx512_stress_test()
+bool qsctest_csx512_stress()
 {
 	uint8_t aad[20] = { 0 };
 	uint8_t* dec;
@@ -115,7 +118,7 @@ bool qsctest_csx512_stress_test()
 	tctr = 0;
 	status = true;
 
-	while (tctr < CSX_TEST_CYCLES)
+	while (tctr < CSXTEST_TEST_CYCLES)
 	{
 		mlen = 0;
 
@@ -148,6 +151,7 @@ bool qsctest_csx512_stress_test()
 
 			if (qsc_csx_transform(&state, enc, msg, mlen) == false)
 			{
+				print_safe("Failure! csx512_stress: encryption failure -CS1 \n");
 				status = false;
 			}
 
@@ -160,12 +164,14 @@ bool qsctest_csx512_stress_test()
 
 			if (qsc_csx_transform(&state, dec, enc, mlen) == false)
 			{
+				print_safe("Failure! csx512_stress: decryption failure -CS2 \n");
 				status = false;
 			}
 
 			/* compare decryption output to message */
 			if (qsc_intutils_are_equal8(dec, msg, mlen) == false)
 			{
+				print_safe("Failure! csx512_stress: authentication failure -CS3 \n");
 				status = false;
 			}
 
@@ -187,21 +193,21 @@ bool qsctest_csx512_stress_test()
 
 void qsctest_csx_run()
 {
-	if (qsctest_csx512_kat_test() == true)
+	if (qsctest_csx512_kat() == true)
 	{
-		printf_s("Success! Passed the CSX known answer tests. \n");
+		print_safe("Success! Passed the CSX known answer tests. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the CSX known answer tests. \n");
+		print_safe("Failure! Failed the CSX known answer tests. \n");
 	}
 
-	if (qsctest_csx512_stress_test() == true)
+	if (qsctest_csx512_stress() == true)
 	{
-		printf_s("Success! Passed the CSX known answer tests. \n");
+		print_safe("Success! Passed the CSX stress tests. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the CSX known answer tests. \n");
+		print_safe("Failure! Failed the CSX stress tests. \n");
 	}
 }

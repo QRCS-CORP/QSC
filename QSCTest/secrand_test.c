@@ -1,6 +1,9 @@
 #include "secrand_test.h"
+#include "testutils.h"
 #include "../QSC/acp.h"
+#include "../QSC/csg.h"
 #include "../QSC/csp.h"
+#include "../QSC/hcg.h"
 #include "../QSC/rdp.h"
 #include "../QSC/secrand.h"
 #include "../QSC/sysutils.h"
@@ -182,10 +185,10 @@ static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t thr
 	size_t c;
 	size_t i;
 	uint8_t val;
-	bool state;
+	bool res;
 
 	c = 0;
-	state = false;
+	res = false;
 	val = input[0];
 
 	/* indicates zeroed output or bad run */
@@ -197,7 +200,7 @@ static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t thr
 
 			if (c >= threshold)
 			{
-				state = true;
+				res = true;
 				break;
 			}
 		}
@@ -208,7 +211,7 @@ static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t thr
 		}
 	}
 
-	return state;
+	return res;
 }
 
 static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t threshold)
@@ -249,7 +252,7 @@ static void secrand_print_double(double input)
 	if (str != NULL)
 	{
 		snprintf(str, len + 1, "%g", input);
-		printf_s(str);
+		print_safe(str);
 		free(str);
 	}
 }
@@ -261,93 +264,121 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 	// mean value test
 	x = secrand_mean_value(sample, length);
 
-	printf_s(name);
-	printf_s(": Mean distribution value is ");
+	print_safe(name);
+	print_safe(": Mean distribution value is ");
 	secrand_print_double(x);
-	printf_s(" (127.5 is optimal) ");
+	print_safe(" (127.5 is optimal) ");
 
 	if (x < 122.5 || x > 132.5)
 	{
-		printf_s(": FAIL! \n");
+		print_safe(": FAIL! \n");
 	}
 	else if (x < 125.0 || x > 130.0)
 	{
-		printf_s(": WARN \n");
+		print_safe(": WARN \n");
 	}
 	else
 	{
-		printf_s(": PASS \n");
+		print_safe(": PASS \n");
 	}
 
 	// ChiSquare
 	x = secrand_chi_square(sample, length) * 100.0;
-	printf_s(name);
-	printf_s(": ChiSquare: random would exceed this value ");
+	print_safe(name);
+	print_safe(": ChiSquare: random would exceed this value ");
 	secrand_print_double(x);
-	printf_s(" percent of the time ");
+	print_safe(" percent of the time ");
 
 	if (x < 1.0 || x > 99.0)
 	{
-		printf_s(": FAIL! \n");
+		print_safe(": FAIL! \n");
 	}
 	else if (x < 5.0 || x > 95.0)
 	{
-		printf_s(": WARN \n");
+		print_safe(": WARN \n");
 	}
 	else
 	{
-		printf_s(": PASS \n");
+		print_safe(": PASS \n");
 	}
 
 	// ordered runs
 	if (secrand_ordered_runs(sample, length, 6))
 	{
-		printf_s(name);
-		printf_s(": Ordered runs test failure! \n");
+		print_safe(name);
+		print_safe(": Ordered runs test failure! \n");
 	}
 	else
 	{
-		printf_s(name);
-		printf_s(": Ordered runs test passed. \n");
+		print_safe(name);
+		print_safe(": Ordered runs test passed. \n");
 	}
 
 	// succesive zeroes
 	if (secrand_succesive_seros(sample, length, 4))
 	{
-		printf_s(name);
-		printf_s(": Succesive zeroes test failure! \n");
+		print_safe(name);
+		print_safe(": Succesive zeroes test failure! \n");
 	}
 	else
 	{
-		printf_s(name);
-		printf_s(": Succesive zeroes test passed. \n");
+		print_safe(name);
+		print_safe(": Succesive zeroes test passed. \n");
 	}
 }
 
 
 void qsctest_secrand_acp_evaluate()
 {
-	uint8_t smp[QSC_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 
 	qsc_acp_generate(smp, sizeof(smp));
 
 	qsctest_secrand_evaluate("ACP", smp, sizeof(smp));
 }
 
-void qsctest_secrand_csp_evaluate()
+void qsctest_secrand_csg_evaluate()
 {
-	uint8_t smp[QSC_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t seed[QSC_CSG256_SEED_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	qsc_csg_state ctx;
 
-	qsc_csg_generate(smp, sizeof(smp));
+	qsc_csp_generate(seed, sizeof(seed));
+
+	qsc_csg_initialize(&ctx, seed, sizeof(seed), NULL, 0, false);
+	qsc_csg_generate(&ctx, smp, sizeof(smp));
 
 	qsctest_secrand_evaluate("CSG", smp, sizeof(smp));
 }
 
+void qsctest_secrand_csp_evaluate()
+{
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+
+	qsc_csp_generate(smp, sizeof(smp));
+
+	qsctest_secrand_evaluate("CSP", smp, sizeof(smp));
+}
+
+void qsctest_secrand_hcg_evaluate()
+{
+	uint8_t seed[QSC_HCG_SEED_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	qsc_hcg_state ctx;
+
+	qsc_csp_generate(seed, sizeof(seed));
+
+	qsc_hcg_initialize(&ctx, seed, sizeof(seed), NULL, 0, false);
+	qsc_hcg_generate(&ctx, smp, sizeof(smp));
+
+	qsctest_secrand_evaluate("HCG", smp, sizeof(smp));
+}
+
 void qsctest_secrand_rdp_evaluate()
 {
-	if (qsc_sysutils_rdrand_available)
+	if (qsc_sysutils_rdrand_available())
 	{
-		uint8_t smp[QSC_SECRAND_SAMPLE_SIZE] = { 0 };
+		uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 
 		qsc_rdp_generate(smp, sizeof(smp));
 
@@ -519,14 +550,19 @@ void qsctest_secrand_run()
 {
 	if (qsctest_secrand_stress() == true)
 	{
-		printf_s("Success! Passed the secrand stress and wellness test. \n");
+		print_safe("Success! Passed the secrand stress and wellness test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the secrand stress and wellness test. \n");
+		print_safe("Failure! Failed the secrand stress and wellness test. \n");
 	}
 
+	print_safe("*** Testing random entropy providers *** \n");
 	qsctest_secrand_acp_evaluate();
 	qsctest_secrand_csp_evaluate();
 	qsctest_secrand_rdp_evaluate();
+
+	print_safe("*** Testing deterministic random bit generators *** \n");
+	qsctest_secrand_csg_evaluate();
+	qsctest_secrand_hcg_evaluate();
 }

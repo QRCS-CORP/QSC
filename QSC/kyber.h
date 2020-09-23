@@ -141,7 +141,6 @@
 */
 #define QSC_KYBER_ALGNAME "KYBER"
 
-
 /**
 * \brief Decapsulates the shared secret for given cipher-text using a private-key
 *

@@ -111,4 +111,13 @@ void qsc_memutils_setvalue(uint8_t* output, size_t length, uint8_t value);
 */
 void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size_t length);
 
+/**
+* \brief Bitwise XOR a block of memory to a byte value
+*
+* \param output: A pointer to the destination array
+* \param input: A byte value
+* \param length: The number of bytes to XOR
+*/
+void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length);
+
 #endif

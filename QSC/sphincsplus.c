@@ -1,5 +1,5 @@
 #include "sphincsplus.h"
-#include "sphincsplus_support.h"
+#include "sphincsplusbase.h"
 
 void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
 {

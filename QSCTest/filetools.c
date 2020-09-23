@@ -32,7 +32,7 @@ int64_t getline(char** line, size_t* length, FILE* fp)
 	}
 
 	// use a chunk array of 128 bytes as parameter for fgets
-	char chunk[128];
+	char chunk[128] = { 0 };
 
 	// allocate a block of memory for *line if it is NULL or smaller than the chunk array
 	if (*line == NULL || *length < sizeof(chunk))

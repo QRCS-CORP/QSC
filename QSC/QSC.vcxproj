@@ -53,6 +53,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -78,8 +79,8 @@
       <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <PrecompiledHeaderFile />
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -90,8 +91,8 @@
       <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <PrecompiledHeaderFile />
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -104,8 +105,8 @@
       <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <PrecompiledHeaderFile />
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -122,8 +123,8 @@
       <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <PrecompiledHeaderFile />
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -134,15 +135,23 @@
     <ClInclude Include="acp.h" />
     <ClInclude Include="chacha.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="cpuid.h" />
     <ClInclude Include="csg.h" />
     <ClInclude Include="csx.h" />
     <ClInclude Include="dilithium.h" />
-    <ClInclude Include="dilithium_support.h" />
+    <ClInclude Include="dilithiumbase.h" />
+    <ClInclude Include="donna128.h" />
+    <ClInclude Include="ecdh.h" />
+    <ClInclude Include="ed25519.h" />
+    <ClInclude Include="ecdhbase.h" />
+    <ClInclude Include="ecdsa.h" />
+    <ClInclude Include="ecdsabase.h" />
+    <ClInclude Include="hcg.h" />
     <ClInclude Include="intrinsics.h" />
     <ClInclude Include="kyber.h" />
-    <ClInclude Include="kyber_support.h" />
+    <ClInclude Include="kyberbase.h" />
     <ClInclude Include="mceliece.h" />
-    <ClInclude Include="mceliece_support.h" />
+    <ClInclude Include="mceliecebase.h" />
     <ClInclude Include="memutils.h" />
     <ClInclude Include="poly1305.h" />
     <ClInclude Include="rcs.h" />
@@ -152,22 +161,31 @@
     <ClInclude Include="sha2.h" />
     <ClInclude Include="sha3.h" />
     <ClInclude Include="sphincsplus.h" />
-    <ClInclude Include="sphincsplus_support.h" />
+    <ClInclude Include="sphincsplusbase.h" />
     <ClInclude Include="csp.h" />
     <ClInclude Include="intutils.h" />
     <ClInclude Include="sysutils.h" />
+    <ClInclude Include="transpose.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="acp.c" />
     <ClCompile Include="chacha.c" />
+    <ClCompile Include="cpuid.c" />
     <ClCompile Include="csg.c" />
     <ClCompile Include="csx.c" />
     <ClCompile Include="dilithium.c" />
-    <ClCompile Include="dilithium_support.c" />
+    <ClCompile Include="dilithiumbase.c" />
+    <ClCompile Include="donna128.c" />
+    <ClCompile Include="ecdh.c" />
+    <ClCompile Include="ed25519.c" />
+    <ClCompile Include="ecdhbase.c" />
+    <ClCompile Include="ecdsa.c" />
+    <ClCompile Include="ecdsabase.c" />
+    <ClCompile Include="hcg.c" />
     <ClCompile Include="kyber.c" />
-    <ClCompile Include="kyber_support.c" />
+    <ClCompile Include="kyberbase.c" />
     <ClCompile Include="mceliece.c" />
-    <ClCompile Include="mceliece_support.c" />
+    <ClCompile Include="mceliecebase.c" />
     <ClCompile Include="memutils.c" />
     <ClCompile Include="poly1305.c" />
     <ClCompile Include="rcs.c" />
@@ -177,12 +195,14 @@
     <ClCompile Include="sha2.c" />
     <ClCompile Include="sha3.c" />
     <ClCompile Include="sphincsplus.c" />
-    <ClCompile Include="sphincsplus_support.c" />
+    <ClCompile Include="sphincsplusbase.c" />
     <ClCompile Include="csp.c" />
     <ClCompile Include="intutils.c" />
     <ClCompile Include="sysutils.c" />
+    <ClCompile Include="transpose.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

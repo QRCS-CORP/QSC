@@ -102,9 +102,10 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 bool qsc_sysutils_rdrand_available()
 {
+#if defined(QSC_SYSTEM_AVX_INTRINSICS)
 	const uint32_t RDRAND_FLAG = (1 << 30);
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
+#	if defined(QSC_SYSTEM_OS_WINDOWS)
 
 	int32_t info[4] = { 0 };
 
@@ -112,7 +113,7 @@ bool qsc_sysutils_rdrand_available()
 
 	return (((uint32_t)info[2] & RDRAND_FLAG) == RDRAND_FLAG);
 
-#else
+#	else
 
 	uint32_t eax;
 	uint32_t ebx;
@@ -123,6 +124,9 @@ bool qsc_sysutils_rdrand_available()
 
 	return ((ecx & RDRAND_FLAG) == RDRAND_FLAG);
 
+#	endif
+#else
+	return false;
 #endif
 }
 

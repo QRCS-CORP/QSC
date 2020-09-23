@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool qsctest_rcs256_kat_test()
+bool qsctest_rcs256_kat()
 {
-	uint8_t ad[20];
+	uint8_t ad[20] = { 0 };
 	uint8_t dec[32] = { 0 };
 	uint8_t enc1[32 + QSC_RCS256_MAC_LENGTH] = { 0 };
 	uint8_t enc2[32 + QSC_RCS256_MAC_LENGTH] = { 0 };
@@ -43,7 +43,7 @@ bool qsctest_rcs256_kat_test()
 	/* initialize the state and create the round-keys */
 	qsc_rcs_initialize(&state, &kp, true, RCS256);
 
-	/* set associted data */
+	/* set associated data */
 	qsc_rcs_set_associated(&state, ad, sizeof(ad));
 
 	/* test encryption */
@@ -51,6 +51,7 @@ bool qsctest_rcs256_kat_test()
 
 	if (qsc_intutils_are_equal8(enc1, exp1, sizeof(exp1)) == false)
 	{
+		print_safe("Failure! rcs256_kat: cipher output does not match the known answer -RK1 \n");
 		status = false;
 	}
 
@@ -59,6 +60,7 @@ bool qsctest_rcs256_kat_test()
 
 	if (qsc_intutils_are_equal8(enc2, exp2, sizeof(exp2)) == false)
 	{
+		print_safe("Failure! rcs256_kat: cipher output does not match the known answer -RK2 \n");
 		status = false;
 	}
 
@@ -68,17 +70,19 @@ bool qsctest_rcs256_kat_test()
 	/* initialize the state */
 	qsc_rcs_initialize(&state, &kp, false, RCS256);
 
-	/* set associted data */
+	/* set associated data */
 	qsc_rcs_set_associated(&state, ad, sizeof(ad));
 
 	/* test decryption */
 	if (qsc_rcs_transform(&state, dec, enc1, sizeof(dec)) == false)
 	{
+		print_safe("Failure! rcs256_kat: authentication failure -RK3 \n");
 		status = false;
 	}
 
 	if (qsc_intutils_are_equal8(dec, msg, sizeof(dec)) == false)
 	{
+		print_safe("Failure! rcs256_kat: cipher output does not match the known answer -RK4 \n");
 		status = false;
 	}
 
@@ -88,9 +92,9 @@ bool qsctest_rcs256_kat_test()
 	return status;
 }
 
-bool qsctest_rcs512_kat_test()
+bool qsctest_rcs512_kat()
 {
-	uint8_t ad[20];
+	uint8_t ad[20] = { 0 };
 	uint8_t dec[64] = { 0 };
 	uint8_t enc1[64 + QSC_RCS512_MAC_LENGTH] = { 0 };
 	uint8_t enc2[64 + QSC_RCS512_MAC_LENGTH] = { 0 };
@@ -126,7 +130,7 @@ bool qsctest_rcs512_kat_test()
 	/* initialize the state and create the round-keys */
 	qsc_rcs_initialize(&state, &kp, true, RCS512);
 
-	/* set associted data */
+	/* set associated data */
 	qsc_rcs_set_associated(&state, ad, sizeof(ad));
 
 	/* test encryption */
@@ -134,6 +138,7 @@ bool qsctest_rcs512_kat_test()
 
 	if (qsc_intutils_are_equal8(enc1, exp1, sizeof(exp1)) == false)
 	{
+		print_safe("Failure! rcs512_kat: cipher output does not match the known answer -RK1 \n");
 		status = false;
 	}
 
@@ -142,6 +147,7 @@ bool qsctest_rcs512_kat_test()
 
 	if (qsc_intutils_are_equal8(enc2, exp2, sizeof(exp2)) == false)
 	{
+		print_safe("Failure! rcs512_kat: cipher output does not match the known answer -RK2 \n");
 		status = false;
 	}
 
@@ -151,17 +157,19 @@ bool qsctest_rcs512_kat_test()
 	/* initialize the state */
 	qsc_rcs_initialize(&state, &kp, false, RCS512);
 
-	/* set associted data */
+	/* set associated data */
 	qsc_rcs_set_associated(&state, ad, sizeof(ad));
 
 	/* test decryption */
 	if (qsc_rcs_transform(&state, dec, enc1, sizeof(dec)) == false)
 	{
+		print_safe("Failure! rcs512_kat: authentication failure -RK3 \n");
 		status = false;
 	}
 
 	if (qsc_intutils_are_equal8(dec, msg, sizeof(dec)) == false)
 	{
+		print_safe("Failure! rcs512_kat: cipher output does not match the known answer -RK4 \n");
 		status = false;
 	}
 
@@ -222,6 +230,7 @@ bool qsctest_rcs256_stress_test()
 
 			if (qsc_rcs_transform(&state, enc, msg, mlen) == false)
 			{
+				print_safe("Failure! rcs256_stress_test: encryption failure -RS1 \n");
 				status = false;
 			}
 
@@ -234,12 +243,14 @@ bool qsctest_rcs256_stress_test()
 
 			if (qsc_rcs_transform(&state, dec, enc, mlen) == false)
 			{
+				print_safe("Failure! rcs256_stress_test: authentication failure -RS2 \n");
 				status = false;
 			}
 
 			/* compare decryption output to message */
 			if (qsc_intutils_are_equal8(dec, msg, mlen) == false)
 			{
+				print_safe("Failure! rcs256_stress_test: decryption failure -RS3 \n");
 				status = false;
 			}
 
@@ -310,6 +321,7 @@ bool qsctest_rcs512_stress_test()
 
 			if (qsc_rcs_transform(&state, enc, msg, mlen) == false)
 			{
+				print_safe("Failure! rcs512_stress_test: encryption failure -RS1 \n");
 				status = false;
 			}
 
@@ -322,12 +334,14 @@ bool qsctest_rcs512_stress_test()
 
 			if (qsc_rcs_transform(&state, dec, enc, mlen) == false)
 			{
+				print_safe("Failure! rcs512_stress_test: authentication failure -RS2 \n");
 				status = false;
 			}
 
 			/* compare decryption output to message */
 			if (qsc_intutils_are_equal8(dec, msg, mlen) == false)
 			{
+				print_safe("Failure! rcs512_stress_test: decryption failure -RS3 \n");
 				status = false;
 			}
 
@@ -349,39 +363,39 @@ bool qsctest_rcs512_stress_test()
 
 void qsctest_rcs_run()
 {
-	if (qsctest_rcs256_kat_test() == true)
+	if (qsctest_rcs256_kat() == true)
 	{
-		printf_s("Success! Passed the RCS-256 known answer tests. \n");
+		print_safe("Success! Passed the RCS-256 known answer tests. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the RCS-256 known answer tests. \n");
+		print_safe("Failure! Failed the RCS-256 known answer tests. \n");
 	}
 
-	if (qsctest_rcs512_kat_test() == true)
+	if (qsctest_rcs512_kat() == true)
 	{
-		printf_s("Success! Passed the RCS-512 known answer tests. \n");
+		print_safe("Success! Passed the RCS-512 known answer tests. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the RCS-512 known answer tests. \n");
+		print_safe("Failure! Failed the RCS-512 known answer tests. \n");
 	}
 
 	if (qsctest_rcs256_stress_test() == true)
 	{
-		printf_s("Success! Passed the RCS-256 stress test. \n");
+		print_safe("Success! Passed the RCS-256 stress test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the RCS-256 stress test. \n");
+		print_safe("Failure! Failed the RCS-256 stress test. \n");
 	}
 
 	if (qsctest_rcs512_stress_test() == true)
 	{
-		printf_s("Success! Passed the RCS-512 stress test. \n");
+		print_safe("Success! Passed the RCS-512 stress test. \n");
 	}
 	else
 	{
-		printf_s("Failure! Failed the RCS-512 stress test. \n");
+		print_safe("Failure! Failed the RCS-512 stress test. \n");
 	}
 }

@@ -494,28 +494,13 @@ static bool rcs_finalize(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* inp
 
 		if (ctx->ctype == RCS256)
 		{
-			/* mac the data and add the code to the end of the cipher-text output array */
-			if (mlen >= QSC_KMAC_256_RATE)
-			{
-				const size_t RNDLEN = (mlen / QSC_KMAC_256_RATE) * QSC_KMAC_256_RATE;
-				qsc_kmac256_blockupdate(&ctx->kstate, pmsg, RNDLEN / QSC_KMAC_256_RATE);
-				mlen -= RNDLEN;
-				poff += RNDLEN;
-			}
-
-			qsc_kmac256_finalize(&ctx->kstate, output, QSC_RCS256_MAC_LENGTH, pmsg + poff, mlen);
+			qsc_kmac_update(&ctx->kstate, keccak_rate_256, pmsg, mlen);
+			qsc_kmac_finalize(&ctx->kstate, keccak_rate_256, output, QSC_RCS256_MAC_LENGTH);
 		}
 		else
 		{
-			if (mlen >= QSC_KMAC_512_RATE)
-			{
-				const size_t RNDLEN = (mlen / QSC_KMAC_512_RATE) * QSC_KMAC_512_RATE;
-				qsc_kmac512_blockupdate(&ctx->kstate, pmsg, RNDLEN / QSC_KMAC_512_RATE);
-				mlen -= RNDLEN;
-				poff += RNDLEN;
-			}
-
-			qsc_kmac512_finalize(&ctx->kstate, output, QSC_RCS512_MAC_LENGTH, pmsg + poff, mlen);
+			qsc_kmac_update(&ctx->kstate, keccak_rate_512, pmsg, mlen);
+			qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_RCS512_MAC_LENGTH);
 		}
 
 		qsc_intutils_clear8(pmsg, CPTLEN);
@@ -529,28 +514,28 @@ static bool rcs_finalize(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* inp
 
 static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams)
 {
-	uint8_t sbuf[QSC_SHAKE_STATE_SIZE * sizeof(uint64_t)] = { 0 };
+	uint8_t sbuf[QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)] = { 0 };
 	qsc_keccak_state kstate;
 	size_t i;
 	size_t oft;
 	size_t rlen;
 
-	qsc_intutils_clear64(kstate.state, QSC_SHAKE_STATE_SIZE);
+	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 	if (ctx->ctype == RCS256)
 	{
 		uint8_t tmpr[RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0 };
 
 		/* initialize an instance of cSHAKE */
-		qsc_cshake256_initialize(&kstate, keyparams->key, keyparams->keylen, rcs256_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
+		qsc_cshake_initialize(&kstate, keccak_rate_256, keyparams->key, keyparams->keylen, rcs256_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
 
 		oft = 0;
 		rlen = RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE;
 
 		while (rlen != 0)
 		{
-			const size_t BLKLEN = (rlen > QSC_SHAKE_256_RATE) ? QSC_SHAKE_256_RATE : rlen;
-			qsc_cshake256_squeezeblocks(&kstate, sbuf, 1);
+			const size_t BLKLEN = (rlen > QSC_KECCAK_256_RATE) ? QSC_KECCAK_256_RATE : rlen;
+			qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
 			qsc_memutils_copy(tmpr + oft, sbuf, BLKLEN);
 
 			oft += BLKLEN;
@@ -575,28 +560,28 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #endif
 
 		/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
-		qsc_cshake256_squeezeblocks(&kstate, sbuf, 1);
+		qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
 		uint8_t mkey[RCS256_MKEY_LENGTH];
 		qsc_memutils_copy(mkey, sbuf, RCS256_MKEY_LENGTH);
-		qsc_kmac256_initialize(&ctx->kstate, mkey, sizeof(mkey), NULL, 0/*, NULL, 0*/);
+		qsc_kmac_initialize(&ctx->kstate, keccak_rate_256, mkey, sizeof(mkey), NULL, 0/*, NULL, 0*/);
 
 		/* clear the shake buffer */
-		qsc_intutils_clear64(kstate.state, QSC_SHAKE_STATE_SIZE);
+		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 	}
 	else
 	{
 		uint8_t tmpr[RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0 };
 
 		/* initialize an instance of cSHAKE */
-		qsc_cshake512_initialize(&kstate, keyparams->key, keyparams->keylen, rcs512_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
+		qsc_cshake_initialize(&kstate, keccak_rate_512, keyparams->key, keyparams->keylen, rcs512_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
 
 		oft = 0;
 		rlen = RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE;
 
 		while (rlen != 0)
 		{
-			const size_t BLKLEN = (rlen > QSC_SHAKE_512_RATE) ? QSC_SHAKE_512_RATE : rlen;
-			qsc_cshake512_squeezeblocks(&kstate, sbuf, 1);
+			const size_t BLKLEN = (rlen > QSC_KECCAK_512_RATE) ? QSC_KECCAK_512_RATE : rlen;
+			qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, sbuf, 1);
 			qsc_memutils_copy(tmpr + oft, sbuf, BLKLEN);
 			oft += BLKLEN;
 			rlen -= BLKLEN;
@@ -613,13 +598,13 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #endif
 
 		/* use two permutation calls (no buffering) to seperate the cipher/mac key outputs to match the CEX implementation */
-		qsc_cshake512_squeezeblocks(&kstate, sbuf, 1);
+		qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, sbuf, 1);
 		uint8_t mkey[RCS512_MKEY_LENGTH];
 		qsc_memutils_copy(mkey, sbuf, RCS512_MKEY_LENGTH);
-		qsc_kmac512_initialize(&ctx->kstate, mkey, sizeof(mkey), NULL, 0/*, NULL, 0*/);
+		qsc_kmac_initialize(&ctx->kstate, keccak_rate_512, mkey, sizeof(mkey), NULL, 0/*, NULL, 0*/);
 
 		/* clear the shake buffer */
-		qsc_intutils_clear64(kstate.state, QSC_SHAKE_STATE_SIZE);
+		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 	}
 }
 
@@ -627,9 +612,12 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 void qsc_rcs_dispose(qsc_rcs_state* ctx)
 {
-	if (ctx != (qsc_rcs_state*)0)
+	if (ctx != NULL)
 	{
-		qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_keccak_dispose(&ctx->kstate);
+		qsc_intutils_clear32(ctx->roundkeys, sizeof(ctx->roundkeys) / sizeof(uint32_t));
+		ctx->aad = NULL;
+		ctx->nonce = NULL;
 		ctx->aadlen = 0;
 		ctx->counter = 0;
 		ctx->ctype = RCS256;

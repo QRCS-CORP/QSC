@@ -88,20 +88,20 @@
 * and replacing the differentially-weak native Rijndael key-schedule expansion function. \n
 * The cipher increases the number of mixing rounds from 14 used by AES-256, to 22 used by RCS-256, twice the best known classical computer attack. \n
 * The cipher also has a 512-bit key configuration, which uses 30 rounds of mixing. \n
-* There are attacks now being proposed, that strongly indicate that larger key sizes will be necessary against future quantum-based attacks on symmetric ciphers.</p>
+* There are attacks now being proposed, that strongly indicate that larger key sizes will be necessary against future quantum-based attacks on symmetric ciphers.
 *
 * \section Mechanism Overview
 * \paragraph The pseudo-random bytes generator used by this cipher is the Keccak cSHAKE extended output function (XOF).
 * The cSHAKE XOF is implemented in 256 and 512-bit forms of those functions, correlating to the input cipher-key size.
 * The cipher has two base variants; RCS256 and RCS512, the 256 variant using a 256-bit input key, and RCS512 using a 512-bit key.
 * This change in key schedule expansion functions to the stronger Keccak based XOF function, can now can safely produce a larger round-key array,
-* unlocking an increased number of mixing rounds, and preventing many serious forms of attack on the Rijndael-based ciphers.</p>
+* unlocking an increased number of mixing rounds, and preventing many serious forms of attack on the Rijndael-based ciphers.
 *
 * \section Tweakable Cipher
 * \paragraph This is a 'tweakable cipher', the initialization parameters; qsc_rcs_keyparams, include an info parameter that can be used as a secondary user input.
 * Internally, the info parameter is used to customize the cSHAKE output, using the cSHAKE 'custom' parameter to pre-initialize the SHAKE state.
 * The info parameter can be tweaked, with a user defined string 'info' in an qsc_rcs_keyparams structure passed to the rcs_intitialize(state,keyparams,encrypt,mode).
-* This tweak can be used as a 'domain key', or to differentiate cipher-text output from other implementations, or as a secondary secret-key input.</p>
+* This tweak can be used as a 'domain key', or to differentiate cipher-text output from other implementations, or as a secondary secret-key input.
 *
 * \section Authentication
 * \paragraph RCS is an authenticated encryption with associated data (AEAD) stream cipher.
@@ -110,13 +110,13 @@
 * which is appended to the cipher-text output of an encryption call.
 * In decryption mode, before decryption is performed, an internal mac code is calculated, and compared to the code embedded in the cipher-text.
 * If authentication fails, the cipher-text is not decrypted, and the qsc_rcs_transform(state,out,in,inlen) function returns a boolean false value.
-* The qsc_rcs_set_associated(state,in,inlen) function can be used to add additional data to the MAC generators input, like packet-header data, or a custom code or counter.</p>
+* The qsc_rcs_set_associated(state,in,inlen) function can be used to add additional data to the MAC generators input, like packet-header data, or a custom code or counter.
 
 * \section Implementation
 * This implementation has both a C reference code, and an implementation that uses the AES-NI instructions that are used in the AES and RCS cipher variants. \n
 * The AES-NI implementation can be enabled by adding the QSC_RCS_AESNI_ENABLED constant to your preprocessor definitions. \n
 * The RCS-256, RCS-512, known answer vectors are taken from the CEX++ cryptographic library <a href="https://github.com/Steppenwolfe65/CEX">The CEX++ Cryptographic Library</a>. \n
-* See the documentation and the rcs_test.h tests for usage examples.</p>
+* See the documentation and the rcs_test.h tests for usage examples.
 * To enable the AES-NI implementation, uncomment the definition in this file or add QSC_RCS_AESNI_ENABLED or add it to the compiler preprocessor definitions. \n
 */
 
@@ -232,8 +232,7 @@ typedef struct
 * \brief Dispose of the RCS cipher state.
 *
 * \warning The dispose function must be called when disposing of the cipher.
-* This function destroys internal arrays allocated on the heap,
-* and must be called before the state goes out of scope.
+* This function destroys the internal state of the cipher.
 *
 * \param ctx: [struct] The cipher state structure
 */
