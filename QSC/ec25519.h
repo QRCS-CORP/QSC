@@ -30,16 +30,16 @@
 * September 21, 2020
 */
 
-#ifndef QSC_ED25519_H
-#define QSC_ED25519_H
+#ifndef QSC_EC25519_H
+#define QSC_EC25519_H
 
 #include "common.h"
 
-#define ED25519_SEED_SIZE 32
-#define ED25519_SIGNATURE_SIZE 64
-#define ED25519_PUBLICKEY_SIZE 32
-#define ED25519_PRIVATEKEY_SIZE 64
-#define ED25519_CURVE_SIZE 32U
+#define EC25519_SEED_SIZE 32
+#define EC25519_SIGNATURE_SIZE 64
+#define EC25519_PUBLICKEY_SIZE 32
+#define EC25519_PRIVATEKEY_SIZE 64
+#define EC25519_CURVE_SIZE 32U
 
 /* fe */
 
@@ -64,9 +64,9 @@ void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n);
 void fe25519_sq(fe25519 h, const fe25519 f);
 void fe25519_sq2(fe25519 h, const fe25519 f);
 void fe25519_reduce(fe25519 h, const fe25519 f);
-void fe25519_tobytes(uint8_t *s, const fe25519 h);
+void fe25519_tobytes(uint8_t* s, const fe25519 h);
 void fe25519_invert(fe25519 out, const fe25519 z);
-void fe25519_frombytes(fe25519 h, const uint8_t *s);
+void fe25519_frombytes(fe25519 h, const uint8_t* s);
 
 /* ge */
 
@@ -108,18 +108,18 @@ typedef struct
 	fe25519 t2d;
 } ge25519_cached;
 
-void ge25519_p1p1_to_p3(ge25519_p3 *r, const ge25519_p1p1 *p);
-void ge25519_p1p1_to_p2(ge25519_p2 *r, const ge25519_p1p1 *p);
-void ge25519_scalarmult_base(ge25519_p3 *h, const uint8_t *a);
-void ge25519_p3_tobytes(uint8_t *s, const ge25519_p3 *h);
-int32_t ge25519_is_canonical(const uint8_t *s);
+void ge25519_p1p1_to_p3(ge25519_p3* r, const ge25519_p1p1* p);
+void ge25519_p1p1_to_p2(ge25519_p2* r, const ge25519_p1p1* p);
+void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a);
+void ge25519_p3_tobytes(uint8_t* s, const ge25519_p3* h);
+int32_t ge25519_is_canonical(const uint8_t* s);
 int32_t ge25519_has_small_order(const uint8_t s[32]);
-int32_t ge25519_frombytes_negate_vartime(ge25519_p3 *h, const uint8_t *s);
-void ge25519_p3_to_cached(ge25519_cached *r, const ge25519_p3 *p);
-void ge25519_add_cached(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_cached *q);
-void ge25519_double_scalarmult_vartime(ge25519_p2 *r, const uint8_t *a, const ge25519_p3 *A, const uint8_t *b);
-void ge25519_sub_cached(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_cached *q);
-void ge25519_tobytes(uint8_t *s, const ge25519_p2 *h);
+int32_t ge25519_frombytes_negate_vartime(ge25519_p3* h, const uint8_t* s);
+void ge25519_p3_to_cached(ge25519_cached* r, const ge25519_p3* p);
+void ge25519_add_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q);
+void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge25519_p3* A, const uint8_t* b);
+void ge25519_sub_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q);
+void ge25519_tobytes(uint8_t* s, const ge25519_p2* h);
 
 /* sc */
 

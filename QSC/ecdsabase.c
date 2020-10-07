@@ -2,10 +2,10 @@
 #include "csp.h"
 #include "intutils.h"
 #include "memutils.h"
-#include "ed25519.h"
+#include "ec25519.h"
 #include "sha2.h"
 
-static int32_t ecdsa_ed25519_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk)
+static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk)
 {
 	uint8_t az[64] = { 0 };
 	uint8_t nonce[64] = { 0 };
@@ -59,48 +59,50 @@ static int32_t ecdsa_ed25519_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, 
 	return 0;
 }
 
-static int32_t ecdsa_ed25519_verify(const uint8_t *sig, const uint8_t *m, size_t mlen, const uint8_t *pk)
+static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t mlen, const uint8_t* pk)
 {
 	qsc_sha512_state ctx;
 	uint8_t h[64] = { 0 };
 	uint8_t rcheck[32] = { 0 };
 	ge25519_p3 A;
 	ge25519_p2 R;
-	int32_t res;
+	bool res;
 
-	res = 0;
+	res = true;
 
 	if ((sig[63] & 240) && sc25519_is_canonical(sig + 32) == 0)
 	{
-		return -1;
+		res = false;
 	}
-	if (ge25519_has_small_order(sig) != 0) 
+	else if (ge25519_has_small_order(sig) != 0) 
 	{
-		return -1;
+		res = false;
 	}
-	if (ge25519_is_canonical(pk) == 0 || ge25519_has_small_order(pk) != 0)
+	else if (ge25519_is_canonical(pk) == 0 || ge25519_has_small_order(pk) != 0)
 	{
-		return -1;
+		res = false;
+	}
+	else if (ge25519_frombytes_negate_vartime(&A, pk) != 0)
+	{
+		res = false;
 	}
 
-	if (ge25519_frombytes_negate_vartime(&A, pk) != 0) 
+	if (res == true)
 	{
-		return -1;
-	}
+		qsc_sha512_initialize(&ctx);
+		qsc_sha512_update(&ctx, sig, 32);
+		qsc_sha512_update(&ctx, pk, 32);
+		qsc_sha512_update(&ctx, m, mlen);
+		qsc_sha512_finalize(&ctx, h);
+		sc25519_reduce(h);
 
-	qsc_sha512_initialize(&ctx);
-	qsc_sha512_update(&ctx, sig, 32);
-	qsc_sha512_update(&ctx, pk, 32);
-	qsc_sha512_update(&ctx, m, mlen);
-	qsc_sha512_finalize(&ctx, h);
-	sc25519_reduce(h);
+		ge25519_double_scalarmult_vartime(&R, h, &A, sig + 32);
+		ge25519_tobytes(rcheck, &R);
 
-	ge25519_double_scalarmult_vartime(&R, h, &A, sig + 32);
-	ge25519_tobytes(rcheck, &R);
-
-	if ((qsc_sc25519_verify(rcheck, sig, 32) | (-(rcheck == sig))) != 0 || qsc_intutils_are_equal8(sig, rcheck, 32) == false)
-	{
-		res = -1;
+		if ((qsc_sc25519_verify(rcheck, sig, 32) | (-(rcheck == sig))) != 0 || qsc_intutils_are_equal8(sig, rcheck, 32) == false)
+		{
+			res = false;
+		}
 	}
 
 	return res;
@@ -112,14 +114,14 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed)
 {
 	ge25519_p3 A;
 
-	qsc_sha2_compute512(privatekey, seed, ED25519_SEED_SIZE);
+	qsc_sha2_compute512(privatekey, seed, EC25519_SEED_SIZE);
 	sc25519_clamp(privatekey);
 
 	ge25519_scalarmult_base(&A, privatekey);
 	ge25519_p3_tobytes(publickey, &A);
 
-	qsc_memutils_copy(privatekey, seed, ED25519_SEED_SIZE);
-	qsc_memutils_copy(privatekey + ED25519_SEED_SIZE, publickey, ED25519_PUBLICKEY_SIZE);
+	qsc_memutils_copy(privatekey, seed, EC25519_SEED_SIZE);
+	qsc_memutils_copy(privatekey + EC25519_SEED_SIZE, publickey, EC25519_PUBLICKEY_SIZE);
 }
 
 int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
@@ -127,16 +129,16 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 	size_t slen;
 	int32_t res;
 
-	qsc_memutils_copy(signedmsg + ED25519_SIGNATURE_SIZE, message, msglen);
+	qsc_memutils_copy(signedmsg + EC25519_SIGNATURE_SIZE, message, msglen);
 
-	if (ecdsa_ed25519_sign(signedmsg, &slen, signedmsg + ED25519_SIGNATURE_SIZE, msglen, privatekey) != 0 || slen != ED25519_SIGNATURE_SIZE)
+	if (ecdsa_ed25519_sign(signedmsg, &slen, signedmsg + EC25519_SIGNATURE_SIZE, msglen, privatekey) != 0 || slen != EC25519_SIGNATURE_SIZE)
 	{
 		if (smsglen != NULL)
 		{
 			*smsglen = 0;
 		}
 
-		qsc_memutils_clear(signedmsg, msglen + ED25519_SIGNATURE_SIZE);
+		qsc_memutils_clear(signedmsg, msglen + EC25519_SIGNATURE_SIZE);
 		res = -1;
 	}
 	else
@@ -154,13 +156,13 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 
 int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
 {
-	const size_t MSGLEN = smsglen - ED25519_SIGNATURE_SIZE;
+	const size_t MSGLEN = smsglen - EC25519_SIGNATURE_SIZE;
 	int32_t res;
 
-	assert(smsglen > ED25519_SIGNATURE_SIZE);
-	assert(smsglen - ED25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
+	assert(smsglen > EC25519_SIGNATURE_SIZE);
+	assert(smsglen - EC25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
 
-	if (ecdsa_ed25519_verify(signedmsg, signedmsg + ED25519_SIGNATURE_SIZE, MSGLEN, publickey) != 0)
+	if (ecdsa_ed25519_verify(signedmsg, signedmsg + EC25519_SIGNATURE_SIZE, MSGLEN, publickey) == false)
 	{
 		if (message != NULL)
 		{
@@ -183,7 +185,7 @@ int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* sign
 
 		if (message != NULL)
 		{
-			qsc_memutils_copy(message, signedmsg + ED25519_SIGNATURE_SIZE, MSGLEN);
+			qsc_memutils_copy(message, signedmsg + EC25519_SIGNATURE_SIZE, MSGLEN);
 		}
 
 		res = 0;

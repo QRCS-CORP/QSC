@@ -1,6 +1,6 @@
 #include "ecdhbase.h"
 #include "csp.h"
-#include "ed25519.h"
+#include "ec25519.h"
 #include "intutils.h"
 #include "memutils.h"
 #include "sha2.h"
@@ -114,7 +114,7 @@ static int crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, cons
     return 0;
 }
 
-static int crypto_scalarmult_curve25519(uint8_t *q, const uint8_t *n, const uint8_t *p)
+static int crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
     size_t i;
     uint8_t d;
@@ -126,7 +126,7 @@ static int crypto_scalarmult_curve25519(uint8_t *q, const uint8_t *n, const uint
         return -1;
     }
 
-    for (i = 0; i < ED25519_CURVE_SIZE; ++i)
+    for (i = 0; i < EC25519_CURVE_SIZE; ++i)
     {
         d |= q[i];
     }
@@ -152,8 +152,8 @@ void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, uint8
 {
     uint8_t tseed[QSC_SHA2_512_HASH_SIZE] = { 0 };
 
-    qsc_sha2_compute512(tseed, seed, ED25519_SEED_SIZE);
-    qsc_memutils_copy(privatekey, tseed, ED25519_SEED_SIZE);
+    qsc_sha2_compute512(tseed, seed, EC25519_SEED_SIZE);
+    qsc_memutils_copy(privatekey, tseed, EC25519_SEED_SIZE);
     crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
 
 }

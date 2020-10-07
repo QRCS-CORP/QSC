@@ -431,7 +431,7 @@ void qsc_dilithium_poly_uniform(qsc_dilithium_poly* a, const uint8_t seed[QSC_DI
 * Returns number of sampled coefficients. Can be smaller than len if not enough
 * random bytes were given.
 **************************************************/
-static uint32_t rej_eta(uint32_t* a, uint32_t len, const uint8_t *buf, size_t buflen)
+static uint32_t rej_eta(uint32_t* a, uint32_t len, const uint8_t* buf, size_t buflen)
 {
 #if QSC_DILITHIUM_ETA > 7
 #error "rej_eta() assumes QSC_DILITHIUM_ETA <= 7"
@@ -1559,9 +1559,9 @@ void challenge(qsc_dilithium_poly* c, const uint8_t mu[QSC_DILITHIUM_CRH_SIZE], 
 
 void qsc_dilithium_ksm_generate(uint8_t* publickey, uint8_t* secretkey, void (*rng_generate)(uint8_t*, size_t))
 {
-	const uint8_t *key;
-	const uint8_t *rho;
-	const uint8_t *rhoprime;
+	const uint8_t* key;
+	const uint8_t* rho;
+	const uint8_t* rhoprime;
 	uint8_t seedbuf[3 * QSC_DILITHIUM_SEED_SIZE];
 	uint8_t tr[QSC_DILITHIUM_CRH_SIZE];
 	qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K];
@@ -1623,15 +1623,30 @@ void qsc_dilithium_ksm_generate(uint8_t* publickey, uint8_t* secretkey, void (*r
 
 void qsc_dilithium_ksm_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
 {
+	uint8_t seedbuf[2 * QSC_DILITHIUM_SEED_SIZE + 3 * QSC_DILITHIUM_CRH_SIZE];
+	uint8_t* rho;
+	uint8_t* tr;
+	uint8_t* key;
+	uint8_t* mu;
+	uint8_t* rhoprime;
+	uint16_t nonce = 0;
+	qsc_dilithium_poly c;
+	qsc_dilithium_poly chat;
+	qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K];
+	qsc_dilithium_polyvecl s1;
+	qsc_dilithium_polyvecl y;
+	qsc_dilithium_polyvecl yhat;
+	qsc_dilithium_polyvecl z;
+	qsc_dilithium_polyveck t0;
+	qsc_dilithium_polyveck s2;
+	qsc_dilithium_polyveck w;
+	qsc_dilithium_polyveck w1;
+	qsc_dilithium_polyveck w0;
+	qsc_dilithium_polyveck h;
+	qsc_dilithium_polyveck cs2;
+	qsc_dilithium_polyveck ct0;
 	size_t i;
 	uint32_t n;
-	uint8_t seedbuf[2 * QSC_DILITHIUM_SEED_SIZE + 3 * QSC_DILITHIUM_CRH_SIZE];
-	uint8_t *rho, *tr, *key, *mu, *rhoprime;
-	uint16_t nonce = 0;
-	qsc_dilithium_poly c, chat;
-	qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K], s1, y, yhat, z;
-	qsc_dilithium_polyveck t0, s2, w, w1, w0;
-	qsc_dilithium_polyveck h, cs2, ct0;
 	int32_t nrej;
 
 	rho = seedbuf;

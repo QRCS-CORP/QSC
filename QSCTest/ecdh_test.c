@@ -14,8 +14,8 @@ bool qsctest_ecdh_kat_test()
 	uint8_t kskb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
 	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seeda[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t seedb[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t seeda[QSC_ECDH_SEED_SIZE] = { 0 };
+	uint8_t seedb[QSC_ECDH_SEED_SIZE] = { 0 };
 	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
@@ -104,7 +104,7 @@ bool qsctest_ecdh_operations_test()
 	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
 	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
 	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	size_t i;
@@ -151,7 +151,7 @@ bool qsctest_ecdh_operations_test()
 
 bool qsctest_ecdh_privatekey_integrity()
 {
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
 	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
 	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
 	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
@@ -205,7 +205,7 @@ bool qsctest_ecdh_privatekey_integrity()
 
 bool qsctest_ecdh_publickey_integrity()
 {
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
 	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
 	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
 	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };

@@ -142,7 +142,7 @@
     <ClInclude Include="dilithiumbase.h" />
     <ClInclude Include="donna128.h" />
     <ClInclude Include="ecdh.h" />
-    <ClInclude Include="ed25519.h" />
+    <ClInclude Include="ec25519.h" />
     <ClInclude Include="ecdhbase.h" />
     <ClInclude Include="ecdsa.h" />
     <ClInclude Include="ecdsabase.h" />
@@ -177,7 +177,7 @@
     <ClCompile Include="dilithiumbase.c" />
     <ClCompile Include="donna128.c" />
     <ClCompile Include="ecdh.c" />
-    <ClCompile Include="ed25519.c" />
+    <ClCompile Include="ec25519.c" />
     <ClCompile Include="ecdhbase.c" />
     <ClCompile Include="ecdsa.c" />
     <ClCompile Include="ecdsabase.c" />
