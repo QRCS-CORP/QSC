@@ -15,7 +15,7 @@ bool qsctest_mceliece_ciphertext_integrity()
 	bool ret;
 	size_t i;
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC) // TODO: change this to ifdef MSC compiler
 	uint8_t pk[QSC_MCELIECE_PUBLICKEY_SIZE] = { 0 };
 #else
 	uint8_t* pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
@@ -64,7 +64,7 @@ bool qsctest_mceliece_ciphertext_integrity()
 		}
 	}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 	free(pk);
 #endif
 
@@ -81,7 +81,7 @@ bool qsctest_mceliece_kat_test()
 	uint8_t sendb[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
 	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
 	bool ret;
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 	uint8_t pk[QSC_MCELIECE_PUBLICKEY_SIZE] = { 0 };
 #else
 	uint8_t* pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
@@ -159,7 +159,7 @@ bool qsctest_mceliece_kat_test()
 		ret = false;
 	}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 	free(pk);
 #endif
 
@@ -175,7 +175,7 @@ bool qsctest_mceliece_operations_test()
 	size_t i;
 	bool ret;
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 	uint8_t pk[QSC_MCELIECE_PUBLICKEY_SIZE];
 #else
 	uint8_t* pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
@@ -214,7 +214,7 @@ bool qsctest_mceliece_operations_test()
 		}
 	}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 	free(pk);
 #endif
 
@@ -231,7 +231,7 @@ bool qsctest_mceliece_publickey_integrity()
 	size_t i;
 	bool ret;
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 	uint8_t pk[QSC_MCELIECE_PUBLICKEY_SIZE] = { 0 };
 #else
 	uint8_t* pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
@@ -280,7 +280,7 @@ bool qsctest_mceliece_publickey_integrity()
 		}
 	}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 	free(pk);
 #endif
 

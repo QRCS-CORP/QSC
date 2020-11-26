@@ -173,6 +173,12 @@
 #	define QSC_EXPORT_API
 #endif
 
+#if defined(__GNUC__)
+#	define QSC_CACHE_ALIGNED __attribute__((aligned(64)))
+#elif defined(_MSC_VER)
+#	define QSC_CACHE_ALIGNED __declspec(align(64))
+#endif
+
 #if defined(QSC_SYSTEM_ARCH_X64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_IA64) || defined(QSC_SYSTEM_ARCH_AMD64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_SPARC64)
 #	define QSC_SYSTEM_IS_X64
 #else

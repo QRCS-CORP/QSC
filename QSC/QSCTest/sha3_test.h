@@ -11,6 +11,7 @@
 #define QSCTEST_SHA3_TEST_H
 
 #include "common.h"
+#include "../QSC/common.h"
 
 /**
 * \brief Tests the 256-bit version of the keccak message digest for correct operation,
@@ -162,6 +163,94 @@ bool qsctest_kpa_256_kat();
 * \return Returns true for success
 */
 bool qsctest_kpa_512_kat();
+
+#if defined(QSC_SYSTEM_HAS_AVX2)
+/**
+* \brief Tests the KMAC-128 AVX2 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_kmac128x4_equality();
+
+/**
+* \brief Tests the KMAC-256 AVX2 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_kmac256x4_equality();
+
+/**
+* \brief Tests the KMAC-512 AVX2 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_kmac512x4_equality();
+
+/**
+* \brief Tests the SHAKE-128 AVX2 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_shake128x4_equality();
+
+/**
+* \brief Tests the SHAKE-256 AVX2 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_shake256x4_equality();
+
+/**
+* \brief Tests the SHAKE-512 AVX2 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_shake512x4_equality();
+#endif
+
+#if defined(QSC_SYSTEM_HAS_AVX512)
+/**
+* \brief Tests the KMAC-128 AVX512 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_kmac128x8_equality();
+
+/**
+* \brief Tests the KMAC-256 AVX512 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_kmac256x8_equality();
+
+/**
+* \brief Tests the KMAC-512 AVX512 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_kmac512x8_equality();
+
+/**
+* \brief Tests the SHAKE-128 AVX512 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_shake128x8_equality();
+
+/**
+* \brief Tests the SHAKE-256 AVX512 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_shake256x8_equality();
+
+/**
+* \brief Tests the SHAKE-512 AVX512 intrinsics implementation for equality with the sequential implementation.
+*
+* \return Returns true for success
+*/
+bool qsctest_shake512x8_equality();
+#endif
 
 /**
 * \brief Run all tests.

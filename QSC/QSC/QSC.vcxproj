@@ -32,20 +32,20 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -81,6 +81,8 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -93,6 +95,8 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -107,6 +111,8 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -125,6 +131,8 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -153,7 +161,9 @@
     <ClInclude Include="mceliece.h" />
     <ClInclude Include="mceliecebase.h" />
     <ClInclude Include="memutils.h" />
+    <ClInclude Include="parallel.h" />
     <ClInclude Include="poly1305.h" />
+    <ClInclude Include="queue.h" />
     <ClInclude Include="rcs.h" />
     <ClInclude Include="rdp.h" />
     <ClInclude Include="secmem.h" />
@@ -188,7 +198,9 @@
     <ClCompile Include="mceliece.c" />
     <ClCompile Include="mceliecebase.c" />
     <ClCompile Include="memutils.c" />
+    <ClCompile Include="parallel.c" />
     <ClCompile Include="poly1305.c" />
+    <ClCompile Include="queue.c" />
     <ClCompile Include="rcs.c" />
     <ClCompile Include="rdp.c" />
     <ClCompile Include="secmem.c" />

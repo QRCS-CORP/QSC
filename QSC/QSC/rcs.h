@@ -138,6 +138,14 @@
 //#	define QSC_RCS_AUTHENTICATED
 #endif
 
+#if defined(QSC_RCS_AUTHENTICATED)
+	/*!
+	* \def QSC_RCS_KPA_AUTHENTICATION
+	* \brief Toggles authentication between KMAC and KPA, default is KPA.
+	*/
+#	define QSC_RCS_KPA_AUTHENTICATION
+#endif
+
 /*!
 * \def QSC_RCS_AESNI_ENABLED
 * \brief Enable the use of intrinsics and the AES-NI implementation.
@@ -235,7 +243,11 @@ QSC_EXPORT_API typedef struct
 #endif
 	size_t roundkeylen;				/*!< The round-key array length */
 	size_t rounds;					/*!< The number of transformation rounds */
-	qsc_keccak_state kstate;			/*!< The keccak state structure */
+#if defined(QSC_RCS_KPA_AUTHENTICATION)
+	qsc_kpa_state kstate;			/*!< The KPA state structure */
+#else
+	qsc_keccak_state kstate;		/*!< The keccak state structure */
+#endif
 	uint8_t* nonce;					/*!< The nonce or initialization vector */
 	uint64_t counter;				/*!< the processed bytes counter */
 	const uint8_t* aad;				/*!< the additional data array */

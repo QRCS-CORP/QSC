@@ -522,6 +522,15 @@ static void csx_permute_p4x1024h(csx_avx256_state* ctx)
 
 #endif
 
+static csx_mac_update(qsc_csx_state* ctx, const uint8_t* input, size_t length)
+{
+#if defined(QSC_CSX_KPA_AUTHENTICATION)
+	qsc_kpa_update(&ctx->kstate, input, length);
+#else
+	qsc_kmac_update(&ctx->kstate, keccak_rate_512, input, length);
+#endif
+}
+
 static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
 	size_t oft;
@@ -668,10 +677,16 @@ static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 	uint8_t ctr[sizeof(uint64_t)] = { 0 };
 
 	qsc_intutils_le64to8(ctr, ctx->counter);
-	qsc_kmac_update(&ctx->kstate, keccak_rate_512, ctr, sizeof(ctr));
+	csx_mac_update(ctx, ctr, sizeof(ctr));
 
+#if defined(QSC_CSX_KPA_AUTHENTICATION)
+	/* finalize the mac and append code to output */
+	qsc_kpa_finalize(&ctx->kstate, output, QSC_CSX_MAC_SIZE);
+#else
 	/* finalize the mac and append code to output */
 	qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_CSX_MAC_SIZE);
+#endif
+
 	ctx->aadlen = 0;
 }
 
@@ -685,7 +700,11 @@ void qsc_csx_dispose(qsc_csx_state* ctx)
 	if (ctx != NULL)
 	{
 #if defined(QSC_CSX_AUTHENTICATED)
+#	if defined(QSC_CSX_KPA_AUTHENTICATION)
+		qsc_kpa_dispose(&ctx->kstate);
+#	else
 		qsc_keccak_dispose(&ctx->kstate);
+#	endif
 #endif
 
 		qsc_intutils_clear64(ctx->state, QSC_CSX_STATE_SIZE);
@@ -741,8 +760,13 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	qsc_memutils_copy(mck, buf, sizeof(mck));
 
 	/* initialize the mac generator */
-	qsc_memutils_clear((uint8_t*)ctx->kstate.state, QSC_KECCAK_STATE_SIZE * sizeof(uint64_t));
+	qsc_memutils_clear((uint8_t*)ctx->kstate.state, sizeof(ctx->kstate.state));
+
+#if defined(QSC_CSX_KPA_AUTHENTICATION)
+	qsc_kpa_initialize(&ctx->kstate, mck, sizeof(mck), NULL, 0);
+#else
 	qsc_kmac_initialize(&ctx->kstate, keccak_rate_512, mck, sizeof(mck), NULL, 0);
+#endif
 
 #else
 
@@ -796,11 +820,11 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 	/* update the mac with the aad */
 	if (ctx->aadlen != 0)
 	{
-		qsc_kmac_update(&ctx->kstate, keccak_rate_512, ctx->aad, ctx->aadlen);
+		csx_mac_update(ctx, ctx->aad, ctx->aadlen);
 	}
 
 	/* update the mac with the nonce */
-	qsc_kmac_update(&ctx->kstate, keccak_rate_512, ncopy, sizeof(ncopy));
+	csx_mac_update(ctx, ncopy, sizeof(ncopy));
 
 	if (ctx->encrypt)
 	{
@@ -808,7 +832,7 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 		csx_transform(ctx, output, input, length);
 
 		/* update the mac with the cipher-text */
-		qsc_kmac_update(&ctx->kstate, keccak_rate_512, output, length);
+		csx_mac_update(ctx, output, length);
 
 		/* mac the cipher-text appending the code to the end of the array */
 		csx_finalize(ctx, output + length);
@@ -819,7 +843,7 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 		uint8_t code[QSC_CSX_MAC_SIZE] = { 0 };
 
 		/* update the mac with the cipher-text */
-		qsc_kmac_update(&ctx->kstate, keccak_rate_512, input, length);
+		csx_mac_update(ctx, input, length);
 
 		/* generate the internal mac code */
 		csx_finalize(ctx, code);

@@ -6,8 +6,8 @@
 * \date October 12, 2020
 */
 
-#ifndef QSCTEST_CIPHER_SPEED_H
-#define QSCTEST_CIPHER_SPEED_H
+#ifndef QSCTEST_BENCHMARK_H
+#define QSCTEST_BENCHMARK_H
 
 #include "common.h"
 
@@ -15,36 +15,48 @@
 * \brief Tests the RHX implementations performance.
 * Tests the AEX; CBC, CTR, and HBA modes for performance timing.
 */
-void qsctest_aes_speed_run();
+void qsctest_benchmark_aes_run();
 
 /**
 * \brief Tests the RHX implementations performance.
 * Tests the RHX; CBC, CTR, and HBA modes for performance timing.
 */
-void qsctest_rhx_speed_run();
+void qsctest_benchmark_rhx_run();
 
 /**
 * \brief Tests the ChaCha implementations performance.
 * Tests the ChaCha stream cipher for performance timing.
 */
-void qsctest_chacha_speed_run();
+void qsctest_benchmark_chacha_run();
 
 /**
 * \brief Tests the CSX implementations performance.
 * Tests the CSX stream cipher for performance timing.
 */
-void qsctest_csx_speed_run();
+void qsctest_benchmark_csx_run();
+
+/**
+* \brief Tests the KMAC implementations performance.
+* Tests the Keccak MACs for performance timing.
+*/
+void qsctest_benchmark_kmac_run();
 
 /**
 * \brief Tests the KPA MAC implementations performance.
 * Tests the Keccak-based Parallel Authentication MACs for performance timing.
 */
-void qsctest_kpa_speed_run();
+void qsctest_benchmark_kpa_run();
 
 /**
 * \brief Tests the RCS implementations performance.
 * Tests the RCS authenticated stream cipher for performance timing.
 */
-void qsctest_rcs_speed_run();
+void qsctest_benchmark_rcs_run();
+
+/**
+* \brief Tests the SHAKE implementations performance.
+* Tests the various SHAKE implementations for performance timing.
+*/
+void qsctest_benchmark_shake_run();
 
 #endif

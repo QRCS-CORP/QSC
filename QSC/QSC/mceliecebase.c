@@ -247,7 +247,7 @@ void qsc_mceliece_bm(gf* out, const gf* s)
 	{
 		d = 0;
 
-		for (i = 0; i <= qsc_intutils_min((size_t)N, (size_t)QSC_MCELIECE_SYS_T); i++)
+		for (i = 0; i <= (int32_t)qsc_intutils_min((size_t)N, (size_t)QSC_MCELIECE_SYS_T); i++)
 		{
 			d ^= qsc_mceliece_gf_mul(C[i], s[N - i]);
 		}
@@ -434,7 +434,7 @@ void qsc_mceliece_composeinv(uint32_t n, uint32_t* y, const uint32_t* x, const u
 
 	size_t i;
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 	uint8_t t[n * sizeof(uint32_t)];
 #else
 	uint32_t* t = malloc(n * sizeof(uint32_t));
@@ -454,7 +454,7 @@ void qsc_mceliece_composeinv(uint32_t n, uint32_t* y, const uint32_t* x, const u
 			y[i] = t[i] & 0x0000FFFFUL;
 		}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 		free(t);
 #endif
 	}
@@ -497,7 +497,7 @@ void qsc_mceliece_compose(uint32_t w, uint32_t n, const uint32_t* pi, uint32_t* 
 	size_t i;
 	uint32_t t;
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 	uint32_t I[2 * n * sizeof(uint32_t)];
 	uint32_t ip[n * sizeof(uint32_t)];
 #else
@@ -521,7 +521,7 @@ void qsc_mceliece_compose(uint32_t w, uint32_t n, const uint32_t* pi, uint32_t* 
 			P[i] = (uint32_t)((i >> w) + (i & ((1UL << w) - 2)) + ((i & 1UL) << w));
 		}
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 		uint32_t PI[2 * n * sizeof(uint32_t)];
 		uint32_t T[2 * n * sizeof(uint32_t)];
 #else
@@ -559,7 +559,7 @@ void qsc_mceliece_compose(uint32_t w, uint32_t n, const uint32_t* pi, uint32_t* 
 			}
 		}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 		if (PI != NULL)
 		{
 			free(PI);
@@ -571,7 +571,7 @@ void qsc_mceliece_compose(uint32_t w, uint32_t n, const uint32_t* pi, uint32_t* 
 #endif
 	}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 	if (I != NULL)
 	{
 		free(I);
@@ -627,7 +627,7 @@ void qsc_mceliece_permutecontrolbits(uint32_t w, uint32_t n, uint32_t step, uint
 
 	if (w > 1)
 	{
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 		uint32_t piflip[n * sizeof(uint32_t)];
 #else
 		uint32_t* piflip = malloc(n * sizeof(uint32_t));
@@ -635,7 +635,7 @@ void qsc_mceliece_permutecontrolbits(uint32_t w, uint32_t n, uint32_t step, uint
 
 		if (piflip != NULL)
 		{
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 			uint32_t P[2 * n * sizeof(uint32_t)];
 #else
 			uint32_t* P = malloc(2 * n * sizeof(uint32_t));
@@ -645,12 +645,12 @@ void qsc_mceliece_permutecontrolbits(uint32_t w, uint32_t n, uint32_t step, uint
 			{
 				qsc_mceliece_compose(w, n, pi, P);
 				qsc_mceliece_permute(w, n, off, step, P, pi, c, piflip);
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 				free(P);
 #endif
 			}
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 			uint32_t subpi[n * sizeof(uint32_t)];
 #else
 			uint32_t* subpi = malloc(n * sizeof(uint32_t));
@@ -668,13 +668,13 @@ void qsc_mceliece_permutecontrolbits(uint32_t w, uint32_t n, uint32_t step, uint
 					subpi[i + n / 2] = piflip[(i * 2) + 1] >> 1;
 				}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 				free(piflip);
 #endif
 				qsc_mceliece_permutecontrolbits(w - 1, n / 2, step * 2, off + step * (n / 2), c, subpi);
 				qsc_mceliece_permutecontrolbits(w - 1, n / 2, step * 2, off + step * ((n / 2) + 1), c, &subpi[n / 2]);
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 				free(subpi);
 #endif
 			}
@@ -1237,7 +1237,7 @@ int32_t qsc_mceliece_pk_gen(uint8_t* pk, const uint8_t* sk)
 
 	ret = 1;
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 	uint8_t mat[QSC_MCELIECE_GFBITS * QSC_MCELIECE_SYS_T][QSC_MCELIECE_SYS_N / 8];
 #else
 	uint8_t** mat = malloc(QSC_MCELIECE_GFBITS * QSC_MCELIECE_SYS_T * sizeof(uint8_t*));
@@ -1353,7 +1353,7 @@ int32_t qsc_mceliece_pk_gen(uint8_t* pk, const uint8_t* sk)
 			memcpy(pk + i * QSC_MCELIECE_PK_ROW_BYTES, mat[i] + QSC_MCELIECE_PK_NROWS / 8, QSC_MCELIECE_PK_ROW_BYTES);
 		}
 
-#ifndef MQC_COMPILER_GCC
+#if !defined(QSC_SYSTEM_COMPILER_GCC)
 		if (mat != NULL)
 		{
 			for (i = 0; i < QSC_MCELIECE_GFBITS * QSC_MCELIECE_SYS_T; ++i)
@@ -1833,15 +1833,18 @@ int32_t qsc_mceliece_pk_gen(uint8_t* pk, const uint8_t* sk)
 
 	ret = 1;
 
-#ifdef MQC_COMPILER_GCC
+#if defined(QSC_SYSTEM_COMPILER_GCC)
 	uint8_t mat[QSC_MCELIECE_GFBITS * QSC_MCELIECE_SYS_T][QSC_MCELIECE_SYS_N / 8];
 #else
 	uint8_t** mat = malloc(QSC_MCELIECE_GFBITS * QSC_MCELIECE_SYS_T * sizeof(uint8_t*));
 
-	for (i = 0; i < QSC_MCELIECE_GFBITS * QSC_MCELIECE_SYS_T; ++i)
+	if (mat != NULL)
 	{
-		mat[i] = malloc(QSC_MCELIECE_SYS_N / 8);
-		memset(mat[i], 0, QSC_MCELIECE_SYS_N / 8);
+		for (i = 0; i < QSC_MCELIECE_GFBITS * QSC_MCELIECE_SYS_T; ++i)
+		{
+			mat[i] = malloc(QSC_MCELIECE_SYS_N / 8);
+			memset(mat[i], 0, QSC_MCELIECE_SYS_N / 8);
+		}
 	}
 #endif
 

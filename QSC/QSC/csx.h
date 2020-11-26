@@ -126,6 +126,14 @@
 //#	define QSC_CSX_AUTHENTICATED
 #endif
 
+#if defined(QSC_CSX_AUTHENTICATED)
+	/*!
+	* \def QSC_CSX_KPA_AUTHENTICATION
+	* \brief Toggles authentication between KMAC and KPA, default is KPA.
+	*/
+#	define QSC_CSX_KPA_AUTHENTICATION
+#endif
+
 /*!
 \def QSC_CSX_BLOCK_SIZE
 * \brief The internal block size in bytes, required by the encryption and decryption functions.
@@ -185,13 +193,16 @@ QSC_EXPORT_API typedef struct
 */
 QSC_EXPORT_API typedef struct
 {
-	uint64_t state[QSC_CSX_STATE_SIZE];						/*!< the primary state array */
-	//uint64_t nonce[QSC_CSX_NONCE_SIZE / sizeof(uint64_t)];	/*!< the nonce array */
-	qsc_keccak_state kstate;								/*!< the kmac state structure */
-	uint64_t counter;										/*!< the processed bytes counter */
-	const uint8_t* aad;										/*!< the additional data array */
-	size_t aadlen;											/*!< the additional data array length */
-	bool encrypt;											/*!< the transformation mode; true for encryption */
+	uint64_t state[QSC_CSX_STATE_SIZE];		/*!< the primary state array */
+#if defined(QSC_CSX_KPA_AUTHENTICATION)
+	qsc_kpa_state kstate;					/*!< the KPA state structure */
+#else
+	qsc_keccak_state kstate;				/*!< the kmac state structure */
+#endif
+	uint64_t counter;						/*!< the processed bytes counter */
+	const uint8_t* aad;						/*!< the additional data array */
+	size_t aadlen;							/*!< the additional data array length */
+	bool encrypt;							/*!< the transformation mode; true for encryption */
 } qsc_csx_state;
 
 /* public functions */

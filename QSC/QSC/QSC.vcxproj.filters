@@ -127,6 +127,12 @@
     <Filter Include="Source Files\TLS">
       <UniqueIdentifier>{98570c55-c119-4b8d-89b1-66c974aa7f11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Network">
+      <UniqueIdentifier>{d8a21b94-dfef-4316-9224-4d5f02d57228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Network">
+      <UniqueIdentifier>{d8ecbcc0-bfe6-4fcd-9093-e9a9a2724b05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -234,6 +240,12 @@
     <ClInclude Include="selftest.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
+    <ClInclude Include="parallel.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="queue.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -334,6 +346,12 @@
     </ClCompile>
     <ClCompile Include="selftest.c">
       <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="parallel.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="queue.c">
+      <Filter>Source Files\Network</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
