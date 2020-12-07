@@ -26,26 +26,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -141,6 +141,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="acp.h" />
+    <ClInclude Include="arrayutils.h" />
+    <ClInclude Include="asyncresult.h" />
     <ClInclude Include="chacha.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="cpuid.h" />
@@ -156,11 +158,13 @@
     <ClInclude Include="ecdsabase.h" />
     <ClInclude Include="hcg.h" />
     <ClInclude Include="intrinsics.h" />
+    <ClInclude Include="ipinfo.h" />
     <ClInclude Include="kyber.h" />
     <ClInclude Include="kyberbase.h" />
     <ClInclude Include="mceliece.h" />
     <ClInclude Include="mceliecebase.h" />
     <ClInclude Include="memutils.h" />
+    <ClInclude Include="netutils.h" />
     <ClInclude Include="parallel.h" />
     <ClInclude Include="poly1305.h" />
     <ClInclude Include="queue.h" />
@@ -171,6 +175,9 @@
     <ClInclude Include="selftest.h" />
     <ClInclude Include="sha2.h" />
     <ClInclude Include="sha3.h" />
+    <ClInclude Include="socket.h" />
+    <ClInclude Include="socketbase.h" />
+    <ClInclude Include="socketflags.h" />
     <ClInclude Include="sphincsplus.h" />
     <ClInclude Include="sphincsplusbase.h" />
     <ClInclude Include="csp.h" />
@@ -180,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="acp.c" />
+    <ClCompile Include="arrayutils.c" />
     <ClCompile Include="chacha.c" />
     <ClCompile Include="cpuid.c" />
     <ClCompile Include="csg.c" />
@@ -193,11 +201,13 @@
     <ClCompile Include="ecdsa.c" />
     <ClCompile Include="ecdsabase.c" />
     <ClCompile Include="hcg.c" />
+    <ClCompile Include="ipinfo.c" />
     <ClCompile Include="kyber.c" />
     <ClCompile Include="kyberbase.c" />
     <ClCompile Include="mceliece.c" />
     <ClCompile Include="mceliecebase.c" />
     <ClCompile Include="memutils.c" />
+    <ClCompile Include="netutils.c" />
     <ClCompile Include="parallel.c" />
     <ClCompile Include="poly1305.c" />
     <ClCompile Include="queue.c" />
@@ -208,6 +218,8 @@
     <ClCompile Include="selftest.c" />
     <ClCompile Include="sha2.c" />
     <ClCompile Include="sha3.c" />
+    <ClCompile Include="socket.c" />
+    <ClCompile Include="socketbase.c" />
     <ClCompile Include="sphincsplus.c" />
     <ClCompile Include="sphincsplusbase.c" />
     <ClCompile Include="csp.c" />

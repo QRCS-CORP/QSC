@@ -686,8 +686,6 @@ static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 	/* finalize the mac and append code to output */
 	qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_CSX_MAC_SIZE);
 #endif
-
-	ctx->aadlen = 0;
 }
 
 /* csx common */
@@ -708,7 +706,6 @@ void qsc_csx_dispose(qsc_csx_state* ctx)
 #endif
 
 		qsc_intutils_clear64(ctx->state, QSC_CSX_STATE_SIZE);
-		ctx->aadlen = 0;
 		ctx->counter = 0;
 		ctx->encrypt = false;
 	}
@@ -722,8 +719,6 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 
 	ctx->counter = 0;
 	ctx->encrypt = encryption;
-	ctx->aad = NULL;
-	ctx->aadlen = 0;
 
 #if defined(QSC_CSX_AUTHENTICATED)
 
@@ -789,12 +784,22 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 #endif
 }
 
-void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t datalen)
+void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t length)
 {
 	assert(ctx != NULL);
+	assert(data != NULL);
+	assert(length != 0);
 
-	ctx->aad = data;
-	ctx->aadlen = datalen;
+	if (data != NULL && length != 0)
+	{
+		uint8_t code[sizeof(uint32_t)] = { 0 };
+
+		/* add the ad data to the hash */
+		csx_mac_update(ctx, data, length);
+		/* add the length of the ad */
+		qsc_intutils_le32to8(code, (uint32_t)length);
+		csx_mac_update(ctx, code, sizeof(code));
+	}
 }
 
 bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
@@ -816,12 +821,6 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 
 	/* update the processed bytes counter */
 	ctx->counter += length;
-
-	/* update the mac with the aad */
-	if (ctx->aadlen != 0)
-	{
-		csx_mac_update(ctx, ctx->aad, ctx->aadlen);
-	}
 
 	/* update the mac with the nonce */
 	csx_mac_update(ctx, ncopy, sizeof(ncopy));

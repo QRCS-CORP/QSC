@@ -139,10 +139,10 @@
 #endif
 
 #if defined(QSC_RCS_AUTHENTICATED)
-	/*!
-	* \def QSC_RCS_KPA_AUTHENTICATION
-	* \brief Toggles authentication between KMAC and KPA, default is KPA.
-	*/
+/*!
+* \def QSC_RCS_KPA_AUTHENTICATION
+* \brief Toggles authentication between KMAC and KPA, default is KPA.
+*/
 #	define QSC_RCS_KPA_AUTHENTICATION
 #endif
 
@@ -250,8 +250,6 @@ QSC_EXPORT_API typedef struct
 #endif
 	uint8_t* nonce;					/*!< The nonce or initialization vector */
 	uint64_t counter;				/*!< the processed bytes counter */
-	const uint8_t* aad;				/*!< the additional data array */
-	size_t aadlen;					/*!< the additional data array length */
 	bool encrypt;					/*!< the transformation mode; true for encryption */
 } qsc_rcs_state;
 
@@ -286,9 +284,9 @@ QSC_EXPORT_API void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keypara
 *
 * \param ctx: [struct] The cipher state structure
 * \param data: [const] The associated data array
-* \param datalen: The associated data array length
+* \param length: The associated data array length
 */
-QSC_EXPORT_API void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t datalen);
+QSC_EXPORT_API void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t length);
 
 /**
 * \brief Transform an array of bytes.

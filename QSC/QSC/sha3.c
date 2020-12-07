@@ -4529,7 +4529,7 @@ void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 	/* clear unused buffer */
 	if (ctx->position != 0)
 	{
-		qsc_memutils_clear(ctx->buffer + ctx->position, sizeof(ctx->buffer) - ctx->position);
+		qsc_memutils_clear(((uint8_t*)ctx->buffer + ctx->position), sizeof(ctx->buffer) - ctx->position);
 		kpa_fast_absorbx8(ctx, ctx->buffer);
 		kpa_permutex8(ctx);
 	}
@@ -4556,7 +4556,7 @@ void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 
 	/* add total processed bytes and output length to padding string */
 	bitlen = keccak_right_encode(prcb, outlen * 8);
-	bitlen += keccak_right_encode(prcb + bitlen, ctx->processed * 8);
+	bitlen += keccak_right_encode(((uint8_t*)prcb + bitlen), ctx->processed * 8);
 	/* copy to buffer */
 	qsc_memutils_copy((uint8_t*)ctx->buffer, prcb, bitlen);
 

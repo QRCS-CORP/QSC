@@ -30,8 +30,17 @@
 #include "intutils.h"
 #include "memutils.h"
 
-#define QSC_QUEUE_MAX_DEPTH 64
+/*!
+\def QSC_QUEUE_ALIGNMENT
+* The internal memory alignment constant
+*/
 #define QSC_QUEUE_ALIGNMENT 64
+
+/*!
+\def QSC_QUEUE_MAX_DEPTH
+* The maximum queue depth
+*/
+#define QSC_QUEUE_MAX_DEPTH 64
 
 /*! \struct qsc_queue_state
 * Contains the queue context state

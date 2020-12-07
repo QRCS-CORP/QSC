@@ -138,6 +138,20 @@
 #	endif
 #endif
 
+// 32 or 64 bit architecture
+#if (defined(__x86_64__) || defined(__amd64__) || defined(_M_X64))
+#	define QSC_ARCH_64
+#else
+#	define QSC_ARCH_32
+#endif
+
+// network architecture
+#if defined(_WIN64) || defined(_WIN32) || defined(__CYGWIN__)
+#	define QSC_SYSTEM_WINDOWS_SOCKETS
+#else
+#	define QSC_SYSTEM_BERKELY_SOCKETS
+#endif
+
 #if !defined(__clang__) && !defined(__GNUC__)
 #	ifdef __attribute__
 #		undef __attribute__

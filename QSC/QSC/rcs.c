@@ -554,7 +554,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 {
 	uint8_t ctr[sizeof(uint64_t)] = { 0 };
-	uint64_t mctr = QSC_RCS_BLOCK_SIZE + ctx->counter + ctx->aadlen + sizeof(uint64_t);
+	uint64_t mctr = QSC_RCS_BLOCK_SIZE + ctx->counter + sizeof(uint64_t);
 
 	qsc_intutils_le64to8(ctr, mctr);
 
@@ -580,8 +580,6 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 		qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_RCS512_MAC_SIZE);
 #endif
 	}
-
-	ctx->aadlen = 0;
 }
 
 static void rcs_mac_update(qsc_rcs_state* ctx, const uint8_t* input, size_t length)
@@ -750,9 +748,7 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 #endif
 
 		qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
-		ctx->aad = NULL;
 		ctx->nonce = NULL;
-		ctx->aadlen = 0;
 		ctx->counter = 0;
 		ctx->ctype = RCS256;
 		ctx->roundkeylen = 0;
@@ -773,7 +769,7 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 	ctx->nonce = keyparams->nonce;
 	ctx->counter = 1;
 	ctx->encrypt = encryption;
-	ctx->aadlen = 0;
+
 
 	if (ctx->ctype == RCS256)
 	{
@@ -792,12 +788,22 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 	rcs_secure_expand(ctx, keyparams);
 }
 
-void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t datalen)
+void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t length)
 {
 	assert(ctx != NULL);
+	assert(data != NULL);
+	assert(length != 0);
 
-	ctx->aad = data;
-	ctx->aadlen = datalen;
+	if (length != 0)
+	{
+		uint8_t code[sizeof(uint32_t)] = { 0 };
+
+		/* add the ad data to the hash */
+		rcs_mac_update(ctx, data, length);
+		/* add the length of the ad */
+		qsc_intutils_le32to8(code, (uint32_t)length);
+		rcs_mac_update(ctx, code, sizeof(code));
+	}
 }
 
 bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
@@ -826,12 +832,6 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 		/* update the mac with the cipher-text */
 		rcs_mac_update(ctx, output, length);
 
-		/* add the aad to the mac */
-		if (ctx->aadlen != 0)
-		{
-			rcs_mac_update(ctx, ctx->aad, ctx->aadlen);
-		}
-
 		/* mac the cipher-text appending the code to the end of the array */
 		rcs_mac_finalize(ctx, output + length);
 		res = true;
@@ -840,12 +840,6 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 	{
 		/* update the mac with the cipher-text */
 		rcs_mac_update(ctx, input, length);
-
-		/* add the aad to the mac */
-		if (ctx->aadlen != 0)
-		{
-			rcs_mac_update(ctx, ctx->aad, ctx->aadlen);
-		}
 
 		if (ctx->ctype == RCS256)
 		{
