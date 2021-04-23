@@ -131,7 +131,7 @@
 * \def QSC_CSX_KPA_AUTHENTICATION
 * \brief Toggles authentication between KMAC and KPA, default is KPA.
 */
-#	define QSC_CSX_KPA_AUTHENTICATION
+//#	define QSC_CSX_KPA_AUTHENTICATION /* KPA requires large input blocks, defaults to kmac */
 #endif
 
 /*!

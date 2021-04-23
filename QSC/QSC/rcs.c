@@ -748,7 +748,7 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 #endif
 
 		qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
-		ctx->nonce = NULL;
+		qsc_memutils_clear(ctx->nonce, sizeof(ctx->nonce));
 		ctx->counter = 0;
 		ctx->ctype = RCS256;
 		ctx->roundkeylen = 0;
@@ -764,12 +764,11 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 	assert(keyparams->key != NULL);
 	assert(keyparams->keylen == QSC_RCS256_KEY_SIZE || keyparams->keylen == QSC_RCS512_KEY_SIZE);
 
-	ctx->ctype = keyparams->keylen == QSC_RCS512_KEY_SIZE ? RCS512 : RCS256;
+	ctx->ctype = (keyparams->keylen == QSC_RCS512_KEY_SIZE) ? RCS512 : RCS256;
 	qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
-	ctx->nonce = keyparams->nonce;
+	qsc_memutils_copy(ctx->nonce, keyparams->nonce, sizeof(ctx->nonce));
 	ctx->counter = 1;
 	ctx->encrypt = encryption;
-
 
 	if (ctx->ctype == RCS256)
 	{
