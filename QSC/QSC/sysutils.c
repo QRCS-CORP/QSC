@@ -371,3 +371,19 @@ uint64_t qsc_sysutils_system_timestamp()
 
 	return rtme;
 }
+
+void qsc_sysutils_user_identity(const char* name, char* id)
+{
+	LPCSTR accname = TEXT(name);
+	LPTSTR domname = (LPTSTR)GlobalAlloc(GPTR, sizeof(TCHAR) * 1024);
+	DWORD cchdomname = 1024;
+	SID_NAME_USE esidtype;
+	char sidbuf[1024] = { 0 };
+	DWORD cbsid = 1024;
+	SID* sid = (SID*)sidbuf;
+
+	if (LookupAccountNameA(NULL, accname, sidbuf, &cbsid, domname, &cchdomname, &esidtype))
+	{
+		ConvertSidToStringSidA(sid, (LPSTR*)id);
+	}
+}

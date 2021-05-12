@@ -31,11 +31,14 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
 
 	res = 0;
 
+	if (slen >= 2)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sscanf_s(str, "%hhx", &res);
+		sscanf_s(str, "%hhx", &res);
 #else
-	sscanf(str, "%hhx", &res);
+		sscanf(str, "%hhx", &res);
 #endif
+	}
 
 	return res;
 }

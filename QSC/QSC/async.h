@@ -1,0 +1,132 @@
+/* The GPL version 3 License (GPLv3)
+*
+* Copyright (c) 2021 Digital Freedom Defence Inc.
+* This file is part of the QSC Cryptographic library
+*
+* This program is free software : you can redistribute it and / or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
+*
+* Implementation Details:
+* A threading base class.
+* Written by John G. Underhill
+* Updated on December 30, 2020
+* Contact: develop@vtdev.com */
+
+#ifndef QSC_ASYNC_H
+#define QSC_ASYNC_H
+
+#include "common.h"
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+#	include <process.h>
+#	include <Windows.h>
+#	define qsc_async_mutex HANDLE
+#elif defined(QSC_SYSTEM_OS_POSIX)
+#	include <sys/types.h>
+#	include <unistd.h>
+#	include <pthread>
+#	define qsc_async_mutex pthread_mutex_t
+#else
+#	error your operating system is not supported!
+#endif
+
+#if !defined(pthread_t)
+#	define pthread_t int
+#endif
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+#	define qsc_thread uintptr_t
+#else
+#	define qsc_thread pthread_t
+#endif
+
+/**
+* \brief Create a mutex
+*
+* \param mtx: The mutex to be created
+* \return Returns true on success
+*/
+QSC_EXPORT_API bool qsc_async_mutex_create(qsc_async_mutex* mtx);
+
+/**
+* \brief Destroy a mutex
+*
+* \param mtx: The mutex to destroy
+* \return Returns true for success
+*/
+QSC_EXPORT_API bool qsc_async_mutex_destroy(qsc_async_mutex* mtx);
+
+/**
+* \brief Lock a mutex. 
+* The mutex must be initialized and destroyed.
+*
+* \param mtx: The mutex to lock
+*/
+QSC_EXPORT_API void qsc_async_mutex_lock(qsc_async_mutex* mtx);
+
+/**
+* \brief Initializes and locks a mutex.
+*
+* \param mtx: The mutex to lock
+*/
+QSC_EXPORT_API void qsc_async_mutex_lock_ex(qsc_async_mutex* mtx);
+
+/**
+* \brief Unlock a mutex.
+* The mutex must be initialized and destroyed.
+*
+* \param mtx: The mutex to unlock
+*/
+QSC_EXPORT_API void qsc_async_mutex_unlock(qsc_async_mutex* mtx);
+
+/**
+* \brief Unlocks and destroys a mutex.
+* The mutex must be initialized and destroyed.
+*
+* \param mtx: The mutex to unlock
+*/
+QSC_EXPORT_API void qsc_async_mutex_unlock_ex(qsc_async_mutex* mtx);
+
+/**
+* \brief Initialize a thread with one parameter
+*
+* \param thd_func: The thread function
+* \param state: The function state
+* \return Returns a thread, or zero on failure
+*/
+QSC_EXPORT_API qsc_thread qsc_async_thread_initialize(void (*thd_func)(void*), void* state);
+
+/**
+* \brief Terminate a thread
+*
+* \param handle: The thread to terminate (terminates calling thread on windows)
+*/
+QSC_EXPORT_API void qsc_async_thread_terminate(qsc_thread* handle);
+
+/**
+* \brief Wait for a thread to complete execution
+*
+* \param handle: The thread handle
+*/
+QSC_EXPORT_API void qsc_async_thread_wait(qsc_thread* handle);
+
+/**
+* \brief Wait for an array of threads to complete execution
+*
+* \param handles: The array of threads
+* \param count: The number of threads
+*/
+QSC_EXPORT_API void qsc_async_thread_wait_all(qsc_thread* handles, int count);
+
+#endif

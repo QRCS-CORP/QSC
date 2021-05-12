@@ -142,9 +142,9 @@
   <ItemGroup>
     <ClInclude Include="acp.h" />
     <ClInclude Include="arrayutils.h" />
-    <ClInclude Include="asyncresult.h" />
     <ClInclude Include="chacha.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="consoleutils.h" />
     <ClInclude Include="cpuid.h" />
     <ClInclude Include="csg.h" />
     <ClInclude Include="csx.h" />
@@ -156,6 +156,10 @@
     <ClInclude Include="ecdhbase.h" />
     <ClInclude Include="ecdsa.h" />
     <ClInclude Include="ecdsabase.h" />
+    <ClInclude Include="encoding.h" />
+    <ClInclude Include="event.h" />
+    <ClInclude Include="fileutils.h" />
+    <ClInclude Include="folderutils.h" />
     <ClInclude Include="hcg.h" />
     <ClInclude Include="intrinsics.h" />
     <ClInclude Include="ipinfo.h" />
@@ -167,6 +171,9 @@
     <ClInclude Include="netutils.h" />
     <ClInclude Include="parallel.h" />
     <ClInclude Include="poly1305.h" />
+    <ClInclude Include="qclient.h" />
+    <ClInclude Include="qserver.h" />
+    <ClInclude Include="qsmp.h" />
     <ClInclude Include="queue.h" />
     <ClInclude Include="rcs.h" />
     <ClInclude Include="rdp.h" />
@@ -177,18 +184,25 @@
     <ClInclude Include="sha3.h" />
     <ClInclude Include="socket.h" />
     <ClInclude Include="socketbase.h" />
+    <ClInclude Include="socketclient.h" />
     <ClInclude Include="socketflags.h" />
+    <ClInclude Include="socketserver.h" />
     <ClInclude Include="sphincsplus.h" />
     <ClInclude Include="sphincsplusbase.h" />
     <ClInclude Include="csp.h" />
     <ClInclude Include="intutils.h" />
+    <ClInclude Include="stringutils.h" />
     <ClInclude Include="sysutils.h" />
+    <ClInclude Include="threadpool.h" />
+    <ClInclude Include="async.h" />
+    <ClInclude Include="timestamp.h" />
     <ClInclude Include="transpose.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="acp.c" />
     <ClCompile Include="arrayutils.c" />
     <ClCompile Include="chacha.c" />
+    <ClCompile Include="consoleutils.c" />
     <ClCompile Include="cpuid.c" />
     <ClCompile Include="csg.c" />
     <ClCompile Include="csx.c" />
@@ -200,6 +214,9 @@
     <ClCompile Include="ecdhbase.c" />
     <ClCompile Include="ecdsa.c" />
     <ClCompile Include="ecdsabase.c" />
+    <ClCompile Include="encoding.c" />
+    <ClCompile Include="fileutils.c" />
+    <ClCompile Include="folderutils.c" />
     <ClCompile Include="hcg.c" />
     <ClCompile Include="ipinfo.c" />
     <ClCompile Include="kyber.c" />
@@ -210,6 +227,9 @@
     <ClCompile Include="netutils.c" />
     <ClCompile Include="parallel.c" />
     <ClCompile Include="poly1305.c" />
+    <ClCompile Include="qclient.c" />
+    <ClCompile Include="qserver.c" />
+    <ClCompile Include="qsmp.c" />
     <ClCompile Include="queue.c" />
     <ClCompile Include="rcs.c" />
     <ClCompile Include="rdp.c" />
@@ -220,11 +240,16 @@
     <ClCompile Include="sha3.c" />
     <ClCompile Include="socket.c" />
     <ClCompile Include="socketbase.c" />
+    <ClCompile Include="socketclient.c" />
+    <ClCompile Include="socketserver.c" />
     <ClCompile Include="sphincsplus.c" />
     <ClCompile Include="sphincsplusbase.c" />
     <ClCompile Include="csp.c" />
     <ClCompile Include="intutils.c" />
+    <ClCompile Include="stringutils.c" />
     <ClCompile Include="sysutils.c" />
+    <ClCompile Include="async.c" />
+    <ClCompile Include="timestamp.c" />
     <ClCompile Include="transpose.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

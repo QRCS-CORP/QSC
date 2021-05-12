@@ -39,9 +39,6 @@
     <ClCompile Include="poly1305_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="filetools.c">
-      <Filter>Source Files\Common</Filter>
-    </ClCompile>
     <ClCompile Include="sha2_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
@@ -87,6 +84,9 @@
     <ClCompile Include="benchmark.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="qsmp_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -100,9 +100,6 @@
     </ClInclude>
     <ClInclude Include="poly1305_test.h">
       <Filter>Header Files\Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="filetools.h">
-      <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="sha2_test.h">
       <Filter>Header Files\Tests</Filter>
@@ -147,6 +144,9 @@
       <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="benchmark.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="qsmp_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>

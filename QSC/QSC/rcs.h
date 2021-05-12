@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -123,6 +123,8 @@
 #ifndef QSC_RCS_H
 #define QSC_RCS_H
 
+/* TODO: Test KPA on small block AVX2 */
+
 #include "common.h"
 #include "sha3.h"
 
@@ -132,7 +134,8 @@
 
 /*!
 \def QSC_RCS_AUTHENTICATED
-* \brief Enables KMAC authentication mode.
+* \brief Enables the AEAD cipher authentication mode.
+* Unrem this flag to enable authenticated encryption for all modes.
 */
 #if !defined(QSC_RCS_AUTHENTICATED)
 //#	define QSC_RCS_AUTHENTICATED
@@ -143,7 +146,7 @@
 * \def QSC_RCS_KPA_AUTHENTICATION
 * \brief Toggles authentication between KMAC and KPA, default is KPA.
 */
-//#	define QSC_RCS_KPA_AUTHENTICATION /* KPA requires large input blocks, defaults to kmac */
+//#	define QSC_RCS_KPA_AUTHENTICATION /* KPA requires wide input blocks for SIMD processing */
 #endif
 
 /*!

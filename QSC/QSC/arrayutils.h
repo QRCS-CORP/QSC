@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -21,7 +21,8 @@
 * An implementation of supporting string based functions
 * Written by John G. Underhill
 * Updated on November 27, 2020
-* Contact: develop@vtdev.com */
+* Contact: develop@vtdev.com 
+*/
 
 /*
 * \file arrayutils.h

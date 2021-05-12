@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -133,5 +133,13 @@ QSC_EXPORT_API uint64_t qsc_sysutils_system_uptime();
 * \return Returns the system time-stamp
 */
 QSC_EXPORT_API uint64_t qsc_sysutils_system_timestamp();
+
+/**
+* \brief Get the users identity string
+*
+* \param name: The char array that holds the user name
+* \param id: The output array containing the id string
+*/
+QSC_EXPORT_API void qsc_sysutils_user_identity(const char* name, char* id);
 
 #endif

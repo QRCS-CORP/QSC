@@ -12,15 +12,24 @@
 #include <x86intrin.h>
 #endif
 
-QSC_EXPORT_API typedef struct
+QSC_EXPORT_API typedef struct qsc_cpu_features
 {
-    bool has_aesni;
-    bool has_avx;
-    bool has_avx2;
-    bool has_avx512;
-    bool has_pclmul;
-    bool has_rdrand;
-    bool has_rdtcsp;
+    bool aesni;
+    bool avx;
+    bool avx2;
+    bool avx512;
+    bool hyperthread;
+    bool pcmul;
+    bool rdrand;
+    bool rdtcsp;
+    uint32_t cacheline;
+    uint32_t cores;
+    uint32_t cpus;
+    uint32_t freqbase;
+    uint32_t l1cache;
+    uint32_t l2cache;
+    char serial[8];
+    char vendor[12];
 } qsc_cpu_features;
 
 

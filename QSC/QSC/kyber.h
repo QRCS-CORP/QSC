@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -21,7 +21,8 @@
 * An implementation of the Kyber asymmetric cipher
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com */
+* Contact: develop@vtdev.com 
+*/
 
 /**
 * \file kyber.h
@@ -42,10 +43,10 @@
 * // create the public and secret keys
 * qsc_kyber_generate_keypair(pk, sk);
 *
-* // output the cipher-text (ct), and the shared key
+* // output the cipher-text (ct), and the shared secret (ssb)
 * qsc_kyber_encapsulate(ssb, ct, pk);
 *
-* // decrypt the cipher-text, and output the shared key
+* // decrypt the cipher-text, and output the shared key (ssa)
 * if (qsc_kyber_decapsulate(ssa, ct, sk) == false)
 * {
 *     // decapsulation failed, do something..
@@ -144,7 +145,7 @@
 *
 * \warning The shared secret array must be sized to the QSC_KYBER_SHAREDSECRET_SIZE.
 *
-* \param secret: Pointer to a shared secret key, an array of QSC_KYBER_SHAREDSECRET_SIZE
+* \param secret: Pointer to the output shared secret key, an array of QSC_KYBER_SHAREDSECRET_SIZE
 * \param ciphertext: [const] Pointer to the cipher-text array
 * \param privatekey: [const] Pointer to the private-key array
 * \return Returns true for success
@@ -156,7 +157,7 @@ QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* cipher
 *
 * \warning Ciphertext array must be sized to the QSC_KYBER_CIPHERTEXT_SIZE.
 *
-* \param secret: Pointer to the shared secret array, a uint8_t array of QSC_KYBER_SHAREDSECRET_SIZE
+* \param secret: Pointer to the shared secret key, a uint8_t array of QSC_KYBER_SHAREDSECRET_SIZE
 * \param ciphertext: Pointer to the cipher-text array
 * \param publickey: [const] Pointer to the public-key array
 * \param rng_generate: A pointer to the random generator

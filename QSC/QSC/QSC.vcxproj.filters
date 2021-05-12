@@ -121,17 +121,29 @@
     <Filter Include="Header Files\Numerics">
       <UniqueIdentifier>{0b63d122-7321-435f-b9ae-3de5927811b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Network">
+      <UniqueIdentifier>{d8a21b94-dfef-4316-9224-4d5f02d57228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Network">
+      <UniqueIdentifier>{d8ecbcc0-bfe6-4fcd-9093-e9a9a2724b05}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files\TLS">
       <UniqueIdentifier>{6e60dba2-81fb-469a-97e8-027ac893d14c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\TLS">
       <UniqueIdentifier>{98570c55-c119-4b8d-89b1-66c974aa7f11}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Network">
-      <UniqueIdentifier>{d8a21b94-dfef-4316-9224-4d5f02d57228}</UniqueIdentifier>
+    <Filter Include="Header Files\KEX">
+      <UniqueIdentifier>{49f523c0-54e5-431a-84a7-9c47932a2729}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Network">
-      <UniqueIdentifier>{d8ecbcc0-bfe6-4fcd-9093-e9a9a2724b05}</UniqueIdentifier>
+    <Filter Include="Header Files\KEX\QSMP">
+      <UniqueIdentifier>{9355f8e2-56dd-4079-97cd-3b454b1d0c1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\KEX">
+      <UniqueIdentifier>{df00b308-ab00-4318-b68c-ec8da659823e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\KEX\QSMP">
+      <UniqueIdentifier>{d4fb1245-4b10-4f53-899b-1cbef04733df}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -225,9 +237,6 @@
     <ClInclude Include="ecdsabase.h">
       <Filter>Header Files\Asymmetric\Signature\ECDSA</Filter>
     </ClInclude>
-    <ClInclude Include="transpose.h">
-      <Filter>Header Files\TLS</Filter>
-    </ClInclude>
     <ClInclude Include="donna128.h">
       <Filter>Header Files\Numerics</Filter>
     </ClInclude>
@@ -264,8 +273,50 @@
     <ClInclude Include="netutils.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="asyncresult.h">
+    <ClInclude Include="event.h">
       <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="socketclient.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="socketserver.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="threadpool.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="stringutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="fileutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="consoleutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="folderutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="encoding.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="async.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="transpose.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="qsmp.h">
+      <Filter>Header Files\KEX\QSMP</Filter>
+    </ClInclude>
+    <ClInclude Include="timestamp.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="qclient.h">
+      <Filter>Header Files\KEX\QSMP</Filter>
+    </ClInclude>
+    <ClInclude Include="qserver.h">
+      <Filter>Header Files\KEX\QSMP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -353,9 +404,6 @@
     <ClCompile Include="ecdsabase.c">
       <Filter>Source Files\Asymmetric\Signature\ECDSA</Filter>
     </ClCompile>
-    <ClCompile Include="transpose.c">
-      <Filter>Source Files\TLS</Filter>
-    </ClCompile>
     <ClCompile Include="donna128.c">
       <Filter>Source Files\Numerics</Filter>
     </ClCompile>
@@ -388,6 +436,45 @@
     </ClCompile>
     <ClCompile Include="netutils.c">
       <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="socketclient.c">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="socketserver.c">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="fileutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="stringutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="consoleutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="folderutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="encoding.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="async.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="transpose.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="qsmp.c">
+      <Filter>Source Files\KEX\QSMP</Filter>
+    </ClCompile>
+    <ClCompile Include="timestamp.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="qclient.c">
+      <Filter>Source Files\KEX\QSMP</Filter>
+    </ClCompile>
+    <ClCompile Include="qserver.c">
+      <Filter>Source Files\KEX\QSMP</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

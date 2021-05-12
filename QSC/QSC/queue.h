@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -21,7 +21,8 @@
 * A FIFO general purpose data queue.
 * Written by John G. Underhill
 * Updated on November 11, 2020
-* Contact: develop@vtdev.com */
+* Contact: develop@vtdev.com 
+*/
 
 #ifndef QSC_QUEUE_H
 #define QSC_QUEUE_H
@@ -119,7 +120,7 @@ QSC_EXPORT_API uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, siz
 * \brief Add an item to the queue.
 *
 * \param state [struct] The function state
-* \param input [array] The array item to be added to thr queue
+* \param input [array] The array item to be added to the queue
 * \param inlen [size] The byte size of the the queue item to be added
 * \param tag [integer] The items associated tag
 */

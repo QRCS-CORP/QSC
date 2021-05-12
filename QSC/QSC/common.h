@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -57,7 +57,7 @@
 /* preprocessor os selection (not all OS's will be supported; targets are win/android/linux/ios) */
 #if defined(_WIN64) || defined(_WIN32)
 #	if !defined(QSC_SYSTEM_OS_WINDOWS)
-#	define QSC_SYSTEM_OS_WINDOWS
+#		define QSC_SYSTEM_OS_WINDOWS
 #	endif
 #	if defined(_WIN64)
 #		define QSC_SYSTEM_ISWIN64
@@ -279,6 +279,8 @@
 #	endif
 #endif
 
+
+#define QSC_SYSTEM_MAX_PATH 260
 
 #define QSC_SYSTEM_SECMEMALLOC_DEFAULT 4096
 #define QSC_SYSTEM_SECMEMALLOC_MIN 16

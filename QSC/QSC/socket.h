@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -20,7 +20,7 @@
 * Implementation Details:
 * A network sockets class.
 * Written by John G. Underhill
-* Updated on November 11, 2020
+* Updated on March 30, 2021
 * Contact: develop@vtdev.com */
 
 #ifndef QSC_SOCKET_H
@@ -30,34 +30,34 @@
 #include "socketflags.h"
 
 /*!
-\def SOCKET_ADDRESS_MAX_LENGTH
+\def QSC_SOCKET_ADDRESS_MAX_LENGTH
 * The maximum string length of an address
 */
-#define SOCKET_ADDRESS_MAX_LENGTH 65
+#define QSC_SOCKET_ADDRESS_MAX_LENGTH 65
 
 /*!
-\def SOCKET_MAX_CONN
+\def QSC_SOCKET_MAX_CONN
 * The maximum number of simultaneous connections
 */
-#define SOCKET_MAX_CONN 0x7FFFFFFFL
+#define QSC_SOCKET_MAX_CONN 0x7FFFFFFFL
 
 /*!
-\def SOCKET_RET_ERROR
+\def QSC_SOCKET_RET_ERROR
 * The base socket error flag
 */
-#define SOCKET_RET_ERROR -1
+#define QSC_SOCKET_RET_ERROR -1
 
 /*!
-\def SOCKET_RET_SUCCESS
+\def QSC_SOCKET_RET_SUCCESS
 * The base socket success flag
 */
-#define SOCKET_RET_SUCCESS 0
+#define QSC_SOCKET_RET_SUCCESS 0
 
 /*!
-\def SOCKET_TIMEOUT_MSEC
+\def QSC_SOCKET_TIMEOUT_MSEC
 * The default number of seconds to wait for a connection
 */
-#define SOCKET_TIMEOUT_MSEC 10000
+#define QSC_SOCKET_TIMEOUT_MSEC 10000
 
 /*!
 \typedef socklen_t
@@ -76,22 +76,22 @@ typedef int32_t socket_t;
 #endif
 
 /*!
-\const UNINITIALIZED_SOCKET
+\const QSC_UNINITIALIZED_SOCKET
 * An unitialized socket handle
 */
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	static const socket_t UNINITIALIZED_SOCKET = (uintptr_t)~0;
+	static const socket_t QSC_UNINITIALIZED_SOCKET = (uintptr_t)~0;
 #else
-	static const int32_t UNINITIALIZED_SOCKET = -1;
+	static const int32_t QSC_UNINITIALIZED_SOCKET = -1;
 #endif
 
 /*! \struct qsc_socket
 * \brief The socket instance structure
 */
-QSC_EXPORT_API typedef struct qsc_socket
+QSC_EXPORT_API typedef struct qsc_socket 
 {
 	socket_t connection;						/*!< A socket conection pointer */
-	int8_t address[SOCKET_ADDRESS_MAX_LENGTH];	/*!< The sockets string address */
+	int8_t address[QSC_SOCKET_ADDRESS_MAX_LENGTH];	/*!< The sockets string address */
 	uint32_t instance;							/*!< The sockets instance count */
 	uint16_t port;								/*!< The sockets port number */
 	qsc_socket_address_families address_family;	/*!< The sockets address family type */

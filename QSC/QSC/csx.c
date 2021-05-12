@@ -354,7 +354,7 @@ typedef struct
 
 static __m256i csx_rotl256(const __m256i x, size_t shift)
 {
-	return _mm256_or_si256(_mm256_slli_epi64(x, (int)shift), _mm256_srli_epi64(x, 64 - shift));
+	return _mm256_or_si256(_mm256_slli_epi64(x, (int)shift), _mm256_srli_epi64(x, 64 - (int)shift));
 }
 
 static __m256i csx_load256(const uint8_t* v)

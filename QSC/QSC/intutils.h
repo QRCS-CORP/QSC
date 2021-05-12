@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -21,7 +21,8 @@
 * An implementation of supporting integer based functions
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com */
+* Contact: develop@vtdev.com 
+*/
 
 /*
 * \file intutils.h
@@ -195,7 +196,7 @@ QSC_EXPORT_API bool qsc_intutils_is_gte(size_t x, size_t y);
 *
 * \param hexstr: The hexidecimal string
 * \param output: The array output
-* \param length: The length of the input string
+* \param length: The length of the output array
 */
 QSC_EXPORT_API void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 

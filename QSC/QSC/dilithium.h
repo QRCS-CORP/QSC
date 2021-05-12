@@ -1,6 +1,6 @@
 /* The GPL version 3 License (GPLv3)
 *
-* Copyright (c) 2020 Digital Freedom Defence Inc.
+* Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -21,7 +21,8 @@
 * An implementation of the Dilithium asymmetric signature scheme
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com */
+* Contact: develop@vtdev.com 
+*/
 
 /**
 * \file dilithium.h
@@ -152,10 +153,10 @@ QSC_EXPORT_API void qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* 
 * \warning Signature array must be sized to the size of the message plus QSC_DILITHIUM_SIGNATURE_SIZE.
 *
 * \param signedmsg: Pointer to the signed-message array
-* \param smsglen: [const] Pointer to the signed message length
-* \param message: Pointer to the message array
-* \param msglen: The message length
-* \param privatekey: [const] Pointer to the private signature-key array
+* \param smsglen: The signed message length
+* \param message: [const] Pointer to the message array
+* \param msglen: The message array length
+* \param privatekey: [const] Pointer to the private signature-key
 * \param rng_generate: Pointer to the random generator
 */
 QSC_EXPORT_API void qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t));
@@ -163,8 +164,8 @@ QSC_EXPORT_API void qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, cons
 /**
 * \brief Verifies a signature-message pair with the public key.
 *
-* \param message: Pointer to the message array to be signed
-* \param msglen: Pointer to the message length
+* \param message: Pointer to the message output array
+* \param msglen: Length of the message array
 * \param signedmsg: [const] Pointer to the signed message array
 * \param smsglen: The signed message length
 * \param publickey: [const] Pointer to the public verification-key array
