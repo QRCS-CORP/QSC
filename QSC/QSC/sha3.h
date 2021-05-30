@@ -1,33 +1,33 @@
-/* The GPL version 3 License (GPLv3)
+/* The AGPL version 3 License (AGPLv3)
 *
 * Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU General Public License as published by
+* it under the terms of the GNU Affero General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-* GNU General Public License for more details.
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
+* You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 *
 * Implementation Details:
 * An implementation of the SHA3 message digest, KMAC, SHAKE, and CSHAKE
 * Written by John G. Underhill
-* Updated on October 20, 2020
+* Updated on May 20, 2021
 * Contact: develop@vtdev.com */
 
 /**
 * \file sha3.h
 * \author John Underhill
 * \date October 27, 2019
-* \updated October 20, 2020
+* \updated May 16, 2021
 *
 * \brief <b>SHA3 header definition</b> \n
 * Contains the public api and documentation for SHA3 digest, SHAKE, cSHAKE, and KMAC implementations.
@@ -112,13 +112,66 @@
 * NIST: SHA3 Keccak Slides http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf \n
 * NIST: SHA3 Third-Round Report http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf \n
 * Team Keccak: Specifications summary https://keccak.team/keccak_specs_summary.html
-*
 */
 
 #ifndef QSC_SHA3_H
 #define QSC_SHA3_H
 
 #include "common.h"
+
+/*!
+* \def QSC_KECCAK_CSHAKE_DOMAIN_ID
+* \brief The cSHAKE domain id
+*/
+#define QSC_KECCAK_CSHAKE_DOMAIN_ID 0x04
+
+/*!
+* \def QSC_KECCAK_KMAC_DOMAIN_ID
+* \brief The KMAC domain id
+*/
+#define QSC_KECCAK_KMAC_DOMAIN_ID 0x04
+
+/*!
+* \def QSC_KECCAK_KPA_DOMAIN_ID
+* \brief The KPA domain id
+*/
+#define QSC_KECCAK_KPA_DOMAIN_ID 0x41
+
+/*!
+* \def QSC_KECCAK_PERMUTATION_ROUNDS
+* \brief The standard number of permutation rounds
+*/
+#define QSC_KECCAK_PERMUTATION_ROUNDS 24
+
+/*!
+* \def QSC_KECCAK_PERMUTATION_MAX_ROUNDS
+* \brief The maximum number of permutation rounds
+*/
+#define QSC_KECCAK_PERMUTATION_MAX_ROUNDS 48
+
+/*!
+* \def QSC_KECCAK_PERMUTATION_MIN_ROUNDS
+* \brief The minimum number of permutation rounds
+*/
+#define QSC_KECCAK_PERMUTATION_MIN_ROUNDS 12
+
+/*!
+* \def QSC_KECCAK_SHA3_DOMAIN_ID
+* \brief The SHA3 domain id
+*/
+#define QSC_KECCAK_SHA3_DOMAIN_ID 0x06
+
+/*!
+* \def QSC_KECCAK_SHAKE_DOMAIN_ID
+* \brief The SHAKE domain id
+*/
+#define QSC_KECCAK_SHAKE_DOMAIN_ID 0x1F
+
+/*!
+* \def QSC_KECCAK_STATE_BYTE_SIZE
+* \brief The Keccak state array byte size
+*/
+#define QSC_KECCAK_STATE_BYTE_SIZE 200
 
 /*!
 * \def QSC_KECCAK_128_RATE
@@ -163,14 +216,20 @@
 #define QSC_KMAC_512_KEY_SIZE 64
 
 /*!
+* \def QSC_SHA3_128_HASH_SIZE
+* \brief The QSC_SHA3_128_HASH_SIZE hash size in bytes (16)
+*/
+#define QSC_SHA3_128_HASH_SIZE 16
+
+/*!
 * \def QSC_SHA3_256_HASH_SIZE
-* \brief The SHA-256 hash size in bytes
+* \brief The SHA-256 hash size in bytes (32)
 */
 #define QSC_SHA3_256_HASH_SIZE 32
 
 /*!
 * \def QSC_SHA3_512_HASH_SIZE
-* \brief The SHA-512 hash size in bytes
+* \brief The SHA-512 hash size in bytes (64)
 */
 #define QSC_SHA3_512_HASH_SIZE 64
 
@@ -211,6 +270,46 @@ QSC_EXPORT_API typedef enum
 } keccak_rate;
 
 /**
+* \brief Absorb an input message into the Keccak state
+*
+* \param ctx: [struct] A reference to the keccak state; must be initialized
+* \param rate: The rate of absorption in bytes
+* \param message: [const] The input message byte array
+* \param msglen: The number of message bytes to process
+* \param domain: The function domain id
+* \param rounds: The number of permutation rounds, the default is 24, maximum is 48
+*/
+QSC_EXPORT_API void qsc_keccak_absorb(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen, uint8_t domain, size_t rounds);
+
+/**
+* \brief Absorb the custom, and name arrays into the Keccak state
+*
+* \param ctx: [struct] The cipher state structure
+* \param rate: The rate of absorption in bytes
+* \param custom: [const] The customization string
+* \param custlen: The byte length of the customization string
+* \param name: [const] The function name string
+* \param namelen: The byte length of the function name
+* \param rounds: The number of permutation rounds, the default is 24, maximum is 48
+*/
+QSC_EXPORT_API void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds);
+
+/**
+* \brief Absorb the custom, name, and key arrays into the Keccak state.
+*
+* \param ctx: [struct] The cipher state structure
+* \param rate: The rate of absorption in bytes
+* \param key: [const] The input key byte array
+* \param keylen: The number of key bytes to process
+* \param custom: [const] The customization string
+* \param custlen: The byte length of the customization string
+* \param name: [const] The function name string
+* \param namelen: The byte length of the function name
+* \param rounds: The number of permutation rounds, the default is 24, maximum is 48
+*/
+QSC_EXPORT_API void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds);
+
+/**
 * \brief Dispose of the Keccak state.
 *
 * \warning The dispose function must be called when disposing of the function state.
@@ -220,7 +319,92 @@ QSC_EXPORT_API typedef enum
 */
 QSC_EXPORT_API void qsc_keccak_dispose(qsc_keccak_state* ctx);
 
+/**
+* \brief Finalize the Keccak state
+*
+* \param ctx: [struct] The cipher state structure
+* \param rate: The rate of absorption in bytes
+* \param output: The output byte array
+* \param outlen: The number of output bytes to generate
+* \param domain: The function domain id
+* \param rounds: The number of permutation rounds, the default is 24, maximum is 48
+*/
+QSC_EXPORT_API void qsc_keccak_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t outlen, uint8_t domain, size_t rounds);
+
+/**
+* \brief The Keccak permute function.
+* Internal function: Permutes the state array, can be used in external constrictions.
+*
+* \param ctx: [struct] The function state; must be initialized
+* \param rounds: The number of permutation rounds, the default and maximum is 24
+*/
+QSC_EXPORT_API void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds);
+
+/**
+* \brief The compact Keccak permute function.
+* Internal function: Permutes the state array, can be used in external constrictions.
+*
+* \param state: The state array; must be initialized
+* \param rounds: The number of permutation rounds, the default and maximum is 24
+*/
+QSC_EXPORT_API void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds);
+
+/**
+* \brief The unrolled Keccak permute function.
+* Internal function: Permutes the state array, can be used in external constrictions.
+*
+* \param state: The state array; must be initialized
+* \param rounds: The number of permutation rounds, the default and maximum is 24
+*/
+QSC_EXPORT_API void qsc_keccak_permute_p1600u(uint64_t* state);
+
+/**
+* \brief The Keccak squeeze function.
+*
+* \warning Output array must be initialized to a multiple of the byte rate.
+*
+* \param ctx: [struct] A reference to the keccak state; must be initialized
+* \param output: The output byte array
+* \param nblocks: The number of blocks to extract
+* \param rate: The rate of absorption in bytes
+* \param rounds: The number of permutation rounds, the default and maximum is 24
+*/
+QSC_EXPORT_API void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks, keccak_rate rate, size_t rounds);
+
+/**
+* \brief Initializes a Keccak state structure, must be called before message processing.
+* Long form api: must be used in conjunction with the blockupdate and finalize functions.
+*
+* \param ctx: [struct] A reference to the keccak state; must be initialized
+*/
+QSC_EXPORT_API void qsc_keccak_state_reset(qsc_keccak_state* ctx);
+
+/**
+* \brief Update Keccak state with message input.
+*
+* \warning The state must be initialized before calling
+*
+* \param ctx: [struct] A reference to the keccak state; must be initialized
+* \param rate: The rate of absorption in bytes
+* \param message: [const] The input message byte array
+* \param msglen: The number of message bytes to process
+* \param rounds: The number of permutation rounds, the default and maximum is 24
+*/
+QSC_EXPORT_API void qsc_keccak_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen, size_t rounds);
+
 /* sha3 */
+
+/**
+* \brief Process a message with SHA3-128 and return the hash code in the output byte array.
+* Short form api: processes the entire message and computes the hash code with a single call.
+*
+* \warning The output array must be at least 16 bytes in length.
+*
+* \param output:: The output byte array; receives the hash code
+* \param message: [const] The message input byte array
+* \param msglen: The number of message bytes to process
+*/
+QSC_EXPORT_API void qsc_sha3_compute128(uint8_t* output, const uint8_t* message, size_t msglen);
 
 /**
 * \brief Process a message with SHA3-256 and return the hash code in the output byte array.
@@ -251,7 +435,7 @@ QSC_EXPORT_API void qsc_sha3_compute512(uint8_t* output, const uint8_t* message,
 * Long form api: must be used in conjunction with the initialize and finalize functions.
 * Absorbs the input message into the state.
 *
-* \warning State must be initialized by the caller.
+* \warning The state must be initialized before calling
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
@@ -263,11 +447,12 @@ QSC_EXPORT_API void qsc_sha3_update(qsc_keccak_state* ctx, keccak_rate rate, con
 /**
 * \brief Finalize the message state and returns the hash value in output.
 * Long form api: must be used in conjunction with the initialize and blockupdate functions.
-* Absorb the last block of message and create the hash value. \n
+* Absorb the last block of message and create the hash value.
 * Produces a 32 byte output code using QSC_KECCAK_256_RATE, 64 bytes with QSC_KECCAK_512_RATE.
 *
-* \warning The output array must be sized correctly corresponding to the absorbtion rate ((200 - rate) / 2). \n
+* \warning The output array must be sized correctly corresponding to the absorbtion rate ((200 - rate) / 2).
 * Finalizes the message state, can not be used in consecutive calls.
+* The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
@@ -276,20 +461,12 @@ QSC_EXPORT_API void qsc_sha3_update(qsc_keccak_state* ctx, keccak_rate rate, con
 QSC_EXPORT_API void qsc_sha3_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output);
 
 /**
-* \brief Initializes a SHA3 state structure, must be called before message processing.
-* Long form api: must be used in conjunction with the blockupdate and finalize functions.
+* \brief Initialize the SHA3 state
+* Long form api: Must be called before the update or finalize functions are called.
 *
-* \param ctx: [struct] A reference to the keccak state; must be initialized
+* \param ctx: [struct] A reference to the keccak state
 */
 QSC_EXPORT_API void qsc_sha3_initialize(qsc_keccak_state* ctx);
-
-/**
-* \brief The Keccak permute function.
-* Internal function: Permutes the state array, can be used in external constrictions.
-*
-* \param ctx: [struct] The function state; must be initialized
-*/
-QSC_EXPORT_API void qsc_keccak_permute(uint64_t* ctx);
 
 /* shake */
 
@@ -337,9 +514,6 @@ QSC_EXPORT_API void qsc_shake512_compute(uint8_t* output, size_t outlen, const u
 * Long form api: must be used in conjunction with the squeezeblocks function.
 * Absorb and finalize an input key byte array.
 *
-* \warning Finalizes the key state, should not be used in consecutive calls. \n
-* State must be initialized by the caller.
-*
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
 * \param key: [const] The input key byte array
@@ -353,6 +527,7 @@ QSC_EXPORT_API void qsc_shake_initialize(qsc_keccak_state* ctx, keccak_rate rate
 * Permutes and extracts the state to an output byte array.
 *
 * \warning Output array must be initialized to a multiple of the byte rate.
+* The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
@@ -416,8 +591,6 @@ QSC_EXPORT_API void qsc_cshake512_compute(uint8_t* output, size_t outlen, const 
 * Long form api: must be used in conjunction with the squeezeblocks function.
 * Initialize the name and customization strings into the state.
 *
-* \warning State must be initialized by the caller.
-*
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
 * \param key: [const] The input key byte array
@@ -435,6 +608,7 @@ QSC_EXPORT_API void qsc_cshake_initialize(qsc_keccak_state* ctx, keccak_rate rat
 * Permutes and extracts blocks of state to an output byte array.
 *
 * \warning Output array must be initialized to a multiple of the byte rate.
+* The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
@@ -448,8 +622,8 @@ QSC_EXPORT_API void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, keccak_rate 
 * Long form api: must be used in conjunction with the initialize and squeezeblocks functions.
 * Finalize an input key directly into the state.
 *
-* \warning Finalizes the key state, should not be used in consecutive calls. \n
-* State must be initialized by the caller.
+* \warning Finalizes the key state, should not be used in consecutive calls.
+* The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
@@ -512,7 +686,7 @@ QSC_EXPORT_API void qsc_kmac512_compute(uint8_t* output, size_t outlen, const ui
 * \brief The KMAC message update function.
 * Long form api: must be used in conjunction with the initialize and finalize functions.
 *
-* \warning qsc_kmac128_initialize must be called before this function to key and initialize the state. \n
+* \warning The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
@@ -526,7 +700,7 @@ QSC_EXPORT_API void qsc_kmac_update(qsc_keccak_state* ctx, keccak_rate rate, con
 * Long form api: must be used in conjunction with the initialize and blockupdate functions.
 * Final processing and calculation of the MAC code.
 *
-* \warning qsc_kmac128_initialize must be called before this function to key and initialize the state. \n
+* \warning The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
@@ -609,7 +783,7 @@ QSC_EXPORT_API typedef struct
 * Long form api: must be used in conjunction with the initialize and blockupdate functions.
 * Final processing and calculation of the MAC code.
 *
-* \warning qsc_kpa_initialize must be called before this function to key and initialize the state. \n
+* \warning The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param output: The output byte array
@@ -634,7 +808,7 @@ QSC_EXPORT_API void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, s
 * \brief The KPA message update function.
 * Long form api: must be used in conjunction with the initialize and finalize functions.
 *
-* \warning qsc_kpa_initialize must be called before this function to key and initialize the state. \n
+* \warning The state must be initialized before calling.
 *
 * \param ctx: [struct] A reference to the keccak state; must be initialized
 * \param message: [const] The message input byte array

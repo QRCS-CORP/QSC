@@ -116,7 +116,7 @@ qsc_socket_exceptions qsc_socket_server_listen(qsc_socket* source, qsc_socket* t
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_server_listen_ipv4(qsc_socket* source, qsc_socket* target, qsc_ipinfo_ipv4_address* address, uint16_t port)
+qsc_socket_exceptions qsc_socket_server_listen_ipv4(qsc_socket* source, qsc_socket* target, const qsc_ipinfo_ipv4_address* address, uint16_t port)
 {
 	assert(source != NULL);
 	assert(target != NULL);
@@ -149,7 +149,7 @@ qsc_socket_exceptions qsc_socket_server_listen_ipv4(qsc_socket* source, qsc_sock
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* source, qsc_socket* target, qsc_ipinfo_ipv6_address* address, uint16_t port)
+qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* source, qsc_socket* target, const qsc_ipinfo_ipv6_address* address, uint16_t port)
 {
 	assert(source != NULL);
 	assert(target != NULL);

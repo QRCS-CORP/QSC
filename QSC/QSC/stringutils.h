@@ -1,19 +1,19 @@
-/* The GPL version 3 License (GPLv3)
+/* The AGPL version 3 License (AGPLv3)
 *
 * Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU General Public License as published by
+* it under the terms of the GNU Affero General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-* GNU General Public License for more details.
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
+* You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 *
@@ -34,7 +34,6 @@
 #define QSC_STRINGUTILS_H
 
 #include "common.h"
-
 
 /**
 * \brief Add line breaks to a string at a line length interval
@@ -73,6 +72,16 @@ QSC_EXPORT_API void qsc_stringutils_clear_string(char* source);
 * \param count: The number of characters to clear
 */
 QSC_EXPORT_API void qsc_stringutils_clear_substring(char* buffer, size_t count);
+
+/**
+* \brief Compare two strings for equivalence
+*
+* \param a: The first string
+* \param b: The second string
+* \param length: The number of characters to compare
+* \return Returns true if the strings are equal
+*/
+QSC_EXPORT_API bool qsc_stringutils_compare_strings(char* a, const char* b, size_t length);
 
 /**
 * \brief Concatonate two strings
@@ -194,7 +203,15 @@ QSC_EXPORT_API char* qsc_stringutils_sub_string(const char* source, const char* 
 * \param source: The string to convert to an integer
 * \return Returns the converted integer
 */
-QSC_EXPORT_API int qsc_stringutils_string_to_int(char* source);
+QSC_EXPORT_API int qsc_stringutils_string_to_int(const char* source);
+
+/**
+* \brief Get the char length of a string
+*
+* \param source: The source string pointer
+* \return Returns the size of the string
+*/
+QSC_EXPORT_API size_t qsc_stringutils_string_size(const char* source);
 
 /**
 * \brief Convert an integer to a string

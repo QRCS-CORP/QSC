@@ -3,6 +3,7 @@
 
 #include "common.h"
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#	define WIN32_LEAN_AND_MEAN
 #	include <process.h>
 #	include <Windows.h>
 #elif defined(QSC_SYSTEM_OS_POSIX)

@@ -124,6 +124,25 @@ void qsc_stringutils_clear_substring(char* buffer, size_t count)
 	}
 }
 
+bool qsc_stringutils_compare_strings(char* a, const char* b, size_t length)
+{
+	assert(a != NULL);
+	assert(b != NULL);
+
+	size_t i;
+	char c;
+
+	c = 0;
+
+	for (i = 0; i < length; ++i)
+	{
+		c += a[i] ^ b[i];
+	}
+
+
+	return (c == 0);
+}
+
 size_t qsc_stringutils_concat_strings(char* buffer, size_t buflen, const char* substr)
 {
 	assert(buffer != NULL);
@@ -468,6 +487,34 @@ char* qsc_stringutils_reverse_sub_string(const char* source, const char* token)
 	return sub;
 }
 
+bool qsc_stringutils_string_compare(const char* a, const char* b, size_t length)
+{
+	assert(a != NULL);
+	assert(b != NULL);
+
+	size_t i;
+	bool res;
+
+	res = true;
+
+	if (strlen(a) == strlen(b))
+	{
+		for (i = 0; i < length; ++i)
+		{
+			if (a[i] != b[i])
+			{
+				res = false;
+			}
+		}
+	}
+	else
+	{
+		res = false;
+	}
+
+	return res;
+}
+
 bool qsc_stringutils_string_contains(const char* source, const char* token)
 {
 	assert(source != NULL);
@@ -485,7 +532,7 @@ bool qsc_stringutils_string_contains(const char* source, const char* token)
 	return res;
 }
 
-int qsc_stringutils_string_to_int(char* source)
+int qsc_stringutils_string_to_int(const char* source)
 {
 	assert(source != NULL);
 
@@ -496,6 +543,22 @@ int qsc_stringutils_string_to_int(char* source)
 	if (source != NULL)
 	{
 		res = atoi(source);
+	}
+
+	return res;
+}
+
+size_t qsc_stringutils_string_size(const char* source)
+{
+	assert(source != NULL);
+
+	size_t res;
+
+	res = 0;
+
+	if (source != NULL)
+	{
+		res = strlen(source);
 	}
 
 	return res;

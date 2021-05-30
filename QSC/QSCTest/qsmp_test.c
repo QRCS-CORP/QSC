@@ -2,8 +2,8 @@
 #include "../QSC/acp.h"
 #include "../QSC/consoleutils.h"
 #include "../QSC/intutils.h"
-#include "../QSC/qclient.h"
-#include "../QSC/qserver.h"
+#include "../QSC/qsmpclient.h"
+#include "../QSC/qsmpserver.h"
 
 void qsc_qsmp_test_run()
 {
@@ -29,10 +29,9 @@ void qsc_qsmp_test_run()
 	size_t mlen;
 
 	mlen = 0;
-
 	qsc_qsmp_server_generate_keypair(&ckey, &skey, PKEYID);
 	qsc_consoleutils_print_line("Encoding and printing the public key..");
-	qsc_qsmp_server_encode_public_key(&sctx, strk, &skey);
+	qsc_qsmp_server_encode_public_key(strk, &skey);
 	qsc_consoleutils_print_safe(strk);
 	qsc_qsmp_client_decode_public_key(&tmpck, strk);
 	qsc_consoleutils_print_line("");

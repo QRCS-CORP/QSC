@@ -9,7 +9,7 @@ bool qsc_async_mutex_create(qsc_async_mutex* mtx)
 	if (mtx != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		*mtx = CreateMutex(NULL, FALSE, NULL);
+		mtx = CreateMutex(NULL, FALSE, NULL);
 #else
 		mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
@@ -31,7 +31,7 @@ bool qsc_async_mutex_destroy(qsc_async_mutex* mtx)
 	if (mtx != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		res = (bool)CloseHandle(*mtx);
+		res = (bool)CloseHandle(mtx);
 		mtx = NULL;
 #else
 		res = (pthread_mutex_destroy(mtx) == 0);
@@ -49,7 +49,7 @@ void qsc_async_mutex_lock(qsc_async_mutex* mtx)
 	if (mtx != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		WaitForSingleObject(*mtx, INFINITE);
+		WaitForSingleObject(mtx, INFINITE);
 #else
 		pthread_mutex_lock(mtx);
 #endif
@@ -74,7 +74,7 @@ void qsc_async_mutex_unlock(qsc_async_mutex* mtx)
 	if (mtx != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		ReleaseMutex(*mtx);
+		ReleaseMutex(mtx);
 #else
 		pthread_mutex_unlock(mtx);
 #endif
@@ -144,6 +144,22 @@ void qsc_async_thread_wait(qsc_thread* handle)
 		{
 			free(stg);
 		}
+#endif
+	}
+}
+
+void qsc_async_thread_sleep(uint32_t msec)
+{
+	assert(msec != 0);
+
+	if (msec != 0)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		HANDLE hthd;
+		hthd = GetCurrentThread();
+		WaitForSingleObject(hthd, msec);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		sleep(msec * 1000);
 #endif
 	}
 }

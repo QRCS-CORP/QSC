@@ -160,54 +160,6 @@ void qsc_socket_client_initialize(qsc_socket* sock)
 		sock->socket_transport = qsc_socket_transport_none;
 	}
 }
-//
-//static void qsc_socket_client_receive_async_invoke(qsc_socket_client_async_receive_state* state)
-//{
-//	qsc_async_mutex mtx;
-//
-//	qsc_async_mutex_lock_ex(&mtx);
-//
-//	if (state != NULL)
-//	{
-//		while (state->source->connection_status == qsc_socket_state_connected)
-//		{
-//			int32_t mlen;
-//			mlen = 0;
-//			mlen = qsc_socket_receive(state->source, state->buffer, state->buflen, qsc_socket_receive_flag_none);
-//
-//			if (mlen > 0)
-//			{
-//				state->callback(state->source, state->buffer, (size_t)mlen);
-//			}
-//			else if (mlen == qsc_socket_exception_error)
-//			{
-//				qsc_socket_exceptions ex;
-//
-//				ex = qsc_socket_get_last_error();
-//				state->error(state->source, ex);
-//			}
-//		}
-//	}
-//
-//	qsc_async_mutex_unlock_ex(&mtx);
-//}
-//
-//qsc_socket_exceptions qsc_socket_client_receive_async(qsc_socket_client_async_receive_state* state)
-//{
-//	assert(state != NULL);
-//	assert(state->source != NULL);
-//
-//	qsc_socket_exceptions res;
-//
-//	res = qsc_socket_invalid_input;
-//
-//	if (state != NULL && state->source != NULL)
-//	{
-//		qsc_async_thread_initialize(qsc_socket_client_receive_async_invoke, state);
-//	}
-//
-//	return res;
-//}
 
 size_t qsc_socket_client_receive(qsc_socket* sock, char* output, size_t outlen, qsc_socket_receive_flags flag)
 {
@@ -290,5 +242,3 @@ void qsc_socket_client_shut_down(qsc_socket* sock)
 		}
 	}
 }
-
-

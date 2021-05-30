@@ -32,7 +32,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -45,7 +45,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -171,9 +171,6 @@
     <ClInclude Include="netutils.h" />
     <ClInclude Include="parallel.h" />
     <ClInclude Include="poly1305.h" />
-    <ClInclude Include="qclient.h" />
-    <ClInclude Include="qserver.h" />
-    <ClInclude Include="qsmp.h" />
     <ClInclude Include="queue.h" />
     <ClInclude Include="rcs.h" />
     <ClInclude Include="rdp.h" />
@@ -227,9 +224,6 @@
     <ClCompile Include="netutils.c" />
     <ClCompile Include="parallel.c" />
     <ClCompile Include="poly1305.c" />
-    <ClCompile Include="qclient.c" />
-    <ClCompile Include="qserver.c" />
-    <ClCompile Include="qsmp.c" />
     <ClCompile Include="queue.c" />
     <ClCompile Include="rcs.c" />
     <ClCompile Include="rdp.c" />

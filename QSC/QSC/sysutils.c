@@ -3,6 +3,7 @@
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	pragma intrinsic(__cpuid)
+#	define WIN32_LEAN_AND_MEAN
 #	define _WINSOCKAPI_
 #	include <Windows.h>
 #	pragma comment(lib, "IPHLPAPI.lib")

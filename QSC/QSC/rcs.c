@@ -70,6 +70,7 @@
 #define RCS_INFO_DEFLEN 9
 
 #if defined(QSC_RCS_AUTHENTICATED)
+
 static const uint8_t rcs256_name[RCS_NAME_LENGTH] =
 {
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x52, 0x43, 0x53, 0x4B, 0x32, 0x35,
@@ -81,7 +82,14 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x52, 0x43, 0x53, 0x4B, 0x35, 0x31,
 	0x32
 };
+
+#	if defined(QSC_RCS_KMACR12)
+#		define RCS_KMACR12_NAME_LENGTH 7
+		static const uint8_t rcs_kmacr24_name[RCS_KMACR12_NAME_LENGTH] = { 0x4B, 0x4D, 0x41, 0x43, 0x52, 0x31, 0x32 };
+#	endif
+
 #else
+
 static const uint8_t rcs256_name[RCS_NAME_LENGTH] =
 {
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x52, 0x43, 0x53
@@ -91,6 +99,7 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 {
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x52, 0x43, 0x53
 };
+
 #endif
 
 /* aes-ni and table-based fallback functions */
@@ -560,11 +569,13 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 
 	if (ctx->ctype == RCS256)
 	{
-#if defined(QSC_RCS_KPA_AUTHENTICATION)
-		qsc_kpa_update(&ctx->kstate, ctr, sizeof(ctr));
-		qsc_kpa_finalize(&ctx->kstate, output, QSC_RCS256_MAC_SIZE);
+#if defined(QSC_RCS_KMACR12)
+		/* update the counter */
+		qsc_keccak_update(&ctx->kstate, keccak_rate_256, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		/* finalize the mac and append code to output */
+		qsc_keccak_finalize(&ctx->kstate, keccak_rate_256, output, QSC_RCS256_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #else
-		/* update with the counter */
+		/* update the counter */
 		qsc_kmac_update(&ctx->kstate, keccak_rate_256, ctr, sizeof(ctr));
 		/* finalize the mac and append code to output */
 		qsc_kmac_finalize(&ctx->kstate, keccak_rate_256, output, QSC_RCS256_MAC_SIZE);
@@ -572,9 +583,9 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 	}
 	else
 	{
-#if defined(QSC_RCS_KPA_AUTHENTICATION)
-		qsc_kpa_update(&ctx->kstate, ctr, sizeof(ctr));
-		qsc_kpa_finalize(&ctx->kstate, output, QSC_RCS512_MAC_SIZE);
+#if defined(QSC_RCS_KMACR12)
+		qsc_keccak_update(&ctx->kstate, keccak_rate_512, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_finalize(&ctx->kstate, keccak_rate_512, output, QSC_RCS512_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #else
 		qsc_kmac_update(&ctx->kstate, keccak_rate_512, ctr, sizeof(ctr));
 		qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_RCS512_MAC_SIZE);
@@ -584,18 +595,22 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 
 static void rcs_mac_update(qsc_rcs_state* ctx, const uint8_t* input, size_t length)
 {
-#if defined(QSC_RCS_KPA_AUTHENTICATION)
-		qsc_kpa_update(&ctx->kstate, input, length);
-#else
 	if (ctx->ctype == RCS256)
 	{
+#if defined(QSC_RCS_KMACR12)
+		qsc_keccak_update(&ctx->kstate, keccak_rate_256, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+#else
 		qsc_kmac_update(&ctx->kstate, keccak_rate_256, input, length);
+#endif
 	}
 	else
 	{
+#if defined(QSC_RCS_KMACR12)
+		qsc_keccak_update(&ctx->kstate, keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+#else
 		qsc_kmac_update(&ctx->kstate, keccak_rate_512, input, length);
-	}
 #endif
+	}
 }
 
 static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams)
@@ -605,8 +620,6 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 	size_t i;
 	size_t oft;
 	size_t rlen;
-
-	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 	if (ctx->ctype == RCS256)
 	{
@@ -650,13 +663,13 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
 		uint8_t mkey[RCS256_MKEY_LENGTH];
 		qsc_memutils_copy(mkey, sbuf, RCS256_MKEY_LENGTH);
-		qsc_memutils_clear((uint8_t*)ctx->kstate.state, sizeof(ctx->kstate.state));
 
-#if defined(QSC_RCS_KPA_AUTHENTICATION)
-		qsc_kpa_initialize(&ctx->kstate, mkey, sizeof(mkey), NULL, 0);
-#else
+#	if defined(QSC_RCS_KMACR12)
+		qsc_keccak_state_reset(&ctx->kstate);
+		qsc_keccak_absorb_key(&ctx->kstate, keccak_rate_256, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+#	else
 		qsc_kmac_initialize(&ctx->kstate, keccak_rate_256, mkey, sizeof(mkey), NULL, 0);
-#endif
+#	endif
 		/* clear the shake buffer */
 		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 #endif
@@ -697,21 +710,20 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #endif
 
 #if defined(QSC_RCS_AUTHENTICATED)
+		uint8_t mkey[RCS512_MKEY_LENGTH];
 		/* use two permutation calls (no buffering) to seperate the cipher/mac key outputs to match the CEX implementation */
 		qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, sbuf, 1);
-		uint8_t mkey[RCS512_MKEY_LENGTH];
 		qsc_memutils_copy(mkey, sbuf, RCS512_MKEY_LENGTH);
-		qsc_memutils_clear((uint8_t*)ctx->kstate.state, sizeof(ctx->kstate.state));
 
-#if defined(QSC_RCS_KPA_AUTHENTICATION)
-		qsc_kpa_initialize(&ctx->kstate, mkey, sizeof(mkey), NULL, 0);
-#else
+#	if defined(QSC_RCS_KMACR12)
+		qsc_keccak_state_reset(&ctx->kstate);
+		qsc_keccak_absorb_key(&ctx->kstate, keccak_rate_512, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+#	else
 		qsc_kmac_initialize(&ctx->kstate, keccak_rate_512, mkey, sizeof(mkey), NULL, 0);
-#endif
+#	endif
 		/* clear the shake buffer */
 		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 #endif
-
 	}
 
 #if defined(QSC_RCS_AESNI_ENABLED)
@@ -734,11 +746,7 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 	if (ctx != NULL)
 	{
 #if defined(QSC_RCS_AUTHENTICATED)
-#	if defined(QSC_RCS_KPA_AUTHENTICATION)
-		qsc_kpa_dispose(&ctx->kstate);
-#	else
 		qsc_keccak_dispose(&ctx->kstate);
-#	endif
 #endif
 
 #if defined(QSC_RCS_AESNI_ENABLED)
@@ -769,7 +777,6 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 	qsc_memutils_copy(ctx->nonce, keyparams->nonce, QSC_RCS_NONCE_SIZE);
 	ctx->counter = 1;
 	ctx->encrypt = encryption;
-
 
 	if (ctx->ctype == RCS256)
 	{

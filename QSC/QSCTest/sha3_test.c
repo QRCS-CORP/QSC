@@ -723,13 +723,10 @@ bool qsctest_kmac_128_kat()
 	bool status;
 
 	qsctest_hex_to_bin("4D7920546167676564204170706C69636174696F6E", cust168, sizeof(cust168));
-
 	qsctest_hex_to_bin("E5780B0D3EA6F7D3A429C5706AA43A00FADBD7D49628839E3187243F456EE14E", exp256a, sizeof(exp256a));
 	qsctest_hex_to_bin("3B1FBA963CD8B0B59E8C1A6D71888B7143651AF8BA0A7070C0979E2811324AA5", exp256b, sizeof(exp256b));
 	qsctest_hex_to_bin("1F5B4E6CCA02209E0DCB5CA635B89A15E271ECC760071DFD805FAA38F9729230", exp256c, sizeof(exp256c));
-
 	qsctest_hex_to_bin("404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F", key256, sizeof(key256));
-
 	qsctest_hex_to_bin("00010203", msg32, sizeof(msg32));
 	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
 		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
@@ -2226,8 +2223,6 @@ static void scatter_gather_test()
 
 void qsctest_sha3_run()
 {
-	qsctest_shake_256_kat();
-
 	if (qsctest_cshake_256_kat() == true)
 	{
 		qsctest_print_safe("Success! Passed the cSHAKE-256 KAT test. \n");

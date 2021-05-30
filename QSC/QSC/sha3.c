@@ -6,87 +6,37 @@
 #	include <immintrin.h>
 #endif
 
-#define KECCAK_CSHAKE_DOMAIN_ID 0x04
-#define KECCAK_KMAC_DOMAIN_ID 0x04
-#define KECCAK_KPA_DOMAIN_ID 0x41
-#define KECCAK_PERMUTATION_ROUNDS 24
-#define KECCAK_SHA3_DOMAIN_ID 0x06
-#define KECCAK_SHAKE_DOMAIN_ID 0x1F
-#define KECCAK_STATE_BYTE_SIZE 200
+#define KPA_LEAF_HASH128 16
+#define KPA_LEAF_HASH256 32
+#define KPA_LEAF_HASH512 64
 
 /* keccak round constants */
-static const uint64_t KECCAK_RC24[KECCAK_PERMUTATION_ROUNDS] =
+static const uint64_t KECCAK_ROUND_CONSTANTS[QSC_KECCAK_PERMUTATION_MAX_ROUNDS] =
 {
-	0x0000000000000001ULL,
-	0x0000000000008082ULL,
-	0x800000000000808aULL,
-	0x8000000080008000ULL,
-	0x000000000000808bULL,
-	0x0000000080000001ULL,
-	0x8000000080008081ULL,
-	0x8000000000008009ULL,
-	0x000000000000008aULL,
-	0x0000000000000088ULL,
-	0x0000000080008009ULL,
-	0x000000008000000aULL,
-	0x000000008000808bULL,
-	0x800000000000008bULL,
-	0x8000000000008089ULL,
-	0x8000000000008003ULL,
-	0x8000000000008002ULL,
-	0x8000000000000080ULL,
-	0x000000000000800aULL,
-	0x800000008000000aULL,
-	0x8000000080008081ULL,
-	0x8000000000008080ULL,
-	0x0000000080000001ULL,
-	0x8000000080008008ULL
+	0x0000000000000001ULL, 0x0000000000008082ULL, 0x800000000000808AULL, 0x8000000080008000ULL,
+	0x000000000000808BULL, 0x0000000080000001ULL, 0x8000000080008081ULL, 0x8000000000008009ULL,
+	0x000000000000008AULL, 0x0000000000000088ULL, 0x0000000080008009ULL, 0x000000008000000AULL,
+	0x000000008000808BULL, 0x800000000000008BULL, 0x8000000000008089ULL, 0x8000000000008003ULL,
+	0x8000000000008002ULL, 0x8000000000000080ULL, 0x000000000000800AULL, 0x800000008000000AULL,
+	0x8000000080008081ULL, 0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL,
+	0x8000000080008082ULL, 0x800000008000800AULL, 0x8000000000000003ULL, 0x8000000080000009ULL,
+	0x8000000000008082ULL, 0x0000000000008009ULL, 0x8000000000000080ULL, 0x0000000000008083ULL,
+	0x8000000000000081ULL, 0x0000000000000001ULL, 0x000000000000800BULL, 0x8000000080008001ULL,
+	0x0000000000000080ULL, 0x8000000000008000ULL, 0x8000000080008001ULL, 0x0000000000000009ULL,
+	0x800000008000808BULL, 0x0000000000000081ULL, 0x8000000000000082ULL, 0x000000008000008BULL,
+	0x8000000080008009ULL, 0x8000000080000000ULL, 0x0000000080000080ULL, 0x0000000080008003ULL
 };
 
-/* keccak */
+/* Common */
 
-static void keccak_absorb(uint64_t* state, keccak_rate rate, const uint8_t* input, size_t inplen, uint8_t domain)
-{
-	uint8_t msg[QSC_KECCAK_STATE_BYTE_SIZE];
-
-	while (inplen >= (size_t)rate)
-	{
-#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-		qsc_memutils_xor((uint8_t*)state, input, rate);
-#else
-		for (size_t i = 0; i < rate / sizeof(uint64_t); ++i)
-		{
-			state[i] ^= qsc_intutils_le8to64((uint8_t*)(input + (sizeof(uint64_t) * i)));
-		}
-#endif
-		qsc_keccak_permute(state);
-		inplen -= rate;
-		input += rate;
-	}
-
-	qsc_memutils_copy(msg, input, inplen);
-	msg[inplen] = domain;
-	qsc_memutils_clear((uint8_t*)(msg + inplen + 1), rate - inplen + 1);
-	msg[rate - 1] |= 128U;
-
-#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-	qsc_memutils_xor((uint8_t*)state, msg, rate);
-#else
-	for (size_t i = 0; i < rate / 8; ++i)
-	{
-		state[i] ^= qsc_intutils_le8to64((uint8_t*)(msg + (8 * i)));
-	}
-#endif
-}
-
-static void keccak_fast_absorb(uint64_t* state, const uint8_t* input, size_t inplen)
+static void keccak_fast_absorb(uint64_t* state, const uint8_t* message, size_t msglen)
 {
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-	qsc_memutils_xor((uint8_t*)state, input, inplen);
+	qsc_memutils_xor((uint8_t*)state, message, msglen);
 #else
-	for (size_t i = 0; i < inplen / sizeof(uint64_t); ++i)
+	for (size_t i = 0; i < msglen / sizeof(uint64_t); ++i)
 	{
-		state[i] ^= qsc_intutils_le8to64((uint8_t*)(input + (sizeof(uint64_t) * i)));
+		state[i] ^= qsc_intutils_le8to64((uint8_t*)(message + (sizeof(uint64_t) * i)));
 	}
 #endif
 }
@@ -116,8 +66,1270 @@ static size_t keccak_left_encode(uint8_t* buffer, size_t value)
 	return (size_t)n + 1;
 }
 
-static void qsc_keccak_permute_p1600(uint64_t* state, size_t rounds)
+static size_t keccak_right_encode(uint8_t* buffer, size_t value)
 {
+	size_t i;
+	size_t n;
+	size_t v;
+
+	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8)
+	{
+	}
+
+	if (n == 0)
+	{
+		n = 1;
+	}
+
+	for (i = 1; i <= n; ++i)
+	{
+		buffer[i - 1] = (uint8_t)(value >> (8 * (n - i)));
+	}
+
+	buffer[n] = (uint8_t)n;
+
+	return (size_t)n + 1;
+}
+
+#if defined(QSC_SYSTEM_HAS_AVX512)
+#	if defined(QSC_KECCAK_UNROLLED_PERMUTATION)
+
+void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
+{
+	assert(rounds % 2 == 0);
+
+	__m512i a0;
+	__m512i a1;
+	__m512i a2;
+	__m512i a3;
+	__m512i a4;
+	__m512i a5;
+	__m512i a6;
+	__m512i a7;
+	__m512i a8;
+	__m512i a9;
+	__m512i a10;
+	__m512i a11;
+	__m512i a12;
+	__m512i a13;
+	__m512i a14;
+	__m512i a15;
+	__m512i a16;
+	__m512i a17;
+	__m512i a18;
+	__m512i a19;
+	__m512i a20;
+	__m512i a21;
+	__m512i a22;
+	__m512i a23;
+	__m512i a24;
+	__m512i c0;
+	__m512i c1;
+	__m512i c2;
+	__m512i c3;
+	__m512i c4;
+	__m512i d0;
+	__m512i d1;
+	__m512i d2;
+	__m512i d3;
+	__m512i d4;
+	__m512i e0;
+	__m512i e1;
+	__m512i e2;
+	__m512i e3;
+	__m512i e4;
+	__m512i e5;
+	__m512i e6;
+	__m512i e7;
+	__m512i e8;
+	__m512i e9;
+	__m512i e10;
+	__m512i e11;
+	__m512i e12;
+	__m512i e13;
+	__m512i e14;
+	__m512i e15;
+	__m512i e16;
+	__m512i e17;
+	__m512i e18;
+	__m512i e19;
+	__m512i e20;
+	__m512i e21;
+	__m512i e22;
+	__m512i e23;
+	__m512i e24;
+	size_t i;
+
+	a0 = state[0];
+	a1 = state[1];
+	a2 = state[2];
+	a3 = state[3];
+	a4 = state[4];
+	a5 = state[5];
+	a6 = state[6];
+	a7 = state[7];
+	a8 = state[8];
+	a9 = state[9];
+	a10 = state[10];
+	a11 = state[11];
+	a12 = state[12];
+	a13 = state[13];
+	a14 = state[14];
+	a15 = state[15];
+	a16 = state[16];
+	a17 = state[17];
+	a18 = state[18];
+	a19 = state[19];
+	a20 = state[20];
+	a21 = state[21];
+	a22 = state[22];
+	a23 = state[23];
+	a24 = state[24];
+
+	for (i = 0; i < rounds; i += 2)
+	{
+		/* round n */
+		c0 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a0, a5), _mm512_xor_si512(a10, a15)), a20);
+		c1 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a1, a6), _mm512_xor_si512(a11, a16)), a21);
+		c2 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a2, a7), _mm512_xor_si512(a12, a17)), a22);
+		c3 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a3, a8), _mm512_xor_si512(a13, a18)), a23);
+		c4 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a4, a9), _mm512_xor_si512(a14, a19)), a24);
+		d0 = _mm512_xor_si512(c4, _mm512_or_si512(_mm512_slli_epi64(c1, 1), _mm512_srli_epi64(c1, 64 - 1)));
+		d1 = _mm512_xor_si512(c0, _mm512_or_si512(_mm512_slli_epi64(c2, 1), _mm512_srli_epi64(c2, 64 - 1)));
+		d2 = _mm512_xor_si512(c1, _mm512_or_si512(_mm512_slli_epi64(c3, 1), _mm512_srli_epi64(c3, 64 - 1)));
+		d3 = _mm512_xor_si512(c2, _mm512_or_si512(_mm512_slli_epi64(c4, 1), _mm512_srli_epi64(c4, 64 - 1)));
+		d4 = _mm512_xor_si512(c3, _mm512_or_si512(_mm512_slli_epi64(c0, 1), _mm512_srli_epi64(c0, 64 - 1)));
+		a0 = _mm512_xor_si512(a0, d0);
+		c0 = a0;
+		a6 = _mm512_xor_si512(a6, d1);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(a6, 44), _mm512_srli_epi64(a6, 64 - 44));
+		a12 = _mm512_xor_si512(a12, d2);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(a12, 43), _mm512_srli_epi64(a12, 64 - 43));
+		a18 = _mm512_xor_si512(a18, d3);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(a18, 21), _mm512_srli_epi64(a18, 64 - 21));
+		a24 = _mm512_xor_si512(a24, d4);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(a24, 14), _mm512_srli_epi64(a24, 64 - 14));
+		e0 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		e0 = _mm512_xor_si512(e0, _mm512_set1_epi64(KECCAK_ROUND_CONSTANTS[i]));
+		e1 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		e2 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		e3 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		e4 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		a3 = _mm512_xor_si512(a3, d3);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(a3, 28), _mm512_srli_epi64(a3, 64 - 28));
+		a9 = _mm512_xor_si512(a9, d4);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(a9, 20), _mm512_srli_epi64(a9, 64 - 20));
+		a10 = _mm512_xor_si512(a10, d0);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(a10, 3), _mm512_srli_epi64(a10, 64 - 3));
+		a16 = _mm512_xor_si512(a16, d1);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(a16, 45), _mm512_srli_epi64(a16, 64 - 45));
+		a22 = _mm512_xor_si512(a22, d2);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(a22, 61), _mm512_srli_epi64(a22, 64 - 61));
+		e5 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		e6 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		e7 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		e8 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		e9 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		a1 = _mm512_xor_si512(a1, d1);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(a1, 1), _mm512_srli_epi64(a1, 64 - 1));
+		a7 = _mm512_xor_si512(a7, d2);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(a7, 6), _mm512_srli_epi64(a7, 64 - 6));
+		a13 = _mm512_xor_si512(a13, d3);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(a13, 25), _mm512_srli_epi64(a13, 64 - 25));
+		a19 = _mm512_xor_si512(a19, d4);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(a19, 8), _mm512_srli_epi64(a19, 64 - 8));
+		a20 = _mm512_xor_si512(a20, d0);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(a20, 18), _mm512_srli_epi64(a20, 64 - 18));
+		e10 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		e11 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		e12 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		e13 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		e14 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		a4 = _mm512_xor_si512(a4, d4);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(a4, 27), _mm512_srli_epi64(a4, 64 - 27));
+		a5 = _mm512_xor_si512(a5, d0);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(a5, 36), _mm512_srli_epi64(a5, 64 - 36));
+		a11 = _mm512_xor_si512(a11, d1);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(a11, 10), _mm512_srli_epi64(a11, 64 - 10));
+		a17 = _mm512_xor_si512(a17, d2);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(a17, 15), _mm512_srli_epi64(a17, 64 - 15));
+		a23 = _mm512_xor_si512(a23, d3);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(a23, 56), _mm512_srli_epi64(a23, 64 - 56));
+		e15 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		e16 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		e17 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		e18 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		e19 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		a2 = _mm512_xor_si512(a2, d2);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(a2, 62), _mm512_srli_epi64(a2, 64 - 62));
+		a8 = _mm512_xor_si512(a8, d3);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(a8, 55), _mm512_srli_epi64(a8, 64 - 55));
+		a14 = _mm512_xor_si512(a14, d4);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(a14, 39), _mm512_srli_epi64(a14, 64 - 39));
+		a15 = _mm512_xor_si512(a15, d0);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(a15, 41), _mm512_srli_epi64(a15, 64 - 41));
+		a21 = _mm512_xor_si512(a21, d1);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(a21, 2), _mm512_srli_epi64(a21, 64 - 2));
+		e20 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		e21 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		e22 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		e23 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		e24 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		/* round n + 1 */
+		c0 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e0, e5), _mm512_xor_si512(e10, e15)), e20);
+		c1 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e1, e6), _mm512_xor_si512(e11, e16)), e21);
+		c2 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e2, e7), _mm512_xor_si512(e12, e17)), e22);
+		c3 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e3, e8), _mm512_xor_si512(e13, e18)), e23);
+		c4 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e4, e9), _mm512_xor_si512(e14, e19)), e24);
+		d0 = _mm512_xor_si512(c4, _mm512_or_si512(_mm512_slli_epi64(c1, 1), _mm512_srli_epi64(c1, 64 - 1)));
+		d1 = _mm512_xor_si512(c0, _mm512_or_si512(_mm512_slli_epi64(c2, 1), _mm512_srli_epi64(c2, 64 - 1)));
+		d2 = _mm512_xor_si512(c1, _mm512_or_si512(_mm512_slli_epi64(c3, 1), _mm512_srli_epi64(c3, 64 - 1)));
+		d3 = _mm512_xor_si512(c2, _mm512_or_si512(_mm512_slli_epi64(c4, 1), _mm512_srli_epi64(c4, 64 - 1)));
+		d4 = _mm512_xor_si512(c3, _mm512_or_si512(_mm512_slli_epi64(c0, 1), _mm512_srli_epi64(c0, 64 - 1)));
+		e0 = _mm512_xor_si512(e0, d0);
+		c0 = e0;
+		e6 = _mm512_xor_si512(e6, d1);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(e6, 44), _mm512_srli_epi64(e6, 64 - 44));
+		e12 = _mm512_xor_si512(e12, d2);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(e12, 43), _mm512_srli_epi64(e12, 64 - 43));
+		e18 = _mm512_xor_si512(e18, d3);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(e18, 21), _mm512_srli_epi64(e18, 64 - 21));
+		e24 = _mm512_xor_si512(e24, d4);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(e24, 14), _mm512_srli_epi64(e24, 64 - 14));
+		a0 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		a0 = _mm512_xor_si512(a0, _mm512_set1_epi64(KECCAK_ROUND_CONSTANTS[i + 1]));
+		a1 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		a2 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		a3 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		a4 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		e3 = _mm512_xor_si512(e3, d3);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(e3, 28), _mm512_srli_epi64(e3, 64 - 28));
+		e9 = _mm512_xor_si512(e9, d4);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(e9, 20), _mm512_srli_epi64(e9, 64 - 20));
+		e10 = _mm512_xor_si512(e10, d0);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(e10, 3), _mm512_srli_epi64(e10, 64 - 3));
+		e16 = _mm512_xor_si512(e16, d1);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(e16, 45), _mm512_srli_epi64(e16, 64 - 45));
+		e22 = _mm512_xor_si512(e22, d2);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(e22, 61), _mm512_srli_epi64(e22, 64 - 61));
+		a5 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		a6 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		a7 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		a8 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		a9 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		e1 = _mm512_xor_si512(e1, d1);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(e1, 1), _mm512_srli_epi64(e1, 64 - 1));
+		e7 = _mm512_xor_si512(e7, d2);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(e7, 6), _mm512_srli_epi64(e7, 64 - 6));
+		e13 = _mm512_xor_si512(e13, d3);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(e13, 25), _mm512_srli_epi64(e13, 64 - 25));
+		e19 = _mm512_xor_si512(e19, d4);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(e19, 8), _mm512_srli_epi64(e19, 64 - 8));
+		e20 = _mm512_xor_si512(e20, d0);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(e20, 18), _mm512_srli_epi64(e20, 64 - 18));
+		a10 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		a11 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		a12 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		a13 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		a14 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		e4 = _mm512_xor_si512(e4, d4);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(e4, 27), _mm512_srli_epi64(e4, 64 - 27));
+		e5 = _mm512_xor_si512(e5, d0);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(e5, 36), _mm512_srli_epi64(e5, 64 - 36));
+		e11 = _mm512_xor_si512(e11, d1);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(e11, 10), _mm512_srli_epi64(e11, 64 - 10));
+		e17 = _mm512_xor_si512(e17, d2);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(e17, 15), _mm512_srli_epi64(e17, 64 - 15));
+		e23 = _mm512_xor_si512(e23, d3);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(e23, 56), _mm512_srli_epi64(e23, 64 - 56));
+		a15 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		a16 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		a17 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		a18 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		a19 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+		e2 = _mm512_xor_si512(e2, d2);
+		c0 = _mm512_or_si512(_mm512_slli_epi64(e2, 62), _mm512_srli_epi64(e2, 64 - 62));
+		e8 = _mm512_xor_si512(e8, d3);
+		c1 = _mm512_or_si512(_mm512_slli_epi64(e8, 55), _mm512_srli_epi64(e8, 64 - 55));
+		e14 = _mm512_xor_si512(e14, d4);
+		c2 = _mm512_or_si512(_mm512_slli_epi64(e14, 39), _mm512_srli_epi64(e14, 64 - 39));
+		e15 = _mm512_xor_si512(e15, d0);
+		c3 = _mm512_or_si512(_mm512_slli_epi64(e15, 41), _mm512_srli_epi64(e15, 64 - 41));
+		e21 = _mm512_xor_si512(e21, d1);
+		c4 = _mm512_or_si512(_mm512_slli_epi64(e21, 2), _mm512_srli_epi64(e21, 64 - 2));
+		a20 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
+		a21 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
+		a22 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
+		a23 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
+		a24 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
+	}
+
+	state[0] = a0;
+	state[1] = a1;
+	state[2] = a2;
+	state[3] = a3;
+	state[4] = a4;
+	state[5] = a5;
+	state[6] = a6;
+	state[7] = a7;
+	state[8] = a8;
+	state[9] = a9;
+	state[10] = a10;
+	state[11] = a11;
+	state[12] = a12;
+	state[13] = a13;
+	state[14] = a14;
+	state[15] = a15;
+	state[16] = a16;
+	state[17] = a17;
+	state[18] = a18;
+	state[19] = a19;
+	state[20] = a20;
+	state[21] = a21;
+	state[22] = a22;
+	state[23] = a23;
+	state[24] = a24;
+}
+
+#	else
+
+void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
+{
+	assert(rounds % 2 == 0);
+
+	__m512i a[25] = { 0 };
+	__m512i c[5] = { 0 };
+	__m512i d[5] = { 0 };
+	__m512i e[25] = { 0 };
+	size_t i;
+
+	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
+	{
+		a[i] = state[i];
+	}
+
+	for (i = 0; i < rounds; i += 2)
+	{
+		// round n
+		c[0] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[0], a[5]), _mm512_xor_si512(a[10], a[15])), a[20]);
+		c[1] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[1], a[6]), _mm512_xor_si512(a[11], a[16])), a[21]);
+		c[2] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[2], a[7]), _mm512_xor_si512(a[12], a[17])), a[22]);
+		c[3] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[3], a[8]), _mm512_xor_si512(a[13], a[18])), a[23]);
+		c[4] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[4], a[9]), _mm512_xor_si512(a[14], a[19])), a[24]);
+		d[0] = _mm512_xor_si512(c[4], _mm512_or_si512(_mm512_slli_epi64(c[1], 1), _mm512_srli_epi64(c[1], 64 - 1)));
+		d[1] = _mm512_xor_si512(c[0], _mm512_or_si512(_mm512_slli_epi64(c[2], 1), _mm512_srli_epi64(c[2], 64 - 1)));
+		d[2] = _mm512_xor_si512(c[1], _mm512_or_si512(_mm512_slli_epi64(c[3], 1), _mm512_srli_epi64(c[3], 64 - 1)));
+		d[3] = _mm512_xor_si512(c[2], _mm512_or_si512(_mm512_slli_epi64(c[4], 1), _mm512_srli_epi64(c[4], 64 - 1)));
+		d[4] = _mm512_xor_si512(c[3], _mm512_or_si512(_mm512_slli_epi64(c[0], 1), _mm512_srli_epi64(c[0], 64 - 1)));
+		a[0] = _mm512_xor_si512(a[0], d[0]);
+		c[0] = a[0];
+		a[6] = _mm512_xor_si512(a[6], d[1]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[6], 44), _mm512_srli_epi64(a[6], 64 - 44));
+		a[12] = _mm512_xor_si512(a[12], d[2]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[12], 43), _mm512_srli_epi64(a[12], 64 - 43));
+		a[18] = _mm512_xor_si512(a[18], d[3]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[18], 21), _mm512_srli_epi64(a[18], 64 - 21));
+		a[24] = _mm512_xor_si512(a[24], d[4]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[24], 14), _mm512_srli_epi64(a[24], 64 - 14));
+		e[0] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		e[0] = _mm512_xor_si512(e[0], _mm512_set1_epi64(KECCAK_ROUND_CONSTANTS[i]));
+		e[1] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		e[2] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		e[3] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		e[4] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		a[3] = _mm512_xor_si512(a[3], d[3]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[3], 28), _mm512_srli_epi64(a[3], 64 - 28));
+		a[9] = _mm512_xor_si512(a[9], d[4]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[9], 20), _mm512_srli_epi64(a[9], 64 - 20));
+		a[10] = _mm512_xor_si512(a[10], d[0]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[10], 3), _mm512_srli_epi64(a[10], 64 - 3));
+		a[16] = _mm512_xor_si512(a[16], d[1]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[16], 45), _mm512_srli_epi64(a[16], 64 - 45));
+		a[22] = _mm512_xor_si512(a[22], d[2]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[22], 61), _mm512_srli_epi64(a[22], 64 - 61));
+		e[5] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		e[6] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		e[7] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		e[8] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		e[9] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		a[1] = _mm512_xor_si512(a[1], d[1]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[1], 1), _mm512_srli_epi64(a[1], 64 - 1));
+		a[7] = _mm512_xor_si512(a[7], d[2]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[7], 6), _mm512_srli_epi64(a[7], 64 - 6));
+		a[13] = _mm512_xor_si512(a[13], d[3]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[13], 25), _mm512_srli_epi64(a[13], 64 - 25));
+		a[19] = _mm512_xor_si512(a[19], d[4]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[19], 8), _mm512_srli_epi64(a[19], 64 - 8));
+		a[20] = _mm512_xor_si512(a[20], d[0]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[20], 18), _mm512_srli_epi64(a[20], 64 - 18));
+		e[10] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		e[11] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		e[12] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		e[13] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		e[14] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		a[4] = _mm512_xor_si512(a[4], d[4]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[4], 27), _mm512_srli_epi64(a[4], 64 - 27));
+		a[5] = _mm512_xor_si512(a[5], d[0]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[5], 36), _mm512_srli_epi64(a[5], 64 - 36));
+		a[11] = _mm512_xor_si512(a[11], d[1]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[11], 10), _mm512_srli_epi64(a[11], 64 - 10));
+		a[17] = _mm512_xor_si512(a[17], d[2]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[17], 15), _mm512_srli_epi64(a[17], 64 - 15));
+		a[23] = _mm512_xor_si512(a[23], d[3]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[23], 56), _mm512_srli_epi64(a[23], 64 - 56));
+		e[15] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		e[16] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		e[17] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		e[18] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		e[19] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		a[2] = _mm512_xor_si512(a[2], d[2]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[2], 62), _mm512_srli_epi64(a[2], 64 - 62));
+		a[8] = _mm512_xor_si512(a[8], d[3]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[8], 55), _mm512_srli_epi64(a[8], 64 - 55));
+		a[14] = _mm512_xor_si512(a[14], d[4]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[14], 39), _mm512_srli_epi64(a[14], 64 - 39));
+		a[15] = _mm512_xor_si512(a[15], d[0]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[15], 41), _mm512_srli_epi64(a[15], 64 - 41));
+		a[21] = _mm512_xor_si512(a[21], d[1]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[21], 2), _mm512_srli_epi64(a[21], 64 - 2));
+		e[20] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		e[21] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		e[22] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		e[23] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		e[24] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+
+		// round n + 1
+		c[0] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[0], e[5]), _mm512_xor_si512(e[10], e[15])), e[20]);
+		c[1] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[1], e[6]), _mm512_xor_si512(e[11], e[16])), e[21]);
+		c[2] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[2], e[7]), _mm512_xor_si512(e[12], e[17])), e[22]);
+		c[3] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[3], e[8]), _mm512_xor_si512(e[13], e[18])), e[23]);
+		c[4] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[4], e[9]), _mm512_xor_si512(e[14], e[19])), e[24]);
+		d[0] = _mm512_xor_si512(c[4], _mm512_or_si512(_mm512_slli_epi64(c[1], 1), _mm512_srli_epi64(c[1], 64 - 1)));
+		d[1] = _mm512_xor_si512(c[0], _mm512_or_si512(_mm512_slli_epi64(c[2], 1), _mm512_srli_epi64(c[2], 64 - 1)));
+		d[2] = _mm512_xor_si512(c[1], _mm512_or_si512(_mm512_slli_epi64(c[3], 1), _mm512_srli_epi64(c[3], 64 - 1)));
+		d[3] = _mm512_xor_si512(c[2], _mm512_or_si512(_mm512_slli_epi64(c[4], 1), _mm512_srli_epi64(c[4], 64 - 1)));
+		d[4] = _mm512_xor_si512(c[3], _mm512_or_si512(_mm512_slli_epi64(c[0], 1), _mm512_srli_epi64(c[0], 64 - 1)));
+		e[0] = _mm512_xor_si512(e[0], d[0]);
+		c[0] = e[0];
+		e[6] = _mm512_xor_si512(e[6], d[1]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[6], 44), _mm512_srli_epi64(e[6], 64 - 44));
+		e[12] = _mm512_xor_si512(e[12], d[2]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[12], 43), _mm512_srli_epi64(e[12], 64 - 43));
+		e[18] = _mm512_xor_si512(e[18], d[3]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[18], 21), _mm512_srli_epi64(e[18], 64 - 21));
+		e[24] = _mm512_xor_si512(e[24], d[4]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[24], 14), _mm512_srli_epi64(e[24], 64 - 14));
+		a[0] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		a[0] = _mm512_xor_si512(a[0], _mm512_set1_epi64(KECCAK_ROUND_CONSTANTS[i + 1]));
+		a[1] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		a[2] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		a[3] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		a[4] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		e[3] = _mm512_xor_si512(e[3], d[3]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[3], 28), _mm512_srli_epi64(e[3], 64 - 28));
+		e[9] = _mm512_xor_si512(e[9], d[4]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[9], 20), _mm512_srli_epi64(e[9], 64 - 20));
+		e[10] = _mm512_xor_si512(e[10], d[0]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[10], 3), _mm512_srli_epi64(e[10], 64 - 3));
+		e[16] = _mm512_xor_si512(e[16], d[1]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[16], 45), _mm512_srli_epi64(e[16], 64 - 45));
+		e[22] = _mm512_xor_si512(e[22], d[2]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[22], 61), _mm512_srli_epi64(e[22], 64 - 61));
+		a[5] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		a[6] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		a[7] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		a[8] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		a[9] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		e[1] = _mm512_xor_si512(e[1], d[1]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[1], 1), _mm512_srli_epi64(e[1], 64 - 1));
+		e[7] = _mm512_xor_si512(e[7], d[2]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[7], 6), _mm512_srli_epi64(e[7], 64 - 6));
+		e[13] = _mm512_xor_si512(e[13], d[3]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[13], 25), _mm512_srli_epi64(e[13], 64 - 25));
+		e[19] = _mm512_xor_si512(e[19], d[4]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[19], 8), _mm512_srli_epi64(e[19], 64 - 8));
+		e[20] = _mm512_xor_si512(e[20], d[0]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[20], 18), _mm512_srli_epi64(e[20], 64 - 18));
+		a[10] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		a[11] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		a[12] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		a[13] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		a[14] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		e[4] = _mm512_xor_si512(e[4], d[4]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[4], 27), _mm512_srli_epi64(e[4], 64 - 27));
+		e[5] = _mm512_xor_si512(e[5], d[0]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[5], 36), _mm512_srli_epi64(e[5], 64 - 36));
+		e[11] = _mm512_xor_si512(e[11], d[1]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[11], 10), _mm512_srli_epi64(e[11], 64 - 10));
+		e[17] = _mm512_xor_si512(e[17], d[2]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[17], 15), _mm512_srli_epi64(e[17], 64 - 15));
+		e[23] = _mm512_xor_si512(e[23], d[3]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[23], 56), _mm512_srli_epi64(e[23], 64 - 56));
+		a[15] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		a[16] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		a[17] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		a[18] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		a[19] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+		e[2] = _mm512_xor_si512(e[2], d[2]);
+		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[2], 62), _mm512_srli_epi64(e[2], 64 - 62));
+		e[8] = _mm512_xor_si512(e[8], d[3]);
+		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[8], 55), _mm512_srli_epi64(e[8], 64 - 55));
+		e[14] = _mm512_xor_si512(e[14], d[4]);
+		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[14], 39), _mm512_srli_epi64(e[14], 64 - 39));
+		e[15] = _mm512_xor_si512(e[15], d[0]);
+		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[15], 41), _mm512_srli_epi64(e[15], 64 - 41));
+		e[21] = _mm512_xor_si512(e[21], d[1]);
+		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[21], 2), _mm512_srli_epi64(e[21], 64 - 2));
+		a[20] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
+		a[21] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
+		a[22] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
+		a[23] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
+		a[24] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
+	}
+
+	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
+	{
+		state[i] = a[i];
+	}
+}
+
+#	endif
+#endif
+
+#if defined(QSC_SYSTEM_HAS_AVX2)
+#	if defined(QSC_KECCAK_UNROLLED_PERMUTATION)
+
+void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
+{
+	assert(rounds % 2 == 0);
+
+	__m256i a0;
+	__m256i a1;
+	__m256i a2;
+	__m256i a3;
+	__m256i a4;
+	__m256i a5;
+	__m256i a6;
+	__m256i a7;
+	__m256i a8;
+	__m256i a9;
+	__m256i a10;
+	__m256i a11;
+	__m256i a12;
+	__m256i a13;
+	__m256i a14;
+	__m256i a15;
+	__m256i a16;
+	__m256i a17;
+	__m256i a18;
+	__m256i a19;
+	__m256i a20;
+	__m256i a21;
+	__m256i a22;
+	__m256i a23;
+	__m256i a24;
+	__m256i c0;
+	__m256i c1;
+	__m256i c2;
+	__m256i c3;
+	__m256i c4;
+	__m256i d0;
+	__m256i d1;
+	__m256i d2;
+	__m256i d3;
+	__m256i d4;
+	__m256i e0;
+	__m256i e1;
+	__m256i e2;
+	__m256i e3;
+	__m256i e4;
+	__m256i e5;
+	__m256i e6;
+	__m256i e7;
+	__m256i e8;
+	__m256i e9;
+	__m256i e10;
+	__m256i e11;
+	__m256i e12;
+	__m256i e13;
+	__m256i e14;
+	__m256i e15;
+	__m256i e16;
+	__m256i e17;
+	__m256i e18;
+	__m256i e19;
+	__m256i e20;
+	__m256i e21;
+	__m256i e22;
+	__m256i e23;
+	__m256i e24;
+
+
+	size_t i;
+
+	a0 = state[0];
+	a1 = state[1];
+	a2 = state[2];
+	a3 = state[3];
+	a4 = state[4];
+	a5 = state[5];
+	a6 = state[6];
+	a7 = state[7];
+	a8 = state[8];
+	a9 = state[9];
+	a10 = state[10];
+	a11 = state[11];
+	a12 = state[12];
+	a13 = state[13];
+	a14 = state[14];
+	a15 = state[15];
+	a16 = state[16];
+	a17 = state[17];
+	a18 = state[18];
+	a19 = state[19];
+	a20 = state[20];
+	a21 = state[21];
+	a22 = state[22];
+	a23 = state[23];
+	a24 = state[24];
+
+	for (i = 0; i < rounds; i += 2)
+	{
+		/* round n */
+		c0 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a0, a5), _mm256_xor_si256(a10, a15)), a20);
+		c1 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a1, a6), _mm256_xor_si256(a11, a16)), a21);
+		c2 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a2, a7), _mm256_xor_si256(a12, a17)), a22);
+		c3 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a3, a8), _mm256_xor_si256(a13, a18)), a23);
+		c4 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a4, a9), _mm256_xor_si256(a14, a19)), a24);
+		d0 = _mm256_xor_si256(c4, _mm256_or_si256(_mm256_slli_epi64(c1, 1), _mm256_srli_epi64(c1, 64 - 1)));
+		d1 = _mm256_xor_si256(c0, _mm256_or_si256(_mm256_slli_epi64(c2, 1), _mm256_srli_epi64(c2, 64 - 1)));
+		d2 = _mm256_xor_si256(c1, _mm256_or_si256(_mm256_slli_epi64(c3, 1), _mm256_srli_epi64(c3, 64 - 1)));
+		d3 = _mm256_xor_si256(c2, _mm256_or_si256(_mm256_slli_epi64(c4, 1), _mm256_srli_epi64(c4, 64 - 1)));
+		d4 = _mm256_xor_si256(c3, _mm256_or_si256(_mm256_slli_epi64(c0, 1), _mm256_srli_epi64(c0, 64 - 1)));
+		a0 = _mm256_xor_si256(a0, d0);
+		c0 = a0;
+		a6 = _mm256_xor_si256(a6, d1);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(a6, 44), _mm256_srli_epi64(a6, 64 - 44));
+		a12 = _mm256_xor_si256(a12, d2);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(a12, 43), _mm256_srli_epi64(a12, 64 - 43));
+		a18 = _mm256_xor_si256(a18, d3);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(a18, 21), _mm256_srli_epi64(a18, 64 - 21));
+		a24 = _mm256_xor_si256(a24, d4);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(a24, 14), _mm256_srli_epi64(a24, 64 - 14));
+		e0 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		e0 = _mm256_xor_si256(e0, _mm256_set1_epi64x(KECCAK_ROUND_CONSTANTS[i]));
+		e1 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		e2 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		e3 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		e4 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		a3 = _mm256_xor_si256(a3, d3);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(a3, 28), _mm256_srli_epi64(a3, 64 - 28));
+		a9 = _mm256_xor_si256(a9, d4);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(a9, 20), _mm256_srli_epi64(a9, 64 - 20));
+		a10 = _mm256_xor_si256(a10, d0);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(a10, 3), _mm256_srli_epi64(a10, 64 - 3));
+		a16 = _mm256_xor_si256(a16, d1);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(a16, 45), _mm256_srli_epi64(a16, 64 - 45));
+		a22 = _mm256_xor_si256(a22, d2);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(a22, 61), _mm256_srli_epi64(a22, 64 - 61));
+		e5 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		e6 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		e7 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		e8 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		e9 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		a1 = _mm256_xor_si256(a1, d1);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(a1, 1), _mm256_srli_epi64(a1, 64 - 1));
+		a7 = _mm256_xor_si256(a7, d2);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(a7, 6), _mm256_srli_epi64(a7, 64 - 6));
+		a13 = _mm256_xor_si256(a13, d3);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(a13, 25), _mm256_srli_epi64(a13, 64 - 25));
+		a19 = _mm256_xor_si256(a19, d4);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(a19, 8), _mm256_srli_epi64(a19, 64 - 8));
+		a20 = _mm256_xor_si256(a20, d0);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(a20, 18), _mm256_srli_epi64(a20, 64 - 18));
+		e10 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		e11 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		e12 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		e13 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		e14 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		a4 = _mm256_xor_si256(a4, d4);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(a4, 27), _mm256_srli_epi64(a4, 64 - 27));
+		a5 = _mm256_xor_si256(a5, d0);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(a5, 36), _mm256_srli_epi64(a5, 64 - 36));
+		a11 = _mm256_xor_si256(a11, d1);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(a11, 10), _mm256_srli_epi64(a11, 64 - 10));
+		a17 = _mm256_xor_si256(a17, d2);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(a17, 15), _mm256_srli_epi64(a17, 64 - 15));
+		a23 = _mm256_xor_si256(a23, d3);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(a23, 56), _mm256_srli_epi64(a23, 64 - 56));
+		e15 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		e16 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		e17 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		e18 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		e19 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		a2 = _mm256_xor_si256(a2, d2);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(a2, 62), _mm256_srli_epi64(a2, 64 - 62));
+		a8 = _mm256_xor_si256(a8, d3);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(a8, 55), _mm256_srli_epi64(a8, 64 - 55));
+		a14 = _mm256_xor_si256(a14, d4);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(a14, 39), _mm256_srli_epi64(a14, 64 - 39));
+		a15 = _mm256_xor_si256(a15, d0);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(a15, 41), _mm256_srli_epi64(a15, 64 - 41));
+		a21 = _mm256_xor_si256(a21, d1);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(a21, 2), _mm256_srli_epi64(a21, 64 - 2));
+		e20 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		e21 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		e22 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		e23 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		e24 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		/* round n + 1 */
+		c0 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e0, e5), _mm256_xor_si256(e10, e15)), e20);
+		c1 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e1, e6), _mm256_xor_si256(e11, e16)), e21);
+		c2 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e2, e7), _mm256_xor_si256(e12, e17)), e22);
+		c3 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e3, e8), _mm256_xor_si256(e13, e18)), e23);
+		c4 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e4, e9), _mm256_xor_si256(e14, e19)), e24);
+		d0 = _mm256_xor_si256(c4, _mm256_or_si256(_mm256_slli_epi64(c1, 1), _mm256_srli_epi64(c1, 64 - 1)));
+		d1 = _mm256_xor_si256(c0, _mm256_or_si256(_mm256_slli_epi64(c2, 1), _mm256_srli_epi64(c2, 64 - 1)));
+		d2 = _mm256_xor_si256(c1, _mm256_or_si256(_mm256_slli_epi64(c3, 1), _mm256_srli_epi64(c3, 64 - 1)));
+		d3 = _mm256_xor_si256(c2, _mm256_or_si256(_mm256_slli_epi64(c4, 1), _mm256_srli_epi64(c4, 64 - 1)));
+		d4 = _mm256_xor_si256(c3, _mm256_or_si256(_mm256_slli_epi64(c0, 1), _mm256_srli_epi64(c0, 64 - 1)));
+		e0 = _mm256_xor_si256(e0, d0);
+		c0 = e0;
+		e6 = _mm256_xor_si256(e6, d1);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(e6, 44), _mm256_srli_epi64(e6, 64 - 44));
+		e12 = _mm256_xor_si256(e12, d2);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(e12, 43), _mm256_srli_epi64(e12, 64 - 43));
+		e18 = _mm256_xor_si256(e18, d3);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(e18, 21), _mm256_srli_epi64(e18, 64 - 21));
+		e24 = _mm256_xor_si256(e24, d4);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(e24, 14), _mm256_srli_epi64(e24, 64 - 14));
+		a0 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		a0 = _mm256_xor_si256(a0, _mm256_set1_epi64x(KECCAK_ROUND_CONSTANTS[i + 1]));
+		a1 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		a2 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		a3 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		a4 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		e3 = _mm256_xor_si256(e3, d3);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(e3, 28), _mm256_srli_epi64(e3, 64 - 28));
+		e9 = _mm256_xor_si256(e9, d4);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(e9, 20), _mm256_srli_epi64(e9, 64 - 20));
+		e10 = _mm256_xor_si256(e10, d0);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(e10, 3), _mm256_srli_epi64(e10, 64 - 3));
+		e16 = _mm256_xor_si256(e16, d1);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(e16, 45), _mm256_srli_epi64(e16, 64 - 45));
+		e22 = _mm256_xor_si256(e22, d2);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(e22, 61), _mm256_srli_epi64(e22, 64 - 61));
+		a5 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		a6 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		a7 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		a8 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		a9 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		e1 = _mm256_xor_si256(e1, d1);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(e1, 1), _mm256_srli_epi64(e1, 64 - 1));
+		e7 = _mm256_xor_si256(e7, d2);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(e7, 6), _mm256_srli_epi64(e7, 64 - 6));
+		e13 = _mm256_xor_si256(e13, d3);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(e13, 25), _mm256_srli_epi64(e13, 64 - 25));
+		e19 = _mm256_xor_si256(e19, d4);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(e19, 8), _mm256_srli_epi64(e19, 64 - 8));
+		e20 = _mm256_xor_si256(e20, d0);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(e20, 18), _mm256_srli_epi64(e20, 64 - 18));
+		a10 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		a11 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		a12 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		a13 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		a14 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		e4 = _mm256_xor_si256(e4, d4);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(e4, 27), _mm256_srli_epi64(e4, 64 - 27));
+		e5 = _mm256_xor_si256(e5, d0);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(e5, 36), _mm256_srli_epi64(e5, 64 - 36));
+		e11 = _mm256_xor_si256(e11, d1);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(e11, 10), _mm256_srli_epi64(e11, 64 - 10));
+		e17 = _mm256_xor_si256(e17, d2);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(e17, 15), _mm256_srli_epi64(e17, 64 - 15));
+		e23 = _mm256_xor_si256(e23, d3);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(e23, 56), _mm256_srli_epi64(e23, 64 - 56));
+		a15 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		a16 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		a17 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		a18 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		a19 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+		e2 = _mm256_xor_si256(e2, d2);
+		c0 = _mm256_or_si256(_mm256_slli_epi64(e2, 62), _mm256_srli_epi64(e2, 64 - 62));
+		e8 = _mm256_xor_si256(e8, d3);
+		c1 = _mm256_or_si256(_mm256_slli_epi64(e8, 55), _mm256_srli_epi64(e8, 64 - 55));
+		e14 = _mm256_xor_si256(e14, d4);
+		c2 = _mm256_or_si256(_mm256_slli_epi64(e14, 39), _mm256_srli_epi64(e14, 64 - 39));
+		e15 = _mm256_xor_si256(e15, d0);
+		c3 = _mm256_or_si256(_mm256_slli_epi64(e15, 41), _mm256_srli_epi64(e15, 64 - 41));
+		e21 = _mm256_xor_si256(e21, d1);
+		c4 = _mm256_or_si256(_mm256_slli_epi64(e21, 2), _mm256_srli_epi64(e21, 64 - 2));
+		a20 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
+		a21 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
+		a22 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
+		a23 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
+		a24 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
+	}
+
+	state[0] = a0;
+	state[1] = a1;
+	state[2] = a2;
+	state[3] = a3;
+	state[4] = a4;
+	state[5] = a5;
+	state[6] = a6;
+	state[7] = a7;
+	state[8] = a8;
+	state[9] = a9;
+	state[10] = a10;
+	state[11] = a11;
+	state[12] = a12;
+	state[13] = a13;
+	state[14] = a14;
+	state[15] = a15;
+	state[16] = a16;
+	state[17] = a17;
+	state[18] = a18;
+	state[19] = a19;
+	state[20] = a20;
+	state[21] = a21;
+	state[22] = a22;
+	state[23] = a23;
+	state[24] = a24;
+}
+
+#	else
+
+void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
+{
+	assert(rounds % 2 == 0);
+
+	__m256i a[25] = { 0 };
+	__m256i c[5] = { 0 };
+	__m256i d[5] = { 0 };
+	__m256i e[25] = { 0 };
+	size_t i;
+
+	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
+	{
+		a[i] = state[i];
+	}
+
+	for (i = 0; i < rounds; i += 2)
+	{
+		// round n
+		c[0] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[0], a[5]), _mm256_xor_si256(a[10], a[15])), a[20]);
+		c[1] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[1], a[6]), _mm256_xor_si256(a[11], a[16])), a[21]);
+		c[2] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[2], a[7]), _mm256_xor_si256(a[12], a[17])), a[22]);
+		c[3] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[3], a[8]), _mm256_xor_si256(a[13], a[18])), a[23]);
+		c[4] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[4], a[9]), _mm256_xor_si256(a[14], a[19])), a[24]);
+		d[0] = _mm256_xor_si256(c[4], _mm256_or_si256(_mm256_slli_epi64(c[1], 1), _mm256_srli_epi64(c[1], 64 - 1)));
+		d[1] = _mm256_xor_si256(c[0], _mm256_or_si256(_mm256_slli_epi64(c[2], 1), _mm256_srli_epi64(c[2], 64 - 1)));
+		d[2] = _mm256_xor_si256(c[1], _mm256_or_si256(_mm256_slli_epi64(c[3], 1), _mm256_srli_epi64(c[3], 64 - 1)));
+		d[3] = _mm256_xor_si256(c[2], _mm256_or_si256(_mm256_slli_epi64(c[4], 1), _mm256_srli_epi64(c[4], 64 - 1)));
+		d[4] = _mm256_xor_si256(c[3], _mm256_or_si256(_mm256_slli_epi64(c[0], 1), _mm256_srli_epi64(c[0], 64 - 1)));
+		a[0] = _mm256_xor_si256(a[0], d[0]);
+		c[0] = a[0];
+		a[6] = _mm256_xor_si256(a[6], d[1]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[6], 44), _mm256_srli_epi64(a[6], 64 - 44));
+		a[12] = _mm256_xor_si256(a[12], d[2]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[12], 43), _mm256_srli_epi64(a[12], 64 - 43));
+		a[18] = _mm256_xor_si256(a[18], d[3]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[18], 21), _mm256_srli_epi64(a[18], 64 - 21));
+		a[24] = _mm256_xor_si256(a[24], d[4]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[24], 14), _mm256_srli_epi64(a[24], 64 - 14));
+		e[0] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		e[0] = _mm256_xor_si256(e[0], _mm256_set1_epi64x(KECCAK_ROUND_CONSTANTS[i]));
+		e[1] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		e[2] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		e[3] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		e[4] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		a[3] = _mm256_xor_si256(a[3], d[3]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[3], 28), _mm256_srli_epi64(a[3], 64 - 28));
+		a[9] = _mm256_xor_si256(a[9], d[4]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[9], 20), _mm256_srli_epi64(a[9], 64 - 20));
+		a[10] = _mm256_xor_si256(a[10], d[0]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[10], 3), _mm256_srli_epi64(a[10], 64 - 3));
+		a[16] = _mm256_xor_si256(a[16], d[1]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[16], 45), _mm256_srli_epi64(a[16], 64 - 45));
+		a[22] = _mm256_xor_si256(a[22], d[2]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[22], 61), _mm256_srli_epi64(a[22], 64 - 61));
+		e[5] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		e[6] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		e[7] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		e[8] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		e[9] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		a[1] = _mm256_xor_si256(a[1], d[1]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[1], 1), _mm256_srli_epi64(a[1], 64 - 1));
+		a[7] = _mm256_xor_si256(a[7], d[2]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[7], 6), _mm256_srli_epi64(a[7], 64 - 6));
+		a[13] = _mm256_xor_si256(a[13], d[3]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[13], 25), _mm256_srli_epi64(a[13], 64 - 25));
+		a[19] = _mm256_xor_si256(a[19], d[4]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[19], 8), _mm256_srli_epi64(a[19], 64 - 8));
+		a[20] = _mm256_xor_si256(a[20], d[0]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[20], 18), _mm256_srli_epi64(a[20], 64 - 18));
+		e[10] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		e[11] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		e[12] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		e[13] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		e[14] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		a[4] = _mm256_xor_si256(a[4], d[4]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[4], 27), _mm256_srli_epi64(a[4], 64 - 27));
+		a[5] = _mm256_xor_si256(a[5], d[0]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[5], 36), _mm256_srli_epi64(a[5], 64 - 36));
+		a[11] = _mm256_xor_si256(a[11], d[1]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[11], 10), _mm256_srli_epi64(a[11], 64 - 10));
+		a[17] = _mm256_xor_si256(a[17], d[2]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[17], 15), _mm256_srli_epi64(a[17], 64 - 15));
+		a[23] = _mm256_xor_si256(a[23], d[3]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[23], 56), _mm256_srli_epi64(a[23], 64 - 56));
+		e[15] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		e[16] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		e[17] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		e[18] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		e[19] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		a[2] = _mm256_xor_si256(a[2], d[2]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[2], 62), _mm256_srli_epi64(a[2], 64 - 62));
+		a[8] = _mm256_xor_si256(a[8], d[3]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[8], 55), _mm256_srli_epi64(a[8], 64 - 55));
+		a[14] = _mm256_xor_si256(a[14], d[4]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[14], 39), _mm256_srli_epi64(a[14], 64 - 39));
+		a[15] = _mm256_xor_si256(a[15], d[0]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[15], 41), _mm256_srli_epi64(a[15], 64 - 41));
+		a[21] = _mm256_xor_si256(a[21], d[1]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[21], 2), _mm256_srli_epi64(a[21], 64 - 2));
+		e[20] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		e[21] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		e[22] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		e[23] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		e[24] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+
+		// round n + 1
+		c[0] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[0], e[5]), _mm256_xor_si256(e[10], e[15])), e[20]);
+		c[1] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[1], e[6]), _mm256_xor_si256(e[11], e[16])), e[21]);
+		c[2] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[2], e[7]), _mm256_xor_si256(e[12], e[17])), e[22]);
+		c[3] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[3], e[8]), _mm256_xor_si256(e[13], e[18])), e[23]);
+		c[4] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[4], e[9]), _mm256_xor_si256(e[14], e[19])), e[24]);
+		d[0] = _mm256_xor_si256(c[4], _mm256_or_si256(_mm256_slli_epi64(c[1], 1), _mm256_srli_epi64(c[1], 64 - 1)));
+		d[1] = _mm256_xor_si256(c[0], _mm256_or_si256(_mm256_slli_epi64(c[2], 1), _mm256_srli_epi64(c[2], 64 - 1)));
+		d[2] = _mm256_xor_si256(c[1], _mm256_or_si256(_mm256_slli_epi64(c[3], 1), _mm256_srli_epi64(c[3], 64 - 1)));
+		d[3] = _mm256_xor_si256(c[2], _mm256_or_si256(_mm256_slli_epi64(c[4], 1), _mm256_srli_epi64(c[4], 64 - 1)));
+		d[4] = _mm256_xor_si256(c[3], _mm256_or_si256(_mm256_slli_epi64(c[0], 1), _mm256_srli_epi64(c[0], 64 - 1)));
+		e[0] = _mm256_xor_si256(e[0], d[0]);
+		c[0] = e[0];
+		e[6] = _mm256_xor_si256(e[6], d[1]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[6], 44), _mm256_srli_epi64(e[6], 64 - 44));
+		e[12] = _mm256_xor_si256(e[12], d[2]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[12], 43), _mm256_srli_epi64(e[12], 64 - 43));
+		e[18] = _mm256_xor_si256(e[18], d[3]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[18], 21), _mm256_srli_epi64(e[18], 64 - 21));
+		e[24] = _mm256_xor_si256(e[24], d[4]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[24], 14), _mm256_srli_epi64(e[24], 64 - 14));
+		a[0] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		a[0] = _mm256_xor_si256(a[0], _mm256_set1_epi64x(KECCAK_ROUND_CONSTANTS[i + 1]));
+		a[1] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		a[2] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		a[3] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		a[4] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		e[3] = _mm256_xor_si256(e[3], d[3]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[3], 28), _mm256_srli_epi64(e[3], 64 - 28));
+		e[9] = _mm256_xor_si256(e[9], d[4]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[9], 20), _mm256_srli_epi64(e[9], 64 - 20));
+		e[10] = _mm256_xor_si256(e[10], d[0]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[10], 3), _mm256_srli_epi64(e[10], 64 - 3));
+		e[16] = _mm256_xor_si256(e[16], d[1]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[16], 45), _mm256_srli_epi64(e[16], 64 - 45));
+		e[22] = _mm256_xor_si256(e[22], d[2]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[22], 61), _mm256_srli_epi64(e[22], 64 - 61));
+		a[5] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		a[6] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		a[7] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		a[8] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		a[9] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		e[1] = _mm256_xor_si256(e[1], d[1]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[1], 1), _mm256_srli_epi64(e[1], 64 - 1));
+		e[7] = _mm256_xor_si256(e[7], d[2]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[7], 6), _mm256_srli_epi64(e[7], 64 - 6));
+		e[13] = _mm256_xor_si256(e[13], d[3]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[13], 25), _mm256_srli_epi64(e[13], 64 - 25));
+		e[19] = _mm256_xor_si256(e[19], d[4]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[19], 8), _mm256_srli_epi64(e[19], 64 - 8));
+		e[20] = _mm256_xor_si256(e[20], d[0]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[20], 18), _mm256_srli_epi64(e[20], 64 - 18));
+		a[10] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		a[11] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		a[12] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		a[13] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		a[14] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		e[4] = _mm256_xor_si256(e[4], d[4]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[4], 27), _mm256_srli_epi64(e[4], 64 - 27));
+		e[5] = _mm256_xor_si256(e[5], d[0]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[5], 36), _mm256_srli_epi64(e[5], 64 - 36));
+		e[11] = _mm256_xor_si256(e[11], d[1]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[11], 10), _mm256_srli_epi64(e[11], 64 - 10));
+		e[17] = _mm256_xor_si256(e[17], d[2]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[17], 15), _mm256_srli_epi64(e[17], 64 - 15));
+		e[23] = _mm256_xor_si256(e[23], d[3]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[23], 56), _mm256_srli_epi64(e[23], 64 - 56));
+		a[15] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		a[16] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		a[17] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		a[18] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		a[19] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+		e[2] = _mm256_xor_si256(e[2], d[2]);
+		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[2], 62), _mm256_srli_epi64(e[2], 64 - 62));
+		e[8] = _mm256_xor_si256(e[8], d[3]);
+		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[8], 55), _mm256_srli_epi64(e[8], 64 - 55));
+		e[14] = _mm256_xor_si256(e[14], d[4]);
+		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[14], 39), _mm256_srli_epi64(e[14], 64 - 39));
+		e[15] = _mm256_xor_si256(e[15], d[0]);
+		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[15], 41), _mm256_srli_epi64(e[15], 64 - 41));
+		e[21] = _mm256_xor_si256(e[21], d[1]);
+		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[21], 2), _mm256_srli_epi64(e[21], 64 - 2));
+		a[20] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
+		a[21] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
+		a[22] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
+		a[23] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
+		a[24] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
+	}
+
+	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
+	{
+		state[i] = a[i];
+	}
+}
+
+#	endif
+#endif
+
+/* Keccak */
+
+void qsc_keccak_absorb(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen, uint8_t domain, size_t rounds)
+{
+	assert(ctx != NULL);
+	assert(message != NULL);
+
+	if (ctx != NULL && message != NULL)
+	{
+		uint8_t msg[QSC_KECCAK_STATE_BYTE_SIZE];
+
+		while (msglen >= (size_t)rate)
+		{
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+			qsc_memutils_xor((uint8_t*)ctx->state, message, rate);
+#else
+			for (size_t i = 0; i < rate / sizeof(uint64_t); ++i)
+			{
+				ctx->state[i] ^= qsc_intutils_le8to64((uint8_t*)(message + (sizeof(uint64_t) * i)));
+			}
+#endif
+			qsc_keccak_permute(ctx, rounds);
+			msglen -= rate;
+			message += rate;
+	}
+
+		qsc_memutils_copy(msg, message, msglen);
+		msg[msglen] = domain;
+		qsc_memutils_clear((uint8_t*)(msg + msglen + 1), rate - msglen + 1);
+		msg[rate - 1] |= 128U;
+
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+		qsc_memutils_xor((uint8_t*)ctx->state, msg, rate);
+#else
+		for (size_t i = 0; i < rate / 8; ++i)
+		{
+			ctx->state[i] ^= qsc_intutils_le8to64((uint8_t*)(msg + (8 * i)));
+		}
+#endif
+	}
+}
+
+void qsc_keccak_dispose(qsc_keccak_state* ctx)
+{
+	assert(ctx != NULL);
+
+	if (ctx != NULL)
+	{
+		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+		qsc_memutils_clear((uint8_t*)ctx->buffer, sizeof(ctx->buffer));
+		ctx->position = 0;
+	}
+}
+
+void qsc_keccak_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t outlen, uint8_t domain, size_t rounds)
+{
+	uint8_t buf[sizeof(size_t) + 1] = { 0 };
+	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	size_t bitlen;
+
+	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
+	bitlen = keccak_right_encode(buf, outlen * 8);
+
+	if (ctx->position + bitlen >= (size_t)rate)
+	{
+		keccak_fast_absorb(ctx->state, pad, ctx->position);
+		qsc_keccak_permute(ctx, rounds);
+		ctx->position = 0;
+	}
+
+	qsc_memutils_copy(((uint8_t*)pad + ctx->position), buf, bitlen);
+
+	pad[ctx->position + bitlen] = domain;
+	pad[rate - 1] |= 128U;
+	keccak_fast_absorb(ctx->state, pad, rate);
+
+	while (outlen >= (size_t)rate)
+	{
+		qsc_keccak_squeezeblocks(ctx, pad, 1, rate, rounds);
+		qsc_memutils_copy(output, pad, rate);
+		output += rate;
+		outlen -= rate;
+	}
+
+	if (outlen > 0)
+	{
+		qsc_keccak_squeezeblocks(ctx, pad, 1, rate, rounds);
+		qsc_memutils_copy(output, pad, outlen);
+	}
+
+	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+	ctx->position = 0;
+}
+
+void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds)
+{
+	assert(ctx != NULL);
+
+	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	size_t i;
+	size_t oft;
+
+	oft = keccak_left_encode(pad, rate);
+	oft += keccak_left_encode(((uint8_t*)pad + oft), namelen * 8);
+
+	if (namelen != 0)
+	{
+		for (i = 0; i < namelen; ++i)
+		{
+			if (oft == rate)
+			{
+				keccak_fast_absorb(ctx->state, pad, rate);
+				qsc_keccak_permute(ctx, rounds);
+				oft = 0;
+			}
+
+			pad[oft] = name[i];
+			++oft;
+		}
+	}
+
+	oft += keccak_left_encode(((uint8_t*)pad + oft), custlen * 8);
+
+	if (custlen != 0)
+	{
+		for (i = 0; i < custlen; ++i)
+		{
+			if (oft == rate)
+			{
+				keccak_fast_absorb(ctx->state, pad, rate);
+				qsc_keccak_permute(ctx, rounds);
+				oft = 0;
+			}
+
+			pad[oft] = custom[i];
+			++oft;
+		}
+	}
+
+	qsc_memutils_clear(((uint8_t*)pad + oft), rate - oft);
+	keccak_fast_absorb(ctx->state, pad, rate);
+	qsc_keccak_permute(ctx, rounds);
+}
+
+void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds)
+{
+	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	size_t oft;
+	size_t i;
+
+	qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+	ctx->position = 0;
+
+	/* stage 1: name + custom */
+
+	oft = keccak_left_encode(pad, rate);
+	oft += keccak_left_encode(((uint8_t*)pad + oft), namelen * 8);
+
+	for (i = 0; i < namelen; ++i)
+	{
+		pad[oft + i] = name[i];
+	}
+
+	oft += namelen;
+	oft += keccak_left_encode(((uint8_t*)pad + oft), custlen * 8);
+
+	for (i = 0; i < custlen; ++i)
+	{
+		if (oft == rate)
+		{
+			keccak_fast_absorb(ctx->state, pad, rate);
+			qsc_keccak_permute(ctx, rounds);
+			oft = 0;
+		}
+
+		pad[oft] = custom[i];
+		++oft;
+	}
+
+	qsc_memutils_clear(((uint8_t*)pad + oft), rate - oft);
+	keccak_fast_absorb(ctx->state, pad, rate);
+	qsc_keccak_permute(ctx, rounds);
+
+
+	/* stage 2: key */
+
+	qsc_memutils_clear(pad, rate);
+
+	oft = keccak_left_encode(pad, rate);
+	oft += keccak_left_encode(((uint8_t*)pad + oft), keylen * 8);
+
+	for (i = 0; i < keylen; ++i)
+	{
+		if (oft == rate)
+		{
+			keccak_fast_absorb(ctx->state, pad, rate);
+			qsc_keccak_permute(ctx, rounds);
+			oft = 0;
+		}
+
+		pad[oft] = key[i];
+		++oft;
+	}
+
+	qsc_memutils_clear(((uint8_t*)pad + oft), rate - oft);
+	keccak_fast_absorb(ctx->state, pad, rate);
+	qsc_keccak_permute(ctx, rounds);
+}
+
+void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds)
+{
+	assert(ctx != NULL);
+
+	if (ctx != NULL)
+	{
+#if defined(QSC_KECCAK_UNROLLED_PERMUTATION)
+		qsc_keccak_permute_p1600u(ctx->state)
+#else
+		qsc_keccak_permute_p1600c(ctx->state, rounds);
+#endif
+	}
+}
+
+void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds)
+{
+	assert(state != NULL);
 	assert(rounds % 2 == 0);
 
 	uint64_t Aba;
@@ -236,7 +1448,7 @@ static void qsc_keccak_permute_p1600(uint64_t* state, size_t rounds)
 		Asu ^= Du;
 		BCu = qsc_intutils_rotl64(Asu, 14);
 		Eba = BCa ^ ((~BCe) & BCi);
-		Eba ^= KECCAK_RC24[i];
+		Eba ^= KECCAK_ROUND_CONSTANTS[i];
 		Ebe = BCe ^ ((~BCi) & BCo);
 		Ebi = BCi ^ ((~BCo) & BCu);
 		Ebo = BCo ^ ((~BCu) & BCa);
@@ -331,7 +1543,7 @@ static void qsc_keccak_permute_p1600(uint64_t* state, size_t rounds)
 		Esu ^= Du;
 		BCu = qsc_intutils_rotl64(Esu, 14);
 		Aba = BCa ^ ((~BCe) & BCi);
-		Aba ^= KECCAK_RC24[i + 1];
+		Aba ^= KECCAK_ROUND_CONSTANTS[i + 1];
 		Abe = BCe ^ ((~BCi) & BCo);
 		Abi = BCi ^ ((~BCo) & BCu);
 		Abo = BCo ^ ((~BCu) & BCa);
@@ -430,10 +1642,10 @@ static void qsc_keccak_permute_p1600(uint64_t* state, size_t rounds)
 	state[24] = Asu;
 }
 
-#if defined(QSC_KECCAK_UNROLLED_PERMUTATION)
-
-static void qsc_keccak_permute_p1600(uint64_t* state)
+void qsc_keccak_permute_p1600u(uint64_t* state)
 {
+	assert(state != NULL);
+
 	uint64_t Aba;
 	uint64_t Abe;
 	uint64_t Abi;
@@ -2637,1129 +3849,103 @@ static void qsc_keccak_permute_p1600(uint64_t* state)
 	state[24] = Asu;
 }
 
-#endif
-
-static size_t keccak_right_encode(uint8_t* buffer, size_t value)
+void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks, keccak_rate rate, size_t rounds)
 {
-	size_t i;
-	size_t n;
-	size_t v;
+	assert(ctx != NULL);
+	assert(output != NULL);
 
-	for (v = value, n = 0; v != 0 && (n < sizeof(size_t)); ++n, v >>= 8)
+	if (ctx != NULL && output != NULL)
 	{
-	}
-
-	if (n == 0)
-	{
-		n = 1;
-	}
-
-	for (i = 1; i <= n; ++i)
-	{
-		buffer[i - 1] = (uint8_t)(value >> (8 * (n - i)));
-	}
-
-	buffer[n] = (uint8_t)n;
-
-	return (size_t)n + 1;
-}
-
-static void keccak_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, keccak_rate rate)
-{
-	while (nblocks > 0)
-	{
-		qsc_keccak_permute(state);
+		while (nblocks > 0)
+		{
+			qsc_keccak_permute(ctx, rounds);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-		qsc_memutils_copy(output, (uint8_t*)state, rate);
+			qsc_memutils_copy(output, (uint8_t*)ctx->state, rate);
 #else
-		for (size_t i = 0; i < (rate >> 3); ++i)
-		{
-			qsc_intutils_le64to8((uint8_t*)(output + sizeof(uint64_t) * i), state[i]);
-		}
+			for (size_t i = 0; i < (rate >> 3); ++i)
+			{
+				qsc_intutils_le64to8((uint8_t*)(output + sizeof(uint64_t) * i), ctx->state[i]);
+			}
 #endif
-		output += rate;
-		nblocks--;
+			output += rate;
+			nblocks--;
+		}
 	}
 }
 
-static void keccak_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen)
+void qsc_keccak_state_reset(qsc_keccak_state* ctx)
+{
+	assert(ctx != NULL);
+
+	if (ctx != NULL)
+	{
+		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+		qsc_memutils_clear((uint8_t*)ctx->buffer, sizeof(ctx->buffer));
+		ctx->position = 0;
+	}
+}
+
+void qsc_keccak_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen, size_t rounds)
 {
 	assert(ctx != NULL);
 	assert(message != NULL);
 
-	if (msglen != 0)
+	if (ctx != NULL && message != NULL)
 	{
-		if (ctx->position != 0 && (ctx->position + msglen >= (size_t)rate))
-		{
-			const size_t RMDLEN = rate - ctx->position;
-
-			if (RMDLEN != 0)
-			{
-				qsc_memutils_copy((uint8_t*)(ctx->buffer + ctx->position), message, RMDLEN);
-			}
-
-			keccak_fast_absorb(ctx->state, ctx->buffer, (size_t)rate);
-			qsc_keccak_permute(ctx->state);
-			ctx->position = 0;
-			message += RMDLEN;
-			msglen -= RMDLEN;
-		}
-
-		/* sequential loop through blocks */
-		while (msglen >= (size_t)rate)
-		{
-			keccak_fast_absorb(ctx->state, message, rate);
-			qsc_keccak_permute(ctx->state);
-			message += rate;
-			msglen -= rate;
-		}
-
-		/* store unaligned bytes */
 		if (msglen != 0)
 		{
-			qsc_memutils_copy((uint8_t*)(ctx->buffer + ctx->position), message, msglen);
-			ctx->position += msglen;
+			if (ctx->position != 0 && (ctx->position + msglen >= (size_t)rate))
+			{
+				const size_t RMDLEN = rate - ctx->position;
+
+				if (RMDLEN != 0)
+				{
+					qsc_memutils_copy((uint8_t*)(ctx->buffer + ctx->position), message, RMDLEN);
+				}
+
+				keccak_fast_absorb(ctx->state, ctx->buffer, (size_t)rate);
+				qsc_keccak_permute(ctx, rounds);
+				ctx->position = 0;
+				message += RMDLEN;
+				msglen -= RMDLEN;
+			}
+
+			/* sequential loop through blocks */
+			while (msglen >= (size_t)rate)
+			{
+				keccak_fast_absorb(ctx->state, message, rate);
+				qsc_keccak_permute(ctx, rounds);
+				message += rate;
+				msglen -= rate;
+			}
+
+			/* store unaligned bytes */
+			if (msglen != 0)
+			{
+				qsc_memutils_copy((uint8_t*)(ctx->buffer + ctx->position), message, msglen);
+				ctx->position += msglen;
+			}
 		}
 	}
 }
 
-#if defined(QSC_SYSTEM_HAS_AVX512)
-#	if defined(QSC_KECCAK_UNROLLED_PERMUTATION)
+/* SHA3 */
 
-void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
+void qsc_sha3_compute128(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-	assert(rounds % 2 == 0);
+	assert(output != NULL);
+	assert(message != NULL);
 
-	__m512i a0;
-	__m512i a1;
-	__m512i a2;
-	__m512i a3;
-	__m512i a4;
-	__m512i a5;
-	__m512i a6;
-	__m512i a7;
-	__m512i a8;
-	__m512i a9;
-	__m512i a10;
-	__m512i a11;
-	__m512i a12;
-	__m512i a13;
-	__m512i a14;
-	__m512i a15;
-	__m512i a16;
-	__m512i a17;
-	__m512i a18;
-	__m512i a19;
-	__m512i a20;
-	__m512i a21;
-	__m512i a22;
-	__m512i a23;
-	__m512i a24;
-	__m512i c0;
-	__m512i c1;
-	__m512i c2;
-	__m512i c3;
-	__m512i c4;
-	__m512i d0;
-	__m512i d1;
-	__m512i d2;
-	__m512i d3;
-	__m512i d4;
-	__m512i e0;
-	__m512i e1;
-	__m512i e2;
-	__m512i e3;
-	__m512i e4;
-	__m512i e5;
-	__m512i e6;
-	__m512i e7;
-	__m512i e8;
-	__m512i e9;
-	__m512i e10;
-	__m512i e11;
-	__m512i e12;
-	__m512i e13;
-	__m512i e14;
-	__m512i e15;
-	__m512i e16;
-	__m512i e17;
-	__m512i e18;
-	__m512i e19;
-	__m512i e20;
-	__m512i e21;
-	__m512i e22;
-	__m512i e23;
-	__m512i e24;
-	size_t i;
+	qsc_keccak_state ctx;
+	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
 
-	a0 = state[0];
-	a1 = state[1];
-	a2 = state[2];
-	a3 = state[3];
-	a4 = state[4];
-	a5 = state[5];
-	a6 = state[6];
-	a7 = state[7];
-	a8 = state[8];
-	a9 = state[9];
-	a10 = state[10];
-	a11 = state[11];
-	a12 = state[12];
-	a13 = state[13];
-	a14 = state[14];
-	a15 = state[15];
-	a16 = state[16];
-	a17 = state[17];
-	a18 = state[18];
-	a19 = state[19];
-	a20 = state[20];
-	a21 = state[21];
-	a22 = state[22];
-	a23 = state[23];
-	a24 = state[24];
-
-	for (i = 0; i < rounds; i += 2)
-	{
-		/* round n */
-		c0 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a0, a5), _mm512_xor_si512(a10, a15)), a20);
-		c1 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a1, a6), _mm512_xor_si512(a11, a16)), a21);
-		c2 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a2, a7), _mm512_xor_si512(a12, a17)), a22);
-		c3 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a3, a8), _mm512_xor_si512(a13, a18)), a23);
-		c4 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a4, a9), _mm512_xor_si512(a14, a19)), a24);
-		d0 = _mm512_xor_si512(c4, _mm512_or_si512(_mm512_slli_epi64(c1, 1), _mm512_srli_epi64(c1, 64 - 1)));
-		d1 = _mm512_xor_si512(c0, _mm512_or_si512(_mm512_slli_epi64(c2, 1), _mm512_srli_epi64(c2, 64 - 1)));
-		d2 = _mm512_xor_si512(c1, _mm512_or_si512(_mm512_slli_epi64(c3, 1), _mm512_srli_epi64(c3, 64 - 1)));
-		d3 = _mm512_xor_si512(c2, _mm512_or_si512(_mm512_slli_epi64(c4, 1), _mm512_srli_epi64(c4, 64 - 1)));
-		d4 = _mm512_xor_si512(c3, _mm512_or_si512(_mm512_slli_epi64(c0, 1), _mm512_srli_epi64(c0, 64 - 1)));
-		a0 = _mm512_xor_si512(a0, d0);
-		c0 = a0;
-		a6 = _mm512_xor_si512(a6, d1);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(a6, 44), _mm512_srli_epi64(a6, 64 - 44));
-		a12 = _mm512_xor_si512(a12, d2);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(a12, 43), _mm512_srli_epi64(a12, 64 - 43));
-		a18 = _mm512_xor_si512(a18, d3);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(a18, 21), _mm512_srli_epi64(a18, 64 - 21));
-		a24 = _mm512_xor_si512(a24, d4);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(a24, 14), _mm512_srli_epi64(a24, 64 - 14));
-		e0 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		e0 = _mm512_xor_si512(e0, _mm512_set1_epi64(KECCAK_RC24[i]));
-		e1 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		e2 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		e3 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		e4 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		a3 = _mm512_xor_si512(a3, d3);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(a3, 28), _mm512_srli_epi64(a3, 64 - 28));
-		a9 = _mm512_xor_si512(a9, d4);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(a9, 20), _mm512_srli_epi64(a9, 64 - 20));
-		a10 = _mm512_xor_si512(a10, d0);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(a10, 3), _mm512_srli_epi64(a10, 64 - 3));
-		a16 = _mm512_xor_si512(a16, d1);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(a16, 45), _mm512_srli_epi64(a16, 64 - 45));
-		a22 = _mm512_xor_si512(a22, d2);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(a22, 61), _mm512_srli_epi64(a22, 64 - 61));
-		e5 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		e6 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		e7 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		e8 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		e9 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		a1 = _mm512_xor_si512(a1, d1);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(a1, 1), _mm512_srli_epi64(a1, 64 - 1));
-		a7 = _mm512_xor_si512(a7, d2);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(a7, 6), _mm512_srli_epi64(a7, 64 - 6));
-		a13 = _mm512_xor_si512(a13, d3);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(a13, 25), _mm512_srli_epi64(a13, 64 - 25));
-		a19 = _mm512_xor_si512(a19, d4);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(a19, 8), _mm512_srli_epi64(a19, 64 - 8));
-		a20 = _mm512_xor_si512(a20, d0);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(a20, 18), _mm512_srli_epi64(a20, 64 - 18));
-		e10 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		e11 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		e12 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		e13 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		e14 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		a4 = _mm512_xor_si512(a4, d4);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(a4, 27), _mm512_srli_epi64(a4, 64 - 27));
-		a5 = _mm512_xor_si512(a5, d0);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(a5, 36), _mm512_srli_epi64(a5, 64 - 36));
-		a11 = _mm512_xor_si512(a11, d1);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(a11, 10), _mm512_srli_epi64(a11, 64 - 10));
-		a17 = _mm512_xor_si512(a17, d2);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(a17, 15), _mm512_srli_epi64(a17, 64 - 15));
-		a23 = _mm512_xor_si512(a23, d3);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(a23, 56), _mm512_srli_epi64(a23, 64 - 56));
-		e15 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		e16 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		e17 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		e18 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		e19 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		a2 = _mm512_xor_si512(a2, d2);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(a2, 62), _mm512_srli_epi64(a2, 64 - 62));
-		a8 = _mm512_xor_si512(a8, d3);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(a8, 55), _mm512_srli_epi64(a8, 64 - 55));
-		a14 = _mm512_xor_si512(a14, d4);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(a14, 39), _mm512_srli_epi64(a14, 64 - 39));
-		a15 = _mm512_xor_si512(a15, d0);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(a15, 41), _mm512_srli_epi64(a15, 64 - 41));
-		a21 = _mm512_xor_si512(a21, d1);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(a21, 2), _mm512_srli_epi64(a21, 64 - 2));
-		e20 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		e21 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		e22 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		e23 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		e24 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		/* round n + 1 */
-		c0 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e0, e5), _mm512_xor_si512(e10, e15)), e20);
-		c1 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e1, e6), _mm512_xor_si512(e11, e16)), e21);
-		c2 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e2, e7), _mm512_xor_si512(e12, e17)), e22);
-		c3 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e3, e8), _mm512_xor_si512(e13, e18)), e23);
-		c4 = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e4, e9), _mm512_xor_si512(e14, e19)), e24);
-		d0 = _mm512_xor_si512(c4, _mm512_or_si512(_mm512_slli_epi64(c1, 1), _mm512_srli_epi64(c1, 64 - 1)));
-		d1 = _mm512_xor_si512(c0, _mm512_or_si512(_mm512_slli_epi64(c2, 1), _mm512_srli_epi64(c2, 64 - 1)));
-		d2 = _mm512_xor_si512(c1, _mm512_or_si512(_mm512_slli_epi64(c3, 1), _mm512_srli_epi64(c3, 64 - 1)));
-		d3 = _mm512_xor_si512(c2, _mm512_or_si512(_mm512_slli_epi64(c4, 1), _mm512_srli_epi64(c4, 64 - 1)));
-		d4 = _mm512_xor_si512(c3, _mm512_or_si512(_mm512_slli_epi64(c0, 1), _mm512_srli_epi64(c0, 64 - 1)));
-		e0 = _mm512_xor_si512(e0, d0);
-		c0 = e0;
-		e6 = _mm512_xor_si512(e6, d1);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(e6, 44), _mm512_srli_epi64(e6, 64 - 44));
-		e12 = _mm512_xor_si512(e12, d2);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(e12, 43), _mm512_srli_epi64(e12, 64 - 43));
-		e18 = _mm512_xor_si512(e18, d3);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(e18, 21), _mm512_srli_epi64(e18, 64 - 21));
-		e24 = _mm512_xor_si512(e24, d4);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(e24, 14), _mm512_srli_epi64(e24, 64 - 14));
-		a0 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		a0 = _mm512_xor_si512(a0, _mm512_set1_epi64(KECCAK_RC24[i + 1]));
-		a1 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		a2 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		a3 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		a4 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		e3 = _mm512_xor_si512(e3, d3);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(e3, 28), _mm512_srli_epi64(e3, 64 - 28));
-		e9 = _mm512_xor_si512(e9, d4);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(e9, 20), _mm512_srli_epi64(e9, 64 - 20));
-		e10 = _mm512_xor_si512(e10, d0);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(e10, 3), _mm512_srli_epi64(e10, 64 - 3));
-		e16 = _mm512_xor_si512(e16, d1);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(e16, 45), _mm512_srli_epi64(e16, 64 - 45));
-		e22 = _mm512_xor_si512(e22, d2);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(e22, 61), _mm512_srli_epi64(e22, 64 - 61));
-		a5 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		a6 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		a7 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		a8 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		a9 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		e1 = _mm512_xor_si512(e1, d1);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(e1, 1), _mm512_srli_epi64(e1, 64 - 1));
-		e7 = _mm512_xor_si512(e7, d2);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(e7, 6), _mm512_srli_epi64(e7, 64 - 6));
-		e13 = _mm512_xor_si512(e13, d3);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(e13, 25), _mm512_srli_epi64(e13, 64 - 25));
-		e19 = _mm512_xor_si512(e19, d4);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(e19, 8), _mm512_srli_epi64(e19, 64 - 8));
-		e20 = _mm512_xor_si512(e20, d0);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(e20, 18), _mm512_srli_epi64(e20, 64 - 18));
-		a10 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		a11 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		a12 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		a13 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		a14 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		e4 = _mm512_xor_si512(e4, d4);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(e4, 27), _mm512_srli_epi64(e4, 64 - 27));
-		e5 = _mm512_xor_si512(e5, d0);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(e5, 36), _mm512_srli_epi64(e5, 64 - 36));
-		e11 = _mm512_xor_si512(e11, d1);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(e11, 10), _mm512_srli_epi64(e11, 64 - 10));
-		e17 = _mm512_xor_si512(e17, d2);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(e17, 15), _mm512_srli_epi64(e17, 64 - 15));
-		e23 = _mm512_xor_si512(e23, d3);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(e23, 56), _mm512_srli_epi64(e23, 64 - 56));
-		a15 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		a16 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		a17 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		a18 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		a19 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-		e2 = _mm512_xor_si512(e2, d2);
-		c0 = _mm512_or_si512(_mm512_slli_epi64(e2, 62), _mm512_srli_epi64(e2, 64 - 62));
-		e8 = _mm512_xor_si512(e8, d3);
-		c1 = _mm512_or_si512(_mm512_slli_epi64(e8, 55), _mm512_srli_epi64(e8, 64 - 55));
-		e14 = _mm512_xor_si512(e14, d4);
-		c2 = _mm512_or_si512(_mm512_slli_epi64(e14, 39), _mm512_srli_epi64(e14, 64 - 39));
-		e15 = _mm512_xor_si512(e15, d0);
-		c3 = _mm512_or_si512(_mm512_slli_epi64(e15, 41), _mm512_srli_epi64(e15, 64 - 41));
-		e21 = _mm512_xor_si512(e21, d1);
-		c4 = _mm512_or_si512(_mm512_slli_epi64(e21, 2), _mm512_srli_epi64(e21, 64 - 2));
-		a20 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		a21 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
-		a22 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
-		a23 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
-		a24 = _mm512_xor_si512(c4, _mm512_and_si512(_mm512_xor_epi64(c0, _mm512_set1_epi64(-1)), c1));
-	}
-
-	state[0] = a0;
-	state[1] = a1;
-	state[2] = a2;
-	state[3] = a3;
-	state[4] = a4;
-	state[5] = a5;
-	state[6] = a6;
-	state[7] = a7;
-	state[8] = a8;
-	state[9] = a9;
-	state[10] = a10;
-	state[11] = a11;
-	state[12] = a12;
-	state[13] = a13;
-	state[14] = a14;
-	state[15] = a15;
-	state[16] = a16;
-	state[17] = a17;
-	state[18] = a18;
-	state[19] = a19;
-	state[20] = a20;
-	state[21] = a21;
-	state[22] = a22;
-	state[23] = a23;
-	state[24] = a24;
+	qsc_sha3_initialize(&ctx);
+	qsc_keccak_absorb(&ctx, keccak_rate_128, message, msglen, QSC_KECCAK_SHA3_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
+	qsc_keccak_squeezeblocks(&ctx, hash, 1, keccak_rate_128, QSC_KECCAK_PERMUTATION_ROUNDS);
+	qsc_memutils_copy(output, hash, QSC_SHA3_128_HASH_SIZE);
+	qsc_keccak_dispose(&ctx);
 }
-
-#	else
-
-void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
-{
-	assert(rounds % 2 == 0);
-
-	__m512i a[25] = { 0 };
-	__m512i c[5] = { 0 };
-	__m512i d[5] = { 0 };
-	__m512i e[25] = { 0 };
-	size_t i;
-
-	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
-	{
-		a[i] = state[i];
-	}
-
-	for (i = 0; i < rounds; i += 2)
-	{
-		// round n
-		c[0] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[0], a[5]), _mm512_xor_si512(a[10], a[15])), a[20]);
-		c[1] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[1], a[6]), _mm512_xor_si512(a[11], a[16])), a[21]);
-		c[2] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[2], a[7]), _mm512_xor_si512(a[12], a[17])), a[22]);
-		c[3] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[3], a[8]), _mm512_xor_si512(a[13], a[18])), a[23]);
-		c[4] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[4], a[9]), _mm512_xor_si512(a[14], a[19])), a[24]);
-		d[0] = _mm512_xor_si512(c[4], _mm512_or_si512(_mm512_slli_epi64(c[1], 1), _mm512_srli_epi64(c[1], 64 - 1)));
-		d[1] = _mm512_xor_si512(c[0], _mm512_or_si512(_mm512_slli_epi64(c[2], 1), _mm512_srli_epi64(c[2], 64 - 1)));
-		d[2] = _mm512_xor_si512(c[1], _mm512_or_si512(_mm512_slli_epi64(c[3], 1), _mm512_srli_epi64(c[3], 64 - 1)));
-		d[3] = _mm512_xor_si512(c[2], _mm512_or_si512(_mm512_slli_epi64(c[4], 1), _mm512_srli_epi64(c[4], 64 - 1)));
-		d[4] = _mm512_xor_si512(c[3], _mm512_or_si512(_mm512_slli_epi64(c[0], 1), _mm512_srli_epi64(c[0], 64 - 1)));
-		a[0] = _mm512_xor_si512(a[0], d[0]);
-		c[0] = a[0];
-		a[6] = _mm512_xor_si512(a[6], d[1]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[6], 44), _mm512_srli_epi64(a[6], 64 - 44));
-		a[12] = _mm512_xor_si512(a[12], d[2]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[12], 43), _mm512_srli_epi64(a[12], 64 - 43));
-		a[18] = _mm512_xor_si512(a[18], d[3]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[18], 21), _mm512_srli_epi64(a[18], 64 - 21));
-		a[24] = _mm512_xor_si512(a[24], d[4]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[24], 14), _mm512_srli_epi64(a[24], 64 - 14));
-		e[0] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		e[0] = _mm512_xor_si512(e[0], _mm512_set1_epi64(KECCAK_RC24[i]));
-		e[1] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		e[2] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		e[3] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		e[4] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		a[3] = _mm512_xor_si512(a[3], d[3]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[3], 28), _mm512_srli_epi64(a[3], 64 - 28));
-		a[9] = _mm512_xor_si512(a[9], d[4]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[9], 20), _mm512_srli_epi64(a[9], 64 - 20));
-		a[10] = _mm512_xor_si512(a[10], d[0]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[10], 3), _mm512_srli_epi64(a[10], 64 - 3));
-		a[16] = _mm512_xor_si512(a[16], d[1]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[16], 45), _mm512_srli_epi64(a[16], 64 - 45));
-		a[22] = _mm512_xor_si512(a[22], d[2]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[22], 61), _mm512_srli_epi64(a[22], 64 - 61));
-		e[5] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		e[6] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		e[7] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		e[8] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		e[9] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		a[1] = _mm512_xor_si512(a[1], d[1]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[1], 1), _mm512_srli_epi64(a[1], 64 - 1));
-		a[7] = _mm512_xor_si512(a[7], d[2]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[7], 6), _mm512_srli_epi64(a[7], 64 - 6));
-		a[13] = _mm512_xor_si512(a[13], d[3]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[13], 25), _mm512_srli_epi64(a[13], 64 - 25));
-		a[19] = _mm512_xor_si512(a[19], d[4]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[19], 8), _mm512_srli_epi64(a[19], 64 - 8));
-		a[20] = _mm512_xor_si512(a[20], d[0]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[20], 18), _mm512_srli_epi64(a[20], 64 - 18));
-		e[10] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		e[11] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		e[12] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		e[13] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		e[14] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		a[4] = _mm512_xor_si512(a[4], d[4]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[4], 27), _mm512_srli_epi64(a[4], 64 - 27));
-		a[5] = _mm512_xor_si512(a[5], d[0]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[5], 36), _mm512_srli_epi64(a[5], 64 - 36));
-		a[11] = _mm512_xor_si512(a[11], d[1]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[11], 10), _mm512_srli_epi64(a[11], 64 - 10));
-		a[17] = _mm512_xor_si512(a[17], d[2]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[17], 15), _mm512_srli_epi64(a[17], 64 - 15));
-		a[23] = _mm512_xor_si512(a[23], d[3]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[23], 56), _mm512_srli_epi64(a[23], 64 - 56));
-		e[15] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		e[16] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		e[17] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		e[18] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		e[19] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		a[2] = _mm512_xor_si512(a[2], d[2]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(a[2], 62), _mm512_srli_epi64(a[2], 64 - 62));
-		a[8] = _mm512_xor_si512(a[8], d[3]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(a[8], 55), _mm512_srli_epi64(a[8], 64 - 55));
-		a[14] = _mm512_xor_si512(a[14], d[4]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(a[14], 39), _mm512_srli_epi64(a[14], 64 - 39));
-		a[15] = _mm512_xor_si512(a[15], d[0]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(a[15], 41), _mm512_srli_epi64(a[15], 64 - 41));
-		a[21] = _mm512_xor_si512(a[21], d[1]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(a[21], 2), _mm512_srli_epi64(a[21], 64 - 2));
-		e[20] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		e[21] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		e[22] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		e[23] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		e[24] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-
-		// round n + 1
-		c[0] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[0], e[5]), _mm512_xor_si512(e[10], e[15])), e[20]);
-		c[1] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[1], e[6]), _mm512_xor_si512(e[11], e[16])), e[21]);
-		c[2] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[2], e[7]), _mm512_xor_si512(e[12], e[17])), e[22]);
-		c[3] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[3], e[8]), _mm512_xor_si512(e[13], e[18])), e[23]);
-		c[4] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[4], e[9]), _mm512_xor_si512(e[14], e[19])), e[24]);
-		d[0] = _mm512_xor_si512(c[4], _mm512_or_si512(_mm512_slli_epi64(c[1], 1), _mm512_srli_epi64(c[1], 64 - 1)));
-		d[1] = _mm512_xor_si512(c[0], _mm512_or_si512(_mm512_slli_epi64(c[2], 1), _mm512_srli_epi64(c[2], 64 - 1)));
-		d[2] = _mm512_xor_si512(c[1], _mm512_or_si512(_mm512_slli_epi64(c[3], 1), _mm512_srli_epi64(c[3], 64 - 1)));
-		d[3] = _mm512_xor_si512(c[2], _mm512_or_si512(_mm512_slli_epi64(c[4], 1), _mm512_srli_epi64(c[4], 64 - 1)));
-		d[4] = _mm512_xor_si512(c[3], _mm512_or_si512(_mm512_slli_epi64(c[0], 1), _mm512_srli_epi64(c[0], 64 - 1)));
-		e[0] = _mm512_xor_si512(e[0], d[0]);
-		c[0] = e[0];
-		e[6] = _mm512_xor_si512(e[6], d[1]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[6], 44), _mm512_srli_epi64(e[6], 64 - 44));
-		e[12] = _mm512_xor_si512(e[12], d[2]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[12], 43), _mm512_srli_epi64(e[12], 64 - 43));
-		e[18] = _mm512_xor_si512(e[18], d[3]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[18], 21), _mm512_srli_epi64(e[18], 64 - 21));
-		e[24] = _mm512_xor_si512(e[24], d[4]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[24], 14), _mm512_srli_epi64(e[24], 64 - 14));
-		a[0] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		a[0] = _mm512_xor_si512(a[0], _mm512_set1_epi64(KECCAK_RC24[i + 1]));
-		a[1] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		a[2] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		a[3] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		a[4] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		e[3] = _mm512_xor_si512(e[3], d[3]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[3], 28), _mm512_srli_epi64(e[3], 64 - 28));
-		e[9] = _mm512_xor_si512(e[9], d[4]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[9], 20), _mm512_srli_epi64(e[9], 64 - 20));
-		e[10] = _mm512_xor_si512(e[10], d[0]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[10], 3), _mm512_srli_epi64(e[10], 64 - 3));
-		e[16] = _mm512_xor_si512(e[16], d[1]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[16], 45), _mm512_srli_epi64(e[16], 64 - 45));
-		e[22] = _mm512_xor_si512(e[22], d[2]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[22], 61), _mm512_srli_epi64(e[22], 64 - 61));
-		a[5] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		a[6] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		a[7] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		a[8] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		a[9] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		e[1] = _mm512_xor_si512(e[1], d[1]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[1], 1), _mm512_srli_epi64(e[1], 64 - 1));
-		e[7] = _mm512_xor_si512(e[7], d[2]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[7], 6), _mm512_srli_epi64(e[7], 64 - 6));
-		e[13] = _mm512_xor_si512(e[13], d[3]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[13], 25), _mm512_srli_epi64(e[13], 64 - 25));
-		e[19] = _mm512_xor_si512(e[19], d[4]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[19], 8), _mm512_srli_epi64(e[19], 64 - 8));
-		e[20] = _mm512_xor_si512(e[20], d[0]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[20], 18), _mm512_srli_epi64(e[20], 64 - 18));
-		a[10] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		a[11] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		a[12] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		a[13] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		a[14] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		e[4] = _mm512_xor_si512(e[4], d[4]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[4], 27), _mm512_srli_epi64(e[4], 64 - 27));
-		e[5] = _mm512_xor_si512(e[5], d[0]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[5], 36), _mm512_srli_epi64(e[5], 64 - 36));
-		e[11] = _mm512_xor_si512(e[11], d[1]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[11], 10), _mm512_srli_epi64(e[11], 64 - 10));
-		e[17] = _mm512_xor_si512(e[17], d[2]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[17], 15), _mm512_srli_epi64(e[17], 64 - 15));
-		e[23] = _mm512_xor_si512(e[23], d[3]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[23], 56), _mm512_srli_epi64(e[23], 64 - 56));
-		a[15] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		a[16] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		a[17] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		a[18] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		a[19] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-		e[2] = _mm512_xor_si512(e[2], d[2]);
-		c[0] = _mm512_or_si512(_mm512_slli_epi64(e[2], 62), _mm512_srli_epi64(e[2], 64 - 62));
-		e[8] = _mm512_xor_si512(e[8], d[3]);
-		c[1] = _mm512_or_si512(_mm512_slli_epi64(e[8], 55), _mm512_srli_epi64(e[8], 64 - 55));
-		e[14] = _mm512_xor_si512(e[14], d[4]);
-		c[2] = _mm512_or_si512(_mm512_slli_epi64(e[14], 39), _mm512_srli_epi64(e[14], 64 - 39));
-		e[15] = _mm512_xor_si512(e[15], d[0]);
-		c[3] = _mm512_or_si512(_mm512_slli_epi64(e[15], 41), _mm512_srli_epi64(e[15], 64 - 41));
-		e[21] = _mm512_xor_si512(e[21], d[1]);
-		c[4] = _mm512_or_si512(_mm512_slli_epi64(e[21], 2), _mm512_srli_epi64(e[21], 64 - 2));
-		a[20] = _mm512_xor_si512(c[0], _mm512_and_si512(_mm512_xor_epi64(c[1], _mm512_set1_epi64(-1)), c[2]));
-		a[21] = _mm512_xor_si512(c[1], _mm512_and_si512(_mm512_xor_epi64(c[2], _mm512_set1_epi64(-1)), c[3]));
-		a[22] = _mm512_xor_si512(c[2], _mm512_and_si512(_mm512_xor_epi64(c[3], _mm512_set1_epi64(-1)), c[4]));
-		a[23] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
-		a[24] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
-	}
-
-	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
-	{
-		state[i] = a[i];
-	}
-}
-
-#	endif
-#endif
-
-#if defined(QSC_SYSTEM_HAS_AVX2)
-#	if defined(QSC_KECCAK_UNROLLED_PERMUTATION)
-
-void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
-{
-	assert(rounds % 2 == 0);
-
-	__m256i a0;
-	__m256i a1;
-	__m256i a2;
-	__m256i a3;
-	__m256i a4;
-	__m256i a5;
-	__m256i a6;
-	__m256i a7;
-	__m256i a8;
-	__m256i a9;
-	__m256i a10;
-	__m256i a11;
-	__m256i a12;
-	__m256i a13;
-	__m256i a14;
-	__m256i a15;
-	__m256i a16;
-	__m256i a17;
-	__m256i a18;
-	__m256i a19;
-	__m256i a20;
-	__m256i a21;
-	__m256i a22;
-	__m256i a23;
-	__m256i a24;
-	__m256i c0;
-	__m256i c1;
-	__m256i c2;
-	__m256i c3;
-	__m256i c4;
-	__m256i d0;
-	__m256i d1;
-	__m256i d2;
-	__m256i d3;
-	__m256i d4;
-	__m256i e0;
-	__m256i e1;
-	__m256i e2;
-	__m256i e3;
-	__m256i e4;
-	__m256i e5;
-	__m256i e6;
-	__m256i e7;
-	__m256i e8;
-	__m256i e9;
-	__m256i e10;
-	__m256i e11;
-	__m256i e12;
-	__m256i e13;
-	__m256i e14;
-	__m256i e15;
-	__m256i e16;
-	__m256i e17;
-	__m256i e18;
-	__m256i e19;
-	__m256i e20;
-	__m256i e21;
-	__m256i e22;
-	__m256i e23;
-	__m256i e24;
-
-
-	size_t i;
-
-	a0 = state[0];
-	a1 = state[1];
-	a2 = state[2];
-	a3 = state[3];
-	a4 = state[4];
-	a5 = state[5];
-	a6 = state[6];
-	a7 = state[7];
-	a8 = state[8];
-	a9 = state[9];
-	a10 = state[10];
-	a11 = state[11];
-	a12 = state[12];
-	a13 = state[13];
-	a14 = state[14];
-	a15 = state[15];
-	a16 = state[16];
-	a17 = state[17];
-	a18 = state[18];
-	a19 = state[19];
-	a20 = state[20];
-	a21 = state[21];
-	a22 = state[22];
-	a23 = state[23];
-	a24 = state[24];
-
-	for (i = 0; i < rounds; i += 2)
-	{
-		/* round n */
-		c0 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a0, a5), _mm256_xor_si256(a10, a15)), a20);
-		c1 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a1, a6), _mm256_xor_si256(a11, a16)), a21);
-		c2 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a2, a7), _mm256_xor_si256(a12, a17)), a22);
-		c3 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a3, a8), _mm256_xor_si256(a13, a18)), a23);
-		c4 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a4, a9), _mm256_xor_si256(a14, a19)), a24);
-		d0 = _mm256_xor_si256(c4, _mm256_or_si256(_mm256_slli_epi64(c1, 1), _mm256_srli_epi64(c1, 64 - 1)));
-		d1 = _mm256_xor_si256(c0, _mm256_or_si256(_mm256_slli_epi64(c2, 1), _mm256_srli_epi64(c2, 64 - 1)));
-		d2 = _mm256_xor_si256(c1, _mm256_or_si256(_mm256_slli_epi64(c3, 1), _mm256_srli_epi64(c3, 64 - 1)));
-		d3 = _mm256_xor_si256(c2, _mm256_or_si256(_mm256_slli_epi64(c4, 1), _mm256_srli_epi64(c4, 64 - 1)));
-		d4 = _mm256_xor_si256(c3, _mm256_or_si256(_mm256_slli_epi64(c0, 1), _mm256_srli_epi64(c0, 64 - 1)));
-		a0 = _mm256_xor_si256(a0, d0);
-		c0 = a0;
-		a6 = _mm256_xor_si256(a6, d1);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(a6, 44), _mm256_srli_epi64(a6, 64 - 44));
-		a12 = _mm256_xor_si256(a12, d2);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(a12, 43), _mm256_srli_epi64(a12, 64 - 43));
-		a18 = _mm256_xor_si256(a18, d3);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(a18, 21), _mm256_srli_epi64(a18, 64 - 21));
-		a24 = _mm256_xor_si256(a24, d4);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(a24, 14), _mm256_srli_epi64(a24, 64 - 14));
-		e0 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		e0 = _mm256_xor_si256(e0, _mm256_set1_epi64x(KECCAK_RC24[i]));
-		e1 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		e2 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		e3 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		e4 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		a3 = _mm256_xor_si256(a3, d3);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(a3, 28), _mm256_srli_epi64(a3, 64 - 28));
-		a9 = _mm256_xor_si256(a9, d4);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(a9, 20), _mm256_srli_epi64(a9, 64 - 20));
-		a10 = _mm256_xor_si256(a10, d0);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(a10, 3), _mm256_srli_epi64(a10, 64 - 3));
-		a16 = _mm256_xor_si256(a16, d1);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(a16, 45), _mm256_srli_epi64(a16, 64 - 45));
-		a22 = _mm256_xor_si256(a22, d2);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(a22, 61), _mm256_srli_epi64(a22, 64 - 61));
-		e5 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		e6 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		e7 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		e8 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		e9 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		a1 = _mm256_xor_si256(a1, d1);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(a1, 1), _mm256_srli_epi64(a1, 64 - 1));
-		a7 = _mm256_xor_si256(a7, d2);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(a7, 6), _mm256_srli_epi64(a7, 64 - 6));
-		a13 = _mm256_xor_si256(a13, d3);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(a13, 25), _mm256_srli_epi64(a13, 64 - 25));
-		a19 = _mm256_xor_si256(a19, d4);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(a19, 8), _mm256_srli_epi64(a19, 64 - 8));
-		a20 = _mm256_xor_si256(a20, d0);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(a20, 18), _mm256_srli_epi64(a20, 64 - 18));
-		e10 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		e11 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		e12 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		e13 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		e14 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		a4 = _mm256_xor_si256(a4, d4);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(a4, 27), _mm256_srli_epi64(a4, 64 - 27));
-		a5 = _mm256_xor_si256(a5, d0);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(a5, 36), _mm256_srli_epi64(a5, 64 - 36));
-		a11 = _mm256_xor_si256(a11, d1);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(a11, 10), _mm256_srli_epi64(a11, 64 - 10));
-		a17 = _mm256_xor_si256(a17, d2);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(a17, 15), _mm256_srli_epi64(a17, 64 - 15));
-		a23 = _mm256_xor_si256(a23, d3);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(a23, 56), _mm256_srli_epi64(a23, 64 - 56));
-		e15 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		e16 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		e17 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		e18 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		e19 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		a2 = _mm256_xor_si256(a2, d2);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(a2, 62), _mm256_srli_epi64(a2, 64 - 62));
-		a8 = _mm256_xor_si256(a8, d3);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(a8, 55), _mm256_srli_epi64(a8, 64 - 55));
-		a14 = _mm256_xor_si256(a14, d4);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(a14, 39), _mm256_srli_epi64(a14, 64 - 39));
-		a15 = _mm256_xor_si256(a15, d0);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(a15, 41), _mm256_srli_epi64(a15, 64 - 41));
-		a21 = _mm256_xor_si256(a21, d1);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(a21, 2), _mm256_srli_epi64(a21, 64 - 2));
-		e20 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		e21 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		e22 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		e23 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		e24 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		/* round n + 1 */
-		c0 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e0, e5), _mm256_xor_si256(e10, e15)), e20);
-		c1 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e1, e6), _mm256_xor_si256(e11, e16)), e21);
-		c2 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e2, e7), _mm256_xor_si256(e12, e17)), e22);
-		c3 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e3, e8), _mm256_xor_si256(e13, e18)), e23);
-		c4 = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e4, e9), _mm256_xor_si256(e14, e19)), e24);
-		d0 = _mm256_xor_si256(c4, _mm256_or_si256(_mm256_slli_epi64(c1, 1), _mm256_srli_epi64(c1, 64 - 1)));
-		d1 = _mm256_xor_si256(c0, _mm256_or_si256(_mm256_slli_epi64(c2, 1), _mm256_srli_epi64(c2, 64 - 1)));
-		d2 = _mm256_xor_si256(c1, _mm256_or_si256(_mm256_slli_epi64(c3, 1), _mm256_srli_epi64(c3, 64 - 1)));
-		d3 = _mm256_xor_si256(c2, _mm256_or_si256(_mm256_slli_epi64(c4, 1), _mm256_srli_epi64(c4, 64 - 1)));
-		d4 = _mm256_xor_si256(c3, _mm256_or_si256(_mm256_slli_epi64(c0, 1), _mm256_srli_epi64(c0, 64 - 1)));
-		e0 = _mm256_xor_si256(e0, d0);
-		c0 = e0;
-		e6 = _mm256_xor_si256(e6, d1);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(e6, 44), _mm256_srli_epi64(e6, 64 - 44));
-		e12 = _mm256_xor_si256(e12, d2);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(e12, 43), _mm256_srli_epi64(e12, 64 - 43));
-		e18 = _mm256_xor_si256(e18, d3);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(e18, 21), _mm256_srli_epi64(e18, 64 - 21));
-		e24 = _mm256_xor_si256(e24, d4);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(e24, 14), _mm256_srli_epi64(e24, 64 - 14));
-		a0 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		a0 = _mm256_xor_si256(a0, _mm256_set1_epi64x(KECCAK_RC24[i + 1]));
-		a1 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		a2 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		a3 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		a4 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		e3 = _mm256_xor_si256(e3, d3);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(e3, 28), _mm256_srli_epi64(e3, 64 - 28));
-		e9 = _mm256_xor_si256(e9, d4);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(e9, 20), _mm256_srli_epi64(e9, 64 - 20));
-		e10 = _mm256_xor_si256(e10, d0);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(e10, 3), _mm256_srli_epi64(e10, 64 - 3));
-		e16 = _mm256_xor_si256(e16, d1);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(e16, 45), _mm256_srli_epi64(e16, 64 - 45));
-		e22 = _mm256_xor_si256(e22, d2);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(e22, 61), _mm256_srli_epi64(e22, 64 - 61));
-		a5 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		a6 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		a7 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		a8 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		a9 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		e1 = _mm256_xor_si256(e1, d1);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(e1, 1), _mm256_srli_epi64(e1, 64 - 1));
-		e7 = _mm256_xor_si256(e7, d2);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(e7, 6), _mm256_srli_epi64(e7, 64 - 6));
-		e13 = _mm256_xor_si256(e13, d3);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(e13, 25), _mm256_srli_epi64(e13, 64 - 25));
-		e19 = _mm256_xor_si256(e19, d4);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(e19, 8), _mm256_srli_epi64(e19, 64 - 8));
-		e20 = _mm256_xor_si256(e20, d0);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(e20, 18), _mm256_srli_epi64(e20, 64 - 18));
-		a10 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		a11 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		a12 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		a13 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		a14 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		e4 = _mm256_xor_si256(e4, d4);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(e4, 27), _mm256_srli_epi64(e4, 64 - 27));
-		e5 = _mm256_xor_si256(e5, d0);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(e5, 36), _mm256_srli_epi64(e5, 64 - 36));
-		e11 = _mm256_xor_si256(e11, d1);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(e11, 10), _mm256_srli_epi64(e11, 64 - 10));
-		e17 = _mm256_xor_si256(e17, d2);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(e17, 15), _mm256_srli_epi64(e17, 64 - 15));
-		e23 = _mm256_xor_si256(e23, d3);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(e23, 56), _mm256_srli_epi64(e23, 64 - 56));
-		a15 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		a16 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		a17 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		a18 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		a19 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-		e2 = _mm256_xor_si256(e2, d2);
-		c0 = _mm256_or_si256(_mm256_slli_epi64(e2, 62), _mm256_srli_epi64(e2, 64 - 62));
-		e8 = _mm256_xor_si256(e8, d3);
-		c1 = _mm256_or_si256(_mm256_slli_epi64(e8, 55), _mm256_srli_epi64(e8, 64 - 55));
-		e14 = _mm256_xor_si256(e14, d4);
-		c2 = _mm256_or_si256(_mm256_slli_epi64(e14, 39), _mm256_srli_epi64(e14, 64 - 39));
-		e15 = _mm256_xor_si256(e15, d0);
-		c3 = _mm256_or_si256(_mm256_slli_epi64(e15, 41), _mm256_srli_epi64(e15, 64 - 41));
-		e21 = _mm256_xor_si256(e21, d1);
-		c4 = _mm256_or_si256(_mm256_slli_epi64(e21, 2), _mm256_srli_epi64(e21, 64 - 2));
-		a20 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		a21 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
-		a22 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
-		a23 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
-		a24 = _mm256_xor_si256(c4, _mm256_and_si256(_mm256_xor_si256(c0, _mm256_set1_epi64x(-1)), c1));
-	}
-
-	state[0] = a0;
-	state[1] = a1;
-	state[2] = a2;
-	state[3] = a3;
-	state[4] = a4;
-	state[5] = a5;
-	state[6] = a6;
-	state[7] = a7;
-	state[8] = a8;
-	state[9] = a9;
-	state[10] = a10;
-	state[11] = a11;
-	state[12] = a12;
-	state[13] = a13;
-	state[14] = a14;
-	state[15] = a15;
-	state[16] = a16;
-	state[17] = a17;
-	state[18] = a18;
-	state[19] = a19;
-	state[20] = a20;
-	state[21] = a21;
-	state[22] = a22;
-	state[23] = a23;
-	state[24] = a24;
-}
-
-#	else
-
-void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
-{
-	assert(rounds % 2 == 0);
-
-	__m256i a[25] = { 0 };
-	__m256i c[5] = { 0 };
-	__m256i d[5] = { 0 };
-	__m256i e[25] = { 0 };
-	size_t i;
-
-	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
-	{
-		a[i] = state[i];
-	}
-
-	for (i = 0; i < rounds; i += 2)
-	{
-		// round n
-		c[0] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[0], a[5]), _mm256_xor_si256(a[10], a[15])), a[20]);
-		c[1] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[1], a[6]), _mm256_xor_si256(a[11], a[16])), a[21]);
-		c[2] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[2], a[7]), _mm256_xor_si256(a[12], a[17])), a[22]);
-		c[3] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[3], a[8]), _mm256_xor_si256(a[13], a[18])), a[23]);
-		c[4] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[4], a[9]), _mm256_xor_si256(a[14], a[19])), a[24]);
-		d[0] = _mm256_xor_si256(c[4], _mm256_or_si256(_mm256_slli_epi64(c[1], 1), _mm256_srli_epi64(c[1], 64 - 1)));
-		d[1] = _mm256_xor_si256(c[0], _mm256_or_si256(_mm256_slli_epi64(c[2], 1), _mm256_srli_epi64(c[2], 64 - 1)));
-		d[2] = _mm256_xor_si256(c[1], _mm256_or_si256(_mm256_slli_epi64(c[3], 1), _mm256_srli_epi64(c[3], 64 - 1)));
-		d[3] = _mm256_xor_si256(c[2], _mm256_or_si256(_mm256_slli_epi64(c[4], 1), _mm256_srli_epi64(c[4], 64 - 1)));
-		d[4] = _mm256_xor_si256(c[3], _mm256_or_si256(_mm256_slli_epi64(c[0], 1), _mm256_srli_epi64(c[0], 64 - 1)));
-		a[0] = _mm256_xor_si256(a[0], d[0]);
-		c[0] = a[0];
-		a[6] = _mm256_xor_si256(a[6], d[1]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[6], 44), _mm256_srli_epi64(a[6], 64 - 44));
-		a[12] = _mm256_xor_si256(a[12], d[2]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[12], 43), _mm256_srli_epi64(a[12], 64 - 43));
-		a[18] = _mm256_xor_si256(a[18], d[3]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[18], 21), _mm256_srli_epi64(a[18], 64 - 21));
-		a[24] = _mm256_xor_si256(a[24], d[4]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[24], 14), _mm256_srli_epi64(a[24], 64 - 14));
-		e[0] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		e[0] = _mm256_xor_si256(e[0], _mm256_set1_epi64x(KECCAK_RC24[i]));
-		e[1] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		e[2] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		e[3] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		e[4] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		a[3] = _mm256_xor_si256(a[3], d[3]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[3], 28), _mm256_srli_epi64(a[3], 64 - 28));
-		a[9] = _mm256_xor_si256(a[9], d[4]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[9], 20), _mm256_srli_epi64(a[9], 64 - 20));
-		a[10] = _mm256_xor_si256(a[10], d[0]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[10], 3), _mm256_srli_epi64(a[10], 64 - 3));
-		a[16] = _mm256_xor_si256(a[16], d[1]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[16], 45), _mm256_srli_epi64(a[16], 64 - 45));
-		a[22] = _mm256_xor_si256(a[22], d[2]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[22], 61), _mm256_srli_epi64(a[22], 64 - 61));
-		e[5] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		e[6] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		e[7] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		e[8] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		e[9] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		a[1] = _mm256_xor_si256(a[1], d[1]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[1], 1), _mm256_srli_epi64(a[1], 64 - 1));
-		a[7] = _mm256_xor_si256(a[7], d[2]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[7], 6), _mm256_srli_epi64(a[7], 64 - 6));
-		a[13] = _mm256_xor_si256(a[13], d[3]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[13], 25), _mm256_srli_epi64(a[13], 64 - 25));
-		a[19] = _mm256_xor_si256(a[19], d[4]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[19], 8), _mm256_srli_epi64(a[19], 64 - 8));
-		a[20] = _mm256_xor_si256(a[20], d[0]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[20], 18), _mm256_srli_epi64(a[20], 64 - 18));
-		e[10] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		e[11] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		e[12] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		e[13] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		e[14] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		a[4] = _mm256_xor_si256(a[4], d[4]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[4], 27), _mm256_srli_epi64(a[4], 64 - 27));
-		a[5] = _mm256_xor_si256(a[5], d[0]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[5], 36), _mm256_srli_epi64(a[5], 64 - 36));
-		a[11] = _mm256_xor_si256(a[11], d[1]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[11], 10), _mm256_srli_epi64(a[11], 64 - 10));
-		a[17] = _mm256_xor_si256(a[17], d[2]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[17], 15), _mm256_srli_epi64(a[17], 64 - 15));
-		a[23] = _mm256_xor_si256(a[23], d[3]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[23], 56), _mm256_srli_epi64(a[23], 64 - 56));
-		e[15] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		e[16] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		e[17] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		e[18] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		e[19] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		a[2] = _mm256_xor_si256(a[2], d[2]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(a[2], 62), _mm256_srli_epi64(a[2], 64 - 62));
-		a[8] = _mm256_xor_si256(a[8], d[3]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(a[8], 55), _mm256_srli_epi64(a[8], 64 - 55));
-		a[14] = _mm256_xor_si256(a[14], d[4]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(a[14], 39), _mm256_srli_epi64(a[14], 64 - 39));
-		a[15] = _mm256_xor_si256(a[15], d[0]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(a[15], 41), _mm256_srli_epi64(a[15], 64 - 41));
-		a[21] = _mm256_xor_si256(a[21], d[1]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(a[21], 2), _mm256_srli_epi64(a[21], 64 - 2));
-		e[20] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		e[21] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		e[22] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		e[23] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		e[24] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-
-		// round n + 1
-		c[0] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[0], e[5]), _mm256_xor_si256(e[10], e[15])), e[20]);
-		c[1] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[1], e[6]), _mm256_xor_si256(e[11], e[16])), e[21]);
-		c[2] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[2], e[7]), _mm256_xor_si256(e[12], e[17])), e[22]);
-		c[3] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[3], e[8]), _mm256_xor_si256(e[13], e[18])), e[23]);
-		c[4] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[4], e[9]), _mm256_xor_si256(e[14], e[19])), e[24]);
-		d[0] = _mm256_xor_si256(c[4], _mm256_or_si256(_mm256_slli_epi64(c[1], 1), _mm256_srli_epi64(c[1], 64 - 1)));
-		d[1] = _mm256_xor_si256(c[0], _mm256_or_si256(_mm256_slli_epi64(c[2], 1), _mm256_srli_epi64(c[2], 64 - 1)));
-		d[2] = _mm256_xor_si256(c[1], _mm256_or_si256(_mm256_slli_epi64(c[3], 1), _mm256_srli_epi64(c[3], 64 - 1)));
-		d[3] = _mm256_xor_si256(c[2], _mm256_or_si256(_mm256_slli_epi64(c[4], 1), _mm256_srli_epi64(c[4], 64 - 1)));
-		d[4] = _mm256_xor_si256(c[3], _mm256_or_si256(_mm256_slli_epi64(c[0], 1), _mm256_srli_epi64(c[0], 64 - 1)));
-		e[0] = _mm256_xor_si256(e[0], d[0]);
-		c[0] = e[0];
-		e[6] = _mm256_xor_si256(e[6], d[1]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[6], 44), _mm256_srli_epi64(e[6], 64 - 44));
-		e[12] = _mm256_xor_si256(e[12], d[2]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[12], 43), _mm256_srli_epi64(e[12], 64 - 43));
-		e[18] = _mm256_xor_si256(e[18], d[3]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[18], 21), _mm256_srli_epi64(e[18], 64 - 21));
-		e[24] = _mm256_xor_si256(e[24], d[4]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[24], 14), _mm256_srli_epi64(e[24], 64 - 14));
-		a[0] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		a[0] = _mm256_xor_si256(a[0], _mm256_set1_epi64x(KECCAK_RC24[i + 1]));
-		a[1] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		a[2] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		a[3] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		a[4] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		e[3] = _mm256_xor_si256(e[3], d[3]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[3], 28), _mm256_srli_epi64(e[3], 64 - 28));
-		e[9] = _mm256_xor_si256(e[9], d[4]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[9], 20), _mm256_srli_epi64(e[9], 64 - 20));
-		e[10] = _mm256_xor_si256(e[10], d[0]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[10], 3), _mm256_srli_epi64(e[10], 64 - 3));
-		e[16] = _mm256_xor_si256(e[16], d[1]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[16], 45), _mm256_srli_epi64(e[16], 64 - 45));
-		e[22] = _mm256_xor_si256(e[22], d[2]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[22], 61), _mm256_srli_epi64(e[22], 64 - 61));
-		a[5] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		a[6] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		a[7] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		a[8] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		a[9] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		e[1] = _mm256_xor_si256(e[1], d[1]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[1], 1), _mm256_srli_epi64(e[1], 64 - 1));
-		e[7] = _mm256_xor_si256(e[7], d[2]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[7], 6), _mm256_srli_epi64(e[7], 64 - 6));
-		e[13] = _mm256_xor_si256(e[13], d[3]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[13], 25), _mm256_srli_epi64(e[13], 64 - 25));
-		e[19] = _mm256_xor_si256(e[19], d[4]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[19], 8), _mm256_srli_epi64(e[19], 64 - 8));
-		e[20] = _mm256_xor_si256(e[20], d[0]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[20], 18), _mm256_srli_epi64(e[20], 64 - 18));
-		a[10] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		a[11] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		a[12] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		a[13] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		a[14] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		e[4] = _mm256_xor_si256(e[4], d[4]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[4], 27), _mm256_srli_epi64(e[4], 64 - 27));
-		e[5] = _mm256_xor_si256(e[5], d[0]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[5], 36), _mm256_srli_epi64(e[5], 64 - 36));
-		e[11] = _mm256_xor_si256(e[11], d[1]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[11], 10), _mm256_srli_epi64(e[11], 64 - 10));
-		e[17] = _mm256_xor_si256(e[17], d[2]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[17], 15), _mm256_srli_epi64(e[17], 64 - 15));
-		e[23] = _mm256_xor_si256(e[23], d[3]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[23], 56), _mm256_srli_epi64(e[23], 64 - 56));
-		a[15] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		a[16] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		a[17] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		a[18] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		a[19] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-		e[2] = _mm256_xor_si256(e[2], d[2]);
-		c[0] = _mm256_or_si256(_mm256_slli_epi64(e[2], 62), _mm256_srli_epi64(e[2], 64 - 62));
-		e[8] = _mm256_xor_si256(e[8], d[3]);
-		c[1] = _mm256_or_si256(_mm256_slli_epi64(e[8], 55), _mm256_srli_epi64(e[8], 64 - 55));
-		e[14] = _mm256_xor_si256(e[14], d[4]);
-		c[2] = _mm256_or_si256(_mm256_slli_epi64(e[14], 39), _mm256_srli_epi64(e[14], 64 - 39));
-		e[15] = _mm256_xor_si256(e[15], d[0]);
-		c[3] = _mm256_or_si256(_mm256_slli_epi64(e[15], 41), _mm256_srli_epi64(e[15], 64 - 41));
-		e[21] = _mm256_xor_si256(e[21], d[1]);
-		c[4] = _mm256_or_si256(_mm256_slli_epi64(e[21], 2), _mm256_srli_epi64(e[21], 64 - 2));
-		a[20] = _mm256_xor_si256(c[0], _mm256_and_si256(_mm256_xor_si256(c[1], _mm256_set1_epi64x(-1)), c[2]));
-		a[21] = _mm256_xor_si256(c[1], _mm256_and_si256(_mm256_xor_si256(c[2], _mm256_set1_epi64x(-1)), c[3]));
-		a[22] = _mm256_xor_si256(c[2], _mm256_and_si256(_mm256_xor_si256(c[3], _mm256_set1_epi64x(-1)), c[4]));
-		a[23] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
-		a[24] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
-	}
-
-	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
-	{
-		state[i] = a[i];
-	}
-}
-
-#	endif
-#endif
-
-/* common */
-
-void qsc_keccak_permute(uint64_t* state)
-{
-#if defined(QSC_KECCAK_UNROLLED_PERMUTATION)
-	qsc_keccak_permute_p1600(ctx->state)
-#else
-	qsc_keccak_permute_p1600(state, KECCAK_PERMUTATION_ROUNDS);
-#endif
-}
-
-QSC_SYSTEM_OPTIMIZE_IGNORE
-void qsc_keccak_dispose(qsc_keccak_state* ctx)
-{
-	if (ctx != NULL)
-	{
-		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
-		ctx->position = 0;
-	}
-}
-QSC_SYSTEM_OPTIMIZE_RESUME
-
-/* sha3 */
 
 void qsc_sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
 {
@@ -3769,9 +3955,9 @@ void qsc_sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
-	keccak_absorb(ctx.state, keccak_rate_256, message, msglen, KECCAK_SHA3_DOMAIN_ID);
-	keccak_squeezeblocks(ctx.state, hash, 1, keccak_rate_256);
+	qsc_sha3_initialize(&ctx);
+	qsc_keccak_absorb(&ctx, keccak_rate_256, message, msglen, QSC_KECCAK_SHA3_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
+	qsc_keccak_squeezeblocks(&ctx, hash, 1, keccak_rate_256, QSC_KECCAK_PERMUTATION_ROUNDS);
 	qsc_memutils_copy(output, hash, QSC_SHA3_256_HASH_SIZE);
 	qsc_keccak_dispose(&ctx);
 }
@@ -3784,9 +3970,9 @@ void qsc_sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen)
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
-	keccak_absorb(ctx.state, keccak_rate_512, message, msglen, KECCAK_SHA3_DOMAIN_ID);
-	keccak_squeezeblocks(ctx.state, hash, 1, keccak_rate_512);
+	qsc_sha3_initialize(&ctx);
+	qsc_keccak_absorb(&ctx, keccak_rate_512, message, msglen, QSC_KECCAK_SHA3_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
+	qsc_keccak_squeezeblocks(&ctx, hash, 1, keccak_rate_512, QSC_KECCAK_PERMUTATION_ROUNDS);
 	qsc_memutils_copy(output, hash, QSC_SHA3_512_HASH_SIZE);
 	qsc_keccak_dispose(&ctx);
 }
@@ -3800,15 +3986,14 @@ void qsc_sha3_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output)
 
 	hlen = (((QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)) - rate) / 2);
 	qsc_memutils_clear(((uint8_t*)ctx->buffer + ctx->position), sizeof(ctx->buffer) - ctx->position);
-	ctx->buffer[ctx->position] = KECCAK_SHA3_DOMAIN_ID;
+	ctx->buffer[ctx->position] = QSC_KECCAK_SHA3_DOMAIN_ID;
 	ctx->buffer[rate - 1] |= 128U;
 	keccak_fast_absorb(ctx->state, ctx->buffer, rate);
-	qsc_keccak_permute(ctx->state);
+	qsc_keccak_permute(ctx, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
 	qsc_memutils_copy(output, (uint8_t*)ctx->state, hlen);
 #else
-
 	for (size_t i = 0; i < hlen / sizeof(uint64_t); ++i)
 	{
 		qsc_intutils_le64to8(output, ctx->state[i]);
@@ -3821,15 +4006,15 @@ void qsc_sha3_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output)
 
 void qsc_sha3_initialize(qsc_keccak_state* ctx)
 {
-	qsc_keccak_dispose(ctx);
+	qsc_keccak_state_reset(ctx);
 }
 
 void qsc_sha3_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen)
 {
-	keccak_update(ctx, rate, message, msglen);
+	qsc_keccak_update(ctx, rate, message, msglen, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
-/* shake */
+/* SHAKE */
 
 void qsc_shake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen)
 {
@@ -3840,7 +4025,6 @@ void qsc_shake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, si
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 	qsc_shake_initialize(&ctx, keccak_rate_128, key, keylen);
 	qsc_shake_squeezeblocks(&ctx, keccak_rate_128, output, nblocks);
 	output += (nblocks * QSC_KECCAK_128_RATE);
@@ -3864,7 +4048,6 @@ void qsc_shake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, si
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 	qsc_shake_initialize(&ctx, keccak_rate_256, key, keylen);
 	qsc_shake_squeezeblocks(&ctx, keccak_rate_256, output, nblocks);
 	output += (nblocks * QSC_KECCAK_256_RATE);
@@ -3888,7 +4071,6 @@ void qsc_shake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, si
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 	qsc_shake_initialize(&ctx, keccak_rate_512, key, keylen);
 	qsc_shake_squeezeblocks(&ctx, keccak_rate_512, output, nblocks);
 	output += (nblocks * QSC_KECCAK_512_RATE);
@@ -3908,7 +4090,8 @@ void qsc_shake_initialize(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t
 	assert(ctx != NULL);
 	assert(key != NULL);
 
-	keccak_absorb(ctx->state, rate, key, keylen, KECCAK_SHAKE_DOMAIN_ID);
+	qsc_keccak_state_reset(ctx);
+	qsc_keccak_absorb(ctx, rate, key, keylen, QSC_KECCAK_SHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t nblocks)
@@ -3916,10 +4099,10 @@ void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* o
 	assert(ctx != NULL);
 	assert(output != NULL);
 
-	keccak_squeezeblocks(ctx->state, output, nblocks, rate);
+	qsc_keccak_squeezeblocks(ctx, output, nblocks, rate, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
-/* cshake */
+/* cSHAKE */
 
 void qsc_cshake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
 {
@@ -3929,8 +4112,6 @@ void qsc_cshake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, s
 	const size_t nblocks = outlen / QSC_KECCAK_128_RATE;
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
-
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 
 	if (custlen + namelen != 0)
 	{
@@ -3962,8 +4143,6 @@ void qsc_cshake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, s
 	const size_t nblocks = outlen / QSC_KECCAK_256_RATE;
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
-
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 
 	if (custlen + namelen != 0)
 	{
@@ -3997,8 +4176,6 @@ void qsc_cshake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, s
 	qsc_keccak_state ctx;
 	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
-
 	if (custlen + namelen != 0)
 	{
 		qsc_cshake_initialize(&ctx, keccak_rate_512, key, keylen, name, namelen, custom, custlen);
@@ -4026,53 +4203,11 @@ void qsc_cshake_initialize(qsc_keccak_state* ctx, keccak_rate rate, const uint8_
 	assert(ctx != NULL);
 	assert(key != NULL);
 
-	uint8_t pad[KECCAK_STATE_BYTE_SIZE] = { 0 };
-	size_t i;
-	size_t oft;
-
-	oft = keccak_left_encode(pad, rate);
-	oft += keccak_left_encode(((uint8_t*)pad + oft), namelen * 8);
-
-	if (namelen != 0)
-	{
-		for (i = 0; i < namelen; ++i)
-		{
-			if (oft == rate)
-			{
-				keccak_fast_absorb(ctx->state, pad, rate);
-				qsc_keccak_permute(ctx->state);
-				oft = 0;
-			}
-
-			pad[oft] = name[i];
-			++oft;
-		}
-	}
-
-	oft += keccak_left_encode(((uint8_t*)pad + oft), custlen * 8);
-
-	if (custlen != 0)
-	{
-		for (i = 0; i < custlen; ++i)
-		{
-			if (oft == rate)
-			{
-				keccak_fast_absorb(ctx->state, pad, rate);
-				qsc_keccak_permute(ctx->state);
-				oft = 0;
-			}
-
-			pad[oft] = custom[i];
-			++oft;
-		}
-	}
-
-	qsc_memutils_clear(((uint8_t*)pad + oft), rate - oft);
-	keccak_fast_absorb(ctx->state, pad, rate);
-	qsc_keccak_permute(ctx->state);
-
-	/* initialize the key */
-	keccak_absorb(ctx->state, rate, key, keylen, KECCAK_CSHAKE_DOMAIN_ID);
+	qsc_keccak_state_reset(ctx);
+	/* absorb the custom and name arrays */
+	qsc_keccak_absorb_custom(ctx, rate, custom, custlen, name, namelen, QSC_KECCAK_PERMUTATION_ROUNDS);
+	/* finalize the key */
+	qsc_keccak_absorb(ctx, rate, key, keylen, QSC_KECCAK_CSHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t nblocks)
@@ -4080,15 +4215,18 @@ void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* 
 	assert(ctx != NULL);
 	assert(output != NULL);
 
-	keccak_squeezeblocks(ctx->state, output, nblocks, (size_t)rate);
+	qsc_keccak_squeezeblocks(ctx, output, nblocks, (size_t)rate, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 void qsc_cshake_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen)
 {
+	assert(ctx != NULL);
+	assert(key != NULL);
+
 	while (keylen >= (size_t)rate)
 	{
 		keccak_fast_absorb(ctx->state, key, keylen);
-		qsc_keccak_permute(ctx->state);
+		qsc_keccak_permute(ctx, QSC_KECCAK_PERMUTATION_ROUNDS);
 		keylen -= rate;
 		key += rate;
 	}
@@ -4096,11 +4234,11 @@ void qsc_cshake_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* k
 	if (keylen != 0)
 	{
 		keccak_fast_absorb(ctx->state, key, keylen);
-		qsc_keccak_permute(ctx->state);
+		qsc_keccak_permute(ctx, QSC_KECCAK_PERMUTATION_ROUNDS);
 	}
 }
 
-/* kmac */
+/* KMAC */
 
 void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
@@ -4110,7 +4248,6 @@ void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message,
 
 	qsc_keccak_state ctx;
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 	qsc_kmac_initialize(&ctx, keccak_rate_128, key, keylen, custom, custlen);
 	qsc_kmac_update(&ctx, keccak_rate_128, message, msglen);
 	qsc_kmac_finalize(&ctx, keccak_rate_128, output, outlen);
@@ -4124,7 +4261,6 @@ void qsc_kmac256_compute(uint8_t* output, size_t outlen, const uint8_t* message,
 
 	qsc_keccak_state ctx;
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 	qsc_kmac_initialize(&ctx, keccak_rate_256, key, keylen, custom, custlen);
 	qsc_kmac_update(&ctx, keccak_rate_256, message, msglen);
 	qsc_kmac_finalize(&ctx, keccak_rate_256, output, outlen);
@@ -4138,7 +4274,6 @@ void qsc_kmac512_compute(uint8_t* output, size_t outlen, const uint8_t* message,
 
 	qsc_keccak_state ctx;
 
-	qsc_memutils_clear((uint8_t*)ctx.state, sizeof(ctx.state));
 	qsc_kmac_initialize(&ctx, keccak_rate_512, key, keylen, custom, custlen);
 	qsc_kmac_update(&ctx, keccak_rate_512, message, msglen);
 	qsc_kmac_finalize(&ctx, keccak_rate_512, output, outlen);
@@ -4146,42 +4281,7 @@ void qsc_kmac512_compute(uint8_t* output, size_t outlen, const uint8_t* message,
 
 void qsc_kmac_finalize(qsc_keccak_state* ctx, keccak_rate rate, uint8_t* output, size_t outlen)
 {
-	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[KECCAK_STATE_BYTE_SIZE] = { 0 };
-	size_t bitlen;
-
-	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
-	bitlen = keccak_right_encode(buf, outlen * 8);
-
-	if (ctx->position + bitlen >= (size_t)rate)
-	{
-		keccak_fast_absorb(ctx->state, pad, ctx->position);
-		qsc_keccak_permute(ctx->state);
-		ctx->position = 0;
-	}
-
-	qsc_memutils_copy(((uint8_t*)pad + ctx->position), buf, bitlen);
-
-	pad[ctx->position + bitlen] = KECCAK_KMAC_DOMAIN_ID;
-	pad[rate - 1] |= 128U;
-	keccak_fast_absorb(ctx->state, pad, rate);
-
-	while (outlen >= (size_t)rate)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, rate);
-		qsc_memutils_copy(output, pad, rate);
-		output += rate;
-		outlen -= rate;
-	}
-
-	if (outlen > 0)
-	{
-		keccak_squeezeblocks(ctx->state, pad, 1, rate);
-		qsc_memutils_copy(output, pad, outlen);
-	}
-
-	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
-	ctx->position = 0;
+	qsc_keccak_finalize(ctx, rate, output, outlen, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 void qsc_kmac_initialize(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
@@ -4189,85 +4289,26 @@ void qsc_kmac_initialize(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t*
 	assert(ctx != NULL);
 	assert(key != NULL);
 
-	uint8_t pad[QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)] = { 0 };
-	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
-	size_t oft;
-	size_t i;
+	const uint8_t name[4] = { 0x4B, 0x4D, 0x41, 0x43 };
 
-	qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
-	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
-	ctx->position = 0;
-
-	/* stage 1: name + custom */
-
-	oft = keccak_left_encode(pad, rate);
-	oft += keccak_left_encode(((uint8_t*)pad + oft), sizeof(name) * 8);
-
-	for (i = 0; i < sizeof(name); ++i)
-	{
-		pad[oft + i] = name[i];
-	}
-
-	oft += sizeof(name);
-	oft += keccak_left_encode(((uint8_t*)pad + oft), custlen * 8);
-
-	for (i = 0; i < custlen; ++i)
-	{
-		if (oft == rate)
-		{
-			keccak_fast_absorb(ctx->state, pad, rate);
-			qsc_keccak_permute(ctx->state);
-			oft = 0;
-		}
-
-		pad[oft] = custom[i];
-		++oft;
-	}
-
-	qsc_memutils_clear(((uint8_t*)pad + oft), rate - oft);
-	keccak_fast_absorb(ctx->state, pad, rate);
-	qsc_keccak_permute(ctx->state);
-
-
-	/* stage 2: key */
-
-	qsc_memutils_clear(pad, rate);
-
-	oft = keccak_left_encode(pad, rate);
-	oft += keccak_left_encode(((uint8_t*)pad + oft), keylen * 8);
-
-	for (i = 0; i < keylen; ++i)
-	{
-		if (oft == rate)
-		{
-			keccak_fast_absorb(ctx->state, pad, rate);
-			qsc_keccak_permute(ctx->state);
-			oft = 0;
-		}
-
-		pad[oft] = key[i];
-		++oft;
-	}
-
-
-	qsc_memutils_clear(((uint8_t*)pad + oft), rate - oft);
-	keccak_fast_absorb(ctx->state, pad, rate);
-	qsc_keccak_permute(ctx->state);
+	qsc_keccak_absorb_key_custom(ctx, rate, key, keylen, custom, custlen, name, sizeof(name), QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 void qsc_kmac_update(qsc_keccak_state* ctx, keccak_rate rate, const uint8_t* message, size_t msglen)
 {
-	keccak_update(ctx, rate, message, msglen);
+	assert(ctx != NULL);
+	assert(message != NULL);
+
+	qsc_keccak_update(ctx, rate, message, msglen, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 /* KPA */
 
-#define KPA_LEAF_HASH128 16
-#define KPA_LEAF_HASH256 32
-#define KPA_LEAF_HASH512 64
-
 static void kpa_absorb_leaves(uint64_t* state, keccak_rate rate, const uint8_t* input, size_t inplen)
 {
+	assert(state != NULL);
+	assert(input != NULL);
+
 	while (inplen >= (size_t)rate)
 	{
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
@@ -4278,7 +4319,7 @@ static void kpa_absorb_leaves(uint64_t* state, keccak_rate rate, const uint8_t* 
 			state[i] ^= qsc_intutils_le8to64(((uint8_t*)input + (sizeof(uint64_t) * i)));
 		}
 #endif
-		qsc_keccak_permute_p1600(state, QSC_KPA_ROUNDS);
+		qsc_keccak_permute_p1600c(state, QSC_KPA_ROUNDS);
 		inplen -= rate;
 		input += rate;
 	}
@@ -4294,12 +4335,15 @@ static void kpa_absorb_leaves(uint64_t* state, keccak_rate rate, const uint8_t* 
 		}
 #endif
 
-		qsc_keccak_permute_p1600(state, QSC_KPA_ROUNDS);
+		qsc_keccak_permute_p1600c(state, QSC_KPA_ROUNDS);
 	}
 }
 
 static void kpa_fast_absorbx8(qsc_kpa_state* ctx, const uint8_t* message)
 {
+	assert(ctx != NULL);
+	assert(message != NULL);
+
 	size_t i;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
@@ -4365,6 +4409,8 @@ static void kpa_fast_absorbx8(qsc_kpa_state* ctx, const uint8_t* message)
 
 static void kpa_permutex8(qsc_kpa_state* ctx)
 {
+	assert(ctx != NULL);
+
 #if defined(QSC_SYSTEM_HAS_AVX512)
 	qsc_keccak_permute_p8x1600(ctx->statew, QSC_KPA_ROUNDS);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
@@ -4373,16 +4419,19 @@ static void kpa_permutex8(qsc_kpa_state* ctx)
 #else
 	for (size_t i = 0; i < QSC_KPA_PARALLELISM; ++i)
 	{
-		qsc_keccak_permute_p1600(ctx->state[i], QSC_KPA_ROUNDS);
+		qsc_keccak_permute_p1600c(ctx->state[i], QSC_KPA_ROUNDS);
 	}
 #endif
 }
 
 static void kpa_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, keccak_rate rate)
 {
+	assert(state != NULL);
+	assert(output != NULL);
+
 	while (nblocks > 0)
 	{
-		qsc_keccak_permute_p1600(state, QSC_KPA_ROUNDS);
+		qsc_keccak_permute_p1600c(state, QSC_KPA_ROUNDS);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
 		qsc_memutils_copy(output, (uint8_t*)state, (size_t)rate);
@@ -4401,6 +4450,8 @@ static void kpa_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, 
 
 static void kpa_load_state(qsc_kpa_state* ctx)
 {
+	assert(ctx != NULL);
+
 	size_t i;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
@@ -4441,6 +4492,8 @@ static void kpa_load_state(qsc_kpa_state* ctx)
 
 static void kpa_store_state(qsc_kpa_state* ctx)
 {
+	assert(ctx != NULL);
+
 	size_t i;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
@@ -4485,6 +4538,8 @@ static void kpa_store_state(qsc_kpa_state* ctx)
 
 void qsc_kpa_dispose(qsc_kpa_state* ctx)
 {
+	assert(ctx != NULL);
+
 	if (ctx != NULL)
 	{
 		if (ctx->state != NULL)
@@ -4561,7 +4616,7 @@ void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 	qsc_memutils_copy((uint8_t*)ctx->buffer, prcb, bitlen);
 
 	/* add the domain id */
-	ctx->buffer[bitlen] = KECCAK_KPA_DOMAIN_ID;
+	ctx->buffer[bitlen] = QSC_KECCAK_KPA_DOMAIN_ID;
 	/* clamp the last byte */
 	ctx->buffer[(size_t)ctx->rate - 1] |= 128U;
 
@@ -4623,7 +4678,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 			if (oft == (size_t)ctx->rate)
 			{
 				keccak_fast_absorb(tmps, pad, ctx->rate);
-				qsc_keccak_permute_p1600(tmps, QSC_KPA_ROUNDS);
+				qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 				oft = 0;
 			}
 
@@ -4636,7 +4691,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 			/* absorb custom and name, and permute state */
 			qsc_memutils_clear(((uint8_t*)pad + oft), (size_t)ctx->rate - oft);
 			keccak_fast_absorb(tmps, pad, ctx->rate);
-			qsc_keccak_permute_p1600(tmps, QSC_KPA_ROUNDS);
+			qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 		}
 	}
 
@@ -4653,7 +4708,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 			if (oft == (size_t)ctx->rate)
 			{
 				keccak_fast_absorb(tmps, pad, ctx->rate);
-				qsc_keccak_permute_p1600(tmps, QSC_KPA_ROUNDS);
+				qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 				oft = 0;
 			}
 
@@ -4666,7 +4721,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 			/* absorb the key and permute the state */
 			qsc_memutils_clear(((uint8_t*)pad + oft), (size_t)ctx->rate - oft);
 			keccak_fast_absorb(tmps, pad, ctx->rate);
-			qsc_keccak_permute_p1600(tmps, QSC_KPA_ROUNDS);
+			qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 		}
 	}
 
@@ -4786,67 +4841,6 @@ void qsc_kpa_update(qsc_kpa_state* ctx, const uint8_t* message, size_t msglen)
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-/*
-static void shakex4_fast_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], const uint8_t* inp0, const uint8_t* inp1,
-	const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
-{
-	__m256i t;
-	uint64_t tmps[4] = { 0 };
-	size_t pos;
-
-	pos = 0;
-
-	for (size_t i = 0; i < inplen / sizeof(uint64_t); ++i)
-	{
-		tmps[0] = qsc_intutils_le8to64(((uint8_t*)inp0 + pos));
-		tmps[1] = qsc_intutils_le8to64(((uint8_t*)inp1 + pos));
-		tmps[2] = qsc_intutils_le8to64(((uint8_t*)inp2 + pos));
-		tmps[3] = qsc_intutils_le8to64(((uint8_t*)inp3 + pos));
-
-		t = _mm256_loadu_si256((const __m256i*)tmps);
-		state[i] = _mm256_xor_si256(state[i], t);
-		pos += 8;
-	}
-}
-
-static void shakex4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate rate,
-	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain)
-{
-	uint8_t pad[4][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
-	size_t pos;
-
-	pos = 0;
-
-	while (inplen >= (size_t)rate)
-	{
-		shakex4_fast_absorb(state, inp0, inp1, inp2, inp3, (size_t)rate);
-		qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
-		inplen -= rate;
-		pos += (size_t)rate;
-	}
-
-	if (inplen > 0)
-	{
-		qsc_memutils_copy(pad[0], ((uint8_t*)inp0 + pos), inplen);
-		qsc_memutils_copy(pad[1], ((uint8_t*)inp1 + pos), inplen);
-		qsc_memutils_copy(pad[2], ((uint8_t*)inp2 + pos), inplen);
-		qsc_memutils_copy(pad[3], ((uint8_t*)inp3 + pos), inplen);
-		pos += inplen;
-	}
-
-	pad[0][pos] = domain;
-	pad[1][pos] = domain;
-	pad[2][pos] = domain;
-	pad[3][pos] = domain;
-
-	pad[0][(size_t)rate - 1] |= 128U;
-	pad[1][(size_t)rate - 1] |= 128U;
-	pad[2][(size_t)rate - 1] |= 128U;
-	pad[3][(size_t)rate - 1] |= 128U;
-
-	shakex4_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], (size_t)rate);
-}*/
-
 static void shakex4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate rate,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain)
 {
@@ -4876,7 +4870,7 @@ static void shakex4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate rat
 			pos += sizeof(uint64_t);
 		}
 
-		qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 		inplen -= rate;
 	}
 
@@ -4917,7 +4911,7 @@ static void keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_
 
 	while (nblocks > 0)
 	{
-		qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 		for (i = 0; i < (size_t)rate / sizeof(uint64_t); ++i)
 		{
@@ -4995,7 +4989,7 @@ static void shakex8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate rat
 	while (inplen >= (size_t)rate)
 	{
 		shakex8_fast_absorb(state, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, (size_t)rate);
-		qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 		inplen -= rate;
 		pos += (size_t)rate;
 	}
@@ -5073,7 +5067,7 @@ static void shakex8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate rat
 			pos += sizeof(uint64_t);
 		}
 
-		qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 		inplen -= rate;
 	}
 
@@ -5120,7 +5114,7 @@ static void keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_
 
 	while (nblocks > 0)
 	{
-		qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 		for (i = 0; i < (size_t)rate / sizeof(uint64_t); ++i)
 		{
@@ -5191,7 +5185,7 @@ void shake128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size
 	uint8_t t[4][QSC_KECCAK_128_RATE] = { 0 };
 	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
 
-	shakex4_absorb(state, keccak_rate_128, inp0, inp1, inp2, inp3, inplen, KECCAK_SHAKE_DOMAIN_ID);
+	shakex4_absorb(state, keccak_rate_128, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
 	if (outlen >= QSC_KECCAK_128_RATE)
 	{
@@ -5241,7 +5235,7 @@ void shake256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size
 	uint8_t t[4][QSC_KECCAK_256_RATE] = { 0 };
 	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
 
-	shakex4_absorb(state, keccak_rate_256, inp0, inp1, inp2, inp3, inplen, KECCAK_SHAKE_DOMAIN_ID);
+	shakex4_absorb(state, keccak_rate_256, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
 	if (outlen >= QSC_KECCAK_256_RATE)
 	{
@@ -5291,7 +5285,7 @@ void shake512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size
 	uint8_t t[4][QSC_KECCAK_512_RATE] = { 0 };
 	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
 
-	shakex4_absorb(state, keccak_rate_512, inp0, inp1, inp2, inp3, inplen, KECCAK_SHAKE_DOMAIN_ID);
+	shakex4_absorb(state, keccak_rate_512, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
 	if (outlen >= QSC_KECCAK_512_RATE)
 	{
@@ -5345,7 +5339,7 @@ void shake128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t t[8][QSC_KECCAK_128_RATE] = { 0 };
 	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
 
-	shakex8_absorb(state, keccak_rate_128, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, KECCAK_SHAKE_DOMAIN_ID);
+	shakex8_absorb(state, keccak_rate_128, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
 	if (outlen >= QSC_KECCAK_128_RATE)
 	{
@@ -5414,7 +5408,7 @@ void shake256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t t[8][QSC_KECCAK_256_RATE] = { 0 };
 	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
 
-	shakex8_absorb(state, keccak_rate_256, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, KECCAK_SHAKE_DOMAIN_ID);
+	shakex8_absorb(state, keccak_rate_256, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
 	if (outlen >= QSC_KECCAK_256_RATE)
 	{
@@ -5483,7 +5477,7 @@ void shake512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t t[8][QSC_KECCAK_512_RATE] = { 0 };
 	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
 
-	shakex8_absorb(state, keccak_rate_512, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, KECCAK_SHAKE_DOMAIN_ID);
+	shakex8_absorb(state, keccak_rate_512, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
 	if (outlen >= QSC_KECCAK_512_RATE)
 	{
@@ -5592,7 +5586,7 @@ static void kmacx4_customize(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 		if (oft == rate)
 		{
 			kmacx4_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], (size_t)rate);
-			qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+			qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 			oft = 0;
 		}
 
@@ -5604,7 +5598,7 @@ static void kmacx4_customize(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 	}
 
 	kmacx4_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], oft + (sizeof(uint64_t) - oft % sizeof(uint64_t)));
-	qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+	qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 	/* stage 2: key */
 
@@ -5624,7 +5618,7 @@ static void kmacx4_customize(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 		if (oft == rate)
 		{
 			kmacx4_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], (size_t)rate);
-			qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+			qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 			oft = 0;
 		}
 
@@ -5641,7 +5635,7 @@ static void kmacx4_customize(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 	qsc_memutils_clear(((uint8_t*)pad[3] + oft), (size_t)rate - oft);
 
 	kmacx4_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], oft + (sizeof(uint64_t) - oft % sizeof(uint64_t)));
-	qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+	qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate rate,
@@ -5661,7 +5655,7 @@ static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate ra
 	while (msglen >= (size_t)rate)
 	{
 		kmacx4_fast_absorb(state, ((uint8_t*)msg0 + pos), ((uint8_t*)msg1 + pos), ((uint8_t*)msg2 + pos), ((uint8_t*)msg3 + pos), (size_t)rate);
-		qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 		pos += (size_t)rate;
 		msglen -= (size_t)rate;
 	}
@@ -5680,12 +5674,12 @@ static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], keccak_rate ra
 	if (pos + bitlen >= (size_t)rate)
 	{
 		kmacx4_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], (size_t)rate);
-		qsc_keccak_permute_p4x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 		pos = 0;
 	}
 
 	qsc_memutils_copy(((uint8_t*)pad[0] + pos), buf, bitlen);
-	pad[0][pos + bitlen] = KECCAK_KMAC_DOMAIN_ID;
+	pad[0][pos + bitlen] = QSC_KECCAK_KMAC_DOMAIN_ID;
 	pad[0][rate - 1] |= 128U;
 	qsc_memutils_copy(((uint8_t*)pad[1] + pos), ((uint8_t*)pad[0] + pos), (size_t)rate - pos);
 	qsc_memutils_copy(((uint8_t*)pad[2] + pos), ((uint8_t*)pad[0] + pos), (size_t)rate - pos);
@@ -5868,7 +5862,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 		if (oft == rate)
 		{
 			kmacx8_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], pad[4], pad[5], pad[6], pad[7], (size_t)rate);
-			qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+			qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 			oft = 0;
 		}
 
@@ -5884,7 +5878,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 	}
 
 	kmacx8_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], pad[4], pad[5], pad[6], pad[7], oft + (sizeof(uint64_t) - oft % sizeof(uint64_t)));
-	qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+	qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 	/* stage 2: key */
 
@@ -5912,7 +5906,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 		if (oft == rate)
 		{
 			kmacx8_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], pad[4], pad[5], pad[6], pad[7], rate);
-			qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+			qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 			oft = 0;
 		}
 
@@ -5928,7 +5922,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate r
 	}
 
 	kmacx8_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], pad[4], pad[5], pad[6], pad[7], oft + (sizeof(uint64_t) - oft % sizeof(uint64_t)));
-	qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+	qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
 static void kmacx8_finalize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate rate,
@@ -5939,7 +5933,7 @@ static void kmacx8_finalize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate ra
 {
 	uint8_t tmps[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
 	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[8][KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t pad[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
 	const size_t BLKCNT = outlen / (size_t)rate;
 	size_t bitlen;
 	size_t i;
@@ -5952,7 +5946,7 @@ static void kmacx8_finalize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate ra
 		kmacx8_fast_absorb(state, ((uint8_t*)msg0 + pos), ((uint8_t*)msg1 + pos), ((uint8_t*)msg2 + pos), ((uint8_t*)msg3 + pos),
 			((uint8_t*)msg4 + pos), ((uint8_t*)msg5 + pos), ((uint8_t*)msg6 + pos), ((uint8_t*)msg7 + pos), (size_t)rate);
 
-		qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 		pos += (size_t)rate;
 		msglen -= (size_t)rate;
 	}
@@ -5975,12 +5969,12 @@ static void kmacx8_finalize(__m512i state[QSC_KECCAK_STATE_SIZE], keccak_rate ra
 	if (pos + bitlen >= (size_t)rate)
 	{
 		kmacx8_fast_absorb(state, pad[0], pad[1], pad[2], pad[3], pad[4], pad[5], pad[6], pad[7], (size_t)rate);
-		qsc_keccak_permute_p8x1600(state, KECCAK_PERMUTATION_ROUNDS);
+		qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 		pos = 0;
 	}
 
 	qsc_memutils_copy(((uint8_t*)pad[0] + pos), buf, bitlen);
-	pad[0][pos + bitlen] = KECCAK_KMAC_DOMAIN_ID;
+	pad[0][pos + bitlen] = QSC_KECCAK_KMAC_DOMAIN_ID;
 	pad[0][rate - 1] |= 128U;
 
 	qsc_memutils_copy(((uint8_t*)pad[1] + pos), ((uint8_t*)pad[0] + pos), (size_t)rate - pos);

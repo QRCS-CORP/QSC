@@ -1,6 +1,7 @@
 #include "folderutils.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#	define WIN32_LEAN_AND_MEAN
 #	include <direct.h>
 #	include <initguid.h>
 #	include <KnownFolders.h>

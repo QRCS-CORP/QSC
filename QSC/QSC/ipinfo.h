@@ -1,19 +1,19 @@
-/* The GPL version 3 License (GPLv3)
+/* The AGPL version 3 License (AGPLv3)
 *
 * Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU General Public License as published by
+* it under the terms of the GNU Affero General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-* GNU General Public License for more details.
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
+* You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 *
@@ -37,6 +37,12 @@
 * The ipv4 byte array length
 */
 #define QSC_IPINFO_IPV4_BYTELEN 4
+
+/*!
+\def QSC_IPINFO_IPV4_MINLEN
+* The minimum ipv4 string length
+*/
+#define QSC_IPINFO_IPV4_MINLEN 8
 
 /*!
 \def QSC_IPINFO_IPV4_STRNLEN

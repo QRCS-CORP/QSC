@@ -1,19 +1,19 @@
-/* The GPL version 3 License (GPLv3)
+/* The AGPL version 3 License (AGPLv3)
 *
 * Copyright (c) 2021 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU General Public License as published by
+* it under the terms of the GNU Affero General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-* GNU General Public License for more details.
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
+* You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 *
@@ -29,26 +29,22 @@
 #include "common.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#	define WIN32_LEAN_AND_MEAN
 #	include <process.h>
 #	include <Windows.h>
-#	define qsc_async_mutex HANDLE
+	typedef HANDLE qsc_async_mutex;
+	typedef uintptr_t qsc_thread;
 #elif defined(QSC_SYSTEM_OS_POSIX)
 #	include <sys/types.h>
 #	include <unistd.h>
 #	include <pthread>
-#	define qsc_async_mutex pthread_mutex_t
+	typedef pthread_mutex_t qsc_async_mutex;
+#	if !defined(pthread_t)
+		typedef int pthread_t;
+#	endif
+	typedef pthread_t qsc_thread;
 #else
 #	error your operating system is not supported!
-#endif
-
-#if !defined(pthread_t)
-#	define pthread_t int
-#endif
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-#	define qsc_thread uintptr_t
-#else
-#	define qsc_thread pthread_t
 #endif
 
 /**
@@ -120,6 +116,13 @@ QSC_EXPORT_API void qsc_async_thread_terminate(qsc_thread* handle);
 * \param handle: The thread handle
 */
 QSC_EXPORT_API void qsc_async_thread_wait(qsc_thread* handle);
+
+/**
+* \brief Pause the thread for a number of milliseconds
+*
+* \param msec: The number of milliseconds to wait
+*/
+QSC_EXPORT_API void qsc_async_thread_sleep(uint32_t msec);
 
 /**
 * \brief Wait for an array of threads to complete execution

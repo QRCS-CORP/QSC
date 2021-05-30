@@ -99,7 +99,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <StackReserveSize>10000000</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,7 +118,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <StackReserveSize>10000000</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -179,7 +177,6 @@
     <ClCompile Include="mceliece_test.c" />
     <ClCompile Include="nistrng.c" />
     <ClCompile Include="poly1305_test.c" />
-    <ClCompile Include="qsmp_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
     <ClCompile Include="rhx.c" />
@@ -202,7 +199,6 @@
     <ClInclude Include="mceliece_test.h" />
     <ClInclude Include="nistrng.h" />
     <ClInclude Include="poly1305_test.h" />
-    <ClInclude Include="qsmp_test.h" />
     <ClInclude Include="rcs_test.h" />
     <ClInclude Include="rhx.h" />
     <ClInclude Include="secrand_test.h" />

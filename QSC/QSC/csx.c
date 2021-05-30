@@ -728,9 +728,6 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	uint8_t mck[QSC_CSX_KEY_SIZE] = { 0 };
 	uint8_t nme[CSX_NAME_LENGTH] = { 0 };
 
-	/* initialize the state */
-	qsc_memutils_clear((uint8_t*)kstate.state, QSC_KECCAK_STATE_SIZE * sizeof(uint64_t));
-
 	/* load the information string */
 	if (keyparams->infolen == 0)
 	{

@@ -136,14 +136,8 @@
     <Filter Include="Header Files\KEX">
       <UniqueIdentifier>{49f523c0-54e5-431a-84a7-9c47932a2729}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\KEX\QSMP">
-      <UniqueIdentifier>{9355f8e2-56dd-4079-97cd-3b454b1d0c1d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\KEX">
       <UniqueIdentifier>{df00b308-ab00-4318-b68c-ec8da659823e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\KEX\QSMP">
-      <UniqueIdentifier>{d4fb1245-4b10-4f53-899b-1cbef04733df}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -306,17 +300,8 @@
     <ClInclude Include="transpose.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="qsmp.h">
-      <Filter>Header Files\KEX\QSMP</Filter>
-    </ClInclude>
     <ClInclude Include="timestamp.h">
       <Filter>Header Files\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="qclient.h">
-      <Filter>Header Files\KEX\QSMP</Filter>
-    </ClInclude>
-    <ClInclude Include="qserver.h">
-      <Filter>Header Files\KEX\QSMP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -464,17 +449,8 @@
     <ClCompile Include="transpose.c">
       <Filter>Source Files\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="qsmp.c">
-      <Filter>Source Files\KEX\QSMP</Filter>
-    </ClCompile>
     <ClCompile Include="timestamp.c">
       <Filter>Source Files\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="qclient.c">
-      <Filter>Source Files\KEX\QSMP</Filter>
-    </ClCompile>
-    <ClCompile Include="qserver.c">
-      <Filter>Source Files\KEX\QSMP</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

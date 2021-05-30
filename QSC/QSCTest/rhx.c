@@ -1759,18 +1759,15 @@ static void rhx_hba256_genkeys(const qsc_rhx_keyparams* keyparams, uint8_t* cprk
 	qsc_keccak_state kstate;
 	uint8_t sbuf[QSC_KECCAK_256_RATE] = { 0 };
 
-	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
-
 	/* initialize an instance of cSHAKE */
 	qsc_cshake_initialize(&kstate, keccak_rate_256, keyparams->key, keyparams->keylen, rhx_hba256_name, HBA_NAME_LENGTH, keyparams->info, keyparams->infolen);
-
 	/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
 	qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
 	qsc_memutils_copy(cprk, sbuf, keyparams->keylen);
 	qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
 	qsc_memutils_copy(mack, sbuf, HBA256_MKEY_LENGTH);
 	/* clear the shake buffer */
-	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
+	qsc_keccak_dispose(&kstate);
 
 #else
 
@@ -1997,8 +1994,6 @@ static void rhx_hba512_genkeys(const qsc_rhx_keyparams* keyparams, uint8_t* cprk
 	uint8_t sbuf[QSC_KECCAK_512_RATE] = { 0 };
 	qsc_keccak_state kstate;
 
-	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
-
 	/* initialize an instance of cSHAKE */
 	qsc_cshake_initialize(&kstate, keccak_rate_512, keyparams->key, keyparams->keylen, rhx_hba512_name, HBA_NAME_LENGTH, keyparams->info, keyparams->infolen);
 	/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
@@ -2009,7 +2004,7 @@ static void rhx_hba512_genkeys(const qsc_rhx_keyparams* keyparams, uint8_t* cprk
 	qsc_memutils_copy(mack, sbuf, HBA512_MKEY_LENGTH);
 
 	/* clear the shake buffer */
-	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
+	qsc_keccak_dispose(&kstate);
 
 #else
 
