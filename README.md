@@ -55,7 +55,7 @@ The Round-2 versions of the NIST PQ asymmetric ciphers and signature schemes (wi
 * Migrartion of asymmetric primitives to NIST PQ round 3 versions
 
 ### License
-GPLv3
+AGPLv3
 
 ## Disclaimer
 This project contains strong cryptography, before downloading the source files, 
