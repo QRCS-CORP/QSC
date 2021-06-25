@@ -73,7 +73,7 @@ static void qsc_cpuid_info(uint32_t info[4], const uint32_t infotype)
     memset(info, 0x00, sizeof(info));
 
 #if defined(QSC_SYSTEM_COMPILER_MSC)
-    __cpuid((int*)info, infotype);
+    __cpuid((int32_t*)info, infotype);
 #elif defined(QSC_SYSTEM_COMPILER_GCC)
     __get_cpuid(infotype, &info[0], &info[1], &info[2], &info[3])
 #endif

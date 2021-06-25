@@ -21,7 +21,7 @@
 * A network sockets class.
 * Written by John G. Underhill
 * Updated on March 30, 2021
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 #ifndef QSC_SOCKET_H
 #define QSC_SOCKET_H
@@ -52,6 +52,12 @@
 * The base socket success flag
 */
 #define QSC_SOCKET_RET_SUCCESS 0
+
+/*!
+\def QSC_SOCKET_TERMINATOR_SIZE
+* The length of the message string terminator character
+*/
+#define QSC_SOCKET_TERMINATOR_SIZE 1
 
 /*!
 \def QSC_SOCKET_TIMEOUT_MSEC

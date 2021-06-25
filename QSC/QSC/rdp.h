@@ -21,7 +21,7 @@
 * An implementation of the RDRAND entropy Provider
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /**
 * \file rdp.h

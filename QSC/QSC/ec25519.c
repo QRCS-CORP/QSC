@@ -4842,7 +4842,7 @@ void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
 
 	for (i = 1; i < 64; i += 2)
 	{
-		ge25519_cmov8_base(&t, (int)i / 2, e[i]);
+		ge25519_cmov8_base(&t, (int32_t)i / 2, e[i]);
 		ge25519_add_precomp(&r, h, &t);
 		ge25519_p1p1_to_p3(h, &r);
 	}
@@ -4858,7 +4858,7 @@ void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
 
 	for (i = 0; i < 64; i += 2)
 	{
-		ge25519_cmov8_base(&t, (int)i / 2, e[i]);
+		ge25519_cmov8_base(&t, (int32_t)i / 2, e[i]);
 		ge25519_add_precomp(&r, h, &t);
 		ge25519_p1p1_to_p3(h, &r);
 	}
@@ -5299,7 +5299,7 @@ void sc25519_clamp(uint8_t* k)
 	k[31] |= 64;
 }
 
-int ed25519_small_order(const uint8_t s[32])
+int32_t ed25519_small_order(const uint8_t s[32])
 {
 	/*
 	 * Reject small order points early to mitigate the implications of

@@ -58,9 +58,9 @@ QSC_EXPORT_API void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STR
 QSC_EXPORT_API void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE]);
 
 /**
-* \brief Get the date and time from the current locale in seconds
+* \brief Get the date and time from the current locale in seconds from epoch
 *
-* \return the date-time in seconds
+* \return the date/time in seconds from epoch
 */
 QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_seconds();
 

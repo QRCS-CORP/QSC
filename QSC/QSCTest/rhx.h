@@ -21,7 +21,7 @@
 * An implementation of the Rijndael Hash-based eXtension (RHX/RSX=eAES) symmetric block cipher.
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /*!
 * \mainpage <b>The RHX cipher</b>
@@ -85,7 +85,7 @@
 * \version		1.0.0.0d
 * \date			October 20, 2019
 * \updated		October 12, 2020
-* \contact:		develop@vtdev.com
+* \contact:		support@vtdev.com
 * \copyright	GPL version 3 license (GPLv3)
 */
 

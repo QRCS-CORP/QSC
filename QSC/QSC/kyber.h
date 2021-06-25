@@ -21,7 +21,7 @@
 * An implementation of the Kyber asymmetric cipher
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /**
@@ -55,6 +55,12 @@
 *
 * \remarks 
 * Based on the C reference branch of PQ-Crystals Kyber; including base code, comments, and api. \n
+* 
+* Removed the K=2 parameter, and added a K=5. The NIST '512' parameter has fallen below the threshhold
+* required by NIST PQ S1 minimum, regardless 'tweaks' to the SVP hardness metric the authors would contend, 
+* and should be considered a toy parameter set, unsuitable for real-world use.
+* The new K5 parameter may have a better chance of long-term security, with only a small increase in cost.
+* 
 * PQ-Crystals <a href="https://github.com/pq-crystals/kyber">Kyber</a>. \n
 * CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">a CCA-secure module-lattice-based KEM</a>. \n
 */
@@ -63,70 +69,29 @@
 #define QSC_KYBER_H
 
 #include "common.h"
-
-#if defined(QSC_KYBER_S1Q3329N256)
-
-/*!
-* \def QSC_KYBER_CIPHERTEXT_SIZE
-* \brief The byte size of the cipher-text array
-*/
-#	define QSC_KYBER_CIPHERTEXT_SIZE 736
-
-/*!
-* \def QSC_KYBER_PRIVATEKEY_SIZE
-* \brief The byte size of the secret private-key array
-*/
-#	define QSC_KYBER_PRIVATEKEY_SIZE 1632
-
-/*!
-* \def QSC_KYBER_PUBLICKEY_SIZE
-* \brief The byte size of the public-key array
-*/
-#	define QSC_KYBER_PUBLICKEY_SIZE 800
-
-#elif defined(QSC_KYBER_S2Q3329N256)
+//#if defined(QSC_SYSTEM_HAS_AVX2)
+//#	include "kyberbase_avx2.h"
+//#else
+#	include "kyberbase.h"
+//#endif
 
 /*!
 * \def QSC_KYBER_CIPHERTEXT_SIZE
 * \brief The byte size of the cipher-text array
 */
-#	define QSC_KYBER_CIPHERTEXT_SIZE 1088
+#define QSC_KYBER_CIPHERTEXT_SIZE (QSC_KYBER_INDCPA_BYTES)
 
 /*!
 * \def QSC_KYBER_PRIVATEKEY_SIZE
 * \brief The byte size of the secret private-key array
 */
-#	define QSC_KYBER_PRIVATEKEY_SIZE 2400
+#define QSC_KYBER_PRIVATEKEY_SIZE (QSC_KYBER_INDCPA_SECRETKEY_BYTES +  QSC_KYBER_INDCPA_PUBLICKEY_BYTES + (2 * QSC_KYBER_SYMBYTES))
 
 /*!
 * \def QSC_KYBER_PUBLICKEY_SIZE
 * \brief The byte size of the public-key array
 */
-#	define QSC_KYBER_PUBLICKEY_SIZE 1184
-
-#elif defined(QSC_KYBER_S3Q3329N256)
-
-/*!
-* \def QSC_KYBER_CIPHERTEXT_SIZE
-* \brief The byte size of the cipher-text array
-*/
-#	define QSC_KYBER_CIPHERTEXT_SIZE 1568
-
-/*!
-* \def QSC_KYBER_PRIVATEKEY_SIZE
-* \brief The byte size of the secret private-key array
-*/
-#	define QSC_KYBER_PRIVATEKEY_SIZE 3168
-
-/*!
-* \def QSC_KYBER_PUBLICKEY_SIZE
-* \brief The byte size of the public-key array
-*/
-#	define QSC_KYBER_PUBLICKEY_SIZE 1568
-
-#else
-#	error No Kyber implementation is defined, check common.h!
-#endif
+#define QSC_KYBER_PUBLICKEY_SIZE (QSC_KYBER_INDCPA_PUBLICKEY_BYTES)
 
 /*!
 * \def QSC_KYBER_SHAREDSECRET_SIZE

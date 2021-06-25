@@ -21,7 +21,7 @@
 * An implementation of a memory related functions utility class
 * Written by John G. Underhill
 * Updated on August 20, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /*
@@ -68,7 +68,7 @@ QSC_EXPORT_API void qsc_memutils_prefetch_l3(uint8_t* address, size_t length);
 *
 * \return Returns the aligned array of bytes, or NULL on failure
 */
-QSC_EXPORT_API void* qsc_memutils_aligned_alloc(int align, size_t length);
+QSC_EXPORT_API void* qsc_memutils_aligned_alloc(int32_t align, size_t length);
 
 /**
 * \brief Free an aligned memory block created with aligned_alloc

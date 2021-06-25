@@ -128,7 +128,7 @@ int32_t sc25519_is_canonical(const uint8_t s[32]);
 void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], const uint8_t c[32]);
 void sc25519_reduce(uint8_t s[64]);
 int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n);
-int ed25519_small_order(const uint8_t s[32]);
+int32_t ed25519_small_order(const uint8_t s[32]);
 
 #endif
 

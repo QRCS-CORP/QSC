@@ -354,7 +354,7 @@ typedef struct
 
 static __m256i csx_rotl256(const __m256i x, size_t shift)
 {
-	return _mm256_or_si256(_mm256_slli_epi64(x, (int)shift), _mm256_srli_epi64(x, 64 - (int)shift));
+	return _mm256_or_si256(_mm256_slli_epi64(x, (int32_t)shift), _mm256_srli_epi64(x, 64 - (int32_t)shift));
 }
 
 static __m256i csx_load256(const uint8_t* v)
@@ -527,7 +527,7 @@ static csx_mac_update(qsc_csx_state* ctx, const uint8_t* input, size_t length)
 #if defined(QSC_CSX_KPA_AUTHENTICATION)
 	qsc_kpa_update(&ctx->kstate, input, length);
 #else
-	qsc_kmac_update(&ctx->kstate, keccak_rate_512, input, length);
+	qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, input, length);
 #endif
 }
 
@@ -684,7 +684,7 @@ static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 	qsc_kpa_finalize(&ctx->kstate, output, QSC_CSX_MAC_SIZE);
 #else
 	/* finalize the mac and append code to output */
-	qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_CSX_MAC_SIZE);
+	qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_CSX_MAC_SIZE);
 #endif
 }
 
@@ -740,15 +740,15 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	}
 
 	/* initialize the cSHAKE generator */
-	qsc_cshake_initialize(&kstate, keccak_rate_512, keyparams->key, keyparams->keylen, nme, sizeof(nme), NULL, 0);
+	qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, nme, sizeof(nme), NULL, 0);
 
 	/* extract the cipher key */
-	qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, buf, 1);
+	qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, buf, 1);
 	qsc_memutils_copy(cpk, buf, QSC_CSX_KEY_SIZE);
 	csx_load(ctx, cpk, keyparams->nonce, csx_info);
 
 	/* extract the mac key */
-	qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, buf, 1);
+	qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, buf, 1);
 	qsc_memutils_copy(mck, buf, sizeof(mck));
 
 	/* initialize the mac generator */
@@ -757,7 +757,7 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 #if defined(QSC_CSX_KPA_AUTHENTICATION)
 	qsc_kpa_initialize(&ctx->kstate, mck, sizeof(mck), NULL, 0);
 #else
-	qsc_kmac_initialize(&ctx->kstate, keccak_rate_512, mck, sizeof(mck), NULL, 0);
+	qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0);
 #endif
 
 #else

@@ -21,7 +21,7 @@
 * An implementation of the Dilithium asymmetric signature scheme
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /**
@@ -66,65 +66,65 @@
 
 #include "common.h"
 
-#if defined(QSC_DILITHIUM_S1N256Q8380417)
-
-/*!
-* \def QSC_DILITHIUM_SIGNATURE_SIZE
-* \brief The byte size of the signature array
-*/
-#	define QSC_DILITHIUM_SIGNATURE_SIZE 2044
+#if defined(QSC_DILITHIUM_S2N256Q8380417K4)
 
 /*!
 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
 * \brief The byte size of the secret private-key array
 */
-#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 2800
+#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 2544
 
 /*!
 * \def QSC_DILITHIUM_PUBLICKEY_SIZE
 * \brief The byte size of the public-key array
 */
-#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1184
-
-#elif defined(QSC_DILITHIUM_S2N256Q8380417)
+#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1312
 
 /*!
 * \def QSC_DILITHIUM_SIGNATURE_SIZE
 * \brief The byte size of the signature array
 */
-#	define QSC_DILITHIUM_SIGNATURE_SIZE 2701
+#	define QSC_DILITHIUM_SIGNATURE_SIZE 2420
+
+#elif defined(QSC_DILITHIUM_S3N256Q8380417K6)
 
 /*!
 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
 * \brief The byte size of the secret private-key array
 */
-#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 3504
+#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 4016
 
 /*!
 * \def QSC_DILITHIUM_PUBLICKEY_SIZE
 * \brief The byte size of the public-key array
 */
-#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1472
-
-#elif defined(QSC_DILITHIUM_S3N256Q8380417)
+#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1952
 
 /*!
 * \def QSC_DILITHIUM_SIGNATURE_SIZE
 * \brief The byte size of the signature array
 */
-#	define QSC_DILITHIUM_SIGNATURE_SIZE 3366
+#	define QSC_DILITHIUM_SIGNATURE_SIZE 3293
+
+#elif defined(QSC_DILITHIUM_S5N256Q8380417K8)
 
 /*!
 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
 * \brief The byte size of the secret private-key array
 */
-#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 3856
+#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 4880
 
 /*!
 * \def QSC_DILITHIUM_PUBLICKEY_SIZE
 * \brief The byte size of the public-key array
 */
-#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1760
+#	define QSC_DILITHIUM_PUBLICKEY_SIZE 2592
+
+/*!
+* \def QSC_DILITHIUM_SIGNATURE_SIZE
+* \brief The byte size of the signature array
+*/
+#	define QSC_DILITHIUM_SIGNATURE_SIZE 4595
 
 #else
 #	error No Dilithium implementation is defined, check common.h!

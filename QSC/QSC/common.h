@@ -424,25 +424,6 @@
 */
 #define QSC_STATUS_FAILURE -1
 
-/*!
-\def QSC_ERROR_AUTHENTICATION
-* Function return value indicates internal failure
-*/
-#define QSC_ERROR_INTERNAL -2
-
-/*!
-\def QSC_ERROR_AUTHENTICATION
-* Function return value indicates authntication failure
-*/
-#define QSC_ERROR_AUTHENTICATION -3
-
-/*!
-\def QSC_ERROR_PROVIDER
-* Function return value indicates a random provider failure
-*/
-#define QSC_ERROR_PROVIDER -4
-
-
 /* Modifiable values that determine which parameter sets and options get compiled */
 
 /*!
@@ -476,22 +457,23 @@
 /*** Kyber ***/
 
 /*!
-\def QSC_KYBER_S1Q3329N256
-* Implement the Kyber S1Q3329N256 parameter set
+\def QSC_KYBER_S3Q3329N256K3
+* Implement the Kyber S3Q3329N256K3 parameter set
 */
-//#define QSC_KYBER_S1Q3329N256
+#define QSC_KYBER_S3Q3329N256K3
 
 /*!
-\def QSC_KYBER_S2Q3329N256
-* Implement the Kyber S2Q3329N256 parameter set
+\def QSC_KYBER_S5Q3329N256K4
+* Implement the Kyber S5Q3329N256K4 parameter set
 */
-#define QSC_KYBER_S2Q3329N256
+//#define QSC_KYBER_S5Q3329N256K4
 
 /*!
-\def QSC_KYBER_S3Q3329N256
-* Implement the Kyber S3Q3329N256 parameter set
+\def QSC_KYBER_S6Q3329N256K5 
+* Implement the Kyber S6Q3329N256K5 parameter set.
+* /warning Experimental, not an official parameter.
 */
-//#define QSC_KYBER_S3Q3329N256
+//#define QSC_KYBER_S6Q3329N256K5
 
 
 /*** ECDH ***/
@@ -509,19 +491,19 @@
 \def QSC_DILITHIUM_S1N256Q8380417
 * Implement the Dilithium S1N256Q8380417 parameter set
 */
-//#define QSC_DILITHIUM_S1N256Q8380417
+//#define QSC_DILITHIUM_S2N256Q8380417K4
 
 /*!
-\def QSC_DILITHIUM_S2N256Q8380417
+\def QSC_DILITHIUM_S2N256Q8380417K4
 * Implement the Dilithium S2N256Q8380417 parameter set
 */
-#define QSC_DILITHIUM_S2N256Q8380417
+#define QSC_DILITHIUM_S3N256Q8380417K6
 
 /*!
-\def QSC_DILITHIUM_S3N256Q8380417
+\def QSC_DILITHIUM_S3N256Q8380417K6
 * Implement the Dilithium S3N256Q8380417 parameter set
 */
-//#define QSC_DILITHIUM_S3N256Q8380417
+//#define QSC_DILITHIUM_S5N256Q8380417K8
 
 
 /*** SphincsPlus ***/

@@ -21,7 +21,7 @@
 * A FIFO general purpose data queue.
 * Written by John G. Underhill
 * Updated on November 11, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 #ifndef QSC_QUEUE_H

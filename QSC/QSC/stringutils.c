@@ -274,13 +274,13 @@ size_t qsc_stringutils_copy_substring(char* buffer, size_t buflen, const char* s
 	return res;
 }
 
-int qsc_stringutils_find_string(const char* source, const char* token)
+int32_t qsc_stringutils_find_string(const char* source, const char* token)
 {
 	assert(source != NULL);
 	assert(token != NULL);
 
 	char* sub;
-	int pos;
+	int32_t pos;
 
 	pos = -1;
 
@@ -290,19 +290,19 @@ int qsc_stringutils_find_string(const char* source, const char* token)
 
 		if (sub != NULL)
 		{
-			pos = (int)(sub - source);
+			pos = (int32_t)(sub - source);
 		}
 	}
 
 	return pos;
 }
 
-int qsc_stringutils_insert_string(char* buffer, size_t buflen, const char* substr, size_t offset)
+int32_t qsc_stringutils_insert_string(char* buffer, size_t buflen, const char* substr, size_t offset)
 {
 	assert(buffer != NULL);
 	assert(substr != NULL);
 
-	int res;
+	int32_t res;
 
 	res = -1;
 
@@ -311,14 +311,107 @@ int qsc_stringutils_insert_string(char* buffer, size_t buflen, const char* subst
 		if ((strlen(buffer) + strlen(substr)) <= buflen && offset < (buflen - strlen(substr)))
 		{
 			qsc_stringutils_concat_strings((char*)(buffer + offset), buflen, substr);
-			res = (int)strlen(buffer);
+			res = (int32_t)strlen(buffer);
 		}
 	}
 
 	return res;
 }
 
-void qsc_stringutils_int_to_string(int num, char* output, size_t outlen)
+bool qsc_stringutils_is_alpha_numeric(char* source, size_t srclen)
+{
+	assert(source != NULL);
+
+	size_t i;
+	char c;
+	bool res;
+
+	if (source != NULL)
+	{
+		res = true;
+
+		for (i = 0; i < srclen; ++i)
+		{
+			c = source[i];
+
+			if (c < 48 || (c > 57 && c < 65) || (c > 90 && c < 97) || c > 122)
+			{
+				res = false;
+			}
+
+		}
+	}
+	else
+	{
+		res = false;
+	}
+
+	return res;
+}
+
+bool qsc_stringutils_is_hex(char* source, size_t srclen)
+{
+	assert(source != NULL);
+
+	size_t i;
+	char c;
+	bool res;
+
+	if (source != NULL)
+	{
+		res = true;
+
+		for (i = 0; i < srclen; ++i)
+		{
+			c = source[i];
+
+			if (c < 48 || (c > 57 && c < 65) || (c > 70 && c < 97) || c > 102)
+			{
+				res = false;
+			}
+
+		}
+	}
+	else
+	{
+		res = false;
+	}
+
+	return res;
+}
+
+bool qsc_stringutils_is_numeric(char* source, size_t srclen)
+{
+	assert(source != NULL);
+
+	size_t i;
+	char c;
+	bool res;
+
+	if (source != NULL)
+	{
+		res = true;
+
+		for (i = 0; i < srclen; ++i)
+		{
+			c = source[i];
+
+			if (c < 48 || c > 57)
+			{
+				res = false;
+			}
+
+		}
+	}
+	else
+	{
+		res = false;
+	}
+
+	return res;
+}
+
+void qsc_stringutils_int_to_string(int32_t num, char* output, size_t outlen)
 {
 	assert(output != NULL);
 
@@ -532,11 +625,11 @@ bool qsc_stringutils_string_contains(const char* source, const char* token)
 	return res;
 }
 
-int qsc_stringutils_string_to_int(const char* source)
+int32_t qsc_stringutils_string_to_int(const char* source)
 {
 	assert(source != NULL);
 
-	int res;
+	int32_t res;
 
 	res = 0;
 
@@ -586,7 +679,7 @@ void qsc_stringutils_trim_newline(char* source)
 	assert(source != NULL);
 
 	size_t slen;
-	int i;
+	int32_t i;
 
 	if (source != NULL)
 	{
@@ -596,7 +689,7 @@ void qsc_stringutils_trim_newline(char* source)
 		slen = strnlen_s(source, QSC_STRING_MAX_LEN);
 #endif
 
-		for (i = (int)slen - 1; i >= 0; --i)
+		for (i = (int32_t)slen - 1; i >= 0; --i)
 		{
 			if (source[i] == '\n')
 			{

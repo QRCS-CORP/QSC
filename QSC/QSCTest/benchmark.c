@@ -1139,8 +1139,8 @@ static void shake128_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		qsc_shake_initialize(&ctx, keccak_rate_128, key, sizeof(key));
-		qsc_shake_squeezeblocks(&ctx, keccak_rate_128, otp, 1);
+		qsc_shake_initialize(&ctx, qsc_keccak_rate_128, key, sizeof(key));
+		qsc_shake_squeezeblocks(&ctx, qsc_keccak_rate_128, otp, 1);
 		tctr += sizeof(otp);
 	}
 
@@ -1164,8 +1164,8 @@ static void shake256_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		qsc_shake_initialize(&ctx, keccak_rate_256, key, sizeof(key));
-		qsc_shake_squeezeblocks(&ctx, keccak_rate_256, otp, 1);
+		qsc_shake_initialize(&ctx, qsc_keccak_rate_256, key, sizeof(key));
+		qsc_shake_squeezeblocks(&ctx, qsc_keccak_rate_256, otp, 1);
 		tctr += sizeof(otp);
 	}
 
@@ -1189,8 +1189,8 @@ static void shake512_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		qsc_shake_initialize(&ctx, keccak_rate_512, key, sizeof(key));
-		qsc_shake_squeezeblocks(&ctx, keccak_rate_512, otp, 1);
+		qsc_shake_initialize(&ctx, qsc_keccak_rate_512, key, sizeof(key));
+		qsc_shake_squeezeblocks(&ctx, qsc_keccak_rate_512, otp, 1);
 		tctr += sizeof(otp);
 	}
 

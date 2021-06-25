@@ -571,24 +571,24 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 	{
 #if defined(QSC_RCS_KMACR12)
 		/* update the counter */
-		qsc_keccak_update(&ctx->kstate, keccak_rate_256, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_256, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 		/* finalize the mac and append code to output */
-		qsc_keccak_finalize(&ctx->kstate, keccak_rate_256, output, QSC_RCS256_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_256, output, QSC_RCS256_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #else
 		/* update the counter */
-		qsc_kmac_update(&ctx->kstate, keccak_rate_256, ctr, sizeof(ctr));
+		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_256, ctr, sizeof(ctr));
 		/* finalize the mac and append code to output */
-		qsc_kmac_finalize(&ctx->kstate, keccak_rate_256, output, QSC_RCS256_MAC_SIZE);
+		qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_256, output, QSC_RCS256_MAC_SIZE);
 #endif
 	}
 	else
 	{
 #if defined(QSC_RCS_KMACR12)
-		qsc_keccak_update(&ctx->kstate, keccak_rate_512, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-		qsc_keccak_finalize(&ctx->kstate, keccak_rate_512, output, QSC_RCS512_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_RCS512_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #else
-		qsc_kmac_update(&ctx->kstate, keccak_rate_512, ctr, sizeof(ctr));
-		qsc_kmac_finalize(&ctx->kstate, keccak_rate_512, output, QSC_RCS512_MAC_SIZE);
+		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr));
+		qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_RCS512_MAC_SIZE);
 #endif
 	}
 }
@@ -598,17 +598,17 @@ static void rcs_mac_update(qsc_rcs_state* ctx, const uint8_t* input, size_t leng
 	if (ctx->ctype == RCS256)
 	{
 #if defined(QSC_RCS_KMACR12)
-		qsc_keccak_update(&ctx->kstate, keccak_rate_256, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_256, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #else
-		qsc_kmac_update(&ctx->kstate, keccak_rate_256, input, length);
+		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_256, input, length);
 #endif
 	}
 	else
 	{
 #if defined(QSC_RCS_KMACR12)
-		qsc_keccak_update(&ctx->kstate, keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #else
-		qsc_kmac_update(&ctx->kstate, keccak_rate_512, input, length);
+		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, input, length);
 #endif
 	}
 }
@@ -626,7 +626,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		uint8_t tmpr[RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0 };
 
 		/* initialize an instance of cSHAKE */
-		qsc_cshake_initialize(&kstate, keccak_rate_256, keyparams->key, keyparams->keylen, rcs256_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
+		qsc_cshake_initialize(&kstate, qsc_keccak_rate_256, keyparams->key, keyparams->keylen, rcs256_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
 
 		oft = 0;
 		rlen = RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE;
@@ -634,7 +634,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		while (rlen != 0)
 		{
 			const size_t BLKLEN = (rlen > QSC_KECCAK_256_RATE) ? QSC_KECCAK_256_RATE : rlen;
-			qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
+			qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1);
 			qsc_memutils_copy(tmpr + oft, sbuf, BLKLEN);
 
 			oft += BLKLEN;
@@ -660,15 +660,15 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 #if defined(QSC_RCS_AUTHENTICATED)
 		/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
-		qsc_cshake_squeezeblocks(&kstate, keccak_rate_256, sbuf, 1);
+		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1);
 		uint8_t mkey[RCS256_MKEY_LENGTH];
 		qsc_memutils_copy(mkey, sbuf, RCS256_MKEY_LENGTH);
 
 #	if defined(QSC_RCS_KMACR12)
-		qsc_keccak_state_reset(&ctx->kstate);
-		qsc_keccak_absorb_key(&ctx->kstate, keccak_rate_256, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_initialize_state(&ctx->kstate);
+		qsc_keccak_absorb_key(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #	else
-		qsc_kmac_initialize(&ctx->kstate, keccak_rate_256, mkey, sizeof(mkey), NULL, 0);
+		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0);
 #	endif
 		/* clear the shake buffer */
 		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
@@ -679,7 +679,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		uint8_t tmpr[RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0 };
 
 		/* initialize an instance of cSHAKE */
-		qsc_cshake_initialize(&kstate, keccak_rate_512, keyparams->key, keyparams->keylen, rcs512_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
+		qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, rcs512_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
 
 		oft = 0;
 		rlen = RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE;
@@ -687,7 +687,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		while (rlen != 0)
 		{
 			const size_t BLKLEN = (rlen > QSC_KECCAK_512_RATE) ? QSC_KECCAK_512_RATE : rlen;
-			qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, sbuf, 1);
+			qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1);
 			qsc_memutils_copy(tmpr + oft, sbuf, BLKLEN);
 			oft += BLKLEN;
 			rlen -= BLKLEN;
@@ -712,14 +712,14 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #if defined(QSC_RCS_AUTHENTICATED)
 		uint8_t mkey[RCS512_MKEY_LENGTH];
 		/* use two permutation calls (no buffering) to seperate the cipher/mac key outputs to match the CEX implementation */
-		qsc_cshake_squeezeblocks(&kstate, keccak_rate_512, sbuf, 1);
+		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1);
 		qsc_memutils_copy(mkey, sbuf, RCS512_MKEY_LENGTH);
 
 #	if defined(QSC_RCS_KMACR12)
-		qsc_keccak_state_reset(&ctx->kstate);
-		qsc_keccak_absorb_key(&ctx->kstate, keccak_rate_512, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_initialize_state(&ctx->kstate);
+		qsc_keccak_absorb_key(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #	else
-		qsc_kmac_initialize(&ctx->kstate, keccak_rate_512, mkey, sizeof(mkey), NULL, 0);
+		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0);
 #	endif
 		/* clear the shake buffer */
 		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);

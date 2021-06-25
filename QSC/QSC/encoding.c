@@ -2,7 +2,7 @@
 
 bool qsc_encoding_base64_decode(uint8_t* output, size_t outlen, const char* input, size_t inlen)
 {
-	const static int DECTBL[] = 
+	const static int32_t DECTBL[] = 
 	{
 		62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58,
 		59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
@@ -14,7 +14,7 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t outlen, const char* inpu
 
 	size_t i;
 	size_t j;
-	int v;
+	int32_t v;
 	bool res;
 
 	res = true;

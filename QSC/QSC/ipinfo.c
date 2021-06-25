@@ -50,6 +50,7 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC
 	qsc_ipinfo_ipv4_address res = { 0 };
 	size_t pos;
 	int32_t a;
+	int32_t cnt;
 	int32_t ret;
 
 	ret = 0;
@@ -59,29 +60,61 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC
 		if (strlen(input) >= 7)
 		{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-			sscanf_s(input, "%d %n", &a, &ret);
-			res.ipv4[0] = a;
-			pos = ret + 1;
-			sscanf_s(((char*)input + pos), "%d %n", &a, &ret);
-			res.ipv4[1] = a;
-			pos += ret + 1;
-			sscanf_s(((char*)input + pos), "%d %n", &a, &ret);
-			res.ipv4[2] = a;
-			pos += ret + 1;
-			sscanf_s(((char*)input + pos), "%d", &a);
-			res.ipv4[3] = a;
+			cnt = sscanf_s(input, "%d %n", &a, &ret);
+
+			if (cnt > 0)
+			{
+				res.ipv4[0] = a;
+				pos = ret + 1;
+				cnt = sscanf_s(((char*)input + pos), "%d %n", &a, &ret);
+
+				if (cnt > 0)
+				{
+					res.ipv4[1] = a;
+					pos += ret + 1;
+					cnt = sscanf_s(((char*)input + pos), "%d %n", &a, &ret);
+
+					if (cnt > 0)
+					{
+						res.ipv4[2] = a;
+						pos += ret + 1;
+						cnt = sscanf_s(((char*)input + pos), "%d", &a);
+
+						if (cnt > 0)
+						{
+							res.ipv4[3] = a;
+						}
+					}
+				}
+			}
 #else
-			sscanf(input, "%d %n", &a, &ret);
-			res.ipv4[0] = a;
-			pos = ret + 1;
-			sscanf(((char*)input + pos), "%d %n", &a, &ret);
-			res.ipv4[1] = a;
-			pos += ret + 1;
-			sscanf(((char*)input + pos), "%d %n", &a, &ret);
-			res.ipv4[2] = a;
-			pos += ret + 1;
-			sscanf(((char*)input + pos), "%d", &a);
-			res.ipv4[3] = a;
+			cnt = sscanf(input, "%d %n", &a, &ret);
+
+			if (cnt > 0)
+			{
+				res.ipv4[0] = a;
+				pos = ret + 1;
+				cnt = sscanf(((char*)input + pos), "%d %n", &a, &ret);
+
+				if (cnt > 0)
+				{
+					res.ipv4[1] = a;
+					pos += ret + 1;
+					cnt = sscanf(((char*)input + pos), "%d %n", &a, &ret);
+
+					if (cnt > 0)
+					{
+						res.ipv4[2] = a;
+						pos += ret + 1;
+						cnt = sscanf(((char*)input + pos), "%d", &a);
+
+						if (cnt > 0)
+						{
+							res.ipv4[3] = a;
+						}
+					}
+				}
+			}
 #endif
 		}
 	}
@@ -89,7 +122,7 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC
 	return res;
 }
 
-bool qsc_ipinfo_ipv4_address_is_equal(qsc_ipinfo_ipv4_address* a, qsc_ipinfo_ipv4_address* b)
+bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qsc_ipinfo_ipv4_address* b)
 {
 	assert(a != NULL);
 	assert(b != NULL);
@@ -114,7 +147,7 @@ bool qsc_ipinfo_ipv4_address_is_equal(qsc_ipinfo_ipv4_address* a, qsc_ipinfo_ipv
 	return res;
 }
 
-bool qsc_ipinfo_ipv4_address_is_routable(qsc_ipinfo_ipv4_address* address)
+bool qsc_ipinfo_ipv4_address_is_routable(const qsc_ipinfo_ipv4_address* address)
 {
 	assert(address != NULL);
 
@@ -140,7 +173,7 @@ bool qsc_ipinfo_ipv4_address_is_routable(qsc_ipinfo_ipv4_address* address)
 		{
 			res = false;
 		}
-		else if (address->ipv4[0] <= 10 || address->ipv4[0] > 223)
+		else if (address->ipv4[0] > 223)
 		{
 			res = false;
 		}
@@ -153,7 +186,7 @@ bool qsc_ipinfo_ipv4_address_is_routable(qsc_ipinfo_ipv4_address* address)
 	return res;
 }
 
-bool qsc_ipinfo_ipv4_address_is_valid(qsc_ipinfo_ipv4_address* address)
+bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 {
 	assert(address != NULL);
 
@@ -163,7 +196,29 @@ bool qsc_ipinfo_ipv4_address_is_valid(qsc_ipinfo_ipv4_address* address)
 
 	if (address != NULL)
 	{
-		if (address->ipv4[0] >= 1 && address->ipv4[1] <= 224)
+		if (address->ipv4[0] <= 224)
+		{
+			if (address->ipv4[1] != 255 && address->ipv4[2] != 255 && address->ipv4[3] != 255)
+			{
+				res = true;
+			}
+		}
+	}
+
+	return res;
+}
+
+bool qsc_ipinfo_ipv4_address_is_zeroed(const qsc_ipinfo_ipv4_address* address)
+{
+	assert(address != NULL);
+
+	bool res;
+
+	res = false;
+
+	if (address != NULL)
+	{
+		if (address->ipv4[0] == 0 && address->ipv4[1] == 0 && address->ipv4[2] == 0 && address->ipv4[3] == 0)
 		{
 			res = true;
 		}
@@ -183,7 +238,7 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loop_back()
 	return res;
 }
 
-void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, qsc_ipinfo_ipv4_address* address)
+void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_address* address)
 {
 	assert(address != NULL);
 	assert(output != NULL);
@@ -194,7 +249,7 @@ void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, qsc_ipinfo_ipv4_address* 
 	}
 }
 
-void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], qsc_ipinfo_ipv4_address* address)
+void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const qsc_ipinfo_ipv4_address* address)
 {
 	assert(address != NULL);
 	assert(output != NULL);
@@ -238,7 +293,7 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], qsc
 	}
 }
 
-qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(qsc_ipinfo_ipv6_address* address)
+qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
 
@@ -336,7 +391,7 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_from_string(const char input[QSC
 	return res;
 }
 
-bool qsc_ipinfo_ipv6_address_is_equal(qsc_ipinfo_ipv6_address* a, qsc_ipinfo_ipv6_address* b)
+bool qsc_ipinfo_ipv6_address_is_equal(const qsc_ipinfo_ipv6_address* a, const qsc_ipinfo_ipv6_address* b)
 {
 	assert(a != NULL);
 	assert(b != NULL);
@@ -361,7 +416,7 @@ bool qsc_ipinfo_ipv6_address_is_equal(qsc_ipinfo_ipv6_address* a, qsc_ipinfo_ipv
 	return res;
 }
 
-bool qsc_ipinfo_ipv6_address_is_routable(qsc_ipinfo_ipv6_address* address)
+bool qsc_ipinfo_ipv6_address_is_routable(const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
 
@@ -399,7 +454,7 @@ bool qsc_ipinfo_ipv6_address_is_routable(qsc_ipinfo_ipv6_address* address)
 	return res;
 }
 
-bool qsc_ipinfo_ipv6_address_is_valid(qsc_ipinfo_ipv6_address* address)
+bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
 
@@ -430,6 +485,28 @@ bool qsc_ipinfo_ipv6_address_is_valid(qsc_ipinfo_ipv6_address* address)
 	return res;
 }
 
+bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address)
+{
+	assert(address != NULL);
+
+	bool res;
+
+	res = false;
+
+	if (address != NULL)
+	{
+		if (address->ipv6[0] == 0 && address->ipv6[1] == 0 && address->ipv6[2] == 0 && address->ipv6[3] == 0 &&
+			address->ipv6[4] == 0 && address->ipv6[5] == 0 && address->ipv6[6] == 0 && address->ipv6[7] == 0 &&
+			address->ipv6[8] == 0 && address->ipv6[9] == 0 && address->ipv6[10] == 0 && address->ipv6[11] == 0 &&
+			address->ipv6[12] == 0 && address->ipv6[13] == 0 && address->ipv6[14] == 0 && address->ipv6[15] == 0)
+		{
+			res = true;
+		}
+	}
+
+	return res;
+}
+
 qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loop_back()
 {
 	qsc_ipinfo_ipv6_address add = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
@@ -437,7 +514,7 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loop_back()
 	return add;
 }
 
-void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, qsc_ipinfo_ipv6_address* address)
+void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
 	assert(output != NULL);
@@ -448,7 +525,7 @@ void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, qsc_ipinfo_ipv6_address* 
 	}
 }
 
-char* qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], qsc_ipinfo_ipv6_address* address)
+char* qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
 	assert(output != NULL);

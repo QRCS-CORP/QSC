@@ -100,7 +100,7 @@ void qsc_secmem_erase(uint8_t* block, size_t length)
 
 #elif defined(QSC_VOLATILE_MEMSET)
 
-	static void* (*const memsetptr)(void*, int, size_t) = memset;
+	static void* (*const memsetptr)(void*, int32_t, size_t) = memset;
 	(memsetptr)(block, 0, length);
 
 #else

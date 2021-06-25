@@ -17,7 +17,7 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 
 	assert(message != NULL);
 
-	int tcol;
+	int32_t tcol;
 
 	if (message != NULL)
 	{
@@ -65,7 +65,7 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 
 	if (line != NULL)
 	{
-		if (fgets(line, (int)maxlen, stdin) != NULL)
+		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
 		{
 			slen = strlen(line);
 		}
@@ -84,7 +84,7 @@ size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen)
 
 	if (line != NULL)
 	{
-		if (fgets(line, (int)maxlen, stdin) != NULL)
+		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
 		{
 			qsc_stringutils_to_lowercase(line);
 			qsc_stringutils_trim_newline(line);
@@ -252,6 +252,47 @@ void qsc_consoleutils_print_hex(const uint8_t* input, size_t inputlen, size_t li
 	}
 }
 
+void qsc_consoleutils_print_formatted(const char* input, size_t inputlen)
+{
+	assert(input != NULL);
+
+	if (input != NULL)
+	{
+		size_t i;
+		const char FLG = '\\';
+		const char RPC[] = "\\";
+		char inp;
+
+		for (i = 0; i < inputlen; ++i)
+		{
+			inp = input[i];
+
+			if (inp != FLG)
+			{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+				printf_s("%c", inp);
+#else
+				printf("%c", inp);
+#endif
+			}
+			else
+			{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+				printf_s(RPC);
+#else
+				printf(RPC);
+#endif
+			}
+		}
+	}
+}
+
+void qsc_consoleutils_print_formatted_line(const char* input, size_t inputlen)
+{
+	qsc_consoleutils_print_formatted(input, inputlen);
+	qsc_consoleutils_print_line("");
+}
+
 void qsc_consoleutils_print_safe(const char* input)
 {
 	assert(input != NULL);
@@ -331,7 +372,7 @@ void qsc_consoleutils_print_double(double digit)
 #endif
 }
 
-void qsc_consoleutils_progress_counter(int seconds)
+void qsc_consoleutils_progress_counter(int32_t seconds)
 {
 	const char schr[] = { "-\\|/-\\|/-" };
 	size_t i;
@@ -394,7 +435,7 @@ void qsc_consoleutils_set_window_size(size_t width, size_t height)
 	HWND con = GetConsoleWindow();
 	RECT r;
 	GetWindowRect(con, &r);
-	MoveWindow(con, r.left, r.top, (int)width, (int)height, TRUE);
+	MoveWindow(con, r.left, r.top, (int32_t)width, (int32_t)height, TRUE);
 
 #else
 

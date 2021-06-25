@@ -21,7 +21,7 @@
 * An implementation of common networking support functions
 * Written by John G. Underhill
 * Updated on March 30, 2021
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /*
 * \file netutils.h

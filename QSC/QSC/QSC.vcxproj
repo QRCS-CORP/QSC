@@ -165,6 +165,7 @@
     <ClInclude Include="ipinfo.h" />
     <ClInclude Include="kyber.h" />
     <ClInclude Include="kyberbase.h" />
+    <ClInclude Include="kyberbase_avx2.h" />
     <ClInclude Include="mceliece.h" />
     <ClInclude Include="mceliecebase.h" />
     <ClInclude Include="memutils.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="ipinfo.c" />
     <ClCompile Include="kyber.c" />
     <ClCompile Include="kyberbase.c" />
+    <ClCompile Include="kyberbase_avx2.c" />
     <ClCompile Include="mceliece.c" />
     <ClCompile Include="mceliecebase.c" />
     <ClCompile Include="memutils.c" />

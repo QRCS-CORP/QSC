@@ -24,7 +24,7 @@
 * An implementation of common console support functions
 * Written by John G. Underhill
 * Written on January 24, 2021
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /*
@@ -91,11 +91,11 @@ QSC_EXPORT_API size_t qsc_consoleutils_get_formatted_line(char* line, size_t max
 QSC_EXPORT_API void qsc_consoleutils_get_wait();
 
 /**
-* \brief Convert a hexadecimal character string to a binary byte array
+* \brief Convert a hexadecimal character string to a character byte array
 *
 * \param hexstr: the string to convert
-* \param output: the binary output array
-* \param length: the number of bytes to convert
+* \param output: the character output array
+* \param length: the number of characters to convert
 */
 QSC_EXPORT_API void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 
@@ -111,7 +111,7 @@ QSC_EXPORT_API bool qsc_consoleutils_line_contains(const char* line, const char*
 /**
 * \brief Gets a password masked on the console screen
 *
-* \param output: the binary output array
+* \param output: the character output array
 * \param length: the size of the output array
 * \return Returns the size of ther password
 */
@@ -125,13 +125,29 @@ QSC_EXPORT_API size_t qsc_consoleutils_masked_password(uint8_t* output, size_t o
 QSC_EXPORT_API bool qsc_consoleutils_message_confirm(const char* message);
 
 /**
-* \brief Convert a binary array to a hexidecimal string and print to the console
+* \brief Convert a character array to a hexidecimal string and print to the console
 *
-* \param input: the binary array
-* \param inputlen: the number of bytes to process
+* \param input: the character array
+* \param inputlen: the number of characters to print
 * \param linelen: the length of output to print, before starting a new line
 */
 QSC_EXPORT_API void qsc_consoleutils_print_hex(const uint8_t* input, size_t inputlen, size_t linelen);
+
+/**
+* \brief Print a string to the console, ignoring special characters
+*
+* \param input: the character array
+* \param inputlen: the number of characters to print
+*/
+QSC_EXPORT_API void qsc_consoleutils_print_formatted(const char* input, size_t inputlen);
+
+/**
+* \brief Print a string to the console, ignoring special characters, and add a line break
+*
+* \param input: the character array
+* \param inputlen: the number of characters to print
+*/
+QSC_EXPORT_API void qsc_consoleutils_print_formatted_line(const char* input, size_t inputlen);
 
 /**
 * \brief Print an array of characters to the console
@@ -176,18 +192,51 @@ QSC_EXPORT_API void qsc_consoleutils_print_ulong(uint64_t digit);
 */
 QSC_EXPORT_API void qsc_consoleutils_print_double(double digit);
 
-QSC_EXPORT_API void qsc_consoleutils_progress_counter(int seconds);
+/**
+* \brief Prints a small spinning counter
+*
+* \param seconds: the number of seconds to run
+*/
+QSC_EXPORT_API void qsc_consoleutils_progress_counter(int32_t seconds);
 
+/**
+* \brief Set the size of the window scroll buffer
+*
+* \param width: the scroll buffer width
+* \param height: the scroll buffer height
+*/
 QSC_EXPORT_API void qsc_consoleutils_set_window_buffer(size_t width, size_t height);
 
+/**
+* \brief Clear text from the window
+*/
 QSC_EXPORT_API void qsc_consoleutils_set_window_clear();
 
+/**
+* \brief Set the window prompt string
+*
+* \param prompt: the prompt string
+*/
 QSC_EXPORT_API void qsc_consoleutils_set_window_prompt(const char* prompt);
 
+/**
+* \brief Set the initial size of the console window
+*
+* \param width: the window width
+* \param height: the window height
+*/
 QSC_EXPORT_API void qsc_consoleutils_set_window_size(size_t width, size_t height);
 
+/**
+* \brief Set the window title string
+*
+* \param title: the title string
+*/
 QSC_EXPORT_API void qsc_consoleutils_set_window_title(const char* title);
 
+/**
+* \brief Enable virtual terminal mode
+*/
 QSC_EXPORT_API void qsc_consoleutils_set_virtual_terminal();
 
 #endif

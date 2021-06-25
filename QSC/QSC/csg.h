@@ -20,8 +20,8 @@
 * Implementation Details:
 * An implementation of a cSHAKE based DRBG.
 * Written by John G. Underhill
-* Updated on January 20, 2020
-* Contact: develop@vtdev.com 
+* Updated on June 14, 2021
+* Contact: support@vtdev.com 
 */
 
 /**

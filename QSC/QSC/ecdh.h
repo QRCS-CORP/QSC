@@ -21,7 +21,7 @@
 * An implementation of the Elliptic Curve Diffie-Hellman asymmetric cipher
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /**

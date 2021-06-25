@@ -21,7 +21,7 @@
 * An implementation of the SHA2 message digests, HMAC and HKDF.
 * Written by John G. Underhill
 * Updated on September 12, 2020
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /**
 * \file sha2.h

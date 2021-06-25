@@ -21,7 +21,7 @@
 * A network sockets base class.
 * Written by John G. Underhill
 * Updated on March 30, 2021
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 #ifndef QSC_SOCKFLAGS_H
 #define QSC_SOCKFLAGS_H

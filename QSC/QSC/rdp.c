@@ -20,7 +20,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 	size_t fctr;
 	size_t i;
 	size_t poff;
-	int fret;
+	int32_t fret;
 	bool hasrand;
 	bool hasseed;
 	bool res;

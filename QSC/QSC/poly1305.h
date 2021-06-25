@@ -21,7 +21,7 @@
 * An implementation of the Poly1305 message authentication code generator (MAC).
 * Written by John G. Underhill
 * Updated on January 20, 2020
-* Contact: develop@vtdev.com
+* Contact: support@vtdev.com
 */
 
 /**
@@ -166,6 +166,6 @@ QSC_EXPORT_API void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* 
 * \param msglen: The number of input message bytes to process
 * \param key: [const] The secret key byte array
 */
-QSC_EXPORT_API int qsc_poly1305_verify(const uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key);
+QSC_EXPORT_API int32_t qsc_poly1305_verify(const uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key);
 
 #endif

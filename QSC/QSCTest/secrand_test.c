@@ -63,7 +63,7 @@ static double secrand_poz(const double z)
 	return (z > 0.0 ? ((x + 1.0) * 0.5) : ((1.0 - x) * 0.5));
 }
 
-static double secrand_po_chi_sq(const double ax, const int df)
+static double secrand_po_chi_sq(const double ax, const int32_t df)
 {
 	/* obtained chi-square value degrees of freedom */
 	double x;
@@ -74,7 +74,7 @@ static double secrand_po_chi_sq(const double ax, const int df)
 	double z;
 	double y;
 	double res;
-	int even;
+	int32_t even;
 
 	y = 0.0;
 	x = ax;
@@ -245,7 +245,7 @@ static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t 
 
 static void secrand_print_double(double input)
 {
-	int len = snprintf(NULL, 0, "%g", input);
+	int32_t len = snprintf(NULL, 0, "%g", input);
 	char* str = malloc(len + 1);
 	memset(str, 0x00, len);
 

@@ -196,7 +196,7 @@ void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t length)
 
 	size_t ctr;
 	size_t i;
-	int vct;
+	int32_t vct;
 
 	ctr = 0;
 

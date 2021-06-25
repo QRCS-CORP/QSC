@@ -19,7 +19,7 @@
 
 bool qsc_folderutils_create_directory(char path[QSC_SYSTEM_MAX_PATH])
 {
-	int res;
+	int32_t res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	res = _mkdir(path);
@@ -32,7 +32,7 @@ bool qsc_folderutils_create_directory(char path[QSC_SYSTEM_MAX_PATH])
 
 bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_MAX_PATH])
 {
-	int res;
+	int32_t res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	res = _rmdir(path);
@@ -143,8 +143,8 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 
 	if (SUCCEEDED(hr))
 	{
-		len = (size_t)WideCharToMultiByte(CP_ACP, 0, pstr, (int)wcslen((wchar_t*)pstr), NULL, 0, NULL, NULL);
-		WideCharToMultiByte(CP_ACP, 0, pstr, (int)wcslen((wchar_t*)pstr), output, (int)len, NULL, NULL);
+		len = (size_t)WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen((wchar_t*)pstr), NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen((wchar_t*)pstr), output, (int32_t)len, NULL, NULL);
 		output[len] = '\0';
 	}
 

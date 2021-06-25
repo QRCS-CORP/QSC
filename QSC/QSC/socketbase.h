@@ -18,7 +18,7 @@
 *
 * Written by John G. Underhill
 * Updated on April 4, 2021
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /**
 * \file socketbase.h

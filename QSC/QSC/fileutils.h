@@ -20,7 +20,7 @@
 * An implementation of supporting time based functions
 * Written by John G. Underhill
 * Updated on February 18, 2021
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /*

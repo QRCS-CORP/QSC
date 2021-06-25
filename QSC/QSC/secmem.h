@@ -21,7 +21,7 @@
 * An implementation of secure locked memory
 * Written by John G. Underhill
 * Updated on June 3, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /*

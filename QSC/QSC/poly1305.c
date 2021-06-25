@@ -244,7 +244,7 @@ void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t
 	}
 }
 
-int qsc_poly1305_verify(const uint8_t* mac, const uint8_t* message, size_t msglen, const uint8_t* key)
+int32_t qsc_poly1305_verify(const uint8_t* mac, const uint8_t* message, size_t msglen, const uint8_t* key)
 {
 	assert(mac != NULL);
 	assert(message != NULL);

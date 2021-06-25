@@ -22,7 +22,7 @@
 * Written by John G. Underhill
 * August 25, 2020
 * Updated October 28, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /**
@@ -34,7 +34,7 @@
 * \version		1.0.0.0b
 * \date			May 2, 2020
 * \updated		October 28, 2020
-* \contact:		develop@vtdev.com
+* \contact:		support@vtdev.com
 * \copyright	GPL version 3 license (GPLv3)
 *
 *

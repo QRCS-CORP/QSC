@@ -17,7 +17,7 @@
 #define QSC_THREADPOOL_THREADS_MAX 1024
 
 #if !defined(pthread_t)
-#	define pthread_t int
+#	define pthread_t int32_t
 #endif
 
 typedef struct qsc_threadpool_state
@@ -71,7 +71,7 @@ QSC_EXPORT_API void qsc_threadpool_clear(qsc_threadpool_state* ctx)
 			}
 		}
 
-		memset(ctx->tpool, 0x00, QSC_THREADPOOL_THREADS_MAX * sizeof(int));
+		memset(ctx->tpool, 0x00, QSC_THREADPOOL_THREADS_MAX * sizeof(int32_t));
 		ctx->tcount = 0;
 	}
 }
@@ -82,7 +82,7 @@ QSC_EXPORT_API void qsc_threadpool_initialize(qsc_threadpool_state* ctx)
 
 	if (ctx != NULL)
 	{
-		memset(ctx->tpool, 0x00, QSC_THREADPOOL_THREADS_MAX * sizeof(int));
+		memset(ctx->tpool, 0x00, QSC_THREADPOOL_THREADS_MAX * sizeof(int32_t));
 	}
 }
 

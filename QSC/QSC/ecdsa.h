@@ -21,7 +21,7 @@
 * An implementation of the Elliptic Curve Digital Signature Algorithm
 * Written by John G. Underhill
 * Updated on August 30, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /**

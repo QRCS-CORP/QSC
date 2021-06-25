@@ -21,7 +21,7 @@
 * An implementation of supporting string based functions
 * Written by John G. Underhill
 * Updated on November 27, 2020
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /*

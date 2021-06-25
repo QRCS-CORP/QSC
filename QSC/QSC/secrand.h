@@ -21,7 +21,7 @@
 * An implementation of the secure random PRNG
 * Written by John G. Underhill
 * Updated on August 1, 2020
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /**
 * \file secrand.h

@@ -34,7 +34,7 @@ bool qsc_filetools_working_directory(char* path)
 
 bool qsc_filetools_file_exists(const char* path)
 {
-	int err;
+	int32_t err;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	err = _access(path, 0);

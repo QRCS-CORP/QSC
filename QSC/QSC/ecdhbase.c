@@ -16,7 +16,7 @@ static void edwards_to_montgomery(fe25519 montgomeryX, const fe25519 edwardsY, c
     fe25519_mul(montgomeryX, tempX, tempZ);
 }
 
-static int crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n)
+static int32_t crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n)
 {
     uint8_t* t = q;
     ge25519_p3 A;
@@ -36,7 +36,7 @@ static int crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n)
     return 0;
 }
 
-static int crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, const uint8_t* p)
+static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
     uint8_t* t;
     uint32_t i;
@@ -114,7 +114,7 @@ static int crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, cons
     return 0;
 }
 
-static int crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
+static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
     size_t i;
     uint8_t d;

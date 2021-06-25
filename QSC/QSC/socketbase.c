@@ -1,6 +1,6 @@
 #include "socketbase.h"
-#include "async.h"
 #include "memutils.h"
+#include "async.h"
 
 static qsc_socket_exceptions qsc_socket_acceptv4(qsc_socket* source, qsc_socket* target)
 {

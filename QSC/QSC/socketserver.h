@@ -18,7 +18,7 @@
 *
 * Written by John G. Underhill
 * Updated on March 30, 2021
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /**
 * \file socketserver.h
@@ -33,7 +33,6 @@
 #define QSC_SOCKETSERVER_H
 
 #include "common.h"
-//#include "asyncresult.h"
 #include "socketbase.h"
 
 #define QSC_SOCKET_SERVER_LISTEN_BACKLOG 128

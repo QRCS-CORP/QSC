@@ -164,7 +164,7 @@ void qsc_async_thread_sleep(uint32_t msec)
 	}
 }
 
-void qsc_async_thread_wait_all(qsc_thread* handles, int count)
+void qsc_async_thread_wait_all(qsc_thread* handles, int32_t count)
 {
 	assert(handles != NULL);
 	assert(count > 0);

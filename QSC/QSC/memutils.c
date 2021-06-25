@@ -59,7 +59,7 @@ void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
 #endif
 }
 
-void* qsc_memutils_aligned_alloc(int align, size_t length)
+void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 {
 	void* ret;
 

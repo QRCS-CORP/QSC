@@ -19,7 +19,7 @@
 *
 * Written by John G. Underhill
 * Updated on November 11, 2020
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 #ifndef QSC_IPINFO_H
 #define QSC_IPINFO_H
@@ -128,7 +128,7 @@ QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const
 * \param address: The second ipv4 address structure
 * \return Returns true if address structures are equal
 */
-QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_equal(qsc_ipinfo_ipv4_address* a, qsc_ipinfo_ipv4_address* b);
+QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qsc_ipinfo_ipv4_address* b);
 
 /**
 * \brief Test the ipv4 address is a valid public address
@@ -136,7 +136,7 @@ QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_equal(qsc_ipinfo_ipv4_address* a,
 * \param address: The first ipv4 address structure
 * \return Returns true if address is valid
 */
-QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_routable(qsc_ipinfo_ipv4_address* address);
+QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_routable(const qsc_ipinfo_ipv4_address* address);
 
 /**
 * \brief Test the ipv4 address for validity
@@ -144,7 +144,15 @@ QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_routable(qsc_ipinfo_ipv4_address*
 * \param address: The first ipv4 address structure
 * \return Returns true if address is valid
 */
-QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_valid(qsc_ipinfo_ipv4_address* address);
+QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address);
+
+/**
+* \brief Test the ipv4 address for zeroed state
+*
+* \param address: The first ipv4 address structure
+* \return Returns true if address is zeroed
+*/
+QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_zeroed(const qsc_ipinfo_ipv4_address* address);
 
 /**
 * \brief Get a copy of the IPv4 loopback address
@@ -159,7 +167,7 @@ QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loop_back();
 * \param output: The address output byte array
 * \param address: A pointer to the ipv4 address structure
 */
-QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, qsc_ipinfo_ipv4_address* address);
+QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_address* address);
 
 /**
 * \brief Serialize an address structure to a string
@@ -167,7 +175,7 @@ QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, qsc_ipinfo
 * \param output: The serialized address string output array
 * \param address: A pointer to the ipv4 address structure
 */
-QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], qsc_ipinfo_ipv4_address* address);
+QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const qsc_ipinfo_ipv4_address* address);
 
 /*! \struct qsc_ipinfo_ipv6_address
 * \brief The IPv6 address structure
@@ -193,7 +201,7 @@ QSC_EXPORT_API typedef struct qsc_ipinfo_ipv6_info
 * \param address: A pointer to the ipv6 address structure
 * \return Returns the prefix type enumeral
 */
-QSC_EXPORT_API qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(qsc_ipinfo_ipv6_address* address);
+QSC_EXPORT_API qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(const qsc_ipinfo_ipv6_address* address);
 
 /**
 * \brief Get a copy of the ipv6 loopback address
@@ -232,7 +240,7 @@ QSC_EXPORT_API qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_from_string(const
 * \param address: The second ipv6 address structure
 * \return Returns true if address structures are equal
 */
-QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_equal(qsc_ipinfo_ipv6_address* a, qsc_ipinfo_ipv6_address* b);
+QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_equal(const qsc_ipinfo_ipv6_address* a, const qsc_ipinfo_ipv6_address* b);
 
 /**
 * \brief Test the ipv6 address is a valid public address
@@ -240,7 +248,7 @@ QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_equal(qsc_ipinfo_ipv6_address* a,
 * \param address: The first ipv6 address structure
 * \return Returns true if address is valid
 */
-QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_routable(qsc_ipinfo_ipv6_address* address);
+QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_routable(const qsc_ipinfo_ipv6_address* address);
 
 /**
 * \brief Test the ipv6 address for validity
@@ -248,7 +256,15 @@ QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_routable(qsc_ipinfo_ipv6_address*
 * \param address: The first ipv6 address structure
 * \return Returns true if address is valid
 */
-QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_valid(qsc_ipinfo_ipv6_address* address);
+QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address);
+
+/**
+* \brief Test the ipv6 address for zeroed state
+*
+* \param address: The first ipv6 address structure
+* \return Returns true if address is zeroed
+*/
+QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address);
 
 /**
 * \brief Get a copy of the ipv6 loopback address
@@ -263,7 +279,7 @@ QSC_EXPORT_API qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loop_back();
 * \param output: The address output byte array
 * \param address: A pointer to the ipv6 address structure
 */
-QSC_EXPORT_API void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, qsc_ipinfo_ipv6_address* address);
+QSC_EXPORT_API void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_address* address);
 
 /**
 * \brief Serialize an ipv6 address structure to a string
@@ -272,6 +288,6 @@ QSC_EXPORT_API void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, qsc_ipinfo
 * \param address: A pointer to the ipv6 address structure
 * \return Returns the serialized ipv6 address string
 */
-QSC_EXPORT_API char* qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], qsc_ipinfo_ipv6_address* address);
+QSC_EXPORT_API char* qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address);
 
 #endif

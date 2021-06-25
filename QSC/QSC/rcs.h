@@ -21,7 +21,7 @@
 * An implementation of the Rijndael-256 authenticated stream cipher.
 * Written by John G. Underhill
 * Updated October 28, 2020
-* Contact: develop@vtdev.com */
+* Contact: support@vtdev.com */
 
 /**
 * \file rcs.h
@@ -32,7 +32,7 @@
 * \version		1.0.0.0e
 * \date			October 20, 2019
 * \updated		October 28, 2020
-* \contact:		develop@vtdev.com
+* \contact:		support@vtdev.com
 * \copyright	GPL version 3 license (GPLv3)
 *
 *

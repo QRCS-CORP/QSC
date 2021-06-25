@@ -21,7 +21,7 @@
 * An implementation of common string support functions
 * Written by John G. Underhill
 * Written on January 23, 2021
-* Contact: develop@vtdev.com 
+* Contact: support@vtdev.com 
 */
 
 /*
@@ -132,7 +132,7 @@ QSC_EXPORT_API size_t qsc_stringutils_copy_string(char* buffer, size_t buflen, c
 * \param token: The substring to search for
 * \return Returns the character position withing the string, or -1 if the string is not found
 */
-QSC_EXPORT_API int qsc_stringutils_find_string(const char* source, const char* token);
+QSC_EXPORT_API int32_t qsc_stringutils_find_string(const char* source, const char* token);
 
 /**
 * \brief Inserts a substring into a string
@@ -143,7 +143,34 @@ QSC_EXPORT_API int qsc_stringutils_find_string(const char* source, const char* t
 * \param offset: The insertion starting position within the source string; position is ordinal, 0-n
 * \return Returns the size of the new string, or -1 if the string insert operation failed
 */
-QSC_EXPORT_API int qsc_stringutils_insert_string(char* buffer, size_t buflen, const char* substr, size_t offset);
+QSC_EXPORT_API int32_t qsc_stringutils_insert_string(char* buffer, size_t buflen, const char* substr, size_t offset);
+
+/**
+* \brief Check that a string contains only alpha numeric ascii characters
+*
+* \param source: The string to check for alpha numeric characters
+* \param srclen: The number of characters to check
+* \return Returns true if the string is alpha numeric
+*/
+QSC_EXPORT_API bool qsc_stringutils_is_alpha_numeric(char* source, size_t srclen);
+
+/**
+* \brief Check that a string contains only hexadecimal ascii characters
+*
+* \param source: The string to check for hexadecimal characters
+* \param srclen: The number of characters to check
+* \return Returns true if the string is hexadecimal
+*/
+QSC_EXPORT_API bool qsc_stringutils_is_hex(char* source, size_t srclen);
+
+/**
+* \brief Check that a string contains only numeric ascii characters
+*
+* \param source: The string to check for numeric characters
+* \param srclen: The number of characters to check
+* \return Returns true if the string is numeric
+*/
+QSC_EXPORT_API bool qsc_stringutils_is_numeric(char* source, size_t srclen);
 
 /**
 * \brief Join an array of strings to form one string
@@ -203,7 +230,7 @@ QSC_EXPORT_API char* qsc_stringutils_sub_string(const char* source, const char* 
 * \param source: The string to convert to an integer
 * \return Returns the converted integer
 */
-QSC_EXPORT_API int qsc_stringutils_string_to_int(const char* source);
+QSC_EXPORT_API int32_t qsc_stringutils_string_to_int(const char* source);
 
 /**
 * \brief Get the char length of a string
@@ -220,7 +247,7 @@ QSC_EXPORT_API size_t qsc_stringutils_string_size(const char* source);
 * \param output: The output string
 * \param outlen: The size of the output buffer
 */
-QSC_EXPORT_API void qsc_stringutils_int_to_string(int num, char* output, size_t outlen);
+QSC_EXPORT_API void qsc_stringutils_int_to_string(int32_t num, char* output, size_t outlen);
 
 /**
 * \brief Convert a string to all lowercase characters

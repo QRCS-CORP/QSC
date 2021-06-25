@@ -19,8 +19,8 @@
 *
 * An implementation of a HMAC based DRBG.
 * Written by John G. Underhill
-* Updated on August 31, 2020
-* Contact: develop@vtdev.com 
+* Updated on June 14, 2021
+* Contact: support@vtdev.com 
 */
 
 /**

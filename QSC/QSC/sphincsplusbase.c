@@ -547,7 +547,11 @@ static void wots_checksum(int32_t* csum_base_w, const int32_t* msg_base_w)
 
 	/* Convert checksum to base_w. */
 	/* Make sure expected empty zero bits are the least significant bits. */
-	csum = csum << (8 - ((SPX_WOTS_LEN2 * SPX_WOTS_LOGW) % 8));
+	if ((SPX_WOTS_LOGW % 8) != 0) 
+	{
+		csum = csum << (8 - ((SPX_WOTS_LEN2 * SPX_WOTS_LOGW) % 8));
+	}
+
 	ull_to_bytes(csum_bytes, sizeof(csum_bytes), csum);
 	base_w(csum_base_w, SPX_WOTS_LEN2, csum_bytes);
 }
