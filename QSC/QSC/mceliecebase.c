@@ -1158,6 +1158,9 @@ static void controlbits_from_permutation(uint8_t* out, const int16_t* pi, int64_
 				break;
 			}
 		}
+
+		free(pi_test);
+		free(temp);
 	}
 }
 
@@ -1627,6 +1630,20 @@ static int32_t pk_gen(uint8_t* pk, uint8_t* sk, uint32_t* perm, int16_t* pi)
 #endif
 
 			res = 0;
+		}
+
+		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
+		{
+			if (mat[i] != NULL)
+			{
+				free(mat[i]);
+			}
+		}
+
+
+		if (mat != NULL)
+		{
+			free(mat);
 		}
 	}
 
