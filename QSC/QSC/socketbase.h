@@ -32,6 +32,9 @@
 #ifndef QSC_SOCKETBASE_H
 #define QSC_SOCKETBASE_H
 
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
+
 #include "common.h"
 #include "intutils.h"
 #include "ipinfo.h"

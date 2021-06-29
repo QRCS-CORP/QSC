@@ -32,6 +32,9 @@
 #ifndef QSC_NETUTILS_H
 #define QSC_NETUTILS_H
 
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
+
 #include "common.h"
 #include "ipinfo.h"
 #include "socketbase.h"

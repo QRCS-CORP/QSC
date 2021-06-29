@@ -99,7 +99,7 @@
 #define QSC_ECDH_ALGNAME "ECDH"
 
 /**
-* \brief Decapsulates the shared secret for given cipher-text using a private-key
+* \brief Decapsulates the shared secret for a given cipher-text using a private-key
 *
 * \warning The shared secret array must be sized to the QSC_ECDH_SHAREDSECRET_SIZE.
 *

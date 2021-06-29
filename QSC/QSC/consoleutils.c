@@ -1,5 +1,6 @@
 #include "consoleutils.h"
 #include "stringutils.h"
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	include <conio.h>
 #	include <tchar.h>

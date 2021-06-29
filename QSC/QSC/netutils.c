@@ -1,6 +1,5 @@
 #include "netutils.h"
 #include "memutils.h"
-#include <string.h>
 
 void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx)
 {

@@ -281,7 +281,6 @@
 
 
 #define QSC_SYSTEM_MAX_PATH 260
-
 #define QSC_SYSTEM_SECMEMALLOC_DEFAULT 4096
 #define QSC_SYSTEM_SECMEMALLOC_MIN 16
 #define QSC_SYSTEM_SECMEMALLOC_MAX 128
@@ -442,16 +441,28 @@
 /*** McEliece ***/
 
 /*!
-\def QSC_MCELIECE_N6960T119
-* Implement the McEliece N6960T119 parameter set
+\def QSC_MCELIECE_S3N4608T96
+* Implement the McEliece S3-N4608T96 parameter set
 */
-#define QSC_MCELIECE_N6960T119
+#define QSC_MCELIECE_S3N4608T96
 
 /*!
-\def QSC_MCELIECE_N8192T128
-* Implement the McEliece N8192T128 parameter set
+\def QSC_MCELIECE_S5N6688T128
+* Implement the McEliece S5-N6688T128 parameter set
 */
-//#define QSC_MCELIECE_N8192T128
+//#define QSC_MCELIECE_S5N6688T128
+
+/*!
+\def QSC_MCELIECE_S5N6960T119
+* Implement the McEliece S5-N6960T119 parameter set
+*/
+//#define QSC_MCELIECE_S5N6960T119
+
+/*!
+\def QSC_MCELIECE_S5N8192T128
+* Implement the McEliece S5-N8192T128 parameter set
+*/
+//#define QSC_MCELIECE_S5N8192T128
 
 
 /*** Kyber ***/

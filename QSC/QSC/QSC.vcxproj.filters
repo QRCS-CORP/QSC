@@ -216,9 +216,6 @@
     <ClInclude Include="kyberbase.h">
       <Filter>Header Files\Asymmetric\Cipher\Kyber</Filter>
     </ClInclude>
-    <ClInclude Include="mceliecebase.h">
-      <Filter>Header Files\Asymmetric\Cipher\McEliece</Filter>
-    </ClInclude>
     <ClInclude Include="sphincsplusbase.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus</Filter>
     </ClInclude>
@@ -306,6 +303,9 @@
     <ClInclude Include="dilithiumbase.h">
       <Filter>Header Files\Asymmetric\Signature\Dilithium</Filter>
     </ClInclude>
+    <ClInclude Include="mceliecebase.h">
+      <Filter>Header Files\Asymmetric\Cipher\McEliece</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -376,9 +376,6 @@
     </ClCompile>
     <ClCompile Include="kyberbase.c">
       <Filter>Source Files\Asymmetric\Cipher\Kyber</Filter>
-    </ClCompile>
-    <ClCompile Include="mceliecebase.c">
-      <Filter>Source Files\Asymmetric\Cipher\McEliece</Filter>
     </ClCompile>
     <ClCompile Include="sphincsplusbase.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus</Filter>
@@ -457,6 +454,9 @@
     </ClCompile>
     <ClCompile Include="dilithiumbase.c">
       <Filter>Source Files\Asymmetric\Signature\Dilithium</Filter>
+    </ClCompile>
+    <ClCompile Include="mceliecebase.c">
+      <Filter>Source Files\Asymmetric\Cipher\McEliece</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

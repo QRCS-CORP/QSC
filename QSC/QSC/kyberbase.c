@@ -668,11 +668,11 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
     qsc_keccak_state state;
     uint8_t buf[KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2];
     uint8_t extseed[QSC_KYBER_SYMBYTES + 2];
-    size_t ctr;
     size_t i;
     size_t j;
     size_t k;
     uint32_t buflen;
+    uint32_t ctr;
     uint32_t off;
 
     qsc_memutils_copy(extseed, seed, QSC_KYBER_SYMBYTES);
@@ -846,7 +846,7 @@ void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8
     rng_generate(sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
 }
 
-void qsc_kyber_ref_encrypt(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], void (*rng_generate)(uint8_t*, size_t))
+void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], void (*rng_generate)(uint8_t*, size_t))
 {
     uint8_t buf[2 * QSC_KYBER_SYMBYTES];
     uint8_t kr[2 * QSC_KYBER_SYMBYTES];
@@ -868,7 +868,7 @@ void qsc_kyber_ref_encrypt(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QS
     qsc_shake256_compute(ss, QSC_KYBER_MSGBYTES, kr, 2 * QSC_KYBER_SYMBYTES);
 }
 
-bool qsc_kyber_ref_decrypt(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES])
+bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES])
 {
     uint8_t buf[2 * QSC_KYBER_SYMBYTES];
     uint8_t cmp[QSC_KYBER_CIPHERTEXT_BYTES];

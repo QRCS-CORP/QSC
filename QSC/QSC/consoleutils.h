@@ -1,6 +1,3 @@
-#ifndef QSC_CONSOLEUTILS_H
-#define QSC_CONSOLEUTILS_H
-
 /* The AGPL version 3 License (AGPLv3)
 *
 * Copyright (c) 2021 Digital Freedom Defence Inc.
@@ -24,7 +21,7 @@
 * An implementation of common console support functions
 * Written by John G. Underhill
 * Written on January 24, 2021
-* Contact: support@vtdev.com 
+* Contact: support@vtdev.com
 */
 
 /*
@@ -32,6 +29,12 @@
 * \brief <b>Console utilities; common console support functions</b> \n
 * January 24, 2021
 */
+
+#ifndef QSC_CONSOLEUTILS_H
+#define QSC_CONSOLEUTILS_H
+
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
 
 #include "common.h"
 

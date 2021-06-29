@@ -1316,7 +1316,7 @@ void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* o
 void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const uint8_t* message, size_t msglen)
 {
 	uint8_t t[8] = { 0 };
-	uint32_t i;
+	size_t i;
 
 	if ((ctx->position & 7) > 0)
 	{
@@ -1387,8 +1387,8 @@ void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const u
 
 void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8_t domain)
 {
-	uint32_t i;
-	uint32_t j;
+	size_t i;
+	size_t j;
 
 	i = ctx->position >> 3;
 	j = ctx->position & 7;
@@ -1399,7 +1399,7 @@ void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8
 
 void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, uint8_t* output, size_t outlen, size_t rate)
 {
-	uint32_t i;
+	size_t i;
 	uint8_t t[8];
 
 	if ((ctx->position & 7) > 0)

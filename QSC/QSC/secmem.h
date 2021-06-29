@@ -33,6 +33,9 @@
 #ifndef QSC_SECMEM_H
 #define QSC_SECMEM_H
 
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
+
 #include "common.h"
 
 /**

@@ -43,6 +43,9 @@
 
 #include "common.h"
 
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
+
 /*!
 * \def QSC_CSP_SEED_MAX
 * \brief The maximum seed size that can be extracted from a single generate call

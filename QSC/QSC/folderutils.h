@@ -33,6 +33,9 @@
 #ifndef QSC_FOLDERUTILS_H
 #define QSC_FOLDERUTILS_H
 
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
+
 #include "common.h"
 
 /*! \enum qsc_folderutils_directories

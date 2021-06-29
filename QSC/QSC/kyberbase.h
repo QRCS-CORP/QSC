@@ -176,7 +176,7 @@ typedef struct
 * \param sk Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 * \return Returns true for success
 */
-bool qsc_kyber_ref_decrypt(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES],
+bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES],
 	const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES]);
 
 /**
@@ -186,7 +186,7 @@ bool qsc_kyber_ref_decrypt(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_
 * \param ss Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
 * \param pk Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
 */
-void qsc_kyber_ref_encrypt(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
+void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
 	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], void (*rng_generate)(uint8_t*, size_t));
 
 /**

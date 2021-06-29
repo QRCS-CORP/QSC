@@ -12,7 +12,7 @@ bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uin
 
 	if (secret != NULL && ciphertext != NULL && privatekey != NULL)
 	{
-		res = qsc_kyber_ref_decrypt(secret, ciphertext, privatekey);
+		res = qsc_kyber_ref_decapsulate(secret, ciphertext, privatekey);
 	}
 
 	return res;
@@ -27,7 +27,7 @@ void qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* 
 
 	if (secret != NULL && ciphertext != NULL && publickey != NULL && rng_generate != NULL)
 	{
-		qsc_kyber_ref_encrypt(ciphertext, secret, publickey, rng_generate);
+		qsc_kyber_ref_encapsulate(ciphertext, secret, publickey, rng_generate);
 	}
 }
 

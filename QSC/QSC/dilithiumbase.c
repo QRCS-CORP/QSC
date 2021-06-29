@@ -426,10 +426,10 @@ static void dilithium_poly_decompose(qsc_dilithium_poly* a1, qsc_dilithium_poly*
     }
 }
 
-static size_t dilithium_poly_make_hint(qsc_dilithium_poly* h, const qsc_dilithium_poly* a0, const qsc_dilithium_poly* a1)
+static uint32_t dilithium_poly_make_hint(qsc_dilithium_poly* h, const qsc_dilithium_poly* a0, const qsc_dilithium_poly* a1)
 {
     size_t i;
-    size_t s;
+    uint32_t s;
 
     s = 0;
 
@@ -1251,7 +1251,7 @@ static void dilithium_polyveck_decompose(qsc_dilithium_polyveck* v1, qsc_dilithi
 static uint32_t dilithium_polyveck_make_hint(qsc_dilithium_polyveck* h, const qsc_dilithium_polyveck* v0, const qsc_dilithium_polyveck* v1)
 {
     size_t i;
-    size_t s;
+    uint32_t s;
 
     s = 0;
 

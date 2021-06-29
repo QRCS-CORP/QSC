@@ -28,6 +28,9 @@
 
 #include "common.h"
 
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
 #	include <process.h>

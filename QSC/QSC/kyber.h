@@ -106,13 +106,11 @@
 #define QSC_KYBER_ALGNAME "KYBER"
 
 /**
-* \brief Decapsulates the shared secret for given cipher-text using a private-key
+* \brief Decapsulates the shared secret for a given cipher-text using a private-key
 *
-* \warning The shared secret array must be sized to the QSC_KYBER_SHAREDSECRET_SIZE.
-*
-* \param secret: Pointer to the output shared secret key, an array of QSC_KYBER_SHAREDSECRET_SIZE
-* \param ciphertext: [const] Pointer to the cipher-text array
-* \param privatekey: [const] Pointer to the private-key array
+* \param secret: Pointer to the output shared secret key, an array of QSC_KYBER_SHAREDSECRET_SIZE constant size
+* \param ciphertext: [const] Pointer to the cipher-text array of QSC_KYBER_CIPHERTEXT_SIZE constant size
+* \param privatekey: [const] Pointer to the secret-key array of QSC_KYBER_PRIVATEKEY_SIZE constant size
 * \return Returns true for success
 */
 QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
@@ -122,10 +120,10 @@ QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* cipher
 *
 * \warning Ciphertext array must be sized to the QSC_KYBER_CIPHERTEXT_SIZE.
 *
-* \param secret: Pointer to the shared secret key, a uint8_t array of QSC_KYBER_SHAREDSECRET_SIZE
-* \param ciphertext: Pointer to the cipher-text array
-* \param publickey: [const] Pointer to the public-key array
-* \param rng_generate: A pointer to the random generator
+* \param secret: Pointer to the shared secret key, a uint8_t array of QSC_KYBER_SHAREDSECRET_SIZE constant size
+* \param ciphertext: Pointer to the cipher-text array of QSC_KYBER_CIPHERTEXT_SIZE constant size
+* \param publickey: [const] Pointer to the public-key array of QSC_KYBER_PUBLICKEY_SIZE constant size
+* \param rng_generate: A pointer to the random generator function
 */
 QSC_EXPORT_API void qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, void (*rng_generate)(uint8_t*, size_t));
 
@@ -134,9 +132,9 @@ QSC_EXPORT_API void qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, 
 *
 * \warning Arrays must be sized to QSC_KYBER_PUBLICKEY_SIZE and QSC_KYBER_SECRETKEY_SIZE.
 *
-* \param publickey: Pointer to the output public-key array
-* \param privatekey: Pointer to output private-key array
-* \param rng_generate: A pointer to the random generator
+* \param publickey: Pointer to the output public-key array of QSC_KYBER_PUBLICKEY_SIZE constant size
+* \param privatekey: Pointer to output private-key array of QSC_KYBER_PRIVATEKEY_SIZE constant size
+* \param rng_generate: A pointer to the random generator function
 */
 QSC_EXPORT_API void qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t));
 

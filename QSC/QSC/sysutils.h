@@ -32,6 +32,9 @@
 #ifndef QSC_SYSUTILS_H
 #define QSC_SYSUTILS_H
 
+/* bogus winbase.h error */
+#pragma warning(disable : 5105)
+
 #include "common.h"
 
 #define QSC_SYSUTILS_SYSTEM_NAME_MAX 256
