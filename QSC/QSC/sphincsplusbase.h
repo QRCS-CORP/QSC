@@ -3,38 +3,92 @@
 
 #include "common.h"
 
-/* sign.h */
+/* api.h */
 
 /**
-* \brief Generates a SphincsPlus public/private key-pair.
-* Arrays must be sized to SPHINCSPLUS_PUBLICKEY_SIZE and SPHINCS_SECRETKEY_SIZE.
+ * \brief Returns the length of a secret key, in bytes
+ */
+size_t sphincsplus_ref_sign_secretkeybytes(void);
+
+/**
+ * \brief Returns the length of a public key, in bytes
+ */
+size_t sphincsplus_ref_sign_publickeybytes(void);
+
+/**
+ * \brief Returns the length of a signature, in bytes
+ */
+size_t sphincsplus_ref_sign_bytes(void);
+
+/**
+ * \brief Returns the length of the seed required to generate a key pair, in bytes
+ */
+size_t sphincsplus_ref_sign_seedbytes(void);
+
+/**
+* \brief Generates a SphincsPlus public/private key-pair from a seed
 *
-* \param publickey The public verification key
-* \param secretkey The private signature key
+* \param pk: The public verification key
+* \param sk: The private signature key
+* \param seed: A pointer to the seed array
 */
-void sphincsplus_generate(uint8_t* publickey, uint8_t* secretkey, void (*rng_generate)(uint8_t*, size_t));
+int32_t sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed);
+
+/**
+* \brief Generates a SphincsPlus public/private key-pair
+*
+* \param pk: The public verification key
+* \param sk: The private signature key
+* \param rng_generate: A pointer to the random generator function
+*/
+void sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate)(uint8_t*, size_t));
+
+/**
+* \brief Takes the message as input and returns an array containing the signature
+*
+* \param sig: The signature
+* \param siglen: The signature length
+* \param m: The message to be signed
+* \param mlen: The message length
+* \param sk: The private signature key
+* \param rng_generate: A pointer to the random generator function
+*/
+void sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* sk, void (*rng_generate)(uint8_t*, size_t));
+
+/**
+* \brief Verifies a signature-message pair with the public key
+*
+* \param sig: The signature array
+* \param siglen: The length of the signature array
+* \param m: The message array
+* \param mlen: The length of the message array
+* \param pk: The public verification key
+* \return Returns true for success
+*/
+bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_t* m, size_t mlen, const uint8_t* pk);
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message.
 *
-* \param signedmsg The signed message
-* \param smsglen The signed message length
-* \param message The message to be signed
-* \param msglen The message length
-* \param secretkey The private signature key
+* \param sm: The signed message
+* \param smlen: The signed message length
+* \param m: The message to be signed
+* \param mlen: The message length
+* \param sk: The private signature key
+* \param rng_generate: A pointer to the random generator function
 */
-void sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* secretkey, void (*rng_generate)(uint8_t*, size_t));
+void sphincsplus_ref_sign(uint8_t* sm, uint64_t* smlen, const uint8_t* m, uint64_t mlen, const uint8_t* sk, void (*rng_generate)(uint8_t*, size_t));
 
 /**
-* \brief Verifies a signature-message pair with the public key.
+* \brief Verifies a signature with the public key
 *
-* \param message The message to be signed
-* \param msglen The message length
-* \param signedmsg The signed message
-* \param smsglen The signed message length
-* \param publickey The public verification key
+* \param m: The message to be signed
+* \param mlen: The message length
+* \param sm: The signed message
+* \param smlen: The signed message length
+* \param pk: The public verification key
 * \return Returns true for success
 */
-bool sphincsplus_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+bool sphincsplus_ref_sign_open(uint8_t* m, uint64_t* mlen, const uint8_t* sm, uint64_t smlen, const uint8_t* pk);
 
 #endif

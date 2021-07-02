@@ -5,6 +5,7 @@
 *
 * \author John Underhill
 * \date June 13, 2019
+* \updated July 1, 2021
 */
 
 #ifndef QSCTEST_DILITHIUM_TEST_H

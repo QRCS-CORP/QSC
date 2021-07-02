@@ -347,7 +347,7 @@ size_t qsc_filetools_read_line(const char* path, char* buffer, size_t buflen, si
 
 				if (ctr == linenum)
 				{
-					res = qsc_stringutils_find_string(buffer + pos, "\n");
+					res = qsc_stringutils_find_string(sbuf + pos, "\n");
 					memcpy(buffer, sbuf, res <= buflen ? res : buflen);
 					break;
 				}

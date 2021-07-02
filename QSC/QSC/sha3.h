@@ -359,7 +359,7 @@ QSC_EXPORT_API void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint3
 * \param outlen: The number of output bytes to generate
 * \param rate: The rate of absorption in bytes
 */
-QSC_EXPORT_API void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, uint8_t* output, size_t outlen, size_t rate);
+QSC_EXPORT_API void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t* output, size_t outlen);
 
 /**
 * \brief The Keccak permute function.

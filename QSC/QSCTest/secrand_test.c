@@ -547,6 +547,10 @@ bool qsctest_secrand_stress()
 
 void qsctest_secrand_run()
 {
+	qsctest_print_safe("*** Note: Random generators will ocassionally fail this test. \n");
+	qsctest_print_safe("This is not the fault of the provider, but the nature of random data. \n");
+	qsctest_print_safe("Only if a random provider fails these tests consistantly, is it considered faulty. \n\n");
+
 	if (qsctest_secrand_stress() == true)
 	{
 		qsctest_print_safe("Success! Passed the secrand stress and wellness test. \n");

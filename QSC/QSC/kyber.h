@@ -27,6 +27,7 @@
 /**
 * \file kyber.h
 * \date January 10, 2018
+* \updated July 2, 2021
 *
 * \brief <b>The Kyber KEM definitions</b> \n
 * Contains the primary public api for the Kyber CCA-secure Key Encapsulation Mechanism implementation.

@@ -444,13 +444,13 @@
 \def QSC_MCELIECE_S3N4608T96
 * Implement the McEliece S3-N4608T96 parameter set
 */
-#define QSC_MCELIECE_S3N4608T96
+//#define QSC_MCELIECE_S3N4608T96
 
 /*!
 \def QSC_MCELIECE_S5N6688T128
 * Implement the McEliece S5-N6688T128 parameter set
 */
-//#define QSC_MCELIECE_S5N6688T128
+#define QSC_MCELIECE_S5N6688T128
 
 /*!
 \def QSC_MCELIECE_S5N6960T119
@@ -471,13 +471,13 @@
 \def QSC_KYBER_S3Q3329N256K3
 * Implement the Kyber S3Q3329N256K3 parameter set
 */
-#define QSC_KYBER_S3Q3329N256K3
+//#define QSC_KYBER_S3Q3329N256K3
 
 /*!
 \def QSC_KYBER_S5Q3329N256K4
 * Implement the Kyber S5Q3329N256K4 parameter set
 */
-//#define QSC_KYBER_S5Q3329N256K4
+#define QSC_KYBER_S5Q3329N256K4
 
 /*!
 \def QSC_KYBER_S6Q3329N256K5 
@@ -520,22 +520,28 @@
 /*** SphincsPlus ***/
 
 /*!
-\def QSC_SPHINCSPLUS_S1S128SHAKE
-* Implement the SphincsPlus S1S128SHAKE parameter set
+\def QSC_SPHINCSPLUS_S3S192SHAKERS
+* Implement the SphincsPlus S3S192SHAKERS robust small parameter set
 */
-#define QSC_SPHINCSPLUS_S1S128SHAKE
+//#define QSC_SPHINCSPLUS_S3S192SHAKERS
 
 /*!
-\def QSC_SPHINCSPLUS_S2S192SHAKE
-* Implement the SphincsPlus S2S192SHAKE parameter set
+\def QSC_SPHINCSPLUS_S3S192SHAKERF
+* Implement the SphincsPlus S3S192SHAKERF robust fast parameter set
 */
-//#define QSC_SPHINCSPLUS_S2S192SHAKE
+//#define QSC_SPHINCSPLUS_S3S192SHAKERF
 
 /*!
-\def QSC_SPHINCSPLUS_S3S256SHAKE
-* Implement the SphincsPlus S3S256SHAKE parameter set
+\def QSC_SPHINCSPLUS_S5S256SHAKERS
+* Implement the SphincsPlus S5S256SHAKERS robust small parameter set
 */
-//#define QSC_SPHINCSPLUS_S3S256SHAKE
+//#define QSC_SPHINCSPLUS_S5S256SHAKERS
+
+/*!
+\def QSC_SPHINCSPLUS_S5S256SHAKERF
+* Implement the SphincsPlus S5S256SHAKERF robust fast parameter set
+*/
+#define QSC_SPHINCSPLUS_S5S256SHAKERF
 
 
 /*** ECDSA ***/

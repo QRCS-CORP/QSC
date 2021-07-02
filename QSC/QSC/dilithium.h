@@ -27,6 +27,7 @@
 /**
 * \file dilithium.h
 * \date November 13, 2018
+* \updated July 2, 2021
 *
 * \brief <b>The Dilithium API definitions</b> \n
 * Contains the primary public api for the Dilithium asymmetric signature scheme implementation.

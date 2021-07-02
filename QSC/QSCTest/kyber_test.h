@@ -5,6 +5,7 @@
 *
 * \author John Underhill
 * \date August 1, 2020
+* \updated July 1, 2021
 */
 
 #ifndef QSCTEST_KYBER_TEST_H
@@ -28,16 +29,22 @@ bool qsctest_kyber_ciphertext_integrity();
 bool qsctest_kyber_kat_test();
 
 /**
-* \brief Stress test the key generation, encryption, and decryption functions in a 100 round loop.
+* \brief Stress test the key generation, encryption, and decryption functions
 * \return Returns true for test success
 */
 bool qsctest_kyber_operations_test();
 
 /**
-* \brief Test the validity of a mutated secret key in a 100 round loop.
+* \brief Test the validity of an altered secret-key
 * \return Returns true for test success
 */
 bool qsctest_kyber_privatekey_integrity();
+
+/**
+* \brief Test the validity of an altered public key
+* \return Returns true for test success
+*/
+bool qsctest_kyber_publickey_integrity();
 
 /**
 * \brief Run the Kyber implementation stress and correctness tests tests

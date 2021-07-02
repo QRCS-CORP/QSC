@@ -69,7 +69,7 @@
     <ClCompile Include="csx_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="rhx.c">
+    <ClCompile Include="aes.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
     <ClCompile Include="ecdh_test.c">
@@ -83,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="benchmark.c">
       <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="katparser.c">
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,7 +131,7 @@
     <ClInclude Include="csx_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
-    <ClInclude Include="rhx.h">
+    <ClInclude Include="aes.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="ecdh_test.h">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="benchmark.h">
       <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="katparser.h">
+      <Filter>Header Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
 *
 * \author John Underhill
 * \date June 09, 2019
+* \updated July 1, 2021
 */
 
 #ifndef QSCTEST_SPHINCSPLUS_TEST_H

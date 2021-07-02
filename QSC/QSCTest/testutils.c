@@ -40,6 +40,46 @@ void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 	}
 }
 
+void qsctest_print_hex_quot(const uint8_t* input, size_t inputlen, size_t linelen)
+{
+	size_t i;
+
+	while (inputlen >= linelen)
+	{
+		qsctest_print_safe("\"");
+
+		for (i = 0; i < linelen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("%02X", input[i]);
+#else
+			printf("%02X", input[i]);
+#endif
+		}
+
+		qsctest_print_safe("\"");
+		input += linelen;
+		inputlen -= linelen;
+		qsctest_print_safe("\n");
+	}
+
+	if (inputlen != 0)
+	{
+		qsctest_print_safe("\"");
+
+		for (i = 0; i < inputlen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("%02X", input[i]);
+#else
+			printf("%02X", input[i]);
+#endif
+		}
+
+		qsctest_print_safe("\"");
+	}
+}
+
 void qsctest_print_hex(const uint8_t* input, size_t inputlen, size_t linelen)
 {
 	size_t i;

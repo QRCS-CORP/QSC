@@ -27,6 +27,7 @@
 /**
 * \file mceliece.h
 * \date May 10, 2019
+* \updated July 2, 2021
 *
 * \brief <b>The McEliece api definitions</b> \n
 * Contains the primary public api for the Niederreiter dual form of the McEliece asymmetric cipher implementation.

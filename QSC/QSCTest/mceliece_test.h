@@ -5,6 +5,7 @@
 *
 * \author John Underhill
 * \date August 1, 2020
+* \updated July 1, 2021
 */
 
 #ifndef QSCTEST_MCELIECE_TEST_H
@@ -12,14 +13,8 @@
 
 #include "common.h"
 
-#ifdef _DEBUG
-#	define QSCTEST_MCELIECE_ITERATIONS 1
-#else
-#	define QSCTEST_MCELIECE_ITERATIONS 4
-#endif
-
 /**
-* \brief Test the validity of a mutated cipher-text in a loop.
+* \brief Test the validity of a mutated cipher-text
 * \return Returns true for test success
 */
 bool qsctest_mceliece_ciphertext_integrity();
@@ -31,13 +26,13 @@ bool qsctest_mceliece_ciphertext_integrity();
 bool qsctest_mceliece_kat_test();
 
 /**
-* \brief Stress test the key generation, encryption, and decryption functions in a loop.
+* \brief Stress test the key generation, encryption, and decryption functions
 * \return Returns true for test success
 */
 bool qsctest_mceliece_operations_test();
 
 /**
-* \brief Test the validity of a mutated public key in a loop.
+* \brief Test the validity of an altered public-key
 * \return Returns true for test success
 */
 bool qsctest_mceliece_publickey_integrity();

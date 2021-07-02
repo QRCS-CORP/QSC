@@ -1,6 +1,6 @@
 #include "nistrng.h"
 #include "../QSC/intutils.h"
-#include "rhx.h"
+#include "aes.h"
 
 /*lint -e747 */
 
@@ -8,14 +8,14 @@ qsctest_nist_aes256_state rng_ctx;
 
 static void aes256_ecb(const uint8_t* key, const uint8_t* counter, uint8_t* buffer)
 {
-	qsc_rhx_state state;
+	qsc_aes_state state;
 
 	/* jgu checked false warning */
 	/*lint -save -e747 */
-	const qsc_rhx_keyparams kp = { key, 32, NULL };
-	qsc_rhx_initialize(&state, &kp, true, AES256);
+	const qsc_aes_keyparams kp = { key, 32, NULL };
+	qsc_aes_initialize(&state, &kp, true, AES256);
 	/*lint -restore */
-	qsc_rhx_ecb_encrypt_block(&state, buffer, counter);
+	qsc_aes_ecb_encrypt_block(&state, buffer, counter);
 }
 
 static void increment_counter(uint8_t* counter)

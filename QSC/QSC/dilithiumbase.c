@@ -1583,7 +1583,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, tr, DILITHIUM_CRHBYTES);
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
     qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-    qsc_keccak_incremental_squeeze(&kctx, mu, DILITHIUM_CRHBYTES, QSC_KECCAK_256_RATE);
+    qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
 #ifdef QSC_DILITHIUM_RANDOMIZED_SIGNING
     rng_generate(rhoprime, DILITHIUM_CRHBYTES);
@@ -1619,7 +1619,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
         qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
         qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, sig, QSC_DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
         qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-        qsc_keccak_incremental_squeeze(&kctx, sig, DILITHIUM_SEEDBYTES, QSC_KECCAK_256_RATE);
+        qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, sig, DILITHIUM_SEEDBYTES);
 
         dilithium_poly_challenge(&cp, sig);
         dilithium_poly_ntt(&cp);
@@ -1636,7 +1636,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
         }
 
         /* Check that subtracting cs2 does not change high bits of w and low bits
-         * do not reveal secret information */
+           do not reveal secret information */
         dilithium_polyveck_pointwise_poly_montgomery(&h, &cp, &s2);
         dilithium_polyveck_invntt_to_mont(&h);
         dilithium_polyveck_sub(&w0, &w0, &h);
@@ -1719,7 +1719,7 @@ bool qsc_dilithium_ref_verify(const uint8_t *sig, size_t siglen, const uint8_t *
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
                 qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-                qsc_keccak_incremental_squeeze(&kctx, mu, DILITHIUM_CRHBYTES, QSC_KECCAK_256_RATE);
+                qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
                 /* Matrix-vector multiplication; compute Az - c2^dt1 */
                 dilithium_poly_challenge(&cp, c);
@@ -1747,7 +1747,7 @@ bool qsc_dilithium_ref_verify(const uint8_t *sig, size_t siglen, const uint8_t *
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, buf, QSC_DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
                 qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-                qsc_keccak_incremental_squeeze(&kctx, c2, DILITHIUM_SEEDBYTES, QSC_KECCAK_256_RATE);
+                qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, c2, DILITHIUM_SEEDBYTES);
 
                 res = (qsc_intutils_verify(c, c2, DILITHIUM_SEEDBYTES) == 0);
             }

@@ -372,7 +372,7 @@ void qsctest_ecdsa_run()
 
 	if (qsctest_ecdsa_stress_test() == true)
 	{
-		qsctest_print_safe("Success! The ECDSA stress test has succeeded. \n");
+		qsctest_print_safe("Success! The ECDSA stress test. \n");
 	}
 	else
 	{
@@ -381,7 +381,7 @@ void qsctest_ecdsa_run()
 
 	if (qsctest_ecdsa_publickey_integrity() == true)
 	{
-		qsctest_print_safe("Success! The ECDSA altered public-key test has succeeded. \n");
+		qsctest_print_safe("Success! The ECDSA altered public-key test. \n");
 	}
 	else
 	{
@@ -390,7 +390,7 @@ void qsctest_ecdsa_run()
 
 	if (qsctest_ecdsa_privatekey_integrity() == true)
 	{
-		qsctest_print_safe("Success! The ECDSA altered secret-key test has succeeded. \n");
+		qsctest_print_safe("Success! The ECDSA altered secret-key test. \n");
 	}
 	else
 	{
@@ -399,7 +399,7 @@ void qsctest_ecdsa_run()
 
 	if (qsctest_ecdsa_signature_integrity() == true)
 	{
-		qsctest_print_safe("Success! The ECDSA altered signature test has succeeded. \n");
+		qsctest_print_safe("Success! The ECDSA altered signature test. \n");
 	}
 	else
 	{

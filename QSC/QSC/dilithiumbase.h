@@ -1,5 +1,5 @@
-#ifndef QSC_DILITHIUMBASE_2_H
-#define QSC_DILITHIUMBASE_2_H
+#ifndef QSC_DILITHIUMBASE_H
+#define QSC_DILITHIUMBASE_H
 
 #include "common.h"
 

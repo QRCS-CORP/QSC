@@ -1396,7 +1396,7 @@ static void encrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, void (*rng_genera
 static int32_t check_c_padding(const uint8_t* c)
 {
 	/* check if the padding bits of c are all zero */
-	unsigned char b;
+	uint8_t b;
 	int ret;
 
 	b = c[MCELIECE_SYND_BYTES - 1] >> (MCELIECE_PK_NROWS % 8);

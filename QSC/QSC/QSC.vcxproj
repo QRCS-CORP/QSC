@@ -150,6 +150,7 @@
     <ClInclude Include="csx.h" />
     <ClInclude Include="dilithium.h" />
     <ClInclude Include="dilithiumbase.h" />
+    <ClInclude Include="dilithiumbase_avx2.h" />
     <ClInclude Include="donna128.h" />
     <ClInclude Include="ecdh.h" />
     <ClInclude Include="ec25519.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="kyberbase_avx2.h" />
     <ClInclude Include="mceliece.h" />
     <ClInclude Include="mceliecebase.h" />
+    <ClInclude Include="mceliecebase_avx2.h" />
     <ClInclude Include="memutils.h" />
     <ClInclude Include="netutils.h" />
     <ClInclude Include="parallel.h" />
@@ -186,9 +188,10 @@
     <ClInclude Include="socketflags.h" />
     <ClInclude Include="socketserver.h" />
     <ClInclude Include="sphincsplus.h" />
-    <ClInclude Include="sphincsplusbase.h" />
     <ClInclude Include="csp.h" />
     <ClInclude Include="intutils.h" />
+    <ClInclude Include="sphincsplusbase.h" />
+    <ClInclude Include="sphincsplusbase_avx2.h" />
     <ClInclude Include="stringutils.h" />
     <ClInclude Include="sysutils.h" />
     <ClInclude Include="threadpool.h" />
@@ -206,6 +209,7 @@
     <ClCompile Include="csx.c" />
     <ClCompile Include="dilithium.c" />
     <ClCompile Include="dilithiumbase.c" />
+    <ClCompile Include="dilithiumbase_avx2.c" />
     <ClCompile Include="donna128.c" />
     <ClCompile Include="ecdh.c" />
     <ClCompile Include="ec25519.c" />
@@ -222,6 +226,7 @@
     <ClCompile Include="kyberbase_avx2.c" />
     <ClCompile Include="mceliece.c" />
     <ClCompile Include="mceliecebase.c" />
+    <ClCompile Include="mceliecebase_avx2.c" />
     <ClCompile Include="memutils.c" />
     <ClCompile Include="netutils.c" />
     <ClCompile Include="parallel.c" />
@@ -239,9 +244,10 @@
     <ClCompile Include="socketclient.c" />
     <ClCompile Include="socketserver.c" />
     <ClCompile Include="sphincsplus.c" />
-    <ClCompile Include="sphincsplusbase.c" />
     <ClCompile Include="csp.c" />
     <ClCompile Include="intutils.c" />
+    <ClCompile Include="sphincsplusbase.c" />
+    <ClCompile Include="sphincsplusbase_avx2.c" />
     <ClCompile Include="stringutils.c" />
     <ClCompile Include="sysutils.c" />
     <ClCompile Include="async.c" />

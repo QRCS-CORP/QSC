@@ -1397,7 +1397,7 @@ void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8
 	ctx->position = 0;
 }
 
-void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, uint8_t* output, size_t outlen, size_t rate)
+void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t* output, size_t outlen)
 {
 	size_t i;
 	uint8_t t[8];

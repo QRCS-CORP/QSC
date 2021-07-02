@@ -25,6 +25,15 @@ void qsctest_get_wait();
 void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 
 /**
+* \brief Convert a binary array to a hexidecimal string, add quotation marks, and print to the console
+*
+* \param input: the binary array
+* \param inputlen: the number of bytes to process
+* \param linelen: the length of output to print, before starting a new line
+*/
+void qsctest_print_hex_quot(const uint8_t* input, size_t inputlen, size_t linelen);
+
+/**
 * \brief Convert a binary array to a hexidecimal string and print to the console
 *
 * \param input: the binary array
