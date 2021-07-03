@@ -152,7 +152,7 @@
 #	define QSC_MCELIECE_PUBLICKEY_SIZE 1357824
 
 #else
-#	error No McEliece implementation is defined, check common.h!
+#	error "The McEliece parameter set is invalid!"
 #endif
 
 /*!

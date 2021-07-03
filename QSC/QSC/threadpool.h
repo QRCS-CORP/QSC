@@ -11,7 +11,7 @@
 #	include <unistd.h>
 #	include <pthread>
 #else
-#	error your operating system is not supported!
+#	error "The operating system is not supported!"
 #endif
 
 #define QSC_THREADPOOL_THREADS_MAX 1024

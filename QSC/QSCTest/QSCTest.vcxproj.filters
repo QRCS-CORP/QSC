@@ -87,6 +87,9 @@
     <ClCompile Include="katparser.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
+    <ClCompile Include="ntru_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -148,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="katparser.h">
       <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ntru_test.h">
+      <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

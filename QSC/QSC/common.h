@@ -517,6 +517,33 @@
 //#define QSC_DILITHIUM_S5N256Q8380417K8
 
 
+/*** NTRU ***/
+
+/*!
+\def QSC_NTRU_S1HPS2048509
+* Implement the NTRU S1HPS2048509 parameter set
+*/
+//#define QSC_NTRU_S1HPS2048509
+
+/*!
+\def QSC_NTRU_HPSS32048677
+* Implement the NTRU HPSS32048677 parameter set
+*/
+#define QSC_NTRU_HPSS32048677
+
+/*!
+\def QSC_NTRU_S5HPS4096821
+* Implement the NTRU S5HPS4096821 parameter set
+*/
+//#define QSC_NTRU_S5HPS4096821
+
+/*!
+\def QSC_NTRU_S5HRSS701
+* Implement the NTRU S5HRSS701 parameter set
+*/
+//#define QSC_NTRU_S5HRSS701
+
+
 /*** SphincsPlus ***/
 
 /*!

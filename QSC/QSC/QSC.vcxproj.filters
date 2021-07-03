@@ -139,6 +139,12 @@
     <Filter Include="Source Files\KEX">
       <UniqueIdentifier>{df00b308-ab00-4318-b68c-ec8da659823e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\NTRU">
+      <UniqueIdentifier>{5a1608e6-5475-4341-94e9-15c40bb61bba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\NTRU">
+      <UniqueIdentifier>{325513a9-490c-4751-8022-e0f291a3ef5c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -315,6 +321,15 @@
     <ClInclude Include="sphincsplusbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus</Filter>
     </ClInclude>
+    <ClInclude Include="ntru.h">
+      <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
+    </ClInclude>
+    <ClInclude Include="ntrubase.h">
+      <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
+    </ClInclude>
+    <ClInclude Include="ntrubase_avx2.h">
+      <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -475,6 +490,15 @@
     </ClCompile>
     <ClCompile Include="sphincsplusbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus</Filter>
+    </ClCompile>
+    <ClCompile Include="ntru.c">
+      <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
+    </ClCompile>
+    <ClCompile Include="ntrubase.c">
+      <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
+    </ClCompile>
+    <ClCompile Include="ntrubase_avx2.c">
+      <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

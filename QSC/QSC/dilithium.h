@@ -128,7 +128,7 @@
 #	define QSC_DILITHIUM_SIGNATURE_SIZE 4595
 
 #else
-#	error No Dilithium implementation is defined, check common.h!
+#	error "The Dilithium parameter set is invalid!"
 #endif
 
 /*!

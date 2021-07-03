@@ -25,14 +25,14 @@
 #endif
 
 /**
-* \brief Test the first ten vectors of the NIST PQ Round 2 KAT tests
+* \brief Test the first ten vectors of the NIST PQ Round 3 KAT tests
 */
 bool qsctest_sphincsplus_kat_test();
 
 /**
 * \brief Test the public and private keys, ciphertext and shared key
-* for correctness against the NIST PQ Round 2 vectors.
-* tests the second vector in the NIST PQ Round 2, Kat file.
+* for correctness against the NIST PQ Round 3 vectors.
+* tests the second vector in the NIST PQ Round 3, Kat file.
 * \return Returns 0 for test success
 */
 bool qsctest_sphincsplus_operations_test();

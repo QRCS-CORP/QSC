@@ -181,6 +181,7 @@
     <ClCompile Include="kyber_test.c" />
     <ClCompile Include="mceliece_test.c" />
     <ClCompile Include="nistrng.c" />
+    <ClCompile Include="ntru_test.c" />
     <ClCompile Include="poly1305_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
@@ -204,6 +205,7 @@
     <ClInclude Include="kyber_test.h" />
     <ClInclude Include="mceliece_test.h" />
     <ClInclude Include="nistrng.h" />
+    <ClInclude Include="ntru_test.h" />
     <ClInclude Include="poly1305_test.h" />
     <ClInclude Include="rcs_test.h" />
     <ClInclude Include="aes.h" />

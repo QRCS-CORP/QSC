@@ -11,6 +11,7 @@
 #endif
 
 #include <stdio.h>
+#include <string.h>
 
 void qsc_consoleutils_colored_message(const char* message, qsc_console_font_color color)
 {
@@ -298,7 +299,7 @@ void qsc_consoleutils_print_safe(const char* input)
 {
 	assert(input != NULL);
 
-	if (input != NULL)
+	if (input != NULL && strlen(input) > 0)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		printf_s(input);

@@ -16,7 +16,6 @@
 
 /**
 * \brief Test the public and private keys, ciphertext and shared key
-* for correctness against the NIST PQ Round 2 vectors
 * \return Returns true for test success
 */
 bool qsctest_ecdh_kat_test();

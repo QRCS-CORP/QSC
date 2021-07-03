@@ -13,17 +13,15 @@
 
 #include "common.h"
 
-#define QSCTEST_KYBER_NTESTS 100
-
 /**
-* \brief Test the validity of a mutated cipher-text in a 100 round loop.
+* \brief Test the validity of a mutated cipher-text
 * \return Returns true for test success
 */
 bool qsctest_kyber_ciphertext_integrity();
 
 /**
 * \brief Test the public and private keys, ciphertext and shared key
-* for correctness against the NIST PQ Round 2 vectors
+* for correctness against the NIST PQ Round 3 vectors
 * \return Returns true for test success
 */
 bool qsctest_kyber_kat_test();

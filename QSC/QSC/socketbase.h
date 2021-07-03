@@ -62,7 +62,7 @@
 #	include <unistd.h>
 #	include <netpacket/packet.h>
 #else
-#	error the operating system is unsupported! 
+#	error "The operating system is not supported!"
 #endif
 
 /*!

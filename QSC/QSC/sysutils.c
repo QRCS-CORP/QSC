@@ -367,7 +367,7 @@ uint64_t qsc_sysutils_system_timestamp()
 	}
 
 #else
-#	error Time not available on this system!
+#	error "Time not available on this system!"
 #endif
 
 	return rtme;

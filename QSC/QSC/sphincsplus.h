@@ -147,7 +147,7 @@
 #	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 64
 
 #else
-#	error No SphincsPlus implementation is defined, check common.h!
+#	error "The SPHINCS+ parameter set is invalid!"
 #endif
 
 /*!

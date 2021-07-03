@@ -54,7 +54,7 @@
 #   define MCELIECE_SYND_BYTES ((MCELIECE_PK_NROWS + 7) / 8)
 #   define MCELIECE_GFMASK ((1 << MCELIECE_GFBITS) - 1)
 #else
-#	error No McEliece implementation is defined, check common.h!
+#	error "The McEliece parameter set is invalid!"
 #endif
 
 /* gf.c */
@@ -337,9 +337,11 @@ static gf bitrev(gf a)
 
 static void int32_minmax(int32_t* a, int32_t* b)
 {
-	int32_t ab = *b ^ *a;
-	int32_t c = *b - *a;
+	int32_t ab;
+	int32_t c;
 
+	ab = *b ^ *a;
+	c = *b - *a;
 	c ^= ab & (c ^ *b);
 	c >>= 31;
 	c &= ab;

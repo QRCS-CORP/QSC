@@ -95,7 +95,7 @@
 #	define QSC_ECDSA_PUBLICKEY_SIZE 32
 
 #else
-#	error No ECDSA implementation is defined, check common.h!
+#	error "The ECDSA parameter set is invalid!"
 #endif
 
 /*!

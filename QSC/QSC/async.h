@@ -47,7 +47,7 @@
 #	endif
 	typedef pthread_t qsc_thread;
 #else
-#	error your operating system is not supported!
+#	error "The operating system is not supported!""
 #endif
 
 /**

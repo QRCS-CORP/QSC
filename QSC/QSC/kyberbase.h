@@ -33,7 +33,7 @@
 #elif defined(QSC_KYBER_S6Q3329N256K5)
 #	define QSC_KYBER_K 5
 #else
-#	error No Kyber implementation is defined, check common.h!
+#	error "The Kyber parameter set is invalid!"
 #endif
 
 /*!
