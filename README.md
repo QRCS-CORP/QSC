@@ -17,6 +17,7 @@ The Round-2 versions of the NIST PQ asymmetric ciphers and signature schemes (wi
 * McEliece: The Niederreiter dual form of the McEliece public key crypto-system
 * Kyber: The Module-LWE Kyber public key crypto-system
 * ECDH: Elliptic Curve Diffie Hellman
+* NTRU: The NTRU asymmetric cipher
 
 ### Asymmetric Signature Schemes
 * Sphincs+: The Sphincs Plus asymmetric signature scheme
@@ -49,6 +50,8 @@ The Round-2 versions of the NIST PQ asymmetric ciphers and signature schemes (wi
 * RDP: The Intel RDRAND provider
 
 ### Features
+* Asynchronous threading
+* Dual IPv4/IPv6 synchronous and asynchronous networking stack
 * cpuid: tests available CPU feature sets
 * secmem: A secure locked-memory class
 * memutils: Intrinsics operations for common memory fuctions
