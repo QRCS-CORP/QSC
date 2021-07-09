@@ -19,9 +19,9 @@
 *
 * Implementation Details:
 * An implementation of the Dilithium asymmetric signature scheme
-* Written by John G. Underhill
+* Rewritten for Misra compliance and library integration by John G. Underhill
+* Contact: support@vtdev.com
 * Updated on January 20, 2020
-* Contact: support@vtdev.com 
 */
 
 /**
@@ -56,10 +56,11 @@
 * }
 * \endcode
 *
-* \remarks Based entirely on the C reference branch of SHINCS+; including base code, comments, and api. \n
-* The <a href="https://sphincs.org/data/sphincs+-specification.pdf">SPHINCS+</a>: specification. \n
-* Sphincs+ entry in the <a href="https://csrc.nist.gov/projects/post-quantum-cryptography/round-1-submissions">NIST PQ Round 1</a> repository.
-* Github source code: <a href="https://github.com/sphincs/sphincsplus">SHINCS+</a> code reference.
+* \remarks 
+* Based entirely on the C reference branch of Dilithium taken from the NIST Post Quantum Competition Round 3 submission. \n
+* The NIST Post Quantum Competition <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</a> Finalists. \n
+* The <a href="https://pq-crystals.org/dilithium/index.shtml">Dilithium</a> website. \n
+* The Dilithium <a href="https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf">Algorithm</a> Specification.
 */
 
 #ifndef QSC_DILITHIUM_H

@@ -7,10 +7,15 @@
 
 bool qsctest_sphincsplus_operations_test()
 {
-	uint8_t ksig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t msg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t kmsg[QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
+	/* note: test message size increase as the kat number increments, ex. 0=33, 1=66, 2=99...
+	   If testing other kats other than zero, make sure to increase the message size accordingly. */
+
+#define TEST_MESSAGE_LEN 33
+
+	uint8_t ksig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint8_t msg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint8_t kmsg[TEST_MESSAGE_LEN] = { 0 };
 	uint8_t kpk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	uint8_t ksk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
@@ -65,10 +70,10 @@ bool qsctest_sphincsplus_operations_test()
 	}
 
 	/* sign the message */
-	qsc_sphincsplus_sign(sig, &siglen, kmsg, QSCTEST_SPHINCSPLUS_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_sphincsplus_sign(sig, &siglen, kmsg, TEST_MESSAGE_LEN, sk, qsctest_nistrng_prng_generate);
 
 	/* compare the signature cipher-text to the expected output */
-	if (qsc_intutils_are_equal8(sig, ksig, QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0) != true)
+	if (qsc_intutils_are_equal8(sig, ksig, QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN) != true)
 	{
 		qsctest_print_safe("Failure! sphincsplus operations: signature does not align with the known answer! - SOT3 \n");
 		ret = false;
@@ -82,7 +87,7 @@ bool qsctest_sphincsplus_operations_test()
 	}
 
 	/* compare the two messages for equality */
-	if (qsc_intutils_are_equal8(msg, kmsg, QSCTEST_SPHINCSPLUS_MLEN0) != true)
+	if (qsc_intutils_are_equal8(msg, kmsg, TEST_MESSAGE_LEN) != true)
 	{
 		qsctest_print_safe("Failure! sphincsplus operations: message does not equal to the original! - SOT5 \n");
 		ret = false;
@@ -93,9 +98,9 @@ bool qsctest_sphincsplus_operations_test()
 
 bool qsctest_sphincsplus_privatekey_integrity()
 {
-	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
 	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t i;
@@ -117,7 +122,7 @@ bool qsctest_sphincsplus_privatekey_integrity()
 	}
 
 	/* process message and return signed message */
-	qsc_sphincsplus_sign(sig, &siglen, msg, QSCTEST_SPHINCSPLUS_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_sphincsplus_sign(sig, &siglen, msg, QSCTEST_SPHINCSPLUS_MLEN, sk, qsctest_nistrng_prng_generate);
 
 	/* verify signed message, if successful with altered public key, fail the test */
 	if (qsc_sphincsplus_verify(mout, &msglen, sig, siglen, pk) == true)
@@ -131,9 +136,9 @@ bool qsctest_sphincsplus_privatekey_integrity()
 
 bool qsctest_sphincsplus_publickey_integrity()
 {
-	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
 	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
@@ -151,7 +156,7 @@ bool qsctest_sphincsplus_publickey_integrity()
 	pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE - 1] ^= 1U;
 
 	/* process message and return signed message */
-	qsc_sphincsplus_sign(sig, &siglen, msg, QSCTEST_SPHINCSPLUS_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_sphincsplus_sign(sig, &siglen, msg, QSCTEST_SPHINCSPLUS_MLEN, sk, qsctest_nistrng_prng_generate);
 
 	/* verify signed message, if successful with altered public key, fail the test */
 	if (qsc_sphincsplus_verify(mout, &msglen, sig, siglen, pk) == true)
@@ -165,9 +170,9 @@ bool qsctest_sphincsplus_publickey_integrity()
 
 bool qsctest_sphincsplus_signature_integrity()
 {
-	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
 	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
@@ -182,7 +187,7 @@ bool qsctest_sphincsplus_signature_integrity()
 	qsc_sphincsplus_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* process message and return signed message */
-	qsc_sphincsplus_sign(sig, &siglen, msg, QSCTEST_SPHINCSPLUS_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_sphincsplus_sign(sig, &siglen, msg, QSCTEST_SPHINCSPLUS_MLEN, sk, qsctest_nistrng_prng_generate);
 
 	/* flip 1 bit in the signed message */
 	sig[siglen - 1] ^= 1U;
@@ -207,49 +212,42 @@ bool qsctest_sphincsplus_signature_integrity()
 
 bool qsctest_sphincsplus_stress_test()
 {
-	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
-	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
 	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
 
 	ret = true;
-	msglen = QSCTEST_SPHINCSPLUS_MLEN0;
-	siglen = QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0;
+	msglen = QSCTEST_SPHINCSPLUS_MLEN;
+	siglen = QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN;
 
 	/* generate the key-pair */
 	qsc_sphincsplus_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
-	for (i = 0; i < QSCTEST_SPHINCSPLUS_ITERATIONS; i++)
+	/* sign the message and return the signed version in sig */
+	qsc_sphincsplus_sign(sig, &siglen, msg, msglen, sk, qsctest_nistrng_prng_generate);
+
+	if (siglen != QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN)
 	{
-		/* sign the message and return the signed version in sig */
-		qsc_sphincsplus_sign(sig, &siglen, msg, msglen, sk, qsctest_nistrng_prng_generate);
+		qsctest_print_safe("Failure! sphincsplus stress: signature length is incorrect! - STT1 \n");
+		ret = false;
+	}
 
-		if (siglen != QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN0)
-		{
-			qsctest_print_safe("Failure! sphincsplus stress: signature length is incorrect! - STT1 \n");
-			ret = false;
-			break;
-		}
+	/* verify the signature in sig and copy msg to mout */
+	if (qsc_sphincsplus_verify(mout, &msglen, sig, siglen, pk) != true)
+	{
+		qsctest_print_safe("Failure! sphincsplus stress: message verification has failed! - STT2 \n");
+		ret = false;
+	}
 
-		/* verify the signature in sig and copy msg to mout */
-		if (qsc_sphincsplus_verify(mout, &msglen, sig, siglen, pk) != true)
-		{
-			qsctest_print_safe("Failure! sphincsplus stress: message verification has failed! - STT2 \n");
-			ret = false;
-			break;
-		}
-
-		if (msglen != QSCTEST_SPHINCSPLUS_MLEN0)
-		{
-			qsctest_print_safe("Failure! sphincsplus stress: message length is incorrect! - STT3 \n");
-			ret = false;
-			break;
-		}
+	if (msglen != QSCTEST_SPHINCSPLUS_MLEN)
+	{
+		qsctest_print_safe("Failure! sphincsplus stress: message length is incorrect! - STT3 \n");
+		ret = false;
 	}
 
 	return ret;

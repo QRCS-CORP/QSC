@@ -80,6 +80,118 @@ void qsctest_print_hex_quot(const uint8_t* input, size_t inputlen, size_t linele
 	}
 }
 
+void qsctest_print_hex_uint16(const uint16_t* input, size_t inputlen, size_t linelen)
+{
+	size_t i;
+
+	while (inputlen >= linelen)
+	{
+		for (i = 0; i < linelen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("0x%04X", input[i]);
+			printf_s("U, ");
+#else
+			printf("0x%04X", input[i]);
+			printf("U, ");
+#endif
+		}
+
+		input += linelen;
+		inputlen -= linelen;
+		qsctest_print_safe("\n");
+	}
+
+	if (inputlen != 0)
+	{
+		for (i = 0; i < inputlen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("0x%04X", input[i]);
+			printf_s("U, ");
+#else
+			printf("0x%04X", input[i]);
+			printf("U, ");
+#endif
+		}
+
+	}
+}
+
+void qsctest_print_hex_uint32(const uint32_t* input, size_t inputlen, size_t linelen)
+{
+	size_t i;
+
+	while (inputlen >= linelen)
+	{
+		for (i = 0; i < linelen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("0x%08lX", input[i]);
+			printf_s("UL, ");
+#else
+			printf("0x%08lX", input[i]);
+			printf("UL, ");
+#endif
+		}
+
+		input += linelen;
+		inputlen -= linelen;
+		qsctest_print_safe("\n");
+	}
+
+	if (inputlen != 0)
+	{
+		for (i = 0; i < inputlen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("0x%08lX", input[i]);
+			printf_s("UL, ");
+#else
+			printf("0x%08lX", input[i]);
+			printf("UL, ");
+#endif
+		}
+	}
+}
+
+void qsctest_print_hex_uint64(const uint64_t* input, size_t inputlen, size_t linelen)
+{
+	size_t i;
+
+	while (inputlen >= linelen)
+	{
+		for (i = 0; i < linelen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("0x%016llX", input[i]);
+			printf_s("ULL, ");
+#else
+			printf("0x%016llX", input[i]);
+			printf("ULL, ");
+#endif
+		}
+
+		input += linelen;
+		inputlen -= linelen;
+		qsctest_print_safe("\n");
+	}
+
+	if (inputlen != 0)
+	{
+		for (i = 0; i < inputlen; ++i)
+		{
+#if defined(_MSC_VER)
+			printf_s("0x%016llX", input[i]);
+			printf_s("ULL, ");
+#else
+			printf("0x%016llX", input[i]);
+			printf_s("ULL, ");
+#endif
+		}
+	}
+}
+
 void qsctest_print_hex(const uint8_t* input, size_t inputlen, size_t linelen)
 {
 	size_t i;

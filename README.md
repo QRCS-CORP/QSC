@@ -2,26 +2,28 @@
 
 ## Status
 
-QSC is a compact and self-contained post-quantum secure cryptographic library witten in C. It has been written to Misra secure coding standards, and has been designed to be easy to read, verify, and implement. The code is well structured, readable and commented, and thoroughly documented, and this solution contains a testing platform, which provides various test functions for every primitive contained in the library. 
+QSC is a compact and self-contained post-quantum secure cryptographic library witten in C. It has been written to MISRA secure coding standards, and has been designed to be easy to read, verify, and implement. The code is well structured, readable and commented, and thoroughly documented, and this solution contains a testing platform, which provides various test functions for every primitive contained in the library. 
 This library incorporates next-generation asymmetric and symmetric primitives, with a strong emphasis on true long-term security. The objective of this library is to provide a basis for future integration efforts, and as the foundation of a compact, high-security, post-quantum secure communications platform. This is currently a Windows/Intel library, however, much of the groundwork has been laid towards interoperability with different operating systems and hardware architectures (looking for volunteers). 
-Tested using the reference, AVX, AVX2, and AVX512 implementation.
-This implementation uses a base reference code, or AVX implementations of the ciphers. For best performance, set the project properties to the highest available SIMD instruction set supported by your CPU. AVX-512 instructions are fully supported in this implementation and offer the best performance profile.
+Tested using the reference, AVX, AVX2, and AVX512 implementations.
+This implementation uses a base reference code, or AVX/AVX2/AVX512 implementations of ciphers and cryptographic protocols. For best performance, set the project properties to the highest available SIMD instruction set supported by your CPU. AVX-512 instructions are fully supported in this implementation and offer the best performance profile.
 
 ## Version
-Version 1.0.0.5G
+Version 1.0.0.5H
 All asymmetric ciphers and signature schemes updated to NIST PQC Round 3
+Added the Falcon asymmetric signature scheme.
 
 ## Contains
 ### Asymmetric Ciphers
-The Round-2 versions of the NIST PQ asymmetric ciphers and signature schemes (will be updated to Round 3 versions in the fall).
+The Round-3 versions of the NIST PQC asymmetric ciphers and signature schemes.
 * McEliece: The Niederreiter dual form of the McEliece public key crypto-system
 * Kyber: The Module-LWE Kyber public key crypto-system
-* ECDH: Elliptic Curve Diffie Hellman
 * NTRU: The NTRU asymmetric cipher
+* ECDH: Elliptic Curve Diffie Hellman
 
 ### Asymmetric Signature Schemes
 * Sphincs+: The Sphincs Plus asymmetric signature scheme
 * Dilithium: the lattice based Dilithium asymmetric signature scheme
+* Falcon: The NTRU based  asymmetric signature scheme
 * ECDSA: Elliptic Curve Digital Signature Algorithm (ED25519)
 
 ### Symmetric ciphers
@@ -58,8 +60,8 @@ The Round-2 versions of the NIST PQ asymmetric ciphers and signature schemes (wi
 * AVX/AVX2/AVX512 intinsics integrated throughout
 
 ### Roadmap
+* ASM/SIMD integration and optimization
 * A post-quantum TLS 1.3 implementation
-* Migrartion of asymmetric primitives to NIST PQ round 3 versions
 
 ### License
 AGPLv3

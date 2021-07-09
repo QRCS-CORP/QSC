@@ -1096,25 +1096,22 @@ void qsctest_benchmark_aes_run()
 
 void qsctest_benchmark_chacha_run()
 {
-	qsctest_print_line("Running the CHACHA-128 performance benchmarks.");
-	chacha128_benchmark_test();
-
-	qsctest_print_line("Running the CHACHA-256 performance benchmarks.");
+	qsctest_print_line("Running the CHACHA-256 encryption only performance benchmarks.");
 	chacha256_benchmark_test();
 }
 
 void qsctest_benchmark_csx_run()
 {
-	qsctest_print_line("Running the CSX-512 performance benchmarks.");
+	qsctest_print_line("Running the CSX-512 encryption and authentication performance benchmarks.");
 	csx_benchmark_test();
 }
 
 void qsctest_benchmark_rcs_run()
 {
-	qsctest_print_line("Running the RCS-256 performance benchmarks.");
+	qsctest_print_line("Running the RCS-256 encryption and authentication performance benchmarks.");
 	rcs256_benchmark_test();
 
-	qsctest_print_line("Running the RCS-512 performance benchmarks.");
+	qsctest_print_line("Running the RCS-512 encryption and authentication performance benchmarks.");
 	rcs512_benchmark_test();
 }
 

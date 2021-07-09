@@ -19,9 +19,10 @@
 *
 * Implementation Details:
 * An implementation of the Sphincs+ asymmetric signature scheme
-* Written by John G. Underhill
+* Rewritten for Misra compliance and library integration by John G. Underhill
+* Contact: support@vtdev.com
 * Updated on January 20, 2020
-* Contact: support@vtdev.com */
+*/
 
 /**
 * \file sphincsplus.h
@@ -55,10 +56,10 @@
 * }
 * \endcode
 *
-* \remarks Based on the C reference branch of SHINCS+; including base code, comments, and api. \n
-* The <a href="https://sphincs.org/data/sphincs+-specification.pdf">SPHINCS+</a>: specification. \n
-* Sphincs+ entry in the <a href="https://csrc.nist.gov/projects/post-quantum-cryptography/round-1-submissions">NIST PQ Round 1</a> repository.
-* Github source code: <a href="https://github.com/sphincs/sphincsplus">SHINCS+</a> code reference.
+* Based entirely on the C reference branch of SPHINCS+ taken from the NIST Post Quantum Competition Round 3 submission. \n
+* The NIST Post Quantum Competition <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</a> Finalists. \n
+* The <a href="https://sphincs.org/">SPHINCS+</a> website. \n
+* The SPHINCS+ <a href="https://sphincs.org/data/sphincs+-specification.pdf">Algorithm</a> Specification. \n
 */
 
 #ifndef QSC_SPHINCSPLUS_H
@@ -127,7 +128,7 @@
 #	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 64
 
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERF)
-//256f: pk=64, sk=128, sd=96, sg=49856
+
 /*!
 * \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
 * \brief The byte size of the signature array

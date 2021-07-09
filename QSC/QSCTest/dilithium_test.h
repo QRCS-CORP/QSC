@@ -13,21 +13,7 @@
 
 #include "common.h"
 
-#define QSCTEST_DILITHIUM_MLEN0 33
-#define QSCTEST_DILITHIUM_MLEN1 66
-#define QSCTEST_DILITHIUM_MLEN2 99
-#define QSCTEST_DILITHIUM_MLEN3 132
-
-#ifdef _DEBUG
-#	define QSCTEST_DILITHIUM_ITERATIONS 1
-#else
-#	define QSCTEST_DILITHIUM_ITERATIONS 10
-#endif
-
-/**
-* \brief Test the first ten vectors of the NIST PQ Round 3 KAT tests
-*/
-bool qsctest_dilithium_kat_test();
+#define QSCTEST_DILITHIUM_MLEN 33
 
 /**
 * \brief Test the public and private keys, ciphertext and shared key

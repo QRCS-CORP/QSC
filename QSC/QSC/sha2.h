@@ -139,6 +139,12 @@
 #define QSC_SHA2_256_HASH_SIZE 32
 
 /*!
+* \def QSC_SHA2_384_HASH_SIZE
+* \brief The SHA2-384 hash size in bytes
+*/
+#define QSC_SHA2_384_HASH_SIZE 48
+
+/*!
 * \def QSC_SHA2_512_HASH_SIZE
 * \brief The SHA2-512 hash size in bytes
 */
@@ -149,6 +155,12 @@
 * \brief The SHA-256 byte absorption rate
 */
 #define QSC_SHA2_256_RATE 64
+
+/*!
+* \def QSC_SHA2_384_RATE
+* \brief The SHA-384 byte absorption rate
+*/
+#define QSC_SHA2_384_RATE 128
 
 /*!
 * \def QSC_SHA2_512_RATE
@@ -240,6 +252,75 @@ QSC_EXPORT_API void qsc_sha256_permute(uint32_t* output, const uint8_t* input);
 * \param msglen: The number of message bytes to process
 */
 QSC_EXPORT_API void qsc_sha256_update(qsc_sha256_state* ctx, const uint8_t* message, size_t msglen);
+
+/* sha2-384 */
+
+/*!
+* \struct qsc_sha512_state
+* \brief The SHA2-512 digest state array
+*/
+QSC_EXPORT_API typedef struct
+{
+	uint64_t state[QSC_SHA2_STATE_SIZE];
+	uint64_t t[2];
+	uint8_t buffer[QSC_SHA2_384_RATE];
+	size_t position;
+} qsc_sha384_state;
+
+/**
+* \brief Process a message with SHA2-384 and returns the hash code in the output byte array.
+* Short form api: processes the entire message and computes the hash code with a single call.
+*
+* \warning The output array must be at least 48 bytes in length.
+*
+* \param output: The output byte array; receives the hash code
+* \param message: [const] The message input byte array
+* \param msglen The number of message bytes to process
+*/
+QSC_EXPORT_API void qsc_sha384_compute(uint8_t* output, const uint8_t* message, size_t msglen);
+
+/**
+* \brief Dispose of the SHA2-384 state.
+* This function destroys the internal state of the cipher.
+*
+* \param ctx: [struct] The cipher state structure
+*/
+QSC_EXPORT_API void qsc_sha384_dispose(qsc_sha384_state* ctx);
+
+/**
+* \brief Finalize the message state and returns the SHA2-384 hash value in output.
+* Long form api: must be used in conjunction with the initialize and update functions.
+* Produces a 48 byte output code.
+*
+* \warning The output array must be sized correctly.
+* Finalizes the message state, can not be used in consecutive calls.
+* State must be initialized by the caller.
+*
+* \param ctx: [struct] The function state; must be initialized
+* \param output: The output byte array; receives the hash code
+*/
+QSC_EXPORT_API void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output);
+
+/**
+* \brief Initializes a SHA2-384 state structure, must be called before message processing.
+* Long form api: must be used in conjunction with the update and finalize functions.
+*
+* \param ctx: [struct] The function state
+*/
+QSC_EXPORT_API void qsc_sha384_initialize(qsc_sha384_state* ctx);
+
+/**
+* \brief Update SHA2-384 with blocks of input.
+* Long form api: must be used in conjunction with the initialize and finalize functions.
+* Absorbs a length of input into the hash function.
+*
+* \warning State must be initialized by the caller.
+*
+* \param ctx: [struct] The function state
+* \param message: [const] The input message byte array
+* \param msglen: The number of message bytes to process
+*/
+QSC_EXPORT_API void qsc_sha384_update(qsc_sha384_state* ctx, const uint8_t* message, size_t msglen);
 
 /* sha2-512 */
 

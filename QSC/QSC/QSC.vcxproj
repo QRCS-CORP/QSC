@@ -159,6 +159,9 @@
     <ClInclude Include="ecdsabase.h" />
     <ClInclude Include="encoding.h" />
     <ClInclude Include="event.h" />
+    <ClInclude Include="falcon.h" />
+    <ClInclude Include="falconbase.h" />
+    <ClInclude Include="falconbase_avx2.h" />
     <ClInclude Include="fileutils.h" />
     <ClInclude Include="folderutils.h" />
     <ClInclude Include="hcg.h" />
@@ -220,6 +223,9 @@
     <ClCompile Include="ecdsa.c" />
     <ClCompile Include="ecdsabase.c" />
     <ClCompile Include="encoding.c" />
+    <ClCompile Include="falcon.c" />
+    <ClCompile Include="falconbase.c" />
+    <ClCompile Include="falconbase_avx2.c" />
     <ClCompile Include="fileutils.c" />
     <ClCompile Include="folderutils.c" />
     <ClCompile Include="hcg.c" />

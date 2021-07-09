@@ -19,9 +19,9 @@
 *
 * Implementation Details:
 * An implementation of the Elliptic Curve Diffie-Hellman asymmetric cipher
-* Written by John G. Underhill
+* Rewritten for Misra compliance and library integration by John G. Underhill
+* Contact: support@vtdev.com
 * Updated on January 20, 2020
-* Contact: support@vtdev.com 
 */
 
 /**
@@ -50,14 +50,9 @@
 *
 * \remarks
 * Reference implementations:
-* LibSodium by Frank Denis
-* https://github.com/jedisct1/libsodium
-*
-* curve25519-donna by Adam Langley
-* https://github.com/agl/curve25519-donna
-*
-* NaCI by Daniel J. Bernstein, Tanja Lange, Peter Schwabe
-* https://nacl.cr.yp.to
+* LibSodium by Frank Denis <a href="https://github.com/jedisct1/libsodium" /a>
+* curve25519-donna by Adam Langley <a href="https://github.com/agl/curve25519-donna" /a>
+* NaCI by Daniel J. Bernstein, Tanja Lange, Peter Schwabe <a href="https://nacl.cr.yp.to" /a>
 *
 * Rewritten for Misra compliance and optimizations by John G. Underhill
 * September 21, 2020

@@ -145,6 +145,12 @@
     <Filter Include="Source Files\Asymmetric\Cipher\NTRU">
       <UniqueIdentifier>{325513a9-490c-4751-8022-e0f291a3ef5c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\Falcon">
+      <UniqueIdentifier>{b91f9597-6441-4580-b253-476e3c1caf77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\Falcon">
+      <UniqueIdentifier>{b3592f05-c821-4a76-9fb4-ba151faba479}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -330,6 +336,15 @@
     <ClInclude Include="ntrubase_avx2.h">
       <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
     </ClInclude>
+    <ClInclude Include="falcon.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
+    </ClInclude>
+    <ClInclude Include="falconbase.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
+    </ClInclude>
+    <ClInclude Include="falconbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -499,6 +514,15 @@
     </ClCompile>
     <ClCompile Include="ntrubase_avx2.c">
       <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
+    </ClCompile>
+    <ClCompile Include="falcon.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
+    </ClCompile>
+    <ClCompile Include="falconbase.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
+    </ClCompile>
+    <ClCompile Include="falconbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

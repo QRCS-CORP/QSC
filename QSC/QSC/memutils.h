@@ -78,57 +78,12 @@ QSC_EXPORT_API void* qsc_memutils_aligned_alloc(int32_t align, size_t length);
 QSC_EXPORT_API void qsc_memutils_aligned_free(void* block);
 
 /**
-* \brief Erase 16 bytes of memory SIMD instructions
-*
-* \param output: A pointer to the memory block to erase
-*/
-QSC_EXPORT_API void qsc_memutils_clear128(uint8_t* output);
-
-/**
-* \brief Erase 32 bytes of memory using SIMD instructions
-*
-* \param output: A pointer to the memory block to erase
-*/
-QSC_EXPORT_API void qsc_memutils_clear256(uint8_t* output);
-
-/**
-* \brief Erase 64 bytes of memory using SIMD instructions
-*
-* \param output: A pointer to the memory block to erase
-*/
-QSC_EXPORT_API void qsc_memutils_clear512(uint8_t* output);
-
-/**
 * \brief Erase a block of memory
 *
 * \param output: A pointer to the memory block to erase
 * \param length: The number of bytes to erase
 */
-QSC_EXPORT_API void qsc_memutils_clear(uint8_t* output, size_t length);
-
-/**
-* \brief Copy 16 bytes of memory using SIMD instructions
-*
-* \param input: A pointer to the input memory block
-* \param output: A pointer to the output memory block
-*/
-QSC_EXPORT_API void qsc_memutils_copy128(const uint8_t* input, uint8_t* output);
-
-/**
-* \brief Copy 32 bytes of memory using SIMD instructions
-*
-* \param input: A pointer to the input memory block
-* \param output: A pointer to the output memory block
-*/
-QSC_EXPORT_API void qsc_memutils_copy256(const uint8_t* input, uint8_t* output);
-
-/**
-* \brief Copy 64 bytes of memory using SIMD instructions
-*
-* \param input: A pointer to the input memory block
-* \param output: A pointer to the output memory block
-*/
-QSC_EXPORT_API void qsc_memutils_copy256(const uint8_t* input, uint8_t* output);
+QSC_EXPORT_API void qsc_memutils_clear(void* output, size_t length);
 
 /**
 * \brief Copy a block of memory
@@ -137,7 +92,7 @@ QSC_EXPORT_API void qsc_memutils_copy256(const uint8_t* input, uint8_t* output);
 * \param input: A pointer to the source array
 * \param length: The number of bytes to copy
 */
-QSC_EXPORT_API void qsc_memutils_copy(uint8_t* output, const uint8_t* input, size_t length);
+QSC_EXPORT_API void qsc_memutils_copy(void* output, const void* input, size_t length);
 
 /**
 * \brief Set a block of memory to a value
@@ -146,7 +101,7 @@ QSC_EXPORT_API void qsc_memutils_copy(uint8_t* output, const uint8_t* input, siz
 * \param length: The number of bytes to change
 * \param value: The value to set each byte
 */
-QSC_EXPORT_API void qsc_memutils_setvalue(uint8_t* output, size_t length, uint8_t value);
+QSC_EXPORT_API void qsc_memutils_setvalue(void* output, size_t length, uint8_t value);
 
 /**
 * \brief Bitwise XOR a block of memory

@@ -72,6 +72,17 @@ bool qsctest_hmac_512_kat();
 bool qsctest_sha2_256_kat();
 
 /**
+* \brief Tests the 384-bit version of the SHA2 message digest for correct operation,
+* using selected vectors from the NIST SHA2 official kat file.
+*
+* \return Returns true for success
+*
+* \remarks <b>Test References:</b> \n
+* KAT: <a href="https://www.di-mgt.com.au/sha_testvectors.html">SHA384</a>
+*/
+bool qsctest_sha2_384_kat();
+
+/**
 * \brief Tests the 512-bit version of the SHA2 message digest for correct operation,
 * using selected vectors from the NIST SHA2 official kat file.
 *

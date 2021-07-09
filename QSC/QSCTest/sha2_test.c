@@ -529,6 +529,126 @@ bool qsctest_sha2_256_kat()
 	return status;
 }
 
+bool qsctest_sha2_384_kat()
+{
+	uint8_t exp0[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	uint8_t exp1[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	uint8_t exp2[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	uint8_t exp3[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	uint8_t msg0[1] = { 0 };
+	uint8_t msg1[3] = { 0 };
+	uint8_t msg2[56] = { 0 };
+	uint8_t msg3[112] = { 0 };
+	uint8_t otp[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	qsc_sha384_state state;
+	bool status;
+
+	qsctest_hex_to_bin("38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA"
+		"274EDEBFE76F65FBD51AD2F14898B95B", exp0, sizeof(exp0));
+	qsctest_hex_to_bin("CB00753F45A35E8BB5A03D699AC65007272C32AB0EDED1631A8B605A43FF5BED"
+		"8086072BA1E7CC2358BAECA134C825A7", exp1, sizeof(exp1));
+	qsctest_hex_to_bin("3391FDDDFC8DC7393707A65B1B4709397CF8B1D162AF05ABFE8F450DE5F36BC6"
+		"B0455A8520BC4E6F5FE95B1FE3C8452B", exp2, sizeof(exp2));
+	qsctest_hex_to_bin("09330C33F71147E83D192FC782CD1B4753111B173B3B05D22FA08086E3B0F712"
+		"FCC7C71A557E2DB966C3E9FA91746039", exp3, sizeof(exp3));
+
+	qsctest_hex_to_bin("00", msg0, sizeof(msg0));
+	qsctest_hex_to_bin("616263", msg1, sizeof(msg1));
+	qsctest_hex_to_bin("6162636462636465636465666465666765666768666768696768696A68696A6B"
+		"696A6B6C6A6B6C6D6B6C6D6E6C6D6E6F6D6E6F706E6F7071", msg2, sizeof(msg2));
+	qsctest_hex_to_bin("61626364656667686263646566676869636465666768696A6465666768696A6B"
+		"65666768696A6B6C666768696A6B6C6D6768696A6B6C6D6E68696A6B6C6D6E6F"
+		"696A6B6C6D6E6F706A6B6C6D6E6F70716B6C6D6E6F7071726C6D6E6F70717273"
+		"6D6E6F70717273746E6F707172737475", msg3, sizeof(msg3));
+
+	status = true;
+
+	/* test compact api */
+
+	qsc_sha384_compute(otp, msg0, 0);
+
+	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK1 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_sha384_compute(otp, msg1, sizeof(msg1));
+
+	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK2 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_sha384_compute(otp, msg2, sizeof(msg2));
+
+	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK3 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_sha384_compute(otp, msg3, sizeof(msg3));
+
+	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK4 \n");
+		status = false;
+	}
+
+	/* test long-form api */
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_sha384_initialize(&state);
+	qsc_sha384_update(&state, msg0, 0);
+	qsc_sha384_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp0, sizeof(exp0)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK5 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_sha384_initialize(&state);
+	qsc_sha384_update(&state, msg1, sizeof(msg1));
+	qsc_sha384_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp1, sizeof(exp1)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK6 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_sha384_initialize(&state);
+	qsc_sha384_update(&state, msg2, sizeof(msg2));
+	qsc_sha384_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp2, sizeof(exp2)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK7 \n");
+		status = false;
+	}
+
+	qsc_intutils_clear8(otp, sizeof(otp));
+	qsc_sha384_initialize(&state);
+	qsc_sha384_update(&state, msg3, sizeof(msg3));
+	qsc_sha384_finalize(&state, otp);
+
+	if (qsc_intutils_are_equal8(otp, exp3, sizeof(exp3)) != true)
+	{
+		qsctest_print_safe("Failure! sha2_384_kat: output does not match the known answer -SK8 \n");
+		status = false;
+	}
+
+	return status;
+}
+
 bool qsctest_sha2_512_kat()
 {
 	uint8_t exp0[QSC_SHA2_512_HASH_SIZE] = { 0 };
@@ -658,6 +778,15 @@ void qsctest_sha2_run()
 	else
 	{
 		qsctest_print_safe("Failure! Failed the SHA2-256 KAT test. \n");
+	}
+
+	if (qsctest_sha2_384_kat() == true)
+	{
+		qsctest_print_safe("Success! Passed the SHA2-384 KAT test. \n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed the SHA2-384 KAT test. \n");
 	}
 
 	if (qsctest_sha2_512_kat() == true)

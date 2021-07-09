@@ -177,6 +177,7 @@
     <ClCompile Include="dilithium_test.c" />
     <ClCompile Include="ecdh_test.c" />
     <ClCompile Include="ecdsa_test.c" />
+    <ClCompile Include="falcon_test.c" />
     <ClCompile Include="katparser.c" />
     <ClCompile Include="kyber_test.c" />
     <ClCompile Include="mceliece_test.c" />
@@ -201,6 +202,7 @@
     <ClInclude Include="dilithium_test.h" />
     <ClInclude Include="ecdh_test.h" />
     <ClInclude Include="ecdsa_test.h" />
+    <ClInclude Include="falcon_test.h" />
     <ClInclude Include="katparser.h" />
     <ClInclude Include="kyber_test.h" />
     <ClInclude Include="mceliece_test.h" />

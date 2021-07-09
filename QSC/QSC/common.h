@@ -217,6 +217,22 @@
 #	endif
 #endif
 
+#if !defined(QSC_ALIGN)
+#	if defined(__GNUC__) || defined(__clang__)
+#		define QSC_ALIGN(x)  __attribute__((aligned(x)))
+#	elif defined(_MSC_VER)
+#		define QSC_ALIGN(x)  __declspec(align(x))
+#	else
+#		define QSC_ALIGN(x)
+#	endif
+#endif
+
+#if defined _MSC_VER && _MSC_VER
+#	ifndef restrict
+#		define restrict   __restrict
+#	endif
+#endif
+
 #if !defined(__GNUC__)
 #	if defined(__attribute__)
 #		undef __attribute__
@@ -438,6 +454,7 @@
 */
 //#define QSC_KECCAK_UNROLLED_PERMUTATION
 
+
 /*** McEliece ***/
 
 /*!
@@ -541,7 +558,21 @@
 \def QSC_NTRU_S5HRSS701
 * Implement the NTRU S5HRSS701 parameter set
 */
-//#define QSC_NTRU_S5HRSS701
+
+
+/*** Falcon ***/
+
+/*!
+\def QSC_FALCON_S3SHAKE256F512
+* Implement the Falcon S3SHAKE256F512 parameter set
+*/
+//#define QSC_FALCON_S3SHAKE256F512
+
+/*!
+\def QSC_FALCON_S5SHAKE256F1024
+* Implement the Falcon S5SHAKE256F1024 parameter set
+*/
+#define QSC_FALCON_S5SHAKE256F1024
 
 
 /*** SphincsPlus ***/

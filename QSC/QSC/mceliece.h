@@ -19,9 +19,9 @@
 *
 * Implementation Details:
 * An implementation of the McEliece asymmetric cipher
-* Written by John G. Underhill
+* Rewritten for Misra compliance and library integration by John G. Underhill
+* Contact: support@vtdev.com
 * Updated on January 20, 2020
-* Contact: support@vtdev.com 
 */
 
 /**
@@ -58,10 +58,11 @@
 * Classic McEliece is a KEM designed for IND-CCA2 security at a very high security level, even against quantum computers. \n
 * The KEM is built conservatively from a PKE designed for OW-CPA security, namely Niederreiter's dual version of McEliece's PKE using binary Goppa codes. \n
 * Every level of the construction is designed so that future cryptographic auditors can be confident in the long-term security of post-quantum public-key encryption. \n
-* Based on the NIST PQ, SUPERCOP C reference branch of McEliece; including base code, and comments. \n
-* McEliece NIST PQ Round 2: <a href="https://classic.mceliece.org/nist/mceliece-20171129.pdf">McEliece</a> conservative code-based cryptography. \n
-* Source code: <a href="https://bench.cr.yp.to/supercop.html">SUPERCOP</a> McEliece implementation. \n
-* The authors: <a href="https://classic.mceliece.org/">McEliece website</a>. \n
+*
+* Based entirely on the C reference branch of Dilithium taken from the NIST Post Quantum Competition Round 3 submission. \n
+* The NIST Post Quantum Competition <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</a> Finalists. \n
+* The <a href="https://classic.mceliece.org/">McEliece</a> website. \n
+* The McEliece <a href="https://classic.mceliece.org/nist/mceliece-20201010.pdf">Algorithm</a> Specification. \n
 * Authors: Daniel J. Bernstein, Tung Chou, Tanja Lange, and Peter Schwabe. \n
 * Updated by John Underhill, June 28 2021.
 */

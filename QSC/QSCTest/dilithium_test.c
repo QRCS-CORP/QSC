@@ -8,15 +8,20 @@
 
 bool qsctest_dilithium_operations_test()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t kmsg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	/* note: test message size increase as the kat number increments, ex. 0=33, 1=66, 2=99...
+	   If testing other kats other than zero, make sure to increase the message size accordingly. */
+
+#define TEST_MESSAGE_LEN 33
+
+	uint8_t msg[TEST_MESSAGE_LEN] = { 0 };
+	uint8_t kmsg[TEST_MESSAGE_LEN] = { 0 };
 	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	uint8_t kpk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t ksk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t ksig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint8_t ksig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
 	size_t msglen;
 	size_t pklen;
 	size_t seedlen;
@@ -64,10 +69,10 @@ bool qsctest_dilithium_operations_test()
 	}
 
 	/* sign the message */
-	qsc_dilithium_sign(sig, &siglen, kmsg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_dilithium_sign(sig, &siglen, kmsg, TEST_MESSAGE_LEN, sk, qsctest_nistrng_prng_generate);
 
 	/* compare the signature cipher-text to the expected output */
-	if (qsc_intutils_are_equal8(sig, ksig, QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0) != true)
+	if (qsc_intutils_are_equal8(sig, ksig, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN) != true)
 	{
 		qsctest_print_safe("Failure! dilithium operations: ciphertext does not align with the known answer -DOT3 \n");
 		ret = false;
@@ -81,7 +86,7 @@ bool qsctest_dilithium_operations_test()
 	}
 
 	/* compare the two messages for equality */
-	if (qsc_intutils_are_equal8(msg, kmsg, QSCTEST_DILITHIUM_MLEN0) != true)
+	if (qsc_intutils_are_equal8(msg, kmsg, TEST_MESSAGE_LEN) != true)
 	{
 		qsctest_print_safe("Failure! dilithium operations: message does not equal to the original -DOT5 \n");
 		ret = false;
@@ -92,10 +97,10 @@ bool qsctest_dilithium_operations_test()
 
 bool qsctest_dilithium_privatekey_integrity()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	size_t i;
@@ -119,7 +124,7 @@ bool qsctest_dilithium_privatekey_integrity()
 	}
 
 	/* process message and return signed message */
-	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN, sk, qsctest_nistrng_prng_generate);
 
 	/* verify signed message, if successful with altered public key, fail the test */
 	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
@@ -133,10 +138,10 @@ bool qsctest_dilithium_privatekey_integrity()
 
 bool qsctest_dilithium_publickey_integrity()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	size_t i;
@@ -161,7 +166,7 @@ bool qsctest_dilithium_publickey_integrity()
 	}
 
 	/* process message and return signed message */
-	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN, sk, qsctest_nistrng_prng_generate);
 
 	/* verify signed message, if successful with altered public key, fail the test */
 	if (qsc_dilithium_verify(mout, &msglen, sig, siglen, pk) == true)
@@ -175,10 +180,10 @@ bool qsctest_dilithium_publickey_integrity()
 
 bool qsctest_dilithium_signature_integrity()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
@@ -195,7 +200,7 @@ bool qsctest_dilithium_signature_integrity()
 	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* process message and return signed message */
-	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN0, sk, qsctest_nistrng_prng_generate);
+	qsc_dilithium_sign(sig, &siglen, msg, QSCTEST_DILITHIUM_MLEN, sk, qsctest_nistrng_prng_generate);
 
 	/* flip 1 bit in the signed message */
 	sig[siglen - 1] ^= 1U;
@@ -221,9 +226,9 @@ bool qsctest_dilithium_signature_integrity()
 
 bool qsctest_dilithium_stress_test()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0] = { 0 };
+	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
@@ -232,8 +237,8 @@ bool qsctest_dilithium_stress_test()
 	bool ret;
 
 	ret = true;
-	msglen = QSCTEST_DILITHIUM_MLEN0;
-	siglen = QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0;
+	msglen = QSCTEST_DILITHIUM_MLEN;
+	siglen = QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN;
 
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
@@ -244,7 +249,7 @@ bool qsctest_dilithium_stress_test()
 	/* sign the message and return the signed version in sig */
 	qsc_dilithium_sign(sig, &siglen, msg, msglen, sk, qsctest_nistrng_prng_generate);
 
-	if (siglen != QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN0)
+	if (siglen != QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN)
 	{
 		qsctest_print_safe("Failure! dilithium stress: signature length is incorrect -DST1 \n");
 		ret = false;
@@ -257,7 +262,7 @@ bool qsctest_dilithium_stress_test()
 		ret = false;
 	}
 
-	if (msglen != QSCTEST_DILITHIUM_MLEN0)
+	if (msglen != QSCTEST_DILITHIUM_MLEN)
 	{
 		qsctest_print_safe("Failure! dilithium stress: message length is incorrect -DST3 \n");
 		ret = false;

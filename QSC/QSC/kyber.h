@@ -19,9 +19,9 @@
 *
 * Implementation Details:
 * An implementation of the Kyber asymmetric cipher
-* Written by John G. Underhill
+* Rewritten for Misra compliance and library integration by John G. Underhill
+* Contact: support@vtdev.com
 * Updated on January 20, 2020
-* Contact: support@vtdev.com 
 */
 
 /**
@@ -56,14 +56,14 @@
 *
 * \remarks 
 * Based on the C reference branch of PQ-Crystals Kyber; including base code, comments, and api. \n
-* 
 * Removed the K=2 parameter, and added a K=5. The NIST '512' parameter has fallen below the threshhold
-* required by NIST PQ S1 minimum, regardless 'tweaks' to the SVP hardness metric the authors would contend, 
-* and should be considered a toy parameter set, unsuitable for real-world use.
-* The new K5 parameter may have a better chance of long-term security, with only a small increase in cost.
+* required by NIST PQ S1 minimum. \n
+* The new K5 parameter may have a better chance of long-term security, with only a small increase in cost. \n
 * 
-* PQ-Crystals <a href="https://github.com/pq-crystals/kyber">Kyber</a>. \n
-* CRYSTALS - Kyber: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">a CCA-secure module-lattice-based KEM</a>. \n
+* Based entirely on the C reference branch of Dilithium taken from the NIST Post Quantum Competition Round 3 submission. \n
+* The NIST Post Quantum Competition <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</a> Finalists. \n
+* The <a href="https://pq-crystals.org/kyber/index.shtml">Kyber</a> website. \n
+* The Kyber <a href="https://pq-crystals.org/kyber/data/kyber-specification-round3-20210131.pdf">Algorithm</a> Specification. \n
 */
 
 #ifndef QSC_KYBER_H

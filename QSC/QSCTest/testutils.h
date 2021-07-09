@@ -25,6 +25,33 @@ void qsctest_get_wait();
 void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 
 /**
+* \brief Convert a uint16 array to a hexidecimal array, delineated with commas, and print to the console
+*
+* \param input: the uint16 array
+* \param inputlen: the number of bytes to process
+* \param linelen: the length of output to print, before starting a new line
+*/
+void qsctest_print_hex_uint16(const uint16_t* input, size_t inputlen, size_t linelen);
+
+/**
+* \brief Convert a uint32 array to a hexidecimal array, delineated with commas, and print to the console
+*
+* \param input: the uint32 array
+* \param inputlen: the number of bytes to process
+* \param linelen: the length of output to print, before starting a new line
+*/
+void qsctest_print_hex_uint32(const uint32_t* input, size_t inputlen, size_t linelen);
+
+/**
+* \brief Convert a uint64 array to a hexidecimal array, delineated with commas, and print to the console
+*
+* \param input: the uint64 array
+* \param inputlen: the number of bytes to process
+* \param linelen: the length of output to print, before starting a new line
+*/
+void qsctest_print_hex_uint64(const uint64_t* input, size_t inputlen, size_t linelen);
+
+/**
 * \brief Convert a binary array to a hexidecimal string, add quotation marks, and print to the console
 *
 * \param input: the binary array

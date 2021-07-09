@@ -70,8 +70,8 @@
 * Team Keccak: Specifications summary https://keccak.team/keccak_specs_summary.html
 */
 
-#ifndef QSC_BCG_H
-#define QSC_BCG_H
+#ifndef QSC_CSG_H
+#define QSC_CSG_H
 
 #include "common.h"
 #include "sha3.h"
@@ -96,12 +96,12 @@ QSC_EXPORT_API typedef struct
 } qsc_csg_state;
 
 /**
-* \brief Dispose of the CSG cipher state.
+* \brief Dispose of the drbg state
 *
 * \warning The dispose function must be called when disposing of the cipher.
 * This function destroys the internal state of the cipher.
 *
-* \param ctx: [struct] The cipher state structure
+* \param ctx: [struct] The drbg state structure
 */
 QSC_EXPORT_API void qsc_csg_dispose(qsc_csg_state* ctx);
 

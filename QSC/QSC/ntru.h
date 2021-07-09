@@ -19,9 +19,9 @@
 *
 * Implementation Details:
 * An implementation of the NTRU asymmetric cipher
-* Written by John G. Underhill
-* Updated on July 5, 2021
+* Rewritten for Misra compliance and library integration by John G. Underhill
 * Contact: support@vtdev.com
+* Updated on July 5, 2021
 */
 
 /**
@@ -55,9 +55,9 @@
 *
 * \remarks
 * Based on the C reference branch of NIST PQC Round 3 submission; including base code, comments, and api. \n
-*
+* The NIST Post Quantum Competition <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</a> Finalists. \n
 * NIST PQC Round 3: <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">NTRU</a>. \n
-* NTRU: <a href="https://ntru.org/f/ntru-20190330.pdf">Algorithm Specifications.</a>. \n
+* The NTRU <a href="https://ntru.org/f/ntru-20190330.pdf">Algorithm.</a> Specifications. \n
 */
 
 #ifndef QSC_NTRU_H
