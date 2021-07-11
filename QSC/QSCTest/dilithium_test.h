@@ -17,8 +17,8 @@
 
 /**
 * \brief Test the public and private keys, ciphertext and shared key
-* for correctness against the NIST PQ Round 3 vectors.
-* tests the second vector in the NIST PQ Round 3, Kat file.
+* for correctness against the NIST PQC Round 3 vectors.
+* tests the second vector in the NIST PQC Round 3, Kat file.
 * \return Returns true for test success
 */
 bool qsctest_dilithium_operations_test();

@@ -47,7 +47,7 @@ bool qsctest_sphincsplus_operations_test()
 #	error The parameter set is invalid!
 #endif
 
-	/* NIST PQ Round 3 KATs */
+	/* NIST PQC Round 3 KATs */
 	parse_nist_signature_kat(path, seed, &seedlen, kmsg, &msglen, kpk, &pklen, ksk, &sklen, ksig, &siglen, 0);
 
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);

@@ -1,7 +1,7 @@
 #include "common.h"
 
 /**
-* \brief Extract a set of values from a NIST PQ asymmetric signature scheme KAT file
+* \brief Extract a set of values from a NIST PQC asymmetric signature scheme KAT file
 *
 * \param path: The KAT file relative path
 * \param seed: The rng seed
@@ -20,7 +20,7 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 	uint8_t* pk, size_t* pklen, uint8_t* sk, size_t* sklen, uint8_t* sm, size_t* smlen, uint32_t setnum);
 
 /**
-* \brief Extract a set of values from a NIST PQ asymmetric cipher KAT file
+* \brief Extract a set of values from a NIST PQC asymmetric cipher KAT file
 *
 * \param path: The KAT file relative path
 * \param seed: The rng seed

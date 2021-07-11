@@ -91,7 +91,7 @@ bool qsctest_ntru_kat_test()
 #	error The parameter set is invalid!
 #endif
 
-	/* NIST PQ Round 3 KATs */
+	/* NIST PQC Round 3 KATs */
 	parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, 0);
 
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);

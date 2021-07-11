@@ -240,14 +240,14 @@
 #	define __attribute__(a)
 #endif
 
-// 128 bit unsigned integer support
+// 128 bit uint32_t integer support
 #if defined(__SIZEOF_INT128__) && defined(QSC_SYSTEM_IS_X64) && !defined(__xlc__)
 #	define QSC_SYSTEM_NATIVE_UINT128
 	// Prefer TI mode over __int128 as GCC rejects the latter in pedantic mode
 #	if defined(__GNUG__)
 		typedef uint32_t uint128_t __attribute__((mode(TI)));
 #	else
-		typedef unsigned __int128 uint128_t;
+		typedef uint32_t __int128 uint128_t;
 #	endif
 #endif
 
@@ -566,13 +566,13 @@
 \def QSC_FALCON_S3SHAKE256F512
 * Implement the Falcon S3SHAKE256F512 parameter set
 */
-//#define QSC_FALCON_S3SHAKE256F512
+#define QSC_FALCON_S3SHAKE256F512
 
 /*!
 \def QSC_FALCON_S5SHAKE256F1024
 * Implement the Falcon S5SHAKE256F1024 parameter set
 */
-#define QSC_FALCON_S5SHAKE256F1024
+//#define QSC_FALCON_S5SHAKE256F1024
 
 
 /*** SphincsPlus ***/

@@ -214,7 +214,7 @@ bool qsctest_kyber_kat_test()
 #	error The parameter set is invalid!
 #endif
 
-/* NIST PQ Round 3 KATs */
+/* NIST PQC Round 3 KATs */
 #if !defined(QSC_KYBER_S6Q3329N256K5)
 	parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, 0);
 #endif

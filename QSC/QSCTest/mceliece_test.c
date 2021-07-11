@@ -105,7 +105,7 @@ bool qsctest_mceliece_kat_test()
 		qsc_intutils_clear8(pk, QSC_MCELIECE_PUBLICKEY_SIZE);
 		qsc_intutils_clear8(kpk, QSC_MCELIECE_PUBLICKEY_SIZE);
 
-		/* NIST PQ Round 3 KATs */
+		/* NIST PQC Round 3 KATs */
 		parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, 0);
 
 		ret = true;
