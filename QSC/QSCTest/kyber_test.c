@@ -9,13 +9,12 @@
 
 bool qsctest_kyber_ciphertext_integrity()
 {
-	uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t pbuf[1] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
@@ -55,16 +54,16 @@ bool qsctest_kyber_ciphertext_integrity()
 
 bool qsctest_kyber_kat_test()
 {
-	uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t kct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t kpk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t ksk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t kss[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ss1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ss2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kpk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kss[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ss1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ss2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
 	size_t ctlen;
 	size_t pklen;
 	size_t seedlen;
@@ -274,12 +273,12 @@ bool qsctest_kyber_kat_test()
 
 bool qsctest_kyber_privatekey_integrity()
 {
-	uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
@@ -316,12 +315,12 @@ bool qsctest_kyber_privatekey_integrity()
 
 bool qsctest_kyber_publickey_integrity()
 {
-	uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
@@ -358,12 +357,12 @@ bool qsctest_kyber_publickey_integrity()
 
 bool qsctest_kyber_operations_test()
 {
-	uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
 	bool res;
 
 	res = true;

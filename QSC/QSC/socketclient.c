@@ -3,7 +3,7 @@
 #include "memutils.h"
 #include "netutils.h"
 
-qsc_socket_address_families qsc_socket_client_address_family(qsc_socket* sock)
+qsc_socket_address_families qsc_socket_client_address_family(const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -19,7 +19,7 @@ qsc_socket_address_families qsc_socket_client_address_family(qsc_socket* sock)
 	return res;
 }
 
-qsc_socket_protocols qsc_socket_client_socket_protocol(qsc_socket* sock)
+qsc_socket_protocols qsc_socket_client_socket_protocol(const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -35,7 +35,7 @@ qsc_socket_protocols qsc_socket_client_socket_protocol(qsc_socket* sock)
 	return res;
 }
 
-qsc_socket_transports qsc_socket_client_socket_transport(qsc_socket* sock)
+qsc_socket_transports qsc_socket_client_socket_transport(const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -51,7 +51,7 @@ qsc_socket_transports qsc_socket_client_socket_transport(qsc_socket* sock)
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const char* host, char* service)
+qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const char* host, const char* service)
 {
 	assert(sock != NULL);
 	assert(host != NULL);
@@ -161,7 +161,7 @@ void qsc_socket_client_initialize(qsc_socket* sock)
 	}
 }
 
-size_t qsc_socket_client_receive(qsc_socket* sock, char* output, size_t outlen, qsc_socket_receive_flags flag)
+size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t outlen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
 	assert(output != NULL);
@@ -172,13 +172,13 @@ size_t qsc_socket_client_receive(qsc_socket* sock, char* output, size_t outlen, 
 
 	if (sock != NULL && output != NULL)
 	{
-		res = qsc_socket_receive(sock, output, outlen, flag);
+		res = qsc_socket_receive(sock, (uint8_t*)output, outlen, flag);
 	}
 
 	return res;
 }
 
-size_t qsc_socket_client_receive_from(qsc_socket* sock, const char* address, uint16_t port, char* output, size_t outlen, qsc_socket_receive_flags flag)
+size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t outlen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
 	assert(address != NULL);
@@ -190,13 +190,13 @@ size_t qsc_socket_client_receive_from(qsc_socket* sock, const char* address, uin
 
 	if (sock != NULL && output != NULL)
 	{
-		res = qsc_socket_receive_from(sock, address, port, output, outlen, flag);
+		res = qsc_socket_receive_from(sock, address, port, (uint8_t*)output, outlen, flag);
 	}
 
 	return res;
 }
 
-size_t qsc_socket_client_send(qsc_socket* sock, const char* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t inlen, qsc_socket_send_flags flag)
 {
 	assert(sock != NULL);
 
@@ -206,7 +206,7 @@ size_t qsc_socket_client_send(qsc_socket* sock, const char* input, size_t inlen,
 
 	if (sock != NULL)
 	{
-		res = qsc_socket_send(sock, input, inlen, flag);
+		res = qsc_socket_send(sock, (const uint8_t*)input, inlen, flag);
 	}
 
 	return res;
@@ -224,7 +224,7 @@ size_t qsc_socket_client_send_to(qsc_socket* sock, const char* address, uint16_t
 
 	if (sock != NULL && address != NULL && input != NULL)
 	{
-		res = qsc_socket_send_to(sock, address, strlen(address), port, input, inlen, flag);
+		res = qsc_socket_send_to(sock, address, strlen(address), port, (const uint8_t*)input, inlen, flag);
 	}
 
 	return res;
@@ -234,11 +234,8 @@ void qsc_socket_client_shut_down(qsc_socket* sock)
 {
 	assert(sock != NULL);
 
-	if (sock != NULL)
+	if (sock != NULL && sock->connection_status == qsc_socket_state_connected)
 	{
-		if (sock->connection_status == qsc_socket_state_connected)
-		{
-			qsc_socket_shut_down(sock, qsc_socket_shut_down_flag_both);
-		}
+		qsc_socket_shut_down(sock, qsc_socket_shut_down_flag_both);
 	}
 }

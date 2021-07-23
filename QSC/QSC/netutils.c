@@ -1,5 +1,6 @@
 #include "netutils.h"
 #include "memutils.h"
+#include <ws2ipdef.h>
 
 void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx)
 {
@@ -11,11 +12,10 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx)
 	{
 		IP_ADAPTER_INFO info;
 		DWORD blen;
-		DWORD status;
 
 		qsc_memutils_clear((uint8_t*)ctx, sizeof(qsc_netutils_adaptor_info));
 		blen = sizeof(info);
-		status = GetAdaptersInfo(&info, &blen);
+		GetAdaptersInfo(&info, &blen);
 
 		PIP_ADAPTER_INFO pinfo = &info;
 
@@ -29,15 +29,15 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx)
 					qsc_memutils_copy((uint8_t*)ctx->dhcp, (uint8_t*)pinfo->DhcpServer.IpAddress.String, strlen(pinfo->DhcpServer.IpAddress.String));
 					qsc_memutils_copy((uint8_t*)ctx->gateway, (uint8_t*)pinfo->GatewayList.IpAddress.String, strlen(pinfo->GatewayList.IpAddress.String));
 					qsc_memutils_copy((uint8_t*)ctx->ip, (uint8_t*)pinfo->IpAddressList.IpAddress.String, strlen(pinfo->IpAddressList.IpAddress.String));
-					qsc_memutils_copy((uint8_t*)ctx->name, (uint8_t*)pinfo->AdapterName, strlen(pinfo->AdapterName));
-					qsc_memutils_copy((uint8_t*)ctx->mac, (uint8_t*)pinfo->Address, strlen(pinfo->Address));
+					qsc_memutils_copy((uint8_t*)ctx->name, (uint8_t*)pinfo->AdapterName, strlen((const char*)pinfo->AdapterName));
+					qsc_memutils_copy((uint8_t*)ctx->mac, (uint8_t*)pinfo->Address, strlen((const char*)pinfo->Address));
 					qsc_memutils_copy((uint8_t*)ctx->subnet, (uint8_t*)pinfo->IpAddressList.IpMask.String, strlen(pinfo->IpAddressList.IpMask.String));
 					break;
 				}
 
 				pinfo = pinfo->Next;
 			}
-		} 
+		}
 		while (pinfo);
 	}
 
@@ -80,14 +80,13 @@ void qsc_netutils_get_adaptor_info_array(qsc_netutils_adaptor_info ctx[QSC_NET_M
 	{
 		IP_ADAPTER_INFO info[16] = { 0 };
 		DWORD blen;
-		DWORD status;
 		size_t ctr;
 
 		qsc_memutils_clear((uint8_t*)ctx, sizeof(qsc_netutils_adaptor_info));
 		blen = sizeof(info);
 		ctr = 0;
 		PIP_ADAPTER_INFO pinfo = NULL;
-		status = GetAdaptersInfo(info, &blen);
+		GetAdaptersInfo(info, &blen);
 		pinfo = info;
 
 		do
@@ -98,14 +97,14 @@ void qsc_netutils_get_adaptor_info_array(qsc_netutils_adaptor_info ctx[QSC_NET_M
 				qsc_memutils_copy((uint8_t*)ctx[ctr].dhcp, (uint8_t*)pinfo->DhcpServer.IpAddress.String, strlen(pinfo->DhcpServer.IpAddress.String));
 				qsc_memutils_copy((uint8_t*)ctx[ctr].gateway, (uint8_t*)pinfo->GatewayList.IpAddress.String, strlen(pinfo->GatewayList.IpAddress.String));
 				qsc_memutils_copy((uint8_t*)ctx[ctr].ip, (uint8_t*)pinfo->IpAddressList.IpAddress.String, strlen(pinfo->IpAddressList.IpAddress.String));
-				qsc_memutils_copy((uint8_t*)ctx[ctr].name, (uint8_t*)pinfo->AdapterName, strlen(pinfo->AdapterName));
-				qsc_memutils_copy((uint8_t*)ctx[ctr].mac, (uint8_t*)pinfo->Address, strlen(pinfo->Address));
-				qsc_memutils_copy((uint8_t*)ctx[ctr].subnet, (uint8_t*)pinfo->IpAddressList.IpMask.String, strlen(pinfo->IpAddressList.IpMask.String));
+				qsc_memutils_copy((uint8_t*)ctx[ctr].name, (uint8_t*)pinfo->AdapterName, strlen((const char*)pinfo->AdapterName));
+				qsc_memutils_copy((uint8_t*)ctx[ctr].mac, (uint8_t*)pinfo->Address, strlen((const char*)pinfo->Address));
+				qsc_memutils_copy((uint8_t*)ctx[ctr].subnet, (uint8_t*)pinfo->IpAddressList.IpMask.String, strlen((const char*)pinfo->IpAddressList.IpMask.String));
 			}
 
 			++ctr;
 			pinfo = pinfo->Next;
-		} 
+		}
 		while (pinfo != NULL && ctr < QSC_NET_MAC_ADAPTOR_INFO_ARRAY);
 	}
 
@@ -148,9 +147,9 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NET_HOSTS_NAME_BUFFER])
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 	DWORD blen;
-	TCHAR dbuf[MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
+	TCHAR dbuf[QSC_SYSTEM_MAX_PATH + 1] = { 0 };
 
-	blen = MAX_COMPUTERNAME_LENGTH + 1;
+	blen = QSC_SYSTEM_MAX_PATH + 1;
 	GetComputerNameEx(ComputerNameDnsDomain, dbuf, &blen);
 
 	if (blen != 0)
@@ -159,7 +158,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NET_HOSTS_NAME_BUFFER])
 	}
 	else
 	{
-		blen = MAX_COMPUTERNAME_LENGTH + 1;
+		blen = QSC_SYSTEM_MAX_PATH + 1;
 		GetComputerNameEx(ComputerNameNetBIOS, dbuf, &blen);
 		qsc_memutils_copy((uint8_t*)output, (uint8_t*)dbuf, blen);
 	}
@@ -184,7 +183,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NET_HOSTS_NAME_BUFFER])
 	}
 
 	return dlen;
-	
+
 #endif
 }
 
@@ -245,10 +244,12 @@ qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address()
 	WSADATA wsd;
 	WSAStartup(0x0202, &wsd);
 #endif
-
+	IN6_ADDR llp6;
+	qsc_memutils_clear(llp6.u.Byte, 15);
+	llp6.u.Byte[15] = 1;
 	qsc_memutils_clear((uint8_t*)&loopback, sizeof(loopback));
 	loopback.sin6_family = AF_INET6;
-	loopback.sin6_addr = in6addr_linklocalprefix;
+	loopback.sin6_addr = llp6;
 	loopback.sin6_port = htons(9);
 	sock = socket(PF_INET6, SOCK_DGRAM, 0);
 
@@ -304,7 +305,7 @@ qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NET_HOSTS_NA
 	{
 		inet_ntop(AF_INET, ((CHAR*)haddr->ai_addr->sa_data + 2), ipstr, INET_ADDRSTRLEN);
 		inet_pton(AF_INET, ipstr, info.address.ipv4);
-		info.port = (uint16_t)ntohs(((struct sockaddr_in*)haddr->ai_addr)->sin_port);
+		info.port = ntohs(((struct sockaddr_in*)haddr->ai_addr)->sin_port);
 
 		if (haddr != NULL)
 		{
@@ -359,7 +360,7 @@ qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NET_HOSTS_NA
 	{
 		inet_ntop(AF_INET6, ((CHAR*)haddr->ai_addr->sa_data + 2), ipstr, INET6_ADDRSTRLEN);
 		inet_pton(AF_INET6, ipstr, info.address.ipv6);
-		info.port = (uint16_t)ntohs(((struct sockaddr_in6*)haddr->ai_addr)->sin6_port);
+		info.port = ntohs(((struct sockaddr_in6*)haddr->ai_addr)->sin6_port);
 
 		if (haddr != NULL)
 		{
@@ -396,10 +397,9 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NET_MAC_ADDRESS_LENGTH])
 
 	IP_ADAPTER_INFO info[16];
 	DWORD blen;
-	DWORD status;
 
 	blen = sizeof(info);
-	status = GetAdaptersInfo(info, &blen);
+	GetAdaptersInfo(info, &blen);
 
 	PIP_ADAPTER_INFO pinfo = info;
 
@@ -409,13 +409,13 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NET_MAC_ADDRESS_LENGTH])
 		{
 			if (pinfo->Address[0] != 0)
 			{
-				qsc_memutils_copy((uint8_t*)mac, (uint8_t*)pinfo->Address, QSC_NET_MAC_ADDRESS_LENGTH);
+				qsc_memutils_copy(mac, (uint8_t*)pinfo->Address, QSC_NET_MAC_ADDRESS_LENGTH);
 				break;
 			}
 
 			pinfo = pinfo->Next;
 		}
-	} 
+	}
 	while (pinfo);
 
 #else
@@ -454,13 +454,12 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NET_MAC_ADDRESS_LENGTH])
 #endif
 }
 
-void qsc_netutils_get_peer_name(char output[QSC_NET_HOSTS_NAME_BUFFER], qsc_socket* sock)
+void qsc_netutils_get_peer_name(char output[QSC_NET_HOSTS_NAME_BUFFER], const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
 	if (sock != NULL)
 	{
-		char name[QSC_NET_HOSTS_NAME_BUFFER] = { 0 };
 		struct sockaddr psa;
 		socklen_t psalen;
 		int32_t res;
@@ -475,13 +474,12 @@ void qsc_netutils_get_peer_name(char output[QSC_NET_HOSTS_NAME_BUFFER], qsc_sock
 	}
 }
 
-void qsc_netutils_get_socket_name(char output[QSC_NET_PROTOCOL_NAME_BUFFER], qsc_socket* sock)
+void qsc_netutils_get_socket_name(char output[QSC_NET_PROTOCOL_NAME_BUFFER], const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
 	if (sock != NULL)
 	{
-		char name[QSC_NET_HOSTS_NAME_BUFFER] = { 0 };
 		struct sockaddr psa;
 		socklen_t psalen;
 		int32_t res;
@@ -499,7 +497,7 @@ void qsc_netutils_get_socket_name(char output[QSC_NET_PROTOCOL_NAME_BUFFER], qsc
 
 uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NET_HOSTS_NAME_BUFFER], const char protocol[QSC_NET_PROTOCOL_NAME_BUFFER])
 {
-	struct servent* se;
+	const struct servent* se;
 	uint16_t port;
 
 	port = (uint16_t)atoi(portname);
@@ -510,7 +508,7 @@ uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NET_HOSTS_NAME
 
 		if (se != NULL)
 		{
-			port = (uint16_t)ntohs(se->s_port);
+			port = ntohs(se->s_port);
 		}
 	}
 

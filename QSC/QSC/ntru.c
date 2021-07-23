@@ -18,7 +18,7 @@ bool qsc_ntru_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint
 	return res;
 }
 
-void qsc_ntru_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_ntru_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(secret != NULL);
 	assert(ciphertext != NULL);
@@ -31,7 +31,7 @@ void qsc_ntru_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* p
 	}
 }
 
-void qsc_ntru_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_ntru_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(publickey != NULL);
 	assert(privatekey != NULL);

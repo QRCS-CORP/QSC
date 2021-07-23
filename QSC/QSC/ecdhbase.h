@@ -55,6 +55,6 @@ bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const u
 * \param privatekey: Pointer to output private-key array
 * \param seed: A pointer to the random seed
 */
-void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
+void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 #endif

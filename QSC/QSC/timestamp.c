@@ -95,7 +95,7 @@ void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char output[Q
 {
 	char tmp[5] = { 0 };
 
-	memset(tstruct, 0x00, sizeof(tstruct));
+	memset(tstruct, 0x00, sizeof(struct tm));
 
 	memcpy(tmp, output, 4);
 	tstruct->tm_year = qsc_stringutils_string_to_int(tmp) - QSC_TIMESTAMP_EPOCH_START;
@@ -257,7 +257,7 @@ uint64_t qsc_timestamp_datetime_seconds_remaining(const char basetime[QSC_TIMEST
 
 	qsc_timestamp_string_to_time_struct(&bt, basetime);
 	qsc_timestamp_string_to_time_struct(&ft, comptime);
-	
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	bsec = _mktime64(&bt);
 	csec = _mktime64(&ft);
@@ -296,7 +296,6 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
 	struct tm nt;
 	time_t lt;
 	errno_t err;

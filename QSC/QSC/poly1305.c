@@ -74,7 +74,6 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 	uint64_t f1;
 	uint64_t f2;
 	uint64_t f3;
-	size_t i;
 	uint32_t b;
 	uint32_t g0;
 	uint32_t g1;
@@ -87,7 +86,7 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 	{
 		ctx->buf[ctx->rmd] = 1;
 
-		for (i = ctx->rmd + 1; i < QSC_POLY1305_BLOCK_SIZE; i++)
+		for (size_t i = ctx->rmd + 1; i < QSC_POLY1305_BLOCK_SIZE; i++)
 		{
 			ctx->buf[i] = 0;
 		}

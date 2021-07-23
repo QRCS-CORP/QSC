@@ -54,7 +54,7 @@ typedef struct
 * \param secretkey: The private signature key
 * \param rng_generate: The random generator
 */
-void qsc_dilithium_ref_generate_keypair(uint8_t *pk, uint8_t *sk, void (*rng_generate)(uint8_t*, size_t));
+void qsc_dilithium_ref_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature
@@ -66,7 +66,7 @@ void qsc_dilithium_ref_generate_keypair(uint8_t *pk, uint8_t *sk, void (*rng_gen
 * \param privatekey: The private signature key
 * \param rng_generate: The random generator
 */
-void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m, size_t mlen, const uint8_t *sk, void (*rng_generate)(uint8_t*, size_t));
+void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message
@@ -78,7 +78,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
 * \param privatekey: The private signature key
 * \param rng_generate: The random generator
 */
-void qsc_dilithium_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, void (*rng_generate)(uint8_t*, size_t));
+void qsc_dilithium_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature-message pair with the public key.

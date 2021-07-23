@@ -110,7 +110,7 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 
 /* public api */
 
-void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed)
+void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
 	ge25519_p3 A;
 

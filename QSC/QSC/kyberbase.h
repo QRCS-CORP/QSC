@@ -140,32 +140,6 @@
 */
 #define QSC_KYBER_CIPHERTEXT_BYTES (QSC_KYBER_INDCPA_BYTES)
 
-/**
-* \struct qsc_kyber_poly
-* \brief Contains an N sized array of 16bit coefficients. /n
-* Elements of R_q = Z_q[X] / (X^n + 1). /n
-* Represents polynomial coeffs[0] + X * coeffs[1] + X^2 * xoeffs[2] + ... + X^{n-1} * coeffs[n-1]
-*
-* \var qsc_kyber_poly::coeffs
-* The array of 16bit coefficients
-*/
-typedef struct
-{
-	int16_t coeffs[QSC_KYBER_N];
-} qsc_kyber_poly;
-
-/**
-* \struct qsc_kyber_polyvec
-* \brief Contains a K sized vector of qsc_kyber_poly structures
-*
-* \var qsc_kyber_polyvec::vec
-* The polynomial vector array
-*/
-typedef struct
-{
-	qsc_kyber_poly vec[QSC_KYBER_K];
-} qsc_kyber_polyvec;
-
 /* kem.h */
 
 /**
@@ -187,7 +161,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 * \param pk Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
 */
 void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
-	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], void (*rng_generate)(uint8_t*, size_t));
+	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
@@ -196,6 +170,6 @@ void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t s
 * \param sk Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 */
 void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], 
-	void (*rng_generate)(uint8_t*, size_t));
+	bool (*rng_generate)(uint8_t*, size_t));
 
 #endif

@@ -45,7 +45,7 @@ uint128 qsc_donna128_shift_right(const uint128* x, size_t shift)
 	return r;
 }
 
-uint128 qsc_donna128_shift_left(uint128* x, size_t shift)
+uint128 qsc_donna128_shift_left(const uint128* x, size_t shift)
 {
 	uint128 r;
 
@@ -56,12 +56,12 @@ uint128 qsc_donna128_shift_left(uint128* x, size_t shift)
 	return r;
 }
 
-uint64_t qsc_donna128_andl(uint128* x, uint64_t mask)
+uint64_t qsc_donna128_andl(const uint128* x, uint64_t mask)
 {
 	return x->low & mask;
 }
 
-uint64_t qsc_donna128_andh(uint128* x, uint64_t mask)
+uint64_t qsc_donna128_andh(const uint128* x, uint64_t mask)
 {
 	return x->high & mask;
 }
@@ -79,7 +79,7 @@ uint128 qsc_donna128_add(const uint128* x, const uint128* y)
 	return r;
 }
 
-uint128 qsc_donna128_multiply(uint128* x, uint64_t Y)
+uint128 qsc_donna128_multiply(const uint128* x, uint64_t Y)
 {
 	uint64_t low;
 	uint64_t high;

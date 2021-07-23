@@ -88,7 +88,7 @@ QSC_EXPORT_API void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, siz
 * \param state [struct] The function state
 * \return The number of items in the queue
 */
-QSC_EXPORT_API size_t qsc_queue_items(qsc_queue_state* ctx);
+QSC_EXPORT_API size_t qsc_queue_items(const qsc_queue_state* ctx);
 
 /**
 * \brief Get the full status from the queue.
@@ -96,7 +96,7 @@ QSC_EXPORT_API size_t qsc_queue_items(qsc_queue_state* ctx);
 * \param state [struct] The function state
 * \return Returns true if the queue is full
 */
-QSC_EXPORT_API bool qsc_queue_isfull(qsc_queue_state* ctx);
+QSC_EXPORT_API bool qsc_queue_isfull(const qsc_queue_state* ctx);
 
 /**
 * \brief Get the empty status from the queue.
@@ -104,7 +104,7 @@ QSC_EXPORT_API bool qsc_queue_isfull(qsc_queue_state* ctx);
 * \param state [struct] The function state
 * \return Returns true if the queue is empty
 */
-QSC_EXPORT_API bool qsc_queue_isempty(qsc_queue_state* ctx);
+QSC_EXPORT_API bool qsc_queue_isempty(const qsc_queue_state* ctx);
 
 /**
 * \brief Returns the first member of the queue, and erases that item from the queue.

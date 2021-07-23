@@ -109,7 +109,7 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 static void rcs_transform_256(qsc_rcs_state* ctx, __m128i output[2], const __m128i input[2])
 {
 	const __m128i BLEND_MASK = _mm_set_epi32(0x80000000UL, 0x80800000UL, 0x80800000UL, 0x80808000UL);
-	const __m128i SHIFT_MASK = { 0, 1, 6, 7, 4, 5, 10, 11, 8, 9, 14, 15, 12, 13, 2, 3 };
+	const __m128i SHIFT_MASK = _mm_set_epi8(0, 1, 6, 7, 4, 5, 10, 11, 8, 9, 14, 15, 12, 13, 2, 3);
 	const size_t HLFBLK = QSC_RCS_BLOCK_SIZE / 2;
 	const size_t RNDCNT = ctx->roundkeylen - 3;
 	size_t kctr;
@@ -345,20 +345,11 @@ static const uint8_t rcs_is_box[256] =
 	0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
 };
 
-static const uint32_t rcs_rcon[30] =
-{
-	0x00000000UL, 0x01000000UL, 0x02000000UL, 0x04000000UL, 0x08000000UL, 0x10000000UL, 0x20000000UL, 0x40000000UL,
-	0x80000000UL, 0x1B000000UL, 0x36000000UL, 0x6C000000UL, 0xD8000000UL, 0xAB000000UL, 0x4D000000UL, 0x9A000000UL,
-	0x2F000000UL, 0x5E000000UL, 0xBC000000UL, 0x63000000UL, 0xC6000000UL, 0x97000000UL, 0x35000000UL, 0x6A000000UL,
-	0xD4000000UL, 0xB3000000UL, 0x7D000000UL, 0xFA000000UL, 0xEF000000UL, 0xC5000000UL
-};
-
 static void rcs_add_roundkey(uint8_t* state, const uint32_t *skeys)
 {
-	size_t i;
 	uint32_t k;
 
-	for (i = 0; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
+	for (size_t i = 0; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
 	{
 		k = *skeys;
 		state[i] ^= (uint8_t)(k >> 24);
@@ -369,18 +360,8 @@ static void rcs_add_roundkey(uint8_t* state, const uint32_t *skeys)
 	}
 }
 
-static uint8_t rcs_gf256_reduce(uint32_t x)
-{
-	uint32_t y;
-
-	y = x >> 8;
-
-	return (x ^ y ^ (y << 1) ^ (y << 3) ^ (y << 4)) & 0xFFU;
-}
-
 static void rcs_mix_columns(uint8_t* state)
 {
-	size_t i;
 	uint32_t s0;
 	uint32_t s1;
 	uint32_t s2;
@@ -390,7 +371,7 @@ static void rcs_mix_columns(uint8_t* state)
 	uint32_t t2;
 	uint32_t t3;
 
-	for (i = 0; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
+	for (size_t i = 0; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
 	{
 		s0 = state[i + 0];
 		s1 = state[i + 1];
@@ -475,40 +456,21 @@ static void rcs_shift_rows(uint8_t* state)
 
 static void rcs_sub_bytes(uint8_t* state, const uint8_t* sbox)
 {
-	size_t i;
-
-	for (i = 0; i < QSC_RCS_BLOCK_SIZE; ++i)
+	for (size_t i = 0; i < QSC_RCS_BLOCK_SIZE; ++i)
 	{
 		state[i] = sbox[state[i]];
 	}
 }
 
-static uint32_t rcs_substitution(uint32_t rot)
-{
-	uint32_t val;
-	uint32_t res;
-
-	val = rot & 0xFFU;
-	res = rcs_s_box[val];
-	val = (rot >> 8) & 0xFFU;
-	res |= ((uint32_t)rcs_s_box[val] << 8);
-	val = (rot >> 16) & 0xFFU;
-	res |= ((uint32_t)rcs_s_box[val] << 16);
-	val = (rot >> 24) & 0xFFU;
-
-	return res | ((uint32_t)(rcs_s_box[val]) << 24);
-}
-
-static void rcs_transform_256(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input)
+static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input)
 {
 	uint8_t buf[QSC_RCS_BLOCK_SIZE];
-	size_t i;
 
 	qsc_memutils_copy(buf, input, QSC_RCS_BLOCK_SIZE);
 	rcs_add_roundkey(buf, ctx->roundkeys);
 	rcs_prefetch_sbox(true);
 
-	for (i = 1; i < ctx->rounds; ++i)
+	for (size_t i = 1; i < ctx->rounds; ++i)
 	{
 		rcs_sub_bytes(buf, rcs_s_box);
 		rcs_shift_rows(buf);
@@ -528,7 +490,6 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 	assert(input != NULL);
 	assert(output != NULL);
 
-	size_t i;
 	size_t oft;
 
 	oft = 0;
@@ -549,7 +510,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 		rcs_transform_256(ctx, tmpb, ctx->nonce);
 
-		for (i = 0; i < length; ++i)
+		for (size_t i = 0; i < length; ++i)
 		{
 			output[oft + i] = tmpb[i] ^ input[oft + i];
 		}

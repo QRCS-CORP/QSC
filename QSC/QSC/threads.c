@@ -86,7 +86,7 @@ qsc_thread qsc_threads_initialize_ex(void (*thd_func)(void**), void** args)
 	res = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	res = _beginthread(thd_func, 0, args);
+	res = _beginthread((void*)thd_func, 0, args);
 #elif defined(QSC_SYSTEM_OS_POSIX)
 	p_thread_create(&res, NULL, thd_func, args);
 #endif

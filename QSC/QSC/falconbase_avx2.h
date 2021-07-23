@@ -1,12 +1,33 @@
+/* The AGPL version 3 License (AGPLv3)
+*
+* Copyright (c) 2021 Digital Freedom Defence Inc.
+* This file is part of the QSC Cryptographic library
+*
+* This program is free software : you can redistribute it and / or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef QSC_FALCONBASE_AVX2_H
 #define QSC_FALCONBASE_AVX2_H
 
 #include "common.h"
+
+#if defined(QSC_SYSTEM_HAS_AVX2)
+
 #include "intrinsics.h"
 #include "sha3.h"
 #include <math.h>
 
-//#pragma warning(disable : 4146)
 /* api.h */
 
 #if defined(QSC_FALCON_S3SHAKE256F512)
@@ -67,7 +88,10 @@ inline static __m256d falcon_fmadd(__m256d a, __m256d b, __m256d c)
 #if defined(FALCON_FMA)
 	return _mm256_fmadd_pd(a, b, c);
 #else
-	return _mm256_add_pd(_mm256_mul_pd(a, b), c);
+	__m256d tmp;
+	tmp = _mm256_mul_pd(a, b);
+	tmp = _mm256_add_pd(tmp, c);
+	return tmp;
 #endif
 }
 
@@ -76,7 +100,9 @@ inline static __m256d falcon_fmsub(__m256d a, __m256d b, __m256d c)
 #if defined(FALCON_FMA)
 	return _mm256_fmsub_pd(a, b, c);
 #else
-	return _mm256_sub_pd(_mm256_mul_pd(a, b), c);
+	__m256d tmp;
+	tmp = _mm256_mul_pd(a, b);
+	return _mm256_sub_pd(tmp, c);
 #endif
 }
 
@@ -834,6 +860,7 @@ inline static uint32_t falcon_mq_montysqr(uint32_t x)
 	return falcon_mq_montymul(x, x);
 }
 
+
 /**
 * \brief Generates a Dilithium public/private key-pair.
 * Arrays must be sized to FALCON_PUBLICKEY_SIZE and FALCON_SECRETKEY_SIZE.
@@ -842,7 +869,7 @@ inline static uint32_t falcon_mq_montysqr(uint32_t x)
 * \param secretkey: The private signature key
 * \param rng_generate: The random generator
 */
-int32_t qsc_falcon_avx2_generate_keypair(uint8_t *pk, uint8_t *sk, void (*rng_generate)(uint8_t*, size_t));
+int32_t qsc_falcon_avx2_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message
@@ -854,7 +881,7 @@ int32_t qsc_falcon_avx2_generate_keypair(uint8_t *pk, uint8_t *sk, void (*rng_ge
 * \param privatekey: The private signature key
 * \param rng_generate: The random generator
 */
-int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, void (*rng_generate)(uint8_t*, size_t));
+int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature-message pair with the public key.
@@ -868,4 +895,5 @@ int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_
 */
 bool qsc_falcon_avx2_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
 
+#endif
 #endif

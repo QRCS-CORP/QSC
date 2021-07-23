@@ -1041,7 +1041,7 @@ static void aes_expand_rot(uint32_t* key, uint32_t keyindex, uint32_t keyoffset,
 	uint32_t subkey;
 
 	subkey = keyindex - keyoffset;
-	key[keyindex] = key[subkey] ^ aes_substitution((uint32_t)(key[keyindex - 1] << 8) | (uint32_t)(key[keyindex - 1] >> 24) & 0xFFU) ^ rcon[rconindex];
+	key[keyindex] = key[subkey] ^ aes_substitution((uint32_t)(key[keyindex - 1] << 8) | (uint32_t)((key[keyindex - 1] >> 24) & 0xFFU)) ^ rcon[rconindex];
 	++keyindex;
 	++subkey;
 	key[keyindex] = key[subkey] ^ key[keyindex - 1];

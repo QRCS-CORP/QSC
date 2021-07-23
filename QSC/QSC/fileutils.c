@@ -15,7 +15,7 @@ bool qsc_filetools_working_directory(char* path)
 	bool res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	char* rbf;
+	const char* rbf;
 	rbf = _getcwd(buf, sizeof(buf));
 #else
 	getcwd(buf, sizeof(buf));
@@ -72,6 +72,8 @@ size_t qsc_filetools_file_size(const char* path)
 #if defined(_MSC_VER)
 int64_t qsc_filetools_getline(char** line, size_t* length, FILE* fp)
 {
+	char* tmpl;
+
 	/* check if either line, length or fp are NULL pointers */
 	if (line == NULL || length == NULL || fp == NULL)
 	{
@@ -116,7 +118,13 @@ int64_t qsc_filetools_getline(char** line, size_t* length, FILE* fp)
 					*length *= 2;
 				}
 
-				if ((*line = realloc(*line, *length)) == NULL)
+				tmpl = realloc(*line, *length);
+
+				if (tmpl != NULL)
+				{
+					*line = tmpl;
+				}
+				else
 				{
 					errno = ENOMEM;
 					return -1;
@@ -232,7 +240,7 @@ size_t qsc_filetools_copy_file_to_stream(const char* path, char* stream, size_t 
 	return len;
 }
 
-bool qsc_filetools_copy_stream_to_file(const char* path, char* stream, size_t length)
+bool qsc_filetools_copy_stream_to_file(const char* path, const char* stream, size_t length)
 {
 	FILE* fp;
 	errno_t err;
@@ -255,7 +263,7 @@ bool qsc_filetools_copy_stream_to_file(const char* path, char* stream, size_t le
 	return res;
 }
 
-bool qsc_filetools_copy_object_to_file(const char* path, void* obj, size_t length)
+bool qsc_filetools_copy_object_to_file(const char* path, const void* obj, size_t length)
 {
 	FILE* fp;
 	errno_t err;
@@ -331,32 +339,35 @@ size_t qsc_filetools_read_line(const char* path, char* buffer, size_t buflen, si
 #endif
 
 	len = qsc_filetools_file_size(path);
-	sbuf = (char*)malloc(len);
 
-	if (sbuf != NULL && fp != NULL && err == 0)
+	if (len > 0)
 	{
-		len = fread(sbuf, 1, len, fp);
+		sbuf = (char*)malloc(len);
 
-		if (len > 0)
+		if (sbuf != NULL && fp != NULL && err == 0)
 		{
-			do
+			len = fread(sbuf, 1, len, fp);
+
+			if (len > 0)
 			{
-				pln = qsc_stringutils_find_string(sbuf + pos, "\n");
-				pos += pln;
-				++ctr;
-
-				if (ctr == linenum)
+				do
 				{
-					res = qsc_stringutils_find_string(sbuf + pos, "\n");
-					memcpy(buffer, sbuf, res <= buflen ? res : buflen);
-					break;
-				}
-			} 
-			while (pln != -1);
-		}
+					pln = qsc_stringutils_find_string(sbuf + pos, "\n");
+					pos += pln;
+					++ctr;
 
-		fclose(fp);
-		free(sbuf);
+					if (ctr == linenum)
+					{
+						res = qsc_stringutils_find_string(sbuf + pos, "\n");
+						memcpy(buffer, sbuf, res <= buflen ? res : buflen);
+						break;
+					}
+				} while (pln != -1);
+			}
+
+			fclose(fp);
+			free(sbuf);
+		}
 	}
 
 	return res;

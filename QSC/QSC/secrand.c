@@ -16,7 +16,7 @@ uint8_t qsc_secrand_next_uchar()
 	uint8_t smp[sizeof(uint8_t)] = { 0 };
 	qsc_secrand_generate(smp, sizeof(smp));
 
-	return (uint8_t)smp[0];
+	return smp[0];
 }
 
 double qsc_secrand_next_double()
@@ -55,8 +55,7 @@ int16_t qsc_secrand_next_int16_max(int16_t maximum)
 	{
 		x = qsc_secrand_next_int16();
 		ret = x % maximum;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret < 0);
 
 	return ret;
 }
@@ -75,8 +74,7 @@ int16_t qsc_secrand_next_int16_maxmin(int16_t maximum, int16_t minimum)
 	{
 		x = qsc_secrand_next_int16();
 		ret = x % SMPTHR;
-	}
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret < 0);
 
 	return minimum + ret;
 }
@@ -105,8 +103,7 @@ uint16_t qsc_secrand_next_uint16_max(uint16_t maximum)
 	{
 		x = qsc_secrand_next_uint16();
 		ret = x % maximum;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret == 0);
 
 	return ret;
 }
@@ -125,8 +122,7 @@ uint16_t qsc_secrand_next_uint16_maxmin(uint16_t maximum, uint16_t minimum)
 	{
 		x = qsc_secrand_next_uint16();
 		ret = x % SMPTHR;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret == 0);
 
 	return minimum + ret;
 }
@@ -147,7 +143,7 @@ int32_t qsc_secrand_next_int32_max(int32_t maximum)
 {
 	assert(maximum != 0);
 
-	const int32_t SMPMAX = (int32_t)(INT32_MAX - (INT32_MAX % maximum));
+	const int32_t SMPMAX = (INT32_MAX - (INT32_MAX % maximum));
 	int32_t x;
 	int32_t ret;
 
@@ -155,8 +151,7 @@ int32_t qsc_secrand_next_int32_max(int32_t maximum)
 	{
 		x = qsc_secrand_next_int32();
 		ret = x % maximum;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret < 0);
 
 	return ret;
 }
@@ -167,7 +162,7 @@ int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum)
 	assert(maximum > minimum);
 
 	const int32_t SMPTHR = (maximum - minimum + 1);
-	const int32_t SMPMAX = (int32_t)(INT32_MAX - (INT32_MAX % SMPTHR));
+	const int32_t SMPMAX = (INT32_MAX - (INT32_MAX % SMPTHR));
 	int32_t x;
 	int32_t ret;
 
@@ -175,8 +170,7 @@ int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum)
 	{
 		x = qsc_secrand_next_int32();
 		ret = x % SMPTHR;
-	}
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret < 0);
 
 	return minimum + ret;
 }
@@ -197,7 +191,7 @@ uint32_t qsc_secrand_next_uint32_max(uint32_t maximum)
 {
 	assert(maximum != 0);
 
-	const uint32_t SMPMAX = (uint32_t)(UINT32_MAX - (UINT32_MAX % maximum));
+	const uint32_t SMPMAX = (UINT32_MAX - (UINT32_MAX % maximum));
 	uint32_t x;
 	uint32_t ret;
 
@@ -205,8 +199,7 @@ uint32_t qsc_secrand_next_uint32_max(uint32_t maximum)
 	{
 		x = qsc_secrand_next_uint32();
 		ret = x % maximum;
-	}
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret == 0);
 
 	return ret;
 }
@@ -217,7 +210,7 @@ uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum)
 	assert(maximum > minimum);
 
 	const uint32_t SMPTHR = (maximum - minimum + 1);
-	const uint32_t SMPMAX = (uint32_t)(UINT32_MAX - (UINT32_MAX % SMPTHR));
+	const uint32_t SMPMAX = (UINT32_MAX - (UINT32_MAX % SMPTHR));
 	uint32_t x;
 	uint32_t ret;
 
@@ -225,8 +218,7 @@ uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum)
 	{
 		x = qsc_secrand_next_uint32();
 		ret = x % SMPTHR;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret == 0);
 
 	return minimum + ret;
 }
@@ -247,7 +239,7 @@ int64_t qsc_secrand_next_int64_max(int64_t maximum)
 {
 	assert(maximum != 0);
 
-	const int64_t SMPMAX = (int64_t)(INT64_MAX - (INT64_MAX % maximum));
+	const int64_t SMPMAX = (INT64_MAX - (INT64_MAX % maximum));
 	int64_t x;
 	int64_t ret;
 
@@ -255,8 +247,7 @@ int64_t qsc_secrand_next_int64_max(int64_t maximum)
 	{
 		x = qsc_secrand_next_int64();
 		ret = x % maximum;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret < 0);
 
 	return ret;
 }
@@ -267,7 +258,7 @@ int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum)
 	assert(maximum > minimum);
 
 	const int64_t SMPTHR = (maximum - minimum + 1);
-	const int64_t SMPMAX = (int64_t)(INT64_MAX - (INT64_MAX % SMPTHR));
+	const int64_t SMPMAX = (INT64_MAX - (INT64_MAX % SMPTHR));
 	int64_t x;
 	int64_t ret;
 
@@ -275,8 +266,7 @@ int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum)
 	{
 		x = qsc_secrand_next_int64();
 		ret = x % SMPTHR;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret < 0);
 
 	return minimum + ret;
 }
@@ -297,7 +287,7 @@ uint64_t qsc_secrand_next_uint64_max(uint64_t maximum)
 {
 	assert(maximum != 0);
 
-	const uint64_t SMPMAX = (uint64_t)(UINT64_MAX - (UINT64_MAX % maximum));
+	const uint64_t SMPMAX = (UINT64_MAX - (UINT64_MAX % maximum));
 	uint64_t x;
 	uint64_t ret;
 
@@ -305,8 +295,7 @@ uint64_t qsc_secrand_next_uint64_max(uint64_t maximum)
 	{
 		x = qsc_secrand_next_uint64();
 		ret = x % maximum;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret == 0);
 
 	return ret;
 }
@@ -317,7 +306,7 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 	assert(maximum > minimum);
 
 	const uint64_t SMPTHR = (maximum - minimum + 1);
-	const uint64_t SMPMAX = (uint64_t)(UINT64_MAX - (UINT64_MAX % SMPTHR));
+	const uint64_t SMPMAX = (UINT64_MAX - (UINT64_MAX % SMPTHR));
 	uint64_t x;
 	uint64_t ret;
 
@@ -325,13 +314,12 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 	{
 		x = qsc_secrand_next_uint64();
 		ret = x % SMPTHR;
-	} 
-	while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX || ret == 0);
 
 	return minimum + ret;
 }
 
-void qsc_secrand_initialize(uint8_t* seed, size_t seedlen, uint8_t* custom, size_t custlen)
+void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* custom, size_t custlen)
 {
 	assert(seed != NULL);
 	assert(seedlen == QSC_CSG256_SEED_SIZE || seedlen == QSC_CSG512_SEED_SIZE);

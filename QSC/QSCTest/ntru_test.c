@@ -271,43 +271,43 @@ void qsctest_ntru_run()
 {
 	if (qsctest_ntru_kat_test() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber encryption, and decryption known answer test.");
+		qsc_consoleutils_print_line("Success! Passed the NTRU encryption, and decryption known answer test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber encryption, and decryption known answer test.");
+		qsc_consoleutils_print_line("Failure! Failed the NTRU encryption, and decryption known answer test.");
 	}
 
 	if (qsctest_ntru_operations_test() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber key generation, encryption, and decryption stress test.");
+		qsc_consoleutils_print_line("Success! Passed the NTRU key generation, encryption, and decryption stress test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber key generation, encryption, and decryption stress test.");
+		qsc_consoleutils_print_line("Failure! Failed the NTRU key generation, encryption, and decryption stress test.");
 	}
 
 	if (qsctest_ntru_privatekey_integrity() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber private-key tamper test.");
+		qsc_consoleutils_print_line("Success! Passed the NTRU private-key tamper test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber private-key tamper test.");
+		qsc_consoleutils_print_line("Failure! Failed the NTRU private-key tamper test.");
 	}
 
 	if (qsctest_ntru_publickey_integrity() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber public-key tamper test.");
+		qsc_consoleutils_print_line("Success! Passed the NTRU public-key tamper test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber public-key tamper test.");
+		qsc_consoleutils_print_line("Failure! Failed the NTRU public-key tamper test.");
 	}
 
 	if (qsctest_ntru_ciphertext_integrity() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber cipher-text tamper test.");
+		qsc_consoleutils_print_line("Success! Passed the NTRU cipher-text tamper test.");
 	}
 	else
 	{

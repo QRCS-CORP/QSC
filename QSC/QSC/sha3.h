@@ -262,7 +262,7 @@ QSC_EXPORT_API typedef struct
 * \enum qsc_keccak_rate
 * \brief The Keccak rate; determines which security strength is used by the function, 128, 256, or 512-bit
 */
-QSC_EXPORT_API typedef enum
+typedef enum
 {
 	qsc_keccak_rate_128 = QSC_KECCAK_128_RATE,
 	qsc_keccak_rate_256 = QSC_KECCAK_256_RATE,
@@ -856,6 +856,94 @@ QSC_EXPORT_API void qsc_kpa_update(qsc_kpa_state* ctx, const uint8_t* message, s
 */
 QSC_EXPORT_API void qsc_kpa_dispose(qsc_kpa_state* ctx);
 
+/* parallel keccak x4 */
+
+#if defined(QSC_SYSTEM_HAS_AVX2)
+
+/**
+* \brief Absorb 4 Keccak instances simultaneously using SIMD instructions.
+*
+* \warning The input and output arrays muct be of the same length.
+* This function requires the AVX2 instruction set.
+*
+* \param state: The keccak state array
+* \param rate: The shake rate
+* \param inp0: The 1st input key array
+* \param inp1: The 2nd input key array
+* \param inp2: The 3rd input key array
+* \param inp3: The 4th input key array
+* \param inplen: The length of the input key arrays
+* \param domain
+*/
+void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
+	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain);
+
+/**
+* \brief Squeeze 4 Keccak instances simultaneously using SIMD instructions.
+*
+* \warning The input and output arrays muct be of the same length.
+* This function requires the AVX2 instruction set.
+*
+* \param state: The keccak state array
+* \param rate: The keccak rate
+* \param out0: The 1st output array
+* \param out1: The 2nd output array
+* \param out2: The 3rd output array
+* \param out3: The 4th output array
+* \param nblocks: The number of output blocks
+*/
+void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
+	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t nblocks);
+
+#endif
+
+/* parallel keccak x8 */
+
+#if defined(QSC_SYSTEM_HAS_AVX512)
+
+/**
+* \brief Absorb 4 Keccak instances simultaneously using SIMD instructions.
+*
+* \warning The input and output arrays muct be of the same length.
+* This function requires the AVX2 instruction set.
+*
+* \param state: The keccak state array
+* \param rate: The shake rate
+* \param inp0: The 1st input key array
+* \param inp1: The 2nd input key array
+* \param inp2: The 3rd input key array
+* \param inp3: The 4th input key array
+* \param inp4: The 5th input key array
+* \param inp5: The 6th input key array
+* \param inp6: The 7th input key array
+* \param inp7: The 8th input key array
+* \param inplen: The length of the input key arrays
+* \param domain
+*/
+void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
+	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
+	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen, uint8_t domain);
+
+/**
+* \brief Squeeze 4 Keccak instances simultaneously using SIMD instructions.
+*
+* \warning The input and output arrays muct be of the same length.
+* This function requires the AVX2 instruction set.
+*
+* \param state: The keccak state array
+* \param rate: The keccak rate
+* \param out0: The 1st output array
+* \param out1: The 2nd output array
+* \param out2: The 3rd output array
+* \param out3: The 4th output array
+* \param nblocks: The number of output blocks
+*/
+void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
+	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, uint8_t* out4,
+	uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t nblocks);
+
+#endif
+
 /* parallel shake x4 */
 
 /**
@@ -883,7 +971,7 @@ QSC_EXPORT_API void shake128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 *
 * \warning The input and output arrays muct be of the same length.
 * This function requires the AVX2 instruction set.
-* 
+*
 * \param out0: The 1st output array
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array
@@ -903,7 +991,7 @@ QSC_EXPORT_API void shake256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 *
 * \warning The input and output arrays muct be of the same length.
 * This function requires the AVX2 instruction set.
-* 
+*
 * \param out0: The 1st output array
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array

@@ -33,10 +33,10 @@
 #ifndef QSC_CONSOLEUTILS_H
 #define QSC_CONSOLEUTILS_H
 
-/* bogus winbase.h error */
-#pragma warning(disable : 5105)
-
 #include "common.h"
+
+/* bogus winbase.h error */
+QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 #define CONSOLE_MAX_LINE 128
 

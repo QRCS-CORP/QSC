@@ -18,7 +18,6 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 	assert(length <= QSC_RDP_SEED_MAX);
 
 	size_t fctr;
-	size_t i;
 	size_t poff;
 	int32_t fret;
 	bool hasrand;
@@ -60,7 +59,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 		{
 			const size_t RMDLEN = qsc_intutils_min(sizeof(uint64_t), length);
 
-			for (i = 0; i < RMDLEN; ++i)
+			for (size_t i = 0; i < RMDLEN; ++i)
 			{
 				output[poff + i] = (uint8_t)(rnd64 >> (i * 8));
 			}

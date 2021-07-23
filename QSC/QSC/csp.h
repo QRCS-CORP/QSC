@@ -44,7 +44,7 @@
 #include "common.h"
 
 /* bogus winbase.h error */
-#pragma warning(disable : 5105)
+QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 /*!
 * \def QSC_CSP_SEED_MAX

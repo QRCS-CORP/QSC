@@ -1,12 +1,11 @@
 #include "falcon.h"
 #if defined(QSC_SYSTEM_HAS_AVX2)
-#	include "intrinsics.h"
 #	include "falconbase_avx2.h"
 #else
 #	include "falconbase.h"
 #endif
 
-void qsc_falcon_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_falcon_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(publickey != NULL);
 	assert(privatekey != NULL);
@@ -19,7 +18,7 @@ void qsc_falcon_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (
 #endif
 }
 
-void qsc_falcon_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_falcon_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(signedmsg != NULL);
 	assert(smsglen != NULL);

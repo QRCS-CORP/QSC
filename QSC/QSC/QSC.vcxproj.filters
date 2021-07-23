@@ -151,6 +151,15 @@
     <Filter Include="Source Files\Asymmetric\Signature\Falcon">
       <UniqueIdentifier>{b3592f05-c821-4a76-9fb4-ba151faba479}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support">
+      <UniqueIdentifier>{2a8d8ef1-94b9-4f1f-82bb-ba9c20567d72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support\GAS">
+      <UniqueIdentifier>{c753403e-2483-49bf-8c60-388b06120bac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support\NASM">
+      <UniqueIdentifier>{f1c20f20-9df7-4d55-ac3d-fb8ec86f9765}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -345,6 +354,9 @@
     <ClInclude Include="falconbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
     </ClInclude>
+    <ClInclude Include="kyber_asm_consts.h">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -524,5 +536,19 @@
     <ClCompile Include="falconbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="kyber_asm_fq.S">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
+    </None>
+    <None Include="kyber_asm_invntt.S">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
+    </None>
+    <None Include="kyber_asm_ntt.S">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
+    </None>
+    <None Include="kyber_asm_shuffle.S">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
+    </None>
   </ItemGroup>
 </Project>

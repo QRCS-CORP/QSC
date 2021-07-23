@@ -1,27 +1,27 @@
 /* The AGPL version 3 License (AGPLv3)
-*
-* Copyright (c) 2021 Digital Freedom Defence Inc.
-* This file is part of the QSC Cryptographic library
-*
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of common networking support functions
-* Written by John G. Underhill
-* Updated on March 30, 2021
-* Contact: support@vtdev.com */
+
+ Copyright (c) 2021 Digital Freedom Defence Inc.
+ This file is part of the QSC Cryptographic library
+
+ This program is free software : you can redistribute it and / or modify
+ it under the terms of the GNU Affero General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+ Implementation Details:
+ An implementation of common networking support functions
+ Written by John G. Underhill
+ Updated on March 30, 2021
+ Contact: support@vtdev.com */
 
 /*
 * \file netutils.h
@@ -32,12 +32,13 @@
 #ifndef QSC_NETUTILS_H
 #define QSC_NETUTILS_H
 
-/* bogus winbase.h error */
-#pragma warning(disable : 5105)
-
 #include "common.h"
 #include "ipinfo.h"
+#include "socket.h"
 #include "socketbase.h"
+
+/* bogus winbase.h error */
+QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 /*!
 \def NET_MAC_ADAPTOR_INFO
@@ -172,7 +173,7 @@ QSC_EXPORT_API void qsc_netutils_get_mac_address(uint8_t mac[QSC_NET_MAC_ADDRESS
 *
 * \return Returns the peers name string
 */
-QSC_EXPORT_API void qsc_netutils_get_peer_name(char output[QSC_NET_HOSTS_NAME_BUFFER], qsc_socket* sock);
+QSC_EXPORT_API void qsc_netutils_get_peer_name(char output[QSC_NET_HOSTS_NAME_BUFFER], const qsc_socket* sock);
 
 /**
 * \brief
@@ -181,7 +182,7 @@ QSC_EXPORT_API void qsc_netutils_get_peer_name(char output[QSC_NET_HOSTS_NAME_BU
 *
 * \return Retrieves the name of the socket
 */
-QSC_EXPORT_API void qsc_netutils_get_socket_name(char output[QSC_NET_PROTOCOL_NAME_BUFFER], qsc_socket* sock);
+QSC_EXPORT_API void qsc_netutils_get_socket_name(char output[QSC_NET_PROTOCOL_NAME_BUFFER], const qsc_socket* sock);
 
 /**
 * \brief Get the port number using the connection parameters

@@ -1,7 +1,7 @@
 #include "sphincsplus.h"
 #include "sphincsplusbase.h"
 
-void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(publickey != NULL);
 	assert(privatekey != NULL);
@@ -13,7 +13,7 @@ void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, v
 	}
 }
 
-void qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(signedmsg != NULL);
 	assert(smsglen != NULL);

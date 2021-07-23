@@ -24,10 +24,6 @@
 
 /* kem.h */
 
-//int crypto_kem_keypair(uint8_t *pk, uint8_t *sk);
-//int crypto_kem_enc(uint8_t *c, uint8_t *k, const uint8_t *pk);
-//int crypto_kem_dec(uint8_t *k, const uint8_t *c, const uint8_t *sk);
-
 /**
 * \brief Generates shared secret for given cipher text and private key
 *
@@ -45,7 +41,7 @@ bool qsc_ntru_ref_decapsulate(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 * \param ss Pointer to output shared secret (an already allocated array of NTRU_BYTES bytes)
 * \param pk Pointer to input public key (an already allocated array of NTRU_PUBLICKEY_SIZE bytes)
 */
-void qsc_ntru_ref_encapsulate(uint8_t* ct, uint8_t* ss, const uint8_t* pk, void (*rng_generate)(uint8_t*, size_t));
+void qsc_ntru_ref_encapsulate(uint8_t* ct, uint8_t* ss, const uint8_t* pk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
@@ -53,6 +49,6 @@ void qsc_ntru_ref_encapsulate(uint8_t* ct, uint8_t* ss, const uint8_t* pk, void 
 * \param pk Pointer to output public key (an already allocated array of NTRU_PUBLICKEY_SIZE bytes)
 * \param sk Pointer to output private key (an already allocated array of NTRU_SECRETKEY_SIZE bytes)
 */
-void qsc_ntru_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate)(uint8_t*, size_t));
+void qsc_ntru_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 #endif

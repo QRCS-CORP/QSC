@@ -40,11 +40,11 @@
 *
 * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_SECRETKEY_SIZE.
 *
-* \param secret: The shared secret
 * \param publickey: Pointer to the output public-key array
 * \param privatekey: Pointer to output private-key array
+* \param secret: The shared secret
 */
-void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
+void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message.

@@ -7,6 +7,7 @@
 * \endcode
 */
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define QSCTEST_NIST_RNG_SEED_SIZE 48
@@ -69,9 +70,9 @@ void qsctest_nistrng_prng_initialize(const uint8_t* seed, const uint8_t* info, s
 *
 * \param output the pseudo-random output array
 * \param outlen the requested number of bytes to generate
-* \return 0 for success
+* \return true for success
 */
-int32_t qsctest_nistrng_prng_generate(uint8_t* output, size_t outlen);
+bool qsctest_nistrng_prng_generate(uint8_t* output, size_t outlen);
 
 /**
 * \brief Update the random provider with new keying material

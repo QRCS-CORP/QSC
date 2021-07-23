@@ -31,7 +31,7 @@ static void hcg_fill_buffer(qsc_hcg_state* ctx)
 	ctx->cpos = 0;
 }
 
-static csg_auto_reseed(qsc_hcg_state* ctx)
+static void csg_auto_reseed(qsc_hcg_state* ctx)
 {
 	if (ctx->pres && ctx->bctr >= QSC_HCG_RESEED_THRESHHOLD)
 	{
@@ -51,7 +51,7 @@ static csg_auto_reseed(qsc_hcg_state* ctx)
 void qsc_hcg_dispose(qsc_hcg_state* ctx)
 {
 	memset(ctx->cache, 0x00, sizeof(ctx->cache));
-	
+
 	ctx->bctr = 0;
 	ctx->cpos = 0;
 	ctx->crmd = 0;

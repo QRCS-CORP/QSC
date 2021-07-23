@@ -13,13 +13,13 @@
 #	include <unistd.h>
 #	include <errno.h>
 #elif defined(QSC_SYSTEM_OS_WINDOWS)
-#	include <windows.h>
+#	include <Windows.h>
 #endif
 
 uint8_t* qsc_secmem_alloc(size_t length)
 {
 	const size_t PGESZE = qsc_secmem_page_size();
-	void* ptr;
+	char* ptr;
 
 	ptr = NULL;
 
@@ -65,7 +65,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 
 #elif defined(QSC_SYSTEM_HAS_VIRTUALLOCK)
 
-	(LPVOID)ptr = VirtualAlloc(NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	ptr = (char*)VirtualAlloc(NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
 	if (ptr != NULL)
 	{
@@ -85,7 +85,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 
 #endif
 
-	return ptr;
+	return (uint8_t*)ptr;
 }
 
 void qsc_secmem_erase(uint8_t* block, size_t length)

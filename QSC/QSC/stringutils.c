@@ -6,29 +6,25 @@
 
 #define QSC_STRING_MAX_LEN 4096
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-static char* strsep(char** stringp, const char* delim)
+char* strsepex(char** stringp, const char* delim)
 {
-	assert(*stringp != NULL);
-	assert(delim != NULL);
+    char *rv = *stringp;
 
-	char* ts = NULL;
+    if (rv)
+    {
+        *stringp += strcspn(*stringp, delim);
+        if (**stringp)
+        {
+            *(*stringp)++ = '\0';
+        }
+        else
+        {
+            *stringp = 0;
+        }
+    }
 
-	if (*stringp != NULL)
-	{
-		ts = *stringp;
-		*stringp = strpbrk(ts, delim);
-
-		if (*stringp)
-		{
-			**stringp = '\0';
-			(*stringp)++;
-		}
-	}
-
-	return ts;
+    return rv;
 }
-#endif
 
 size_t qsc_stringutils_add_line_breaks(char* buffer, size_t buflen, size_t linelen, const char* source, size_t sourcelen)
 {
@@ -124,17 +120,16 @@ void qsc_stringutils_clear_substring(char* buffer, size_t count)
 	}
 }
 
-bool qsc_stringutils_compare_strings(char* a, const char* b, size_t length)
+bool qsc_stringutils_compare_strings(const char* a, const char* b, size_t length)
 {
 	assert(a != NULL);
 	assert(b != NULL);
 
-	size_t i;
 	char c;
 
 	c = 0;
 
-	for (i = 0; i < length; ++i)
+	for (size_t i = 0; i < length; ++i)
 	{
 		c += a[i] ^ b[i];
 	}
@@ -208,7 +203,7 @@ size_t qsc_stringutils_concat_and_copy(char* buffer, size_t buflen, const char* 
 
 			if (strlen(substr2) > 0)
 			{
-				qsc_stringutils_copy_string(((char*)buffer + slen), buflen, substr2);
+				qsc_stringutils_copy_string((buffer + slen), buflen, substr2);
 			}
 		}
 
@@ -279,7 +274,7 @@ int32_t qsc_stringutils_find_string(const char* source, const char* token)
 	assert(source != NULL);
 	assert(token != NULL);
 
-	char* sub;
+	const char* sub;
 	int32_t pos;
 
 	pos = -1;
@@ -310,7 +305,7 @@ int32_t qsc_stringutils_insert_string(char* buffer, size_t buflen, const char* s
 	{
 		if ((strlen(buffer) + strlen(substr)) <= buflen && offset < (buflen - strlen(substr)))
 		{
-			qsc_stringutils_concat_strings((char*)(buffer + offset), buflen, substr);
+			qsc_stringutils_concat_strings((buffer + offset), buflen, substr);
 			res = (int32_t)strlen(buffer);
 		}
 	}
@@ -318,11 +313,10 @@ int32_t qsc_stringutils_insert_string(char* buffer, size_t buflen, const char* s
 	return res;
 }
 
-bool qsc_stringutils_is_alpha_numeric(char* source, size_t srclen)
+bool qsc_stringutils_is_alpha_numeric(const char* source, size_t srclen)
 {
 	assert(source != NULL);
 
-	size_t i;
 	char c;
 	bool res;
 
@@ -330,7 +324,7 @@ bool qsc_stringutils_is_alpha_numeric(char* source, size_t srclen)
 	{
 		res = true;
 
-		for (i = 0; i < srclen; ++i)
+		for (size_t i = 0; i < srclen; ++i)
 		{
 			c = source[i];
 
@@ -349,11 +343,10 @@ bool qsc_stringutils_is_alpha_numeric(char* source, size_t srclen)
 	return res;
 }
 
-bool qsc_stringutils_is_hex(char* source, size_t srclen)
+bool qsc_stringutils_is_hex(const char* source, size_t srclen)
 {
 	assert(source != NULL);
 
-	size_t i;
 	char c;
 	bool res;
 
@@ -361,7 +354,7 @@ bool qsc_stringutils_is_hex(char* source, size_t srclen)
 	{
 		res = true;
 
-		for (i = 0; i < srclen; ++i)
+		for (size_t i = 0; i < srclen; ++i)
 		{
 			c = source[i];
 
@@ -380,11 +373,10 @@ bool qsc_stringutils_is_hex(char* source, size_t srclen)
 	return res;
 }
 
-bool qsc_stringutils_is_numeric(char* source, size_t srclen)
+bool qsc_stringutils_is_numeric(const char* source, size_t srclen)
 {
 	assert(source != NULL);
 
-	size_t i;
 	char c;
 	bool res;
 
@@ -392,7 +384,7 @@ bool qsc_stringutils_is_numeric(char* source, size_t srclen)
 	{
 		res = true;
 
-		for (i = 0; i < srclen; ++i)
+		for (size_t i = 0; i < srclen; ++i)
 		{
 			c = source[i];
 
@@ -463,16 +455,15 @@ char* qsc_stringutils_join_string(char** source, size_t count)
 	return nstr;
 }
 
-char** qsc_stringutils_split_string(char* source, char* delim, size_t* count)
+char** qsc_stringutils_split_string(char* source, const char* delim, size_t* count)
 {
 	assert(source != NULL);
 	assert(delim != NULL);
 	assert(count != NULL);
 
 	char** ptok;
-	char* tok;
-	char* str;
-	char* tfr;
+	const char* tok;
+	char* pstr;
 	int32_t pln;
 	int32_t pos;
 	size_t ctr;
@@ -486,52 +477,58 @@ char** qsc_stringutils_split_string(char* source, char* delim, size_t* count)
 		pos = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		str = _strdup(source);
+		pstr = _strdup(source);
 #else
-		str = strdup(source);
+		pstr = strdup(source);
 #endif
-		tfr = str;
-
-		do
-		{
-			pln = qsc_stringutils_find_string(source + pos, delim);
-			pos += pln + 1;
-
-			if (pln > 0)
-			{
-				++ctr;
-			}
-		} while (pln != -1);
-
-		ptok = (char**)malloc(ctr * sizeof(char*));
-		ctr = 0;
-
-		if (ptok != NULL)
+		if (pstr != NULL)
 		{
 			do
 			{
-				tok = strsep(&source, delim);
+				pln = qsc_stringutils_find_string(source + pos, delim);
+				pos += pln + 1;
 
-				if (tok != NULL)
+				if (pln > 0)
 				{
-					len = strlen(tok);
+					++ctr;
+				}
+			} while (pln != -1);
 
-					if (len > 0)
+			if (ctr > 0)
+			{
+				ptok = (char**)malloc(ctr * sizeof(char*));
+			}
+
+			ctr = 0;
+
+			if (ptok != NULL)
+			{
+				do
+				{
+					tok = strsepex(&source, delim);
+
+					if (tok != NULL)
 					{
-						ptok[ctr] = (char*)malloc(len + 1);
+						len = strlen(tok);
 
-						if (ptok[ctr] != NULL)
+						if (len > 0)
 						{
-							memcpy(ptok[ctr], tok, len);
-							ptok[ctr][len] = '\0';
-							++ctr;
+							ptok[ctr] = (char*)malloc(len + 1);
+
+							if (ptok[ctr] != NULL)
+							{
+								memcpy(ptok[ctr], tok, len);
+								ptok[ctr][len] = '\0';
+								++ctr;
+							}
 						}
 					}
-				}
-			} while (tok != NULL);
+				} while (tok != NULL);
 
-			*count = ctr;
-			free(tfr);
+				*count = ctr;
+			}
+
+			free(pstr);
 		}
 	}
 
@@ -560,7 +557,7 @@ char* qsc_stringutils_reverse_sub_string(const char* source, const char* token)
 	assert(source != NULL);
 	assert(token != NULL);
 
-	char* pch;
+	const char* pch;
 	char* sub;
 	size_t pos;
 
@@ -585,14 +582,13 @@ bool qsc_stringutils_string_compare(const char* a, const char* b, size_t length)
 	assert(a != NULL);
 	assert(b != NULL);
 
-	size_t i;
 	bool res;
 
 	res = true;
 
 	if (strlen(a) == strlen(b))
 	{
-		for (i = 0; i < length; ++i)
+		for (size_t i = 0; i < length; ++i)
 		{
 			if (a[i] != b[i])
 			{
@@ -679,7 +675,6 @@ void qsc_stringutils_trim_newline(char* source)
 	assert(source != NULL);
 
 	size_t slen;
-	int32_t i;
 
 	if (source != NULL)
 	{
@@ -689,7 +684,7 @@ void qsc_stringutils_trim_newline(char* source)
 		slen = strnlen_s(source, QSC_STRING_MAX_LEN);
 #endif
 
-		for (i = (int32_t)slen - 1; i >= 0; --i)
+		for (int32_t i = (int32_t)slen - 1; i >= 0; --i)
 		{
 			if (source[i] == '\n')
 			{

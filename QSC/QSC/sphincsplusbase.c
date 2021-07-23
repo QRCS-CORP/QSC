@@ -201,11 +201,10 @@ static void sphincsplus_u32_to_bytes(uint8_t* out, uint32_t in)
 static uint64_t sphincsplus_bytes_to_ull(const uint8_t* in, uint32_t inlen)
 {
     uint64_t ret;
-    size_t i;
 
     ret = 0;
 
-    for (i = 0; i < inlen; ++i)
+    for (size_t i = 0; i < inlen; ++i)
     {
         ret |= ((uint64_t)in[i]) << (8 * (inlen - 1 - i));
     }
@@ -221,7 +220,7 @@ static void sphincsplus_set_layer_addr(uint32_t addr[8], uint32_t layer)
 {
     /* Specify which level of Merkle tree (the "layer") we're working on */
 
-    ((uint8_t*)addr)[SPX_OFFSET_LAYER] = layer;
+    ((uint8_t*)addr)[SPX_OFFSET_LAYER] = (uint8_t)layer;
 }
 
 static void sphincsplus_set_tree_addr(uint32_t addr[8], uint64_t tree)
@@ -242,7 +241,7 @@ static void sphincsplus_set_type(uint32_t addr[8], uint32_t type)
        hashes don't accidentally get the same address structure.  The type will be
        one of the SPX_ADDR_TYPE constants */
 
-    ((uint8_t*)addr)[SPX_OFFSET_TYPE] = type;
+    ((uint8_t*)addr)[SPX_OFFSET_TYPE] = (uint8_t)type;
 }
 
 static void sphincsplus_copy_subtree_addr(uint32_t out[8], const uint32_t in[8])
@@ -250,7 +249,7 @@ static void sphincsplus_copy_subtree_addr(uint32_t out[8], const uint32_t in[8])
     /* Copy the layer and tree fields of the address structure.  This is used
        when we're doing multiple types of hashes within the same Merkle tree */
 
-    qsc_memutils_copy((uint8_t*)out, (uint8_t*)in, SPX_OFFSET_TREE + 8);
+    qsc_memutils_copy((uint8_t*)out, (const uint8_t*)in, SPX_OFFSET_TREE + 8);
 }
 
 static void sphincsplus_set_keypair_addr(uint32_t addr[8], uint32_t keypair)
@@ -264,7 +263,7 @@ static void sphincsplus_set_keypair_addr(uint32_t addr[8], uint32_t keypair)
     ((uint8_t*)addr)[SPX_OFFSET_KP_ADDR2] = keypair >> 8;
 #endif
 
-    ((uint8_t*)addr)[SPX_OFFSET_KP_ADDR1] = keypair;
+    ((uint8_t*)addr)[SPX_OFFSET_KP_ADDR1] = (uint8_t)keypair;
 }
 
 static void sphincsplus_copy_keypair_addr(uint32_t out[8], const uint32_t in[8])
@@ -272,33 +271,33 @@ static void sphincsplus_copy_keypair_addr(uint32_t out[8], const uint32_t in[8])
     /* Copy the layer, tree and keypair fields of the address structure.
        This is used when we're doing multiple things within the same OTS keypair */
 
-    qsc_memutils_copy((uint8_t*)out, (uint8_t*)in, SPX_OFFSET_TREE + 8);
+    qsc_memutils_copy((uint8_t*)out, (const uint8_t*)in, SPX_OFFSET_TREE + 8);
 
 #if (SPX_FULL_HEIGHT/SPX_D > 8)
     ((uint8_t*)out)[SPX_OFFSET_KP_ADDR2] = ((uint8_t*)in)[SPX_OFFSET_KP_ADDR2];
 #endif
-    ((uint8_t*)out)[SPX_OFFSET_KP_ADDR1] = ((uint8_t*)in)[SPX_OFFSET_KP_ADDR1];
+    ((uint8_t*)out)[SPX_OFFSET_KP_ADDR1] = ((const uint8_t*)in)[SPX_OFFSET_KP_ADDR1];
 }
 
 static void sphincsplus_set_chain_addr(uint32_t addr[8], uint32_t chain)
 {
     /* Specify which Merkle chain within the OTS we're working with (the chain address) */
 
-    ((uint8_t*)addr)[SPX_OFFSET_CHAIN_ADDR] = chain;
+    ((uint8_t*)addr)[SPX_OFFSET_CHAIN_ADDR] = (uint8_t)chain;
 }
 
 static void sphincsplus_set_hash_addr(uint32_t addr[8], uint32_t hash)
 {
     /* Specify where in the Merkle chain we are (the hash address) */
 
-    ((uint8_t*)addr)[SPX_OFFSET_HASH_ADDR] = hash;
+    ((uint8_t*)addr)[SPX_OFFSET_HASH_ADDR] = (uint8_t)hash;
 }
 
 static void sphincsplus_set_tree_height(uint32_t addr[8], uint32_t tree_height)
 {
     /* Specify the height of the node in the Merkle/FORS tree we are in (the tree height) */
 
-    ((uint8_t*)addr)[SPX_OFFSET_TREE_HGT] = tree_height;
+    ((uint8_t*)addr)[SPX_OFFSET_TREE_HGT] = (uint8_t)tree_height;
 }
 
 static void sphincsplus_set_tree_index(uint32_t addr[8], uint32_t tree_index)
@@ -317,7 +316,7 @@ static void sphincsplus_prf_addr(uint8_t* out, const uint8_t* key, const uint32_
     uint8_t buf[SPX_N + SPX_ADDR_BYTES];
 
     qsc_memutils_copy(buf, key, SPX_N);
-    qsc_memutils_copy(buf + SPX_N, (uint8_t*)addr, SPX_ADDR_BYTES);
+    qsc_memutils_copy(buf + SPX_N, (const uint8_t*)addr, SPX_ADDR_BYTES);
 
     qsc_shake256_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES);
 }
@@ -342,7 +341,7 @@ static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* 
        the tree index and the leaf index, for convenient copying to an address. */
 
     uint8_t buf[SPX_DGST_BYTES];
-    uint8_t* bufp = buf;
+    const uint8_t* bufp = buf;
     qsc_keccak_state kctx = { 0 };
 
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, R, SPX_N);
@@ -372,7 +371,6 @@ static void sphincsplus_thash(uint8_t* out, const uint8_t* in, uint32_t inblocks
 
     uint8_t* buf;
     uint8_t* bitmask;
-    uint32_t i;
 
     buf = (uint8_t*)malloc(SPX_N + SPX_ADDR_BYTES + inblocks * SPX_N);
     bitmask = (uint8_t*)malloc(inblocks * SPX_N);
@@ -385,7 +383,7 @@ static void sphincsplus_thash(uint8_t* out, const uint8_t* in, uint32_t inblocks
 
         qsc_shake256_compute(bitmask, inblocks * SPX_N, buf, SPX_N + SPX_ADDR_BYTES);
 
-        for (i = 0; i < inblocks * SPX_N; ++i)
+        for (size_t i = 0; i < inblocks * SPX_N; ++i)
         {
             buf[SPX_N + SPX_ADDR_BYTES + i] = in[i] ^ bitmask[i];
         }
@@ -411,7 +409,6 @@ static void sphincsplus_compute_root(uint8_t* root, const uint8_t* leaf, uint32_
        Expects address to be complete other than the tree_height and tree_index */
 
     uint8_t buffer[2 * SPX_N];
-    size_t i;
 
     /* If leaf_idx is odd (last bit = 1), current path element is a right child
        and auth_path has to go left. Otherwise it is the other way around. */
@@ -428,7 +425,7 @@ static void sphincsplus_compute_root(uint8_t* root, const uint8_t* leaf, uint32_
 
     auth_path += SPX_N;
 
-    for (i = 0; i < tree_height - 1; ++i)
+    for (size_t i = 0; i < tree_height - 1; ++i)
     {
         leaf_idx >>= 1;
         idx_offset >>= 1;
@@ -479,17 +476,17 @@ static void sphincsplus_treehash(uint8_t* root, uint8_t* auth_path, const uint8_
 
     uint8_t* stack;
     uint32_t* heights;
-    uint32_t offset = 0;
-    uint32_t idx;
+    uint32_t offset;
     uint32_t tree_idx;
 
+    offset = 0;
     stack = (uint8_t*)malloc((tree_height + 1) * SPX_N);
     heights = (uint32_t*)malloc((tree_height + 1) * sizeof(uint32_t));
     assert(stack != NULL && heights != NULL);
 
     if (stack != NULL && heights != NULL)
     {
-        for (idx = 0; idx < (uint32_t)(1 << tree_height); ++idx)
+        for (uint32_t idx = 0; idx < (uint32_t)(1 << tree_height); ++idx)
         {
             /* Add the next leaf node to the stack. */
             gen_leaf(stack + offset * SPX_N, sk_seed, pub_seed, idx + idx_offset, tree_addr);
@@ -534,7 +531,7 @@ static void sphincsplus_treehash(uint8_t* root, uint8_t* auth_path, const uint8_
 
 /* fors.c */
 
-static void sphincsplus_fors_gen_sk(uint8_t* sk, const uint8_t* sk_seed, uint32_t fors_leaf_addr[8])
+static void sphincsplus_fors_gen_sk(uint8_t* sk, const uint8_t* sk_seed, const uint32_t fors_leaf_addr[8])
 {
     sphincsplus_prf_addr(sk, sk_seed, fors_leaf_addr);
 }
@@ -563,17 +560,15 @@ static void sphincsplus_message_to_indices(uint32_t* indices, const uint8_t* m)
        Assumes m contains at least SPX_FORS_HEIGHT * SPX_FORS_TREES bits.
        Assumes indices has space for SPX_FORS_TREES integers. */
 
-    size_t i;
-    size_t j;
     size_t oft;
 
     oft = 0;
 
-    for (i = 0; i < SPX_FORS_TREES; ++i)
+    for (size_t i = 0; i < SPX_FORS_TREES; ++i)
     {
         indices[i] = 0;
 
-        for (j = 0; j < SPX_FORS_HEIGHT; ++j)
+        for (size_t j = 0; j < SPX_FORS_HEIGHT; ++j)
         {
             indices[i] ^= ((m[oft >> 3] >> (oft & 0x7)) & 0x1) << j;
             ++oft;
@@ -590,7 +585,6 @@ static void sphincsplus_fors_sign(uint8_t* sig, uint8_t* pk, const uint8_t* m, c
     uint32_t fors_tree_addr[8] = { 0 };
     uint32_t fors_pk_addr[8] = { 0 };
     uint32_t idx_offset;
-    uint32_t i;
 
     sphincsplus_copy_keypair_addr(fors_tree_addr, fors_addr);
     sphincsplus_copy_keypair_addr(fors_pk_addr, fors_addr);
@@ -600,7 +594,7 @@ static void sphincsplus_fors_sign(uint8_t* sig, uint8_t* pk, const uint8_t* m, c
 
     sphincsplus_message_to_indices(indices, m);
 
-    for (i = 0; i < SPX_FORS_TREES; ++i)
+    for (uint32_t i = 0; i < SPX_FORS_TREES; ++i)
     {
         idx_offset = i * (1 << SPX_FORS_HEIGHT);
 
@@ -635,7 +629,6 @@ static void sphincsplus_fors_pk_from_sig(uint8_t* pk, const uint8_t* sig, const 
     uint32_t fors_tree_addr[8] = { 0 };
     uint32_t fors_pk_addr[8] = { 0 };
     uint32_t idx_offset;
-    uint32_t i;
 
     sphincsplus_copy_keypair_addr(fors_tree_addr, fors_addr);
     sphincsplus_copy_keypair_addr(fors_pk_addr, fors_addr);
@@ -645,7 +638,7 @@ static void sphincsplus_fors_pk_from_sig(uint8_t* pk, const uint8_t* sig, const 
 
     sphincsplus_message_to_indices(indices, m);
 
-    for (i = 0; i < SPX_FORS_TREES; ++i)
+    for (uint32_t i = 0; i < SPX_FORS_TREES; ++i)
     {
         idx_offset = i * (1 << SPX_FORS_HEIGHT);
 
@@ -688,13 +681,11 @@ static void sphincsplus_gen_chain(uint8_t* out, const uint8_t* in, uint32_t star
        Interprets in as start-th value of the chain.
        addr has to contain the address of the chain. */
 
-    size_t i;
-
     /* Initialize out with the value at position 'start'. */
     qsc_memutils_copy(out, in, SPX_N);
 
     /* Iterate 'steps' calls to the hash function. */
-    for (i = start; i < (start + steps) && i < SPX_WOTS_W; ++i)
+    for (size_t i = start; i < (start + steps) && i < SPX_WOTS_W; ++i)
     {
         sphincsplus_set_hash_addr(addr, (uint32_t)i);
         sphincsplus_thash(out, out, 1, pub_seed, addr);
@@ -711,13 +702,12 @@ static void sphincsplus_base_w(uint32_t* output, const int out_len, const uint8_
     size_t octr;
     uint8_t total;
     int32_t bits;
-    int32_t consumed;
 
     bits = 0;
     ictr = 0;
     octr = 0;
 
-    for (consumed = 0; consumed < out_len; ++consumed)
+    for (int32_t consumed = 0; consumed < out_len; ++consumed)
     {
         if (bits == 0)
         {
@@ -737,13 +727,12 @@ static void sphincsplus_wots_checksum(uint32_t* csum_base_w, const uint32_t* msg
     /* Computes the WOTS+ checksum over a message (in sphincsplus_base_w). */
 
     uint8_t csum_bytes[(SPX_WOTS_LEN2 * SPX_WOTS_LOGW + 7) / 8];
-    size_t i;
     uint32_t csum;
 
     csum = 0;
 
     /* Compute checksum. */
-    for (i = 0; i < SPX_WOTS_LEN1; ++i)
+    for (size_t i = 0; i < SPX_WOTS_LEN1; ++i)
     {
         csum += SPX_WOTS_W - 1 - msg_base_w[i];
     }
@@ -771,9 +760,7 @@ static void sphincsplus_wots_gen_pk(uint8_t* pk, const uint8_t* sk_seed, const u
        and the address of this WOTS key pair.
        Writes the computed public key to 'pk'. */
 
-    size_t i;
-
-    for (i = 0; i < SPX_WOTS_LEN; ++i)
+    for (size_t i = 0; i < SPX_WOTS_LEN; ++i)
     {
         sphincsplus_set_chain_addr(addr, (uint32_t)i);
         sphincsplus_wots_gen_sk(pk + i * SPX_N, sk_seed, addr);
@@ -786,11 +773,10 @@ static void sphincsplus_wots_sign(uint8_t* sig, const uint8_t* msg, const uint8_
     /* Takes a n-byte message and the 32-byte sk_see to compute a signature 'sig'. */
 
     uint32_t lengths[SPX_WOTS_LEN];
-    size_t i;
 
     sphincsplus_chain_lengths(lengths, msg);
 
-    for (i = 0; i < SPX_WOTS_LEN; ++i)
+    for (size_t i = 0; i < SPX_WOTS_LEN; ++i)
     {
         sphincsplus_set_chain_addr(addr, (uint32_t)i);
         sphincsplus_wots_gen_sk(sig + i * SPX_N, sk_seed, addr);
@@ -804,11 +790,10 @@ static void sphincsplus_wots_pk_from_sig(uint8_t* pk, const uint8_t* sig, const 
        Writes the computed public key to 'pk'. */
 
     uint32_t lengths[SPX_WOTS_LEN];
-    size_t i;
 
     sphincsplus_chain_lengths(lengths, msg);
 
-    for (i = 0; i < SPX_WOTS_LEN; ++i)
+    for (size_t i = 0; i < SPX_WOTS_LEN; ++i)
     {
         sphincsplus_set_chain_addr(addr, (uint32_t)i);
         sphincsplus_gen_chain(pk + i * SPX_N, sig + i * SPX_N, lengths[i], SPX_WOTS_W - 1 - lengths[i], pub_seed, addr);
@@ -868,8 +853,8 @@ size_t sphincsplus_ref_sign_seedbytes(void)
 int32_t sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed)
 {
     /* Generates an SPX key pair given a seed of length
-       Format sk: [SK_SEED || SK_PRF || PUB_SEED || root]
-       Format pk: [PUB_SEED || root] */
+       Format sk [SK_SEED || SK_PRF || PUB_SEED || root]
+       Format pk [PUB_SEED || root] */
     /* We do not need the auth path in key generation, but it simplifies the
         code to have just one sphincsplus_treehash routine that computes both root and path
         in one function. */
@@ -885,19 +870,18 @@ int32_t sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const ui
     qsc_memutils_copy(pk, sk + 2 * SPX_N, SPX_N);
 
     /* Compute root node of the top-most subtree. */
-    sphincsplus_treehash(sk + 3 * SPX_N, auth_path, sk, sk + 2 * SPX_N, 0, 0, SPX_TREE_HEIGHT,
-        sphincsplus_wots_gen_leaf, top_tree_addr);
+    sphincsplus_treehash(sk + 3 * SPX_N, auth_path, sk, sk + 2 * SPX_N, 0, 0, SPX_TREE_HEIGHT, sphincsplus_wots_gen_leaf, top_tree_addr);
 
     qsc_memutils_copy(pk + SPX_N, sk + 3 * SPX_N, SPX_N);
 
     return 0;
 }
 
-void sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+void sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     /* Generates an SPX key pair.
-       Format sk: [SK_SEED || SK_PRF || PUB_SEED || root]
-       Format pk: [PUB_SEED || root] */
+       Format sk [SK_SEED || SK_PRF || PUB_SEED || root]
+       Format pk [PUB_SEED || root] */
 
     uint8_t seed[SPHINCSPLUS_CRYPTO_SEEDBYTES];
 
@@ -905,7 +889,7 @@ void sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_gener
     sphincsplus_ref_generate_seed_keypair(pk, sk, seed);
 }
 
-void sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+void sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     /* Returns an array containing a detached signature */
 
@@ -917,7 +901,6 @@ void sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t*
     uint8_t optrand[SPX_N];
     uint8_t mhash[SPX_FORS_MSG_BYTES];
     uint8_t root[SPX_N];
-    uint64_t i;
     uint64_t tree;
     uint32_t idx_leaf;
     uint32_t wots_addr[8] = { 0 };
@@ -945,7 +928,7 @@ void sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t*
     sphincsplus_fors_sign(sig, root, mhash, sk_seed, pub_seed, wots_addr);
     sig += SPX_FORS_BYTES;
 
-    for (i = 0; i < SPX_D; ++i)
+    for (size_t i = 0; i < SPX_D; ++i)
     {
         sphincsplus_set_layer_addr(tree_addr, (uint32_t)i);
         sphincsplus_set_tree_addr(tree_addr, tree);
@@ -980,7 +963,6 @@ bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_
     uint8_t wots_pk[SPX_WOTS_BYTES];
     uint8_t root[SPX_N];
     uint8_t leaf[SPX_N];
-    uint32_t i;
     uint64_t tree;
     uint32_t idx_leaf;
     uint32_t wots_addr[8] = { 0 };
@@ -990,13 +972,13 @@ bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_
 
     res = false;
 
-    if (siglen = SPX_BYTES)
+    if (siglen == SPX_BYTES)
     {
         sphincsplus_set_type(wots_addr, SPX_ADDR_TYPE_WOTS);
         sphincsplus_set_type(tree_addr, SPX_ADDR_TYPE_HASHTREE);
         sphincsplus_set_type(wots_pk_addr, SPX_ADDR_TYPE_WOTSPK);
 
-        /* Derive the message digest and leaf index from R || PK || M. */
+        /* Derive the message digest and leaf index from R || PK || M */
         /* The additional SPX_N is a result of the hash domain separator. */
         sphincsplus_hash_message(mhash, &tree, &idx_leaf, sig, pk, m, mlen);
         sig += SPX_N;
@@ -1009,7 +991,7 @@ bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_
         sig += SPX_FORS_BYTES;
 
         /* For each subtree.. */
-        for (i = 0; i < SPX_D; ++i)
+        for (uint32_t i = 0; i < SPX_D; ++i)
         {
             sphincsplus_set_layer_addr(tree_addr, i);
             sphincsplus_set_tree_addr(tree_addr, tree);
@@ -1048,13 +1030,13 @@ bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_
     return res;
 }
 
-void sphincsplus_ref_sign(uint8_t* sm, uint64_t* smlen, const uint8_t* m, uint64_t mlen, const uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+void sphincsplus_ref_sign(uint8_t* sm, uint64_t* smlen, const uint8_t* m, uint64_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     /* Returns an array containing the signature followed by the message */
 
     size_t siglen;
 
-    sphincsplus_ref_sign_signature(sm, &siglen, m, (size_t)mlen, sk, rng_generate);
+    sphincsplus_ref_sign_signature(sm, &siglen, m, mlen, sk, rng_generate);
     memmove(sm + SPX_BYTES, m, mlen);
     *smlen = siglen + mlen;
 }
@@ -1072,7 +1054,7 @@ bool sphincsplus_ref_sign_open(uint8_t* m, uint64_t* mlen, const uint8_t* sm, ui
     if (smlen >= SPX_BYTES)
     {
         *mlen = smlen - SPX_BYTES;
-        res = sphincsplus_ref_sign_verify(sm, SPX_BYTES, sm + SPX_BYTES, (size_t)*mlen, pk);
+        res = sphincsplus_ref_sign_verify(sm, SPX_BYTES, sm + SPX_BYTES, *mlen, pk);
 
         if (res == true)
         {

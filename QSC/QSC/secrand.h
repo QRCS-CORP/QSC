@@ -230,7 +230,7 @@ QSC_EXPORT_API uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_
 * \param custom: The optional customization parameter (can be NULL)
 * \param custlen: The length of the customization array
 */
-QSC_EXPORT_API void qsc_secrand_initialize(uint8_t* seed, size_t seedlen, uint8_t* custom, size_t custlen);
+QSC_EXPORT_API void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* custom, size_t custlen);
 
 /**
 * \brief Generate an array of pseudo-random bytes

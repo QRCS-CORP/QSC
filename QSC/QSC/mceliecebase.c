@@ -83,13 +83,12 @@ static gf gf_mul(gf in0, gf in1)
 	uint64_t t0;
 	uint64_t t1;
 	uint64_t tmp;
-	int32_t i;
 
 	t0 = in0;
 	t1 = in1;
 	tmp = t0 * (t1 & 1);
 
-	for (i = 1; i < MCELIECE_GFBITS; ++i)
+	for (size_t i = 1; i < MCELIECE_GFBITS; ++i)
 	{
 		tmp ^= (t0 * (t1 & (1ULL << i)));
 	}
@@ -112,7 +111,6 @@ static gf gf_sq2(gf in)
 	const uint64_t M[] = { 0x0001FF0000000000ULL, 0x000000FF80000000ULL, 0x000000007FC00000ULL, 0x00000000003FE000ULL };
 	uint64_t t;
 	uint64_t x;
-	size_t i;
 
 	x = in;
 	x = (x | (x << 24)) & Bf[3];
@@ -120,7 +118,7 @@ static gf gf_sq2(gf in)
 	x = (x | (x << 6)) & Bf[1];
 	x = (x | (x << 3)) & Bf[0];
 
-	for (i = 0; i < 4; ++i)
+	for (size_t i = 0; i < 4; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -139,21 +137,20 @@ static gf gf_sqmul(gf in, gf m)
 	uint64_t t0;
 	uint64_t t1;
 	uint64_t x;
-	size_t i;
 
 	t0 = in;
 	t1 = m;
 	x = (t1 << 6) * (t0 & (1 << 6));
 	t0 ^= (t0 << 7);
 
-	x ^= (t1 * (t0 & (0x0000000000004001ULL)));
-	x ^= (t1 * (t0 & (0x0000000000008002ULL))) << 1;
-	x ^= (t1 * (t0 & (0x0000000000010004ULL))) << 2;
-	x ^= (t1 * (t0 & (0x0000000000020008ULL))) << 3;
-	x ^= (t1 * (t0 & (0x0000000000040010ULL))) << 4;
-	x ^= (t1 * (t0 & (0x0000000000080020ULL))) << 5;
+	x ^= (t1 * (t0 & 0x0000000000004001ULL));
+	x ^= (t1 * (t0 & 0x0000000000008002ULL)) << 1;
+	x ^= (t1 * (t0 & 0x0000000000010004ULL)) << 2;
+	x ^= (t1 * (t0 & 0x0000000000020008ULL)) << 3;
+	x ^= (t1 * (t0 & 0x0000000000040010ULL)) << 4;
+	x ^= (t1 * (t0 & 0x0000000000080020ULL)) << 5;
 
-	for (i = 0; i < 3; ++i)
+	for (size_t i = 0; i < 3; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -172,21 +169,20 @@ static gf gf_sq2mul(gf in, gf m)
 	uint64_t t0;
 	uint64_t t1;
 	uint64_t t;
-	size_t i;
 
 	t0 = in;
 	t1 = m;
 	x = (t1 << 18) * (t0 & (1 << 6));
 	t0 ^= (t0 << 21);
 
-	x ^= (t1 * (t0 & (0x0000000010000001ULL)));
-	x ^= (t1 * (t0 & (0x0000000020000002ULL))) << 3;
-	x ^= (t1 * (t0 & (0x0000000040000004ULL))) << 6;
-	x ^= (t1 * (t0 & (0x0000000080000008ULL))) << 9;
-	x ^= (t1 * (t0 & (0x0000000100000010ULL))) << 12;
-	x ^= (t1 * (t0 & (0x0000000200000020ULL))) << 15;
+	x ^= (t1 * (t0 & 0x0000000010000001ULL));
+	x ^= (t1 * (t0 & 0x0000000020000002ULL)) << 3;
+	x ^= (t1 * (t0 & 0x0000000040000004ULL)) << 6;
+	x ^= (t1 * (t0 & 0x0000000080000008ULL)) << 9;
+	x ^= (t1 * (t0 & 0x0000000100000010ULL)) << 12;
+	x ^= (t1 * (t0 & 0x0000000200000020ULL)) << 15;
 
-	for (i = 0; i < 6; ++i)
+	for (size_t i = 0; i < 6; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -219,18 +215,17 @@ static gf gf_inv(gf den)
 	return gf_frac(den, ((gf)1));
 }
 
-static void GF_mul(gf* out, gf* in0, gf* in1)
+static void GF_mul(gf* out, const gf* in0, const gf* in1)
 {
 	/* input: in0, in1 in GF((2^m)^t)
 	   output: out = in0*in1 */
 
 	gf prod[MCELIECE_SYS_T * 2 - 1] = { 0 };
 	size_t i;
-	size_t j;
 
 	for (i = 0; i < MCELIECE_SYS_T; ++i)
 	{
-		for (j = 0; j < MCELIECE_SYS_T; ++j)
+		for (size_t j = 0; j < MCELIECE_SYS_T; ++j)
 		{
 			prod[i + j] ^= gf_mul(in0[i], in1[j]);
 		}
@@ -254,10 +249,7 @@ static void GF_mul(gf* out, gf* in0, gf* in1)
 #endif
 	}
 
-	for (i = 0; i < MCELIECE_SYS_T; ++i)
-	{
-		out[i] = prod[i];
-	}
+	qsc_memutils_copy(out, prod, MCELIECE_SYS_T * sizeof(gf));
 }
 
 /* util.c */
@@ -282,11 +274,10 @@ static uint16_t load_gf(const uint8_t* src)
 static uint32_t load4(const uint8_t* in)
 {
 	uint32_t ret;
-	int32_t i;
 
 	ret = in[3];
 
-	for (i = 2; i >= 0; --i)
+	for (int32_t i = 2; i >= 0; --i)
 	{
 		ret <<= 8;
 		ret |= in[i];
@@ -310,11 +301,10 @@ static void store8(uint8_t* out, uint64_t in)
 static uint64_t load8(const uint8_t* in)
 {
 	uint64_t ret;
-	int32_t i;
 
 	ret = in[7];
 
-	for (i = 6; i >= 0; --i)
+	for (int32_t i = 6; i >= 0; --i)
 	{
 		ret <<= 8;
 		ret |= in[i];
@@ -325,10 +315,10 @@ static uint64_t load8(const uint8_t* in)
 
 static gf bitrev(gf a)
 {
-	a = ((a & 0x00FFU) << 8) | ((a & 0xFF00U) >> 8);
-	a = ((a & 0x0F0FU) << 4) | ((a & 0xF0F0U) >> 4);
-	a = ((a & 0x3333U) << 2) | ((a & 0xCCCCU) >> 2);
-	a = ((a & 0x5555U) << 1) | ((a & 0xAAAAU) >> 1);
+	a = (gf)((a & 0x00FFU) << 8) | ((a & 0xFF00U) >> 8);
+	a = (gf)((a & 0x0F0FU) << 4) | ((a & 0xF0F0U) >> 4);
+	a = (gf)((a & 0x3333U) << 2) | ((a & 0xCCCCU) >> 2);
+	a = (gf)((a & 0x5555U) << 1) | ((a & 0xAAAAU) >> 1);
 
 	return (a >> 3);
 }
@@ -349,11 +339,9 @@ static void int32_minmax(int32_t* a, int32_t* b)
 	*b ^= c;
 }
 
-static void int32_sort(int32_t *x, int64_t n)
+static void int32_sort(int32_t* x, int64_t n)
 {
 	int64_t top;
-	int64_t p;
-	int64_t q;
 	int64_t r;
 	int64_t i;
 
@@ -366,7 +354,7 @@ static void int32_sort(int32_t *x, int64_t n)
 			top += top;
 		}
 
-		for (p = top; p > 0; p >>= 1)
+		for (int64_t p = top; p > 0; p >>= 1)
 		{
 			for (i = 0; i < n - p; ++i)
 			{
@@ -378,7 +366,7 @@ static void int32_sort(int32_t *x, int64_t n)
 
 			i = 0;
 
-			for (q = top; q > p; q >>= 1)
+			for (int64_t q = top; q > p; q >>= 1)
 			{
 				for (; i < n - q; ++i)
 				{
@@ -413,8 +401,6 @@ static void int64_minmax(uint64_t* a, uint64_t* b)
 static void uint64_sort(uint64_t *x, int64_t n)
 {
 	int64_t top;
-	int64_t p;
-	int64_t q;
 	int64_t r;
 	int64_t i;
 
@@ -427,7 +413,7 @@ static void uint64_sort(uint64_t *x, int64_t n)
 			top += top;
 		}
 
-		for (p = top; p > 0; p >>= 1)
+		for (int64_t p = top; p > 0; p >>= 1)
 		{
 			for (i = 0; i < n - p; ++i)
 			{
@@ -439,7 +425,7 @@ static void uint64_sort(uint64_t *x, int64_t n)
 
 			i = 0;
 
-			for (q = top; q > p; q >>= 1)
+			for (int64_t q = top; q > p; q >>= 1)
 			{
 				for (; i < n - q; ++i)
 				{
@@ -462,7 +448,7 @@ static void uint64_sort(uint64_t *x, int64_t n)
 
 /* root.c */
 
-static gf eval(gf* f, gf a)
+static gf eval(const gf* f, gf a)
 {
 	/* input: polynomial f and field element a
 	   return f(a) */
@@ -478,19 +464,18 @@ static gf eval(gf* f, gf a)
 		--i;
 		r = gf_mul(r, a);
 		r = gf_add(r, f[i]);
-	} while (i > 0);
+	} 
+	while (i > 0);
 
 	return r;
 }
 
-static void root(gf* out, gf* f, gf* L)
+static void root(gf* out, const gf* f, const gf* L)
 {
 	/* input: polynomial f and list of field elements L
 	   output: out = [ f(a) for a in L ] */
 
-	size_t i;
-
-	for (i = 0; i < MCELIECE_SYS_N; ++i)
+	for (size_t i = 0; i < MCELIECE_SYS_N; ++i)
 	{
 		out[i] = eval(f, L[i]);
 	}
@@ -498,7 +483,7 @@ static void root(gf* out, gf* f, gf* L)
 
 /* synd.c */
 
-static void synd(gf* out, gf* f, gf* L, uint8_t* r)
+static void synd(gf* out, const gf* f, const gf* L, const uint8_t* r)
 {
 	/* input: Goppa polynomial f, support L, received word r
 	   output: out, the syndrome of length 2t */
@@ -506,21 +491,16 @@ static void synd(gf* out, gf* f, gf* L, uint8_t* r)
 	gf c;
 	gf e;
 	gf e_inv;
-	size_t i;
-	size_t j;
 
-	for (j = 0; j < 2 * MCELIECE_SYS_T; ++j)
-	{
-		out[j] = 0;
-	}
+	qsc_memutils_clear(out, 2 * MCELIECE_SYS_T * sizeof(gf));
 
-	for (i = 0; i < MCELIECE_SYS_N; ++i)
+	for (size_t i = 0; i < MCELIECE_SYS_N; ++i)
 	{
 		c = (r[i / 8] >> (i % 8)) & 1;
 		e = eval(f, L[i]);
 		e_inv = gf_inv(gf_mul(e, e));
 
-		for (j = 0; j < 2 * MCELIECE_SYS_T; ++j)
+		for (size_t j = 0; j < 2 * MCELIECE_SYS_T; ++j)
 		{
 			out[j] = gf_add(out[j], gf_mul(e_inv, c));
 			e_inv = gf_mul(e_inv, L[i]);
@@ -530,7 +510,7 @@ static void synd(gf* out, gf* f, gf* L, uint8_t* r)
 
 /* transpose.c */
 
-static void transpose_64x64(uint64_t* out, uint64_t* in)
+static void transpose_64x64(uint64_t* out, const uint64_t* in)
 {
 	/* input: in, a 64x64 matrix over GF(2) */
 	/* output: out, transpose of in */
@@ -547,23 +527,17 @@ static void transpose_64x64(uint64_t* out, uint64_t* in)
 
 	uint64_t x;
 	uint64_t y;
-	size_t i;
-	size_t j;
 	int32_t s;
-	int32_t d;
 
-	for (i = 0; i < 64; ++i)
-	{
-		out[i] = in[i];
-	}
+	qsc_memutils_copy(out, in, 64 * sizeof(uint64_t));
 
-	for (d = 5; d >= 0; d--)
+	for (int32_t d = 5; d >= 0; d--)
 	{
 		s = 1 << d;
 
-		for (i = 0; i < 64; i += s * 2)
+		for (size_t i = 0; i < 64; i += s * 2)
 		{
-			for (j = i; j < i + s; ++j)
+			for (size_t j = i; j < i + s; ++j)
 			{
 				x = (out[j] & masks[d][0]) | ((out[j + s] & masks[d][0]) << s);
 				y = ((out[j] & masks[d][1]) >> s) | (out[j + s] & masks[d][1]);
@@ -576,20 +550,18 @@ static void transpose_64x64(uint64_t* out, uint64_t* in)
 
 /* benes.c */
 
-static void layer_in(uint64_t data[2][64], uint64_t* bits, int32_t lgs)
+static void layer_in(uint64_t data[2][64], const uint64_t* bits, int32_t lgs)
 {
 	/* middle layers of the benes network */
 
 	uint64_t d;
-	size_t i;
-	size_t j;
 	int32_t s;
 
 	s = 1 << lgs;
 
-	for (i = 0; i < 64; i += s * 2)
+	for (size_t i = 0; i < 64; i += s * 2)
 	{
-		for (j = i; j < i + s; ++j)
+		for (size_t j = i; j < i + s; ++j)
 		{
 			d = (data[0][j] ^ data[0][j + s]);
 			d &= (*bits);
@@ -606,19 +578,17 @@ static void layer_in(uint64_t data[2][64], uint64_t* bits, int32_t lgs)
 	}
 }
 
-static void layer_ex(uint64_t* data, uint64_t* bits, int32_t lgs)
+static void layer_ex(uint64_t* data, const uint64_t* bits, int32_t lgs)
 {
 	/* first and last layers of the benes network */
 	uint64_t d;
-	size_t i;
-	size_t j;
 	int32_t s;
 
 	s = 1 << lgs;
 
-	for (i = 0; i < 128; i += s * 2)
+	for (size_t i = 0; i < 128; i += s * 2)
 	{
-		for (j = i; j < i + s; j++)
+		for (size_t j = i; j < i + s; j++)
 		{
 			d = (data[j] ^ data[j + s]);
 			d &= (*bits);
@@ -631,9 +601,8 @@ static void layer_ex(uint64_t* data, uint64_t* bits, int32_t lgs)
 
 static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 {
-	/* input: r, sequence of bits to be permuted bits, 
-	condition bits of the Benes network rev, 0 for normal application; 
-	!0 for inverse output: r, permuted bits */
+	/* input: r, sequence of bits to be permuted bits, condition bits of the Benes network rev,
+	0 for normal application, !0 for inverse output: r, permuted bits */
 
 	uint64_t r_int_v[2][64];
 	uint64_t r_int_h[2][64];
@@ -772,7 +741,7 @@ static void support_gen(gf* s, const uint8_t* c)
 
 /* bm.c */
 
-static void bm(gf* out, gf* s)
+static void bm(gf* out, const gf* s)
 {
 	/* the Berlekamp-Massey algorithm. 
 	input: s, sequence of field elements
@@ -791,7 +760,6 @@ static void bm(gf* out, gf* s)
 	uint16_t mne;
 
 	b = 1;
-	N = 0;
 	L = 0;
 	B[1] = 1;
 	C[0] = 1;
@@ -815,10 +783,7 @@ static void bm(gf* out, gf* s)
 		mle -= 1;
 		mle &= mne;
 
-		for (i = 0; i <= MCELIECE_SYS_T; ++i)
-		{
-			T[i] = C[i];
-		}
+		qsc_memutils_copy(T, C, MCELIECE_SYS_T * sizeof(gf));
 
 		f = gf_frac(b, d);
 
@@ -866,7 +831,6 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 	int16_t* q = ((int16_t *)(temp + n + n / 4));
 	int64_t i;
 	int64_t j;
-	int64_t k;
 	int64_t x;
 
 	if (w == 1) 
@@ -1000,12 +964,16 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 			}
 
 			int32_sort(A, n);
-			/* A = id<<16+cp */
 
+			/* A = id<<16+cp */
 			for (x = 0; x < n; ++x)
 			{
 				int32_t cpx = (B[x] & ~0x0000FFFF) | (A[x] & 0x0000FFFF);
-				if (cpx < B[x]) B[x] = cpx;
+
+				if (cpx < B[x])
+				{
+					B[x] = cpx;
+				}
 			}
 		}
 
@@ -1041,7 +1009,7 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 	/* B = (id<<16)+F(pi) */
 	pos += (2 * w - 3) * step * (n / 2);
 
-	for (k = 0; k < n / 2; ++k)
+	for (int64_t k = 0; k < n / 2; ++k)
 	{
 		int64_t y = 2 * k;
 		int32_t lk = B[y] & 1;			/* l[k] */
@@ -1078,17 +1046,15 @@ static void layer(int16_t* p, const uint8_t* cb, int32_t s, int32_t n)
 	   output: the result of apply the control bits to p */
 
 	const int32_t stride = 1 << s;
-	size_t i;
-	size_t j;
 	int32_t index;
 	int16_t d;
 	int16_t m;
 
 	index = 0;
 
-	for (i = 0; i < n; i += stride * 2)
+	for (size_t i = 0; i < n; i += stride * 2)
 	{
-		for (j = 0; j < stride; ++j)
+		for (size_t j = 0; j < stride; ++j)
 		{
 			d = p[i + j] ^ p[i + j + stride];
 			m = (cb[index >> 3] >> (index & 7)) & 1;
@@ -1112,7 +1078,7 @@ static void controlbits_from_permutation(uint8_t* out, const int16_t* pi, int64_
 	int16_t* pi_test;
 	int32_t i;
 	int16_t diff;
-	uint8_t *ptr;
+	const uint8_t* ptr;
 
 	temp = malloc((size_t)n * 2 * sizeof(int32_t));
 	pi_test = malloc((size_t)n * sizeof(int16_t));
@@ -1189,15 +1155,12 @@ static int32_t decrypt(uint8_t* e, const uint8_t* sk, const uint8_t* c)
 
 	w = 0;
 	qsc_memutils_copy(r, c, MCELIECE_SYND_BYTES);
-
-	for (i = MCELIECE_SYND_BYTES; i < MCELIECE_SYS_N / 8; ++i)
-	{
-		r[i] = 0;
-	}
+	qsc_memutils_clear(r + MCELIECE_SYND_BYTES, (MCELIECE_SYS_N / 8) - MCELIECE_SYND_BYTES);
 
 	for (i = 0; i < MCELIECE_SYS_T; ++i)
 	{
-		g[i] = load_gf(sk); sk += 2;
+		g[i] = load_gf(sk);
+		sk += 2;
 	} 
 	
 	g[MCELIECE_SYS_T] = 1;
@@ -1244,7 +1207,7 @@ static uint8_t same_mask(uint16_t x, uint16_t y)
 	return mask & 0x000000FFUL;
 }
 
-static void gen_e(uint8_t* e, void (*rng_generate)(uint8_t*, size_t))
+static void gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 {
 	/* output: e, an error vector of weight t */
 	uint16_t ind[MCELIECE_SYS_T];
@@ -1280,12 +1243,17 @@ static void gen_e(uint8_t* e, void (*rng_generate)(uint8_t*, size_t))
 
 		count = 0;
 
-		for (i = 0; i < MCELIECE_SYS_T * 2 && count < MCELIECE_SYS_T; ++i)
+		for (i = 0; i < MCELIECE_SYS_T * 2; ++i)
 		{
 			if (nrnd[i] < MCELIECE_SYS_N)
 			{
 				ind[count] = nrnd[i];
 				++count;
+
+				if (count >= MCELIECE_SYS_T)
+				{
+					break;
+				}
 			}
 		}
 
@@ -1306,6 +1274,7 @@ static void gen_e(uint8_t* e, void (*rng_generate)(uint8_t*, size_t))
 				if (ind[i] == ind[j])
 				{
 					eq = 1;
+					break;
 				}
 			}
 		}
@@ -1318,7 +1287,7 @@ static void gen_e(uint8_t* e, void (*rng_generate)(uint8_t*, size_t))
 
 	for (j = 0; j < MCELIECE_SYS_T; ++j)
 	{
-		val[j] = 1 << (ind[j] & 7);
+		val[j] = (uint8_t)(1 << (ind[j] & 7));
 	}
 
 	for (i = 0; i < MCELIECE_SYS_N / 8; ++i)
@@ -1333,14 +1302,13 @@ static void gen_e(uint8_t* e, void (*rng_generate)(uint8_t*, size_t))
 	}
 }
 
-static void syndrome(uint8_t* s, const uint8_t* pk, uint8_t* e)
+static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 {
 	/* input: public key pk, error vector e
 	   output: syndrome s */
 
 	uint8_t row[MCELIECE_SYS_N / 8];
 	const uint8_t *pk_ptr = pk;
-	size_t i;
 	size_t j;
 	uint8_t b;
 #if defined(QSC_MCELIECE_S5N6960T119)
@@ -1350,7 +1318,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, uint8_t* e)
 
 	qsc_memutils_clear(s, MCELIECE_SYND_BYTES);
 
-	for (i = 0; i < MCELIECE_PK_NROWS; ++i)
+	for (size_t i = 0; i < MCELIECE_PK_NROWS; ++i)
 	{
 		qsc_memutils_clear(row, MCELIECE_SYS_N / 8);
 
@@ -1362,7 +1330,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, uint8_t* e)
 #if defined(QSC_MCELIECE_S5N6960T119)
 		for (j = MCELIECE_SYS_N / 8 - 1; j >= MCELIECE_SYS_N / 8 - MCELIECE_PK_ROW_BYTES; --j)
 		{
-			row[j] = (row[j] << tail) | (row[j - 1] >> (8 - tail));
+			row[j] = (uint8_t)((row[j] << tail) | (row[j - 1] >> (8 - tail)));
 		}
 
 		row[i / 8] |= 1 << (i % 8);
@@ -1387,7 +1355,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, uint8_t* e)
 	}
 }
 
-static void encrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, void (*rng_generate)(uint8_t*, size_t))
+static void encrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, bool (*rng_generate)(uint8_t*, size_t))
 {
 	gen_e(e, rng_generate);
 	syndrome(s, pk, e);
@@ -1412,12 +1380,11 @@ static int32_t check_c_padding(const uint8_t* c)
 static int32_t check_pk_padding(const uint8_t* pk)
 {
 	uint8_t b;
-	size_t i;
 	int32_t ret;
 
 	b = 0;
 
-	for (i = 0; i < MCELIECE_PK_NROWS; i++)
+	for (size_t i = 0; i < MCELIECE_PK_NROWS; i++)
 	{
 		b |= pk[i * MCELIECE_PK_ROW_BYTES + MCELIECE_PK_ROW_BYTES - 1];
 	}
@@ -1432,10 +1399,9 @@ static int32_t check_pk_padding(const uint8_t* pk)
 
 /* pk_gen.c */
 
-static int32_t pk_gen(uint8_t* pk, uint8_t* sk, uint32_t* perm, int16_t* pi)
+static int32_t pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t* pi)
 {
-	/* input: secret key sk
-	   output: public key pk */
+	/* input: secret key sk output: public key pk */
 
 	uint64_t buf[1 << MCELIECE_GFBITS];
 	gf g[MCELIECE_SYS_T + 1];	/* Goppa polynomial */
@@ -1617,7 +1583,7 @@ static int32_t pk_gen(uint8_t* pk, uint8_t* sk, uint32_t* perm, int16_t* pi)
 			{
 				for (j = (MCELIECE_PK_NROWS - 1) / 8; j < MCELIECE_SYS_N / 8 - 1; ++j)
 				{
-					*pk_ptr = (mat[i][j] >> tail) | (mat[i][j + 1] << (8 - tail));
+					*pk_ptr = (uint8_t)((mat[i][j] >> tail) | (mat[i][j + 1] << (8 - tail)));
 					++pk_ptr;
 				}
 
@@ -1636,17 +1602,10 @@ static int32_t pk_gen(uint8_t* pk, uint8_t* sk, uint32_t* perm, int16_t* pi)
 
 		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
 		{
-			if (mat[i] != NULL)
-			{
-				free(mat[i]);
-			}
+			free(mat[i]);
 		}
 
-
-		if (mat != NULL)
-		{
-			free(mat);
-		}
+		free(mat);
 	}
 
 	return res;
@@ -1654,13 +1613,13 @@ static int32_t pk_gen(uint8_t* pk, uint8_t* sk, uint32_t* perm, int16_t* pi)
 
 /* sk_gen.c */
 
-static int32_t genpoly_gen(gf* out, gf* f)
+static int32_t genpoly_gen(gf* out, const gf* f)
 {
 	/* input: f, element in GF((2^m)^t)
 	   output: out, minimal polynomial of f
 	   return: 0 for success and -1 for failure */
 
-	gf mat[MCELIECE_SYS_T + 1][MCELIECE_SYS_T];
+	gf mat[MCELIECE_SYS_T + 1][MCELIECE_SYS_T] = { 0 };
 	gf inv;
 	gf mask;
 	gf t;
@@ -1674,11 +1633,6 @@ static int32_t genpoly_gen(gf* out, gf* f)
 
 	res = 0;
 	mat[0][0] = 1;
-
-	for (i = 1; i < MCELIECE_SYS_T; ++i)
-	{
-		mat[0][i] = 0;
-	}
 
 	for (i = 0; i < MCELIECE_SYS_T; ++i)
 	{
@@ -1742,14 +1696,15 @@ static int32_t genpoly_gen(gf* out, gf* f)
 	return res;
 }
 
-int32_t qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, void (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	uint8_t one_ec[1 + MCELIECE_SYS_N / 8 + (MCELIECE_SYND_BYTES + 32)] = { 1 };
 	uint8_t two_e[1 + MCELIECE_SYS_N / 8] = { 2 };
 	uint8_t *e = two_e + 1;
 #if defined(QSC_MCELIECE_S5N6960T119)
 	uint8_t mask;
-	int i, padding_ok;
+	int32_t i;
+	int32_t padding_ok;
 
 	padding_ok = check_pk_padding(pk);
 #endif
@@ -1803,7 +1758,7 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8
 #endif
 
 	ret_confirm = 0;
-	ret_decrypt = decrypt(e, sk + 40, c);
+	ret_decrypt = (uint8_t)decrypt(e, (sk + 40), c);
 	qsc_shake256_compute(conf, MCELIECE_SHAREDSECRET_SIZE, two_e, sizeof(two_e));
 
 	for (i = 0; i < 32; ++i)
@@ -1835,7 +1790,7 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8
 #if defined(QSC_MCELIECE_S5N6960T119)
 	// clear outputs (set to all 1's) if padding bits are not all zero
 
-	mask = padding_ok;
+	mask = (uint8_t)padding_ok;
 
 	for (i = 0; i < 32; ++i)
 	{
@@ -1848,7 +1803,7 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8
 #endif
 }
 
-int32_t qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	uint32_t perm[1 << MCELIECE_GFBITS];/* random permutation as 32-bit integers */
 	int16_t pi[1 << MCELIECE_GFBITS];	/* random permutation */
@@ -1856,11 +1811,11 @@ int32_t qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_g
 	gf irr[MCELIECE_SYS_T];				/* Goppa polynomial */
 	uint8_t r[(MCELIECE_SYS_N / 8) + ((1 << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2) + 32];
 	uint8_t seed[33] = { 64 };
-	uint8_t *rp;
+	const uint8_t* rp;
 	uint8_t *skp;
 	int32_t i;
 
-	rng_generate(seed + 1, 32);
+	rng_generate((seed + 1), 32);
 
 	while (true)
 	{

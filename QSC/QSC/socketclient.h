@@ -45,7 +45,7 @@
 *
 * \return The socket address family
 */
-QSC_EXPORT_API qsc_socket_address_families qsc_socket_client_address_family(qsc_socket* sock);
+QSC_EXPORT_API qsc_socket_address_families qsc_socket_client_address_family(const qsc_socket* sock);
 
 /**
 * \brief Get the socket protocol type
@@ -54,7 +54,7 @@ QSC_EXPORT_API qsc_socket_address_families qsc_socket_client_address_family(qsc_
 *
 * \return The socket protocol type
 */
-QSC_EXPORT_API qsc_socket_protocols qsc_socket_client_socket_protocol(qsc_socket* sock);
+QSC_EXPORT_API qsc_socket_protocols qsc_socket_client_socket_protocol(const qsc_socket* sock);
 
 /**
 * \brief Connect to a remote host using the network host name and service name
@@ -65,7 +65,7 @@ QSC_EXPORT_API qsc_socket_protocols qsc_socket_client_socket_protocol(qsc_socket
 *
 * \return Returns an exception code on failure, or success(0)
 */
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const char* host, char* service);
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const char* host, const char* service);
 
 /**
 * \brief Establishes a socket connection to a remote host using IPv4 addressing
@@ -96,7 +96,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_ipv6(qsc_socket* 
 *
 * \return The socket transport type
 */
-QSC_EXPORT_API qsc_socket_transports qsc_socket_client_socket_transport(qsc_socket* sock);
+QSC_EXPORT_API qsc_socket_transports qsc_socket_client_socket_transport(const qsc_socket* sock);
 
 /**
 * \brief Initialize the server socket
@@ -115,7 +115,7 @@ QSC_EXPORT_API void qsc_socket_client_initialize(qsc_socket* sock);
 *
 * \return Returns the number of bytes received from the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_receive(qsc_socket* sock, char* output, size_t outlen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t outlen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Receive UDP data from a remote host
@@ -129,7 +129,7 @@ QSC_EXPORT_API size_t qsc_socket_client_receive(qsc_socket* sock, char* output, 
 *
 * \return Returns the number of bytes sent by the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, const char* address, uint16_t port, char* output, size_t outlen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t outlen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Sends data on a connected socket
@@ -141,7 +141,7 @@ QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, const cha
 *
 * \return Returns the number of bytes sent to the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_send(qsc_socket* sock, const char* input, size_t inlen, qsc_socket_send_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t inlen, qsc_socket_send_flags flag);
 
 /**
 * \brief Sends UDP data to a remote host

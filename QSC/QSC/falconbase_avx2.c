@@ -1,8 +1,27 @@
 #include "falconbase_avx2.h"
+
+#if defined(QSC_SYSTEM_HAS_AVX2)
+
 #include "memutils.h"
 #include "sha3.h"
 
 /* rng.c */
+
+inline static void chacha_quarter_round(__m256i state[16], size_t a, size_t b, size_t c, size_t d)
+{
+	state[a] = _mm256_add_epi32(state[a], state[b]);
+	state[d] = _mm256_xor_si256(state[d], state[a]);
+	state[d] = _mm256_or_si256(_mm256_slli_epi32(state[d], 16), _mm256_srli_epi32(state[d], 16));
+	state[c] = _mm256_add_epi32(state[c], state[d]);
+	state[b] = _mm256_xor_si256(state[b], state[c]);
+	state[b] = _mm256_or_si256(_mm256_slli_epi32(state[b], 12), _mm256_srli_epi32(state[b], 20));
+	state[a] = _mm256_add_epi32(state[a], state[b]);
+	state[d] = _mm256_xor_si256(state[d], state[a]);
+	state[d] = _mm256_or_si256(_mm256_slli_epi32(state[d], 8), _mm256_srli_epi32(state[d], 24));
+	state[c] = _mm256_add_epi32(state[c], state[d]);
+	state[b] = _mm256_xor_si256(state[b], state[c]);
+	state[b] = _mm256_or_si256(_mm256_slli_epi32(state[b], 7), _mm256_srli_epi32(state[b], 25));
+}
 
 /*
  * PRNG based on ChaCha20.
@@ -21,32 +40,22 @@
 static void falcon_prng_refill(falcon_prng_state* p)
 {
 	static const uint32_t CW[] = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
-
-	uint64_t cc;
-	size_t u;
-	int32_t i;
-	uint32_t *sw;
-
-	union 
-	{
-		uint32_t w[16];
-		__m256i y[2];  /* for alignment */
-	} t;
-
 	__m256i state[16];
 	__m256i init[16];
+	QSC_ALIGN(64) uint32_t w[16];
+	const uint32_t* sw;
+	uint64_t cc;
+	size_t u;
 
 	sw = (uint32_t*)p->state;
 
-	/*
-	 * XOR next counter values into state.
-	 */
+	/* XOR next counter values into state */
 	cc = *(uint64_t*)(p->state + 48);
 
-	for (u = 0; u < 8; ++u) 
+	for (u = 0; u < 8; ++u)
 	{
-		t.w[u] = (uint32_t)(cc + u);
-		t.w[u + 8] = (uint32_t)((cc + u) >> 32);
+		w[u] = (uint32_t)(cc + u);
+		w[u + 8] = (uint32_t)((cc + u) >> 32);
 	}
 
 	*(uint64_t*)(p->state + 48) = cc + 8;
@@ -64,48 +73,20 @@ static void falcon_prng_refill(falcon_prng_state* p)
 		state[u + 4] = init[u + 4] = _mm256_broadcastd_epi32(_mm_cvtsi32_si128(sw[u]));
 	}
 
-	state[14] = init[14] = _mm256_xor_si256(_mm256_broadcastd_epi32(_mm_cvtsi32_si128(sw[10])), _mm256_loadu_si256((__m256i*) & t.w[0]));
-	state[15] = init[15] = _mm256_xor_si256(_mm256_broadcastd_epi32(_mm_cvtsi32_si128(sw[11])), _mm256_loadu_si256((__m256i*) & t.w[8]));
+	state[14] = init[14] = _mm256_xor_si256(_mm256_broadcastd_epi32(_mm_cvtsi32_si128(sw[10])), _mm256_loadu_si256((const __m256i*)&w[0]));
+	state[15] = init[15] = _mm256_xor_si256(_mm256_broadcastd_epi32(_mm_cvtsi32_si128(sw[11])), _mm256_loadu_si256((const __m256i*)&w[8]));
 
-	/*
-	 * Do all rounds
-	 */
-	for (i = 0; i < 10; ++i)
+	/* Do all rounds */
+	for (size_t i = 0; i < 10; ++i)
 	{
-
-#define QROUND(a, b, c, d)   do { \
-		state[a] = _mm256_add_epi32(state[a], state[b]); \
-		state[d] = _mm256_xor_si256(state[d], state[a]); \
-		state[d] = _mm256_or_si256( \
-			_mm256_slli_epi32(state[d], 16), \
-			_mm256_srli_epi32(state[d], 16)); \
-		state[c] = _mm256_add_epi32(state[c], state[d]); \
-		state[b] = _mm256_xor_si256(state[b], state[c]); \
-		state[b] = _mm256_or_si256( \
-			_mm256_slli_epi32(state[b], 12), \
-			_mm256_srli_epi32(state[b], 20)); \
-		state[a] = _mm256_add_epi32(state[a], state[b]); \
-		state[d] = _mm256_xor_si256(state[d], state[a]); \
-		state[d] = _mm256_or_si256( \
-			_mm256_slli_epi32(state[d],  8), \
-			_mm256_srli_epi32(state[d], 24)); \
-		state[c] = _mm256_add_epi32(state[c], state[d]); \
-		state[b] = _mm256_xor_si256(state[b], state[c]); \
-		state[b] = _mm256_or_si256( \
-			_mm256_slli_epi32(state[b], 7), \
-			_mm256_srli_epi32(state[b], 25)); \
-	} while (0)
-
-		QROUND(0, 4, 8, 12);
-		QROUND(1, 5, 9, 13);
-		QROUND(2, 6, 10, 14);
-		QROUND(3, 7, 11, 15);
-		QROUND(0, 5, 10, 15);
-		QROUND(1, 6, 11, 12);
-		QROUND(2, 7, 8, 13);
-		QROUND(3, 4, 9, 14);
-
-#undef QROUND
+		chacha_quarter_round(state, 0, 4, 8, 12);
+		chacha_quarter_round(state, 1, 5, 9, 13);
+		chacha_quarter_round(state, 2, 6, 10, 14);
+		chacha_quarter_round(state, 3, 7, 11, 15);
+		chacha_quarter_round(state, 0, 5, 10, 15);
+		chacha_quarter_round(state, 1, 6, 11, 12);
+		chacha_quarter_round(state, 2, 7, 8, 13);
+		chacha_quarter_round(state, 3, 4, 9, 14);
 	}
 
 	/*
@@ -113,7 +94,7 @@ static void falcon_prng_refill(falcon_prng_state* p)
 	 * buffer. We can dump the AVX2 values "as is" because the non-AVX2
 	 * code uses a compatible order of values.
 	 */
-	for (u = 0; u < 16; ++u) 
+	for (u = 0; u < 16; ++u)
 	{
 		_mm256_storeu_si256((__m256i *) & p->buf[u << 5], _mm256_add_epi32(state[u], init[u]));
 	}
@@ -127,13 +108,13 @@ static void falcon_prng_get_bytes(falcon_prng_state* p, void* dst, size_t len)
 
 	buf = dst;
 
-	while (len > 0) 
+	while (len > 0)
 	{
 		size_t clen;
 
 		clen = (sizeof p->buf) - p->ptr;
 
-		if (clen > len) 
+		if (clen > len)
 		{
 			clen = len;
 		}
@@ -167,11 +148,13 @@ static uint64_t falcon_prng_get_u64(falcon_prng_state *p)
 	 * an empty buffer.
 	 */
 	u = p->ptr;
-	if (u >= (sizeof p->buf) - 9)
+
+	if (u >= sizeof(p->buf) - 9)
 	{
 		falcon_prng_refill(p);
 		u = 0;
 	}
+
 	p->ptr = u + 8;
 
 	/*
@@ -186,10 +169,12 @@ static uint32_t falcon_prng_get_u8(falcon_prng_state *p)
 	uint32_t v;
 
 	v = p->buf[p->ptr++];
-	if (p->ptr == sizeof p->buf)
+
+	if (p->ptr == sizeof(p->buf))
 	{
 		falcon_prng_refill(p);
 	}
+
 	return v;
 }
 
@@ -238,7 +223,6 @@ static int32_t falcon_is_short(const int16_t* s1, const int16_t* s2, uint32_t lo
 	 * the value exceeds 2^31-1.
 	 */
 	size_t n;
-	size_t u;
 	uint32_t ng;
 	uint32_t s;
 
@@ -246,7 +230,7 @@ static int32_t falcon_is_short(const int16_t* s1, const int16_t* s2, uint32_t lo
 	s = 0;
 	ng = 0;
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		int32_t z;
 
@@ -266,13 +250,12 @@ static int32_t falcon_is_short(const int16_t* s1, const int16_t* s2, uint32_t lo
 static int32_t falcon_is_short_half(uint32_t sqn, const int16_t* s2, uint32_t logn)
 {
 	size_t n;
-	size_t u;
 	uint32_t ng;
 
 	n = (size_t)1 << logn;
 	ng = (uint32_t)-(int32_t)(sqn >> 31);
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		int32_t z;
 
@@ -290,7 +273,7 @@ static int32_t falcon_is_short_half(uint32_t sqn, const int16_t* s2, uint32_t lo
 
 const falcon_fpr falcon_avx2_fpr_gm_tab[FALCON_FPR_GM_TAB_SIZE] =
 {
-	{0}, {0}, 
+	{0}, {0},
 	{-0.000000000000000000000000000}, { 1.000000000000000000000000000},
 	{ 0.707106781186547524400844362}, { 0.707106781186547524400844362},
 	{-0.707106781186547524400844362}, { 0.707106781186547524400844362},
@@ -1402,7 +1385,7 @@ static void falcon_FFT(falcon_fpr* f, uint32_t logn)
 
 			j2 = j1 + ht;
 
-			if (ht >= 4) 
+			if (ht >= 4)
 			{
 				__m256d s_re;
 				__m256d s_im;
@@ -1410,7 +1393,7 @@ static void falcon_FFT(falcon_fpr* f, uint32_t logn)
 				s_re = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((m + i1) << 1) + 0].v);
 				s_im = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((m + i1) << 1) + 1].v);
 
-				for (j = j1; j < j2; j += 4) 
+				for (j = j1; j < j2; j += 4)
 				{
 					__m256d x_re;
 					__m256d x_im;
@@ -1418,21 +1401,27 @@ static void falcon_FFT(falcon_fpr* f, uint32_t logn)
 					__m256d y_im;
 					__m256d z_re;
 					__m256d z_im;
-
+					__m256d tmpd;
 					x_re = _mm256_loadu_pd(&f[j].v);
 					x_im = _mm256_loadu_pd(&f[j + hn].v);
 					z_re = _mm256_loadu_pd(&f[j + ht].v);
 					z_im = _mm256_loadu_pd(&f[j + ht + hn].v);
 
-					y_re = falcon_fmsub(z_re, s_re, _mm256_mul_pd(z_im, s_im));
-					y_im = falcon_fmadd(z_re, s_im, _mm256_mul_pd(z_im, s_re));
-					_mm256_storeu_pd(&f[j].v, _mm256_add_pd(x_re, y_re));
-					_mm256_storeu_pd(&f[j + hn].v, _mm256_add_pd(x_im, y_im));
-					_mm256_storeu_pd(&f[j + ht].v, _mm256_sub_pd(x_re, y_re));
-					_mm256_storeu_pd(&f[j + ht + hn].v, _mm256_sub_pd(x_im, y_im));
+					tmpd = _mm256_mul_pd(z_im, s_im);
+					y_re = falcon_fmsub(z_re, s_re, tmpd);
+					tmpd = _mm256_mul_pd(z_im, s_re);
+					y_im = falcon_fmadd(z_re, s_im, tmpd);
+					tmpd = _mm256_add_pd(x_re, y_re);
+					_mm256_storeu_pd(&f[j].v, tmpd);
+					tmpd = _mm256_add_pd(x_im, y_im);
+					_mm256_storeu_pd(&f[j + hn].v, tmpd);
+					tmpd = _mm256_sub_pd(x_re, y_re);
+					_mm256_storeu_pd(&f[j + ht].v, tmpd);
+					tmpd = _mm256_sub_pd(x_im, y_im);
+					_mm256_storeu_pd(&f[j + ht + hn].v, tmpd);
 				}
 			}
-			else 
+			else
 			{
 				falcon_fpr s_re;
 				falcon_fpr s_im;
@@ -1518,7 +1507,7 @@ static void falcon_iFFT(falcon_fpr* f, uint32_t logn)
 	m = n;
 	hn = n >> 1;
 
-	for (u = logn; u > 1; u--) 
+	for (u = logn; u > 1; u--)
 	{
 		size_t hm;
 		size_t dt;
@@ -1534,7 +1523,7 @@ static void falcon_iFFT(falcon_fpr* f, uint32_t logn)
 
 			j2 = j1 + t;
 
-			if (t >= 4) 
+			if (t >= 4)
 			{
 				__m256d s_re;
 				__m256d s_im;
@@ -1542,7 +1531,7 @@ static void falcon_iFFT(falcon_fpr* f, uint32_t logn)
 				s_re = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((hm + i1) << 1) + 0].v);
 				s_im = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((hm + i1) << 1) + 1].v);
 
-				for (j = j1; j < j2; j += 4) 
+				for (j = j1; j < j2; j += 4)
 				{
 					__m256d x_re;
 					__m256d x_im;
@@ -1600,7 +1589,7 @@ static void falcon_iFFT(falcon_fpr* f, uint32_t logn)
 	 * Last iteration is a no-op, provided that we divide by N/2
 	 * instead of N. We need to make a special case for logn = 0.
 	 */
-	if (logn > 0) 
+	if (logn > 0)
 	{
 		falcon_fpr ni;
 
@@ -1629,7 +1618,7 @@ static void falcon_poly_add(falcon_fpr* restrict a, const falcon_fpr* restrict b
 	}
 	else
 	{
-		for (u = 0; u < n; ++u) 
+		for (u = 0; u < n; ++u)
 		{
 			a[u] = falcon_fpr_add(a[u], b[u]);
 		}
@@ -1638,13 +1627,14 @@ static void falcon_poly_add(falcon_fpr* restrict a, const falcon_fpr* restrict b
 
 static void falcon_poly_sub(falcon_fpr* restrict a, const falcon_fpr* restrict b, uint32_t logn)
 {
-	size_t n, u;
+	size_t n;
+	size_t u;
 
 	n = (size_t)1 << logn;
 
 	if (n >= 4)
 	{
-		for (u = 0; u < n; u += 4) 
+		for (u = 0; u < n; u += 4)
 		{
 			_mm256_storeu_pd(&a[u].v, _mm256_sub_pd(_mm256_loadu_pd(&a[u].v), _mm256_loadu_pd(&b[u].v)));
 		}
@@ -1678,7 +1668,7 @@ static void falcon_poly_neg(falcon_fpr* a, uint32_t logn)
 	}
 	else
 	{
-		for (u = 0; u < n; ++u) 
+		for (u = 0; u < n; ++u)
 		{
 			a[u] = falcon_fpr_neg(a[u]);
 		}
@@ -1698,12 +1688,12 @@ static void falcon_poly_adj_fft(falcon_fpr* a, uint32_t logn)
 
 		s = _mm256_set1_pd(-0.0);
 
-		for (u = (n >> 1); u < n; u += 4) 
+		for (u = (n >> 1); u < n; u += 4)
 		{
 			_mm256_storeu_pd(&a[u].v, _mm256_xor_pd(_mm256_loadu_pd(&a[u].v), s));
 		}
 	}
-	else 
+	else
 	{
 		for (u = (n >> 1); u < n; ++u)
 		{
@@ -1721,9 +1711,9 @@ static void falcon_poly_mul_fft(falcon_fpr* restrict a, const falcon_fpr* restri
 	n = (size_t)1 << logn;
 	hn = n >> 1;
 
-	if (n >= 8) 
+	if (n >= 8)
 	{
-		for (u = 0; u < hn; u += 4) 
+		for (u = 0; u < hn; u += 4)
 		{
 			__m256d a_re;
 			__m256d a_im;
@@ -1742,7 +1732,7 @@ static void falcon_poly_mul_fft(falcon_fpr* restrict a, const falcon_fpr* restri
 			_mm256_storeu_pd(&a[u + hn].v, c_im);
 		}
 	}
-	else 
+	else
 	{
 		for (u = 0; u < hn; ++u)
 		{
@@ -1771,13 +1761,13 @@ static void falcon_poly_muladj_fft(falcon_fpr* restrict a, const falcon_fpr* res
 
 	if (n >= 8)
 	{
-		for (u = 0; u < hn; u += 4) 
+		for (u = 0; u < hn; u += 4)
 		{
 			__m256d a_re;
 			__m256d a_im;
 			__m256d b_re;
 			__m256d b_im;
-			__m256d c_re; 
+			__m256d c_re;
 			__m256d c_im;
 
 			a_re = _mm256_loadu_pd(&a[u].v);
@@ -1840,9 +1830,10 @@ static void falcon_poly_mulselfadj_fft(falcon_fpr* a, uint32_t logn)
 	}
 	else
 	{
-		for (u = 0; u < hn; ++u) 
+		for (u = 0; u < hn; ++u)
 		{
-			falcon_fpr a_re, a_im;
+			falcon_fpr a_re;
+			falcon_fpr a_im;
 
 			a_re = a[u];
 			a_im = a[u + hn];
@@ -1859,17 +1850,17 @@ static void falcon_poly_mulconst(falcon_fpr* a, falcon_fpr x, uint32_t logn)
 
 	n = (size_t)1 << logn;
 
-	if (n >= 4) 
+	if (n >= 4)
 	{
 		__m256d x4;
 
 		x4 = _mm256_set1_pd(x.v);
-		for (u = 0; u < n; u += 4) 
+		for (u = 0; u < n; u += 4)
 		{
 			_mm256_storeu_pd(&a[u].v, _mm256_mul_pd(x4, _mm256_loadu_pd(&a[u].v)));
 		}
 	}
-	else 
+	else
 	{
 		for (u = 0; u < n; ++u)
 		{
@@ -1900,7 +1891,8 @@ static void falcon_poly_div_fft(falcon_fpr* restrict a, const falcon_fpr* restri
 			__m256d b_re;
 			__m256d b_im;
 			__m256d c_re;
-			__m256d c_im, t;
+			__m256d c_im;
+			__m256d t;
 
 			a_re = _mm256_loadu_pd(&a[u].v);
 			a_im = _mm256_loadu_pd(&a[u + hn].v);
@@ -1915,9 +1907,9 @@ static void falcon_poly_div_fft(falcon_fpr* restrict a, const falcon_fpr* restri
 			_mm256_storeu_pd(&a[u + hn].v, c_im);
 		}
 	}
-	else 
+	else
 	{
-		for (u = 0; u < hn; ++u) 
+		for (u = 0; u < hn; ++u)
 		{
 			falcon_fpr a_re;
 			falcon_fpr a_im;
@@ -1948,12 +1940,13 @@ static void falcon_poly_invnorm2_fft(falcon_fpr* restrict d, const falcon_fpr* r
 
 		one = _mm256_set1_pd(1.0);
 
-		for (u = 0; u < hn; u += 4) 
+		for (u = 0; u < hn; u += 4)
 		{
 			__m256d a_re;
 			__m256d a_im;
 			__m256d b_re;
-			__m256d b_im, dv;
+			__m256d b_im;
+			__m256d dv;
 
 			a_re = _mm256_loadu_pd(&a[u].v);
 			a_im = _mm256_loadu_pd(&a[u + hn].v);
@@ -1995,7 +1988,7 @@ static void falcon_poly_add_muladj_fft(falcon_fpr* restrict d, const falcon_fpr*
 
 	if (n >= 8)
 	{
-		for (u = 0; u < hn; u += 4) 
+		for (u = 0; u < hn; u += 4)
 		{
 			__m256d F_re;
 			__m256d F_im;
@@ -2027,7 +2020,7 @@ static void falcon_poly_add_muladj_fft(falcon_fpr* restrict d, const falcon_fpr*
 			_mm256_storeu_pd(&d[u + hn].v, _mm256_add_pd(a_im, b_im));
 		}
 	}
-	else 
+	else
 	{
 		for (u = 0; u < hn; ++u)
 		{
@@ -2070,9 +2063,9 @@ static void falcon_poly_mul_autoadj_fft(falcon_fpr* restrict a, const falcon_fpr
 	n = (size_t)1 << logn;
 	hn = n >> 1;
 
-	if (n >= 8) 
+	if (n >= 8)
 	{
-		for (u = 0; u < hn; u += 4) 
+		for (u = 0; u < hn; u += 4)
 		{
 			__m256d a_re;
 			__m256d a_im;
@@ -2085,9 +2078,9 @@ static void falcon_poly_mul_autoadj_fft(falcon_fpr* restrict a, const falcon_fpr
 			_mm256_storeu_pd(&a[u + hn].v, _mm256_mul_pd(a_im, bv));
 		}
 	}
-	else 
+	else
 	{
-		for (u = 0; u < hn; ++u) 
+		for (u = 0; u < hn; ++u)
 		{
 			a[u] = falcon_fpr_mul(a[u], b[u]);
 			a[u + hn] = falcon_fpr_mul(a[u + hn], b[u]);
@@ -2125,7 +2118,7 @@ static void falcon_poly_div_autoadj_fft(falcon_fpr* restrict a, const falcon_fpr
 	}
 	else
 	{
-		for (u = 0; u < hn; ++u) 
+		for (u = 0; u < hn; ++u)
 		{
 			falcon_fpr ib;
 
@@ -2151,7 +2144,7 @@ static void falcon_poly_LDL_fft(const falcon_fpr* restrict g00, falcon_fpr* rest
 
 		one = _mm256_set1_pd(1.0);
 
-		for (u = 0; u < hn; u += 4) 
+		for (u = 0; u < hn; u += 4)
 		{
 			__m256d g00_re;
 			__m256d g00_im;
@@ -2187,7 +2180,7 @@ static void falcon_poly_LDL_fft(const falcon_fpr* restrict g00, falcon_fpr* rest
 	}
 	else
 	{
-		for (u = 0; u < hn; ++u) 
+		for (u = 0; u < hn; ++u)
 		{
 			falcon_fpr g00_re;
 			falcon_fpr g00_im;
@@ -2222,13 +2215,13 @@ static void falcon_poly_LDLmv_fft(falcon_fpr* restrict d11, falcon_fpr* restrict
 	n = (size_t)1 << logn;
 	hn = n >> 1;
 
-	if (n >= 8) 
+	if (n >= 8)
 	{
 		__m256d one;
 
 		one = _mm256_set1_pd(1.0);
 
-		for (u = 0; u < hn; u += 4) 
+		for (u = 0; u < hn; u += 4)
 		{
 			__m256d g00_re;
 			__m256d g00_im;
@@ -2262,9 +2255,9 @@ static void falcon_poly_LDLmv_fft(falcon_fpr* restrict d11, falcon_fpr* restrict
 			_mm256_storeu_pd(&l10[u + hn].v, mu_im);
 		}
 	}
-	else 
+	else
 	{
-		for (u = 0; u < hn; ++u) 
+		for (u = 0; u < hn; ++u)
 		{
 			falcon_fpr g00_re;
 			falcon_fpr g00_im;
@@ -2307,7 +2300,7 @@ static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict 
 	hn = n >> 1;
 	qn = hn >> 1;
 
-	if (n >= 8) 
+	if (n >= 8)
 	{
 		__m256d half;
 		__m256d sv;
@@ -2346,7 +2339,7 @@ static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict 
 		f0[0] = f[0];
 		f1[0] = f[hn];
 
-		for (u = 0; u < qn; ++u) 
+		for (u = 0; u < qn; ++u)
 		{
 			falcon_fpr a_re;
 			falcon_fpr a_im;
@@ -2354,6 +2347,7 @@ static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict 
 			falcon_fpr b_im;
 			falcon_fpr t_re;
 			falcon_fpr t_im;
+			falcon_fpr tmp;
 
 			a_re = f[(u << 1) + 0];
 			a_im = f[(u << 1) + 0 + hn];
@@ -2365,7 +2359,8 @@ static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict 
 			f0[u + qn] = falcon_fpr_half(t_im);
 
 			falcon_fpc_sub(&t_re, &t_im, a_re, a_im, b_re, b_im);
-			falcon_fpc_mul(&t_re, &t_im, t_re, t_im, falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 0], falcon_fpr_neg(falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 1]));
+			tmp = falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 1];
+			falcon_fpc_mul(&t_re, &t_im, t_re, t_im, falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 0], falcon_fpr_neg(tmp));
 			f1[u] = falcon_fpr_half(t_re);
 			f1[u + qn] = falcon_fpr_half(t_im);
 		}
@@ -2383,7 +2378,7 @@ static void falcon_poly_merge_fft(falcon_fpr* restrict f, const falcon_fpr* rest
 	hn = n >> 1;
 	qn = hn >> 1;
 
-	if (n >= 16) 
+	if (n >= 16)
 	{
 		for (u = 0; u < qn; u += 4)
 		{
@@ -2449,10 +2444,12 @@ static void falcon_poly_merge_fft(falcon_fpr* restrict f, const falcon_fpr* rest
 			falcon_fpr b_im;
 			falcon_fpr t_re;
 			falcon_fpr t_im;
+			falcon_fpr tmp;
 
 			a_re = f0[u];
 			a_im = f0[u + qn];
-			falcon_fpc_mul(&b_re, &b_im, f1[u], f1[u + qn], falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 0], falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 1]);
+			tmp = falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 1];
+			falcon_fpc_mul(&b_re, &b_im, f1[u], f1[u + qn], falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 0], tmp);
 			falcon_fpc_add(&t_re, &t_im, a_re, a_im, b_re, b_im);
 			f[(u << 1) + 0] = t_re;
 			f[(u << 1) + 0 + hn] = t_im;
@@ -2689,9 +2686,7 @@ static size_t falcon_trim_i8_decode(int8_t* x, uint32_t logn, uint32_t bits, con
 
 			if (w == (uint32_t)-(int32_t)mask2)
 			{
-				/*
-				 * The -2^(bits-1) value is forbidden.
-				 */
+				/* The -2^(bits-1) value is forbidden */
 				return 0;
 			}
 
@@ -2702,9 +2697,7 @@ static size_t falcon_trim_i8_decode(int8_t* x, uint32_t logn, uint32_t bits, con
 
 	if ((acc & (((uint32_t)1 << acclen) - 1)) != 0)
 	{
-		/*
-		 * Extra bits in the last byte must be zero.
-		 */
+		/* Extra bits in the last byte must be zero */
 		return 0;
 	}
 
@@ -2713,7 +2706,7 @@ static size_t falcon_trim_i8_decode(int8_t* x, uint32_t logn, uint32_t bits, con
 
 static size_t falcon_comp_encode(void* out, size_t maxoutlen, const int16_t* x, uint32_t logn)
 {
-	uint8_t *buf;
+	uint8_t* buf;
 	size_t n;
 	size_t u;
 	size_t v;
@@ -2743,10 +2736,7 @@ static size_t falcon_comp_encode(void* out, size_t maxoutlen, const int16_t* x, 
 		int32_t t;
 		uint32_t w;
 
-		/*
-		 * Get sign and absolute value of next integer; push the
-		 * sign bit.
-		 */
+		/* Get sign and absolute value of next integer; push the sign bit */
 		acc <<= 1;
 		t = x[u];
 
@@ -2758,9 +2748,7 @@ static size_t falcon_comp_encode(void* out, size_t maxoutlen, const int16_t* x, 
 
 		w = (uint32_t)t;
 
-		/*
-		 * Push the low 7 bits of the absolute value.
-		 */
+		/* Push the low 7 bits of the absolute value */
 		acc <<= 7;
 		acc |= w & 127u;
 		w >>= 7;
@@ -2782,9 +2770,7 @@ static size_t falcon_comp_encode(void* out, size_t maxoutlen, const int16_t* x, 
 		acc |= 1;
 		acclen += w + 1;
 
-		/*
-		 * Produce all full bytes.
-		 */
+		/* Produce all full bytes */
 		while (acclen >= 8)
 		{
 			acclen -= 8;
@@ -2803,9 +2789,7 @@ static size_t falcon_comp_encode(void* out, size_t maxoutlen, const int16_t* x, 
 		}
 	}
 
-	/*
-	 * Flush remaining bits (if any).
-	 */
+	/* Flush remaining bits (if any) */
 	if (acclen > 0)
 	{
 		if (buf != NULL)
@@ -2828,7 +2812,6 @@ static size_t falcon_comp_decode(int16_t* x, uint32_t logn, const void* in, size
 {
 	const uint8_t *buf;
 	size_t n;
-	size_t u;
 	size_t v;
 	uint32_t acc;
 	uint32_t acclen;
@@ -2839,7 +2822,7 @@ static size_t falcon_comp_decode(int16_t* x, uint32_t logn, const void* in, size
 	acclen = 0;
 	v = 0;
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		uint32_t b;
 		uint32_t s;
@@ -2863,7 +2846,7 @@ static size_t falcon_comp_decode(int16_t* x, uint32_t logn, const void* in, size
 		/*
 		 * Get next bits until a 1 is reached.
 		 */
-		for (;;)
+		while (true)
 		{
 			if (acclen == 0)
 			{
@@ -2892,15 +2875,13 @@ static size_t falcon_comp_decode(int16_t* x, uint32_t logn, const void* in, size
 			}
 		}
 
-		/*
-		 * "-0" is forbidden.
-		 */
+		/* "-0" is forbidden */
 		if (s && m == 0)
 		{
 			return 0;
 		}
 
-		x[u] = (int16_t)(s ? -(int32_t)m : (int32_t)m);
+		x[u] = (int16_t)(s ? -(int32_t)m : m);
 	}
 
 	/*
@@ -3263,18 +3244,15 @@ static uint32_t falcon_mq_div_12289(uint32_t x, uint32_t y)
 
 static void falcon_mq_NTT(uint16_t* a, uint32_t logn)
 {
-	/*
-	* Compute NTT on a ring element.
-	*/
+	/* Compute NTT on a ring element */
 
-	size_t m;
 	size_t n;
 	size_t t;
 
 	n = (size_t)1 << logn;
 	t = n;
 
-	for (m = 1; m < n; m <<= 1)
+	for (size_t m = 1; m < n; m <<= 1)
 	{
 		size_t ht;
 		size_t i;
@@ -3284,14 +3262,13 @@ static void falcon_mq_NTT(uint16_t* a, uint32_t logn)
 
 		for (i = 0, j1 = 0; i < m; i++, j1 += t)
 		{
-			size_t j;
 			size_t j2;
 			uint32_t s;
 
 			s = falcon_avx2_GMb[m + i];
 			j2 = j1 + ht;
 
-			for (j = j1; j < j2; ++j)
+			for (size_t j = j1; j < j2; ++j)
 			{
 				uint32_t u;
 				uint32_t v;
@@ -3309,9 +3286,7 @@ static void falcon_mq_NTT(uint16_t* a, uint32_t logn)
 
 static void falcon_mq_iNTT(uint16_t* a, uint32_t logn)
 {
-	/*
-	* Compute the inverse NTT on a ring element, binary case.
-	*/
+	/* Compute the inverse NTT on a ring element, binary case */
 
 	size_t m;
 	size_t n;
@@ -3334,14 +3309,13 @@ static void falcon_mq_iNTT(uint16_t* a, uint32_t logn)
 
 		for (i = 0, j1 = 0; i < hm; i++, j1 += dt)
 		{
-			size_t j;
 			size_t j2;
 			uint32_t s;
 
 			j2 = j1 + t;
 			s = falcon_avx2_iGMb[hm + i];
 
-			for (j = j1; j < j2; ++j)
+			for (size_t j = j1; j < j2; ++j)
 			{
 				uint32_t u;
 				uint32_t v;
@@ -3365,30 +3339,31 @@ static void falcon_mq_iNTT(uint16_t* a, uint32_t logn)
 	 * need to divide 1 by 2 logn times. But we also want it in
 	 * Montgomery representation, i.e. we also want to multiply it
 	 * by R = 2^16. In the common case, this should be a simple right
-	 * shift. The loop below is generic and works also in corner cases;
+	 * shift. The loop below is generic and works also in corner cases
 	 * its computation time is negligible.
 	 */
 	ni = FALCON_R;
-	for (m = n; m > 1; m >>= 1) {
+
+	for (m = n; m > 1; m >>= 1) 
+	{
 		ni = falcon_mq_rshift1(ni);
 	}
-	for (m = 0; m < n; m++) {
+
+	for (m = 0; m < n; ++m) 
+	{
 		a[m] = (uint16_t)falcon_mq_montymul(a[m], ni);
 	}
 }
 
 static void falcon_mq_poly_tomonty(uint16_t* f, uint32_t logn)
 {
-	/*
-	* Convert a polynomial (mod q) to Montgomery representation.
-	*/
+	/* Convert a polynomial (mod q) to Montgomery representation */
 
-	size_t u;
 	size_t n;
 
 	n = (size_t)1 << logn;
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		f[u] = (uint16_t)falcon_mq_montymul(f[u], FALCON_R2);
 	}
@@ -3402,11 +3377,10 @@ static void falcon_mq_poly_montymul_ntt(uint16_t* f, const uint16_t* g, uint32_t
 	*/
 
 	size_t n;
-	size_t u;
 
 	n = (size_t)1 << logn;
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		f[u] = (uint16_t)falcon_mq_montymul(f[u], g[u]);
 	}
@@ -3414,16 +3388,13 @@ static void falcon_mq_poly_montymul_ntt(uint16_t* f, const uint16_t* g, uint32_t
 
 static void falcon_mq_poly_sub(uint16_t* f, const uint16_t* g, uint32_t logn)
 {
-	/*
-	* Subtract polynomial g from polynomial f.
-	*/
+	/* Subtract polynomial g from polynomial f */
 
 	size_t n;
-	size_t u;
 
 	n = (size_t)1 << logn;
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		f[u] = (uint16_t)falcon_mq_sub(f[u], g[u]);
 	}
@@ -3444,9 +3415,7 @@ static int32_t falcon_verify_raw(const uint16_t* c0, const int16_t* s2, const ui
 	n = (size_t)1 << logn;
 	tt = (uint16_t *)tmp;
 
-	/*
-	 * Reduce s2 elements modulo q ([0..q-1] range).
-	 */
+	/* Reduce s2 elements modulo q ([0..q-1] range) */
 	for (u = 0; u < n; ++u)
 	{
 		uint32_t w;
@@ -3456,17 +3425,13 @@ static int32_t falcon_verify_raw(const uint16_t* c0, const int16_t* s2, const ui
 		tt[u] = (uint16_t)w;
 	}
 
-	/*
-	 * Compute -s1 = s2*h - c0 mod phi mod q (in tt[]).
-	 */
+	/* Compute -s1 = s2*h - c0 mod phi mod q (in tt[]) */
 	falcon_mq_NTT(tt, logn);
 	falcon_mq_poly_montymul_ntt(tt, h, logn);
 	falcon_mq_iNTT(tt, logn);
 	falcon_mq_poly_sub(tt, c0, logn);
 
-	/*
-	 * Normalize -s1 elements into the [-q/2..q/2] range.
-	 */
+	/* Normalize -s1 elements into the [-q/2..q/2] range */
 	for (u = 0; u < n; ++u)
 	{
 		int32_t w;
@@ -3476,10 +3441,7 @@ static int32_t falcon_verify_raw(const uint16_t* c0, const int16_t* s2, const ui
 		((int16_t *)tt)[u] = (int16_t)w;
 	}
 
-	/*
-	 * Signature is valid if and only if the aggregate (-s1,s2) vector
-	 * is short enough.
-	 */
+	/* Signature is valid if and only if the aggregate (-s1,s2) vector is short enough */
 	return falcon_is_short((int16_t*)tt, s2, logn);
 }
 
@@ -3978,9 +3940,7 @@ const uint16_t falcon_avx2_falcon_rev10[FALCON_REV10_SIZE] =
 
 static uint32_t falcon_modp_R2(uint32_t p, uint32_t p0i)
 {
-	/*
-	* Compute R2 = 2^62 mod p.
-	*/
+	/* Compute R2 = 2^62 mod p */
 
 	uint32_t z;
 
@@ -3991,19 +3951,14 @@ static uint32_t falcon_modp_R2(uint32_t p, uint32_t p0i)
 	z = falcon_modp_R(p);
 	z = falcon_modp_add(z, z, p);
 
-	/*
-	 * Square it five times to obtain 2^32 in Montgomery representation
-	 * (i.e. 2^63 mod p).
-	 */
+	/* Square it five times to obtain 2^32 in Montgomery representation (i.e. 2^63 mod p) */
 	z = falcon_modp_montymul(z, z, p, p0i);
 	z = falcon_modp_montymul(z, z, p, p0i);
 	z = falcon_modp_montymul(z, z, p, p0i);
 	z = falcon_modp_montymul(z, z, p, p0i);
 	z = falcon_modp_montymul(z, z, p, p0i);
 
-	/*
-	 * Halve the value mod p to get 2^62.
-	 */
+	/* Halve the value mod p to get 2^62 */
 	z = (z + (p & (uint32_t)-(int32_t)(z & 1))) >> 1;
 
 	return z;
@@ -4017,7 +3972,6 @@ static uint32_t falcon_modp_Rx(uint32_t x, uint32_t p, uint32_t p0i, uint32_t R2
 	* -1/p mod 2^31; R2 must be equal to 2^62 mod p.
 	*/
 
-	int32_t i;
 	uint32_t r;
 	uint32_t z;
 
@@ -4030,7 +3984,7 @@ static uint32_t falcon_modp_Rx(uint32_t x, uint32_t p, uint32_t p0i, uint32_t R2
 	r = R2;
 	z = falcon_modp_R(p);
 
-	for (i = 0; (1U << i) <= x; i++)
+	for (int32_t i = 0; (1U << i) <= x; i++)
 	{
 		if ((x & (1U << i)) != 0)
 		{
@@ -4052,12 +4006,11 @@ static uint32_t falcon_modp_div(uint32_t a, uint32_t b, uint32_t p, uint32_t p0i
 
 	uint32_t e;
 	uint32_t z;
-	int32_t i;
 
 	e = p - 2;
 	z = R;
 
-	for (i = 30; i >= 0; i--)
+	for (int32_t i = 30; i >= 0; i--)
 	{
 		uint32_t z2;
 
@@ -4097,8 +4050,7 @@ static void falcon_modp_mkgm2(uint32_t* restrict gm, uint32_t* restrict igm, uin
 	*
 	* p must be a prime such that p = 1 mod 2048.
 	*/
-
-	size_t u, n;
+	size_t n;
 	uint32_t k;
 	uint32_t ig;
 	uint32_t x1;
@@ -4123,7 +4075,7 @@ static void falcon_modp_mkgm2(uint32_t* restrict gm, uint32_t* restrict igm, uin
 	k = 10 - logn;
 	x1 = x2 = falcon_modp_R(p);
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		size_t v;
 
@@ -4142,7 +4094,6 @@ static void falcon_modp_NTT2_ext(uint32_t* a, size_t stride, const uint32_t* gm,
 	* are a[0], a[stride], a[2 * stride]...
 	*/
 
-	size_t m;
 	size_t n;
 	size_t t;
 
@@ -4153,7 +4104,8 @@ static void falcon_modp_NTT2_ext(uint32_t* a, size_t stride, const uint32_t* gm,
 
 	n = (size_t)1 << logn;
 	t = n;
-	for (m = 1; m < n; m <<= 1)
+
+	for (size_t m = 1; m < n; m <<= 1)
 	{
 		size_t ht;
 		size_t u;
@@ -4164,7 +4116,6 @@ static void falcon_modp_NTT2_ext(uint32_t* a, size_t stride, const uint32_t* gm,
 		for (u = 0, v1 = 0; u < m; u++, v1 += t)
 		{
 			uint32_t s;
-			size_t v;
 			uint32_t *r1;
 			uint32_t *r2;
 
@@ -4172,7 +4123,7 @@ static void falcon_modp_NTT2_ext(uint32_t* a, size_t stride, const uint32_t* gm,
 			r1 = a + v1 * stride;
 			r2 = r1 + ht * stride;
 
-			for (v = 0; v < ht; v++, r1 += stride, r2 += stride)
+			for (size_t v = 0; v < ht; v++, r1 += stride, r2 += stride)
 			{
 				uint32_t x;
 				uint32_t y;
@@ -4190,71 +4141,65 @@ static void falcon_modp_NTT2_ext(uint32_t* a, size_t stride, const uint32_t* gm,
 
 static void falcon_modp_iNTT2_ext(uint32_t* a, size_t stride, const uint32_t* igm, uint32_t logn, uint32_t p, uint32_t p0i)
 {
-	/*
-	* Compute the inverse NTT over a polynomial (binary case).
-	*/
+	/* Compute the inverse NTT over a polynomial (binary case) */
 
 	size_t t;
-	size_t m;
 	size_t n;
 	size_t k;
 	uint32_t ni;
 	uint32_t *r;
 
-	if (logn == 0)
+	if (logn != 0)
 	{
-		return;
-	}
+		n = (size_t)1 << logn;
+		t = 1;
 
-	n = (size_t)1 << logn;
-	t = 1;
-
-	for (m = n; m > 1; m >>= 1)
-	{
-		size_t hm;
-		size_t dt;
-		size_t u;
-		size_t v1;
-
-		hm = m >> 1;
-		dt = t << 1;
-
-		for (u = 0, v1 = 0; u < hm; u++, v1 += dt)
+		for (size_t m = n; m > 1; m >>= 1)
 		{
-			uint32_t s;
-			size_t v;
-			uint32_t* r1;
-			uint32_t* r2;
+			size_t hm;
+			size_t dt;
+			size_t u;
+			size_t v1;
 
-			s = igm[hm + u];
-			r1 = a + v1 * stride;
-			r2 = r1 + t * stride;
+			hm = m >> 1;
+			dt = t << 1;
 
-			for (v = 0; v < t; v++, r1 += stride, r2 += stride)
+			for (u = 0, v1 = 0; u < hm; u++, v1 += dt)
 			{
-				uint32_t x;
-				uint32_t y;
+				uint32_t s;
+				uint32_t* r1;
+				uint32_t* r2;
 
-				x = *r1;
-				y = *r2;
-				*r1 = falcon_modp_add(x, y, p);
-				*r2 = falcon_modp_montymul(falcon_modp_sub(x, y, p), s, p, p0i);;
+				s = igm[hm + u];
+				r1 = a + v1 * stride;
+				r2 = r1 + t * stride;
+
+				for (size_t v = 0; v < t; v++, r1 += stride, r2 += stride)
+				{ 
+					uint32_t x;
+					uint32_t y;
+
+					x = *r1;
+					y = *r2;
+					*r1 = falcon_modp_add(x, y, p);
+					*r2 = falcon_modp_montymul(falcon_modp_sub(x, y, p), s, p, p0i);;
+				}
 			}
+
+			t = dt;
 		}
 
-		t = dt;
-	}
+		/*
+		 * We need 1/n in Montgomery representation, i.e. R/n. Since
+		 * 1 <= logn <= 10, R/n is an integer; morever, R/n <= 2^30 < p,
+		 * thus a simple shift will do.
+		 */
+		ni = (uint32_t)1 << (31 - logn);
 
-	/*
-	 * We need 1/n in Montgomery representation, i.e. R/n. Since
-	 * 1 <= logn <= 10, R/n is an integer; morever, R/n <= 2^30 < p,
-	 * thus a simple shift will do.
-	 */
-	ni = (uint32_t)1 << (31 - logn);
-
-	for (k = 0, r = a; k < n; k++, r += stride)
-	{
-		*r = falcon_modp_montymul(*r, ni, p, p0i);
+		for (k = 0, r = a; k < n; k++, r += stride)
+		{
+			*r = falcon_modp_montymul(*r, ni, p, p0i);
+		}
 	}
 }
 
@@ -4276,16 +4221,15 @@ static void falcon_modp_poly_rec_res(uint32_t* f, uint32_t logn, uint32_t p, uin
 	*/
 
 	size_t hn;
-	size_t u;
 
 	hn = (size_t)1 << (logn - 1);
 
-	for (u = 0; u < hn; ++u)
+	for (size_t u = 0; u < hn; ++u)
 	{
 		uint32_t w0;
 		uint32_t w1;
 
-		w0 = f[(u << 1)];
+		w0 = f[u << 1];
 		w1 = f[(u << 1) + 1];
 		f[u] = falcon_modp_montymul(falcon_modp_montymul(w0, w1, p, p0i), R2, p, p0i);
 	}
@@ -4303,14 +4247,13 @@ static uint32_t falcon_zint_sub(uint32_t* restrict a, const uint32_t* restrict b
 	* still performed, and the carry is computed and returned.
 	*/
 
-	size_t u;
 	uint32_t cc;
 	uint32_t m;
 
 	cc = 0;
 	m = (uint32_t)-(int32_t)ctl;
 
-	for (u = 0; u < len; ++u)
+	for (size_t u = 0; u < len; ++u)
 	{
 		uint32_t aw;
 		uint32_t w;
@@ -4318,7 +4261,7 @@ static uint32_t falcon_zint_sub(uint32_t* restrict a, const uint32_t* restrict b
 		aw = a[u];
 		w = aw - b[u] - cc;
 		cc = w >> 31;
-		aw ^= ((w & 0x7FFFFFFF) ^ aw) & m;
+		aw ^= ((w & 0x7FFFFFFFUL) ^ aw) & m;
 		a[u] = aw;
 	}
 
@@ -4332,17 +4275,16 @@ static uint32_t falcon_zint_mul_small(uint32_t* m, size_t mlen, uint32_t x)
 	* This function assumes that x < 2^31. The carry word is returned.
 	*/
 
-	size_t u;
 	uint32_t cc;
 
 	cc = 0;
 
-	for (u = 0; u < mlen; ++u)
+	for (size_t u = 0; u < mlen; ++u)
 	{
 		uint64_t z;
 
 		z = (uint64_t)m[u] * (uint64_t)x + cc;
-		m[u] = (uint32_t)z & 0x7FFFFFFF;
+		m[u] = (uint32_t)z & 0x7FFFFFFFUL;
 		cc = (uint32_t)(z >> 31);
 	}
 
@@ -4373,10 +4315,11 @@ static uint32_t falcon_zint_mod_small_unsigned(const uint32_t* d, size_t dlen, u
 	x = 0;
 	u = dlen;
 
-	while (u-- > 0)
+	while (u > 0)
 	{
 		uint32_t w;
 
+		--u;
 		x = falcon_modp_montymul(x, R2, p, p0i);
 		w = d[u] - p;
 		w += p & (uint32_t)-(int32_t)(w >> 31);
@@ -4395,13 +4338,13 @@ static uint32_t falcon_zint_mod_small_signed(const uint32_t* d, size_t dlen, uin
 
 	uint32_t z;
 
-	if (dlen == 0)
-	{
-		return 0;
-	}
+	z = 0;
 
-	z = falcon_zint_mod_small_unsigned(d, dlen, p, p0i, R2);
-	z = falcon_modp_sub(z, Rx & (uint32_t)-(int32_t)(d[dlen - 1] >> 30), p);
+	if (dlen != 0)
+	{
+		z = falcon_zint_mod_small_unsigned(d, dlen, p, p0i, R2);
+		z = falcon_modp_sub(z, Rx & (uint32_t)-(int32_t)(d[dlen - 1] >> 30), p);
+	}
 
 	return z;
 }
@@ -4414,12 +4357,11 @@ static void falcon_zint_add_mul_small(uint32_t* restrict x, const uint32_t* rest
 	* not overlap.
 	*/
 
-	size_t u;
 	uint32_t cc;
 
 	cc = 0;
 
-	for (u = 0; u < len; ++u)
+	for (size_t u = 0; u < len; ++u)
 	{
 		uint32_t xw;
 		uint32_t yw;
@@ -4428,7 +4370,7 @@ static void falcon_zint_add_mul_small(uint32_t* restrict x, const uint32_t* rest
 		xw = x[u];
 		yw = y[u];
 		z = (uint64_t)yw * (uint64_t)s + (uint64_t)xw + (uint64_t)cc;
-		x[u] = (uint32_t)z & 0x7FFFFFFF;
+		x[u] = (uint32_t)z & 0x7FFFFFFFUL;
 		cc = (uint32_t)(z >> 31);
 	}
 
@@ -4521,8 +4463,7 @@ static void falcon_zint_rebuild_CRT(uint32_t* restrict xx, size_t xlen, size_t x
 	{
 		/*
 		 * At the entry of each loop iteration:
-		 *  - the first u words of each array have been
-		 *    reassembled;
+		 *  - the first u words of each array have been reassembled;
 		 *  - the first u words of tmp[] contains the
 		 * product of the prime moduli processed so far.
 		 *
@@ -4545,29 +4486,22 @@ static void falcon_zint_rebuild_CRT(uint32_t* restrict xx, size_t xlen, size_t x
 			uint32_t xq;
 			uint32_t xr;
 			/*
-			 * xp = the integer x modulo the prime p for this
-			 *      iteration
+			 * xp = the integer x modulo the prime p for this iteration
 			 * xq = (x mod q) mod p
 			 */
 			xp = x[u];
 			xq = falcon_zint_mod_small_unsigned(x, u, p, p0i, R2);
 
-			/*
-			 * New value is (x mod q) + q * (s * (xp - xq) mod p)
-			 */
+			/* New value is (x mod q) + q * (s * (xp - xq) mod p) */
 			xr = falcon_modp_montymul(s, falcon_modp_sub(xp, xq, p), p, p0i);
 			falcon_zint_add_mul_small(x, tmp, u, xr);
 		}
 
-		/*
-		 * Update product of primes in tmp[].
-		 */
+		/* Update product of primes in tmp[] */
 		tmp[u] = falcon_zint_mul_small(tmp, u, p);
 	}
 
-	/*
-	 * Normalize the reconstructed values around 0.
-	 */
+	/* Normalize the reconstructed values around 0 */
 	if (normalize_signed)
 	{
 		for (u = 0, x = xx; u < num; u++, x += xstride)
@@ -4584,25 +4518,24 @@ static void falcon_zint_negate(uint32_t* a, size_t len, uint32_t ctl)
 	* and only if ctl = 1. Control value ctl must be 0 or 1.
 	*/
 
-	size_t u;
 	uint32_t cc;
 	uint32_t m;
 
 	/*
 	 * If ctl = 1 then we flip the bits of a by XORing with
-	 * 0x7FFFFFFF, and we add 1 to the value. If ctl = 0 then we XOR
+	 * 0x7FFFFFFFUL, and we add 1 to the value. If ctl = 0 then we XOR
 	 * with 0 and add 0, which leaves the value unchanged.
 	 */
 	cc = ctl;
 	m = (uint32_t)-(int32_t)ctl >> 1;
 
-	for (u = 0; u < len; ++u)
+	for (size_t u = 0; u < len; ++u)
 	{
 		uint32_t aw;
 
 		aw = a[u];
 		aw = (aw ^ m) + cc;
-		a[u] = aw & 0x7FFFFFFF;
+		a[u] = aw & 0x7FFFFFFFUL;
 		cc = aw >> 31;
 	}
 }
@@ -4626,14 +4559,13 @@ static uint32_t falcon_zint_co_reduce(uint32_t* a, uint32_t* b, size_t len, int6
 
 	int64_t cca;
 	int64_t ccb;
-	size_t u;
 	uint32_t nega;
 	uint32_t negb;
 
 	cca = 0;
 	ccb = 0;
 
-	for (u = 0; u < len; ++u)
+	for (size_t u = 0; u < len; ++u)
 	{
 		uint64_t za;
 		uint64_t zb;
@@ -4647,12 +4579,12 @@ static uint32_t falcon_zint_co_reduce(uint32_t* a, uint32_t* b, size_t len, int6
 
 		if (u > 0)
 		{
-			a[u - 1] = (uint32_t)za & 0x7FFFFFFF;
-			b[u - 1] = (uint32_t)zb & 0x7FFFFFFF;
+			a[u - 1] = (uint32_t)za & 0x7FFFFFFFUL;
+			b[u - 1] = (uint32_t)zb & 0x7FFFFFFFUL;
 		}
 
-		cca = *(int64_t *)&za >> 31;
-		ccb = *(int64_t *)&zb >> 31;
+		cca = *(int64_t*)&za >> 31;
+		ccb = *(int64_t*)&zb >> 31;
 	}
 
 	a[len - 1] = (uint32_t)cca;
@@ -4701,12 +4633,12 @@ static void falcon_zint_finish_mod(uint32_t* a, size_t len, const uint32_t* m, u
 	 * If neg = 0 and cc = 0 then we must subtract m
 	 * If neg = 0 and cc = 1 then we must do nothing
 	 *
-	 * In the loop below, we conditionally subtract either m or -m
-	 * from a. Word xm is a word of m (if neg = 0) or -m (if neg = 1);
+	 * In the loop below, we conditionally subtract either m or -m from a. 
+	 * Word xm is a word of m (if neg = 0) or -m (if neg = 1)
 	 * but if neg = 0 and cc = 1, then ym = 0 and it forces mw to 0.
 	 */
-	xm = (uint32_t)-(int32_t)neg >> 1;
-	ym = (uint32_t)-(int32_t)(neg | (1 - cc));
+	xm = -(int32_t)neg >> 1;
+	ym = -(int32_t)(neg | (1 - cc));
 	cc = neg;
 
 	for (u = 0; u < len; ++u)
@@ -4717,7 +4649,7 @@ static void falcon_zint_finish_mod(uint32_t* a, size_t len, const uint32_t* m, u
 		aw = a[u];
 		mw = (m[u] ^ xm) & ym;
 		aw = aw - mw - cc;
-		a[u] = aw & 0x7FFFFFFF;
+		a[u] = aw & 0x7FFFFFFFUL;
 		cc = aw >> 31;
 	}
 }
@@ -4732,7 +4664,6 @@ static void falcon_zint_co_reduce_mod(uint32_t* a, uint32_t* b, const uint32_t* 
 
 	int64_t cca;
 	int64_t ccb;
-	size_t u;
 	uint32_t fa;
 	uint32_t fb;
 
@@ -4741,10 +4672,10 @@ static void falcon_zint_co_reduce_mod(uint32_t* a, uint32_t* b, const uint32_t* 
 	 */
 	cca = 0;
 	ccb = 0;
-	fa = ((a[0] * (uint32_t)xa + b[0] * (uint32_t)xb) * m0i) & 0x7FFFFFFF;
-	fb = ((a[0] * (uint32_t)ya + b[0] * (uint32_t)yb) * m0i) & 0x7FFFFFFF;
+	fa = ((a[0] * (uint32_t)xa + b[0] * (uint32_t)xb) * m0i) & 0x7FFFFFFFUL;
+	fb = ((a[0] * (uint32_t)ya + b[0] * (uint32_t)yb) * m0i) & 0x7FFFFFFFUL;
 
-	for (u = 0; u < len; ++u)
+	for (size_t u = 0; u < len; ++u)
 	{
 		uint64_t za;
 		uint64_t zb;
@@ -4758,12 +4689,12 @@ static void falcon_zint_co_reduce_mod(uint32_t* a, uint32_t* b, const uint32_t* 
 
 		if (u > 0)
 		{
-			a[u - 1] = (uint32_t)za & 0x7FFFFFFF;
-			b[u - 1] = (uint32_t)zb & 0x7FFFFFFF;
+			a[u - 1] = (uint32_t)za & 0x7FFFFFFFUL;
+			b[u - 1] = (uint32_t)zb & 0x7FFFFFFFUL;
 		}
 
-		cca = *(int64_t *)&za >> 31;
-		ccb = *(int64_t *)&zb >> 31;
+		cca = *(int64_t*)&za >> 31;
+		ccb = *(int64_t*)&zb >> 31;
 	}
 
 	a[len - 1] = (uint32_t)cca;
@@ -4863,7 +4794,7 @@ static int32_t falcon_zint_bezout(uint32_t* restrict u, uint32_t* restrict v, co
 	 *
 	 * The values a and b start at x and y, respectively. Since x
 	 * and y are odd, their GCD is odd, and it is easily seen that
-	 * all steps conserve the GCD (GCD(a-b,b) = GCD(a, b);
+	 * all steps conserve the GCD (GCD(a-b,b) = GCD(a, b)
 	 * GCD(a/2,b) = GCD(a,b) if GCD(a,b) is odd). Moreover, either a
 	 * or b is reduced by at least one bit at each iteration, so
 	 * the algorithm necessarily converges on the case a = b, at
@@ -4903,222 +4834,222 @@ static int32_t falcon_zint_bezout(uint32_t* restrict u, uint32_t* restrict v, co
 	size_t j;
 	uint32_t x0i;
 	uint32_t y0i;
-	uint32_t num;
 	uint32_t rc;
+	int32_t res;
 
-	if (len == 0)
+	res = 0;
+
+	if (len != 0)
 	{
-		return 0;
-	}
+		/*
+		 * u0 and v0 are the u and v result buffers; the four other
+		 * values (u1, v1, a and b) are taken from tmp[].
+		 */
+		u0 = u;
+		v0 = v;
+		u1 = tmp;
+		v1 = u1 + len;
+		a = v1 + len;
+		b = a + len;
 
-	/*
-	 * u0 and v0 are the u and v result buffers; the four other
-	 * values (u1, v1, a and b) are taken from tmp[].
-	 */
-	u0 = u;
-	v0 = v;
-	u1 = tmp;
-	v1 = u1 + len;
-	a = v1 + len;
-	b = a + len;
-
-	/*
-	 * We'll need the Montgomery reduction coefficients.
-	 */
-	x0i = falcon_modp_ninv31(x[0]);
-	y0i = falcon_modp_ninv31(y[0]);
-
-	/*
-	 * Initialize a, b, u0, u1, v0 and v1.
-	 *  a = x   u0 = 1   v0 = 0
-	 *  b = y   u1 = y   v1 = x-1
-	 * Note that x is odd, so computing x-1 is easy.
-	 */
-	qsc_memutils_copy(a, x, len * sizeof(*x));
-	qsc_memutils_copy(b, y, len * sizeof(*y));
-	u0[0] = 1;
-	qsc_memutils_clear(u0 + 1, (len - 1) * sizeof(*u0));
-	qsc_memutils_clear(v0, len * sizeof(*v0));
-	qsc_memutils_copy(u1, y, len * sizeof(*u1));
-	qsc_memutils_copy(v1, x, len * sizeof(*v1));
-	v1[0] --;
-
-	/*
-	 * Each input operand may be as large as 31*len bits, and we
-	 * reduce the total length by at least 30 bits at each iteration.
-	 */
-	for (num = 62 * (uint32_t)len + 30; num >= 30; num -= 30)
-	{
-		uint64_t a_hi;
-		uint64_t b_hi;
-		int64_t pa;
-		int64_t pb;
-		int64_t qa;
-		int64_t qb;
-		uint32_t c0;
-		uint32_t c1;
-		uint32_t a0;
-		uint32_t a1;
-		uint32_t b0;
-		uint32_t b1;
-		uint32_t a_lo;
-		uint32_t b_lo;
-		uint32_t r;
-		int32_t i;
+		/* We'll need the Montgomery reduction coefficients */
+		x0i = falcon_modp_ninv31(x[0]);
+		y0i = falcon_modp_ninv31(y[0]);
 
 		/*
-		 * Extract the top words of a and b. If j is the highest
-		 * index >= 1 such that a[j] != 0 or b[j] != 0, then we
-		 * want (a[j] << 31) + a[j-1] and (b[j] << 31) + b[j-1].
-		 * If a and b are down to one word each, then we use
-		 * a[0] and b[0].
+		 * Initialize a, b, u0, u1, v0 and v1.
+		 *  a = x   u0 = 1   v0 = 0
+		 *  b = y   u1 = y   v1 = x-1
+		 * Note that x is odd, so computing x-1 is easy.
 		 */
-		c0 = (uint32_t)-1;
-		c1 = (uint32_t)-1;
-		a0 = 0;
-		a1 = 0;
-		b0 = 0;
-		b1 = 0;
-		j = len;
+		qsc_memutils_copy(a, x, len * sizeof(*x));
+		qsc_memutils_copy(b, y, len * sizeof(*y));
+		u0[0] = 1;
+		qsc_memutils_clear(u0 + 1, (len - 1) * sizeof(*u0));
+		qsc_memutils_clear(v0, len * sizeof(*v0));
+		qsc_memutils_copy(u1, y, len * sizeof(*u1));
+		qsc_memutils_copy(v1, x, len * sizeof(*v1));
+		v1[0] --;
 
-		while (j > 0)
+		/*
+		 * Each input operand may be as large as 31*len bits, and we
+		 * reduce the total length by at least 30 bits at each iteration.
+		 */
+		for (uint32_t num = 62 * (uint32_t)len + 30; num >= 30; num -= 30)
 		{
-			uint32_t aw;
-			uint32_t bw;
+			uint64_t a_hi;
+			uint64_t b_hi;
+			int64_t pa;
+			int64_t pb;
+			int64_t qa;
+			int64_t qb;
+			uint32_t c0;
+			uint32_t c1;
+			uint32_t a0;
+			uint32_t a1;
+			uint32_t b0;
+			uint32_t b1;
+			uint32_t a_lo;
+			uint32_t b_lo;
+			uint32_t r;
+			int32_t i;
 
-			--j;
-			aw = a[j];
-			bw = b[j];
-			a0 ^= (a0 ^ aw) & c0;
-			a1 ^= (a1 ^ aw) & c1;
-			b0 ^= (b0 ^ bw) & c0;
-			b1 ^= (b1 ^ bw) & c1;
-			c1 = c0;
-			c0 &= (((aw | bw) + 0x7FFFFFFF) >> 31) - (uint32_t)1;
+			/*
+			 * Extract the top words of a and b. If j is the highest
+			 * index >= 1 such that a[j] != 0 or b[j] != 0, then we
+			 * want (a[j] << 31) + a[j-1] and (b[j] << 31) + b[j-1].
+			 * If a and b are down to one word each, then we use
+			 * a[0] and b[0].
+			 */
+			c0 = (uint32_t)-1;
+			c1 = (uint32_t)-1;
+			a0 = 0;
+			a1 = 0;
+			b0 = 0;
+			b1 = 0;
+			j = len;
+
+			while (j > 0)
+			{
+				uint32_t aw;
+				uint32_t bw;
+
+				--j;
+				aw = a[j];
+				bw = b[j];
+				a0 ^= (a0 ^ aw) & c0;
+				a1 ^= (a1 ^ aw) & c1;
+				b0 ^= (b0 ^ bw) & c0;
+				b1 ^= (b1 ^ bw) & c1;
+				c1 = c0;
+				c0 &= (((aw | bw) + 0x7FFFFFFFUL) >> 31) - 1UL;
+			}
+
+			/*
+			 * If c1 = 0, then we grabbed two words for a and b.
+			 * If c1 != 0 but c0 = 0, then we grabbed one word. It
+			 * is not possible that c1 != 0 and c0 != 0, because that
+			 * would mean that both integers are zero.
+			 */
+			a1 |= a0 & c1;
+			a0 &= ~c1;
+			b1 |= b0 & c1;
+			b0 &= ~c1;
+			a_hi = ((uint64_t)a0 << 31) + a1;
+			b_hi = ((uint64_t)b0 << 31) + b1;
+			a_lo = a[0];
+			b_lo = b[0];
+
+			/*
+			 * Compute reduction factors:
+			 *
+			 *   a' = a*pa + b*pb
+			 *   b' = a*qa + b*qb
+			 *
+			 * such that a' and b' are both multiple of 2^31, but are
+			 * only marginally larger than a and b.
+			 */
+			pa = 1;
+			pb = 0;
+			qa = 0;
+			qb = 1;
+
+			for (i = 0; i < 31; ++i)
+			{
+				/*
+				 * At each iteration:
+				 *
+				 *   a <- (a-b)/2 if: a is odd, b is odd, a_hi > b_hi
+				 *   b <- (b-a)/2 if: a is odd, b is odd, a_hi <= b_hi
+				 *   a <- a/2 if: a is even
+				 *   b <- b/2 if: a is odd, b is even
+				 *
+				 * We multiply a_lo and b_lo by 2 at each
+				 * iteration, thus a division by 2 really is a
+				 * non-multiplication by 2.
+				 */
+				uint32_t rt, oa, ob, cAB, cBA, cA;
+				uint64_t rz;
+
+				/*
+				 * rt = 1 if a_hi > b_hi, 0 otherwise.
+				 */
+				rz = b_hi - a_hi;
+				rt = (uint32_t)((rz ^ ((a_hi ^ b_hi) & (a_hi ^ rz))) >> 63);
+
+				/*
+				 * cAB = 1 if b must be subtracted from a
+				 * cBA = 1 if a must be subtracted from b
+				 * cA = 1 if a must be divided by 2
+				 *
+				 * Rules:
+				 *
+				 *   cAB and cBA cannot both be 1.
+				 *   If a is not divided by 2, b is.
+				 */
+				oa = (a_lo >> i) & 1;
+				ob = (b_lo >> i) & 1;
+				cAB = oa & ob & rt;
+				cBA = oa & ob & ~rt;
+				cA = cAB | (oa ^ 1);
+
+				/*
+				 * Conditional subtractions.
+				 */
+				a_lo -= b_lo & (uint32_t)-(int32_t)cAB;
+				a_hi -= b_hi & (uint64_t)-(int64_t)cAB;
+				pa -= qa & -(int64_t)cAB;
+				pb -= qb & -(int64_t)cAB;
+				b_lo -= a_lo & (uint32_t)-(int32_t)cBA;
+				b_hi -= a_hi & (uint64_t)-(int64_t)cBA;
+				qa -= pa & -(int64_t)cBA;
+				qb -= pb & -(int64_t)cBA;
+
+				/*
+				 * Shifting.
+				 */
+				a_lo += a_lo & (cA - 1);
+				pa += pa & ((int64_t)cA - 1);
+				pb += pb & ((int64_t)cA - 1);
+				a_hi ^= (a_hi ^ (a_hi >> 1)) & (uint64_t)-(int64_t)cA;
+				b_lo += b_lo & (uint32_t)-(int32_t)cA;
+				qa += qa & -(int64_t)cA;
+				qb += qb & -(int64_t)cA;
+				b_hi ^= (b_hi ^ (b_hi >> 1)) & ((uint64_t)cA - 1);
+			}
+
+			/*
+			 * Apply the computed parameters to our values. We
+			 * may have to correct pa and pb depending on the
+			 * returned value of falcon_zint_co_reduce() (when a and/or b
+			 * had to be negated).
+			 */
+			r = falcon_zint_co_reduce(a, b, len, pa, pb, qa, qb);
+			pa -= (pa + pa) & -(int64_t)(r & 1);
+			pb -= (pb + pb) & -(int64_t)(r & 1);
+			qa -= (qa + qa) & -(int64_t)(r >> 1);
+			qb -= (qb + qb) & -(int64_t)(r >> 1);
+			falcon_zint_co_reduce_mod(u0, u1, y, len, y0i, pa, pb, qa, qb);
+			falcon_zint_co_reduce_mod(v0, v1, x, len, x0i, pa, pb, qa, qb);
 		}
 
 		/*
-		 * If c1 = 0, then we grabbed two words for a and b.
-		 * If c1 != 0 but c0 = 0, then we grabbed one word. It
-		 * is not possible that c1 != 0 and c0 != 0, because that
-		 * would mean that both integers are zero.
+		 * At that point, array a[] should contain the GCD, and the
+		 * results (u,v) should already be set. We check that the GCD
+		 * is indeed 1. We also check that the two operands x and y
+		 * are odd.
 		 */
-		a1 |= a0 & c1;
-		a0 &= ~c1;
-		b1 |= b0 & c1;
-		b0 &= ~c1;
-		a_hi = ((uint64_t)a0 << 31) + a1;
-		b_hi = ((uint64_t)b0 << 31) + b1;
-		a_lo = a[0];
-		b_lo = b[0];
+		rc = a[0] ^ 1;
 
-		/*
-		 * Compute reduction factors:
-		 *
-		 *   a' = a*pa + b*pb
-		 *   b' = a*qa + b*qb
-		 *
-		 * such that a' and b' are both multiple of 2^31, but are
-		 * only marginally larger than a and b.
-		 */
-		pa = 1;
-		pb = 0;
-		qa = 0;
-		qb = 1;
-
-		for (i = 0; i < 31; ++i)
+		for (j = 1; j < len; ++j)
 		{
-			/*
-			 * At each iteration:
-			 *
-			 *   a <- (a-b)/2 if: a is odd, b is odd, a_hi > b_hi
-			 *   b <- (b-a)/2 if: a is odd, b is odd, a_hi <= b_hi
-			 *   a <- a/2 if: a is even
-			 *   b <- b/2 if: a is odd, b is even
-			 *
-			 * We multiply a_lo and b_lo by 2 at each
-			 * iteration, thus a division by 2 really is a
-			 * non-multiplication by 2.
-			 */
-			uint32_t rt, oa, ob, cAB, cBA, cA;
-			uint64_t rz;
-
-			/*
-			 * rt = 1 if a_hi > b_hi, 0 otherwise.
-			 */
-			rz = b_hi - a_hi;
-			rt = (uint32_t)((rz ^ ((a_hi ^ b_hi) & (a_hi ^ rz))) >> 63);
-
-			/*
-			 * cAB = 1 if b must be subtracted from a
-			 * cBA = 1 if a must be subtracted from b
-			 * cA = 1 if a must be divided by 2
-			 *
-			 * Rules:
-			 *
-			 *   cAB and cBA cannot both be 1.
-			 *   If a is not divided by 2, b is.
-			 */
-			oa = (a_lo >> i) & 1;
-			ob = (b_lo >> i) & 1;
-			cAB = oa & ob & rt;
-			cBA = oa & ob & ~rt;
-			cA = cAB | (oa ^ 1);
-
-			/*
-			 * Conditional subtractions.
-			 */
-			a_lo -= b_lo & (uint32_t)-(int32_t)cAB;
-			a_hi -= b_hi & (uint64_t)-(int64_t)cAB;
-			pa -= qa & -(int64_t)cAB;
-			pb -= qb & -(int64_t)cAB;
-			b_lo -= a_lo & (uint32_t)-(int32_t)cBA;
-			b_hi -= a_hi & (uint64_t)-(int64_t)cBA;
-			qa -= pa & -(int64_t)cBA;
-			qb -= pb & -(int64_t)cBA;
-
-			/*
-			 * Shifting.
-			 */
-			a_lo += a_lo & (cA - 1);
-			pa += pa & ((int64_t)cA - 1);
-			pb += pb & ((int64_t)cA - 1);
-			a_hi ^= (a_hi ^ (a_hi >> 1)) & (uint64_t)-(int64_t)cA;
-			b_lo += b_lo & (uint32_t)-(int32_t)cA;
-			qa += qa & -(int64_t)cA;
-			qb += qb & -(int64_t)cA;
-			b_hi ^= (b_hi ^ (b_hi >> 1)) & ((uint64_t)cA - 1);
+			rc |= a[j];
 		}
 
-		/*
-		 * Apply the computed parameters to our values. We
-		 * may have to correct pa and pb depending on the
-		 * returned value of falcon_zint_co_reduce() (when a and/or b
-		 * had to be negated).
-		 */
-		r = falcon_zint_co_reduce(a, b, len, pa, pb, qa, qb);
-		pa -= (pa + pa) & -(int64_t)(r & 1);
-		pb -= (pb + pb) & -(int64_t)(r & 1);
-		qa -= (qa + qa) & -(int64_t)(r >> 1);
-		qb -= (qb + qb) & -(int64_t)(r >> 1);
-		falcon_zint_co_reduce_mod(u0, u1, y, len, y0i, pa, pb, qa, qb);
-		falcon_zint_co_reduce_mod(v0, v1, x, len, x0i, pa, pb, qa, qb);
+		res = (int32_t)((1 - ((rc | (uint32_t)-(int32_t)rc) >> 31)) & x[0] & y[0]);
 	}
 
-	/*
-	 * At that point, array a[] should contain the GCD, and the
-	 * results (u,v) should already be set. We check that the GCD
-	 * is indeed 1. We also check that the two operands x and y
-	 * are odd.
-	 */
-	rc = a[0] ^ 1;
-
-	for (j = 1; j < len; ++j)
-	{
-		rc |= a[j];
-	}
-
-	return (int32_t)((1 - ((rc | (uint32_t)-(int32_t)rc) >> 31)) & x[0] & y[0]);
+	return res;
 }
 
 static void falcon_zint_add_scaled_mul_small(uint32_t* restrict x, size_t xlen, const uint32_t* restrict y,
@@ -5136,54 +5067,51 @@ static void falcon_zint_add_scaled_mul_small(uint32_t* restrict x, size_t xlen, 
 	* negative values.
 	*/
 
-	size_t u;
 	uint32_t ysign;
 	uint32_t tw;
 	int32_t cc;
 
-	if (ylen == 0)
+	if (ylen != 0)
 	{
-		return;
-	}
+		ysign = -(int32_t)(y[ylen - 1] >> 30) >> 1;
+		tw = 0;
+		cc = 0;
 
-	ysign = (uint32_t)-(int32_t)(y[ylen - 1] >> 30) >> 1;
-	tw = 0;
-	cc = 0;
+		for (size_t u = sch; u < xlen; ++u)
+		{
+			uint64_t z;
+			size_t v;
+			uint32_t wy;
+			uint32_t wys;
+			uint32_t ccu;
 
-	for (u = sch; u < xlen; ++u)
-	{
-		uint64_t z;
-		size_t v;
-		uint32_t wy;
-		uint32_t wys;
-		uint32_t ccu;
+			/*
+			 * Get the next word of y (scaled).
+			 */
+			v = u - sch;
+			wy = v < ylen ? y[v] : ysign;
+			wys = ((wy << scl) & 0x7FFFFFFFUL) | tw;
+			tw = wy >> (31 - scl);
 
-		/*
-		 * Get the next word of y (scaled).
-		 */
-		v = u - sch;
-		wy = v < ylen ? y[v] : ysign;
-		wys = ((wy << scl) & 0x7FFFFFFF) | tw;
-		tw = wy >> (31 - scl);
+			/*
+			 * The expression below does not overflow.
+			 */
+			z = (uint64_t)((int64_t)wys * (int64_t)k + (int64_t)x[u] + cc);
+			x[u] = (uint32_t)z & 0x7FFFFFFFUL;
 
-		/*
-		 * The expression below does not overflow.
-		 */
-		z = (uint64_t)((int64_t)wys * (int64_t)k + (int64_t)x[u] + cc);
-		x[u] = (uint32_t)z & 0x7FFFFFFF;
-
-		/*
-		 * Right-shifting the signed value z would yield
-		 * implementation-defined results (arithmetic shift is
-		 * not guaranteed). However, we can cast to uint32_t,
-		 * and get the next carry as an uint32_t word. We can
-		 * then convert it back to signed by using the guaranteed
-		 * fact that 'int32_t' uses two's complement with no
-		 * trap representation or padding bit, and with a layout
-		 * compatible with that of 'uint32_t'.
-		 */
-		ccu = (uint32_t)(z >> 31);
-		cc = *(int32_t *)&ccu;
+			/*
+			 * Right-shifting the signed value z would yield
+			 * implementation-defined results (arithmetic shift is
+			 * not guaranteed). However, we can cast to uint32_t,
+			 * and get the next carry as an uint32_t word. We can
+			 * then convert it back to signed by using the guaranteed
+			 * fact that 'int32_t' uses two's complement with no
+			 * trap representation or padding bit, and with a layout
+			 * compatible with that of 'uint32_t'.
+			 */
+			ccu = (uint32_t)(z >> 31);
+			cc = *(int32_t*)&ccu;
+		}
 	}
 }
 
@@ -5201,38 +5129,35 @@ static void falcon_zint_sub_scaled(uint32_t* restrict x, size_t xlen, const uint
 	* negative values.
 	*/
 
-	size_t u;
 	uint32_t tw;
 	uint32_t ysign;
 	uint32_t cc;
 
-	if (ylen == 0)
+	if (ylen != 0)
 	{
-		return;
-	}
+		ysign = (uint32_t)-(int32_t)(y[ylen - 1] >> 30) >> 1;
+		tw = 0;
+		cc = 0;
 
-	ysign = (uint32_t)-(int32_t)(y[ylen - 1] >> 30) >> 1;
-	tw = 0;
-	cc = 0;
+		for (size_t u = sch; u < xlen; ++u)
+		{
+			size_t v;
+			uint32_t w;
+			uint32_t wy;
+			uint32_t wys;
 
-	for (u = sch; u < xlen; ++u)
-	{
-		size_t v;
-		uint32_t w;
-		uint32_t wy;
-		uint32_t wys;
+			/*
+			 * Get the next word of y (scaled).
+			 */
+			v = u - sch;
+			wy = v < ylen ? y[v] : ysign;
+			wys = ((wy << scl) & 0x7FFFFFFFUL) | tw;
+			tw = wy >> (31 - scl);
 
-		/*
-		 * Get the next word of y (scaled).
-		 */
-		v = u - sch;
-		wy = v < ylen ? y[v] : ysign;
-		wys = ((wy << scl) & 0x7FFFFFFF) | tw;
-		tw = wy >> (31 - scl);
-
-		w = x[u] - wys - cc;
-		x[u] = w & 0x7FFFFFFF;
-		cc = w >> 31;
+			w = x[u] - wys - cc;
+			x[u] = w & 0x7FFFFFFFUL;
+			cc = w >> 31;
+		}
 	}
 }
 
@@ -5269,48 +5194,47 @@ static void falcon_poly_big_to_fp(falcon_fpr* d, const uint32_t* f, size_t flen,
 
 	n = falcon_mkn(logn);
 
-	if (flen == 0)
+	if (flen != 0)
+	{
+		for (u = 0; u < n; u++, f += fstride)
+		{
+			falcon_fpr fsc;
+			falcon_fpr x;
+			uint32_t cc;
+			uint32_t neg;
+			uint32_t xm;
+
+			/*
+			 * Get sign of the integer; if it is negative, then we
+			 * will load its absolute value instead, and negate the
+			 * result.
+			 */
+			neg = (uint32_t)-(int32_t)(f[flen - 1] >> 30);
+			xm = neg >> 1;
+			cc = neg & 1;
+			x = falcon_fpr_zero;
+			fsc = falcon_fpr_one;
+
+			for (size_t v = 0; v < flen; v++, fsc = falcon_fpr_mul(fsc, falcon_fpr_ptwo31))
+			{
+				uint32_t w;
+
+				w = (f[v] ^ xm) + cc;
+				cc = w >> 31;
+				w &= 0x7FFFFFFFUL;
+				w -= (w << 1) & neg;
+				x = falcon_fpr_add(x, falcon_fpr_mul(falcon_fpr_of(*(int32_t*)&w), fsc));
+			}
+
+			d[u] = x;
+		}
+	}
+	else
 	{
 		for (u = 0; u < n; ++u)
 		{
 			d[u] = falcon_fpr_zero;
 		}
-
-		return;
-	}
-
-	for (u = 0; u < n; u++, f += fstride)
-	{
-		falcon_fpr fsc;
-		falcon_fpr x;
-		size_t v;
-		uint32_t cc;
-		uint32_t neg;
-		uint32_t xm;
-
-		/*
-		 * Get sign of the integer; if it is negative, then we
-		 * will load its absolute value instead, and negate the
-		 * result.
-		 */
-		neg = (uint32_t)-(int32_t)(f[flen - 1] >> 30);
-		xm = neg >> 1;
-		cc = neg & 1;
-		x = falcon_fpr_zero;
-		fsc = falcon_fpr_one;
-
-		for (v = 0; v < flen; v++, fsc = falcon_fpr_mul(fsc, falcon_fpr_ptwo31))
-		{
-			uint32_t w;
-
-			w = (f[v] ^ xm) + cc;
-			cc = w >> 31;
-			w &= 0x7FFFFFFF;
-			w -= (w << 1) & neg;
-			x = falcon_fpr_add(x, falcon_fpr_mul(falcon_fpr_of(*(int32_t *)&w), fsc));
-		}
-
-		d[u] = x;
 	}
 }
 
@@ -5328,11 +5252,10 @@ static int32_t falcon_poly_big_to_small(int8_t* d, const uint32_t* s, int32_t li
 	*/
 
 	size_t n;
-	size_t u;
 
 	n = falcon_mkn(logn);
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		int32_t z;
 
@@ -5364,14 +5287,12 @@ static void falcon_poly_sub_scaled(uint32_t* restrict F, size_t Flen, size_t Fst
 	*/
 
 	size_t n;
-	size_t u;
 
 	n = falcon_mkn(logn);
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		int32_t kf;
-		size_t v;
 		uint32_t* x;
 		const uint32_t* y;
 
@@ -5379,7 +5300,7 @@ static void falcon_poly_sub_scaled(uint32_t* restrict F, size_t Flen, size_t Fst
 		x = F + u * Fstride;
 		y = f;
 
-		for (v = 0; v < n; v++)
+		for (size_t v = 0; v < n; ++v)
 		{
 			falcon_zint_add_scaled_mul_small(x, Flen, y, flen, kf, sch, scl);
 
@@ -5413,7 +5334,7 @@ static void falcon_poly_sub_scaled_ntt(uint32_t* restrict F, size_t Flen, size_t
 	uint32_t* fk;
 	uint32_t* t1;
 	uint32_t* x;
-	const uint32_t *y;
+	const uint32_t* y;
 	const falcon_small_prime* primes;
 	size_t n;
 	size_t u;
@@ -5467,14 +5388,10 @@ static void falcon_poly_sub_scaled_ntt(uint32_t* restrict F, size_t Flen, size_t
 		falcon_modp_iNTT2_ext(fk + u, tlen, igm, logn, p, p0i);
 	}
 
-	/*
-	 * Rebuild k*f.
-	 */
+	/* Rebuild k*f */
 	falcon_zint_rebuild_CRT(fk, tlen, tlen, n, primes, 1, t1);
 
-	/*
-	 * Subtract k*f, scaled, from F.
-	 */
+	/* Subtract k*f, scaled, from F */
 	for (u = 0, x = F, y = fk; u < n; u++, x += Fstride, y += tlen)
 	{
 		falcon_zint_sub_scaled(x, Flen, y, tlen, sch, scl);
@@ -5531,14 +5448,13 @@ static int32_t falcon_mkgauss(qsc_keccak_state* kctx, uint32_t logn)
 	* together for lower dimensions.
 	*/
 
-	uint32_t u;
 	uint32_t g;
 	int32_t val;
 
 	g = 1U << (10 - logn);
 	val = 0;
 
-	for (u = 0; u < g; ++u)
+	for (uint32_t u = 0; u < g; ++u)
 	{
 		/*
 		 * Each iteration generates one value with the
@@ -5617,7 +5533,6 @@ static uint32_t falcon_poly_small_sqnorm(const int8_t* f, uint32_t logn)
 	*/
 
 	size_t n;
-	size_t u;
 	uint32_t s;
 	uint32_t ng;
 
@@ -5625,7 +5540,7 @@ static uint32_t falcon_poly_small_sqnorm(const int8_t* f, uint32_t logn)
 	s = 0;
 	ng = 0;
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		int32_t z;
 
@@ -5645,7 +5560,7 @@ static falcon_fpr* falcon_align_fpr(void* base, void* data)
 	*/
 
 	uint8_t* cb;
-	uint8_t* cd;
+	const uint8_t* cd;
 	size_t k;
 	size_t km;
 
@@ -5659,7 +5574,7 @@ static falcon_fpr* falcon_align_fpr(void* base, void* data)
 		k += (sizeof(falcon_fpr)) - km;
 	}
 
-	return (falcon_fpr *)(cb + k);
+	return (falcon_fpr*)(cb + k);
 }
 
 static uint32_t* falcon_align_u32(void* base, void* data)
@@ -5670,7 +5585,7 @@ static uint32_t* falcon_align_u32(void* base, void* data)
 	*/
 
 	uint8_t* cb;
-	uint8_t* cd;
+	const uint8_t* cd;
 	size_t k;
 	size_t km;
 
@@ -5689,15 +5604,12 @@ static uint32_t* falcon_align_u32(void* base, void* data)
 
 static void falcon_poly_small_to_fp(falcon_fpr* x, const int8_t* f, uint32_t logn)
 {
-	/*
-	* Convert a small vector to floating point.
-	*/
+	/* Convert a small vector to floating point */
 	size_t n;
-	size_t u;
 
 	n = falcon_mkn(logn);
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		x[u] = falcon_fpr_of(f[u]);
 	}
@@ -5853,7 +5765,8 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 
 		for (v = 0, x = fd + u; v < hn; v++, x += tlen)
 		{
-			uint32_t w0, w1;
+			uint32_t w0;
+			uint32_t w1;
 
 			w0 = t1[(v << 1)];
 			w1 = t1[(v << 1) + 1];
@@ -5872,7 +5785,7 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 			uint32_t w0;
 			uint32_t w1;
 
-			w0 = t1[(v << 1)];
+			w0 = t1[v << 1];
 			w1 = t1[(v << 1) + 1];
 			*x = falcon_modp_montymul(falcon_modp_montymul(w0, w1, p, p0i), R2, p, p0i);
 		}
@@ -5892,19 +5805,16 @@ static void falcon_make_fg(uint32_t* data, const int8_t* f, const int8_t* g, uin
 	*
 	* Returned values are stored in the data[] array, at slen words per integer.
 	*
-	* Conditions:
-	*   0 <= depth <= logn
+	* Conditions: 0 <= depth <= logn
 	*
 	* Space use in data[]: enough room for any two successive values (f', g',
 	* f and g).
 	*/
 
 	size_t n;
-	size_t u;
 	uint32_t* ft;
 	uint32_t* gt;
 	uint32_t p0;
-	uint32_t d;
 	const falcon_small_prime* primes;
 
 	n = falcon_mkn(logn);
@@ -5913,7 +5823,7 @@ static void falcon_make_fg(uint32_t* data, const int8_t* f, const int8_t* g, uin
 	primes = falcon_avx2_small_primes;
 	p0 = primes[0].p;
 
-	for (u = 0; u < n; ++u)
+	for (size_t u = 0; u < n; ++u)
 	{
 		ft[u] = falcon_modp_set(f[u], p0);
 		gt[u] = falcon_modp_set(g[u], p0);
@@ -5937,7 +5847,7 @@ static void falcon_make_fg(uint32_t* data, const int8_t* f, const int8_t* g, uin
 		return;
 	}
 
-	for (d = 0; d < depth; ++d)
+	for (uint32_t d = 0; d < depth; ++d)
 	{
 		falcon_make_fg_step(data, logn - d, d, d != 0, (d + 1) < depth || out_ntt);
 	}
@@ -5961,7 +5871,9 @@ static int32_t falcon_solve_NTRU_deepest(uint32_t logn_top, const int8_t* f, con
 	uint32_t* t1;
 	uint32_t q;
 	const falcon_small_prime* primes;
+	int32_t res;
 
+	res = 1;
 	len = falcon_avx2_max_bl_small[logn_top];
 	primes = falcon_avx2_small_primes;
 
@@ -5988,26 +5900,24 @@ static int32_t falcon_solve_NTRU_deepest(uint32_t logn_top, const int8_t* f, con
 	 * imply failure of the NTRU solving equation, and the (f,g)
 	 * values will be abandoned in that case.
 	 */
-	if (!falcon_zint_bezout(Gp, Fp, fp, gp, len, t1))
+	if (falcon_zint_bezout(Gp, Fp, fp, gp, len, t1) != 0)
 	{
-		return 0;
+		/*
+		 * Multiply the two values by the target value q. Values must
+		 * fit in the destination arrays.
+		 * We can again test on the returned words: a non-zero output
+		 * of falcon_zint_mul_small() means that we exceeded our array
+		 * capacity, and that implies failure and rejection of (f,g).
+		 */
+		q = 12289;
+
+		if (falcon_zint_mul_small(Fp, len, q) != 0 || falcon_zint_mul_small(Gp, len, q) != 0)
+		{
+			res = 0;
+		}
 	}
 
-	/*
-	 * Multiply the two values by the target value q. Values must
-	 * fit in the destination arrays.
-	 * We can again test on the returned words: a non-zero output
-	 * of falcon_zint_mul_small() means that we exceeded our array
-	 * capacity, and that implies failure and rejection of (f,g).
-	 */
-	q = 12289;
-
-	if (falcon_zint_mul_small(Fp, len, q) != 0 || falcon_zint_mul_small(Gp, len, q) != 0)
-	{
-		return 0;
-	}
-
-	return 1;
+	return res;
 }
 
 static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f, const int8_t* g, uint32_t depth, uint32_t* tmp)
@@ -6021,9 +5931,8 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 	*
 	* In this function, 'logn' is the log2 of the degree for
 	* this step. If N = 2^logn, then:
-	*  - the F and G values already in fk->tmp (from the deeper
-	*    levels) have degree N/2;
-	*  - this function should return F and G of degree N.
+	*  the F and G values already in fk->tmp (from the deeper levels) have degree N/2
+	*  this function should return F and G of degree N.
 	*/
 
 	falcon_fpr* rt1;
@@ -6117,8 +6026,8 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 	for (u = 0; u < llen; ++u)
 	{
 		size_t v;
-		uint32_t* xs;
-		uint32_t* ys;
+		const uint32_t* xs;
+		const uint32_t* ys;
 		uint32_t* xd;
 		uint32_t* yd;
 		uint32_t p;
@@ -6422,7 +6331,7 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 	 * The size of the coefficients of k is (roughly) the difference
 	 * between the size of the coefficients of (F,G) and the size
 	 * of the coefficients of (f,g). Thus, the maximum size of the
-	 * coefficients of k is, at the start, maxbl_FG - minbl_fg;
+	 * coefficients of k is, at the start, maxbl_FG - minbl_fg
 	 * this is our starting scale value for k.
 	 *
 	 * We need to estimate the size of (F,G) during the execution of
@@ -6440,7 +6349,7 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 	 */
 	scale_k = maxbl_FG - minbl_fg;
 
-	for (;;)
+	while (true)
 	{
 		falcon_fpr pdc;
 		falcon_fpr pt;
@@ -6531,11 +6440,11 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 			 * failure here implies that we discard the current
 			 * secret key (f,g).
 			 */
-			if (!falcon_fpr_lt(falcon_fpr_mtwo31m1, xv)
-				|| !falcon_fpr_lt(xv, falcon_fpr_ptwo31m1))
+			if (!falcon_fpr_lt(falcon_fpr_mtwo31m1, xv) || !falcon_fpr_lt(xv, falcon_fpr_ptwo31m1))
 			{
 				return 0;
 			}
+
 			k[u] = (int32_t)falcon_fpr_rint(xv);
 		}
 
@@ -6725,8 +6634,8 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 	for (u = 0; u < llen; ++u)
 	{
 		size_t v;
-		uint32_t* xs;
-		uint32_t* ys;
+		const uint32_t* xs;
+		const uint32_t* ys;
 		uint32_t* xd;
 		uint32_t* yd;
 		uint32_t p;
@@ -7011,7 +6920,7 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 	/*
 	 * Compute k as the rounded version of rt5. Check that none of
 	 * the values is larger than 2^63-1 (in absolute value)
-	 * because that would make the falcon_fpr_rint() do something undefined;
+	 * because that would make the falcon_fpr_rint() do something undefined
 	 * note that any out-of-bounds value here implies a failure and
 	 * (f,g) will be discarded, so we can make a simple test.
 	 */
@@ -7534,7 +7443,7 @@ static void falcon_poly_small_mkgauss(qsc_keccak_state* kctx, int8_t* f, uint32_
 			s = falcon_mkgauss(kctx, logn);
 
 			/*
-			 * We need the coefficient to fit within -127..+127;
+			 * We need the coefficient to fit within -127..+127
 			 * realistically, this is always the case except for
 			 * the very low degrees (N = 2 or 4), for which there
 			 * is no real security anyway.
@@ -7574,13 +7483,13 @@ static void falcon_keygen(qsc_keccak_state* kctx, int8_t* f, int8_t* g, int8_t* 
 	 *
 	 *  - Generate f and g with the Gaussian distribution.
 	 *
-	 *  - If either Res(f,phi) or Res(g,phi) is even, try again.
+	 *    If either Res(f,phi) or Res(g,phi) is even, try again.
 	 *
-	 *  - If ||(f,g)|| is too large, try again.
+	 *    If ||(f,g)|| is too large, try again.
 	 *
-	 *  - If ||B~_{f,g}|| is too large, try again.
+	 *    If ||B~_{f,g}|| is too large, try again.
 	 *
-	 *  - If f is not invertible mod phi mod q, try again.
+	 *    If f is not invertible mod phi mod q, try again.
 	 *
 	 *  - Compute h = g/f mod phi mod q.
 	 *
@@ -7614,7 +7523,7 @@ static void falcon_keygen(qsc_keccak_state* kctx, int8_t* f, int8_t* g, int8_t* 
 	 * We require that Res(f,phi) and Res(g,phi) are both odd (the
 	 * NTRU equation solver requires it).
 	 */
-	for (;;)
+	while (true)
 	{
 		falcon_fpr* rt1;
 		falcon_fpr* rt2;
@@ -7714,13 +7623,13 @@ static void falcon_keygen(qsc_keccak_state* kctx, int8_t* f, int8_t* g, int8_t* 
 		 */
 		if (h == NULL)
 		{
-			h2 = (uint16_t *)tmp;
+			h2 = (uint16_t*)tmp;
 			tmp2 = h2 + n;
 		}
 		else
 		{
 			h2 = h;
-			tmp2 = (uint16_t *)tmp;
+			tmp2 = (uint16_t*)tmp;
 		}
 
 		if (!falcon_compute_public(h2, f, g, logn, (uint8_t*)tmp2))
@@ -7876,6 +7785,7 @@ static void falcon_ffLDL_binary_normalize(falcon_fpr* tree, uint32_t orig_logn, 
 	size_t n;
 
 	n = falcon_mkn(logn);
+
 	if (n == 1)
 	{
 		/*
@@ -8155,19 +8065,25 @@ static void falcon_ffSampling_fft(falcon_samplerZ samp, void* samp_ctx, falcon_f
 		z0[2] = falcon_fpr_add(a_im, c_im);
 		z0[1] = falcon_fpr_sub(a_re, c_re);
 		z0[3] = falcon_fpr_sub(a_im, c_im);
-
-		return;
 	}
-
-	/*
-	 * Case logn == 1 is reachable only when using Falcon-2 (the
-	 * smallest size for which Falcon is mathematically defined, but
-	 * of course way too insecure to be of any use).
-	 */
-	if (logn == 1)
+	else if (logn == 1)
 	{
-		falcon_fpr x0, x1, y0, y1, sigma;
-		falcon_fpr a_re, a_im, b_re, b_im, c_re, c_im;
+		/*
+		 * Case logn == 1 is reachable only when using Falcon-2 (the
+		 * smallest size for which Falcon is mathematically defined, but
+		 * of course way too insecure to be of any use).
+		 */
+		 falcon_fpr x0;
+		 falcon_fpr x1;
+		 falcon_fpr y0;
+		 falcon_fpr y1;
+		 falcon_fpr sigma;
+		 falcon_fpr a_re;
+		 falcon_fpr a_im;
+		 falcon_fpr b_re;
+		 falcon_fpr b_im;
+		 falcon_fpr c_re;
+		 falcon_fpr c_im;
 
 		x0 = t1[0];
 		x1 = t1[1];
@@ -8185,61 +8101,49 @@ static void falcon_ffSampling_fft(falcon_samplerZ samp, void* samp_ctx, falcon_f
 		sigma = tree[2];
 		z0[0] = falcon_fpr_of(samp(samp_ctx, x0, sigma));
 		z0[1] = falcon_fpr_of(samp(samp_ctx, x1, sigma));
-
-		return;
 	}
+	else
+	{
+		/*
+		 * Normal end of recursion is for logn == 0. Since the last
+		 * steps of the recursions were inlined in the blocks above
+		 * (when logn == 1 or 2), this case is not reachable, and is
+		 * retained here only for documentation purposes.
+		 */
 
-	/*
-	 * Normal end of recursion is for logn == 0. Since the last
-	 * steps of the recursions were inlined in the blocks above
-	 * (when logn == 1 or 2), this case is not reachable, and is
-	 * retained here only for documentation purposes.
+		 /*
+		  * General recursive case (logn >= 3).
+		  */
 
-	if (logn == 0) {
-		falcon_fpr x0, x1, sigma;
+		n = (size_t)1 << logn;
+		hn = n >> 1;
+		tree0 = tree + n;
+		tree1 = tree + n + falcon_ffLDL_treesize(logn - 1);
 
-		x0 = t0[0];
-		x1 = t1[0];
-		sigma = tree[0];
-		z0[0] = falcon_fpr_of(samp(samp_ctx, x0, sigma));
-		z1[0] = falcon_fpr_of(samp(samp_ctx, x1, sigma));
-		return;
+		/*
+		 * We split t1 into z1 (reused as temporary storage), then do
+		 * the recursive invocation, with output in tmp. We finally
+		 * merge back into z1.
+		 */
+		falcon_poly_split_fft(z1, z1 + hn, t1, logn);
+		falcon_ffSampling_fft(samp, samp_ctx, tmp, tmp + hn, tree1, z1, z1 + hn, logn - 1, tmp + n);
+		falcon_poly_merge_fft(z1, tmp, tmp + hn, logn);
+
+		/*
+		 * Compute tb0 = t0 + (t1 - z1) * L. Value tb0 ends up in tmp[].
+		 */
+		qsc_memutils_copy(tmp, t1, n * sizeof(*t1));
+		falcon_poly_sub(tmp, z1, logn);
+		falcon_poly_mul_fft(tmp, tree, logn);
+		falcon_poly_add(tmp, t0, logn);
+
+		/*
+		 * Second recursive invocation.
+		 */
+		falcon_poly_split_fft(z0, z0 + hn, tmp, logn);
+		falcon_ffSampling_fft(samp, samp_ctx, tmp, tmp + hn, tree0, z0, z0 + hn, logn - 1, tmp + n);
+		falcon_poly_merge_fft(z0, tmp, tmp + hn, logn);
 	}
-
-	 */
-
-	 /*
-	  * General recursive case (logn >= 3).
-	  */
-
-	n = (size_t)1 << logn;
-	hn = n >> 1;
-	tree0 = tree + n;
-	tree1 = tree + n + falcon_ffLDL_treesize(logn - 1);
-
-	/*
-	 * We split t1 into z1 (reused as temporary storage), then do
-	 * the recursive invocation, with output in tmp. We finally
-	 * merge back into z1.
-	 */
-	falcon_poly_split_fft(z1, z1 + hn, t1, logn);
-	falcon_ffSampling_fft(samp, samp_ctx, tmp, tmp + hn, tree1, z1, z1 + hn, logn - 1, tmp + n);
-	falcon_poly_merge_fft(z1, tmp, tmp + hn, logn);
-
-	/*
-	 * Compute tb0 = t0 + (t1 - z1) * L. Value tb0 ends up in tmp[].
-	 */
-	qsc_memutils_copy(tmp, t1, n * sizeof(*t1));
-	falcon_poly_sub(tmp, z1, logn);
-	falcon_poly_mul_fft(tmp, tree, logn);
-	falcon_poly_add(tmp, t0, logn);
-
-	/*
-	 * Second recursive invocation.
-	 */
-	falcon_poly_split_fft(z0, z0 + hn, tmp, logn);
-	falcon_ffSampling_fft(samp, samp_ctx, tmp, tmp + hn, tree0, z0, z0 + hn, logn - 1, tmp + n);
-	falcon_poly_merge_fft(z0, tmp, tmp + hn, logn);
 }
 
 static int32_t falcon_do_sign_tree(falcon_samplerZ samp, void* samp_ctx, int16_t* s2, const falcon_fpr* restrict expanded_key,
@@ -8349,7 +8253,7 @@ static int32_t falcon_do_sign_tree(falcon_samplerZ samp, void* samp_ctx, int16_t
 
 	/*
 	 * With "normal" degrees (e.g. 512 or 1024), it is very
-	 * improbable that the computed vector is not short enough;
+	 * improbable that the computed vector is not short enough
 	 * however, it may happen in practice for the very reduced
 	 * versions (e.g. degree 16 or below). In that case, the caller
 	 * will loop, and we must not write anything into s2[] because
@@ -8482,9 +8386,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 	for (u = 0; u < n; ++u)
 	{
 		t0[u] = falcon_fpr_of(hm[u]);
-		/* This is implicit.
-		t1[u] = falcon_fpr_zero;
-		*/
+		/* This is implicit*/
 	}
 
 	/*
@@ -8501,8 +8403,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 
 	/*
 	 * b01 and b11 can be discarded, so we move back (t0,t1).
-	 * Memory layout is now:
-	 *      g00 g01 g11 t0 t1
+	 * Memory layout is now: g00 g01 g11 t0 t1
 	 */
 	qsc_memutils_copy(b11, t0, n * 2 * sizeof(*t0));
 	t0 = g11 + n;
@@ -8575,7 +8476,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 
 	/*
 	 * With "normal" degrees (e.g. 512 or 1024), it is very
-	 * improbable that the computed vector is not short enough;
+	 * improbable that the computed vector is not short enough
 	 * however, it may happen in practice for the very reduced
 	 * versions (e.g. degree 16 or below). In that case, the caller
 	 * will loop, and we must not write anything into s2[] because
@@ -8782,7 +8683,7 @@ static int32_t falcon_sampler(void* ctx, falcon_fpr mu, falcon_fpr isigma)
 		z = b + ((b << 1) - 1) * z0;
 
 		/*
-		 * Rejection sampling. We want a Gaussian centered on r;
+		 * Rejection sampling. We want a Gaussian centered on r
 		 * but we sampled against a Gaussian centered on b (0 or
 		 * 1). But we know that z is always in the range where
 		 * our sampling distribution is greater than the Gaussian
@@ -8827,7 +8728,7 @@ static void falcon_sign_dyn(int16_t* sig, qsc_keccak_state* kctx, const int8_t* 
 
 	ftmp = (falcon_fpr*)tmp;
 
-	for (;;)
+	while (true)
 	{
 		/*
 		 * Signature produces short vectors s1 and s2. The
@@ -8864,7 +8765,7 @@ static void falcon_sign_dyn(int16_t* sig, qsc_keccak_state* kctx, const int8_t* 
 
 #if defined(QSC_FALCON_S3SHAKE256F512)
 
-int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	uint8_t b[FALCON_KEYGEN_TEMP_9];
 	int8_t f[512];
@@ -8934,7 +8835,7 @@ int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_ge
 	return 0;
 }
 
-int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, void (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	int16_t sig[512];
 	uint8_t b[72 * 512];
@@ -9020,7 +8921,7 @@ int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_
 	/*
 	 * Compute the signature.
 	 */
-	falcon_sign_dyn(sig, &kctx, f, g, F, G, sig, 9, b);
+	falcon_sign_dyn(sig, &kctx, f, g, F, G, (uint16_t*)sig, 9, b);
 
 
 	/*
@@ -9135,7 +9036,7 @@ bool qsc_falcon_avx2_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t sm
 
 #elif defined(QSC_FALCON_S5SHAKE256F1024)
 
-int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	uint16_t h[1024];
 	uint8_t b[FALCON_KEYGEN_TEMP_10];
@@ -9206,7 +9107,7 @@ int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_ge
 	return 0;
 }
 
-int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	int16_t sig[1024];
 	uint8_t b[72 * 1024];
@@ -9402,4 +9303,5 @@ bool qsc_falcon_avx2_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t sm
 	return true;
 }
 
+#endif
 #endif

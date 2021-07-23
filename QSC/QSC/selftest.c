@@ -17,9 +17,8 @@
 
 static void hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 {
-	size_t  pos;
-	uint8_t  idx0;
-	uint8_t  idx1;
+	uint8_t idx0;
+	uint8_t idx1;
 
 	const uint8_t hashmap[] =
 	{
@@ -31,7 +30,7 @@ static void hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 
 	memset(output, 0, length);
 
-	for (pos = 0; pos < (length * 2); pos += 2)
+	for (size_t pos = 0; pos < (length * 2); pos += 2)
 	{
 		idx0 = ((uint8_t)hexstr[pos + 0] & 0x1FU) ^ 0x10U;
 		idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
@@ -48,36 +47,6 @@ void print_safe(const char* input)
 #else
 		printf(input);
 #endif
-	}
-}
-
-static void print_array8(const uint8_t* a, size_t count, size_t line)
-{
-	size_t i;
-
-	for (i = 0; i < count; ++i)
-	{
-		if (i != 0 && i % line == 0)
-		{
-			printf("\n");
-		}
-
-		printf("0x%02X, ", a[i]);
-	}
-}
-
-static void print_array32(const uint32_t* a, size_t count, size_t line)
-{
-	size_t i;
-
-	for (i = 0; i < count; ++i)
-	{
-		if (i != 0 && i % line == 0)
-		{
-			printf("\n");
-		}
-
-		printf("%d ", a[i]);
 	}
 }
 

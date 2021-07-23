@@ -8,17 +8,16 @@
 
 static int32_t ecdsabase_is_zero(const uint8_t* n, const size_t nlen)
 {
-	size_t i;
 	uint8_t d;
 
 	d = 0;
 
-	for (i = 0; i < nlen; ++i)
+	for (size_t i = 0; i < nlen; ++i)
 	{
 		d |= n[i];
 	}
 
-	return 1 & ((d - 1) >> 8);
+	return 1L & (int32_t)((uint32_t)(d - 1) >> 8);
 }
 
 static uint64_t ecdsabase_load3(const uint8_t* in)
@@ -57,9 +56,7 @@ static uint8_t ecdsabase_negative(int8_t b)
 static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 {
 	size_t i;
-	size_t k;
 	int32_t cmp;
-	int32_t b;
 	int32_t ribs;
 
 	for (i = 0; i < 256; ++i)
@@ -74,7 +71,7 @@ static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 			continue;
 		}
 
-		for (b = 1; b <= 6 && i + b < 256; ++b)
+		for (int32_t b = 1; b <= 6 && i + b < 256; ++b)
 		{
 			if (!r[i + b])
 			{
@@ -86,7 +83,7 @@ static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 
 			if (cmp <= 15)
 			{
-				r[i] = cmp;
+				r[i] = (int8_t)cmp;
 				r[i + b] = 0;
 			}
 			else
@@ -98,9 +95,9 @@ static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 					break;
 				}
 
-				r[i] = cmp;
+				r[i] = (int8_t)cmp;
 
-				for (k = i + b; k < 256; ++k)
+				for (size_t k = i + b; k < 256; ++k)
 				{
 					if (!r[k])
 					{
@@ -117,17 +114,16 @@ static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 
 int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 {
-	size_t i;
 	uint16_t d;
 
 	d = 0;
 
-	for (i = 0; i < n; ++i)
+	for (size_t i = 0; i < n; ++i)
 	{
 		d |= x[i] ^ y[i];
 	}
 
-	return (1 & ((d - 1) >> 8)) - 1;
+	return (1L & ((d - 1) >> 8)) - 1;
 }
 
 /* fe */
@@ -190,18 +186,18 @@ static const fe25519 ed25519_sqdmone =
 	1507062230895904, 1572317787530805, 683053064812840, 317374165784489, 1572899562415810
 };
 
-static void fe25519_0(fe25519 h)
+void fe25519_0(fe25519 h)
 {
 	memset(&h[0], 0, 5 * sizeof h[0]);
 }
 
-static void fe25519_1(fe25519 h)
+void fe25519_1(fe25519 h)
 {
 	h[0] = 1;
 	memset(&h[1], 0, 4 * sizeof h[0]);
 }
 
-static void fe25519_add(fe25519 h, const fe25519 f, const fe25519 g)
+void fe25519_add(fe25519 h, const fe25519 f, const fe25519 g)
 {
 	/* h = f + g; Can overlap h with f or g */
 	uint64_t h0;
@@ -222,10 +218,10 @@ static void fe25519_add(fe25519 h, const fe25519 f, const fe25519 g)
 	h[4] = h4;
 }
 
-static void fe25519_sub(fe25519 h, const fe25519 f, const fe25519 g)
+void fe25519_sub(fe25519 h, const fe25519 f, const fe25519 g)
 {
 	/*  h = f - g */
-	const uint64_t MASK = 0x7FFFFFFFFFFFFULL;
+	const uint64_t MASK = 0x7FFFFFFFFFFFF;
 	uint64_t h0;
 	uint64_t h1;
 	uint64_t h2;
@@ -246,14 +242,14 @@ static void fe25519_sub(fe25519 h, const fe25519 f, const fe25519 g)
 	h2 &= MASK;
 	h4 += h3 >> 51;
 	h3 &= MASK;
-	h0 += 19ULL * (h4 >> 51);
+	h0 += 19 * (h4 >> 51);
 	h4 &= MASK;
 
-	h0 = (f[0] + 0xFFFFFFFFFFFDAULL) - h0;
-	h1 = (f[1] + 0xFFFFFFFFFFFFEULL) - h1;
-	h2 = (f[2] + 0xFFFFFFFFFFFFEULL) - h2;
-	h3 = (f[3] + 0xFFFFFFFFFFFFEULL) - h3;
-	h4 = (f[4] + 0xFFFFFFFFFFFFEULL) - h4;
+	h0 = (f[0] + 0xFFFFFFFFFFFDA) - h0;
+	h1 = (f[1] + 0xFFFFFFFFFFFFE) - h1;
+	h2 = (f[2] + 0xFFFFFFFFFFFFE) - h2;
+	h3 = (f[3] + 0xFFFFFFFFFFFFE) - h3;
+	h4 = (f[4] + 0xFFFFFFFFFFFFE) - h4;
 
 	h[0] = h0;
 	h[1] = h1;
@@ -262,7 +258,7 @@ static void fe25519_sub(fe25519 h, const fe25519 f, const fe25519 g)
 	h[4] = h4;
 }
 
-static void fe25519_neg(fe25519 h, const fe25519 f)
+void fe25519_neg(fe25519 h, const fe25519 f)
 {
 	/* h = -f */
 	fe25519 zero;
@@ -272,7 +268,7 @@ static void fe25519_neg(fe25519 h, const fe25519 f)
 }
 
 
-static void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
+void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
 {
 	/*
 	* Replace (f,g) with (g,g) if b == 1;
@@ -316,7 +312,7 @@ static void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
 	f[4] = f4 ^ x4;
 }
 
-static void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b)
+void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b)
 {
 	/*
 	* Replace (f,g) with (g,f) if b == 1;
@@ -377,12 +373,12 @@ static void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b)
 	g[4] = g4 ^ x4;
 }
 
-static void fe25519_copy(fe25519 h, const fe25519 f)
+void fe25519_copy(fe25519 h, const fe25519 f)
 {
 	memcpy(h, f, 5 * 8);
 }
 
-static int32_t fe25519_isnegative(const fe25519 f)
+int32_t fe25519_isnegative(const fe25519 f)
 {
 	/*
 	return 1 if f is in {1,3,5,...,q-2}
@@ -395,7 +391,7 @@ static int32_t fe25519_isnegative(const fe25519 f)
 	return s[0] & 1;
 }
 
-static int32_t fe25519_iszero(const fe25519 f)
+int32_t fe25519_iszero(const fe25519 f)
 {
 	uint8_t s[32] = { 0 };
 
@@ -404,10 +400,10 @@ static int32_t fe25519_iszero(const fe25519 f)
 	return ecdsabase_is_zero(s, 32);
 }
 
-static void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
+void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
 {
 	/* h = f * g; Can overlap h with f or g */
-	const uint64_t MASK = 0x7FFFFFFFFFFFFULL;
+	const uint64_t MASK = 0x7FFFFFFFFFFFF;
 	uint128_t r0;
 	uint128_t r1;
 	uint128_t r2;
@@ -446,10 +442,10 @@ static void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
 	g3 = (uint128_t)g[3];
 	g4 = (uint128_t)g[4];
 
-	f119 = 19ULL * f1;
-	f219 = 19ULL * f2;
-	f319 = 19ULL * f3;
-	f419 = 19ULL * f4;
+	f119 = 19 * f1;
+	f219 = 19 * f2;
+	f319 = 19 * f3;
+	f419 = 19 * f4;
 
 	r0 = f0 * g0 + f119 * g4 + f219 * g3 + f319 * g2 + f419 * g1;
 	r1 = f0 * g1 + f1 * g0 + f219 * g4 + f319 * g3 + f419 * g2;
@@ -471,7 +467,7 @@ static void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
 	r4 += carry;
 	r04 = ((uint64_t)r4) & MASK;
 	carry = (uint64_t)(r4 >> 51);
-	r00 += 19ULL * carry;
+	r00 += 19 * carry;
 	carry = r00 >> 51;
 	r00 &= MASK;
 	r01 += carry;
@@ -486,10 +482,10 @@ static void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
 	h[4] = r04;
 }
 
-static void fe25519_sq(fe25519 h, const fe25519 f)
+void fe25519_sq(fe25519 h, const fe25519 f)
 {
 	/* h = f * f; Can overlap h with f */
-	const uint64_t MASK = 0x7FFFFFFFFFFFFULL;
+	const uint64_t MASK = 0x7FFFFFFFFFFFF;
 	uint128_t r0;
 	uint128_t r1;
 	uint128_t r2;
@@ -521,11 +517,11 @@ static void fe25519_sq(fe25519 h, const fe25519 f)
 	f4 = (uint128_t)f[4];
 	f0x2 = f0 << 1;
 	f1x2 = f1 << 1;
-	f138 = 38ULL * f1;
-	f238 = 38ULL * f2;
-	f338 = 38ULL * f3;
-	f319 = 19ULL * f3;
-	f419 = 19ULL * f4;
+	f138 = 38 * f1;
+	f238 = 38 * f2;
+	f338 = 38 * f3;
+	f319 = 19 * f3;
+	f419 = 19 * f4;
 
 	r0 = f0 * f0 + f138 * f4 + f238 * f3;
 	r1 = f0x2 * f1 + f238 * f4 + f319 * f3;
@@ -547,7 +543,7 @@ static void fe25519_sq(fe25519 h, const fe25519 f)
 	r4 += carry;
 	r04 = ((uint64_t)r4) & MASK;
 	carry = (uint64_t)(r4 >> 51);
-	r00 += 19ULL * carry;
+	r00 += 19 * carry;
 	carry = r00 >> 51;
 	r00 &= MASK;
 	r01 += carry;
@@ -562,10 +558,10 @@ static void fe25519_sq(fe25519 h, const fe25519 f)
 	h[4] = r04;
 }
 
-static void fe25519_sq2(fe25519 h, const fe25519 f)
+void fe25519_sq2(fe25519 h, const fe25519 f)
 {
 	/* h = 2 * f * f; Can overlap h with f */
-	const uint64_t MASK = 0x7FFFFFFFFFFFFULL;
+	const uint64_t MASK = 0x7FFFFFFFFFFFF;
 	uint128_t r0;
 	uint128_t r1;
 	uint128_t r2;
@@ -598,11 +594,11 @@ static void fe25519_sq2(fe25519 h, const fe25519 f)
 
 	f0x2 = f0 << 1;
 	f1x2 = f1 << 1;
-	f138 = 38ULL * f1;
-	f238 = 38ULL * f2;
-	f338 = 38ULL * f3;
-	f319 = 19ULL * f3;
-	f419 = 19ULL * f4;
+	f138 = 38 * f1;
+	f238 = 38 * f2;
+	f338 = 38 * f3;
+	f319 = 19 * f3;
+	f419 = 19 * f4;
 
 	r0 = f0 * f0 + f138 * f4 + f238 * f3;
 	r1 = f0x2 * f1 + f238 * f4 + f319 * f3;
@@ -630,7 +626,7 @@ static void fe25519_sq2(fe25519 h, const fe25519 f)
 	r4 += carry;
 	r04 = ((uint64_t)r4) & MASK;
 	carry = (uint64_t)(r4 >> 51);
-	r00 += 19ULL * carry;
+	r00 += 19 * carry;
 	carry = r00 >> 51;
 	r00 &= MASK;
 	r01 += carry;
@@ -645,9 +641,9 @@ static void fe25519_sq2(fe25519 h, const fe25519 f)
 	h[4] = r04;
 }
 
-static void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
+void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
 {
-	const uint64_t MASK = 0x7FFFFFFFFFFFFULL;
+	const uint64_t MASK = 0x7FFFFFFFFFFFF;
 	uint128_t a;
 	uint128_t sn;
 	uint64_t h0;
@@ -667,7 +663,7 @@ static void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
 	h3 = ((uint64_t)a) & MASK;
 	a = f[4] * sn + ((uint64_t)(a >> 51));
 	h4 = ((uint64_t)a) & MASK;
-	h0 += (a >> 51) * 19ULL;
+	h0 += (a >> 51) * 19;
 
 	h[0] = h0;
 	h[1] = h1;
@@ -678,7 +674,7 @@ static void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
 
 void fe25519_frombytes(fe25519 h, const uint8_t* s)
 {
-	const uint64_t MASK = 0x7FFFFFFFFFFFFULL;
+	const uint64_t MASK = 0x7FFFFFFFFFFFF;
 	uint64_t h0;
 	uint64_t h1;
 	uint64_t h2;
@@ -698,9 +694,9 @@ void fe25519_frombytes(fe25519 h, const uint8_t* s)
 	h[4] = h4;
 }
 
-static void fe25519_reduce(fe25519 h, const fe25519 f)
+void fe25519_reduce(fe25519 h, const fe25519 f)
 {
-	const uint64_t MASK = 0x7FFFFFFFFFFFFULL;
+	const uint64_t MASK = 0x7FFFFFFFFFFFF;
 	uint128_t t[5] = { 0 };
 
 	t[0] = f[0];
@@ -733,7 +729,7 @@ static void fe25519_reduce(fe25519 h, const fe25519 f)
 
 	/* now t is between 0 and 2^255-1, properly carried. */
 	/* case 1: between 0 and 2^255-20. case 2: between 2^255-19 and 2^255-1. */
-	t[0] += 19ULL;
+	t[0] += 19;
 	t[1] += t[0] >> 51;
 	t[0] &= MASK;
 	t[2] += t[1] >> 51;
@@ -742,15 +738,15 @@ static void fe25519_reduce(fe25519 h, const fe25519 f)
 	t[2] &= MASK;
 	t[4] += t[3] >> 51;
 	t[3] &= MASK;
-	t[0] += 19ULL * (t[4] >> 51);
+	t[0] += 19 * (t[4] >> 51);
 	t[4] &= MASK;
 
 	/* now between 19 and 2^255-1 in both cases, and offset by 19. */
-	t[0] += 0x8000000000000 - 19ULL;
-	t[1] += 0x8000000000000 - 1ULL;
-	t[2] += 0x8000000000000 - 1ULL;
-	t[3] += 0x8000000000000 - 1ULL;
-	t[4] += 0x8000000000000 - 1ULL;
+	t[0] += 0x8000000000000 - 19;
+	t[1] += 0x8000000000000 - 1;
+	t[2] += 0x8000000000000 - 1;
+	t[3] += 0x8000000000000 - 1;
+	t[4] += 0x8000000000000 - 1;
 
 	/* now between 2^255 and 2^256-20, and offset by 2^255. */
 	t[1] += t[0] >> 51;
@@ -837,7 +833,7 @@ void fe25519_add(fe25519 h, const fe25519 f, const fe25519 g)
 
 void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b)
 {
-	const uint32_t MASK = (~b + 1);
+	const int32_t MASK = -(int32_t)b;
 	int32_t f0;
 	int32_t f1;
 	int32_t f2;
@@ -975,7 +971,7 @@ void fe25519_neg(fe25519 h, const fe25519 f)
 
 void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
 {
-	const uint32_t MASK = (~b + 1);
+	const int32_t MASK = -(int32_t)b;
 	int32_t f0;
 	int32_t f1;
 	int32_t f2;
@@ -998,16 +994,16 @@ void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
 	f8 = f[8];
 	f9 = f[9];
 
-	f0 ^= (f0 ^ g[0]) & MASK;
-	f1 ^= (f1 ^ g[1]) & MASK;
-	f2 ^= (f2 ^ g[2]) & MASK;
-	f3 ^= (f3 ^ g[3]) & MASK;
-	f4 ^= (f4 ^ g[4]) & MASK;
-	f5 ^= (f5 ^ g[5]) & MASK;
-	f6 ^= (f6 ^ g[6]) & MASK;
-	f7 ^= (f7 ^ g[7]) & MASK;
-	f8 ^= (f8 ^ g[8]) & MASK;
-	f9 ^= (f9 ^ g[9]) & MASK;
+	f0 ^= ((f0 ^ g[0]) & MASK);
+	f1 ^= ((f1 ^ g[1]) & MASK);
+	f2 ^= ((f2 ^ g[2]) & MASK);
+	f3 ^= ((f3 ^ g[3]) & MASK);
+	f4 ^= ((f4 ^ g[4]) & MASK);
+	f5 ^= ((f5 ^ g[5]) & MASK);
+	f6 ^= ((f6 ^ g[6]) & MASK);
+	f7 ^= ((f7 ^ g[7]) & MASK);
+	f8 ^= ((f8 ^ g[8]) & MASK);
+	f9 ^= ((f9 ^ g[9]) & MASK);
 
 	f[0] = f0;
 	f[1] = f1;
@@ -1023,7 +1019,7 @@ void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
 
 void fe25519_copy(fe25519 h, const fe25519 f)
 {
-	qsc_memutils_copy((uint8_t*)h, (uint8_t*)f, 10 * sizeof(int32_t));
+	qsc_memutils_copy((uint8_t*)h, (const uint8_t*)f, 10 * sizeof(int32_t));
 }
 
 int32_t fe25519_isnegative(const fe25519 f)
@@ -1145,64 +1141,64 @@ void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
 	 i.e. |h0| <= 1.4*2^60; narrower ranges for h2, h4, h6, h8
 	 |h1| <= (1.65*1.65*2^51*(1+1+19+19+19+19+19+19+19+19))
 	 i.e. |h1| <= 1.7*2^59; narrower ranges for h3, h5, h7, h9 */
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1ULL << 26);
-	carry = (h4 + (1LL << 25)) >> 26;
+	h0 -= carry * (1 << 26);
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1ULL << 26);
+	h4 -= carry * (1 << 26);
 	/* |h0| <= 2^25 */
 	/* |h4| <= 2^25 */
 	/* |h1| <= 1.71*2^59 */
 	/* |h5| <= 1.71*2^59 */
-	carry = (h1 + (1LL << 24)) >> 25;
+	carry = (h1 + (1 << 24)) >> 25;
 	h2 += carry;
-	h1 -= carry * (1ULL << 25);
-	carry = (h5 + (1LL << 24)) >> 25;
+	h1 -= carry * (1 << 25);
+	carry = (h5 + (1 << 24)) >> 25;
 	h6 += carry;
-	h5 -= carry * (1ULL << 25);
+	h5 -= carry * (1 << 25);
 	/* |h1| <= 2^24; from now on fits into int32 */
 	/* |h5| <= 2^24; from now on fits into int32 */
 	/* |h2| <= 1.41*2^60 */
 	/* |h6| <= 1.41*2^60 */
-	carry = (h2 + (1LL << 25)) >> 26;
+	carry = (h2 + (1 << 25)) >> 26;
 	h3 += carry;
-	h2 -= carry * (1ULL << 26);
-	carry = (h6 + (1LL << 25)) >> 26;
+	h2 -= carry * (1 << 26);
+	carry = (h6 + (1 << 25)) >> 26;
 	h7 += carry;
-	h6 -= carry * (1ULL << 26);
+	h6 -= carry * (1 << 26);
 	/* |h2| <= 2^25; from now on fits into int32 unchanged */
 	/* |h6| <= 2^25; from now on fits into int32 unchanged */
 	/* |h3| <= 1.71*2^59 */
 	/* |h7| <= 1.71*2^59 */
-	carry = (h3 + (1LL << 24)) >> 25;
+	carry = (h3 + (1 << 24)) >> 25;
 	h4 += carry;
-	h3 -= carry * (1ULL << 25);
-	carry = (h7 + (1LL << 24)) >> 25;
+	h3 -= carry * (1 << 25);
+	carry = (h7 + (1 << 24)) >> 25;
 	h8 += carry;
-	h7 -= carry * (1ULL << 25);
+	h7 -= carry * (1 << 25);
 	/* |h3| <= 2^24; from now on fits into int32 unchanged */
 	/* |h7| <= 2^24; from now on fits into int32 unchanged */
 	/* |h4| <= 1.72*2^34 */
 	/* |h8| <= 1.41*2^60 */
-	carry = (h4 + (1LL << 25)) >> 26;
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1ULL << 26);
-	carry = (h8 + (1LL << 25)) >> 26;
+	h4 -= carry * (1 << 26);
+	carry = (h8 + (1 << 25)) >> 26;
 	h9 += carry;
-	h8 -= carry * (1ULL << 26);
+	h8 -= carry * (1 << 26);
 	/* |h4| <= 2^25; from now on fits into int32 unchanged */
 	/* |h8| <= 2^25; from now on fits into int32 unchanged */
 	/* |h5| <= 1.01*2^24 */
 	/* |h9| <= 1.71*2^59 */
-	carry = (h9 + (1LL << 24)) >> 25;
+	carry = (h9 + (1 << 24)) >> 25;
 	h0 += carry * 19;
-	h9 -= carry * (1ULL << 25);
+	h9 -= carry * (1 << 25);
 	/* |h9| <= 2^24; from now on fits into int32 unchanged */
 	/* |h0| <= 1.1*2^39 */
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1ULL << 26);
+	h0 -= carry * (1 << 26);
 	/* |h0| <= 2^25; from now on fits into int32 unchanged */
 	/* |h1| <= 1.01*2^24 */
 
@@ -1245,37 +1241,37 @@ void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
 	h8 = f[8] * sn;
 	h9 = f[9] * sn;
 
-	carry = (h9 + (1LL << 24)) >> 25;
+	carry = (h9 + (1 << 24)) >> 25;
 	h0 += carry * 19;
-	h9 -= carry * (1LL << 25);
-	carry = (h1 + (1LL << 24)) >> 25;
+	h9 -= carry * (1 << 25);
+	carry = (h1 + (1 << 24)) >> 25;
 	h2 += carry;
-	h1 -= carry * (1LL << 25);
-	carry = (h3 + (1LL << 24)) >> 25;
+	h1 -= carry * (1 << 25);
+	carry = (h3 + (1 << 24)) >> 25;
 	h4 += carry;
-	h3 -= carry * (1LL << 25);
-	carry = (h5 + (1LL << 24)) >> 25;
+	h3 -= carry * (1 << 25);
+	carry = (h5 + (1 << 24)) >> 25;
 	h6 += carry;
-	h5 -= carry * (1LL << 25);
-	carry = (h7 + (1LL << 24)) >> 25;
+	h5 -= carry * (1 << 25);
+	carry = (h7 + (1 << 24)) >> 25;
 	h8 += carry;
-	h7 -= carry * (1LL << 25);
+	h7 -= carry * (1 << 25);
 
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1LL << 26);
-	carry = (h2 + (1LL << 25)) >> 26;
+	h0 -= carry * (1 << 26);
+	carry = (h2 + (1 << 25)) >> 26;
 	h3 += carry;
-	h2 -= carry * (1LL << 26);
-	carry = (h4 + (1LL << 25)) >> 26;
+	h2 -= carry * (1 << 26);
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1LL << 26);
-	carry = (h6 + (1LL << 25)) >> 26;
+	h4 -= carry * (1 << 26);
+	carry = (h6 + (1 << 25)) >> 26;
 	h7 += carry;
-	h6 -= carry * (1LL << 26);
-	carry = (h8 + (1LL << 25)) >> 26;
+	h6 -= carry * (1 << 26);
+	carry = (h8 + (1 << 25)) >> 26;
 	h9 += carry;
-	h8 -= carry * (1LL << 26);
+	h8 -= carry * (1 << 26);
 
 	h[0] = (int32_t)h0;
 	h[1] = (int32_t)h1;
@@ -1406,48 +1402,48 @@ void fe25519_sq(fe25519 h, const fe25519 f)
 	h8 = f0f8x2 + f1f7x4 + (f2x2 * f6) + (f3x2 * f5x2) + (f4 * f4) + (f9 * f9x38);
 	h9 = f0f9x2 + f1f8x2 + (f2x2 * f7) + (f3x2 * f6) + (f4x2 * f5);
 
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1ULL << 26);
-	carry = (h4 + (1LL << 25)) >> 26;
+	h0 -= carry * (1 << 26);
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1ULL << 26);
+	h4 -= carry * (1 << 26);
 
-	carry = (h1 + (1LL << 24)) >> 25;
+	carry = (h1 + (1 << 24)) >> 25;
 	h2 += carry;
-	h1 -= carry * (1ULL << 25);
-	carry = (h5 + (1LL << 24)) >> 25;
+	h1 -= carry * (1 << 25);
+	carry = (h5 + (1 << 24)) >> 25;
 	h6 += carry;
-	h5 -= carry * (1ULL << 25);
+	h5 -= carry * (1 << 25);
 
-	carry = (h2 + (1LL << 25)) >> 26;
+	carry = (h2 + (1 << 25)) >> 26;
 	h3 += carry;
-	h2 -= carry * (1ULL << 26);
-	carry = (h6 + (1LL << 25)) >> 26;
+	h2 -= carry * (1 << 26);
+	carry = (h6 + (1 << 25)) >> 26;
 	h7 += carry;
-	h6 -= carry * (1ULL << 26);
+	h6 -= carry * (1 << 26);
 
-	carry = (h3 + (1LL << 24)) >> 25;
+	carry = (h3 + (1 << 24)) >> 25;
 	h4 += carry;
-	h3 -= carry * (1ULL << 25);
-	carry = (h7 + (1LL << 24)) >> 25;
+	h3 -= carry * (1 << 25);
+	carry = (h7 + (1 << 24)) >> 25;
 	h8 += carry;
-	h7 -= carry * (1ULL << 25);
+	h7 -= carry * (1 << 25);
 
-	carry = (h4 + (1LL << 25)) >> 26;
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1ULL << 26);
-	carry = (h8 + (1LL << 25)) >> 26;
+	h4 -= carry * (1 << 26);
+	carry = (h8 + (1 << 25)) >> 26;
 	h9 += carry;
-	h8 -= carry * (1ULL << 26);
+	h8 -= carry * (1 << 26);
 
-	carry = (h9 + (1LL << 24)) >> 25;
+	carry = (h9 + (1 << 24)) >> 25;
 	h0 += carry * 19;
-	h9 -= carry * (1ULL << 25);
+	h9 -= carry * (1 << 25);
 
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1ULL << 26);
+	h0 -= carry * (1 << 26);
 
 	h[0] = (int32_t)h0;
 	h[1] = (int32_t)h1;
@@ -1558,48 +1554,48 @@ void fe25519_sq2(fe25519 h, const fe25519 f)
 	h8 += h8;
 	h9 += h9;
 
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1ULL << 26);
-	carry = (h4 + (1LL << 25)) >> 26;
+	h0 -= carry * (1 << 26);
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1ULL << 26);
+	h4 -= carry * (1 << 26);
 
-	carry = (h1 + (1LL << 24)) >> 25;
+	carry = (h1 + (1 << 24)) >> 25;
 	h2 += carry;
-	h1 -= carry * (1ULL << 25);
-	carry = (h5 + (1LL << 24)) >> 25;
+	h1 -= carry * (1 << 25);
+	carry = (h5 + (1 << 24)) >> 25;
 	h6 += carry;
-	h5 -= carry * (1ULL << 25);
+	h5 -= carry * (1 << 25);
 
-	carry = (h2 + (1LL << 25)) >> 26;
+	carry = (h2 + (1 << 25)) >> 26;
 	h3 += carry;
-	h2 -= carry * (1ULL << 26);
-	carry = (h6 + (1LL << 25)) >> 26;
+	h2 -= carry * (1 << 26);
+	carry = (h6 + (1 << 25)) >> 26;
 	h7 += carry;
-	h6 -= carry * (1ULL << 26);
+	h6 -= carry * (1 << 26);
 
-	carry = (h3 + (1LL << 24)) >> 25;
+	carry = (h3 + (1 << 24)) >> 25;
 	h4 += carry;
-	h3 -= carry * (1ULL << 25);
-	carry = (h7 + (1LL << 24)) >> 25;
+	h3 -= carry * (1 << 25);
+	carry = (h7 + (1 << 24)) >> 25;
 	h8 += carry;
-	h7 -= carry * (1ULL << 25);
+	h7 -= carry * (1 << 25);
 
-	carry = (h4 + (1LL << 25)) >> 26;
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1ULL << 26);
-	carry = (h8 + (1LL << 25)) >> 26;
+	h4 -= carry * (1 << 26);
+	carry = (h8 + (1 << 25)) >> 26;
 	h9 += carry;
-	h8 -= carry * (1ULL << 26);
+	h8 -= carry * (1 << 26);
 
-	carry = (h9 + (1LL << 24)) >> 25;
+	carry = (h9 + (1 << 24)) >> 25;
 	h0 += carry * 19;
-	h9 -= carry * (1ULL << 25);
+	h9 -= carry * (1 << 25);
 
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1ULL << 26);
+	h0 -= carry * (1 << 26);
 
 	h[0] = (int32_t)h0;
 	h[1] = (int32_t)h1;
@@ -1638,37 +1634,37 @@ void fe25519_frombytes(fe25519 h, const uint8_t* s)
 	h8 = ecdsabase_load3(s + 26) << 4;
 	h9 = (ecdsabase_load3(s + 29) & 8388607) << 2;
 
-	carry = (h9 + (1LL << 24)) >> 25;
+	carry = (h9 + (1 << 24)) >> 25;
 	h0 += carry * 19;
-	h9 -= carry * (1ULL << 25);
-	carry = (h1 + (1LL << 24)) >> 25;
+	h9 -= carry * (1 << 25);
+	carry = (h1 + (1 << 24)) >> 25;
 	h2 += carry;
-	h1 -= carry * (1ULL << 25);
-	carry = (h3 + (1LL << 24)) >> 25;
+	h1 -= carry * (1 << 25);
+	carry = (h3 + (1 << 24)) >> 25;
 	h4 += carry;
-	h3 -= carry * (1ULL << 25);
-	carry = (h5 + (1LL << 24)) >> 25;
+	h3 -= carry * (1 << 25);
+	carry = (h5 + (1 << 24)) >> 25;
 	h6 += carry;
-	h5 -= carry * (1ULL << 25);
-	carry = (h7 + (1LL << 24)) >> 25;
+	h5 -= carry * (1 << 25);
+	carry = (h7 + (1 << 24)) >> 25;
 	h8 += carry;
-	h7 -= carry * (1ULL << 25);
+	h7 -= carry * (1 << 25);
 
-	carry = (h0 + (1LL << 25)) >> 26;
+	carry = (h0 + (1 << 25)) >> 26;
 	h1 += carry;
-	h0 -= carry * (1ULL << 26);
-	carry = (h2 + (1LL << 25)) >> 26;
+	h0 -= carry * (1 << 26);
+	carry = (h2 + (1 << 25)) >> 26;
 	h3 += carry;
-	h2 -= carry * (1ULL << 26);
-	carry = (h4 + (1LL << 25)) >> 26;
+	h2 -= carry * (1 << 26);
+	carry = (h4 + (1 << 25)) >> 26;
 	h5 += carry;
-	h4 -= carry * (1ULL << 26);
-	carry = (h6 + (1LL << 25)) >> 26;
+	h4 -= carry * (1 << 26);
+	carry = (h6 + (1 << 25)) >> 26;
 	h7 += carry;
-	h6 -= carry * (1ULL << 26);
-	carry = (h8 + (1LL << 25)) >> 26;
+	h6 -= carry * (1 << 26);
+	carry = (h8 + (1 << 25)) >> 26;
 	h9 += carry;
-	h8 -= carry * (1ULL << 26);
+	h8 -= carry * (1 << 26);
 
 	h[0] = (int32_t)h0;
 	h[1] = (int32_t)h1;
@@ -2030,14 +2026,14 @@ static uint8_t ge25519_equal(int8_t b, int8_t c)
 	y -= 1;
 	y >>= 31;
 
-	return y;
+	return (uint8_t)y;
 }
 
 static void ge25519_cmov8(ge25519_precomp* t, const ge25519_precomp precomp[8], const int8_t b)
 {
 	ge25519_precomp minust;
 	const uint8_t BNEG = ecdsabase_negative(b);
-	const uint8_t BABS = b - (((~BNEG + 1) & b) * ((int8_t)1 << 1));
+	const uint8_t BABS = (uint8_t)(b - (-(int8_t)BNEG & b) * (1 << 1));
 
 	ge25519_precomp_0(t);
 
@@ -4782,6 +4778,7 @@ static void ge25519_p3_to_p2(ge25519_p2* r, const ge25519_p3* p)
 static void ge25519_p3_dbl(ge25519_p1p1* r, const ge25519_p3* p)
 {
 	ge25519_p2 q;
+
 	ge25519_p3_to_p2(&q, p);
 	ge25519_p2_dbl(r, &q);
 }
@@ -4810,39 +4807,38 @@ void ge25519_p1p1_to_p2(ge25519_p2* r, const ge25519_p1p1* p)
 
 void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
 {
-	int8_t e[64] = { 0 };
-	int8_t carry;
-	ge25519_p1p1 r;
-	ge25519_p2 s;
+	signed char     e[64];
+	signed char     carry;
+	ge25519_p1p1    r;
+	ge25519_p2      s;
 	ge25519_precomp t;
-	size_t i;
+	int             i;
 
-	for (i = 0; i < 32; ++i)
+	for (i = 0; i < 32; ++i) 
 	{
 		e[2 * i + 0] = a[i] & 15;
 		e[2 * i + 1] = (a[i] >> 4) & 15;
 	}
-
-	carry = 0;
-
 	/* each e[i] is between 0 and 15 */
 	/* e[63] is between 0 and 7 */
+
+	carry = 0;
 	for (i = 0; i < 63; ++i)
 	{
 		e[i] += carry;
 		carry = e[i] + 8;
 		carry >>= 4;
-		e[i] -= carry * ((uint8_t)1 << 4);
+		e[i] -= carry * ((signed char)1 << 4);
 	}
 
 	e[63] += carry;
-
 	/* each e[i] is between -8 and 8 */
+
 	ge25519_p3_0(h);
 
 	for (i = 1; i < 64; i += 2)
 	{
-		ge25519_cmov8_base(&t, (int32_t)i / 2, e[i]);
+		ge25519_cmov8_base(&t, i / 2, e[i]);
 		ge25519_add_precomp(&r, h, &t);
 		ge25519_p1p1_to_p3(h, &r);
 	}
@@ -4858,7 +4854,7 @@ void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
 
 	for (i = 0; i < 64; i += 2)
 	{
-		ge25519_cmov8_base(&t, (int32_t)i / 2, e[i]);
+		ge25519_cmov8_base(&t, i / 2, e[i]);
 		ge25519_add_precomp(&r, h, &t);
 		ge25519_p1p1_to_p3(h, &r);
 	}
@@ -4874,24 +4870,23 @@ void ge25519_p3_tobytes(uint8_t* s, const ge25519_p3* h)
 	fe25519_mul(x, h->x, recip);
 	fe25519_mul(y, h->y, recip);
 	fe25519_tobytes(s, y);
-	s[31] ^= fe25519_isnegative(x) << 7;
+	s[31] ^= (fe25519_isnegative(x) << 7);
 }
 
 int32_t ge25519_is_canonical(const uint8_t* s)
 {
 	uint8_t c;
 	uint8_t d;
-	size_t i;
 
-	c = (s[31] & 0x7f) ^ 0x7f;
+	c = (s[31] & 0x7F) ^ 0x7F;
 
-	for (i = 30; i > 0; i--)
+	for (size_t i = 30; i > 0; i--)
 	{
 		c |= s[i] ^ 0xFF;
 	}
 
-	c = (((uint32_t)c) - 1U) >> 8;
-	d = (0xed - 1U - (uint32_t)s[0]) >> 8;
+	c = (uint8_t)((uint32_t)(c - 1UL) >> 8);
+	d = (uint8_t)((uint32_t)(0x000000EDUL - 1UL - (uint32_t)s[0]) >> 8);
 
 	return 1 - (c & d & 1);
 }
@@ -5064,15 +5059,15 @@ void ge25519_add_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cach
 	fe25519_sub(r->t, t0, r->t);
 }
 
-/*
-* r = a * A + b * B
-* where a = a[0]+256*a[1]+...+256^31 a[31].
-* and b = b[0]+256*b[1]+...+256^31 b[31].
-* B is the Ed25519 base point (x,4/5) with x positive.
-* Only used for signatures verification.
-*/
 static void ge25519_sub_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_precomp* q)
 {
+	/*
+	* r = a * A + b * B
+	* where a = a[0]+256*a[1]+...+256^31 a[31].
+	* and b = b[0]+256*b[1]+...+256^31 b[31].
+	* B is the Ed25519 base point (x,4/5) with x positive.
+	* Only used for signatures verification.
+	*/
 	fe25519 t0;
 
 	fe25519_add(r->x, p->y, p->x);
@@ -5287,16 +5282,16 @@ void ge25519_tobytes(uint8_t* s, const ge25519_p2* h)
 	fe25519_mul(x, h->x, recip);
 	fe25519_mul(y, h->y, recip);
 	fe25519_tobytes(s, y);
-	s[31] ^= fe25519_isnegative(x) << 7;
+	s[31] ^= (fe25519_isnegative(x) << 7);
 }
 
 /* main */
 
-void sc25519_clamp(uint8_t* k)
+void sc25519_clamp(uint8_t* t)
 {
-	k[0] &= 248;
-	k[31] &= 127;
-	k[31] |= 64;
+	t[0] &= 248;
+	t[31] &= 127;
+	t[31] |= 64;
 }
 
 int32_t ed25519_small_order(const uint8_t s[32])
@@ -5399,8 +5394,8 @@ int32_t sc25519_is_canonical(const uint8_t s[32])
 	do
 	{
 		i--;
-		c |= ((s[i] - L[i]) >> 8) & n;
-		n &= ((s[i] ^ L[i]) - 1) >> 8;
+		c |= (((s[i] - L[i]) >> 8) & n);
+		n &= (((s[i] ^ L[i]) - 1) >> 8);
 	} 
 	while (i != 0);
 
@@ -5510,101 +5505,101 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
 	c10 = 2097151 & (ecdsabase_load3(c + 26) >> 2);
 	c11 = (ecdsabase_load4(c + 28) >> 7);
 
-	s0 = c0 + a0 * b0;
-	s1 = c1 + a0 * b1 + a1 * b0;
-	s2 = c2 + a0 * b2 + a1 * b1 + a2 * b0;
-	s3 = c3 + a0 * b3 + a1 * b2 + a2 * b1 + a3 * b0;
-	s4 = c4 + a0 * b4 + a1 * b3 + a2 * b2 + a3 * b1 + a4 * b0;
-	s5 = c5 + a0 * b5 + a1 * b4 + a2 * b3 + a3 * b2 + a4 * b1 + a5 * b0;
-	s6 = c6 + a0 * b6 + a1 * b5 + a2 * b4 + a3 * b3 + a4 * b2 + a5 * b1 + a6 * b0;
-	s7 = c7 + a0 * b7 + a1 * b6 + a2 * b5 + a3 * b4 + a4 * b3 + a5 * b2 + a6 * b1 + a7 * b0;
-	s8 = c8 + a0 * b8 + a1 * b7 + a2 * b6 + a3 * b5 + a4 * b4 + a5 * b3 + a6 * b2 + a7 * b1 + a8 * b0;
-	s9 = c9 + a0 * b9 + a1 * b8 + a2 * b7 + a3 * b6 + a4 * b5 + a5 * b4 + a6 * b3 + a7 * b2 + a8 * b1 + a9 * b0;
-	s10 = c10 + a0 * b10 + a1 * b9 + a2 * b8 + a3 * b7 + a4 * b6 + a5 * b5 + a6 * b4 + a7 * b3 + a8 * b2 + a9 * b1 + a10 * b0;
-	s11 = c11 + a0 * b11 + a1 * b10 + a2 * b9 + a3 * b8 + a4 * b7 + a5 * b6 + a6 * b5 + a7 * b4 + a8 * b3 + a9 * b2 + a10 * b1 + a11 * b0;
-	s12 = a1 * b11 + a2 * b10 + a3 * b9 + a4 * b8 + a5 * b7 + a6 * b6 + a7 * b5 + a8 * b4 + a9 * b3 + a10 * b2 + a11 * b1;
-	s13 = a2 * b11 + a3 * b10 + a4 * b9 + a5 * b8 + a6 * b7 + a7 * b6 + a8 * b5 + a9 * b4 + a10 * b3 + a11 * b2;
-	s14 = a3 * b11 + a4 * b10 + a5 * b9 + a6 * b8 + a7 * b7 + a8 * b6 + a9 * b5 + a10 * b4 + a11 * b3;
-	s15 = a4 * b11 + a5 * b10 + a6 * b9 + a7 * b8 + a8 * b7 + a9 * b6 + a10 * b5 + a11 * b4;
-	s16 = a5 * b11 + a6 * b10 + a7 * b9 + a8 * b8 + a9 * b7 + a10 * b6 + a11 * b5;
-	s17 = a6 * b11 + a7 * b10 + a8 * b9 + a9 * b8 + a10 * b7 + a11 * b6;
-	s18 = a7 * b11 + a8 * b10 + a9 * b9 + a10 * b8 + a11 * b7;
-	s19 = a8 * b11 + a9 * b10 + a10 * b9 + a11 * b8;
-	s20 = a9 * b11 + a10 * b10 + a11 * b9;
-	s21 = a10 * b11 + a11 * b10;
-	s22 = a11 * b11;
+	s0 = c0 + (a0 * b0);
+	s1 = c1 + (a0 * b1) + (a1 * b0);
+	s2 = c2 + (a0 * b2) + (a1 * b1) + (a2 * b0);
+	s3 = c3 + (a0 * b3) + (a1 * b2) + (a2 * b1) + (a3 * b0);
+	s4 = c4 + (a0 * b4) + (a1 * b3) + (a2 * b2) + (a3 * b1) + (a4 * b0);
+	s5 = c5 + (a0 * b5) + (a1 * b4) + (a2 * b3) + (a3 * b2) + (a4 * b1) + (a5 * b0);
+	s6 = c6 + (a0 * b6) + (a1 * b5) + (a2 * b4) + (a3 * b3) + (a4 * b2) + (a5 * b1) + (a6 * b0);
+	s7 = c7 + (a0 * b7) + (a1 * b6) + (a2 * b5) + (a3 * b4) + (a4 * b3) + (a5 * b2) + (a6 * b1) + (a7 * b0);
+	s8 = c8 + (a0 * b8) + (a1 * b7) + (a2 * b6) + (a3 * b5) + (a4 * b4) + (a5 * b3) + (a6 * b2) + (a7 * b1) + (a8 * b0);
+	s9 = c9 + (a0 * b9) + (a1 * b8) + (a2 * b7) + (a3 * b6) + (a4 * b5) + (a5 * b4) + (a6 * b3) + (a7 * b2) + (a8 * b1) + (a9 * b0);
+	s10 = c10 + (a0 * b10) + (a1 * b9) + (a2 * b8) + (a3 * b7) + (a4 * b6) + (a5 * b5) + (a6 * b4) + (a7 * b3) + (a8 * b2) + (a9 * b1) + (a10 * b0);
+	s11 = c11 + (a0 * b11) + (a1 * b10) + (a2 * b9) + (a3 * b8) + (a4 * b7) + (a5 * b6) + (a6 * b5) + (a7 * b4) + (a8 * b3) + (a9 * b2) + (a10 * b1) + (a11 * b0);
+	s12 = (a1 * b11) + (a2 * b10) + (a3 * b9) + (a4 * b8) + (a5 * b7) + (a6 * b6) + (a7 * b5) + (a8 * b4) + (a9 * b3) + (a10 * b2) + (a11 * b1);
+	s13 = (a2 * b11) + (a3 * b10) + (a4 * b9) + (a5 * b8) + (a6 * b7) + (a7 * b6) + (a8 * b5) + (a9 * b4) + (a10 * b3) + (a11 * b2);
+	s14 = (a3 * b11) + (a4 * b10) + (a5 * b9) + (a6 * b8) + (a7 * b7) + (a8 * b6) + (a9 * b5) + (a10 * b4) + (a11 * b3);
+	s15 = (a4 * b11) + (a5 * b10) + (a6 * b9) + (a7 * b8) + (a8 * b7) + (a9 * b6) + (a10 * b5) + (a11 * b4);
+	s16 = (a5 * b11) + (a6 * b10) + (a7 * b9) + (a8 * b8) + (a9 * b7) + (a10 * b6) + (a11 * b5);
+	s17 = (a6 * b11) + (a7 * b10) + (a8 * b9) + (a9 * b8) + (a10 * b7) + (a11 * b6);
+	s18 = (a7 * b11) + (a8 * b10) + (a9 * b9) + (a10 * b8) + (a11 * b7);
+	s19 = (a8 * b11) + (a9 * b10) + (a10 * b9) + (a11 * b8);
+	s20 = (a9 * b11) + (a10 * b10) + (a11 * b9);
+	s21 = (a10 * b11) + (a11 * b10);
+	s22 = (a11 * b11);
 	s23 = 0;
 
-	carry = (s0 + (1LL << 20)) >> 21;
+	carry = (s0 + (1 << 20)) >> 21;
 	s1 += carry;
-	s0 -= carry * (1ULL << 21);
-	carry = (s2 + (1LL << 20)) >> 21;
+	s0 -= carry * (1 << 21);
+	carry = (s2 + (1 << 20)) >> 21;
 	s3 += carry;
-	s2 -= carry * (1ULL << 21);
-	carry = (s4 + (1LL << 20)) >> 21;
+	s2 -= carry * (1 << 21);
+	carry = (s4 + (1 << 20)) >> 21;
 	s5 += carry;
-	s4 -= carry * (1ULL << 21);
-	carry = (s6 + (1LL << 20)) >> 21;
+	s4 -= carry * (1 << 21);
+	carry = (s6 + (1 << 20)) >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
-	carry = (s8 + (1LL << 20)) >> 21;
+	s6 -= carry * (1 << 21);
+	carry = (s8 + (1 << 20)) >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
-	carry = (s10 + (1LL << 20)) >> 21;
+	s8 -= carry * (1 << 21);
+	carry = (s10 + (1 << 20)) >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
-	carry = (s12 + (1LL << 20)) >> 21;
+	s10 -= carry * (1 << 21);
+	carry = (s12 + (1 << 20)) >> 21;
 	s13 += carry;
-	s12 -= carry * (1ULL << 21);
-	carry = (s14 + (1LL << 20)) >> 21;
+	s12 -= carry * (1 << 21);
+	carry = (s14 + (1 << 20)) >> 21;
 	s15 += carry;
-	s14 -= carry * (1ULL << 21);
-	carry = (s16 + (1LL << 20)) >> 21;
+	s14 -= carry * (1 << 21);
+	carry = (s16 + (1 << 20)) >> 21;
 	s17 += carry;
-	s16 -= carry * (1ULL << 21);
-	carry = (s18 + (1LL << 20)) >> 21;
+	s16 -= carry * (1 << 21);
+	carry = (s18 + (1 << 20)) >> 21;
 	s19 += carry;
-	s18 -= carry * (1ULL << 21);
-	carry = (s20 + (1LL << 20)) >> 21;
+	s18 -= carry * (1 << 21);
+	carry = (s20 + (1 << 20)) >> 21;
 	s21 += carry;
-	s20 -= carry * (1ULL << 21);
-	carry = (s22 + (1LL << 20)) >> 21;
+	s20 -= carry * (1 << 21);
+	carry = (s22 + (1 << 20)) >> 21;
 	s23 += carry;
-	s22 -= carry * (1ULL << 21);
+	s22 -= carry * (1 << 21);
 
-	carry = (s1 + (1LL << 20)) >> 21;
+	carry = (s1 + (1 << 20)) >> 21;
 	s2 += carry;
-	s1 -= carry * (1ULL << 21);
-	carry = (s3 + (1LL << 20)) >> 21;
+	s1 -= carry * (1 << 21);
+	carry = (s3 + (1 << 20)) >> 21;
 	s4 += carry;
-	s3 -= carry * (1ULL << 21);
-	carry = (s5 + (1LL << 20)) >> 21;
+	s3 -= carry * (1 << 21);
+	carry = (s5 + (1 << 20)) >> 21;
 	s6 += carry;
-	s5 -= carry * (1ULL << 21);
-	carry = (s7 + (1LL << 20)) >> 21;
+	s5 -= carry * (1 << 21);
+	carry = (s7 + (1 << 20)) >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
-	carry = (s9 + (1LL << 20)) >> 21;
+	s7 -= carry * (1 << 21);
+	carry = (s9 + (1 << 20)) >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
-	carry = (s11 + (1LL << 20)) >> 21;
+	s9 -= carry * (1 << 21);
+	carry = (s11 + (1 << 20)) >> 21;
 	s12 += carry;
-	s11 -= carry * (1ULL << 21);
-	carry = (s13 + (1LL << 20)) >> 21;
+	s11 -= carry * (1 << 21);
+	carry = (s13 + (1 << 20)) >> 21;
 	s14 += carry;
-	s13 -= carry * (1ULL << 21);
-	carry = (s15 + (1LL << 20)) >> 21;
+	s13 -= carry * (1 << 21);
+	carry = (s15 + (1 << 20)) >> 21;
 	s16 += carry;
-	s15 -= carry * (1ULL << 21);
-	carry = (s17 + (1LL << 20)) >> 21;
+	s15 -= carry * (1 << 21);
+	carry = (s17 + (1 << 20)) >> 21;
 	s18 += carry;
-	s17 -= carry * (1ULL << 21);
-	carry = (s19 + (1LL << 20)) >> 21;
+	s17 -= carry * (1 << 21);
+	carry = (s19 + (1 << 20)) >> 21;
 	s20 += carry;
-	s19 -= carry * (1ULL << 21);
-	carry = (s21 + (1LL << 20)) >> 21;
+	s19 -= carry * (1 << 21);
+	carry = (s21 + (1 << 20)) >> 21;
 	s22 += carry;
-	s21 -= carry * (1ULL << 21);
+	s21 -= carry * (1 << 21);
 
 	s11 += s23 * 666643;
 	s12 += s23 * 470296;
@@ -5648,40 +5643,40 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
 	s10 += s18 * 136657;
 	s11 -= s18 * 683901;
 
-	carry = (s6 + (1LL << 20)) >> 21;
+	carry = (s6 + (1 << 20)) >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
-	carry = (s8 + (1LL << 20)) >> 21;
+	s6 -= carry * (1 << 21);
+	carry = (s8 + (1 << 20)) >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
-	carry = (s10 + (1LL << 20)) >> 21;
+	s8 -= carry * (1 << 21);
+	carry = (s10 + (1 << 20)) >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
-	carry = (s12 + (1LL << 20)) >> 21;
+	s10 -= carry * (1 << 21);
+	carry = (s12 + (1 << 20)) >> 21;
 	s13 += carry;
-	s12 -= carry * (1ULL << 21);
-	carry = (s14 + (1LL << 20)) >> 21;
+	s12 -= carry * (1 << 21);
+	carry = (s14 + (1 << 20)) >> 21;
 	s15 += carry;
-	s14 -= carry * (1ULL << 21);
-	carry = (s16 + (1LL << 20)) >> 21;
+	s14 -= carry * (1 << 21);
+	carry = (s16 + (1 << 20)) >> 21;
 	s17 += carry;
-	s16 -= carry * (1ULL << 21);
+	s16 -= carry * (1 << 21);
 
-	carry = (s7 + (1LL << 20)) >> 21;
+	carry = (s7 + (1 << 20)) >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
-	carry = (s9 + (1LL << 20)) >> 21;
+	s7 -= carry * (1 << 21);
+	carry = (s9 + (1 << 20)) >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
-	carry = (s11 + (1LL << 20)) >> 21;
+	s9 -= carry * (1 << 21);
+	carry = (s11 + (1 << 20)) >> 21;
 	s12 += carry;
-	s11 -= carry * (1ULL << 21);
-	carry = (s13 + (1LL << 20)) >> 21;
+	s11 -= carry * (1 << 21);
+	carry = (s13 + (1 << 20)) >> 21;
 	s14 += carry;
-	s13 -= carry * (1ULL << 21);
-	carry = (s15 + (1LL << 20)) >> 21;
+	s13 -= carry * (1 << 21);
+	carry = (s15 + (1 << 20)) >> 21;
 	s16 += carry;
-	s15 -= carry * (1ULL << 21);
+	s15 -= carry * (1 << 21);
 
 	s5 += s17 * 666643;
 	s6 += s17 * 470296;
@@ -5726,43 +5721,43 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
 	s5 -= s12 * 683901;
 	s12 = 0;
 
-	carry = (s0 + (1LL << 20)) >> 21;
+	carry = (s0 + (1 << 20)) >> 21;
 	s1 += carry;
-	s0 -= carry * (1ULL << 21);
-	carry = (s2 + (1LL << 20)) >> 21;
+	s0 -= carry * (1 << 21);
+	carry = (s2 + (1 << 20)) >> 21;
 	s3 += carry;
-	s2 -= carry * (1ULL << 21);
-	carry = (s4 + (1LL << 20)) >> 21;
+	s2 -= carry * (1 << 21);
+	carry = (s4 + (1 << 20)) >> 21;
 	s5 += carry;
-	s4 -= carry * (1ULL << 21);
-	carry = (s6 + (1LL << 20)) >> 21;
+	s4 -= carry * (1 << 21);
+	carry = (s6 + (1 << 20)) >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
-	carry = (s8 + (1LL << 20)) >> 21;
+	s6 -= carry * (1 << 21);
+	carry = (s8 + (1 << 20)) >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
-	carry = (s10 + (1LL << 20)) >> 21;
+	s8 -= carry * (1 << 21);
+	carry = (s10 + (1 << 20)) >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
+	s10 -= carry * (1 << 21);
 
-	carry = (s1 + (1LL << 20)) >> 21;
+	carry = (s1 + (1 << 20)) >> 21;
 	s2 += carry;
-	s1 -= carry * (1ULL << 21);
-	carry = (s3 + (1LL << 20)) >> 21;
+	s1 -= carry * (1 << 21);
+	carry = (s3 + (1 << 20)) >> 21;
 	s4 += carry;
-	s3 -= carry * (1ULL << 21);
-	carry = (s5 + (1LL << 20)) >> 21;
+	s3 -= carry * (1 << 21);
+	carry = (s5 + (1 << 20)) >> 21;
 	s6 += carry;
-	s5 -= carry * (1ULL << 21);
-	carry = (s7 + (1LL << 20)) >> 21;
+	s5 -= carry * (1 << 21);
+	carry = (s7 + (1 << 20)) >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
-	carry = (s9 + (1LL << 20)) >> 21;
+	s7 -= carry * (1 << 21);
+	carry = (s9 + (1 << 20)) >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
-	carry = (s11 + (1LL << 20)) >> 21;
+	s9 -= carry * (1 << 21);
+	carry = (s11 + (1 << 20)) >> 21;
 	s12 += carry;
-	s11 -= carry * (1ULL << 21);
+	s11 -= carry * (1 << 21);
 
 	s0 += s12 * 666643;
 	s1 += s12 * 470296;
@@ -5774,40 +5769,40 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
 
 	carry = s0 >> 21;
 	s1 += carry;
-	s0 -= carry * (1ULL << 21);
+	s0 -= carry * (1 << 21);
 	carry = s1 >> 21;
 	s2 += carry;
-	s1 -= carry * (1ULL << 21);
+	s1 -= carry * (1 << 21);
 	carry = s2 >> 21;
 	s3 += carry;
-	s2 -= carry * (1ULL << 21);
+	s2 -= carry * (1 << 21);
 	carry = s3 >> 21;
 	s4 += carry;
-	s3 -= carry * (1ULL << 21);
+	s3 -= carry * (1 << 21);
 	carry = s4 >> 21;
 	s5 += carry;
-	s4 -= carry * (1ULL << 21);
+	s4 -= carry * (1 << 21);
 	carry = s5 >> 21;
 	s6 += carry;
-	s5 -= carry * (1ULL << 21);
+	s5 -= carry * (1 << 21);
 	carry = s6 >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
+	s6 -= carry * (1 << 21);
 	carry = s7 >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
+	s7 -= carry * (1 << 21);
 	carry = s8 >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
+	s8 -= carry * (1 << 21);
 	carry = s9 >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
+	s9 -= carry * (1 << 21);
 	carry = s10 >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
+	s10 -= carry * (1 << 21);
 	carry = s11 >> 21;
 	s12 += carry;
-	s11 -= carry * (1ULL << 21);
+	s11 -= carry * (1 << 21);
 
 	s0 += s12 * 666643;
 	s1 += s12 * 470296;
@@ -5818,67 +5813,67 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
 
 	carry = s0 >> 21;
 	s1 += carry;
-	s0 -= carry * (1ULL << 21);
+	s0 -= carry * (1 << 21);
 	carry = s1 >> 21;
 	s2 += carry;
-	s1 -= carry * (1ULL << 21);
+	s1 -= carry * (1 << 21);
 	carry = s2 >> 21;
 	s3 += carry;
-	s2 -= carry * (1ULL << 21);
+	s2 -= carry * (1 << 21);
 	carry = s3 >> 21;
 	s4 += carry;
-	s3 -= carry * (1ULL << 21);
+	s3 -= carry * (1 << 21);
 	carry = s4 >> 21;
 	s5 += carry;
-	s4 -= carry * (1ULL << 21);
+	s4 -= carry * (1 << 21);
 	carry = s5 >> 21;
 	s6 += carry;
-	s5 -= carry * (1ULL << 21);
+	s5 -= carry * (1 << 21);
 	carry = s6 >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
+	s6 -= carry * (1 << 21);
 	carry = s7 >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
+	s7 -= carry * (1 << 21);
 	carry = s8 >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
+	s8 -= carry * (1 << 21);
 	carry = s9 >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
+	s9 -= carry * (1 << 21);
 	carry = s10 >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
+	s10 -= carry * (1 << 21);
 
 	s[0] = (uint8_t)s0;
 	s[1] = (uint8_t)(s0 >> 8);
-	s[2] = (uint8_t)((s0 >> 16) | (s1 * ((uint64_t)1 << 5)));
+	s[2] = (uint8_t)((s0 >> 16) | (s1 * (1 << 5)));
 	s[3] = (uint8_t)(s1 >> 3);
 	s[4] = (uint8_t)(s1 >> 11);
-	s[5] = (uint8_t)((s1 >> 19) | (s2 * ((uint64_t)1 << 2)));
+	s[5] = (uint8_t)((s1 >> 19) | (s2 * (1 << 2)));
 	s[6] = (uint8_t)(s2 >> 6);
-	s[7] = (uint8_t)((s2 >> 14) | (s3 * ((uint64_t)1 << 7)));
+	s[7] = (uint8_t)((s2 >> 14) | (s3 * (1 << 7)));
 	s[8] = (uint8_t)(s3 >> 1);
 	s[9] = (uint8_t)(s3 >> 9);
-	s[10] = (uint8_t)((s3 >> 17) | (s4 * ((uint64_t)1 << 4)));
+	s[10] = (uint8_t)((s3 >> 17) | (s4 * (1 << 4)));
 	s[11] = (uint8_t)(s4 >> 4);
 	s[12] = (uint8_t)(s4 >> 12);
-	s[13] = (uint8_t)((s4 >> 20) | (s5 * ((uint64_t)1 << 1)));
+	s[13] = (uint8_t)((s4 >> 20) | (s5 * (1 << 1)));
 	s[14] = (uint8_t)(s5 >> 7);
-	s[15] = (uint8_t)((s5 >> 15) | (s6 * ((uint64_t)1 << 6)));
+	s[15] = (uint8_t)((s5 >> 15) | (s6 * (1 << 6)));
 	s[16] = (uint8_t)(s6 >> 2);
 	s[17] = (uint8_t)(s6 >> 10);
-	s[18] = (uint8_t)((s6 >> 18) | (s7 * ((uint64_t)1 << 3)));
+	s[18] = (uint8_t)((s6 >> 18) | (s7 * (1 << 3)));
 	s[19] = (uint8_t)(s7 >> 5);
 	s[20] = (uint8_t)(s7 >> 13);
 	s[21] = (uint8_t)s8;
 	s[22] = (uint8_t)(s8 >> 8);
-	s[23] = (uint8_t)((s8 >> 16) | (s9 * ((uint64_t)1 << 5)));
+	s[23] = (uint8_t)((s8 >> 16) | (s9 * (1 << 5)));
 	s[24] = (uint8_t)(s9 >> 3);
 	s[25] = (uint8_t)(s9 >> 11);
-	s[26] = (uint8_t)((s9 >> 19) | (s10 * ((uint64_t)1 << 2)));
+	s[26] = (uint8_t)((s9 >> 19) | (s10 * (1 << 2)));
 	s[27] = (uint8_t)(s10 >> 6);
-	s[28] = (uint8_t)((s10 >> 14) | (s11 * ((uint64_t)1 << 7)));
+	s[28] = (uint8_t)((s10 >> 14) | (s11 * (1 << 7)));
 	s[29] = (uint8_t)(s11 >> 1);
 	s[30] = (uint8_t)(s11 >> 9);
 	s[31] = (uint8_t)(s11 >> 17);
@@ -5979,40 +5974,40 @@ void sc25519_reduce(uint8_t s[64])
 	s10 += s18 * 136657;
 	s11 -= s18 * 683901;
 
-	carry = (s6 + (1LL << 20)) >> 21;
+	carry = (s6 + (1 << 20)) >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
-	carry = (s8 + (1LL << 20)) >> 21;
+	s6 -= carry * (1 << 21);
+	carry = (s8 + (1 << 20)) >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
-	carry = (s10 + (1LL << 20)) >> 21;
+	s8 -= carry * (1 << 21);
+	carry = (s10 + (1 << 20)) >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
-	carry = (s12 + (1LL << 20)) >> 21;
+	s10 -= carry * (1 << 21);
+	carry = (s12 + (1 << 20)) >> 21;
 	s13 += carry;
-	s12 -= carry * (1ULL << 21);
-	carry = (s14 + (1LL << 20)) >> 21;
+	s12 -= carry * (1 << 21);
+	carry = (s14 + (1 << 20)) >> 21;
 	s15 += carry;
-	s14 -= carry * (1ULL << 21);
-	carry = (s16 + (1LL << 20)) >> 21;
+	s14 -= carry * (1 << 21);
+	carry = (s16 + (1 << 20)) >> 21;
 	s17 += carry;
-	s16 -= carry * (1ULL << 21);
+	s16 -= carry * (1 << 21);
 
-	carry = (s7 + (1LL << 20)) >> 21;
+	carry = (s7 + (1 << 20)) >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
-	carry = (s9 + (1LL << 20)) >> 21;
+	s7 -= carry * (1 << 21);
+	carry = (s9 + (1 << 20)) >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
-	carry = (s11 + (1LL << 20)) >> 21;
+	s9 -= carry * (1 << 21);
+	carry = (s11 + (1 << 20)) >> 21;
 	s12 += carry;
-	s11 -= carry * (1ULL << 21);
-	carry = (s13 + (1LL << 20)) >> 21;
+	s11 -= carry * (1 << 21);
+	carry = (s13 + (1 << 20)) >> 21;
 	s14 += carry;
-	s13 -= carry * (1ULL << 21);
-	carry = (s15 + (1LL << 20)) >> 21;
+	s13 -= carry * (1 << 21);
+	carry = (s15 + (1 << 20)) >> 21;
 	s16 += carry;
-	s15 -= carry * (1ULL << 21);
+	s15 -= carry * (1 << 21);
 
 	s5 += s17 * 666643;
 	s6 += s17 * 470296;
@@ -6057,43 +6052,43 @@ void sc25519_reduce(uint8_t s[64])
 	s5 -= s12 * 683901;
 	s12 = 0;
 
-	carry = (s0 + (1LL << 20)) >> 21;
+	carry = (s0 + (1 << 20)) >> 21;
 	s1 += carry;
-	s0 -= carry * (1ULL << 21);
-	carry = (s2 + (1LL << 20)) >> 21;
+	s0 -= carry * (1 << 21);
+	carry = (s2 + (1 << 20)) >> 21;
 	s3 += carry;
-	s2 -= carry * (1ULL << 21);
-	carry = (s4 + (1LL << 20)) >> 21;
+	s2 -= carry * (1 << 21);
+	carry = (s4 + (1 << 20)) >> 21;
 	s5 += carry;
-	s4 -= carry * (1ULL << 21);
-	carry = (s6 + (1LL << 20)) >> 21;
+	s4 -= carry * (1 << 21);
+	carry = (s6 + (1 << 20)) >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
-	carry = (s8 + (1LL << 20)) >> 21;
+	s6 -= carry * (1 << 21);
+	carry = (s8 + (1 << 20)) >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
-	carry = (s10 + (1LL << 20)) >> 21;
+	s8 -= carry * (1 << 21);
+	carry = (s10 + (1 << 20)) >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
+	s10 -= carry * (1 << 21);
 
-	carry = (s1 + (1LL << 20)) >> 21;
+	carry = (s1 + (1 << 20)) >> 21;
 	s2 += carry;
-	s1 -= carry * (1ULL << 21);
-	carry = (s3 + (1LL << 20)) >> 21;
+	s1 -= carry * (1 << 21);
+	carry = (s3 + (1 << 20)) >> 21;
 	s4 += carry;
-	s3 -= carry * (1ULL << 21);
-	carry = (s5 + (1LL << 20)) >> 21;
+	s3 -= carry * (1 << 21);
+	carry = (s5 + (1 << 20)) >> 21;
 	s6 += carry;
-	s5 -= carry * (1ULL << 21);
-	carry = (s7 + (1LL << 20)) >> 21;
+	s5 -= carry * (1 << 21);
+	carry = (s7 + (1 << 20)) >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
-	carry = (s9 + (1LL << 20)) >> 21;
+	s7 -= carry * (1 << 21);
+	carry = (s9 + (1 << 20)) >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
-	carry = (s11 + (1LL << 20)) >> 21;
+	s9 -= carry * (1 << 21);
+	carry = (s11 + (1 << 20)) >> 21;
 	s12 += carry;
-	s11 -= carry * (1ULL << 21);
+	s11 -= carry * (1 << 21);
 
 	s0 += s12 * 666643;
 	s1 += s12 * 470296;
@@ -6105,40 +6100,40 @@ void sc25519_reduce(uint8_t s[64])
 
 	carry = s0 >> 21;
 	s1 += carry;
-	s0 -= carry * (1ULL << 21);
+	s0 -= carry * (1 << 21);
 	carry = s1 >> 21;
 	s2 += carry;
-	s1 -= carry * (1ULL << 21);
+	s1 -= carry * (1 << 21);
 	carry = s2 >> 21;
 	s3 += carry;
-	s2 -= carry * (1ULL << 21);
+	s2 -= carry * (1 << 21);
 	carry = s3 >> 21;
 	s4 += carry;
-	s3 -= carry * (1ULL << 21);
+	s3 -= carry * (1 << 21);
 	carry = s4 >> 21;
 	s5 += carry;
-	s4 -= carry * (1ULL << 21);
+	s4 -= carry * (1 << 21);
 	carry = s5 >> 21;
 	s6 += carry;
-	s5 -= carry * (1ULL << 21);
+	s5 -= carry * (1 << 21);
 	carry = s6 >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
+	s6 -= carry * (1 << 21);
 	carry = s7 >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
+	s7 -= carry * (1 << 21);
 	carry = s8 >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
+	s8 -= carry * (1 << 21);
 	carry = s9 >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
+	s9 -= carry * (1 << 21);
 	carry = s10 >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
+	s10 -= carry * (1 << 21);
 	carry = s11 >> 21;
 	s12 += carry;
-	s11 -= carry * (1ULL << 21);
+	s11 -= carry * (1 << 21);
 
 	s0 += s12 * 666643;
 	s1 += s12 * 470296;
@@ -6149,67 +6144,67 @@ void sc25519_reduce(uint8_t s[64])
 
 	carry = s0 >> 21;
 	s1 += carry;
-	s0 -= carry * (1ULL << 21);
+	s0 -= carry * (1 << 21);
 	carry = s1 >> 21;
 	s2 += carry;
-	s1 -= carry * (1ULL << 21);
+	s1 -= carry * (1 << 21);
 	carry = s2 >> 21;
 	s3 += carry;
-	s2 -= carry * (1ULL << 21);
+	s2 -= carry * (1 << 21);
 	carry = s3 >> 21;
 	s4 += carry;
-	s3 -= carry * (1ULL << 21);
+	s3 -= carry * (1 << 21);
 	carry = s4 >> 21;
 	s5 += carry;
-	s4 -= carry * (1ULL << 21);
+	s4 -= carry * (1 << 21);
 	carry = s5 >> 21;
 	s6 += carry;
-	s5 -= carry * (1ULL << 21);
+	s5 -= carry * (1 << 21);
 	carry = s6 >> 21;
 	s7 += carry;
-	s6 -= carry * (1ULL << 21);
+	s6 -= carry * (1 << 21);
 	carry = s7 >> 21;
 	s8 += carry;
-	s7 -= carry * (1ULL << 21);
+	s7 -= carry * (1 << 21);
 	carry = s8 >> 21;
 	s9 += carry;
-	s8 -= carry * (1ULL << 21);
+	s8 -= carry * (1 << 21);
 	carry = s9 >> 21;
 	s10 += carry;
-	s9 -= carry * (1ULL << 21);
+	s9 -= carry * (1 << 21);
 	carry = s10 >> 21;
 	s11 += carry;
-	s10 -= carry * (1ULL << 21);
+	s10 -= carry * (1 << 21);
 
 	s[0] = (uint8_t)s0;
 	s[1] = (uint8_t)(s0 >> 8);
-	s[2] = (uint8_t)((s0 >> 16) | (s1 * ((uint64_t)1 << 5)));
+	s[2] = (uint8_t)((s0 >> 16) | (s1 * (1 << 5)));
 	s[3] = (uint8_t)(s1 >> 3);
 	s[4] = (uint8_t)(s1 >> 11);
-	s[5] = (uint8_t)((s1 >> 19) | (s2 * ((uint64_t)1 << 2)));
+	s[5] = (uint8_t)((s1 >> 19) | (s2 * (1 << 2)));
 	s[6] = (uint8_t)(s2 >> 6);
-	s[7] = (uint8_t)((s2 >> 14) | (s3 * ((uint64_t)1 << 7)));
+	s[7] = (uint8_t)((s2 >> 14) | (s3 * (1 << 7)));
 	s[8] = (uint8_t)(s3 >> 1);
 	s[9] = (uint8_t)(s3 >> 9);
-	s[10] = (uint8_t)((s3 >> 17) | (s4 * ((uint64_t)1 << 4)));
+	s[10] = (uint8_t)((s3 >> 17) | (s4 * (1 << 4)));
 	s[11] = (uint8_t)(s4 >> 4);
 	s[12] = (uint8_t)(s4 >> 12);
-	s[13] = (uint8_t)((s4 >> 20) | (s5 * ((uint64_t)1 << 1)));
+	s[13] = (uint8_t)((s4 >> 20) | (s5 * (1 << 1)));
 	s[14] = (uint8_t)(s5 >> 7);
-	s[15] = (uint8_t)((s5 >> 15) | (s6 * ((uint64_t)1 << 6)));
+	s[15] = (uint8_t)((s5 >> 15) | (s6 * (1 << 6)));
 	s[16] = (uint8_t)(s6 >> 2);
 	s[17] = (uint8_t)(s6 >> 10);
-	s[18] = (uint8_t)((s6 >> 18) | (s7 * ((uint64_t)1 << 3)));
+	s[18] = (uint8_t)((s6 >> 18) | (s7 * (1 << 3)));
 	s[19] = (uint8_t)(s7 >> 5);
 	s[20] = (uint8_t)(s7 >> 13);
 	s[21] = (uint8_t)s8;
 	s[22] = (uint8_t)(s8 >> 8);
-	s[23] = (uint8_t)((s8 >> 16) | (s9 * ((uint64_t)1 << 5)));
+	s[23] = (uint8_t)((s8 >> 16) | (s9 * (1 << 5)));
 	s[24] = (uint8_t)(s9 >> 3);
 	s[25] = (uint8_t)(s9 >> 11);
-	s[26] = (uint8_t)((s9 >> 19) | (s10 * ((uint64_t)1 << 2)));
+	s[26] = (uint8_t)((s9 >> 19) | (s10 * (1 << 2)));
 	s[27] = (uint8_t)(s10 >> 6);
-	s[28] = (uint8_t)((s10 >> 14) | (s11 * ((uint64_t)1 << 7)));
+	s[28] = (uint8_t)((s10 >> 14) | (s11 * (1 << 7)));
 	s[29] = (uint8_t)(s11 >> 1);
 	s[30] = (uint8_t)(s11 >> 9);
 	s[31] = (uint8_t)(s11 >> 17);

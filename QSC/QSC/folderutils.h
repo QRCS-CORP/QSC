@@ -21,7 +21,7 @@
 * An implementation of common string support functions
 * Written by John G. Underhill
 * Written on February 18, 2021
-* Contact: support@vtdev.com 
+* Contact: support@vtdev.com
 */
 
 /*
@@ -33,15 +33,15 @@
 #ifndef QSC_FOLDERUTILS_H
 #define QSC_FOLDERUTILS_H
 
-/* bogus winbase.h error */
-#pragma warning(disable : 5105)
-
 #include "common.h"
+
+/* bogus winbase.h error */
+QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 /*! \enum qsc_folderutils_directories
 * \brief The system special folders enumeration
 */
-QSC_EXPORT_API typedef enum qsc_folderutils_directories
+typedef enum qsc_folderutils_directories
 {
 	qsc_folderutils_directories_user_app_data,
 	qsc_folderutils_directories_user_desktop,
@@ -62,7 +62,7 @@ QSC_EXPORT_API typedef enum qsc_folderutils_directories
 * \param path: The full path including the new folder name
 * \return Returns true if the folder is created
 */
-QSC_EXPORT_API bool qsc_folderutils_create_directory(char path[QSC_SYSTEM_MAX_PATH]);
+QSC_EXPORT_API bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH]);
 
 /**
 * \brief Delete a folder in an existing directory

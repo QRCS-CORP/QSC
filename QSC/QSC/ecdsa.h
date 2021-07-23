@@ -125,7 +125,7 @@ QSC_EXPORT_API void qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_
 * \param privatekey: Pointer to the private signature-key array
 * \param rng_generate: Pointer to the random generator
 */
-QSC_EXPORT_API void qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API void qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message.

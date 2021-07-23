@@ -2,15 +2,17 @@
 #include "intrinsics.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#	pragma intrinsic(__cpuid)
 #	define WIN32_LEAN_AND_MEAN
 #	define _WINSOCKAPI_
 #	include <Windows.h>
-#	pragma comment(lib, "IPHLPAPI.lib")
 #	include <iphlpapi.h>
-#	include <intrin.h>  
-#	include <Sddl.h>
-#	include <tlhelp32.h>
+#	include <intrin.h>
+#	include <sddl.h>
+#	include <TlHelp32.h>
+#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#	    pragma intrinsic(__cpuid)
+#	    pragma comment(lib, "IPHLPAPI.lib")
+#   endif
 #elif defined(QSC_SYSTEM_OS_UNIX)
 #	include <time.h>
 #	include <unistd.h>
@@ -41,8 +43,6 @@
 size_t qsc_sysutils_computer_name(char* name)
 {
 	size_t res;
-
-	res = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
@@ -193,10 +193,10 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
 	GlobalMemoryStatusEx(&memInfo);
 
-	state->phystotal = (uint64_t)memInfo.ullTotalPhys;
-	state->physavail = (uint64_t)memInfo.ullAvailPhys;
-	state->virttotal = (uint64_t)memInfo.ullTotalVirtual;
-	state->virtavail = (uint64_t)memInfo.ullAvailVirtual;
+	state->phystotal = memInfo.ullTotalPhys;
+	state->physavail = memInfo.ullAvailPhys;
+	state->virttotal = memInfo.ullTotalVirtual;
+	state->virtavail = memInfo.ullAvailVirtual;
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
@@ -215,8 +215,6 @@ uint32_t qsc_sysutils_process_id()
 {
 	uint32_t res;
 
-	res = 0;
-
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	res = (uint32_t)GetCurrentProcessId();
 #else
@@ -229,8 +227,6 @@ uint32_t qsc_sysutils_process_id()
 size_t qsc_sysutils_user_name(char* name)
 {
 	size_t res;
-
-	res = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
@@ -257,8 +253,6 @@ size_t qsc_sysutils_user_name(char* name)
 uint64_t qsc_sysutils_system_uptime()
 {
 	uint64_t res;
-
-	res = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
@@ -289,7 +283,7 @@ uint64_t qsc_sysutils_system_timestamp()
 	if (qsc_sysutils_rdtsc_available())
 	{
 		// use tsc if available
-		rtme = (uint64_t)__rdtsc();
+		rtme = __rdtsc();
 	}
 	else
 	{
@@ -302,7 +296,7 @@ uint64_t qsc_sysutils_system_timestamp()
 			// return microseconds to milliseconds
 			if (freq > 0)
 			{
-				rtme = (uint64_t)(ctr1 * 1000ULL / freq);
+				rtme = (ctr1 * 1000ULL / freq);
 			}
 		}
 		else

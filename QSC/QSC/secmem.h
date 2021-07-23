@@ -33,10 +33,10 @@
 #ifndef QSC_SECMEM_H
 #define QSC_SECMEM_H
 
-/* bogus winbase.h error */
-#pragma warning(disable : 5105)
-
 #include "common.h"
+
+/* bogus winbase.h error */
+QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 /**
 * \brief Allovcate a block of secure memory

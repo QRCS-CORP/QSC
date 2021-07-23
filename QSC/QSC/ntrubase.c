@@ -9,22 +9,6 @@
 #define NTRU_PRFKEYBYTES 32
 #define NTRU_SHAREDKEYBYTES 32
 
-#define NTRU_Q (1 << NTRU_LOGQ)
-#define NTRU_WEIGHT (NTRU_Q / 8 - 2)
-#define NTRU_SAMPLE_IID_BYTES (NTRU_N - 1)
-#define NTRU_PACK_DEG (NTRU_N - 1)
-#define NTRU_PACK_TRINARY_BYTES ((NTRU_PACK_DEG + 4) / 5)
-#define NTRU_SAMPLE_FT_BYTES   ((30 * (NTRU_N - 1) + 7) / 8)
-
-#define NTRU_OWCPA_MSGBYTES (2 * NTRU_PACK_TRINARY_BYTES)
-#define NTRU_OWCPA_PUBLICKEYBYTES ((NTRU_LOGQ * NTRU_PACK_DEG + 7) / 8)
-#define NTRU_OWCPA_SECRETKEYBYTES (2 * NTRU_PACK_TRINARY_BYTES + NTRU_OWCPA_PUBLICKEYBYTES)
-#define NTRU_OWCPA_BYTES ((NTRU_LOGQ * NTRU_PACK_DEG + 7) / 8)
-
-#define NTRU_PUBLICKEYBYTES (NTRU_OWCPA_PUBLICKEYBYTES)
-#define NTRU_SECRETKEYBYTES (NTRU_OWCPA_SECRETKEYBYTES + NTRU_PRFKEYBYTES)
-#define NTRU_CIPHERTEXTBYTES (NTRU_OWCPA_BYTES)
-
 #if defined(QSC_NTRU_S1HPS2048509)
 
 #define NTRU_HPS
@@ -61,6 +45,22 @@
 #	error "The NTRU parameter set is invalid!"
 #endif
 
+#define NTRU_Q (1 << NTRU_LOGQ)
+#define NTRU_WEIGHT (NTRU_Q / 8 - 2)
+#define NTRU_SAMPLE_IID_BYTES (NTRU_N - 1)
+#define NTRU_PACK_DEG (NTRU_N - 1)
+#define NTRU_PACK_TRINARY_BYTES ((NTRU_PACK_DEG + 4) / 5)
+#define NTRU_SAMPLE_FT_BYTES   ((30 * (NTRU_N - 1) + 7) / 8)
+
+#define NTRU_OWCPA_MSGBYTES (2 * NTRU_PACK_TRINARY_BYTES)
+#define NTRU_OWCPA_PUBLICKEYBYTES ((NTRU_LOGQ * NTRU_PACK_DEG + 7) / 8)
+#define NTRU_OWCPA_SECRETKEYBYTES (2 * NTRU_PACK_TRINARY_BYTES + NTRU_OWCPA_PUBLICKEYBYTES)
+#define NTRU_OWCPA_BYTES ((NTRU_LOGQ * NTRU_PACK_DEG + 7) / 8)
+
+#define NTRU_PUBLICKEYBYTES (NTRU_OWCPA_PUBLICKEYBYTES)
+#define NTRU_SECRETKEYBYTES (NTRU_OWCPA_SECRETKEYBYTES + NTRU_PRFKEYBYTES)
+#define NTRU_CIPHERTEXTBYTES (NTRU_OWCPA_BYTES)
+
 /* poly.h */
 
 typedef struct
@@ -78,12 +78,9 @@ static uint16_t ntru_modq(uint16_t x)
 static void ntru_cmov(uint8_t* r, const uint8_t* x, size_t len, uint8_t b)
 {
     /* b = 1 means mov, b = 0 means don't mov*/
-
-    size_t i;
-
     b = (~b + 1);
 
-    for (i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         r[i] ^= b & (x[i] ^ r[i]);
     }
@@ -112,8 +109,6 @@ static void ntru_crypto_sort_int32(int32_t* array, size_t n)
     int32_t* x;
     size_t i;
     size_t j;
-    size_t p;
-    size_t q;
     size_t r;
     size_t top;
     int32_t a;
@@ -128,7 +123,7 @@ static void ntru_crypto_sort_int32(int32_t* array, size_t n)
         top += top;
     }
 
-    for (p = top; p >= 1; p >>= 1) 
+    for (size_t p = top; p >= 1; p >>= 1)
     {
         i = 0;
 
@@ -150,11 +145,11 @@ static void ntru_crypto_sort_int32(int32_t* array, size_t n)
         i = 0;
         j = 0;
 
-        for (q = top; q > p; q >>= 1) 
+        for (size_t q = top; q > p; q >>= 1)
         {
-            if (j != i) 
+            if (j != i)
             {
-                for (;;)
+                while (true)
                 {
                     if (j == n - q)
                     {
@@ -185,7 +180,7 @@ static void ntru_crypto_sort_int32(int32_t* array, size_t n)
                 break;
             }
 
-            while (i + p <= n - q) 
+            while (i + p <= n - q)
             {
                 for (j = i; j < i + p; ++j)
                 {
@@ -236,14 +231,12 @@ static uint16_t ntru_mod3(uint16_t a)
     t = r - 3;
     c = t >> 15;
 
-    return (c & r) ^ (~c & t);
+    return (uint16_t)((c & r) ^ (~c & t));
 }
 
 static void ntru_poly_mod_3_Phi_n(poly* r)
 {
-    size_t i;
-
-    for (i = 0; i < NTRU_N; ++i)
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         r->coeffs[i] = ntru_mod3(r->coeffs[i] + 2 * r->coeffs[NTRU_N - 1]);
     }
@@ -251,9 +244,7 @@ static void ntru_poly_mod_3_Phi_n(poly* r)
 
 static void ntru_poly_mod_q_Phi_n(poly* r)
 {
-    size_t i;
-
-    for (i = 0; i < NTRU_N; ++i)
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         r->coeffs[i] = r->coeffs[i] - r->coeffs[NTRU_N - 1];
     }
@@ -261,13 +252,12 @@ static void ntru_poly_mod_q_Phi_n(poly* r)
 
 static void ntru_poly_Rq_to_S3(poly* r, const poly* a)
 {
-    size_t i;
     uint16_t flag;
 
     /* The coefficients of a are stored as non-negative integers. */
     /* We must translate to representatives in [-q/2, q/2) before reduction mod 3. */
 
-    for (i = 0; i < NTRU_N; ++i)
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         /* Need an explicit reduction mod q here */
         r->coeffs[i] = ntru_modq(a->coeffs[i]);
@@ -288,9 +278,8 @@ static void ntru_poly_Rq_to_S3(poly* r, const poly* a)
 static void ntru_poly_Rq_mul(poly* r, const poly* a, const poly* b)
 {
     size_t i;
-    size_t k;
 
-    for (k = 0; k < NTRU_N; ++k)
+    for (size_t k = 0; k < NTRU_N; ++k)
     {
         r->coeffs[k] = 0;
 
@@ -322,7 +311,6 @@ static void ntru_poly_R2_inv(poly* r, const poly* a)
     poly v;
     poly w;
     size_t i;
-    size_t loop;
     int16_t delta;
     int16_t sign;
     int16_t swap;
@@ -353,7 +341,7 @@ static void ntru_poly_R2_inv(poly* r, const poly* a)
     g.coeffs[NTRU_N - 1] = 0;
     delta = 1;
 
-    for (loop = 0; loop < 2 * (NTRU_N - 1) - 1; ++loop)
+    for (size_t j = 0; j < (2 * (NTRU_N - 1)) - 1; ++j)
     {
         for (i = NTRU_N - 1; i > 0; --i)
         {
@@ -427,7 +415,6 @@ static void ntru_poly_S3_inv(poly* r, const poly* a)
     poly v;
     poly w;
     size_t i;
-    size_t loop;
     int16_t delta;
     int16_t sign;
     int16_t swap;
@@ -458,7 +445,7 @@ static void ntru_poly_S3_inv(poly* r, const poly* a)
     g.coeffs[NTRU_N - 1] = 0;
     delta = 1;
 
-    for (loop = 0; loop < 2 * (NTRU_N - 1) - 1; ++loop)
+    for (size_t j = 0; j < (2 * (NTRU_N - 1)) - 1; ++j)
     {
         for (i = NTRU_N - 1; i > 0; --i)
         {
@@ -511,9 +498,7 @@ static void ntru_poly_Z3_to_Zq(poly* r)
 {
     /* Map {0, 1, 2} -> {0,1,q-1} in place */
 
-    size_t i;
-
-    for (i = 0; i < NTRU_N; ++i)
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         r->coeffs[i] = r->coeffs[i] | ((-(r->coeffs[i] >> 1)) & (NTRU_Q - 1));
     }
@@ -523,9 +508,7 @@ static void ntru_poly_trinary_Zq_to_Z3(poly* r)
 {
     /* Map {0, 1, q-1} -> {0,1,2} in place */
 
-    size_t i;
-
-    for (i = 0; i < NTRU_N; ++i)
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         r->coeffs[i] = ntru_modq(r->coeffs[i]);
         r->coeffs[i] = 3 & (r->coeffs[i] ^ (r->coeffs[i] >> (NTRU_LOGQ - 1)));
@@ -597,9 +580,7 @@ static void ntru_poly_Rq_inv(poly* r, const poly* a)
 #ifdef NTRU_HPS
 static void ntru_poly_lift(poly* r, const poly* a)
 {
-    size_t i;
-
-    for (i = 0; i < NTRU_N; ++i) 
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         r->coeffs[i] = a->coeffs[i];
     }
@@ -677,9 +658,6 @@ static void ntru_poly_S3_to_bytes(uint8_t msg[NTRU_OWCPA_MSGBYTES], const poly* 
 {
     int32_t i;
     uint8_t c;
-#if NTRU_PACK_DEG > (NTRU_PACK_DEG / 5) * 5  /* if 5 does not divide NTRU_N-1 */
-    int32_t j;
-#endif
 
     for (i = 0; i < NTRU_PACK_DEG / 5; ++i)
     {
@@ -695,7 +673,7 @@ static void ntru_poly_S3_to_bytes(uint8_t msg[NTRU_OWCPA_MSGBYTES], const poly* 
     i = NTRU_PACK_DEG / 5;
     c = 0;
 
-    for (j = NTRU_PACK_DEG - (5 * i) - 1; j >= 0; j--)
+    for (int32_t j = NTRU_PACK_DEG - (5 * i) - 1; j >= 0; j--)
     {
         c = ((3 * c) + a->coeffs[(5 * i) + j]) & 0x00FF;
     }
@@ -708,9 +686,6 @@ static void ntru_poly_S3_from_bytes(poly* r, const uint8_t msg[NTRU_OWCPA_MSGBYT
 {
     size_t i;
     uint8_t c;
-#if NTRU_PACK_DEG > (NTRU_PACK_DEG / 5) * 5  /* if 5 does not divide NTRU_N-1 */
-    size_t j;
-#endif
 
     for (i = 0; i < NTRU_PACK_DEG / 5; ++i)
     {
@@ -726,7 +701,7 @@ static void ntru_poly_S3_from_bytes(poly* r, const uint8_t msg[NTRU_OWCPA_MSGBYT
     i = NTRU_PACK_DEG / 5;
     c = msg[i];
 
-    for (j = 0; ((5 * i) + j) < NTRU_PACK_DEG; ++j)
+    for (size_t j = 0; ((5 * i) + j) < NTRU_PACK_DEG; ++j)
     {
         r->coeffs[(5 * i) + j] = c;
         c = (c * 171) >> 9;
@@ -755,14 +730,14 @@ static void ntru_poly_Sq_to_bytes(uint8_t* r, const poly* a)
             t[j] = ntru_modq(a->coeffs[(8 * i) + j]);
         }
 
-        r[11 * i] = (uint8_t)(t[0] & 0xff);
+        r[11 * i] = (uint8_t)(t[0] & 0xFF);
         r[(11 * i) + 1] = (uint8_t)((t[0] >> 8) | ((t[1] & 0x1F) << 3));
         r[(11 * i) + 2] = (uint8_t)((t[1] >> 5) | ((t[2] & 0x03) << 6));
-        r[(11 * i) + 3] = (uint8_t)((t[2] >> 2) & 0xff);
+        r[(11 * i) + 3] = (uint8_t)((t[2] >> 2) & 0xFF);
         r[(11 * i) + 4] = (uint8_t)((t[2] >> 10) | ((t[3] & 0x7F) << 1));
         r[(11 * i) + 5] = (uint8_t)((t[3] >> 7) | ((t[4] & 0x0F) << 4));
         r[(11 * i) + 6] = (uint8_t)((t[4] >> 4) | ((t[5] & 0x01) << 7));
-        r[(11 * i) + 7] = (uint8_t)((t[5] >> 1) & 0xff);
+        r[(11 * i) + 7] = (uint8_t)((t[5] >> 1) & 0xFF);
         r[(11 * i) + 8] = (uint8_t)((t[5] >> 9) | ((t[6] & 0x3F) << 2));
         r[(11 * i) + 9] = (uint8_t)((t[6] >> 6) | ((t[7] & 0x07) << 5));
         r[(11 * i) + 10] = (uint8_t)((t[7] >> 3));
@@ -778,23 +753,22 @@ static void ntru_poly_Sq_to_bytes(uint8_t* r, const poly* a)
         t[j] = 0;
     }
 
-    switch (NTRU_PACK_DEG & 0x07)
+    if ((NTRU_PACK_DEG & 0x07) == 4)
     {
         // cases 0 and 6 are impossible since 2 generates (Z/n)* and
         // p mod 8 in {1, 7} implies that 2 is a quadratic residue.
-    case 4:
         r[11 * i] = (uint8_t)(t[0] & 0xFF);
-        r[(11 * i) + 1] = (uint8_t)(t[0] >> 8) | ((t[1] & 0x1F) << 3);
-        r[(11 * i) + 2] = (uint8_t)(t[1] >> 5) | ((t[2] & 0x03) << 6);
-        r[(11 * i) + 3] = (uint8_t)(t[2] >> 2) & 0xFF;
-        r[(11 * i) + 4] = (uint8_t)(t[2] >> 10) | ((t[3] & 0x7F) << 1);
-        r[(11 * i) + 5] = (uint8_t)(t[3] >> 7) | ((t[4] & 0x0F) << 4);
-        break;
-    case 2:
+        r[(11 * i) + 1] = (uint8_t)((t[0] >> 8) | ((t[1] & 0x1F) << 3));
+        r[(11 * i) + 2] = (uint8_t)((t[1] >> 5) | ((t[2] & 0x03) << 6));
+        r[(11 * i) + 3] = (uint8_t)((t[2] >> 2) & 0xFF);
+        r[(11 * i) + 4] = (uint8_t)((t[2] >> 10) | ((t[3] & 0x7F) << 1));
+        r[(11 * i) + 5] = (uint8_t)((t[3] >> 7) | ((t[4] & 0x0F) << 4));
+    }
+    else if ((NTRU_PACK_DEG & 0x07) == 2)
+    {
         r[11 * i] = (uint8_t)(t[0] & 0xFF);
-        r[(11 * i) + 1] = (uint8_t)(t[0] >> 8) | ((t[1] & 0x1F) << 3);
-        r[(11 * i) + 2] = (uint8_t)(t[1] >> 5) | ((t[2] & 0x03) << 6);
-        break;
+        r[(11 * i) + 1] = (uint8_t)((t[0] >> 8) | ((t[1] & 0x1F) << 3));
+        r[(11 * i) + 2] = (uint8_t)((t[1] >> 5) | ((t[2] & 0x03) << 6));
     }
 
 #elif defined(QSC_NTRU_S5HPS4096821)
@@ -874,31 +848,31 @@ static void ntru_poly_Sq_from_bytes(poly* r, const uint8_t* a)
 
     for (i = 0; i < NTRU_PACK_DEG / 8; ++i)
     {
-        r->coeffs[8 * i] = (a[11 * i] >> 0) | (((uint16_t)a[11 * i + 1] & 0x07) << 8);
-        r->coeffs[(8 * i) + 1] = (a[(11 * i) + 1] >> 3) | (((uint16_t)a[(11 * i) + 2] & 0x3F) << 5);
-        r->coeffs[(8 * i) + 2] = (a[(11 * i) + 2] >> 6) | (((uint16_t)a[(11 * i) + 3] & 0xFF) << 2) | (((uint16_t)a[(11 * i) + 4] & 0x01) << 10);
-        r->coeffs[(8 * i) + 3] = (a[(11 * i) + 4] >> 1) | (((uint16_t)a[(11 * i) + 5] & 0x0F) << 7);
-        r->coeffs[(8 * i) + 4] = (a[(11 * i) + 5] >> 4) | (((uint16_t)a[(11 * i) + 6] & 0x7F) << 4);
-        r->coeffs[(8 * i) + 5] = (a[(11 * i) + 6] >> 7) | (((uint16_t)a[(11 * i) + 7] & 0xFF) << 1) | (((uint16_t)a[(11 * i) + 8] & 0x03) << 9);
-        r->coeffs[(8 * i) + 6] = (a[(11 * i) + 8] >> 2) | (((uint16_t)a[(11 * i) + 9] & 0x1F) << 6);
-        r->coeffs[(8 * i) + 7] = (a[(11 * i) + 9] >> 5) | (((uint16_t)a[(11 * i) + 10] & 0xFF) << 3);
+        r->coeffs[8 * i] = (uint16_t)((a[11 * i] >> 0) | (((uint16_t)a[11 * i + 1] & 0x07) << 8));
+        r->coeffs[(8 * i) + 1] = (uint16_t)((a[(11 * i) + 1] >> 3) | (((uint16_t)a[(11 * i) + 2] & 0x3F) << 5));
+        r->coeffs[(8 * i) + 2] = (uint16_t)((a[(11 * i) + 2] >> 6) | (((uint16_t)a[(11 * i) + 3] & 0xFF) << 2) | (((uint16_t)a[(11 * i) + 4] & 0x01) << 10));
+        r->coeffs[(8 * i) + 3] = (uint16_t)((a[(11 * i) + 4] >> 1) | (((uint16_t)a[(11 * i) + 5] & 0x0F) << 7));
+        r->coeffs[(8 * i) + 4] = (uint16_t)((a[(11 * i) + 5] >> 4) | (((uint16_t)a[(11 * i) + 6] & 0x7F) << 4));
+        r->coeffs[(8 * i) + 5] = (uint16_t)((a[(11 * i) + 6] >> 7) | (((uint16_t)a[(11 * i) + 7] & 0xFF) << 1) | (((uint16_t)a[(11 * i) + 8] & 0x03) << 9));
+        r->coeffs[(8 * i) + 6] = (uint16_t)((a[(11 * i) + 8] >> 2) | (((uint16_t)a[(11 * i) + 9] & 0x1F) << 6));
+        r->coeffs[(8 * i) + 7] = (uint16_t)((a[(11 * i) + 9] >> 5) | (((uint16_t)a[(11 * i) + 10] & 0xFF) << 3));
     }
 
-    switch (NTRU_PACK_DEG & 0x07)
+    if ((NTRU_PACK_DEG & 0x07) == 4)
     {
         // cases 0 and 6 are impossible since 2 generates (Z/n)* and
         // p mod 8 in {1, 7} implies that 2 is a quadratic residue.
-    case 4:
-        r->coeffs[8 * i] = (a[11 * i] >> 0) | (((uint16_t)a[(11 * i) + 1] & 0x07) << 8);
-        r->coeffs[(8 * i) + 1] = (a[(11 * i) + 1] >> 3) | (((uint16_t)a[(11 * i) + 2] & 0x3F) << 5);
-        r->coeffs[(8 * i) + 2] = (a[(11 * i) + 2] >> 6) | (((uint16_t)a[(11 * i) + 3] & 0xFF) << 2) | (((uint16_t)a[(11 * i) + 4] & 0x01) << 10);
-        r->coeffs[(8 * i) + 3] = (a[(11 * i) + 4] >> 1) | (((uint16_t)a[(11 * i) + 5] & 0x0F) << 7);
-        break;
-    case 2:
-        r->coeffs[8 * i] = (a[11 * i] >> 0) | (((uint16_t)a[(11 * i) + 1] & 0x07) << 8);
-        r->coeffs[(8 * i) + 1] = (a[(11 * i) + 1] >> 3) | (((uint16_t)a[(11 * i) + 2] & 0x3F) << 5);
-        break;
+        r->coeffs[8 * i] = (uint16_t)((a[11 * i] >> 0) | (((uint16_t)a[(11 * i) + 1] & 0x07) << 8));
+        r->coeffs[(8 * i) + 1] = (uint16_t)((a[(11 * i) + 1] >> 3) | (((uint16_t)a[(11 * i) + 2] & 0x3F) << 5));
+        r->coeffs[(8 * i) + 2] = (uint16_t)((a[(11 * i) + 2] >> 6) | (((uint16_t)a[(11 * i) + 3] & 0xFF) << 2) | (((uint16_t)a[(11 * i) + 4] & 0x01) << 10));
+        r->coeffs[(8 * i) + 3] = (uint16_t)((a[(11 * i) + 4] >> 1) | (((uint16_t)a[(11 * i) + 5] & 0x0F) << 7));
     }
+    else if ((NTRU_PACK_DEG & 0x07) == 2)
+    {
+        r->coeffs[8 * i] = (uint16_t)((a[11 * i] >> 0) | (((uint16_t)a[(11 * i) + 1] & 0x07) << 8));
+        r->coeffs[(8 * i) + 1] = (uint16_t)((a[(11 * i) + 1] >> 3) | (((uint16_t)a[(11 * i) + 2] & 0x3F) << 5));
+    }
+
     r->coeffs[NTRU_N - 1] = 0;
 
 #elif defined(QSC_NTRU_S5HPS4096821)
@@ -952,14 +926,12 @@ static void ntru_poly_Rq_sum_zero_to_bytes(uint8_t* r, const poly* a)
 
 static void ntru_poly_Rq_sum_zero_from_bytes(poly* r, const uint8_t* a)
 {
-    size_t i;
-
     ntru_poly_Sq_from_bytes(r, a);
 
     /* Set r[n-1] so that the sum of coefficients is zero mod q */
     r->coeffs[NTRU_N - 1] = 0;
 
-    for (i = 0; i < NTRU_PACK_DEG; ++i)
+    for (size_t i = 0; i < NTRU_PACK_DEG; ++i)
     {
         r->coeffs[NTRU_N - 1] -= r->coeffs[i];
     }
@@ -1013,7 +985,8 @@ static void ntru_sample_fixed_type(poly *r, const uint8_t u[NTRU_SAMPLE_FT_BYTES
 static uint16_t ntru_sample_iid_mod3(uint16_t a)
 {
     uint16_t r;
-    int16_t t, c;
+    int16_t c;
+    int16_t t;
 
     r = (a >> 8) + (a & 0xFF); /* r' mod 255 == a mod 255 */
     r = (r >> 4) + (r & 0x0F); /* r' mod 15 == r mod 15 */
@@ -1023,16 +996,14 @@ static uint16_t ntru_sample_iid_mod3(uint16_t a)
     t = r - 3;
     c = t >> 15;
 
-    return (c & r) ^ (~c & t);
+    return (uint16_t)((c & r) ^ (~c & t));
 }
 
 static void ntru_sample_iid(poly *r, const uint8_t uniformbytes[NTRU_SAMPLE_IID_BYTES])
 {
-    size_t  i;
-
     /* {0,1,...,255} -> {0,1,2}; Pr[0] = 86/256, Pr[1] = Pr[-1] = 85/256 */
 
-    for (i = 0; i < NTRU_N - 1; ++i)
+    for (size_t  i = 0; i < NTRU_N - 1; ++i)
     {
         r->coeffs[i] = ntru_sample_iid_mod3(uniformbytes[i]);
     }
@@ -1119,11 +1090,11 @@ static int32_t ntru_owcpa_check_ciphertext(const uint8_t* ciphertext)
     uint16_t t;
 
     t = ciphertext[NTRU_CIPHERTEXTBYTES - 1];
-    t &= 0xff << (8 - (7 & (NTRU_LOGQ * NTRU_PACK_DEG)));
+    t &= 0xFF << (8 - (7 & (NTRU_LOGQ * NTRU_PACK_DEG)));
 
     /* We have 0 <= t < 256 */
     /* Return 0 on success (t=0), 1 on failure */
-    return (int32_t)(1 & ((~t + 1) >> 15));
+    return (1 & ((~t + 1) >> 15));
 }
 
 static int32_t ntru_owcpa_check_r(const poly* r)
@@ -1131,13 +1102,12 @@ static int32_t ntru_owcpa_check_r(const poly* r)
     /* A valid r has coefficients in {0,1,q-1} and has r[N-1] = 0 */
     /* Note: We may assume that 0 <= r[i] <= q-1 for all i        */
 
-    size_t i;
     uint32_t t;
     uint16_t c;
 
     t = 0;
 
-    for (i = 0; i < NTRU_N - 1; ++i)
+    for (size_t i = 0; i < NTRU_N - 1; ++i)
     {
         c = r->coeffs[i];
         t |= (c + 1) & (NTRU_Q - 4);    /* 0 iff c is in {-1,0,1,2} */
@@ -1159,7 +1129,6 @@ static int32_t ntru_owcpa_check_m(const poly* m)
         (2)  |{i : m[i] != 0}| = NTRU_WEIGHT.
         Note: We may assume that m has coefficients in {0,1,2}. */
 
-    size_t i;
     uint32_t t;
     uint16_t ps;
     uint16_t ms;
@@ -1168,14 +1137,14 @@ static int32_t ntru_owcpa_check_m(const poly* m)
     ms = 0;
     ps = 0;
 
-    for (i = 0; i < NTRU_N; ++i)
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         ps += m->coeffs[i] & 1;
         ms += m->coeffs[i] & 2;
     }
 
-    t |= ps ^ (ms >> 1);   /* 0 if (1) holds */
-    t |= ms ^ NTRU_WEIGHT; /* 0 if (1) and (2) hold */
+    t |= ps ^ (ms >> 1);
+    t |= ms ^ NTRU_WEIGHT;
 
     /* We have 0 <= t < 2^16. */
     /* Return 0 on success (t=0), 1 on failure */
@@ -1198,7 +1167,6 @@ static void ntru_owcpa_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[NTRU
     poly* tmp;
     poly* invh;
     poly* h;
-    int32_t i;
 
     f = &x1;
     g = &x2;
@@ -1221,7 +1189,7 @@ static void ntru_owcpa_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[NTRU
 
 #ifdef NTRU_HRSS
     /* g = 3*(x-1)*g */
-    for (i = NTRU_N - 1; i > 0; i--)
+    for (int32_t i = NTRU_N - 1; i > 0; i--)
     {
         g->coeffs[i] = 3 * (g->coeffs[i - 1] - g->coeffs[i]);
     }
@@ -1231,7 +1199,7 @@ static void ntru_owcpa_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[NTRU
 
 #ifdef NTRU_HPS
     /* g = 3*g */
-    for (i = 0; i < NTRU_N; ++i)
+    for (int32_t i = 0; i < NTRU_N; ++i)
     {
         g->coeffs[i] = 3 * g->coeffs[i];
     }
@@ -1251,7 +1219,6 @@ static void ntru_owcpa_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[NTRU
 
 static void ntru_owcpa_enc(uint8_t* c, const poly* r, const poly* m, const uint8_t* pk)
 {
-    int32_t i;
     poly x1;
     poly x2;
     poly* h;
@@ -1266,7 +1233,7 @@ static void ntru_owcpa_enc(uint8_t* c, const poly* r, const poly* m, const uint8
     ntru_poly_Rq_mul(ct, r, h);
     ntru_poly_lift(liftm, m);
 
-    for (i = 0; i < NTRU_N; ++i)
+    for (int32_t i = 0; i < NTRU_N; ++i)
     {
         ct->coeffs[i] = ct->coeffs[i] + liftm->coeffs[i];
     }
@@ -1290,7 +1257,6 @@ static int32_t ntru_owcpa_dec(uint8_t* rm, const uint8_t* ciphertext, const uint
     poly* invh;
     poly* r;
     poly* b;
-    size_t i;
     int32_t fail;
 
     c = &x1;
@@ -1332,7 +1298,7 @@ static int32_t ntru_owcpa_dec(uint8_t* rm, const uint8_t* ciphertext, const uint
     /* b = c - Lift(m) mod (q, x^n - 1) */
     ntru_poly_lift(liftm, m);
 
-    for (i = 0; i < NTRU_N; ++i)
+    for (size_t i = 0; i < NTRU_N; ++i)
     {
         b->coeffs[i] = c->coeffs[i] - liftm->coeffs[i];
     }
@@ -1346,7 +1312,7 @@ static int32_t ntru_owcpa_dec(uint8_t* rm, const uint8_t* ciphertext, const uint
        This differs from Figure 10 of Saito--Xagawa--Yamakawa
        [SXY17] https://eprint.iacr.org/2017/1005/20180516:055500
        where r gets a final reduction modulo p.
-       We need this change to use Proposition 1 of [Sch18].
+       We need this change to use Proposition 1 of [Sch18]. */
 
     /* Proposition 1 of [Sch18] shows that re-encryption with (r,m) yields c.
        if and only if fail==0 after the following call to ntru_owcpa_check_r
@@ -1362,7 +1328,7 @@ static int32_t ntru_owcpa_dec(uint8_t* rm, const uint8_t* ciphertext, const uint
 
 /* kem.c */
 
-void qsc_ntru_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate)(uint8_t*, size_t))
+void qsc_ntru_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     uint8_t seed[NTRU_SAMPLE_FG_BYTES];
 
@@ -1372,7 +1338,7 @@ void qsc_ntru_ref_generate_keypair(uint8_t* pk, uint8_t* sk, void (*rng_generate
     rng_generate(sk + NTRU_OWCPA_SECRETKEYBYTES, NTRU_PRFKEYBYTES);
 }
 
-void qsc_ntru_ref_encapsulate(uint8_t* ct, uint8_t* ss, const uint8_t* pk, void (*rng_generate)(uint8_t*, size_t))
+void qsc_ntru_ref_encapsulate(uint8_t* ct, uint8_t* ss, const uint8_t* pk, bool (*rng_generate)(uint8_t*, size_t))
 {
     poly r;
     poly m;

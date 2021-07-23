@@ -113,7 +113,7 @@ qsc_thread qsc_async_thread_initialize(void (*thd_func)(void*), void* state)
 	return res;
 }
 
-void qsc_async_thread_terminate(qsc_thread* handle)
+void qsc_async_thread_terminate(const qsc_thread* handle)
 {
 	assert(handle != NULL);
 

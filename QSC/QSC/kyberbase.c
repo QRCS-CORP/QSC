@@ -8,7 +8,7 @@
 #define KYBER_QINV 62209 /* q^-1 mod 2^16 */
 #define KYBER_GEN_MATRIX_NBLOCKS ((12 * QSC_KYBER_N / 8 * (1 << 12) / QSC_KYBER_Q + QSC_KECCAK_128_RATE) / QSC_KECCAK_128_RATE)
 
-static const int16_t kyber_zetas[KYBER_ZETA_SIZE] =
+static const uint16_t kyber_zetas[KYBER_ZETA_SIZE] =
 {
     0xFBEC, 0xFD0A, 0xFE99, 0xFA13, 0x05D5, 0x058E, 0x011F, 0x00CA,
     0xFF55, 0x026E, 0x0629, 0x00B6, 0x03C2, 0xFB4E, 0xFA3E, 0x05BC,
@@ -54,27 +54,53 @@ static int16_t kyber_barrett_reduce(int16_t a)
     return (a - t);
 }
 
+/* poly.h */
+
+/**
+* \struct qsc_kyber_poly
+* \brief Contains an N sized array of 16bit coefficients. /n
+* Elements of R_q = Z_q[X] / (X^n + 1). /n
+* Represents polynomial coeffs[0] + X * coeffs[1] + X^2 * xoeffs[2] + ... + X^{n-1} * coeffs[n-1]
+*
+* \var qsc_kyber_poly::coeffs
+* The array of 16bit coefficients
+*/
+typedef struct
+{
+    int16_t coeffs[QSC_KYBER_N];
+} qsc_kyber_poly;
+
+/**
+* \struct qsc_kyber_polyvec
+* \brief Contains a K sized vector of qsc_kyber_poly structures
+*
+* \var qsc_kyber_polyvec::vec
+* The polynomial vector array
+*/
+typedef struct
+{
+    qsc_kyber_poly vec[QSC_KYBER_K];
+} qsc_kyber_polyvec;
+
 /* cbd.c */
 
 static void kyber_cbd2(qsc_kyber_poly* r, const uint8_t buf[2 * QSC_KYBER_N / 4])
 {
-    size_t i;
-    size_t j;
     uint32_t t;
     uint32_t d;
     int16_t a;
     int16_t b;
 
-    for (i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
     {
         t = qsc_intutils_le8to32(buf + (4 * i));
         d = t & 0x55555555UL;
         d += (t >> 1) & 0x55555555UL;
 
-        for (j = 0; j < 8; ++j)
+        for (size_t j = 0; j < 8; ++j)
         {
-            a = (d >> (4 * j)) & 0x3;
-            b = (d >> ((4 * j) + 2)) & 0x3;
+            a = (int16_t)((d >> (4 * j)) & 0x03);
+            b = (int16_t)((d >> ((4 * j) + 2)) & 0x03);
             r->coeffs[(8 * i) + j] = a - b;
         }
     }
@@ -91,18 +117,16 @@ static void kyber_ntt(int16_t r[QSC_KYBER_N])
 {
     size_t j;
     size_t k;
-    size_t len;
-    size_t start;
     int16_t t;
     int16_t zeta;
 
     k = 1;
 
-    for (len = 128; len >= 2; len >>= 1)
+    for (size_t len = 128; len >= 2; len >>= 1)
     {
-        for (start = 0; start < QSC_KYBER_N; start = j + len)
+        for (size_t start = 0; start < QSC_KYBER_N; start = (j + len))
         {
-            zeta = kyber_zetas[k];
+            zeta = (int16_t)kyber_zetas[k];
             ++k;
 
             for (j = start; j < start + len; ++j)
@@ -119,19 +143,17 @@ static void kyber_invntt(int16_t r[256])
 {
     size_t j;
     size_t k;
-    size_t len;
-    size_t start;
     int16_t t;
     int16_t zeta;
     const int16_t F = 1441;
 
     k = 127;
 
-    for (len = 2; len <= 128; len <<= 1)
+    for (size_t len = 2; len <= 128; len <<= 1)
     {
-        for (start = 0; start < 256; start = j + len)
+        for (size_t start = 0; start < 256; start = j + len)
         {
-            zeta = kyber_zetas[k];
+            zeta = (int16_t)kyber_zetas[k];
             --k;
 
             for (j = start; j < start + len; ++j)
@@ -171,34 +193,32 @@ static void kyber_poly_cbd_eta2(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_E
     kyber_cbd2(r, buf);
 }
 
-static void kyber_poly_compress(uint8_t* r, qsc_kyber_poly* a)
+static void kyber_poly_compress(uint8_t* r, const qsc_kyber_poly* a)
 {
     uint8_t t[8];
-    size_t i;
-    size_t j;
     int16_t u;
 
 #if (QSC_KYBER_POLYCOMPRESSED_BYTES == 128)
-    for (i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
     {
-        for (j = 0; j < 8; ++j)
+        for (size_t j = 0; j < 8; ++j)
         {
             /* map to positive standard representatives */
             u = a->coeffs[(8 * i) + j];
             u += (u >> 15) & QSC_KYBER_Q;
-            t[j] = ((((uint16_t)u << 4) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 15;
+            t[j] = (uint8_t)(((((uint16_t)u << 4) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 0x000F);
         }
 
-        r[0] = t[0] | (t[1] << 4);
-        r[1] = t[2] | (t[3] << 4);
-        r[2] = t[4] | (t[5] << 4);
-        r[3] = t[6] | (t[7] << 4);
+        r[0] = (uint8_t)(t[0] | (t[1] << 4));
+        r[1] = (uint8_t)(t[2] | (t[3] << 4));
+        r[2] = (uint8_t)(t[4] | (t[5] << 4));
+        r[3] = (uint8_t)(t[6] | (t[7] << 4));
         r += 4;
     }
 #elif (QSC_KYBER_POLYCOMPRESSED_BYTES == 160)
-    for (i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
     {
-        for (j = 0; j < 8; ++j) 
+        for (size_t j = 0; j < 8; ++j)
         {
             /* map to positive standard representatives */
             u = a->coeffs[(8 * i) + j];
@@ -206,11 +226,11 @@ static void kyber_poly_compress(uint8_t* r, qsc_kyber_poly* a)
             t[j] = ((((uint32_t)u << 5) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 31;
         }
 
-        r[0] = (t[0] >> 0) | (t[1] << 5);
-        r[1] = (t[1] >> 3) | (t[2] << 2) | (t[3] << 7);
-        r[2] = (t[3] >> 1) | (t[4] << 4);
-        r[3] = (t[4] >> 4) | (t[5] << 1) | (t[6] << 6);
-        r[4] = (t[6] >> 2) | (t[7] << 3);
+        r[0] = (uint8_t)(t[0] | (t[1] << 5));
+        r[1] = (uint8_t)((t[1] >> 3) | (t[2] << 2) | (t[3] << 7));
+        r[2] = (uint8_t)((t[3] >> 1) | (t[4] << 4));
+        r[3] = (uint8_t)((t[4] >> 4) | (t[5] << 1) | (t[6] << 6));
+        r[4] = (uint8_t)((t[6] >> 2) | (t[7] << 3));
         r += 5;
     }
 #endif
@@ -218,34 +238,31 @@ static void kyber_poly_compress(uint8_t* r, qsc_kyber_poly* a)
 
 static void kyber_poly_decompress(qsc_kyber_poly* r, const uint8_t* a)
 {
-    size_t i;
-
 #if (QSC_KYBER_POLYCOMPRESSED_BYTES == 128)
-    for (i = 0; i < QSC_KYBER_N / 2; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 2; ++i)
     {
-        r->coeffs[2 * i] = (((uint16_t)(a[0] & 15) * QSC_KYBER_Q) + 8) >> 4;
-        r->coeffs[(2 * i) + 1] = (((uint16_t)(a[0] >> 4) * QSC_KYBER_Q) + 8) >> 4;
+        r->coeffs[2 * i] = (int16_t)((((uint16_t)(a[0] & 15) * QSC_KYBER_Q) + 8) >> 4);
+        r->coeffs[(2 * i) + 1] = (int16_t)((((uint16_t)(a[0] >> 4) * QSC_KYBER_Q) + 8) >> 4);
         a += 1;
     }
 #elif (QSC_KYBER_POLYCOMPRESSED_BYTES == 160)
     uint8_t t[8];
-    size_t j;
 
-    for (i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
     {
-        t[0] = (a[0] >> 0);
-        t[1] = (a[0] >> 5) | (a[1] << 3);
-        t[2] = (a[1] >> 2);
-        t[3] = (a[1] >> 7) | (a[2] << 1);
-        t[4] = (a[2] >> 4) | (a[3] << 4);
-        t[5] = (a[3] >> 1);
-        t[6] = (a[3] >> 6) | (a[4] << 2);
-        t[7] = (a[4] >> 3);
+        t[0] = (uint8_t)(a[0] >> 0);
+        t[1] = (uint8_t)((a[0] >> 5) | (a[1] << 3));
+        t[2] = (uint8_t)(a[1] >> 2);
+        t[3] = (uint8_t)((a[1] >> 7) | (a[2] << 1));
+        t[4] = (uint8_t)((a[2] >> 4) | (a[3] << 4));
+        t[5] = (uint8_t)(a[3] >> 1);
+        t[6] = (uint8_t)((a[3] >> 6) | (a[4] << 2));
+        t[7] = (uint8_t)(a[4] >> 3);
         a += 5;
 
-        for (j = 0; j < 8; ++j)
+        for (size_t j = 0; j < 8; ++j)
         {
-            r->coeffs[(8 * i) + j] = ((uint32_t)(t[j] & 31) * QSC_KYBER_Q + 16) >> 5;
+            r->coeffs[(8 * i) + j] = (uint16_t)(((uint32_t)(t[j] & 31) * QSC_KYBER_Q + 16) >> 5);
         }
     }
 #endif
@@ -253,11 +270,10 @@ static void kyber_poly_decompress(qsc_kyber_poly* r, const uint8_t* a)
 
 static void kyber_poly_to_bytes(uint8_t r[QSC_KYBER_POLYBYTES], const qsc_kyber_poly* a)
 {
-    size_t i;
     uint16_t t0;
     uint16_t t1;
 
-    for (i = 0; i < QSC_KYBER_N / 2; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 2; ++i)
     {
         /* map to positive standard representatives */
         t0 = a->coeffs[2 * i];
@@ -272,46 +288,41 @@ static void kyber_poly_to_bytes(uint8_t r[QSC_KYBER_POLYBYTES], const qsc_kyber_
 
 static void kyber_poly_from_bytes(qsc_kyber_poly* r, const uint8_t a[QSC_KYBER_POLYBYTES])
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_N / 2; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 2; ++i)
     {
-        r->coeffs[2 * i] = ((a[3 * i] >> 0) | ((uint16_t)a[3 * i + 1] << 8)) & 0xFFF;
-        r->coeffs[(2 * i) + 1] = ((a[(3 * i) + 1] >> 4) | ((uint16_t)a[(3 * i) + 2] << 4)) & 0xFFF;
+        r->coeffs[2 * i] = (((a[3 * i] >> 0) | ((uint16_t)a[3 * i + 1] << 8)) & 0x0FFF);
+        r->coeffs[(2 * i) + 1] = (((a[(3 * i) + 1] >> 4) | ((uint16_t)a[(3 * i) + 2] << 4)) & 0x0FFF);
     }
 }
 
 static void kyber_poly_from_msg(qsc_kyber_poly* r, const uint8_t msg[QSC_KYBER_SYMBYTES])
 {
-    size_t i;
-    size_t j;
     int16_t mask;
 
-    for (i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
     {
-        for (j = 0; j < 8; ++j)
+        for (size_t j = 0; j < 8; ++j)
         {
             mask = -(int16_t)((msg[i] >> j) & 1);
-            r->coeffs[(8 * i) + j] = mask & ((QSC_KYBER_Q + 1) / 2);
+            r->coeffs[(8 * i) + j] = mask & ((int16_t)(QSC_KYBER_Q + 1) / 2);
         }
     }
 }
 
 static void kyber_poly_to_msg(uint8_t msg[QSC_KYBER_SYMBYTES], const qsc_kyber_poly* a)
 {
-    size_t i, j;
     uint16_t t;
 
-    for (i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
     {
         msg[i] = 0;
 
-        for (j = 0; j < 8; ++j)
+        for (size_t j = 0; j < 8; ++j)
         {
             t = a->coeffs[(8 * i) + j];
             t += ((int16_t)t >> 15) & QSC_KYBER_Q;
             t = (((t << 1) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 1;
-            msg[i] |= t << j;
+            msg[i] |= (uint8_t)(t << j);
         }
     }
 }
@@ -342,9 +353,7 @@ static void kyber_poly_get_noise_eta2(qsc_kyber_poly* r, const uint8_t seed[QSC_
 
 static void kyber_poly_reduce(qsc_kyber_poly* r)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = kyber_barrett_reduce(r->coeffs[i]);
     }
@@ -363,21 +372,18 @@ static void kyber_poly_invntt_to_mont(qsc_kyber_poly* r)
 
 static void kyber_poly_basemul_montgomery(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_N / 4; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N / 4; ++i)
     {
-        kyber_basemul(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i], kyber_zetas[64 + i]);
-        kyber_basemul(&r->coeffs[(4 * i) + 2], &a->coeffs[(4 * i) + 2], &b->coeffs[(4 * i) + 2], -kyber_zetas[64 + i]);
+        kyber_basemul(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i], (int16_t)kyber_zetas[64 + i]);
+        kyber_basemul(&r->coeffs[(4 * i) + 2], &a->coeffs[(4 * i) + 2], &b->coeffs[(4 * i) + 2], -(int16_t)kyber_zetas[64 + i]);
     }
 }
 
 static void kyber_poly_to_mont(qsc_kyber_poly* r)
 {
-    size_t i;
     const int16_t F = (1ULL << 32) % QSC_KYBER_Q;
 
-    for (i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = kyber_montgomery_reduce((int32_t)r->coeffs[i] * F);
     }
@@ -385,9 +391,7 @@ static void kyber_poly_to_mont(qsc_kyber_poly* r)
 
 static void kyber_poly_add(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
     }
@@ -395,9 +399,7 @@ static void kyber_poly_add(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc
 
 static void kyber_poly_sub(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
     }
@@ -407,22 +409,18 @@ static void kyber_poly_sub(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc
 
 static void kyber_polyvec_compress(uint8_t r[QSC_KYBER_POLYVEC_COMPRESSED_BYTES], const qsc_kyber_polyvec* a)
 {
-	size_t i;
-	size_t j;
-	size_t k;
-
 #if (QSC_KYBER_K == 4 || QSC_KYBER_K == 5)
 	uint16_t t[8];
 
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
-        for (j = 0; j < QSC_KYBER_N / 8; ++j)
+        for (size_t j = 0; j < QSC_KYBER_N / 8; ++j)
         {
-            for (k = 0; k < 8; ++k)
+            for (size_t k = 0; k < 8; ++k)
             {
-                t[k] = a->vec[i].coeffs[(8 * j) + k];
-                t[k] += ((int16_t)t[k] >> 15) & QSC_KYBER_Q;
-                t[k] = ((((uint32_t)t[k] << 11) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 0x7FF;
+                t[k] = (uint16_t)a->vec[i].coeffs[(8 * j) + k];
+                t[k] += (uint16_t)(((int16_t)t[k] >> 15) & QSC_KYBER_Q);
+                t[k] = (uint16_t)(((((uint32_t)t[k] << 11) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 0x07FF);
             }
 
             r[0] = (uint8_t)(t[0] >> 0);
@@ -442,15 +440,15 @@ static void kyber_polyvec_compress(uint8_t r[QSC_KYBER_POLYVEC_COMPRESSED_BYTES]
 #elif (QSC_KYBER_K == 3)
 	uint16_t t[4];
 
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
-        for (j = 0; j < QSC_KYBER_N / 4; ++j)
+        for (size_t j = 0; j < QSC_KYBER_N / 4; ++j)
         {
-            for (k = 0; k < 4; ++k)
+            for (size_t k = 0; k < 4; ++k)
             {
-                t[k] = a->vec[i].coeffs[(4 * j) + k];
-                t[k] += ((int16_t)t[k] >> 15) & QSC_KYBER_Q;
-                t[k] = ((((uint32_t)t[k] << 10) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 0x3FF;
+                t[k] = (uint16_t)a->vec[i].coeffs[(4 * j) + k];
+                t[k] += (uint16_t)(((int16_t)t[k] >> 15) & QSC_KYBER_Q);
+                t[k] = (uint16_t)(((((uint32_t)t[k] << 10) + QSC_KYBER_Q / 2) / QSC_KYBER_Q) & 0x03FF);
             }
 
             r[0] = (uint8_t)(t[0] >> 0);
@@ -466,31 +464,27 @@ static void kyber_polyvec_compress(uint8_t r[QSC_KYBER_POLYVEC_COMPRESSED_BYTES]
 
 static void kyber_polyvec_decompress(qsc_kyber_polyvec* r, const uint8_t a[QSC_KYBER_POLYVEC_COMPRESSED_BYTES])
 {
-	size_t i;
-	size_t j;
-	size_t k;
-
 #if (QSC_KYBER_K == 4 || QSC_KYBER_K == 5)
 
     uint16_t t[8];
 
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
-        for (j = 0; j < QSC_KYBER_N / 8; ++j)
+        for (size_t j = 0; j < QSC_KYBER_N / 8; ++j)
         {
-            t[0] = (a[0] >> 0) | ((uint16_t)a[1] << 8);
-            t[1] = (a[1] >> 3) | ((uint16_t)a[2] << 5);
-            t[2] = (a[2] >> 6) | ((uint16_t)a[3] << 2) | ((uint16_t)a[4] << 10);
-            t[3] = (a[4] >> 1) | ((uint16_t)a[5] << 7);
-            t[4] = (a[5] >> 4) | ((uint16_t)a[6] << 4);
-            t[5] = (a[6] >> 7) | ((uint16_t)a[7] << 1) | ((uint16_t)a[8] << 9);
-            t[6] = (a[8] >> 2) | ((uint16_t)a[9] << 6);
-            t[7] = (a[9] >> 5) | ((uint16_t)a[10] << 3);
+            t[0] = (uint16_t)a[0] | (uint16_t)(a[1] << 8);
+            t[1] = (uint16_t)(a[1] >> 3) | (uint16_t)(a[2] << 5);
+            t[2] = (uint16_t)(a[2] >> 6) | (uint16_t)(a[3] << 2) | (uint16_t)(a[4] << 10);
+            t[3] = (uint16_t)(a[4] >> 1) | (uint16_t)(a[5] << 7);
+            t[4] = (uint16_t)(a[5] >> 4) | (uint16_t)(a[6] << 4);
+            t[5] = (uint16_t)(a[6] >> 7) | (uint16_t)(a[7] << 1) | (uint16_t)(a[8] << 9);
+            t[6] = (uint16_t)(a[8] >> 2) | (uint16_t)(a[9] << 6);
+            t[7] = (uint16_t)(a[9] >> 5) | (uint16_t)(a[10] << 3);
             a += 11;
 
-            for (k = 0; k < 8; ++k) 
+            for (size_t k = 0; k < 8; ++k)
             {
-                r->vec[i].coeffs[(8 * j) + k] = ((uint32_t)(t[k] & 0x7FF) * QSC_KYBER_Q + 1024) >> 11;
+                r->vec[i].coeffs[(8 * j) + k] = (int16_t)(((uint32_t)(t[k] & 0x7FF) * QSC_KYBER_Q + 1024) >> 11);
             }
         }
     }
@@ -499,19 +493,19 @@ static void kyber_polyvec_decompress(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
 
 	uint16_t t[4];
 
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
-        for (j = 0; j < QSC_KYBER_N / 4; ++j)
+        for (size_t j = 0; j < QSC_KYBER_N / 4; ++j)
         {
-            t[0] = (a[0] >> 0) | ((uint16_t)a[1] << 8);
-            t[1] = (a[1] >> 2) | ((uint16_t)a[2] << 6);
-            t[2] = (a[2] >> 4) | ((uint16_t)a[3] << 4);
-            t[3] = (a[3] >> 6) | ((uint16_t)a[4] << 2);
+            t[0] = (uint16_t)(a[0] | ((uint16_t)a[1] << 8));
+            t[1] = (uint16_t)((a[1] >> 2) | ((uint16_t)a[2] << 6));
+            t[2] = (uint16_t)((a[2] >> 4) | ((uint16_t)a[3] << 4));
+            t[3] = (uint16_t)((a[3] >> 6) | ((uint16_t)a[4] << 2));
             a += 5;
 
-            for (k = 0; k < 4; ++k)
+            for (size_t k = 0; k < 4; ++k)
             {
-                r->vec[i].coeffs[(4 * j) + k] = ((uint32_t)(t[k] & 0x3FF) * QSC_KYBER_Q + 512) >> 10;
+                r->vec[i].coeffs[(4 * j) + k] = (int16_t)(((uint32_t)(t[k] & 0x3FF) * QSC_KYBER_Q + 512) >> 10);
             }
         }
     }
@@ -521,9 +515,7 @@ static void kyber_polyvec_decompress(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
 
 static void kyber_polyvec_to_bytes(uint8_t r[QSC_KYBER_POLYVEC_BYTES], const qsc_kyber_polyvec* a)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_to_bytes(r + (i * QSC_KYBER_POLYBYTES), &a->vec[i]);
     }
@@ -531,9 +523,7 @@ static void kyber_polyvec_to_bytes(uint8_t r[QSC_KYBER_POLYVEC_BYTES], const qsc
 
 static void kyber_polyvec_from_bytes(qsc_kyber_polyvec* r, const uint8_t a[QSC_KYBER_POLYVEC_BYTES])
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_from_bytes(&r->vec[i], a + (i * QSC_KYBER_POLYBYTES));
     }
@@ -541,9 +531,7 @@ static void kyber_polyvec_from_bytes(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
 
 static void kyber_polyvec_ntt(qsc_kyber_polyvec* r)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_ntt(&r->vec[i]);
     }
@@ -551,9 +539,7 @@ static void kyber_polyvec_ntt(qsc_kyber_polyvec* r)
 
 static void kyber_polyvec_invntt_to_mont(qsc_kyber_polyvec* r)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_invntt_to_mont(&r->vec[i]);
     }
@@ -562,11 +548,10 @@ static void kyber_polyvec_invntt_to_mont(qsc_kyber_polyvec* r)
 static void kyber_polyvec_basemul_acc_montgomery(qsc_kyber_poly* r, const qsc_kyber_polyvec* a, const qsc_kyber_polyvec* b)
 {
     qsc_kyber_poly t;
-    size_t i;
 
     kyber_poly_basemul_montgomery(r, &a->vec[0], &b->vec[0]);
 
-    for (i = 1; i < QSC_KYBER_K; ++i)
+    for (size_t i = 1; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_basemul_montgomery(&t, &a->vec[i], &b->vec[i]);
         kyber_poly_add(r, r, &t);
@@ -577,9 +562,7 @@ static void kyber_polyvec_basemul_acc_montgomery(qsc_kyber_poly* r, const qsc_ky
 
 static void kyber_polyvec_reduce(qsc_kyber_polyvec* r)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_reduce(&r->vec[i]);
     }
@@ -587,9 +570,7 @@ static void kyber_polyvec_reduce(qsc_kyber_polyvec* r)
 
 static void kyber_polyvec_add(qsc_kyber_polyvec* r, const qsc_kyber_polyvec* a, const qsc_kyber_polyvec* b)
 {
-    size_t i;
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_add(&r->vec[i], &a->vec[i], &b->vec[i]);
     }
@@ -597,19 +578,19 @@ static void kyber_polyvec_add(qsc_kyber_polyvec* r, const qsc_kyber_polyvec* a, 
 
 /* indcpa.c */
 
-static void kyber_pack_pk(uint8_t r[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], qsc_kyber_polyvec* pk, const uint8_t seed[QSC_KYBER_SYMBYTES])
+static void kyber_pack_pk(uint8_t r[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], const qsc_kyber_polyvec* pk, const uint8_t seed[QSC_KYBER_SYMBYTES])
 {
     kyber_polyvec_to_bytes(r, pk);
-    qsc_memutils_copy(((uint8_t*)r + QSC_KYBER_POLYVEC_BYTES), seed, QSC_KYBER_SYMBYTES);
+    qsc_memutils_copy((r + QSC_KYBER_POLYVEC_BYTES), seed, QSC_KYBER_SYMBYTES);
 }
 
 static void kyber_unpack_pk(qsc_kyber_polyvec* pk, uint8_t seed[QSC_KYBER_SYMBYTES], const uint8_t packedpk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES])
 {
     kyber_polyvec_from_bytes(pk, packedpk);
-    qsc_memutils_copy(seed, ((uint8_t*)packedpk + QSC_KYBER_POLYVEC_BYTES), QSC_KYBER_SYMBYTES);
+    qsc_memutils_copy(seed, (packedpk + QSC_KYBER_POLYVEC_BYTES), QSC_KYBER_SYMBYTES);
 }
 
-static void kyber_pack_sk(uint8_t r[QSC_KYBER_INDCPA_SECRETKEY_BYTES], qsc_kyber_polyvec* sk)
+static void kyber_pack_sk(uint8_t r[QSC_KYBER_INDCPA_SECRETKEY_BYTES], const qsc_kyber_polyvec* sk)
 {
     kyber_polyvec_to_bytes(r, sk);
 }
@@ -619,7 +600,7 @@ static void kyber_unpack_sk(qsc_kyber_polyvec* sk, const uint8_t packedsk[QSC_KY
     kyber_polyvec_from_bytes(sk, packedsk);
 }
 
-static void kyber_pack_ciphertext(uint8_t r[QSC_KYBER_INDCPA_BYTES], qsc_kyber_polyvec* b, qsc_kyber_poly* v)
+static void kyber_pack_ciphertext(uint8_t r[QSC_KYBER_INDCPA_BYTES], const qsc_kyber_polyvec* b, const qsc_kyber_poly* v)
 {
     kyber_polyvec_compress(r, b);
     kyber_poly_compress(r + QSC_KYBER_POLYVEC_COMPRESSED_BYTES, v);
@@ -643,8 +624,8 @@ static uint32_t kyber_rej_uniform(int16_t* r, uint32_t len, const uint8_t* buf, 
 
     while (ctr < len && pos + 3 <= buflen)
     {
-        val0 = ((buf[pos] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0xFFF;
-        val1 = ((buf[pos + 1] >> 4) | ((uint16_t)buf[pos + 2] << 4)) & 0xFFF;
+        val0 = (uint16_t)(((buf[pos] >> 0) | ((uint16_t)buf[pos + 1] << 8)) & 0x0FFF);
+        val1 = (uint16_t)(((buf[pos + 1] >> 4) | ((uint16_t)buf[pos + 2] << 4)) & 0x0FFF);
         pos += 3;
 
         if (val0 < QSC_KYBER_Q)
@@ -668,18 +649,15 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
     qsc_keccak_state state;
     uint8_t buf[KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2];
     uint8_t extseed[QSC_KYBER_SYMBYTES + 2];
-    size_t i;
-    size_t j;
-    size_t k;
     uint32_t buflen;
     uint32_t ctr;
     uint32_t off;
 
     qsc_memutils_copy(extseed, seed, QSC_KYBER_SYMBYTES);
 
-    for (i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0; i < QSC_KYBER_K; ++i)
     {
-        for (j = 0; j < QSC_KYBER_K; ++j)
+        for (size_t j = 0; j < QSC_KYBER_K; ++j)
         {
             if (transposed)
             {
@@ -702,7 +680,7 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
             {
                 off = buflen % 3;
 
-                for (k = 0; k < off; ++k)
+                for (size_t k = 0; k < off; ++k)
                 {
                     buf[k] = buf[buflen - off + k];
                 }
@@ -717,7 +695,7 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
     }
 }
 
-static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], void (*rng_generate)(uint8_t*, size_t))
+static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
 {
     qsc_kyber_polyvec a[QSC_KYBER_K];
     qsc_kyber_polyvec e;
@@ -836,17 +814,17 @@ static void kyber_indcpa_dec(uint8_t m[QSC_KYBER_MSGBYTES], const uint8_t c[QSC_
 
 /* kem.c */
 
-void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], void (*rng_generate)(uint8_t*, size_t))
+void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
 {
     kyber_indcpa_keypair(pk, sk, rng_generate);
-    qsc_memutils_copy(((uint8_t*)sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES), pk, QSC_KYBER_INDCPA_PUBLICKEY_BYTES);
+    qsc_memutils_copy((sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES), pk, QSC_KYBER_INDCPA_PUBLICKEY_BYTES);
 
     qsc_sha3_compute256(sk + QSC_KYBER_SECRETKEY_BYTES - 2 * QSC_KYBER_SYMBYTES, pk, QSC_KYBER_PUBLICKEY_BYTES);
     /* Value z for pseudo-random output on reject */
     rng_generate(sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
 }
 
-void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], void (*rng_generate)(uint8_t*, size_t))
+void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
 {
     uint8_t buf[2 * QSC_KYBER_SYMBYTES];
     uint8_t kr[2 * QSC_KYBER_SYMBYTES];
@@ -879,7 +857,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
     kyber_indcpa_dec(buf, ct, sk);
 
     /* Multitarget countermeasure for coins + contributory KEM */
-    qsc_memutils_copy(((uint8_t*)buf + QSC_KYBER_SYMBYTES), ((uint8_t*)sk + QSC_KYBER_SECRETKEY_BYTES - (2 * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
+    qsc_memutils_copy(((uint8_t*)buf + QSC_KYBER_SYMBYTES), (sk + QSC_KYBER_SECRETKEY_BYTES - (2 * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
     qsc_sha3_compute512(kr, buf, 2 * QSC_KYBER_SYMBYTES);
 
     /* coins are in kr+QSC_KYBER_SYMBYTES */

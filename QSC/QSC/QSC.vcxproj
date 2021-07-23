@@ -170,6 +170,7 @@
     <ClInclude Include="kyber.h" />
     <ClInclude Include="kyberbase.h" />
     <ClInclude Include="kyberbase_avx2.h" />
+    <ClInclude Include="kyber_asm_consts.h" />
     <ClInclude Include="mceliece.h" />
     <ClInclude Include="mceliecebase.h" />
     <ClInclude Include="mceliecebase_avx2.h" />
@@ -265,6 +266,12 @@
     <ClCompile Include="async.c" />
     <ClCompile Include="timestamp.c" />
     <ClCompile Include="transpose.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="kyber_asm_fq.S" />
+    <None Include="kyber_asm_invntt.S" />
+    <None Include="kyber_asm_ntt.S" />
+    <None Include="kyber_asm_shuffle.S" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

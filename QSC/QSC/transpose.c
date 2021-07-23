@@ -7,12 +7,11 @@ void qsc_transpose_bytes_to_native(uint32_t* output, const uint8_t* input, size_
 	assert(output != NULL);
 	assert(input != NULL);
 
-	size_t i;
 	size_t j;
 
 	qsc_intutils_clear32(output, (length + (sizeof(uint32_t) - 1)) / sizeof(uint32_t));
 
-	for (i = 0; i < length; ++i)
+	for (size_t i = 0; i < length; ++i)
 	{
 		j = length - 1 - i;
 		output[j / sizeof(uint32_t)] |= (uint32_t)input[i] << (8 * (j % sizeof(uint32_t)));
@@ -24,9 +23,8 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 	assert(output != NULL);
 	assert(input != NULL);
 
-	size_t  pos;
-	uint8_t  idx0;
-	uint8_t  idx1;
+	uint8_t idx0;
+	uint8_t idx1;
 
 	const uint8_t HASHMAP[32] =
 	{
@@ -38,7 +36,7 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 
 	memset(output, 0, length);
 
-	for (pos = 0; pos < (length * 2); pos += 2)
+	for (size_t pos = 0; pos < (length * 2); pos += 2)
 	{
 		idx0 = ((uint8_t)input[pos + 0] & 0x1FU) ^ 0x10U;
 		idx1 = ((uint8_t)input[pos + 1] & 0x1FU) ^ 0x10U;
@@ -51,9 +49,7 @@ void qsc_transpose_native_to_bytes(uint8_t* output, const uint32_t* input, size_
 	assert(output != NULL);
 	assert(input != NULL);
 
-	size_t i;
-
-	for (i = 0; i < length; ++i)
+	for (size_t i = 0; i < length; ++i)
 	{
 		uint8_t b = (uint8_t)(length - 1 - i);
 		output[i] = (uint8_t)input[b / sizeof(uint32_t)] >> (8 * (b % sizeof(uint32_t)));

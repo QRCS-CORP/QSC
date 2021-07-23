@@ -7,7 +7,7 @@ void qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, 
 	qsc_ed25519_keypair(publickey, privatekey, seed);
 }
 
-void qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	uint8_t seed[QSC_ECDSA_SEED_SIZE] = { 0 };
 

@@ -81,7 +81,7 @@ QSC_EXPORT_API void qsc_stringutils_clear_substring(char* buffer, size_t count);
 * \param length: The number of characters to compare
 * \return Returns true if the strings are equal
 */
-QSC_EXPORT_API bool qsc_stringutils_compare_strings(char* a, const char* b, size_t length);
+QSC_EXPORT_API bool qsc_stringutils_compare_strings(const char* a, const char* b, size_t length);
 
 /**
 * \brief Concatonate two strings
@@ -152,7 +152,7 @@ QSC_EXPORT_API int32_t qsc_stringutils_insert_string(char* buffer, size_t buflen
 * \param srclen: The number of characters to check
 * \return Returns true if the string is alpha numeric
 */
-QSC_EXPORT_API bool qsc_stringutils_is_alpha_numeric(char* source, size_t srclen);
+QSC_EXPORT_API bool qsc_stringutils_is_alpha_numeric(const char* source, size_t srclen);
 
 /**
 * \brief Check that a string contains only hexadecimal ascii characters
@@ -161,7 +161,7 @@ QSC_EXPORT_API bool qsc_stringutils_is_alpha_numeric(char* source, size_t srclen
 * \param srclen: The number of characters to check
 * \return Returns true if the string is hexadecimal
 */
-QSC_EXPORT_API bool qsc_stringutils_is_hex(char* source, size_t srclen);
+QSC_EXPORT_API bool qsc_stringutils_is_hex(const char* source, size_t srclen);
 
 /**
 * \brief Check that a string contains only numeric ascii characters
@@ -170,7 +170,7 @@ QSC_EXPORT_API bool qsc_stringutils_is_hex(char* source, size_t srclen);
 * \param srclen: The number of characters to check
 * \return Returns true if the string is numeric
 */
-QSC_EXPORT_API bool qsc_stringutils_is_numeric(char* source, size_t srclen);
+QSC_EXPORT_API bool qsc_stringutils_is_numeric(const char* source, size_t srclen);
 
 /**
 * \brief Join an array of strings to form one string
@@ -211,7 +211,7 @@ QSC_EXPORT_API bool qsc_stringutils_string_contains(const char* source, const ch
 * \param count: The number of substrings in the new array
 * \return Returns a 2 dimensional character array of substrings
 */
-QSC_EXPORT_API char** qsc_stringutils_split_string(char* source, char* delim, size_t* count);
+QSC_EXPORT_API char** qsc_stringutils_split_string(char* source, const char* delim, size_t* count);
 
 /**
 * \brief Find a substring within a string

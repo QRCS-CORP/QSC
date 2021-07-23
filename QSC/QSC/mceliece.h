@@ -186,7 +186,7 @@ QSC_EXPORT_API bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* cip
 * \param publickey: [const] Pointer to the public-key array of QSC_MCELIECE_PUBLICKEY_SIZE constant size
 * \param rng_generate: Pointer to the random generator
 */
-QSC_EXPORT_API void qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, void (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API void qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates public and private key for the McEliece key encapsulation mechanism
@@ -195,6 +195,6 @@ QSC_EXPORT_API void qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertex
 * \param privatekey: Pointer to output private-key array of QSC_MCELIECE_PRIVATEKEY_SIZE constant size
 * \param rng_generate: Pointer to the random generator function
 */
-QSC_EXPORT_API void qsc_mceliece_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API void qsc_mceliece_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 #endif

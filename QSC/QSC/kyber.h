@@ -70,11 +70,11 @@
 #define QSC_KYBER_H
 
 #include "common.h"
-//#if defined(QSC_SYSTEM_HAS_AVX2)
-//#	include "kyberbase_avx2.h"
-//#else
+#if defined(QSC_SYSTEM_HAS_AVX2)
+#	include "kyberbase_avx2.h"
+#else
 #	include "kyberbase.h"
-//#endif
+#endif
 
 /*!
 * \def QSC_KYBER_CIPHERTEXT_SIZE
@@ -126,7 +126,7 @@ QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* cipher
 * \param publickey: [const] Pointer to the public-key array of QSC_KYBER_PUBLICKEY_SIZE constant size
 * \param rng_generate: A pointer to the random generator function
 */
-QSC_EXPORT_API void qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, void (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API void qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates public and private key for the KYBER key encapsulation mechanism
@@ -137,6 +137,6 @@ QSC_EXPORT_API void qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, 
 * \param privatekey: Pointer to output private-key array of QSC_KYBER_PRIVATEKEY_SIZE constant size
 * \param rng_generate: A pointer to the random generator function
 */
-QSC_EXPORT_API void qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API void qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 #endif

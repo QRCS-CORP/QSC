@@ -9,7 +9,9 @@
 #	include <Shlwapi.h>
 #	include <tchar.h>
 #	include <Windows.h>
-#	pragma comment(lib, "Shlwapi.lib")
+#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#	    pragma comment(lib, "Shlwapi.lib")
+#   endif
 #else
 #	include <dirent.h>
 #	include <sys/stat.h>
@@ -17,7 +19,7 @@
 #	include <unistd.h>
 #endif
 
-bool qsc_folderutils_create_directory(char path[QSC_SYSTEM_MAX_PATH])
+bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH])
 {
 	int32_t res;
 
@@ -72,7 +74,7 @@ bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 
 void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char output[QSC_SYSTEM_MAX_PATH])
 {
-	memset(output, 0x00, sizeof(output));
+	memset(output, 0x00, QSC_SYSTEM_MAX_PATH);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
@@ -83,68 +85,68 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 
 	switch (directory)
 	{
-	case qsc_folderutils_directories_user_app_data:
-	{
-		id = FOLDERID_LocalAppData;
-		break;
-	}
-	case qsc_folderutils_directories_user_desktop:
-	{
-		id = FOLDERID_Desktop;
-		break;
-	}
-	case qsc_folderutils_directories_user_documents:
-	{
-		id = FOLDERID_LocalDocuments;
-		break;
-	}
-	case qsc_folderutils_directories_user_downloads:
-	{
-		id = FOLDERID_LocalDownloads;
-		break;
-	}
-	case qsc_folderutils_directories_user_favourites:
-	{
-		id = FOLDERID_Favorites;
-		break;
-	}
-	case qsc_folderutils_directories_user_music:
-	{
-		id = FOLDERID_LocalMusic;
-		break;
-	}
-	case qsc_folderutils_directories_user_pictures:
-	{
-		id = FOLDERID_LocalPictures;
-		break;
-	}
-	case qsc_folderutils_directories_user_programs:
-	{
-		id = FOLDERID_Programs;
-		break;
-	}
-	case qsc_folderutils_directories_user_shortcuts:
-	{
-		id = FOLDERID_ApplicationShortcuts;
-		break;
-	}
-	case qsc_folderutils_directories_user_videos:
-	{
-		id = FOLDERID_Videos;
-		break;
-	}
-	default:
-	{
-		id = FOLDERID_Documents;
-	}
+		case qsc_folderutils_directories_user_app_data:
+		{
+			id = FOLDERID_LocalAppData;
+			break;
+		}
+		case qsc_folderutils_directories_user_desktop:
+		{
+			id = FOLDERID_Desktop;
+			break;
+		}
+		case qsc_folderutils_directories_user_documents:
+		{
+			id = FOLDERID_LocalDocuments;
+			break;
+		}
+		case qsc_folderutils_directories_user_downloads:
+		{
+			id = FOLDERID_LocalDownloads;
+			break;
+		}
+		case qsc_folderutils_directories_user_favourites:
+		{
+			id = FOLDERID_Favorites;
+			break;
+		}
+		case qsc_folderutils_directories_user_music:
+		{
+			id = FOLDERID_LocalMusic;
+			break;
+		}
+		case qsc_folderutils_directories_user_pictures:
+		{
+			id = FOLDERID_LocalPictures;
+			break;
+		}
+		case qsc_folderutils_directories_user_programs:
+		{
+			id = FOLDERID_Programs;
+			break;
+		}
+		case qsc_folderutils_directories_user_shortcuts:
+		{
+			id = FOLDERID_ApplicationShortcuts;
+			break;
+		}
+		case qsc_folderutils_directories_user_videos:
+		{
+			id = FOLDERID_Videos;
+			break;
+		}
+		default:
+		{
+			id = FOLDERID_Documents;
+		}
 	}
 
 	hr = SHGetKnownFolderPath(&id, 0, NULL, &pstr);
 
 	if (SUCCEEDED(hr))
 	{
-		len = (size_t)WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen((wchar_t*)pstr), NULL, 0, NULL, NULL);
-		WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen((wchar_t*)pstr), output, (int32_t)len, NULL, NULL);
+		len = (size_t)WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen(pstr), NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen(pstr), output, (int32_t)len, NULL, NULL);
 		output[len] = '\0';
 	}
 

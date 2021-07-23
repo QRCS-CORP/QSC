@@ -3,7 +3,7 @@
 #include "memutils.h"
 #include "acp.h"
 
-static csg_fill_buffer(qsc_csg_state* ctx)
+static void csg_fill_buffer(qsc_csg_state* ctx)
 {
 	/* cache the block */
 	if (ctx->rate == QSC_KECCAK_512_RATE)
@@ -20,7 +20,7 @@ static csg_fill_buffer(qsc_csg_state* ctx)
 	ctx->cpos = 0;
 }
 
-static csg_auto_reseed(qsc_csg_state* ctx)
+static void csg_auto_reseed(qsc_csg_state* ctx)
 {
 	if (ctx->pres && ctx->bctr >= QSC_CSG_RESEED_THRESHHOLD)
 	{
@@ -160,7 +160,7 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t outlen)
 	/* clear used bytes */
 	if (ctx->crmd != 0)
 	{
-		qsc_memutils_clear((uint8_t*)ctx->cache, ctx->cpos);
+		qsc_memutils_clear(ctx->cache, ctx->cpos);
 	}
 
 	/* reseed check */

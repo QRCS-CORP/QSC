@@ -55,7 +55,7 @@
 /*! \enum qsc_aes_cipher_mode
 * The pre-defined cipher mode implementations
 */
-typedef enum
+typedef enum qsc_aes_cipher_type
 {
 	AES128 = 1,	/*!< The AES-128 block cipher */
 	AES256 = 2,	/*!< The AES-256 block cipher */
@@ -64,7 +64,7 @@ typedef enum
 /*! \enum qsc_aes_cipher_mode
 * The pre-defined cipher mode implementations
 */
-typedef enum
+typedef enum qsc_aes_cipher_mode
 {
 	CBC = 1,	/*!< Cipher Block Chaining */
 	CTR = 2,	/*!< segmented integer counter */

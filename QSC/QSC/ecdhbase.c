@@ -21,9 +21,8 @@ static int32_t crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t
     uint8_t* t = q;
     ge25519_p3 A;
     fe25519 pk;
-    size_t i;
 
-    for (i = 0; i < 32; i++)
+    for (size_t i = 0; i < 32; ++i)
     {
         t[i] = n[i];
     }
@@ -39,7 +38,6 @@ static int32_t crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t
 static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
     uint8_t* t;
-    uint32_t i;
     fe25519 a;
     fe25519 b;
     fe25519 aa;
@@ -52,7 +50,6 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
     fe25519 x3;
     fe25519 z2;
     fe25519 z3;
-    int32_t pos;
     uint32_t swap;
     uint32_t bit;
 
@@ -63,7 +60,7 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
         return -1;
     }
 
-    for (i = 0; i < 32; i++) 
+    for (size_t i = 0; i < 32; i++) 
     {
         t[i] = n[i];
     }
@@ -77,7 +74,7 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
 
     swap = 0;
 
-    for (pos = 254; pos >= 0; --pos)
+    for (int32_t pos = 254; pos >= 0; --pos)
     {
         bit = t[pos / 8] >> (pos & 7);
         bit &= 1;
@@ -116,7 +113,6 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
 
 static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
-    size_t i;
     uint8_t d;
 
     d = 0;
@@ -126,7 +122,7 @@ static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const 
         return -1;
     }
 
-    for (i = 0; i < EC25519_CURVE_SIZE; ++i)
+    for (size_t i = 0; i < EC25519_CURVE_SIZE; ++i)
     {
         d |= q[i];
     }
@@ -148,14 +144,13 @@ bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const u
     return (res == 0);
 }
 
-void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed)
+void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
     uint8_t tseed[QSC_SHA2_512_HASH_SIZE] = { 0 };
 
     qsc_sha512_compute(tseed, seed, EC25519_SEED_SIZE);
     qsc_memutils_copy(privatekey, tseed, EC25519_SEED_SIZE);
     crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
-
 }
 
 

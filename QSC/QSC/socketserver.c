@@ -4,7 +4,7 @@
 #include "async.h"
 #include <stdlib.h>
 
-qsc_socket_address_families qsc_socket_server_address_family(qsc_socket* sock)
+qsc_socket_address_families qsc_socket_server_address_family(const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -20,7 +20,7 @@ qsc_socket_address_families qsc_socket_server_address_family(qsc_socket* sock)
 	return res;
 }
 
-qsc_socket_protocols qsc_socket_server_socket_protocol(qsc_socket* sock)
+qsc_socket_protocols qsc_socket_server_socket_protocol(const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -36,7 +36,7 @@ qsc_socket_protocols qsc_socket_server_socket_protocol(qsc_socket* sock)
 	return res;
 }
 
-qsc_socket_transports qsc_socket_server_socket_transport(qsc_socket* sock)
+qsc_socket_transports qsc_socket_server_socket_transport(const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -56,12 +56,9 @@ void qsc_socket_server_close_socket(qsc_socket* sock)
 {
 	assert(sock != NULL);
 
-	if (sock != NULL)
+	if (sock != NULL && sock->connection_status == qsc_socket_state_connected)
 	{
-		if (sock->connection_status == qsc_socket_state_connected)
-		{
-			qsc_socket_shut_down(sock, qsc_socket_shut_down_flag_both);
-		}
+		qsc_socket_shut_down(sock, qsc_socket_shut_down_flag_both);
 	}
 }
 
@@ -212,7 +209,7 @@ static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state
 			if (state->callback != NULL)
 			{
 				state->callback(&ar);
-				qsc_async_thread_initialize(qsc_socket_server_accept_invoke, state);
+				qsc_async_thread_initialize((void*)&qsc_socket_server_accept_invoke, state);
 			}
 		}
 		else
@@ -264,7 +261,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_server_async_acc
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_async_accept_state* state, qsc_ipinfo_ipv4_address* address, uint16_t port)
+qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv4_address* address, uint16_t port)
 {
 	assert(state != NULL);
 	assert(address != NULL);
@@ -288,7 +285,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_asyn
 				if (res == qsc_socket_exception_success)
 				{
 					state->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_initialize(qsc_socket_server_accept_invoke, state);
+					qsc_async_thread_initialize((void*)&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}
@@ -330,7 +327,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_asyn
 				if (res == qsc_socket_exception_success)
 				{
 					state->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_initialize(qsc_socket_server_accept_invoke, state);
+					qsc_async_thread_initialize((void*)&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}
@@ -339,7 +336,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_asyn
 	return res;
 }
 
-void qsc_socket_server_set_options(qsc_socket* sock, qsc_socket_protocols level, qsc_socket_options option, int32_t optval)
+void qsc_socket_server_set_options(const qsc_socket* sock, qsc_socket_protocols level, qsc_socket_options option, int32_t optval)
 {
 	assert(sock != NULL);
 

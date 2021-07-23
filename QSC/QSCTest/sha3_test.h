@@ -11,7 +11,6 @@
 #define QSCTEST_SHA3_TEST_H
 
 #include "common.h"
-#include "../QSC/common.h"
 
 /**
 * \brief Tests the 256-bit version of the keccak message digest for correct operation,

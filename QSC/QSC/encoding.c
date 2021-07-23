@@ -42,9 +42,9 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t outlen, const char* inpu
 				for (i = 0, j = 0; i < inlen; i += 4, j += 3)
 				{
 					v = DECTBL[input[i] - 43];
-					v = (v << 6) | DECTBL[input[i + 1] - 43];
-					v = input[i + 2] == '=' ? v << 6 : (v << 6) | DECTBL[input[i + 2] - 43];
-					v = input[i + 3] == '=' ? v << 6 : (v << 6) | DECTBL[input[i + 3] - 43];
+					v = ((uint32_t)v << 6) | DECTBL[input[i + 1] - 43];
+					v = input[i + 2] == '=' ? (uint32_t)v << 6 : ((uint32_t)v << 6) | DECTBL[input[i + 2] - 43];
+					v = input[i + 3] == '=' ? (uint32_t)v << 6 : ((uint32_t)v << 6) | DECTBL[input[i + 3] - 43];
 					output[j] = (v >> 16) & 0xFF;
 
 					if (input[i + 2] != '=')
@@ -67,7 +67,6 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t outlen, const char* inpu
 size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 {
 	size_t res;
-	size_t i;
 
 	res = 0;
 
@@ -75,7 +74,7 @@ size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 	{
 		res = (length / 4) * 3;
 
-		for (i = length; i > 0; --i)
+		for (size_t i = length; i > 0; --i)
 		{
 			if (input[i] == '=')
 			{
@@ -169,35 +168,4 @@ bool qsc_encoding_base64_is_valid_char(char c)
 	}
 
 	return res;
-}
-
-void qsc_encoding_self_test()
-{
-	//const char *data = "ABC123Test Lets Try this' input and see What \"happens\"";
-	//char       *enc;
-	//char       *out;
-	//size_t      out_len;
-
-	//printf("data:    '%s'\n", data);
-
-	//enc = b64_encode((const unsigned char *)data, strlen(data));
-	//printf("encoded: '%s'\n", enc);
-
-	//printf("dec size %s data size\n", b64_decoded_size(enc) == strlen(data) ? "==" : "!=");
-
-	///* +1 for the NULL terminator. */
-	//out_len = b64_decoded_size(enc) + 1;
-	//out = malloc(out_len);
-
-	//if (!b64_decode(enc, (unsigned char *)out, out_len)) {
-	//	printf("Decode Failure\n");
-	//	return 1;
-	//}
-	//out[out_len] = '\0';
-
-	//printf("dec:     '%s'\n", out);
-	//printf("data %s dec\n", strcmp(data, out) == 0 ? "==" : "!=");
-	//free(out);
-
-	//return 0;
 }

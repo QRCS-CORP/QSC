@@ -43,7 +43,7 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t *key, const uint8_t *c, const uint8
 * \param rng_generate: Pointer to the random generator
 * \return Returns 0 for success
 */
-int32_t qsc_mceliece_ref_encapsulate(uint8_t *c, uint8_t *key, const uint8_t *pk, void (*rng_generate)(uint8_t*, size_t));
+int32_t qsc_mceliece_ref_encapsulate(uint8_t *c, uint8_t *key, const uint8_t *pk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates public and private key for the McEliece key encapsulation mechanism
@@ -55,6 +55,6 @@ int32_t qsc_mceliece_ref_encapsulate(uint8_t *c, uint8_t *key, const uint8_t *pk
 * \param rng_generate: Pointer to the random generator function
 * \return Returns 0 for success
 */
-int32_t qsc_mceliece_ref_generate_keypair(uint8_t *pk, uint8_t *sk, void (*rng_generate)(uint8_t*, size_t));
+int32_t qsc_mceliece_ref_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
 
 #endif

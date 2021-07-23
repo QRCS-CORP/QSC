@@ -8,7 +8,7 @@ size_t qsc_arrayutils_find_string(const char* str, size_t slen, const char* toke
 	assert(token != 0);
 	assert(slen != 0);
 
-	char* fnd;
+	const char* fnd;
 	size_t res;
 
 	res = (size_t)QSC_ARRAYTILS_NPOS;
@@ -133,7 +133,6 @@ bool qsc_arrayutils_self_test()
 	const uint8_t nchr1 = 1;
 	const uint8_t nchr2 = 192;
 	uint64_t x64;
-	size_t i;
 	size_t pos;
 	uint32_t x32;
 	uint16_t x16;
@@ -178,7 +177,7 @@ bool qsc_arrayutils_self_test()
 		res = false;
 	}
 
-	for (i = 0; i < 256; ++i)
+	for (size_t i = 0; i < 256; ++i)
 	{
 		x8 = (uint8_t)i;
 		qsc_arrayutils_uint8_to_hex(shex, sizeof(shex), x8);

@@ -173,7 +173,7 @@ void qsctest_nistrng_prng_initialize(const uint8_t* seed, const uint8_t* info, s
     rng_ctx.rctr = 1;
 }
 
-int32_t qsctest_nistrng_prng_generate(uint8_t* output, size_t outlen)
+bool qsctest_nistrng_prng_generate(uint8_t* output, size_t outlen)
 {
 	uint8_t tmpb[16] = { 0 };
 	size_t i;
@@ -202,7 +202,7 @@ int32_t qsctest_nistrng_prng_generate(uint8_t* output, size_t outlen)
 	qsctest_nistrng_prng_update(rng_ctx.key, rng_ctx.ctr, NULL, 0);
 	++rng_ctx.rctr;
 
-	return QSCTEST_NIST_RNG_SUCCESS;
+	return true;
 }
 
 void qsctest_nistrng_prng_update(uint8_t* key, uint8_t* counter, const uint8_t* info, size_t infolen)

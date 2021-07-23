@@ -29,7 +29,7 @@
 #include "common.h"
 
 /* bogus winbase.h error */
-#pragma warning(disable : 5105)
+QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
@@ -47,7 +47,7 @@
 #	endif
 	typedef pthread_t qsc_thread;
 #else
-#	error "The operating system is not supported!""
+#	error "The operating system is not supported!"
 #endif
 
 /**
@@ -67,7 +67,7 @@ QSC_EXPORT_API bool qsc_async_mutex_create(qsc_async_mutex* mtx);
 QSC_EXPORT_API bool qsc_async_mutex_destroy(qsc_async_mutex* mtx);
 
 /**
-* \brief Lock a mutex. 
+* \brief Lock a mutex.
 * The mutex must be initialized and destroyed.
 *
 * \param mtx: The mutex to lock
@@ -111,7 +111,7 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_initialize(void (*thd_func)(void*), v
 *
 * \param handle: The thread to terminate (terminates calling thread on windows)
 */
-QSC_EXPORT_API void qsc_async_thread_terminate(qsc_thread* handle);
+QSC_EXPORT_API void qsc_async_thread_terminate(const qsc_thread* handle);
 
 /**
 * \brief Wait for a thread to complete execution

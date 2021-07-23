@@ -1,7 +1,7 @@
 #include "dilithium.h"
 #include "dilithiumbase.h"
 
-void qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(publickey != NULL);
 	assert(privatekey != NULL);
@@ -10,7 +10,7 @@ void qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, voi
 	qsc_dilithium_ref_generate_keypair(publickey, privatekey, rng_generate);
 }
 
-void qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	assert(signedmsg != NULL);
 	assert(smsglen != NULL);

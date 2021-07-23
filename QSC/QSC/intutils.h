@@ -302,11 +302,11 @@ QSC_EXPORT_API size_t qsc_intutils_max(size_t a, size_t b);
 QSC_EXPORT_API size_t qsc_intutils_min(size_t a, size_t b);
 
 #if defined(QSC_SYSTEM_HAS_AVX)
-QSC_EXPORT_API void qsc_intutils_reverse_bytes_x128(__m128i* input, __m128i* output);
+QSC_EXPORT_API void qsc_intutils_reverse_bytes_x128(const __m128i* input, __m128i* output);
 #endif
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-QSC_EXPORT_API void qsc_intutils_reverse_bytes_x512(__m512i* input, __m512i* output);
+QSC_EXPORT_API void qsc_intutils_reverse_bytes_x512(const __m512i* input, __m512i* output);
 #endif
 
 /**

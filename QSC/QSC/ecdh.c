@@ -10,7 +10,7 @@ bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uin
 	return res;
 }
 
-void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t))
+void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
 
@@ -18,7 +18,7 @@ void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*r
 	qsc_ed25519_generate_keypair(publickey, privatekey, seed);
 }
 
-void qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed)
+void qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
 	qsc_ed25519_generate_keypair(publickey, privatekey, seed);
 }

@@ -114,7 +114,7 @@ QSC_EXPORT_API bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privat
 * \param privatekey: Pointer to output private-key array
 * \param rng_generate: A pointer to the random generator
 */
-QSC_EXPORT_API void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, void (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates public and private key for the ECDH key encapsulation mechanism
@@ -125,6 +125,6 @@ QSC_EXPORT_API void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* priva
 * \param privatekey: Pointer to output private-key array
 * \param seed: A pointer to the random seed
 */
-QSC_EXPORT_API void qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
+QSC_EXPORT_API void qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 #endif

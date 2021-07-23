@@ -2,17 +2,20 @@
 #include "../QSC/chacha.h"
 #include "../QSC/csp.h"
 #include "../QSC/intutils.h"
+#include "../QSC/memutils.h"
 #include "testutils.h"
 #include <stdio.h>
 #include <string.h>
 
+#define CHACHA_TEST_SAMPLE 16 * 64
+
 bool qsctest_chacha128_kat()
 {
-	uint8_t exp[2][64] = { 0 };
-	uint8_t msg[64] = { 0 };
-	uint8_t out[64] = { 0 };
-	uint8_t key[2][QSC_CHACHA_KEY128_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[2][64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[2][QSC_CHACHA_KEY128_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	bool status;
 
 	status = true;
@@ -113,100 +116,70 @@ bool qsctest_chacha256_kat()
 #if defined(QSCTEST_CHACHA_WIDE_BLOCK_TESTS)
 bool qsctest_chacha128_wide_equality()
 {
-	const size_t SMPMIN = 16 * 64;
-	uint8_t* dec;
-	uint8_t* enc;
-	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
-	uint8_t* msg;
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec[CHACHA_TEST_SAMPLE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[CHACHA_TEST_SAMPLE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[CHACHA_TEST_SAMPLE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx1;
 	qsc_chacha_state ctx2;
+	size_t i;
 	size_t mctr;
 	size_t moft;
-	size_t mlen;
-	size_t tctr;
-	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	bool status;
 
-	tctr = 0;
 	status = true;
 
-	while (tctr < QSCTEST_CHACHA_TEST_CYCLES)
+	for (i = 0; i < QSCTEST_CHACHA_TEST_CYCLES; ++i)
 	{
-		mlen = 0;
+		qsc_intutils_clear8(dec, sizeof(dec));
+		qsc_intutils_clear8(enc, sizeof(enc));
+		qsc_intutils_clear8(msg, sizeof(msg));
 
-		do
+		/* generate the key and nonce */
+		qsc_csp_generate(key, sizeof(key));
+		qsc_csp_generate(ncopy, sizeof(ncopy));
+		qsc_csp_generate(msg, sizeof(msg));
+
+		/* initialize the key parameters struct */
+		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_chacha_keyparams kp1 = { key, sizeof(key), nonce };
+
+		/* initialize the state */
+		qsc_chacha_initialize(&ctx1, &kp1);
+
+		/* encrypt the array using avx */
+		qsc_chacha_transform(&ctx1, enc, msg, sizeof(msg));
+
+		/* erase the internal state */
+		qsc_chacha_dispose(&ctx1);
+
+		/* decrypt the cipher-text using 16-byte blocks, bypassing AVX */
+
+		/* reset the nonce */
+		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_chacha_keyparams kp2 = { key, sizeof(key), nonce };
+
+		/* initialize the 2nd state */
+		qsc_chacha_initialize(&ctx2, &kp2);
+
+		moft = 0;
+		mctr = CHACHA_TEST_SAMPLE;
+
+		while (mctr != 0)
 		{
-			qsc_csp_generate(pmcnt, sizeof(pmcnt));
-			memcpy(&mlen, pmcnt, sizeof(uint16_t));
-		} while (mlen < SMPMIN);
-
-		dec = (uint8_t*)malloc(mlen);
-		enc = (uint8_t*)malloc(mlen);
-		msg = (uint8_t*)malloc(mlen);
-
-		if (dec != NULL && enc != NULL && msg != NULL)
-		{
-			qsc_intutils_clear8(dec, mlen);
-			qsc_intutils_clear8(enc, mlen);
-			qsc_intutils_clear8(msg, mlen);
-
-			/* generate the key and nonce */
-			qsc_csp_generate(key, sizeof(key));
-			qsc_csp_generate(ncopy, sizeof(ncopy));
-			/* use a random sized message 1-65535 */
-			qsc_csp_generate(msg, mlen);
-
-			/* initialize the key parameters struct */
-			memcpy(nonce, ncopy, sizeof(nonce));
-			qsc_chacha_keyparams kp1 = { key, sizeof(key), nonce };
-
-			/* initialize the state */
-			qsc_chacha_initialize(&ctx1, &kp1);
-
-			/* encrypt the array */
-			qsc_chacha_transform(&ctx1, enc, msg, mlen);
-
-			/* erase the internal state */
-			qsc_chacha_dispose(&ctx1);
-
-			/* reset the nonce */
-			memcpy(nonce, ncopy, sizeof(nonce));
-			qsc_chacha_keyparams kp2 = { key, sizeof(key), nonce };
-
-			/* initialize the state */
-			qsc_chacha_initialize(&ctx2, &kp2);
-
-			/* decrypt using 16-byte blocks, bypassing AVX512 */
-
-			mctr = mlen;
-			moft = 0;
-
-			while (mctr != 0)
-			{
-				const size_t BLKRMD = qsc_intutils_min(QSC_CHACHA_BLOCK_SIZE, mctr);
-				qsc_chacha_transform(&ctx2, (uint8_t*)(dec + moft), (uint8_t*)(enc + moft), BLKRMD);
-				mctr -= BLKRMD;
-				moft += BLKRMD;
-			}
-
-			/* erase the internal state */
-			qsc_chacha_dispose(&ctx2);
-
-			if (qsc_intutils_are_equal8(dec, msg, mlen) == false)
-			{
-				status = false;
-				break;
-			}
-
-			/* reset the state */
-			free(dec);
-			free(enc);
-			free(msg);
-			++tctr;
+			const size_t BLKRMD = qsc_intutils_min(QSC_CHACHA_BLOCK_SIZE, mctr);
+			qsc_chacha_transform(&ctx2, (dec + moft), (enc + moft), BLKRMD);
+			mctr -= BLKRMD;
+			moft += BLKRMD;
 		}
-		else
+
+		/* erase the internal state */
+		qsc_chacha_dispose(&ctx2);
+
+		/* compare the decrypted cipher-text with the message */
+		if (qsc_intutils_are_equal8(dec, msg, sizeof(msg)) == false)
 		{
 			status = false;
 			break;
@@ -218,101 +191,70 @@ bool qsctest_chacha128_wide_equality()
 
 bool qsctest_chacha256_wide_equality()
 {
-	const size_t SMPMIN = 16 * 64;
-	uint8_t* dec;
-	uint8_t* enc;
-	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	uint8_t* msg;
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec[CHACHA_TEST_SAMPLE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[CHACHA_TEST_SAMPLE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[CHACHA_TEST_SAMPLE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx1;
 	qsc_chacha_state ctx2;
+	size_t i;
 	size_t mctr;
 	size_t moft;
-	size_t mlen;
-	size_t tctr;
-	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	bool status;
 
-	tctr = 0;
 	status = true;
 
-	while (tctr < QSCTEST_CHACHA_TEST_CYCLES)
+	for (i = 0; i < QSCTEST_CHACHA_TEST_CYCLES; ++i)
 	{
-		mlen = 0;
+		qsc_intutils_clear8(dec, sizeof(dec));
+		qsc_intutils_clear8(enc, sizeof(enc));
+		qsc_intutils_clear8(msg, sizeof(msg));
 
-		do
+		/* generate the key and nonce */
+		qsc_csp_generate(key, sizeof(key));
+		qsc_csp_generate(ncopy, sizeof(ncopy));
+		qsc_csp_generate(msg, sizeof(msg));
+
+		/* initialize the key parameters struct */
+		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_chacha_keyparams kp1 = { key, sizeof(key), nonce };
+
+		/* initialize the state */
+		qsc_chacha_initialize(&ctx1, &kp1);
+
+		/* encrypt the array using avx */
+		qsc_chacha_transform(&ctx1, enc, msg, sizeof(msg));
+
+		/* erase the internal state */
+		qsc_chacha_dispose(&ctx1);
+
+		/* decrypt the cipher-text using 16-byte blocks, bypassing AVX */
+
+		/* reset the nonce */
+		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_chacha_keyparams kp2 = { key, sizeof(key), nonce };
+
+		/* initialize the 2nd state */
+		qsc_chacha_initialize(&ctx2, &kp2);
+
+		moft = 0;
+		mctr = CHACHA_TEST_SAMPLE;
+
+		while (mctr != 0)
 		{
-			qsc_csp_generate(pmcnt, sizeof(pmcnt));
-			memcpy(&mlen, pmcnt, sizeof(uint16_t));
-		} 
-		while (mlen < SMPMIN);
-
-		dec = (uint8_t*)malloc(mlen);
-		enc = (uint8_t*)malloc(mlen);
-		msg = (uint8_t*)malloc(mlen);
-
-		if (dec != NULL && enc != NULL && msg != NULL)
-		{
-			qsc_intutils_clear8(dec, mlen);
-			qsc_intutils_clear8(enc, mlen);
-			qsc_intutils_clear8(msg, mlen);
-
-			/* generate the key and nonce */
-			qsc_csp_generate(key, sizeof(key));
-			qsc_csp_generate(ncopy, sizeof(ncopy));
-			/* use a random sized message 1-65535 */
-			qsc_csp_generate(msg, mlen);
-
-			/* initialize the key parameters struct */
-			memcpy(nonce, ncopy, sizeof(nonce));
-			qsc_chacha_keyparams kp1 = { key, sizeof(key), nonce };
-
-			/* initialize the state */
-			qsc_chacha_initialize(&ctx1, &kp1);
-
-			/* encrypt the array */
-			qsc_chacha_transform(&ctx1, enc, msg, mlen);
-
-			/* erase the internal state */
-			qsc_chacha_dispose(&ctx1);
-
-			/* reset the nonce */
-			memcpy(nonce, ncopy, sizeof(nonce));
-			qsc_chacha_keyparams kp2 = { key, sizeof(key), nonce };
-
-			/* initialize the state */
-			qsc_chacha_initialize(&ctx2, &kp2);
-
-			/* decrypt using 16-byte blocks, bypassing AVX512 */
-
-			mctr = mlen;
-			moft = 0;
-
-			while (mctr != 0)
-			{
-				const size_t BLKRMD = qsc_intutils_min(QSC_CHACHA_BLOCK_SIZE, mctr);
-				qsc_chacha_transform(&ctx2, (uint8_t*)(dec + moft), (uint8_t*)(enc + moft), BLKRMD);
-				mctr -= BLKRMD;
-				moft += BLKRMD;
-			}
-
-			/* erase the internal state */
-			qsc_chacha_dispose(&ctx2);
-
-			if (qsc_intutils_are_equal8(dec, msg, mlen) == false)
-			{
-				status = false;
-				break;
-			}
-
-			/* reset the state */
-			free(dec);
-			free(enc);
-			free(msg);
-			++tctr;
+			const size_t BLKRMD = qsc_intutils_min(QSC_CHACHA_BLOCK_SIZE, mctr);
+			qsc_chacha_transform(&ctx2, (dec + moft), (enc + moft), BLKRMD);
+			mctr -= BLKRMD;
+			moft += BLKRMD;
 		}
-		else
+
+		/* erase the internal state */
+		qsc_chacha_dispose(&ctx2);
+
+		/* compare the decrypted cipher-text with the message */
+		if (qsc_intutils_are_equal8(dec, msg, sizeof(msg)) == false)
 		{
 			status = false;
 			break;

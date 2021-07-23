@@ -1,0 +1,664 @@
+# depslib dependency file v1.0
+1626652516 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\acp.c
+	"acp.h"
+	"csp.h"
+	"rdp.h"
+	"sha3.h"
+	"sysutils.h"
+
+1626652516 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\acp.h
+	"common.h"
+
+1626799512 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\common.h
+	<assert.h>
+	<intrin.h>
+	<stdbool.h>
+	<stdint.h>
+	<string.h>
+	"TargetConditionals.h"
+	<intrin.h>
+	<unistd.h>
+	<immintrin.h>
+
+1626745072 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\csp.h
+	"common.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\rdp.h
+	"common.h"
+
+1626747673 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sha3.h
+	"common.h"
+
+1626745023 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sysutils.h
+	"common.h"
+
+1626652516 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\arrayutils.c
+	"arrayutils.h"
+	<stdio.h>
+	<string.h>
+
+1626652516 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\arrayutils.h
+	"common.h"
+	<stdio.h>
+
+1626652516 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\async.c
+	"async.h"
+
+1626747673 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\async.h
+	"common.h"
+	<process.h>
+	<Windows.h>
+	<sys/types.h>
+	<unistd.h>
+	<pthread>
+
+1626652516 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\chacha.c
+	"chacha.h"
+	"intutils.h"
+	"memutils.h"
+	"intrinsics.h"
+
+1626652516 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\chacha.h
+	"common.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\intutils.h
+	"common.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\memutils.h
+	"common.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\intrinsics.h
+	"common.h"
+	<arm_neon.h>
+	<intrin.h>
+	<x86intrin.h>
+	<arm_neon.h>
+	<mmintrin.h>
+	<altivec.h>
+	<spe.h>
+
+1626747673 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\consoleutils.c
+	"consoleutils.h"
+	"stringutils.h"
+	<conio.h>
+	<tchar.h>
+	<Windows.h>
+	<unistd.h>
+	<stdio.h>
+	<string.h>
+
+1626745024 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\consoleutils.h
+	"common.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\stringutils.h
+	"common.h"
+
+1626657185 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\cpuid.c
+	"cpuid.h"
+
+1626664146 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\cpuid.h
+	"common.h"
+	<stdbool.h>
+	<stdint.h>
+	<intrin.h>
+	<cpuid.h>
+	<x86intrin.h>
+
+1626747673 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\csg.c
+	"csg.h"
+	"intutils.h"
+	"memutils.h"
+	"acp.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\csg.h
+	"common.h"
+	"sha3.h"
+
+1626747673 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\csp.c
+	"csp.h"
+	<windows.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<errno.h>
+	<fcntl.h>
+	<limits.h>
+	<stdlib.h>
+	<stdio.h>
+	<sys/types.h>
+	<unistd.h>
+
+1626747673 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\csx.c
+	"csx.h"
+	"intutils.h"
+	"memutils.h"
+	<stdlib.h>
+	"intrinsics.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\csx.h
+	"common.h"
+	"sha3.h"
+
+1626739724 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\dilithium.c
+	"dilithium.h"
+	"dilithiumbase.h"
+
+1626739724 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\dilithium.h
+	"common.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\dilithiumbase.h
+	"common.h"
+
+1626753824 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\dilithiumbase.c
+	"dilithiumbase.h"
+	"intutils.h"
+	"memutils.h"
+	"sha3.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\dilithiumbase_avx2.c
+	"dilithiumbase_avx2.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\dilithiumbase_avx2.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\donna128.c
+	"donna128.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\donna128.h
+	"common.h"
+
+1626666228 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ec25519.c
+	"ec25519.h"
+	"csp.h"
+	"intutils.h"
+	"memutils.h"
+	"sha2.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ec25519.h
+	"common.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sha2.h
+	"common.h"
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdh.c
+	"ecdh.h"
+	"ecdhbase.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdh.h
+	"common.h"
+
+1626740106 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdhbase.h
+	"common.h"
+
+1626740106 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdhbase.c
+	"ecdhbase.h"
+	"csp.h"
+	"ec25519.h"
+	"intutils.h"
+	"memutils.h"
+	"sha2.h"
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdsa.c
+	"ecdsa.h"
+	"ecdsabase.h"
+	"sha2.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdsa.h
+	"common.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdsabase.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ecdsabase.c
+	"ecdsabase.h"
+	"csp.h"
+	"intutils.h"
+	"memutils.h"
+	"ec25519.h"
+	"sha2.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\encoding.c
+	"encoding.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\encoding.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\event.c
+	"event.h"
+	<stdio.h>
+	<stdlib.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\event.h
+	"common.h"
+
+1626739725 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\falcon.c
+	"falcon.h"
+	"falconbase_avx2.h"
+	"falconbase.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\falcon.h
+	"common.h"
+
+1626745023 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\falconbase_avx2.h
+	"common.h"
+	"intrinsics.h"
+	"sha3.h"
+	<math.h>
+
+1626739725 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\falconbase.h
+	"common.h"
+
+1626747673 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\falconbase.c
+	"falconbase.h"
+	"intutils.h"
+	"memutils.h"
+	"sha3.h"
+
+1626748707 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\falconbase_avx2.c
+	"falconbase_avx2.h"
+	"memutils.h"
+	"sha3.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\fileutils.c
+	"fileutils.h"
+	"stringutils.h"
+	<direct.h>
+	<io.h>
+	<unistd.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\fileutils.h
+	"common.h"
+	<stdio.h>
+
+1626749962 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\folderutils.c
+	"folderutils.h"
+	<direct.h>
+	<initguid.h>
+	<KnownFolders.h>
+	<ShlObj.h>
+	<Shlwapi.h>
+	<tchar.h>
+	<Windows.h>
+	<dirent.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<unistd.h>
+
+1626747673 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\folderutils.h
+	"common.h"
+
+1626747673 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\hcg.c
+	"hcg.h"
+	"intutils.h"
+	"memutils.h"
+	"acp.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\hcg.h
+	"sha2.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\intutils.c
+	"intutils.h"
+
+1626750967 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ipinfo.c
+	"ipinfo.h"
+	"stringutils.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ipinfo.h
+	"common.h"
+	"arrayutils.h"
+	"intutils.h"
+	"memutils.h"
+	"socketflags.h"
+	<stdio.h>
+	<string.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socketflags.h
+	"common.h"
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\kyber.c
+	"kyber.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\kyber.h
+	"common.h"
+	"kyberbase_avx2.h"
+	"kyberbase.h"
+
+1626739725 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\kyberbase_avx2.h
+	"common.h"
+	"kyber_asm_consts.h"
+
+1626717571 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\kyber_asm_consts.h
+	<stdint.h>
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\kyberbase.h
+	"common.h"
+
+1626739725 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\kyberbase.c
+	"kyberbase.h"
+	"intutils.h"
+	"memutils.h"
+	"sha3.h"
+
+1626739725 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\kyberbase_avx2.c
+	"kyberbase_avx2.h"
+	"intutils.h"
+	"memutils.h"
+	"sha3.h"
+
+1584205422 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\main.c
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\mceliece.c
+	"mceliece.h"
+	"mceliecebase.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\mceliece.h
+	"common.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\mceliecebase.h
+	"common.h"
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\mceliecebase.c
+	"mceliecebase.h"
+	"intutils.h"
+	"memutils.h"
+	"sha3.h"
+	<inttypes.h>
+	<stdlib.h>
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\mceliecebase_avx2.c
+	"mceliecebase_avx2.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\mceliecebase_avx2.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\memutils.c
+	"memutils.h"
+	<stdlib.h>
+	"intrinsics.h"
+	<malloc.h>
+
+1626753168 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\netutils.c
+	"netutils.h"
+	"memutils.h"
+	<ws2ipdef.h>
+
+1626745023 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\netutils.h
+	"common.h"
+	"ipinfo.h"
+	"socket.h"
+	"socketbase.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socket.h
+	"common.h"
+	"socketflags.h"
+
+1626750967 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socketbase.h
+	"common.h"
+	"intutils.h"
+	"ipinfo.h"
+	"memutils.h"
+	"socket.h"
+	<WinSock2.h>
+	<WS2tcpip.h>
+	<ws2def.h>
+	<objbase.h>
+	<inaddr.h>
+	<iphlpapi.h>
+	<errno.h>
+	<netdb.h>
+	<ifaddrs.h>
+	<netinet/in.h>
+	<arpa/inet.h>
+	<sys/sock.h>
+	<string.h>
+	<sys/types.h>
+	<unistd.h>
+	<netpacket/packet.h>
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ntru.c
+	"ntru.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ntru.h
+	"common.h"
+	"ntrubase.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ntrubase.h
+	"common.h"
+
+1626748707 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ntrubase.c
+	"ntrubase.h"
+	"intutils.h"
+	"memutils.h"
+	"sha3.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ntrubase_avx2.c
+	"ntrubase_avx2.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\ntrubase_avx2.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\parallel.c
+	"parallel.h"
+	<omp.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\parallel.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\poly1305.c
+	"poly1305.h"
+	"intutils.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\poly1305.h
+	"common.h"
+
+1626752605 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\queue.c
+	"queue.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\queue.h
+	"common.h"
+	"intutils.h"
+	"memutils.h"
+
+1626669711 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\rcs.c
+	"rcs.h"
+	"intutils.h"
+	"memutils.h"
+	<stdlib.h>
+
+1626748707 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\rcs.h
+	"common.h"
+	"sha3.h"
+	"intrinsics.h"
+	<immintrin.h>
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\rdp.c
+	"rdp.h"
+	"intutils.h"
+	"intrinsics.h"
+	"sysutils.h"
+
+1626752605 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\secmem.c
+	"secmem.h"
+	<string.h>
+	<sys/types.h>
+	<sys/resource.h>
+	<sys/mman.h>
+	<cstdlib>
+	<signal.h>
+	<setjmp.h>
+	<unistd.h>
+	<errno.h>
+	<windows.h>
+
+1626745023 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\secmem.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\secrand.c
+	"secrand.h"
+	"memutils.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\secrand.h
+	"common.h"
+	"acp.h"
+	"csg.h"
+
+1626753468 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\selftest.c
+	"selftest.h"
+	"../QSC/chacha.h"
+	"../QSC/csx.h"
+	"../QSC/intutils.h"
+	"../QSC/poly1305.h"
+	"../QSC/rcs.h"
+	"../QSC/sha2.h"
+	"../QSC/sha3.h"
+	"../QSC/csp.h"
+	<stdio.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\selftest.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sha3.c
+	"sha3.h"
+	"intutils.h"
+	"memutils.h"
+	"intrinsics.h"
+	<immintrin.h>
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socket.c
+	"socket.h"
+
+1626751619 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socketbase.c
+	"socketbase.h"
+	"memutils.h"
+	"async.h"
+
+1626752605 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socketclient.c
+	"socketclient.h"
+	"async.h"
+	"memutils.h"
+	"netutils.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socketclient.h
+	"common.h"
+	"ipinfo.h"
+	"socketbase.h"
+
+1626751369 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socketserver.c
+	"socketserver.h"
+	"ipinfo.h"
+	"memutils.h"
+	"async.h"
+	<stdlib.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\socketserver.h
+	"common.h"
+	"socketbase.h"
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sphincsplus.c
+	"sphincsplus.h"
+	"sphincsplusbase.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sphincsplus.h
+	"common.h"
+
+1626739723 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sphincsplusbase.h
+	"common.h"
+
+1626739723 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sphincsplusbase.c
+	"sphincsplusbase.h"
+	"intutils.h"
+	"memutils.h"
+	"sha3.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sphincsplusbase_avx2.c
+	"sphincsplusbase_avx2.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sphincsplusbase_avx2.h
+	"common.h"
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sha2.c
+	"sha2.h"
+	"intutils.h"
+	"intrinsics.h"
+	"memutils.h"
+
+1626663590 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\stringutils.c
+	"stringutils.h"
+	<ctype.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1626752605 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\sysutils.c
+	"sysutils.h"
+	"intrinsics.h"
+	<Windows.h>
+	<iphlpapi.h>
+	<intrin.h>
+	<Sddl.h>
+	<tlhelp32.h>
+	<time.h>
+	<unistd.h>
+	<mach/mach.h>
+	<mach/mach_time.h>
+	<time.h>
+	<cpuid.h>
+	<dirent.h>
+	<fstream>
+	<ios>
+	<iostream>
+	<limits.h>
+	<pwd.h>
+	<stdio.h>
+	<stdlib.h>
+	<sys/resource.h>
+	<sys/statvfs.h>
+	<sys/sysctl.h>
+	<sys/sysinfo.h>
+	<sys/time.h>
+	<sys/types.h>
+	<unistd.h>
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\testutils.c
+	"testutils.h"
+	<stdio.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\testutils.h
+	"common.h"
+
+1626752605 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\threads.c
+	"threads.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\threads.h
+	"common.h"
+	<omp.h>
+	<process.h>
+	<Windows.h>
+	<sys/types.h>
+	<unistd.h>
+	<pthread>
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\timer.c
+	"timer.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\timer.h
+	"common.h"
+	<time.h>
+
+1626753168 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\timestamp.c
+	"timestamp.h"
+	<locale.h>
+	"stringutils.h"
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\timestamp.h
+	"common.h"
+	<time.h>
+
+1626652517 source:c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\transpose.c
+	"transpose.h"
+	"ecdhbase.h"
+	<stdlib.h>
+
+1626652517 c:\users\stepp\documents\visual studio 2019\projects\c\gcc\qsc\transpose.h
+	"common.h"
+	"intutils.h"
+

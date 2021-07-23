@@ -77,7 +77,7 @@ QSC_EXPORT_API void qsc_socket_server_error_callback(qsc_socket* source, qsc_soc
 *
 * \return The socket address family
 */
-QSC_EXPORT_API qsc_socket_address_families qsc_socket_server_address_family(qsc_socket* sock);
+QSC_EXPORT_API qsc_socket_address_families qsc_socket_server_address_family(const qsc_socket* sock);
 
 /**
 * \brief Get the socket protocol type
@@ -86,7 +86,7 @@ QSC_EXPORT_API qsc_socket_address_families qsc_socket_server_address_family(qsc_
 *
 * \return The socket protocol type
 */
-QSC_EXPORT_API qsc_socket_protocols qsc_socket_server_socket_protocol(qsc_socket* sock);
+QSC_EXPORT_API qsc_socket_protocols qsc_socket_server_socket_protocol(const qsc_socket* sock);
 
 /**
 * \brief Get the socket transport type
@@ -95,7 +95,7 @@ QSC_EXPORT_API qsc_socket_protocols qsc_socket_server_socket_protocol(qsc_socket
 *
 * \return The socket transport type
 */
-QSC_EXPORT_API qsc_socket_transports qsc_socket_server_socket_transport(qsc_socket* sock);
+QSC_EXPORT_API qsc_socket_transports qsc_socket_server_socket_transport(const qsc_socket* sock);
 
 /**
 * \brief Close a socket
@@ -172,7 +172,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_s
 *
 * \return Returns an exception code on failure, or success(0)
 */
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_async_accept_state* state, qsc_ipinfo_ipv4_address* address, uint16_t port);
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv4_address* address, uint16_t port);
 
 /**
 * \brief Places the IPv6 socket in an asynchronous listening state
@@ -194,7 +194,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_soc
 * \param option: The option command to send
 * \param optval: The value of the option command
 */
-QSC_EXPORT_API void qsc_socket_server_set_options(qsc_socket* sock, qsc_socket_protocols level, qsc_socket_options option, int32_t optval);
+QSC_EXPORT_API void qsc_socket_server_set_options(const qsc_socket* sock, qsc_socket_protocols level, qsc_socket_options option, int32_t optval);
 
 /**
 * \brief Shut down the server
