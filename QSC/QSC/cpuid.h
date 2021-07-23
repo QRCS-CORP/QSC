@@ -14,7 +14,7 @@
 #include <x86intrin.h>
 #endif
 
-typedef struct
+QSC_EXPORT_API typedef struct
 {
     bool aesni;
     bool avx;
@@ -41,6 +41,6 @@ typedef struct
 * \param features: A qsc_cpu_features structure
 * \return Returns true for success, false if CPU is not recognized
 */
-bool qsc_runtime_features(qsc_cpu_features* const features);
+QSC_EXPORT_API bool qsc_runtime_features(qsc_cpu_features* const features);
 
 #endif
