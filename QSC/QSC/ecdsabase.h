@@ -19,19 +19,17 @@
 * Reference implementations:
 * LibSodium by Frank Denis
 * https://github.com/jedisct1/libsodium
-*
 * curve25519-donna by Adam Langley
 * https://github.com/agl/curve25519-donna
-*
 * NaCI by Daniel J. Bernstein, Tanja Lange, Peter Schwabe
 * https://nacl.cr.yp.to
-*
 * Rewritten for Misra compliance and optimizations by John G. Underhill
-* September 21, 2020
 */
 
 #ifndef QSC_ECDSABASE_H
 #define QSC_ECDSABASE_H
+
+/* \cond DOXYGEN_IGNORE */
 
 #include "common.h"
 
@@ -49,11 +47,11 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message.
 *
-* \param signedmsg The signed message
-* \param smsglen The signed message length
-* \param message The message to be signed
-* \param msglen The message length
-* \param secretkey The private signature key
+* \param signedmsg: The signed message
+* \param smsglen: The signed message length
+* \param message: [const] The message to be signed
+* \param msglen: The message length
+* \param secretkey: [const] The private signature key
 * \return Returns 0 for success
 */
 int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
@@ -61,13 +59,15 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 /**
 * \brief Verifies a signature-message pair with the public key.
 *
-* \param message The message to be signed
-* \param msglen The message length
-* \param signedmsg The signed message
-* \param smsglen The signed message length
-* \param publickey The public verification key
+* \param message: The message to be signed
+* \param msglen: The message length
+* \param signedmsg: [const] The signed message
+* \param smsglen: The signed message length
+* \param publickey: [const] The public verification key
 * \return Returns 0 for success
 */
 int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

@@ -1,4 +1,5 @@
 #include "secmem.h"
+#include "memutils.h"
 
 #if defined(QSC_OS_OPENBSD)
 #	include <string.h>
@@ -7,7 +8,7 @@
 #	include <sys/types.h>
 #	include <sys/resource.h>
 #	include <sys/mman.h>
-#	include <cstdlib>
+#	include <stdlib.h>
 #	include <signal.h>
 #	include <setjmp.h>
 #	include <unistd.h>
@@ -35,7 +36,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 #	endif
 
 #	if !defined(MAP_ANONYMOUS)
-#		define MAP_ANONYMOUS MAP_ANON
+#		define MAP_ANONYMOUS 0x0002
 #	endif
 
 	ptr = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED | MAP_NOCORE, -1, 0);
@@ -54,7 +55,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 #	if defined(QSC_SYSTEM_HAS_POSIXMLOCK)
 		if (mlock(ptr, length) != 0)
 		{
-			memset(ptr, 0, length);
+			qsc_memutils_clear(ptr, length);
 			munmap(ptr, length);
 
 			// failed to lock
@@ -67,16 +68,11 @@ uint8_t* qsc_secmem_alloc(size_t length)
 
 	ptr = (char*)VirtualAlloc(NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
-	if (ptr != NULL)
+	if (ptr != NULL && VirtualLock((LPVOID)ptr, length) == 0)
 	{
-		if (VirtualLock((LPVOID)ptr, length) == 0)
-		{
-			memset(ptr, 0, length);
-			VirtualFree((LPVOID)ptr, 0, MEM_RELEASE);
-
-			// failed to lock
-			ptr = NULL;
-		}
+		qsc_memutils_clear(ptr, length);
+		VirtualFree((LPVOID)ptr, 0, MEM_RELEASE);
+		ptr = NULL;
 	}
 
 #else
@@ -91,28 +87,11 @@ uint8_t* qsc_secmem_alloc(size_t length)
 void qsc_secmem_erase(uint8_t* block, size_t length)
 {
 #if defined(QSC_HAS_RTLSECUREMEMORY)
-
 	RtlSecureZeroMemory(block, length);
-
 #elif defined(QSC_OS_OPENBSD)
-
 	explicit_bzero(block, length);
-
-#elif defined(QSC_VOLATILE_MEMSET)
-
-	static void* (*const memsetptr)(void*, int32_t, size_t) = memset;
-	(memsetptr)(block, 0, length);
-
 #else
-
-	char* ptr = (char*)block;
-	size_t i;
-
-	for (i = 0; i != length; ++i)
-	{
-		ptr[i] = 0;
-	}
-
+	qsc_memutils_clear(block, length);
 #endif
 }
 
@@ -152,8 +131,6 @@ void qsc_secmem_free(uint8_t* block, size_t length)
 size_t qsc_secmem_page_size()
 {
 	size_t pagelen;
-
-	pagelen = 0x00001000LL;
 
 #if defined(QSC_SYSTEM_OS_POSIX)
 

@@ -103,7 +103,6 @@ bool qsctest_dilithium_privatekey_integrity()
 	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -118,7 +117,7 @@ bool qsctest_dilithium_privatekey_integrity()
 	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* flip bit in the private key */
-	for (i = 0; i < 32; ++i)
+	for (size_t i = 0; i < 32; ++i)
 	{
 		sk[QSC_DILITHIUM_PUBLICKEY_SIZE + i] ^= 1;
 	}
@@ -144,7 +143,6 @@ bool qsctest_dilithium_publickey_integrity()
 	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
 	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -160,7 +158,7 @@ bool qsctest_dilithium_publickey_integrity()
 	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* flip bits in the public key */
-	for (i = 0; i < 32; ++i)
+	for (size_t i = 0; i < 32; ++i)
 	{
 		pk[i] ^= 1;
 	}

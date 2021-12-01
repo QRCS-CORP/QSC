@@ -22,6 +22,8 @@
 
 #include "common.h"
 
+/* \cond DOXYGEN_IGNORE */
+
 /* operations.h */
 
 /**
@@ -56,5 +58,7 @@ int32_t qsc_mceliece_ref_encapsulate(uint8_t *c, uint8_t *key, const uint8_t *pk
 * \return Returns 0 for success
 */
 int32_t qsc_mceliece_ref_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

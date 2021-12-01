@@ -69,9 +69,6 @@
     <ClCompile Include="csx_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="aes.c">
-      <Filter>Source Files\Common</Filter>
-    </ClCompile>
     <ClCompile Include="ecdh_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
@@ -91,6 +88,18 @@
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
     <ClCompile Include="falcon_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="aes_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="aesavs_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="async_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="netutils_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
   </ItemGroup>
@@ -137,9 +146,6 @@
     <ClInclude Include="csx_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
-    <ClInclude Include="aes.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
     <ClInclude Include="ecdh_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
@@ -159,6 +165,18 @@
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="falcon_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="aes_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="aesavs_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="async_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="netutils_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>

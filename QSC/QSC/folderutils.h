@@ -15,25 +15,17 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of common string support functions
-* Written by John G. Underhill
-* Written on February 18, 2021
-* Contact: support@vtdev.com
-*/
-
-/*
-* \file stringutils.h
-* \brief <b>Folder utilities; common folder support functions</b> \n
-* February 18, 2021
 */
 
 #ifndef QSC_FOLDERUTILS_H
 #define QSC_FOLDERUTILS_H
 
 #include "common.h"
+
+/*
+* \file folderutils.h
+* \brief Folder utilities, common folder support functions
+*/
 
 /* bogus winbase.h error */
 QSC_SYSTEM_CONDITION_IGNORE(5105)
@@ -43,32 +35,32 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 */
 typedef enum qsc_folderutils_directories
 {
-	qsc_folderutils_directories_user_app_data,
-	qsc_folderutils_directories_user_desktop,
-	qsc_folderutils_directories_user_documents,
-	qsc_folderutils_directories_user_downloads,
-	qsc_folderutils_directories_user_favourites,
-	qsc_folderutils_directories_user_music,
-	qsc_folderutils_directories_user_pictures,
-	qsc_folderutils_directories_user_programs,
-	qsc_folderutils_directories_user_shortcuts,
-	qsc_folderutils_directories_user_videos,
+	qsc_folderutils_directories_user_app_data,		/*!< User App Data directory */
+	qsc_folderutils_directories_user_desktop,		/*!< User Desktop directory */
+	qsc_folderutils_directories_user_documents,		/*!< User Documents directory */
+	qsc_folderutils_directories_user_downloads,		/*!< User Downloads directory */
+	qsc_folderutils_directories_user_favourites,	/*!< User Favourites directory */
+	qsc_folderutils_directories_user_music,			/*!< User Music directory */
+	qsc_folderutils_directories_user_pictures,		/*!< User Pictures directory */
+	qsc_folderutils_directories_user_programs,		/*!< User Programs directory */
+	qsc_folderutils_directories_user_shortcuts,		/*!< User Shortcuts directory */
+	qsc_folderutils_directories_user_videos,		/*!< User Video directory */
 } qsc_folderutils_directories;
 
 /**
-* \brief Create a folder in an existing directory
+* \brief Create a new folder
 
 *
-* \param path: The full path including the new folder name
+* \param path: [const] The full path including the new folder name
 * \return Returns true if the folder is created
 */
 QSC_EXPORT_API bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH]);
 
 /**
-* \brief Delete a folder in an existing directory
+* \brief Delete a folder
 
 *
-* \param path: The full path including the folder name
+* \param path: [const] The full path including the folder name
 * \return Returns true if the folder is deleted
 */
 QSC_EXPORT_API bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_MAX_PATH]);
@@ -77,7 +69,7 @@ QSC_EXPORT_API bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_
 * \brief Check if a folder exists
 
 *
-* \param path: The full path including the folder name
+* \param path: [const] The full path including the folder name
 * \return Returns true if the folder is found
 */
 QSC_EXPORT_API bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH]);

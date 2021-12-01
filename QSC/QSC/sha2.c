@@ -1,6 +1,6 @@
 #include "sha2.h"
-#include "intutils.h"
 #include "intrinsics.h"
+#include "intutils.h"
 #include "memutils.h"
 
 
@@ -30,6 +30,8 @@ static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha256_dispose(qsc_sha256_state* ctx)
 {
+	assert(ctx != NULL);
+
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
@@ -114,6 +116,9 @@ void qsc_sha256_initialize(qsc_sha256_state* ctx)
 #if defined(QSC_SHA2_SHANI_ENABLED)
 void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 {
+	assert(output != NULL);
+	assert(message != NULL);
+
 	__m128i s0;
 	__m128i s1;
 	__m128i t0;
@@ -289,6 +294,9 @@ void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 #else
 void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 {
+	assert(output != NULL);
+	assert(message != NULL);
+
 	uint32_t a;
 	uint32_t b;
 	uint32_t c;
@@ -677,6 +685,8 @@ void qsc_sha384_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha384_dispose(qsc_sha384_state* ctx)
 {
+	assert(ctx != NULL);
+	
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
@@ -830,6 +840,8 @@ void qsc_sha512_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha512_dispose(qsc_sha512_state* ctx)
 {
+	assert(ctx != NULL);
+	
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
@@ -904,6 +916,9 @@ void qsc_sha512_initialize(qsc_sha512_state* ctx)
 
 void qsc_sha512_permute(uint64_t* output, const uint8_t* message)
 {
+	assert(output != NULL);
+	assert(message != NULL);
+
 	uint64_t a;
 	uint64_t b;
 	uint64_t c;
@@ -1334,6 +1349,8 @@ void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_hmac256_dispose(qsc_hmac256_state* ctx)
 {
+	assert(ctx != NULL);
+	
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear(ctx->ipad, sizeof(ctx->ipad));
@@ -1413,6 +1430,8 @@ void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_hmac512_dispose(qsc_hmac512_state* ctx)
 {
+	assert(ctx != NULL);
+	
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear(ctx->ipad, sizeof(ctx->ipad));

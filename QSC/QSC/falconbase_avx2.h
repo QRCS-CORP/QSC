@@ -20,6 +20,8 @@
 #ifndef QSC_FALCONBASE_AVX2_H
 #define QSC_FALCONBASE_AVX2_H
 
+/* \cond DOXYGEN_IGNORE */
+
 #include "common.h"
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
@@ -31,15 +33,15 @@
 /* api.h */
 
 #if defined(QSC_FALCON_S3SHAKE256F512)
-#	define CRYPTO_SECRETKEYBYTES   1281
-#	define CRYPTO_PUBLICKEYBYTES   897
-#	define CRYPTO_BYTES            690
-#	define CRYPTO_ALGNAME          "Falcon-512"
+#	define CRYPTO_SECRETKEYBYTES 1281
+#	define CRYPTO_PUBLICKEYBYTES 897
+#	define CRYPTO_BYTES 690
+#	define CRYPTO_ALGNAME "Falcon-512"
 #elif defined(QSC_FALCON_S5SHAKE256F1024)
-#	define CRYPTO_SECRETKEYBYTES   2305
-#	define CRYPTO_PUBLICKEYBYTES   1793
-#	define CRYPTO_BYTES            1330
-#	define CRYPTO_ALGNAME          "Falcon-1024"
+#	define CRYPTO_SECRETKEYBYTES 2305
+#	define CRYPTO_PUBLICKEYBYTES 1793
+#	define CRYPTO_BYTES 1330
+#	define CRYPTO_ALGNAME "Falcon-1024"
 #endif
 
 /* falcon_fpr.h */
@@ -97,6 +99,7 @@ inline static __m256d falcon_fmadd(__m256d a, __m256d b, __m256d c)
 
 inline static __m256d falcon_fmsub(__m256d a, __m256d b, __m256d c)
 {
+	/* Note artifact, unused function */
 #if defined(FALCON_FMA)
 	return _mm256_fmsub_pd(a, b, c);
 #else
@@ -106,30 +109,30 @@ inline static __m256d falcon_fmsub(__m256d a, __m256d b, __m256d c)
 #endif
 }
 
-inline static uint32_t falcon_set_fpu_cw(uint32_t x)
-{
-#if defined __GNUC__ && defined __i386__
-	uint32_t short t;
-	uint32_t old;
-
-	__asm__ __volatile__("fstcw %0" : "=m" (t) : : );
-	old = (t & 0x0300u) >> 8;
-	t = (uint32_t short)((t & ~0x0300u) | (x << 8));
-	__asm__ __volatile__("fldcw %0" : : "m" (t) : );
-	return old;
-#elif defined _M_IX86
-	uint32_t short t;
-	uint32_t old;
-
-	__asm { fstcw t }
-	old = (t & 0x0300u) >> 8;
-	t = (uint32_t short)((t & ~0x0300u) | (x << 8));
-	__asm { fldcw t }
-	return old;
-#else
-	return x;
-#endif
-}
+//inline static uint32_t falcon_set_fpu_cw(uint32_t x)
+//{
+//#if defined __GNUC__ && defined __i386__
+//	uint32_t short t;
+//	uint32_t old;
+//
+//	__asm__ __volatile__("fstcw %0" : "=m" (t) : : );
+//	old = (t & 0x0300u) >> 8;
+//	t = (uint32_t short)((t & ~0x0300u) | (x << 8));
+//	__asm__ __volatile__("fldcw %0" : : "m" (t) : );
+//	return old;
+//#elif defined _M_IX86
+//	uint32_t short t;
+//	uint32_t old;
+//
+//	__asm { fstcw t }
+//	old = (t & 0x0300u) >> 8;
+//	t = (uint32_t short)((t & ~0x0300u) | (x << 8));
+//	__asm { fldcw t }
+//	return old;
+//#else
+//	return x;
+//#endif
+//}
 
 /*
  * For optimal reproducibility of values, we need to disable contraction
@@ -208,7 +211,7 @@ extern const falcon_fpr falcon_avx2_fpr_p2_tab[FALCON_FPR_GM_P2_SIZE];
 
 inline static falcon_fpr falcon_FPR(double v)
 {
-	falcon_fpr x;
+	falcon_fpr x = { 0 };
 
 	x.v = v;
 
@@ -481,7 +484,7 @@ inline static uint64_t falcon_fpr_expm_p63(falcon_fpr x, falcon_fpr ccs)
 
 inline static size_t falcon_mkn(uint32_t logn)
 {
-	return ((size_t)1 << (logn));
+	return ((size_t)1 << logn);
 }
 
 /* fft.c */
@@ -517,10 +520,10 @@ inline static void falcon_fpc_mul(falcon_fpr* d_re, falcon_fpr* d_im, falcon_fpr
 	falcon_fpr fpct_d_re;
 	falcon_fpr fpct_d_im;
 
-	fpct_a_re = (a_re);
-	fpct_a_im = (a_im);
-	fpct_b_re = (b_re);
-	fpct_b_im = (b_im);
+	fpct_a_re = a_re;
+	fpct_a_im = a_im;
+	fpct_b_re = b_re;
+	fpct_b_im = b_im;
 	fpct_d_re = falcon_fpr_sub(falcon_fpr_mul(fpct_a_re, fpct_b_re), falcon_fpr_mul(fpct_a_im, fpct_b_im));
 	fpct_d_im = falcon_fpr_add(falcon_fpr_mul(fpct_a_re, fpct_b_im), falcon_fpr_mul(fpct_a_im, fpct_b_re));
 	*d_re = fpct_d_re;
@@ -537,10 +540,10 @@ inline static void falcon_fpc_div(falcon_fpr* d_re, falcon_fpr* d_im, falcon_fpr
 	falcon_fpr fpct_d_im;
 	falcon_fpr fpct_m;
 
-	fpct_a_re = (a_re);
-	fpct_a_im = (a_im);
-	fpct_b_re = (b_re);
-	fpct_b_im = (b_im);
+	fpct_a_re = a_re;
+	fpct_a_im = a_im;
+	fpct_b_re = b_re;
+	fpct_b_im = b_im;
 	fpct_m = falcon_fpr_add(falcon_fpr_sqr(fpct_b_re), falcon_fpr_sqr(fpct_b_im));
 	fpct_m = falcon_fpr_inv(fpct_m);
 	fpct_b_re = falcon_fpr_mul(fpct_b_re, fpct_m);
@@ -896,4 +899,5 @@ int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_
 bool qsc_falcon_avx2_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
 
 #endif
+/* \endcond DOXYGEN_IGNORE */
 #endif

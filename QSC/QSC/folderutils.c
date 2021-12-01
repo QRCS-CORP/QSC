@@ -1,5 +1,5 @@
 #include "folderutils.h"
-
+#include "memutils.h"
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
 #	include <direct.h>
@@ -13,10 +13,11 @@
 #	    pragma comment(lib, "Shlwapi.lib")
 #   endif
 #else
-#	include <dirent.h>
-#	include <sys/stat.h>
-#	include <sys/types.h>
-#	include <unistd.h>
+#   include <dirent.h>
+#   include <sys/stat.h>
+#   include <stdlib.h>
+#   include <sys/types.h>
+#   include <unistd.h>
 #endif
 
 bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH])
@@ -26,7 +27,7 @@ bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH])
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	res = _mkdir(path);
 #else
-	res = mkdir(path);
+	res = mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
 
 	return (res == 0);
@@ -49,8 +50,6 @@ bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 {
 	bool res;
 
-	res = false;
-
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 	LPCSTR lppath = TEXT(path);
@@ -58,6 +57,8 @@ bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 	res = (PathFileExistsA(lppath) == TRUE);
 
 #else
+
+	res = false;
 
 	DIR* dir = opendir(path);
 
@@ -74,7 +75,7 @@ bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 
 void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char output[QSC_SYSTEM_MAX_PATH])
 {
-	memset(output, 0x00, QSC_SYSTEM_MAX_PATH);
+	qsc_memutils_clear(output, QSC_SYSTEM_MAX_PATH);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
@@ -83,75 +84,58 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 	PWSTR pstr;
 	size_t len;
 
-	switch (directory)
+	if (directory == qsc_folderutils_directories_user_app_data)
 	{
-		case qsc_folderutils_directories_user_app_data:
-		{
-			id = FOLDERID_LocalAppData;
-			break;
-		}
-		case qsc_folderutils_directories_user_desktop:
-		{
-			id = FOLDERID_Desktop;
-			break;
-		}
-		case qsc_folderutils_directories_user_documents:
-		{
-			id = FOLDERID_LocalDocuments;
-			break;
-		}
-		case qsc_folderutils_directories_user_downloads:
-		{
-			id = FOLDERID_LocalDownloads;
-			break;
-		}
-		case qsc_folderutils_directories_user_favourites:
-		{
-			id = FOLDERID_Favorites;
-			break;
-		}
-		case qsc_folderutils_directories_user_music:
-		{
-			id = FOLDERID_LocalMusic;
-			break;
-		}
-		case qsc_folderutils_directories_user_pictures:
-		{
-			id = FOLDERID_LocalPictures;
-			break;
-		}
-		case qsc_folderutils_directories_user_programs:
-		{
-			id = FOLDERID_Programs;
-			break;
-		}
-		case qsc_folderutils_directories_user_shortcuts:
-		{
-			id = FOLDERID_ApplicationShortcuts;
-			break;
-		}
-		case qsc_folderutils_directories_user_videos:
-		{
-			id = FOLDERID_Videos;
-			break;
-		}
-		default:
-		{
-			id = FOLDERID_Documents;
-		}
+		id = FOLDERID_LocalAppData;
+	}
+	else if (directory == qsc_folderutils_directories_user_desktop)
+	{
+		id = FOLDERID_Desktop;
+	}
+	else if (directory == qsc_folderutils_directories_user_documents)
+	{
+		id = FOLDERID_LocalDocuments;
+	}
+	else if (directory == qsc_folderutils_directories_user_downloads)
+	{
+		id = FOLDERID_LocalDownloads;
+	}
+	else if (directory == qsc_folderutils_directories_user_favourites)
+	{
+		id = FOLDERID_Favorites;
+	}
+	else if (directory == qsc_folderutils_directories_user_music)
+	{
+		id = FOLDERID_LocalMusic;
+	}
+	else if (directory == qsc_folderutils_directories_user_pictures)
+	{
+		id = FOLDERID_LocalPictures;
+	}
+	else if (directory == qsc_folderutils_directories_user_programs)
+	{
+		id = FOLDERID_Programs;
+	}
+	else if (directory == qsc_folderutils_directories_user_shortcuts)
+	{
+		id = FOLDERID_ApplicationShortcuts;
+	}
+	else if (directory == qsc_folderutils_directories_user_videos)
+	{
+		id = FOLDERID_Videos;
+	}
+	else
+	{
+		id = FOLDERID_Documents;
 	}
 
 	hr = SHGetKnownFolderPath(&id, 0, NULL, &pstr);
 
-	if (SUCCEEDED(hr))
+	if (SUCCEEDED(hr) && pstr != NULL)
 	{
 		len = (size_t)WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen(pstr), NULL, 0, NULL, NULL);
 		WideCharToMultiByte(CP_ACP, 0, pstr, (int32_t)wcslen(pstr), output, (int32_t)len, NULL, NULL);
 		output[len] = '\0';
-	}
-
-	if (pstr != NULL)
-	{
 		CoTaskMemFree(pstr);
 	}
 
@@ -187,8 +171,8 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 	}
 
 	len = strlen((char*)pstr);
-	len = (len <= sizeof(path)) ? len : sizeof(path);
-	memcpy(path, pstr, len);
+	len = (len <= QSC_SYSTEM_MAX_PATH) ? len : QSC_SYSTEM_MAX_PATH;
+	qsc_memutils_copy(output, pstr, len);
 
 #endif
 }

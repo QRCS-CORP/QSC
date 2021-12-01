@@ -1,7 +1,7 @@
 /**
 * \file ntru_test.c
-* \brief <b>NTRU test functions</b> \n
-* Contains the Kyber implementation KAT and wellness test functions.
+* \brief NTRU test functions \n
+* Contains the NTRU implementation KAT and wellness test functions.
 *
 * \author John Underhill
 * \date July 1, 2021
@@ -17,36 +17,36 @@
 * \brief Test the validity of a mutated cipher-text
 * \return Returns true for test success
 */
-bool qsctest_ntru_ciphertext_integrity();
+bool qsctest_ntru_ciphertext_integrity(void);
 
 /**
-* \brief Test the public and private keys, ciphertext and shared key
+* \brief Test the public and private keys, cipher-text and shared key
 * for correctness against the NIST PQC Round 3 vectors
 * \return Returns true for test success
 */
-bool qsctest_ntru_kat_test();
+bool qsctest_ntru_kat_test(void);
 
 /**
 * \brief Stress test the key generation, encryption, and decryption functions
 * \return Returns true for test success
 */
-bool qsctest_ntru_operations_test();
+bool qsctest_ntru_operations_test(void);
 
 /**
 * \brief Test the validity of an altered secret-key
 * \return Returns true for test success
 */
-bool qsctest_ntru_privatekey_integrity();
+bool qsctest_ntru_privatekey_integrity(void);
 
 /**
 * \brief Test the validity of an altered public key
 * \return Returns true for test success
 */
-bool qsctest_ntru_publickey_integrity();
+bool qsctest_ntru_publickey_integrity(void);
 
 /**
-* \brief Run the Kyber implementation stress and correctness tests tests
+* \brief Run the NTRU implementation stress and correctness tests tests
 */
-void qsctest_ntru_run();
+void qsctest_ntru_run(void);
 
 #endif

@@ -1,11 +1,12 @@
 #include "memutils.h"
-#include <stdlib.h>
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	include "intrinsics.h"
 #endif
-#if defined(QSC_SYSTEM_COMPILER_MSC)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 #	include <malloc.h>
+#else
+#	include <stdlib.h>
 #endif
 
 void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)
@@ -59,6 +60,54 @@ void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
 #endif
 }
 
+void* qsc_memutils_malloc(size_t length)
+{
+	void* ret;
+
+	ret = NULL;
+
+	if (length != 0)
+	{
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+		ret = _aligned_malloc(length, QSC_SIMD_ALIGNMENT);
+#else
+		ret = malloc(length);
+#endif
+	}
+
+	return ret;
+}
+
+void* qsc_memutils_realloc(void* block, size_t length)
+{
+	void* ret;
+
+	ret = NULL;
+
+	if (length != 0)
+	{
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+		ret = _aligned_realloc(block, length, QSC_SIMD_ALIGNMENT);
+#else
+		ret = realloc(block, length);
+#endif
+	}
+
+	return ret;
+}
+
+void qsc_memutils_alloc_free(void* block)
+{
+	if (block != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		_aligned_free(block);
+#else
+		free(block);
+#endif
+	}
+}
+
 void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 {
 	void* ret;
@@ -69,9 +118,16 @@ void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 	{
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_OS_WINDOWS)
-		ret = _mm_malloc(length, align);
+		ret = _aligned_malloc(length, align);
 #	elif defined(QSC_SYSTEM_OS_POSIX)
-		posix_memalign(&ret, align, length);
+		int res;
+
+		res = posix_memalign(&ret, align, length);
+
+		if (res != 0)
+		{
+			ret = NULL;
+		}
 #	else
 		ret = (void*)malloc(length);
 #	endif
@@ -89,7 +145,7 @@ void qsc_memutils_aligned_free(void* block)
 	{
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_OS_WINDOWS)
-		_mm_free(block);
+		_aligned_free(block);
 #	else
 		free(block);
 #	endif
@@ -99,34 +155,26 @@ void qsc_memutils_aligned_free(void* block)
 	}
 }
 
+#if defined(QSC_SYSTEM_HAS_AVX)
 static void qsc_memutils_clear128(void* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX)
 	_mm_storeu_si128((__m128i*)output, _mm_setzero_si128());
-#else
-	memset((uint8_t*)output, 0x00, 16);
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX2)
 static void qsc_memutils_clear256(void* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX2)
 	_mm256_storeu_si256((__m256i*)output, _mm256_setzero_si256());
-#else
-	qsc_memutils_clear128((uint8_t*)output);
-	qsc_memutils_clear128(((uint8_t*)output + 16));
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX512)
 static void qsc_memutils_clear512(void* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX512)
 	_mm512_storeu_si512((__m512i*)output, _mm512_setzero_si512());
-#else
-	qsc_memutils_clear256((uint8_t*)output);
-	qsc_memutils_clear256(((uint8_t*)output + 32));
-#endif
 }
+#endif
 
 void qsc_memutils_clear(void* output, size_t length)
 {
@@ -184,39 +232,34 @@ void qsc_memutils_clear(void* output, size_t length)
 
 		if (pctr != length)
 		{
-			memset(((uint8_t*)output + pctr), 0x00, length - pctr);
+			for (size_t i = pctr; i < length; ++i)
+			{
+				((uint8_t*)output)[i] = 0x00;
+			}
 		}
 	}
 }
 
+#if defined(QSC_SYSTEM_HAS_AVX)
 static void qsc_memutils_copy128(const void* input, void* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX)
 	_mm_storeu_si128((__m128i*)output, _mm_loadu_si128((const __m128i*)input));
-#else
-	memcpy(output, (uint8_t*)input, 16);
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX2)
 static void qsc_memutils_copy256(const void* input, void* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX2)
 	_mm256_storeu_si256((__m256i*)output, _mm256_loadu_si256((const __m256i*)input));
-#else
-	qsc_memutils_copy128((const uint8_t*)input, (uint8_t*)output);
-	qsc_memutils_copy128((const uint8_t*)input + 16, (uint8_t*)output + 16);
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX512)
 static void qsc_memutils_copy512(const void* input, void* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX512)
 	_mm512_storeu_si512((__m512i*)output, _mm512_loadu_si512((const __m512i*)input));
-#else
-	qsc_memutils_copy256((const uint8_t*)input, (uint8_t*)output);
-	qsc_memutils_copy256((const uint8_t*)input + 32, (uint8_t*)output + 32);
-#endif
 }
+#endif
 
 void qsc_memutils_copy(void* output, const void* input, size_t length)
 {
@@ -274,41 +317,45 @@ void qsc_memutils_copy(void* output, const void* input, size_t length)
 
 		if (pctr != length)
 		{
-			memcpy((uint8_t*)output + pctr, (const uint8_t*)input + pctr, length - pctr);
+			for (size_t i = pctr; i < length; ++i)
+			{
+				((uint8_t*)output)[i] = ((const uint8_t*)input)[i];
+			}
 		}
 	}
 }
 
+void qsc_memutils_move(void* output, const void* input, size_t length)
+{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	memmove_s(output, length, input, length);
+#else
+	memmove(output, input, length);
+#endif
+}
+
+#if defined(QSC_SYSTEM_HAS_AVX)
 static void qsc_memutils_setval128(void* output, uint8_t value)
 {
-#if defined(QSC_SYSTEM_HAS_AVX)
 	_mm_storeu_si128((__m128i*)output, _mm_set1_epi8(value));
-#else
-	memset((uint8_t*)output, value, 16);
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX2)
 static void qsc_memutils_setval256(void* output, uint8_t value)
 {
-#if defined(QSC_SYSTEM_HAS_AVX2)
 	_mm256_storeu_si256((__m256i*)output, _mm256_set1_epi8(value));
-#else
-	qsc_memutils_setval128((uint8_t*)output, value);
-	qsc_memutils_setval128((uint8_t*)output + 16, value);
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX512)
 static void qsc_memutils_setval512(void* output, uint8_t value)
 {
-#if defined(QSC_SYSTEM_HAS_AVX512)
 	_mm512_storeu_si512((__m512i*)output, _mm512_set1_epi8(value));
-#else
-	qsc_memutils_setval256(output, value);
-	qsc_memutils_setval256((uint8_t*)output + 32, value);
-#endif
 }
+#endif
 
-void qsc_memutils_setvalue(void* output, size_t length, uint8_t value)
+void qsc_memutils_setvalue(void* output, uint8_t value, size_t length)
 {
 	size_t pctr;
 
@@ -364,44 +411,34 @@ void qsc_memutils_setvalue(void* output, size_t length, uint8_t value)
 
 		if (pctr != length)
 		{
-			memset((uint8_t*)output + pctr, value, length - pctr);
+			for (size_t i = pctr; i < length; ++i)
+			{
+				((uint8_t*)output)[i] = value;
+			}
 		}
 	}
 }
 
+#if defined(QSC_SYSTEM_HAS_AVX)
 static void qsc_memutils_xor128(const uint8_t* input, uint8_t* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX)
 	_mm_storeu_si128((__m128i*)output, _mm_xor_si128(_mm_loadu_si128((const __m128i*)input), _mm_loadu_si128((const __m128i*)output)));
-#else
-	size_t i;
-
-	for (i = 0; i < 16; ++i)
-	{
-		output[i] ^= input[i];
-	}
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX2)
 static void qsc_memutils_xor256(const uint8_t* input, uint8_t* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX2)
 	_mm256_storeu_si256((__m256i*)output, _mm256_xor_si256(_mm256_loadu_si256((const __m256i*)input), _mm256_loadu_si256((const __m256i*)output)));
-#else
-	qsc_memutils_xor128(input, output);
-	qsc_memutils_xor128((input + 16), (output + 16));
-#endif
 }
+#endif
 
+#if defined(QSC_SYSTEM_HAS_AVX512)
 static void qsc_memutils_xor512(const uint8_t* input, uint8_t* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX512)
 	_mm512_storeu_si512((__m512i*)output, _mm512_xor_si512(_mm512_loadu_si512((const __m512i*)input), _mm512_loadu_si512((__m512i*)output)));
-#else
-	qsc_memutils_xor256(input, output);
-	qsc_memutils_xor256((input + 32), (output + 32));
-#endif
 }
+#endif
 
 void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size_t length)
 {
@@ -464,40 +501,25 @@ void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size_t length)
 	}
 }
 
-inline static void qsc_memutils_xorv128(const uint8_t value, uint8_t* output)
-{
-#if defined(QSC_SYSTEM_HAS_AVX)
-	__m128i v = _mm_set1_epi8(value);
-	_mm_storeu_si128((__m128i*)output, _mm_xor_si128(_mm_loadu_si128((const __m128i*) & v), _mm_loadu_si128((const __m128i*)output)));
-#else
-	for (size_t i = 0; i < 16; ++i)
-	{
-		output[i] ^= value;
-	}
-#endif
-}
-
-inline static void qsc_memutils_xorv256(const uint8_t value, uint8_t* output)
-{
-#if defined(QSC_SYSTEM_HAS_AVX2)
-	__m256i v = _mm256_set1_epi8(value);
-	_mm256_storeu_si256((__m256i*)output, _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) & v), _mm256_loadu_si256((const __m256i*)output)));
-#else
-	qsc_memutils_xorv128(value, output);
-	qsc_memutils_xorv128(value, (output + 16));
-#endif
-}
-
+#if defined(QSC_SYSTEM_HAS_AVX512)
 inline static void qsc_memutils_xorv512(const uint8_t value, uint8_t* output)
 {
-#if defined(QSC_SYSTEM_HAS_AVX512)
 	__m512i v = _mm512_set1_epi8(value);
 	_mm512_storeu_si512((__m512i*)output, _mm512_xor_si512(_mm512_loadu_si512((const __m512i*)&v), _mm512_loadu_si512((__m512i*)output)));
-#else
-	qsc_memutils_xorv256(value, output);
-	qsc_memutils_xorv256(value, (output + 32));
-#endif
 }
+#elif defined(QSC_SYSTEM_HAS_AVX2)
+inline static void qsc_memutils_xorv256(const uint8_t value, uint8_t* output)
+{
+	__m256i v = _mm256_set1_epi8(value);
+	_mm256_storeu_si256((__m256i*)output, _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) & v), _mm256_loadu_si256((const __m256i*)output)));
+}
+#elif defined(QSC_SYSTEM_HAS_AVX)
+inline static void qsc_memutils_xorv128(const uint8_t value, uint8_t* output)
+{
+	__m128i v = _mm_set1_epi8(value);
+	_mm_storeu_si128((__m128i*)output, _mm_xor_si128(_mm_loadu_si128((const __m128i*) & v), _mm_loadu_si128((const __m128i*)output)));
+}
+#endif
 
 void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
 {

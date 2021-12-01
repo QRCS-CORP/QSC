@@ -81,7 +81,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -95,7 +95,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -111,7 +111,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -141,11 +141,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="acp.h" />
+    <ClInclude Include="aes.h" />
     <ClInclude Include="arrayutils.h" />
     <ClInclude Include="chacha.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="consoleutils.h" />
-    <ClInclude Include="cpuid.h" />
+    <ClInclude Include="cpuidex.h" />
     <ClInclude Include="csg.h" />
     <ClInclude Include="csx.h" />
     <ClInclude Include="dilithium.h" />
@@ -170,7 +171,6 @@
     <ClInclude Include="kyber.h" />
     <ClInclude Include="kyberbase.h" />
     <ClInclude Include="kyberbase_avx2.h" />
-    <ClInclude Include="kyber_asm_consts.h" />
     <ClInclude Include="mceliece.h" />
     <ClInclude Include="mceliecebase.h" />
     <ClInclude Include="mceliecebase_avx2.h" />
@@ -179,7 +179,6 @@
     <ClInclude Include="ntru.h" />
     <ClInclude Include="ntrubase.h" />
     <ClInclude Include="ntrubase_avx2.h" />
-    <ClInclude Include="parallel.h" />
     <ClInclude Include="poly1305.h" />
     <ClInclude Include="queue.h" />
     <ClInclude Include="rcs.h" />
@@ -203,15 +202,17 @@
     <ClInclude Include="sysutils.h" />
     <ClInclude Include="threadpool.h" />
     <ClInclude Include="async.h" />
+    <ClInclude Include="timerex.h" />
     <ClInclude Include="timestamp.h" />
     <ClInclude Include="transpose.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="acp.c" />
+    <ClCompile Include="aes.c" />
     <ClCompile Include="arrayutils.c" />
     <ClCompile Include="chacha.c" />
     <ClCompile Include="consoleutils.c" />
-    <ClCompile Include="cpuid.c" />
+    <ClCompile Include="cpuidex.c" />
     <ClCompile Include="csg.c" />
     <ClCompile Include="csx.c" />
     <ClCompile Include="dilithium.c" />
@@ -224,6 +225,7 @@
     <ClCompile Include="ecdsa.c" />
     <ClCompile Include="ecdsabase.c" />
     <ClCompile Include="encoding.c" />
+    <ClCompile Include="event.c" />
     <ClCompile Include="falcon.c" />
     <ClCompile Include="falconbase.c" />
     <ClCompile Include="falconbase_avx2.c" />
@@ -242,7 +244,6 @@
     <ClCompile Include="ntru.c" />
     <ClCompile Include="ntrubase.c" />
     <ClCompile Include="ntrubase_avx2.c" />
-    <ClCompile Include="parallel.c" />
     <ClCompile Include="poly1305.c" />
     <ClCompile Include="queue.c" />
     <ClCompile Include="rcs.c" />
@@ -263,15 +264,11 @@
     <ClCompile Include="sphincsplusbase_avx2.c" />
     <ClCompile Include="stringutils.c" />
     <ClCompile Include="sysutils.c" />
+    <ClCompile Include="threadpool.c" />
     <ClCompile Include="async.c" />
+    <ClCompile Include="timerex.c" />
     <ClCompile Include="timestamp.c" />
     <ClCompile Include="transpose.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="kyber_asm_fq.S" />
-    <None Include="kyber_asm_invntt.S" />
-    <None Include="kyber_asm_ntt.S" />
-    <None Include="kyber_asm_shuffle.S" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

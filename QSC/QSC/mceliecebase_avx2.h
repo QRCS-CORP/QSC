@@ -20,8 +20,12 @@
 #ifndef QSC_MCELIECEBASE_AVX2_H
 #define QSC_MCELIECEBASE_AVX2_H
 
+ /* \cond DOXYGEN_IGNORE */
+
 #include "common.h"
 
- /* waiting for the code-base to stabilize before adding the intrinsics version */
+/* waiting for the code-base to stabilize before adding the intrinsics version */
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

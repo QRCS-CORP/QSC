@@ -1,4 +1,5 @@
 #include "ipinfo.h"
+#include "memutils.h"
 #include "stringutils.h"
 
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_any()
@@ -67,21 +68,21 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC
 		if (cnt > 0)
 		{
 			res.ipv4[0] = (uint8_t)a;
-			pos = ret + 1;
+			pos = (size_t)ret + 1;
 			cnt = sscanf_s((input + pos), "%d %n", &a, &ret);
 		}
 
 		if (cnt > 0)
 		{
 			res.ipv4[1] = (uint8_t)a;
-			pos += ret + 1;
+			pos += (size_t)ret + 1;
 			cnt = sscanf_s((input + pos), "%d %n", &a, &ret);
 		}
 
 		if (cnt > 0)
 		{
 			res.ipv4[2] = (uint8_t)a;
-			pos += ret + 1;
+			pos += (size_t)ret + 1;
 			cnt = sscanf_s((input + pos), "%d", &a);
 
 			if (cnt > 0)
@@ -208,7 +209,7 @@ bool qsc_ipinfo_ipv4_address_is_zeroed(const qsc_ipinfo_ipv4_address* address)
 	return res;
 }
 
-qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loop_back()
+qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loopback()
 {
 	qsc_ipinfo_ipv4_address res = {
 		.ipv4[0] = 127,
@@ -217,6 +218,52 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loop_back()
 		.ipv4[3] = 1 };
 
 	return res;
+}
+
+void qsc_ipinfo_ipv4_address_get_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], const qsc_ipinfo_ipv4_address* address)
+{
+	qsc_memutils_clear(mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
+
+	if (address->ipv4[0] > 0 && address->ipv4[0] < 127)
+	{
+		mask = "255.0.0.0";
+	}
+	else if (address->ipv4[0] > 127 && address->ipv4[0] < 192)
+	{
+		mask = "255.255.0.0";
+	}
+	else if (address->ipv4[0] > 191 && address->ipv4[0] < 224)
+	{
+		mask = "255.255.255.0";
+	}
+	else
+	{
+		mask = "255.255.255.255";
+	}
+}
+
+uint8_t qsc_ipinfo_ipv4_address_get_cidr_mask(const qsc_ipinfo_ipv4_address* address)
+{
+	uint8_t nmsk;
+
+	if (address->ipv4[0] > 0 && address->ipv4[0] < 127)
+	{
+		nmsk = 8;
+	}
+	else if (address->ipv4[0] > 127 && address->ipv4[0] < 192)
+	{
+		nmsk = 16;
+	}
+	else if (address->ipv4[0] > 191 && address->ipv4[0] < 224)
+	{
+		nmsk = 24;
+	}
+	else
+	{
+		nmsk = 32;
+	}
+
+	return nmsk;
 }
 
 void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_address* address)
@@ -258,16 +305,16 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 
 #else
 
-		pos = (size_t)sprintf(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address->ipv4[0]);
+		pos = (size_t)sprintf(output, "%d", address->ipv4[0]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[1]);
+		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[1]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[2]);
+		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[2]);
 		output[pos] = DELIM;
 		++pos;
-		sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[3]);
+		sprintf((output + pos), "%d", address->ipv4[3]);
 
 #endif
 
@@ -312,7 +359,7 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_any()
 	return res;
 }
 
-void qsc_ipinfo_ipv6_address_destroy(qsc_ipinfo_ipv6_address* address)
+void qsc_ipinfo_ipv6_address_clear(qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
 
@@ -346,7 +393,7 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_from_string(const char input[QSC
 	{
 		if (qsc_stringutils_string_contains(input, "::1") == true)
 		{
-			res = qsc_ipinfo_ipv6_address_loop_back();
+			res = qsc_ipinfo_ipv6_address_loopback();
 		}
 		else
 		{
@@ -487,7 +534,7 @@ bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address)
 	return res;
 }
 
-qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loop_back()
+qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loopback()
 {
 	qsc_ipinfo_ipv6_address add;
 
@@ -511,6 +558,54 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loop_back()
 	return add;
 }
 
+void qsc_ipinfo_ipv6_address_get_mask(char mask[QSC_IPINFO_IPV6_MASK_STRNLEN], const qsc_ipinfo_ipv6_address* address)
+{
+	size_t ctr;
+
+	ctr = QSC_IPINFO_IPV6_BYTELEN;
+
+	do
+	{
+		--ctr;
+
+		if (address->ipv6[ctr] == 0)
+		{
+			mask[ctr] = 'f';
+		}
+		else
+		{
+			break;
+		}
+	}
+	while (ctr != 0);
+}
+
+uint8_t qsc_ipinfo_ipv6_address_get_cidr_mask(const qsc_ipinfo_ipv6_address* address)
+{
+	size_t ctr;
+	uint8_t nmsk;
+
+	nmsk = 0;
+	ctr = QSC_IPINFO_IPV6_BYTELEN;
+
+	do
+	{
+		--ctr;
+
+		if (address->ipv6[ctr] == 0)
+		{
+			++nmsk;
+		}
+		else
+		{
+			break;
+		}
+	}
+	while (ctr != 0);
+
+	return nmsk;
+}
+
 void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
@@ -522,7 +617,7 @@ void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_add
 	}
 }
 
-char* qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address)
+void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
 	assert(output != NULL);
@@ -530,32 +625,156 @@ char* qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], co
 	if (address != NULL && output != NULL)
 	{
 		const char DELIM = ':';
+		uint16_t n;
 
-		memset(output, 0x00, QSC_IPINFO_IPV6_STRNLEN);
-		qsc_arrayutils_uint8_to_hex(output, 2, address->ipv6[0]);
-		qsc_arrayutils_uint8_to_hex((output + 2), 2, address->ipv6[1]);
+		qsc_memutils_clear(output, QSC_IPINFO_IPV6_STRNLEN);
+
+		n = qsc_intutils_be8to16(&address->ipv6[0]);
+		qsc_arrayutils_uint16_to_hex(&output[0], 5, n);
 		output[4] = DELIM;
-		qsc_arrayutils_uint8_to_hex((output + 5), 2, address->ipv6[2]);
-		qsc_arrayutils_uint8_to_hex((output + 7), 2, address->ipv6[3]);
+		n = qsc_intutils_be8to16(&address->ipv6[2]);
+		qsc_arrayutils_uint16_to_hex(&output[5], 5, n);
 		output[9] = DELIM;
-		qsc_arrayutils_uint8_to_hex((output + 10), 2, address->ipv6[4]);
-		qsc_arrayutils_uint8_to_hex((output + 12), 2, address->ipv6[5]);
+		n = qsc_intutils_be8to16(&address->ipv6[4]);
+		qsc_arrayutils_uint16_to_hex(&output[10], 5, n);
 		output[14] = DELIM;
-		qsc_arrayutils_uint8_to_hex((output + 15), 2, address->ipv6[6]);
-		qsc_arrayutils_uint8_to_hex((output + 17), 2, address->ipv6[7]);
+		n = qsc_intutils_be8to16(&address->ipv6[6]);
+		qsc_arrayutils_uint16_to_hex(&output[15], 5, n);
 		output[19] = DELIM;
-		qsc_arrayutils_uint8_to_hex((output + 20), 2, address->ipv6[8]);
-		qsc_arrayutils_uint8_to_hex((output + 22), 2, address->ipv6[9]);
+		n = qsc_intutils_be8to16(&address->ipv6[8]);
+		qsc_arrayutils_uint16_to_hex(&output[20], 5, n);
 		output[24] = DELIM;
-		qsc_arrayutils_uint8_to_hex((output + 25), 2, address->ipv6[10]);
-		qsc_arrayutils_uint8_to_hex((output + 27), 2, address->ipv6[11]);
+		n = qsc_intutils_be8to16(&address->ipv6[10]);
+		qsc_arrayutils_uint16_to_hex(&output[25], 5, n);
 		output[29] = DELIM;
-		qsc_arrayutils_uint8_to_hex((output + 30), 2, address->ipv6[12]);
-		qsc_arrayutils_uint8_to_hex((output + 32), 2, address->ipv6[13]);
+		n = qsc_intutils_be8to16(&address->ipv6[12]);
+		qsc_arrayutils_uint16_to_hex(&output[30], 5, n);
 		output[34] = DELIM;
-		qsc_arrayutils_uint8_to_hex((output + 35), 2, address->ipv6[14]);
-		qsc_arrayutils_uint8_to_hex((output + 37), 2, address->ipv6[15]);
+		n = qsc_intutils_be8to16(&address->ipv6[14]);
+		qsc_arrayutils_uint16_to_hex(&output[35], 5, n);
+	}
+}
+
+uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLEN])
+{
+	uint32_t ta[4] = { 0 };
+	const char* tmp = mask;
+	uint32_t bmask;
+	int32_t pos;
+	uint8_t bits;
+
+	for (size_t i = 0; i < 4; ++i)
+	{
+		pos = qsc_stringutils_find_string(tmp, ".");
+		ta[i] += qsc_stringutils_string_to_int(tmp);
+		tmp += (size_t)pos + 1;
 	}
 
-	return output;
+	bits = 0;
+	bmask = ((ta[0] << 24) + (ta[1] << 16) + (ta[2] << 8) + (ta[3]));
+
+	while (bmask != 0)
+	{
+		bits += bmask & 1;
+		bmask >>= 1;
+	}
+
+	return bits;
+}
+
+void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8_t cidr)
+{
+	qsc_stringutils_clear_string(mask);
+	uint32_t tmpn;
+
+	tmpn = 0;
+
+	if (cidr <= 8)
+	{
+		char tail[] = ".0.0.0";
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_int_to_string(tmpn, mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+	}
+	else if (cidr <= 16)
+	{
+		char head[] = "255.";
+		char tail[] = ".0.0";
+		char tmask[4] = { 0 };
+
+		cidr -= 8;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+	}
+	else if (cidr <= 24)
+	{
+		char head[] = "255.255.";
+		char tail[] = ".0";
+		char tmask[4] = { 0 };
+
+		cidr -= 16;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+	}
+	else
+	{
+		char head[] = "255.255.255.";
+		char tmask[4] = { 0 };
+
+		cidr -= 24;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+	}
 }

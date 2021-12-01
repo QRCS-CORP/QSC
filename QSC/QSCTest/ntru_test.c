@@ -5,6 +5,7 @@
 #include "../QSC/consoleutils.h"
 #include "../QSC/csp.h"
 #include "../QSC/intutils.h"
+#include "../QSC/memutils.h"
 #include "../QSC/ntru.h"
 
 bool qsctest_ntru_ciphertext_integrity()
@@ -15,7 +16,6 @@ bool qsctest_ntru_ciphertext_integrity()
 	uint8_t sk[QSC_NTRU_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t ssk1[QSC_NTRU_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t ssk2[QSC_NTRU_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t pbuf[1] = { 0 };
 	bool res;
 
 	res = true;
@@ -234,6 +234,7 @@ bool qsctest_ntru_publickey_integrity()
 bool qsctest_ntru_operations_test()
 {
 	uint8_t ct[QSC_NTRU_CIPHERTEXT_SIZE] = { 0 };
+	uint8_t esd[QSC_NTRU_SEED_SIZE] = { 0 };
 	uint8_t pk[QSC_NTRU_PUBLICKEY_SIZE] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t ssk1[QSC_NTRU_SHAREDSECRET_SIZE] = { 0 };
@@ -261,6 +262,23 @@ bool qsctest_ntru_operations_test()
 	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_NTRU_SHAREDSECRET_SIZE) != true)
 	{
 		qsc_consoleutils_print_line("Failure! ntru operations: the shared secrets are not equal -KOT2");
+		res = false;
+	}
+
+	/* test encrypt/decrypt api */
+
+	qsc_memutils_clear(ct, sizeof(ct));
+	qsc_memutils_clear(ssk1, sizeof(ssk1));
+	qsc_memutils_clear(ssk2, sizeof(ssk2));
+
+	qsc_csp_generate(esd, sizeof(esd));
+
+	qsc_ntru_encrypt(ssk1, ct, pk, esd);
+	qsc_ntru_decrypt(ssk2, ct, sk);
+
+	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_NTRU_SHAREDSECRET_SIZE) != true)
+	{
+		qsc_consoleutils_print_line("Failure! ntru operations: the shared secrets are not equal -KOT3");
 		res = false;
 	}
 

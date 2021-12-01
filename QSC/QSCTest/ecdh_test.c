@@ -40,7 +40,6 @@ bool qsctest_ecdh_kat_test()
 	qsc_ecdh_generate_seeded_keypair(pkb, skb, seedb);
 
 	/* test key generation */
-
 	if (qsc_intutils_are_equal8(pka, kpka, sizeof(pka)) != true)
 	{
 		qsctest_print_safe("Failure! ecdh_kat: public key a does not match expected -EK1 \n");
@@ -107,14 +106,13 @@ bool qsctest_ecdh_operations_test()
 	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
 	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	size_t i;
 	bool res;
 
 	res = true;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
-	for (i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
+	for (size_t i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
 	{
 		/* alice generates a key-pair */
 		qsc_ecdh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
@@ -158,14 +156,13 @@ bool qsctest_ecdh_privatekey_integrity()
 	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	size_t i;
 	bool res;
 
 	res = true;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
-	for (i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
+	for (size_t i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
 	{
 		/* alice generates a key-pair */
 		qsc_ecdh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
@@ -212,14 +209,13 @@ bool qsctest_ecdh_publickey_integrity()
 	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	size_t i;
 	bool res;
 
 	res = true;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
-	for (i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
+	for (size_t i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
 	{
 		/* alice generates a key-pair */
 		qsc_ecdh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);

@@ -1,4 +1,5 @@
 #include "ecdhbase.h"
+#include "consoleutils.h"
 #include "csp.h"
 #include "ec25519.h"
 #include "intutils.h"
@@ -50,65 +51,72 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
     fe25519 x3;
     fe25519 z2;
     fe25519 z3;
+    uint32_t pos;
     uint32_t swap;
     uint32_t bit;
+    int32_t res;
 
     t = q;
+    res = 0;
 
-    if (ed25519_small_order(p))
+    if (ed25519_small_order(p) == 0)
     {
-        return -1;
-    }
+        for (size_t i = 0; i < 32; ++i)
+        {
+            t[i] = n[i];
+        }
 
-    for (size_t i = 0; i < 32; i++) 
-    {
-        t[i] = n[i];
-    }
+        sc25519_clamp(t);
+        fe25519_frombytes(x1, p);
+        fe25519_1(x2);
+        fe25519_0(z2);
+        fe25519_copy(x3, x1);
+        fe25519_1(z3);
 
-    sc25519_clamp(t);
-    fe25519_frombytes(x1, p);
-    fe25519_1(x2);
-    fe25519_0(z2);
-    fe25519_copy(x3, x1);
-    fe25519_1(z3);
+        swap = 0;
+        pos = 255;
 
-    swap = 0;
+        do
+        {
+            --pos;
+            bit = (uint32_t)t[pos / 8] >> (pos & 7);
+            bit &= 1UL;
+            swap ^= bit;
+            fe25519_cswap(x2, x3, swap);
+            fe25519_cswap(z2, z3, swap);
+            swap = bit;
+            fe25519_add(a, x2, z2);
+            fe25519_sub(b, x2, z2);
+            fe25519_sq(aa, a);
+            fe25519_sq(bb, b);
+            fe25519_mul(x2, aa, bb);
+            fe25519_sub(e, aa, bb);
+            fe25519_sub(da, x3, z3);
+            fe25519_mul(da, da, a);
+            fe25519_add(cb, x3, z3);
+            fe25519_mul(cb, cb, b);
+            fe25519_add(x3, da, cb);
+            fe25519_sq(x3, x3);
+            fe25519_sub(z3, da, cb);
+            fe25519_sq(z3, z3);
+            fe25519_mul(z3, z3, x1);
+            fe25519_mul32(z2, e, 121666);
+            fe25519_add(z2, z2, bb);
+            fe25519_mul(z2, z2, e);
+        } while (pos > 0);
 
-    for (int32_t pos = 254; pos >= 0; --pos)
-    {
-        bit = t[pos / 8] >> (pos & 7);
-        bit &= 1;
-        swap ^= bit;
         fe25519_cswap(x2, x3, swap);
         fe25519_cswap(z2, z3, swap);
-        swap = bit;
-        fe25519_add(a, x2, z2);
-        fe25519_sub(b, x2, z2);
-        fe25519_sq(aa, a);
-        fe25519_sq(bb, b);
-        fe25519_mul(x2, aa, bb);
-        fe25519_sub(e, aa, bb);
-        fe25519_sub(da, x3, z3);
-        fe25519_mul(da, da, a);
-        fe25519_add(cb, x3, z3);
-        fe25519_mul(cb, cb, b);
-        fe25519_add(x3, da, cb);
-        fe25519_sq(x3, x3);
-        fe25519_sub(z3, da, cb);
-        fe25519_sq(z3, z3);
-        fe25519_mul(z3, z3, x1);
-        fe25519_mul32(z2, e, 121666);
-        fe25519_add(z2, z2, bb);
-        fe25519_mul(z2, z2, e);
+        fe25519_invert(z2, z2);
+        fe25519_mul(x2, x2, z2);
+        fe25519_tobytes(q, x2);
+    }
+    else
+    {
+        res = -1;
     }
 
-    fe25519_cswap(x2, x3, swap);
-    fe25519_cswap(z2, z3, swap);
-    fe25519_invert(z2, z2);
-    fe25519_mul(x2, x2, z2);
-    fe25519_tobytes(q, x2);
-
-    return 0;
+    return res;
 }
 
 static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)

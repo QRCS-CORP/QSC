@@ -15,16 +15,15 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* A network sockets class.
-* Written by John G. Underhill
-* Updated on March 30, 2021
-* Contact: support@vtdev.com */
+*/
 
 #ifndef QSC_SOCKET_H
 #define QSC_SOCKET_H
+
+/*
+* \file socket.h
+* \brief TCP/IP function constants and structures
+*/
 
 #include "common.h"
 #include "socketflags.h"
@@ -65,11 +64,13 @@
 */
 #define QSC_SOCKET_TIMEOUT_MSEC 10000
 
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 /*!
 \typedef socklen_t
 * The socket length type
 */
 typedef int32_t socklen_t;
+#endif
 
 /*!
 \typedef socket_t
@@ -83,7 +84,7 @@ typedef int32_t socket_t;
 
 /*!
 \const QSC_UNINITIALIZED_SOCKET
-* An unitialized socket handle
+* An uninitialized socket handle
 */
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	static const socket_t QSC_UNINITIALIZED_SOCKET = (uintptr_t)~0;
@@ -94,16 +95,16 @@ typedef int32_t socket_t;
 /*! \struct qsc_socket
 * \brief The socket instance structure
 */
-QSC_EXPORT_API typedef struct qsc_socket 
+QSC_EXPORT_API typedef struct qsc_socket
 {
-	socket_t connection;						/*!< A socket conection pointer */
+	socket_t connection;							/*!< A socket connection pointer */
 	int8_t address[QSC_SOCKET_ADDRESS_MAX_LENGTH];	/*!< The sockets string address */
-	uint32_t instance;							/*!< The sockets instance count */
-	uint16_t port;								/*!< The sockets port number */
-	qsc_socket_address_families address_family;	/*!< The sockets address family type */
-	qsc_socket_states connection_status;		/*!< The connection state type */
-	qsc_socket_protocols socket_protocol;		/*!< The socket protocol type */
-	qsc_socket_transports socket_transport;		/*!< The socket transport type */
+	uint32_t instance;								/*!< The sockets instance count */
+	uint16_t port;									/*!< The sockets port number */
+	qsc_socket_address_families address_family;		/*!< The sockets address family type */
+	qsc_socket_states connection_status;			/*!< The connection state type */
+	qsc_socket_protocols socket_protocol;			/*!< The socket protocol type */
+	qsc_socket_transports socket_transport;			/*!< The socket transport type */
 } qsc_socket;
 
 #endif

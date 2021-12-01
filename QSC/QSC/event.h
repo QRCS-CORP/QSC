@@ -15,62 +15,69 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Written by John G. Underhill
-* Updated on November 11, 2020
-* Contact: support@vtdev.com */
+*/
 
 #ifndef QSC_EVENT_H
 #define QSC_EVENT_H
 
 #include "common.h"
+#include <stdarg.h>
 
-#define QSC_EVENT_LIST_LENGTH 4
-
-typedef void (*qsc_event_callback)(void*);
-
-/*! \enum qsc_event_list
-* \brief The event types enumeration
+/*
+* \file event.h
+* \brief Event function definitions
 */
-typedef enum qsc_event_list
-{
-	qsc_event_receive_callback = 0,
-	qsc_event_send_callback = 1,
-	qsc_event_connection_request = 3,
-	qsc_event_connection_shutdown = 4
-} qsc_event_list;
 
-/*! \struct qsc_event_handlers
+/*!
+* \def QSC_EVENT_NAME_SIZE
+* \brief The character length of the event name
+*/
+#define QSC_EVENT_NAME_SIZE 32
+
+/*! \typedef qsc_event_callback
+* \brief The event callback variadic prototype.
+* Takes the count number of arguments, and the argument array.
+*/
+typedef void (*qsc_event_callback)(size_t, ...);
+
+/* alternative callback definition that complies with Misra
+typedef void (*qsc_event_callback)(void*, size_t); */
+
+/*! \struct qsc_event_handler
 * \brief The event handler structure
 */
-QSC_EXPORT_API typedef struct qsc_event_handlers
+QSC_EXPORT_API typedef struct qsc_event_handler
 {
-	qsc_event_callback callback;
-	struct qsc_event_handlers* next;
-} qsc_event_handlers;
+	qsc_event_callback callback;		/*!< The callback function  */
+	char name[QSC_EVENT_NAME_SIZE];		/*!< The event handler name  */
+} qsc_event_handler;
 
 /**
 * \brief Register an event and callback
 *
-* \param event: The event to register
+* \param name: The name of the event
 * \param callback: The callback function
 * \return Returns 0 for success
 */
-QSC_EXPORT_API int32_t qsc_event_register(qsc_event_list event, qsc_event_callback callback);
+QSC_EXPORT_API int32_t qsc_event_register(const char name[QSC_EVENT_NAME_SIZE], qsc_event_callback callback);
 
 /**
-* \brief Initialize the event handler array
+* \brief Clear a listener
 *
-* \param handlers: The array of event handlers
+* \param name: The name of the event
 */
-QSC_EXPORT_API void qsc_event_init_listeners(qsc_event_handlers* handlers[QSC_EVENT_LIST_LENGTH]);
+QSC_EXPORT_API void qsc_event_clear_listener(const char name[QSC_EVENT_NAME_SIZE]);
 
 /**
-* \brief Destroy the event handler array
+* \brief Retrieve a callback by name
 *
-* \param handlers: The array of event handlers
+* \param name: The name of the event
 */
-QSC_EXPORT_API void qsc_event_destroy_listeners(qsc_event_handlers* handlers[QSC_EVENT_LIST_LENGTH]);
+QSC_EXPORT_API qsc_event_callback qsc_event_get_callback(const char name[QSC_EVENT_NAME_SIZE]);
+
+/**
+* \brief Destroy the event handler state
+*/
+QSC_EXPORT_API void qsc_event_destroy_listeners();
 
 #endif

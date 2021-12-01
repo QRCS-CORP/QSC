@@ -15,23 +15,19 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of the ECDSA asymmetric signature scheme
-* Rewritten for Misra compliance and library integration by John G. Underhill
-* Contact: support@vtdev.com
-* Updated on August 30, 2020
 */
+
+#ifndef QSC_ECDSA_H
+#define QSC_ECDSA_H
+
+#include "common.h"
 
 /**
 * \file ecdsa.h
+* \brief Contains the primary public api for the ECDSA asymmetric signature scheme implementation
 * \date September 21, 2020
 *
-* \brief <b>The ECDSA API definitions</b> \n
-* Contains the primary public api for the ECDSA asymmetric signature scheme implementation.
-*
-* \para <b>Example</b> \n
+* \par Example
 * \code
 * // An example of key-pair creation, encryption, and decryption
 * #define MSGLEN 32
@@ -63,11 +59,6 @@
 * Rewritten for Misra compliance and library integration by John G. Underhill
 * September 21, 2020
 */
-
-#ifndef QSC_ECDSA_H
-#define QSC_ECDSA_H
-
-#include "common.h"
 
 #if defined(QSC_ECDSA_S1EC25519)
 
@@ -112,9 +103,9 @@
 *
 * \param publickey: Pointer to the public verification-key array
 * \param privatekey: Pointer to the private signature-key array
-* \param seed: Pointer to the random 32-byte seed array
+* \param seed: [const] Pointer to the random 32-byte seed array
 */
-QSC_EXPORT_API void qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
+QSC_EXPORT_API void qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 /**
 * \brief Generates a ECDSA public/private key-pair.
@@ -137,7 +128,6 @@ QSC_EXPORT_API void qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* priv
 * \param message: Pointer to the message array
 * \param msglen: The message length
 * \param privatekey: [const] Pointer to the private signature-key array
-* \param rng_generate: Pointer to the random generator
 */
 QSC_EXPORT_API void qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 

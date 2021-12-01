@@ -40,9 +40,9 @@ inline static void chacha_quarter_round(__m256i state[16], size_t a, size_t b, s
 static void falcon_prng_refill(falcon_prng_state* p)
 {
 	static const uint32_t CW[] = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
-	__m256i state[16];
-	__m256i init[16];
-	QSC_ALIGN(64) uint32_t w[16];
+	__m256i state[16] = { 0 };
+	__m256i init[16] = { 0 };
+	QSC_ALIGN(64) uint32_t w[16] = { 0 };
 	const uint32_t* sw;
 	uint64_t cc;
 	size_t u;
@@ -100,35 +100,6 @@ static void falcon_prng_refill(falcon_prng_state* p)
 	}
 
 	p->ptr = 0;
-}
-
-static void falcon_prng_get_bytes(falcon_prng_state* p, void* dst, size_t len)
-{
-	uint8_t *buf;
-
-	buf = dst;
-
-	while (len > 0)
-	{
-		size_t clen;
-
-		clen = (sizeof p->buf) - p->ptr;
-
-		if (clen > len)
-		{
-			clen = len;
-		}
-
-		memcpy(buf, p->buf, clen);
-		buf += clen;
-		len -= clen;
-		p->ptr += clen;
-
-		if (p->ptr == sizeof p->buf)
-		{
-			falcon_prng_refill(p);
-		}
-	}
 }
 
 static void falcon_prng_init(falcon_prng_state* p, qsc_keccak_state* src)
@@ -1869,62 +1840,6 @@ static void falcon_poly_mulconst(falcon_fpr* a, falcon_fpr x, uint32_t logn)
 	}
 }
 
-static void falcon_poly_div_fft(falcon_fpr* restrict a, const falcon_fpr* restrict b, uint32_t logn)
-{
-	size_t n;
-	size_t hn;
-	size_t u;
-
-	n = (size_t)1 << logn;
-	hn = n >> 1;
-
-	if (n >= 8)
-	{
-		__m256d one;
-
-		one = _mm256_set1_pd(1.0);
-
-		for (u = 0; u < hn; u += 4)
-		{
-			__m256d a_re;
-			__m256d a_im;
-			__m256d b_re;
-			__m256d b_im;
-			__m256d c_re;
-			__m256d c_im;
-			__m256d t;
-
-			a_re = _mm256_loadu_pd(&a[u].v);
-			a_im = _mm256_loadu_pd(&a[u + hn].v);
-			b_re = _mm256_loadu_pd(&b[u].v);
-			b_im = _mm256_loadu_pd(&b[u + hn].v);
-			t = _mm256_div_pd(one, falcon_fmadd(b_re, b_re, _mm256_mul_pd(b_im, b_im)));
-			b_re = _mm256_mul_pd(b_re, t);
-			b_im = _mm256_mul_pd(b_im, t);
-			c_re = falcon_fmadd(a_re, b_re, _mm256_mul_pd(a_im, b_im));
-			c_im = falcon_fmsub(a_im, b_re, _mm256_mul_pd(a_re, b_im));
-			_mm256_storeu_pd(&a[u].v, c_re);
-			_mm256_storeu_pd(&a[u + hn].v, c_im);
-		}
-	}
-	else
-	{
-		for (u = 0; u < hn; ++u)
-		{
-			falcon_fpr a_re;
-			falcon_fpr a_im;
-			falcon_fpr b_re;
-			falcon_fpr b_im;
-
-			a_re = a[u];
-			a_im = a[u + hn];
-			b_re = b[u];
-			b_im = b[u + hn];
-			falcon_fpc_div(&a[u], &a[u + hn], a_re, a_im, b_re, b_im);
-		}
-	}
-}
-
 static void falcon_poly_invnorm2_fft(falcon_fpr* restrict d, const falcon_fpr* restrict a, const falcon_fpr* restrict b, uint32_t logn)
 {
 	size_t n;
@@ -2206,83 +2121,6 @@ static void falcon_poly_LDL_fft(const falcon_fpr* restrict g00, falcon_fpr* rest
 	}
 }
 
-static void falcon_poly_LDLmv_fft(falcon_fpr* restrict d11, falcon_fpr* restrict l10, const falcon_fpr* restrict g00, const falcon_fpr* restrict g01, const falcon_fpr* restrict g11, uint32_t logn)
-{
-	size_t n;
-	size_t hn;
-	size_t u;
-
-	n = (size_t)1 << logn;
-	hn = n >> 1;
-
-	if (n >= 8)
-	{
-		__m256d one;
-
-		one = _mm256_set1_pd(1.0);
-
-		for (u = 0; u < hn; u += 4)
-		{
-			__m256d g00_re;
-			__m256d g00_im;
-			__m256d g01_re;
-			__m256d g01_im;
-			__m256d g11_re;
-			__m256d g11_im;
-			__m256d t;
-			__m256d mu_re;
-			__m256d mu_im;
-			__m256d xi_re;
-			__m256d xi_im;
-
-			g00_re = _mm256_loadu_pd(&g00[u].v);
-			g00_im = _mm256_loadu_pd(&g00[u + hn].v);
-			g01_re = _mm256_loadu_pd(&g01[u].v);
-			g01_im = _mm256_loadu_pd(&g01[u + hn].v);
-			g11_re = _mm256_loadu_pd(&g11[u].v);
-			g11_im = _mm256_loadu_pd(&g11[u + hn].v);
-
-			t = _mm256_div_pd(one, falcon_fmadd(g00_re, g00_re, _mm256_mul_pd(g00_im, g00_im)));
-			g00_re = _mm256_mul_pd(g00_re, t);
-			g00_im = _mm256_mul_pd(g00_im, t);
-			mu_re = falcon_fmadd(g01_re, g00_re, _mm256_mul_pd(g01_im, g00_im));
-			mu_im = falcon_fmsub(g01_re, g00_im, _mm256_mul_pd(g01_im, g00_re));
-			xi_re = falcon_fmsub(mu_re, g01_re, _mm256_mul_pd(mu_im, g01_im));
-			xi_im = falcon_fmadd(mu_im, g01_re, _mm256_mul_pd(mu_re, g01_im));
-			_mm256_storeu_pd(&d11[u].v, _mm256_sub_pd(g11_re, xi_re));
-			_mm256_storeu_pd(&d11[u + hn].v, _mm256_add_pd(g11_im, xi_im));
-			_mm256_storeu_pd(&l10[u].v, mu_re);
-			_mm256_storeu_pd(&l10[u + hn].v, mu_im);
-		}
-	}
-	else
-	{
-		for (u = 0; u < hn; ++u)
-		{
-			falcon_fpr g00_re;
-			falcon_fpr g00_im;
-			falcon_fpr g01_re;
-			falcon_fpr g01_im;
-			falcon_fpr g11_re;
-			falcon_fpr g11_im;
-			falcon_fpr mu_re;
-			falcon_fpr mu_im;
-
-			g00_re = g00[u];
-			g00_im = g00[u + hn];
-			g01_re = g01[u];
-			g01_im = g01[u + hn];
-			g11_re = g11[u];
-			g11_im = g11[u + hn];
-			falcon_fpc_div(&mu_re, &mu_im, g01_re, g01_im, g00_re, g00_im);
-			falcon_fpc_mul(&g01_re, &g01_im, mu_re, mu_im, g01_re, falcon_fpr_neg(g01_im));
-			falcon_fpc_sub(&d11[u], &d11[u + hn], g11_re, g11_im, g01_re, g01_im);
-			l10[u] = mu_re;
-			l10[u + hn] = falcon_fpr_neg(mu_im);
-		}
-	}
-}
-
 static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict f1, const falcon_fpr* restrict f, uint32_t logn)
 {
 	/*
@@ -2318,7 +2156,7 @@ static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict 
 			__m256d ff3;
 			__m256d gmt;
 
-			ab_re = _mm256_loadu_pd(&f[(u << 1)].v);
+			ab_re = _mm256_loadu_pd(&f[u << 1].v);
 			ab_im = _mm256_loadu_pd(&f[(u << 1) + hn].v);
 			ff0 = _mm256_mul_pd(_mm256_hadd_pd(ab_re, ab_im), half);
 			ff0 = _mm256_permute4x64_pd(ff0, 0xD8);
@@ -2425,7 +2263,7 @@ static void falcon_poly_merge_fft(falcon_fpr* restrict f, const falcon_fpr* rest
 			tu2_re = _mm256_unpackhi_pd(t_re, u_re);
 			tu1_im = _mm256_unpacklo_pd(t_im, u_im);
 			tu2_im = _mm256_unpackhi_pd(t_im, u_im);
-			_mm256_storeu_pd(&f[(u << 1)].v, _mm256_permute2f128_pd(tu1_re, tu2_re, 0x20));
+			_mm256_storeu_pd(&f[u << 1].v, _mm256_permute2f128_pd(tu1_re, tu2_re, 0x20));
 			_mm256_storeu_pd(&f[(u << 1) + 4].v, _mm256_permute2f128_pd(tu1_re, tu2_re, 0x31));
 			_mm256_storeu_pd(&f[(u << 1) + hn].v, _mm256_permute2f128_pd(tu1_im, tu2_im, 0x20));
 			_mm256_storeu_pd(&f[(u << 1) + 4 + hn].v, _mm256_permute2f128_pd(tu1_im, tu2_im, 0x31));
@@ -3418,11 +3256,10 @@ static int32_t falcon_verify_raw(const uint16_t* c0, const int16_t* s2, const ui
 	/* Reduce s2 elements modulo q ([0..q-1] range) */
 	for (u = 0; u < n; ++u)
 	{
-		uint32_t w;
-
-		w = (uint32_t)s2[u];
-		w += FALCON_Q & (uint32_t)-(int32_t)(w >> 31);
-		tt[u] = (uint16_t)w;
+		uint32_t w1;
+		w1 = (uint32_t)s2[u];
+		w1 += FALCON_Q & (uint32_t)-(int32_t)(w1 >> 31);
+		tt[u] = (uint16_t)w1;
 	}
 
 	/* Compute -s1 = s2*h - c0 mod phi mod q (in tt[]) */
@@ -3434,11 +3271,10 @@ static int32_t falcon_verify_raw(const uint16_t* c0, const int16_t* s2, const ui
 	/* Normalize -s1 elements into the [-q/2..q/2] range */
 	for (u = 0; u < n; ++u)
 	{
-		int32_t w;
-
-		w = (int32_t)tt[u];
-		w -= (int32_t)(FALCON_Q & (uint32_t)-(int32_t)(((FALCON_Q >> 1) - (uint32_t)w) >> 31));
-		((int16_t *)tt)[u] = (int16_t)w;
+		int32_t w2;
+		w2 = (int32_t)tt[u];
+		w2 -= (int32_t)(FALCON_Q & (uint32_t)-(int32_t)(((FALCON_Q >> 1) - (uint32_t)w2) >> 31));
+		((int16_t *)tt)[u] = (int16_t)w2;
 	}
 
 	/* Signature is valid if and only if the aggregate (-s1,s2) vector is short enough */
@@ -4182,7 +4018,7 @@ static void falcon_modp_iNTT2_ext(uint32_t* a, size_t stride, const uint32_t* ig
 					x = *r1;
 					y = *r2;
 					*r1 = falcon_modp_add(x, y, p);
-					*r2 = falcon_modp_montymul(falcon_modp_sub(x, y, p), s, p, p0i);;
+					*r2 = falcon_modp_montymul(falcon_modp_sub(x, y, p), s, p, p0i);
 				}
 			}
 
@@ -4502,7 +4338,7 @@ static void falcon_zint_rebuild_CRT(uint32_t* restrict xx, size_t xlen, size_t x
 	}
 
 	/* Normalize the reconstructed values around 0 */
-	if (normalize_signed)
+	if (normalize_signed != 0)
 	{
 		for (u = 0, x = xx; u < num; u++, x += xstride)
 		{
@@ -5552,7 +5388,7 @@ static uint32_t falcon_poly_small_sqnorm(const int8_t* f, uint32_t logn)
 	return (s | (uint32_t)-(int32_t)(ng >> 31));
 }
 
-static falcon_fpr* falcon_align_fpr(void* base, void* data)
+static falcon_fpr* falcon_align_fpr(void* base, const void* data)
 {
 	/*
 	* Align (upwards) the provided 'data' pointer with regards to 'base'
@@ -5569,7 +5405,7 @@ static falcon_fpr* falcon_align_fpr(void* base, void* data)
 	k = (size_t)(cd - cb);
 	km = k % sizeof(falcon_fpr);
 
-	if (km)
+	if (km != 0)
 	{
 		k += (sizeof(falcon_fpr)) - km;
 	}
@@ -5577,7 +5413,7 @@ static falcon_fpr* falcon_align_fpr(void* base, void* data)
 	return (falcon_fpr*)(cb + k);
 }
 
-static uint32_t* falcon_align_u32(void* base, void* data)
+static uint32_t* falcon_align_u32(void* base, const void* data)
 {
 	/*
 	* Align (upwards) the provided 'data' pointer with regards to 'base'
@@ -5594,7 +5430,7 @@ static uint32_t* falcon_align_u32(void* base, void* data)
 	k = (size_t)(cd - cb);
 	km = k % sizeof(uint32_t);
 
-	if (km)
+	if (km != 0)
 	{
 		k += (sizeof(uint32_t)) - km;
 	}
@@ -5656,7 +5492,7 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 	gm = gs + n * slen;
 	igm = gm + n;
 	t1 = igm + n;
-	memmove(fs, data, 2 * n * slen * sizeof(*data));
+	qsc_memutils_move(fs, data, 2 * n * slen * sizeof(*data));
 
 	/*
 	 * First slen words: we use the input values directly, and apply
@@ -5680,21 +5516,22 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 			t1[v] = *x;
 		}
 
-		if (!in_ntt)
+		if (in_ntt == 0)
 		{
 			falcon_modp_NTT2_ext(t1, 1, gm, logn, p, p0i);
 		}
 
 		for (v = 0, x = fd + u; v < hn; v++, x += tlen)
 		{
-			uint32_t w0, w1;
+			uint32_t w0;
+			uint32_t w1;
 
-			w0 = t1[(v << 1)];
+			w0 = t1[v << 1];
 			w1 = t1[(v << 1) + 1];
 			*x = falcon_modp_montymul(falcon_modp_montymul(w0, w1, p, p0i), R2, p, p0i);
 		}
 
-		if (in_ntt)
+		if (in_ntt != 0)
 		{
 			falcon_modp_iNTT2_ext(fs + u, slen, igm, logn, p, p0i);
 		}
@@ -5704,7 +5541,7 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 			t1[v] = *x;
 		}
 
-		if (!in_ntt)
+		if (in_ntt == 0)
 		{
 			falcon_modp_NTT2_ext(t1, 1, gm, logn, p, p0i);
 		}
@@ -5714,17 +5551,17 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 			uint32_t w0;
 			uint32_t w1;
 
-			w0 = t1[(v << 1)];
+			w0 = t1[v << 1];
 			w1 = t1[(v << 1) + 1];
 			*x = falcon_modp_montymul(falcon_modp_montymul(w0, w1, p, p0i), R2, p, p0i);
 		}
 
-		if (in_ntt)
+		if (in_ntt != 0)
 		{
 			falcon_modp_iNTT2_ext(gs + u, slen, igm, logn, p, p0i);
 		}
 
-		if (!out_ntt)
+		if (out_ntt == 0)
 		{
 			falcon_modp_iNTT2_ext(fd + u, tlen, igm, logn - 1, p, p0i);
 			falcon_modp_iNTT2_ext(gd + u, tlen, igm, logn - 1, p, p0i);
@@ -5768,7 +5605,7 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 			uint32_t w0;
 			uint32_t w1;
 
-			w0 = t1[(v << 1)];
+			w0 = t1[v << 1];
 			w1 = t1[(v << 1) + 1];
 			*x = falcon_modp_montymul(falcon_modp_montymul(w0, w1, p, p0i), R2, p, p0i);
 		}
@@ -5790,7 +5627,7 @@ static void falcon_make_fg_step(uint32_t *data, uint32_t logn, uint32_t depth, i
 			*x = falcon_modp_montymul(falcon_modp_montymul(w0, w1, p, p0i), R2, p, p0i);
 		}
 
-		if (!out_ntt)
+		if (out_ntt == 0)
 		{
 			falcon_modp_iNTT2_ext(fd + u, tlen, igm, logn - 1, p, p0i);
 			falcon_modp_iNTT2_ext(gd + u, tlen, igm, logn - 1, p, p0i);
@@ -6007,7 +5844,7 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 	Ft = tmp;
 	Gt = Ft + n * llen;
 	t1 = Gt + n * llen;
-	memmove(t1, ft, 2 * n * slen * sizeof(*ft));
+	qsc_memutils_move(t1, ft, 2 * n * slen * sizeof(*ft));
 	ft = t1;
 	gt = ft + slen * n;
 	t1 = gt + slen * n;
@@ -6015,7 +5852,7 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 	/*
 	 * Move Fd and Gd _after_ f and g.
 	 */
-	memmove(t1, Fd, 2 * hn * dlen * sizeof(*Fd));
+	qsc_memutils_move(t1, Fd, 2 * hn * dlen * sizeof(*Fd));
 	Fd = t1;
 	Gd = Fd + hn * dlen;
 
@@ -6174,9 +6011,9 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 			uint32_t mFp;
 			uint32_t mGp;
 
-			ftA = fx[(v << 1)];
+			ftA = fx[v << 1];
 			ftB = fx[(v << 1) + 1];
-			gtA = gx[(v << 1)];
+			gtA = gx[v << 1];
 			gtB = gx[(v << 1) + 1];
 			mFp = falcon_modp_montymul(Fp[v], R2, p, p0i);
 			mGp = falcon_modp_montymul(Gp[v], R2, p, p0i);
@@ -6440,7 +6277,7 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 			 * failure here implies that we discard the current
 			 * secret key (f,g).
 			 */
-			if (!falcon_fpr_lt(falcon_fpr_mtwo31m1, xv) || !falcon_fpr_lt(xv, falcon_fpr_ptwo31m1))
+			if (falcon_fpr_lt(falcon_fpr_mtwo31m1, xv) == 0 || falcon_fpr_lt(xv, falcon_fpr_ptwo31m1) == 0)
 			{
 				return 0;
 			}
@@ -6538,7 +6375,7 @@ static int32_t falcon_solve_NTRU_intermediate(uint32_t logn_top, const int8_t* f
 	 */
 	for (u = 0, x = tmp, y = tmp; u < (n << 1); u++, x += slen, y += llen)
 	{
-		memmove(x, y, slen * sizeof(*y));
+		qsc_memutils_move(x, y, slen * sizeof(*y));
 	}
 
 	return 1;
@@ -6658,9 +6495,9 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 	/*
 	 * Now Fd and Gd are not needed anymore; we can squeeze them out.
 	 */
-	memmove(tmp, Ft, llen * n * sizeof(uint32_t));
+	qsc_memutils_move(tmp, Ft, llen * n * sizeof(uint32_t));
 	Ft = tmp;
-	memmove(Ft + llen * n, Gt, llen * n * sizeof(uint32_t));
+	qsc_memutils_move(Ft + llen * n, Gt, llen * n * sizeof(uint32_t));
 	Gt = Ft + llen * n;
 	ft = Gt + llen * n;
 	gt = ft + slen * n;
@@ -6732,11 +6569,11 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 		 */
 		if (depth > 0)
 		{
-			memmove(gm + n, igm, n * sizeof(*igm));
+			qsc_memutils_move(gm + n, igm, n * sizeof(*igm));
 			igm = gm + n;
-			memmove(igm + n, fx, n * sizeof(*ft));
+			qsc_memutils_move(igm + n, fx, n * sizeof(*ft));
 			fx = igm + n;
-			memmove(fx + n, gx, n * sizeof(*gt));
+			qsc_memutils_move(fx + n, gx, n * sizeof(*gt));
 			gx = fx + n;
 		}
 
@@ -6803,9 +6640,9 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 			uint32_t mFp;
 			uint32_t mGp;
 
-			ftA = fx[(v << 1)];
+			ftA = fx[v << 1];
 			ftB = fx[(v << 1) + 1];
-			gtA = gx[(v << 1)];
+			gtA = gx[v << 1];
 			gtB = gx[(v << 1) + 1];
 			mFp = falcon_modp_montymul(Fp[v], R2, p, p0i);
 			mGp = falcon_modp_montymul(Gp[v], R2, p, p0i);
@@ -6862,11 +6699,11 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 	 * Integer representation of F and G is no longer needed, we
 	 * can remove it.
 	 */
-	memmove(tmp, ft, 2 * slen * n * sizeof(*ft));
+	qsc_memutils_move(tmp, ft, 2 * slen * n * sizeof(*ft));
 	ft = tmp;
 	gt = ft + slen * n;
 	rt3 = falcon_align_fpr(tmp, gt + slen * n);
-	memmove(rt3, rt1, 2 * n * sizeof(*rt1));
+	qsc_memutils_move(rt3, rt1, 2 * n * sizeof(*rt1));
 	rt1 = rt3;
 	rt2 = rt1 + n;
 	rt3 = rt2 + n;
@@ -6881,8 +6718,8 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 	/*
 	 * Remove unneeded ft and gt.
 	 */
-	memmove(tmp, rt1, 4 * n * sizeof(*rt1));
-	rt1 = (falcon_fpr *)tmp;
+	qsc_memutils_move(tmp, rt1, 4 * n * sizeof(*rt1));
+	rt1 = (falcon_fpr*)tmp;
 	rt2 = rt1 + n;
 	rt3 = rt2 + n;
 	rt4 = rt3 + n;
@@ -6932,7 +6769,7 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 
 		z = rt5[u];
 
-		if (!falcon_fpr_lt(z, falcon_fpr_ptwo63m1) || !falcon_fpr_lt(falcon_fpr_mtwo63m1, z))
+		if (falcon_fpr_lt(z, falcon_fpr_ptwo63m1) == 0 || falcon_fpr_lt(falcon_fpr_mtwo63m1, z) == 0)
 		{
 			return 0;
 		}
@@ -6958,7 +6795,7 @@ static int32_t falcon_solve_NTRU_binary_depth1(uint32_t logn_top, const int8_t* 
 	Ft = tmp;
 	Gt = Ft + n;
 	rt3 = falcon_align_fpr(tmp, Gt + n);
-	memmove(rt3, rt1, 2 * n * sizeof(*rt1));
+	qsc_memutils_move(rt3, rt1, 2 * n * sizeof(*rt1));
 	rt1 = rt3;
 	rt2 = rt1 + n;
 
@@ -7084,7 +6921,7 @@ static int32_t falcon_solve_NTRU_binary_depth0(uint32_t logn, const int8_t* f, c
 
 	Gp = Fp + n;
 	t1 = Gp + n;
-	memmove(Fp, ft, 2 * n * sizeof(*ft));
+	qsc_memutils_move(Fp, ft, 2 * n * sizeof(*ft));
 
 	/*
 	 * We now need to apply the Babai reduction. At that point,
@@ -7208,7 +7045,7 @@ static int32_t falcon_solve_NTRU_binary_depth0(uint32_t logn, const int8_t* f, c
 
 	falcon_FFT(rt3, logn);
 	rt2 = falcon_align_fpr(tmp, t2);
-	memmove(rt2, rt3, hn * sizeof(*rt3));
+	qsc_memutils_move(rt2, rt3, hn * sizeof(*rt3));
 
 	/*
 	 * Convert F*adj(f)+G*adj(g) in FFT representation.
@@ -7303,7 +7140,7 @@ static int32_t falcon_solve_NTRU(uint32_t logn, int8_t *F, int8_t *G, const int8
 
 	n = falcon_mkn(logn);
 
-	if (!falcon_solve_NTRU_deepest(logn, f, g, tmp))
+	if (falcon_solve_NTRU_deepest(logn, f, g, tmp) == 0)
 	{
 		return 0;
 	}
@@ -7321,7 +7158,7 @@ static int32_t falcon_solve_NTRU(uint32_t logn, int8_t *F, int8_t *G, const int8
 
 		while (depth-- > 0)
 		{
-			if (!falcon_solve_NTRU_intermediate(logn, f, g, depth, tmp))
+			if (falcon_solve_NTRU_intermediate(logn, f, g, depth, tmp) == 0)
 			{
 				return 0;
 			}
@@ -7335,18 +7172,18 @@ static int32_t falcon_solve_NTRU(uint32_t logn, int8_t *F, int8_t *G, const int8
 
 		while (depth-- > 2)
 		{
-			if (!falcon_solve_NTRU_intermediate(logn, f, g, depth, tmp))
+			if (falcon_solve_NTRU_intermediate(logn, f, g, depth, tmp) == 0)
 			{
 				return 0;
 			}
 		}
 
-		if (!falcon_solve_NTRU_binary_depth1(logn, f, g, tmp))
+		if (falcon_solve_NTRU_binary_depth1(logn, f, g, tmp) == 0)
 		{
 			return 0;
 		}
 
-		if (!falcon_solve_NTRU_binary_depth0(logn, f, g, tmp))
+		if (falcon_solve_NTRU_binary_depth0(logn, f, g, tmp) == 0)
 		{
 			return 0;
 		}
@@ -7364,7 +7201,7 @@ static int32_t falcon_solve_NTRU(uint32_t logn, int8_t *F, int8_t *G, const int8
 	 * Final F and G are in fk->tmp, one word per coefficient
 	 * (signed value over 31 bits).
 	 */
-	if (!falcon_poly_big_to_small(F, tmp, lim, logn) || !falcon_poly_big_to_small(G, tmp + n, lim, logn))
+	if (falcon_poly_big_to_small(F, tmp, lim, logn) == 0 || falcon_poly_big_to_small(G, tmp + n, lim, logn) == 0)
 	{
 		return 0;
 	}
@@ -7549,7 +7386,7 @@ static void falcon_keygen(qsc_keccak_state* kctx, int8_t* f, int8_t* g, int8_t* 
 		 * overwhelming probability; this guarantees that the
 		 * key will be encodable with FALCON_COMP_TRIM.
 		 */
-		lim = 1 << (falcon_avx2_max_fg_bits[logn] - 1);
+		lim = 1UL << (falcon_avx2_max_fg_bits[logn] - 1);
 
 		for (u = 0; u < n; ++u)
 		{
@@ -7612,7 +7449,7 @@ static void falcon_keygen(qsc_keccak_state* kctx, int8_t* f, int8_t* g, int8_t* 
 			bnorm = falcon_fpr_add(bnorm, falcon_fpr_sqr(rt2[u]));
 		}
 
-		if (!falcon_fpr_lt(bnorm, falcon_fpr_bnorm_max))
+		if (falcon_fpr_lt(bnorm, falcon_fpr_bnorm_max) == 0)
 		{
 			continue;
 		}
@@ -7632,7 +7469,7 @@ static void falcon_keygen(qsc_keccak_state* kctx, int8_t* f, int8_t* g, int8_t* 
 			tmp2 = (uint16_t*)tmp;
 		}
 
-		if (!falcon_compute_public(h2, f, g, logn, (uint8_t*)tmp2))
+		if (falcon_compute_public(h2, f, g, logn, (uint8_t*)tmp2) == 0)
 		{
 			continue;
 		}
@@ -7640,9 +7477,9 @@ static void falcon_keygen(qsc_keccak_state* kctx, int8_t* f, int8_t* g, int8_t* 
 		/*
 		 * Solve the NTRU equation to get F and G.
 		 */
-		lim = (1 << (falcon_falcon_max_FG_bits[logn] - 1)) - 1;
+		lim = (1UL << (uint32_t)(falcon_falcon_max_FG_bits[logn] - 1)) - 1;
 
-		if (!falcon_solve_NTRU(logn, F, G, f, g, lim, (uint32_t*)tmp))
+		if (falcon_solve_NTRU(logn, F, G, f, g, lim, (uint32_t*)tmp) == 0)
 		{
 			continue;
 		}
@@ -7685,122 +7522,6 @@ const falcon_fpr falcon_avx2_fpr_sigma_min[FALCON_FPR_INV_SIGMA_SIZE] =
 	{ 1.2778336969128335860256340575729042 },
 	{ 1.2982803343442918539708792538826807 }
 };
-
-static void falcon_ffLDL_fft_inner(falcon_fpr* restrict tree, falcon_fpr* restrict g0, falcon_fpr* restrict g1, uint32_t logn, falcon_fpr* restrict tmp)
-{
-	/*
-	 * Inner function for falcon_ffLDL_fft(). It expects the matrix to be both
-	 * auto-adjoint and quasicyclic; also, it uses the source operands
-	 * as modifiable temporaries.
-	 *
-	 * tmp[] must have room for at least one polynomial.
-	 */
-
-	size_t hn;
-	size_t n;
-
-	n = falcon_mkn(logn);
-
-	if (n == 1)
-	{
-		tree[0] = g0[0];
-		return;
-	}
-
-	hn = n >> 1;
-
-	/*
-	 * The LDL decomposition yields L (which is written in the tree)
-	 * and the diagonal of D. Since d00 = g0, we just write d11
-	 * into tmp.
-	 */
-	falcon_poly_LDLmv_fft(tmp, tree, g0, g1, g0, logn);
-
-	/*
-	 * Split d00 (currently in g0) and d11 (currently in tmp). We
-	 * reuse g0 and g1 as temporary storage spaces:
-	 *   d00 splits into g1, g1+hn
-	 *   d11 splits into g0, g0+hn
-	 */
-	falcon_poly_split_fft(g1, g1 + hn, g0, logn);
-	falcon_poly_split_fft(g0, g0 + hn, tmp, logn);
-
-	/*
-	 * Each split result is the first row of a new auto-adjoint
-	 * quasicyclic matrix for the next recursive step.
-	 */
-	falcon_ffLDL_fft_inner(tree + n, g1, g1 + hn, logn - 1, tmp);
-	falcon_ffLDL_fft_inner(tree + n + falcon_ffLDL_treesize(logn - 1), g0, g0 + hn, logn - 1, tmp);
-}
-
-static void falcon_ffLDL_fft(falcon_fpr* restrict tree, const falcon_fpr* restrict g00, const falcon_fpr* restrict g01, const falcon_fpr* restrict g11, uint32_t logn, falcon_fpr* restrict tmp)
-{
-	/*
-	 * Compute the ffLDL tree of an auto-adjoint matrix G. The matrix
-	 * is provided as three polynomials (FFT representation).
-	 *
-	 * The "tree" array is filled with the computed tree, of size
-	 * (logn+1)*(2^logn) elements (see falcon_ffLDL_treesize()).
-	 *
-	 * Input arrays MUST NOT overlap, except possibly the three unmodified
-	 * arrays g00, g01 and g11. tmp[] should have room for at least three
-	 * polynomials of 2^logn elements each.
-	 */
-
-	falcon_fpr* d00;
-	falcon_fpr* d11;
-	size_t hn;
-	size_t n;
-
-	n = falcon_mkn(logn);
-
-	if (n == 1)
-	{
-		tree[0] = g00[0];
-		return;
-	}
-
-	hn = n >> 1;
-	d00 = tmp;
-	d11 = tmp + n;
-	tmp += n << 1;
-
-	qsc_memutils_copy(d00, g00, n * sizeof(*g00));
-	falcon_poly_LDLmv_fft(d11, tree, g00, g01, g11, logn);
-
-	falcon_poly_split_fft(tmp, tmp + hn, d00, logn);
-	falcon_poly_split_fft(d00, d00 + hn, d11, logn);
-	qsc_memutils_copy(d11, tmp, n * sizeof(*tmp));
-	falcon_ffLDL_fft_inner(tree + n, d11, d11 + hn, logn - 1, tmp);
-	falcon_ffLDL_fft_inner(tree + n + falcon_ffLDL_treesize(logn - 1), d00, d00 + hn, logn - 1, tmp);
-}
-
-static void falcon_ffLDL_binary_normalize(falcon_fpr* tree, uint32_t orig_logn, uint32_t logn)
-{
-	/*
-	* Normalize an ffLDL tree: each leaf of value x is replaced with
-	* sigma / sqrt(x).
-	*/
-
-	size_t n;
-
-	n = falcon_mkn(logn);
-
-	if (n == 1)
-	{
-		/*
-		 * We actually store in the tree leaf the inverse of
-		 * the value mandated by the specification: this
-		 * saves a division both here and in the sampler.
-		 */
-		tree[0] = falcon_fpr_mul(falcon_fpr_sqrt(tree[0]), falcon_avx2_fpr_inv_sigma[orig_logn]);
-	}
-	else
-	{
-		falcon_ffLDL_binary_normalize(tree + n, orig_logn, logn - 1);
-		falcon_ffLDL_binary_normalize(tree + n + falcon_ffLDL_treesize(logn - 1), orig_logn, logn - 1);
-	}
-}
 
 static void falcon_smallints_to_fpr(falcon_fpr* r, const int8_t* t, uint32_t logn)
 {
@@ -7912,6 +7633,132 @@ static void falcon_ffSampling_fft_dyntree(falcon_samplerZ samp, void* samp_ctx, 
 	falcon_poly_split_fft(z0, z0 + hn, t0, logn);
 	falcon_ffSampling_fft_dyntree(samp, samp_ctx, z0, z0 + hn, g00, g00 + hn, g01, orig_logn, logn - 1, z0 + n);
 	falcon_poly_merge_fft(t0, z0, z0 + hn, logn);
+}
+
+#if defined(FALCON_HISTORICAL_ENABLE)
+
+static void falcon_poly_LDLmv_fft(falcon_fpr* restrict d11, falcon_fpr* restrict l10, const falcon_fpr* restrict g00, const falcon_fpr* restrict g01, const falcon_fpr* restrict g11, uint32_t logn)
+{
+	size_t n;
+	size_t hn;
+	size_t u;
+
+	n = (size_t)1 << logn;
+	hn = n >> 1;
+
+	if (n >= 8)
+	{
+		__m256d one;
+
+		one = _mm256_set1_pd(1.0);
+
+		for (u = 0; u < hn; u += 4)
+		{
+			__m256d g00_re;
+			__m256d g00_im;
+			__m256d g01_re;
+			__m256d g01_im;
+			__m256d g11_re;
+			__m256d g11_im;
+			__m256d t;
+			__m256d mu_re;
+			__m256d mu_im;
+			__m256d xi_re;
+			__m256d xi_im;
+
+			g00_re = _mm256_loadu_pd(&g00[u].v);
+			g00_im = _mm256_loadu_pd(&g00[u + hn].v);
+			g01_re = _mm256_loadu_pd(&g01[u].v);
+			g01_im = _mm256_loadu_pd(&g01[u + hn].v);
+			g11_re = _mm256_loadu_pd(&g11[u].v);
+			g11_im = _mm256_loadu_pd(&g11[u + hn].v);
+
+			t = _mm256_div_pd(one, falcon_fmadd(g00_re, g00_re, _mm256_mul_pd(g00_im, g00_im)));
+			g00_re = _mm256_mul_pd(g00_re, t);
+			g00_im = _mm256_mul_pd(g00_im, t);
+			mu_re = falcon_fmadd(g01_re, g00_re, _mm256_mul_pd(g01_im, g00_im));
+			mu_im = falcon_fmsub(g01_re, g00_im, _mm256_mul_pd(g01_im, g00_re));
+			xi_re = falcon_fmsub(mu_re, g01_re, _mm256_mul_pd(mu_im, g01_im));
+			xi_im = falcon_fmadd(mu_im, g01_re, _mm256_mul_pd(mu_re, g01_im));
+			_mm256_storeu_pd(&d11[u].v, _mm256_sub_pd(g11_re, xi_re));
+			_mm256_storeu_pd(&d11[u + hn].v, _mm256_add_pd(g11_im, xi_im));
+			_mm256_storeu_pd(&l10[u].v, mu_re);
+			_mm256_storeu_pd(&l10[u + hn].v, mu_im);
+		}
+	}
+	else
+	{
+		for (u = 0; u < hn; ++u)
+		{
+			falcon_fpr g00_re;
+			falcon_fpr g00_im;
+			falcon_fpr g01_re;
+			falcon_fpr g01_im;
+			falcon_fpr g11_re;
+			falcon_fpr g11_im;
+			falcon_fpr mu_re;
+			falcon_fpr mu_im;
+
+			g00_re = g00[u];
+			g00_im = g00[u + hn];
+			g01_re = g01[u];
+			g01_im = g01[u + hn];
+			g11_re = g11[u];
+			g11_im = g11[u + hn];
+			falcon_fpc_div(&mu_re, &mu_im, g01_re, g01_im, g00_re, g00_im);
+			falcon_fpc_mul(&g01_re, &g01_im, mu_re, mu_im, g01_re, falcon_fpr_neg(g01_im));
+			falcon_fpc_sub(&d11[u], &d11[u + hn], g11_re, g11_im, g01_re, g01_im);
+			l10[u] = mu_re;
+			l10[u + hn] = falcon_fpr_neg(mu_im);
+		}
+	}
+}
+
+static void falcon_ffLDL_fft_inner(falcon_fpr* restrict tree, falcon_fpr* restrict g0, falcon_fpr* restrict g1, uint32_t logn, falcon_fpr* restrict tmp)
+{
+	/*
+	 * Inner function for falcon_ffLDL_fft(). It expects the matrix to be both
+	 * auto-adjoint and quasicyclic; also, it uses the source operands
+	 * as modifiable temporaries.
+	 *
+	 * tmp[] must have room for at least one polynomial.
+	 */
+
+	size_t hn;
+	size_t n;
+
+	n = falcon_mkn(logn);
+
+	if (n == 1)
+	{
+		tree[0] = g0[0];
+		return;
+	}
+
+	hn = n >> 1;
+
+	/*
+	 * The LDL decomposition yields L (which is written in the tree)
+	 * and the diagonal of D. Since d00 = g0, we just write d11
+	 * into tmp.
+	 */
+	falcon_poly_LDLmv_fft(tmp, tree, g0, g1, g0, logn);
+
+	/*
+	 * Split d00 (currently in g0) and d11 (currently in tmp). We
+	 * reuse g0 and g1 as temporary storage spaces:
+	 *   d00 splits into g1, g1+hn
+	 *   d11 splits into g0, g0+hn
+	 */
+	falcon_poly_split_fft(g1, g1 + hn, g0, logn);
+	falcon_poly_split_fft(g0, g0 + hn, tmp, logn);
+
+	/*
+	 * Each split result is the first row of a new auto-adjoint
+	 * quasicyclic matrix for the next recursive step.
+	 */
+	falcon_ffLDL_fft_inner(tree + n, g1, g1 + hn, logn - 1, tmp);
+	falcon_ffLDL_fft_inner(tree + n + falcon_ffLDL_treesize(logn - 1), g0, g0 + hn, logn - 1, tmp);
 }
 
 static void falcon_ffSampling_fft(falcon_samplerZ samp, void* samp_ctx, falcon_fpr* restrict z0, falcon_fpr* restrict z1, const falcon_fpr* restrict tree,
@@ -8146,6 +7993,160 @@ static void falcon_ffSampling_fft(falcon_samplerZ samp, void* samp_ctx, falcon_f
 	}
 }
 
+static void falcon_prng_get_bytes(falcon_prng_state* p, void* dst, size_t len)
+{
+	uint8_t *buf;
+
+	buf = dst;
+
+	while (len > 0)
+	{
+		size_t clen;
+
+		clen = (sizeof p->buf) - p->ptr;
+
+		if (clen > len)
+		{
+			clen = len;
+		}
+
+		qsc_memutils_copy(buf, p->buf, clen);
+		buf += clen;
+		len -= clen;
+		p->ptr += clen;
+
+		if (p->ptr == sizeof p->buf)
+		{
+			falcon_prng_refill(p);
+		}
+	}
+}
+
+static void falcon_poly_div_fft(falcon_fpr* restrict a, const falcon_fpr* restrict b, uint32_t logn)
+{
+	size_t n;
+	size_t hn;
+	size_t u;
+
+	n = (size_t)1 << logn;
+	hn = n >> 1;
+
+	if (n >= 8)
+	{
+		__m256d one;
+
+		one = _mm256_set1_pd(1.0);
+
+		for (u = 0; u < hn; u += 4)
+		{
+			__m256d a_re;
+			__m256d a_im;
+			__m256d b_re;
+			__m256d b_im;
+			__m256d c_re;
+			__m256d c_im;
+			__m256d t;
+
+			a_re = _mm256_loadu_pd(&a[u].v);
+			a_im = _mm256_loadu_pd(&a[u + hn].v);
+			b_re = _mm256_loadu_pd(&b[u].v);
+			b_im = _mm256_loadu_pd(&b[u + hn].v);
+			t = _mm256_div_pd(one, falcon_fmadd(b_re, b_re, _mm256_mul_pd(b_im, b_im)));
+			b_re = _mm256_mul_pd(b_re, t);
+			b_im = _mm256_mul_pd(b_im, t);
+			c_re = falcon_fmadd(a_re, b_re, _mm256_mul_pd(a_im, b_im));
+			c_im = falcon_fmsub(a_im, b_re, _mm256_mul_pd(a_re, b_im));
+			_mm256_storeu_pd(&a[u].v, c_re);
+			_mm256_storeu_pd(&a[u + hn].v, c_im);
+		}
+	}
+	else
+	{
+		for (u = 0; u < hn; ++u)
+		{
+			falcon_fpr a_re;
+			falcon_fpr a_im;
+			falcon_fpr b_re;
+			falcon_fpr b_im;
+
+			a_re = a[u];
+			a_im = a[u + hn];
+			b_re = b[u];
+			b_im = b[u + hn];
+			falcon_fpc_div(&a[u], &a[u + hn], a_re, a_im, b_re, b_im);
+		}
+	}
+}
+
+static void falcon_ffLDL_fft(falcon_fpr* restrict tree, const falcon_fpr* restrict g00, const falcon_fpr* restrict g01, const falcon_fpr* restrict g11, uint32_t logn, falcon_fpr* restrict tmp)
+{
+	/*
+	 * Compute the ffLDL tree of an auto-adjoint matrix G. The matrix
+	 * is provided as three polynomials (FFT representation).
+	 *
+	 * The "tree" array is filled with the computed tree, of size
+	 * (logn+1)*(2^logn) elements (see falcon_ffLDL_treesize()).
+	 *
+	 * Input arrays MUST NOT overlap, except possibly the three unmodified
+	 * arrays g00, g01 and g11. tmp[] should have room for at least three
+	 * polynomials of 2^logn elements each.
+	 */
+
+	falcon_fpr* d00;
+	falcon_fpr* d11;
+	size_t hn;
+	size_t n;
+
+	n = falcon_mkn(logn);
+
+	if (n == 1)
+	{
+		tree[0] = g00[0];
+		return;
+	}
+
+	hn = n >> 1;
+	d00 = tmp;
+	d11 = tmp + n;
+	tmp += n << 1;
+
+	qsc_memutils_copy(d00, g00, n * sizeof(*g00));
+	falcon_poly_LDLmv_fft(d11, tree, g00, g01, g11, logn);
+
+	falcon_poly_split_fft(tmp, tmp + hn, d00, logn);
+	falcon_poly_split_fft(d00, d00 + hn, d11, logn);
+	qsc_memutils_copy(d11, tmp, n * sizeof(*tmp));
+	falcon_ffLDL_fft_inner(tree + n, d11, d11 + hn, logn - 1, tmp);
+	falcon_ffLDL_fft_inner(tree + n + falcon_ffLDL_treesize(logn - 1), d00, d00 + hn, logn - 1, tmp);
+}
+
+static void falcon_ffLDL_binary_normalize(falcon_fpr* tree, uint32_t orig_logn, uint32_t logn)
+{
+	/*
+	* Normalize an ffLDL tree: each leaf of value x is replaced with
+	* sigma / sqrt(x).
+	*/
+
+	size_t n;
+
+	n = falcon_mkn(logn);
+
+	if (n == 1)
+	{
+		/*
+		 * We actually store in the tree leaf the inverse of
+		 * the value mandated by the specification: this
+		 * saves a division both here and in the sampler.
+		 */
+		tree[0] = falcon_fpr_mul(falcon_fpr_sqrt(tree[0]), falcon_avx2_fpr_inv_sigma[orig_logn]);
+	}
+	else
+	{
+		falcon_ffLDL_binary_normalize(tree + n, orig_logn, logn - 1);
+		falcon_ffLDL_binary_normalize(tree + n + falcon_ffLDL_treesize(logn - 1), orig_logn, logn - 1);
+	}
+}
+
 static int32_t falcon_do_sign_tree(falcon_samplerZ samp, void* samp_ctx, int16_t* s2, const falcon_fpr* restrict expanded_key,
 	const uint16_t* hm, uint32_t logn, falcon_fpr* restrict tmp)
 {
@@ -8267,7 +8268,7 @@ static int32_t falcon_do_sign_tree(falcon_samplerZ samp, void* samp_ctx, int16_t
 		s2tmp[u] = (int16_t)-falcon_fpr_rint(t1[u]);
 	}
 
-	if (falcon_is_short_half(sqn, s2tmp, logn))
+	if (falcon_is_short_half(sqn, s2tmp, logn) != 0)
 	{
 		qsc_memutils_copy(s2, s2tmp, n * sizeof(*s2));
 		qsc_memutils_copy(tmp, s1tmp, n * sizeof(*s1tmp));
@@ -8277,6 +8278,8 @@ static int32_t falcon_do_sign_tree(falcon_samplerZ samp, void* samp_ctx, int16_t
 
 	return 0;
 }
+
+#endif
 
 static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t* s2, const int8_t* restrict f, const int8_t* restrict g,
 	const int8_t* restrict F, const int8_t* restrict G, const uint16_t* hm, uint32_t logn, falcon_fpr* restrict tmp)
@@ -8331,7 +8334,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 	falcon_poly_neg(b11, logn);
 
 	/*
-	 * Compute the Gram matrix G = B·B*. Formulas are:
+	 * Compute the Gram matrix G = Bï¿½B*. Formulas are:
 	 *   g00 = b00*adj(b00) + b01*adj(b01)
 	 *   g01 = b00*adj(b10) + b01*adj(b11)
 	 *   g10 = b10*adj(b00) + b11*adj(b01)
@@ -8425,7 +8428,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 	b01 = b00 + n;
 	b10 = b01 + n;
 	b11 = b10 + n;
-	memmove(b11 + n, t0, n * 2 * sizeof(*t0));
+	qsc_memutils_move(b11 + n, t0, n * 2 * sizeof(*t0));
 	t0 = b11 + n;
 	t1 = t0 + n;
 	falcon_smallints_to_fpr(b01, f, logn);
@@ -8490,7 +8493,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 		s2tmp[u] = (int16_t)-falcon_fpr_rint(t1[u]);
 	}
 
-	if (falcon_is_short_half(sqn, s2tmp, logn))
+	if (falcon_is_short_half(sqn, s2tmp, logn) != 0)
 	{
 		qsc_memutils_copy(s2, s2tmp, n * sizeof(*s2));
 		qsc_memutils_copy(tmp, s1tmp, n * sizeof(*s1tmp));
@@ -8616,7 +8619,7 @@ static int32_t falcon_BerExp(falcon_prng_state* p, falcon_fpr x, falcon_fpr ccs)
 	{
 		i -= 8;
 		w = falcon_prng_get_u8(p) - ((uint32_t)(z >> i) & 0xFF);
-	} while (!w && i > 0);
+	} while (w == 0 && i > 0);
 
 	return (int32_t)(w >> 31);
 }
@@ -8710,7 +8713,7 @@ static int32_t falcon_sampler(void* ctx, falcon_fpr mu, falcon_fpr isigma)
 		x = falcon_fpr_mul(falcon_fpr_sqr(falcon_fpr_sub(falcon_fpr_of(z), r)), dss);
 		x = falcon_fpr_sub(x, falcon_fpr_mul(falcon_fpr_of(z0 * z0), falcon_fpr_inv_2sqrsigma0));
 
-		if (falcon_BerExp(&spc->p, x, ccs))
+		if (falcon_BerExp(&spc->p, x, ccs) != 0)
 		{
 			/*
 			 * Rejection sampling was centered on r, but the
@@ -8740,7 +8743,7 @@ static void falcon_sign_dyn(int16_t* sig, qsc_keccak_state* kctx, const int8_t* 
 		 * (the verifier recomputes s1 from s2, the hashed message,
 		 * and the public key).
 		 */
-		falcon_sampler_context spc;
+		falcon_sampler_context spc = { 0 };
 		falcon_samplerZ samp;
 		void *samp_ctx;
 
@@ -8756,7 +8759,7 @@ static void falcon_sign_dyn(int16_t* sig, qsc_keccak_state* kctx, const int8_t* 
 		/*
 		 * Do the actual signature.
 		 */
-		if (falcon_do_sign_dyn(samp, samp_ctx, sig, f, g, F, G, hm, logn, ftmp))
+		if (falcon_do_sign_dyn(samp, samp_ctx, sig, f, g, F, G, hm, logn, ftmp) != 0)
 		{
 			break;
 		}
@@ -8940,7 +8943,7 @@ int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_
 	}
 
 	siglen++;
-	memmove(sm + 2 + sizeof(nonce), m, mlen);
+	qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
 	sm[0] = (uint8_t)(siglen >> 8);
 	sm[1] = (uint8_t)siglen;
 	qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
@@ -9027,7 +9030,7 @@ bool qsc_falcon_avx2_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t sm
 	/*
 	 * Return plaintext.
 	 */
-	memmove(m, sm + 2 + FALCON_NONCE_SIZE, msglen);
+	qsc_memutils_move(m, sm + 2 + FALCON_NONCE_SIZE, msglen);
 	*mlen = msglen;
 
 	return true;
@@ -9109,7 +9112,7 @@ int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_ge
 
 int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	int16_t sig[1024];
+	int16_t sig[1024] = { 0 };
 	uint8_t b[72 * 1024];
 	int8_t f[1024];
 	int8_t g[1024];
@@ -9117,7 +9120,7 @@ int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_
 	int8_t G[1024];
 	uint8_t seed[48];
 	uint8_t nonce[FALCON_NONCE_SIZE];
-	uint8_t esig[CRYPTO_BYTES - 2 - sizeof(nonce)];
+	uint8_t esig[CRYPTO_BYTES - 2 - sizeof(nonce)] = { 0 };
 	qsc_keccak_state kctx;
 	size_t u;
 	size_t v;
@@ -9162,7 +9165,7 @@ int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_
 		return -1;
 	}
 
-	if (!falcon_complete_private(G, f, g, F, 10, b))
+	if (falcon_complete_private(G, f, g, F, 10, b) == 0)
 	{
 		return -1;
 	}
@@ -9210,7 +9213,7 @@ int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_
 	}
 
 	siglen++;
-	memmove(sm + 2 + sizeof(nonce), m, mlen);
+	qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
 	sm[0] = (uint8_t)(siglen >> 8);
 	sm[1] = (uint8_t)siglen;
 	qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
@@ -9289,7 +9292,7 @@ bool qsc_falcon_avx2_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t sm
 	/*
 	 * Verify signature.
 	 */
-	if (!falcon_verify_raw(hm, sig, h, 10, b))
+	if (falcon_verify_raw(hm, sig, h, 10, b) == 0)
 	{
 		return false;
 	}
@@ -9297,7 +9300,7 @@ bool qsc_falcon_avx2_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t sm
 	/*
 	 * Return plaintext.
 	 */
-	memmove(m, sm + 2 + FALCON_NONCE_SIZE, msglen);
+	qsc_memutils_move(m, sm + 2 + FALCON_NONCE_SIZE, msglen);
 	*mlen = msglen;
 
 	return true;

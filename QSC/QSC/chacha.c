@@ -833,7 +833,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 
 			for (i = 0; i < 16; ++i)
 			{
-				tmpin = chacha_load256((input + oft + (i * 4)));
+				tmpin = chacha_load256(input + oft + (i * 4));
 				ctxw.outw[i] = _mm256_xor_si256(ctxw.outw[i], tmpin);
 				chacha_store256((output + oft + (i * 4)), ctxw.outw[i]);
 			}
@@ -905,7 +905,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 			uint8_t tmp[QSC_CHACHA_BLOCK_SIZE] = { 0 };
 			chacha_permute_p512c(ctx, tmp);
 			chacha_increment(ctx);
-			memcpy((output + oft), tmp, length);
+			qsc_memutils_copy((output + oft), tmp, length);
 
 			for (i = oft; i < oft + length; ++i)
 			{

@@ -15,30 +15,27 @@
 * 
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-* 
-*
-* Implementation Details:
-* An implementation of the CSX-512 authenticated stream cipher.
-* Written by John G. Underhill
-* August 25, 2020
-* Updated October 28, 2020
-* Contact: support@vtdev.com 
 */
+
+#ifndef QSC_CSX_H
+#define QSC_CSX_H
+
+#include "common.h"
+#include "sha3.h"
 
 /**
 * \file csx.h
-* \brief <b>CSX-512 function definitions</b> \n
-* ChaCha-based authenticated Stream cipher eXtension.
+* \brief ChaCha-based authenticated Stream cipher eXtension
 *
 * \author		John G. Underhill
 * \version		1.0.0.0b
 * \date			May 2, 2020
-* \updated		October 28, 2020
-* \contact:		support@vtdev.com
+* \updated		October 13, 2021
+* \contact:		support@digitalfreedomdefence.com
 * \copyright	GPL version 3 license (GPLv3)
 *
 *
-* <b>CSX-512 encryption example</b> \n
+* CSX-512 encryption example \n
 * \code
 * // external message, key, nonce, and custom-info arrays
 * #define CSTLEN 20
@@ -58,7 +55,7 @@
 * qsc_csx_transform(&state, cpt, msg, MSGLEN)
 * \endcode
 *
-* <b>CSX-512 decryption example</b> \n
+* CSX-512 decryption example \n
 * \code
 * // external cipher-text, key and custom-info arrays,
 * // and cipher-text containing the encrypted plain-text and the mac-code
@@ -83,45 +80,45 @@
 * \endcode
 *
 * \remarks
-* \section Description
-* \paragraph An [EXPERIMENTAL] vectorized, 64-bit, 40-round stream cipher [CSX512] implementation based on ChaCha.
+* \par
+* An [EXPERIMENTAL] vectorized, 64-bit, 40-round stream cipher [CSX512] implementation based on ChaCha.
 * This cipher uses KMAC-512 to authenticate the cipher-text stream in an encrypt-then-mac authentication configuration.
 * The CSX (authenticated Cipher Stream, ChaCha eXtended) cipher, is a hybrid of the ChaCha stream cipher, 
 * using 64-bit integers, a 1024-bit block and a 512-bit key. \n
-*
-* \section Mechanism Overview
-* \paragraph The pseudo-random bytes generator used by this cipher is the Keccak cSHAKE extended output function (XOF).
+* 
+* \par
+* The pseudo-random bytes generator used by this cipher is the Keccak cSHAKE extended output function (XOF).
 * The cSHAKE XOF is implemented in the 512-bit form of that function, and used to expand the input cipher-key into the cipher and MAC keys.
-* CSX-512 uses a 512-bit input key, an a 16 byte nonce, and an optional tweak; the info parameter, up to 48 btes in length.
+* CSX-512 uses a 512-bit input key, an a 16 byte nonce, and an optional tweak; the info parameter, up to 48 bytes in length.
 *
-* \section Tweakable Cipher
-* \paragraph This is a 'tweakable cipher', the initialization parameters; qsc_csx_keyparams, include an info parameter that can be used as a secondary user input.
+* \par
+* This is a 'tweakable cipher', the initialization parameters; qsc_csx_keyparams, include an info parameter that can be used as a secondary user input.
 * Internally, the info parameter is used to customize the cSHAKE output, using the cSHAKE 'custom' parameter to pre-initialize the SHAKE state.
 * The info parameter can be tweaked, with a user defined string 'info' in an qsc_csx_keyparams structure passed to the csx_intitialize(state,keyparams,encrypt).
 * This tweak can be used as a 'domain key', or to differentiate cipher-text output from other implementations, or as a secondary secret-key input.
 *
-* \section Authentication
-* \paragraph CSX is an authenticated encryption with associated data (AEAD) stream cipher.
-* The cSHAKE key-expansion function generates a key for the keyed hash-based MAC funtion; KMAC, used to generate the authentication code,
+* \par
+* CSX is an authenticated encryption with associated data (AEAD) stream cipher.
+* The cSHAKE key-expansion function generates a key for the keyed hash-based MAC function; KMAC, used to generate the authentication code,
 * which is appended to the cipher-text output of an encryption call.
 * In decryption mode, before decryption is performed, an internal mac code is calculated, and compared to the code embedded in the cipher-text.
 * If authentication fails, the cipher-text is not decrypted, and the qsc_csx_transform(state,out,in,inlen) function returns a boolean false value.
 * The qsc_csx_set_associated(state,in,inlen) function can be used to add additional data to the MAC generators input, like packet-header data, or a custom code or counter.
-
-* \section Implementation
+*
+* \par
+* For authentication CSX can use either the standard form of KMAC, which uses 24 rounds, or the default authentication setting;
+* a reduced-rounds version of KMAC that uses half the number of permutation rounds KMAC-R12.
+* To enable the standard from of KMAC, pass the QSC_RCS_AUTH_KMAC as a compiler definition, or unrem the definition in this header file.
+* To run CSX without authentication, remove the QSC_RCS_AUTHENTICATED in this header file.
+*
+* \par
 * The CSX-512, known answer vectors are taken from the CEX++ cryptographic library <a href="https://github.com/Steppenwolfe65/CEX">The CEX++ Cryptographic Library</a>. \n
 * See the documentation and the csx_test.h tests for usage examples.
 */
 
-#ifndef QSC_CSX_H
-#define QSC_CSX_H
-
-#include "common.h"
-#include "sha3.h"
-
 /*!
 \def QSC_CSX_AUTHENTICATED
-* \brief Enables KMAC authentication mode.
+* \brief Enables KMAC authentication mode
 */
 #if !defined(QSC_CSX_AUTHENTICATED)
 #	define QSC_CSX_AUTHENTICATED
@@ -129,15 +126,27 @@
 
 #if defined(QSC_CSX_AUTHENTICATED)
 /*!
-* \def QSC_CSX_KPA_AUTHENTICATION
-* \brief Toggles authentication between KMAC and KPA, default is KPA.
+* \def QSC_CSX_AUTH_KMAC
+* \brief Sets the authentication mode to standard KMAC-R24.
+* Remove this definition to enable the reduced rounds version using KMAC-R12.
 */
-#	define QSC_CSX_KPA_AUTHENTICATION
+//#	define QSC_CSX_AUTH_KMAC
+#endif
+
+/*!
+\def QSC_CSX_KMAC_R12
+* \brief Enables the reduced rounds KMAC-R12 implementation.
+* Unrem this flag to enable the reduced rounds KMAC implementation.
+*/
+#if	defined(QSC_CSX_AUTHENTICATED)
+#	if !defined(QSC_CSX_AUTH_KMAC) && !defined(QSC_CSX_AUTH_KMACR12)
+#		define QSC_CSX_AUTH_KMACR12
+#	endif
 #endif
 
 /*!
 \def QSC_CSX_BLOCK_SIZE
-* \brief The internal block size in bytes, required by the encryption and decryption functions.
+* \brief The internal block size in bytes, required by the encryption and decryption functions
 */
 #define QSC_CSX_BLOCK_SIZE 128
 
@@ -149,13 +158,13 @@
 
 /*!
 \def QSC_CSX_KEY_SIZE
-* \brief The size in bytes of the CSX-512 input cipher-key.
+* \brief The size in bytes of the CSX-512 input cipher-key
 */
 #define QSC_CSX_KEY_SIZE 64
 
 /*!
-\def CSX512_MAC_LENGTH
-* \brief The CSX-512 MAC code array length in bytes.
+\def QSC_CSX_MAC_SIZE
+* \brief The CSX-512 MAC code array length in bytes
 */
 #define QSC_CSX_MAC_SIZE 64
 
@@ -198,7 +207,7 @@ QSC_EXPORT_API typedef struct
 #if defined(QSC_CSX_KPA_AUTHENTICATION)
 	qsc_kpa_state kstate;					/*!< the KPA state structure */
 #else
-	qsc_keccak_state kstate;				/*!< the kmac state structure */
+	qsc_keccak_state kstate;				/*!< the KMAC state structure */
 #endif
 	uint64_t counter;						/*!< the processed bytes counter */
 	bool encrypt;							/*!< the transformation mode; true for encryption */
@@ -207,7 +216,7 @@ QSC_EXPORT_API typedef struct
 /* public functions */
 
 /**
-* \brief Dispose of the CSX cipher state.
+* \brief Dispose of the CSX cipher state
 *
 * \warning The dispose function must be called when disposing of the cipher.
 * This function destroys the internal state of the cipher.
@@ -241,8 +250,8 @@ QSC_EXPORT_API void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* da
 
 /**
 * \brief Transform an array of bytes.
-* In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the ciphertext.
-* In decryption mode, the input cipher-text is authenticated internally and compared to the mac code appended to the cipher-text,
+* In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the cipher-text.
+* In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
 * if the codes to not match, the cipher-text is not decrypted and the call fails.
 *
 * \warning The cipher must be initialized before this function can be called

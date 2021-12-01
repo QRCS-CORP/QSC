@@ -15,30 +15,23 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of the auto entropy collection provider
-* Written by John G. Underhill
-* Updated on January 20, 2020
-* Contact: support@vtdev.com 
-*/
-
-/**
-* \file acp.h
-* \brief <b>The Auto entropy Collection Provider: ACP</b> \n
-* ACP is the recommended entropy provider. \n
-* ACP uses a hashed collection of system timers, statistics, 
-* the RDRAND, and the system random providers, to seed an instance of cSHAKE-512.
-*
-* \author John Underhill
-* \date August 17, 2020
 */
 
 #ifndef QSC_ACP_H
 #define QSC_ACP_H
 
 #include "common.h"
+
+/**
+* \file acp.h
+* \brief The Auto entropy Collection Provider: ACP
+* ACP is the recommended entropy provider.
+* ACP uses a hashed collection of system timers, statistics, 
+* the RDRAND provider, and the system random provider, to seed an instance of cSHAKE-512.
+*
+* \author John Underhill
+* \date August 17, 2020
+*/
 
 /*!
 * \def QSC_ACP_SEED_MAX

@@ -4,14 +4,13 @@
 #include "../QSC/csg.h"
 #include "../QSC/csp.h"
 #include "../QSC/hcg.h"
+#include "../QSC/memutils.h"
 #include "../QSC/rdp.h"
 #include "../QSC/secrand.h"
 #include "../QSC/sysutils.h"
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-#define	ex(x) (((x) < -BIGX) ? 0.0 : exp(x))
+#define ex(x) (((x) < -BIGX) ? 0.0 : exp(x))
 
 static const double Z_MAX = 6.0;
 static const double LOG_SQRT_PI = 0.5723649429247000870717135;
@@ -83,54 +82,56 @@ static double secrand_po_chi_sq(const double ax, const int32_t df)
 	{
 		res = 1.0;
 	}
-
-	a = 0.5 * x;
-	even = (2 * (df / 2)) == df;
-
-	if (df > 1)
+	else
 	{
-		y = ex(-a);
-	}
+		a = 0.5 * x;
+		even = (2 * (df / 2)) == df;
 
-	s = (even ? y : (2.0 * secrand_poz(-sqrt(x))));
-
-	if (df > 2)
-	{
-		x = 0.5 * ((double)df - 1.0);
-		z = (even ? 1.0 : 0.5);
-
-		if (a > BIGX)
+		if (df > 1)
 		{
-			e = (even ? 0.0 : LOG_SQRT_PI);
-			c = log(a);
+			y = ex(-a);
+		}
 
-			while (z <= x)
+		s = (even ? y : (2.0 * secrand_poz(-sqrt(x))));
+
+		if (df > 2)
+		{
+			x = 0.5 * ((double)df - 1.0);
+			z = (even ? 1.0 : 0.5);
+
+			if (a > BIGX)
 			{
-				e = log(z) + e;
-				s += ex(c * z - a - e);
-				z += 1.0;
-			}
+				e = (even ? 0.0 : LOG_SQRT_PI);
+				c = log(a);
 
-			res = s;
+				while (z <= x)
+				{
+					e = log(z) + e;
+					s += ex(c * z - a - e);
+					z += 1.0;
+				}
+
+				res = s;
+			}
+			else
+			{
+				e = (even ? 1.0 : (I_SQRT_PI / sqrt(a)));
+				c = 0.0;
+
+				while (z <= x)
+				{
+					e = e * (a / z);
+					c = c + e;
+					z += 1.0;
+				}
+
+				res = (c * y + s);
+			}
 		}
 		else
 		{
-			e = (even ? 1.0 : (I_SQRT_PI / sqrt(a)));
-			c = 0.0;
-
-			while (z <= x)
-			{
-				e = e * (a / z);
-				c = c + e;
-				z += 1.0;
-			}
-
-			res = (c * y + s);
+			res = s;
 		}
-	}
-	else
-	{
-		res = s;
 	}
 
 	return res;
@@ -168,11 +169,10 @@ static double secrand_chi_square(const uint8_t* input, size_t length)
 static double secrand_mean_value(const uint8_t* input, size_t length)
 {
 	double ret;
-	size_t i;
 
 	ret = 0.0;
 
-	for (i = 0; i < length; ++i)
+	for (size_t i = 0; i < length; ++i)
 	{
 		ret += (double)input[i];
 	}
@@ -183,7 +183,6 @@ static double secrand_mean_value(const uint8_t* input, size_t length)
 static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t threshold)
 {
 	size_t c;
-	size_t i;
 	uint8_t val;
 	bool res;
 
@@ -192,7 +191,7 @@ static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t thr
 	val = input[0];
 
 	/* indicates zeroed output or bad run */
-	for (i = 1; i < length; ++i)
+	for (size_t i = 1; i < length; ++i)
 	{
 		if (input[i] == val)
 		{
@@ -217,13 +216,12 @@ static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t thr
 static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t threshold)
 {
 	size_t c;
-	size_t i;
 	bool res;
 
 	c = 0;
 	res = false;
 
-	for (i = 0; i < length; ++i)
+	for (size_t i = 0; i < length; ++i)
 	{
 		if (input[i] == 0x00)
 		{
@@ -246,14 +244,14 @@ static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t 
 static void secrand_print_double(double input)
 {
 	int32_t len = snprintf(NULL, 0, "%g", input);
-	char* str = malloc(len + 1);
-	memset(str, 0x00, len);
+	char* str = qsc_memutils_malloc(len + 1);
 
 	if (str != NULL)
 	{
-		snprintf(str, len + 1, "%g", input);
+		qsc_memutils_clear(str, len);
+		snprintf(str, (size_t)len + 1, "%g", input);
 		qsctest_print_safe(str);
-		free(str);
+		qsc_memutils_alloc_free(str);
 	}
 }
 
@@ -375,14 +373,10 @@ void qsctest_secrand_hcg_evaluate()
 
 void qsctest_secrand_rdp_evaluate()
 {
-	if (qsc_sysutils_rdrand_available())
-	{
-		uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 
-		qsc_rdp_generate(smp, sizeof(smp));
-
-		qsctest_secrand_evaluate("RDP", smp, sizeof(smp));
-	}
+	qsc_rdp_generate(smp, sizeof(smp));
+	qsctest_secrand_evaluate("RDP", smp, sizeof(smp));
 }
 
 bool qsctest_secrand_stress()
@@ -563,8 +557,9 @@ void qsctest_secrand_run()
 	qsctest_print_safe("*** Testing random entropy providers *** \n");
 	qsctest_secrand_acp_evaluate();
 	qsctest_secrand_csp_evaluate();
+#if defined(QSC_RDRAND_COMPATIBLE)
 	qsctest_secrand_rdp_evaluate();
-
+#endif
 	qsctest_print_safe("*** Testing deterministic random bit generators *** \n");
 	qsctest_secrand_csg_evaluate();
 	qsctest_secrand_hcg_evaluate();

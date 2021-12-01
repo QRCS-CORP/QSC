@@ -1,6 +1,8 @@
 #ifndef QSC_SPHINCSPLUSBASE_H
 #define QSC_SPHINCSPLUSBASE_H
 
+/* \cond DOXYGEN_IGNORE */
+
 #include "common.h"
 
 /* api.h */
@@ -77,7 +79,7 @@ bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_
 * \param sk: The private signature key
 * \param rng_generate: A pointer to the random generator function
 */
-void sphincsplus_ref_sign(uint8_t* sm, uint64_t* smlen, const uint8_t* m, uint64_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+void sphincsplus_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature with the public key
@@ -89,6 +91,8 @@ void sphincsplus_ref_sign(uint8_t* sm, uint64_t* smlen, const uint8_t* m, uint64
 * \param pk: The public verification key
 * \return Returns true for success
 */
-bool sphincsplus_ref_sign_open(uint8_t* m, uint64_t* mlen, const uint8_t* sm, uint64_t smlen, const uint8_t* pk);
+bool sphincsplus_ref_sign_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* pk);
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

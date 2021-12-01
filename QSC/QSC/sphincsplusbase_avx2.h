@@ -15,13 +15,17 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #ifndef QSC_SPHINCSPLUSBASE_AVX2_H
 #define QSC_SPHINCSPLUSBASE_AVX2_H
 
 #include "common.h"
 
+/* \cond DOXYGEN_IGNORE */
+
  /* waiting for the code-base to stabilize before adding the intrinsics version */
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

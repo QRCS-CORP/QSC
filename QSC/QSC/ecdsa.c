@@ -1,8 +1,9 @@
 #include "ecdsa.h"
 #include "ecdsabase.h"
+#include "memutils.h"
 #include "sha2.h"
 
-void qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed)
+void qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
 	qsc_ed25519_keypair(publickey, privatekey, seed);
 }
@@ -13,7 +14,7 @@ void qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*
 
 	rng_generate(seed, sizeof(seed));
 	qsc_ed25519_keypair(publickey, privatekey, seed);
-	memset(seed, 0x00, sizeof(seed)); // fix w/ memutils
+	qsc_memutils_clear(seed, sizeof(seed));
 }
 
 void qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)

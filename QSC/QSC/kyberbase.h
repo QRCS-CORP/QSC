@@ -22,6 +22,8 @@
 
 #include "common.h"
 
+ /* \cond DOXYGEN_IGNORE */
+
  /*!
  \def QSC_KYBER_K
  * Read Only: The k level
@@ -84,7 +86,7 @@
 
 /*!
 \def QSC_KYBER_POLYCOMPRESSED_BYTES
-* Read Only: The ciphertext compressed byte size
+* Read Only: The cipher-text compressed byte size
 */
 #if (QSC_KYBER_K == 3)
 #	define QSC_KYBER_POLYCOMPRESSED_BYTES 128
@@ -145,9 +147,9 @@
 /**
 * \brief Generates shared secret for given cipher text and private key
 *
-* \param ss Pointer to output shared secret (an already allocated array of KYBER_SECRET_BYTES bytes)
-* \param ct Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param sk Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param ss: Pointer to output shared secret (an already allocated array of KYBER_SECRET_BYTES bytes)
+* \param ct: [const] Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param sk: [const] Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 * \return Returns true for success
 */
 bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES],
@@ -156,9 +158,10 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 /**
 * \brief Generates cipher text and shared secret for given public key
 *
-* \param ct Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param ss Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param ct: Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param ss: Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param pk: [const] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param rng_generate: Pointer to the random generator function
 */
 void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
 	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
@@ -166,10 +169,13 @@ void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t s
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
 *
-* \param pk Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param pk: Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk: Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param rng_generate: Pointer to the random generator function
 */
 void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], 
 	bool (*rng_generate)(uint8_t*, size_t));
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

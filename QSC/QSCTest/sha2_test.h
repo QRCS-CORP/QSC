@@ -1,6 +1,6 @@
 /**
 * \file sha3_test.h
-* \brief <b>SHA2, HKDF, and HMAC, Known Answer Tests</b> \n
+* \brief SHA2, HKDF, and HMAC, Known Answer Tests \n
 * Uses Known Answer Tests from official sources to qsc_intutils_verify the
 * correct operation of the SHA2 digests, HKDF, and HMAC implementations.
 * \author John Underhill
@@ -14,7 +14,7 @@
 
 /**
 * \brief Tests the 256-bit version of the HFDF-Expand(HMAC(SHA2-256)) key derivation function for correct operation,
-* using vectors from the official kat file.
+* using vectors from the official KAT file.
 *
 * \return Returns true for success
 *
@@ -22,11 +22,11 @@
 * Uses vectors from: RFC 5869: HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
 * KAT: <a href="http://tools.ietf.org/html/rfc5869">RFC 5869</a>
 */
-bool qsctest_hkdf_256_kat();
+bool qsctest_hkdf_256_kat(void);
 
 /**
 * \brief Tests the 512-bit version of the HFDF-Expand(HMAC(SHA2-512)) key derivation function for correct operation,
-* using vectors from the official kat file.
+* using vectors from the official KAT file.
 *
 * \return Returns true for success
 *
@@ -34,11 +34,11 @@ bool qsctest_hkdf_256_kat();
 * Uses vectors from: RFC 5869: HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
 * KAT: <a href="http://tools.ietf.org/html/rfc5869">RFC 5869</a>
 */
-bool qsctest_hkdf_512_kat();
+bool qsctest_hkdf_512_kat(void);
 
 /**
 * \brief Tests the 256-bit version of the HMAC(SHA2-256) function for correct operation,
-* using vectors from the official kat file.
+* using vectors from the official KAT file.
 *
 * \return Returns true for success
 *
@@ -46,11 +46,11 @@ bool qsctest_hkdf_512_kat();
 * Using vectors from: RFC 4321: Test Vectors for the SHA2-256 HMAC:
 * KAT: <a href="http://tools.ietf.org/html/rfc4231">RFC 4321</a>
 */
-bool qsctest_hmac_256_kat();
+bool qsctest_hmac_256_kat(void);
 
 /**
 * \brief Tests the 512-bit version of the HMAC(SHA2-512) function for correct operation,
-* using vectors from the official kat file.
+* using vectors from the official KAT file.
 *
 * \return Returns true for success
 *
@@ -58,44 +58,44 @@ bool qsctest_hmac_256_kat();
 * Using vectors from: RFC 4321: Test Vectors for the SHA2-512 HMAC:
 * KAT: <a href="http://tools.ietf.org/html/rfc4231">RFC 4321</a>
 */
-bool qsctest_hmac_512_kat();
+bool qsctest_hmac_512_kat(void);
 
 /**
 * \brief Tests the 256-bit version of the SHA2 message digest for correct operation,
-* using selected vectors from the NIST SHA2 official kat file.
+* using selected vectors from the NIST SHA2 official KAT file.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
 * KAT: <a href="https://www.di-mgt.com.au/sha_testvectors.html">SHA256</a>
 */
-bool qsctest_sha2_256_kat();
+bool qsctest_sha2_256_kat(void);
 
 /**
 * \brief Tests the 384-bit version of the SHA2 message digest for correct operation,
-* using selected vectors from the NIST SHA2 official kat file.
+* using selected vectors from the NIST SHA2 official KAT file.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
 * KAT: <a href="https://www.di-mgt.com.au/sha_testvectors.html">SHA384</a>
 */
-bool qsctest_sha2_384_kat();
+bool qsctest_sha2_384_kat(void);
 
 /**
 * \brief Tests the 512-bit version of the SHA2 message digest for correct operation,
-* using selected vectors from the NIST SHA2 official kat file.
+* using selected vectors from the NIST SHA2 official KAT file.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
 * KAT: <a href="https://www.di-mgt.com.au/sha_testvectors.html">SHA512</a>
 */
-bool qsctest_sha2_512_kat();
+bool qsctest_sha2_512_kat(void);
 
 /**
 * \brief Run all tests.
 */
-void qsctest_sha2_run();
+void qsctest_sha2_run(void);
 
 #endif

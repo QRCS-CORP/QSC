@@ -1,12 +1,16 @@
 #include "timestamp.h"
-#include <locale.h>
+#include "memutils.h"
 #include "stringutils.h"
+#if defined(QSC_DEBUG_MODE)
+#	include "consoleutils.h"
+#endif
+#include <locale.h>
 
 void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE], const struct tm* tstruct)
 {
 	size_t pos;
 
-	qsc_stringutils_int_to_string(tstruct->tm_year + QSC_TIMESTAMP_EPOCH_START, output, 5);
+	qsc_stringutils_int_to_string(tstruct->tm_year + QSC_TIMESTAMP_EPOCH_START, output, QSC_TIMESTAMP_STRING_SIZE);
 	pos = 4;
 	output[pos] = '-';
 	++pos;
@@ -15,12 +19,12 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 	{
 		output[pos] = '0';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, 2);
+		qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		++pos;
 	}
 	else
 	{
-		qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, 3);
+		qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		pos += 2;
 	}
 
@@ -31,12 +35,12 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 	{
 		output[pos] = '0';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, 2);
+		qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		++pos;
 	}
 	else
 	{
-		qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, 3);
+		qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		pos += 2;
 	}
 
@@ -47,12 +51,12 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 	{
 		output[pos] = '0';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, 2);
+		qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		++pos;
 	}
 	else
 	{
-		qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, 3);
+		qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		pos += 2;
 	}
 
@@ -63,12 +67,12 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 	{
 		output[pos] = '0';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, 2);
+		qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		++pos;
 	}
 	else
 	{
-		qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, 3);
+		qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		pos += 2;
 	}
 
@@ -79,36 +83,36 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 	{
 		output[pos] = '0';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, 2);
+		qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		++pos;
 	}
 	else
 	{
-		qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, 3);
+		qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
 		pos += 2;
 	}
 
-	memset(output + pos, 0x00, 1);
+	qsc_memutils_clear(output + pos, 1);
 }
 
 void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char output[QSC_TIMESTAMP_STRING_SIZE])
 {
 	char tmp[5] = { 0 };
 
-	memset(tstruct, 0x00, sizeof(struct tm));
+	qsc_memutils_clear(tstruct, sizeof(struct tm));
 
-	memcpy(tmp, output, 4);
+	qsc_memutils_copy(tmp, output, 4);
 	tstruct->tm_year = qsc_stringutils_string_to_int(tmp) - QSC_TIMESTAMP_EPOCH_START;
-	memset(tmp, 0x00, sizeof(tmp));
-	memcpy(tmp, output + 5, 2);
+	qsc_memutils_clear(tmp, sizeof(tmp));
+	qsc_memutils_copy(tmp, output + 5, 2);
 	tstruct->tm_mon = qsc_stringutils_string_to_int(tmp) - 1;
-	memcpy(tmp, output + 8, 2);
+	qsc_memutils_copy(tmp, output + 8, 2);
 	tstruct->tm_mday = qsc_stringutils_string_to_int(tmp);
-	memcpy(tmp, output + 11, 2);
+	qsc_memutils_copy(tmp, output + 11, 2);
 	tstruct->tm_hour = qsc_stringutils_string_to_int(tmp);
-	memcpy(tmp, output + 14, 2);
+	qsc_memutils_copy(tmp, output + 14, 2);
 	tstruct->tm_min = qsc_stringutils_string_to_int(tmp);
-	memcpy(tmp, output + 17, 2);
+	qsc_memutils_copy(tmp, output + 17, 2);
 	tstruct->tm_sec = qsc_stringutils_string_to_int(tmp);
 	tstruct->tm_wday = 0;
 	tstruct->tm_yday = 0;
@@ -126,7 +130,7 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 	size_t len;
 
 	lt = 0;
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	time(&lt);
 	err = localtime_s(&nt, &lt);
 
@@ -136,7 +140,7 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 		if (len > 0 && len < QSC_TIMESTAMP_STRING_SIZE)
 		{
-			memcpy(output, tbuf, len);
+			qsc_memutils_copy(output, tbuf, len);
 		}
 	}
 
@@ -147,7 +151,7 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 	time_t lt;
 	size_t len;
 
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	time(&lt);
 	nt = localtime(&lt);
 	strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%F", nt);
@@ -156,7 +160,7 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 	if (len > 0 && len < QSC_TIMESTAMP_STRING_SIZE)
 	{
-		memcpy(output, tbuf, len);
+		qsc_memutils_copy(output, tbuf, len);
 	}
 
 #endif
@@ -171,7 +175,7 @@ void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STRING_SIZE])
 	errno_t err;
 
 	lt = 0;
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	time(&lt);
 	err = _localtime64_s(&nt, &lt);
 
@@ -184,18 +188,11 @@ void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 	time_t lt;
 	struct tm* nt;
-	char* ct;
 
-	size_t len;
-
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	lt = time(NULL);
-	nt = localtime(lt);
-
-	if (ct != NULL)
-	{
-		qsc_timestamp_time_struct_to_string(output, nt);
-	}
+	nt = localtime(&lt);
+    qsc_timestamp_time_struct_to_string(output, nt);
 
 #endif
 }
@@ -211,7 +208,7 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 	size_t len;
 
 	lt = 0;
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	time(&lt);
 	err = localtime_s(&nt, &lt);
 
@@ -221,7 +218,7 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 		if (len > 0 && len < QSC_TIMESTAMP_STRING_SIZE)
 		{
-			memcpy(output, tbuf, len);
+			qsc_memutils_copy(output, tbuf, len);
 		}
 	}
 
@@ -232,7 +229,7 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 	char buf[QSC_TIMESTAMP_STRING_SIZE];
 	size_t len;
 
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	time(&lt);
 	nt = localtime(&lt);
 	strftime(buf, QSC_TIMESTAMP_STRING_SIZE, "%T", nt);
@@ -241,7 +238,7 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 	if (len > 0 && len < QSC_TIMESTAMP_STRING_SIZE)
 	{
-		memcpy(output, buf, len);
+		qsc_memutils_copy(output, buf, len);
 	}
 
 #endif
@@ -301,7 +298,7 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 	errno_t err;
 
 	lt = (time_t)dtsec;
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	nt.tm_isdst = -1;
 	err = localtime_s(&nt, &lt);
 
@@ -312,11 +309,10 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 
 #else
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE];
 	struct tm* nt;
 	time_t lt;
 
-	memset(output, 0x00, QSC_TIMESTAMP_STRING_SIZE);
+	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 	lt = (time_t)dtsec;
 	nt = localtime(&lt);
 
@@ -351,22 +347,36 @@ uint64_t qsc_timestamp_epochtime_seconds()
 #endif
 }
 
-clock_t qsc_timestamp_stopwatch_start()
+#if defined(QSC_DEBUG_MODE)
+void qsc_timestamp_print_values()
 {
-	clock_t start;
+	char stpo[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
+	struct tm tstamp = { 0 };
+	uint64_t tms;
 
-	start = clock();
+	qsc_consoleutils_print_line("Time-stamp visual verification test");
+	qsc_consoleutils_print_line("Printing output from time-stamp functions..");
 
-	return start;
+	qsc_consoleutils_print_safe("Current date-stamp: ");
+	qsc_timestamp_current_date(stpo);
+	qsc_consoleutils_print_line(stpo);
+	qsc_memutils_clear(stpo, sizeof(stpo));
+
+	qsc_consoleutils_print_safe("Current time-stamp: ");
+	qsc_timestamp_current_time(stpo);
+	qsc_consoleutils_print_line(stpo);
+	qsc_memutils_clear(stpo, sizeof(stpo));
+
+	qsc_consoleutils_print_safe("After conversion: ");
+	qsc_timestamp_current_datetime(stpo);
+	qsc_timestamp_string_to_time_struct(&tstamp, stpo);
+	qsc_timestamp_time_struct_to_string(stpo, &tstamp);
+	qsc_consoleutils_print_line(stpo);
+	qsc_memutils_clear(stpo, sizeof(stpo));
+
+	qsc_consoleutils_print_safe("Epoch seconds: ");
+	tms = qsc_timestamp_epochtime_seconds();
+	qsc_consoleutils_print_ulong(tms);
+	qsc_consoleutils_print_line("");
 }
-
-uint64_t qsc_timestamp_stopwatch_elapsed(clock_t start)
-{
-	clock_t diff;
-	uint64_t msec;
-
-	diff = clock() - start;
-	msec = (diff * 1000) / CLOCKS_PER_SEC;
-
-	return msec;
-}
+#endif

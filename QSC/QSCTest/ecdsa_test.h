@@ -1,6 +1,6 @@
 /**
 * \file ecdsa_test.c
-* \brief <b>ECDSA test functions</b> \n
+* \brief ECDSA test functions \n
 * Contains the ECDSA implementation KAT and wellness test functions.
 *
 * \author John Underhill
@@ -21,35 +21,35 @@
 /**
 * \brief Test the ECDSA known answer test vectors
 */
-bool qsctest_ecdsa_kat_test();
+bool qsctest_ecdsa_kat_test(void);
 
 /**
 * \brief Test the validity of a mutated secret key
 * \return Returns true for test success
 */
-bool qsctest_ecdsa_privatekey_integrity();
+bool qsctest_ecdsa_privatekey_integrity(void);
 
 /**
 * \brief Test the validity of a mutated public key
 * \return Returns true for test success
 */
-bool qsctest_ecdsa_publickey_integrity();
+bool qsctest_ecdsa_publickey_integrity(void);
 
 /**
 * \brief Test the validity of a mutated signature
 * \return Returns true for test success
 */
-bool qsctest_ecdsa_signature_integrity();
+bool qsctest_ecdsa_signature_integrity(void);
 
 /**
 * \brief Stress test the key generation, encryption, and decryption functions in a looping test.
 * \return Returns true for test success
 */
-bool qsctest_ecdsa_stress_test();
+bool qsctest_ecdsa_stress_test(void);
 
 /**
 * \brief Run the ECDSA implementation stress and correctness tests tests
 */
-void qsctest_ecdsa_run();
+void qsctest_ecdsa_run(void);
 
 #endif

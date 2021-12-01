@@ -15,13 +15,12 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of the SHA2 message digests, HMAC and HKDF.
-* Written by John G. Underhill
-* Updated on September 12, 2020
-* Contact: support@vtdev.com */
+*/
+
+#ifndef QSC_SHA2_H
+#define QSC_SHA2_H
+
+#include "common.h"
 
 /**
 * \file sha2.h
@@ -29,24 +28,18 @@
 * \date May 23, 2019
 * \updated September 12, 2020
 *
-* \brief <b>SHA2 header definition</b> \n
+* \brief SHA2 header definition \n
 * Contains the public api and documentation for SHA2 digests, HMAC and HKDF implementations.
 *
-* <b>SHA2-512 hash computation using long-form api</b> \n
+* SHA2-512 hash computation using long-form api \n
 * \code
-* // external message array
 * #define MSGLEN 200
 * uint8_t msg[MSGLEN] = { ... };
-* ...
-*
 * uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };
 * qsc_sha512_state ctx;
 *
-* // initialize the SHA2 state
 * qsc_sha512_initialize(&ctx);
-* // update with the message
 * qsc_sha512_update(&ctx, msg, MSGLEN);
-* // finalize the message
 * qsc_sha512_finalize(&ctx, otp);
 * \endcode
 *
@@ -57,7 +50,8 @@
 * Analysis of SIMD Applicability to SHA Algorithms https://software.intel.com/sites/default/files/m/b/9/b/aciicmez.pdf \n
 *
 * \remarks
-* \paragraph The SHA2 and HMAC implementations use two different forms of api: short-form and long-form. \n
+* \par
+* The SHA2 and HMAC implementations use two different forms of api: short-form and long-form. \n
 * The short-form api, which initializes the state, processes a message, and finalizes by producing output, all in a single function call,
 * for example; qsc_sha512_compute(uint8_t* output, const uint8_t* message, size_t msglen),
 * the entire message array is processed and the hash code is written to the output array. \n
@@ -70,15 +64,10 @@
 * For additional usage examples, see sha2_test.h
 */
 
-#ifndef QSC_SHA2_H
-#define QSC_SHA2_H
-
-#include "common.h"
-
 /*!
 * \def QSC_SHA2_SHANI_ENABLED
 * \brief Enables the SHA2 permutation intrinsics.
-* For testing only; add this flag to your preprocessor defintions to enable SHA-NI intrinsics.
+* For testing only; add this flag to your preprocessor definitions to enable SHA-NI intrinsics.
 */
 #if !defined(QSC_SHA2_SHANI_ENABLED)
 //#	define QSC_SHA2_SHANI_ENABLED
@@ -169,12 +158,12 @@
 #define QSC_SHA2_512_RATE 128
 
 /*!
-* \def SHA2_256_STATESIZE
+* \def QSC_SHA2_STATE_SIZE
 * \brief The SHA2-256 state array size
 */
 #define QSC_SHA2_STATE_SIZE 8
 
-/* sha2-256 */
+/* SHA2-256 */
 
 /*!
 * \struct qsc_sha256_state
@@ -182,10 +171,10 @@
 */
 QSC_EXPORT_API typedef struct
 {
-	uint32_t state[QSC_SHA2_STATE_SIZE];
-	uint8_t buffer[QSC_SHA2_256_RATE];
-	uint64_t t;
-	size_t position;
+	uint32_t state[QSC_SHA2_STATE_SIZE];	/*!< The SHA2-256 state  */
+	uint8_t buffer[QSC_SHA2_256_RATE];		/*!< The message buffer  */
+	uint64_t t;								/*!< The message length  */
+	size_t position;						/*!< The cache position  */
 } qsc_sha256_state;
 
 /**
@@ -231,7 +220,7 @@ QSC_EXPORT_API void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output);
 QSC_EXPORT_API void qsc_sha256_initialize(qsc_sha256_state* ctx);
 
 /**
-* \brief The SHA2-256 permution function.
+* \brief The SHA2-256 permutation function.
 * Internal function: called by protocol hash and generation functions, or in the construction of other external protocols.
 * Absorbs a message and permutes the state array.
 *
@@ -253,18 +242,18 @@ QSC_EXPORT_API void qsc_sha256_permute(uint32_t* output, const uint8_t* input);
 */
 QSC_EXPORT_API void qsc_sha256_update(qsc_sha256_state* ctx, const uint8_t* message, size_t msglen);
 
-/* sha2-384 */
+/* SHA2-384 */
 
 /*!
-* \struct qsc_sha512_state
-* \brief The SHA2-512 digest state array
+* \struct qsc_sha384_state
+* \brief The SHA2-384 digest state array
 */
 QSC_EXPORT_API typedef struct
 {
-	uint64_t state[QSC_SHA2_STATE_SIZE];
-	uint64_t t[2];
-	uint8_t buffer[QSC_SHA2_384_RATE];
-	size_t position;
+	uint64_t state[QSC_SHA2_STATE_SIZE];	/*!< The SHA2-384 state  */
+	uint64_t t[2];							/*!< The message size  */
+	uint8_t buffer[QSC_SHA2_384_RATE];		/*!< The message buffer  */
+	size_t position;						/*!< The message position  */
 } qsc_sha384_state;
 
 /**
@@ -322,7 +311,7 @@ QSC_EXPORT_API void qsc_sha384_initialize(qsc_sha384_state* ctx);
 */
 QSC_EXPORT_API void qsc_sha384_update(qsc_sha384_state* ctx, const uint8_t* message, size_t msglen);
 
-/* sha2-512 */
+/* SHA2-512 */
 
 /*!
 * \struct qsc_sha512_state
@@ -330,10 +319,10 @@ QSC_EXPORT_API void qsc_sha384_update(qsc_sha384_state* ctx, const uint8_t* mess
 */
 QSC_EXPORT_API typedef struct
 {
-	uint64_t state[QSC_SHA2_STATE_SIZE];
-	uint64_t t[2];
-	uint8_t buffer[QSC_SHA2_512_RATE];
-	size_t position;
+	uint64_t state[QSC_SHA2_STATE_SIZE];	/*!< The SHA2-512 state  */
+	uint64_t t[2];							/*!< The message length  */
+	uint8_t buffer[QSC_SHA2_512_RATE];		/*!< The message buffer  */
+	size_t position;						/*!< The cache position  */
 } qsc_sha512_state;
 
 /**
@@ -379,7 +368,7 @@ QSC_EXPORT_API void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output);
 QSC_EXPORT_API void qsc_sha512_initialize(qsc_sha512_state* ctx);
 
 /**
-* \brief The SHA2-512 permution function.
+* \brief The SHA2-512 permutation function.
 * Internal function: called by protocol hash and generation functions, or in the construction of other external protocols.
 * Absorbs a message and permutes the state array.
 *
@@ -401,7 +390,7 @@ QSC_EXPORT_API void qsc_sha512_permute(uint64_t* output, const uint8_t* input);
 */
 QSC_EXPORT_API void qsc_sha512_update(qsc_sha512_state* ctx, const uint8_t* message, size_t msglen);
 
-/* hmac-256 */
+/* HMAC-256 */
 
 /*!
 * \struct qsc_hmac256_state
@@ -409,9 +398,9 @@ QSC_EXPORT_API void qsc_sha512_update(qsc_sha512_state* ctx, const uint8_t* mess
 */
 QSC_EXPORT_API typedef struct
 {
-	qsc_sha256_state pstate;
-	uint8_t ipad[QSC_SHA2_256_RATE];
-	uint8_t opad[QSC_SHA2_256_RATE];
+	qsc_sha256_state pstate;			/*!< The SHA2-256 state  */
+	uint8_t ipad[QSC_SHA2_256_RATE];	/*!< The input pad array  */
+	uint8_t opad[QSC_SHA2_256_RATE];	/*!< The output pad array  */
 } qsc_hmac256_state;
 
 /**
@@ -472,7 +461,7 @@ QSC_EXPORT_API void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t
 */
 QSC_EXPORT_API void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t msglen);
 
-/* hmac-512 */
+/* HMAC-512 */
 
 /*!
 * \struct qsc_hmac512_state
@@ -480,9 +469,9 @@ QSC_EXPORT_API void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* me
 */
 QSC_EXPORT_API typedef struct
 {
-	qsc_sha512_state pstate;
-	uint8_t ipad[QSC_SHA2_512_RATE];
-	uint8_t opad[QSC_SHA2_512_RATE];
+	qsc_sha512_state pstate;			/*!< The SHA2-512 state  */
+	uint8_t ipad[QSC_SHA2_512_RATE];	/*!< The input pad array  */
+	uint8_t opad[QSC_SHA2_512_RATE];	/*!< The output pad array  */
 } qsc_hmac512_state;
 
 /**
@@ -545,13 +534,14 @@ QSC_EXPORT_API void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t
 */
 QSC_EXPORT_API void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t msglen);
 
-/* hkdf */
+/* HKDF */
 
 /**
 * \brief Initialize an instance of HKDF(HMAC(SHA2-256)), and output an array of pseudo-random.
 * Short form api: initializes with the key and user info, and generates the output pseudo-random with a single call.
 *
 * \param output: The output pseudo-random byte array
+* \param outlen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param info: [const] The info array
@@ -563,6 +553,7 @@ QSC_EXPORT_API void qsc_hkdf256_expand(uint8_t* output, size_t outlen, const uin
 * \brief Extract a key from a combined key and salt input using HMAC(SHA2-256).
 *
 * \param output: The output pseudo-random byte array
+* \param outlen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param salt: [const] The salt array
@@ -575,6 +566,7 @@ QSC_EXPORT_API void qsc_hkdf256_extract(uint8_t* output, size_t outlen, const ui
 * Short form api: initializes with the key and user info, and generates the output pseudo-random with a single call.
 *
 * \param output: The output pseudo-random byte array
+* \param outlen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param info: [const] The info array
@@ -586,6 +578,7 @@ QSC_EXPORT_API void qsc_hkdf512_expand(uint8_t* output, size_t outlen, const uin
 * \brief Extract a key from a combined key and salt input using HMAC(SHA2-512).
 *
 * \param output: The output pseudo-random byte array
+* \param outlen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param salt: [const] The salt array

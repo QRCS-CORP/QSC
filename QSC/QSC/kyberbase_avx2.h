@@ -22,11 +22,14 @@
 
 #include "common.h"
 
-#if defined(QSC_SYSTEM_HAS_AVX2)
+/* \cond DOXYGEN_IGNORE */
 
-#if defined(QSC_GCC_ASM_ENABLED)
-#   include "kyber_asm_consts.h"
-#endif
+/**
+* \file kyberbase_avx2.h
+* \brief The Kyber AVX2	functions
+*/
+
+#if defined(QSC_SYSTEM_HAS_AVX2)
 
  /*!
  \def QSC_KYBER_K
@@ -80,7 +83,7 @@
 
  /*!
  \def QSC_KYBER_POLYVEC_BYTES
- * Read Only: The base size of the compressed public key polynolial
+ * Read Only: The base size of the compressed public key polynomial
  */
 #if (QSC_KYBER_K == 3)
 #	define QSC_KYBER_POLYVECBASE_BYTES 320
@@ -90,7 +93,7 @@
 
  /*!
  \def QSC_KYBER_POLYCOMPRESSED_BYTES
- * Read Only: The ciphertext compressed byte size
+ * Read Only: The cipher-text compressed byte size
  */
 #if (QSC_KYBER_K == 3)
 #	define QSC_KYBER_POLYCOMPRESSED_BYTES 128
@@ -147,17 +150,27 @@
 #define QSC_KYBER_CIPHERTEXT_BYTES (QSC_KYBER_INDCPA_BYTES)
 
 #if defined(QSC_GCC_ASM_ENABLED)
-	void kyber_ntt_avx(int16_t r[QSC_KYBER_N]);
-	void kyber_invntt_avx(int16_t r[QSC_KYBER_N]);
-	extern const int16_t kyber_qdata[];
-	void kyber_nttpack_avx(int16_t* r, const int16_t* qdata);;
-	void kyber_ntt_unpack_avx(int16_t* r, const int16_t* qdata);
-	void kyber_ntt_to_bytes_avx(uint8_t* r, const int16_t* a, const int16_t* qdata);
-	void kyber_ntt_from_bytes128_avx(int16_t* r, const uint8_t* a, const int16_t* qdata);
-	int16_t kyber_reduce_avx(int16_t* r, const int16_t* qdata);
-	int16_t kyber_csubq_avx(int16_t* r, const int16_t* qdata);
-	int16_t kyber_tomont_avx(int16_t* r, const int16_t* qdata);
+	void ntt_avx(__m256i *r, const __m256i *qdata);
+	void invntt_avx(__m256i *r, const __m256i *qdata);
+	void nttpack_avx(__m256i *r, const __m256i *qdata);
+	void nttunpack_avx(__m256i *r, const __m256i *qdata);
+	void basemul_avx(__m256i *r, const __m256i *a, const __m256i *b, const __m256i *qdata);
+	void ntttobytes_avx(uint8_t *r, const __m256i *a, const __m256i *qdata);
+	void nttfrombytes_avx(__m256i *r, const uint8_t *a, const __m256i *qdata);
+	int16_t reduce_avx(int16_t* r, const int16_t* qdata);
+	int16_t csubq_avx(int16_t* r, const int16_t* qdata);
+	int16_t tomont_avx(int16_t* r, const int16_t* qdata);
 
+	/*void ntt_avx(int16_t r[QSC_KYBER_N]);
+	void invntt_avx(int16_t r[QSC_KYBER_N]);
+	extern const int16_t qdata[];
+	void nttpack_avx(int16_t* r, const int16_t* qdata);;
+	void nttunpack_avx(int16_t* r, const int16_t* qdata);
+	void ntttobytes_avx(uint8_t* r, const int16_t* a, const int16_t* qdata);
+	void nttfrombytes_avx(int16_t* r, const uint8_t* a, const int16_t* qdata);
+	int16_t reduce_avx(int16_t* r, const int16_t* qdata);
+	int16_t csubq_avx(int16_t* r, const int16_t* qdata);
+	int16_t tomont_avx(int16_t* r, const int16_t* qdata);*/
 #endif
 
 /* kem.h */
@@ -165,9 +178,9 @@
 /**
 * \brief Generates shared secret for given cipher text and private key
 *
-* \param ss Pointer to output shared secret (an already allocated array of KYBER_SECRET_BYTES bytes)
-* \param ct Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param sk Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param ss: Pointer to output shared secret (an already allocated array of KYBER_SECRET_BYTES bytes)
+* \param ct: [const] Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param sk: [const] Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 * \return Returns true for success
 */
 bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES],
@@ -176,9 +189,10 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
 /**
 * \brief Generates cipher text and shared secret for given public key
 *
-* \param ct Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param ss Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param ct: Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param ss: Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param pk: [const] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param rng_generate: Pointer to the random generator function
 */
 void qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
 	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
@@ -186,11 +200,15 @@ void qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t 
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
 *
-* \param pk Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param pk: Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk: Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param rng_generate: Pointer to the random generator function
 */
 void qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],
 	bool (*rng_generate)(uint8_t*, size_t));
 
 #endif
+
+/* \endcond DOXYGEN_IGNORE */
+
 #endif

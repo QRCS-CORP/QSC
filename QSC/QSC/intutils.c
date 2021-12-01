@@ -1,4 +1,5 @@
 #include "intutils.h"
+#include "memutils.h"
 
 bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 {
@@ -28,7 +29,8 @@ void qsc_intutils_be8increment(uint8_t* output, size_t outlen)
 		{
 			--i;
 			++output[i];
-		} while (i != 0 && output[i] == 0);
+		} 
+		while (i != 0 && output[i] == 0);
 	}
 }
 
@@ -91,7 +93,7 @@ void qsc_intutils_bswap32(uint32_t* destination, const uint32_t* source, size_t 
 
 	for (size_t i = 0; i < length; i += 4)
 	{
-		_mm_storeu_si128((__m128i*) & destination[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*) & source[i]), mask));
+		_mm_storeu_si128((__m128i*)&destination[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)&source[i]), mask));
 	}
 }
 
@@ -101,7 +103,7 @@ void qsc_intutils_bswap64(uint64_t* destination, const uint64_t* source, size_t 
 
 	for (size_t i = 0; i < length; i += 2)
 	{
-		_mm_storeu_si128((__m128i*) & destination[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*) & source[i]), mask));
+		_mm_storeu_si128((__m128i*)&destination[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)&source[i]), mask));
 	}
 }
 #endif
@@ -138,13 +140,13 @@ void qsc_intutils_clear64(uint64_t* a, size_t count)
 	}
 }
 
-void qsc_intutils_cmov(uint8_t* r, const uint8_t* x, size_t length, uint8_t b)
+void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint8_t cond)
 {
-	b = ~b + 1;
+	cond = ~cond + 1;
 
 	for (size_t i = 0; i < length; i++)
 	{
-		r[i] ^= (uint8_t)(b & (uint8_t)(x[i] ^ r[i]));
+		dest[i] ^= (uint8_t)(cond & (uint8_t)(source[i] ^ dest[i]));
 	}
 }
 
@@ -166,7 +168,7 @@ size_t qsc_intutils_expand_mask(size_t x)
 	return r;
 }
 
-bool qsc_intutils_is_equal(size_t x, size_t y)
+bool qsc_intutils_are_equal(size_t x, size_t y)
 {
 	return (bool)((x ^ y) == 0);
 }
@@ -211,7 +213,7 @@ void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
-	memset(output, 0, length);
+	qsc_memutils_clear(output, length);
 
 	for (size_t pos = 0; pos < (length * 2); pos += 2)
 	{

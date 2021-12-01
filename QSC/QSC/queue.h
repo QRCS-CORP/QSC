@@ -15,13 +15,6 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* A FIFO general purpose data queue.
-* Written by John G. Underhill
-* Updated on November 11, 2020
-* Contact: support@vtdev.com 
 */
 
 #ifndef QSC_QUEUE_H
@@ -30,6 +23,11 @@
 #include "common.h"
 #include "intutils.h"
 #include "memutils.h"
+
+/*
+* \file queue.h
+* \brief Memory queue function definitions
+*/
 
 /*!
 \def QSC_QUEUE_ALIGNMENT
@@ -54,21 +52,19 @@ typedef struct qsc_queue_state
 	size_t depth;						/*!< The maximum number of items in the queue */
 	size_t position;					/*!< The next empty slot in the queue */
 	size_t width;						/*!< The maximum byte length of a queue item */
-
 } qsc_queue_state;
-
 
 /**
 * \brief Destroy the queue state.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 */
 QSC_EXPORT_API void qsc_queue_destroy(qsc_queue_state* ctx);
 
 /**
 * \brief Flush the content of the queue to an array.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 * \param output [array] The array receiving the queue items
 */
 QSC_EXPORT_API void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output);
@@ -76,7 +72,7 @@ QSC_EXPORT_API void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output);
 /**
 * \brief Initialize the queue state.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 * \param depth [size] The number of queue items to initialize, maximum is QSC_QUEUE_MAX_DEPTH
 * \param width [size] The maximum size of each queue item in bytes
 */
@@ -85,7 +81,7 @@ QSC_EXPORT_API void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, siz
 /**
 * \brief Get the number of items in the queue.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 * \return The number of items in the queue
 */
 QSC_EXPORT_API size_t qsc_queue_items(const qsc_queue_state* ctx);
@@ -93,7 +89,7 @@ QSC_EXPORT_API size_t qsc_queue_items(const qsc_queue_state* ctx);
 /**
 * \brief Get the full status from the queue.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 * \return Returns true if the queue is full
 */
 QSC_EXPORT_API bool qsc_queue_isfull(const qsc_queue_state* ctx);
@@ -101,7 +97,7 @@ QSC_EXPORT_API bool qsc_queue_isfull(const qsc_queue_state* ctx);
 /**
 * \brief Get the empty status from the queue.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 * \return Returns true if the queue is empty
 */
 QSC_EXPORT_API bool qsc_queue_isempty(const qsc_queue_state* ctx);
@@ -109,7 +105,7 @@ QSC_EXPORT_API bool qsc_queue_isempty(const qsc_queue_state* ctx);
 /**
 * \brief Returns the first member of the queue, and erases that item from the queue.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 * \param output [array] The array receiving the queue item
 * \param outlen [size] The number of bytes to copy from the queue item
 * \return The items associated tag
@@ -119,18 +115,18 @@ QSC_EXPORT_API uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, siz
 /**
 * \brief Add an item to the queue.
 *
-* \param state [struct] The function state
+* \param ctx [struct] The function state
 * \param input [array] The array item to be added to the queue
-* \param inlen [size] The byte size of the the queue item to be added
+* \param inplen [size] The byte size of the the queue item to be added
 * \param tag [integer] The items associated tag
 */
-QSC_EXPORT_API void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, uint64_t tag);
+QSC_EXPORT_API void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inplen, uint64_t tag);
 
 /**
-* \brief The queing functions self test.
+* \brief The queuing functions self test.
 *
 * \return [bool] Returns true upon success
 */
-QSC_EXPORT_API bool qsc_queue_self_test();
+QSC_EXPORT_API bool qsc_queue_self_test(void);
 
 #endif

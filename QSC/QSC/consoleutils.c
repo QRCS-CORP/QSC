@@ -1,16 +1,22 @@
 #include "consoleutils.h"
+#include "memutils.h"
 #include "stringutils.h"
 #include <stdio.h>
 #include <string.h>
 
+/* bogus winbase.h error */
+QSC_SYSTEM_CONDITION_IGNORE(5105)
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	include <conio.h>
+#	include <stdio.h>
 #	include <tchar.h>
 #	include <Windows.h>
 #   if defined(QSC_SYSTEM_COMPILER_MSC)
 #	    pragma comment(lib, "user32.lib")
 #   endif
 #else
+#	include <stdlib.h>
 #	include <unistd.h>
 #endif
 
@@ -24,7 +30,6 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 
 	if (message != NULL)
 	{
-		tcol = 0;
 		HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
 
 		if (color == blue)
@@ -38,6 +43,10 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 		else if (color == red)
 		{
 			tcol = FOREGROUND_RED;
+		}
+		else
+		{
+			tcol = 0;
 		}
 
 		SetConsoleTextAttribute(hcon, (WORD)tcol);
@@ -53,9 +62,21 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 char qsc_consoleutils_get_char()
 {
 	char line[8] = { 0 };
-	fgets(line, sizeof(line), stdin);
+	char* res;
+	char ret;
 
-	return line[0];
+	res = fgets(line, sizeof(line), stdin);
+
+	if (res != NULL)
+	{
+		ret = line[0];
+	}
+	else
+	{
+		ret = 0;
+	}
+
+	return ret;
 }
 
 size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
@@ -66,12 +87,9 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 
 	slen = 0;
 
-	if (line != NULL)
+	if (line != NULL && fgets(line, (int32_t)maxlen, stdin) != NULL)
 	{
-		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
-		{
-			slen = strlen(line);
-		}
+		slen = strlen(line);
 	}
 
 	return slen;
@@ -85,23 +103,35 @@ size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen)
 
 	slen = 0;
 
-	if (line != NULL)
+	if (line != NULL && fgets(line, (int32_t)maxlen, stdin) != NULL)
 	{
-		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
-		{
-			qsc_stringutils_to_lowercase(line);
-			qsc_stringutils_trim_newline(line);
-			slen = strlen(line);
-		}
+		qsc_stringutils_to_lowercase(line);
+		qsc_stringutils_trim_newline(line);
+		slen = strlen(line);
 	}
 
 	return slen;
 }
 
-void qsc_consoleutils_get_wait()
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+wint_t qsc_consoleutils_get_wait()
 {
-	getwchar();
+	wint_t c;
+
+	c = getwchar();
+
+	return c;
 }
+#else
+char qsc_consoleutils_get_wait()
+{
+	char c;
+
+	c = getchar();
+
+	return c;
+}
+#endif
 
 void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 {
@@ -121,7 +151,7 @@ void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t len
 
 	if (hexstr != NULL && output != NULL)
 	{
-		memset(output, 0, length);
+		qsc_memutils_clear(output, length);
 
 		for (size_t  pos = 0; pos < (length * 2); pos += 2)
 		{
@@ -156,14 +186,19 @@ size_t qsc_consoleutils_masked_password(uint8_t* output, size_t outlen)
 	size_t ctr;
 	char c;
 
-	c = '0';
 	ctr = 0;
+	c = 0;
 
 	if (output != NULL)
 	{
 		do
 		{
-			c = (char)_getch();
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+            c = (char)_getch();
+#else
+            //c = (char)getch(); // TODO
+#endif
+
 
 			if (c != '\n' && c != '\r')
 			{
@@ -185,7 +220,8 @@ size_t qsc_consoleutils_masked_password(uint8_t* output, size_t outlen)
 				}
 
 			}
-		} while (c != '\r' || ctr >= outlen);
+		}
+		while (c != '\r' || ctr >= outlen);
 	}
 
 	qsc_consoleutils_print_line("");
@@ -212,6 +248,48 @@ bool qsc_consoleutils_message_confirm(const char* message)
 	}
 
 	return res;
+}
+
+void qsc_consoleutils_print_array(const uint8_t* input, size_t inputlen, size_t linelen)
+{
+	assert(input != NULL);
+
+	size_t i;
+
+	if (input != NULL)
+	{
+		while (inputlen >= linelen)
+		{
+			for (i = 0; i < linelen; ++i)
+			{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+				printf_s("%u", input[i]);
+				printf_s(", ");
+#else
+				printf("%u", input[i]);
+				printf(", ");
+#endif
+			}
+
+			input += linelen;
+			inputlen -= linelen;
+			qsc_consoleutils_print_safe("\n");
+		}
+
+		if (inputlen != 0)
+		{
+			for (i = 0; i < inputlen; ++i)
+			{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+				printf_s("%u", input[i]);
+				printf_s(", ");
+#else
+				printf("%u", input[i]);
+				printf(", ");
+#endif
+			}
+		}
+	}
 }
 
 void qsc_consoleutils_print_hex(const uint8_t* input, size_t inputlen, size_t linelen)
@@ -258,15 +336,14 @@ void qsc_consoleutils_print_formatted(const char* input, size_t inputlen)
 
 	if (input != NULL)
 	{
-		const char FLG = '\\';
-		const char RPC[] = "\\";
+		const char flag = '\\';
 		char inp;
 
 		for (size_t i = 0; i < inputlen; ++i)
 		{
 			inp = input[i];
 
-			if (inp != FLG)
+			if (inp != flag)
 			{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 				printf_s("%c", inp);
@@ -277,9 +354,9 @@ void qsc_consoleutils_print_formatted(const char* input, size_t inputlen)
 			else
 			{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-				printf_s(RPC);
+				printf_s("%c", flag);
 #else
-				printf(RPC);
+				printf("%c", flag);
 #endif
 			}
 		}
@@ -299,9 +376,9 @@ void qsc_consoleutils_print_safe(const char* input)
 	if (input != NULL && strlen(input) > 0)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		printf_s(input);
+		printf_s("%s", input);
 #else
-		printf(input);
+		printf("%s", input);
 #endif
 	}
 }
@@ -318,24 +395,17 @@ void qsc_consoleutils_print_line(const char* input)
 	qsc_consoleutils_print_safe("\n");
 }
 
-void qsc_consoleutils_print_concatonated_line(const char** input, size_t count)
+void qsc_consoleutils_print_concatenated_line(const char** input, size_t count)
 {
 	assert(input != NULL);
-
-	size_t slen;
 
 	if (input != NULL)
 	{
 		for (size_t i = 0; i < count; ++i)
 		{
-			if (input[i] != NULL)
+			if (input[i] != NULL && strlen(input[i]) != 0)
 			{
-				slen = strlen(input[i]);
-
-				if (slen != 0)
-				{
-					qsc_consoleutils_print_safe(input[i]);
-				}
+				qsc_consoleutils_print_safe(input[i]);
 			}
 		}
 	}
@@ -348,7 +418,7 @@ void qsc_consoleutils_print_uint(uint32_t digit)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	printf_s("%lu", digit);
 #else
-	printf("%lu", digit);
+	printf("%lu", (unsigned long)digit);
 #endif
 }
 
@@ -357,7 +427,7 @@ void qsc_consoleutils_print_ulong(uint64_t digit)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	printf_s("%llu", digit);
 #else
-	printf("%llu", digit);
+	printf("%llu", (unsigned long long)digit);
 #endif
 }
 
@@ -375,12 +445,16 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 	const char schr[] = { "-\\|/-\\|/-" };
 	size_t cnt;
 
-	cnt = seconds * 10;
+	cnt = (size_t)seconds * 10;
 
 	for (size_t i = 0; i < cnt; ++i)
 	{
-		putchar(schr[i % sizeof(schr)]);
-		fflush(stdout);
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		printf_s("%c", schr[i % sizeof(schr)]);
+#else
+		printf("%c", schr[i % sizeof(schr)]);
+#endif
+
 		qsc_consoleutils_print_safe("\b");
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -409,9 +483,26 @@ void qsc_consoleutils_set_window_buffer(size_t width, size_t height)
 void qsc_consoleutils_set_window_clear()
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	system("cls");
+	HANDLE hcon;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	DWORD count;
+	DWORD cells;
+	COORD coords = { 0, 0 };
+
+	hcon = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	if (hcon != INVALID_HANDLE_VALUE && GetConsoleScreenBufferInfo(hcon, &csbi) == TRUE)
+	{
+		cells = csbi.dwSize.X * csbi.dwSize.Y;
+
+		if (FillConsoleOutputCharacter(hcon, (TCHAR)' ', cells, coords, &count) == TRUE &&
+			FillConsoleOutputAttribute(hcon, csbi.wAttributes, cells, coords, &count) == TRUE)
+		{
+			SetConsoleCursorPosition(hcon, coords);
+		}
+	}
 #else
-	system("clear");
+	printf("\033[H\033[J");
 #endif
 }
 

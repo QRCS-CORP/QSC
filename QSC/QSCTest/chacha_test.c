@@ -124,14 +124,13 @@ bool qsctest_chacha128_wide_equality()
 	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx1;
 	qsc_chacha_state ctx2;
-	size_t i;
 	size_t mctr;
 	size_t moft;
 	bool status;
 
 	status = true;
 
-	for (i = 0; i < QSCTEST_CHACHA_TEST_CYCLES; ++i)
+	for (size_t i = 0; i < QSCTEST_CHACHA_TEST_CYCLES; ++i)
 	{
 		qsc_intutils_clear8(dec, sizeof(dec));
 		qsc_intutils_clear8(enc, sizeof(enc));
@@ -143,7 +142,7 @@ bool qsctest_chacha128_wide_equality()
 		qsc_csp_generate(msg, sizeof(msg));
 
 		/* initialize the key parameters struct */
-		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
 		qsc_chacha_keyparams kp1 = { key, sizeof(key), nonce };
 
 		/* initialize the state */
@@ -158,7 +157,7 @@ bool qsctest_chacha128_wide_equality()
 		/* decrypt the cipher-text using 16-byte blocks, bypassing AVX */
 
 		/* reset the nonce */
-		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
 		qsc_chacha_keyparams kp2 = { key, sizeof(key), nonce };
 
 		/* initialize the 2nd state */
@@ -199,14 +198,13 @@ bool qsctest_chacha256_wide_equality()
 	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx1;
 	qsc_chacha_state ctx2;
-	size_t i;
 	size_t mctr;
 	size_t moft;
 	bool status;
 
 	status = true;
 
-	for (i = 0; i < QSCTEST_CHACHA_TEST_CYCLES; ++i)
+	for (size_t i = 0; i < QSCTEST_CHACHA_TEST_CYCLES; ++i)
 	{
 		qsc_intutils_clear8(dec, sizeof(dec));
 		qsc_intutils_clear8(enc, sizeof(enc));
@@ -218,7 +216,7 @@ bool qsctest_chacha256_wide_equality()
 		qsc_csp_generate(msg, sizeof(msg));
 
 		/* initialize the key parameters struct */
-		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
 		qsc_chacha_keyparams kp1 = { key, sizeof(key), nonce };
 
 		/* initialize the state */
@@ -233,7 +231,7 @@ bool qsctest_chacha256_wide_equality()
 		/* decrypt the cipher-text using 16-byte blocks, bypassing AVX */
 
 		/* reset the nonce */
-		memcpy(nonce, ncopy, sizeof(nonce));
+		qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
 		qsc_chacha_keyparams kp2 = { key, sizeof(key), nonce };
 
 		/* initialize the 2nd state */

@@ -1,6 +1,6 @@
 /**
 * \file poly1305_test.h
-* \brief <b>Poly1305 Known Answer Tests</b> \n
+* \brief Poly1305 Known Answer Tests \n
 * Poly1305 known answer comparison (KAT) tests. \n
 * Test vectors from the official Poly1305 implementation. \n
 * \author John Underhill \n
@@ -20,11 +20,11 @@
 * \remarks <b>Test References:</b> \n
 * RFC7539: <a href="https://tools.ietf.org/html/rfc7539">7539</a>ChaCha20 and Poly1305 for IETF Protocols.</a>
 */
-bool qsctest_poly1305_kat();
+bool qsctest_poly1305_kat(void);
 
 /**
 * \brief Run all Poly1305 MAC generator tests
 */
-void qsctest_poly1305_run();
+void qsctest_poly1305_run(void);
 
 #endif

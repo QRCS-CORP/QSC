@@ -15,26 +15,18 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of a cSHAKE based DRBG.
-* Written by John G. Underhill
-* Updated on June 14, 2021
-* Contact: support@vtdev.com 
 */
+
+#ifndef QSC_CSG_H
+#define QSC_CSG_H
 
 /**
 * \file csg.h
-* \author John Underhill
-* \date August 15, 2020
+* \brief Contains the public api and documentation for the CSG pseudo-random bytes generator
 *
-* \brief <b>An implementation of an cSHAKE Generator DRBG: CSG</b> \n
-* Contains the public api and documentation for the CSG pseudo-random bytes generator.
+* Usage Example \n
 *
-* <b>Usage Example</b> \n
-*
-* <b>Initialize the DRBG and generate output</b> \n
+* Initialize the DRBG and generate output \n
 * \code
 * // external key and optional custom arrays
 * uint8_t seed[32] = { ... };
@@ -43,7 +35,7 @@
 * // random bytes
 * uint8_t rnd[200] = { 0 };
 *
-* // initialize with seed, and optional cutomization array, with predictive resistance enabled
+* // initialize with seed, and optional customization array, with predictive resistance enabled
 * qsc_csg_initialize(seed, sizeof(seed), info, sizeof(info), true);
 *
 * // generate the pseudo-random
@@ -52,7 +44,8 @@
 * \endcode
 *
 * \remarks
-* \paragraph CSG uses the Keccak cSHAKE XOF function to produce pseudo-random bytes from a seeded custom SHAKE generator. \n
+* \par
+* CSG uses the Keccak cSHAKE XOF function to produce pseudo-random bytes from a seeded custom SHAKE generator. \n
 * If a 32-byte key is used, the implementation uses the cSHAKE-256 implementation for pseudo-random generation, if a 64-byte key is used, the generator uses cSHAKE-512. \n
 * An optional predictive resistance feature, enabled through the initialize function, injects random bytes into the generator at initialization and 1MB intervals,
 * creating a non-deterministic pseudo-random output. \n
@@ -61,7 +54,6 @@
 *
 * For additional usage examples, see csg_test.h. \n
 *
-* \section Links
 * NIST: SHA3 Fips202 http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
 * NIST: SP800-185 http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pd
 * NIST: SHA3 Keccak Submission http://keccak.noekeon.org/Keccak-submission-3.pdf
@@ -70,14 +62,25 @@
 * Team Keccak: Specifications summary https://keccak.team/keccak_specs_summary.html
 */
 
-#ifndef QSC_CSG_H
-#define QSC_CSG_H
-
 #include "common.h"
 #include "sha3.h"
 
+/*!
+* \def QSC_CSG256_SEED_SIZE
+* \brief The CSG-256 seed size
+*/
 #define QSC_CSG256_SEED_SIZE 32
+
+/*!
+* \def QSC_CSG512_SEED_SIZE
+* \brief The CSG-512 seed size
+*/
 #define QSC_CSG512_SEED_SIZE 64
+
+/*!
+* \def QSC_CSG_RESEED_THRESHHOLD
+* \brief The CSG re-seed threshold interval
+*/
 #define QSC_CSG_RESEED_THRESHHOLD 1024000
 
 /*!
@@ -86,22 +89,22 @@
 */
 QSC_EXPORT_API typedef struct
 {
-    qsc_keccak_state kstate;
-    uint8_t cache[QSC_KECCAK_256_RATE];
-    size_t bctr;
-    size_t cpos;
-    size_t crmd;
-    size_t rate;
-    bool pres;
+    qsc_keccak_state kstate;            /*!< The Keccak state  */
+    uint8_t cache[QSC_KECCAK_256_RATE]; /*!< The cache buffer */
+    size_t bctr;                        /*!< The bytes counter  */
+    size_t cpos;                        /*!< The cache position  */
+    size_t crmd;                        /*!< The cache remainder  */
+    size_t rate;                        /*!< The absorption rate  */
+    bool pres;                          /*!< The predictive resistance flag  */
 } qsc_csg_state;
 
 /**
-* \brief Dispose of the drbg state
+* \brief Dispose of the DRBG state
 *
 * \warning The dispose function must be called when disposing of the cipher.
 * This function destroys the internal state of the cipher.
 *
-* \param ctx: [struct] The drbg state structure
+* \param ctx: [struct] The DRBG state structure
 */
 QSC_EXPORT_API void qsc_csg_dispose(qsc_csg_state* ctx);
 
@@ -113,9 +116,9 @@ QSC_EXPORT_API void qsc_csg_dispose(qsc_csg_state* ctx);
 * \param seedlen: The length of the input seed
 * \param info: [const] The optional personalization string
 * \param infolen: The length of the personalization string
-* \param predictive_resistance: Enable periodic random injection; enables non deterministic pseudo-random generation
+* \param predres: Enable periodic random injection; enables non deterministic pseudo-random generation
 */
-QSC_EXPORT_API void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predictive_resistance);
+QSC_EXPORT_API void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predres);
 
 /**
 * \brief Generate pseudo-random bytes using the random provider.

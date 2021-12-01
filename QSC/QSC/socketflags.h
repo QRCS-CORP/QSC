@@ -15,18 +15,17 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* A network sockets base class.
-* Written by John G. Underhill
-* Updated on March 30, 2021
-* Contact: support@vtdev.com */
+*/
 
 #ifndef QSC_SOCKFLAGS_H
 #define QSC_SOCKFLAGS_H
 
 #include "common.h"
+
+/*
+* \file socketflags.h
+* \brief The socket flags enumerations
+*/
 
 /*! \enum qsc_ipv6_address_prefix_types
 * \brief IPv6 address prefixes
@@ -51,7 +50,7 @@ typedef enum qsc_socket_address_families
 	qsc_socket_address_family_ipv6 = 0x00000017L		/*!< The Internet Protocol 6 address family AF_INET6 */
 } qsc_socket_address_families;
 
-/*! \enum SocketStates
+/*! \enum qsc_socket_states
 * \brief The socket instance current connection state
 */
 typedef enum qsc_socket_states
@@ -59,10 +58,10 @@ typedef enum qsc_socket_states
 	qsc_socket_state_none = 0,							/*!< The socket instance is not initialized */
 	qsc_socket_state_connected = 1,						/*!< The socket instance is connected */
 	qsc_socket_state_listening = 2,						/*!< The socket instance is listening */
-	qsc_socket_state_connectionless = 3					/*!< The socket is in connectionless mode */
+	qsc_socket_state_connectionless = 3					/*!< The socket is in connection-less mode */
 } qsc_socket_states;
 
-/*! \enum SocketOptions
+/*! \enum qsc_socket_options
 * \brief TCP socket options
 */
 typedef enum qsc_socket_options
@@ -70,7 +69,7 @@ typedef enum qsc_socket_options
 	qsc_socket_option_none = 0x00000000L,				/*!< No flag is used */
 	qsc_socket_option_broadcast = 0x00000020L,			/*!< Configures a socket for sending broadcast data SO_BROADCAST */
 	qsc_socket_option_ipv6_only = 0x0000001BL,			/*!< Flag used to enable a dual stack configuration IPV6_V6ONLY */
-	qsc_socket_option_keepalive = 0x00000008L,			/*!<  Enables sending keep-alive packets for a socket connection SO_KEEPALIVE*/
+	qsc_socket_option_keepalive = 0x00000008L,			/*!< Enables sending keep-alive packets for a socket connection SO_KEEPALIVE */
 	qsc_socket_option_linger = 0x00000080L,				/*!< Lingers on close if unsent data is present SO_LINGER */
 	qsc_socket_option_no_route = 0x00000010L,			/*!< Sets whether outgoing data should be sent on interface the socket is bound to and not a routed on some other interface SO_DONTROUTE */
 	qsc_socket_option_out_of_band = 0x00000100L,		/*!< Indicates that out-of-bound data should be returned in-line with regular data SO_OOBINLINE */
@@ -80,7 +79,7 @@ typedef enum qsc_socket_options
 	qsc_socket_option_tcp_no_delay = 0x00000001L		/*!< Enables or disables the Nagle algorithm for TCP sockets. This option is disabled (set to FALSE) by default TCP_NODELAY */
 } qsc_socket_options;
 
-/*! \enum SocketProtocols
+/*! \enum qsc_socket_protocols
 * \brief The socket IP protocol type
 */
 typedef enum qsc_socket_protocols
@@ -99,7 +98,7 @@ typedef enum qsc_socket_protocols
 	qsc_socket_protocol_raw = 0x000000FFL				/*!< Raw Packet IPPROTO_RAW */
 } qsc_socket_protocols;
 
-/*! \enum SocketReceiveFlags
+/*! \enum qsc_socket_receive_flags
 * \brief The socket receive api flags
 */
 typedef enum qsc_socket_receive_flags
@@ -110,7 +109,7 @@ typedef enum qsc_socket_receive_flags
 	qsc_socket_receive_flag_wait_all = 0x00000008L		/*!< Request completes only when buffer is full MSG_WAITALL */
 } qsc_socket_receive_flags;
 
-/*! \enum SocketSendFlags
+/*! \enum qsc_socket_send_flags
 * \brief The socket send api flags
 */
 typedef enum qsc_socket_send_flags
@@ -121,7 +120,7 @@ typedef enum qsc_socket_send_flags
 	qsc_socket_send_flag_no_routing = 0x00000004L,		/*!< The data packets should not be routed MSG_DONTROUTE */
 } qsc_socket_send_flags;
 
-/*! \enum SocketShutdownFlags
+/*! \enum qsc_socket_shut_down_flags
 * \brief The socket shutdown api flags
 */
 typedef enum qsc_socket_shut_down_flags
@@ -131,7 +130,7 @@ typedef enum qsc_socket_shut_down_flags
 	qsc_socket_shut_down_flag_both = 0x00000002L		/*!< Shut down both channels QSC_SOCKET_SD_BOTH */
 } qsc_socket_shut_down_flags;
 
-/*! \enum SocketTransports
+/*! \enum qsc_socket_transports
 * \brief The socket transmission type
 */
 typedef enum qsc_socket_transports

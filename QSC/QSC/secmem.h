@@ -15,19 +15,6 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of secure locked memory
-* Written by John G. Underhill
-* Updated on June 3, 2020
-* Contact: support@vtdev.com 
-*/
-
-/*
-* \file secmem.h
-* \brief <b>Secure memory functions</b> \n
-* This file contains secure memory-locked functions
 */
 
 #ifndef QSC_SECMEM_H
@@ -35,11 +22,16 @@
 
 #include "common.h"
 
+/*
+* \file secmem.h
+* \brief Contains secure memory locking functions
+*/
+
 /* bogus winbase.h error */
 QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 /**
-* \brief Allovcate a block of secure memory
+* \brief Allocate a block of secure memory
 *
 * \param length: The length in bytes of the allocation request
 * \return Returns a pointer to a block of secure memory
@@ -66,7 +58,7 @@ QSC_EXPORT_API void qsc_secmem_free(uint8_t* block, size_t length);
 * \brief Returns the internal memory page size.
 * Large allocations should be paged on memory boundaries
 *
-* \return Returns the system memory page bounday size
+* \return Returns the system memory page boundary size
 */
 QSC_EXPORT_API size_t qsc_secmem_page_size();
 

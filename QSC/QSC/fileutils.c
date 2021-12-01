@@ -1,4 +1,5 @@
 #include "fileutils.h"
+#include "memutils.h"
 #include "stringutils.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -6,30 +7,39 @@
 #	include <io.h>
 #else
 #	include <unistd.h>
+#	include <stdlib.h>
 #endif
 
 bool qsc_filetools_working_directory(char* path)
 {
 	char buf[FILENAME_MAX] = { 0 };
 	size_t len;
-	bool res;
+	char* res;
+	bool ret;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	const char* rbf;
-	rbf = _getcwd(buf, sizeof(buf));
+	res = _getcwd(buf, sizeof(buf));
 #else
-	getcwd(buf, sizeof(buf));
+
+	res = getcwd(buf, sizeof(buf));
 #endif
 
-	len = strlen(buf);
-	res = strlen(path) <= len;
-
-	if (res == true)
+	if (res != NULL)
 	{
-		memcpy(path, buf, len);
+		len = strlen(buf);
+		ret = strlen(path) <= len;
+
+		if (ret == true)
+		{
+			qsc_memutils_copy(path, buf, len);
+		}
+	}
+	else
+	{
+		ret = false;
 	}
 
-	return res;
+	return ret;
 }
 
 bool qsc_filetools_file_exists(const char* path)
@@ -69,7 +79,21 @@ size_t qsc_filetools_file_size(const char* path)
 	return res;
 }
 
-#if defined(_MSC_VER)
+FILE*  qsc_filetools_open_file(const char* path, const char* mode, errno_t* err)
+{
+    FILE* fp;
+
+    fp = NULL;
+    #if defined(QSC_SYSTEM_OS_WINDOWS)
+	*err = fopen_s(&fp, path, mode);
+#else
+    fp = fopen(path, mode);
+    *err = (fp == NULL) ? -1 : 0;
+#endif
+
+return fp;
+}
+
 int64_t qsc_filetools_getline(char** line, size_t* length, FILE* fp)
 {
 	char* tmpl;
@@ -132,7 +156,7 @@ int64_t qsc_filetools_getline(char** line, size_t* length, FILE* fp)
 			}
 
 			/* copy the chunk to the end of the line buffer */
-			memcpy(*line + lenused, chunk, chunkused);
+			qsc_memutils_copy(*line + lenused, chunk, chunkused);
 			lenused += chunkused;
 			(*line)[lenused] = '\0';
 
@@ -146,7 +170,6 @@ int64_t qsc_filetools_getline(char** line, size_t* length, FILE* fp)
 		return -1;
 	}
 }
-#endif
 
 bool qsc_filetools_append_to_file(const char* path, const char* stream, size_t length)
 {
@@ -327,7 +350,6 @@ size_t qsc_filetools_read_line(const char* path, char* buffer, size_t buflen, si
 	size_t res;
 
 	ctr = 0;
-	len = 0;
 	pos = 0;
 	res = 0;
 
@@ -342,7 +364,7 @@ size_t qsc_filetools_read_line(const char* path, char* buffer, size_t buflen, si
 
 	if (len > 0)
 	{
-		sbuf = (char*)malloc(len);
+		sbuf = (char*)qsc_memutils_malloc(len);
 
 		if (sbuf != NULL && fp != NULL && err == 0)
 		{
@@ -359,14 +381,14 @@ size_t qsc_filetools_read_line(const char* path, char* buffer, size_t buflen, si
 					if (ctr == linenum)
 					{
 						res = qsc_stringutils_find_string(sbuf + pos, "\n");
-						memcpy(buffer, sbuf, res <= buflen ? res : buflen);
+						qsc_memutils_copy(buffer, sbuf, res <= buflen ? res : buflen);
 						break;
 					}
 				} while (pln != -1);
 			}
 
 			fclose(fp);
-			free(sbuf);
+			qsc_memutils_alloc_free(sbuf);
 		}
 	}
 

@@ -19,21 +19,19 @@
 * Reference implementations:
 * LibSodium by Frank Denis
 * https://github.com/jedisct1/libsodium
-*
 * curve25519-donna by Adam Langley
 * https://github.com/agl/curve25519-donna
-*
 * NaCI by Daniel J. Bernstein, Tanja Lange, Peter Schwabe
 * https://nacl.cr.yp.to
-*
 * Rewritten for Misra compliance and optimizations by John G. Underhill
-* September 21, 2020
 */
 
 #ifndef QSC_EC25519_H
 #define QSC_EC25519_H
 
 #include "common.h"
+
+/* \cond DOXYGEN_IGNORE */
 
 #define EC25519_SEED_SIZE 32
 #define EC25519_SIGNATURE_SIZE 64
@@ -42,12 +40,7 @@
 #define EC25519_CURVE_SIZE 32U
 
 /* fe */
-
-#if defined(QSC_SYSTEM_NATIVE_UINT128)
-typedef uint64_t fe25519[5];
-#else
-typedef int32_t fe25519[10];
-#endif
+typedef QSC_SIMD_ALIGN int32_t fe25519[10];
 
 void fe25519_0(fe25519 h);
 void fe25519_1(fe25519 h);
@@ -129,6 +122,8 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
 void sc25519_reduce(uint8_t s[64]);
 int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n);
 int32_t ed25519_small_order(const uint8_t s[32]);
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif
 

@@ -1,6 +1,6 @@
 /**
 * \file chacha_test.h
-* \brief <b>ChaCha Known Answer Tests</b> \n
+* \brief ChaCha Known Answer Tests \n
 * ChaChaP20 known answer comparison (KAT) tests. \n
 * Test vectors from the official ChaCha implementation. \n
 * \author John Underhill
@@ -26,7 +26,7 @@
 * \remarks <b>Test References:</b> \n
 * RFC7539: <a href="https://tools.ietf.org/html/rfc7539">ChaCha and Poly1305 based Cipher Suites for TLS</a>
 */
-bool qsctest_chacha128_kat();
+bool qsctest_chacha128_kat(void);
 
 /**
 * \brief Tests the ChaChaP20 implementation using a 256bit key.
@@ -36,7 +36,7 @@ bool qsctest_chacha128_kat();
 * \remarks <b>Test References:</b> \n
 * RFC7539: <a href="https://tools.ietf.org/html/rfc7539">ChaCha and Poly1305 based Cipher Suites for TLS</a>
 */
-bool qsctest_chacha256_kat();
+bool qsctest_chacha256_kat(void);
 
 
 #if defined(QSCTEST_CHACHA_WIDE_BLOCK_TESTS)
@@ -47,7 +47,7 @@ bool qsctest_chacha256_kat();
 *
 * \return Returns true for success
 */
-bool qsctest_chacha128_wide_equality();
+bool qsctest_chacha128_wide_equality(void);
 
 /**
 * \brief Tests the AVX implementations of the ChaCha-256 cipher for equivalence with the reference mode.
@@ -55,12 +55,12 @@ bool qsctest_chacha128_wide_equality();
 *
 * \return Returns true for success
 */
-bool qsctest_chacha256_wide_equality();
+bool qsctest_chacha256_wide_equality(void);
 #endif
 
 /**
 * \brief Run all tests.
 */
-void qsctest_chacha_run();
+void qsctest_chacha_run(void);
 
 #endif

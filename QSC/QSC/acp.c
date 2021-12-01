@@ -1,5 +1,6 @@
 #include "acp.h"
 #include "csp.h"
+#include "memutils.h"
 #include "rdp.h"
 #include "sha3.h"
 #include "sysutils.h"
@@ -16,38 +17,38 @@ static void acp_collect_statistics(uint8_t* seed)
 	size_t oft;
 	uint32_t id;
 
-	/* add user stats */
+	/* add user statistics */
 	ts = qsc_sysutils_system_timestamp();
-	/* interspersed with timestamps, as return from sys calls has some entropic variability */
-	memcpy(buffer, &ts, sizeof(uint64_t));
+	/* interspersed with time-stamps, as return from system calls has some entropy variability */
+	qsc_memutils_copy(buffer, &ts, sizeof(uint64_t));
 	oft = sizeof(uint64_t);
 	len = qsc_sysutils_computer_name(tname);
-	memcpy(buffer + oft, tname, len);
+	qsc_memutils_copy(buffer + oft, tname, len);
 	oft += len;
 	id = qsc_sysutils_process_id();
-	memcpy(buffer + oft, &id, sizeof(uint32_t));
+	qsc_memutils_copy(buffer + oft, &id, sizeof(uint32_t));
 	oft += sizeof(uint32_t);
 	len = qsc_sysutils_user_name(tname);
-	memcpy(buffer + oft, tname, len);
+	qsc_memutils_copy(buffer + oft, tname, len);
 	oft += len;
 	ts = qsc_sysutils_system_uptime();
-	memcpy(buffer + oft, &ts, sizeof(uint64_t));
+	qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
 	oft += sizeof(uint64_t);
 
-	/* add drive stats */
+	/* add drive statistics */
 	ts = qsc_sysutils_system_timestamp();
-	memcpy(buffer + oft, &ts, sizeof(uint64_t));
+	qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
 	oft += sizeof(uint64_t);
 	qsc_sysutils_drive_space(drv, &dstate);
-	memcpy(buffer + oft, &dstate, sizeof(dstate));
+	qsc_memutils_copy(buffer + oft, &dstate, sizeof(dstate));
 	oft += sizeof(dstate);
 
-	/* add memory stats */
+	/* add memory statistics */
 	ts = qsc_sysutils_system_timestamp();
-	memcpy(buffer + oft, &ts, sizeof(uint64_t));
+	qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
 	oft += sizeof(uint64_t);
 	qsc_sysutils_memory_statistics(&mstate);
-	memcpy(buffer + oft, &mstate, sizeof(mstate));
+	qsc_memutils_copy(buffer + oft, &mstate, sizeof(mstate));
 	len = oft + sizeof(mstate);
 
 	/* compress the statistics */
@@ -67,14 +68,12 @@ bool qsc_acp_generate(uint8_t* output, size_t length)
 	/* collect timers and system stats, compressed as tertiary seed */
 	acp_collect_statistics(stat);
 
-	if (qsc_sysutils_rdrand_available())
+	/* add a seed using RDRAND used as cSHAKE custom parameter */
+	res = qsc_rdp_generate(cust, sizeof(cust));
+
+	if (res == false)
 	{
-		/* add a seed using RDRAND used as cSHAKE custom parameter */
-		res = qsc_rdp_generate(cust, sizeof(cust));
-	}
-	else
-	{
-		/* fallback to system provider */
+		/* fall-back to system provider */
 		res = qsc_csp_generate(cust, sizeof(cust));
 	}
 

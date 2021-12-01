@@ -15,20 +15,16 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of the cryptographic system entropy provider
-* Written by John G. Underhill
-* Updated on January 20, 2020
-* Contact: support@vtdev.com 
 */
+
+#ifndef QSC_CSP_H
+#define QSC_CSP_H
 
 /**
 * \file csp.h
-* \brief <b>Cryptographic System entropy Provider: CSP</b> \n
+* \brief Cryptographic System entropy Provider
 * Provides access to either the Windows CryptGenRandom provider or
-* the /dev/urandom pool on posix systems.
+* the /dev/urandom pool on Posix systems.
 * This provider is not recommended for stand-alone use, but should be combined
 * with another entropy provider to seed a MAC or DRBG function to provide quality
 * random output.
@@ -37,9 +33,6 @@
 * \author John Underhill
 * \date June 05, 2019
 */
-
-#ifndef QSC_CSP_H
-#define QSC_CSP_H
 
 #include "common.h"
 

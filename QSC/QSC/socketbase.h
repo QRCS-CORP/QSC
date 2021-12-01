@@ -15,18 +15,6 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-* Written by John G. Underhill
-* Updated on April 4, 2021
-* Contact: support@vtdev.com */
-
-/**
-* \file socketbase.h
-* \brief <b>The socketbase header definition</b> \n
-* Contains the public api and documentation for the socketbase implementation.
-* \author John Underhill
-* \date April 4, 2021
-* \remarks For usage examples, see network_test.h
 */
 
 #ifndef QSC_SOCKETBASE_H
@@ -37,6 +25,11 @@
 #include "ipinfo.h"
 #include "memutils.h"
 #include "socket.h"
+
+/*
+* \file socketbase.h
+* \brief Time-stamp function definitions
+*/
 
 /* bogus winbase.h error */
 QSC_SYSTEM_CONDITION_IGNORE(5105)
@@ -52,45 +45,53 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	    pragma comment(lib, "iphlpapi.lib")
 #	    pragma comment(lib, "ws2_32.lib")
 #   endif
-#elif defined(QSC_SYSTEM_OS_POSIX)
+#else //elif defined(QSC_SYSTEM_OS_POSIX)
+
 #	include <errno.h>
 #	include <netdb.h>
 #	include <ifaddrs.h>
 #	include <netinet/in.h>
 #	include <arpa/inet.h>
-#	include <sys/sock.h>
+#include <sys/select.h>
+#	include <sys/socket.h>
 #	include <string.h>
 #	include <sys/types.h>
 #	include <unistd.h>
-#	include <netpacket/packet.h>
-#else
-#	error "The operating system is not supported!"
+#	if defined(QSC_SYSTEM_OS_APPLE)
+#
+#	else
+#		include <netpacket/packet.h>
+#	endif
+//#else
+//#	error "The operating system is not supported!"
 #endif
 
-/*!
-\def QSC_SOCKET_DUAL_IPV6_STACK
-* \brief Enables a dual stack ipv4 and ipv6 listener.
-*/
-#if !defined(QSC_SOCKET_DUAL_IPV6_STACK)
+///*!
+//\def QSC_SOCKET_DUAL_IPV6_STACK
+//* \brief Enables a dual stack ipv4 and ipv6 listener.
+//*/
+//#if !defined(QSC_SOCKET_DUAL_IPV6_STACK)
 //#	define QSC_SOCKET_DUAL_IPV6_STACK
-#endif
+//#endif
 
 /*** Function State ***/
 
+/*!
+\def QSC_SOCKET_RECEIVE_BUFFER_SIZE
+* \brief The socket receive buffer size
+*/
 #define QSC_SOCKET_RECEIVE_BUFFER_SIZE 1600
 
-/*! \enum SocketExceptions
-* \brief Symmetric AEAD cipher mode enumeration names
+/*! \enum qsc_socket_exceptions
+* \brief Socket code enumeration names
 */
 typedef enum qsc_socket_exceptions
 {
-	qsc_socket_exception_success = 0,								/*!< The operation completed succesfully */
+	qsc_socket_exception_success = 0,								/*!< The operation completed successfully */
 	qsc_socket_exception_error = -1,								/*!< The operation has failed */
 	qsc_socket_invalid_input = -2,									/*!< The input parameters are incorrect */
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	qsc_socket_exception_address_in_use = WSAEADDRINUSE,			/*!< The socket's local address is already in use and the socket was not marked to allow address reuse with SO_REUSEADDR.
-	* This error usually occurs during execution of the bind function, but could be delayed until this function if the bind was to a partially wildcard address
-	* (involving ADDR_ANY) and if a specific address needs to be committed at the time of this function. */
+	qsc_socket_exception_address_in_use = WSAEADDRINUSE,			/*!< The socket's local address is already in use and the socket was not marked to allow address reuse with SO_REUSEADDR */
 	qsc_socket_exception_address_required = WSAEDESTADDRREQ,		/*!< A destination address is required */
 	qsc_socket_exception_address_unsupported = WSAEAFNOSUPPORT,		/*!< The address family is not supported */
 	qsc_socket_exception_already_in_use = WSAEISCONN,				/*!< The socket is already connected */
@@ -98,9 +99,7 @@ typedef enum qsc_socket_exceptions
 	qsc_socket_exception_blocking_in_progress = WSAEINPROGRESS,		/*!< A blocking sockets call is in progress, or the service provider is still processing a callback function */
 	qsc_socket_exception_broadcast_address = WSAEACCES,				/*!< The requested address is a broadcast address, but the appropriate flag was not set */
 	qsc_socket_exception_buffer_fault = WSAEFAULT,					/*!< The buffer parameter is not completely contained in a valid part of the user address space */
-	qsc_socket_exception_circuit_reset = WSAECONNRESET,				/*!< The virtual circuit was reset by the remote side executing a hard or abortive close.
-		* For UDP sockets, the remote host was unable to deliver a previously sent UDP datagram and responded with a "port Unreachable" ICMP packet.
-		* The application should close the socket as it is no longer usable. */
+	qsc_socket_exception_circuit_reset = WSAECONNRESET,				/*!< The virtual circuit was reset by the remote side executing a hard or abortive close. */
 	qsc_socket_exception_circuit_terminated = WSAECONNABORTED,		/*!< The virtual circuit was terminated due to a time-out or other failure. The application should close the socket as it is no longer usable */
 	qsc_socket_exception_circuit_timeout = WSAETIMEDOUT,			/*!< The connection has been dropped, because of a network failure or because the system on the other end went down without notice */
 	qsc_socket_exception_connection_refused = WSAECONNREFUSED,		/*!< The connection was refused */
@@ -157,10 +156,10 @@ typedef enum qsc_socket_exceptions
 	qsc_socket_exception_host_unreachable = EHOSTUNREACH,			/*!< The remote host cannot be reached from this host at this time */
 	qsc_socket_exception_in_progress = EALREADY,					/*!< Operation already in progress */
 	qsc_socket_exception_invalid_address = EADDRNOTAVAIL,			/*!< Can't assign requested address */
-	qsc_socket_exception_invalid_parameter = EOTHER,				/*!< One or more parameters are invalid */
+	//qsc_socket_exception_invalid_parameter = EOTHER,				/*!< One or more parameters are invalid */
 	qsc_socket_exception_invalid_protocol = EPROTOTYPE,				/*!< Protocol wrong type for socket */
 	qsc_socket_exception_invalid_protocol_option = ENOPROTOOPT,		/*!< Protocol not available */
-	qsc_socket_exception_invalid_provider = EINVALIDPROVIDER,		/*!< The service provider is invalid */
+	//qsc_socket_exception_invalid_provider = EINVALIDPROVIDER,		/*!< The service provider is invalid */
 	qsc_socket_exception_item_is_remote = EREMOTE,					/*!< The item is not available locally */
 	qsc_socket_exception_message_too_long = EMSGSIZE,				/*!< The message size is too long */
 	qsc_socket_exception_name_too_long = ENAMETOOLONG,				/*!< The name is too long */
@@ -175,7 +174,7 @@ typedef enum qsc_socket_exceptions
 	qsc_socket_exception_socket_unsupported = ESOCKTNOSUPPORT,		/*!< qsc_socket type not supported */
 	qsc_socket_exception_shut_down = ESHUTDOWN,						/*!< Can't send after socket shutdown */
 	qsc_socket_exception_system_not_ready = ETXTBSY,				/*!< The subsystem is unavailable */
-	qsc_socket_exception_too_many_processes = EPROCLIM,				/*!< The host is using too many processes */
+	//qsc_socket_exception_too_many_processes = EPROCLIM,			/*!< The host is using too many processes */
 	qsc_socket_exception_too_many_users = EUSERS,					/*!< The user quota is exceeded */
 	qsc_socket_exception_translation_failed = ELOOP,				/*!< Can not translate name */
 	qsc_socket_exception_would_block = EWOULDBLOCK,					/*!< Operation would block */
@@ -188,7 +187,7 @@ typedef enum qsc_socket_exceptions
 */
 static const char QSC_SOCKET_ERROR_STRINGS[48][128] =
 {
-	"SUCCESS: The operation completed succesfully.",
+	"SUCCESS: The operation completed successfully.",
 	"ERROR: The operation has failed.",
 	"INVALID: The input parameters are incorrect.",
 	"EADDRINUSE: The socket's local address is in use and the socket was not marked to allow address reuse with SO_REUSEADDR.",
@@ -241,14 +240,14 @@ static const char QSC_SOCKET_ERROR_STRINGS[48][128] =
 /*! \struct qsc_socket_receive_async_state
 * \brief The socket async receive state structure.
 * The structure contains pointers to the originating socket,
-* message and error callbacks, and the message buffer.
+* message and error call-backs, and the message buffer.
 */
 typedef struct qsc_socket_receive_async_state
 {
-	void (*callback)(qsc_socket*, uint8_t*, size_t);	/*!< A pointer to a callback function */
-	void (*error)(qsc_socket*, qsc_socket_exceptions);	/*!< A pointer to an error function */
-	qsc_socket* source;									/*!< A pointer to the originating socket */
-	uint8_t buffer[QSC_SOCKET_RECEIVE_BUFFER_SIZE];		/*!< A pointer to the message buffer */
+	void (*callback)(const qsc_socket* sock, const uint8_t* message, size_t* msglen);	/*!< A pointer to a callback function */
+	void (*error)(const qsc_socket* sock, qsc_socket_exceptions exception);				/*!< A pointer to an error function */
+	qsc_socket* source;																	/*!< A pointer to the originating socket */
+	uint8_t buffer[QSC_SOCKET_RECEIVE_BUFFER_SIZE];										/*!< A pointer to the message buffer */
 } qsc_socket_receive_async_state;
 
 /*! \struct qsc_socket_receive_poll_state
@@ -258,25 +257,44 @@ typedef struct qsc_socket_receive_async_state
 */
 typedef struct qsc_socket_receive_poll_state
 {
-	qsc_socket** sockarr;								/*!< A pointer to an array of sockets */
-	void (*callback)(qsc_socket*, size_t);				/*!< A pointer to a callback function */
-	void (*error)(qsc_socket*, qsc_socket_exceptions);	/*!< A pointer to an error function */
-	uint32_t count;										/*!< The number of active sockets */
+	qsc_socket** sockarr;																/*!< A pointer to an array of sockets */
+	void (*callback)(qsc_socket* sock, size_t id);										/*!< A pointer to a callback function */
+	void (*error)(qsc_socket* sock, qsc_socket_exceptions exception);					/*!< A pointer to an error function */
+	uint32_t count;																		/*!< The number of active sockets */
 } qsc_socket_receive_poll_state;
 
 /*** Function Prototypes ***/
 
-QSC_EXPORT_API void qsc_socket_exception_callback(qsc_socket* source, qsc_socket_exceptions error);
+/**
+* \brief The socket exception callback prototype
+*
+* \param source: [const] The socket source
+* \param error: The socket exception
+*/
+QSC_EXPORT_API void qsc_socket_exception_callback(const qsc_socket* source, qsc_socket_exceptions error);
 
-QSC_EXPORT_API void qsc_socket_receive_async_callback(qsc_socket* source, uint8_t* buffer, size_t msglen);
+/**
+* \brief The socket receive asynchronous callback prototype
+*
+* \param source: [const] The socket source
+* \param message: [const] The socket message buffer
+* \param msglen: A pointer to the size of the message
+*/
+QSC_EXPORT_API void qsc_socket_receive_async_callback(const qsc_socket* source, const uint8_t* message, size_t* msglen);
 
-QSC_EXPORT_API void qsc_socket_receive_poll_callback(qsc_socket* source, size_t error);
+/**
+* \brief The receive polling callback prototype
+*
+* \param source: [const] The socket source
+* \param error: The socket exception
+*/
+QSC_EXPORT_API void qsc_socket_receive_poll_callback(const qsc_socket* source, size_t error);
 
 /*** Accessors ***/
 
 /**
 * \brief Detects if the string contains a valid IPV4 address
-* \param address: The ip address string
+* \param address: [const] The IP address string
 *
 * \return Returns true if the address is a valid IPV4 address
 */
@@ -284,16 +302,16 @@ QSC_EXPORT_API bool qsc_socket_ipv4_valid_address(const char* address);
 
 /**
 * \brief Detects if the string contains a valid IPV6 address
-* \param address: The ip address string
+* \param address: [const] The IP address string
 *
-* \return Returns true if ther address is a valid IPV6 address
+* \return Returns true if the address is a valid IPV6 address
 */
 QSC_EXPORT_API bool qsc_socket_ipv6_valid_address(const char* address);
 
 /**
 * \brief Determines if the socket is in blocking mode
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 *
 * \return Returns true if the socket is blocking
 */
@@ -302,7 +320,7 @@ QSC_EXPORT_API bool qsc_socket_is_blocking(const qsc_socket* sock);
 /**
 * \brief Determines if the socket is connected
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 *
 * \return Returns true if the socket is connected
 */
@@ -311,7 +329,7 @@ QSC_EXPORT_API bool qsc_socket_is_connected(const qsc_socket* sock);
 /**
 * \brief The Accept function handles an incoming connection attempt on the socket
 *
-* \param source: The source listening socket instance
+* \param source: [const] The source listening socket instance
 * \param target: The socket receiving the new socket
 *
 * \return Returns an exception code on failure, or success(0)
@@ -330,8 +348,8 @@ QSC_EXPORT_API void qsc_socket_attach(qsc_socket* source, qsc_socket* target);
 * \brief The Bind function associates an IP address with a socket
 *
 * \param sock: The socket instance
-* \param address: The ip address to bind to the socket
-* \param port:The service port number
+* \param address: [const] The IP address to bind to the socket
+* \param port: The service port number
 *
 * \return Returns an exception code on failure, or success(0)
 */
@@ -340,8 +358,8 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_bind(qsc_socket* sock, const cha
 /**
 * \brief The Bind function associates an IPv4 address with a socket
 *
-* \param soure: The socket instance
-* \param address: The IPv4 address to bind to the socket
+* \param sock: The socket instance
+* \param address: [const] The IPv4 address to bind to the socket
 * \param port: The service port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -351,8 +369,8 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_bind_ipv4(qsc_socket* sock, cons
 /**
 * \brief The Bind function associates an IPv6 address with a socket
 *
-* \param soure: The socket instance
-* \param address: The IPv6 address to bind to the socket
+* \param sock: The socket instance
+* \param address: [const] The IPv6 address to bind to the socket
 * \param port: The service port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -362,7 +380,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_bind_ipv6(qsc_socket* sock, cons
 /**
 * \brief The Close socket function closes and disposes of the socket
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 *
 * \return Returns an exception code on failure, or success(0)
 */
@@ -372,7 +390,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_close_socket(const qsc_socket* s
 * \brief The Connect function establishes a connection to a remote host
 *
 * \param sock: The socket instance
-* \param address: The remote hosts ip address
+* \param address: [const] The remote hosts IP address
 * \param port: The remote hosts service port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -383,7 +401,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_connect(qsc_socket* sock, const 
 * \brief The Connect function establishes a connection to a remote host using IPv4 addressing
 *
 * \param sock: The socket instance
-* \param address: The remote hosts IPv4 address
+* \param address: [const] The remote hosts IPv4 address
 * \param port: The remote hosts service port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -394,7 +412,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_connect_ipv4(qsc_socket* sock, c
 * \brief The Connect function establishes a connection to a remote host using IPv6 addressing
 *
 * \param sock: The socket instance
-* \param address: The remote hosts IPv6 address
+* \param address: [const] The remote hosts IPv6 address
 * \param port: The remote hosts service port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -416,7 +434,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_create(qsc_socket* sock, qsc_soc
 /**
 * \brief Places the socket in the listening state, waiting for a connection
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 * \param backlog: The maximum pending connections queue length
 *
 * \return Returns an exception code on failure, or success(0)
@@ -424,9 +442,9 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_create(qsc_socket* sock, qsc_soc
 QSC_EXPORT_API qsc_socket_exceptions qsc_socket_listen(const qsc_socket* sock, int32_t backlog);
 
 /**
-* \brief Receive data from a synchronous connected socket or a bound connectionless socket
+* \brief Receive data from a synchronous connected socket or a bound connection-less socket
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 * \param output: The output buffer that receives data
 * \param outlen: The length of the output received
 * \param flag: Flags that influence the behavior of the receive function
@@ -443,9 +461,9 @@ QSC_EXPORT_API size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output
 QSC_EXPORT_API qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive_async_state* state);
 
 /**
-* \brief Receive a block of data from a synchronous connected socket or a bound connectionless socket, and returns when buffer is full
+* \brief Receive a block of data from a synchronous connected socket or a bound connection-less socket, and returns when buffer is full
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 * \param output: The output buffer that receives data
 * \param outlen: The length of the output received
 * \param flag: Flags that influence the behavior of the receive function
@@ -455,7 +473,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive
 QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t outlen, qsc_socket_receive_flags flag);
 
 /**
-* \brief Receive data from a synchronous connected socket or a bound connectionless socket
+* \brief Receive data from a synchronous connected socket or a bound connection-less socket
 *
 * \param sock: The local socket
 * \param destination: The destination IP address string
@@ -472,9 +490,8 @@ QSC_EXPORT_API size_t qsc_socket_receive_from(qsc_socket* sock, char* destinatio
 * \brief Polls an array of sockets.
 * Fires a callback if a socket is ready to receive data, or an error if socket is disconnected.
 *
-* \param state: The server state, containing a pointer to an array of sockets
+* \param state: [const] The server state, containing a pointer to an array of sockets
 *
-
 * \return Returns the number of sockets with data
 */
 QSC_EXPORT_API uint32_t qsc_socket_receive_poll(const qsc_socket_receive_poll_state* state);
@@ -482,8 +499,8 @@ QSC_EXPORT_API uint32_t qsc_socket_receive_poll(const qsc_socket_receive_poll_st
 /**
 * \brief Sends data on a TCP connected socket
 *
-* \param sock: The socket instance
-* \param input: The input buffer containing the data to be transmitted
+* \param sock: [const] The socket instance
+* \param input: [const] The input buffer containing the data to be transmitted
 * \param inlen: The number of bytes to send
 * \param flag: Flags that influence the behavior of the send function
 *
@@ -494,8 +511,11 @@ QSC_EXPORT_API size_t qsc_socket_send(const qsc_socket* sock, const uint8_t* inp
 /**
 * \brief Sends data on a UDP socket
 *
-* \param sock: The socket instance
-* \param input: The input buffer containing the data to be transmitted
+* \param sock: [const] The socket instance
+* \param destination: [const] The destination address string
+* \param destlen: The lenghth of the destination address string
+* \param port: The destination port number
+* \param input: [const] The input buffer containing the data to be transmitted
 * \param inlen: The number of bytes to send
 * \param flag: Flags that influence the behavior of the send function
 *
@@ -506,8 +526,8 @@ QSC_EXPORT_API size_t qsc_socket_send_to(const qsc_socket* sock, const char* des
 /**
 * \brief Sends a block of data larger than a single packet size, on a TCP socket and returns when sent
 *
-* \param sock: The socket instance
-* \param input: The input buffer containing the data to be transmitted
+* \param sock: [const] The socket instance
+* \param input: [const] The input buffer containing the data to be transmitted
 * \param inlen: The number of bytes to send
 * \param flag: Flags that influence the behavior of the send function
 *
@@ -531,7 +551,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_shut_down(qsc_socket* sock, qsc_
 * \brief Returns the error string associated with the exception code
 * \param code: The exception code
 *
-* \return Returns the error string
+* \return [const] Returns the error string
 */
 QSC_EXPORT_API const char* qsc_socket_error_to_string(qsc_socket_exceptions code);
 
@@ -540,12 +560,12 @@ QSC_EXPORT_API const char* qsc_socket_error_to_string(qsc_socket_exceptions code
 *
 * \return Returns the last exception code
 */
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_get_last_error();
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_get_last_error(void);
 
 /**
 * \brief Sets the IO mode of the socket
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 * \param command: The command to pass to the socket
 * \param arguments: The command arguments
 *
@@ -556,8 +576,8 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_ioctl(const qsc_socket* sock, in
 /**
 * \brief Tests the socket to see if it is ready to receive data
 *
-* \param sock: The socket instance
-* \param timeout: The receive wait timeout
+* \param sock: [const] The socket instance
+* \param timeout: [const] The receive wait timeout
 *
 * \return Returns true if the socket is ready to receive data
 */
@@ -566,8 +586,8 @@ QSC_EXPORT_API bool qsc_socket_receive_ready(const qsc_socket* sock, const struc
 /**
 * \brief Tests the socket to see if it is ready to send data
 *
-* \param Source: The socket instance
-* \param Timeout: The maximum time to wait for a response from the socket
+* \param sock: [const] The socket instance
+* \param timeout: [const] The maximum time to wait for a response from the socket
 *
 * \return Returns true if the socket is ready to send data
 */
@@ -585,13 +605,13 @@ QSC_EXPORT_API void qsc_socket_set_last_error(qsc_socket_exceptions error);
 *
 * \return Returns an exception code on failure, or success(0)
 */
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_shut_down_sockets();
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_shut_down_sockets(void);
 
 /**
 * \brief Send an option command to the socket.
 * Options that use a boolean are format: 0=false, 1=true.
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 * \param level: The level at which the option is assigned
 * \param option: The option command to send
 * \param optval: The value of the option command
@@ -605,6 +625,6 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_set_option(const qsc_socket* soc
 *
 * \return Returns true on success
 */
-QSC_EXPORT_API bool qsc_socket_start_sockets();
+QSC_EXPORT_API bool qsc_socket_start_sockets(void);
 
 #endif

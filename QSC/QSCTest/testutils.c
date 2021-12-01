@@ -1,24 +1,42 @@
 #include "testutils.h"
+#include "../QSC/memutils.h"
 #include <stdio.h>
 
 char qsctest_get_char()
 {
 	char line[8] = { 0 };
-	fgets(line, sizeof(line), stdin);
+	char* res;
+	char ret;
 
-	return line[0];
+	res = fgets(line, sizeof(line), stdin);
+
+	if (res != NULL)
+	{
+		ret = line[0];
+	}
+	else
+	{
+		ret = 0;
+	}
+
+	return ret;
 }
 
-void qsctest_get_wait()
+uint8_t qsctest_get_wait()
 {
-	wint_t res;
+	char ret;
 
-	res = getwchar();
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	ret = getwchar();
+#else
+	ret = getchar();
+#endif
+
+	return (uint8_t)ret;
 }
 
 void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 {
-	size_t  pos;
 	uint8_t  idx0;
 	uint8_t  idx1;
 
@@ -30,9 +48,9 @@ void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
-	memset(output, 0, length);
+	qsc_memutils_clear(output, length);
 
-	for (pos = 0; pos < (length * 2); pos += 2)
+	for (size_t  pos = 0; pos < (length * 2); pos += 2)
 	{
 		idx0 = ((uint8_t)hexstr[pos + 0] & 0x1FU) ^ 0x10U;
 		idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
@@ -50,7 +68,7 @@ void qsctest_print_hex_quot(const uint8_t* input, size_t inputlen, size_t linele
 
 		for (i = 0; i < linelen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("%02X", input[i]);
 #else
 			printf("%02X", input[i]);
@@ -69,7 +87,7 @@ void qsctest_print_hex_quot(const uint8_t* input, size_t inputlen, size_t linele
 
 		for (i = 0; i < inputlen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("%02X", input[i]);
 #else
 			printf("%02X", input[i]);
@@ -88,12 +106,12 @@ void qsctest_print_hex_uint16(const uint16_t* input, size_t inputlen, size_t lin
 	{
 		for (i = 0; i < linelen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("0x%04X", input[i]);
-			printf_s("U, ");
+			printf_s("%s", "U, ");
 #else
 			printf("0x%04X", input[i]);
-			printf("U, ");
+			printf("%s", "U, ");
 #endif
 		}
 
@@ -106,12 +124,12 @@ void qsctest_print_hex_uint16(const uint16_t* input, size_t inputlen, size_t lin
 	{
 		for (i = 0; i < inputlen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("0x%04X", input[i]);
-			printf_s("U, ");
+			printf_s("%s", "U, ");
 #else
 			printf("0x%04X", input[i]);
-			printf("U, ");
+			printf("%s", "U, ");
 #endif
 		}
 
@@ -126,12 +144,12 @@ void qsctest_print_hex_uint32(const uint32_t* input, size_t inputlen, size_t lin
 	{
 		for (i = 0; i < linelen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("0x%08lX", input[i]);
-			printf_s("UL, ");
+			printf_s("%s", "UL, ");
 #else
-			printf("0x%08lX", input[i]);
-			printf("UL, ");
+			printf("0x%08lX", (long unsigned int)input[i]);
+			printf("%s", "UL, ");
 #endif
 		}
 
@@ -144,12 +162,12 @@ void qsctest_print_hex_uint32(const uint32_t* input, size_t inputlen, size_t lin
 	{
 		for (i = 0; i < inputlen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("0x%08lX", input[i]);
-			printf_s("UL, ");
+			printf_s("%s", "UL, ");
 #else
-			printf("0x%08lX", input[i]);
-			printf("UL, ");
+			printf("0x%08lX", (long unsigned int)input[i]);
+			printf("%s", "UL, ");
 #endif
 		}
 	}
@@ -163,12 +181,12 @@ void qsctest_print_hex_uint64(const uint64_t* input, size_t inputlen, size_t lin
 	{
 		for (i = 0; i < linelen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("0x%016llX", input[i]);
-			printf_s("ULL, ");
+			printf_s("%s", "ULL, ");
 #else
-			printf("0x%016llX", input[i]);
-			printf("ULL, ");
+			printf("0x%016llX", (long long unsigned int)input[i]);
+			printf("%s", "ULL, ");
 #endif
 		}
 
@@ -181,12 +199,12 @@ void qsctest_print_hex_uint64(const uint64_t* input, size_t inputlen, size_t lin
 	{
 		for (i = 0; i < inputlen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("0x%016llX", input[i]);
-			printf_s("ULL, ");
+			printf_s("%s", "ULL, ");
 #else
-			printf("0x%016llX", input[i]);
-			printf_s("ULL, ");
+			printf("0x%016llX", (long long unsigned int)input[i]);
+			printf("%s", "ULL, ");
 #endif
 		}
 	}
@@ -200,7 +218,7 @@ void qsctest_print_hex(const uint8_t* input, size_t inputlen, size_t linelen)
 	{
 		for (i = 0; i < linelen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("%02X", input[i]);
 #else
 			printf("%02X", input[i]);
@@ -216,7 +234,7 @@ void qsctest_print_hex(const uint8_t* input, size_t inputlen, size_t linelen)
 	{
 		for (i = 0; i < inputlen; ++i)
 		{
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 			printf_s("%02X", input[i]);
 #else
 			printf("%02X", input[i]);
@@ -229,10 +247,10 @@ void qsctest_print_safe(const char* input)
 {
 	if (input != NULL)
 	{
-#if defined(_MSC_VER)
-		printf_s(input);
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		printf_s("%s", input);
 #else
-		printf(input);
+		printf("%s", input);
 #endif
 	}
 }
@@ -245,23 +263,23 @@ void qsctest_print_line(const char* input)
 
 void qsctest_print_ulong(uint64_t digit)
 {
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 	printf_s("%llu", digit);
 #else
-	printf("%llu", digit);
+	printf("%llu", (long long unsigned int)digit);
 #endif
 }
 
 void qsctest_print_double(double digit)
 {
-#if defined(_MSC_VER)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 	printf_s("%.*lf", 3, digit);
 #else
 	printf("%.*lf", 3, digit);
 #endif
 }
 
-bool qsctest_test_confirm(char* message)
+bool qsctest_test_confirm(const char* message)
 {
 	char ans;
 	bool res;

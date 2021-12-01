@@ -14,7 +14,7 @@ size_t qsc_arrayutils_find_string(const char* str, size_t slen, const char* toke
 	res = (size_t)QSC_ARRAYTILS_NPOS;
 	fnd = strstr(str, token);
 
-	if (fnd)
+	if (fnd != NULL)
 	{
 		res = slen - strlen(fnd);
 	}
@@ -44,13 +44,46 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
 }
 
 void qsc_arrayutils_uint8_to_hex(char* output, size_t outlen, uint8_t value)
-{ 
+{
 	assert(output != NULL);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sprintf_s(output, outlen, "%hhx", value);
+	sprintf_s(output, outlen, "%02hhx", value);
 #else
-	sprintf(output, "%hhx", value);
+	sprintf(output, "%02hhx", value);
+#endif
+}
+
+void qsc_arrayutils_uint16_to_hex(char* output, size_t outlen, uint16_t value)
+{
+	assert(output != NULL);
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	sprintf_s(output, outlen, "%04hx", value);
+#else
+	sprintf(output, "%04hx", value);
+#endif
+}
+
+void qsc_arrayutils_uint32_to_hex(char* output, size_t outlen, uint32_t value)
+{
+	assert(output != NULL);
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	sprintf_s(output, outlen, "%08lx", value);
+#else
+	sprintf(output, "%08lx", (unsigned long)value);
+#endif
+}
+
+void qsc_arrayutils_uint64_to_hex(char* output, size_t outlen, uint64_t value)
+{
+	assert(output != NULL);
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	sprintf_s(output, outlen, "%016llx", value);
+#else
+	sprintf(output, "%016lldx", (unsigned long long)value);
 #endif
 }
 
@@ -112,7 +145,7 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	sscanf_s(str, "%lld", &res);
 #else
-	sscanf(str, "%lld", &res);
+	sscanf(str, "%lld", (long long int*)&res);
 #endif
 
 	return res;

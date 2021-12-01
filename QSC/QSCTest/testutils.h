@@ -2,18 +2,24 @@
 #define QSCTEST_TESTUTILS_H
 
 #include "common.h"
+/**
+* \file testutils.h
+* \brief Test support functions
+*/
 
 /**
 * \brief Get a single character from the console
-* 
+*
 * \return Returns the character detected
 */
-char qsctest_get_char();
+char qsctest_get_char(void);
 
 /**
 * \brief Pause the console until user input is detected
+*
+* \return Returns the character detected
 */
-void qsctest_get_wait();
+uint8_t qsctest_get_wait(void);
 
 /**
 * \brief Convert a hexadecimal character string to a binary byte array
@@ -25,7 +31,7 @@ void qsctest_get_wait();
 void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 
 /**
-* \brief Convert a uint16 array to a hexidecimal array, delineated with commas, and print to the console
+* \brief Convert a uint16 array to a hexadecimal array, delineated with commas, and print to the console
 *
 * \param input: the uint16 array
 * \param inputlen: the number of bytes to process
@@ -34,7 +40,7 @@ void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 void qsctest_print_hex_uint16(const uint16_t* input, size_t inputlen, size_t linelen);
 
 /**
-* \brief Convert a uint32 array to a hexidecimal array, delineated with commas, and print to the console
+* \brief Convert a uint32 array to a hexadecimal array, delineated with commas, and print to the console
 *
 * \param input: the uint32 array
 * \param inputlen: the number of bytes to process
@@ -43,7 +49,7 @@ void qsctest_print_hex_uint16(const uint16_t* input, size_t inputlen, size_t lin
 void qsctest_print_hex_uint32(const uint32_t* input, size_t inputlen, size_t linelen);
 
 /**
-* \brief Convert a uint64 array to a hexidecimal array, delineated with commas, and print to the console
+* \brief Convert a uint64 array to a hexadecimal array, delineated with commas, and print to the console
 *
 * \param input: the uint64 array
 * \param inputlen: the number of bytes to process
@@ -52,7 +58,7 @@ void qsctest_print_hex_uint32(const uint32_t* input, size_t inputlen, size_t lin
 void qsctest_print_hex_uint64(const uint64_t* input, size_t inputlen, size_t linelen);
 
 /**
-* \brief Convert a binary array to a hexidecimal string, add quotation marks, and print to the console
+* \brief Convert a binary array to a hexadecimal string, add quotation marks, and print to the console
 *
 * \param input: the binary array
 * \param inputlen: the number of bytes to process
@@ -61,7 +67,7 @@ void qsctest_print_hex_uint64(const uint64_t* input, size_t inputlen, size_t lin
 void qsctest_print_hex_quot(const uint8_t* input, size_t inputlen, size_t linelen);
 
 /**
-* \brief Convert a binary array to a hexidecimal string and print to the console
+* \brief Convert a binary array to a hexadecimal string and print to the console
 *
 * \param input: the binary array
 * \param inputlen: the number of bytes to process
@@ -102,6 +108,6 @@ void qsctest_print_double(double digit);
 *
 * \param message: the message to print
 */
-bool qsctest_test_confirm(char* message);
+bool qsctest_test_confirm(const char* message);
 
 #endif

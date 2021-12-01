@@ -182,7 +182,6 @@ bool qsctest_ecdsa_privatekey_integrity()
 	uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
 	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -197,7 +196,7 @@ bool qsctest_ecdsa_privatekey_integrity()
 	qsc_ecdsa_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* flip bits in the private key */
-	for (i = 0; i < 4; ++i)
+	for (size_t i = 0; i < 4; ++i)
 	{
 		sk[i] ^= 1U;
 	}
@@ -260,7 +259,6 @@ bool qsctest_ecdsa_signature_integrity()
 	uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
 	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -288,7 +286,7 @@ bool qsctest_ecdsa_signature_integrity()
 	}
 
 	/* flip one bit per hash; the signature is entirely hashes */
-	for (i = 0; i < (int32_t)(siglen - QSCTEST_ECDSA_MSG0_SIZE); ++i)
+	for (size_t i = 0; i < (int32_t)(siglen - QSCTEST_ECDSA_MSG0_SIZE); ++i)
 	{
 		sig[i] ^= 1U;
 
@@ -314,7 +312,6 @@ bool qsctest_ecdsa_stress_test()
 	uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
 	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -328,7 +325,7 @@ bool qsctest_ecdsa_stress_test()
 	/* generate the key-pair */
 	qsc_ecdsa_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
-	for (i = 0; i < QSCTEST_ECDSA_ITERATIONS; i++)
+	for (size_t i = 0; i < QSCTEST_ECDSA_ITERATIONS; i++)
 	{
 		/* sign the message and return the signed version in sig */
 		qsc_ecdsa_sign(sig, &siglen, msg, msglen, sk);

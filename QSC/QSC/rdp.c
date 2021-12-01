@@ -1,7 +1,10 @@
 #include "rdp.h"
-#include "intutils.h"
+#include "cpuidex.h"
 #include "intrinsics.h"
+#include "intutils.h"
 #include "sysutils.h"
+
+#include "consoleutils.h"
 
 /* the number of times to read from the RDRAND/RDSEED RNGs; each read generates 32 bits of output */
 #define RDP_RNG_POLLS 32
@@ -17,119 +20,91 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 	assert(output != 0);
 	assert(length <= QSC_RDP_SEED_MAX);
 
-	size_t fctr;
-	size_t poff;
-	int32_t fret;
-	bool hasrand;
-	bool hasseed;
 	bool res;
 
+#if defined(QSC_RDRAND_COMPATIBLE)
+
+	qsc_cpuidex_cpu_features cfeat;
+	size_t ectr;
+	size_t pos;
+	int32_t fret;
+	bool hrand;
+	bool hfeat;
+
+	ectr = 0;
+	pos = 0;
 	res = true;
-	fctr = 0;
-	poff = 0;
-	fret = 0;
-	hasrand = qsc_sysutils_rdrand_available();
-	hasseed = qsc_sysutils_rdseed_available();
+	hfeat = qsc_cpuidex_features_set(&cfeat);
+	hrand = cfeat.rdrand;
 
-#if defined(QSC_SYSTEM_AVX_INTRINSICS)
-
+	if (hrand == true && hfeat == true)
+	{
+		while (length != 0)
+		{
 #	if defined(QSC_SYSTEM_IS_X64)
+			uint64_t rnd64;
 
-	uint64_t rnd64;
+			fret = _rdrand64_step((unsigned long long*)&rnd64);
 
-	while (length != 0)
-	{
-		rnd64 = 0;
-
-		if (hasseed)
-		{
-			fret = _rdseed64_step(&rnd64);
-		}
-		else if (hasrand)
-		{
-			fret = _rdrand64_step(&rnd64);
-		}
-		else
-		{
-			res = false;
-			break;
-		}
-
-		if (fret == RDP_RDR_SUCCESS)
-		{
-			const size_t RMDLEN = qsc_intutils_min(sizeof(uint64_t), length);
-
-			for (size_t i = 0; i < RMDLEN; ++i)
+			if (fret == RDP_RDR_SUCCESS)
 			{
-				output[poff + i] = (uint8_t)(rnd64 >> (i * 8));
+				const size_t RMDLEN = qsc_intutils_min(sizeof(uint64_t), length);
+
+				for (size_t i = 0; i < RMDLEN; ++i)
+				{
+					output[pos + i] = (uint8_t)(rnd64 >> (i * 8));
+				}
+
+				pos += RMDLEN;
+				length -= RMDLEN;
+				ectr = 0;
 			}
-
-			poff += RMDLEN;
-			length -= RMDLEN;
-			fctr = 0;
-		}
-		else
-		{
-			++fctr;
-
-			if (fctr > RDP_RDS_RETRY)
+			else
 			{
-				res = false;
-				break;
-			}
-		}
-	}
+				++ectr;
 
+				if (ectr > RDP_RDS_RETRY)
+				{
+					res = false;
+					break;
+				}
+			}
 #	else
+			uint32_t rnd32;
 
-	uint32_t rnd32;
+			fret = _rdrand32_step((unsigned int*)&rnd32);
 
-	while (length != 0)
-	{
-		rnd32 = 0;
-
-		if (hasseed)
-		{
-			fret = _rdseed32_step(&rnd32);
-		}
-		else if (hasrand)
-		{
-			fret = _rdrand32_step(&rnd32);
-		}
-		else
-		{
-			res = false;
-			break;
-		}
-
-		if (fret == RDP_RDR_SUCCESS)
-		{
-			const size_t RMDLEN = qsc_intutils_min(sizeof(uint32_t), length);
-
-			for (i = 0; i < RMDLEN; ++i)
+			if (fret == RDP_RDR_SUCCESS)
 			{
-				output[poff + i] = (uint8_t)(rnd32 >> (i * 8));
+				const size_t RMDLEN = qsc_intutils_min(sizeof(uint32_t), length);
+
+				for (size_t i = 0; i < RMDLEN; ++i)
+				{
+					output[pos + i] = (uint8_t)(rnd32 >> (i * 8));
+				}
+
+				pos += RMDLEN;
+				length -= RMDLEN;
+				ectr = 0;
 			}
-
-			poff += RMDLEN;
-			length -= RMDLEN;
-			fctr = 0;
-		}
-		else
-		{
-			++fctr;
-
-			if (fctr > RDP_RDS_RETRY)
+			else
 			{
-				res = false;
-				break;
+				++ectr;
+
+				if (ectr > RDP_RDS_RETRY)
+				{
+					res = false;
+					break;
+				}
 			}
+#	endif
 		}
 	}
-#	endif
 
 #else
+
 	res = false;
+
 #endif
 
 	return res;

@@ -1,6 +1,6 @@
 #include "socketclient.h"
-#include "async.h"
 #include "memutils.h"
+#include "async.h"
 #include "netutils.h"
 
 qsc_socket_address_families qsc_socket_client_address_family(const qsc_socket* sock)
@@ -212,7 +212,7 @@ size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t 
 	return res;
 }
 
-size_t qsc_socket_client_send_to(qsc_socket* sock, const char* address, uint16_t port, const char* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, uint16_t port, const char* input, size_t inlen, qsc_socket_send_flags flag)
 {
 	assert(sock != NULL);
 	assert(address != NULL);

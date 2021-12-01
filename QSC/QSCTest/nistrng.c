@@ -1,6 +1,6 @@
 #include "nistrng.h"
 #include "../QSC/intutils.h"
-#include "aes.h"
+#include "../QSC/aes.h"
 
 /*lint -e747 */
 
@@ -55,13 +55,13 @@ int32_t qsctest_nistrng_kdf_initialize(qsctest_nist_rng_state* ctx, const uint8_
 			ctx->ctr[i] = diversifier[i];
 		}
 
-		ctx->ctr[11] = maxlen % 256;
+		ctx->ctr[11] = (uint8_t)(maxlen % 256);
 		maxlen >>= 8;
-		ctx->ctr[10] = maxlen % 256;
+		ctx->ctr[10] = (uint8_t)(maxlen % 256);
 		maxlen >>= 8;
-		ctx->ctr[9] = maxlen % 256;
+		ctx->ctr[9] = (uint8_t)(maxlen % 256);
 		maxlen >>= 8;
-		ctx->ctr[8] = maxlen % 256;
+		ctx->ctr[8] = (uint8_t)(maxlen % 256);
 
 		for (i = 12; i < 16; ++i)
 		{

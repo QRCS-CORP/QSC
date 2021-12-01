@@ -1,8 +1,7 @@
 #include "socketserver.h"
+#include "async.h"
 #include "ipinfo.h"
 #include "memutils.h"
-#include "async.h"
-#include <stdlib.h>
 
 qsc_socket_address_families qsc_socket_server_address_family(const qsc_socket* sock)
 {
@@ -190,10 +189,10 @@ qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* source, qsc_sock
 static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state* state)
 {
 	assert(state != NULL);
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	qsc_mutex mtx;
 
-	qsc_async_mutex mtx;
-
-	qsc_async_mutex_lock_ex(&mtx);
+	mtx = qsc_async_mutex_lock_ex();
 
 	if (state != NULL)
 	{
@@ -209,7 +208,7 @@ static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state
 			if (state->callback != NULL)
 			{
 				state->callback(&ar);
-				qsc_async_thread_initialize((void*)&qsc_socket_server_accept_invoke, state);
+				qsc_async_thread_create((void*)&qsc_socket_server_accept_invoke, state);
 			}
 		}
 		else
@@ -222,7 +221,8 @@ static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state
 		}
 	}
 
-	qsc_async_mutex_unlock_ex(&mtx);
+	qsc_async_mutex_unlock_ex(mtx);
+	#endif
 }
 
 qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_server_async_accept_state* state, const char* address, uint16_t port, qsc_socket_address_families family)
@@ -285,7 +285,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_asyn
 				if (res == qsc_socket_exception_success)
 				{
 					state->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_initialize((void*)&qsc_socket_server_accept_invoke, state);
+					qsc_async_thread_create((void*)&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}
@@ -294,7 +294,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_asyn
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_async_accept_state* state, qsc_ipinfo_ipv6_address* address, uint16_t port)
+qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv6_address* address, uint16_t port)
 {
 	assert(state != NULL);
 	assert(address != NULL);
@@ -327,7 +327,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_asyn
 				if (res == qsc_socket_exception_success)
 				{
 					state->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_initialize((void*)&qsc_socket_server_accept_invoke, state);
+					qsc_async_thread_create((void*)&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}

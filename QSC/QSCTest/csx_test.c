@@ -1,11 +1,9 @@
 #include "csx_test.h"
 #include "../QSC/intutils.h"
+#include "../QSC/memutils.h"
 #include "../QSC/sha3.h"
 #include "../QSC/csp.h"
 #include "testutils.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 bool qsctest_csx512_kat()
 {
@@ -32,20 +30,20 @@ bool qsctest_csx512_kat()
 
 	/* vectors from CEX */
 #if defined(QSC_CSX_AUTHENTICATED)
-#	if defined(QSC_CSX_KPA_AUTHENTICATION)
+#	if defined(QSC_CSX_AUTH_KMACR12)
 	/* csxc512p512 */
 	qsctest_hex_to_bin("F726CF4BECEBDFDE9275C54B5284D0CDEEF158D8E146C027B731B6EF852C008F"
 		"842B15CD0DCF168F93C9DE6B41DEE964D62777AA999E44C6CFD903E65E0096EF"
 		"A271F75C45FE13CE879973C85934D0B43B49BC0ED71AD1E72A9425D2FCDA45FD"
 		"1A56CE66B25EA602D9F99BDE6909F7D73C68B8A52870577D30F0C0E4D02DE2E5"
-		"9DCC45BBA60180BA1B7A644EEFE64E8807D416A7D8CC6B6FA3098C0DC4CE172B"
-		"1B3D9A75743E05BB4FA25D83CECDD8B6F47998FF6D44F920C14D38DBB2C781DB", exp1, sizeof(exp1));
+		"5FCF2735ADF4D7A22FB2EA72172F0E06173C56991CA24C7927A213F4D548F155"
+		"4240A769A599A75A8A2DA332B260FECC1B0F30E74990AF855F0D3DB5041947E9", exp1, sizeof(exp1));
 	qsctest_hex_to_bin("379E86BCE2F0BE6DF0BAA8FEC403C6A7244B21D1D5B9193FCE79510FF2633893"
 		"F58D57DABBEF0424E1E8D5ED7B485EB7381CC7235350220CA03F1D107A102BD3"
 		"5FAB74869AB656D35E0F40950E1564DBDC37ECFD6C50BEE201BFA0F953AEC0A2"
 		"9B063993F5D019CDDE4A8AA02D440C19A4A08AD7A0CD3F2FDFEF61D0383314B5"
-		"48B7B434D54EE4240DE6FA3F40D41FA98B4BB6F0E9EFF3945C41A222F02C01A5"
-		"413380193F2B871213C78DFA60B4CC01B2E9AC39968D76AB37DDD226234CC583", exp2, sizeof(exp2));
+		"17EE1D270EE97F7443D8334024FA3A656395B240328DFDD87293457F11074ED9"
+		"4A9A3D32F48CD88EC4550531B0B6B36413622BBC27570828E054FC2CF15BD998", exp2, sizeof(exp2));
 #	else
 	/* csxc512k512 */
 	qsctest_hex_to_bin("F726CF4BECEBDFDE9275C54B5284D0CDEEF158D8E146C027B731B6EF852C008F"
@@ -61,7 +59,7 @@ bool qsctest_csx512_kat()
 		"FCDFC3F96D8A40E41B35A35D4E2AFB81E0C054BA4DBC7FC183DA37E45ADA60F8"
 		"F77303C276C7E3A33327EB5E481E4A8886E2E76100434D92384943C7D648C0A5", exp2, sizeof(exp2));
 #	endif
-	memset(ad, 0x01, sizeof(ad));
+	qsc_memutils_setvalue(ad, 0x01, sizeof(ad));
 #else
 	qsctest_hex_to_bin("E1E27CD3CF085080363AC3903D31C2AE5E51D4CCF8FB9278FEFB24077A72C2AC"
 		"671249C32DED5F96CBC31702CED6B3575F3B562BA9FF9E6467DE7C687AEDA54C"
@@ -83,7 +81,7 @@ bool qsctest_csx512_kat()
 	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F", nce, sizeof(nce));
 
 	/* copy the nonce */
-	memcpy(ncpy, nce, sizeof(nce));
+	qsc_memutils_copy(ncpy, nce, sizeof(nce));
 
 	/* initialize the key parameters struct, info is optional */
 	qsc_csx_keyparams kp = { key, QSC_CSX_KEY_SIZE, nce };
@@ -155,7 +153,9 @@ bool qsctest_csx512_kat()
 
 bool qsctest_csx512_stress()
 {
+#if defined(QSC_CSX_AUTHENTICATED)
 	uint8_t aad[20] = { 0 };
+#endif
 	uint8_t* dec;
 	uint8_t* enc;
 	uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
@@ -163,7 +163,7 @@ bool qsctest_csx512_stress()
 	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
 	uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
 	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
-	uint16_t mlen;
+	size_t mlen;
 	size_t tctr;
 	bool status;
 	qsc_csx_state state;
@@ -179,19 +179,19 @@ bool qsctest_csx512_stress()
 		{
 			/* unlikely but this could return zero */
 			qsc_csp_generate(pmcnt, sizeof(pmcnt));
-			memcpy(&mlen, pmcnt, sizeof(uint16_t));
+			qsc_memutils_copy(&mlen, pmcnt, sizeof(uint16_t));
 		}
 
-		dec = (uint8_t*)malloc(mlen);
-		enc = (uint8_t*)malloc(mlen + QSC_CSX_MAC_SIZE);
-		msg = (uint8_t*)malloc(mlen);
+		dec = (uint8_t*)qsc_memutils_malloc(mlen);
+		enc = (uint8_t*)qsc_memutils_malloc(mlen + QSC_CSX_MAC_SIZE);
+		msg = (uint8_t*)qsc_memutils_malloc(mlen);
 
 		if (dec != NULL && enc != NULL && msg != NULL)
 		{
 			qsc_intutils_clear8(dec, mlen);
 			qsc_intutils_clear8(enc, mlen + QSC_CSX_MAC_SIZE);
 			qsc_intutils_clear8(msg, mlen);
-			memcpy(nonce, ncopy, QSC_CSX_NONCE_SIZE);
+			qsc_memutils_copy(nonce, ncopy, QSC_CSX_NONCE_SIZE);
 
 			/* use a random sized message 1-65535 */
 			qsc_csp_generate(msg, mlen);
@@ -212,7 +212,7 @@ bool qsctest_csx512_stress()
 			}
 
 			/* reset the nonce */
-			memcpy(kp1.nonce, ncopy, QSC_CSX_NONCE_SIZE);
+			qsc_memutils_copy(kp1.nonce, ncopy, QSC_CSX_NONCE_SIZE);
 
 			/* decrypt the message */
 			qsc_csx_initialize(&state, &kp1, false);
@@ -234,9 +234,9 @@ bool qsctest_csx512_stress()
 				status = false;
 			}
 
-			free(dec);
-			free(enc);
-			free(msg);
+			qsc_memutils_alloc_free(dec);
+			qsc_memutils_alloc_free(enc);
+			qsc_memutils_alloc_free(msg);
 
 			++tctr;
 		}
@@ -279,17 +279,17 @@ bool qsctest_csx_wide_equality()
 		do
 		{
 			qsc_csp_generate(pmcnt, sizeof(pmcnt));
-			memcpy(&mlen, pmcnt, sizeof(uint16_t));
+			qsc_memutils_copy(&mlen, pmcnt, sizeof(uint16_t));
 		} 
 		while (mlen < SMPMIN);
 
-		dec = (uint8_t*)malloc(mlen);
+		dec = (uint8_t*)qsc_memutils_malloc(mlen);
 #if defined(QSC_CSX_AUTHENTICATED)
-		enc = (uint8_t*)malloc(mlen + QSC_CSX_MAC_SIZE);
+		enc = (uint8_t*)qsc_memutils_malloc(mlen + QSC_CSX_MAC_SIZE);
 #else
-		enc = (uint8_t*)malloc(mlen);
+		enc = (uint8_t*)qsc_memutils_malloc(mlen);
 #endif
-		msg = (uint8_t*)malloc(mlen);
+		msg = (uint8_t*)qsc_memutils_malloc(mlen);
 
 		if (dec != NULL && enc != NULL && msg != NULL)
 		{
@@ -308,7 +308,7 @@ bool qsctest_csx_wide_equality()
 			qsc_csp_generate(msg, mlen);
 
 			/* initialize the key parameters struct */
-			memcpy(nonce, ncopy, sizeof(nonce));
+			qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
 			qsc_csx_keyparams kp1 = { key, sizeof(key), nonce };
 
 			/* initialize the state */
@@ -321,7 +321,7 @@ bool qsctest_csx_wide_equality()
 			qsc_csx_dispose(&ctx1);
 
 			/* reset the nonce */
-			memcpy(nonce, ncopy, sizeof(nonce));
+			qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
 			qsc_csx_keyparams kp2 = { key, sizeof(key), nonce };
 
 			/* initialize the state */
@@ -350,9 +350,9 @@ bool qsctest_csx_wide_equality()
 			}
 
 			/* reset the state */
-			free(dec);
-			free(enc);
-			free(msg);
+			qsc_memutils_alloc_free(dec);
+			qsc_memutils_alloc_free(enc);
+			qsc_memutils_alloc_free(msg);
 			++tctr;
 		}
 		else

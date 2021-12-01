@@ -15,27 +15,20 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of the Elliptic Curve Diffie-Hellman asymmetric cipher
-* Rewritten for Misra compliance and library integration by John G. Underhill
-* Contact: support@vtdev.com
-* Updated on January 20, 2020
 */
+
+#ifndef QSC_ECDH_H
+#define QSC_ECDH_H
 
 /**
 * \file ecdh.h
-* \date September 21, 2020
+* \brief Contains the primary public api for the Elliptic Curve Diffie Hellman key exchange
 *
-* \brief <b>The ECDH KEX definitions</b> \n
-* Contains the primary public api for the Elliptic Curve Diffie Hellman key exchange.
-*
-* \para <b>Example</b> \n
+* \par Example
 * \code
 * // An example of key-pair creation, encryption, and decryption
 * uint8_t pk[QSC_ECDH_PUBLICKEY_SIZE];
-* uint8_t sk[QSC_ECDH_PRIVATEKEY_SIZE]; 
+* uint8_t sk[QSC_ECDH_PRIVATEKEY_SIZE];
 * uint8_t sec[QSC_ECDH_SHAREDSECRET_SIZE];
 *
 * // create the public and secret keys
@@ -58,9 +51,6 @@
 * September 21, 2020
 */
 
-#ifndef QSC_ECDH_H
-#define QSC_ECDH_H
-
 #include "common.h"
 
 /*!
@@ -82,7 +72,7 @@
 #define QSC_ECDH_SHAREDSECRET_SIZE 32
 
 /*!
-* \def QSC_ECDH_SHAREDSECRET_SIZE
+* \def QSC_ECDH_SEED_SIZE
 * \brief The byte size of the shared secret-key array
 */
 #define QSC_ECDH_SEED_SIZE 32
@@ -99,8 +89,8 @@
 * \warning The shared secret array must be sized to the QSC_ECDH_SHAREDSECRET_SIZE.
 *
 * \param secret: Pointer to a shared secret key, an array of QSC_ECDH_SHAREDSECRET_SIZE
-* \param ciphertext: [const] Pointer to the cipher-text array
 * \param privatekey: [const] Pointer to the private-key array
+* \param publickey: [const] Pointer to the public-key array
 * \return Returns true for success
 */
 QSC_EXPORT_API bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey);
@@ -123,7 +113,7 @@ QSC_EXPORT_API void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* priva
 *
 * \param publickey: Pointer to the output public-key array
 * \param privatekey: Pointer to output private-key array
-* \param seed: A pointer to the random seed
+* \param seed: [const] A pointer to the random seed
 */
 QSC_EXPORT_API void qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 

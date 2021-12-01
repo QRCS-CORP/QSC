@@ -15,24 +15,19 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of the Dilithium asymmetric signature scheme
-* Rewritten for Misra compliance and library integration by John G. Underhill
-* Contact: support@vtdev.com
-* Updated on January 20, 2020
 */
+
+#ifndef QSC_DILITHIUM_H
+#define QSC_DILITHIUM_H
+
+#include "common.h"
 
 /**
 * \file dilithium.h
-* \date November 13, 2018
+* \brief Contains the primary public api for the Dilithium asymmetric signature scheme implementation
 * \updated July 2, 2021
 *
-* \brief <b>The Dilithium API definitions</b> \n
-* Contains the primary public api for the Dilithium asymmetric signature scheme implementation.
-*
-* \para <b>Example</b> \n
+* \par Example
 * \code
 * // An example of key-pair creation, encryption, and decryption
 * #define MSGLEN 32
@@ -56,17 +51,12 @@
 * }
 * \endcode
 *
-* \remarks 
+* \remarks
 * Based entirely on the C reference branch of Dilithium taken from the NIST Post Quantum Competition Round 3 submission. \n
 * The NIST Post Quantum Competition <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</a> Finalists. \n
-* The <a href="https://pq-crystals.org/dilithium/index.shtml">Dilithium</a> website. \n
+* The <a href="https://pq-crystals.org/dilithium/index.shtml">Dilithium</a> web-site. \n
 * The Dilithium <a href="https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf">Algorithm</a> Specification.
 */
-
-#ifndef QSC_DILITHIUM_H
-#define QSC_DILITHIUM_H
-
-#include "common.h"
 
 #if defined(QSC_DILITHIUM_S2N256Q8380417K4)
 

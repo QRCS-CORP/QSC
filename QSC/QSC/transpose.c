@@ -1,6 +1,6 @@
 #include "transpose.h"
 #include "ecdhbase.h"
-#include <stdlib.h>
+#include "memutils.h"
 
 void qsc_transpose_bytes_to_native(uint32_t* output, const uint8_t* input, size_t length)
 {
@@ -34,7 +34,7 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
-	memset(output, 0, length);
+	qsc_memutils_clear(output, length);
 
 	for (size_t pos = 0; pos < (length * 2); pos += 2)
 	{
@@ -56,7 +56,7 @@ void qsc_transpose_native_to_bytes(uint8_t* output, const uint32_t* input, size_
 	}
 }
 
-void qsc_transpose_string_to_scalar(uint32_t* output, const char* input, size_t count)
+void qsc_transpose_string_to_scalar(uint32_t* output, const char* input, size_t length)
 {
 	assert(output != NULL);
 	assert(input != NULL);
@@ -66,8 +66,8 @@ void qsc_transpose_string_to_scalar(uint32_t* output, const char* input, size_t 
 	size_t len;
 	size_t pad;
 
-	len = 4 * count;
-	tmp = (uint8_t*)malloc(len);
+	len = 4 * length;
+	tmp = (uint8_t*)qsc_memutils_malloc(len);
 
 	if (tmp != NULL)
 	{
@@ -75,11 +75,11 @@ void qsc_transpose_string_to_scalar(uint32_t* output, const char* input, size_t 
 
 		if (pad == 0)
 		{
-			memset(tmp, 0, pad / 2);
+			qsc_memutils_clear(tmp, pad / 2);
 			qsc_transpose_hex_to_bin(tmp + (pad / 2), input, HEXLEN);
 			qsc_transpose_bytes_to_native(output, tmp, len);
 		}
 
-		free(tmp);
+		qsc_memutils_alloc_free(tmp);
 	}
 }

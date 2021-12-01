@@ -15,44 +15,38 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* Implementation Details:
-* An implementation of the Sphincs+ asymmetric signature scheme
-* Rewritten for Misra compliance and library integration by John G. Underhill
-* Contact: support@vtdev.com
-* Updated on January 20, 2020
 */
+
+#ifndef QSC_SPHINCSPLUS_H
+#define QSC_SPHINCSPLUS_H
+
+#include "common.h"
 
 /**
 * \file sphincsplus.h
 * \date June 14, 2018
 * \updated July 2, 2021
 *
-* \brief <b>The SphincsPlus API definitions</b> \n
+* \brief The SphincsPlus API definitions \n
 * Contains the primary public api for the Sphincs+ asymmetric signature scheme implementation.
 *
-* \para <b>Example</b> \n
+* \par Example
 * \code
-* // An example of key-pair creation, encryption, and decryption
 * #define MSGLEN 32
 * uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE];
 * uint8_t sk[QSC_SPHINCSPLUS_SECRETKEY_SIZE];
 * uint8_t msg[32];
 * uint8_t smsg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + MSGLEN];
 * uint8_t rmsg[32];
-
 * uint32_t rmsglen = 0;
 * uint32_t smsglen = 0;
 *
-* // create the public and secret keys
 * qsc_sphincsplus_generate(pk, sk);
-* // returns the signed the message in smsg, and the signaure length in smsglen
 * qsc_sphincsplus_sign(smsg, &smsglen, msg, MSGLEN, sk);
-* // test the signature and return the message bytes in rmsg, and the message length in rmsglen
+* 
 * if (qsc_sphincsplus_verify(rmsg, &rmsglen, smsg, smsglen, pk) != true)
 * {
-*     // authentication failed, do something..
+*     authentication failed, do something..
 * }
 * \endcode
 *
@@ -61,11 +55,6 @@
 * The <a href="https://sphincs.org/">SPHINCS+</a> website. \n
 * The SPHINCS+ <a href="https://sphincs.org/data/sphincs+-specification.pdf">Algorithm</a> Specification. \n
 */
-
-#ifndef QSC_SPHINCSPLUS_H
-#define QSC_SPHINCSPLUS_H
-
-#include "common.h"
 
 #if defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
 

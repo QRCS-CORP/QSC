@@ -14,15 +14,14 @@ void qsc_queue_destroy(qsc_queue_state* ctx)
 				qsc_memutils_aligned_free(ctx->queue[i]);
 			}
 		}
+
+		qsc_memutils_aligned_free(ctx->queue);
+		qsc_memutils_clear((uint8_t*)ctx->tags, sizeof(ctx->tags));
+		ctx->count = 0;
+		ctx->depth = 0;
+		ctx->position = 0;
+		ctx->width = 0;
 	}
-
-	qsc_memutils_aligned_free(ctx->queue);
-	qsc_memutils_clear((uint8_t*)ctx->tags, sizeof(ctx->tags));
-
-	ctx->count = 0;
-	ctx->depth = 0;
-	ctx->position = 0;
-	ctx->width = 0;
 }
 
 void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output)

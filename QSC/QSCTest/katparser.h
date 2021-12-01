@@ -1,11 +1,16 @@
 #include "common.h"
 
 /**
+* \file katparser.h
+* \brief KAT file support functions
+*/
+
+/**
 * \brief Extract a set of values from a NIST PQC asymmetric signature scheme KAT file
 *
 * \param path: The KAT file relative path
-* \param seed: The rng seed
-* \param seedlen: The rng seed length
+* \param seed: The RNG seed
+* \param seedlen: The RNG seed length
 * \param msg: The message
 * \param msglen: The message length
 * \param pk: The public key
@@ -23,8 +28,8 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 * \brief Extract a set of values from a NIST PQC asymmetric cipher KAT file
 *
 * \param path: The KAT file relative path
-* \param seed: The rng seed
-* \param seedlen: The rng seed length
+* \param seed: The RNG seed
+* \param seedlen: The RNG seed length
 * \param pk: The public key
 * \param pklen: The public key length
 * \param sk: The secret key

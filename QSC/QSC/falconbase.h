@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+/* \cond DOXYGEN_IGNORE */
+
 /* api.h */
 
 #if defined(QSC_FALCON_S3SHAKE256F512)
@@ -253,5 +255,7 @@ int32_t qsc_falcon_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t
 * \return Returns true for success
 */
 bool qsc_falcon_ref_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

@@ -717,11 +717,11 @@ static void ntru_poly_S3_from_bytes(poly* r, const uint8_t msg[NTRU_OWCPA_MSGBYT
 static void ntru_poly_Sq_to_bytes(uint8_t* r, const poly* a)
 {
     size_t i;
-    size_t j;
 
 #if defined(QSC_NTRU_S1HPS2048509) || defined(QSC_NTRU_HPSS32048677)
 
     uint16_t t[8];
+    size_t j;
 
     for (i = 0; i < NTRU_PACK_DEG / 8; ++i)
     {
@@ -740,7 +740,7 @@ static void ntru_poly_Sq_to_bytes(uint8_t* r, const poly* a)
         r[(11 * i) + 7] = (uint8_t)((t[5] >> 1) & 0xFF);
         r[(11 * i) + 8] = (uint8_t)((t[5] >> 9) | ((t[6] & 0x3F) << 2));
         r[(11 * i) + 9] = (uint8_t)((t[6] >> 6) | ((t[7] & 0x07) << 5));
-        r[(11 * i) + 10] = (uint8_t)((t[7] >> 3));
+        r[(11 * i) + 10] = (uint8_t)(t[7] >> 3);
     }
 
     for (j = 0; j < NTRU_PACK_DEG - 8 * i; ++j)
@@ -783,6 +783,7 @@ static void ntru_poly_Sq_to_bytes(uint8_t* r, const poly* a)
 #elif defined(QSC_NTRU_S5HRSS701)
 
     uint16_t t[8];
+    size_t j;
 
     for (i = 0; i < NTRU_PACK_DEG / 8; ++i)
     {

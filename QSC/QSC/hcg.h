@@ -15,25 +15,22 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* An implementation of a HMAC based DRBG.
-* Written by John G. Underhill
-* Updated on June 14, 2021
-* Contact: support@vtdev.com 
 */
+
+#ifndef QSC_HCG_H
+#define QSC_HCG_H
+
+#include "sha2.h"
 
 /**
 * \file hcg.h
+* \brief Contains the public api and documentation for the HCG pseudo-random bytes generator
 * \author John Underhill
 * \date August 31, 2020
 *
-* \brief <b>An implementation of an HMAC based DRBG: CSG</b> \n
-* Contains the public api and documentation for the HCG pseudo-random bytes generator.
+* Usage Example \n
 *
-* <b>Usage Example</b> \n
-*
-* <b>Initialize the DRBG and generate output</b> \n
+* Initialize the DRBG and generate output \n
 * \code
 * // external key and optional custom arrays
 * uint8_t seed[32] = { ... };
@@ -42,7 +39,7 @@
 * // random bytes
 * uint8_t rnd[200] = { 0 };
 *
-* // initialize with seed, and optional cutomization array, with predictive resistance enabled
+* // initialize with seed, and optional customization array, with predictive resistance enabled
 * qsc_hcg_initialize(seed, sizeof(seed), info, sizeof(info), true);
 *
 * // generate the pseudo-random
@@ -51,26 +48,44 @@
 * \endcode
 *
 * \remarks
-* \paragraph 
+* \par
 * HCG has a similar configuration to the HKDF Expand pseudo-random generator, but with a 128-bit nonce, and a default info parameter.
 * For additional usage examples, see hcg_test.h. \n
 *
-* \section Links
 * The HKDF Scheme: Cryptographic Extraction and Key Derivation http://eprint.iacr.org/2010/264.pdf
 * RFC 2104 HMAC: Keyed-Hashing for Message Authentication http://tools.ietf.org/html/rfc2104 \n
 * Fips 198-1: The Keyed-Hash Message Authentication Code (HMAC) http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf \n
 * Fips 180-4: Secure Hash Standard (SHS) http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
 */
 
-#ifndef QSC_HCG_H
-#define QSC_HCG_H
-
-#include "sha2.h"
-
+/*!
+* \def QSC_HCG_CACHE_SIZE
+* \brief The HCG cache size size
+*/
 #define QSC_HCG_CACHE_SIZE 64
+
+/*!
+* \def QSC_HCG_MAX_INFO_SIZE
+* \brief The HCG info size
+*/
 #define QSC_HCG_MAX_INFO_SIZE 56
+
+/*!
+* \def QSC_HCG_NONCE_SIZE
+* \brief The HCG nonce size
+*/
 #define QSC_HCG_NONCE_SIZE 8
+
+/*!
+* \def QSC_HCG_RESEED_THRESHHOLD
+* \brief The HCG re-seed size
+*/
 #define QSC_HCG_RESEED_THRESHHOLD 1024000
+
+/*!
+* \def QSC_HCG_SEED_SIZE
+* \brief The HCG seed size
+*/
 #define QSC_HCG_SEED_SIZE 64
 
 /*!
@@ -79,42 +94,44 @@
 */
 QSC_EXPORT_API typedef struct
 {
-	qsc_hmac512_state hstate;
-	uint8_t cache[QSC_HCG_CACHE_SIZE];
-	uint8_t info[QSC_HCG_MAX_INFO_SIZE];
-	uint8_t nonce[QSC_HCG_NONCE_SIZE];
-	size_t bctr;
-	size_t cpos;
-	size_t crmd;
-	bool pres;
+	qsc_hmac512_state hstate;				/*!< The hmac state  */
+	uint8_t cache[QSC_HCG_CACHE_SIZE];		/*!< The cache buffer  */
+	uint8_t info[QSC_HCG_MAX_INFO_SIZE];	/*!< The info string  */
+	uint8_t nonce[QSC_HCG_NONCE_SIZE];		/*!< The nonce array  */
+	size_t bctr;							/*!< The bytes counter  */
+	size_t cpos;							/*!< The cache position  */
+	size_t crmd;							/*!< The cache remainder  */
+	bool pres;								/*!< The predictive resistance flag  */
 } qsc_hcg_state;
 
 /**
-* \brief Dispose of the HCG drbg state
+* \brief Dispose of the HCG DRBG state
 *
 * \warning The dispose function must be called when disposing of the cipher.
 * This function destroys the internal state of the cipher.
 *
-* \param ctx: [struct] The drbg state structure
+* \param ctx: [struct] The HCG state structure
 */
 QSC_EXPORT_API void qsc_hcg_dispose(qsc_hcg_state* ctx);
 
 /**
 * \brief Initialize the pseudo-random provider state with a seed and optional personalization string
 *
+* \param ctx: [struct] The hcg state structure
 * \param seed: [const] The random seed, 32 bytes of seed instantiates the 256-bit generator, 64 bytes the 512-bit generator
 * \param seedlen: The length of the input seed
 * \param info: [const] The optional personalization string
 * \param infolen: The length of the personalization string
-* \param predictive_resistance: Enable periodic random injection; enables non deterministic pseudo-random generation
+* \param pres: Enable periodic random injection; enables non deterministic pseudo-random generation
 */
-QSC_EXPORT_API void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predictive_resistance);
+QSC_EXPORT_API void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool pres);
 
 /**
 * \brief Generate pseudo-random bytes using the random provider.
 *
 * \warning Initialize must first be called before this function can be used.
 *
+* \param ctx: [struct] The HCG state structure
 * \param output: The pseudo-random output array
 * \param outlen: The requested number of bytes to generate
 * \return The number of bytes generated
@@ -126,6 +143,7 @@ QSC_EXPORT_API void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t
 *
 * \warning Initialize must first be called before this function can be used.
 *
+* \param ctx: [struct] The HCG state structure
 * \param seed: [const] The random update seed
 * \param seedlen: The length of the update seed
 */

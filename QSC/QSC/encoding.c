@@ -144,27 +144,29 @@ size_t qsc_encoding_base64_encoded_size(size_t length)
 	return ret;
 }
 
-bool qsc_encoding_base64_is_valid_char(char c)
+bool qsc_encoding_base64_is_valid_char(char value)
 {
 	bool res;
 
-	res = false;
-
-	if (c >= '0' && c <= '9')
+	if (value >= '0' && value <= '9')
 	{
 		res = true;
 	}
-	else if (c >= 'A' && c <= 'Z')
+	else if (value >= 'A' && value <= 'Z')
 	{
 		res = true;
 	}
-	else if (c >= 'a' && c <= 'z')
+	else if (value >= 'a' && value <= 'z')
 	{
 		res = true;
 	}
-	else if (c == '+' || c == '/' || c == '=')
+	else if (value == '+' || value == '/' || value == '=')
 	{
 		res = true;
+	}
+	else
+	{
+		res = false;
 	}
 
 	return res;

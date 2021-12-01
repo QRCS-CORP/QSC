@@ -14,10 +14,18 @@
 * See the GNU Affero General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>. */
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef QSC_INTRINSICS_H
 #define QSC_INTRINSICS_H
+
+/* \cond DOXYGEN_IGNORE */
+
+/**
+* \file intrinsics.h
+* \brief SIMD include files
+*/
 
 #include "common.h"
 
@@ -27,16 +35,18 @@
 #	else
 #		include <intrin.h>	/* Microsoft C/C++ compatible compiler */
 #	endif
-#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)) 
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
 #	include <x86intrin.h>	/* GCC-compatible compiler, targeting x86/x86-64 */
-#elif defined(__GNUC__) && defined(__ARM_NEON__) 
+#elif defined(__GNUC__) && defined(__ARM_NEON__)
 #	include <arm_neon.h>	/* GCC-compatible compiler, targeting ARM with NEON */
 #elif defined(__GNUC__) && defined(__IWMMXT__)
 #	include <mmintrin.h>	/* GCC-compatible compiler, targeting ARM with WMMX */
-#elif (defined(__GNUC__) || defined(__xlC__)) && (defined(__VEC__) || defined(__ALTIVEC__)) 
+#elif (defined(__GNUC__) || defined(__xlC__)) && (defined(__VEC__) || defined(__ALTIVEC__))
 #	include <altivec.h>		/* XLC or GCC-compatible compiler, targeting PowerPC with VMX/VSX */
-#elif defined(__GNUC__) && defined(__SPE__) 
+#elif defined(__GNUC__) && defined(__SPE__)
 #	include <spe.h>			/* GCC-compatible compiler, targeting PowerPC with SPE */
 #endif
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

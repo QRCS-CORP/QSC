@@ -19,15 +19,11 @@
 * Reference implementations:
 * LibSodium by Frank Denis
 * https://github.com/jedisct1/libsodium
-*
 * curve25519-donna by Adam Langley
 * https://github.com/agl/curve25519-donna
-*
 * NaCI by Daniel J. Bernstein, Tanja Lange, Peter Schwabe
 * https://nacl.cr.yp.to
-*
 * Rewritten for Misra compliance and optimizations by John G. Underhill
-* September 21, 2020
 */
 
 #ifndef QSC_ECDHBASE_H
@@ -35,14 +31,16 @@
 
 #include "common.h"
 
+/* \cond DOXYGEN_IGNORE */
+
 /**
 * \brief Combine and external public key with an internal private key to produce a shared secret
 *
 * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_SECRETKEY_SIZE.
 *
 * \param secret: The shared secret
-* \param publickey: Pointer to the output public-key array
-* \param privatekey: Pointer to output private-key array
+* \param publickey: [const] Pointer to the output public-key array
+* \param privatekey: [const] Pointer to output private-key array
 */
 bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey);
 
@@ -53,8 +51,10 @@ bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const u
 *
 * \param publickey: Pointer to the output public-key array
 * \param privatekey: Pointer to output private-key array
-* \param seed: A pointer to the random seed
+* \param seed: [const] A pointer to the random seed
 */
 void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+/* \endcond DOXYGEN_IGNORE */
 
 #endif

@@ -5,6 +5,8 @@
 #include "testutils.h"
 #include "../QSC/falcon.h"
 #include "../QSC/intutils.h"
+#include "../QSC/memutils.h"
+#include "../QSC/secrand.h"
 
 bool qsctest_falcon_operations_test()
 {
@@ -101,7 +103,6 @@ bool qsctest_falcon_privatekey_integrity()
 	uint8_t sig[QSC_FALCON_SIGNATURE_SIZE + QSCTEST_FALCON_MLEN] = { 0 };
 	uint8_t sk[QSC_FALCON_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_FALCON_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -116,7 +117,7 @@ bool qsctest_falcon_privatekey_integrity()
 	qsc_falcon_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* flip bit in the private key */
-	for (i = 0; i < 32; ++i)
+	for (size_t i = 0; i < 32; ++i)
 	{
 		sk[QSC_FALCON_PUBLICKEY_SIZE + i] ^= 1;
 	}
@@ -142,7 +143,6 @@ bool qsctest_falcon_publickey_integrity()
 	uint8_t sig[QSC_FALCON_SIGNATURE_SIZE + QSCTEST_FALCON_MLEN] = { 0 };
 	uint8_t sk[QSC_FALCON_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_FALCON_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -158,7 +158,7 @@ bool qsctest_falcon_publickey_integrity()
 	qsc_falcon_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* flip bits in the public key */
-	for (i = 0; i < 32; ++i)
+	for (size_t i = 0; i < 32; ++i)
 	{
 		pk[i] ^= 1;
 	}
@@ -246,7 +246,7 @@ bool qsctest_falcon_stress_test()
 
 	/* sign the message and return the signed version in sig */
 	qsc_falcon_sign(sig, &siglen, msg, msglen, sk, qsctest_nistrng_prng_generate);
-	
+
 	if (siglen != QSC_FALCON_SIGNATURE_SIZE + QSCTEST_FALCON_MLEN)
 	{
 		qsctest_print_safe("Failure! falcon stress: signature length is incorrect -DST1 \n");
@@ -264,6 +264,81 @@ bool qsctest_falcon_stress_test()
 	{
 		qsctest_print_safe("Failure! falcon stress: message length is incorrect -DST3 \n");
 		ret = false;
+	}
+
+	return ret;
+}
+
+bool qsctest_falcon_stress_test2()
+{
+	uint8_t srnd[QSC_SECRAND_SEED_SIZE] = { 0 };
+	uint8_t sk[QSC_FALCON_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_FALCON_PUBLICKEY_SIZE] = { 0 };
+	size_t msglen;
+	uint32_t rndnum;
+	size_t siglen;
+	bool ret;
+
+	qsc_secrand_initialize(srnd, sizeof(srnd), NULL, 0);
+
+	for (size_t i = 0; i < 10; ++i)
+	{
+		uint8_t* msg;
+		uint8_t* mout;
+		uint8_t* sig;
+
+		rndnum = qsc_secrand_next_uint32_maxmin(128, 16);
+
+		ret = true;
+		msglen = rndnum;
+		siglen = (size_t)QSC_FALCON_SIGNATURE_SIZE + rndnum;
+
+		msg = (uint8_t*)qsc_memutils_malloc(rndnum);
+		if (msg == NULL)
+		{
+			ret = false;
+			break;
+		}
+		qsc_secrand_generate(msg, rndnum);
+
+		mout = (uint8_t*)qsc_memutils_malloc((size_t)QSC_FALCON_SIGNATURE_SIZE + rndnum);
+		if (mout == NULL)
+		{
+			ret = false;
+			break;
+		}
+
+		sig = (uint8_t*)qsc_memutils_malloc((size_t)QSC_FALCON_SIGNATURE_SIZE + rndnum);
+		if (sig == NULL)
+		{
+			ret = false;
+			break;
+		}
+
+		/* generate the key-pair */
+		qsc_falcon_generate_keypair(pk, sk, qsc_secrand_generate);
+
+		/* sign the message and return the signed version in sig */
+		qsc_falcon_sign(sig, &siglen, msg, msglen, sk, qsc_secrand_generate);
+
+		/* verify the signature in sig and copy msg to mout */
+		if (qsc_falcon_verify(mout, &msglen, sig, siglen, pk) != true)
+		{
+			qsctest_print_safe("Failure! falcon stress: message verification has failed -DST2 \n");
+			ret = false;
+			break;
+		}
+
+		if (msglen != rndnum)
+		{
+			qsctest_print_safe("Failure! falcon stress: message length is incorrect -DST3 \n");
+			ret = false;
+			break;
+		}
+
+		qsc_memutils_alloc_free(mout);
+		qsc_memutils_alloc_free(msg);
+		qsc_memutils_alloc_free(sig);
 	}
 
 	return ret;

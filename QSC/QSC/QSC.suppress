@@ -1,0 +1,178 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="SuppressVersion">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CurrentVersion" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="FileName" type="xs:string" default="" />
+                <xs:element name="ErrorCode" type="xs:string" default="" />
+                <xs:element name="Message" type="xs:string" default="" />
+                <xs:element name="CodePrev" type="xs:unsignedInt" default="0" />
+                <xs:element name="CodeCurrent" type="xs:unsignedInt" default="0" />
+                <xs:element name="CodeNext" type="xs:unsignedInt" default="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+      <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+        <xs:selector xpath=".//Table1" />
+        <xs:field xpath="FileName" />
+        <xs:field xpath="ErrorCode" />
+        <xs:field xpath="Message" />
+        <xs:field xpath="CodePrev" />
+        <xs:field xpath="CodeCurrent" />
+        <xs:field xpath="CodeNext" />
+      </xs:unique>
+    </xs:element>
+  </xs:schema>
+  <SuppressVersion>
+    <CurrentVersion>2</CurrentVersion>
+  </SuppressVersion>
+  <Table1>
+    <FileName>ecdh.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>649</CodePrev>
+    <CodeCurrent>173532662</CodeCurrent>
+    <CodeNext>1577411063</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdh.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>42</CodePrev>
+    <CodeCurrent>3255072674</CodeCurrent>
+    <CodeNext>2907137972</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdh.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>42</CodePrev>
+    <CodeCurrent>1509008102</CodeCurrent>
+    <CodeNext>1924377037</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdh.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>47</CodePrev>
+    <CodeCurrent>898654705</CodeCurrent>
+    <CodeNext>41</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdh.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>613814348</CodePrev>
+    <CodeCurrent>3512293491</CodeCurrent>
+    <CodeNext>3606417897</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdh.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>3512293491</CodePrev>
+    <CodeCurrent>3606417897</CodeCurrent>
+    <CodeNext>2966314695</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdh.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>3606417897</CodePrev>
+    <CodeCurrent>2966314695</CodeCurrent>
+    <CodeNext>42</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdhbase.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>1501351333</CodePrev>
+    <CodeCurrent>3839717073</CodeCurrent>
+    <CodeNext>42</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdhbase.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>61544977</CodePrev>
+    <CodeCurrent>1582719399</CodeCurrent>
+    <CodeNext>2299512954</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdhbase.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>2299512954</CodePrev>
+    <CodeCurrent>2035633292</CodeCurrent>
+    <CodeNext>1942214845</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>ecdhbase.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>1942214845</CodePrev>
+    <CodeCurrent>20225775</CodeCurrent>
+    <CodeNext>1662042000</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>common.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>1501351333</CodePrev>
+    <CodeCurrent>3839717073</CodeCurrent>
+    <CodeNext>123</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>common.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>833</CodeCurrent>
+    <CodeNext>670054398</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>common.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>191888361</CodePrev>
+    <CodeCurrent>1210519291</CodeCurrent>
+    <CodeNext>1906440700</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>common.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>1210519291</CodePrev>
+    <CodeCurrent>1906440700</CodeCurrent>
+    <CodeNext>3088748751</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>common.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>1906440700</CodePrev>
+    <CodeCurrent>3088748751</CodeCurrent>
+    <CodeNext>42</CodeNext>
+  </Table1>
+  <Table1>
+    <FileName>sha3.h</FileName>
+    <ErrorCode>V2587</ErrorCode>
+    <Message>The '//' and '/*' character sequences should not appear within comments.</Message>
+    <CodePrev>1501351333</CodePrev>
+    <CodeCurrent>3839717073</CodeCurrent>
+    <CodeNext>123</CodeNext>
+  </Table1>
+</NewDataSet>

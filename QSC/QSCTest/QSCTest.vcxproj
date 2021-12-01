@@ -95,6 +95,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,6 +116,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +139,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -161,6 +164,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -171,6 +175,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aesavs_test.c" />
+    <ClCompile Include="aes_test.c" />
+    <ClCompile Include="async_test.c" />
     <ClCompile Include="chacha_test.c" />
     <ClCompile Include="benchmark.c" />
     <ClCompile Include="csx_test.c" />
@@ -181,12 +188,12 @@
     <ClCompile Include="katparser.c" />
     <ClCompile Include="kyber_test.c" />
     <ClCompile Include="mceliece_test.c" />
+    <ClCompile Include="netutils_test.c" />
     <ClCompile Include="nistrng.c" />
     <ClCompile Include="ntru_test.c" />
     <ClCompile Include="poly1305_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
-    <ClCompile Include="aes.c" />
     <ClCompile Include="secrand_test.c" />
     <ClCompile Include="sha2_test.c" />
     <ClCompile Include="sha3_test.c" />
@@ -195,6 +202,9 @@
     <ClCompile Include="timer.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aesavs_test.h" />
+    <ClInclude Include="aes_test.h" />
+    <ClInclude Include="async_test.h" />
     <ClInclude Include="chacha_test.h" />
     <ClInclude Include="benchmark.h" />
     <ClInclude Include="common.h" />
@@ -206,11 +216,11 @@
     <ClInclude Include="katparser.h" />
     <ClInclude Include="kyber_test.h" />
     <ClInclude Include="mceliece_test.h" />
+    <ClInclude Include="netutils_test.h" />
     <ClInclude Include="nistrng.h" />
     <ClInclude Include="ntru_test.h" />
     <ClInclude Include="poly1305_test.h" />
     <ClInclude Include="rcs_test.h" />
-    <ClInclude Include="aes.h" />
     <ClInclude Include="secrand_test.h" />
     <ClInclude Include="sha2_test.h" />
     <ClInclude Include="sha3_test.h" />

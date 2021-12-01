@@ -6,6 +6,7 @@
 #include "../QSC/csp.h"
 #include "../QSC/intutils.h"
 #include "../QSC/mceliece.h"
+#include "../QSC/memutils.h"
 
 bool qsctest_mceliece_ciphertext_integrity()
 {
@@ -13,12 +14,12 @@ bool qsctest_mceliece_ciphertext_integrity()
 	uint8_t* pk;
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ss1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ss2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	bool ret;
 
 	ret = false;
-	pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
+	pk = qsc_memutils_malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
 
 	if (pk != NULL)
 	{
@@ -29,8 +30,8 @@ bool qsctest_mceliece_ciphertext_integrity()
 		/* generate public and secret keys */
 		qsc_mceliece_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
-		/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-		qsc_mceliece_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate);
+		/* derive a shared-secret key and creates a response (in: pk | out: ct and ssk2) */
+		qsc_mceliece_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
 
 		/* replace some ciphertext bytes with random values */
 		if (qsc_csp_generate(ct, 8) == false)
@@ -40,20 +41,20 @@ bool qsctest_mceliece_ciphertext_integrity()
 		}
 
 		/* invalid ciphertext, authentication should fail */
-		if (qsc_mceliece_decapsulate(ss1, ct, sk) == true)
+		if (qsc_mceliece_decapsulate(ssk1, ct, sk) == true)
 		{
 			qsctest_print_safe("Failure! mceliece ciphertext integrity: secret decapsulation failure -MCT2 \n");
 			ret = false;
 		}
 
 		/* fail if equal */
-		if (qsc_intutils_are_equal8(ss1, ss2, QSC_MCELIECE_SHAREDSECRET_SIZE) == true)
+		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) == true)
 		{
 			qsctest_print_safe("Failure! mceliece ciphertext integrity: message decrypted succesfully with altered cipher-text -MCT3 \n");
 			ret = false;
 		}
 
-		free(pk);
+		qsc_memutils_alloc_free(pk);
 	}
 
 	return ret;
@@ -67,8 +68,8 @@ bool qsctest_mceliece_kat_test()
 	uint8_t ksk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t kss[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t* pk;
-	uint8_t ss1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ss2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
 	size_t ctlen;
@@ -84,8 +85,8 @@ bool qsctest_mceliece_kat_test()
 	sklen = 0;
 	sslen = 0;
 	ret = false;
-	pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
-	kpk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
+	pk = qsc_memutils_malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
+	kpk = qsc_memutils_malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
 
 	if (pk != NULL && kpk != NULL)
 	{
@@ -107,8 +108,6 @@ bool qsctest_mceliece_kat_test()
 
 		/* NIST PQC Round 3 KATs */
 		parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, 0);
-
-		ret = true;
 		qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
 		/* alice generates public and secret keys */
@@ -128,8 +127,8 @@ bool qsctest_mceliece_kat_test()
 			ret = false;
 		}
 
-		/* bob derives a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-		qsc_mceliece_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate);
+		/* bob derives a shared-secret key and creates a response (in: pk | out: ct and ssk2) */
+		qsc_mceliece_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
 
 		/* compare the cipher-text to the expected output */
 		if (qsc_intutils_are_equal8(ct, kct, QSC_MCELIECE_CIPHERTEXT_SIZE) != true)
@@ -138,29 +137,29 @@ bool qsctest_mceliece_kat_test()
 			ret = false;
 		}
 
-		/* alice uses bobs response to get the shared-secret key (in: ct, sk | out: ss1) */
-		if (qsc_mceliece_decapsulate(ss1, ct, sk) != true)
+		/* alice uses bobs response to get the shared-secret key (in: ct, sk | out: ssk1) */
+		if (qsc_mceliece_decapsulate(ssk1, ct, sk) != true)
 		{
 			qsctest_print_safe("Failure! mceliece kat: decapsulation failure -MKT3 \n");
 			ret = false;
 		}
 
 		/* compare the two keys for equality */
-		if (qsc_intutils_are_equal8(ss1, ss2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
+		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
 		{
 			qsctest_print_safe("Failure! mceliece kat: secret keys do not match -MKT4 \n");
 			ret = false;
 		}
 
 		/* compare the key to the expected output */
-		if (qsc_intutils_are_equal8(ss1, kss, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
+		if (qsc_intutils_are_equal8(ssk1, kss, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
 		{
 			qsctest_print_safe("Failure! mceliece kat: shared secret does not match the known answer -MKT5 \n");
 			ret = false;
 		}
 
-		free(kpk);
-		free(pk);
+		qsc_memutils_alloc_free(kpk);
+		qsc_memutils_alloc_free(pk);
 	}
 
 	return ret;
@@ -169,14 +168,15 @@ bool qsctest_mceliece_kat_test()
 bool qsctest_mceliece_operations_test()
 {
 	uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
+	uint8_t esd[QSC_MCELIECE_SEED_SIZE] = { 0 };
 	uint8_t* pk;
 	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ss1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ss2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	bool ret;
 
 	ret = false;
-	pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
+	pk = qsc_memutils_malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
 
 	if (pk != NULL)
 	{
@@ -186,24 +186,41 @@ bool qsctest_mceliece_operations_test()
 		/* generate public and secret keys */
 		qsc_mceliece_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
-		/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-		qsc_mceliece_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate);
+		/* derive a shared-secret key and creates a response (in: pk | out: ct and ssk2) */
+		qsc_mceliece_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
 
 		/* decrypt the cipher-text */
-		if (qsc_mceliece_decapsulate(ss1, ct, sk) != true)
+		if (qsc_mceliece_decapsulate(ssk1, ct, sk) != true)
 		{
 			qsctest_print_safe("Failure! mceliece operations: decapsulation failure -MOT1 \n");
 			ret = false;
 		}
 
 		/* compare the two keys for equality */
-		if (qsc_intutils_are_equal8(ss1, ss2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
+		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
 		{
 			qsctest_print_safe("Failure! mceliece operations: the two secret keys do not match -MOT2 \n");
 			ret = false;
 		}
 
-		free(pk);
+		/* test encrypt/decrypt api */
+
+		qsc_memutils_clear(ct, sizeof(ct));
+		qsc_memutils_clear(ssk1, sizeof(ssk1));
+		qsc_memutils_clear(ssk2, sizeof(ssk2));
+
+		qsc_csp_generate(esd, sizeof(esd));
+
+		qsc_mceliece_encrypt(ssk1, ct, pk, esd);
+		qsc_mceliece_decrypt(ssk2, ct, sk);
+
+		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
+		{
+			qsctest_print_safe("Failure! mceliece operations: the two secret keys do not match -MOT3 \n");
+			ret = false;
+		}
+
+		qsc_memutils_alloc_free(pk);
 	}
 
 	return ret;
@@ -215,12 +232,12 @@ bool qsctest_mceliece_publickey_integrity()
 	uint8_t* pk;
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ss1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ss2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	bool ret;
 
 	ret = false;
-	pk = malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
+	pk = qsc_memutils_malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
 
 	if (pk != NULL)
 	{
@@ -239,24 +256,24 @@ bool qsctest_mceliece_publickey_integrity()
 			ret = false;
 		}
 
-		/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-		qsc_mceliece_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate);
+		/* derive a shared-secret key and creates a response (in: pk | out: ct and ssk2) */
+		qsc_mceliece_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
 
 		/* invalid secret key generated, should return fail */
-		if (qsc_mceliece_decapsulate(ss1, ct, sk) == true)
+		if (qsc_mceliece_decapsulate(ssk1, ct, sk) == true)
 		{
 			qsctest_print_safe("Failure! mceliece public-key: decapsulation failure -MPT2 \n");
 			ret = false;
 		}
 
 		/* fail if output keys are equal */
-		if (qsc_intutils_are_equal8(ss1, ss2, QSC_MCELIECE_SHAREDSECRET_SIZE) == true)
+		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) == true)
 		{
 			qsctest_print_safe("Failure! mceliece public-key: the two secret keys match with an altered public key -MPT3 \n");
 			ret = false;
 		}
 
-		free(pk);
+		qsc_memutils_alloc_free(pk);
 	}
 
 	return ret;

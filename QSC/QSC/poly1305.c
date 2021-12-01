@@ -82,7 +82,7 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 	uint32_t g4;
 	uint32_t nb;
 
-	if (ctx->rmd)
+	if (ctx->rmd != 0)
 	{
 		ctx->buf[ctx->rmd] = 1;
 
@@ -200,7 +200,7 @@ void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t
 	size_t i;
 	size_t rmd;
 
-	if (ctx->rmd)
+	if (ctx->rmd != 0)
 	{
 		rmd = (QSC_POLY1305_BLOCK_SIZE - ctx->rmd);
 
@@ -232,7 +232,7 @@ void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t
 		msglen -= QSC_POLY1305_BLOCK_SIZE;
 	}
 
-	if (msglen)
+	if (msglen != 0)
 	{
 		for (i = 0; i < msglen; ++i)
 		{
@@ -243,9 +243,9 @@ void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t
 	}
 }
 
-int32_t qsc_poly1305_verify(const uint8_t* mac, const uint8_t* message, size_t msglen, const uint8_t* key)
+int32_t qsc_poly1305_verify(const uint8_t* code, const uint8_t* message, size_t msglen, const uint8_t* key)
 {
-	assert(mac != NULL);
+	assert(code != NULL);
 	assert(message != NULL);
 	assert(key != NULL);
 
@@ -253,6 +253,6 @@ int32_t qsc_poly1305_verify(const uint8_t* mac, const uint8_t* message, size_t m
 
 	qsc_poly1305_compute(hash, message, msglen, key);
 
-	return qsc_intutils_verify(mac, hash, QSC_POLY1305_MAC_SIZE);
+	return qsc_intutils_verify(code, hash, QSC_POLY1305_MAC_SIZE);
 }
 

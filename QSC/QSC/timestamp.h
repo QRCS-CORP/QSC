@@ -17,24 +17,31 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-* \file timer.h
-* \brief <b>Timing utilities</b> \n
-* This file contains common time related functions
-* February 18, 2021
-*/
-
 #ifndef QSC_TIMESTAMP_H
 #define QSC_TIMESTAMP_H
 
 #include "common.h"
 #include <time.h>
 
+/**
+* \file timestamp.h
+* \brief Time-stamp function definitions
+*/
+
+/*!
+* \def QSC_TIMESTAMP_EPOCH_START
+* \brief The year starting the epoch
+*/
 #define QSC_TIMESTAMP_EPOCH_START 1900
+
+/*!
+* \def QSC_TIMESTAMP_STRING_SIZE
+* \brief The size of the time-stamp string
+*/
 #define QSC_TIMESTAMP_STRING_SIZE 20
 
 /**
-* \brief Get the calender date from the current locale
+* \brief Get the calendar date from the current locale
 *
 * \param output: The output date string
 * \return 
@@ -42,8 +49,8 @@
 QSC_EXPORT_API void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE]);
 
 /**
-* \brief Get the calender date and time from the current locale.
-* Timestamp string format is YYYY-MM-DD HH-MM-SS.
+* \brief Get the calendar date and time from the current locale.
+* Time-stamp string format is YYYY-MM-DD HH-MM-SS.
 *
 * \param output: The output time and date string
 */
@@ -62,33 +69,33 @@ QSC_EXPORT_API void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_
 *
 * \return the date/time in seconds from epoch
 */
-QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_seconds();
+QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_seconds(void);
 
 /**
-* \brief Convert a time steructure to a date and time string.
-* Timestamp string format is YYYY-MM-DD HH-MM-SS.
+* \brief Convert a time structure to a date and time string.
+* Time-stamp string format is YYYY-MM-DD HH-MM-SS.
 *
 * \param output: The output time and date string
-* \param tstruct: The populated time structure
+* \param tstruct: [const] The populated time structure
 */
 QSC_EXPORT_API void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE], const struct tm* tstruct);
 
 /**
 * \brief Convert a date and time string to a time structure.
-* Timestamp string format must be YYYY-MM-DD HH-MM-SS.
+* Time-stamp string format must be YYYY-MM-DD HH-MM-SS.
 *
 * \param tstruct: The time struct to be populated
-* \param input: The input time and date string
+* \param input: [const] The input time and date string
 */
 QSC_EXPORT_API void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char input[QSC_TIMESTAMP_STRING_SIZE]);
 
 /**
-* \brief Compare a base datetime with another future datetime string, and return the difference in seconds.
+* \brief Compare a base date-time with another future date-time string, and return the difference in seconds.
 * if the comparison date is less than the base date, the return is zero.
-* Timestamp string format must be YYYY-MM-DD HH-MM-SS.
+* Time-stamp string format must be YYYY-MM-DD HH-MM-SS.
 *
-* \param basetime: The base time string
-* \param comptime: The future time string
+* \param basetime: [const] The base time string
+* \param comptime: [const] The future time string
 * \return Returns the number of seconds remaining
 */
 QSC_EXPORT_API uint64_t qsc_timestamp_datetime_seconds_remaining(const char basetime[QSC_TIMESTAMP_STRING_SIZE], const char comptime[QSC_TIMESTAMP_STRING_SIZE]);
@@ -96,7 +103,7 @@ QSC_EXPORT_API uint64_t qsc_timestamp_datetime_seconds_remaining(const char base
 /**
 * \brief Convert the date-time string to a seconds from epoch unsigned 64-bit integer
 *
-* \param input: The input date-time string
+* \param input: [const] The input date-time string
 * \return The number of seconds in the date-time string
 */
 QSC_EXPORT_API uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING_SIZE]);
@@ -104,23 +111,16 @@ QSC_EXPORT_API uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_T
 /**
 * \brief Convert a seconds count from epoch-time to a date-time string
 *
-* \param tsec: The number of seconds between the clock epoch time and now.
+* \param tsec: The number of seconds between the clock epoch time and now
 * \param output: The output time and date string
 */
 QSC_EXPORT_API void qsc_timestamp_seconds_to_datetime(uint64_t tsec, char output[QSC_TIMESTAMP_STRING_SIZE]);
 
+#if defined(QSC_DEBUG_MODE)
 /**
-* \brief Returns the clock time at the start of a timed operation
-*
-* \return The starting clock time
+* \brief Print time-stamp function values
 */
-QSC_EXPORT_API clock_t qsc_timestamp_stopwatch_start();
-
-/**
-* \brief Returns the time difference between the start and current time in milliseconds
-*
-* \return The timke difference in milliseconds
-*/
-QSC_EXPORT_API uint64_t qsc_timestamp_stopwatch_elapsed(clock_t start);
+QSC_EXPORT_API void qsc_timestamp_print_values();
+#endif
 
 #endif

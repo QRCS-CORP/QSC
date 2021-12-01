@@ -15,18 +15,6 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-* Written by John G. Underhill
-* Updated on March 30, 2021
-* Contact: support@vtdev.com */
-
-/**
-* \file socketclient.h
-* \brief <b>The socketclient header definition</b> \n
-* Contains the public api and documentation for the socketclient implementation.
-* \author John Underhill
-* \date April 4, 2021
-* \remarks For usage examples, see network_test.h
 */
 
 #ifndef QSC_SOCKETCLIENT_H
@@ -36,12 +24,17 @@
 #include "ipinfo.h"
 #include "socketbase.h"
 
+/*
+* \file socketclient.h
+* \brief The socket client function definitions
+*/
+
 /*** Accessors ***/
 
 /**
 * \brief Get the sockets address family, IPv4 or IPv6
 *
-* \param sock: A pointer to the initialized socket
+* \param sock: [const] A pointer to the initialized socket
 *
 * \return The socket address family
 */
@@ -50,7 +43,7 @@ QSC_EXPORT_API qsc_socket_address_families qsc_socket_client_address_family(cons
 /**
 * \brief Get the socket protocol type
 *
-* \param sock: A pointer to the initialized socket
+* \param sock: [const] A pointer to the initialized socket
 *
 * \return The socket protocol type
 */
@@ -59,8 +52,8 @@ QSC_EXPORT_API qsc_socket_protocols qsc_socket_client_socket_protocol(const qsc_
 /**
 * \brief Connect to a remote host using the network host name and service name
 *
-* \param sock: A pointer to the initialized socket
-* \param host: The remote host name
+* \param sock: [const] A pointer to the initialized socket
+* \param host: [const] The remote host name
 * \param service: The service name
 *
 * \return Returns an exception code on failure, or success(0)
@@ -71,7 +64,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* 
 * \brief Establishes a socket connection to a remote host using IPv4 addressing
 *
 * \param sock: A pointer to the initialized socket
-* \param address: The remote hosts IPv4 address
+* \param address: [const] The remote hosts IPv4 address
 * \param port: The remote hosts service port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -82,7 +75,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_ipv4(qsc_socket* 
 * \brief Establishes a socket connection to a remote host using IPv6 addressing
 *
 * \param sock: A pointer to the initialized socket
-* \param address: The remote hosts IPv6 address
+* \param address: [const] The remote hosts IPv6 address
 * \param port: The remote hosts service port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -92,7 +85,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_ipv6(qsc_socket* 
 /**
 * \brief Get the socket transport type
 *
-* \param sock: A pointer to the initialized socket
+* \param sock: [const] A pointer to the initialized socket
 *
 * \return The socket transport type
 */
@@ -108,7 +101,7 @@ QSC_EXPORT_API void qsc_socket_client_initialize(qsc_socket* sock);
 /**
 * \brief Receive data from a synchronous connected socket or a bound connectionless socket
 *
-* \param sock: A pointer to the initialized socket
+* \param sock: [const] A pointer to the initialized socket
 * \param output: The buffer that receives incoming data
 * \param outlen: The length of the output buffer
 * \param flag: Flag that influences the behavior of the receive function
@@ -134,28 +127,28 @@ QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, char* add
 /**
 * \brief Sends data on a connected socket
 *
-* \param sock: A pointer to the initialized socket
-* \param input: The input buffer containing the data to be transmitted
-* \param length: The number of bytes to send
+* \param sock: [const] A pointer to the initialized socket
+* \param input: [const] The input buffer containing the data to be transmitted
+* \param inplen: The number of bytes to send
 * \param flag: Flag that influence the behavior of the send function
 *
 * \return Returns the number of bytes sent to the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t inlen, qsc_socket_send_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t inplen, qsc_socket_send_flags flag);
 
 /**
 * \brief Sends UDP data to a remote host
 *
-* \param sock: A pointer to the initialized socket
-* \param address: The remote host address
+* \param sock: [const] A pointer to the initialized socket
+* \param address: [const] The remote host address
 * \param port: The remote port
-* \param input: The input buffer containing the data to be transmitted
-* \param length: The number of bytes to send
+* \param input: [const] The input buffer containing the data to be transmitted
+* \param inplen: The number of bytes to send
 * \param flag: Flag that influence the behavior of the send function
 *
 * \return Returns the number of bytes sent to the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_send_to(qsc_socket* sock, const char* address, uint16_t port, const char* input, size_t inlen, qsc_socket_send_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, uint16_t port, const char* input, size_t inplen, qsc_socket_send_flags flag);
 
 /**
 * \brief Shut down the socket

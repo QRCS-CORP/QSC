@@ -1,178 +1,262 @@
+#include "cpuidex.h"
 #include "async.h"
 
-bool qsc_async_mutex_create(qsc_async_mutex* mtx)
+void qsc_async_launch_thread(void (*func)(void*), void* state)
 {
-	assert(mtx != NULL);
+	assert(func != NULL);
 
-	bool res;
+	qsc_mutex mtx;
+	qsc_thread thd;
 
-	if (mtx != NULL)
+	if (func != NULL)
 	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		mtx = CreateMutex(NULL, FALSE, NULL);
-#else
-		mtx = PTHREAD_MUTEX_INITIALIZER;
-#endif
+		mtx = qsc_async_mutex_lock_ex();
+		thd = qsc_async_thread_create(func, state);
+		qsc_async_thread_wait(thd);
+		qsc_async_mutex_unlock_ex(mtx);
 	}
-
-	res = (mtx != NULL);
-
-	return res;
 }
 
-bool qsc_async_mutex_destroy(qsc_async_mutex* mtx)
+void qsc_async_launch_parallel_threads(void (*func)(void*), size_t count, ...)
 {
-	assert(mtx != NULL);
+	assert(func != NULL);
+	assert(count <= QSC_ASYNC_PARALLEL_MAX);
 
+	qsc_mutex mtx;
+	qsc_thread thds[QSC_ASYNC_PARALLEL_MAX] = { 0 };
+	va_list list;
+
+	if (func != NULL)
+	{
+		mtx = qsc_async_mutex_lock_ex();
+		va_start(list, count);
+
+		for (size_t i = 0; i < count; ++i)
+		{
+			thds[i] = qsc_async_thread_create(func, va_arg(list, void*));
+		}
+
+		qsc_async_thread_wait_all(thds, count);
+		va_end(list);
+		qsc_async_mutex_unlock_ex(mtx);
+	}
+}
+
+qsc_mutex qsc_async_mutex_create()
+{
+	qsc_mutex mtx;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	mtx = CreateMutex(NULL, FALSE, NULL);
+#else
+	pthread_mutex_init(&mtx, NULL);
+#endif
+
+	return mtx;
+}
+
+bool qsc_async_mutex_destroy(qsc_mutex mtx)
+{
 	bool res;
 
 	res = false;
 
-	if (mtx != NULL)
-	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		res = (bool)CloseHandle(mtx);
-		mtx = NULL;
+	res = (bool)CloseHandle(mtx);
 #else
-		res = (pthread_mutex_destroy(mtx) == 0);
-		mtx = NULL;
+	res = (pthread_mutex_destroy(&mtx) == 0);
 #endif
-	}
 
 	return res;
 }
 
-void qsc_async_mutex_lock(qsc_async_mutex* mtx)
+void qsc_async_mutex_lock(qsc_mutex mtx)
 {
-	assert(mtx != NULL);
-
-	if (mtx != NULL)
-	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		WaitForSingleObject(mtx, INFINITE);
+	WaitForSingleObject(mtx, INFINITE);
 #else
-		pthread_mutex_lock(mtx);
+	pthread_mutex_lock(&mtx);
 #endif
-	}
 }
 
-void qsc_async_mutex_lock_ex(qsc_async_mutex* mtx)
+qsc_mutex qsc_async_mutex_lock_ex()
 {
-	assert(mtx != NULL);
+	qsc_mutex mtx;
 
-	if (mtx != NULL)
-	{
-		qsc_async_mutex_create(mtx);
-		qsc_async_mutex_lock(mtx);
-	}
+	mtx = qsc_async_mutex_create();
+	qsc_async_mutex_lock(mtx);
+
+	return mtx;
 }
 
-void qsc_async_mutex_unlock(qsc_async_mutex* mtx)
+void qsc_async_mutex_unlock(qsc_mutex mtx)
 {
-	assert(mtx != NULL);
-
-	if (mtx != NULL)
-	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		ReleaseMutex(mtx);
+	ReleaseMutex(mtx);
 #else
-		pthread_mutex_unlock(mtx);
+	pthread_mutex_unlock(&mtx);
 #endif
-	}
 }
 
-void qsc_async_mutex_unlock_ex(qsc_async_mutex* mtx)
+void qsc_async_mutex_unlock_ex(qsc_mutex mtx)
 {
-	assert(mtx != NULL);
+	qsc_async_mutex_unlock(mtx);
+	qsc_async_mutex_destroy(mtx);
+}
 
-	if (mtx != NULL)
+size_t qsc_async_processor_count()
+{
+	qsc_cpuidex_cpu_features feat = { 0 };
+	size_t cpus;
+
+	qsc_cpuidex_features_set(&feat);
+	cpus = 1;
+
+	if (feat.cores != 0)
 	{
-		qsc_async_mutex_unlock(mtx);
-		qsc_async_mutex_destroy(mtx);
+		cpus = feat.cores;
 	}
+
+	return cpus;
 }
 
-qsc_thread qsc_async_thread_initialize(void (*thd_func)(void*), void* state)
+qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
 {
-	assert(thd_func != NULL);
-	assert(state != NULL);
+	assert(func != NULL);
 
 	qsc_thread res;
 
-	res = 0;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+    res = NULL;
+#else
+    res = 0;
+#endif
 
-	if (state != NULL && thd_func != NULL)
+	if (func != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		res = _beginthread(thd_func, 0, state);
+		uint32_t id;
+		id = 0;
+		res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, state, 0, &id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-		p_thread_create(&res, NULL, thd_func, state);
+		pthread_create(&res, NULL, (void *(*) (void *))func, state);
 #endif
 	}
 
 	return res;
 }
 
-void qsc_async_thread_terminate(const qsc_thread* handle)
+qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
 {
-	assert(handle != NULL);
+	assert(func != NULL);
+	assert(args != NULL);
 
+	qsc_thread res;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+    res = NULL;
+#else
+    res = 0;
+#endif
+
+	if (func != NULL && args != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		uint32_t id;
+		id = 0;
+		res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, args, 0, &id);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		pthread_create(&res, NULL, (void *(*) (void *))func, args);
+#endif
+	}
+
+	return res;
+}
+
+int32_t qsc_async_thread_resume(qsc_thread handle)
+{
+	int32_t res;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 	if (handle != NULL)
 	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		_endthread();
-#elif defined(QSC_SYSTEM_OS_POSIX)
-		pthread_cancel(handle);
-#endif
+		res = ResumeThread(handle);
 	}
+#else
+	pthread_mutex_lock(&tsusp);
+	suspended = false;
+	pthread_cond_signal(&tcond);
+	pthread_mutex_unlock(&tsusp);
+	res = 0;
+#endif
+
+	return res;
 }
 
-void qsc_async_thread_wait(qsc_thread* handle)
+int32_t qsc_async_thread_suspend(qsc_thread handle)
 {
-	assert(handle != NULL);
+	int32_t res;
 
+	res = -1;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 	if (handle != NULL)
 	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		WaitForSingleObject((HANDLE)handle, INFINITE);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-		void* stg;
-
-		pthread_join(handle, &stg);
-
-		if (stg != NULL)
-		{
-			free(stg);
-		}
-#endif
+		res = SuspendThread(handle);
 	}
-}
+#else
+	pthread_mutex_lock(&tsusp);
 
-void qsc_async_thread_sleep(uint32_t msec)
-{
-	assert(msec != 0);
-
-	if (msec != 0)
+	do
 	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		HANDLE hthd;
-		hthd = GetCurrentThread();
-		WaitForSingleObject(hthd, msec);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-		sleep(msec * 1000);
+		pthread_cond_wait(&tcond, &tsusp);
+	} while (suspended == true);
+
+	pthread_mutex_unlock(&tsusp);
 #endif
-	}
+
+	return res;
 }
 
-void qsc_async_thread_wait_all(qsc_thread* handles, int32_t count)
+bool qsc_async_thread_terminate(qsc_thread handle)
+{
+	bool res;
+
+	res = false;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	if (handle != NULL)
+	{
+		res = CloseHandle(handle);
+	}
+#elif defined(QSC_SYSTEM_OS_POSIX)
+	res = (pthread_cancel(handle) == 0);
+#endif
+
+	return res;
+}
+
+void qsc_async_thread_wait(qsc_thread handle)
+{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	if (handle != NULL)
+	{
+		WaitForSingleObject(handle, INFINITE);
+	}
+#elif defined(QSC_SYSTEM_OS_POSIX)
+	void* stg;
+	pthread_join(handle, &stg);
+#endif
+}
+
+void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)
 {
 	assert(handles != NULL);
-	assert(count > 0);
 
-	if (handles != NULL && count > 0)
+	if (handles != NULL && count != 0)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		WaitForMultipleObjects(count, (HANDLE*)handles, TRUE, INFINITE);
+		WaitForMultipleObjects((DWORD)count, handles, TRUE, INFINITE);
 #elif defined(QSC_SYSTEM_OS_POSIX)
 		void* stg;
 		size_t i;
@@ -180,11 +264,6 @@ void qsc_async_thread_wait_all(qsc_thread* handles, int32_t count)
 		for (i = 0; i < count; ++i)
 		{
 			pthread_join(handles[i], &stg);
-
-			if (stg != NULL)
-			{
-				free(stg);
-			}
 		}
 #endif
 	}

@@ -127,18 +127,6 @@
     <Filter Include="Source Files\Network">
       <UniqueIdentifier>{d8ecbcc0-bfe6-4fcd-9093-e9a9a2724b05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\TLS">
-      <UniqueIdentifier>{6e60dba2-81fb-469a-97e8-027ac893d14c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\TLS">
-      <UniqueIdentifier>{98570c55-c119-4b8d-89b1-66c974aa7f11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\KEX">
-      <UniqueIdentifier>{49f523c0-54e5-431a-84a7-9c47932a2729}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\KEX">
-      <UniqueIdentifier>{df00b308-ab00-4318-b68c-ec8da659823e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Asymmetric\Cipher\NTRU">
       <UniqueIdentifier>{5a1608e6-5475-4341-94e9-15c40bb61bba}</UniqueIdentifier>
     </Filter>
@@ -153,12 +141,6 @@
     </Filter>
     <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support">
       <UniqueIdentifier>{2a8d8ef1-94b9-4f1f-82bb-ba9c20567d72}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support\GAS">
-      <UniqueIdentifier>{c753403e-2483-49bf-8c60-388b06120bac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support\NASM">
-      <UniqueIdentifier>{f1c20f20-9df7-4d55-ac3d-fb8ec86f9765}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -246,16 +228,10 @@
     <ClInclude Include="donna128.h">
       <Filter>Header Files\Numerics</Filter>
     </ClInclude>
-    <ClInclude Include="cpuid.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
     <ClInclude Include="ec25519.h">
       <Filter>Header Files\Asymmetric\Cipher\ECDH</Filter>
     </ClInclude>
     <ClInclude Include="selftest.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="queue.h">
@@ -274,12 +250,6 @@
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
     <ClInclude Include="ipinfo.h">
-      <Filter>Header Files\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="netutils.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="event.h">
       <Filter>Header Files\Network</Filter>
     </ClInclude>
     <ClInclude Include="socketclient.h">
@@ -305,9 +275,6 @@
     </ClInclude>
     <ClInclude Include="encoding.h">
       <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="async.h">
-      <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="transpose.h">
       <Filter>Header Files\Tools</Filter>
@@ -354,8 +321,23 @@
     <ClInclude Include="falconbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
     </ClInclude>
-    <ClInclude Include="kyber_asm_consts.h">
-      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
+    <ClInclude Include="event.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="netutils.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="aes.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="async.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="cpuidex.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="timerex.h">
+      <Filter>Header Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -437,16 +419,10 @@
     <ClCompile Include="donna128.c">
       <Filter>Source Files\Numerics</Filter>
     </ClCompile>
-    <ClCompile Include="cpuid.c">
-      <Filter>Source Files\Common</Filter>
-    </ClCompile>
     <ClCompile Include="ec25519.c">
       <Filter>Source Files\Asymmetric\Cipher\ECDH</Filter>
     </ClCompile>
     <ClCompile Include="selftest.c">
-      <Filter>Source Files\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="parallel.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
     <ClCompile Include="queue.c">
@@ -463,9 +439,6 @@
     </ClCompile>
     <ClCompile Include="ipinfo.c">
       <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="netutils.c">
-      <Filter>Source Files\Tools</Filter>
     </ClCompile>
     <ClCompile Include="socketclient.c">
       <Filter>Source Files\Network</Filter>
@@ -487,9 +460,6 @@
     </ClCompile>
     <ClCompile Include="encoding.c">
       <Filter>Source Files\Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="async.c">
-      <Filter>Source Files\Common</Filter>
     </ClCompile>
     <ClCompile Include="transpose.c">
       <Filter>Source Files\Tools</Filter>
@@ -536,19 +506,26 @@
     <ClCompile Include="falconbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="kyber_asm_fq.S">
-      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
-    </None>
-    <None Include="kyber_asm_invntt.S">
-      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
-    </None>
-    <None Include="kyber_asm_ntt.S">
-      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
-    </None>
-    <None Include="kyber_asm_shuffle.S">
-      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support\GAS</Filter>
-    </None>
+    <ClCompile Include="event.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="netutils.c">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="aes.c">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="threadpool.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="async.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="cpuidex.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="timerex.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

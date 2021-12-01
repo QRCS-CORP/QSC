@@ -1,5 +1,10 @@
 #include "sysutils.h"
+#include "cpuidex.h"
 #include "intrinsics.h"
+#include "memutils.h"
+#if defined(QSC_DEBUG_MODE)
+#	include "consoleutils.h"
+#endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
@@ -17,27 +22,44 @@
 #	include <time.h>
 #	include <unistd.h>
 #elif defined(QSC_SYSTEM_OS_APPLE)
+#	include <stdio.h>
+#	include <sys/types.h>
 #	include <mach/mach.h>
 #	include <mach/mach_time.h>
+#	include <sys/sysctl.h>
 #	include <time.h>
 #endif
 #if defined(QSC_SYSTEM_OS_POSIX)
 #	include <cpuid.h>
 #	include <dirent.h>
-#	include <fstream>
-#	include <ios>
-#	include <iostream>
+#	include <time.h>
+#if !defined(HOST_NAME_MAX)
+#   define HOST_NAME_MAX 256
+#endif
+#if !defined(LOGIN_NAME_MAX)
+#   define LOGIN_NAME_MAX 256
+#endif
 #	include <limits.h>
 #	include <pwd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
 #	include <sys/resource.h>
 #	include <sys/statvfs.h>
-#	include <sys/sysctl.h>
-#	include <sys/sysinfo.h>
+#	if defined(QSC_SYSTEM_OS_APPLE)
+#		include <sys/sysctl.h>
+#		include <mach/vm_statistics.h>
+#		include <mach/mach_types.h>
+#		include <mach/mach_init.h>
+#		include <mach/mach_host.h>
+#	else
+#		include <sys/sysinfo.h>
+#	endif
 #	include <sys/time.h>
 #	include <sys/types.h>
 #	include <unistd.h>
+#endif
+#if defined(QSC_SYSTEM_COMPILER_GCC)
+#	elif defined(QSC_SYSTEM_COMPILER_GCC)
 #endif
 
 size_t qsc_sysutils_computer_name(char* name)
@@ -45,21 +67,18 @@ size_t qsc_sysutils_computer_name(char* name)
 	size_t res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-
 	TCHAR buf[MAX_COMPUTERNAME_LENGTH + 1];
 	DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
 	GetComputerName(buf, &bufflen);
 	res = strlen(buf);
-	memcpy(name, (char*)buf, res);
-
-
+	qsc_memutils_copy(name, (char*)buf, res);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-
 	char buf[HOST_NAME_MAX];
 	gethostname(buf, HOST_NAME_MAX);
 	res = strlen(buf);
-	memcpy(name, buf, res);
-
+	qsc_memutils_copy(name, buf, res);
+#else
+	res = 0;
 #endif
 
 	return res;
@@ -79,14 +98,12 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 	UINT drvtype = GetDriveType(drive);
 
-	if (drvtype == 3 || drvtype == 6)
+	if ((drvtype == 3 || drvtype == 6) &&
+		GetDiskFreeSpaceEx(drive, &freebt, &totalbt, &availbt))
 	{
-		if (GetDiskFreeSpaceEx(drive, &freebt, &totalbt, &availbt))
-		{
-			state->free = freebt.QuadPart;
-			state->total = totalbt.QuadPart;
-			state->avail = availbt.QuadPart;
-		}
+		state->free = freebt.QuadPart;
+		state->total = totalbt.QuadPart;
+		state->avail = availbt.QuadPart;
 	}
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
@@ -96,92 +113,9 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 	state->free = fsinfo.f_frsize * fsinfo.f_blocks;
 	state->total = fsinfo.f_bsize * fsinfo.f_bfree;
-	state->avail = total - free;
+	state->avail = state->total - state->free;
 
 #endif
-}
-
-bool qsc_sysutils_rdrand_available()
-{
-#if defined(QSC_SYSTEM_AVX_INTRINSICS)
-	const uint32_t RDRAND_FLAG = (1 << 30);
-
-#	if defined(QSC_SYSTEM_OS_WINDOWS)
-
-	int32_t info[4] = { 0 };
-
-	__cpuid(info, 1);
-
-	return (((uint32_t)info[2] & RDRAND_FLAG) == RDRAND_FLAG);
-
-#	else
-
-	uint32_t eax;
-	uint32_t ebx;
-	uint32_t ecx;
-	uint32_t edx;
-
-	__cpuid(1, eax, ebx, ecx, edx);
-
-	return ((ecx & RDRAND_FLAG) == RDRAND_FLAG);
-
-#	endif
-#else
-	return false;
-#endif
-}
-
-bool qsc_sysutils_rdseed_available()
-{
-	const uint32_t RDSEED_FLAG = 18;
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-
-	int32_t info[4] = { 0 };
-
-	__cpuid(info, 1);
-
-	return (((uint32_t)info[2] & RDSEED_FLAG) == RDSEED_FLAG);
-
-#else
-
-	uint32_t eax;
-	uint32_t ebx;
-	uint32_t ecx;
-	uint32_t edx;
-
-	__cpuid(1, eax, ebx, ecx, edx);
-
-	return ((ebx & RDSEED_FLAG) == RDSEED_FLAG);
-
-#endif
-}
-
-bool qsc_sysutils_rdtsc_available()
-{
-	const uint32_t RDTSC_FLAG = 27;
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-
-	int32_t info[4] = { 0 };
-
-	__cpuid(info, 1);
-
-	return (((uint32_t)info[3] & RDTSC_FLAG) == RDTSC_FLAG);
-
-#else
-
-	uint32_t eax;
-	uint32_t ebx;
-	uint32_t ecx;
-	uint32_t edx;
-
-	__cpuid(1, eax, ebx, ecx, edx);
-
-	return ((edx & RDTSC_FLAG) == RDTSC_FLAG);
-
-#endif
-
 }
 
 void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
@@ -197,6 +131,43 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 	state->physavail = memInfo.ullAvailPhys;
 	state->virttotal = memInfo.ullTotalVirtual;
 	state->virtavail = memInfo.ullAvailVirtual;
+
+#elif defined(QSC_SYSTEM_OS_APPLE)
+
+	vm_size_t page_size;
+	mach_port_t mach_port;
+	mach_msg_type_number_t count;
+	vm_statistics64_data_t vm_stats;
+
+	mach_port = mach_host_self();
+	count = sizeof(vm_stats) / sizeof(natural_t);
+
+	if (KERN_SUCCESS == host_page_size(mach_port, &page_size) && KERN_SUCCESS == host_statistics64(mach_port, HOST_VM_INFO, (host_info64_t)&vm_stats, &count))
+	{
+		state->physavail = (uint64_t)vm_stats.free_count * (uint64_t)page_size;
+		state->phystotal = state->physavail + ((uint64_t)vm_stats.active_count + (uint64_t)vm_stats.inactive_count + (uint64_t)vm_stats.wire_count) *  (uint64_t)page_size;
+	}
+
+	size_t pgf;
+	size_t pgn;
+	size_t pgs;
+
+	pgn = 0;
+	pgs = 0;
+	pgf = 0;
+
+	if (sysctlbyname("vm.pages", &pgn, NULL, NULL, 0) == 0)
+	{
+		if (sysctlbyname("vm.pagesize", &pgs, NULL, NULL, 0) == 0)
+		{
+			state->virttotal = pgn * pgs;
+		}
+
+		if (state->virttotal != 0 && sysctlbyname("vm.page_free_count", &pgf, NULL, NULL, 0) == 0)
+		{
+			state->virtavail = state->virttotal - (pgf * pgn);
+		}
+	}
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
@@ -217,11 +188,28 @@ uint32_t qsc_sysutils_process_id()
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	res = (uint32_t)GetCurrentProcessId();
-#else
-	res = (uint32_t)::getpid();
+#else//QSC_SYSTEM_OS_POSIX
+	res = (uint32_t)getpid();
 #endif
 
 	return res;
+}
+
+bool qsc_sysutils_rdtsc_available()
+{
+	qsc_cpuidex_cpu_features cfeat;
+	bool hfeat;
+	bool ret;
+
+	ret = false;
+	hfeat = qsc_cpuidex_features_set(&cfeat);
+
+	if (hfeat == true)
+	{
+		ret = cfeat.rdtcsp;
+	}
+
+	return ret;
 }
 
 size_t qsc_sysutils_user_name(char* name)
@@ -234,16 +222,15 @@ size_t qsc_sysutils_user_name(char* name)
 	DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
 	GetUserName(buf, &bufflen);
 	res = strlen(buf);
-	memcpy(name, (char*)buf, res);
+	qsc_memutils_copy(name, (char*)buf, res);
 
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
 	char buf[LOGIN_NAME_MAX];
 	getlogin_r(buf, LOGIN_NAME_MAX);
-	size_t bufflen = sizeof(buf) / sizeof(char);
 	res = strlen(buf);
-	memcpy(name, buf, res);
+	qsc_memutils_copy(name, buf, res);
 
 #endif
 
@@ -255,18 +242,18 @@ uint64_t qsc_sysutils_system_uptime()
 	uint64_t res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-
 	res = GetTickCount64();
-
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
 	struct timespec ts;
 
-	if (clock_gettime(CLOCK_UPTIME_PRECISE, &ts) == 0)
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
 	{
 		res = (uint64_t)((ts.tv_sec * 1000ULL) + (ts.tv_nsec / 1000000ULL));
 	}
 
+#else
+	res = 0;
 #endif
 
 	return res;
@@ -357,7 +344,7 @@ uint64_t qsc_sysutils_system_timestamp()
 
 	if (id != (clockid_t)-1 && clock_gettime(id, &ts) != -1)
 	{
-		rtme = static_cast<ulong>(ts.tv_sec + ts.tv_nsec);
+		rtme = (uint64_t)(ts.tv_sec + ts.tv_nsec);
 	}
 
 #else
@@ -367,6 +354,7 @@ uint64_t qsc_sysutils_system_timestamp()
 	return rtme;
 }
 
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 void qsc_sysutils_user_identity(const char* name, char* id)
 {
 	LPCSTR accname = TEXT(name);
@@ -382,3 +370,77 @@ void qsc_sysutils_user_identity(const char* name, char* id)
 		ConvertSidToStringSidA(sid, (LPSTR*)id);
 	}
 }
+#endif
+
+#if defined(QSC_DEBUG_MODE)
+void qsc_system_values_print()
+{
+	const char* drv = "C:";
+	char tname[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0 };
+	qsc_sysutils_drive_space_state dstate;
+	qsc_sysutils_memory_statistics_state mstate;
+	uint64_t ts;
+	size_t len;
+	uint32_t id;
+
+	qsc_consoleutils_print_line("System visual verification test");
+	qsc_consoleutils_print_line("Printing system values..");
+
+	qsc_consoleutils_print_safe("Computer name: ");
+	len = qsc_sysutils_computer_name(tname);
+	qsc_consoleutils_print_line(tname);
+
+	qsc_consoleutils_print_safe("Process Id: ");
+	id = qsc_sysutils_process_id();
+	qsc_consoleutils_print_uint(id);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("User name: ");
+	len = qsc_sysutils_user_name(tname);
+	qsc_consoleutils_print_line(tname);
+
+	qsc_consoleutils_print_safe("Computer up-time: ");
+	ts = qsc_sysutils_system_uptime();
+	qsc_consoleutils_print_ulong(id);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("Time stamp: ");
+	ts = qsc_sysutils_system_timestamp();
+	qsc_consoleutils_print_ulong(ts);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("Drive statistics");
+	qsc_sysutils_drive_space(drv, &dstate);
+	qsc_consoleutils_print_safe("Free bytes: ");
+	qsc_consoleutils_print_ulong(dstate.free);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("Available bytes: ");
+	qsc_consoleutils_print_ulong(dstate.avail);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("Total bytes: ");
+	qsc_consoleutils_print_ulong(dstate.total);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_line("Memory statistics");
+	qsc_sysutils_memory_statistics(&mstate);
+	qsc_consoleutils_print_safe("Physical Available: ");
+	qsc_consoleutils_print_ulong(mstate.physavail);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("Physical total: ");
+	qsc_consoleutils_print_ulong(mstate.phystotal);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("Virtual available: ");
+	qsc_consoleutils_print_ulong(mstate.virtavail);
+	qsc_consoleutils_print_line("");
+
+	qsc_consoleutils_print_safe("Virtual total: ");
+	qsc_consoleutils_print_ulong(mstate.virttotal);
+	qsc_consoleutils_print_line("");
+	qsc_consoleutils_print_line("");
+}
+#endif
+

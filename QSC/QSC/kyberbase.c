@@ -659,7 +659,7 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
     {
         for (size_t j = 0; j < QSC_KYBER_K; ++j)
         {
-            if (transposed)
+            if (transposed != 0)
             {
                 extseed[QSC_KYBER_SYMBYTES] = (uint8_t)i;
                 extseed[QSC_KYBER_SYMBYTES + 1] = (uint8_t)j;

@@ -3,14 +3,16 @@
 ## Status
 
 QSC is a compact and self-contained post-quantum secure cryptographic library witten in C. It has been written to MISRA secure coding standards, and has been designed to be easy to read, verify, and implement. The code is well structured, readable and commented, and thoroughly documented, and this solution contains a testing platform, which provides various test functions for every primitive contained in the library. 
-This library incorporates next-generation asymmetric and symmetric primitives, with a strong emphasis on true long-term security. The objective of this library is to provide a basis for future integration efforts, and as the foundation of a compact, high-security, post-quantum secure communications platform. This is currently a Windows/Intel library, however, much of the groundwork has been laid towards interoperability with different operating systems and hardware architectures (looking for volunteers). 
-Tested using the reference, AVX, AVX2, and AVX512 implementations.
+This library incorporates next-generation asymmetric and symmetric primitives, with a strong emphasis on true long-term security. The objective of this library is to provide a basis for future integration efforts, and as the foundation of a compact, high-security, post-quantum-secure communications platform. This version has been tested on Windows 10, Ubuntu Linux, and MAC Big Sur. 
+This library has SIMD intrinsice integratewd throughout, using AVX, AVX2, and AVX512 implementations.
 This implementation uses a base reference code, or AVX/AVX2/AVX512 implementations of ciphers and cryptographic protocols. For best performance, set the project properties to the highest available SIMD instruction set supported by your CPU. AVX-512 instructions are fully supported in this implementation and offer the best performance profile.
 
 ## Version
-Version 1.0.0.5H
+Version 1.0.0.5L
+Tested on Windows 10, version 10.0.19042 using Visual Studio version 16.10.2,
+Ubuntu Linux version 20.04 using Eclipse version 2021-09 GCC Ubuntu 9.3.0-17
+and Mac Big Sur version 11.5.2 using Eclipse version 2021-09 GCC Apple Clang version 12.0.5.
 All asymmetric ciphers and signature schemes updated to NIST PQC Round 3
-Added the Falcon asymmetric signature scheme.
 
 ## Contains
 ### Asymmetric Ciphers
@@ -27,6 +29,7 @@ The Round-3 versions of the NIST PQC asymmetric ciphers and signature schemes.
 * ECDSA: Elliptic Curve Digital Signature Algorithm (ED25519)
 
 ### Symmetric ciphers
+* AES: The AES symmetric block cipher and modes
 * ChaChaPoly20: The ChaCha stream cipher
 * RCS: The authenticated stream cipher using wide-block Rijndael and KMAC authentication
 * CSX: The authenticated stream cipher based on ChaCha, using 64-bit integers, 512-bit keys, and KMAC authentication

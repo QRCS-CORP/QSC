@@ -15,18 +15,6 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-* Written by John G. Underhill
-* Updated on March 30, 2021
-* Contact: support@vtdev.com */
-
-/**
-* \file socketserver.h
-* \brief <b>The socketserver header definition</b> \n
-* Contains the public api and documentation for the socketserver implementation.
-* \author John Underhill
-* \date April 4, 2021
-* \remarks For usage examples, see network_test.h
 */
 
 #ifndef QSC_SOCKETSERVER_H
@@ -35,7 +23,21 @@
 #include "common.h"
 #include "socketbase.h"
 
+/*
+* \file socketserver.h
+* \brief The socket server function definitions
+*/
+
+/*!
+* \def QSC_SOCKET_SERVER_LISTEN_BACKLOG
+* \brief The socket connection backlog, default is 128
+*/
 #define QSC_SOCKET_SERVER_LISTEN_BACKLOG 128
+
+/*!
+* \def QSC_SOCKET_SERVER_MAX_THREADS
+* \brief The maximum number of active threads
+*/
 #define QSC_SOCKET_SERVER_MAX_THREADS 1024
 
 /*** Structures ***/
@@ -45,7 +47,7 @@
 */
 typedef struct qsc_socket_server_accept_result
 {
-	qsc_socket target;									/*!< The accepted socket */
+	qsc_socket target;		/*!< The accepted socket */
 } qsc_socket_server_accept_result;
 
 /*! \struct qsc_socket_server_async_accept_state
@@ -57,23 +59,34 @@ typedef struct qsc_socket_server_accept_result
 */
 typedef struct qsc_socket_server_async_accept_state
 {
-	qsc_socket* source;									/*!< A pointer to the listener socket */
-	void (*callback)(qsc_socket_server_accept_result*);	/*!< A pointer to a callback function */
-	void (*error)(qsc_socket*, qsc_socket_exceptions);	/*!< A pointer to an error function */
+	qsc_socket* source;													/*!< A pointer to the listener socket */
+	void (*callback)(qsc_socket_server_accept_result* result);			/*!< A pointer to a callback function */
+	void (*error)(qsc_socket* sock, qsc_socket_exceptions exception);	/*!< A pointer to an error function */
 } qsc_socket_server_async_accept_state;
 
 /*** Function Prototypes ***/
 
+/**
+* \brief The socket server accept callback prototype
+*
+* \param ares: A pointer to the server accept result structure
+*/
 QSC_EXPORT_API void qsc_socket_server_accept_callback(qsc_socket_server_accept_result* ares);
 
-QSC_EXPORT_API void qsc_socket_server_error_callback(qsc_socket* source, qsc_socket_exceptions error);
+/**
+* \brief The socket server error callback prototype
+*
+* \param source: [const] A pointer to the initialized socket
+* \param error: The socket exception
+*/
+QSC_EXPORT_API void qsc_socket_server_error_callback(const qsc_socket* source, qsc_socket_exceptions error);
 
 /*** Accessors ***/
 
 /**
 * \brief Get the sockets address family, IPv4 or IPv6
 *
-* \param sock: A pointer to the initialized socket
+* \param sock: [const] A pointer to the initialized socket
 *
 * \return The socket address family
 */
@@ -82,7 +95,7 @@ QSC_EXPORT_API qsc_socket_address_families qsc_socket_server_address_family(cons
 /**
 * \brief Get the socket protocol type
 *
-* \param sock: A pointer to the initialized socket
+* \param sock: [const] A pointer to the initialized socket
 *
 * \return The socket protocol type
 */
@@ -91,14 +104,14 @@ QSC_EXPORT_API qsc_socket_protocols qsc_socket_server_socket_protocol(const qsc_
 /**
 * \brief Get the socket transport type
 *
-* \param sock: A pointer to the initialized socket
+* \param sock: [const] A pointer to the initialized socket
 *
 * \return The socket transport type
 */
 QSC_EXPORT_API qsc_socket_transports qsc_socket_server_socket_transport(const qsc_socket* sock);
 
 /**
-* \brief Close a socket
+* \brief Close the socket
 *
 * \param sock: A pointer to the socket structure
 */
@@ -117,7 +130,7 @@ QSC_EXPORT_API void qsc_socket_server_initialize(qsc_socket* sock);
 *
 * \param source: The listening socket
 * \param target: The accepted remote socket
-* \param address: The servers address
+* \param address: [const] The servers address
 * \param port: The servers port number
 * \param family: The socket address family
 *
@@ -131,7 +144,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen(qsc_socket* source
 *
 * \param source: The listening socket
 * \param target: The accepted remote socket
-* \param address: The servers IPv4 address
+* \param address: [const] The servers IPv4 address
 * \param port: The servers port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -144,7 +157,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_ipv4(qsc_socket* s
 *
 * \param source: The listening socket
 * \param target: The accepted remote socket
-* \param address: The servers IPv6 address
+* \param address: [const] The servers IPv6 address
 * \param port: The servers port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -155,7 +168,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* s
 * \brief Places the socket in an asynchronous listening state
 *
 * \param state: The asynchronous server state
-* \param address: The servers address
+* \param address: [const] The servers address
 * \param port: The servers port number
 * \param family: The socket address family
 *
@@ -167,7 +180,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_s
 * \brief Places the IPv4 socket in an asynchronous listening state
 *
 * \param state: The asynchronous server state
-* \param address: The servers address
+* \param address: [const] The servers address
 * \param port: The servers port number
 *
 * \return Returns an exception code on failure, or success(0)
@@ -183,13 +196,13 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_soc
 *
 * \return Returns an exception code on failure, or success(0)
 */
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_async_accept_state* state, qsc_ipinfo_ipv6_address* address, uint16_t port);
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv6_address* address, uint16_t port);
 
 /**
 * \brief Send an option command to the socket.
 * Options that use a boolean are format: 0=false, 1=true.
 *
-* \param sock: The socket instance
+* \param sock: [const] The socket instance
 * \param level: The level at which the option is assigned
 * \param option: The option command to send
 * \param optval: The value of the option command

@@ -103,7 +103,6 @@ bool qsctest_sphincsplus_privatekey_integrity()
 	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
 	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
-	size_t i;
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -116,7 +115,7 @@ bool qsctest_sphincsplus_privatekey_integrity()
 	qsc_sphincsplus_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
 	/* flip bits in the private key */
-	for (i = 0; i < 16; ++i)
+	for (size_t i = 0; i < 16; ++i)
 	{
 		sk[i] ^= 1U;
 	}

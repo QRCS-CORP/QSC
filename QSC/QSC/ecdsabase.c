@@ -1,8 +1,8 @@
 #include "ecdsabase.h"
 #include "csp.h"
+#include "ec25519.h"
 #include "intutils.h"
 #include "memutils.h"
-#include "ec25519.h"
 #include "sha2.h"
 
 static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk)
@@ -68,8 +68,6 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 	ge25519_p2 R;
 	bool res;
 
-	res = true;
-
 	if ((sig[63] & 240) && sc25519_is_canonical(sig + 32) == 0)
 	{
 		res = false;
@@ -85,6 +83,10 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 	else if (ge25519_frombytes_negate_vartime(&A, pk) != 0)
 	{
 		res = false;
+	}
+	else
+	{
+		res = true;
 	}
 
 	if (res == true)

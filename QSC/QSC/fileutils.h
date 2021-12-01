@@ -15,19 +15,6 @@
 *
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-* Implementation Details:
-* An implementation of supporting time based functions
-* Written by John G. Underhill
-* Updated on February 18, 2021
-* Contact: support@vtdev.com 
-*/
-
-/*
-* \file timer.h
-* \brief <b>File utilities</b> \n
-* This file contains common file related functions
-* February 18, 2021
 */
 
 #ifndef QSC_FILEUTILS_H
@@ -35,6 +22,21 @@
 
 #include "common.h"
 #include <stdio.h>
+
+/**
+* \file fileutils.h
+* \brief File utilities contains common file related functions
+*/
+
+/**
+* \brief Open a file and return the file pointer
+*
+* \param path: The filer path
+* \param mode: The read, write, or read/write mode
+* \param err: A pointer to an error variable
+* \return Returns the FILE handle or NULL on failure
+*/
+QSC_EXPORT_API FILE*  qsc_filetools_open_file(const char* path, const char* mode, errno_t* err);
 
 /**
 * \brief Get the working directory path
@@ -48,7 +50,7 @@ QSC_EXPORT_API bool qsc_filetools_working_directory(char* path);
 /**
 * \brief Test to see if a file exists
 *
-* \param path: The fully qualified path to the file
+* \param path: [const] The fully qualified path to the file
 * \return Returns true if the file exists
 */
 QSC_EXPORT_API bool qsc_filetools_file_exists(const char* path);
@@ -56,15 +58,14 @@ QSC_EXPORT_API bool qsc_filetools_file_exists(const char* path);
 /**
 * \brief Get the files size in bytes
 *
-* \param path: The path to the file
+* \param path: [const] The path to the file
 * \return Returns the length of the file
 */
 QSC_EXPORT_API size_t qsc_filetools_file_size(const char* path);
 
-#if defined(_MSC_VER)
 /**
 * \brief Reads a line of text from a formatted file.
-* 
+*
 * \warning line buffer must be freed after last call
 *
 * \param line: the line of text to read
@@ -73,14 +74,14 @@ QSC_EXPORT_API size_t qsc_filetools_file_size(const char* path);
 * \return Returns the number of characters read
 */
 QSC_EXPORT_API int64_t qsc_filetools_getline(char** line, size_t* length, FILE* fp);
-#endif
 
 /**
-* \brief Append elements of an array to a file.
+* \brief Append an array of characters to a file.
 * Writes new data to the end of a binary file.
 *
-* \param path: The path to the file
-* \param stream: The array to write to the file
+* \param path: [const] The path to the file
+* \param stream: [const] The array to write to the file
+* \param length: the stream size
 * \return Returns true if the operation succeeded
 */
 QSC_EXPORT_API bool qsc_filetools_append_to_file(const char* path, const char* stream, size_t length);
@@ -88,7 +89,7 @@ QSC_EXPORT_API bool qsc_filetools_append_to_file(const char* path, const char* s
 /**
 * \brief Create a new file
 *
-* \param path: The path to the file to be created
+* \param path: [const] The path to the file to be created
 * \return Returns true for success
 */
 QSC_EXPORT_API bool qsc_filetools_create_file(const char* path);
@@ -96,8 +97,8 @@ QSC_EXPORT_API bool qsc_filetools_create_file(const char* path);
 /**
 * \brief Copy an object to a file.
 *
-* \param path: The path to the file
-* \param obj: The object to write to the file
+* \param path: [const] The path to the file
+* \param obj: [const] The object to write to the file
 * \param length: The size of the object
 * \return Returns true if the operation succeeded
 */
@@ -106,8 +107,8 @@ QSC_EXPORT_API bool qsc_filetools_copy_object_to_file(const char* path, const vo
 /**
 * \brief Copy the contents of a stream to a file.
 *
-* \param path: The path to the file
-* \param stream: The array to write to the file
+* \param [const] path: The path to the file
+* \param [const] stream: The array to write to the file
 * \param length: The length of the array
 * \return Returns true if the operation succeeded
 */
@@ -116,7 +117,7 @@ QSC_EXPORT_API bool qsc_filetools_copy_stream_to_file(const char* path, const ch
 /**
 * \brief Copy a file to an object.
 *
-* \param path: The path to the file
+* \param path: [const] The path to the file
 * \param obj: The object to write to the file
 * \param length: The size of the object
 * \return Returns the number of characters written to the byte array
@@ -126,7 +127,7 @@ QSC_EXPORT_API size_t qsc_filetools_copy_file_to_object(const char* path, void* 
 /**
 * \brief Copy elements from a file to a byte array.
 *
-* \param path: The path to the file
+* \param path: [const] The path to the file
 * \param stream: The array to write to the file
 * \param length: The number of bytes to write to the file
 * \return Returns the number of characters written to the byte array
@@ -136,7 +137,7 @@ QSC_EXPORT_API size_t qsc_filetools_copy_file_to_stream(const char* path, char* 
 /**
 * \brief Delete a file
 *
-* \param path: The path to the file ro be deleted
+* \param path: [const] The path to the file ro be deleted
 * \return Returns true for success
 */
 QSC_EXPORT_API bool qsc_filetools_delete_file(const char* path);
@@ -144,7 +145,7 @@ QSC_EXPORT_API bool qsc_filetools_delete_file(const char* path);
 /**
 * \brief Erase a files contents
 *
-* \param path: The path to the file
+* \param path: [const] The path to the file
 * \return Returns true for success
 */
 QSC_EXPORT_API bool qsc_filetools_erase_file(const char* path);
@@ -152,7 +153,7 @@ QSC_EXPORT_API bool qsc_filetools_erase_file(const char* path);
 /**
 * \brief Read a line of text from a file
 *
-* \param path: The path to the file
+* \param path: [const] The path to the file
 * \param buffer: The string buffer
 * \param buflen: The size of the string buffer
 * \param linenum: The line number to read

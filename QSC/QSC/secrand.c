@@ -26,7 +26,7 @@ double qsc_secrand_next_double()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	memcpy(&res, smp, sizeof(double));
+	qsc_memutils_copy(&res, smp, sizeof(double));
 
 	return res;
 }
@@ -38,7 +38,7 @@ int16_t qsc_secrand_next_int16()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	memcpy(&res, smp, sizeof(int16_t));
+	qsc_memutils_copy(&res, smp, sizeof(int16_t));
 
 	return res;
 }
@@ -86,7 +86,7 @@ uint16_t qsc_secrand_next_uint16()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	memcpy(&res, smp, sizeof(uint16_t));
+	qsc_memutils_copy(&res, smp, sizeof(uint16_t));
 
 	return res;
 }
@@ -134,7 +134,7 @@ int32_t qsc_secrand_next_int32()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	memcpy(&res, smp, sizeof(int32_t));
+	qsc_memutils_copy(&res, smp, sizeof(int32_t));
 
 	return res;
 }
@@ -182,7 +182,7 @@ uint32_t qsc_secrand_next_uint32()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	memcpy(&res, smp, sizeof(uint32_t));
+	qsc_memutils_copy(&res, smp, sizeof(uint32_t));
 
 	return res;
 }
@@ -230,7 +230,7 @@ int64_t qsc_secrand_next_int64()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	memcpy(&res, smp, sizeof(int64_t));
+	qsc_memutils_copy(&res, smp, sizeof(int64_t));
 
 	return res;
 }
@@ -278,7 +278,7 @@ uint64_t qsc_secrand_next_uint64()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	memcpy(&res, smp, sizeof(uint64_t));
+	qsc_memutils_copy(&res, smp, sizeof(uint64_t));
 
 	return res;
 }
@@ -319,6 +319,17 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 	return minimum + ret;
 }
 
+void qsc_secrand_destroy()
+{
+	if (secrand_state.init == true)
+	{
+		qsc_memutils_clear(secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+		qsc_csg_dispose(&secrand_state.hstate);
+		secrand_state.cpos = 0;
+		secrand_state.init = false;
+	}
+}
+
 void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* custom, size_t custlen)
 {
 	assert(seed != NULL);
@@ -333,12 +344,15 @@ void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* 
 	secrand_state.init = true;
 }
 
-void qsc_secrand_generate(uint8_t* output, size_t length)
+bool qsc_secrand_generate(uint8_t* output, size_t length)
 {
 	assert(secrand_state.init == true);
 
 	const size_t BUFLEN = QSC_SECRAND_CACHE_SIZE - secrand_state.cpos;
 	size_t poft;
+	bool res;
+
+	res = false;
 
 	if (secrand_state.init != true)
 	{
@@ -380,10 +394,14 @@ void qsc_secrand_generate(uint8_t* output, size_t length)
 			qsc_memutils_copy(output, secrand_state.cache + secrand_state.cpos, length);
 			secrand_state.cpos += length;
 		}
+
+		res = true;
 	}
 
 	if (secrand_state.cpos != 0)
 	{
 		qsc_memutils_clear((uint8_t*)secrand_state.cache, secrand_state.cpos);
 	}
+
+	return res;
 }

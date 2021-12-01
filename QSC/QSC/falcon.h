@@ -28,18 +28,17 @@
 *
 * An implementation of the Falcon asymmetric signature scheme
 * Rewritten for Misra compliance and library integration by John G. Underhill
-* Contact: support@vtdev.com
+* Contact: support@digitalfreedomdefence.com
 */
+
+#ifndef QSC_FALCON_H
+#define QSC_FALCON_H
 
 /**
 * \file falcon.h
-* \date July 5, 2021
-* \updated July 5, 2021
+* \brief Contains the primary public api for the Falcon asymmetric signature scheme implementation
 *
-* \brief <b>The Falcon API definitions</b> \n
-* Contains the primary public api for the Falcon asymmetric signature scheme implementation.
-*
-* \para <b>Example</b> \n
+* \par Example
 * \code
 * // An example of key-pair creation, encryption, and decryption
 * #define MSGLEN 32
@@ -68,9 +67,6 @@
 * The <a href="https://falcon-sign.info/">Falcon</a> website. \n
 * The Falcon <a href="https://falcon-sign.info/falcon.pdf">Algorithm</a> Specification.
 */
-
-#ifndef QSC_FALCON_H
-#define QSC_FALCON_H
 
 #include "common.h"
 

@@ -1,6 +1,20 @@
 #include "../QSC/common.h"
-#include "../QSC/cpuid.h"
+#include "../QSC/consoleutils.h"
+#include "../QSC/cpuidex.h"
+#include "../QSC/memutils.h"
 #include "../QSC/selftest.h"
+#include "../QSC/stringutils.h"
+#if defined(QSC_DEBUG_MODE)
+#	include "../QSC/acp.h"
+#	include "../QSC/csp.h"
+#	include "../QSC/rdp.h"
+#	include "../QSC/sysutils.h"
+#	include "../QSC/timerex.h"
+#	include "../QSC/timestamp.h"
+#endif
+#include "aes_test.h"
+#include "aesavs_test.h"
+#include "async_test.h"
 #include "benchmark.h"
 #include "chacha_test.h"
 #include "common.h"
@@ -11,6 +25,7 @@
 #include "falcon_test.h"
 #include "kyber_test.h"
 #include "mceliece_test.h"
+#include "netutils_test.h"
 #include "ntru_test.h"
 #include "poly1305_test.h"
 #include "rcs_test.h"
@@ -20,26 +35,67 @@
 #include "sphincsplus_test.h"
 #include "testutils.h"
 
-static void print_title()
+static void print_title(void)
 {
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.5j (A5)                       *");
+	qsctest_print_line("* Release:   v1.0.0.5l (A5)                       *");
 	qsctest_print_line("* License:   GPLv3                                *");
-	qsctest_print_line("* Date:      July 23, 2021                        *");
-	qsctest_print_line("* Contact:   support@vtdev.com                    *");
+	qsctest_print_line("* Date:      November 31, 2021                    *");
+	qsctest_print_line("* Contact:   support@digitalfreedomdefence.com    *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
 }
 
-int main()
+#if defined(QSC_DEBUG_MODE)
+static void random_sample_print()
 {
-	qsc_cpu_features features;
+	uint8_t smp[256] = { 0 };
+
+	qsc_consoleutils_print_line("Random verification test");
+	qsc_consoleutils_print_line("Printing random from installed generators..");
+
+	qsc_consoleutils_print_line("CSP sample: ");
+	qsc_csp_generate(smp, sizeof(smp));
+	qsc_consoleutils_print_array(smp, sizeof(smp), 64);
+	qsc_memutils_clear(smp, sizeof(smp));
+	qsc_consoleutils_print_line("");
+
+#if defined(QSC_RDRAND_COMPATIBLE)
+	qsc_consoleutils_print_line("RDP sample: ");
+	qsc_rdp_generate(smp, sizeof(smp));
+	qsc_consoleutils_print_array(smp, sizeof(smp), 64);
+	qsc_memutils_clear(smp, sizeof(smp));
+	qsc_consoleutils_print_line("");
+#endif
+
+	qsc_consoleutils_print_line("ACP sample: ");
+	qsc_acp_generate(smp, sizeof(smp));
+	qsc_consoleutils_print_array(smp, sizeof(smp), 64);
+	qsc_memutils_clear(smp, sizeof(smp));
+	qsc_consoleutils_print_line("");
+	qsc_consoleutils_print_line("");
+}
+#endif
+
+int main(void)
+{
+	qsc_cpuidex_cpu_features cfeat;
 	bool valid;
 	bool hfeat;
 
-	valid = qsctest_symmetric_selftest_run();
+#if defined(QSC_DEBUG_MODE)
+	qsc_consoleutils_print_line("Loading visual pre-check...");
+	qsc_consoleutils_print_line("");
+	random_sample_print();
+	qsc_system_values_print();
+	qsc_timerex_print_values();
+	qsc_timestamp_print_values();
+	qsc_consoleutils_print_line("");
+#endif
+
+	valid = qsc_selftest_symmetric_run();
 
 	if (valid == true)
 	{
@@ -47,7 +103,7 @@ int main()
 
 		qsctest_print_line("Passed the internal symmetric primitive self-checks.");
 
-		hfeat = qsc_runtime_features(&features);
+		hfeat = qsc_cpuidex_features_set(&cfeat);
 
 		if (hfeat == false)
 		{
@@ -55,7 +111,7 @@ int main()
 			qsctest_print_line("Some features may be disabled.");
 		}
 
-		if (features.aesni == true)
+		if (cfeat.aesni == true)
 		{
 			qsctest_print_line("AES-NI is available on this system.");
 			qsctest_print_line("The QSC_SYSTEM_AESNI_ENABLED flag has been detected, AES-NI intrinsics are enabled.");
@@ -65,15 +121,15 @@ int main()
 			qsctest_print_line("AES-NI was not detected on this system.");
 		}
 
-		if (features.avx512 == true)
+		if (cfeat.avx512f == true)
 		{
 			qsctest_print_line("AVX-512 intrinsics functions have been detected on this system.");
 		}
-		else if (features.avx2 == true)
+		else if (cfeat.avx2 == true)
 		{
 			qsctest_print_line("AVX2 intrinsics functions have been detected on this system.");
 		}
-		else if (features.avx == true)
+		else if (cfeat.avx == true)
 		{
 			qsctest_print_line("AVX intrinsics functions have been detected on this system.");
 		}
@@ -122,15 +178,23 @@ int main()
 	{
 		if (qsctest_test_confirm("Press 'Y' then Enter to run Diagnostic Tests, any other key to cancel: ") == true)
 		{
-			qsctest_print_line("*** Test the ChaCha stream cipher with known answer tests ***");
+			qsctest_print_line("*** Test the AES cipher and modes with stress tests, and the FIPS known answer tests ***");
+			qsctest_aes_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the AES cipher and modes with stress tests, and the AESAVS known answer tests ***");
+			qsctest_aesavs_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the ChaCha stream cipher with stress tests, and known answer tests ***");
 			qsctest_chacha_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the CSX-512 stream cipher using stress tests and KAT vectors ***");
+			qsctest_print_line("*** Test the CSX-512 stream cipher stress tests, and known answer tests ***");
 			qsctest_csx_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the RCS stream cipher using stress tests and KAT vectors ***");
+			qsctest_print_line("*** Test the RCS stream cipher with stress tests, and known answer tests ***");
 			qsctest_rcs_run();
 			qsctest_print_line("");
 
@@ -138,11 +202,11 @@ int main()
 			qsctest_poly1305_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test HKDF, HMAC, and SHA2 implementations using the official KAT vectors ***");
+			qsctest_print_line("*** Test HKDF, HMAC, and SHA2 implementations using the official known answer tests ***");
 			qsctest_sha2_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test SHAKE, cSHAKE, KMAC, and SHA3 implementations using the official KAT vectors ***");
+			qsctest_print_line("*** Test SHAKE, cSHAKE, KMAC, and SHA3 implementations using the official known answer tests ***");
 			qsctest_sha3_run();
 			qsctest_print_line("");
 
@@ -210,7 +274,7 @@ int main()
 	}
 	else
 	{
-		qsctest_print_line("The test has been cancelled. Press any key to close..");
+		qsctest_print_line("The test has been canceled. Press any key to close..");
 		qsctest_get_wait();
 	}
 
