@@ -1,20 +1,123 @@
 #include "fileutils.h"
 #include "memutils.h"
 #include "stringutils.h"
+#include <stdlib.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	include <direct.h>
 #	include <io.h>
 #else
 #	include <unistd.h>
-#	include <stdlib.h>
 #endif
+
+void qsc_filetools_file_close(FILE* fp)
+{
+	if (fp != NULL)
+	{
+		fclose(fp);
+	}
+}
+
+FILE* qsc_filetools_file_binary_open(const char* path, qsc_fileutils_mode mode)
+{
+	char mstr[4] = { 0 };
+	FILE* fp;
+
+	if (mode == qsc_fileutils_mode_read)
+	{
+		qsc_stringutils_copy_string(mstr, sizeof(mstr), "rb");
+	}
+	else if (mode == qsc_fileutils_mode_read_update)
+	{
+		qsc_stringutils_copy_string(mstr, sizeof(mstr), "r+b");
+	}
+	else if (mode == qsc_fileutils_mode_write)
+	{
+		qsc_stringutils_copy_string(mstr, sizeof(mstr), "wb");
+	}
+	else if (mode == qsc_fileutils_mode_write_update)
+	{
+		qsc_stringutils_copy_string(mstr, sizeof(mstr), "w+b");
+	}
+	else if (mode == qsc_fileutils_mode_append)
+	{
+		qsc_stringutils_copy_string(mstr, sizeof(mstr), "ab");
+	}
+	else
+	{
+		qsc_stringutils_copy_string(mstr, sizeof(mstr), "a+b");
+	}
+
+	fp = NULL;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	errno_t err;
+	err = fopen_s(&fp, path, mstr);
+#else
+	fp = fopen(path, mstr);
+#endif
+
+	return fp;
+}
+
+FILE* qsc_filetools_file_open(const char* path, qsc_fileutils_mode mode)
+{
+	char mstr[4] = { 0 };
+    FILE* fp;
+
+    if (mode == qsc_fileutils_mode_read)
+    {
+    	qsc_stringutils_copy_string(mstr, sizeof(mstr), "r");
+    }
+    else if (mode == qsc_fileutils_mode_read_update)
+    {
+    	qsc_stringutils_copy_string(mstr, sizeof(mstr), "r+");
+    }
+    else if (mode == qsc_fileutils_mode_write)
+    {
+    	qsc_stringutils_copy_string(mstr, sizeof(mstr), "w");
+    }
+    else if (mode == qsc_fileutils_mode_write_update)
+	{
+    	qsc_stringutils_copy_string(mstr, sizeof(mstr), "w+");
+	}
+    else if (mode == qsc_fileutils_mode_append)
+	{
+    	qsc_stringutils_copy_string(mstr, sizeof(mstr), "a");
+	}
+    else
+	{
+    	qsc_stringutils_copy_string(mstr, sizeof(mstr), "a+");
+	}
+
+    fp = NULL;
+   #if defined(QSC_SYSTEM_OS_WINDOWS)
+    errno_t err;
+	err = fopen_s(&fp, path, mstr);
+#else
+    fp = fopen(path, mstr);
+#endif
+
+return fp;
+}
+
+static bool file_has_access(const char* path, qsc_fileutils_access_rights level)
+{
+	int32_t err;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	err = _access(path, (int32_t)level);
+#else
+	err = access(path, (int32_t)level);
+#endif
+
+	return (err == 0);
+}
 
 bool qsc_filetools_working_directory(char* path)
 {
 	char buf[FILENAME_MAX] = { 0 };
 	size_t len;
-	char* res;
+	const char* res;
 	bool ret;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -42,17 +145,58 @@ bool qsc_filetools_working_directory(char* path)
 	return ret;
 }
 
+bool qsc_filetools_file_access(const char* path, qsc_fileutils_access_rights level)
+{
+	bool res;
+
+	res = false;
+
+	if (qsc_filetools_file_exists(path))
+	{
+		res = file_has_access(path, level);
+	}
+
+	return res;
+}
+
 bool qsc_filetools_file_exists(const char* path)
 {
-	int32_t err;
+	FILE* fp;
+	bool res;
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = _access(path, 0);
-#else
-	err = access(path, F_OK);
-#endif
+	res = false;
+	fp = NULL;
 
-	return (err == 0);
+	fp = qsc_filetools_file_open(path, qsc_fileutils_mode_read);
+
+	if (fp != NULL)
+	{
+		qsc_filetools_file_close(fp);
+		res = true;
+	}
+
+	return res;
+}
+
+size_t qsc_filetools_file_read(const char* path, size_t position, char* output, size_t length)
+{
+	FILE* fp;
+	size_t res;
+
+	res = 0;
+	fp = qsc_filetools_file_open(path, qsc_fileutils_mode_read);
+
+	if (fp != NULL)
+	{
+		if (fseek(fp, (uint64_t)position, SEEK_SET) == 0)
+		{
+			res = fread(output, length, 1, fp);
+		}
+
+		fclose(fp);
+	}
+
+	return res;
 }
 
 size_t qsc_filetools_file_size(const char* path)
@@ -79,19 +223,26 @@ size_t qsc_filetools_file_size(const char* path)
 	return res;
 }
 
-FILE*  qsc_filetools_open_file(const char* path, const char* mode, errno_t* err)
+size_t qsc_filetools_file_write(const char* path, size_t position, const char* input, size_t length)
 {
-    FILE* fp;
+	FILE* fp;
+	size_t res;
 
-    fp = NULL;
-    #if defined(QSC_SYSTEM_OS_WINDOWS)
-	*err = fopen_s(&fp, path, mode);
-#else
-    fp = fopen(path, mode);
-    *err = (fp == NULL) ? -1 : 0;
-#endif
+	res = 0;
+	fp = qsc_filetools_file_open(path, qsc_fileutils_mode_write);
 
-return fp;
+	if (fp != NULL)
+	{
+		if (fseek(fp, (uint64_t)position, SEEK_SET) == 0)
+		{
+			res = fwrite(input, 1, length, fp);
+			fflush(fp);
+		}
+
+		fclose(fp);
+	}
+
+	return res;
 }
 
 int64_t qsc_filetools_getline(char** line, size_t* length, FILE* fp)

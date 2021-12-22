@@ -193,6 +193,22 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
 	return res;
 }
 
+void qsc_async_thread_sleep(uint32_t msec)
+{
+	assert(msec != 0);
+
+	if (msec != 0)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		HANDLE hthd;
+		hthd = GetCurrentThread();
+		WaitForSingleObject(hthd, msec);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		sleep(msec * 1000);
+#endif
+	}
+}
+
 int32_t qsc_async_thread_suspend(qsc_thread handle)
 {
 	int32_t res;

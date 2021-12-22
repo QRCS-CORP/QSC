@@ -1,6 +1,6 @@
 /**
 * \file sha3_test.h
-* \brief SHA3 Known Answer Tests \n
+* \brief <b>SHA3 Known Answer Tests</b> \n
 * Uses Known Answer Tests from official sources to qsc_intutils_verify the
 * correct operation of SHA3 digest and SHAKE implementations.
 * \author John Underhill
@@ -13,7 +13,7 @@
 #include "common.h"
 
 /**
-* \brief Tests the 256-bit version of the Keccak message digest for correct operation,
+* \brief Tests the 256-bit version of the keccak message digest for correct operation,
 * using selected vectors from the NIST Fips202 and alternative references.
 *
 * \return Returns true for success
@@ -27,7 +27,7 @@
 bool qsctest_sha3_256_kat(void);
 
 /**
-* \brief Tests the 512-bit version of the Keccak message digest for correct operation,
+* \brief Tests the 512-bit version of the keccak message digest for correct operation,
 * using selected vectors from NIST Fips202 and alternative references.
 *
 * \return Returns true for success

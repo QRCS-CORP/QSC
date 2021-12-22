@@ -4997,12 +4997,12 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 	assert(inp3 != NULL);
 
 	__m256i t;
-	__m256i idx;
+	__m256i idx = { 0 };
 	int64_t p0;
 	int64_t p1;
 	int64_t p2;
 	int64_t p3;
-	int64_t pos;
+	size_t pos;
 	size_t i;
 
 	pos = 0;

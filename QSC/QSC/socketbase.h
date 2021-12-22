@@ -45,22 +45,29 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	    pragma comment(lib, "iphlpapi.lib")
 #	    pragma comment(lib, "ws2_32.lib")
 #   endif
-#else //elif defined(QSC_SYSTEM_OS_POSIX)
-
+#elif defined(QSC_SYSTEM_OS_POSIX)
 #	include <errno.h>
 #	include <netdb.h>
 #	include <ifaddrs.h>
 #	include <netinet/in.h>
 #	include <arpa/inet.h>
-#include <sys/select.h>
+#	include <sys/select.h>
 #	include <sys/socket.h>
 #	include <string.h>
 #	include <sys/types.h>
+#	include <sys/un.h>
 #	include <unistd.h>
-#	if defined(QSC_SYSTEM_OS_APPLE)
-#
-#	else
+#	if defined(QSC_SYSTEM_OS_LINUX)
 #		include <netpacket/packet.h>
+#	elif defined(QSC_SYSTEM_OS_APPLE)
+#		include <net/if_dl.h>
+#		include <netinet/in.h>
+#		include <netinet/in6.h>
+#		if !defined(AF_PACKET)
+#			define AF_PACKET PF_INET
+#		endif
+#	elif defined(QSC_SYSTEM_OS_UNIX)
+
 #	endif
 //#else
 //#	error "The operating system is not supported!"
@@ -271,7 +278,7 @@ typedef struct qsc_socket_receive_poll_state
 * \param source: [const] The socket source
 * \param error: The socket exception
 */
-QSC_EXPORT_API void qsc_socket_exception_callback(const qsc_socket* source, qsc_socket_exceptions error);
+//QSC_EXPORT_API void qsc_socket_exception_callback(const qsc_socket* source, qsc_socket_exceptions error);
 
 /**
 * \brief The socket receive asynchronous callback prototype
@@ -280,7 +287,7 @@ QSC_EXPORT_API void qsc_socket_exception_callback(const qsc_socket* source, qsc_
 * \param message: [const] The socket message buffer
 * \param msglen: A pointer to the size of the message
 */
-QSC_EXPORT_API void qsc_socket_receive_async_callback(const qsc_socket* source, const uint8_t* message, size_t* msglen);
+//QSC_EXPORT_API void qsc_socket_receive_async_callback(const qsc_socket* source, const uint8_t* message, size_t* msglen);
 
 /**
 * \brief The receive polling callback prototype

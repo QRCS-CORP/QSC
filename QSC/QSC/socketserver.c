@@ -189,7 +189,7 @@ qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* source, qsc_sock
 static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state* state)
 {
 	assert(state != NULL);
-#if defined(QSC_SYSTEM_OS_WINDOWS)
+
 	qsc_mutex mtx;
 
 	mtx = qsc_async_mutex_lock_ex();
@@ -222,7 +222,6 @@ static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state
 	}
 
 	qsc_async_mutex_unlock_ex(mtx);
-	#endif
 }
 
 qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_server_async_accept_state* state, const char* address, uint16_t port, qsc_socket_address_families family)

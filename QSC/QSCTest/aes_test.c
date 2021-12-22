@@ -651,13 +651,13 @@ bool qsctest_aes256_hba_stress()
 		}
 
 		dec = (uint8_t*)qsc_memutils_malloc(mlen);
-		enc = (uint8_t*)qsc_memutils_malloc(mlen + QSC_HBA256_MAC_LENGTH);
+		enc = (uint8_t*)qsc_memutils_malloc((size_t)mlen + QSC_HBA256_MAC_LENGTH);
 		msg = (uint8_t*)qsc_memutils_malloc(mlen);
 
 		if (dec != NULL && enc != NULL && msg != NULL)
 		{
 			qsc_intutils_clear8(dec, mlen);
-			qsc_intutils_clear8(enc, mlen + QSC_HBA256_MAC_LENGTH);
+			qsc_intutils_clear8(enc, (size_t)mlen + QSC_HBA256_MAC_LENGTH);
 			qsc_intutils_clear8(msg, mlen);
 			qsc_memutils_copy(nonce, ncopy, QSC_AES_BLOCK_SIZE);
 

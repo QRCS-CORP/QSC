@@ -130,10 +130,7 @@ QSC_EXPORT_API void qsc_sysutils_user_identity(const char* name, char* id);
 
 #if defined(QSC_DEBUG_MODE)
 /**
-* \brief Get the users identity string
-*
-* \param name: The char array that holds the user name
-* \param id: The output array containing the id string
+* \brief Print the output of system function calls
 */
 QSC_EXPORT_API void qsc_system_values_print();
 #endif

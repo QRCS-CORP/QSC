@@ -30,6 +30,12 @@
 /* bogus winbase.h error */
 QSC_SYSTEM_CONDITION_IGNORE(5105)
 
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+static const char QSC_FOLDERUTILS_DELIMITER = '\\';
+#else
+static const char QSC_FOLDERUTILS_DELIMITER = '/';
+#endif
+
 /*! \enum qsc_folderutils_directories
 * \brief The system special folders enumeration
 */
@@ -46,6 +52,15 @@ typedef enum qsc_folderutils_directories
 	qsc_folderutils_directories_user_shortcuts,		/*!< User Shortcuts directory */
 	qsc_folderutils_directories_user_videos,		/*!< User Video directory */
 } qsc_folderutils_directories;
+
+/**
+* \brief Append a folder path delimiter
+
+*
+* \param path: [const] The full path including the new folder name
+* \return Returns true if the folder is created
+*/
+QSC_EXPORT_API void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH]);
 
 /**
 * \brief Create a new folder

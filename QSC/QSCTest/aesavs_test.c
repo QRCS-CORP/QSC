@@ -31,7 +31,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 	line = NULL;
 	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
 	if (fp != NULL && err == 0)
 	{
@@ -41,7 +41,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, CBC_COUNT, strlen(CBC_COUNT)) == 0)
 				{
@@ -106,17 +106,12 @@ static bool aesavs_cbc128_kat(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -140,16 +135,14 @@ static bool aesavs_cbc256_kat(const char* filepath)
 	int64_t read;
 	size_t i;
 	size_t len;
-	errno_t err;
 	bool res;
 
 	res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		read = 0;
 
@@ -157,7 +150,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, CBC_COUNT, strlen(CBC_COUNT)) == 0)
 				{
@@ -222,17 +215,12 @@ static bool aesavs_cbc256_kat(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -253,16 +241,14 @@ static bool aesavs_ecb128_kat(const char* filepath)
 	int64_t read;
 	size_t i;
 	size_t len;
-	errno_t err;
 	bool res;
 
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		read = 0;
 
@@ -270,7 +256,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -328,17 +314,12 @@ static bool aesavs_ecb128_kat(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -359,16 +340,14 @@ static bool aesavs_ecb256_kat(const char* filepath)
 	int64_t read;
 	size_t i;
 	size_t len;
-	errno_t err;
 	bool res;
 
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		read = 0;
 
@@ -376,7 +355,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -434,17 +413,12 @@ static bool aesavs_ecb256_kat(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -471,17 +445,15 @@ static bool aesavs_cbc128_mct(const char* filepath)
 	size_t count;
 	size_t i;
 	size_t len;
-	errno_t err;
 	bool res;
 
 	count = 0;
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		read = 0;
 
@@ -489,7 +461,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, CBC_COUNT, strlen(CBC_COUNT)) == 0)
 				{
@@ -593,17 +565,12 @@ static bool aesavs_cbc128_mct(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -630,17 +597,15 @@ static bool aesavs_cbc256_mct(const char* filepath)
 	size_t count;
 	size_t i;
 	size_t len;
-	errno_t err;
 	bool res;
 
 	count = 0;
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		read = 0;
 
@@ -648,7 +613,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, CBC_COUNT, strlen(CBC_COUNT)) == 0)
 				{
@@ -752,17 +717,12 @@ static bool aesavs_cbc256_mct(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -784,16 +744,14 @@ static bool aesavs_ecb128_mct(const char* filepath)
 	int64_t read;
 	size_t i;
 	size_t len;
-	errno_t err;
 	bool res;
 
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		read = 0;
 
@@ -801,7 +759,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -872,17 +830,12 @@ static bool aesavs_ecb128_mct(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -904,16 +857,14 @@ static bool aesavs_ecb256_mct(const char* filepath)
 	int64_t read;
 	size_t i;
 	size_t len;
-	errno_t err;
 	bool res;
 
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		read = 0;
 
@@ -921,7 +872,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &len, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -992,17 +943,12 @@ static bool aesavs_ecb256_mct(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -1028,7 +974,6 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 	size_t i;
 	size_t alen;
 	size_t rlen;
-	errno_t err;
 	bool res;
 
 	exp = NULL;
@@ -1037,11 +982,10 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 	pln = NULL;
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		alen = 0;
 		count = 0;
@@ -1051,7 +995,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &rlen, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -1183,17 +1127,12 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -1219,7 +1158,6 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 	size_t i;
 	size_t alen;
 	size_t rlen;
-	errno_t err;
 	bool res;
 
 	exp = NULL;
@@ -1228,11 +1166,10 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 	pln = NULL;
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		alen = 0;
 		count = 0;
@@ -1242,7 +1179,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &rlen, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -1374,17 +1311,12 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -1405,7 +1337,6 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 	size_t i;
 	size_t alen;
 	size_t rlen;
-	errno_t err;
 	bool res;
 
 	exp = NULL;
@@ -1413,11 +1344,10 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 	pln = NULL;
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		alen = 0;
 		read = 0;
@@ -1426,7 +1356,7 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &rlen, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -1515,17 +1445,12 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }
@@ -1546,7 +1471,6 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 	size_t i;
 	size_t alen;
 	size_t rlen;
-	errno_t err;
 	bool res;
 
 	exp = NULL;
@@ -1554,11 +1478,10 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 	pln = NULL;
     res = true;
 	line = NULL;
-	err = 0;
 
-    fp = qsc_filetools_open_file(filepath, "r", &err);
+    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
 
-	if (fp != NULL && err == 0)
+	if (fp != NULL)
 	{
 		alen = 0;
 		read = 0;
@@ -1567,7 +1490,7 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 		{
 			read = qsc_filetools_getline(&line, &rlen, fp);
 
-			if (read > 0)
+			if (read > 0 && line != NULL)
 			{
 				if (memcmp(line, ECB_COUNT, strlen(ECB_COUNT)) == 0)
 				{
@@ -1656,17 +1579,12 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 		res = false;
 	}
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+	qsc_filetools_file_close(fp);
 
-#if defined(QSC_COMPILER_MSC)
 	if (line != NULL)
 	{
-		qsc_memutils_alloc_free(line);
+		free(line);
 	}
-#endif
 
 	return res;
 }

@@ -388,7 +388,11 @@ void qsc_system_values_print()
 
 	qsc_consoleutils_print_safe("Computer name: ");
 	len = qsc_sysutils_computer_name(tname);
-	qsc_consoleutils_print_line(tname);
+
+	if (len > 0)
+	{
+		qsc_consoleutils_print_line(tname);
+	}
 
 	qsc_consoleutils_print_safe("Process Id: ");
 	id = qsc_sysutils_process_id();
@@ -397,7 +401,11 @@ void qsc_system_values_print()
 
 	qsc_consoleutils_print_safe("User name: ");
 	len = qsc_sysutils_user_name(tname);
-	qsc_consoleutils_print_line(tname);
+
+	if (len > 0)
+	{
+		qsc_consoleutils_print_line(tname);
+	}
 
 	qsc_consoleutils_print_safe("Computer up-time: ");
 	ts = qsc_sysutils_system_uptime();

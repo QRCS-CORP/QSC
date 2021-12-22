@@ -31,7 +31,7 @@
 QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 #if !defined(wint_t)
-    #define wint_t  char
+    #define wint_t char
 #endif
 
 /*!

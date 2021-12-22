@@ -251,9 +251,9 @@ static void vendor_name(qsc_cpuidex_cpu_features* features)
 
     cpuid_info(info, 0x00000000UL);
     qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_LENGTH);
-    qsc_memutils_copy(&features->vendor[0], &info[1], 4);
-    qsc_memutils_copy(&features->vendor[4], &info[3], 4);
-    qsc_memutils_copy(&features->vendor[8], &info[2], 4);
+    qsc_memutils_copy(&features->vendor[0], &info[1], sizeof(uint32_t));
+    qsc_memutils_copy(&features->vendor[4], &info[3], sizeof(uint32_t));
+    qsc_memutils_copy(&features->vendor[8], &info[2], sizeof(uint32_t));
 }
 
 static void bus_info(qsc_cpuidex_cpu_features* features)
@@ -414,10 +414,10 @@ static void cpu_topology(qsc_cpuidex_cpu_features* features)
 
 static void cpu_type(qsc_cpuidex_cpu_features* features)
 {
-    char tmpn[QSC_CPUIDEX_VENDOR_LENGTH] = { 0 };
+    char tmpn[QSC_CPUIDEX_VENDOR_LENGTH + 1] = { 0 };
 
     vendor_name(features);
-    qsc_memutils_copy(tmpn, features->vendor, sizeof(tmpn));
+    qsc_memutils_copy(tmpn, features->vendor, QSC_CPUIDEX_VENDOR_LENGTH);
     qsc_stringutils_to_lowercase(tmpn);
 
     if (qsc_stringutils_string_contains(tmpn, "intel") == true)
@@ -440,9 +440,9 @@ static void serial_number(qsc_cpuidex_cpu_features* features)
 
     cpuid_info(info, 0x00000003UL);
     qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_LENGTH);
-    qsc_memutils_copy(&features->serial[0], &info[1], 4);
-    qsc_memutils_copy(&features->serial[4], &info[3], 4);
-    qsc_memutils_copy(&features->serial[8], &info[2], 4);
+    qsc_memutils_copy(&features->serial[0], &info[1], sizeof(uint32_t));
+    qsc_memutils_copy(&features->serial[4], &info[3], sizeof(uint32_t));
+    qsc_memutils_copy(&features->serial[8], &info[2], sizeof(uint32_t));
 }
 
 #endif
@@ -470,6 +470,7 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
     features->l1cacheline = 0;
     features->l2associative = 4;
     features->l2cache = 0;
+	res = false;
     qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_LENGTH);
 
 #if defined(QSC_SYSTEM_OS_APPLE) && defined(QSC_SYSTEM_COMPILER_GCC)
@@ -486,8 +487,6 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
         serial_number(features);
         res = true;
     }
-#else
-    res = false;
 #endif
 
     return res;

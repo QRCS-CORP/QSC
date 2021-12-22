@@ -16,7 +16,8 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	    pragma comment(lib, "user32.lib")
 #   endif
 #else
-#	include <stdlib.h>
+#	include <stdio.h>
+#	include <termios.h>
 #	include <unistd.h>
 #endif
 
@@ -90,6 +91,7 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 	if (line != NULL && fgets(line, (int32_t)maxlen, stdin) != NULL)
 	{
 		slen = strlen(line);
+		line[slen - 1] = '\0';
 	}
 
 	return slen;
@@ -123,6 +125,44 @@ wint_t qsc_consoleutils_get_wait()
 	return c;
 }
 #else
+static char getch(void)
+{
+    char buf = 0;
+    struct termios old = {0};
+    fflush(stdout);
+
+    if(tcgetattr(0, &old) < 0)
+    {
+        perror("tcsetattr()");
+    }
+
+    old.c_lflag &= ~ICANON;
+    old.c_lflag &= ~ECHO;
+    old.c_cc[VMIN] = 1;
+    old.c_cc[VTIME] = 0;
+
+    if(tcsetattr(0, TCSANOW, &old) < 0)
+    {
+        perror("tcsetattr ICANON");
+    }
+
+    if(read(0, &buf, 1) < 0)
+    {
+        perror("read()");
+    }
+
+    old.c_lflag |= ICANON;
+    old.c_lflag |= ECHO;
+
+    if(tcsetattr(0, TCSADRAIN, &old) < 0)
+    {
+        perror("tcsetattr ~ICANON");
+    }
+
+    //printf("%c\n", buf);
+    return buf;
+ }
+
 char qsc_consoleutils_get_wait()
 {
 	char c;
@@ -196,9 +236,8 @@ size_t qsc_consoleutils_masked_password(uint8_t* output, size_t outlen)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
             c = (char)_getch();
 #else
-            //c = (char)getch(); // TODO
+            c = getch();
 #endif
-
 
 			if (c != '\n' && c != '\r')
 			{
@@ -538,7 +577,7 @@ void qsc_consoleutils_set_window_title(const char* title)
 
 	if (title != NULL)
 	{
-		SetConsoleTitle(title);
+		SetConsoleTitle((LPCSTR)title);
 	}
 
 #else

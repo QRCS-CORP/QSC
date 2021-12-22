@@ -1,5 +1,6 @@
 #include "secmem.h"
 #include "memutils.h"
+#include <stdlib.h>
 
 #if defined(QSC_OS_OPENBSD)
 #	include <string.h>

@@ -1,11 +1,14 @@
 #include "socketbase.h"
+#include "intutils.h"
 #include "memutils.h"
 #include "async.h"
 
 #if defined(QSC_SYSTEM_OS_POSIX)
 #   include <sys/ioctl.h>
 #   include <sys/select.h>
-#   define LPCSTR char*
+#	if !defined(PSTR)
+#   	define PSTR char*
+#	endif
 #endif
 
 static qsc_socket_exceptions qsc_socket_acceptv4(const qsc_socket* source, qsc_socket* target)
@@ -35,7 +38,7 @@ static qsc_socket_exceptions qsc_socket_acceptv4(const qsc_socket* source, qsc_s
 		if (target->connection != QSC_UNINITIALIZED_SOCKET && target->connection != QSC_SOCKET_RET_ERROR)
 		{
 			target->connection_status = qsc_socket_state_connected;
-			inet_ntop(AF_INET, &sa.sin_addr, (LPCSTR)target->address, (int)INET_ADDRSTRLEN);
+			inet_ntop(AF_INET, (const void*)&sa.sin_addr, (PSTR)target->address, INET_ADDRSTRLEN);
 			qsc_memutils_copy(target->address, target->address, QSC_IPINFO_IPV4_STRNLEN);
 			target->port = ntohs(sa.sin_port);
 			res = qsc_socket_exception_success;
@@ -244,15 +247,22 @@ qsc_socket_exceptions qsc_socket_bind_ipv4(qsc_socket* sock, const qsc_ipinfo_ip
 
 	if (sock != NULL && address != NULL)
 	{
+		uint32_t ip4u;
+
 		qsc_memutils_clear((uint8_t*)&sa, sizeof(sa));
 		sa.sin_family = AF_INET;
 		sa.sin_port = htons(port);
+		ip4u = qsc_intutils_be8to32(address->ipv4);
+		sa.sin_addr.s_addr = ip4u;
+#if defined(QSC_SYSTEM_OS_APPLE)
+		sa.sin_len = sizeof(sockaddr_in);
+#endif
 
 		res = (qsc_socket_exceptions)bind(sock->connection, (const struct sockaddr*)&sa, sizeof(sa));
 
 		if (res != qsc_socket_exception_error)
 		{
-			inet_ntop(AF_INET, address->ipv4, (LPCSTR)sock->address, sizeof(sock->address));
+			inet_ntop(AF_INET, address->ipv4, (PSTR)sock->address, sizeof(sock->address));
 			sock->address_family = qsc_socket_address_family_ipv4;
 			sock->port = port;
 		}
@@ -279,17 +289,23 @@ qsc_socket_exceptions qsc_socket_bind_ipv6(qsc_socket* sock, const qsc_ipinfo_ip
 	if (sock != NULL && address != NULL)
 	{
 		qsc_memutils_clear((uint8_t*)&sa, sizeof(sa));
-#if defined(QSC_SYSTEM_OS_POSIX)
-//		sa.sin6_len = sizeof(sa);
-#endif
 		sa.sin6_family = AF_INET6;
 		sa.sin6_port = htons(port);
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		qsc_memutils_copy(sa.sin6_addr.u.Byte, address->ipv6, 16);
+#elif defined(QSC_SYSTEM_OS_LINUX)
+		qsc_memutils_copy(sa.sin6_addr.__in6_u.__u6_addr8, address->ipv6, 16);
+#elif defined(QSC_SYSTEM_OS_APPLE)
+		qsc_memutils_copy(sa.in6_addr.__u6_addr8, address->ipv6, 16);
+		sa.sin6_len = sizeof(sockaddr_in);
+#endif
 
 		res = (qsc_socket_exceptions)bind(sock->connection, (const struct sockaddr*)&sa, sizeof(sa));
 
 		if (res != qsc_socket_exception_error)
 		{
-			inet_ntop(AF_INET6, address->ipv6, (LPCSTR)sock->address, sizeof(sock->address));
+			inet_ntop(AF_INET6, address->ipv6, (PSTR)sock->address, sizeof(sock->address));
 			sock->port = port;
 		}
 	}
@@ -377,8 +393,8 @@ qsc_socket_exceptions qsc_socket_connect_ipv4(qsc_socket* sock, const qsc_ipinfo
 		qsc_memutils_clear((uint8_t*)&sa, sizeof(sa));
 		sa.sin_family = AF_INET;
 		sa.sin_port = htons(port);
-		inet_ntop(AF_INET, address->ipv4, (LPCSTR)sadd, sizeof(sadd));
-		inet_pton(AF_INET, (LPCSTR)sadd, &(sa.sin_addr));
+		inet_ntop(AF_INET, address->ipv4, (PSTR)sadd, sizeof(sadd));
+		inet_pton(AF_INET, (PSTR)sadd, &(sa.sin_addr));
 
 		res = (qsc_socket_exceptions)connect(sock->connection, (const struct sockaddr*)&sa, sizeof(sa));
 
@@ -415,8 +431,8 @@ qsc_socket_exceptions qsc_socket_connect_ipv6(qsc_socket* sock, const qsc_ipinfo
 		qsc_memutils_clear((uint8_t*)&sa, sizeof(sa));
 		sa.sin6_family = AF_INET6;
 		sa.sin6_port = htons(port);
-		inet_ntop(AF_INET6, address->ipv6, (LPCSTR)sadd, sizeof(sadd));
-		inet_pton(AF_INET6, (LPCSTR)sadd, &(sa.sin6_addr));
+		inet_ntop(AF_INET6, address->ipv6, (PSTR)sadd, sizeof(sadd));
+		inet_pton(AF_INET6, (PSTR)sadd, &(sa.sin6_addr));
 
 		res = (qsc_socket_exceptions)connect(sock->connection, (const struct sockaddr*)&sa, sizeof(sa));
 
@@ -440,16 +456,22 @@ qsc_socket_exceptions qsc_socket_create(qsc_socket* sock, qsc_socket_address_fam
 {
 	assert(sock != NULL);
 
+	int32_t prot;
 	qsc_socket_exceptions res;
 
 	res = qsc_socket_invalid_input;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	prot = (int32_t)protocol;
+#else
+	prot = 0;
+#endif
 
 	if (sock != NULL)
 	{
 		sock->address_family = family;
 		sock->socket_transport = transport;
 		sock->socket_protocol = protocol;
-		sock->connection = socket((int32_t)family, (int32_t)transport, (int32_t)protocol);
+		sock->connection = socket((int32_t)family, (int32_t)transport, prot);
 		res = (sock->connection != QSC_UNINITIALIZED_SOCKET) ? qsc_socket_exception_success : qsc_socket_exception_error;
 	}
 
@@ -627,7 +649,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t por
 
 			d.sin_family = AF_INET;
 			d.sin_port = htons(port);
-			d.sin_addr.s_addr = inet_pton(AF_INET, destination, &d.sin_addr); // TODO (PCSTR)destination
+			d.sin_addr.s_addr = inet_pton(AF_INET, destination, &d.sin_addr);
 
 			res = recvfrom(sock->connection, (char*)output, (int32_t)outlen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
 
@@ -789,220 +811,220 @@ const char* qsc_socket_error_to_string(qsc_socket_exceptions code)
 
 	switch (code)
 	{
-		case qsc_socket_exception_success:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[0];
-			break;
-		}
-		case qsc_socket_exception_error:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[1];
-			break;
-		}
-		case qsc_socket_invalid_input:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[2];
-			break;
-		}
-		case qsc_socket_exception_address_in_use:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[3];
-			break;
-		}
-		case qsc_socket_exception_address_required:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[4];
-			break;
-		}
-		case qsc_socket_exception_address_unsupported:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[5];
-			break;
-		}
-		case qsc_socket_exception_already_in_use:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[6];
-			break;
-		}
-		case qsc_socket_exception_blocking_cancelled:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[7];
-			break;
-		}
-		case qsc_socket_exception_blocking_in_progress:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[8];
-			break;
-		}
-		case qsc_socket_exception_broadcast_address:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[9];
-			break;
-		}
-		case qsc_socket_exception_buffer_fault:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[10];
-			break;
-		}
-		case qsc_socket_exception_circuit_reset:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[11];
-			break;
-		}
-		case qsc_socket_exception_circuit_terminated:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[12];
-			break;
-		}
-		case qsc_socket_exception_circuit_timeout:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[13];
-			break;
-		}
-		case qsc_socket_exception_connection_refused:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[14];
-			break;
-		}
-		case qsc_socket_exception_descriptor_not_socket:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[15];
-			break;
-		}
-		case qsc_socket_exception_disk_quota_exceeded:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[16];
-			break;
-		}
-		case qsc_socket_exception_dropped_connection:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[17];
-			break;
-		}
-		case qsc_socket_exception_family_unsupported:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[18];
-			break;
-		}
-		case qsc_socket_exception_host_is_down:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[19];
-			break;
-		}
-		case qsc_socket_exception_host_unreachable:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[20];
-			break;
-		}
-		case qsc_socket_exception_in_progress:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[21];
-			break;
-		}
-		case qsc_socket_exception_invalid_address:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[22];
-			break;
-		}
-		case qsc_socket_exception_invalid_protocol:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[24];
-			break;
-		}
-		case qsc_socket_exception_invalid_protocol_option:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[25];
-			break;
-		}
-		case qsc_socket_exception_item_is_remote:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[27];
-			break;
-		}
-		case qsc_socket_exception_message_too_long:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[28];
-			break;
-		}
-		case qsc_socket_exception_name_too_long:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[29];
-			break;
-		}
-		case qsc_socket_exception_network_failure:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[30];
-			break;
-		}
-		case qsc_socket_exception_network_unreachable:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[31];
-			break;
-		}
-		case qsc_socket_exception_no_buffer_space:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[32];
-			break;
-		}
-		case qsc_socket_exception_no_descriptors:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[33];
-			break;
-		}
-		case qsc_socket_exception_not_bound:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[35];
-			break;
-		}
-		case qsc_socket_exception_not_connected:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[36];
-			break;
-		}
-		case qsc_socket_exception_operation_unsupported:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[38];
-			break;
-		}
-		case qsc_socket_exception_protocol_unsupported:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[39];
-			break;
-		}
-		case qsc_socket_exception_shut_down:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[40];
-			break;
-		}
-		case qsc_socket_exception_socket_unsupported:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[41];
-			break;
-		}
-		case qsc_socket_exception_system_not_ready:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[42];
-			break;
-		}
-		case qsc_socket_exception_too_many_users:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[44];
-			break;
-		}
-		case qsc_socket_exception_translation_failed:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[45];
-			break;
-		}
-		case qsc_socket_exception_would_block:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[46];
-			break;
-		}
-		default:
-		{
-			pmsg = QSC_SOCKET_ERROR_STRINGS[1];
-		}
+	case qsc_socket_exception_success:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[0];
+		break;
+	}
+	case qsc_socket_exception_error:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[1];
+		break;
+	}
+	case qsc_socket_invalid_input:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[2];
+		break;
+	}
+	case qsc_socket_exception_address_in_use:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[3];
+		break;
+	}
+	case qsc_socket_exception_address_required:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[4];
+		break;
+	}
+	case qsc_socket_exception_address_unsupported:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[5];
+		break;
+	}
+	case qsc_socket_exception_already_in_use:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[6];
+		break;
+	}
+	case qsc_socket_exception_blocking_cancelled:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[7];
+		break;
+	}
+	case qsc_socket_exception_blocking_in_progress:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[8];
+		break;
+	}
+	case qsc_socket_exception_broadcast_address:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[9];
+		break;
+	}
+	case qsc_socket_exception_buffer_fault:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[10];
+		break;
+	}
+	case qsc_socket_exception_circuit_reset:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[11];
+		break;
+	}
+	case qsc_socket_exception_circuit_terminated:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[12];
+		break;
+	}
+	case qsc_socket_exception_circuit_timeout:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[13];
+		break;
+	}
+	case qsc_socket_exception_connection_refused:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[14];
+		break;
+	}
+	case qsc_socket_exception_descriptor_not_socket:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[15];
+		break;
+	}
+	case qsc_socket_exception_disk_quota_exceeded:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[16];
+		break;
+	}
+	case qsc_socket_exception_dropped_connection:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[17];
+		break;
+	}
+	case qsc_socket_exception_family_unsupported:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[18];
+		break;
+	}
+	case qsc_socket_exception_host_is_down:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[19];
+		break;
+	}
+	case qsc_socket_exception_host_unreachable:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[20];
+		break;
+	}
+	case qsc_socket_exception_in_progress:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[21];
+		break;
+	}
+	case qsc_socket_exception_invalid_address:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[22];
+		break;
+	}
+	case qsc_socket_exception_invalid_protocol:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[24];
+		break;
+	}
+	case qsc_socket_exception_invalid_protocol_option:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[25];
+		break;
+	}
+	case qsc_socket_exception_item_is_remote:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[27];
+		break;
+	}
+	case qsc_socket_exception_message_too_long:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[28];
+		break;
+	}
+	case qsc_socket_exception_name_too_long:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[29];
+		break;
+	}
+	case qsc_socket_exception_network_failure:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[30];
+		break;
+	}
+	case qsc_socket_exception_network_unreachable:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[31];
+		break;
+	}
+	case qsc_socket_exception_no_buffer_space:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[32];
+		break;
+	}
+	case qsc_socket_exception_no_descriptors:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[33];
+		break;
+	}
+	case qsc_socket_exception_not_bound:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[35];
+		break;
+	}
+	case qsc_socket_exception_not_connected:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[36];
+		break;
+	}
+	case qsc_socket_exception_operation_unsupported:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[38];
+		break;
+	}
+	case qsc_socket_exception_protocol_unsupported:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[39];
+		break;
+	}
+	case qsc_socket_exception_shut_down:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[40];
+		break;
+	}
+	case qsc_socket_exception_socket_unsupported:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[41];
+		break;
+	}
+	case qsc_socket_exception_system_not_ready:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[42];
+		break;
+	}
+	case qsc_socket_exception_too_many_users:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[44];
+		break;
+	}
+	case qsc_socket_exception_translation_failed:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[45];
+		break;
+	}
+	case qsc_socket_exception_would_block:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[46];
+		break;
+	}
+	default:
+	{
+		pmsg = QSC_SOCKET_ERROR_STRINGS[1];
+	}
 	}
 
 	return pmsg;

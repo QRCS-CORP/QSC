@@ -7,10 +7,9 @@ static bool qsctest_address_info()
 {
 	qsc_ipinfo_ipv4_address addv4 = { 0 };
 	qsc_ipinfo_ipv6_address addv6 = { 0 };
-	qsc_ipinfo_ipv4_info infv4 = { 0 };
-	qsc_ipinfo_ipv6_info infv6 = { 0 };
-	char dom[QSC_NET_HOSTS_NAME_BUFFER] = { 0 };
-	char mac[QSC_NET_MAC_ADDRESS_LENGTH] = { 0 };
+	qsc_ipinfo_ipv4_info infv4;
+	qsc_ipinfo_ipv6_info infv6;
+	char dom[QSC_NETUTILS_HOSTS_NAME_LENGTH] = { 0 };
 	char saddv4[QSC_IPINFO_IPV4_STRNLEN] = { 0 };
 	char saddv6[QSC_IPINFO_IPV6_STRNLEN] = { "1"};
 	char portc[] = "80";
@@ -60,19 +59,6 @@ static bool qsctest_address_info()
     {
         qsctest_print_safe("Domain name: ");
         qsctest_print_line(dom);
-    }
-
-	qsc_netutils_get_mac_address(mac);
-
-	if (strlen(mac) == 0)
-	{
-		qsctest_print_line("Failure! qsctest_address_info: mac address was not detected! -AI5");
-		res = false;
-	}
-    else
-    {
-        qsctest_print_safe("MAC Address: ");
-        qsctest_print_line(mac);
     }
 
 	port = qsc_netutils_port_name_to_number(portc, protc);

@@ -106,7 +106,11 @@ typedef enum qsc_socket_receive_flags
 	qsc_socket_receive_flag_none = 0x00000000L,			/*!< No flag is used */
 	qsc_socket_receive_flag_out_of_band = 0x00000001L,	/*!< Process out of band data MSG_OOB */
 	qsc_socket_receive_flag_peek = 0x00000002L,			/*!< Peeks at the incoming data MSG_PEEK */
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 	qsc_socket_receive_flag_wait_all = 0x00000008L		/*!< Request completes only when buffer is full MSG_WAITALL */
+#else
+	qsc_socket_receive_flag_wait_all = 0x00000100L		/*!< Request completes only when buffer is full MSG_WAITALL */
+#endif
 } qsc_socket_receive_flags;
 
 /*! \enum qsc_socket_send_flags

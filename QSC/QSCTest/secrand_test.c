@@ -244,7 +244,7 @@ static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t 
 static void secrand_print_double(double input)
 {
 	int32_t len = snprintf(NULL, 0, "%g", input);
-	char* str = qsc_memutils_malloc(len + 1);
+	char* str = qsc_memutils_malloc((size_t)len + 1);
 
 	if (str != NULL)
 	{

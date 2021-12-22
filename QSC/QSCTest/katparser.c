@@ -1,4 +1,5 @@
 #include "katparser.h"
+#include <stdlib.h>
 #include "../QSC/fileutils.h"
 #include "../QSC/intutils.h"
 #include "../QSC/stringutils.h"

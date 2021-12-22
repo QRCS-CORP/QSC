@@ -103,7 +103,7 @@ int32_t qsctest_nistrng_kdf_generate(qsctest_nist_rng_state* ctx, uint8_t* outpu
 		}
 		else
 		{
-			ctx->rmdr -= outlen;
+			ctx->rmdr -= (uint32_t)outlen;
 			oft = 0;
 
 			while (outlen > 0)
@@ -116,7 +116,7 @@ int32_t qsctest_nistrng_kdf_generate(qsctest_nist_rng_state* ctx, uint8_t* outpu
 						output[oft + i] = ctx->state[ctx->bpos + i];
 					}
 
-					ctx->bpos += outlen;
+					ctx->bpos += (uint32_t)outlen;
 
 					break;
 				}

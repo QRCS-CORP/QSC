@@ -1,5 +1,6 @@
 #include "folderutils.h"
 #include "memutils.h"
+#include "stringutils.h"
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
 #	include <direct.h>
@@ -19,6 +20,20 @@
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
+
+void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH])
+{
+	size_t len;
+
+	len = qsc_stringutils_string_size(path);
+
+	if (len < QSC_SYSTEM_MAX_PATH)
+	{
+		path[len] = QSC_FOLDERUTILS_DELIMITER;
+		++len;
+		path[len] = '\0';
+	}
+}
 
 bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH])
 {
@@ -144,35 +159,56 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 	char* pstr;
 	size_t len;
 
+	qsc_stringutils_clear_string(output);
+	pstr = getenv("HOME");
+	len = qsc_stringutils_string_size(pstr);
+
+	if (len > 0)
+	{
+		qsc_stringutils_copy_string(output, QSC_SYSTEM_MAX_PATH, pstr);
+	}
+
+#	if defined(QSC_SYSTEM_OS_LINUX)
+
 	switch (directory)
 	{
-	case qsc_folderutils_directories_user_app_data:
-	{
-		pstr = getenv("PATH");
-		break;
+		case qsc_folderutils_directories_user_desktop:
+		{
+			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Desktop");
+			break;
+		}
+		case qsc_folderutils_directories_user_documents:
+		{
+			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Documents");
+			break;
+		}
+		case qsc_folderutils_directories_user_downloads:
+		{
+			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Downloads");
+			break;
+		}
+		case qsc_folderutils_directories_user_music:
+		{
+			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Music");
+			break;
+		}
+		case qsc_folderutils_directories_user_pictures:
+		{
+			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Pictures");
+			break;
+		}
+		case qsc_folderutils_directories_user_videos:
+		{
+			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Videos");
+			break;
+		}
+		default:
+		{
+			//qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/");
+		}
 	}
-	case qsc_folderutils_directories_user_desktop:
-	case qsc_folderutils_directories_user_documents:
-	case qsc_folderutils_directories_user_downloads:
-	case qsc_folderutils_directories_user_favourites:
-	case qsc_folderutils_directories_user_music:
-	case qsc_folderutils_directories_user_pictures:
-	case qsc_folderutils_directories_user_programs:
-	case qsc_folderutils_directories_user_shortcuts:
-	case qsc_folderutils_directories_user_videos:
-	{
-		pstr = getenv("HOME");
-		break;
-	}
-	default:
-	{
-		pstr = getenv("HOME");
-	}
-	}
+#	elif defined(QSC_SYSTEM_OS_APPLE)
 
-	len = strlen((char*)pstr);
-	len = (len <= QSC_SYSTEM_MAX_PATH) ? len : QSC_SYSTEM_MAX_PATH;
-	qsc_memutils_copy(output, pstr, len);
-
+#	endif
 #endif
 }

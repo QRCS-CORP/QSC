@@ -28,24 +28,79 @@
 * \brief File utilities contains common file related functions
 */
 
-/**
-* \brief Open a file and return the file pointer
-*
-* \param path: The filer path
-* \param mode: The read, write, or read/write mode
-* \param err: A pointer to an error variable
-* \return Returns the FILE handle or NULL on failure
+/*! \enum qsc_fileutils_access_rights
+* The access rights enumeration.
 */
-QSC_EXPORT_API FILE*  qsc_filetools_open_file(const char* path, const char* mode, errno_t* err);
+typedef enum qsc_fileutils_access_rights
+{
+	qsc_fileutils_access_exists = 0,		/*!< No access right specified */
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	qsc_fileutils_access_read = 1,			/*!< The read access right */
+	qsc_fileutils_access_write = 2,			/*!< The write access right */
+	qsc_fileutils_access_execute = 3,		/*!< The execute access right */
+#else
+	qsc_fileutils_access_read = 4,			/*!< The read access right */
+	qsc_fileutils_access_write = 2,			/*!< The write access right */
+	qsc_fileutils_access_execute = 6,		/*!< The execute access right */
+#endif
+} qsc_fileutils_access_rights;
+
+/*! \enum qsc_fileutils_mode
+* The file mode enumeration.
+*/
+typedef enum qsc_fileutils_mode
+{
+	qsc_fileutils_mode_none = 0,			/*!< No mode was specified */
+	qsc_fileutils_mode_read = 1,			/*!< Open file for input operations */
+	qsc_fileutils_mode_read_update = 2,		/*!< read/update: Open a file for update (both for input and output) */
+	qsc_fileutils_mode_write = 3,			/*!< Create an empty file for output operations */
+	qsc_fileutils_mode_write_update = 4,	/*!< write/update: Create an empty file and open it for update */
+	qsc_fileutils_mode_append = 5,			/*!< Open file for output at the end of a file */
+	qsc_fileutils_mode_append_update = 6,	/*!< append/update: Open a file for update (both for input and output) */
+
+} qsc_fileutils_mode;
+
+/**
+* \brief Close a file
+*
+* \param fp: The file pointer
+*/
+QSC_EXPORT_API void qsc_filetools_file_close(FILE* fp);
+
+/**
+* \brief Open a file and return the handle
+*
+* \param path: The current director
+* \param mode: The file access mode
+* \return Returns the file handle, or NULL on failure
+*/
+QSC_EXPORT_API FILE* qsc_filetools_file_open(const char* path, qsc_fileutils_mode mode);
+
+/**
+* \brief Open a file for binary operations and return the handle
+*
+* \param path: The current director
+* \param mode: The file access mode
+* \return Returns the file handle, or NULL on failure
+*/
+QSC_EXPORT_API FILE* qsc_filetools_file_binary_open(const char* path, qsc_fileutils_mode mode);
 
 /**
 * \brief Get the working directory path
-
 *
 * \param path: The current directory
 * \return Returns true if the path is found, false if the buffer is too small or path not found
 */
 QSC_EXPORT_API bool qsc_filetools_working_directory(char* path);
+
+/**
+* \brief Test a users access right to a file
+*
+* \param path: [const] The fully qualified path to the file
+* \param level: the access level to check
+* \return Returns true if the access level is present
+*/
+QSC_EXPORT_API bool qsc_filetools_file_access(const char* path, qsc_fileutils_access_rights level);
 
 /**
 * \brief Test to see if a file exists
@@ -56,12 +111,34 @@ QSC_EXPORT_API bool qsc_filetools_working_directory(char* path);
 QSC_EXPORT_API bool qsc_filetools_file_exists(const char* path);
 
 /**
+* \brief Read data to a binary file
+*
+* \param path: The file path
+* \param position: The position to start reading from
+* \param output: the output char stream
+* \param length:the number of bytes to read
+* \return Returns the number of characters read
+*/
+QSC_EXPORT_API size_t qsc_filetools_file_read(const char* path, size_t position, char* output, size_t length);
+
+/**
 * \brief Get the files size in bytes
 *
 * \param path: [const] The path to the file
 * \return Returns the length of the file
 */
 QSC_EXPORT_API size_t qsc_filetools_file_size(const char* path);
+
+/**
+* \brief Write data to a binary file
+*
+* \param path: The file path
+* \param position: The position to start writing to
+* \param input: the input character string
+* \param length: the number of bytes to write
+* \return Returns the number of characters written
+*/
+QSC_EXPORT_API size_t qsc_filetools_file_write(const char* path, size_t position, const char* input, size_t length);
 
 /**
 * \brief Reads a line of text from a formatted file.

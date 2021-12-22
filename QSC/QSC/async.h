@@ -20,17 +20,10 @@
 #ifndef QSC_THREADS_H
 #define QSC_THREADS_H
 
-#include "common.h"
-
-/**
-* \file async.h
-* \brief This file contains thread and mutex functions
-* \endcode
-*/
-
 /* bogus winbase.h error */
 QSC_SYSTEM_CONDITION_IGNORE(5105)
 
+#include "common.h"
 #include <stdarg.h>
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	include <process.h>
@@ -49,6 +42,12 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #else
 #	error your operating system is not supported!
 #endif
+
+/**
+* \file async.h
+* \brief This file contains thread and mutex functions
+* \endcode
+*/
 
 /*!
 * \def QSC_ASYNC_PARALLEL_MAX
@@ -146,6 +145,13 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void*
 * \param handle: The thread to resume
 */
 QSC_EXPORT_API int32_t qsc_async_thread_resume(qsc_thread handle);
+
+/**
+* \brief Pause the thread for a number of milliseconds
+*
+* \param msec: The number of milliseconds to wait
+*/
+QSC_EXPORT_API void qsc_async_thread_sleep(uint32_t msec);
 
 /**
 * \brief Suspend a thread

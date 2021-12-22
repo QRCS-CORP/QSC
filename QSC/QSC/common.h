@@ -71,7 +71,6 @@
 #	define QSC_SYSTEM_COMPILER_TURBO
 #endif
 
-
 /*!
 \def QSC_SYSTEM_OS_XXX
 * \brief The identified operating system

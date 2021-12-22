@@ -7,6 +7,10 @@
 #if defined(QSC_DEBUG_MODE)
 #	include "../QSC/acp.h"
 #	include "../QSC/csp.h"
+#	include "../QSC/fileutils.h"
+#	include "../QSC/folderutils.h"
+#	include "../QSC/intutils.h"
+#	include "../QSC/netutils.h"
 #	include "../QSC/rdp.h"
 #	include "../QSC/sysutils.h"
 #	include "../QSC/timerex.h"
@@ -34,6 +38,8 @@
 #include "sha3_test.h"
 #include "sphincsplus_test.h"
 #include "testutils.h"
+
+//#define QSCTEST_PRINT_STATS
 
 static void print_title(void)
 {
@@ -79,16 +85,146 @@ static void random_sample_print()
 }
 #endif
 
+static void file_test()
+{
+	char fpath[] = "/home/john/Documents/qsc_test.txt";
+	uint8_t rnd[1024] = { 0 };
+	char smp[1024] = { 0 };
+	size_t len;
+
+	qsc_consoleutils_print_line("File verification test");
+	qsc_consoleutils_print_line("Printing file function output..");
+
+	if (qsc_filetools_file_exists(fpath) == true)
+	{
+		qsc_filetools_delete_file(fpath);
+	}
+
+	qsc_filetools_create_file(fpath);
+
+	if (qsc_filetools_file_exists(fpath) == true)
+	{
+		qsc_csp_generate(rnd, sizeof(rnd));
+
+		if (qsc_filetools_copy_stream_to_file(fpath, (char*)rnd, sizeof(rnd)) == true)
+		{
+			qsc_consoleutils_print_line("Success: copied random sample to file: /home/john/Documents/qsc_test.txt");
+
+			len = qsc_filetools_file_size(fpath);
+
+			if (len == sizeof(rnd))
+			{
+				qsc_consoleutils_print_line("Success: copied file size is a match.");
+
+				if (qsc_filetools_copy_file_to_stream(fpath, smp, sizeof(smp)) == sizeof(rnd))
+				{
+					if (qsc_intutils_are_equal8((uint8_t*)smp, rnd, sizeof(rnd)) == true)
+					{
+						qsc_consoleutils_print_line("Success: read file matches random input.");
+					}
+					else
+					{
+						qsc_consoleutils_print_line("Failure: read random sample does not match.");
+					}
+				}
+				else
+				{
+					qsc_consoleutils_print_line("Failure: could not copy data to file.");
+				}
+			}
+			else
+			{
+				qsc_consoleutils_print_line("Failure: failed to write random data to file.");
+			}
+		}
+		else
+		{
+			qsc_consoleutils_print_line("Failure: could not write to the test file.");
+		}
+	}
+	else
+	{
+		qsc_consoleutils_print_line("Failure: the test file could not be created.");
+	}
+
+	if (qsc_filetools_file_exists(fpath) == true)
+	{
+		qsc_filetools_delete_file(fpath);
+	}
+
+	qsc_consoleutils_print_line("");
+}
+
+static void folder_test()
+{
+	char fpath[QSC_SYSTEM_MAX_PATH] = { 0 };
+
+	qsc_consoleutils_print_line("Folder verification test");
+	qsc_consoleutils_print_line("Printing folder function output..");
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_app_data, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_desktop, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_downloads, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_favourites, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_music, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_pictures, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_programs, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_shortcuts, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_videos, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_documents, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_stringutils_concat_strings(fpath, sizeof(fpath), "/test");
+	qsc_folderutils_create_directory(fpath);
+
+	if (qsc_folderutils_directory_exists(fpath) == true)
+	{
+		qsc_consoleutils_print_safe("Found path: ");
+		qsc_consoleutils_print_line(fpath);
+
+		qsc_folderutils_delete_directory(fpath);
+
+		if (qsc_folderutils_directory_exists(fpath) == false)
+		{
+			qsc_consoleutils_print_safe("Deleted path: ");
+			qsc_consoleutils_print_line(fpath);
+		}
+	}
+
+	qsc_consoleutils_print_line("");
+}
+
 int main(void)
 {
 	qsc_cpuidex_cpu_features cfeat;
 	bool valid;
 	bool hfeat;
 
-#if defined(QSC_DEBUG_MODE)
+#if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
+	file_test();
+	folder_test(); // TODO: move these to the library
 	qsc_consoleutils_print_line("Loading visual pre-check...");
 	qsc_consoleutils_print_line("");
 	random_sample_print();
+	qsc_netutils_values_print();
 	qsc_system_values_print();
 	qsc_timerex_print_values();
 	qsc_timestamp_print_values();

@@ -2788,28 +2788,8 @@ void ge25519_p1p1_to_p2(ge25519_p2* r, const ge25519_p1p1* p)
 	fe25519_mul(r->z, p->z, p->t);
 }
 
-static void func_test()
-{
-    int8_t e[64] = {0};
-    ge25519_precomp t = {0};
-    size_t i;
-
-    for (i = 0; i < 64; ++i)
-    {
-        e[i] = i;
-    }
-
-    for (i = 1; i < 64; i += 2)
-	{
-	    ge25519_cmov8_base(&t, i / 2, e[i]);
-	}
-}
-
 void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
 {
-
-    func_test();
-
 	signed char e[64] = {0};
 	signed char carry;
 	ge25519_p1p1 r = {0};
