@@ -247,6 +247,7 @@ QSC_EXPORT_API typedef struct
 */
 typedef enum
 {
+	qsc_keccak_rate_none = 0,						/*!< No bit rate was selected  */
 	qsc_keccak_rate_128 = QSC_KECCAK_128_RATE,		/*!< The Keccak 128-bit rate  */
 	qsc_keccak_rate_256 = QSC_KECCAK_256_RATE,		/*!< The Keccak 256-bit rate  */
 	qsc_keccak_rate_512 = QSC_KECCAK_512_RATE,		/*!< The Keccak 512-bit rate  */

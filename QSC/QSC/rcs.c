@@ -18,7 +18,7 @@
 \def RCS_ROUNDKEY_ELEMENT_SIZE
 * The round key element size in bytes.
 */
-#ifdef QSC_SYSTEM_AESNI_ENABLED
+#ifdef QSC_RCS_AESNI_ENABLED
 #	define RCS_ROUNDKEY_ELEMENT_SIZE 16
 #	define RCS_AVX512_BLOCK 64
 #else
@@ -84,7 +84,7 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 
 #	if defined(QSC_RCS_AUTH_KMACR12)
 #		define RCS_KMACR12_NAME_LENGTH 7
-		static const uint8_t rcs_kmacr12_name[RCS_KMACR12_NAME_LENGTH] = { 0x4B, 0x4D, 0x41, 0x43, 0x52, 0x31, 0x32 };
+		static const uint8_t rcs_kmacr24_name[RCS_KMACR12_NAME_LENGTH] = { 0x4B, 0x4D, 0x41, 0x43, 0x52, 0x31, 0x32 };
 #	endif
 
 #else
@@ -103,12 +103,13 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 
 /* aes-ni and table-based fallback functions */
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_RCS_AESNI_ENABLED)
 
-static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2], const __m128i input[2])
+static void rcs_transform_256(qsc_rcs_state* ctx, __m128i output[2], const __m128i input[2])
 {
 	const __m128i BLEND_MASK = _mm_set_epi32(0x80000000UL, 0x80800000UL, 0x80800000UL, 0x80808000UL);
-	const __m128i SHIFT_MASK = _mm_set_epi8(3, 2, 13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0);
+	const __m128i SHIFT_MASK = _mm_set_epi8(0, 1, 6, 7, 4, 5, 10, 11, 8, 9, 14, 15, 12, 13, 2, 3);
+	const size_t HLFBLK = QSC_RCS_BLOCK_SIZE / 2;
 	const size_t RNDCNT = ctx->roundkeylen - 3;
 	size_t kctr;
 
@@ -172,14 +173,14 @@ __m512i rcs_shuffle512(const __m512i* value, const __m512i* k0, const __m512i* k
 
 static void rcs_transform_512(qsc_rcs_state* ctx, __m512i* output, const __m512i* input)
 {
-	const __m512i NI512K0 = _mm512_set_epi64(17361641481138401520ULL, 17361641481138401520ULL, 8102099357864587376ULL, 8102099357864587376ULL,
-		17361641481138401520ULL, 17361641481138401520ULL, 8102099357864587376ULL, 8102099357864587376ULL);
-	const __m512i NI512K1 = _mm512_set_epi64(8102099357864587376ULL, 8102099357864587376ULL, 17361641481138401520ULL, 17361641481138401520ULL,
-		8102099357864587376ULL, 8102099357864587376ULL, 17361641481138401520ULL, 17361641481138401520ULL);
-	const __m512i SWMASKL = _mm512_set_epi8(3, 2, 29, 28, 15, 30, 25, 24, 11, 10, 21, 20, 7, 6, 1, 16,
-		19, 18, 13, 12, 31, 14, 9, 8, 27, 26, 5, 4, 23, 22, 17, 0,
-		3, 2, 29, 28, 15, 30, 25, 24, 11, 10, 21, 20, 7, 6, 1, 16,
-		19, 18, 13, 12, 31, 14, 9, 8, 27, 26, 5, 4, 23, 22, 17, 0);
+	const __m512i NI512K0 = _mm512_set_epi64(17361641481138401520, 17361641481138401520, 8102099357864587376, 8102099357864587376,
+		17361641481138401520, 17361641481138401520, 8102099357864587376, 8102099357864587376);
+	const __m512i NI512K1 = _mm512_set_epi64(8102099357864587376, 8102099357864587376, 17361641481138401520, 17361641481138401520,
+		8102099357864587376, 8102099357864587376, 17361641481138401520, 17361641481138401520);
+	const __m512i SWMASKL = _mm512_setr_epi8(0, 17, 22, 23, 4, 5, 26, 27, 8, 9, 14, 31, 12, 13, 18, 19,
+		16, 1, 6, 7, 20, 21, 10, 11, 24, 25, 30, 15, 28, 29, 2, 3,
+		0, 17, 22, 23, 4, 5, 26, 27, 8, 9, 14, 31, 12, 13, 18, 19, 
+		16, 1, 6, 7, 20, 21, 10, 11, 24, 25, 30, 15, 28, 29, 2, 3);
 
 	const size_t RNDCNT = (ctx->roundkeylen / 2) - 2;
 	size_t kctr;
@@ -210,6 +211,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 	assert(output != NULL);
 
 	const size_t HLFBLK = QSC_RCS_BLOCK_SIZE / 2;
+	size_t i;
 	size_t oft;
 
 	oft = 0;
@@ -218,7 +220,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 	if (length >= RCS_AVX512_BLOCK)
 	{
-		QSC_SIMD_ALIGN uint8_t ctrblk[64];
+		uint8_t ctrblk[64];
 		__m512i ctrw;
 		__m512i inpw;
 		__m512i otpw;
@@ -262,7 +264,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 		rcs_transform_256(ctx, tmpo, tmpn);
 
-		__m128i tmpi[2] = { _mm_loadu_si128((const __m128i*)(input + oft)) , _mm_loadu_si128((const __m128i*)(input + HLFBLK + oft)) };
+		__m128i tmpi[2] = { _mm_loadu_si128((const __m128i*)((uint8_t*)input + oft)) , _mm_loadu_si128((const __m128i*)((uint8_t*)input + HLFBLK + oft)) };
 
 		tmpo[0] = _mm_xor_si128(tmpo[0], tmpi[0]);
 		tmpo[1] = _mm_xor_si128(tmpo[1], tmpi[1]);
@@ -270,8 +272,8 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
 
 		/* store in output */
-		_mm_storeu_si128((__m128i*)(output + oft), tmpo[0]);
-		_mm_storeu_si128((__m128i*)(output + HLFBLK + oft), tmpo[1]);
+		_mm_storeu_si128((__m128i*)((uint8_t*)output + oft), tmpo[0]);
+		_mm_storeu_si128((__m128i*)((uint8_t*)output + HLFBLK + oft), tmpo[1]);
 
 		length -= QSC_RCS_BLOCK_SIZE;
 		oft += QSC_RCS_BLOCK_SIZE;
@@ -289,7 +291,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 		_mm_storeu_si128((__m128i*)tmpb, tmpo[0]);
 		_mm_storeu_si128((__m128i*)((uint8_t*)tmpb + HLFBLK), tmpo[1]);
 
-		for (size_t i = 0; i < length; ++i)
+		for (i = 0; i < length; ++i)
 		{
 			output[oft + i] = tmpb[i] ^ input[oft + i];
 		}
@@ -302,7 +304,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 /* rijndael rcs_rcon, and s-box constant tables */
 
-static const uint8_t rcs_sbox[256] =
+static const uint8_t rcs_s_box[256] =
 {
 	0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
 	0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
@@ -320,6 +322,26 @@ static const uint8_t rcs_sbox[256] =
 	0x70, 0x3E, 0xB5, 0x66, 0x48, 0x03, 0xF6, 0x0E, 0x61, 0x35, 0x57, 0xB9, 0x86, 0xC1, 0x1D, 0x9E,
 	0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
 	0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
+};
+
+static const uint8_t rcs_is_box[256] =
+{
+	0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
+	0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
+	0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D, 0xEE, 0x4C, 0x95, 0x0B, 0x42, 0xFA, 0xC3, 0x4E,
+	0x08, 0x2E, 0xA1, 0x66, 0x28, 0xD9, 0x24, 0xB2, 0x76, 0x5B, 0xA2, 0x49, 0x6D, 0x8B, 0xD1, 0x25,
+	0x72, 0xF8, 0xF6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xD4, 0xA4, 0x5C, 0xCC, 0x5D, 0x65, 0xB6, 0x92,
+	0x6C, 0x70, 0x48, 0x50, 0xFD, 0xED, 0xB9, 0xDA, 0x5E, 0x15, 0x46, 0x57, 0xA7, 0x8D, 0x9D, 0x84,
+	0x90, 0xD8, 0xAB, 0x00, 0x8C, 0xBC, 0xD3, 0x0A, 0xF7, 0xE4, 0x58, 0x05, 0xB8, 0xB3, 0x45, 0x06,
+	0xD0, 0x2C, 0x1E, 0x8F, 0xCA, 0x3F, 0x0F, 0x02, 0xC1, 0xAF, 0xBD, 0x03, 0x01, 0x13, 0x8A, 0x6B,
+	0x3A, 0x91, 0x11, 0x41, 0x4F, 0x67, 0xDC, 0xEA, 0x97, 0xF2, 0xCF, 0xCE, 0xF0, 0xB4, 0xE6, 0x73,
+	0x96, 0xAC, 0x74, 0x22, 0xE7, 0xAD, 0x35, 0x85, 0xE2, 0xF9, 0x37, 0xE8, 0x1C, 0x75, 0xDF, 0x6E,
+	0x47, 0xF1, 0x1A, 0x71, 0x1D, 0x29, 0xC5, 0x89, 0x6F, 0xB7, 0x62, 0x0E, 0xAA, 0x18, 0xBE, 0x1B,
+	0xFC, 0x56, 0x3E, 0x4B, 0xC6, 0xD2, 0x79, 0x20, 0x9A, 0xDB, 0xC0, 0xFE, 0x78, 0xCD, 0x5A, 0xF4,
+	0x1F, 0xDD, 0xA8, 0x33, 0x88, 0x07, 0xC7, 0x31, 0xB1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xEC, 0x5F,
+	0x60, 0x51, 0x7F, 0xA9, 0x19, 0xB5, 0x4A, 0x0D, 0x2D, 0xE5, 0x7A, 0x9F, 0x93, 0xC9, 0x9C, 0xEF,
+	0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB, 0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61,
+	0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
 };
 
 static void rcs_add_roundkey(uint8_t* state, const uint32_t *skeys)
@@ -367,20 +389,27 @@ static void rcs_mix_columns(uint8_t* state)
 	}
 }
 
-static void rcs_prefetch_sbox()
+static void rcs_prefetch_sbox(bool encryption)
 {
-#if defined(QSC_SYSTEM_AVX_INTRINSICS)
-	qsc_memutils_prefetch_l2(rcs_sbox, sizeof(rcs_sbox));
-#else
+	size_t i;
 	volatile uint32_t dmy;
 
 	dmy = 0;
 
-	for (size_t i = 0; i < 256; ++i)
+	if (encryption)
 	{
-		dmy |= rcs_sbox[i];
+		for (i = 0; i < 256; ++i)
+		{
+			dmy |= rcs_s_box[i];
+		}
 	}
-#endif
+	else
+	{
+		for (i = 0; i < 256; ++i)
+		{
+			dmy |= rcs_is_box[i];
+		}
+	}
 }
 
 static void rcs_shift_rows(uint8_t* state)
@@ -438,17 +467,17 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const u
 
 	qsc_memutils_copy(buf, input, QSC_RCS_BLOCK_SIZE);
 	rcs_add_roundkey(buf, ctx->roundkeys);
-	rcs_prefetch_sbox();
+	rcs_prefetch_sbox(true);
 
 	for (size_t i = 1; i < ctx->rounds; ++i)
 	{
-		rcs_sub_bytes(buf, rcs_sbox);
+		rcs_sub_bytes(buf, rcs_s_box);
 		rcs_shift_rows(buf);
 		rcs_mix_columns(buf);
 		rcs_add_roundkey(buf, ctx->roundkeys + (i << 3));
 	}
 
-	rcs_sub_bytes(buf, rcs_sbox);
+	rcs_sub_bytes(buf, rcs_s_box);
 	rcs_shift_rows(buf);
 	rcs_add_roundkey(buf, ctx->roundkeys + (ctx->rounds << 3));
 	qsc_memutils_copy(output, buf, QSC_RCS_BLOCK_SIZE);
@@ -491,7 +520,6 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 #endif
 
-#if defined(QSC_RCS_AUTHENTICATED)
 static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 {
 	uint8_t ctr[sizeof(uint64_t)] = { 0 };
@@ -524,7 +552,6 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 #endif
 	}
 }
-#endif
 
 static void rcs_mac_update(qsc_rcs_state* ctx, const uint8_t* input, size_t length)
 {
@@ -574,7 +601,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 			rlen -= BLKLEN;
 		}
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_RCS_AESNI_ENABLED)
 		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1);
 
 		/* copy p-rand bytes to round keys */
@@ -599,7 +626,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 #	if defined(QSC_RCS_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
-		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0, rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #	else
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0);
 #	endif
@@ -626,7 +653,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 			rlen -= BLKLEN;
 		}
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_RCS_AESNI_ENABLED)
 		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1);
 
 		/* copy p-rand bytes to round keys */
@@ -650,7 +677,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 #	if defined(QSC_RCS_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
-		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0, rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0, rcs_kmacr24_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #	else
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0);
 #	endif
@@ -659,9 +686,9 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #endif
 	}
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_RCS_AESNI_ENABLED)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-	/* store the avx-512 round keys qsc_keccak_initialize_state*/
+	/* store the avx-512 round keys */
 	qsc_memutils_clear((uint8_t*)ctx->roundkeysw, sizeof(ctx->roundkeysw));
 
 	for (i = 0; i < ctx->roundkeylen; i += 2)
@@ -682,7 +709,7 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 		qsc_keccak_dispose(&ctx->kstate);
 #endif
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_RCS_AESNI_ENABLED)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
 		qsc_memutils_clear((uint8_t*)ctx->roundkeysw, sizeof(ctx->roundkeysw));
 #	endif
@@ -726,10 +753,6 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 
 	/* generate the cipher and mac keys */
 	rcs_secure_expand(ctx, keyparams);
-
-#if !defined(QSC_SYSTEM_AESNI_ENABLED)
-	rcs_prefetch_sbox();
-#endif
 }
 
 void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t length)
@@ -811,6 +834,93 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 				rcs_ctr_transform(ctx, output, input, length);
 				res = true;
 			}
+		}
+	}
+
+#else
+
+	rcs_ctr_transform(ctx, output, input, length);
+	res = true;
+
+#endif
+
+	return res;
+}
+
+bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize)
+{
+	assert(ctx != NULL);
+	assert(output != NULL);
+	assert(input != NULL);
+
+	bool res;
+
+#if defined(QSC_RCS_AUTHENTICATED)
+
+	res = false;
+
+	/* update the processed bytes counter */
+	ctx->counter += length;
+
+	/* update the mac with the current nonce position */
+	rcs_mac_update(ctx, ctx->nonce, QSC_RCS_BLOCK_SIZE);
+
+	if (ctx->encrypt == true)
+	{
+		/* transform the plain-text with the counter-mode cipher */
+		rcs_ctr_transform(ctx, output, input, length);
+
+		/* update the mac with the cipher-text */
+		rcs_mac_update(ctx, output, length);
+
+		if (finalize == true)
+		{
+			/* mac the cipher-text appending the code to the end of the array */
+			rcs_mac_finalize(ctx, output + length);
+		}
+
+		res = true;
+	}
+	else
+	{
+		/* update the mac with the cipher-text */
+		rcs_mac_update(ctx, input, length);
+
+		if (finalize == true)
+		{
+			if (ctx->ctype == RCS256)
+			{
+				uint8_t code[QSC_RCS256_MAC_SIZE] = { 0 };
+
+				/* mac the cipher-text to a temp array for comparison */
+				rcs_mac_finalize(ctx, code);
+
+				/* test the mac for equality, bypassing the transform if the mac check fails */
+				if (qsc_intutils_verify(code, input + length, QSC_RCS256_MAC_SIZE) == 0)
+				{
+					/* transform the plain-text with the counter-mode cipher */
+					rcs_ctr_transform(ctx, output, input, length);
+					res = true;
+				}
+			}
+			else
+			{
+				uint8_t code[QSC_RCS512_MAC_SIZE] = { 0 };
+
+				rcs_mac_finalize(ctx, code);
+
+				if (qsc_intutils_verify(code, input + length, QSC_RCS512_MAC_SIZE) == 0)
+				{
+					rcs_ctr_transform(ctx, output, input, length);
+					res = true;
+				}
+			}
+		}
+		else
+		{
+			/* transform the plain-text with the counter-mode cipher */
+			rcs_ctr_transform(ctx, output, input, length);
+			res = true;
 		}
 	}
 

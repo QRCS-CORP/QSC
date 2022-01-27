@@ -18,7 +18,7 @@ static char* file_to_string(const char* path, size_t* flen)
 #endif
 
 	fbuf = NULL;
-	*flen = qsc_filetools_file_size(path);
+	*flen = qsc_fileutils_get_size(path);
 
 	if (*flen > 0 && ferr == 0 && fp != NULL)
 	{
@@ -52,7 +52,7 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 
 	sctr = 0;
 
-	if (qsc_filetools_file_exists(path))
+	if (qsc_fileutils_exists(path))
 	{
 		pbuf = file_to_string(path, &flen);
 
@@ -128,7 +128,7 @@ void parse_nist_cipher_kat(const char* path, uint8_t* seed, size_t* seedlen, uin
 
 	sctr = 0;
 
-	if (qsc_filetools_file_exists(path))
+	if (qsc_fileutils_exists(path))
 	{
 		pbuf = file_to_string(path, &flen);
 

@@ -496,6 +496,36 @@ char* qsc_stringutils_join_string(char** source, size_t count)
 	return nstr;
 }
 
+void qsc_stringutils_split_strings(char* dest1, char* dest2, size_t destlen, const char* source, const char* token)
+{
+	const char* pstr;
+	size_t plen;
+	int32_t pos;
+
+	pos = qsc_stringutils_find_string(source, token);
+
+	if (pos > 0)
+	{
+		const size_t TOKLEN = qsc_stringutils_string_size(token);
+
+		pstr = source;
+		plen = (size_t)pos + TOKLEN;
+
+		if (destlen >= plen)
+		{
+			qsc_memutils_copy(dest1, pstr, plen);
+			++plen;
+			pstr += plen;
+			plen = qsc_stringutils_string_size(pstr);
+
+			if (destlen >= plen)
+			{
+				qsc_memutils_copy(dest2, pstr, plen);
+			}
+		}
+	}
+}
+
 char** qsc_stringutils_split_string(char* source, const char* delim, size_t* count)
 {
 	assert(source != NULL);

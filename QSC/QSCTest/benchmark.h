@@ -18,12 +18,6 @@
 void qsctest_benchmark_aes_run(void);
 
 /**
-* \brief Tests the RHX implementations performance.
-* Tests the RHX; CBC, CTR, and HBA modes for performance timing.
-*/
-void qsctest_benchmark_rhx_run(void);
-
-/**
 * \brief Tests the ChaCha implementations performance.
 * Tests the ChaCha stream cipher for performance timing.
 */

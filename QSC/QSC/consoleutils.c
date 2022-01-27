@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
-/* bogus winbase.h error */
-QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+/* bogus winbase.h error */
+	QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	include <conio.h>
 #	include <stdio.h>
 #	include <tchar.h>
@@ -63,7 +63,7 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 char qsc_consoleutils_get_char()
 {
 	char line[8] = { 0 };
-	char* res;
+	const char* res;
 	char ret;
 
 	res = fgets(line, sizeof(line), stdin);
@@ -90,7 +90,7 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 
 	if (line != NULL && fgets(line, (int32_t)maxlen, stdin) != NULL)
 	{
-		slen = strlen(line);
+		slen = qsc_stringutils_string_size(line);
 		line[slen - 1] = '\0';
 	}
 
@@ -109,13 +109,13 @@ size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen)
 	{
 		qsc_stringutils_to_lowercase(line);
 		qsc_stringutils_trim_newline(line);
-		slen = strlen(line);
+		slen = qsc_stringutils_string_size(line);
 	}
 
 	return slen;
 }
 
-#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 wint_t qsc_consoleutils_get_wait()
 {
 	wint_t c;
@@ -127,6 +127,8 @@ wint_t qsc_consoleutils_get_wait()
 #else
 static char getch(void)
 {
+	/* TODO: not working in ubuntu */
+
     char buf = 0;
     struct termios old = {0};
     fflush(stdout);
@@ -219,7 +221,7 @@ bool qsc_consoleutils_line_contains(const char* line, const char* token)
 	return res;
 }
 
-size_t qsc_consoleutils_masked_password(uint8_t* output, size_t outlen)
+size_t qsc_consoleutils_masked_password(char* output, size_t outlen)
 {
 	assert(output != NULL);
 
@@ -254,13 +256,11 @@ size_t qsc_consoleutils_masked_password(uint8_t* output, size_t outlen)
 						qsc_consoleutils_print_safe("\b \b");
 						output[ctr] = '0';
 						--ctr;
-
 					}
 				}
-
 			}
 		}
-		while (c != '\r' || ctr >= outlen);
+		while ((c != '\n' && c != '\r') || ctr >= outlen);
 	}
 
 	qsc_consoleutils_print_line("");
@@ -412,7 +412,7 @@ void qsc_consoleutils_print_safe(const char* input)
 {
 	assert(input != NULL);
 
-	if (input != NULL && strlen(input) > 0)
+	if (input != NULL && qsc_stringutils_string_size(input) > 0)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		printf_s("%s", input);
@@ -442,7 +442,7 @@ void qsc_consoleutils_print_concatenated_line(const char** input, size_t count)
 	{
 		for (size_t i = 0; i < count; ++i)
 		{
-			if (input[i] != NULL && strlen(input[i]) != 0)
+			if (input[i] != NULL && qsc_stringutils_string_size(input[i]) != 0)
 			{
 				qsc_consoleutils_print_safe(input[i]);
 			}

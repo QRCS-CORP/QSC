@@ -339,6 +339,9 @@
     <ClInclude Include="timerex.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
+    <ClInclude Include="scb.h">
+      <Filter>Header Files\DRBG</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -526,6 +529,9 @@
     </ClCompile>
     <ClCompile Include="timerex.c">
       <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="scb.c">
+      <Filter>Source Files\DRBG</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

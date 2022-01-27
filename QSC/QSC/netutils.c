@@ -96,7 +96,6 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 	}
 
 #else
-	// TODO: 
 	struct ifaddrs* ifaddr = NULL;
 	struct ifaddrs* ifa = NULL;
 
@@ -572,6 +571,7 @@ uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NETUTILS_HOSTS
 
 	if (port == 0)
 	{
+
 		se = getservbyname(portname, protocol);
 
 		if (se != NULL)
@@ -583,6 +583,7 @@ uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NETUTILS_HOSTS
 	return port;
 }
 
+#if defined(QSC_DEBUG_MODE)
 void qsc_netutils_values_print()
 {
 	char domain[QSC_NETUTILS_HOSTS_NAME_LENGTH] = { 0 };
@@ -648,3 +649,4 @@ void qsc_netutils_values_print()
 	qsc_consoleutils_print_uint((uint32_t)port);
 	qsc_consoleutils_print_line("");
 }
+#endif

@@ -231,6 +231,17 @@ QSC_EXPORT_API bool qsc_stringutils_string_contains(const char* source, const ch
 QSC_EXPORT_API char** qsc_stringutils_split_string(char* source, const char* delim, size_t* count);
 
 /**
+* \brief Split a string into two substrings
+*
+* \param dest1: The first destination string
+* \param dest2: The second destination string
+* \param destlen: The destination strings length
+* \param [const] source: The source string
+* \param [const] token: The search token
+*/
+QSC_EXPORT_API void qsc_stringutils_split_strings(char* dest1, char* dest2, size_t destlen, const char* source, const char* token);
+
+/**
 * \brief Find a substring within a string
 *
 * \warning The string returned must be deleted by the caller

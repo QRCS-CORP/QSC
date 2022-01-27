@@ -91,11 +91,15 @@ QSC_EXPORT_API bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_
 
 /**
 * \brief Get the full path to a special system folder
-
 *
 * \param directory: The enum name of the system directory
 * \param output: The output string containing the directory path
 */
 QSC_EXPORT_API void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char output[QSC_SYSTEM_MAX_PATH]);
+
+/**
+* \brief Test the folder functions
+*/
+QSC_EXPORT_API void qsc_folderutils_test();
 
 #endif

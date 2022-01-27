@@ -32,7 +32,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -45,7 +45,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -183,6 +183,7 @@
     <ClInclude Include="queue.h" />
     <ClInclude Include="rcs.h" />
     <ClInclude Include="rdp.h" />
+    <ClInclude Include="scb.h" />
     <ClInclude Include="secmem.h" />
     <ClInclude Include="secrand.h" />
     <ClInclude Include="selftest.h" />
@@ -248,6 +249,7 @@
     <ClCompile Include="queue.c" />
     <ClCompile Include="rcs.c" />
     <ClCompile Include="rdp.c" />
+    <ClCompile Include="scb.c" />
     <ClCompile Include="secmem.c" />
     <ClCompile Include="secrand.c" />
     <ClCompile Include="selftest.c" />

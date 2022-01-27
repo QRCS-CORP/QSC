@@ -27,7 +27,7 @@ static void csg_auto_reseed(qsc_csg_state* ctx)
 		if (ctx->rate == QSC_KECCAK_512_RATE)
 		{
 			/* add a random seed to input seed and info */
-			uint8_t prand[QSC_CSG512_SEED_SIZE];
+			uint8_t prand[QSC_CSG_512_SEED_SIZE];
 			qsc_acp_generate(prand, sizeof(prand));
 
 			qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_512, prand, sizeof(prand));
@@ -35,7 +35,7 @@ static void csg_auto_reseed(qsc_csg_state* ctx)
 		else
 		{
 			/* add a random seed to input seed and info */
-			uint8_t prand[QSC_CSG256_SEED_SIZE];
+			uint8_t prand[QSC_CSG_256_SEED_SIZE];
 			qsc_acp_generate(prand, sizeof(prand));
 
 			qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_256, prand, sizeof(prand));
@@ -67,9 +67,9 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 {
 	assert(ctx != NULL);
 	assert(seed != NULL);
-	assert(seedlen == QSC_CSG256_SEED_SIZE || seedlen == QSC_CSG512_SEED_SIZE);
+	assert(seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE);
 
-	if (seedlen == QSC_CSG512_SEED_SIZE)
+	if (seedlen == QSC_CSG_512_SEED_SIZE)
 	{
 		ctx->rate = QSC_KECCAK_512_RATE;
 	}
@@ -89,7 +89,7 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 		if (ctx->pres)
 		{
 			/* add a random seed to input seed and info */
-			uint8_t prand[QSC_CSG512_SEED_SIZE];
+			uint8_t prand[QSC_CSG_512_SEED_SIZE];
 			qsc_acp_generate(prand, sizeof(prand));
 			qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_512, seed, seedlen, info, infolen, prand, sizeof(prand));
 		}
@@ -103,7 +103,7 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 	{
 		if (ctx->pres)
 		{
-			uint8_t prand[QSC_CSG256_SEED_SIZE];
+			uint8_t prand[QSC_CSG_256_SEED_SIZE];
 			qsc_acp_generate(prand, sizeof(prand));
 			qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_256, seed, seedlen, info, infolen, prand, sizeof(prand));
 		}

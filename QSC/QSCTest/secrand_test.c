@@ -6,6 +6,7 @@
 #include "../QSC/hcg.h"
 #include "../QSC/memutils.h"
 #include "../QSC/rdp.h"
+#include "../QSC/scb.h"
 #include "../QSC/secrand.h"
 #include "../QSC/sysutils.h"
 #include <math.h>
@@ -336,7 +337,7 @@ void qsctest_secrand_acp_evaluate()
 
 void qsctest_secrand_csg_evaluate()
 {
-	uint8_t seed[QSC_CSG256_SEED_SIZE] = { 0 };
+	uint8_t seed[QSC_CSG_256_SEED_SIZE] = { 0 };
 	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 	qsc_csg_state ctx;
 
@@ -377,6 +378,21 @@ void qsctest_secrand_rdp_evaluate()
 
 	qsc_rdp_generate(smp, sizeof(smp));
 	qsctest_secrand_evaluate("RDP", smp, sizeof(smp));
+}
+
+void qsctest_secrand_scb_evaluate()
+{
+	uint8_t seed[QSC_SCB_256_SEED_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	qsc_scb_state ctx = { 0 };
+
+	qsc_csp_generate(seed, sizeof(seed));
+
+	qsc_scb_initialize(&ctx, seed, sizeof(seed), NULL, 0, 10, 0);
+	qsc_scb_generate(&ctx, smp, sizeof(smp));
+	qsc_scb_dispose(&ctx);
+
+	qsctest_secrand_evaluate("SCB", smp, sizeof(smp));
 }
 
 bool qsctest_secrand_stress()
@@ -563,4 +579,7 @@ void qsctest_secrand_run()
 	qsctest_print_safe("*** Testing deterministic random bit generators *** \n");
 	qsctest_secrand_csg_evaluate();
 	qsctest_secrand_hcg_evaluate();
+
+	qsctest_print_safe("*** Testing key derivation functions *** \n");
+	qsctest_secrand_scb_evaluate();
 }

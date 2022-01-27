@@ -873,3 +873,80 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 
 	return res;
 }
+
+bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize)
+{
+	assert(ctx != NULL);
+	assert(output != NULL);
+	assert(input != NULL);
+
+	bool res;
+
+#if defined(QSC_CSX_AUTHENTICATED)
+
+	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
+	res = false;
+
+	/* store the nonce */
+	qsc_intutils_le64to8(ncopy, ctx->state[12]);
+	qsc_intutils_le64to8(ncopy + sizeof(uint64_t), ctx->state[13]);
+
+	/* update the processed bytes counter */
+	ctx->counter += length;
+
+	/* update the mac with the nonce */
+	csx_mac_update(ctx, ncopy, sizeof(ncopy));
+
+	if (ctx->encrypt)
+	{
+		/* use the transform to generate the key-stream and encrypt the data  */
+		csx_transform(ctx, output, input, length);
+
+		/* update the mac with the cipher-text */
+		csx_mac_update(ctx, output, length);
+
+		if (finalize == true)
+		{
+			/* mac the cipher-text appending the code to the end of the array */
+			csx_finalize(ctx, output + length);
+		}
+
+		res = true;
+	}
+	else
+	{
+		uint8_t code[QSC_CSX_MAC_SIZE] = { 0 };
+
+		/* update the mac with the cipher-text */
+		csx_mac_update(ctx, input, length);
+
+		if (finalize == true)
+		{
+			/* generate the internal mac code */
+			csx_finalize(ctx, code);
+
+			/* compare the mac code with the one embedded in the cipher-text, bypassing the transform if the mac check fails */
+			if (qsc_intutils_verify(code, input + length, QSC_CSX_MAC_SIZE) == 0)
+			{
+				/* generate the key-stream and decrypt the array */
+				csx_transform(ctx, output, input, length);
+				res = true;
+			}
+		}
+		else
+		{
+			/* generate the key-stream and decrypt the array */
+			csx_transform(ctx, output, input, length);
+			res = true;
+		}
+	}
+
+#else
+
+	csx_transform(ctx, output, input, length);
+	res = true;
+
+#endif
+
+	return res;
+}

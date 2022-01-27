@@ -26,44 +26,54 @@
 * Rijndael-256 authenticated Cipher Stream.
 *
 * \author		John G. Underhill
-* \version		1.0.0.0e
+* \version		1.0.0.0f
 * \date			October 20, 2019
-* \updated		October 13, 2021
+* \updated		January 22, 2022
 * \contact:		support@digitalfreedomdefence.com
 * \copyright	GPL version 3 license (GPLv3)
 *
 *
 * RCS-256 encryption example \n
 * \code
+* // external message, key, nonce, and custom-info arrays
 * #define CSTLEN 20
 * #define MSGLEN 200
 * uint8_t cust[CSTLEN] = {...};
 * uint8_t key[QSC_RCS256_KEY_SIZE] = {...};
 * uint8_t msg[MSGLEN] = {...};
 * uint8_t nonce[QSC_RCS_BLOCK_SIZE] = {...};
+* ...
 * uint8_t cpt[MSGLEN + QSC_RCS256_MAC_SIZE] = { 0 };
 * qsc_rcs_state state;
 * qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nonce, cust, CSTLEN };
 *
+* // initialize the state
 * qsc_rcs_initialize(&state, &kp, true);
+* // encrypt the message
 * qsc_rcs_transform(&state, cpt, msg, MSGLEN)
 * \endcode
 *
 * RCS-256 decryption example \n
 * \code
+* // external cipher-text, key and custom-info arrays,
+* // and cipher-text containing the encrypted plain-text and the mac-code
 * uint8_t cpt[CPTLEN] = { qsc_rcs_transform(k,p) }
 * uint8_t key[QSC_RCS256_KEY_SIZE] = {...};
 * uint8_t nonce[QSC_RCS_BLOCK_SIZE] = {...};
 * uint8_t cust[CSTLEN] = {...};
+* ...
+* // subtract the mac-code length from the overall cipher-text length for the message size
 * const size_t MSGLEN = CPTLEN - QSC_RCS256_MAC_SIZE;
 * uint8_t msg[MSGLEN] = { 0 };
 * qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nonce, cust, CSTLEN };
 *
+* // initialize the cipher state for decryption
 * qsc_rcs_initialize(&state, &kp, false);
 *
+* // authenticate and decrypt the cipher-text
 * if (rcs256_transform(&state, msg, cpt, MSGLEN) == false)
 * {
-*	  authentication has failed, do something..
+*	// authentication has failed, do something..
 * }
 * \endcode
 *
@@ -93,24 +103,21 @@
 * \par
 * RCS is an authenticated encryption with associated data (AEAD) stream cipher.
 * It uses the hash-based key schedule extended form of Rijndael-256, wrapped in a segmented integer counter mode (CTR) for encryption.
-* The cSHAKE key-schedule function also generates a key for the keyed hash-based MAC function; KMAC, used to generate the authentication code,
+* The cSHAKE key-schedule function also generates a key for the keyed hash-based MAC funtion; KMAC, used to generate the authentication code,
 * which is appended to the cipher-text output of an encryption call.
-* 
-* \par
-* For authentication RCS can use either the standard form of KMAC, which uses 24 rounds, or the default authentication setting;
-* a reduced-rounds version of KMAC that uses half the number of permutation rounds KMAC-R12.
-* To enable the standard from of KMAC, pass the QSC_RCS_AUTH_KMAC as a compiler definition, or unrem the definition in this header file.
-* To run RCS without authentication, rem the QSC_RCS_AUTHENTICATED in this header file.
-* RCS can use either a standard implementation of the Rijndael transformation functions, or one that implements CPU embedded AES-NI instructions.
-* To enable AES-NI instructions, unrem the QSC_SYSTEM_AESNI_ENABLED definition in the common.h file.
+* In decryption mode, before decryption is performed, an internal mac code is calculated, and compared to the code embedded in the cipher-text.
+* If authentication fails, the cipher-text is not decrypted, and the qsc_rcs_transform(state,out,in,inlen) function returns a boolean false value.
+* The qsc_rcs_set_associated(state,in,inlen) function can be used to add additional data to the MAC generators input, like packet-header data, or a custom code or counter.
 *
 * \par
 * This implementation has both a C reference code, and an implementation that uses the AES-NI instructions that are used in the AES and RCS cipher variants. \n
-* The AES-NI implementation can be enabled by adding the QSC_SYSTEM_AESNI_ENABLED constant to your preprocessor definitions. \n
+* The AES-NI implementation can be enabled by adding the QSC_RCS_AESNI_ENABLED constant to your preprocessor definitions. \n
 * The RCS-256, RCS-512, known answer vectors are taken from the CEX++ cryptographic library <a href="https://github.com/Steppenwolfe65/CEX">The CEX++ Cryptographic Library</a>. \n
 * See the documentation and the rcs_test.h tests for usage examples.
-* To enable the AES-NI implementation, un-comment the definition in this file or add QSC_SYSTEM_AESNI_ENABLED or add it to the compiler preprocessor definitions. \n
+* To enable the AES-NI implementation, uncomment the definition in this file or add QSC_RCS_AESNI_ENABLED or add it to the compiler preprocessor definitions. \n
 */
+
+/* TODO: Test KPA on small block AVX2 */
 
 #include "common.h"
 #include "sha3.h"
@@ -128,31 +135,29 @@
 #	define QSC_RCS_AUTHENTICATED
 #endif
 
-#if defined(QSC_RCS_AUTHENTICATED)
 /*!
-* \def QSC_RCS_AUTH_KMAC
-* \brief Sets the authentication mode to standard KMAC-R24.
-* Remove this definition to enable the reduced rounds version using KMAC-R12.
-*/
-//#	define QSC_RCS_AUTH_KMAC
-#endif
-
-/*!
-\def QSC_RCS_KMAC_R12
+\def QSC_RCS_AUTH_KMACR12
 * \brief Enables the reduced rounds KMAC-R12 implementation.
 * Unrem this flag to enable the reduced rounds KMAC implementation.
 */
-#if	defined(QSC_RCS_AUTHENTICATED)
-#	if !defined(QSC_RCS_AUTH_KMAC) && !defined(QSC_RCS_AUTH_KMACR12)
-#		define QSC_RCS_AUTH_KMACR12
-#	endif
+#if !defined(QSC_RCS_AUTH_KMACR12)
+#	define QSC_RCS_AUTH_KMACR12
+#endif
+
+/*!
+* \def QSC_RCS_AESNI_ENABLED
+* \brief Enable the use of intrinsics and the AES-NI implementation.
+* Just for testing, add the QSC_RCS_AESNI_ENABLED preprocessor definition and enable SIMD and AES-NI.
+*/
+#if !defined(QSC_RCS_AESNI_ENABLED)
+#	define QSC_RCS_AESNI_ENABLED
 #endif
 
 /***********************************
 *     RCS CONSTANTS AND SIZES      *
 ***********************************/
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_RCS_AESNI_ENABLED)
 #	include "intrinsics.h"
 #	include <immintrin.h>
 #endif
@@ -212,10 +217,10 @@ typedef enum
 */
 QSC_EXPORT_API typedef struct
 {
-	const uint8_t* key;					/*!< [const] The input cipher key */
+	const uint8_t* key;					/*!< The input cipher key */
 	size_t keylen;						/*!< The length in bytes of the cipher key */
 	uint8_t* nonce;						/*!< The nonce or initialization vector */
-	const uint8_t* info;				/*!< [const] The information tweak */
+	const uint8_t* info;				/*!< The information tweak */
 	size_t infolen;						/*!< The length in bytes of the information tweak */
 } qsc_rcs_keyparams;
 
@@ -226,20 +231,20 @@ QSC_EXPORT_API typedef struct
 QSC_EXPORT_API typedef struct
 {
 	rcs_cipher_type ctype;				/*!< The cipher type; RCS-256 or RCS-512 */
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_RCS_AESNI_ENABLED)
 	__m128i roundkeys[62];				/*!< The 128-bit integer round-key array */
 #	if defined(QSC_SYSTEM_HAS_AVX512)
 		__m512i roundkeysw[31];			/*!< The 512-bit integer round-key array */
 #	endif
 #else
-	uint32_t roundkeys[248];			/*!< The round-keys 32-bit sub-key array */
+	uint32_t roundkeys[248];			/*!< The round-keys 32-bit subkey array */
 #endif
 	size_t roundkeylen;					/*!< The round-key array length */
 	size_t rounds;						/*!< The number of transformation rounds */
 #if defined(QSC_RCS_KPA_AUTHENTICATION)
 	qsc_kpa_state kstate;				/*!< The KPA state structure */
 #else
-	qsc_keccak_state kstate;			/*!< The Keccak state structure */
+	qsc_keccak_state kstate;			/*!< The keccak state structure */
 #endif
 	uint8_t nonce[QSC_RCS_NONCE_SIZE];	/*!< The nonce or initialization vector */
 	uint64_t counter;					/*!< the processed bytes counter */
@@ -283,8 +288,8 @@ QSC_EXPORT_API void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* da
 
 /**
 * \brief Transform an array of bytes.
-* In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the cipher-text.
-* In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
+* In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the ciphertext.
+* In decryption mode, the input cipher-text is authenticated internally and compared to the mac code appended to the cipher-text,
 * if the codes to not match, the cipher-text is not decrypted and the call fails.
 *
 * \warning The cipher must be initialized before this function can be called
@@ -297,5 +302,27 @@ QSC_EXPORT_API void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* da
 * \return: Returns true if the cipher has been transformed the data successfully, false on failure
 */
 QSC_EXPORT_API bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/**
+* \brief A multi-call transform for a large array of bytes, such as required by file encryption.
+* This call can be used to transform and authenticate a very large array of bytes (+1GB).
+* On the last call in the sequence, set the finalize parameter to true to complete authentication,
+* and write the MAC code to the end of the output array in encryption mode,
+* or compare to the embedded MAC code and authenticate in decryption mode.
+* In encryption mode, the input plain-text is encrypted, then authenticated, and the MAC code is appended to the cipher-text.
+* In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
+* if the codes to not match, the cipher-text is not decrypted and the call fails.
+*
+* \warning The cipher must be initialized before this function can be called
+*
+* \param ctx: [struct] The cipher state structure
+* \param output: A pointer to the output array
+* \param input: [const] A pointer to the input array
+* \param length: The number of bytes to transform
+* \param finalize: Complete authentication on a stream if set to true
+*
+* \return: Returns true if the cipher has been transformed the data successfully, false on failure
+*/
+QSC_EXPORT_API bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize);
 
 #endif

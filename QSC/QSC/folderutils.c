@@ -1,4 +1,7 @@
 #include "folderutils.h"
+#if defined(QSC_DEBUG_MODE)
+#	include "consoleutils.h"
+#endif
 #include "memutils.h"
 #include "stringutils.h"
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -212,3 +215,63 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 #	endif
 #endif
 }
+
+#if defined(QSC_DEBUG_MODE)
+void qsc_folderutils_test()
+{
+	char fpath[QSC_SYSTEM_MAX_PATH] = { 0 };
+
+	qsc_consoleutils_print_line("Folder verification test");
+	qsc_consoleutils_print_line("Printing folder function output..");
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_app_data, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_desktop, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_downloads, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_favourites, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_music, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_pictures, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_programs, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_shortcuts, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_videos, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_folderutils_get_directory(qsc_folderutils_directories_user_documents, fpath);
+	qsc_consoleutils_print_line(fpath);
+
+	qsc_stringutils_concat_strings(fpath, sizeof(fpath), "/test");
+	qsc_folderutils_create_directory(fpath);
+
+	if (qsc_folderutils_directory_exists(fpath) == true)
+	{
+		qsc_consoleutils_print_safe("Found path: ");
+		qsc_consoleutils_print_line(fpath);
+
+		qsc_folderutils_delete_directory(fpath);
+
+		if (qsc_folderutils_directory_exists(fpath) == false)
+		{
+			qsc_consoleutils_print_safe("Deleted path: ");
+			qsc_consoleutils_print_line(fpath);
+		}
+	}
+
+	qsc_consoleutils_print_line("");
+}
+#endif
+

@@ -66,16 +66,16 @@
 #include "sha3.h"
 
 /*!
-* \def QSC_CSG256_SEED_SIZE
+* \def QSC_CSG_256_SEED_SIZE
 * \brief The CSG-256 seed size
 */
-#define QSC_CSG256_SEED_SIZE 32
+#define QSC_CSG_256_SEED_SIZE 32
 
 /*!
-* \def QSC_CSG512_SEED_SIZE
+* \def QSC_CSG_512_SEED_SIZE
 * \brief The CSG-512 seed size
 */
-#define QSC_CSG512_SEED_SIZE 64
+#define QSC_CSG_512_SEED_SIZE 64
 
 /*!
 * \def QSC_CSG_RESEED_THRESHHOLD

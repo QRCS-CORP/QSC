@@ -376,16 +376,10 @@ static void cpu_topology(qsc_cpuidex_cpu_features* features)
 		havx2 = ((info[1] & CPUID_EBX_AVX2) != 0x00000000UL);
 		features->adx = ((info[1] & CPUID_EBX_ADX) != 0x00000000UL);
 #	endif
+
 		if (havx2 == true)
 		{
-			uint32_t xcr1;
-
-			xcr1 = (uint32_t)_xgetbv(0);
-
-			if ((xcr1 & 0x000000E6) == 0x000000E6)
-			{
-				features->avx2 = true;
-			}
+			features->avx2 = (_xgetbv(0) & 0xE6) != 0;
 		}
 #endif
 

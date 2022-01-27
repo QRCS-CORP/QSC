@@ -194,6 +194,7 @@
     <ClCompile Include="poly1305_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
+    <ClCompile Include="scb_test.c" />
     <ClCompile Include="secrand_test.c" />
     <ClCompile Include="sha2_test.c" />
     <ClCompile Include="sha3_test.c" />
@@ -221,6 +222,7 @@
     <ClInclude Include="ntru_test.h" />
     <ClInclude Include="poly1305_test.h" />
     <ClInclude Include="rcs_test.h" />
+    <ClInclude Include="scb_test.h" />
     <ClInclude Include="secrand_test.h" />
     <ClInclude Include="sha2_test.h" />
     <ClInclude Include="sha3_test.h" />

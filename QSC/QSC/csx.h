@@ -30,7 +30,7 @@
 * \author		John G. Underhill
 * \version		1.0.0.0b
 * \date			May 2, 2020
-* \updated		October 13, 2021
+* \updated		January 26, 2022
 * \contact:		support@digitalfreedomdefence.com
 * \copyright	GPL version 3 license (GPLv3)
 *
@@ -264,5 +264,27 @@ QSC_EXPORT_API void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* da
 * \return: Returns true if the cipher has been transformed the data successfully, false on failure
 */
 QSC_EXPORT_API bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/**
+* \brief A multi-call transform for a large array of bytes, such as required by file encryption.
+* This call can be used to transform and authenticate a very large array of bytes (+1GB).
+* On the last call in the sequence, set the finalize parameter to true to complete authentication,
+* and write the MAC code to the end of the output array in encryption mode, 
+* or compare to the embedded MAC code and authenticate in decryption mode.
+* In encryption mode, the input plain-text is encrypted, then authenticated, and the MAC code is appended to the cipher-text.
+* In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
+* if the codes to not match, the cipher-text is not decrypted and the call fails.
+*
+* \warning The cipher must be initialized before this function can be called
+*
+* \param ctx: [struct] The cipher state structure
+* \param output: A pointer to the output array
+* \param input: [const] A pointer to the input array
+* \param length: The number of bytes to transform
+* \param finalize: Complete authentication on a stream if set to true
+*
+* \return: Returns true if the cipher has been transformed the data successfully, false on failure
+*/
+QSC_EXPORT_API bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize);
 
 #endif

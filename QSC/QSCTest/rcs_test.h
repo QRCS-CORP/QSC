@@ -61,6 +61,13 @@ bool qsctest_rcs256_stress_test(void);
 */
 bool qsctest_rcs512_stress_test(void);
 
+/**
+* \brief Tests the RCS extended transform API.
+*
+* \return Returns true for success
+*/
+bool qsctest_extended_cipher_test(void);
+
 #if defined(QSCTEST_RCS_WIDE_BLOCK_TESTS)
 /**
 * \brief Tests the RCS AVX functions for equal output to sequential processing.

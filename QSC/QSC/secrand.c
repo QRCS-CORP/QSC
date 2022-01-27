@@ -333,7 +333,7 @@ void qsc_secrand_destroy()
 void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* custom, size_t custlen)
 {
 	assert(seed != NULL);
-	assert(seedlen == QSC_CSG256_SEED_SIZE || seedlen == QSC_CSG512_SEED_SIZE);
+	assert(seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE);
 
 	/* initialize the underlying generator */
 	qsc_csg_initialize(&secrand_state.hstate, seed, seedlen, custom, custlen, true);

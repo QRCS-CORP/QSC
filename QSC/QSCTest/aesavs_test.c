@@ -31,7 +31,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 	line = NULL;
 	err = 0;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL && err == 0)
 	{
@@ -39,7 +39,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -47,7 +47,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 				{
 					for (i = 0; i < 4; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, CBC_KEY, strlen(CBC_KEY)) == 0)
 						{
@@ -106,7 +106,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -140,7 +140,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 	res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -148,7 +148,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -156,7 +156,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 				{
 					for (i = 0; i < 4; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, CBC_KEY, strlen(CBC_KEY)) == 0)
 						{
@@ -215,7 +215,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -246,7 +246,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -254,7 +254,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -262,7 +262,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
 				{
 					for (i = 0; i < 3; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -314,7 +314,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -345,7 +345,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -353,7 +353,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -361,7 +361,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
 				{
 					for (i = 0; i < 3; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -413,7 +413,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -451,7 +451,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -459,7 +459,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -469,7 +469,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 
 					for (i = 0; i < 4; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, CBC_KEY, strlen(CBC_KEY)) == 0)
 						{
@@ -565,7 +565,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -603,7 +603,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -611,7 +611,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -621,7 +621,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 
 					for (i = 0; i < 4; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, CBC_KEY, strlen(CBC_KEY)) == 0)
 						{
@@ -717,7 +717,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -749,7 +749,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -757,7 +757,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -765,7 +765,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
 				{
 					for (i = 0; i < 3; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -830,7 +830,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -862,7 +862,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -870,7 +870,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &len, fp);
+			read = qsc_fileutils_get_line(&line, &len, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -878,7 +878,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
 				{
 					for (i = 0; i < 3; ++i)
 					{
-						read = qsc_filetools_getline(&line, &len, fp);
+						read = qsc_fileutils_get_line(&line, &len, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -943,7 +943,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -983,7 +983,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -993,7 +993,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &rlen, fp);
+			read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -1003,7 +1003,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 
 					for (i = 0; i < 4; ++i)
 					{
-						read = qsc_filetools_getline(&line, &rlen, fp);
+						read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -1127,7 +1127,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -1167,7 +1167,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -1177,7 +1177,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &rlen, fp);
+			read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -1187,7 +1187,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 
 					for (i = 0; i < 4; ++i)
 					{
-						read = qsc_filetools_getline(&line, &rlen, fp);
+						read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -1311,7 +1311,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -1345,7 +1345,7 @@ static bool aesavs_ecb128_mmt(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -1354,7 +1354,7 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &rlen, fp);
+			read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -1362,7 +1362,7 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 				{
 					for (i = 0; i < 3; ++i)
 					{
-						read = qsc_filetools_getline(&line, &rlen, fp);
+						read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -1445,7 +1445,7 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -1479,7 +1479,7 @@ static bool aesavs_ecb256_mmt(const char* filepath)
     res = true;
 	line = NULL;
 
-    fp = qsc_filetools_file_open(filepath, qsc_fileutils_mode_read);
+    fp = qsc_fileutils_open(filepath, qsc_fileutils_mode_read, false);
 
 	if (fp != NULL)
 	{
@@ -1488,7 +1488,7 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 
 		while (read != -1)
 		{
-			read = qsc_filetools_getline(&line, &rlen, fp);
+			read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 			if (read > 0 && line != NULL)
 			{
@@ -1496,7 +1496,7 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 				{
 					for (i = 0; i < 3; ++i)
 					{
-						read = qsc_filetools_getline(&line, &rlen, fp);
+						read = qsc_fileutils_get_line(&line, &rlen, fp);
 
 						if (memcmp(line, ECB_KEY, strlen(ECB_KEY)) == 0)
 						{
@@ -1579,7 +1579,7 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 		res = false;
 	}
 
-	qsc_filetools_file_close(fp);
+	qsc_fileutils_close(fp);
 
 	if (line != NULL)
 	{
@@ -1597,7 +1597,7 @@ bool aesavs_cbc_kat()
 	const char* CBC256_VARTXT = "AESAVS/CBC/KAT/CBCVarTxt256.rsp";
 	bool res;
 
-	if (qsc_filetools_file_exists(CBC128_VARKEY) && qsc_filetools_file_exists(CBC128_VARTXT) && qsc_filetools_file_exists(CBC256_VARKEY) && qsc_filetools_file_exists(CBC256_VARTXT) == true)
+	if (qsc_fileutils_exists(CBC128_VARKEY) && qsc_fileutils_exists(CBC128_VARTXT) && qsc_fileutils_exists(CBC256_VARKEY) && qsc_fileutils_exists(CBC256_VARTXT) == true)
 	{
 		res = true;
 
@@ -1641,7 +1641,7 @@ bool aesavs_ecb_kat()
 	const char* ECB256_VARTXT = "AESAVS/ECB/KAT/ECBVarTxt256.rsp";
 	bool res;
 
-	if (qsc_filetools_file_exists(ECB128_VARKEY) && qsc_filetools_file_exists(ECB128_VARTXT) && qsc_filetools_file_exists(ECB256_VARKEY) && qsc_filetools_file_exists(ECB256_VARTXT) == true)
+	if (qsc_fileutils_exists(ECB128_VARKEY) && qsc_fileutils_exists(ECB128_VARTXT) && qsc_fileutils_exists(ECB256_VARKEY) && qsc_fileutils_exists(ECB256_VARTXT) == true)
 	{
 		res = true;
 
@@ -1683,7 +1683,7 @@ bool aesavs_cbc_mct()
 	const char* CBC256_MCT = "AESAVS/CBC/MCT/CBCMCT256.rsp";
 	bool res;
 
-	if (qsc_filetools_file_exists(CBC128_MCT) && qsc_filetools_file_exists(CBC256_MCT) == true)
+	if (qsc_fileutils_exists(CBC128_MCT) && qsc_fileutils_exists(CBC256_MCT) == true)
 	{
 		res = true;
 
@@ -1713,7 +1713,7 @@ bool aesavs_ecb_mct()
 	const char* ECB256_MCT = "AESAVS/ECB/MCT/ECBMCT256.rsp";
 	bool res;
 
-	if (qsc_filetools_file_exists(ECB128_MCT) && qsc_filetools_file_exists(ECB256_MCT) == true)
+	if (qsc_fileutils_exists(ECB128_MCT) && qsc_fileutils_exists(ECB256_MCT) == true)
 	{
 		res = true;
 
@@ -1743,7 +1743,7 @@ bool aesavs_cbc_mmt()
 	const char* CBC256_MMT = "AESAVS/CBC/MMT/CBCMMT256.rsp";
 	bool res;
 
-	if (qsc_filetools_file_exists(CBC128_MMT) && qsc_filetools_file_exists(CBC256_MMT) == true)
+	if (qsc_fileutils_exists(CBC128_MMT) && qsc_fileutils_exists(CBC256_MMT) == true)
 	{
 		res = true;
 
@@ -1773,7 +1773,7 @@ bool aesavs_ecb_mmt()
 	const char* ECB256_MMT = "AESAVS/ECB/MMT/ECBMMT256.rsp";
 	bool res;
 
-	if (qsc_filetools_file_exists(ECB128_MMT) && qsc_filetools_file_exists(ECB256_MMT) == true)
+	if (qsc_fileutils_exists(ECB128_MMT) && qsc_fileutils_exists(ECB256_MMT) == true)
 	{
 		res = true;
 
