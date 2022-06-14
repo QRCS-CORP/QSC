@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -62,7 +62,7 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	elif defined(QSC_SYSTEM_OS_APPLE)
 #		include <net/if_dl.h>
 #		include <netinet/in.h>
-#		include <netinet/in6.h>
+//#		include <netinet/in6.h>
 #		if !defined(AF_PACKET)
 #			define AF_PACKET PF_INET
 #		endif

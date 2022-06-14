@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -78,6 +78,15 @@ QSC_EXPORT_API void qsc_consoleutils_colored_message(const char* message, qsc_co
 QSC_EXPORT_API char qsc_consoleutils_get_char(void);
 
 /**
+* \brief Get a string of characters from the console that is lowercase and trimmed
+*
+* \param line: The string of text received
+* \param maxlen: The maximum text length
+* \return Returns the number of characters in the line
+*/
+QSC_EXPORT_API size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen);
+
+/**
 * \brief Get a string of characters from the console
 *
 * \param line: The string of text received
@@ -88,13 +97,15 @@ QSC_EXPORT_API char qsc_consoleutils_get_char(void);
 QSC_EXPORT_API size_t qsc_consoleutils_get_line(char* line, size_t maxlen);
 
 /**
-* \brief Get a string of characters from the console that is lowercase and trimmed
+* \brief Extract a string with quotation marks
 *
-* \param line: The string of text received
+* \param output: The extracted string
+* \param input: The string to check
 * \param maxlen: The maximum text length
-* \return Returns the number of characters in the line
+*
+* \return Returns the number of characters in quoted string
 */
-QSC_EXPORT_API size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen);
+QSC_EXPORT_API size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_t maxlen);
 
 /**
 * \brief Pause the console until user input is detected

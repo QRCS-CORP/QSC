@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 * 
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 * 
 * This program is free software : you can redistribute it and / or modify
@@ -30,7 +30,7 @@
 * \author		John G. Underhill
 * \version		1.0.0.0b
 * \date			May 2, 2020
-* \updated		January 26, 2022
+* \updated		October 13, 2021
 * \contact:		support@digitalfreedomdefence.com
 * \copyright	GPL version 3 license (GPLv3)
 *

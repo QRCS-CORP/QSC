@@ -1,12 +1,7 @@
 #include "memutils.h"
-
+#include <stdlib.h>
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	include "intrinsics.h"
-#endif
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-#	include <malloc.h>
-#else
-#	include <stdlib.h>
 #endif
 
 void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)

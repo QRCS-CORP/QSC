@@ -641,6 +641,42 @@ bool qsc_fileutils_seekto(FILE* fp, size_t position)
 	return (res == 0);
 }
 
+bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
+{
+	size_t flen;
+	bool res;
+
+	res = false;
+
+	if (fp != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		_fseeki64(fp, 0L, SEEK_END);
+		flen = (size_t)_ftelli64(fp);
+#else
+		fseeko(fp, 0L, SEEK_END);
+		flen = (size_t)ftello(fp);
+#endif
+		
+		if (length < flen)
+		{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+			if (_chsize_s(_fileno(fp), length) == 0)
+			{
+				res = true;
+			}
+#else
+			if (ftruncate(fileno(fp), length) == 0)
+			{
+				res = true;
+			}
+#endif
+		}
+	}
+
+	return res;
+}
+
 bool qsc_fileutils_valid_path(const char* path)
 {
 	char dir[QSC_FILEUTILS_MAX_PATH] = { 0 };
@@ -683,8 +719,39 @@ size_t qsc_fileutils_write(const char* input, size_t inlen, size_t position, FIL
 	return res;
 }
 
+bool qsc_fileutils_write_line(const char* path, const char* input, size_t inlen)
+{
+	FILE* fp;
+	errno_t err;
+	bool res;
+
+	res = false;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	err = fopen_s(&fp, path, "a");
+#else
+	fp = fopen(path, "a");
+	err = (fp != NULL) ? 0 : -1;
+#endif
+
+	if (fp != NULL && err == 0)
+	{
+		fseek(fp, 0L, SEEK_END);
+		res = (fwrite(input, sizeof(char), inlen, fp) != 0);
+
+		if (res == true)
+		{
+			const char line[1] = { '\n' };
+			res = (fwrite(line, sizeof(char), sizeof(line), fp) != 0);
+		}
+
+		fclose(fp);
+	}
+
+	return res;
+}
+
 #if defined(QSC_DEBUG_MODE)
-void qsc_fileutils_test(char* fpath)
+void qsc_fileutils_test(const char* fpath)
 {
 	uint8_t rnd[1024] = { 0 };
 	char smp[1024] = { 0 };

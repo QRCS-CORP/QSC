@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -293,6 +293,15 @@ QSC_EXPORT_API bool qsc_fileutils_seekto(FILE* fp, size_t position);
 QSC_EXPORT_API size_t qsc_fileutils_read_line(const char* path, char* buffer, size_t buflen, size_t linenum);
 
 /**
+* \brief Reset the file size to a specified byte size
+*
+* \param fp: The file pointer
+* \param length: The new file size
+* \return Returns true if the pointer has been moved
+*/
+QSC_EXPORT_API bool qsc_fileutils_truncate_file(FILE* fp, size_t length);
+
+/**
 * \brief Checks if the path is valid
 *
 * \param path: [const] The full path to the file
@@ -312,10 +321,22 @@ QSC_EXPORT_API bool qsc_fileutils_valid_path(const char* path);
 QSC_EXPORT_API size_t qsc_fileutils_write(const char* input, size_t inlen, size_t position, FILE* fp);
 
 /**
+* \brief Open a file and append a line of text to the end
+*
+* \param path: The file path
+* \param input: The input buffer
+* \param inlen: The size of the input buffer
+* \return Returns the number of bytes written
+*/
+QSC_EXPORT_API bool qsc_fileutils_write_line(const char* path, const char* input, size_t inlen);
+
+#if defined(QSC_DEBUG_MODE)
+/**
 * \brief Test the file functions
 *
 * \param fpath: The file path
 */
-QSC_EXPORT_API void qsc_fileutils_test(char* fpath);
+QSC_EXPORT_API void qsc_fileutils_test(const char* fpath);
+#endif
 
 #endif

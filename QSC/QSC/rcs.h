@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -39,13 +39,13 @@
 * #define CSTLEN 20
 * #define MSGLEN 200
 * uint8_t cust[CSTLEN] = {...};
-* uint8_t key[QSC_RCS256_KEY_SIZE] = {...};
+* uint8_t key[QSC_RCS_256_KEY_SIZE] = {...};
 * uint8_t msg[MSGLEN] = {...};
 * uint8_t nonce[QSC_RCS_BLOCK_SIZE] = {...};
 * ...
-* uint8_t cpt[MSGLEN + QSC_RCS256_MAC_SIZE] = { 0 };
+* uint8_t cpt[MSGLEN + QSC_RCS_256_MAC_SIZE] = { 0 };
 * qsc_rcs_state state;
-* qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nonce, cust, CSTLEN };
+* qsc_rcs_keyparams kp = { key, QSC_RCS_256_KEY_SIZE, nonce, cust, CSTLEN };
 *
 * // initialize the state
 * qsc_rcs_initialize(&state, &kp, true);
@@ -58,14 +58,14 @@
 * // external cipher-text, key and custom-info arrays,
 * // and cipher-text containing the encrypted plain-text and the mac-code
 * uint8_t cpt[CPTLEN] = { qsc_rcs_transform(k,p) }
-* uint8_t key[QSC_RCS256_KEY_SIZE] = {...};
+* uint8_t key[QSC_RCS_256_KEY_SIZE] = {...};
 * uint8_t nonce[QSC_RCS_BLOCK_SIZE] = {...};
 * uint8_t cust[CSTLEN] = {...};
 * ...
 * // subtract the mac-code length from the overall cipher-text length for the message size
-* const size_t MSGLEN = CPTLEN - QSC_RCS256_MAC_SIZE;
+* const size_t MSGLEN = CPTLEN - QSC_RCS_256_MAC_SIZE;
 * uint8_t msg[MSGLEN] = { 0 };
-* qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nonce, cust, CSTLEN };
+* qsc_rcs_keyparams kp = { key, QSC_RCS_256_KEY_SIZE, nonce, cust, CSTLEN };
 *
 * // initialize the cipher state for decryption
 * qsc_rcs_initialize(&state, &kp, false);
@@ -90,7 +90,7 @@
 * \par
 * The pseudo-random bytes generator used by this cipher is the Keccak cSHAKE extended output function (XOF).
 * The cSHAKE XOF is implemented in 256 and 512-bit forms of those functions, correlating to the input cipher-key size.
-* The cipher has two base variants; RCS256 and RCS512, the 256 variant using a 256-bit input key, and RCS512 using a 512-bit key.
+* The cipher has two base variants; qsc_rcs_cipher_256 and qsc_rcs_cipher_512, the 256 variant using a 256-bit input key, and qsc_rcs_cipher_512 using a 512-bit key.
 * This change in key schedule expansion functions to the stronger Keccak based XOF function, can now can safely produce a larger round-key array,
 * unlocking an increased number of mixing rounds, and preventing many serious forms of attack on the Rijndael-based ciphers.
 *
@@ -102,7 +102,7 @@
 *
 * \par
 * RCS is an authenticated encryption with associated data (AEAD) stream cipher.
-* It uses the hash-based key schedule extended form of Rijndael-256, wrapped in a segmented integer counter mode (CTR) for encryption.
+* It uses the hash-based key schedule extended form of Rijndael-256, wrapped in a segmented integer counter mode (qsc_aes_mode_ctr) for encryption.
 * The cSHAKE key-schedule function also generates a key for the keyed hash-based MAC funtion; KMAC, used to generate the authentication code,
 * which is appended to the cipher-text output of an encryption call.
 * In decryption mode, before decryption is performed, an internal mac code is calculated, and compared to the code embedded in the cipher-text.
@@ -135,14 +135,15 @@
 #	define QSC_RCS_AUTHENTICATED
 #endif
 
-/*!
-\def QSC_RCS_AUTH_KMACR12
-* \brief Enables the reduced rounds KMAC-R12 implementation.
-* Unrem this flag to enable the reduced rounds KMAC implementation.
-*/
-#if !defined(QSC_RCS_AUTH_KMACR12)
-#	define QSC_RCS_AUTH_KMACR12
-#endif
+///*!
+//\def QSC_RCS_KMACR12
+//* \brief Enables the reduced rounds KMAC-R12 implementation.
+//* Unrem this flag to enable the reduced rounds KMAC implementation.
+//*/
+//#if !defined(QSC_RCS_KMACR12)
+//#	define QSC_RCS_KMACR12
+//#endif
+
 
 /*!
 * \def QSC_RCS_AESNI_ENABLED
@@ -150,7 +151,7 @@
 * Just for testing, add the QSC_RCS_AESNI_ENABLED preprocessor definition and enable SIMD and AES-NI.
 */
 #if !defined(QSC_RCS_AESNI_ENABLED)
-#	define QSC_RCS_AESNI_ENABLED
+//#	define QSC_RCS_AESNI_ENABLED
 #endif
 
 /***********************************
@@ -169,28 +170,28 @@
 #define QSC_RCS_BLOCK_SIZE 32
 
 /*!
-* \def QSC_RCS256_KEY_SIZE
+* \def QSC_RCS_256_KEY_SIZE
 * \brief The size in bytes of the RCS-256 input cipher-key.
 */
-#define QSC_RCS256_KEY_SIZE 32
+#define QSC_RCS_256_KEY_SIZE 32
 
 /*!
-* \def QSC_RCS256_MAC_SIZE
+* \def QSC_RCS_256_MAC_SIZE
 * \brief The RCS-256 MAC code array length in bytes.
 */
-#define QSC_RCS256_MAC_SIZE 32
+#define QSC_RCS_256_MAC_SIZE 32
 
 /*!
-* \def QSC_RCS512_KEY_SIZE
+* \def QSC_RCS_512_KEY_SIZE
 * \brief The size in bytes of the RCS-512 input cipher-key.
 */
-#define QSC_RCS512_KEY_SIZE 64
+#define QSC_RCS_512_KEY_SIZE 64
 
 /*!
-* \def QSC_RCS512_MAC_SIZE
+* \def QSC_RCS_512_MAC_SIZE
 * \brief The RCS-512 MAC code array length in bytes.
 */
-#define QSC_RCS512_MAC_SIZE 64
+#define QSC_RCS_512_MAC_SIZE 64
 
 /*!
 * \def QSC_RCS_NONCE_SIZE
@@ -201,10 +202,10 @@
 /*! \enum rcs_cipher_type
 * \brief The pre-defined cipher mode implementations
 */
-typedef enum
+typedef enum rcs_cipher_type
 {
-	RCS256 = 1,	/*!< The RCS-256 cipher */
-	RCS512 = 2,	/*!< The RCS-512 cipher */
+	qsc_rcs_cipher_256 = 1,	/*!< The RCS-256 cipher */
+	qsc_rcs_cipher_512 = 2,	/*!< The RCS-512 cipher */
 } rcs_cipher_type;
 
 /*!
@@ -252,6 +253,14 @@ QSC_EXPORT_API typedef struct
 } qsc_rcs_state;
 
 /* public functions */
+
+/**
+* \brief Make a copy of the RCS cipher state.
+*
+* \param input: [const][struct] The input cipher state structure
+* \param output: [struct] The cipher state structure copy
+*/
+QSC_EXPORT_API void qsc_rcs_clone(const qsc_rcs_state* input, qsc_rcs_state* output);
 
 /**
 * \brief Dispose of the RCS cipher state.

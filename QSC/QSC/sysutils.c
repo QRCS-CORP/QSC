@@ -58,9 +58,6 @@
 #	include <sys/types.h>
 #	include <unistd.h>
 #endif
-#if defined(QSC_SYSTEM_COMPILER_GCC)
-#	elif defined(QSC_SYSTEM_COMPILER_GCC)
-#endif
 
 size_t qsc_sysutils_computer_name(char* name)
 {
@@ -247,6 +244,8 @@ uint64_t qsc_sysutils_system_uptime()
 
 	struct timespec ts;
 
+	res = 0;
+
 	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
 	{
 		res = (uint64_t)((ts.tv_sec * 1000ULL) + (ts.tv_nsec / 1000000ULL));
@@ -267,12 +266,13 @@ uint64_t qsc_sysutils_system_timestamp()
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
+#if defined(QSC_SYSTEM_ARCH_IX86_32)
 	if (qsc_sysutils_rdtsc_available())
 	{
-		// use tsc if available
 		rtme = __rdtsc();
 	}
 	else
+#endif
 	{
 		int64_t ctr1 = 0;
 		int64_t freq = 0;
@@ -280,7 +280,7 @@ uint64_t qsc_sysutils_system_timestamp()
 		if (QueryPerformanceCounter((LARGE_INTEGER*)&ctr1) != 0)
 		{
 			QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-			// return microseconds to milliseconds
+			
 			if (freq > 0)
 			{
 				rtme = (ctr1 * 1000ULL / freq);
@@ -290,25 +290,23 @@ uint64_t qsc_sysutils_system_timestamp()
 		{
 			FILETIME ft;
 			LARGE_INTEGER li;
-			// Get the amount of 100 nano seconds intervals elapsed since January 1, 1601 (UTC) and copy it to a LARGE_INTEGER structure
+			
 			GetSystemTimeAsFileTime(&ft);
 			li.LowPart = ft.dwLowDateTime;
 			li.HighPart = ft.dwHighDateTime;
 			rtme = (uint64_t)li.QuadPart;
-			// Convert from file time to UNIX epoch time.
 			rtme -= 116444736000000000LL;
-			// From 100 nano seconds (10^-7) to 1 millisecond (10^-3) intervals
 			rtme /= 10000;
 		}
 	}
 
 #elif (defined(QSC_SYSTEM_OS_HPUX) || defined(QSC_SYSTEM_OS_SUNUX)) && (defined(__SVR4) || defined(__svr4__))
 
-	// HP-UX, Solaris
+	/* HP-UX, Solaris */
 	rtme = (uint64_t)gethrtime();
 
 #elif defined(QSC_SYSTEM_OS_APPLE)
-	// OSX
+	/* OSX */
 	static double timeConvert = 0.0;
 	mach_timebase_info_data_t timeBase;
 	(void)mach_timebase_info(&timeBase);
@@ -317,28 +315,28 @@ uint64_t qsc_sysutils_system_timestamp()
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
-	// POSIX
+	/* POSIX */
 #	if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
 	struct timespec ts;
 
 #		if defined(CLOCK_MONOTONIC_PRECISE)
-	// BSD
-	const clockid_t id = CLOCK_MONOTONIC_PRECISE;
+			/* BSD */
+			const clockid_t id = CLOCK_MONOTONIC_PRECISE;
 #		elif defined(CLOCK_MONOTONIC_RAW)
-	// Linux
-	const clockid_t id = CLOCK_MONOTONIC_RAW;
+			/* Linux */
+			const clockid_t id = CLOCK_MONOTONIC_RAW;
 #		elif defined(CLOCK_HIGHRES)
-	// Solaris
-	const clockid_t id = CLOCK_HIGHRES;
+			/* Solaris */
+			const clockid_t id = CLOCK_HIGHRES;
 #		elif defined(CLOCK_MONOTONIC)
-	// AIX, BSD, Linux, POSIX, Solaris
-	const clockid_t id = CLOCK_MONOTONIC;
+			/* AIX, BSD, Linux, POSIX, Solaris */
+			const clockid_t id = CLOCK_MONOTONIC;
 #		elif defined(CLOCK_REALTIME)
-	// AIX, BSD, HP-UX, Linux, POSIX
-	const clockid_t id = CLOCK_REALTIME;
+			/* AIX, BSD, HP - UX, Linux, POSIX */
+			const clockid_t id = CLOCK_REALTIME;
 #		else
-	// Unknown
-	const clockid_t id = (clockid_t)-1;
+			/* Unknown */
+			const clockid_t id = (clockid_t)-1;
 #		endif
 #	endif
 

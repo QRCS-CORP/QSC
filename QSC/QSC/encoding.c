@@ -79,6 +79,12 @@ size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 			if (input[i] == '=')
 			{
 				--res;
+
+				if (i > 0 && input[i - 1] == '=')
+				{
+					--res;
+				}
+
 				break;
 			}
 		}

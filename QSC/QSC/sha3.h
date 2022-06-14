@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -245,7 +245,7 @@ QSC_EXPORT_API typedef struct
 * \enum qsc_keccak_rate
 * \brief The Keccak rate; determines which security strength is used by the function, 128, 256, or 512-bit
 */
-typedef enum
+typedef enum qsc_keccak_rate
 {
 	qsc_keccak_rate_none = 0,						/*!< No bit rate was selected  */
 	qsc_keccak_rate_128 = QSC_KECCAK_128_RATE,		/*!< The Keccak 128-bit rate  */

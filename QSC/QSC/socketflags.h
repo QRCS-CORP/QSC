@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -105,9 +105,11 @@ typedef enum qsc_socket_receive_flags
 {
 	qsc_socket_receive_flag_none = 0x00000000L,			/*!< No flag is used */
 	qsc_socket_receive_flag_out_of_band = 0x00000001L,	/*!< Process out of band data MSG_OOB */
-	qsc_socket_receive_flag_peek = 0x00000002L,			/*!< Peeks at the incoming data MSG_PEEK */
+	qsc_socket_receive_flag_peek = 0x00000002L,			/*!< Peeks at the incoming data MSG_PEEK */ //0x40
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	qsc_socket_receive_flag_wait_all = 0x00000008L		/*!< Request completes only when buffer is full MSG_WAITALL */
+#elif defined(QSC_SYSTEM_OS_APPLE)
+	qsc_socket_receive_flag_wait_all = 0x00000040L		/*!< Request completes only when buffer is full MSG_WAITALL */
 #else
 	qsc_socket_receive_flag_wait_all = 0x00000100L		/*!< Request completes only when buffer is full MSG_WAITALL */
 #endif

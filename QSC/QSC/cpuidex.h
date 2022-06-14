@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -27,7 +27,6 @@
 
 #include "common.h"
 
-
 /*!
 * \def QSC_CPUIDEX_SERIAL_LENGTH
 * \brief The CPU serial number length
@@ -48,11 +47,13 @@
 * \enum qsc_cpuidex_cpu_type
 * \brief The detectable CPU architectures
 */
-typedef enum
+typedef enum qsc_cpuidex_cpu_type
 {
     qsc_cpuid_unknown = 0,                  /*!< The CPU type is unknown  */
     qsc_cpuid_amd = 1,                      /*!< The CPU type is AMD  */
     qsc_cpuid_intel = 2,                    /*!< The CPU type is Intel */
+    qsc_cpuid_via = 3,                      /*!< The CPU type is VIA */
+    qsc_cpuid_hygion = 4,                   /*!< The CPU type is Hygion */
 } qsc_cpuidex_cpu_type;
 
 /*!
@@ -63,13 +64,21 @@ QSC_EXPORT_API typedef struct
 {
 	bool adx;	                            	/*!< The ADX flag  */
     bool aesni;	                            	/*!< The AESNI flag  */
+    bool pcmul;                             	/*!< The PCLMULQDQ flag */
+
+    bool armv7;                                 /*!< ARMv7 cpu flag */
+    bool neon;                                  /*!< Neon instructions flag */
+    bool sha256;                                /*!< SHA2-256 flag */
+    bool sha512;                                /*!< SHA2-512 flag */
+    bool sha3;                                  /*!< SHA3 flag */
+
     bool avx;                               	/*!< The AVX flag */
     bool avx2;                              	/*!< The AVX2 flag */
     bool avx512f;                           	/*!< The AVX512F flag */
     bool hyperthread;                       	/*!< The hyper-thread flag */
-    bool pcmul;                             	/*!< The PCLMULQDQ flag */
     bool rdrand;                            	/*!< The RDRAND flag */
     bool rdtcsp;                            	/*!< The RDTCSP flag */
+
     uint32_t cacheline;                     	/*!< The number of cache lines */
     uint32_t cores;                         	/*!< The number of cores */
     uint32_t cpus;                          	/*!< The number of CPUs */

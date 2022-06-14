@@ -255,7 +255,7 @@ qsc_socket_exceptions qsc_socket_bind_ipv4(qsc_socket* sock, const qsc_ipinfo_ip
 		ip4u = qsc_intutils_be8to32(address->ipv4);
 		sa.sin_addr.s_addr = ip4u;
 #if defined(QSC_SYSTEM_OS_APPLE)
-		sa.sin_len = sizeof(sockaddr_in);
+		sa.sin_len = sizeof(sa);
 #endif
 
 		res = (qsc_socket_exceptions)bind(sock->connection, (const struct sockaddr*)&sa, sizeof(sa));
@@ -297,8 +297,8 @@ qsc_socket_exceptions qsc_socket_bind_ipv6(qsc_socket* sock, const qsc_ipinfo_ip
 #elif defined(QSC_SYSTEM_OS_LINUX)
 		qsc_memutils_copy(sa.sin6_addr.__in6_u.__u6_addr8, address->ipv6, 16);
 #elif defined(QSC_SYSTEM_OS_APPLE)
-		qsc_memutils_copy(sa.in6_addr.__u6_addr8, address->ipv6, 16);
-		sa.sin6_len = sizeof(sockaddr_in);
+		qsc_memutils_copy(sa.sin6_addr.__u6_addr.__u6_addr8, address->ipv6, 16);
+		sa.sin6_len = sizeof(sa);
 #endif
 
 		res = (qsc_socket_exceptions)bind(sock->connection, (const struct sockaddr*)&sa, sizeof(sa));

@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -27,7 +27,7 @@
 * \file aes.h
 * \brief An implementation of the AES symmetric cipher
 *
-* AES-256 CTR short-form api example \n
+* AES-256 qsc_aes_mode_ctr short-form api example \n
 * \code
 * const size_t MSG_LEN = 200;
 * const size_t CST_LEN = 20;
@@ -40,7 +40,7 @@
 * qsc_hba_state state;
 * qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, nonce, cust, CST_LEN };
 *
-* qsc_aes_initialize(&state, &kp, true, AES256);
+* qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 * qsc_aes_ctr_transform(&state, output, msg, MSG_LEN)
 * \endcode
 */
@@ -68,8 +68,8 @@
 */
 typedef enum qsc_aes_cipher_type
 {
-	AES128 = 1,	/*!< The AES-128 block cipher */
-	AES256 = 2,	/*!< The AES-256 block cipher */
+	qsc_aes_cipher_128 = 1,	/*!< The AES-128 block cipher */
+	qsc_aes_cipher_256 = 2,	/*!< The AES-256 block cipher */
 } qsc_aes_cipher_type;
 
 /*! \enum qsc_aes_cipher_mode
@@ -77,9 +77,9 @@ typedef enum qsc_aes_cipher_type
 */
 typedef enum qsc_aes_cipher_mode
 {
-	CBC = 1,	/*!< Cipher Block Chaining */
-	CTR = 2,	/*!< segmented integer counter */
-	ECB = 3,	/*!< Electronic CodeBook mode (insecure) */
+	qsc_aes_mode_cbc = 1,	/*!< Cipher Block Chaining */
+	qsc_aes_mode_ctr = 2,	/*!< segmented integer counter */
+	qsc_aes_mode_ecb = 3,	/*!< Electronic CodeBook mode (insecure) */
 } qsc_aes_cipher_mode;
 
 /***********************************
@@ -195,7 +195,7 @@ QSC_EXPORT_API void qsc_aes_dispose(qsc_aes_state* state);
 * \param keyparams: [const] The input cipher-key, expanded to the state round-key array
 * \param encryption: Initialize the cipher for encryption, false for decryption mode
 *
-* \warning When using a CTR mode, the cipher is always initialized for encryption.
+* \warning When using a qsc_aes_mode_ctr mode, the cipher is always initialized for encryption.
 */
 QSC_EXPORT_API void qsc_aes_initialize(qsc_aes_state* state, const qsc_aes_keyparams* keyparams, bool encryption, qsc_aes_cipher_type ctype);
 
@@ -273,7 +273,7 @@ QSC_EXPORT_API size_t qsc_pkcs7_padding_length(const uint8_t* input);
 
 /**
 * \brief Transform a length of data using a Big Endian block cipher Counter mode. \n
-* The CTR mode will encrypt plain-text, and decrypt cipher-text.
+* The qsc_aes_mode_ctr mode will encrypt plain-text, and decrypt cipher-text.
 *
 * \warning the qsc_aes_initialize function must be called first to initialize the state
 *
@@ -286,7 +286,7 @@ QSC_EXPORT_API void qsc_aes_ctrbe_transform(qsc_aes_state* state, uint8_t* outpu
 
 /**
 * \brief Transform a length of data using a Little Endian block cipher Counter mode. \n
-* The CTR mode will encrypt plain-text, and decrypt cipher-text.
+* The qsc_aes_mode_ctr mode will encrypt plain-text, and decrypt cipher-text.
 *
 * \warning the qsc_aes_initialize function must be called first to initialize the state
 *
@@ -301,7 +301,7 @@ QSC_EXPORT_API void qsc_aes_ctrle_transform(qsc_aes_state* state, uint8_t* outpu
 
 /**
 * \brief Decrypt one 16-byte block of cipher-text using Electronic CodeBook Mode mode. \n
-* \warning ECB is not a secure mode, and should be used only for testing, or building more complex primitives.
+* \warning qsc_aes_mode_ecb is not a secure mode, and should be used only for testing, or building more complex primitives.
 *
 * \param state: [struct] The initialized qsc_aes_state structure
 * \param output: The output byte array; receives the decrypted plain-text
@@ -311,7 +311,7 @@ QSC_EXPORT_API void qsc_aes_ecb_decrypt_block(const qsc_aes_state* state, uint8_
 
 /**
 * \brief Encrypt one 16-byte block of cipher-text using Electronic CodeBook Mode mode. \n
-* \warning ECB is not a secure mode, and should be used only for testing, or building more complex primitives.
+* \warning qsc_aes_mode_ecb is not a secure mode, and should be used only for testing, or building more complex primitives.
 *
 * \param state: [struct] The initialized qsc_aes_state structure
 * \param output: The output byte array; receives the encrypted cipher-text

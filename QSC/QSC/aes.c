@@ -27,7 +27,7 @@
 
 /*!
 \def AES_NONCE_SIZE
-* The size byte size of the CTR nonce and CBC initialization vector.
+* The size byte size of the qsc_aes_mode_ctr nonce and qsc_aes_mode_cbc initialization vector.
 */
 #define AES_NONCE_SIZE QSC_AES_BLOCK_SIZE
 
@@ -277,13 +277,13 @@ void qsc_aes_initialize(qsc_aes_state* state, const qsc_aes_keyparams* keyparams
 
 	qsc_memutils_clear((uint8_t*)state->roundkeys, sizeof(state->roundkeys));
 
-	if (ctype == AES256)
+	if (ctype == qsc_aes_cipher_256)
 	{
 		state->roundkeylen = AES256_ROUNDKEY_SIZE;
 		state->rounds = 14;
 		aes_standard_expand(state, keyparams);
 	}
-	else if (ctype == AES128)
+	else if (ctype == qsc_aes_cipher_128)
 	{
 		state->roundkeylen = AES128_ROUNDKEY_SIZE;
 		state->rounds = 10;
@@ -1125,13 +1125,13 @@ void qsc_aes_initialize(qsc_aes_state* state, const qsc_aes_keyparams* keyparams
 
 	qsc_memutils_clear((uint8_t*)state->roundkeys, sizeof(state->roundkeys));
 
-	if (ctype == AES256)
+	if (ctype == qsc_aes_cipher_256)
 	{
 		state->roundkeylen = AES256_ROUNDKEY_SIZE;
 		state->rounds = 14;
 		aes_standard_expand(state, keyparams);
 	}
-	else if (ctype == AES128)
+	else if (ctype == qsc_aes_cipher_128)
 	{
 		state->roundkeylen = AES128_ROUNDKEY_SIZE;
 		state->rounds = 10;
@@ -1557,7 +1557,7 @@ void qsc_aes_hba256_initialize(qsc_aes_hba256_state* state, const qsc_aes_keypar
 	/* initialize the key parameters struct, info is optional */
 	qsc_aes_keyparams kp = { cprk, QSC_AES256_KEY_SIZE, keyparams->nonce };
 	/* initialize the cipher state */
-	qsc_aes_initialize(&state->cstate, &kp, true, AES256);
+	qsc_aes_initialize(&state->cstate, &kp, true, qsc_aes_cipher_256);
 
 	/* populate the hba state structure with mac-key and counter */
 	/* the state counter always initializes at 1 */

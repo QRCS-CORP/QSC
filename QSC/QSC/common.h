@@ -1,6 +1,6 @@
 /* The AGPL version 3 License (AGPLv3)
 *
-* Copyright (c) 2021 Digital Freedom Defence Inc.
+* Copyright (c) 2022 Digital Freedom Defence Inc.
 * This file is part of the QSC Cryptographic library
 *
 * This program is free software : you can redistribute it and / or modify
@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <limits.h>
 #include <string.h>
 
 /**
@@ -56,7 +57,6 @@
 #	define QSC_SYSTEM_COMPILER_GCC
 #elif defined(__clang__)
 #	define QSC_SYSTEM_COMPILER_CLANG
-
 #elif defined(__IBMC__) || defined(__IBMCPP__)
 #	define QSC_SYSTEM_COMPILER_IBM
 #elif defined(__INTEL_COMPILER) || defined(__ICL)
@@ -89,6 +89,7 @@
 #elif defined(__APPLE__) || defined(__MACH__)
 #	include "TargetConditionals.h"
 #	define QSC_SYSTEM_OS_APPLE
+#	define QSC_SYSTEM_OS_BSD
 #	if defined(TARGET_OS_IPHONE) && defined(TARGET_IPHONE_SIMULATOR)
 #		define QSC_SYSTEM_ISIPHONESIM
 #	elif TARGET_OS_IPHONE
@@ -96,6 +97,8 @@
 #	else
 #		define QSC_SYSTEM_ISOSX
 #	endif
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__DragonFly__) || defined(QSC_SYSTEM_ISOSX)
+#	define QSC_SYSTEM_OS_BSD
 #elif defined(__linux) || defined(__linux__) || defined(__gnu_linux__ )
 #	define QSC_SYSTEM_OS_LINUX
     typedef int errno_t;
@@ -117,13 +120,16 @@
 #	define QSC_SYSTEM_OS_POSIX
 #endif
 
-
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
     /*!
     \def QSC_WINDOWS_VSTUDIO_BUILD
     * \brief The build is MSVC windows
     */
 #   define QSC_WINDOWS_VSTUDIO_BUILD
+#endif
+
+#if defined(_OPENMP)
+#	define QSC_SYSTEM_OPENMP
 #endif
 
 #if defined(DEBUG) || defined(_DEBUG) || defined(__DEBUG__) || (defined(__GNUC__) && !defined(__OPTIMIZE__))
@@ -140,14 +146,14 @@
 */
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #	if defined(_M_X64) || defined(_M_AMD64)
-#		define QSC_SYSTEM_ARCH_X64
-#		define QSC_SYSTEM_ARCH_X86_X64
+#		define QSC_SYSTEM_ARCH_IX86_64
+#		define QSC_SYSTEM_ARCH_IX86
 #		if defined(_M_AMD64)
 #			define QSC_SYSTEM_ARCH_AMD64
 #		endif
 #	elif defined(_M_IX86) || defined(_X86_)
+#		define QSC_SYSTEM_ARCH_IX86_32
 #		define QSC_SYSTEM_ARCH_IX86
-#		define QSC_SYSTEM_ARCH_X86_X64
 #	elif defined(_M_ARM)
 #		define QSC_SYSTEM_ARCH_ARM
 #		if defined(_M_ARM_ARMV7VE)
@@ -162,14 +168,14 @@
 #	endif
 #elif defined(QSC_SYSTEM_COMPILER_GCC)
 #	if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64)
-#		define QSC_SYSTEM_ARCH_X64
-#		define QSC_SYSTEM_ARCH_X86_X64
+#		define QSC_SYSTEM_ARCH_IX86_64
+#		define QSC_SYSTEM_ARCH_IX86
 #		if defined(_M_AMD64)
 #			define QSC_SYSTEM_ARCH_AMD64
 #		endif
 #	elif defined(i386) || defined(__i386) || defined(__i386__)
+#		define QSC_SYSTEM_ARCH_IX86_32
 #		define QSC_SYSTEM_ARCH_IX86
-#		define QSC_SYSTEM_ARCH_X86_X64
 #	elif defined(__arm__)
 #		define QSC_SYSTEM_ARCH_ARM
 #		if defined(__aarch64__)
@@ -185,16 +191,6 @@
 #			define QSC_SYSTEM_ARCH_SPARC64
 #		endif
 #	endif
-#endif
-
-/*!
-\def QSC_CPU_ARCH_XXX
-* \brief The identifies 32-bit or 64-bit architecture
-*/
-#if (defined(__x86_64__) || defined(__amd64__) || defined(_M_X64))
-#	define QSC_CPU_ARCH_X64
-#else
-#	define QSC_CPU_ARCH_X32
 #endif
 
 /*!
@@ -269,7 +265,7 @@
 #	define QSC_CACHE_ALIGNED __declspec(align(64))
 #endif
 
-#if defined(QSC_SYSTEM_ARCH_X64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_IA64) || defined(QSC_SYSTEM_ARCH_AMD64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_SPARC64)
+#if defined(QSC_SYSTEM_ARCH_IX86_64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_IA64) || defined(QSC_SYSTEM_ARCH_AMD64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_SPARC64)
 /*!
 \def QSC_SYSTEM_IS_X64
 * \brief The system is X64
@@ -330,16 +326,6 @@
 #endif
 
 /*!
-\def restrict
-* \brief Restrict an integer array
-*/
-#if defined(_MSC_VER) && _MSC_VER
-#	ifndef restrict
-#		define restrict __restrict
-#	endif
-#endif
-
-/*!
 \def uint128_t
 * \brief 128-bit uint32_t integer support
 */
@@ -374,7 +360,7 @@
 	} while(0)
 
 #elif defined(QSC_SYSTEM_COMPILER_GCC)
-#	if defined(QSC_SYSTEM_ARCH_X86_X64)
+#	if defined(QSC_SYSTEM_ARCH_IX86)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
 		do {																	\
 		asm("mulq %3" : "=d" (*High), "=X" (*Low) : "X" (X), "rm" (Y) : "cc");	\

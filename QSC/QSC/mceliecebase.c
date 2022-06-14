@@ -1050,9 +1050,9 @@ static void layer(int16_t* p, const uint8_t* cb, int32_t s, int32_t n)
 
 	index = 0;
 
-	for (size_t i = 0; i < n; i += stride * 2)
+	for (size_t i = 0; i < (size_t)n; i += stride * 2)
 	{
-		for (size_t j = 0; j < stride; ++j)
+		for (size_t j = 0; j < (size_t)stride; ++j)
 		{
 			d = p[i + j] ^ p[i + j + stride];
 			m = (cb[index >> 3] >> (index & 7)) & 1;

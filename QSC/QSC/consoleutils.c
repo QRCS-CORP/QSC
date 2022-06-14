@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 /* bogus winbase.h error */
 	QSC_SYSTEM_CONDITION_IGNORE(5105)
@@ -95,6 +94,64 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 	}
 
 	return slen;
+}
+
+size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_t maxlen)
+{
+	size_t i;
+	size_t len;
+	size_t pos;
+
+	len = 0;
+	pos = 0;
+
+	if (qsc_consoleutils_line_contains(input, "\"") == true)
+	{
+		for (i = 0; i < maxlen; ++i)
+		{
+			if (input[i] == 34)
+			{
+				pos = i + 1;
+				break;
+			}
+		}
+
+		for (i = pos; i < maxlen; ++i)
+		{
+			if (input[i] == 34)
+			{
+				len = i - pos;
+				break;
+			}
+		}
+	}
+	else if (qsc_consoleutils_line_contains(input, "\'") == true)
+	{
+		for (i = 0; i < maxlen; ++i)
+		{
+			if (input[i] == 39)
+			{
+				pos = i + 1;
+				break;
+			}
+		}
+
+		for (i = pos; i < maxlen; ++i)
+		{
+			if (input[i] == 39)
+			{
+				len = i - pos;
+				break;
+			}
+		}
+	}
+
+	if (len > 0 && len <= maxlen)
+	{
+		qsc_memutils_copy(output, input + pos, len);
+	}
+
+	return len;
 }
 
 size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen)

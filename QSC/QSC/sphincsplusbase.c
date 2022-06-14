@@ -329,7 +329,7 @@ static void sphincsplus_gen_message_random(uint8_t* R, const uint8_t* sk_prf, co
 
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, sk_prf, SPX_N);
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, optrand, SPX_N);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
+    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, (size_t)mlen);
     qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
     qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, R, SPX_N);
 }
@@ -346,7 +346,7 @@ static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* 
 
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, R, SPX_N);
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, pk, SPX_PK_BYTES);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
+    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, (size_t)mlen);
     qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
     qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, buf, SPX_DGST_BYTES);
 
