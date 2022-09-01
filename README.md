@@ -66,8 +66,10 @@ The Round-3 versions of the NIST PQC asymmetric ciphers and signature schemes.
 * ASM/SIMD integration and optimization
 * A post-quantum TLS 1.3 implementation
 
-### License
-AGPLv3
+## License
+This project's code is copyrighted, and the mechanism is patent pending.
+This placed here for educational purposes only, and not to be used commercially, or redistributed without the author's expressed written permission.
+All rights reserved by Digital Freedom Defense Inc. 2022.
 
 ## Disclaimer
 This project contains strong cryptography, before downloading the source files, 
