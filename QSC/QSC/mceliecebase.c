@@ -1633,14 +1633,14 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 	   return: 0 for success and -1 for failure */
 
 	gf mat[MCELIECE_SYS_T + 1][MCELIECE_SYS_T] = { 0 };
-	gf inv;
-	gf mask;
-	gf t;
-	int32_t res;
 	size_t c;
 	size_t i;
 	size_t j;
 	size_t k;
+	int32_t res;
+	gf inv;
+	gf mask;
+	gf t;
 
 	/* fill matrix */
 

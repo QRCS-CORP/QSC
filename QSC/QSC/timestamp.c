@@ -289,6 +289,20 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 	return (uint64_t)tsec;
 }
 
+uint64_t qsc_timestamp_datetime_utc()
+{
+	time_t lt;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	lt = 0;
+	time(&lt);
+#else
+	lt = time(NULL);
+#endif
+
+	return (uint64_t)lt;
+}
+
 void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP_STRING_SIZE])
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)

@@ -2,7 +2,7 @@
 #include "testutils.h"
 #include "../QSC/intutils.h"
 #include "../QSC/sha3.h"
-//xxx
+
 bool qsctest_sha3_256_kat()
 {
 	uint8_t exp0[QSC_SHA3_256_HASH_SIZE] = { 0 };

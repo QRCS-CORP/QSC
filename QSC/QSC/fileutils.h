@@ -1,20 +1,29 @@
-/* The AGPL version 3 License (AGPLv3)
+/*
+* 2022 John G. Underhill
+* All Rights Reserved.
 *
-* Copyright (c) 2022 Digital Freedom Defence Inc.
-* This file is part of the QSC Cryptographic library
-*
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
+* NOTICE:  All information contained herein is, and remains
+* the property of John G. Underhill.
+* The intellectual and technical concepts contained
+* herein are proprietary to John G. Underhill
+* and his suppliers and may be covered by U.S. and Foreign Patents,
+* patents in process, and are protected by trade secret or copyright law.
+* Dissemination of this information or reproduction of this material
+* is strictly forbidden unless prior written permission is obtained
+* from Digital Freedom Defense Incorporated.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
 *
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
+* This library was published publicly in hopes that it would aid in prototyping
+* post-quantum secure primitives for educational purposes only.
+* All and any commercial uses of this library are exclusively reserved by the author
+* John G. Underhill.
+* Any use of this library in a commercial context must be approved by the author
+* in writing.
+* All rights for commercial and/or non-educational purposes, are fully reserved
+* by the author.
 */
 
 #ifndef QSC_FILEUTILS_H
@@ -84,7 +93,7 @@ typedef enum qsc_fileutils_mode
 QSC_EXPORT_API bool qsc_fileutils_append_to_file(const char* path, const char* stream, size_t length);
 
 /**
-* \brief Copy a file to an object.
+* \brief Copy a file to an object
 *
 * \param path: [const] The full path to the file
 * \param obj: The object to write to the file
@@ -94,17 +103,17 @@ QSC_EXPORT_API bool qsc_fileutils_append_to_file(const char* path, const char* s
 QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_object(const char* path, void* obj, size_t length);
 
 /**
-* \brief Copy elements from a file to a byte array.
+* \brief Copy elements from a file to a byte array
 *
-* \param path: [const] The full path to the file
-* \param stream: The array to write to the file
-* \param length: The number of bytes to write to the file
-* \return Returns the number of characters written to the byte array
+* \param path: [const] The full path to the stream
+* \param stream: The stream receiving the file
+* \param length: The number of bytes to write to the stream
+* \return Returns the number of characters written to the stream
 */
 QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_stream(const char* path, char* stream, size_t length);
 
 /**
-* \brief Copy an object to a file.
+* \brief Copy an object to a file
 *
 * \param path: [const] The full path to the file
 * \param obj: [const] The object to write to the file
@@ -114,7 +123,7 @@ QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_stream(const char* path, char* 
 QSC_EXPORT_API bool qsc_fileutils_copy_object_to_file(const char* path, const void* obj, size_t length);
 
 /**
-* \brief Copy the contents of a stream to a file.
+* \brief Copy the contents of a stream to a file
 *
 * \param [const] path: The full path to the file
 * \param [const] stream: The array to write to the file
@@ -187,7 +196,7 @@ QSC_EXPORT_API size_t qsc_fileutils_get_extension(char* extension, size_t extlen
 QSC_EXPORT_API size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* path);
 
 /**
-* \brief Reads a line of text from a formatted file.
+* \brief Reads a line of text from a formatted file
 *
 * \warning line buffer must be freed after last call
 *

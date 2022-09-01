@@ -48,6 +48,12 @@ bool qsctest_sphincsplus_signature_integrity(void);
 bool qsctest_sphincsplus_stress_test(void);
 
 /**
+* \brief Tests the 512-bit extended version of the signature scheme
+* \return Returns one (true) for test success
+*/
+bool qsctest_sphincsplus_extended_test(void);
+
+/**
 * \brief Run the SPHINCS+ implementation stress and correctness tests tests
 */
 void qsctest_sphincsplus_run(void);

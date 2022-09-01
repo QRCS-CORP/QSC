@@ -22,7 +22,7 @@
 #endif
 
 /**
-* \brief Tests the CBC 128bit key KAT vectors from NIST SP800-85a.
+* \brief Tests the qsc_aes_mode_cbc 128bit key KAT vectors from NIST SP800-85a.
 *
 * \return Returns true for success
 *
@@ -32,7 +32,7 @@
 bool qsctest_fips_aes128_cbc(void);
 
 /**
-* \brief Tests the CBC 256-bit key KAT vectors from NIST SP800-85a.
+* \brief Tests the qsc_aes_mode_cbc 256-bit key KAT vectors from NIST SP800-85a.
 *
 * \return Returns true for success
 *
@@ -42,7 +42,7 @@ bool qsctest_fips_aes128_cbc(void);
 bool qsctest_fips_aes256_cbc(void);
 
 /**
-* \brief Tests the CTR 128bit key KAT vectors from NIST SP800-85a.
+* \brief Tests the qsc_aes_mode_ctr 128bit key KAT vectors from NIST SP800-85a.
 *
 * \return Returns true for success
 *
@@ -52,7 +52,7 @@ bool qsctest_fips_aes256_cbc(void);
 bool qsctest_fips_aes128_ctr(void);
 
 /**
-* \brief Tests the CTR 128bit key KAT vectors from NIST SP800-85a.
+* \brief Tests the qsc_aes_mode_ctr 128bit key KAT vectors from NIST SP800-85a.
 *
 * \return Returns true for success
 *
@@ -62,7 +62,7 @@ bool qsctest_fips_aes128_ctr(void);
 bool qsctest_fips_aes256_ctr(void);
 
 /**
-* \brief Tests the ECB mode 128bit key KAT vectors from NIST FIPS197 and SP800-85a
+* \brief Tests the qsc_aes_mode_ecb mode 128bit key KAT vectors from NIST FIPS197 and SP800-85a
 *
 * \return Returns true for success
 *
@@ -73,7 +73,7 @@ bool qsctest_fips_aes256_ctr(void);
 bool qsctest_fips_aes128_ecb(void);
 
 /**
-* \brief Tests the ECB 256-bit key KAT vectors from NIST FIPS197 and SP800-85a.
+* \brief Tests the qsc_aes_mode_ecb 256-bit key KAT vectors from NIST FIPS197 and SP800-85a.
 *
 * \return Returns true for success
 *

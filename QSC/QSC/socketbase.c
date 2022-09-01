@@ -708,20 +708,20 @@ size_t qsc_socket_send(const qsc_socket* sock, const uint8_t* input, size_t inle
 	return (size_t)res;
 }
 
-size_t qsc_socket_send_to(const qsc_socket* sock, const char* destination, size_t destlen, uint16_t port, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_send_to(const qsc_socket* sock, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
 {
 	int32_t res;
 
 	res = 0;
 
-	if (sock != NULL && destination != NULL && destlen > 0 && input != NULL)
+	if (sock != NULL && input != NULL)
 	{
 		if (sock->address_family == qsc_socket_address_family_ipv4)
 		{
 			struct sockaddr_in d;
 			d.sin_family = AF_INET;
-			d.sin_port = htons(port);
-			inet_pton(AF_INET, destination, &d.sin_addr);
+			d.sin_port = htons(sock->port);
+			inet_pton(AF_INET, sock->address, &d.sin_addr);
 
 			res = sendto(sock->connection, (const char*)input, (int32_t)inlen, (int32_t)flag, (struct sockaddr*)&d, sizeof(d));
 		}
@@ -729,8 +729,8 @@ size_t qsc_socket_send_to(const qsc_socket* sock, const char* destination, size_
 		{
 			struct sockaddr_in6 d;
 			d.sin6_family = AF_INET6;
-			d.sin6_port = htons(port);
-			inet_pton(AF_INET6, destination, &d.sin6_addr);
+			d.sin6_port = htons(sock->port);
+			inet_pton(AF_INET6, sock->address, &d.sin6_addr);
 
 			res = sendto(sock->connection, (const char*)input, (int32_t)inlen, (int32_t)flag, (struct sockaddr*)&d, sizeof(d));
 		}

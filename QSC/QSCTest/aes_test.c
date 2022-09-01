@@ -38,7 +38,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	}
 
 	/* initialize the state */
-	qsc_aes_initialize(&state, &kp, true, AES128);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 	/* test the cbc encryption function */
 	for (i = 0; i < 4; ++i)
@@ -53,7 +53,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 	/* reset the iv and test the cbc decryption function */
 	qsc_memutils_copy(kp.nonce, iv, QSC_AES_BLOCK_SIZE);
-	qsc_aes_initialize(&state, &kp, false, AES128);
+	qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 
 	for (i = 0; i < 4; ++i)
 	{
@@ -86,7 +86,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	status = true;
 
 	/* initialize the state and create the round-keys */
-	qsc_aes_initialize(&state, &kp, true, AES256);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 	/* test the cbc encryption function */
 	for (i = 0; i < 4; ++i)
@@ -101,7 +101,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 	/* reset the iv and test decryption */
 	qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
-	qsc_aes_initialize(&state, &kp, false, AES256);
+	qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 
 	/* test the cbc decryption function */
 	for (i = 0; i < 4; ++i)
@@ -134,7 +134,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	status = true;
 
 	/* initialize the state and create the round-keys */
-	qsc_aes_initialize(&state, &kp, true, AES128);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 	/* test the ctr encryption function */
 	for (i = 0; i < 4; ++i)
@@ -153,7 +153,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	state.nonce = nce;
 
 	/* initialize the state and create the round-keys; encrypt always equals true with ctr mode */
-	qsc_aes_initialize(&state, &kp, true, AES128);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 	/* test the ctr decryption */
 	for (i = 0; i < 4; ++i)
@@ -186,7 +186,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	status = true;
 
 	/* initialize the state and create the round-keys */
-	qsc_aes_initialize(&state, &kp, true, AES256);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 	/* test the ctr encryption function */
 	for (i = 0; i < 4; ++i)
@@ -204,7 +204,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	state.nonce = nce;
 
 	/* initialize the state and create the round-keys; encrypt always equals true with ctr mode */
-	qsc_aes_initialize(&state, &kp, true, AES256);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 	/* test the ctr decryption */
 	for (i = 0; i < 4; ++i)
@@ -236,7 +236,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	status = true;
 
 	/* initialize the state and create the round-keys */
-	qsc_aes_initialize(&state, &kp, true, AES128);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 	/* test the ecb encryption function */
 	for (i = 0; i < 4; ++i)
@@ -250,7 +250,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	}
 
 	/* initialize the state */
-	qsc_aes_initialize(&state, &kp, false, AES128);
+	qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 
 	/* test the ecb decryption function */
 	for (i = 0; i < 4; ++i)
@@ -281,7 +281,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	status = true;
 
 	/* initialize the state and create the round-keys */
-	qsc_aes_initialize(&state, &kp, true, AES256);
+	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 	/* test the ecb encryption function */
 	for (i = 0; i < 4; ++i)
@@ -295,7 +295,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	}
 
 	/* initialize the state  */
-	qsc_aes_initialize(&state, &kp, false, AES256);
+	qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 
 	/* test the ecb decryption function */
 	for (i = 0; i < 4; ++i)
@@ -774,56 +774,56 @@ void qsctest_aes_run()
 {
 	if (qsctest_fips_aes128_cbc() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CBC(AES-128) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_cbc(AES-128) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CBC(AES-128) CBC KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_cbc(AES-128) qsc_aes_mode_cbc KAT test. \n");
 	}
 
 	if (qsctest_fips_aes256_cbc() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CBC(AES-256) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_cbc(AES-256) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CBC(AES-256) CBC KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_cbc(AES-256) qsc_aes_mode_cbc KAT test. \n");
 	}
 
 	if (qsctest_fips_aes128_ctr() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CTR(AES-128) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ctr(AES-128) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CTR(AES-128) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ctr(AES-128) KAT test. \n");
 	}
 
 	if (qsctest_fips_aes256_ctr() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CTR(AES-256) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ctr(AES-256) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CTR(AES-256) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ctr(AES-256) KAT test. \n");
 	}
 
 	if (qsctest_fips_aes128_ecb() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 ECB(AES-128) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ecb(AES-128) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-128) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ecb(AES-128) KAT test. \n");
 	}
 
 	if (qsctest_fips_aes256_ecb() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 ECB(AES-256) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ecb(AES-256) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-256) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ecb(AES-256) KAT test. \n");
 	}
 
 	if (qsctest_aes256_hba_kat() == true)

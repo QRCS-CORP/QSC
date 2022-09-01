@@ -224,7 +224,7 @@ size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, ui
 
 	if (sock != NULL && address != NULL && input != NULL)
 	{
-		res = qsc_socket_send_to(sock, address, strlen(address), port, (const uint8_t*)input, inlen, flag);
+		res = qsc_socket_send_to(sock, (const uint8_t*)input, inlen, flag);
 	}
 
 	return res;

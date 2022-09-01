@@ -9,17 +9,17 @@ bool qsctest_rcs256_kat()
 #if defined(QSC_RCS_AUTHENTICATED)
 	uint8_t ad[20] = { 0 };
 	uint8_t dec[32] = { 0 };
-	uint8_t enc1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t enc2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t exp1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t exp2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	uint8_t enc1[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
+	uint8_t enc2[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
+	uint8_t exp1[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
+	uint8_t exp2[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
 	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
 #else
 	uint8_t enc1[32] = { 0 };
 	uint8_t exp1[32] = { 0 };
 #endif
 
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
+	uint8_t key[QSC_RCS_256_KEY_SIZE] = { 0 };
 	uint8_t msg[32] = { 0 };
 	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
 
@@ -35,10 +35,10 @@ bool qsctest_rcs256_kat()
 #if defined(QSC_RCS_AUTHENTICATED)
 #	if defined(QSC_RCS_AUTH_KMACR12)
 	/* rcsc256p256 */
-	qsctest_hex_to_bin("D4E387B91DC17672FBF74AF42F28D16576DAE20AA03CA3D3D6711D3ED3821BF8"
-		"A282FF629207678A430AA676CFA1C21C763FA0C950136FA7338E55B5CFDEA89F", exp1, sizeof(exp1));
-	qsctest_hex_to_bin("7921324560D43CE63751293E280D638E50D60C6171BF6E78C"
-		"3BC7B160E3E9BE54709E5670CC8C6664CFED35709620A6642A21EE1EC054588082D4933E15F86DD", exp2, sizeof(exp2));
+	qsctest_hex_to_bin("7940917E9219A31248946F71647B15421535941574F84F79F6110C1F2F776D03"
+		"225B05B1FB100A4D9208522BACB1AEBEE62A94D19BFF53B41ACE75D031926707", exp1, sizeof(exp1));
+	qsctest_hex_to_bin("ABF3574126DAA563B423B0EEEE9970FD0C8F060F65CB00CDC05BB0DC047DB2AD"
+		"009BDF7169E5FBDFDEBB1CE9E01B6FEA7E9E36E33C3E885B28EEA26D4F14CE3D", exp2, sizeof(exp2));
 #	else
 	/* rcsc256k256 */
 	qsctest_hex_to_bin("7940917E9219A31248946F71647B15421535941574F84F79F"
@@ -53,7 +53,7 @@ bool qsctest_rcs256_kat()
 #endif
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { key, QSC_RCS_256_KEY_SIZE, nce };
 
 	status = true;
 
@@ -121,17 +121,17 @@ bool qsctest_rcs512_kat()
 #if defined(QSC_RCS_AUTHENTICATED)
 	uint8_t ad[20] = { 0 };
 	uint8_t dec[64] = { 0 };
-	uint8_t enc1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t enc2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t exp1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t exp2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	uint8_t enc1[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
+	uint8_t enc2[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
+	uint8_t exp1[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
+	uint8_t exp2[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
 	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
 #else
 	uint8_t enc1[64] = { 0 };
 	uint8_t exp1[64] = { 0 };
 #endif
 
-	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
+	uint8_t key[QSC_RCS_512_KEY_SIZE] = { 0 };
 	uint8_t msg[64] = { 0 };
 	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
 	bool status;
@@ -147,14 +147,14 @@ bool qsctest_rcs512_kat()
 #if defined(QSC_RCS_AUTHENTICATED)
 #	if defined(QSC_RCS_AUTH_KMACR12)
 	/* rcsc512p512 */
-	qsctest_hex_to_bin("B83B8234D260FBBBA5CB52BD1B37B30EDC2705FC53A7B846EFE04CDA430F0405"
-		"CB779CEA01B82D0407D9FA19AAB9D5969A93F35E245DD28A107A7A851EAF0DCE"
-		"44875E52383407C3C21EBEC2412C7E84EFE9AB9AC5FB65D9AD209774DF9A589C"
-		"D9142AFA79B46F5B52D4C066133FEBCD595C3ED50ABDCE9ACDC7E1EB3E107980", exp1, sizeof(exp1));
-	qsctest_hex_to_bin("720F4AFC15C716643AEA680AF059FFA560E8CFA0BD70AF3C7C05552D5768D122"
-		"3D19623EA202BC2136500BE6B9BFAFC8C840AB2E30E90FF343623AEBDE9BC00F"
-		"744482F38748DDA73748822C521FF7298F22AA35ADC9F56EC3AAFD3DF99904CD"
-		"B33489C684F17C06E861C6BED81EF8CAFA7C6479237298CBE98DECEFD204150C", exp2, sizeof(exp2));
+	qsctest_hex_to_bin("21E97A126E35BE731EF204E48248A2EEB01B692992F73786602F21031FBFB7C8"
+		"A1CF250F2EC948D5985B92667349B72EFA751048AF0B919AE9E16F177F5C97F2"
+		"2B1CF7254DEB7659203F37CCBB9D55C4DF916C06ACEC3FF684F47DB1802F2A2B"
+		"F433F1A838872DD8AD9C889D570F4CF801B15A2B84C069F5C8DF77E130B3CDDF", exp1, sizeof(exp1));
+	qsctest_hex_to_bin("388270BF8DF03483BB287FFA527D81403F0362210FD525657C8541250DFFE3BA"
+		"D1285FAB37A6821DA524F3F7FF7EFCB39C5B59E3897B177E45D6AA7F4BB5BE77"
+		"864E82FC36E22E830EBCC10DF875CFA126070CAFAC402113167920E0EC9E0D12"
+		"1FCCDEBF7112496AF04FD8FB6E83137666167FDDF9E0983ADA3AD179FDCF220A", exp2, sizeof(exp2));
 #	else
 	/* rcsc512k512 */
 	qsctest_hex_to_bin("21E97A126E35BE731EF204E48248A2EEB01B692992F73786602F21031FBFB7C8"
@@ -174,7 +174,7 @@ bool qsctest_rcs512_kat()
 #endif
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS512_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { key, QSC_RCS_512_KEY_SIZE, nce };
 
 	status = true;
 
@@ -244,7 +244,7 @@ bool qsctest_rcs256_stress_test()
 #endif
 	uint8_t* dec;
 	uint8_t* enc;
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
+	uint8_t key[QSC_RCS_256_KEY_SIZE] = { 0 };
 	uint8_t* msg;
 	uint8_t ncopy[QSC_RCS_NONCE_SIZE] = { 0 };
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
@@ -269,7 +269,7 @@ bool qsctest_rcs256_stress_test()
 		}
 
 #if defined(QSC_RCS_AUTHENTICATED)
-		enc = (uint8_t*)qsc_memutils_malloc(mlen + QSC_RCS256_MAC_SIZE);
+		enc = (uint8_t*)qsc_memutils_malloc(mlen + QSC_RCS_256_MAC_SIZE);
 #else
 		enc = (uint8_t*)qsc_memutils_malloc(mlen);
 #endif
@@ -281,7 +281,7 @@ bool qsctest_rcs256_stress_test()
 		{
 			qsc_intutils_clear8(dec, mlen);
 #if defined(QSC_RCS_AUTHENTICATED)
-			qsc_intutils_clear8(enc, mlen + QSC_RCS256_MAC_SIZE);
+			qsc_intutils_clear8(enc, mlen + QSC_RCS_256_MAC_SIZE);
 #else
 			qsc_intutils_clear8(enc, mlen);
 #endif
@@ -352,7 +352,7 @@ bool qsctest_rcs512_stress_test()
 #endif
 	uint8_t* dec;
 	uint8_t* enc;
-	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
+	uint8_t key[QSC_RCS_512_KEY_SIZE] = { 0 };
 	uint8_t* msg;
 	uint8_t ncopy[QSC_RCS_NONCE_SIZE] = { 0 };
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
@@ -377,7 +377,7 @@ bool qsctest_rcs512_stress_test()
 		}
 
 #if defined(QSC_RCS_AUTHENTICATED)
-		enc = (uint8_t*)qsc_memutils_malloc(mlen + QSC_RCS512_MAC_SIZE);
+		enc = (uint8_t*)qsc_memutils_malloc(mlen + QSC_RCS_512_MAC_SIZE);
 #else
 		enc = (uint8_t*)qsc_memutils_malloc(mlen);
 #endif
@@ -389,7 +389,7 @@ bool qsctest_rcs512_stress_test()
 		{
 			qsc_intutils_clear8(dec, mlen);
 #if defined(QSC_RCS_AUTHENTICATED)
-			qsc_intutils_clear8(enc, mlen + QSC_RCS512_MAC_SIZE);
+			qsc_intutils_clear8(enc, mlen + QSC_RCS_512_MAC_SIZE);
 #else
 			qsc_intutils_clear8(enc, mlen);
 #endif
@@ -455,10 +455,10 @@ bool qsctest_rcs512_stress_test()
 
 bool qsctest_extended_cipher_test()
 {
-	uint8_t seed[QSC_RCS512_KEY_SIZE] = { 0 };
+	uint8_t seed[QSC_RCS_512_KEY_SIZE] = { 0 };
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	uint8_t inp[1024] = { 0 };
-	uint8_t cpt[1024 + QSC_RCS512_MAC_SIZE] = { 0 };
+	uint8_t cpt[1024 + QSC_RCS_512_MAC_SIZE] = { 0 };
 	uint8_t otp[1024] = { 0 };
 	qsc_rcs_state ctx = { 0 };
 	bool res;
@@ -467,7 +467,7 @@ bool qsctest_extended_cipher_test()
 
 	qsc_csp_generate(seed, sizeof(seed));
 	qsc_memutils_setvalue(inp, 0x80, sizeof(inp));
-	qsc_rcs_keyparams kp1 = { seed, QSC_RCS512_KEY_SIZE, nonce, NULL, 0 };
+	qsc_rcs_keyparams kp1 = { seed, QSC_RCS_512_KEY_SIZE, nonce, NULL, 0 };
 	qsc_rcs_initialize(&ctx, &kp1, true);
 
 	for (size_t i = 0; i < 4; ++i)
@@ -483,7 +483,7 @@ bool qsctest_extended_cipher_test()
 	if (res == true)
 	{
 		qsc_memutils_setvalue(nonce, 0x00, sizeof(nonce));
-		qsc_rcs_keyparams kp2 = { seed, QSC_RCS512_KEY_SIZE, nonce, NULL, 0 };
+		qsc_rcs_keyparams kp2 = { seed, QSC_RCS_512_KEY_SIZE, nonce, NULL, 0 };
 		qsc_rcs_initialize(&ctx, &kp2, false);
 
 		for (size_t i = 0; i < 4; ++i)
@@ -506,7 +506,7 @@ bool qsctest_rcs_wide_equality()
 	const size_t SMPMIN = 16 * 128;
 	uint8_t* dec;
 	uint8_t* enc;
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
+	uint8_t key[QSC_RCS_256_KEY_SIZE] = { 0 };
 	uint8_t* msg;
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	uint8_t ncopy[QSC_RCS_NONCE_SIZE] = { 0 };

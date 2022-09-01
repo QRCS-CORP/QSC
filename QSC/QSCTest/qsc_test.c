@@ -47,9 +47,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.5l (A5)                       *");
+	qsctest_print_line("* Release:   v1.0.0.5n (A5)                       *");
 	qsctest_print_line("* License:   GPLv3                                *");
-	qsctest_print_line("* Date:      November 31, 2021                    *");
+	qsctest_print_line("* Date:      August 31, 2022                      *");
 	qsctest_print_line("* Contact:   support@digitalfreedomdefence.com    *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -148,7 +148,7 @@ int main(void)
 			qsctest_print_line("For best performance, enable the maximum available AVX feature set in the project properties (AVX/AVX2/AVX512).");
 		}
 
-#if defined(QSC_IS_X86)
+#if defined(QSC_SYSTEM_ARCH_IX86_32)
 		qsctest_print_line("The system is running in X86 mode; for best performance, compile as X64.");
 #endif
 

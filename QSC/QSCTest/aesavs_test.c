@@ -75,7 +75,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
 					qsc_aes_state state;
 					qsc_aes_keyparams kp1 = { key, QSC_AES128_KEY_SIZE, ivc };
-					qsc_aes_initialize(&state, &kp1, true, AES128);
+					qsc_aes_initialize(&state, &kp1, true, qsc_aes_cipher_128);
 					qsc_aes_cbc_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
 
@@ -87,7 +87,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
 					qsc_aes_keyparams kp2 = { key, QSC_AES128_KEY_SIZE, ivc };
-					qsc_aes_initialize(&state, &kp2, false, AES128);
+					qsc_aes_initialize(&state, &kp2, false, qsc_aes_cipher_128);
 					qsc_aes_cbc_decrypt_block(&state, dec, otp);
 					qsc_aes_dispose(&state);
 
@@ -184,7 +184,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
 					qsc_aes_state state;
 					qsc_aes_keyparams kp1 = { key, QSC_AES256_KEY_SIZE, ivc };
-					qsc_aes_initialize(&state, &kp1, true, AES256);
+					qsc_aes_initialize(&state, &kp1, true, qsc_aes_cipher_256);
 					qsc_aes_cbc_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
 
@@ -196,7 +196,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
 					qsc_aes_keyparams kp2 = { key, QSC_AES256_KEY_SIZE, ivc };
-					qsc_aes_initialize(&state, &kp2, false, AES256);
+					qsc_aes_initialize(&state, &kp2, false, qsc_aes_cipher_256);
 					qsc_aes_cbc_decrypt_block(&state, dec, otp);
 					qsc_aes_dispose(&state);
 
@@ -285,7 +285,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
 
 					qsc_aes_state state;
 					qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
-					qsc_aes_initialize(&state, &kp, true, AES128);
+					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 					qsc_aes_ecb_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
 
@@ -295,7 +295,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
 						break;
 					}
 
-					qsc_aes_initialize(&state, &kp, false, AES128);
+					qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 					qsc_aes_ecb_decrypt_block(&state, dec, otp);
 					qsc_aes_dispose(&state);
 
@@ -384,7 +384,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
 
 					qsc_aes_state state;
 					qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
-					qsc_aes_initialize(&state, &kp, true, AES256);
+					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 					qsc_aes_ecb_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
 
@@ -394,7 +394,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
 						break;
 					}
 
-					qsc_aes_initialize(&state, &kp, false, AES256);
+					qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 					qsc_aes_ecb_decrypt_block(&state, dec, otp);
 					qsc_aes_dispose(&state);
 
@@ -501,7 +501,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 
 						qsc_aes_state state;
 						qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
-						qsc_aes_initialize(&state, &kp, true, AES128);
+						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 						for (i = 0; i < 1000; ++i)
 						{
@@ -533,7 +533,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 
 						qsc_aes_state state;
 						qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
-						qsc_aes_initialize(&state, &kp, false, AES128);
+						qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 
 						for (i = 0; i < 1000; ++i)
 						{
@@ -653,7 +653,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 
 						qsc_aes_state state;
 						qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
-						qsc_aes_initialize(&state, &kp, true, AES256);
+						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 						for (i = 0; i < 1000; ++i)
 						{
@@ -685,7 +685,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 
 						qsc_aes_state state;
 						qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
-						qsc_aes_initialize(&state, &kp, false, AES256);
+						qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 
 						for (i = 0; i < 1000; ++i)
 						{
@@ -788,7 +788,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
 
 					qsc_aes_state state;
 					qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
-					qsc_aes_initialize(&state, &kp, true, AES128);
+					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 					qsc_memutils_copy(plnc, pln, QSC_AES_BLOCK_SIZE);
 
 					for (i = 0; i < 1000; ++i)
@@ -805,7 +805,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
 						break;
 					}
 
-					qsc_aes_initialize(&state, &kp, false, AES128);
+					qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 
 					for (i = 0; i < 1000; ++i)
 					{
@@ -901,7 +901,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
 
 					qsc_aes_state state;
 					qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
-					qsc_aes_initialize(&state, &kp, true, AES256);
+					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 					qsc_memutils_copy(plnc, pln, QSC_AES_BLOCK_SIZE);
 
 					for (i = 0; i < 1000; ++i)
@@ -918,7 +918,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
 						break;
 					}
 
-					qsc_aes_initialize(&state, &kp, false, AES256);
+					qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 
 					for (i = 0; i < 1000; ++i)
 					{
@@ -1068,7 +1068,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 
 							qsc_aes_state state;
 							qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
-							qsc_aes_initialize(&state, &kp, true, AES128);
+							qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
 							{
@@ -1097,7 +1097,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 
 							qsc_aes_state state;
 							qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
-							qsc_aes_initialize(&state, &kp, false, AES128);
+							qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
 							{
@@ -1252,7 +1252,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 
 							qsc_aes_state state;
 							qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
-							qsc_aes_initialize(&state, &kp, true, AES256);
+							qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
 							{
@@ -1281,7 +1281,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 
 							qsc_aes_state state;
 							qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
-							qsc_aes_initialize(&state, &kp, false, AES256);
+							qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
 							{
@@ -1417,7 +1417,7 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 					{
 						qsc_aes_state state;
 						qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
-						qsc_aes_initialize(&state, &kp, true, AES128);
+						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 						for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
 						{
@@ -1551,7 +1551,7 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 					{
 						qsc_aes_state state;
 						qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
-						qsc_aes_initialize(&state, &kp, true, AES256);
+						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 						for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
 						{
@@ -1591,10 +1591,10 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 
 bool aesavs_cbc_kat()
 {
-	const char* CBC128_VARKEY = "AESAVS/CBC/KAT/CBCVarKey128.rsp";
-	const char* CBC128_VARTXT = "AESAVS/CBC/KAT/CBCVarTxt128.rsp";
-	const char* CBC256_VARKEY = "AESAVS/CBC/KAT/CBCVarKey256.rsp";
-	const char* CBC256_VARTXT = "AESAVS/CBC/KAT/CBCVarTxt256.rsp";
+	const char* CBC128_VARKEY = "AESAVS/qsc_aes_mode_cbc/KAT/CBCVarKey128.rsp";
+	const char* CBC128_VARTXT = "AESAVS/qsc_aes_mode_cbc/KAT/CBCVarTxt128.rsp";
+	const char* CBC256_VARKEY = "AESAVS/qsc_aes_mode_cbc/KAT/CBCVarKey256.rsp";
+	const char* CBC256_VARTXT = "AESAVS/qsc_aes_mode_cbc/KAT/CBCVarTxt256.rsp";
 	bool res;
 
 	if (qsc_fileutils_exists(CBC128_VARKEY) && qsc_fileutils_exists(CBC128_VARTXT) && qsc_fileutils_exists(CBC256_VARKEY) && qsc_fileutils_exists(CBC256_VARTXT) == true)
@@ -1603,25 +1603,25 @@ bool aesavs_cbc_kat()
 
 		if (aesavs_cbc128_kat(CBC128_VARKEY) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-128) variable key KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-128) variable key KAT test. \n");
 			res = false;
 		}
 
 		if (aesavs_cbc128_kat(CBC128_VARTXT) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-128) variable text KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-128) variable text KAT test. \n");
 			res = false;
 		}
 
 		if (aesavs_cbc256_kat(CBC256_VARKEY) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-256) variable key KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-256) variable key KAT test. \n");
 			res = false;
 		}
 
 		if (aesavs_cbc256_kat(CBC256_VARTXT) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-256) variable text KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-256) variable text KAT test. \n");
 			res = false;
 		}
 	}
@@ -1635,10 +1635,10 @@ bool aesavs_cbc_kat()
 
 bool aesavs_ecb_kat()
 {
-	const char* ECB128_VARKEY = "AESAVS/ECB/KAT/ECBVarKey128.rsp";
-	const char* ECB128_VARTXT = "AESAVS/ECB/KAT/ECBVarTxt128.rsp";
-	const char* ECB256_VARKEY = "AESAVS/ECB/KAT/ECBVarKey256.rsp";
-	const char* ECB256_VARTXT = "AESAVS/ECB/KAT/ECBVarTxt256.rsp";
+	const char* ECB128_VARKEY = "AESAVS/qsc_aes_mode_ecb/KAT/ECBVarKey128.rsp";
+	const char* ECB128_VARTXT = "AESAVS/qsc_aes_mode_ecb/KAT/ECBVarTxt128.rsp";
+	const char* ECB256_VARKEY = "AESAVS/qsc_aes_mode_ecb/KAT/ECBVarKey256.rsp";
+	const char* ECB256_VARTXT = "AESAVS/qsc_aes_mode_ecb/KAT/ECBVarTxt256.rsp";
 	bool res;
 
 	if (qsc_fileutils_exists(ECB128_VARKEY) && qsc_fileutils_exists(ECB128_VARTXT) && qsc_fileutils_exists(ECB256_VARKEY) && qsc_fileutils_exists(ECB256_VARTXT) == true)
@@ -1647,25 +1647,25 @@ bool aesavs_ecb_kat()
 
 		if (aesavs_ecb128_kat(ECB128_VARKEY) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-128) variable key KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-128) variable key KAT test. \n");
 			res = false;
 		}
 
 		if (aesavs_ecb128_kat(ECB128_VARTXT) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-128) variable text KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-128) variable text KAT test. \n");
 			res = false;
 		}
 
 		if (aesavs_ecb256_kat(ECB256_VARKEY) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-256) variable key KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-256) variable key KAT test. \n");
 			res = false;
 		}
 
 		if (aesavs_ecb256_kat(ECB256_VARTXT) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-256) variable text KAT test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-256) variable text KAT test. \n");
 			res = false;
 		}
 	}
@@ -1679,8 +1679,8 @@ bool aesavs_ecb_kat()
 
 bool aesavs_cbc_mct()
 {
-	const char* CBC128_MCT = "AESAVS/CBC/MCT/CBCMCT128.rsp";
-	const char* CBC256_MCT = "AESAVS/CBC/MCT/CBCMCT256.rsp";
+	const char* CBC128_MCT = "AESAVS/qsc_aes_mode_cbc/MCT/CBCMCT128.rsp";
+	const char* CBC256_MCT = "AESAVS/qsc_aes_mode_cbc/MCT/CBCMCT256.rsp";
 	bool res;
 
 	if (qsc_fileutils_exists(CBC128_MCT) && qsc_fileutils_exists(CBC256_MCT) == true)
@@ -1689,13 +1689,13 @@ bool aesavs_cbc_mct()
 
 		if (aesavs_cbc128_mct(CBC128_MCT) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-128) monte carlo test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-128) monte carlo test. \n");
 			res = false;
 		}
 
 		if (aesavs_cbc256_mct(CBC256_MCT) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-256) monte carlo test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-256) monte carlo test. \n");
 			res = false;
 		}
 	}
@@ -1709,8 +1709,8 @@ bool aesavs_cbc_mct()
 
 bool aesavs_ecb_mct()
 {
-	const char* ECB128_MCT = "AESAVS/ECB/MCT/ECBMCT128.rsp";
-	const char* ECB256_MCT = "AESAVS/ECB/MCT/ECBMCT256.rsp";
+	const char* ECB128_MCT = "AESAVS/qsc_aes_mode_ecb/MCT/ECBMCT128.rsp";
+	const char* ECB256_MCT = "AESAVS/qsc_aes_mode_ecb/MCT/ECBMCT256.rsp";
 	bool res;
 
 	if (qsc_fileutils_exists(ECB128_MCT) && qsc_fileutils_exists(ECB256_MCT) == true)
@@ -1719,13 +1719,13 @@ bool aesavs_ecb_mct()
 
 		if (aesavs_ecb128_mct(ECB128_MCT) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-128) monte carlo test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-128) monte carlo test. \n");
 			res = false;
 		}
 
 		if (aesavs_ecb256_mct(ECB256_MCT) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-256) monte carlo test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-256) monte carlo test. \n");
 			res = false;
 		}
 	}
@@ -1739,8 +1739,8 @@ bool aesavs_ecb_mct()
 
 bool aesavs_cbc_mmt()
 {
-	const char* CBC128_MMT = "AESAVS/CBC/MMT/CBCMMT128.rsp";
-	const char* CBC256_MMT = "AESAVS/CBC/MMT/CBCMMT256.rsp";
+	const char* CBC128_MMT = "AESAVS/qsc_aes_mode_cbc/MMT/CBCMMT128.rsp";
+	const char* CBC256_MMT = "AESAVS/qsc_aes_mode_cbc/MMT/CBCMMT256.rsp";
 	bool res;
 
 	if (qsc_fileutils_exists(CBC128_MMT) && qsc_fileutils_exists(CBC256_MMT) == true)
@@ -1749,13 +1749,13 @@ bool aesavs_cbc_mmt()
 
 		if (aesavs_cbc128_mmt(CBC128_MMT) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-128) multi-block message test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-128) multi-block message test. \n");
 			res = false;
 		}
 
 		if (aesavs_cbc256_mmt(CBC256_MMT) == false)
 		{
-			qsctest_print_safe("AESAVS failed CBC(AES-256) multi-block message test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_cbc(AES-256) multi-block message test. \n");
 			res = false;
 		}
 	}
@@ -1769,8 +1769,8 @@ bool aesavs_cbc_mmt()
 
 bool aesavs_ecb_mmt()
 {
-	const char* ECB128_MMT = "AESAVS/ECB/MMT/ECBMMT128.rsp";
-	const char* ECB256_MMT = "AESAVS/ECB/MMT/ECBMMT256.rsp";
+	const char* ECB128_MMT = "AESAVS/qsc_aes_mode_ecb/MMT/ECBMMT128.rsp";
+	const char* ECB256_MMT = "AESAVS/qsc_aes_mode_ecb/MMT/ECBMMT256.rsp";
 	bool res;
 
 	if (qsc_fileutils_exists(ECB128_MMT) && qsc_fileutils_exists(ECB256_MMT) == true)
@@ -1779,13 +1779,13 @@ bool aesavs_ecb_mmt()
 
 		if (aesavs_ecb128_mmt(ECB128_MMT) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-128) multi-block message test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-128) multi-block message test. \n");
 			res = false;
 		}
 
 		if (aesavs_ecb256_mmt(ECB256_MMT) == false)
 		{
-			qsctest_print_safe("AESAVS failed ECB(AES-256) multi-block message test. \n");
+			qsctest_print_safe("AESAVS failed qsc_aes_mode_ecb(AES-256) multi-block message test. \n");
 			res = false;
 		}
 	}
@@ -1801,55 +1801,55 @@ void qsctest_aesavs_run()
 {
 	if (aesavs_cbc_kat() == true)
 	{
-		qsctest_print_safe("Success! Passed the AESAVS CBC(AES-128) and CBC(AES-256) KAT tests. \n");
+		qsctest_print_safe("Success! Passed the AESAVS qsc_aes_mode_cbc(AES-128) and qsc_aes_mode_cbc(AES-256) KAT tests. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed AESAVS CBC(AES-128) and CBC(AES-256) KAT tests. \n");
+		qsctest_print_safe("Failure! Failed AESAVS qsc_aes_mode_cbc(AES-128) and qsc_aes_mode_cbc(AES-256) KAT tests. \n");
 	}
 
 	if (aesavs_ecb_kat() == true)
 	{
-		qsctest_print_safe("Success! Passed the AESAVS ECB(AES-128) and ECB(AES-256) KAT tests. \n");
+		qsctest_print_safe("Success! Passed the AESAVS qsc_aes_mode_ecb(AES-128) and qsc_aes_mode_ecb(AES-256) KAT tests. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the AESAVS ECB(AES-128) and ECB(AES-256) KAT tests. \n");
+		qsctest_print_safe("Failure! Failed the AESAVS qsc_aes_mode_ecb(AES-128) and qsc_aes_mode_ecb(AES-256) KAT tests. \n");
 	}
 
 	if (aesavs_cbc_mct() == true)
 	{
-		qsctest_print_safe("Success! Passed the AESAVS CBC(AES-128) and CBC(AES-256) Monte Carlo tests. \n");
+		qsctest_print_safe("Success! Passed the AESAVS qsc_aes_mode_cbc(AES-128) and qsc_aes_mode_cbc(AES-256) Monte Carlo tests. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed AESAVS CBC(AES-128) and CBC(AES-256) Monte Carlo tests. \n");
+		qsctest_print_safe("Failure! Failed AESAVS qsc_aes_mode_cbc(AES-128) and qsc_aes_mode_cbc(AES-256) Monte Carlo tests. \n");
 	}
 
 	if (aesavs_ecb_mct() == true)
 	{
-		qsctest_print_safe("Success! Passed the AESAVS ECB(AES-128) and ECB(AES-256) Monte Carlo tests. \n");
+		qsctest_print_safe("Success! Passed the AESAVS qsc_aes_mode_ecb(AES-128) and qsc_aes_mode_ecb(AES-256) Monte Carlo tests. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the AESAVS ECB(AES-128) and ECB(AES-256) Monte Carlo tests. \n");
+		qsctest_print_safe("Failure! Failed the AESAVS qsc_aes_mode_ecb(AES-128) and qsc_aes_mode_ecb(AES-256) Monte Carlo tests. \n");
 	}
 
 	if (aesavs_cbc_mmt() == true)
 	{
-		qsctest_print_safe("Success! Passed the AESAVS CBC(AES-128) and CBC(AES-256) Multi-block Message tests. \n");
+		qsctest_print_safe("Success! Passed the AESAVS qsc_aes_mode_cbc(AES-128) and qsc_aes_mode_cbc(AES-256) Multi-block Message tests. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed AESAVS CBC(AES-128) and CBC(AES-256) Multi-block Message tests. \n");
+		qsctest_print_safe("Failure! Failed AESAVS qsc_aes_mode_cbc(AES-128) and qsc_aes_mode_cbc(AES-256) Multi-block Message tests. \n");
 	}
 
 	if (aesavs_ecb_mmt() == true)
 	{
-		qsctest_print_safe("Success! Passed the AESAVS ECB(AES-128) and ECB(AES-256) Multi-block Message tests. \n");
+		qsctest_print_safe("Success! Passed the AESAVS qsc_aes_mode_ecb(AES-128) and qsc_aes_mode_ecb(AES-256) Multi-block Message tests. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the AESAVS ECB(AES-128) and ECB(AES-256) Multi-block Message tests. \n");
+		qsctest_print_safe("Failure! Failed the AESAVS qsc_aes_mode_ecb(AES-128) and qsc_aes_mode_ecb(AES-256) Multi-block Message tests. \n");
 	}
 }

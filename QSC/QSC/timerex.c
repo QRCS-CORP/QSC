@@ -138,21 +138,22 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 #endif
 }
 
-clock_t qsc_timerex_stopwatch_start()
+uint64_t qsc_timerex_stopwatch_start()
 {
-	clock_t start;
+	uint64_t start;
 
-	start = clock();
+	start = (uint64_t)clock();
 
 	return start;
 }
 
-uint64_t qsc_timerex_stopwatch_elapsed(clock_t start)
+uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start)
 {
 	clock_t diff;
 	uint64_t msec;
 
-	diff = clock() - start;
+	msec = clock();
+	diff = msec - start;
 	msec = (diff * 1000) / CLOCKS_PER_SEC;
 
 	return msec;

@@ -13,7 +13,7 @@
 
 /**
 * \brief Tests the RHX implementations performance.
-* Tests the AEX; CBC, CTR, and HBA modes for performance timing.
+* Tests the AEX; qsc_aes_mode_cbc, qsc_aes_mode_ctr, and HBA modes for performance timing.
 */
 void qsctest_benchmark_aes_run(void);
 

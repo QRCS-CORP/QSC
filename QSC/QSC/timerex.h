@@ -62,14 +62,14 @@ QSC_EXPORT_API void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 *
 * \return The starting clock time
 */
-QSC_EXPORT_API clock_t qsc_timerex_stopwatch_start();
+QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_start();
 
 /**
 * \brief Returns the time difference between the start and current time in milliseconds
 *
 * \return The time difference in milliseconds
 */
-QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_elapsed(clock_t start);
+QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start);
 
 #if defined(QSC_DEBUG_MODE)
 /**

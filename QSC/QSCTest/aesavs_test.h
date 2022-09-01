@@ -13,62 +13,62 @@
 */
 
 /**
-* \brief Tests the CBC 128 and 256-bit key and text KAT vectors from NIST AESAVS.
+* \brief Tests the qsc_aes_mode_cbc 128 and 256-bit key and text KAT vectors from NIST AESAVS.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
-* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS KAT CBC 6.2</a>
+* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS KAT qsc_aes_mode_cbc 6.2</a>
 */
 bool aesavs_cbc_kat(void);
 
 /**
-* \brief Tests the ECB 128 and 256-bit key and text KAT vectors from NIST AESAVS.
+* \brief Tests the qsc_aes_mode_ecb 128 and 256-bit key and text KAT vectors from NIST AESAVS.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
-* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS KAT ECB 6.2</a>
+* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS KAT qsc_aes_mode_ecb 6.2</a>
 */
 bool aesavs_ecb_kat(void);
 
 /**
-* \brief Tests the CBC 128 and 256-bit key monte-carlo tests from NIST AESAVS.
+* \brief Tests the qsc_aes_mode_cbc 128 and 256-bit key monte-carlo tests from NIST AESAVS.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
-* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS MCT 6.4.2 CBC</a>
+* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS MCT 6.4.2 qsc_aes_mode_cbc</a>
 */
 bool aesavs_cbc_mct(void);
 
 /**
-* \brief Tests the ECB 128 and 256-bit key monte-carlo tests from NIST AESAVS.
+* \brief Tests the qsc_aes_mode_ecb 128 and 256-bit key monte-carlo tests from NIST AESAVS.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
-* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS 6.4.1 ECB</a>
+* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS 6.4.1 qsc_aes_mode_ecb</a>
 */
 bool aesavs_ecb_mct(void);
 
 /**
-* \brief Tests the CBC 128 and 256-bit key multi-block message tests from NIST AESAVS.
+* \brief Tests the qsc_aes_mode_cbc 128 and 256-bit key multi-block message tests from NIST AESAVS.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
-* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS 6.3 CBC</a>
+* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS 6.3 qsc_aes_mode_cbc</a>
 */
 bool aesavs_cbc_mmt(void);
 
 /**
-* \brief Tests the ECB 128 and 256-bit key monte-carlo multi-block message tests from NIST AESAVS.
+* \brief Tests the qsc_aes_mode_ecb 128 and 256-bit key monte-carlo multi-block message tests from NIST AESAVS.
 *
 * \return Returns true for success
 *
 * \remarks <b>Test References:</b> \n
-* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS 6.3 ECB</a>
+* NIST <a href="https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf">AESAVS 6.3 qsc_aes_mode_ecb</a>
 */
 bool aesavs_ecb_mmt(void);
 

@@ -5,6 +5,64 @@
 #include "../QSC/intutils.h"
 #include "../QSC/sphincsplus.h"
 
+
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+
+bool qsctest_sphincsplus_extended_test()
+{
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	size_t msglen;
+	size_t siglen;
+	bool ret;
+
+	uint8_t* sig = malloc(QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN);
+
+	if (sig != NULL)
+	{
+		ret = true;
+		msglen = QSCTEST_SPHINCSPLUS_MLEN;
+		siglen = QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN;
+
+		/* generate the key-pair */
+		qsc_sphincsplus_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
+
+		/* sign the message and return the signed version in sig */
+		qsc_sphincsplus_sign(sig, &siglen, msg, msglen, sk, qsctest_nistrng_prng_generate);
+
+		if (siglen != QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN)
+		{
+			qsctest_print_safe("Failure! sphincsplus stress: signature length is incorrect! - STT1 \n");
+			ret = false;
+		}
+
+		/* verify the signature in sig and copy msg to mout */
+		if (qsc_sphincsplus_verify(mout, &msglen, sig, siglen, pk) != true)
+		{
+			qsctest_print_safe("Failure! sphincsplus stress: message verification has failed! - STT2 \n");
+			ret = false;
+		}
+
+		if (msglen != QSCTEST_SPHINCSPLUS_MLEN)
+		{
+			qsctest_print_safe("Failure! sphincsplus stress: message length is incorrect! - STT3 \n");
+			ret = false;
+		}
+
+		free(sig);
+	}
+	else
+	{
+		ret = false;
+	}
+
+	return ret;
+}
+
+#else
+
 bool qsctest_sphincsplus_operations_test()
 {
 	/* note: test message size increase as the kat number increments, ex. 0=33, 1=66, 2=99...
@@ -44,7 +102,7 @@ bool qsctest_sphincsplus_operations_test()
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERF)
 	char path[] = "NPQCR3/sphincs-shake256-256f-robust.rsp";
 #else
-#	error The parameter set is invalid!
+#	//error The parameter set is invalid!
 #endif
 
 	/* NIST PQC Round 3 KATs */
@@ -252,8 +310,20 @@ bool qsctest_sphincsplus_stress_test()
 	return ret;
 }
 
+#endif
+
 void qsctest_sphincsplus_run()
 {
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+	if (qsctest_sphincsplus_extended_test() == true)
+	{
+		qsctest_print_safe("Success! Passed the SphincsPlus extended 512-bit parameter tests. \n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed the SphincsPlus extended 512-bit parameter tests. \n");
+	}
+#else
 	if (qsctest_sphincsplus_operations_test() == true)
 	{
 		qsctest_print_safe("Success! Passed the SphincsPlus public-key, private-key, cipher-text, and message known answer tests. \n");
@@ -298,4 +368,5 @@ void qsctest_sphincsplus_run()
 	{
 		qsctest_print_safe("Failure! Failed the SphincsPlus altered signature test has failed. \n");
 	}
+#endif
 }

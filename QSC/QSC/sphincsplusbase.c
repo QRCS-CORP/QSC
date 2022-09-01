@@ -7,6 +7,8 @@
 
 #if defined(QSC_SPHINCSPLUS_S3S192SHAKERF)
 
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
 #define SPX_N 24
 /* Height of the hypertree. */
@@ -21,6 +23,8 @@
 
 #elif defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
 
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
 #define SPX_N 24
 /* Height of the hypertree. */
@@ -35,6 +39,8 @@
 
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERF)
 
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
 #define SPX_N 32
 /* Height of the hypertree. */
@@ -49,6 +55,8 @@
 
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERS)
 
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
 #define SPX_N 32
 /* Height of the hypertree. */
@@ -58,6 +66,39 @@
 /* FORS tree dimensions. */
 #define SPX_FORS_HEIGHT 14
 #define SPX_FORS_TREES 22
+/* Winternitz parameter, */
+#define SPX_WOTS_W 16
+
+
+#elif defined(QSC_SPHINCSPLUS_S6S512SHAKERF)
+
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_512_RATE)
+/* Hash output length in bytes. */
+#define SPX_N 64
+/* Height of the hypertree. */
+#define SPX_FULL_HEIGHT 64
+/* Number of subtree layer. */
+#define SPX_D 16
+/* FORS tree dimensions. */
+#define SPX_FORS_HEIGHT 10
+#define SPX_FORS_TREES 38
+/* Winternitz parameter, */
+#define SPX_WOTS_W 16
+
+#elif defined(QSC_SPHINCSPLUS_S6S512SHAKERS)
+
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_512_RATE)
+/* Hash output length in bytes. */
+#define SPX_N 64
+/* Height of the hypertree. */
+#define SPX_FULL_HEIGHT 70
+/* Number of subtree layer. */
+#define SPX_D 10
+/* FORS tree dimensions. */
+#define SPX_FORS_HEIGHT 14
+#define SPX_FORS_TREES 26
 /* Winternitz parameter, */
 #define SPX_WOTS_W 16
 
@@ -318,7 +359,11 @@ static void sphincsplus_prf_addr(uint8_t* out, const uint8_t* key, const uint32_
     qsc_memutils_copy(buf, key, SPX_N);
     qsc_memutils_copy(buf + SPX_N, (const uint8_t*)addr, SPX_ADDR_BYTES);
 
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+    qsc_shake512_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES);
+#else
     qsc_shake256_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES);
+#endif
 }
 
 static void sphincsplus_gen_message_random(uint8_t* R, const uint8_t* sk_prf, const uint8_t* optrand, const uint8_t* m, uint64_t mlen)
@@ -327,11 +372,11 @@ static void sphincsplus_gen_message_random(uint8_t* R, const uint8_t* sk_prf, co
        optional randomization value as well as the message. */
     qsc_keccak_state kctx = { 0 };
 
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, sk_prf, SPX_N);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, optrand, SPX_N);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, (size_t)mlen);
-    qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-    qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, R, SPX_N);
+    qsc_keccak_incremental_absorb(&kctx, SPX_HASH_RATE, sk_prf, SPX_N);
+    qsc_keccak_incremental_absorb(&kctx, SPX_HASH_RATE, optrand, SPX_N);
+    qsc_keccak_incremental_absorb(&kctx, SPX_HASH_RATE, m, mlen);
+    qsc_keccak_incremental_finalize(&kctx, SPX_HASH_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+    qsc_keccak_incremental_squeeze(&kctx, SPX_HASH_RATE, R, SPX_N);
 }
 
 static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* leaf_idx, const uint8_t* R, const uint8_t* pk, const uint8_t* m, uint64_t mlen)
@@ -344,11 +389,11 @@ static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* 
     const uint8_t* bufp = buf;
     qsc_keccak_state kctx = { 0 };
 
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, R, SPX_N);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, pk, SPX_PK_BYTES);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, (size_t)mlen);
-    qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-    qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, buf, SPX_DGST_BYTES);
+    qsc_keccak_incremental_absorb(&kctx, SPX_HASH_RATE, R, SPX_N);
+    qsc_keccak_incremental_absorb(&kctx, SPX_HASH_RATE, pk, SPX_PK_BYTES);
+    qsc_keccak_incremental_absorb(&kctx, SPX_HASH_RATE, m, mlen);
+    qsc_keccak_incremental_finalize(&kctx, SPX_HASH_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+    qsc_keccak_incremental_squeeze(&kctx, SPX_HASH_RATE, buf, SPX_DGST_BYTES);
 
     qsc_memutils_copy(digest, bufp, SPX_FORS_MSG_BYTES);
     bufp += SPX_FORS_MSG_BYTES;
@@ -368,7 +413,7 @@ static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* 
 static void sphincsplus_thash(uint8_t* out, const uint8_t* in, uint32_t inblocks, const uint8_t* pubseed, uint32_t addr[8])
 {
     /* Takes an array of inblocks concatenated arrays of SPX_N bytes */
-    const size_t BLKLEN = inblocks * SPX_N;
+    const size_t BLKLEN = (size_t)inblocks * SPX_N;
     const size_t KEYLEN = SPX_N + SPX_ADDR_BYTES;
     uint8_t* buf;
     uint8_t* bitmask;
@@ -382,14 +427,22 @@ static void sphincsplus_thash(uint8_t* out, const uint8_t* in, uint32_t inblocks
         qsc_memutils_copy(buf, pubseed, SPX_N);
         qsc_memutils_copy(buf + SPX_N, (uint8_t*)addr, SPX_ADDR_BYTES);
 
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+
+#else
         qsc_shake256_compute(bitmask, BLKLEN, buf, KEYLEN);
+#endif
 
         for (size_t i = 0; i < BLKLEN; ++i)
         {
             buf[KEYLEN + i] = in[i] ^ bitmask[i];
         }
 
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+        qsc_shake512_compute(out, SPX_N, buf, KEYLEN + BLKLEN);
+#else
         qsc_shake256_compute(out, SPX_N, buf, KEYLEN + BLKLEN);
+#endif
         qsc_memutils_alloc_free(bitmask);
         qsc_memutils_alloc_free(buf);
     }

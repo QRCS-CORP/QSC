@@ -1,20 +1,29 @@
-/* The AGPL version 3 License (AGPLv3)
+/*
+* 2022 John G. Underhill
+* All Rights Reserved.
 *
-* Copyright (c) 2022 Digital Freedom Defence Inc.
-* This file is part of the QSC Cryptographic library
-*
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
+* NOTICE:  All information contained herein is, and remains
+* the property of John G. Underhill.
+* The intellectual and technical concepts contained
+* herein are proprietary to John G. Underhill
+* and his suppliers and may be covered by U.S. and Foreign Patents,
+* patents in process, and are protected by trade secret or copyright law.
+* Dissemination of this information or reproduction of this material
+* is strictly forbidden unless prior written permission is obtained
+* from Digital Freedom Defense Incorporated.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
 *
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
+* This library was published publicly in hopes that it would aid in prototyping
+* post-quantum secure primitives for educational purposes only.
+* All and any commercial uses of this library are exclusively reserved by the author
+* John G. Underhill.
+* Any use of this library in a commercial context must be approved by the author
+* in writing.
+* All rights for commercial and/or non-educational purposes, are fully reserved
+* by the author.
 */
 
 #ifndef QSC_IPINFO_H
@@ -75,6 +84,12 @@
 */
 #define QSC_IPINFO_IPV6_MASK_STRNLEN 0x41
 
+/*!
+\def QSC_IPINFO_IPV6_STRNLEN
+* The maximum ip string length
+*/
+#define QSC_IPINFO_MAX_LENGTH (QSC_IPINFO_IPV6_STRNLEN)
+
 /*! \struct qsc_ipinfo_ipv4_address
 * \brief The IPv4 address structure
 */
@@ -89,8 +104,8 @@ QSC_EXPORT_API typedef struct qsc_ipinfo_ipv4_address
 QSC_EXPORT_API typedef struct qsc_ipinfo_ipv4_info
 {
 	qsc_ipinfo_ipv4_address address;		/*!< A pointer to the ipv4 address structure */
-	uint16_t port;							        /*!< The port number */
-	uint8_t mask;							        /*!< The network mask */
+	uint16_t port;							/*!< The port number */
+	uint8_t mask;							/*!< The network mask */
 } qsc_ipinfo_ipv4_info;
 
 /**
