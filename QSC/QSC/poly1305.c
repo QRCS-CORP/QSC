@@ -141,7 +141,7 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 	f3 = ((ctx->h[3] >> 18) | (ctx->h[4] << 8)) + (uint64_t)ctx->k[3];
 	/*lint -restore */
 
-	qsc_intutils_le32to8(output + 0, (uint32_t)f0);
+	qsc_intutils_le32to8(output, (uint32_t)f0);
 	f1 += (f0 >> 32);
 	qsc_intutils_le32to8(output + 4, (uint32_t)f1);
 	f2 += (f1 >> 32);

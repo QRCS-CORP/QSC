@@ -38,7 +38,7 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 
 	for (size_t pos = 0; pos < (length * 2); pos += 2)
 	{
-		idx0 = ((uint8_t)input[pos + 0] & 0x1FU) ^ 0x10U;
+		idx0 = ((uint8_t)input[pos] & 0x1FU) ^ 0x10U;
 		idx1 = ((uint8_t)input[pos + 1] & 0x1FU) ^ 0x10U;
 		output[pos / 2] = (uint8_t)(HASHMAP[idx0] << 4) | HASHMAP[idx1];
 	}

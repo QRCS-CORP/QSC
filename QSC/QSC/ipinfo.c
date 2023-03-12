@@ -2,6 +2,38 @@
 #include "memutils.h"
 #include "stringutils.h"
 
+qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
+{
+	qsc_ipinfo_address_types tadd;
+
+	tadd = qsc_ipinfo_address_type_unknown;
+
+	if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV4_STRNLEN)
+	{
+		qsc_ipinfo_ipv4_address ipv4;
+
+		ipv4 = qsc_ipinfo_ipv4_address_from_string(address);
+
+		if (qsc_ipinfo_ipv4_address_is_valid(&ipv4) == true)
+		{
+			tadd = qsc_ipinfo_address_type_ipv4;
+		}
+	}
+	else if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV6_STRNLEN)
+	{
+		qsc_ipinfo_ipv6_address ipv6;
+
+		ipv6 = qsc_ipinfo_ipv6_address_from_string(address);
+
+		if (qsc_ipinfo_ipv6_address_is_valid(&ipv6) == true)
+		{
+			tadd = qsc_ipinfo_address_type_ipv6;
+		}
+	}
+
+	return tadd;
+}
+
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_any()
 {
 	qsc_ipinfo_ipv4_address res;

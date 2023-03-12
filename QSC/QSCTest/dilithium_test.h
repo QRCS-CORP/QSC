@@ -21,7 +21,7 @@
 * tests the second vector in the NIST PQC Round 3, KAT file.
 * \return Returns true for test success
 */
-bool qsctest_dilithium_operations_test(void);
+bool qsctest_dilithium_kat_test(void);
 
 /**
 * \brief Test the validity of a mutated secret key

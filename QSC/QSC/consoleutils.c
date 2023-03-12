@@ -254,7 +254,7 @@ void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t len
 
 		for (size_t  pos = 0; pos < (length * 2); pos += 2)
 		{
-			idx0 = ((uint8_t)hexstr[pos + 0] & 0x1FU) ^ 0x10U;
+			idx0 = ((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U;
 			idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
 			output[pos / 2] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
 		}

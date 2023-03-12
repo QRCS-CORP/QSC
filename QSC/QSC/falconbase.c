@@ -8616,20 +8616,20 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 	t1 = t0 + n;
 
 	qsc_memutils_copy(t0, b01, n * sizeof(*b01));
-	falcon_poly_mulselfadj_fft(t0, logn);    // t0 <- b01*adj(b01)
+	falcon_poly_mulselfadj_fft(t0, logn);    /* t0 <-b01 * adj(b01) */
 
 	qsc_memutils_copy(t1, b00, n * sizeof(*b00));
-	falcon_poly_muladj_fft(t1, b10, logn);   // t1 <- b00*adj(b10)
-	falcon_poly_mulselfadj_fft(b00, logn);   // b00 <- b00*adj(b00)
-	falcon_poly_add(b00, t0, logn);      // b00 <- g00
+	falcon_poly_muladj_fft(t1, b10, logn);   /* t1 <-b00 * adj(b10) */
+	falcon_poly_mulselfadj_fft(b00, logn);   /* b00 <-b00 * adj(b00) */
+	falcon_poly_add(b00, t0, logn);      /* b00 <-g00 */
 	qsc_memutils_copy(t0, b01, n * sizeof(*b01));
-	falcon_poly_muladj_fft(b01, b11, logn);  // b01 <- b01*adj(b11)
-	falcon_poly_add(b01, t1, logn);      // b01 <- g01
+	falcon_poly_muladj_fft(b01, b11, logn);  /* b01 <-b01 * adj(b11) */
+	falcon_poly_add(b01, t1, logn);      /* b01 <-g01 */
 
-	falcon_poly_mulselfadj_fft(b10, logn);   // b10 <- b10*adj(b10)
+	falcon_poly_mulselfadj_fft(b10, logn);   /* b10 <-b10 * adj(b10) */
 	qsc_memutils_copy(t1, b11, n * sizeof(*b11));
-	falcon_poly_mulselfadj_fft(t1, logn);    // t1 <- b11*adj(b11)
-	falcon_poly_add(b10, t1, logn);      // b10 <- g11
+	falcon_poly_mulselfadj_fft(t1, logn);    /* t1 <-b11 * adj(b11) */
+	falcon_poly_add(b10, t1, logn);      /* b10 <-g11 */
 
 	/*
 	 * We rename variables to make things clearer. The three elements

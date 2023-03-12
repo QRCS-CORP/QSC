@@ -434,7 +434,7 @@ static void cpuidex_vendor_name(qsc_cpuidex_cpu_features* features)
 	uint32_t info[4] = { 0 };
 
 	cpuidex_cpu_info(info, 0x00000000UL);
-	qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_LENGTH);
+	qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
 	qsc_memutils_copy(&features->vendor[0], &info[1], sizeof(uint32_t));
 	qsc_memutils_copy(&features->vendor[4], &info[3], sizeof(uint32_t));
 	qsc_memutils_copy(&features->vendor[8], &info[2], sizeof(uint32_t));
@@ -565,10 +565,10 @@ static void cpuidex_cpu_topology(qsc_cpuidex_cpu_features* features)
 
 static void cpuidex_cpu_type(qsc_cpuidex_cpu_features* features)
 {
-	char tmpn[QSC_CPUIDEX_VENDOR_LENGTH + 1] = { 0 };
+	char tmpn[QSC_CPUIDEX_VENDOR_SIZE + 1] = { 0 };
 
 	cpuidex_vendor_name(features);
-	qsc_memutils_copy(tmpn, features->vendor, QSC_CPUIDEX_VENDOR_LENGTH);
+	qsc_memutils_copy(tmpn, features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
 	qsc_stringutils_to_lowercase(tmpn);
 
 	if (qsc_stringutils_string_contains(tmpn, "intel") == true)
@@ -602,7 +602,7 @@ static void cpuidex_serial_number(qsc_cpuidex_cpu_features* features)
 	uint32_t info[4] = { 0 };
 
 	cpuidex_cpu_info(info, 0x00000003UL);
-	qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_LENGTH);
+	qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_SIZE);
 	qsc_memutils_copy(&features->serial[0], &info[1], sizeof(uint32_t));
 	qsc_memutils_copy(&features->serial[4], &info[3], sizeof(uint32_t));
 	qsc_memutils_copy(&features->serial[8], &info[2], sizeof(uint32_t));
@@ -756,7 +756,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("machdep.cpu.brand_string", vend, &plen, NULL, 0) >= 0)
 	{
-		qsc_memutils_copy(features->vendor, vend, QSC_CPUIDEX_VENDOR_LENGTH - 1);
+		qsc_memutils_copy(features->vendor, vend, QSC_CPUIDEX_VENDOR_SIZE - 1);
 		qsc_stringutils_to_lowercase(vend);
 
 		if (qsc_stringutils_string_contains(vend, "intel") == true)
@@ -901,7 +901,7 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
     features->l1cacheline = 0;
     features->l2associative = 4;
     features->l2cache = 0;
-    qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_LENGTH);
+    qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_SIZE);
 
 #if defined(QSC_SYSTEM_OS_POSIX)
 #	if defined(QSC_SYSTEM_OS_BSD)

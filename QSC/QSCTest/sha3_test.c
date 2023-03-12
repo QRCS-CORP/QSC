@@ -1136,7 +1136,7 @@ bool qsctest_kmac128x4_equality()
 
 	qsc_kmac128_compute(exp[0], 16, msg[0], 256, key[0], 18, cst[0], 16);
 
-	kmac128x4(otp[0], otp[1], otp[2], otp[3], 16, key[0], key[1], key[2], key[3], 18,
+	qsc_kmac_128x4(otp[0], otp[1], otp[2], otp[3], 16, key[0], key[1], key[2], key[3], 18,
 		cst[0], cst[1], cst[2], cst[3], 16, msg[0], msg[1], msg[2], msg[3], 256);
 
 	if (qsc_intutils_are_equal8(exp[0], otp[0], sizeof(exp[0])) == false)
@@ -1209,7 +1209,7 @@ bool qsctest_kmac256x4_equality()
 		msg[3][i] = (uint8_t)i;
 	}
 
-	kmac256x4(otp[0], otp[1], otp[2], otp[3], 32, key[0], key[1], key[2], key[3], 34,
+	qsc_kmac_256x4(otp[0], otp[1], otp[2], otp[3], 32, key[0], key[1], key[2], key[3], 34,
 		cst[0], cst[1], cst[2], cst[3], 16, msg[0], msg[1], msg[2], msg[3], 256);
 
 	qsc_kmac256_compute(exp[0], 32, msg[0], 256, key[0], 34, cst[0], 16);
@@ -1284,7 +1284,7 @@ bool qsctest_kmac512x4_equality()
 		msg[3][i] = (uint8_t)i;
 	}
 
-	kmac512x4(otp[0], otp[1], otp[2], otp[3], 64, key[0], key[1], key[2], key[3], 66,
+	qsc_kmac_512x4(otp[0], otp[1], otp[2], otp[3], 64, key[0], key[1], key[2], key[3], 66,
 		cst[0], cst[1], cst[2], cst[3], 16, msg[0], msg[1], msg[2], msg[3], 256);
 
 	qsc_kmac512_compute(exp[0], 64, msg[0], 256, key[0], 66, cst[0], 16);
@@ -1345,7 +1345,7 @@ bool qsctest_shake128x4_equality()
 	key[2][16] = (uint8_t)3;
 	key[3][16] = (uint8_t)4;
 
-	shake128x4(otp[0], otp[1], otp[2], otp[3], 168, key[0], key[1], key[2], key[3], 18);
+	qsc_shake_128x4(otp[0], otp[1], otp[2], otp[3], 168, key[0], key[1], key[2], key[3], 18);
 
 	qsc_shake128_compute(exp[0], 168, key[0], 18);
 
@@ -1405,7 +1405,7 @@ bool qsctest_shake256x4_equality()
 	key[2][32] = (uint8_t)3;
 	key[3][32] = (uint8_t)4;
 
-	shake256x4(otp[0], otp[1], otp[2], otp[3], 136, key[0], key[1], key[2], key[3], 34);
+	qsc_shake_256x4(otp[0], otp[1], otp[2], otp[3], 136, key[0], key[1], key[2], key[3], 34);
 
 	qsc_shake256_compute(exp[0], 136, key[0], 34);
 
@@ -1465,7 +1465,7 @@ bool qsctest_shake512x4_equality()
 	key[2][64] = (uint8_t)3;
 	key[3][64] = (uint8_t)4;
 
-	shake512x4(otp[0], otp[1], otp[2], otp[3], 72, key[0], key[1], key[2], key[3], 66);
+	qsc_shake_512x4(otp[0], otp[1], otp[2], otp[3], 72, key[0], key[1], key[2], key[3], 66);
 
 	qsc_shake512_compute(exp[0], 72, key[0], 66);
 
@@ -1557,7 +1557,7 @@ bool qsctest_kmac128x8_equality()
 		msg[7][i] = (uint8_t)i;
 	}
 
-	kmac128x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 16, 
+	qsc_kmac_128x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 16, 
 		key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 18,
 		cst[0], cst[1], cst[2], cst[3], cst[4], cst[5], cst[6], cst[7], 16, 
 		msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], 256);
@@ -1682,7 +1682,7 @@ bool qsctest_kmac256x8_equality()
 		msg[7][i] = (uint8_t)i;
 	}
 
-	kmac256x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 32, 
+	qsc_kmac_256x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 32, 
 		key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 34,
 		cst[0], cst[1], cst[2], cst[3], cst[4], cst[5], cst[6], cst[7], 16, 
 		msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], 256);
@@ -1807,7 +1807,7 @@ bool qsctest_kmac512x8_equality()
 		msg[7][i] = (uint8_t)i;
 	}
 
-	kmac512x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 64, 
+	qsc_kmac_512x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 64, 
 		key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 66,
 		cst[0], cst[1], cst[2], cst[3], cst[4], cst[5], cst[6], cst[7], 16, 
 		msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], 256);
@@ -1910,7 +1910,7 @@ bool qsctest_shake128x8_equality()
 	key[6][16] = (uint8_t)3;
 	key[7][16] = (uint8_t)4;
 
-	shake128x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 168,
+	qsc_shake_128x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 168,
 		key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 18);
 
 	qsc_shake128_compute(exp[0], 168, key[0], 18);
@@ -2011,7 +2011,7 @@ bool qsctest_shake256x8_equality()
 	key[6][32] = (uint8_t)3;
 	key[7][32] = (uint8_t)4;
 
-	shake256x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 136, 
+	qsc_shake_256x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 136, 
 		key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 34);
 
 	qsc_shake256_compute(exp[0], 136, key[0], 34);
@@ -2112,7 +2112,7 @@ bool qsctest_shake512x8_equality()
 	key[6][64] = (uint8_t)3;
 	key[7][64] = (uint8_t)4;
 
-	shake512x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 72,
+	qsc_shake_512x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], 72,
 		key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 66);
 
 	qsc_shake512_compute(exp[0], 72, key[0], 66);

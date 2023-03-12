@@ -1,4 +1,8 @@
 #include "queue.h"
+#include "memutils.h"
+#if defined(QSC_DEBUG_MODE)
+#	include "intutils.h"
+#endif
 
 void qsc_queue_destroy(qsc_queue_state* ctx)
 {
@@ -77,21 +81,48 @@ size_t qsc_queue_items(const qsc_queue_state* ctx)
 {
 	assert(ctx != NULL);
 
-	return ctx->count;
+	size_t res;
+
+	res = 0;
+
+	if (ctx != NULL)
+	{
+		res = ctx->count;
+	}
+
+	return res;
 }
 
 bool qsc_queue_isfull(const qsc_queue_state* ctx)
 {
 	assert(ctx != NULL);
 
-	return (bool)(ctx->count == ctx->depth);
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL)
+	{
+		res = (bool)(ctx->count == ctx->depth);
+	}
+
+	return res;
 }
 
 bool qsc_queue_isempty(const qsc_queue_state* ctx)
 {
 	assert(ctx != NULL);
 
-	return (bool)(ctx->count == 0);
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL)
+	{
+		res = (bool)(ctx->count == 0);
+	}
+
+	return res;
 }
 
 uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t outlen)
@@ -143,13 +174,14 @@ void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, ui
 	}
 }
 
+#if defined(QSC_DEBUG_MODE)
 bool qsc_queue_self_test()
 {
 	uint8_t exp[64][16] = { 0 };
 	uint8_t otp1[64 * 16] = { 0 };
 	uint8_t otp2[64][16] = { 0 };
 	qsc_queue_state ctx;
-	size_t i;
+	int32_t i;
 	bool ret;
 
 	ret = true;
@@ -223,3 +255,4 @@ bool qsc_queue_self_test()
 
 	return ret;
 }
+#endif

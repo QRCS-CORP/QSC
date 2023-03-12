@@ -400,7 +400,7 @@ void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rou
 
 	for (i = 0; i < rounds; i += 2)
 	{
-		// round n
+		/* round n */
 		c[0] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[0], a[5]), _mm512_xor_si512(a[10], a[15])), a[20]);
 		c[1] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[1], a[6]), _mm512_xor_si512(a[11], a[16])), a[21]);
 		c[2] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(a[2], a[7]), _mm512_xor_si512(a[12], a[17])), a[22]);
@@ -488,7 +488,7 @@ void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rou
 		e[23] = _mm512_xor_si512(c[3], _mm512_and_si512(_mm512_xor_epi64(c[4], _mm512_set1_epi64(-1)), c[0]));
 		e[24] = _mm512_xor_si512(c[4], _mm512_and_si512(_mm512_xor_epi64(c[0], _mm512_set1_epi64(-1)), c[1]));
 
-		// round n + 1
+		/* round n + 1 */
 		c[0] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[0], e[5]), _mm512_xor_si512(e[10], e[15])), e[20]);
 		c[1] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[1], e[6]), _mm512_xor_si512(e[11], e[16])), e[21]);
 		c[2] = _mm512_xor_si512(_mm512_xor_si512(_mm512_xor_si512(e[2], e[7]), _mm512_xor_si512(e[12], e[17])), e[22]);
@@ -907,7 +907,7 @@ void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rou
 
 	for (i = 0; i < rounds; i += 2)
 	{
-		// round n
+		/* round n */
 		c[0] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[0], a[5]), _mm256_xor_si256(a[10], a[15])), a[20]);
 		c[1] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[1], a[6]), _mm256_xor_si256(a[11], a[16])), a[21]);
 		c[2] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(a[2], a[7]), _mm256_xor_si256(a[12], a[17])), a[22]);
@@ -995,7 +995,7 @@ void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rou
 		e[23] = _mm256_xor_si256(c[3], _mm256_and_si256(_mm256_xor_si256(c[4], _mm256_set1_epi64x(-1)), c[0]));
 		e[24] = _mm256_xor_si256(c[4], _mm256_and_si256(_mm256_xor_si256(c[0], _mm256_set1_epi64x(-1)), c[1]));
 
-		// round n + 1
+		/* round n + 1 */
 		c[0] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[0], e[5]), _mm256_xor_si256(e[10], e[15])), e[20]);
 		c[1] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[1], e[6]), _mm256_xor_si256(e[11], e[16])), e[21]);
 		c[2] = _mm256_xor_si256(_mm256_xor_si256(_mm256_xor_si256(e[2], e[7]), _mm256_xor_si256(e[12], e[17])), e[22]);
@@ -1117,7 +1117,7 @@ void qsc_keccak_absorb(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 			qsc_keccak_permute(ctx, rounds);
 			msglen -= rate;
 			message += rate;
-	}
+		}
 
 		qsc_memutils_copy(msg, message, msglen);
 		msg[msglen] = domain;
@@ -5264,7 +5264,7 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 
 #endif
 
-void shake128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
 {
 	assert(inp0 != NULL);
@@ -5321,7 +5321,7 @@ void shake128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size
 #endif
 }
 
-void shake256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
 {
 	assert(inp0 != NULL);
@@ -5377,7 +5377,7 @@ void shake256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size
 #endif
 }
 
-void shake512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
 {
 	assert(inp0 != NULL);
@@ -5435,7 +5435,7 @@ void shake512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size
 
 /* parallel shake x8 */
 
-void shake128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen)
@@ -5501,8 +5501,8 @@ void shake128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	shake128x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
-	shake128x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
+	qsc_shake_128x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
+	qsc_shake_128x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
 
 #else
 
@@ -5518,7 +5518,7 @@ void shake128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 #endif
 }
 
-void shake256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen)
@@ -5584,8 +5584,8 @@ void shake256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	shake256x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
-	shake256x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
+	qsc_shake_256x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
+	qsc_shake_256x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
 
 #else
 
@@ -5601,7 +5601,7 @@ void shake256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 #endif
 }
 
-void shake512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen)
@@ -5667,8 +5667,8 @@ void shake512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	shake512x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
-	shake512x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
+	qsc_shake_512x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
+	qsc_shake_512x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
 
 #else
 
@@ -5868,7 +5868,7 @@ static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 
 #endif
 
-void kmac128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen)
@@ -5907,7 +5907,7 @@ void kmac128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_
 #endif
 }
 
-void kmac256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen)
@@ -5946,7 +5946,7 @@ void kmac256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_
 #endif
 }
 
-void kmac512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen)
@@ -6213,7 +6213,7 @@ static void kmacx8_finalize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 
 #endif
 
-void kmac128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
@@ -6262,9 +6262,9 @@ void kmac128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	kmac128x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
+	qsc_kmac_128x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
 		cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
-	kmac128x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
+	qsc_kmac_128x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
 		cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
 
 #else
@@ -6281,7 +6281,7 @@ void kmac128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 #endif
 }
 
-void kmac256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
@@ -6330,9 +6330,9 @@ void kmac256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	kmac256x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
+	qsc_kmac_256x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
 		cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
-	kmac256x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
+	qsc_kmac_256x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
 		cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
 
 #else
@@ -6349,7 +6349,7 @@ void kmac256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 #endif
 }
 
-void kmac512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
@@ -6398,9 +6398,9 @@ void kmac512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	kmac512x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
+	qsc_kmac_512x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
 		cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
-	kmac512x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
+	qsc_kmac_512x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
 		cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
 
 #else

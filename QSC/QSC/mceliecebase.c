@@ -693,7 +693,7 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (i = 0; i < 64; ++i)
 	{
-		store8(r_ptr + i * 16 + 0, r_int_v[0][i]);
+		store8(r_ptr + i * 16, r_int_v[0][i]);
 		store8(r_ptr + i * 16 + 8, r_int_v[1][i]);
 	}
 }
@@ -1364,7 +1364,6 @@ static void encrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, bool (*rng_genera
 #if defined(QSC_MCELIECE_S5N6960T119)
 static int32_t check_c_padding(const uint8_t* c)
 {
-	/* Note artifact, no longer used */
 	/* check if the padding bits of c are all zero */
 	uint8_t b;
 	int ret;
@@ -1521,7 +1520,7 @@ static int32_t pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int1
 							b <<= 1;
 							b |= (inv[j + 1] >> k) & 1;
 							b <<= 1;
-							b |= (inv[j + 0] >> k) & 1;
+							b |= (inv[j] >> k) & 1;
 
 							mat[i * MCELIECE_GFBITS + k][j / 8] = b;
 						}

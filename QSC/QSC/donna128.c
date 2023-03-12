@@ -22,11 +22,11 @@ static void Mul64x64To128(uint64_t x, uint64_t y, uint64_t* low, uint64_t* high)
 	x2 = (uint64_t)AH * BL;
 	x3 = (uint64_t)AL * BL;
 
-	// this cannot overflow as (2^32-1)^2 + 2^32-1 < 2^64-1
+	/* this cannot overflow as(2 ^ 32 - 1) ^ 2 + 2 ^ 32 - 1 < 2 ^ 64 - 1 */
 	x2 += x3 >> HWORD_BITS;
-	// this one can overflow
+	/* this one can overflow */
 	x2 += x1;
-	// propagate the carry if any
+	/* propagate the carry if any */
 	x0 += (uint64_t)(bool)(x2 < x1) << HWORD_BITS;
 
 	*high = x0 + (x2 >> HWORD_BITS);

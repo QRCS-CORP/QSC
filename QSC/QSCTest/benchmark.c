@@ -21,7 +21,7 @@ static void aes128_cbc_benchmark_test()
 	qsc_aes_state ctx;
 	size_t olen;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and iv */
@@ -78,7 +78,7 @@ static void aes256_cbc_benchmark_test()
 	qsc_aes_state ctx;
 	size_t olen;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and iv */
@@ -134,7 +134,7 @@ static void aes128_ctrbe_benchmark_test()
 	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and iv */
@@ -170,7 +170,7 @@ static void aes128_ctrle_benchmark_test()
 	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and iv */
@@ -206,7 +206,7 @@ static void aes256_ctrbe_benchmark_test()
 	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and iv */
@@ -242,7 +242,7 @@ static void aes256_ctrle_benchmark_test()
 	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and iv */
@@ -278,7 +278,7 @@ static void chacha128_benchmark_test()
 	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and nonce */
@@ -314,7 +314,7 @@ static void chacha256_benchmark_test()
 	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and nonce */
@@ -350,7 +350,7 @@ static void csx_benchmark_test()
 	uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
 	qsc_csx_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and nonce */
@@ -386,7 +386,7 @@ static void rcs256_benchmark_test()
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	qsc_rcs_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and nonce */
@@ -422,7 +422,7 @@ static void rcs512_benchmark_test()
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	qsc_rcs_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	/* generate the message, key and nonce */
@@ -457,7 +457,7 @@ static void kmac128_benchmark()
 	uint8_t key[16] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -485,7 +485,7 @@ static void kmac256_benchmark()
 	uint8_t key[32] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -513,7 +513,7 @@ static void kmac512_benchmark()
 	uint8_t key[64] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -541,7 +541,7 @@ static void kmac128x4_benchmark()
 	uint8_t tag[4][16] = { 0 };
 	uint8_t key[4][16] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -549,7 +549,7 @@ static void kmac128x4_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		kmac128x4(tag[0], tag[1], tag[2], tag[3], 16, key[0], key[1], key[2], key[3], 16, 
+		qsc_kmac_128x4(tag[0], tag[1], tag[2], tag[3], 16, key[0], key[1], key[2], key[3], 16, 
 			NULL, NULL, NULL, NULL, 0, msg[0], msg[1], msg[2], msg[3], BUFFER_SIZE);
 		tctr += (4 * BUFFER_SIZE);
 	}
@@ -566,7 +566,7 @@ static void kmac256x4_benchmark()
 	uint8_t tag[4][32] = { 0 };
 	uint8_t key[4][32] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -574,7 +574,7 @@ static void kmac256x4_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		kmac256x4(tag[0], tag[1], tag[2], tag[3], 32, key[0], key[1], key[2], key[3], 32,
+		qsc_kmac_256x4(tag[0], tag[1], tag[2], tag[3], 32, key[0], key[1], key[2], key[3], 32,
 			NULL, NULL, NULL, NULL, 0, msg[0], msg[1], msg[2], msg[3], BUFFER_SIZE);
 		tctr += (4 * BUFFER_SIZE);
 	}
@@ -591,7 +591,7 @@ static void kmac512x4_benchmark()
 	uint8_t tag[4][64] = { 0 };
 	uint8_t key[4][64] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -599,7 +599,7 @@ static void kmac512x4_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		kmac512x4(tag[0], tag[1], tag[2], tag[3], 64, key[0], key[1], key[2], key[3], 64,
+		qsc_kmac_512x4(tag[0], tag[1], tag[2], tag[3], 64, key[0], key[1], key[2], key[3], 64,
 			NULL, NULL, NULL, NULL, 0, msg[0], msg[1], msg[2], msg[3], BUFFER_SIZE);
 		tctr += (4 * BUFFER_SIZE);
 	}
@@ -618,7 +618,7 @@ static void kmac128x8_benchmark()
 	uint8_t tag[8][16] = { 0 };
 	uint8_t key[8][16] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -626,7 +626,7 @@ static void kmac128x8_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		kmac128x8(tag[0], tag[1], tag[2], tag[3], tag[4], tag[5], tag[6], tag[7], 16, 
+		qsc_kmac_128x8(tag[0], tag[1], tag[2], tag[3], tag[4], tag[5], tag[6], tag[7], 16, 
 			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 16,
 			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 
 			msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], BUFFER_SIZE);
@@ -645,7 +645,7 @@ static void kmac256x8_benchmark()
 	uint8_t tag[8][32] = { 0 };
 	uint8_t key[8][32] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -653,7 +653,7 @@ static void kmac256x8_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		kmac256x8(tag[0], tag[1], tag[2], tag[3], tag[4], tag[5], tag[6], tag[7], 32,
+		qsc_kmac_256x8(tag[0], tag[1], tag[2], tag[3], tag[4], tag[5], tag[6], tag[7], 32,
 			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 32,
 			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0,
 			msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], BUFFER_SIZE);
@@ -672,7 +672,7 @@ static void kmac512x8_benchmark()
 	uint8_t tag[8][64] = { 0 };
 	uint8_t key[8][64] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -680,7 +680,7 @@ static void kmac512x8_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		kmac512x8(tag[0], tag[1], tag[2], tag[3], tag[4], tag[5], tag[6], tag[7], 64,
+		qsc_kmac_512x8(tag[0], tag[1], tag[2], tag[3], tag[4], tag[5], tag[6], tag[7], 64,
 			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 64,
 			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0,
 			msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], BUFFER_SIZE);
@@ -701,7 +701,7 @@ static void kpa128_benchmark()
 	uint8_t key[16] = { 0 };
 	qsc_kpa_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -729,7 +729,7 @@ static void kpa256_benchmark()
 	uint8_t key[32] = { 0 };
 	qsc_kpa_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -757,7 +757,7 @@ static void kpa512_benchmark()
 	uint8_t key[64] = { 0 };
 	qsc_kpa_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -784,7 +784,7 @@ static void shake128_benchmark()
 	uint8_t otp[QSC_KECCAK_128_RATE] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -809,7 +809,7 @@ static void shake256_benchmark()
 	uint8_t otp[QSC_KECCAK_256_RATE] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -834,7 +834,7 @@ static void shake512_benchmark()
 	uint8_t otp[QSC_KECCAK_512_RATE] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -859,7 +859,7 @@ static void shake128x4_benchmark()
 	uint8_t key[4][16] = { 0 };
 	uint8_t otp[4][QSC_KECCAK_128_RATE] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -867,7 +867,7 @@ static void shake128x4_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		shake128x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_128_RATE, key[0], key[1], key[2], key[3], 16);
+		qsc_shake_128x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_128_RATE, key[0], key[1], key[2], key[3], 16);
 		tctr += (4 * QSC_KECCAK_128_RATE);
 	}
 
@@ -882,7 +882,7 @@ static void shake256x4_benchmark()
 	uint8_t key[4][32] = { 0 };
 	uint8_t otp[4][QSC_KECCAK_256_RATE] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -890,7 +890,7 @@ static void shake256x4_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		shake256x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_256_RATE, key[0], key[1], key[2], key[3], 32);
+		qsc_shake_256x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_256_RATE, key[0], key[1], key[2], key[3], 32);
 		tctr += (4 * QSC_KECCAK_256_RATE);
 	}
 
@@ -905,7 +905,7 @@ static void shake512x4_benchmark()
 	uint8_t key[4][64] = { 0 };
 	uint8_t otp[4][QSC_KECCAK_512_RATE] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -913,7 +913,7 @@ static void shake512x4_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		shake512x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_512_RATE, key[0], key[1], key[2], key[3], 64);
+		qsc_shake_512x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_512_RATE, key[0], key[1], key[2], key[3], 64);
 		tctr += (4 * QSC_KECCAK_512_RATE);
 	}
 
@@ -930,7 +930,7 @@ static void shake128x8_benchmark()
 	uint8_t key[8][16] = { 0 };
 	uint8_t otp[8][QSC_KECCAK_128_RATE] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -938,7 +938,7 @@ static void shake128x8_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		shake128x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], QSC_KECCAK_128_RATE,
+		qsc_shake_128x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], QSC_KECCAK_128_RATE,
 			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 16);
 		tctr += (8 * QSC_KECCAK_128_RATE);
 	}
@@ -954,7 +954,7 @@ static void shake256x8_benchmark()
 	uint8_t key[8][32] = { 0 };
 	uint8_t otp[8][QSC_KECCAK_256_RATE] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -962,7 +962,7 @@ static void shake256x8_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		shake256x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], QSC_KECCAK_256_RATE,
+		qsc_shake_256x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], QSC_KECCAK_256_RATE,
 			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 32);
 		tctr += (8 * QSC_KECCAK_256_RATE);
 	}
@@ -978,7 +978,7 @@ static void shake512x8_benchmark()
 	uint8_t key[8][64] = { 0 };
 	uint8_t otp[8][QSC_KECCAK_512_RATE] = { 0 };
 	size_t tctr;
-	clock_t start;
+	uint64_t start;
 	uint64_t elapsed;
 
 	tctr = 0;
@@ -986,7 +986,7 @@ static void shake512x8_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		shake512x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], QSC_KECCAK_512_RATE,
+		qsc_shake_512x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], QSC_KECCAK_512_RATE,
 			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 64);
 		tctr += (8 * QSC_KECCAK_512_RATE);
 	}

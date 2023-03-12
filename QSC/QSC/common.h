@@ -1,29 +1,25 @@
 /*
-* 2022 John G. Underhill
-* All Rights Reserved.
+* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
+* This file is part of the QSC Cryptographic library.
+* The QSC library was written as a prototyping library for post-quantum primitives,
+* in the hopes that it would be useful for educational purposes only.
+* Any use of the QSC library in a commercial context, or reproduction of original material
+* contained in this library is strictly forbidden unless prior written consent is obtained
+* from the QSCS Corporation.
 *
-* NOTICE:  All information contained herein is, and remains
-* the property of John G. Underhill.
-* The intellectual and technical concepts contained
-* herein are proprietary to John G. Underhill
-* and his suppliers and may be covered by U.S. and Foreign Patents,
-* patents in process, and are protected by trade secret or copyright law.
-* Dissemination of this information or reproduction of this material
-* is strictly forbidden unless prior written permission is obtained
-* from Digital Freedom Defense Incorporated.
+* The AGPL version 3 License (AGPLv3)
+* This program is free software : you can redistribute it and / or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
 *
-* This library was published publicly in hopes that it would aid in prototyping
-* post-quantum secure primitives for educational purposes only.
-* All and any commercial uses of this library are exclusively reserved by the author
-* John G. Underhill.
-* Any use of this library in a commercial context must be approved by the author
-* in writing.
-* All rights for commercial and/or non-educational purposes, are fully reserved
-* by the author.
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef QSC_COMMON_H
@@ -110,7 +106,7 @@
 #	define QSC_SYSTEM_OS_BSD
 #elif defined(__linux) || defined(__linux__) || defined(__gnu_linux__ )
 #	define QSC_SYSTEM_OS_LINUX
-    typedef int errno_t;
+    typedef int32_t errno_t;
 #elif defined(__unix) || defined(__unix__)
 #	define QSC_SYSTEM_OS_UNIX
 #	if defined(__hpux) || defined(hpux)
@@ -144,7 +140,7 @@
 #if defined(DEBUG) || defined(_DEBUG) || defined(__DEBUG__) || (defined(__GNUC__) && !defined(__OPTIMIZE__))
     /*!
 	\def QSC_DEBUG_MODE
-	* \brief The build is in bedug mode
+	* \brief The build is in bebug mode
 	*/
 #	define QSC_DEBUG_MODE
 #endif
@@ -727,23 +723,23 @@
 /*** Kyber ***/
 
 /*!
-\def QSC_KYBER_S3Q3329N256K3
-* Implement the Kyber S3Q3329N256K3 parameter set
+\def QSC_KYBER_S3K2400
+* Implement the Kyber S3K2400 parameter set
 */
-/*#define QSC_KYBER_S3Q3329N256K3*/
+/*#define QSC_KYBER_S3K2400*/
 
 /*!
-\def QSC_KYBER_S5Q3329N256K4
-* Implement the Kyber S5Q3329N256K4 parameter set
+\def QSC_KYBER_S5K3168
+* Implement the Kyber S5K3168 parameter set
 */
-#define QSC_KYBER_S5Q3329N256K4
+#define QSC_KYBER_S5K3168
 
 /*!
-\def QSC_KYBER_S6Q3329N256K5
-* Implement the Kyber S6Q3329N256K5 parameter set.
+\def QSC_KYBER_S6K3936
+* Implement the Kyber S6K3936 parameter set.
 * /warning Experimental, not an official parameter.
 */
-/*#define QSC_KYBER_S6Q3329N256K5*/
+/*#define QSC_KYBER_S6K3936*/
 
 /*** McEliece ***/
 
@@ -811,13 +807,13 @@
 \def QSC_DILITHIUM_S2N256Q8380417K4
 * Implement the Dilithium S2N256Q8380417 parameter set
 */
-#define QSC_DILITHIUM_S3N256Q8380417K6
+/*#define QSC_DILITHIUM_S3N256Q8380417K6*/
 
 /*!
 \def QSC_DILITHIUM_S3N256Q8380417K6
 * Implement the Dilithium S3N256Q8380417 parameter set
 */
-/*#define QSC_DILITHIUM_S5N256Q8380417K8*/
+#define QSC_DILITHIUM_S5N256Q8380417K8
 
 /*** ECDSA ***/
 
@@ -844,6 +840,18 @@
 /*** SphincsPlus ***/
 
 /*!
+\def QSC_SPHINCSPLUS_S1S128SHAKERS
+* Implement the SphincsPlus S1S128SHAKERS robust small parameter set
+*/
+/*#define QSC_SPHINCSPLUS_S1S128SHAKERS*/
+
+/*!
+\def QSC_SPHINCSPLUS_S1S128SHAKERF
+* Implement the SphincsPlus S1S128SHAKERF robust fast parameter set
+*/
+/*#define QSC_SPHINCSPLUS_S1S128SHAKERF*/
+
+/*!
 \def QSC_SPHINCSPLUS_S3S192SHAKERS
 * Implement the SphincsPlus S3S192SHAKERS robust small parameter set
 */
@@ -859,13 +867,13 @@
 \def QSC_SPHINCSPLUS_S5S256SHAKERS
 * Implement the SphincsPlus S5S256SHAKERS robust small parameter set
 */
-/*#define QSC_SPHINCSPLUS_S5S256SHAKERS*/
+#define QSC_SPHINCSPLUS_S5S256SHAKERS
 
 /*!
 \def QSC_SPHINCSPLUS_S5S256SHAKERF
 * Implement the SphincsPlus S5S256SHAKERF robust fast parameter set
 */
-#define QSC_SPHINCSPLUS_S5S256SHAKERF
+/*#define QSC_SPHINCSPLUS_S5S256SHAKERF*/
 
 /*!
 \def QSC_SPHINCSPLUS_S6S512SHAKERS

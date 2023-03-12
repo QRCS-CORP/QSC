@@ -4,8 +4,39 @@
 #include "sha3.h"
 
 /* params.h */
+#if defined(QSC_SPHINCSPLUS_S1S128SHAKERF)
 
-#if defined(QSC_SPHINCSPLUS_S3S192SHAKERF)
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
+/* Hash output length in bytes. */
+#define SPX_N 16
+/* Height of the hypertree. */
+#define SPX_FULL_HEIGHT 66
+/* Number of subtree layer. */
+#define SPX_D 22
+/* FORS tree dimensions. */
+#define SPX_FORS_HEIGHT 6
+#define SPX_FORS_TREES 33
+/* Winternitz parameter, */
+#define SPX_WOTS_W 16
+
+#elif defined(QSC_SPHINCSPLUS_S1S128SHAKERS)
+
+/* the hash absorbtion rate */
+#define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
+/* Hash output length in bytes. */
+#define SPX_N 16
+/* Height of the hypertree. */
+#define SPX_FULL_HEIGHT 63
+/* Number of subtree layer. */
+#define SPX_D 7
+/* FORS tree dimensions. */
+#define SPX_FORS_HEIGHT 12
+#define SPX_FORS_TREES 14
+/* Winternitz parameter, */
+#define SPX_WOTS_W 16
+
+#elif defined(QSC_SPHINCSPLUS_S3S192SHAKERF)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
@@ -68,7 +99,6 @@
 #define SPX_FORS_TREES 22
 /* Winternitz parameter, */
 #define SPX_WOTS_W 16
-
 
 #elif defined(QSC_SPHINCSPLUS_S6S512SHAKERF)
 
@@ -642,7 +672,8 @@ static void sphincsplus_fors_sign(uint8_t* sig, uint8_t* pk, const uint8_t* m, c
     for (uint32_t i = 0; i < SPX_FORS_TREES; ++i)
     {
         idx_offset = i * (1 << SPX_FORS_HEIGHT);
-
+        // 0, 0, 7850056, 274452521, 3, 164, 0, 2595
+        // 0, 0, 1221080832, 701520656, 50331648, 2986344448, 0, 587857920
         sphincsplus_set_tree_height(fors_tree_addr, 0);
         sphincsplus_set_tree_index(fors_tree_addr, indices[i] + idx_offset);
 

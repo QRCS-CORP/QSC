@@ -182,6 +182,8 @@ void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STRING_SIZE])
 	if (err == 0)
 	{
 		qsc_timestamp_time_struct_to_string(output, &nt);
+		/* terminate the string */
+		output[QSC_TIMESTAMP_STRING_SIZE - 1] = 0;
 	}
 
 #else

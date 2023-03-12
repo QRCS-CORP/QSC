@@ -1,29 +1,25 @@
 /*
-* 2022 John G. Underhill
-* All Rights Reserved.
+* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
+* This file is part of the QSC Cryptographic library.
+* The QSC library was written as a prototyping library for post-quantum primitives,
+* in the hopes that it would be useful for educational purposes only.
+* Any use of the QSC library in a commercial context, or reproduction of original material
+* contained in this library is strictly forbidden unless prior written consent is obtained
+* from the QSCS Corporation.
 *
-* NOTICE:  All information contained herein is, and remains
-* the property of John G. Underhill.
-* The intellectual and technical concepts contained
-* herein are proprietary to John G. Underhill
-* and his suppliers and may be covered by U.S. and Foreign Patents,
-* patents in process, and are protected by trade secret or copyright law.
-* Dissemination of this information or reproduction of this material
-* is strictly forbidden unless prior written permission is obtained
-* from Digital Freedom Defense Incorporated.
+* The AGPL version 3 License (AGPLv3)
+* This program is free software : you can redistribute it and / or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
 *
-* This library was published publicly in hopes that it would aid in prototyping
-* post-quantum secure primitives for educational purposes only.
-* All and any commercial uses of this library are exclusively reserved by the author
-* John G. Underhill.
-* Any use of this library in a commercial context must be approved by the author
-* in writing.
-* All rights for commercial and/or non-educational purposes, are fully reserved
-* by the author.
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef QSC_AES_H
@@ -120,10 +116,10 @@ typedef enum qsc_aes_cipher_mode
 #define QSC_AES256_KEY_SIZE 32
 
 /*!
-\def QSC_HBA256_MAC_LENGTH
+\def QSC_HBA256_MAC_SIZE
 * The HBA-256 MAC code array length in bytes.
 */
-#define QSC_HBA256_MAC_LENGTH 32
+#define QSC_HBA256_MAC_SIZE 32
 
 /*!
 \def QSC_HBA_MAXAAD_SIZE
@@ -138,13 +134,13 @@ typedef enum qsc_aes_cipher_mode
 #define QSC_HBA_MAXINFO_SIZE 256
 
 /*!
-\def HBA_NAME_LENGTH
+\def HBA_NAME_SIZE
 * The HBA implementation specific name array length.
 */
 #if defined(QSC_HBA_KMAC_EXTENSION)
-#	define HBA_NAME_LENGTH 29
+#	define HBA_NAME_SIZE 29
 #else
-#	define HBA_NAME_LENGTH 33
+#	define HBA_NAME_SIZE 33
 #endif
 
 /*!

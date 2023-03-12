@@ -6,7 +6,7 @@
 #include "../QSC/dilithium.h"
 #include "../QSC/intutils.h"
 
-bool qsctest_dilithium_operations_test()
+bool qsctest_dilithium_kat_test()
 {
 	/* note: test message size increase as the kat number increments, ex. 0=33, 1=66, 2=99...
 	   If testing other kats other than zero, make sure to increase the message size accordingly. */
@@ -271,7 +271,7 @@ bool qsctest_dilithium_stress_test()
 
 void qsctest_dilithium_run()
 {
-	if (qsctest_dilithium_operations_test() == true)
+	if (qsctest_dilithium_kat_test() == true)
 	{
 		qsctest_print_safe("Success! Passed the Dilithium public key, private key, ciphertext, and message known answer tests. \n");
 	}

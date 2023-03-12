@@ -718,11 +718,11 @@ void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chacha_keyparams* ke
 		ctx->state[1] = 0x3120646EULL;
 		ctx->state[2] = 0x79622D36ULL;
 		ctx->state[3] = 0x6B206574ULL;
-		ctx->state[4] = qsc_intutils_le8to32(keyparams->key + 0);
+		ctx->state[4] = qsc_intutils_le8to32(keyparams->key);
 		ctx->state[5] = qsc_intutils_le8to32(keyparams->key + 4);
 		ctx->state[6] = qsc_intutils_le8to32(keyparams->key + 8);
 		ctx->state[7] = qsc_intutils_le8to32(keyparams->key + 12);
-		ctx->state[8] = qsc_intutils_le8to32(keyparams->key + 0);
+		ctx->state[8] = qsc_intutils_le8to32(keyparams->key);
 		ctx->state[9] = qsc_intutils_le8to32(keyparams->key + 4);
 		ctx->state[10] = qsc_intutils_le8to32(keyparams->key + 8);
 		ctx->state[11] = qsc_intutils_le8to32(keyparams->key + 12);

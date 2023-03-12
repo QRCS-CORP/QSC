@@ -59,7 +59,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 			qsc_memutils_clear(ptr, length);
 			munmap(ptr, length);
 
-			// failed to lock
+			/* failed to lock */
 			ptr = NULL;
 		}
 #	endif

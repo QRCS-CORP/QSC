@@ -1361,7 +1361,7 @@ static void falcon_FFT(falcon_fpr* f, uint32_t logn)
 				__m256d s_re;
 				__m256d s_im;
 
-				s_re = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((m + i1) << 1) + 0].v);
+				s_re = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((m + i1) << 1)].v);
 				s_im = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((m + i1) << 1) + 1].v);
 
 				for (j = j1; j < j2; j += 4)
@@ -1397,7 +1397,7 @@ static void falcon_FFT(falcon_fpr* f, uint32_t logn)
 				falcon_fpr s_re;
 				falcon_fpr s_im;
 
-				s_re = falcon_avx2_fpr_gm_tab[((m + i1) << 1) + 0];
+				s_re = falcon_avx2_fpr_gm_tab[((m + i1) << 1)];
 				s_im = falcon_avx2_fpr_gm_tab[((m + i1) << 1) + 1];
 
 				for (j = j1; j < j2; j++)
@@ -1499,7 +1499,7 @@ static void falcon_iFFT(falcon_fpr* f, uint32_t logn)
 				__m256d s_re;
 				__m256d s_im;
 
-				s_re = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((hm + i1) << 1) + 0].v);
+				s_re = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((hm + i1) << 1)].v);
 				s_im = _mm256_set1_pd(falcon_avx2_fpr_gm_tab[((hm + i1) << 1) + 1].v);
 
 				for (j = j1; j < j2; j += 4)
@@ -1531,7 +1531,7 @@ static void falcon_iFFT(falcon_fpr* f, uint32_t logn)
 				falcon_fpr s_re;
 				falcon_fpr s_im;
 
-				s_re = falcon_avx2_fpr_gm_tab[((hm + i1) << 1) + 0];
+				s_re = falcon_avx2_fpr_gm_tab[((hm + i1) << 1)];
 				s_im = falcon_fpr_neg(falcon_avx2_fpr_gm_tab[((hm + i1) << 1) + 1]);
 
 				for (j = j1; j < j2; ++j)
@@ -2187,8 +2187,8 @@ static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict 
 			falcon_fpr t_im;
 			falcon_fpr tmp;
 
-			a_re = f[(u << 1) + 0];
-			a_im = f[(u << 1) + 0 + hn];
+			a_re = f[(u << 1)];
+			a_im = f[(u << 1) + hn];
 			b_re = f[(u << 1) + 1];
 			b_im = f[(u << 1) + 1 + hn];
 
@@ -2198,7 +2198,7 @@ static void falcon_poly_split_fft(falcon_fpr* restrict f0, falcon_fpr* restrict 
 
 			falcon_fpc_sub(&t_re, &t_im, a_re, a_im, b_re, b_im);
 			tmp = falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 1];
-			falcon_fpc_mul(&t_re, &t_im, t_re, t_im, falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 0], falcon_fpr_neg(tmp));
+			falcon_fpc_mul(&t_re, &t_im, t_re, t_im, falcon_avx2_fpr_gm_tab[((u + hn) << 1)], falcon_fpr_neg(tmp));
 			f1[u] = falcon_fpr_half(t_re);
 			f1[u + qn] = falcon_fpr_half(t_im);
 		}
@@ -2287,10 +2287,10 @@ static void falcon_poly_merge_fft(falcon_fpr* restrict f, const falcon_fpr* rest
 			a_re = f0[u];
 			a_im = f0[u + qn];
 			tmp = falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 1];
-			falcon_fpc_mul(&b_re, &b_im, f1[u], f1[u + qn], falcon_avx2_fpr_gm_tab[((u + hn) << 1) + 0], tmp);
+			falcon_fpc_mul(&b_re, &b_im, f1[u], f1[u + qn], falcon_avx2_fpr_gm_tab[((u + hn) << 1)], tmp);
 			falcon_fpc_add(&t_re, &t_im, a_re, a_im, b_re, b_im);
-			f[(u << 1) + 0] = t_re;
-			f[(u << 1) + 0 + hn] = t_im;
+			f[(u << 1)] = t_re;
+			f[(u << 1) + hn] = t_im;
 			falcon_fpc_sub(&t_re, &t_im, a_re, a_im, b_re, b_im);
 			f[(u << 1) + 1] = t_re;
 			f[(u << 1) + 1 + hn] = t_im;

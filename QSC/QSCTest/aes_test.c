@@ -7,7 +7,7 @@
 #include "testutils.h"
 
 #define AES_TEST_CYCLES 100
-#define CTR_OUTPUT_LENGTH 33
+#define CTR_OUTPUT_SIZE 33
 #define HBA_TEST_CYCLES 100
 #define MONTE_CARLO_CYCLES 10000
 
@@ -468,9 +468,9 @@ bool qsctest_aes256_hba_kat()
 	uint8_t dec1[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t dec2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
 	uint8_t dec3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
-	uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_LENGTH] = { 0 };
+	uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
 	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 	uint8_t msg1[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t msg2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
@@ -481,9 +481,9 @@ bool qsctest_aes256_hba_kat()
 	uint8_t n1copy[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t n2copy[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t n3copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_LENGTH] = { 0 };
+	uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
 	bool status;
 
 	/* vectors from CEX */
@@ -539,7 +539,7 @@ bool qsctest_aes256_hba_kat()
 	qsc_aes_hba256_initialize(&state, &kp1, false);
 	qsc_aes_hba256_set_associated(&state, aad1, sizeof(aad1));
 
-	if (qsc_aes_hba256_transform(&state, dec1, enc1, sizeof(enc1) - QSC_HBA256_MAC_LENGTH) == false)
+	if (qsc_aes_hba256_transform(&state, dec1, enc1, sizeof(enc1) - QSC_HBA256_MAC_SIZE) == false)
 	{
 		status = false;
 	}
@@ -571,7 +571,7 @@ bool qsctest_aes256_hba_kat()
 	qsc_aes_hba256_initialize(&state, &kp2, false);
 	qsc_aes_hba256_set_associated(&state, aad2, sizeof(aad2));
 
-	if (qsc_aes_hba256_transform(&state, dec2, enc2, sizeof(enc2) - QSC_HBA256_MAC_LENGTH) == false)
+	if (qsc_aes_hba256_transform(&state, dec2, enc2, sizeof(enc2) - QSC_HBA256_MAC_SIZE) == false)
 	{
 		status = false;
 	}
@@ -603,7 +603,7 @@ bool qsctest_aes256_hba_kat()
 	qsc_aes_hba256_initialize(&state, &kp3, false);
 	qsc_aes_hba256_set_associated(&state, aad3, sizeof(aad3));
 
-	if (qsc_aes_hba256_transform(&state, dec3, enc3, sizeof(enc3) - QSC_HBA256_MAC_LENGTH) == false)
+	if (qsc_aes_hba256_transform(&state, dec3, enc3, sizeof(enc3) - QSC_HBA256_MAC_SIZE) == false)
 	{
 		status = false;
 	}
@@ -651,13 +651,13 @@ bool qsctest_aes256_hba_stress()
 		}
 
 		dec = (uint8_t*)qsc_memutils_malloc(mlen);
-		enc = (uint8_t*)qsc_memutils_malloc((size_t)mlen + QSC_HBA256_MAC_LENGTH);
+		enc = (uint8_t*)qsc_memutils_malloc((size_t)mlen + QSC_HBA256_MAC_SIZE);
 		msg = (uint8_t*)qsc_memutils_malloc(mlen);
 
 		if (dec != NULL && enc != NULL && msg != NULL)
 		{
 			qsc_intutils_clear8(dec, mlen);
-			qsc_intutils_clear8(enc, (size_t)mlen + QSC_HBA256_MAC_LENGTH);
+			qsc_intutils_clear8(enc, (size_t)mlen + QSC_HBA256_MAC_SIZE);
 			qsc_intutils_clear8(msg, mlen);
 			qsc_memutils_copy(nonce, ncopy, QSC_AES_BLOCK_SIZE);
 
@@ -774,56 +774,56 @@ void qsctest_aes_run()
 {
 	if (qsctest_fips_aes128_cbc() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_cbc(AES-128) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 CBC(AES-128) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_cbc(AES-128) qsc_aes_mode_cbc KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 CBC(AES-128) CBC KAT test. \n");
 	}
 
 	if (qsctest_fips_aes256_cbc() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_cbc(AES-256) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 CBC(AES-256) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_cbc(AES-256) qsc_aes_mode_cbc KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 CBC(AES-256) CBC KAT test. \n");
 	}
 
 	if (qsctest_fips_aes128_ctr() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ctr(AES-128) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 CTR(AES-128) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ctr(AES-128) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 CTR(AES-128) KAT test. \n");
 	}
 
 	if (qsctest_fips_aes256_ctr() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ctr(AES-256) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 CTR(AES-256) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ctr(AES-256) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 CTR(AES-256) KAT test. \n");
 	}
 
 	if (qsctest_fips_aes128_ecb() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ecb(AES-128) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 ECB(AES-128) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ecb(AES-128) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-128) KAT test. \n");
 	}
 
 	if (qsctest_fips_aes256_ecb() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 qsc_aes_mode_ecb(AES-256) KAT test. \n");
+		qsctest_print_safe("Success! Passed the FIPS 197 ECB(AES-256) KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 qsc_aes_mode_ecb(AES-256) KAT test. \n");
+		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-256) KAT test. \n");
 	}
 
 	if (qsctest_aes256_hba_kat() == true)

@@ -468,9 +468,9 @@ static bool aes256_hba_kat()
 	uint8_t dec1[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t dec2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
 	uint8_t dec3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
-	uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_LENGTH] = { 0 };
+	uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
 	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 	uint8_t msg1[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t msg2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
@@ -481,9 +481,9 @@ static bool aes256_hba_kat()
 	uint8_t n1copy[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t n2copy[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t n3copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_LENGTH] = { 0 };
-	uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_LENGTH] = { 0 };
+	uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
 	bool status;
 
 	/* vectors from CEX */
@@ -539,7 +539,7 @@ static bool aes256_hba_kat()
 	qsc_aes_hba256_initialize(&state, &kp1, false);
 	qsc_aes_hba256_set_associated(&state, aad1, sizeof(aad1));
 
-	if (qsc_aes_hba256_transform(&state, dec1, enc1, sizeof(enc1) - QSC_HBA256_MAC_LENGTH) == false)
+	if (qsc_aes_hba256_transform(&state, dec1, enc1, sizeof(enc1) - QSC_HBA256_MAC_SIZE) == false)
 	{
 		status = false;
 	}
@@ -571,7 +571,7 @@ static bool aes256_hba_kat()
 	qsc_aes_hba256_initialize(&state, &kp2, false);
 	qsc_aes_hba256_set_associated(&state, aad2, sizeof(aad2));
 
-	if (qsc_aes_hba256_transform(&state, dec2, enc2, sizeof(enc2) - QSC_HBA256_MAC_LENGTH) == false)
+	if (qsc_aes_hba256_transform(&state, dec2, enc2, sizeof(enc2) - QSC_HBA256_MAC_SIZE) == false)
 	{
 		status = false;
 	}
@@ -603,7 +603,7 @@ static bool aes256_hba_kat()
 	qsc_aes_hba256_initialize(&state, &kp3, false);
 	qsc_aes_hba256_set_associated(&state, aad3, sizeof(aad3));
 
-	if (qsc_aes_hba256_transform(&state, dec3, enc3, sizeof(enc3) - QSC_HBA256_MAC_LENGTH) == false)
+	if (qsc_aes_hba256_transform(&state, dec3, enc3, sizeof(enc3) - QSC_HBA256_MAC_SIZE) == false)
 	{
 		status = false;
 	}

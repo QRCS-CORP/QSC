@@ -86,11 +86,17 @@ static void random_sample_print()
 }
 #endif
 
-int main(void)
+int32_t main(void)
 {
 	qsc_cpuidex_cpu_features cfeat;
 	bool valid;
 	bool hfeat;
+
+	//qsctest_rcs_run();
+	//qsctest_mceliece_run();
+	//qsctest_kyber_run();
+	//qsctest_dilithium_run();
+	qsctest_sphincsplus_run();
 
 #if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
 	qsc_consoleutils_print_line("Loading visual pre-check...");

@@ -149,7 +149,7 @@ uint64_t qsc_timerex_stopwatch_start()
 
 uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start)
 {
-	clock_t diff;
+	uint64_t diff;
 	uint64_t msec;
 
 	msec = clock();
@@ -164,7 +164,7 @@ void qsc_timerex_print_values()
 {
 	char tmro[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
 
-	clock_t elps;
+	uint64_t elps;
 	uint64_t tms;
 
 	elps = qsc_timerex_stopwatch_start();

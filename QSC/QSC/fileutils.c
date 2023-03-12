@@ -363,7 +363,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 
 			if (*length - lenused < chunkused)
 			{
-				// Check for overflow
+				/* Check for overflow */
 				if (*length > SIZE_MAX / 2)
 				{
 					errno = EOVERFLOW;

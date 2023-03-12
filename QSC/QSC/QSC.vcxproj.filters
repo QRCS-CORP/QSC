@@ -142,6 +142,51 @@
     <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support">
       <UniqueIdentifier>{2a8d8ef1-94b9-4f1f-82bb-ba9c20567d72}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\Dilithium\Support">
+      <UniqueIdentifier>{ff99cb58-5604-4074-bc96-d0f5e99db338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\Dilithium\Support">
+      <UniqueIdentifier>{8e3a3902-f3c4-4811-9869-d1613fe7f367}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\ECDH\Support">
+      <UniqueIdentifier>{3fd8f977-27d4-4c47-a80b-2d3e548735cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\McEliece\Support">
+      <UniqueIdentifier>{ec6da9b6-ca0b-45b0-94b7-a36d431e8c00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\NTRU\Support">
+      <UniqueIdentifier>{7dfb12e7-5af1-405e-98eb-868345439b91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\ECDSA\Support">
+      <UniqueIdentifier>{97e23e08-e303-424d-8a8e-d561a1be9853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\Falcon\Support">
+      <UniqueIdentifier>{5568de26-3d56-477c-9590-a61b141599d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\SphincsPlus\Support">
+      <UniqueIdentifier>{d82e819d-24e0-47bd-ab23-098c060cfb85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\ECDH\Support">
+      <UniqueIdentifier>{65d9cf53-ed33-4e31-93bd-474351452446}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\Kyber\Support">
+      <UniqueIdentifier>{21942bba-ac1d-4f15-b24f-ad9d1aeb2e86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\McEliece\Support">
+      <UniqueIdentifier>{97233bab-3642-491e-8fa6-32c616641938}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\NTRU\Support">
+      <UniqueIdentifier>{b14be658-8796-4588-9943-9853bf63ebcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\ECDSA\Support">
+      <UniqueIdentifier>{026ca531-7993-4d59-917b-6da4c4f1e4c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\Falcon\Support">
+      <UniqueIdentifier>{685bb590-d199-4c62-aea4-2c4de6034553}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\SphincsPlus\Support">
+      <UniqueIdentifier>{6a29f59c-2a8c-483a-957c-5cd73a8227f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -216,20 +261,8 @@
     <ClInclude Include="hcg.h">
       <Filter>Header Files\DRBG</Filter>
     </ClInclude>
-    <ClInclude Include="kyberbase.h">
-      <Filter>Header Files\Asymmetric\Cipher\Kyber</Filter>
-    </ClInclude>
-    <ClInclude Include="ecdhbase.h">
-      <Filter>Header Files\Asymmetric\Cipher\ECDH</Filter>
-    </ClInclude>
-    <ClInclude Include="ecdsabase.h">
-      <Filter>Header Files\Asymmetric\Signature\ECDSA</Filter>
-    </ClInclude>
     <ClInclude Include="donna128.h">
       <Filter>Header Files\Numerics</Filter>
-    </ClInclude>
-    <ClInclude Include="ec25519.h">
-      <Filter>Header Files\Asymmetric\Cipher\ECDH</Filter>
     </ClInclude>
     <ClInclude Include="selftest.h">
       <Filter>Header Files\Common</Filter>
@@ -282,43 +315,10 @@
     <ClInclude Include="timestamp.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="kyberbase_avx2.h">
-      <Filter>Header Files\Asymmetric\Cipher\Kyber</Filter>
-    </ClInclude>
-    <ClInclude Include="dilithiumbase.h">
-      <Filter>Header Files\Asymmetric\Signature\Dilithium</Filter>
-    </ClInclude>
-    <ClInclude Include="mceliecebase.h">
-      <Filter>Header Files\Asymmetric\Cipher\McEliece</Filter>
-    </ClInclude>
-    <ClInclude Include="sphincsplusbase.h">
-      <Filter>Header Files\Asymmetric\Signature\SphincsPlus</Filter>
-    </ClInclude>
-    <ClInclude Include="mceliecebase_avx2.h">
-      <Filter>Header Files\Asymmetric\Cipher\McEliece</Filter>
-    </ClInclude>
-    <ClInclude Include="dilithiumbase_avx2.h">
-      <Filter>Header Files\Asymmetric\Signature\Dilithium</Filter>
-    </ClInclude>
-    <ClInclude Include="sphincsplusbase_avx2.h">
-      <Filter>Header Files\Asymmetric\Signature\SphincsPlus</Filter>
-    </ClInclude>
     <ClInclude Include="ntru.h">
       <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
     </ClInclude>
-    <ClInclude Include="ntrubase.h">
-      <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
-    </ClInclude>
-    <ClInclude Include="ntrubase_avx2.h">
-      <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
-    </ClInclude>
     <ClInclude Include="falcon.h">
-      <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
-    </ClInclude>
-    <ClInclude Include="falconbase.h">
-      <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
-    </ClInclude>
-    <ClInclude Include="falconbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
     </ClInclude>
     <ClInclude Include="event.h">
@@ -341,6 +341,54 @@
     </ClInclude>
     <ClInclude Include="scb.h">
       <Filter>Header Files\DRBG</Filter>
+    </ClInclude>
+    <ClInclude Include="list.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="kyberbase.h">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="kyberbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Cipher\Kyber\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="dilithiumbase.h">
+      <Filter>Header Files\Asymmetric\Signature\Dilithium\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="dilithiumbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Signature\Dilithium\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ec25519.h">
+      <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdhbase.h">
+      <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="mceliecebase.h">
+      <Filter>Header Files\Asymmetric\Cipher\McEliece\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="mceliecebase_avx2.h">
+      <Filter>Header Files\Asymmetric\Cipher\McEliece\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ntrubase.h">
+      <Filter>Header Files\Asymmetric\Cipher\NTRU\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ntrubase_avx2.h">
+      <Filter>Header Files\Asymmetric\Cipher\NTRU\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsabase.h">
+      <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="falconbase.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="falconbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="sphincsplusbase.h">
+      <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="sphincsplusbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -410,20 +458,8 @@
     <ClCompile Include="hcg.c">
       <Filter>Source Files\DRBG</Filter>
     </ClCompile>
-    <ClCompile Include="kyberbase.c">
-      <Filter>Source Files\Asymmetric\Cipher\Kyber</Filter>
-    </ClCompile>
-    <ClCompile Include="ecdhbase.c">
-      <Filter>Source Files\Asymmetric\Cipher\ECDH</Filter>
-    </ClCompile>
-    <ClCompile Include="ecdsabase.c">
-      <Filter>Source Files\Asymmetric\Signature\ECDSA</Filter>
-    </ClCompile>
     <ClCompile Include="donna128.c">
       <Filter>Source Files\Numerics</Filter>
-    </ClCompile>
-    <ClCompile Include="ec25519.c">
-      <Filter>Source Files\Asymmetric\Cipher\ECDH</Filter>
     </ClCompile>
     <ClCompile Include="selftest.c">
       <Filter>Source Files\Common</Filter>
@@ -470,43 +506,10 @@
     <ClCompile Include="timestamp.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="kyberbase_avx2.c">
-      <Filter>Source Files\Asymmetric\Cipher\Kyber</Filter>
-    </ClCompile>
-    <ClCompile Include="dilithiumbase.c">
-      <Filter>Source Files\Asymmetric\Signature\Dilithium</Filter>
-    </ClCompile>
-    <ClCompile Include="mceliecebase.c">
-      <Filter>Source Files\Asymmetric\Cipher\McEliece</Filter>
-    </ClCompile>
-    <ClCompile Include="sphincsplusbase.c">
-      <Filter>Source Files\Asymmetric\Signature\SphincsPlus</Filter>
-    </ClCompile>
-    <ClCompile Include="mceliecebase_avx2.c">
-      <Filter>Source Files\Asymmetric\Cipher\McEliece</Filter>
-    </ClCompile>
-    <ClCompile Include="dilithiumbase_avx2.c">
-      <Filter>Source Files\Asymmetric\Signature\Dilithium</Filter>
-    </ClCompile>
-    <ClCompile Include="sphincsplusbase_avx2.c">
-      <Filter>Source Files\Asymmetric\Signature\SphincsPlus</Filter>
-    </ClCompile>
     <ClCompile Include="ntru.c">
       <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
     </ClCompile>
-    <ClCompile Include="ntrubase.c">
-      <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
-    </ClCompile>
-    <ClCompile Include="ntrubase_avx2.c">
-      <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
-    </ClCompile>
     <ClCompile Include="falcon.c">
-      <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
-    </ClCompile>
-    <ClCompile Include="falconbase.c">
-      <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
-    </ClCompile>
-    <ClCompile Include="falconbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
     </ClCompile>
     <ClCompile Include="event.c">
@@ -532,6 +535,54 @@
     </ClCompile>
     <ClCompile Include="scb.c">
       <Filter>Source Files\DRBG</Filter>
+    </ClCompile>
+    <ClCompile Include="list.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithiumbase.c">
+      <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithiumbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ec25519.c">
+      <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdhbase.c">
+      <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="kyberbase.c">
+      <Filter>Source Files\Asymmetric\Cipher\Kyber\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="kyberbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Cipher\Kyber\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="mceliecebase.c">
+      <Filter>Source Files\Asymmetric\Cipher\McEliece\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="mceliecebase_avx2.c">
+      <Filter>Source Files\Asymmetric\Cipher\McEliece\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ntrubase.c">
+      <Filter>Source Files\Asymmetric\Cipher\NTRU\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ntrubase_avx2.c">
+      <Filter>Source Files\Asymmetric\Cipher\NTRU\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsabase.c">
+      <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="falconbase.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="falconbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="sphincsplusbase.c">
+      <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="sphincsplusbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

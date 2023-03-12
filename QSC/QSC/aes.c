@@ -56,31 +56,31 @@
 /* HBA */
 
 /*!
-\def HBA_INFO_LENGTH
+\def HBA_INFO_SIZE
 * The HBA version information array length.
 */
-#define HBA_INFO_LENGTH 16
+#define HBA_INFO_SIZE 16
 
 /*!
-\def HBA256_MKEY_LENGTH
+\def HBA256_MKEY_SIZE
 * The size of the hba-256 mac key array
 */
-#define HBA256_MKEY_LENGTH 32
+#define HBA256_MKEY_SIZE 32
 
 /*!
-\def HBA512_MKEY_LENGTH
+\def HBA512_MKEY_SIZE
 * The size of the hba-512 mac key array
 */
-#define HBA512_MKEY_LENGTH 64
+#define HBA512_MKEY_SIZE 64
 
 /*!
-\def HBA_NAME_LENGTH
+\def HBA_NAME_SIZE
 * The HBA implementation specific name array length.
 */
 #if defined(QSC_HBA_KMAC_EXTENSION)
-#	define HBA_NAME_LENGTH 29
+#	define HBA_NAME_SIZE 29
 #else
-#	define HBA_NAME_LENGTH 33
+#	define HBA_NAME_SIZE 33
 #endif
 
 /* aes-ni and table-based fallback functions */
@@ -889,7 +889,7 @@ static void aes_mix_columns(uint8_t* state)
 
 	for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; i += sizeof(uint32_t))
 	{
-		s0 = state[i + 0];
+		s0 = state[i];
 		s1 = state[i + 1];
 		s2 = state[i + 2];
 		s3 = state[i + 3];
@@ -899,7 +899,7 @@ static void aes_mix_columns(uint8_t* state)
 		t2 = s0 ^ s1 ^ (s2 << 1) ^ s3 ^ (s3 << 1);
 		t3 = s0 ^ (s0 << 1) ^ s1 ^ s2 ^ (s3 << 1);
 
-		state[i + 0] = (uint8_t)(t0 ^ ((~(t0 >> 8) + 1) & 0x0000011BUL));
+		state[i] = (uint8_t)(t0 ^ ((~(t0 >> 8) + 1) & 0x0000011BUL));
 		state[i + 1] = (uint8_t)(t1 ^ ((~(t1 >> 8) + 1) & 0x0000011BUL));
 		state[i + 2] = (uint8_t)(t2 ^ ((~(t2 >> 8) + 1) & 0x0000011BUL));
 		state[i + 3] = (uint8_t)(t3 ^ ((~(t3 >> 8) + 1) & 0x0000011BUL));
@@ -1407,13 +1407,13 @@ size_t qsc_pkcs7_padding_length(const uint8_t* input)
 /* aes-hba256 */
 
 #if defined(QSC_HBA_KMAC_AUTH)
-static const uint8_t aes_hba256_name[HBA_NAME_LENGTH] =
+static const uint8_t aes_hba256_name[HBA_NAME_SIZE] =
 {
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x48, 0x42, 0x41, 0x2D, 0x52, 0x48,
 	0x58, 0x53, 0x32, 0x35, 0x36, 0x2D, 0x4B, 0x4D, 0x41, 0x43, 0x32, 0x35, 0x36
 };
 #else
-static const uint8_t aes_hba256_name[HBA_NAME_LENGTH] =
+static const uint8_t aes_hba256_name[HBA_NAME_SIZE] =
 {
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x48, 0x42, 0x41, 0x2D, 0x52, 0x48,
 	0x58, 0x48, 0x32, 0x35, 0x36, 0x2D, 0x48, 0x4D, 0x41, 0x43, 0x53, 0x48, 0x41, 0x32, 0x32, 0x35, 0x36
@@ -1431,9 +1431,9 @@ static void aes_hba256_update(qsc_aes_hba256_state* state, const uint8_t* input,
 
 static void aes_hba256_finalize(qsc_aes_hba256_state* state, uint8_t* output)
 {
-	uint8_t mkey[HBA256_MKEY_LENGTH] = { 0 };
+	uint8_t mkey[HBA256_MKEY_SIZE] = { 0 };
 	uint8_t pctr[sizeof(uint64_t)] = { 0 };
-	uint8_t tmpn[HBA_NAME_LENGTH];
+	uint8_t tmpn[HBA_NAME_SIZE];
 	uint64_t mctr;
 
 	/* version 1.1a add the nonce, ciphertext, and encoding sizes to the counter */
@@ -1445,27 +1445,27 @@ static void aes_hba256_finalize(qsc_aes_hba256_state* state, uint8_t* output)
 
 #if defined(QSC_HBA_KMAC_AUTH)
 	/* mac the data and add the code to the end of the cipher-text output array */
-	qsc_kmac_finalize(&state->kstate, QSC_KECCAK_256_RATE, output, QSC_HBA256_MAC_LENGTH);
+	qsc_kmac_finalize(&state->kstate, QSC_KECCAK_256_RATE, output, QSC_HBA256_MAC_SIZE);
 #else
 	/* mac the data and add the code to the end of the cipher-text output array */
 	qsc_hmac256_finalize(&state->kstate, output);
 #endif
 
 	/* generate the new mac key */
-	qsc_memutils_copy(tmpn, aes_hba256_name, HBA_NAME_LENGTH);
+	qsc_memutils_copy(tmpn, aes_hba256_name, HBA_NAME_SIZE);
 	/* add 1 + the nonce, and last input size */
 	/* append the counter to the end of the mac input array */
 	qsc_intutils_le64to8(tmpn, state->counter);
 
 #if defined(QSC_HBA_KMAC_AUTH)
-	qsc_cshake256_compute(mkey, HBA256_MKEY_LENGTH, state->mkey, sizeof(state->mkey), tmpn, HBA_NAME_LENGTH, state->cust, state->custlen);
-	qsc_memutils_copy(state->mkey, mkey, HBA256_MKEY_LENGTH);
-	qsc_kmac_initialize(&state->kstate, QSC_KECCAK_256_RATE, state->mkey, HBA256_MKEY_LENGTH, NULL, 0);
+	qsc_cshake256_compute(mkey, HBA256_MKEY_SIZE, state->mkey, sizeof(state->mkey), tmpn, HBA_NAME_SIZE, state->cust, state->custlen);
+	qsc_memutils_copy(state->mkey, mkey, HBA256_MKEY_SIZE);
+	qsc_kmac_initialize(&state->kstate, QSC_KECCAK_256_RATE, state->mkey, HBA256_MKEY_SIZE, NULL, 0);
 #else
 	/* extract the HKDF key from the state mac-key and salt */
-	qsc_hkdf256_extract(mkey, HBA256_MKEY_LENGTH, state->mkey, sizeof(state->mkey), tmpn, HBA_NAME_LENGTH);
+	qsc_hkdf256_extract(mkey, HBA256_MKEY_SIZE, state->mkey, sizeof(state->mkey), tmpn, HBA_NAME_SIZE);
 	/* key HKDF Expand and generate the next mac-key to state */
-	qsc_hkdf256_expand(state->mkey, sizeof(state->mkey), mkey, HBA256_MKEY_LENGTH, state->cust, state->custlen);
+	qsc_hkdf256_expand(state->mkey, sizeof(state->mkey), mkey, HBA256_MKEY_SIZE, state->cust, state->custlen);
 #endif
 }
 
@@ -1479,30 +1479,30 @@ static void aes_hba256_genkeys(const qsc_aes_keyparams* keyparams, uint8_t* cprk
 	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 	/* initialize an instance of cSHAKE */
-	qsc_cshake_initialize(&kstate, qsc_keccak_rate_256, keyparams->key, keyparams->keylen, aes_hba256_name, HBA_NAME_LENGTH, keyparams->info, keyparams->infolen);
+	qsc_cshake_initialize(&kstate, qsc_keccak_rate_256, keyparams->key, keyparams->keylen, aes_hba256_name, HBA_NAME_SIZE, keyparams->info, keyparams->infolen);
 
 	/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
 	qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1);
 	qsc_memutils_copy(cprk, sbuf, keyparams->keylen);
 	qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1);
-	qsc_memutils_copy(mack, sbuf, HBA256_MKEY_LENGTH);
+	qsc_memutils_copy(mack, sbuf, HBA256_MKEY_SIZE);
 	/* clear the shake buffer */
 	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
 
 #else
 
-	uint8_t kbuf[QSC_AES256_KEY_SIZE + HBA256_MKEY_LENGTH] = { 0 };
+	uint8_t kbuf[QSC_AES256_KEY_SIZE + HBA256_MKEY_SIZE] = { 0 };
 	uint8_t genk[QSC_HMAC_256_MAC_SIZE] = { 0 };
 
 	/* extract the HKDF key from the user-key and salt */
-	qsc_hkdf256_extract(genk, sizeof(genk), keyparams->key, keyparams->keylen, aes_hba256_name, HBA_NAME_LENGTH);
+	qsc_hkdf256_extract(genk, sizeof(genk), keyparams->key, keyparams->keylen, aes_hba256_name, HBA_NAME_SIZE);
 
 	/* key HKDF Expand and generate the key buffer */
 	qsc_hkdf256_expand(kbuf, sizeof(kbuf), genk, sizeof(genk), keyparams->info, keyparams->infolen);
 
 	/* copy the cipher and mac keys from the buffer */
 	qsc_memutils_copy(cprk, kbuf, QSC_AES256_KEY_SIZE);
-	qsc_memutils_copy(mack, kbuf + QSC_AES256_KEY_SIZE, HBA256_MKEY_LENGTH);
+	qsc_memutils_copy(mack, kbuf + QSC_AES256_KEY_SIZE, HBA256_MKEY_SIZE);
 
 	/* clear the buffer */
 	qsc_memutils_clear(kbuf, sizeof(kbuf));
@@ -1549,9 +1549,9 @@ void qsc_aes_hba256_initialize(qsc_aes_hba256_state* state, const qsc_aes_keypar
 
 	/* initialize the mac state */
 #if defined(QSC_HBA_KMAC_EXTENSION)
-	qsc_kmac_initialize(&state->kstate, QSC_KECCAK_256_RATE, state->mkey, HBA256_MKEY_LENGTH, NULL, 0);
+	qsc_kmac_initialize(&state->kstate, QSC_KECCAK_256_RATE, state->mkey, HBA256_MKEY_SIZE, NULL, 0);
 #else
-	qsc_hmac256_initialize(&state->kstate, state->mkey, HBA256_MKEY_LENGTH);
+	qsc_hmac256_initialize(&state->kstate, state->mkey, HBA256_MKEY_SIZE);
 #endif
 
 	/* initialize the key parameters struct, info is optional */
@@ -1606,7 +1606,7 @@ bool qsc_aes_hba256_transform(qsc_aes_hba256_state* state, uint8_t* output, cons
 	}
 	else
 	{
-		uint8_t code[QSC_HBA256_MAC_LENGTH] = { 0 };
+		uint8_t code[QSC_HBA256_MAC_SIZE] = { 0 };
 
 		/* update the mac with the nonce */
 		aes_hba256_update(state, state->cstate.nonce, QSC_AES_BLOCK_SIZE);
@@ -1616,7 +1616,7 @@ bool qsc_aes_hba256_transform(qsc_aes_hba256_state* state, uint8_t* output, cons
 		aes_hba256_finalize(state, code);
 
 		/* test the mac for equality, bypassing the transform if the mac check fails */
-		if (qsc_intutils_verify(code, (input + length), QSC_HBA256_MAC_LENGTH) == 0)
+		if (qsc_intutils_verify(code, (input + length), QSC_HBA256_MAC_SIZE) == 0)
 		{
 			/* use aes counter-mode to decrypt the array */
 			qsc_aes_ctrle_transform(&state->cstate, output, input, length);

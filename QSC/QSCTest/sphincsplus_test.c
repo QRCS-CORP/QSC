@@ -93,7 +93,11 @@ bool qsctest_sphincsplus_operations_test()
 	siglen = 0;
 	sklen = 0;
 
-#if defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
+#if defined(QSC_SPHINCSPLUS_S1S128SHAKERS)
+	char path[] = "NPQCR3/sphincs-shake256-128s-robust.rsp";
+#elif defined(QSC_SPHINCSPLUS_S1S128SHAKERF)
+	char path[] = "NPQCR3/sphincs-shake256-128f-robust.rsp";
+#elif defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
 	char path[] = "NPQCR3/sphincs-shake256-192s-robust.rsp";
 #elif defined(QSC_SPHINCSPLUS_S3S192SHAKERF)
 	char path[] = "NPQCR3/sphincs-shake256-192f-robust.rsp";
@@ -102,10 +106,10 @@ bool qsctest_sphincsplus_operations_test()
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERF)
 	char path[] = "NPQCR3/sphincs-shake256-256f-robust.rsp";
 #else
-#	//error The parameter set is invalid!
+#	error The parameter set is invalid!
 #endif
 
-	/* NIST PQC Round 3 KATs */
+	/* NIST PQC Round 3 KATs */ //pk=32,sk=64,sg=7889
 	parse_nist_signature_kat(path, seed, &seedlen, kmsg, &msglen, kpk, &pklen, ksk, &sklen, ksig, &siglen, 0);
 
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);

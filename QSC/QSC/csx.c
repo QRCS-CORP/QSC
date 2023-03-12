@@ -14,10 +14,10 @@
 #define CSX_ROUND_COUNT 40
 
 /*!
-\def CSX_NAME_LENGTH
+\def CSX_NAME_SIZE
 * \brief The byte size of the name array
 */
-#define CSX_NAME_LENGTH 14
+#define CSX_NAME_SIZE 14
 
 #define CSX_AVX512_BLOCK (8 * QSC_CSX_BLOCK_SIZE)
 #define CSX_AVX2_BLOCK (4 * QSC_CSX_BLOCK_SIZE)
@@ -30,14 +30,14 @@ static const uint8_t csx_info[QSC_CSX_INFO_SIZE] =
 };
 
 #if	defined(QSC_CSX_AUTHENTICATED)
-static const uint8_t csx_name[CSX_NAME_LENGTH] =
+static const uint8_t csx_name[CSX_NAME_SIZE] =
 {
 	0x43, 0x53, 0x58, 0x35, 0x31, 0x32, 0x2D, 0x4B, 0x4D, 0x41, 0x43, 0x35, 0x31, 0x32
 };
 
 #	if defined(QSC_CSX_AUTH_KMACR12)
 #		define QSC_CSX_AUTH_KMACR12
-static const uint8_t csx_kmacr12_name[CSX_NAME_LENGTH] =
+static const uint8_t csx_kmacr12_name[CSX_NAME_SIZE] =
 {
 	0x43, 0x53, 0x58, 0x35, 0x31, 0x32, 0x2D, 0x4B, 0x4D, 0x41, 0x43, 0x52, 0x31, 0x32
 };
@@ -736,16 +736,16 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	uint8_t buf[QSC_KECCAK_512_RATE] = { 0 };
 	uint8_t cpk[QSC_CSX_KEY_SIZE] = { 0 };
 	uint8_t mck[QSC_CSX_KEY_SIZE] = { 0 };
-	uint8_t nme[CSX_NAME_LENGTH] = { 0 };
+	uint8_t nme[CSX_NAME_SIZE] = { 0 };
 
 	/* load the information string */
 	if (keyparams->infolen == 0)
 	{
-		qsc_memutils_copy(nme, csx_name, CSX_NAME_LENGTH);
+		qsc_memutils_copy(nme, csx_name, CSX_NAME_SIZE);
 	}
 	else
 	{
-		const size_t INFLEN = qsc_intutils_min(keyparams->infolen, CSX_NAME_LENGTH);
+		const size_t INFLEN = qsc_intutils_min(keyparams->infolen, CSX_NAME_SIZE);
 		qsc_memutils_copy(nme, keyparams->info, INFLEN);
 	}
 
@@ -766,7 +766,7 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 
 #if defined(QSC_CSX_AUTH_KMACR12)
 	qsc_keccak_initialize_state(&ctx->kstate);
-	qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0, csx_kmacr12_name, CSX_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+	qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0, csx_kmacr12_name, CSX_NAME_SIZE, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #else
 	qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0);
 #endif

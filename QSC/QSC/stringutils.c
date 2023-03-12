@@ -730,7 +730,11 @@ size_t qsc_stringutils_string_size(const char* source)
 
 	if (source != NULL)
 	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		res = strnlen_s(source, QSC_STRING_MAX_LEN);
+#else
 		res = strlen(source);
+#endif
 	}
 
 	return res;
@@ -745,7 +749,7 @@ void qsc_stringutils_to_lowercase(char* source)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		size_t slen;
 
-		slen = strnlen_s(source, QSC_STRING_MAX_LEN) + 1;
+		slen = qsc_stringutils_string_size(source) + 1;
 		_strlwr_s(source, slen);
 #else
 		for(size_t i = 0; i < strlen(source); ++i)
@@ -764,11 +768,7 @@ void qsc_stringutils_trim_newline(char* source)
 
 	if (source != NULL)
 	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		slen = strnlen_s(source, QSC_STRING_MAX_LEN);
-#else
-		slen = strnlen(source, QSC_STRING_MAX_LEN);
-#endif
+		slen = qsc_stringutils_string_size(source);
 
 		for (int32_t i = (int32_t)slen - 1; i >= 0; --i)
 		{
@@ -789,7 +789,7 @@ void qsc_stringutils_to_uppercase(char* source)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		size_t slen;
 
-		slen = strnlen_s(source, QSC_STRING_MAX_LEN) + 1;
+		slen = qsc_stringutils_string_size(source) + 1;
 		_strupr_s(source, slen);
 #else
 		for(size_t i = 0; i < strlen(source); ++i)

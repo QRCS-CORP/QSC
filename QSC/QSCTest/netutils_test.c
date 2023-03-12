@@ -9,7 +9,7 @@ static bool qsctest_address_info()
 	qsc_ipinfo_ipv6_address addv6 = { 0 };
 	qsc_ipinfo_ipv4_info infv4;
 	qsc_ipinfo_ipv6_info infv6;
-	char dom[QSC_NETUTILS_HOSTS_NAME_LENGTH] = { 0 };
+	char dom[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0 };
 	char saddv4[QSC_IPINFO_IPV4_STRNLEN] = { 0 };
 	char saddv6[QSC_IPINFO_IPV6_STRNLEN] = { "1"};
 	char portc[] = "80";

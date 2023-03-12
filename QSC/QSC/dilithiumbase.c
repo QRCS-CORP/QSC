@@ -5,6 +5,28 @@
 
 /* params.h */
 
+#if defined(QSC_DILITHIUM_S2N256Q8380417K4)
+#   define DILITHIUM_MODE 2
+#elif defined(QSC_DILITHIUM_S3N256Q8380417K6) 
+#   define DILITHIUM_MODE 3
+#elif defined(QSC_DILITHIUM_S5N256Q8380417K8)
+#   define DILITHIUM_MODE 5
+#else
+#error The dilithium mode is not supported!
+#endif
+
+#if (DILITHIUM_MODE == 2)
+#   define DILITHIUM_K 4
+#   define DILITHIUM_L 4
+#elif (DILITHIUM_MODE == 3)
+#   define DILITHIUM_K 6
+#   define DILITHIUM_L 5
+#elif (DILITHIUM_MODE == 5)
+#   define DILITHIUM_K 8
+#   define DILITHIUM_L 7
+#endif
+
+#define DILITHIUM_N 256
 #define DILITHIUM_MONT -4186625 /* 2^32 % DILITHIUM_Q */
 #define DILITHIUM_QINV 58728449 /* q^(-1) mod 2^32 */
 
@@ -14,21 +36,21 @@
 #define DILITHIUM_D 13
 #define DILITHIUM_ROOT_OF_UNITY 1753
 
-#if (QSC_DILITHIUM_MODE == 2)
+#if (DILITHIUM_MODE == 2)
 #   define DILITHIUM_ETA 2
 #   define DILITHIUM_TAU 39
 #   define DILITHIUM_BETA 78
 #   define DILITHIUM_GAMMA1 (1 << 17)
 #   define DILITHIUM_GAMMA2 ((DILITHIUM_Q-1) / 88)
 #   define DILITHIUM_OMEGA 80
-#elif (QSC_DILITHIUM_MODE == 3)
+#elif (DILITHIUM_MODE == 3)
 #   define DILITHIUM_ETA 4
 #   define DILITHIUM_TAU 49
 #   define DILITHIUM_BETA 196
 #   define DILITHIUM_GAMMA1 (1 << 19)
 #   define DILITHIUM_GAMMA2 ((DILITHIUM_Q-1) / 32)
 #   define DILITHIUM_OMEGA 55
-#elif (QSC_DILITHIUM_MODE == 5)
+#elif (DILITHIUM_MODE == 5)
 #   define DILITHIUM_ETA 2
 #   define DILITHIUM_TAU 60
 #   define DILITHIUM_BETA 120
@@ -39,32 +61,32 @@
 
 #define DILITHIUM_POLYT1_PACKEDBYTES  320
 #define DILITHIUM_POLYT0_PACKEDBYTES  416
-#define DILITHIUM_POLYVECH_PACKEDBYTES (DILITHIUM_OMEGA + QSC_DILITHIUM_K)
+#define DILITHIUM_POLYVECH_PACKEDBYTES (DILITHIUM_OMEGA + DILITHIUM_K)
 
 #if (DILITHIUM_GAMMA1 == (1 << 17))
-#   define DILITHIUM_POLYZ_PACKEDBYTES   576
+#   define DILITHIUM_POLYZ_PACKEDBYTES 576
 #elif (DILITHIUM_GAMMA1 == (1 << 19))
-#   define DILITHIUM_POLYZ_PACKEDBYTES   640
+#   define DILITHIUM_POLYZ_PACKEDBYTES 640
 #endif
 
 #if (DILITHIUM_GAMMA2 == (DILITHIUM_Q-1) / 88)
-#   define DILITHIUM_POLYW1_PACKEDBYTES  192
+#   define DILITHIUM_POLYW1_PACKEDBYTES 192
 #elif (DILITHIUM_GAMMA2 == (DILITHIUM_Q-1) / 32)
 #   define DILITHIUM_POLYW1_PACKEDBYTES  128
 #endif
 
 #if (DILITHIUM_ETA == 2)
-#   define DILITHIUM_POLYETA_PACKEDBYTES  96
+#   define DILITHIUM_POLYETA_PACKEDBYTES 96
 #elif (DILITHIUM_ETA == 4)
 #   define DILITHIUM_POLYETA_PACKEDBYTES 128
 #endif
 
-#define DILITHIUM_PUBLICKEY_SIZE (DILITHIUM_SEEDBYTES + QSC_DILITHIUM_K * DILITHIUM_POLYT1_PACKEDBYTES)
+#define DILITHIUM_PUBLICKEY_SIZE (DILITHIUM_SEEDBYTES + DILITHIUM_K * DILITHIUM_POLYT1_PACKEDBYTES)
 #define DILITHIUM_PRIVATEKEY_SIZE (2 * DILITHIUM_SEEDBYTES + DILITHIUM_CRHBYTES \
-                               + QSC_DILITHIUM_L * DILITHIUM_POLYETA_PACKEDBYTES \
-                               + QSC_DILITHIUM_K * DILITHIUM_POLYETA_PACKEDBYTES \
-                               + QSC_DILITHIUM_K * DILITHIUM_POLYT0_PACKEDBYTES)
-#define DILITHIUM_SIGNATURE_SIZE (DILITHIUM_SEEDBYTES + QSC_DILITHIUM_L * DILITHIUM_POLYZ_PACKEDBYTES + DILITHIUM_POLYVECH_PACKEDBYTES)
+                               + DILITHIUM_L * DILITHIUM_POLYETA_PACKEDBYTES \
+                               + DILITHIUM_K * DILITHIUM_POLYETA_PACKEDBYTES \
+                               + DILITHIUM_K * DILITHIUM_POLYT0_PACKEDBYTES)
+#define DILITHIUM_SIGNATURE_SIZE (DILITHIUM_SEEDBYTES + DILITHIUM_L * DILITHIUM_POLYZ_PACKEDBYTES + DILITHIUM_POLYVECH_PACKEDBYTES)
 
 #define DILITHIUM_POLY_UNIFORM_NBLOCKS ((768 + QSC_KECCAK_128_RATE - 1) / QSC_KECCAK_128_RATE)
 
@@ -80,7 +102,34 @@
 #   define DILITHIUM_POLY_UNIFORM_GAMMA1_NBLOCKS ((640 + QSC_KECCAK_256_RATE - 1) / QSC_KECCAK_256_RATE)
 #endif
 
-static const int32_t dilithium_zetas[QSC_DILITHIUM_N] =
+/*!
+* \struct dilithium_poly
+* \brief Array of coefficients of length N
+*/
+typedef struct
+{
+    int32_t coeffs[DILITHIUM_N];            /*!< The coefficients  */
+} dilithium_poly;
+
+/*!
+* \struct dilithium_polyvecl
+* \brief Vectors of polynomials of length L
+*/
+typedef struct
+{
+    dilithium_poly vec[DILITHIUM_L];    /*!< The poly vector of L  */
+} dilithium_polyvecl;
+
+/*!
+* \struct dilithium_polyveck
+* \brief Vectors of polynomials of length K
+*/
+typedef struct
+{
+    dilithium_poly vec[DILITHIUM_K];    /*!< The poly vector of K  */
+} dilithium_polyveck;
+
+static const int32_t dilithium_zetas[DILITHIUM_N] =
 {
     0x00000000L, 0x000064F7L, 0xFFD83102L, 0xFFF81503L, 0x00039E44L, 0xFFF42118L, 0xFFF2A128L, 0x00071E24L,
     0x001BDE2BL, 0x0023E92BL, 0xFFFA84ADL, 0xFFE0147FL, 0x002F9A75L, 0xFFD3FB09L, 0x002F7A49L, 0x0028E527L,
@@ -228,9 +277,9 @@ static int32_t dilithium_use_hint(int32_t a, uint32_t hint)
     return res;
 }
 
-/* qsc_dilithium_poly.c */
+/* poly.c */
 
-static void dilithium_shake128_stream_init(qsc_keccak_state *kctx, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
+static void dilithium_shake128_stream_init(qsc_keccak_state* kctx, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
     uint8_t tn[2];
     tn[0] = (uint8_t)nonce;
@@ -242,7 +291,7 @@ static void dilithium_shake128_stream_init(qsc_keccak_state *kctx, const uint8_t
     qsc_keccak_incremental_finalize(kctx, QSC_KECCAK_128_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
 }
 
-static void dilithium_shake256_stream_init(qsc_keccak_state *kctx, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
+static void dilithium_shake256_stream_init(qsc_keccak_state* kctx, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
 {
     uint8_t tn[2];
     tn[0] = (uint8_t)nonce;
@@ -254,9 +303,9 @@ static void dilithium_shake256_stream_init(qsc_keccak_state *kctx, const uint8_t
     qsc_keccak_incremental_finalize(kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
 }
 
-/* dilithium_ntt.c */
+/* ntt.c */
 
-static void dilithium_ntt(int32_t a[QSC_DILITHIUM_N])
+static void dilithium_ntt(int32_t a[DILITHIUM_N])
 {
     size_t j;
     size_t k;
@@ -267,7 +316,7 @@ static void dilithium_ntt(int32_t a[QSC_DILITHIUM_N])
 
     for (size_t len = 128; len > 0; len >>= 1)
     {
-        for (size_t start = 0; start < QSC_DILITHIUM_N; start = j + len)
+        for (size_t start = 0; start < DILITHIUM_N; start = j + len)
         {
             ++k;
             zeta = dilithium_zetas[k];
@@ -282,19 +331,19 @@ static void dilithium_ntt(int32_t a[QSC_DILITHIUM_N])
     }
 }
 
-static void dilithium_invntt_to_mont(int32_t a[QSC_DILITHIUM_N])
+static void dilithium_invntt_to_mont(int32_t a[DILITHIUM_N])
 {
     size_t j;
     size_t k;
     int32_t t;
     int32_t zeta;
-    const int32_t F = 41978; // mont^2/256
+    const int32_t F = 41978; /* mont ^ 2 / 256 */
 
     k = 256;
 
-    for (size_t len = 1; len < QSC_DILITHIUM_N; len <<= 1)
+    for (size_t len = 1; len < DILITHIUM_N; len <<= 1)
     {
-        for (size_t start = 0; start < QSC_DILITHIUM_N; start = j + len)
+        for (size_t start = 0; start < DILITHIUM_N; start = j + len)
         {
             --k;
             zeta = -dilithium_zetas[k];
@@ -309,93 +358,93 @@ static void dilithium_invntt_to_mont(int32_t a[QSC_DILITHIUM_N])
         }
     }
 
-    for (j = 0; j < QSC_DILITHIUM_N; ++j)
+    for (j = 0; j < DILITHIUM_N; ++j)
     {
         a[j] = dilithium_montgomery_reduce((int64_t)F * a[j]);
     }
 }
 
-static void dilithium_poly_reduce(qsc_dilithium_poly* a)
+static void dilithium_poly_reduce(dilithium_poly* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         a->coeffs[i] = dilithium_reduce32(a->coeffs[i]);
     }
 }
 
-static void dilithium_poly_caddq(qsc_dilithium_poly* a)
+static void dilithium_poly_caddq(dilithium_poly* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         a->coeffs[i] = dilithium_caddq(a->coeffs[i]);
     }
 }
 
-static void dilithium_poly_add(qsc_dilithium_poly* c, const qsc_dilithium_poly* a, const qsc_dilithium_poly* b)
+static void dilithium_poly_add(dilithium_poly* c, const dilithium_poly* a, const dilithium_poly* b)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         c->coeffs[i] = a->coeffs[i] + b->coeffs[i];
     }
 }
 
-static void dilithium_poly_sub(qsc_dilithium_poly* c, const qsc_dilithium_poly* a, const qsc_dilithium_poly* b)
+static void dilithium_poly_sub(dilithium_poly* c, const dilithium_poly* a, const dilithium_poly* b)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         c->coeffs[i] = a->coeffs[i] - b->coeffs[i];
     }
 }
 
-static void dilithium_poly_shiftl(qsc_dilithium_poly* a)
+static void dilithium_poly_shiftl(dilithium_poly* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         a->coeffs[i] <<= DILITHIUM_D;
     }
 }
 
-static void dilithium_poly_ntt(qsc_dilithium_poly* a)
+static void dilithium_poly_ntt(dilithium_poly* a)
 {
     dilithium_ntt(a->coeffs);
 }
 
-static void dilithium_poly_invntt_to_mont(qsc_dilithium_poly* a)
+static void dilithium_poly_invntt_to_mont(dilithium_poly* a)
 {
     dilithium_invntt_to_mont(a->coeffs);
 }
 
-static void dilithium_poly_pointwise_montgomery(qsc_dilithium_poly* c, const qsc_dilithium_poly* a, const qsc_dilithium_poly* b)
+static void dilithium_poly_pointwise_montgomery(dilithium_poly* c, const dilithium_poly* a, const dilithium_poly* b)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         c->coeffs[i] = dilithium_montgomery_reduce((int64_t)a->coeffs[i] * b->coeffs[i]);
     }
 }
 
-static void dilithium_poly_power2_round(qsc_dilithium_poly* a1, qsc_dilithium_poly* a0, const qsc_dilithium_poly* a)
+static void dilithium_poly_power2_round(dilithium_poly* a1, dilithium_poly* a0, const dilithium_poly* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         a1->coeffs[i] = dilithium_power2_round(&a0->coeffs[i], a->coeffs[i]);
     }
 }
 
-static void dilithium_poly_decompose(qsc_dilithium_poly* a1, qsc_dilithium_poly* a0, const qsc_dilithium_poly* a)
+static void dilithium_poly_decompose(dilithium_poly* a1, dilithium_poly* a0, const dilithium_poly* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         a1->coeffs[i] = dilithium_decompose(&a0->coeffs[i], a->coeffs[i]);
     }
 }
 
-static uint32_t dilithium_poly_make_hint(qsc_dilithium_poly* h, const qsc_dilithium_poly* a0, const qsc_dilithium_poly* a1)
+static uint32_t dilithium_poly_make_hint(dilithium_poly* h, const dilithium_poly* a0, const dilithium_poly* a1)
 {
     uint32_t s;
 
     s = 0;
 
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         h->coeffs[i] = dilithium_make_hint(a0->coeffs[i], a1->coeffs[i]);
         s += h->coeffs[i];
@@ -404,15 +453,15 @@ static uint32_t dilithium_poly_make_hint(qsc_dilithium_poly* h, const qsc_dilith
     return s;
 }
 
-static void dilithium_poly_use_hint(qsc_dilithium_poly* b, const qsc_dilithium_poly* a, const qsc_dilithium_poly* h)
+static void dilithium_poly_use_hint(dilithium_poly* b, const dilithium_poly* a, const dilithium_poly* h)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (size_t i = 0; i < DILITHIUM_N; ++i)
     {
         b->coeffs[i] = dilithium_use_hint(a->coeffs[i], h->coeffs[i]);
     }
 }
 
-static int32_t dilithium_poly_chknorm(const qsc_dilithium_poly* a, int32_t B)
+static int32_t dilithium_poly_chknorm(const dilithium_poly* a, int32_t B)
 {
     int32_t t;
     int32_t res;
@@ -428,7 +477,7 @@ static int32_t dilithium_poly_chknorm(const qsc_dilithium_poly* a, int32_t B)
         /* It is ok to leak which coefficient violates the bound since
            the probability for each coefficient is independent of secret
            data but we must not leak the sign of the centralized representative. */
-        for (size_t i = 0; i < QSC_DILITHIUM_N; ++i)
+        for (size_t i = 0; i < DILITHIUM_N; ++i)
         {
             /* Absolute value */
             t = a->coeffs[i] >> 31;
@@ -473,7 +522,7 @@ static size_t dilithium_rej_uniform(int32_t* a, size_t len, const uint8_t* buf, 
     return ctr;
 }
 
-static void dilithium_poly_uniform(qsc_dilithium_poly* a, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
+static void dilithium_poly_uniform(dilithium_poly* a, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
     uint8_t buf[DILITHIUM_POLY_UNIFORM_NBLOCKS * QSC_KECCAK_128_RATE + 2];
     qsc_keccak_state kctx;
@@ -484,9 +533,9 @@ static void dilithium_poly_uniform(qsc_dilithium_poly* a, const uint8_t seed[DIL
     buflen = DILITHIUM_POLY_UNIFORM_NBLOCKS * QSC_KECCAK_128_RATE;
     dilithium_shake128_stream_init(&kctx, seed, nonce);
     qsc_keccak_squeezeblocks(&kctx, buf, DILITHIUM_POLY_UNIFORM_NBLOCKS, QSC_KECCAK_128_RATE, QSC_KECCAK_PERMUTATION_ROUNDS);
-    ctr = dilithium_rej_uniform(a->coeffs, QSC_DILITHIUM_N, buf, buflen);
+    ctr = dilithium_rej_uniform(a->coeffs, DILITHIUM_N, buf, buflen);
 
-    while (ctr < QSC_DILITHIUM_N)
+    while (ctr < DILITHIUM_N)
     {
         off = buflen % 3;
 
@@ -497,7 +546,7 @@ static void dilithium_poly_uniform(qsc_dilithium_poly* a, const uint8_t seed[DIL
 
         qsc_keccak_squeezeblocks(&kctx, buf + off, 1, QSC_KECCAK_128_RATE, QSC_KECCAK_PERMUTATION_ROUNDS);
         buflen = QSC_KECCAK_128_RATE + off;
-        ctr += dilithium_rej_uniform(a->coeffs + ctr, QSC_DILITHIUM_N - ctr, buf, buflen);
+        ctr += dilithium_rej_uniform(a->coeffs + ctr, DILITHIUM_N - ctr, buf, buflen);
     }
 }
 
@@ -548,7 +597,7 @@ static size_t dilithium_rej_eta(int32_t* a, size_t len, const uint8_t* buf, size
     return ctr;
 }
 
-static void dilithium_poly_challenge(qsc_dilithium_poly* c, const uint8_t seed[DILITHIUM_SEEDBYTES])
+static void dilithium_poly_challenge(dilithium_poly* c, const uint8_t seed[DILITHIUM_SEEDBYTES])
 {
     uint8_t buf[QSC_KECCAK_256_RATE];
     qsc_keccak_state kctx;
@@ -569,12 +618,12 @@ static void dilithium_poly_challenge(qsc_dilithium_poly* c, const uint8_t seed[D
         signs |= (uint64_t)buf[i] << (8 * i);
     }
 
-    for (i = 0; i < QSC_DILITHIUM_N; ++i)
+    for (i = 0; i < DILITHIUM_N; ++i)
     {
         c->coeffs[i] = 0;
     }
 
-    for (i = QSC_DILITHIUM_N - DILITHIUM_TAU; i < QSC_DILITHIUM_N; ++i)
+    for (i = DILITHIUM_N - DILITHIUM_TAU; i < DILITHIUM_N; ++i)
     {
         do
         {
@@ -586,8 +635,7 @@ static void dilithium_poly_challenge(qsc_dilithium_poly* c, const uint8_t seed[D
 
             b = buf[pos];
             ++pos;
-        }
-        while (b > i);
+        } while (b > i);
 
         c->coeffs[i] = c->coeffs[b];
         c->coeffs[b] = 1 - (2 * (signs & 1));
@@ -595,12 +643,12 @@ static void dilithium_poly_challenge(qsc_dilithium_poly* c, const uint8_t seed[D
     }
 }
 
-static void dilithium_polyeta_pack(uint8_t* r, const qsc_dilithium_poly* a)
+static void dilithium_polyeta_pack(uint8_t* r, const dilithium_poly* a)
 {
     uint8_t t[8];
 
 #if DILITHIUM_ETA == 2
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 8; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
     {
         t[0] = (uint8_t)(DILITHIUM_ETA - a->coeffs[8 * i]);
         t[1] = (uint8_t)(DILITHIUM_ETA - a->coeffs[(8 * i) + 1]);
@@ -616,7 +664,7 @@ static void dilithium_polyeta_pack(uint8_t* r, const qsc_dilithium_poly* a)
         r[(3 * i) + 2] = (uint8_t)((t[5] >> 1) | (t[6] << 2) | (t[7] << 5));
     }
 #elif DILITHIUM_ETA == 4
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 2; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
     {
         t[0] = (uint8_t)(DILITHIUM_ETA - a->coeffs[2 * i]);
         t[1] = (uint8_t)(DILITHIUM_ETA - a->coeffs[(2 * i) + 1]);
@@ -625,10 +673,10 @@ static void dilithium_polyeta_pack(uint8_t* r, const qsc_dilithium_poly* a)
 #endif
 }
 
-static void dilithium_polyeta_unpack(qsc_dilithium_poly* r, const uint8_t* a)
+static void dilithium_polyeta_unpack(dilithium_poly* r, const uint8_t* a)
 {
 #if (DILITHIUM_ETA == 2)
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 8; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
     {
         r->coeffs[8 * i] = (a[3 * i] >> 0) & 7;
         r->coeffs[(8 * i) + 1] = (a[3 * i] >> 3) & 7;
@@ -649,7 +697,7 @@ static void dilithium_polyeta_unpack(qsc_dilithium_poly* r, const uint8_t* a)
         r->coeffs[(8 * i) + 7] = DILITHIUM_ETA - r->coeffs[(8 * i) + 7];
     }
 #elif (DILITHIUM_ETA == 4)
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 2; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
     {
         r->coeffs[2 * i] = a[i] & 0x0F;
         r->coeffs[(2 * i) + 1] = a[i] >> 4;
@@ -659,9 +707,9 @@ static void dilithium_polyeta_unpack(qsc_dilithium_poly* r, const uint8_t* a)
 #endif
 }
 
-static void dilithium_polyt1_pack(uint8_t* r, const qsc_dilithium_poly* a)
+static void dilithium_polyt1_pack(uint8_t* r, const dilithium_poly* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 4; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
     {
         r[5 * i] = (uint8_t)(a->coeffs[4 * i] >> 0);
         r[(5 * i) + 1] = (uint8_t)((a->coeffs[4 * i] >> 8) | (a->coeffs[(4 * i) + 1] << 2));
@@ -671,9 +719,9 @@ static void dilithium_polyt1_pack(uint8_t* r, const qsc_dilithium_poly* a)
     }
 }
 
-static void dilithium_polyt1_unpack(qsc_dilithium_poly* r, const uint8_t* a)
+static void dilithium_polyt1_unpack(dilithium_poly* r, const uint8_t* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 4; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
     {
         r->coeffs[4 * i] = ((a[5 * i] >> 0) | ((uint32_t)a[(5 * i) + 1] << 8)) & 0x000003FF;
         r->coeffs[(4 * i) + 1] = ((a[(5 * i) + 1] >> 2) | ((uint32_t)a[(5 * i) + 2] << 6)) & 0x000003FF;
@@ -682,11 +730,11 @@ static void dilithium_polyt1_unpack(qsc_dilithium_poly* r, const uint8_t* a)
     }
 }
 
-static void dilithium_polyt0_pack(uint8_t* r, const qsc_dilithium_poly* a)
+static void dilithium_polyt0_pack(uint8_t* r, const dilithium_poly* a)
 {
     uint32_t t[8];
 
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 8; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
     {
         t[0] = (1 << (DILITHIUM_D - 1)) - a->coeffs[8 * i];
         t[1] = (1 << (DILITHIUM_D - 1)) - a->coeffs[(8 * i) + 1];
@@ -720,9 +768,9 @@ static void dilithium_polyt0_pack(uint8_t* r, const qsc_dilithium_poly* a)
     }
 }
 
-static void dilithium_polyt0_unpack(qsc_dilithium_poly* r, const uint8_t* a)
+static void dilithium_polyt0_unpack(dilithium_poly* r, const uint8_t* a)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 8; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
     {
         r->coeffs[8 * i] = a[13 * i];
         r->coeffs[8 * i] |= (uint32_t)a[(13 * i) + 1] << 8;
@@ -771,12 +819,12 @@ static void dilithium_polyt0_unpack(qsc_dilithium_poly* r, const uint8_t* a)
     }
 }
 
-static void dilithium_polyz_pack(uint8_t* r, const qsc_dilithium_poly* a)
+static void dilithium_polyz_pack(uint8_t* r, const dilithium_poly* a)
 {
     uint32_t t[4];
 
 #if (DILITHIUM_GAMMA1 == (1 << 17))
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 4; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
     {
         t[0] = DILITHIUM_GAMMA1 - a->coeffs[4 * i];
         t[1] = DILITHIUM_GAMMA1 - a->coeffs[(4 * i) + 1];
@@ -797,7 +845,7 @@ static void dilithium_polyz_pack(uint8_t* r, const qsc_dilithium_poly* a)
         r[(9 * i) + 8] = (uint8_t)(t[3] >> 10);
     }
 #elif (DILITHIUM_GAMMA1 == (1 << 19))
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 2; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
     {
         t[0] = DILITHIUM_GAMMA1 - a->coeffs[2 * i];
         t[1] = DILITHIUM_GAMMA1 - a->coeffs[(2 * i) + 1];
@@ -812,10 +860,10 @@ static void dilithium_polyz_pack(uint8_t* r, const qsc_dilithium_poly* a)
 #endif
 }
 
-static void dilithium_polyz_unpack(qsc_dilithium_poly* r, const uint8_t* a)
+static void dilithium_polyz_unpack(dilithium_poly* r, const uint8_t* a)
 {
 #if (DILITHIUM_GAMMA1 == (1 << 17))
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 4; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
     {
         r->coeffs[4 * i] = a[9 * i];
         r->coeffs[4 * i] |= (uint32_t)a[(9 * i) + 1] << 8;
@@ -843,7 +891,7 @@ static void dilithium_polyz_unpack(qsc_dilithium_poly* r, const uint8_t* a)
         r->coeffs[(4 * i) + 3] = DILITHIUM_GAMMA1 - r->coeffs[(4 * i) + 3];
     }
 #elif (DILITHIUM_GAMMA1 == (1 << 19))
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 2; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
     {
         r->coeffs[2 * i] = a[5 * i];
         r->coeffs[2 * i] |= (uint32_t)a[(5 * i) + 1] << 8;
@@ -861,10 +909,10 @@ static void dilithium_polyz_unpack(qsc_dilithium_poly* r, const uint8_t* a)
 #endif
 }
 
-static void dilithium_polyw1_pack(uint8_t* r, const qsc_dilithium_poly* a)
+static void dilithium_polyw1_pack(uint8_t* r, const dilithium_poly* a)
 {
 #if (DILITHIUM_GAMMA2 == (DILITHIUM_Q - 1) / 88)
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 4; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
     {
         r[3 * i] = (uint8_t)a->coeffs[4 * i];
         r[3 * i] |= (uint8_t)(a->coeffs[(4 * i) + 1] << 6);
@@ -874,14 +922,14 @@ static void dilithium_polyw1_pack(uint8_t* r, const qsc_dilithium_poly* a)
         r[(3 * i) + 2] |= (uint8_t)(a->coeffs[(4 * i) + 3] << 2);
     }
 #elif (DILITHIUM_GAMMA2 == (DILITHIUM_Q - 1) / 32)
-    for (size_t i = 0; i < QSC_DILITHIUM_N / 2; ++i)
+    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
     {
         r[i] = (uint8_t)(a->coeffs[2 * i] | (a->coeffs[(2 * i) + 1] << 4));
     }
 #endif
 }
 
-static void dilithium_poly_uniform_eta(qsc_dilithium_poly* a, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
+static void dilithium_poly_uniform_eta(dilithium_poly* a, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
     uint8_t buf[DILITHIUM_POLY_UNIFORM_ETA_NBLOCKS * QSC_KECCAK_128_RATE];
     qsc_keccak_state kctx;
@@ -892,16 +940,16 @@ static void dilithium_poly_uniform_eta(qsc_dilithium_poly* a, const uint8_t seed
     dilithium_shake128_stream_init(&kctx, seed, nonce);
     qsc_keccak_squeezeblocks(&kctx, buf, DILITHIUM_POLY_UNIFORM_ETA_NBLOCKS, QSC_KECCAK_128_RATE, QSC_KECCAK_PERMUTATION_ROUNDS);
 
-    ctr = dilithium_rej_eta(a->coeffs, QSC_DILITHIUM_N, buf, buflen);
+    ctr = dilithium_rej_eta(a->coeffs, DILITHIUM_N, buf, buflen);
 
-    while (ctr < QSC_DILITHIUM_N)
+    while (ctr < DILITHIUM_N)
     {
         qsc_keccak_squeezeblocks(&kctx, buf, 1, QSC_KECCAK_128_RATE, QSC_KECCAK_PERMUTATION_ROUNDS);
-        ctr += dilithium_rej_eta(a->coeffs + ctr, QSC_DILITHIUM_N - ctr, buf, QSC_KECCAK_128_RATE);
+        ctr += dilithium_rej_eta(a->coeffs + ctr, DILITHIUM_N - ctr, buf, QSC_KECCAK_128_RATE);
     }
 }
 
-static void dilithium_poly_uniform_gamma1(qsc_dilithium_poly* a, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
+static void dilithium_poly_uniform_gamma1(dilithium_poly* a, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
 {
     uint8_t buf[DILITHIUM_POLY_UNIFORM_GAMMA1_NBLOCKS * QSC_KECCAK_256_RATE];
     qsc_keccak_state kctx;
@@ -913,102 +961,102 @@ static void dilithium_poly_uniform_gamma1(qsc_dilithium_poly* a, const uint8_t s
 
 /* polyvec.c */
 
-static void dilithium_polyvec_matrix_expand(qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K], const uint8_t rho[DILITHIUM_SEEDBYTES])
+static void dilithium_polyvec_matrix_expand(dilithium_polyvecl mat[DILITHIUM_K], const uint8_t rho[DILITHIUM_SEEDBYTES])
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
-        for (size_t j = 0; j < QSC_DILITHIUM_L; ++j)
+        for (size_t j = 0; j < DILITHIUM_L; ++j)
         {
             dilithium_poly_uniform(&mat[i].vec[j], rho, (uint16_t)((i << 8) + j));
         }
     }
 }
 
-static void dilithium_polyvecl_pointwise_acc_montgomery(qsc_dilithium_poly* w, const qsc_dilithium_polyvecl* u, const qsc_dilithium_polyvecl* v)
+static void dilithium_polyvecl_pointwise_acc_montgomery(dilithium_poly* w, const dilithium_polyvecl* u, const dilithium_polyvecl* v)
 {
-    qsc_dilithium_poly t;
+    dilithium_poly t;
 
     dilithium_poly_pointwise_montgomery(w, &u->vec[0], &v->vec[0]);
 
-    for (size_t i = 1; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 1; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_pointwise_montgomery(&t, &u->vec[i], &v->vec[i]);
         dilithium_poly_add(w, w, &t);
     }
 }
 
-static void dilithium_polyvec_matrix_pointwise_montgomery(qsc_dilithium_polyveck* t, const qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K], const qsc_dilithium_polyvecl* v)
+static void dilithium_polyvec_matrix_pointwise_montgomery(dilithium_polyveck* t, const dilithium_polyvecl mat[DILITHIUM_K], const dilithium_polyvecl* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyvecl_pointwise_acc_montgomery(&t->vec[i], &mat[i], v);
     }
 }
 
-static void dilithium_polyvecl_uniform_eta(qsc_dilithium_polyvecl* v, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
+static void dilithium_polyvecl_uniform_eta(dilithium_polyvecl* v, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_uniform_eta(&v->vec[i], seed, nonce);
         ++nonce;
     }
 }
 
-static void dilithium_polyvecl_uniform_gamma1(qsc_dilithium_polyvecl* v, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
+static void dilithium_polyvecl_uniform_gamma1(dilithium_polyvecl* v, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
-        dilithium_poly_uniform_gamma1(&v->vec[i], seed, (uint16_t)((QSC_DILITHIUM_L * nonce) + i));
+        dilithium_poly_uniform_gamma1(&v->vec[i], seed, (uint16_t)((DILITHIUM_L * nonce) + i));
     }
 }
 
-static void dilithium_polyvecl_reduce(qsc_dilithium_polyvecl* v)
+static void dilithium_polyvecl_reduce(dilithium_polyvecl* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_reduce(&v->vec[i]);
     }
 }
 
-static void dilithium_polyvecl_add(qsc_dilithium_polyvecl* w, const qsc_dilithium_polyvecl* u, const qsc_dilithium_polyvecl* v)
+static void dilithium_polyvecl_add(dilithium_polyvecl* w, const dilithium_polyvecl* u, const dilithium_polyvecl* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_add(&w->vec[i], &u->vec[i], &v->vec[i]);
     }
 }
 
-static void dilithium_polyvecl_ntt(qsc_dilithium_polyvecl* v)
+static void dilithium_polyvecl_ntt(dilithium_polyvecl* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_ntt(&v->vec[i]);
     }
 }
 
-static void dilithium_polyvecl_invntt_to_mont(qsc_dilithium_polyvecl* v)
+static void dilithium_polyvecl_invntt_to_mont(dilithium_polyvecl* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_invntt_to_mont(&v->vec[i]);
     }
 }
 
-static void dilithium_polyvecl_pointwise_poly_montgomery(qsc_dilithium_polyvecl* r, const qsc_dilithium_poly* a, const qsc_dilithium_polyvecl* v)
+static void dilithium_polyvecl_pointwise_poly_montgomery(dilithium_polyvecl* r, const dilithium_poly* a, const dilithium_polyvecl* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_pointwise_montgomery(&r->vec[i], a, &v->vec[i]);
     }
 }
 
-static int32_t dilithium_polyvecl_chknorm(const qsc_dilithium_polyvecl* v, int32_t bound)
+static int32_t dilithium_polyvecl_chknorm(const dilithium_polyvecl* v, int32_t bound)
 {
     int32_t res;
 
     res = 0;
 
-    for (size_t i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (size_t i = 0; i < DILITHIUM_L; ++i)
     {
         if (dilithium_poly_chknorm(&v->vec[i], bound) != 0)
         {
@@ -1020,86 +1068,86 @@ static int32_t dilithium_polyvecl_chknorm(const qsc_dilithium_polyvecl* v, int32
     return res;
 }
 
-static void dilithium_polyveck_uniform_eta(qsc_dilithium_polyveck* v, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
+static void dilithium_polyveck_uniform_eta(dilithium_polyveck* v, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_uniform_eta(&v->vec[i], seed, nonce);
         ++nonce;
     }
 }
 
-static void dilithium_polyveck_reduce(qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_reduce(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_reduce(&v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_caddq(qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_caddq(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_caddq(&v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_add(qsc_dilithium_polyveck* w, const qsc_dilithium_polyveck* u, const qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_add(dilithium_polyveck* w, const dilithium_polyveck* u, const dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_add(&w->vec[i], &u->vec[i], &v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_sub(qsc_dilithium_polyveck* w, const qsc_dilithium_polyveck* u, const qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_sub(dilithium_polyveck* w, const dilithium_polyveck* u, const dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_sub(&w->vec[i], &u->vec[i], &v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_shiftl(qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_shiftl(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_shiftl(&v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_ntt(qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_ntt(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_ntt(&v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_invntt_to_mont(qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_invntt_to_mont(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_invntt_to_mont(&v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_pointwise_poly_montgomery(qsc_dilithium_polyveck* r, const qsc_dilithium_poly* a, const qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_pointwise_poly_montgomery(dilithium_polyveck* r, const dilithium_poly* a, const dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_pointwise_montgomery(&r->vec[i], a, &v->vec[i]);
     }
 }
 
-static int32_t dilithium_polyveck_chknorm(const qsc_dilithium_polyveck* v, int32_t bound)
+static int32_t dilithium_polyveck_chknorm(const dilithium_polyveck* v, int32_t bound)
 {
     int32_t res;
 
     res = 0;
 
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         if (dilithium_poly_chknorm(&v->vec[i], bound) != 0)
         {
@@ -1111,29 +1159,29 @@ static int32_t dilithium_polyveck_chknorm(const qsc_dilithium_polyveck* v, int32
     return res;
 }
 
-static void dilithium_polyveck_power2_round(qsc_dilithium_polyveck* v1, qsc_dilithium_polyveck* v0, const qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_power2_round(dilithium_polyveck* v1, dilithium_polyveck* v0, const dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_power2_round(&v1->vec[i], &v0->vec[i], &v->vec[i]);
     }
 }
 
-static void dilithium_polyveck_decompose(qsc_dilithium_polyveck* v1, qsc_dilithium_polyveck* v0, const qsc_dilithium_polyveck* v)
+static void dilithium_polyveck_decompose(dilithium_polyveck* v1, dilithium_polyveck* v0, const dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_decompose(&v1->vec[i], &v0->vec[i], &v->vec[i]);
     }
 }
 
-static uint32_t dilithium_polyveck_make_hint(qsc_dilithium_polyveck* h, const qsc_dilithium_polyveck* v0, const qsc_dilithium_polyveck* v1)
+static uint32_t dilithium_polyveck_make_hint(dilithium_polyveck* h, const dilithium_polyveck* v0, const dilithium_polyveck* v1)
 {
     uint32_t s;
 
     s = 0;
 
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         s += dilithium_poly_make_hint(&h->vec[i], &v0->vec[i], &v1->vec[i]);
     }
@@ -1141,17 +1189,17 @@ static uint32_t dilithium_polyveck_make_hint(qsc_dilithium_polyveck* h, const qs
     return s;
 }
 
-static void dilithium_polyveck_use_hint(qsc_dilithium_polyveck* w, const qsc_dilithium_polyveck* u, const qsc_dilithium_polyveck* h)
+static void dilithium_polyveck_use_hint(dilithium_polyveck* w, const dilithium_polyveck* u, const dilithium_polyveck* h)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_use_hint(&w->vec[i], &u->vec[i], &h->vec[i]);
     }
 }
 
-static void dilithium_polyveck_pack_w1(uint8_t r[QSC_DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES], const qsc_dilithium_polyveck* w1)
+static void dilithium_polyveck_pack_w1(uint8_t r[DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES], const dilithium_polyveck* w1)
 {
-    for (size_t i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyw1_pack(&r[i * DILITHIUM_POLYW1_PACKEDBYTES], &w1->vec[i]);
     }
@@ -1159,7 +1207,7 @@ static void dilithium_polyveck_pack_w1(uint8_t r[QSC_DILITHIUM_K * DILITHIUM_POL
 
 /* packing.c */
 
-static void dilithium_pack_pk(uint8_t pk[DILITHIUM_PUBLICKEY_SIZE], const uint8_t rho[DILITHIUM_SEEDBYTES], const qsc_dilithium_polyveck* t1)
+static void dilithium_pack_pk(uint8_t pk[DILITHIUM_PUBLICKEY_SIZE], const uint8_t rho[DILITHIUM_SEEDBYTES], const dilithium_polyveck* t1)
 {
     size_t i;
 
@@ -1170,13 +1218,13 @@ static void dilithium_pack_pk(uint8_t pk[DILITHIUM_PUBLICKEY_SIZE], const uint8_
 
     pk += DILITHIUM_SEEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyt1_pack(pk + i * DILITHIUM_POLYT1_PACKEDBYTES, &t1->vec[i]);
     }
 }
 
-static void dilithium_unpack_pk(uint8_t rho[DILITHIUM_SEEDBYTES], qsc_dilithium_polyveck* t1, const uint8_t pk[DILITHIUM_PUBLICKEY_SIZE])
+static void dilithium_unpack_pk(uint8_t rho[DILITHIUM_SEEDBYTES], dilithium_polyveck* t1, const uint8_t pk[DILITHIUM_PUBLICKEY_SIZE])
 {
     size_t i;
 
@@ -1187,14 +1235,14 @@ static void dilithium_unpack_pk(uint8_t rho[DILITHIUM_SEEDBYTES], qsc_dilithium_
 
     pk += DILITHIUM_SEEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyt1_unpack(&t1->vec[i], pk + i * DILITHIUM_POLYT1_PACKEDBYTES);
     }
 }
 
 static void dilithium_pack_sk(uint8_t sk[DILITHIUM_PRIVATEKEY_SIZE], const uint8_t rho[DILITHIUM_SEEDBYTES], const uint8_t tr[DILITHIUM_CRHBYTES],
-    const uint8_t key[DILITHIUM_SEEDBYTES], const qsc_dilithium_polyveck* t0, const qsc_dilithium_polyvecl* s1, const qsc_dilithium_polyveck* s2)
+    const uint8_t key[DILITHIUM_SEEDBYTES], const dilithium_polyveck* t0, const dilithium_polyvecl* s1, const dilithium_polyveck* s2)
 {
     size_t  i;
 
@@ -1207,28 +1255,28 @@ static void dilithium_pack_sk(uint8_t sk[DILITHIUM_PRIVATEKEY_SIZE], const uint8
     qsc_memutils_copy(sk, tr, DILITHIUM_CRHBYTES);
     sk += DILITHIUM_CRHBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_polyeta_pack(sk + i * DILITHIUM_POLYETA_PACKEDBYTES, &s1->vec[i]);
     }
 
-    sk += QSC_DILITHIUM_L * DILITHIUM_POLYETA_PACKEDBYTES;
+    sk += DILITHIUM_L * DILITHIUM_POLYETA_PACKEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyeta_pack(sk + i * DILITHIUM_POLYETA_PACKEDBYTES, &s2->vec[i]);
     }
 
-    sk += QSC_DILITHIUM_K * DILITHIUM_POLYETA_PACKEDBYTES;
+    sk += DILITHIUM_K * DILITHIUM_POLYETA_PACKEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyt0_pack(sk + i * DILITHIUM_POLYT0_PACKEDBYTES, &t0->vec[i]);
     }
 }
 
 static void dilithium_unpack_sk(uint8_t rho[DILITHIUM_SEEDBYTES], uint8_t tr[DILITHIUM_CRHBYTES], uint8_t key[DILITHIUM_SEEDBYTES],
-    qsc_dilithium_polyveck* t0, qsc_dilithium_polyvecl* s1, qsc_dilithium_polyveck* s2, const uint8_t sk[DILITHIUM_PRIVATEKEY_SIZE])
+    dilithium_polyveck* t0, dilithium_polyvecl* s1, dilithium_polyveck* s2, const uint8_t sk[DILITHIUM_PRIVATEKEY_SIZE])
 {
     size_t  i;
 
@@ -1241,27 +1289,27 @@ static void dilithium_unpack_sk(uint8_t rho[DILITHIUM_SEEDBYTES], uint8_t tr[DIL
     qsc_memutils_copy(tr, sk, DILITHIUM_CRHBYTES);
     sk += DILITHIUM_CRHBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_polyeta_unpack(&s1->vec[i], sk + i * DILITHIUM_POLYETA_PACKEDBYTES);
     }
 
-    sk += QSC_DILITHIUM_L * DILITHIUM_POLYETA_PACKEDBYTES;
+    sk += DILITHIUM_L * DILITHIUM_POLYETA_PACKEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyeta_unpack(&s2->vec[i], sk + i * DILITHIUM_POLYETA_PACKEDBYTES);
     }
 
-    sk += QSC_DILITHIUM_K * DILITHIUM_POLYETA_PACKEDBYTES;
+    sk += DILITHIUM_K * DILITHIUM_POLYETA_PACKEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
         dilithium_polyt0_unpack(&t0->vec[i], sk + i * DILITHIUM_POLYT0_PACKEDBYTES);
     }
 }
 
-static void dilithium_pack_sig(uint8_t sig[DILITHIUM_SIGNATURE_SIZE], const uint8_t c[DILITHIUM_SEEDBYTES], const qsc_dilithium_polyvecl* z, const qsc_dilithium_polyveck* h)
+static void dilithium_pack_sig(uint8_t sig[DILITHIUM_SIGNATURE_SIZE], const uint8_t c[DILITHIUM_SEEDBYTES], const dilithium_polyvecl* z, const dilithium_polyveck* h)
 {
     size_t i;
     size_t j;
@@ -1274,20 +1322,20 @@ static void dilithium_pack_sig(uint8_t sig[DILITHIUM_SIGNATURE_SIZE], const uint
 
     sig += DILITHIUM_SEEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_polyz_pack(sig + i * DILITHIUM_POLYZ_PACKEDBYTES, &z->vec[i]);
     }
 
-    sig += QSC_DILITHIUM_L * DILITHIUM_POLYZ_PACKEDBYTES;
+    sig += DILITHIUM_L * DILITHIUM_POLYZ_PACKEDBYTES;
 
     /* Encode h */
-    qsc_memutils_clear(sig, DILITHIUM_OMEGA + QSC_DILITHIUM_K);
+    qsc_memutils_clear(sig, DILITHIUM_OMEGA + DILITHIUM_K);
     k = 0;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
-        for (j = 0; j < QSC_DILITHIUM_N; ++j)
+        for (j = 0; j < DILITHIUM_N; ++j)
         {
             if (h->vec[i].coeffs[j] != 0)
             {
@@ -1300,7 +1348,7 @@ static void dilithium_pack_sig(uint8_t sig[DILITHIUM_SIGNATURE_SIZE], const uint
     }
 }
 
-static int32_t dilithium_unpack_sig(uint8_t c[DILITHIUM_SEEDBYTES], qsc_dilithium_polyvecl* z, qsc_dilithium_polyveck* h, const uint8_t sig[DILITHIUM_SIGNATURE_SIZE])
+static int32_t dilithium_unpack_sig(uint8_t c[DILITHIUM_SEEDBYTES], dilithium_polyvecl* z, dilithium_polyveck* h, const uint8_t sig[DILITHIUM_SIGNATURE_SIZE])
 {
     size_t i;
     size_t j;
@@ -1312,19 +1360,19 @@ static int32_t dilithium_unpack_sig(uint8_t c[DILITHIUM_SEEDBYTES], qsc_dilithiu
     qsc_memutils_copy(c, sig, DILITHIUM_SEEDBYTES);
     sig += DILITHIUM_SEEDBYTES;
 
-    for (i = 0; i < QSC_DILITHIUM_L; ++i)
+    for (i = 0; i < DILITHIUM_L; ++i)
     {
         dilithium_polyz_unpack(&z->vec[i], sig + i * DILITHIUM_POLYZ_PACKEDBYTES);
     }
 
-    sig += QSC_DILITHIUM_L * DILITHIUM_POLYZ_PACKEDBYTES;
+    sig += DILITHIUM_L * DILITHIUM_POLYZ_PACKEDBYTES;
 
     /* Decode h */
     k = 0;
 
-    for (i = 0; i < QSC_DILITHIUM_K; ++i)
+    for (i = 0; i < DILITHIUM_K; ++i)
     {
-        for (j = 0; j < QSC_DILITHIUM_N; ++j)
+        for (j = 0; j < DILITHIUM_N; ++j)
         {
             h->vec[i].coeffs[j] = 0;
         }
@@ -1374,19 +1422,19 @@ static int32_t dilithium_unpack_sig(uint8_t c[DILITHIUM_SEEDBYTES], qsc_dilithiu
 
 /* sign.c */
 
-void qsc_dilithium_ref_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t))
+void qsc_dilithium_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-    qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K];
-    qsc_dilithium_polyvecl s1;
-    qsc_dilithium_polyvecl s1hat;
-    qsc_dilithium_polyveck s2;
-    qsc_dilithium_polyveck t1;
-    qsc_dilithium_polyveck t0;
+    dilithium_polyvecl mat[DILITHIUM_K];
+    dilithium_polyvecl s1;
+    dilithium_polyvecl s1hat;
+    dilithium_polyveck s2;
+    dilithium_polyveck t1;
+    dilithium_polyveck t0;
     uint8_t seedbuf[3 * DILITHIUM_SEEDBYTES];
     uint8_t tr[DILITHIUM_CRHBYTES];
-    const uint8_t *rho;
-    const uint8_t *rhoprime;
-    const uint8_t *key;
+    const uint8_t* rho;
+    const uint8_t* rhoprime;
+    const uint8_t* key;
 
     /* Get randomness for rho, rhoprime and key */
     rng_generate(seedbuf, DILITHIUM_SEEDBYTES);
@@ -1400,7 +1448,7 @@ void qsc_dilithium_ref_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_gen
 
     /* Sample short vectors s1 and s2 */
     dilithium_polyvecl_uniform_eta(&s1, rhoprime, 0);
-    dilithium_polyveck_uniform_eta(&s2, rhoprime, QSC_DILITHIUM_L);
+    dilithium_polyveck_uniform_eta(&s2, rhoprime, DILITHIUM_L);
 
     /* Matrix-vector multiplication */
     s1hat = s1;
@@ -1422,25 +1470,25 @@ void qsc_dilithium_ref_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_gen
     dilithium_pack_sk(sk, rho, tr, key, &t0, &s1, &s2);
 }
 
-void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t))
+void qsc_dilithium_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     uint8_t seedbuf[2 * DILITHIUM_SEEDBYTES + 3 * DILITHIUM_CRHBYTES];
-    qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K];
-    qsc_dilithium_polyvecl s1;
-    qsc_dilithium_polyvecl y;
-    qsc_dilithium_polyvecl z;
-    qsc_dilithium_polyveck h;
-    qsc_dilithium_polyveck s2;
-    qsc_dilithium_polyveck t0;
-    qsc_dilithium_polyveck w1;
-    qsc_dilithium_polyveck w0;
-    qsc_dilithium_poly cp;
+    dilithium_polyvecl mat[DILITHIUM_K];
+    dilithium_polyvecl s1;
+    dilithium_polyvecl y;
+    dilithium_polyvecl z;
+    dilithium_polyveck h;
+    dilithium_polyveck s2;
+    dilithium_polyveck t0;
+    dilithium_polyveck w1;
+    dilithium_polyveck w0;
+    dilithium_poly cp;
     qsc_keccak_state kctx;
-    uint8_t *rho;
-    uint8_t *tr;
-    uint8_t *key;
-    uint8_t *mu;
-    uint8_t *rhoprime;
+    uint8_t* rho;
+    uint8_t* tr;
+    uint8_t* key;
+    uint8_t* mu;
+    uint8_t* rhoprime;
     uint32_t n;
     uint16_t nonce;
 
@@ -1450,6 +1498,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
     key = tr + DILITHIUM_CRHBYTES;
     mu = key + DILITHIUM_SEEDBYTES;
     rhoprime = mu + DILITHIUM_CRHBYTES;
+
     dilithium_unpack_sk(rho, tr, key, &t0, &s1, &s2, sk);
 
     /* Compute CRH(tr, msg) */
@@ -1459,7 +1508,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
     qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
     qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
-#ifdef QSC_DILITHIUM_RANDOMIZED_SIGNING
+#if defined(QSC_DILITHIUM_RANDOMIZED_SIGNING)
     rng_generate(rhoprime, DILITHIUM_CRHBYTES);
 #else
     qsc_shake256_compute(rhoprime, DILITHIUM_CRHBYTES, key, DILITHIUM_SEEDBYTES + DILITHIUM_CRHBYTES);
@@ -1491,7 +1540,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
 
         qsc_keccak_initialize_state(&kctx);
         qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
-        qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, sig, QSC_DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
+        qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, sig, DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
         qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
         qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, sig, DILITHIUM_SEEDBYTES);
 
@@ -1548,7 +1597,7 @@ void qsc_dilithium_ref_sign_signature(uint8_t *sig, size_t *siglen, const uint8_
     *siglen = DILITHIUM_SIGNATURE_SIZE;
 }
 
-void qsc_dilithium_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t))
+void qsc_dilithium_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     for (size_t i = 0; i < mlen; ++i)
     {
@@ -1559,19 +1608,19 @@ void qsc_dilithium_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t
     *smlen += mlen;
 }
 
-bool qsc_dilithium_ref_verify(const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen, const uint8_t *pk)
+bool qsc_dilithium_ref_verify(const uint8_t* sig, size_t siglen, const uint8_t* m, size_t mlen, const uint8_t* pk)
 {
-    uint8_t buf[QSC_DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES];
+    uint8_t buf[DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES];
     uint8_t rho[DILITHIUM_SEEDBYTES];
     uint8_t mu[DILITHIUM_CRHBYTES];
     uint8_t c[DILITHIUM_SEEDBYTES];
     uint8_t c2[DILITHIUM_SEEDBYTES];
-    qsc_dilithium_polyvecl mat[QSC_DILITHIUM_K];
-    qsc_dilithium_polyvecl z;
-    qsc_dilithium_polyveck h;
-    qsc_dilithium_polyveck t1;
-    qsc_dilithium_polyveck w1;
-    qsc_dilithium_poly cp;
+    dilithium_polyvecl mat[DILITHIUM_K];
+    dilithium_polyvecl z;
+    dilithium_polyveck h;
+    dilithium_polyveck t1;
+    dilithium_polyveck w1;
+    dilithium_poly cp;
     qsc_keccak_state kctx = { 0 };
     bool res;
 
@@ -1617,7 +1666,7 @@ bool qsc_dilithium_ref_verify(const uint8_t *sig, size_t siglen, const uint8_t *
                 /* Call random oracle and verify challenge */
                 qsc_keccak_initialize_state(&kctx);
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
-                qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, buf, QSC_DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
+                qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, buf, DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
                 qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
                 qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, c2, DILITHIUM_SEEDBYTES);
 
@@ -1629,7 +1678,7 @@ bool qsc_dilithium_ref_verify(const uint8_t *sig, size_t siglen, const uint8_t *
     return res;
 }
 
-bool qsc_dilithium_ref_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk)
+bool qsc_dilithium_ref_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* pk)
 {
     bool res;
 

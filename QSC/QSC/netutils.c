@@ -129,6 +129,14 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 #endif
 }
 
+void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
+{
+	qsc_netutils_adaptor_info ctx = { 0 };
+
+	qsc_netutils_get_adaptor_info(&ctx, "wlan0");
+	qsc_memutils_copy(mac, ctx.mac, QSC_NETUTILS_MAC_ADDRESS_SIZE);
+}
+
 uint32_t qsc_netutils_atoi(const char* source)
 {
 	assert(source != NULL);
@@ -160,7 +168,7 @@ uint32_t qsc_netutils_atoi(const char* source)
 	return res;
 }
 
-size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_HOSTS_NAME_LENGTH])
+size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 {
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
@@ -185,7 +193,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_HOSTS_NAME_LENGTH])
 
 #else
 
-	char hn[QSC_NETUTILS_HOSTS_NAME_LENGTH] = { 0 };
+	char hn[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0 };
 	char* dn;
 	struct hostent* hp;
 	size_t dlen;
@@ -210,9 +218,60 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_HOSTS_NAME_LENGTH])
 #endif
 }
 
-size_t qsc_netutils_get_host_name(char host[QSC_NETUTILS_HOSTS_NAME_LENGTH])
+size_t qsc_netutils_get_host_name(char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
 {
-	return (size_t)gethostname(host, QSC_NETUTILS_HOSTS_NAME_LENGTH);
+	return (size_t)gethostname(host, QSC_NETUTILS_HOSTS_NAME_SIZE);
+}
+
+void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address address, char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
+{
+	int32_t err;
+	int32_t slen;
+
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+
+	WSADATA wsd;
+
+	err = WSAStartup(0x0202, &wsd);
+
+	if (err == 0)
+	{
+		struct sockaddr insock4 = { 0 };
+
+		slen = QSC_IPINFO_IPV4_BYTELEN;
+		insock4.sa_family = AF_INET;
+		
+		err = WSAStringToAddressW((LPWSTR)address.ipv4, AF_INET, NULL, (LPSOCKADDR)&insock4, &slen);
+		
+		if (err == 0 && slen > 0)
+		{
+			char aurl[NI_MAXSERV] = { 0 };
+
+			if (getnameinfo((const SOCKADDR*)&insock4, (socklen_t)sizeof(insock4), (PCHAR)aurl, (DWORD)sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
+			{
+				qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
+			}
+		}
+
+		err = WSACleanup();
+	}
+	
+#else
+
+	struct sockaddr insock4;
+	socklen_t addrlen;
+	char aurl[NI_MAXHOST] = { 0 };
+
+	slen = QSC_IPINFO_IPV4_BYTELEN;
+	insock4.sin_family = AF_INET;
+	inet_pton(AF_INET, insock4.addr, &info.address);
+
+	if (getnameinfo((sockaddr*)&insock4, addrlen, aurl, sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
+	{
+		qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
+	}
+
+#endif
 }
 
 qsc_ipinfo_ipv4_address qsc_netutils_get_ipv4_address()
@@ -420,7 +479,7 @@ qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address()
 	return add;
 }
 
-qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOSTS_NAME_LENGTH], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_LENGTH])
+qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
 {
 	char hname[INET_ADDRSTRLEN] = { 0 };
 	qsc_ipinfo_ipv4_info info = { 0 };
@@ -467,7 +526,7 @@ qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOS
 	return info;
 }
 
-qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOSTS_NAME_LENGTH], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_LENGTH])
+qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
 {
 	char buf[INET6_ADDRSTRLEN] = { 0 };
 	qsc_ipinfo_ipv6_info info = { 0 };
@@ -521,7 +580,7 @@ qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOS
 	return info;
 }
 
-void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_LENGTH], const qsc_socket* sock)
+void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_SIZE], const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -541,7 +600,7 @@ void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_LENGTH], con
 	}
 }
 
-void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_LENGTH], const qsc_socket* sock)
+void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_SIZE], const qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -562,7 +621,7 @@ void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_LENGTH], 
 	}
 }
 
-uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NETUTILS_HOSTS_NAME_LENGTH], const char protocol[QSC_NETUTILS_NAME_BUFFER_LENGTH])
+uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NETUTILS_HOSTS_NAME_SIZE], const char protocol[QSC_NETUTILS_NAME_BUFFER_SIZE])
 {
 	const struct servent* se;
 	uint16_t port;
@@ -586,7 +645,7 @@ uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NETUTILS_HOSTS
 #if defined(QSC_DEBUG_MODE)
 void qsc_netutils_values_print()
 {
-	char domain[QSC_NETUTILS_HOSTS_NAME_LENGTH] = { 0 };
+	char domain[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0 };
 	char ipv4s[QSC_IPINFO_IPV4_STRNLEN] = { 0 };
 	char ipv6s[QSC_IPINFO_IPV6_STRNLEN] = { 0 };
 	qsc_ipinfo_ipv4_address ipv4;

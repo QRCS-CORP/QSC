@@ -1,29 +1,25 @@
 /*
-* 2022 John G. Underhill
-* All Rights Reserved.
+* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
+* This file is part of the QSC Cryptographic library.
+* The QSC library was written as a prototyping library for post-quantum primitives,
+* in the hopes that it would be useful for educational purposes only.
+* Any use of the QSC library in a commercial context, or reproduction of original material
+* contained in this library is strictly forbidden unless prior written consent is obtained
+* from the QSCS Corporation.
 *
-* NOTICE:  All information contained herein is, and remains
-* the property of John G. Underhill.
-* The intellectual and technical concepts contained
-* herein are proprietary to John G. Underhill
-* and his suppliers and may be covered by U.S. and Foreign Patents,
-* patents in process, and are protected by trade secret or copyright law.
-* Dissemination of this information or reproduction of this material
-* is strictly forbidden unless prior written permission is obtained
-* from Digital Freedom Defense Incorporated.
+* The AGPL version 3 License (AGPLv3)
+* This program is free software : you can redistribute it and / or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Affero General Public License for more details.
 *
-* This library was published publicly in hopes that it would aid in prototyping
-* post-quantum secure primitives for educational purposes only.
-* All and any commercial uses of this library are exclusively reserved by the author
-* John G. Underhill.
-* Any use of this library in a commercial context must be approved by the author
-* in writing.
-* All rights for commercial and/or non-educational purposes, are fully reserved
-* by the author.
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef QSC_SHA3_H
@@ -243,7 +239,7 @@
 * \struct qsc_keccak_state
 * \brief The Keccak state array; state array must be initialized by the caller
 */
-QSC_EXPORT_API typedef struct
+QSC_EXPORT_API typedef struct qsc_keccak_state
 {
 	uint64_t state[QSC_KECCAK_STATE_SIZE];			/*!< The SHA3 state  */
 	uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];		/*!< The message buffer  */
@@ -954,7 +950,7 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 * \param inp3: [const] The 4th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void shake128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+QSC_EXPORT_API void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
 
 /**
@@ -974,7 +970,7 @@ QSC_EXPORT_API void shake128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 * \param inp3: [const] The 4th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void shake256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+QSC_EXPORT_API void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
 
 /**
@@ -994,7 +990,7 @@ QSC_EXPORT_API void shake256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 * \param inp3: [const] The 4th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void shake512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
 
 /* parallel shake x8 */
@@ -1024,7 +1020,7 @@ QSC_EXPORT_API void shake512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 * \param inp7: [const] The 8th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void shake128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+QSC_EXPORT_API void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen);
@@ -1054,7 +1050,7 @@ QSC_EXPORT_API void shake128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 * \param [const] inp7: The 8th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void shake256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+QSC_EXPORT_API void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen);
@@ -1084,7 +1080,7 @@ QSC_EXPORT_API void shake256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 * \param inp7: [const] The 8th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void shake512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+QSC_EXPORT_API void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen);
@@ -1118,7 +1114,7 @@ QSC_EXPORT_API void shake512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint
 * \param msg3: [const] The 4th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void kmac128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen);
@@ -1150,7 +1146,7 @@ QSC_EXPORT_API void kmac128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8
 * \param msg3: [const] The 4th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void kmac256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen);
@@ -1182,7 +1178,7 @@ QSC_EXPORT_API void kmac256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8
 * \param msg3: [const] The 4th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void kmac512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
+QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen);
@@ -1232,7 +1228,7 @@ QSC_EXPORT_API void kmac512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8
 * \param msg7: [const] The 8th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void kmac128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+QSC_EXPORT_API void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
@@ -1284,7 +1280,7 @@ QSC_EXPORT_API void kmac128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8
 * \param msg7: [const] The 8th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void kmac256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+QSC_EXPORT_API void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
@@ -1336,7 +1332,7 @@ QSC_EXPORT_API void kmac256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8
 * \param msg7: [const] The 8th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void kmac512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
+QSC_EXPORT_API void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,

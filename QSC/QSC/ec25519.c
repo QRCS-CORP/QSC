@@ -2799,7 +2799,7 @@ void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
 
 	for (i = 0; i < 32; ++i)
 	{
-		e[2 * i + 0] = a[i] & 15;
+		e[2 * i] = a[i] & 15;
 		e[2 * i + 1] = (a[i] >> 4) & 15;
 	}
 
