@@ -26,7 +26,6 @@
 #define QSC_KYBERBASE_AVX2_H
 
 #include "common.h"
-
 /* \cond DOXYGEN_IGNORE */
 
 /**
@@ -40,11 +39,13 @@
  \def QSC_KYBER_K
  * Read Only: The k level
  */
-#if defined(QSC_KYBER_S3K2400)
+#if defined(QSC_KYBER_S1P1632)
+#	define QSC_KYBER_K 2
+#elif defined(QSC_KYBER_S3P2400)
 #	define QSC_KYBER_K 3
-#elif defined(QSC_KYBER_S5K3168)
+#elif defined(QSC_KYBER_S5P3168)
 #	define QSC_KYBER_K 4
-#elif defined(QSC_KYBER_S6K3936)
+#elif defined(QSC_KYBER_S6P3936)
 #	define QSC_KYBER_K 5
 #else
 #	error "The Kyber parameter set is invalid!"
@@ -63,10 +64,10 @@
 #define QSC_KYBER_Q 3329
 
  /*!
- \def QSC_KYBER_ETA
+ \def QSC_KYBER_ETA2
  * Read Only: The binomial distribution factor
  */
-#define QSC_KYBER_ETA 2
+#define QSC_KYBER_ETA2 2
 
  /*!
  \def QSC_KYBER_MSGBYTES
@@ -86,24 +87,22 @@
  */
 #define QSC_KYBER_POLYBYTES 384
 
- /*!
- \def QSC_KYBER_POLYVEC_BYTES
- * Read Only: The base size of the compressed public key polynomial
- */
-#if (QSC_KYBER_K == 3)
+#if (QSC_KYBER_K == 2)
 #	define QSC_KYBER_POLYVECBASE_BYTES 320
-#elif (QSC_KYBER_K == 4 || QSC_KYBER_K == 5)
-#	define QSC_KYBER_POLYVECBASE_BYTES 352
-#endif
-
- /*!
- \def QSC_KYBER_POLYCOMPRESSED_BYTES
- * Read Only: The cipher-text compressed byte size
- */
-#if (QSC_KYBER_K == 3)
 #	define QSC_KYBER_POLYCOMPRESSED_BYTES 128
-#elif (QSC_KYBER_K == 4 || QSC_KYBER_K == 5)
+#	define QSC_KYBER_ETA1 3
+#elif (QSC_KYBER_K == 3)
+#	define QSC_KYBER_POLYVECBASE_BYTES 320
+#	define QSC_KYBER_POLYCOMPRESSED_BYTES 128
+#	define QSC_KYBER_ETA1 2
+#elif (QSC_KYBER_K == 4)
+#	define QSC_KYBER_POLYVECBASE_BYTES 352
 #	define QSC_KYBER_POLYCOMPRESSED_BYTES 160
+#	define QSC_KYBER_ETA1 2
+#elif (QSC_KYBER_K == 5)
+#	define QSC_KYBER_POLYVECBASE_BYTES 352
+#	define QSC_KYBER_POLYCOMPRESSED_BYTES 160
+#	define QSC_KYBER_ETA1 2
 #endif
 
  /*!

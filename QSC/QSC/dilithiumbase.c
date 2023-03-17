@@ -15,17 +15,6 @@
 #error The dilithium mode is not supported!
 #endif
 
-#if (DILITHIUM_MODE == 2)
-#   define DILITHIUM_K 4
-#   define DILITHIUM_L 4
-#elif (DILITHIUM_MODE == 3)
-#   define DILITHIUM_K 6
-#   define DILITHIUM_L 5
-#elif (DILITHIUM_MODE == 5)
-#   define DILITHIUM_K 8
-#   define DILITHIUM_L 7
-#endif
-
 #define DILITHIUM_N 256
 #define DILITHIUM_MONT -4186625 /* 2^32 % DILITHIUM_Q */
 #define DILITHIUM_QINV 58728449 /* q^(-1) mod 2^32 */
@@ -37,6 +26,8 @@
 #define DILITHIUM_ROOT_OF_UNITY 1753
 
 #if (DILITHIUM_MODE == 2)
+#   define DILITHIUM_K 4
+#   define DILITHIUM_L 4
 #   define DILITHIUM_ETA 2
 #   define DILITHIUM_TAU 39
 #   define DILITHIUM_BETA 78
@@ -44,6 +35,8 @@
 #   define DILITHIUM_GAMMA2 ((DILITHIUM_Q-1) / 88)
 #   define DILITHIUM_OMEGA 80
 #elif (DILITHIUM_MODE == 3)
+#   define DILITHIUM_K 6
+#   define DILITHIUM_L 5
 #   define DILITHIUM_ETA 4
 #   define DILITHIUM_TAU 49
 #   define DILITHIUM_BETA 196
@@ -51,6 +44,8 @@
 #   define DILITHIUM_GAMMA2 ((DILITHIUM_Q-1) / 32)
 #   define DILITHIUM_OMEGA 55
 #elif (DILITHIUM_MODE == 5)
+#   define DILITHIUM_K 8
+#   define DILITHIUM_L 7
 #   define DILITHIUM_ETA 2
 #   define DILITHIUM_TAU 60
 #   define DILITHIUM_BETA 120

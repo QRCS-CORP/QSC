@@ -79,12 +79,14 @@ bool qsctest_kyber_kat_test()
 	sslen = 0;
 	ret = true;
 
-#if defined(QSC_KYBER_S3K2400)
+#if defined(QSC_KYBER_S1P1632)
+	char path[] = "NPQCR3/kyber-1632.rsp";
+#elif defined(QSC_KYBER_S3P2400)
 	char path[] = "NPQCR3/kyber-2400.rsp";
-#elif defined(QSC_KYBER_S5K3168)
+#elif defined(QSC_KYBER_S5P3168)
 	char path[] = "NPQCR3/kyber-3168.rsp";
-#elif defined(QSC_KYBER_S6K3936)
-	/* Note: parameter set 3936 is a custom implementation, there are 10 KAT vectors included for testing */
+#elif defined(QSC_KYBER_S6P3936)
+	/* Note: contains only a single test KAT set */
 	char path[] = "NPQCR3/kyber-3936.rsp";
 #else
 #	error The parameter set is invalid!

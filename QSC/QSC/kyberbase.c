@@ -84,7 +84,7 @@ typedef struct
 
 /* cbd.c */
 
-static void kyber_cbd2(qsc_kyber_poly* r, const uint8_t buf[2 * QSC_KYBER_N / 4])
+static void kyber_cbd2(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4])
 {
     uint32_t t;
     uint32_t d;
@@ -105,6 +105,44 @@ static void kyber_cbd2(qsc_kyber_poly* r, const uint8_t buf[2 * QSC_KYBER_N / 4]
         }
     }
 }
+
+#if QSC_KYBER_ETA1 == 3
+static uint32_t kyber_load24le(const uint8_t x[3])
+{
+    uint32_t r;
+
+    r = (uint32_t)x[0];
+    r |= (uint32_t)x[1] << 8;
+    r |= (uint32_t)x[2] << 16;
+
+    return r;
+}
+
+static void kyber_cbd3(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4])
+{
+    size_t i;
+    size_t j;
+    uint32_t t;
+    uint32_t d;
+    int16_t a;
+    int16_t b;
+
+    for (i = 0; i < QSC_KYBER_N / 4; i++)
+    {
+        t = kyber_load24le(buf + 3 * i);
+        d = t & 0x00249249;
+        d += (t >> 1) & 0x00249249;
+        d += (t >> 2) & 0x00249249;
+
+        for (j = 0; j < 4; ++j)
+        {
+            a = (d >> (6 * j + 0)) & 0x7;
+            b = (d >> (6 * j + 3)) & 0x7;
+            r->coeffs[4 * i + j] = a - b;
+        }
+    }
+}
+#endif
 
 /* kyber_ntt.c */
 
@@ -183,12 +221,16 @@ static void kyber_basemul(int16_t r[2], const int16_t a[2], const int16_t b[2], 
 
 /* poly.c */
 
-static void kyber_poly_cbd_eta1(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA * QSC_KYBER_N / 4])
+static void kyber_poly_cbd_eta1(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4])
 {
+#if QSC_KYBER_ETA1 == 2
     kyber_cbd2(r, buf);
+#elif QSC_KYBER_ETA1 == 3
+    kyber_cbd3(r, buf);
+#endif
 }
 
-static void kyber_poly_cbd_eta2(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA * QSC_KYBER_N / 4])
+static void kyber_poly_cbd_eta2(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4])
 {
     kyber_cbd2(r, buf);
 }
@@ -329,7 +371,7 @@ static void kyber_poly_to_msg(uint8_t msg[QSC_KYBER_SYMBYTES], const qsc_kyber_p
 
 static void kyber_poly_get_noise_eta1(qsc_kyber_poly* r, const uint8_t seed[QSC_KYBER_SYMBYTES], uint8_t nonce)
 {
-    uint8_t buf[QSC_KYBER_ETA * QSC_KYBER_N / 4];
+    uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4];
     uint8_t extkey[QSC_KYBER_SYMBYTES + 1];
 
     qsc_memutils_copy(extkey, seed, QSC_KYBER_SYMBYTES);
@@ -341,7 +383,7 @@ static void kyber_poly_get_noise_eta1(qsc_kyber_poly* r, const uint8_t seed[QSC_
 
 static void kyber_poly_get_noise_eta2(qsc_kyber_poly* r, const uint8_t seed[QSC_KYBER_SYMBYTES], uint8_t nonce)
 {
-    uint8_t buf[QSC_KYBER_ETA * QSC_KYBER_N / 4];
+    uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4];
     uint8_t extkey[QSC_KYBER_SYMBYTES + 1];
 
     qsc_memutils_copy(extkey, seed, QSC_KYBER_SYMBYTES);
@@ -437,7 +479,7 @@ static void kyber_polyvec_compress(uint8_t r[QSC_KYBER_POLYVEC_COMPRESSED_BYTES]
             r += 11;
         }
     }
-#elif (QSC_KYBER_K == 3)
+#elif (QSC_KYBER_K == 2 || QSC_KYBER_K == 3)
 	uint16_t t[4];
 
     for (size_t i = 0; i < QSC_KYBER_K; ++i)
@@ -489,7 +531,7 @@ static void kyber_polyvec_decompress(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
         }
     }
 
-#elif (QSC_KYBER_K == 3)
+#elif (QSC_KYBER_K == 2 || QSC_KYBER_K == 3)
 
 	uint16_t t[4];
 

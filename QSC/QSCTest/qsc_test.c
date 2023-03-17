@@ -92,12 +92,6 @@ int32_t main(void)
 	bool valid;
 	bool hfeat;
 
-	//qsctest_rcs_run();
-	//qsctest_mceliece_run();
-	//qsctest_kyber_run();
-	//qsctest_dilithium_run();
-	qsctest_sphincsplus_run();
-
 #if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
 	qsc_consoleutils_print_line("Loading visual pre-check...");
 	qsc_folderutils_test();
