@@ -265,6 +265,18 @@ void qsc_async_thread_wait(qsc_thread handle)
 #endif
 }
 
+void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
+{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	if (handle != NULL)
+	{
+		WaitForSingleObject(handle, msec);
+	}
+#elif defined(QSC_SYSTEM_OS_POSIX)
+	sleep(msec * 1000);
+#endif
+}
+
 void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)
 {
 	assert(handles != NULL);

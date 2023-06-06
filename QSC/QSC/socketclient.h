@@ -108,12 +108,12 @@ QSC_EXPORT_API void qsc_socket_client_initialize(qsc_socket* sock);
 *
 * \param sock: [const] A pointer to the initialized socket
 * \param output: The buffer that receives incoming data
-* \param outlen: The length of the output buffer
+* \param otplen: The length of the output buffer
 * \param flag: Flag that influences the behavior of the receive function
 *
 * \return Returns the number of bytes received from the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t outlen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Receive UDP data from a remote host
@@ -122,12 +122,12 @@ QSC_EXPORT_API size_t qsc_socket_client_receive(const qsc_socket* sock, char* ou
 * \param address: The remote host address
 * \param port: The remote port
 * \param output: The output buffer receiving the data
-* \param outlen: The number of bytes in the output buffer
+* \param otplen: The number of bytes in the output buffer
 * \param flag: Flag that influence the behavior of the receive function
 *
 * \return Returns the number of bytes sent by the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t outlen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Sends data on a connected socket

@@ -90,13 +90,15 @@ bool qsctest_mceliece_kat_test()
 
 	if (pk != NULL && kpk != NULL)
 	{
-#if defined(QSC_MCELIECE_S3N4608T96)
+#if defined(QSC_MCELIECE_S1N3488T64)
+		char path[] = "NPQCR3/mceliece-348864.rsp";
+#elif defined(QSC_MCELIECE_S3N4608T96)
 		char path[] = "NPQCR3/mceliece-460896.rsp";
 #elif defined(QSC_MCELIECE_S5N6688T128)
 		char path[] = "NPQCR3/mceliece-6688128.rsp";
-#elif defined(QSC_MCELIECE_S5N6960T119)
+#elif defined(QSC_MCELIECE_S6N6960T119)
 		char path[] = "NPQCR3/mceliece-6960119.rsp";
-#elif defined(QSC_MCELIECE_S5N8192T128)
+#elif defined(QSC_MCELIECE_S7N8192T128)
 		char path[] = "NPQCR3/mceliece-8192128.rsp";
 #else
 #	error The parameter set is invalid!

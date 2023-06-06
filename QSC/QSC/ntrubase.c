@@ -17,7 +17,7 @@
 #define NTRU_SAMPLE_FG_BYTES (NTRU_SAMPLE_IID_BYTES + NTRU_SAMPLE_FT_BYTES)
 #define NTRU_SAMPLE_RM_BYTES (NTRU_SAMPLE_IID_BYTES + NTRU_SAMPLE_FT_BYTES)
 
-#elif defined(QSC_NTRU_HPSS32048677)
+#elif defined(QSC_NTRU_S3HPS2048677)
 
 #define NTRU_HPS
 #define NTRU_N 677
@@ -718,7 +718,7 @@ static void ntru_poly_Sq_to_bytes(uint8_t* r, const poly* a)
 {
     size_t i;
 
-#if defined(QSC_NTRU_S1HPS2048509) || defined(QSC_NTRU_HPSS32048677)
+#if defined(QSC_NTRU_S1HPS2048509) || defined(QSC_NTRU_S3HPS2048677)
 
     uint16_t t[8];
     size_t j;
@@ -845,7 +845,7 @@ static void ntru_poly_Sq_from_bytes(poly* r, const uint8_t* a)
 {
     size_t i;
 
-#if defined(QSC_NTRU_S1HPS2048509) || defined(QSC_NTRU_HPSS32048677)
+#if defined(QSC_NTRU_S1HPS2048509) || defined(QSC_NTRU_S3HPS2048677)
 
     for (i = 0; i < NTRU_PACK_DEG / 8; ++i)
     {

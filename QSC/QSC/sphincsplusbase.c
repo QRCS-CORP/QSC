@@ -246,11 +246,11 @@ getting a large number of traces when the signer uses the same nodes. */
 
 /* utils.c */
 
-static void sphincsplus_ull_to_bytes(uint8_t* out, uint32_t outlen, uint64_t in)
+static void sphincsplus_ull_to_bytes(uint8_t* out, uint32_t otplen, uint64_t in)
 {
     size_t pos;
 
-    pos = outlen;
+    pos = otplen;
 
     do
     {

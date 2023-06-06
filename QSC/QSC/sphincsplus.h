@@ -60,14 +60,13 @@
 * The <a href="https://sphincs.org/">SPHINCS+</a> website. \n
 * The SPHINCS+ <a href="https://sphincs.org/data/sphincs+-specification.pdf">Algorithm</a> Specification. \n
 */
-
-#if defined(QSC_SPHINCSPLUS_S1S128SHAKERS)
+#if defined(QSC_SPHINCSPLUS_S1S128SHAKERF)
 
 /*!
 * \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
 * \brief The byte size of the signature array
 */
-#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 7889
+#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 17088
 
 /*!
 * \def QSC_SPHINCSPLUS_PRIVATEKEY_SIZE
@@ -81,13 +80,13 @@
 */
 #	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 32
 
-#elif defined(QSC_SPHINCSPLUS_S1S128SHAKERF)
+#elif defined(QSC_SPHINCSPLUS_S1S128SHAKERS)
 
 /*!
 * \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
 * \brief The byte size of the signature array
 */
-#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 17121
+#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 7856
 
 /*!
 * \def QSC_SPHINCSPLUS_PRIVATEKEY_SIZE
@@ -100,26 +99,6 @@
 * \brief The byte size of the public-key array
 */
 #	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 32
-
-#elif defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
-
-/*!
-* \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
-* \brief The byte size of the signature array
-*/
-#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 16224
-
-/*!
-* \def QSC_SPHINCSPLUS_PRIVATEKEY_SIZE
-* \brief The byte size of the secret private-key array
-*/
-#	define QSC_SPHINCSPLUS_PRIVATEKEY_SIZE 96
-
-/*!
-* \def QSC_SPHINCSPLUS_PUBLICKEY_SIZE
-* \brief The byte size of the public-key array
-*/
-#	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 48
 
 #elif defined(QSC_SPHINCSPLUS_S3S192SHAKERF)
 
@@ -140,26 +119,25 @@
 * \brief The byte size of the public-key array
 */
 #	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 48
-
-#elif defined(QSC_SPHINCSPLUS_S5S256SHAKERS)
+#elif defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
 
 /*!
 * \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
 * \brief The byte size of the signature array
 */
-#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 29792
+#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 16224
 
 /*!
 * \def QSC_SPHINCSPLUS_PRIVATEKEY_SIZE
 * \brief The byte size of the secret private-key array
 */
-#	define QSC_SPHINCSPLUS_PRIVATEKEY_SIZE 128
+#	define QSC_SPHINCSPLUS_PRIVATEKEY_SIZE 96
 
 /*!
 * \def QSC_SPHINCSPLUS_PUBLICKEY_SIZE
 * \brief The byte size of the public-key array
 */
-#	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 64
+#	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 48
 
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERF)
 
@@ -181,7 +159,27 @@
 */
 #	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 64
 
-#elif defined(QSC_SPHINCSPLUS_S6S512SHAKERS)
+#elif defined(QSC_SPHINCSPLUS_S5S256SHAKERS)
+
+/*!
+* \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
+* \brief The byte size of the signature array
+*/
+#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 29792
+
+/*!
+* \def QSC_SPHINCSPLUS_PRIVATEKEY_SIZE
+* \brief The byte size of the secret private-key array
+*/
+#	define QSC_SPHINCSPLUS_PRIVATEKEY_SIZE 128
+
+/*!
+* \def QSC_SPHINCSPLUS_PUBLICKEY_SIZE
+* \brief The byte size of the public-key array
+*/
+#	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 64
+
+#elif defined(QSC_SPHINCSPLUS_S6S512SHAKERF)
 
 /* The hash is 512-bit extended */
 #	define QSC_SPHINCSPLUS_EXTENDED
@@ -190,7 +188,7 @@
 * \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
 * \brief The byte size of the signature array
 */
-#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 113344
+#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 165056
 
 /*!
 * \def QSC_SPHINCSPLUS_PRIVATEKEY_SIZE
@@ -204,7 +202,7 @@
 */
 #	define QSC_SPHINCSPLUS_PUBLICKEY_SIZE 128
 
-#elif defined(QSC_SPHINCSPLUS_S6S512SHAKERF)
+#elif defined(QSC_SPHINCSPLUS_S6S512SHAKERS)
 
 /* The hash is 512-bit extended */
 #	define QSC_SPHINCSPLUS_EXTENDED
@@ -213,7 +211,7 @@
 * \def QSC_SPHINCSPLUS_SIGNATURE_SIZE
 * \brief The byte size of the signature array
 */
-#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 165056
+#	define QSC_SPHINCSPLUS_SIGNATURE_SIZE 113344
 
 /*!
 * \def QSC_SPHINCSPLUS_PRIVATEKEY_SIZE

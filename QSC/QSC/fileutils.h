@@ -248,12 +248,12 @@ QSC_EXPORT_API FILE* qsc_fileutils_open(const char* path, qsc_fileutils_mode mod
 * \brief Read data from a file to an output stream
 *
 * \param output: The output buffer
-* \param outlen: The size of the output buffer
+* \param otplen: The size of the output buffer
 * \param position: The starting position within the file
 * \param fp: The file pointer
 * \return Returns the number of bytes read
 */
-QSC_EXPORT_API size_t qsc_fileutils_read(char* output, size_t outlen, size_t position, FILE* fp);
+QSC_EXPORT_API size_t qsc_fileutils_read(char* output, size_t otplen, size_t position, FILE* fp);
 
 /**
 * \brief Read data to a binary file

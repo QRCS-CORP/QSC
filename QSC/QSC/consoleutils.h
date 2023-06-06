@@ -144,10 +144,10 @@ QSC_EXPORT_API bool qsc_consoleutils_line_contains(const char* line, const char*
 * \brief Gets a password masked on the console screen
 *
 * \param output: The output character array
-* \param outlen: The maximum size of the output array
+* \param otplen: The maximum size of the output array
 * \return Returns the size of the password
 */
-QSC_EXPORT_API size_t qsc_consoleutils_masked_password(char* output, size_t outlen);
+QSC_EXPORT_API size_t qsc_consoleutils_masked_password(char* output, size_t otplen);
 
 /**
 * \brief User confirmation that and action can continue(Y/N y/n)

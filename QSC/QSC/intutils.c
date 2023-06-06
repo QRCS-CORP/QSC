@@ -19,11 +19,11 @@ bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 	return status;
 }
 
-void qsc_intutils_be8increment(uint8_t* output, size_t outlen)
+void qsc_intutils_be8increment(uint8_t* output, size_t otplen)
 {
-	size_t i = outlen;
+	size_t i = otplen;
 
-	if (outlen > 0)
+	if (otplen > 0)
 	{
 		do
 		{
@@ -223,13 +223,13 @@ void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 	}
 }
 
-void qsc_intutils_le8increment(uint8_t* output, size_t outlen)
+void qsc_intutils_le8increment(uint8_t* output, size_t otplen)
 {
 	size_t i;
 
 	i = 0;
 
-	while (i < outlen)
+	while (i < otplen)
 	{
 		++output[i];
 

@@ -511,7 +511,7 @@ FILE* qsc_fileutils_open(const char* path, qsc_fileutils_mode mode, bool binary)
 return fp;
 }
 
-size_t qsc_fileutils_read(char* output, size_t outlen, size_t position, FILE* fp)
+size_t qsc_fileutils_read(char* output, size_t otplen, size_t position, FILE* fp)
 {
 	size_t res;
 
@@ -521,7 +521,7 @@ size_t qsc_fileutils_read(char* output, size_t outlen, size_t position, FILE* fp
 	{
 		if (qsc_fileutils_seekto(fp, position) == true)
 		{
-			res = fread(output, sizeof(char), outlen, fp);
+			res = fread(output, sizeof(char), otplen, fp);
 		}
 	}
 

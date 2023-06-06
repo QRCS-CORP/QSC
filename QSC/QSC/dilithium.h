@@ -63,7 +63,7 @@
 * The Dilithium <a href="https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf">Algorithm</a> Specification.
 */
 
-#if defined(QSC_DILITHIUM_S2N256Q8380417K4)
+#if defined(QSC_DILITHIUM_S1P2544)
 
 /*!
 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
@@ -83,7 +83,7 @@
 */
 #	define QSC_DILITHIUM_SIGNATURE_SIZE 2420
 
-#elif defined(QSC_DILITHIUM_S3N256Q8380417K6)
+#elif defined(QSC_DILITHIUM_S3P4016)
 
 /*!
 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
@@ -103,7 +103,7 @@
 */
 #	define QSC_DILITHIUM_SIGNATURE_SIZE 3293
 
-#elif defined(QSC_DILITHIUM_S5N256Q8380417K8)
+#elif defined(QSC_DILITHIUM_S5P4880)
 
 /*!
 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE

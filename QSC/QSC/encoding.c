@@ -1,6 +1,6 @@
 #include "encoding.h"
 
-bool qsc_encoding_base64_decode(uint8_t* output, size_t outlen, const char* input, size_t inlen)
+bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* input, size_t inlen)
 {
 	const static int32_t DECTBL[] = 
 	{
@@ -21,7 +21,7 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t outlen, const char* inpu
 
 	if (input != NULL && output != NULL)
 	{
-		if (outlen < qsc_encoding_base64_decoded_size(input, inlen) || inlen % 4 != 0)
+		if (otplen < qsc_encoding_base64_decoded_size(input, inlen) || inlen % 4 != 0)
 		{
 			res = false;
 		}
@@ -93,7 +93,7 @@ size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 	return res;
 }
 
-void qsc_encoding_base64_encode(char* output, size_t outlen, const uint8_t* input, size_t inplen)
+void qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* input, size_t inplen)
 {
 	const char ENCTBL[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -101,7 +101,7 @@ void qsc_encoding_base64_encode(char* output, size_t outlen, const uint8_t* inpu
 	size_t j;
 	size_t v;
 
-	if (input != NULL && inplen != 0 && qsc_encoding_base64_encoded_size(inplen) <= outlen)
+	if (input != NULL && inplen != 0 && qsc_encoding_base64_encoded_size(inplen) <= otplen)
 	{
 		for (i = 0, j = 0; i < inplen; i += 3, j += 4)
 		{

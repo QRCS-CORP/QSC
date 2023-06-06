@@ -125,19 +125,19 @@ bool qsc_queue_isempty(const qsc_queue_state* ctx)
 	return res;
 }
 
-uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t outlen)
+uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
-	assert(outlen != 0);
+	assert(otplen != 0);
 
 	uint64_t tag;
 
 	tag = 0;
 
-	if (!qsc_queue_isempty(ctx) && outlen <= ctx->width)
+	if (!qsc_queue_isempty(ctx) && otplen <= ctx->width)
 	{
-		qsc_memutils_copy(output, ctx->queue[0], outlen);
+		qsc_memutils_copy(output, ctx->queue[0], otplen);
 		qsc_memutils_clear(ctx->queue[0], ctx->width);
 		tag = ctx->tags[ctx->position - 1];
 

@@ -138,10 +138,10 @@ QSC_EXPORT_API void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, 
 *
 * \param ctx: [struct] The HCG state structure
 * \param output: The pseudo-random output array
-* \param outlen: The requested number of bytes to generate
+* \param otplen: The requested number of bytes to generate
 * \return The number of bytes generated
 */
-QSC_EXPORT_API void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t outlen);
+QSC_EXPORT_API void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen);
 
 /**
 * \brief Update the random provider with new keying material

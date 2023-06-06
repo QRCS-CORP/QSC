@@ -146,7 +146,7 @@
 
 /*!
 * \def QSC_SHA2_256_RATE
-* \brief The SHA-256 byte absorption rate
+* \brief The SHA-256-bit absorption rate
 */
 #define QSC_SHA2_256_RATE 64
 
@@ -158,7 +158,7 @@
 
 /*!
 * \def QSC_SHA2_512_RATE
-* \brief The SHA2-512 byte absorption rate
+* \brief The SHA2-512-bit absorption rate
 */
 #define QSC_SHA2_512_RATE 128
 
@@ -546,49 +546,49 @@ QSC_EXPORT_API void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* me
 * Short form api: initializes with the key and user info, and generates the output pseudo-random with a single call.
 *
 * \param output: The output pseudo-random byte array
-* \param outlen: The output array length
+* \param otplen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param info: [const] The info array
 * \param infolen: The info array length
 */
-QSC_EXPORT_API void qsc_hkdf256_expand(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
+QSC_EXPORT_API void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
 
 /**
 * \brief Extract a key from a combined key and salt input using HMAC(SHA2-256).
 *
 * \param output: The output pseudo-random byte array
-* \param outlen: The output array length
+* \param otplen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param salt: [const] The salt array
 * \param saltlen: The salt array length
 */
-QSC_EXPORT_API void qsc_hkdf256_extract(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
+QSC_EXPORT_API void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
 
 /**
 * \brief Initialize an instance of HKDF(HMAC(SHA2-512)), and output an array of pseudo-random.
 * Short form api: initializes with the key and user info, and generates the output pseudo-random with a single call.
 *
 * \param output: The output pseudo-random byte array
-* \param outlen: The output array length
+* \param otplen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param info: [const] The info array
 * \param infolen: The info array length
 */
-QSC_EXPORT_API void qsc_hkdf512_expand(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
+QSC_EXPORT_API void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
 
 /**
 * \brief Extract a key from a combined key and salt input using HMAC(SHA2-512).
 *
 * \param output: The output pseudo-random byte array
-* \param outlen: The output array length
+* \param otplen: The output array length
 * \param key: [const] The HKDF key array
 * \param keylen: The key array length
 * \param salt: [const] The salt array
 * \param saltlen: The salt array length
 */
-QSC_EXPORT_API void qsc_hkdf512_extract(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
+QSC_EXPORT_API void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
 
 #endif

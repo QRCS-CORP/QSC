@@ -36,12 +36,12 @@
 * \brief Decodes a base64 string to a byte array
 *
 * \param output: The byte array receiving the decoded output
-* \param outlen: The size of the output byte array
+* \param otplen: The size of the output byte array
 * \param input: The base64 encoded input string
 * \param inlen: The length of there input string
 * \return Returns true if the string was encoded successfully
 */
-QSC_EXPORT_API bool qsc_encoding_base64_decode(uint8_t* output, size_t outlen, const char* input, size_t inlen);
+QSC_EXPORT_API bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* input, size_t inlen);
 
 /**
 * \brief Gets the expected size of an array required by decoding
@@ -56,11 +56,11 @@ QSC_EXPORT_API size_t qsc_encoding_base64_decoded_size(const char* input, size_t
 * \brief Encode a byte array to a base64 string
 *
 * \param output: The character string receiving the encoded bytes
-* \param outlen: The size of the output character array
+* \param otplen: The size of the output character array
 * \param input: The byte array to encode to base64
 * \param inplen: The size of the byte array
 */
-QSC_EXPORT_API void qsc_encoding_base64_encode(char* output, size_t outlen, const uint8_t* input, size_t inplen);
+QSC_EXPORT_API void qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* input, size_t inplen);
 
 /**
 * \brief Gets the expected size of an character array required by encoding

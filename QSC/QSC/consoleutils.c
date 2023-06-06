@@ -278,7 +278,7 @@ bool qsc_consoleutils_line_contains(const char* line, const char* token)
 	return res;
 }
 
-size_t qsc_consoleutils_masked_password(char* output, size_t outlen)
+size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 {
 	assert(output != NULL);
 
@@ -317,7 +317,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t outlen)
 				}
 			}
 		}
-		while ((c != '\n' && c != '\r') || ctr >= outlen);
+		while ((c != '\n' && c != '\r') || ctr >= otplen);
 	}
 
 	qsc_consoleutils_print_line("");

@@ -1084,7 +1084,7 @@ const uint8_t falcon_max_FG_bits[FALCON_MAXBITS_SIZE] =
 static size_t falcon_modq_encode(void* out, size_t maxoutlen, const uint16_t* x, uint32_t logn)
 {
 	size_t n;
-	size_t outlen;
+	size_t otplen;
 	size_t u;
 	uint32_t acc;
 	int32_t acclen;
@@ -1092,7 +1092,7 @@ static size_t falcon_modq_encode(void* out, size_t maxoutlen, const uint16_t* x,
 	bool res;
 
 	res = true;
-	outlen = 0;
+	otplen = 0;
 	n = (size_t)1 << logn;
 
 	for (u = 0; u < n; ++u)
@@ -1106,9 +1106,9 @@ static size_t falcon_modq_encode(void* out, size_t maxoutlen, const uint16_t* x,
 
 	if (res == true)
 	{
-		outlen = ((n * 14) + 7) >> 3;
+		otplen = ((n * 14) + 7) >> 3;
 
-		if (out != NULL && outlen <= maxoutlen)
+		if (out != NULL && otplen <= maxoutlen)
 		{
 
 			buf = out;
@@ -1134,7 +1134,7 @@ static size_t falcon_modq_encode(void* out, size_t maxoutlen, const uint16_t* x,
 		}
 	}
 
-	return outlen;
+	return otplen;
 }
 
 static size_t falcon_modq_decode(uint16_t* x, uint32_t logn, const void* in, size_t maxinlen)
@@ -1195,7 +1195,7 @@ static size_t falcon_modq_decode(uint16_t* x, uint32_t logn, const void* in, siz
 
 static size_t falcon_trim_i8_encode(void* out, size_t maxoutlen, const int8_t* x, uint32_t logn, uint32_t bits)
 {
-	size_t outlen;
+	size_t otplen;
 	size_t n;
 	size_t u;
 	uint32_t acc;
@@ -1217,14 +1217,14 @@ static size_t falcon_trim_i8_encode(void* out, size_t maxoutlen, const int8_t* x
 		}
 	}
 
-	outlen = ((n * bits) + 7) >> 3;
+	otplen = ((n * bits) + 7) >> 3;
 
 	if (out == NULL)
 	{
-		return outlen;
+		return otplen;
 	}
 
-	if (outlen > maxoutlen)
+	if (otplen > maxoutlen)
 	{
 		return 0;
 	}
@@ -1251,7 +1251,7 @@ static size_t falcon_trim_i8_encode(void* out, size_t maxoutlen, const int8_t* x
 		*buf++ = (uint8_t)(acc << (8 - acclen));
 	}
 
-	return outlen;
+	return otplen;
 }
 
 static size_t falcon_trim_i8_decode(int8_t* x, uint32_t logn, uint32_t bits, const void* in, size_t maxinlen)

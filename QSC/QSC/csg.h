@@ -132,10 +132,10 @@ QSC_EXPORT_API void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, 
 *
 * \param ctx: [struct] The function state
 * \param output: The pseudo-random output array
-* \param outlen: The requested number of bytes to generate
+* \param otplen: The requested number of bytes to generate
 * \return The number of bytes generated
 */
-QSC_EXPORT_API void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t outlen);
+QSC_EXPORT_API void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen);
 
 /**
 * \brief Update the random provider with new keying material

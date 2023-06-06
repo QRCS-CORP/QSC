@@ -36,11 +36,11 @@ bool qsctest_dilithium_kat_test()
 	siglen = 0;
 	sklen = 0;
 
-#if defined(QSC_DILITHIUM_S2N256Q8380417K4)
+#if defined(QSC_DILITHIUM_S1P2544)
 	char path[] = "NPQCR3/dilithium-2544.rsp";
-#elif defined(QSC_DILITHIUM_S3N256Q8380417K6)
+#elif defined(QSC_DILITHIUM_S3P4016)
 	char path[] = "NPQCR3/dilithium-4016.rsp";
-#elif defined(QSC_DILITHIUM_S5N256Q8380417K8)
+#elif defined(QSC_DILITHIUM_S5P4880)
 	char path[] = "NPQCR3/dilithium-4880.rsp";
 #else
 #	error The parameter set is invalid!

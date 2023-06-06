@@ -95,9 +95,9 @@ QSC_EXPORT_API void qsc_intutils_be64to8(uint8_t* output, uint64_t value);
 * \brief Increment an 8-bit integer array as a segmented big-endian integer
 *
 * \param output: The destination integer 8-bit array
-* \param outlen: The length of the output counter array
+* \param otplen: The length of the output counter array
 */
-QSC_EXPORT_API void qsc_intutils_be8increment(uint8_t* output, size_t outlen);
+QSC_EXPORT_API void qsc_intutils_be8increment(uint8_t* output, size_t otplen);
 
 #if defined(QSC_SYSTEM_HAS_AVX)
 /**
@@ -210,9 +210,9 @@ QSC_EXPORT_API void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, 
 * \brief Increment an 8-bit integer array as a segmented little-endian integer
 *
 * \param output: The source integer 8-bit array
-* \param outlen: The length of the output counter array
+* \param otplen: The length of the output counter array
 */
-QSC_EXPORT_API void qsc_intutils_le8increment(uint8_t* output, size_t outlen);
+QSC_EXPORT_API void qsc_intutils_le8increment(uint8_t* output, size_t otplen);
 
 #if defined(QSC_SYSTEM_HAS_AVX)
 /**

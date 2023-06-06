@@ -1495,7 +1495,7 @@ void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t m
 
 /* HKDF-256 */
 
-void qsc_hkdf256_expand(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
+void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
 {
 	assert(output != NULL);
 	assert(key != NULL);
@@ -1504,7 +1504,7 @@ void qsc_hkdf256_expand(uint8_t* output, size_t outlen, const uint8_t* key, size
 	uint8_t buf[QSC_SHA2_256_HASH_SIZE] = { 0 };
 	uint8_t ctr[1] = { 0 };
 
-	while (outlen != 0)
+	while (otplen != 0)
 	{
 		qsc_hmac256_initialize(&ctx, key, keylen);
 
@@ -1522,20 +1522,20 @@ void qsc_hkdf256_expand(uint8_t* output, size_t outlen, const uint8_t* key, size
 		qsc_hmac256_update(&ctx, ctr, sizeof(ctr));
 		qsc_hmac256_finalize(&ctx, buf);
 
-		const size_t RMDLEN = qsc_intutils_min(outlen, (size_t)QSC_SHA2_256_HASH_SIZE);
+		const size_t RMDLEN = qsc_intutils_min(otplen, (size_t)QSC_SHA2_256_HASH_SIZE);
 		qsc_memutils_copy(output, buf, RMDLEN);
 
-		outlen -= RMDLEN;
+		otplen -= RMDLEN;
 		output += RMDLEN;
 	}
 }
 
-void qsc_hkdf256_extract(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
+void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
 {
 	assert(output != NULL);
 	assert(key != NULL);
 
-	if (outlen >= 32)
+	if (otplen >= 32)
     {
         qsc_hmac256_state ctx;
 
@@ -1556,7 +1556,7 @@ void qsc_hkdf256_extract(uint8_t* output, size_t outlen, const uint8_t* key, siz
 
 /* HKDF-512 */
 
-void qsc_hkdf512_expand(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
+void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
 {
 	assert(output != NULL);
 	assert(key != NULL);
@@ -1565,7 +1565,7 @@ void qsc_hkdf512_expand(uint8_t* output, size_t outlen, const uint8_t* key, size
 	uint8_t buf[QSC_SHA2_512_HASH_SIZE] = { 0 };
 	uint8_t ctr[1] = { 0 };
 
-	while (outlen != 0)
+	while (otplen != 0)
 	{
 		qsc_hmac512_initialize(&ctx, key, keylen);
 
@@ -1583,20 +1583,20 @@ void qsc_hkdf512_expand(uint8_t* output, size_t outlen, const uint8_t* key, size
 		qsc_hmac512_update(&ctx, ctr, sizeof(ctr));
 		qsc_hmac512_finalize(&ctx, buf);
 
-		const size_t RMDLEN = qsc_intutils_min(outlen, (size_t)QSC_SHA2_512_HASH_SIZE);
+		const size_t RMDLEN = qsc_intutils_min(otplen, (size_t)QSC_SHA2_512_HASH_SIZE);
 		qsc_memutils_copy(output, buf, RMDLEN);
 
-		outlen -= RMDLEN;
+		otplen -= RMDLEN;
 		output += RMDLEN;
 	}
 }
 
-void qsc_hkdf512_extract(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
+void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
 {
 	assert(output != NULL);
 	assert(key != NULL);
 
-    if (outlen >= 64)
+    if (otplen >= 64)
     {
         qsc_hmac512_state ctx;
 

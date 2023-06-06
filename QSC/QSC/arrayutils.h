@@ -62,37 +62,37 @@ QSC_EXPORT_API uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
 * \brief Converts a byte value to hexadecimal and writes to a string
 *
 * \param output: The output string char array
-* \param outlen: The length of the output string
+* \param otplen: The length of the output string
 * \param value: The byte value to convert
 */
-QSC_EXPORT_API void qsc_arrayutils_uint8_to_hex(char* output, size_t outlen, uint8_t value);
+QSC_EXPORT_API void qsc_arrayutils_uint8_to_hex(char* output, size_t otplen, uint8_t value);
 
 /**
 * \brief Converts an unsigned short value to hexadecimal and writes to a string
 *
 * \param output: The output string char array
-* \param outlen: The length of the output string
+* \param otplen: The length of the output string
 * \param value: The unsigned short value to convert
 */
-QSC_EXPORT_API void qsc_arrayutils_uint16_to_hex(char* output, size_t outlen, uint16_t value);
+QSC_EXPORT_API void qsc_arrayutils_uint16_to_hex(char* output, size_t otplen, uint16_t value);
 
 /**
 * \brief Converts an unsigned 32-bit integer value to hexadecimal and writes to a string
 *
 * \param output: The output string char array
-* \param outlen: The length of the output string
+* \param otplen: The length of the output string
 * \param value: The unsigned 32-bit integer value to convert
 */
-QSC_EXPORT_API void qsc_arrayutils_uint32_to_hex(char* output, size_t outlen, uint32_t value);
+QSC_EXPORT_API void qsc_arrayutils_uint32_to_hex(char* output, size_t otplen, uint32_t value);
 
 /**
 * \brief Converts an unsigned 64-bit integer value to hexadecimal and writes to a string
 *
 * \param output: The output string char array
-* \param outlen: The length of the output string
+* \param otplen: The length of the output string
 * \param value: The unsigned 64-bit integer value to convert
 */
-QSC_EXPORT_API void qsc_arrayutils_uint64_to_hex(char* output, size_t outlen, uint64_t value);
+QSC_EXPORT_API void qsc_arrayutils_uint64_to_hex(char* output, size_t otplen, uint64_t value);
 
 /**
 * \brief Parse an 8-bit unsigned integer from a string

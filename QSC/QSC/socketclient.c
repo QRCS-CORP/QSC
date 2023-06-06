@@ -161,7 +161,7 @@ void qsc_socket_client_initialize(qsc_socket* sock)
 	}
 }
 
-size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t outlen, qsc_socket_receive_flags flag)
+size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
 	assert(output != NULL);
@@ -172,13 +172,13 @@ size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t ou
 
 	if (sock != NULL && output != NULL)
 	{
-		res = qsc_socket_receive(sock, (uint8_t*)output, outlen, flag);
+		res = qsc_socket_receive(sock, (uint8_t*)output, otplen, flag);
 	}
 
 	return res;
 }
 
-size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t outlen, qsc_socket_receive_flags flag)
+size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
 	assert(address != NULL);
@@ -190,7 +190,7 @@ size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t 
 
 	if (sock != NULL && output != NULL)
 	{
-		res = qsc_socket_receive_from(sock, address, port, (uint8_t*)output, outlen, flag);
+		res = qsc_socket_receive_from(sock, address, port, (uint8_t*)output, otplen, flag);
 	}
 
 	return res;

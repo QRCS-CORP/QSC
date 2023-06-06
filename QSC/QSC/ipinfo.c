@@ -353,6 +353,130 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 	}
 }
 
+uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLEN])
+{
+	uint32_t ta[4] = { 0 };
+	const char* tmp = mask;
+	uint32_t bmask;
+	int32_t pos;
+	uint8_t bits;
+
+	for (size_t i = 0; i < 4; ++i)
+	{
+		pos = qsc_stringutils_find_string(tmp, ".");
+		ta[i] += qsc_stringutils_string_to_int(tmp);
+		tmp += (size_t)pos + 1;
+	}
+
+	bits = 0;
+	bmask = ((ta[0] << 24) + (ta[1] << 16) + (ta[2] << 8) + (ta[3]));
+
+	while (bmask != 0)
+	{
+		bits += bmask & 1;
+		bmask >>= 1;
+	}
+
+	return bits;
+}
+
+void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8_t cidr)
+{
+	qsc_stringutils_clear_string(mask);
+	uint32_t tmpn;
+
+	tmpn = 0;
+
+	if (cidr <= 8)
+	{
+		char tail[] = ".0.0.0";
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_int_to_string(tmpn, mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+	}
+	else if (cidr <= 16)
+	{
+		char head[] = "255.";
+		char tail[] = ".0.0";
+		char tmask[4] = { 0 };
+
+		cidr -= 8;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+	}
+	else if (cidr <= 24)
+	{
+		char head[] = "255.255.";
+		char tail[] = ".0";
+		char tmask[4] = { 0 };
+
+		cidr -= 16;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+	}
+	else
+	{
+		char head[] = "255.255.255.";
+		char tmask[4] = { 0 };
+
+		cidr -= 24;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			if (cidr == 0)
+			{
+				break;
+			}
+
+			tmpn |= 1 << (7 - i);
+			--cidr;
+		}
+
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+	}
+}
+
 qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
@@ -684,129 +808,5 @@ void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], con
 		output[34] = DELIM;
 		n = qsc_intutils_be8to16(&address->ipv6[14]);
 		qsc_arrayutils_uint16_to_hex(&output[35], 5, n);
-	}
-}
-
-uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLEN])
-{
-	uint32_t ta[4] = { 0 };
-	const char* tmp = mask;
-	uint32_t bmask;
-	int32_t pos;
-	uint8_t bits;
-
-	for (size_t i = 0; i < 4; ++i)
-	{
-		pos = qsc_stringutils_find_string(tmp, ".");
-		ta[i] += qsc_stringutils_string_to_int(tmp);
-		tmp += (size_t)pos + 1;
-	}
-
-	bits = 0;
-	bmask = ((ta[0] << 24) + (ta[1] << 16) + (ta[2] << 8) + (ta[3]));
-
-	while (bmask != 0)
-	{
-		bits += bmask & 1;
-		bmask >>= 1;
-	}
-
-	return bits;
-}
-
-void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8_t cidr)
-{
-	qsc_stringutils_clear_string(mask);
-	uint32_t tmpn;
-
-	tmpn = 0;
-
-	if (cidr <= 8)
-	{
-		char tail[] = ".0.0.0";
-
-		for (size_t i = 0; i < 8; ++i)
-		{
-			if (cidr == 0)
-			{
-				break;
-			}
-
-			tmpn |= 1 << (7 - i);
-			--cidr;
-		}
-
-		qsc_stringutils_int_to_string(tmpn, mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
-	}
-	else if (cidr <= 16)
-	{
-		char head[] = "255.";
-		char tail[] = ".0.0";
-		char tmask[4] = { 0 };
-
-		cidr -= 8;
-
-		for (size_t i = 0; i < 8; ++i)
-		{
-			if (cidr == 0)
-			{
-				break;
-			}
-
-			tmpn |= 1 << (7 - i);
-			--cidr;
-		}
-
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
-	}
-	else if (cidr <= 24)
-	{
-		char head[] = "255.255.";
-		char tail[] = ".0";
-		char tmask[4] = { 0 };
-
-		cidr -= 16;
-
-		for (size_t i = 0; i < 8; ++i)
-		{
-			if (cidr == 0)
-			{
-				break;
-			}
-
-			tmpn |= 1 << (7 - i);
-			--cidr;
-		}
-
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
-	}
-	else
-	{
-		char head[] = "255.255.255.";
-		char tmask[4] = { 0 };
-
-		cidr -= 24;
-
-		for (size_t i = 0; i < 8; ++i)
-		{
-			if (cidr == 0)
-			{
-				break;
-			}
-
-			tmpn |= 1 << (7 - i);
-			--cidr;
-		}
-
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
 	}
 }

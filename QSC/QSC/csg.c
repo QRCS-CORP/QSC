@@ -117,14 +117,14 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 	csg_fill_buffer(ctx);
 }
 
-void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t outlen)
+void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 
-	ctx->bctr += outlen;
+	ctx->bctr += otplen;
 
-	if (ctx->crmd < outlen)
+	if (ctx->crmd < otplen)
 	{
 		size_t outpos;
 
@@ -136,20 +136,20 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t outlen)
 			/* empty the state buffer */
 			qsc_memutils_copy(output, ctx->cache + ctx->cpos, ctx->crmd);
 			outpos += ctx->crmd;
-			outlen -= ctx->crmd;
+			otplen -= ctx->crmd;
 		}
 
 		/* loop through the remainder */
-		while (outlen != 0)
+		while (otplen != 0)
 		{
 			/* fill the buffer */
 			csg_fill_buffer(ctx);
 
 			/* copy to output */
-			const size_t RMDLEN = qsc_intutils_min(ctx->crmd, outlen);
+			const size_t RMDLEN = qsc_intutils_min(ctx->crmd, otplen);
 			qsc_memutils_copy(output + outpos, ctx->cache, RMDLEN);
 
-			outlen -= RMDLEN;
+			otplen -= RMDLEN;
 			outpos += RMDLEN;
 			ctx->crmd -= RMDLEN;
 			ctx->cpos += RMDLEN;
@@ -158,7 +158,7 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t outlen)
 	else
 	{
 		/* copy from the state buffer to output */
-		const size_t RMDLEN = qsc_intutils_min(ctx->crmd, outlen);
+		const size_t RMDLEN = qsc_intutils_min(ctx->crmd, otplen);
 		qsc_memutils_copy(output, ctx->cache + ctx->cpos, RMDLEN);
 		ctx->crmd -= RMDLEN;
 		ctx->cpos += RMDLEN;

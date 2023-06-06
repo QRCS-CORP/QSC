@@ -3,6 +3,22 @@
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	include "intrinsics.h"
 #endif
+#if defined(QSC_SYSTEM_OS_OPENBSD)
+#	include <string.h>
+#endif
+#if defined(QSC_SYSTEM_OS_POSIX)
+#	include <sys/types.h>
+#	include <sys/resource.h>
+#	include <sys/mman.h>
+#	include <cstdlib>
+#	include <signal.h>
+#	include <setjmp.h>
+#	include <unistd.h>
+#	include <errno.h>
+#elif defined(QSC_SYSTEM_OS_WINDOWS)
+#	include <windows.h>
+#endif
+// TODO: Add secmem alloc and free
 
 void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)
 {
@@ -71,6 +87,131 @@ void* qsc_memutils_malloc(size_t length)
 	}
 
 	return ret;
+}
+
+size_t qsc_memutils_page_size()
+{
+	int64_t pagelen;
+
+	pagelen = 0x00001000LL;
+
+#if defined(QSC_SYSTEM_OS_POSIX)
+
+	pagelen = sysconf(_SC_PAGESIZE);
+
+	if (pagelen < 1)
+	{
+		pagelen = CEX_SECMEMALLOC_DEFAULT;
+	}
+
+#elif defined(QSC_SYSTEM_OS_WINDOWS)
+
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo(&sysinfo);
+	pagelen = (size_t)sysinfo.dwPageSize;
+
+#endif
+
+	return (size_t)pagelen;
+}
+
+size_t qsc_memutils_secure_malloc(void* block, size_t length)
+{
+	uint32_t nlen;
+	const size_t pagesize = qsc_memutils_page_size();
+
+	nlen = length;
+
+	if (nlen % pagesize != 0)
+	{
+		nlen = (nlen + pagesize - (nlen % pagesize));
+	}
+
+#if defined(QSC_SYSTEM_OS_POSIX)
+
+#	if !defined(MAP_NOCORE)
+#		define MAP_NOCORE 0
+#	endif
+
+#	if !defined(MAP_ANONYMOUS)
+#		define MAP_ANONYMOUS MAP_ANON
+#	endif
+
+	block = mmap(NULL, nlen, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED | MAP_NOCORE, -1, 0);
+
+	if (block != MAP_FAILED)
+	{
+#	if defined(MADV_DONTDUMP)
+		madvise(block, nlen, MADV_DONTDUMP);
+#	endif
+
+#	if defined(CEX_HAS_POSIXMLOCK)
+		if (mlock(block, nlen) != 0)
+		{
+			qsc_memutils_clear(block, nlen);
+			munmap(block, nlen);
+		}
+#	endif
+	}
+	else
+	{
+		block = NULL;
+	}
+
+#elif defined(QSC_SYSTEM_VIRTUAL_LOCK)
+
+	block = VirtualAlloc(NULL, nlen, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+
+	if (block != NULL)
+	{
+		if (VirtualLock((LPVOID)block, nlen) == 0)
+		{
+			qsc_memutils_clear(block, nlen);
+			VirtualFree((LPVOID)block, 0, MEM_RELEASE);
+		}
+	}
+
+#else
+
+	block = (uint8_t*)qsc_memutils_malloc(nlen);
+
+#endif
+
+	if (block == NULL)
+	{
+		nlen = 0;
+	}
+
+	return (size_t)nlen;
+}
+
+void qsc_memutils_secure_free(void* block, size_t length)
+{
+	if (block != NULL || length != 0)
+	{
+#if defined(QSC_SYSTEM_OS_POSIX)
+
+		qsc_memutils_clear(block, length);
+
+#	if defined(CEX_HAS_POSIXMLOCK)
+		munlock(block, length);
+#	endif
+		munmap(block, length);
+
+#elif defined(QSC_SYSTEM_VIRTUAL_LOCK)
+
+		if (block != NULL)
+		{
+			qsc_memutils_clear(block, length);
+
+			VirtualUnlock((LPVOID)block, length);
+			VirtualFree((LPVOID)block, 0, MEM_RELEASE);
+		}
+
+#else
+		free((uint8_t*)block);
+#endif
+	}
 }
 
 void* qsc_memutils_realloc(void* block, size_t length)
@@ -557,3 +698,19 @@ void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
 		}
 	}
 }
+
+bool qsc_memutils_zeroed(const void* input, size_t length)
+{
+	const uint8_t* pinp = (uint8_t*)input;
+	size_t i;
+
+	i = 0;
+
+	while (i < length && pinp[i] == 0)
+	{
+		++i;
+	}
+
+	return (i == length);
+}
+

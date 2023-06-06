@@ -110,10 +110,10 @@ QSC_EXPORT_API bool qsc_queue_isempty(const qsc_queue_state* ctx);
 *
 * \param ctx [struct] The function state
 * \param output [array] The array receiving the queue item
-* \param outlen [size] The number of bytes to copy from the queue item
+* \param otplen [size] The number of bytes to copy from the queue item
 * \return The items associated tag
 */
-QSC_EXPORT_API uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t outlen);
+QSC_EXPORT_API uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen);
 
 /**
 * \brief Add an item to the queue

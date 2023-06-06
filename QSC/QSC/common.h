@@ -427,27 +427,27 @@
 
 #if defined(_WIN32)
 	/*!
-	\def QSC_SYSTEM_HAS_VIRTUALLOCK
+	\def QSC_SYSTEM_VIRTUAL_LOCK
 	* \brief The system has virtual memory allocation
 	*/
-#	define QSC_SYSTEM_HAS_VIRTUALLOCK
+#	define QSC_SYSTEM_VIRTUAL_LOCK
 
 	/*!
-	\def QSC_HAS_RTLSECUREMEMORY
+	\def QSC_RTL_SECURE_MEMORY
 	* \brief The system has secure memory allocation
 	*/
-#	define QSC_HAS_RTLSECUREMEMORY
+#	define QSC_RTL_SECURE_MEMORY
 #endif
 
 #if defined(_POSIX_MEMLOCK_RANGE)
 	/*!
-	\def QSC_SYSTEM_HAS_POSIXMLOCK
+	\def QSC_SYSTEM_POSIX_MLOCK
 	* \brief The memory has posix lock
 	*/
-#	define QSC_SYSTEM_HAS_POSIXMLOCK
+#	define QSC_SYSTEM_POSIX_MLOCK
 #endif
 
-#if defined(QSC_SYSTEM_HAS_VIRTUALLOCK) || defined(QSC_SYSTEM_HAS_POSIXMLOCK)
+#if defined(QSC_SYSTEM_VIRTUAL_LOCK) || defined(QSC_SYSTEM_POSIX_MLOCK)
 	/*!
 	\def QSC_SYSTEM_SECURE_ALLOCATOR
 	* \brief The system has a secure memory allocator
@@ -730,7 +730,7 @@
 \def QSC_KYBER_S1P1632
 * Implement the Kyber S1-P1632 parameter set
 */
-/*#define QSC_KYBER_S1P1632*/
+#define QSC_KYBER_S1P1632
 
 /*!
 \def QSC_KYBER_S3P2400
@@ -742,7 +742,7 @@
 \def QSC_KYBER_S5P3168
 * Implement the Kyber S5-P3168 parameter set
 */
-#define QSC_KYBER_S5P3168
+/*#define QSC_KYBER_S5P3168*/
 
 /*!
 \def QSC_KYBER_S6P3936
@@ -754,6 +754,12 @@
 /*** McEliece ***/
 
 /*!
+\def QSC_MCELIECE_S1N3488T64
+* Implement the McEliece S1-N3488T64 parameter set
+*/
+/*#define QSC_MCELIECE_S1N3488T64*/
+
+/*!
 \def QSC_MCELIECE_S3N4608T96
 * Implement the McEliece S3-N4608T96 parameter set
 */
@@ -763,19 +769,19 @@
 \def QSC_MCELIECE_S5N6688T128
 * Implement the McEliece S5-N6688T128 parameter set
 */
-#define QSC_MCELIECE_S5N6688T128
+/*#define QSC_MCELIECE_S5N6688T128*/
 
 /*!
-\def QSC_MCELIECE_S5N6960T119
-* Implement the McEliece S5-N6960T119 parameter set
+\def QSC_MCELIECE_S6N6960T119
+* Implement the McEliece S6-N6960T119 parameter set
 */
-/*#define QSC_MCELIECE_S5N6960T119*/
+/*#define QSC_MCELIECE_S6N6960T119*/
 
 /*!
-\def QSC_MCELIECE_S5N8192T128
+\def QSC_MCELIECE_S7N8192T128
 * Implement the McEliece S5-N8192T128 parameter set
 */
-/*#define QSC_MCELIECE_S5N8192T128*/
+#define QSC_MCELIECE_S7N8192T128
 
 /*** NTRU ***/
 
@@ -786,10 +792,10 @@
 /*#define QSC_NTRU_S1HPS2048509*/
 
 /*!
-\def QSC_NTRU_HPSS32048677
+\def QSC_NTRU_S3HPS2048677
 * Implement the NTRU HPSS32048677 parameter set
 */
-/*#define QSC_NTRU_HPSS32048677*/
+/*#define QSC_NTRU_S3HPS2048677*/
 
 /*!
 \def QSC_NTRU_S5HPS4096821
@@ -808,22 +814,22 @@
 /*** Dilithium ***/
 
 /*!
-\def QSC_DILITHIUM_S2N256Q8380417K4
-* Implement the Dilithium S1N256Q8380417 parameter set
+\def QSC_DILITHIUM_S1P2544
+* Implement the Dilithium S1P2544 parameter set
 */
-/*#define QSC_DILITHIUM_S2N256Q8380417K4*/
+#define QSC_DILITHIUM_S1P2544
 
 /*!
-\def QSC_DILITHIUM_S2N256Q8380417K4
-* Implement the Dilithium S2N256Q8380417 parameter set
+\def QSC_DILITHIUM_S3P4016
+* Implement the Dilithium S3P4016 parameter set
 */
-#define QSC_DILITHIUM_S3N256Q8380417K6
+/*#define QSC_DILITHIUM_S3P4016*/
 
 /*!
-\def QSC_DILITHIUM_S3N256Q8380417K6
-* Implement the Dilithium S3N256Q8380417 parameter set
+\def QSC_DILITHIUM_S5P4880
+* Implement the Dilithium S5P4880 parameter set
 */
-/*#define QSC_DILITHIUM_S5N256Q8380417K8*/
+/*#define QSC_DILITHIUM_S5P4880*/
 
 /*** ECDSA ***/
 
@@ -850,10 +856,16 @@
 /*** SphincsPlus ***/
 
 /*!
-\def QSC_SPHINCSPLUS_S3S192SHAKERS
-* Implement the SphincsPlus S3S192SHAKERS robust small parameter set
+\def QSC_SPHINCSPLUS_S1S128SHAKERF
+* Implement the SphincsPlus S1S128SHAKERF robust fast parameter set
 */
-/*#define QSC_SPHINCSPLUS_S3S192SHAKERS*/
+/*#define QSC_SPHINCSPLUS_S1S128SHAKERF*/
+
+/*!
+\def QSC_SPHINCSPLUS_S1S128SHAKERS
+* Implement the SphincsPlus S1S128SHAKERS robust small parameter set
+*/
+/*#define QSC_SPHINCSPLUS_S1S128SHAKERS*/
 
 /*!
 \def QSC_SPHINCSPLUS_S3S192SHAKERF
@@ -862,10 +874,10 @@
 /*#define QSC_SPHINCSPLUS_S3S192SHAKERF*/
 
 /*!
-\def QSC_SPHINCSPLUS_S5S256SHAKERS
-* Implement the SphincsPlus S5S256SHAKERS robust small parameter set
+\def QSC_SPHINCSPLUS_S3S192SHAKERS
+* Implement the SphincsPlus S3S192SHAKERS robust small parameter set
 */
-/*#define QSC_SPHINCSPLUS_S5S256SHAKERS*/
+/*#define QSC_SPHINCSPLUS_S3S192SHAKERS*/
 
 /*!
 \def QSC_SPHINCSPLUS_S5S256SHAKERF
@@ -874,15 +886,21 @@
 #define QSC_SPHINCSPLUS_S5S256SHAKERF
 
 /*!
-\def QSC_SPHINCSPLUS_S6S512SHAKERS
-* Implement the SphincsPlus S6S512SHAKERS robust small parameter set
+\def QSC_SPHINCSPLUS_S5S256SHAKERS
+* Implement the SphincsPlus S5S256SHAKERS robust small parameter set
 */
-/*#define QSC_SPHINCSPLUS_S6S512SHAKERS*/
+/*#define QSC_SPHINCSPLUS_S5S256SHAKERS*/
 
 /*!
 \def QSC_SPHINCSPLUS_S6S512SHAKERF
 * Implement the SphincsPlus S6S512SHAKERF robust fast parameter set
 */
 /*#define QSC_SPHINCSPLUS_S6S512SHAKERF*/
+
+/*!
+\def QSC_SPHINCSPLUS_S6S512SHAKERS
+* Implement the SphincsPlus S6S512SHAKERS robust small parameter set
+*/
+/*#define QSC_SPHINCSPLUS_S6S512SHAKERS*/
 
 #endif

@@ -43,45 +43,45 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
 	return res;
 }
 
-void qsc_arrayutils_uint8_to_hex(char* output, size_t outlen, uint8_t value)
+void qsc_arrayutils_uint8_to_hex(char* output, size_t otplen, uint8_t value)
 {
 	assert(output != NULL);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sprintf_s(output, outlen, "%02hhx", value);
+	sprintf_s(output, otplen, "%02hhx", value);
 #else
 	sprintf(output, "%02hhx", value);
 #endif
 }
 
-void qsc_arrayutils_uint16_to_hex(char* output, size_t outlen, uint16_t value)
+void qsc_arrayutils_uint16_to_hex(char* output, size_t otplen, uint16_t value)
 {
 	assert(output != NULL);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sprintf_s(output, outlen, "%04hx", value);
+	sprintf_s(output, otplen, "%04hx", value);
 #else
 	sprintf(output, "%04hx", value);
 #endif
 }
 
-void qsc_arrayutils_uint32_to_hex(char* output, size_t outlen, uint32_t value)
+void qsc_arrayutils_uint32_to_hex(char* output, size_t otplen, uint32_t value)
 {
 	assert(output != NULL);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sprintf_s(output, outlen, "%08lx", value);
+	sprintf_s(output, otplen, "%08lx", value);
 #else
 	sprintf(output, "%08lx", (unsigned long)value);
 #endif
 }
 
-void qsc_arrayutils_uint64_to_hex(char* output, size_t outlen, uint64_t value)
+void qsc_arrayutils_uint64_to_hex(char* output, size_t otplen, uint64_t value)
 {
 	assert(output != NULL);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sprintf_s(output, outlen, "%016llx", value);
+	sprintf_s(output, otplen, "%016llx", value);
 #else
 	sprintf(output, "%016lldx", (unsigned long long)value);
 #endif

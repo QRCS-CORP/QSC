@@ -154,7 +154,7 @@ QSC_EXPORT_API int32_t qsc_async_thread_resume(qsc_thread handle);
 /**
 * \brief Pause the thread for a number of milliseconds
 *
-* \param msec: The number of milliseconds to wait
+* \param msec: The number of milliseconds to sleep
 */
 QSC_EXPORT_API void qsc_async_thread_sleep(uint32_t msec);
 
@@ -178,6 +178,14 @@ QSC_EXPORT_API bool qsc_async_thread_terminate(qsc_thread handle);
 * \param handle: The thread handle
 */
 QSC_EXPORT_API void qsc_async_thread_wait(qsc_thread handle);
+
+/**
+* \brief Wait a number of milliseconds for a thread to complete execution
+*
+* \param handle: The thread handle
+* \param msec: The number of milliseconds to wait
+*/
+QSC_EXPORT_API void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec);
 
 /**
 * \brief Wait for an array of threads to complete execution

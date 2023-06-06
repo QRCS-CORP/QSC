@@ -504,7 +504,25 @@ qsc_socket_exceptions qsc_socket_listen(const qsc_socket* sock, int32_t backlog)
 	return res;
 }
 
-size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output, size_t outlen, qsc_socket_receive_flags flag)
+size_t qsc_socket_peek(const qsc_socket* sock, uint8_t* output, size_t otplen)
+{
+	assert(output != NULL);
+	assert(sock != NULL);
+
+	int32_t res;
+
+	res = 0;
+
+	if (sock != NULL && output != NULL)
+	{
+		res = recv(sock->connection, (char*)output, (int32_t)otplen, (int32_t)qsc_socket_receive_flag_peek);
+		res = (res == qsc_socket_exception_error) ? 0 : res;
+	}
+
+	return (size_t)res;
+}
+
+size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
 	assert(output != NULL);
@@ -515,7 +533,7 @@ size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output, size_t outlen
 
 	if (sock != NULL && output != NULL)
 	{
-		res = recv(sock->connection, (char*)output, (int32_t)outlen, (int32_t)flag);
+		res = recv(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag);
 		res = (res == qsc_socket_exception_error) ? 0 : res;
 	}
 
@@ -597,7 +615,7 @@ uint32_t qsc_socket_receive_poll(const qsc_socket_receive_poll_state* state)
 	return ctr;
 }
 
-size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t outlen, qsc_socket_receive_flags flag)
+size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
 	assert(output != NULL);
@@ -609,9 +627,9 @@ size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t ou
 
 	if (sock != NULL && output != NULL)
 	{
-		while (outlen > 0)
+		while (otplen > 0)
 		{
-			res = recv(sock->connection, (char*)output, (int32_t)outlen, (int32_t)flag);
+			res = recv(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag);
 
 			if (res < 1)
 			{
@@ -619,7 +637,7 @@ size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t ou
 				break;
 			}
 
-			outlen -= res;
+			otplen -= res;
 			pos += res;
 		}
 	}
@@ -627,7 +645,7 @@ size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t ou
 	return (size_t)pos;
 }
 
-size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t port, uint8_t* output, size_t outlen, qsc_socket_receive_flags flag)
+size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
 	assert(destination != NULL);
@@ -651,7 +669,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t por
 			d.sin_port = htons(port);
 			d.sin_addr.s_addr = inet_pton(AF_INET, destination, &d.sin_addr);
 
-			res = recvfrom(sock->connection, (char*)output, (int32_t)outlen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
+			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
 
 			if (res != qsc_socket_exception_error)
 			{
@@ -670,7 +688,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t por
 			d.sin6_port = htons(port);
 			inet_pton(AF_INET6, destination, &d.sin6_addr);
 
-			res = recvfrom(sock->connection, (char*)output, (int32_t)outlen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
+			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
 
 			if (res != qsc_socket_exception_error)
 			{

@@ -454,16 +454,27 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_create(qsc_socket* sock, qsc_soc
 QSC_EXPORT_API qsc_socket_exceptions qsc_socket_listen(const qsc_socket* sock, int32_t backlog);
 
 /**
+* \brief Receive data from a synchronous connected socket or a bound connection-less socket without downloading the entire message
+*
+* \param sock: [const] The socket instance
+* \param output: The output buffer that receives data
+* \param otplen: The length of the output received
+*
+* \return Returns the number of bytes received from the remote host
+*/
+QSC_EXPORT_API size_t qsc_socket_peek(const qsc_socket* sock, uint8_t* output, size_t otplen);
+
+/**
 * \brief Receive data from a synchronous connected socket or a bound connection-less socket
 *
 * \param sock: [const] The socket instance
 * \param output: The output buffer that receives data
-* \param outlen: The length of the output received
+* \param otplen: The length of the output received
 * \param flag: Flags that influence the behavior of the receive function
 *
 * \return Returns the number of bytes received from the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output, size_t outlen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Receive data from a connected socket asynchronously
@@ -477,12 +488,12 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive
 *
 * \param sock: [const] The socket instance
 * \param output: The output buffer that receives data
-* \param outlen: The length of the output received
+* \param otplen: The length of the output received
 * \param flag: Flags that influence the behavior of the receive function
 *
 * \return Returns the number of bytes received from the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t outlen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Receive data from a synchronous connected socket or a bound connection-less socket
@@ -491,12 +502,12 @@ QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* ou
 * \param destination: The destination IP address string
 * \param port: The port receiving the data
 * \param output: The output buffer
-* \param outlen: The length of the output buffer
+* \param otplen: The length of the output buffer
 * \param flag: Flags that influence the behavior of the receive from function
 *
 * \return Returns the number of bytes received from the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t port, uint8_t* output, size_t outlen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Polls an array of sockets.

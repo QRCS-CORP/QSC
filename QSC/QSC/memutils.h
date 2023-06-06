@@ -92,11 +92,29 @@ QSC_EXPORT_API void qsc_memutils_alloc_free(void* block);
 QSC_EXPORT_API void* qsc_memutils_aligned_alloc(int32_t align, size_t length);
 
 /**
-* \brief Free an aligned memory block created with aligned_alloc
+* \brief Free an aligned memory block
 *
 * \param block: A pointer to the memory block to release
 */
 QSC_EXPORT_API void qsc_memutils_aligned_free(void* block);
+
+/**
+* \brief Allocate an secure 8-bit integer array
+*
+* \param block: The memory block pointer
+* \param length: The length of the requested block
+*
+* \return Returns the length of the memory block or zero
+*/
+QSC_EXPORT_API size_t qsc_memutils_secure_malloc(void* block, size_t length);
+
+/**
+* \brief Free an secure memory block
+*
+* \param block: A pointer to the memory block
+* \param length: The length of the requested block
+*/
+QSC_EXPORT_API void qsc_memutils_secure_free(void* block, size_t length);
 
 /**
 * \brief Erase a block of memory
@@ -150,5 +168,16 @@ QSC_EXPORT_API void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size
 * \param length: The number of bytes to XOR
 */
 QSC_EXPORT_API void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length);
+
+
+/**
+* \brief Tests an array for all zeroed elements
+*
+* \param input: The input array to test
+* \param length: The length of the input array
+*
+* \return Returns true if the array is zeroed
+*/
+QSC_EXPORT_API bool qsc_memutils_zeroed(const void* input, size_t length);
 
 #endif

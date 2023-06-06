@@ -43,25 +43,25 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 	{
 		PIP_ADAPTER_INFO padapt;
 		PIP_ADAPTER_INFO pinfo;
-		ULONG outlen;
+		ULONG otplen;
 		size_t pctr;
 		const size_t PINTMX = 32;
 
 		qsc_memutils_clear((uint8_t*)ctx, sizeof(qsc_netutils_adaptor_info));
-		outlen = sizeof(IP_ADAPTER_INFO);
+		otplen = sizeof(IP_ADAPTER_INFO);
 		pinfo = (IP_ADAPTER_INFO*)malloc(sizeof(IP_ADAPTER_INFO));
 
 		if (pinfo != NULL)
 		{
-			if (GetAdaptersInfo(pinfo, &outlen) == ERROR_BUFFER_OVERFLOW)
+			if (GetAdaptersInfo(pinfo, &otplen) == ERROR_BUFFER_OVERFLOW)
 			{
 				free(pinfo);
-				pinfo = (IP_ADAPTER_INFO*)malloc(outlen);
+				pinfo = (IP_ADAPTER_INFO*)malloc(otplen);
 			}
 
 			if (pinfo != NULL)
 			{
-				if (GetAdaptersInfo(pinfo, &outlen) == NO_ERROR)
+				if (GetAdaptersInfo(pinfo, &otplen) == NO_ERROR)
 				{
 					padapt = pinfo;
 					pctr = 0;

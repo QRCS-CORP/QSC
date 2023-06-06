@@ -6,11 +6,11 @@
 /* params.h */
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-#if defined(QSC_DILITHIUM_S2N256Q8380417K4)
+#if defined(QSC_DILITHIUM_S1P2544)
 #   define DILITHIUM_MODE 2
-#elif defined(QSC_DILITHIUM_S3N256Q8380417K6) 
+#elif defined(QSC_DILITHIUM_S3P4016) 
 #   define DILITHIUM_MODE 3
-#elif defined(QSC_DILITHIUM_S5N256Q8380417K8)
+#elif defined(QSC_DILITHIUM_S5P4880)
 #   define DILITHIUM_MODE 5
 #else
 #   error The dilithium mode is not supported!

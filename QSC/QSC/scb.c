@@ -7,19 +7,19 @@
 
 static char scb_name[QSC_SCB_NAME_SIZE] = "SCB v1.a";
 
-static void scb_extract(qsc_scb_state* ctx, uint8_t* output, size_t outlen)
+static void scb_extract(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 {
-	if (outlen > 0)
+	if (otplen > 0)
 	{
-		const size_t BLKCNT = outlen / (size_t)ctx->rate;
+		const size_t BLKCNT = otplen / (size_t)ctx->rate;
 
 		/* extract the bytes from shake */
 		qsc_shake_squeezeblocks(&ctx->kstate, ctx->rate, output, BLKCNT);
 
-		if ((size_t)ctx->rate * BLKCNT < outlen)
+		if ((size_t)ctx->rate * BLKCNT < otplen)
 		{
 			uint8_t tmpb[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
-			const size_t FNLBLK = outlen - ((size_t)ctx->rate * BLKCNT);
+			const size_t FNLBLK = otplen - ((size_t)ctx->rate * BLKCNT);
 
 			qsc_shake_squeezeblocks(&ctx->kstate, ctx->rate, tmpb, 1);
 			qsc_memutils_copy(output + ((size_t)ctx->rate * BLKCNT), tmpb, FNLBLK);
@@ -110,7 +110,7 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 	}
 }
 
-void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t outlen)
+void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
@@ -119,7 +119,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t outlen)
 	scb_expand(ctx);
 
 	/* cost-expand and extract the bytes */
-	scb_extract(ctx, output, outlen);
+	scb_extract(ctx, output, otplen);
 }
 
 void qsc_scb_update(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen)

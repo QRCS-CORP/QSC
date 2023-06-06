@@ -65,7 +65,27 @@
 * Updated by John Underhill, June 28 2021.
 */
 
-#if defined(QSC_MCELIECE_S3N4608T96)
+#if defined(QSC_MCELIECE_S1N3488T64)
+
+/*!
+* \def QSC_MCELIECE_CIPHERTEXT_SIZE
+* \brief The byte size of the cipher-text array
+*/
+#	define QSC_MCELIECE_CIPHERTEXT_SIZE 128
+
+/*!
+* \def QSC_MCELIECE_PRIVATEKEY_SIZE
+* \brief The byte size of the secret private-key array
+*/
+#	define QSC_MCELIECE_PRIVATEKEY_SIZE 6492
+
+/*!
+* \def QSC_MCELIECE_PUBLICKEY_SIZE
+* \brief The byte size of the public-key array
+*/
+#	define QSC_MCELIECE_PUBLICKEY_SIZE 261120
+
+#elif defined(QSC_MCELIECE_S3N4608T96)
 
 	/*!
 	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
@@ -105,7 +125,7 @@
 */
 #	define QSC_MCELIECE_PUBLICKEY_SIZE 1044992
 
-#elif defined(QSC_MCELIECE_S5N6960T119)
+#elif defined(QSC_MCELIECE_S6N6960T119)
 
 /*!
 * \def QSC_MCELIECE_CIPHERTEXT_SIZE
@@ -125,7 +145,7 @@
 */
 #	define QSC_MCELIECE_PUBLICKEY_SIZE 1047319
 
-#elif defined(QSC_MCELIECE_S5N8192T128)
+#elif defined(QSC_MCELIECE_S7N8192T128)
 
 /*!
 * \def QSC_MCELIECE_CIPHERTEXT_SIZE

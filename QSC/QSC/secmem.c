@@ -53,7 +53,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 		madvise(ptr, length, MADV_DONTDUMP);
 #	endif
 
-#	if defined(QSC_SYSTEM_HAS_POSIXMLOCK)
+#	if defined(QSC_SYSTEM_POSIX_MLOCK)
 		if (mlock(ptr, length) != 0)
 		{
 			qsc_memutils_clear(ptr, length);
@@ -65,7 +65,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 #	endif
 	}
 
-#elif defined(QSC_SYSTEM_HAS_VIRTUALLOCK)
+#elif defined(QSC_SYSTEM_VIRTUAL_LOCK)
 
 	ptr = (char*)VirtualAlloc(NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
@@ -87,7 +87,7 @@ uint8_t* qsc_secmem_alloc(size_t length)
 
 void qsc_secmem_erase(uint8_t* block, size_t length)
 {
-#if defined(QSC_HAS_RTLSECUREMEMORY)
+#if defined(QSC_RTL_SECURE_MEMORY)
 	RtlSecureZeroMemory(block, length);
 #elif defined(QSC_OS_OPENBSD)
 	explicit_bzero(block, length);
@@ -105,13 +105,13 @@ void qsc_secmem_free(uint8_t* block, size_t length)
 
 		qsc_secmem_erase(block, length);
 
-#	if defined(QSC_SYSTEM_HAS_POSIXMLOCK)
+#	if defined(QSC_SYSTEM_POSIX_MLOCK)
 		munlock(block, length);
 #	endif
 
 		munmap(block, length);
 
-#elif defined(QSC_SYSTEM_HAS_VIRTUALLOCK)
+#elif defined(QSC_SYSTEM_VIRTUAL_LOCK)
 
 		qsc_secmem_erase(block, length);
 

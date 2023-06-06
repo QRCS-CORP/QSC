@@ -77,7 +77,7 @@
 */
 #	define QSC_NTRU_PUBLICKEY_SIZE 699
 
-#elif defined(QSC_NTRU_HPSS32048677)
+#elif defined(QSC_NTRU_S3HPS2048677)
 
 /*!
 * \def QSC_NTRU_CIPHERTEXT_SIZE
