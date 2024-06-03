@@ -370,14 +370,14 @@ uint64_t qsc_intutils_rotr64(uint64_t value, size_t shift)
 
 int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length)
 {
-	uint16_t d;
+	uint8_t d;
 
 	d = 0;
 
 	for (size_t i = 0; i < length; ++i)
 	{
-		d |= (uint16_t)(a[i] ^ b[i]);
+		d |= (a[i] ^ b[i]);
 	}
 
-	return (1U & ((d - 1U) >> 8U)) - 1U;
+	return d;
 }

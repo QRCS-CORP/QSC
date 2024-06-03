@@ -1,60 +1,51 @@
 #include "list.h"
+#include "async.h"
 #include "memutils.h"
-#if defined(QSC_DEBUG_MODE)
-#	include "intutils.h"
-#endif
+#include "intutils.h"
 
-bool qsc_list_add(qsc_list_state* ctx, void* item)
+void qsc_list_add(qsc_list_state* ctx, void* item)
 {
 	assert(ctx != NULL);
 	assert(item != NULL);
 
-	size_t nlen;
-	bool res;
+	uint8_t* itmp;
+	size_t cnt;
+	size_t pos;
 
-	res = false;
-
-	if (!qsc_list_isfull(ctx))
+	if (ctx != NULL && item != NULL)
 	{
-		if (ctx->count == ctx->depth)
-		{
-			nlen = ctx->count;
-			ctx->items = (uint8_t**)qsc_memutils_realloc(ctx->items, nlen + 1 * sizeof(uint8_t*));
+		qsc_mutex mtx;
 
-			if (ctx->items != NULL)
-			{
-				ctx->items[nlen] = qsc_memutils_malloc(ctx->width);
+		mtx = qsc_async_mutex_lock_ex();
+		cnt = ctx->count + 1;
+		itmp = qsc_memutils_realloc(ctx->items, cnt * ctx->width);
 
-				if (ctx->items[nlen] != NULL)
-				{
-					qsc_memutils_clear(ctx->items[nlen], ctx->width);
-					qsc_memutils_copy(ctx->items[nlen], item, ctx->width);
-					++ctx->count;
-					res = true;
-				}
-			}
-		}
-		else
+		if (itmp != NULL)
 		{
-			qsc_memutils_clear(ctx->items[ctx->count], ctx->width);
-			qsc_memutils_copy(ctx->items[ctx->count], item, ctx->width);
-			++ctx->count;
-			res = true;
+			ctx->items = itmp;
+			pos = ctx->count * ctx->width;
+			qsc_memutils_copy(ctx->items + pos, item, ctx->width);
+			ctx->count = (uint32_t)cnt;
 		}
+
+		qsc_async_mutex_unlock_ex(mtx);
 	}
-
-	return res;
 }
 
 void qsc_list_copy(const qsc_list_state* ctx, size_t index, void* item)
 {
 	assert(ctx != NULL);
+	assert(item != NULL);
 
-	if (ctx != NULL)
+	if (ctx != NULL && item != NULL)
 	{
-		if (index < ctx->count && ctx->items[index] != NULL)
+		qsc_mutex mtx;
+
+		if (index < ctx->count)
 		{
-			qsc_memutils_copy(item, ctx->items[index], ctx->width);
+			mtx = qsc_async_mutex_lock_ex();
+			qsc_memutils_copy(item, ctx->items + (index * ctx->width), ctx->width);
+			qsc_async_mutex_unlock_ex(mtx);
 		}
 	}
 }
@@ -75,55 +66,40 @@ size_t qsc_list_count(const qsc_list_state* ctx)
 	return res;
 }
 
-void qsc_list_destroy(qsc_list_state* ctx)
+void qsc_list_deserialize(qsc_list_state* ctx, const uint8_t* input)
+{
+	assert(ctx != NULL);
+	assert(input != NULL);
+
+	size_t pos;
+
+	if (ctx != NULL && input != NULL)
+	{
+		ctx->count = qsc_intutils_le8to32(input);
+		pos = sizeof(uint32_t);
+		ctx->width = qsc_intutils_le8to32(input + pos);
+		pos += sizeof(uint32_t);
+
+		qsc_memutils_copy(ctx->items, input + pos, ctx->count * ctx->width);
+	}
+}
+
+void qsc_list_dispose(qsc_list_state* ctx)
 {
 	assert(ctx != NULL);
 
-	if (ctx != NULL)
+	if (ctx != NULL && ctx->items != NULL && ctx->count > 0)
 	{
-		for (size_t i = 0; i < ctx->depth; ++i)
-		{
-			if (ctx->items[i] != NULL)
-			{
-				qsc_memutils_clear(ctx->items[i], ctx->width);
-				qsc_memutils_alloc_free(ctx->items[i]);
-			}
-		}
-
+		qsc_memutils_clear(ctx->items, ctx->count * ctx->width);
 		qsc_memutils_alloc_free(ctx->items);
+
 		ctx->items = NULL;
 		ctx->count = 0;
-		ctx->depth = 0;
 		ctx->width = 0;
 	}
 }
 
-void qsc_list_initialize(qsc_list_state* ctx, size_t depth, size_t width)
-{
-	assert(ctx != NULL);
-	assert(depth != 0 && width != 0);
-
-	ctx->items = (uint8_t**)qsc_memutils_malloc(depth * sizeof(uint8_t*));
-
-	if (ctx->items != NULL)
-	{
-		for (size_t i = 0; i < depth; ++i)
-		{
-			ctx->items[i] = (uint8_t*)qsc_memutils_malloc(width);
-
-			if (ctx->items[i] != NULL)
-			{
-				qsc_memutils_clear(ctx->items[i], width);
-			}
-		}
-	}
-
-	ctx->count = 0;
-	ctx->depth = depth;
-	ctx->width = width;
-}
-
-bool qsc_list_isempty(const qsc_list_state* ctx)
+bool qsc_list_empty(const qsc_list_state* ctx)
 {
 	assert(ctx != NULL);
 
@@ -139,7 +115,7 @@ bool qsc_list_isempty(const qsc_list_state* ctx)
 	return res;
 }
 
-bool qsc_list_isfull(const qsc_list_state* ctx)
+bool qsc_list_full(const qsc_list_state* ctx)
 {
 	assert(ctx != NULL);
 
@@ -155,24 +131,149 @@ bool qsc_list_isfull(const qsc_list_state* ctx)
 	return res;
 }
 
+void qsc_list_initialize(qsc_list_state* ctx, size_t width)
+{
+	assert(ctx != NULL);
+	assert(width > 0);
+
+	if (ctx != NULL && width > 0)
+	{
+		ctx->items = (uint8_t*)qsc_memutils_malloc(sizeof(uint8_t));
+		ctx->count = 0;
+		ctx->width = width;
+	}
+}
+
+void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index)
+{
+	assert(ctx != NULL);
+	assert(item != NULL);
+
+	if (ctx != NULL && item != NULL && index < ctx->count)
+	{
+		qsc_mutex mtx;
+		uint8_t* pitm;
+
+		mtx = qsc_async_mutex_lock_ex();
+		pitm = ctx->items + (index * ctx->width);
+		qsc_memutils_copy(item, pitm, ctx->width);
+		qsc_async_mutex_unlock_ex(mtx);
+	}
+}
+
 void qsc_list_remove(qsc_list_state* ctx, size_t index)
 {
 	assert(ctx != NULL);
 
 	if (ctx != NULL)
 	{
-		if (index < ctx->count && ctx->items[index] != NULL)
+		if (index < ctx->count && ctx->items != NULL)
 		{
-			qsc_memutils_clear(ctx->items[index], ctx->width);
+			qsc_mutex mtx;
+
+			mtx = qsc_async_mutex_lock_ex();
+
+			qsc_memutils_clear(ctx->items + (index * ctx->width), ctx->width);
 
 			/* shift last item into slot */
 			if (index < ctx->count - 1)
 			{
-				qsc_memutils_copy(ctx->items[index], ctx->items[ctx->count - 1], ctx->width);
-				qsc_memutils_clear(ctx->items[ctx->count - 1], ctx->width);
+				uint8_t* itmp;
+				size_t ncnt;
+
+				ncnt = ctx->count - 1;
+				qsc_memutils_copy(ctx->items + (index * ctx->width), ctx->items + (ncnt * ctx->width), ctx->width);
+				qsc_memutils_clear(ctx->items + (ncnt * ctx->width), ctx->width);
+
+				itmp = qsc_memutils_realloc(ctx->items, ncnt * ctx->width);
+
+				if (itmp != NULL)
+				{
+					ctx->items = itmp;
+					ctx->count = ncnt;
+				}
 			}
 
-			--ctx->count;
+			qsc_async_mutex_unlock_ex(mtx);
+		}
+	}
+}
+
+size_t qsc_list_serialize(uint8_t* output, const qsc_list_state* ctx)
+{
+	assert(output != NULL);
+	assert(ctx != NULL);
+
+	size_t pos;
+
+	pos = 0;
+
+	if (output != NULL && ctx != NULL)
+	{
+		qsc_intutils_le32to8(output, (uint32_t)ctx->count);
+		pos = sizeof(uint32_t);
+		qsc_intutils_le32to8(output + pos, (uint32_t)ctx->width);
+		pos += sizeof(uint32_t);
+
+		qsc_memutils_copy(output + pos, ctx->items, ctx->count * ctx->width);
+		pos += ctx->count * ctx->width;
+	}
+
+	return pos;
+}
+
+size_t qsc_list_size(const qsc_list_state* ctx)
+{
+	assert(ctx != NULL);
+
+	size_t res;
+
+	res = 0;
+
+	if (ctx != NULL)
+	{
+		res = sizeof(uint32_t) + sizeof(uint32_t) + (ctx->count * ctx->width);
+	}
+
+	return res;
+}
+
+void qsc_list_sort(qsc_list_state* ctx)
+{
+	assert(ctx != NULL);
+
+	uint8_t* pia;
+	uint8_t* pib;
+	uint8_t* tmp;
+
+	if (ctx != NULL)
+	{
+		qsc_mutex mtx;
+
+		mtx = qsc_async_mutex_lock_ex();
+		tmp = qsc_memutils_malloc(ctx->width);
+
+		if (tmp != NULL)
+		{
+			/* sort the list as a little endian array */
+			for (size_t i = 0; i < ctx->count - 1; ++i)
+			{
+				for (size_t j = i + 1; j < ctx->count; ++j)
+				{
+					pia = ctx->items + (i * ctx->width);
+					pib = ctx->items + (j * ctx->width);
+
+					if (qsc_memutils_greater_than_le128(pib, pia) == true)
+					{
+						qsc_memutils_copy(tmp, pia, ctx->width);
+						qsc_memutils_copy(pia, pib, ctx->width);
+						qsc_memutils_copy(pib, tmp, ctx->width);
+					}
+				}
+			}
+
+			qsc_memutils_alloc_free(tmp);
+			qsc_async_mutex_unlock_ex(mtx);
 		}
 	}
 }
@@ -186,7 +287,7 @@ bool qsc_list_self_test()
 	bool ret;
 
 	ret = true;
-	qsc_list_initialize(&ctx, 64, 16);
+	qsc_list_initialize(&ctx, 16);
 
 
 	for (i = 0; i < 64; ++i)
@@ -202,7 +303,7 @@ bool qsc_list_self_test()
 		qsc_list_add(&ctx, exp[i]);
 	}
 
-	if (qsc_list_isfull(&ctx) == true)
+	if (qsc_list_full(&ctx) == true)
 	{
 		ret = false;
 	}
@@ -212,7 +313,7 @@ bool qsc_list_self_test()
 		qsc_list_remove(&ctx, i);
 	}
 
-	if (qsc_list_isempty(&ctx) == false)
+	if (qsc_list_empty(&ctx) == false)
 	{
 		ret = false;
 	}
@@ -227,12 +328,15 @@ bool qsc_list_self_test()
 		qsc_list_add(&ctx, exp[i]);
 	}
 
-	for (i = 0; i < 64; ++i)
+	if (ctx.items != NULL)
 	{
-		if (qsc_intutils_are_equal8(exp[i], (uint8_t*)ctx.items[i], 16) == false)
+		for (i = 0; i < 64; ++i)
 		{
-			ret = false;
-			break;
+			if (qsc_intutils_are_equal8(exp[i], (uint8_t*)ctx.items[i], 16) == false)
+			{
+				ret = false;
+				break;
+			}
 		}
 	}
 
@@ -241,7 +345,7 @@ bool qsc_list_self_test()
 		ret = false;
 	}
 
-	qsc_list_destroy(&ctx);
+	qsc_list_dispose(&ctx);
 
 	return ret;
 }

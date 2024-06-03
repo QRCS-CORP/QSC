@@ -14,20 +14,20 @@
 #	include <unistd.h>
 #endif
 
-static bool file_has_access(const char* path, qsc_fileutils_access_rights level)
+static bool file_has_access(const char* fpath, qsc_fileutils_access_rights level)
 {
 	int32_t err;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = _access(path, (int32_t)level);
+	err = _access(fpath, (int32_t)level);
 #else
-	err = access(path, (int32_t)level);
+	err = access(fpath, (int32_t)level);
 #endif
 
 	return (err == 0);
 }
 
-bool qsc_fileutils_append_to_file(const char* path, const char* stream, size_t length)
+bool qsc_fileutils_append_to_file(const char* fpath, const char* stream, size_t length)
 {
 	FILE* fp;
 	errno_t err;
@@ -35,9 +35,9 @@ bool qsc_fileutils_append_to_file(const char* path, const char* stream, size_t l
 
 	res = false;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "ab");
+	err = fopen_s(&fp, fpath, "ab");
 #else
-	fp = fopen(path, "ab");
+	fp = fopen(fpath, "ab");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
@@ -60,7 +60,7 @@ void qsc_fileutils_close(FILE* fp)
 	}
 }
 
-size_t qsc_fileutils_copy_file_to_object(const char* path, void* obj, size_t length)
+size_t qsc_fileutils_copy_file_to_object(const char* fpath, void* obj, size_t length)
 {
 	FILE* fp;
 	errno_t err;
@@ -68,9 +68,9 @@ size_t qsc_fileutils_copy_file_to_object(const char* path, void* obj, size_t len
 
 	len = 0;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "rb");
+	err = fopen_s(&fp, fpath, "rb");
 #else
-	fp = fopen(path, "rb");
+	fp = fopen(fpath, "rb");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
@@ -83,7 +83,7 @@ size_t qsc_fileutils_copy_file_to_object(const char* path, void* obj, size_t len
 	return len;
 }
 
-size_t qsc_fileutils_copy_file_to_stream(const char* path, char* stream, size_t length)
+size_t qsc_fileutils_copy_file_to_stream(const char* fpath, char* stream, size_t length)
 {
 	FILE* fp;
 	errno_t err;
@@ -91,9 +91,9 @@ size_t qsc_fileutils_copy_file_to_stream(const char* path, char* stream, size_t 
 
 	len = 0;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "rb");
+	err = fopen_s(&fp, fpath, "rb");
 #else
-	fp = fopen(path, "rb");
+	fp = fopen(fpath, "rb");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
@@ -106,7 +106,7 @@ size_t qsc_fileutils_copy_file_to_stream(const char* path, char* stream, size_t 
 	return len;
 }
 
-bool qsc_fileutils_copy_object_to_file(const char* path, const void* obj, size_t length)
+bool qsc_fileutils_copy_object_to_file(const char* fpath, const void* obj, size_t length)
 {
 	FILE* fp;
 	errno_t err;
@@ -114,9 +114,9 @@ bool qsc_fileutils_copy_object_to_file(const char* path, const void* obj, size_t
 
 	res = false;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "wb");
+	err = fopen_s(&fp, fpath, "wb");
 #else
-	fp = fopen(path, "wb");
+	fp = fopen(fpath, "wb");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
@@ -129,7 +129,7 @@ bool qsc_fileutils_copy_object_to_file(const char* path, const void* obj, size_t
 	return res;
 }
 
-bool qsc_fileutils_copy_stream_to_file(const char* path, const char* stream, size_t length)
+bool qsc_fileutils_copy_stream_to_file(const char* fpath, const char* stream, size_t length)
 {
 	FILE* fp;
 	errno_t err;
@@ -137,9 +137,9 @@ bool qsc_fileutils_copy_stream_to_file(const char* path, const char* stream, siz
 
 	res = false;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "wb");
+	err = fopen_s(&fp, fpath, "wb");
 #else
-	fp = fopen(path, "wb");
+	fp = fopen(fpath, "wb");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
@@ -152,17 +152,17 @@ bool qsc_fileutils_copy_stream_to_file(const char* path, const char* stream, siz
 	return res;
 }
 
-bool qsc_fileutils_create(const char* path)
+bool qsc_fileutils_create(const char* fpath)
 {
 	FILE* fp;
 	bool res;
 
-	qsc_fileutils_delete(path);
+	qsc_fileutils_delete(fpath);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	res = (fopen_s(&fp, path, "wb") == 0);
+	res = (fopen_s(&fp, fpath, "wb") == 0);
 #else
-	fp = fopen(path, "wb");
+	fp = fopen(fpath, "wb");
 	res = (fp != NULL) ? true : false;
 #endif
 
@@ -174,36 +174,52 @@ bool qsc_fileutils_create(const char* path)
 	return res;
 }
 
-bool qsc_fileutils_delete(const char* path)
+bool qsc_fileutils_delete(const char* fpath)
 {
 	bool res;
 
-	res = (remove(path) == 0);
+	res = (remove(fpath) == 0);
 
 	return res;
 }
 
-bool qsc_fileutils_erase(const char* path)
+bool qsc_fileutils_erase(const char* fpath)
 {
-	FILE* fp;
+	size_t flen;
 	bool res;
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-	res = (fopen_s(&fp, path, "wb") == 0);
-#else
-	fp = fopen(path, "wb");
-	res = (fp != NULL) ? true : false;
-#endif
+	res = false;
+	flen = qsc_fileutils_get_size(fpath);
 
-	if (fp != NULL)
+	if (flen > 0)
 	{
-		fclose(fp);
+		char* pbuff;
+
+		pbuff = (char*)qsc_memutils_malloc(flen);
+
+		if (pbuff != NULL)
+		{
+			/* overwrite with 4 passes, flushing to disk each time */
+			qsc_memutils_setvalue(pbuff, 0xFF, flen);
+			qsc_fileutils_safe_write(fpath, 0, pbuff, flen);
+			qsc_memutils_setvalue(pbuff, 0x00, flen);
+			qsc_fileutils_safe_write(fpath, 0, pbuff, flen);
+			qsc_memutils_setvalue(pbuff, 0xFF, flen);
+			qsc_fileutils_safe_write(fpath, 0, pbuff, flen);
+			qsc_memutils_setvalue(pbuff, 0x00, flen);
+			qsc_fileutils_safe_write(fpath, 0, pbuff, flen);
+
+			qsc_memutils_alloc_free(pbuff);
+			res = true;
+		}
+
+		qsc_fileutils_zeroise(fpath);
 	}
 
 	return res;
 }
 
-bool qsc_fileutils_exists(const char* path)
+bool qsc_fileutils_exists(const char* fpath)
 {
 	FILE* fp;
 	bool res;
@@ -211,7 +227,7 @@ bool qsc_fileutils_exists(const char* path)
 	res = false;
 	fp = NULL;
 
-	fp = qsc_fileutils_open(path, qsc_fileutils_mode_read, true);
+	fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_read, true);
 
 	if (fp != NULL)
 	{
@@ -222,21 +238,51 @@ bool qsc_fileutils_exists(const char* path)
 	return res;
 }
 
-bool qsc_fileutils_get_access(const char* path, qsc_fileutils_access_rights level)
+bool qsc_fileutils_file_copy(const char* inpath, const char* outpath)
+{
+	char* pfs;
+	size_t len;
+
+	len = qsc_fileutils_get_size(inpath);
+
+	if (len > 0)
+	{
+		pfs = (char*)qsc_memutils_malloc(len);
+
+		if (pfs != NULL)
+		{
+			len = qsc_fileutils_copy_file_to_stream(inpath, pfs, len);
+
+			if (len > 0)
+			{
+				if (qsc_fileutils_copy_stream_to_file(outpath, pfs, len) != true)
+				{
+					len = 0;
+				}
+			}
+
+			qsc_memutils_alloc_free(pfs);
+		}
+	}
+
+	return len;
+}
+
+bool qsc_fileutils_get_access(const char* fpath, qsc_fileutils_access_rights level)
 {
 	bool res;
 
 	res = false;
 
-	if (qsc_fileutils_exists(path))
+	if (qsc_fileutils_exists(fpath))
 	{
-		res = file_has_access(path, level);
+		res = file_has_access(fpath, level);
 	}
 
 	return res;
 }
 
-size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* path)
+size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* fpath)
 {
 	const char* pname;
 	size_t pos;
@@ -246,15 +292,15 @@ size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* p
 	if (dirlen > 0)
 	{
 		qsc_memutils_clear(directory, dirlen);
-		pname = qsc_stringutils_reverse_sub_string(path, QSC_FILEUTILS_DIRECTORY_SEPERATOR);
+		pname = qsc_stringutils_reverse_sub_string(fpath, QSC_FILEUTILS_DIRECTORY_SEPERATOR);
 
 		if (pname != NULL)
 		{
-			pos = pname - path;
+			pos = pname - fpath;
 
 			if (pos > 0)
 			{
-				qsc_memutils_copy(directory, path, pos);
+				qsc_memutils_copy(directory, fpath, pos);
 			}
 		}
 	}
@@ -262,7 +308,7 @@ size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* p
 	return pos;
 }
 
-size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* path)
+size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* fpath)
 {
 	const char* pname;
 	size_t len;
@@ -274,16 +320,16 @@ size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* p
 	if (extlen > 0)
 	{
 		qsc_memutils_clear(extension, extlen);
-		pname = qsc_stringutils_reverse_sub_string(path, ".");
+		pname = qsc_stringutils_reverse_sub_string(fpath, ".");
 
 		if (pname != NULL)
 		{
-			pos = pname - path - 1;
-			len = qsc_stringutils_string_size(path);
+			pos = pname - fpath - 1;
+			len = qsc_stringutils_string_size(fpath);
 
 			if (pos > 0 && extlen >= (len - pos))
 			{
-				qsc_memutils_copy(extension, path + pos, len - pos);
+				qsc_memutils_copy(extension, fpath + pos, len - pos);
 			}
 		}
 	}
@@ -291,7 +337,7 @@ size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* p
 	return (len - pos);
 }
 
-size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* path)
+size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* fpath)
 {
 	const char* pname;
 	size_t len;
@@ -303,21 +349,21 @@ size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* path)
 	if (namelen > 0)
 	{
 		qsc_memutils_clear(name, namelen);
-		pname = qsc_stringutils_reverse_sub_string(path, QSC_FILEUTILS_DIRECTORY_SEPERATOR);
+		pname = qsc_stringutils_reverse_sub_string(fpath, QSC_FILEUTILS_DIRECTORY_SEPERATOR);
 
 		if (pname != NULL)
 		{
-			pos = pname - path;
-			len = qsc_stringutils_string_size(path);
-			const char* pext = qsc_stringutils_reverse_sub_string(path, ".");
+			pos = pname - fpath;
+			len = qsc_stringutils_string_size(fpath);
+			const char* pext = qsc_stringutils_reverse_sub_string(fpath, ".");
 
 			if (pext != NULL)
 			{
-				size_t elen = (len - (pext - path)) + 1;
+				size_t elen = (len - (pext - fpath)) + 1;
 
 				if (pos > 0 && namelen >= (len - (pos + elen)))
 				{
-					qsc_memutils_copy(name, path + pos, len - (pos + elen));
+					qsc_memutils_copy(name, fpath + pos, len - (pos + elen));
 				}
 			}
 		}
@@ -403,7 +449,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 	}
 }
 
-size_t qsc_fileutils_get_size(const char* path)
+size_t qsc_fileutils_get_size(const char* fpath)
 {
 	FILE* fp;
 	errno_t err;
@@ -411,9 +457,9 @@ size_t qsc_fileutils_get_size(const char* path)
 
 	res = 0;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "rb");
+	err = fopen_s(&fp, fpath, "rb");
 #else
-	fp = fopen(path, "rb");
+	fp = fopen(fpath, "rb");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
@@ -432,7 +478,7 @@ size_t qsc_fileutils_get_size(const char* path)
 	return res;
 }
 
-bool qsc_fileutils_get_working_directory(char* path)
+bool qsc_fileutils_get_working_directory(char* fpath)
 {
 	char buf[FILENAME_MAX] = { 0 };
 	size_t len;
@@ -449,11 +495,11 @@ bool qsc_fileutils_get_working_directory(char* path)
 	if (res != NULL)
 	{
 		len = qsc_stringutils_string_size(buf);
-		ret = qsc_stringutils_string_size(path) <= len;
+		ret = qsc_stringutils_string_size(fpath) <= len;
 
 		if (ret == true)
 		{
-			qsc_memutils_copy(path, buf, len);
+			qsc_memutils_copy(fpath, buf, len);
 		}
 	}
 	else
@@ -464,7 +510,7 @@ bool qsc_fileutils_get_working_directory(char* path)
 	return ret;
 }
 
-FILE* qsc_fileutils_open(const char* path, qsc_fileutils_mode mode, bool binary)
+FILE* qsc_fileutils_open(const char* fpath, qsc_fileutils_mode mode, bool binary)
 {
 	char mstr[4] = { 0 };
     FILE* fp;
@@ -503,9 +549,9 @@ FILE* qsc_fileutils_open(const char* path, qsc_fileutils_mode mode, bool binary)
     fp = NULL;
  #if defined(QSC_SYSTEM_OS_WINDOWS)
     errno_t err;
-	err = fopen_s(&fp, path, mstr);
+	err = fopen_s(&fp, fpath, mstr);
 #else
-    fp = fopen(path, mstr);
+    fp = fopen(fpath, mstr);
 #endif
 
 return fp;
@@ -528,70 +574,83 @@ size_t qsc_fileutils_read(char* output, size_t otplen, size_t position, FILE* fp
 	return res;
 }
 
-size_t qsc_fileutils_read_line(const char* path, char* buffer, size_t buflen, size_t linenum)
+int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, size_t linenum)
 {
 	FILE* fp;
 	char* sbuf;
 	errno_t err;
-	int32_t pln;
+	int64_t pln;
 	size_t ctr;
 	size_t len;
 	size_t pos;
-	size_t res;
 
+	pln = 0;
 	ctr = 0;
 	pos = 0;
-	res = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "r");
+	err = fopen_s(&fp, fpath, "r");
 #else
-	fp = fopen(path, "r");
+	fp = fopen(fpath, "r");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
-	len = qsc_fileutils_get_size(path);
-
-	if (len > 0)
+	if (fp != NULL && err == 0)
 	{
-		sbuf = (char*)qsc_memutils_malloc(len);
+		len = qsc_fileutils_get_size(fpath);
 
-		if (sbuf != NULL && fp != NULL && err == 0)
+		if (len > 0)
 		{
-			len = fread(sbuf, sizeof(char), len, fp);
+			sbuf = (char*)qsc_memutils_malloc(len);
+			qsc_memutils_clear(sbuf, len);
 
-			if (len > 0)
+			if (sbuf != NULL)
 			{
-				do
+				len = fread(sbuf, sizeof(char), len, fp);
+
+				if (len > 0)
 				{
-					pln = qsc_stringutils_find_string(sbuf + pos, "\n");
-					pos += pln;
-					++ctr;
-
-					if (ctr == linenum)
+					while (true)
 					{
-						res = qsc_stringutils_find_string(sbuf + pos, "\n");
-						qsc_memutils_copy(buffer, sbuf, res <= buflen ? res : buflen);
-						break;
-					}
-				} while (pln != -1);
-			}
+						pln = qsc_stringutils_find_string(sbuf + pos, "\n");
 
-			fclose(fp);
-			qsc_memutils_alloc_free(sbuf);
+						if (pln == QSC_STRINGUTILS_TOKEN_NOT_FOUND || ctr > linenum)
+						{
+							break;
+						}
+
+						if (ctr == linenum)
+						{
+							if (pln > 0)
+							{
+								qsc_memutils_copy(buffer, sbuf + pos, (size_t)pln <= buflen ? (size_t)pln : buflen);
+							}
+
+							break;
+						}
+
+						pos += pln + 1;
+						++ctr;
+					};
+				}
+
+				qsc_memutils_alloc_free(sbuf);
+			}
 		}
+
+		fclose(fp);
 	}
 
-	return res;
+	return pln;
 }
 
-size_t qsc_fileutils_safe_read(const char* path, size_t position, char* output, size_t length)
+size_t qsc_fileutils_safe_read(const char* fpath, size_t position, char* output, size_t length)
 {
 	FILE* fp;
 	size_t res;
 
 	res = 0;
-	fp = qsc_fileutils_open(path, qsc_fileutils_mode_read, true);
+	fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_read, true);
 
 	if (fp != NULL)
 	{
@@ -606,13 +665,13 @@ size_t qsc_fileutils_safe_read(const char* path, size_t position, char* output, 
 	return res;
 }
 
-size_t qsc_fileutils_safe_write(const char* path, size_t position, const char* input, size_t length)
+size_t qsc_fileutils_safe_write(const char* fpath, size_t position, const char* input, size_t length)
 {
 	FILE* fp;
 	size_t res;
 
 	res = 0;
-	fp = qsc_fileutils_open(path, qsc_fileutils_mode_write, true);
+	fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_write, true);
 
 	if (fp != NULL)
 	{
@@ -677,7 +736,7 @@ bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 	return res;
 }
 
-bool qsc_fileutils_valid_path(const char* path)
+bool qsc_fileutils_valid_path(const char* fpath)
 {
 	char dir[QSC_FILEUTILS_MAX_PATH] = { 0 };
 	char ext[QSC_FILEUTILS_MAX_EXTENSION] = { 0 };
@@ -687,11 +746,11 @@ bool qsc_fileutils_valid_path(const char* path)
 
 	res = false;
 
-	if (qsc_fileutils_get_directory(dir, sizeof(dir), path) > 0)
+	if (qsc_fileutils_get_directory(dir, sizeof(dir), fpath) > 0)
 	{
-		if (qsc_fileutils_get_name(name, sizeof(name), path) > 0)
+		if (qsc_fileutils_get_name(name, sizeof(name), fpath) > 0)
 		{
-			if (qsc_fileutils_get_extension(ext, sizeof(ext), path) > 0)
+			if (qsc_fileutils_get_extension(ext, sizeof(ext), fpath) > 0)
 			{
 				res = true;
 			}
@@ -701,7 +760,7 @@ bool qsc_fileutils_valid_path(const char* path)
 	return res;
 }
 
-size_t qsc_fileutils_write(const char* input, size_t inlen, size_t position, FILE* fp)
+size_t qsc_fileutils_write(const char* input, size_t inplen, size_t position, FILE* fp)
 {
 	size_t res;
 
@@ -711,7 +770,7 @@ size_t qsc_fileutils_write(const char* input, size_t inlen, size_t position, FIL
 	{
 		if (qsc_fileutils_seekto(fp, position) == true)
 		{
-			res = fwrite(input, 1, inlen, fp);
+			res = fwrite(input, 1, inplen, fp);
 			fflush(fp);
 		}
 	}
@@ -719,7 +778,7 @@ size_t qsc_fileutils_write(const char* input, size_t inlen, size_t position, FIL
 	return res;
 }
 
-bool qsc_fileutils_write_line(const char* path, const char* input, size_t inlen)
+bool qsc_fileutils_write_line(const char* fpath, const char* input, size_t inplen)
 {
 	FILE* fp;
 	errno_t err;
@@ -727,16 +786,16 @@ bool qsc_fileutils_write_line(const char* path, const char* input, size_t inlen)
 
 	res = false;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	err = fopen_s(&fp, path, "a");
+	err = fopen_s(&fp, fpath, "a");
 #else
-	fp = fopen(path, "a");
+	fp = fopen(fpath, "a");
 	err = (fp != NULL) ? 0 : -1;
 #endif
 
 	if (fp != NULL && err == 0)
 	{
 		fseek(fp, 0L, SEEK_END);
-		res = (fwrite(input, sizeof(char), inlen, fp) != 0);
+		res = (fwrite(input, sizeof(char), inplen, fp) != 0);
 
 		if (res == true)
 		{
@@ -748,6 +807,24 @@ bool qsc_fileutils_write_line(const char* path, const char* input, size_t inlen)
 	}
 
 	return res;
+}
+
+void qsc_fileutils_zeroise(const char* fpath)
+{
+	FILE* fp;
+	bool res;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	res = (fopen_s(&fp, fpath, "wb") == 0);
+#else
+	fp = fopen(fpath, "wb");
+	res = (fp != NULL) ? true : false;
+#endif
+
+	if (fp != NULL)
+	{
+		fclose(fp);
+	}
 }
 
 #if defined(QSC_DEBUG_MODE)

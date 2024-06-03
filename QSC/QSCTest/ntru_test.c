@@ -81,7 +81,7 @@ bool qsctest_ntru_kat_test()
 
 #if defined(QSC_NTRU_S1HPS2048509)
 	char path[] = "NPQCR3/ntruhps-2048509.rsp";
-#elif defined(QSC_NTRU_HPSS32048677)
+#elif defined(QSC_NTRU_S3HPS2048677)
 	char path[] = "NPQCR3/ntruhps-2048677.rsp";
 #elif defined(QSC_NTRU_S5HPS4096821)
 	char path[] = "NPQCR3/ntruhps-4096821.rsp";

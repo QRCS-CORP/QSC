@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_NETUTILS_H
 #define QSC_NETUTILS_H
@@ -167,36 +161,36 @@ QSC_EXPORT_API void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv
 /**
 * \brief Retrieves the local IPv4 address
 *
-* \return The default interface IP address
+* \param padd: The ipv6 address structure
+* \return Returns true on function success
 */
-QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_netutils_get_ipv4_address(void);
+QSC_EXPORT_API bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd);
 
 /**
 * \brief Retrieves the local IPv6 address
 *
-* \return The default interface IP address
+* \param padd: The ipv6 address structure
+* \return Returns true on function success
 */
-QSC_EXPORT_API qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address(void);
+QSC_EXPORT_API bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd);
 
 /**
 * \brief Retrieves the IPv4 address information for a remote host
 *
+* \param pinfo: A pointer to the output ipinfo structure
 * \param host: [const] The hosts qualified name
 * \param service: [const] The service name
-*
-* \return Returns the default interface IP info
 */
-QSC_EXPORT_API qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE]);
+QSC_EXPORT_API void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE]);
 
 /**
 * \brief Retrieves the IPv6 address information for a remote host
 *
+* \param pinfo: A pointer to the output ipinfo structure
 * \param host: [const] The hosts qualified name
 * \param service: [const] The service name
-*
-* \return Returns the default interface IP info
 */
-QSC_EXPORT_API qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE]);
+QSC_EXPORT_API void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE]);
 
 /**
 * \brief Retrieves the host name of the connected peer

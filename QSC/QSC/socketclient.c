@@ -65,23 +65,17 @@ qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const cha
 	{
 		if (sock->address_family == qsc_socket_address_family_ipv4)
 		{
-			qsc_ipinfo_ipv4_info info = qsc_netutils_get_ipv4_info(host, service);
-			res = qsc_socket_client_connect_ipv4(sock, &info.address, info.port);
+			qsc_ipinfo_ipv4_info info = { 0 };
 
-			if (res == qsc_socket_exception_success)
-			{
-				sock->connection_status = qsc_socket_state_connected;
-			}
+			qsc_netutils_get_ipv4_info(&info, host, service);
+			res = qsc_socket_client_connect_ipv4(sock, &info.address, info.port);
 		}
 		else
 		{
-			qsc_ipinfo_ipv6_info info = qsc_netutils_get_ipv6_info(host, service);
+			qsc_ipinfo_ipv6_info info = { 0 };
+			
+			qsc_netutils_get_ipv6_info(&info, host, service);
 			res = qsc_socket_client_connect_ipv6(sock, &info.address, info.port);
-
-			if (res == qsc_socket_exception_success)
-			{
-				sock->connection_status = qsc_socket_state_connected;
-			}
 		}
 	}
 
@@ -104,10 +98,7 @@ qsc_socket_exceptions qsc_socket_client_connect_ipv4(qsc_socket* sock, const qsc
 		if (res == qsc_socket_exception_success)
 		{
 			res = qsc_socket_connect_ipv4(sock, address, port);
-		}
-
-		if (res == qsc_socket_exception_success)
-		{
+			sock->port = port;
 			sock->connection_status = qsc_socket_state_connected;
 		}
 	}
@@ -131,10 +122,7 @@ qsc_socket_exceptions qsc_socket_client_connect_ipv6(qsc_socket* sock, const qsc
 		if (res == qsc_socket_exception_success)
 		{
 			res = qsc_socket_connect_ipv6(sock, address, port);
-		}
-
-		if (res == qsc_socket_exception_success)
-		{
+			sock->port = port;
 			sock->connection_status = qsc_socket_state_connected;
 		}
 	}
@@ -237,5 +225,6 @@ void qsc_socket_client_shut_down(qsc_socket* sock)
 	if (sock != NULL && sock->connection_status == qsc_socket_state_connected)
 	{
 		qsc_socket_shut_down(sock, qsc_socket_shut_down_flag_both);
+		qsc_socket_close_socket(sock);
 	}
 }

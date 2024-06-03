@@ -252,7 +252,7 @@ qsc_socket_exceptions qsc_socket_bind_ipv4(qsc_socket* sock, const qsc_ipinfo_ip
 		qsc_memutils_clear((uint8_t*)&sa, sizeof(sa));
 		sa.sin_family = AF_INET;
 		sa.sin_port = htons(port);
-		ip4u = qsc_intutils_be8to32(address->ipv4);
+		ip4u = qsc_intutils_le8to32(address->ipv4);
 		sa.sin_addr.s_addr = ip4u;
 #if defined(QSC_SYSTEM_OS_APPLE)
 		sa.sin_len = sizeof(sa);
@@ -329,12 +329,7 @@ qsc_socket_exceptions qsc_socket_close_socket(const qsc_socket* sock)
 	if (sock != NULL && sock->connection != QSC_UNINITIALIZED_SOCKET && sock->connection != qsc_socket_exception_error)
 	{
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-		res = (qsc_socket_exceptions)shutdown(sock->connection, qsc_socket_shut_down_flag_send);
-
-		if (res != qsc_socket_exception_error)
-		{
-			res = (qsc_socket_exceptions)closesocket(sock->connection);
-		}
+		res = (qsc_socket_exceptions)closesocket(sock->connection);
 #else
 		res = (qsc_socket_exceptions)close(sock->connection);
 #endif
@@ -803,14 +798,6 @@ qsc_socket_exceptions qsc_socket_shut_down(qsc_socket* sock, qsc_socket_shut_dow
 		{
 			res = (qsc_socket_exceptions)shutdown(sock->connection, (int32_t)parameters);
 		}
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		res = (qsc_socket_exceptions)closesocket(sock->connection);
-#else
-		res = (qsc_socket_exceptions)close(sock->connection);
-#endif
-
-		sock->connection = QSC_UNINITIALIZED_SOCKET;
 	}
 
 	if (res == qsc_socket_exception_error)

@@ -62,7 +62,7 @@ void qsc_mceliece_encrypt(uint8_t* secret, uint8_t* ciphertext, const uint8_t* p
 	{
 		qsc_secrand_initialize(seed, QSC_MCELIECE_SEED_SIZE, NULL, 0);
 		qsc_mceliece_encapsulate(secret, ciphertext, publickey, &qsc_secrand_generate);
-		qsc_secrand_destroy();
+		qsc_secrand_dispose();
 	}
 }
 

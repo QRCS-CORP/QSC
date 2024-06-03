@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_CONSOLEUTILS_H
 #define QSC_CONSOLEUTILS_H
@@ -133,12 +127,22 @@ QSC_EXPORT_API char qsc_consoleutils_get_wait(void);
 QSC_EXPORT_API void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 
 /**
-* \brief Find a set of characters in a line of console text.
+* \brief Find a set of characters in a line of console text
 *
 * \param line: [const] The string of text received
 * \param token: [const] The string to search for
+* \return Returns true if the line contains the token
 */
 QSC_EXPORT_API bool qsc_consoleutils_line_contains(const char* line, const char* token);
+
+/**
+* \brief Compare two lines of text for equivalence
+*
+* \param line1: [const] The first string of text
+* \param line2: [const] The second string of text
+* \return Returns true if the strings are equal
+*/
+QSC_EXPORT_API bool qsc_consoleutils_line_equals(const char* line1, const char* line2);
 
 /**
 * \brief Gets a password masked on the console screen
@@ -152,8 +156,8 @@ QSC_EXPORT_API size_t qsc_consoleutils_masked_password(char* output, size_t otpl
 /**
 * \brief User confirmation that and action can continue(Y/N y/n)
 *
-* \param message: [const] The message to print
-* \return Returns the size of the password
+* \param message: [const] The confirmation dialog message
+* \return Returns the message response
 */
 QSC_EXPORT_API bool qsc_consoleutils_message_confirm(const char* message);
 
@@ -161,35 +165,35 @@ QSC_EXPORT_API bool qsc_consoleutils_message_confirm(const char* message);
 * \brief Print a byte array
 *
 * \param input: [const] The character array
-* \param inputlen: The number of characters to print
+* \param inplen: The number of characters to print
 * \param linelen: The length of output to print, before starting a new line
 */
-QSC_EXPORT_API void qsc_consoleutils_print_array(const uint8_t* input, size_t inputlen, size_t linelen);
+QSC_EXPORT_API void qsc_consoleutils_print_array(const uint8_t* input, size_t inplen, size_t linelen);
 
 /**
 * \brief Convert a character array to a hexadecimal string and print to the console
 *
 * \param input: [const] The character array
-* \param inputlen: The number of characters to print
+* \param inplen: The number of characters to print
 * \param linelen: The length of output to print, before starting a new line
 */
-QSC_EXPORT_API void qsc_consoleutils_print_hex(const uint8_t* input, size_t inputlen, size_t linelen);
+QSC_EXPORT_API void qsc_consoleutils_print_hex(const uint8_t* input, size_t inplen, size_t linelen);
 
 /**
 * \brief Print a string to the console, ignoring special characters
 *
 * \param input: [const] The character array
-* \param inputlen: The number of characters to print
+* \param inplen: The number of characters to print
 */
-QSC_EXPORT_API void qsc_consoleutils_print_formatted(const char* input, size_t inputlen);
+QSC_EXPORT_API void qsc_consoleutils_print_formatted(const char* input, size_t inplen);
 
 /**
 * \brief Print a string to the console, ignoring special characters, and add a line break
 *
 * \param input: [const] The character array
-* \param inputlen: The number of characters to print
+* \param inplen: The number of characters to print
 */
-QSC_EXPORT_API void qsc_consoleutils_print_formatted_line(const char* input, size_t inputlen);
+QSC_EXPORT_API void qsc_consoleutils_print_formatted_line(const char* input, size_t inplen);
 
 /**
 * \brief Print an array of characters to the console

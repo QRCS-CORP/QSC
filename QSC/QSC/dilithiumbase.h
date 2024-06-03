@@ -1,30 +1,20 @@
-/*
-* 2023 John G. Underhill
-* All Rights Reserved.
-*
-* NOTICE:  All information contained herein is, and remains
-* the property of John G. Underhill.
-* The intellectual and technical concepts contained
-* herein are proprietary to John G. Underhill
-* and his suppliers and may be covered by U.S. and Foreign Patents,
-* patents in process, and are protected by trade secret or copyright law.
-* Dissemination of this information or reproduction of this material
-* is strictly forbidden unless prior written permission is obtained
-* from the QSCS Corporation.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-*
-* This library was published publicly in hopes that it would aid in prototyping
-* post-quantum secure primitives for educational purposes only.
-* All and any commercial uses of this library are exclusively reserved by the author
-* John G. Underhill.
-* Any use of this library in a commercial context must be approved by the author
-* in writing.
-* All rights for commercial and/or non-educational purposes, are fully reserved
-* by the author.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_DILITHIUMBASE_H
 #define QSC_DILITHIUMBASE_H

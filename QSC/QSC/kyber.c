@@ -69,7 +69,7 @@ void qsc_kyber_encrypt(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publ
 	{
 		qsc_secrand_initialize(seed, QSC_KYBER_SEED_SIZE, NULL, 0);
 		qsc_kyber_encapsulate(secret, ciphertext, publickey, &qsc_secrand_generate);
-		qsc_secrand_destroy();
+		qsc_secrand_dispose();
 	}
 }
 

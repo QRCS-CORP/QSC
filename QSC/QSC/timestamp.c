@@ -15,7 +15,7 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 	output[pos] = '-';
 	++pos;
 
-	if (tstruct->tm_mon < 10)
+	if (tstruct->tm_mon + 1 < 10)
 	{
 		output[pos] = '0';
 		++pos;
@@ -294,15 +294,29 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 uint64_t qsc_timestamp_datetime_utc()
 {
 	time_t lt;
+	time_t ut;
+	struct tm ptm = { 0 };
+
+	lt = 0;
+	ut = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	lt = 0;
-	time(&lt);
+	errno_t err;
+
+	_time64(&lt);
+	err = _gmtime64_s(&ptm, &lt);
+
+	if (err == 0)
+	{
+		ut = _mktime64(&ptm);
+	}
 #else
 	lt = time(NULL);
+	ptm = gmtime(&lt);
+	ut = mktime(ptm);
 #endif
 
-	return (uint64_t)lt;
+	return (uint64_t)ut;
 }
 
 void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP_STRING_SIZE])
@@ -339,28 +353,16 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 
 uint64_t qsc_timestamp_epochtime_seconds()
 {
-	uint64_t res;
+	time_t lt;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-
-	time_t lt;
-
 	lt = 0;
 	time(&lt);
-	res = (uint64_t)lt;
-
-	return res;
-
 #else
-
-	time_t lt;
-
 	lt = time(NULL);
-	res = (uint64_t)lt;
-
-	return res;
-
 #endif
+
+	return (uint64_t)lt;
 }
 
 #if defined(QSC_DEBUG_MODE)

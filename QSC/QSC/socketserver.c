@@ -58,6 +58,7 @@ void qsc_socket_server_close_socket(qsc_socket* sock)
 	if (sock != NULL && sock->connection_status == qsc_socket_state_connected)
 	{
 		qsc_socket_shut_down(sock, qsc_socket_shut_down_flag_both);
+		qsc_socket_close_socket(sock);
 	}
 }
 

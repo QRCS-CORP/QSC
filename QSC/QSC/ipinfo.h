@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_IPINFO_H
 #define QSC_IPINFO_H
@@ -197,6 +191,14 @@ QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_routable(const qsc_ipinfo_ipv4_ad
 QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address);
 
 /**
+* \brief Test the ipv4 address string for validity
+*
+* \param address: [const] The first ipv4 address string
+* \return Returns true if address is valid
+*/
+QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address);
+
+/**
 * \brief Test the ipv4 address for zeroed state
 *
 * \param address: [const] The first ipv4 address structure
@@ -243,6 +245,14 @@ QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_
 * \param address: [const] A pointer to the ipv4 address structure
 */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const qsc_ipinfo_ipv4_address* address);
+
+/**
+* \brief Convert an address array to a string
+*
+* \param output: The serialized address string output array
+* \param address: [const] A pointer to the ipv4 address structure
+*/
+QSC_EXPORT_API void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const uint8_t* address);
 
 /*! \struct qsc_ipinfo_ipv6_address
 * \brief The IPv6 address structure
@@ -326,6 +336,14 @@ QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_routable(const qsc_ipinfo_ipv6_ad
 QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address);
 
 /**
+* \brief Test the ipv6 address string for validity
+*
+* \param address: [const] The first ipv6 address string
+* \return Returns true if address is valid
+*/
+QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address);
+
+/**
 * \brief Test the ipv6 address for zeroed state
 *
 * \param address: [const] The first ipv6 address structure
@@ -368,11 +386,18 @@ QSC_EXPORT_API void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_
 /**
 * \brief Serialize an ipv6 address structure to a string
 *
-* \param output: The serialized address string output array
+* \param output: The address string output array
 * \param address: [const] A pointer to the ipv6 address structure
-* \return Returns the serialized ipv6 address string
 */
 QSC_EXPORT_API void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address);
+
+/**
+* \brief Convert an ipv6 address array to a string
+*
+* \param output: The address string output array
+* \param address: [const] A pointer to the ipv6 address array
+*/
+QSC_EXPORT_API void qsc_ipinfo_ipv6_array_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const uint8_t* address);
 
 /**
 * \brief Convert a subnet mask to a CIDR mask

@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_QUEUE_H
 #define QSC_QUEUE_H
@@ -62,7 +56,7 @@ QSC_EXPORT_API typedef struct qsc_queue_state
 *
 * \param ctx [struct] The function state
 */
-QSC_EXPORT_API void qsc_queue_destroy(qsc_queue_state* ctx);
+QSC_EXPORT_API void qsc_queue_dispose(qsc_queue_state* ctx);
 
 /**
 * \brief Flush the content of the queue to an array
@@ -95,7 +89,7 @@ QSC_EXPORT_API size_t qsc_queue_items(const qsc_queue_state* ctx);
 * \param ctx [struct] The function state
 * \return Returns true if the queue is full
 */
-QSC_EXPORT_API bool qsc_queue_isfull(const qsc_queue_state* ctx);
+QSC_EXPORT_API bool qsc_queue_full(const qsc_queue_state* ctx);
 
 /**
 * \brief Get the empty status from the queue
@@ -103,7 +97,7 @@ QSC_EXPORT_API bool qsc_queue_isfull(const qsc_queue_state* ctx);
 * \param ctx [struct] The function state
 * \return Returns true if the queue is empty
 */
-QSC_EXPORT_API bool qsc_queue_isempty(const qsc_queue_state* ctx);
+QSC_EXPORT_API bool qsc_queue_empty(const qsc_queue_state* ctx);
 
 /**
 * \brief Returns the first member of the queue, and erases that item from the queue

@@ -1,3 +1,26 @@
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
+
+#ifndef QSCTEST_SHA3_TEST_H
+#define QSCTEST_SHA3_TEST_H
+
+#include "common.h"
+
 /**
 * \file sha3_test.h
 * \brief <b>SHA3 Known Answer Tests</b> \n
@@ -6,11 +29,6 @@
 * \author John Underhill
 * \date December 28, 2017
 */
-
-#ifndef QSCTEST_SHA3_TEST_H
-#define QSCTEST_SHA3_TEST_H
-
-#include "common.h"
 
 /**
 * \brief Tests the 256-bit version of the keccak message digest for correct operation,

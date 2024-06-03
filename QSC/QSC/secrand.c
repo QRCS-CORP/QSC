@@ -319,7 +319,7 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 	return minimum + ret;
 }
 
-void qsc_secrand_destroy()
+void qsc_secrand_dispose()
 {
 	if (secrand_state.init == true)
 	{

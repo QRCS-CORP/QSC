@@ -47,7 +47,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -110,6 +110,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -124,6 +125,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -139,6 +141,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -155,6 +158,8 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -175,6 +180,8 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -196,6 +203,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -207,6 +215,7 @@
     <ClInclude Include="aes.h" />
     <ClInclude Include="arrayutils.h" />
     <ClInclude Include="chacha.h" />
+    <ClInclude Include="collection.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="consoleutils.h" />
     <ClInclude Include="cpuidex.h" />
@@ -248,7 +257,6 @@
     <ClInclude Include="rcs.h" />
     <ClInclude Include="rdp.h" />
     <ClInclude Include="scb.h" />
-    <ClInclude Include="secmem.h" />
     <ClInclude Include="secrand.h" />
     <ClInclude Include="selftest.h" />
     <ClInclude Include="sha2.h" />
@@ -258,6 +266,7 @@
     <ClInclude Include="socketclient.h" />
     <ClInclude Include="socketflags.h" />
     <ClInclude Include="socketserver.h" />
+    <ClInclude Include="qsort.h" />
     <ClInclude Include="sphincsplus.h" />
     <ClInclude Include="csp.h" />
     <ClInclude Include="intutils.h" />
@@ -276,6 +285,7 @@
     <ClCompile Include="aes.c" />
     <ClCompile Include="arrayutils.c" />
     <ClCompile Include="chacha.c" />
+    <ClCompile Include="collection.c" />
     <ClCompile Include="consoleutils.c" />
     <ClCompile Include="cpuidex.c" />
     <ClCompile Include="csg.c" />
@@ -311,11 +321,11 @@
     <ClCompile Include="ntrubase.c" />
     <ClCompile Include="ntrubase_avx2.c" />
     <ClCompile Include="poly1305.c" />
+    <ClCompile Include="qsort.c" />
     <ClCompile Include="queue.c" />
     <ClCompile Include="rcs.c" />
     <ClCompile Include="rdp.c" />
     <ClCompile Include="scb.c" />
-    <ClCompile Include="secmem.c" />
     <ClCompile Include="secrand.c" />
     <ClCompile Include="selftest.c" />
     <ClCompile Include="sha2.c" />

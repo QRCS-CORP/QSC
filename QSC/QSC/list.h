@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_LIST_H
 #define QSC_LIST_H
@@ -49,82 +43,124 @@
 */
 QSC_EXPORT_API typedef struct qsc_list_state
 {
-	uint8_t** items;					/*!< The pointer to a 2 dimensional array */
+	uint8_t* items;						/*!< A pointer to the items array */
 	size_t count;						/*!< The number of list items */
-	size_t depth;						/*!< The maximum number of items in the list */
 	size_t width;						/*!< The byte length of a list item */
 } qsc_list_state;
 
 /**
 * \brief Add an item to the list
 *
-* \param ctx [struct] The function state
-* \param input [pointer] The item to be added to the list
+* \param ctx: [struct] The function state
+* \param input: [pointer] The item to be added to the list
 */
-QSC_EXPORT_API bool qsc_list_add(qsc_list_state* ctx, void* item);
+QSC_EXPORT_API void qsc_list_add(qsc_list_state* ctx, void* item);
 
 /**
 * \brief Copy an item from the list
 *
-* \param ctx [struct] The function state
-* \param index The index number of the list item
-* \param item A pointer to the item receiving the copy
+* \param ctx: [struct] The function state
+* \param index: The index number of the list item
+* \param item: A pointer to the item receiving the copy
 */
 QSC_EXPORT_API void qsc_list_copy(const qsc_list_state* ctx, size_t index, void* item);
 
 /**
 * \brief Get the number of items in the list
 *
-* \param ctx [struct] The function state
+* \param ctx: [struct] The function state
+* 
 * \return The number of items in the queue
 */
 QSC_EXPORT_API size_t qsc_list_count(const qsc_list_state* ctx);
 
 /**
-* \brief Destroy the list state
-*
-* \param ctx [struct] The function state
+* \brief Convert a serialized list into a list context
+* 
+* \param ctx: [struct] The function state
+* \param input: [const] The serialized list
 */
-QSC_EXPORT_API void qsc_list_destroy(qsc_list_state* ctx);
+QSC_EXPORT_API void qsc_list_deserialize(qsc_list_state* ctx, const uint8_t* input);
+
+/**
+* \brief Dispose of the list state
+*
+* \param ctx: [struct] The function state
+*/
+QSC_EXPORT_API void qsc_list_dispose(qsc_list_state* ctx);
 
 /**
 * \brief Initialize the list state
 *
-* \param ctx [struct] The function state
-* \param depth [size] The number of queue items to initialize, maximum is QSC_QUEUE_MAX_DEPTH
-* \param width [size] The maximum size of each queue item in bytes
+* \param ctx: [struct] The function state
+* \param width: [size] The maximum size of each queue item in bytes
 */
-QSC_EXPORT_API void qsc_list_initialize(qsc_list_state* ctx, size_t depth, size_t width);
+QSC_EXPORT_API void qsc_list_initialize(qsc_list_state* ctx, size_t width);
 
 /**
 * \brief Get the empty status from the list
 *
-* \param ctx [struct] The function state
+* \param ctx: [struct] The function state
+* 
 * \return Returns true if the list is empty
 */
-QSC_EXPORT_API bool qsc_list_isempty(const qsc_list_state* ctx);
+QSC_EXPORT_API bool qsc_list_empty(const qsc_list_state* ctx);
 
 /**
 * \brief Get the full status from the list
 *
-* \param ctx [struct] The function state
+* \param ctx: [struct] The function state
+* 
 * \return Returns true if the list is full
 */
-QSC_EXPORT_API bool qsc_list_isfull(const qsc_list_state* ctx);
+QSC_EXPORT_API bool qsc_list_full(const qsc_list_state* ctx);
+
+/**
+* \brief Retrieve a pointer to a list item
+*
+* \param ctx: [struct] The function state
+* \param item: the array receiving the item
+* \param index: [size] The item index
+*/
+QSC_EXPORT_API void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index);
 
 /**
 * \brief Returns the first member of the queue, and erases that item from the queue
 *
-* \param ctx [struct] The function state
-* \param index The index number of the list item
+* \param ctx: [struct] The function state
+* \param index: The index number of the list item
 */
 QSC_EXPORT_API void qsc_list_remove(qsc_list_state* ctx, size_t index);
+
+/**
+* \brief Serialize a list into a byte array
+* 
+* \param output: The serialized collection ctx
+* \param ctx: [struct] The function state
+*/
+QSC_EXPORT_API size_t qsc_list_serialize(uint8_t* output, const qsc_list_state* ctx);
+
+/**
+* \brief Get the serialized size of a list
+* 
+* \param ctx: [struct] The function state
+* 
+* \return Returns the byte size of a serialized list
+*/
+QSC_EXPORT_API size_t qsc_list_size(const qsc_list_state* ctx);
+
+/**
+* \brief Sort the items in the list
+*
+* \param ctx: [struct] The function state
+*/
+QSC_EXPORT_API void qsc_list_sort(qsc_list_state* ctx);
 
 #if defined(QSC_DEBUG_MODE)
 /**
 * \brief The list functions self test
 *
-* \return [bool] Returns true upon success
+* \return Returns true upon success
 */
 QSC_EXPORT_API bool qsc_list_self_test(void);
 #endif

@@ -4,7 +4,7 @@
 #	include "intutils.h"
 #endif
 
-void qsc_queue_destroy(qsc_queue_state* ctx)
+void qsc_queue_dispose(qsc_queue_state* ctx)
 {
 	assert(ctx != NULL);
 
@@ -93,7 +93,7 @@ size_t qsc_queue_items(const qsc_queue_state* ctx)
 	return res;
 }
 
-bool qsc_queue_isfull(const qsc_queue_state* ctx)
+bool qsc_queue_full(const qsc_queue_state* ctx)
 {
 	assert(ctx != NULL);
 
@@ -109,7 +109,7 @@ bool qsc_queue_isfull(const qsc_queue_state* ctx)
 	return res;
 }
 
-bool qsc_queue_isempty(const qsc_queue_state* ctx)
+bool qsc_queue_empty(const qsc_queue_state* ctx)
 {
 	assert(ctx != NULL);
 
@@ -135,7 +135,7 @@ uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen)
 
 	tag = 0;
 
-	if (!qsc_queue_isempty(ctx) && otplen <= ctx->width)
+	if (!qsc_queue_empty(ctx) && otplen <= ctx->width)
 	{
 		qsc_memutils_copy(output, ctx->queue[0], otplen);
 		qsc_memutils_clear(ctx->queue[0], ctx->width);
@@ -165,7 +165,7 @@ void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, ui
 	assert(input != NULL);
 	assert(inlen != 0);
 
-	if (!qsc_queue_isfull(ctx) && inlen <= ctx->width)
+	if (!qsc_queue_full(ctx) && inlen <= ctx->width)
 	{
 		qsc_memutils_copy(ctx->queue[ctx->position], input, inlen);
 		ctx->tags[ctx->position] = tag;
@@ -201,7 +201,7 @@ bool qsc_queue_self_test()
 		qsc_queue_push(&ctx, exp[i], 16, i);
 	}
 
-	if (qsc_queue_isfull(&ctx) == false)
+	if (qsc_queue_full(&ctx) == false)
 	{
 		ret = false;
 	}
@@ -211,7 +211,7 @@ bool qsc_queue_self_test()
 		qsc_queue_pop(&ctx, otp2[i], 16);
 	}
 
-	if (qsc_queue_isempty(&ctx) == false)
+	if (qsc_queue_empty(&ctx) == false)
 	{
 		ret = false;
 	}
@@ -251,7 +251,7 @@ bool qsc_queue_self_test()
 		}
 	}
 
-	qsc_queue_destroy(&ctx);
+	qsc_queue_dispose(&ctx);
 
 	return ret;
 }

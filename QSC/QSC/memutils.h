@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_MEMUTILS_H
 #define QSC_MEMUTILS_H
@@ -92,29 +86,21 @@ QSC_EXPORT_API void qsc_memutils_alloc_free(void* block);
 QSC_EXPORT_API void* qsc_memutils_aligned_alloc(int32_t align, size_t length);
 
 /**
+* \brief reallocate an aligned 8-bit integer array
+*
+* \param align: The memory alignment boundary
+* \param length: The length of the requested block
+*
+* \return Returns the aligned array of bytes, or NULL on failure
+*/
+QSC_EXPORT_API void* qsc_memutils_aligned_realloc(void* block, size_t length);
+
+/**
 * \brief Free an aligned memory block
 *
 * \param block: A pointer to the memory block to release
 */
 QSC_EXPORT_API void qsc_memutils_aligned_free(void* block);
-
-/**
-* \brief Allocate an secure 8-bit integer array
-*
-* \param block: The memory block pointer
-* \param length: The length of the requested block
-*
-* \return Returns the length of the memory block or zero
-*/
-QSC_EXPORT_API size_t qsc_memutils_secure_malloc(void* block, size_t length);
-
-/**
-* \brief Free an secure memory block
-*
-* \param block: A pointer to the memory block
-* \param length: The length of the requested block
-*/
-QSC_EXPORT_API void qsc_memutils_secure_free(void* block, size_t length);
 
 /**
 * \brief Erase a block of memory
@@ -123,6 +109,47 @@ QSC_EXPORT_API void qsc_memutils_secure_free(void* block, size_t length);
 * \param length: The number of bytes to erase
 */
 QSC_EXPORT_API void qsc_memutils_clear(void* output, size_t length);
+
+/**
+* \brief Compare two byte arrays for equality
+*
+* \param a: A pointer to the first array
+* \param b: A pointer to the second array
+* \param length: The number of bytes to compare
+*
+* \return Returns if the arrays are equivalent
+*/
+QSC_EXPORT_API bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length);
+
+/**
+* \brief Compare two 16 byte arrays for equality
+*
+* \param a: A pointer to the first array
+* \param b: A pointer to the second array
+*
+* \return Returns true if the arrays are equivalent
+*/
+QSC_EXPORT_API bool qsc_memutils_are_equal_128(const uint8_t* a, const uint8_t* b);
+
+/**
+* \brief Compare two 32 byte arrays for equality
+*
+* \param a: A pointer to the first array
+* \param b: A pointer to the second array
+*
+* \return Returns true if the arrays are equivalent
+*/
+QSC_EXPORT_API bool qsc_memutils_are_equal_256(const uint8_t* a, const uint8_t* b);
+
+/**
+* \brief Compare two 64 byte arrays for equality
+*
+* \param a: A pointer to the first array
+* \param b: A pointer to the second array
+*
+* \return Returns true if the arrays are equivalent
+*/
+QSC_EXPORT_API bool qsc_memutils_are_equal_512(const uint8_t* a, const uint8_t* b);
 
 /**
 * \brief Copy a block of memory
@@ -134,6 +161,66 @@ QSC_EXPORT_API void qsc_memutils_clear(void* output, size_t length);
 QSC_EXPORT_API void qsc_memutils_copy(void* output, const void* input, size_t length);
 
 /**
+* \brief Compare two 16 byte arrays as 128-bit big endian integers as A is greater than B
+*
+* \param a: A pointer to the primary array
+* \param b: A pointer to the comparison array
+*
+* \return Returns true if A array is greater than B
+*/
+QSC_EXPORT_API bool qsc_memutils_greater_than_be128(const uint8_t* a, const uint8_t* b);
+
+/**
+* \brief Compare two 32 byte arrays as 256-bit big endian integers as A is greater than B
+*
+* \param a: A pointer to the primary array
+* \param b: A pointer to the comparison array
+*
+* \return Returns true if A array is greater than B
+*/
+QSC_EXPORT_API bool qsc_memutils_greater_than_be256(const uint8_t* a, const uint8_t* b);
+
+/**
+* \brief Compare two 64 byte arrays as 512-bit big endian integers as A is greater than B
+*
+* \param a: A pointer to the primary array
+* \param b: A pointer to the comparison array
+*
+* \return Returns true if A array is greater than B
+*/
+QSC_EXPORT_API bool qsc_memutils_greater_than_be512(const uint8_t* a, const uint8_t* b);
+
+/**
+* \brief Compare two 16 byte arrays as 128-bit little endian integers as A is greater than B
+*
+* \param a: A pointer to the primary array
+* \param b: A pointer to the comparison array
+*
+* \return Returns true if A array is greater than B
+*/
+QSC_EXPORT_API bool qsc_memutils_greater_than_le128(const uint8_t* a, const uint8_t* b);
+
+/**
+* \brief Compare two 32 byte arrays as 256-bit little endian integers as A is greater than B
+*
+* \param a: A pointer to the primary array
+* \param b: A pointer to the comparison array
+*
+* \return Returns true if A array is greater than B
+*/
+QSC_EXPORT_API bool qsc_memutils_greater_than_le256(const uint8_t* a, const uint8_t* b);
+
+/**
+* \brief Compare two 64 byte arrays as 512-bit little endian integers as A is greater than B
+*
+* \param a: A pointer to the primary array
+* \param b: A pointer to the comparison array
+*
+* \return Returns true if A array is greater than B
+*/
+QSC_EXPORT_API bool qsc_memutils_greater_than_le512(const uint8_t* a, const uint8_t* b);
+
+/**
 * \brief Move a block of memory, erasing the previous location
 *
 * \param output: A pointer to the destination array
@@ -141,6 +228,32 @@ QSC_EXPORT_API void qsc_memutils_copy(void* output, const void* input, size_t le
 * \param length: The number of bytes to copy
 */
 QSC_EXPORT_API void qsc_memutils_move(void* output, const void* input, size_t length);
+
+/**
+* \brief Erase a memory block securely
+*
+* \param block: A pointer to the memory block
+* \param length: The length of the block
+*/
+QSC_EXPORT_API void qsc_memutils_secure_erase(void* block, size_t length);
+
+/**
+* \brief Free a secure memory block
+*
+* \param block: A pointer to the memory block
+* \param length: The length of the requested block
+*/
+QSC_EXPORT_API void qsc_memutils_secure_free(void* block, size_t length);
+
+/**
+* \brief Allocate an secure 8-bit integer array
+*
+* \param block: The memory block pointer
+* \param length: The length of the requested block
+*
+* \return Returns the length of the memory block or zero
+*/
+QSC_EXPORT_API void* qsc_memutils_secure_malloc(size_t length);
 
 /**
 * \brief Set a block of memory to a value
@@ -168,7 +281,6 @@ QSC_EXPORT_API void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size
 * \param length: The number of bytes to XOR
 */
 QSC_EXPORT_API void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length);
-
 
 /**
 * \brief Tests an array for all zeroed elements

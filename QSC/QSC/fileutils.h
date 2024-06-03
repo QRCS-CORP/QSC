@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_FILEUTILS_H
 #define QSC_FILEUTILS_H
@@ -81,115 +75,124 @@ typedef enum qsc_fileutils_mode
 * \brief Append an array of characters to a file.
 * Writes new data to the end of a binary file.
 *
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \param stream: [const] The array to write to the file
 * \param length: the stream size
 * \return Returns true if the operation succeeded
 */
-QSC_EXPORT_API bool qsc_fileutils_append_to_file(const char* path, const char* stream, size_t length);
+QSC_EXPORT_API bool qsc_fileutils_append_to_file(const char* fpath, const char* stream, size_t length);
 
 /**
 * \brief Copy a file to an object
 *
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \param obj: The object to write to the file
 * \param length: The size of the object
 * \return Returns the number of characters written to the byte array
 */
-QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_object(const char* path, void* obj, size_t length);
+QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_object(const char* fpath, void* obj, size_t length);
 
 /**
 * \brief Copy elements from a file to a byte array
 *
-* \param path: [const] The full path to the stream
+* \param fpath: [const] The full fpath to the stream
 * \param stream: The stream receiving the file
 * \param length: The number of bytes to write to the stream
 * \return Returns the number of characters written to the stream
 */
-QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_stream(const char* path, char* stream, size_t length);
+QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_stream(const char* fpath, char* stream, size_t length);
 
 /**
 * \brief Copy an object to a file
 *
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \param obj: [const] The object to write to the file
 * \param length: The size of the object
 * \return Returns true if the operation succeeded
 */
-QSC_EXPORT_API bool qsc_fileutils_copy_object_to_file(const char* path, const void* obj, size_t length);
+QSC_EXPORT_API bool qsc_fileutils_copy_object_to_file(const char* fpath, const void* obj, size_t length);
 
 /**
 * \brief Copy the contents of a stream to a file
 *
-* \param [const] path: The full path to the file
+* \param [const] fpath: The full fpath to the file
 * \param [const] stream: The array to write to the file
 * \param length: The length of the array
 * \return Returns true if the operation succeeded
 */
-QSC_EXPORT_API bool qsc_fileutils_copy_stream_to_file(const char* path, const char* stream, size_t length);
+QSC_EXPORT_API bool qsc_fileutils_copy_stream_to_file(const char* fpath, const char* stream, size_t length);
 
 /**
 * \brief Create a new file
 *
-* \param path: [const] The full path to the file to be created
+* \param fpath: [const] The full fpath to the file to be created
 * \return Returns true for success
 */
-QSC_EXPORT_API bool qsc_fileutils_create(const char* path);
+QSC_EXPORT_API bool qsc_fileutils_create(const char* fpath);
 
 /**
 * \brief Delete a file
 *
-* \param path: [const] The full path to the file ro be deleted
+* \param fpath: [const] The full fpath to the file ro be deleted
 * \return Returns true for success
 */
-QSC_EXPORT_API bool qsc_fileutils_delete(const char* path);
+QSC_EXPORT_API bool qsc_fileutils_delete(const char* fpath);
 
 /**
 * \brief Erase a files contents
 *
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \return Returns true for success
 */
-QSC_EXPORT_API bool qsc_fileutils_erase(const char* path);
+QSC_EXPORT_API bool qsc_fileutils_erase(const char* fpath);
+
+/**
+* \brief Copy a file to a new location
+*
+* \param inpath: [const] The full fpath to the input file
+* \param outpath: [const] The full fpath to the output file
+* \return Returns true if the file was copied
+*/
+QSC_EXPORT_API bool qsc_fileutils_file_copy(const char* inpath, const char* outpath);
 
 /**
 * \brief Test a users access right to a file
 *
-* \param path: [const] The fully qualified path to the file
+* \param fpath: [const] The fully qualified fpath to the file
 * \param level: the access level to check
 * \return Returns true if the access level is present
 */
-QSC_EXPORT_API bool qsc_fileutils_get_access(const char* path, qsc_fileutils_access_rights level);
+QSC_EXPORT_API bool qsc_fileutils_get_access(const char* fpath, qsc_fileutils_access_rights level);
 
 /**
 * \brief Get the file directory
 *
 * \param directory: The output file extension
 * \param dirlen: The length of the directory buffer
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \return Returns the length of the file extension
 */
-QSC_EXPORT_API size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* path);
+QSC_EXPORT_API size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* fpath);
 
 /**
 * \brief Get the file extension
 *
 * \param extension: The output file extension
 * \param extlen: The length of the extension buffer
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \return Returns the length of the file extension
 */
-QSC_EXPORT_API size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* path);
+QSC_EXPORT_API size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* fpath);
 
 /**
 * \brief Get the file name
 *
 * \param name: The output file name
 * \param namelen: The length of the name buffer
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \return Returns the length of the file extension
 */
-QSC_EXPORT_API size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* path);
+QSC_EXPORT_API size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* fpath);
 
 /**
 * \brief Reads a line of text from a formatted file
@@ -206,18 +209,18 @@ QSC_EXPORT_API int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE*
 /**
 * \brief Get the files size in bytes
 *
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \return Returns the length of the file
 */
-QSC_EXPORT_API size_t qsc_fileutils_get_size(const char* path);
+QSC_EXPORT_API size_t qsc_fileutils_get_size(const char* fpath);
 
 /**
-* \brief Get the working directory path
+* \brief Get the working directory fpath
 *
-* \param path: The current directory
-* \return Returns true if the path is found, false if the buffer is too small or path not found
+* \param fpath: The current directory
+* \return Returns true if the fpath is found, false if the buffer is too small or fpath not found
 */
-QSC_EXPORT_API bool qsc_fileutils_get_working_directory(char* path);
+QSC_EXPORT_API bool qsc_fileutils_get_working_directory(char* fpath);
 
 /**
 * \brief Close a file
@@ -229,20 +232,20 @@ QSC_EXPORT_API void qsc_fileutils_close(FILE* fp);
 /**
 * \brief Test to see if a file exists
 *
-* \param path: [const] The fully qualified path to the file
+* \param fpath: [const] The fully qualified fpath to the file
 * \return Returns true if the file exists
 */
-QSC_EXPORT_API bool qsc_fileutils_exists(const char* path);
+QSC_EXPORT_API bool qsc_fileutils_exists(const char* fpath);
 
 /**
 * \brief Open a file and return the handle
 *
-* \param path: The fully qualified file path
+* \param fpath: The fully qualified file fpath
 * \param mode: The file access mode
 * \param binary: open the file in binary mode, false is ansi mode
 * \return Returns the file handle, or NULL on failure
 */
-QSC_EXPORT_API FILE* qsc_fileutils_open(const char* path, qsc_fileutils_mode mode, bool binary);
+QSC_EXPORT_API FILE* qsc_fileutils_open(const char* fpath, qsc_fileutils_mode mode, bool binary);
 
 /**
 * \brief Read data from a file to an output stream
@@ -258,24 +261,24 @@ QSC_EXPORT_API size_t qsc_fileutils_read(char* output, size_t otplen, size_t pos
 /**
 * \brief Read data to a binary file
 *
-* \param path: The file path
+* \param fpath: The file fpath
 * \param position: The position to start reading from
 * \param output: the output char stream
 * \param length:the number of bytes to read
 * \return Returns the number of characters read
 */
-QSC_EXPORT_API size_t qsc_fileutils_safe_read(const char* path, size_t position, char* output, size_t length);
+QSC_EXPORT_API size_t qsc_fileutils_safe_read(const char* fpath, size_t position, char* output, size_t length);
 
 /**
 * \brief Write data to a binary file
 *
-* \param path: The file path
+* \param fpath: The file fpath
 * \param position: The position to start writing to
 * \param input: the input character string
 * \param length: the number of bytes to write
 * \return Returns the number of characters written
 */
-QSC_EXPORT_API size_t qsc_fileutils_safe_write(const char* path, size_t position, const char* input, size_t length);
+QSC_EXPORT_API size_t qsc_fileutils_safe_write(const char* fpath, size_t position, const char* input, size_t length);
 
 /**
 * \brief Set the file pointer position
@@ -289,13 +292,13 @@ QSC_EXPORT_API bool qsc_fileutils_seekto(FILE* fp, size_t position);
 /**
 * \brief Read a line of text from a file
 *
-* \param path: [const] The full path to the file
+* \param fpath: [const] The full fpath to the file
 * \param buffer: The string buffer
 * \param buflen: The size of the string buffer
 * \param linenum: The line number to read
-* \return Returns the length of the line
+* \return Returns the length of the line or -1 at EOF
 */
-QSC_EXPORT_API size_t qsc_fileutils_read_line(const char* path, char* buffer, size_t buflen, size_t linenum);
+QSC_EXPORT_API int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, size_t linenum);
 
 /**
 * \brief Reset the file size to a specified byte size
@@ -307,39 +310,46 @@ QSC_EXPORT_API size_t qsc_fileutils_read_line(const char* path, char* buffer, si
 QSC_EXPORT_API bool qsc_fileutils_truncate_file(FILE* fp, size_t length);
 
 /**
-* \brief Checks if the path is valid
+* \brief Checks if the fpath is valid
 *
-* \param path: [const] The full path to the file
-* \return Returns true if the path is formed properly
+* \param fpath: [const] The full fpath to the file
+* \return Returns true if the fpath is formed properly
 */
-QSC_EXPORT_API bool qsc_fileutils_valid_path(const char* path);
+QSC_EXPORT_API bool qsc_fileutils_valid_path(const char* fpath);
 
 /**
 * \brief Open a file and return the handle
 *
 * \param input: The input buffer
-* \param inlen: The size of the input buffer
+* \param inplen: The size of the input buffer
 * \param position: The starting position within the file
 * \param fp: The file pointer
 * \return Returns the number of bytes written
 */
-QSC_EXPORT_API size_t qsc_fileutils_write(const char* input, size_t inlen, size_t position, FILE* fp);
+QSC_EXPORT_API size_t qsc_fileutils_write(const char* input, size_t inplen, size_t position, FILE* fp);
 
 /**
 * \brief Open a file and append a line of text to the end
 *
-* \param path: The file path
+* \param fpath: The file fpath
 * \param input: The input buffer
-* \param inlen: The size of the input buffer
+* \param inplen: The size of the input buffer
 * \return Returns the number of bytes written
 */
-QSC_EXPORT_API bool qsc_fileutils_write_line(const char* path, const char* input, size_t inlen);
+QSC_EXPORT_API bool qsc_fileutils_write_line(const char* fpath, const char* input, size_t inplen);
+
+/**
+* \brief Truncate a file to zero bytes
+*
+* \param fpath: The file fpath
+*/
+QSC_EXPORT_API void qsc_fileutils_zeroise(const char* fpath);
 
 #if defined(QSC_DEBUG_MODE)
 /**
 * \brief Test the file functions
 *
-* \param fpath: The file path
+* \param fpath: The file fpath
 */
 QSC_EXPORT_API void qsc_fileutils_test(const char* fpath);
 #endif

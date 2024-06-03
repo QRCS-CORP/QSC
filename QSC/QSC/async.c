@@ -177,6 +177,8 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
 {
 	int32_t res;
 
+	res = 0;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	if (handle != NULL)
 	{
@@ -187,7 +189,7 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
 	suspended = false;
 	pthread_cond_signal(&tcond);
 	pthread_mutex_unlock(&tsusp);
-	res = 0;
+
 #endif
 
 	return res;

@@ -8,6 +8,8 @@
 #endif
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+#	define NETUTILS_WSA_STARTUP_SEQUENCE 0x0202
+#	define NETUTILS_INET_PTON_SUCCESS 1
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
 #else
@@ -232,14 +234,14 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address addre
 
 	WSADATA wsd;
 
-	err = WSAStartup(0x0202, &wsd);
+	err = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 
 	if (err == 0)
 	{
-		struct sockaddr insock4 = { 0 };
+		struct sockaddr_in insock4 = { 0 };
 
 		slen = QSC_IPINFO_IPV4_BYTELEN;
-		insock4.sa_family = AF_INET;
+		insock4.sin_family = AF_INET;
 		
 		err = WSAStringToAddressW((LPWSTR)address.ipv4, AF_INET, NULL, (LPSOCKADDR)&insock4, &slen);
 		
@@ -247,7 +249,7 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address addre
 		{
 			char aurl[NI_MAXSERV] = { 0 };
 
-			if (getnameinfo((const SOCKADDR*)&insock4, (socklen_t)sizeof(insock4), (PCHAR)aurl, (DWORD)sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
+			if (getnameinfo((const struct SOCKADDR*)&insock4, (socklen_t)sizeof(struct sockaddr), (PCHAR)aurl, (DWORD)sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
 			{
 				qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
 			}
@@ -274,26 +276,25 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address addre
 #endif
 }
 
-qsc_ipinfo_ipv4_address qsc_netutils_get_ipv4_address()
+bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
 {
-	qsc_ipinfo_ipv4_address add = { 0 };
+	qsc_socket_exceptions serr;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
 	char hname[INET_ADDRSTRLEN] = { 0 };
 	struct addrinfo hints = { 0 };
 	struct sockaddr_in insock4 = { 0 };
-	WSADATA wsd;
-	struct addrinfo* hres = NULL;
-	struct addrinfo* ralloc = NULL;
+	WSADATA wsd = { 0 };
+	struct addrinfo* hres;
+	struct addrinfo* ralloc;
 	size_t pctr;
-	qsc_socket_exceptions ex;
-	int32_t res;
-	const size_t ADRMAX = 32;
 
-	res = WSAStartup(0x0202, &wsd);
+	hres = NULL;
+	ralloc = NULL;
+	serr = (qsc_socket_exceptions)WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 
-	if (res == 0)
+	if (serr == qsc_socket_exception_success)
 	{
 		qsc_memutils_clear(&hints, sizeof(hints));
 		qsc_memutils_clear(&insock4, sizeof(struct sockaddr_in));
@@ -301,40 +302,56 @@ qsc_ipinfo_ipv4_address qsc_netutils_get_ipv4_address()
 		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_flags = AI_PASSIVE;
 
-		gethostname(hname, sizeof(hname));
-		ex = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
+		serr = (qsc_socket_exceptions)gethostname(hname, sizeof(hname));
 
-		if (ex == qsc_socket_exception_success)
+		if (serr == qsc_socket_exception_success)
 		{
-			ralloc = hres;
-			pctr = 0;
+			serr = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
 
-			while (hres)
+			if (serr == qsc_socket_exception_success)
 			{
-				if (hres->ai_family == AF_INET)
-				{
-					qsc_memutils_copy(&insock4, hres->ai_addr, hres->ai_addrlen);
-					insock4.sin_port = htons(9);
-					insock4.sin_family = AF_INET;
+				const size_t ADDMAX = 32;
 
-					if (inet_ntop(AF_INET, &insock4.sin_addr, hname, INET_ADDRSTRLEN) != 0)
+				ralloc = hres;
+				pctr = 0;
+
+				while (hres)
+				{
+					if (hres->ai_family == AF_INET)
 					{
-						inet_pton(AF_INET, hname, add.ipv4);
+						qsc_memutils_copy(&insock4, hres->ai_addr, hres->ai_addrlen);
+						insock4.sin_port = htons(9);
+						insock4.sin_family = AF_INET;
+
+						if (inet_ntop(AF_INET, &insock4.sin_addr, hname, INET_ADDRSTRLEN) != NULL)
+						{
+							if (inet_pton(AF_INET, hname, padd->ipv4) == NETUTILS_INET_PTON_SUCCESS)
+							{
+								serr = qsc_socket_exception_success;
+								break;
+							}
+							else
+							{
+								serr = qsc_socket_exception_error;
+							}
+						}
+						else
+						{
+							serr = qsc_socket_exception_error;
+						}
 					}
 
-					break;
+					hres = hres->ai_next;
+					++pctr;
+
+					if (pctr > ADDMAX)
+					{
+						break;
+					}
 				}
 
-				hres = hres->ai_next;
-				++pctr;
-
-				if (pctr > ADRMAX)
-				{
-					break;
-				}
+				freeaddrinfo(ralloc);
 			}
-
-			freeaddrinfo(ralloc);
 		}
 
 		WSACleanup();
@@ -342,9 +359,15 @@ qsc_ipinfo_ipv4_address qsc_netutils_get_ipv4_address()
 
 #else
 
-	struct ifaddrs* ifas = NULL;
-	struct ifaddrs* ifa = NULL;
-	void* padd = NULL;
+	struct ifaddrs* ifas;
+	struct ifaddrs* ifa;
+	void* pva;
+
+	ifas = NULL;
+	ifa = NULL;
+	pva = NULL;
+
+	serr = qsc_socket_exception_error;
 
 	getifaddrs(&ifas);
 
@@ -359,12 +382,16 @@ qsc_ipinfo_ipv4_address qsc_netutils_get_ipv4_address()
 
             if (ifa->ifa_addr->sa_family == AF_INET)
             {
-                padd = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
-                char buf[INET_ADDRSTRLEN];
+                pva = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+				char buf[INET_ADDRSTRLEN] = { 0 };
 
-                if (inet_ntop(AF_INET, padd, buf, INET_ADDRSTRLEN) != 0)
+                if (inet_ntop(AF_INET, pva, buf, INET_ADDRSTRLEN) != NULL)
                 {
-                    inet_pton(AF_INET, buf, add.ipv4);
+					if (inet_pton(AF_INET, buf, padd->ipv4) == 1)
+					{
+						serr = qsc_socket_exception_success;
+						break;
+					}
                 }
             }
         }
@@ -374,28 +401,27 @@ qsc_ipinfo_ipv4_address qsc_netutils_get_ipv4_address()
 
 #endif
 
-	return add;
+	return (serr == qsc_socket_exception_success);
 }
 
-qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address()
+bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd)
 {
-	qsc_ipinfo_ipv6_address add = { 0 };
+	qsc_socket_exceptions serr;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 	char hname[INET6_ADDRSTRLEN] = { 0 };
 	struct addrinfo hints = { 0 };
 	struct sockaddr_in6 insock6 = { 0 };
-	WSADATA wsd;
-	struct addrinfo* hres = NULL;
+	WSADATA wsd = { 0 };
+	struct addrinfo* hres;
 	struct addrinfo* ralloc;
 	size_t pctr;
-	qsc_socket_exceptions ex;
-	int32_t res;
-	const size_t ADRMAX = 32;
+	
+	hres = NULL;
+	ralloc = NULL;
+	serr = (qsc_socket_exceptions)WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 
-	res = WSAStartup(0x0202, &wsd);
-
-	if (res == 0)
+	if (serr == qsc_socket_exception_success)
 	{
 		qsc_memutils_clear(&hints, sizeof(hints));
 		qsc_memutils_clear(&insock6, sizeof(struct sockaddr_in6));
@@ -403,40 +429,56 @@ qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address()
 		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_flags = AI_PASSIVE;
 
-		gethostname(hname, sizeof(hname));
-		ex = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
+		serr = (qsc_socket_exceptions)gethostname(hname, sizeof(hname));
 
-		if (ex == qsc_socket_exception_success)
+		if (serr == qsc_socket_exception_success)
 		{
-			pctr = 0;
-			ralloc = hres;
+			serr = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
 
-			while (hres != NULL)
+			if (serr == qsc_socket_exception_success)
 			{
-				if (hres->ai_family == AF_INET6)
-				{
-					qsc_memutils_copy(&insock6, hres->ai_addr, hres->ai_addrlen);
-					insock6.sin6_port = htons(9);
-					insock6.sin6_family = AF_INET6;
+				const size_t ADDMAX = 32;
 
-					if (inet_ntop(AF_INET6, &insock6.sin6_addr, hname, INET6_ADDRSTRLEN) != 0)
+				pctr = 0;
+				ralloc = hres;
+
+				while (hres != NULL)
+				{
+					if (hres->ai_family == AF_INET6)
 					{
-						inet_pton(AF_INET6, hname, add.ipv6);
+						qsc_memutils_copy(&insock6, hres->ai_addr, hres->ai_addrlen);
+						insock6.sin6_port = htons(9);
+						insock6.sin6_family = AF_INET6;
+
+						if (inet_ntop(AF_INET6, &insock6.sin6_addr, hname, INET6_ADDRSTRLEN) != NULL)
+						{
+							if (inet_pton(AF_INET6, hname, padd->ipv6) == NETUTILS_INET_PTON_SUCCESS)
+							{
+								serr = qsc_socket_exception_success;
+								break;
+							}
+							else
+							{
+								serr = qsc_socket_exception_error;
+							}
+						}
+						else
+						{
+							serr = qsc_socket_exception_error;
+						}
 					}
 
-					break;
+					hres = hres->ai_next;
+					++pctr;
+
+					if (pctr > ADDMAX)
+					{
+						break;
+					}
 				}
 
-				hres = hres->ai_next;
-				++pctr;
-
-				if (pctr > ADRMAX)
-				{
-					break;
-				}
+				freeaddrinfo(ralloc);
 			}
-
-			freeaddrinfo(ralloc);
 		}
 
 		WSACleanup();
@@ -444,9 +486,15 @@ qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address()
 
 #else
 
-	struct ifaddrs* ifas = NULL;
-	struct ifaddrs* ifa = NULL;
-	void* padd = NULL;
+	struct ifaddrs* ifas;
+	struct ifaddrs* ifa;
+	void* pva;
+
+	ifas = NULL;
+	ifa = NULL;
+	pva = NULL;
+
+	serr = qsc_socket_exception_error;
 
 	getifaddrs(&ifas);
 
@@ -461,12 +509,16 @@ qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address()
 
             if (ifa->ifa_addr->sa_family == AF_INET6)
             {
-                padd = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
-                char buf[INET6_ADDRSTRLEN];
+                pva = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
+				char buf[INET6_ADDRSTRLEN] = { 0 };
 
-                if (inet_ntop(AF_INET6, padd, buf, INET6_ADDRSTRLEN) != 0)
+                if (inet_ntop(AF_INET6, pva, buf, INET6_ADDRSTRLEN) != NULL)
                 {
-                    inet_pton(AF_INET6, buf, add.ipv6);
+					if (inet_pton(AF_INET6, buf, padd->ipv6) == 1)
+					{
+						serr = qsc_socket_exception_success;
+						break;
+					}
                 }
             }
         }
@@ -476,13 +528,12 @@ qsc_ipinfo_ipv6_address qsc_netutils_get_ipv6_address()
 
 #endif
 
-	return add;
+	return (serr == qsc_socket_exception_success);
 }
 
-qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
+void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
 {
 	char hname[INET_ADDRSTRLEN] = { 0 };
-	qsc_ipinfo_ipv4_info info = { 0 };
 	struct addrinfo hints;
 	struct addrinfo* hres = NULL;
 	qsc_socket_exceptions ex;
@@ -490,7 +541,7 @@ qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOS
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
     WSADATA wsd;
-    res = WSAStartup(0x0202, &wsd);
+    res = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 #else
     res = 0;
 #endif
@@ -510,9 +561,9 @@ qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOS
 			{
 				if (inet_ntop(AF_INET, ((char*)hres->ai_addr->sa_data + 2), hname, INET_ADDRSTRLEN) != 0)
 				{
-					inet_pton(AF_INET, hname, info.address.ipv4);
-					info.port = ntohs(((struct sockaddr_in*)hres->ai_addr)->sin_port);
-					info.mask = qsc_ipinfo_ipv4_address_get_cidr_mask(&info.address);
+					inet_pton(AF_INET, hname, pinfo->address.ipv4);
+					pinfo->port = ntohs(((struct sockaddr_in*)hres->ai_addr)->sin_port);
+					pinfo->mask = qsc_ipinfo_ipv4_address_get_cidr_mask(&pinfo->address);
 					freeaddrinfo(hres);
 				}
 			}
@@ -522,14 +573,11 @@ qsc_ipinfo_ipv4_info qsc_netutils_get_ipv4_info(const char host[QSC_NETUTILS_HOS
 		WSACleanup();
 #endif
 	}
-
-	return info;
 }
 
-qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
+void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
 {
 	char buf[INET6_ADDRSTRLEN] = { 0 };
-	qsc_ipinfo_ipv6_info info = { 0 };
 	struct addrinfo hints;
 	struct sockaddr_in6 insock6 = { 0 };
 	struct addrinfo* haddr = NULL;
@@ -538,7 +586,7 @@ qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOS
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
     WSADATA wsd;
-    res = WSAStartup(0x0202, &wsd);
+    res = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 #else
     res = 0;
 #endif
@@ -563,9 +611,9 @@ qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOS
 
 				if (inet_ntop(AF_INET6, &insock6.sin6_addr, buf, INET6_ADDRSTRLEN) != 0)
 				{
-					inet_pton(AF_INET6, buf, &info.address);
-					info.port = ntohs(((struct sockaddr_in6*)haddr->ai_addr)->sin6_port);
-					info.mask = qsc_ipinfo_ipv6_address_get_cidr_mask(&info.address);
+					inet_pton(AF_INET6, buf, pinfo->address.ipv6);
+					pinfo->port = ntohs(((struct sockaddr_in6*)haddr->ai_addr)->sin6_port);
+					pinfo->mask = qsc_ipinfo_ipv6_address_get_cidr_mask(&pinfo->address);
 				}
 			}
 
@@ -576,8 +624,6 @@ qsc_ipinfo_ipv6_info qsc_netutils_get_ipv6_info(const char host[QSC_NETUTILS_HOS
 		WSACleanup();
 #endif
 	}
-
-	return info;
 }
 
 void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_SIZE], const qsc_socket* sock)
@@ -666,17 +712,17 @@ void qsc_netutils_values_print()
 	}
 
 	qsc_consoleutils_print_safe("IPv4 address: ");
-	ipv4 = qsc_netutils_get_ipv4_address();
+	qsc_netutils_get_ipv4_address(&ipv4);
 	qsc_ipinfo_ipv4_address_to_string(ipv4s, &ipv4);
 	qsc_consoleutils_print_line(ipv4s);
 
 	qsc_consoleutils_print_safe("IPv6 address: ");
-	ipv6 = qsc_netutils_get_ipv6_address();
+	qsc_netutils_get_ipv6_address(&ipv6);
 	qsc_ipinfo_ipv6_address_to_string(ipv6s, &ipv6);
 	qsc_consoleutils_print_line(ipv6s);
 
 	qsc_consoleutils_print_line("IPv4 info");
-	ipv4inf = qsc_netutils_get_ipv4_info("127.0.0.1", "http");
+	qsc_netutils_get_ipv4_info(&ipv4inf, "127.0.0.1", "http");
 	qsc_consoleutils_print_safe("IPv4 address: ");
 	qsc_ipinfo_ipv4_address_to_string(ipv4s, &ipv4inf.address);
 	qsc_consoleutils_print_line(ipv4s);
@@ -688,7 +734,7 @@ void qsc_netutils_values_print()
 	qsc_consoleutils_print_line("");
 
 	qsc_consoleutils_print_line("IPv6 info:");
-	ipv6inf = qsc_netutils_get_ipv6_info("::1", "http");
+	qsc_netutils_get_ipv6_info(&ipv6inf, "::1", "http");
 	qsc_consoleutils_print_safe("IPv6 address: ");
 	qsc_ipinfo_ipv6_address_to_string(ipv6s, &ipv6inf.address);
 	qsc_consoleutils_print_line(ipv6s);

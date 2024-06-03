@@ -19,9 +19,9 @@ static bool qsctest_address_info()
 	bool res;
 
 	res = true;
-	addv4 = qsc_netutils_get_ipv4_address();
+	qsc_netutils_get_ipv4_address(&addv4);
 	qsc_ipinfo_ipv4_address_to_string(saddv4, &addv4);
-	infv4 = qsc_netutils_get_ipv4_info(saddv4, portc);
+	qsc_netutils_get_ipv4_info(&infv4, saddv4, portc);
 
 	if (qsc_ipinfo_ipv4_address_is_equal(&addv4, &infv4.address) == false)
 	{
@@ -34,9 +34,9 @@ static bool qsctest_address_info()
         qsctest_print_line(saddv4);
     }
 
-	addv6 = qsc_netutils_get_ipv6_address();
+	qsc_netutils_get_ipv6_address(&addv6);
 	qsc_ipinfo_ipv6_address_to_string(saddv6, &addv6);
-	infv6 = qsc_netutils_get_ipv6_info(saddv6, portc);
+	qsc_netutils_get_ipv6_info(&infv6, saddv6, portc);
 
 	if (qsc_ipinfo_ipv6_address_is_equal(&addv6, &infv6.address) == false)
 	{

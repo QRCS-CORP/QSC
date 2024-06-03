@@ -225,7 +225,18 @@ bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 
 	bool res;
 
-	res = (address != NULL && address->ipv4[0] <= 224 && address->ipv4[1] != 255 && address->ipv4[2] != 255 && address->ipv4[3] != 255);
+	res = (address != NULL && address->ipv4[0] <= 224 && address->ipv4[0] != 255 && address->ipv4[1] != 255 && address->ipv4[2] != 255 && address->ipv4[3] != 255);
+
+	return res;
+}
+
+bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address)
+{
+	assert(address != NULL);
+
+	bool res;
+
+	res = (address != NULL && address[0] <= 224 && address[0] != 255 && address[1] != 255 && address[2] != 255 && address[3] != 255);
 
 	return res;
 }
@@ -319,9 +330,6 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 		const char DELIM = '.';
 		size_t pos;
 
-		qsc_memutils_clear(output, QSC_IPINFO_IPV4_STRNLEN);
-		output[QSC_IPINFO_IPV4_STRNLEN - 1] = '\0';
-
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address->ipv4[0]);
@@ -333,7 +341,7 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[2]);
 		output[pos] = DELIM;
 		++pos;
-		sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[3]);
+		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[3]);
 
 #else
 
@@ -346,10 +354,51 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[2]);
 		output[pos] = DELIM;
 		++pos;
-		sprintf((output + pos), "%d", address->ipv4[3]);
+		pos += sprintf((output + pos), "%d", address->ipv4[3]);
 
 #endif
+		qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
+	}
+}
 
+void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const uint8_t* address)
+{
+	assert(address != NULL);
+	assert(output != NULL);
+
+	if (address != NULL && output != NULL)
+	{
+		const char DELIM = '.';
+		size_t pos;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+
+		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address[0]);
+		output[pos] = DELIM;
+		++pos;
+		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[1]);
+		output[pos] = DELIM;
+		++pos;
+		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[2]);
+		output[pos] = DELIM;
+		++pos;
+		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[3]);
+
+#else
+
+		pos = (size_t)sprintf(output, "%d", address[0]);
+		output[pos] = DELIM;
+		++pos;
+		pos += (size_t)sprintf((output + pos), "%d", address[1]);
+		output[pos] = DELIM;
+		++pos;
+		pos += (size_t)sprintf((output + pos), "%d", address[2]);
+		output[pos] = DELIM;
+		++pos;
+		pos += sprintf((output + pos), "%d", address[3]);
+
+#endif
+		qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
 	}
 }
 
@@ -358,7 +407,7 @@ uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLE
 	uint32_t ta[4] = { 0 };
 	const char* tmp = mask;
 	uint32_t bmask;
-	int32_t pos;
+	int64_t pos;
 	uint8_t bits;
 
 	for (size_t i = 0; i < 4; ++i)
@@ -668,6 +717,37 @@ bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address)
 	return res;
 }
 
+bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address)
+{
+	assert(address != NULL);
+
+	bool res;
+
+	res = false;
+
+	if (address != NULL)
+	{
+		if (address[0] == 0)
+		{
+			res = false;
+		}
+		else if (address[0] == 1)
+		{
+			res = false;
+		}
+		else if (address[2] == 219 && address[3] == 128)
+		{
+			res = false;
+		}
+		else
+		{
+			res = true;
+		}
+	}
+
+	return res;
+}
+
 bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
@@ -807,6 +887,44 @@ void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], con
 		qsc_arrayutils_uint16_to_hex(&output[30], 5, n);
 		output[34] = DELIM;
 		n = qsc_intutils_be8to16(&address->ipv6[14]);
+		qsc_arrayutils_uint16_to_hex(&output[35], 5, n);
+	}
+}
+
+void qsc_ipinfo_ipv6_array_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const uint8_t* address)
+{
+	assert(address != NULL);
+	assert(output != NULL);
+
+	if (address != NULL && output != NULL)
+	{
+		const char DELIM = ':';
+		uint16_t n;
+
+		qsc_memutils_clear(output, QSC_IPINFO_IPV6_STRNLEN);
+
+		n = qsc_intutils_be8to16(&address[0]);
+		qsc_arrayutils_uint16_to_hex(&output[0], 5, n);
+		output[4] = DELIM;
+		n = qsc_intutils_be8to16(&address[2]);
+		qsc_arrayutils_uint16_to_hex(&output[5], 5, n);
+		output[9] = DELIM;
+		n = qsc_intutils_be8to16(&address[4]);
+		qsc_arrayutils_uint16_to_hex(&output[10], 5, n);
+		output[14] = DELIM;
+		n = qsc_intutils_be8to16(&address[6]);
+		qsc_arrayutils_uint16_to_hex(&output[15], 5, n);
+		output[19] = DELIM;
+		n = qsc_intutils_be8to16(&address[8]);
+		qsc_arrayutils_uint16_to_hex(&output[20], 5, n);
+		output[24] = DELIM;
+		n = qsc_intutils_be8to16(&address[10]);
+		qsc_arrayutils_uint16_to_hex(&output[25], 5, n);
+		output[29] = DELIM;
+		n = qsc_intutils_be8to16(&address[12]);
+		qsc_arrayutils_uint16_to_hex(&output[30], 5, n);
+		output[34] = DELIM;
+		n = qsc_intutils_be8to16(&address[14]);
 		qsc_arrayutils_uint16_to_hex(&output[35], 5, n);
 	}
 }

@@ -171,8 +171,6 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 		qsc_stringutils_copy_string(output, QSC_SYSTEM_MAX_PATH, pstr);
 	}
 
-#	if defined(QSC_SYSTEM_OS_LINUX)
-
 	switch (directory)
 	{
 		case qsc_folderutils_directories_user_desktop:
@@ -207,13 +205,19 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 		}
 		default:
 		{
-			//qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/");
+			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Documents");
 		}
 	}
-#	elif defined(QSC_SYSTEM_OS_APPLE)
-
-#	endif
 #endif
+}
+
+bool qsc_folderutils_directory_has_delimiter(const char path[QSC_SYSTEM_MAX_PATH])
+{
+	size_t len;
+
+	len = qsc_stringutils_string_size(path);
+
+	return (path[len - 1] == '\\');
 }
 
 #if defined(QSC_DEBUG_MODE)

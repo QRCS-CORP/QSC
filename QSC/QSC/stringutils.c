@@ -145,35 +145,36 @@ size_t qsc_stringutils_concat_strings(char* dest, size_t dstlen, const char* sou
 	assert(dest != NULL);
 	assert(source != NULL);
 
-	errno_t err;
-	size_t res;
-	size_t dlen;
-	size_t slen;
+	size_t pos;
 
-	err = 0;
-	res = 0;
+	pos = 0;
 
 	if (dest != NULL && source != NULL)
 	{
+		size_t dlen;
+		size_t slen;
+
 		dlen = strlen(dest);
 		slen = strlen(source);
 
 		if (slen > 0 && slen <= dstlen - dlen)
 		{
+			errno_t err;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 			err = strcat_s(dest, dstlen, source);
 #else
 			err = (strcat(dest, source) != NULL);
 #endif
-		}
-
-		if (err == 0)
-		{
-			res = strlen(dest);
+			if (err == 0)
+			{
+				pos = dlen + slen;
+				qsc_memutils_clear(dest + pos, dstlen - pos);
+			}
 		}
 	}
 
-	return res;
+	return pos;
 }
 
 size_t qsc_stringutils_concat_and_copy(char* dest, size_t dstlen, const char* str1, const char* str2)
@@ -312,13 +313,13 @@ size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char
 	return ctr;
 }
 
-int32_t qsc_stringutils_find_string(const char* source, const char* token)
+int64_t qsc_stringutils_find_string(const char* source, const char* token)
 {
 	assert(source != NULL);
 	assert(token != NULL);
 
 	const char* sub;
-	int32_t pos;
+	int64_t pos;
 
 	pos = QSC_STRINGUTILS_TOKEN_NOT_FOUND;
 
@@ -328,19 +329,19 @@ int32_t qsc_stringutils_find_string(const char* source, const char* token)
 
 		if (sub != NULL)
 		{
-			pos = (int32_t)(sub - source);
+			pos = (int64_t)(sub - source);
 		}
 	}
 
 	return pos;
 }
 
-int32_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* source, size_t offset)
+int64_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* source, size_t offset)
 {
 	assert(dest != NULL);
 	assert(source != NULL);
 
-	int32_t res;
+	int64_t res;
 
 	res = QSC_STRINGUTILS_TOKEN_NOT_FOUND;
 
@@ -348,40 +349,31 @@ int32_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* sou
 		(strlen(dest) + strlen(source)) <= dstlen && offset < (dstlen - strlen(source)))
 	{
 		qsc_stringutils_concat_strings((dest + offset), dstlen, source);
-		res = (int32_t)strlen(dest);
+		res = (int64_t)strlen(dest);
 	}
 
 	return res;
 }
 
-bool qsc_stringutils_is_alpha_numeric(const char* source, size_t srclen)
+void qsc_stringutils_int_to_string(int32_t num, char* dest, size_t destlen)
+{
+	assert(dest != NULL);
+
+	if (dest != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		_itoa_s(num, dest, destlen, 10);
+#else
+		snprintf(dest, destlen, "%d", num);
+#endif
+	}
+}
+
+bool qsc_stringutils_is_empty(const char* source)
 {
 	assert(source != NULL);
 
-	char c;
-	bool res;
-
-	if (source != NULL)
-	{
-		res = true;
-
-		for (size_t i = 0; i < srclen; ++i)
-		{
-			c = source[i];
-
-			if (c < 48 || (c > 57 && c < 65) || (c > 90 && c < 97) || c > 122)
-			{
-				res = false;
-			}
-
-		}
-	}
-	else
-	{
-		res = false;
-	}
-
-	return res;
+	return (qsc_stringutils_string_size(source) == 0);
 }
 
 bool qsc_stringutils_is_hex(const char* source, size_t srclen)
@@ -444,21 +436,7 @@ bool qsc_stringutils_is_numeric(const char* source, size_t srclen)
 	return res;
 }
 
-void qsc_stringutils_int_to_string(int32_t num, char* dest, size_t destlen)
-{
-	assert(dest != NULL);
-
-	if (dest != NULL)
-	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		_itoa_s(num, dest, destlen, 10);
-#else
-		snprintf(dest, destlen, "%d", num);
-#endif
-	}
-}
-
-char* qsc_stringutils_join_string(char** source, size_t count)
+char* qsc_stringutils_register_string(char** source, size_t count)
 {
 	assert(*source != NULL);
 
@@ -496,20 +474,43 @@ char* qsc_stringutils_join_string(char** source, size_t count)
 	return nstr;
 }
 
+const char* qsc_stringutils_reverse_sub_string(const char* source, const char* token)
+{
+	assert(source != NULL);
+	assert(token != NULL);
+
+	const char* pch;
+	const char* sub;
+	size_t pos;
+
+	sub = NULL;
+
+	if (source != NULL && token != NULL)
+	{
+		pch = strrchr(source, token[0]);
+
+		if (pch != NULL)
+		{
+			pos = pch - source + 1;
+			sub = source + pos;
+		}
+	}
+
+	return sub;
+}
+
 void qsc_stringutils_split_strings(char* dest1, char* dest2, size_t destlen, const char* source, const char* token)
 {
 	const char* pstr;
 	size_t plen;
-	int32_t pos;
+	int64_t pos;
 
 	pos = qsc_stringutils_find_string(source, token);
 
 	if (pos > 0)
 	{
-		const size_t TOKLEN = qsc_stringutils_string_size(token);
-
 		pstr = source;
-		plen = (size_t)pos + TOKLEN;
+		plen = (size_t)pos;
 
 		if (destlen >= plen)
 		{
@@ -535,8 +536,8 @@ char** qsc_stringutils_split_string(char* source, const char* delim, size_t* cou
 	char** ptok;
 	const char* tok;
 	char* pstr;
-	int32_t pln;
-	int32_t pos;
+	int64_t pln;
+	int64_t pos;
 	size_t ctr;
 	size_t len;
 
@@ -604,48 +605,6 @@ char** qsc_stringutils_split_string(char* source, const char* delim, size_t* cou
 	}
 
 	return ptok;
-}
-
-char* qsc_stringutils_sub_string(const char* source, const char* token)
-{
-	assert(source != NULL);
-	assert(token != NULL);
-
-	char* sub;
-
-	sub = NULL;
-
-	if (source != NULL && token != NULL)
-	{
-		sub = strstr(source, token);
-	}
-
-	return sub;
-}
-
-const char* qsc_stringutils_reverse_sub_string(const char* source, const char* token)
-{
-	assert(source != NULL);
-	assert(token != NULL);
-
-	const char* pch;
-	const char* sub;
-	size_t pos;
-
-	sub = NULL;
-
-	if (source != NULL && token != NULL)
-	{
-		pch = strrchr(source, token[0]);
-
-		if (pch != NULL)
-		{
-			pos = pch - source + 1;
-			sub = source + pos;
-		}
-	}
-
-	return sub;
 }
 
 bool qsc_stringutils_string_compare(const char* str1, const char* str2, size_t length)
@@ -740,6 +699,23 @@ size_t qsc_stringutils_string_size(const char* source)
 	return res;
 }
 
+char* qsc_stringutils_sub_string(const char* source, const char* token)
+{
+	assert(source != NULL);
+	assert(token != NULL);
+
+	char* sub;
+
+	sub = NULL;
+
+	if (source != NULL && token != NULL)
+	{
+		sub = strstr(source, token);
+	}
+
+	return sub;
+}
+
 void qsc_stringutils_to_lowercase(char* source)
 {
 	assert(source != NULL);
@@ -776,6 +752,23 @@ void qsc_stringutils_trim_newline(char* source)
 			{
 				source[i] = '\0';
 			}
+		}
+	}
+}
+
+void qsc_stringutils_trim_spaces(char* source)
+{
+	assert(source != NULL);
+
+	size_t slen;
+
+	if (source != NULL)
+	{
+		slen = qsc_stringutils_string_size(source);
+
+		if (source[slen - 1] == ' ')
+		{
+			source[slen - 1] = '\0';
 		}
 	}
 }

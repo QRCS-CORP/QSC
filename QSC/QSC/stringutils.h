@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_STRINGUTILS_H
 #define QSC_STRINGUTILS_H
@@ -154,7 +148,7 @@ QSC_EXPORT_API size_t qsc_stringutils_copy_string(char* dest, size_t dstlen, con
 * \param token: [const] The substring to search for
 * \return Returns the character position within the string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the string is not found
 */
-QSC_EXPORT_API int32_t qsc_stringutils_find_string(const char* source, const char* token);
+QSC_EXPORT_API int64_t qsc_stringutils_find_string(const char* source, const char* token);
 
 /**
 * \brief Inserts a substring into a string
@@ -165,7 +159,7 @@ QSC_EXPORT_API int32_t qsc_stringutils_find_string(const char* source, const cha
 * \param offset: The insertion starting position within the source string; position is ordinal, 0-n
 * \return Returns the size of the new string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the string insert operation failed
 */
-QSC_EXPORT_API int32_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* source, size_t offset);
+QSC_EXPORT_API int64_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* source, size_t offset);
 
 /**
 * \brief Check that a string contains only alpha numeric ASCII characters
@@ -175,6 +169,15 @@ QSC_EXPORT_API int32_t qsc_stringutils_insert_string(char* dest, size_t dstlen, 
 * \return Returns true if the string is alpha numeric
 */
 QSC_EXPORT_API bool qsc_stringutils_is_alpha_numeric(const char* source, size_t srclen);
+
+/**
+* \brief Check if a string contains and characters
+*
+* \param source: [const] The string to check for characters
+* 
+* \return Returns true if the string is empty
+*/
+QSC_EXPORT_API bool qsc_stringutils_is_empty(const char* source);
 
 /**
 * \brief Check that a string contains only hexadecimal ASCII characters
@@ -203,7 +206,7 @@ QSC_EXPORT_API bool qsc_stringutils_is_numeric(const char* source, size_t srclen
 * \param count: The number of substring arrays
 * \return Returns a concatenated string
 */
-QSC_EXPORT_API char* qsc_stringutils_join_string(char** source, size_t count);
+QSC_EXPORT_API char* qsc_stringutils_register_string(char** source, size_t count);
 
 /**
 * \brief Find a substring within a string, searching in reverse
@@ -302,6 +305,13 @@ QSC_EXPORT_API void qsc_stringutils_to_uppercase(char* source);
 * \param source: The string to trim
 */
 QSC_EXPORT_API void qsc_stringutils_trim_newline(char* source);
+
+/**
+* \brief Trim a trailing space character from a string
+*
+* \param source: The string to trim
+*/
+QSC_EXPORT_API void qsc_stringutils_trim_spaces(char* source);
 
 /**
 * \brief Count all the white-spaces in a string

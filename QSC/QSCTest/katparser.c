@@ -43,8 +43,8 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 	const char SKYTAG[] = "sk = ";
 	const char SMGTAG[] = "sm = ";
 	size_t flen;
-	size_t fpos;
-	size_t llen;
+	int64_t fpos;
+	int64_t llen;
 	size_t sctr;
 	uint32_t setc;
 	const char* fbuf;
@@ -63,6 +63,12 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 			while (true)
 			{
 				fpos = (size_t)qsc_stringutils_find_string(fbuf, CNTTAG) + sizeof(CNTTAG) - 1;
+
+				if (fpos < 0)
+				{
+					break;
+				}
+
 				fbuf += fpos;
 				setc = (uint32_t)qsc_stringutils_string_to_int(fbuf);
 
@@ -75,34 +81,74 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 			}
 
 			fpos = (size_t)qsc_stringutils_find_string(fbuf, SEDTAG) + sizeof(SEDTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, seed, llen);
-			*seedlen = llen;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, MSGTAG) + sizeof(MSGTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, msg, llen);
-			*msglen = llen;
+			if (fpos > 0)
+			{
+				fbuf += fpos;
+				llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, PKYTAG) + sizeof(PKYTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, pk, llen);
-			*pklen = llen;
+				if (llen > 0)
+				{
+					qsc_intutils_hex_to_bin(fbuf, seed, llen);
+					*seedlen = llen;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, SKYTAG) + sizeof(SKYTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, sk, llen);
-			*sklen = llen;
+					fpos = (size_t)qsc_stringutils_find_string(fbuf, MSGTAG) + sizeof(MSGTAG) - 1;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, SMGTAG) + sizeof(SMGTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, sm, llen);
-			*smlen = llen;
+					if (fpos > 0)
+					{
+						fbuf += fpos;
+						llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+						if (llen > 0)
+						{
+							qsc_intutils_hex_to_bin(fbuf, msg, llen);
+							*msglen = llen;
+
+							fpos = (size_t)qsc_stringutils_find_string(fbuf, PKYTAG) + sizeof(PKYTAG) - 1;
+
+							if (fpos > 0)
+							{
+								fbuf += fpos;
+								llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+								if (llen > 0)
+								{
+									qsc_intutils_hex_to_bin(fbuf, pk, llen);
+									*pklen = llen;
+
+									fpos = (size_t)qsc_stringutils_find_string(fbuf, SKYTAG) + sizeof(SKYTAG) - 1;
+
+									if (fpos > 0)
+									{
+										fbuf += fpos;
+										llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+										if (llen > 0)
+										{
+											qsc_intutils_hex_to_bin(fbuf, sk, llen);
+											*sklen = llen;
+
+											fpos = (size_t)qsc_stringutils_find_string(fbuf, SMGTAG) + sizeof(SMGTAG) - 1;
+
+											if (fpos > 0)
+											{
+												fbuf += fpos;
+												llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+												if (llen > 0)
+												{
+													qsc_intutils_hex_to_bin(fbuf, sm, llen);
+													*smlen = llen;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 
 			free(pbuf);
 		}
@@ -121,8 +167,8 @@ void parse_nist_cipher_kat(const char* path, uint8_t* seed, size_t* seedlen, uin
 	char* pbuf;
 	const char* fbuf;
 	size_t flen;
-	size_t fpos;
-	size_t llen;
+	int64_t fpos;
+	int64_t llen;
 	size_t sctr;
 	uint32_t setc;
 
@@ -139,6 +185,12 @@ void parse_nist_cipher_kat(const char* path, uint8_t* seed, size_t* seedlen, uin
 			while (true)
 			{
 				fpos = (size_t)qsc_stringutils_find_string(fbuf, CNTTAG) + sizeof(CNTTAG) - 1;
+
+				if (fpos < 0)
+				{
+					break;
+				}
+
 				fbuf += fpos;
 				setc = (uint32_t)qsc_stringutils_string_to_int(fbuf);
 
@@ -151,34 +203,74 @@ void parse_nist_cipher_kat(const char* path, uint8_t* seed, size_t* seedlen, uin
 			}
 
 			fpos = (size_t)qsc_stringutils_find_string(fbuf, SEDTAG) + sizeof(SEDTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, seed, llen);
-			*seedlen = llen;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, PKYTAG) + sizeof(PKYTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, pk, llen);
-			*pklen = llen;
+			if (fpos > 0)
+			{
+				fbuf += fpos;
+				llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, SKYTAG) + sizeof(SKYTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, sk, llen);
-			*sklen = llen;
+				if (llen > 0)
+				{
+					qsc_intutils_hex_to_bin(fbuf, seed, llen);
+					*seedlen = llen;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, CPRTAG) + sizeof(CPRTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, ct, llen);
-			*ctlen = llen;
+					fpos = (size_t)qsc_stringutils_find_string(fbuf, PKYTAG) + sizeof(PKYTAG) - 1;
 
-			fpos = (size_t)qsc_stringutils_find_string(fbuf, SSTTAG) + sizeof(SSTTAG) - 1;
-			fbuf += fpos;
-			llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
-			qsc_intutils_hex_to_bin(fbuf, ss, llen);
-			*sslen = llen;
+					if (fpos > 0)
+					{
+						fbuf += fpos;
+						llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+						if (llen > 0)
+						{
+							qsc_intutils_hex_to_bin(fbuf, pk, llen);
+							*pklen = llen;
+
+							fpos = (size_t)qsc_stringutils_find_string(fbuf, SKYTAG) + sizeof(SKYTAG) - 1;
+
+							if (fpos > 0)
+							{
+								fbuf += fpos;
+								llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+								if (llen > 0)
+								{
+									qsc_intutils_hex_to_bin(fbuf, sk, llen);
+									*sklen = llen;
+
+									fpos = (size_t)qsc_stringutils_find_string(fbuf, CPRTAG) + sizeof(CPRTAG) - 1;
+
+									if (fpos > 0)
+									{
+										fbuf += fpos;
+										llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+										if (llen > 0)
+										{
+											qsc_intutils_hex_to_bin(fbuf, ct, llen);
+											*ctlen = llen;
+
+											fpos = (size_t)qsc_stringutils_find_string(fbuf, SSTTAG) + sizeof(SSTTAG) - 1;
+
+											if (fpos > 0)
+											{
+												fbuf += fpos;
+												llen = (size_t)qsc_stringutils_find_string(fbuf, "\n") / 2;
+
+												if (llen > 0)
+												{
+													qsc_intutils_hex_to_bin(fbuf, ss, llen);
+													*sslen = llen;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 
 			free(pbuf);
 		}

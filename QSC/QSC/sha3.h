@@ -1,26 +1,20 @@
-/*
-* Copyright (c) 2023 Quantum Secure Cryptographic Solutions QSCS Corp. (QSCS.ca).
-* This file is part of the QSC Cryptographic library.
-* The QSC library was written as a prototyping library for post-quantum primitives,
-* in the hopes that it would be useful for educational purposes only.
-* Any use of the QSC library in a commercial context, or reproduction of original material
-* contained in this library is strictly forbidden unless prior written consent is obtained
-* from the QSCS Corporation.
-*
-* The AGPL version 3 License (AGPLv3)
-* This program is free software : you can redistribute it and / or modify
-* it under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+
+/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Quantum Resistant Cryptographic Solutions Incorporated.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Quantum Resistant Cryptographic Solutions Incorporated.
+ *
+ * Written by John G. Underhill
+ * Contact: develop@qrcs.ca
+ */
 
 #ifndef QSC_SHA3_H
 #define QSC_SHA3_H
@@ -204,6 +198,12 @@
 #define QSC_KMAC_512_KEY_SIZE 64
 
 /*!
+* \def QSC_KECCAK_SCBKDF_DOMAIN_ID
+* \brief The SCBKDF domain id
+*/
+#define QSC_KECCAK_SCBKDF_DOMAIN_ID 0x42
+
+/*!
 * \def QSC_SHA3_128_HASH_SIZE
 * \brief The QSC_SHA3_128_HASH_SIZE hash size in bytes (16)
 */
@@ -314,11 +314,11 @@ QSC_EXPORT_API void qsc_keccak_dispose(qsc_keccak_state* ctx);
 * \param ctx: [struct] The Keccak state structure
 * \param rate: The rate of absorption in bytes
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param domain: The function domain id
 * \param rounds: The number of permutation rounds, the default is 24, maximum is 48
 */
-QSC_EXPORT_API void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t otplen, uint8_t domain, size_t rounds);
+QSC_EXPORT_API void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t outlen, uint8_t domain, size_t rounds);
 
 /**
 * \brief Absorb bytes into state incrementally
@@ -344,10 +344,10 @@ QSC_EXPORT_API void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint3
 *
 * \param ctx: The function state
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param rate: The rate of absorption in bytes
 */
-QSC_EXPORT_API void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t* output, size_t otplen);
+QSC_EXPORT_API void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t* output, size_t outlen);
 
 /**
 * \brief The Keccak permute function.
@@ -494,11 +494,11 @@ QSC_EXPORT_API void qsc_sha3_update(qsc_keccak_state* ctx, qsc_keccak_rate rate,
 * \warning The output array length must not be zero.
 *
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param key: [const] The input key byte array
 * \param keylen: The number of key bytes to process
 */
-QSC_EXPORT_API void qsc_shake128_compute(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen);
+QSC_EXPORT_API void qsc_shake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen);
 
 /**
 * \brief Key a SHAKE-256 instance, and generate an array of pseudo-random bytes.
@@ -507,11 +507,11 @@ QSC_EXPORT_API void qsc_shake128_compute(uint8_t* output, size_t otplen, const u
 * \warning The output array length must not be zero.
 *
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param key: [const] The input key byte array
 * \param keylen: The number of key bytes to process
 */
-QSC_EXPORT_API void qsc_shake256_compute(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen);
+QSC_EXPORT_API void qsc_shake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen);
 
 /**
 * \brief Key a SHAKE-512 instance, and generate an array of pseudo-random bytes.
@@ -520,11 +520,11 @@ QSC_EXPORT_API void qsc_shake256_compute(uint8_t* output, size_t otplen, const u
 * \warning The output array length must not be zero.
 *
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param key: [const] The input key byte array
 * \param keylen: The number of key bytes to process
 */
-QSC_EXPORT_API void qsc_shake512_compute(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen);
+QSC_EXPORT_API void qsc_shake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen);
 
 /**
 * \brief The SHAKE initialize function.
@@ -561,7 +561,7 @@ QSC_EXPORT_API void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_ra
 * Permutes and extracts the state to an output byte array..
 *
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param key: [const] The input key byte array
 * \param keylen: The number of key bytes to process
 * \param name: [const] The function name string
@@ -569,7 +569,7 @@ QSC_EXPORT_API void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_ra
 * \param custom: [const] The customization string
 * \param custlen: The byte length of the customization string
 */
-QSC_EXPORT_API void qsc_cshake128_compute(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
+QSC_EXPORT_API void qsc_cshake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
 
 /**
 * \brief Key a cSHAKE-256 instance and generate pseudo-random output.
@@ -577,7 +577,7 @@ QSC_EXPORT_API void qsc_cshake128_compute(uint8_t* output, size_t otplen, const 
 * Permutes and extracts the state to an output byte array.
 *
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param key: [const] The input key byte array
 * \param keylen: The number of key bytes to process
 * \param name: [const] The function name string
@@ -585,7 +585,7 @@ QSC_EXPORT_API void qsc_cshake128_compute(uint8_t* output, size_t otplen, const 
 * \param custom: [const] The customization string
 * \param custlen: The byte length of the customization string
 */
-QSC_EXPORT_API void qsc_cshake256_compute(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
+QSC_EXPORT_API void qsc_cshake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
 
 /**
 * \brief Key a cSHAKE-512 instance and generate pseudo-random output.
@@ -593,7 +593,7 @@ QSC_EXPORT_API void qsc_cshake256_compute(uint8_t* output, size_t otplen, const 
 * Permutes and extracts the state to an output byte array.
 *
 * \param output: The output byte array
-* \param otplen: The number of output bytes to generate
+* \param outlen: The number of output bytes to generate
 * \param key: [const] The input key byte array
 * \param keylen: The number of key bytes to process
 * \param name: [const] The function name string
@@ -601,7 +601,7 @@ QSC_EXPORT_API void qsc_cshake256_compute(uint8_t* output, size_t otplen, const 
 * \param custom: [const] The customization string
 * \param custlen: The byte length of the customization string
 */
-QSC_EXPORT_API void qsc_cshake512_compute(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
+QSC_EXPORT_API void qsc_cshake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
 
 /**
 * \brief The cSHAKE initialize function.
@@ -657,7 +657,7 @@ QSC_EXPORT_API void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rat
 * Key the MAC generator process a message and output the MAC code.
 *
 * \param output: The MAC code byte array
-* \param otplen: The number of MAC code bytes to generate
+* \param outlen: The number of MAC code bytes to generate
 * \param message: [const] The message input byte array
 * \param msglen: The number of message bytes to process
 * \param key: [const] The input key byte array
@@ -665,7 +665,7 @@ QSC_EXPORT_API void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rat
 * \param custom: [const] The customization string
 * \param custlen: The byte length of the customization string
 */
-QSC_EXPORT_API void qsc_kmac128_compute(uint8_t* output, size_t otplen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
+QSC_EXPORT_API void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
 /**
 * \brief Key a KMAC-256 instance and generate a MAC code.
@@ -673,7 +673,7 @@ QSC_EXPORT_API void qsc_kmac128_compute(uint8_t* output, size_t otplen, const ui
 * Key the MAC generator process a message and output the MAC code.
 *
 * \param output: The MAC code byte array
-* \param otplen: The number of MAC code bytes to generate
+* \param outlen: The number of MAC code bytes to generate
 * \param message: [const] The message input byte array
 * \param msglen: The number of message bytes to process
 * \param key: [const] The input key byte array
@@ -681,7 +681,7 @@ QSC_EXPORT_API void qsc_kmac128_compute(uint8_t* output, size_t otplen, const ui
 * \param custom: [const] The customization string
 * \param custlen: The byte length of the customization string
 */
-QSC_EXPORT_API void qsc_kmac256_compute(uint8_t* output, size_t otplen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
+QSC_EXPORT_API void qsc_kmac256_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
 /**
 * \brief Key a KMAC-512 instance and generate a MAC code.
@@ -689,7 +689,7 @@ QSC_EXPORT_API void qsc_kmac256_compute(uint8_t* output, size_t otplen, const ui
 * Key the MAC generator process a message and output the MAC code.
 *
 * \param output: The MAC code byte array
-* \param otplen: The number of MAC code bytes to generate
+* \param outlen: The number of MAC code bytes to generate
 * \param message: [const] The message input byte array
 * \param msglen: The number of message bytes to process
 * \param key: [const] The input key byte array
@@ -697,7 +697,7 @@ QSC_EXPORT_API void qsc_kmac256_compute(uint8_t* output, size_t otplen, const ui
 * \param custom: [const] The customization string
 * \param custlen: The byte length of the customization string
 */
-QSC_EXPORT_API void qsc_kmac512_compute(uint8_t* output, size_t otplen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
+QSC_EXPORT_API void qsc_kmac512_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
 /**
 * \brief The KMAC message update function.
@@ -722,9 +722,9 @@ QSC_EXPORT_API void qsc_kmac_update(qsc_keccak_state* ctx, qsc_keccak_rate rate,
 * \param ctx: [struct] A reference to the Keccak state; must be initialized
 * \param rate: The rate of absorption in bytes
 * \param output: The output byte array
-* \param otplen: The number of bytes to extract
+* \param outlen: The number of bytes to extract
 */
-QSC_EXPORT_API void qsc_kmac_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t otplen);
+QSC_EXPORT_API void qsc_kmac_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t outlen);
 
 /**
 * \brief Initialize a KMAC instance.
@@ -802,18 +802,18 @@ QSC_EXPORT_API typedef struct
 *
 * \warning The state must be initialized before calling.
 *
-* \param ctx: [struct] A reference to the Keccak state; must be initialized
+* \param ctx: [struct] A reference to the KPA state structure; must be initialized
 * \param output: The output byte array
-* \param otplen: The number of bytes to extract
+* \param outlen: The number of bytes to extract
 */
-QSC_EXPORT_API void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t otplen);
+QSC_EXPORT_API void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen);
 
 /**
 * \brief Initialize a KPA instance.
 * Long form api: must be used in conjunction with the blockupdate and finalize functions.
 * Key the MAC generator and initialize the internal state.
 *
-* \param ctx: [struct] A reference to the Keccak state; must be initialized
+* \param ctx: [struct] A reference to the KPA state structure; must be initialized
 * \param key: [const] The input key byte array
 * \param keylen: The number of key bytes to process
 * \param custom: [const] The customization string
@@ -827,7 +827,7 @@ QSC_EXPORT_API void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, s
 *
 * \warning The state must be initialized before calling.
 *
-* \param ctx: [struct] A reference to the Keccak state; must be initialized
+* \param ctx: [struct] A reference to the KPA state structure; must be initialized
 * \param message: [const] The message input byte array
 * \param msglen: The number of message bytes to process
 */
@@ -839,7 +839,7 @@ QSC_EXPORT_API void qsc_kpa_update(qsc_kpa_state* ctx, const uint8_t* message, s
 * \warning The dispose function must be called when disposing of the function state.
 * This function safely destroys the internal state.
 *
-* \param ctx: [struct] The Keccak state structure
+* \param ctx: [struct] A reference to the KPA state structure; must be initialized
 */
 QSC_EXPORT_API void qsc_kpa_dispose(qsc_kpa_state* ctx);
 
@@ -943,14 +943,14 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array
 * \param out3: The 4th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param inp0: [const] The 1st input key array
 * \param inp1: [const] The 2nd input key array
 * \param inp2: [const] The 3rd input key array
 * \param inp3: [const] The 4th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t otplen,
+QSC_EXPORT_API void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
 
 /**
@@ -963,14 +963,14 @@ QSC_EXPORT_API void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array
 * \param out3: The 4th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param inp0: [const] The 1st input key array
 * \param inp1: [const] The 2nd input key array
 * \param inp2: [const] The 3rd input key array
 * \param inp3: [const] The 4th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t otplen,
+QSC_EXPORT_API void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
 
 /**
@@ -983,14 +983,14 @@ QSC_EXPORT_API void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array
 * \param out3: The 4th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param inp0: [const] The 1st input key array
 * \param inp1: [const] The 2nd input key array
 * \param inp2: [const] The 3rd input key array
 * \param inp3: [const] The 4th input key array
 * \param inplen: The length of the input key arrays
 */
-QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t otplen,
+QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
 
 /* parallel shake x8 */
@@ -1009,7 +1009,7 @@ QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param out5: The 6th output array
 * \param out6: The 7th output array
 * \param out7: The 8th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param inp0: [const] The 1st input key array
 * \param inp1: [const] The 2nd input key array
 * \param inp2: [const] The 3rd input key array
@@ -1021,7 +1021,7 @@ QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param inplen: The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
-	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t otplen,
+	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen);
 
@@ -1039,7 +1039,7 @@ QSC_EXPORT_API void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param out5: The 6th output array
 * \param out6: The 7th output array
 * \param out7: The 8th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param [const] inp0: The 1st input key array
 * \param [const] inp1: The 2nd input key array
 * \param [const] inp2: The 3rd input key array
@@ -1051,7 +1051,7 @@ QSC_EXPORT_API void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param inplen: The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
-	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t otplen,
+	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen);
 
@@ -1069,7 +1069,7 @@ QSC_EXPORT_API void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param out5: The 6th output array
 * \param out6: The 7th output array
 * \param out7: The 8th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param inp0: [const] The 1st input key array
 * \param inp1: [const] The 2nd input key array
 * \param inp2: [const] The 3rd input key array
@@ -1081,7 +1081,7 @@ QSC_EXPORT_API void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param inplen: The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
-	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t otplen,
+	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen);
 
@@ -1097,7 +1097,7 @@ QSC_EXPORT_API void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array
 * \param out3: The 4th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param key0: [const] The 1st key array
 * \param key1: [const] The 2nd key array
 * \param key2: [const] The 3rd key array
@@ -1114,7 +1114,7 @@ QSC_EXPORT_API void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \param msg3: [const] The 4th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t otplen,
+QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen);
@@ -1129,7 +1129,7 @@ QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array
 * \param out3: The 4th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param key0: [const] The 1st key array
 * \param key1: [const] The 2nd key array
 * \param key2: [const] The 3rd key array
@@ -1146,7 +1146,7 @@ QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param msg3: [const] The 4th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t otplen,
+QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen);
@@ -1161,7 +1161,7 @@ QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param out1: The 2nd output array
 * \param out2: The 3rd output array
 * \param out3: The 4th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param key0: [const] The 1st key array
 * \param key1: [const] The 2nd key array
 * \param key2: [const] The 3rd key array
@@ -1178,7 +1178,7 @@ QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param msg3: [const] The 4th message array
 * \param msglen: The length of the message arrays
 */
-QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t otplen,
+QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen);
@@ -1199,7 +1199,7 @@ QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param out5: The 6th output array
 * \param out6: The 7th output array
 * \param out7: The 8th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param key0: [const] The 1st key array
 * \param key1: [const] The 2nd key array
 * \param key2: [const] The 3rd key array
@@ -1229,7 +1229,7 @@ QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param msglen: The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
-	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t otplen,
+	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3,
@@ -1251,7 +1251,7 @@ QSC_EXPORT_API void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param out5: The 6th output array
 * \param out6: The 7th output array
 * \param out7: The 8th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param key0: [const] The 1st key array
 * \param key1: [const] The 2nd key array
 * \param key2: [const] The 3rd key array
@@ -1281,7 +1281,7 @@ QSC_EXPORT_API void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param msglen: The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
-	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t otplen,
+	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3,
@@ -1303,7 +1303,7 @@ QSC_EXPORT_API void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param out5: The 6th output array
 * \param out6: The 7th output array
 * \param out7: The 8th output array
-* \param otplen: The length of the output arrays
+* \param outlen: The length of the output arrays
 * \param key0: [const] The 1st key array
 * \param key1: [const] The 2nd key array
 * \param key2: [const] The 3rd key array
@@ -1333,12 +1333,76 @@ QSC_EXPORT_API void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \param msglen: The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
-	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t otplen,
+	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3,
 	const uint8_t* key4, const uint8_t* key5, const uint8_t* key6, const uint8_t* key7, size_t keylen,
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3,
 	const uint8_t* cst4, const uint8_t* cst5, const uint8_t* cst6, const uint8_t* cst7, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3,
 	const uint8_t* msg4, const uint8_t* msg5, const uint8_t* msg6, const uint8_t* msg7, size_t msglen);
+
+/*!
+* \struct qsc_scbkdf_state
+* \brief A pointer to the SCBKDF state structure
+*/
+QSC_EXPORT_API typedef struct
+{
+	qsc_keccak_state kstate;											/*!< The keccak state  */
+	uint8_t* cache;														/*!< A pointer to the cache buffer  */
+	size_t cpos;														/*!< The buffer position  */
+	size_t cpucost;														/*!< The cpu cost factor  */
+	size_t memcost;														/*!< The memory cost factor  */
+	qsc_keccak_rate rate;												/*!< The keccak absorption rate  */
+} qsc_scbkdf_state;
+
+/**
+* \brief Dispose of the SCBKDF state, releases memory allocations and clears state
+*
+* \warning The dispose function must be called when disposing of the function state.
+* This function safely destroys the internal state and releases memory allocations.
+*
+* \param ctx: [struct] A pointer to the SCBKDF state structure
+*/
+QSC_EXPORT_API void qsc_scbkdf_dispose(qsc_scbkdf_state* ctx);
+
+/**
+* \brief Initialize a SCBKDF instance. 
+* The memcost (MB) can not be less than the cpucost * the rate.
+* Example implementation would be r=136, m=1000, c=1000, 
+* 1000 iterations maxing out at 1GB of memory.
+*
+* \param ctx: [struct] A pointer to the SCBKDF state
+* \param rate: The Keccak rate: 128, 256, or 512
+* \param cpucost: The Cpu cost factor in cycle repetitions; maximum of 1000000
+* \param memcost: The memory cost factor in megabytes; maximum of 8192 (8GB)
+* \param seed: [const] The input key byte array
+* \param seedlen: The byte length of the key
+* \param custom: [const] The customization string
+* \param custlen: The byte length of the customization string
+*/
+QSC_EXPORT_API bool qsc_scbkdf_initialize(qsc_scbkdf_state* ctx, qsc_keccak_rate rate, size_t cpucost, size_t memcost, const uint8_t* seed, size_t seedlen, const uint8_t* custom, size_t custlen);
+
+/**
+* \brief The SCBKDF squeeze function; writes hashed bytes to an output array
+* Must be used in conjunction with the initialize and dispose functions.
+*
+* \warning The state must be initialized before calling.
+*
+* \param ctx: [struct] A reference to the Keccak state; must be initialized
+* \param output: The output byte array
+* \param outlen: The size of the output array
+*/
+QSC_EXPORT_API void qsc_scbkdf_squeeze(qsc_scbkdf_state* ctx, uint8_t* output, size_t outlen);
+
+/**
+* \brief The SCBKDF update function
+*
+* \warning The state must be initialized before calling.
+*
+* \param ctx: [struct] A reference to the Keccak state; must be initialized
+* \param message: [const] The input message array
+* \param msglen: The size of the input array
+*/
+QSC_EXPORT_API void qsc_scbkdf_update(qsc_scbkdf_state* ctx, const uint8_t* message, size_t msglen);
 
 #endif

@@ -237,9 +237,6 @@
     <ClInclude Include="acp.h">
       <Filter>Header Files\Provider</Filter>
     </ClInclude>
-    <ClInclude Include="secmem.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
     <ClInclude Include="secrand.h">
       <Filter>Header Files\PRNG</Filter>
     </ClInclude>
@@ -342,9 +339,6 @@
     <ClInclude Include="scb.h">
       <Filter>Header Files\DRBG</Filter>
     </ClInclude>
-    <ClInclude Include="list.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
     <ClInclude Include="kyberbase.h">
       <Filter>Header Files\Asymmetric\Cipher\Kyber\Support</Filter>
     </ClInclude>
@@ -390,6 +384,15 @@
     <ClInclude Include="sphincsplusbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClInclude>
+    <ClInclude Include="collection.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="list.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="qsort.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -433,9 +436,6 @@
     </ClCompile>
     <ClCompile Include="acp.c">
       <Filter>Source Files\Provider</Filter>
-    </ClCompile>
-    <ClCompile Include="secmem.c">
-      <Filter>Source Files\Tools</Filter>
     </ClCompile>
     <ClCompile Include="secrand.c">
       <Filter>Source Files\PRNG</Filter>
@@ -536,9 +536,6 @@
     <ClCompile Include="scb.c">
       <Filter>Source Files\DRBG</Filter>
     </ClCompile>
-    <ClCompile Include="list.c">
-      <Filter>Source Files\Tools</Filter>
-    </ClCompile>
     <ClCompile Include="dilithiumbase.c">
       <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
     </ClCompile>
@@ -583,6 +580,15 @@
     </ClCompile>
     <ClCompile Include="sphincsplusbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="collection.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="list.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="qsort.c">
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
