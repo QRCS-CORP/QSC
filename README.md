@@ -75,3 +75,6 @@ All rights reserved by Digital Freedom Defense Inc. 2022.
 This project contains strong cryptography, before downloading the source files, 
 it is your responsibility to check if the cryptographic algorithms contained in this project are legal in your country. 
 If you use this code, please do so responsibly and in accordance to law in your region.
+Written by John G. Underhill, under the QRCS-PL license, see the included license file for details.
+Not to be redistributed without the author's expressed written permission.
+All rights reserved by QRCS Corp. 2025.
