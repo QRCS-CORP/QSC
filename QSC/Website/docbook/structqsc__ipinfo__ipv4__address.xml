@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__ipinfo__ipv4__address" xml:lang="en-US">
+<title>qsc_ipinfo_ipv4_address Struct Reference</title>
+<indexterm><primary>qsc_ipinfo_ipv4_address</primary></indexterm>
+<para>
+
+<para>The IPv4 address structure. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;ipinfo.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint8_t <link linkend="_structqsc__ipinfo__ipv4__address_1a44dcd83c3c9be9025e3532bbd9a95e5e">ipv4</link> [QSC_IPINFO_IPV4_BYTELEN]</para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The IPv4 address structure. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__ipinfo__ipv4__address_1a44dcd83c3c9be9025e3532bbd9a95e5e"/><section>
+    <title>ipv4</title>
+<indexterm><primary>ipv4</primary><secondary>qsc_ipinfo_ipv4_address</secondary></indexterm>
+<indexterm><primary>qsc_ipinfo_ipv4_address</primary><secondary>ipv4</secondary></indexterm>
+<para><computeroutput>uint8_t ipv4[QSC_IPINFO_IPV4_BYTELEN]</computeroutput></para>
+<para>The ipv4 address array </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ipinfo.h</section>
+</section>

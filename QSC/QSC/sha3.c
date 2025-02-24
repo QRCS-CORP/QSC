@@ -2,9 +2,9 @@
 #include "intutils.h"
 #include "memutils.h"
 
-#define KPA_LEAF_HASH128 16
-#define KPA_LEAF_HASH256 32
-#define KPA_LEAF_HASH512 64
+#define KPA_LEAF_HASH128 16ULL
+#define KPA_LEAF_HASH256 32ULL
+#define KPA_LEAF_HASH512 64ULL
 
 /* keccak round constants */
 static const uint64_t KECCAK_ROUND_CONSTANTS[QSC_KECCAK_PERMUTATION_MAX_ROUNDS] =
@@ -4510,7 +4510,7 @@ static void kpa_fast_absorbx8(qsc_kpa_state* ctx, const uint8_t* message)
 	const size_t ROFT = (size_t)ctx->rate;
 	__m512i idx;
 	__m512i wbuf;
-	size_t pos;
+	int64_t pos;
 
 	idx = _mm512_set_epi64((int64_t)&message[7 * ROFT], (int64_t)&message[6 * ROFT], (int64_t)&message[5 * ROFT],
 		(int64_t)&message[4 * ROFT], (int64_t)&message[3 * ROFT], (int64_t)&message[2 * ROFT], (int64_t)&message[ROFT], (int64_t)&message[0]);
@@ -4616,7 +4616,7 @@ static void kpa_load_state(qsc_kpa_state* ctx)
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
 	__m512i idx;
-	size_t pos;
+	int64_t pos;
 
 	idx = _mm512_set_epi64((int64_t)&ctx->state[7][0], (int64_t)&ctx->state[6][0], (int64_t)&ctx->state[5][0], (int64_t)&ctx->state[4][0],
 		(int64_t)&ctx->state[3][0], (int64_t)&ctx->state[2][0], (int64_t)&ctx->state[1][0], (int64_t)&ctx->state[0][0]);
@@ -4989,6 +4989,95 @@ void qsc_kpa_update(qsc_kpa_state* ctx, const uint8_t* message, size_t msglen)
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
 void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
+	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, 
+	size_t inplen, uint8_t domain)
+{
+	assert(inp0 != NULL);
+	assert(inp1 != NULL);
+	assert(inp2 != NULL);
+	assert(inp3 != NULL);
+
+    // Validate input pointers
+	if (inp0 != NULL || inp1 != NULL || inp2 != NULL || inp3 != NULL)
+	{
+		__m256i t;
+		uint64_t v0;
+		uint64_t v1;
+		uint64_t v2;
+		uint64_t v3;
+		size_t pos;
+		size_t i;
+
+		pos = 0;
+
+		/* process full blocks */
+		while (inplen >= (size_t)rate)
+		{
+			for (i = 0; i < (size_t)rate / sizeof(uint64_t); ++i)
+			{
+				v0 = *(const uint64_t*)(inp0 + pos);
+				v1 = *(const uint64_t*)(inp1 + pos);
+				v2 = *(const uint64_t*)(inp2 + pos);
+				v3 = *(const uint64_t*)(inp3 + pos);
+
+				t = _mm256_set_epi64x(v3, v2, v1, v0);
+				state[i] = _mm256_xor_si256(state[i], t);
+
+				pos += sizeof(uint64_t);
+			}
+
+			qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
+			inplen -= rate;
+		}
+
+		i = 0;
+
+		/* process remaining input */
+		while (inplen >= sizeof(uint64_t))
+		{
+			v0 = *(const uint64_t*)(inp0 + pos);
+			v1 = *(const uint64_t*)(inp1 + pos);
+			v2 = *(const uint64_t*)(inp2 + pos);
+			v3 = *(const uint64_t*)(inp3 + pos);
+
+			t = _mm256_set_epi64x(v3, v2, v1, v0);
+			state[i] = _mm256_xor_si256(state[i], t);
+
+			++i;
+			pos += sizeof(uint64_t);
+			inplen -= sizeof(uint64_t);
+		}
+
+		/* partial block */
+		if (inplen != 0)
+		{
+			v0 = 0;
+			v1 = 0;
+			v2 = 0;
+			v3 = 0;
+
+			/* copy remaining bytes into temporary variables */
+			for (size_t j = 0; j < inplen; ++j)
+			{
+				((uint8_t*)&v0)[j] = inp0[pos + j];
+				((uint8_t*)&v1)[j] = inp1[pos + j];
+				((uint8_t*)&v2)[j] = inp2[pos + j];
+				((uint8_t*)&v3)[j] = inp3[pos + j];
+			}
+
+			t = _mm256_set_epi64x(v3, v2, v1, v0);
+			state[i] = _mm256_xor_si256(state[i], t);
+		}
+
+		/* apply domain separation and padding */
+		t = _mm256_set1_epi64x((int64_t)domain << (sizeof(uint64_t) * inplen));
+		state[i] = _mm256_xor_si256(state[i], t);
+		t = _mm256_set1_epi64x(1ULL << 63);
+		state[(rate / sizeof(uint64_t)) - 1] = _mm256_xor_si256(state[(rate / sizeof(uint64_t)) - 1], t);
+	}
+}
+
+void qsc_keccakx4_absorb_aligned(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain)
 {
 	assert(inp0 != NULL);
@@ -5002,14 +5091,14 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 	int64_t p1;
 	int64_t p2;
 	int64_t p3;
-	size_t pos;
+	int64_t pos;
 	size_t i;
 
 	pos = 0;
-	p0 = (int64_t)inp0;
-	p1 = (int64_t)inp1;
-	p2 = (int64_t)inp2;
-	p3 = (int64_t)inp3;
+	p0 = (int64_t)(uintptr_t)inp0;
+	p1 = (int64_t)(uintptr_t)inp1;
+	p2 = (int64_t)(uintptr_t)inp2;
+	p3 = (int64_t)(uintptr_t)inp3;
 
 	idx = _mm256_set_epi64x(p3, p2, p1, p0);
 
@@ -5105,6 +5194,112 @@ void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
         _mm_extract_epi64(_mm512_extracti64x2_epi64(b, i / 2), i % 2))
 
 void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
+    const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
+    const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, 
+	size_t inplen, uint8_t domain)
+{
+    // Validate input pointers
+	if (inp0 != NULL || inp1 != NULL || inp2 != NULL || inp3 != NULL ||
+		inp4 != NULL || inp5 != NULL || inp6 != NULL || inp7 != NULL) {
+
+		__m512i t;
+		uint64_t v0;
+		uint64_t v1;
+		uint64_t v2;
+		uint64_t v3;
+		uint64_t v4;
+		uint64_t v5;
+		uint64_t v6;
+		uint64_t v7;
+		size_t pos;
+		size_t i;
+
+		pos = 0;
+
+		/* process full blocks */
+		while (inplen >= (size_t)rate)
+		{
+			for (i = 0; i < (size_t)rate / sizeof(uint64_t); ++i)
+			{
+				v0 = *(const uint64_t*)(inp0 + pos);
+				v1 = *(const uint64_t*)(inp1 + pos);
+				v2 = *(const uint64_t*)(inp2 + pos);
+				v3 = *(const uint64_t*)(inp3 + pos);
+				v4 = *(const uint64_t*)(inp4 + pos);
+				v5 = *(const uint64_t*)(inp5 + pos);
+				v6 = *(const uint64_t*)(inp6 + pos);
+				v7 = *(const uint64_t*)(inp7 + pos);
+
+				t = _mm512_set_epi64(v7, v6, v5, v4, v3, v2, v1, v0);
+				state[i] = _mm512_xor_si512(state[i], t);
+
+				pos += sizeof(uint64_t);
+			}
+
+			qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
+			inplen -= rate;
+		}
+
+		i = 0;
+
+		/* process remaining input */
+		while (inplen >= sizeof(uint64_t))
+		{
+			v0 = *(const uint64_t*)(inp0 + pos);
+			v1 = *(const uint64_t*)(inp1 + pos);
+			v2 = *(const uint64_t*)(inp2 + pos);
+			v3 = *(const uint64_t*)(inp3 + pos);
+			v4 = *(const uint64_t*)(inp4 + pos);
+			v5 = *(const uint64_t*)(inp5 + pos);
+			v6 = *(const uint64_t*)(inp6 + pos);
+			v7 = *(const uint64_t*)(inp7 + pos);
+
+			t = _mm512_set_epi64(v7, v6, v5, v4, v3, v2, v1, v0);
+			state[i] = _mm512_xor_si512(state[i], t);
+
+			i++;
+			pos += sizeof(uint64_t);
+			inplen -= sizeof(uint64_t);
+		}
+
+		/* handle the remaining partial block */
+		if (inplen != 0)
+		{
+			v0 = 0;
+			v1 = 0;
+			v2 = 0;
+			v3 = 0;
+			v4 = 0;
+			v5 = 0;
+			v6 = 0;
+			v7 = 0;
+
+			/* copy remaining bytes into temporary variables*/
+			for (size_t j = 0; j < inplen; ++j)
+			{
+				((uint8_t*)&v0)[j] = inp0[pos + j];
+				((uint8_t*)&v1)[j] = inp1[pos + j];
+				((uint8_t*)&v2)[j] = inp2[pos + j];
+				((uint8_t*)&v3)[j] = inp3[pos + j];
+				((uint8_t*)&v4)[j] = inp4[pos + j];
+				((uint8_t*)&v5)[j] = inp5[pos + j];
+				((uint8_t*)&v6)[j] = inp6[pos + j];
+				((uint8_t*)&v7)[j] = inp7[pos + j];
+			}
+
+			t = _mm512_set_epi64(v7, v6, v5, v4, v3, v2, v1, v0);
+			state[i] = _mm512_xor_si512(state[i], t);
+		}
+
+		/* apply domain separation and padding */
+		t = _mm512_set1_epi64((int64_t)domain << (sizeof(uint64_t) * inplen));
+		state[i] = _mm512_xor_si512(state[i], t);
+		t = _mm512_set1_epi64(1ULL << 63);
+		state[(rate / sizeof(uint64_t)) - 1] = _mm512_xor_si512(state[(rate / sizeof(uint64_t)) - 1], t);
+	}
+}
+
+void qsc_keccakx8_absorb_aligned(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen, uint8_t domain)
 {
@@ -5127,8 +5322,8 @@ void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 	int64_t p5;
 	int64_t p6;
 	int64_t p7;
+	int64_t pos;
 	size_t i;
-	size_t pos;
 
 	pos = 0;
 	p0 = (int64_t)inp0;
@@ -6417,142 +6612,3 @@ void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 #endif
 }
 
-void qsc_scbkdf_dispose(qsc_scbkdf_state* ctx)
-{
-	if (ctx->cache != NULL)
-	{
-		if (ctx->cpos != 0)
-		{
-			qsc_memutils_clear(ctx->cache, ctx->cpos);
-		}
-
-		qsc_memutils_alloc_free(ctx->cache);
-	}
-
-	qsc_keccak_dispose(&ctx->kstate);
-	ctx->cpos = 0;
-	ctx->cpucost = 0;
-	ctx->memcost = 0;
-	ctx->rate = qsc_keccak_rate_none;
-}
-
-bool qsc_scbkdf_initialize(qsc_scbkdf_state* ctx, qsc_keccak_rate rate, size_t cpucost, size_t memcost, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
-{
-	assert(ctx != NULL);
-	assert(key != NULL);
-	assert(keylen >= QSC_SHAKE_256_KEY_SIZE);
-	assert(cpucost <= 1000000);
-	assert(memcost <= 8192);
-
-	const size_t MB1 = 1048576;
-	bool res;
-
-	ctx->cpucost = cpucost;
-	ctx->memcost = memcost;
-	ctx->rate = rate;
-
-	const size_t MER = ((ctx->memcost * MB1) / ctx->cpucost) - (((ctx->memcost * MB1) / ctx->cpucost) % (size_t)ctx->rate);
-	ctx->cache = (uint8_t*)qsc_memutils_malloc(MER);
-
-	if (ctx->cache != NULL)
-	{
-		qsc_keccak_initialize_state(&ctx->kstate);
-
-		if (rate == qsc_keccak_rate_128)
-		{
-			const char SBKDF_128_NAME[16] = "SBKDF-SHAKE-128";
-			/* absorb the custom and name arrays */
-			qsc_keccak_absorb_custom(&ctx->kstate, rate, custom, custlen, SBKDF_128_NAME, sizeof(SBKDF_128_NAME), QSC_KECCAK_PERMUTATION_ROUNDS);
-			/* finalize the key */
-			qsc_keccak_absorb(&ctx->kstate, rate, key, keylen, QSC_KECCAK_SCBKDF_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
-		}
-		else if (rate == qsc_keccak_rate_256)
-		{
-			const char SBKDF_256_NAME[16] = "SBKDF-SHAKE-256";
-			/* absorb the custom and name arrays */
-			qsc_keccak_absorb_custom(&ctx->kstate, rate, custom, custlen, SBKDF_256_NAME, sizeof(SBKDF_256_NAME), QSC_KECCAK_PERMUTATION_ROUNDS);
-			/* finalize the key */
-			qsc_keccak_absorb(&ctx->kstate, rate, key, keylen, QSC_KECCAK_SCBKDF_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
-		}
-		else if (rate == qsc_keccak_rate_512)
-		{
-			const char SBKDF_512_NAME[16] = "SBKDF-SHAKE512";
-			/* absorb the custom and name arrays */
-			qsc_keccak_absorb_custom(&ctx->kstate, rate, custom, custlen, SBKDF_512_NAME, sizeof(SBKDF_512_NAME), QSC_KECCAK_PERMUTATION_ROUNDS);
-			/* finalize the key */
-			qsc_keccak_absorb(&ctx->kstate, rate, key, keylen, QSC_KECCAK_SCBKDF_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
-		}
-
-		const size_t NBLK = MER / (size_t)ctx->rate;
-
-		qsc_keccak_squeezeblocks(&ctx->kstate, ctx->cache, NBLK, ctx->rate, QSC_KECCAK_PERMUTATION_ROUNDS);
-		ctx->cpos = MER;
-		res = true;
-	}
-	else
-	{
-		res = false;
-	}
-
-	return res;
-}
-
-void qsc_scbkdf_update(qsc_scbkdf_state* ctx, const uint8_t* message, size_t msglen)
-{
-	qsc_keccak_absorb(&ctx->kstate, ctx->rate, message, msglen, QSC_KECCAK_SCBKDF_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
-}
-
-void qsc_scbkdf_squeeze(qsc_scbkdf_state* ctx, uint8_t* output, size_t outlen)
-{
-	const size_t MB1 = 1048576;
-	size_t i;
-	size_t opos;
-
-	const size_t MER = (((ctx->memcost * MB1) / ctx->cpucost) - ((ctx->memcost * MB1) / ctx->cpucost) % (size_t)ctx->rate);
-
-	/* run the hashing function in a loop, increasing the cache size and keccak output each time */
-	for (i = 1; i < ctx->cpucost; ++i)
-	{
-		/* absorb the cache */
-		qsc_keccak_absorb(&ctx->kstate, ctx->rate, ctx->cache, ctx->cpos, QSC_KECCAK_SCBKDF_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
-
-		/* incrementally increase the cache size up to max memory cost */
-		if (ctx->cpos <= ctx->memcost * MB1)
-		{
-			uint8_t* ptmp;
-			const size_t CLEN = ctx->cpos + MER;
-
-			ptmp = qsc_memutils_realloc(ctx->cache, CLEN);
-
-			if (ptmp != NULL)
-			{
-				const size_t NBLK = MER / (size_t)ctx->rate;
-
-				ctx->cache = ptmp;
-				qsc_keccak_squeezeblocks(&ctx->kstate, ctx->cache + ctx->cpos, NBLK, ctx->rate, QSC_KECCAK_PERMUTATION_ROUNDS);
-				ctx->cpos = CLEN;
-			}
-		}
-	}
-
-	opos = 0;
-
-	/* fill the output buffer */
-	if (outlen >= (size_t)ctx->rate)
-	{
-		const size_t BLKCNT = outlen / (size_t)ctx->rate;
-
-		qsc_keccak_squeezeblocks(&ctx->kstate, output, BLKCNT, ctx->rate, QSC_KECCAK_PERMUTATION_ROUNDS);
-
-		opos += BLKCNT * (size_t)ctx->rate;
-		outlen -= opos;
-	}
-
-	if (outlen != 0)
-	{
-		uint8_t buff[QSC_KECCAK_128_RATE] = { 0 };
-
-		qsc_keccak_squeezeblocks(&ctx->kstate, buff, 1, ctx->rate, QSC_KECCAK_PERMUTATION_ROUNDS);
-		qsc_memutils_copy(output + opos, buff, outlen);
-	}
-}

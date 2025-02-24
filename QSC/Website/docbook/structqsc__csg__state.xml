@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__csg__state" xml:lang="en-US">
+<title>qsc_csg_state Struct Reference</title>
+<indexterm><primary>qsc_csg_state</primary></indexterm>
+<para>
+
+<para>The CSG state structure. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;csg.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para><link linkend="_structqsc__keccak__state">qsc_keccak_state</link> <link linkend="_structqsc__csg__state_1a7dcff7935c756d16f1e445db22570492">kstate</link></para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__csg__state_1a972618f39e7320395fa6fbf4745b90b7">cache</link> [<link linkend="_sha3_8h_1af0de2745d4d9cf9915394520a45ee8ea">QSC_KECCAK_256_RATE</link>]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__csg__state_1a339d4473f6fc17802f67a3a3aadbbe9d">bctr</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__csg__state_1a31b98eae4240373438740f98250c1252">cpos</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__csg__state_1a8880fe6f7039205872c4ab9f37831507">crmd</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__csg__state_1a591a9837b83764fcc50ea7375c95ae9e">rate</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__csg__state_1ab149c2f8cc2711d915ec186839a93e69">pres</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The CSG state structure. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__csg__state_1a339d4473f6fc17802f67a3a3aadbbe9d"/><section>
+    <title>bctr</title>
+<indexterm><primary>bctr</primary><secondary>qsc_csg_state</secondary></indexterm>
+<indexterm><primary>qsc_csg_state</primary><secondary>bctr</secondary></indexterm>
+<para><computeroutput>size_t bctr</computeroutput></para>
+<para>The bytes counter </para>
+</section>
+<anchor xml:id="_structqsc__csg__state_1a972618f39e7320395fa6fbf4745b90b7"/><section>
+    <title>cache</title>
+<indexterm><primary>cache</primary><secondary>qsc_csg_state</secondary></indexterm>
+<indexterm><primary>qsc_csg_state</primary><secondary>cache</secondary></indexterm>
+<para><computeroutput>uint8_t cache[<link linkend="_sha3_8h_1af0de2745d4d9cf9915394520a45ee8ea">QSC_KECCAK_256_RATE</link>]</computeroutput></para>
+<para>The cache buffer </para>
+</section>
+<anchor xml:id="_structqsc__csg__state_1a31b98eae4240373438740f98250c1252"/><section>
+    <title>cpos</title>
+<indexterm><primary>cpos</primary><secondary>qsc_csg_state</secondary></indexterm>
+<indexterm><primary>qsc_csg_state</primary><secondary>cpos</secondary></indexterm>
+<para><computeroutput>size_t cpos</computeroutput></para>
+<para>The cache position </para>
+</section>
+<anchor xml:id="_structqsc__csg__state_1a8880fe6f7039205872c4ab9f37831507"/><section>
+    <title>crmd</title>
+<indexterm><primary>crmd</primary><secondary>qsc_csg_state</secondary></indexterm>
+<indexterm><primary>qsc_csg_state</primary><secondary>crmd</secondary></indexterm>
+<para><computeroutput>size_t crmd</computeroutput></para>
+<para>The cache remainder </para>
+</section>
+<anchor xml:id="_structqsc__csg__state_1a7dcff7935c756d16f1e445db22570492"/><section>
+    <title>kstate</title>
+<indexterm><primary>kstate</primary><secondary>qsc_csg_state</secondary></indexterm>
+<indexterm><primary>qsc_csg_state</primary><secondary>kstate</secondary></indexterm>
+<para><computeroutput><link linkend="_structqsc__keccak__state">qsc_keccak_state</link> kstate</computeroutput></para>
+<para>The Keccak state </para>
+</section>
+<anchor xml:id="_structqsc__csg__state_1ab149c2f8cc2711d915ec186839a93e69"/><section>
+    <title>pres</title>
+<indexterm><primary>pres</primary><secondary>qsc_csg_state</secondary></indexterm>
+<indexterm><primary>qsc_csg_state</primary><secondary>pres</secondary></indexterm>
+<para><computeroutput>bool pres</computeroutput></para>
+<para>The predictive resistance flag </para>
+</section>
+<anchor xml:id="_structqsc__csg__state_1a591a9837b83764fcc50ea7375c95ae9e"/><section>
+    <title>rate</title>
+<indexterm><primary>rate</primary><secondary>qsc_csg_state</secondary></indexterm>
+<indexterm><primary>qsc_csg_state</primary><secondary>rate</secondary></indexterm>
+<para><computeroutput>size_t rate</computeroutput></para>
+<para>The absorption rate </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_csg_8h">csg.h</link></section>
+</section>

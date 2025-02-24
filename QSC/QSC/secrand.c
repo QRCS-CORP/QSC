@@ -346,6 +346,7 @@ void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* 
 
 bool qsc_secrand_generate(uint8_t* output, size_t length)
 {
+	assert(output != NULL);
 	assert(secrand_state.init == true);
 
 	const size_t BUFLEN = QSC_SECRAND_CACHE_SIZE - secrand_state.cpos;

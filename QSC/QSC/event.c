@@ -2,10 +2,14 @@
 #include "memutils.h"
 #include "stringutils.h"
 
+/*!
+* \struct event_state
+* \brief The internal event state
+*/
 typedef struct
 {
-	qsc_event_handler* listeners;
-	size_t lcount;
+	qsc_event_handler* listeners;	/*!< The event listeners  */
+	size_t lcount;					/*!< The listener count  */
 } event_state;
 
 event_state m_event_state;

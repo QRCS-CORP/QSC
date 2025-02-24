@@ -1,7 +1,7 @@
 #include "timerex.h"
+#include "memutils.h"
 #if defined(QSC_DEBUG_MODE)
 #	include "consoleutils.h"
-#	include "memutils.h"
 #endif
 
 void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
@@ -14,7 +14,7 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	size_t len;
 
 	lt = 0;
-	memset(output, 0x00, QSC_TIMEREX_TIMESTAMP_MAX);
+	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
 	_time64(&lt);
 	err = localtime_s(&nt, &lt);
@@ -25,7 +25,7 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 		if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
 		{
-			memcpy(output, tbuf, len);
+			qsc_memutils_copy(output, tbuf, len);
 		}
 	}
 #else
@@ -34,7 +34,7 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	char buf[QSC_TIMEREX_TIMESTAMP_MAX];
 	size_t len;
 
-	memset(output, 0x00, QSC_TIMEREX_TIMESTAMP_MAX);
+	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 	time(&rt);
 
 	ti = localtime(&rt);
@@ -44,7 +44,7 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 	if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
 	{
-		memcpy(output, buf, len);
+		qsc_memutils_copy(output, buf, len);
 	}
 #endif
 }
@@ -59,7 +59,7 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	size_t len;
 
 	lt = 0;
-	memset(output, 0x00, QSC_TIMEREX_TIMESTAMP_MAX);
+	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
 	_time64(&lt);
 	err = _localtime64_s(&nt, &lt);
@@ -71,7 +71,7 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 		if (err == 0 && len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
 		{
-			memcpy(output, tbuf, len);
+			qsc_memutils_copy(output, tbuf, len);
 		}
 	}
 #else
@@ -81,7 +81,7 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 	size_t len;
 
-	memset(output, 0x00, QSC_TIMEREX_TIMESTAMP_MAX);
+	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 	rt = time(NULL);
 	ti = localtime(&rt);
 	ct = asctime(ti);
@@ -89,7 +89,7 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	if (ct != NULL)
 	{
 		len = strlen(ct);
-		memcpy(output, ct, len);
+		qsc_memutils_copy(output, ct, len);
 	}
 #endif
 }
@@ -104,7 +104,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	size_t len;
 
 	lt = 0;
-	memset(output, 0x00, QSC_TIMEREX_TIMESTAMP_MAX);
+	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
 	_time64(&lt);
 	err = localtime_s(&nt, &lt);
@@ -115,7 +115,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 		if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
 		{
-			memcpy(output, tbuf, len);
+			qsc_memutils_copy(output, tbuf, len);
 		}
 	}
 #else
@@ -124,7 +124,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	char buf[QSC_TIMEREX_TIMESTAMP_MAX];
 	size_t len;
 
-	memset(output, 0x00, QSC_TIMEREX_TIMESTAMP_MAX);
+	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 	time(&rt);
 	ti = localtime(&rt);
 	strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%T", ti);
@@ -133,7 +133,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 	if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
 	{
-		memcpy(output, buf, len);
+		qsc_memutils_copy(output, buf, len);
 	}
 #endif
 }

@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_sysutils_8h_source" xml:lang="en-US">
+<title>sysutils.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sysutils.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 
+2 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+3 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+4 <emphasis role="comment">&#32;*</emphasis>
+5 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+6 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+7 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+9 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+10 <emphasis role="comment">&#32;*</emphasis>
+11 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+12 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+14 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+15 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+16 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+17 <emphasis role="comment">&#32;*</emphasis>
+18 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+19 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+20 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+21 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+22 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+24 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+25 <emphasis role="comment">&#32;*</emphasis>
+26 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+27 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+30 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+31 <emphasis role="comment">&#32;*</emphasis>
+32 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+33 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+35 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+36 <emphasis role="comment">&#32;*</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+38 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+39 <emphasis role="comment">&#32;*/</emphasis>
+40 
+41 
+42 <emphasis role="preprocessor">#ifndef&#32;QSC_SYSUTILS_H</emphasis>
+43 <emphasis role="preprocessor">#define&#32;QSC_SYSUTILS_H</emphasis>
+44 
+45 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+46 
+51 
+52 <emphasis role="comment">/*&#32;bogus&#32;winbase.h&#32;error&#32;*/</emphasis>
+53 QSC_SYSTEM_CONDITION_IGNORE(5105)
+54 
+55 
+59 <emphasis role="preprocessor">#define&#32;QSC_SYSUTILS_SYSTEM_NAME_MAX&#32;256</emphasis>
+60 
+65 <emphasis role="preprocessor">#define&#32;QSC_USERNAME_SYSTEM_NAME_MAX&#32;256</emphasis>
+66 
+73 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_sysutils_8h_1ad94319353cf20391c6c1544ef8f3100b">qsc_sysutils_computer_name</link>(<emphasis role="keywordtype">char</emphasis>*&#32;name);
+74 
+79 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+80 {
+81 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__sysutils__drive__space__state_1a42a93fee794a59c61c468508dcfcf940">free</link>;&#32;&#32;&#32;&#32;&#32;&#32;
+82 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__sysutils__drive__space__state_1a91271c136d08958b70aae29b0a0bbcad">total</link>;&#32;&#32;&#32;&#32;&#32;
+83 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__sysutils__drive__space__state_1aea74c286b8e42c85ca62fd2f9129e23e">avail</link>;&#32;&#32;&#32;&#32;&#32;
+84 }&#32;
+85 <link linkend="_structqsc__sysutils__drive__space__state">qsc_sysutils_drive_space_state</link>;
+86 
+93 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_sysutils_8h_1aed8d7785fe076f03888289596c676eaa">qsc_sysutils_drive_space</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;drive,&#32;<link linkend="_structqsc__sysutils__drive__space__state">qsc_sysutils_drive_space_state</link>*&#32;state);
+94 
+99 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+100 {
+101 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__sysutils__memory__statistics__state_1afa8c68c84ee36288f66c4dbc39cf92b9">phystotal</link>;&#32;&#32;&#32;&#32;&#32;
+102 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__sysutils__memory__statistics__state_1a57b41feb8df593d15c49fffa24e6ff12">physavail</link>;&#32;&#32;&#32;&#32;&#32;
+103 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__sysutils__memory__statistics__state_1abf05794d43756d7e67d711ccf94520c8">virttotal</link>;&#32;&#32;&#32;&#32;&#32;
+104 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__sysutils__memory__statistics__state_1a8d690ac26ec56109bc97ebbfde2d4868">virtavail</link>;&#32;&#32;&#32;&#32;&#32;
+105 }
+106 <link linkend="_structqsc__sysutils__memory__statistics__state">qsc_sysutils_memory_statistics_state</link>;
+107 
+113 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_sysutils_8h_1a34d37e4bea4f54eec01316092c27f171">qsc_sysutils_memory_statistics</link>(<link linkend="_structqsc__sysutils__memory__statistics__state">qsc_sysutils_memory_statistics_state</link>*&#32;state);
+114 
+120 QSC_EXPORT_API&#32;uint32_t&#32;<link linkend="_sysutils_8h_1ae8d2dda6cfceb77ef9afd901a8ffbc13">qsc_sysutils_process_id</link>(<emphasis role="keywordtype">void</emphasis>);
+121 
+127 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_sysutils_8h_1a89244e2c1c6e48a979aaef6e03209b86">qsc_sysutils_rdtsc_available</link>();
+128 
+135 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_sysutils_8h_1acc95d147c6fd027d09714f1ddf8d908c">qsc_sysutils_user_name</link>(<emphasis role="keywordtype">char</emphasis>*&#32;name);
+136 
+142 QSC_EXPORT_API&#32;uint64_t&#32;<link linkend="_sysutils_8h_1acbfaf075895f6b7dd8039fd6f30cda4a">qsc_sysutils_system_uptime</link>(<emphasis role="keywordtype">void</emphasis>);
+143 
+149 QSC_EXPORT_API&#32;uint64_t&#32;<link linkend="_sysutils_8h_1a91c0e9ec066d44058975dad6feeffd02">qsc_sysutils_system_timestamp</link>(<emphasis role="keywordtype">void</emphasis>);
+150 
+157 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_sysutils_8h_1aa9d6ed7b83d3003d80e36358e81af717">qsc_sysutils_user_identity</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;name,&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<emphasis role="keywordtype">id</emphasis>);
+158 
+159 <emphasis role="preprocessor">#if&#32;defined(QSC_DEBUG_MODE)</emphasis><emphasis role="preprocessor"></emphasis>
+163 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_system_values_print();
+164 <emphasis role="preprocessor">#endif</emphasis>
+165 
+166 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

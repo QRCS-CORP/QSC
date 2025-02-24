@@ -1,5 +1,6 @@
 #include "kyber.h"
 #include "secrand.h"
+#include "sha3.h"
 
 bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {
@@ -53,7 +54,7 @@ void qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 		qsc_kyber_avx2_encapsulate(ciphertext, secret, publickey, rng_generate);
 #else
-		qsc_kyber_ref_encapsulate(ciphertext, secret, publickey, rng_generate);	
+		qsc_kyber_ref_encapsulate(ciphertext, secret, publickey, rng_generate);
 #endif
 	}
 }

@@ -1,0 +1,87 @@
+\doxysection{scb.\+h}
+\hypertarget{scb_8h_source}{}\label{scb_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/scb.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/scb.h}}
+\mbox{\hyperlink{scb_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_SCB\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{sha3_8h}{sha3.h}}"{}}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_256\_SEED\_SIZE\ 32}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_512\_SEED\_SIZE\ 64}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_L2CACHE\_DEFAULT\_SIZE\ (1024\ *\ 256)}}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00125\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_MEMORY\_COST\_SIZE\ (1024\ *\ 1024)}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_MEMORY\_MAXIMUM\ 128}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_MEMORY\_MINIMUM\ 1}}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_CPU\_MINIMUM\ 1}}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\#define\ QSC\_SCB\_CPU\_MAXIMUM\ 1000}}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00155\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00156\ \{}
+\DoxyCodeLine{00157\ \ \ \ \ uint8\_t\ \mbox{\hyperlink{structqsc__scb__state_a5b2dc7078f33902684fc214634b600dd}{ckey}}[\mbox{\hyperlink{scb_8h_af04f804f5e916ce3fe92948a7d4a0eee}{QSC\_SCB\_512\_SEED\_SIZE}}];\ \ \ \ }
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structqsc__scb__state_afbedac7945e381d987c3bac73bbd781a}{cpuc}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structqsc__scb__state_a54ed3e83de1a1a4e419a97d0afff6288}{memc}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structqsc__scb__state_a70d958290b8b8ebaff45365d4e5b9e54}{klen}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00161\ \ \ \ \ \mbox{\hyperlink{sha3_8h_a3283a3326659d4e2e0679c6bd32b6cc6}{qsc\_keccak\_rate}}\ \mbox{\hyperlink{structqsc__scb__state_ac9a3da9c6d703bf06f29151437eeede9}{rate}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00162\ \}\ \mbox{\hyperlink{structqsc__scb__state}{qsc\_scb\_state}};}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00172\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{scb_8h_a12d0a4d316949c8e927055d7d8de97af}{qsc\_scb\_dispose}}(\mbox{\hyperlink{structqsc__scb__state}{qsc\_scb\_state}}*\ ctx);}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00185\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{scb_8h_a0d452fcb95ea81c7fc7e39910525321b}{qsc\_scb\_initialize}}(\mbox{\hyperlink{structqsc__scb__state}{qsc\_scb\_state}}*\ ctx,\ \textcolor{keyword}{const}\ uint8\_t*\ seed,\ \textcolor{keywordtype}{size\_t}\ seedlen,\ \textcolor{keyword}{const}\ uint8\_t*\ info,\ \textcolor{keywordtype}{size\_t}\ infolen,\ \textcolor{keywordtype}{size\_t}\ cpucost,\ \textcolor{keywordtype}{size\_t}\ memcost);}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00196\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{scb_8h_a2c5f0aa797f606428c24c90121167ec9}{qsc\_scb\_generate}}(\mbox{\hyperlink{structqsc__scb__state}{qsc\_scb\_state}}*\ ctx,\ uint8\_t*\ output,\ \textcolor{keywordtype}{size\_t}\ otplen);}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00207\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{scb_8h_a974f89f0ba4e953d66e92fcbeae568c4}{qsc\_scb\_update}}(\mbox{\hyperlink{structqsc__scb__state}{qsc\_scb\_state}}*\ ctx,\ \textcolor{keyword}{const}\ uint8\_t*\ seed,\ \textcolor{keywordtype}{size\_t}\ seedlen);}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

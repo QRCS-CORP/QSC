@@ -1,18 +1,18 @@
 #include "qsort.h"
 
-static int qsort_partition_u8(int8_t* arr, int start, int end)
+static int32_t qsort_partition_u8(int8_t* arr, int32_t start, int32_t end)
 {
-    int count;
-    int i;
-    int j;
-    int pindex;
+    int32_t count;
+    int32_t i;
+    int32_t j;
+    int32_t pindex;
     int8_t pivot;
     int8_t ntmp;
 
     count = 0;
     pivot = arr[start];
 
-    for (int i = start + 1; i <= end; ++i) 
+    for (int32_t i = start + 1; i <= end; ++i) 
     {
         if (arr[i] <= pivot)
         {
@@ -54,19 +54,19 @@ static int qsort_partition_u8(int8_t* arr, int start, int end)
     return pindex;
 }
  
-static int qsort_partition_u16(int16_t* arr, int start, int end)
+static int32_t qsort_partition_u16(int16_t* arr, int32_t start, int32_t end)
 {
-    int count;
-    int i;
-    int j;
-    int pindex;
+    int32_t count;
+    int32_t i;
+    int32_t j;
+    int32_t pindex;
     int16_t pivot;
     int16_t ntmp;
 
     count = 0;
     pivot = arr[start];
 
-    for (int i = start + 1; i <= end; ++i) 
+    for (int32_t i = start + 1; i <= end; ++i) 
     {
         if (arr[i] <= pivot)
         {
@@ -108,19 +108,19 @@ static int qsort_partition_u16(int16_t* arr, int start, int end)
     return pindex;
 }
  
-static int qsort_partition_u32(int* arr, int start, int end)
+static int32_t qsort_partition_u32(int32_t* arr, int32_t start, int32_t end)
 {
-    int count;
-    int i;
-    int j;
-    int pindex;
-    int pivot;
-    int ntmp;
+    int32_t count;
+    int32_t i;
+    int32_t j;
+    int32_t pindex;
+    int32_t pivot;
+    int32_t ntmp;
 
     count = 0;
     pivot = arr[start];
 
-    for (int i = start + 1; i <= end; ++i) 
+    for (int32_t i = start + 1; i <= end; ++i) 
     {
         if (arr[i] <= pivot)
         {
@@ -216,50 +216,58 @@ static int64_t qsort_partition_u64(int64_t* arr, int64_t start, int64_t end)
     return pindex;
 }
   
-void qsc_qsort_sort_u8(int8_t* arr8, int start, int end)
+void qsc_qsort_sort_i8(int8_t* arr8, int32_t start, int32_t end)
 {
+    assert(arr8 != NULL);
+
     int16_t p;
 
     if (start <= end)
     {
         p = qsort_partition_u8(arr8, start, end);
-        qsc_qsort_sort_u8(arr8, start, p - 1);
-        qsc_qsort_sort_u8(arr8, p + 1, end);
+        qsc_qsort_sort_i8(arr8, start, p - 1);
+        qsc_qsort_sort_i8(arr8, p + 1, end);
     }
 }
  
-void qsc_qsort_sort_u16(int16_t* arr16, int start, int end)
+void qsc_qsort_sort_i16(int16_t* arr16, int32_t start, int32_t end)
 {
+    assert(arr16 != NULL);
+
     int16_t p;
 
     if (start <= end)
     {
         p = qsort_partition_u16(arr16, start, end);
-        qsc_qsort_sort_u16(arr16, start, p - 1);
-        qsc_qsort_sort_u16(arr16, p + 1, end);
+        qsc_qsort_sort_i16(arr16, start, p - 1);
+        qsc_qsort_sort_i16(arr16, p + 1, end);
     }
 }
  
-void qsc_qsort_sort_u32(int* arr32, int start, int end)
+void qsc_qsort_sort_i32(int32_t* arr32, int32_t start, int32_t end)
 {
-    int p;
+    assert(arr32 != NULL);
+
+    int32_t p;
 
     if (start <= end)
     {
         p = qsort_partition_u32(arr32, start, end);
-        qsc_qsort_sort_u32(arr32, start, p - 1);
-        qsc_qsort_sort_u32(arr32, p + 1, end);
+        qsc_qsort_sort_i32(arr32, start, p - 1);
+        qsc_qsort_sort_i32(arr32, p + 1, end);
     }
 }
  
-void qsc_qsort_sort_u64(int64_t* arr64, int64_t start, int64_t end)
+void qsc_qsort_sort_i64(int64_t* arr64, int64_t start, int64_t end)
 {
+    assert(arr64 != NULL);
+
     int64_t p;
 
     if (start <= end)
     {
         p = qsort_partition_u64(arr64, start, end);
-        qsc_qsort_sort_u64(arr64, start, p - 1);
-        qsc_qsort_sort_u64(arr64, p + 1, end);
+        qsc_qsort_sort_i64(arr64, start, p - 1);
+        qsc_qsort_sort_i64(arr64, p + 1, end);
     }
 }

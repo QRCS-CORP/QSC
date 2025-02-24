@@ -4,19 +4,33 @@
 #include "../QSC/csg.h"
 #include "../QSC/csp.h"
 #include "../QSC/hcg.h"
+#include "../QSC/intutils.h"
 #include "../QSC/memutils.h"
 #include "../QSC/rdp.h"
 #include "../QSC/scb.h"
 #include "../QSC/secrand.h"
 #include "../QSC/sysutils.h"
-#include <math.h>
-
-#define ex(x) (((x) < -BIGX) ? 0.0 : exp(x))
 
 static const double Z_MAX = 6.0;
 static const double LOG_SQRT_PI = 0.5723649429247000870717135;
 static const double I_SQRT_PI = 0.5641895835477562869480795;
 static const double BIGX = 20.0;
+
+static double secrand_ex(double x)
+{
+    double result;
+    
+    if (x < -BIGX)
+    {
+        result = 0.0;
+    }
+    else
+    {
+        result = qsc_intutils_calculate_exp(x);
+    }
+    
+    return result;
+}
 
 static double secrand_poz(const double z)
 {
@@ -32,7 +46,8 @@ static double secrand_poz(const double z)
 	}
 	else
 	{
-		y = 0.5 * fabs(z);
+		y = 0.5 * qsc_intutils_calculate_fabs(z);
+
 		if (y >= (Z_MAX * 0.5))
 		{
 			x = 1.0;
@@ -90,10 +105,10 @@ static double secrand_po_chi_sq(const double ax, const int32_t df)
 
 		if (df > 1)
 		{
-			y = ex(-a);
+			y = secrand_ex(-a);
 		}
 
-		s = (even ? y : (2.0 * secrand_poz(-sqrt(x))));
+		s = (even ? y : (2.0 * secrand_poz(-qsc_intutils_calculate_sqrt(x))));
 
 		if (df > 2)
 		{
@@ -103,12 +118,12 @@ static double secrand_po_chi_sq(const double ax, const int32_t df)
 			if (a > BIGX)
 			{
 				e = (even ? 0.0 : LOG_SQRT_PI);
-				c = log(a);
+				c = qsc_intutils_calculate_log(a);
 
 				while (z <= x)
 				{
-					e = log(z) + e;
-					s += ex(c * z - a - e);
+					e = qsc_intutils_calculate_log(z) + e;
+					s += secrand_ex(c * z - a - e);
 					z += 1.0;
 				}
 
@@ -116,7 +131,7 @@ static double secrand_po_chi_sq(const double ax, const int32_t df)
 			}
 			else
 			{
-				e = (even ? 1.0 : (I_SQRT_PI / sqrt(a)));
+				e = (even ? 1.0 : (I_SQRT_PI / qsc_intutils_calculate_sqrt(a)));
 				c = 0.0;
 
 				while (z <= x)
@@ -345,6 +360,7 @@ void qsctest_secrand_csg_evaluate()
 
 	qsc_csg_initialize(&ctx, seed, sizeof(seed), NULL, 0, false);
 	qsc_csg_generate(&ctx, smp, sizeof(smp));
+	qsc_csg_dispose(&ctx);
 
 	qsctest_secrand_evaluate("CSG", smp, sizeof(smp));
 }
@@ -368,6 +384,7 @@ void qsctest_secrand_hcg_evaluate()
 
 	qsc_hcg_initialize(&ctx, seed, sizeof(seed), NULL, 0, false);
 	qsc_hcg_generate(&ctx, smp, sizeof(smp));
+	qsc_hcg_dispose(&ctx);
 
 	qsctest_secrand_evaluate("HCG", smp, sizeof(smp));
 }
@@ -388,7 +405,7 @@ void qsctest_secrand_scb_evaluate()
 
 	qsc_csp_generate(seed, sizeof(seed));
 
-	qsc_scb_initialize(&ctx, seed, sizeof(seed), NULL, 0, 10, 0);
+	qsc_scb_initialize(&ctx, seed, sizeof(seed), NULL, 0, 1, 1);
 	qsc_scb_generate(&ctx, smp, sizeof(smp));
 	qsc_scb_dispose(&ctx);
 

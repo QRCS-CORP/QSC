@@ -3,49 +3,53 @@
 #include "intutils.h"
 #include "memutils.h"
 
-/* QSC-HCG-SHA51201*/
-static const uint8_t QSC_DEFAULT_INFO[17] = { 0x51, 0x53, 0x43, 0x2D, 0x48, 0x43, 0x47, 0x2D, 0x53, 0x48, 0x41, 0x32, 0x35, 0x31, 0x32, 0x00, 0x01 };
-
-static void hcg_fill_buffer(qsc_hcg_state* ctx)
-{
-	/* similar mechanism to hkdf, but with a larger counter and set info size */
-
-	uint8_t hblk[QSC_HMAC_512_RATE] = { 0 };
-
-	/* copy the cache */
-	qsc_memutils_copy(hblk, ctx->cache, sizeof(ctx->cache));
-
-	/* increment and copy the counter */
-	qsc_intutils_be8increment(ctx->nonce, sizeof(ctx->nonce));
-	qsc_memutils_copy(hblk + sizeof(ctx->cache), ctx->nonce, sizeof(ctx->nonce));
-
-	/* copy the info */
-	qsc_memutils_copy(hblk + sizeof(ctx->cache) + sizeof(ctx->nonce), ctx->info, sizeof(ctx->info));
-
-	/* finalize and cache the block */
-	qsc_hmac512_update(&ctx->hstate, hblk, sizeof(hblk));
-	qsc_hmac512_finalize(&ctx->hstate, ctx->cache);
-
-	/* reset cache counters */
-	ctx->crmd = QSC_HCG_CACHE_SIZE;
-	ctx->cpos = 0;
-}
+/* QSC-HCG-SHA2-512-02 */
+static const uint8_t QSC_DEFAULT_INFO[QSC_HCG_INFO_SIZE] = { 
+	0x51, 0x53, 0x43, 0x2D, 0x48, 0x43, 0x47, 0x2D, 0x53, 
+	0x48, 0x41, 0x32, 0x2D, 0x35, 0x31, 0x32, 0x2D, 0x00, 0x02 };
 
 static void csg_auto_reseed(qsc_hcg_state* ctx)
 {
-	if (ctx->pres && ctx->bctr >= QSC_HCG_RESEED_THRESHHOLD)
+	/* add a random seed to input seed and info */
+	if (ctx->pres == true && ctx->rpos >= QSC_HCG_RESEED_THRESHHOLD)
 	{
-		/* add a random seed to input seed and info */
-		uint8_t prand[QSC_HMAC_512_RATE];
-		qsc_acp_generate(prand, sizeof(prand));
+		qsc_sha512_state sstate = { 0 };
+		uint8_t prnd[QSC_HCG_KEY_SIZE];
 
-		/* update hmac */
-		qsc_hmac512_update(&ctx->hstate, prand, sizeof(prand));
+		qsc_acp_generate(prnd, QSC_HCG_KEY_SIZE);
 
-		/* re-fill the buffer and reset counter */
-		hcg_fill_buffer(ctx);
-		ctx->bctr = 0;
+		qsc_sha512_initialize(&sstate);
+		qsc_sha512_update(&sstate, ctx->key, QSC_HCG_KEY_SIZE);
+		qsc_sha512_update(&sstate, prnd, QSC_HCG_KEY_SIZE);
+		/* update the key */
+		qsc_sha512_finalize(&sstate, ctx->key);
+		ctx->rpos = 0;
 	}
+}
+
+static void hcg_fill_buffer(qsc_hcg_state* ctx, uint8_t* buffer)
+{
+	qsc_hmac512_state hstate = { 0 };
+
+	/* increment the nonce counter */
+	qsc_intutils_be8increment(ctx->nonce, QSC_HCG_NONCE_SIZE);
+	/* initialize HMAC */
+	qsc_hmac512_initialize(&hstate, ctx->key, QSC_HCG_KEY_SIZE);
+	/* update the MAC with the nonce */
+	qsc_hmac512_update(&hstate, ctx->nonce, QSC_HCG_NONCE_SIZE);
+	/* update the MAC with the info */
+	qsc_hmac512_update(&hstate, ctx->info, ctx->inflen);
+	
+	/* if predictive resistance is enabled, add a new seed */
+	if (ctx->pres)
+	{
+		csg_auto_reseed(ctx);
+	}
+
+	/* write the hash to the output buffer */
+	qsc_hmac512_finalize(&hstate, buffer);
+	/* clear the state */
+	qsc_hmac512_dispose(&hstate);
 }
 
 void qsc_hcg_dispose(qsc_hcg_state* ctx)
@@ -54,10 +58,11 @@ void qsc_hcg_dispose(qsc_hcg_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->cache, sizeof(ctx->cache));
-		ctx->bctr = 0;
-		ctx->cpos = 0;
-		ctx->crmd = 0;
+		qsc_memutils_clear(ctx->info, QSC_HCG_MAX_INFO_SIZE);
+		qsc_memutils_clear(ctx->key, QSC_HCG_KEY_SIZE);
+		qsc_memutils_clear(ctx->nonce, QSC_HCG_NONCE_SIZE);
+		ctx->inflen = 0;
+		ctx->rpos = 0;
 		ctx->pres = false;
 	}
 }
@@ -68,38 +73,47 @@ void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen,
 	assert(seed != NULL);
 	assert(seedlen == QSC_HCG_SEED_SIZE);
 
-	qsc_intutils_clear8(ctx->cache, sizeof(ctx->cache));
-	qsc_intutils_clear8(ctx->nonce, sizeof(ctx->nonce));
-	ctx->bctr = 0;
-	ctx->cpos = 0;
-	ctx->pres = predictive_resistance;
-
-	qsc_hmac512_initialize(&ctx->hstate, seed, seedlen);
-
-	/* copy from the info string to state */
-	if (infolen != 0)
+	if (ctx != NULL && seed != NULL && seedlen == QSC_HCG_SEED_SIZE)
 	{
-		const size_t RMDLEN = qsc_intutils_min(sizeof(ctx->info), infolen);
-		qsc_memutils_copy(ctx->info, info, RMDLEN);
-	}
-	else
-	{
-		qsc_memutils_copy(ctx->info, QSC_DEFAULT_INFO, sizeof(QSC_DEFAULT_INFO));
-	}
+		qsc_hmac512_state hstate = { 0 };
 
-	if (ctx->pres)
-	{
-		/* add a random seed to hmac state */
-		uint8_t prand[QSC_HMAC_512_RATE];
-		qsc_acp_generate(prand, sizeof(prand));
-		qsc_hmac512_update(&ctx->hstate, prand, sizeof(prand));
+		qsc_memutils_clear(ctx->info, QSC_HCG_MAX_INFO_SIZE);
+		qsc_memutils_clear(ctx->key, QSC_HCG_KEY_SIZE);
+		qsc_memutils_clear(ctx->nonce, QSC_HCG_NONCE_SIZE);
+		ctx->rpos = 0;
+		ctx->pres = predictive_resistance;
+
+		/* initialize the HMAC */
+		qsc_hmac512_initialize(&hstate, seed, seedlen);
+
+		/* copy from info string to state */
+		if (infolen != 0)
+		{
+			ctx->inflen = qsc_intutils_min(QSC_HCG_MAX_INFO_SIZE, infolen);
+			qsc_memutils_copy(ctx->info, info, ctx->inflen);
+		}
+		else
+		{
+			ctx->inflen = QSC_HCG_INFO_SIZE;
+			qsc_memutils_copy(ctx->info, QSC_DEFAULT_INFO, QSC_HCG_INFO_SIZE);
+		}
+
+		/* add the info to the MAC */
+		qsc_hmac512_update(&hstate, ctx->info, ctx->inflen);
+
+		/* predictive resistance enabled */
+		if (ctx->pres)
+		{
+			uint8_t prnd[QSC_HCG_KEY_SIZE];
+
+			/* add a random seed to hmac message */
+			qsc_acp_generate(prnd, QSC_HCG_KEY_SIZE);
+			qsc_hmac512_update(&hstate, prnd, QSC_HCG_KEY_SIZE);
+		}
+
+		/* generate the key */
+		qsc_hmac512_finalize(&hstate, ctx->key);
 	}
-
-	/* pre-load the state cache */
-	qsc_hmac512_finalize(&ctx->hstate, ctx->cache);
-
-	/* cache the first block */
-	hcg_fill_buffer(ctx);
 }
 
 void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
@@ -107,66 +121,49 @@ void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
 	assert(ctx != NULL);
 	assert(output != NULL);
 
-	ctx->bctr += otplen;
-
-	if (ctx->crmd < otplen)
+	if (ctx != NULL && output != NULL)
 	{
-		size_t outpos;
+		uint8_t buf[QSC_SHA2_512_HASH_SIZE] = { 0 };
+		size_t pos;
+		size_t rmd;
 
-		outpos = 0;
+		pos = 0;
 
-		/* copy remaining bytes from the cache */
-		if (ctx->crmd != 0)
-		{
-			/* empty the state buffer */
-			qsc_memutils_copy(output, ctx->cache + ctx->cpos, ctx->crmd);
-			outpos += ctx->crmd;
-			otplen -= ctx->crmd;
-		}
-
-		/* loop through the remainder */
+		/* loop through the buffer */
 		while (otplen != 0)
 		{
 			/* fill the buffer */
-			hcg_fill_buffer(ctx);
+			hcg_fill_buffer(ctx, buf);
 
 			/* copy to output */
-			const size_t RMDLEN = qsc_intutils_min(ctx->crmd, otplen);
-			qsc_memutils_copy(output + outpos, ctx->cache, RMDLEN);
+			rmd = qsc_intutils_min(QSC_SHA2_512_HASH_SIZE, otplen);
+			qsc_memutils_copy(output + pos, buf, rmd);
 
-			otplen -= RMDLEN;
-			outpos += RMDLEN;
-			ctx->crmd -= RMDLEN;
-			ctx->cpos += RMDLEN;
+			ctx->rpos += rmd;
+			otplen -= rmd;
+			pos += rmd;
 		}
-	}
-	else
-	{
-		/* copy from the state buffer to output */
-		const size_t RMDLEN = qsc_intutils_min(ctx->crmd, otplen);
-		qsc_memutils_copy(output, ctx->cache + ctx->cpos, RMDLEN);
-		ctx->crmd -= RMDLEN;
-		ctx->cpos += RMDLEN;
-	}
 
-	/* reseed check */
-	csg_auto_reseed(ctx);
+		/* reseed check */
+		csg_auto_reseed(ctx);
+	}
 }
 
 void qsc_hcg_update(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen)
 {
 	assert(ctx != NULL);
 	assert(seed != NULL);
-	assert(seedlen != QSC_HCG_SEED_SIZE);
 
-	uint8_t hblk[QSC_HMAC_512_RATE] = { 0 };
+	if (ctx != NULL && seed != NULL)
+	{
+		qsc_sha512_state sstate = { 0 };
 
-	/* copy the existing cache */
-	qsc_memutils_copy(hblk, ctx->cache, sizeof(ctx->cache));
-	/* copy the new seed */
-	qsc_memutils_copy(hblk + sizeof(ctx->cache), seed, seedlen);
+		qsc_sha512_initialize(&sstate);
+		qsc_sha512_update(&sstate, ctx->key, QSC_HCG_KEY_SIZE);
+		qsc_sha512_update(&sstate, seed, seedlen);
 
-	/* reset the hmac key */
-	qsc_hmac512_initialize(&ctx->hstate, hblk, sizeof(hblk));
+		/* update the key */
+		qsc_sha512_finalize(&sstate, ctx->key);
+	}
 }
 

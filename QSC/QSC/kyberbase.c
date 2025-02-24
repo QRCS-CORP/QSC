@@ -32,13 +32,10 @@ static const uint16_t kyber_zetas[KYBER_ZETA_SIZE] =
 
 static int16_t kyber_montgomery_reduce(int32_t a)
 {
-    int32_t t;
-    int16_t u;
+    int16_t t;
 
-    u = (int16_t)(a * (int64_t)KYBER_QINV);
-    t = (int32_t)u * QSC_KYBER_Q;
-    t = a - t;
-    t >>= 16;
+    t = (int16_t)(a * (int64_t)KYBER_QINV);
+    t = (a - (int32_t)t * QSC_KYBER_Q) >> 16;
 
     return (int16_t)t;
 }
@@ -737,52 +734,6 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
     }
 }
 
-static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
-{
-    qsc_kyber_polyvec a[QSC_KYBER_K];
-    qsc_kyber_polyvec e;
-    qsc_kyber_polyvec pkpv;
-    qsc_kyber_polyvec skpv;
-    uint8_t buf[2 * QSC_KYBER_SYMBYTES];
-    const uint8_t* publicseed = buf;
-    const uint8_t* noiseseed = buf + QSC_KYBER_SYMBYTES;
-    size_t i;
-    uint8_t nonce;
-
-    nonce = 0;
-    rng_generate(buf, QSC_KYBER_SYMBYTES);
-    qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES);
-
-    kyber_gen_matrix(a, publicseed, 0);
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
-    {
-        kyber_poly_get_noise_eta1(&skpv.vec[i], noiseseed, nonce);
-        ++nonce;
-    }
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
-    {
-        kyber_poly_get_noise_eta1(&e.vec[i], noiseseed, nonce);
-        ++nonce;
-    }
-
-    kyber_polyvec_ntt(&skpv);
-    kyber_polyvec_ntt(&e);
-
-    for (i = 0; i < QSC_KYBER_K; ++i)
-    {
-        kyber_polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
-        kyber_poly_to_mont(&pkpv.vec[i]);
-    }
-
-    kyber_polyvec_add(&pkpv, &pkpv, &e);
-    kyber_polyvec_reduce(&pkpv);
-
-    kyber_pack_sk(sk, &skpv);
-    kyber_pack_pk(pk, &pkpv, publicseed);
-}
-
 static void kyber_indcpa_enc(uint8_t c[QSC_KYBER_INDCPA_BYTES], const uint8_t m[QSC_KYBER_MSGBYTES],
     const uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], const uint8_t coins[QSC_KYBER_SYMBYTES])
 {
@@ -856,6 +807,174 @@ static void kyber_indcpa_dec(uint8_t m[QSC_KYBER_MSGBYTES], const uint8_t c[QSC_
 
 /* kem.c */
 
+#if defined(QSC_KYBER_FIPS203)
+
+static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], uint8_t* coins)
+{
+    qsc_kyber_polyvec a[QSC_KYBER_K];
+    qsc_kyber_polyvec e;
+    qsc_kyber_polyvec pkpv;
+    qsc_kyber_polyvec skpv;
+    uint8_t buf[2 * QSC_KYBER_SYMBYTES];
+    const uint8_t* publicseed = buf;
+    const uint8_t* noiseseed = buf + QSC_KYBER_SYMBYTES;
+    size_t i;
+    uint8_t nonce;
+
+    nonce = 0;
+    
+    qsc_memutils_copy(buf, coins, QSC_KYBER_SYMBYTES); // new...
+    buf[QSC_KYBER_SYMBYTES] = QSC_KYBER_K;
+
+    qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES + 1);
+
+    kyber_gen_matrix(a, publicseed, 0);
+
+    for (i = 0; i < QSC_KYBER_K; ++i)
+    {
+        kyber_poly_get_noise_eta1(&skpv.vec[i], noiseseed, nonce);
+        ++nonce;
+    }
+
+    for (i = 0; i < QSC_KYBER_K; ++i)
+    {
+        kyber_poly_get_noise_eta1(&e.vec[i], noiseseed, nonce);
+        ++nonce;
+    }
+
+    kyber_polyvec_ntt(&skpv);
+    kyber_polyvec_ntt(&e);
+
+    for (i = 0; i < QSC_KYBER_K; ++i)
+    {
+        kyber_polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
+        kyber_poly_to_mont(&pkpv.vec[i]);
+    }
+
+    kyber_polyvec_add(&pkpv, &pkpv, &e);
+    kyber_polyvec_reduce(&pkpv);
+
+    kyber_pack_sk(sk, &skpv);
+    kyber_pack_pk(pk, &pkpv, publicseed);
+}
+
+void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
+{
+    uint8_t coins[2 * QSC_KYBER_SYMBYTES];
+
+    rng_generate(coins, 2 * QSC_KYBER_SYMBYTES);
+
+    kyber_indcpa_keypair(pk, sk, coins);
+    qsc_memutils_copy((sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES), pk, QSC_KYBER_INDCPA_PUBLICKEY_BYTES);
+
+    qsc_sha3_compute256(sk + QSC_KYBER_SECRETKEY_BYTES - 2 * QSC_KYBER_SYMBYTES, pk, QSC_KYBER_PUBLICKEY_BYTES);
+    /* Value z for pseudo-random output on reject */
+    qsc_memutils_copy(sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, coins + QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
+}
+
+void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
+{
+    uint8_t buf[2 * QSC_KYBER_SYMBYTES];
+    uint8_t kr[2 * QSC_KYBER_SYMBYTES];
+
+    rng_generate(buf, QSC_KYBER_SYMBYTES);
+
+    /* Multitarget countermeasure for coins + contributory KEM */
+    qsc_sha3_compute256(buf + QSC_KYBER_SYMBYTES, pk, QSC_KYBER_PUBLICKEY_BYTES);
+    qsc_sha3_compute512(kr, buf, 2 * QSC_KYBER_SYMBYTES);
+
+    /* coins are in kr+QSC_KYBER_SYMBYTES */
+    kyber_indcpa_enc(ct, buf, pk, kr + QSC_KYBER_SYMBYTES);
+
+    qsc_memutils_copy(ss, kr, QSC_KYBER_SYMBYTES);
+}
+
+bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES])
+{
+    uint8_t buf[2 * QSC_KYBER_SYMBYTES];
+    uint8_t cmp[QSC_KYBER_SYMBYTES + QSC_KYBER_CIPHERTEXT_BYTES];
+    uint8_t kr[2 * QSC_KYBER_SYMBYTES];
+    qsc_keccak_state kctx = { 0 };
+    const uint8_t *pk = sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES;
+    int32_t fail;
+
+    kyber_indcpa_dec(buf, ct, sk);
+
+    /* Multitarget countermeasure for coins + contributory KEM */
+    qsc_memutils_copy(((uint8_t*)buf + QSC_KYBER_SYMBYTES), (sk + QSC_KYBER_SECRETKEY_BYTES - (2 * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
+    qsc_sha3_compute512(kr, buf, 2 * QSC_KYBER_SYMBYTES);
+
+    /* coins are in kr+QSC_KYBER_SYMBYTES */
+    kyber_indcpa_enc(cmp + QSC_KYBER_SYMBYTES, buf, pk, kr + QSC_KYBER_SYMBYTES);
+
+    fail = qsc_intutils_verify(ct, cmp + QSC_KYBER_SYMBYTES, QSC_KYBER_CIPHERTEXT_BYTES);
+
+    qsc_memutils_copy(cmp, sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
+    qsc_keccak_absorb(&kctx, qsc_keccak_rate_256, cmp, sizeof(cmp), QSC_KECCAK_SHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
+    qsc_keccak_permute(&kctx, QSC_KECCAK_PERMUTATION_ROUNDS);
+
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
+	qsc_memutils_copy(ss, (uint8_t*)kctx.state, QSC_KYBER_SYMBYTES);
+#else
+	for (size_t i = 0; i < QSC_KYBER_SYMBYTES / sizeof(uint64_t); ++i)
+	{
+		qsc_intutils_le64to8((output + sizeof(uint64_t) * i), ctx->state[i]);
+	}
+#endif
+
+    qsc_intutils_cmov(ss, kr, QSC_KYBER_SYMBYTES, (uint8_t)!fail);
+
+    return (fail == 0);
+}
+
+#else
+
+static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
+{
+    qsc_kyber_polyvec a[QSC_KYBER_K];
+    qsc_kyber_polyvec e;
+    qsc_kyber_polyvec pkpv;
+    qsc_kyber_polyvec skpv;
+    uint8_t buf[2 * QSC_KYBER_SYMBYTES];
+    const uint8_t* publicseed = buf;
+    const uint8_t* noiseseed = buf + QSC_KYBER_SYMBYTES;
+    size_t i;
+    uint8_t nonce;
+
+    nonce = 0;
+    rng_generate(buf, QSC_KYBER_SYMBYTES);
+    qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES);
+
+    kyber_gen_matrix(a, publicseed, 0);
+
+    for (i = 0; i < QSC_KYBER_K; ++i)
+    {
+        kyber_poly_get_noise_eta1(&skpv.vec[i], noiseseed, nonce);
+        ++nonce;
+    }
+
+    for (i = 0; i < QSC_KYBER_K; ++i)
+    {
+        kyber_poly_get_noise_eta1(&e.vec[i], noiseseed, nonce);
+        ++nonce;
+    }
+
+    kyber_polyvec_ntt(&skpv);
+    kyber_polyvec_ntt(&e);
+
+    for (i = 0; i < QSC_KYBER_K; ++i)
+    {
+        kyber_polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
+        kyber_poly_to_mont(&pkpv.vec[i]);
+    }
+
+    kyber_polyvec_add(&pkpv, &pkpv, &e);
+    kyber_polyvec_reduce(&pkpv);
+
+    kyber_pack_sk(sk, &skpv);
+    kyber_pack_pk(pk, &pkpv, publicseed);
+}
+
 void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
 {
     kyber_indcpa_keypair(pk, sk, rng_generate);
@@ -918,3 +1037,5 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 
     return (fail == 0);
 }
+
+#endif

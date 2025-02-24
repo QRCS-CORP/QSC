@@ -5,9 +5,11 @@
 
 /* api_bytes */
 
-#define NTRU_SEEDBYTES 32
-#define NTRU_PRFKEYBYTES 32
-#define NTRU_SHAREDKEYBYTES 32
+ /* \cond */
+
+#define NTRU_SEEDBYTES 32ULL
+#define NTRU_PRFKEYBYTES 32ULL
+#define NTRU_SHAREDKEYBYTES 32ULL
 
 #if defined(QSC_NTRU_S1HPS2048509)
 
@@ -952,7 +954,7 @@ static void ntru_sample_fixed_type(poly *r, const uint8_t u[NTRU_SAMPLE_FT_BYTES
         s[4 * i] = (u[15 * i] << 2) + (u[(15 * i) + 1] << 10) + (u[(15 * i) + 2] << 18) + ((uint32_t)u[(15 * i) + 3] << 26);
         s[(4 * i) + 1] = ((u[(15 * i) + 3] & 0xC0) >> 4) + (u[(15 * i) + 4] << 4) + (u[(15 * i) + 5] << 12) + (u[(15 * i) + 6] << 20) + ((uint32_t)u[(15 * i) + 7] << 28);
         s[(4 * i) + 2] = ((u[(15 * i) + 7] & 0xF0) >> 2) + (u[(15 * i) + 8] << 6) + (u[(15 * i) + 9] << 14) + (u[(15 * i) + 10] << 22) + ((uint32_t)u[(15 * i) + 11] << 30);
-        s[(4 * i) + 3] = (u[(15 * i) + 11] & 0xFC) + (u[(15 * i) + 12] << 8) + (u[(15 * i) + 13] << 16/*changed to 15*/) + ((uint32_t)u[(15 * i) + 14] << 24);
+        s[(4 * i) + 3] = (u[(15 * i) + 11] & 0xFC) + (u[(15 * i) + 12] << 8) + (u[(15 * i) + 13] << 16) + ((uint32_t)u[(15 * i) + 14] << 24);
     }
 #if (NTRU_N - 1) > ((NTRU_N - 1) / 4) * 4 // (N-1) = 2 mod 4
     i = (NTRU_N - 1) / 4;
@@ -1385,3 +1387,5 @@ bool qsc_ntru_ref_decapsulate(uint8_t* ss, const uint8_t* ct, const uint8_t* sk)
 
     return (fail == 0);
 }
+
+/* \endcond */

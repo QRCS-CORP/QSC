@@ -1,5 +1,5 @@
 
-/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+/* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -13,7 +13,7 @@
  * from Quantum Resistant Cryptographic Solutions Incorporated.
  *
  * Written by John G. Underhill
- * Contact: develop@qrcs.ca
+ * Contact: john.underhill@protonmail.com
  */
 
 #ifndef QSC_POLY1305_H

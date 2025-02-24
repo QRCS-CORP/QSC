@@ -4,6 +4,8 @@
 
 qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
 {
+	assert(address != NULL);
+	
 	qsc_ipinfo_address_types tadd;
 
 	tadd = qsc_ipinfo_address_type_unknown;
@@ -265,6 +267,8 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loopback()
 
 void qsc_ipinfo_ipv4_address_get_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], const qsc_ipinfo_ipv4_address* address)
 {
+	assert(address != NULL);
+
 	qsc_memutils_clear(mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
 
 	if (address->ipv4[0] > 0 && address->ipv4[0] < 127)
@@ -287,6 +291,8 @@ void qsc_ipinfo_ipv4_address_get_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], c
 
 uint8_t qsc_ipinfo_ipv4_address_get_cidr_mask(const qsc_ipinfo_ipv4_address* address)
 {
+	assert(address != NULL);
+
 	uint8_t nmsk;
 
 	if (address->ipv4[0] > 0 && address->ipv4[0] < 127)
@@ -311,6 +317,9 @@ uint8_t qsc_ipinfo_ipv4_address_get_cidr_mask(const qsc_ipinfo_ipv4_address* add
 
 void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_address* address)
 {
+	assert(output != NULL);
+	assert(address != NULL);
+
 	assert(address != NULL);
 	assert(output != NULL);
 
@@ -323,7 +332,6 @@ void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_add
 void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const qsc_ipinfo_ipv4_address* address)
 {
 	assert(address != NULL);
-	assert(output != NULL);
 
 	if (address != NULL && output != NULL)
 	{
@@ -364,7 +372,6 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const uint8_t* address)
 {
 	assert(address != NULL);
-	assert(output != NULL);
 
 	if (address != NULL && output != NULL)
 	{
@@ -796,6 +803,8 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loopback()
 
 void qsc_ipinfo_ipv6_address_get_mask(char mask[QSC_IPINFO_IPV6_MASK_STRNLEN], const qsc_ipinfo_ipv6_address* address)
 {
+	assert(address != NULL);
+
 	size_t ctr;
 
 	ctr = QSC_IPINFO_IPV6_BYTELEN;
@@ -818,6 +827,8 @@ void qsc_ipinfo_ipv6_address_get_mask(char mask[QSC_IPINFO_IPV6_MASK_STRNLEN], c
 
 uint8_t qsc_ipinfo_ipv6_address_get_cidr_mask(const qsc_ipinfo_ipv6_address* address)
 {
+	assert(address != NULL);
+
 	size_t ctr;
 	uint8_t nmsk;
 
@@ -844,8 +855,8 @@ uint8_t qsc_ipinfo_ipv6_address_get_cidr_mask(const qsc_ipinfo_ipv6_address* add
 
 void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_address* address)
 {
-	assert(address != NULL);
 	assert(output != NULL);
+	assert(address != NULL);
 
 	if (address != NULL && output != NULL)
 	{
@@ -856,7 +867,6 @@ void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_add
 void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address)
 {
 	assert(address != NULL);
-	assert(output != NULL);
 
 	if (address != NULL && output != NULL)
 	{
@@ -894,7 +904,6 @@ void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], con
 void qsc_ipinfo_ipv6_array_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const uint8_t* address)
 {
 	assert(address != NULL);
-	assert(output != NULL);
 
 	if (address != NULL && output != NULL)
 	{

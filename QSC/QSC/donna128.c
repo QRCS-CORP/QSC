@@ -2,6 +2,9 @@
 
 static void Mul64x64To128(uint64_t x, uint64_t y, uint64_t* low, uint64_t* high)
 {
+	assert(low != NULL);
+	assert(high != NULL);
+
 #if defined(QSC_SYSTEM_FAST_64X64_MUL)
 	QSC_SYSTEM_FAST_64X64_MUL(x, y, low, high);
 #else

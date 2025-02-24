@@ -4,7 +4,9 @@
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), void* state)
 {
-	assert(ctx != NULL && func != NULL && state != NULL);
+	assert(ctx != NULL);
+	assert(func != NULL);
+	assert(state != NULL);
 
 	qsc_thread thd;
 	qsc_mutex mtx;

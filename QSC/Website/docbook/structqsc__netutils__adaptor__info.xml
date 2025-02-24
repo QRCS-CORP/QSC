@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__netutils__adaptor__info" xml:lang="en-US">
+<title>qsc_netutils_adaptor_info Struct Reference</title>
+<indexterm><primary>qsc_netutils_adaptor_info</primary></indexterm>
+<para>
+
+<para>The netutils adaptor info structure. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;netutils.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>char <link linkend="_structqsc__netutils__adaptor__info_1ad194f398e37e83c871d0f5187acf8c5c">desc</link> [QSC_NETUTILS_ADAPTOR_DESCRIPTION_SIZE]</para>
+</listitem>
+            <listitem><para>char <link linkend="_structqsc__netutils__adaptor__info_1a7661ade92a27964dc3d61876f3752edb">dhcp</link> [QSC_NETUTILS_IP_STRING_SIZE]</para>
+</listitem>
+            <listitem><para>char <link linkend="_structqsc__netutils__adaptor__info_1a4a49728314ec8a226b0b0b599af5758f">gateway</link> [QSC_NETUTILS_IP_STRING_SIZE]</para>
+</listitem>
+            <listitem><para>char <link linkend="_structqsc__netutils__adaptor__info_1a74ab18cc9dec0bb4bccaacde4c5e45f0">ip</link> [QSC_NETUTILS_IP_STRING_SIZE]</para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__netutils__adaptor__info_1af60188e63796ccf489a6035b58711a2b">mac</link> [QSC_NETUTILS_MAC_ADDRESS_SIZE]</para>
+</listitem>
+            <listitem><para>char <link linkend="_structqsc__netutils__adaptor__info_1a3005f687a9043403135da090e26cc433">name</link> [QSC_NETUTILS_ADAPTOR_NAME_SIZE]</para>
+</listitem>
+            <listitem><para>char <link linkend="_structqsc__netutils__adaptor__info_1a502ce67a9299d80e2bf23642c19f3000">subnet</link> [QSC_NETUTILS_IP_STRING_SIZE]</para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The netutils adaptor info structure. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__netutils__adaptor__info_1ad194f398e37e83c871d0f5187acf8c5c"/><section>
+    <title>desc</title>
+<indexterm><primary>desc</primary><secondary>qsc_netutils_adaptor_info</secondary></indexterm>
+<indexterm><primary>qsc_netutils_adaptor_info</primary><secondary>desc</secondary></indexterm>
+<para><computeroutput>char desc[QSC_NETUTILS_ADAPTOR_DESCRIPTION_SIZE]</computeroutput></para>
+<para>The description string </para>
+</section>
+<anchor xml:id="_structqsc__netutils__adaptor__info_1a7661ade92a27964dc3d61876f3752edb"/><section>
+    <title>dhcp</title>
+<indexterm><primary>dhcp</primary><secondary>qsc_netutils_adaptor_info</secondary></indexterm>
+<indexterm><primary>qsc_netutils_adaptor_info</primary><secondary>dhcp</secondary></indexterm>
+<para><computeroutput>char dhcp[QSC_NETUTILS_IP_STRING_SIZE]</computeroutput></para>
+<para>The DHCP address </para>
+</section>
+<anchor xml:id="_structqsc__netutils__adaptor__info_1a4a49728314ec8a226b0b0b599af5758f"/><section>
+    <title>gateway</title>
+<indexterm><primary>gateway</primary><secondary>qsc_netutils_adaptor_info</secondary></indexterm>
+<indexterm><primary>qsc_netutils_adaptor_info</primary><secondary>gateway</secondary></indexterm>
+<para><computeroutput>char gateway[QSC_NETUTILS_IP_STRING_SIZE]</computeroutput></para>
+<para>The IP gateway address </para>
+</section>
+<anchor xml:id="_structqsc__netutils__adaptor__info_1a74ab18cc9dec0bb4bccaacde4c5e45f0"/><section>
+    <title>ip</title>
+<indexterm><primary>ip</primary><secondary>qsc_netutils_adaptor_info</secondary></indexterm>
+<indexterm><primary>qsc_netutils_adaptor_info</primary><secondary>ip</secondary></indexterm>
+<para><computeroutput>char ip[QSC_NETUTILS_IP_STRING_SIZE]</computeroutput></para>
+<para>The interface IP address </para>
+</section>
+<anchor xml:id="_structqsc__netutils__adaptor__info_1af60188e63796ccf489a6035b58711a2b"/><section>
+    <title>mac</title>
+<indexterm><primary>mac</primary><secondary>qsc_netutils_adaptor_info</secondary></indexterm>
+<indexterm><primary>qsc_netutils_adaptor_info</primary><secondary>mac</secondary></indexterm>
+<para><computeroutput>uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE]</computeroutput></para>
+<para>The MAC address </para>
+</section>
+<anchor xml:id="_structqsc__netutils__adaptor__info_1a3005f687a9043403135da090e26cc433"/><section>
+    <title>name</title>
+<indexterm><primary>name</primary><secondary>qsc_netutils_adaptor_info</secondary></indexterm>
+<indexterm><primary>qsc_netutils_adaptor_info</primary><secondary>name</secondary></indexterm>
+<para><computeroutput>char name[QSC_NETUTILS_ADAPTOR_NAME_SIZE]</computeroutput></para>
+<para>The host name </para>
+</section>
+<anchor xml:id="_structqsc__netutils__adaptor__info_1a502ce67a9299d80e2bf23642c19f3000"/><section>
+    <title>subnet</title>
+<indexterm><primary>subnet</primary><secondary>qsc_netutils_adaptor_info</secondary></indexterm>
+<indexterm><primary>qsc_netutils_adaptor_info</primary><secondary>subnet</secondary></indexterm>
+<para><computeroutput>char subnet[QSC_NETUTILS_IP_STRING_SIZE]</computeroutput></para>
+<para>The subnet address </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/netutils.h</section>
+</section>

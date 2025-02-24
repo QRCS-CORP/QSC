@@ -1,0 +1,158 @@
+\doxysection{fileutils.\+h}
+\hypertarget{fileutils_8h_source}{}\label{fileutils_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/fileutils.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/fileutils.h}}
+\mbox{\hyperlink{fileutils_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_FILEUTILS\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_FILEUTILS\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#define\ QSC\_FILEUTILS\_CHUNK\_SIZE\ 4096}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#define\ QSC\_FILEUTILS\_MAX\_EXTENSION\ 16}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#define\ QSC\_FILEUTILS\_MAX\_FILENAME\ QSC\_SYSTEM\_MAX\_PATH}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#define\ QSC\_FILEUTILS\_MAX\_PATH\ QSC\_SYSTEM\_MAX\_PATH}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_OS\_WINDOWS)}}
+\DoxyCodeLine{00081\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ QSC\_FILEUTILS\_DIRECTORY\_SEPERATOR[]\ =\ \textcolor{stringliteral}{"{}\(\backslash\)\(\backslash\)"{}};}
+\DoxyCodeLine{00082\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00083\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ QSC\_FILEUTILS\_DIRECTORY\_SEPERATOR[]\ =\ \textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{00084\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00089\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\_fileutils\_access\_rights}}}
+\DoxyCodeLine{00090\ \{}
+\DoxyCodeLine{00091\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a773ae94551358adbab1160d9c818077e}{qsc\_fileutils\_access\_exists}}\ =\ 0,\ \ \ \ \ }
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_OS\_WINDOWS)}}
+\DoxyCodeLine{00093\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a444ee9a5670c3d6ce6c1fb41c0af0223}{qsc\_fileutils\_access\_read}}\ =\ 1,\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00094\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a39667676389de9d431ca692cf53138e3}{qsc\_fileutils\_access\_write}}\ =\ 2,\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00095\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40ab6115624f3964e431556458f150d02d4}{qsc\_fileutils\_access\_execute}}\ =\ 3,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00097\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a444ee9a5670c3d6ce6c1fb41c0af0223}{qsc\_fileutils\_access\_read}}\ =\ 4,\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00098\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a39667676389de9d431ca692cf53138e3}{qsc\_fileutils\_access\_write}}\ =\ 2,\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00099\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40ab6115624f3964e431556458f150d02d4}{qsc\_fileutils\_access\_execute}}\ =\ 6,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00101\ \}\ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\_fileutils\_access\_rights}};}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00106\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\_fileutils\_mode}}}
+\DoxyCodeLine{00107\ \{}
+\DoxyCodeLine{00108\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8ab6c70e7903e9cc9bab27664c6a12db3b}{qsc\_fileutils\_mode\_none}}\ =\ 0,\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00109\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a7e61a9786bad774ef9d26df321d241f0}{qsc\_fileutils\_mode\_read}}\ =\ 1,\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00110\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8abc43ea15f2e7fe7aa54eab31555928eb}{qsc\_fileutils\_mode\_read\_update}}\ =\ 2,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00111\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a2a52b5ddf1782d1ea28602138cf077bd}{qsc\_fileutils\_mode\_write}}\ =\ 3,\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00112\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8aa9260a118b1d329a4a8ee22adf5fcf7d}{qsc\_fileutils\_mode\_write\_update}}\ =\ 4,\ }
+\DoxyCodeLine{00113\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a5f3709b901e05618bcaa51f87512e93d}{qsc\_fileutils\_mode\_append}}\ =\ 5,\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00114\ \ \ \ \ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a0e8584aaa835bd00e2f0ecd7ae9ce2d2}{qsc\_fileutils\_mode\_append\_update}}\ =\ 6,\ \ \ }
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \}\ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\_fileutils\_mode}};}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00127\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_aa6bca3f2094462b12405b2734e763428}{qsc\_fileutils\_append\_to\_file}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ stream,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00137\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_add9cb29d0d98fd71dd39f819f06b6c15}{qsc\_fileutils\_copy\_file\_to\_object}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keywordtype}{void}*\ obj,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00147\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a3eb655510803b636c28dd007455f935b}{qsc\_fileutils\_copy\_file\_to\_stream}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keywordtype}{char}*\ stream,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00157\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a4a3089295cde5d695207f3c5a2846f94}{qsc\_fileutils\_copy\_object\_to\_file}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ obj,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00167\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_acb8d92b779d3074a6d67332f12f91629}{qsc\_fileutils\_copy\_stream\_to\_file}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ stream,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00175\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a38b929d1921edc1379a23c1577129612}{qsc\_fileutils\_create}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00183\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_ad2fbe57dbc23543838e37729e31de9bc}{qsc\_fileutils\_delete}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00191\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a5607e8280b4755b17b9768977929688c}{qsc\_fileutils\_erase}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00200\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_af2fbcf540fad86252322cbf57fa380dd}{qsc\_fileutils\_file\_copy}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ inpath,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ outpath);}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00209\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a7824f3efd0fa32f173b544baf7b0fbc0}{qsc\_fileutils\_get\_access}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\_fileutils\_access\_rights}}\ level);}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00219\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a812585a8804111f11d13fe33a2044bb1}{qsc\_fileutils\_get\_directory}}(\textcolor{keywordtype}{char}*\ directory,\ \textcolor{keywordtype}{size\_t}\ dirlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00229\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a0569b55ebae69409c18432980875f14a}{qsc\_fileutils\_get\_extension}}(\textcolor{keywordtype}{char}*\ extension,\ \textcolor{keywordtype}{size\_t}\ extlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00239\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a2983498281859c8e9d9c309295919ace}{qsc\_fileutils\_get\_name}}(\textcolor{keywordtype}{char}*\ name,\ \textcolor{keywordtype}{size\_t}\ namelen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00251\ QSC\_EXPORT\_API\ int64\_t\ \mbox{\hyperlink{fileutils_8h_a723a719d5e663bfabd5ae382c40d1b93}{qsc\_fileutils\_get\_line}}(\textcolor{keywordtype}{char}**\ line,\ \textcolor{keywordtype}{size\_t}*\ length,\ FILE*\ fp);}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00259\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a4bf7a13fb30f0c0d48c22d377d1d9976}{qsc\_fileutils\_get\_size}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00267\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a44c84c8b25e33f70bf306336590c09de}{qsc\_fileutils\_get\_working\_directory}}(\textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00278\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_ab69afb75a279d755beab01747a69c2a0}{qsc\_fileutils\_list\_files}}(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ directory);}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00285\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{fileutils_8h_a91a98d664848c1f56fefd73184628cb9}{qsc\_fileutils\_close}}(FILE*\ fp);}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00293\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a25fe3e3b47c78cd540c5d397f5ec752b}{qsc\_fileutils\_exists}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00294\ }
+\DoxyCodeLine{00303\ QSC\_EXPORT\_API\ FILE*\ \mbox{\hyperlink{fileutils_8h_a1e886b5efc097391c3deac2ad447d23e}{qsc\_fileutils\_open}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\_fileutils\_mode}}\ mode,\ \textcolor{keywordtype}{bool}\ binary);}
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00314\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_aec1b6a578c4fbc6f7c65eb53c8e8e821}{qsc\_fileutils\_read}}(\textcolor{keywordtype}{char}*\ output,\ \textcolor{keywordtype}{size\_t}\ otplen,\ \textcolor{keywordtype}{size\_t}\ position,\ FILE*\ fp);}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00325\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a4761e5e7fa706c2329ad59c5503e4de3}{qsc\_fileutils\_safe\_read}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keywordtype}{size\_t}\ position,\ \textcolor{keywordtype}{char}*\ output,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00336\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a1e5c01a7800b6966bd81ec47d90ec0ed}{qsc\_fileutils\_safe\_write}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keywordtype}{size\_t}\ position,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ input,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00337\ }
+\DoxyCodeLine{00345\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_abd1997040f3b2527454526283f2a6a0a}{qsc\_fileutils\_seekto}}(FILE*\ fp,\ \textcolor{keywordtype}{size\_t}\ position);}
+\DoxyCodeLine{00346\ }
+\DoxyCodeLine{00356\ QSC\_EXPORT\_API\ int64\_t\ \mbox{\hyperlink{fileutils_8h_a4284944057814d82269548c284103209}{qsc\_fileutils\_read\_line}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keywordtype}{char}*\ buffer,\ \textcolor{keywordtype}{size\_t}\ buflen,\ \textcolor{keywordtype}{size\_t}\ linenum);}
+\DoxyCodeLine{00357\ }
+\DoxyCodeLine{00365\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a7a82a7c7a8933f8bc0df4d85f48b251f}{qsc\_fileutils\_truncate\_file}}(FILE*\ fp,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00373\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_af11afff120957101ce8acc7afb492040}{qsc\_fileutils\_valid\_path}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00384\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{fileutils_8h_a09307ee7ba9fba6ae2349407c49551e0}{qsc\_fileutils\_write}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ input,\ \textcolor{keywordtype}{size\_t}\ inplen,\ \textcolor{keywordtype}{size\_t}\ position,\ FILE*\ fp);}
+\DoxyCodeLine{00385\ }
+\DoxyCodeLine{00394\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{fileutils_8h_a011607505e52be29a7ee70944dcdb514}{qsc\_fileutils\_write\_line}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ input,\ \textcolor{keywordtype}{size\_t}\ inplen);}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00401\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{fileutils_8h_a64dd593582102869fd5e0804992a1267}{qsc\_fileutils\_zeroise}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00402\ }
+\DoxyCodeLine{00403\ \textcolor{preprocessor}{\#if\ defined(QSC\_DEBUG\_MODE)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00409\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_fileutils\_test(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fpath);}
+\DoxyCodeLine{00410\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00411\ }
+\DoxyCodeLine{00412\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,176 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/hcg.h File Reference}
+\hypertarget{hcg_8h}{}\label{hcg_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/hcg.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/hcg.h}}
+
+
+Contains the public api and documentation for the HCG pseudo-\/random bytes generator.  
+
+
+{\ttfamily \#include "{}sha2.\+h"{}}\newline
+Include dependency graph for hcg.\+h\+:
+% FIG 0
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The HCG state structure. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{hcg_8h_a1084f334864c13af94f7d980b9c28508}\label{hcg_8h_a1084f334864c13af94f7d980b9c28508} 
+\#define {\bfseries QSC\+\_\+\+HCG\+\_\+\+KEY\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The HCG internal key size. \end{DoxyCompactList}\item 
+\Hypertarget{hcg_8h_a3b4ca51cdcbe98e298364b3270af2d6b}\label{hcg_8h_a3b4ca51cdcbe98e298364b3270af2d6b} 
+\#define {\bfseries QSC\+\_\+\+HCG\+\_\+\+INFO\+\_\+\+SIZE}~19
+\begin{DoxyCompactList}\small\item\em The HCG default info size. \end{DoxyCompactList}\item 
+\Hypertarget{hcg_8h_aff1460756f7a46e917e8e44eb1999fdb}\label{hcg_8h_aff1460756f7a46e917e8e44eb1999fdb} 
+\#define {\bfseries QSC\+\_\+\+HCG\+\_\+\+MAX\+\_\+\+INFO\+\_\+\+SIZE}~56
+\begin{DoxyCompactList}\small\item\em The HCG maximum info size. \end{DoxyCompactList}\item 
+\Hypertarget{hcg_8h_a15dcf6d6c44b55fba137e3105bbff7ee}\label{hcg_8h_a15dcf6d6c44b55fba137e3105bbff7ee} 
+\#define {\bfseries QSC\+\_\+\+HCG\+\_\+\+NONCE\+\_\+\+SIZE}~8
+\begin{DoxyCompactList}\small\item\em The HCG nonce size. \end{DoxyCompactList}\item 
+\Hypertarget{hcg_8h_aa84389657008311972c71329d5e061fb}\label{hcg_8h_aa84389657008311972c71329d5e061fb} 
+\#define {\bfseries QSC\+\_\+\+HCG\+\_\+\+RESEED\+\_\+\+THRESHHOLD}~65535
+\begin{DoxyCompactList}\small\item\em The HCG reseed threshold. \end{DoxyCompactList}\item 
+\Hypertarget{hcg_8h_ac1e216ac648364ca13c7710a51a7fbcc}\label{hcg_8h_ac1e216ac648364ca13c7710a51a7fbcc} 
+\#define {\bfseries QSC\+\_\+\+HCG\+\_\+\+SEED\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The HCG seed size. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{hcg_8h_ad02c87962d4302c598655a68e35e22e6}{qsc\+\_\+hcg\+\_\+dispose}} (\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the HCG DRBG state. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{hcg_8h_a28a2c1690583253e27b92d3152d063e8}{qsc\+\_\+hcg\+\_\+initialize}} (\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}seed, size\+\_\+t seedlen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}info, size\+\_\+t infolen, bool pres)
+\begin{DoxyCompactList}\small\item\em Initialize the pseudo-\/random provider state with a seed and optional personalization string. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{hcg_8h_a32e5a8c4e8174ad13bfddfe814256167}{qsc\+\_\+hcg\+\_\+generate}} (\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen)
+\begin{DoxyCompactList}\small\item\em Generate pseudo-\/random bytes using the random provider. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{hcg_8h_aaf80227f318e327545005d4f7feef935}{qsc\+\_\+hcg\+\_\+update}} (\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}seed, size\+\_\+t seedlen)
+\begin{DoxyCompactList}\small\item\em Update the random provider with new keying material. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Contains the public api and documentation for the HCG pseudo-\/random bytes generator. 
+
+\begin{DoxyAuthor}{Author}
+John Underhill 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+August 31, 2020 \textbackslash{}update November 21, 2024 
+\end{DoxyDate}
+\begin{DoxyVersion}{Version}
+1.\+1
+\end{DoxyVersion}
+Usage Example ~\newline
+ Initialize the DRBG and generate output ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ external\ key\ and\ optional\ custom\ arrays}}
+\DoxyCodeLine{uint8\_t\ seed[32]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{uint8\_t\ info[32]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ random\ bytes}}
+\DoxyCodeLine{uint8\_t\ rnd[200]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ initialize\ with\ seed,\ and\ optional\ customization\ array,\ with\ predictive\ resistance\ enabled}}
+\DoxyCodeLine{qsc\_hcg\_initialize(seed,\ \textcolor{keyword}{sizeof}(seed),\ info,\ \textcolor{keyword}{sizeof}(info),\ \textcolor{keyword}{true});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ generate\ the\ pseudo-\/random}}
+\DoxyCodeLine{qsc\_hcg\_generate(rnd,\ \textcolor{keyword}{sizeof}(rnd)));}
+
+\end{DoxyCode}
+
+
+\begin{DoxyRemark}{Remarks}
+\textbackslash{}para HCG has a similar configuration to the HKDF Expand key derivation function, but with a 128-\/bit nonce, and a default info parameter. Setting the predictive resistance option to true during intialization changes HCG from a determinsitic to a non-\/determinstic generator. New seed material is generated at initialization and at the default 64 kilobyte output boundary, injecting new random seed material into the HMAC. The update function can be used to periodically update the HMAC key, by hashing the existing key and new seed material to create a new key. The dispose function must be called before an HCG instance is discarded.
+\end{DoxyRemark}
+The HKDF Scheme\+: Cryptographic Extraction and Key Derivation \href{http://eprint.iacr.org/2010/264.pdf}{\texttt{ http\+://eprint.\+iacr.\+org/2010/264.\+pdf}} RFC 2104 HMAC\+: Keyed-\/\+Hashing for Message Authentication \href{http://tools.ietf.org/html/rfc2104}{\texttt{ http\+://tools.\+ietf.\+org/html/rfc2104}} ~\newline
+Fips 198-\/1\+: The Keyed-\/\+Hash Message Authentication Code (HMAC) \href{http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf}{\texttt{ http\+://csrc.\+nist.\+gov/publications/fips/fips198-\/1/\+FIPS-\/198-\/1\+\_\+final.\+pdf}} ~\newline
+Fips 180-\/4\+: Secure Hash Standard (SHS) \href{http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf}{\texttt{ http\+://csrc.\+nist.\+gov/publications/fips/fips180-\/4/fips-\/180-\/4.\+pdf}} 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{hcg_8h_ad02c87962d4302c598655a68e35e22e6}\index{hcg.h@{hcg.h}!qsc\_hcg\_dispose@{qsc\_hcg\_dispose}}
+\index{qsc\_hcg\_dispose@{qsc\_hcg\_dispose}!hcg.h@{hcg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hcg\_dispose()}{qsc\_hcg\_dispose()}}
+{\footnotesize\ttfamily \label{hcg_8h_ad02c87962d4302c598655a68e35e22e6} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hcg\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the HCG DRBG state. 
+
+\begin{DoxyWarning}{Warning}
+The dispose function must be called when disposing of the cipher. This function destroys the internal state of the cipher.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The HCG state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{hcg_8h_a32e5a8c4e8174ad13bfddfe814256167}\index{hcg.h@{hcg.h}!qsc\_hcg\_generate@{qsc\_hcg\_generate}}
+\index{qsc\_hcg\_generate@{qsc\_hcg\_generate}!hcg.h@{hcg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hcg\_generate()}{qsc\_hcg\_generate()}}
+{\footnotesize\ttfamily \label{hcg_8h_a32e5a8c4e8174ad13bfddfe814256167} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hcg\+\_\+generate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{}\end{DoxyParamCaption})}
+
+
+
+Generate pseudo-\/random bytes using the random provider. 
+
+\begin{DoxyWarning}{Warning}
+Initialize must first be called before this function can be used.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The HCG state structure \\
+\hline
+{\em output} & The pseudo-\/random output array \\
+\hline
+{\em otplen} & The requested number of bytes to generate \\
+\hline
+\end{DoxyParams}
+\Hypertarget{hcg_8h_a28a2c1690583253e27b92d3152d063e8}\index{hcg.h@{hcg.h}!qsc\_hcg\_initialize@{qsc\_hcg\_initialize}}
+\index{qsc\_hcg\_initialize@{qsc\_hcg\_initialize}!hcg.h@{hcg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hcg\_initialize()}{qsc\_hcg\_initialize()}}
+{\footnotesize\ttfamily \label{hcg_8h_a28a2c1690583253e27b92d3152d063e8} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hcg\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{seed}{, }\item[{size\+\_\+t}]{seedlen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{info}{, }\item[{size\+\_\+t}]{infolen}{, }\item[{bool}]{pres}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the pseudo-\/random provider state with a seed and optional personalization string. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The hcg state structure \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} The random seed, 32 bytes of seed instantiates the 256-\/bit generator, 64 bytes the 512-\/bit generator \\
+\hline
+{\em seedlen} & The length of the input seed \\
+\hline
+{\em info} & \mbox{[}const\mbox{]} The optional personalization string \\
+\hline
+{\em infolen} & The length of the personalization string \\
+\hline
+{\em pres} & Enable periodic random injection; enables non deterministic pseudo-\/random generation \\
+\hline
+\end{DoxyParams}
+\Hypertarget{hcg_8h_aaf80227f318e327545005d4f7feef935}\index{hcg.h@{hcg.h}!qsc\_hcg\_update@{qsc\_hcg\_update}}
+\index{qsc\_hcg\_update@{qsc\_hcg\_update}!hcg.h@{hcg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hcg\_update()}{qsc\_hcg\_update()}}
+{\footnotesize\ttfamily \label{hcg_8h_aaf80227f318e327545005d4f7feef935} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hcg\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hcg__state}{qsc\+\_\+hcg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{seed}{, }\item[{size\+\_\+t}]{seedlen}{}\end{DoxyParamCaption})}
+
+
+
+Update the random provider with new keying material. 
+
+\begin{DoxyWarning}{Warning}
+Initialize must first be called before this function can be used.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The HCG state structure \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} The random update seed \\
+\hline
+{\em seedlen} & The length of the update seed \\
+\hline
+\end{DoxyParams}

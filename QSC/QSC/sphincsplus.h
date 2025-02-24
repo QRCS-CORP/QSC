@@ -1,20 +1,42 @@
-
-/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+/* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
- * NOTICE:  All information contained herein is, and remains
- * the property of Quantum Resistant Cryptographic Solutions Incorporated.
- * The intellectual and technical concepts contained
- * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
- * and its suppliers and may be covered by U.S. and Foreign Patents,
- * patents in process, and are protected by trade secret or copyright law.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from Quantum Resistant Cryptographic Solutions Incorporated.
+ * NOTICE: This software and all accompanying materials are the exclusive 
+ * property of Quantum Resistant Cryptographic Solutions Corporation (QRCS).
+ * The intellectual and technical concepts contained within this implementation 
+ * are proprietary to QRCS and its authorized licensors and are protected under 
+ * applicable U.S. and international copyright, patent, and trade secret laws.
  *
- * Written by John G. Underhill
- * Contact: develop@qrcs.ca
+ * CRYPTOGRAPHIC STANDARDS:
+ * - This software includes implementations of cryptographic algorithms such as 
+ *   SHA3, AES, and others. These algorithms are public domain or standardized 
+ *   by organizations such as NIST and are NOT the property of QRCS.
+ * - However, all source code, optimizations, and implementations in this library 
+ *   are original works of QRCS and are protected under this license.
+ *
+ * RESTRICTIONS:
+ * - Redistribution, modification, or unauthorized distribution of this software, 
+ *   in whole or in part, is strictly prohibited.
+ * - This software is provided for non-commercial, educational, and research 
+ *   purposes only. Commercial use in any form is expressly forbidden.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ * - Any use of this software implies acceptance of these restrictions.
+ *
+ * DISCLAIMER:
+ * This software is provided "as is," without warranty of any kind, express or 
+ * implied, including but not limited to warranties of merchantability or fitness 
+ * for a particular purpose. QRCS disclaims all liability for any direct, indirect, 
+ * incidental, or consequential damages resulting from the use or misuse of this software.
+ *
+ * FULL LICENSE:
+ * This software is subject to the **Quantum Resistant Cryptographic Solutions 
+ * Proprietary License (QRCS-PL)**. The complete license terms are included 
+ * in the LICENSE.txt file distributed with this software.
+ *
+ * Written by: John G. Underhill
+ * Contact: john.underhill@protonmail.com
  */
+
 
 #ifndef QSC_SPHINCSPLUS_H
 #define QSC_SPHINCSPLUS_H
@@ -22,38 +44,43 @@
 #include "common.h"
 
 /**
-* \file sphincsplus.h
-* \date June 14, 2018
-* \updated July 2, 2021
-*
-* \brief The SphincsPlus API definitions \n
-* Contains the primary public api for the Sphincs+ asymmetric signature scheme implementation.
-*
-* \par Example
-* \code
-* #define MSGLEN 32
-* uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE];
-* uint8_t sk[QSC_SPHINCSPLUS_SECRETKEY_SIZE];
-* uint8_t msg[32];
-* uint8_t smsg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + MSGLEN];
-* uint8_t rmsg[32];
-* uint32_t rmsglen = 0;
-* uint32_t smsglen = 0;
-*
-* qsc_sphincsplus_generate(pk, sk);
-* qsc_sphincsplus_sign(smsg, &smsglen, msg, MSGLEN, sk);
-* 
-* if (qsc_sphincsplus_verify(rmsg, &rmsglen, smsg, smsglen, pk) != true)
-* {
-*     authentication failed, do something..
-* }
-* \endcode
-*
-* Based entirely on the C reference branch of SPHINCS+ taken from the NIST Post Quantum Competition Round 3 submission. \n
-* The NIST Post Quantum Competition <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</a> Finalists. \n
-* The <a href="https://sphincs.org/">SPHINCS+</a> website. \n
-* The SPHINCS+ <a href="https://sphincs.org/data/sphincs+-specification.pdf">Algorithm</a> Specification. \n
-*/
+ * \file sphincsplus.h
+ * \brief The FIPS 205 implementation of the Sphincs+ Asymmetric Signature Scheme.
+ *
+ * \details
+ * This header defines the primary public API for the FIPS 205 Sphincs+ asymmetric signature scheme implementation.
+ * It provides functions for generating key pairs, signing messages, and verifying signatures.
+ * The implementation is based on the C reference branch of SPHINCS+ from the FIPS 205 implementation.
+ *
+ * \code
+ * // Example usage:
+ * #define MSGLEN 32
+ * uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE];
+ * uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE];
+ * uint8_t msg[MSGLEN];
+ * uint8_t smsg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + MSGLEN];
+ * uint8_t rmsg[MSGLEN];
+ * uint32_t smsglen = 0;
+ * uint32_t rmsglen = 0;
+ *
+ * // Generate the key pair
+ * qsc_sphincsplus_generate_keypair(pk, sk, rng_generate);
+ *
+ * // Sign the message
+ * qsc_sphincsplus_sign(smsg, &smsglen, msg, MSGLEN, sk, rng_generate);
+ *
+ * // Verify the signature and recover the message
+ * if (!qsc_sphincsplus_verify(rmsg, &rmsglen, smsg, smsglen, pk))
+ * {
+ *     // Signature verification failed; handle error.
+ * }
+ * \endcode
+ *
+ * \section sphincs_links Reference Links:
+ * <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.205.pdf">NIST FIPS-205 SPHINCS+ Specification</a>
+ * <a href="https://sphincs.org/">SPHINCS+ Website</a>
+ */
+
 #if defined(QSC_SPHINCSPLUS_S1S128SHAKERF)
 
 /*!
@@ -234,9 +261,9 @@
 *
 * \warning Arrays must be sized to QSC_SPHINCSPLUS_PUBLICKEY_SIZE and QSC_SPHINCSPLUS_SECRETKEY_SIZE.
 *
-* \param publickey: Pointer to the public verification-key array
-* \param privatekey: Pointer to the private signature-key array
-* \param rng_generate: Pointer to the random generator
+* \param publickey:		[uint8_t*] Pointer to the public verification-key array
+* \param privatekey:	[uint8_t*] Pointer to the private signature-key array
+* \param rng_generate:	[(uint8_t*, size_t)] Pointer to the random generator
 */
 QSC_EXPORT_API void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -245,24 +272,24 @@ QSC_EXPORT_API void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t
 *
 * \warning Signature array must be sized to the size of the message plus QSC_SPHINCSPLUS_SIGNATURE_SIZE.
 *
-* \param signedmsg: Pointer to the signed-message array
-* \param smsglen: [const] Pointer to the signed message length
-* \param message: Pointer to the message array
-* \param msglen: The message length
-* \param privatekey: [const] Pointer to the private signature-key array
-* \param rng_generate: Pointer to the random generator
+* \param signedmsg:		[uint8_t*] Pointer to the signed-message array
+* \param smsglen:		[size_t*] Pointer to the signed message length
+* \param message:		[const uint8_t*] Pointer to the message array
+* \param msglen:		[size_t] The message length
+* \param privatekey:	[const uint8_t*] Pointer to the private signature-key array
+* \param rng_generate:	[(uint8_t*, size_t)] Pointer to the random generator
 */
 QSC_EXPORT_API void qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature-message pair with the public key.
 *
-* \param message: Pointer to the message array to be signed
-* \param msglen: Pointer to the message length
-* \param signedmsg: [const] Pointer to the signed message array
-* \param smsglen: The signed message length
-* \param publickey: [const] Pointer to the public verification-key array
-* \return Returns true for success
+* \param message:		[uint8_t*] Pointer to the message array to be signed
+* \param msglen:		[size_t*] Pointer to the message length
+* \param signedmsg:		[const uint8_t*] Pointer to the signed message array
+* \param smsglen:		[size_t] The signed message length
+* \param publickey:		[const uint8_t*] Pointer to the public verification-key array
+* \return				[bool] Returns true for success
 */
 QSC_EXPORT_API bool qsc_sphincsplus_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 

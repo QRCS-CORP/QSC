@@ -7,13 +7,13 @@
 #include "consoleutils.h"
 
 /* the number of times to read from the RDRAND/RDSEED RNGs; each read generates 32 bits of output */
-#define RDP_RNG_POLLS 32
+#define RDP_RNG_POLLS 32ULL
 /* RDRAND is guaranteed to generate a random number within 10 retries on a working CPU */
-#define RDP_RDR_RETRY 10
+#define RDP_RDR_RETRY 10ULL
 /* RDSEED is not guaranteed to generate a random number within a specific number of retries */
-#define RDP_RDS_RETRY 1000
+#define RDP_RDS_RETRY 1000ULL
 /* successful return of a rdrand step call */
-#define RDP_RDR_SUCCESS 1
+#define RDP_RDR_SUCCESS 1ULL
 
 bool qsc_rdp_generate(uint8_t* output, size_t length)
 {
@@ -72,7 +72,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 #	else
 			uint32_t rnd32;
 
-			fret = _rdrand32_step((unsigned int*)&rnd32);
+			fret = _rdrand32_step((uint32_t*)&rnd32);
 
 			if (fret == RDP_RDR_SUCCESS)
 			{
@@ -108,4 +108,51 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 #endif
 
 	return res;
+}
+
+uint16_t qsc_rdp_uint16()
+{
+	uint8_t arr[sizeof(uint16_t)] = { 0 };
+	uint16_t num;
+
+	qsc_rdp_generate(arr, sizeof(arr));
+
+	num = (((uint16_t)arr[1]) | 
+		(uint16_t)((uint16_t)arr[0] << 8U));
+
+	return num;
+}
+
+uint32_t qsc_rdp_uint32()
+{
+	uint8_t arr[sizeof(uint32_t)] = { 0 };
+	uint32_t num;
+
+	qsc_rdp_generate(arr, sizeof(arr));
+
+	num = (uint32_t)(arr[3]) |
+		(((uint32_t)(arr[2])) << 8) |
+		(((uint32_t)(arr[1])) << 16) |
+		(((uint32_t)(arr[0])) << 24);
+
+	return num;
+}
+
+uint64_t qsc_rdp_uint64()
+{
+	uint8_t arr[sizeof(uint64_t)] = { 0 };
+	uint64_t num;
+
+	qsc_rdp_generate(arr, sizeof(arr));
+
+	num = (uint64_t)(arr[7]) |
+		(((uint64_t)(arr[6])) << 8) |
+		(((uint64_t)(arr[5])) << 16) |
+		(((uint64_t)(arr[4])) << 24) |
+		(((uint64_t)(arr[3])) << 32) |
+		(((uint64_t)(arr[2])) << 40) |
+		(((uint64_t)(arr[1])) << 48) |
+		(((uint64_t)(arr[0])) << 56);
+
+	return num;
 }

@@ -83,6 +83,9 @@ size_t qsc_sysutils_computer_name(char* name)
 
 void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state* state)
 {
+	assert(drive != NULL);
+	assert(state != NULL);
+
 	state->free = 0;
 	state->total = 0;
 	state->avail = 0;
@@ -117,6 +120,8 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 {
+	assert(state != NULL);
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 	MEMORYSTATUSEX memInfo;
@@ -211,6 +216,8 @@ bool qsc_sysutils_rdtsc_available()
 
 size_t qsc_sysutils_user_name(char* name)
 {
+	assert(name != NULL);
+
 	size_t res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -355,6 +362,9 @@ uint64_t qsc_sysutils_system_timestamp()
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 void qsc_sysutils_user_identity(const char* name, char* id)
 {
+	assert(name != NULL);
+	assert(id != NULL);
+
 	LPCSTR accname = TEXT(name);
 	LPTSTR domname = (LPTSTR)GlobalAlloc(GPTR, sizeof(TCHAR) * 1024);
 	DWORD cchdomname = 1024;

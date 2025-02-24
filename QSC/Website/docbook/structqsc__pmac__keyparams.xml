@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__pmac__keyparams" xml:lang="en-US">
+<title>qsc_pmac_keyparams Struct Reference</title>
+<indexterm><primary>qsc_pmac_keyparams</primary></indexterm>
+<para>
+
+<para>The key parameters structure containing key and info arrays and lengths. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;pmac.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>const uint8_t * <link linkend="_structqsc__pmac__keyparams_1aa60a0c39d29c4a6fdaac5bfc05f1dbec">key</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__pmac__keyparams_1af347fae5dae0b613448c54f3dea76ad2">keylen</link></para>
+</listitem>
+            <listitem><para>uint8_t * <link linkend="_structqsc__pmac__keyparams_1a3da4e88c03c821f8b2dc28af618543bd">nonce</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__pmac__keyparams_1ad5ec0a12837faf3f08ebeba9d2da69ae">noncelen</link></para>
+</listitem>
+            <listitem><para>const uint8_t * <link linkend="_structqsc__pmac__keyparams_1af70030048884ad194b9870321e1cf792">info</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__pmac__keyparams_1aeeac5f1dea8f8694bdf3d934c72ae872">infolen</link></para>
+</listitem>
+            <listitem><para><link linkend="_pmac_8h_1a01bcf64c9786f328be722858e1af97e1">qsc_pmac_modes</link> <link linkend="_structqsc__pmac__keyparams_1a16abf23343b72f3644695e195300e781">mode</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The key parameters structure containing key and info arrays and lengths. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__pmac__keyparams_1af70030048884ad194b9870321e1cf792"/><section>
+    <title>info</title>
+<indexterm><primary>info</primary><secondary>qsc_pmac_keyparams</secondary></indexterm>
+<indexterm><primary>qsc_pmac_keyparams</primary><secondary>info</secondary></indexterm>
+<para><computeroutput>const uint8_t* info</computeroutput></para>
+<para>[const] The information tweak </para>
+</section>
+<anchor xml:id="_structqsc__pmac__keyparams_1aeeac5f1dea8f8694bdf3d934c72ae872"/><section>
+    <title>infolen</title>
+<indexterm><primary>infolen</primary><secondary>qsc_pmac_keyparams</secondary></indexterm>
+<indexterm><primary>qsc_pmac_keyparams</primary><secondary>infolen</secondary></indexterm>
+<para><computeroutput>size_t infolen</computeroutput></para>
+<para>The length in bytes of the information tweak </para>
+</section>
+<anchor xml:id="_structqsc__pmac__keyparams_1aa60a0c39d29c4a6fdaac5bfc05f1dbec"/><section>
+    <title>key</title>
+<indexterm><primary>key</primary><secondary>qsc_pmac_keyparams</secondary></indexterm>
+<indexterm><primary>qsc_pmac_keyparams</primary><secondary>key</secondary></indexterm>
+<para><computeroutput>const uint8_t* key</computeroutput></para>
+<para>[const] The input mac key </para>
+</section>
+<anchor xml:id="_structqsc__pmac__keyparams_1af347fae5dae0b613448c54f3dea76ad2"/><section>
+    <title>keylen</title>
+<indexterm><primary>keylen</primary><secondary>qsc_pmac_keyparams</secondary></indexterm>
+<indexterm><primary>qsc_pmac_keyparams</primary><secondary>keylen</secondary></indexterm>
+<para><computeroutput>size_t keylen</computeroutput></para>
+<para>The length in bytes of the mac key </para>
+</section>
+<anchor xml:id="_structqsc__pmac__keyparams_1a16abf23343b72f3644695e195300e781"/><section>
+    <title>mode</title>
+<indexterm><primary>mode</primary><secondary>qsc_pmac_keyparams</secondary></indexterm>
+<indexterm><primary>qsc_pmac_keyparams</primary><secondary>mode</secondary></indexterm>
+<para><computeroutput><link linkend="_pmac_8h_1a01bcf64c9786f328be722858e1af97e1">qsc_pmac_modes</link> mode</computeroutput></para>
+<para>the operation mode </para>
+</section>
+<anchor xml:id="_structqsc__pmac__keyparams_1a3da4e88c03c821f8b2dc28af618543bd"/><section>
+    <title>nonce</title>
+<indexterm><primary>nonce</primary><secondary>qsc_pmac_keyparams</secondary></indexterm>
+<indexterm><primary>qsc_pmac_keyparams</primary><secondary>nonce</secondary></indexterm>
+<para><computeroutput>uint8_t* nonce</computeroutput></para>
+<para>pointer to the nonce array </para>
+</section>
+<anchor xml:id="_structqsc__pmac__keyparams_1ad5ec0a12837faf3f08ebeba9d2da69ae"/><section>
+    <title>noncelen</title>
+<indexterm><primary>noncelen</primary><secondary>qsc_pmac_keyparams</secondary></indexterm>
+<indexterm><primary>qsc_pmac_keyparams</primary><secondary>noncelen</secondary></indexterm>
+<para><computeroutput>size_t noncelen</computeroutput></para>
+<para>the nonce length </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_pmac_8h">pmac.h</link></section>
+</section>

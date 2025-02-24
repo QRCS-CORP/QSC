@@ -8,6 +8,8 @@
 
 void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE], const struct tm* tstruct)
 {
+	assert(tstruct != NULL);
+
 	size_t pos;
 
 	qsc_stringutils_int_to_string(tstruct->tm_year + QSC_TIMESTAMP_EPOCH_START, output, QSC_TIMESTAMP_STRING_SIZE);
@@ -97,6 +99,8 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 
 void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char output[QSC_TIMESTAMP_STRING_SIZE])
 {
+	assert(tstruct != NULL);
+
 	char tmp[5] = { 0 };
 
 	qsc_memutils_clear(tstruct, sizeof(struct tm));
@@ -293,30 +297,34 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 
 uint64_t qsc_timestamp_datetime_utc()
 {
-	time_t lt;
-	time_t ut;
-	struct tm ptm = { 0 };
+    time_t lt;
+    time_t ut;
+    struct tm ptm = { 0 };
 
-	lt = 0;
-	ut = 0;
+    lt = 0;
+    ut = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	errno_t err;
+    errno_t err;
 
-	_time64(&lt);
-	err = _gmtime64_s(&ptm, &lt);
+    _time64(&lt);
+    err = _gmtime64_s(&ptm, &lt);
 
-	if (err == 0)
-	{
-		ut = _mktime64(&ptm);
-	}
+    if (err == 0)
+    {
+        ut = _mktime64(&ptm);
+    }
 #else
-	lt = time(NULL);
-	ptm = gmtime(&lt);
-	ut = mktime(ptm);
+    lt = time(NULL);
+
+    if (lt != -1)
+    {
+        gmtime_r(&lt, &ptm);
+        ut = mktime(&ptm);
+    }
 #endif
 
-	return (uint64_t)ut;
+    return (uint64_t)ut;
 }
 
 void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP_STRING_SIZE])

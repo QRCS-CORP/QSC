@@ -1,0 +1,81 @@
+\doxysection{qsc\+\_\+pmac\+\_\+keyparams Struct Reference}
+\hypertarget{structqsc__pmac__keyparams}{}\label{structqsc__pmac__keyparams}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+
+
+The key parameters structure containing key and info arrays and lengths.  
+
+
+
+
+{\ttfamily \#include $<$pmac.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__pmac__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec}{key}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__pmac__keyparams_af347fae5dae0b613448c54f3dea76ad2}{keylen}}
+\item 
+uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__pmac__keyparams_a3da4e88c03c821f8b2dc28af618543bd}{nonce}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__pmac__keyparams_ad5ec0a12837faf3f08ebeba9d2da69ae}{noncelen}}
+\item 
+const uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__pmac__keyparams_af70030048884ad194b9870321e1cf792}{info}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__pmac__keyparams_aeeac5f1dea8f8694bdf3d934c72ae872}{infolen}}
+\item 
+\mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes}} \mbox{\hyperlink{structqsc__pmac__keyparams_a16abf23343b72f3644695e195300e781}{mode}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The key parameters structure containing key and info arrays and lengths. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__pmac__keyparams_af70030048884ad194b9870321e1cf792}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}!info@{info}}
+\index{info@{info}!qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+\doxysubsubsection{\texorpdfstring{info}{info}}
+{\footnotesize\ttfamily \label{structqsc__pmac__keyparams_af70030048884ad194b9870321e1cf792} 
+const uint8\+\_\+t\texorpdfstring{$\ast$}{*} info}
+
+\mbox{[}const\mbox{]} The information tweak \Hypertarget{structqsc__pmac__keyparams_aeeac5f1dea8f8694bdf3d934c72ae872}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}!infolen@{infolen}}
+\index{infolen@{infolen}!qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+\doxysubsubsection{\texorpdfstring{infolen}{infolen}}
+{\footnotesize\ttfamily \label{structqsc__pmac__keyparams_aeeac5f1dea8f8694bdf3d934c72ae872} 
+size\+\_\+t infolen}
+
+The length in bytes of the information tweak \Hypertarget{structqsc__pmac__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}!key@{key}}
+\index{key@{key}!qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+\doxysubsubsection{\texorpdfstring{key}{key}}
+{\footnotesize\ttfamily \label{structqsc__pmac__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec} 
+const uint8\+\_\+t\texorpdfstring{$\ast$}{*} key}
+
+\mbox{[}const\mbox{]} The input mac key \Hypertarget{structqsc__pmac__keyparams_af347fae5dae0b613448c54f3dea76ad2}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}!keylen@{keylen}}
+\index{keylen@{keylen}!qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+\doxysubsubsection{\texorpdfstring{keylen}{keylen}}
+{\footnotesize\ttfamily \label{structqsc__pmac__keyparams_af347fae5dae0b613448c54f3dea76ad2} 
+size\+\_\+t keylen}
+
+The length in bytes of the mac key \Hypertarget{structqsc__pmac__keyparams_a16abf23343b72f3644695e195300e781}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}!mode@{mode}}
+\index{mode@{mode}!qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+\doxysubsubsection{\texorpdfstring{mode}{mode}}
+{\footnotesize\ttfamily \label{structqsc__pmac__keyparams_a16abf23343b72f3644695e195300e781} 
+\mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes}} mode}
+
+the operation mode \Hypertarget{structqsc__pmac__keyparams_a3da4e88c03c821f8b2dc28af618543bd}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}!nonce@{nonce}}
+\index{nonce@{nonce}!qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+\doxysubsubsection{\texorpdfstring{nonce}{nonce}}
+{\footnotesize\ttfamily \label{structqsc__pmac__keyparams_a3da4e88c03c821f8b2dc28af618543bd} 
+uint8\+\_\+t\texorpdfstring{$\ast$}{*} nonce}
+
+pointer to the nonce array \Hypertarget{structqsc__pmac__keyparams_ad5ec0a12837faf3f08ebeba9d2da69ae}\index{qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}!noncelen@{noncelen}}
+\index{noncelen@{noncelen}!qsc\_pmac\_keyparams@{qsc\_pmac\_keyparams}}
+\doxysubsubsection{\texorpdfstring{noncelen}{noncelen}}
+{\footnotesize\ttfamily \label{structqsc__pmac__keyparams_ad5ec0a12837faf3f08ebeba9d2da69ae} 
+size\+\_\+t noncelen}
+
+the nonce length 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/\mbox{\hyperlink{pmac_8h}{pmac.\+h}}\end{DoxyCompactItemize}

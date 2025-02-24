@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__hcg__state" xml:lang="en-US">
+<title>qsc_hcg_state Struct Reference</title>
+<indexterm><primary>qsc_hcg_state</primary></indexterm>
+<para>
+
+<para>The HCG state structure. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;hcg.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint8_t <link linkend="_structqsc__hcg__state_1a90e462a85df30ad384c0c73780c2ef0c">key</link> [<link linkend="_hcg_8h_1a1084f334864c13af94f7d980b9c28508">QSC_HCG_KEY_SIZE</link>]</para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__hcg__state_1a187e108674e0d898f31e28d1a56bb2fb">info</link> [<link linkend="_hcg_8h_1aff1460756f7a46e917e8e44eb1999fdb">QSC_HCG_MAX_INFO_SIZE</link>]</para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__hcg__state_1a2fa7d1f817bb55b73050e73774ffa731">nonce</link> [<link linkend="_hcg_8h_1a15dcf6d6c44b55fba137e3105bbff7ee">QSC_HCG_NONCE_SIZE</link>]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__hcg__state_1a4c2a3dbe4d7520c178239455fe63b3e9">inflen</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__hcg__state_1a0d9dffc575d511c355c40afdc84a2795">rpos</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__hcg__state_1ab149c2f8cc2711d915ec186839a93e69">pres</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The HCG state structure. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__hcg__state_1a4c2a3dbe4d7520c178239455fe63b3e9"/><section>
+    <title>inflen</title>
+<indexterm><primary>inflen</primary><secondary>qsc_hcg_state</secondary></indexterm>
+<indexterm><primary>qsc_hcg_state</primary><secondary>inflen</secondary></indexterm>
+<para><computeroutput>size_t inflen</computeroutput></para>
+<para>The info string length </para>
+</section>
+<anchor xml:id="_structqsc__hcg__state_1a187e108674e0d898f31e28d1a56bb2fb"/><section>
+    <title>info</title>
+<indexterm><primary>info</primary><secondary>qsc_hcg_state</secondary></indexterm>
+<indexterm><primary>qsc_hcg_state</primary><secondary>info</secondary></indexterm>
+<para><computeroutput>uint8_t info[<link linkend="_hcg_8h_1aff1460756f7a46e917e8e44eb1999fdb">QSC_HCG_MAX_INFO_SIZE</link>]</computeroutput></para>
+<para>The info string </para>
+</section>
+<anchor xml:id="_structqsc__hcg__state_1a90e462a85df30ad384c0c73780c2ef0c"/><section>
+    <title>key</title>
+<indexterm><primary>key</primary><secondary>qsc_hcg_state</secondary></indexterm>
+<indexterm><primary>qsc_hcg_state</primary><secondary>key</secondary></indexterm>
+<para><computeroutput>uint8_t key[<link linkend="_hcg_8h_1a1084f334864c13af94f7d980b9c28508">QSC_HCG_KEY_SIZE</link>]</computeroutput></para>
+<para>The key cache </para>
+</section>
+<anchor xml:id="_structqsc__hcg__state_1a2fa7d1f817bb55b73050e73774ffa731"/><section>
+    <title>nonce</title>
+<indexterm><primary>nonce</primary><secondary>qsc_hcg_state</secondary></indexterm>
+<indexterm><primary>qsc_hcg_state</primary><secondary>nonce</secondary></indexterm>
+<para><computeroutput>uint8_t nonce[<link linkend="_hcg_8h_1a15dcf6d6c44b55fba137e3105bbff7ee">QSC_HCG_NONCE_SIZE</link>]</computeroutput></para>
+<para>The nonce array </para>
+</section>
+<anchor xml:id="_structqsc__hcg__state_1ab149c2f8cc2711d915ec186839a93e69"/><section>
+    <title>pres</title>
+<indexterm><primary>pres</primary><secondary>qsc_hcg_state</secondary></indexterm>
+<indexterm><primary>qsc_hcg_state</primary><secondary>pres</secondary></indexterm>
+<para><computeroutput>bool pres</computeroutput></para>
+<para>The predictive resistance flag </para>
+</section>
+<anchor xml:id="_structqsc__hcg__state_1a0d9dffc575d511c355c40afdc84a2795"/><section>
+    <title>rpos</title>
+<indexterm><primary>rpos</primary><secondary>qsc_hcg_state</secondary></indexterm>
+<indexterm><primary>qsc_hcg_state</primary><secondary>rpos</secondary></indexterm>
+<para><computeroutput>size_t rpos</computeroutput></para>
+<para>The reseed position </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_hcg_8h">hcg.h</link></section>
+</section>

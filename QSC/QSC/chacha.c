@@ -6,7 +6,7 @@
 #	include "intrinsics.h"
 #endif
 
-#define CHACHA_STATE_SIZE 16
+#define CHACHA_STATE_SIZE 16ULL
 
 #if defined(QSC_SYSTEM_HAS_AVX)
 #	define CHACHA_AVXBLOCK_SIZE (4 * QSC_CHACHA_BLOCK_SIZE)
@@ -683,6 +683,8 @@ static void chacha_permute_p4x512h(chacha_avx_state* ctxw)
 
 void qsc_chacha_dispose(qsc_chacha_state* ctx)
 {
+	assert(ctx != NULL);
+
 	qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
 }
 

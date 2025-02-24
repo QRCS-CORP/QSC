@@ -1,7 +1,6 @@
 #include "csx.h"
 #include "intutils.h"
 #include "memutils.h"
-
 #if defined(QSC_SYSTEM_HAS_AVX)
 #	include "intrinsics.h"
 #endif
@@ -11,13 +10,13 @@
 \def CSX_ROUND_COUNT
 * \brief The number of mixing rounds used by CSX-512
 */
-#define CSX_ROUND_COUNT 40
+#define CSX_ROUND_COUNT 40ULL
 
 /*!
 \def CSX_NAME_SIZE
 * \brief The byte size of the name array
 */
-#define CSX_NAME_SIZE 14
+#define CSX_NAME_SIZE 14ULL
 
 #define CSX_AVX512_BLOCK (8 * QSC_CSX_BLOCK_SIZE)
 #define CSX_AVX2_BLOCK (4 * QSC_CSX_BLOCK_SIZE)
@@ -36,7 +35,6 @@ static const uint8_t csx_name[CSX_NAME_SIZE] =
 };
 
 #	if defined(QSC_CSX_AUTH_KMACR12)
-#		define QSC_CSX_AUTH_KMACR12
 static const uint8_t csx_kmacr12_name[CSX_NAME_SIZE] =
 {
 	0x43, 0x53, 0x58, 0x35, 0x31, 0x32, 0x2D, 0x4B, 0x4D, 0x41, 0x43, 0x52, 0x31, 0x32
@@ -536,8 +534,10 @@ static void csx_mac_update(qsc_csx_state* ctx, const uint8_t* input, size_t leng
 {
 #if defined(QSC_CSX_AUTH_KMACR12)
 	qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#else
+#elif defined(QSC_CSX_AUTH_KMAC24)
 	qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, input, length);
+#else
+	qsc_qmac_update(&ctx->kstate, input, length);
 #endif
 }
 
@@ -624,6 +624,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 		}
 
 		QSC_ALIGN(32) uint8_t ctrblk[32];
+
 		/* store the nonce */
 		_mm256_storeu_si256((__m256i*)ctrblk, ctxw.state[12]);
 		ctx->state[12] = qsc_intutils_le8to64((ctrblk + 24));
@@ -678,7 +679,6 @@ static void csx_load_key(qsc_csx_state* ctx, const uint8_t* key, const uint8_t* 
 	ctx->state[13] = qsc_intutils_le8to64((nonce + 8));
 	ctx->state[14] = qsc_intutils_le8to64((code + 32));
 	ctx->state[15] = qsc_intutils_le8to64((code + 40));
-
 #endif
 }
 
@@ -695,9 +695,12 @@ static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 	qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 	/* finalize the mac and append code to output */
 	qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_CSX_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#else
+#elif defined(QSC_CSX_AUTH_KMAC24)
 	/* finalize the mac and append code to output */
 	qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_CSX_MAC_SIZE);
+#else
+	/* finalize the mac and append code to output */
+	qsc_qmac_finalize(&ctx->kstate, output);
 #endif
 }
 #endif
@@ -712,7 +715,11 @@ void qsc_csx_dispose(qsc_csx_state* ctx)
 	if (ctx != NULL)
 	{
 #if defined(QSC_CSX_AUTHENTICATED)
-	qsc_keccak_dispose(&ctx->kstate);
+#	if defined(QSC_CSX_AUTH_QMAC)
+		qsc_qmac_dispose(&ctx->kstate);
+#	else
+		qsc_keccak_dispose(&ctx->kstate);
+#	endif
 #endif
 
 		qsc_intutils_clear64(ctx->state, QSC_CSX_STATE_SIZE);
@@ -749,7 +756,7 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 		qsc_memutils_copy(nme, keyparams->info, INFLEN);
 	}
 
-	/* initialize the cSHAKE generator */
+	/* initialize the cSHAKE generator state */
 	qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, nme, sizeof(nme), NULL, 0);
 
 	/* extract the cipher key */
@@ -761,15 +768,18 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, buf, 1);
 	qsc_memutils_copy(mck, buf, sizeof(mck));
 
-	/* initialize the mac generator */
-	qsc_memutils_clear((uint8_t*)ctx->kstate.state, sizeof(ctx->kstate.state));
+	/* initialize the mac generator state */
+	qsc_memutils_clear((uint8_t*)&ctx->kstate, sizeof(ctx->kstate));
 
-#if defined(QSC_CSX_AUTH_KMACR12)
+#	if defined(QSC_CSX_AUTH_KMACR12)
 	qsc_keccak_initialize_state(&ctx->kstate);
 	qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0, csx_kmacr12_name, CSX_NAME_SIZE, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#else
+#	elif defined(QSC_CSX_AUTH_KMAC24)
 	qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0);
-#endif
+#	else
+	qsc_qmac_keyparams pk = { mck, QSC_CSX_KEY_SIZE, keyparams->nonce, QSC_CSX_NONCE_SIZE, NULL, 0, qsc_qmac_mode_512 };
+	qsc_qmac_initialize(&ctx->kstate, &pk);
+#	endif
 
 #else
 
@@ -794,6 +804,7 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 
 void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t length)
 {
+#if defined(QSC_CSX_AUTHENTICATED)
 	assert(ctx != NULL);
 	assert(data != NULL);
 	assert(length != 0);
@@ -808,6 +819,15 @@ void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t leng
 		qsc_intutils_le32to8(code, (uint32_t)length);
 		csx_mac_update(ctx, code, sizeof(code));
 	}
+#endif
+}
+
+void qsc_csx_store_nonce(const qsc_csx_state* ctx, uint8_t nonce[QSC_CSX_NONCE_SIZE])
+{
+	assert(ctx != NULL);
+
+	qsc_intutils_le64to8(nonce, ctx->state[12]);
+	qsc_intutils_le64to8(nonce + sizeof(uint64_t), ctx->state[13]);
 }
 
 bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length)

@@ -37,12 +37,6 @@
     <Filter Include="Source Files\DRBG">
       <UniqueIdentifier>{4547faae-8aa0-486d-8afd-70fb698f67c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\MAC">
-      <UniqueIdentifier>{456aed9a-c2ea-4ec9-a2cb-153bfb01319a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MAC">
-      <UniqueIdentifier>{850a1187-428c-4310-b332-bcc7de01d22c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Provider">
       <UniqueIdentifier>{d49f9f40-93ff-4b50-8562-57b5214e8493}</UniqueIdentifier>
     </Filter>
@@ -187,6 +181,12 @@
     <Filter Include="Source Files\Asymmetric\Signature\SphincsPlus\Support">
       <UniqueIdentifier>{6a29f59c-2a8c-483a-957c-5cd73a8227f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MAC">
+      <UniqueIdentifier>{7a68758b-23e9-408a-ae10-da57fe8c66ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MAC">
+      <UniqueIdentifier>{940646ef-a66b-4a4e-8a89-8f30ab963662}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -197,9 +197,6 @@
     </ClInclude>
     <ClInclude Include="sha3.h">
       <Filter>Header Files\Digest</Filter>
-    </ClInclude>
-    <ClInclude Include="poly1305.h">
-      <Filter>Header Files\MAC</Filter>
     </ClInclude>
     <ClInclude Include="sha2.h">
       <Filter>Header Files\Digest</Filter>
@@ -348,9 +345,6 @@
     <ClInclude Include="dilithiumbase.h">
       <Filter>Header Files\Asymmetric\Signature\Dilithium\Support</Filter>
     </ClInclude>
-    <ClInclude Include="dilithiumbase_avx2.h">
-      <Filter>Header Files\Asymmetric\Signature\Dilithium\Support</Filter>
-    </ClInclude>
     <ClInclude Include="ec25519.h">
       <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
     </ClInclude>
@@ -393,13 +387,25 @@
     <ClInclude Include="qsort.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
+    <ClInclude Include="winutils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="doxymain.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="qmac.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="poly1305.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="dilithiumbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Signature\Dilithium\Support</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
       <Filter>Source Files\Digest</Filter>
-    </ClCompile>
-    <ClCompile Include="poly1305.c">
-      <Filter>Source Files\MAC</Filter>
     </ClCompile>
     <ClCompile Include="sha2.c">
       <Filter>Source Files\Digest</Filter>
@@ -539,9 +545,6 @@
     <ClCompile Include="dilithiumbase.c">
       <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
     </ClCompile>
-    <ClCompile Include="dilithiumbase_avx2.c">
-      <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
-    </ClCompile>
     <ClCompile Include="ec25519.c">
       <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
     </ClCompile>
@@ -590,5 +593,20 @@
     <ClCompile Include="qsort.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
+    <ClCompile Include="winutils.c">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="qmac.c">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="poly1305.c">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithiumbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="QRCS-PL License.txt" />
   </ItemGroup>
 </Project>

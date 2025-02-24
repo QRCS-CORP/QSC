@@ -1,25 +1,48 @@
-/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+/* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
- * NOTICE:  All information contained herein is, and remains
- * the property of Quantum Resistant Cryptographic Solutions Incorporated.
- * The intellectual and technical concepts contained
- * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
- * and its suppliers and may be covered by U.S. and Foreign Patents,
- * patents in process, and are protected by trade secret or copyright law.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from Quantum Resistant Cryptographic Solutions Incorporated.
+ * NOTICE: This software and all accompanying materials are the exclusive 
+ * property of Quantum Resistant Cryptographic Solutions Corporation (QRCS).
+ * The intellectual and technical concepts contained within this implementation 
+ * are proprietary to QRCS and its authorized licensors and are protected under 
+ * applicable U.S. and international copyright, patent, and trade secret laws.
  *
- * Written by John G. Underhill
- * Contact: develop@qrcs.ca
+ * CRYPTOGRAPHIC STANDARDS:
+ * - This software includes implementations of cryptographic algorithms such as 
+ *   SHA3, AES, and others. These algorithms are public domain or standardized 
+ *   by organizations such as NIST and are NOT the property of QRCS.
+ * - However, all source code, optimizations, and implementations in this library 
+ *   are original works of QRCS and are protected under this license.
+ *
+ * RESTRICTIONS:
+ * - Redistribution, modification, or unauthorized distribution of this software, 
+ *   in whole or in part, is strictly prohibited.
+ * - This software is provided for non-commercial, educational, and research 
+ *   purposes only. Commercial use in any form is expressly forbidden.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ * - Any use of this software implies acceptance of these restrictions.
+ *
+ * DISCLAIMER:
+ * This software is provided "as is," without warranty of any kind, express or 
+ * implied, including but not limited to warranties of merchantability or fitness 
+ * for a particular purpose. QRCS disclaims all liability for any direct, indirect, 
+ * incidental, or consequential damages resulting from the use or misuse of this software.
+ *
+ * FULL LICENSE:
+ * This software is subject to the **Quantum Resistant Cryptographic Solutions 
+ * Proprietary License (QRCS-PL)**. The complete license terms are included 
+ * in the LICENSE.txt file distributed with this software.
+ *
+ * Written by: John G. Underhill
+ * Contact: john.underhill@protonmail.com
  */
 
 #ifndef QSC_KYBERBASE_AVX2_H
 #define QSC_KYBERBASE_AVX2_H
 
 #include "common.h"
-/* \cond DOXYGEN_IGNORE */
+
+/* \cond */
 
 /**
 * \file kyberbase_avx2.h
@@ -146,30 +169,6 @@
  */
 #define QSC_KYBER_CIPHERTEXT_BYTES (QSC_KYBER_INDCPA_BYTES)
 
-#if defined(QSC_GCC_ASM_ENABLED)
-	void ntt_avx(__m256i *r, const __m256i *qdata);
-	void invntt_avx(__m256i *r, const __m256i *qdata);
-	void nttpack_avx(__m256i *r, const __m256i *qdata);
-	void nttunpack_avx(__m256i *r, const __m256i *qdata);
-	void basemul_avx(__m256i *r, const __m256i *a, const __m256i *b, const __m256i *qdata);
-	void ntttobytes_avx(uint8_t *r, const __m256i *a, const __m256i *qdata);
-	void nttfrombytes_avx(__m256i *r, const uint8_t *a, const __m256i *qdata);
-	int16_t reduce_avx(int16_t* r, const int16_t* qdata);
-	int16_t csubq_avx(int16_t* r, const int16_t* qdata);
-	int16_t tomont_avx(int16_t* r, const int16_t* qdata);
-
-	/*void ntt_avx(int16_t r[QSC_KYBER_N]);
-	void invntt_avx(int16_t r[QSC_KYBER_N]);
-	extern const int16_t qdata[];
-	void nttpack_avx(int16_t* r, const int16_t* qdata);;
-	void nttunpack_avx(int16_t* r, const int16_t* qdata);
-	void ntttobytes_avx(uint8_t* r, const int16_t* a, const int16_t* qdata);
-	void nttfrombytes_avx(int16_t* r, const uint8_t* a, const int16_t* qdata);
-	int16_t reduce_avx(int16_t* r, const int16_t* qdata);
-	int16_t csubq_avx(int16_t* r, const int16_t* qdata);
-	int16_t tomont_avx(int16_t* r, const int16_t* qdata);*/
-#endif
-
 /* kem.h */
 
 /**
@@ -206,6 +205,6 @@ void qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint
 
 #endif
 
-/* \endcond DOXYGEN_IGNORE */
+/* \endcond */
 
 #endif

@@ -1,0 +1,238 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/pmac.h File Reference}
+\hypertarget{pmac_8h}{}\label{pmac_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/pmac.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/pmac.h}}
+
+
+PMAC function definitions ~\newline
+Contains the public api and documentation for the PMAC implementation.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+Include dependency graph for pmac.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The pmac state. \end{DoxyCompactList}\item 
+struct \mbox{\hyperlink{structqsc__pmac__keyparams}{qsc\+\_\+pmac\+\_\+keyparams}}
+\begin{DoxyCompactList}\small\item\em The key parameters structure containing key and info arrays and lengths. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{pmac_8h_a76a06bee20027b9dd557425e78390c73}\label{pmac_8h_a76a06bee20027b9dd557425e78390c73} 
+\#define {\bfseries QSC\+\_\+\+PMAC\+\_\+\+BLOCK\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The natural block size of the message input in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{pmac_8h_ae860b62603abd6848bfbb3df5a1a8c0f}\label{pmac_8h_ae860b62603abd6848bfbb3df5a1a8c0f} 
+\#define {\bfseries QSC\+\_\+\+PMAC\+\_\+\+KEY\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The PMAC key size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{pmac_8h_ab3df44c99d5ebc7812dd76cdacf4e554}\label{pmac_8h_ab3df44c99d5ebc7812dd76cdacf4e554} 
+\#define {\bfseries QSC\+\_\+\+PMAC\+\_\+\+MAC\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The PMAC MAC code size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{pmac_8h_ae8418aad19cfc57f7752bf8c05aedc75}\label{pmac_8h_ae8418aad19cfc57f7752bf8c05aedc75} 
+\#define {\bfseries QSC\+\_\+\+PMAC\+\_\+\+NONCE\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The PMAC nonce size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{pmac_8h_a63848dd6f98c1064f381a18393e9f162}\label{pmac_8h_a63848dd6f98c1064f381a18393e9f162} 
+\#define {\bfseries QSC\+\_\+\+PMAC\+\_\+\+STATE\+\_\+\+SIZE}~(\mbox{\hyperlink{pmac_8h_a76a06bee20027b9dd557425e78390c73}{QSC\+\_\+\+PMAC\+\_\+\+BLOCK\+\_\+\+SIZE}} / sizeof(uint64\+\_\+t))
+\begin{DoxyCompactList}\small\item\em The PMAC state size. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef enum \mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes}} \mbox{\hyperlink{pmac_8h_a553d5c1aaea8706eb6a88146cdf2737f}{qsc\+\_\+pmac\+\_\+modes}}
+\begin{DoxyCompactList}\small\item\em The PMAC mode types. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes}} \{ \mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1a8baf5b4f47ea7d037a234507c3886fe8}{qsc\+\_\+pmac\+\_\+mode\+\_\+256}}
+, \mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1a137aef295e1eed125797b204a49b6437}{qsc\+\_\+pmac\+\_\+mode\+\_\+512}}
+ \}
+\begin{DoxyCompactList}\small\item\em The PMAC mode types. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{pmac_8h_a31301a069ce546f18ef5152e5892559b}{qsc\+\_\+pmac\+\_\+compute}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, \mbox{\hyperlink{structqsc__pmac__keyparams}{qsc\+\_\+pmac\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}keyparams, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Compute the MAC code and return the result in the mac byte array. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{pmac_8h_ab0aee9e4aa722c7c2c1d2429c2762a68}{qsc\+\_\+pmac\+\_\+dispose}} (\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Reset the state values to zero. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{pmac_8h_af1ed45d96723eb6a9ae7ad9b089f3d99}{qsc\+\_\+pmac\+\_\+finalize}} (\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output)
+\begin{DoxyCompactList}\small\item\em Finalize the message state and returns the MAC code. Absorb the last block of message and create the MAC array. ~\newline
+. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{pmac_8h_a4ff51f093813a8628459c0019fc16fa2}{qsc\+\_\+pmac\+\_\+initialize}} (\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, \mbox{\hyperlink{structqsc__pmac__keyparams}{qsc\+\_\+pmac\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}keyparams)
+\begin{DoxyCompactList}\small\item\em Initialize the state with the secret key. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{pmac_8h_a790e4cf68b673d10a5d9453bf970de31}{qsc\+\_\+pmac\+\_\+update}} (\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Update the pmac generator with a single block of message input. Absorbs block sized lengths of input message into the state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+PMAC function definitions ~\newline
+Contains the public api and documentation for the PMAC implementation. 
+
+\begin{DoxyWarning}{Warning}
+If the key is re-\/used, the nonce must be unique to every same-\/key session. Just as with GMAC, the nonce must not be re-\/used, this is unsupported, and can seriously compromise the security of the MAC function. If the key is ephemeral, and only used once for a single session, no nonce is required, and (NULL, 0) can be passed for the nonce and nonce size in the keyparams structure. If the key is to be re-\/used, the nonce paramater must be implemented, and the nonce must be incremented with every use of the same key. In the case of re-\/initializing the cipher using a cached key, the implementation can pass the cipher nonce into the MAC function as the nonce parameter.
+\end{DoxyWarning}
+PMAC Examples ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{uint8\_t\ key[\mbox{\hyperlink{pmac_8h_ae860b62603abd6848bfbb3df5a1a8c0f}{QSC\_PMAC\_KEY\_SIZE}}]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{uint8\_t\ mac[\mbox{\hyperlink{pmac_8h_ab3df44c99d5ebc7812dd76cdacf4e554}{QSC\_PMAC\_MAC\_SIZE}}]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{uint8\_t\ nonce[32]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{uint8\_t\ msg[64]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{structqsc__pmac__keyparams}{qsc\_pmac\_keyparams}}\ kp\ =\ \{\ key,\ \mbox{\hyperlink{pmac_8h_ae860b62603abd6848bfbb3df5a1a8c0f}{QSC\_PMAC\_KEY\_SIZE}},\ nonce,\ 32,\ NULL,\ 0\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ simplified}}
+\DoxyCodeLine{qsc\_pmac\_compute(mac,\ \&kp,\ msg,\ 64);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ long-\/form}}
+\DoxyCodeLine{\mbox{\hyperlink{structqsc__pmac__state}{qsc\_pmac\_state}}\ ctx\ =\ \{\ 0\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{qsc\_pmac\_initialize(\&ctx,\ \&kp);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i\ =\ 0;\ i\ <\ 64;\ i\ +=\ \mbox{\hyperlink{pmac_8h_a76a06bee20027b9dd557425e78390c73}{QSC\_PMAC\_BLOCK\_SIZE}})}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ qsc\_pmac\_update(\&ctx,\ msg\ +\ i,\ \mbox{\hyperlink{pmac_8h_a76a06bee20027b9dd557425e78390c73}{QSC\_PMAC\_BLOCK\_SIZE}});}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{}
+\DoxyCodeLine{qsc\_pmac\_finalize(\&ctx,\ mac);}
+
+\end{DoxyCode}
+ \begin{DoxyRemark}{Remarks}
+For usage examples, see pmac\+\_\+test.\+h 
+\end{DoxyRemark}
+
+
+\doxysubsection{Typedef Documentation}
+\Hypertarget{pmac_8h_a553d5c1aaea8706eb6a88146cdf2737f}\index{pmac.h@{pmac.h}!qsc\_pmac\_modes@{qsc\_pmac\_modes}}
+\index{qsc\_pmac\_modes@{qsc\_pmac\_modes}!pmac.h@{pmac.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pmac\_modes}{qsc\_pmac\_modes}}
+{\footnotesize\ttfamily \label{pmac_8h_a553d5c1aaea8706eb6a88146cdf2737f} 
+typedef enum \mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes}} \mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes}}}
+
+
+
+The PMAC mode types. 
+
+enum \doxylink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes} 
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{pmac_8h_a01bcf64c9786f328be722858e1af97e1}\index{pmac.h@{pmac.h}!qsc\_pmac\_modes@{qsc\_pmac\_modes}}
+\index{qsc\_pmac\_modes@{qsc\_pmac\_modes}!pmac.h@{pmac.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pmac\_modes}{qsc\_pmac\_modes}}
+{\footnotesize\ttfamily \label{pmac_8h_a01bcf64c9786f328be722858e1af97e1} 
+enum \mbox{\hyperlink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes}}}
+
+
+
+The PMAC mode types. 
+
+enum \doxylink{pmac_8h_a01bcf64c9786f328be722858e1af97e1}{qsc\+\_\+pmac\+\_\+modes} \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_pmac\_mode\_256@{qsc\_pmac\_mode\_256}!pmac.h@{pmac.h}}\index{pmac.h@{pmac.h}!qsc\_pmac\_mode\_256@{qsc\_pmac\_mode\_256}}}\Hypertarget{pmac_8h_a01bcf64c9786f328be722858e1af97e1a8baf5b4f47ea7d037a234507c3886fe8}\label{pmac_8h_a01bcf64c9786f328be722858e1af97e1a8baf5b4f47ea7d037a234507c3886fe8} 
+qsc\+\_\+pmac\+\_\+mode\+\_\+256&the pmac-\/256 mode \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_pmac\_mode\_512@{qsc\_pmac\_mode\_512}!pmac.h@{pmac.h}}\index{pmac.h@{pmac.h}!qsc\_pmac\_mode\_512@{qsc\_pmac\_mode\_512}}}\Hypertarget{pmac_8h_a01bcf64c9786f328be722858e1af97e1a137aef295e1eed125797b204a49b6437}\label{pmac_8h_a01bcf64c9786f328be722858e1af97e1a137aef295e1eed125797b204a49b6437} 
+qsc\+\_\+pmac\+\_\+mode\+\_\+512&the pmac-\/512 mode \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{pmac_8h_a31301a069ce546f18ef5152e5892559b}\index{pmac.h@{pmac.h}!qsc\_pmac\_compute@{qsc\_pmac\_compute}}
+\index{qsc\_pmac\_compute@{qsc\_pmac\_compute}!pmac.h@{pmac.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pmac\_compute()}{qsc\_pmac\_compute()}}
+{\footnotesize\ttfamily \label{pmac_8h_a31301a069ce546f18ef5152e5892559b} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+pmac\+\_\+compute (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{\mbox{\hyperlink{structqsc__pmac__keyparams}{qsc\+\_\+pmac\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}}]{keyparams}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Compute the MAC code and return the result in the mac byte array. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be at least 16 bytes in length.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output byte array; receives the MAC code \\
+\hline
+{\em keyparams} & \mbox{[}const\mbox{]} The pmac keyparams structure \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The message input byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{pmac_8h_ab0aee9e4aa722c7c2c1d2429c2762a68}\index{pmac.h@{pmac.h}!qsc\_pmac\_dispose@{qsc\_pmac\_dispose}}
+\index{qsc\_pmac\_dispose@{qsc\_pmac\_dispose}!pmac.h@{pmac.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pmac\_dispose()}{qsc\_pmac\_dispose()}}
+{\footnotesize\ttfamily \label{pmac_8h_ab0aee9e4aa722c7c2c1d2429c2762a68} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+pmac\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Reset the state values to zero. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & The function state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{pmac_8h_af1ed45d96723eb6a9ae7ad9b089f3d99}\index{pmac.h@{pmac.h}!qsc\_pmac\_finalize@{qsc\_pmac\_finalize}}
+\index{qsc\_pmac\_finalize@{qsc\_pmac\_finalize}!pmac.h@{pmac.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pmac\_finalize()}{qsc\_pmac\_finalize()}}
+{\footnotesize\ttfamily \label{pmac_8h_af1ed45d96723eb6a9ae7ad9b089f3d99} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+pmac\+\_\+finalize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{}\end{DoxyParamCaption})}
+
+
+
+Finalize the message state and returns the MAC code. Absorb the last block of message and create the MAC array. ~\newline
+. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state; must be initialized \\
+\hline
+{\em output} & The MAC byte array; receives the MAC code \\
+\hline
+\end{DoxyParams}
+\Hypertarget{pmac_8h_a4ff51f093813a8628459c0019fc16fa2}\index{pmac.h@{pmac.h}!qsc\_pmac\_initialize@{qsc\_pmac\_initialize}}
+\index{qsc\_pmac\_initialize@{qsc\_pmac\_initialize}!pmac.h@{pmac.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pmac\_initialize()}{qsc\_pmac\_initialize()}}
+{\footnotesize\ttfamily \label{pmac_8h_a4ff51f093813a8628459c0019fc16fa2} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+pmac\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{\mbox{\hyperlink{structqsc__pmac__keyparams}{qsc\+\_\+pmac\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}}]{keyparams}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the state with the secret key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em keyparams} & \mbox{[}const\mbox{]} The pmac keyparams structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{pmac_8h_a790e4cf68b673d10a5d9453bf970de31}\index{pmac.h@{pmac.h}!qsc\_pmac\_update@{qsc\_pmac\_update}}
+\index{qsc\_pmac\_update@{qsc\_pmac\_update}!pmac.h@{pmac.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pmac\_update()}{qsc\_pmac\_update()}}
+{\footnotesize\ttfamily \label{pmac_8h_a790e4cf68b673d10a5d9453bf970de31} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+pmac\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Update the pmac generator with a single block of message input. Absorbs block sized lengths of input message into the state. 
+
+\begin{DoxyWarning}{Warning}
+Message length must be a single 16 byte message block. ~\newline
+ 
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state; must be initialized \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+{\em msglen} & The length of the message \\
+\hline
+\end{DoxyParams}

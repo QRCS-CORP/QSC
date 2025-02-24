@@ -6,7 +6,6 @@
 #include "csx.h"
 #include "intutils.h"
 #include "memutils.h"
-#include "poly1305.h"
 #include "rcs.h"
 #include "sha2.h"
 #include "sha3.h"
@@ -762,7 +761,7 @@ static bool csx512_kat()
 		"9B063993F5D019CDDE4A8AA02D440C19A4A08AD7A0CD3F2FDFEF61D0383314B5"
 		"17EE1D270EE97F7443D8334024FA3A656395B240328DFDD87293457F11074ED9"
 		"4A9A3D32F48CD88EC4550531B0B6B36413622BBC27570828E054FC2CF15BD998", exp2, sizeof(exp2));
-#	else
+#elif defined(QSC_CSX_AUTH_KMAC24)
 	/* csxc512k512 */
 	qsc_consoleutils_hex_to_bin("F726CF4BECEBDFDE9275C54B5284D0CDEEF158D8E146C027B731B6EF852C008F"
 		"842B15CD0DCF168F93C9DE6B41DEE964D62777AA999E44C6CFD903E65E0096EF"
@@ -776,13 +775,30 @@ static bool csx512_kat()
 		"9B063993F5D019CDDE4A8AA02D440C19A4A08AD7A0CD3F2FDFEF61D0383314B5"
 		"FCDFC3F96D8A40E41B35A35D4E2AFB81E0C054BA4DBC7FC183DA37E45ADA60F8"
 		"F77303C276C7E3A33327EB5E481E4A8886E2E76100434D92384943C7D648C0A5", exp2, sizeof(exp2));
+#	else
+	/* csxc512p256 */
+	qsc_consoleutils_hex_to_bin("F726CF4BECEBDFDE9275C54B5284D0CDEEF158D8E146C027B731B6EF852C008F"
+		"842B15CD0DCF168F93C9DE6B41DEE964D62777AA999E44C6CFD903E65E0096EF"
+		"A271F75C45FE13CE879973C85934D0B43B49BC0ED71AD1E72A9425D2FCDA45FD"
+		"1A56CE66B25EA602D9F99BDE6909F7D73C68B8A52870577D30F0C0E4D02DE2E5"
+		"13B04B2DD5AC152470E52E7771932258348E918604A42A54F6383D46EFE27226", exp1, sizeof(exp1));
+	qsc_consoleutils_hex_to_bin("379E86BCE2F0BE6DF0BAA8FEC403C6A7244B21D1D5B9193FCE79510FF2633893"
+		"F58D57DABBEF0424E1E8D5ED7B485EB7381CC7235350220CA03F1D107A102BD3"
+		"5FAB74869AB656D35E0F40950E1564DBDC37ECFD6C50BEE201BFA0F953AEC0A2"
+		"9B063993F5D019CDDE4A8AA02D440C19A4A08AD7A0CD3F2FDFEF61D0383314B5"
+		"3285521CBCDC258DD1C8621606EA76D846A9E7272E3294BBF02DF3C546A46CD7", exp2, sizeof(exp2));
 #	endif
-	qsc_memutils_setvalue(ad, 0x01, sizeof(ad));
+	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
 #else
-	qsc_consoleutils_hex_to_bin("E1E27CD3CF085080363AC3903D31C2AE5E51D4CCF8FB9278FEFB24077A72C2AC671249C32DED5F96CBC31702CED6B3575F3B562BA9FF9E6467DE7C687AEDA54C"
-		"7043FC912BF57B4892FED02E5F4D67C2404DCF99B6021FDBD1B241DBD8673F96D67A15AC380946EBE5287C61F74C8ECD6A34AF7499D145F1B74BED2A5A7CA631", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("026FE8D3D224909030939FF99D7308ACFF9472A3656193CFDA3991C87E955E3FE2A1C1983FF3E7D7E6B9E646F161765F70D14E2A52312E60C6EC3C774FDC1985"
-		"9AE0B3C43F93F0A9900693F451D4B7A342CEB9F0BE047AE7D64C16001843B7A80F7EC32CC7A4FF745DBF1700390017B357DF27B1CE2CC44515F2D392AE20E4A8", exp2, sizeof(exp2));
+	qsc_consoleutils_hex_to_bin("E1E27CD3CF085080363AC3903D31C2AE5E51D4CCF8FB9278FEFB24077A72C2AC"
+		"671249C32DED5F96CBC31702CED6B3575F3B562BA9FF9E6467DE7C687AEDA54C"
+		"7043FC912BF57B4892FED02E5F4D67C2404DCF99B6021FDBD1B241DBD8673F96"
+		"D67A15AC380946EBE5287C61F74C8ECD6A34AF7499D145F1B74BED2A5A7CA631", exp1, sizeof(exp1));
+
+	qsc_consoleutils_hex_to_bin("026FE8D3D224909030939FF99D7308ACFF9472A3656193CFDA3991C87E955E3F"
+		"E2A1C1983FF3E7D7E6B9E646F161765F70D14E2A52312E60C6EC3C774FDC1985"
+		"9AE0B3C43F93F0A9900693F451D4B7A342CEB9F0BE047AE7D64C16001843B7A8"
+		"0F7EC32CC7A4FF745DBF1700390017B357DF27B1CE2CC44515F2D392AE20E4A8", exp2, sizeof(exp2));
 #endif
 
 	qsc_consoleutils_hex_to_bin("0053A6F94C9FF24598EB3E91E4378ADD3083D6297CCF2275C81B6EC11467BA0D0558ABFE51A4F74A9DF04396E93C8FE23588DB2E81D4277ACD2073C6196CBF12", key, sizeof(key));
@@ -790,7 +806,7 @@ static bool csx512_kat()
 		"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", msg, sizeof(msg));
 	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F", nce, sizeof(nce));
 
-	qsc_memutils_setvalue(ad, 0x01, sizeof(ad));
+	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
 
 	/* copy the nonce */
 	qsc_memutils_copy(ncpy, nce, sizeof(nce));
@@ -827,6 +843,7 @@ static bool csx512_kat()
 
 	if (qsc_intutils_are_equal8(enc2, exp2, sizeof(exp2)) == false)
 	{
+		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK2 \n");
 		status = false;
 	}
 
@@ -844,111 +861,18 @@ static bool csx512_kat()
 	/* test decryption */
 	if (qsc_csx_transform(&state, dec, enc1, sizeof(dec)) == false)
 	{
-		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK2 \n");
+		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK3 \n");
 		status = false;
 	}
 
 	if (qsc_intutils_are_equal8(dec, msg, sizeof(dec)) == false)
 	{
-		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK3 \n");
+		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK4 \n");
 		status = false;
 	}
 
 	/* erase the round-key array and reset the state */
 	qsc_csx_dispose(&state);
-
-	return status;
-}
-
-/*** POLY1305 ***/
-
-static bool poly1305_kat()
-{
-	uint8_t exp[4][16] = { 0 };
-	uint8_t key[4][32] = { 0 };
-	uint8_t out[16] = { 0 };
-	uint8_t msg1[34] = { 0 };
-	uint8_t msg2[12] = { 0 };
-	uint8_t msg3[64] = { 0 };
-	uint8_t msg4[64] = { 0 };
-	size_t i;
-	bool status;
-
-	status = true;
-
-	qsc_consoleutils_hex_to_bin("A8061DC1305136C6C22B8BAF0C0127A9", exp[0], sizeof(exp[0]));
-	qsc_consoleutils_hex_to_bin("A6F745008F81C916A20DCC74EEF2B2F0", exp[1], sizeof(exp[1]));
-	qsc_consoleutils_hex_to_bin("00000000000000000000000000000000", exp[2], sizeof(exp[2]));
-	qsc_consoleutils_hex_to_bin("36E5F6B5C5E06070F0EFCA96227A863E", exp[3], sizeof(exp[3]));
-
-	qsc_consoleutils_hex_to_bin("85D6BE7857556D337F4452FE42D506A80103808AFB0DB2FD4ABFF6AF4149F51B", key[0], sizeof(key[0]));
-	qsc_consoleutils_hex_to_bin("746869732069732033322D62797465206B657920666F7220506F6C7931333035", key[1], sizeof(key[1]));
-	qsc_consoleutils_hex_to_bin("0000000000000000000000000000000000000000000000000000000000000000", key[2], sizeof(key[2]));
-	qsc_consoleutils_hex_to_bin("0000000000000000000000000000000036E5F6B5C5E06070F0EFCA96227A863E", key[3], sizeof(key[3]));
-
-	qsc_consoleutils_hex_to_bin("43727970746F6772617068696320466F72756D2052657365617263682047726F7570", msg1, sizeof(msg1));
-	qsc_consoleutils_hex_to_bin("48656C6C6F20776F726C6421", msg2, sizeof(msg2));
-	qsc_consoleutils_hex_to_bin("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", msg3, sizeof(msg3));
-	qsc_consoleutils_hex_to_bin("416E79207375626D697373696F6E20746F20746865204945544620696E74656E6465642062792074686520436F6E7472696275746F7220666F72207075626C69", msg4, sizeof(msg4));
-
-	/* compact api */
-
-	qsc_intutils_clear8(out, 16);
-	qsc_poly1305_compute(out, msg1, 34, key[0]);
-
-	if (qsc_intutils_are_equal8(out, exp[0], 16) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! poly1305_kat: MAC output does not match the known answer -PK1 \n");
-		status = false;
-	}
-
-	qsc_intutils_clear8(out, 16);
-	qsc_poly1305_compute(out, msg2, 12, key[1]);
-
-	if (qsc_intutils_are_equal8(out, exp[1], 16) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! poly1305_kat: MAC output does not match the known answer -PK2 \n");
-		status = false;
-	}
-
-	qsc_intutils_clear8(out, 16);
-	qsc_poly1305_compute(out, msg3, 34, key[2]);
-
-	if (qsc_intutils_are_equal8(out, exp[2], 16) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! poly1305_kat: MAC output does not match the known answer -PK3 \n");
-		status = false;
-	}
-
-	qsc_intutils_clear8(out, 16);
-	qsc_poly1305_compute(out, msg4, 34, key[3]);
-
-	if (qsc_intutils_are_equal8(out, exp[3], 16) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! poly1305_kat: MAC output does not match the known answer -PK4 \n");
-		status = false;
-	}
-
-	/* long-form api */
-
-	qsc_intutils_clear8(out, 16);
-	qsc_poly1305_state ctx;
-
-	qsc_poly1305_initialize(&ctx, key[0]);
-
-	for (i = 0; i < 32; i += QSC_POLY1305_BLOCK_SIZE)
-	{
-		qsc_poly1305_blockupdate(&ctx, msg1 + i);
-	}
-
-	qsc_poly1305_update(&ctx, msg1 + i, 2);
-	qsc_poly1305_finalize(&ctx, out);
-
-	if (qsc_intutils_are_equal8(out, exp[0], 16) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! poly1305_kat: MAC output does not match the known answer -PK5 \n");
-		status = false;
-	}
 
 	return status;
 }
@@ -960,16 +884,16 @@ bool rcs256_kat()
 #if defined(QSC_RCS_AUTHENTICATED)
 	uint8_t ad[20] = { 0 };
 	uint8_t dec[32] = { 0 };
-	uint8_t enc1[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
-	uint8_t enc2[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
-	uint8_t exp1[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
-	uint8_t exp2[32 + QSC_RCS_256_MAC_SIZE] = { 0 };
+	uint8_t enc1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	uint8_t enc2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	uint8_t exp1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	uint8_t exp2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
 	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
 #else
 	uint8_t enc1[32] = { 0 };
 	uint8_t exp1[32] = { 0 };
 #endif
-	uint8_t key[QSC_RCS_256_KEY_SIZE] = { 0 };
+	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
 	uint8_t msg[32] = { 0 };
 	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
 
@@ -989,22 +913,27 @@ bool rcs256_kat()
 		"225B05B1FB100A4D9208522BACB1AEBEE62A94D19BFF53B41ACE75D031926707", exp1, sizeof(exp1));
 	qsc_consoleutils_hex_to_bin("ABF3574126DAA563B423B0EEEE9970FD0C8F060F65CB00CDC05BB0DC047DB2AD"
 		"009BDF7169E5FBDFDEBB1CE9E01B6FEA7E9E36E33C3E885B28EEA26D4F14CE3D", exp2, sizeof(exp2));
-#	else
+#	elif defined(QSC_RCS_AUTH_KMACR24)
 	/* rcsc256k256 */
 	qsc_consoleutils_hex_to_bin("7940917E9219A31248946F71647B15421535941574F84F79F"
 		"6110C1F2F776D03F38582F301390A6B8807C75914CE0CF410051D73CAE97D1D295CB0420146E179", exp1, sizeof(exp1));
 	qsc_consoleutils_hex_to_bin("ABF3574126DAA563B423B0EEEE9970FD0C8F060F65CB00CDC"
 		"05BB0DC047DB2ADA2A39BEB441FCD4C5F83F1142F264EEFCBAAA51D7874A0E7DA0A7B285DFD55AA", exp2, sizeof(exp2));
+#	else
+	/* rcsc256p256 */
+	qsc_consoleutils_hex_to_bin("7940917E9219A31248946F71647B15421535941574F84F79F6110C1F2F776D03"
+		"6546BA4893C00FC5CCECB28F5B8580DEBBED6AE0F14015C3716A86526FA54F9C", exp1, sizeof(exp1));
+	qsc_consoleutils_hex_to_bin("ABF3574126DAA563B423B0EEEE9970FD0C8F060F65CB00CDC05BB0DC047DB2AD"
+		"6ADCD16F5C5F96BB1984419DE6EDADE438710329C7BC30AC6FC25307EC9DB667", exp2, sizeof(exp2));
 #	endif
-
-	qsc_memutils_setvalue(ad, 0x01, sizeof(ad));
+	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
 	qsc_memutils_copy(ncpy, nce, QSC_RCS_NONCE_SIZE);
 #else
 	qsc_consoleutils_hex_to_bin("9EF7D04279C5277366D2DDD3FBB47F0DFCB3994D6F43D7F3A782778838C56DB3", exp1, sizeof(exp1));
 #endif
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS_256_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nce };
 
 	status = true;
 
@@ -1069,16 +998,16 @@ bool rcs512_kat()
 #if defined(QSC_RCS_AUTHENTICATED)
 	uint8_t ad[20] = { 0 };
 	uint8_t dec[64] = { 0 };
-	uint8_t enc1[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
-	uint8_t enc2[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
-	uint8_t exp1[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
-	uint8_t exp2[64 + QSC_RCS_512_MAC_SIZE] = { 0 };
+	uint8_t enc1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	uint8_t enc2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	uint8_t exp1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	uint8_t exp2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
 	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
 #else
 	uint8_t enc1[64] = { 0 };
 	uint8_t exp1[64] = { 0 };
 #endif
-	uint8_t key[QSC_RCS_512_KEY_SIZE] = { 0 };
+	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
 	uint8_t msg[64] = { 0 };
 	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
 	bool status;
@@ -1103,7 +1032,7 @@ bool rcs512_kat()
 		"D1285FAB37A6821DA524F3F7FF7EFCB39C5B59E3897B177E45D6AA7F4BB5BE77"
 		"864E82FC36E22E830EBCC10DF875CFA126070CAFAC402113167920E0EC9E0D12"
 		"1FCCDEBF7112496AF04FD8FB6E83137666167FDDF9E0983ADA3AD179FDCF220A", exp2, sizeof(exp2));
-#	else
+#	elif defined(QSC_RCS_AUTH_KMACR24)
 	/* rcsc512k512 */
 	qsc_consoleutils_hex_to_bin("21E97A126E35BE731EF204E48248A2EEB01B692992F73786602F21031FBFB7C8"
 		"A1CF250F2EC948D5985B92667349B72EFA751048AF0B919AE9E16F177F5C97F2"
@@ -1113,9 +1042,16 @@ bool rcs512_kat()
 		"D1285FAB37A6821DA524F3F7FF7EFCB39C5B59E3897B177E45D6AA7F4BB5BE77"
 		"9CB2429F4693DF70D38DBBCB00EE86172435C117D442171A8485A87BF1D7282F"
 		"2D69032C85F1CD1A1FEE794843E0CED7616722A4B0937210E9023220B085EA18", exp2, sizeof(exp2));
+#	else
+		/* rcsc512p256 */
+	qsc_consoleutils_hex_to_bin("21E97A126E35BE731EF204E48248A2EEB01B692992F73786602F21031FBFB7C8"
+		"A1CF250F2EC948D5985B92667349B72EFA751048AF0B919AE9E16F177F5C97F2"
+		"72E3A325FA0F62F91580EAFAB104F7BED0D3B9A9FC17A8E69BCA090DBEA6CB76", exp1, sizeof(exp1));
+	qsc_consoleutils_hex_to_bin("388270BF8DF03483BB287FFA527D81403F0362210FD525657C8541250DFFE3BA"
+		"D1285FAB37A6821DA524F3F7FF7EFCB39C5B59E3897B177E45D6AA7F4BB5BE77"
+		"6D714E62EDB8571B72B8D5E94B2F4E42E46EEF3DBBECFFF894759881EDA744AA", exp2, sizeof(exp2));
 #	endif
-
-	qsc_memutils_setvalue(ad, 0x01, sizeof(ad));
+	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
 	qsc_memutils_copy(ncpy, nce, sizeof(nce));
 #else
 	qsc_consoleutils_hex_to_bin("8643251F3880261010BF195886C0496CC2EB07BB68D9F13BCBD266890467F47F"
@@ -1123,7 +1059,7 @@ bool rcs512_kat()
 #endif
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS_512_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { key, QSC_RCS512_KEY_SIZE, nce };
 
 	status = true;
 
@@ -2855,15 +2791,6 @@ bool qsc_selftest_csx_test()
 	return res;
 }
 
-bool qsc_selftest_poly1305_test()
-{
-	bool res;
-
-	res = poly1305_kat();
-
-	return res;
-}
-
 bool qsc_selftest_rcs_test()
 {
 	bool res;
@@ -2989,10 +2916,6 @@ bool qsc_selftest_symmetric_run()
 		res = false;
 	}
 	else if (qsc_selftest_csx_test() == false)
-	{
-		res = false;
-	}
-	else if (qsc_selftest_poly1305_test() == false)
 	{
 		res = false;
 	}

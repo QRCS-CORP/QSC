@@ -5,12 +5,12 @@
 
 /* params.h */
 
-#define MCELIECE_SHAREDSECRET_SIZE 32
+#define MCELIECE_SHAREDSECRET_SIZE 32ULL
 
 #if defined(QSC_MCELIECE_S1N3488T64)
-#	define MCELIECE_GFBITS 12
-#	define MCELIECE_SYS_N 3488
-#	define MCELIECE_SYS_T 64
+#	define MCELIECE_GFBITS 12ULL
+#	define MCELIECE_SYS_N 3488ULL
+#	define MCELIECE_SYS_T 64ULL
 #	define MCELIECE_COND_BYTES ((1 << (MCELIECE_GFBITS - 4)) * (2 * MCELIECE_GFBITS - 1))
 #	define MCELIECE_IRR_BYTES (MCELIECE_SYS_T * 2)
 #	define MCELIECE_PK_NROWS (MCELIECE_SYS_T * MCELIECE_GFBITS) 
@@ -19,9 +19,9 @@
 #	define MCELIECE_SYND_BYTES ((MCELIECE_PK_NROWS + 7) / 8)
 #	define MCELIECE_GFMASK ((1 << MCELIECE_GFBITS) - 1)
 #elif defined(QSC_MCELIECE_S3N4608T96)
-#   define MCELIECE_GFBITS 13
-#   define MCELIECE_SYS_N 4608
-#   define MCELIECE_SYS_T 96
+#   define MCELIECE_GFBITS 13ULL
+#   define MCELIECE_SYS_N 4608ULL
+#   define MCELIECE_SYS_T 96ULL
 #   define MCELIECE_COND_BYTES ((1 << (MCELIECE_GFBITS - 4)) * (2 * MCELIECE_GFBITS - 1))
 #   define MCELIECE_IRR_BYTES (MCELIECE_SYS_T * 2)
 #   define MCELIECE_PK_NROWS (MCELIECE_SYS_T * MCELIECE_GFBITS) 
@@ -30,9 +30,9 @@
 #   define MCELIECE_SYND_BYTES ((MCELIECE_PK_NROWS + 7) / 8)
 #   define MCELIECE_GFMASK ((1 << MCELIECE_GFBITS) - 1)
 #elif defined(QSC_MCELIECE_S5N6688T128)
-#   define MCELIECE_GFBITS 13
-#   define MCELIECE_SYS_N 6688
-#   define MCELIECE_SYS_T 128
+#   define MCELIECE_GFBITS 13ULL
+#   define MCELIECE_SYS_N 6688ULL
+#   define MCELIECE_SYS_T 128ULL
 #   define MCELIECE_COND_BYTES ((1 << (MCELIECE_GFBITS - 4)) * (2 * MCELIECE_GFBITS - 1))
 #   define MCELIECE_IRR_BYTES (MCELIECE_SYS_T * 2)
 #   define MCELIECE_PK_NROWS (MCELIECE_SYS_T * MCELIECE_GFBITS) 
@@ -41,9 +41,9 @@
 #   define MCELIECE_SYND_BYTES ((MCELIECE_PK_NROWS + 7) / 8)
 #   define MCELIECE_GFMASK ((1 << MCELIECE_GFBITS) - 1)
 #elif defined(QSC_MCELIECE_S6N6960T119)
-#   define MCELIECE_GFBITS 13
-#   define MCELIECE_SYS_N 6960
-#   define MCELIECE_SYS_T 119
+#   define MCELIECE_GFBITS 13ULL
+#   define MCELIECE_SYS_N 6960ULL
+#   define MCELIECE_SYS_T 119ULL
 #   define MCELIECE_COND_BYTES ((1 << (MCELIECE_GFBITS - 4)) * (2 * MCELIECE_GFBITS - 1))
 #   define MCELIECE_IRR_BYTES (MCELIECE_SYS_T * 2)
 #   define MCELIECE_PK_NROWS (MCELIECE_SYS_T * MCELIECE_GFBITS) 
@@ -52,9 +52,9 @@
 #   define MCELIECE_SYND_BYTES ((MCELIECE_PK_NROWS + 7) / 8)
 #   define MCELIECE_GFMASK ((1 << MCELIECE_GFBITS) - 1)
 #elif defined(QSC_MCELIECE_S7N8192T128)
-#   define MCELIECE_GFBITS 13
-#   define MCELIECE_SYS_N 8192
-#   define MCELIECE_SYS_T 128
+#   define MCELIECE_GFBITS 13ULL
+#   define MCELIECE_SYS_N 8192ULL
+#   define MCELIECE_SYS_T 128ULL
 #   define MCELIECE_COND_BYTES ((1 << (MCELIECE_GFBITS - 4)) * (2 * MCELIECE_GFBITS - 1))
 #   define MCELIECE_IRR_BYTES (MCELIECE_SYS_T * 2)
 #   define MCELIECE_PK_NROWS (MCELIECE_SYS_T * MCELIECE_GFBITS) 
@@ -1619,7 +1619,7 @@ static int32_t check_c_padding(const uint8_t* c)
 {
 	/* check if the padding bits of c are all zero */
 	uint8_t b;
-	int ret;
+	int32_t ret;
 
 	b = c[MCELIECE_SYND_BYTES - 1] >> (MCELIECE_PK_NROWS % 8);
 	b -= 1;
@@ -2020,7 +2020,7 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8
 	uint8_t *e = two_e + 1;
 	uint8_t *x = preimage;
 #if defined(QSC_MCELIECE_S6N6960T119)
-	int padding_ok;
+	int32_t padding_ok;
 	uint8_t mask;
 
 	padding_ok = check_c_padding(c);

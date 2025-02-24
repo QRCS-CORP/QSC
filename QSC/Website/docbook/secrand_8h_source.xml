@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_secrand_8h_source" xml:lang="en-US">
+<title>secrand.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/secrand.h</primary></indexterm>
+<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;QSC_SECRAND_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;QSC_SECRAND_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_csg_8h">csg.h</link>&quot;</emphasis>
+46 
+47 <emphasis role="comment">/*</emphasis>
+48 <emphasis role="comment">*&#32;\file&#32;secrand.h</emphasis>
+49 <emphasis role="comment">*&#32;\brief&#32;An&#32;implementation&#32;of&#32;an&#32;secure&#32;pseudo-random&#32;generator.</emphasis>
+50 <emphasis role="comment">*&#32;Must&#32;be&#32;pre-keyed&#32;using&#32;the&#32;secrand_initialize&#32;function.</emphasis>
+51 <emphasis role="comment">*/</emphasis>
+52 
+57 <emphasis role="preprocessor">#define&#32;QSC_SECRAND_SEED_SIZE&#32;0x20</emphasis>
+58 
+63 <emphasis role="preprocessor">#define&#32;QSC_SECRAND_CACHE_SIZE&#32;0x400</emphasis>
+64 
+69 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+70 {
+71 &#32;&#32;&#32;&#32;<link linkend="_structqsc__csg__state">qsc_csg_state</link>&#32;<link linkend="_structqsc__secrand__state_1a9d66994a118feb83999ed41201131cdd">hstate</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+72 &#32;&#32;&#32;&#32;uint8_t&#32;<link linkend="_structqsc__secrand__state_1af76edab6ca22af4cd404c8d1047c2168">cache</link>[QSC_SECRAND_CACHE_SIZE];&#32;&#32;
+73 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_structqsc__secrand__state_1a31b98eae4240373438740f98250c1252">cpos</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+74 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_structqsc__secrand__state_1a50300ba6e38ec30121edcc07ebac42c6">init</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+75 }&#32;<link linkend="_structqsc__secrand__state">qsc_secrand_state</link>;
+76 
+82 QSC_EXPORT_API&#32;int8_t&#32;qsc_secrand_next_char(<emphasis role="keywordtype">void</emphasis>);
+83 
+89 QSC_EXPORT_API&#32;uint8_t&#32;qsc_secrand_next_uchar(<emphasis role="keywordtype">void</emphasis>);
+90 
+96 QSC_EXPORT_API&#32;<emphasis role="keywordtype">double</emphasis>&#32;qsc_secrand_next_double(<emphasis role="keywordtype">void</emphasis>);
+97 
+103 QSC_EXPORT_API&#32;int16_t&#32;qsc_secrand_next_int16(<emphasis role="keywordtype">void</emphasis>);
+104 
+111 QSC_EXPORT_API&#32;int16_t&#32;qsc_secrand_next_int16_max(int16_t&#32;maximum);
+112 
+120 QSC_EXPORT_API&#32;int16_t&#32;qsc_secrand_next_int16_maxmin(int16_t&#32;maximum,&#32;int16_t&#32;minimum);
+121 
+127 QSC_EXPORT_API&#32;uint16_t&#32;qsc_secrand_next_uint16(<emphasis role="keywordtype">void</emphasis>);
+128 
+135 QSC_EXPORT_API&#32;uint16_t&#32;qsc_secrand_next_uint16_max(uint16_t&#32;maximum);
+136 
+144 QSC_EXPORT_API&#32;uint16_t&#32;qsc_secrand_next_uint16_maxmin(uint16_t&#32;maximum,&#32;uint16_t&#32;minimum);
+145 
+151 QSC_EXPORT_API&#32;int32_t&#32;qsc_secrand_next_int32(<emphasis role="keywordtype">void</emphasis>);
+152 
+159 QSC_EXPORT_API&#32;int32_t&#32;qsc_secrand_next_int32_max(int32_t&#32;maximum);
+160 
+168 QSC_EXPORT_API&#32;int32_t&#32;qsc_secrand_next_int32_maxmin(int32_t&#32;maximum,&#32;int32_t&#32;minimum);
+169 
+175 QSC_EXPORT_API&#32;uint32_t&#32;qsc_secrand_next_uint32(<emphasis role="keywordtype">void</emphasis>);
+176 
+183 QSC_EXPORT_API&#32;uint32_t&#32;qsc_secrand_next_uint32_max(uint32_t&#32;maximum);
+184 
+192 QSC_EXPORT_API&#32;uint32_t&#32;qsc_secrand_next_uint32_maxmin(uint32_t&#32;maximum,&#32;uint32_t&#32;minimum);
+193 
+199 QSC_EXPORT_API&#32;int64_t&#32;qsc_secrand_next_int64(<emphasis role="keywordtype">void</emphasis>);
+200 
+207 QSC_EXPORT_API&#32;int64_t&#32;qsc_secrand_next_int64_max(int64_t&#32;maximum);
+208 
+216 QSC_EXPORT_API&#32;int64_t&#32;qsc_secrand_next_int64_maxmin(int64_t&#32;maximum,&#32;int64_t&#32;minimum);
+217 
+223 QSC_EXPORT_API&#32;uint64_t&#32;qsc_secrand_next_uint64(<emphasis role="keywordtype">void</emphasis>);
+224 
+231 QSC_EXPORT_API&#32;uint64_t&#32;qsc_secrand_next_uint64_max(uint64_t&#32;maximum);
+232 
+240 QSC_EXPORT_API&#32;uint64_t&#32;qsc_secrand_next_uint64_maxmin(uint64_t&#32;maximum,&#32;uint64_t&#32;minimum);
+241 
+245 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_secrand_dispose(<emphasis role="keywordtype">void</emphasis>);
+246 
+255 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_secrand_initialize(<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;seed,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;seedlen,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;custom,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;custlen);
+256 
+263 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_secrand_generate(uint8_t*&#32;output,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+264 
+265 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

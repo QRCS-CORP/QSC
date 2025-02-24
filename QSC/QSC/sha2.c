@@ -4,9 +4,9 @@
 #include "memutils.h"
 
 
-#define SHA2_256_ROUNDS_COUNT 64
-#define SHA2_384_ROUNDS_COUNT 80
-#define SHA2_512_ROUNDS_COUNT 80
+#define SHA2_256_ROUNDS_COUNT 64ULL
+#define SHA2_384_ROUNDS_COUNT 80ULL
+#define SHA2_512_ROUNDS_COUNT 80ULL
 
 /* SHA2-256 */
 
@@ -24,6 +24,8 @@ static const uint32_t sha256_iv[8] =
 
 static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
 {
+	assert(ctx != NULL);
+
 	ctx->t += msglen;
 }
 
@@ -661,6 +663,8 @@ static const uint64_t sha384_iv[8] =
 
 static void sha384_increase(qsc_sha384_state* ctx, size_t length)
 {
+	assert(ctx != NULL);
+
 	ctx->t[0] += length;
 
 	if (ctx->t[0] > 0x1FFFFFFFFFFFFFFFULL)
@@ -816,6 +820,8 @@ static const uint64_t sha512_iv[8] =
 
 static void sha512_increase(qsc_sha512_state* ctx, size_t length)
 {
+	assert(ctx != NULL);
+
 	ctx->t[0] += length;
 
 	if (ctx->t[0] > 0x1FFFFFFFFFFFFFFFULL)

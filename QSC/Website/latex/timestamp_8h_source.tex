@@ -1,0 +1,88 @@
+\doxysection{timestamp.\+h}
+\hypertarget{timestamp_8h_source}{}\label{timestamp_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/timestamp.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/timestamp.h}}
+\mbox{\hyperlink{timestamp_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_TIMESTAMP\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_TIMESTAMP\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ <time.h>}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#define\ QSC\_TIMESTAMP\_EPOCH\_START\ 1900}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#define\ QSC\_TIMESTAMP\_SECONDS\_PER\_MINUTE\ 60}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#define\ QSC\_TIMESTAMP\_SECONDS\_PER\_HOUR\ (QSC\_TIMESTAMP\_SECONDS\_PER\_MINUTE\ *\ 60)}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#define\ QSC\_TIMESTAMP\_SECONDS\_PER\_DAY\ (QSC\_TIMESTAMP\_SECONDS\_PER\_HOUR\ *\ 24)}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#define\ QSC\_TIMESTAMP\_STRING\_SIZE\ 20}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00087\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{timestamp_8h_a75a46ce49631940b269b89d387854179}{qsc\_timestamp\_current\_date}}(\textcolor{keywordtype}{char}\ output[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}]);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00095\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{timestamp_8h_a4be264e636f3281dfc22b853ba490934}{qsc\_timestamp\_current\_datetime}}(\textcolor{keywordtype}{char}\ output[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}]);}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00102\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{timestamp_8h_a5cc707f89b3da229053c6c0afa0c3be5}{qsc\_timestamp\_current\_time}}(\textcolor{keywordtype}{char}\ output[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}]);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00109\ QSC\_EXPORT\_API\ uint64\_t\ \mbox{\hyperlink{timestamp_8h_a21823e9d4bab002997d8591f9a109eef}{qsc\_timestamp\_epochtime\_seconds}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00118\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{timestamp_8h_a49e4e2d04287a7a355307a4b923a9a37}{qsc\_timestamp\_time\_struct\_to\_string}}(\textcolor{keywordtype}{char}\ output[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}],\ \textcolor{keyword}{const}\ \textcolor{keyword}{struct}\ tm*\ tstruct);}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00127\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{timestamp_8h_a76603c6ea90f434d220eea9099af0772}{qsc\_timestamp\_string\_to\_time\_struct}}(\textcolor{keyword}{struct}\ tm*\ tstruct,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ input[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}]);}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00138\ QSC\_EXPORT\_API\ uint64\_t\ \mbox{\hyperlink{timestamp_8h_a3903d51482f9356c315cc229e570fbf5}{qsc\_timestamp\_datetime\_seconds\_remaining}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ basetime[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}],\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ comptime[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}]);}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00146\ QSC\_EXPORT\_API\ uint64\_t\ \mbox{\hyperlink{timestamp_8h_a0f4db1927de13bbecbe566d89812845c}{qsc\_timestamp\_datetime\_to\_seconds}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ input[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}]);}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00153\ QSC\_EXPORT\_API\ uint64\_t\ \mbox{\hyperlink{timestamp_8h_a86954fa0d21cd57b6bcda9014f53e018}{qsc\_timestamp\_datetime\_utc}}();}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00161\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{timestamp_8h_adca029210fba1927158aa88b785fd1ac}{qsc\_timestamp\_seconds\_to\_datetime}}(uint64\_t\ tsec,\ \textcolor{keywordtype}{char}\ output[\mbox{\hyperlink{timestamp_8h_a530d0e4cfd2c072c380f2826cf835445}{QSC\_TIMESTAMP\_STRING\_SIZE}}]);}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#if\ defined(QSC\_DEBUG\_MODE)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00167\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_timestamp\_print\_values();}
+\DoxyCodeLine{00168\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -102,7 +102,7 @@ char qsc_consoleutils_get_char()
 	char res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	res = getwchar();
+	res = (char)getwchar();
 #else
 	res = getchar();
 #endif
@@ -616,6 +616,11 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 		usleep(100000);
 #endif
 	}
+}
+
+void qsc_consoleutils_send_enter() 
+{
+    putchar('\n');
 }
 
 void qsc_consoleutils_set_window_buffer(size_t width, size_t height)

@@ -1,0 +1,181 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/scb.h File Reference}
+\hypertarget{scb_8h}{}\label{scb_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/scb.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/scb.h}}
+
+
+An implementation of the SHAKE Cost Based key derivation function\+: SCB-\/\+KDF.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+{\ttfamily \#include "{}sha3.\+h"{}}\newline
+Include dependency graph for scb.\+h\+:
+% FIG 0
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The CSG state structure. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{scb_8h_a14f11e08f14932c25a9d5878c26c2739}\label{scb_8h_a14f11e08f14932c25a9d5878c26c2739} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+256\+\_\+\+SEED\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The SCB-\/256 seed size. \end{DoxyCompactList}\item 
+\Hypertarget{scb_8h_af04f804f5e916ce3fe92948a7d4a0eee}\label{scb_8h_af04f804f5e916ce3fe92948a7d4a0eee} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+512\+\_\+\+SEED\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The SCB-\/512 seed size. \end{DoxyCompactList}\item 
+\Hypertarget{scb_8h_a8c166f3f439d46eb500cd757ced24572}\label{scb_8h_a8c166f3f439d46eb500cd757ced24572} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+\+L2\+CACHE\+\_\+\+DEFAULT\+\_\+\+SIZE}~(1024 \texorpdfstring{$\ast$}{*} 256)
+\begin{DoxyCompactList}\small\item\em The default L2 cache size (256 KiB). Smaller sizes will not be affected by a diminished cache miss rate, but larger sizes (doubling from 256 to 512, 1024, 2048...) is possible if tuning for increased cache misses on specific architectures with large L2 cache sizes. If increasing the L2 cache size the memory cost minimum also increases, so that the memory cost must be divisible by 4 times the L2 cache size. The minimum memcost with a 512 KiB cache is memcost=2 or 2 MiB, with a 1024 Kib cache size (1 MiB) the memcost minimum must be 4, or 4 MiB of memory cost buffering. \end{DoxyCompactList}\item 
+\Hypertarget{scb_8h_a318b0cdfc90eca709e5204301fbc9616}\label{scb_8h_a318b0cdfc90eca709e5204301fbc9616} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+\+MEMORY\+\_\+\+COST\+\_\+\+SIZE}~(1024 \texorpdfstring{$\ast$}{*} 1024)
+\begin{DoxyCompactList}\small\item\em The base memory cost of 1 MiB (1,048,576 bytes) \end{DoxyCompactList}\item 
+\Hypertarget{scb_8h_a157dcb1b3b6d20d5adc776a5e76c4eb9}\label{scb_8h_a157dcb1b3b6d20d5adc776a5e76c4eb9} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+\+MEMORY\+\_\+\+MAXIMUM}~128
+\begin{DoxyCompactList}\small\item\em The maximum memory cost. \end{DoxyCompactList}\item 
+\Hypertarget{scb_8h_a43440e56d1124af033fb80f51e550771}\label{scb_8h_a43440e56d1124af033fb80f51e550771} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+\+MEMORY\+\_\+\+MINIMUM}~1
+\begin{DoxyCompactList}\small\item\em The minimum memory cost. \end{DoxyCompactList}\item 
+\Hypertarget{scb_8h_a009ddba9935e6b3305b4a3ae43856cfe}\label{scb_8h_a009ddba9935e6b3305b4a3ae43856cfe} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+\+CPU\+\_\+\+MINIMUM}~1
+\begin{DoxyCompactList}\small\item\em The minimum CPU cost multiplier. \end{DoxyCompactList}\item 
+\Hypertarget{scb_8h_a1ab3242cf825f88c7b4b843dfcf74448}\label{scb_8h_a1ab3242cf825f88c7b4b843dfcf74448} 
+\#define {\bfseries QSC\+\_\+\+SCB\+\_\+\+CPU\+\_\+\+MAXIMUM}~1000
+\begin{DoxyCompactList}\small\item\em The maximum CPU cost multiplier. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{scb_8h_a12d0a4d316949c8e927055d7d8de97af}{qsc\+\_\+scb\+\_\+dispose}} (\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the DRBG state. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{scb_8h_a0d452fcb95ea81c7fc7e39910525321b}{qsc\+\_\+scb\+\_\+initialize}} (\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}seed, size\+\_\+t seedlen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}info, size\+\_\+t infolen, size\+\_\+t cpucost, size\+\_\+t memcost)
+\begin{DoxyCompactList}\small\item\em Initialize the pseudo-\/random provider state with a seed and optional personalization string. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{scb_8h_a2c5f0aa797f606428c24c90121167ec9}{qsc\+\_\+scb\+\_\+generate}} (\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen)
+\begin{DoxyCompactList}\small\item\em Generate pseudo-\/random bytes using the random provider. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{scb_8h_a974f89f0ba4e953d66e92fcbeae568c4}{qsc\+\_\+scb\+\_\+update}} (\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}seed, size\+\_\+t seedlen)
+\begin{DoxyCompactList}\small\item\em Update the random provider with new keying material. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+An implementation of the SHAKE Cost Based key derivation function\+: SCB-\/\+KDF. 
+
+Usage Example ~\newline
+ Initialize the DRBG and generate output ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ external\ key\ and\ optional\ custom\ arrays}}
+\DoxyCodeLine{uint8\_t\ seed[32]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{uint8\_t\ info[32]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ output\ bytes}}
+\DoxyCodeLine{uint8\_t\ rnd[200]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ initialize\ with\ seed,\ and\ optional\ info\ array,\ with\ a\ cpu\ cost\ of\ 2,\ and\ a\ memory\ cost\ of\ 1.}}
+\DoxyCodeLine{qsc\_scb\_initialize(seed,\ \textcolor{keyword}{sizeof}(seed),\ info,\ \textcolor{keyword}{sizeof}(info),\ 2,\ 1);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ generate\ the\ pseudo-\/random}}
+\DoxyCodeLine{qsc\_scb\_generate(rnd,\ \textcolor{keyword}{sizeof}(rnd)));}
+
+\end{DoxyCode}
+
+
+\begin{DoxyRemark}{Remarks}
+
+\end{DoxyRemark}
+\begin{DoxyParagraph}{}
+SCB is a cost based key derivation function (KDF) that uses the Keccak c\+SHAKE XOF function, to produce pseudo-\/random bytes from a seeded custom SHAKE generator. ~\newline
+If a 32-\/byte key is used, the implementation uses the c\+SHAKE-\/256 implementation for pseudo-\/random generation, if a 64-\/byte key is used, the generator uses c\+SHAKE-\/512. ~\newline
+The CPU cost feature is an iteration count in the cost mechanism, it determines the number of times both the state absorption and memory scattering functions execute. The Memory cost, is the maximum number of mebibytes (MiB) the internal cache uses, during execution of the memory cost mechanism. ~\newline
+The L2 cache mechanism can be changed to a doubling of 128 KiB (128, 256, 512, 1024 KiB), doubling the cache sizes above the default 256 KiB, also means that the minimum memory cost must be doubled, L2=512 Kib, minimum memcost is 2, 1024 KiB minimum memcost is 4 etc. The generator can be updated with new seed material, which is absorbed into the Keccak state.
+\end{DoxyParagraph}
+For additional usage examples, see scb\+\_\+test.\+h. ~\newline
+ NIST\+: SHA3 Fips202 \href{http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf}{\texttt{ http\+://nvlpubs.\+nist.\+gov/nistpubs/\+FIPS/\+NIST.\+FIPS.\+202.\+pdf}} NIST\+: SP800-\/185 \href{http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pd}{\texttt{ http\+://nvlpubs.\+nist.\+gov/nistpubs/\+Special\+Publications/\+NIST.\+SP.\+800-\/185.\+pd}} NIST\+: SHA3 Keccak Submission \href{http://keccak.noekeon.org/Keccak-submission-3.pdf}{\texttt{ http\+://keccak.\+noekeon.\+org/\+Keccak-\/submission-\/3.\+pdf}} NIST\+: SHA3 Keccak Slides \href{http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf}{\texttt{ http\+://csrc.\+nist.\+gov/groups/\+ST/hash/sha-\/3/documents/\+Keccak-\/slides-\/at-\/\+NIST.\+pdf}} NIST\+: SHA3 Third-\/\+Round Report \href{http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf}{\texttt{ http\+://nvlpubs.\+nist.\+gov/nistpubs/ir/2012/\+NIST.\+IR.\+7896.\+pdf}} Team Keccak\+: Specifications summary \href{https://keccak.team/keccak_specs_summary.html}{\texttt{ https\+://keccak.\+team/keccak\+\_\+specs\+\_\+summary.\+html}} 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{scb_8h_a12d0a4d316949c8e927055d7d8de97af}\index{scb.h@{scb.h}!qsc\_scb\_dispose@{qsc\_scb\_dispose}}
+\index{qsc\_scb\_dispose@{qsc\_scb\_dispose}!scb.h@{scb.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_scb\_dispose()}{qsc\_scb\_dispose()}}
+{\footnotesize\ttfamily \label{scb_8h_a12d0a4d316949c8e927055d7d8de97af} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+scb\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the DRBG state. 
+
+\begin{DoxyWarning}{Warning}
+The dispose function must be called when disposing of the cipher. This function destroys the internal state of the cipher.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The DRBG state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{scb_8h_a2c5f0aa797f606428c24c90121167ec9}\index{scb.h@{scb.h}!qsc\_scb\_generate@{qsc\_scb\_generate}}
+\index{qsc\_scb\_generate@{qsc\_scb\_generate}!scb.h@{scb.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_scb\_generate()}{qsc\_scb\_generate()}}
+{\footnotesize\ttfamily \label{scb_8h_a2c5f0aa797f606428c24c90121167ec9} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+scb\+\_\+generate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{}\end{DoxyParamCaption})}
+
+
+
+Generate pseudo-\/random bytes using the random provider. 
+
+\begin{DoxyWarning}{Warning}
+Initialize must first be called before this function can be used.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em output} & The pseudo-\/random output array \\
+\hline
+{\em otplen} & The requested number of bytes to generate \\
+\hline
+\end{DoxyParams}
+\Hypertarget{scb_8h_a0d452fcb95ea81c7fc7e39910525321b}\index{scb.h@{scb.h}!qsc\_scb\_initialize@{qsc\_scb\_initialize}}
+\index{qsc\_scb\_initialize@{qsc\_scb\_initialize}!scb.h@{scb.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_scb\_initialize()}{qsc\_scb\_initialize()}}
+{\footnotesize\ttfamily \label{scb_8h_a0d452fcb95ea81c7fc7e39910525321b} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+scb\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{seed}{, }\item[{size\+\_\+t}]{seedlen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{info}{, }\item[{size\+\_\+t}]{infolen}{, }\item[{size\+\_\+t}]{cpucost}{, }\item[{size\+\_\+t}]{memcost}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the pseudo-\/random provider state with a seed and optional personalization string. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} The random seed, 32 bytes of seed instantiates the 256-\/bit generator, 64 bytes the 512-\/bit generator \\
+\hline
+{\em seedlen} & The length of the input seed \\
+\hline
+{\em info} & \mbox{[}const\mbox{]} The optional personalization string \\
+\hline
+{\em infolen} & The length of the personalization string \\
+\hline
+{\em cpucost} & The number of iterations the internal cost mechanism is executed \\
+\hline
+{\em memcost} & The memory cost is the number of mebibytes used by the cost mechanism, minimum is 1, maximum 10000 \\
+\hline
+\end{DoxyParams}
+\Hypertarget{scb_8h_a974f89f0ba4e953d66e92fcbeae568c4}\index{scb.h@{scb.h}!qsc\_scb\_update@{qsc\_scb\_update}}
+\index{qsc\_scb\_update@{qsc\_scb\_update}!scb.h@{scb.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_scb\_update()}{qsc\_scb\_update()}}
+{\footnotesize\ttfamily \label{scb_8h_a974f89f0ba4e953d66e92fcbeae568c4} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+scb\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__scb__state}{qsc\+\_\+scb\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{seed}{, }\item[{size\+\_\+t}]{seedlen}{}\end{DoxyParamCaption})}
+
+
+
+Update the random provider with new keying material. 
+
+\begin{DoxyWarning}{Warning}
+Initialize must first be called before this function can be used.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} The random update seed \\
+\hline
+{\em seedlen} & The length of the update seed \\
+\hline
+\end{DoxyParams}

@@ -9,139 +9,139 @@
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 16
+#define SPX_N 16ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 66
+#define SPX_FULL_HEIGHT 66ULL
 /* Number of subtree layer. */
-#define SPX_D 22
+#define SPX_D 22ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 6
-#define SPX_FORS_TREES 33
+#define SPX_FORS_HEIGHT 6ULL
+#define SPX_FORS_TREES 33ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #elif defined(QSC_SPHINCSPLUS_S1S128SHAKERS)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 16
+#define SPX_N 16ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 63
+#define SPX_FULL_HEIGHT 63ULL
 /* Number of subtree layer. */
-#define SPX_D 7
+#define SPX_D 7ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 12
-#define SPX_FORS_TREES 14
+#define SPX_FORS_HEIGHT 12ULL
+#define SPX_FORS_TREES 14ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #elif defined(QSC_SPHINCSPLUS_S3S192SHAKERF)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 24
+#define SPX_N 24ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 66
+#define SPX_FULL_HEIGHT 66ULL
 /* Number of subtree layer. */
-#define SPX_D 22
+#define SPX_D 22ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 8
-#define SPX_FORS_TREES 33
+#define SPX_FORS_HEIGHT 8ULL
+#define SPX_FORS_TREES 33ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #elif defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 24
+#define SPX_N 24ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 63
+#define SPX_FULL_HEIGHT 63ULL
 /* Number of subtree layer. */
-#define SPX_D 7
+#define SPX_D 7ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 14
-#define SPX_FORS_TREES 17
+#define SPX_FORS_HEIGHT 14ULL
+#define SPX_FORS_TREES 17ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERF)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 32
+#define SPX_N 32ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 68
+#define SPX_FULL_HEIGHT 68ULL
 /* Number of subtree layer. */
-#define SPX_D 17
+#define SPX_D 17ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 9
-#define SPX_FORS_TREES 35
+#define SPX_FORS_HEIGHT 9ULL
+#define SPX_FORS_TREES 35ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERS)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_256_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 32
+#define SPX_N 32ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 64
+#define SPX_FULL_HEIGHT 64ULL
 /* Number of subtree layer. */
-#define SPX_D 8
+#define SPX_D 8ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 14
-#define SPX_FORS_TREES 22
+#define SPX_FORS_HEIGHT 14ULL
+#define SPX_FORS_TREES 22ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #elif defined(QSC_SPHINCSPLUS_S6S512SHAKERF)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_512_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 64
+#define SPX_N 64ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 64
+#define SPX_FULL_HEIGHT 64ULL
 /* Number of subtree layer. */
-#define SPX_D 16
+#define SPX_D 16ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 10
-#define SPX_FORS_TREES 38
+#define SPX_FORS_HEIGHT 10ULL
+#define SPX_FORS_TREES 38ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #elif defined(QSC_SPHINCSPLUS_S6S512SHAKERS)
 
 /* the hash absorbtion rate */
 #define SPX_HASH_RATE (QSC_KECCAK_512_RATE)
 /* Hash output length in bytes. */
-#define SPX_N 64
+#define SPX_N 64ULL
 /* Height of the hypertree. */
-#define SPX_FULL_HEIGHT 70
+#define SPX_FULL_HEIGHT 70ULL
 /* Number of subtree layer. */
-#define SPX_D 10
+#define SPX_D 10ULL
 /* FORS tree dimensions. */
-#define SPX_FORS_HEIGHT 14
-#define SPX_FORS_TREES 26
+#define SPX_FORS_HEIGHT 14ULL
+#define SPX_FORS_TREES 26ULL
 /* Winternitz parameter, */
-#define SPX_WOTS_W 16
+#define SPX_WOTS_W 16ULL
 
 #endif
 
  /* For clarity */
-#define SPX_ADDR_BYTES 32
+#define SPX_ADDR_BYTES 32ULL
 
 /* WOTS parameters. */
-#if SPX_WOTS_W == 256
-#   define SPX_WOTS_LOGW 8
-#elif SPX_WOTS_W == 16
-#   define SPX_WOTS_LOGW 4
+#if SPX_WOTS_W == 256ULL
+#   define SPX_WOTS_LOGW 8ULL
+#elif SPX_WOTS_W == 16ULL
+#   define SPX_WOTS_LOGW 4ULL
 #else
 #   error SPX_WOTS_W assumed 16 or 256
 #endif
@@ -149,21 +149,21 @@
 #define SPX_WOTS_LEN1 (8 * SPX_N / SPX_WOTS_LOGW)
 
 /* SPX_WOTS_LEN2 is floor(log(len_1 * (w - 1)) / log(w)) + 1; we precompute */
-#if SPX_WOTS_W == 256
+#if SPX_WOTS_W == 256ULL
 #   if SPX_N <= 1
-#       define SPX_WOTS_LEN2 1
+#       define SPX_WOTS_LEN2 1ULL
 #   elif SPX_N <= 256
-#       define SPX_WOTS_LEN2 2
+#       define SPX_WOTS_LEN2 2ULL
 #   else
 #       error Did not precompute SPX_WOTS_LEN2 for n outside {2, .., 256}
 #   endif
-#elif SPX_WOTS_W == 16
-#   if SPX_N <= 8
-#       define SPX_WOTS_LEN2 2
-#   elif SPX_N <= 136
-#       define SPX_WOTS_LEN2 3
-#   elif SPX_N <= 256
-#       define SPX_WOTS_LEN2 4
+#elif SPX_WOTS_W == 16ULL
+#   if SPX_N <= 8ULL
+#       define SPX_WOTS_LEN2 2ULL
+#   elif SPX_N <= 136ULL
+#       define SPX_WOTS_LEN2 3ULL
+#   elif SPX_N <= 256ULL
+#       define SPX_WOTS_LEN2 4ULL
 #   else
 #       error Did not precompute SPX_WOTS_LEN2 for n outside {2, .., 256}
 #   endif
@@ -181,14 +181,14 @@
 #endif
 
 /* FORS parameters. */
-#define SPX_FORS_MSG_BYTES ((SPX_FORS_HEIGHT * SPX_FORS_TREES + 7) / 8)
-#define SPX_FORS_BYTES ((SPX_FORS_HEIGHT + 1) * SPX_FORS_TREES * SPX_N)
+#define SPX_FORS_MSG_BYTES ((SPX_FORS_HEIGHT * SPX_FORS_TREES + 7ULL) / 8ULL)
+#define SPX_FORS_BYTES ((SPX_FORS_HEIGHT + 1ULL) * SPX_FORS_TREES * SPX_N)
 #define SPX_FORS_PK_BYTES SPX_N
 
 /* Resulting SPX sizes. */
 #define SPX_BYTES (SPX_N + SPX_FORS_BYTES + SPX_D * SPX_WOTS_BYTES + SPX_FULL_HEIGHT * SPX_N)
-#define SPX_PK_BYTES (2 * SPX_N)
-#define SPX_SK_BYTES (2 * SPX_N + SPX_PK_BYTES)
+#define SPX_PK_BYTES (2ULL * SPX_N)
+#define SPX_SK_BYTES (2ULL * SPX_N + SPX_PK_BYTES)
 
 #define SPX_WOTS_LEN (SPX_WOTS_LEN1 + SPX_WOTS_LEN2)
 #define SPX_WOTS_BYTES (SPX_WOTS_LEN * SPX_N)
@@ -204,45 +204,45 @@
 /* Optionally, signing can be made non-deterministic using optrand.
 This can help counter side-channel attacks that would benefit from
 getting a large number of traces when the signer uses the same nodes. */
-#define SPX_OPTRAND_BYTES 32
+#define SPX_OPTRAND_BYTES 32ULL
 
 /* Offsets of various fields in the address structure when we use SHAKE as the Sphincs+ hash function */
 /* The byte used to specify the Merkle tree layer */
-#define SPX_OFFSET_LAYER 3
+#define SPX_OFFSET_LAYER 3ULL
 /* The start of the 8 byte field used to specify the tree */
-#define SPX_OFFSET_TREE 8
+#define SPX_OFFSET_TREE 8ULL
 /* The byte used to specify the hash type (reason) */
-#define SPX_OFFSET_TYPE 19
+#define SPX_OFFSET_TYPE 19ULL
 /* The high byte used to specify the key pair (which one-time signature) */
-#define SPX_OFFSET_KP_ADDR2 22
+#define SPX_OFFSET_KP_ADDR2 22ULL
 /* The low byte used to specify the key pair */
-#define SPX_OFFSET_KP_ADDR1 23
+#define SPX_OFFSET_KP_ADDR1 23ULL
 /* The byte used to specify the chain address (which Winternitz chain) */
-#define SPX_OFFSET_CHAIN_ADDR 27
+#define SPX_OFFSET_CHAIN_ADDR 27ULL
 /* The byte used to specify the hash address (where in the Winternitz chain) */
-#define SPX_OFFSET_HASH_ADDR 31
+#define SPX_OFFSET_HASH_ADDR 31ULL
 /* The byte used to specify the height of this node in the FORS or Merkle tree */
-#define SPX_OFFSET_TREE_HGT  27
+#define SPX_OFFSET_TREE_HGT  27ULL
 /* The start of the 4 byte field used to specify the node in the FORS or Merkle tree */
-#define SPX_OFFSET_TREE_INDEX 28
+#define SPX_OFFSET_TREE_INDEX 28ULL
 
 /* The hash types that are passed to set_type */
-#define SPX_ADDR_TYPE_WOTS 0
-#define SPX_ADDR_TYPE_WOTSPK 1
-#define SPX_ADDR_TYPE_HASHTREE 2
-#define SPX_ADDR_TYPE_FORSTREE 3
-#define SPX_ADDR_TYPE_FORSPK 4
+#define SPX_ADDR_TYPE_WOTS 0ULL
+#define SPX_ADDR_TYPE_WOTSPK 1ULL
+#define SPX_ADDR_TYPE_HASHTREE 2ULL
+#define SPX_ADDR_TYPE_FORSTREE 3ULL
+#define SPX_ADDR_TYPE_FORSPK 4ULL
 
-#define SPX_TREE_BITS (SPX_TREE_HEIGHT * (SPX_D - 1))
-#define SPX_TREE_BYTES ((SPX_TREE_BITS + 7) / 8)
+#define SPX_TREE_BITS (SPX_TREE_HEIGHT * (SPX_D - 1ULL))
+#define SPX_TREE_BYTES ((SPX_TREE_BITS + 7ULL) / 8ULL)
 #define SPX_LEAF_BITS SPX_TREE_HEIGHT
-#define SPX_LEAF_BYTES ((SPX_LEAF_BITS + 7) / 8)
+#define SPX_LEAF_BYTES ((SPX_LEAF_BITS + 7ULL) / 8ULL)
 #define SPX_DGST_BYTES (SPX_FORS_MSG_BYTES + SPX_TREE_BYTES + SPX_LEAF_BYTES)
 
 #define SPHINCSPLUS_PRIVATEKEY_SIZE SPX_SK_BYTES
 #define SPHINCSPLUS_PUBLICKEY_SIZE SPX_PK_BYTES
 #define SPHINCSPLUS_SIGNATURE_SIZE SPX_BYTES
-#define SPHINCSPLUS_CRYPTO_SEEDBYTES 3 * SPX_N
+#define SPHINCSPLUS_CRYPTO_SEEDBYTES 3ULL * SPX_N
 
 /* utils.c */
 
@@ -768,7 +768,7 @@ static void sphincsplus_gen_chain(uint8_t* out, const uint8_t* in, uint32_t star
     }
 }
 
-static void sphincsplus_base_w(uint32_t* output, const int out_len, const uint8_t* input)
+static void sphincsplus_base_w(uint32_t* output, const int32_t out_len, const uint8_t* input)
 {
     /* sphincsplus_base_w algorithm as described in draft.
        Interprets an array of bytes as integers in base w.

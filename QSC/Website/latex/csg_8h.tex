@@ -1,0 +1,167 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/csg.h File Reference}
+\hypertarget{csg_8h}{}\label{csg_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/csg.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/csg.h}}
+
+
+Contains the public api and documentation for the CSG pseudo-\/random bytes generator.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+{\ttfamily \#include "{}sha3.\+h"{}}\newline
+Include dependency graph for csg.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The CSG state structure. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{csg_8h_ac8686305ab0a5b86c0fd3cbf87e051fa}\label{csg_8h_ac8686305ab0a5b86c0fd3cbf87e051fa} 
+\#define {\bfseries QSC\+\_\+\+CSG\+\_\+256\+\_\+\+SEED\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The CSG-\/256 seed size. \end{DoxyCompactList}\item 
+\Hypertarget{csg_8h_af49b3e53cd60de9e1621ef20f95d04b7}\label{csg_8h_af49b3e53cd60de9e1621ef20f95d04b7} 
+\#define {\bfseries QSC\+\_\+\+CSG\+\_\+512\+\_\+\+SEED\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The CSG-\/512 seed size. \end{DoxyCompactList}\item 
+\Hypertarget{csg_8h_af8e1492c832330bb00ae64a4470d37d4}\label{csg_8h_af8e1492c832330bb00ae64a4470d37d4} 
+\#define {\bfseries QSC\+\_\+\+CSG\+\_\+\+RESEED\+\_\+\+THRESHHOLD}~1024000
+\begin{DoxyCompactList}\small\item\em The CSG re-\/seed threshold interval. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{csg_8h_aec897b8492bb1dd8e28779d6c37d0624}{qsc\+\_\+csg\+\_\+dispose}} (\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the DRBG state. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{csg_8h_a6ff098602de71c1c799bf950263dea47}{qsc\+\_\+csg\+\_\+initialize}} (\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}seed, size\+\_\+t seedlen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}info, size\+\_\+t infolen, bool predres)
+\begin{DoxyCompactList}\small\item\em Initialize the pseudo-\/random provider state with a seed and optional personalization string. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{csg_8h_a83b7669982e8240fee85e5faf1416d9f}{qsc\+\_\+csg\+\_\+generate}} (\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen)
+\begin{DoxyCompactList}\small\item\em Generate pseudo-\/random bytes using the random provider. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{csg_8h_aa91ebadc6e643a002855b2fc28b41b72}{qsc\+\_\+csg\+\_\+update}} (\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}seed, size\+\_\+t seedlen)
+\begin{DoxyCompactList}\small\item\em Update the random provider with new keying material. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Contains the public api and documentation for the CSG pseudo-\/random bytes generator. 
+
+Usage Example ~\newline
+ Initialize the DRBG and generate output ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ external\ key\ and\ optional\ custom\ arrays}}
+\DoxyCodeLine{uint8\_t\ seed[32]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{uint8\_t\ info[32]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ random\ bytes}}
+\DoxyCodeLine{uint8\_t\ rnd[200]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ initialize\ with\ seed,\ and\ optional\ customization\ array,\ with\ predictive\ resistance\ enabled}}
+\DoxyCodeLine{qsc\_csg\_initialize(seed,\ \textcolor{keyword}{sizeof}(seed),\ info,\ \textcolor{keyword}{sizeof}(info),\ \textcolor{keyword}{true});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ generate\ the\ pseudo-\/random}}
+\DoxyCodeLine{qsc\_csg\_generate(rnd,\ \textcolor{keyword}{sizeof}(rnd)));}
+
+\end{DoxyCode}
+
+
+\begin{DoxyRemark}{Remarks}
+
+\end{DoxyRemark}
+\begin{DoxyParagraph}{}
+CSG uses the Keccak c\+SHAKE XOF function to produce pseudo-\/random bytes from a seeded custom SHAKE generator. ~\newline
+If a 32-\/byte key is used, the implementation uses the c\+SHAKE-\/256 implementation for pseudo-\/random generation, if a 64-\/byte key is used, the generator uses c\+SHAKE-\/512. ~\newline
+An optional predictive resistance feature, enabled through the initialize function, injects random bytes into the generator at initialization and 1MB intervals, creating a non-\/deterministic pseudo-\/random output. ~\newline
+Pseudo random bytes are cached internally, and the generator can be initialized and then reused without requiring re-\/initialization in an online configuration. ~\newline
+The generator can be updated with new seed material, which is absorbed into the Keccak state.
+\end{DoxyParagraph}
+For additional usage examples, see csg\+\_\+test.\+h. ~\newline
+ NIST\+: SHA3 Fips202 \href{http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf}{\texttt{ http\+://nvlpubs.\+nist.\+gov/nistpubs/\+FIPS/\+NIST.\+FIPS.\+202.\+pdf}} NIST\+: SP800-\/185 \href{http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pd}{\texttt{ http\+://nvlpubs.\+nist.\+gov/nistpubs/\+Special\+Publications/\+NIST.\+SP.\+800-\/185.\+pd}} NIST\+: SHA3 Keccak Submission \href{http://keccak.noekeon.org/Keccak-submission-3.pdf}{\texttt{ http\+://keccak.\+noekeon.\+org/\+Keccak-\/submission-\/3.\+pdf}} NIST\+: SHA3 Keccak Slides \href{http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf}{\texttt{ http\+://csrc.\+nist.\+gov/groups/\+ST/hash/sha-\/3/documents/\+Keccak-\/slides-\/at-\/\+NIST.\+pdf}} NIST\+: SHA3 Third-\/\+Round Report \href{http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf}{\texttt{ http\+://nvlpubs.\+nist.\+gov/nistpubs/ir/2012/\+NIST.\+IR.\+7896.\+pdf}} Team Keccak\+: Specifications summary \href{https://keccak.team/keccak_specs_summary.html}{\texttt{ https\+://keccak.\+team/keccak\+\_\+specs\+\_\+summary.\+html}} 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{csg_8h_aec897b8492bb1dd8e28779d6c37d0624}\index{csg.h@{csg.h}!qsc\_csg\_dispose@{qsc\_csg\_dispose}}
+\index{qsc\_csg\_dispose@{qsc\_csg\_dispose}!csg.h@{csg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_csg\_dispose()}{qsc\_csg\_dispose()}}
+{\footnotesize\ttfamily \label{csg_8h_aec897b8492bb1dd8e28779d6c37d0624} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+csg\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the DRBG state. 
+
+\begin{DoxyWarning}{Warning}
+The dispose function must be called when disposing of the cipher. This function destroys the internal state of the cipher.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The DRBG state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{csg_8h_a83b7669982e8240fee85e5faf1416d9f}\index{csg.h@{csg.h}!qsc\_csg\_generate@{qsc\_csg\_generate}}
+\index{qsc\_csg\_generate@{qsc\_csg\_generate}!csg.h@{csg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_csg\_generate()}{qsc\_csg\_generate()}}
+{\footnotesize\ttfamily \label{csg_8h_a83b7669982e8240fee85e5faf1416d9f} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+csg\+\_\+generate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{}\end{DoxyParamCaption})}
+
+
+
+Generate pseudo-\/random bytes using the random provider. 
+
+\begin{DoxyWarning}{Warning}
+Initialize must first be called before this function can be used.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em output} & The pseudo-\/random output array \\
+\hline
+{\em otplen} & The requested number of bytes to generate \\
+\hline
+\end{DoxyParams}
+\Hypertarget{csg_8h_a6ff098602de71c1c799bf950263dea47}\index{csg.h@{csg.h}!qsc\_csg\_initialize@{qsc\_csg\_initialize}}
+\index{qsc\_csg\_initialize@{qsc\_csg\_initialize}!csg.h@{csg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_csg\_initialize()}{qsc\_csg\_initialize()}}
+{\footnotesize\ttfamily \label{csg_8h_a6ff098602de71c1c799bf950263dea47} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+csg\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{seed}{, }\item[{size\+\_\+t}]{seedlen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{info}{, }\item[{size\+\_\+t}]{infolen}{, }\item[{bool}]{predres}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the pseudo-\/random provider state with a seed and optional personalization string. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} The random seed, 32 bytes of seed instantiates the 256-\/bit generator, 64 bytes the 512-\/bit generator \\
+\hline
+{\em seedlen} & The length of the input seed \\
+\hline
+{\em info} & \mbox{[}const\mbox{]} The optional personalization string \\
+\hline
+{\em infolen} & The length of the personalization string \\
+\hline
+{\em predres} & Enable periodic random injection; enables non deterministic pseudo-\/random generation \\
+\hline
+\end{DoxyParams}
+\Hypertarget{csg_8h_aa91ebadc6e643a002855b2fc28b41b72}\index{csg.h@{csg.h}!qsc\_csg\_update@{qsc\_csg\_update}}
+\index{qsc\_csg\_update@{qsc\_csg\_update}!csg.h@{csg.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_csg\_update()}{qsc\_csg\_update()}}
+{\footnotesize\ttfamily \label{csg_8h_aa91ebadc6e643a002855b2fc28b41b72} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+csg\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__csg__state}{qsc\+\_\+csg\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{seed}{, }\item[{size\+\_\+t}]{seedlen}{}\end{DoxyParamCaption})}
+
+
+
+Update the random provider with new keying material. 
+
+\begin{DoxyWarning}{Warning}
+Initialize must first be called before this function can be used.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} The random update seed \\
+\hline
+{\em seedlen} & The length of the update seed \\
+\hline
+\end{DoxyParams}

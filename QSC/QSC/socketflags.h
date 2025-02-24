@@ -1,27 +1,49 @@
-
-/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+/* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
- * NOTICE:  All information contained herein is, and remains
- * the property of Quantum Resistant Cryptographic Solutions Incorporated.
- * The intellectual and technical concepts contained
- * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
- * and its suppliers and may be covered by U.S. and Foreign Patents,
- * patents in process, and are protected by trade secret or copyright law.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from Quantum Resistant Cryptographic Solutions Incorporated.
+ * NOTICE: This software and all accompanying materials are the exclusive 
+ * property of Quantum Resistant Cryptographic Solutions Corporation (QRCS).
+ * The intellectual and technical concepts contained within this implementation 
+ * are proprietary to QRCS and its authorized licensors and are protected under 
+ * applicable U.S. and international copyright, patent, and trade secret laws.
  *
- * Written by John G. Underhill
- * Contact: develop@qrcs.ca
+ * CRYPTOGRAPHIC STANDARDS:
+ * - This software includes implementations of cryptographic algorithms such as 
+ *   SHA3, AES, and others. These algorithms are public domain or standardized 
+ *   by organizations such as NIST and are NOT the property of QRCS.
+ * - However, all source code, optimizations, and implementations in this library 
+ *   are original works of QRCS and are protected under this license.
+ *
+ * RESTRICTIONS:
+ * - Redistribution, modification, or unauthorized distribution of this software, 
+ *   in whole or in part, is strictly prohibited.
+ * - This software is provided for non-commercial, educational, and research 
+ *   purposes only. Commercial use in any form is expressly forbidden.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ * - Any use of this software implies acceptance of these restrictions.
+ *
+ * DISCLAIMER:
+ * This software is provided "as is," without warranty of any kind, express or 
+ * implied, including but not limited to warranties of merchantability or fitness 
+ * for a particular purpose. QRCS disclaims all liability for any direct, indirect, 
+ * incidental, or consequential damages resulting from the use or misuse of this software.
+ *
+ * FULL LICENSE:
+ * This software is subject to the **Quantum Resistant Cryptographic Solutions 
+ * Proprietary License (QRCS-PL)**. The complete license terms are included 
+ * in the LICENSE.txt file distributed with this software.
+ *
+ * Written by: John G. Underhill
+ * Contact: john.underhill@protonmail.com
  */
+
 
 #ifndef QSC_SOCKFLAGS_H
 #define QSC_SOCKFLAGS_H
 
 #include "common.h"
 
-/*
+/**
 * \file socketflags.h
 * \brief The socket flags enumerations
 */
@@ -29,19 +51,19 @@
 /*! \enum qsc_ipv6_address_prefix_types
 * \brief IPv6 address prefixes
 */
-typedef enum qsc_ipv6_address_prefix_types
+typedef enum
 {
-	qsc_ipv6_prefix_none = 0,							/*!< No prefix is set */
-	qsc_ipv6_prefix_link_local = 1,						/*!< An link local address type, not globally routable, prefix: fe80 */
-	qsc_ipv6_prefix_multicast = 2,						/*!< A qsc_ipv6_prefix_multicast address type, prefix: ff00 */
-	qsc_ipv6_prefix_global = 3,							/*!< A globally routable address type, prefix: 2000 */
-	qsc_ipv6_prefix_unique_local = 4					/*!< A unique local address type, not globally routable, prefix: fc00-fd00 */
+	qsc_ipv6_prefix_none = 0x00U,							/*!< No prefix is set */
+	qsc_ipv6_prefix_link_local = 0x01U,						/*!< An link local address type, not globally routable, prefix: fe80 */
+	qsc_ipv6_prefix_multicast = 0x02U,						/*!< A qsc_ipv6_prefix_multicast address type, prefix: ff00 */
+	qsc_ipv6_prefix_global = 0x03U,							/*!< A globally routable address type, prefix: 2000 */
+	qsc_ipv6_prefix_unique_local = 0x04U					/*!< A unique local address type, not globally routable, prefix: fc00-fd00 */
 } qsc_ipv6_address_prefix_types;
 
 /*! \enum qsc_socket_address_families
 * \brief The socket address family type
 */
-typedef enum qsc_socket_address_families
+typedef enum
 {
 	qsc_socket_address_family_none = 0x00000000L,		/*!< No address family is specified AF_UNSPEC */
 	qsc_socket_address_family_unix = 0x00000001L,		/*!< Unix local to host (pipes, portals) AF_UNIX */
@@ -52,18 +74,18 @@ typedef enum qsc_socket_address_families
 /*! \enum qsc_socket_states
 * \brief The socket instance current connection state
 */
-typedef enum qsc_socket_states
+typedef enum
 {
-	qsc_socket_state_none = 0,							/*!< The socket instance is not initialized */
-	qsc_socket_state_connected = 1,						/*!< The socket instance is connected */
-	qsc_socket_state_listening = 2,						/*!< The socket instance is listening */
-	qsc_socket_state_connectionless = 3					/*!< The socket is in connection-less mode */
+	qsc_socket_state_none = 0x00U,						/*!< The socket instance is not initialized */
+	qsc_socket_state_connected = 0x01U,					/*!< The socket instance is connected */
+	qsc_socket_state_listening = 0x02U,					/*!< The socket instance is listening */
+	qsc_socket_state_connectionless = 0x03U				/*!< The socket is in connection-less mode */
 } qsc_socket_states;
 
 /*! \enum qsc_socket_options
 * \brief TCP socket options
 */
-typedef enum qsc_socket_options
+typedef enum
 {
 	qsc_socket_option_none = 0x00000000L,				/*!< No flag is used */
 	qsc_socket_option_broadcast = 0x00000020L,			/*!< Configures a socket for sending broadcast data SO_BROADCAST */
@@ -81,7 +103,7 @@ typedef enum qsc_socket_options
 /*! \enum qsc_socket_protocols
 * \brief The socket IP protocol type
 */
-typedef enum qsc_socket_protocols
+typedef enum
 {
 	qsc_socket_protocol_none = 0x00000000L,				/*!< No protocol type specified */
 	qsc_socket_protocol_ipv4 = 0x00000004L,				/*!< Internet Protocol version 4 IPPROTO_IPV4 */
@@ -100,7 +122,7 @@ typedef enum qsc_socket_protocols
 /*! \enum qsc_socket_receive_flags
 * \brief The socket receive api flags
 */
-typedef enum qsc_socket_receive_flags
+typedef enum
 {
 	qsc_socket_receive_flag_none = 0x00000000L,			/*!< No flag is used */
 	qsc_socket_receive_flag_out_of_band = 0x00000001L,	/*!< Process out of band data MSG_OOB */
@@ -117,7 +139,7 @@ typedef enum qsc_socket_receive_flags
 /*! \enum qsc_socket_send_flags
 * \brief The socket send api flags
 */
-typedef enum qsc_socket_send_flags
+typedef enum
 {
 	qsc_socket_send_flag_none = 0x00000000L,			/*!< No flag is used */
 	qsc_socket_send_flag_send_oob = 0x00000001L,		/*!< Sends OOB data on a stream type socket MSG_OOB */
@@ -128,7 +150,7 @@ typedef enum qsc_socket_send_flags
 /*! \enum qsc_socket_shut_down_flags
 * \brief The socket shutdown api flags
 */
-typedef enum qsc_socket_shut_down_flags
+typedef enum
 {
 	qsc_socket_shut_down_flag_receive = 0x00000000L,	/*!< Shut down the receiving channel QSC_SOCKET_SD_RECEIVE */
 	qsc_socket_shut_down_flag_send = 0x00000001L,		/*!< Shut down the sending channel QSC_SOCKET_SD_SEND */
@@ -138,7 +160,7 @@ typedef enum qsc_socket_shut_down_flags
 /*! \enum qsc_socket_transports
 * \brief The socket transmission type
 */
-typedef enum qsc_socket_transports
+typedef enum
 {
 	qsc_socket_transport_none = 0x00000000L,			/*!< No flag is used */
 	qsc_socket_transport_stream = 0x00000001L,			/*!< Streaming connection SOCK_STREAM */

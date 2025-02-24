@@ -1,0 +1,318 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_sysutils_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sysutils.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sysutils.h</primary></indexterm>
+<para>
+
+<para>System functions; provides system statistics, counters, and feature availability. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Data Structures    </title>
+        <itemizedlist>
+            <listitem><para>struct <link linkend="_structqsc__sysutils__drive__space__state">qsc_sysutils_drive_space_state</link></para>
+
+<para>The drive_space state structure. </para>
+</listitem>
+            <listitem><para>struct <link linkend="_structqsc__sysutils__memory__statistics__state">qsc_sysutils_memory_statistics_state</link></para>
+
+<para>The memory_statistics state structure. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Macros    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_sysutils_8h_1abd4b33217f6e8fde40f9a19538f7cfd6"/>#define <emphasis role="strong">QSC_SYSUTILS_SYSTEM_NAME_MAX</emphasis>&#160;&#160;&#160;256</para>
+
+<para>The system maximum name length. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sysutils_8h_1a3ab9e938c30c33ba749dfe8262911f44"/>#define <emphasis role="strong">QSC_USERNAME_SYSTEM_NAME_MAX</emphasis>&#160;&#160;&#160;256</para>
+
+<para>The maximum user name length. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para>QSC_EXPORT_API size_t <link linkend="_sysutils_8h_1ad94319353cf20391c6c1544ef8f3100b">qsc_sysutils_computer_name</link> (char *name)</para>
+
+<para>Get the computer string name. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sysutils_8h_1aed8d7785fe076f03888289596c676eaa">qsc_sysutils_drive_space</link> (const char *drive, <link linkend="_structqsc__sysutils__drive__space__state">qsc_sysutils_drive_space_state</link> *state)</para>
+
+<para>Get the system drive space statistics. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sysutils_8h_1a34d37e4bea4f54eec01316092c27f171">qsc_sysutils_memory_statistics</link> (<link linkend="_structqsc__sysutils__memory__statistics__state">qsc_sysutils_memory_statistics_state</link> *state)</para>
+
+<para>Get the memory statistics from the system. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API uint32_t <link linkend="_sysutils_8h_1ae8d2dda6cfceb77ef9afd901a8ffbc13">qsc_sysutils_process_id</link> (void)</para>
+
+<para>Get the current process id. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_sysutils_8h_1a89244e2c1c6e48a979aaef6e03209b86">qsc_sysutils_rdtsc_available</link> ()</para>
+
+<para>Get the RDTSC availability status. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API size_t <link linkend="_sysutils_8h_1acc95d147c6fd027d09714f1ddf8d908c">qsc_sysutils_user_name</link> (char *name)</para>
+
+<para>Get the systems logged-on user name string. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API uint64_t <link linkend="_sysutils_8h_1acbfaf075895f6b7dd8039fd6f30cda4a">qsc_sysutils_system_uptime</link> (void)</para>
+
+<para>Get the system up-time since boot. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API uint64_t <link linkend="_sysutils_8h_1a91c0e9ec066d44058975dad6feeffd02">qsc_sysutils_system_timestamp</link> (void)</para>
+
+<para>Get the current high-resolution time-stamp. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sysutils_8h_1aa9d6ed7b83d3003d80e36358e81af717">qsc_sysutils_user_identity</link> (const char *name, char *id)</para>
+
+<para>Get the users identity string. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>System functions; provides system statistics, counters, and feature availability. </para>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_sysutils_8h_1ad94319353cf20391c6c1544ef8f3100b"/><section>
+    <title>qsc_sysutils_computer_name()</title>
+<indexterm><primary>qsc_sysutils_computer_name</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_computer_name</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API size_t qsc_sysutils_computer_name (char * name)</computeroutput></para><para>
+
+<para>Get the computer string name. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>name</entry><entry>
+<para>The array receiving the computer name string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>Returns the size of the computer name in characters </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_sysutils_8h_1aed8d7785fe076f03888289596c676eaa"/><section>
+    <title>qsc_sysutils_drive_space()</title>
+<indexterm><primary>qsc_sysutils_drive_space</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_drive_space</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sysutils_drive_space (const char * drive, <link linkend="_structqsc__sysutils__drive__space__state">qsc_sysutils_drive_space_state</link> * state)</computeroutput></para><para>
+
+<para>Get the system drive space statistics. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>drive</entry><entry>
+<para>The drive letter </para>
+</entry>
+                            </row>
+                            <row>
+<entry>state</entry><entry>
+<para>The struct containing the statistics </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sysutils_8h_1a34d37e4bea4f54eec01316092c27f171"/><section>
+    <title>qsc_sysutils_memory_statistics()</title>
+<indexterm><primary>qsc_sysutils_memory_statistics</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_memory_statistics</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sysutils_memory_statistics (<link linkend="_structqsc__sysutils__memory__statistics__state">qsc_sysutils_memory_statistics_state</link> * state)</computeroutput></para><para>
+
+<para>Get the memory statistics from the system. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>The struct containing the memory statistics </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sysutils_8h_1ae8d2dda6cfceb77ef9afd901a8ffbc13"/><section>
+    <title>qsc_sysutils_process_id()</title>
+<indexterm><primary>qsc_sysutils_process_id</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_process_id</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API uint32_t qsc_sysutils_process_id (void )</computeroutput></para><para>
+
+<para>Get the current process id. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns the process id </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_sysutils_8h_1a89244e2c1c6e48a979aaef6e03209b86"/><section>
+    <title>qsc_sysutils_rdtsc_available()</title>
+<indexterm><primary>qsc_sysutils_rdtsc_available</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_rdtsc_available</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_sysutils_rdtsc_available ( )</computeroutput></para><para>
+
+<para>Get the RDTSC availability status. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true if RDTSC is available </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_sysutils_8h_1a91c0e9ec066d44058975dad6feeffd02"/><section>
+    <title>qsc_sysutils_system_timestamp()</title>
+<indexterm><primary>qsc_sysutils_system_timestamp</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_system_timestamp</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API uint64_t qsc_sysutils_system_timestamp (void )</computeroutput></para><para>
+
+<para>Get the current high-resolution time-stamp. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns the system time-stamp </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_sysutils_8h_1acbfaf075895f6b7dd8039fd6f30cda4a"/><section>
+    <title>qsc_sysutils_system_uptime()</title>
+<indexterm><primary>qsc_sysutils_system_uptime</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_system_uptime</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API uint64_t qsc_sysutils_system_uptime (void )</computeroutput></para><para>
+
+<para>Get the system up-time since boot. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns the system up-time </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_sysutils_8h_1aa9d6ed7b83d3003d80e36358e81af717"/><section>
+    <title>qsc_sysutils_user_identity()</title>
+<indexterm><primary>qsc_sysutils_user_identity</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_user_identity</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sysutils_user_identity (const char * name, char * id)</computeroutput></para><para>
+
+<para>Get the users identity string. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>name</entry><entry>
+<para>The char array that holds the user name </para>
+</entry>
+                            </row>
+                            <row>
+<entry>id</entry><entry>
+<para>The output array containing the id string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sysutils_8h_1acc95d147c6fd027d09714f1ddf8d908c"/><section>
+    <title>qsc_sysutils_user_name()</title>
+<indexterm><primary>qsc_sysutils_user_name</primary><secondary>sysutils.h</secondary></indexterm>
+<indexterm><primary>sysutils.h</primary><secondary>qsc_sysutils_user_name</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API size_t qsc_sysutils_user_name (char * name)</computeroutput></para><para>
+
+<para>Get the systems logged-on user name string. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>name</entry><entry>
+<para>The char array that holds the user name </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>Returns the size of the user name </para>
+</formalpara>
+</para>
+</section>
+</section>
+</section>

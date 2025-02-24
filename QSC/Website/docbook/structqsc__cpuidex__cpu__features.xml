@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__cpuidex__cpu__features" xml:lang="en-US">
+<title>qsc_cpuidex_cpu_features Struct Reference</title>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary></indexterm>
+<para>
+
+<para>Contains the CPU feature availability. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;cpuidex.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1a3641afbc487dcdf0351606da7afba7c6">adx</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1aa013b3f21917811b5625ebe2f3209eb1">aesni</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1af30db326e1a91ba1cdb86644aadbb176">pcmul</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1aae1ab7b9372e65aad2e06852158c8722">armv7</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1af778cbee81845454fec3eaec33d7ac57">neon</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1a76501a16c6c1fe9b7e74c52ee0ae6afc">sha256</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1abbe10bce9e8dccfe5e5f2dc6272f9806">sha512</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1a7e88070ce4e756ac5e13b0216a4cc004">sha3</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1a81b25c20a46dd43bd5152e0a0848b866">avx</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1aa124c86174dda7398e1b7dc9f88442df">avx2</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1a053129fd4693f49193465dfd51cbda44">avx512f</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1a5fc7e7962d85798a87da3bb9360bdbf4">hyperthread</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1aacb61267caa3ed1f4015d2c532c0c733">rdrand</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__cpuidex__cpu__features_1ae4bd93d37a56e7388cfb45d825b7d343">rdtcsp</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1ade976b5f96a80a5a7729a6f2cb15cee4">cacheline</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a55a53123baf540c3d93d594d60de224f">cores</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a148b00861c88b4f5d5bf006071fbdc04">cpus</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a217fd8540aa98b3d43594ad0047a5a86">freqbase</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a8c39756171056df834df5f81428ae4a0">freqmax</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a1a4cbd5916e959d81088b83711f3fac4">freqref</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a6900e727be30ba6c4d4c2a0858c37c0a">l1cache</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1abfe3eb6950772d7f6922dd9ba854d73c">l1cacheline</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a4eaee093701962a93862c096741dd500">l2associative</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__cpuidex__cpu__features_1a809264abd013b108a1935a3bd5fac690">l2cache</link></para>
+</listitem>
+            <listitem><para>char <link linkend="_structqsc__cpuidex__cpu__features_1a3aaea09323b9c38820be326556c6b804">serial</link> [<link linkend="_cpuidex_8h_1a2fbc340094576e7083f2bbdeaf818b87">QSC_CPUIDEX_SERIAL_SIZE</link>]</para>
+</listitem>
+            <listitem><para>char <link linkend="_structqsc__cpuidex__cpu__features_1a6ecc08b91788de9a06a1314780ef3ea6">vendor</link> [<link linkend="_cpuidex_8h_1a45a1ea191b047053a2c3ff958d9f893a">QSC_CPUIDEX_VENDOR_SIZE</link>]</para>
+</listitem>
+            <listitem><para><link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295">qsc_cpuidex_cpu_type</link> <link linkend="_structqsc__cpuidex__cpu__features_1ae8b43433561ad651bc8d879cea42aa9a">cputype</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Contains the CPU feature availability. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a3641afbc487dcdf0351606da7afba7c6"/><section>
+    <title>adx</title>
+<indexterm><primary>adx</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>adx</secondary></indexterm>
+<para><computeroutput>bool adx</computeroutput></para>
+<para>The ADX flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1aa013b3f21917811b5625ebe2f3209eb1"/><section>
+    <title>aesni</title>
+<indexterm><primary>aesni</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>aesni</secondary></indexterm>
+<para><computeroutput>bool aesni</computeroutput></para>
+<para>The AESNI flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1aae1ab7b9372e65aad2e06852158c8722"/><section>
+    <title>armv7</title>
+<indexterm><primary>armv7</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>armv7</secondary></indexterm>
+<para><computeroutput>bool armv7</computeroutput></para>
+<para>ARMv7 cpu flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a81b25c20a46dd43bd5152e0a0848b866"/><section>
+    <title>avx</title>
+<indexterm><primary>avx</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>avx</secondary></indexterm>
+<para><computeroutput>bool avx</computeroutput></para>
+<para>The AVX flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1aa124c86174dda7398e1b7dc9f88442df"/><section>
+    <title>avx2</title>
+<indexterm><primary>avx2</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>avx2</secondary></indexterm>
+<para><computeroutput>bool avx2</computeroutput></para>
+<para>The AVX2 flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a053129fd4693f49193465dfd51cbda44"/><section>
+    <title>avx512f</title>
+<indexterm><primary>avx512f</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>avx512f</secondary></indexterm>
+<para><computeroutput>bool avx512f</computeroutput></para>
+<para>The AVX512F flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1ade976b5f96a80a5a7729a6f2cb15cee4"/><section>
+    <title>cacheline</title>
+<indexterm><primary>cacheline</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>cacheline</secondary></indexterm>
+<para><computeroutput>uint32_t cacheline</computeroutput></para>
+<para>The number of cache lines </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a55a53123baf540c3d93d594d60de224f"/><section>
+    <title>cores</title>
+<indexterm><primary>cores</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>cores</secondary></indexterm>
+<para><computeroutput>uint32_t cores</computeroutput></para>
+<para>The number of cores </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a148b00861c88b4f5d5bf006071fbdc04"/><section>
+    <title>cpus</title>
+<indexterm><primary>cpus</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>cpus</secondary></indexterm>
+<para><computeroutput>uint32_t cpus</computeroutput></para>
+<para>The number of CPUs </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1ae8b43433561ad651bc8d879cea42aa9a"/><section>
+    <title>cputype</title>
+<indexterm><primary>cputype</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>cputype</secondary></indexterm>
+<para><computeroutput><link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295">qsc_cpuidex_cpu_type</link> cputype</computeroutput></para>
+<para>The CPU manufacturer </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a217fd8540aa98b3d43594ad0047a5a86"/><section>
+    <title>freqbase</title>
+<indexterm><primary>freqbase</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>freqbase</secondary></indexterm>
+<para><computeroutput>uint32_t freqbase</computeroutput></para>
+<para>The frequency base </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a8c39756171056df834df5f81428ae4a0"/><section>
+    <title>freqmax</title>
+<indexterm><primary>freqmax</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>freqmax</secondary></indexterm>
+<para><computeroutput>uint32_t freqmax</computeroutput></para>
+<para>The frequency maximum </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a1a4cbd5916e959d81088b83711f3fac4"/><section>
+    <title>freqref</title>
+<indexterm><primary>freqref</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>freqref</secondary></indexterm>
+<para><computeroutput>uint32_t freqref</computeroutput></para>
+<para>The frequency reference </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a5fc7e7962d85798a87da3bb9360bdbf4"/><section>
+    <title>hyperthread</title>
+<indexterm><primary>hyperthread</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>hyperthread</secondary></indexterm>
+<para><computeroutput>bool hyperthread</computeroutput></para>
+<para>The hyper-thread flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a6900e727be30ba6c4d4c2a0858c37c0a"/><section>
+    <title>l1cache</title>
+<indexterm><primary>l1cache</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>l1cache</secondary></indexterm>
+<para><computeroutput>uint32_t l1cache</computeroutput></para>
+<para>The L1 cache size </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1abfe3eb6950772d7f6922dd9ba854d73c"/><section>
+    <title>l1cacheline</title>
+<indexterm><primary>l1cacheline</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>l1cacheline</secondary></indexterm>
+<para><computeroutput>uint32_t l1cacheline</computeroutput></para>
+<para>The L1 cache line size </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a4eaee093701962a93862c096741dd500"/><section>
+    <title>l2associative</title>
+<indexterm><primary>l2associative</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>l2associative</secondary></indexterm>
+<para><computeroutput>uint32_t l2associative</computeroutput></para>
+<para>The L2 associative size </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a809264abd013b108a1935a3bd5fac690"/><section>
+    <title>l2cache</title>
+<indexterm><primary>l2cache</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>l2cache</secondary></indexterm>
+<para><computeroutput>uint32_t l2cache</computeroutput></para>
+<para>The L2 cache size </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1af778cbee81845454fec3eaec33d7ac57"/><section>
+    <title>neon</title>
+<indexterm><primary>neon</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>neon</secondary></indexterm>
+<para><computeroutput>bool neon</computeroutput></para>
+<para>Neon instructions flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1af30db326e1a91ba1cdb86644aadbb176"/><section>
+    <title>pcmul</title>
+<indexterm><primary>pcmul</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>pcmul</secondary></indexterm>
+<para><computeroutput>bool pcmul</computeroutput></para>
+<para>The PCLMULQDQ flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1aacb61267caa3ed1f4015d2c532c0c733"/><section>
+    <title>rdrand</title>
+<indexterm><primary>rdrand</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>rdrand</secondary></indexterm>
+<para><computeroutput>bool rdrand</computeroutput></para>
+<para>The RDRAND flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1ae4bd93d37a56e7388cfb45d825b7d343"/><section>
+    <title>rdtcsp</title>
+<indexterm><primary>rdtcsp</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>rdtcsp</secondary></indexterm>
+<para><computeroutput>bool rdtcsp</computeroutput></para>
+<para>The RDTCSP flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a3aaea09323b9c38820be326556c6b804"/><section>
+    <title>serial</title>
+<indexterm><primary>serial</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>serial</secondary></indexterm>
+<para><computeroutput>char serial[<link linkend="_cpuidex_8h_1a2fbc340094576e7083f2bbdeaf818b87">QSC_CPUIDEX_SERIAL_SIZE</link>]</computeroutput></para>
+<para>The CPU serial number </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a76501a16c6c1fe9b7e74c52ee0ae6afc"/><section>
+    <title>sha256</title>
+<indexterm><primary>sha256</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>sha256</secondary></indexterm>
+<para><computeroutput>bool sha256</computeroutput></para>
+<para>SHA2-256 flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a7e88070ce4e756ac5e13b0216a4cc004"/><section>
+    <title>sha3</title>
+<indexterm><primary>sha3</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>sha3</secondary></indexterm>
+<para><computeroutput>bool sha3</computeroutput></para>
+<para>SHA3 flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1abbe10bce9e8dccfe5e5f2dc6272f9806"/><section>
+    <title>sha512</title>
+<indexterm><primary>sha512</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>sha512</secondary></indexterm>
+<para><computeroutput>bool sha512</computeroutput></para>
+<para>SHA2-512 flag </para>
+</section>
+<anchor xml:id="_structqsc__cpuidex__cpu__features_1a6ecc08b91788de9a06a1314780ef3ea6"/><section>
+    <title>vendor</title>
+<indexterm><primary>vendor</primary><secondary>qsc_cpuidex_cpu_features</secondary></indexterm>
+<indexterm><primary>qsc_cpuidex_cpu_features</primary><secondary>vendor</secondary></indexterm>
+<para><computeroutput>char vendor[<link linkend="_cpuidex_8h_1a45a1ea191b047053a2c3ff958d9f893a">QSC_CPUIDEX_VENDOR_SIZE</link>]</computeroutput></para>
+<para>The CPU vendor name </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_cpuidex_8h">cpuidex.h</link></section>
+</section>

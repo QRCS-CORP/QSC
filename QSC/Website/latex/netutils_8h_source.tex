@@ -1,0 +1,128 @@
+\doxysection{netutils.\+h}
+\hypertarget{netutils_8h_source}{}\label{netutils_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/netutils.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/netutils.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_NETUTILS\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ "{}ipinfo.h"{}}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#include\ "{}socket.h"{}}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#include\ "{}socketbase.h"{}}}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00050\ \textcolor{comment}{*\ \(\backslash\)file\ netutils.h}}
+\DoxyCodeLine{00051\ \textcolor{comment}{*\ \(\backslash\)brief\ Network\ utilities;\ common\ networking\ support\ functions}}
+\DoxyCodeLine{00052\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \textcolor{comment}{/*\ bogus\ winbase.h\ error\ */}}
+\DoxyCodeLine{00055\ QSC\_SYSTEM\_CONDITION\_IGNORE(5105)}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_ADAPTOR\_NAME\_SIZE\ 0x104}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_ADAPTOR\_DESCRIPTION\_SIZE\ 0x84}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_ADAPTOR\_INFO\_ARRAY\_SIZE\ 0x08}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_DOMAIN\_NAME\_SIZE\ 0x104}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00085\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_HOSTS\_NAME\_SIZE\ 0x104}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00091\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_IP\_STRING\_SIZE\ 0x80}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00097\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_MAC\_ADDRESS\_SIZE\ 0x12}}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_NAME\_BUFFER\_SIZE\ 0x80}}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_SERVICE\_NAME\_BUFFER\_SIZE\ 0x80}}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\#define\ QSC\_NETUTILS\_SUBNET\_STRING\_SIZE\ 0x10}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00120\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structqsc__netutils__adaptor__info}{qsc\_netutils\_adaptor\_info}}}
+\DoxyCodeLine{00121\ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{structqsc__netutils__adaptor__info_ad194f398e37e83c871d0f5187acf8c5c}{desc}}[QSC\_NETUTILS\_ADAPTOR\_DESCRIPTION\_SIZE];\ \ \ }
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{structqsc__netutils__adaptor__info_a7661ade92a27964dc3d61876f3752edb}{dhcp}}[QSC\_NETUTILS\_IP\_STRING\_SIZE];\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{structqsc__netutils__adaptor__info_a4a49728314ec8a226b0b0b599af5758f}{gateway}}[QSC\_NETUTILS\_IP\_STRING\_SIZE];\ \ \ \ \ \ \ }
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{structqsc__netutils__adaptor__info_a74ab18cc9dec0bb4bccaacde4c5e45f0}{ip}}[QSC\_NETUTILS\_IP\_STRING\_SIZE];\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00126\ \ \ \ \ uint8\_t\ \mbox{\hyperlink{structqsc__netutils__adaptor__info_af60188e63796ccf489a6035b58711a2b}{mac}}[QSC\_NETUTILS\_MAC\_ADDRESS\_SIZE];\ \ \ \ \ \ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{structqsc__netutils__adaptor__info_a3005f687a9043403135da090e26cc433}{name}}[QSC\_NETUTILS\_ADAPTOR\_NAME\_SIZE];\ \ \ \ \ \ }
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{structqsc__netutils__adaptor__info_a502ce67a9299d80e2bf23642c19f3000}{subnet}}[QSC\_NETUTILS\_IP\_STRING\_SIZE];\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \}\ \mbox{\hyperlink{structqsc__netutils__adaptor__info}{qsc\_netutils\_adaptor\_info}};}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{comment}{//\string~\string~\string~IP\ Address\string~\string~\string~//}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00140\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_get\_adaptor\_info(\mbox{\hyperlink{structqsc__netutils__adaptor__info}{qsc\_netutils\_adaptor\_info}}*\ info,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ infname);}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00147\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_get\_mac\_address(uint8\_t\ mac[QSC\_NETUTILS\_MAC\_ADDRESS\_SIZE]);}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00156\ QSC\_EXPORT\_API\ uint32\_t\ qsc\_netutils\_atoi(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00165\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_netutils\_get\_domain\_name(\textcolor{keywordtype}{char}\ output[QSC\_NETUTILS\_DOMAIN\_NAME\_SIZE]);}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00174\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_netutils\_get\_host\_name(\textcolor{keywordtype}{char}\ host[QSC\_NETUTILS\_HOSTS\_NAME\_SIZE]);}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00182\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_get\_name\_from\_ipv4\_address(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address,\ \textcolor{keywordtype}{char}\ host[QSC\_NETUTILS\_HOSTS\_NAME\_SIZE]);}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00190\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_netutils\_get\_ipv4\_address(\mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ padd);}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00198\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_netutils\_get\_ipv6\_address(\mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ padd);}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00207\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_get\_ipv4\_info(\mbox{\hyperlink{structqsc__ipinfo__ipv4__info}{qsc\_ipinfo\_ipv4\_info}}*\ pinfo,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ host,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ service);}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00216\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_get\_ipv6\_info(\mbox{\hyperlink{structqsc__ipinfo__ipv6__info}{qsc\_ipinfo\_ipv6\_info}}*\ pinfo,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ host,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ service);}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00226\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_get\_peer\_name(\textcolor{keywordtype}{char}\ output[QSC\_NETUTILS\_HOSTS\_NAME\_SIZE],\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__socket}{qsc\_socket}}*\ sock);}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00236\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_get\_socket\_name(\textcolor{keywordtype}{char}\ output[QSC\_NETUTILS\_NAME\_BUFFER\_SIZE],\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__socket}{qsc\_socket}}*\ sock);}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00246\ QSC\_EXPORT\_API\ uint16\_t\ qsc\_netutils\_port\_name\_to\_number(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ portname,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ protocol);}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \textcolor{preprocessor}{\#if\ defined(QSC\_DEBUG\_MODE)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00252\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_netutils\_values\_print(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00253\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -102,6 +102,8 @@ void qsc_collection_dispose(qsc_collection_state* ctx)
 
 void qsc_collection_erase(qsc_collection_state* ctx)
 {
+	assert(ctx != NULL);
+
 	size_t width;
 
 	width = ctx->width;
@@ -186,6 +188,7 @@ void qsc_collection_initialize(qsc_collection_state* ctx, size_t width)
 void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item, size_t index)
 {
 	assert(ctx != NULL);
+	assert(item != NULL);
 
 	if (ctx != NULL && ctx->items != NULL && index < ctx->count)
 	{

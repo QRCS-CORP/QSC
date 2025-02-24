@@ -5,12 +5,13 @@
 #include "memutils.h"
 #include "stringutils.h"
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#	define WIN32_LEAN_AND_MEAN
 #	include <direct.h>
 #	include <initguid.h>
 #	include <KnownFolders.h>
 #	include <ShlObj.h>
 #	include <Shlwapi.h>
+#	include <stdio.h>
+#	include <string.h>
 #	include <tchar.h>
 #	include <Windows.h>
 #   if defined(QSC_SYSTEM_COMPILER_MSC)
@@ -89,6 +90,109 @@ bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 #endif
 
 	return res;
+}
+
+size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* directory)
+{
+	assert(result != NULL);
+	assert(reslen != 0);
+	assert(directory != NULL);
+
+	size_t lctr;
+
+	lctr = 0;
+
+	if (result != NULL && reslen != 0 && directory != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+
+		WIN32_FIND_DATA wfd;
+		HANDLE hFind;
+		char spath[MAX_PATH] = { 0 };
+
+		/* create the search path pattern */
+		snprintf(spath, MAX_PATH, "%s\\*", directory);
+		hFind = FindFirstFile(spath, &wfd);
+
+		if (hFind != INVALID_HANDLE_VALUE)
+		{
+			do {
+				/* check if the found item is a directory and not "." or ".." */
+				if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY &&
+					strcmp(wfd.cFileName, ".") != 0 &&
+					strcmp(wfd.cFileName, "..") != 0)
+				{
+					size_t ilen = strlen(wfd.cFileName);
+
+					if (lctr + ilen + 1 <= reslen)
+					{
+						SYSTEMTIME atime;
+						SYSTEMTIME ctime;
+						size_t lpos;
+
+						/* Append directory name to result buffer */
+						strcat_s(result, reslen, wfd.cFileName);
+						strcat_s(result, reslen, "\t");
+						lpos = strlen(result);
+
+						FileTimeToSystemTime(&wfd.ftLastAccessTime, &atime);
+						FileTimeToSystemTime(&wfd.ftCreationTime, &ctime);
+
+						lpos += sprintf_s(result + lpos, reslen - lpos, "%02d-%02d-%d %02d:%02d:%02d\t",
+							ctime.wMonth, ctime.wDay, ctime.wYear, ctime.wHour, ctime.wMinute, ctime.wSecond);
+
+						sprintf_s(result + lpos, reslen - lpos, "%02d-%02d-%d %02d:%02d:%02d\n",
+							atime.wMonth, atime.wDay, atime.wYear, atime.wHour, atime.wMinute, atime.wSecond);
+
+						lctr += ilen + 1;
+					}
+					else
+					{
+						break;
+					}
+				}
+			} while (FindNextFile(hFind, &wfd) != 0);
+
+			FindClose(hFind);
+		}
+
+#else
+
+		DIR *dir;
+		struct dirent *entry;
+
+		dir = opendir(directory);
+
+		if (dir)
+		{
+			while ((entry = readdir(dir)) != NULL)
+			{
+				if (entry->d_type == DT_DIR &&
+					strcmp(entry->d_name, ".") != 0 &&
+					strcmp(entry->d_name, "..") != 0)
+				{
+					size_t item_length = strlen(entry->d_name);
+
+					if (lctr + item_length + 1 <= reslen)
+					{
+						strcat(result, entry->d_name);
+						strcat(result, "\n");
+						lctr += item_length + 1;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+
+			closedir(dir);
+		}
+
+#endif
+	}
+
+    return lctr;
 }
 
 void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char output[QSC_SYSTEM_MAX_PATH])

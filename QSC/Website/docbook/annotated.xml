@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_annotated" xml:lang="en-US">
+<title>Data Structures</title>
+Here are the data structures with brief descriptions:<link linkend="_structdilithium__poly">dilithium_poly</link>
+<para>Array of coefficients of length N </para>
+<link linkend="_structdilithium__polyveck">dilithium_polyveck</link>
+<para>Vectors of polynomials of length K </para>
+<link linkend="_structdilithium__polyvecl">dilithium_polyvecl</link>
+<para>Vectors of polynomials of length L </para>
+<link linkend="_structpoly">poly</link><link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link><link linkend="_structqsc__aes__keyparams">qsc_aes_keyparams</link><link linkend="_structqsc__aes__state">qsc_aes_state</link><link linkend="_structqsc__chacha__keyparams">qsc_chacha_keyparams</link>
+<para>The key parameters structure containing key, and nonce arrays and lengths. Use this structure to load an input cipher-key and nonce using the qsc_chacha_initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The key must be QSC_CHACHA_KEY128_SIZE or QSC_CHACHA_KEY256_SIZE in length. The nonce is always QSC_CHACHA_NONCE_SIZE in length </para>
+<link linkend="_structqsc__chacha__state">qsc_chacha_state</link>
+<para>Internal: contains the <link linkend="_structqsc__chacha__state">qsc_chacha_state</link> state </para>
+<link linkend="_structqsc__collection__state">qsc_collection_state</link>
+<para>The collection state structure </para>
+<link linkend="_structqsc__cpuidex__cpu__features">qsc_cpuidex_cpu_features</link>
+<para>Contains the CPU feature availability </para>
+<link linkend="_structqsc__csg__state">qsc_csg_state</link>
+<para>The CSG state structure </para>
+<link linkend="_structqsc__csx__keyparams">qsc_csx_keyparams</link>
+<para>The key parameters structure containing key, nonce, and info arrays and lengths. Use this structure to load an input cipher-key and optional info tweak, using the qsc_csx_initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The info parameter is optional, and can be a salt or cryptographic key. The nonce is always QSC_CSX_BLOCK_SIZE in length </para>
+<link linkend="_structqsc__csx__state">qsc_csx_state</link>
+<para>The internal state structure containing the round-key array </para>
+<link linkend="_structqsc__event__handler">qsc_event_handler</link>
+<para>The event handler structure </para>
+<link linkend="_structqsc__hcg__state">qsc_hcg_state</link>
+<para>The HCG state structure </para>
+<link linkend="_structqsc__hmac256__state">qsc_hmac256_state</link>
+<para>The HMAC(SHA2-256) state array </para>
+<link linkend="_structqsc__hmac512__state">qsc_hmac512_state</link>
+<para>The HMAC(SHA2-512) state array </para>
+<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>
+<para>The IPv4 address structure </para>
+<link linkend="_structqsc__ipinfo__ipv4__info">qsc_ipinfo_ipv4_info</link>
+<para>The IPv4 information structure containing the address and port number </para>
+<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>
+<para>The IPv6 address structure </para>
+<link linkend="_structqsc__ipinfo__ipv6__info">qsc_ipinfo_ipv6_info</link>
+<para>The IPv6 information structure containing the address and port number </para>
+<link linkend="_structqsc__keccak__state">qsc_keccak_state</link>
+<para>The Keccak state array; state array must be initialized by the caller </para>
+<link linkend="_structqsc__kpa__state">qsc_kpa_state</link>
+<para>The KPA state array; state array must be initialized by the caller </para>
+<link linkend="_structqsc__kyber__poly">qsc_kyber_poly</link>
+<para>Contains an N sized array of 16bit coefficients. /n Elements of R_q = Z_q[X] / (X^n + 1). /n Represents polynomial coeffs[0] + X * coeffs[1] + X^2 * xoeffs[2] + ... + X^{n-1} * coeffs[n-1] </para>
+<link linkend="_structqsc__kyber__polyvec">qsc_kyber_polyvec</link>
+<para>Contains a K sized vector of <link linkend="_structqsc__kyber__poly">qsc_kyber_poly</link> structures </para>
+<link linkend="_structqsc__list__state">qsc_list_state</link><link linkend="_structqsc__netutils__adaptor__info">qsc_netutils_adaptor_info</link>
+<para>The netutils adaptor info structure </para>
+<link linkend="_structqsc__pmac__keyparams">qsc_pmac_keyparams</link>
+<para>The key parameters structure containing key and info arrays and lengths </para>
+<link linkend="_structqsc__pmac__state">qsc_pmac_state</link>
+<para>The pmac state </para>
+<link linkend="_structqsc__queue__state">qsc_queue_state</link><link linkend="_structqsc__rcs__keyparams">qsc_rcs_keyparams</link>
+<para>The key parameters structure containing key, nonce, and info arrays and lengths. Use this structure to load an input cipher-key and optional info tweak, using the qsc_rcs_initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The info parameter is optional, and can be a salt or cryptographic key. The nonce is always QSC_RCS_BLOCK_SIZE in length </para>
+<link linkend="_structqsc__rcs__state">qsc_rcs_state</link>
+<para>The internal state structure containing the round-key array </para>
+<link linkend="_structqsc__scb__state">qsc_scb_state</link>
+<para>The CSG state structure </para>
+<link linkend="_structqsc__secrand__state">qsc_secrand_state</link>
+<para>The internal secrand state array </para>
+<link linkend="_structqsc__sha256__state">qsc_sha256_state</link>
+<para>The SHA2-256 digest state array </para>
+<link linkend="_structqsc__sha384__state">qsc_sha384_state</link>
+<para>The SHA2-384 digest state array </para>
+<link linkend="_structqsc__sha512__state">qsc_sha512_state</link>
+<para>The SHA2-512 digest state array </para>
+<link linkend="_structqsc__socket">qsc_socket</link>
+<para>The socket instance structure </para>
+<link linkend="_structqsc__socket__receive__async__state">qsc_socket_receive_async_state</link>
+<para>The socket async receive state structure. The structure contains pointers to the originating socket, message and error call-backs, and the message buffer </para>
+<link linkend="_structqsc__socket__receive__poll__state">qsc_socket_receive_poll_state</link>
+<para>The socket polling state structure. The structure contains an array of client sockets, and a socket counter with sockets that are ready to receive data </para>
+<link linkend="_structqsc__socket__server__accept__result">qsc_socket_server_accept_result</link>
+<para>The async socket result structure </para>
+<link linkend="_structqsc__socket__server__async__accept__state">qsc_socket_server_async_accept_state</link>
+<para>The async listener-accept state structure. The structure contains a pointer to the listener socket, and pointers to a callback and error functions. The callback function returns a populated <link linkend="_structqsc__socket__server__accept__result">qsc_socket_server_accept_result</link> structure. The error function returns the listener socket and an qsc_socket_exceptions error code </para>
+<link linkend="_structqsc__sysutils__drive__space__state">qsc_sysutils_drive_space_state</link>
+<para>The drive_space state structure </para>
+<link linkend="_structqsc__sysutils__memory__statistics__state">qsc_sysutils_memory_statistics_state</link>
+<para>The memory_statistics state structure </para>
+<link linkend="_structqsc__threadpool__state">qsc_threadpool_state</link>
+<para>The thread pool state </para>
+<link linkend="_structuint128">uint128</link>
+<para>The <link linkend="_structuint128">uint128</link> state structure </para>
+</section>

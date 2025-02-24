@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__threadpool__state" xml:lang="en-US">
+<title>qsc_threadpool_state Struct Reference</title>
+<indexterm><primary>qsc_threadpool_state</primary></indexterm>
+<para>
+
+<para>The thread pool state. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;threadpool.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>qsc_thread <link linkend="_structqsc__threadpool__state_1a2d54237320ee92cdb5b585d69a9aa237">tpool</link> [<link linkend="_threadpool_8h_1a68c18fa37083351e8ebd6f32c64aa1a6">QSC_THREADPOOL_THREADS_MAX</link>]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__threadpool__state_1a8c4efaf0e30c4a8d2ee977a37971be2d">tcount</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The thread pool state. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__threadpool__state_1a8c4efaf0e30c4a8d2ee977a37971be2d"/><section>
+    <title>tcount</title>
+<indexterm><primary>tcount</primary><secondary>qsc_threadpool_state</secondary></indexterm>
+<indexterm><primary>qsc_threadpool_state</primary><secondary>tcount</secondary></indexterm>
+<para><computeroutput>size_t tcount</computeroutput></para>
+<para>The thread count </para>
+</section>
+<anchor xml:id="_structqsc__threadpool__state_1a2d54237320ee92cdb5b585d69a9aa237"/><section>
+    <title>tpool</title>
+<indexterm><primary>tpool</primary><secondary>qsc_threadpool_state</secondary></indexterm>
+<indexterm><primary>qsc_threadpool_state</primary><secondary>tpool</secondary></indexterm>
+<para><computeroutput>qsc_thread tpool[<link linkend="_threadpool_8h_1a68c18fa37083351e8ebd6f32c64aa1a6">QSC_THREADPOOL_THREADS_MAX</link>]</computeroutput></para>
+<para>The thread pool </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_threadpool_8h">threadpool.h</link></section>
+</section>

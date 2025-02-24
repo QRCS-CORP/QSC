@@ -1,0 +1,339 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_kyber_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/kyber.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/kyber.h</primary></indexterm>
+<para>
+
+<para>Contains the primary public api for the Kyber CCA-secure Key Encapsulation Mechanism implementation. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?>#include &quot;kyberbase.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Macros    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_kyber_8h_1a314a086ebb183778749b7f425ba7d46e"/>#define <emphasis role="strong">QSC_KYBER_CIPHERTEXT_SIZE</emphasis>&#160;&#160;&#160;(QSC_KYBER_INDCPA_BYTES)</para>
+
+<para>The byte size of the cipher-text array. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_kyber_8h_1a324d3b4dde6bd2bba5ad414c82f15b66"/>#define <emphasis role="strong">QSC_KYBER_PRIVATEKEY_SIZE</emphasis>&#160;&#160;&#160;(QSC_KYBER_INDCPA_SECRETKEY_BYTES +  QSC_KYBER_INDCPA_PUBLICKEY_BYTES + (2 * QSC_KYBER_SYMBYTES))</para>
+
+<para>The byte size of the secret private-key array. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_kyber_8h_1adde5321c5b55a0c87eff031f89dfa756"/>#define <emphasis role="strong">QSC_KYBER_PUBLICKEY_SIZE</emphasis>&#160;&#160;&#160;(QSC_KYBER_INDCPA_PUBLICKEY_BYTES)</para>
+
+<para>The byte size of the public-key array. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_kyber_8h_1a8e5ba39a57a1f9fc4af613d957ca3df5"/>#define <emphasis role="strong">QSC_KYBER_SEED_SIZE</emphasis>&#160;&#160;&#160;32</para>
+
+<para>The byte size of the seed array. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_kyber_8h_1ae7c6524a5c0bf0336df3af0f7d2eb297"/>#define <emphasis role="strong">QSC_KYBER_SHAREDSECRET_SIZE</emphasis>&#160;&#160;&#160;32</para>
+
+<para>The byte size of the shared secret-key array. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_kyber_8h_1a194c8e38e2ddb685cae84e38783da144"/>#define <emphasis role="strong">QSC_KYBER_ALGNAME</emphasis>&#160;&#160;&#160;&quot;KYBER&quot;</para>
+
+<para>The formal algorithm name. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_kyber_8h_1a07e969adf524c02dfc8e069bc383f163">qsc_kyber_decapsulate</link> (uint8_t *secret, const uint8_t *ciphertext, const uint8_t *privatekey)</para>
+
+<para>Decapsulates the shared secret for a given cipher-text using a private-key. Used in conjunction with the encapsulate function. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_kyber_8h_1ac29729a9d20073fb5bf0caaf07e47513">qsc_kyber_decrypt</link> (uint8_t *secret, const uint8_t *ciphertext, const uint8_t *privatekey)</para>
+
+<para>Decrypts the shared secret for a given cipher-text using a private-key Used in conjunction with the encrypt function. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_kyber_8h_1a2846270dbee6004f92b992fa2b533908">qsc_kyber_encapsulate</link> (uint8_t *secret, uint8_t *ciphertext, const uint8_t *publickey, bool(*rng_generate)(uint8_t *, size_t))</para>
+
+<para>Generates cipher-text and encapsulates a shared secret key using a public-key. Used in conjunction with the decapsulate function. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_kyber_8h_1a692db6b4a2e4ba5356b68380feca1494">qsc_kyber_encrypt</link> (uint8_t *secret, uint8_t *ciphertext, const uint8_t *publickey, const uint8_t seed[<link linkend="_kyber_8h_1a8e5ba39a57a1f9fc4af613d957ca3df5">QSC_KYBER_SEED_SIZE</link>])</para>
+
+<para>Generates cipher-text and encapsulates a shared secret key using a public-key Used in conjunction with the encrypt function. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_kyber_8h_1a371669e2f7670c62f46402cad358f383">qsc_kyber_generate_keypair</link> (uint8_t *publickey, uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</para>
+
+<para>Generates public and private key for the KYBER key encapsulation mechanism. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Contains the primary public api for the Kyber CCA-secure Key Encapsulation Mechanism implementation. </para>
+
+<para><formalpara><title>Date</title>
+
+<para>January 10, 2018 updated July 2, 2021</para>
+</formalpara>
+<formalpara>
+<title>Example</title>
+<para><literallayout><computeroutput><emphasis role="comment">//&#32;An&#32;example&#32;of&#32;key-pair&#32;creation,&#32;encryption,&#32;and&#32;decryption</emphasis>
+uint8_t&#32;ct[<link linkend="_kyber_8h_1a314a086ebb183778749b7f425ba7d46e">QSC_KYBER_CIPHERTEXT_SIZE</link>];
+uint8_t&#32;pk[<link linkend="_kyber_8h_1adde5321c5b55a0c87eff031f89dfa756">QSC_KYBER_PUBLICKEY_SIZE</link>];
+uint8_t&#32;sk[<link linkend="_kyber_8h_1a324d3b4dde6bd2bba5ad414c82f15b66">QSC_KYBER_PRIVATEKEY_SIZE</link>];
+uint8_t&#32;ssa[<link linkend="_kyber_8h_1ae7c6524a5c0bf0336df3af0f7d2eb297">QSC_KYBER_SHAREDSECRET_SIZE</link>];
+uint8_t&#32;ssb[<link linkend="_kyber_8h_1ae7c6524a5c0bf0336df3af0f7d2eb297">QSC_KYBER_SHAREDSECRET_SIZE</link>];
+
+<emphasis role="comment">//&#32;create&#32;the&#32;public&#32;and&#32;secret&#32;keys</emphasis>
+qsc_kyber_generate_keypair(pk,&#32;sk);
+
+<emphasis role="comment">//&#32;output&#32;the&#32;cipher-text&#32;(ct),&#32;and&#32;the&#32;shared&#32;secret&#32;(ssb)</emphasis>
+qsc_kyber_encapsulate(ssb,&#32;ct,&#32;pk);
+
+<emphasis role="comment">//&#32;decrypt&#32;the&#32;cipher-text,&#32;and&#32;output&#32;the&#32;shared&#32;key&#32;(ssa)</emphasis>
+<emphasis role="keywordflow">if</emphasis>&#32;(qsc_kyber_decapsulate(ssa,&#32;ct,&#32;sk)&#32;==&#32;<emphasis role="keyword">false</emphasis>)
+{
+&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;decapsulation&#32;failed,&#32;do&#32;something..</emphasis>
+}
+</computeroutput></literallayout></para>
+</formalpara>
+<formalpara><title>Remarks</title>
+
+<para>Based on the C reference branch of PQ-Crystals Kyber; including base code, comments, and api. <?linebreak?>Removed the K=2 parameter, and added a K=5. The NIST &apos;512&apos; parameter has fallen below the threshold required by NIST PQ S1 minimum. <?linebreak?>The new K5 parameter may have a better chance of long-term security, with only a small increase in cost. <?linebreak?> Based entirely on the C reference branch of Dilithium taken from the NIST Post Quantum Competition Round 3 submission. <?linebreak?>The NIST Post Quantum Competition <link xlink:href="https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions">Round 3</link> Finalists. <?linebreak?>The <link xlink:href="https://pq-crystals.org/kyber/index.shtml">Kyber</link> website. <?linebreak?>The Kyber <link xlink:href="https://pq-crystals.org/kyber/data/kyber-specification-round3-20210131.pdf">Algorithm</link> Specification. <?linebreak?></para>
+</formalpara>
+</para>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_kyber_8h_1a07e969adf524c02dfc8e069bc383f163"/><section>
+    <title>qsc_kyber_decapsulate()</title>
+<indexterm><primary>qsc_kyber_decapsulate</primary><secondary>kyber.h</secondary></indexterm>
+<indexterm><primary>kyber.h</primary><secondary>qsc_kyber_decapsulate</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_kyber_decapsulate (uint8_t * secret, const uint8_t * ciphertext, const uint8_t * privatekey)</computeroutput></para><para>
+
+<para>Decapsulates the shared secret for a given cipher-text using a private-key. Used in conjunction with the encapsulate function. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>secret</entry><entry>
+<para>Pointer to the output shared secret key, an array of QSC_KYBER_SHAREDSECRET_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>ciphertext</entry><entry>
+<para>[const] Pointer to the cipher-text array of QSC_KYBER_CIPHERTEXT_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>privatekey</entry><entry>
+<para>[const] Pointer to the secret-key array of QSC_KYBER_PRIVATEKEY_SIZE constant size </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_kyber_8h_1ac29729a9d20073fb5bf0caaf07e47513"/><section>
+    <title>qsc_kyber_decrypt()</title>
+<indexterm><primary>qsc_kyber_decrypt</primary><secondary>kyber.h</secondary></indexterm>
+<indexterm><primary>kyber.h</primary><secondary>qsc_kyber_decrypt</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_kyber_decrypt (uint8_t * secret, const uint8_t * ciphertext, const uint8_t * privatekey)</computeroutput></para><para>
+
+<para>Decrypts the shared secret for a given cipher-text using a private-key Used in conjunction with the encrypt function. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>secret</entry><entry>
+<para>Pointer to the output shared secret key, an array of QSC_KYBER_SHAREDSECRET_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>ciphertext</entry><entry>
+<para>[const] Pointer to the cipher-text array of QSC_KYBER_CIPHERTEXT_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>privatekey</entry><entry>
+<para>[const] Pointer to the secret-key array of QSC_KYBER_PRIVATEKEY_SIZE constant size </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_kyber_8h_1a2846270dbee6004f92b992fa2b533908"/><section>
+    <title>qsc_kyber_encapsulate()</title>
+<indexterm><primary>qsc_kyber_encapsulate</primary><secondary>kyber.h</secondary></indexterm>
+<indexterm><primary>kyber.h</primary><secondary>qsc_kyber_encapsulate</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kyber_encapsulate (uint8_t * secret, uint8_t * ciphertext, const uint8_t * publickey, bool(* rng_generate&#160;)(uint8_t *, size_t))</computeroutput></para><para>
+
+<para>Generates cipher-text and encapsulates a shared secret key using a public-key. Used in conjunction with the decapsulate function. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Ciphertext array must be sized to the QSC_KYBER_CIPHERTEXT_SIZE.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>secret</entry><entry>
+<para>Pointer to the shared secret key, a uint8_t array of QSC_KYBER_SHAREDSECRET_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>ciphertext</entry><entry>
+<para>Pointer to the cipher-text array of QSC_KYBER_CIPHERTEXT_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>publickey</entry><entry>
+<para>[const] Pointer to the public-key array of QSC_KYBER_PUBLICKEY_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rng_generate</entry><entry>
+<para>A pointer to the random generator function </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_kyber_8h_1a692db6b4a2e4ba5356b68380feca1494"/><section>
+    <title>qsc_kyber_encrypt()</title>
+<indexterm><primary>qsc_kyber_encrypt</primary><secondary>kyber.h</secondary></indexterm>
+<indexterm><primary>kyber.h</primary><secondary>qsc_kyber_encrypt</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kyber_encrypt (uint8_t * secret, uint8_t * ciphertext, const uint8_t * publickey, const uint8_t seed[QSC_KYBER_SEED_SIZE])</computeroutput></para><para>
+
+<para>Generates cipher-text and encapsulates a shared secret key using a public-key Used in conjunction with the encrypt function. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Ciphertext array must be sized to the QSC_KYBER_CIPHERTEXT_SIZE.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>secret</entry><entry>
+<para>Pointer to the shared secret key, a uint8_t array of QSC_KYBER_SHAREDSECRET_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>ciphertext</entry><entry>
+<para>Pointer to the cipher-text array of QSC_KYBER_CIPHERTEXT_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>publickey</entry><entry>
+<para>[const] Pointer to the public-key array of QSC_KYBER_PUBLICKEY_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>seed</entry><entry>
+<para>[const] A pointer to the random seed array </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_kyber_8h_1a371669e2f7670c62f46402cad358f383"/><section>
+    <title>qsc_kyber_generate_keypair()</title>
+<indexterm><primary>qsc_kyber_generate_keypair</primary><secondary>kyber.h</secondary></indexterm>
+<indexterm><primary>kyber.h</primary><secondary>qsc_kyber_generate_keypair</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kyber_generate_keypair (uint8_t * publickey, uint8_t * privatekey, bool(* rng_generate&#160;)(uint8_t *, size_t))</computeroutput></para><para>
+
+<para>Generates public and private key for the KYBER key encapsulation mechanism. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Arrays must be sized to QSC_KYBER_PUBLICKEY_SIZE and QSC_KYBER_SECRETKEY_SIZE.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>publickey</entry><entry>
+<para>Pointer to the output public-key array of QSC_KYBER_PUBLICKEY_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>privatekey</entry><entry>
+<para>Pointer to output private-key array of QSC_KYBER_PRIVATEKEY_SIZE constant size </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rng_generate</entry><entry>
+<para>A pointer to the random generator function </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+</section>
+</section>

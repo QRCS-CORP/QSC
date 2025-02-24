@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__chacha__state" xml:lang="en-US">
+<title>qsc_chacha_state Struct Reference</title>
+<indexterm><primary>qsc_chacha_state</primary></indexterm>
+<para>
+
+<para>Internal: contains the <link linkend="_structqsc__chacha__state">qsc_chacha_state</link> state. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;chacha.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint32_t <link linkend="_structqsc__chacha__state_1a27904b346479aa02e8ba45a88151a9b1">state</link> [16]</para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Internal: contains the <link linkend="_structqsc__chacha__state">qsc_chacha_state</link> state. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__chacha__state_1a27904b346479aa02e8ba45a88151a9b1"/><section>
+    <title>state</title>
+<indexterm><primary>state</primary><secondary>qsc_chacha_state</secondary></indexterm>
+<indexterm><primary>qsc_chacha_state</primary><secondary>state</secondary></indexterm>
+<para><computeroutput>uint32_t state[16]</computeroutput></para>
+<para>The internal state array </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_chacha_8h">chacha.h</link></section>
+</section>

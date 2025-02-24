@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define QSC_STRING_MAX_LEN 4096
+#define QSC_STRING_MAX_LEN 4096ULL
 
 char* strsepex(char** stringp, const char* delim)
 {
@@ -274,6 +274,8 @@ size_t qsc_stringutils_copy_substring(char* dest, size_t dstlen, const char* sou
 
 size_t qsc_stringutils_formatting_count(const char* dest, size_t dstlen)
 {
+	assert(dest != NULL);
+
 	size_t ctr;
 
 	ctr = 0;
@@ -294,6 +296,9 @@ size_t qsc_stringutils_formatting_count(const char* dest, size_t dstlen)
 
 size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char* dest)
 {
+	assert(source != NULL);
+	assert(dest != NULL);
+
 	size_t ctr;
 
 	ctr = 0;
@@ -311,6 +316,28 @@ size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char
 	}
 
 	return ctr;
+}
+
+int64_t qsc_stringutils_find_char(const char* source, const char tok)
+{
+	assert(source != NULL);
+
+	const char* sub;
+	int64_t pos;
+
+	pos = QSC_STRINGUTILS_TOKEN_NOT_FOUND;
+
+	if (source != NULL)
+	{
+		sub = strchr(source, tok);
+
+		if (sub != NULL)
+		{
+			pos = (int64_t)(sub - source);
+		}
+	}
+
+	return pos;
 }
 
 int64_t qsc_stringutils_find_string(const char* source, const char* token)
@@ -334,6 +361,24 @@ int64_t qsc_stringutils_find_string(const char* source, const char* token)
 	}
 
 	return pos;
+}
+
+void qsc_stringutils_byte_to_hex(char* hex, uint8_t input)
+{
+	assert(hex != NULL);
+
+	snprintf(hex, 3, "%.2x", input);
+}
+
+uint8_t qsc_stringutils_hex_to_byte(const char* hex)
+{
+	assert(hex != NULL);
+
+	uint8_t res;
+
+	res = (uint8_t)strtol(hex, NULL, 16);
+
+	return res;
 }
 
 int64_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* source, size_t offset)
@@ -365,6 +410,48 @@ void qsc_stringutils_int_to_string(int32_t num, char* dest, size_t destlen)
 		_itoa_s(num, dest, destlen, 10);
 #else
 		snprintf(dest, destlen, "%d", num);
+#endif
+	}
+}
+
+void qsc_stringutils_uint32_to_string(uint32_t num, char* dest, size_t destlen)
+{
+	assert(dest != NULL);
+
+	if (dest != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		_ultoa_s(num, dest, destlen, 10);
+#else
+		snprintf(dest, destlen, "%u", num);
+#endif
+	}
+}
+
+void qsc_stringutils_int64_to_string(int64_t num, char* dest, size_t dstlen)
+{
+	assert(dest != NULL);
+
+	if (dest != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		_i64toa_s(num, dest, dstlen, 10);
+#else
+		snprintf(dest, dstlen, "%ld", num);
+#endif
+	}
+}
+
+void qsc_stringutils_uint64_to_string(uint64_t num, char* dest, size_t dstlen)
+{
+	assert(dest != NULL);
+
+	if (dest != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		_ui64toa_s(num, dest, dstlen, 10);
+#else
+		snprintf(dest, dstlen, "%lu", num);
 #endif
 	}
 }
@@ -474,6 +561,76 @@ char* qsc_stringutils_register_string(char** source, size_t count)
 	return nstr;
 }
 
+size_t qsc_stringutils_remove_null_chars(char* source, size_t srclen)
+{
+	assert(source != NULL);
+
+	char* scpy;
+	size_t pos;
+
+	pos = 0;
+
+	scpy = (char*)qsc_memutils_malloc(srclen);
+
+	if (scpy != NULL)
+	{
+		qsc_memutils_clear(scpy, srclen);
+
+		for (size_t i = 0; i < srclen; ++i)
+		{
+			if (source[i] != 0)
+			{
+				scpy[pos] = source[i];
+				++pos;
+			}
+		}
+
+		qsc_memutils_clear(source, srclen);
+		qsc_memutils_copy(source, scpy, pos);
+		qsc_memutils_alloc_free(scpy);
+	}
+
+	return pos;
+}
+
+int64_t qsc_stringutils_reverse_find_string(const char* source, const char* token, size_t start)
+{
+	assert(source != NULL);
+	assert(token != NULL);
+	assert(start != 0);
+
+	int64_t res;
+
+	res = -1;
+
+	if (source != NULL || token != NULL)
+	{
+		size_t slen;
+		size_t tlen;
+
+		slen = strlen(source);
+		tlen = strlen(token);
+
+		if (slen != 0 || tlen != 0 || start >= slen)
+		{
+			size_t ss;
+
+			ss = (start + tlen > slen) ? slen - tlen : start;
+
+			for (size_t i = ss + 1; i > 0; --i) 
+			{
+				if (strncmp(&source[i - 1], token, tlen) == 0) 
+				{
+					res = (int64_t)(i - 1);
+					break;
+				}
+			}
+		}
+	}
+
+    return res;
+}
+
 const char* qsc_stringutils_reverse_sub_string(const char* source, const char* token)
 {
 	assert(source != NULL);
@@ -501,6 +658,11 @@ const char* qsc_stringutils_reverse_sub_string(const char* source, const char* t
 
 void qsc_stringutils_split_strings(char* dest1, char* dest2, size_t destlen, const char* source, const char* token)
 {
+	assert(dest1 != NULL);
+	assert(dest2 != NULL);
+	assert(source != NULL);
+	assert(token != NULL);
+
 	const char* pstr;
 	size_t plen;
 	int64_t pos;
@@ -634,6 +796,24 @@ bool qsc_stringutils_string_compare(const char* str1, const char* str2, size_t l
 	return res;
 }
 
+int32_t qsc_stringutils_string_comparison(const char* source, const char* token)
+{
+	assert(source != NULL);
+	assert(token  != NULL);
+
+	size_t slen;
+	bool res;
+
+	slen = strlen(source);
+
+	if (source != NULL && token != NULL && slen != 0)
+	{
+		res = strncmp(source, token, slen);
+	}
+
+	return res;
+}
+
 bool qsc_stringutils_string_contains(const char* source, const char* token)
 {
 	assert(source != NULL);
@@ -646,6 +826,32 @@ bool qsc_stringutils_string_contains(const char* source, const char* token)
 	if (source != NULL && token != NULL)
 	{
 		res = (qsc_stringutils_find_string(source, token) >= 0);
+	}
+
+	return res;
+}
+
+bool qsc_stringutils_strings_equal(const char* str1, const char* str2)
+{
+	assert(str1 != NULL);
+	assert(str2 != NULL);
+
+	size_t slen;
+	bool res;
+
+	slen = qsc_stringutils_string_size(str1);
+	res = (slen == qsc_stringutils_string_size(str2));
+
+	if (res == true)
+	{
+		for (size_t i = 0; i < slen; ++i)
+		{
+			if (str1[i] != str2[i])
+			{
+				res = false;
+				break;
+			}
+		}
 	}
 
 	return res;
@@ -751,6 +957,7 @@ void qsc_stringutils_trim_newline(char* source)
 			if (source[i] == '\n')
 			{
 				source[i] = '\0';
+				break;
 			}
 		}
 	}
@@ -795,6 +1002,8 @@ void qsc_stringutils_to_uppercase(char* source)
 
 size_t qsc_stringutils_whitespace_count(const char* source, size_t srclen)
 {
+	assert(source != NULL);
+
 	size_t ctr;
 
 	ctr = 0;
@@ -815,6 +1024,9 @@ size_t qsc_stringutils_whitespace_count(const char* source, size_t srclen)
 
 size_t qsc_stringutils_whitespace_filter(const char* source, size_t srclen, char* dest)
 {
+	assert(source != NULL);
+	assert(dest != NULL);
+
 	size_t ctr;
 
 	ctr = 0;

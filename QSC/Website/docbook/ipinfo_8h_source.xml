@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_ipinfo_8h_source" xml:lang="en-US">
+<title>ipinfo.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ipinfo.h</primary></indexterm>
+<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;QSC_IPINFO_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>
+46 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+47 <emphasis role="preprocessor">#include&#32;&quot;arrayutils.h&quot;</emphasis>
+48 <emphasis role="preprocessor">#include&#32;&quot;intutils.h&quot;</emphasis>
+49 <emphasis role="preprocessor">#include&#32;&quot;memutils.h&quot;</emphasis>
+50 <emphasis role="preprocessor">#include&#32;&quot;socketflags.h&quot;</emphasis>
+51 <emphasis role="preprocessor">#include&#32;&quot;stringutils.h&quot;</emphasis>
+52 
+53 <emphasis role="comment">/*</emphasis>
+54 <emphasis role="comment">*&#32;\file&#32;ipinfo.h</emphasis>
+55 <emphasis role="comment">*&#32;\brief&#32;IP&#32;information&#32;function&#32;definitions</emphasis>
+56 <emphasis role="comment">*/</emphasis>
+57 
+62 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IPV4_BYTELEN&#32;0x04</emphasis>
+63 
+68 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IPV4_MINLEN&#32;0x08</emphasis>
+69 
+74 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IPV4_STRNLEN&#32;0x16</emphasis>
+75 
+80 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IPV4_MASK_STRNLEN&#32;0x10</emphasis>
+81 
+86 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IPV6_BYTELEN&#32;0x10</emphasis>
+87 
+92 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IP_MAX_BYTELEN&#32;(QSC_IPINFO_IPV6_BYTELEN)</emphasis>
+93 
+98 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IPV6_STRNLEN&#32;0x41</emphasis>
+99 
+104 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_IPV6_MASK_STRNLEN&#32;0x41</emphasis>
+105 
+110 <emphasis role="preprocessor">#define&#32;QSC_IPINFO_MAX_SIZE&#32;(QSC_IPINFO_IPV6_STRNLEN)</emphasis>
+111 
+115 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_ipinfo_address_types
+116 {
+117 &#32;&#32;&#32;&#32;qsc_ipinfo_address_type_none&#32;=&#32;0x00,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+118 &#32;&#32;&#32;&#32;qsc_ipinfo_address_type_ipv4&#32;=&#32;0x01,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+119 &#32;&#32;&#32;&#32;qsc_ipinfo_address_type_ipv6&#32;=&#32;0x02,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+120 &#32;&#32;&#32;&#32;qsc_ipinfo_address_type_unknown&#32;=&#32;0xFF,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+121 }&#32;qsc_ipinfo_address_types;
+122 
+126 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>
+127 {
+128 &#32;&#32;&#32;&#32;uint8_t&#32;<link linkend="_structqsc__ipinfo__ipv4__address_1a44dcd83c3c9be9025e3532bbd9a95e5e">ipv4</link>[QSC_IPINFO_IPV4_BYTELEN];&#32;&#32;
+129 }&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>;
+130 
+134 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structqsc__ipinfo__ipv4__info">qsc_ipinfo_ipv4_info</link>
+135 {
+136 &#32;&#32;&#32;&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>&#32;<link linkend="_structqsc__ipinfo__ipv4__info_1a14ac6b3128035a8c60ee85cee6454ee0">address</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+137 &#32;&#32;&#32;&#32;uint16_t&#32;<link linkend="_structqsc__ipinfo__ipv4__info_1a8e0798404bf2cf5dabb84c5ba9a4f236">port</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+138 &#32;&#32;&#32;&#32;uint8_t&#32;<link linkend="_structqsc__ipinfo__ipv4__info_1a8a74907784be6c7786c2d060c8d7e10b">mask</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+139 }&#32;<link linkend="_structqsc__ipinfo__ipv4__info">qsc_ipinfo_ipv4_info</link>;
+140 
+141 
+147 QSC_EXPORT_API&#32;qsc_ipinfo_address_types&#32;qsc_ipinfo_get_address_type(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;address);
+148 
+154 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>&#32;qsc_ipinfo_ipv4_address_any(<emphasis role="keywordtype">void</emphasis>);
+155 
+161 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv4_address_clear(<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+162 
+169 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>&#32;qsc_ipinfo_ipv4_address_from_array(<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;address);
+170 
+180 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>&#32;qsc_ipinfo_ipv4_address_from_bytes(uint8_t&#32;a1,&#32;uint8_t&#32;a2,&#32;uint8_t&#32;a3,&#32;uint8_t&#32;a4);
+181 
+188 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>&#32;qsc_ipinfo_ipv4_address_from_string(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;input[QSC_IPINFO_IPV4_STRNLEN]);
+189 
+197 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv4_address_is_equal(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;a,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;b);
+198 
+205 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv4_address_is_routable(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+206 
+213 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv4_address_is_valid(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+214 
+221 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv4_address_string_is_valid(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;address);
+222 
+229 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv4_address_is_zeroed(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+230 
+236 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>&#32;qsc_ipinfo_ipv4_address_loopback(<emphasis role="keywordtype">void</emphasis>);
+237 
+245 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv4_address_get_mask(<emphasis role="keywordtype">char</emphasis>&#32;mask[QSC_IPINFO_IPV4_MASK_STRNLEN],&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+246 
+253 QSC_EXPORT_API&#32;uint8_t&#32;qsc_ipinfo_ipv4_address_get_cidr_mask(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+254 
+261 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv4_address_to_array(uint8_t*&#32;output,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+262 
+269 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv4_address_to_string(<emphasis role="keywordtype">char</emphasis>&#32;output[QSC_IPINFO_IPV4_STRNLEN],&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address);
+270 
+277 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv4_array_to_string(<emphasis role="keywordtype">char</emphasis>&#32;output[QSC_IPINFO_IPV4_STRNLEN],&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;address);
+278 
+282 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>
+283 {
+284 &#32;&#32;&#32;&#32;uint8_t&#32;<link linkend="_structqsc__ipinfo__ipv6__address_1a71245b942c5be57407b6153b0a369bfc">ipv6</link>[QSC_IPINFO_IPV6_BYTELEN];&#32;&#32;
+285 }&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>;
+286 
+290 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structqsc__ipinfo__ipv6__info">qsc_ipinfo_ipv6_info</link>
+291 {
+292 &#32;&#32;&#32;&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>&#32;<link linkend="_structqsc__ipinfo__ipv6__info_1a02ed6819e1ce9a855804e46b0692a18d">address</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+293 &#32;&#32;&#32;&#32;uint16_t&#32;<link linkend="_structqsc__ipinfo__ipv6__info_1a8e0798404bf2cf5dabb84c5ba9a4f236">port</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+294 &#32;&#32;&#32;&#32;uint8_t&#32;<link linkend="_structqsc__ipinfo__ipv6__info_1a8a74907784be6c7786c2d060c8d7e10b">mask</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+295 }&#32;<link linkend="_structqsc__ipinfo__ipv6__info">qsc_ipinfo_ipv6_info</link>;
+296 
+303 QSC_EXPORT_API&#32;qsc_ipv6_address_prefix_types&#32;qsc_ipinfo_ipv6_address_type(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+304 
+310 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>&#32;qsc_ipinfo_ipv6_address_any(<emphasis role="keywordtype">void</emphasis>);
+311 
+317 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv6_address_clear(<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+318 
+325 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>&#32;qsc_ipinfo_ipv6_address_from_array(<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;address);
+326 
+333 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>&#32;qsc_ipinfo_ipv6_address_from_string(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;input[QSC_IPINFO_IPV6_STRNLEN]);
+334 
+342 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv6_address_is_equal(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;a,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;b);
+343 
+350 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv6_address_is_routable(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+351 
+358 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv6_address_is_valid(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+359 
+366 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv6_address_string_is_valid(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;address);
+367 
+374 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_ipinfo_ipv6_address_is_zeroed(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+375 
+381 QSC_EXPORT_API&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>&#32;qsc_ipinfo_ipv6_address_loopback(<emphasis role="keywordtype">void</emphasis>);
+382 
+389 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv6_address_get_mask(<emphasis role="keywordtype">char</emphasis>&#32;mask[QSC_IPINFO_IPV6_MASK_STRNLEN],&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+390 
+398 QSC_EXPORT_API&#32;uint8_t&#32;qsc_ipinfo_ipv6_address_get_cidr_mask(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+399 
+406 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv6_address_to_array(uint8_t*&#32;output,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+407 
+414 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv6_address_to_string(<emphasis role="keywordtype">char</emphasis>&#32;output[QSC_IPINFO_IPV6_STRNLEN],&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;address);
+415 
+422 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv6_array_to_string(<emphasis role="keywordtype">char</emphasis>&#32;output[QSC_IPINFO_IPV6_STRNLEN],&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;address);
+423 
+430 QSC_EXPORT_API&#32;uint8_t&#32;qsc_ipinfo_ipv4_mask_to_cidr(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;mask[QSC_IPINFO_IPV4_MASK_STRNLEN]);
+431 
+438 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_ipinfo_ipv4_cidr_to_mask(<emphasis role="keywordtype">char</emphasis>&#32;mask[QSC_IPINFO_IPV4_MASK_STRNLEN],&#32;uint8_t&#32;cidr);
+439 
+440 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

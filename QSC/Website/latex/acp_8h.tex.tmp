@@ -1,0 +1,100 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/acp.h File Reference}
+\hypertarget{acp_8h}{}\label{acp_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/acp.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/acp.h}}
+
+
+The Auto entropy Collection Provider\+: ACP ACP is the recommended entropy provider. ACP uses a hashed collection of system timers, statistics, the RDRAND provider, and the system random provider, to seed an instance of c\+SHAKE-\/512.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+Include dependency graph for acp.\+h\+:
+% FIG 0
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{acp_8h_ad25efe032505a1bc74a324ddfe5a6d66}\label{acp_8h_ad25efe032505a1bc74a324ddfe5a6d66} 
+\#define {\bfseries QSC\+\_\+\+ACP\+\_\+\+SEED\+\_\+\+MAX}~10240000
+\begin{DoxyCompactList}\small\item\em The maximum seed size that can be extracted from a single generate call. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{acp_8h_aa62d1695cd25163dcd52b434625d5efc}{qsc\+\_\+acp\+\_\+generate}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Get an array of random bytes from the auto entropy collection provider. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint16\+\_\+t \mbox{\hyperlink{acp_8h_a371ef60b02ca3f5408d551821d5a7e7d}{qsc\+\_\+acp\+\_\+uint16}} ()
+\begin{DoxyCompactList}\small\item\em Get a random 16-\/bit unsigned integer. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint32\+\_\+t \mbox{\hyperlink{acp_8h_abc731ec49b80f1b4a227ac023b944093}{qsc\+\_\+acp\+\_\+uint32}} ()
+\begin{DoxyCompactList}\small\item\em Get a random 32-\/bit unsigned integer. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t \mbox{\hyperlink{acp_8h_a177e779e6c0d05897d39d1c4c4cca1ff}{qsc\+\_\+acp\+\_\+uint64}} ()
+\begin{DoxyCompactList}\small\item\em Get a random 64-\/bit unsigned integer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The Auto entropy Collection Provider\+: ACP ACP is the recommended entropy provider. ACP uses a hashed collection of system timers, statistics, the RDRAND provider, and the system random provider, to seed an instance of c\+SHAKE-\/512. 
+
+\begin{DoxyAuthor}{Author}
+John Underhill 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+August 17, 2020 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{acp_8h_aa62d1695cd25163dcd52b434625d5efc}\index{acp.h@{acp.h}!qsc\_acp\_generate@{qsc\_acp\_generate}}
+\index{qsc\_acp\_generate@{qsc\_acp\_generate}!acp.h@{acp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_acp\_generate()}{qsc\_acp\_generate()}}
+{\footnotesize\ttfamily \label{acp_8h_aa62d1695cd25163dcd52b434625d5efc} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+acp\+\_\+generate (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Get an array of random bytes from the auto entropy collection provider. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & Pointer to the output byte array \\
+\hline
+{\em length} & The number of bytes to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{acp_8h_a371ef60b02ca3f5408d551821d5a7e7d}\index{acp.h@{acp.h}!qsc\_acp\_uint16@{qsc\_acp\_uint16}}
+\index{qsc\_acp\_uint16@{qsc\_acp\_uint16}!acp.h@{acp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_acp\_uint16()}{qsc\_acp\_uint16()}}
+{\footnotesize\ttfamily \label{acp_8h_a371ef60b02ca3f5408d551821d5a7e7d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint16\+\_\+t qsc\+\_\+acp\+\_\+uint16 (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Get a random 16-\/bit unsigned integer. 
+
+\begin{DoxyReturn}{Returns}
+Returns the random integer 
+\end{DoxyReturn}
+\Hypertarget{acp_8h_abc731ec49b80f1b4a227ac023b944093}\index{acp.h@{acp.h}!qsc\_acp\_uint32@{qsc\_acp\_uint32}}
+\index{qsc\_acp\_uint32@{qsc\_acp\_uint32}!acp.h@{acp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_acp\_uint32()}{qsc\_acp\_uint32()}}
+{\footnotesize\ttfamily \label{acp_8h_abc731ec49b80f1b4a227ac023b944093} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint32\+\_\+t qsc\+\_\+acp\+\_\+uint32 (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Get a random 32-\/bit unsigned integer. 
+
+\begin{DoxyReturn}{Returns}
+Returns the random integer 
+\end{DoxyReturn}
+\Hypertarget{acp_8h_a177e779e6c0d05897d39d1c4c4cca1ff}\index{acp.h@{acp.h}!qsc\_acp\_uint64@{qsc\_acp\_uint64}}
+\index{qsc\_acp\_uint64@{qsc\_acp\_uint64}!acp.h@{acp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_acp\_uint64()}{qsc\_acp\_uint64()}}
+{\footnotesize\ttfamily \label{acp_8h_a177e779e6c0d05897d39d1c4c4cca1ff} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t qsc\+\_\+acp\+\_\+uint64 (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Get a random 64-\/bit unsigned integer. 
+
+\begin{DoxyReturn}{Returns}
+Returns the random integer 
+\end{DoxyReturn}

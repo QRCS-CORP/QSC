@@ -1,19 +1,40 @@
-
-/* 2024 Quantum Resistant Cryptographic Solutions Corporation
+/* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
- * NOTICE:  All information contained herein is, and remains
- * the property of Quantum Resistant Cryptographic Solutions Incorporated.
- * The intellectual and technical concepts contained
- * herein are proprietary to Quantum Resistant Cryptographic Solutions Incorporated
- * and its suppliers and may be covered by U.S. and Foreign Patents,
- * patents in process, and are protected by trade secret or copyright law.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from Quantum Resistant Cryptographic Solutions Incorporated.
+ * NOTICE: This software and all accompanying materials are the exclusive 
+ * property of Quantum Resistant Cryptographic Solutions Corporation (QRCS).
+ * The intellectual and technical concepts contained within this implementation 
+ * are proprietary to QRCS and its authorized licensors and are protected under 
+ * applicable U.S. and international copyright, patent, and trade secret laws.
  *
- * Written by John G. Underhill
- * Contact: develop@qrcs.ca
+ * CRYPTOGRAPHIC STANDARDS:
+ * - This software includes implementations of cryptographic algorithms such as 
+ *   SHA3, AES, and others. These algorithms are public domain or standardized 
+ *   by organizations such as NIST and are NOT the property of QRCS.
+ * - However, all source code, optimizations, and implementations in this library 
+ *   are original works of QRCS and are protected under this license.
+ *
+ * RESTRICTIONS:
+ * - Redistribution, modification, or unauthorized distribution of this software, 
+ *   in whole or in part, is strictly prohibited.
+ * - This software is provided for non-commercial, educational, and research 
+ *   purposes only. Commercial use in any form is expressly forbidden.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ * - Any use of this software implies acceptance of these restrictions.
+ *
+ * DISCLAIMER:
+ * This software is provided "as is," without warranty of any kind, express or 
+ * implied, including but not limited to warranties of merchantability or fitness 
+ * for a particular purpose. QRCS disclaims all liability for any direct, indirect, 
+ * incidental, or consequential damages resulting from the use or misuse of this software.
+ *
+ * FULL LICENSE:
+ * This software is subject to the **Quantum Resistant Cryptographic Solutions 
+ * Proprietary License (QRCS-PL)**. The complete license terms are included 
+ * in the LICENSE.txt file distributed with this software.
+ *
+ * Written by: John G. Underhill
+ * Contact: john.underhill@protonmail.com
  */
 
 #include "../QSC/common.h"
@@ -44,12 +65,14 @@
 #include "dilithium_test.h"
 #include "ecdh_test.h"
 #include "ecdsa_test.h"
+#include "encoding_test.h"
 #include "falcon_test.h"
 #include "kyber_test.h"
 #include "mceliece_test.h"
 #include "netutils_test.h"
 #include "ntru_test.h"
 #include "poly1305_test.h"
+#include "qmac_test.h"
 #include "rcs_test.h"
 #include "scb_test.h"
 #include "secrand_test.h"
@@ -65,10 +88,10 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.5o (A5)                       *");
-	qsctest_print_line("* License:   GPLv3                                *");
-	qsctest_print_line("* Date:      June 02, 2024                        *");
-	qsctest_print_line("* Contact:   support@digitalfreedomdefence.com    *");
+	qsctest_print_line("* Release:   v1.0.0.6b (A6)                       *");
+	qsctest_print_line("* License:   QRCS-PL                              *");
+	qsctest_print_line("* Date:      February 04, 2025                     *");
+	qsctest_print_line("* Contact:   john.underhill@protonmail.com        *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
 }
@@ -225,16 +248,20 @@ int32_t main(void)
 			qsctest_rcs_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the Poly1305 MAC generator with known answer tests ***");
-			qsctest_poly1305_run();
-			qsctest_print_line("");
-
 			qsctest_print_line("*** Test HKDF, HMAC, and SHA2 implementations using the official known answer tests ***");
 			qsctest_sha2_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test SHAKE, cSHAKE, KMAC, and SHA3 implementations using the official known answer tests ***");
 			qsctest_sha3_run();
+			qsctest_print_line("");
+						
+			qsctest_print_line("*** Test the Poly1305 MAC implementation using the official known answer tests ***");
+			qsctest_poly1305_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the QMAC implementation using the official known answer tests ***");
+			qsctest_qmac_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Secure Random provider and entropy provider implementations ***");
@@ -243,6 +270,10 @@ int32_t main(void)
 
 			qsctest_print_line("*** Test the SHAKE Cost-Based KDF implementation ***");
 			qsctest_scb_run();
+			qsctest_print_line("");
+			
+			qsctest_print_line("*** Test the BER, DER, HEX, and PEM encoding schemes ***");
+			qsctest_encoding_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the ECDH implementation using stress, validity checks, and known answer tests ***");
@@ -261,12 +292,12 @@ int32_t main(void)
 			qsctest_ntru_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the Falcon implementation using stress, validity checks, and known answer tests ***");
-			qsctest_falcon_run();
-			qsctest_print_line("");
-
 			qsctest_print_line("*** Test the Dilithium implementation using stress, validity checks, and known answer tests ***");
 			qsctest_dilithium_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the Falcon implementation using stress, validity checks, and known answer tests ***");
+			qsctest_falcon_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the ECDSA implementation using stress, validity checks, and known answer tests ***");

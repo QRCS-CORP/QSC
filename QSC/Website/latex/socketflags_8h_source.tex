@@ -1,0 +1,152 @@
+\doxysection{socketflags.\+h}
+\hypertarget{socketflags_8h_source}{}\label{socketflags_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/socketflags.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/socketflags.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_SOCKFLAGS\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_SOCKFLAGS\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00047\ \textcolor{comment}{*\ \(\backslash\)file\ socketflags.h}}
+\DoxyCodeLine{00048\ \textcolor{comment}{*\ \(\backslash\)brief\ The\ socket\ flags\ enumerations}}
+\DoxyCodeLine{00049\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00054\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_ipv6\_address\_prefix\_types}
+\DoxyCodeLine{00055\ \{}
+\DoxyCodeLine{00056\ \ \ \ \ qsc\_ipv6\_prefix\_none\ =\ 0,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00057\ \ \ \ \ qsc\_ipv6\_prefix\_link\_local\ =\ 1,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00058\ \ \ \ \ qsc\_ipv6\_prefix\_multicast\ =\ 2,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00059\ \ \ \ \ qsc\_ipv6\_prefix\_global\ =\ 3,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00060\ \ \ \ \ qsc\_ipv6\_prefix\_unique\_local\ =\ 4\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00061\ \}\ qsc\_ipv6\_address\_prefix\_types;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00066\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_address\_families}
+\DoxyCodeLine{00067\ \{}
+\DoxyCodeLine{00068\ \ \ \ \ qsc\_socket\_address\_family\_none\ =\ 0x00000000L,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00069\ \ \ \ \ qsc\_socket\_address\_family\_unix\ =\ 0x00000001L,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00070\ \ \ \ \ qsc\_socket\_address\_family\_ipv4\ =\ 0x00000002L,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00071\ \ \ \ \ qsc\_socket\_address\_family\_ipv6\ =\ 0x00000017L\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00072\ \}\ qsc\_socket\_address\_families;}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00077\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_states}
+\DoxyCodeLine{00078\ \{}
+\DoxyCodeLine{00079\ \ \ \ \ qsc\_socket\_state\_none\ =\ 0,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00080\ \ \ \ \ qsc\_socket\_state\_connected\ =\ 1,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00081\ \ \ \ \ qsc\_socket\_state\_listening\ =\ 2,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00082\ \ \ \ \ qsc\_socket\_state\_connectionless\ =\ 3\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00083\ \}\ qsc\_socket\_states;}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00088\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_options}
+\DoxyCodeLine{00089\ \{}
+\DoxyCodeLine{00090\ \ \ \ \ qsc\_socket\_option\_none\ =\ 0x00000000L,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00091\ \ \ \ \ qsc\_socket\_option\_broadcast\ =\ 0x00000020L,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00092\ \ \ \ \ qsc\_socket\_option\_ipv6\_only\ =\ 0x0000001BL,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00093\ \ \ \ \ qsc\_socket\_option\_keepalive\ =\ 0x00000008L,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00094\ \ \ \ \ qsc\_socket\_option\_linger\ =\ 0x00000080L,\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00095\ \ \ \ \ qsc\_socket\_option\_no\_route\ =\ 0x00000010L,\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00096\ \ \ \ \ qsc\_socket\_option\_out\_of\_band\ =\ 0x00000100L,\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00097\ \ \ \ \ qsc\_socket\_option\_reuse\_address\ =\ 0x00000004L,\ \ \ \ \ \ }
+\DoxyCodeLine{00098\ \ \ \ \ qsc\_socket\_option\_receive\_time\_out\ =\ 0x00001006L,\ \ \ }
+\DoxyCodeLine{00099\ \ \ \ \ qsc\_socket\_option\_send\_time\_out\ =\ 0x00001005L,\ \ \ \ \ \ }
+\DoxyCodeLine{00100\ \ \ \ \ qsc\_socket\_option\_tcp\_no\_delay\ =\ 0x00000001L\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00101\ \}\ qsc\_socket\_options;}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00106\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_protocols}
+\DoxyCodeLine{00107\ \{}
+\DoxyCodeLine{00108\ \ \ \ \ qsc\_socket\_protocol\_none\ =\ 0x00000000L,\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00109\ \ \ \ \ qsc\_socket\_protocol\_ipv4\ =\ 0x00000004L,\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00110\ \ \ \ \ qsc\_socket\_protocol\_socket\ =\ 0x0000FFFFL,\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00111\ \ \ \ \ qsc\_socket\_protocol\_tcp\ =\ 0x00000006L,\ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00112\ \ \ \ \ qsc\_socket\_protocol\_udp\ =\ 0x00000011L,\ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00113\ \ \ \ \ qsc\_socket\_protocol\_ipv6\ =\ 0x00000029L,\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00114\ \ \ \ \ qsc\_socket\_protocol\_ipv6\_routing\ =\ 0x0000002BL,\ \ \ \ \ }
+\DoxyCodeLine{00115\ \ \ \ \ qsc\_socket\_protocol\_ipv6\_fragment\ =\ 0x0000002CL,\ \ \ \ }
+\DoxyCodeLine{00116\ \ \ \ \ qsc\_socket\_protocol\_icmpv6\ =\ 0x0000003AL,\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00117\ \ \ \ \ qsc\_socket\_protocol\_ipv6\_no\_header\ =\ 0x0000003BL,\ \ \ }
+\DoxyCodeLine{00118\ \ \ \ \ qsc\_socket\_protocol\_dstopts\ =\ 0x0000003CL,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00119\ \ \ \ \ qsc\_socket\_protocol\_raw\ =\ 0x000000FFL\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00120\ \}\ qsc\_socket\_protocols;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00125\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_receive\_flags}
+\DoxyCodeLine{00126\ \{}
+\DoxyCodeLine{00127\ \ \ \ \ qsc\_socket\_receive\_flag\_none\ =\ 0x00000000L,\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00128\ \ \ \ \ qsc\_socket\_receive\_flag\_out\_of\_band\ =\ 0x00000001L,\ \ }
+\DoxyCodeLine{00129\ \ \ \ \ qsc\_socket\_receive\_flag\_peek\ =\ 0x00000002L,\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//0x40}}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_OS\_WINDOWS)}}
+\DoxyCodeLine{00131\ \ \ \ \ qsc\_socket\_receive\_flag\_wait\_all\ =\ 0x00000008L\ \ \ \ \ \ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#elif\ defined(QSC\_SYSTEM\_OS\_APPLE)}}
+\DoxyCodeLine{00133\ \ \ \ \ qsc\_socket\_receive\_flag\_wait\_all\ =\ 0x00000040L\ \ \ \ \ \ }
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00135\ \ \ \ \ qsc\_socket\_receive\_flag\_wait\_all\ =\ 0x00000100L\ \ \ \ \ \ }
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00137\ \}\ qsc\_socket\_receive\_flags;}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00142\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_send\_flags}
+\DoxyCodeLine{00143\ \{}
+\DoxyCodeLine{00144\ \ \ \ \ qsc\_socket\_send\_flag\_none\ =\ 0x00000000L,\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00145\ \ \ \ \ qsc\_socket\_send\_flag\_send\_oob\ =\ 0x00000001L,\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00146\ \ \ \ \ qsc\_socket\_send\_flag\_peek\_message\ =\ 0x00000002L,\ \ \ \ }
+\DoxyCodeLine{00147\ \ \ \ \ qsc\_socket\_send\_flag\_no\_routing\ =\ 0x00000004L,\ \ \ \ \ \ }
+\DoxyCodeLine{00148\ \}\ qsc\_socket\_send\_flags;}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00153\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_shut\_down\_flags}
+\DoxyCodeLine{00154\ \{}
+\DoxyCodeLine{00155\ \ \ \ \ qsc\_socket\_shut\_down\_flag\_receive\ =\ 0x00000000L,\ \ \ \ }
+\DoxyCodeLine{00156\ \ \ \ \ qsc\_socket\_shut\_down\_flag\_send\ =\ 0x00000001L,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00157\ \ \ \ \ qsc\_socket\_shut\_down\_flag\_both\ =\ 0x00000002L\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00158\ \}\ qsc\_socket\_shut\_down\_flags;}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00163\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_socket\_transports}
+\DoxyCodeLine{00164\ \{}
+\DoxyCodeLine{00165\ \ \ \ \ qsc\_socket\_transport\_none\ =\ 0x00000000L,\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00166\ \ \ \ \ qsc\_socket\_transport\_stream\ =\ 0x00000001L,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00167\ \ \ \ \ qsc\_socket\_transport\_datagram\ =\ 0x00000002L,\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00168\ \ \ \ \ qsc\_socket\_transport\_raw\ =\ 0x00000003L,\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00169\ \ \ \ \ qsc\_socket\_transport\_reliable\ =\ 0x00000004L,\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00170\ \ \ \ \ qsc\_socket\_transport\_sequenced\ =\ 0x00000005L\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00171\ \}\ qsc\_socket\_transports;}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

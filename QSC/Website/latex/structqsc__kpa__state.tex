@@ -1,0 +1,65 @@
+\doxysection{qsc\+\_\+kpa\+\_\+state Struct Reference}
+\hypertarget{structqsc__kpa__state}{}\label{structqsc__kpa__state}\index{qsc\_kpa\_state@{qsc\_kpa\_state}}
+
+
+The KPA state array; state array must be initialized by the caller.  
+
+
+
+
+{\ttfamily \#include $<$sha3.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structqsc__kpa__state_a15d65aef29d1eef4b4ecc31331a44b1f}{state}} \mbox{[}\mbox{\hyperlink{sha3_8h_aff23e68acf93ef5b90d988d0ec6c5459}{QSC\+\_\+\+KPA\+\_\+\+PARALLELISM}}\mbox{]}\mbox{[}\mbox{\hyperlink{sha3_8h_a4a5209edb9ecb070655b876af085b66c}{QSC\+\_\+\+KECCAK\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{structqsc__kpa__state_a962dc51c0a50636ac1cdff958f04b482}{buffer}} \mbox{[}\mbox{\hyperlink{sha3_8h_aff23e68acf93ef5b90d988d0ec6c5459}{QSC\+\_\+\+KPA\+\_\+\+PARALLELISM}} \texorpdfstring{$\ast$}{*}\mbox{\hyperlink{sha3_8h_a66f9f02e5abf8ad658e7a231444c4ee5}{QSC\+\_\+\+KECCAK\+\_\+\+STATE\+\_\+\+BYTE\+\_\+\+SIZE}}\mbox{]}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__kpa__state_a7a04afe5347934be732ec70a70bd0a28}{position}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__kpa__state_a4f5e2a77c03d6867d49cf047173e7f2e}{processed}}
+\item 
+\mbox{\hyperlink{sha3_8h_a3283a3326659d4e2e0679c6bd32b6cc6}{qsc\+\_\+keccak\+\_\+rate}} \mbox{\hyperlink{structqsc__kpa__state_ac9a3da9c6d703bf06f29151437eeede9}{rate}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The KPA state array; state array must be initialized by the caller. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__kpa__state_a962dc51c0a50636ac1cdff958f04b482}\index{qsc\_kpa\_state@{qsc\_kpa\_state}!buffer@{buffer}}
+\index{buffer@{buffer}!qsc\_kpa\_state@{qsc\_kpa\_state}}
+\doxysubsubsection{\texorpdfstring{buffer}{buffer}}
+{\footnotesize\ttfamily \label{structqsc__kpa__state_a962dc51c0a50636ac1cdff958f04b482} 
+uint8\+\_\+t buffer\mbox{[}\mbox{\hyperlink{sha3_8h_aff23e68acf93ef5b90d988d0ec6c5459}{QSC\+\_\+\+KPA\+\_\+\+PARALLELISM}} \texorpdfstring{$\ast$}{*}\mbox{\hyperlink{sha3_8h_a66f9f02e5abf8ad658e7a231444c4ee5}{QSC\+\_\+\+KECCAK\+\_\+\+STATE\+\_\+\+BYTE\+\_\+\+SIZE}}\mbox{]}}
+
+The message buffer \Hypertarget{structqsc__kpa__state_a7a04afe5347934be732ec70a70bd0a28}\index{qsc\_kpa\_state@{qsc\_kpa\_state}!position@{position}}
+\index{position@{position}!qsc\_kpa\_state@{qsc\_kpa\_state}}
+\doxysubsubsection{\texorpdfstring{position}{position}}
+{\footnotesize\ttfamily \label{structqsc__kpa__state_a7a04afe5347934be732ec70a70bd0a28} 
+size\+\_\+t position}
+
+The buffer position \Hypertarget{structqsc__kpa__state_a4f5e2a77c03d6867d49cf047173e7f2e}\index{qsc\_kpa\_state@{qsc\_kpa\_state}!processed@{processed}}
+\index{processed@{processed}!qsc\_kpa\_state@{qsc\_kpa\_state}}
+\doxysubsubsection{\texorpdfstring{processed}{processed}}
+{\footnotesize\ttfamily \label{structqsc__kpa__state_a4f5e2a77c03d6867d49cf047173e7f2e} 
+size\+\_\+t processed}
+
+The number of message bytes processed \Hypertarget{structqsc__kpa__state_ac9a3da9c6d703bf06f29151437eeede9}\index{qsc\_kpa\_state@{qsc\_kpa\_state}!rate@{rate}}
+\index{rate@{rate}!qsc\_kpa\_state@{qsc\_kpa\_state}}
+\doxysubsubsection{\texorpdfstring{rate}{rate}}
+{\footnotesize\ttfamily \label{structqsc__kpa__state_ac9a3da9c6d703bf06f29151437eeede9} 
+\mbox{\hyperlink{sha3_8h_a3283a3326659d4e2e0679c6bd32b6cc6}{qsc\+\_\+keccak\+\_\+rate}} rate}
+
+The absorption rate \Hypertarget{structqsc__kpa__state_a15d65aef29d1eef4b4ecc31331a44b1f}\index{qsc\_kpa\_state@{qsc\_kpa\_state}!state@{state}}
+\index{state@{state}!qsc\_kpa\_state@{qsc\_kpa\_state}}
+\doxysubsubsection{\texorpdfstring{state}{state}}
+{\footnotesize\ttfamily \label{structqsc__kpa__state_a15d65aef29d1eef4b4ecc31331a44b1f} 
+uint64\+\_\+t state\mbox{[}\mbox{\hyperlink{sha3_8h_aff23e68acf93ef5b90d988d0ec6c5459}{QSC\+\_\+\+KPA\+\_\+\+PARALLELISM}}\mbox{]}\mbox{[}\mbox{\hyperlink{sha3_8h_a4a5209edb9ecb070655b876af085b66c}{QSC\+\_\+\+KECCAK\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}}
+
+The long state array 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/\mbox{\hyperlink{sha3_8h}{sha3.\+h}}\end{DoxyCompactItemize}

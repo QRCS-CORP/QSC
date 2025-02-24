@@ -8,10 +8,11 @@
 
 bool qsctest_dilithium_kat_test()
 {
-	/* note: test message size increase as the kat number increments, ex. 0=33, 1=66, 2=99...
-	   If testing other kats other than zero, make sure to increase the message size accordingly. */
+#if defined(QSC_DILITHIUM_RANDOMIZED_SIGNING)
+	qsctest_print_safe("Disable randomized signing: QSC_DILITHIUM_RANDOMIZED_SIGNING to enable tests. -DOT6 \n");
+#else
 
-#define TEST_MESSAGE_LEN 33
+#define TEST_MESSAGE_LEN 330
 
 	uint8_t msg[TEST_MESSAGE_LEN] = { 0 };
 	uint8_t kmsg[TEST_MESSAGE_LEN] = { 0 };
@@ -22,6 +23,7 @@ bool qsctest_dilithium_kat_test()
 	uint8_t ksk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
 	uint8_t ksig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint32_t i;
 	size_t msglen;
 	size_t pklen;
 	size_t seedlen;
@@ -30,6 +32,7 @@ bool qsctest_dilithium_kat_test()
 	bool ret;
 
 	ret = true;
+	i = 0;
 	msglen = 0;
 	pklen = 0;
 	seedlen = 0;
@@ -37,60 +40,66 @@ bool qsctest_dilithium_kat_test()
 	sklen = 0;
 
 #if defined(QSC_DILITHIUM_S1P2544)
-	char path[] = "NPQCR3/dilithium-2544.rsp";
+	char path[] = "FIPS/dilithium-2544.rsp";
 #elif defined(QSC_DILITHIUM_S3P4016)
-	char path[] = "NPQCR3/dilithium-4016.rsp";
+	char path[] = "FIPS/dilithium-4016.rsp";
 #elif defined(QSC_DILITHIUM_S5P4880)
-	char path[] = "NPQCR3/dilithium-4880.rsp";
+	char path[] = "FIPS/dilithium-4880.rsp";
 #else
 #	error The parameter set is invalid!
 #endif
 
-	/* NIST PQC Round 3 KATs */
-	parse_nist_signature_kat(path, seed, &seedlen, kmsg, &msglen, kpk, &pklen, ksk, &sklen, ksig, &siglen, 0);
-
-	qsctest_nistrng_prng_initialize(seed, NULL, 0);
-
-	/* generate public and secret keys */
-	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
-
-	/* compare the public key to the expected output */
-	if (qsc_intutils_are_equal8(pk, kpk, QSC_DILITHIUM_PUBLICKEY_SIZE) != true)
+#if defined(QSCTEST_DILITHIUM_FULL_KAT)
+	for (i = 0; i < QSCTEST_DILITHIUM_TEST_COUNT; ++i)
+#endif
 	{
-		qsctest_print_safe("Failure! dilithium operations: public-key does not align with the known answer -DOT1 \n");
-		ret = false;
-	}
+		/* NIST FIPS 204 KATs */
+		parse_nist_signature_kat(path, seed, &seedlen, kmsg, &msglen, kpk, &pklen, ksk, &sklen, ksig, &siglen, i);
 
-	/* compare the secret key to the expected output */
-	if (qsc_intutils_are_equal8(sk, ksk, QSC_DILITHIUM_PRIVATEKEY_SIZE) != true)
-	{
-		qsctest_print_safe("Failure! dilithium operations: private key does not align with the known answer -DOT2 \n");
-		ret = false;
-	}
+		qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
-	/* sign the message */
-	qsc_dilithium_sign(sig, &siglen, kmsg, TEST_MESSAGE_LEN, sk, qsctest_nistrng_prng_generate);
+		/* generate public and secret keys */
+		qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
-	/* compare the signature cipher-text to the expected output */
-	if (qsc_intutils_are_equal8(sig, ksig, QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN) != true)
-	{
-		qsctest_print_safe("Failure! dilithium operations: ciphertext does not align with the known answer -DOT3 \n");
-		ret = false;
-	}
+		/* compare the public key to the expected output */
+		if (qsc_intutils_are_equal8(pk, kpk, QSC_DILITHIUM_PUBLICKEY_SIZE) != true)
+		{
+			qsctest_print_safe("Failure! dilithium operations: public-key does not align with the known answer -DOT1 \n");
+			ret = false;
+		}
 
-	/* verify the message using the public key */
-	if (qsc_dilithium_verify(msg, &msglen, sig, siglen, pk) != true)
-	{
-		qsctest_print_safe("Failure! dilithium operations: signature verification check failure -DOT4 \n");
-		ret = false;
-	}
+		/* compare the secret key to the expected output */
+		if (qsc_intutils_are_equal8(sk, ksk, QSC_DILITHIUM_PRIVATEKEY_SIZE) != true)
+		{
+			qsctest_print_safe("Failure! dilithium operations: private key does not align with the known answer -DOT2 \n");
+			ret = false;
+		}
 
-	/* compare the two messages for equality */
-	if (qsc_intutils_are_equal8(msg, kmsg, TEST_MESSAGE_LEN) != true)
-	{
-		qsctest_print_safe("Failure! dilithium operations: message does not equal to the original -DOT5 \n");
-		ret = false;
+		/* sign the message */
+		qsc_dilithium_sign(sig, &siglen, kmsg, msglen, sk, qsctest_nistrng_prng_generate);
+
+		/* compare the signature cipher-text to the expected output */
+		if (qsc_intutils_are_equal8(sig, ksig, siglen) != true)
+		{
+			qsctest_print_safe("Failure! dilithium operations: ciphertext does not align with the known answer -DOT3 \n");
+			ret = false;
+		}
+
+		/* verify the message using the public key */
+		if (qsc_dilithium_verify(msg, &msglen, sig, siglen, pk) != true)
+		{
+			qsctest_print_safe("Failure! dilithium operations: signature verification check failure -DOT4 \n");
+			ret = false;
+		}
+
+		/* compare the two messages for equality */
+		if (qsc_intutils_are_equal8(msg, kmsg, msglen) != true)
+		{
+			qsctest_print_safe("Failure! dilithium operations: message does not equal to the original -DOT5 \n");
+			ret = false;
+		}
 	}
+#endif
 
 	return ret;
 }
@@ -116,8 +125,10 @@ bool qsctest_dilithium_privatekey_integrity()
 	/* generate the signature key-pair */
 	qsc_dilithium_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
-	/* flip bit in the private key */
-	for (size_t i = 0; i < 32; ++i)
+	/* flip bits in the private key */
+	/* Note: this used to fail if fewer bits (<=32) were flipped in the secret key, 
+	   but changes to Dilithium made by NIST, have changed this behavior. */
+	for (size_t i = 0; i < 64; ++i)
 	{
 		sk[QSC_DILITHIUM_PUBLICKEY_SIZE + i] ^= 1;
 	}

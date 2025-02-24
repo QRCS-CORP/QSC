@@ -1,0 +1,53 @@
+\doxysection{qsc\+\_\+socket\+\_\+server\+\_\+async\+\_\+accept\+\_\+state Struct Reference}
+\hypertarget{structqsc__socket__server__async__accept__state}{}\label{structqsc__socket__server__async__accept__state}\index{qsc\_socket\_server\_async\_accept\_state@{qsc\_socket\_server\_async\_accept\_state}}
+
+
+The async listener-\/accept state structure. The structure contains a pointer to the listener socket, and pointers to a callback and error functions. The callback function returns a populated \doxylink{structqsc__socket__server__accept__result}{qsc\+\_\+socket\+\_\+server\+\_\+accept\+\_\+result} structure. The error function returns the listener socket and an qsc\+\_\+socket\+\_\+exceptions error code.  
+
+
+
+
+{\ttfamily \#include $<$socketserver.\+h$>$}
+
+
+
+Collaboration diagram for qsc\+\_\+socket\+\_\+server\+\_\+async\+\_\+accept\+\_\+state\+:
+% FIG 0
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__socket__server__async__accept__state_ab765a6774e0fdaf15d0905c2e3843476}{source}}
+\item 
+void(\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__socket__server__async__accept__state_a4d05c72509d38f150d79cbc245e26109}{callback}} )(\mbox{\hyperlink{structqsc__socket__server__accept__result}{qsc\+\_\+socket\+\_\+server\+\_\+accept\+\_\+result}} \texorpdfstring{$\ast$}{*}result)
+\item 
+void(\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__socket__server__async__accept__state_ab578ff3ac205a666bccf6a6d4ccac4ce}{error}} )(\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*}sock, qsc\+\_\+socket\+\_\+exceptions exception)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The async listener-\/accept state structure. The structure contains a pointer to the listener socket, and pointers to a callback and error functions. The callback function returns a populated \doxylink{structqsc__socket__server__accept__result}{qsc\+\_\+socket\+\_\+server\+\_\+accept\+\_\+result} structure. The error function returns the listener socket and an qsc\+\_\+socket\+\_\+exceptions error code. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__socket__server__async__accept__state_a4d05c72509d38f150d79cbc245e26109}\index{qsc\_socket\_server\_async\_accept\_state@{qsc\_socket\_server\_async\_accept\_state}!callback@{callback}}
+\index{callback@{callback}!qsc\_socket\_server\_async\_accept\_state@{qsc\_socket\_server\_async\_accept\_state}}
+\doxysubsubsection{\texorpdfstring{callback}{callback}}
+{\footnotesize\ttfamily \label{structqsc__socket__server__async__accept__state_a4d05c72509d38f150d79cbc245e26109} 
+void(\texorpdfstring{$\ast$}{*} callback) (\mbox{\hyperlink{structqsc__socket__server__accept__result}{qsc\+\_\+socket\+\_\+server\+\_\+accept\+\_\+result}} \texorpdfstring{$\ast$}{*}result)}
+
+A pointer to a callback function \Hypertarget{structqsc__socket__server__async__accept__state_ab578ff3ac205a666bccf6a6d4ccac4ce}\index{qsc\_socket\_server\_async\_accept\_state@{qsc\_socket\_server\_async\_accept\_state}!error@{error}}
+\index{error@{error}!qsc\_socket\_server\_async\_accept\_state@{qsc\_socket\_server\_async\_accept\_state}}
+\doxysubsubsection{\texorpdfstring{error}{error}}
+{\footnotesize\ttfamily \label{structqsc__socket__server__async__accept__state_ab578ff3ac205a666bccf6a6d4ccac4ce} 
+void(\texorpdfstring{$\ast$}{*} error) (\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*}sock, qsc\+\_\+socket\+\_\+exceptions exception)}
+
+A pointer to an error function \Hypertarget{structqsc__socket__server__async__accept__state_ab765a6774e0fdaf15d0905c2e3843476}\index{qsc\_socket\_server\_async\_accept\_state@{qsc\_socket\_server\_async\_accept\_state}!source@{source}}
+\index{source@{source}!qsc\_socket\_server\_async\_accept\_state@{qsc\_socket\_server\_async\_accept\_state}}
+\doxysubsubsection{\texorpdfstring{source}{source}}
+{\footnotesize\ttfamily \label{structqsc__socket__server__async__accept__state_ab765a6774e0fdaf15d0905c2e3843476} 
+\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}}\texorpdfstring{$\ast$}{*} source}
+
+A pointer to the listener socket 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/socketserver.\+h\end{DoxyCompactItemize}

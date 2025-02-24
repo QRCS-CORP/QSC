@@ -6,13 +6,13 @@
 \def AES128_ROUND_COUNT
 * The number of Rijndael mixing rounds used by AES-128.
 */
-#define AES128_ROUND_COUNT 10
+#define AES128_ROUND_COUNT 10ULL
 
 /*!
 \def AES256_ROUND_COUNT
 * The number of Rijndael mixing rounds used by AES-256.
 */
-#define AES256_ROUND_COUNT 14
+#define AES256_ROUND_COUNT 14ULL
 
 /*!
 \def ROUNDKEY_ELEMENT_SIZE
@@ -59,28 +59,28 @@
 \def HBA_INFO_SIZE
 * The HBA version information array length.
 */
-#define HBA_INFO_SIZE 16
+#define HBA_INFO_SIZE 16ULL
 
 /*!
 \def HBA256_MKEY_SIZE
 * The size of the hba-256 mac key array
 */
-#define HBA256_MKEY_SIZE 32
+#define HBA256_MKEY_SIZE 32ULL
 
 /*!
 \def HBA512_MKEY_SIZE
 * The size of the hba-512 mac key array
 */
-#define HBA512_MKEY_SIZE 64
+#define HBA512_MKEY_SIZE 64ULL
 
 /*!
 \def HBA_NAME_SIZE
 * The HBA implementation specific name array length.
 */
 #if defined(QSC_HBA_KMAC_EXTENSION)
-#	define HBA_NAME_SIZE 29
+#	define HBA_NAME_SIZE 29ULL
 #else
-#	define HBA_NAME_SIZE 33
+#	define HBA_NAME_SIZE 33ULL
 #endif
 
 /* aes-ni and table-based fallback functions */
@@ -270,6 +270,9 @@ static void aes_standard_expand(qsc_aes_state* state, const qsc_aes_keyparams* k
 
 void qsc_aes_initialize(qsc_aes_state* state, const qsc_aes_keyparams* keyparams, bool encryption, qsc_aes_cipher_type ctype)
 {
+	assert(state != NULL);
+	assert(keyparams != NULL);
+
 	if (keyparams->nonce != NULL)
 	{
 		state->nonce = keyparams->nonce;

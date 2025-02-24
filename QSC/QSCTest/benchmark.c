@@ -4,6 +4,7 @@
 #include "../QSC/chacha.h"
 #include "../QSC/csp.h"
 #include "../QSC/csx.h"
+#include "../QSC/qmac.h"
 #include "../QSC/rcs.h"
 #include "../QSC/sha3.h"
 #include "../QSC/timerex.h"
@@ -366,11 +367,13 @@ static void csx_benchmark_test()
 
 	qsc_csx_initialize(&ctx, &kp, true);
 
-	while (tctr < SAMPLE_COUNT)
+	while (tctr < SAMPLE_COUNT - 1)
 	{
-		qsc_csx_transform(&ctx, enc, msg, sizeof(msg));
+		qsc_csx_extended_transform(&ctx, enc, msg, sizeof(msg), false);
 		++tctr;
 	}
+
+	qsc_csx_extended_transform(&ctx, enc, msg, sizeof(msg), true);
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("CSX-512 processed 1GB of data in ");
@@ -380,8 +383,8 @@ static void csx_benchmark_test()
 
 static void rcs256_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE + QSC_RCS_256_MAC_SIZE] = { 0 };
-	uint8_t key[QSC_RCS_256_KEY_SIZE] = { 0 };
+	uint8_t enc[BUFFER_SIZE + QSC_RCS256_MAC_SIZE] = { 0 };
+	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
 	uint8_t msg[BUFFER_SIZE] = { 0 };
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	qsc_rcs_state ctx;
@@ -402,11 +405,13 @@ static void rcs256_benchmark_test()
 
 	qsc_rcs_initialize(&ctx, &kp, true);
 
-	while (tctr < SAMPLE_COUNT)
+	while (tctr < SAMPLE_COUNT - 1)
 	{
-		qsc_rcs_transform(&ctx, enc, msg, sizeof(msg));
+		qsc_rcs_extended_transform(&ctx, enc, msg, sizeof(msg), false);
 		++tctr;
 	}
+
+	qsc_rcs_extended_transform(&ctx, enc, msg, sizeof(msg), true);
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("RCS-256 processed 1GB of data in ");
@@ -416,8 +421,8 @@ static void rcs256_benchmark_test()
 
 static void rcs512_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE + QSC_RCS_512_MAC_SIZE] = { 0 };
-	uint8_t key[QSC_RCS_512_KEY_SIZE] = { 0 };
+	uint8_t enc[BUFFER_SIZE + QSC_RCS512_MAC_SIZE] = { 0 };
+	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
 	uint8_t msg[BUFFER_SIZE] = { 0 };
 	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	qsc_rcs_state ctx;
@@ -438,11 +443,13 @@ static void rcs512_benchmark_test()
 
 	qsc_rcs_initialize(&ctx, &kp, true);
 
-	while (tctr < SAMPLE_COUNT)
+	while (tctr < SAMPLE_COUNT - 1)
 	{
-		qsc_rcs_transform(&ctx, enc, msg, sizeof(msg));
+		qsc_rcs_extended_transform(&ctx, enc, msg, sizeof(msg), false);
 		++tctr;
 	}
+
+	qsc_rcs_extended_transform(&ctx, enc, msg, sizeof(msg), true);
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("RCS-512 processed 1GB of data in ");
@@ -468,9 +475,10 @@ static void kmac128_benchmark()
 	while (tctr < SAMPLE_COUNT)
 	{
 		qsc_kmac_update(&ctx, QSC_KECCAK_128_RATE, msg, sizeof(msg));
-		qsc_kmac_finalize(&ctx, QSC_KECCAK_128_RATE, tag, sizeof(tag));
 		++tctr;
 	}
+
+	qsc_kmac_finalize(&ctx, QSC_KECCAK_128_RATE, tag, sizeof(tag));
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("KMAC-128 processed 1GB of data in ");
@@ -496,9 +504,10 @@ static void kmac256_benchmark()
 	while (tctr < SAMPLE_COUNT)
 	{
 		qsc_kmac_update(&ctx, QSC_KECCAK_256_RATE, msg, sizeof(msg));
-		qsc_kmac_finalize(&ctx, QSC_KECCAK_256_RATE, tag, sizeof(tag));
 		++tctr;
 	}
+
+	qsc_kmac_finalize(&ctx, QSC_KECCAK_256_RATE, tag, sizeof(tag));
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("KMAC-256 processed 1GB of data in ");
@@ -524,9 +533,10 @@ static void kmac512_benchmark()
 	while (tctr < SAMPLE_COUNT)
 	{
 		qsc_kmac_update(&ctx, QSC_KECCAK_512_RATE, msg, sizeof(msg));
-		qsc_kmac_finalize(&ctx, QSC_KECCAK_512_RATE, tag, sizeof(tag));
 		++tctr;
 	}
+
+	qsc_kmac_finalize(&ctx, QSC_KECCAK_512_RATE, tag, sizeof(tag));
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("KMAC-512 processed 1GB of data in ");
@@ -712,9 +722,10 @@ static void kpa128_benchmark()
 	while (tctr < SAMPLE_COUNT)
 	{
 		qsc_kpa_update(&ctx, msg, sizeof(msg));
-		qsc_kpa_finalize(&ctx, tag, sizeof(tag));
 		++tctr;
 	}
+
+	qsc_kpa_finalize(&ctx, tag, sizeof(tag));
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("KPA-128 processed 1GB of data in ");
@@ -740,9 +751,10 @@ static void kpa256_benchmark()
 	while (tctr < SAMPLE_COUNT)
 	{
 		qsc_kpa_update(&ctx, msg, sizeof(msg));
-		qsc_kpa_finalize(&ctx, tag, sizeof(tag));
 		++tctr;
 	}
+
+	qsc_kpa_finalize(&ctx, tag, sizeof(tag));
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("KPA-256 processed 1GB of data in ");
@@ -767,10 +779,11 @@ static void kpa512_benchmark()
 
 	while (tctr < SAMPLE_COUNT)
 	{
-		qsc_kpa_update(&ctx, msg, sizeof(msg));
 		qsc_kpa_finalize(&ctx, tag, sizeof(tag));
 		++tctr;
 	}
+
+	qsc_kpa_update(&ctx, msg, sizeof(msg));
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("KPA-512 processed 1GB of data in ");
@@ -790,9 +803,10 @@ static void shake128_benchmark()
 	tctr = 0;
 	start = qsc_timerex_stopwatch_start();
 
+	qsc_shake_initialize(&ctx, QSC_KECCAK_128_RATE, key, sizeof(key));
+
 	while (tctr < ONE_GIGABYTE)
 	{
-		qsc_shake_initialize(&ctx, QSC_KECCAK_128_RATE, key, sizeof(key));
 		qsc_shake_squeezeblocks(&ctx, QSC_KECCAK_128_RATE, otp, 1);
 		tctr += sizeof(otp);
 	}
@@ -815,9 +829,10 @@ static void shake256_benchmark()
 	tctr = 0;
 	start = qsc_timerex_stopwatch_start();
 
+	qsc_shake_initialize(&ctx, QSC_KECCAK_256_RATE, key, sizeof(key));
+
 	while (tctr < ONE_GIGABYTE)
 	{
-		qsc_shake_initialize(&ctx, QSC_KECCAK_256_RATE, key, sizeof(key));
 		qsc_shake_squeezeblocks(&ctx, QSC_KECCAK_256_RATE, otp, 1);
 		tctr += sizeof(otp);
 	}
@@ -840,9 +855,10 @@ static void shake512_benchmark()
 	tctr = 0;
 	start = qsc_timerex_stopwatch_start();
 
+	qsc_shake_initialize(&ctx, QSC_KECCAK_512_RATE, key, sizeof(key));
+
 	while (tctr < ONE_GIGABYTE)
 	{
-		qsc_shake_initialize(&ctx, QSC_KECCAK_512_RATE, key, sizeof(key));
 		qsc_shake_squeezeblocks(&ctx, QSC_KECCAK_512_RATE, otp, 1);
 		tctr += sizeof(otp);
 	}
@@ -923,6 +939,34 @@ static void shake512x4_benchmark()
 	qsctest_print_line(" seconds");
 }
 #endif
+
+static void qmac_benchmark()
+{
+	uint8_t key[QSC_QMAC_KEY_SIZE] = { 0x03, 0x05, 0x07, 0x0B };
+	uint8_t msg[QSC_QMAC_BLOCK_SIZE] = { 0x0D, 0x11, 0x13, 0x17 };
+	uint8_t otp[QSC_QMAC_MAC_SIZE] = { 0 };
+	qsc_qmac_state ctx;
+	size_t tctr;
+	uint64_t start;
+	uint64_t elapsed;
+
+	tctr = 0;
+	qsc_qmac_keyparams kp = { key, sizeof(key), NULL, 0, NULL, 0 };
+	start = qsc_timerex_stopwatch_start();
+
+	qsc_qmac_initialize(&ctx, &kp);
+
+	while (tctr < ONE_GIGABYTE)
+	{
+		qsc_qmac_update(&ctx, msg, QSC_QMAC_BLOCK_SIZE);
+		tctr += QSC_QMAC_BLOCK_SIZE;
+	}
+
+	elapsed = qsc_timerex_stopwatch_elapsed(start);
+	qsctest_print_safe("QMAC processed 1GB of data in ");
+	qsctest_print_double((double)elapsed / 1000.0);
+	qsctest_print_line(" seconds");
+}
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 static void shake128x8_benchmark()
@@ -1112,4 +1156,10 @@ void qsctest_benchmark_shake_run()
 	qsctest_print_line("Running the AVX512 8X SHAKE-512 performance benchmarks.");
 	shake512x8_benchmark();
 #endif
+}
+
+void qsctest_benchmark_qmac_run()
+{
+	qsctest_print_line("Running the QMAC performance benchmarks.");
+	qmac_benchmark();
 }

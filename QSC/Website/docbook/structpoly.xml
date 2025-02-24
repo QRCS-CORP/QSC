@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structpoly" xml:lang="en-US">
+<title>poly Struct Reference</title>
+<indexterm><primary>poly</primary></indexterm>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_structpoly_1a04b47b45bf4e06838e9b980e1be12970"/>uint16_t <emphasis role="strong">coeffs</emphasis> [NTRU_N]</para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ntrubase.c</section>

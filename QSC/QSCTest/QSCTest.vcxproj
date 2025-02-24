@@ -150,6 +150,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -219,7 +220,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -264,6 +265,7 @@
     <ClCompile Include="dilithium_test.c" />
     <ClCompile Include="ecdh_test.c" />
     <ClCompile Include="ecdsa_test.c" />
+    <ClCompile Include="encoding_test.c" />
     <ClCompile Include="falcon_test.c" />
     <ClCompile Include="katparser.c" />
     <ClCompile Include="kyber_test.c" />
@@ -272,6 +274,7 @@
     <ClCompile Include="nistrng.c" />
     <ClCompile Include="ntru_test.c" />
     <ClCompile Include="poly1305_test.c" />
+    <ClCompile Include="qmac_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
     <ClCompile Include="scb_test.c" />
@@ -293,6 +296,7 @@
     <ClInclude Include="dilithium_test.h" />
     <ClInclude Include="ecdh_test.h" />
     <ClInclude Include="ecdsa_test.h" />
+    <ClInclude Include="encoding_test.h" />
     <ClInclude Include="falcon_test.h" />
     <ClInclude Include="katparser.h" />
     <ClInclude Include="kyber_test.h" />
@@ -301,6 +305,7 @@
     <ClInclude Include="nistrng.h" />
     <ClInclude Include="ntru_test.h" />
     <ClInclude Include="poly1305_test.h" />
+    <ClInclude Include="qmac_test.h" />
     <ClInclude Include="rcs_test.h" />
     <ClInclude Include="scb_test.h" />
     <ClInclude Include="secrand_test.h" />

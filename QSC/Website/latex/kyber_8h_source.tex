@@ -1,0 +1,80 @@
+\doxysection{kyber.\+h}
+\hypertarget{kyber_8h_source}{}\label{kyber_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/kyber.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/kyber.h}}
+\mbox{\hyperlink{kyber_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_KYBER\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00086\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_HAS\_AVX2)}}
+\DoxyCodeLine{00087\ \textcolor{preprocessor}{\#\ \ \ include\ "{}kyberbase\_avx2.h"{}}}
+\DoxyCodeLine{00088\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00089\ \textcolor{preprocessor}{\#\ \ \ include\ "{}kyberbase.h"{}}}
+\DoxyCodeLine{00090\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_CIPHERTEXT\_SIZE\ (QSC\_KYBER\_INDCPA\_BYTES)}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_PRIVATEKEY\_SIZE\ (QSC\_KYBER\_INDCPA\_SECRETKEY\_BYTES\ +\ \ QSC\_KYBER\_INDCPA\_PUBLICKEY\_BYTES\ +\ (2\ *\ QSC\_KYBER\_SYMBYTES))}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_PUBLICKEY\_SIZE\ (QSC\_KYBER\_INDCPA\_PUBLICKEY\_BYTES)}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_SEED\_SIZE\ 32}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_SHAREDSECRET\_SIZE\ 32}}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00126\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_ALGNAME\ "{}KYBER"{}}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00137\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{kyber_8h_a07e969adf524c02dfc8e069bc383f163}{qsc\_kyber\_decapsulate}}(uint8\_t*\ secret,\ \textcolor{keyword}{const}\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ privatekey);}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00148\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{kyber_8h_ac29729a9d20073fb5bf0caaf07e47513}{qsc\_kyber\_decrypt}}(uint8\_t*\ secret,\ \textcolor{keyword}{const}\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ privatekey);}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00161\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{kyber_8h_a2846270dbee6004f92b992fa2b533908}{qsc\_kyber\_encapsulate}}(uint8\_t*\ secret,\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ publickey,\ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00174\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{kyber_8h_a692db6b4a2e4ba5356b68380feca1494}{qsc\_kyber\_encrypt}}(uint8\_t*\ secret,\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ publickey,\ \textcolor{keyword}{const}\ uint8\_t\ seed[\mbox{\hyperlink{kyber_8h_a8e5ba39a57a1f9fc4af613d957ca3df5}{QSC\_KYBER\_SEED\_SIZE}}]);}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00185\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{kyber_8h_a371669e2f7670c62f46402cad358f383}{qsc\_kyber\_generate\_keypair}}(uint8\_t*\ publickey,\ uint8\_t*\ privatekey,\ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,113 @@
+\doxysection{mceliece.\+h}
+\hypertarget{mceliece_8h_source}{}\label{mceliece_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/mceliece.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/mceliece.h}}
+\mbox{\hyperlink{mceliece_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_MCELIECE\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_MCELIECE\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \textcolor{preprocessor}{\#if\ defined(QSC\_MCELIECE\_S1N3488T64)}}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00090\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_CIPHERTEXT\_SIZE\ 128}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PRIVATEKEY\_SIZE\ 6492}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PUBLICKEY\_SIZE\ 261120}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#elif\ defined(QSC\_MCELIECE\_S3N4608T96)}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_CIPHERTEXT\_SIZE\ 188}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PRIVATEKEY\_SIZE\ 13608}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PUBLICKEY\_SIZE\ 524160}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \textcolor{preprocessor}{\#elif\ defined(QSC\_MCELIECE\_S5N6688T128)}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_CIPHERTEXT\_SIZE\ 240}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PRIVATEKEY\_SIZE\ 13932}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00142\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PUBLICKEY\_SIZE\ 1044992}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\#elif\ defined(QSC\_MCELIECE\_S6N6960T119)}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_CIPHERTEXT\_SIZE\ 226}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PRIVATEKEY\_SIZE\ 13948}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00162\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PUBLICKEY\_SIZE\ 1047319}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#elif\ defined(QSC\_MCELIECE\_S7N8192T128)}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00170\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_CIPHERTEXT\_SIZE\ 240\ }}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00176\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PRIVATEKEY\_SIZE\ 14120}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00182\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_MCELIECE\_PUBLICKEY\_SIZE\ 1357824}}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00185\ \textcolor{preprocessor}{\#\ \ \ error\ "{}The\ McEliece\ parameter\ set\ is\ invalid!"{}}}
+\DoxyCodeLine{00186\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00192\ \textcolor{preprocessor}{\#define\ QSC\_MCELIECE\_SEED\_SIZE\ 32}}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00198\ \textcolor{preprocessor}{\#define\ QSC\_MCELIECE\_SHAREDSECRET\_SIZE\ 32}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00204\ \textcolor{preprocessor}{\#define\ QSC\_MCELIECE\_ALGNAME\ "{}MCELIECE"{}}}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00214\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{mceliece_8h_a01e711ff5e4aa6463567f343dc289aa4}{qsc\_mceliece\_decapsulate}}(uint8\_t*\ secret,\ \textcolor{keyword}{const}\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ privatekey);}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00225\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{mceliece_8h_afc1dcfa7d08600d9f08f652b1870c89f}{qsc\_mceliece\_decrypt}}(uint8\_t*\ secret,\ \textcolor{keyword}{const}\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ privatekey);}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00235\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{mceliece_8h_a0243223caa07b630aceafb747fd072e8}{qsc\_mceliece\_encapsulate}}(uint8\_t*\ secret,\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ publickey,\ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00248\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{mceliece_8h_aed581a4509d43bfd08374f04ab8fc43f}{qsc\_mceliece\_encrypt}}(uint8\_t*\ secret,\ uint8\_t*\ ciphertext,\ \textcolor{keyword}{const}\ uint8\_t*\ publickey,\ \textcolor{keyword}{const}\ uint8\_t\ seed[\mbox{\hyperlink{mceliece_8h_a73d907806bc87503e60376c0561b3ec4}{QSC\_MCELIECE\_SEED\_SIZE}}]);}
+\DoxyCodeLine{00249\ }
+\DoxyCodeLine{00257\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{mceliece_8h_a7281ad99725a38a63c880411cb707dba}{qsc\_mceliece\_generate\_keypair}}(uint8\_t*\ publickey,\ uint8\_t*\ privatekey,\ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

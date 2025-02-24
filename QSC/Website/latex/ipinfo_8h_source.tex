@@ -1,0 +1,185 @@
+\doxysection{ipinfo.\+h}
+\hypertarget{ipinfo_8h_source}{}\label{ipinfo_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ipinfo.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ipinfo.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_IPINFO\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#include\ "{}arrayutils.h"{}}}
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#include\ "{}intutils.h"{}}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#include\ "{}memutils.h"{}}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#include\ "{}socketflags.h"{}}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#include\ "{}stringutils.h"{}}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00054\ \textcolor{comment}{*\ \(\backslash\)file\ ipinfo.h}}
+\DoxyCodeLine{00055\ \textcolor{comment}{*\ \(\backslash\)brief\ IP\ information\ function\ definitions}}
+\DoxyCodeLine{00056\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IPV4\_BYTELEN\ 0x04}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IPV4\_MINLEN\ 0x08}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IPV4\_STRNLEN\ 0x16}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IPV4\_MASK\_STRNLEN\ 0x10}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00086\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IPV6\_BYTELEN\ 0x10}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IP\_MAX\_BYTELEN\ (QSC\_IPINFO\_IPV6\_BYTELEN)}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IPV6\_STRNLEN\ 0x41}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_IPV6\_MASK\_STRNLEN\ 0x41}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#define\ QSC\_IPINFO\_MAX\_SIZE\ (QSC\_IPINFO\_IPV6\_STRNLEN)}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00115\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_ipinfo\_address\_types}
+\DoxyCodeLine{00116\ \{}
+\DoxyCodeLine{00117\ \ \ \ \ qsc\_ipinfo\_address\_type\_none\ =\ 0x00,\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00118\ \ \ \ \ qsc\_ipinfo\_address\_type\_ipv4\ =\ 0x01,\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00119\ \ \ \ \ qsc\_ipinfo\_address\_type\_ipv6\ =\ 0x02,\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00120\ \ \ \ \ qsc\_ipinfo\_address\_type\_unknown\ =\ 0xFF,\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00121\ \}\ qsc\_ipinfo\_address\_types;}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00126\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}}
+\DoxyCodeLine{00127\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ uint8\_t\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address_a44dcd83c3c9be9025e3532bbd9a95e5e}{ipv4}}[QSC\_IPINFO\_IPV4\_BYTELEN];\ \ }
+\DoxyCodeLine{00129\ \}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}};}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00134\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structqsc__ipinfo__ipv4__info}{qsc\_ipinfo\_ipv4\_info}}}
+\DoxyCodeLine{00135\ \{}
+\DoxyCodeLine{00136\ \ \ \ \ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__info_a14ac6b3128035a8c60ee85cee6454ee0}{address}};\ \ \ \ \ \ }
+\DoxyCodeLine{00137\ \ \ \ \ uint16\_t\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__info_a8e0798404bf2cf5dabb84c5ba9a4f236}{port}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00138\ \ \ \ \ uint8\_t\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__info_a8a74907784be6c7786c2d060c8d7e10b}{mask}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00139\ \}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__info}{qsc\_ipinfo\_ipv4\_info}};}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00147\ QSC\_EXPORT\_API\ qsc\_ipinfo\_address\_types\ qsc\_ipinfo\_get\_address\_type(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ address);}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00154\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}\ qsc\_ipinfo\_ipv4\_address\_any(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00161\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv4\_address\_clear(\mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00169\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}\ qsc\_ipinfo\_ipv4\_address\_from\_array(\textcolor{keyword}{const}\ uint8\_t*\ address);}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00180\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}\ qsc\_ipinfo\_ipv4\_address\_from\_bytes(uint8\_t\ a1,\ uint8\_t\ a2,\ uint8\_t\ a3,\ uint8\_t\ a4);}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00188\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}\ qsc\_ipinfo\_ipv4\_address\_from\_string(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ input[QSC\_IPINFO\_IPV4\_STRNLEN]);}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00197\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv4\_address\_is\_equal(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ a,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ b);}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00205\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv4\_address\_is\_routable(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00213\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv4\_address\_is\_valid(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00221\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv4\_address\_string\_is\_valid(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ address);}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00229\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv4\_address\_is\_zeroed(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00236\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}\ qsc\_ipinfo\_ipv4\_address\_loopback(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00245\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv4\_address\_get\_mask(\textcolor{keywordtype}{char}\ mask[QSC\_IPINFO\_IPV4\_MASK\_STRNLEN],\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00253\ QSC\_EXPORT\_API\ uint8\_t\ qsc\_ipinfo\_ipv4\_address\_get\_cidr\_mask(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00261\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv4\_address\_to\_array(uint8\_t*\ output,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00269\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv4\_address\_to\_string(\textcolor{keywordtype}{char}\ output[QSC\_IPINFO\_IPV4\_STRNLEN],\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv4__address}{qsc\_ipinfo\_ipv4\_address}}*\ address);}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00277\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv4\_array\_to\_string(\textcolor{keywordtype}{char}\ output[QSC\_IPINFO\_IPV4\_STRNLEN],\ \textcolor{keyword}{const}\ uint8\_t*\ address);}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00282\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}}
+\DoxyCodeLine{00283\ \{}
+\DoxyCodeLine{00284\ \ \ \ \ uint8\_t\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address_a71245b942c5be57407b6153b0a369bfc}{ipv6}}[QSC\_IPINFO\_IPV6\_BYTELEN];\ \ }
+\DoxyCodeLine{00285\ \}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}};}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00290\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structqsc__ipinfo__ipv6__info}{qsc\_ipinfo\_ipv6\_info}}}
+\DoxyCodeLine{00291\ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__info_a02ed6819e1ce9a855804e46b0692a18d}{address}};\ \ \ \ \ \ }
+\DoxyCodeLine{00293\ \ \ \ \ uint16\_t\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__info_a8e0798404bf2cf5dabb84c5ba9a4f236}{port}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00294\ \ \ \ \ uint8\_t\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__info_a8a74907784be6c7786c2d060c8d7e10b}{mask}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00295\ \}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__info}{qsc\_ipinfo\_ipv6\_info}};}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00303\ QSC\_EXPORT\_API\ qsc\_ipv6\_address\_prefix\_types\ qsc\_ipinfo\_ipv6\_address\_type(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00310\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}\ qsc\_ipinfo\_ipv6\_address\_any(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00311\ }
+\DoxyCodeLine{00317\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv6\_address\_clear(\mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00318\ }
+\DoxyCodeLine{00325\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}\ qsc\_ipinfo\_ipv6\_address\_from\_array(\textcolor{keyword}{const}\ uint8\_t*\ address);}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00333\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}\ qsc\_ipinfo\_ipv6\_address\_from\_string(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ input[QSC\_IPINFO\_IPV6\_STRNLEN]);}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00342\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv6\_address\_is\_equal(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ a,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ b);}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00350\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv6\_address\_is\_routable(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00358\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv6\_address\_is\_valid(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00366\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv6\_address\_string\_is\_valid(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ address);}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00374\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_ipinfo\_ipv6\_address\_is\_zeroed(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00375\ }
+\DoxyCodeLine{00381\ QSC\_EXPORT\_API\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}\ qsc\_ipinfo\_ipv6\_address\_loopback(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00389\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv6\_address\_get\_mask(\textcolor{keywordtype}{char}\ mask[QSC\_IPINFO\_IPV6\_MASK\_STRNLEN],\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00398\ QSC\_EXPORT\_API\ uint8\_t\ qsc\_ipinfo\_ipv6\_address\_get\_cidr\_mask(\textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00399\ }
+\DoxyCodeLine{00406\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv6\_address\_to\_array(uint8\_t*\ output,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00407\ }
+\DoxyCodeLine{00414\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv6\_address\_to\_string(\textcolor{keywordtype}{char}\ output[QSC\_IPINFO\_IPV6\_STRNLEN],\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structqsc__ipinfo__ipv6__address}{qsc\_ipinfo\_ipv6\_address}}*\ address);}
+\DoxyCodeLine{00415\ }
+\DoxyCodeLine{00422\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv6\_array\_to\_string(\textcolor{keywordtype}{char}\ output[QSC\_IPINFO\_IPV6\_STRNLEN],\ \textcolor{keyword}{const}\ uint8\_t*\ address);}
+\DoxyCodeLine{00423\ }
+\DoxyCodeLine{00430\ QSC\_EXPORT\_API\ uint8\_t\ qsc\_ipinfo\_ipv4\_mask\_to\_cidr(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ mask[QSC\_IPINFO\_IPV4\_MASK\_STRNLEN]);}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00438\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_ipinfo\_ipv4\_cidr\_to\_mask(\textcolor{keywordtype}{char}\ mask[QSC\_IPINFO\_IPV4\_MASK\_STRNLEN],\ uint8\_t\ cidr);}
+\DoxyCodeLine{00439\ }
+\DoxyCodeLine{00440\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

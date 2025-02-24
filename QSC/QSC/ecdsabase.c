@@ -114,6 +114,10 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 
 void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
+	assert(publickey != NULL);
+	assert(privatekey != NULL);
+	assert(seed != NULL);
+
 	ge25519_p3 A;
 
 	qsc_sha512_compute(privatekey, seed, EC25519_SEED_SIZE);
@@ -128,6 +132,11 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
 
 int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
 {
+	assert(signedmsg != NULL);
+	assert(smsglen != NULL);
+	assert(message != NULL);
+	assert(privatekey != NULL);
+
 	size_t slen;
 	int32_t res;
 
@@ -158,11 +167,15 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 
 int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
 {
-	const size_t MSGLEN = smsglen - EC25519_SIGNATURE_SIZE;
-	int32_t res;
-
+	assert(message != NULL);
+	assert(msglen != NULL);
+	assert(signedmsg != NULL);
+	assert(publickey != NULL);
 	assert(smsglen > EC25519_SIGNATURE_SIZE);
 	assert(smsglen - EC25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
+
+	const size_t MSGLEN = smsglen - EC25519_SIGNATURE_SIZE;
+	int32_t res;
 
 	if (ecdsa_ed25519_verify(signedmsg, signedmsg + EC25519_SIGNATURE_SIZE, MSGLEN, publickey) == false)
 	{

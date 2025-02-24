@@ -142,7 +142,7 @@ bool qsc_socket_is_blocking(const qsc_socket* sock)
 
 	res = false;
 
-	if (sock != NULL)
+	if (sock != NULL && sock->connection != QSC_UNINITIALIZED_SOCKET)
 	{
 		res = (recv(sock->connection, (char*)b, 0, 0) == QSC_SOCKET_RET_SUCCESS);
 	}
@@ -161,7 +161,7 @@ bool qsc_socket_is_connected(const qsc_socket* sock)
 	err = 0;
 	res = -1;
 
-	if (sock != NULL)
+	if (sock != NULL && sock->connection != QSC_UNINITIALIZED_SOCKET)
 	{
 		slen = sizeof(err);
 		res = getsockopt(sock->connection, SOL_SOCKET, SO_ERROR, (char*)&err, &slen);
@@ -318,7 +318,21 @@ qsc_socket_exceptions qsc_socket_bind_ipv6(qsc_socket* sock, const qsc_ipinfo_ip
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_close_socket(const qsc_socket* sock)
+void qsc_socket_clear_socket(qsc_socket* sock)
+{
+	assert(sock != NULL);
+
+	qsc_memutils_clear(sock->address, QSC_SOCKET_ADDRESS_MAX_SIZE);
+	sock->address_family = qsc_socket_address_family_none;
+	sock->connection = QSC_UNINITIALIZED_SOCKET;
+	sock->connection_status = qsc_socket_state_none;
+	sock->instance = 0;
+	sock->port = 0;
+	sock->socket_protocol = qsc_socket_protocol_none;
+	sock->socket_transport = qsc_socket_transport_none;
+}
+
+qsc_socket_exceptions qsc_socket_close_socket(qsc_socket* sock)
 {
 	assert(sock != NULL);
 
@@ -333,6 +347,9 @@ qsc_socket_exceptions qsc_socket_close_socket(const qsc_socket* sock)
 #else
 		res = (qsc_socket_exceptions)close(sock->connection);
 #endif
+
+		sock->connection = QSC_UNINITIALIZED_SOCKET;
+		sock->connection_status = qsc_socket_state_none;
 	}
 
 	if (res == qsc_socket_exception_error)
@@ -499,6 +516,33 @@ qsc_socket_exceptions qsc_socket_listen(const qsc_socket* sock, int32_t backlog)
 	return res;
 }
 
+size_t qsc_socket_max_send_buffer_size(const qsc_socket* sock)
+{
+	assert(sock != NULL);
+
+	socklen_t slen;
+	int32_t plen;
+
+	plen = 0;
+
+	if (sock != NULL && sock->connection != QSC_UNINITIALIZED_SOCKET)
+	{
+		slen = sizeof(plen);
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		getsockopt(sock->connection, SOL_SOCKET, SO_MAX_MSG_SIZE, (char*)&plen, &slen);
+#else
+		getsockopt(sock->connection, SOL_SOCKET, SO_SNDBUF, (char*)&plen, &slen);
+#endif
+	}
+
+	if (plen == 0)
+	{
+		plen = SO_SNDBUF;
+	}
+
+	return plen;
+}
+
 size_t qsc_socket_peek(const qsc_socket* sock, uint8_t* output, size_t otplen)
 {
 	assert(output != NULL);
@@ -640,10 +684,10 @@ size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t ot
 	return (size_t)pos;
 }
 
-size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
+size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	assert(sock != NULL);
-	assert(destination != NULL);
+	assert(dest != NULL);
 	assert(output != NULL);
 
 	int32_t len;
@@ -651,7 +695,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t por
 
 	res = 0;
 
-	if (sock != NULL && destination != NULL && output != NULL)
+	if (sock != NULL && dest != NULL && output != NULL)
 	{
 		len = 0;
 
@@ -662,14 +706,14 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t por
 
 			d.sin_family = AF_INET;
 			d.sin_port = htons(port);
-			d.sin_addr.s_addr = inet_pton(AF_INET, destination, &d.sin_addr);
+			d.sin_addr.s_addr = inet_pton(AF_INET, dest, &d.sin_addr);
 
 			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
 
 			if (res != qsc_socket_exception_error)
 			{
 				inet_ntop(AF_INET, &d.sin_addr, astr, INET_ADDRSTRLEN);
-				qsc_memutils_copy((uint8_t*)destination, (uint8_t*)astr, len);
+				qsc_memutils_copy((uint8_t*)dest, (uint8_t*)astr, len);
 				sock->connection_status = qsc_socket_state_connectionless;
 				sock->port = port;
 			}
@@ -681,14 +725,14 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t por
 
 			d.sin6_family = AF_INET6;
 			d.sin6_port = htons(port);
-			inet_pton(AF_INET6, destination, &d.sin6_addr);
+			inet_pton(AF_INET6, dest, &d.sin6_addr);
 
 			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
 
 			if (res != qsc_socket_exception_error)
 			{
 				inet_ntop(AF_INET6, &d.sin6_addr, astr, INET6_ADDRSTRLEN);
-				qsc_memutils_copy((uint8_t*)destination, (uint8_t*)astr, len);
+				qsc_memutils_copy((uint8_t*)dest, (uint8_t*)astr, len);
 				sock->address_family = qsc_socket_address_family_ipv6;
 				sock->connection_status = qsc_socket_state_connectionless;
 				sock->port = port;
@@ -703,7 +747,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* destination, uint16_t por
 	return (size_t)res;
 }
 
-size_t qsc_socket_send(const qsc_socket* sock, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_send(const qsc_socket* sock, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag)
 {
 	assert(sock != NULL);
 	assert(input != NULL);
@@ -714,15 +758,18 @@ size_t qsc_socket_send(const qsc_socket* sock, const uint8_t* input, size_t inle
 
 	if (sock != NULL && input != NULL)
 	{
-		res = send(sock->connection, (const char*)input, (int32_t)inlen + 1, (int32_t)flag);
+		res = send(sock->connection, (const char*)input, (int32_t)inplen, (int32_t)flag);
 		res = (res == qsc_socket_exception_error) ? 0 : res;
 	}
 
 	return (size_t)res;
 }
 
-size_t qsc_socket_send_to(const qsc_socket* sock, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_send_to(const qsc_socket* sock, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag)
 {
+	assert(sock != NULL);
+	assert(input != NULL);
+
 	int32_t res;
 
 	res = 0;
@@ -734,18 +781,18 @@ size_t qsc_socket_send_to(const qsc_socket* sock, const uint8_t* input, size_t i
 			struct sockaddr_in d;
 			d.sin_family = AF_INET;
 			d.sin_port = htons(sock->port);
-			inet_pton(AF_INET, sock->address, &d.sin_addr);
+			inet_pton(AF_INET, (char*)sock->address, &d.sin_addr);
 
-			res = sendto(sock->connection, (const char*)input, (int32_t)inlen, (int32_t)flag, (struct sockaddr*)&d, sizeof(d));
+			res = sendto(sock->connection, (const char*)input, (int32_t)inplen, (int32_t)flag, (struct sockaddr*)&d, sizeof(d));
 		}
 		else
 		{
 			struct sockaddr_in6 d;
 			d.sin6_family = AF_INET6;
 			d.sin6_port = htons(sock->port);
-			inet_pton(AF_INET6, sock->address, &d.sin6_addr);
+			inet_pton(AF_INET6, (char*)sock->address, &d.sin6_addr);
 
-			res = sendto(sock->connection, (const char*)input, (int32_t)inlen, (int32_t)flag, (struct sockaddr*)&d, sizeof(d));
+			res = sendto(sock->connection, (const char*)input, (int32_t)inplen, (int32_t)flag, (struct sockaddr*)&d, sizeof(d));
 		}
 	}
 
@@ -754,7 +801,7 @@ size_t qsc_socket_send_to(const qsc_socket* sock, const uint8_t* input, size_t i
 	return (size_t)res;
 }
 
-size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag)
 {
 	assert(sock != NULL);
 	assert(input != NULL);
@@ -766,9 +813,9 @@ size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t* input, size_t 
 
 	if (sock != NULL && input != NULL)
 	{
-		while (inlen > 0)
+		while (inplen > 0)
 		{
-			res = send(sock->connection, (const char*)input, (int32_t)inlen, (int32_t)flag);
+			res = send(sock->connection, (const char*)input, (int32_t)inplen, (int32_t)flag);
 
 			if (res < 1)
 			{
@@ -776,7 +823,7 @@ size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t* input, size_t 
 				break;
 			}
 
-			inlen -= res;
+			inplen -= res;
 			pos += res;
 		}
 	}
@@ -784,7 +831,7 @@ size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t* input, size_t 
 	return (size_t)pos;
 }
 
-qsc_socket_exceptions qsc_socket_shut_down(qsc_socket* sock, qsc_socket_shut_down_flags parameters)
+qsc_socket_exceptions qsc_socket_shut_down(qsc_socket* sock, qsc_socket_shut_down_flags params)
 {
 	assert(sock != NULL);
 
@@ -794,9 +841,9 @@ qsc_socket_exceptions qsc_socket_shut_down(qsc_socket* sock, qsc_socket_shut_dow
 
 	if (sock != NULL)
 	{
-		if (sock->connection != QSC_UNINITIALIZED_SOCKET && qsc_socket_is_connected(sock))
+		if (sock->connection != QSC_UNINITIALIZED_SOCKET && qsc_socket_is_connected(sock) == true)
 		{
-			res = (qsc_socket_exceptions)shutdown(sock->connection, (int32_t)parameters);
+			res = (qsc_socket_exceptions)shutdown(sock->connection, (int32_t)params);
 		}
 	}
 

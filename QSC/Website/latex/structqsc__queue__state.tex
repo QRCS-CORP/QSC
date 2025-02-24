@@ -1,0 +1,68 @@
+\doxysection{qsc\+\_\+queue\+\_\+state Struct Reference}
+\hypertarget{structqsc__queue__state}{}\label{structqsc__queue__state}\index{qsc\_queue\_state@{qsc\_queue\_state}}
+
+
+{\ttfamily \#include $<$queue.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+uint8\+\_\+t \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__queue__state_ab92c679f5a4c8e2ca4242def8e365352}{queue}}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structqsc__queue__state_a08c0e1539af0e43f104b9c3b9ffbd93e}{tags}} \mbox{[}QSC\+\_\+\+QUEUE\+\_\+\+MAX\+\_\+\+DEPTH\mbox{]}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__queue__state_a76d971a3c552bc58ba9f0d5fceae9806}{count}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__queue__state_a820c167ceaaa9759b0ca2695d22db55c}{depth}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__queue__state_a7a04afe5347934be732ec70a70bd0a28}{position}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__queue__state_a02bed8590a9ddf520e58a060059518ec}{width}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Contains the queue context state 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__queue__state_a76d971a3c552bc58ba9f0d5fceae9806}\index{qsc\_queue\_state@{qsc\_queue\_state}!count@{count}}
+\index{count@{count}!qsc\_queue\_state@{qsc\_queue\_state}}
+\doxysubsubsection{\texorpdfstring{count}{count}}
+{\footnotesize\ttfamily \label{structqsc__queue__state_a76d971a3c552bc58ba9f0d5fceae9806} 
+size\+\_\+t count}
+
+The number of queue items \Hypertarget{structqsc__queue__state_a820c167ceaaa9759b0ca2695d22db55c}\index{qsc\_queue\_state@{qsc\_queue\_state}!depth@{depth}}
+\index{depth@{depth}!qsc\_queue\_state@{qsc\_queue\_state}}
+\doxysubsubsection{\texorpdfstring{depth}{depth}}
+{\footnotesize\ttfamily \label{structqsc__queue__state_a820c167ceaaa9759b0ca2695d22db55c} 
+size\+\_\+t depth}
+
+The maximum number of items in the queue \Hypertarget{structqsc__queue__state_a7a04afe5347934be732ec70a70bd0a28}\index{qsc\_queue\_state@{qsc\_queue\_state}!position@{position}}
+\index{position@{position}!qsc\_queue\_state@{qsc\_queue\_state}}
+\doxysubsubsection{\texorpdfstring{position}{position}}
+{\footnotesize\ttfamily \label{structqsc__queue__state_a7a04afe5347934be732ec70a70bd0a28} 
+size\+\_\+t position}
+
+The next empty slot in the queue \Hypertarget{structqsc__queue__state_ab92c679f5a4c8e2ca4242def8e365352}\index{qsc\_queue\_state@{qsc\_queue\_state}!queue@{queue}}
+\index{queue@{queue}!qsc\_queue\_state@{qsc\_queue\_state}}
+\doxysubsubsection{\texorpdfstring{queue}{queue}}
+{\footnotesize\ttfamily \label{structqsc__queue__state_ab92c679f5a4c8e2ca4242def8e365352} 
+uint8\+\_\+t\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*} queue}
+
+The pointer to a 2 dimensional queue array \Hypertarget{structqsc__queue__state_a08c0e1539af0e43f104b9c3b9ffbd93e}\index{qsc\_queue\_state@{qsc\_queue\_state}!tags@{tags}}
+\index{tags@{tags}!qsc\_queue\_state@{qsc\_queue\_state}}
+\doxysubsubsection{\texorpdfstring{tags}{tags}}
+{\footnotesize\ttfamily \label{structqsc__queue__state_a08c0e1539af0e43f104b9c3b9ffbd93e} 
+uint64\+\_\+t tags\mbox{[}QSC\+\_\+\+QUEUE\+\_\+\+MAX\+\_\+\+DEPTH\mbox{]}}
+
+The 64-\/bit tag associated with each queue item \Hypertarget{structqsc__queue__state_a02bed8590a9ddf520e58a060059518ec}\index{qsc\_queue\_state@{qsc\_queue\_state}!width@{width}}
+\index{width@{width}!qsc\_queue\_state@{qsc\_queue\_state}}
+\doxysubsubsection{\texorpdfstring{width}{width}}
+{\footnotesize\ttfamily \label{structqsc__queue__state_a02bed8590a9ddf520e58a060059518ec} 
+size\+\_\+t width}
+
+The maximum byte length of a queue item 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/queue.\+h\end{DoxyCompactItemize}

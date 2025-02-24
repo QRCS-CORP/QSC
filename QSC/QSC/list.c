@@ -1,7 +1,8 @@
 #include "list.h"
 #include "async.h"
-#include "memutils.h"
 #include "intutils.h"
+#include "memutils.h"
+#include "secrand.h"
 
 void qsc_list_add(qsc_list_state* ctx, void* item)
 {
@@ -158,6 +159,42 @@ void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index)
 		pitm = ctx->items + (index * ctx->width);
 		qsc_memutils_copy(item, pitm, ctx->width);
 		qsc_async_mutex_unlock_ex(mtx);
+	}
+}
+
+void qsc_list_rshuffle(qsc_list_state* ctx)
+{
+	assert(ctx != NULL);
+
+	uint32_t idx;
+	uint8_t* ditm;
+	uint8_t* sitm;
+
+	if (ctx != NULL && ctx->count > 0 && ctx->width > 0)
+	{
+		uint8_t* pitm;
+
+		pitm = qsc_memutils_malloc(ctx->width);
+
+		if (pitm != NULL)
+		{
+			for (size_t i = 0; i < ctx->count; ++i)
+			{
+				/* random index in range current index to max index */
+				idx = (uint32_t)qsc_secrand_next_int32_maxmin((int32_t)ctx->count - 1, (int32_t)i);
+
+				sitm = ctx->items + ((size_t)idx * ctx->width);
+				ditm = ctx->items + (i * ctx->width);
+				/* copy the current index item to temp */
+				qsc_memutils_copy(pitm, ditm, ctx->width);
+				/* copy the rand index item to the index item */
+				qsc_memutils_copy(sitm, ditm, ctx->width);
+				/* copy the temp item to the random index item */
+				qsc_memutils_copy(ditm, pitm, ctx->width);
+			}
+
+			qsc_memutils_alloc_free(pitm);
+		}
 	}
 }
 
@@ -332,7 +369,9 @@ bool qsc_list_self_test()
 	{
 		for (i = 0; i < 64; ++i)
 		{
-			if (qsc_intutils_are_equal8(exp[i], (uint8_t*)ctx.items[i], 16) == false)
+			const uint8_t* ptmp = ctx.items+ i;
+
+			if (qsc_intutils_are_equal8(exp[i], ptmp, 16) == false)
 			{
 				ret = false;
 				break;

@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__list__state" xml:lang="en-US">
+<title>qsc_list_state Struct Reference</title>
+<indexterm><primary>qsc_list_state</primary></indexterm>
+<para>
+<computeroutput>#include &lt;list.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint8_t * <link linkend="_structqsc__list__state_1ab3391c1f41518ebd25b3e51e6fe48931">items</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__list__state_1a76d971a3c552bc58ba9f0d5fceae9806">count</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__list__state_1a02bed8590a9ddf520e58a060059518ec">width</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Contains the list context state </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__list__state_1a76d971a3c552bc58ba9f0d5fceae9806"/><section>
+    <title>count</title>
+<indexterm><primary>count</primary><secondary>qsc_list_state</secondary></indexterm>
+<indexterm><primary>qsc_list_state</primary><secondary>count</secondary></indexterm>
+<para><computeroutput>size_t count</computeroutput></para>
+<para>The number of list items </para>
+</section>
+<anchor xml:id="_structqsc__list__state_1ab3391c1f41518ebd25b3e51e6fe48931"/><section>
+    <title>items</title>
+<indexterm><primary>items</primary><secondary>qsc_list_state</secondary></indexterm>
+<indexterm><primary>qsc_list_state</primary><secondary>items</secondary></indexterm>
+<para><computeroutput>uint8_t* items</computeroutput></para>
+<para>A pointer to the items array </para>
+</section>
+<anchor xml:id="_structqsc__list__state_1a02bed8590a9ddf520e58a060059518ec"/><section>
+    <title>width</title>
+<indexterm><primary>width</primary><secondary>qsc_list_state</secondary></indexterm>
+<indexterm><primary>qsc_list_state</primary><secondary>width</secondary></indexterm>
+<para><computeroutput>size_t width</computeroutput></para>
+<para>The byte length of a list item </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/list.h</section>
+</section>

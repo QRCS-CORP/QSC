@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_socketflags_8h_source" xml:lang="en-US">
+<title>socketflags.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/socketflags.h</primary></indexterm>
+<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;QSC_SOCKFLAGS_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;QSC_SOCKFLAGS_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+45 
+46 <emphasis role="comment">/*</emphasis>
+47 <emphasis role="comment">*&#32;\file&#32;socketflags.h</emphasis>
+48 <emphasis role="comment">*&#32;\brief&#32;The&#32;socket&#32;flags&#32;enumerations</emphasis>
+49 <emphasis role="comment">*/</emphasis>
+50 
+54 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_ipv6_address_prefix_types
+55 {
+56 &#32;&#32;&#32;&#32;qsc_ipv6_prefix_none&#32;=&#32;0,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+57 &#32;&#32;&#32;&#32;qsc_ipv6_prefix_link_local&#32;=&#32;1,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+58 &#32;&#32;&#32;&#32;qsc_ipv6_prefix_multicast&#32;=&#32;2,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+59 &#32;&#32;&#32;&#32;qsc_ipv6_prefix_global&#32;=&#32;3,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+60 &#32;&#32;&#32;&#32;qsc_ipv6_prefix_unique_local&#32;=&#32;4&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+61 }&#32;qsc_ipv6_address_prefix_types;
+62 
+66 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_address_families
+67 {
+68 &#32;&#32;&#32;&#32;qsc_socket_address_family_none&#32;=&#32;0x00000000L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+69 &#32;&#32;&#32;&#32;qsc_socket_address_family_unix&#32;=&#32;0x00000001L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+70 &#32;&#32;&#32;&#32;qsc_socket_address_family_ipv4&#32;=&#32;0x00000002L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+71 &#32;&#32;&#32;&#32;qsc_socket_address_family_ipv6&#32;=&#32;0x00000017L&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+72 }&#32;qsc_socket_address_families;
+73 
+77 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_states
+78 {
+79 &#32;&#32;&#32;&#32;qsc_socket_state_none&#32;=&#32;0,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+80 &#32;&#32;&#32;&#32;qsc_socket_state_connected&#32;=&#32;1,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+81 &#32;&#32;&#32;&#32;qsc_socket_state_listening&#32;=&#32;2,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+82 &#32;&#32;&#32;&#32;qsc_socket_state_connectionless&#32;=&#32;3&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+83 }&#32;qsc_socket_states;
+84 
+88 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_options
+89 {
+90 &#32;&#32;&#32;&#32;qsc_socket_option_none&#32;=&#32;0x00000000L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+91 &#32;&#32;&#32;&#32;qsc_socket_option_broadcast&#32;=&#32;0x00000020L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+92 &#32;&#32;&#32;&#32;qsc_socket_option_ipv6_only&#32;=&#32;0x0000001BL,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+93 &#32;&#32;&#32;&#32;qsc_socket_option_keepalive&#32;=&#32;0x00000008L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+94 &#32;&#32;&#32;&#32;qsc_socket_option_linger&#32;=&#32;0x00000080L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+95 &#32;&#32;&#32;&#32;qsc_socket_option_no_route&#32;=&#32;0x00000010L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+96 &#32;&#32;&#32;&#32;qsc_socket_option_out_of_band&#32;=&#32;0x00000100L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+97 &#32;&#32;&#32;&#32;qsc_socket_option_reuse_address&#32;=&#32;0x00000004L,&#32;&#32;&#32;&#32;&#32;&#32;
+98 &#32;&#32;&#32;&#32;qsc_socket_option_receive_time_out&#32;=&#32;0x00001006L,&#32;&#32;&#32;
+99 &#32;&#32;&#32;&#32;qsc_socket_option_send_time_out&#32;=&#32;0x00001005L,&#32;&#32;&#32;&#32;&#32;&#32;
+100 &#32;&#32;&#32;&#32;qsc_socket_option_tcp_no_delay&#32;=&#32;0x00000001L&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+101 }&#32;qsc_socket_options;
+102 
+106 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_protocols
+107 {
+108 &#32;&#32;&#32;&#32;qsc_socket_protocol_none&#32;=&#32;0x00000000L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+109 &#32;&#32;&#32;&#32;qsc_socket_protocol_ipv4&#32;=&#32;0x00000004L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+110 &#32;&#32;&#32;&#32;qsc_socket_protocol_socket&#32;=&#32;0x0000FFFFL,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+111 &#32;&#32;&#32;&#32;qsc_socket_protocol_tcp&#32;=&#32;0x00000006L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+112 &#32;&#32;&#32;&#32;qsc_socket_protocol_udp&#32;=&#32;0x00000011L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+113 &#32;&#32;&#32;&#32;qsc_socket_protocol_ipv6&#32;=&#32;0x00000029L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+114 &#32;&#32;&#32;&#32;qsc_socket_protocol_ipv6_routing&#32;=&#32;0x0000002BL,&#32;&#32;&#32;&#32;&#32;
+115 &#32;&#32;&#32;&#32;qsc_socket_protocol_ipv6_fragment&#32;=&#32;0x0000002CL,&#32;&#32;&#32;&#32;
+116 &#32;&#32;&#32;&#32;qsc_socket_protocol_icmpv6&#32;=&#32;0x0000003AL,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+117 &#32;&#32;&#32;&#32;qsc_socket_protocol_ipv6_no_header&#32;=&#32;0x0000003BL,&#32;&#32;&#32;
+118 &#32;&#32;&#32;&#32;qsc_socket_protocol_dstopts&#32;=&#32;0x0000003CL,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+119 &#32;&#32;&#32;&#32;qsc_socket_protocol_raw&#32;=&#32;0x000000FFL&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+120 }&#32;qsc_socket_protocols;
+121 
+125 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_receive_flags
+126 {
+127 &#32;&#32;&#32;&#32;qsc_socket_receive_flag_none&#32;=&#32;0x00000000L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+128 &#32;&#32;&#32;&#32;qsc_socket_receive_flag_out_of_band&#32;=&#32;0x00000001L,&#32;&#32;
+129 &#32;&#32;&#32;&#32;qsc_socket_receive_flag_peek&#32;=&#32;0x00000002L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//0x40</emphasis>
+130 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_OS_WINDOWS)</emphasis>
+131 &#32;&#32;&#32;&#32;qsc_socket_receive_flag_wait_all&#32;=&#32;0x00000008L&#32;&#32;&#32;&#32;&#32;&#32;
+132 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_OS_APPLE)</emphasis>
+133 &#32;&#32;&#32;&#32;qsc_socket_receive_flag_wait_all&#32;=&#32;0x00000040L&#32;&#32;&#32;&#32;&#32;&#32;
+134 <emphasis role="preprocessor">#else</emphasis>
+135 &#32;&#32;&#32;&#32;qsc_socket_receive_flag_wait_all&#32;=&#32;0x00000100L&#32;&#32;&#32;&#32;&#32;&#32;
+136 <emphasis role="preprocessor">#endif</emphasis>
+137 }&#32;qsc_socket_receive_flags;
+138 
+142 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_send_flags
+143 {
+144 &#32;&#32;&#32;&#32;qsc_socket_send_flag_none&#32;=&#32;0x00000000L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+145 &#32;&#32;&#32;&#32;qsc_socket_send_flag_send_oob&#32;=&#32;0x00000001L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+146 &#32;&#32;&#32;&#32;qsc_socket_send_flag_peek_message&#32;=&#32;0x00000002L,&#32;&#32;&#32;&#32;
+147 &#32;&#32;&#32;&#32;qsc_socket_send_flag_no_routing&#32;=&#32;0x00000004L,&#32;&#32;&#32;&#32;&#32;&#32;
+148 }&#32;qsc_socket_send_flags;
+149 
+153 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_shut_down_flags
+154 {
+155 &#32;&#32;&#32;&#32;qsc_socket_shut_down_flag_receive&#32;=&#32;0x00000000L,&#32;&#32;&#32;&#32;
+156 &#32;&#32;&#32;&#32;qsc_socket_shut_down_flag_send&#32;=&#32;0x00000001L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+157 &#32;&#32;&#32;&#32;qsc_socket_shut_down_flag_both&#32;=&#32;0x00000002L&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+158 }&#32;qsc_socket_shut_down_flags;
+159 
+163 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;qsc_socket_transports
+164 {
+165 &#32;&#32;&#32;&#32;qsc_socket_transport_none&#32;=&#32;0x00000000L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+166 &#32;&#32;&#32;&#32;qsc_socket_transport_stream&#32;=&#32;0x00000001L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+167 &#32;&#32;&#32;&#32;qsc_socket_transport_datagram&#32;=&#32;0x00000002L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+168 &#32;&#32;&#32;&#32;qsc_socket_transport_raw&#32;=&#32;0x00000003L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+169 &#32;&#32;&#32;&#32;qsc_socket_transport_reliable&#32;=&#32;0x00000004L,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+170 &#32;&#32;&#32;&#32;qsc_socket_transport_sequenced&#32;=&#32;0x00000005L&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+171 }&#32;qsc_socket_transports;
+172 
+173 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

@@ -47,7 +47,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -124,8 +124,8 @@
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <OpenMPSupport>true</OpenMPSupport>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <OpenMPSupport>false</OpenMPSupport>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -157,9 +157,10 @@
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -179,9 +180,10 @@
       <PrecompiledHeaderFile />
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <OpenMPSupport>true</OpenMPSupport>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <OpenMPSupport>false</OpenMPSupport>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -202,8 +204,10 @@
       </PrecompiledHeaderFile>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -225,6 +229,7 @@
     <ClInclude Include="dilithiumbase.h" />
     <ClInclude Include="dilithiumbase_avx2.h" />
     <ClInclude Include="donna128.h" />
+    <ClInclude Include="doxymain.h" />
     <ClInclude Include="ecdh.h" />
     <ClInclude Include="ec25519.h" />
     <ClInclude Include="ecdhbase.h" />
@@ -253,6 +258,7 @@
     <ClInclude Include="ntrubase.h" />
     <ClInclude Include="ntrubase_avx2.h" />
     <ClInclude Include="poly1305.h" />
+    <ClInclude Include="qmac.h" />
     <ClInclude Include="queue.h" />
     <ClInclude Include="rcs.h" />
     <ClInclude Include="rdp.h" />
@@ -279,6 +285,7 @@
     <ClInclude Include="timerex.h" />
     <ClInclude Include="timestamp.h" />
     <ClInclude Include="transpose.h" />
+    <ClInclude Include="winutils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="acp.c" />
@@ -321,6 +328,7 @@
     <ClCompile Include="ntrubase.c" />
     <ClCompile Include="ntrubase_avx2.c" />
     <ClCompile Include="poly1305.c" />
+    <ClCompile Include="qmac.c" />
     <ClCompile Include="qsort.c" />
     <ClCompile Include="queue.c" />
     <ClCompile Include="rcs.c" />
@@ -346,6 +354,10 @@
     <ClCompile Include="timerex.c" />
     <ClCompile Include="timestamp.c" />
     <ClCompile Include="transpose.c" />
+    <ClCompile Include="winutils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="QRCS-PL License.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

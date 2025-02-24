@@ -220,64 +220,98 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 #endif
 }
 
-size_t qsc_netutils_get_host_name(char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
+bool qsc_netutils_get_host_name(char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
 {
-	return (size_t)gethostname(host, QSC_NETUTILS_HOSTS_NAME_SIZE);
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+	WSADATA wsd;
+	int32_t slen;
+
+	slen = -1;
+
+	if (WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd) == 0)
+	{
+		slen = gethostname(host, QSC_NETUTILS_HOSTS_NAME_SIZE);
+		WSACleanup();
+	}
+
+	return (slen == 0);
+#else
+    int32_t slen;
+
+    slen = gethostname(host, QSC_NETUTILS_HOSTS_NAME_SIZE);
+
+    if (slen == 0)
+    {
+        host[QSC_NETUTILS_HOSTS_NAME_SIZE - 1] = '\0';
+    }
+
+    return (slen == 0);
+#endif
 }
 
-void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address address, char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
+void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* address, char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
 {
-	int32_t err;
-	int32_t slen;
+	assert(address != NULL);
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
 	WSADATA wsd;
+	int32_t err;
+	int32_t slen;
 
-	err = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
-
-	if (err == 0)
+	if (WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd) == 0)
 	{
 		struct sockaddr_in insock4 = { 0 };
 
 		slen = QSC_IPINFO_IPV4_BYTELEN;
 		insock4.sin_family = AF_INET;
 		
-		err = WSAStringToAddressW((LPWSTR)address.ipv4, AF_INET, NULL, (LPSOCKADDR)&insock4, &slen);
+		err = WSAStringToAddressW((LPWSTR)address->ipv4, AF_INET, NULL, (LPSOCKADDR)&insock4, &slen);
 		
 		if (err == 0 && slen > 0)
 		{
 			char aurl[NI_MAXSERV] = { 0 };
 
-			if (getnameinfo((const struct SOCKADDR*)&insock4, (socklen_t)sizeof(struct sockaddr), (PCHAR)aurl, (DWORD)sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
+			if (getnameinfo((const SOCKADDR*)&insock4, (socklen_t)sizeof(insock4), (PCHAR)aurl, (DWORD)sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
 			{
 				qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
 			}
 		}
 
-		err = WSACleanup();
+		WSACleanup();
 	}
 	
 #else
 
-	struct sockaddr insock4;
-	socklen_t addrlen;
-	char aurl[NI_MAXHOST] = { 0 };
+    struct sockaddr_in insock4;
+    socklen_t addrlen;
+    char aurl[NI_MAXHOST] = { 0 };
+    char sip[QSC_IPINFO_IPV4_STRNLEN] = { 0 };
 
-	slen = QSC_IPINFO_IPV4_BYTELEN;
-	insock4.sin_family = AF_INET;
-	inet_pton(AF_INET, insock4.addr, &info.address);
+    // Initialize sockaddr_in struct for IPv4
+    memset(&insock4, 0, sizeof(insock4));
+    insock4.sin_family = AF_INET;
 
-	if (getnameinfo((sockaddr*)&insock4, addrlen, aurl, sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
-	{
-		qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
-	}
+    qsc_ipinfo_ipv4_address_to_string(sip, address);
 
+    //address.ipv4
+    inet_pton(AF_INET, sip, &insock4.sin_addr);
+
+    // Set the address length to sizeof(sockaddr_in) for getnameinfo
+    addrlen = sizeof(insock4);
+
+    // Call getnameinfo to resolve the hostname
+    if (getnameinfo((struct sockaddr*)&insock4, addrlen, aurl, sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
+    {
+        qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
+    }
 #endif
 }
 
 bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
 {
+	assert(padd != NULL);
+
 	qsc_socket_exceptions serr;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
@@ -406,6 +440,8 @@ bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
 
 bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd)
 {
+	assert(padd != NULL);
+
 	qsc_socket_exceptions serr;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
@@ -531,8 +567,12 @@ bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd)
 	return (serr == qsc_socket_exception_success);
 }
 
-void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
+void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char* host, const char* service)
 {
+	assert(pinfo != NULL);
+	assert(host != NULL);
+	assert(service != NULL);
+
 	char hname[INET_ADDRSTRLEN] = { 0 };
 	struct addrinfo hints;
 	struct addrinfo* hres = NULL;
@@ -575,8 +615,12 @@ void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char host[QSC
 	}
 }
 
-void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char host[QSC_NETUTILS_HOSTS_NAME_SIZE], const char service[QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE])
+void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char* host, const char* service)
 {
+	assert(pinfo != NULL);
+	assert(host != NULL);
+	assert(service != NULL);
+
 	char buf[INET6_ADDRSTRLEN] = { 0 };
 	struct addrinfo hints;
 	struct sockaddr_in6 insock6 = { 0 };
@@ -667,8 +711,11 @@ void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_SIZE], co
 	}
 }
 
-uint16_t qsc_netutils_port_name_to_number(const char portname[QSC_NETUTILS_HOSTS_NAME_SIZE], const char protocol[QSC_NETUTILS_NAME_BUFFER_SIZE])
+uint16_t qsc_netutils_port_name_to_number(const char* portname, const char* protocol)
 {
+	assert(portname != NULL);
+	assert(protocol != NULL);
+
 	const struct servent* se;
 	uint16_t port;
 

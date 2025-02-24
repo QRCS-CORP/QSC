@@ -5,7 +5,6 @@
 #include "../QSC/intutils.h"
 #include "../QSC/sphincsplus.h"
 
-
 #if defined(QSC_SPHINCSPLUS_EXTENDED)
 
 bool qsctest_sphincsplus_extended_test()
@@ -109,7 +108,7 @@ bool qsctest_sphincsplus_operations_test()
 #	error The parameter set is invalid!
 #endif
 
-	/* NIST PQC Round 3 KATs */ //pk=32,sk=64,sg=17121
+	/* NIST FIPS 205 KATs */
 	parse_nist_signature_kat(path, seed, &seedlen, kmsg, &msglen, kpk, &pklen, ksk, &sklen, ksig, &siglen, 0);
 
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);

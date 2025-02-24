@@ -416,15 +416,15 @@ static void cpuidex_arm_features(qsc_cpuidex_cpu_features* features)
 static void cpuidex_cpu_info(uint32_t info[4], const uint32_t infotype)
 {
 #if defined(QSC_SYSTEM_COMPILER_MSC)
-	__cpuid((int*)info, infotype);
+	__cpuid((int32_t*)info, infotype);
 #elif defined(QSC_SYSTEM_COMPILER_GCC)
 	__get_cpuid(infotype, &info[0], &info[1], &info[2], &info[3]);
 #endif
 }
 
-static uint32_t cpuidex_read_bits(uint32_t value, int index, int length)
+static uint32_t cpuidex_read_bits(uint32_t value, int32_t index, int32_t length)
 {
-	int mask = ((1L << length) - 1) << index;
+	int32_t mask = ((1L << length) - 1) << index;
 
 	return (value & mask) >> index;
 }
@@ -872,6 +872,8 @@ static void cpuidex_windows_topology(qsc_cpuidex_cpu_features* features)
 
 bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 {
+	assert(features != NULL);
+
     bool res;
 
     features->adx = false;

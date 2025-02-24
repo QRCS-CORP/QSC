@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__aes__hba256__state" xml:lang="en-US">
+<title>qsc_aes_hba256_state Struct Reference</title>
+<indexterm><primary>qsc_aes_hba256_state</primary></indexterm>
+<para>
+<computeroutput>#include &lt;aes.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para><link linkend="_structqsc__keccak__state">qsc_keccak_state</link> <link linkend="_structqsc__aes__hba256__state_1a7dcff7935c756d16f1e445db22570492">kstate</link></para>
+</listitem>
+            <listitem><para><link linkend="_structqsc__aes__state">qsc_aes_state</link> <link linkend="_structqsc__aes__hba256__state_1a4c092c1eca0d9109c41462ba34909d5e">cstate</link></para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__aes__hba256__state_1a1944753ac8107ec537f75b7e0201d866">counter</link></para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__aes__hba256__state_1ae94d8409732ec9a97edce2fb6448be8d">mkey</link> [32]</para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__aes__hba256__state_1aa0daad95efd06d820b491981635f9c72">cust</link> [<link linkend="_aes_8h_1ad26e21759c9003561f5b7f4232ba588a">QSC_HBA_MAXINFO_SIZE</link>]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__aes__hba256__state_1a0d806096012676672a0009667f13c64d">custlen</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__aes__hba256__state_1af69c97ab299480b81e3f622d79777334">encrypt</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The HBA-256 state array; pointers for the cipher state, mac-key and length, transformation mode, and the state counter. Used by the long-form of the HBA api, and initialized by the hba_initialize function. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__aes__hba256__state_1a1944753ac8107ec537f75b7e0201d866"/><section>
+    <title>counter</title>
+<indexterm><primary>counter</primary><secondary>qsc_aes_hba256_state</secondary></indexterm>
+<indexterm><primary>qsc_aes_hba256_state</primary><secondary>counter</secondary></indexterm>
+<para><computeroutput>uint64_t counter</computeroutput></para>
+<para>the processed bytes counter </para>
+</section>
+<anchor xml:id="_structqsc__aes__hba256__state_1a4c092c1eca0d9109c41462ba34909d5e"/><section>
+    <title>cstate</title>
+<indexterm><primary>cstate</primary><secondary>qsc_aes_hba256_state</secondary></indexterm>
+<indexterm><primary>qsc_aes_hba256_state</primary><secondary>cstate</secondary></indexterm>
+<para><computeroutput><link linkend="_structqsc__aes__state">qsc_aes_state</link> cstate</computeroutput></para>
+<para>the underlying block-ciphers state structure </para>
+</section>
+<anchor xml:id="_structqsc__aes__hba256__state_1aa0daad95efd06d820b491981635f9c72"/><section>
+    <title>cust</title>
+<indexterm><primary>cust</primary><secondary>qsc_aes_hba256_state</secondary></indexterm>
+<indexterm><primary>qsc_aes_hba256_state</primary><secondary>cust</secondary></indexterm>
+<para><computeroutput>uint8_t cust[<link linkend="_aes_8h_1ad26e21759c9003561f5b7f4232ba588a">QSC_HBA_MAXINFO_SIZE</link>]</computeroutput></para>
+<para>the ciphers custom key </para>
+</section>
+<anchor xml:id="_structqsc__aes__hba256__state_1a0d806096012676672a0009667f13c64d"/><section>
+    <title>custlen</title>
+<indexterm><primary>custlen</primary><secondary>qsc_aes_hba256_state</secondary></indexterm>
+<indexterm><primary>qsc_aes_hba256_state</primary><secondary>custlen</secondary></indexterm>
+<para><computeroutput>size_t custlen</computeroutput></para>
+<para>the custom key array length </para>
+</section>
+<anchor xml:id="_structqsc__aes__hba256__state_1af69c97ab299480b81e3f622d79777334"/><section>
+    <title>encrypt</title>
+<indexterm><primary>encrypt</primary><secondary>qsc_aes_hba256_state</secondary></indexterm>
+<indexterm><primary>qsc_aes_hba256_state</primary><secondary>encrypt</secondary></indexterm>
+<para><computeroutput>bool encrypt</computeroutput></para>
+<para>the transformation mode; true for encryption </para>
+</section>
+<anchor xml:id="_structqsc__aes__hba256__state_1a7dcff7935c756d16f1e445db22570492"/><section>
+    <title>kstate</title>
+<indexterm><primary>kstate</primary><secondary>qsc_aes_hba256_state</secondary></indexterm>
+<indexterm><primary>qsc_aes_hba256_state</primary><secondary>kstate</secondary></indexterm>
+<para><computeroutput><link linkend="_structqsc__keccak__state">qsc_keccak_state</link> kstate</computeroutput></para>
+<para>the mac state </para>
+</section>
+<anchor xml:id="_structqsc__aes__hba256__state_1ae94d8409732ec9a97edce2fb6448be8d"/><section>
+    <title>mkey</title>
+<indexterm><primary>mkey</primary><secondary>qsc_aes_hba256_state</secondary></indexterm>
+<indexterm><primary>qsc_aes_hba256_state</primary><secondary>mkey</secondary></indexterm>
+<para><computeroutput>uint8_t mkey[32]</computeroutput></para>
+<para>the mac generators key array </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_aes_8h">aes.h</link></section>
+</section>

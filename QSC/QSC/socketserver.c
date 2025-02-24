@@ -64,6 +64,8 @@ void qsc_socket_server_close_socket(qsc_socket* sock)
 
 void qsc_socket_server_initialize(qsc_socket* sock)
 {
+	assert(sock != NULL);
+
 	qsc_socket_start_sockets();
 
 	sock->connection = QSC_UNINITIALIZED_SOCKET;

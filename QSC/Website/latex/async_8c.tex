@@ -1,0 +1,353 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/async.c File Reference}
+\hypertarget{async_8c}{}\label{async_8c}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/async.c@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/async.c}}
+{\ttfamily \#include "{}async.\+h"{}}\newline
+{\ttfamily \#include "{}cpuidex.\+h"{}}\newline
+{\ttfamily \#include "{}memutils.\+h"{}}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+Include dependency graph for async.\+c\+:
+% FIG 0
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{async_8c_a0efa8e032421b336c8085861663d667e}\label{async_8c_a0efa8e032421b336c8085861663d667e} 
+THREAD\+\_\+\+FUNC\+\_\+\+RETURN THREAD\+\_\+\+FUNC\+\_\+\+CALL {\bfseries async\+\_\+thread\+\_\+worker} (void \texorpdfstring{$\ast$}{*}arg)
+\item 
+bool \mbox{\hyperlink{async_8c_aaab58e54628e962848e8074550108e62}{qsc\+\_\+async\+\_\+parallel\+\_\+for}} (void(\texorpdfstring{$\ast$}{*}task)(void \texorpdfstring{$\ast$}{*}context, size\+\_\+t index), void \texorpdfstring{$\ast$}{*}context, size\+\_\+t nthreads)
+\begin{DoxyCompactList}\small\item\em A parallel for loop implementation Processes each function call on a unique thread and waits for all threads before returning. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_a9b724664ea6dab2d8481af9b4eee6b31}{qsc\+\_\+async\+\_\+launch\+\_\+thread}} (void(\texorpdfstring{$\ast$}{*}func)(void \texorpdfstring{$\ast$}{*}), void \texorpdfstring{$\ast$}{*}state)
+\begin{DoxyCompactList}\small\item\em Launch a function on a new thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_a930ada65a7a87817ecb91bfbc9a93bab}{qsc\+\_\+async\+\_\+launch\+\_\+parallel\+\_\+threads}} (void(\texorpdfstring{$\ast$}{*}func)(void \texorpdfstring{$\ast$}{*}), size\+\_\+t count,...)
+\begin{DoxyCompactList}\small\item\em Launch a series of threads, using variadic function arguments. \end{DoxyCompactList}\item 
+qsc\+\_\+mutex \mbox{\hyperlink{async_8c_a3eba811cd3f2107fb0eaa6c3cc566e7c}{qsc\+\_\+async\+\_\+mutex\+\_\+create}} ()
+\begin{DoxyCompactList}\small\item\em Create a mutex. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{async_8c_ae527eab5e5b23183940c50aa35ae2a63}{qsc\+\_\+async\+\_\+mutex\+\_\+destroy}} (qsc\+\_\+mutex mtx)
+\begin{DoxyCompactList}\small\item\em Destroy a mutex. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_a0be6ce883a383530decfae10fdee2921}{qsc\+\_\+async\+\_\+mutex\+\_\+lock}} (qsc\+\_\+mutex mtx)
+\begin{DoxyCompactList}\small\item\em Lock a mutex. \end{DoxyCompactList}\item 
+qsc\+\_\+mutex \mbox{\hyperlink{async_8c_aa030a69d5ced56db0754baac881463c6}{qsc\+\_\+async\+\_\+mutex\+\_\+lock\+\_\+ex}} ()
+\begin{DoxyCompactList}\small\item\em Creates and locks a mutex. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_a34436bcc9edf108937ca9c974fb09701}{qsc\+\_\+async\+\_\+mutex\+\_\+unlock}} (qsc\+\_\+mutex mtx)
+\begin{DoxyCompactList}\small\item\em Unlock a mutex. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_abf6f7aeafb442a45824a14213a6b522e}{qsc\+\_\+async\+\_\+mutex\+\_\+unlock\+\_\+ex}} (qsc\+\_\+mutex mtx)
+\begin{DoxyCompactList}\small\item\em Unlocks and destroys a mutex. The mutex must be initialized and destroyed. \end{DoxyCompactList}\item 
+\Hypertarget{async_8c_a05b23e5462a9732b27d5281df8634c19}\label{async_8c_a05b23e5462a9732b27d5281df8634c19} 
+size\+\_\+t {\bfseries qsc\+\_\+async\+\_\+processor\+\_\+count} ()
+\begin{DoxyCompactList}\small\item\em Returns the number of CPU cores (including hyper-\/threads) available on the system. \end{DoxyCompactList}\item 
+qsc\+\_\+thread \mbox{\hyperlink{async_8c_a37bb19e4d0f7f29aa7a957c091b4ad3d}{qsc\+\_\+async\+\_\+thread\+\_\+create}} (void(\texorpdfstring{$\ast$}{*}func)(void \texorpdfstring{$\ast$}{*}), void \texorpdfstring{$\ast$}{*}state)
+\begin{DoxyCompactList}\small\item\em Create a thread with one parameter. \end{DoxyCompactList}\item 
+qsc\+\_\+thread \mbox{\hyperlink{async_8c_ac40e3fb1eb4b15041c7d17dc872d80bc}{qsc\+\_\+async\+\_\+thread\+\_\+create\+\_\+ex}} (void(\texorpdfstring{$\ast$}{*}func)(void \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}), void \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}args)
+\begin{DoxyCompactList}\small\item\em Create a thread with multiple parameters. \end{DoxyCompactList}\item 
+int32\+\_\+t \mbox{\hyperlink{async_8c_a8ef6fd6e0c75fabb7af7f634e95210ca}{qsc\+\_\+async\+\_\+thread\+\_\+resume}} (qsc\+\_\+thread handle)
+\begin{DoxyCompactList}\small\item\em Resume a suspended thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_a60962c913f9f8e7f47594dbb521a20d5}{qsc\+\_\+async\+\_\+thread\+\_\+sleep}} (uint32\+\_\+t msec)
+\begin{DoxyCompactList}\small\item\em Pause the thread for a number of milliseconds. \end{DoxyCompactList}\item 
+int32\+\_\+t \mbox{\hyperlink{async_8c_aa9be69badb42975433a7ea44168a21c0}{qsc\+\_\+async\+\_\+thread\+\_\+suspend}} (qsc\+\_\+thread handle)
+\begin{DoxyCompactList}\small\item\em Suspend a thread. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{async_8c_abb5e50dcb1ea4ef72bb5e4d6f94773da}{qsc\+\_\+async\+\_\+thread\+\_\+terminate}} (qsc\+\_\+thread handle)
+\begin{DoxyCompactList}\small\item\em Terminate a thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_aef6fb6dbd971c6f61289ef23ed6d53de}{qsc\+\_\+async\+\_\+thread\+\_\+wait}} (qsc\+\_\+thread handle)
+\begin{DoxyCompactList}\small\item\em Wait for a thread to complete execution. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_af400679f161881a9288953c24d369183}{qsc\+\_\+async\+\_\+thread\+\_\+wait\+\_\+time}} (qsc\+\_\+thread handle, uint32\+\_\+t msec)
+\begin{DoxyCompactList}\small\item\em Wait a number of milliseconds for a thread to complete execution. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{async_8c_a1f6bfc5d92cfd277201845a1efabfd86}{qsc\+\_\+async\+\_\+thread\+\_\+wait\+\_\+all}} (qsc\+\_\+thread \texorpdfstring{$\ast$}{*}handles, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Wait for an array of threads to complete execution. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{async_8c_a930ada65a7a87817ecb91bfbc9a93bab}\index{async.c@{async.c}!qsc\_async\_launch\_parallel\_threads@{qsc\_async\_launch\_parallel\_threads}}
+\index{qsc\_async\_launch\_parallel\_threads@{qsc\_async\_launch\_parallel\_threads}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_launch\_parallel\_threads()}{qsc\_async\_launch\_parallel\_threads()}}
+{\footnotesize\ttfamily \label{async_8c_a930ada65a7a87817ecb91bfbc9a93bab} 
+void qsc\+\_\+async\+\_\+launch\+\_\+parallel\+\_\+threads (\begin{DoxyParamCaption}\item[{void(\texorpdfstring{$\ast$}{*}}]{func~}{)(void \texorpdfstring{$\ast$}{*}), }\item[{size\+\_\+t}]{count}{, }\item[{}]{...}{}\end{DoxyParamCaption})}
+
+
+
+Launch a series of threads, using variadic function arguments. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em func} & The function pointer \\
+\hline
+{\em count} & The number of arguments \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_a9b724664ea6dab2d8481af9b4eee6b31}\index{async.c@{async.c}!qsc\_async\_launch\_thread@{qsc\_async\_launch\_thread}}
+\index{qsc\_async\_launch\_thread@{qsc\_async\_launch\_thread}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_launch\_thread()}{qsc\_async\_launch\_thread()}}
+{\footnotesize\ttfamily \label{async_8c_a9b724664ea6dab2d8481af9b4eee6b31} 
+void qsc\+\_\+async\+\_\+launch\+\_\+thread (\begin{DoxyParamCaption}\item[{void(\texorpdfstring{$\ast$}{*}}]{func~}{)(void \texorpdfstring{$\ast$}{*}), }\item[{void \texorpdfstring{$\ast$}{*}}]{state}{}\end{DoxyParamCaption})}
+
+
+
+Launch a function on a new thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em func} & The function pointer \\
+\hline
+{\em state} & The function state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_a3eba811cd3f2107fb0eaa6c3cc566e7c}\index{async.c@{async.c}!qsc\_async\_mutex\_create@{qsc\_async\_mutex\_create}}
+\index{qsc\_async\_mutex\_create@{qsc\_async\_mutex\_create}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_mutex\_create()}{qsc\_async\_mutex\_create()}}
+{\footnotesize\ttfamily \label{async_8c_a3eba811cd3f2107fb0eaa6c3cc566e7c} 
+qsc\+\_\+mutex qsc\+\_\+async\+\_\+mutex\+\_\+create (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Create a mutex. 
+
+\begin{DoxyReturn}{Returns}
+Returns the mutex handle 
+\end{DoxyReturn}
+\Hypertarget{async_8c_ae527eab5e5b23183940c50aa35ae2a63}\index{async.c@{async.c}!qsc\_async\_mutex\_destroy@{qsc\_async\_mutex\_destroy}}
+\index{qsc\_async\_mutex\_destroy@{qsc\_async\_mutex\_destroy}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_mutex\_destroy()}{qsc\_async\_mutex\_destroy()}}
+{\footnotesize\ttfamily \label{async_8c_ae527eab5e5b23183940c50aa35ae2a63} 
+bool qsc\+\_\+async\+\_\+mutex\+\_\+destroy (\begin{DoxyParamCaption}\item[{qsc\+\_\+mutex}]{mtx}{}\end{DoxyParamCaption})}
+
+
+
+Destroy a mutex. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mtx} & The mutex to destroy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{async_8c_a0be6ce883a383530decfae10fdee2921}\index{async.c@{async.c}!qsc\_async\_mutex\_lock@{qsc\_async\_mutex\_lock}}
+\index{qsc\_async\_mutex\_lock@{qsc\_async\_mutex\_lock}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_mutex\_lock()}{qsc\_async\_mutex\_lock()}}
+{\footnotesize\ttfamily \label{async_8c_a0be6ce883a383530decfae10fdee2921} 
+void qsc\+\_\+async\+\_\+mutex\+\_\+lock (\begin{DoxyParamCaption}\item[{qsc\+\_\+mutex}]{mtx}{}\end{DoxyParamCaption})}
+
+
+
+Lock a mutex. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mtx} & The mutex to lock \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_aa030a69d5ced56db0754baac881463c6}\index{async.c@{async.c}!qsc\_async\_mutex\_lock\_ex@{qsc\_async\_mutex\_lock\_ex}}
+\index{qsc\_async\_mutex\_lock\_ex@{qsc\_async\_mutex\_lock\_ex}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_mutex\_lock\_ex()}{qsc\_async\_mutex\_lock\_ex()}}
+{\footnotesize\ttfamily \label{async_8c_aa030a69d5ced56db0754baac881463c6} 
+qsc\+\_\+mutex qsc\+\_\+async\+\_\+mutex\+\_\+lock\+\_\+ex (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Creates and locks a mutex. 
+
+\begin{DoxyReturn}{Returns}
+Returns the locked mutex 
+\end{DoxyReturn}
+\Hypertarget{async_8c_a34436bcc9edf108937ca9c974fb09701}\index{async.c@{async.c}!qsc\_async\_mutex\_unlock@{qsc\_async\_mutex\_unlock}}
+\index{qsc\_async\_mutex\_unlock@{qsc\_async\_mutex\_unlock}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_mutex\_unlock()}{qsc\_async\_mutex\_unlock()}}
+{\footnotesize\ttfamily \label{async_8c_a34436bcc9edf108937ca9c974fb09701} 
+void qsc\+\_\+async\+\_\+mutex\+\_\+unlock (\begin{DoxyParamCaption}\item[{qsc\+\_\+mutex}]{mtx}{}\end{DoxyParamCaption})}
+
+
+
+Unlock a mutex. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mtx} & The mutex to unlock \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_abf6f7aeafb442a45824a14213a6b522e}\index{async.c@{async.c}!qsc\_async\_mutex\_unlock\_ex@{qsc\_async\_mutex\_unlock\_ex}}
+\index{qsc\_async\_mutex\_unlock\_ex@{qsc\_async\_mutex\_unlock\_ex}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_mutex\_unlock\_ex()}{qsc\_async\_mutex\_unlock\_ex()}}
+{\footnotesize\ttfamily \label{async_8c_abf6f7aeafb442a45824a14213a6b522e} 
+void qsc\+\_\+async\+\_\+mutex\+\_\+unlock\+\_\+ex (\begin{DoxyParamCaption}\item[{qsc\+\_\+mutex}]{mtx}{}\end{DoxyParamCaption})}
+
+
+
+Unlocks and destroys a mutex. The mutex must be initialized and destroyed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mtx} & The mutex to unlock \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_aaab58e54628e962848e8074550108e62}\index{async.c@{async.c}!qsc\_async\_parallel\_for@{qsc\_async\_parallel\_for}}
+\index{qsc\_async\_parallel\_for@{qsc\_async\_parallel\_for}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_parallel\_for()}{qsc\_async\_parallel\_for()}}
+{\footnotesize\ttfamily \label{async_8c_aaab58e54628e962848e8074550108e62} 
+bool qsc\+\_\+async\+\_\+parallel\+\_\+for (\begin{DoxyParamCaption}\item[{void(\texorpdfstring{$\ast$}{*}}]{task~}{)(void \texorpdfstring{$\ast$}{*}context, size\+\_\+t index), }\item[{void \texorpdfstring{$\ast$}{*}}]{context}{, }\item[{size\+\_\+t}]{nthreads}{}\end{DoxyParamCaption})}
+
+
+
+A parallel for loop implementation Processes each function call on a unique thread and waits for all threads before returning. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em task} & A pointer to the function to run in parallel, with a pointer to a state, and the index value \\
+\hline
+{\em context} & The function context \\
+\hline
+{\em nthreads} & The number of threads to process\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if all threads were created 
+\end{DoxyReturn}
+\Hypertarget{async_8c_a37bb19e4d0f7f29aa7a957c091b4ad3d}\index{async.c@{async.c}!qsc\_async\_thread\_create@{qsc\_async\_thread\_create}}
+\index{qsc\_async\_thread\_create@{qsc\_async\_thread\_create}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_create()}{qsc\_async\_thread\_create()}}
+{\footnotesize\ttfamily \label{async_8c_a37bb19e4d0f7f29aa7a957c091b4ad3d} 
+qsc\+\_\+thread qsc\+\_\+async\+\_\+thread\+\_\+create (\begin{DoxyParamCaption}\item[{void(\texorpdfstring{$\ast$}{*}}]{func~}{)(void \texorpdfstring{$\ast$}{*}), }\item[{void \texorpdfstring{$\ast$}{*}}]{state}{}\end{DoxyParamCaption})}
+
+
+
+Create a thread with one parameter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em func} & The thread function \\
+\hline
+{\em state} & The function state\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns a thread handle, or NULL on failure 
+\end{DoxyReturn}
+\Hypertarget{async_8c_ac40e3fb1eb4b15041c7d17dc872d80bc}\index{async.c@{async.c}!qsc\_async\_thread\_create\_ex@{qsc\_async\_thread\_create\_ex}}
+\index{qsc\_async\_thread\_create\_ex@{qsc\_async\_thread\_create\_ex}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_create\_ex()}{qsc\_async\_thread\_create\_ex()}}
+{\footnotesize\ttfamily \label{async_8c_ac40e3fb1eb4b15041c7d17dc872d80bc} 
+qsc\+\_\+thread qsc\+\_\+async\+\_\+thread\+\_\+create\+\_\+ex (\begin{DoxyParamCaption}\item[{void(\texorpdfstring{$\ast$}{*}}]{func~}{)(void \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}), }\item[{void \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{args}{}\end{DoxyParamCaption})}
+
+
+
+Create a thread with multiple parameters. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em func} & The thread function \\
+\hline
+{\em args} & The function argument list \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns a thread handle, or NULL on failure 
+\end{DoxyReturn}
+\Hypertarget{async_8c_a8ef6fd6e0c75fabb7af7f634e95210ca}\index{async.c@{async.c}!qsc\_async\_thread\_resume@{qsc\_async\_thread\_resume}}
+\index{qsc\_async\_thread\_resume@{qsc\_async\_thread\_resume}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_resume()}{qsc\_async\_thread\_resume()}}
+{\footnotesize\ttfamily \label{async_8c_a8ef6fd6e0c75fabb7af7f634e95210ca} 
+int32\+\_\+t qsc\+\_\+async\+\_\+thread\+\_\+resume (\begin{DoxyParamCaption}\item[{qsc\+\_\+thread}]{handle}{}\end{DoxyParamCaption})}
+
+
+
+Resume a suspended thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em handle} & The thread to resume\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns zero on success 
+\end{DoxyReturn}
+\Hypertarget{async_8c_a60962c913f9f8e7f47594dbb521a20d5}\index{async.c@{async.c}!qsc\_async\_thread\_sleep@{qsc\_async\_thread\_sleep}}
+\index{qsc\_async\_thread\_sleep@{qsc\_async\_thread\_sleep}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_sleep()}{qsc\_async\_thread\_sleep()}}
+{\footnotesize\ttfamily \label{async_8c_a60962c913f9f8e7f47594dbb521a20d5} 
+void qsc\+\_\+async\+\_\+thread\+\_\+sleep (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{msec}{}\end{DoxyParamCaption})}
+
+
+
+Pause the thread for a number of milliseconds. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em msec} & The number of milliseconds to sleep \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_aa9be69badb42975433a7ea44168a21c0}\index{async.c@{async.c}!qsc\_async\_thread\_suspend@{qsc\_async\_thread\_suspend}}
+\index{qsc\_async\_thread\_suspend@{qsc\_async\_thread\_suspend}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_suspend()}{qsc\_async\_thread\_suspend()}}
+{\footnotesize\ttfamily \label{async_8c_aa9be69badb42975433a7ea44168a21c0} 
+int32\+\_\+t qsc\+\_\+async\+\_\+thread\+\_\+suspend (\begin{DoxyParamCaption}\item[{qsc\+\_\+thread}]{handle}{}\end{DoxyParamCaption})}
+
+
+
+Suspend a thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em handle} & The thread to suspend \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_abb5e50dcb1ea4ef72bb5e4d6f94773da}\index{async.c@{async.c}!qsc\_async\_thread\_terminate@{qsc\_async\_thread\_terminate}}
+\index{qsc\_async\_thread\_terminate@{qsc\_async\_thread\_terminate}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_terminate()}{qsc\_async\_thread\_terminate()}}
+{\footnotesize\ttfamily \label{async_8c_abb5e50dcb1ea4ef72bb5e4d6f94773da} 
+bool qsc\+\_\+async\+\_\+thread\+\_\+terminate (\begin{DoxyParamCaption}\item[{qsc\+\_\+thread}]{handle}{}\end{DoxyParamCaption})}
+
+
+
+Terminate a thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em handle} & The thread to terminate (terminates calling thread on windows) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_aef6fb6dbd971c6f61289ef23ed6d53de}\index{async.c@{async.c}!qsc\_async\_thread\_wait@{qsc\_async\_thread\_wait}}
+\index{qsc\_async\_thread\_wait@{qsc\_async\_thread\_wait}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_wait()}{qsc\_async\_thread\_wait()}}
+{\footnotesize\ttfamily \label{async_8c_aef6fb6dbd971c6f61289ef23ed6d53de} 
+void qsc\+\_\+async\+\_\+thread\+\_\+wait (\begin{DoxyParamCaption}\item[{qsc\+\_\+thread}]{handle}{}\end{DoxyParamCaption})}
+
+
+
+Wait for a thread to complete execution. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em handle} & The thread handle \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_a1f6bfc5d92cfd277201845a1efabfd86}\index{async.c@{async.c}!qsc\_async\_thread\_wait\_all@{qsc\_async\_thread\_wait\_all}}
+\index{qsc\_async\_thread\_wait\_all@{qsc\_async\_thread\_wait\_all}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_wait\_all()}{qsc\_async\_thread\_wait\_all()}}
+{\footnotesize\ttfamily \label{async_8c_a1f6bfc5d92cfd277201845a1efabfd86} 
+void qsc\+\_\+async\+\_\+thread\+\_\+wait\+\_\+all (\begin{DoxyParamCaption}\item[{qsc\+\_\+thread \texorpdfstring{$\ast$}{*}}]{handles}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+
+
+Wait for an array of threads to complete execution. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em handles} & The array of threads \\
+\hline
+{\em count} & The number of threads \\
+\hline
+\end{DoxyParams}
+\Hypertarget{async_8c_af400679f161881a9288953c24d369183}\index{async.c@{async.c}!qsc\_async\_thread\_wait\_time@{qsc\_async\_thread\_wait\_time}}
+\index{qsc\_async\_thread\_wait\_time@{qsc\_async\_thread\_wait\_time}!async.c@{async.c}}
+\doxysubsubsection{\texorpdfstring{qsc\_async\_thread\_wait\_time()}{qsc\_async\_thread\_wait\_time()}}
+{\footnotesize\ttfamily \label{async_8c_af400679f161881a9288953c24d369183} 
+void qsc\+\_\+async\+\_\+thread\+\_\+wait\+\_\+time (\begin{DoxyParamCaption}\item[{qsc\+\_\+thread}]{handle}{, }\item[{uint32\+\_\+t}]{msec}{}\end{DoxyParamCaption})}
+
+
+
+Wait a number of milliseconds for a thread to complete execution. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em handle} & The thread handle \\
+\hline
+{\em msec} & The number of milliseconds to wait \\
+\hline
+\end{DoxyParams}

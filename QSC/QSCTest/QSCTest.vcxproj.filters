@@ -36,9 +36,6 @@
     <ClCompile Include="chacha_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="poly1305_test.c">
-      <Filter>Source Files\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="sha2_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
@@ -105,6 +102,15 @@
     <ClCompile Include="scb_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="qmac_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="encoding_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="poly1305_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -114,9 +120,6 @@
       <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="chacha_test.h">
-      <Filter>Header Files\Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="poly1305_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="sha2_test.h">
@@ -183,6 +186,15 @@
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="scb_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="qmac_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="encoding_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="poly1305_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>

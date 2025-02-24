@@ -91,3 +91,50 @@ bool qsc_acp_generate(uint8_t* output, size_t length)
 
 	return res;
 }
+
+uint16_t qsc_acp_uint16()
+{
+	uint8_t arr[sizeof(uint16_t)] = { 0 };
+	uint16_t num;
+
+	qsc_acp_generate(arr, sizeof(arr));
+
+	num = (((uint16_t)arr[1]) | 
+		(uint16_t)((uint16_t)arr[0] << 8U));
+
+	return num;
+}
+
+uint32_t qsc_acp_uint32()
+{
+	uint8_t arr[sizeof(uint32_t)] = { 0 };
+	uint32_t num;
+
+	qsc_acp_generate(arr, sizeof(arr));
+
+	num = (uint32_t)(arr[3]) |
+		(((uint32_t)(arr[2])) << 8) |
+		(((uint32_t)(arr[1])) << 16) |
+		(((uint32_t)(arr[0])) << 24);
+
+	return num;
+}
+
+uint64_t qsc_acp_uint64()
+{
+	uint8_t arr[sizeof(uint64_t)] = { 0 };
+	uint64_t num;
+
+	qsc_acp_generate(arr, sizeof(arr));
+
+	num = (uint64_t)(arr[7]) |
+		(((uint64_t)(arr[6])) << 8) |
+		(((uint64_t)(arr[5])) << 16) |
+		(((uint64_t)(arr[4])) << 24) |
+		(((uint64_t)(arr[3])) << 32) |
+		(((uint64_t)(arr[2])) << 40) |
+		(((uint64_t)(arr[1])) << 48) |
+		(((uint64_t)(arr[0])) << 56);
+
+	return num;
+}
