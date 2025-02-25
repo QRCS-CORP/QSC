@@ -84,6 +84,9 @@ _All asymmetric ciphers and signature schemes have been updated to NIST PQC Roun
 - **Threading & Networking:**  
   - Asynchronous threading, mutex-based synchronization, and dual IPv4/IPv6 networking (both synchronous and asynchronous).
 
+- **Tools & Utilities:**
+- Hundreds of utility functions, encoding schemes, SIMD functions, mathematical and integer tools, you can build anything with this library.
+
 - **Hardware Support:**  
   - CPU feature detection (CPUID) and secure memory management via a dedicated secure memory (secmem) class.  
   - Extensive use of SIMD intrinsics (AVX, AVX2, AVX512) for optimized performance.
