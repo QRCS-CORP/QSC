@@ -25,7 +25,7 @@ Tested on:
 - **Ubuntu Linux** (version 20.04 using Eclipse 2021-09 with GCC Ubuntu 9.3.0-17)  
 - **macOS Big Sur** (version 11.5.2 using Eclipse 2021-09 with Apple Clang 12.0.5)
 
-_All asymmetric ciphers and signature schemes have been updated to NIST PQC Round 3 standards._
+_All asymmetric ciphers and signature schemes have been updated to new FIPS standards for the winners, and NIST PQC Round 3 standards for last round contenders._
 
 ## Library Contents
 
@@ -47,11 +47,11 @@ _All asymmetric ciphers and signature schemes have been updated to NIST PQC Roun
 
 - **Block Ciphers:**  
   - *AES:* Supports modes such as CBC, CTR, and ECB.  
-  - *RCS:* An authenticated stream cipher based on wide-block Rijndael and KMAC.
 
-- **Stream Ciphers:**  
-  - *ChaChaPoly20:* ChaCha-based stream cipher.  
+- **Stream Ciphers:**
+  - *RCS:* An authenticated stream cipher based on wide-block Rijndael and KMAC/QMAC. 
   - *CSX:* A ChaCha-based authenticated cipher using 64-bit integers, 512-bit keys, and KMAC authentication.
+  - *ChaChaPoly20:* ChaCha-based stream cipher. 
 
 ### Hash Functions and MACs
 
@@ -130,6 +130,7 @@ QSC has been thoroughly tested on:
 ## Roadmap
 
 - Continued ASM/SIMD integration and optimization.
+- Wrapper libraries for .NET, Java, and Rust.
 - Development of a post-quantum TLS 1.3 implementation.
 - Expansion of testing and benchmarking frameworks.
 - Integration of emerging cryptographic research and standards.
