@@ -57,8 +57,8 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 
 - **Message Authentication Codes:**  
   - *QMAC:* GMAC(2^256) variant.  
-  - *KMAC:* Keccak-based MAC.  
-  - *HMAC:* Based on SHA2.  
+  - *KMAC:* Keccak FIPS-202 MAC function.  
+  - *HMAC:* SHA2-256 and 512-bit MAC functions.  
   - *Poly1305:* High-speed MAC generator.
 
 - **DRBGs and PRNGs:**
