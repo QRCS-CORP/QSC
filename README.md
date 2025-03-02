@@ -51,11 +51,9 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
   - *CSX:* A ChaCha-based authenticated AEAD stream cipher using 64-bit integers, 512-bit keys, and KMAC/QMAC authentication.
   - *ChaChaPoly20:* ChaCha-based stream cipher. 
 
-#### Hash Functions and MACs
-
 - **Hash Functions:**  
-  - *SHA3* 256- and 512-bit variants.
-  - *SHA2* 256- and 512-bit variants.
+  - *SHA3* 256 and 512-bit variants.
+  - *SHA2* 256 and 512-bit variants.
 
 - **Message Authentication Codes:**  
   - *QMAC:* GMAC(2^256) variant.  
@@ -63,8 +61,16 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
   - *HMAC:* Based on SHA2.  
   - *Poly1305:* High-speed MAC generator.
 
-#### DRBG, XOF, and PRNGs
-
+- **DRBGs and PRNGs:**
+  - **CSG (`csg.h`)**
+    cSHAKE wrapped auto-seeding DRBG.
+  - **HCG (`hcg.h`)**
+    HMAC wrapped auto-seeding DRBG.
+  - **SCB (`scb.h`)**
+    SHAKE Cost Based KDF (uses memory thrashing and CPU cost mechanisms).
+  - **Secrand (`secrand.h`)**
+    Secure PRNG producing random integers of every type.
+    
 - **XOF and KDF Functions:**  
   - *SHAKE* and *cSHAKE* (for key derivation functions and DRBGs).  
   - *SCB (SHAKE Cost Based KDF):* For secure key derivation.
@@ -79,14 +85,7 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
     The operating system entropy provider.
   - **RDRAND (`rdp.h`):**  
     Utilizes hardware-based random number generation.
-  - **CSG (`csg.h`)**
-    cSHAKE wrapped auto-seeding DRBG.
-  - **HCG (`hcg.h`)**
-    HMAC wrapped auto-seeding DRBG.
-  - **SCB (`scb.h`)**
-    SHAKE Cost Based KDF (uses memory thrashing and CPU cost mechanisms).
-  - **Secrand (`secrand.h`)**
-    Secure PRNG producing random integers of every type.
+
 
 ### Utility Functions and System Support
 
