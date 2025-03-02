@@ -160,7 +160,7 @@ QSC has been thoroughly tested on:
 ## Roadmap
 
 - Continued ASM/SIMD integration and optimization.
-- Wrapper libraries for .NET, Java, and Rust.
+- Wrapper libraries for .NET, Java, and C++.
 - Development of a post-quantum TLS 1.3 implementation.
 - Expansion of testing and benchmarking frameworks.
 - Integration of emerging cryptographic research and standards.
