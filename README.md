@@ -74,7 +74,7 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 - **XOF and KDF Functions:**  
   - *SHAKE* and *cSHAKE* (for key derivation functions and DRBGs).  
   - *SCB (SHAKE Cost Based KDF):* For secure key derivation.
-  - *HKDF SHA2-256 AND 512 bit variants
+  - *HKDF* SHA2-256 AND 512 bit variants
 
 ### Randomness and Entropy
 
