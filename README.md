@@ -72,8 +72,6 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
   - **SCB:** SHAKE Cost Based KDF used for secure passphrase-key derivation.
   - **HKDF:** SHA2-256 AND 512 bit variants
 
-### Randomness and Entropy
-
 - **Entropy Providers & PRNGs:**
   - **ACP (`acp.h`):** Auto Entropy Collection Provider for gathering entropy.
   - **CSP (`csp.h`):** The operating system entropy provider.
