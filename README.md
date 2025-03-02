@@ -101,7 +101,9 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 
 #### Networking
 - **TCP/IP and Socket Utilities:**  
-  A complete set of network functions provided in `netutils.h`, `socket.h`, `socketclient.h`, `socketserver.h`, `socketbase.h`, and `socketflags.h`.
+  A complete set of network functions provided in `netutils.h`, `socket.h`, `socketbase.h`, and `socketflags.h`.
+- **Socket Server and Client:**
+  An asynchronous high-performance socket server and client in `socketclient.h` and `socketserver.h`.
 
 #### Concurrency and System Utilities
 - **Asynchronous Operations:**  
