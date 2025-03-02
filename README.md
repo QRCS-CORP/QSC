@@ -45,18 +45,17 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 
 ### Symmetric Cryptography
 
-- **Block Ciphers:**  
-  - *AES:* Supports modes such as CBC, CTR, and ECB.  
-
-- **Stream Ciphers:**
-  - *RCS:* An authenticated stream cipher based on wide-block Rijndael and KMAC/QMAC. 
-  - *CSX:* A ChaCha-based authenticated cipher using 64-bit integers, 512-bit keys, and KMAC authentication.
+- **Symmetric Ciphers:**
+  - *AES:* Supports modes such as CBC, CTR, HBA, and ECB.  
+  - *RCS:* An authenticated AEAD stream cipher based on wide-block Rijndael and KMAC/QMAC. 
+  - *CSX:* A ChaCha-based authenticated AEAD stream cipher using 64-bit integers, 512-bit keys, and KMAC/QMAC authentication.
   - *ChaChaPoly20:* ChaCha-based stream cipher. 
 
-### Hash Functions and MACs
+#### Hash Functions and MACs
 
 - **Hash Functions:**  
-  - *SHA3* and *SHA2* (256- and 512-bit variants).
+  - *SHA3* 256- and 512-bit variants.
+  - *SHA2* 256- and 512-bit variants.
 
 - **Message Authentication Codes:**  
   - *QMAC:* GMAC(2^256) variant.  
@@ -64,33 +63,59 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
   - *HMAC:* Based on SHA2.  
   - *Poly1305:* High-speed MAC generator.
 
-### DRBG, XOF, and PRNGs
+#### DRBG, XOF, and PRNGs
 
-- **XOF Functions:**  
+- **XOF and KDF Functions:**  
   - *SHAKE* and *cSHAKE* (for key derivation functions and DRBGs).  
   - *SCB (SHAKE Cost Based KDF):* For secure key derivation.
+  - *HKDF SHA2-256 AND 512 bit variants
 
-- **Random Number Generation:**  
-  - Secure PRNGs and entropy providers integrating hardware randomness (e.g., Intel RDRAND).
+### Randomness and Entropy
 
-### Entropy Providers
+- **Entropy Providers & PRNGs:**
+  - **ACP (`acp.h`):**  
+    Auto Entropy Collection Provider for gathering entropy.
+  - **RDRAND (`rdp.h`):**  
+    Utilizes hardware-based random number generation.
+  - **Additional Generators:**  
+    - *CSG cSHAKE wrapped auto-seeding DRBG.
+    - *HCG HMAC wrapped auto-seeding DRBG.
+    - *SCB SHAKE Cost Based KDF (uses memory thrashing and CPU cost mechanisms).
+    - *Secrand secure PRNG producing random integers of every type.
 
-- **ACP:** Auto-collection provider that mixes system entropy sources (timers, system state, RDRAND) with cSHAKE-512 seeding.  
-- **CSP:** System cryptographic provider.  
-- **RDP:** Intel RDRAND-based provider.
+### Utility Functions and System Support
 
-### System Utilities
+#### Memory, Data, and File Management
+- **Array and String Utilities:**  
+  `arrayutils.h` and `stringutils.h` for managing character arrays and strings.
+- **Memory Functions:**  
+  `memutils.h` implements optimized memory operations using SIMD instructions.
+- **Integer and Arithmetic:**  
+  `intutils.h` and `donna128.h` provide high-precision arithmetic and integer manipulation.
+- **File and Folder Utilities:**  
+  `fileutils.h` and `folderutils.h` simplify file handling and directory management.
 
-- **Threading & Networking:**  
-  - Asynchronous threading, mutex-based synchronization, and dual IPv4/IPv6 networking (both synchronous and asynchronous).
+#### Networking
+- **TCP/IP and Socket Utilities:**  
+  A complete set of network functions provided in `netutils.h`, `socket.h`, `socketclient.h`, `socketserver.h`, `socketbase.h`, and `socketflags.h`.
 
-- **Tools & Utilities:**
-  - Hundreds of utility functions, SIMD functions, mathematical and integer tools.
-  - Encoding schemes, file, folder, string, and console utilities, you can build anything with this library.
+#### Concurrency and System Utilities
+- **Asynchronous Operations:**  
+  Managed through `async.h` and `threadpool.h` for multi-threaded processing.
+- **System and CPU Information:**  
+  `cpuidex.h`, `sysutils.h`, and `ipinfo.h` for system statistics and CPU feature detection.
+- **Timing and Events:**  
+  `timerex.h`, `timestamp.h`, and `event.h` offer precise timing and event management.
+- **Platform-Specific Utilities:**  
+  `consoleutils.h` and `winutils.h` provide support for console applications and Windows environments.
 
-- **Hardware Support:**  
-  - CPU feature detection (CPUID) and secure memory management via a dedicated secure memory (secmem) class.  
-  - Extensive use of SIMD intrinsics (AVX, AVX2, AVX512) for optimized performance.
+#### Additional Utilities
+- **Data Structures:**  
+  Efficient keyed collections (`collection.h`), list (`list.h`), and queue (`queue.h`) management.
+- **Encoding & Sorting:**  
+  `encoding.h` for multiple encoding schemes and `qsort.h` for quicksort operations.
+- **Self-Test Mechanisms:**  
+  `selftest.h` contains routines to verify the integrity and performance of the cryptographic functions.
 
 
 ## Architecture and Performance
@@ -107,7 +132,7 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 QSC has been thoroughly tested on:
 - **Windows** (Visual Studio)
 - **Ubuntu Linux** (GCC)
-- **macOS Big Sur** (Apple Clang)
+- **macOS** (Apple Clang)
 
 ## Features
 
