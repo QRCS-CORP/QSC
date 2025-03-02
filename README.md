@@ -160,7 +160,7 @@ QSC has been thoroughly tested on:
 
 QRCS-PL Private License. See the included license file for details.  
 Software is copyrighted, and some mechanisms are patent pending.  
-Written by John G. Underhill under the QRCS-PL license. 
+Written by John G. Underhill under the QRCS-PL license.  
 Redistribution or commercial use is not permitted without expressed written permission.  
 _All rights reserved by QRCS Corp. 2025._
 
