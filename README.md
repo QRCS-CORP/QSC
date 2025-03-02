@@ -75,13 +75,18 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 - **Entropy Providers & PRNGs:**
   - **ACP (`acp.h`):**  
     Auto Entropy Collection Provider for gathering entropy.
+  - **CSP (`csp.h`):**  
+    The operating system entropy provider.
   - **RDRAND (`rdp.h`):**  
     Utilizes hardware-based random number generation.
-  - **Additional Generators:**  
-    - *CSG cSHAKE wrapped auto-seeding DRBG.
-    - *HCG HMAC wrapped auto-seeding DRBG.
-    - *SCB SHAKE Cost Based KDF (uses memory thrashing and CPU cost mechanisms).
-    - *Secrand secure PRNG producing random integers of every type.
+  - **CSG (`csg.h`)**
+    cSHAKE wrapped auto-seeding DRBG.
+  - **HCG (`hcg.h`)**
+    HMAC wrapped auto-seeding DRBG.
+  - **SCB (`scb.h`)**
+    SHAKE Cost Based KDF (uses memory thrashing and CPU cost mechanisms).
+  - **Secrand (`secrand.h`)**
+    Secure PRNG producing random integers of every type.
 
 ### Utility Functions and System Support
 
@@ -116,7 +121,6 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
   `encoding.h` for multiple encoding schemes and `qsort.h` for quicksort operations.
 - **Self-Test Mechanisms:**  
   `selftest.h` contains routines to verify the integrity and performance of the cryptographic functions.
-
 
 ## Architecture and Performance
 
