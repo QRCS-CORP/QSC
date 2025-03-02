@@ -32,59 +32,52 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 ### Asymmetric Cryptography
 
 - **Key Encapsulation Mechanisms:**  
-  - *McEliece:* Niederreiter dual form of the McEliece public key crypto-system.  
-  - *Kyber:* Module-LWE based key encapsulation (updated to NIST FIPS-203 standards).  
-  - *NTRU:* Asymmetric cipher implementation.  
-  - *ECDH:* Elliptic Curve Diffie-Hellman key exchange.
+  - **McEliece:** Niederreiter dual form of the McEliece public key crypto-system.  
+  - **Kyber:** Module-LWE based key encapsulation (updated to NIST FIPS-203 standards).  
+  - **NTRU:** Asymmetric cipher implementation.  
+  - **ECDH:** Elliptic Curve Diffie-Hellman key exchange.
 
 - **Digital Signature Schemes:**  
-  - *Sphincs+:* Post-quantum secure signature scheme (updated to NIST FIPS-205 standards).  
-  - *Dilithium:* Lattice-based signature scheme (updated to NIST FIPS-204 standards).  
-  - *Falcon:* NTRU-based signature scheme.  
-  - *ECDSA (Ed25519):* Elliptic Curve Digital Signature Algorithm.
+  - **Sphincs+:** Post-quantum secure signature scheme (updated to NIST FIPS-205 standards).  
+  - **Dilithium:** Lattice-based signature scheme (updated to NIST FIPS-204 standards).  
+  - **Falcon:** NTRU-based signature scheme.  
+  - **ECDSA (Ed25519):** Elliptic Curve Digital Signature Algorithm.
 
 ### Symmetric Cryptography
 
 - **Symmetric Ciphers:**
-  - *AES:* Supports modes such as CBC, CTR, HBA, and ECB.  
-  - *RCS:* An authenticated AEAD stream cipher based on wide-block Rijndael and KMAC/QMAC. 
-  - *CSX:* A ChaCha-based authenticated AEAD stream cipher using 64-bit integers, 512-bit keys, and KMAC/QMAC authentication.
-  - *ChaChaPoly20:* ChaCha-based stream cipher. 
+  - **AES:** Supports modes such as CBC, CTR, HBA, and ECB.  
+  - **RCS:** An authenticated AEAD stream cipher based on wide-block Rijndael and KMAC/QMAC. 
+  - **CSX:** A ChaCha-based authenticated AEAD stream cipher using 64-bit integers, 512-bit keys, and KMAC/QMAC authentication.
+  - **ChaChaPoly20:** ChaCha-based stream cipher. 
 
 - **Hash Functions:**  
-  - *SHA3* 256 and 512-bit variants.
-  - *SHA2* 256 and 512-bit variants.
+  - **SHA3:** 256 and 512-bit variants.
+  - **SHA2:** 256 and 512-bit variants.
 
 - **Message Authentication Codes:**  
-  - *QMAC:* GMAC(2^256) variant.  
-  - *KMAC:* Keccak FIPS-202 MAC function.  
-  - *HMAC:* SHA2-256 and 512-bit MAC functions.  
-  - *Poly1305:* High-speed MAC generator.
+  - **QMAC:** GMAC(2^256) variant.  
+  - **KMAC:** Keccak FIPS-202 MAC function.  
+  - **HMAC:** SHA2-256 and 512-bit MAC functions.  
+  - **Poly1305:** High-speed MAC generator.
 
 - **DRBGs and PRNGs:**
-  - **CSG (`csg.h`)**
-    cSHAKE wrapped auto-seeding DRBG.
-  - **HCG (`hcg.h`)**
-    HMAC wrapped auto-seeding DRBG.
-  - **SCB (`scb.h`)**
-    SHAKE Cost Based KDF (uses memory thrashing and CPU cost mechanisms).
-  - **Secrand (`secrand.h`)**
-    Secure PRNG producing random integers of every type.
+  - **CSG (`csg.h`):** cSHAKE wrapped auto-seeding DRBG.
+  - **HCG (`hcg.h`):** HMAC wrapped auto-seeding DRBG.
+  - **SCB (`scb.h`):** SHAKE Cost Based KDF (uses memory thrashing and CPU cost mechanisms).
+  - **Secrand (`secrand.h`):** Secure PRNG producing random integers of every type.
     
 - **XOF and KDF Functions:**  
-  - *SHAKE* and *cSHAKE* (for key derivation functions and DRBGs).  
-  - *SCB (SHAKE Cost Based KDF):* For secure key derivation.
-  - *HKDF* SHA2-256 AND 512 bit variants
+  - **SHAKE** and **cSHAKE:** (for key derivation functions and DRBGs).  
+  - **SCB:** SHAKE Cost Based KDF used for secure passphrase-key derivation.
+  - **HKDF:** SHA2-256 AND 512 bit variants
 
 ### Randomness and Entropy
 
 - **Entropy Providers & PRNGs:**
-  - **ACP (`acp.h`):**  
-    Auto Entropy Collection Provider for gathering entropy.
-  - **CSP (`csp.h`):**  
-    The operating system entropy provider.
-  - **RDRAND (`rdp.h`):**  
-    Utilizes hardware-based random number generation.
+  - **ACP (`acp.h`):** Auto Entropy Collection Provider for gathering entropy.
+  - **CSP (`csp.h`):** The operating system entropy provider.
+  - **RDRAND (`rdp.h`):** Utilizes hardware-based random number generation.
 
 
 ### Utility Functions and System Support
