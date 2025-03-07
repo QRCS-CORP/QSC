@@ -45,6 +45,8 @@
 #include "common.h"
 #include <stdio.h>
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file arrayutils.h
  * \brief Functions for handling character arrays.
@@ -227,5 +229,7 @@ QSC_EXPORT_API uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t 
  * \return [bool] \c true if all tests pass; otherwise \c false.
  */
 QSC_EXPORT_API bool qsc_arrayutils_self_test(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

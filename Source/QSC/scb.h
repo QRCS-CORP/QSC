@@ -43,6 +43,8 @@
 #include "common.h"
 #include "sha3.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file scb.h
  * \brief Contains the public API and documentation for the SCB pseudo-random bytes generator.
@@ -174,5 +176,7 @@ QSC_EXPORT_API void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t
  * \param seedlen:  [size_t] The length of the update seed in bytes.
  */
 QSC_EXPORT_API void qsc_scb_update(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

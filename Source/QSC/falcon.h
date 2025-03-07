@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file falcon.h
  * \brief Contains the primary public API for the Falcon asymmetric signature scheme implementation.
@@ -158,5 +160,7 @@ QSC_EXPORT_API void qsc_falcon_sign(uint8_t* signedmsg, size_t* smsglen, const u
  * \return				[bool] Returns true for success.
  */
 QSC_EXPORT_API bool qsc_falcon_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

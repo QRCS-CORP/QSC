@@ -42,6 +42,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file donna128.h
  * \brief Donna128 128-bit Integer Arithmetic Functions
@@ -162,5 +164,7 @@ QSC_EXPORT_API uint128 qsc_donna128_multiply(const uint128* x, uint64_t y);
  * \return          [uint128] The result of the OR operation.
  */
 QSC_EXPORT_API uint128 qsc_donna128_or(const uint128* x, const uint128* y);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

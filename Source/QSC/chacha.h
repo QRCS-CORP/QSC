@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file chacha.h
  * \brief Contains the public API and documentation for the ChaCha20 implementation.
@@ -161,5 +163,7 @@ QSC_EXPORT_API void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chach
  * \param length:       [size_t] The number of bytes to process.
  */
 QSC_EXPORT_API void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

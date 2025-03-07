@@ -289,7 +289,7 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* addr
     char sip[QSC_IPINFO_IPV4_STRNLEN] = { 0 };
 
     // Initialize sockaddr_in struct for IPv4
-    memset(&insock4, 0, sizeof(insock4));
+    qsc_memutils_clear(&insock4, sizeof(insock4));
     insock4.sin_family = AF_INET;
 
     qsc_ipinfo_ipv4_address_to_string(sip, address);

@@ -42,6 +42,29 @@
 #ifndef QSC_AES_H
 #define QSC_AES_H
 
+#include "common.h"
+#include "intrinsics.h"
+
+/*! \def QSC_HBA_KMAC_EXTENSION
+ * \brief Enables the cSHAKE/KMAC extensions for the HBA cipher mode.
+ *
+ * When defined, the HBA-256 mode uses cSHAKE/KMAC for message authentication.
+ */
+#define QSC_HBA_KMAC_EXTENSION
+
+/*! \def QSC_HBA_HKDF_EXTENSION
+ * \brief Enables the HKDF extensions for the HBA cipher mode as an alternative to the cSHAKE mode.
+ *
+ * When defined (and if QSC_HBA_KMAC_EXTENSION is not defined), HMAC(SHA2) is used by default.
+ */
+#define QSC_HBA_HKDF_EXTENSION
+
+#if defined(QSC_HBA_KMAC_EXTENSION)
+#	include "sha3.h"
+#else
+#	include "sha2.h"
+#endif
+
 /*!
  * \file aes.h
  * \brief An implementation of the AES symmetric cipher along with modes and an AEAD scheme.
@@ -85,28 +108,7 @@
  * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">SHA3 Implementation NIST FIPS 202</a>
  */
 
-#include "common.h"
-#include "intrinsics.h"
-
-/*! \def QSC_HBA_KMAC_EXTENSION
- * \brief Enables the cSHAKE/KMAC extensions for the HBA cipher mode.
- *
- * When defined, the HBA-256 mode uses cSHAKE/KMAC for message authentication.
- */
-#define QSC_HBA_KMAC_EXTENSION
-
-/*! \def QSC_HBA_HKDF_EXTENSION
- * \brief Enables the HKDF extensions for the HBA cipher mode as an alternative to the cSHAKE mode.
- *
- * When defined (and if QSC_HBA_KMAC_EXTENSION is not defined), HMAC(SHA2) is used by default.
- */
-#define QSC_HBA_HKDF_EXTENSION
-
-#if defined(QSC_HBA_KMAC_EXTENSION)
-#	include "sha3.h"
-#else
-#	include "sha2.h"
-#endif
+QSC_CPLUSPLUS_ENABLED_START
 
 /*! 
  * \enum qsc_aes_cipher_type
@@ -497,5 +499,7 @@ QSC_EXPORT_API void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* state, c
  * \sa qsc_aes_hba256_initialize, qsc_aes_hba256_set_associated
  */
 QSC_EXPORT_API bool qsc_aes_hba256_transform(qsc_aes_hba256_state* state, uint8_t* output, const uint8_t* input, size_t length);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

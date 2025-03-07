@@ -44,6 +44,8 @@
 #include "common.h"
 #include "csg.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file secrand.h
  * \brief Secure pseudo-random generator (PRNG) function definitions.
@@ -272,5 +274,7 @@ QSC_EXPORT_API void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, 
  * \return          [bool] Returns true if the operation succeeded.
  */
 QSC_EXPORT_API bool qsc_secrand_generate(uint8_t* output, size_t length);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

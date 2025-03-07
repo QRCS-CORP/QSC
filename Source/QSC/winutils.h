@@ -37,11 +37,12 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_WINUTILLS_H
 #define QSC_WINUTILLS_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file winutils.h
@@ -308,5 +309,7 @@ QSC_EXPORT_API size_t qsc_winutils_current_user(char* result, size_t reslen);
 * \brief Test the winutils functions
 */
 QSC_EXPORT_API void qsc_winutils_test(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

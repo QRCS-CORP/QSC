@@ -7,6 +7,10 @@
 #include <stdint.h>
 #include <immintrin.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // consts
 
 #define _8XQ          0
@@ -279,7 +283,8 @@ void nttunpack_avx(__m256i *a);
 void pointwise_avx(__m256i *c, const __m256i *a, const __m256i *b, const __m256i *qdata);
 void pointwise_acc_avx(__m256i *c, const __m256i *a, const __m256i *b, const __m256i *qdata);
 
-
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

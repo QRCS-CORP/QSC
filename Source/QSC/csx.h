@@ -43,6 +43,8 @@
 #include "common.h"
 #include "sha3.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file csx.h
  * \brief ChaCha-based authenticated Stream cipher eXtension
@@ -286,5 +288,7 @@ QSC_EXPORT_API bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const
 * \return:				[bool] Returns true if the cipher has been transformed the data successfully, false on failure
 */
 QSC_EXPORT_API bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

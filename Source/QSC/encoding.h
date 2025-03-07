@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file encoding.h
  * \brief Functions and data types for multiple encoding schemes.
@@ -459,5 +461,7 @@ QSC_EXPORT_API bool qsc_encoding_pem_decode(const char* input, uint8_t* output, 
  * \return          [bool] Returns true if encoding succeeded; false if the output buffer is too small.
  */
 QSC_EXPORT_API bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, const uint8_t* data, size_t datalen);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

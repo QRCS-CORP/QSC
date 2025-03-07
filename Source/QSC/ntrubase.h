@@ -37,13 +37,14 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_NTRUBASE_H
 #define QSC_NTRUBASE_H
 
  /* \cond */
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /* kem.h */
 
@@ -75,6 +76,8 @@ void qsc_ntru_ref_encapsulate(uint8_t* ct, uint8_t* ss, const uint8_t* pk, bool 
 * \param rng_generate: [uint8_t*, size_t] Pointer to the random generator function
 */
 void qsc_ntru_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

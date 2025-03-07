@@ -37,7 +37,6 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_MCELIECEBASE_AVX2_H
 #define QSC_MCELIECEBASE_AVX2_H
 
@@ -45,7 +44,11 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /* waiting for the code-base to stabilize before adding the intrinsics version */
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

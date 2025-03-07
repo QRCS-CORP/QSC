@@ -44,6 +44,8 @@
 
 /* \cond */
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
 * \file kyberbase_avx2.h
 * \brief The Kyber AVX2	functions
@@ -204,6 +206,8 @@ void qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint
 	bool (*rng_generate)(uint8_t*, size_t));
 
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

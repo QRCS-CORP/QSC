@@ -44,6 +44,8 @@
 #include "common.h"
 #include "intrinsics.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file intutils.h
  * \brief This file contains common integer manipulation and conversion functions.
@@ -574,5 +576,7 @@ QSC_EXPORT_API uint64_t qsc_intutils_rotr64(uint64_t value, size_t shift);
  * \return			[int32_t] Returns zero if the arrays are equivalent.
  */
 QSC_EXPORT_API int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

@@ -44,6 +44,8 @@
 #include "common.h"
 #include <stdio.h>
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file fileutils.h
  * \brief Contains common file related functions.
@@ -429,5 +431,7 @@ QSC_EXPORT_API void qsc_fileutils_zeroise(const char* fpath);
 #if defined(QSC_DEBUG_MODE)
 QSC_EXPORT_API void qsc_fileutils_test(const char* fpath);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

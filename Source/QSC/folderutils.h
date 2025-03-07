@@ -44,6 +44,11 @@
 #include "common.h"
 #include <stdio.h>
 
+QSC_CPLUSPLUS_ENABLED_START
+
+/* bogus winbase.h error */
+QSC_SYSTEM_CONDITION_IGNORE(5105)
+
 /*!
  * \file folderutils.h
  * \brief Folder utilities: common folder support functions.
@@ -67,10 +72,6 @@
  * - <a href="https://docs.microsoft.com/en-us/windows/win32/fileio/directory-functions">Microsoft Directory Functions</a>
  * - <a href="https://pubs.opengroup.org/onlinepubs/9699919799/functions/opendir.html">POSIX Directory Operations</a>
  */
-
-
-/* bogus winbase.h error */
-QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     static const char QSC_FOLDERUTILS_DELIMITER = '\\';
@@ -167,7 +168,6 @@ QSC_EXPORT_API void qsc_folderutils_get_directory(qsc_folderutils_directories di
  */
 QSC_EXPORT_API bool qsc_folderutils_directory_has_delimiter(const char path[QSC_SYSTEM_MAX_PATH]);
 
-
 #if defined(QSC_DEBUG_MODE)
 /**
  * \brief Test the folder functions.
@@ -176,5 +176,7 @@ QSC_EXPORT_API bool qsc_folderutils_directory_has_delimiter(const char path[QSC_
  */
 QSC_EXPORT_API void qsc_folderutils_test(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

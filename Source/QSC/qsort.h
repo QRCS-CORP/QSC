@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file qsort.h
  * \brief An implementation of the quicksort sorting function.
@@ -99,5 +101,7 @@ QSC_EXPORT_API void qsc_qsort_sort_i32(int32_t* arr32, int32_t start, int32_t en
  * \param end:		[int64_t] The end index of the sort.
  */
 QSC_EXPORT_API void qsc_qsort_sort_i64(int64_t* arr64, int64_t start, int64_t end);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

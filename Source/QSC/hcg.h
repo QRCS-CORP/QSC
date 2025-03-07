@@ -44,6 +44,8 @@
 #include "common.h"
 #include "sha2.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file hcg.h
  * \brief Contains the public API and documentation for the HCG pseudo-random bytes generator.
@@ -134,9 +136,9 @@ QSC_EXPORT_API typedef struct
     uint8_t key[QSC_HCG_KEY_SIZE];          /*!< The key cache. */
     uint8_t info[QSC_HCG_MAX_INFO_SIZE];    /*!< The info string. */
     uint8_t nonce[QSC_HCG_NONCE_SIZE];      /*!< The nonce array. */
-    size_t  inflen;                         /*!< The info string length. */
-    size_t  rpos;                           /*!< The reseed position. */
-    bool    pres;                           /*!< The predictive resistance flag. */
+    size_t inflen;                          /*!< The info string length. */
+    size_t rpos;                            /*!< The reseed position. */
+    bool pres;                              /*!< The predictive resistance flag. */
 } qsc_hcg_state;
 
 /**
@@ -181,5 +183,7 @@ QSC_EXPORT_API void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t
  * \param seedlen:  [size_t] The length of the update seed in bytes.
  */
 QSC_EXPORT_API void qsc_hcg_update(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

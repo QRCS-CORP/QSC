@@ -2,7 +2,7 @@
 #include "../QSC/async.h"
 #include "testutils.h"
 
-/* \cond DOXYGEN_IGNORE */
+/* \cond */
 
 typedef struct
 {
@@ -11,7 +11,7 @@ typedef struct
 	int32_t z;
 } thread_data;
 
-/* \endcond DOXYGEN_IGNORE */
+/* \endcond */
 
 static void thread_func(thread_data* data)
 {

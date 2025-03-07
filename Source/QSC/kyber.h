@@ -48,6 +48,8 @@
 	#include "kyberbase.h"
 #endif
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file kyber.h
  * \brief Contains the public API for the FIPS 203 implementation of the Kyber CCA-secure Key Encapsulation Mechanism.
@@ -171,5 +173,7 @@ QSC_EXPORT_API void qsc_kyber_encrypt(uint8_t* secret, uint8_t* ciphertext, cons
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
  */
 QSC_EXPORT_API void qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

@@ -2148,7 +2148,7 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
             qsc_memutils_clear(h.coeffs, DILITHIUM_N);
 
             /* Get hint polynomial and reconstruct w1 */
-            memset(h.coeffs, 0, sizeof(dilithium_poly));
+            qsc_memutils_clear(h.coeffs, sizeof(dilithium_poly));
 
             if(hint[DILITHIUM_OMEGA + i] < pos || hint[DILITHIUM_OMEGA + i] > DILITHIUM_OMEGA)
             {

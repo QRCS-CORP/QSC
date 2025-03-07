@@ -1,4 +1,3 @@
-
 /* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
@@ -38,11 +37,12 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_SYSUTILS_H
 #define QSC_SYSUTILS_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file sysutils.h
@@ -179,5 +179,7 @@ QSC_EXPORT_API void qsc_sysutils_user_identity(const char* name, char* id);
 */
 QSC_EXPORT_API void qsc_system_values_print(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

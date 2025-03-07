@@ -37,13 +37,14 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_MCELIECEBASE_H
 #define QSC_MCELIECEBASE_H
 
 #include "common.h"
 
 /* \cond */
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /* operations.h */
 
@@ -79,6 +80,8 @@ int32_t qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk
 * \return		[int32_t] Returns 0 for success
 */
 int32_t qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

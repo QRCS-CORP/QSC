@@ -1,4 +1,3 @@
-
 /* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
@@ -20,6 +19,8 @@
 #define QSC_POLY1305_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
 * \file poly1305.h
@@ -157,5 +158,7 @@ QSC_EXPORT_API void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* 
 * \return Returns success or failure
 */
 QSC_EXPORT_API int32_t qsc_poly1305_verify(const uint8_t* code, const uint8_t* message, size_t msglen, const uint8_t* key);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

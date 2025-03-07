@@ -44,6 +44,8 @@
 #include "common.h"
 #include <stdarg.h>
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file event.h
  * \brief Event function definitions.
@@ -136,5 +138,7 @@ QSC_EXPORT_API qsc_event_callback qsc_event_get_callback(const char name[QSC_EVE
  * Destroys the event handler state and frees all associated resources.
  */
 QSC_EXPORT_API void qsc_event_destroy_listeners(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

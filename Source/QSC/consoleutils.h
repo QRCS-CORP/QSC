@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file consoleutils.h
  * \brief Console support functions.
@@ -345,5 +347,7 @@ QSC_EXPORT_API void qsc_consoleutils_set_window_title(const char* title);
  * \brief Enable virtual terminal processing mode in the console.
  */
 QSC_EXPORT_API void qsc_consoleutils_set_virtual_terminal(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

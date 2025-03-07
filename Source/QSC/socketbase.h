@@ -46,6 +46,8 @@
 #include "memutils.h"
 #include "socket.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file socketbase.h
  * \brief Socket function definitions.
@@ -695,5 +697,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_set_option(const qsc_socket* soc
 * \return			[bool] Returns true on success
 */
 QSC_EXPORT_API bool qsc_socket_start_sockets(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

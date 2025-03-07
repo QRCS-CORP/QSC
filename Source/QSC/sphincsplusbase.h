@@ -37,13 +37,14 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_SPHINCSPLUSBASE_H
 #define QSC_SPHINCSPLUSBASE_H
 
 /* \cond */
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /* api.h */
 
@@ -132,6 +133,8 @@ void sphincsplus_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t m
 * \return Returns true for success
 */
 bool sphincsplus_ref_sign_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* pk);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

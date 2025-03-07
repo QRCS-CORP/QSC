@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file list.h
  * \brief Memory-aligned list management functions.
@@ -234,5 +236,7 @@ QSC_EXPORT_API void qsc_list_sort(qsc_list_state* ctx);
  */
 QSC_EXPORT_API bool qsc_list_self_test(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

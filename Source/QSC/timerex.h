@@ -37,12 +37,13 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_TIMEREX_H
 #define QSC_TIMEREX_H
 
 #include "common.h"
 #include <time.h>
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file timerex.h
@@ -120,5 +121,7 @@ QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start);
 */
 QSC_EXPORT_API void qsc_timerex_print_values(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

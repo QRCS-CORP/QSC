@@ -37,16 +37,19 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_SPHINCSPLUSBASE_AVX2_H
 #define QSC_SPHINCSPLUSBASE_AVX2_H
 
+/* \cond */
+
 #include "common.h"
 
-/* \cond */
+QSC_CPLUSPLUS_ENABLED_START
 
  /* waiting for the code-base to stabilize before adding the intrinsics version */
 
-/* \endcond */
+QSC_CPLUSPLUS_ENABLED_END
 
+/* \endcond */
+	
 #endif

@@ -37,7 +37,6 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_INTRINSICS_H
 #define QSC_INTRINSICS_H
 

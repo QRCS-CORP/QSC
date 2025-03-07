@@ -145,6 +145,8 @@ int32_t main(void)
 	qsc_consoleutils_print_line("");
 #endif
 
+	qsctest_kyber_run();
+
 	valid = qsc_selftest_symmetric_run();
 
 	if (valid == true)

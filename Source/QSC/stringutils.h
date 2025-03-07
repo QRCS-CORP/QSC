@@ -37,11 +37,12 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_STRINGUTILS_H
 #define QSC_STRINGUTILS_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file stringutils.h
@@ -503,5 +504,7 @@ QSC_EXPORT_API size_t qsc_stringutils_whitespace_count(const char* source, size_
 * \return			[size_t] Returns the number of characters copied
 */
 QSC_EXPORT_API size_t qsc_stringutils_whitespace_filter(const char* source, size_t srclen, char* dest);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

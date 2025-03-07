@@ -40,13 +40,15 @@
 #ifndef QSC_SOCKET_H
 #define QSC_SOCKET_H
 
+#include "common.h"
+#include "socketflags.h"
+
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
 * \file socket.h
 * \brief TCP/IP function constants and structures
 */
-
-#include "common.h"
-#include "socketflags.h"
 
 /*!
 \def QSC_SOCKET_ADDRESS_MAX_SIZE
@@ -126,5 +128,7 @@ QSC_EXPORT_API typedef struct
 	qsc_socket_protocols socket_protocol;			/*!< The socket protocol type */
 	qsc_socket_transports socket_transport;			/*!< The socket transport type */
 } qsc_socket;
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

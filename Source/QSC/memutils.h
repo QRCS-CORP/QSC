@@ -44,6 +44,8 @@
 #include "common.h"
 #include "intrinsics.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file memutils.h
  * \brief Contains common memory-related functions implemented using SIMD instructions.
@@ -395,5 +397,7 @@ QSC_EXPORT_API void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size
  * \return			[bool] Returns true if the array is zeroed.
  */
 QSC_EXPORT_API bool qsc_memutils_zeroed(const void* input, size_t length);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

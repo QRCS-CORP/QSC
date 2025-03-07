@@ -48,6 +48,8 @@
 #	include <immintrin.h>
 #endif
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file rcs.h
  * \brief Rijndael-256 authenticated Cipher Stream.
@@ -321,5 +323,7 @@ QSC_EXPORT_API bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const
  * \return				[bool] Returns true if the data was transformed successfully, false on failure.
  */
 QSC_EXPORT_API bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

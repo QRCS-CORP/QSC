@@ -37,11 +37,12 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_SOCKFLAGS_H
 #define QSC_SOCKFLAGS_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
 * \file socketflags.h
@@ -169,5 +170,7 @@ typedef enum
 	qsc_socket_transport_reliable = 0x00000004L,		/*!< Reliable protocol SOCK_RDM */
 	qsc_socket_transport_sequenced = 0x00000005L		/*!< Sequenced packets SOCK_SEQPACKET */
 } qsc_socket_transports;
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

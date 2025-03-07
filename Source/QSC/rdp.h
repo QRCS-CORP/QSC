@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file rdp.h
  * \brief RDRAND Entropy Provider (RDP).
@@ -104,5 +106,7 @@ QSC_EXPORT_API uint32_t qsc_rdp_uint32(void);
  * \return			[uint64_t] Returns a random 64-bit unsigned integer.
  */
 QSC_EXPORT_API uint64_t qsc_rdp_uint64(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

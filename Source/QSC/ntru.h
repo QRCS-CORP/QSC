@@ -41,6 +41,11 @@
 #ifndef QSC_NTRU_H
 #define QSC_NTRU_H
 
+#include "common.h"
+#include "ntrubase.h"
+
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file ntru.h
  * \brief Contains the public API for the NTRU CCA-secure Key Encapsulation Mechanism implementation.
@@ -54,10 +59,6 @@
  * \section ntru_links Reference Links:
  * - <a href="https://ntru.org/f/ntru-20190330.pdf">Formal NTRU Specification</a>
  */
-
-
-#include "common.h"
-#include "ntrubase.h"
 
 #if defined(QSC_NTRU_S1HPS2048509)
 
@@ -217,5 +218,7 @@ QSC_EXPORT_API void qsc_ntru_encrypt(uint8_t* secret, uint8_t* ciphertext, const
  * \param rng_generate:	[function pointer] Pointer to the random generator function.
  */
 QSC_EXPORT_API void qsc_ntru_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

@@ -61,6 +61,8 @@
     #error your operating system is not supported!
 #endif
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file async.h
  * \brief Asynchronous Thread and Mutex Management Functions.
@@ -273,5 +275,7 @@ QSC_EXPORT_API void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
  * \param count:    [size_t] The number of threads in the array.
  */
 QSC_EXPORT_API void qsc_async_thread_wait_all(qsc_thread* handles, size_t count);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

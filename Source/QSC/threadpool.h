@@ -37,12 +37,13 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_THREADPOOL_H
 #define QSC_THREADPOOL_H
 
 #include "common.h"
 #include "async.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file threadpool.h
@@ -150,5 +151,7 @@ QSC_EXPORT_API bool qsc_threadpool_thread_active(const qsc_threadpool_state* ctx
 * \param index:	[size_t] The thread index
 */
 QSC_EXPORT_API void qsc_threadpool_remove_task(qsc_threadpool_state* ctx, size_t index);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

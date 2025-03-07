@@ -37,12 +37,13 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_TRANSPOSE_H
 #define QSC_TRANSPOSE_H
 
 #include "common.h"
 #include "intutils.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file transpose.h
@@ -105,5 +106,7 @@ QSC_EXPORT_API void qsc_transpose_native_to_bytes(uint8_t* output, const uint32_
  * \param length:	[size_t] The number of 8-bit integers to convert
  */
 QSC_EXPORT_API void qsc_transpose_string_to_scalar(uint32_t* output, const char* input, size_t length);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

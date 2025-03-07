@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric">
+      <UniqueIdentifier>{70f608d3-e6c8-4c11-88ab-c68b06fe8d57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher">
+      <UniqueIdentifier>{25791ccc-012f-46ed-95fd-92bd32dfaaf3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature">
+      <UniqueIdentifier>{cc6a8179-1469-46b6-99bd-ee019ac9dad3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Cipher">
+      <UniqueIdentifier>{7b46b477-cb26-4e34-be34-62d1b9d58ded}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Digest">
+      <UniqueIdentifier>{019b5603-bedf-43b1-bced-2ea59ea28025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric">
+      <UniqueIdentifier>{5fbc3869-9f71-44d9-960e-a95bce5189ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher">
+      <UniqueIdentifier>{2442747a-992c-4bc4-87df-803705aac833}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature">
+      <UniqueIdentifier>{5b711a86-f0d7-4467-a065-12ebc8f713b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cipher">
+      <UniqueIdentifier>{f75c1960-b9a7-4916-a06a-ce18d254555b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Digext">
+      <UniqueIdentifier>{505dbec3-8f07-4d92-89d1-ca34a96a052c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PRNG">
+      <UniqueIdentifier>{79e2134a-fdc6-4db9-938b-c185004c02a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Provider">
+      <UniqueIdentifier>{d23fa071-523c-4ce3-9642-19c6c5945168}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Provider">
+      <UniqueIdentifier>{fef5dceb-b844-47cc-b8e4-25ba23e0eb4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools">
+      <UniqueIdentifier>{b926cf4d-8ada-457b-9e62-04693c2d974d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tools">
+      <UniqueIdentifier>{c117678b-4ee6-4139-b275-fcff3bf42328}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common">
+      <UniqueIdentifier>{46d457ea-d55a-47ab-ba26-8a1e8cdb870b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MAC">
+      <UniqueIdentifier>{37931238-11d5-4b69-9ad4-7926d3427830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{3338f2e9-a38f-485c-abab-a4fdf0ca7e9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MAC">
+      <UniqueIdentifier>{fecef634-e85a-452d-9452-52209caea340}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PRNG">
+      <UniqueIdentifier>{a84527d5-5179-485c-99c5-c43852ffc92f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ACP.cpp">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
+    <ClCompile Include="AES.cpp">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="AssemblyInfo.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="CHACHA.cpp">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="CSG.cpp">
+      <Filter>Source Files\PRNG</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP.cpp">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
+    <ClCompile Include="CSX.cpp">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="Dilithium.cpp">
+      <Filter>Source Files\Asymmetric\Signature</Filter>
+    </ClCompile>
+    <ClCompile Include="ECDH.cpp">
+      <Filter>Source Files\Asymmetric\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="ECDSA.cpp">
+      <Filter>Source Files\Asymmetric\Signature</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoding.cpp">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="HBA.cpp">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="HCG.cpp">
+      <Filter>Source Files\PRNG</Filter>
+    </ClCompile>
+    <ClCompile Include="Kyber.cpp">
+      <Filter>Source Files\Asymmetric\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="McEliece.cpp">
+      <Filter>Source Files\Asymmetric\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="MemUtils.cpp">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="IntUtils.cpp">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="NTRU.cpp">
+      <Filter>Source Files\Asymmetric\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="Poly1305.cpp">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="QMAC.cpp">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="RCS.cpp">
+      <Filter>Source Files\Cipher</Filter>
+    </ClCompile>
+    <ClCompile Include="RDP.cpp">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
+    <ClCompile Include="SCB.cpp">
+      <Filter>Source Files\PRNG</Filter>
+    </ClCompile>
+    <ClCompile Include="SecRand.cpp">
+      <Filter>Source Files\PRNG</Filter>
+    </ClCompile>
+    <ClCompile Include="SHA2.cpp">
+      <Filter>Source Files\Digext</Filter>
+    </ClCompile>
+    <ClCompile Include="SHA3.cpp">
+      <Filter>Source Files\Digext</Filter>
+    </ClCompile>
+    <ClCompile Include="SphincsPlus.cpp">
+      <Filter>Source Files\Asymmetric\Signature</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ACP.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
+    <ClInclude Include="AES.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="CHACHA.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="CSX.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="CSP.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CSG.h">
+      <Filter>Header Files\PRNG</Filter>
+    </ClInclude>
+    <ClInclude Include="Dilithium.h">
+      <Filter>Header Files\Asymmetric\Signature</Filter>
+    </ClInclude>
+    <ClInclude Include="ECDH.h">
+      <Filter>Header Files\Asymmetric\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="ECDSA.h">
+      <Filter>Header Files\Asymmetric\Signature</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoding.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="HBA.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="HCG.h">
+      <Filter>Header Files\PRNG</Filter>
+    </ClInclude>
+    <ClInclude Include="Kyber.h">
+      <Filter>Header Files\Asymmetric\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="McEliece.h">
+      <Filter>Header Files\Asymmetric\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="MemUtils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="IntUtils.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="NTRU.h">
+      <Filter>Header Files\Asymmetric\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="Poly1305.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="QMAC.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="RCS.h">
+      <Filter>Header Files\Cipher</Filter>
+    </ClInclude>
+    <ClInclude Include="RDP.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
+    <ClInclude Include="SCB.h">
+      <Filter>Header Files\PRNG</Filter>
+    </ClInclude>
+    <ClInclude Include="SecRand.h">
+      <Filter>Header Files\PRNG</Filter>
+    </ClInclude>
+    <ClInclude Include="SHA2.h">
+      <Filter>Header Files\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="SHA3.h">
+      <Filter>Header Files\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="SphincsPlus.h">
+      <Filter>Header Files\Asymmetric\Signature</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

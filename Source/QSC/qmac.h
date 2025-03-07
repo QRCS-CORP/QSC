@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file QMAC.h
  * \brief QMAC function definitions
@@ -193,5 +195,7 @@ QSC_EXPORT_API void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams*
  * \param msglen:		[size_t] The length of the message; must equal one block (QSC_QMAC_BLOCK_SIZE).
  */
 QSC_EXPORT_API void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

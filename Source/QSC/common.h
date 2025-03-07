@@ -41,13 +41,22 @@
 #ifndef QSC_COMMON_H
 #define QSC_COMMON_H
 
-/* All includes come immediately after the include guard */
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <limits.h>
 #include <string.h>
+
+#if defined(__cplusplus)
+#   define QSC_CPLUSPLUS_ENABLED_START extern "C" {
+#   define QSC_CPLUSPLUS_ENABLED_END }
+#else
+#   define QSC_CPLUSPLUS_ENABLED_START
+#   define QSC_CPLUSPLUS_ENABLED_END
+#endif
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \file common.h
@@ -1186,5 +1195,7 @@
 // * \brief Enable the SphincsPlus S6S512SHAKERS robust small parameter set.
 // */
 //#define QSC_SPHINCSPLUS_S6S512SHAKERS
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

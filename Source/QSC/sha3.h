@@ -45,6 +45,8 @@
 #	include "intrinsics.h"
 #endif
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file sha3.h
  * \brief SHA3 family of hash functions.
@@ -1377,5 +1379,7 @@ QSC_EXPORT_API void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 	const uint8_t* cst4, const uint8_t* cst5, const uint8_t* cst6, const uint8_t* cst7, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3,
 	const uint8_t* msg4, const uint8_t* msg5, const uint8_t* msg6, const uint8_t* msg7, size_t msglen);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

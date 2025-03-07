@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file ecdhbase.h
  * \brief Contains the internal API for Ed25519 key exchange operations.
@@ -76,5 +78,7 @@ bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const u
  * \param seed:		  [const uint8_t*] Pointer to the random seed.
  */
 void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

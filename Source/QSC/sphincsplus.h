@@ -37,11 +37,12 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_SPHINCSPLUS_H
 #define QSC_SPHINCSPLUS_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file sphincsplus.h
@@ -292,5 +293,7 @@ QSC_EXPORT_API void qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, co
 * \return				[bool] Returns true for success
 */
 QSC_EXPORT_API bool qsc_sphincsplus_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

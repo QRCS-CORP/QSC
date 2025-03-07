@@ -37,12 +37,13 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_SOCKETSERVER_H
 #define QSC_SOCKETSERVER_H
 
 #include "common.h"
 #include "socketbase.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file socketserver.h
@@ -269,5 +270,7 @@ QSC_EXPORT_API void qsc_socket_server_set_options(const qsc_socket* sock, qsc_so
 * \param sock:		[qsc_socket*] The listening socket
 */
 QSC_EXPORT_API void qsc_socket_server_shut_down(qsc_socket* sock);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

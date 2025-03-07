@@ -37,11 +37,12 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_SHA2_H
 #define QSC_SHA2_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file sha2.h
@@ -544,5 +545,7 @@ QSC_EXPORT_API void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uin
  * \param saltlen:  [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

@@ -45,6 +45,8 @@
 
 /* \cond */
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /* api.h */
 
 #if defined(QSC_FALCON_S3SHAKE256F512)
@@ -300,6 +302,8 @@ int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t
 * \return				[bool] Returns true for success
 */
 bool qsc_falcon_ref_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* pk);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

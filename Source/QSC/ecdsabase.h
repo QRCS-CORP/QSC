@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file ecdsabase.h
  * \brief Contains the internal API for Ed25519 key exchange operations.
@@ -86,5 +88,7 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
  * \return				[int32_t]Returns 0 for success.
  */
 int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

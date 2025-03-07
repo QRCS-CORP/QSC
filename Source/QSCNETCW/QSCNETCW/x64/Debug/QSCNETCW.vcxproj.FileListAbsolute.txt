@@ -1,0 +1,4 @@
+C:\Users\stepp\Documents\Visual Studio 2022\Projects\C\QSC\QSCNETCW\x64\Debug\Ijwhost.dll
+C:\Users\stepp\Documents\Visual Studio 2022\Projects\C\QSC\QSCNETCW\x64\Debug\QSCNETCW.deps.json
+C:\Users\stepp\Documents\Visual Studio 2022\Projects\C\QSC\QSCNETCW\x64\Debug\QSCNETCW.runtimeconfig.json
+C:\Users\stepp\Documents\Visual Studio 2022\Projects\C\QSC\QSCNETCW\QSCNETCW\x64\Debug\QSCNETCW.genruntimeconfig.cache

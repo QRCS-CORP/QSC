@@ -37,13 +37,14 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_FALCONBASE_AVX2_H
 #define QSC_FALCONBASE_AVX2_H
 
+#include "common.h"
+
 /* \cond */
 
-#include "common.h"
+QSC_CPLUSPLUS_ENABLED_START
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
@@ -920,5 +921,9 @@ int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_
 bool qsc_falcon_avx2_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
 
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
+
 /* \endcond */
+
 #endif

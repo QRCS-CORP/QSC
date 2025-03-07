@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file ecdh.h
  * \brief Contains the primary public API for the Elliptic Curve Diffie-Hellman key exchange.
@@ -83,8 +85,6 @@
  *  - <a href="https://cr.yp.to/ecdh.html"></a>
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 Field Operations</a>
  */
-
-#include "common.h"
 
 /*!
  * \def QSC_ECDH_PRIVATEKEY_SIZE
@@ -149,5 +149,7 @@ QSC_EXPORT_API void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* priva
  * \param seed:			[const uint8_t*] Pointer to the random seed.
  */
 QSC_EXPORT_API void qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

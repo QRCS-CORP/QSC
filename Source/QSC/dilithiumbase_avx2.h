@@ -44,6 +44,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
 * \brief Generates a Dilithium public/private key-pair.
 * Arrays must be sized to DILITHIUM_PUBLICKEY_SIZE and DILITHIUM_SECRETKEY_SIZE.
@@ -107,6 +109,8 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
 * \return Returns true for success
 */
 bool qsc_dilithium_avx2_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* context, size_t contextlen, const uint8_t* pk);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

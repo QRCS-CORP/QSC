@@ -44,7 +44,7 @@
 #include "common.h"
 #include <time.h>
 
-/* \cond DOXYGEN_IGNORE */
+/* \cond */
 
 /**
 * \brief Returns the clock time at the start of a timed operation
@@ -60,6 +60,6 @@ clock_t qsctest_timer_start();
 */
 uint64_t qsctest_timer_elapsed(clock_t start);
 
-/* \endcond DOXYGEN_IGNORE */
+/* \endcond */
 
 #endif

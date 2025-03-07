@@ -37,7 +37,6 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_NETUTILS_H
 #define QSC_NETUTILS_H
 
@@ -45,6 +44,8 @@
 #include "ipinfo.h"
 #include "socket.h"
 #include "socketbase.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file netutils.h
@@ -258,5 +259,7 @@ QSC_EXPORT_API uint16_t qsc_netutils_port_name_to_number(const char* portname, c
 */
 QSC_EXPORT_API void qsc_netutils_values_print(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

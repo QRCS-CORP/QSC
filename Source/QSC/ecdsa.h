@@ -37,11 +37,12 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_ECDSA_H
 #define QSC_ECDSA_H
 
 #include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file ecdsa.h
@@ -86,7 +87,6 @@
  *  - <a href="https://cr.yp.to/ecdh.html">Curve25519 ECDH Specification</a>
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 Field Arithmetic Details</a>
  */
-
 
 #if defined(QSC_ECDSA_S1EC25519)
 
@@ -170,5 +170,7 @@ QSC_EXPORT_API void qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const ui
 * \return				[bool] Returns true for success
 */
 QSC_EXPORT_API bool qsc_ecdsa_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

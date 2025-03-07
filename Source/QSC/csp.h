@@ -38,6 +38,16 @@
  * Contact: john.underhill@protonmail.com
  */
 
+#ifndef QSC_CSP_H
+#define QSC_CSP_H
+
+#include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
+
+/* bogus winbase.h error */
+QSC_SYSTEM_CONDITION_IGNORE(5105)
+
 /**
  * \file csp.h
  * \brief Cryptographic System Entropy Provider Header
@@ -69,14 +79,6 @@
  * - <a href="https://docs.microsoft.com/en-us/windows/win32/seccrypto/cryptgenrandom">Microsoft CryptGenRandom Documentation</a>
  * - <a href="https://pubs.opengroup.org/onlinepubs/9699919799/functions/devurandom.html">POSIX /dev/urandom Documentation</a>
  */
-
-#ifndef QSC_CSP_H
-#define QSC_CSP_H
-
-#include "common.h"
-
-/* bogus winbase.h error */
-QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 /*!
  * \def QSC_CSP_SEED_MAX
@@ -136,5 +138,7 @@ QSC_EXPORT_API uint32_t qsc_csp_uint32(void);
  * \see qsc_csp_generate()
  */
 QSC_EXPORT_API uint64_t qsc_csp_uint64(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

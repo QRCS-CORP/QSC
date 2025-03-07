@@ -37,12 +37,13 @@
  * Contact: john.underhill@protonmail.com
  */
 
-
 #ifndef QSC_TIMESTAMP_H
 #define QSC_TIMESTAMP_H
 
 #include "common.h"
 #include <time.h>
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file timestamp.h
@@ -209,5 +210,7 @@ QSC_EXPORT_API void qsc_timestamp_seconds_to_datetime(uint64_t tsec, char output
 */
 QSC_EXPORT_API void qsc_timestamp_print_values(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

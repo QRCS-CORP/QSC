@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file queue.h
  * \brief Memory queue function definitions.
@@ -188,5 +190,7 @@ QSC_EXPORT_API void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, s
  */
 QSC_EXPORT_API bool qsc_queue_self_test(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

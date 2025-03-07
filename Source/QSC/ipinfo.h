@@ -50,6 +50,8 @@
 #include "socketflags.h"
 #include "stringutils.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file ipinfo.h
  * \brief IP information function definitions.
@@ -462,5 +464,7 @@ QSC_EXPORT_API uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_I
  * \param cidr:     [uint8_t] The input CIDR mask.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8_t cidr);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

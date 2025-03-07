@@ -41,7 +41,7 @@
 #ifndef QSCTEST_COMMON_H
 #define QSCTEST_COMMON_H
 
-/* \cond DOXYGEN_IGNORE */
+/* \cond */
 
 #include <assert.h>
 #include <errno.h>
@@ -51,6 +51,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* \endcond DOXYGEN_IGNORE */
+/* \endcond */
 
 #endif

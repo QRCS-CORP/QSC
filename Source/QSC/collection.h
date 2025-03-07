@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file collection.h
  * \brief A Keyed Collection Implementation.
@@ -235,5 +237,7 @@ QSC_EXPORT_API size_t qsc_collection_size(const qsc_collection_state* ctx);
  */
 QSC_EXPORT_API bool qsc_collection_test(void);
 #endif
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

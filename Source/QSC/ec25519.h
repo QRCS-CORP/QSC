@@ -42,6 +42,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file ec25519.h
  * \brief Elliptic Curve (Ed25519) and Field Arithmetic Implementation.
@@ -587,6 +589,8 @@ void sc25519_reduce(uint8_t s[64]);
  * \return [int32_t] Returns 0 if all \a n bytes of \a x and \a y are equal; returns -1 if they differ.
  */
 int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif
 

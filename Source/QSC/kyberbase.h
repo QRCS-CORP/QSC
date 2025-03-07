@@ -44,6 +44,8 @@
 
  /* \cond */
 
+QSC_CPLUSPLUS_ENABLED_START
+
  /*!
  \def QSC_KYBER_K
  * Read Only: The k level
@@ -195,6 +197,8 @@ void qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t s
 */
 void qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], 
 	bool (*rng_generate)(uint8_t*, size_t));
+
+QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond */
 

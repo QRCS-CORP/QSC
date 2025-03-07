@@ -44,6 +44,8 @@
 #include "ipinfo.h"
 #include "socketbase.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file socketclient.h
  * \brief The socket client function definitions.
@@ -207,5 +209,7 @@ QSC_EXPORT_API size_t qsc_socket_client_send_to(const qsc_socket* sock, const ch
 * \param sock:		[qsc_socket*] A pointer to the initialized socket
 */
 QSC_EXPORT_API void qsc_socket_client_shut_down(qsc_socket* sock);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

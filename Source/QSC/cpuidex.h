@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /*!
  * \file cpuidex.h
  * \brief Retrieves CPU features and capabilities.
@@ -160,5 +162,7 @@ QSC_EXPORT_API bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* const fea
  * to the console.
  */
 QSC_EXPORT_API void qsc_cpuidex_print_stats(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

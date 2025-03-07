@@ -1,4 +1,5 @@
 #include "winutils.h"
+#include "memutils.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #   include "stringutils.h"
@@ -377,7 +378,7 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
         tlen += snprintf(result + tlen, reslen - tlen, "Domain Name -Unknown\n");
     }
 
-    memset(cbuf, 0, sizeof(cbuf));
+    qsc_memutils_clear(cbuf, sizeof(cbuf));
     nlen = QSC_WINTOOLS_NETSTAT_NAME_SIZE;
 
     if (GetComputerNameA(cbuf, &nlen) == true) 

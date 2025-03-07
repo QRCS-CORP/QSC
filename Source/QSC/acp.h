@@ -40,6 +40,10 @@
 #ifndef QSC_ACP_H
 #define QSC_ACP_H
 
+#include "common.h"
+
+QSC_CPLUSPLUS_ENABLED_START
+
 /*! 
  * \file acp.h
  * \brief An implementation of the Auto Entropy Collection Provider (ACP).
@@ -95,8 +99,6 @@
  * - <a href="https://docs.microsoft.com/en-us/windows/win32/seccrypto/cryptgenrandom">Microsoft CryptGenRandom Documentation</a>
  * - <a href="https://man7.org/linux/man-pages/man4/urandom.4.html">POSIX /dev/urandom Documentation</a>
  */
-
-#include "common.h"
 
 /*!
  * \def QSC_ACP_SEED_MAX
@@ -157,5 +159,7 @@ QSC_EXPORT_API uint32_t qsc_acp_uint32(void);
  * \sa qsc_acp_generate
  */
 QSC_EXPORT_API uint64_t qsc_acp_uint64(void);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif

@@ -43,6 +43,8 @@
 
 #include "common.h"
 
+QSC_CPLUSPLUS_ENABLED_START
+
 /**
  * \file dilithium.h
  * \brief Contains the primary public API for the Dilithium asymmetric signature scheme implementation.
@@ -226,5 +228,7 @@ QSC_EXPORT_API bool qsc_dilithium_verify(uint8_t* message, size_t* msglen, const
  * \return				[bool] Returns true if the signature is valid; otherwise, false.
  */
 QSC_EXPORT_API bool qsc_dilithium_verify_ex(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* context, size_t contextlen, const uint8_t* publickey);
+
+QSC_CPLUSPLUS_ENABLED_END
 
 #endif
