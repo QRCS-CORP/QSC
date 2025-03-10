@@ -19,11 +19,11 @@ This implementation uses both a base reference code and optimized AVX/AVX2/AVX51
 
 ## Version
 
-**Version:** 1.0.0.5L  
+**Version:** 1.0.0.5M  
 Tested on:  
-- **Windows 10** (version 10.0.19042 using Visual Studio 16.10.2)  
-- **Ubuntu Linux** (version 20.04 using Eclipse 2021-09 with GCC Ubuntu 9.3.0-17)  
-- **macOS Big Sur** (version 11.5.2 using Eclipse 2021-09 with Apple Clang 12.0.5)
+- **Windows 10/11/Server**    
+- **Ubuntu Linux**  
+- **macOS**  
 
 _All asymmetric ciphers and signature schemes have been updated to new FIPS standards for the winners, and NIST PQC Round 3 standards for last round contenders._
 
@@ -147,11 +147,14 @@ QSC has been thoroughly tested on:
 - **System Utilities:**  
   Provides asynchronous threading, dual-stack networking, CPUID detection, and secure memory management.
 
+- **Language Interoperability**
+  Interoperability with C++, and .NET via the QSCNETCW wrapper library.
+
 
 ## Roadmap
 
 - Continued ASM/SIMD integration and optimization.
-- Wrapper libraries for .NET, Java, and C++.
+- Wrapper library for Java.
 - Development of a post-quantum TLS 1.3 implementation.
 - Expansion of testing and benchmarking frameworks.
 - Integration of emerging cryptographic research and standards.
