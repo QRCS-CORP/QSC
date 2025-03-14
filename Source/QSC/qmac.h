@@ -148,7 +148,6 @@ QSC_EXPORT_API typedef struct
  *
  * Computes the QMAC code for the provided message using the given key parameters.
  *
- * \param ctx:			[qsc_qmac_state*] Pointer to the QMAC state structure.
  * \param output:		[uint8_t*] Pointer to the output byte array; receives the MAC code.
  * \param keyparams:	[qsc_qmac_keyparams*] Pointer to the QMAC key parameters structure.
  * \param message:		[const uint8_t*] Pointer to the message input byte array.

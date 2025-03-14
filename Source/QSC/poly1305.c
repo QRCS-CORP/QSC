@@ -1,5 +1,6 @@
 #include "poly1305.h"
 #include "intutils.h"
+#include "memutils.h"
 
 void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint8_t* message)
 {
@@ -63,6 +64,16 @@ void qsc_poly1305_compute(uint8_t* output, const uint8_t* message, size_t msglen
 	qsc_poly1305_initialize(&ctx, key);
 	qsc_poly1305_update(&ctx, message, msglen);
 	qsc_poly1305_finalize(&ctx, output);
+}
+
+void qsc_poly1305_dispose(qsc_poly1305_state* ctx)
+{
+	qsc_memutils_clear(ctx->h, sizeof(ctx->h));
+	qsc_memutils_clear(ctx->r, sizeof(ctx->r));
+	qsc_memutils_clear(ctx->s, sizeof(ctx->s));
+	qsc_memutils_clear(ctx->buf, sizeof(ctx->buf));
+	ctx->fnl = 0;
+	ctx->rmd = 0;
 }
 
 void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)

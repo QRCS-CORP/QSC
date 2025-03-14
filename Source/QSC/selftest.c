@@ -26,7 +26,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	/* copy iv to local */
 	qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 	/* initialize the key parameters struct, info is optional */
-	const qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
 
 	status = true;
 
@@ -83,7 +83,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 	qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 	/* initialize the key parameters struct, info is optional */
-	const qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
 
 	status = true;
 
@@ -132,7 +132,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 	/* initialize the key parameters struct with key and nonce, info not used in AES */
 	qsc_memutils_copy(nce, nonce, QSC_AES_BLOCK_SIZE);
-	const qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, nce };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -182,7 +182,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 	/* initialize the key parameters struct with key and nonce, info is optional */
 	qsc_memutils_copy(nce, nonce, QSC_AES_BLOCK_SIZE);
-	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, nce };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -230,7 +230,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	qsc_aes_state state;
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE };
 
 	status = true;
 
@@ -276,7 +276,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	qsc_aes_state state;
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -459,6 +459,57 @@ static bool fips_aes256_ecb()
 	return aes256_ecb_monte_carlo(key, msg, exp);
 }
 
+static bool aes_gcm256_kat()
+{
+    /* Test vector parameters from NIST SP 800-38D for AES-256 GCM */
+	qsc_aes_gcm256_state state = { 0 };
+    uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+    uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };
+    uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+    uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 }; /* 96-bit IV */
+    uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+    uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0 }; /* 16-byte plaintext (all zeros) */
+    bool status;
+
+	status = true;
+
+    qsc_consoleutils_hex_to_bin("0000000000000000000000000000000000000000000000000000000000000000", key, sizeof(key));
+    qsc_consoleutils_hex_to_bin("000000000000000000000000", iv, sizeof(iv));
+    qsc_consoleutils_hex_to_bin("00000000000000000000000000000000", ptxt, sizeof(ptxt));
+    qsc_consoleutils_hex_to_bin("CEA7403D4D606B6E074EC5D3BAF39D18D0D1C8A799996BF0265B98B5D48AB919", exp, sizeof(exp));
+
+	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, iv, QSC_GCM_NONCE_SIZE, NULL, 0 };
+
+    /* encryption test */
+    qsc_aes_gcm256_initialize(&state, &kp);
+    qsc_aes_gcm256_encrypt(&state, ctxt, ptxt, sizeof(ptxt));
+
+    if (qsc_intutils_are_equal8(ctxt, exp, sizeof(exp)) == false)
+    {
+        status = false;
+    }
+
+	qsc_aes_gcm256_dispose(&state);
+
+    /* decryption test */
+
+    /* reinitialize the state (to reset the counter) for decryption */
+	qsc_memutils_clear(iv, sizeof(iv));
+    qsc_aes_gcm256_initialize(&state, &kp);
+
+    if (qsc_aes_gcm256_decrypt(&state, dec, ctxt, sizeof(ctxt)) == false)
+    {
+        status = false;
+    }
+
+    if (qsc_intutils_are_equal8(dec, ptxt, sizeof(ptxt)) == false)
+    {
+        status = false;
+    }
+
+    return status;
+}
+
 static bool aes256_hba_kat()
 {
 	uint8_t aad1[20] = { 0 };
@@ -517,7 +568,7 @@ static bool aes256_hba_kat()
 
 	qsc_aes_hba256_state state;
 
-	const qsc_aes_keyparams kp1 = { key, sizeof(key), nce1, NULL, 0 };
+	const qsc_aes_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nce1, .noncelen = sizeof(nce1) };
 
 	qsc_aes_hba256_initialize(&state, &kp1, true);
 	qsc_aes_hba256_set_associated(&state, aad1, sizeof(aad1));
@@ -550,7 +601,7 @@ static bool aes256_hba_kat()
 
 	/* second KAT vector */
 
-	const qsc_aes_keyparams kp2 = { key, sizeof(key), nce2, NULL, 0 };
+	const qsc_aes_keyparams kp2 = { .key = key, .keylen = sizeof(key), .nonce = nce2, .noncelen = sizeof(nce2) };
 	qsc_aes_hba256_initialize(&state, &kp2, true);
 	qsc_aes_hba256_set_associated(&state, aad2, sizeof(aad2));
 
@@ -582,7 +633,7 @@ static bool aes256_hba_kat()
 
 	/* third KAT vector */
 
-	const qsc_aes_keyparams kp3 = { key, sizeof(key), nce3, NULL, 0 };
+	const qsc_aes_keyparams kp3 = { .key = key, .keylen = sizeof(key), .nonce = nce3, .noncelen = sizeof(nce3) };
 	qsc_aes_hba256_initialize(&state, &kp3, true);
 	qsc_aes_hba256_set_associated(&state, aad3, sizeof(aad3));
 
@@ -619,49 +670,49 @@ static bool aes256_hba_kat()
 
 static bool chacha128_kat()
 {
-	uint8_t exp[2][64] = { 0 };
-	uint8_t msg[64] = { 0 };
-	uint8_t out[64] = { 0 };
-	uint8_t key[2][QSC_CHACHA_KEY128_SIZE] = { 0 };
+	uint8_t ctext[114] = { 0 };
+	uint8_t cexp[114] = { 0 };
+	uint8_t input[114] = { 0 };
+	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
 	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t ptext[114] = { 0 };
 	bool status;
 
 	status = true;
-	qsc_intutils_clear8(msg, 64);
-	qsc_intutils_clear8(nonce, 8);
-	qsc_intutils_clear8(out, 64);
 
-	qsc_consoleutils_hex_to_bin("FBB87FBB8395E05DAA3B1D683C422046F913985C2AD9B23CFC06C1D8D04FF213D44A7A7CDB84929F915420A8A3DC58BF0F7ECB4B1F167BB1A5E6153FDAF4493D", exp[0], sizeof(exp[0]));
-	qsc_consoleutils_hex_to_bin("A276339F99316A913885A0A4BE870F0691E72B00F1B3F2239F714FE81E88E00CBBE52B4EBBE1EA15894E29658C4CB145E6F89EE4ABB045A78514482CE75AFB7C", exp[1], sizeof(exp[1]));
-
-	qsc_consoleutils_hex_to_bin("80000000000000000000000000000000", key[0], sizeof(key[0]));
-	qsc_consoleutils_hex_to_bin("00400000000000000000000000000000", key[1], sizeof(key[1]));
+	qsc_consoleutils_hex_to_bin("4C616469657320616E642047656E746C656D656E206F662074686520636C6173"
+		"73206F66202739393A204966204920636F756C64206F6666657220796F75206F"
+		"6E6C79206F6E652074697020666F7220746865206675747572652C2073756E73"
+		"637265656E20776F756C642062652069742E", input, sizeof(input));
+	qsc_consoleutils_hex_to_bin("808182838485868788898A8B8C8D8E8F", key, sizeof(key));
+	qsc_consoleutils_hex_to_bin("070000004041424344454647", nonce, sizeof(nonce));
+	qsc_consoleutils_hex_to_bin("9ECE0069991CE8E91A5F7AA3F723CA6AAF436D210F8021D31FD7B338BB39DC6E"
+		"7A488701446A2A542480611145A5597FD46E8004ECB3E2BF9C6337624ABF30D9"
+		"677931A2BE0ACAC083BA44A1455843BD89C87048C1345748CA2A155C3242FE81"
+		"A4AC18F76B6411AAF5DF0E7CD82AC9F226BC", cexp, sizeof(cexp));
 
 	qsc_chacha_state ctx;
 
 	/* initialize the key parameters struct */
-	qsc_chacha_keyparams kp1 = { key[0], QSC_CHACHA_KEY128_SIZE, nonce };
+	qsc_chacha_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
-	qsc_chacha_initialize(&ctx, &kp1);
-	qsc_chacha_transform(&ctx, out, msg, 64);
+	qsc_chacha_initialize(&ctx, &kp);
+	qsc_chacha_transform(&ctx, ctext, input, sizeof(input));
 
-	if (qsc_intutils_are_equal8(out, exp[0], 64) == false)
+	if (qsc_intutils_are_equal8(ctext, cexp, sizeof(ctext)) == false)
 	{
-		qsc_consoleutils_print_safe("Failure! chacha128_kat: output does not match the expected answer -CK1 \n");
+		qsc_consoleutils_print_safe("Failure! chacha256_kat: output does not match the expected answer -CK1 \n");
 		status = false;
 	}
 
-	qsc_intutils_clear8(out, 64);
-
 	/* initialize the key parameters struct */
-	qsc_chacha_keyparams kp2 = { key[1], QSC_CHACHA_KEY128_SIZE, nonce };
 
-	qsc_chacha_initialize(&ctx, &kp2);
-	qsc_chacha_transform(&ctx, out, msg, 64);
+	qsc_chacha_initialize(&ctx, &kp);
+	qsc_chacha_transform(&ctx, ptext, ctext, sizeof(ctext));
 
-	if (qsc_intutils_are_equal8(out, exp[1], 64) == false)
+	if (qsc_intutils_are_equal8(ptext, input, sizeof(ptext)) == false)
 	{
-		qsc_consoleutils_print_safe("Failure! chacha128_kat: output does not match the expected answer -CK2 \n");
+		qsc_consoleutils_print_safe("Failure! Failure! chacha256_kat: output does not match the expected answer -CK2 \n");
 		status = false;
 	}
 
@@ -670,49 +721,48 @@ static bool chacha128_kat()
 
 static bool chacha256_kat()
 {
-	uint8_t exp[2][64] = { 0 };
-	uint8_t msg[64] = { 0 };
-	uint8_t out[64] = { 0 };
-	uint8_t key[2][QSC_CHACHA_KEY256_SIZE] = { 0 };
-	uint8_t nonce[2][QSC_CHACHA_NONCE_SIZE] = { 0 };
+	/* RFC?7539 Vector, section 2.3.2: https://www.rfc-editor.org/rfc/rfc7539.html */
+	uint8_t ctext[114] = { 0 };
+	uint8_t cexp[114] = { 0 };
+	uint8_t input[114] = { 0 };
+	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t ptext[114] = { 0 };
 	bool status;
 
 	status = true;
-	qsc_intutils_clear8(msg, 64);
-	qsc_intutils_clear8(out, 64);
 
-	qsc_consoleutils_hex_to_bin("57459975BC46799394788DE80B928387862985A269B9E8E77801DE9D874B3F51AC4610B9F9BEE8CF8CACD8B5AD0BF17D3DDF23FD7424887EB3F81405BD498CC3", exp[0], sizeof(exp[0]));
-	qsc_consoleutils_hex_to_bin("92A2508E2C4084567195F2A1005E552B4874EC0504A9CD5E4DAF739AB553D2E783D79C5BA11E0653BEBB5C116651302E8D381CB728CA627B0B246E83942A2B99", exp[1], sizeof(exp[1]));
-
-	qsc_consoleutils_hex_to_bin("0053A6F94C9FF24598EB3E91E4378ADD3083D6297CCF2275C81B6EC11467BA0D", key[0], sizeof(key[0]));
-	qsc_consoleutils_hex_to_bin("0558ABFE51A4F74A9DF04396E93C8FE23588DB2E81D4277ACD2073C6196CBF12", key[1], sizeof(key[1]));
-
-	qsc_consoleutils_hex_to_bin("0D74DB42A91077DE", nonce[0], sizeof(nonce[0]));
-	qsc_consoleutils_hex_to_bin("167DE44BB21980E7", nonce[1], sizeof(nonce[1]));
+	qsc_consoleutils_hex_to_bin("4C616469657320616E642047656E746C656D656E206F662074686520636C6173"
+		"73206F66202739393A204966204920636F756C64206F6666657220796F75206F"
+		"6E6C79206F6E652074697020666F7220746865206675747572652C2073756E73"
+		"637265656E20776F756C642062652069742E", input, sizeof(input));
+	qsc_consoleutils_hex_to_bin("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", key, sizeof(key));
+	qsc_consoleutils_hex_to_bin("000000090000004A00000000", nonce, sizeof(nonce));
+	qsc_consoleutils_hex_to_bin("C6BDF594FA87D094756B8D179A7BA25B816398CC26A334E7F7CF2720335074F1"
+		"BEB85C505D2D6DEC471CD7FFAF002E85F3D6207BD9865FC130F6E554067F15BB"
+		"7E9D9EC4BE553C352466AD3FC54F03E4B3B991E755B51C76764786BAB0A1023D"
+		"B1F0012369BFDD6661AEB325BBEE22CBC13C", cexp, sizeof(cexp));
 
 	qsc_chacha_state ctx;
 
 	/* initialize the key parameters struct */
-	qsc_chacha_keyparams kp1 = { key[0], QSC_CHACHA_KEY256_SIZE, nonce[0] };
+	qsc_chacha_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
-	qsc_chacha_initialize(&ctx, &kp1);
-	qsc_chacha_transform(&ctx, out, msg, 64);
+	qsc_chacha_initialize(&ctx, &kp);
+	qsc_chacha_transform(&ctx, ctext, input, sizeof(input));
 
-	if (qsc_intutils_are_equal8(out, exp[0], 64) == false)
+	if (qsc_intutils_are_equal8(ctext, cexp, sizeof(ctext)) == false)
 	{
 		qsc_consoleutils_print_safe("Failure! chacha256_kat: output does not match the expected answer -CK1 \n");
 		status = false;
 	}
 
-	qsc_intutils_clear8(out, 64);
-
 	/* initialize the key parameters struct */
-	qsc_chacha_keyparams kp2 = { key[1], QSC_CHACHA_KEY256_SIZE, nonce[1] };
 
-	qsc_chacha_initialize(&ctx, &kp2);
-	qsc_chacha_transform(&ctx, out, msg, 64);
+	qsc_chacha_initialize(&ctx, &kp);
+	qsc_chacha_transform(&ctx, ptext, ctext, sizeof(ctext));
 
-	if (qsc_intutils_are_equal8(out, exp[1], 64) == false)
+	if (qsc_intutils_are_equal8(ptext, input, sizeof(ptext)) == false)
 	{
 		qsc_consoleutils_print_safe("Failure! Failure! chacha256_kat: output does not match the expected answer -CK2 \n");
 		status = false;
@@ -2751,6 +2801,10 @@ bool qsc_selftest_aes_test()
 		res = false;
 	}
 	else if (aes256_hba_kat() == false)
+	{
+		res = false;
+	}
+	else if (aes_gcm256_kat() == false)
 	{
 		res = false;
 	}

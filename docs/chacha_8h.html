@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -115,6 +115,7 @@ $(function(){initNavTree('chacha_8h.html',''); initResizable(true); });
 <p>Contains the public API and documentation for the ChaCha20 implementation.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="common_8h_source.html">common.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="poly1305_8h_source.html">poly1305.h</a>&quot;</code><br />
 </div>
 <p><a href="chacha_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -125,6 +126,8 @@ Data Structures</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__chacha__keyparams.html">qsc_chacha_keyparams</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Key parameters for the ChaCha20 cipher.  <a href="structqsc__chacha__keyparams.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -142,8 +145,8 @@ Macros</h2></td></tr>
 <tr class="memdesc:af0baec38ae6e816c276dd88316408b39"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the 256-bit secret key (in bytes). <br /></td></tr>
 <tr class="separator:af0baec38ae6e816c276dd88316408b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af41a09548e9181403299ff4057aaa715" id="r_af41a09548e9181403299ff4057aaa715"><td class="memItemLeft" align="right" valign="top"><a id="af41a09548e9181403299ff4057aaa715" name="af41a09548e9181403299ff4057aaa715"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_CHACHA_NONCE_SIZE</b>&#160;&#160;&#160;8ULL</td></tr>
-<tr class="memdesc:af41a09548e9181403299ff4057aaa715"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the nonce (in bytes). <br /></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_CHACHA_NONCE_SIZE</b>&#160;&#160;&#160;12ULL</td></tr>
+<tr class="memdesc:af41a09548e9181403299ff4057aaa715"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the nonce in bytes. <br /></td></tr>
 <tr class="separator:af41a09548e9181403299ff4057aaa715"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acacd14ab3dd74aff272f7bb39344187e" id="r_acacd14ab3dd74aff272f7bb39344187e"><td class="memItemLeft" align="right" valign="top"><a id="acacd14ab3dd74aff272f7bb39344187e" name="acacd14ab3dd74aff272f7bb39344187e"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_CHACHA_ROUND_COUNT</b>&#160;&#160;&#160;20ULL</td></tr>
@@ -161,15 +164,30 @@ Functions</h2></td></tr>
 <tr class="memitem:a2cc406c69bd6810302a37db43516f519" id="r_a2cc406c69bd6810302a37db43516f519"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2cc406c69bd6810302a37db43516f519">qsc_chacha_transform</a> (<a class="el" href="structqsc__chacha__state.html">qsc_chacha_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
 <tr class="memdesc:a2cc406c69bd6810302a37db43516f519"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a block of input data using the ChaCha20 cipher.  <br /></td></tr>
 <tr class="separator:a2cc406c69bd6810302a37db43516f519"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77da31132027d9d2ec62a0abeacd078f" id="r_a77da31132027d9d2ec62a0abeacd078f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77da31132027d9d2ec62a0abeacd078f">qsc_chacha_poly1305_set_associated</a> (<a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *ctx, const uint8_t *data, size_t datalen)</td></tr>
+<tr class="memdesc:a77da31132027d9d2ec62a0abeacd078f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the associated data (AAD) for ChaCha-Poly1305 authenticated encryption.  <br /></td></tr>
+<tr class="separator:a77da31132027d9d2ec62a0abeacd078f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafb546c6f650b12df0029e26d62ccc98" id="r_aafb546c6f650b12df0029e26d62ccc98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aafb546c6f650b12df0029e26d62ccc98">qsc_chacha_poly1305_decrypt</a> (<a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:aafb546c6f650b12df0029e26d62ccc98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt data using the ChaCha-Poly1305 authenticated encryption mode.  <br /></td></tr>
+<tr class="separator:aafb546c6f650b12df0029e26d62ccc98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9adaa025bacdb0556ecdcfc0ee02e255" id="r_a9adaa025bacdb0556ecdcfc0ee02e255"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9adaa025bacdb0556ecdcfc0ee02e255">qsc_chacha_poly1305_dispose</a> (<a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *ctx)</td></tr>
+<tr class="memdesc:a9adaa025bacdb0556ecdcfc0ee02e255"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispose of an ChaCha-Poly1305 state.  <br /></td></tr>
+<tr class="separator:a9adaa025bacdb0556ecdcfc0ee02e255"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae859a94487c4d39c3d8ffa4c20760ab0" id="r_ae859a94487c4d39c3d8ffa4c20760ab0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae859a94487c4d39c3d8ffa4c20760ab0">qsc_chacha_poly1305_initialize</a> (<a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *ctx, const <a class="el" href="structqsc__chacha__keyparams.html">qsc_chacha_keyparams</a> *keyparams)</td></tr>
+<tr class="memdesc:ae859a94487c4d39c3d8ffa4c20760ab0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the ChaCha-Poly1305 state for authenticated encryption or decryption.  <br /></td></tr>
+<tr class="separator:ae859a94487c4d39c3d8ffa4c20760ab0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a25774a78af1aa958e6fb8c717f7d06" id="r_a5a25774a78af1aa958e6fb8c717f7d06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a25774a78af1aa958e6fb8c717f7d06">qsc_chacha_poly1305_encrypt</a> (<a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:a5a25774a78af1aa958e6fb8c717f7d06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt data using the ChaCha-Poly1305 authenticated encryption mode.  <br /></td></tr>
+<tr class="separator:a5a25774a78af1aa958e6fb8c717f7d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Contains the public API and documentation for the ChaCha20 implementation. </p>
-<p>This header defines the API for the ChaCha20 stream cipher implementation. The cipher supports both 128-bit and 256-bit key sizes (16 or 32 bytes respectively) and requires an 8-byte nonce for initialization. The implementation includes support for AVX, AVX2, and AVX512 intrinsics where available, ensuring high-performance encryption on modern processors. ChaCha20 is widely recognized for its security and efficiency in both software and hardware implementations.</p>
+<p>This header defines the API for the ChaCha20 stream cipher implementation used by TLS and specified in RFC?7539. The cipher supports both 128-bit and 256-bit key sizes (16 or 32 bytes respectively) and requires an 12-byte nonce for initialization. The implementation includes support for AVX, AVX2, and AVX512 intrinsics where available, ensuring high-performance encryption on modern processors. ChaCha20 is widely recognized for its security and efficiency in both software and hardware implementations.</p>
 <dl class="section user"><dt>Example Usage:</dt><dd><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="chacha_8h.html">chacha.h</a>&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">size_t</span> <span class="keyword">const</span> MSG_LEN = 1024;</div>
-<div class="line">uint8_t key[32] = { 0 };                  <span class="comment">// 256-bit key</span></div>
-<div class="line">uint8_t nonce[<a class="code hl_define" href="#af41a09548e9181403299ff4057aaa715">QSC_CHACHA_NONCE_SIZE</a>] = { 0 }; <span class="comment">// 8-byte nonce</span></div>
+<div class="line">uint8_t key[32] = { 0 };                      <span class="comment">// 256-bit key</span></div>
+<div class="line">uint8_t nonce[<a class="code hl_define" href="#af41a09548e9181403299ff4057aaa715">QSC_CHACHA_NONCE_SIZE</a>] = { 0 }; <span class="comment">// 12-byte nonce</span></div>
 <div class="line">uint8_t msg[MSG_LEN] = { 0 };</div>
 <div class="line">uint8_t out[MSG_LEN] = { 0 };</div>
 <div class="line"> </div>
@@ -179,9 +197,9 @@ Functions</h2></td></tr>
 <div class="line">qsc_chacha_initialize(&amp;ctx, &amp;kp);</div>
 <div class="line">qsc_chacha_transform(&amp;ctx, out, msg, MSG_LEN);</div>
 <div class="ttc" id="achacha_8h_html"><div class="ttname"><a href="chacha_8h.html">chacha.h</a></div><div class="ttdoc">Contains the public API and documentation for the ChaCha20 implementation.</div></div>
-<div class="ttc" id="achacha_8h_html_af41a09548e9181403299ff4057aaa715"><div class="ttname"><a href="#af41a09548e9181403299ff4057aaa715">QSC_CHACHA_NONCE_SIZE</a></div><div class="ttdeci">#define QSC_CHACHA_NONCE_SIZE</div><div class="ttdoc">The size of the nonce (in bytes).</div><div class="ttdef"><b>Definition</b> chacha.h:100</div></div>
-<div class="ttc" id="astructqsc__chacha__keyparams_html"><div class="ttname"><a href="structqsc__chacha__keyparams.html">qsc_chacha_keyparams</a></div><div class="ttdoc">Key parameters for the ChaCha20 cipher.</div><div class="ttdef"><b>Definition</b> chacha.h:127</div></div>
-<div class="ttc" id="astructqsc__chacha__state_html"><div class="ttname"><a href="structqsc__chacha__state.html">qsc_chacha_state</a></div><div class="ttdoc">Internal state structure for the ChaCha20 cipher.</div><div class="ttdef"><b>Definition</b> chacha.h:115</div></div>
+<div class="ttc" id="achacha_8h_html_af41a09548e9181403299ff4057aaa715"><div class="ttname"><a href="#af41a09548e9181403299ff4057aaa715">QSC_CHACHA_NONCE_SIZE</a></div><div class="ttdeci">#define QSC_CHACHA_NONCE_SIZE</div><div class="ttdoc">The size of the nonce in bytes.</div><div class="ttdef"><b>Definition</b> chacha.h:103</div></div>
+<div class="ttc" id="astructqsc__chacha__keyparams_html"><div class="ttname"><a href="structqsc__chacha__keyparams.html">qsc_chacha_keyparams</a></div><div class="ttdoc">Key parameters for the ChaCha20 cipher.</div><div class="ttdef"><b>Definition</b> chacha.h:130</div></div>
+<div class="ttc" id="astructqsc__chacha__state_html"><div class="ttname"><a href="structqsc__chacha__state.html">qsc_chacha_state</a></div><div class="ttdoc">Internal state structure for the ChaCha20 cipher.</div><div class="ttdef"><b>Definition</b> chacha.h:118</div></div>
 </div><!-- fragment --></dd></dl>
 <h1><a class="anchor" id="chacha_links"></a>
 Reference Links:</h1>
@@ -235,7 +253,7 @@ Reference Links:</h1>
 </div><div class="memdoc">
 
 <p>Initialize the ChaCha20 cipher state with the secret key and nonce. </p>
-<dl class="section warning"><dt>Warning</dt><dd>The key must be either 16 or 32 bytes in length, and the nonce must be exactly 8 bytes.</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The key must be either 16 or 32 bytes in length, and the nonce must be exactly 12 bytes.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ctx</td><td>[qsc_chacha_state*] Pointer to the ChaCha20 state structure. </td></tr>
@@ -243,6 +261,194 @@ Reference Links:</h1>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aafb546c6f650b12df0029e26d62ccc98" name="aafb546c6f650b12df0029e26d62ccc98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafb546c6f650b12df0029e26d62ccc98">&#9670;&#160;</a></span>qsc_chacha_poly1305_decrypt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool qsc_chacha_poly1305_decrypt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>length</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Decrypt data using the ChaCha-Poly1305 authenticated encryption mode. </p>
+<p>This function decrypts the plaintext using ChaCha in Poly1305 mode, computes a MAC over the ciphertext, and writes the MAC to the tag parameter.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> structure. </td></tr>
+    <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the plaintext buffer. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the ciphertext data with the appended MAC. </td></tr>
+    <tr><td class="paramname">length</td><td>[size_t] Length of the input ciphertext in bytes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[bool] Returns <code>true</code> if the MAC verification and transformation was successful; otherwise, <code>false</code>.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#ae859a94487c4d39c3d8ffa4c20760ab0" title="Initialize the ChaCha-Poly1305 state for authenticated encryption or decryption.">qsc_chacha_poly1305_initialize</a>, <a class="el" href="#a77da31132027d9d2ec62a0abeacd078f" title="Set the associated data (AAD) for ChaCha-Poly1305 authenticated encryption.">qsc_chacha_poly1305_set_associated</a> </dd></dl>
+
+</div>
+</div>
+<a id="a9adaa025bacdb0556ecdcfc0ee02e255" name="a9adaa025bacdb0556ecdcfc0ee02e255"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9adaa025bacdb0556ecdcfc0ee02e255">&#9670;&#160;</a></span>qsc_chacha_poly1305_dispose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_chacha_poly1305_dispose </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dispose of an ChaCha-Poly1305 state. </p>
+<p>Securely clears all internal state and keys used by the ChaCha-Poly1305 authenticated encryption mode.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to a <a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> structure.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>Must be called before the state goes out of scope.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a77da31132027d9d2ec62a0abeacd078f" title="Set the associated data (AAD) for ChaCha-Poly1305 authenticated encryption.">qsc_chacha_poly1305_set_associated</a>, <a class="el" href="#aafb546c6f650b12df0029e26d62ccc98" title="Decrypt data using the ChaCha-Poly1305 authenticated encryption mode.">qsc_chacha_poly1305_decrypt</a>, <a class="el" href="#a5a25774a78af1aa958e6fb8c717f7d06" title="Encrypt data using the ChaCha-Poly1305 authenticated encryption mode.">qsc_chacha_poly1305_encrypt</a>, <a class="el" href="#ae859a94487c4d39c3d8ffa4c20760ab0" title="Initialize the ChaCha-Poly1305 state for authenticated encryption or decryption.">qsc_chacha_poly1305_initialize</a> </dd></dl>
+
+</div>
+</div>
+<a id="a5a25774a78af1aa958e6fb8c717f7d06" name="a5a25774a78af1aa958e6fb8c717f7d06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a25774a78af1aa958e6fb8c717f7d06">&#9670;&#160;</a></span>qsc_chacha_poly1305_encrypt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_chacha_poly1305_encrypt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>length</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Encrypt data using the ChaCha-Poly1305 authenticated encryption mode. </p>
+<p>In encryption mode, this function encrypts the plaintext using ChaCha20, computes a MAC over the ciphertext, and appends the MAC to the output.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> structure. </td></tr>
+    <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the output buffer, must be large enough to hold ciphertext plus MAC. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the input data; ciphertext with appended MAC. </td></tr>
+    <tr><td class="paramname">length</td><td>[size_t] Length of the input data in bytes (excluding the MAC for decryption).</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#ae859a94487c4d39c3d8ffa4c20760ab0" title="Initialize the ChaCha-Poly1305 state for authenticated encryption or decryption.">qsc_chacha_poly1305_initialize</a>, <a class="el" href="#a77da31132027d9d2ec62a0abeacd078f" title="Set the associated data (AAD) for ChaCha-Poly1305 authenticated encryption.">qsc_chacha_poly1305_set_associated</a> </dd></dl>
+
+</div>
+</div>
+<a id="ae859a94487c4d39c3d8ffa4c20760ab0" name="ae859a94487c4d39c3d8ffa4c20760ab0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae859a94487c4d39c3d8ffa4c20760ab0">&#9670;&#160;</a></span>qsc_chacha_poly1305_initialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_chacha_poly1305_initialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__chacha__keyparams.html">qsc_chacha_keyparams</a> *</td>          <td class="paramname"><span class="paramname"><em>keyparams</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the ChaCha-Poly1305 state for authenticated encryption or decryption. </p>
+<p>Generates the cipher key and MAC key from the provided key parameters and sets up the internal states.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to a <a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> structure to initialize. </td></tr>
+    <tr><td class="paramname">keyparams</td><td>[const struct] Pointer to a constant <a class="el" href="structqsc__chacha__keyparams.html" title="Key parameters for the ChaCha20 cipher.">qsc_chacha_keyparams</a> structure that provides the key.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>Must be called before using qsc_chacha_poly1305_set_associated, qsc_chacha_poly1305_encrypt or qsc_chacha_poly1305_decrypt.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#aafb546c6f650b12df0029e26d62ccc98" title="Decrypt data using the ChaCha-Poly1305 authenticated encryption mode.">qsc_chacha_poly1305_decrypt</a>, <a class="el" href="#a5a25774a78af1aa958e6fb8c717f7d06" title="Encrypt data using the ChaCha-Poly1305 authenticated encryption mode.">qsc_chacha_poly1305_encrypt</a>, <a class="el" href="#a9adaa025bacdb0556ecdcfc0ee02e255" title="Dispose of an ChaCha-Poly1305 state.">qsc_chacha_poly1305_dispose</a> </dd></dl>
+
+</div>
+</div>
+<a id="a77da31132027d9d2ec62a0abeacd078f" name="a77da31132027d9d2ec62a0abeacd078f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77da31132027d9d2ec62a0abeacd078f">&#9670;&#160;</a></span>qsc_chacha_poly1305_set_associated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_chacha_poly1305_set_associated </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>datalen</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the associated data (AAD) for ChaCha-Poly1305 authenticated encryption. </p>
+<p>The associated data is used to authenticate additional information (such as headers) that is not encrypted. It must be set after initialization and before each call to qsc_chacha_poly1305_encrypt</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to the <a class="el" href="structqsc__chacha__poly1305__state.html">qsc_chacha_poly1305_state</a> structure. </td></tr>
+    <tr><td class="paramname">data</td><td>[const uint8_t*] Pointer to the associated data. </td></tr>
+    <tr><td class="paramname">datalen</td><td>[size_t] Length of the associated data in bytes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a5a25774a78af1aa958e6fb8c717f7d06" title="Encrypt data using the ChaCha-Poly1305 authenticated encryption mode.">qsc_chacha_poly1305_encrypt</a> </dd></dl>
 
 </div>
 </div>

@@ -93,11 +93,11 @@
  * uint8_t cust[CST_LEN] = { 0 };
  *
  * uint8_t output[MSG_LEN] = { 0 };
- * qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, nonce, cust, CST_LEN };
+ * qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = nonce, .noncelen = QSC_AES_BLOCK_SIZE, .info = cust, .infolen = CST_LEN };
  *
- * qsc_aes_state state;
- * qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
- * qsc_aes_ctrbe_transform(&state, output, msg, MSG_LEN);
+ * qsc_aes_state ctx;
+ * qsc_aes_initialize(&ctx, &kp, true, qsc_aes_cipher_256);
+ * qsc_aes_ctrbe_transform(&ctx, output, msg, MSG_LEN);
  * \endcode
  *
  * \sa qsc_aes_initialize, qsc_aes_dispose, qsc_aes_cbc_encrypt, qsc_aes_ctrbe_transform, qsc_aes_hba256_initialize
@@ -169,6 +169,24 @@ typedef enum
 #define QSC_AES256_KEY_SIZE 32ULL
 
 /*!
+ * \def QSC_GCM256_MAC_SIZE
+ * \brief Size in bytes of the MAC code for GCM-AES-256.
+ */
+#define QSC_GCM256_MAC_SIZE 16ULL
+
+/*!
+ * \def QSC_GCM_MAXAAD_SIZE
+ * \brief Maximum allowed size (in bytes) for Associated Additional Data (AAD) in GCM.
+ */
+#define QSC_GCM_MAXAAD_SIZE 256ULL
+
+/*!
+ * \def QSC_GCM_NONCE_SIZE
+ * \brief The standard nonce size used by GCM-AES-256.
+ */
+#define QSC_GCM_NONCE_SIZE 12ULL
+
+/*!
  * \def QSC_HBA256_MAC_SIZE
  * \brief Size in bytes of the MAC code for HBA-256.
  */
@@ -201,7 +219,7 @@ typedef enum
  * \brief Structure for AES key parameters.
  *
  * This structure contains pointers to the key, nonce, and optional info data
- * used to initialize the AES cipher state.
+ * used to initialize the AES cipher ctx.
  *
  * \note The key must be random and secret. The info field is optional (e.g., a salt).
  */
@@ -210,13 +228,14 @@ QSC_EXPORT_API typedef struct
 	const uint8_t* key;   /*!< [const] Pointer to the input cipher key */
 	size_t keylen;        /*!< [size_t] Length (in bytes) of the cipher key */
 	uint8_t* nonce;       /*!< [uint8_t*] Pointer to the nonce or initialization vector */
+	size_t noncelen;	  /*!< [size_t] Length (in bytes) of the nonce */
 	const uint8_t* info;  /*!< [const] Pointer to the optional information tweak */
 	size_t infolen;       /*!< [size_t] Length (in bytes) of the information tweak */
 } qsc_aes_keyparams;
 
 /*! 
  * \struct qsc_aes_state
- * \brief AES cipher state structure.
+ * \brief AES cipher ctx structure.
  *
  * Contains the expanded round-key array, round count, and a pointer to the nonce.
  *
@@ -240,32 +259,32 @@ QSC_EXPORT_API typedef struct
 /* Function Declarations */
 
 /**
- * \brief Erase and dispose of the AES state.
+ * \brief Erase and dispose of the AES ctx.
  *
  * Securely clears the round-key array and resets the key length.
  *
- * \param state: [struct] Pointer to a qsc_aes_state structure.
+ * \param ctx: [struct] Pointer to a qsc_aes_state structure.
  *
  * \sa qsc_aes_initialize
  */
-QSC_EXPORT_API void qsc_aes_dispose(qsc_aes_state* state);
+QSC_EXPORT_API void qsc_aes_dispose(qsc_aes_state* ctx);
 
 /**
- * \brief Initialize the AES state with the given key parameters.
+ * \brief Initialize the AES ctx with the given key parameters.
  *
  * Expands the input cipher key into a round-key array for encryption or decryption.
  * Note that for CTR mode the cipher is always initialized for encryption.
  *
- * \param state:      [struct] Pointer to the qsc_aes_state structure to initialize.
+ * \param ctx:      [struct] Pointer to the qsc_aes_state structure to initialize.
  * \param keyparams:  [const struct] Pointer to a constant qsc_aes_keyparams structure containing key, nonce, and optional info.
  * \param encryption: [bool] Set to \c true to initialize for encryption; \c false for decryption.
  * \param ctype:      [enum] Specifies the AES cipher type (qsc_aes_cipher_128 or qsc_aes_cipher_256).
  *
- * \warning Ensure that \c state->roundkeys is cleared and its size set before calling.
+ * \warning Ensure that \c ctx->roundkeys is cleared and its size set before calling.
  *
  * \sa qsc_aes_dispose
  */
-QSC_EXPORT_API void qsc_aes_initialize(qsc_aes_state* state, const qsc_aes_keyparams* keyparams, bool encryption, qsc_aes_cipher_type ctype);
+QSC_EXPORT_API void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, bool encryption, qsc_aes_cipher_type ctype);
 
 /* CBC Mode */
 
@@ -274,59 +293,59 @@ QSC_EXPORT_API void qsc_aes_initialize(qsc_aes_state* state, const qsc_aes_keypa
  *
  * Decrypts the input data in CBC mode and removes PKCS#7 padding.
  *
- * \param state:     [struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:     [struct] Pointer to an initialized qsc_aes_state structure.
  * \param output:    [uint8_t*] Pointer to the output buffer where plaintext will be stored.
  * \param outputlen: [size_t*] Pointer to a size_t that receives the length of the decrypted data.
  * \param input:     [const uint8_t*] Pointer to the input ciphertext.
  * \param length:    [size_t] Number of bytes of input ciphertext.
  *
- * \warning The state must be initialized by qsc_aes_initialize.
+ * \warning The ctx must be initialized by qsc_aes_initialize.
  *
  * \sa qsc_aes_cbc_encrypt, qsc_pkcs7_padding_length
  */
-QSC_EXPORT_API void qsc_aes_cbc_decrypt(qsc_aes_state* state, uint8_t* output, size_t* outputlen, const uint8_t* input, size_t length);
+QSC_EXPORT_API void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t* outputlen, const uint8_t* input, size_t length);
 
 /**
  * \brief Encrypt plaintext using AES in Cipher Block Chaining (CBC) mode.
  *
  * Encrypts the input data in CBC mode, automatically applying PKCS#7 padding to the final block.
  *
- * \param state:  [struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:  [struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to the output buffer where ciphertext will be stored.
  * \param input:  [const uint8_t*] Pointer to the input plaintext.
  * \param length: [size_t] Number of bytes of input plaintext.
  *
- * \warning The state must be initialized by qsc_aes_initialize.
+ * \warning The ctx must be initialized by qsc_aes_initialize.
  *
  * \sa qsc_aes_cbc_decrypt, qsc_pkcs7_add_padding
  */
-QSC_EXPORT_API void qsc_aes_cbc_encrypt(qsc_aes_state* state, uint8_t* output, const uint8_t* input, size_t length);
+QSC_EXPORT_API void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /**
  * \brief Decrypt a single 16-byte block using AES in CBC mode.
  *
  * Decrypts one block of ciphertext and performs the XOR with the previous ciphertext block (or IV).
  *
- * \param state:  [struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:  [struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to a 16-byte buffer to receive the decrypted block.
  * \param input:  [const uint8_t*] Pointer to a 16-byte block of ciphertext.
  *
- * \warning The state must be initialized by qsc_aes_initialize.
+ * \warning The ctx must be initialized by qsc_aes_initialize.
  */
-QSC_EXPORT_API void qsc_aes_cbc_decrypt_block(qsc_aes_state* state, uint8_t* output, const uint8_t* input);
+QSC_EXPORT_API void qsc_aes_cbc_decrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input);
 
 /**
  * \brief Encrypt a single 16-byte block using AES in CBC mode.
  *
  * Encrypts one block of plaintext by XOR-ing with the previous ciphertext block (or IV) and applying AES encryption.
  *
- * \param state:  [struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:  [struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to a 16-byte buffer to receive the ciphertext block.
  * \param input:  [const uint8_t*] Pointer to a 16-byte block of plaintext.
  *
- * \warning The state must be initialized by qsc_aes_initialize.
+ * \warning The ctx must be initialized by qsc_aes_initialize.
  */
-QSC_EXPORT_API void qsc_aes_cbc_encrypt_block(qsc_aes_state* state, uint8_t* output, const uint8_t* input);
+QSC_EXPORT_API void qsc_aes_cbc_encrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input);
 
 /* PKCS#7 Padding */
 
@@ -362,32 +381,32 @@ QSC_EXPORT_API size_t qsc_pkcs7_padding_length(const uint8_t* input);
  *
  * Encrypts or decrypts data in CTR mode. The same function is used for both operations.
  *
- * \param state:  [struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:  [struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to the buffer where the transformed data will be stored.
  * \param input:  [const uint8_t*] Pointer to the input data.
  * \param length: [size_t] Number of bytes to process.
  *
- * \warning The state must be initialized by qsc_aes_initialize.
+ * \warning The ctx must be initialized by qsc_aes_initialize.
  *
  * \sa qsc_aes_ctrle_transform
  */
-QSC_EXPORT_API void qsc_aes_ctrbe_transform(qsc_aes_state* state, uint8_t* output, const uint8_t* input, size_t length);
+QSC_EXPORT_API void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /**
  * \brief Transform data using AES in Counter (CTR) mode with Little Endian counter incrementation.
  *
  * Encrypts or decrypts data in CTR mode using a little endian counter.
  *
- * \param state:  [struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:  [struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to the buffer where the transformed data will be stored.
  * \param input:  [const uint8_t*] Pointer to the input data.
  * \param length: [size_t] Number of bytes to process.
  *
- * \warning The state must be initialized by qsc_aes_initialize.
+ * \warning The ctx must be initialized by qsc_aes_initialize.
  *
  * \sa qsc_aes_ctrbe_transform
  */
-QSC_EXPORT_API void qsc_aes_ctrle_transform(qsc_aes_state* state, uint8_t* output, const uint8_t* input, size_t length);
+QSC_EXPORT_API void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /* ECB Mode */
 
@@ -396,24 +415,24 @@ QSC_EXPORT_API void qsc_aes_ctrle_transform(qsc_aes_state* state, uint8_t* outpu
  *
  * ECB mode should only be used for testing or as a building block due to its inherent insecurity.
  *
- * \param state:  [const struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:  [const struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to a 16-byte buffer to receive the decrypted plaintext.
  * \param input:  [const uint8_t*] Pointer to a 16-byte ciphertext block.
  *
  * \warning ECB mode does not provide semantic security.
  */
-QSC_EXPORT_API void qsc_aes_ecb_decrypt_block(const qsc_aes_state* state, uint8_t* output, const uint8_t* input);
+QSC_EXPORT_API void qsc_aes_ecb_decrypt_block(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input);
 
 /**
  * \brief Encrypt a single 16-byte block using AES in Electronic CodeBook (ECB) mode.
  *
- * \param state:  [const struct] Pointer to an initialized qsc_aes_state structure.
+ * \param ctx:  [const struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to a 16-byte buffer to receive the ciphertext.
  * \param input:  [const uint8_t*] Pointer to a 16-byte plaintext block.
  *
  * \warning ECB mode is insecure and should be used only for testing.
  */
-QSC_EXPORT_API void qsc_aes_ecb_encrypt_block(const qsc_aes_state* state, uint8_t* output, const uint8_t* input);
+QSC_EXPORT_API void qsc_aes_ecb_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input);
 
 /* HBA-256 Authenticated Encryption */
 
@@ -421,44 +440,44 @@ QSC_EXPORT_API void qsc_aes_ecb_encrypt_block(const qsc_aes_state* state, uint8_
  * \struct qsc_aes_hba256_state
  * \brief State structure for AES-based Hash Based Authentication (HBA-256).
  *
- * Combines an AES-256 cipher state with a MAC state (using either KMAC or HMAC) to implement an AEAD scheme.
+ * Combines an AES-256 cipher ctx with a MAC ctx (using either KMAC or HMAC) to implement an AEAD scheme.
  *
  * \sa qsc_aes_hba256_initialize, qsc_aes_hba256_transform, qsc_aes_hba256_dispose
  */
 QSC_EXPORT_API typedef struct
 {
 #if defined(QSC_HBA_KMAC_EXTENSION)
-	qsc_keccak_state kstate;			/*!< [struct] MAC state for KMAC authentication */
+	qsc_keccak_state kstate;			/*!< [struct] MAC ctx for KMAC authentication */
 #else
-	qsc_hmac256_state kstate;			/*!< [struct] MAC state for HMAC(SHA2) authentication */
+	qsc_hmac256_state kstate;			/*!< [struct] MAC ctx for HMAC(SHA2) authentication */
 #endif
-	qsc_aes_state cstate;				/*!< [struct] Underlying AES cipher state */
+	qsc_aes_state cstate;				/*!< [struct] Underlying AES cipher ctx */
 	uint64_t counter;					/*!< [uint64_t] Counter for the number of processed bytes */
 	uint8_t mkey[QSC_HBA256_MAC_SIZE];	/*!< [uint8_t[QSC_HBA256_MAC_SIZE]] MAC generator key */
-	uint8_t cust[QSC_HBA_MAXINFO_SIZE];	/*!< [uint8_t[]] Customization key (user provided tweak) */
+	uint8_t cust[QSC_HBA_MAXINFO_SIZE];	/*!< [uint8_t[QSC_HBA_MAXINFO_SIZE]] Customization key (user provided tweak) */
 	size_t custlen;						/*!< [size_t] Length of the customization key */
 	bool encrypt;						/*!< [bool] Transformation mode: true for encryption, false for decryption */
 } qsc_aes_hba256_state;
 
 /**
- * \brief Dispose of an HBA-256 state.
+ * \brief Dispose of an HBA-256 ctx.
  *
- * Securely clears all internal state and keys used by the HBA-256 authenticated encryption mode.
+ * Securely clears all internal ctx and keys used by the HBA-256 authenticated encryption mode.
  *
- * \param state:	[struct] Pointer to a qsc_aes_hba256_state structure.
+ * \param ctx:	[struct] Pointer to a qsc_aes_hba256_state structure.
  *
- * \warning Must be called before the state goes out of scope.
+ * \warning Must be called before the ctx goes out of scope.
  *
  * \sa qsc_aes_hba256_initialize, qsc_aes_hba256_transform
  */
-QSC_EXPORT_API void qsc_aes_hba256_dispose(qsc_aes_hba256_state* state);
+QSC_EXPORT_API void qsc_aes_hba256_dispose(qsc_aes_hba256_state* ctx);
 
 /**
- * \brief Initialize the HBA-256 state for authenticated encryption or decryption.
+ * \brief Initialize the HBA-256 ctx for authenticated encryption or decryption.
  *
  * Generates the cipher key and MAC key from the provided key parameters and sets up the internal states.
  *
- * \param state:     [struct] Pointer to a qsc_aes_hba256_state structure to initialize.
+ * \param ctx:     [struct] Pointer to a qsc_aes_hba256_state structure to initialize.
  * \param keyparams: [const struct] Pointer to a constant qsc_aes_keyparams structure that provides the key, nonce, and optional info.
  * \param encrypt:   [bool] Set to \c true for encryption mode, or \c false for decryption mode.
  *
@@ -466,7 +485,7 @@ QSC_EXPORT_API void qsc_aes_hba256_dispose(qsc_aes_hba256_state* state);
  *
  * \sa qsc_aes_hba256_transform, qsc_aes_hba256_dispose
  */
-QSC_EXPORT_API void qsc_aes_hba256_initialize(qsc_aes_hba256_state* state, const qsc_aes_keyparams* keyparams, bool encrypt);
+QSC_EXPORT_API void qsc_aes_hba256_initialize(qsc_aes_hba256_state* ctx, const qsc_aes_keyparams* keyparams, bool encrypt);
 
 /**
  * \brief Set the associated data (AAD) for HBA-256 authenticated encryption.
@@ -474,13 +493,13 @@ QSC_EXPORT_API void qsc_aes_hba256_initialize(qsc_aes_hba256_state* state, const
  * The associated data is used to authenticate additional information (such as headers) that is not encrypted.
  * It must be set after initialization and before each call to qsc_aes_hba256_transform.
  *
- * \param state:	[struct] Pointer to the qsc_aes_hba256_state structure.
+ * \param ctx:	[struct] Pointer to the qsc_aes_hba256_state structure.
  * \param data:		[const uint8_t*] Pointer to the associated data.
  * \param datalen:	[size_t] Length of the associated data in bytes.
  *
  * \sa qsc_aes_hba256_transform
  */
-QSC_EXPORT_API void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* state, const uint8_t* data, size_t datalen);
+QSC_EXPORT_API void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* ctx, const uint8_t* data, size_t datalen);
 
 /**
  * \brief Transform data using the HBA-256 authenticated encryption mode.
@@ -489,7 +508,7 @@ QSC_EXPORT_API void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* state, c
  * over the nonce and ciphertext, and appends the MAC to the output. In decryption mode, it first verifies
  * the MAC before decrypting the ciphertext.
  *
- * \param state:	[struct] Pointer to an initialized qsc_aes_hba256_state structure.
+ * \param ctx:	[struct] Pointer to an initialized qsc_aes_hba256_state structure.
  * \param output:	[uint8_t*] Pointer to the output buffer (must be large enough to hold ciphertext plus MAC in encryption mode).
  * \param input:	[const uint8_t*] Pointer to the input data (ciphertext with appended MAC in decryption mode, plaintext in encryption mode).
  * \param length:	[size_t] Length of the input data in bytes (excluding the MAC for decryption).
@@ -498,7 +517,102 @@ QSC_EXPORT_API void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* state, c
  *
  * \sa qsc_aes_hba256_initialize, qsc_aes_hba256_set_associated
  */
-QSC_EXPORT_API bool qsc_aes_hba256_transform(qsc_aes_hba256_state* state, uint8_t* output, const uint8_t* input, size_t length);
+QSC_EXPORT_API bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/* GCM-AES-256 RFC 5288/5116 */
+
+/*! 
+ * \struct qsc_aes_gcm256_state
+ * \brief State structure for AES-based Galois Counter Mode (GCM-256).
+ *
+ * Combines an AES-256 cipher ctx with a Galois counter mode to implement an AEAD scheme.
+ *
+ * \sa qsc_aes_gcm256_set_associated, qsc_aes_gcm256_decrypt, qsc_aes_gcm256_dispose, qsc_aes_gcm256_encrypt, qsc_aes_gcm256_initialize
+ */
+QSC_EXPORT_API typedef struct qsc_aes_gcm256_state 
+{
+    qsc_aes_state cstate;                   /*!< [struct] Underlying AES cipher ctx */
+    uint8_t C[QSC_AES_BLOCK_SIZE];			/*!< uint8_t[QSC_AES_BLOCK_SIZE] Current counter block */
+    uint8_t H[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] Hash subkey H = AES(K,0) */
+    uint8_t J0[QSC_AES_BLOCK_SIZE];         /*!< uint8_t[QSC_AES_BLOCK_SIZE] Pre-counter block */
+    uint8_t S[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
+    uint64_t aadlen;						/*!< [uint64_t] AAD length in bits */
+    uint64_t ctlen;							/*!< [uint64_t] Ciphertext length in bits */
+
+} qsc_aes_gcm256_state;
+
+/**
+ * \brief Decrypt data using the GCM-AES-256 authenticated encryption mode.
+ *
+ * This function decrypts the plaintext using AES-256 in GCM-CTR mode, computes a MAC
+ * over the nonce and ciphertext, and writes the MAC to the tag parameter.
+ *
+ * \param ctx:	[struct] Pointer to an initialized qsc_aes_gcm256_state structure.
+ * \param output:	[uint8_t*] Pointer to the plaintext buffer.
+ * \param input:	[const uint8_t*] Pointer to the ciphertext data with the appended MAC.
+ * \param length:	[size_t] Length of the input ciphertext in bytes.
+ *
+ * \return			[bool] Returns \c true if the transformation and MAC verification was successful; otherwise, \c false.
+ *
+ * \sa qsc_aes_gcm256_initialize, qsc_aes_gcm256_set_associated
+ */
+QSC_EXPORT_API bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/*!
+ * \brief Dispose of an GCM-256 ctx.
+ *
+ * Securely clears all internal ctx and keys used by the GCM-256 authenticated encryption mode.
+ *
+ * \param ctx:	[struct] Pointer to a qsc_aes_gcm256_state structure.
+ *
+ * \warning Must be called before the ctx goes out of scope.
+ *
+ * \sa qsc_aes_gcm256_set_associated, qsc_aes_gcm_decrypt, qsc_aes_gcm_encrypt, qsc_aes_gcm_initialize
+ */
+QSC_EXPORT_API void qsc_aes_gcm256_dispose(qsc_aes_gcm256_state* ctx);
+
+/**
+ * \brief Encrypt data using the GCM-AES-256 authenticated encryption mode.
+ *
+ * In encryption mode, this function encrypts the plaintext using AES-256 in CTR mode, computes a MAC
+ * over the nonce and ciphertext, and appends the MAC to the output.
+ *
+ * \param ctx:	[struct] Pointer to an initialized qsc_aes_gcm256_state structure.
+ * \param output:	[uint8_t*] Pointer to the output buffer; must be large enough to hold ciphertext plus MAC.
+ * \param input:	[const uint8_t*] Pointer to the input data; ciphertext with appended MAC.
+ * \param length:	[size_t] Length of the input data in bytes (excluding the MAC for decryption).
+ *
+ * \sa qsc_aes_gcm256_initialize, qsc_aes_gcm256_set_associated
+ */
+QSC_EXPORT_API void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/**
+ * \brief Initialize the GCM-256 ctx for authenticated encryption or decryption.
+ *
+ * Generates the cipher key and MAC key from the provided key parameters and sets up the internal states.
+ *
+ * \param ctx:     [struct] Pointer to a qsc_aes_gcm256_state structure to initialize.
+ * \param keyparams: [const struct] Pointer to a constant qsc_aes_keyparams structure that provides the key, nonce, and optional info.
+ *
+ * \warning Must be called before using qsc_aes_gcm256_set_associated, qsc_aes_gcm256_encrypt or qsc_aes_gcm256_decrypt.
+ *
+ * \sa qsc_aes_gcm256_decrypt, qsc_aes_gcm256_encrypt, qsc_aes_gcm256_dispose
+ */
+QSC_EXPORT_API void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparams* keyparams);
+
+/**
+ * \brief Set the associated data (AAD) for GCM-256 authenticated encryption.
+ *
+ * The associated data is used to authenticate additional information (such as headers) that is not encrypted.
+ * It must be set after initialization and before each call to qsc_aes_gcm256_encrypt
+ *
+ * \param ctx:	[struct] Pointer to the qsc_aes_gcm256_state structure.
+ * \param data:		[const uint8_t*] Pointer to the associated data.
+ * \param datalen:	[size_t] Length of the associated data in bytes.
+ *
+ * \sa qsc_aes_gcm256_encrypt
+ */
+QSC_EXPORT_API void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* data, size_t datalen);
 
 QSC_CPLUSPLUS_ENABLED_END
 

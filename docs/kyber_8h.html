@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -180,11 +180,11 @@ Functions</h2></td></tr>
 <div class="line">}</div>
 <div class="ttc" id="akyber_8h_html_a07e969adf524c02dfc8e069bc383f163"><div class="ttname"><a href="#a07e969adf524c02dfc8e069bc383f163">qsc_kyber_decapsulate</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t *secret, const uint8_t *ciphertext, const uint8_t *privatekey)</div><div class="ttdoc">Decapsulates the shared secret for a given ciphertext using a private key.</div><div class="ttdef"><b>Definition</b> kyber.c:5</div></div>
 <div class="ttc" id="akyber_8h_html_a2846270dbee6004f92b992fa2b533908"><div class="ttname"><a href="#a2846270dbee6004f92b992fa2b533908">qsc_kyber_encapsulate</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_kyber_encapsulate(uint8_t *secret, uint8_t *ciphertext, const uint8_t *publickey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Encapsulates a shared secret key using a public key.</div><div class="ttdef"><b>Definition</b> kyber.c:45</div></div>
-<div class="ttc" id="akyber_8h_html_a314a086ebb183778749b7f425ba7d46e"><div class="ttname"><a href="#a314a086ebb183778749b7f425ba7d46e">QSC_KYBER_CIPHERTEXT_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_CIPHERTEXT_SIZE</div><div class="ttdoc">The byte size of the ciphertext array.</div><div class="ttdef"><b>Definition</b> kyber.h:84</div></div>
-<div class="ttc" id="akyber_8h_html_a324d3b4dde6bd2bba5ad414c82f15b66"><div class="ttname"><a href="#a324d3b4dde6bd2bba5ad414c82f15b66">QSC_KYBER_PRIVATEKEY_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_PRIVATEKEY_SIZE</div><div class="ttdoc">The byte size of the secret private-key array.</div><div class="ttdef"><b>Definition</b> kyber.h:90</div></div>
+<div class="ttc" id="akyber_8h_html_a314a086ebb183778749b7f425ba7d46e"><div class="ttname"><a href="#a314a086ebb183778749b7f425ba7d46e">QSC_KYBER_CIPHERTEXT_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_CIPHERTEXT_SIZE</div><div class="ttdoc">The byte size of the ciphertext array.</div><div class="ttdef"><b>Definition</b> kyber.h:86</div></div>
+<div class="ttc" id="akyber_8h_html_a324d3b4dde6bd2bba5ad414c82f15b66"><div class="ttname"><a href="#a324d3b4dde6bd2bba5ad414c82f15b66">QSC_KYBER_PRIVATEKEY_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_PRIVATEKEY_SIZE</div><div class="ttdoc">The byte size of the secret private-key array.</div><div class="ttdef"><b>Definition</b> kyber.h:92</div></div>
 <div class="ttc" id="akyber_8h_html_a371669e2f7670c62f46402cad358f383"><div class="ttname"><a href="#a371669e2f7670c62f46402cad358f383">qsc_kyber_generate_keypair</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_kyber_generate_keypair(uint8_t *publickey, uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Generates a Kyber public/private key pair.</div><div class="ttdef"><b>Definition</b> kyber.c:77</div></div>
-<div class="ttc" id="akyber_8h_html_adde5321c5b55a0c87eff031f89dfa756"><div class="ttname"><a href="#adde5321c5b55a0c87eff031f89dfa756">QSC_KYBER_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> kyber.h:96</div></div>
-<div class="ttc" id="akyber_8h_html_ae7c6524a5c0bf0336df3af0f7d2eb297"><div class="ttname"><a href="#ae7c6524a5c0bf0336df3af0f7d2eb297">QSC_KYBER_SHAREDSECRET_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_SHAREDSECRET_SIZE</div><div class="ttdoc">The byte size of the shared secret-key array.</div><div class="ttdef"><b>Definition</b> kyber.h:108</div></div>
+<div class="ttc" id="akyber_8h_html_adde5321c5b55a0c87eff031f89dfa756"><div class="ttname"><a href="#adde5321c5b55a0c87eff031f89dfa756">QSC_KYBER_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> kyber.h:98</div></div>
+<div class="ttc" id="akyber_8h_html_ae7c6524a5c0bf0336df3af0f7d2eb297"><div class="ttname"><a href="#ae7c6524a5c0bf0336df3af0f7d2eb297">QSC_KYBER_SHAREDSECRET_SIZE</a></div><div class="ttdeci">#define QSC_KYBER_SHAREDSECRET_SIZE</div><div class="ttdoc">The byte size of the shared secret-key array.</div><div class="ttdef"><b>Definition</b> kyber.h:110</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="kyber_links"></a>
 Reference Links:</h1>
 <ul>

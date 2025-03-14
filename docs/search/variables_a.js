@@ -1,11 +1,9 @@
 var searchData=
 [
-  ['l1cache_0',['l1cache',['../structqsc__cpuidex__cpu__features.html#a6900e727be30ba6c4d4c2a0858c37c0a',1,'qsc_cpuidex_cpu_features']]],
-  ['l1cacheline_1',['l1cacheline',['../structqsc__cpuidex__cpu__features.html#abfe3eb6950772d7f6922dd9ba854d73c',1,'qsc_cpuidex_cpu_features']]],
-  ['l2associative_2',['l2associative',['../structqsc__cpuidex__cpu__features.html#a4eaee093701962a93862c096741dd500',1,'qsc_cpuidex_cpu_features']]],
-  ['l2cache_3',['l2cache',['../structqsc__cpuidex__cpu__features.html#a809264abd013b108a1935a3bd5fac690',1,'qsc_cpuidex_cpu_features']]],
-  ['lcount_4',['lcount',['../structevent__state.html#abeb096bf1a43cfb1b2fac511995e62c7',1,'event_state']]],
-  ['length_5',['length',['../structqsc__encoding__ber__element.html#ae809d5359ac030c60a30a8f0b2294b82',1,'qsc_encoding_ber_element']]],
-  ['listeners_6',['listeners',['../structevent__state.html#a0172ace34a3d1e5ab95e8e2966e9b4f8',1,'event_state']]],
-  ['low_7',['low',['../structuint128.html#a8325b33af041490126f231fdfd194797',1,'uint128']]]
+  ['k_0',['k',['../structqsc__poly1305__state.html#a2544a219cad452c4173f1c61523889b7',1,'qsc_poly1305_state']]],
+  ['key_1',['key',['../structqsc__aes__keyparams.html#aa60a0c39d29c4a6fdaac5bfc05f1dbec',1,'qsc_aes_keyparams::key'],['../structqsc__chacha__keyparams.html#aa60a0c39d29c4a6fdaac5bfc05f1dbec',1,'qsc_chacha_keyparams::key'],['../structqsc__csx__keyparams.html#aa60a0c39d29c4a6fdaac5bfc05f1dbec',1,'qsc_csx_keyparams::key'],['../structqsc__hcg__state.html#a90e462a85df30ad384c0c73780c2ef0c',1,'qsc_hcg_state::key'],['../structqsc__qmac__keyparams.html#aa60a0c39d29c4a6fdaac5bfc05f1dbec',1,'qsc_qmac_keyparams::key'],['../structqsc__rcs__keyparams.html#aa60a0c39d29c4a6fdaac5bfc05f1dbec',1,'qsc_rcs_keyparams::key']]],
+  ['keylen_2',['keylen',['../structqsc__aes__keyparams.html#af347fae5dae0b613448c54f3dea76ad2',1,'qsc_aes_keyparams::keylen'],['../structqsc__chacha__keyparams.html#af347fae5dae0b613448c54f3dea76ad2',1,'qsc_chacha_keyparams::keylen'],['../structqsc__csx__keyparams.html#af347fae5dae0b613448c54f3dea76ad2',1,'qsc_csx_keyparams::keylen'],['../structqsc__qmac__keyparams.html#af347fae5dae0b613448c54f3dea76ad2',1,'qsc_qmac_keyparams::keylen'],['../structqsc__rcs__keyparams.html#af347fae5dae0b613448c54f3dea76ad2',1,'qsc_rcs_keyparams::keylen']]],
+  ['keys_3',['keys',['../structqsc__collection__state.html#a1f5aae6c93ea1f9ec02284b5733c00c0',1,'qsc_collection_state']]],
+  ['klen_4',['klen',['../structqsc__scb__state.html#a70d958290b8b8ebaff45365d4e5b9e54',1,'qsc_scb_state']]],
+  ['kstate_5',['kstate',['../structqsc__aes__hba256__state.html#a7dcff7935c756d16f1e445db22570492',1,'qsc_aes_hba256_state::kstate'],['../structqsc__csg__state.html#a7dcff7935c756d16f1e445db22570492',1,'qsc_csg_state::kstate'],['../structqsc__csx__state.html#a38851990350937831185667728101e01',1,'qsc_csx_state::kstate'],['../structqsc__rcs__state.html#a38851990350937831185667728101e01',1,'qsc_rcs_state::kstate']]]
 ];

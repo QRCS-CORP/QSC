@@ -88,9 +88,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.6b (A6)                       *");
+	qsctest_print_line("* Release:   v1.0.0.6c (A6)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      February 04, 2025                     *");
+	qsctest_print_line("* Date:      March 14, 2025						  *");
 	qsctest_print_line("* Contact:   john.underhill@protonmail.com        *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");

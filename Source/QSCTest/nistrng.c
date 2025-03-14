@@ -12,7 +12,7 @@ static void aes256_ecb(const uint8_t* key, const uint8_t* counter, uint8_t* buff
 
 	/* jgu checked false warning */
 	/*lint -save -e747 */
-	const qsc_aes_keyparams kp = { key, 32, NULL };
+	const qsc_aes_keyparams kp = { .key = key, QSC_AES256_KEY_SIZE };
 	qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 	/*lint -restore */
 	qsc_aes_ecb_encrypt_block(&state, buffer, counter);

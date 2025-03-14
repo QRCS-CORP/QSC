@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -146,35 +146,38 @@ $(function(){initNavTree('timerex_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"> * Contact: john.underhill@protonmail.com</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#ifndef QSC_TIMEREX_H</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define QSC_TIMEREX_H</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &quot;<a class="code" href="common_8h.html">common.h</a>&quot;</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#include &lt;time.h&gt;</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">   80</a></span><span class="preprocessor">#define QSC_TIMEREX_TIMESTAMP_MAX 80ULL</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="timerex_8h.html#a4fae6a1ec2f5f7bf9c14f19eb9b34539">qsc_timerex_get_date</a>(<span class="keywordtype">char</span> output[<a class="code hl_define" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a>]);</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="timerex_8h.html#a062943eb937d0f7ddc745c104da2e47e">qsc_timerex_get_datetime</a>(<span class="keywordtype">char</span> output[<a class="code hl_define" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a>]);</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="timerex_8h.html#a51495b0d16ee3f7a565c8febf40c7dfc">qsc_timerex_get_time</a>(<span class="keywordtype">char</span> output[<a class="code hl_define" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a>]);</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint64_t <a class="code hl_function" href="timerex_8h.html#a98898424b805ef34438931ab1fc9fb8d">qsc_timerex_stopwatch_start</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint64_t <a class="code hl_function" href="timerex_8h.html#aad5e009fa2d0fe90957c5e17022f3a78">qsc_timerex_stopwatch_elapsed</a>(uint64_t start);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="preprocessor">#if defined(QSC_DEBUG_MODE)</span><span class="preprocessor"></span></div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> qsc_timerex_print_values(<span class="keywordtype">void</span>);</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifndef QSC_TIMEREX_H</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#define QSC_TIMEREX_H</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="common_8h.html">common.h</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &lt;time.h&gt;</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>QSC_CPLUSPLUS_ENABLED_START</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">   81</a></span><span class="preprocessor">#define QSC_TIMEREX_TIMESTAMP_MAX 80ULL</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="timerex_8h.html#a4fae6a1ec2f5f7bf9c14f19eb9b34539">qsc_timerex_get_date</a>(<span class="keywordtype">char</span> output[<a class="code hl_define" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a>]);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="timerex_8h.html#a062943eb937d0f7ddc745c104da2e47e">qsc_timerex_get_datetime</a>(<span class="keywordtype">char</span> output[<a class="code hl_define" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a>]);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="timerex_8h.html#a51495b0d16ee3f7a565c8febf40c7dfc">qsc_timerex_get_time</a>(<span class="keywordtype">char</span> output[<a class="code hl_define" href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a>]);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint64_t <a class="code hl_function" href="timerex_8h.html#a98898424b805ef34438931ab1fc9fb8d">qsc_timerex_stopwatch_start</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint64_t <a class="code hl_function" href="timerex_8h.html#aad5e009fa2d0fe90957c5e17022f3a78">qsc_timerex_stopwatch_elapsed</a>(uint64_t start);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#if defined(QSC_DEBUG_MODE)</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> qsc_timerex_print_values(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>QSC_CPLUSPLUS_ENABLED_END</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="acommon_8h_html"><div class="ttname"><a href="common_8h.html">common.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
-<div class="ttc" id="acommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> common.h:511</div></div>
+<div class="ttc" id="acommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> common.h:520</div></div>
 <div class="ttc" id="atimerex_8h_html_a062943eb937d0f7ddc745c104da2e47e"><div class="ttname"><a href="timerex_8h.html#a062943eb937d0f7ddc745c104da2e47e">qsc_timerex_get_datetime</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])</div><div class="ttdoc">Get the calendar date and time from the current locale.</div><div class="ttdef"><b>Definition</b> timerex.c:52</div></div>
-<div class="ttc" id="atimerex_8h_html_a0e7bf52316f6dd13a61b90607fa71d7c"><div class="ttname"><a href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a></div><div class="ttdeci">#define QSC_TIMEREX_TIMESTAMP_MAX</div><div class="ttdoc">The maximum time-stamp array size.</div><div class="ttdef"><b>Definition</b> timerex.h:80</div></div>
+<div class="ttc" id="atimerex_8h_html_a0e7bf52316f6dd13a61b90607fa71d7c"><div class="ttname"><a href="timerex_8h.html#a0e7bf52316f6dd13a61b90607fa71d7c">QSC_TIMEREX_TIMESTAMP_MAX</a></div><div class="ttdeci">#define QSC_TIMEREX_TIMESTAMP_MAX</div><div class="ttdoc">The maximum time-stamp array size.</div><div class="ttdef"><b>Definition</b> timerex.h:81</div></div>
 <div class="ttc" id="atimerex_8h_html_a4fae6a1ec2f5f7bf9c14f19eb9b34539"><div class="ttname"><a href="timerex_8h.html#a4fae6a1ec2f5f7bf9c14f19eb9b34539">qsc_timerex_get_date</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])</div><div class="ttdoc">Get the calendar date from the current locale.</div><div class="ttdef"><b>Definition</b> timerex.c:7</div></div>
 <div class="ttc" id="atimerex_8h_html_a51495b0d16ee3f7a565c8febf40c7dfc"><div class="ttname"><a href="timerex_8h.html#a51495b0d16ee3f7a565c8febf40c7dfc">qsc_timerex_get_time</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])</div><div class="ttdoc">Get the local time.</div><div class="ttdef"><b>Definition</b> timerex.c:97</div></div>
 <div class="ttc" id="atimerex_8h_html_a98898424b805ef34438931ab1fc9fb8d"><div class="ttname"><a href="timerex_8h.html#a98898424b805ef34438931ab1fc9fb8d">qsc_timerex_stopwatch_start</a></div><div class="ttdeci">QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_start(void)</div><div class="ttdoc">Returns the clock time at the start of a timed operation.</div><div class="ttdef"><b>Definition</b> timerex.c:141</div></div>

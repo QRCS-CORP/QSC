@@ -39,7 +39,7 @@ bool qsctest_qmac_kat()
 
 	/* compact api */
 
-	qsc_qmac_keyparams kp0 = { key[0], QSC_QMAC_KEY_SIZE, NULL, 0, NULL, 0 };
+	qsc_qmac_keyparams kp0 = { .key = key[0], .keylen =  QSC_QMAC_KEY_SIZE };
 	
 	qsc_qmac_compute(otp, &kp0, msg1, sizeof(msg1));
 
@@ -49,7 +49,7 @@ bool qsctest_qmac_kat()
 		status = false;
 	}
 
-	qsc_qmac_keyparams kp1 = { key[1], QSC_QMAC_KEY_SIZE, NULL, 0, NULL, 0 };
+	qsc_qmac_keyparams kp1 = { .key = key[1], .keylen = QSC_QMAC_KEY_SIZE };
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_qmac_compute(otp, &kp1, msg1, sizeof(msg1));
@@ -60,7 +60,7 @@ bool qsctest_qmac_kat()
 		status = false;
 	}
 
-	qsc_qmac_keyparams kp2 = { key[2], QSC_QMAC_KEY_SIZE, NULL, 0, NULL, 0 };
+	qsc_qmac_keyparams kp2 = { .key = key[2], .keylen = QSC_QMAC_KEY_SIZE };
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_qmac_compute(otp, &kp2, msg2, sizeof(msg2));
@@ -89,7 +89,7 @@ bool qsctest_qmac_kat()
 		status = false;
 	}
 
-	qsc_qmac_keyparams kp3 = { key[3], QSC_QMAC_KEY_SIZE, nonce, sizeof(nonce), NULL, 0 };
+	qsc_qmac_keyparams kp3 = { .key = key[3], .keylen = QSC_QMAC_KEY_SIZE, .nonce = nonce, .noncelen = sizeof(nonce) };
 
 	qsc_intutils_clear8(otp, sizeof(otp));
 	qsc_qmac_compute(otp, &kp3, msg3, sizeof(msg3));

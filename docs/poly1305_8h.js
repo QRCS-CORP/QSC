@@ -6,6 +6,7 @@ var poly1305_8h =
     [ "QSC_POLY1305_MAC_SIZE", "poly1305_8h.html#a5c1ec4fec4733fc07f3e47868332ffd7", null ],
     [ "qsc_poly1305_blockupdate", "poly1305_8h.html#ac85b811c0215421bfb3377afa3c2a394", null ],
     [ "qsc_poly1305_compute", "poly1305_8h.html#a6d2f228dd24470602479b5ed876ab304", null ],
+    [ "qsc_poly1305_dispose", "poly1305_8h.html#adce9f9302e681e8d038d31ed19286e65", null ],
     [ "qsc_poly1305_finalize", "poly1305_8h.html#a8f41cc104e8c8dd2aa0549491a4b119f", null ],
     [ "qsc_poly1305_initialize", "poly1305_8h.html#a877ef2be917b79451e7cbaa201272a2c", null ],
     [ "qsc_poly1305_reset", "poly1305_8h.html#a8144aefcb382ef0e274feba3cfd21966", null ],

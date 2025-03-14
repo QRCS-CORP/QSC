@@ -74,7 +74,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
 					qsc_aes_state state;
-					qsc_aes_keyparams kp1 = { key, QSC_AES128_KEY_SIZE, ivc };
+					qsc_aes_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 					qsc_aes_initialize(&state, &kp1, true, qsc_aes_cipher_128);
 					qsc_aes_cbc_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
@@ -86,7 +86,7 @@ static bool aesavs_cbc128_kat(const char* filepath)
 					}
 
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
-					qsc_aes_keyparams kp2 = { key, QSC_AES128_KEY_SIZE, ivc };
+					qsc_aes_keyparams kp2 = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 					qsc_aes_initialize(&state, &kp2, false, qsc_aes_cipher_128);
 					qsc_aes_cbc_decrypt_block(&state, dec, otp);
 					qsc_aes_dispose(&state);
@@ -183,7 +183,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
 					qsc_aes_state state;
-					qsc_aes_keyparams kp1 = { key, QSC_AES256_KEY_SIZE, ivc };
+					qsc_aes_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 					qsc_aes_initialize(&state, &kp1, true, qsc_aes_cipher_256);
 					qsc_aes_cbc_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
@@ -195,7 +195,7 @@ static bool aesavs_cbc256_kat(const char* filepath)
 					}
 
 					qsc_memutils_copy(ivc, iv, sizeof(iv));
-					qsc_aes_keyparams kp2 = { key, QSC_AES256_KEY_SIZE, ivc };
+					qsc_aes_keyparams kp2 = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 					qsc_aes_initialize(&state, &kp2, false, qsc_aes_cipher_256);
 					qsc_aes_cbc_decrypt_block(&state, dec, otp);
 					qsc_aes_dispose(&state);
@@ -284,7 +284,7 @@ static bool aesavs_ecb128_kat(const char* filepath)
 					}
 
 					qsc_aes_state state;
-					qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
+					qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key) };
 					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 					qsc_aes_ecb_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
@@ -383,7 +383,7 @@ static bool aesavs_ecb256_kat(const char* filepath)
 					}
 
 					qsc_aes_state state;
-					qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
+					qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key) };
 					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 					qsc_aes_ecb_encrypt_block(&state, otp, pln);
 					qsc_aes_dispose(&state);
@@ -500,7 +500,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 						qsc_memutils_copy(plnc, pln, QSC_AES_BLOCK_SIZE);
 
 						qsc_aes_state state;
-						qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
+						qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 						for (i = 0; i < 1000; ++i)
@@ -532,7 +532,7 @@ static bool aesavs_cbc128_mct(const char* filepath)
 						qsc_memutils_copy(enc, exp, QSC_AES_BLOCK_SIZE);
 
 						qsc_aes_state state;
-						qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
+						qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 						qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 
 						for (i = 0; i < 1000; ++i)
@@ -652,7 +652,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 						qsc_memutils_copy(plnc, pln, QSC_AES_BLOCK_SIZE);
 
 						qsc_aes_state state;
-						qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
+						qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 						for (i = 0; i < 1000; ++i)
@@ -684,7 +684,7 @@ static bool aesavs_cbc256_mct(const char* filepath)
 						qsc_memutils_copy(enc, exp, QSC_AES_BLOCK_SIZE);
 
 						qsc_aes_state state;
-						qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
+						qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 						qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 
 						for (i = 0; i < 1000; ++i)
@@ -787,7 +787,7 @@ static bool aesavs_ecb128_mct(const char* filepath)
 					}
 
 					qsc_aes_state state;
-					qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
+					qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key) };
 					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 					qsc_memutils_copy(plnc, pln, QSC_AES_BLOCK_SIZE);
 
@@ -900,7 +900,7 @@ static bool aesavs_ecb256_mct(const char* filepath)
 					}
 
 					qsc_aes_state state;
-					qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
+					qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key) };
 					qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 					qsc_memutils_copy(plnc, pln, QSC_AES_BLOCK_SIZE);
 
@@ -1067,7 +1067,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 							qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 
 							qsc_aes_state state;
-							qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
+							qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 							qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
@@ -1096,7 +1096,7 @@ static bool aesavs_cbc128_mmt(const char* filepath)
 							qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 
 							qsc_aes_state state;
-							qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
+							qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 							qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_128);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
@@ -1251,7 +1251,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 							qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 
 							qsc_aes_state state;
-							qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
+							qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 							qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
@@ -1280,7 +1280,7 @@ static bool aesavs_cbc256_mmt(const char* filepath)
 							qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 
 							qsc_aes_state state;
-							qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
+							qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = ivc, .noncelen = sizeof(ivc)};
 							qsc_aes_initialize(&state, &kp, false, qsc_aes_cipher_256);
 
 							for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
@@ -1416,7 +1416,7 @@ static bool aesavs_ecb128_mmt(const char* filepath)
 					if (pln != NULL && exp != NULL && otp != NULL)
 					{
 						qsc_aes_state state;
-						qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
+						qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key) };
 						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_128);
 
 						for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)
@@ -1550,7 +1550,7 @@ static bool aesavs_ecb256_mmt(const char* filepath)
 					if (pln != NULL && exp != NULL && otp != NULL)
 					{
 						qsc_aes_state state;
-						qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
+						qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key) };
 						qsc_aes_initialize(&state, &kp, true, qsc_aes_cipher_256);
 
 						for (i = 0; i < alen / QSC_AES_BLOCK_SIZE; ++i)

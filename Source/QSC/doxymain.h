@@ -15,22 +15,25 @@
  * \par Overview
  * The QSC Library includes a comprehensive suite of cryptographic algorithms and utilities, such as:
  * - **Asymmetric Cryptography:**
- *   - *Key Encapsulation Mechanisms:* McEliece (Niederreiter dual form), Kyber, NTRU, and ECDH.
- *   - *Digital Signature Schemes:* Sphincs+, Dilithium, Falcon, and ECDSA (Ed25519).
+ *   - *Key Encapsulation Mechanisms:* McEliece (Niederreiter dual form), Kyber (FIPS-203), and NTRU.
+ *   - *Digital Signature Schemes:* Sphincs+ (FIPS-205), Dilithium (FIPS-204), and Falcon.
+ *	 - *Classical Asymmetric Algorithms:* ECDSA and ECDH using the EC25519 curve.
  * - **Symmetric Cryptography:**
- *   - *Block Ciphers:* AES (with modes such as CBC, CTR, and ECB) and RCS (an authenticated stream cipher 
- *     based on wide-block Rijndael and KMAC).
- *   - *Stream Ciphers:* ChaChaPoly20 and CSX (a ChaCha-based authenticated cipher).
+ *   - *Block Ciphers:* AES with the blockcipher modes GCM, HBA, CBC, CTR, ECB, and PKCS7 padding.
+ *   - *Authenticated Stream Ciphers:* ChaChaPoly1305, CSX (a wide-block AEAD ChaCha-based authenticated cipher using KMAC/QMAC), 
+ *	    and RCS (an authenticated stream cipher based on wide-block Rijndael and KMAC/QMAC).
  * - **Hash Functions and MACs:**
  *   - Cryptographic message digests including SHA3 and SHA2.
- *   - Message authentication codes (MAC) via KMAC, HMAC, and Poly1305.
+ *   - Message authentication codes (MAC) via QMAC, KMAC, HMAC, and Poly1305.
  * - **Pseudo-Random Number Generation and Entropy:**
  *   - XOF functions (SHAKE and cSHAKE) used in DRBGs and key derivation functions (HKDF).
  *   - Secure random number generators (PRNGs) and entropy providers (ACP, CSP, RDP) that integrate hardware 
  *     randomness (e.g., Intel RDRAND) with system entropy.
  * - **System Utilities:**
- *   - Asynchronous threading, mutex-based synchronization, and dual IPv4/IPv6 networking.
+ *   - Asynchronous threading, mutex-based synchronization, and dual IPv4/IPv6 networking stacks.
  *   - CPU feature detection (CPUID) and secure memory management with SIMD (AVX/AVX2/AVX512) optimizations.
+ *	 - A complete dual-stack sockets library, support functions, a multi-threaded server and client architectures.
+ *   - A large set of integrated tools; file, directory, string, integer, console, array, sockets, threading, and SIMD memory functions.
  *
  * \par Architecture and Performance
  * The QSC Library is architected with both portability and performance in mind:
@@ -40,9 +43,9 @@
  *
  * \par Supported Platforms
  * QSC has been thoroughly tested on:
- * - Windows 10 (Visual Studio)
+ * - Windows 10/11/Server (Visual Studio)
  * - Ubuntu Linux (GCC)
- * - macOS Big Sur (Apple Clang)
+ * - macOS (Apple Clang)
  *
  * \par References and Standards
  * - **NIST SHA3 (FIPS 202):** [SHA-3 FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)
@@ -65,19 +68,17 @@
  * \par Example
  * Refer to the module-specific headers (e.g., aes.h, sha3.h, kyber.h, ecdh.h, ecdsa.h, etc.) for detailed usage examples.
  *
- * \author John G. Underhill
- * \date 2025-02-15
  *
  * \remarks
  * QSC is designed to serve as the foundational cryptographic solution for secure, post-quantum 
- * communications and is continuously updated to incorporate emerging cryptographic research and 
- * standards.
+ * communications and is continuously updated to incorporate emerging cryptographic research and standards.
  * 
  * QRCS-PL private License. See license file for details.
  * All rights reserved by QRCS Corporation, copyrighted and patents pending.
  * 
  * \author John G. Underhill
- * \date 2025-02-10
+ * \date 2025-03-14
+ * \version 1.0.0.6c
  */
 
 #endif

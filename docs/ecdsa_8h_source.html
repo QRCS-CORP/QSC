@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -146,13 +146,13 @@ $(function(){initNavTree('ecdsa_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"> * Contact: john.underhill@protonmail.com</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#ifndef QSC_ECDSA_H</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define QSC_ECDSA_H</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &quot;<a class="code" href="common_8h.html">common.h</a>&quot;</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifndef QSC_ECDSA_H</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#define QSC_ECDSA_H</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="common_8h.html">common.h</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>QSC_CPLUSPLUS_ENABLED_START</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span></div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#if defined(QSC_ECDSA_S1EC25519)</span></div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span></div>
@@ -178,9 +178,11 @@ $(function(){initNavTree('ecdsa_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span></div>
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">bool</span> <a class="code hl_function" href="ecdsa_8h.html#af695383a08648a04c1ce7d039a3c2e18">qsc_ecdsa_verify</a>(uint8_t* message, <span class="keywordtype">size_t</span>* msglen, <span class="keyword">const</span> uint8_t* signedmsg, <span class="keywordtype">size_t</span> smsglen, <span class="keyword">const</span> uint8_t* publickey);</div>
 <div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>QSC_CPLUSPLUS_ENABLED_END</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="acommon_8h_html"><div class="ttname"><a href="common_8h.html">common.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
-<div class="ttc" id="acommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> common.h:511</div></div>
+<div class="ttc" id="acommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> common.h:520</div></div>
 <div class="ttc" id="aecdsa_8h_html_a5cb7019a87307acc6cabd32215bff2be"><div class="ttname"><a href="ecdsa_8h.html#a5cb7019a87307acc6cabd32215bff2be">qsc_ecdsa_generate_seeded_keypair</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_ecdsa_generate_seeded_keypair(uint8_t *publickey, uint8_t *privatekey, const uint8_t *seed)</div><div class="ttdoc">Generates a ECDSA public/private key-pair.</div><div class="ttdef"><b>Definition</b> ecdsa.c:6</div></div>
 <div class="ttc" id="aecdsa_8h_html_acb610f9305bde8f9c0b86aa2681cee94"><div class="ttname"><a href="ecdsa_8h.html#acb610f9305bde8f9c0b86aa2681cee94">qsc_ecdsa_generate_keypair</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_ecdsa_generate_keypair(uint8_t *publickey, uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Generates a ECDSA public/private key-pair.</div><div class="ttdef"><b>Definition</b> ecdsa.c:15</div></div>
 <div class="ttc" id="aecdsa_8h_html_af695383a08648a04c1ce7d039a3c2e18"><div class="ttname"><a href="ecdsa_8h.html#af695383a08648a04c1ce7d039a3c2e18">qsc_ecdsa_verify</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_ecdsa_verify(uint8_t *message, size_t *msglen, const uint8_t *signedmsg, size_t smsglen, const uint8_t *publickey)</div><div class="ttdoc">Verifies a signature-message pair with the public key.</div><div class="ttdef"><b>Definition</b> ecdsa.c:38</div></div>

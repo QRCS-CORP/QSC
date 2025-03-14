@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -146,25 +146,28 @@ $(function(){initNavTree('transpose_8h_source.html',''); initResizable(true); })
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"> * Contact: john.underhill@protonmail.com</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#ifndef QSC_TRANSPOSE_H</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define QSC_TRANSPOSE_H</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &quot;<a class="code" href="common_8h.html">common.h</a>&quot;</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#include &quot;<a class="code" href="intutils_8h.html">intutils.h</a>&quot;</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a69a211d3f561df31ca171b1a00850db0">qsc_transpose_bytes_to_native</a>(uint32_t* output, <span class="keyword">const</span> uint8_t* input, <span class="keywordtype">size_t</span> length);</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a414c7d6d973f0ab34d705a8e095f3f3b">qsc_transpose_hex_to_bin</a>(uint8_t* output, <span class="keyword">const</span> <span class="keywordtype">char</span>* input, <span class="keywordtype">size_t</span> length);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a9cee33b9d9f5c73cfd8ab7036681b399">qsc_transpose_native_to_bytes</a>(uint8_t* output, <span class="keyword">const</span> uint32_t* input, <span class="keywordtype">size_t</span> length);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a5173bcfbb43a166d5cd7278c9c74551c">qsc_transpose_string_to_scalar</a>(uint32_t* output, <span class="keyword">const</span> <span class="keywordtype">char</span>* input, <span class="keywordtype">size_t</span> length);</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifndef QSC_TRANSPOSE_H</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#define QSC_TRANSPOSE_H</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="common_8h.html">common.h</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &quot;<a class="code" href="intutils_8h.html">intutils.h</a>&quot;</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>QSC_CPLUSPLUS_ENABLED_START</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a69a211d3f561df31ca171b1a00850db0">qsc_transpose_bytes_to_native</a>(uint32_t* output, <span class="keyword">const</span> uint8_t* input, <span class="keywordtype">size_t</span> length);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a414c7d6d973f0ab34d705a8e095f3f3b">qsc_transpose_hex_to_bin</a>(uint8_t* output, <span class="keyword">const</span> <span class="keywordtype">char</span>* input, <span class="keywordtype">size_t</span> length);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a9cee33b9d9f5c73cfd8ab7036681b399">qsc_transpose_native_to_bytes</a>(uint8_t* output, <span class="keyword">const</span> uint32_t* input, <span class="keywordtype">size_t</span> length);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><a class="code hl_define" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> <a class="code hl_function" href="transpose_8h.html#a5173bcfbb43a166d5cd7278c9c74551c">qsc_transpose_string_to_scalar</a>(uint32_t* output, <span class="keyword">const</span> <span class="keywordtype">char</span>* input, <span class="keywordtype">size_t</span> length);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>QSC_CPLUSPLUS_ENABLED_END</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="acommon_8h_html"><div class="ttname"><a href="common_8h.html">common.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
-<div class="ttc" id="acommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> common.h:511</div></div>
+<div class="ttc" id="acommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> common.h:520</div></div>
 <div class="ttc" id="aintutils_8h_html"><div class="ttname"><a href="intutils_8h.html">intutils.h</a></div><div class="ttdoc">This file contains common integer manipulation and conversion functions.</div></div>
 <div class="ttc" id="atranspose_8h_html_a414c7d6d973f0ab34d705a8e095f3f3b"><div class="ttname"><a href="transpose_8h.html#a414c7d6d973f0ab34d705a8e095f3f3b">qsc_transpose_hex_to_bin</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_transpose_hex_to_bin(uint8_t *output, const char *input, size_t length)</div><div class="ttdoc">Convert a hexadecimal string to a decimal 8-bit array.</div><div class="ttdef"><b>Definition</b> transpose.c:21</div></div>
 <div class="ttc" id="atranspose_8h_html_a5173bcfbb43a166d5cd7278c9c74551c"><div class="ttname"><a href="transpose_8h.html#a5173bcfbb43a166d5cd7278c9c74551c">qsc_transpose_string_to_scalar</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_transpose_string_to_scalar(uint32_t *output, const char *input, size_t length)</div><div class="ttdoc">Convert a 8-bit character array to zero padded 32-bit scalar integers.</div><div class="ttdef"><b>Definition</b> transpose.c:59</div></div>

@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -134,7 +134,7 @@ Data Fields</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>State structure for AES-based Hash Based Authentication (HBA-256). </p>
-<p>Combines an AES-256 cipher state with a MAC state (using either KMAC or HMAC) to implement an AEAD scheme.</p>
+<p>Combines an AES-256 cipher ctx with a MAC ctx (using either KMAC or HMAC) to implement an AEAD scheme.</p>
 <dl class="section see"><dt>See also</dt><dd>qsc_aes_hba256_initialize, qsc_aes_hba256_transform, qsc_aes_hba256_dispose </dd></dl>
 </div><h2 class="groupheader">Field Documentation</h2>
 <a id="a1944753ac8107ec537f75b7e0201d866" name="a1944753ac8107ec537f75b7e0201d866"></a>
@@ -163,7 +163,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>[struct] Underlying AES cipher state </p>
+<p>[struct] Underlying AES cipher ctx </p>
 
 </div>
 </div>
@@ -178,7 +178,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>[uint8_t[]] Customization key (user provided tweak) </p>
+<p>[uint8_t[QSC_HBA_MAXINFO_SIZE]] Customization key (user provided tweak) </p>
 
 </div>
 </div>
@@ -223,7 +223,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>[struct] MAC state for KMAC authentication </p>
+<p>[struct] MAC ctx for KMAC authentication </p>
 
 </div>
 </div>

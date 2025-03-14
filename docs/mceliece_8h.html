@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -184,11 +184,11 @@ Functions</h2></td></tr>
 <div class="line">}</div>
 <div class="ttc" id="amceliece_8h_html_a01e711ff5e4aa6463567f343dc289aa4"><div class="ttname"><a href="#a01e711ff5e4aa6463567f343dc289aa4">qsc_mceliece_decapsulate</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_mceliece_decapsulate(uint8_t *secret, const uint8_t *ciphertext, const uint8_t *privatekey)</div><div class="ttdoc">Decapsulates the shared secret for a given ciphertext using a private key.</div><div class="ttdef"><b>Definition</b> mceliece.c:5</div></div>
 <div class="ttc" id="amceliece_8h_html_a0243223caa07b630aceafb747fd072e8"><div class="ttname"><a href="#a0243223caa07b630aceafb747fd072e8">qsc_mceliece_encapsulate</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_mceliece_encapsulate(uint8_t *secret, uint8_t *ciphertext, const uint8_t *publickey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Encapsulates a shared secret key using a public key.</div><div class="ttdef"><b>Definition</b> mceliece.c:41</div></div>
-<div class="ttc" id="amceliece_8h_html_a33075c60010696c0c406eb3d2bf9bee4"><div class="ttname"><a href="#a33075c60010696c0c406eb3d2bf9bee4">QSC_MCELIECE_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> mceliece.h:141</div></div>
-<div class="ttc" id="amceliece_8h_html_a4d9d3debda3b739b3ec80d08b4f23421"><div class="ttname"><a href="#a4d9d3debda3b739b3ec80d08b4f23421">QSC_MCELIECE_PRIVATEKEY_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_PRIVATEKEY_SIZE</div><div class="ttdoc">The byte size of the secret private-key array.</div><div class="ttdef"><b>Definition</b> mceliece.h:135</div></div>
-<div class="ttc" id="amceliece_8h_html_a596f097d76ebcdd0ae2d568da5bd4e76"><div class="ttname"><a href="#a596f097d76ebcdd0ae2d568da5bd4e76">QSC_MCELIECE_CIPHERTEXT_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_CIPHERTEXT_SIZE</div><div class="ttdoc">The byte size of the ciphertext array.</div><div class="ttdef"><b>Definition</b> mceliece.h:129</div></div>
+<div class="ttc" id="amceliece_8h_html_a33075c60010696c0c406eb3d2bf9bee4"><div class="ttname"><a href="#a33075c60010696c0c406eb3d2bf9bee4">QSC_MCELIECE_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> mceliece.h:143</div></div>
+<div class="ttc" id="amceliece_8h_html_a4d9d3debda3b739b3ec80d08b4f23421"><div class="ttname"><a href="#a4d9d3debda3b739b3ec80d08b4f23421">QSC_MCELIECE_PRIVATEKEY_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_PRIVATEKEY_SIZE</div><div class="ttdoc">The byte size of the secret private-key array.</div><div class="ttdef"><b>Definition</b> mceliece.h:137</div></div>
+<div class="ttc" id="amceliece_8h_html_a596f097d76ebcdd0ae2d568da5bd4e76"><div class="ttname"><a href="#a596f097d76ebcdd0ae2d568da5bd4e76">QSC_MCELIECE_CIPHERTEXT_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_CIPHERTEXT_SIZE</div><div class="ttdoc">The byte size of the ciphertext array.</div><div class="ttdef"><b>Definition</b> mceliece.h:131</div></div>
 <div class="ttc" id="amceliece_8h_html_a7281ad99725a38a63c880411cb707dba"><div class="ttname"><a href="#a7281ad99725a38a63c880411cb707dba">qsc_mceliece_generate_keypair</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_mceliece_generate_keypair(uint8_t *publickey, uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Generates a McEliece public/private key pair.</div><div class="ttdef"><b>Definition</b> mceliece.c:69</div></div>
-<div class="ttc" id="amceliece_8h_html_a9a25450a39b13893e4a22910fbe6f2b3"><div class="ttname"><a href="#a9a25450a39b13893e4a22910fbe6f2b3">QSC_MCELIECE_SHAREDSECRET_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_SHAREDSECRET_SIZE</div><div class="ttdoc">The byte size of the shared secret-key array.</div><div class="ttdef"><b>Definition</b> mceliece.h:197</div></div>
+<div class="ttc" id="amceliece_8h_html_a9a25450a39b13893e4a22910fbe6f2b3"><div class="ttname"><a href="#a9a25450a39b13893e4a22910fbe6f2b3">QSC_MCELIECE_SHAREDSECRET_SIZE</a></div><div class="ttdeci">#define QSC_MCELIECE_SHAREDSECRET_SIZE</div><div class="ttdoc">The byte size of the shared secret-key array.</div><div class="ttdef"><b>Definition</b> mceliece.h:199</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="mceliece_links"></a>
 Reference Links:</h1>
 <ul>

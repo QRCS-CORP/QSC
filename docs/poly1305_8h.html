@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -150,23 +150,26 @@ typedef <a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QS
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ac85b811c0215421bfb3377afa3c2a394" id="r_ac85b811c0215421bfb3377afa3c2a394"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac85b811c0215421bfb3377afa3c2a394">qsc_poly1305_blockupdate</a> (<a class="el" href="structqsc__poly1305__state.html">qsc_poly1305_state</a> *ctx, const uint8_t *message)</td></tr>
-<tr class="memdesc:ac85b811c0215421bfb3377afa3c2a394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the poly1305 generator with a single block of message input. Absorbs block sized lengths of input message into the state.  <br /></td></tr>
+<tr class="memdesc:ac85b811c0215421bfb3377afa3c2a394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the poly1305 generator with a single block of message input. Absorbs block sized lengths of input message into the ctx.  <br /></td></tr>
 <tr class="separator:ac85b811c0215421bfb3377afa3c2a394"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d2f228dd24470602479b5ed876ab304" id="r_a6d2f228dd24470602479b5ed876ab304"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d2f228dd24470602479b5ed876ab304">qsc_poly1305_compute</a> (uint8_t *output, const uint8_t *message, size_t msglen, const uint8_t *key)</td></tr>
 <tr class="memdesc:a6d2f228dd24470602479b5ed876ab304"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the MAC code and return the result in the mac byte array.  <br /></td></tr>
 <tr class="separator:a6d2f228dd24470602479b5ed876ab304"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adce9f9302e681e8d038d31ed19286e65" id="r_adce9f9302e681e8d038d31ed19286e65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adce9f9302e681e8d038d31ed19286e65">qsc_poly1305_dispose</a> (<a class="el" href="structqsc__poly1305__state.html">qsc_poly1305_state</a> *ctx)</td></tr>
+<tr class="memdesc:adce9f9302e681e8d038d31ed19286e65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispose of the ctx resetting all values to zero.  <br /></td></tr>
+<tr class="separator:adce9f9302e681e8d038d31ed19286e65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f41cc104e8c8dd2aa0549491a4b119f" id="r_a8f41cc104e8c8dd2aa0549491a4b119f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8f41cc104e8c8dd2aa0549491a4b119f">qsc_poly1305_finalize</a> (<a class="el" href="structqsc__poly1305__state.html">qsc_poly1305_state</a> *ctx, uint8_t *mac)</td></tr>
-<tr class="memdesc:a8f41cc104e8c8dd2aa0549491a4b119f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finalize the message state and returns the MAC code. Absorb the last block of message and create the MAC array. <br  />
+<tr class="memdesc:a8f41cc104e8c8dd2aa0549491a4b119f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finalize the message ctx and returns the MAC code. Absorb the last block of message and create the MAC array. <br  />
 .  <br /></td></tr>
 <tr class="separator:a8f41cc104e8c8dd2aa0549491a4b119f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a877ef2be917b79451e7cbaa201272a2c" id="r_a877ef2be917b79451e7cbaa201272a2c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a877ef2be917b79451e7cbaa201272a2c">qsc_poly1305_initialize</a> (<a class="el" href="structqsc__poly1305__state.html">qsc_poly1305_state</a> *ctx, const uint8_t *key)</td></tr>
-<tr class="memdesc:a877ef2be917b79451e7cbaa201272a2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the state with the secret key.  <br /></td></tr>
+<tr class="memdesc:a877ef2be917b79451e7cbaa201272a2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the ctx with the secret key.  <br /></td></tr>
 <tr class="separator:a877ef2be917b79451e7cbaa201272a2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8144aefcb382ef0e274feba3cfd21966" id="r_a8144aefcb382ef0e274feba3cfd21966"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8144aefcb382ef0e274feba3cfd21966">qsc_poly1305_reset</a> (<a class="el" href="structqsc__poly1305__state.html">qsc_poly1305_state</a> *ctx)</td></tr>
-<tr class="memdesc:a8144aefcb382ef0e274feba3cfd21966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the state values to zero.  <br /></td></tr>
+<tr class="memdesc:a8144aefcb382ef0e274feba3cfd21966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the ctx values to zero.  <br /></td></tr>
 <tr class="separator:a8144aefcb382ef0e274feba3cfd21966"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70934e3670d8eaa2be360a5e897ca347" id="r_a70934e3670d8eaa2be360a5e897ca347"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70934e3670d8eaa2be360a5e897ca347">qsc_poly1305_update</a> (<a class="el" href="structqsc__poly1305__state.html">qsc_poly1305_state</a> *ctx, const uint8_t *message, size_t msglen)</td></tr>
-<tr class="memdesc:a70934e3670d8eaa2be360a5e897ca347"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the poly1305 generator with a length of message input. Absorbs the input message into the state.  <br /></td></tr>
+<tr class="memdesc:a70934e3670d8eaa2be360a5e897ca347"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the poly1305 generator with a length of message input. Absorbs the input message into the ctx.  <br /></td></tr>
 <tr class="separator:a70934e3670d8eaa2be360a5e897ca347"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a67f21ff3c1b696cc6eaecc4e8e672f" id="r_a4a67f21ff3c1b696cc6eaecc4e8e672f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a67f21ff3c1b696cc6eaecc4e8e672f">qsc_poly1305_verify</a> (const uint8_t *code, const uint8_t *message, size_t msglen, const uint8_t *key)</td></tr>
 <tr class="memdesc:a4a67f21ff3c1b696cc6eaecc4e8e672f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify a MAC code. Tests the code against the message and returns MQC_STATUS_SUCCESS or MQC_STATUS_FAILURE.  <br /></td></tr>
@@ -196,13 +199,13 @@ Contains the public api and documentation for the Poly1305 implementation. </p>
 <div class="line"> </div>
 <div class="line">qsc_poly1305_update(&amp;ctx, msg + i, 2);</div>
 <div class="line">qsc_poly1305_finalize(&amp;ctx, mac);</div>
-<div class="ttc" id="apoly1305_8h_html_a0c2f932d987ab32788e7701e46908944"><div class="ttname"><a href="#a0c2f932d987ab32788e7701e46908944">QSC_POLY1305_BLOCK_SIZE</a></div><div class="ttdeci">#define QSC_POLY1305_BLOCK_SIZE</div><div class="ttdoc">The natural block size of the message input in bytes.</div><div class="ttdef"><b>Definition</b> poly1305.h:62</div></div>
-<div class="ttc" id="apoly1305_8h_html_a5c1ec4fec4733fc07f3e47868332ffd7"><div class="ttname"><a href="#a5c1ec4fec4733fc07f3e47868332ffd7">QSC_POLY1305_MAC_SIZE</a></div><div class="ttdeci">#define QSC_POLY1305_MAC_SIZE</div><div class="ttdoc">The Poly1305 MAC code size in bytes.</div><div class="ttdef"><b>Definition</b> poly1305.h:74</div></div>
-<div class="ttc" id="apoly1305_8h_html_a6d2f228dd24470602479b5ed876ab304"><div class="ttname"><a href="#a6d2f228dd24470602479b5ed876ab304">qsc_poly1305_compute</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_poly1305_compute(uint8_t *output, const uint8_t *message, size_t msglen, const uint8_t *key)</div><div class="ttdoc">Compute the MAC code and return the result in the mac byte array.</div><div class="ttdef"><b>Definition</b> poly1305.c:55</div></div>
-<div class="ttc" id="apoly1305_8h_html_a783cd12e7d4f41a484979a10f38ae551"><div class="ttname"><a href="#a783cd12e7d4f41a484979a10f38ae551">QSC_POLY1305_KEY_SIZE</a></div><div class="ttdeci">#define QSC_POLY1305_KEY_SIZE</div><div class="ttdoc">The Poly1305 key size in bytes.</div><div class="ttdef"><b>Definition</b> poly1305.h:68</div></div>
-<div class="ttc" id="apoly1305_8h_html_a877ef2be917b79451e7cbaa201272a2c"><div class="ttname"><a href="#a877ef2be917b79451e7cbaa201272a2c">qsc_poly1305_initialize</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_poly1305_initialize(qsc_poly1305_state *ctx, const uint8_t *key)</div><div class="ttdoc">Initialize the state with the secret key.</div><div class="ttdef"><b>Definition</b> poly1305.c:155</div></div>
-<div class="ttc" id="apoly1305_8h_html_ac85b811c0215421bfb3377afa3c2a394"><div class="ttname"><a href="#ac85b811c0215421bfb3377afa3c2a394">qsc_poly1305_blockupdate</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_poly1305_blockupdate(qsc_poly1305_state *ctx, const uint8_t *message)</div><div class="ttdoc">Update the poly1305 generator with a single block of message input. Absorbs block sized lengths of in...</div><div class="ttdef"><b>Definition</b> poly1305.c:4</div></div>
-<div class="ttc" id="astructqsc__poly1305__state_html"><div class="ttname"><a href="structqsc__poly1305__state.html">qsc_poly1305_state</a></div><div class="ttdoc">Contains the Poly1305 internal state.</div><div class="ttdef"><b>Definition</b> poly1305.h:81</div></div>
+<div class="ttc" id="apoly1305_8h_html_a0c2f932d987ab32788e7701e46908944"><div class="ttname"><a href="#a0c2f932d987ab32788e7701e46908944">QSC_POLY1305_BLOCK_SIZE</a></div><div class="ttdeci">#define QSC_POLY1305_BLOCK_SIZE</div><div class="ttdoc">The natural block size of the message input in bytes.</div><div class="ttdef"><b>Definition</b> poly1305.h:63</div></div>
+<div class="ttc" id="apoly1305_8h_html_a5c1ec4fec4733fc07f3e47868332ffd7"><div class="ttname"><a href="#a5c1ec4fec4733fc07f3e47868332ffd7">QSC_POLY1305_MAC_SIZE</a></div><div class="ttdeci">#define QSC_POLY1305_MAC_SIZE</div><div class="ttdoc">The Poly1305 MAC code size in bytes.</div><div class="ttdef"><b>Definition</b> poly1305.h:75</div></div>
+<div class="ttc" id="apoly1305_8h_html_a6d2f228dd24470602479b5ed876ab304"><div class="ttname"><a href="#a6d2f228dd24470602479b5ed876ab304">qsc_poly1305_compute</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_poly1305_compute(uint8_t *output, const uint8_t *message, size_t msglen, const uint8_t *key)</div><div class="ttdoc">Compute the MAC code and return the result in the mac byte array.</div><div class="ttdef"><b>Definition</b> poly1305.c:56</div></div>
+<div class="ttc" id="apoly1305_8h_html_a783cd12e7d4f41a484979a10f38ae551"><div class="ttname"><a href="#a783cd12e7d4f41a484979a10f38ae551">QSC_POLY1305_KEY_SIZE</a></div><div class="ttdeci">#define QSC_POLY1305_KEY_SIZE</div><div class="ttdoc">The Poly1305 key size in bytes.</div><div class="ttdef"><b>Definition</b> poly1305.h:69</div></div>
+<div class="ttc" id="apoly1305_8h_html_a877ef2be917b79451e7cbaa201272a2c"><div class="ttname"><a href="#a877ef2be917b79451e7cbaa201272a2c">qsc_poly1305_initialize</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_poly1305_initialize(qsc_poly1305_state *ctx, const uint8_t *key)</div><div class="ttdoc">Initialize the ctx with the secret key.</div><div class="ttdef"><b>Definition</b> poly1305.c:166</div></div>
+<div class="ttc" id="apoly1305_8h_html_ac85b811c0215421bfb3377afa3c2a394"><div class="ttname"><a href="#ac85b811c0215421bfb3377afa3c2a394">qsc_poly1305_blockupdate</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_poly1305_blockupdate(qsc_poly1305_state *ctx, const uint8_t *message)</div><div class="ttdoc">Update the poly1305 generator with a single block of message input. Absorbs block sized lengths of in...</div><div class="ttdef"><b>Definition</b> poly1305.c:5</div></div>
+<div class="ttc" id="astructqsc__poly1305__state_html"><div class="ttname"><a href="structqsc__poly1305__state.html">qsc_poly1305_state</a></div><div class="ttdoc">Contains the Poly1305 internal state.</div><div class="ttdef"><b>Definition</b> poly1305.h:82</div></div>
 </div><!-- fragment --> <dl class="section remark"><dt>Remarks</dt><dd>For usage examples, see poly1305_test.h </dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="ac85b811c0215421bfb3377afa3c2a394" name="ac85b811c0215421bfb3377afa3c2a394"></a>
@@ -224,12 +227,12 @@ Contains the public api and documentation for the Poly1305 implementation. </p>
       </table>
 </div><div class="memdoc">
 
-<p>Update the poly1305 generator with a single block of message input. Absorbs block sized lengths of input message into the state. </p>
+<p>Update the poly1305 generator with a single block of message input. Absorbs block sized lengths of input message into the ctx. </p>
 <dl class="section warning"><dt>Warning</dt><dd>Message length must be a single 16 byte message block. <br  />
  </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctx</td><td>[struct] The function state; must be initialized </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] The function ctx; must be initialized </td></tr>
     <tr><td class="paramname">message</td><td>[const] The input message byte array </td></tr>
   </table>
   </dd>
@@ -280,6 +283,31 @@ Contains the public api and documentation for the Poly1305 implementation. </p>
 
 </div>
 </div>
+<a id="adce9f9302e681e8d038d31ed19286e65" name="adce9f9302e681e8d038d31ed19286e65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adce9f9302e681e8d038d31ed19286e65">&#9670;&#160;</a></span>qsc_poly1305_dispose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_poly1305_dispose </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__poly1305__state.html">qsc_poly1305_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dispose of the ctx resetting all values to zero. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] The function ctx </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a8f41cc104e8c8dd2aa0549491a4b119f" name="a8f41cc104e8c8dd2aa0549491a4b119f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8f41cc104e8c8dd2aa0549491a4b119f">&#9670;&#160;</a></span>qsc_poly1305_finalize()</h2>
 
@@ -299,11 +327,11 @@ Contains the public api and documentation for the Poly1305 implementation. </p>
       </table>
 </div><div class="memdoc">
 
-<p>Finalize the message state and returns the MAC code. Absorb the last block of message and create the MAC array. <br  />
+<p>Finalize the message ctx and returns the MAC code. Absorb the last block of message and create the MAC array. <br  />
 . </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctx</td><td>[struct] The function state; must be initialized </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] The function ctx; must be initialized </td></tr>
     <tr><td class="paramname">mac</td><td>The MAC byte array; receives the MAC code </td></tr>
   </table>
   </dd>
@@ -330,10 +358,10 @@ Contains the public api and documentation for the Poly1305 implementation. </p>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize the state with the secret key. </p>
+<p>Initialize the ctx with the secret key. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctx</td><td>[struct] The function state </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] The function ctx </td></tr>
     <tr><td class="paramname">key</td><td>[const] The secret key byte array </td></tr>
   </table>
   </dd>
@@ -356,10 +384,10 @@ Contains the public api and documentation for the Poly1305 implementation. </p>
       </table>
 </div><div class="memdoc">
 
-<p>Reset the state values to zero. </p>
+<p>Reset the ctx values to zero. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctx</td><td>The function state </td></tr>
+    <tr><td class="paramname">ctx</td><td>The function ctx </td></tr>
   </table>
   </dd>
 </dl>
@@ -390,10 +418,10 @@ Contains the public api and documentation for the Poly1305 implementation. </p>
       </table>
 </div><div class="memdoc">
 
-<p>Update the poly1305 generator with a length of message input. Absorbs the input message into the state. </p>
+<p>Update the poly1305 generator with a length of message input. Absorbs the input message into the ctx. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctx</td><td>[struct] The function state; must be initialized </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] The function ctx; must be initialized </td></tr>
     <tr><td class="paramname">message</td><td>[const] The input message byte array </td></tr>
     <tr><td class="paramname">msglen</td><td>The number of input message bytes to process </td></tr>
   </table>

@@ -76,7 +76,7 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*! 
 * \struct qsc_poly1305_state
-* \brief Contains the Poly1305 internal state
+* \brief Contains the Poly1305 internal state.
 */
 QSC_EXPORT_API typedef struct qsc_poly1305_state
 {
@@ -92,11 +92,11 @@ QSC_EXPORT_API typedef struct qsc_poly1305_state
 
 /**
 * \brief Update the poly1305 generator with a single block of message input.
-* Absorbs block sized lengths of input message into the state.
+* Absorbs block sized lengths of input message into the ctx.
 *
 * \warning Message length must be a single 16 byte message block. \n
 *
-* \param ctx: [struct] The function state; must be initialized
+* \param ctx: [struct] The function ctx; must be initialized
 * \param message: [const] The input message byte array
 */
 QSC_EXPORT_API void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint8_t* message);
@@ -114,34 +114,41 @@ QSC_EXPORT_API void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint
 QSC_EXPORT_API void qsc_poly1305_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key);
 
 /**
-* \brief Finalize the message state and returns the MAC code.
+* \brief Dispose of the ctx resetting all values to zero.
+*
+* \param ctx: [struct] The function ctx
+*/
+QSC_EXPORT_API void qsc_poly1305_dispose(qsc_poly1305_state* ctx);
+
+/**
+* \brief Finalize the message ctx and returns the MAC code.
 * Absorb the last block of message and create the MAC array. \n
 *
-* \param ctx: [struct] The function state; must be initialized
+* \param ctx: [struct] The function ctx; must be initialized
 * \param mac: The MAC byte array; receives the MAC code
 */
 QSC_EXPORT_API void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* mac);
 
 /**
-* \brief Initialize the state with the secret key.
+* \brief Initialize the ctx with the secret key.
 *
-* \param ctx: [struct] The function state
+* \param ctx: [struct] The function ctx
 * \param key: [const] The secret key byte array
 */
 QSC_EXPORT_API void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t* key);
 
 /**
-* \brief Reset the state values to zero.
+* \brief Reset the ctx values to zero.
 *
-* \param ctx The function state
+* \param ctx The function ctx
 */
 QSC_EXPORT_API void qsc_poly1305_reset(qsc_poly1305_state* ctx);
 
 /**
 * \brief Update the poly1305 generator with a length of message input.
-* Absorbs the input message into the state.
+* Absorbs the input message into the ctx.
 *
-* \param ctx: [struct] The function state; must be initialized
+* \param ctx: [struct] The function ctx; must be initialized
 * \param message: [const] The input message byte array
 * \param msglen: The number of input message bytes to process
 */

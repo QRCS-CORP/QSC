@@ -613,7 +613,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 
 			for (i = 0; i < 16; ++i)
 			{
-				tmpin = csx_load256(input + oft + (i * 8));
+				tmpin = csx_load256(input + oft + (i * 8)); // i * 32?
 				ctxw.outw[i] = _mm256_xor_si256(ctxw.outw[i], tmpin);
 				csx_store256((output + oft + (i * 8)), ctxw.outw[i]);
 			}
@@ -648,6 +648,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 	if (length != 0)
 	{
 		uint8_t tmp[QSC_CSX_BLOCK_SIZE] = { 0 };
+
 		csx_permute_p1024c(ctx, tmp);
 		csx_increment(ctx);
 		qsc_memutils_copy((output + oft), tmp, length);

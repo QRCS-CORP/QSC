@@ -24,7 +24,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	/* copy iv to local */
 	qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 	/* initialize the key parameters struct, info is optional */
-	const qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, ivc };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
 
 	status = true;
 
@@ -81,7 +81,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 	qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 	/* initialize the key parameters struct, info is optional */
-	const qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, ivc };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
 
 	status = true;
 
@@ -130,7 +130,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 	/* initialize the key parameters struct with key and nonce, info not used in AES */
 	qsc_memutils_copy(nce, nonce, QSC_AES_BLOCK_SIZE);
-	const qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE, nce };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -182,7 +182,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 	/* initialize the key parameters struct with key and nonce, info is optional */
 	qsc_memutils_copy(nce, nonce, QSC_AES_BLOCK_SIZE);
-	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, nce };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -231,7 +231,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	qsc_aes_state state;
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_aes_keyparams kp = { key, QSC_AES128_KEY_SIZE };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE };
 
 	status = true;
 
@@ -277,7 +277,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	qsc_aes_state state;
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -322,7 +322,7 @@ bool qsctest_fips_aes128_cbc()
 	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	/* SP800-38a F2.1 */
-
+	
 	qsctest_hex_to_bin("2B7E151628AED2A6ABF7158809CF4F3C", key, QSC_AES_BLOCK_SIZE);
 	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F", iv, QSC_AES_BLOCK_SIZE);
 
@@ -460,6 +460,57 @@ bool qsctest_fips_aes256_ecb()
 	return aes256_ecb_monte_carlo(key, msg, exp);
 }
 
+bool qsctest_aes256_gcm_kat()
+{
+    /* Test vector parameters from NIST SP 800-38D for AES-256 GCM */
+	qsc_aes_gcm256_state state = { 0 };
+    uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+    uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };
+    uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+    uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 }; /* 96-bit IV */
+    uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+    uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0 }; /* 16-byte plaintext (all zeros) */
+    bool status;
+
+	status = true;
+
+    qsctest_hex_to_bin("0000000000000000000000000000000000000000000000000000000000000000", key, sizeof(key));
+    qsctest_hex_to_bin("000000000000000000000000", iv, sizeof(iv));
+    qsctest_hex_to_bin("00000000000000000000000000000000", ptxt, sizeof(ptxt));
+    qsctest_hex_to_bin("CEA7403D4D606B6E074EC5D3BAF39D18D0D1C8A799996BF0265B98B5D48AB919", exp, sizeof(exp));
+
+	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, iv, QSC_GCM_NONCE_SIZE, NULL, 0 };
+
+    /* encryption test */
+    qsc_aes_gcm256_initialize(&state, &kp);
+    qsc_aes_gcm256_encrypt(&state, ctxt, ptxt, sizeof(ptxt));
+
+    if (qsc_intutils_are_equal8(ctxt, exp, sizeof(exp)) == false)
+    {
+        status = false;
+    }
+
+	qsc_aes_gcm256_dispose(&state);
+
+    /* decryption test */
+
+    /* reinitialize the state (to reset the counter) for decryption */
+	qsc_memutils_clear(iv, sizeof(iv));
+    qsc_aes_gcm256_initialize(&state, &kp);
+
+    if (qsc_aes_gcm256_decrypt(&state, dec, ctxt, sizeof(ctxt)) == false)
+    {
+        status = false;
+    }
+
+    if (qsc_intutils_are_equal8(dec, ptxt, sizeof(ptxt)) == false)
+    {
+        status = false;
+    }
+
+    return status;
+}
+
 bool qsctest_aes256_hba_kat()
 {
 	uint8_t aad1[20] = { 0 };
@@ -518,7 +569,7 @@ bool qsctest_aes256_hba_kat()
 
 	qsc_aes_hba256_state state;
 
-	const qsc_aes_keyparams kp1 = { key, sizeof(key), nce1, NULL, 0 };
+	const qsc_aes_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nce1, .noncelen = sizeof(nce1) };
 
 	qsc_aes_hba256_initialize(&state, &kp1, true);
 	qsc_aes_hba256_set_associated(&state, aad1, sizeof(aad1));
@@ -551,7 +602,7 @@ bool qsctest_aes256_hba_kat()
 
 	/* second KAT vector */
 
-	const qsc_aes_keyparams kp2 = { key, sizeof(key), nce2, NULL, 0 };
+	const qsc_aes_keyparams kp2 = { .key = key, .keylen = sizeof(key), .nonce = nce2, .noncelen = sizeof(nce2) };
 	qsc_aes_hba256_initialize(&state, &kp2, true);
 	qsc_aes_hba256_set_associated(&state, aad2, sizeof(aad2));
 
@@ -583,7 +634,7 @@ bool qsctest_aes256_hba_kat()
 
 	/* third KAT vector */
 
-	const qsc_aes_keyparams kp3 = { key, sizeof(key), nce3, NULL, 0 };
+	const qsc_aes_keyparams kp3 = { .key = key, .keylen = sizeof(key), .nonce = nce3, .noncelen = sizeof(nce3) };
 	qsc_aes_hba256_initialize(&state, &kp3, true);
 	qsc_aes_hba256_set_associated(&state, aad3, sizeof(aad3));
 
@@ -664,7 +715,7 @@ bool qsctest_aes256_hba_stress()
 			/* use a random sized message 1-65535 */
 			qsc_csp_generate(msg, mlen);
 
-			qsc_aes_keyparams kp1 = { key, sizeof(key), nonce, NULL, 0 };
+			qsc_aes_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
 
 			/* encrypt the message */
 			qsc_aes_hba256_initialize(&state, &kp1, true);
@@ -826,22 +877,31 @@ void qsctest_aes_run()
 		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-256) KAT test. \n");
 	}
 
-	if (qsctest_aes256_hba_kat() == true)
+	if (qsctest_aes256_gcm_kat() == true)
 	{
-		qsctest_print_safe("Success! Passed the RHX-256 HBA AEAD mode KAT test. \n");
+		qsctest_print_safe("Success! Passed the GCM-AES-256 AEAD mode KAT test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the RHX-256 HBA AEAD mode KAT test. \n");
+		qsctest_print_safe("Failure! Failed the GCM-AES-256 AEAD mode KAT test. \n");
+	}
+
+	if (qsctest_aes256_hba_kat() == true)
+	{
+		qsctest_print_safe("Success! Passed the HBA-AES-256 AEAD mode KAT test. \n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed the HBA-AES-256 AEAD mode KAT test. \n");
 	}
 
 	if (qsctest_aes256_hba_stress() == true)
 	{
-		qsctest_print_safe("Success! Passed the RHX-256 HBA AEAD mode stress test. \n");
+		qsctest_print_safe("Success! Passed the HBA-AES-256 AEAD mode stress test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the RHX-256 HBA AEAD mode stress test. \n");
+		qsctest_print_safe("Failure! Failed the HBA-AES-256 AEAD mode stress test. \n");
 	}
 
 	if (qsctest_aes256_padding_test() == true)

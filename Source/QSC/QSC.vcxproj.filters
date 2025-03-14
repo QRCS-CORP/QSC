@@ -187,6 +187,12 @@
     <Filter Include="Source Files\MAC">
       <UniqueIdentifier>{940646ef-a66b-4a4e-8a89-8f30ab963662}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\X509">
+      <UniqueIdentifier>{5eb7a543-755c-4047-b72e-ebb45ff29755}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\X509">
+      <UniqueIdentifier>{4fb2ab71-ba19-4ef6-8a9c-61db425fdf58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">

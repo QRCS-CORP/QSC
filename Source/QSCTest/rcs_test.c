@@ -59,7 +59,7 @@ bool qsctest_rcs256_kat()
 #endif
 	
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { .key = key, .keylen = QSC_RCS256_KEY_SIZE, .nonce = nce };
 
 	status = true;
 
@@ -188,7 +188,7 @@ bool qsctest_rcs512_kat()
 #endif
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS512_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { .key = key, .keylen = QSC_RCS512_KEY_SIZE, .nonce = nce };
 
 	status = true;
 
@@ -305,7 +305,7 @@ bool qsctest_rcs256_stress_test()
 			/* use a random sized message 1-65535 */
 			qsc_csp_generate(msg, mlen);
 
-			qsc_rcs_keyparams kp1 = { key, sizeof(key), nonce, NULL, 0 };
+			qsc_rcs_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 			/* encrypt the message */
 			qsc_rcs_initialize(&state, &kp1, true);
@@ -413,7 +413,7 @@ bool qsctest_rcs512_stress_test()
 			/* use a random sized message 1-65535 */
 			qsc_csp_generate(msg, mlen);
 
-			qsc_rcs_keyparams kp1 = { key, sizeof(key), nonce, NULL, 0 };
+			qsc_rcs_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 			/* encrypt the message */
 			qsc_rcs_initialize(&state, &kp1, true);

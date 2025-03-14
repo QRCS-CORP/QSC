@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -111,18 +111,19 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
 <p>QSC (Quantum Secure Cryptographic Solutions) is a compact, self-contained, and highly optimized cryptographic library written in C. It is designed to provide next-generation, post-quantum secure cryptographic primitives for applications requiring long-term security. The library adheres to MISRA secure coding standards and is structured for clarity, ease of verification, and integration into secure communication platforms.</p>
 <dl class="section user"><dt>Overview</dt><dd>The QSC Library includes a comprehensive suite of cryptographic algorithms and utilities, such as:<ul>
 <li><b>Asymmetric Cryptography:</b><ul>
-<li><em>Key Encapsulation Mechanisms:</em> McEliece (Niederreiter dual form), Kyber, NTRU, and ECDH.</li>
-<li><em>Digital Signature Schemes:</em> Sphincs+, Dilithium, Falcon, and ECDSA (Ed25519).</li>
+<li><em>Key Encapsulation Mechanisms:</em> McEliece (Niederreiter dual form), Kyber (FIPS-203), and NTRU.</li>
+<li><em>Digital Signature Schemes:</em> Sphincs+ (FIPS-205), Dilithium (FIPS-204), and Falcon.</li>
+<li><em>Classical Asymmetric Algorithms:</em> ECDSA and ECDH using the EC25519 curve.</li>
 </ul>
 </li>
 <li><b>Symmetric Cryptography:</b><ul>
-<li><em>Block Ciphers:</em> AES (with modes such as CBC, CTR, and ECB) and RCS (an authenticated stream cipher based on wide-block Rijndael and KMAC).</li>
-<li><em>Stream Ciphers:</em> ChaChaPoly20 and CSX (a ChaCha-based authenticated cipher).</li>
+<li><em>Block Ciphers:</em> AES with the blockcipher modes GCM, HBA, CBC, CTR, ECB, and PKCS7 padding.</li>
+<li><em>Authenticated Stream Ciphers:</em> ChaChaPoly1305, CSX (a wide-block AEAD ChaCha-based authenticated cipher using KMAC/QMAC), and RCS (an authenticated stream cipher based on wide-block Rijndael and KMAC/QMAC).</li>
 </ul>
 </li>
 <li><b>Hash Functions and MACs:</b><ul>
 <li>Cryptographic message digests including SHA3 and SHA2.</li>
-<li>Message authentication codes (MAC) via KMAC, HMAC, and Poly1305.</li>
+<li>Message authentication codes (MAC) via QMAC, KMAC, HMAC, and Poly1305.</li>
 </ul>
 </li>
 <li><b>Pseudo-Random Number Generation and Entropy:</b><ul>
@@ -131,8 +132,10 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
 </ul>
 </li>
 <li><b>System Utilities:</b><ul>
-<li>Asynchronous threading, mutex-based synchronization, and dual IPv4/IPv6 networking.</li>
+<li>Asynchronous threading, mutex-based synchronization, and dual IPv4/IPv6 networking stacks.</li>
 <li>CPU feature detection (CPUID) and secure memory management with SIMD (AVX/AVX2/AVX512) optimizations.</li>
+<li>A complete dual-stack sockets library, support functions, a multi-threaded server and client architectures.</li>
+<li>A large set of integrated tools; file, directory, string, integer, console, array, sockets, threading, and SIMD memory functions.</li>
 </ul>
 </li>
 </ul>
@@ -143,9 +146,9 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
 </ul>
 </dd></dl>
 <dl class="section user"><dt>Supported Platforms</dt><dd>QSC has been thoroughly tested on:<ul>
-<li>Windows 10 (Visual Studio)</li>
+<li>Windows 10/11/Server (Visual Studio)</li>
 <li>Ubuntu Linux (GCC)</li>
-<li>macOS Big Sur (Apple Clang)</li>
+<li>macOS (Apple Clang)</li>
 </ul>
 </dd></dl>
 <dl class="section user"><dt>References and Standards</dt><dd><ul>
@@ -164,12 +167,11 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
 </dd></dl>
 <dl class="section user"><dt>Keywords</dt><dd>Cryptography, Post-Quantum, Asymmetric Cryptography, Symmetric Cryptography, Digital Signature, Key Encapsulation, Key Exchange, Hash Function, MAC, Pseudo-Random Number Generator, DRBG, Entropy, SIMD, AVX, AVX2, AVX512, Secure Memory, Asynchronous, MISRA, QSC.</dd></dl>
 <dl class="section user"><dt>Example</dt><dd>Refer to the module-specific headers (e.g., <a class="el" href="aes_8h.html" title="An implementation of the AES symmetric cipher along with modes and an AEAD scheme.">aes.h</a>, <a class="el" href="sha3_8h.html" title="SHA3 family of hash functions.">sha3.h</a>, <a class="el" href="kyber_8h.html" title="Contains the public API for the FIPS 203 implementation of the Kyber CCA-secure Key Encapsulation Mec...">kyber.h</a>, <a class="el" href="ecdh_8h.html" title="Contains the primary public API for the Elliptic Curve Diffie-Hellman key exchange.">ecdh.h</a>, <a class="el" href="ecdsa_8h.html" title="Contains the primary public API for the ECDSA asymmetric signature scheme implementation.">ecdsa.h</a>, etc.) for detailed usage examples.</dd></dl>
-<dl class="section author"><dt>Author</dt><dd>John G. Underhill </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>2025-02-15</dd></dl>
 <dl class="section remark"><dt>Remarks</dt><dd>QSC is designed to serve as the foundational cryptographic solution for secure, post-quantum communications and is continuously updated to incorporate emerging cryptographic research and standards.</dd></dl>
 <p>QRCS-PL private License. See license file for details. All rights reserved by QRCS Corporation, copyrighted and patents pending.</p>
 <dl class="section author"><dt>Author</dt><dd>John G. Underhill </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>2025-02-10 </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>2025-03-14 </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.0.0.6c </dd></dl>
 </div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"></a>
 </div><!-- contents -->

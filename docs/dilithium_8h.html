@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -177,10 +177,10 @@ Functions</h2></td></tr>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// Authentication failed; handle error.</span></div>
 <div class="line">}</div>
-<div class="ttc" id="adilithium_8h_html_a09bd93da49b1ba22630a737c658549e9"><div class="ttname"><a href="#a09bd93da49b1ba22630a737c658549e9">QSC_DILITHIUM_SIGNATURE_SIZE</a></div><div class="ttdeci">#define QSC_DILITHIUM_SIGNATURE_SIZE</div><div class="ttdoc">The byte size of the signature array.</div><div class="ttdef"><b>Definition</b> dilithium.h:143</div></div>
-<div class="ttc" id="adilithium_8h_html_a0aacdd750a48aa5a9e682d39d7d04d20"><div class="ttname"><a href="#a0aacdd750a48aa5a9e682d39d7d04d20">QSC_DILITHIUM_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_DILITHIUM_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> dilithium.h:137</div></div>
+<div class="ttc" id="adilithium_8h_html_a09bd93da49b1ba22630a737c658549e9"><div class="ttname"><a href="#a09bd93da49b1ba22630a737c658549e9">QSC_DILITHIUM_SIGNATURE_SIZE</a></div><div class="ttdeci">#define QSC_DILITHIUM_SIGNATURE_SIZE</div><div class="ttdoc">The byte size of the signature array.</div><div class="ttdef"><b>Definition</b> dilithium.h:145</div></div>
+<div class="ttc" id="adilithium_8h_html_a0aacdd750a48aa5a9e682d39d7d04d20"><div class="ttname"><a href="#a0aacdd750a48aa5a9e682d39d7d04d20">QSC_DILITHIUM_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_DILITHIUM_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> dilithium.h:139</div></div>
 <div class="ttc" id="adilithium_8h_html_a21aa65b5873462ff3ae1d91fcc149c2d"><div class="ttname"><a href="#a21aa65b5873462ff3ae1d91fcc149c2d">qsc_dilithium_verify</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_dilithium_verify(uint8_t *message, size_t *msglen, const uint8_t *signedmsg, size_t smsglen, const uint8_t *publickey)</div><div class="ttdoc">Verifies a signature-message pair with the public key.</div><div class="ttdef"><b>Definition</b> dilithium.c:52</div></div>
-<div class="ttc" id="adilithium_8h_html_a9f61eb1f65015490e94f1f06ffc2b956"><div class="ttname"><a href="#a9f61eb1f65015490e94f1f06ffc2b956">QSC_DILITHIUM_PRIVATEKEY_SIZE</a></div><div class="ttdeci">#define QSC_DILITHIUM_PRIVATEKEY_SIZE</div><div class="ttdoc">The byte size of the secret private-key array.</div><div class="ttdef"><b>Definition</b> dilithium.h:131</div></div>
+<div class="ttc" id="adilithium_8h_html_a9f61eb1f65015490e94f1f06ffc2b956"><div class="ttname"><a href="#a9f61eb1f65015490e94f1f06ffc2b956">QSC_DILITHIUM_PRIVATEKEY_SIZE</a></div><div class="ttdeci">#define QSC_DILITHIUM_PRIVATEKEY_SIZE</div><div class="ttdoc">The byte size of the secret private-key array.</div><div class="ttdef"><b>Definition</b> dilithium.h:133</div></div>
 <div class="ttc" id="adilithium_8h_html_acf2512952ca0d01682821d5ccdfb9a24"><div class="ttname"><a href="#acf2512952ca0d01682821d5ccdfb9a24">qsc_dilithium_sign</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_dilithium_sign(uint8_t *signedmsg, size_t *smsglen, const uint8_t *message, size_t msglen, const uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Takes the message as input and returns an array containing the signature followed by the message.</div><div class="ttdef"><b>Definition</b> dilithium.c:22</div></div>
 <div class="ttc" id="adilithium_8h_html_ad10e76933ac05bda319ad04dc13f150b"><div class="ttname"><a href="#ad10e76933ac05bda319ad04dc13f150b">qsc_dilithium_generate_keypair</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_dilithium_generate_keypair(uint8_t *publickey, uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Generates a Dilithium public/private key-pair.</div><div class="ttdef"><b>Definition</b> dilithium.c:9</div></div>
 </div><!-- fragment --></dd></dl>

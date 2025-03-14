@@ -33,7 +33,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6b (A6)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.0.0.6c (A6)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -107,6 +107,7 @@ $(function(){initNavTree('aes_8h.html',''); initResizable(true); });
   <div class="summary">
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">aes.h File Reference</div></div>
@@ -127,10 +128,13 @@ Data Structures</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure for AES key parameters.  <a href="structqsc__aes__keyparams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">AES cipher state structure.  <a href="structqsc__aes__state.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">AES cipher ctx structure.  <a href="structqsc__aes__state.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">State structure for AES-based Hash Based Authentication (HBA-256).  <a href="structqsc__aes__hba256__state.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">State structure for AES-based Galois Counter Mode (GCM-256).  <a href="structqsc__aes__gcm256__state.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -155,6 +159,18 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_AES256_KEY_SIZE</b>&#160;&#160;&#160;32ULL</td></tr>
 <tr class="memdesc:a90146a0952bb45baab83eb6aa2f58094"><td class="mdescLeft">&#160;</td><td class="mdescRight">Key size in bytes for AES-256. <br /></td></tr>
 <tr class="separator:a90146a0952bb45baab83eb6aa2f58094"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fecd48ef890720226a52569dae94259" id="r_a8fecd48ef890720226a52569dae94259"><td class="memItemLeft" align="right" valign="top"><a id="a8fecd48ef890720226a52569dae94259" name="a8fecd48ef890720226a52569dae94259"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_GCM256_MAC_SIZE</b>&#160;&#160;&#160;16ULL</td></tr>
+<tr class="memdesc:a8fecd48ef890720226a52569dae94259"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size in bytes of the MAC code for GCM-AES-256. <br /></td></tr>
+<tr class="separator:a8fecd48ef890720226a52569dae94259"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02f1b087326ba10192bdb2f423ce893b" id="r_a02f1b087326ba10192bdb2f423ce893b"><td class="memItemLeft" align="right" valign="top"><a id="a02f1b087326ba10192bdb2f423ce893b" name="a02f1b087326ba10192bdb2f423ce893b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_GCM_MAXAAD_SIZE</b>&#160;&#160;&#160;256ULL</td></tr>
+<tr class="memdesc:a02f1b087326ba10192bdb2f423ce893b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum allowed size (in bytes) for Associated Additional Data (AAD) in GCM. <br /></td></tr>
+<tr class="separator:a02f1b087326ba10192bdb2f423ce893b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adae7217803801d6c992460534163991b" id="r_adae7217803801d6c992460534163991b"><td class="memItemLeft" align="right" valign="top"><a id="adae7217803801d6c992460534163991b" name="adae7217803801d6c992460534163991b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_GCM_NONCE_SIZE</b>&#160;&#160;&#160;12ULL</td></tr>
+<tr class="memdesc:adae7217803801d6c992460534163991b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The standard nonce size used by GCM-AES-256. <br /></td></tr>
+<tr class="separator:adae7217803801d6c992460534163991b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c4512dc0b52e3cc5458b2947f2aa8be" id="r_a7c4512dc0b52e3cc5458b2947f2aa8be"><td class="memItemLeft" align="right" valign="top"><a id="a7c4512dc0b52e3cc5458b2947f2aa8be" name="a7c4512dc0b52e3cc5458b2947f2aa8be"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HBA256_MAC_SIZE</b>&#160;&#160;&#160;32ULL</td></tr>
 <tr class="memdesc:a7c4512dc0b52e3cc5458b2947f2aa8be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size in bytes of the MAC code for HBA-256. <br /></td></tr>
@@ -170,6 +186,12 @@ Macros</h2></td></tr>
 <tr class="memitem:a19d52a85cf593f5d89397fd1eade2479" id="r_a19d52a85cf593f5d89397fd1eade2479"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19d52a85cf593f5d89397fd1eade2479">QSC_HBA_KMAC_AUTH</a></td></tr>
 <tr class="memdesc:a19d52a85cf593f5d89397fd1eade2479"><td class="mdescLeft">&#160;</td><td class="mdescRight">When defined, enables the use of KMAC for authenticating HBA.  <br /></td></tr>
 <tr class="separator:a19d52a85cf593f5d89397fd1eade2479"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:acfb27025fa5708dd6f31d12ba31ee3be" id="r_acfb27025fa5708dd6f31d12ba31ee3be"><td class="memItemLeft" align="right" valign="top"><a id="acfb27025fa5708dd6f31d12ba31ee3be" name="acfb27025fa5708dd6f31d12ba31ee3be"></a>
+typedef <a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> struct qsc_aes_gcm256_state&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_aes_gcm256_state</b></td></tr>
+<tr class="separator:acfb27025fa5708dd6f31d12ba31ee3be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -187,54 +209,69 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:acb1b9fd8437451657beca66abc728186" id="r_acb1b9fd8437451657beca66abc728186"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb1b9fd8437451657beca66abc728186">qsc_aes_dispose</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state)</td></tr>
-<tr class="memdesc:acb1b9fd8437451657beca66abc728186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase and dispose of the AES state.  <br /></td></tr>
-<tr class="separator:acb1b9fd8437451657beca66abc728186"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2bb21b64e1efb178d1f1ae57ce3e1ab2" id="r_a2bb21b64e1efb178d1f1ae57ce3e1ab2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2bb21b64e1efb178d1f1ae57ce3e1ab2">qsc_aes_initialize</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, const <a class="el" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> *keyparams, bool encryption, <a class="el" href="#aa53a8230f3171dbb0958e240cb90738e">qsc_aes_cipher_type</a> ctype)</td></tr>
-<tr class="memdesc:a2bb21b64e1efb178d1f1ae57ce3e1ab2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the AES state with the given key parameters.  <br /></td></tr>
-<tr class="separator:a2bb21b64e1efb178d1f1ae57ce3e1ab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99ba803d35a7bfbf0e7e1df57214c901" id="r_a99ba803d35a7bfbf0e7e1df57214c901"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a99ba803d35a7bfbf0e7e1df57214c901">qsc_aes_cbc_decrypt</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, size_t *outputlen, const uint8_t *input, size_t length)</td></tr>
-<tr class="memdesc:a99ba803d35a7bfbf0e7e1df57214c901"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt ciphertext using AES in Cipher Block Chaining (CBC) mode.  <br /></td></tr>
-<tr class="separator:a99ba803d35a7bfbf0e7e1df57214c901"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8cdd54ccd033cf355c5f4a8967f4683c" id="r_a8cdd54ccd033cf355c5f4a8967f4683c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8cdd54ccd033cf355c5f4a8967f4683c">qsc_aes_cbc_encrypt</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
-<tr class="memdesc:a8cdd54ccd033cf355c5f4a8967f4683c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt plaintext using AES in Cipher Block Chaining (CBC) mode.  <br /></td></tr>
-<tr class="separator:a8cdd54ccd033cf355c5f4a8967f4683c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7899343ed7871332a8adfec75d9e0e07" id="r_a7899343ed7871332a8adfec75d9e0e07"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7899343ed7871332a8adfec75d9e0e07">qsc_aes_cbc_decrypt_block</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, const uint8_t *input)</td></tr>
-<tr class="memdesc:a7899343ed7871332a8adfec75d9e0e07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt a single 16-byte block using AES in CBC mode.  <br /></td></tr>
-<tr class="separator:a7899343ed7871332a8adfec75d9e0e07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab3fef5311f4655e332b05d9a0d33493" id="r_aab3fef5311f4655e332b05d9a0d33493"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab3fef5311f4655e332b05d9a0d33493">qsc_aes_cbc_encrypt_block</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, const uint8_t *input)</td></tr>
-<tr class="memdesc:aab3fef5311f4655e332b05d9a0d33493"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt a single 16-byte block using AES in CBC mode.  <br /></td></tr>
-<tr class="separator:aab3fef5311f4655e332b05d9a0d33493"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac032e496fc3a3f885a83e16b6a7471c5" id="r_ac032e496fc3a3f885a83e16b6a7471c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac032e496fc3a3f885a83e16b6a7471c5">qsc_aes_dispose</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx)</td></tr>
+<tr class="memdesc:ac032e496fc3a3f885a83e16b6a7471c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase and dispose of the AES ctx.  <br /></td></tr>
+<tr class="separator:ac032e496fc3a3f885a83e16b6a7471c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a274105f4ec2fe847bb3c4d04f85bcfce" id="r_a274105f4ec2fe847bb3c4d04f85bcfce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a274105f4ec2fe847bb3c4d04f85bcfce">qsc_aes_initialize</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, const <a class="el" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> *keyparams, bool encryption, <a class="el" href="#aa53a8230f3171dbb0958e240cb90738e">qsc_aes_cipher_type</a> ctype)</td></tr>
+<tr class="memdesc:a274105f4ec2fe847bb3c4d04f85bcfce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the AES ctx with the given key parameters.  <br /></td></tr>
+<tr class="separator:a274105f4ec2fe847bb3c4d04f85bcfce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae202462f3745ff5178e180f9d8df9d92" id="r_ae202462f3745ff5178e180f9d8df9d92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae202462f3745ff5178e180f9d8df9d92">qsc_aes_cbc_decrypt</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, size_t *outputlen, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:ae202462f3745ff5178e180f9d8df9d92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt ciphertext using AES in Cipher Block Chaining (CBC) mode.  <br /></td></tr>
+<tr class="separator:ae202462f3745ff5178e180f9d8df9d92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28d9d5c0c5346e5236261c363196b4e6" id="r_a28d9d5c0c5346e5236261c363196b4e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a28d9d5c0c5346e5236261c363196b4e6">qsc_aes_cbc_encrypt</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:a28d9d5c0c5346e5236261c363196b4e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt plaintext using AES in Cipher Block Chaining (CBC) mode.  <br /></td></tr>
+<tr class="separator:a28d9d5c0c5346e5236261c363196b4e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99472d35e5337a9d6a57be206bf32306" id="r_a99472d35e5337a9d6a57be206bf32306"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a99472d35e5337a9d6a57be206bf32306">qsc_aes_cbc_decrypt_block</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, const uint8_t *input)</td></tr>
+<tr class="memdesc:a99472d35e5337a9d6a57be206bf32306"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt a single 16-byte block using AES in CBC mode.  <br /></td></tr>
+<tr class="separator:a99472d35e5337a9d6a57be206bf32306"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad95ffd3b42b3495f53e9b4c0c91ff25d" id="r_ad95ffd3b42b3495f53e9b4c0c91ff25d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad95ffd3b42b3495f53e9b4c0c91ff25d">qsc_aes_cbc_encrypt_block</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, const uint8_t *input)</td></tr>
+<tr class="memdesc:ad95ffd3b42b3495f53e9b4c0c91ff25d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt a single 16-byte block using AES in CBC mode.  <br /></td></tr>
+<tr class="separator:ad95ffd3b42b3495f53e9b4c0c91ff25d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d67695184a3f97172d0590002cb18d6" id="r_a6d67695184a3f97172d0590002cb18d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d67695184a3f97172d0590002cb18d6">qsc_pkcs7_add_padding</a> (uint8_t *input, size_t length)</td></tr>
 <tr class="memdesc:a6d67695184a3f97172d0590002cb18d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add PKCS#7 padding to a plaintext block.  <br /></td></tr>
 <tr class="separator:a6d67695184a3f97172d0590002cb18d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2833090995832e107a059fe012b56c0" id="r_ab2833090995832e107a059fe012b56c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2833090995832e107a059fe012b56c0">qsc_pkcs7_padding_length</a> (const uint8_t *input)</td></tr>
 <tr class="memdesc:ab2833090995832e107a059fe012b56c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine the length of PKCS#7 padding in a decrypted block.  <br /></td></tr>
 <tr class="separator:ab2833090995832e107a059fe012b56c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb52bc95067e34098b8a27b0a0b80abf" id="r_aeb52bc95067e34098b8a27b0a0b80abf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb52bc95067e34098b8a27b0a0b80abf">qsc_aes_ctrbe_transform</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
-<tr class="memdesc:aeb52bc95067e34098b8a27b0a0b80abf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform data using AES in Counter (CTR) mode with Big Endian counter incrementation.  <br /></td></tr>
-<tr class="separator:aeb52bc95067e34098b8a27b0a0b80abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a098c89f24df538f3b1d474dc264f4694" id="r_a098c89f24df538f3b1d474dc264f4694"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a098c89f24df538f3b1d474dc264f4694">qsc_aes_ctrle_transform</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
-<tr class="memdesc:a098c89f24df538f3b1d474dc264f4694"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform data using AES in Counter (CTR) mode with Little Endian counter incrementation.  <br /></td></tr>
-<tr class="separator:a098c89f24df538f3b1d474dc264f4694"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bb23a27efad75b6906c44fd226087de" id="r_a1bb23a27efad75b6906c44fd226087de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1bb23a27efad75b6906c44fd226087de">qsc_aes_ecb_decrypt_block</a> (const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, const uint8_t *input)</td></tr>
-<tr class="memdesc:a1bb23a27efad75b6906c44fd226087de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt a single 16-byte block using AES in Electronic CodeBook (ECB) mode.  <br /></td></tr>
-<tr class="separator:a1bb23a27efad75b6906c44fd226087de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a9f6fd4a3763e223fc3eadb50f15643" id="r_a8a9f6fd4a3763e223fc3eadb50f15643"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a9f6fd4a3763e223fc3eadb50f15643">qsc_aes_ecb_encrypt_block</a> (const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *state, uint8_t *output, const uint8_t *input)</td></tr>
-<tr class="memdesc:a8a9f6fd4a3763e223fc3eadb50f15643"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt a single 16-byte block using AES in Electronic CodeBook (ECB) mode.  <br /></td></tr>
-<tr class="separator:a8a9f6fd4a3763e223fc3eadb50f15643"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90515597a3277e357973ac456d853c8d" id="r_a90515597a3277e357973ac456d853c8d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a90515597a3277e357973ac456d853c8d">qsc_aes_hba256_dispose</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *state)</td></tr>
-<tr class="memdesc:a90515597a3277e357973ac456d853c8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispose of an HBA-256 state.  <br /></td></tr>
-<tr class="separator:a90515597a3277e357973ac456d853c8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33ddd7d27a86d775abc1bda63cd9e399" id="r_a33ddd7d27a86d775abc1bda63cd9e399"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33ddd7d27a86d775abc1bda63cd9e399">qsc_aes_hba256_initialize</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *state, const <a class="el" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> *keyparams, bool encrypt)</td></tr>
-<tr class="memdesc:a33ddd7d27a86d775abc1bda63cd9e399"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the HBA-256 state for authenticated encryption or decryption.  <br /></td></tr>
-<tr class="separator:a33ddd7d27a86d775abc1bda63cd9e399"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8404cb73e9e5f22dce09a989b9125d4" id="r_ac8404cb73e9e5f22dce09a989b9125d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8404cb73e9e5f22dce09a989b9125d4">qsc_aes_hba256_set_associated</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *state, const uint8_t *data, size_t datalen)</td></tr>
-<tr class="memdesc:ac8404cb73e9e5f22dce09a989b9125d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the associated data (AAD) for HBA-256 authenticated encryption.  <br /></td></tr>
-<tr class="separator:ac8404cb73e9e5f22dce09a989b9125d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ee9dce5cb91a8daff60b89a9eb0d4c5" id="r_a3ee9dce5cb91a8daff60b89a9eb0d4c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ee9dce5cb91a8daff60b89a9eb0d4c5">qsc_aes_hba256_transform</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *state, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
-<tr class="memdesc:a3ee9dce5cb91a8daff60b89a9eb0d4c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform data using the HBA-256 authenticated encryption mode.  <br /></td></tr>
-<tr class="separator:a3ee9dce5cb91a8daff60b89a9eb0d4c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad79a123c488047f57b0890c27cd66609" id="r_ad79a123c488047f57b0890c27cd66609"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad79a123c488047f57b0890c27cd66609">qsc_aes_ctrbe_transform</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:ad79a123c488047f57b0890c27cd66609"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform data using AES in Counter (CTR) mode with Big Endian counter incrementation.  <br /></td></tr>
+<tr class="separator:ad79a123c488047f57b0890c27cd66609"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77821e450bc226500a1def0e13097775" id="r_a77821e450bc226500a1def0e13097775"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77821e450bc226500a1def0e13097775">qsc_aes_ctrle_transform</a> (<a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:a77821e450bc226500a1def0e13097775"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform data using AES in Counter (CTR) mode with Little Endian counter incrementation.  <br /></td></tr>
+<tr class="separator:a77821e450bc226500a1def0e13097775"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89dfeddbc77834ee253df1d1b82223b7" id="r_a89dfeddbc77834ee253df1d1b82223b7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89dfeddbc77834ee253df1d1b82223b7">qsc_aes_ecb_decrypt_block</a> (const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, const uint8_t *input)</td></tr>
+<tr class="memdesc:a89dfeddbc77834ee253df1d1b82223b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt a single 16-byte block using AES in Electronic CodeBook (ECB) mode.  <br /></td></tr>
+<tr class="separator:a89dfeddbc77834ee253df1d1b82223b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1608abd55ff55a72319c7ae10bf6d0d" id="r_ad1608abd55ff55a72319c7ae10bf6d0d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad1608abd55ff55a72319c7ae10bf6d0d">qsc_aes_ecb_encrypt_block</a> (const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *ctx, uint8_t *output, const uint8_t *input)</td></tr>
+<tr class="memdesc:ad1608abd55ff55a72319c7ae10bf6d0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt a single 16-byte block using AES in Electronic CodeBook (ECB) mode.  <br /></td></tr>
+<tr class="separator:ad1608abd55ff55a72319c7ae10bf6d0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2baaf8df3cc1038f46802e9becbcb640" id="r_a2baaf8df3cc1038f46802e9becbcb640"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2baaf8df3cc1038f46802e9becbcb640">qsc_aes_hba256_dispose</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *ctx)</td></tr>
+<tr class="memdesc:a2baaf8df3cc1038f46802e9becbcb640"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispose of an HBA-256 ctx.  <br /></td></tr>
+<tr class="separator:a2baaf8df3cc1038f46802e9becbcb640"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e02b991c29065b00ef40611a73fbae9" id="r_a8e02b991c29065b00ef40611a73fbae9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e02b991c29065b00ef40611a73fbae9">qsc_aes_hba256_initialize</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *ctx, const <a class="el" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> *keyparams, bool encrypt)</td></tr>
+<tr class="memdesc:a8e02b991c29065b00ef40611a73fbae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the HBA-256 ctx for authenticated encryption or decryption.  <br /></td></tr>
+<tr class="separator:a8e02b991c29065b00ef40611a73fbae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a394459c54b65314619887d9987b07316" id="r_a394459c54b65314619887d9987b07316"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a394459c54b65314619887d9987b07316">qsc_aes_hba256_set_associated</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *ctx, const uint8_t *data, size_t datalen)</td></tr>
+<tr class="memdesc:a394459c54b65314619887d9987b07316"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the associated data (AAD) for HBA-256 authenticated encryption.  <br /></td></tr>
+<tr class="separator:a394459c54b65314619887d9987b07316"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1874af1617beea4feb79ebca72d5f3bc" id="r_a1874af1617beea4feb79ebca72d5f3bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1874af1617beea4feb79ebca72d5f3bc">qsc_aes_hba256_transform</a> (<a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:a1874af1617beea4feb79ebca72d5f3bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform data using the HBA-256 authenticated encryption mode.  <br /></td></tr>
+<tr class="separator:a1874af1617beea4feb79ebca72d5f3bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80b8cc8e52625f17669796c6e9e1acb0" id="r_a80b8cc8e52625f17669796c6e9e1acb0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a80b8cc8e52625f17669796c6e9e1acb0">qsc_aes_gcm256_decrypt</a> (<a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:a80b8cc8e52625f17669796c6e9e1acb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt data using the GCM-AES-256 authenticated encryption mode.  <br /></td></tr>
+<tr class="separator:a80b8cc8e52625f17669796c6e9e1acb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d70800fd17c3b55f932b69c2b9c411c" id="r_a4d70800fd17c3b55f932b69c2b9c411c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d70800fd17c3b55f932b69c2b9c411c">qsc_aes_gcm256_dispose</a> (<a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *ctx)</td></tr>
+<tr class="memdesc:a4d70800fd17c3b55f932b69c2b9c411c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispose of an GCM-256 ctx.  <br /></td></tr>
+<tr class="separator:a4d70800fd17c3b55f932b69c2b9c411c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66295971d144c3a70cb4a84ef8b84692" id="r_a66295971d144c3a70cb4a84ef8b84692"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a66295971d144c3a70cb4a84ef8b84692">qsc_aes_gcm256_encrypt</a> (<a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *ctx, uint8_t *output, const uint8_t *input, size_t length)</td></tr>
+<tr class="memdesc:a66295971d144c3a70cb4a84ef8b84692"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt data using the GCM-AES-256 authenticated encryption mode.  <br /></td></tr>
+<tr class="separator:a66295971d144c3a70cb4a84ef8b84692"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27faf012522dc0d664def73e5dd2a9a2" id="r_a27faf012522dc0d664def73e5dd2a9a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a27faf012522dc0d664def73e5dd2a9a2">qsc_aes_gcm256_initialize</a> (<a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *ctx, const <a class="el" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> *keyparams)</td></tr>
+<tr class="memdesc:a27faf012522dc0d664def73e5dd2a9a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the GCM-256 ctx for authenticated encryption or decryption.  <br /></td></tr>
+<tr class="separator:a27faf012522dc0d664def73e5dd2a9a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a870242c52448d64cf7dcf25fde62c6d8" id="r_a870242c52448d64cf7dcf25fde62c6d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a870242c52448d64cf7dcf25fde62c6d8">qsc_aes_gcm256_set_associated</a> (<a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *ctx, const uint8_t *data, size_t datalen)</td></tr>
+<tr class="memdesc:a870242c52448d64cf7dcf25fde62c6d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the associated data (AAD) for GCM-256 authenticated encryption.  <br /></td></tr>
+<tr class="separator:a870242c52448d64cf7dcf25fde62c6d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>An implementation of the AES symmetric cipher along with modes and an AEAD scheme. </p>
@@ -255,19 +292,19 @@ Functions</h2></td></tr>
 <div class="line">uint8_t cust[CST_LEN] = { 0 };</div>
 <div class="line"> </div>
 <div class="line">uint8_t output[MSG_LEN] = { 0 };</div>
-<div class="line"><a class="code hl_struct" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> kp = { key, <a class="code hl_define" href="#a90146a0952bb45baab83eb6aa2f58094">QSC_AES256_KEY_SIZE</a>, nonce, cust, CST_LEN };</div>
+<div class="line"><a class="code hl_struct" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> kp = { .key = key, .keylen = <a class="code hl_define" href="#a90146a0952bb45baab83eb6aa2f58094">QSC_AES256_KEY_SIZE</a>, .nonce = nonce, .noncelen = <a class="code hl_define" href="#ac2aa9a63f78ad0410cfa1020cab1a8a2">QSC_AES_BLOCK_SIZE</a>, .info = cust, .infolen = CST_LEN };</div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_struct" href="structqsc__aes__state.html">qsc_aes_state</a> state;</div>
-<div class="line">qsc_aes_initialize(&amp;state, &amp;kp, <span class="keyword">true</span>, <a class="code hl_enumvalue" href="#aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65">qsc_aes_cipher_256</a>);</div>
-<div class="line">qsc_aes_ctrbe_transform(&amp;state, output, msg, MSG_LEN);</div>
+<div class="line"><a class="code hl_struct" href="structqsc__aes__state.html">qsc_aes_state</a> ctx;</div>
+<div class="line">qsc_aes_initialize(&amp;ctx, &amp;kp, <span class="keyword">true</span>, <a class="code hl_enumvalue" href="#aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65">qsc_aes_cipher_256</a>);</div>
+<div class="line">qsc_aes_ctrbe_transform(&amp;ctx, output, msg, MSG_LEN);</div>
 <div class="ttc" id="aaes_8h_html"><div class="ttname"><a href="aes_8h.html">aes.h</a></div><div class="ttdoc">An implementation of the AES symmetric cipher along with modes and an AEAD scheme.</div></div>
-<div class="ttc" id="aaes_8h_html_a90146a0952bb45baab83eb6aa2f58094"><div class="ttname"><a href="#a90146a0952bb45baab83eb6aa2f58094">QSC_AES256_KEY_SIZE</a></div><div class="ttdeci">#define QSC_AES256_KEY_SIZE</div><div class="ttdoc">Key size in bytes for AES-256.</div><div class="ttdef"><b>Definition</b> aes.h:167</div></div>
-<div class="ttc" id="aaes_8h_html_aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65"><div class="ttname"><a href="#aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65">qsc_aes_cipher_256</a></div><div class="ttdeci">@ qsc_aes_cipher_256</div><div class="ttdef"><b>Definition</b> aes.h:120</div></div>
-<div class="ttc" id="aaes_8h_html_ac2aa9a63f78ad0410cfa1020cab1a8a2"><div class="ttname"><a href="#ac2aa9a63f78ad0410cfa1020cab1a8a2">QSC_AES_BLOCK_SIZE</a></div><div class="ttdeci">#define QSC_AES_BLOCK_SIZE</div><div class="ttdoc">Internal AES block size in bytes.</div><div class="ttdef"><b>Definition</b> aes.h:147</div></div>
-<div class="ttc" id="astructqsc__aes__keyparams_html"><div class="ttname"><a href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a></div><div class="ttdoc">Structure for AES key parameters.</div><div class="ttdef"><b>Definition</b> aes.h:207</div></div>
-<div class="ttc" id="astructqsc__aes__state_html"><div class="ttname"><a href="structqsc__aes__state.html">qsc_aes_state</a></div><div class="ttdoc">AES cipher state structure.</div><div class="ttdef"><b>Definition</b> aes.h:224</div></div>
+<div class="ttc" id="aaes_8h_html_a90146a0952bb45baab83eb6aa2f58094"><div class="ttname"><a href="#a90146a0952bb45baab83eb6aa2f58094">QSC_AES256_KEY_SIZE</a></div><div class="ttdeci">#define QSC_AES256_KEY_SIZE</div><div class="ttdoc">Key size in bytes for AES-256.</div><div class="ttdef"><b>Definition</b> aes.h:169</div></div>
+<div class="ttc" id="aaes_8h_html_aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65"><div class="ttname"><a href="#aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65">qsc_aes_cipher_256</a></div><div class="ttdeci">@ qsc_aes_cipher_256</div><div class="ttdef"><b>Definition</b> aes.h:122</div></div>
+<div class="ttc" id="aaes_8h_html_ac2aa9a63f78ad0410cfa1020cab1a8a2"><div class="ttname"><a href="#ac2aa9a63f78ad0410cfa1020cab1a8a2">QSC_AES_BLOCK_SIZE</a></div><div class="ttdeci">#define QSC_AES_BLOCK_SIZE</div><div class="ttdoc">Internal AES block size in bytes.</div><div class="ttdef"><b>Definition</b> aes.h:149</div></div>
+<div class="ttc" id="astructqsc__aes__keyparams_html"><div class="ttname"><a href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a></div><div class="ttdoc">Structure for AES key parameters.</div><div class="ttdef"><b>Definition</b> aes.h:227</div></div>
+<div class="ttc" id="astructqsc__aes__state_html"><div class="ttname"><a href="structqsc__aes__state.html">qsc_aes_state</a></div><div class="ttdoc">AES cipher ctx structure.</div><div class="ttdef"><b>Definition</b> aes.h:245</div></div>
 </div><!-- fragment --></dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2bb21b64e1efb178d1f1ae57ce3e1ab2" title="Initialize the AES state with the given key parameters.">qsc_aes_initialize</a>, <a class="el" href="#acb1b9fd8437451657beca66abc728186" title="Erase and dispose of the AES state.">qsc_aes_dispose</a>, <a class="el" href="#a8cdd54ccd033cf355c5f4a8967f4683c" title="Encrypt plaintext using AES in Cipher Block Chaining (CBC) mode.">qsc_aes_cbc_encrypt</a>, <a class="el" href="#aeb52bc95067e34098b8a27b0a0b80abf" title="Transform data using AES in Counter (CTR) mode with Big Endian counter incrementation.">qsc_aes_ctrbe_transform</a>, <a class="el" href="#a33ddd7d27a86d775abc1bda63cd9e399" title="Initialize the HBA-256 state for authenticated encryption or decryption.">qsc_aes_hba256_initialize</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a274105f4ec2fe847bb3c4d04f85bcfce" title="Initialize the AES ctx with the given key parameters.">qsc_aes_initialize</a>, <a class="el" href="#ac032e496fc3a3f885a83e16b6a7471c5" title="Erase and dispose of the AES ctx.">qsc_aes_dispose</a>, <a class="el" href="#a28d9d5c0c5346e5236261c363196b4e6" title="Encrypt plaintext using AES in Cipher Block Chaining (CBC) mode.">qsc_aes_cbc_encrypt</a>, <a class="el" href="#ad79a123c488047f57b0890c27cd66609" title="Transform data using AES in Counter (CTR) mode with Big Endian counter incrementation.">qsc_aes_ctrbe_transform</a>, <a class="el" href="#a8e02b991c29065b00ef40611a73fbae9" title="Initialize the HBA-256 ctx for authenticated encryption or decryption.">qsc_aes_hba256_initialize</a></dd></dl>
 <h1><a class="anchor" id="aes_links"></a>
 Reference Links</h1>
 <ul>
@@ -411,8 +448,8 @@ Reference Links</h1>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a99ba803d35a7bfbf0e7e1df57214c901" name="a99ba803d35a7bfbf0e7e1df57214c901"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a99ba803d35a7bfbf0e7e1df57214c901">&#9670;&#160;</a></span>qsc_aes_cbc_decrypt()</h2>
+<a id="ae202462f3745ff5178e180f9d8df9d92" name="ae202462f3745ff5178e180f9d8df9d92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae202462f3745ff5178e180f9d8df9d92">&#9670;&#160;</a></span>qsc_aes_cbc_decrypt()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -420,7 +457,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_cbc_decrypt </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -449,7 +486,7 @@ Reference Links</h1>
 <p>Decrypts the input data in CBC mode and removes PKCS#7 padding.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the output buffer where plaintext will be stored. </td></tr>
     <tr><td class="paramname">outputlen</td><td>[size_t*] Pointer to a size_t that receives the length of the decrypted data. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the input ciphertext. </td></tr>
@@ -457,13 +494,13 @@ Reference Links</h1>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>The state must be initialized by qsc_aes_initialize.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a8cdd54ccd033cf355c5f4a8967f4683c" title="Encrypt plaintext using AES in Cipher Block Chaining (CBC) mode.">qsc_aes_cbc_encrypt</a>, <a class="el" href="#ab2833090995832e107a059fe012b56c0" title="Determine the length of PKCS#7 padding in a decrypted block.">qsc_pkcs7_padding_length</a> </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The ctx must be initialized by qsc_aes_initialize.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a28d9d5c0c5346e5236261c363196b4e6" title="Encrypt plaintext using AES in Cipher Block Chaining (CBC) mode.">qsc_aes_cbc_encrypt</a>, <a class="el" href="#ab2833090995832e107a059fe012b56c0" title="Determine the length of PKCS#7 padding in a decrypted block.">qsc_pkcs7_padding_length</a> </dd></dl>
 
 </div>
 </div>
-<a id="a7899343ed7871332a8adfec75d9e0e07" name="a7899343ed7871332a8adfec75d9e0e07"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7899343ed7871332a8adfec75d9e0e07">&#9670;&#160;</a></span>qsc_aes_cbc_decrypt_block()</h2>
+<a id="a99472d35e5337a9d6a57be206bf32306" name="a99472d35e5337a9d6a57be206bf32306"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99472d35e5337a9d6a57be206bf32306">&#9670;&#160;</a></span>qsc_aes_cbc_decrypt_block()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -471,7 +508,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_cbc_decrypt_block </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -490,18 +527,18 @@ Reference Links</h1>
 <p>Decrypts one block of ciphertext and performs the XOR with the previous ciphertext block (or IV).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to a 16-byte buffer to receive the decrypted block. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to a 16-byte block of ciphertext.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>The state must be initialized by qsc_aes_initialize. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The ctx must be initialized by qsc_aes_initialize. </dd></dl>
 
 </div>
 </div>
-<a id="a8cdd54ccd033cf355c5f4a8967f4683c" name="a8cdd54ccd033cf355c5f4a8967f4683c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8cdd54ccd033cf355c5f4a8967f4683c">&#9670;&#160;</a></span>qsc_aes_cbc_encrypt()</h2>
+<a id="a28d9d5c0c5346e5236261c363196b4e6" name="a28d9d5c0c5346e5236261c363196b4e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28d9d5c0c5346e5236261c363196b4e6">&#9670;&#160;</a></span>qsc_aes_cbc_encrypt()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -509,7 +546,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_cbc_encrypt </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -533,20 +570,20 @@ Reference Links</h1>
 <p>Encrypts the input data in CBC mode, automatically applying PKCS#7 padding to the final block.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the output buffer where ciphertext will be stored. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the input plaintext. </td></tr>
     <tr><td class="paramname">length</td><td>[size_t] Number of bytes of input plaintext.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>The state must be initialized by qsc_aes_initialize.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a99ba803d35a7bfbf0e7e1df57214c901" title="Decrypt ciphertext using AES in Cipher Block Chaining (CBC) mode.">qsc_aes_cbc_decrypt</a>, <a class="el" href="#a6d67695184a3f97172d0590002cb18d6" title="Add PKCS#7 padding to a plaintext block.">qsc_pkcs7_add_padding</a> </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The ctx must be initialized by qsc_aes_initialize.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#ae202462f3745ff5178e180f9d8df9d92" title="Decrypt ciphertext using AES in Cipher Block Chaining (CBC) mode.">qsc_aes_cbc_decrypt</a>, <a class="el" href="#a6d67695184a3f97172d0590002cb18d6" title="Add PKCS#7 padding to a plaintext block.">qsc_pkcs7_add_padding</a> </dd></dl>
 
 </div>
 </div>
-<a id="aab3fef5311f4655e332b05d9a0d33493" name="aab3fef5311f4655e332b05d9a0d33493"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab3fef5311f4655e332b05d9a0d33493">&#9670;&#160;</a></span>qsc_aes_cbc_encrypt_block()</h2>
+<a id="ad95ffd3b42b3495f53e9b4c0c91ff25d" name="ad95ffd3b42b3495f53e9b4c0c91ff25d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad95ffd3b42b3495f53e9b4c0c91ff25d">&#9670;&#160;</a></span>qsc_aes_cbc_encrypt_block()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -554,7 +591,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_cbc_encrypt_block </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -573,18 +610,18 @@ Reference Links</h1>
 <p>Encrypts one block of plaintext by XOR-ing with the previous ciphertext block (or IV) and applying AES encryption.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to a 16-byte buffer to receive the ciphertext block. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to a 16-byte block of plaintext.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>The state must be initialized by qsc_aes_initialize. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The ctx must be initialized by qsc_aes_initialize. </dd></dl>
 
 </div>
 </div>
-<a id="aeb52bc95067e34098b8a27b0a0b80abf" name="aeb52bc95067e34098b8a27b0a0b80abf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb52bc95067e34098b8a27b0a0b80abf">&#9670;&#160;</a></span>qsc_aes_ctrbe_transform()</h2>
+<a id="ad79a123c488047f57b0890c27cd66609" name="ad79a123c488047f57b0890c27cd66609"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad79a123c488047f57b0890c27cd66609">&#9670;&#160;</a></span>qsc_aes_ctrbe_transform()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -592,7 +629,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_ctrbe_transform </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -616,20 +653,20 @@ Reference Links</h1>
 <p>Encrypts or decrypts data in CTR mode. The same function is used for both operations.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the buffer where the transformed data will be stored. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the input data. </td></tr>
     <tr><td class="paramname">length</td><td>[size_t] Number of bytes to process.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>The state must be initialized by qsc_aes_initialize.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a098c89f24df538f3b1d474dc264f4694" title="Transform data using AES in Counter (CTR) mode with Little Endian counter incrementation.">qsc_aes_ctrle_transform</a> </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The ctx must be initialized by qsc_aes_initialize.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a77821e450bc226500a1def0e13097775" title="Transform data using AES in Counter (CTR) mode with Little Endian counter incrementation.">qsc_aes_ctrle_transform</a> </dd></dl>
 
 </div>
 </div>
-<a id="a098c89f24df538f3b1d474dc264f4694" name="a098c89f24df538f3b1d474dc264f4694"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a098c89f24df538f3b1d474dc264f4694">&#9670;&#160;</a></span>qsc_aes_ctrle_transform()</h2>
+<a id="a77821e450bc226500a1def0e13097775" name="a77821e450bc226500a1def0e13097775"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77821e450bc226500a1def0e13097775">&#9670;&#160;</a></span>qsc_aes_ctrle_transform()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -637,7 +674,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_ctrle_transform </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -661,20 +698,20 @@ Reference Links</h1>
 <p>Encrypts or decrypts data in CTR mode using a little endian counter.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the buffer where the transformed data will be stored. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the input data. </td></tr>
     <tr><td class="paramname">length</td><td>[size_t] Number of bytes to process.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>The state must be initialized by qsc_aes_initialize.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#aeb52bc95067e34098b8a27b0a0b80abf" title="Transform data using AES in Counter (CTR) mode with Big Endian counter incrementation.">qsc_aes_ctrbe_transform</a> </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The ctx must be initialized by qsc_aes_initialize.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#ad79a123c488047f57b0890c27cd66609" title="Transform data using AES in Counter (CTR) mode with Big Endian counter incrementation.">qsc_aes_ctrbe_transform</a> </dd></dl>
 
 </div>
 </div>
-<a id="acb1b9fd8437451657beca66abc728186" name="acb1b9fd8437451657beca66abc728186"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb1b9fd8437451657beca66abc728186">&#9670;&#160;</a></span>qsc_aes_dispose()</h2>
+<a id="ac032e496fc3a3f885a83e16b6a7471c5" name="ac032e496fc3a3f885a83e16b6a7471c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac032e496fc3a3f885a83e16b6a7471c5">&#9670;&#160;</a></span>qsc_aes_dispose()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -682,26 +719,26 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_dispose </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Erase and dispose of the AES state. </p>
+<p>Erase and dispose of the AES ctx. </p>
 <p>Securely clears the round-key array and resets the key length.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure.</td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2bb21b64e1efb178d1f1ae57ce3e1ab2" title="Initialize the AES state with the given key parameters.">qsc_aes_initialize</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a274105f4ec2fe847bb3c4d04f85bcfce" title="Initialize the AES ctx with the given key parameters.">qsc_aes_initialize</a> </dd></dl>
 
 </div>
 </div>
-<a id="a1bb23a27efad75b6906c44fd226087de" name="a1bb23a27efad75b6906c44fd226087de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bb23a27efad75b6906c44fd226087de">&#9670;&#160;</a></span>qsc_aes_ecb_decrypt_block()</h2>
+<a id="a89dfeddbc77834ee253df1d1b82223b7" name="a89dfeddbc77834ee253df1d1b82223b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89dfeddbc77834ee253df1d1b82223b7">&#9670;&#160;</a></span>qsc_aes_ecb_decrypt_block()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -709,7 +746,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_ecb_decrypt_block </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -728,7 +765,7 @@ Reference Links</h1>
 <p>ECB mode should only be used for testing or as a building block due to its inherent insecurity.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[const struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[const struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to a 16-byte buffer to receive the decrypted plaintext. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to a 16-byte ciphertext block.</td></tr>
   </table>
@@ -738,8 +775,8 @@ Reference Links</h1>
 
 </div>
 </div>
-<a id="a8a9f6fd4a3763e223fc3eadb50f15643" name="a8a9f6fd4a3763e223fc3eadb50f15643"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a9f6fd4a3763e223fc3eadb50f15643">&#9670;&#160;</a></span>qsc_aes_ecb_encrypt_block()</h2>
+<a id="ad1608abd55ff55a72319c7ae10bf6d0d" name="ad1608abd55ff55a72319c7ae10bf6d0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1608abd55ff55a72319c7ae10bf6d0d">&#9670;&#160;</a></span>qsc_aes_ecb_encrypt_block()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -747,7 +784,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_ecb_encrypt_block </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -765,7 +802,7 @@ Reference Links</h1>
 <p>Encrypt a single 16-byte block using AES in Electronic CodeBook (ECB) mode. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[const struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[const struct] Pointer to an initialized <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to a 16-byte buffer to receive the ciphertext. </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to a 16-byte plaintext block.</td></tr>
   </table>
@@ -775,8 +812,196 @@ Reference Links</h1>
 
 </div>
 </div>
-<a id="a90515597a3277e357973ac456d853c8d" name="a90515597a3277e357973ac456d853c8d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90515597a3277e357973ac456d853c8d">&#9670;&#160;</a></span>qsc_aes_hba256_dispose()</h2>
+<a id="a80b8cc8e52625f17669796c6e9e1acb0" name="a80b8cc8e52625f17669796c6e9e1acb0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80b8cc8e52625f17669796c6e9e1acb0">&#9670;&#160;</a></span>qsc_aes_gcm256_decrypt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool qsc_aes_gcm256_decrypt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>length</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Decrypt data using the GCM-AES-256 authenticated encryption mode. </p>
+<p>This function decrypts the plaintext using AES-256 in GCM-CTR mode, computes a MAC over the nonce and ciphertext, and writes the MAC to the tag parameter.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__gcm256__state.html" title="State structure for AES-based Galois Counter Mode (GCM-256).">qsc_aes_gcm256_state</a> structure. </td></tr>
+    <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the plaintext buffer. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the ciphertext data with the appended MAC. </td></tr>
+    <tr><td class="paramname">length</td><td>[size_t] Length of the input ciphertext in bytes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[bool] Returns <code>true</code> if the transformation and MAC verification was successful; otherwise, <code>false</code>.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a27faf012522dc0d664def73e5dd2a9a2" title="Initialize the GCM-256 ctx for authenticated encryption or decryption.">qsc_aes_gcm256_initialize</a>, <a class="el" href="#a870242c52448d64cf7dcf25fde62c6d8" title="Set the associated data (AAD) for GCM-256 authenticated encryption.">qsc_aes_gcm256_set_associated</a> </dd></dl>
+
+</div>
+</div>
+<a id="a4d70800fd17c3b55f932b69c2b9c411c" name="a4d70800fd17c3b55f932b69c2b9c411c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d70800fd17c3b55f932b69c2b9c411c">&#9670;&#160;</a></span>qsc_aes_gcm256_dispose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_gcm256_dispose </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dispose of an GCM-256 ctx. </p>
+<p>Securely clears all internal ctx and keys used by the GCM-256 authenticated encryption mode.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__gcm256__state.html" title="State structure for AES-based Galois Counter Mode (GCM-256).">qsc_aes_gcm256_state</a> structure.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>Must be called before the ctx goes out of scope.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a870242c52448d64cf7dcf25fde62c6d8" title="Set the associated data (AAD) for GCM-256 authenticated encryption.">qsc_aes_gcm256_set_associated</a>, qsc_aes_gcm_decrypt, qsc_aes_gcm_encrypt, qsc_aes_gcm_initialize </dd></dl>
+
+</div>
+</div>
+<a id="a66295971d144c3a70cb4a84ef8b84692" name="a66295971d144c3a70cb4a84ef8b84692"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66295971d144c3a70cb4a84ef8b84692">&#9670;&#160;</a></span>qsc_aes_gcm256_encrypt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_gcm256_encrypt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>length</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Encrypt data using the GCM-AES-256 authenticated encryption mode. </p>
+<p>In encryption mode, this function encrypts the plaintext using AES-256 in CTR mode, computes a MAC over the nonce and ciphertext, and appends the MAC to the output.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__gcm256__state.html" title="State structure for AES-based Galois Counter Mode (GCM-256).">qsc_aes_gcm256_state</a> structure. </td></tr>
+    <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the output buffer; must be large enough to hold ciphertext plus MAC. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the input data; ciphertext with appended MAC. </td></tr>
+    <tr><td class="paramname">length</td><td>[size_t] Length of the input data in bytes (excluding the MAC for decryption).</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a27faf012522dc0d664def73e5dd2a9a2" title="Initialize the GCM-256 ctx for authenticated encryption or decryption.">qsc_aes_gcm256_initialize</a>, <a class="el" href="#a870242c52448d64cf7dcf25fde62c6d8" title="Set the associated data (AAD) for GCM-256 authenticated encryption.">qsc_aes_gcm256_set_associated</a> </dd></dl>
+
+</div>
+</div>
+<a id="a27faf012522dc0d664def73e5dd2a9a2" name="a27faf012522dc0d664def73e5dd2a9a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27faf012522dc0d664def73e5dd2a9a2">&#9670;&#160;</a></span>qsc_aes_gcm256_initialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_gcm256_initialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__aes__keyparams.html">qsc_aes_keyparams</a> *</td>          <td class="paramname"><span class="paramname"><em>keyparams</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the GCM-256 ctx for authenticated encryption or decryption. </p>
+<p>Generates the cipher key and MAC key from the provided key parameters and sets up the internal states.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__gcm256__state.html" title="State structure for AES-based Galois Counter Mode (GCM-256).">qsc_aes_gcm256_state</a> structure to initialize. </td></tr>
+    <tr><td class="paramname">keyparams</td><td>[const struct] Pointer to a constant <a class="el" href="structqsc__aes__keyparams.html" title="Structure for AES key parameters.">qsc_aes_keyparams</a> structure that provides the key, nonce, and optional info.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>Must be called before using qsc_aes_gcm256_set_associated, qsc_aes_gcm256_encrypt or qsc_aes_gcm256_decrypt.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a80b8cc8e52625f17669796c6e9e1acb0" title="Decrypt data using the GCM-AES-256 authenticated encryption mode.">qsc_aes_gcm256_decrypt</a>, <a class="el" href="#a66295971d144c3a70cb4a84ef8b84692" title="Encrypt data using the GCM-AES-256 authenticated encryption mode.">qsc_aes_gcm256_encrypt</a>, <a class="el" href="#a4d70800fd17c3b55f932b69c2b9c411c" title="Dispose of an GCM-256 ctx.">qsc_aes_gcm256_dispose</a> </dd></dl>
+
+</div>
+</div>
+<a id="a870242c52448d64cf7dcf25fde62c6d8" name="a870242c52448d64cf7dcf25fde62c6d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a870242c52448d64cf7dcf25fde62c6d8">&#9670;&#160;</a></span>qsc_aes_gcm256_set_associated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_gcm256_set_associated </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__gcm256__state.html">qsc_aes_gcm256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>datalen</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the associated data (AAD) for GCM-256 authenticated encryption. </p>
+<p>The associated data is used to authenticate additional information (such as headers) that is not encrypted. It must be set after initialization and before each call to qsc_aes_gcm256_encrypt</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to the <a class="el" href="structqsc__aes__gcm256__state.html" title="State structure for AES-based Galois Counter Mode (GCM-256).">qsc_aes_gcm256_state</a> structure. </td></tr>
+    <tr><td class="paramname">data</td><td>[const uint8_t*] Pointer to the associated data. </td></tr>
+    <tr><td class="paramname">datalen</td><td>[size_t] Length of the associated data in bytes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a66295971d144c3a70cb4a84ef8b84692" title="Encrypt data using the GCM-AES-256 authenticated encryption mode.">qsc_aes_gcm256_encrypt</a> </dd></dl>
+
+</div>
+</div>
+<a id="a2baaf8df3cc1038f46802e9becbcb640" name="a2baaf8df3cc1038f46802e9becbcb640"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2baaf8df3cc1038f46802e9becbcb640">&#9670;&#160;</a></span>qsc_aes_hba256_dispose()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -784,27 +1009,27 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_hba256_dispose </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Dispose of an HBA-256 state. </p>
-<p>Securely clears all internal state and keys used by the HBA-256 authenticated encryption mode.</p>
+<p>Dispose of an HBA-256 ctx. </p>
+<p>Securely clears all internal ctx and keys used by the HBA-256 authenticated encryption mode.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure.</td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>Must be called before the state goes out of scope.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a33ddd7d27a86d775abc1bda63cd9e399" title="Initialize the HBA-256 state for authenticated encryption or decryption.">qsc_aes_hba256_initialize</a>, <a class="el" href="#a3ee9dce5cb91a8daff60b89a9eb0d4c5" title="Transform data using the HBA-256 authenticated encryption mode.">qsc_aes_hba256_transform</a> </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Must be called before the ctx goes out of scope.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a8e02b991c29065b00ef40611a73fbae9" title="Initialize the HBA-256 ctx for authenticated encryption or decryption.">qsc_aes_hba256_initialize</a>, <a class="el" href="#a1874af1617beea4feb79ebca72d5f3bc" title="Transform data using the HBA-256 authenticated encryption mode.">qsc_aes_hba256_transform</a> </dd></dl>
 
 </div>
 </div>
-<a id="a33ddd7d27a86d775abc1bda63cd9e399" name="a33ddd7d27a86d775abc1bda63cd9e399"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33ddd7d27a86d775abc1bda63cd9e399">&#9670;&#160;</a></span>qsc_aes_hba256_initialize()</h2>
+<a id="a8e02b991c29065b00ef40611a73fbae9" name="a8e02b991c29065b00ef40611a73fbae9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e02b991c29065b00ef40611a73fbae9">&#9670;&#160;</a></span>qsc_aes_hba256_initialize()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -812,7 +1037,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_hba256_initialize </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -827,23 +1052,23 @@ Reference Links</h1>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize the HBA-256 state for authenticated encryption or decryption. </p>
+<p>Initialize the HBA-256 ctx for authenticated encryption or decryption. </p>
 <p>Generates the cipher key and MAC key from the provided key parameters and sets up the internal states.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure to initialize. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to a <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure to initialize. </td></tr>
     <tr><td class="paramname">keyparams</td><td>[const struct] Pointer to a constant <a class="el" href="structqsc__aes__keyparams.html" title="Structure for AES key parameters.">qsc_aes_keyparams</a> structure that provides the key, nonce, and optional info. </td></tr>
     <tr><td class="paramname">encrypt</td><td>[bool] Set to <code>true</code> for encryption mode, or <code>false</code> for decryption mode.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section warning"><dt>Warning</dt><dd>Must be called before using qsc_aes_hba256_set_associated or qsc_aes_hba256_transform.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a3ee9dce5cb91a8daff60b89a9eb0d4c5" title="Transform data using the HBA-256 authenticated encryption mode.">qsc_aes_hba256_transform</a>, <a class="el" href="#a90515597a3277e357973ac456d853c8d" title="Dispose of an HBA-256 state.">qsc_aes_hba256_dispose</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a1874af1617beea4feb79ebca72d5f3bc" title="Transform data using the HBA-256 authenticated encryption mode.">qsc_aes_hba256_transform</a>, <a class="el" href="#a2baaf8df3cc1038f46802e9becbcb640" title="Dispose of an HBA-256 ctx.">qsc_aes_hba256_dispose</a> </dd></dl>
 
 </div>
 </div>
-<a id="ac8404cb73e9e5f22dce09a989b9125d4" name="ac8404cb73e9e5f22dce09a989b9125d4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8404cb73e9e5f22dce09a989b9125d4">&#9670;&#160;</a></span>qsc_aes_hba256_set_associated()</h2>
+<a id="a394459c54b65314619887d9987b07316" name="a394459c54b65314619887d9987b07316"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a394459c54b65314619887d9987b07316">&#9670;&#160;</a></span>qsc_aes_hba256_set_associated()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -851,7 +1076,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_hba256_set_associated </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -870,18 +1095,18 @@ Reference Links</h1>
 <p>The associated data is used to authenticate additional information (such as headers) that is not encrypted. It must be set after initialization and before each call to qsc_aes_hba256_transform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to the <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to the <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure. </td></tr>
     <tr><td class="paramname">data</td><td>[const uint8_t*] Pointer to the associated data. </td></tr>
     <tr><td class="paramname">datalen</td><td>[size_t] Length of the associated data in bytes.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a3ee9dce5cb91a8daff60b89a9eb0d4c5" title="Transform data using the HBA-256 authenticated encryption mode.">qsc_aes_hba256_transform</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a1874af1617beea4feb79ebca72d5f3bc" title="Transform data using the HBA-256 authenticated encryption mode.">qsc_aes_hba256_transform</a> </dd></dl>
 
 </div>
 </div>
-<a id="a3ee9dce5cb91a8daff60b89a9eb0d4c5" name="a3ee9dce5cb91a8daff60b89a9eb0d4c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ee9dce5cb91a8daff60b89a9eb0d4c5">&#9670;&#160;</a></span>qsc_aes_hba256_transform()</h2>
+<a id="a1874af1617beea4feb79ebca72d5f3bc" name="a1874af1617beea4feb79ebca72d5f3bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1874af1617beea4feb79ebca72d5f3bc">&#9670;&#160;</a></span>qsc_aes_hba256_transform()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -889,7 +1114,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool qsc_aes_hba256_transform </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__hba256__state.html">qsc_aes_hba256_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -913,7 +1138,7 @@ Reference Links</h1>
 <p>In encryption mode, this function encrypts the plaintext using AES-256 in CTR mode, computes a MAC over the nonce and ciphertext, and appends the MAC to the output. In decryption mode, it first verifies the MAC before decrypting the ciphertext.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to an initialized <a class="el" href="structqsc__aes__hba256__state.html" title="State structure for AES-based Hash Based Authentication (HBA-256).">qsc_aes_hba256_state</a> structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the output buffer (must be large enough to hold ciphertext plus MAC in encryption mode). </td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the input data (ciphertext with appended MAC in decryption mode, plaintext in encryption mode). </td></tr>
     <tr><td class="paramname">length</td><td>[size_t] Length of the input data in bytes (excluding the MAC for decryption).</td></tr>
@@ -921,12 +1146,12 @@ Reference Links</h1>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>[bool] Returns <code>true</code> if the transformation (and MAC verification in decryption mode) was successful; otherwise, <code>false</code>.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a33ddd7d27a86d775abc1bda63cd9e399" title="Initialize the HBA-256 state for authenticated encryption or decryption.">qsc_aes_hba256_initialize</a>, <a class="el" href="#ac8404cb73e9e5f22dce09a989b9125d4" title="Set the associated data (AAD) for HBA-256 authenticated encryption.">qsc_aes_hba256_set_associated</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a8e02b991c29065b00ef40611a73fbae9" title="Initialize the HBA-256 ctx for authenticated encryption or decryption.">qsc_aes_hba256_initialize</a>, <a class="el" href="#a394459c54b65314619887d9987b07316" title="Set the associated data (AAD) for HBA-256 authenticated encryption.">qsc_aes_hba256_set_associated</a> </dd></dl>
 
 </div>
 </div>
-<a id="a2bb21b64e1efb178d1f1ae57ce3e1ab2" name="a2bb21b64e1efb178d1f1ae57ce3e1ab2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2bb21b64e1efb178d1f1ae57ce3e1ab2">&#9670;&#160;</a></span>qsc_aes_initialize()</h2>
+<a id="a274105f4ec2fe847bb3c4d04f85bcfce" name="a274105f4ec2fe847bb3c4d04f85bcfce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a274105f4ec2fe847bb3c4d04f85bcfce">&#9670;&#160;</a></span>qsc_aes_initialize()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -934,7 +1159,7 @@ Reference Links</h1>
         <tr>
           <td class="memname"><a class="el" href="common_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_aes_initialize </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structqsc__aes__state.html">qsc_aes_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -954,19 +1179,19 @@ Reference Links</h1>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize the AES state with the given key parameters. </p>
+<p>Initialize the AES ctx with the given key parameters. </p>
 <p>Expands the input cipher key into a round-key array for encryption or decryption. Note that for CTR mode the cipher is always initialized for encryption.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">state</td><td>[struct] Pointer to the <a class="el" href="structqsc__aes__state.html" title="AES cipher state structure.">qsc_aes_state</a> structure to initialize. </td></tr>
+    <tr><td class="paramname">ctx</td><td>[struct] Pointer to the <a class="el" href="structqsc__aes__state.html" title="AES cipher ctx structure.">qsc_aes_state</a> structure to initialize. </td></tr>
     <tr><td class="paramname">keyparams</td><td>[const struct] Pointer to a constant <a class="el" href="structqsc__aes__keyparams.html" title="Structure for AES key parameters.">qsc_aes_keyparams</a> structure containing key, nonce, and optional info. </td></tr>
     <tr><td class="paramname">encryption</td><td>[bool] Set to <code>true</code> to initialize for encryption; <code>false</code> for decryption. </td></tr>
     <tr><td class="paramname">ctype</td><td>[enum] Specifies the AES cipher type (qsc_aes_cipher_128 or qsc_aes_cipher_256).</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>Ensure that <code>state-&gt;roundkeys</code> is cleared and its size set before calling.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#acb1b9fd8437451657beca66abc728186" title="Erase and dispose of the AES state.">qsc_aes_dispose</a> </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Ensure that <code>ctx-&gt;roundkeys</code> is cleared and its size set before calling.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#ac032e496fc3a3f885a83e16b6a7471c5" title="Erase and dispose of the AES ctx.">qsc_aes_dispose</a> </dd></dl>
 
 </div>
 </div>

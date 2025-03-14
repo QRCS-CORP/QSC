@@ -96,7 +96,7 @@ bool qsctest_csx512_kat()
 	qsc_memutils_copy(ncpy, nce, sizeof(nce));
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_csx_keyparams kp = { key, QSC_CSX_KEY_SIZE, nce };
+	qsc_csx_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nce};
 
 	status = true;
 
@@ -209,7 +209,7 @@ bool qsctest_csx512_stress()
 			/* use a random sized message 1-65535 */
 			qsc_csp_generate(msg, mlen);
 
-			qsc_csx_keyparams kp1 = { key, sizeof(key), nonce, NULL, 0 };
+			qsc_csx_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 			/* encrypt the message */
 			qsc_csx_initialize(&state, &kp1, true);
@@ -322,7 +322,7 @@ bool qsctest_csx_wide_equality()
 
 			/* initialize the key parameters struct */
 			qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
-			qsc_csx_keyparams kp1 = { key, sizeof(key), nonce };
+			qsc_csx_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 			/* initialize the state */
 			qsc_csx_initialize(&ctx1, &kp1, true);
@@ -335,7 +335,7 @@ bool qsctest_csx_wide_equality()
 
 			/* reset the nonce */
 			qsc_memutils_copy(nonce, ncopy, sizeof(nonce));
-			qsc_csx_keyparams kp2 = { key, sizeof(key), nonce };
+			qsc_csx_keyparams kp2 = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 			/* initialize the state */
 			qsc_csx_initialize(&ctx2, &kp2, false);

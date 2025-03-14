@@ -194,6 +194,18 @@ bool qsctest_fips_aes128_ecb(void);
 bool qsctest_fips_aes256_ecb(void);
 
 /**
+ * \brief Executes the Known Answer Test for the GCM-AES-256 AEAD mode with a 256-bit key.
+ *
+ * \details
+ * This function tests the known answer test from NIST SP800-38D for GCM-AES-256 AEAD mode using a 256-bit key.
+ *
+ * The test vectors are derived from the authoritative NIST SP800-38D document.
+ *
+ * \return Returns true if the known answer test for the GCM-AES-256 mode are successful; otherwise, false.
+ */
+bool qsctest_aes256_gcm_kat();
+
+/**
  * \brief Executes the Known Answer Test for the HBA-RHX AEAD mode with a 256-bit key.
  *
  * \details

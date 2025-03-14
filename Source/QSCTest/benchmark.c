@@ -29,7 +29,7 @@ static void aes128_cbc_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(iv, sizeof(iv));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_aes_keyparams kp = { key, sizeof(key), iv };
+	qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv, .noncelen = sizeof(iv) };
 
 	/* encryption */
 
@@ -86,7 +86,7 @@ static void aes256_cbc_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(iv, sizeof(iv));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_aes_keyparams kp = { key, sizeof(key), iv };
+	qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv, .noncelen = sizeof(iv) };
 
 	/* encryption */
 
@@ -142,7 +142,7 @@ static void aes128_ctrbe_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(iv, sizeof(iv));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_aes_keyparams kp = { key, sizeof(key), iv };
+	qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv, .noncelen = sizeof(iv) };
 
 	/* encryption */
 
@@ -178,7 +178,7 @@ static void aes128_ctrle_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(iv, sizeof(iv));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_aes_keyparams kp = { key, sizeof(key), iv };
+	qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv, .noncelen = sizeof(iv) };
 
 	/* encryption */
 
@@ -214,7 +214,7 @@ static void aes256_ctrbe_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(iv, sizeof(iv));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_aes_keyparams kp = { key, sizeof(key), iv };
+	qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv, .noncelen = sizeof(iv) };
 
 	/* encryption */
 
@@ -250,7 +250,7 @@ static void aes256_ctrle_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(iv, sizeof(iv));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_aes_keyparams kp = { key, sizeof(key), iv };
+	qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv, .noncelen = sizeof(iv) };
 
 	/* encryption */
 
@@ -286,7 +286,7 @@ static void chacha128_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(nonce, sizeof(nonce));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_chacha_keyparams kp = { key, sizeof(key), nonce };
+	qsc_chacha_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 	/* encryption */
 
@@ -322,7 +322,7 @@ static void chacha256_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(nonce, sizeof(nonce));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_chacha_keyparams kp = { key, sizeof(key), nonce };
+	qsc_chacha_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 	/* encryption */
 
@@ -358,7 +358,7 @@ static void csx_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(nonce, sizeof(nonce));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_csx_keyparams kp = { key, sizeof(key), nonce, NULL, 0 };
+	qsc_csx_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 	/* encryption */
 
@@ -396,7 +396,7 @@ static void rcs256_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(nonce, sizeof(nonce));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_rcs_keyparams kp = { key, sizeof(key), nonce, NULL, 0 };
+	qsc_rcs_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 	/* encryption */
 
@@ -434,7 +434,7 @@ static void rcs512_benchmark_test()
 	qsc_csp_generate(key, sizeof(key));
 	qsc_csp_generate(nonce, sizeof(nonce));
 	qsc_csp_generate(msg, sizeof(msg));
-	qsc_rcs_keyparams kp = { key, sizeof(key), nonce, NULL, 0 };
+	qsc_rcs_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = nonce };
 
 	/* encryption */
 
@@ -951,7 +951,7 @@ static void qmac_benchmark()
 	uint64_t elapsed;
 
 	tctr = 0;
-	qsc_qmac_keyparams kp = { key, sizeof(key), NULL, 0, NULL, 0 };
+	qsc_qmac_keyparams kp = { .key = key, .keylen = sizeof(key) };
 	start = qsc_timerex_stopwatch_start();
 
 	qsc_qmac_initialize(&ctx, &kp);
