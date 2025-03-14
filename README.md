@@ -19,7 +19,7 @@ This implementation uses both a base reference code and optimized AVX/AVX2/AVX51
 
 ## Version
 
-**Version:** 1.0.0.5M  
+**Version:** 1.0.0.6c 
 Tested on:  
 - **Windows 10/11/Server**    
 - **Ubuntu Linux**  
