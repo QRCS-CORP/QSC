@@ -4,6 +4,7 @@
 
 [View full documentation online](https://qrcs-corp.github.io/QSC/)  
 [QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/QSC_Specification.pdf)  
+[QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/QSC_Summary.pdf)  
 
 ## Overview
 
