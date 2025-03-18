@@ -2,8 +2,8 @@
 
 **A compact, self-contained, and highly optimized post-quantum secure cryptographic library written in C.**
 
-[View full documentation online](https://qrcs-corp.github.io/QSC/)
-
+[View full documentation online](https://qrcs-corp.github.io/QSC/)  
+[QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/QSC_Specificationn.pdf)  
 
 ## Overview
 
