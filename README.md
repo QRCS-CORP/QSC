@@ -148,7 +148,7 @@ QSC has been thoroughly tested on:
 - **System Utilities:**  
   Provides asynchronous threading, dual-stack networking, CPUID detection, and secure memory management.
 
-- **Language Interoperability**
+- **Language Interoperability:**  
   Interoperability with C++, and .NET via the QSCNETCW wrapper library.
 
 
