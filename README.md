@@ -1,4 +1,4 @@
-# QSC: Quantum Secure Cryptographic Solutions Library
+# QSC: Quantum Secure Cryptographic Library
 
 **A compact, self-contained, and highly optimized post-quantum secure cryptographic library written in C.**
 
