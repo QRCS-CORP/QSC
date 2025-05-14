@@ -230,6 +230,8 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	bool status;
 	qsc_aes_state state;
 
+	status = true;
+
 	/* initialize the key parameters struct, info is optional */
 	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE };
 
@@ -462,7 +464,7 @@ bool qsctest_fips_aes256_ecb()
 
 bool qsctest_aes256_gcm_kat()
 {
-    /* Test vector parameters from NIST SP 800-38D for AES-256 GCM */
+    /* Test vector parameters from NIST SP800-38D for AES-256 GCM */
 	qsc_aes_gcm256_state state = { 0 };
     uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
     uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };

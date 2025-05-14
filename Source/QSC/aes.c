@@ -1,4 +1,4 @@
-#include "aes.h"
+﻿#include "aes.h"
 #include "intutils.h"
 #include "memutils.h"
 
@@ -740,46 +740,6 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 
 /* rijndael rcon, and s-box constant tables */
 
-static const uint8_t aes_sbox[256] =
-{
-	0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
-	0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
-	0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15,
-	0x04, 0xC7, 0x23, 0xC3, 0x18, 0x96, 0x05, 0x9A, 0x07, 0x12, 0x80, 0xE2, 0xEB, 0x27, 0xB2, 0x75,
-	0x09, 0x83, 0x2C, 0x1A, 0x1B, 0x6E, 0x5A, 0xA0, 0x52, 0x3B, 0xD6, 0xB3, 0x29, 0xE3, 0x2F, 0x84,
-	0x53, 0xD1, 0x00, 0xED, 0x20, 0xFC, 0xB1, 0x5B, 0x6A, 0xCB, 0xBE, 0x39, 0x4A, 0x4C, 0x58, 0xCF,
-	0xD0, 0xEF, 0xAA, 0xFB, 0x43, 0x4D, 0x33, 0x85, 0x45, 0xF9, 0x02, 0x7F, 0x50, 0x3C, 0x9F, 0xA8,
-	0x51, 0xA3, 0x40, 0x8F, 0x92, 0x9D, 0x38, 0xF5, 0xBC, 0xB6, 0xDA, 0x21, 0x10, 0xFF, 0xF3, 0xD2,
-	0xCD, 0x0C, 0x13, 0xEC, 0x5F, 0x97, 0x44, 0x17, 0xC4, 0xA7, 0x7E, 0x3D, 0x64, 0x5D, 0x19, 0x73,
-	0x60, 0x81, 0x4F, 0xDC, 0x22, 0x2A, 0x90, 0x88, 0x46, 0xEE, 0xB8, 0x14, 0xDE, 0x5E, 0x0B, 0xDB,
-	0xE0, 0x32, 0x3A, 0x0A, 0x49, 0x06, 0x24, 0x5C, 0xC2, 0xD3, 0xAC, 0x62, 0x91, 0x95, 0xE4, 0x79,
-	0xE7, 0xC8, 0x37, 0x6D, 0x8D, 0xD5, 0x4E, 0xA9, 0x6C, 0x56, 0xF4, 0xEA, 0x65, 0x7A, 0xAE, 0x08,
-	0xBA, 0x78, 0x25, 0x2E, 0x1C, 0xA6, 0xB4, 0xC6, 0xE8, 0xDD, 0x74, 0x1F, 0x4B, 0xBD, 0x8B, 0x8A,
-	0x70, 0x3E, 0xB5, 0x66, 0x48, 0x03, 0xF6, 0x0E, 0x61, 0x35, 0x57, 0xB9, 0x86, 0xC1, 0x1D, 0x9E,
-	0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
-	0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
-};
-
-static const uint8_t aes_isbox[256] =
-{
-	0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
-	0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
-	0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D, 0xEE, 0x4C, 0x95, 0x0B, 0x42, 0xFA, 0xC3, 0x4E,
-	0x08, 0x2E, 0xA1, 0x66, 0x28, 0xD9, 0x24, 0xB2, 0x76, 0x5B, 0xA2, 0x49, 0x6D, 0x8B, 0xD1, 0x25,
-	0x72, 0xF8, 0xF6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xD4, 0xA4, 0x5C, 0xCC, 0x5D, 0x65, 0xB6, 0x92,
-	0x6C, 0x70, 0x48, 0x50, 0xFD, 0xED, 0xB9, 0xDA, 0x5E, 0x15, 0x46, 0x57, 0xA7, 0x8D, 0x9D, 0x84,
-	0x90, 0xD8, 0xAB, 0x00, 0x8C, 0xBC, 0xD3, 0x0A, 0xF7, 0xE4, 0x58, 0x05, 0xB8, 0xB3, 0x45, 0x06,
-	0xD0, 0x2C, 0x1E, 0x8F, 0xCA, 0x3F, 0x0F, 0x02, 0xC1, 0xAF, 0xBD, 0x03, 0x01, 0x13, 0x8A, 0x6B,
-	0x3A, 0x91, 0x11, 0x41, 0x4F, 0x67, 0xDC, 0xEA, 0x97, 0xF2, 0xCF, 0xCE, 0xF0, 0xB4, 0xE6, 0x73,
-	0x96, 0xAC, 0x74, 0x22, 0xE7, 0xAD, 0x35, 0x85, 0xE2, 0xF9, 0x37, 0xE8, 0x1C, 0x75, 0xDF, 0x6E,
-	0x47, 0xF1, 0x1A, 0x71, 0x1D, 0x29, 0xC5, 0x89, 0x6F, 0xB7, 0x62, 0x0E, 0xAA, 0x18, 0xBE, 0x1B,
-	0xFC, 0x56, 0x3E, 0x4B, 0xC6, 0xD2, 0x79, 0x20, 0x9A, 0xDB, 0xC0, 0xFE, 0x78, 0xCD, 0x5A, 0xF4,
-	0x1F, 0xDD, 0xA8, 0x33, 0x88, 0x07, 0xC7, 0x31, 0xB1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xEC, 0x5F,
-	0x60, 0x51, 0x7F, 0xA9, 0x19, 0xB5, 0x4A, 0x0D, 0x2D, 0xE5, 0x7A, 0x9F, 0x93, 0xC9, 0x9C, 0xEF,
-	0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB, 0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61,
-	0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
-};
-
 static const uint32_t rcon[30] =
 {
 	0x00000000UL, 0x01000000UL, 0x02000000UL, 0x04000000UL, 0x08000000UL, 0x10000000UL, 0x20000000UL, 0x40000000UL,
@@ -787,6 +747,537 @@ static const uint32_t rcon[30] =
 	0x2F000000UL, 0x5E000000UL, 0xBC000000UL, 0x63000000UL, 0xC6000000UL, 0x97000000UL, 0x35000000UL, 0x6A000000UL,
 	0xD4000000UL, 0xB3000000UL, 0x7D000000UL, 0xFA000000UL, 0xEF000000UL, 0xC5000000UL
 };
+
+static inline void aes_swapn(uint32_t cl, uint32_t ch, uint32_t s, uint32_t* x, uint32_t* y)
+{
+	uint32_t a = *x;
+	uint32_t b = *y;
+	*x = (a & cl) | ((b & cl) << s);
+	*y = ((a & ch) >> s) | (b & ch);
+}
+  
+static inline void aes_swap2(uint32_t* x, uint32_t* y)
+{
+	/* 0101… / 1010…  (1-bit lanes) */
+	aes_swapn(0x55555555U, 0xAAAAAAAAU, 1, x, y);
+}
+
+static inline void aes_swap4(uint32_t* x, uint32_t* y)
+{
+	/* 0011… / 1100…  (2-bit lanes) */
+	aes_swapn(0x33333333U, 0xCCCCCCCCU, 2, x, y);
+}
+
+static inline void aes_swap8(uint32_t* x, uint32_t* y)
+{
+	/* 0000 1111… / 1111 0000…  (4-bit lanes) */
+	aes_swapn(0x0F0F0F0FU, 0xF0F0F0F0U, 4, x, y);
+}
+
+static void aes_ct_ortho(uint32_t* q)
+{
+	aes_swap2(&q[0], &q[1]);
+	aes_swap2(&q[2], &q[3]);
+	aes_swap2(&q[4], &q[5]);
+	aes_swap2(&q[6], &q[7]);
+
+	aes_swap4(&q[0], &q[2]);
+	aes_swap4(&q[1], &q[3]);
+	aes_swap4(&q[4], &q[6]);
+	aes_swap4(&q[5], &q[7]);
+
+	aes_swap8(&q[0], &q[4]);
+	aes_swap8(&q[1], &q[5]);
+	aes_swap8(&q[2], &q[6]);
+	aes_swap8(&q[3], &q[7]);
+}
+
+static void aes_ct_sbox(uint32_t* q)
+{
+	/*
+	 * adapted from bearssl, author Thomas Pourin
+	 * This S-box implementation is a straightforward translation of
+	 * the circuit described by Boyar and Peralta in "A new
+	 * combinational logic minimization technique with applications
+	 * to cryptology" (https://eprint.iacr.org/2009/191.pdf).
+	 *
+	 * Note that variables x* (input) and s* (output) are numbered
+	 * in "reverse" order (x0 is the high bit, x7 is the low bit).
+	 */
+
+	uint32_t s0;
+	uint32_t s1;
+	uint32_t s2;
+	uint32_t s3;
+	uint32_t s4;
+	uint32_t s5;
+	uint32_t s6;
+	uint32_t s7;
+	uint32_t t0;
+	uint32_t t1;
+	uint32_t t2;
+	uint32_t t3;
+	uint32_t t4;
+	uint32_t t5;
+	uint32_t t6;
+	uint32_t t7;
+	uint32_t t8;
+	uint32_t t9;
+	uint32_t t10;
+	uint32_t t11;
+	uint32_t t12;
+	uint32_t t13;
+	uint32_t t14;
+	uint32_t t15;
+	uint32_t t16;
+	uint32_t t17;
+	uint32_t t18;
+	uint32_t t19;
+	uint32_t t20;
+	uint32_t t21;
+	uint32_t t22;
+	uint32_t t23;
+	uint32_t t24;
+	uint32_t t25;
+	uint32_t t26;
+	uint32_t t27;
+	uint32_t t28;
+	uint32_t t29;
+	uint32_t t30;
+	uint32_t t31;
+	uint32_t t32;
+	uint32_t t33;
+	uint32_t t34;
+	uint32_t t35;
+	uint32_t t36;
+	uint32_t t37;
+	uint32_t t38;
+	uint32_t t39;
+	uint32_t t40;
+	uint32_t t41;
+	uint32_t t42;
+	uint32_t t43;
+	uint32_t t44;
+	uint32_t t45;
+	uint32_t t46;
+	uint32_t t47;
+	uint32_t t48;
+	uint32_t t49;
+	uint32_t t50;
+	uint32_t t51;
+	uint32_t t52;
+	uint32_t t53;
+	uint32_t t54;
+	uint32_t t55;
+	uint32_t t56;
+	uint32_t t57;
+	uint32_t t58;
+	uint32_t t59;
+	uint32_t t60;
+	uint32_t t61;
+	uint32_t t62;
+	uint32_t t63;
+	uint32_t t64;
+	uint32_t t65;
+	uint32_t t66;
+	uint32_t t67;
+	uint32_t x0;
+	uint32_t x1;
+	uint32_t x2;
+	uint32_t x3;
+	uint32_t x4;
+	uint32_t x5;
+	uint32_t x6;
+	uint32_t x7;
+	uint32_t y1;
+	uint32_t y2;
+	uint32_t y3;
+	uint32_t y4;
+	uint32_t y5;
+	uint32_t y6;
+	uint32_t y7;
+	uint32_t y8;
+	uint32_t y9;
+	uint32_t y10;
+	uint32_t y11;
+	uint32_t y12;
+	uint32_t y13;
+	uint32_t y14;
+	uint32_t y15;
+	uint32_t y16;
+	uint32_t y17;
+	uint32_t y18;
+	uint32_t y19;
+	uint32_t y20;
+	uint32_t y21;
+	uint32_t z0;
+	uint32_t z1;
+	uint32_t z2;
+	uint32_t z3;
+	uint32_t z4;
+	uint32_t z5;
+	uint32_t z6;
+	uint32_t z7;
+	uint32_t z8;
+	uint32_t z9;
+	uint32_t z10;
+	uint32_t z11;
+	uint32_t z12;
+	uint32_t z13;
+	uint32_t z14;
+	uint32_t z15;
+	uint32_t z16;
+	uint32_t z17;
+
+	x0 = q[7];
+	x1 = q[6];
+	x2 = q[5];
+	x3 = q[4];
+	x4 = q[3];
+	x5 = q[2];
+	x6 = q[1];
+	x7 = q[0];
+
+	/* top linear transformation */
+	y14 = x3 ^ x5;
+	y13 = x0 ^ x6;
+	y9 = x0 ^ x3;
+	y8 = x0 ^ x5;
+	t0 = x1 ^ x2;
+	y1 = t0 ^ x7;
+	y4 = y1 ^ x3;
+	y12 = y13 ^ y14;
+	y2 = y1 ^ x0;
+	y5 = y1 ^ x6;
+	y3 = y5 ^ y8;
+	t1 = x4 ^ y12;
+	y15 = t1 ^ x5;
+	y20 = t1 ^ x1;
+	y6 = y15 ^ x7;
+	y10 = y15 ^ t0;
+	y11 = y20 ^ y9;
+	y7 = x7 ^ y11;
+	y17 = y10 ^ y11;
+	y19 = y10 ^ y8;
+	y16 = t0 ^ y11;
+	y21 = y13 ^ y16;
+	y18 = x0 ^ y16;
+
+	/* non-linear section */
+	t2 = y12 & y15;
+	t3 = y3 & y6;
+	t4 = t3 ^ t2;
+	t5 = y4 & x7;
+	t6 = t5 ^ t2;
+	t7 = y13 & y16;
+	t8 = y5 & y1;
+	t9 = t8 ^ t7;
+	t10 = y2 & y7;
+	t11 = t10 ^ t7;
+	t12 = y9 & y11;
+	t13 = y14 & y17;
+	t14 = t13 ^ t12;
+	t15 = y8 & y10;
+	t16 = t15 ^ t12;
+	t17 = t4 ^ t14;
+	t18 = t6 ^ t16;
+	t19 = t9 ^ t14;
+	t20 = t11 ^ t16;
+	t21 = t17 ^ y20;
+	t22 = t18 ^ y19;
+	t23 = t19 ^ y21;
+	t24 = t20 ^ y18;
+
+	t25 = t21 ^ t22;
+	t26 = t21 & t23;
+	t27 = t24 ^ t26;
+	t28 = t25 & t27;
+	t29 = t28 ^ t22;
+	t30 = t23 ^ t24;
+	t31 = t22 ^ t26;
+	t32 = t31 & t30;
+	t33 = t32 ^ t24;
+	t34 = t23 ^ t33;
+	t35 = t27 ^ t33;
+	t36 = t24 & t35;
+	t37 = t36 ^ t34;
+	t38 = t27 ^ t36;
+	t39 = t29 & t38;
+	t40 = t25 ^ t39;
+
+	t41 = t40 ^ t37;
+	t42 = t29 ^ t33;
+	t43 = t29 ^ t40;
+	t44 = t33 ^ t37;
+	t45 = t42 ^ t41;
+	z0 = t44 & y15;
+	z1 = t37 & y6;
+	z2 = t33 & x7;
+	z3 = t43 & y16;
+	z4 = t40 & y1;
+	z5 = t29 & y7;
+	z6 = t42 & y11;
+	z7 = t45 & y17;
+	z8 = t41 & y10;
+	z9 = t44 & y12;
+	z10 = t37 & y3;
+	z11 = t33 & y4;
+	z12 = t43 & y13;
+	z13 = t40 & y5;
+	z14 = t29 & y2;
+	z15 = t42 & y9;
+	z16 = t45 & y14;
+	z17 = t41 & y8;
+
+	/* bottom linear transformation */
+	t46 = z15 ^ z16;
+	t47 = z10 ^ z11;
+	t48 = z5 ^ z13;
+	t49 = z9 ^ z10;
+	t50 = z2 ^ z12;
+	t51 = z2 ^ z5;
+	t52 = z7 ^ z8;
+	t53 = z0 ^ z3;
+	t54 = z6 ^ z7;
+	t55 = z16 ^ z17;
+	t56 = z12 ^ t48;
+	t57 = t50 ^ t53;
+	t58 = z4 ^ t46;
+	t59 = z3 ^ t54;
+	t60 = t46 ^ t57;
+	t61 = z14 ^ t57;
+	t62 = t52 ^ t58;
+	t63 = t49 ^ t58;
+	t64 = z4 ^ t59;
+	t65 = t61 ^ t62;
+	t66 = z1 ^ t63;
+	s0 = t59 ^ t63;
+	s6 = t56 ^ ~t62;
+	s7 = t48 ^ ~t60;
+	t67 = t64 ^ t65;
+	s3 = t53 ^ t66;
+	s4 = t51 ^ t66;
+	s5 = t47 ^ t65;
+	s1 = t64 ^ ~s3;
+	s2 = t55 ^ ~t67;
+
+	q[7] = s0;
+	q[6] = s1;
+	q[5] = s2;
+	q[4] = s3;
+	q[3] = s4;
+	q[2] = s5;
+	q[1] = s6;
+	q[0] = s7;
+}
+
+static uint32_t sub_word(uint32_t x)
+{
+	uint32_t q[8] = { 0 };
+
+	q[0] = x;
+	aes_ct_ortho(q);
+	aes_ct_sbox(q);
+	aes_ct_ortho(q);
+
+	return q[0];
+}
+
+static void aes_ct_isbox(uint32_t* q)
+{
+	/*
+	 * adapted from bearssl, author Thomas Pourin
+	 * AES S-box is:
+	 *   S(x) = A(I(x)) ^ 0x63
+	 * where I() is inversion in GF(256), and A() is a linear
+	 * transform (0 is formally defined to be its own inverse).
+	 * Since inversion is an involution, the inverse S-box can be
+	 * computed from the S-box as:
+	 *   iS(x) = B(S(B(x ^ 0x63)) ^ 0x63)
+	 * where B() is the inverse of A(). Indeed, for any y in GF(256):
+	 *   iS(S(y)) = B(A(I(B(A(I(y)) ^ 0x63 ^ 0x63))) ^ 0x63 ^ 0x63) = y
+	 *
+	 * Note: we reuse the implementation of the forward S-box,
+	 * instead of duplicating it here, so that total code size is
+	 * lower. By merging the B() transforms into the S-box circuit
+	 * we could make faster CBC decryption, but CBC decryption is
+	 * already quite faster than CBC encryption because we can
+	 * process two blocks in parallel.
+	 */
+
+	uint32_t q0;
+	uint32_t q1;
+	uint32_t q2;
+	uint32_t q3;
+	uint32_t q4;
+	uint32_t q5;
+	uint32_t q6;
+	uint32_t q7;
+
+	q0 = ~q[0];
+	q1 = ~q[1];
+	q2 = q[2];
+	q3 = q[3];
+	q4 = q[4];
+	q5 = ~q[5];
+	q6 = ~q[6];
+	q7 = q[7];
+
+	q[7] = q1 ^ q4 ^ q6;
+	q[6] = q0 ^ q3 ^ q5;
+	q[5] = q7 ^ q2 ^ q4;
+	q[4] = q6 ^ q1 ^ q3;
+	q[3] = q5 ^ q0 ^ q2;
+	q[2] = q4 ^ q7 ^ q1;
+	q[1] = q3 ^ q6 ^ q0;
+	q[0] = q2 ^ q5 ^ q7;
+
+	aes_ct_sbox(q);
+
+	q0 = ~q[0];
+	q1 = ~q[1];
+	q2 = q[2];
+	q3 = q[3];
+	q4 = q[4];
+	q5 = ~q[5];
+	q6 = ~q[6];
+	q7 = q[7];
+
+	q[7] = q1 ^ q4 ^ q6;
+	q[6] = q0 ^ q3 ^ q5;
+	q[5] = q7 ^ q2 ^ q4;
+	q[4] = q6 ^ q1 ^ q3;
+	q[3] = q5 ^ q0 ^ q2;
+	q[2] = q4 ^ q7 ^ q1;
+	q[1] = q3 ^ q6 ^ q0;
+	q[0] = q2 ^ q5 ^ q7;
+}
+
+static uint32_t sub_iword(uint32_t x)
+{
+	uint32_t q[8] = { 0 };
+
+	q[0] = x;
+	aes_ct_ortho(q);
+	aes_ct_isbox(q);
+	aes_ct_ortho(q);
+
+	return q[0];
+}
+
+static void aes_sub_bytes(uint8_t* ctx)
+{
+	uint32_t q[8] = { 0 };
+
+	q[0] = ctx[0];
+	q[1] = ctx[1];
+	q[2] = ctx[2];
+	q[3] = ctx[3];
+	q[4] = ctx[4];
+	q[5] = ctx[5];
+	q[6] = ctx[6];
+	q[7] = ctx[7];
+
+	aes_ct_ortho(q);
+	aes_ct_sbox(q);
+	aes_ct_ortho(q);
+
+	ctx[0] = (uint8_t)q[0];
+	ctx[1] = (uint8_t)q[1];
+	ctx[2] = (uint8_t)q[2];
+	ctx[3] = (uint8_t)q[3];
+	ctx[4] = (uint8_t)q[4];
+	ctx[5] = (uint8_t)q[5];
+	ctx[6] = (uint8_t)q[6];
+	ctx[7] = (uint8_t)q[7];
+
+	q[0] = ctx[8];
+	q[1] = ctx[9];
+	q[2] = ctx[10];
+	q[3] = ctx[11];
+	q[4] = ctx[12];
+	q[5] = ctx[13];
+	q[6] = ctx[14];
+	q[7] = ctx[15];
+
+	aes_ct_ortho(q);
+	aes_ct_sbox(q);
+	aes_ct_ortho(q);
+
+	ctx[8] = (uint8_t)q[0];
+	ctx[9] = (uint8_t)q[1];
+	ctx[10] = (uint8_t)q[2];
+	ctx[11] = (uint8_t)q[3];
+	ctx[12] = (uint8_t)q[4];
+	ctx[13] = (uint8_t)q[5];
+	ctx[14] = (uint8_t)q[6];
+	ctx[15] = (uint8_t)q[7];
+}
+
+static uint32_t aes_substitution(uint32_t rot)
+{
+	uint32_t val;
+	uint32_t res;
+
+	val = rot & 0xFFU;
+	res = (uint8_t)sub_word(val);
+	val = (rot >> 8) & 0xFFU;
+	res |= ((uint32_t)(uint8_t)sub_word(val) << 8);
+	val = (rot >> 16) & 0xFFU;
+	res |= ((uint32_t)(uint8_t)sub_word(val) << 16);
+	val = (rot >> 24) & 0xFFU;
+
+	return res | ((uint32_t)((uint8_t)sub_word(val)) << 24);
+}
+
+static void aes_invsub_bytes(uint8_t* ctx)
+{
+	uint32_t q[8] = { 0 };
+
+	q[0] = ctx[0];
+	q[1] = ctx[1];
+	q[2] = ctx[2];
+	q[3] = ctx[3];
+	q[4] = ctx[4];
+	q[5] = ctx[5];
+	q[6] = ctx[6];
+	q[7] = ctx[7];
+
+	aes_ct_ortho(q);
+	aes_ct_isbox(q);
+	aes_ct_ortho(q);
+
+	ctx[0] = (uint8_t)q[0];
+	ctx[1] = (uint8_t)q[1];
+	ctx[2] = (uint8_t)q[2];
+	ctx[3] = (uint8_t)q[3];
+	ctx[4] = (uint8_t)q[4];
+	ctx[5] = (uint8_t)q[5];
+	ctx[6] = (uint8_t)q[6];
+	ctx[7] = (uint8_t)q[7];
+
+	q[0] = ctx[8];
+	q[1] = ctx[9];
+	q[2] = ctx[10];
+	q[3] = ctx[11];
+	q[4] = ctx[12];
+	q[5] = ctx[13];
+	q[6] = ctx[14];
+	q[7] = ctx[15];
+
+	aes_ct_ortho(q);
+	aes_ct_isbox(q);
+	aes_ct_ortho(q);
+
+	ctx[8] = (uint8_t)q[0];
+	ctx[9] = (uint8_t)q[1];
+	ctx[10] = (uint8_t)q[2];
+	ctx[11] = (uint8_t)q[3];
+	ctx[12] = (uint8_t)q[4];
+	ctx[13] = (uint8_t)q[5];
+	ctx[14] = (uint8_t)q[6];
+	ctx[15] = (uint8_t)q[7];
+}
 
 static void aes_add_roundkey(uint8_t* ctx, const uint32_t *skeys)
 {
@@ -873,14 +1364,6 @@ static void aes_invshift_rows(uint8_t* ctx)
 	ctx[15] = tmp;
 }
 
-static void aes_invsub_bytes(uint8_t* ctx)
-{
-	for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; ++i)
-	{
-		ctx[i] = aes_isbox[ctx[i]];
-	}
-}
-
 static void aes_mix_columns(uint8_t* ctx)
 {
 	uint32_t s0;
@@ -935,30 +1418,6 @@ static void aes_shift_rows(uint8_t* ctx)
 	ctx[3] = tmp;
 }
 
-static void aes_sub_bytes(uint8_t* ctx, const uint8_t* sbox)
-{
-	for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; ++i)
-	{
-		ctx[i] = sbox[ctx[i]];
-	}
-}
-
-static uint32_t aes_substitution(uint32_t rot)
-{
-	uint32_t val;
-	uint32_t res;
-
-	val = rot & 0xFFU;
-	res = aes_sbox[val];
-	val = (rot >> 8) & 0xFFU;
-	res |= ((uint32_t)aes_sbox[val] << 8);
-	val = (rot >> 16) & 0xFFU;
-	res |= ((uint32_t)aes_sbox[val] << 16);
-	val = (rot >> 24) & 0xFFU;
-
-	return res | ((uint32_t)(aes_sbox[val]) << 24);
-}
-
 static void aes_decrypt_block(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input)
 {
 	const uint8_t* buf;
@@ -991,13 +1450,13 @@ static void aes_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const u
 
 	for (size_t i = 1; i < ctx->rounds; ++i)
 	{
-		aes_sub_bytes(buf, aes_sbox);
+		aes_sub_bytes(buf);
 		aes_shift_rows(buf);
 		aes_mix_columns(buf);
 		aes_add_roundkey(buf, ctx->roundkeys + (i << 2));
 	}
 
-	aes_sub_bytes(buf, aes_sbox);
+	aes_sub_bytes(buf);
 	aes_shift_rows(buf);
 	aes_add_roundkey(buf, ctx->roundkeys + (ctx->rounds << 2));
 	qsc_memutils_copy(output, buf, QSC_AES_BLOCK_SIZE);
@@ -1035,36 +1494,6 @@ static void aes_expand_sub(uint32_t* key, uint32_t keyindex, uint32_t keyoffset)
 	++keyindex;
 	++subkey;
 	key[keyindex] = key[subkey] ^ key[keyindex - 1];
-}
-
-static void aes_prefetch_sbox(bool encryption)
-{
-	if (encryption)
-	{
-#if defined(QSC_SYSTEM_AVX_INTRINSICS)
-		qsc_memutils_prefetch_l2(aes_sbox, sizeof(aes_sbox));
-#else
-		volatile uint32_t dmy = 0;
-
-		for (size_t i = 0; i < 256; ++i)
-		{
-			dmy += aes_sbox[i];
-		}
-#endif
-	}
-	else
-	{
-#if defined(QSC_SYSTEM_AVX_INTRINSICS)
-		qsc_memutils_prefetch_l2(aes_isbox, sizeof(aes_isbox));
-#else
-		volatile uint32_t dmy = 0;
-
-		for (size_t i = 0; i < 256; ++i)
-		{
-			dmy += aes_isbox[i];
-		}
-#endif
-	}
 }
 
 static void aes_standard_expand(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams)
@@ -1150,10 +1579,6 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 		ctx->rounds = 0;
 		ctx->roundkeylen = 0;
 	}
-
-#if !defined(QSC_SYSTEM_AESNI_ENABLED)
-	aes_prefetch_sbox(encryption);
-#endif
 }
 
 /* cbc mode */
@@ -1646,46 +2071,7 @@ bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t* output, const 
 
 /* aes-gcm */
 
-static void gcm_mult_fallback(const uint8_t* X, const uint8_t* Y, uint8_t* result)
-{
-	uint8_t Z[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t V[QSC_AES_BLOCK_SIZE];
-	int32_t lsb;
-
-	qsc_memutils_copy(V, Y, QSC_AES_BLOCK_SIZE);
-
-	for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; ++i) 
-	{
-		for (int32_t bit = 7; bit >= 0; bit--) 
-		{
-			if ((X[i] >> bit) & 1) 
-			{
-				for (int32_t j = 0; j < QSC_AES_BLOCK_SIZE; j++)
-				{
-					Z[j] ^= V[j];
-				}
-			}
-
-			lsb = V[QSC_AES_BLOCK_SIZE - 1] & 1;
-
-			for (size_t j = QSC_AES_BLOCK_SIZE - 1; j > 0; j--)
-			{
-				V[j] = (V[j] >> 1) | ((V[j - 1] & 1) << 7);
-			}
-
-			V[0] >>= 1;
-
-			if (lsb)
-			{
-				V[0] ^= 0xe1;
-			}
-		}
-	}
-
-	qsc_memutils_copy(result, Z, QSC_AES_BLOCK_SIZE);
-}
-
-#ifdef QSC_SYSTEM_AVX_INTRINSICS
+#if defined(QSC_SYSTEM_AVX_INTRINSICS)
 
 static void gcm_clmul(const __m128i a, const __m128i b, __m128i* c, __m128i* d)
 {
@@ -1738,17 +2124,17 @@ static __m128i gcm_mix(__m128i dx)
     return _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(_mm_xor_si128(e, f), g), hh), dx);
 }
 
-static void gcm_mult_avx(uint8_t result[16], const uint8_t X[16], const uint8_t Y[16])
+static void gcm_mult(const uint8_t* x, const uint8_t* y, uint8_t* result)
 {
 	__m128i a = { 0 };
 	__m128i b = { 0 };
 	__m128i c = { 0 };
 	__m128i d = { 0 };
 
-    for (size_t i = 0; i < 16; i++) 
+    for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; i++)
 	{
-        ((uint8_t*)&a)[i] = X[15 - i];
-        ((uint8_t*)&b)[i] = Y[15 - i];
+        ((uint8_t*)&a)[i] = x[15 - i];
+        ((uint8_t*)&b)[i] = y[15 - i];
     }
 
     gcm_clmul(a, b, &c, &d);
@@ -1759,34 +2145,62 @@ static void gcm_mult_avx(uint8_t result[16], const uint8_t X[16], const uint8_t 
 
     c = _mm_xor_si128(xh, d);
 
-    for (size_t i = 0; i < 16; i++)
+    for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; i++)
 	{
         result[i] = ((uint8_t*)&c)[15 - i];
     }
 }
 
-#endif
-
-static void gcm_mult(const uint8_t* X, const uint8_t* Y, uint8_t* result)
-{
-#ifdef QSC_SYSTEM_AVX_INTRINSICS
-    gcm_mult_avx(result, X, Y);
 #else
-    gcm_mult_fallback(X, Y, result);
-#endif
+
+static void gcm_mult(const uint8_t* x, const uint8_t* y, uint8_t* result)
+{
+	uint8_t v[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t z[QSC_AES_BLOCK_SIZE] = { 0 };
+	int32_t lsb;
+
+	qsc_memutils_copy(v, y, QSC_AES_BLOCK_SIZE);
+
+	for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; ++i)
+	{
+		for (int32_t bit = 7; bit >= 0; bit--)
+		{
+			if ((x[i] >> bit) & 1)
+			{
+				for (int32_t j = 0; j < QSC_AES_BLOCK_SIZE; j++)
+				{
+					z[j] ^= v[j];
+				}
+			}
+
+			lsb = v[QSC_AES_BLOCK_SIZE - 1] & 1;
+
+			for (size_t j = QSC_AES_BLOCK_SIZE - 1; j > 0; j--)
+			{
+				v[j] = (v[j] >> 1) | ((v[j - 1] & 1) << 7);
+			}
+
+			v[0] >>= 1;
+
+			if (lsb)
+			{
+				v[0] ^= 0xe1;
+			}
+		}
+	}
+
+	qsc_memutils_copy(result, z, QSC_AES_BLOCK_SIZE);
 }
 
-static void ghash_update(uint8_t* S, const uint8_t* block, const uint8_t* H)
+#endif
+
+static void ghash_update(uint8_t* s, const uint8_t* block, const uint8_t* h)
 {
     uint8_t tmp[QSC_AES_BLOCK_SIZE];
 
-    for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; ++i)
-	{
-        S[i] ^= block[i];
-    }
-
-    gcm_mult(S, H, tmp);
-    qsc_memutils_copy(S, tmp, QSC_AES_BLOCK_SIZE);
+	qsc_memutils_xor(s, block, QSC_AES_BLOCK_SIZE);
+    gcm_mult(s, h, tmp);
+    qsc_memutils_copy(s, tmp, QSC_AES_BLOCK_SIZE);
 }
 
 static void aes_gcm256_finalize(qsc_aes_gcm256_state* ctx, uint8_t* tag)
@@ -1794,10 +2208,10 @@ static void aes_gcm256_finalize(qsc_aes_gcm256_state* ctx, uint8_t* tag)
     uint8_t lblock[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t tblock[QSC_AES_BLOCK_SIZE];
 
-    for (size_t i = 0; i < 8; ++i) 
+    for (size_t i = 0; i < sizeof(uint64_t); ++i)
 	{
-        lblock[i] = (uint8_t)(ctx->aadlen >> (56 - 8 * i));
-        lblock[8 + i] = (uint8_t)(ctx->ctlen  >> (56 - 8 * i));
+        lblock[i] = (uint8_t)(ctx->aadlen >> (56 - sizeof(uint64_t) * i));
+        lblock[sizeof(uint64_t) + i] = (uint8_t)(ctx->ctlen  >> (56 - sizeof(uint64_t) * i));
     }
 
     ghash_update(ctx->S, lblock, ctx->H);
@@ -1829,7 +2243,7 @@ void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* dat
         ghash_update(ctx->S, block, ctx->H);
     }
 
-    ctx->aadlen += ((uint64_t)datalen) * 8;
+    ctx->aadlen += ((uint64_t)datalen) * sizeof(uint64_t);
 }
 
 bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
@@ -1879,12 +2293,12 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
         qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
     }
 
-    ctx->ctlen += ((uint64_t)clen) * 8;
+    ctx->ctlen += ((uint64_t)clen) * sizeof(uint64_t);
 
-    for (size_t i = 0; i < 8; i++)
+    for (size_t i = 0; i < sizeof(uint64_t); i++)
 	{
-        lblock[i] = (uint8_t)(ctx->aadlen >> (56 - 8 * i));
-        lblock[8 + i] = (uint8_t)(ctx->ctlen  >> (56 - 8 * i));
+        lblock[i] = (uint8_t)(ctx->aadlen >> (56 - sizeof(uint64_t) * i));
+        lblock[sizeof(uint64_t) + i] = (uint8_t)(ctx->ctlen  >> (56 - sizeof(uint64_t) * i));
     }
 
     ghash_update(ctx->S, lblock, ctx->H);
@@ -1957,7 +2371,7 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
         qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
     }
 
-    ctx->ctlen += ((uint64_t)length) * 8;
+    ctx->ctlen += ((uint64_t)length) * sizeof(uint64_t);
 
 	aes_gcm256_finalize(ctx, output + length);
 }
@@ -1974,7 +2388,7 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
     /* compute hash subkey: H = AES(K, 0^128) */
     qsc_aes_ecb_encrypt_block(&ctx->cstate, ctx->H, zero);
 
-    /* compute pre�counter block J0 based on IV length */
+    /* compute pre–counter block J0 based on IV length */
     if (keyparams->noncelen == 12) 
 	{
         qsc_memutils_copy(ctx->J0, keyparams->nonce, keyparams->noncelen);
@@ -1997,11 +2411,11 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 			qsc_memutils_clear(buf, buflen);
 			qsc_memutils_copy(buf, keyparams->nonce, keyparams->noncelen);
 
-			ivbits = keyparams->noncelen * 8;
+			ivbits = keyparams->noncelen * sizeof(uint64_t);
 
-			for (size_t i = 0; i < 8; ++i)
+			for (size_t i = 0; i < sizeof(uint64_t); ++i)
 			{
-				buf[buflen - 8 + i] = (uint8_t)(ivbits >> (56 - 8 * i));
+				buf[buflen - sizeof(uint64_t) + i] = (uint8_t)(ivbits >> (56 - sizeof(uint64_t) * i));
 			}
 
 			qsc_memutils_clear(ctx->J0, QSC_AES_BLOCK_SIZE);

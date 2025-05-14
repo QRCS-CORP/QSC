@@ -538,7 +538,6 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm256_state
     uint8_t S[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
     uint64_t aadlen;						/*!< [uint64_t] AAD length in bits */
     uint64_t ctlen;							/*!< [uint64_t] Ciphertext length in bits */
-
 } qsc_aes_gcm256_state;
 
 /**
