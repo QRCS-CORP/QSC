@@ -90,8 +90,8 @@ static void print_title(void)
 	qsctest_print_line("*                                                 *");
 	qsctest_print_line("* Release:   v1.0.0.6c (A6)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      March 14, 2025						  *");
-	qsctest_print_line("* Contact:   john.underhill@protonmail.com        *");
+	qsctest_print_line("* Date:      March 14, 2025			      *");
+	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
 }
@@ -145,6 +145,9 @@ int32_t main(void)
 	qsc_consoleutils_print_line("");
 #endif
 
+	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
+	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
+	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file */
 	valid = qsc_selftest_symmetric_run();
 
 	if (valid == true)
