@@ -469,8 +469,10 @@ bool qsctest_aes256_gcm_kat()
     uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
     uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };
     uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+	uint8_t exp2[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
     uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 }; /* 96-bit IV */
     uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	uint8_t shdr[QSC_AES256_KEY_SIZE] = { 0x80 };
     uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0 }; /* 16-byte plaintext (all zeros) */
     bool status;
 
@@ -480,11 +482,12 @@ bool qsctest_aes256_gcm_kat()
     qsctest_hex_to_bin("000000000000000000000000", iv, sizeof(iv));
     qsctest_hex_to_bin("00000000000000000000000000000000", ptxt, sizeof(ptxt));
     qsctest_hex_to_bin("CEA7403D4D606B6E074EC5D3BAF39D18D0D1C8A799996BF0265B98B5D48AB919", exp, sizeof(exp));
+	qsctest_hex_to_bin("CEA7403D4D606B6E074EC5D3BAF39D180839260DFD972BAAF4E6D9D37948C842", exp2, sizeof(exp2));
 
 	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, iv, QSC_GCM_NONCE_SIZE, NULL, 0 };
 
     /* encryption test */
-    qsc_aes_gcm256_initialize(&state, &kp);
+    qsc_aes_gcm256_initialize(&state, &kp, true);
     qsc_aes_gcm256_encrypt(&state, ctxt, ptxt, sizeof(ptxt));
 
     if (qsc_intutils_are_equal8(ctxt, exp, sizeof(exp)) == false)
@@ -498,7 +501,7 @@ bool qsctest_aes256_gcm_kat()
 
     /* reinitialize the state (to reset the counter) for decryption */
 	qsc_memutils_clear(iv, sizeof(iv));
-    qsc_aes_gcm256_initialize(&state, &kp);
+    qsc_aes_gcm256_initialize(&state, &kp, false);
 
     if (qsc_aes_gcm256_decrypt(&state, dec, ctxt, sizeof(ctxt)) == false)
     {
@@ -509,6 +512,36 @@ bool qsctest_aes256_gcm_kat()
     {
         status = false;
     }
+
+	/* test the AEAD function */
+
+	/* encryption test */
+	qsc_aes_gcm256_initialize(&state, &kp, true);
+	qsc_aes_gcm256_set_associated(&state, shdr, sizeof(shdr));
+	qsc_aes_gcm256_transform(&state, ctxt, ptxt, sizeof(ptxt));
+
+	if (qsc_intutils_are_equal8(ctxt, exp2, sizeof(exp2)) == false)
+	{
+		status = false;
+	}
+
+	qsc_aes_gcm256_dispose(&state);
+
+	/* decryption test */
+
+	qsc_memutils_clear(iv, sizeof(iv));
+	qsc_aes_gcm256_initialize(&state, &kp, false);
+	qsc_aes_gcm256_set_associated(&state, shdr, sizeof(shdr));
+
+	if (qsc_aes_gcm256_transform(&state, dec, ctxt, sizeof(ctxt)) == false)
+	{
+		status = false;
+	}
+
+	if (qsc_intutils_are_equal8(dec, ptxt, sizeof(ptxt)) == false)
+	{
+		status = false;
+	}
 
     return status;
 }

@@ -538,6 +538,7 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm256_state
     uint8_t S[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
     uint64_t aadlen;						/*!< [uint64_t] AAD length in bits */
     uint64_t ctlen;							/*!< [uint64_t] Ciphertext length in bits */
+	bool encrypt;							/*!< [bool] Initialized for encryption */
 } qsc_aes_gcm256_state;
 
 /**
@@ -549,7 +550,7 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm256_state
  * \param ctx:	[struct] Pointer to an initialized qsc_aes_gcm256_state structure.
  * \param output:	[uint8_t*] Pointer to the plaintext buffer.
  * \param input:	[const uint8_t*] Pointer to the ciphertext data with the appended MAC.
- * \param length:	[size_t] Length of the input ciphertext in bytes.
+ * \param length:	[size_t] Length of the input ciphertext in bytes including the MAC tag length.
  *
  * \return			[bool] Returns \c true if the transformation and MAC verification was successful; otherwise, \c false.
  *
@@ -592,12 +593,13 @@ QSC_EXPORT_API void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* o
  *
  * \param ctx:     [struct] Pointer to a qsc_aes_gcm256_state structure to initialize.
  * \param keyparams: [const struct] Pointer to a constant qsc_aes_keyparams structure that provides the key, nonce, and optional info.
+ * \param encryption:	[bool] A flag that specifies true for encryption, false for decryption.
  *
  * \warning Must be called before using qsc_aes_gcm256_set_associated, qsc_aes_gcm256_encrypt or qsc_aes_gcm256_decrypt.
  *
  * \sa qsc_aes_gcm256_decrypt, qsc_aes_gcm256_encrypt, qsc_aes_gcm256_dispose
  */
-QSC_EXPORT_API void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparams* keyparams);
+QSC_EXPORT_API void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparams* keyparams, bool encryption);
 
 /**
  * \brief Set the associated data (AAD) for GCM-256 authenticated encryption.
@@ -612,6 +614,22 @@ QSC_EXPORT_API void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const q
  * \sa qsc_aes_gcm256_encrypt
  */
 QSC_EXPORT_API void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* data, size_t datalen);
+
+/**
+ * \brief Transform an array of bytes.
+ *
+ * In encryption mode, the input plain-text is encrypted and an authentication MAC code is appended
+ * to the cipher-text. In decryption mode, the input cipher-text is authenticated and compared to the MAC code.
+ * If the codes do not match, the cipher-text is not decrypted and the call fails.
+ *
+ * \param ctx:			[qsc_aes_gcm256_state*] A pointer to the cipher state structure.
+ * \param output:		[uint8_t*] A pointer to the output array.
+ * \param input:		[const uint8_t*] A pointer to the input array.
+ * \param length:		[size_t] The number of bytes to transform.
+ *
+ * \return				[bool] Returns true if the data was transformed successfully, false on failure.
+ */
+QSC_EXPORT_API bool qsc_aes_gcm256_transform(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 QSC_CPLUSPLUS_ENABLED_END
 

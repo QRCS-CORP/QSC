@@ -186,28 +186,28 @@ static void aes_encrypt_blockw(qsc_aes_state* ctx, __m512i* output, const __m512
 }
 #endif
 
-static void aes_expand_rot(__m128i* Key, size_t Index, size_t Offset)
+static void aes_expand_rot(__m128i* key, size_t index, size_t offset)
 {
 	__m128i pkb;
 
-	pkb = Key[Index - Offset];
-	Key[Index] = _mm_shuffle_epi32(Key[Index], 0xFF);
+	pkb = key[index - offset];
+	key[index] = _mm_shuffle_epi32(key[index], 0xFF);
 	pkb = _mm_xor_si128(pkb, _mm_slli_si128(pkb, 0x04));
 	pkb = _mm_xor_si128(pkb, _mm_slli_si128(pkb, 0x04));
 	pkb = _mm_xor_si128(pkb, _mm_slli_si128(pkb, 0x04));
-	Key[Index] = _mm_xor_si128(pkb, Key[Index]);
+	key[index] = _mm_xor_si128(pkb, key[index]);
 }
 
-static void aes_expand_sub(__m128i* Key, size_t Index, size_t Offset)
+static void aes_expand_sub(__m128i* key, size_t index, size_t offset)
 {
 	__m128i pkb;
 
-	pkb = Key[Index - Offset];
-	Key[Index] = _mm_shuffle_epi32(_mm_aeskeygenassist_si128(Key[Index - 1], 0x0), 0xAA);
+	pkb = key[index - offset];
+	key[index] = _mm_shuffle_epi32(_mm_aeskeygenassist_si128(key[index - 1], 0x0), 0xAA);
 	pkb = _mm_xor_si128(pkb, _mm_slli_si128(pkb, 0x04));
 	pkb = _mm_xor_si128(pkb, _mm_slli_si128(pkb, 0x04));
 	pkb = _mm_xor_si128(pkb, _mm_slli_si128(pkb, 0x04));
-	Key[Index] = _mm_xor_si128(pkb, Key[Index]);
+	key[index] = _mm_xor_si128(pkb, key[index]);
 }
 
 static void aes_standard_expand(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams)
@@ -354,7 +354,7 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 		__m512i inpw;
 		__m512i ivtw;
 		__m512i otpw;
-		uint8_t ivtb[AVX512_BLOCK_SIZE];
+		uint8_t ivtb[AVX512_BLOCK_SIZE] = { 0 };
 
 		/* assemble the first block in the chain */
 		qsc_memutils_copy(ivtb, ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -619,7 +619,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 		__m512i inpw;
 		__m512i ncew;
 		__m512i otpw;
-		uint8_t nceb[AVX512_BLOCK_SIZE];
+		uint8_t nceb[AVX512_BLOCK_SIZE] = { 0 };
 
 		/* load the ctr nonce block */
 		qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -795,7 +795,7 @@ static void aes_ct_ortho(uint32_t* q)
 static void aes_ct_sbox(uint32_t* q)
 {
 	/*
-	 * adapted from bearssl, author Thomas Pornin
+	 * adapted from bearssl, author Thomas Pourin
 	 * This S-box implementation is a straightforward translation of
 	 * the circuit described by Boyar and Peralta in "A new
 	 * combinational logic minimization technique with applications
@@ -1086,7 +1086,7 @@ static uint32_t sub_word(uint32_t x)
 static void aes_ct_isbox(uint32_t* q)
 {
 	/*
-	 * adapted from bearssl, author Thomas Pornin
+	 * adapted from bearssl, author Thomas Pourin
 	 * AES S-box is:
 	 *   S(x) = A(I(x)) ^ 0x63
 	 * where I() is inversion in GF(256), and A() is a linear
@@ -1443,7 +1443,7 @@ static void aes_decrypt_block(const qsc_aes_state* ctx, uint8_t* output, const u
 
 static void aes_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input)
 {
-	uint8_t buf[QSC_AES_BLOCK_SIZE];
+	uint8_t buf[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	qsc_memutils_copy(buf, input, QSC_AES_BLOCK_SIZE);
 	aes_add_roundkey(buf, ctx->roundkeys);
@@ -1866,7 +1866,7 @@ static void aes_hba256_finalize(qsc_aes_hba256_state* ctx, uint8_t* output)
 {
 	uint8_t mkey[HBA256_MKEY_SIZE] = { 0 };
 	uint8_t pctr[sizeof(uint64_t)] = { 0 };
-	uint8_t tmpn[HBA_NAME_SIZE];
+	uint8_t tmpn[HBA_NAME_SIZE] = { 0 };
 	uint64_t mctr;
 
 	/* version 1.1a add the nonce, ciphertext, and encoding sizes to the counter */
@@ -1906,7 +1906,7 @@ static void aes_hba256_genkeys(const qsc_aes_keyparams* keyparams, uint8_t* cprk
 {
 #if defined(QSC_HBA_KMAC_EXTENSION)
 
-	qsc_keccak_state kstate;
+	qsc_keccak_state kstate = { 0 };
 	uint8_t sbuf[QSC_KECCAK_256_RATE] = { 0 };
 
 	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
@@ -2196,7 +2196,7 @@ static void gcm_mult(const uint8_t* x, const uint8_t* y, uint8_t* result)
 
 static void ghash_update(uint8_t* s, const uint8_t* block, const uint8_t* h)
 {
-    uint8_t tmp[QSC_AES_BLOCK_SIZE];
+    uint8_t tmp[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	qsc_memutils_xor(s, block, QSC_AES_BLOCK_SIZE);
     gcm_mult(s, h, tmp);
@@ -2206,7 +2206,7 @@ static void ghash_update(uint8_t* s, const uint8_t* block, const uint8_t* h)
 static void aes_gcm256_finalize(qsc_aes_gcm256_state* ctx, uint8_t* tag)
 {
     uint8_t lblock[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t tblock[QSC_AES_BLOCK_SIZE];
+	uint8_t tblock[QSC_AES_BLOCK_SIZE] = { 0 };
 
     for (size_t i = 0; i < sizeof(uint64_t); ++i)
 	{
@@ -2223,39 +2223,16 @@ static void aes_gcm256_finalize(qsc_aes_gcm256_state* ctx, uint8_t* tag)
     }
 }
 
-void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* data, size_t datalen)
-{
-	assert(ctx != NULL);
-	assert(data != NULL);
-
-    size_t i;
-
-    for (i = 0; i + QSC_AES_BLOCK_SIZE <= datalen; i += QSC_AES_BLOCK_SIZE) 
-	{
-        ghash_update(ctx->S, data + i, ctx->H);
-    }
-
-    if (i < datalen) 
-	{
-        uint8_t block[QSC_AES_BLOCK_SIZE] = { 0 };
-
-        qsc_memutils_copy(block, data + i, datalen - i);
-        ghash_update(ctx->S, block, ctx->H);
-    }
-
-    ctx->aadlen += ((uint64_t)datalen) * sizeof(uint64_t);
-}
-
 bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
 	assert(ctx != NULL);
 	assert(output != NULL);
 	assert(input != NULL);
 
-    uint8_t ctag[QSC_AES_BLOCK_SIZE];
-    uint8_t kstream[QSC_AES_BLOCK_SIZE];
+    uint8_t ctag[QSC_AES_BLOCK_SIZE] = { 0 };
+    uint8_t kstream[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t lblock[QSC_AES_BLOCK_SIZE] = { 0 };
-    uint8_t tblock[QSC_AES_BLOCK_SIZE];
+    uint8_t tblock[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
 	size_t clen;
 	bool res;
@@ -2336,7 +2313,7 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 	assert(output != NULL);
 	assert(input != NULL);
 
-    uint8_t keystream[QSC_AES_BLOCK_SIZE];
+    uint8_t keystream[QSC_AES_BLOCK_SIZE] = { 0 };
     size_t i;
 
     for (i = 0; i + QSC_AES_BLOCK_SIZE <= length; i += QSC_AES_BLOCK_SIZE)
@@ -2376,13 +2353,14 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 	aes_gcm256_finalize(ctx, output + length);
 }
 
-void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparams* keyparams)
+void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparams* keyparams, bool encryption)
 {
 	assert(ctx != NULL);
 	assert(keyparams != NULL);
 
     uint8_t zero[QSC_AES_BLOCK_SIZE] = { 0 };
 
+	ctx->encrypt = encryption;
     qsc_aes_initialize(&ctx->cstate, keyparams, true, qsc_aes_cipher_256);
 
     /* compute hash subkey: H = AES(K, 0^128) */
@@ -2438,3 +2416,42 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
     qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
 }
 
+void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* data, size_t datalen)
+{
+	assert(ctx != NULL);
+	assert(data != NULL);
+
+    size_t i;
+
+    for (i = 0; i + QSC_AES_BLOCK_SIZE <= datalen; i += QSC_AES_BLOCK_SIZE) 
+	{
+        ghash_update(ctx->S, data + i, ctx->H);
+    }
+
+    if (i < datalen) 
+	{
+        uint8_t block[QSC_AES_BLOCK_SIZE] = { 0 };
+
+        qsc_memutils_copy(block, data + i, datalen - i);
+        ghash_update(ctx->S, block, ctx->H);
+    }
+
+    ctx->aadlen += ((uint64_t)datalen) * sizeof(uint64_t);
+}
+
+bool qsc_aes_gcm256_transform(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
+{
+	bool res;
+
+	if (ctx->encrypt == true)
+	{
+		qsc_aes_gcm256_encrypt(ctx, output, input, length);
+		res = true;
+	}
+	else
+	{
+		res = qsc_aes_gcm256_decrypt(ctx, output, input, length + QSC_GCM256_MAC_SIZE);
+	}
+
+	return res;
+}

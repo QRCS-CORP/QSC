@@ -481,7 +481,7 @@ static bool aes_gcm256_kat()
 	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, iv, QSC_GCM_NONCE_SIZE, NULL, 0 };
 
     /* encryption test */
-    qsc_aes_gcm256_initialize(&state, &kp);
+    qsc_aes_gcm256_initialize(&state, &kp, true);
     qsc_aes_gcm256_encrypt(&state, ctxt, ptxt, sizeof(ptxt));
 
     if (qsc_intutils_are_equal8(ctxt, exp, sizeof(exp)) == false)
@@ -495,7 +495,7 @@ static bool aes_gcm256_kat()
 
     /* reinitialize the state (to reset the counter) for decryption */
 	qsc_memutils_clear(iv, sizeof(iv));
-    qsc_aes_gcm256_initialize(&state, &kp);
+    qsc_aes_gcm256_initialize(&state, &kp, false);
 
     if (qsc_aes_gcm256_decrypt(&state, dec, ctxt, sizeof(ctxt)) == false)
     {
