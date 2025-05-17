@@ -255,31 +255,39 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* addr
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
-	WSADATA wsd;
-	int32_t err;
-	int32_t slen;
+    WSADATA  wsd;
+    int32_t  err;
 
-	if (WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd) == 0)
-	{
-		struct sockaddr_in insock4 = { 0 };
+    if (WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd) == 0)
+    {
+        struct sockaddr_in insock4 = { 0 };
+        int32_t            slen    = (int32_t)sizeof(insock4);   /* correct size */
 
-		slen = QSC_IPINFO_IPV4_BYTELEN;
-		insock4.sin_family = AF_INET;
-		
-		err = WSAStringToAddressW((LPWSTR)address->ipv4, AF_INET, NULL, (LPSOCKADDR)&insock4, &slen);
-		
-		if (err == 0 && slen > 0)
-		{
-			char aurl[NI_MAXSERV] = { 0 };
+        insock4.sin_family = AF_INET;
 
-			if (getnameinfo((const SOCKADDR*)&insock4, (socklen_t)sizeof(insock4), (PCHAR)aurl, (DWORD)sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
-			{
-				qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
-			}
-		}
+        err = WSAStringToAddressW((LPWSTR)address->ipv4,
+                                  AF_INET,
+                                  NULL,
+                                  (LPSOCKADDR)&insock4,
+                                  &slen);
 
-		WSACleanup();
-	}
+        if (err == 0)
+        {
+            char aurl[NI_MAXSERV] = { 0 };
+
+            if (getnameinfo((const SOCKADDR*)&insock4,
+                            (socklen_t)sizeof(insock4),
+                            (PCHAR)aurl,
+                            (DWORD)sizeof(aurl),
+                            NULL, 0, NI_NAMEREQD) == 0)
+            {
+                qsc_stringutils_copy_string(host,
+                                            QSC_NETUTILS_HOSTS_NAME_SIZE,
+                                            aurl);
+            }
+        }
+        (void)WSACleanup();
+    }
 	
 #else
 

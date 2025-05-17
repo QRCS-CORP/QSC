@@ -1,10 +1,6 @@
 #include "winutils.h"
 #include "memutils.h"
 
-#ifndef ERROR_TRANSACTIONAL_CONFLICT
-#   define ERROR_TRANSACTIONAL_CONFLICT 6800  /* 0x1A90, same as MS SDK */
-#endif
-
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #   include "stringutils.h"
 #   include <stdbool.h>
@@ -31,6 +27,10 @@
 #       include "consoleutils.h"
 #       include "fileutils.h"
 #   endif
+
+#if !defined(ERROR_TRANSACTIONAL_CONFLICT)
+#   define ERROR_TRANSACTIONAL_CONFLICT 6800  /* 0x1A90, same as MS SDK */
+#endif
 
 typedef struct AttributeDescription
 {
@@ -427,10 +427,13 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
         if (rval == ERROR_BUFFER_OVERFLOW)
         {
-            padd = (IP_ADAPTER_ADDRESSES*)realloc(padd, ulen);
+            IP_ADAPTER_ADDRESSES* ptmp;
 
-            if (padd == NULL)
+            ptmp = (IP_ADAPTER_ADDRESSES*)realloc(padd, ulen);
+
+            if (ptmp == NULL)
             {
+                padd = ptmp;
                 tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
                 return tlen;
             }
@@ -449,8 +452,8 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
                 char fname[128] = { 0 };
                 char desc [256] = { 0 };
 
-                wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
-                wide_to_utf8(cadd->Description , desc , sizeof(desc));
+                winutils_wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
+                winutils_wide_to_utf8(cadd->Description , desc , sizeof(desc));
 
                 tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Adaptor Name:\t\t%s\n", fname);
                 tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Description:\t\t%s\n", desc);
@@ -1055,12 +1058,17 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
                     &hres,
                     NULL);
 
-                if (pinfo != NULL && res == true)
+                if (pinfo && res == true)
                 {
                     for (DWORD i = 0; i < dret; i++)
                     {
                         char sbuf[QSC_WINTOOLS_SERVICE_BUFFER_SIZE] = { 0 };
                         size_t elen;
+
+                        if (((i + 1U) * sizeof(ENUM_SERVICE_STATUS_PROCESS)) > llen)
+                        {
+                            break;
+                        }
 
 #if !defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
                         const char* pstr;
@@ -1077,15 +1085,15 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
 
 #if defined(QSC_WINTOOLS_SERVICE_LIST_DESCRIPTION)
 #   if defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
-                        snprintf(sbuf, QSC_WINTOOLS_SERVICE_LIST_SIZE, "%s%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName);
+                        snprintf(sbuf, sizeof(sbuf), "%s%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName);
 #   else
-                        snprintf(sbuf, QSC_WINTOOLS_SERVICE_LIST_SIZE, "%s\t%s\t%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName, pstr);
+                        snprintf(sbuf, sizeof(sbuf), "%s\t%s\t%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName, pstr);
 #   endif
 #else
 #   if defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
-                        snprintf(sbuf, QSC_WINTOOLS_SERVICE_LIST_SIZE, "%s\n", pinfo[i].lpServiceName);
+                        snprintf(sbuf, sizeof(sbuf), "%s\n", pinfo[i].lpServiceName);
 #   else
-                        snprintf(sbuf, QSC_WINTOOLS_SERVICE_LIST_SIZE, "%s\t%s\n", pinfo[i].lpServiceName, pstr);
+                        snprintf(sbuf, sizeof(sbuf), "%s\t%s\n", pinfo[i].lpServiceName, pstr);
 #   endif
 #endif
 

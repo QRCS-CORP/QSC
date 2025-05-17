@@ -44,6 +44,8 @@
 #include "common.h"
 #include <stdarg.h>
 
+QSC_CPLUSPLUS_ENABLED_START
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     /* Windows-specific thread and mutex definitions */
     QSC_SYSTEM_CONDITION_IGNORE(5105)
@@ -62,8 +64,6 @@
 #endif
 
 typedef void (*qsc_thread_func_t)(void * /* arg */);
-
-QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file async.h

@@ -34,71 +34,79 @@ THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void *arg)
     return 0;
 }
 
-bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* context, size_t nthreads)
+bool qsc_async_parallel_for(void (*task)(void *context, size_t index),
+                            void *context, size_t nthreads)
 {
     assert(task != NULL);
 
-    bool res = false;
+    bool   res = false;
 
-    if (task != NULL && nthreads != 0)
+    if ((task != NULL) && (nthreads > 0U))
     {
-        qsc_thread* threads;
-        async_thread_task_t* tasks;
+        qsc_thread           *threads = NULL;
+        async_thread_task_t  *tasks   = NULL;
+        size_t                created = 0U;     /* count of live threads */
 
-        threads = (qsc_thread*)qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
-        tasks = (async_thread_task_t*)qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
+        threads = qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
+        tasks   = qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
 
-        if (threads != NULL && tasks != NULL)
+        if ((threads != NULL) && (tasks != NULL))
         {
             qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
-            qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
-            res = true;
+            qsc_memutils_clear(tasks,   nthreads * sizeof(async_thread_task_t));
 
-            /* Process each task on a new thread */
-            for (size_t i = 0; i < nthreads; ++i)
+            /* ---------- spawn ---------- */
+            for (created = 0U; created < nthreads; ++created)
             {
-                tasks[i].task = task;
-                tasks[i].context = context;
-                tasks[i].index = i;
+                tasks[created].task    = task;
+                tasks[created].context = context;
+                tasks[created].index   = created;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-                threads[i] = (HANDLE)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
+                threads[created] = (HANDLE)_beginthreadex(
+                        NULL, 0U,
+                        async_thread_worker,
+                        &tasks[created],
+                        0U, NULL);
 
-                if (threads[i] == NULL)
+                if (threads[created] == NULL)
                 {
-                    res = false;
-                    break;
+                    break;              /* stop spawning            */
                 }
 #elif defined(QSC_SYSTEM_OS_POSIX)
-                if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
+                if (pthread_create(&threads[created],
+                                   NULL,
+                                   async_thread_worker,
+                                   &tasks[created]) != 0)
                 {
-                    res = false;
-                    break;
+                    break;              /* stop spawning            */
                 }
 #endif
             }
 
-            /* Wait for all threads to finish */
-            for (size_t i = 0; i < nthreads; ++i)
+            /* if at least one thread started, wait for them              */
+            if (created > 0U)
             {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-                if (threads[i] != NULL)
+                res = true;
+                for (size_t i = 0U; i < created; ++i)
                 {
-                    WaitForSingleObject(threads[i], INFINITE);
-                    CloseHandle(threads[i]);
-                }
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+                    (void)WaitForSingleObject(threads[i], INFINITE);
+                    (void)CloseHandle(threads[i]);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-                pthread_join(threads[i], NULL);
+                    (void)pthread_join(threads[i], NULL);
 #endif
+                }
             }
-
-            qsc_memutils_alloc_free(threads);
-            qsc_memutils_alloc_free(tasks);
         }
+
+        qsc_memutils_alloc_free(threads);
+        qsc_memutils_alloc_free(tasks);
     }
 
     return res;
 }
+
 
 void qsc_async_launch_thread(void (*func)(void*), void* state)
 {
@@ -221,7 +229,7 @@ size_t qsc_async_processor_count(void)
     return cpus;
 }
 
-qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
+qsc_thread qsc_async_thread_create(qsc_thread_func_t func, void* state)
 {
     assert(func != NULL);
 
@@ -246,7 +254,7 @@ qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
     return res;
 }
 
-qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
+qsc_thread qsc_async_thread_create_ex(qsc_thread_func_t func, void** args)
 {
     assert(func != NULL);
     assert(args != NULL);
