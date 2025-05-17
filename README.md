@@ -1,6 +1,8 @@
 # QSC: Quantum Secure Cryptographic Library
 
 ![Build](https://img.shields.io/github/actions/workflow/status/QRCS-CORP/QSC/build.yml?branch=main)
+![CodeQL](https://img.shields.io/github/actions/workflow/status/QRCS-CORP/QSC/codeql-analysis.yml?label=CodeQL&branch=main)
+
 
 **A compact, self-contained, and highly optimized post-quantum secure cryptographic library written in C.**
 
