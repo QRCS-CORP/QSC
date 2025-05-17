@@ -112,6 +112,12 @@ install(
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/qsc)
 
 # ─── Summary ──────────────────────────────────────────────────────────────────
-message(STATUS "QSC built as ${BUILD_SHARED_LIBS?\"shared\":\"static\"} library")
+if(BUILD_SHARED_LIBS)
+  set(_qsc_kind "shared")
+else()
+  set(_qsc_kind "static")
+endif()
+
+message(STATUS "QSC built as ${_qsc_kind} library")
 message(STATUS "Source path : ${QSC_SOURCE_DIR}")
 message(STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
