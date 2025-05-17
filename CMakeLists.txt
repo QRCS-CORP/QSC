@@ -30,13 +30,12 @@ if(QSC_STRICT_WARNINGS)
 endif()
 
 # ─── Source & Include Paths ────────────────────────────────────────────────────
-set(QSC_SOURCE_DIR   ${PROJECT_SOURCE_DIR}/Source/QSC)
-file(GLOB_RECURSE QSC_SRC CONFIGURE_DEPENDS
-     "${QSC_SOURCE_DIR}/*.c"
-     "${QSC_SOURCE_DIR}/*.h")
-
-add_library(qsc ${QSC_SRC})
+set(QSC_SOURCE_DIR ${PROJECT_SOURCE_DIR}/Source/QSC)
+file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS
+     "${QSC_SOURCE_DIR}/*.c" "${QSC_SOURCE_DIR}/*.h")
+add_library(qsc STATIC ${QSC_SOURCES})
 target_include_directories(qsc PUBLIC ${QSC_SOURCE_DIR})
+
 
 # OS-specific macro (optional)
 if(WIN32)

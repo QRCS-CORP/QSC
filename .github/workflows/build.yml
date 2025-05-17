@@ -2,9 +2,9 @@ name: Build QSC
 
 on:
   push:
-    branches: [main]
+    branches: [master]        # or main
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   build:
@@ -14,24 +14,14 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Install build tools (Linux only)
+      - name: Install tools (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y build-essential cmake ninja-build
 
-      - name: Configure CMake
-        run: cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build
-
-      - name: Cache build outputs
-        uses: actions/cache@v3
-        with:
-          path: |
-            build
-          key: ${{ runner.os }}-qsc-${{ hashFiles('**/*.c', '**/*.h', 'CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-qsc
