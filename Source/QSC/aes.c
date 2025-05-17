@@ -2360,6 +2360,7 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 
     uint8_t zero[QSC_AES_BLOCK_SIZE] = { 0 };
 
+	/* initialize AES */
 	ctx->encrypt = encryption;
     qsc_aes_initialize(&ctx->cstate, keyparams, true, qsc_aes_cipher_256);
 
