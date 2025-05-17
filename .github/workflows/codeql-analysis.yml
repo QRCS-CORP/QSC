@@ -2,9 +2,11 @@ name: CodeQL Analysis
 
 on:
   push:
-    branches: [master]          # change to main if needed
+    branches: [master]           # ← change if your default branch is main
   pull_request:
     branches: [master]
+  schedule:
+    - cron: '0 0 * * 0'          # optional weekly scan
 
 permissions:
   actions: read
@@ -13,7 +15,11 @@ permissions:
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
+    name: CodeQL ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -23,9 +29,21 @@ jobs:
         with:
           languages: c
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build build-essential
+      # ---------- Linux toolchain ----------
+      - name: Install build tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build build-essential
 
+      # ---------- Windows toolchain ----------
+      # (GitHub's windows-latest runner already has Ninja + MinGW;
+      #   no install step needed unless you prefer MSVC.)
+      - name: Set MinGW in PATH (Windows)
+        if: runner.os == 'Windows'
+        run: echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      # ---------- Configure & Build ----------
       - name: Configure with CMake
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
