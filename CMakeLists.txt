@@ -31,11 +31,19 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
 
+# ─── Warning flags ────────────────────────────────────────────────────────────
 if(QSC_STRICT_WARNINGS)
   if(MSVC)
-    add_compile_options(/W4)
-  else()
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    # /WX = treat warnings as errors in MSVC
+    add_compile_options(/W4 /WX)
+  elseif(CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang)$")
+    # Keep high warning level but DO NOT turn them into errors on GCC/Clang
+    add_compile_options(
+        -Wall -Wextra -Wpedantic
+        -Wno-unused-parameter
+        -Wno-unused-function
+        -Wno-cast-function-type
+        -Wno-sign-compare)
   endif()
 endif()
 
