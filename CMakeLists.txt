@@ -1,38 +1,34 @@
 cmake_minimum_required(VERSION 3.15)
 project(QSC LANGUAGES C)
 
-# Set default to Release build type
+# Use C11 and generate position-independent code
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Set Release as default build type
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Use position-independent code for shared libs if required later
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Source directory
+set(QSC_SOURCE_DIR ${PROJECT_SOURCE_DIR}/Source/QSC)
 
-# Set C standard
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
-# Source files
-file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS "src/*.c" "src/*.h" "include/*.h")
-
-# Create the static library
-add_library(qsc STATIC ${QSC_SOURCES})
-target_include_directories(qsc PUBLIC
-  ${PROJECT_SOURCE_DIR}/include
+# Collect all .c and .h files from Source/QSC
+file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS
+  "${QSC_SOURCE_DIR}/*.c"
+  "${QSC_SOURCE_DIR}/*.h"
 )
 
-# OS-specific flags (basic example)
+# Create static library
+add_library(qsc STATIC ${QSC_SOURCES})
+
+# Public header include path
+target_include_directories(qsc PUBLIC ${QSC_SOURCE_DIR})
+
+# OS-specific macro definitions
 if(WIN32)
   target_compile_definitions(qsc PRIVATE QSC_WINDOWS)
 elseif(UNIX)
   target_compile_definitions(qsc PRIVATE QSC_LINUX)
 endif()
-
-# Optional: install target
-install(TARGETS qsc DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include)
-
-# Enable tests later (commented for now)
-# enable_testing()
-# add_subdirectory(tests)
