@@ -3055,7 +3055,7 @@ void ge25519_add_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cach
 	fe25519_sub(r->t, t0, r->t);
 }
 
-static void ge25519_sub_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_precomp* q)
+void ge25519_sub_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_precomp* q)
 {
 	/*
 	* r = a * A + b * B
