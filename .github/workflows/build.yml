@@ -2,24 +2,35 @@ name: Build QSC
 
 on:
   push:
-    branches: [master]        # or main
+    branches: [master]      # or main
   pull_request:
     branches: [master]
 
 jobs:
   build:
+    name: Build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v3
 
+      # ---------- Linux ----------
       - name: Install tools (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y build-essential cmake ninja-build
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build build-essential
 
+      # ---------- Windows ----------
+      # mingw + ninja already present on windows-latest
+
+      # ---------- macOS ----------
+      - name: Install Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
+      # ---------- Configure & Build ----------
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
