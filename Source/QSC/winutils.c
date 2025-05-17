@@ -1,6 +1,10 @@
 #include "winutils.h"
 #include "memutils.h"
 
+#ifndef ERROR_TRANSACTIONAL_CONFLICT
+#   define ERROR_TRANSACTIONAL_CONFLICT 6800  /* 0x1A90, same as MS SDK */
+#endif
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #   include "stringutils.h"
 #   include <stdbool.h>
