@@ -46,6 +46,20 @@ file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS
      "${QSC_SOURCE_DIR}/*.c"
      "${QSC_SOURCE_DIR}/*.h")
 
+# ─── Source collection ────────────────────────────────────────────────────────
+set(QSC_SOURCE_DIR ${PROJECT_SOURCE_DIR}/Source/QSC)
+
+file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS
+     "${QSC_SOURCE_DIR}/*.c"
+     "${QSC_SOURCE_DIR}/*.h")
+
+# ----------------------------------------------------------------------------- 
+# Remove Intel-specific NASM files on non-x86 targets (e.g., Apple Silicon)
+# -----------------------------------------------------------------------------
+if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|i[3-6]86)$")
+  list(FILTER QSC_SOURCES EXCLUDE REGEX ".*/NASM/.*\\.c$")
+endif()
+
 add_library(qsc ${QSC_SOURCES})
 
 # Public headers: build interface vs install interface (CMP0135 compliant)
