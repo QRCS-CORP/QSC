@@ -335,7 +335,7 @@ double qsc_intutils_calculate_log(double x)
 double qsc_intutils_calculate_sqrt(double x)
 {
 	uint64_t nanbits;
-	double abs_nguess;
+	double absnguess;
 	double diff;
 	double epsilon;
 	double guess;
@@ -365,7 +365,6 @@ double qsc_intutils_calculate_sqrt(double x)
         }
 
         epsilon = 1e-12;
-        nguess;
 
         while (true)
         {
@@ -380,9 +379,9 @@ double qsc_intutils_calculate_sqrt(double x)
 
             /* stop when the relative difference is below the tolerance */
             {
-                abs_nguess = (nguess < 0.0) ? -nguess : nguess;
+                absnguess = (nguess < 0.0) ? -nguess : nguess;
 
-                if (diff < epsilon * abs_nguess)
+                if (diff < epsilon * absnguess)
                 {
                     break;
                 }

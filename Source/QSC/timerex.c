@@ -21,7 +21,7 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 	if (err == 0)
 	{
-		len = strftime(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, "%F", &nt);
+		len = strftime(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, "%Y-%m-%d", &nt);
 
 		if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
 		{

@@ -1,6 +1,72 @@
 #include "ipinfo.h"
 #include "memutils.h"
 #include "stringutils.h"
+#include <ctype.h>
+
+static bool ipinfo_hexfield_valid(const char ** pp)
+{
+    uint32_t value  = 0U;
+    uint32_t digits = 0U;
+    const char * p  = *pp;
+
+    while ((digits < 4U) && (p[0] != '\0') && (p[0] != ':'))
+    {
+        unsigned int nibble;
+
+        if ((p[0] >= '0') && (p[0] <= '9'))
+        {
+            nibble = (unsigned int)(p[0] - '0');
+        }
+        else if ((p[0] >= 'A') && (p[0] <= 'F'))
+        {
+            nibble = (unsigned int)(10U + (p[0] - 'A'));
+        }
+        else if ((p[0] >= 'a') && (p[0] <= 'f'))
+        {
+            nibble = (unsigned int)(10U + (p[0] - 'a'));
+        }
+        else
+        {
+            break;
+        }
+
+        value = (value << 4U) | nibble;
+        ++digits;
+        ++p;
+    }
+
+    if (digits > 0U)
+    {
+        *pp = p;                        /* advance caller’s pointer   */
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static bool ipinfo_octet_valid(const char **p)
+{
+    int digits;
+	int val;
+
+	digits = 0;
+	val = 0;
+
+    while (isdigit((unsigned char)**p))
+    {
+        val = val * 10 + (**p - '0');
+        (*p)++;
+        digits++;
+
+		if (val > 255)
+		{
+			return false;
+		}
+    }
+    return (digits > 0);
+}
 
 qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
 {
@@ -236,9 +302,38 @@ bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address)
 {
 	assert(address != NULL);
 
+	size_t i;
 	bool res;
 
-	res = (address != NULL && address[0] <= 224 && address[0] != 255 && address[1] != 255 && address[2] != 255 && address[3] != 255);
+	res = false;
+
+	if (address != NULL)
+	{
+		const char* p = address;
+		i = 0;
+
+		for (i = 0; i < 4; ++i)
+		{
+			if (ipinfo_octet_valid(&p) == true)
+			{
+				if (i < 3)
+				{
+					if (*p != '.')
+					{
+						break;
+					}
+
+					p++;
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		res = (*p == '\0' && i == 4);
+	}
 
 	return res;
 }
@@ -726,33 +821,73 @@ bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address)
 
 bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address)
 {
-	assert(address != NULL);
+    assert(address != NULL);
 
-	bool res;
+    bool res;
+    uint32_t fields;
+    bool dblcolon;
+    bool bok;
 
+	fields = 0U;
+	bok = true;
+	dblcolon = false;
 	res = false;
 
-	if (address != NULL)
-	{
-		if (address[0] == 0)
-		{
-			res = false;
-		}
-		else if (address[0] == 1)
-		{
-			res = false;
-		}
-		else if (address[2] == 219 && address[3] == 128)
-		{
-			res = false;
-		}
-		else
-		{
-			res = true;
-		}
-	}
+    if (address != NULL)
+    {
+        const char * p = address;
 
-	return res;
+        if (p[0] != '\0')
+        {
+            while ((bok == true) && (fields < 8U) && (p[0] != '\0'))
+            {
+                bok = ipinfo_hexfield_valid(&p);
+
+                if (bok == true)
+                {
+                    ++fields;
+
+                    if (p[0] == ':')
+                    {
+                        if (p[1] == ':')
+                        {
+                            if (dblcolon == true)
+                            {
+                                bok = false;
+                            }
+                            else
+                            {
+                                dblcolon = true;
+                                p += 2;
+                            }
+                        }
+                        else
+                        {
+                            ++p;
+                        }
+                    }
+                }
+            }
+
+            if (bok == true)
+            {
+                bool bfcount;
+
+                if (dblcolon == true)
+                {
+                    bfcount = (fields <= 8U);
+                }
+                else
+                {
+                    bfcount = (fields == 8U);
+                }
+
+                res = (bfcount == true) && (p[0] == '\0');
+            }
+        }
+    }
+
+    return res;
 }
 
 bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address)

@@ -140,7 +140,7 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 	if (err == 0)
 	{
-		len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%F", &nt);
+		len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%Y-%m-%d", &nt);
 
 		if (len > 0 && len < QSC_TIMESTAMP_STRING_SIZE)
 		{

@@ -135,7 +135,7 @@ typedef struct
 	char dhcp[QSC_NETUTILS_IP_STRING_SIZE];				/*!< The DHCP address  */
 	char gateway[QSC_NETUTILS_IP_STRING_SIZE];			/*!< The IP gateway address  */
 	char ip[QSC_NETUTILS_IP_STRING_SIZE];				/*!< The interface IP address  */
-	uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE];			/*!< The MAC address  */
+	char mac[QSC_NETUTILS_MAC_ADDRESS_SIZE];			/*!< The MAC address  */
 	char name[QSC_NETUTILS_ADAPTOR_NAME_SIZE];			/*!< The host name  */
 	char subnet[QSC_NETUTILS_IP_STRING_SIZE];			/*!< The subnet address  */
 

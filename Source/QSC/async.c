@@ -237,7 +237,7 @@ qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         uint32_t id = 0;
-        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, state, 0, &id);
+        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, state, 0, (LPDWORD)&id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
         pthread_create(&res, NULL, (void *(*) (void *))func, state);
 #endif
@@ -263,7 +263,7 @@ qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         uint32_t id = 0;
-        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, args, 0, &id);
+        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, args, 0, (LPDWORD)&id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
         pthread_create(&res, NULL, (void *(*) (void *))func, args);
 #endif

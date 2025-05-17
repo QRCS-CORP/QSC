@@ -10,7 +10,7 @@
 #	include <conio.h>
 #	include <tchar.h>
 #	include <Windows.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#   if defined(QSC_SYSTEM_COMPILER_MSC) && !defined(__GNUC__)
 #	    pragma comment(lib, "user32.lib")
 #   endif
 #else
@@ -375,11 +375,11 @@ bool qsc_consoleutils_message_confirm(const char* message)
 	char ans;
 	bool res;
 
+	res = false;
+
 	if (message != NULL)
 	{
 		qsc_consoleutils_print_line(message);
-
-		res = false;
 		ans = qsc_consoleutils_get_char();
 
 		if (ans == 'y' || ans == 'Y')

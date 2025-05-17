@@ -14,7 +14,7 @@
 #	include <intrin.h>
 #	include <sddl.h>
 #	include <TlHelp32.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#   if defined(QSC_SYSTEM_COMPILER_MSC) && !defined(__GNUC__)
 #	    pragma intrinsic(__cpuid)
 #	    pragma comment(lib, "IPHLPAPI.lib")
 #   endif

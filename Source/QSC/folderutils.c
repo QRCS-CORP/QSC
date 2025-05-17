@@ -14,7 +14,7 @@
 #	include <string.h>
 #	include <tchar.h>
 #	include <Windows.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#   if defined(QSC_SYSTEM_COMPILER_MSC) && !defined(__GNUC__)
 #	    pragma comment(lib, "Shlwapi.lib")
 #   endif
 #else

@@ -2,7 +2,7 @@
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	include <Windows.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#   if defined(QSC_SYSTEM_COMPILER_MSC) && !defined(__GNUC__)
 #	    pragma comment(lib, "advapi32.lib")
 #   endif
 #else

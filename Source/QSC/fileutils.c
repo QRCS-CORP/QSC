@@ -379,6 +379,8 @@ bool qsc_fileutils_file_copy(const char* inpath, const char* outpath)
 	char* pfs;
 	size_t len;
 
+	len = 0;
+
 	if (inpath != NULL && outpath != NULL)
 	{
 		len = qsc_fileutils_get_size(inpath);
@@ -879,6 +881,11 @@ FILE* qsc_fileutils_open(const char* fpath, qsc_fileutils_mode mode, bool binary
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		errno_t err;
 		err = fopen_s(&fp, fpath, mstr);
+
+		if (err != 0)
+		{
+			fp = NULL;
+		}
 #else
 		fp = fopen(fpath, mstr);
 #endif

@@ -61,6 +61,8 @@
     #error your operating system is not supported!
 #endif
 
+typedef void (*qsc_thread_func_t)(void * /* arg */);
+
 QSC_CPLUSPLUS_ENABLED_START
 
 /**
@@ -195,7 +197,7 @@ QSC_EXPORT_API size_t qsc_async_processor_count(void);
  * \param state:    [void*] Pointer to the argument to pass to the thread function.
  * \return          [qsc_thread] Returns a handle to the created thread, or NULL on failure.
  */
-QSC_EXPORT_API qsc_thread qsc_async_thread_create(void (*func)(void*), void* state);
+QSC_EXPORT_API qsc_thread qsc_async_thread_create(qsc_thread_func_t, void* state);
 
 /**
  * \brief Create a thread with multiple parameters.
@@ -206,7 +208,7 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create(void (*func)(void*), void* sta
  * \param args:     [void**] An array of pointers to the arguments.
  * \return          [qsc_thread] Returns a handle to the created thread, or NULL on failure.
  */
-QSC_EXPORT_API qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args);
+QSC_EXPORT_API qsc_thread qsc_async_thread_create_ex(qsc_thread_func_t, void** args);
 
 /**
  * \brief Resume a suspended thread.

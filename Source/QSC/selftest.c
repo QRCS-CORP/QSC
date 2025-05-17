@@ -13,7 +13,7 @@
 
 /*** AES ***/
 
-static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -26,7 +26,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	/* copy iv to local */
 	qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 	/* initialize the key parameters struct, info is optional */
-	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
 
 	status = true;
 
@@ -73,7 +73,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	return status;
 }
 
-static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -83,7 +83,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 	qsc_memutils_copy(ivc, iv, QSC_AES_BLOCK_SIZE);
 	/* initialize the key parameters struct, info is optional */
-	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = ivc, .noncelen = QSC_AES_BLOCK_SIZE };
 
 	status = true;
 
@@ -122,7 +122,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	return status;
 }
 
-static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -132,7 +132,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 	/* initialize the key parameters struct with key and nonce, info not used in AES */
 	qsc_memutils_copy(nce, nonce, QSC_AES_BLOCK_SIZE);
-	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
+	const qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -172,7 +172,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	return status;
 }
 
-static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -182,7 +182,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 	/* initialize the key parameters struct with key and nonce, info is optional */
 	qsc_memutils_copy(nce, nonce, QSC_AES_BLOCK_SIZE);
-	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = nce, .noncelen = QSC_AES_BLOCK_SIZE };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -222,7 +222,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	return status;
 }
 
-static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
@@ -230,7 +230,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	qsc_aes_state state;
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = NULL, .noncelen = 0 };
 
 	status = true;
 
@@ -268,7 +268,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	return status;
 }
 
-static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
@@ -276,7 +276,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	qsc_aes_state state;
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = NULL, .noncelen = 0 };
 	status = true;
 
 	/* initialize the state and create the round-keys */
@@ -478,7 +478,7 @@ static bool aes_gcm256_kat()
     qsc_consoleutils_hex_to_bin("00000000000000000000000000000000", ptxt, sizeof(ptxt));
     qsc_consoleutils_hex_to_bin("CEA7403D4D606B6E074EC5D3BAF39D18D0D1C8A799996BF0265B98B5D48AB919", exp, sizeof(exp));
 
-	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, iv, QSC_GCM_NONCE_SIZE, NULL, 0 };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = iv, .noncelen = QSC_GCM_NONCE_SIZE };
 
     /* encryption test */
     qsc_aes_gcm256_initialize(&state, &kp, true);
@@ -568,7 +568,7 @@ static bool aes256_hba_kat()
 
 	qsc_aes_hba256_state state;
 
-	const qsc_aes_keyparams kp1 = { .key = key, .keylen = sizeof(key), .nonce = nce1, .noncelen = sizeof(nce1) };
+	const qsc_aes_keyparams kp1 = { .key = key, .keylen = sizeof(key), .info = NULL, .infolen = 0, .nonce = nce1, .noncelen = sizeof(nce1) };
 
 	qsc_aes_hba256_initialize(&state, &kp1, true);
 	qsc_aes_hba256_set_associated(&state, aad1, sizeof(aad1));
@@ -601,7 +601,7 @@ static bool aes256_hba_kat()
 
 	/* second KAT vector */
 
-	const qsc_aes_keyparams kp2 = { .key = key, .keylen = sizeof(key), .nonce = nce2, .noncelen = sizeof(nce2) };
+	const qsc_aes_keyparams kp2 = { .key = key, .keylen = sizeof(key), .info = NULL, .infolen = 0, .nonce = nce2, .noncelen = sizeof(nce2) };
 	qsc_aes_hba256_initialize(&state, &kp2, true);
 	qsc_aes_hba256_set_associated(&state, aad2, sizeof(aad2));
 
@@ -633,7 +633,7 @@ static bool aes256_hba_kat()
 
 	/* third KAT vector */
 
-	const qsc_aes_keyparams kp3 = { .key = key, .keylen = sizeof(key), .nonce = nce3, .noncelen = sizeof(nce3) };
+	const qsc_aes_keyparams kp3 = { .key = key, .keylen = sizeof(key), .info = NULL, .infolen = 0, .nonce = nce3, .noncelen = sizeof(nce3) };
 	qsc_aes_hba256_initialize(&state, &kp3, true);
 	qsc_aes_hba256_set_associated(&state, aad3, sizeof(aad3));
 
@@ -862,7 +862,7 @@ static bool csx512_kat()
 	qsc_memutils_copy(ncpy, nce, sizeof(nce));
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_csx_keyparams kp = { key, QSC_CSX_KEY_SIZE, nce };
+	qsc_csx_keyparams kp = { .key = key, .keylen = QSC_CSX_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = nce };
 
 	status = true;
 
@@ -983,7 +983,7 @@ bool rcs256_kat()
 #endif
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { .key = key, .keylen = QSC_RCS256_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = nce };
 
 	status = true;
 
@@ -1109,7 +1109,7 @@ bool rcs512_kat()
 #endif
 
 	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS512_KEY_SIZE, nce };
+	qsc_rcs_keyparams kp = { key, QSC_RCS512_KEY_SIZE, .info = NULL, .infolen = 0, .nonce = nce };
 
 	status = true;
 

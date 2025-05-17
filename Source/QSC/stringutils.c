@@ -437,7 +437,7 @@ void qsc_stringutils_int64_to_string(int64_t num, char* dest, size_t dstlen)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		_i64toa_s(num, dest, dstlen, 10);
 #else
-		snprintf(dest, dstlen, "%ld", num);
+		snprintf(dest, dstlen, "%lld", num);
 #endif
 	}
 }
@@ -451,7 +451,7 @@ void qsc_stringutils_uint64_to_string(uint64_t num, char* dest, size_t dstlen)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		_ui64toa_s(num, dest, dstlen, 10);
 #else
-		snprintf(dest, dstlen, "%lu", num);
+		snprintf(dest, dstlen, "%llu", num);
 #endif
 	}
 }
@@ -804,6 +804,7 @@ int32_t qsc_stringutils_string_comparison(const char* source, const char* token)
 	size_t slen;
 	bool res;
 
+	res = false;
 	slen = strlen(source);
 
 	if (source != NULL && token != NULL && slen != 0)

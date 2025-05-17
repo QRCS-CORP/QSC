@@ -170,7 +170,7 @@ QSC_EXPORT_API typedef struct
  * \param address:  [const char*] A pointer to the address string.
  * \return          [qsc_ipinfo_address_types] Returns the IP address type.
  */
-QSC_EXPORT_API qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address);
+qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address);
 
 /**
  * \brief Use the device's primary IPv4 address.

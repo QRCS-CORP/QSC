@@ -11,7 +11,6 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	include <Windows.h>
 #	if defined(QSC_SYSTEM_ARCH_IX86)
 #		include <intrin.h>
-#		pragma intrinsic(__cpuid)
 #	elif defined(QSC_SYSTEM_ARCH_ARM)
 #		include <processthreadsapi.h>
 #	endif

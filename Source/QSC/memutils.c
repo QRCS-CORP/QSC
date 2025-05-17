@@ -424,10 +424,11 @@ bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 	size_t pctr;
 	int32_t mctr;
 
+	mctr = 0;
+	pctr = 0;
+
 	if (a != NULL && b != NULL && length != 0)
 	{
-		mctr = 0;
-		pctr = 0;
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
@@ -885,6 +886,8 @@ bool qsc_memutils_greater_than_be128(const uint8_t* a, const uint8_t* b)
 
 	bool res;
 
+	res = false;
+
 #if defined(QSC_SYSTEM_HAS_AVX)
 
     __m128i ge;
@@ -932,6 +935,8 @@ bool qsc_memutils_greater_than_be256(const uint8_t* a, const uint8_t* b)
 
 	bool res;
 
+	res = false;
+
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
     __m256i ge;
@@ -952,10 +957,8 @@ bool qsc_memutils_greater_than_be256(const uint8_t* a, const uint8_t* b)
     res = (m2 >= m1);
 
 #else
-
 	res = qsc_memutils_greater_than_be128(a, b);
 	res |= qsc_memutils_greater_than_be128(a + 16, b + 16);
-
 #endif
 
 	return res;
@@ -967,6 +970,8 @@ bool qsc_memutils_greater_than_be512(const uint8_t* a, const uint8_t* b)
 	assert(b != NULL);
 
 	bool res;
+
+	res = false;
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 	res = qsc_memutils_greater_than_be256(a, b);
@@ -987,6 +992,8 @@ bool qsc_memutils_greater_than_le128(const uint8_t* a, const uint8_t* b)
 	assert(b != NULL);
 
 	bool res;
+
+	res = false;
 
 #if defined(QSC_SYSTEM_HAS_AVX)
 
@@ -1035,6 +1042,8 @@ bool qsc_memutils_greater_than_le256(const uint8_t* a, const uint8_t* b)
 
 	bool res;
 
+	res = false;
+
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
     __m256i ge;
@@ -1070,6 +1079,8 @@ bool qsc_memutils_greater_than_le512(const uint8_t* a, const uint8_t* b)
 	assert(b != NULL);
 
 	bool res;
+
+	res = false;
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 	res = qsc_memutils_greater_than_le256(a, b);

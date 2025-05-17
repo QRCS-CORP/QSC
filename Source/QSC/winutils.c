@@ -21,10 +21,12 @@
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
 #   include <iphlpapi.h>
+#if !defined(__GNUC__)
 #   pragma comment(lib, "advapi32.lib")
 #   pragma comment(lib, "IPHLPAPI.lib")
 #   pragma comment(lib, "netapi32.lib")
 #   pragma comment(lib, "psapi.lib")
+#endif
 #   if defined(QSC_DEBUG_MODE)
 #       include "consoleutils.h"
 #       include "fileutils.h"
@@ -350,6 +352,20 @@ bool qsc_winutils_file_set_attribute(const char* path, const char* attr)
     return res;
 }
 
+static void winutils_wide_to_utf8(const wchar_t *wsrc, char *dst, size_t dstlen)
+{
+    if ((wsrc != NULL) && (dst != NULL) && (dstlen > 0U))
+    {
+        /* returns number of bytes written, incl. NUL, or 0 on failure */
+        (void)WideCharToMultiByte(
+                CP_UTF8,                /* output in UTF-8            */
+                0,                      /* default flags              */
+                wsrc, -1,               /* source wide string         */
+                dst, (int)dstlen,       /* destination buffer         */
+                NULL, NULL);            /* no default char / used flag*/
+    }
+}
+
 size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 {
     assert(result != NULL);
@@ -430,9 +446,14 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
             {
                 tlen += snprintf(result + tlen, reslen - tlen, "\n");
                 PIP_ADAPTER_UNICAST_ADDRESS puni = cadd->FirstUnicastAddress;
+                char fname[128] = { 0 };
+                char desc [256] = { 0 };
 
-                tlen += snprintf(result + tlen, reslen - tlen, "Adaptor Name: \t\t%wS\n", padd->FriendlyName);
-                tlen += snprintf(result + tlen, reslen - tlen, "Description: \t\t-%wS\n", padd->Description);
+                wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
+                wide_to_utf8(cadd->Description , desc , sizeof(desc));
+
+                tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Adaptor Name:\t\t%s\n", fname);
+                tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Description:\t\t%s\n", desc);
                 tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", padd->AdapterName);
                 tlen += snprintf(result + tlen, reslen - tlen, "Interface Addresses\n");
 
@@ -639,7 +660,7 @@ bool qsc_winutils_process_token_elevate()
             }
             else
             {
-                printf("AdjustTokenPrivileges error: %u\n", GetLastError());
+                printf("AdjustTokenPrivileges error: %lu\n", GetLastError());
             }
         }
     }
@@ -1130,7 +1151,10 @@ size_t qsc_winutils_service_list_size()
             &hres,
             NULL);
 
-        tlen = (size_t)dexp + (dret * 12) + 1;
+        if (res == true)
+        {
+            tlen = (size_t)dexp + (dret * 12) + 1;
+        }
 
         CloseServiceHandle(sch);
     }
@@ -1171,7 +1195,7 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
             &tote,
             &resh);
 
-        if ((pbuf != NULL) && (stat == NERR_Success) || (stat == ERROR_MORE_DATA))
+        if ((pbuf != NULL) && ((stat == NERR_Success) || (stat == ERROR_MORE_DATA)))
         {
             USER_INFO_1 *ptmp;
             DWORD pctr;
