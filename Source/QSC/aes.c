@@ -2381,6 +2381,7 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 		size_t numblk;
 		size_t buflen;
 
+		/* initialize the buffer */
 		numblk = ((keyparams->noncelen + QSC_AES_BLOCK_SIZE - 1) / QSC_AES_BLOCK_SIZE);
 		buflen = (numblk + 1) * QSC_AES_BLOCK_SIZE;
 		buf = (uint8_t*)qsc_memutils_malloc(buflen);
