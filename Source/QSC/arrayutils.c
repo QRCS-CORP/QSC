@@ -131,10 +131,8 @@ uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t slen)
 	res = 0;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	sscanf_s(str, "%d", &res);
-#elif defined(QSC_SYSTEM_OS_LINUX)
-	sscanf(str, "%d", (int32_t*)&res);
 #else
-	sscanf(str, "%ld", (int32_t*)&res);
+	sscanf(str, "%d", (int32_t*)&res);
 #endif
 
 	return (uint32_t)res;
@@ -150,10 +148,8 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
 	res = 0;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	sscanf_s(str, "%lld", &res);
-#elif defined(QSC_SYSTEM_OS_LINUX)
-	sscanf(str, "%ld", (int64_t*)&res);
 #else
-	sscanf(str, "%lld", (int64_t*)&res);
+	sscanf(str, "%ld", (int64_t*)&res);
 #endif
 
 	return (uint64_t)res;

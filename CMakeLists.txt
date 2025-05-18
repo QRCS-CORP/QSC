@@ -32,19 +32,33 @@ if(POLICY CMP0135)
 endif()
 
 # ─── Warning flags ────────────────────────────────────────────────────────────
+#
+#  Set QSC_STRICT_WARNINGS=ON (default) to compile with:
+#     • /W4 /WX               on MSVC / clang-cl
+#     • -Wall -Wextra -Wpedantic -Werror on GCC / Clang
+#
+#  Switch it off with:
+#       cmake -DQSC_STRICT_WARNINGS=OFF ..
+#
+#  – The list deliberately keeps only portable flags.
+#  – Platform-specific warnings (e.g., -Wno-padded) can be added locally.
+# -----------------------------------------------------------------------------
+option(QSC_STRICT_WARNINGS
+       "Treat all compiler warnings as errors and enable maximum diagnostics"
+       ON)
+
 if(QSC_STRICT_WARNINGS)
-  if(MSVC)
-    # /WX = treat warnings as errors in MSVC
-    add_compile_options(/W4 /WX)
-  elseif(CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang)$")
-    # Keep high warning level but DO NOT turn them into errors on GCC/Clang
-    add_compile_options(
-        -Wall -Wextra -Wpedantic
-        -Wno-unused-parameter
-        -Wno-unused-function
-        -Wno-cast-function-type
-        -Wno-sign-compare)
-  endif()
+    if(MSVC)
+        # /permissive- for standard conformance, /wd… to silence noisy MSVC
+        target_compile_options(qsc PRIVATE /W4 /WX /permissive-)
+    elseif(CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang)$")
+        target_compile_options(qsc PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Werror
+        )
+    endif()
 endif()
 
 # ─── Source collection ────────────────────────────────────────────────────────
