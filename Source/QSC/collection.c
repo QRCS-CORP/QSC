@@ -94,10 +94,10 @@ void qsc_collection_dispose(qsc_collection_state* ctx)
 			qsc_memutils_alloc_free(ctx->keys);
 			ctx->keys = NULL;
 		}
-	}
 
-	ctx->count = 0;
-	ctx->width = 0;
+		ctx->count = 0;
+		ctx->width = 0;
+	}
 }
 
 void qsc_collection_erase(qsc_collection_state* ctx)
@@ -123,7 +123,7 @@ bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const u
 
 	if (ctx != NULL && ctx->items != NULL && key != NULL)
 	{
-		uint8_t* pitm;
+		const uint8_t* pitm;
 		qsc_mutex mtx;
 
 		mtx = qsc_async_mutex_lock_ex();
@@ -193,7 +193,7 @@ void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item, size_t index)
 	if (ctx != NULL && ctx->items != NULL && index < ctx->count)
 	{
 		qsc_mutex mtx;
-		uint8_t* pitm;
+		const uint8_t* pitm;
 
 		mtx = qsc_async_mutex_lock_ex();
 		pitm = ctx->items + (index * ctx->width);

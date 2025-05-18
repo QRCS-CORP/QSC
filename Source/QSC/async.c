@@ -34,8 +34,7 @@ THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void *arg)
     return 0;
 }
 
-bool qsc_async_parallel_for(void (*task)(void *context, size_t index),
-                            void *context, size_t nthreads)
+bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void *context, size_t nthreads)
 {
     assert(task != NULL);
 
@@ -43,19 +42,18 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index),
 
     if ((task != NULL) && (nthreads > 0U))
     {
-        qsc_thread           *threads = NULL;
-        async_thread_task_t  *tasks   = NULL;
-        size_t                created = 0U;     /* count of live threads */
+        qsc_thread* threads;
+        async_thread_task_t* tasks;
+        size_t created;
 
         threads = qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
-        tasks   = qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
+        tasks = qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
 
         if ((threads != NULL) && (tasks != NULL))
         {
             qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
             qsc_memutils_clear(tasks,   nthreads * sizeof(async_thread_task_t));
 
-            /* ---------- spawn ---------- */
             for (created = 0U; created < nthreads; ++created)
             {
                 tasks[created].task    = task;
@@ -71,7 +69,7 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index),
 
                 if (threads[created] == NULL)
                 {
-                    break;              /* stop spawning            */
+                    break;
                 }
 #elif defined(QSC_SYSTEM_OS_POSIX)
                 if (pthread_create(&threads[created],
@@ -79,15 +77,16 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index),
                                    async_thread_worker,
                                    &tasks[created]) != 0)
                 {
-                    break;              /* stop spawning            */
+                    break;
                 }
 #endif
             }
 
-            /* if at least one thread started, wait for them              */
+            /* if at least one thread started, wait for them */
             if (created > 0U)
             {
                 res = true;
+
                 for (size_t i = 0U; i < created; ++i)
                 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)

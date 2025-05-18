@@ -431,17 +431,17 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
             ptmp = (IP_ADAPTER_ADDRESSES*)realloc(padd, ulen);
 
-            if (ptmp == NULL)
+            if (ptmp != NULL)
+            {
+                padd = ptmp;
+                tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
+                rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
+            }
+            else
             {
                 free(padd);
                 padd = NULL;
-                return 0U;
             }
-
-            padd = ptmp;
-            tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
-            return tlen;
-            rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
         }
 
         if (rval == NO_ERROR)
@@ -1218,11 +1218,6 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
                 char uname[UNLEN + 1] = { 0 };
                 size_t nlen;
                 size_t olen;
-
-                if (tlen >= reslen)
-                {
-                    break;
-                }
 
                 nlen = wcslen(ptmp->usri1_name);
                 olen = 0;

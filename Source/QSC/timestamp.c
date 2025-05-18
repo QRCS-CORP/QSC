@@ -128,7 +128,7 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
-	struct tm nt;
+	struct tm nt = { 0 };
 	time_t lt;
 	errno_t err;
 	size_t len;

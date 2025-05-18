@@ -809,7 +809,7 @@ static void kyber_indcpa_dec(uint8_t m[QSC_KYBER_MSGBYTES], const uint8_t c[QSC_
 
 #if defined(QSC_KYBER_FIPS203)
 
-static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], uint8_t* coins)
+static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], const uint8_t* coins)
 {
     qsc_kyber_polyvec a[QSC_KYBER_K];
     qsc_kyber_polyvec e;
@@ -823,7 +823,7 @@ static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], u
 
     nonce = 0;
     
-    qsc_memutils_copy(buf, coins, QSC_KYBER_SYMBYTES); // new...
+    qsc_memutils_copy(buf, coins, QSC_KYBER_SYMBYTES);
     buf[QSC_KYBER_SYMBYTES] = QSC_KYBER_K;
 
     qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES + 1);

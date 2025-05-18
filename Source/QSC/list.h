@@ -122,7 +122,7 @@ QSC_EXPORT_API typedef struct
  * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
  * \param item:     [void*] Pointer to the item to be added.
  */
-QSC_EXPORT_API void qsc_list_add(qsc_list_state* ctx, void* item);
+QSC_EXPORT_API void qsc_list_add(qsc_list_state* ctx, const void* item);
 
 /**
  * \brief Copy an item from the list.

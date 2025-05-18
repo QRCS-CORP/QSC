@@ -2272,7 +2272,7 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 
     ctx->ctlen += ((uint64_t)clen) * sizeof(uint64_t);
 
-    for (size_t i = 0; i < sizeof(uint64_t); i++)
+    for (i = 0; i < sizeof(uint64_t); i++)
 	{
         lblock[i] = (uint8_t)(ctx->aadlen >> (56 - sizeof(uint64_t) * i));
         lblock[sizeof(uint64_t) + i] = (uint8_t)(ctx->ctlen  >> (56 - sizeof(uint64_t) * i));
@@ -2281,7 +2281,7 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
     ghash_update(ctx->S, lblock, ctx->H);
     qsc_aes_ecb_encrypt_block(&ctx->cstate, tblock, ctx->J0);
 
-    for (size_t i = 0; i < QSC_AES_BLOCK_SIZE; ++i) 
+    for (i = 0; i < QSC_AES_BLOCK_SIZE; ++i) 
 	{
         ctag[i] = tblock[i] ^ ctx->S[i];
     }

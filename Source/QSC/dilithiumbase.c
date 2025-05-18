@@ -185,7 +185,8 @@ static int32_t dilithium_reduce32(int32_t a)
 
 static int32_t dilithium_caddq(int32_t a)
 {
-    a += (a >> 31) & DILITHIUM_Q;
+    uint32_t temp = (uint32_t)a;
+    a += (int32_t)((temp >> 31) & DILITHIUM_Q);
 
     return a;
 }
@@ -476,7 +477,8 @@ static int32_t dilithium_poly_chknorm(const dilithium_poly* a, int32_t B)
         for (size_t i = 0; i < DILITHIUM_N; ++i)
         {
             /* Absolute value */
-            t = a->coeffs[i] >> 31;
+            uint32_t coeff = (uint32_t)a->coeffs[i];
+            t = (int32_t)(coeff >> 31);
             t = a->coeffs[i] - (t & 2 * a->coeffs[i]);
 
             if (t >= B)

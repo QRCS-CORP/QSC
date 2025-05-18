@@ -118,23 +118,19 @@ size_t qsc_memutils_page_size()
 {
 	int64_t pagelen;
 
-	pagelen = 0x00001000LL;
-
 #if defined(QSC_SYSTEM_OS_POSIX)
-
 	pagelen = sysconf(_SC_PAGESIZE);
 
 	if (pagelen < 1)
 	{
 		pagelen = QSC_SYSTEM_SECMEMALLOC_DEFAULT;
 	}
-
 #elif defined(QSC_SYSTEM_OS_WINDOWS)
-
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
 	pagelen = (size_t)sysinfo.dwPageSize;
-
+#else
+	pagelen = 0x00001000LL;
 #endif
 
 	return (size_t)pagelen;

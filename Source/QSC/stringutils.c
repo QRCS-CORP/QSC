@@ -809,11 +809,15 @@ int32_t qsc_stringutils_string_comparison(const char* source, const char* token)
 	bool res;
 
 	res = false;
-	slen = strlen(source);
 
-	if (source != NULL && token != NULL && slen != 0)
+	if (source != NULL && token != NULL)
 	{
-		res = strncmp(source, token, slen);
+		slen = strlen(source);
+
+		if (slen != 0)
+		{
+			res = strncmp(source, token, slen);
+		}
 	}
 
 	return res;

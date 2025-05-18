@@ -908,10 +908,10 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 #	if defined(QSC_SYSTEM_OS_BSD)
 	cpuidex_bsd_topology(features);
     res = true;
-#else
+#	else
 	cpuidex_posix_topology(features);
 	res = true;
-#endif
+#	endif
 #elif defined(QSC_SYSTEM_OS_WINDOWS)
 	cpuidex_windows_topology(features);
 	res = true;

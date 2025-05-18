@@ -4,7 +4,7 @@
 #include "memutils.h"
 #include "secrand.h"
 
-void qsc_list_add(qsc_list_state* ctx, void* item)
+void qsc_list_add(qsc_list_state* ctx, const void* item)
 {
 	assert(ctx != NULL);
 	assert(item != NULL);
@@ -153,7 +153,7 @@ void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index)
 	if (ctx != NULL && item != NULL && index < ctx->count)
 	{
 		qsc_mutex mtx;
-		uint8_t* pitm;
+		const uint8_t* pitm;
 
 		mtx = qsc_async_mutex_lock_ex();
 		pitm = ctx->items + (index * ctx->width);

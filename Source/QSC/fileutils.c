@@ -115,7 +115,6 @@ bool qsc_fileutils_append_to_file(const char* fpath, const char* stream, size_t 
 
 		if (fp != NULL && err == 0)
 		{
-			fseek(fp, 0L, SEEK_END);
 			res = (fwrite(stream, sizeof(char), length, fp) != 0);
 			fclose(fp);
 		}
@@ -439,7 +438,7 @@ size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* f
 
 	pos = 0;
 
-	if (dirlen > 0 && dirlen != 0 && fpath != NULL)
+	if (dirlen > 0 && fpath != NULL)
 	{
 		qsc_memutils_clear(directory, dirlen);
 		pname = qsc_stringutils_reverse_sub_string(fpath, QSC_FILEUTILS_DIRECTORY_SEPERATOR);
@@ -740,8 +739,6 @@ size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directo
 							size_t lpos;
 
 							qsc_stringutils_concat_strings(result, reslen, wfd.cFileName);
-							lpos = qsc_stringutils_concat_strings(result, reslen, "\t");
-
 							pattr = fileutils_file_get_attribute_string(wfd.dwFileAttributes);
 
 							if (pattr != NULL)
@@ -1188,7 +1185,6 @@ bool qsc_fileutils_write_line(const char* fpath, const char* input, size_t inple
 
 		if (fp != NULL && err == 0)
 		{
-			fseek(fp, 0L, SEEK_END);
 			res = (fwrite(input, sizeof(char), inplen, fp) != 0);
 
 			if (res == true)

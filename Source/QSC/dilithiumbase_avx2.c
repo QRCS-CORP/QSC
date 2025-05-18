@@ -2100,7 +2100,6 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
     bool res;
 
     res = true;
-    pos = 0;
 
     if (siglen == DILITHIUM_SIGNATURE_SIZE)
     {

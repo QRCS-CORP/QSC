@@ -12,9 +12,9 @@ static int32_t qsort_partition_u8(int8_t* arr, int32_t start, int32_t end)
     count = 0;
     pivot = arr[start];
 
-    for (int32_t i = start + 1; i <= end; ++i) 
+    for (int32_t k = start + 1; k <= end; ++k) 
     {
-        if (arr[i] <= pivot)
+        if (arr[k] <= pivot)
         {
             ++count;
         }
@@ -66,9 +66,9 @@ static int32_t qsort_partition_u16(int16_t* arr, int32_t start, int32_t end)
     count = 0;
     pivot = arr[start];
 
-    for (int32_t i = start + 1; i <= end; ++i) 
+    for (int32_t k = start + 1; k <= end; ++k) 
     {
-        if (arr[i] <= pivot)
+        if (arr[k] <= pivot)
         {
             ++count;
         }
@@ -120,9 +120,9 @@ static int32_t qsort_partition_u32(int32_t* arr, int32_t start, int32_t end)
     count = 0;
     pivot = arr[start];
 
-    for (int32_t i = start + 1; i <= end; ++i) 
+    for (int32_t k = start + 1; k <= end; ++k) 
     {
-        if (arr[i] <= pivot)
+        if (arr[k] <= pivot)
         {
             ++count;
         }
@@ -174,9 +174,9 @@ static int64_t qsort_partition_u64(int64_t* arr, int64_t start, int64_t end)
     count = 0;
     pivot = arr[start];
 
-    for (int64_t i = start + 1; i <= end; ++i) 
+    for (int64_t k = start + 1; k <= end; ++k) 
     {
-        if (arr[i] <= pivot)
+        if (arr[k] <= pivot)
         {
             ++count;
         }

@@ -7,9 +7,9 @@
 void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	struct tm nt;
+	struct tm nt = { 0 };
 	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
-	__time64_t lt;
+	__time64_t lt = { 0 };
 	errno_t err;
 	size_t len;
 

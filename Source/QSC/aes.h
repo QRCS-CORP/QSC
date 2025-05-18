@@ -625,7 +625,7 @@ QSC_EXPORT_API void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, con
  * \param ctx:			[qsc_aes_gcm256_state*] A pointer to the cipher state structure.
  * \param output:		[uint8_t*] A pointer to the output array.
  * \param input:		[const uint8_t*] A pointer to the input array.
- * \param length:		[size_t] The number of bytes to transform.
+ * \param length:		[size_t] The number of bytes to transform  (not including the tag length).
  *
  * \return				[bool] Returns true if the data was transformed successfully, false on failure.
  */

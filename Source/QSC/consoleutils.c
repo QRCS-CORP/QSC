@@ -322,7 +322,6 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 
 	ctr = 0;
 	mlen = otplen - 1;
-	c = 0;
 
 	if (output != NULL && otplen != 0)
 	{

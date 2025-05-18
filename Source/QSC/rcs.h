@@ -300,7 +300,7 @@ QSC_EXPORT_API void qsc_rcs_store_nonce(const qsc_rcs_state* ctx, uint8_t nonce[
  * \param ctx:			[qsc_rcs_state*] A pointer to the cipher state structure.
  * \param output:		[uint8_t*] A pointer to the output array.
  * \param input:		[const uint8_t*] A pointer to the input array.
- * \param length:		[size_t] The number of bytes to transform.
+ * \param length:		[size_t] The number of bytes to transform (not including the tag length).
  *
  * \return				[bool] Returns true if the data was transformed successfully, false on failure.
  */

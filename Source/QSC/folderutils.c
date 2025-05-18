@@ -31,7 +31,7 @@ void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH])
 
 	len = qsc_stringutils_string_size(path);
 
-	if (len < QSC_SYSTEM_MAX_PATH)
+	if (len < QSC_SYSTEM_MAX_PATH - 1)
 	{
 		path[len] = QSC_FOLDERUTILS_DELIMITER;
 		++len;

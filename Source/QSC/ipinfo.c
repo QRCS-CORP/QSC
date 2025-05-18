@@ -293,7 +293,7 @@ bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 
 	bool res;
 
-	res = (address != NULL && address->ipv4[0] <= 224 && address->ipv4[0] != 255 && address->ipv4[1] != 255 && address->ipv4[2] != 255 && address->ipv4[3] != 255);
+	res = (address != NULL && address->ipv4[0] <= 224 && address->ipv4[1] != 255 && address->ipv4[2] != 255 && address->ipv4[3] != 255);
 
 	return res;
 }
@@ -540,7 +540,7 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 
 	if (cidr <= 8)
 	{
-		char tail[] = ".0.0.0";
+		const char tail[] = ".0.0.0";
 
 		for (size_t i = 0; i < 8; ++i)
 		{
@@ -558,8 +558,8 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 	}
 	else if (cidr <= 16)
 	{
-		char head[] = "255.";
-		char tail[] = ".0.0";
+		const char head[] = "255.";
+		const char tail[] = ".0.0";
 		char tmask[4] = { 0 };
 
 		cidr -= 8;
@@ -582,8 +582,8 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 	}
 	else if (cidr <= 24)
 	{
-		char head[] = "255.255.";
-		char tail[] = ".0";
+		const char head[] = "255.255.";
+		const char tail[] = ".0";
 		char tmask[4] = { 0 };
 
 		cidr -= 16;
@@ -606,7 +606,7 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 	}
 	else
 	{
-		char head[] = "255.255.255.";
+		const char head[] = "255.255.255.";
 		char tmask[4] = { 0 };
 
 		cidr -= 24;

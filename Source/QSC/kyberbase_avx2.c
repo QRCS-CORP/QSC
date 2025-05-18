@@ -1398,7 +1398,7 @@ int32_t kyber_verify_avx2(const uint8_t* a, const uint8_t* b, size_t len)
     return (int32_t)r;
 }
 
-static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], uint8_t* coins)
+static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], const uint8_t* coins)
 {
     qsc_kyber_polyvec a[QSC_KYBER_K];
     qsc_kyber_polyvec e;
@@ -1412,7 +1412,7 @@ static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], u
 
     nonce = 0;
     
-    qsc_memutils_copy(buf, coins, QSC_KYBER_SYMBYTES); // new...
+    qsc_memutils_copy(buf, coins, QSC_KYBER_SYMBYTES);
     buf[QSC_KYBER_SYMBYTES] = QSC_KYBER_K;
 
     qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES + 1);
