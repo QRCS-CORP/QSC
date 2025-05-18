@@ -690,7 +690,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint
 	assert(dest != NULL);
 	assert(output != NULL);
 
-	int32_t len;
+	socklen_t len;
 	int32_t res;
 
 	res = 0;
