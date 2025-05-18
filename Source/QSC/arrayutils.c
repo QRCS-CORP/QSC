@@ -1,7 +1,6 @@
 #include "arrayutils.h"
 #include <stdio.h>
 #include <string.h>
-#include <inttypes.h>
 
 size_t qsc_arrayutils_find_string(const char* str, size_t slen, const char* token)
 {
@@ -133,12 +132,12 @@ uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t slen)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	sscanf_s(str, "%d", &res);
 #elif defined(QSC_SYSTEM_OS_LINUX)
-	sscanf(str, "%" SCNd32, &res);
-#else
 	sscanf(str, "%d", &res);
+#else
+	sscanf(str, "%ld", &res);
 #endif
 
-	return res;
+	return (uint32_t)res;
 }
 
 uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
@@ -152,12 +151,12 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	sscanf_s(str, "%lld", &res);
 #elif defined(QSC_SYSTEM_OS_LINUX)
-	sscanf(str, "%" SCNd64, &res);
+	sscanf(str, "ld%" SCNd64, &res);
 #else
 	sscanf(str, "%lld", (int64_t*)&res);
 #endif
 
-	return res;
+	return (uint64_t)res;
 }
 
 bool qsc_arrayutils_self_test()
