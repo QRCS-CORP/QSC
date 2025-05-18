@@ -70,7 +70,6 @@
 #include "kyber_test.h"
 #include "mceliece_test.h"
 #include "netutils_test.h"
-#include "ntru_test.h"
 #include "poly1305_test.h"
 #include "qmac_test.h"
 #include "rcs_test.h"
@@ -289,10 +288,6 @@ int32_t main(void)
 
 			qsctest_print_line("*** Test the McEliece implementation using stress, validity checks, and known answer tests ***");
 			qsctest_mceliece_run();
-			qsctest_print_line("");
-
-			qsctest_print_line("*** Test the NTRU implementation using stress, validity checks, and known answer tests ***");
-			qsctest_ntru_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Dilithium implementation using stress, validity checks, and known answer tests ***");

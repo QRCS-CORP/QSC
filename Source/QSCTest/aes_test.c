@@ -11,7 +11,7 @@
 #define HBA_TEST_CYCLES 100
 #define MONTE_CARLO_CYCLES 10000
 
-static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -71,7 +71,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	return status;
 }
 
-static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -120,7 +120,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	return status;
 }
 
-static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -172,7 +172,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	return status;
 }
 
-static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -223,7 +223,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	return status;
 }
 
-static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
@@ -271,7 +271,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][
 	return status;
 }
 
-static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t message[4][16], const uint8_t expected[4][16])
+static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
@@ -484,7 +484,7 @@ bool qsctest_aes256_gcm_kat()
     qsctest_hex_to_bin("CEA7403D4D606B6E074EC5D3BAF39D18D0D1C8A799996BF0265B98B5D48AB919", exp, sizeof(exp));
 	qsctest_hex_to_bin("CEA7403D4D606B6E074EC5D3BAF39D180839260DFD972BAAF4E6D9D37948C842", exp2, sizeof(exp2));
 
-	qsc_aes_keyparams kp = { key, QSC_AES256_KEY_SIZE, iv, QSC_GCM_NONCE_SIZE, NULL, 0 };
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = iv, .noncelen = QSC_GCM_NONCE_SIZE, .info = NULL, .infolen = 0 };
 
     /* encryption test */
     qsc_aes_gcm256_initialize(&state, &kp, true);
@@ -533,7 +533,7 @@ bool qsctest_aes256_gcm_kat()
 	qsc_aes_gcm256_initialize(&state, &kp, false);
 	qsc_aes_gcm256_set_associated(&state, shdr, sizeof(shdr));
 
-	if (qsc_aes_gcm256_transform(&state, dec, ctxt, sizeof(ctxt)) == false)
+	if (qsc_aes_gcm256_transform(&state, dec, ctxt, sizeof(ptxt)) == false)
 	{
 		status = false;
 	}
