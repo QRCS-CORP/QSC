@@ -1152,18 +1152,18 @@ static void aes_ct_isbox(uint32_t* q)
 	q[1] = q3 ^ q6 ^ q0;
 	q[0] = q2 ^ q5 ^ q7;
 }
-
-static uint32_t sub_iword(uint32_t x)
-{
-	uint32_t q[8] = { 0 };
-
-	q[0] = x;
-	aes_ct_ortho(q);
-	aes_ct_isbox(q);
-	aes_ct_ortho(q);
-
-	return q[0];
-}
+//
+//static uint32_t sub_iword(uint32_t x)
+//{
+//	uint32_t q[8] = { 0 };
+//
+//	q[0] = x;
+//	aes_ct_ortho(q);
+//	aes_ct_isbox(q);
+//	aes_ct_ortho(q);
+//
+//	return q[0];
+//}
 
 static void aes_sub_bytes(uint8_t* ctx)
 {
@@ -2167,7 +2167,7 @@ static void gcm_mult(const uint8_t* x, const uint8_t* y, uint8_t* result)
 		{
 			if ((x[i] >> bit) & 1)
 			{
-				for (int32_t j = 0; j < QSC_AES_BLOCK_SIZE; j++)
+				for (int32_t j = 0; j < (int32_t)QSC_AES_BLOCK_SIZE; j++)
 				{
 					z[j] ^= v[j];
 				}

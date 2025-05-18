@@ -95,11 +95,15 @@ uint8_t qsc_arrayutils_string_to_uint8(const char* str, size_t slen)
 	uint8_t res;
 
 	res = 0;
+
+	if (slen > 0)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sscanf_s(str, "%hhu", &res);
+		sscanf_s(str, "%hhu", &res);
 #else
-	sscanf(str, "%hhu", &res);
+		sscanf(str, "%hhu", &res);
 #endif
+	}
 
 	return res;
 }
@@ -112,11 +116,15 @@ uint16_t qsc_arrayutils_string_to_uint16(const char* str, size_t slen)
 	uint16_t res;
 
 	res = 0;
+
+	if (slen > 0)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sscanf_s(str, "%hu", &res);
+		sscanf_s(str, "%hu", &res);
 #else
-	sscanf(str, "%hu", &res);
+		sscanf(str, "%hu", &res);
 #endif
+	}
 
 	return res;
 }
@@ -129,11 +137,15 @@ uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t slen)
 	uint32_t res;
 
 	res = 0;
+
+	if (slen > 0)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sscanf_s(str, "%d", &res);
+		sscanf_s(str, "%d", &res);
 #else
-	sscanf(str, "%d", (int32_t*)&res);
+		sscanf(str, "%d", (int32_t*)&res);
 #endif
+	}
 
 	return (uint32_t)res;
 }
@@ -146,11 +158,17 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
 	uint64_t res;
 
 	res = 0;
+
+	if (slen > 0)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	sscanf_s(str, "%lld", &res);
+		sscanf_s(str, "%lld", &res);
+#elif defined(QSC_SYSTEM_OS_LINUX)
+		sscanf(str, "%ld", (int64_t*)&res);
 #else
-	sscanf(str, "%ld", (int64_t*)&res);
+		sscanf(str, "%lld", (int64_t*)&res);
 #endif
+	}
 
 	return (uint64_t)res;
 }
