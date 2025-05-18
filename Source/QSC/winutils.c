@@ -433,11 +433,14 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
             if (ptmp == NULL)
             {
-                padd = ptmp;
-                tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
-                return tlen;
+                free(padd);
+                padd = NULL;
+                return 0U;
             }
 
+            padd = ptmp;
+            tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
+            return tlen;
             rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
         }
 
