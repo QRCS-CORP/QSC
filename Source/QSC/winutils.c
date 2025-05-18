@@ -421,7 +421,7 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
     ulen = 15000;
     padd = (IP_ADAPTER_ADDRESSES*)malloc(ulen);
 
-    if (padd != NULL)
+    if (padd)
     {
         rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
 

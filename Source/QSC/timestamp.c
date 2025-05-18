@@ -220,7 +220,7 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 	if (err == 0)
 	{
-		len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%T", &nt);
+		len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%H:%M:%S", &nt);
 
 		if (len > 0 && len < QSC_TIMESTAMP_STRING_SIZE)
 		{

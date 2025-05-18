@@ -121,12 +121,6 @@
     <Filter Include="Source Files\Network">
       <UniqueIdentifier>{d8ecbcc0-bfe6-4fcd-9093-e9a9a2724b05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Asymmetric\Cipher\NTRU">
-      <UniqueIdentifier>{5a1608e6-5475-4341-94e9-15c40bb61bba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Cipher\NTRU">
-      <UniqueIdentifier>{325513a9-490c-4751-8022-e0f291a3ef5c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Asymmetric\Signature\Falcon">
       <UniqueIdentifier>{b91f9597-6441-4580-b253-476e3c1caf77}</UniqueIdentifier>
     </Filter>
@@ -148,9 +142,6 @@
     <Filter Include="Header Files\Asymmetric\Cipher\McEliece\Support">
       <UniqueIdentifier>{ec6da9b6-ca0b-45b0-94b7-a36d431e8c00}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Asymmetric\Cipher\NTRU\Support">
-      <UniqueIdentifier>{7dfb12e7-5af1-405e-98eb-868345439b91}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Asymmetric\Signature\ECDSA\Support">
       <UniqueIdentifier>{97e23e08-e303-424d-8a8e-d561a1be9853}</UniqueIdentifier>
     </Filter>
@@ -168,9 +159,6 @@
     </Filter>
     <Filter Include="Source Files\Asymmetric\Cipher\McEliece\Support">
       <UniqueIdentifier>{97233bab-3642-491e-8fa6-32c616641938}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Cipher\NTRU\Support">
-      <UniqueIdentifier>{b14be658-8796-4588-9943-9853bf63ebcf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Asymmetric\Signature\ECDSA\Support">
       <UniqueIdentifier>{026ca531-7993-4d59-917b-6da4c4f1e4c8}</UniqueIdentifier>
@@ -309,9 +297,6 @@
     <ClInclude Include="timestamp.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="ntru.h">
-      <Filter>Header Files\Asymmetric\Cipher\NTRU</Filter>
-    </ClInclude>
     <ClInclude Include="falcon.h">
       <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
     </ClInclude>
@@ -356,12 +341,6 @@
     </ClInclude>
     <ClInclude Include="mceliecebase_avx2.h">
       <Filter>Header Files\Asymmetric\Cipher\McEliece\Support</Filter>
-    </ClInclude>
-    <ClInclude Include="ntrubase.h">
-      <Filter>Header Files\Asymmetric\Cipher\NTRU\Support</Filter>
-    </ClInclude>
-    <ClInclude Include="ntrubase_avx2.h">
-      <Filter>Header Files\Asymmetric\Cipher\NTRU\Support</Filter>
     </ClInclude>
     <ClInclude Include="ecdsabase.h">
       <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
@@ -512,9 +491,6 @@
     <ClCompile Include="timestamp.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="ntru.c">
-      <Filter>Source Files\Asymmetric\Cipher\NTRU</Filter>
-    </ClCompile>
     <ClCompile Include="falcon.c">
       <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
     </ClCompile>
@@ -562,12 +538,6 @@
     </ClCompile>
     <ClCompile Include="mceliecebase_avx2.c">
       <Filter>Source Files\Asymmetric\Cipher\McEliece\Support</Filter>
-    </ClCompile>
-    <ClCompile Include="ntrubase.c">
-      <Filter>Source Files\Asymmetric\Cipher\NTRU\Support</Filter>
-    </ClCompile>
-    <ClCompile Include="ntrubase_avx2.c">
-      <Filter>Source Files\Asymmetric\Cipher\NTRU\Support</Filter>
     </ClCompile>
     <ClCompile Include="ecdsabase.c">
       <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>

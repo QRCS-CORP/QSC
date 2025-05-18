@@ -257,9 +257,6 @@
     <ClInclude Include="mceliecebase_avx2.h" />
     <ClInclude Include="memutils.h" />
     <ClInclude Include="netutils.h" />
-    <ClInclude Include="ntru.h" />
-    <ClInclude Include="ntrubase.h" />
-    <ClInclude Include="ntrubase_avx2.h" />
     <ClInclude Include="poly1305.h" />
     <ClInclude Include="qmac.h" />
     <ClInclude Include="queue.h" />
@@ -327,9 +324,6 @@
     <ClCompile Include="mceliecebase_avx2.c" />
     <ClCompile Include="memutils.c" />
     <ClCompile Include="netutils.c" />
-    <ClCompile Include="ntru.c" />
-    <ClCompile Include="ntrubase.c" />
-    <ClCompile Include="ntrubase_avx2.c" />
     <ClCompile Include="poly1305.c" />
     <ClCompile Include="qmac.c" />
     <ClCompile Include="qsort.c" />

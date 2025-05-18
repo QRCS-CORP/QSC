@@ -13,7 +13,7 @@
 
 /*** AES ***/
 
-static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
+static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t* message, const uint8_t* expected)
 {
 	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -35,8 +35,8 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	/* copy split message and expected arrays to full input */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_memutils_copy(inpf + (i * QSC_AES_BLOCK_SIZE), message[i], QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy(expf + (i * QSC_AES_BLOCK_SIZE), expected[i], QSC_AES_BLOCK_SIZE);
+		qsc_memutils_copy(inpf + (i * QSC_AES_BLOCK_SIZE), message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+		qsc_memutils_copy(expf + (i * QSC_AES_BLOCK_SIZE), expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 	}
 
 	/* initialize the state */
@@ -45,9 +45,9 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	/* test the cbc encryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_cbc_encrypt_block(&state, out, message[i]);
+		qsc_aes_cbc_encrypt_block(&state, out, message + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, expected[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -59,9 +59,9 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_cbc_decrypt_block(&state, out, expected[i]);
+		qsc_aes_cbc_decrypt_block(&state, out, expected + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, message[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -73,7 +73,7 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	return status;
 }
 
-static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
+static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t* message, const uint8_t* expected)
 {
 	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -93,9 +93,9 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	/* test the cbc encryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_cbc_encrypt_block(&state, out, message[i]);
+		qsc_aes_cbc_encrypt_block(&state, out, message + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, expected[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -108,9 +108,9 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	/* test the cbc decryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_cbc_decrypt_block(&state, out, expected[i]);
+		qsc_aes_cbc_decrypt_block(&state, out, expected + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, message[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -122,7 +122,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 	return status;
 }
 
-static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
+static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t* message, const uint8_t* expected)
 {
 	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -141,9 +141,9 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	/* test the ctr encryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ctrbe_transform(&state, out, message[i], QSC_AES_BLOCK_SIZE);
+		qsc_aes_ctrbe_transform(&state, out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-		if (qsc_intutils_are_equal8(out, expected[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -158,9 +158,9 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	/* test the ctr decryption */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ctrbe_transform(&state, out, expected[i], QSC_AES_BLOCK_SIZE);
+		qsc_aes_ctrbe_transform(&state, out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-		if (qsc_intutils_are_equal8(out, message[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -172,7 +172,7 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	return status;
 }
 
-static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
+static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t* message, const uint8_t* expected)
 {
 	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
@@ -191,9 +191,9 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	/* test the ctr encryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ctrbe_transform(&state, out, message[i], QSC_AES_BLOCK_SIZE);
+		qsc_aes_ctrbe_transform(&state, out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-		if (qsc_intutils_are_equal8(out, expected[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -208,9 +208,9 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	/* test the ctr decryption */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ctrbe_transform(&state, out, expected[i], QSC_AES_BLOCK_SIZE);
+		qsc_aes_ctrbe_transform(&state, out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-		if (qsc_intutils_are_equal8(out, message[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -222,7 +222,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 	return status;
 }
 
-static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
+static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t* message, const uint8_t* expected)
 {
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
@@ -240,9 +240,9 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 	/* test the ecb encryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ecb_encrypt_block(&state, out, message[i]);
+		qsc_aes_ecb_encrypt_block(&state, out, message + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, expected[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -254,9 +254,9 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 	/* test the ecb decryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ecb_decrypt_block(&state, out, expected[i]);
+		qsc_aes_ecb_decrypt_block(&state, out, expected + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, message[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -268,7 +268,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 	return status;
 }
 
-static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
+static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t* message, const uint8_t* expected)
 {
 	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
@@ -285,9 +285,9 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 	/* test the ecb encryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ecb_encrypt_block(&state, out, message[i]);
+		qsc_aes_ecb_encrypt_block(&state, out, message + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, expected[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, expected + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -299,9 +299,9 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 	/* test the ecb decryption function */
 	for (i = 0; i < 4; ++i)
 	{
-		qsc_aes_ecb_decrypt_block(&state, out, expected[i]);
+		qsc_aes_ecb_decrypt_block(&state, out, expected + (i * QSC_AES_BLOCK_SIZE));
 
-		if (qsc_intutils_are_equal8(out, message[i], QSC_AES_BLOCK_SIZE) == false)
+		if (qsc_intutils_are_equal8(out, message + (i * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE) == false)
 		{
 			status = false;
 		}
@@ -315,8 +315,8 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 
 static bool fips_aes128_cbc()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
 
@@ -325,23 +325,23 @@ static bool fips_aes128_cbc()
 	qsc_consoleutils_hex_to_bin("2B7E151628AED2A6ABF7158809CF4F3C", key, QSC_AES_BLOCK_SIZE);
 	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F", iv, QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("7649ABAC8119B246CEE98E9B12E9197D", exp[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("5086CB9B507219EE95DB113A917678B2", exp[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("73BED6B8E3C1743B7116E69E22229516", exp[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("3FF1CAA1681FAC09120ECA307586E1A7", exp[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("7649ABAC8119B246CEE98E9B12E9197D", exp, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("5086CB9B507219EE95DB113A917678B2", exp + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("73BED6B8E3C1743B7116E69E22229516", exp + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("3FF1CAA1681FAC09120ECA307586E1A7", exp + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
 	return aes128_cbc_monte_carlo(key, iv, msg, exp);
 }
 
 static bool fips_aes256_cbc()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 
@@ -350,23 +350,23 @@ static bool fips_aes256_cbc()
 	qsc_consoleutils_hex_to_bin("603DEB1015CA71BE2B73AEF0857D77811F352C073B6108D72D9810A30914DFF4", key, QSC_AES256_KEY_SIZE);
 	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F", iv, QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("F58C4C04D6E5F1BA779EABFB5F7BFBD6", exp[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("9CFC4E967EDB808D679F777BC6702C7D", exp[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("39F23369A9D9BACFA530E26304231461", exp[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("B2EB05E2C39BE9FCDA6C19078C6A9D1B", exp[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F58C4C04D6E5F1BA779EABFB5F7BFBD6", exp, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("9CFC4E967EDB808D679F777BC6702C7D", exp + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("39F23369A9D9BACFA530E26304231461", exp + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("B2EB05E2C39BE9FCDA6C19078C6A9D1B", exp + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
 	return aes256_cbc_monte_carlo(key, iv, msg, exp);
 }
 
 static bool fips_aes128_ctr()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
 
@@ -375,23 +375,23 @@ static bool fips_aes128_ctr()
 	qsc_consoleutils_hex_to_bin("2B7E151628AED2A6ABF7158809CF4F3C", key, QSC_AES_BLOCK_SIZE);
 	qsc_consoleutils_hex_to_bin("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF", nonce, QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("874D6191B620E3261BEF6864990DB6CE", exp[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("9806F66B7970FDFF8617187BB9FFFDFF", exp[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("5AE4DF3EDBD5D35E5B4F09020DB03EAB", exp[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("1E031DDA2FBE03D1792170A0F3009CEE", exp[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("874D6191B620E3261BEF6864990DB6CE", exp, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("9806F66B7970FDFF8617187BB9FFFDFF", exp + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("5AE4DF3EDBD5D35E5B4F09020DB03EAB", exp + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("1E031DDA2FBE03D1792170A0F3009CEE", exp + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
 	return aes128_ctr_monte_carlo(key, nonce, msg, exp);
 }
 
 static bool fips_aes256_ctr()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
 
@@ -400,61 +400,61 @@ static bool fips_aes256_ctr()
 	qsc_consoleutils_hex_to_bin("603DEB1015CA71BE2B73AEF0857D77811F352C073B6108D72D9810A30914DFF4", key, QSC_AES256_KEY_SIZE);
 	qsc_consoleutils_hex_to_bin("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF", nonce, QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("601EC313775789A5B7A7F504BBF3D228", exp[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F443E3CA4D62B59ACA84E990CACAF5C5", exp[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("2B0930DAA23DE94CE87017BA2D84988D", exp[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("DFC9C58DB67AADA613C2DD08457941A6", exp[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("601EC313775789A5B7A7F504BBF3D228", exp, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F443E3CA4D62B59ACA84E990CACAF5C5", exp + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("2B0930DAA23DE94CE87017BA2D84988D", exp + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("DFC9C58DB67AADA613C2DD08457941A6", exp + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
 	return aes256_ctr_monte_carlo(key, nonce, msg, exp);
 }
 
 static bool fips_aes128_ecb()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	/* SP800-38a F1.1 */
 
 	qsc_consoleutils_hex_to_bin("2B7E151628AED2A6ABF7158809CF4F3C", key, QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("3AD77BB40D7A3660A89ECAF32466EF97", exp[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F5D3D58503B9699DE785895A96FDBAAF", exp[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("43B1CD7F598ECE23881B00E3ED030688", exp[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("7B0C785E27E8AD3F8223207104725DD4", exp[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("3AD77BB40D7A3660A89ECAF32466EF97", exp, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F5D3D58503B9699DE785895A96FDBAAF", exp + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("43B1CD7F598ECE23881B00E3ED030688", exp + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("7B0C785E27E8AD3F8223207104725DD4", exp + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
 	return aes128_ecb_monte_carlo(key, msg, exp);
 }
 
 static bool fips_aes256_ecb()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
 	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 
 	/* SP800-38a F1.5 */
 
 	qsc_consoleutils_hex_to_bin("603DEB1015CA71BE2B73AEF0857D77811F352C073B6108D72D9810A30914DFF4", key, QSC_AES256_KEY_SIZE);
 
-	qsc_consoleutils_hex_to_bin("F3EED1BDB5D2A03C064B5A7E3DB181F8", exp[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("591CCB10D410ED26DC5BA74A31362870", exp[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("B6ED21B99CA6F4F9F153E7B1BEAFED1D", exp[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("23304B7A39F9F3FF067D8D8F9E24ECC7", exp[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F3EED1BDB5D2A03C064B5A7E3DB181F8", exp, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("591CCB10D410ED26DC5BA74A31362870", exp + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("B6ED21B99CA6F4F9F153E7B1BEAFED1D", exp + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("23304B7A39F9F3FF067D8D8F9E24ECC7", exp + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
-	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg[0], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg[1], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg[2], QSC_AES_BLOCK_SIZE);
-	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg[3], QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("6BC1BEE22E409F96E93D7E117393172A", msg, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("AE2D8A571E03AC9C9EB76FAC45AF8E51", msg + QSC_AES_BLOCK_SIZE, QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("30C81C46A35CE411E5FBC1191A0A52EF", msg + (2 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+	qsc_consoleutils_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg + (3 * QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
 
 	return aes256_ecb_monte_carlo(key, msg, exp);
 }

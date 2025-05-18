@@ -132,7 +132,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \enum qsc_ipinfo_address_types
  * \brief The IP address family types.
  */
-QSC_EXPORT_API typedef enum
+typedef enum
 {
     qsc_ipinfo_address_type_none = 0x00U,    /*!< The address type is not set. */
     qsc_ipinfo_address_type_ipv4 = 0x01U,    /*!< The address type is IPv4. */
