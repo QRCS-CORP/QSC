@@ -613,7 +613,7 @@ qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive_async_state* s
 
 	if (state != NULL && state->source != NULL)
 	{
-		qsc_async_thread_create(&qsc_socket_receive_async_invoke, state);
+		qsc_async_thread_create((qsc_thread_func_t)qsc_socket_receive_async_invoke, state);
 	}
 
 	return res;
