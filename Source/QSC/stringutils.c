@@ -436,6 +436,8 @@ void qsc_stringutils_int64_to_string(int64_t num, char* dest, size_t dstlen)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		_i64toa_s(num, dest, dstlen, 10);
+#elif defined(QSC_SYSTEM_OS_LINUX)
+		snprintf(dest, dstlen, "%ld", num);
 #else
 		snprintf(dest, dstlen, "%lld", num);
 #endif
@@ -450,6 +452,8 @@ void qsc_stringutils_uint64_to_string(uint64_t num, char* dest, size_t dstlen)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		_ui64toa_s(num, dest, dstlen, 10);
+#elif defined(QSC_SYSTEM_OS_LINUX)
+		snprintf(dest, dstlen, "%lu", num);
 #else
 		snprintf(dest, dstlen, "%llu", num);
 #endif
