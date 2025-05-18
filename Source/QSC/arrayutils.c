@@ -151,7 +151,7 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	sscanf_s(str, "%lld", &res);
 #elif defined(QSC_SYSTEM_OS_LINUX)
-	sscanf(str, "ld%", (int64_t*)&res);
+	sscanf(str, "%ld", (int64_t*)&res);
 #else
 	sscanf(str, "%lld", (int64_t*)&res);
 #endif
