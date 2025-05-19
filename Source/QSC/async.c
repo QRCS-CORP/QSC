@@ -34,78 +34,71 @@ THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void *arg)
     return 0;
 }
 
-bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void *context, size_t nthreads)
+bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* context, size_t nthreads)
 {
     assert(task != NULL);
 
-    bool   res = false;
+    bool res = false;
 
-    if ((task != NULL) && (nthreads > 0U))
+    if (task != NULL && nthreads != 0)
     {
         qsc_thread* threads;
         async_thread_task_t* tasks;
-        size_t created;
 
-        threads = qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
-        tasks = qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
+        threads = (qsc_thread*)qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
+        tasks = (async_thread_task_t*)qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
 
-        if ((threads != NULL) && (tasks != NULL))
+        if (threads != NULL && tasks != NULL)
         {
             qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
-            qsc_memutils_clear(tasks,   nthreads * sizeof(async_thread_task_t));
+            qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
+            res = true;
 
-            for (created = 0U; created < nthreads; ++created)
+            /* Process each task on a new thread */
+            for (size_t i = 0; i < nthreads; ++i)
             {
-                tasks[created].task    = task;
-                tasks[created].context = context;
-                tasks[created].index   = created;
+                tasks[i].task = task;
+                tasks[i].context = context;
+                tasks[i].index = i;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-                threads[created] = (HANDLE)_beginthreadex(
-                        NULL, 0U,
-                        async_thread_worker,
-                        &tasks[created],
-                        0U, NULL);
+                threads[i] = (HANDLE)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
 
-                if (threads[created] == NULL)
+                if (threads[i] == NULL)
                 {
+                    res = false;
                     break;
                 }
 #elif defined(QSC_SYSTEM_OS_POSIX)
-                if (pthread_create(&threads[created],
-                                   NULL,
-                                   async_thread_worker,
-                                   &tasks[created]) != 0)
+                if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
                 {
+                    res = false;
                     break;
                 }
 #endif
             }
 
-            /* if at least one thread started, wait for them */
-            if (created > 0U)
+            /* Wait for all threads to finish */
+            for (size_t i = 0; i < nthreads; ++i)
             {
-                res = true;
-
-                for (size_t i = 0U; i < created; ++i)
-                {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-                    (void)WaitForSingleObject(threads[i], INFINITE);
-                    (void)CloseHandle(threads[i]);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-                    (void)pthread_join(threads[i], NULL);
-#endif
+                if (threads[i] != NULL)
+                {
+                    WaitForSingleObject(threads[i], INFINITE);
+                    CloseHandle(threads[i]);
                 }
+#elif defined(QSC_SYSTEM_OS_POSIX)
+                pthread_join(threads[i], NULL);
+#endif
             }
+
+            qsc_memutils_alloc_free(threads);
+            qsc_memutils_alloc_free(tasks);
         }
-
-        qsc_memutils_alloc_free(threads);
-        qsc_memutils_alloc_free(tasks);
     }
 
     return res;
 }
-
 
 void qsc_async_launch_thread(void (*func)(void*), void* state)
 {
@@ -228,7 +221,7 @@ size_t qsc_async_processor_count(void)
     return cpus;
 }
 
-qsc_thread qsc_async_thread_create(qsc_thread_func_t func, void* state)
+qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
 {
     assert(func != NULL);
 
@@ -244,7 +237,7 @@ qsc_thread qsc_async_thread_create(qsc_thread_func_t func, void* state)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         uint32_t id = 0;
-        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, state, 0, (LPDWORD)&id);
+        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, state, 0, &id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
         pthread_create(&res, NULL, (void *(*) (void *))func, state);
 #endif
@@ -253,7 +246,7 @@ qsc_thread qsc_async_thread_create(qsc_thread_func_t func, void* state)
     return res;
 }
 
-qsc_thread qsc_async_thread_create_ex(qsc_thread_func_t func, void** args)
+qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
 {
     assert(func != NULL);
     assert(args != NULL);
@@ -270,7 +263,7 @@ qsc_thread qsc_async_thread_create_ex(qsc_thread_func_t func, void** args)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         uint32_t id = 0;
-        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, args, 0, (LPDWORD)&id);
+        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, args, 0, &id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
         pthread_create(&res, NULL, (void *(*) (void *))func, args);
 #endif

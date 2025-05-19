@@ -5,9 +5,9 @@
 
 qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
-    assert(buffer != NULL);
-    assert(buflen != 0);
-    assert(consumed != NULL);
+    QSC_ASSERT(buffer != NULL);
+    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(consumed != NULL);
 
     qsc_encoding_ber_element* relem;
     qsc_encoding_ber_element* elem;
@@ -244,10 +244,10 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
 
 size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size_t* length, bool* indef)
 {
-    assert(buffer != NULL);
-    assert(buflen != 0);
-    assert(length != NULL);
-    assert(indef != NULL);
+    QSC_ASSERT(buffer != NULL);
+    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(length != NULL);
+    QSC_ASSERT(indef != NULL);
 
     size_t res;
 
@@ -306,11 +306,11 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
 
 size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t buflen, uint8_t* tagclass, bool* construct, uint32_t* tagnum)
 {
-    assert(buffer != NULL);
-    assert(buflen != 0);
-    assert(tagclass != NULL);
-    assert(construct != NULL);
-    assert(tagnum != NULL);
+    QSC_ASSERT(buffer != NULL);
+    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(tagclass != NULL);
+    QSC_ASSERT(construct != NULL);
+    QSC_ASSERT(tagnum != NULL);
 
     size_t pos;
 
@@ -361,12 +361,12 @@ size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t buflen, uint8_t
 
 size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_t* buffer, size_t buflen)
 {
-    assert(element != NULL);
-    assert(buffer != NULL);
-    assert(buflen != 0);
+    QSC_ASSERT(element != NULL);
+    QSC_ASSERT(buffer != NULL);
+    QSC_ASSERT(buflen != 0);
 
-    uint8_t alen[10] = { 0 };
-    uint8_t tagbuf[10] = { 0 };
+    uint8_t alen[10] = { 0U };
+    uint8_t tagbuf[10] = { 0U };
     size_t ret;
     size_t total;
     size_t taglen;
@@ -488,8 +488,8 @@ size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_
 
 size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buflen)
 {
-    assert(buffer != NULL);
-    assert(buflen != 0);
+    QSC_ASSERT(buffer != NULL);
+    QSC_ASSERT(buflen != 0);
 
     size_t res;
 
@@ -510,7 +510,7 @@ size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buf
         else
         {
             /* long form: determine the number of bytes needed to encode the length */
-            uint8_t alen[8] = { 0 };
+            uint8_t alen[8] = { 0U };
             size_t bnum;
             size_t tlen;
 
@@ -548,8 +548,8 @@ size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buf
 
 size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t tagnum, uint8_t* buffer, size_t buflen)
 {
-    assert(buffer != NULL);
-    assert(buflen != 0);
+    QSC_ASSERT(buffer != NULL);
+    QSC_ASSERT(buflen != 0);
 
     size_t pos;
     uint8_t first;
@@ -574,7 +574,7 @@ size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t ta
         }
         else 
         {
-            uint8_t temp[5] = { 0 };
+            uint8_t temp[5] = { 0U };
             size_t tmplen;
 
             /* indicate long-form tag */
@@ -621,7 +621,7 @@ size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t ta
 
 void encoding_ber_free_element(qsc_encoding_ber_element* element)
 {
-    assert(element != NULL);
+    QSC_ASSERT(element != NULL);
 
     if (element != NULL)
     {
@@ -645,9 +645,9 @@ void encoding_ber_free_element(qsc_encoding_ber_element* element)
 
 bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* input, size_t inplen)
 {
-    assert(output != NULL);
-    assert(input != NULL);
-    assert(inplen != 0);
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(inplen != 0);
 
 	const int32_t DECTBL[80] = 
 	{
@@ -715,8 +715,8 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
 
 size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 {
-    assert(input != NULL);
-    assert(length != 0);
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(length != 0);
 
 	size_t res;
 
@@ -747,10 +747,10 @@ size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 
 void qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* input, size_t inplen)
 {
-    assert(output != NULL);
-    assert(otplen != 0);
-    assert(input != NULL);
-    assert(inplen != 0);
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(otplen != 0);
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(inplen != 0);
 
 	const char ENCTBL[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -792,7 +792,7 @@ void qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* inpu
 
 size_t qsc_encoding_base64_encoded_size(size_t length)
 {
-    assert(length != 0);
+    QSC_ASSERT(length != 0);
 
 	size_t ret;
 
@@ -839,9 +839,9 @@ bool qsc_encoding_base64_is_valid_char(char value)
 
 qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
-    assert(buffer != NULL);
-    assert(buflen != 0);
-    assert(consumed != NULL);
+    QSC_ASSERT(buffer != NULL);
+    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(consumed != NULL);
 
     qsc_encoding_ber_element* elem;
 
@@ -960,11 +960,11 @@ size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_
 
 bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, size_t otplen, size_t* declen)
 {
-    assert(input != NULL);
-    assert(inplen != 0);
-    assert(output != NULL);
-    assert(otplen != 0);
-    assert(declen != NULL);
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(inplen != 0);
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(otplen != 0);
+    QSC_ASSERT(declen != NULL);
 
     size_t req;
     bool res;
@@ -1033,10 +1033,10 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
 
 bool qsc_encoding_hex_encode(const uint8_t* input, size_t inplen, char* output, size_t otplen)
 {
-    assert(input != NULL);
-    assert(inplen != 0);
-    assert(output != NULL);
-    assert(otplen != 0);
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(inplen != 0);
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(otplen != 0);
 
     bool res;
 

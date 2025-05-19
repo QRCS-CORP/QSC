@@ -205,9 +205,9 @@ static void rcs_transform_512(qsc_rcs_state* ctx, __m512i* output, const __m512i
 
 static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
-	assert(ctx != NULL);
-	assert(input != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(output != NULL);
 
 	const size_t HLFBLK = QSC_RCS_BLOCK_SIZE / 2;
 	size_t oft;
@@ -258,7 +258,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 	while (length >= QSC_RCS_BLOCK_SIZE)
 	{
 		__m128i tmpn[2] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
-		__m128i tmpo[2] = { 0 };
+		__m128i tmpo[2] = { 0U };
 
 		rcs_transform_256(ctx, tmpo, tmpn);
 
@@ -280,8 +280,8 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 	if (length != 0)
 	{
 		__m128i tmpn[2] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
-		__m128i tmpo[2] = { 0 };
-		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0 };
+		__m128i tmpo[2] = { 0U };
+		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0U };
 
 		rcs_transform_256(ctx, tmpo, tmpn);
 
@@ -625,7 +625,7 @@ static void rcs_ct_sbox(uint32_t* q)
 
 static void rcs_sub_bytes(uint8_t* ctx)
 {
-	uint32_t q[8] = { 0 };
+	uint32_t q[8] = { 0U };
 
 	q[0] = ctx[0];
 	q[1] = ctx[1];
@@ -826,9 +826,9 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const u
 
 static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
-	assert(ctx != NULL);
-	assert(input != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t oft;
 
@@ -846,7 +846,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 	if (length != 0)
 	{
-		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0 };
+		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0U };
 
 		rcs_transform_256(ctx, tmpb, ctx->nonce);
 
@@ -864,7 +864,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 #if defined(QSC_RCS_AUTHENTICATED)
 static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 {
-	uint8_t ctr[sizeof(uint64_t)] = { 0 };
+	uint8_t ctr[sizeof(uint64_t)] = { 0U };
 	uint64_t mctr = QSC_RCS_BLOCK_SIZE + ctx->counter + sizeof(uint64_t);
 
 	qsc_intutils_le64to8(ctr, mctr);
@@ -926,7 +926,7 @@ static void rcs_mac_update(qsc_rcs_state* ctx, const uint8_t* input, size_t leng
 
 static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams)
 {
-	uint8_t sbuf[QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)] = { 0 };
+	uint8_t sbuf[QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)] = { 0U };
 	qsc_keccak_state kstate;
 	size_t i;
 	size_t oft;
@@ -934,7 +934,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 	if (ctx->ctype == RCS256)
 	{
-		uint8_t tmpr[RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0 };
+		uint8_t tmpr[RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0U };
 
 		/* initialize an instance of cSHAKE */
 		qsc_cshake_initialize(&kstate, qsc_keccak_rate_256, keyparams->key, keyparams->keylen, rcs256_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
@@ -991,7 +991,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 	}
 	else
 	{
-		uint8_t tmpr[RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0 };
+		uint8_t tmpr[RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0U };
 
 		/* initialize an instance of cSHAKE */
 		qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, rcs512_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
@@ -1062,7 +1062,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 void qsc_rcs_dispose(qsc_rcs_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -1092,10 +1092,10 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 
 void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, bool encryption)
 {
-	assert(ctx != NULL);
-	assert(keyparams->nonce != NULL);
-	assert(keyparams->key != NULL);
-	assert(keyparams->keylen == QSC_RCS256_KEY_SIZE || keyparams->keylen == QSC_RCS512_KEY_SIZE);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(keyparams->nonce != NULL);
+	QSC_ASSERT(keyparams->key != NULL);
+	QSC_ASSERT(keyparams->keylen == QSC_RCS256_KEY_SIZE || keyparams->keylen == QSC_RCS512_KEY_SIZE);
 
 	ctx->ctype = keyparams->keylen == QSC_RCS512_KEY_SIZE ? RCS512 : RCS256;
 	qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
@@ -1122,13 +1122,13 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 
 void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t length)
 {
-	assert(ctx != NULL);
-	assert(data != NULL);
-	assert(length != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(data != NULL);
+	QSC_ASSERT(length != 0);
 
 	if (length != 0)
 	{
-		uint8_t code[sizeof(uint32_t)] = { 0 };
+		uint8_t code[sizeof(uint32_t)] = { 0U };
 
 		/* add the ad data to the hash */
 		rcs_mac_update(ctx, data, length);
@@ -1140,16 +1140,16 @@ void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t leng
 
 void qsc_rcs_store_nonce(const qsc_rcs_state* ctx, uint8_t nonce[QSC_RCS_NONCE_SIZE])
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	qsc_memutils_copy(nonce, ctx->nonce, QSC_RCS_NONCE_SIZE);
 }
 
 bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	bool res;
 
@@ -1182,7 +1182,7 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 
 		if (ctx->ctype == RCS256)
 		{
-			uint8_t code[QSC_RCS256_MAC_SIZE] = { 0 };
+			uint8_t code[QSC_RCS256_MAC_SIZE] = { 0U };
 
 			/* mac the cipher-text to a temp array for comparison */
 			rcs_mac_finalize(ctx, code);
@@ -1197,7 +1197,7 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 		}
 		else
 		{
-			uint8_t code[QSC_RCS512_MAC_SIZE] = { 0 };
+			uint8_t code[QSC_RCS512_MAC_SIZE] = { 0U };
 
 			rcs_mac_finalize(ctx, code);
 
@@ -1221,9 +1221,9 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 
 bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	bool res;
 
@@ -1262,7 +1262,7 @@ bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8
 		{
 			if (ctx->ctype == RCS256)
 			{
-				uint8_t code[QSC_RCS256_MAC_SIZE] = { 0 };
+				uint8_t code[QSC_RCS256_MAC_SIZE] = { 0U };
 
 				/* mac the cipher-text to a temp array for comparison */
 				rcs_mac_finalize(ctx, code);
@@ -1277,7 +1277,7 @@ bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8
 			}
 			else
 			{
-				uint8_t code[QSC_RCS512_MAC_SIZE] = { 0 };
+				uint8_t code[QSC_RCS512_MAC_SIZE] = { 0U };
 
 				rcs_mac_finalize(ctx, code);
 

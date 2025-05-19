@@ -37,7 +37,7 @@
 
 void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* infname)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
@@ -133,7 +133,7 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 
 void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 {
-	qsc_netutils_adaptor_info ctx = { 0 };
+	qsc_netutils_adaptor_info ctx = { 0U };
 
 	qsc_netutils_get_adaptor_info(&ctx, "wlan0");
 	qsc_memutils_copy(mac, ctx.mac, QSC_NETUTILS_MAC_ADDRESS_SIZE);
@@ -141,7 +141,7 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 
 uint32_t qsc_netutils_atoi(const char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t len;
 	uint32_t res;
@@ -175,7 +175,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
 	DWORD blen;
-	TCHAR dbuf[QSC_SYSTEM_MAX_PATH + 1] = { 0 };
+	TCHAR dbuf[QSC_SYSTEM_MAX_PATH + 1] = { 0U };
 
 	blen = QSC_SYSTEM_MAX_PATH + 1;
 	GetComputerNameEx(ComputerNameDnsDomain, dbuf, &blen);
@@ -195,7 +195,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 
 #else
 
-	char hn[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0 };
+	char hn[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0U };
 	char* dn;
 	struct hostent* hp;
 	size_t dlen;
@@ -251,7 +251,7 @@ bool qsc_netutils_get_host_name(char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
 
 void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* address, char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
 {
-	assert(address != NULL);
+	QSC_ASSERT(address != NULL);
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
@@ -260,7 +260,7 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* addr
 
     if (WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd) == 0)
     {
-        struct sockaddr_in insock4 = { 0 };
+        struct sockaddr_in insock4 = { 0U };
         int32_t            slen    = (int32_t)sizeof(insock4);   /* correct size */
 
         insock4.sin_family = AF_INET;
@@ -273,7 +273,7 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* addr
 
         if (err == 0)
         {
-            char aurl[NI_MAXSERV] = { 0 };
+            char aurl[NI_MAXSERV] = { 0U };
 
             if (getnameinfo((const SOCKADDR*)&insock4,
                             (socklen_t)sizeof(insock4),
@@ -293,8 +293,8 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* addr
 
     struct sockaddr_in insock4;
     socklen_t addrlen;
-    char aurl[NI_MAXHOST] = { 0 };
-    char sip[QSC_IPINFO_IPV4_STRNLEN] = { 0 };
+    char aurl[NI_MAXHOST] = { 0U };
+    char sip[QSC_IPINFO_IPV4_STRNLEN] = { 0U };
 
     // Initialize sockaddr_in struct for IPv4
     qsc_memutils_clear(&insock4, sizeof(insock4));
@@ -318,16 +318,16 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* addr
 
 bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
 {
-	assert(padd != NULL);
+	QSC_ASSERT(padd != NULL);
 
 	qsc_socket_exceptions serr;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
-	char hname[INET_ADDRSTRLEN] = { 0 };
-	struct addrinfo hints = { 0 };
-	struct sockaddr_in insock4 = { 0 };
-	WSADATA wsd = { 0 };
+	char hname[INET_ADDRSTRLEN] = { 0U };
+	struct addrinfo hints = { 0U };
+	struct sockaddr_in insock4 = { 0U };
+	WSADATA wsd = { 0U };
 	struct addrinfo* hres;
 	struct addrinfo* ralloc;
 	size_t pctr;
@@ -425,7 +425,7 @@ bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
             if (ifa->ifa_addr->sa_family == AF_INET)
             {
                 pva = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
-				char buf[INET_ADDRSTRLEN] = { 0 };
+				char buf[INET_ADDRSTRLEN] = { 0U };
 
                 if (inet_ntop(AF_INET, pva, buf, INET_ADDRSTRLEN) != NULL)
                 {
@@ -448,15 +448,15 @@ bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
 
 bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd)
 {
-	assert(padd != NULL);
+	QSC_ASSERT(padd != NULL);
 
 	qsc_socket_exceptions serr;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-	char hname[INET6_ADDRSTRLEN] = { 0 };
-	struct addrinfo hints = { 0 };
-	struct sockaddr_in6 insock6 = { 0 };
-	WSADATA wsd = { 0 };
+	char hname[INET6_ADDRSTRLEN] = { 0U };
+	struct addrinfo hints = { 0U };
+	struct sockaddr_in6 insock6 = { 0U };
+	WSADATA wsd = { 0U };
 	struct addrinfo* hres;
 	struct addrinfo* ralloc;
 	size_t pctr;
@@ -554,7 +554,7 @@ bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd)
             if (ifa->ifa_addr->sa_family == AF_INET6)
             {
                 pva = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
-				char buf[INET6_ADDRSTRLEN] = { 0 };
+				char buf[INET6_ADDRSTRLEN] = { 0U };
 
                 if (inet_ntop(AF_INET6, pva, buf, INET6_ADDRSTRLEN) != NULL)
                 {
@@ -577,11 +577,11 @@ bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd)
 
 void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char* host, const char* service)
 {
-	assert(pinfo != NULL);
-	assert(host != NULL);
-	assert(service != NULL);
+	QSC_ASSERT(pinfo != NULL);
+	QSC_ASSERT(host != NULL);
+	QSC_ASSERT(service != NULL);
 
-	char hname[INET_ADDRSTRLEN] = { 0 };
+	char hname[INET_ADDRSTRLEN] = { 0U };
 	struct addrinfo hints;
 	struct addrinfo* hres = NULL;
 	qsc_socket_exceptions ex;
@@ -625,13 +625,13 @@ void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char* host, c
 
 void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char* host, const char* service)
 {
-	assert(pinfo != NULL);
-	assert(host != NULL);
-	assert(service != NULL);
+	QSC_ASSERT(pinfo != NULL);
+	QSC_ASSERT(host != NULL);
+	QSC_ASSERT(service != NULL);
 
-	char buf[INET6_ADDRSTRLEN] = { 0 };
+	char buf[INET6_ADDRSTRLEN] = { 0U };
 	struct addrinfo hints;
-	struct sockaddr_in6 insock6 = { 0 };
+	struct sockaddr_in6 insock6 = { 0U };
 	struct addrinfo* haddr = NULL;
 	qsc_socket_exceptions ex;
 	int32_t res;
@@ -680,7 +680,7 @@ void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char* host, c
 
 void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_SIZE], const qsc_socket* sock)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	if (sock != NULL)
 	{
@@ -700,7 +700,7 @@ void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_SIZE], const
 
 void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_SIZE], const qsc_socket* sock)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	if (sock != NULL)
 	{
@@ -721,8 +721,8 @@ void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_SIZE], co
 
 uint16_t qsc_netutils_port_name_to_number(const char* portname, const char* protocol)
 {
-	assert(portname != NULL);
-	assert(protocol != NULL);
+	QSC_ASSERT(portname != NULL);
+	QSC_ASSERT(protocol != NULL);
 
 	const struct servent* se;
 	uint16_t port;
@@ -746,9 +746,9 @@ uint16_t qsc_netutils_port_name_to_number(const char* portname, const char* prot
 #if defined(QSC_DEBUG_MODE)
 void qsc_netutils_values_print()
 {
-	char domain[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0 };
-	char ipv4s[QSC_IPINFO_IPV4_STRNLEN] = { 0 };
-	char ipv6s[QSC_IPINFO_IPV6_STRNLEN] = { 0 };
+	char domain[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0U };
+	char ipv4s[QSC_IPINFO_IPV4_STRNLEN] = { 0U };
+	char ipv6s[QSC_IPINFO_IPV6_STRNLEN] = { 0U };
 	qsc_ipinfo_ipv4_address ipv4;
 	qsc_ipinfo_ipv6_address ipv6;
 	qsc_ipinfo_ipv4_info ipv4inf;
@@ -801,7 +801,7 @@ void qsc_netutils_values_print()
 	qsc_consoleutils_print_line("");
 
 	qsc_consoleutils_print_safe("Interface info: ");
-	qsc_netutils_adaptor_info info = { 0 };
+	qsc_netutils_adaptor_info info = { 0U };
 	qsc_netutils_get_adaptor_info(&info, "loop0");
 	qsc_consoleutils_print_line(info.desc);
 

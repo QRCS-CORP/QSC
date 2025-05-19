@@ -39,7 +39,7 @@ static inline __m256i qmac_shift256_left_19(__m256i x)
 
 static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint64_t b[4])
 {
-    uint64_t prod[8] = { 0 };
+    uint64_t prod[8] = { 0U };
 
     qsc_memutils_clmulepi64_si256(prod, a, b);
 
@@ -86,7 +86,7 @@ static inline void qmac_shift256_left_19(__m128i in[2], __m128i out[2])
 
 static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint64_t b[4])
 {
-    uint64_t prod[8] = { 0 };
+    uint64_t prod[8] = { 0U };
     
     /* compute the full 512 - bit product using the verified cmul function */
     qsc_memutils_clmulepi64_si256(prod, a, b);
@@ -174,10 +174,10 @@ static void qmac_reduce_320_to_256_poly19(uint64_t x[5])
             x[word] ^= (1ULL << bit);
             shift = i - deg;
 
-            uint64_t poly320[5] = { 0 };
+            uint64_t poly320[5] = { 0U };
             /* poly fits in one word */
             poly320[0] = poly;
-            uint64_t pshift[5] = { 0 };
+            uint64_t pshift[5] = { 0U };
             carry = 0;
             
             for (j = 0; j < 5; j++)
@@ -199,7 +199,7 @@ static void qmac_reduce_320_to_256_poly19(uint64_t x[5])
 
 static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint64_t b[4])
 {
-    uint64_t prod[8] = { 0 };
+    uint64_t prod[8] = { 0U };
 
     qsc_memutils_clmulepi64_si256(prod, a, b);
     
@@ -216,7 +216,7 @@ static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint6
     uint64_t b320[5] = { pb[0], pb[1], pb[2], pb[3], 0 };
     
     /* compute t19 = b320 << 19, with folding of the final carry */
-    uint64_t t19[4] = { 0 };
+    uint64_t t19[4] = { 0U };
     qmac_shift256_left_19_fold(b320, 19, t19);
     
     /* form q320 = b320 xor t19. We build a 5-word result */
@@ -260,14 +260,14 @@ static void qmac_compute_final(uint8_t* tag, qsc_qmac_state* ctx)
 
 void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keyparams, const uint8_t* message, size_t msglen)
 {
-    assert(output != NULL);
-    assert(keyparams != NULL);
-    assert(message != NULL);
-    assert(msglen != 0);
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(keyparams != NULL);
+    QSC_ASSERT(message != NULL);
+    QSC_ASSERT(msglen != 0);
 
     if (output != NULL && keyparams != NULL && message != NULL && msglen != 0)
     {
-        qsc_qmac_state ctx = { 0 };
+        qsc_qmac_state ctx = { 0U };
 
         qsc_qmac_initialize(&ctx, keyparams);
         qsc_qmac_update(&ctx, message, msglen);
@@ -277,7 +277,7 @@ void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keyparams, const uint
 
 void qsc_qmac_dispose(qsc_qmac_state* ctx)
 {
-    assert(ctx != NULL);
+    QSC_ASSERT(ctx != NULL);
 
     if (ctx != NULL)
     {
@@ -290,8 +290,8 @@ void qsc_qmac_dispose(qsc_qmac_state* ctx)
 
 void qsc_qmac_finalize(qsc_qmac_state* ctx, uint8_t* output)
 {
-    assert(ctx != NULL);
-    assert(output != NULL);
+    QSC_ASSERT(ctx != NULL);
+    QSC_ASSERT(output != NULL);
 
     if (ctx != NULL && output != NULL && ctx->initialized == true)
     {
@@ -302,13 +302,13 @@ void qsc_qmac_finalize(qsc_qmac_state* ctx, uint8_t* output)
 
 void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
 {
-    assert(ctx != NULL);
-    assert(keyparams != NULL);
+    QSC_ASSERT(ctx != NULL);
+    QSC_ASSERT(keyparams != NULL);
 
     if (ctx != NULL && keyparams != NULL)
     {
-        qsc_keccak_state kstate = { 0 };
-	    uint8_t sbuf[QSC_KECCAK_256_RATE] = { 0 };
+        qsc_keccak_state kstate = { 0U };
+	    uint8_t sbuf[QSC_KECCAK_256_RATE] = { 0U };
 
         qsc_memutils_clear((uint8_t*)ctx->Y, QSC_QMAC_BLOCK_SIZE);
 
@@ -336,9 +336,9 @@ void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
 
 void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen)
 {
-    assert(ctx != NULL);
-    assert(message != NULL);
-    assert(msglen != 0);
+    QSC_ASSERT(ctx != NULL);
+    QSC_ASSERT(message != NULL);
+    QSC_ASSERT(msglen != 0);
 
 	size_t mlen;
 	size_t mpos;

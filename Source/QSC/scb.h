@@ -62,7 +62,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t info[32] = { ... };
  *
  * // Output bytes buffer
- * uint8_t rnd[200] = { 0 };
+ * uint8_t rnd[200] = { 0U };
  *
  * // Initialize with seed, optional info, CPU cost of 2 iterations, and memory cost of 1 MiB
  * qsc_scb_initialize(ctx, seed, sizeof(seed), info, sizeof(info), 2, 1);

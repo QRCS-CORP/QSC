@@ -312,6 +312,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_DEBUG_MODE
 #endif
 
+#if defined(QSC_DEBUG_MODE)
+#   define QSC_ASSERT assert
+#else
+#   define QSC_ASSERT
+#endif
+
 /*==============================================================================
     CPU Architecture Identification Macros
 ==============================================================================*/
@@ -466,15 +472,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_SYSTEM_SOCKETS_BERKELY
 #endif
 
-#if !defined(__clang__) && !defined(__GNUC__)
-  /*!
-   * \def __attribute__
-   * \brief Fallback definition for the __attribute__ keyword for compilers that do not support it.
-   */
-#	ifdef __attribute__
-#		undef __attribute__
-#	endif
-#	define __attribute__(a)
+#if defined(__attribute__)
+#   define QSC_ATTRIBUTE __attribute__
+#else
+#   define QSC_ATTRIBUTE(a)
 #endif
 
 #if defined(_DLL)
@@ -499,21 +500,21 @@ QSC_CPLUSPLUS_ENABLED_START
 #   endif
 #elif defined(QSC_SYSTEM_COMPILER_GCC)
 #   if defined(QSC_DLL_IMPORT)
-#		define QSC_EXPORT_API __attribute__((dllimport))
+#		define QSC_EXPORT_API QSC_ATTRIBUTE((dllimport))
 #   else
-#		define QSC_EXPORT_API __attribute__((dllexport))
+#		define QSC_EXPORT_API QSC_ATTRIBUTE((dllexport))
 #   endif
 #else
 #   if defined(__SUNPRO_C)
 #       if !defined(__GNU_C__)
-#		    define QSC_EXPORT_API __attribute__ (visibility(__global))
+#		    define QSC_EXPORT_API QSC_ATTRIBUTE (visibility(__global))
 #       else
-#			define QSC_EXPORT_API __attribute__ __global
+#			define QSC_EXPORT_API QSC_ATTRIBUTE __global
 #       endif
 #   elif defined(_MSG_VER)
 #		define QSC_EXPORT_API extern __declspec(dllexport)
 #   else
-#		define QSC_EXPORT_API __attribute__ ((visibility ("default")))
+#		define QSC_EXPORT_API QSC_ATTRIBUTE ((visibility ("default")))
 #   endif
 #endif
 #else
@@ -522,12 +523,12 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
 * \def QSC_CACHE_ALIGNED
-* \brief Defines cache-line alignment using GCC's __attribute__ syntax.
+* \brief Defines cache-line alignment using GCC's QSC_ATTRIBUTE syntax.
 */
 #if defined(__GNUC__)
-#	define QSC_CACHE_ALIGNED __attribute__((aligned(64)))
+#	define QSC_CACHE_ALIGNED QSC_ATTRIBUTE((aligned(64)))
 #elif defined(_MSC_VER)
-#	define QSC_CACHE_ALIGNED __declspec(align(64))
+#	define QSC_CACHE_ALIGNED __declspec(align(64U))
 #endif
 
 #if defined(QSC_SYSTEM_ARCH_IX86_64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_IA64) || defined(QSC_SYSTEM_ARCH_AMD64) || defined(QSC_SYSTEM_ARCH_SPARC64)
@@ -562,7 +563,15 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_SYSTEM_IS_LITTLE_ENDIAN
  * \brief Defined if the system is little endian.
  */
-#define QSC_SYSTEM_IS_LITTLE_ENDIAN (((union { uint32_t x; uint8_t c; }){1}).c)
+#if !defined(__BIG_ENDIAN__)
+#   if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#       define QSC_SYSTEM_IS_LITTLE_ENDIAN 1U
+#   elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#       define QSC_SYSTEM_IS_LITTLE_ENDIAN 0U
+#   elif defined(_WIN32) || defined(__LITTLE_ENDIAN__)
+#       define QSC_SYSTEM_IS_LITTLE_ENDIAN 1U
+#   endif
+#endif
 
 #if (!defined(QSC_SYSTEM_IS_LITTLE_ENDIAN))
 #	if defined(__sparc) || defined(__sparc__) || defined(__hppa__) || defined(__PPC__) || defined(__mips__) || (defined(__MWERKS__) && !defined(__INTEL__))
@@ -586,7 +595,7 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 #if !defined(QSC_ALIGN)
 #	if defined(__GNUC__) || defined(__clang__)
-#		define QSC_ALIGN(x)  __attribute__((aligned(x)))
+#		define QSC_ALIGN(x)  QSC_ATTRIBUTE((aligned(x)))
 #	elif defined(_MSC_VER)
 #		define QSC_ALIGN(x)  __declspec(align(x))
 #	else
@@ -605,7 +614,7 @@ QSC_CPLUSPLUS_ENABLED_START
      * \typedef uint128_t
      * \brief A 128-bit unsigned integer type using GCC's mode(TI) attribute.
      */
-		typedef uint32_t uint128_t __attribute__((mode(TI)));
+		typedef uint32_t uint128_t QSC_ATTRIBUTE((mode(TI)));
 #	else
 		typedef __int128 uint128_t;
 #	endif
@@ -621,38 +630,38 @@ QSC_CPLUSPLUS_ENABLED_START
       const uint128_t r = (uint128_t)(X) * (Y);	\
       *(High) = (r >> 64) & 0xFFFFFFFFFFFFFFFFULL;			\
       *(Low) = (r) & 0xFFFFFFFFFFFFFFFFULL;					\
-	} while(0)
+	} while(0U)
 #elif defined(QSC_SYSTEM_COMPILER_MSC) && defined(QSC_SYSTEM_IS_X64)
 #	include <intrin.h>
 #	pragma intrinsic(_umul128)
 #	define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)			\
 	do {													\
 		*(Low) = _umul128((X), (Y), (High));				\
-	} while(0)
+	} while(0U)
 #elif defined(QSC_SYSTEM_COMPILER_GCC)
 #	if defined(QSC_SYSTEM_ARCH_IX86)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							    \
 		do {																	    \
 		asm("mulq %3" : "=d" (*(High)), "=X" (*(Low)) : "X" (X), "rm" (Y) : "cc");	\
-		} while(0)
+		} while(0U)
 #	elif defined(QSC_SYSTEM_ARCH_ALPHA)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
 		do {																	\
-		asm("umulh %1,%2,%0" : "=r" (*(High)) : "r" (X), "r" (Y));				\
+		asm("umulh %1,%2,%0U" : "=r" (*(High)) : "r" (X), "r" (Y));				\
 		*(Low) = (X) * (Y);														\
-		} while(0)
+		} while(0U)
 #	elif defined(QSC_SYSTEM_ARCH_IA64)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
 		do {																	\
-		asm("xmpy.hu %0=%1,%2" : "=f" (*(High)) : "f" (X), "f" (Y));			\
+		asm("xmpy.hu %0U=%1,%2" : "=f" (*(High)) : "f" (X), "f" (Y));			\
 		*(Low) = (X) * (Y);														\
-		} while(0)
+		} while(0U)
 #	elif defined(QSC_SYSTEM_ARCH_PPC)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
 		do {																	\
-		asm("mulhdu %0,%1,%2" : "=r" (*(High)) : "r" (X), "r" (Y) : "cc");		\
+		asm("mulhdu %0U,%1,%2" : "=r" (*(High)) : "r" (X), "r" (Y) : "cc");		\
 		*(Low) = (X) * (Y);														\
-		} while(0)
+		} while(0U)
 #	endif
 #endif
 
@@ -728,20 +737,20 @@ QSC_CPLUSPLUS_ENABLED_START
      * \def QSC_SYSTEM_OPTIMIZE_IGNORE
      * \brief Compiler hint to disable optimization in Clang.
      */
-#		define QSC_SYSTEM_OPTIMIZE_IGNORE __attribute__((optnone))
+#		define QSC_SYSTEM_OPTIMIZE_IGNORE QSC_ATTRIBUTE((optnone))
 #   else
     /*!
      * \def QSC_SYSTEM_OPTIMIZE_IGNORE
      * \brief Compiler hint to disable optimization in GCC.
      */
-#		define QSC_SYSTEM_OPTIMIZE_IGNORE __attribute__((optimize("O0")))
+#		define QSC_SYSTEM_OPTIMIZE_IGNORE QSC_ATTRIBUTE((optimize("O0")))
 #   endif
 #elif defined(QSC_SYSTEM_COMPILER_CLANG)
   /*!
    * \def QSC_SYSTEM_OPTIMIZE_IGNORE
    * \brief Compiler hint to disable optimization in Clang.
    */
-#	define QSC_SYSTEM_OPTIMIZE_IGNORE __attribute__((optnone))
+#	define QSC_SYSTEM_OPTIMIZE_IGNORE QSC_ATTRIBUTE((optnone))
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
   /*!
    * \def QSC_SYSTEM_OPTIMIZE_IGNORE

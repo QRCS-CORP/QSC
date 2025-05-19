@@ -60,7 +60,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * // Example: SHA3-512 hash computation using the long-form API
  * #define MSGLEN 200
  * uint8_t msg[MSGLEN] = { ... };
- * uint8_t hash[QSC_SHA3_512_HASH_SIZE] = { 0 };
+ * uint8_t hash[QSC_SHA3_512_HASH_SIZE] = { 0U };
  * qsc_keccak_state ctx;
  *
  * qsc_sha3_initialize(ctx.state);
@@ -73,14 +73,14 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t key[QSC_KMAC_256_KEY_SIZE] = { ... };
  * uint8_t cust[...] = { ... };
  * qsc_keccak_state ctx2;
- * uint8_t code[QSC_KMAC_256_MAC_SIZE] = { 0 };
+ * uint8_t code[QSC_KMAC_256_MAC_SIZE] = { 0U };
  *
  * qsc_kmac_initialize(&ctx2, qsc_keccak_rate_256, key, sizeof(key), cust, sizeof(cust));
  * qsc_kmac_update(&ctx2, qsc_keccak_rate_256, msg, MSGLEN);
  * qsc_kmac_finalize(&ctx2, qsc_keccak_rate_256, code, sizeof(code));
  *
  * // Example: cSHAKE-512 pseudo-random generation using the long-form API
- * uint8_t output[64] = { 0 };
+ * uint8_t output[64] = { 0U };
  * uint8_t key2[QSC_KMAC_512_KEY_SIZE] = { ... };
  * uint8_t cust2[...] = { ... };
  * uint8_t name[...] = { ... };

@@ -23,11 +23,11 @@ static char getch(void)
 {
 	/* TODO: not working in ubuntu */
 
-    char buf = 0;
-    struct termios old = {0};
+    char buf = 0U;
+    struct termios old = {0U};
     fflush(stdout);
 
-    if(tcgetattr(0, &old) < 0)
+    if(tcgetattr(0U, &old) < 0U)
     {
         perror("tcsetattr()");
     }
@@ -35,14 +35,14 @@ static char getch(void)
     old.c_lflag &= ~ICANON;
     old.c_lflag &= ~ECHO;
     old.c_cc[VMIN] = 1;
-    old.c_cc[VTIME] = 0;
+    old.c_cc[VTIME] = 0U;
 
-    if(tcsetattr(0, TCSANOW, &old) < 0)
+    if(tcsetattr(0U, TCSANOW, &old) < 0U)
     {
         perror("tcsetattr ICANON");
     }
 
-    if(read(0, &buf, 1) < 0)
+    if(read(0U, &buf, 1) < 0U)
     {
         perror("read()");
     }
@@ -50,7 +50,7 @@ static char getch(void)
     old.c_lflag |= ICANON;
     old.c_lflag |= ECHO;
 
-    if(tcsetattr(0, TCSADRAIN, &old) < 0)
+    if(tcsetattr(0U, TCSADRAIN, &old) < 0U)
     {
         perror("tcsetattr ~ICANON");
     }
@@ -63,7 +63,7 @@ static char getch(void)
 void qsc_consoleutils_colored_message(const char* message, qsc_console_font_color color)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	assert(message != NULL);
+	QSC_ASSERT(message != NULL);
 
 	int32_t tcol;
 
@@ -85,7 +85,7 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 		}
 		else
 		{
-			tcol = 0;
+			tcol = 0U;
 		}
 
 		SetConsoleTextAttribute(hcon, (WORD)tcol);
@@ -112,14 +112,14 @@ char qsc_consoleutils_get_char()
 
 size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 {
-	assert(line != NULL);
-	assert(maxlen != 0);
+	QSC_ASSERT(line != NULL);
+	QSC_ASSERT(maxlen != 0U);
 
 	size_t slen;
 
-	slen = 0;
+	slen = 0U;
 
-	if (line != NULL && maxlen != 0)
+	if (line != NULL && maxlen != 0U)
 	{
 		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
 		{
@@ -147,14 +147,14 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 
 size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen)
 {
-	assert(line != NULL);
-	assert(maxlen != 0);
+	QSC_ASSERT(line != NULL);
+	QSC_ASSERT(maxlen != 0U);
 
 	size_t slen;
 
-	slen = 0;
+	slen = 0U;
 
-	if (line != NULL && maxlen != 0)
+	if (line != NULL && maxlen != 0U)
 	{
 		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
 		{
@@ -169,22 +169,22 @@ size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen)
 
 size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_t maxlen)
 {
-	assert(output != NULL);
-	assert(input != NULL);
-	assert(maxlen != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(maxlen != 0U);
 
 	size_t i;
 	size_t len;
 	size_t pos;
 
-	len = 0;
-	pos = 0;
+	len = 0U;
+	pos = 0U;
 
-	if (output != NULL && input != NULL && maxlen != 0)
+	if (output != NULL && input != NULL && maxlen != 0U)
 	{
 		if (qsc_consoleutils_line_contains(input, "\"") == true)
 		{
-			for (i = 0; i < maxlen; ++i)
+			for (i = 0U; i < maxlen; ++i)
 			{
 				if (input[i] == 34)
 				{
@@ -204,7 +204,7 @@ size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_
 		}
 		else if (qsc_consoleutils_line_contains(input, "\'") == true)
 		{
-			for (i = 0; i < maxlen; ++i)
+			for (i = 0U; i < maxlen; ++i)
 			{
 				if (input[i] == 39)
 				{
@@ -223,7 +223,7 @@ size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_
 			}
 		}
 
-		if (len > 0 && len <= maxlen)
+		if (len > 0U && len <= maxlen)
 		{
 			qsc_memutils_copy(output, input + pos, len);
 		}
@@ -243,9 +243,9 @@ char qsc_consoleutils_get_wait()
 
 void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 {
-	assert(hexstr != NULL);
-	assert(output != NULL);
-	assert(length != 0);
+	QSC_ASSERT(hexstr != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0U);
 
 	uint8_t idx0;
 	uint8_t idx1;
@@ -258,11 +258,11 @@ void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t len
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
-	if (hexstr != NULL && output != NULL && length != 0)
+	if (hexstr != NULL && output != NULL && length != 0U)
 	{
 		qsc_memutils_clear(output, length);
 
-		for (size_t  pos = 0; pos < (length * 2); pos += 2)
+		for (size_t  pos = 0U; pos < (length * 2); pos += 2)
 		{
 			idx0 = ((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U;
 			idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
@@ -273,8 +273,8 @@ void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t len
 
 bool qsc_consoleutils_line_contains(const char* line, const char* token)
 {
-	assert(line != NULL);
-	assert(token != NULL);
+	QSC_ASSERT(line != NULL);
+	QSC_ASSERT(token != NULL);
 
 	bool res;
 
@@ -290,8 +290,8 @@ bool qsc_consoleutils_line_contains(const char* line, const char* token)
 
 bool qsc_consoleutils_line_equals(const char* line1, const char* line2)
 {
-	assert(line1 != NULL);
-	assert(line2 != NULL);
+	QSC_ASSERT(line1 != NULL);
+	QSC_ASSERT(line2 != NULL);
 
 	size_t slen;
 	bool res;
@@ -313,17 +313,17 @@ bool qsc_consoleutils_line_equals(const char* line1, const char* line2)
 
 size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 {
-	assert(output != NULL);
-	assert(otplen != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(otplen != 0U);
 
 	size_t ctr;
 	size_t mlen;
 	char c;
 
-	ctr = 0;
+	ctr = 0U;
 	mlen = otplen - 1;
 
-	if (output != NULL && otplen != 0)
+	if (output != NULL && otplen != 0U)
 	{
 		while (true)
 		{
@@ -347,7 +347,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 				}
 				else
 				{
-					if (ctr > 0)
+					if (ctr > 0U)
 					{
 						qsc_consoleutils_print_safe("\b \b");
 						output[ctr] = '0';
@@ -369,7 +369,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 
 bool qsc_consoleutils_message_confirm(const char* message)
 {
-	assert(message != NULL);
+	QSC_ASSERT(message != NULL);
 
 	char ans;
 	bool res;
@@ -392,17 +392,17 @@ bool qsc_consoleutils_message_confirm(const char* message)
 
 void qsc_consoleutils_print_array(const uint8_t* input, size_t inplen, size_t linelen)
 {
-	assert(input != NULL);
-	assert(inplen != 0);
-	assert(linelen != 0);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(inplen != 0U);
+	QSC_ASSERT(linelen != 0U);
 
 	size_t i;
 
-	if (input != NULL && inplen != 0 && linelen != 0)
+	if (input != NULL && inplen != 0U && linelen != 0U)
 	{
 		while (inplen >= linelen)
 		{
-			for (i = 0; i < linelen; ++i)
+			for (i = 0U; i < linelen; ++i)
 			{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 				printf_s("%u", input[i]);
@@ -418,9 +418,9 @@ void qsc_consoleutils_print_array(const uint8_t* input, size_t inplen, size_t li
 			qsc_consoleutils_print_safe("\n");
 		}
 
-		if (inplen != 0)
+		if (inplen != 0U)
 		{
-			for (i = 0; i < inplen; ++i)
+			for (i = 0U; i < inplen; ++i)
 			{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 				printf_s("%u", input[i]);
@@ -445,14 +445,14 @@ void qsc_consoleutils_print_double(double digit)
 
 void qsc_consoleutils_print_concatenated_line(const char** input, size_t count)
 {
-	assert(input != NULL);
-	assert(count != 0);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(count != 0U);
 
-	if (input != NULL && count != 0)
+	if (input != NULL && count != 0U)
 	{
-		for (size_t i = 0; i < count; ++i)
+		for (size_t i = 0U; i < count; ++i)
 		{
-			if (input[i] != NULL && qsc_stringutils_string_size(input[i]) != 0)
+			if (input[i] != NULL && qsc_stringutils_string_size(input[i]) != 0U)
 			{
 				qsc_consoleutils_print_safe(input[i]);
 			}
@@ -464,17 +464,17 @@ void qsc_consoleutils_print_concatenated_line(const char** input, size_t count)
 
 void qsc_consoleutils_print_hex(const uint8_t* input, size_t inplen, size_t linelen)
 {
-	assert(input != NULL);
-	assert(inplen != 0);
-	assert(linelen != 0);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(inplen != 0U);
+	QSC_ASSERT(linelen != 0U);
 
 	size_t i;
 
-	if (input != NULL && inplen != 0 && linelen != 0)
+	if (input != NULL && inplen != 0U && linelen != 0U)
 	{
 		while (inplen >= linelen)
 		{
-			for (i = 0; i < linelen; ++i)
+			for (i = 0U; i < linelen; ++i)
 			{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 				printf_s("%02X", input[i]);
@@ -488,9 +488,9 @@ void qsc_consoleutils_print_hex(const uint8_t* input, size_t inplen, size_t line
 			qsc_consoleutils_print_safe("\n");
 		}
 
-		if (inplen != 0)
+		if (inplen != 0U)
 		{
-			for (i = 0; i < inplen; ++i)
+			for (i = 0U; i < inplen; ++i)
 			{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 				printf_s("%02X", input[i]);
@@ -504,15 +504,15 @@ void qsc_consoleutils_print_hex(const uint8_t* input, size_t inplen, size_t line
 
 void qsc_consoleutils_print_formatted(const char* input, size_t inplen)
 {
-	assert(input != NULL);
-	assert(inplen != 0);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(inplen != 0U);
 
-	if (input != NULL && inplen != 0)
+	if (input != NULL && inplen != 0U)
 	{
 		const char flag = '\\';
 		char inp;
 
-		for (size_t i = 0; i < inplen; ++i)
+		for (size_t i = 0U; i < inplen; ++i)
 		{
 			inp = input[i];
 
@@ -538,10 +538,10 @@ void qsc_consoleutils_print_formatted(const char* input, size_t inplen)
 
 void qsc_consoleutils_print_formatted_line(const char* input, size_t inplen)
 {
-	assert(input != NULL);
-	assert(inplen != 0);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(inplen != 0U);
 
-	if (input != NULL && inplen != 0)
+	if (input != NULL && inplen != 0U)
 	{
 		qsc_consoleutils_print_formatted(input, inplen);
 		qsc_consoleutils_print_line("");
@@ -550,7 +550,7 @@ void qsc_consoleutils_print_formatted_line(const char* input, size_t inplen)
 
 void qsc_consoleutils_print_line(const char* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
 	if (input != NULL)
 	{
@@ -562,9 +562,9 @@ void qsc_consoleutils_print_line(const char* input)
 
 void qsc_consoleutils_print_safe(const char* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
-	if (input != NULL && qsc_stringutils_string_size(input) > 0)
+	if (input != NULL && qsc_stringutils_string_size(input) > 0U)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		printf_s("%s", input);
@@ -599,7 +599,7 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 
 	cnt = (size_t)seconds * 10;
 
-	for (size_t i = 0; i < cnt; ++i)
+	for (size_t i = 0U; i < cnt; ++i)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		printf_s("%c", schr[i % sizeof(schr)]);
@@ -642,7 +642,7 @@ void qsc_consoleutils_set_window_clear()
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	DWORD count;
 	DWORD cells;
-	COORD coords = { 0, 0 };
+	COORD coords = { 0U, 0U };
 
 	hcon = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -663,7 +663,7 @@ void qsc_consoleutils_set_window_clear()
 
 void qsc_consoleutils_set_window_prompt(const char* prompt)
 {
-	assert(prompt != NULL);
+	QSC_ASSERT(prompt != NULL);
 
 	if (prompt != NULL)
 	{
@@ -673,10 +673,10 @@ void qsc_consoleutils_set_window_prompt(const char* prompt)
 
 void qsc_consoleutils_set_window_size(size_t width, size_t height)
 {
-	assert(width != 0);
-	assert(height != 0);
+	QSC_ASSERT(width != 0U);
+	QSC_ASSERT(height != 0U);
 
-	if (width != 0 && height != 0)
+	if (width != 0U && height != 0U)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		RECT r;
@@ -691,7 +691,7 @@ void qsc_consoleutils_set_window_size(size_t width, size_t height)
 
 void qsc_consoleutils_set_window_title(const char* title)
 {
-	assert(title != NULL);
+	QSC_ASSERT(title != NULL);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	if (title != NULL)
@@ -710,7 +710,7 @@ void qsc_consoleutils_set_virtual_terminal()
 
 	if (hcon != INVALID_HANDLE_VALUE)
 	{
-		DWORD dwmode = 0;
+		DWORD dwmode = 0U;
 
 		if (GetConsoleMode(hcon, &dwmode) == TRUE)
 		{

@@ -58,7 +58,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \code
  * #define MSGLEN 200
  * uint8_t msg[MSGLEN] = { ... };
- * uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };
+ * uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0U };
  * qsc_sha512_state ctx;
  *
  * qsc_sha512_initialize(&ctx);

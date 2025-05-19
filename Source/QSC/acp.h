@@ -89,7 +89,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *     uint32_t rand32 = qsc_acp_uint32();
  *     uint64_t rand64 = qsc_acp_uint64();
  *
- *     return 0;
+ *     return 0U;
  * }
  * \endcode
  *

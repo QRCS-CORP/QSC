@@ -352,7 +352,7 @@ static gf gf_inv(gf den)
 
 static void GF_mul(gf* out, const gf* in0, const gf* in1)
 {
-	gf prod[MCELIECE_SYS_T * 2 - 1] = { 0 };
+	gf prod[MCELIECE_SYS_T * 2 - 1] = { 0U };
 	size_t i;
 
 	for (i = 0; i < MCELIECE_SYS_T; ++i)
@@ -855,9 +855,9 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 	/* input: r, sequence of bits to be permuted bits, condition bits of the Benes network rev,
 	0 for normal application, !0 for inverse output: r, permuted bits */
 
-	uint64_t r_int_v[2][64] = { 0 };
-	uint64_t r_int_h[2][64] = { 0 };
-	uint64_t b_int_v[64] = { 0 };
+	uint64_t r_int_v[2][64] = { 0U };
+	uint64_t r_int_h[2][64] = { 0U };
+	uint64_t b_int_v[64] = { 0U };
 	uint64_t b_int_h[64];
 	size_t i;
 	int32_t inc;
@@ -956,7 +956,7 @@ static void support_gen(gf* s, const uint8_t* c)
 {
 	/* input: condition bits c output: support s */
 
-	uint8_t L[MCELIECE_GFBITS][(1 << MCELIECE_GFBITS) / 8] = { 0 };
+	uint8_t L[MCELIECE_GFBITS][(1 << MCELIECE_GFBITS) / 8] = { 0U };
 	size_t i;
 	size_t j;
 	gf a;
@@ -999,9 +999,9 @@ static void bm(gf* out, const gf* s)
 	input: s, sequence of field elements
 	output: out, minimal polynomial of s */
 
-	gf T[MCELIECE_SYS_T + 1] = { 0 };
-	gf C[MCELIECE_SYS_T + 1] = { 0 };
-	gf B[MCELIECE_SYS_T + 1] = { 0 };
+	gf T[MCELIECE_SYS_T + 1] = { 0U };
+	gf C[MCELIECE_SYS_T + 1] = { 0U };
+	gf B[MCELIECE_SYS_T + 1] = { 0U };
 	size_t i;
 	gf b;
 	gf d;
@@ -1334,8 +1334,8 @@ static void controlbits_from_permutation(uint8_t* out, const int16_t* pi, int64_
 	temp = qsc_memutils_malloc((size_t)n * 2 * sizeof(int32_t));
 	pi_test = qsc_memutils_malloc((size_t)n * sizeof(int16_t));
 
-	assert(temp != NULL);
-	assert(pi_test != NULL);
+	QSC_ASSERT(temp != NULL);
+	QSC_ASSERT(pi_test != NULL);
 
 	if (temp != NULL && pi_test != NULL)
 	{
@@ -1392,7 +1392,7 @@ static int32_t decrypt(uint8_t* e, const uint8_t* sk, const uint8_t* c)
 	   output: e, error vector
 	   return: 0 for success; 1 for failure */
 
-	gf g[MCELIECE_SYS_T + 1] = { 0 };
+	gf g[MCELIECE_SYS_T + 1] = { 0U };
 	gf L[MCELIECE_SYS_N];
 	gf s[MCELIECE_SYS_T * 2];
 	gf s_cmp[MCELIECE_SYS_T * 2];
@@ -1461,8 +1461,8 @@ static uint8_t same_mask(uint16_t x, uint16_t y)
 static void gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 {
 	/* output: e, an error vector of weight t */
-	uint16_t ind[MCELIECE_SYS_T] = { 0 };
-	uint8_t val[MCELIECE_SYS_T] = { 0 };
+	uint16_t ind[MCELIECE_SYS_T] = { 0U };
+	uint8_t val[MCELIECE_SYS_T] = { 0U };
 	size_t eq;
 	size_t i;
 	size_t j;
@@ -1471,7 +1471,7 @@ static void gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 	uint8_t brnd[MCELIECE_SYS_T * sizeof(uint16_t)];
 #else
 	size_t count;
-	uint16_t nrnd[MCELIECE_SYS_T * 2] = { 0 };
+	uint16_t nrnd[MCELIECE_SYS_T * 2] = { 0U };
 	uint8_t brnd[MCELIECE_SYS_T * 2 * sizeof(uint16_t)];
 #endif
 
@@ -1657,9 +1657,9 @@ static int32_t pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int1
 {
 	/* input: secret key sk output: public key pk */
 
-	uint64_t buf[1 << MCELIECE_GFBITS] = { 0 };
-	gf g[MCELIECE_SYS_T + 1] = { 0 };	/* Goppa polynomial */
-	gf L[MCELIECE_SYS_N] = { 0 };		/* support */
+	uint64_t buf[1 << MCELIECE_GFBITS] = { 0U };
+	gf g[MCELIECE_SYS_T + 1] = { 0U };	/* Goppa polynomial */
+	gf L[MCELIECE_SYS_N] = { 0U };		/* support */
 	gf inv[MCELIECE_SYS_N];
 	uint8_t** mat;
 	size_t i;
@@ -1680,7 +1680,7 @@ static int32_t pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int1
 	res = -1;
 
 	mat = (uint8_t**)qsc_memutils_malloc(MCELIECE_PK_NROWS * sizeof(uint8_t*));
-	assert(mat != NULL);
+	QSC_ASSERT(mat != NULL);
 
 	if (mat != NULL)
 	{
@@ -1886,7 +1886,7 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 	   output: out, minimal polynomial of f
 	   return: 0 for success and -1 for failure */
 
-	gf mat[MCELIECE_SYS_T + 1][MCELIECE_SYS_T] = { 0 };
+	gf mat[MCELIECE_SYS_T + 1][MCELIECE_SYS_T] = { 0U };
 	size_t c;
 	size_t i;
 	size_t j;
@@ -1965,8 +1965,8 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 
 int32_t qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	uint8_t one_ec[1 + MCELIECE_SYS_N / 8 + (MCELIECE_SYND_BYTES + 32)] = { 0 };
-	uint8_t two_e[1 + MCELIECE_SYS_N / 8] = { 0 };
+	uint8_t one_ec[1 + MCELIECE_SYS_N / 8 + (MCELIECE_SYND_BYTES + 32)] = { 0U };
+	uint8_t two_e[1 + MCELIECE_SYS_N / 8] = { 0U };
 	uint8_t *e = two_e + 1;
 #if defined(QSC_MCELIECE_S6N6960T119)
 	uint8_t mask;
@@ -2010,8 +2010,8 @@ int32_t qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk
 int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8_t* sk)
 {
 	uint8_t conf[32];
-	uint8_t preimage[1 + MCELIECE_SYS_N / 8 + (MCELIECE_SYND_BYTES + 32)] = { 0 };
-	uint8_t two_e[1 + MCELIECE_SYS_N / 8] = { 0 };
+	uint8_t preimage[1 + MCELIECE_SYS_N / 8 + (MCELIECE_SYND_BYTES + 32)] = { 0U };
+	uint8_t two_e[1 + MCELIECE_SYS_N / 8] = { 0U };
 	const uint8_t *s = sk + 40 + MCELIECE_IRR_BYTES + MCELIECE_COND_BYTES;
 	size_t i;
 	uint16_t m;
@@ -2075,12 +2075,12 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8
 
 int32_t qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	uint32_t perm[1 << MCELIECE_GFBITS] = { 0 };	/* random permutation as 32-bit integers */
+	uint32_t perm[1 << MCELIECE_GFBITS] = { 0U };	/* random permutation as 32-bit integers */
 	int16_t pi[1 << MCELIECE_GFBITS];	/* random permutation */
-	gf f[MCELIECE_SYS_T] = { 0 };		/* element in GF(2 ^ mt) */
+	gf f[MCELIECE_SYS_T] = { 0U };		/* element in GF(2 ^ mt) */
 	gf irr[MCELIECE_SYS_T];				/* Goppa polynomial */
-	uint8_t r[(MCELIECE_SYS_N / 8) + ((1 << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2) + 32] = { 0 };
-	uint8_t seed[33] = { 0 };
+	uint8_t r[(MCELIECE_SYS_N / 8) + ((1 << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2) + 32] = { 0U };
+	uint8_t seed[33] = { 0U };
 	const uint8_t* rp;
 	uint8_t *skp;
 	int32_t i;

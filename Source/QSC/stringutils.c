@@ -30,9 +30,9 @@ char* strsepex(char** stringp, const char* delim)
 
 size_t qsc_stringutils_add_line_breaks(char* dest, size_t dstlen, size_t linelen, const char* source, size_t srclen)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
-	assert(linelen != 0);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(linelen != 0);
 
 	size_t blen;
 	size_t i;
@@ -67,8 +67,8 @@ size_t qsc_stringutils_add_line_breaks(char* dest, size_t dstlen, size_t linelen
 
 size_t qsc_stringutils_remove_line_breaks(char* dest, size_t dstlen, const char* source, size_t srclen)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t i;
 	size_t j;
@@ -97,7 +97,7 @@ size_t qsc_stringutils_remove_line_breaks(char* dest, size_t dstlen, const char*
 
 void qsc_stringutils_clear_string(char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t len;
 
@@ -114,7 +114,7 @@ void qsc_stringutils_clear_string(char* source)
 
 void qsc_stringutils_clear_substring(char* dest, size_t length)
 {
-	assert(dest != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	if (dest != NULL && length != 0)
 	{
@@ -124,8 +124,8 @@ void qsc_stringutils_clear_substring(char* dest, size_t length)
 
 bool qsc_stringutils_compare_strings(const char* str1, const char* str2, size_t length)
 {
-	assert(str1 != NULL);
-	assert(str1 != NULL);
+	QSC_ASSERT(str1 != NULL);
+	QSC_ASSERT(str1 != NULL);
 
 	char c;
 
@@ -142,8 +142,8 @@ bool qsc_stringutils_compare_strings(const char* str1, const char* str2, size_t 
 
 size_t qsc_stringutils_concat_strings(char* dest, size_t dstlen, const char* source)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t pos;
 
@@ -179,9 +179,9 @@ size_t qsc_stringutils_concat_strings(char* dest, size_t dstlen, const char* sou
 
 size_t qsc_stringutils_concat_and_copy(char* dest, size_t dstlen, const char* str1, const char* str2)
 {
-	assert(dest != NULL);
-	assert(str1 != NULL);
-	assert(str2 != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(str1 != NULL);
+	QSC_ASSERT(str2 != NULL);
 
 	size_t res;
 	size_t slen;
@@ -218,8 +218,8 @@ size_t qsc_stringutils_concat_and_copy(char* dest, size_t dstlen, const char* st
 
 size_t qsc_stringutils_copy_string(char* dest, size_t dstlen, const char* source)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 
 	errno_t err;
 	size_t res;
@@ -252,8 +252,8 @@ size_t qsc_stringutils_copy_string(char* dest, size_t dstlen, const char* source
 
 size_t qsc_stringutils_copy_substring(char* dest, size_t dstlen, const char* source, size_t srclen)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t res;
 
@@ -274,7 +274,7 @@ size_t qsc_stringutils_copy_substring(char* dest, size_t dstlen, const char* sou
 
 size_t qsc_stringutils_formatting_count(const char* dest, size_t dstlen)
 {
-	assert(dest != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	size_t ctr;
 
@@ -296,8 +296,8 @@ size_t qsc_stringutils_formatting_count(const char* dest, size_t dstlen)
 
 size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char* dest)
 {
-	assert(source != NULL);
-	assert(dest != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	size_t ctr;
 
@@ -320,7 +320,7 @@ size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char
 
 int64_t qsc_stringutils_find_char(const char* source, const char tok)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	const char* sub;
 	int64_t pos;
@@ -342,8 +342,8 @@ int64_t qsc_stringutils_find_char(const char* source, const char tok)
 
 int64_t qsc_stringutils_find_string(const char* source, const char* token)
 {
-	assert(source != NULL);
-	assert(token != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(token != NULL);
 
 	const char* sub;
 	int64_t pos;
@@ -365,14 +365,14 @@ int64_t qsc_stringutils_find_string(const char* source, const char* token)
 
 void qsc_stringutils_byte_to_hex(char* hex, uint8_t input)
 {
-	assert(hex != NULL);
+	QSC_ASSERT(hex != NULL);
 
 	snprintf(hex, 3, "%.2x", input);
 }
 
 uint8_t qsc_stringutils_hex_to_byte(const char* hex)
 {
-	assert(hex != NULL);
+	QSC_ASSERT(hex != NULL);
 
 	uint8_t res;
 
@@ -383,8 +383,8 @@ uint8_t qsc_stringutils_hex_to_byte(const char* hex)
 
 int64_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* source, size_t offset)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 
 	int64_t res;
 
@@ -402,7 +402,7 @@ int64_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* sou
 
 void qsc_stringutils_int_to_string(int32_t num, char* dest, size_t destlen)
 {
-	assert(dest != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	if (dest != NULL)
 	{
@@ -416,7 +416,7 @@ void qsc_stringutils_int_to_string(int32_t num, char* dest, size_t destlen)
 
 void qsc_stringutils_uint32_to_string(uint32_t num, char* dest, size_t destlen)
 {
-	assert(dest != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	if (dest != NULL)
 	{
@@ -430,7 +430,7 @@ void qsc_stringutils_uint32_to_string(uint32_t num, char* dest, size_t destlen)
 
 void qsc_stringutils_int64_to_string(int64_t num, char* dest, size_t dstlen)
 {
-	assert(dest != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	if (dest != NULL)
 	{
@@ -446,7 +446,7 @@ void qsc_stringutils_int64_to_string(int64_t num, char* dest, size_t dstlen)
 
 void qsc_stringutils_uint64_to_string(uint64_t num, char* dest, size_t dstlen)
 {
-	assert(dest != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	if (dest != NULL)
 	{
@@ -462,14 +462,14 @@ void qsc_stringutils_uint64_to_string(uint64_t num, char* dest, size_t dstlen)
 
 bool qsc_stringutils_is_empty(const char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	return (qsc_stringutils_string_size(source) == 0);
 }
 
 bool qsc_stringutils_is_hex(const char* source, size_t srclen)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	char c;
 	bool res;
@@ -499,7 +499,7 @@ bool qsc_stringutils_is_hex(const char* source, size_t srclen)
 
 bool qsc_stringutils_is_numeric(const char* source, size_t srclen)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	char c;
 	bool res;
@@ -529,7 +529,7 @@ bool qsc_stringutils_is_numeric(const char* source, size_t srclen)
 
 char* qsc_stringutils_register_string(char** source, size_t count)
 {
-	assert(*source != NULL);
+	QSC_ASSERT(*source != NULL);
 
 	char* nstr;
 	size_t i;
@@ -567,7 +567,7 @@ char* qsc_stringutils_register_string(char** source, size_t count)
 
 size_t qsc_stringutils_remove_null_chars(char* source, size_t srclen)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	char* scpy;
 	size_t pos;
@@ -599,9 +599,9 @@ size_t qsc_stringutils_remove_null_chars(char* source, size_t srclen)
 
 int64_t qsc_stringutils_reverse_find_string(const char* source, const char* token, size_t start)
 {
-	assert(source != NULL);
-	assert(token != NULL);
-	assert(start != 0);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(token != NULL);
+	QSC_ASSERT(start != 0);
 
 	int64_t res;
 
@@ -637,8 +637,8 @@ int64_t qsc_stringutils_reverse_find_string(const char* source, const char* toke
 
 const char* qsc_stringutils_reverse_sub_string(const char* source, const char* token)
 {
-	assert(source != NULL);
-	assert(token != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(token != NULL);
 
 	const char* pch;
 	const char* sub;
@@ -662,10 +662,10 @@ const char* qsc_stringutils_reverse_sub_string(const char* source, const char* t
 
 void qsc_stringutils_split_strings(char* dest1, char* dest2, size_t destlen, const char* source, const char* token)
 {
-	assert(dest1 != NULL);
-	assert(dest2 != NULL);
-	assert(source != NULL);
-	assert(token != NULL);
+	QSC_ASSERT(dest1 != NULL);
+	QSC_ASSERT(dest2 != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(token != NULL);
 
 	const char* pstr;
 	size_t plen;
@@ -695,9 +695,9 @@ void qsc_stringutils_split_strings(char* dest1, char* dest2, size_t destlen, con
 
 char** qsc_stringutils_split_string(char* source, const char* delim, size_t* count)
 {
-	assert(source != NULL);
-	assert(delim != NULL);
-	assert(count != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(delim != NULL);
+	QSC_ASSERT(count != NULL);
 
 	char** ptok;
 	const char* tok;
@@ -775,8 +775,8 @@ char** qsc_stringutils_split_string(char* source, const char* delim, size_t* cou
 
 bool qsc_stringutils_string_compare(const char* str1, const char* str2, size_t length)
 {
-	assert(str1 != NULL);
-	assert(str2 != NULL);
+	QSC_ASSERT(str1 != NULL);
+	QSC_ASSERT(str2 != NULL);
 
 	bool res;
 
@@ -802,8 +802,8 @@ bool qsc_stringutils_string_compare(const char* str1, const char* str2, size_t l
 
 int32_t qsc_stringutils_string_comparison(const char* source, const char* token)
 {
-	assert(source != NULL);
-	assert(token  != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(token  != NULL);
 
 	size_t slen;
 	bool res;
@@ -825,8 +825,8 @@ int32_t qsc_stringutils_string_comparison(const char* source, const char* token)
 
 bool qsc_stringutils_string_contains(const char* source, const char* token)
 {
-	assert(source != NULL);
-	assert(token != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(token != NULL);
 
 	bool res;
 
@@ -842,8 +842,8 @@ bool qsc_stringutils_string_contains(const char* source, const char* token)
 
 bool qsc_stringutils_strings_equal(const char* str1, const char* str2)
 {
-	assert(str1 != NULL);
-	assert(str2 != NULL);
+	QSC_ASSERT(str1 != NULL);
+	QSC_ASSERT(str2 != NULL);
 
 	size_t slen;
 	bool res;
@@ -868,7 +868,7 @@ bool qsc_stringutils_strings_equal(const char* str1, const char* str2)
 
 int32_t qsc_stringutils_string_to_int(const char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t len;
 	uint32_t res;
@@ -896,7 +896,7 @@ int32_t qsc_stringutils_string_to_int(const char* source)
 
 size_t qsc_stringutils_string_size(const char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t res;
 
@@ -916,8 +916,8 @@ size_t qsc_stringutils_string_size(const char* source)
 
 char* qsc_stringutils_sub_string(const char* source, const char* token)
 {
-	assert(source != NULL);
-	assert(token != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(token != NULL);
 
 	char* sub;
 
@@ -933,7 +933,7 @@ char* qsc_stringutils_sub_string(const char* source, const char* token)
 
 void qsc_stringutils_to_lowercase(char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	if (source != NULL)
 	{
@@ -953,7 +953,7 @@ void qsc_stringutils_to_lowercase(char* source)
 
 void qsc_stringutils_trim_newline(char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t slen;
 
@@ -974,7 +974,7 @@ void qsc_stringutils_trim_newline(char* source)
 
 void qsc_stringutils_trim_spaces(char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t slen;
 
@@ -991,7 +991,7 @@ void qsc_stringutils_trim_spaces(char* source)
 
 void qsc_stringutils_to_uppercase(char* source)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	if (source != NULL)
 	{
@@ -1011,7 +1011,7 @@ void qsc_stringutils_to_uppercase(char* source)
 
 size_t qsc_stringutils_whitespace_count(const char* source, size_t srclen)
 {
-	assert(source != NULL);
+	QSC_ASSERT(source != NULL);
 
 	size_t ctr;
 
@@ -1033,8 +1033,8 @@ size_t qsc_stringutils_whitespace_count(const char* source, size_t srclen)
 
 size_t qsc_stringutils_whitespace_filter(const char* source, size_t srclen, char* dest)
 {
-	assert(source != NULL);
-	assert(dest != NULL);
+	QSC_ASSERT(source != NULL);
+	QSC_ASSERT(dest != NULL);
 
 	size_t ctr;
 

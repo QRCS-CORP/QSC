@@ -240,7 +240,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_s
 *
 * \return			[qsc_socket_exceptions] Returns an exception code on failure, or success(0)
 */
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(void* state, const qsc_ipinfo_ipv4_address* address, uint16_t port);
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv4_address* address, uint16_t port);
 
 /**
 * \brief Places the IPv6 socket in an asynchronous listening state
@@ -251,7 +251,7 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(void* s
 *
 * \return			[qsc_socket_exceptions] Returns an exception code on failure, or success(0)
 */
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(void* state, const qsc_ipinfo_ipv6_address* address, uint16_t port);
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv6_address* address, uint16_t port);
 
 /**
 * \brief Send an option command to the socket.

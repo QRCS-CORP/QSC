@@ -87,12 +87,12 @@
  *
  * const size_t MSG_LEN = 200;
  * const size_t CST_LEN = 20;
- * uint8_t msg[MSG_LEN] = { 0 };
- * uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
- * uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
- * uint8_t cust[CST_LEN] = { 0 };
+ * uint8_t msg[MSG_LEN] = { 0U };
+ * uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+ * uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
+ * uint8_t cust[CST_LEN] = { 0U };
  *
- * uint8_t output[MSG_LEN] = { 0 };
+ * uint8_t output[MSG_LEN] = { 0U };
  * qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES256_KEY_SIZE, .nonce = nonce, .noncelen = QSC_AES_BLOCK_SIZE, .info = cust, .infolen = CST_LEN };
  *
  * qsc_aes_state ctx;
@@ -368,7 +368,7 @@ QSC_EXPORT_API void qsc_pkcs7_add_padding(uint8_t* input, size_t length);
  *
  * \param input: [const uint8_t*] Pointer to a decrypted block of plaintext.
  *
- * \return [size_t] The number of padding bytes, or 0 if the padding is invalid.
+ * \return [size_t] The number of padding bytes, or 0U if the padding is invalid.
  *
  * \sa qsc_pkcs7_add_padding
  */
@@ -533,7 +533,7 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm256_state
 {
     qsc_aes_state cstate;                   /*!< [struct] Underlying AES cipher ctx */
     uint8_t C[QSC_AES_BLOCK_SIZE];			/*!< uint8_t[QSC_AES_BLOCK_SIZE] Current counter block */
-    uint8_t H[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] Hash subkey H = AES(K,0) */
+    uint8_t H[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] Hash subkey H = AES(K,0U) */
     uint8_t J0[QSC_AES_BLOCK_SIZE];         /*!< uint8_t[QSC_AES_BLOCK_SIZE] Pre-counter block */
     uint8_t S[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
     uint64_t aadlen;						/*!< [uint64_t] AAD length in bits */

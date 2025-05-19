@@ -6,8 +6,8 @@
 
 void qsc_list_add(qsc_list_state* ctx, const void* item)
 {
-	assert(ctx != NULL);
-	assert(item != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(item != NULL);
 
 	uint8_t* itmp;
 	size_t cnt;
@@ -35,8 +35,8 @@ void qsc_list_add(qsc_list_state* ctx, const void* item)
 
 void qsc_list_copy(const qsc_list_state* ctx, size_t index, void* item)
 {
-	assert(ctx != NULL);
-	assert(item != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(item != NULL);
 
 	if (ctx != NULL && item != NULL)
 	{
@@ -53,7 +53,7 @@ void qsc_list_copy(const qsc_list_state* ctx, size_t index, void* item)
 
 size_t qsc_list_count(const qsc_list_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	size_t res;
 
@@ -69,8 +69,8 @@ size_t qsc_list_count(const qsc_list_state* ctx)
 
 void qsc_list_deserialize(qsc_list_state* ctx, const uint8_t* input)
 {
-	assert(ctx != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(input != NULL);
 
 	size_t pos;
 
@@ -87,7 +87,7 @@ void qsc_list_deserialize(qsc_list_state* ctx, const uint8_t* input)
 
 void qsc_list_dispose(qsc_list_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL && ctx->items != NULL && ctx->count > 0)
 	{
@@ -102,7 +102,7 @@ void qsc_list_dispose(qsc_list_state* ctx)
 
 bool qsc_list_empty(const qsc_list_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	bool res;
 
@@ -118,7 +118,7 @@ bool qsc_list_empty(const qsc_list_state* ctx)
 
 bool qsc_list_full(const qsc_list_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	bool res;
 
@@ -134,8 +134,8 @@ bool qsc_list_full(const qsc_list_state* ctx)
 
 void qsc_list_initialize(qsc_list_state* ctx, size_t width)
 {
-	assert(ctx != NULL);
-	assert(width > 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(width > 0);
 
 	if (ctx != NULL && width > 0)
 	{
@@ -147,8 +147,8 @@ void qsc_list_initialize(qsc_list_state* ctx, size_t width)
 
 void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index)
 {
-	assert(ctx != NULL);
-	assert(item != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(item != NULL);
 
 	if (ctx != NULL && item != NULL && index < ctx->count)
 	{
@@ -164,7 +164,7 @@ void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index)
 
 void qsc_list_rshuffle(qsc_list_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	uint32_t idx;
 	uint8_t* ditm;
@@ -200,7 +200,7 @@ void qsc_list_rshuffle(qsc_list_state* ctx)
 
 void qsc_list_remove(qsc_list_state* ctx, size_t index)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -238,8 +238,8 @@ void qsc_list_remove(qsc_list_state* ctx, size_t index)
 
 size_t qsc_list_serialize(uint8_t* output, const qsc_list_state* ctx)
 {
-	assert(output != NULL);
-	assert(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	size_t pos;
 
@@ -261,7 +261,7 @@ size_t qsc_list_serialize(uint8_t* output, const qsc_list_state* ctx)
 
 size_t qsc_list_size(const qsc_list_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	size_t res;
 
@@ -277,7 +277,7 @@ size_t qsc_list_size(const qsc_list_state* ctx)
 
 void qsc_list_sort(qsc_list_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	uint8_t* pia;
 	uint8_t* pib;
@@ -318,8 +318,8 @@ void qsc_list_sort(qsc_list_state* ctx)
 #if defined(QSC_DEBUG_MODE)
 bool qsc_list_self_test()
 {
-	uint8_t exp[64][16] = { 0 };
-	qsc_list_state ctx = { 0 };
+	uint8_t exp[64][16] = { 0U };
+	qsc_list_state ctx = { 0U };
 	int32_t i;
 	bool ret;
 

@@ -16,7 +16,7 @@
 #	include <sys/types.h>
 #	include <unistd.h>
 #	if !defined(O_NOCTTY)
-#		define O_NOCTTY 0
+#		define O_NOCTTY 0U
 #	endif
 #endif
 
@@ -26,8 +26,8 @@
 
 bool qsc_csp_generate(uint8_t* output, size_t length)
 {
-	assert(output != 0);
-	assert(length <= QSC_CSP_SEED_MAX);
+	QSC_ASSERT(output != 0U);
+	QSC_ASSERT(length <= QSC_CSP_SEED_MAX);
 
 	bool res;
 
@@ -37,7 +37,7 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 
 	HCRYPTPROV hprov;
 
-	if (CryptAcquireContextW(&hprov, 0, 0, PROV_RSA_FULL, (CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) == true)
+	if (CryptAcquireContextW(&hprov, 0U, 0U, PROV_RSA_FULL, (CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) == true)
 	{
 		if (CryptGenRandom(hprov, (DWORD)length, output) == false)
 		{
@@ -49,9 +49,9 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 		res = false;
 	}
 
-	if (hprov != 0)
+	if (hprov != 0U)
 	{
-		CryptReleaseContext(hprov, 0);
+		CryptReleaseContext(hprov, 0U);
 	}
 
 #elif defined(HAVE_SAFE_ARC4RANDOM)
@@ -62,7 +62,7 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 
 	int32_t fd = open("/dev/urandom", O_RDONLY);
 
-	if (fd <= 0)
+	if (fd <= 0U)
 	{
 		res = false;
 	}
@@ -85,20 +85,20 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 
 uint16_t qsc_csp_uint16()
 {
-	uint8_t arr[sizeof(uint16_t)] = { 0 };
+	uint8_t arr[sizeof(uint16_t)] = { 0U };
 	uint16_t num;
 
 	qsc_csp_generate(arr, sizeof(arr));
 
 	num = (((uint16_t)arr[1]) | 
-		(uint16_t)((uint16_t)arr[0] << 8U));
+		(uint16_t)((uint16_t)arr[0U] << 8U));
 
 	return num;
 }
 
 uint32_t qsc_csp_uint32()
 {
-	uint8_t arr[sizeof(uint32_t)] = { 0 };
+	uint8_t arr[sizeof(uint32_t)] = { 0U };
 	uint32_t num;
 
 	qsc_csp_generate(arr, sizeof(arr));
@@ -106,14 +106,14 @@ uint32_t qsc_csp_uint32()
 	num = (uint32_t)(arr[3]) |
 		(((uint32_t)(arr[2])) << 8) |
 		(((uint32_t)(arr[1])) << 16) |
-		(((uint32_t)(arr[0])) << 24);
+		(((uint32_t)(arr[0U])) << 24);
 
 	return num;
 }
 
 uint64_t qsc_csp_uint64()
 {
-	uint8_t arr[sizeof(uint64_t)] = { 0 };
+	uint8_t arr[sizeof(uint64_t)] = { 0U };
 	uint64_t num;
 
 	qsc_csp_generate(arr, sizeof(arr));
@@ -125,7 +125,7 @@ uint64_t qsc_csp_uint64()
 		(((uint64_t)(arr[3])) << 32) |
 		(((uint64_t)(arr[2])) << 40) |
 		(((uint64_t)(arr[1])) << 48) |
-		(((uint64_t)(arr[0])) << 56);
+		(((uint64_t)(arr[0U])) << 56);
 
 	return num;
 }

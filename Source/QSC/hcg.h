@@ -66,7 +66,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * // Allocate state and output buffer
  * qsc_hcg_state ctx;
- * uint8_t rnd[200] = { 0 };
+ * uint8_t rnd[200] = { 0U };
  *
  * // Initialize the generator with predictive resistance enabled
  * qsc_hcg_initialize(&ctx, seed, sizeof(seed), info, sizeof(info), true);

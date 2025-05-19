@@ -81,11 +81,11 @@ QSC_CPLUSPLUS_ENABLED_START
  * // Example: Base64 Encoding and Decoding
  * uint8_t data[] = { 0xDE, 0xAD, 0xBE, 0xEF };
  * size_t data_len = sizeof(data);
- * char b64_encoded[128] = { 0 };
+ * char b64_encoded[128] = { 0U };
  * qsc_encoding_base64_encode(b64_encoded, sizeof(b64_encoded), data, data_len);
  *
  * // Example: Hexadecimal Encoding and Decoding
- * char hex_encoded[128] = { 0 };
+ * char hex_encoded[128] = { 0U };
  * qsc_encoding_hex_encode(data, data_len, hex_encoded, sizeof(hex_encoded));
  *
  * // Example: BER Encoding and Decoding
@@ -95,7 +95,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * size_t ber_len = qsc_encoding_ber_encode_element(&element, ber_buf, sizeof(ber_buf));
  *
  * // Example: PEM Encoding and Decoding
- * char pem_output[512] = { 0 };
+ * char pem_output[512] = { 0U };
  * qsc_encoding_pem_encode("CERTIFICATE", pem_output, sizeof(pem_output), data, data_len);
  * \endcode
  *

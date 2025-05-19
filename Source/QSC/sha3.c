@@ -86,7 +86,7 @@ static size_t keccak_right_encode(uint8_t* buffer, size_t value)
 
 void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
 {
-	assert(rounds % 2 == 0);
+	QSC_ASSERT(rounds % 2 == 0);
 
 	__m512i a0;
 	__m512i a1;
@@ -385,12 +385,12 @@ void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rou
 
 void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
 {
-	assert(rounds % 2 == 0);
+	QSC_ASSERT(rounds % 2 == 0);
 
-	__m512i a[25] = { 0 };
-	__m512i c[5] = { 0 };
-	__m512i d[5] = { 0 };
-	__m512i e[25] = { 0 };
+	__m512i a[25] = { 0U };
+	__m512i c[5] = { 0U };
+	__m512i d[5] = { 0U };
+	__m512i e[25] = { 0U };
 	size_t i;
 
 	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
@@ -591,7 +591,7 @@ void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rou
 
 void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
 {
-	assert(rounds % 2 == 0);
+	QSC_ASSERT(rounds % 2 == 0);
 
 	__m256i a0;
 	__m256i a1;
@@ -892,12 +892,12 @@ void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rou
 
 void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
 {
-	assert(rounds % 2 == 0);
+	QSC_ASSERT(rounds % 2 == 0);
 
-	__m256i a[25] = { 0 };
-	__m256i c[5] = { 0 };
-	__m256i d[5] = { 0 };
-	__m256i e[25] = { 0 };
+	__m256i a[25] = { 0U };
+	__m256i c[5] = { 0U };
+	__m256i d[5] = { 0U };
+	__m256i e[25] = { 0U };
 	size_t i;
 
 	for (i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
@@ -1097,8 +1097,8 @@ void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rou
 
 void qsc_keccak_absorb(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen, uint8_t domain, size_t rounds)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	if (ctx != NULL && message != NULL)
 	{
@@ -1137,9 +1137,9 @@ void qsc_keccak_absorb(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 
 void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
-	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	size_t i;
 	size_t oft;
 
@@ -1187,9 +1187,9 @@ void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const
 
 void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
-	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	size_t oft;
 	size_t i;
 
@@ -1264,7 +1264,7 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 
 void qsc_keccak_dispose(qsc_keccak_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -1276,11 +1276,11 @@ void qsc_keccak_dispose(qsc_keccak_state* ctx)
 
 void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t outlen, uint8_t domain, size_t rounds)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
-	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t buf[sizeof(size_t) + 1] = { 0U };
+	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	size_t bitlen;
 
 	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
@@ -1319,10 +1319,10 @@ void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* o
 
 void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
-	uint8_t t[8] = { 0 };
+	uint8_t t[8] = { 0U };
 	size_t i;
 
 	if ((ctx->position & 7) > 0)
@@ -1394,7 +1394,7 @@ void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const u
 
 void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8_t domain)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 	
 	size_t i;
 	size_t j;
@@ -1408,8 +1408,8 @@ void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8
 
 void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t* output, size_t outlen)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t i;
 	uint8_t t[8];
@@ -1483,7 +1483,7 @@ void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t*
 
 void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -1497,8 +1497,8 @@ void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds)
 
 void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds)
 {
-	assert(state != NULL);
-	assert(rounds % 2 == 0);
+	QSC_ASSERT(state != NULL);
+	QSC_ASSERT(rounds % 2 == 0);
 
 	uint64_t Aba;
 	uint64_t Abe;
@@ -1811,7 +1811,7 @@ void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds)
 
 void qsc_keccak_permute_p1600u(uint64_t* state)
 {
-	assert(state != NULL);
+	QSC_ASSERT(state != NULL);
 
 	uint64_t Aba;
 	uint64_t Abe;
@@ -4018,8 +4018,8 @@ void qsc_keccak_permute_p1600u(uint64_t* state)
 
 void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks, qsc_keccak_rate rate, size_t rounds)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	if (ctx != NULL && output != NULL)
 	{
@@ -4043,7 +4043,7 @@ void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nbl
 
 void qsc_keccak_initialize_state(qsc_keccak_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -4055,8 +4055,8 @@ void qsc_keccak_initialize_state(qsc_keccak_state* ctx)
 
 void qsc_keccak_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen, size_t rounds)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	if (ctx != NULL && message != NULL && msglen != 0)
 	{
@@ -4098,11 +4098,11 @@ void qsc_keccak_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 
 void qsc_sha3_compute128(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_128_RATE] = { 0U };
 
 	qsc_sha3_initialize(&ctx);
 	qsc_keccak_absorb(&ctx, qsc_keccak_rate_128, message, msglen, QSC_KECCAK_SHA3_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -4113,11 +4113,11 @@ void qsc_sha3_compute128(uint8_t* output, const uint8_t* message, size_t msglen)
 
 void qsc_sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_256_RATE] = { 0U };
 
 	qsc_sha3_initialize(&ctx);
 	qsc_keccak_absorb(&ctx, qsc_keccak_rate_256, message, msglen, QSC_KECCAK_SHA3_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -4128,11 +4128,11 @@ void qsc_sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen)
 
 void qsc_sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_512_RATE] = { 0U };
 
 	qsc_sha3_initialize(&ctx);
 	qsc_keccak_absorb(&ctx, qsc_keccak_rate_512, message, msglen, QSC_KECCAK_SHA3_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -4143,8 +4143,8 @@ void qsc_sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen)
 
 void qsc_sha3_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t hlen;
 
@@ -4182,12 +4182,12 @@ void qsc_sha3_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t*
 
 void qsc_shake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const size_t nblocks = outlen / QSC_KECCAK_128_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_128_RATE] = { 0U };
 
 	qsc_shake_initialize(&ctx, qsc_keccak_rate_128, key, keylen);
 	qsc_shake_squeezeblocks(&ctx, qsc_keccak_rate_128, output, nblocks);
@@ -4205,12 +4205,12 @@ void qsc_shake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, si
 
 void qsc_shake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const size_t nblocks = outlen / QSC_KECCAK_256_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_256_RATE] = { 0U };
 
 	qsc_shake_initialize(&ctx, qsc_keccak_rate_256, key, keylen);
 	qsc_shake_squeezeblocks(&ctx, qsc_keccak_rate_256, output, nblocks);
@@ -4228,12 +4228,12 @@ void qsc_shake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, si
 
 void qsc_shake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const size_t nblocks = outlen / QSC_KECCAK_512_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_512_RATE] = { 0U };
 
 	qsc_shake_initialize(&ctx, qsc_keccak_rate_512, key, keylen);
 	qsc_shake_squeezeblocks(&ctx, qsc_keccak_rate_512, output, nblocks);
@@ -4251,8 +4251,8 @@ void qsc_shake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, si
 
 void qsc_shake_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_keccak_initialize_state(ctx);
 	qsc_keccak_absorb(ctx, rate, key, keylen, QSC_KECCAK_SHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -4260,8 +4260,8 @@ void qsc_shake_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uin
 
 void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t nblocks)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	qsc_keccak_squeezeblocks(ctx, output, nblocks, rate, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
@@ -4270,12 +4270,12 @@ void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_
 
 void qsc_cshake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const size_t nblocks = outlen / QSC_KECCAK_128_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_128_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_128_RATE] = { 0U };
 
 	if (custlen + namelen != 0)
 	{
@@ -4301,12 +4301,12 @@ void qsc_cshake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, s
 
 void qsc_cshake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const size_t nblocks = outlen / QSC_KECCAK_256_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_256_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_256_RATE] = { 0U };
 
 	if (custlen + namelen != 0)
 	{
@@ -4333,12 +4333,12 @@ void qsc_cshake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, s
 
 void qsc_cshake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const size_t nblocks = outlen / QSC_KECCAK_512_RATE;
 	qsc_keccak_state ctx;
-	uint8_t hash[QSC_KECCAK_512_RATE] = { 0 };
+	uint8_t hash[QSC_KECCAK_512_RATE] = { 0U };
 
 	if (custlen + namelen != 0)
 	{
@@ -4364,8 +4364,8 @@ void qsc_cshake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, s
 
 void qsc_cshake_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_keccak_initialize_state(ctx);
 	/* absorb the custom and name arrays */
@@ -4381,8 +4381,8 @@ void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8
 
 void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	while (keylen >= (size_t)rate)
 	{
@@ -4403,9 +4403,9 @@ void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 
 void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_keccak_state ctx;
 
@@ -4416,9 +4416,9 @@ void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message,
 
 void qsc_kmac256_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_keccak_state ctx;
 
@@ -4429,9 +4429,9 @@ void qsc_kmac256_compute(uint8_t* output, size_t outlen, const uint8_t* message,
 
 void qsc_kmac512_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_keccak_state ctx;
 
@@ -4447,8 +4447,8 @@ void qsc_kmac_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* out
 
 void qsc_kmac_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const uint8_t name[4] = { 0x4B, 0x4D, 0x41, 0x43 };
 
@@ -4457,8 +4457,8 @@ void qsc_kmac_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint
 
 void qsc_kmac_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_keccak_update(ctx, rate, message, msglen, QSC_KECCAK_PERMUTATION_ROUNDS);
 }
@@ -4467,8 +4467,8 @@ void qsc_kmac_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t*
 
 static void kpa_absorb_leaves(uint64_t* state, qsc_keccak_rate rate, const uint8_t* input, size_t inplen)
 {
-	assert(state != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(state != NULL);
+	QSC_ASSERT(input != NULL);
 
 	while (inplen >= (size_t)rate)
 	{
@@ -4502,8 +4502,8 @@ static void kpa_absorb_leaves(uint64_t* state, qsc_keccak_rate rate, const uint8
 
 static void kpa_fast_absorbx8(qsc_kpa_state* ctx, const uint8_t* message)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
@@ -4527,7 +4527,7 @@ static void kpa_fast_absorbx8(qsc_kpa_state* ctx, const uint8_t* message)
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
 	const size_t ROFT = (size_t)ctx->rate;
-	QSC_ALIGN(32) uint64_t tmp[4] = { 0 };
+	QSC_ALIGN(32) uint64_t tmp[4] = { 0U };
 	__m256i wbuf;
 	const uint8_t* pmsg = message;
 
@@ -4568,7 +4568,7 @@ static void kpa_fast_absorbx8(qsc_kpa_state* ctx, const uint8_t* message)
 
 static void kpa_permutex8(qsc_kpa_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 	qsc_keccak_permute_p8x1600(ctx->statew, QSC_KPA_ROUNDS);
@@ -4585,8 +4585,8 @@ static void kpa_permutex8(qsc_kpa_state* ctx)
 
 static void kpa_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, qsc_keccak_rate rate)
 {
-	assert(state != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(state != NULL);
+	QSC_ASSERT(output != NULL);
 
 	while (nblocks > 0)
 	{
@@ -4611,7 +4611,7 @@ static void kpa_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, 
 static void kpa_load_state(qsc_kpa_state* ctx)
 {
 	/* Note: artifact, not currently used */
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
@@ -4631,7 +4631,7 @@ static void kpa_load_state(qsc_kpa_state* ctx)
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	QSC_ALIGN(32) uint64_t tmp[4] = { 0 };
+	QSC_ALIGN(32) uint64_t tmp[4] = { 0U };
 
 	for (size_t i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
 	{
@@ -4652,11 +4652,11 @@ static void kpa_load_state(qsc_kpa_state* ctx)
 
 static void kpa_store_state(qsc_kpa_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	uint64_t tmp[8] = { 0 };
+	uint64_t tmp[8] = { 0U };
 
 	for (size_t i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
 	{
@@ -4673,7 +4673,7 @@ static void kpa_store_state(qsc_kpa_state* ctx)
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	QSC_ALIGN(32) uint64_t tmp[4] = { 0 };
+	QSC_ALIGN(32) uint64_t tmp[4] = { 0U };
 
 	for (size_t i = 0; i < QSC_KECCAK_STATE_SIZE; ++i)
 	{
@@ -4696,7 +4696,7 @@ static void kpa_store_state(qsc_kpa_state* ctx)
 
 void qsc_kpa_dispose(qsc_kpa_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -4714,17 +4714,17 @@ void qsc_kpa_dispose(qsc_kpa_state* ctx)
 
 void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(outlen != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(outlen != 0);
 
 	const size_t HASHLEN = (ctx->rate == QSC_KECCAK_512_RATE) ?
 		KPA_LEAF_HASH512 : (ctx->rate == QSC_KECCAK_256_RATE) ?
 		KPA_LEAF_HASH256 : KPA_LEAF_HASH128;
 
-	uint8_t fbuf[QSC_KPA_PARALLELISM * KPA_LEAF_HASH512] = { 0 };
-	uint64_t pstate[QSC_KECCAK_STATE_SIZE] = { 0 };
-	uint8_t prcb[2 * sizeof(uint64_t)] = { 0 };
+	uint8_t fbuf[QSC_KPA_PARALLELISM * KPA_LEAF_HASH512] = { 0U };
+	uint64_t pstate[QSC_KECCAK_STATE_SIZE] = { 0U };
+	uint8_t prcb[2 * sizeof(uint64_t)] = { 0U };
 	size_t bitlen;
 
 	/* clear unused buffer */
@@ -4793,11 +4793,11 @@ void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 
 void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
-	uint64_t tmps[QSC_KECCAK_STATE_SIZE] = { 0 };
-	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint64_t tmps[QSC_KECCAK_STATE_SIZE] = { 0U };
+	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	uint8_t algb[8] = { 0x00, 0x00, 0x4B, 0x42, 0x41, 0xAD, 0x31, 0x32 };
 	uint64_t algn;
 	size_t oft;
@@ -4875,7 +4875,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 	/* stage 3: copy state to leaf nodes, and add leaf-unique name string */
 #if defined(QSC_KPA_AVX_PARALLEL)
 
-	uint64_t tmpi[8] = { 0 };
+	uint64_t tmpi[8] = { 0U };
 
 #	if defined(QSC_SYSTEM_HAS_AVX512)
 
@@ -4941,8 +4941,8 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 
 void qsc_kpa_update(qsc_kpa_state* ctx, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	const size_t BLKLEN = (size_t)ctx->rate * QSC_KPA_PARALLELISM;
 
@@ -4992,10 +4992,10 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, 
 	size_t inplen, uint8_t domain)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
 
     // Validate input pointers
 	if (inp0 != NULL || inp1 != NULL || inp2 != NULL || inp3 != NULL)
@@ -5080,13 +5080,13 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 void qsc_keccakx4_absorb_aligned(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
 
 	__m256i t;
-	__m256i idx = { 0 };
+	__m256i idx = { 0U };
 	int64_t p0;
 	int64_t p1;
 	int64_t p2;
@@ -5144,10 +5144,10 @@ void qsc_keccakx4_absorb_aligned(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_kecca
 void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t nblocks)
 {
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
 
 	uint64_t f0;
 	uint64_t f1;
@@ -5303,14 +5303,14 @@ void qsc_keccakx8_absorb_aligned(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_kecca
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen, uint8_t domain)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
-	assert(inp4 != NULL);
-	assert(inp5 != NULL);
-	assert(inp6 != NULL);
-	assert(inp7 != NULL);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
+	QSC_ASSERT(inp4 != NULL);
+	QSC_ASSERT(inp5 != NULL);
+	QSC_ASSERT(inp6 != NULL);
+	QSC_ASSERT(inp7 != NULL);
 
 	__m512i t;
 	__m512i idx;
@@ -5380,14 +5380,14 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, uint8_t* out4,
 	uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t nblocks)
 {
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(out4 != NULL);
-	assert(out5 != NULL);
-	assert(out6 != NULL);
-	assert(out7 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(out4 != NULL);
+	QSC_ASSERT(out5 != NULL);
+	QSC_ASSERT(out6 != NULL);
+	QSC_ASSERT(out7 != NULL);
 
 	__m128i x;
 	uint64_t f0;
@@ -5462,23 +5462,23 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(inplen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(inplen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
 	size_t i;
 	size_t nblocks = outlen / QSC_KECCAK_128_RATE;
-	uint8_t t[4][QSC_KECCAK_128_RATE] = { 0 };
-	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	uint8_t t[4][QSC_KECCAK_128_RATE] = { 0U };
+	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 	qsc_keccakx4_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -5519,22 +5519,22 @@ void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(inplen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(inplen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
 	size_t nblocks = outlen / QSC_KECCAK_256_RATE;
-	uint8_t t[4][QSC_KECCAK_256_RATE] = { 0 };
-	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	uint8_t t[4][QSC_KECCAK_256_RATE] = { 0U };
+	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 	qsc_keccakx4_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -5575,22 +5575,22 @@ void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(inplen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(inplen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
 	size_t nblocks = outlen / QSC_KECCAK_512_RATE;
-	uint8_t t[4][QSC_KECCAK_512_RATE] = { 0 };
-	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	uint8_t t[4][QSC_KECCAK_512_RATE] = { 0U };
+	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 	qsc_keccakx4_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -5635,30 +5635,30 @@ void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
-	assert(inp4 != NULL);
-	assert(inp5 != NULL);
-	assert(inp6 != NULL);
-	assert(inp7 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(out4 != NULL);
-	assert(out5 != NULL);
-	assert(out6 != NULL);
-	assert(out7 != NULL);
-	assert(inplen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
+	QSC_ASSERT(inp4 != NULL);
+	QSC_ASSERT(inp5 != NULL);
+	QSC_ASSERT(inp6 != NULL);
+	QSC_ASSERT(inp7 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(out4 != NULL);
+	QSC_ASSERT(out5 != NULL);
+	QSC_ASSERT(out6 != NULL);
+	QSC_ASSERT(out7 != NULL);
+	QSC_ASSERT(inplen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
 	size_t nblocks = outlen / QSC_KECCAK_128_RATE;
-	uint8_t t[8][QSC_KECCAK_128_RATE] = { 0 };
-	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	uint8_t t[8][QSC_KECCAK_128_RATE] = { 0U };
+	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 	qsc_keccakx8_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -5718,30 +5718,30 @@ void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
-	assert(inp4 != NULL);
-	assert(inp5 != NULL);
-	assert(inp6 != NULL);
-	assert(inp7 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(out4 != NULL);
-	assert(out5 != NULL);
-	assert(out6 != NULL);
-	assert(out7 != NULL);
-	assert(inplen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
+	QSC_ASSERT(inp4 != NULL);
+	QSC_ASSERT(inp5 != NULL);
+	QSC_ASSERT(inp6 != NULL);
+	QSC_ASSERT(inp7 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(out4 != NULL);
+	QSC_ASSERT(out5 != NULL);
+	QSC_ASSERT(out6 != NULL);
+	QSC_ASSERT(out7 != NULL);
+	QSC_ASSERT(inplen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
 	size_t nblocks = outlen / QSC_KECCAK_256_RATE;
-	uint8_t t[8][QSC_KECCAK_256_RATE] = { 0 };
-	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	uint8_t t[8][QSC_KECCAK_256_RATE] = { 0U };
+	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 	qsc_keccakx8_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -5801,30 +5801,30 @@ void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen)
 {
-	assert(inp0 != NULL);
-	assert(inp1 != NULL);
-	assert(inp2 != NULL);
-	assert(inp3 != NULL);
-	assert(inp4 != NULL);
-	assert(inp5 != NULL);
-	assert(inp6 != NULL);
-	assert(inp7 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(out4 != NULL);
-	assert(out5 != NULL);
-	assert(out6 != NULL);
-	assert(out7 != NULL);
-	assert(inplen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(inp0 != NULL);
+	QSC_ASSERT(inp1 != NULL);
+	QSC_ASSERT(inp2 != NULL);
+	QSC_ASSERT(inp3 != NULL);
+	QSC_ASSERT(inp4 != NULL);
+	QSC_ASSERT(inp5 != NULL);
+	QSC_ASSERT(inp6 != NULL);
+	QSC_ASSERT(inp7 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(out4 != NULL);
+	QSC_ASSERT(out5 != NULL);
+	QSC_ASSERT(out6 != NULL);
+	QSC_ASSERT(out7 != NULL);
+	QSC_ASSERT(inplen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
 	size_t nblocks = outlen / QSC_KECCAK_512_RATE;
-	uint8_t t[8][QSC_KECCAK_512_RATE] = { 0 };
-	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	uint8_t t[8][QSC_KECCAK_512_RATE] = { 0U };
+	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 	qsc_keccakx8_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -5887,7 +5887,7 @@ static void kmacx4_fast_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], const uint8
 	const uint8_t* inp2, const uint8_t* inp3, size_t inplen)
 {
 	__m256i t;
-	uint64_t tmps[4] = { 0 };
+	uint64_t tmps[4] = { 0U };
 	size_t pos;
 
 	pos = 0;
@@ -5910,7 +5910,7 @@ static void kmacx4_customize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* name, size_t nmelen)
 {
-	uint8_t pad[4][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t pad[4][QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	size_t oft;
 	size_t i;
 
@@ -5991,9 +5991,9 @@ static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen,
 	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen)
 {
-	uint8_t tmps[4][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
-	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[4][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t tmps[4][QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
+	uint8_t buf[sizeof(size_t) + 1] = { 0U };
+	uint8_t pad[4][QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	const size_t BLKCNT = outlen / (size_t)rate;
 	size_t bitlen;
 	size_t i;
@@ -6068,25 +6068,25 @@ void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen)
 {
-	assert(key0 != NULL);
-	assert(key1 != NULL);
-	assert(key2 != NULL);
-	assert(key3 != NULL);
-	assert(msg0 != NULL);
-	assert(msg1 != NULL);
-	assert(msg2 != NULL);
-	assert(msg3 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(keylen != 0);
-	assert(msglen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(key0 != NULL);
+	QSC_ASSERT(key1 != NULL);
+	QSC_ASSERT(key2 != NULL);
+	QSC_ASSERT(key3 != NULL);
+	QSC_ASSERT(msg0 != NULL);
+	QSC_ASSERT(msg1 != NULL);
+	QSC_ASSERT(msg2 != NULL);
+	QSC_ASSERT(msg3 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(keylen != 0);
+	QSC_ASSERT(msglen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
 	kmacx4_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
@@ -6107,25 +6107,25 @@ void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen)
 {
-	assert(key0 != NULL);
-	assert(key1 != NULL);
-	assert(key2 != NULL);
-	assert(key3 != NULL);
-	assert(msg0 != NULL);
-	assert(msg1 != NULL);
-	assert(msg2 != NULL);
-	assert(msg3 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(keylen != 0);
-	assert(msglen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(key0 != NULL);
+	QSC_ASSERT(key1 != NULL);
+	QSC_ASSERT(key2 != NULL);
+	QSC_ASSERT(key3 != NULL);
+	QSC_ASSERT(msg0 != NULL);
+	QSC_ASSERT(msg1 != NULL);
+	QSC_ASSERT(msg2 != NULL);
+	QSC_ASSERT(msg3 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(keylen != 0);
+	QSC_ASSERT(msglen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
 	kmacx4_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
@@ -6146,25 +6146,25 @@ void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	const uint8_t* cst0, const uint8_t* cst1, const uint8_t* cst2, const uint8_t* cst3, size_t cstlen,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3, size_t msglen)
 {
-	assert(key0 != NULL);
-	assert(key1 != NULL);
-	assert(key2 != NULL);
-	assert(key3 != NULL);
-	assert(msg0 != NULL);
-	assert(msg1 != NULL);
-	assert(msg2 != NULL);
-	assert(msg3 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(keylen != 0);
-	assert(msglen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(key0 != NULL);
+	QSC_ASSERT(key1 != NULL);
+	QSC_ASSERT(key2 != NULL);
+	QSC_ASSERT(key3 != NULL);
+	QSC_ASSERT(msg0 != NULL);
+	QSC_ASSERT(msg1 != NULL);
+	QSC_ASSERT(msg2 != NULL);
+	QSC_ASSERT(msg3 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(keylen != 0);
+	QSC_ASSERT(msglen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
 	kmacx4_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
@@ -6190,7 +6190,7 @@ static void kmacx8_fast_absorb(__m512i state[QSC_KECCAK_STATE_SIZE],
 	size_t inplen)
 {
 	__m512i t;
-	uint64_t tmps[8] = { 0 };
+	uint64_t tmps[8] = { 0U };
 	size_t pos;
 
 	pos = 0;
@@ -6219,7 +6219,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 	const uint8_t* cst4, const uint8_t* cst5, const uint8_t* cst6, const uint8_t* cst7, size_t cstlen,
 	const uint8_t* name, size_t nmelen)
 {
-	uint8_t pad[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t pad[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	size_t oft;
 	size_t i;
 
@@ -6317,9 +6317,9 @@ static void kmacx8_finalize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen)
 {
-	uint8_t tmps[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
-	uint8_t buf[sizeof(size_t) + 1] = { 0 };
-	uint8_t pad[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0 };
+	uint8_t tmps[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
+	uint8_t buf[sizeof(size_t) + 1] = { 0U };
+	uint8_t pad[8][QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	const size_t BLKCNT = outlen / (size_t)rate;
 	size_t bitlen;
 	size_t i;
@@ -6417,37 +6417,37 @@ void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3,
 	const uint8_t* msg4, const uint8_t* msg5, const uint8_t* msg6, const uint8_t* msg7, size_t msglen)
 {
-	assert(key0 != NULL);
-	assert(key1 != NULL);
-	assert(key2 != NULL);
-	assert(key3 != NULL);
-	assert(key4 != NULL);
-	assert(key5 != NULL);
-	assert(key6 != NULL);
-	assert(key7 != NULL);
-	assert(msg0 != NULL);
-	assert(msg1 != NULL);
-	assert(msg2 != NULL);
-	assert(msg3 != NULL);
-	assert(msg4 != NULL);
-	assert(msg5 != NULL);
-	assert(msg6 != NULL);
-	assert(msg7 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(out4 != NULL);
-	assert(out5 != NULL);
-	assert(out6 != NULL);
-	assert(out7 != NULL);
-	assert(keylen != 0);
-	assert(msglen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(key0 != NULL);
+	QSC_ASSERT(key1 != NULL);
+	QSC_ASSERT(key2 != NULL);
+	QSC_ASSERT(key3 != NULL);
+	QSC_ASSERT(key4 != NULL);
+	QSC_ASSERT(key5 != NULL);
+	QSC_ASSERT(key6 != NULL);
+	QSC_ASSERT(key7 != NULL);
+	QSC_ASSERT(msg0 != NULL);
+	QSC_ASSERT(msg1 != NULL);
+	QSC_ASSERT(msg2 != NULL);
+	QSC_ASSERT(msg3 != NULL);
+	QSC_ASSERT(msg4 != NULL);
+	QSC_ASSERT(msg5 != NULL);
+	QSC_ASSERT(msg6 != NULL);
+	QSC_ASSERT(msg7 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(out4 != NULL);
+	QSC_ASSERT(out5 != NULL);
+	QSC_ASSERT(out6 != NULL);
+	QSC_ASSERT(out7 != NULL);
+	QSC_ASSERT(keylen != 0);
+	QSC_ASSERT(msglen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
 	kmacx8_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
@@ -6485,37 +6485,37 @@ void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3,
 	const uint8_t* msg4, const uint8_t* msg5, const uint8_t* msg6, const uint8_t* msg7, size_t msglen)
 {
-	assert(key0 != NULL);
-	assert(key1 != NULL);
-	assert(key2 != NULL);
-	assert(key3 != NULL);
-	assert(key4 != NULL);
-	assert(key5 != NULL);
-	assert(key6 != NULL);
-	assert(key7 != NULL);
-	assert(msg0 != NULL);
-	assert(msg1 != NULL);
-	assert(msg2 != NULL);
-	assert(msg3 != NULL);
-	assert(msg4 != NULL);
-	assert(msg5 != NULL);
-	assert(msg6 != NULL);
-	assert(msg7 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(out4 != NULL);
-	assert(out5 != NULL);
-	assert(out6 != NULL);
-	assert(out7 != NULL);
-	assert(keylen != 0);
-	assert(msglen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(key0 != NULL);
+	QSC_ASSERT(key1 != NULL);
+	QSC_ASSERT(key2 != NULL);
+	QSC_ASSERT(key3 != NULL);
+	QSC_ASSERT(key4 != NULL);
+	QSC_ASSERT(key5 != NULL);
+	QSC_ASSERT(key6 != NULL);
+	QSC_ASSERT(key7 != NULL);
+	QSC_ASSERT(msg0 != NULL);
+	QSC_ASSERT(msg1 != NULL);
+	QSC_ASSERT(msg2 != NULL);
+	QSC_ASSERT(msg3 != NULL);
+	QSC_ASSERT(msg4 != NULL);
+	QSC_ASSERT(msg5 != NULL);
+	QSC_ASSERT(msg6 != NULL);
+	QSC_ASSERT(msg7 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(out4 != NULL);
+	QSC_ASSERT(out5 != NULL);
+	QSC_ASSERT(out6 != NULL);
+	QSC_ASSERT(out7 != NULL);
+	QSC_ASSERT(keylen != 0);
+	QSC_ASSERT(msglen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
 	kmacx8_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
@@ -6553,37 +6553,37 @@ void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	const uint8_t* msg0, const uint8_t* msg1, const uint8_t* msg2, const uint8_t* msg3,
 	const uint8_t* msg4, const uint8_t* msg5, const uint8_t* msg6, const uint8_t* msg7, size_t msglen)
 {
-	assert(key0 != NULL);
-	assert(key1 != NULL);
-	assert(key2 != NULL);
-	assert(key3 != NULL);
-	assert(key4 != NULL);
-	assert(key5 != NULL);
-	assert(key6 != NULL);
-	assert(key7 != NULL);
-	assert(msg0 != NULL);
-	assert(msg1 != NULL);
-	assert(msg2 != NULL);
-	assert(msg3 != NULL);
-	assert(msg4 != NULL);
-	assert(msg5 != NULL);
-	assert(msg6 != NULL);
-	assert(msg7 != NULL);
-	assert(out0 != NULL);
-	assert(out1 != NULL);
-	assert(out2 != NULL);
-	assert(out3 != NULL);
-	assert(out4 != NULL);
-	assert(out5 != NULL);
-	assert(out6 != NULL);
-	assert(out7 != NULL);
-	assert(keylen != 0);
-	assert(msglen != 0);
-	assert(outlen != 0);
+	QSC_ASSERT(key0 != NULL);
+	QSC_ASSERT(key1 != NULL);
+	QSC_ASSERT(key2 != NULL);
+	QSC_ASSERT(key3 != NULL);
+	QSC_ASSERT(key4 != NULL);
+	QSC_ASSERT(key5 != NULL);
+	QSC_ASSERT(key6 != NULL);
+	QSC_ASSERT(key7 != NULL);
+	QSC_ASSERT(msg0 != NULL);
+	QSC_ASSERT(msg1 != NULL);
+	QSC_ASSERT(msg2 != NULL);
+	QSC_ASSERT(msg3 != NULL);
+	QSC_ASSERT(msg4 != NULL);
+	QSC_ASSERT(msg5 != NULL);
+	QSC_ASSERT(msg6 != NULL);
+	QSC_ASSERT(msg7 != NULL);
+	QSC_ASSERT(out0 != NULL);
+	QSC_ASSERT(out1 != NULL);
+	QSC_ASSERT(out2 != NULL);
+	QSC_ASSERT(out3 != NULL);
+	QSC_ASSERT(out4 != NULL);
+	QSC_ASSERT(out5 != NULL);
+	QSC_ASSERT(out6 != NULL);
+	QSC_ASSERT(out7 != NULL);
+	QSC_ASSERT(keylen != 0);
+	QSC_ASSERT(msglen != 0);
+	QSC_ASSERT(outlen != 0);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0 };
+	__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 	const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
 	kmacx8_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, key4, key5, key6, key7, keylen,

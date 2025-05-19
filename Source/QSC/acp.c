@@ -8,8 +8,8 @@
 static void acp_collect_statistics(uint8_t* seed)
 {
 	const char* drv = "C:";
-	uint8_t buffer[1024] = { 0 };
-	char tname[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0 };
+	uint8_t buffer[1024U] = { 0U };
+	char tname[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
 	qsc_sysutils_drive_space_state dstate;
 	qsc_sysutils_memory_statistics_state mstate;
 	uint64_t ts;
@@ -19,36 +19,75 @@ static void acp_collect_statistics(uint8_t* seed)
 
 	/* add user statistics */
 	ts = qsc_sysutils_system_timestamp();
+
 	/* interspersed with time-stamps, as return from system calls has some entropy variability */
-	qsc_memutils_copy(buffer, &ts, sizeof(uint64_t));
+	qsc_memutils_copy(buffer, (const uint8_t*)&ts, sizeof(uint64_t));
 	oft = sizeof(uint64_t);
 	len = qsc_sysutils_computer_name(tname);
-	qsc_memutils_copy(buffer + oft, tname, len);
-	oft += len;
+
+	if ((oft + len) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, tname, len);
+		oft += len;
+	}
+
 	id = qsc_sysutils_process_id();
-	qsc_memutils_copy(buffer + oft, &id, sizeof(uint32_t));
-	oft += sizeof(uint32_t);
+
+	if ((oft + sizeof(uint32_t)) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, (const uint8_t*)&id, sizeof(uint32_t));
+		oft += sizeof(uint32_t);
+	}
+
 	len = qsc_sysutils_user_name(tname);
-	qsc_memutils_copy(buffer + oft, tname, len);
-	oft += len;
+
+	if ((oft + len) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, tname, len);
+		oft += len;
+	}
+
 	ts = qsc_sysutils_system_uptime();
-	qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
-	oft += sizeof(uint64_t);
+
+	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
+		oft += sizeof(uint64_t);
+	}
 
 	/* add drive statistics */
 	ts = qsc_sysutils_system_timestamp();
-	qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
-	oft += sizeof(uint64_t);
+
+	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
+		oft += sizeof(uint64_t);
+	}
+
 	qsc_sysutils_drive_space(drv, &dstate);
-	qsc_memutils_copy(buffer + oft, &dstate, sizeof(dstate));
-	oft += sizeof(dstate);
+
+	if ((oft + sizeof(dstate)) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, (const uint8_t*)&dstate, sizeof(dstate));
+		oft += sizeof(dstate);
+	}
 
 	/* add memory statistics */
 	ts = qsc_sysutils_system_timestamp();
-	qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
-	oft += sizeof(uint64_t);
+
+	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
+		oft += sizeof(uint64_t);
+	}
+
 	qsc_sysutils_memory_statistics(&mstate);
-	qsc_memutils_copy(buffer + oft, &mstate, sizeof(mstate));
+
+	if ((oft + sizeof(mstate)) <= sizeof(buffer))
+	{
+		qsc_memutils_copy(buffer + oft, (const uint8_t*)&mstate, sizeof(mstate));
+	}
+
 	len = oft + sizeof(mstate);
 
 	/* compress the statistics */
@@ -57,12 +96,12 @@ static void acp_collect_statistics(uint8_t* seed)
 
 bool qsc_acp_generate(uint8_t* output, size_t length)
 {
-	assert(output != 0);
-	assert(length <= QSC_ACP_SEED_MAX);
+	QSC_ASSERT(output != 0U);
+	QSC_ASSERT(length <= QSC_ACP_SEED_MAX);
 
-	uint8_t cust[64] = { 0 };
-	uint8_t key[64] = { 0 };
-	uint8_t stat[64] = { 0 };
+	uint8_t cust[64U] = { 0U };
+	uint8_t key[64U] = { 0U };
+	uint8_t stat[64U] = { 0U };
 	bool res;
 
 	/* collect timers and system stats, compressed as tertiary seed */
@@ -94,47 +133,46 @@ bool qsc_acp_generate(uint8_t* output, size_t length)
 
 uint16_t qsc_acp_uint16()
 {
-	uint8_t arr[sizeof(uint16_t)] = { 0 };
+	uint8_t arr[sizeof(uint16_t)] = { 0U };
 	uint16_t num;
 
 	qsc_acp_generate(arr, sizeof(arr));
 
-	num = (((uint16_t)arr[1]) | 
-		(uint16_t)((uint16_t)arr[0] << 8U));
+	num = (((uint16_t)arr[1U]) | (uint16_t)((uint16_t)arr[0U] << 8U));
 
 	return num;
 }
 
 uint32_t qsc_acp_uint32()
 {
-	uint8_t arr[sizeof(uint32_t)] = { 0 };
+	uint8_t arr[sizeof(uint32_t)] = { 0U };
 	uint32_t num;
 
 	qsc_acp_generate(arr, sizeof(arr));
 
-	num = (uint32_t)(arr[3]) |
-		(((uint32_t)(arr[2])) << 8) |
-		(((uint32_t)(arr[1])) << 16) |
-		(((uint32_t)(arr[0])) << 24);
+	num = (uint32_t)(arr[3U]) |
+		(((uint32_t)(arr[2U])) << 8U) |
+		(((uint32_t)(arr[1U])) << 16U) |
+		(((uint32_t)(arr[0U])) << 24U);
 
 	return num;
 }
 
 uint64_t qsc_acp_uint64()
 {
-	uint8_t arr[sizeof(uint64_t)] = { 0 };
+	uint8_t arr[sizeof(uint64_t)] = { 0U };
 	uint64_t num;
 
 	qsc_acp_generate(arr, sizeof(arr));
 
-	num = (uint64_t)(arr[7]) |
-		(((uint64_t)(arr[6])) << 8) |
-		(((uint64_t)(arr[5])) << 16) |
-		(((uint64_t)(arr[4])) << 24) |
-		(((uint64_t)(arr[3])) << 32) |
-		(((uint64_t)(arr[2])) << 40) |
-		(((uint64_t)(arr[1])) << 48) |
-		(((uint64_t)(arr[0])) << 56);
+	num = (uint64_t)(arr[7U]) |
+		(((uint64_t)(arr[6U])) << 8U) |
+		(((uint64_t)(arr[5U])) << 16U) |
+		(((uint64_t)(arr[4U])) << 24U) |
+		(((uint64_t)(arr[3U])) << 32U) |
+		(((uint64_t)(arr[2U])) << 40U) |
+		(((uint64_t)(arr[1U])) << 48U) |
+		(((uint64_t)(arr[0U])) << 56U);
 
 	return num;
 }

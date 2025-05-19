@@ -121,9 +121,9 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
 
 static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
-    assert(q != NULL);
-	assert(n != NULL);
-	assert(p != NULL);
+    QSC_ASSERT(q != NULL);
+	QSC_ASSERT(n != NULL);
+	QSC_ASSERT(p != NULL);
 
     uint8_t d;
 
@@ -144,9 +144,9 @@ static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const 
 
 bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey)
 {
-	assert(secret != NULL);
-    assert(privatekey != NULL);
-	assert(publickey != NULL);
+	QSC_ASSERT(secret != NULL);
+    QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(publickey != NULL);
 
     int32_t res;
 
@@ -162,11 +162,11 @@ bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const u
 
 void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
-    assert(privatekey != NULL);
-	assert(publickey != NULL);
-    assert(seed != NULL);
+    QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(publickey != NULL);
+    QSC_ASSERT(seed != NULL);
 
-    uint8_t tseed[QSC_SHA2_512_HASH_SIZE] = { 0 };
+    uint8_t tseed[QSC_SHA2_512_HASH_SIZE] = { 0U };
 
     qsc_sha512_compute(tseed, seed, EC25519_SEED_SIZE);
     qsc_memutils_copy(privatekey, tseed, EC25519_SEED_SIZE);

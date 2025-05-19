@@ -613,7 +613,7 @@ qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive_async_state* s
 
 	if (state != NULL && state->source != NULL)
 	{
-		qsc_async_thread_create((qsc_thread_func_t)qsc_socket_receive_async_invoke, state);
+		qsc_async_thread_create((void*)&qsc_socket_receive_async_invoke, state);
 	}
 
 	return res;
@@ -690,7 +690,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint
 	assert(dest != NULL);
 	assert(output != NULL);
 
-	socklen_t len;
+	int32_t len;
 	int32_t res;
 
 	res = 0;
@@ -708,7 +708,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint
 			d.sin_port = htons(port);
 			d.sin_addr.s_addr = inet_pton(AF_INET, dest, &d.sin_addr);
 
-			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, &len);
+			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
 
 			if (res != qsc_socket_exception_error)
 			{
@@ -727,7 +727,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint
 			d.sin6_port = htons(port);
 			inet_pton(AF_INET6, dest, &d.sin6_addr);
 
-			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, &len);
+			res = recvfrom(sock->connection, (char*)output, (int32_t)otplen, (int32_t)flag, (struct sockaddr*)&d, (uint32_t*)&len);
 
 			if (res != qsc_socket_exception_error)
 			{

@@ -933,7 +933,7 @@ static void falcon_prng_refill(falcon_prng_state* pctx)
 
 	for (u = 0; u < 8; ++u)
 	{
-		uint32_t state[16] = { 0 };
+		uint32_t state[16] = { 0U };
 		size_t v;
 		int32_t i;
 
@@ -9007,7 +9007,7 @@ static void falcon_sign_dyn(int16_t* sig, qsc_keccak_state* kctx, const int8_t* 
 		 * (the verifier recomputes s1 from s2, the hashed message,
 		 * and the public key).
 		 */
-		falcon_sampler_context spc = { 0 };
+		falcon_sampler_context spc = { 0U };
 		falcon_samplerZ samp;
 		void *samp_ctx;
 
@@ -9376,7 +9376,7 @@ int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 
 int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	int16_t sig[1024] = { 0 };
+	int16_t sig[1024] = { 0U };
 	uint8_t b[72 * 1024];
 	int8_t f[1024];
 	int8_t g[1024];
@@ -9384,7 +9384,7 @@ int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t
 	int8_t G[1024];
 	uint8_t seed[48];
 	uint8_t nonce[FALCON_NONCE_SIZE];
-	uint8_t esig[FALCON_CRYPTO_SIGNATURE_BYTES - 2 - sizeof(nonce)] = { 0 };
+	uint8_t esig[FALCON_CRYPTO_SIGNATURE_BYTES - 2 - sizeof(nonce)] = { 0U };
 	qsc_keccak_state kctx;
 	size_t u;
 	size_t v;

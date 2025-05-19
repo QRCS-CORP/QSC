@@ -8,9 +8,9 @@
 
 void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const uint8_t* key)
 {
-	assert(ctx != NULL);
-	assert(item != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(item != NULL);
+	QSC_ASSERT(key != NULL);
 
 	uint8_t* itmp;
 	uint8_t* ktmp;
@@ -54,8 +54,8 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 
 void qsc_collection_deserialize(qsc_collection_state* ctx, const uint8_t* input)
 {
-	assert(input != NULL);
-	assert(ctx != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	size_t cnt;
 	size_t pos;
@@ -67,7 +67,7 @@ void qsc_collection_deserialize(qsc_collection_state* ctx, const uint8_t* input)
 		ctx->width = qsc_intutils_le8to32(input + pos);
 		pos += sizeof(uint32_t);
 
-		for (size_t i = 0; i < cnt; ++i)
+		for (size_t i = 0U; i < cnt; ++i)
 		{
 			qsc_collection_add(ctx, input + pos, input + ctx->width + pos);
 			pos += ctx->width + QSC_COLLECTION_KEY_WIDTH;
@@ -77,7 +77,7 @@ void qsc_collection_deserialize(qsc_collection_state* ctx, const uint8_t* input)
 
 void qsc_collection_dispose(qsc_collection_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -95,14 +95,14 @@ void qsc_collection_dispose(qsc_collection_state* ctx)
 			ctx->keys = NULL;
 		}
 
-		ctx->count = 0;
-		ctx->width = 0;
+		ctx->count = 0U;
+		ctx->width = 0U;
 	}
 }
 
 void qsc_collection_erase(qsc_collection_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	size_t width;
 
@@ -113,9 +113,9 @@ void qsc_collection_erase(qsc_collection_state* ctx)
 
 bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const uint8_t* key)
 {
-	assert(ctx != NULL);
-	assert(item != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(item != NULL);
+	QSC_ASSERT(key != NULL);
 
 	bool res;
 
@@ -128,7 +128,7 @@ bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const u
 
 		mtx = qsc_async_mutex_lock_ex();
 
-		for (size_t i = 0; i < ctx->count; ++i)
+		for (size_t i = 0U; i < ctx->count; ++i)
 		{
 			if (qsc_memutils_are_equal_128(ctx->keys + (i * QSC_COLLECTION_KEY_WIDTH), key) == true)
 			{
@@ -147,8 +147,8 @@ bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const u
 
 bool qsc_collection_item_exists(const qsc_collection_state* ctx, const uint8_t* key)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	uint8_t* item;
 	bool res;
@@ -171,12 +171,12 @@ bool qsc_collection_item_exists(const qsc_collection_state* ctx, const uint8_t* 
 
 void qsc_collection_initialize(qsc_collection_state* ctx, size_t width)
 {
-	assert(ctx != NULL);
-	assert(width != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(width != 0U);
 
-	if (ctx != NULL && width != 0)
+	if (ctx != NULL && width != 0U)
 	{
-		ctx->count = 0;
+		ctx->count = 0U;
 		ctx->width = (uint32_t)width;
 
 		/* initialize the placeholders */
@@ -187,8 +187,8 @@ void qsc_collection_initialize(qsc_collection_state* ctx, size_t width)
 
 void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item, size_t index)
 {
-	assert(ctx != NULL);
-	assert(item != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(item != NULL);
 
 	if (ctx != NULL && ctx->items != NULL && index < ctx->count)
 	{
@@ -204,8 +204,8 @@ void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item, size_t index)
 
 void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	uint8_t *itmp;
 	uint8_t *ktmp;
@@ -218,7 +218,7 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 		mtx = qsc_async_mutex_lock_ex();
 
-		for (size_t i = 0; i < ctx->count; ++i)
+		for (size_t i = 0U; i < ctx->count; ++i)
 		{
 			if (qsc_memutils_are_equal_128(ctx->keys + (i * QSC_COLLECTION_KEY_WIDTH), key) == true)
 			{
@@ -247,7 +247,7 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 				--ctx->count;
 
-				if (ctx->count != 0)
+				if (ctx->count != 0U)
 				{
 					itmp = qsc_memutils_realloc(ctx->items, ctx->width * ctx->count);
 
@@ -286,12 +286,12 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 size_t qsc_collection_serialize(uint8_t* output, const qsc_collection_state* ctx)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t pos;
 
-	pos = 0;
+	pos = 0U;
 
 	if (ctx != NULL && ctx->items != NULL && output != NULL)
 	{
@@ -300,7 +300,7 @@ size_t qsc_collection_serialize(uint8_t* output, const qsc_collection_state* ctx
 		qsc_intutils_le32to8(output + pos, ctx->width);
 		pos += sizeof(uint32_t);
 
-		for (size_t i = 0; i < ctx->count; ++i)
+		for (size_t i = 0U; i < ctx->count; ++i)
 		{
 			qsc_memutils_copy(output + pos, ctx->items + (i * ctx->width), ctx->width);
 			pos += ctx->width;
@@ -314,11 +314,11 @@ size_t qsc_collection_serialize(uint8_t* output, const qsc_collection_state* ctx
 
 size_t qsc_collection_size(const qsc_collection_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	size_t res;
 
-	res = 0;
+	res = 0U;
 
 	if (ctx != NULL && ctx->items != NULL)
 	{
@@ -331,17 +331,17 @@ size_t qsc_collection_size(const qsc_collection_state* ctx)
 #if defined(QSC_DEBUG_MODE)
 bool qsc_collection_test()
 {
-	uint8_t keys[10][16] = { 0 };
-	uint8_t items[10][16] = { 0 };
-	qsc_collection_state cstate = { 0 };
-	uint8_t item[16] = { 0 };
+	uint8_t keys[10][16] = { 0U };
+	uint8_t items[10][16] = { 0U };
+	qsc_collection_state cstate = { 0U };
+	uint8_t item[16] = { 0U };
 	bool res;
 
 	res = true;
 	qsc_collection_initialize(&cstate, 16);
 
 	/* test the add function */
-	for (size_t i = 0; i < 10; ++i)
+	for (size_t i = 0U; i < 10; ++i)
 	{
 		qsc_acp_generate(keys[i], sizeof(keys[i]));
 		qsc_acp_generate(items[i], sizeof(items[i]));
@@ -349,7 +349,7 @@ bool qsc_collection_test()
 	}
 
 	/* test the find function */
-	for (size_t i = 0; i < 10; ++i)
+	for (size_t i = 0U; i < 10; ++i)
 	{
 		if (qsc_collection_find(&cstate, item, keys[i]) == true)
 		{
@@ -364,7 +364,7 @@ bool qsc_collection_test()
 	if (res == true)
 	{
 		/* test the remove function */
-		for (size_t i = 0; i < 10; ++i)
+		for (size_t i = 0U; i < 10; ++i)
 		{
 			qsc_collection_remove(&cstate, keys[i]);
 

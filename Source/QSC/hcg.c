@@ -13,7 +13,7 @@ static void csg_auto_reseed(qsc_hcg_state* ctx)
 	/* add a random seed to input seed and info */
 	if (ctx->pres == true && ctx->rpos >= QSC_HCG_RESEED_THRESHHOLD)
 	{
-		qsc_sha512_state sstate = { 0 };
+		qsc_sha512_state sstate = { 0U };
 		uint8_t prnd[QSC_HCG_KEY_SIZE];
 
 		qsc_acp_generate(prnd, QSC_HCG_KEY_SIZE);
@@ -29,7 +29,7 @@ static void csg_auto_reseed(qsc_hcg_state* ctx)
 
 static void hcg_fill_buffer(qsc_hcg_state* ctx, uint8_t* buffer)
 {
-	qsc_hmac512_state hstate = { 0 };
+	qsc_hmac512_state hstate = { 0U };
 
 	/* increment the nonce counter */
 	qsc_intutils_be8increment(ctx->nonce, QSC_HCG_NONCE_SIZE);
@@ -54,7 +54,7 @@ static void hcg_fill_buffer(qsc_hcg_state* ctx, uint8_t* buffer)
 
 void qsc_hcg_dispose(qsc_hcg_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -69,13 +69,13 @@ void qsc_hcg_dispose(qsc_hcg_state* ctx)
 
 void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predictive_resistance)
 {
-	assert(ctx != NULL);
-	assert(seed != NULL);
-	assert(seedlen == QSC_HCG_SEED_SIZE);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(seed != NULL);
+	QSC_ASSERT(seedlen == QSC_HCG_SEED_SIZE);
 
 	if (ctx != NULL && seed != NULL && seedlen == QSC_HCG_SEED_SIZE)
 	{
-		qsc_hmac512_state hstate = { 0 };
+		qsc_hmac512_state hstate = { 0U };
 
 		qsc_memutils_clear(ctx->info, QSC_HCG_MAX_INFO_SIZE);
 		qsc_memutils_clear(ctx->key, QSC_HCG_KEY_SIZE);
@@ -118,12 +118,12 @@ void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen,
 
 void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	if (ctx != NULL && output != NULL)
 	{
-		uint8_t buf[QSC_SHA2_512_HASH_SIZE] = { 0 };
+		uint8_t buf[QSC_SHA2_512_HASH_SIZE] = { 0U };
 		size_t pos;
 		size_t rmd;
 
@@ -151,12 +151,12 @@ void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
 
 void qsc_hcg_update(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen)
 {
-	assert(ctx != NULL);
-	assert(seed != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(seed != NULL);
 
 	if (ctx != NULL && seed != NULL)
 	{
-		qsc_sha512_state sstate = { 0 };
+		qsc_sha512_state sstate = { 0U };
 
 		qsc_sha512_initialize(&sstate);
 		qsc_sha512_update(&sstate, ctx->key, QSC_HCG_KEY_SIZE);

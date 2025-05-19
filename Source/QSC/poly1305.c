@@ -4,8 +4,8 @@
 
 void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint8_t* message)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	const uint32_t HIBIT = (ctx->fnl != 0) ? 0UL : (1UL << 24);
 	uint64_t b;
@@ -55,9 +55,9 @@ void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint8_t* message)
 
 void qsc_poly1305_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key)
 {
-	assert(output != NULL);
-	assert(message != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_poly1305_state ctx;
 
@@ -78,8 +78,8 @@ void qsc_poly1305_dispose(qsc_poly1305_state* ctx)
 
 void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	uint64_t f0;
 	uint64_t f1;
@@ -165,8 +165,8 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 
 void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t* key)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	ctx->r[0] = (qsc_intutils_le8to32(&key[0])) & 0x3FFFFFFUL;
 	ctx->r[1] = (qsc_intutils_le8to32(&key[3]) >> 2) & 0x3FFFF03UL;
@@ -192,7 +192,7 @@ void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t* key)
 
 void qsc_poly1305_reset(qsc_poly1305_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	qsc_intutils_clear32(ctx->h, 5);
 	qsc_intutils_clear32(ctx->k, 4);
@@ -205,8 +205,8 @@ void qsc_poly1305_reset(qsc_poly1305_state* ctx)
 
 void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	size_t i;
 	size_t rmd;
@@ -256,11 +256,11 @@ void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t
 
 int32_t qsc_poly1305_verify(const uint8_t* code, const uint8_t* message, size_t msglen, const uint8_t* key)
 {
-	assert(code != NULL);
-	assert(message != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(code != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
 
-	uint8_t hash[QSC_POLY1305_MAC_SIZE] = { 0 };
+	uint8_t hash[QSC_POLY1305_MAC_SIZE] = { 0U };
 
 	qsc_poly1305_compute(hash, message, msglen, key);
 

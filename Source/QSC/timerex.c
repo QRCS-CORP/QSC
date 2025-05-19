@@ -7,9 +7,9 @@
 void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	struct tm nt = { 0 };
-	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
-	__time64_t lt = { 0 };
+	struct tm nt = { 0U };
+	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
+	__time64_t lt = { 0U };
 	errno_t err;
 	size_t len;
 
@@ -53,7 +53,7 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	struct tm nt;
-	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
+	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
 	__time64_t lt;
 	errno_t err;
 	size_t len;
@@ -98,7 +98,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	struct tm nt;
-	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
+	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
 	__time64_t lt;
 	errno_t err;
 	size_t len;
@@ -162,7 +162,7 @@ uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start)
 #if defined(QSC_DEBUG_MODE)
 void qsc_timerex_print_values()
 {
-	char tmro[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
+	char tmro[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
 
 	uint64_t elps;
 	uint64_t tms;

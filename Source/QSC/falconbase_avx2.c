@@ -40,9 +40,9 @@ inline static void chacha_quarter_round(__m256i state[16], size_t a, size_t b, s
 static void falcon_prng_refill(falcon_prng_state* p)
 {
 	static const uint32_t CW[] = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
-	__m256i state[16] = { 0 };
-	__m256i init[16] = { 0 };
-	QSC_ALIGN(64) uint32_t w[16] = { 0 };
+	__m256i state[16] = { 0U };
+	__m256i init[16] = { 0U };
+	QSC_ALIGN(64) uint32_t w[16] = { 0U };
 	const uint32_t* sw;
 	uint64_t cc;
 	size_t u;
@@ -8743,7 +8743,7 @@ static void falcon_sign_dyn(int16_t* sig, qsc_keccak_state* kctx, const int8_t* 
 		 * (the verifier recomputes s1 from s2, the hashed message,
 		 * and the public key).
 		 */
-		falcon_sampler_context spc = { 0 };
+		falcon_sampler_context spc = { 0U };
 		falcon_samplerZ samp;
 		void *samp_ctx;
 
@@ -9112,7 +9112,7 @@ int32_t qsc_falcon_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_ge
 
 int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	int16_t sig[1024] = { 0 };
+	int16_t sig[1024] = { 0U };
 	uint8_t b[72 * 1024];
 	int8_t f[1024];
 	int8_t g[1024];
@@ -9120,7 +9120,7 @@ int32_t qsc_falcon_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_
 	int8_t G[1024];
 	uint8_t seed[48];
 	uint8_t nonce[FALCON_NONCE_SIZE];
-	uint8_t esig[CRYPTO_BYTES - 2 - sizeof(nonce)] = { 0 };
+	uint8_t esig[CRYPTO_BYTES - 2 - sizeof(nonce)] = { 0U };
 	qsc_keccak_state kctx;
 	size_t u;
 	size_t v;

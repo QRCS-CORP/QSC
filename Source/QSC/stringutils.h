@@ -58,7 +58,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \code
  * // Example: Remove all whitespace from a string.
  * const char* original = "  Hello,   World!  ";
- * char cleaned[50] = { 0 };
+ * char cleaned[50] = { 0U };
  * size_t new_len = qsc_stringutils_whitespace_filter(original, strlen(original), cleaned);
  * printf("Cleaned string: '%s' (length: %zu)\n", cleaned, new_len);
  * \endcode

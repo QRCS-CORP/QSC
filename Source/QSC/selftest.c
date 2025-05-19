@@ -15,10 +15,10 @@
 
 static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t* message, const uint8_t* expected)
 {
-	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t expf[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t inpf[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t expf[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t inpf[4 * QSC_AES_BLOCK_SIZE] = { 0U };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -75,8 +75,8 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t* message, const uint8_t* expected)
 {
-	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0U };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -124,8 +124,8 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t* message, const uint8_t* expected)
 {
-	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0U };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -174,8 +174,8 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t* message, const uint8_t* expected)
 {
-	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0U };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -224,7 +224,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t* message, const uint8_t* expected)
 {
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0U };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -270,7 +270,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t* message, c
 
 static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t* message, const uint8_t* expected)
 {
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0U };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -315,10 +315,10 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t* message, c
 
 static bool fips_aes128_cbc()
 {
-	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0U };
 
 	/* SP800-38a F2.1 */
 
@@ -340,10 +340,10 @@ static bool fips_aes128_cbc()
 
 static bool fips_aes256_cbc()
 {
-	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
 
 	/* SP800-38a F2.5 */
 
@@ -365,10 +365,10 @@ static bool fips_aes256_cbc()
 
 static bool fips_aes128_ctr()
 {
-	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
 
 	/* SP800-38a F5.1 */
 
@@ -390,10 +390,10 @@ static bool fips_aes128_ctr()
 
 static bool fips_aes256_ctr()
 {
-	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
 
 	/* SP800-38a F5.5 */
 
@@ -415,9 +415,9 @@ static bool fips_aes256_ctr()
 
 static bool fips_aes128_ecb()
 {
-	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0U };
 
 	/* SP800-38a F1.1 */
 
@@ -438,9 +438,9 @@ static bool fips_aes128_ecb()
 
 static bool fips_aes256_ecb()
 {
-	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	uint8_t exp[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t msg[4 * QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
 
 	/* SP800-38a F1.5 */
 
@@ -462,13 +462,13 @@ static bool fips_aes256_ecb()
 static bool aes_gcm256_kat()
 {
     /* Test vector parameters from NIST SP 800-38D for AES-256 GCM */
-	qsc_aes_gcm256_state state = { 0 };
-    uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
-    uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };
-    uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
-    uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 }; /* 96-bit IV */
-    uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-    uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0 }; /* 16-byte plaintext (all zeros) */
+	qsc_aes_gcm256_state state = { 0U };
+    uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0U };
+    uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0U };
+    uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0U };
+    uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0U }; /* 96-bit IV */
+    uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+    uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0U }; /* 16-byte plaintext (all zeros) */
     bool status;
 
 	status = true;
@@ -512,28 +512,28 @@ static bool aes_gcm256_kat()
 
 static bool aes256_hba_kat()
 {
-	uint8_t aad1[20] = { 0 };
-	uint8_t aad2[20] = { 0 };
-	uint8_t aad3[20] = { 0 };
-	uint8_t dec1[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t dec2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
-	uint8_t dec3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
-	uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t msg1[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
-	uint8_t msg3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
-	uint8_t nce1[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t nce2[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t nce3[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t n1copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t n2copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t n3copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
+	uint8_t aad1[20] = { 0U };
+	uint8_t aad2[20] = { 0U };
+	uint8_t aad3[20] = { 0U };
+	uint8_t dec1[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t dec2[QSC_AES_BLOCK_SIZE * 2] = { 0U };
+	uint8_t dec3[QSC_AES_BLOCK_SIZE * 4] = { 0U };
+	uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t msg1[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t msg2[QSC_AES_BLOCK_SIZE * 2] = { 0U };
+	uint8_t msg3[QSC_AES_BLOCK_SIZE * 4] = { 0U };
+	uint8_t nce1[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t nce2[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t nce3[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t n1copy[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t n2copy[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t n3copy[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0U };
 	bool status;
 
 	/* vectors from CEX */
@@ -670,12 +670,12 @@ static bool aes256_hba_kat()
 
 static bool chacha128_kat()
 {
-	uint8_t ctext[114] = { 0 };
-	uint8_t cexp[114] = { 0 };
-	uint8_t input[114] = { 0 };
-	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	uint8_t ptext[114] = { 0 };
+	uint8_t ctext[114] = { 0U };
+	uint8_t cexp[114] = { 0U };
+	uint8_t input[114] = { 0U };
+	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0U };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0U };
+	uint8_t ptext[114] = { 0U };
 	bool status;
 
 	status = true;
@@ -722,12 +722,12 @@ static bool chacha128_kat()
 static bool chacha256_kat()
 {
 	/* RFC?7539 Vector, section 2.3.2: https://www.rfc-editor.org/rfc/rfc7539.html */
-	uint8_t ctext[114] = { 0 };
-	uint8_t cexp[114] = { 0 };
-	uint8_t input[114] = { 0 };
-	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	uint8_t ptext[114] = { 0 };
+	uint8_t ctext[114] = { 0U };
+	uint8_t cexp[114] = { 0U };
+	uint8_t input[114] = { 0U };
+	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0U };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0U };
+	uint8_t ptext[114] = { 0U };
 	bool status;
 
 	status = true;
@@ -775,23 +775,23 @@ static bool chacha256_kat()
 
 static bool csx512_kat()
 {
-	uint8_t ad[20] = { 0 };
-	uint8_t dec[128] = { 0 };
+	uint8_t ad[20] = { 0U };
+	uint8_t dec[128] = { 0U };
 #if defined(QSC_CSX_AUTHENTICATED)
-	uint8_t enc1[128 + QSC_CSX_MAC_SIZE] = { 0 };
-	uint8_t enc2[128 + QSC_CSX_MAC_SIZE] = { 0 };
-	uint8_t exp1[128 + QSC_CSX_MAC_SIZE] = { 0 };
-	uint8_t exp2[128 + QSC_CSX_MAC_SIZE] = { 0 };
+	uint8_t enc1[128 + QSC_CSX_MAC_SIZE] = { 0U };
+	uint8_t enc2[128 + QSC_CSX_MAC_SIZE] = { 0U };
+	uint8_t exp1[128 + QSC_CSX_MAC_SIZE] = { 0U };
+	uint8_t exp2[128 + QSC_CSX_MAC_SIZE] = { 0U };
 #else
-	uint8_t enc1[128] = { 0 };
-	uint8_t enc2[128] = { 0 };
-	uint8_t exp1[128] = { 0 };
-	uint8_t exp2[128] = { 0 };
+	uint8_t enc1[128] = { 0U };
+	uint8_t enc2[128] = { 0U };
+	uint8_t exp1[128] = { 0U };
+	uint8_t exp2[128] = { 0U };
 #endif
-	uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
-	uint8_t msg[128] = { 0 };
-	uint8_t nce[QSC_CSX_NONCE_SIZE] = { 0 };
-	uint8_t ncpy[QSC_CSX_NONCE_SIZE] = { 0 };
+	uint8_t key[QSC_CSX_KEY_SIZE] = { 0U };
+	uint8_t msg[128] = { 0U };
+	uint8_t nce[QSC_CSX_NONCE_SIZE] = { 0U };
+	uint8_t ncpy[QSC_CSX_NONCE_SIZE] = { 0U };
 	bool status;
 	qsc_csx_state state;
 
@@ -932,20 +932,20 @@ static bool csx512_kat()
 bool rcs256_kat()
 {
 #if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t ad[20] = { 0 };
-	uint8_t dec[32] = { 0 };
-	uint8_t enc1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t enc2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t exp1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t exp2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
+	uint8_t ad[20] = { 0U };
+	uint8_t dec[32] = { 0U };
+	uint8_t enc1[32 + QSC_RCS256_MAC_SIZE] = { 0U };
+	uint8_t enc2[32 + QSC_RCS256_MAC_SIZE] = { 0U };
+	uint8_t exp1[32 + QSC_RCS256_MAC_SIZE] = { 0U };
+	uint8_t exp2[32 + QSC_RCS256_MAC_SIZE] = { 0U };
+	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0U };
 #else
-	uint8_t enc1[32] = { 0 };
-	uint8_t exp1[32] = { 0 };
+	uint8_t enc1[32] = { 0U };
+	uint8_t exp1[32] = { 0U };
 #endif
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
-	uint8_t msg[32] = { 0 };
-	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
+	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0U };
+	uint8_t msg[32] = { 0U };
+	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0U };
 
 	bool status;
 	qsc_rcs_state state;
@@ -1046,20 +1046,20 @@ bool rcs256_kat()
 bool rcs512_kat()
 {
 #if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t ad[20] = { 0 };
-	uint8_t dec[64] = { 0 };
-	uint8_t enc1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t enc2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t exp1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t exp2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
+	uint8_t ad[20] = { 0U };
+	uint8_t dec[64] = { 0U };
+	uint8_t enc1[64 + QSC_RCS512_MAC_SIZE] = { 0U };
+	uint8_t enc2[64 + QSC_RCS512_MAC_SIZE] = { 0U };
+	uint8_t exp1[64 + QSC_RCS512_MAC_SIZE] = { 0U };
+	uint8_t exp2[64 + QSC_RCS512_MAC_SIZE] = { 0U };
+	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0U };
 #else
-	uint8_t enc1[64] = { 0 };
-	uint8_t exp1[64] = { 0 };
+	uint8_t enc1[64] = { 0U };
+	uint8_t exp1[64] = { 0U };
 #endif
-	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
-	uint8_t msg[64] = { 0 };
-	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
+	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0U };
+	uint8_t msg[64] = { 0U };
+	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0U };
 	bool status;
 	qsc_rcs_state state;
 
@@ -1173,15 +1173,15 @@ bool rcs512_kat()
 
 static bool sha2_256_kat()
 {
-	uint8_t exp0[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp1[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp2[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp3[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg1[3] = { 0 };
-	uint8_t msg2[56] = { 0 };
-	uint8_t msg3[112] = { 0 };
-	uint8_t otp[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	uint8_t exp0[QSC_SHA2_256_HASH_SIZE] = { 0U };
+	uint8_t exp1[QSC_SHA2_256_HASH_SIZE] = { 0U };
+	uint8_t exp2[QSC_SHA2_256_HASH_SIZE] = { 0U };
+	uint8_t exp3[QSC_SHA2_256_HASH_SIZE] = { 0U };
+	uint8_t msg0[1] = { 0U };
+	uint8_t msg1[3] = { 0U };
+	uint8_t msg2[56] = { 0U };
+	uint8_t msg3[112] = { 0U };
+	uint8_t otp[QSC_SHA2_256_HASH_SIZE] = { 0U };
 	qsc_sha256_state state;
 	bool status;
 
@@ -1294,15 +1294,15 @@ static bool sha2_256_kat()
 
 static bool sha2_512_kat()
 {
-	uint8_t exp0[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp1[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp2[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp3[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg1[3] = { 0 };
-	uint8_t msg2[56] = { 0 };
-	uint8_t msg3[112] = { 0 };
-	uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	uint8_t exp0[QSC_SHA2_512_HASH_SIZE] = { 0U };
+	uint8_t exp1[QSC_SHA2_512_HASH_SIZE] = { 0U };
+	uint8_t exp2[QSC_SHA2_512_HASH_SIZE] = { 0U };
+	uint8_t exp3[QSC_SHA2_512_HASH_SIZE] = { 0U };
+	uint8_t msg0[1] = { 0U };
+	uint8_t msg1[3] = { 0U };
+	uint8_t msg2[56] = { 0U };
+	uint8_t msg3[112] = { 0U };
+	uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0U };
 	qsc_sha512_state state;
 	bool status;
 
@@ -1414,14 +1414,14 @@ static bool sha2_512_kat()
 
 static bool hkdf_256_kat()
 {
-	uint8_t exp0[42] = { 0 };
-	uint8_t exp1[82] = { 0 };
-	uint8_t inf0[10] = { 0 };
-	uint8_t inf1[80] = { 0 };
-	uint8_t key0[22] = { 0 };
-	uint8_t key1[80] = { 0 };
-	uint8_t otp0[42] = { 0 };
-	uint8_t otp1[82] = { 0 };
+	uint8_t exp0[42] = { 0U };
+	uint8_t exp1[82] = { 0U };
+	uint8_t inf0[10] = { 0U };
+	uint8_t inf1[80] = { 0U };
+	uint8_t key0[22] = { 0U };
+	uint8_t key1[80] = { 0U };
+	uint8_t otp0[42] = { 0U };
+	uint8_t otp1[82] = { 0U };
 	bool status;
 
 	qsc_consoleutils_hex_to_bin("D03C9AB82C884B1DCFD3F4CFFD0E4AD1501915E5D72DF0E6D846D59F6CF78047"
@@ -1463,14 +1463,14 @@ static bool hkdf_256_kat()
 
 static bool hkdf_512_kat()
 {
-	uint8_t exp0[42] = { 0 };
-	uint8_t exp1[82] = { 0 };
-	uint8_t inf0[10] = { 0 };
-	uint8_t inf1[80] = { 0 };
-	uint8_t key0[22] = { 0 };
-	uint8_t key1[80] = { 0 };
-	uint8_t otp0[42] = { 0 };
-	uint8_t otp1[82] = { 0 };
+	uint8_t exp0[42] = { 0U };
+	uint8_t exp1[82] = { 0U };
+	uint8_t inf0[10] = { 0U };
+	uint8_t inf1[80] = { 0U };
+	uint8_t key0[22] = { 0U };
+	uint8_t key1[80] = { 0U };
+	uint8_t otp0[42] = { 0U };
+	uint8_t otp1[82] = { 0U };
 	bool status;
 
 	qsc_consoleutils_hex_to_bin("7CE212EEB2A92270C4460A4728944B9B0EE9E060DE13C197853D37A20CE7184F"
@@ -1512,22 +1512,22 @@ static bool hkdf_512_kat()
 
 static bool hmac_256_kat()
 {
-	uint8_t exp0[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp1[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp2[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp3[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp4[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t key0[20] = { 0 };
-	uint8_t key1[20] = { 0 };
-	uint8_t key2[25] = { 0 };
-	uint8_t key3[131] = { 0 };
-	uint8_t key4[131] = { 0 };
-	uint8_t msg0[8] = { 0 };
-	uint8_t msg1[50] = { 0 };
-	uint8_t msg2[50] = { 0 };
-	uint8_t msg3[54] = { 0 };
-	uint8_t msg4[152] = { 0 };
-	uint8_t otp[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	uint8_t exp0[QSC_HMAC_256_MAC_SIZE] = { 0U };
+	uint8_t exp1[QSC_HMAC_256_MAC_SIZE] = { 0U };
+	uint8_t exp2[QSC_HMAC_256_MAC_SIZE] = { 0U };
+	uint8_t exp3[QSC_HMAC_256_MAC_SIZE] = { 0U };
+	uint8_t exp4[QSC_HMAC_256_MAC_SIZE] = { 0U };
+	uint8_t key0[20] = { 0U };
+	uint8_t key1[20] = { 0U };
+	uint8_t key2[25] = { 0U };
+	uint8_t key3[131] = { 0U };
+	uint8_t key4[131] = { 0U };
+	uint8_t msg0[8] = { 0U };
+	uint8_t msg1[50] = { 0U };
+	uint8_t msg2[50] = { 0U };
+	uint8_t msg3[54] = { 0U };
+	uint8_t msg4[152] = { 0U };
+	uint8_t otp[QSC_HMAC_256_MAC_SIZE] = { 0U };
 	qsc_hmac256_state state;
 	bool status;
 
@@ -1665,22 +1665,22 @@ static bool hmac_256_kat()
 
 static bool hmac_512_kat()
 {
-	uint8_t exp0[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp1[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp2[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp3[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp4[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t key0[20] = { 0 };
-	uint8_t key1[20] = { 0 };
-	uint8_t key2[25] = { 0 };
-	uint8_t key3[131] = { 0 };
-	uint8_t key4[131] = { 0 };
-	uint8_t msg0[8] = { 0 };
-	uint8_t msg1[50] = { 0 };
-	uint8_t msg2[50] = { 0 };
-	uint8_t msg3[54] = { 0 };
-	uint8_t msg4[152] = { 0 };
-	uint8_t otp[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	uint8_t exp0[QSC_HMAC_512_MAC_SIZE] = { 0U };
+	uint8_t exp1[QSC_HMAC_512_MAC_SIZE] = { 0U };
+	uint8_t exp2[QSC_HMAC_512_MAC_SIZE] = { 0U };
+	uint8_t exp3[QSC_HMAC_512_MAC_SIZE] = { 0U };
+	uint8_t exp4[QSC_HMAC_512_MAC_SIZE] = { 0U };
+	uint8_t key0[20] = { 0U };
+	uint8_t key1[20] = { 0U };
+	uint8_t key2[25] = { 0U };
+	uint8_t key3[131] = { 0U };
+	uint8_t key4[131] = { 0U };
+	uint8_t msg0[8] = { 0U };
+	uint8_t msg1[50] = { 0U };
+	uint8_t msg2[50] = { 0U };
+	uint8_t msg3[54] = { 0U };
+	uint8_t msg4[152] = { 0U };
+	uint8_t otp[QSC_HMAC_512_MAC_SIZE] = { 0U };
 	qsc_hmac512_state state;
 	bool status;
 
@@ -1820,16 +1820,16 @@ static bool hmac_512_kat()
 
 static bool sha3_256_kat()
 {
-	uint8_t exp0[QSC_SHA3_256_HASH_SIZE] = { 0 };
-	uint8_t exp24[QSC_SHA3_256_HASH_SIZE] = { 0 };
-	uint8_t exp448[QSC_SHA3_256_HASH_SIZE] = { 0 };
-	uint8_t exp1600[QSC_SHA3_256_HASH_SIZE] = { 0 };
-	uint8_t hash[200] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg24[3] = { 0 };
-	uint8_t msg448[56] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t output[QSC_SHA3_256_HASH_SIZE] = { 0 };
+	uint8_t exp0[QSC_SHA3_256_HASH_SIZE] = { 0U };
+	uint8_t exp24[QSC_SHA3_256_HASH_SIZE] = { 0U };
+	uint8_t exp448[QSC_SHA3_256_HASH_SIZE] = { 0U };
+	uint8_t exp1600[QSC_SHA3_256_HASH_SIZE] = { 0U };
+	uint8_t hash[200] = { 0U };
+	uint8_t msg0[1] = { 0U };
+	uint8_t msg24[3] = { 0U };
+	uint8_t msg448[56] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t output[QSC_SHA3_256_HASH_SIZE] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -1945,16 +1945,16 @@ static bool sha3_256_kat()
 
 static bool sha3_512_kat()
 {
-	uint8_t exp0[QSC_SHA3_512_HASH_SIZE] = { 0 };
-	uint8_t exp24[QSC_SHA3_512_HASH_SIZE] = { 0 };
-	uint8_t exp448[QSC_SHA3_512_HASH_SIZE] = { 0 };
-	uint8_t exp1600[QSC_SHA3_512_HASH_SIZE] = { 0 };
-	uint8_t hash[200] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg24[3] = { 0 };
-	uint8_t msg448[56] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t output[QSC_SHA3_512_HASH_SIZE] = { 0 };
+	uint8_t exp0[QSC_SHA3_512_HASH_SIZE] = { 0U };
+	uint8_t exp24[QSC_SHA3_512_HASH_SIZE] = { 0U };
+	uint8_t exp448[QSC_SHA3_512_HASH_SIZE] = { 0U };
+	uint8_t exp1600[QSC_SHA3_512_HASH_SIZE] = { 0U };
+	uint8_t hash[200] = { 0U };
+	uint8_t msg0[1] = { 0U };
+	uint8_t msg24[3] = { 0U };
+	uint8_t msg448[56] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t output[QSC_SHA3_512_HASH_SIZE] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2073,12 +2073,12 @@ static bool sha3_512_kat()
 
 static bool shake_128_kat()
 {
-	uint8_t exp0[512] = { 0 };
-	uint8_t exp1600[512] = { 0 };
-	uint8_t hash[qsc_keccak_rate_128 * 4] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t output[512] = { 0 };
+	uint8_t exp0[512] = { 0U };
+	uint8_t exp1600[512] = { 0U };
+	uint8_t hash[qsc_keccak_rate_128 * 4] = { 0U };
+	uint8_t msg0[1] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t output[512] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2164,12 +2164,12 @@ static bool shake_128_kat()
 
 static bool shake_256_kat()
 {
-	uint8_t exp0[512] = { 0 };
-	uint8_t exp1600[512] = { 0 };
-	uint8_t hash[qsc_keccak_rate_256 * 4] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t output[512] = { 0 };
+	uint8_t exp0[512] = { 0U };
+	uint8_t exp1600[512] = { 0U };
+	uint8_t hash[qsc_keccak_rate_256 * 4] = { 0U };
+	uint8_t msg0[1] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t output[512] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2255,12 +2255,12 @@ static bool shake_256_kat()
 
 static bool shake_512_kat()
 {
-	uint8_t exp1[512] = { 0 };
-	uint8_t exp2[512] = { 0 };
-	uint8_t hash[qsc_keccak_rate_512 * 8] = { 0 };
-	uint8_t msg1[64] = { 0 };
-	uint8_t msg2[200] = { 0 };
-	uint8_t output[512] = { 0 };
+	uint8_t exp1[512] = { 0U };
+	uint8_t exp2[512] = { 0U };
+	uint8_t hash[qsc_keccak_rate_512 * 8] = { 0U };
+	uint8_t msg1[64] = { 0U };
+	uint8_t msg2[200] = { 0U };
+	uint8_t output[512] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2349,14 +2349,14 @@ static bool shake_512_kat()
 
 static bool cshake_128_kat()
 {
-	uint8_t cust[15] = { 0 };
-	uint8_t exp256a[32] = { 0 };
-	uint8_t exp256b[32] = { 0 };
-	uint8_t hashb[qsc_keccak_rate_128] = { 0 };
-	uint8_t msg32[4] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t name[1] = { 0 };
-	uint8_t output[32] = { 0 };
+	uint8_t cust[15] = { 0U };
+	uint8_t exp256a[32] = { 0U };
+	uint8_t exp256b[32] = { 0U };
+	uint8_t hashb[qsc_keccak_rate_128] = { 0U };
+	uint8_t msg32[4] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t name[1] = { 0U };
+	uint8_t output[32] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2412,14 +2412,14 @@ static bool cshake_128_kat()
 
 static bool cshake_256_kat()
 {
-	uint8_t cust[15] = { 0 };
-	uint8_t exp512a[64] = { 0 };
-	uint8_t exp512b[64] = { 0 };
-	uint8_t hashb[qsc_keccak_rate_256] = { 0 };
-	uint8_t msg32[4] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t name[1] = { 0 };
-	uint8_t output[64] = { 0 };
+	uint8_t cust[15] = { 0U };
+	uint8_t exp512a[64] = { 0U };
+	uint8_t exp512b[64] = { 0U };
+	uint8_t hashb[qsc_keccak_rate_256] = { 0U };
+	uint8_t msg32[4] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t name[1] = { 0U };
+	uint8_t output[64] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2478,11 +2478,11 @@ static bool cshake_256_kat()
 
 static bool cshake_512_kat()
 {
-	uint8_t exp512[64] = { 0 };
-	uint8_t cust[15] = { 0 };
-	uint8_t hashb[qsc_keccak_rate_512] = { 0 };
-	uint8_t msg512[64] = { 0 };
-	uint8_t output[64] = { 0 };
+	uint8_t exp512[64] = { 0U };
+	uint8_t cust[15] = { 0U };
+	uint8_t hashb[qsc_keccak_rate_512] = { 0U };
+	uint8_t msg512[64] = { 0U };
+	uint8_t output[64] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2525,15 +2525,15 @@ static bool cshake_512_kat()
 
 static bool kmac_128_kat()
 {
-	uint8_t cust0[1] = { 0 };
-	uint8_t cust168[21] = { 0 };
-	uint8_t exp256a[32] = { 0 };
-	uint8_t exp256b[32] = { 0 };
-	uint8_t exp256c[32] = { 0 };
-	uint8_t msg32[4] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t key256[32] = { 0 };
-	uint8_t output[32] = { 0 };
+	uint8_t cust0[1] = { 0U };
+	uint8_t cust168[21] = { 0U };
+	uint8_t exp256a[32] = { 0U };
+	uint8_t exp256b[32] = { 0U };
+	uint8_t exp256c[32] = { 0U };
+	uint8_t msg32[4] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t key256[32] = { 0U };
+	uint8_t output[32] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2604,15 +2604,15 @@ static bool kmac_128_kat()
 
 static bool kmac_256_kat()
 {
-	uint8_t cust0[1] = { 0 };
-	uint8_t cust168[21] = { 0 };
-	uint8_t exp256a[64] = { 0 };
-	uint8_t exp256b[64] = { 0 };
-	uint8_t exp256c[64] = { 0 };
-	uint8_t msg32[4] = { 0 };
-	uint8_t msg1600[200] = { 0 };
-	uint8_t key256[32] = { 0 };
-	uint8_t output[64] = { 0 };
+	uint8_t cust0[1] = { 0U };
+	uint8_t cust168[21] = { 0U };
+	uint8_t exp256a[64] = { 0U };
+	uint8_t exp256b[64] = { 0U };
+	uint8_t exp256c[64] = { 0U };
+	uint8_t msg32[4] = { 0U };
+	uint8_t msg1600[200] = { 0U };
+	uint8_t key256[32] = { 0U };
+	uint8_t output[64] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 
@@ -2686,17 +2686,17 @@ static bool kmac_256_kat()
 
 static bool kmac_512_kat()
 {
-	uint8_t cust0[21] = { 0 };
-	uint8_t cust1[42] = { 0 };
-	uint8_t cust2[45] = { 0 };
-	uint8_t exp0[64] = { 0 };
-	uint8_t exp1[64] = { 0 };
-	uint8_t exp2[64] = { 0 };
-	uint8_t key0[21] = { 0 };
-	uint8_t key1[60] = { 0 };
-	uint8_t msg0[42] = { 0 };
-	uint8_t msg1[84] = { 0 };
-	uint8_t output[64] = { 0 };
+	uint8_t cust0[21] = { 0U };
+	uint8_t cust1[42] = { 0U };
+	uint8_t cust2[45] = { 0U };
+	uint8_t exp0[64] = { 0U };
+	uint8_t exp1[64] = { 0U };
+	uint8_t exp2[64] = { 0U };
+	uint8_t key0[21] = { 0U };
+	uint8_t key1[60] = { 0U };
+	uint8_t msg0[42] = { 0U };
+	uint8_t msg1[84] = { 0U };
+	uint8_t output[64] = { 0U };
 	qsc_keccak_state state;
 	bool status;
 

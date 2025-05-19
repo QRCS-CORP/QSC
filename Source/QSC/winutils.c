@@ -171,7 +171,7 @@ static DWORD winutils_attribute_from_string(const char* attr)
 
 static uint32_t winutils_process_pid_from_name(const char* name) 
 {
-    PROCESSENTRY32 pe32 = { 0 };
+    PROCESSENTRY32 pe32 = { 0U };
     HANDLE snap;
     uint32_t pid;
 
@@ -286,9 +286,9 @@ static const char* winutils_service_state_to_string(DWORD state)
 
 size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char* path) 
 {
-    assert(result != NULL);
-    assert(reslen != 0);
-    assert(path != NULL);
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(path != NULL);
 
     size_t tlen;
     DWORD attr;
@@ -335,8 +335,8 @@ size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char*
 
 bool qsc_winutils_file_set_attribute(const char* path, const char* attr)
 {
-    assert(path != NULL);
-    assert(attr != NULL);
+    QSC_ASSERT(path != NULL);
+    QSC_ASSERT(attr != NULL);
 
     DWORD datt;
     bool res;
@@ -368,10 +368,10 @@ static void winutils_wide_to_utf8(const wchar_t *wsrc, char *dst, size_t dstlen)
 
 size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 {
-    assert(result != NULL);
-    assert(reslen != 0);
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
     
-    char cbuf[QSC_WINTOOLS_NETSTAT_NAME_SIZE] = { 0 };
+    char cbuf[QSC_WINTOOLS_NETSTAT_NAME_SIZE] = { 0U };
     size_t tlen;
     ULONG ufam;
     ULONG ulen;
@@ -452,8 +452,8 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
             {
                 tlen += snprintf(result + tlen, reslen - tlen, "\n");
                 PIP_ADAPTER_UNICAST_ADDRESS puni = cadd->FirstUnicastAddress;
-                char fname[128] = { 0 };
-                char desc [256] = { 0 };
+                char fname[128] = { 0U };
+                char desc [256] = { 0U };
 
                 winutils_wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
                 winutils_wide_to_utf8(cadd->Description , desc , sizeof(desc));
@@ -562,12 +562,12 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
 size_t qsc_winutils_process_list(char* result, size_t reslen) 
 {
-    assert(result != NULL);
-    assert(reslen != 0);
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
     
-    PROCESSENTRY32 pe32 = { 0 };
-    char pname[MAX_PATH] = { 0 };
-    char pdesc[MAX_PATH] = { 0 };
+    PROCESSENTRY32 pe32 = { 0U };
+    char pname[MAX_PATH] = { 0U };
+    char pdesc[MAX_PATH] = { 0U };
     HANDLE hsnap;
     HANDLE hproc;
     size_t slen;
@@ -643,8 +643,8 @@ size_t qsc_winutils_process_list(char* result, size_t reslen)
 bool qsc_winutils_process_token_elevate()
 {
     HANDLE htok;
-    LUID luid = { 0 };
-    TOKEN_PRIVILEGES tpriv = { 0 };
+    LUID luid = { 0U };
+    TOKEN_PRIVILEGES tpriv = { 0U };
     BOOL status;
     bool res;
 
@@ -676,7 +676,7 @@ bool qsc_winutils_process_token_elevate()
 
 bool qsc_winutils_process_terminate(const char* name) 
 {
-    assert(name != NULL);
+    QSC_ASSERT(name != NULL);
     
     HANDLE hproc;
     DWORD dwexit;
@@ -706,12 +706,12 @@ bool qsc_winutils_process_terminate(const char* name)
 
 bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_winutils_registry_value_types vtype)
 {
-    assert(keypath != NULL);
-    assert(value != 0);
+    QSC_ASSERT(keypath != NULL);
+    QSC_ASSERT(value != 0);
     
-    HKEY hkey = { 0 };
-    HKEY rkey = { 0 };
-    char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0 };
+    HKEY hkey = { 0U };
+    HKEY rkey = { 0U };
+    char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
     char* root;
     char* ct;
     LONG lres;
@@ -789,10 +789,10 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
 
 bool qsc_winutils_registry_key_delete(const char* keypath) 
 {
-    assert(keypath != NULL);
+    QSC_ASSERT(keypath != NULL);
     
-    HKEY rkey = { 0 };
-    char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0 };
+    HKEY rkey = { 0U };
+    char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
     char* ct;
     char* root;
     char* subkey;
@@ -816,15 +816,15 @@ bool qsc_winutils_registry_key_delete(const char* keypath)
 
 size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* keypath) 
 {
-    assert(result != NULL);
-    assert(reslen != 0);
-    assert(keypath != NULL);
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(keypath != NULL);
 
-    HKEY hkey = { 0 };
-    HKEY rkey = { 0 };
-    FILETIME lft = { 0 };
-    char kname[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0 };
-    char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0 };
+    HKEY hkey = { 0U };
+    HKEY rkey = { 0U };
+    FILETIME lft = { 0U };
+    char kname[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
+    char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
     char* ct;
     char* root;
     char* subkey;
@@ -857,8 +857,8 @@ size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* k
 
                 if (lres == ERROR_SUCCESS)
                 {
-                    SYSTEMTIME tm = { 0 };
-                    char kbuf[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0 };
+                    SYSTEMTIME tm = { 0U };
+                    char kbuf[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
                     size_t lpos;
 
                     lpos = sprintf_s(kbuf, sizeof(kbuf), "%s\t", kname);
@@ -895,7 +895,7 @@ size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* k
 
 bool qsc_winutils_run_executable(const char* expath) 
 {
-    assert(expath != NULL);
+    QSC_ASSERT(expath != NULL);
     
     HRESULT hres;
     HINSTANCE pret;
@@ -915,15 +915,15 @@ bool qsc_winutils_run_executable(const char* expath)
 
 bool qsc_winutils_run_as_user(const char* user, const char* password, const char* expath)
 {
-    assert(user != NULL);
-    assert(password != 0);
-    assert(expath != NULL);
+    QSC_ASSERT(user != NULL);
+    QSC_ASSERT(password != 0);
+    QSC_ASSERT(expath != NULL);
 
-    STARTUPINFOW si = { 0 };
-    PROCESS_INFORMATION pi = { 0 };
-    wchar_t wuser[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0 };
-    wchar_t wpass[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0 };
-    wchar_t wpath[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0 };
+    STARTUPINFOW si = { 0U };
+    PROCESS_INFORMATION pi = { 0U };
+    wchar_t wuser[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
+    wchar_t wpass[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
+    wchar_t wpath[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
     wchar_t wdomain[sizeof(wchar_t)] = L".";
     bool res;
 
@@ -960,9 +960,9 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
 
 bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states estate) 
 {
-    assert(name != NULL);
+    QSC_ASSERT(name != NULL);
     
-    SERVICE_STATUS_PROCESS ssp = { 0 };
+    SERVICE_STATUS_PROCESS ssp = { 0U };
     SC_HANDLE scm;
     SC_HANDLE sch;
     bool res;
@@ -1015,10 +1015,10 @@ bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states es
 
 size_t qsc_winutils_service_list(char* result, size_t reslen) 
 {
-    assert(result != NULL);
-    assert(reslen != 0);
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
     
-    SC_HANDLE sch = { 0 };
+    SC_HANDLE sch = { 0U };
     ENUM_SERVICE_STATUS_PROCESS* pinfo;
     DWORD dexp;
     DWORD dret;
@@ -1065,7 +1065,7 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
                 {
                     for (DWORD i = 0; i < dret; i++)
                     {
-                        char sbuf[QSC_WINTOOLS_SERVICE_BUFFER_SIZE] = { 0 };
+                        char sbuf[QSC_WINTOOLS_SERVICE_BUFFER_SIZE] = { 0U };
                         size_t elen;
 
                         if (((i + 1U) * sizeof(ENUM_SERVICE_STATUS_PROCESS)) > llen)
@@ -1129,7 +1129,7 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
 
 size_t qsc_winutils_service_list_size()
 {
-    SC_HANDLE sch = { 0 };
+    SC_HANDLE sch = { 0U };
     DWORD dexp;
     DWORD dret;
     DWORD hres;
@@ -1175,8 +1175,8 @@ size_t qsc_winutils_service_list_size()
 
 size_t qsc_winutils_user_list(char* result, size_t reslen) 
 {
-    assert(result != NULL);
-    assert(reslen != 0);
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
     
     USER_INFO_1* pbuf;
     DWORD derd;
@@ -1215,7 +1215,7 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
 
             for (pctr = 0; (pctr < derd) && (tlen < reslen); ++pctr) 
             {
-                char uname[UNLEN + 1] = { 0 };
+                char uname[UNLEN + 1] = { 0U };
                 size_t nlen;
                 size_t olen;
 
@@ -1258,10 +1258,10 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
 
 size_t qsc_winutils_current_user(char* result, size_t reslen)
 {
-    assert(result != NULL);
-    assert(reslen != 0);
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
     
-    char uname[UNLEN + 1] = { 0 };
+    char uname[UNLEN + 1] = { 0U };
     size_t tlen;
     DWORD ulen;
 
@@ -1270,8 +1270,8 @@ size_t qsc_winutils_current_user(char* result, size_t reslen)
     
     if (GetUserNameA(uname, &ulen) == true)
     {
-        USER_INFO_1* uinfo = { 0 };
-        wchar_t wuser[UNLEN + 1] = { 0 };
+        USER_INFO_1* uinfo = { 0U };
+        wchar_t wuser[UNLEN + 1] = { 0U };
         NET_API_STATUS stat;
         size_t olen;
 
@@ -1312,7 +1312,7 @@ void qsc_winutils_test()
     FILE* fp;
     char msg[] = "This is a test file.";
     char path[] = "C:\\Users\\Public\\test.txt";
-    char sbuf[QSC_WINTOOLS_SERVICE_LIST_SIZE] = { 0 };
+    char sbuf[QSC_WINTOOLS_SERVICE_LIST_SIZE] = { 0U };
     size_t rlen;
 
     /* file attributes */

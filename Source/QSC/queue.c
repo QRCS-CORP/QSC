@@ -6,7 +6,7 @@
 
 void qsc_queue_dispose(qsc_queue_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -30,8 +30,8 @@ void qsc_queue_dispose(qsc_queue_state* ctx)
 
 void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	if (ctx->queue != NULL)
 	{
@@ -52,8 +52,8 @@ void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output)
 
 void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width)
 {
-	assert(ctx != NULL);
-	assert(depth != 0 && width != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(depth != 0 && width != 0);
 
 	ctx->queue = (uint8_t**)qsc_memutils_aligned_alloc(QSC_QUEUE_ALIGNMENT, depth * sizeof(uint8_t*));
 
@@ -79,7 +79,7 @@ void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width)
 
 size_t qsc_queue_items(const qsc_queue_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	size_t res;
 
@@ -95,7 +95,7 @@ size_t qsc_queue_items(const qsc_queue_state* ctx)
 
 bool qsc_queue_full(const qsc_queue_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	bool res;
 
@@ -111,7 +111,7 @@ bool qsc_queue_full(const qsc_queue_state* ctx)
 
 bool qsc_queue_empty(const qsc_queue_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	bool res;
 
@@ -127,9 +127,9 @@ bool qsc_queue_empty(const qsc_queue_state* ctx)
 
 uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(otplen != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(otplen != 0);
 
 	uint64_t tag;
 
@@ -161,9 +161,9 @@ uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen)
 
 void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, uint64_t tag)
 {
-	assert(ctx != NULL);
-	assert(input != NULL);
-	assert(inlen != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(inlen != 0);
 
 	if (!qsc_queue_full(ctx) && inlen <= ctx->width)
 	{
@@ -177,9 +177,9 @@ void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, ui
 #if defined(QSC_DEBUG_MODE)
 bool qsc_queue_self_test()
 {
-	uint8_t exp[64][16] = { 0 };
-	uint8_t otp1[64 * 16] = { 0 };
-	uint8_t otp2[64][16] = { 0 };
+	uint8_t exp[64][16] = { 0U };
+	uint8_t otp1[64 * 16] = { 0U };
+	uint8_t otp2[64][16] = { 0U };
 	qsc_queue_state ctx;
 	int32_t i;
 	bool ret;

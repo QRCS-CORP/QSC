@@ -94,9 +94,9 @@ bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 
 size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* directory)
 {
-	assert(result != NULL);
-	assert(reslen != 0);
-	assert(directory != NULL);
+	QSC_ASSERT(result != NULL);
+	QSC_ASSERT(reslen != 0);
+	QSC_ASSERT(directory != NULL);
 
 	size_t lctr;
 
@@ -108,7 +108,7 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 
 		WIN32_FIND_DATA wfd;
 		HANDLE hFind;
-		char spath[MAX_PATH] = { 0 };
+		char spath[MAX_PATH] = { 0U };
 
 		/* create the search path pattern */
 		snprintf(spath, MAX_PATH, "%s\\*", directory);
@@ -327,7 +327,7 @@ bool qsc_folderutils_directory_has_delimiter(const char path[QSC_SYSTEM_MAX_PATH
 #if defined(QSC_DEBUG_MODE)
 void qsc_folderutils_test()
 {
-	char fpath[QSC_SYSTEM_MAX_PATH] = { 0 };
+	char fpath[QSC_SYSTEM_MAX_PATH] = { 0U };
 
 	qsc_consoleutils_print_line("Folder verification test");
 	qsc_consoleutils_print_line("Printing folder function output..");

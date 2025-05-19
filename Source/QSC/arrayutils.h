@@ -78,7 +78,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * // Example 2: Converting a 32-bit unsigned integer to a hexadecimal string.
  * uint32_t number = 305419896; // 0x12345678
- * char hex_output[9] = {0};
+ * char hex_output[9] = {0U};
  * qsc_arrayutils_uint32_to_hex(hex_output, sizeof(hex_output), number);
  * // hex_output now holds the string "12345678".
  * \endcode

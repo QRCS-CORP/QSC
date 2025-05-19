@@ -3,8 +3,8 @@
 
 bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	bool status;
 
@@ -24,7 +24,7 @@ bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 
 void qsc_intutils_be8increment(uint8_t* output, size_t otplen)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t i = otplen;
 
@@ -41,7 +41,7 @@ void qsc_intutils_be8increment(uint8_t* output, size_t otplen)
 
 uint16_t qsc_intutils_be8to16(const uint8_t* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
 	return (((uint16_t)input[1]) | 
 		(uint16_t)((uint16_t)input[0] << 8U));
@@ -49,7 +49,7 @@ uint16_t qsc_intutils_be8to16(const uint8_t* input)
 
 uint32_t qsc_intutils_be8to32(const uint8_t* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
 	return (uint32_t)(input[3]) |
 		(((uint32_t)(input[2])) << 8) |
@@ -59,7 +59,7 @@ uint32_t qsc_intutils_be8to32(const uint8_t* input)
 
 uint64_t qsc_intutils_be8to64(const uint8_t* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
 	return (uint64_t)(input[7]) |
 		(((uint64_t)(input[6])) << 8) |
@@ -73,7 +73,7 @@ uint64_t qsc_intutils_be8to64(const uint8_t* input)
 
 void qsc_intutils_be16to8(uint8_t* output, uint16_t value)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	output[1] = (uint8_t)value & 0xFFU;
 	output[0] = (uint8_t)(value >> 8) & 0xFFU;
@@ -81,7 +81,7 @@ void qsc_intutils_be16to8(uint8_t* output, uint16_t value)
 
 void qsc_intutils_be32to8(uint8_t* output, uint32_t value)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	output[3] = (uint8_t)value & 0xFFU;
 	output[2] = (uint8_t)(value >> 8) & 0xFFU;
@@ -91,7 +91,7 @@ void qsc_intutils_be32to8(uint8_t* output, uint32_t value)
 
 void qsc_intutils_be64to8(uint8_t* output, uint64_t value)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	output[7] = (uint8_t)value & 0xFFU;
 	output[6] = (uint8_t)(value >> 8) & 0xFFU;
@@ -152,8 +152,8 @@ size_t qsc_intutils_bit_reverse(size_t x, uint32_t bits)
 #if defined(QSC_SYSTEM_HAS_AVX)
 void qsc_intutils_bswap32(uint32_t* dest, const uint32_t* source, size_t length)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 
 	__m128i mask = _mm_set_epi8(12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3);
 
@@ -165,8 +165,8 @@ void qsc_intutils_bswap32(uint32_t* dest, const uint32_t* source, size_t length)
 
 void qsc_intutils_bswap64(uint64_t* dest, const uint64_t* source, size_t length)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 
 	__m128i mask = _mm_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7);
 
@@ -398,7 +398,7 @@ double qsc_intutils_calculate_sqrt(double x)
 
 void qsc_intutils_clear8(uint8_t* a, size_t count)
 {
-	assert(a != NULL);
+	QSC_ASSERT(a != NULL);
 	
 	for (size_t i = 0; i < count; ++i)
 	{
@@ -408,7 +408,7 @@ void qsc_intutils_clear8(uint8_t* a, size_t count)
 
 void qsc_intutils_clear16(uint16_t* a, size_t count)
 {
-	assert(a != NULL);
+	QSC_ASSERT(a != NULL);
 
 	for (size_t i = 0; i < count; ++i)
 	{
@@ -418,7 +418,7 @@ void qsc_intutils_clear16(uint16_t* a, size_t count)
 
 void qsc_intutils_clear32(uint32_t* a, size_t count)
 {
-	assert(a != NULL);
+	QSC_ASSERT(a != NULL);
 
 	for (size_t i = 0; i < count; ++i)
 	{
@@ -428,7 +428,7 @@ void qsc_intutils_clear32(uint32_t* a, size_t count)
 
 void qsc_intutils_clear64(uint64_t* a, size_t count)
 {
-	assert(a != NULL);
+	QSC_ASSERT(a != NULL);
 
 	for (size_t i = 0; i < count; ++i)
 	{
@@ -438,8 +438,8 @@ void qsc_intutils_clear64(uint64_t* a, size_t count)
 
 void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint8_t cond)
 {
-	assert(dest != NULL);
-	assert(source != NULL);
+	QSC_ASSERT(dest != NULL);
+	QSC_ASSERT(source != NULL);
 	
 #if defined(__GNUC__) || defined(__clang__)
   // Prevent the compiler from
@@ -489,8 +489,8 @@ bool qsc_intutils_is_gte(size_t x, size_t y)
 
 void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t inplen)
 {
-	assert(input != NULL);
-	assert(hexstr != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(hexstr != NULL);
 
 	const uint8_t ENCODING_TABLE[16] =
 	{
@@ -514,8 +514,8 @@ void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t inplen)
 
 void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t outlen)
 {
-	assert(hexstr != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(hexstr != NULL);
+	QSC_ASSERT(output != NULL);
 
 	uint8_t idx0;
 	uint8_t idx1;
@@ -540,7 +540,7 @@ void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t outlen)
 
 void qsc_intutils_le8increment(uint8_t* output, size_t otplen)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t i;
 
@@ -562,7 +562,7 @@ void qsc_intutils_le8increment(uint8_t* output, size_t otplen)
 #if defined(QSC_SYSTEM_HAS_AVX)
 void qsc_intutils_leincrement_x128(__m128i* counter)
 {
-	assert(counter != NULL);
+	QSC_ASSERT(counter != NULL);
 
 	*counter = _mm_add_epi64(*counter, _mm_set_epi64x(0, 1));
 }
@@ -571,7 +571,7 @@ void qsc_intutils_leincrement_x128(__m128i* counter)
 #if defined(QSC_SYSTEM_HAS_AVX512)
 void qsc_intutils_leincrement_x512(__m512i* counter)
 {
-	assert(counter != NULL);
+	QSC_ASSERT(counter != NULL);
 
 	*counter = _mm512_add_epi64(*counter, _mm512_set_epi64(0, 4, 0, 4, 0, 4, 0, 4));
 }
@@ -579,7 +579,7 @@ void qsc_intutils_leincrement_x512(__m512i* counter)
 
 uint16_t qsc_intutils_le8to16(const uint8_t* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
 	return (((uint16_t)input[0]) |
 		(uint16_t)((uint16_t)input[1] << 8U));
@@ -587,7 +587,7 @@ uint16_t qsc_intutils_le8to16(const uint8_t* input)
 
 uint32_t qsc_intutils_le8to32(const uint8_t* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
 	return ((uint32_t)input[0]) |
 		((uint32_t)input[1] << 8) |
@@ -597,7 +597,7 @@ uint32_t qsc_intutils_le8to32(const uint8_t* input)
 
 uint64_t qsc_intutils_le8to64(const uint8_t* input)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 
 	return ((uint64_t)input[0]) |
 		((uint64_t)input[1] << 8) |
@@ -611,7 +611,7 @@ uint64_t qsc_intutils_le8to64(const uint8_t* input)
 
 void qsc_intutils_le16to8(uint8_t* output, uint16_t value)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	output[0] = (uint8_t)value & 0xFFU;
 	output[1] = (uint8_t)(value >> 8) & 0xFFU;
@@ -619,7 +619,7 @@ void qsc_intutils_le16to8(uint8_t* output, uint16_t value)
 
 void qsc_intutils_le32to8(uint8_t* output, uint32_t value)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	output[0] = (uint8_t)value & 0xFFU;
 	output[1] = (uint8_t)(value >> 8) & 0xFFU;
@@ -629,7 +629,7 @@ void qsc_intutils_le32to8(uint8_t* output, uint32_t value)
 
 void qsc_intutils_le64to8(uint8_t* output, uint64_t value)
 {
-	assert(output != NULL);
+	QSC_ASSERT(output != NULL);
 
 	output[0] = (uint8_t)value & 0xFFU;
 	output[1] = (uint8_t)(value >> 8) & 0xFFU;
@@ -662,8 +662,8 @@ uint32_t qsc_intutils_popcount32(uint32_t v)
 #if defined(QSC_SYSTEM_HAS_AVX)
 void qsc_intutils_reverse_bytes_x128(const __m128i* input, __m128i* output)
 {
-	assert(input != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(output != NULL);
 
 	__m128i mask = _mm_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 
@@ -674,8 +674,8 @@ void qsc_intutils_reverse_bytes_x128(const __m128i* input, __m128i* output)
 #if defined(QSC_SYSTEM_HAS_AVX512)
 void qsc_intutils_reverse_bytes_x512(const __m512i* input, __m512i* output)
 {
-	assert(input != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(output != NULL);
 
 	__m512i mask = _mm512_set_epi8(
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -709,8 +709,8 @@ uint64_t qsc_intutils_rotr64(uint64_t value, size_t shift)
 
 int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	uint8_t d;
 

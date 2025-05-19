@@ -1171,17 +1171,17 @@ static uint32_t kyber_rej_uniform(int16_t* r, uint32_t len, const uint8_t* buf, 
 
 static void kyber_gen_matrix_avx2(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_SYMBYTES], int32_t transposed)
 {
-    __m256i ksa[QSC_KECCAK_STATE_SIZE] = { 0 };
+    __m256i ksa[QSC_KECCAK_STATE_SIZE] = { 0U };
 #if (QSC_KYBER_K == 5)
-    QSC_ALIGN(32) uint8_t buf[5][KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2] = { 0 };
-    QSC_ALIGN(32) uint8_t extseed[5][QSC_KYBER_SYMBYTES + 2] = { 0 };
+    QSC_ALIGN(32) uint8_t buf[5][KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2] = { 0U };
+    QSC_ALIGN(32) uint8_t extseed[5][QSC_KYBER_SYMBYTES + 2] = { 0U };
     qsc_keccak_state kctx;
 #else
-    QSC_ALIGN(32) uint8_t buf[4][KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2] = { 0 };
-    QSC_ALIGN(32) uint8_t extseed[4][QSC_KYBER_SYMBYTES + 2] = { 0 };
+    QSC_ALIGN(32) uint8_t buf[4][KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2] = { 0U };
+    QSC_ALIGN(32) uint8_t extseed[4][QSC_KYBER_SYMBYTES + 2] = { 0U };
 #endif
 
-    uint32_t ctr[QSC_KYBER_K] = { 0 };
+    uint32_t ctr[QSC_KYBER_K] = { 0U };
     size_t i;
     size_t j;
     bool bchk;
@@ -1483,7 +1483,7 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
     uint8_t buf[2 * QSC_KYBER_SYMBYTES];
     uint8_t cmp[QSC_KYBER_SYMBYTES + QSC_KYBER_CIPHERTEXT_BYTES];
     uint8_t kr[2 * QSC_KYBER_SYMBYTES];
-    qsc_keccak_state kctx = { 0 };
+    qsc_keccak_state kctx = { 0U };
     const uint8_t *pk = sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES;
     int32_t fail;
 

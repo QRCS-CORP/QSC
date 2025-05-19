@@ -46,7 +46,7 @@ static void csx_increment(qsc_csx_state* ctx)
 {
 	++ctx->state[12];
 
-	if (ctx->state[12] == 0)
+	if (ctx->state[12] == 0U)
 	{
 		++ctx->state[13];
 	}
@@ -54,7 +54,7 @@ static void csx_increment(qsc_csx_state* ctx)
 
 static void csx_permute_p1024c(const qsc_csx_state* ctx, uint8_t* output)
 {
-	uint64_t X0 = ctx->state[0];
+	uint64_t X0 = ctx->state[0U];
 	uint64_t X1 = ctx->state[1];
 	uint64_t X2 = ctx->state[2];
 	uint64_t X3 = ctx->state[3];
@@ -82,7 +82,7 @@ static void csx_permute_p1024c(const qsc_csx_state* ctx, uint8_t* output)
 	31,44,47,46
 	12,47,44,30 */
 
-	while (ctr != 0)
+	while (ctr != 0U)
 	{
 		/* round n */
 		X0 += X4;
@@ -153,7 +153,7 @@ static void csx_permute_p1024c(const qsc_csx_state* ctx, uint8_t* output)
 		ctr -= 2;
 	}
 
-	qsc_intutils_le64to8(output, X0 + ctx->state[0]);
+	qsc_intutils_le64to8(output, X0 + ctx->state[0U]);
 	qsc_intutils_le64to8(output + 8, X1 + ctx->state[1]);
 	qsc_intutils_le64to8(output + 16, X2 + ctx->state[2]);
 	qsc_intutils_le64to8(output + 24, X3 + ctx->state[3]);
@@ -188,7 +188,7 @@ static __m512i csx_load512(const uint8_t* v)
 {
 	const uint64_t* v64 = (uint64_t*)v;
 
-	return _mm512_set_epi64(v64[0], v64[16], v64[32], v64[48], v64[64], v64[80], v64[96], v64[112]);
+	return _mm512_set_epi64(v64[0U], v64[16], v64[32], v64[48], v64[64], v64[80], v64[96], v64[112]);
 }
 
 static void csx_store512(uint8_t* output, const __m512i x)
@@ -204,7 +204,7 @@ static void csx_store512(uint8_t* output, const __m512i x)
 	qsc_intutils_le64to8((output + 512), tmp[3]);
 	qsc_intutils_le64to8((output + 640), tmp[2]);
 	qsc_intutils_le64to8((output + 768), tmp[1]);
-	qsc_intutils_le64to8((output + 896), tmp[0]);
+	qsc_intutils_le64to8((output + 896), tmp[0U]);
 }
 
 static void leincrement_512(__m512i* v)
@@ -234,7 +234,7 @@ static void csx_permute_p8x1024h(csx_avx512_state* ctx)
 	__m512i x15;
 	size_t ctr;
 
-	x0 = ctx->state[0];
+	x0 = ctx->state[0U];
 	x1 = ctx->state[1];
 	x2 = ctx->state[2];
 	x3 = ctx->state[3];
@@ -262,7 +262,7 @@ static void csx_permute_p8x1024h(csx_avx512_state* ctx)
 	31,44,47,46
 	12,47,44,30 */
 
-	while (ctr != 0)
+	while (ctr != 0U)
 	{
 		/* round n */
 		x0 = _mm512_add_epi64(x0, x4);
@@ -333,7 +333,7 @@ static void csx_permute_p8x1024h(csx_avx512_state* ctx)
 		ctr -= 2;
 	}
 
-	ctx->outw[0] = _mm512_add_epi64(x0, ctx->state[0]);
+	ctx->outw[0U] = _mm512_add_epi64(x0, ctx->state[0U]);
 	ctx->outw[1] = _mm512_add_epi64(x1, ctx->state[1]);
 	ctx->outw[2] = _mm512_add_epi64(x2, ctx->state[2]);
 	ctx->outw[3] = _mm512_add_epi64(x3, ctx->state[3]);
@@ -369,7 +369,7 @@ static __m256i csx_load256(const uint8_t* v)
 {
 	const uint64_t* v64 = (const uint64_t*)v;
 
-	return _mm256_set_epi64x(v64[0], v64[16], v64[32], v64[48]);
+	return _mm256_set_epi64x(v64[0U], v64[16], v64[32], v64[48]);
 }
 
 static void csx_store256(uint8_t* output, const __m256i x)
@@ -381,7 +381,7 @@ static void csx_store256(uint8_t* output, const __m256i x)
 	qsc_intutils_le64to8(output, tmp[3]);
 	qsc_intutils_le64to8((output + 128), tmp[2]);
 	qsc_intutils_le64to8((output + 256), tmp[1]);
-	qsc_intutils_le64to8((output + 384), tmp[0]);
+	qsc_intutils_le64to8((output + 384), tmp[0U]);
 }
 
 static void leincrement_256(__m256i* v)
@@ -411,7 +411,7 @@ static void csx_permute_p4x1024h(csx_avx256_state* ctx)
 	__m256i x15;
 	size_t ctr;
 
-	x0 = ctx->state[0];
+	x0 = ctx->state[0U];
 	x1 = ctx->state[1];
 	x2 = ctx->state[2];
 	x3 = ctx->state[3];
@@ -439,7 +439,7 @@ static void csx_permute_p4x1024h(csx_avx256_state* ctx)
 	31,44,47,46
 	12,47,44,30 */
 
-	while (ctr != 0)
+	while (ctr != 0U)
 	{
 		/* round n */
 		x0 = _mm256_add_epi64(x0, x4);
@@ -510,7 +510,7 @@ static void csx_permute_p4x1024h(csx_avx256_state* ctx)
 		ctr -= 2;
 	}
 
-	ctx->outw[0] = _mm256_add_epi64(x0, ctx->state[0]);
+	ctx->outw[0U] = _mm256_add_epi64(x0, ctx->state[0U]);
 	ctx->outw[1] = _mm256_add_epi64(x1, ctx->state[1]);
 	ctx->outw[2] = _mm256_add_epi64(x2, ctx->state[2]);
 	ctx->outw[3] = _mm256_add_epi64(x3, ctx->state[3]);
@@ -545,7 +545,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 {
 	size_t oft;
 
-	oft = 0;
+	oft = 0U;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
@@ -555,21 +555,21 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 		__m512i tmpin;
 		size_t i;
 
-		for (i = 0; i < 16; ++i)
+		for (i = 0U; i < 16; ++i)
 		{
 			uint64_t x = ctx->state[i];
 			ctxw.state[i] = _mm512_set1_epi64(x);
 		}
 
 		/* initialize the nonce */
-		ctxw.state[12] = _mm512_add_epi64(ctxw.state[12], _mm512_set_epi64(0, 1, 2, 3, 4, 5, 6, 7));
+		ctxw.state[12] = _mm512_add_epi64(ctxw.state[12], _mm512_set_epi64(0U, 1, 2, 3, 4, 5, 6, 7));
 
 		/* process 8 blocks in parallel (uses avx512 if available) */
 		while (length >= CSX_AVX512_BLOCK)
 		{
 			csx_permute_p8x1024h(&ctxw);
 
-			for (i = 0; i < 16; ++i)
+			for (i = 0U; i < 16; ++i)
 			{
 				tmpin = csx_load512((input + oft + (i * 8)));
 				ctxw.outw[i] = _mm512_xor_si512(ctxw.outw[i], tmpin);
@@ -597,21 +597,21 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 		__m256i tmpin;
 		size_t i;
 
-		for (i = 0; i < 16; ++i)
+		for (i = 0U; i < 16; ++i)
 		{
 			uint64_t x = ctx->state[i];
 			ctxw.state[i] = _mm256_set1_epi64x(x);
 		}
 
 		/* initialize the nonce */
-		ctxw.state[12] = _mm256_add_epi64(ctxw.state[12], _mm256_set_epi64x(0, 1, 2, 3));
+		ctxw.state[12] = _mm256_add_epi64(ctxw.state[12], _mm256_set_epi64x(0U, 1, 2, 3));
 
 		/* process 8 blocks in parallel (uses avx512 if available) */
 		while (length >= CSX_AVX2_BLOCK)
 		{
 			csx_permute_p4x1024h(&ctxw);
 
-			for (i = 0; i < 16; ++i)
+			for (i = 0U; i < 16; ++i)
 			{
 				tmpin = csx_load256(input + oft + (i * 8)); // i * 32?
 				ctxw.outw[i] = _mm256_xor_si256(ctxw.outw[i], tmpin);
@@ -645,9 +645,9 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 	}
 
 	/* generate unaligned key-stream */
-	if (length != 0)
+	if (length != 0U)
 	{
-		uint8_t tmp[QSC_CSX_BLOCK_SIZE] = { 0 };
+		uint8_t tmp[QSC_CSX_BLOCK_SIZE] = { 0U };
 
 		csx_permute_p1024c(ctx, tmp);
 		csx_increment(ctx);
@@ -664,7 +664,7 @@ static void csx_load_key(qsc_csx_state* ctx, const uint8_t* key, const uint8_t* 
 	qsc_memutils_copy(((uint8_t*)ctx->state + 96), nonce, 16);
 	qsc_memutils_copy(((uint8_t*)ctx->state + 112), (code + 32), 16);
 #else
-	ctx->state[0] = qsc_intutils_le8to64(key);
+	ctx->state[0U] = qsc_intutils_le8to64(key);
 	ctx->state[1] = qsc_intutils_le8to64((key + 8));
 	ctx->state[2] = qsc_intutils_le8to64((key + 16));
 	ctx->state[3] = qsc_intutils_le8to64((key + 24));
@@ -686,7 +686,7 @@ static void csx_load_key(qsc_csx_state* ctx, const uint8_t* key, const uint8_t* 
 #if	defined(QSC_CSX_AUTHENTICATED)
 static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 {
-	uint8_t ctr[sizeof(uint64_t)] = { 0 };
+	uint8_t ctr[sizeof(uint64_t)] = { 0U };
 
 	qsc_intutils_le64to8(ctr, ctx->counter);
 	csx_mac_update(ctx, ctr, sizeof(ctr));
@@ -710,7 +710,7 @@ static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 
 void qsc_csx_dispose(qsc_csx_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	/* clear state */
 	if (ctx != NULL)
@@ -724,30 +724,30 @@ void qsc_csx_dispose(qsc_csx_state* ctx)
 #endif
 
 		qsc_intutils_clear64(ctx->state, QSC_CSX_STATE_SIZE);
-		ctx->counter = 0;
+		ctx->counter = 0U;
 		ctx->encrypt = false;
 	}
 }
 
 void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, bool encryption)
 {
-	assert(keyparams->nonce != NULL);
-	assert(keyparams->key != NULL);
-	assert(keyparams->keylen == QSC_CSX_KEY_SIZE);
+	QSC_ASSERT(keyparams->nonce != NULL);
+	QSC_ASSERT(keyparams->key != NULL);
+	QSC_ASSERT(keyparams->keylen == QSC_CSX_KEY_SIZE);
 
-	ctx->counter = 0;
+	ctx->counter = 0U;
 	ctx->encrypt = encryption;
 
 #if defined(QSC_CSX_AUTHENTICATED)
 
 	qsc_keccak_state kstate;
-	uint8_t buf[QSC_KECCAK_512_RATE] = { 0 };
-	uint8_t cpk[QSC_CSX_KEY_SIZE] = { 0 };
-	uint8_t mck[QSC_CSX_KEY_SIZE] = { 0 };
-	uint8_t nme[CSX_NAME_SIZE] = { 0 };
+	uint8_t buf[QSC_KECCAK_512_RATE] = { 0U };
+	uint8_t cpk[QSC_CSX_KEY_SIZE] = { 0U };
+	uint8_t mck[QSC_CSX_KEY_SIZE] = { 0U };
+	uint8_t nme[CSX_NAME_SIZE] = { 0U };
 
 	/* load the information string */
-	if (keyparams->infolen == 0)
+	if (keyparams->infolen == 0U)
 	{
 		qsc_memutils_copy(nme, csx_name, CSX_NAME_SIZE);
 	}
@@ -758,7 +758,7 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 	}
 
 	/* initialize the cSHAKE generator state */
-	qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, nme, sizeof(nme), NULL, 0);
+	qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, nme, sizeof(nme), NULL, 0U);
 
 	/* extract the cipher key */
 	qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, buf, 1);
@@ -774,20 +774,20 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 
 #	if defined(QSC_CSX_AUTH_KMACR12)
 	qsc_keccak_initialize_state(&ctx->kstate);
-	qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0, csx_kmacr12_name, CSX_NAME_SIZE, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
+	qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0U, csx_kmacr12_name, CSX_NAME_SIZE, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #	elif defined(QSC_CSX_AUTH_KMAC24)
-	qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0);
+	qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0U);
 #	else
-	qsc_qmac_keyparams pk = { mck, QSC_CSX_KEY_SIZE, keyparams->nonce, QSC_CSX_NONCE_SIZE, NULL, 0, qsc_qmac_mode_512 };
+	qsc_qmac_keyparams pk = { mck, QSC_CSX_KEY_SIZE, keyparams->nonce, QSC_CSX_NONCE_SIZE, NULL, 0U, qsc_qmac_mode_512 };
 	qsc_qmac_initialize(&ctx->kstate, &pk);
 #	endif
 
 #else
 
-	uint8_t inf[QSC_CSX_INFO_SIZE] = { 0 };
+	uint8_t inf[QSC_CSX_INFO_SIZE] = { 0U };
 
 	/* load the information string */
-	if (keyparams->infolen == 0)
+	if (keyparams->infolen == 0U)
 	{
 		qsc_memutils_copy(inf, csx_info, QSC_CSX_INFO_SIZE);
 }
@@ -806,13 +806,13 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t length)
 {
 #if defined(QSC_CSX_AUTHENTICATED)
-	assert(ctx != NULL);
-	assert(data != NULL);
-	assert(length != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(data != NULL);
+	QSC_ASSERT(length != 0U);
 
-	if (data != NULL && length != 0)
+	if (data != NULL && length != 0U)
 	{
-		uint8_t code[sizeof(uint32_t)] = { 0 };
+		uint8_t code[sizeof(uint32_t)] = { 0U };
 
 		/* add the ad data to the hash */
 		csx_mac_update(ctx, data, length);
@@ -825,7 +825,7 @@ void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t leng
 
 void qsc_csx_store_nonce(const qsc_csx_state* ctx, uint8_t nonce[QSC_CSX_NONCE_SIZE])
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	qsc_intutils_le64to8(nonce, ctx->state[12]);
 	qsc_intutils_le64to8(nonce + sizeof(uint64_t), ctx->state[13]);
@@ -833,15 +833,15 @@ void qsc_csx_store_nonce(const qsc_csx_state* ctx, uint8_t nonce[QSC_CSX_NONCE_S
 
 bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	bool res;
 
 #if defined(QSC_CSX_AUTHENTICATED)
 
-	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
+	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0U };
 	res = false;
 
 	/* store the nonce */
@@ -868,7 +868,7 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 	}
 	else
 	{
-		uint8_t code[QSC_CSX_MAC_SIZE] = { 0 };
+		uint8_t code[QSC_CSX_MAC_SIZE] = { 0U };
 
 		/* update the mac with the cipher-text */
 		csx_mac_update(ctx, input, length);
@@ -877,7 +877,7 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 		csx_finalize(ctx, code);
 
 		/* compare the mac code with the one embedded in the cipher-text, bypassing the transform if the mac check fails */
-		if (qsc_intutils_verify(code, input + length, QSC_CSX_MAC_SIZE) == 0)
+		if (qsc_intutils_verify(code, input + length, QSC_CSX_MAC_SIZE) == 0U)
 		{
 			/* generate the key-stream and decrypt the array */
 			csx_transform(ctx, output, input, length);
@@ -897,15 +897,15 @@ bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input
 
 bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	bool res;
 
 #if defined(QSC_CSX_AUTHENTICATED)
 
-	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
+	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0U };
 	res = false;
 
 	/* store the nonce */
@@ -936,7 +936,7 @@ bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8
 	}
 	else
 	{
-		uint8_t code[QSC_CSX_MAC_SIZE] = { 0 };
+		uint8_t code[QSC_CSX_MAC_SIZE] = { 0U };
 
 		/* update the mac with the cipher-text */
 		csx_mac_update(ctx, input, length);
@@ -947,7 +947,7 @@ bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8
 			csx_finalize(ctx, code);
 
 			/* compare the mac code with the one embedded in the cipher-text, bypassing the transform if the mac check fails */
-			if (qsc_intutils_verify(code, input + length, QSC_CSX_MAC_SIZE) == 0)
+			if (qsc_intutils_verify(code, input + length, QSC_CSX_MAC_SIZE) == 0U)
 			{
 				/* generate the key-stream and decrypt the array */
 				csx_transform(ctx, output, input, length);

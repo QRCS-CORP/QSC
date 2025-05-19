@@ -74,7 +74,7 @@ static const char* fileutils_file_get_attribute_string(DWORD attr)
 
 static bool file_has_access(const char* fpath, qsc_fileutils_access_rights level)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
 	int32_t err;
 
@@ -94,9 +94,9 @@ static bool file_has_access(const char* fpath, qsc_fileutils_access_rights level
 
 bool qsc_fileutils_append_to_file(const char* fpath, const char* stream, size_t length)
 {
-	assert(fpath != NULL);
-	assert(stream != NULL);
-	assert(length != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(stream != NULL);
+	QSC_ASSERT(length != 0);
 
 	FILE* fp;
 	errno_t err;
@@ -125,7 +125,7 @@ bool qsc_fileutils_append_to_file(const char* fpath, const char* stream, size_t 
 
 void qsc_fileutils_close(FILE* fp)
 {
-	assert(fp != NULL);
+	QSC_ASSERT(fp != NULL);
 
 	if (fp != NULL)
 	{
@@ -136,9 +136,9 @@ void qsc_fileutils_close(FILE* fp)
 
 size_t qsc_fileutils_copy_file_to_object(const char* fpath, void* obj, size_t length)
 {
-	assert(fpath != NULL);
-	assert(obj != NULL);
-	assert(length != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(obj != NULL);
+	QSC_ASSERT(length != 0);
 
 	FILE* fp;
 	errno_t err;
@@ -167,9 +167,9 @@ size_t qsc_fileutils_copy_file_to_object(const char* fpath, void* obj, size_t le
 
 size_t qsc_fileutils_copy_file_to_stream(const char* fpath, char* stream, size_t length)
 {
-	assert(fpath != NULL);
-	assert(stream != NULL);
-	assert(length != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(stream != NULL);
+	QSC_ASSERT(length != 0);
 
 	FILE* fp;
 	errno_t err;
@@ -198,9 +198,9 @@ size_t qsc_fileutils_copy_file_to_stream(const char* fpath, char* stream, size_t
 
 bool qsc_fileutils_copy_object_to_file(const char* fpath, const void* obj, size_t length)
 {
-	assert(fpath != NULL);
-	assert(obj != NULL);
-	assert(length != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(obj != NULL);
+	QSC_ASSERT(length != 0);
 
 	FILE* fp;
 	errno_t err;
@@ -229,9 +229,9 @@ bool qsc_fileutils_copy_object_to_file(const char* fpath, const void* obj, size_
 
 bool qsc_fileutils_copy_stream_to_file(const char* fpath, const char* stream, size_t length)
 {
-	assert(fpath != NULL);
-	assert(stream != NULL);
-	assert(length != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(stream != NULL);
+	QSC_ASSERT(length != 0);
 
 	FILE* fp;
 	errno_t err;
@@ -260,7 +260,7 @@ bool qsc_fileutils_copy_stream_to_file(const char* fpath, const char* stream, si
 
 bool qsc_fileutils_create(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
 	FILE* fp;
 	bool res;
@@ -289,7 +289,7 @@ bool qsc_fileutils_create(const char* fpath)
 
 bool qsc_fileutils_delete(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
 	bool res;
 
@@ -305,7 +305,7 @@ bool qsc_fileutils_delete(const char* fpath)
 
 bool qsc_fileutils_erase(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
 	size_t flen;
 	bool res;
@@ -347,7 +347,7 @@ bool qsc_fileutils_erase(const char* fpath)
 
 bool qsc_fileutils_exists(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
 	FILE* fp;
 	bool res;
@@ -372,8 +372,8 @@ bool qsc_fileutils_exists(const char* fpath)
 
 bool qsc_fileutils_file_copy(const char* inpath, const char* outpath)
 {
-	assert(inpath != NULL);
-	assert(outpath != NULL);
+	QSC_ASSERT(inpath != NULL);
+	QSC_ASSERT(outpath != NULL);
 
 	char* pfs;
 	size_t len;
@@ -410,7 +410,7 @@ bool qsc_fileutils_file_copy(const char* inpath, const char* outpath)
 
 bool qsc_fileutils_get_access(const char* fpath, qsc_fileutils_access_rights level)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 	
 	bool res;
 
@@ -429,9 +429,9 @@ bool qsc_fileutils_get_access(const char* fpath, qsc_fileutils_access_rights lev
 
 size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* fpath)
 {
-	assert(directory != NULL);
-	assert(dirlen != 0);
-	assert(fpath != NULL);
+	QSC_ASSERT(directory != NULL);
+	QSC_ASSERT(dirlen != 0);
+	QSC_ASSERT(fpath != NULL);
 
 	const char* pname;
 	size_t pos;
@@ -459,9 +459,9 @@ size_t qsc_fileutils_get_directory(char* directory, size_t dirlen, const char* f
 
 size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* fpath)
 {
-	assert(extension != NULL);
-	assert(extlen != 0);
-	assert(fpath != NULL);
+	QSC_ASSERT(extension != NULL);
+	QSC_ASSERT(extlen != 0);
+	QSC_ASSERT(fpath != NULL);
 
 	const char* pname;
 	size_t len;
@@ -492,9 +492,9 @@ size_t qsc_fileutils_get_extension(char* extension, size_t extlen, const char* f
 
 size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* fpath)
 {
-	assert(name != NULL);
-	assert(namelen != 0);
-	assert(fpath != NULL);
+	QSC_ASSERT(name != NULL);
+	QSC_ASSERT(namelen != 0);
+	QSC_ASSERT(fpath != NULL);
 
 	const char* pname;
 	size_t len;
@@ -531,9 +531,9 @@ size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* fpath)
 
 int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 {
-	assert(line != NULL);
-	assert(length != 0);
-	assert(fp != NULL);
+	QSC_ASSERT(line != NULL);
+	QSC_ASSERT(length != 0);
+	QSC_ASSERT(fp != NULL);
 
 	char* tmpl;
 
@@ -546,7 +546,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 	else
 	{
 		/* use a chunk array of 128 bytes as parameter for fgets */
-		char chunk[128] = { 0 };
+		char chunk[128] = { 0U };
 
 		/* allocate a block of memory for *line if it is NULL or smaller than the chunk array */
 		if (*line == NULL || *length < sizeof(chunk))
@@ -612,7 +612,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 
 size_t qsc_fileutils_get_size(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 	
 	FILE* fp;
 	errno_t err;
@@ -647,9 +647,9 @@ size_t qsc_fileutils_get_size(const char* fpath)
 
 bool qsc_fileutils_get_working_directory(char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
-	char buf[FILENAME_MAX] = { 0 };
+	char buf[FILENAME_MAX] = { 0U };
 	const char* sdir;
 	size_t len;
 	bool res;
@@ -686,9 +686,9 @@ bool qsc_fileutils_get_working_directory(char* fpath)
 
 size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directory) 
 {
-	assert(result != NULL);
-	assert(reslen != 0);
-	assert(directory != NULL);
+	QSC_ASSERT(result != NULL);
+	QSC_ASSERT(reslen != 0);
+	QSC_ASSERT(directory != NULL);
 
 	size_t sctr;
 	size_t slen;
@@ -699,8 +699,8 @@ size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directo
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-		char sdir[QSC_FILEUTILS_MAX_FILENAME] = { 0 };
-		WIN32_FIND_DATA wfd = { 0 };
+		char sdir[QSC_FILEUTILS_MAX_FILENAME] = { 0U };
+		WIN32_FIND_DATA wfd = { 0U };
 		HANDLE hfind;
 		size_t dlen;
 
@@ -733,8 +733,8 @@ size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directo
 						if (qsc_stringutils_strings_equal(wfd.cFileName, ".") == false &&
 							qsc_stringutils_strings_equal(wfd.cFileName, "..") == false)
 						{
-							SYSTEMTIME atime = { 0 };
-							SYSTEMTIME ctime = { 0 };
+							SYSTEMTIME atime = { 0U };
+							SYSTEMTIME ctime = { 0U };
 							const char* pattr;
 							size_t lpos;
 
@@ -834,7 +834,7 @@ size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directo
 
 FILE* qsc_fileutils_open(const char* fpath, qsc_fileutils_mode mode, bool binary)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 	
 	FILE* fp;
 
@@ -893,9 +893,9 @@ return fp;
 
 size_t qsc_fileutils_read(char* output, size_t otplen, size_t position, FILE* fp)
 {
-	assert(output != NULL);
-	assert(otplen != 0);
-	assert(fp != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(otplen != 0);
+	QSC_ASSERT(fp != NULL);
 
 	size_t res;
 
@@ -914,9 +914,9 @@ size_t qsc_fileutils_read(char* output, size_t otplen, size_t position, FILE* fp
 
 int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, size_t linenum)
 {
-	assert(fpath != NULL);
-	assert(buffer != NULL);
-	assert(buflen != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(buffer != NULL);
+	QSC_ASSERT(buflen != 0);
 
 	int64_t pln;
 
@@ -993,9 +993,9 @@ int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, 
 
 size_t qsc_fileutils_safe_read(const char* fpath, size_t position, char* output, size_t length)
 {
-	assert(fpath != NULL);
-	assert(output != NULL);
-	assert(length != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t res;
 
@@ -1023,9 +1023,9 @@ size_t qsc_fileutils_safe_read(const char* fpath, size_t position, char* output,
 
 size_t qsc_fileutils_safe_write(const char* fpath, size_t position, const char* input, size_t length)
 {
-	assert(fpath != NULL);
-	assert(input != NULL);
-	assert(length != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t res;
 
@@ -1054,7 +1054,7 @@ size_t qsc_fileutils_safe_write(const char* fpath, size_t position, const char* 
 
 bool qsc_fileutils_seekto(FILE* fp, size_t position)
 {
-	assert(fp != NULL);
+	QSC_ASSERT(fp != NULL);
 	
 	int32_t res;
 
@@ -1074,7 +1074,7 @@ bool qsc_fileutils_seekto(FILE* fp, size_t position)
 
 bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 {
-	assert(fp != NULL);
+	QSC_ASSERT(fp != NULL);
 
 	size_t flen;
 	bool res;
@@ -1112,7 +1112,7 @@ bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 
 bool qsc_fileutils_valid_path(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
 	bool res;
 
@@ -1120,9 +1120,9 @@ bool qsc_fileutils_valid_path(const char* fpath)
 
 	if (fpath != NULL)
 	{
-		char dir[QSC_FILEUTILS_MAX_PATH] = { 0 };
-		char ext[QSC_FILEUTILS_MAX_EXTENSION] = { 0 };
-		char name[QSC_FILEUTILS_MAX_FILENAME] = { 0 };
+		char dir[QSC_FILEUTILS_MAX_PATH] = { 0U };
+		char ext[QSC_FILEUTILS_MAX_EXTENSION] = { 0U };
+		char name[QSC_FILEUTILS_MAX_FILENAME] = { 0U };
 
 		if (qsc_fileutils_get_directory(dir, sizeof(dir), fpath) > 0)
 		{
@@ -1141,9 +1141,9 @@ bool qsc_fileutils_valid_path(const char* fpath)
 
 size_t qsc_fileutils_write(const char* input, size_t inplen, size_t position, FILE* fp)
 {
-	assert(input != NULL);
-	assert(inplen != 0);
-	assert(fp != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(inplen != 0);
+	QSC_ASSERT(fp != NULL);
 
 	size_t res;
 
@@ -1163,9 +1163,9 @@ size_t qsc_fileutils_write(const char* input, size_t inplen, size_t position, FI
 
 bool qsc_fileutils_write_line(const char* fpath, const char* input, size_t inplen)
 {
-	assert(fpath != NULL);
-	assert(input != NULL);
-	assert(inplen != 0);
+	QSC_ASSERT(fpath != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(inplen != 0);
 
 	bool res;
 
@@ -1202,7 +1202,7 @@ bool qsc_fileutils_write_line(const char* fpath, const char* input, size_t inple
 
 void qsc_fileutils_zeroise(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
 	if (fpath != NULL)
 	{
@@ -1226,10 +1226,10 @@ void qsc_fileutils_zeroise(const char* fpath)
 #if defined(QSC_DEBUG_MODE)
 void qsc_fileutils_test(const char* fpath)
 {
-	assert(fpath != NULL);
+	QSC_ASSERT(fpath != NULL);
 
-	uint8_t rnd[1024] = { 0 };
-	char smp[1024] = { 0 };
+	uint8_t rnd[1024] = { 0U };
+	char smp[1024] = { 0U };
 	size_t len;
 
 	qsc_consoleutils_print_line("File verification test");

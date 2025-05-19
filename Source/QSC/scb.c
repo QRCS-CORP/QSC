@@ -33,7 +33,7 @@ static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 
 static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, qsc_keccak_state* hstate) 
 {
-	qsc_keccak_state kstate = { 0 };
+	qsc_keccak_state kstate = { 0U };
 	size_t* indice;
 	size_t lcnt;
 	size_t oft;
@@ -48,8 +48,8 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 
 	if (indice != NULL)
 	{
-		uint8_t kblk[QSC_KECCAK_256_RATE] = { 0 };
-		uint8_t bnum[sizeof(uint64_t)] = { 0 };
+		uint8_t kblk[QSC_KECCAK_256_RATE] = { 0U };
+		uint8_t bnum[sizeof(uint64_t)] = { 0U };
 		uint64_t lidx;
 		uint64_t litr;
 
@@ -92,7 +92,7 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 
 void qsc_scb_dispose(qsc_scb_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -106,20 +106,20 @@ void qsc_scb_dispose(qsc_scb_state* ctx)
 
 void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, size_t cpucost, size_t memcost)
 {
-	assert(ctx != NULL);
-	assert(seed != NULL);
-	assert(cpucost <= QSC_SCB_CPU_MAXIMUM);
-	assert(cpucost >= QSC_SCB_CPU_MINIMUM);
-	assert(memcost <= QSC_SCB_MEMORY_MAXIMUM);
-	assert(memcost >= QSC_SCB_MEMORY_MINIMUM);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(seed != NULL);
+	QSC_ASSERT(cpucost <= QSC_SCB_CPU_MAXIMUM);
+	QSC_ASSERT(cpucost >= QSC_SCB_CPU_MINIMUM);
+	QSC_ASSERT(memcost <= QSC_SCB_MEMORY_MAXIMUM);
+	QSC_ASSERT(memcost >= QSC_SCB_MEMORY_MINIMUM);
 
 	if (ctx != NULL && seed != NULL && 
 		(seedlen == QSC_SCB_256_SEED_SIZE || seedlen == QSC_SCB_512_SEED_SIZE) &&
 		cpucost <= QSC_SCB_CPU_MAXIMUM && cpucost >= QSC_SCB_CPU_MINIMUM &&
 		memcost <= QSC_SCB_MEMORY_MAXIMUM && memcost >= QSC_SCB_MEMORY_MINIMUM)
 	{
-		qsc_keccak_state kstate = { 0 };
-		uint8_t kbuf[QSC_KECCAK_256_RATE] = { 0 };
+		qsc_keccak_state kstate = { 0U };
+		uint8_t kbuf[QSC_KECCAK_256_RATE] = { 0U };
 
 		if (seedlen >= QSC_SCB_512_SEED_SIZE)
 		{
@@ -148,13 +148,13 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 
 void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
-	assert(otplen != 0);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(otplen != 0);
 
 	if (ctx != NULL && output != NULL && otplen != 0)
 	{
-		qsc_keccak_state hstate = { 0 };
+		qsc_keccak_state hstate = { 0U };
 		uint8_t* cbuf;
 		size_t clen;
 
@@ -187,7 +187,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 
 			while (pos < otplen)
 			{
-				uint8_t kblk[QSC_KECCAK_256_RATE] = { 0 };
+				uint8_t kblk[QSC_KECCAK_256_RATE] = { 0U };
 				const size_t plen = (otplen - pos > ctx->rate) ? ctx->rate : otplen - pos;
 
 				/* copy SHAKE blocks to the output */
@@ -203,10 +203,10 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 
 void qsc_scb_update(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen)
 {
-	assert(ctx != NULL);
-	assert(seed != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(seed != NULL);
 
-	qsc_keccak_state kstate = { 0 };
+	qsc_keccak_state kstate = { 0U };
 
 	/* absorb and permute */
 	qsc_sha3_initialize(&kstate);

@@ -17,7 +17,7 @@ static void csg_fill_buffer(qsc_csg_state* ctx)
 
 	/* reset cache counters */
 	ctx->crmd = ctx->rate;
-	ctx->cpos = 0;
+	ctx->cpos = 0U;
 }
 
 static void csg_auto_reseed(qsc_csg_state* ctx)
@@ -43,31 +43,31 @@ static void csg_auto_reseed(qsc_csg_state* ctx)
 
 		/* re-fill the buffer and reset counter */
 		csg_fill_buffer(ctx);
-		ctx->bctr = 0;
+		ctx->bctr = 0U;
 	}
 }
 
 void qsc_csg_dispose(qsc_csg_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
 		qsc_keccak_dispose(&ctx->kstate);
 		qsc_memutils_clear(ctx->cache, sizeof(ctx->cache));
-		ctx->bctr = 0;
-		ctx->cpos = 0;
-		ctx->crmd = 0;
-		ctx->rate = 0;
+		ctx->bctr = 0U;
+		ctx->cpos = 0U;
+		ctx->crmd = 0U;
+		ctx->rate = 0U;
 		ctx->pres = false;
 	}
 }
 
 void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predres)
 {
-	assert(ctx != NULL);
-	assert(seed != NULL);
-	assert(seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(seed != NULL);
+	QSC_ASSERT(seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE);
 
 	if (seedlen == QSC_CSG_512_SEED_SIZE)
 	{
@@ -79,8 +79,8 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 	}
 
 	qsc_intutils_clear8(ctx->cache, sizeof(ctx->cache));
-	ctx->bctr = 0;
-	ctx->cpos = 0;
+	ctx->bctr = 0U;
+	ctx->cpos = 0U;
 	ctx->pres = predres;
 	qsc_intutils_clear64(ctx->kstate.state, sizeof(ctx->kstate.state) / sizeof(uint64_t));
 
@@ -96,7 +96,7 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 		else
 		{
 			/* initialize with the seed and info */
-			qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_512, seed, seedlen, info, infolen, NULL, 0);
+			qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_512, seed, seedlen, info, infolen, NULL, 0U);
 		}
 	}
 	else
@@ -109,7 +109,7 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 		}
 		else
 		{
-			qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_256, seed, seedlen, info, infolen, NULL, 0);
+			qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_256, seed, seedlen, info, infolen, NULL, 0U);
 		}
 	}
 
@@ -119,8 +119,8 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 
 void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
 	ctx->bctr += otplen;
 
@@ -128,10 +128,10 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 	{
 		size_t outpos;
 
-		outpos = 0;
+		outpos = 0U;
 
 		/* copy remaining bytes from the cache */
-		if (ctx->crmd != 0)
+		if (ctx->crmd != 0U)
 		{
 			/* empty the state buffer */
 			qsc_memutils_copy(output, ctx->cache + ctx->cpos, ctx->crmd);
@@ -140,7 +140,7 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 		}
 
 		/* loop through the remainder */
-		while (otplen != 0)
+		while (otplen != 0U)
 		{
 			/* fill the buffer */
 			csg_fill_buffer(ctx);
@@ -165,7 +165,7 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 	}
 
 	/* clear used bytes */
-	if (ctx->crmd != 0)
+	if (ctx->crmd != 0U)
 	{
 		qsc_memutils_clear(ctx->cache, ctx->cpos);
 	}
@@ -176,8 +176,8 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 
 void qsc_csg_update(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen)
 {
-	assert(ctx != NULL);
-	assert(seed != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(seed != NULL);
 
 	/* absorb and permute */
 

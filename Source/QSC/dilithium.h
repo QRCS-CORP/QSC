@@ -65,8 +65,8 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t smsg[QSC_DILITHIUM_SIGNATURE_SIZE + MSGLEN];
  * uint8_t rmsg[32];
  *
- * uint32_t rmsglen = 0;
- * uint32_t smsglen = 0;
+ * uint32_t rmsglen = 0U;
+ * uint32_t smsglen = 0U;
  *
  * // Create the public and secret keys.
  * qsc_dilithium_generate_keypair(pk, sk, rng_generate);

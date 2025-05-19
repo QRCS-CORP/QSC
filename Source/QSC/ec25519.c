@@ -114,8 +114,8 @@ static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 
 int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 {
-	assert(x != NULL);
-	assert(y != NULL);
+	QSC_ASSERT(x != NULL);
+	QSC_ASSERT(y != NULL);
 
 	uint16_t d;
 
@@ -366,7 +366,7 @@ void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
 
 int32_t fe25519_isnegative(const fe25519 f)
 {
-	uint8_t s[32] = { 0 };
+	uint8_t s[32] = { 0U };
 
 	fe25519_tobytes(s, f);
 
@@ -375,7 +375,7 @@ int32_t fe25519_isnegative(const fe25519 f)
 
 int32_t fe25519_iszero(const fe25519 f)
 {
-	uint8_t s[32] = { 0 };
+	uint8_t s[32] = { 0U };
 
 	fe25519_tobytes(s, f);
 
@@ -2927,7 +2927,7 @@ int32_t ge25519_has_small_order(const uint8_t s[32])
 		}
 	};
 
-	uint8_t c[7] = { 0 };
+	uint8_t c[7] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;
@@ -2957,8 +2957,8 @@ int32_t ge25519_has_small_order(const uint8_t s[32])
 
 int32_t ge25519_frombytes_negate_vartime(ge25519_p3* h, const uint8_t* s)
 {
-	assert(h != NULL);
-	assert(s != NULL);
+	QSC_ASSERT(h != NULL);
+	QSC_ASSERT(s != NULL);
 
 	fe25519 u = {0};
 	fe25519 v = {0};
@@ -3025,8 +3025,8 @@ int32_t ge25519_frombytes_negate_vartime(ge25519_p3* h, const uint8_t* s)
 
 void ge25519_p3_to_cached(ge25519_cached* r, const ge25519_p3* p)
 {
-	assert(r != NULL);
-	assert(p != NULL);
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(p != NULL);
 
 	fe25519_add(r->yplusx, p->y, p->x);
 	fe25519_sub(r->yminusx, p->y, p->x);
@@ -3036,9 +3036,9 @@ void ge25519_p3_to_cached(ge25519_cached* r, const ge25519_p3* p)
 
 void ge25519_add_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q)
 {
-	assert(r != NULL);
-	assert(p != NULL);
-	assert(q != NULL);
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(p != NULL);
+	QSC_ASSERT(q != NULL);
 
 	fe25519 t0 = {0};
 
@@ -3080,10 +3080,10 @@ void ge25519_sub_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_pre
 
 void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge25519_p3* A, const uint8_t* b)
 {
-	assert(r != NULL);
-	assert(a != NULL);
-	assert(A != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(A != NULL);
+	QSC_ASSERT(b != NULL);
 
 	static const ge25519_precomp Bi[8] =
 	{
@@ -3129,9 +3129,9 @@ void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge
 		}
 	};
 
-	int8_t aslide[256] = { 0 };
-	int8_t bslide[256] = { 0 };
-	ge25519_cached Ai[8] = { 0 };
+	int8_t aslide[256] = { 0U };
+	int8_t bslide[256] = { 0U };
+	ge25519_cached Ai[8] = { 0U };
 	ge25519_p1p1 t;
 	ge25519_p3 u;
 	ge25519_p3 A2;
@@ -3215,9 +3215,9 @@ void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge
 
 void ge25519_sub_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q)
 {
-	assert(r != NULL);
-	assert(p != NULL);
-	assert(q != NULL);
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(p != NULL);
+	QSC_ASSERT(q != NULL);
 
 	fe25519 t0 = {0};
 
@@ -3251,7 +3251,7 @@ void ge25519_tobytes(uint8_t* s, const ge25519_p2* h)
 
 void sc25519_clamp(uint8_t* t)
 {
-	assert(t != NULL);
+	QSC_ASSERT(t != NULL);
 
 	t[0] &= 248;
 	t[31] &= 127;
@@ -3308,12 +3308,12 @@ int32_t ed25519_small_order(const uint8_t s[32])
 		}
 	};
 
-	uint8_t c[7] = { 0 };
+	uint8_t c[7] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;
 
-	assert(7 == sizeof(blocklist) / sizeof(blocklist[0]));
+	QSC_ASSERT(7 == sizeof(blocklist) / sizeof(blocklist[0]));
 
 	for (j = 0; j < 31; j++)
 	{

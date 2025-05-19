@@ -62,10 +62,10 @@ QSC_CPLUSPLUS_ENABLED_START
  * #include "chacha.h"
  *
  * size_t const MSG_LEN = 1024;
- * uint8_t key[32] = { 0 };                      // 256-bit key
- * uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 }; // 12-byte nonce
- * uint8_t msg[MSG_LEN] = { 0 };
- * uint8_t out[MSG_LEN] = { 0 };
+ * uint8_t key[32] = { 0U };                      // 256-bit key
+ * uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0U }; // 12-byte nonce
+ * uint8_t msg[MSG_LEN] = { 0U };
+ * uint8_t out[MSG_LEN] = { 0U };
  *
  * qsc_chacha_state ctx;
  * qsc_chacha_keyparams kp = { key, 32, nonce };

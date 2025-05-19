@@ -4,8 +4,8 @@
 
 void qsc_transpose_bytes_to_native(uint32_t* output, const uint8_t* input, size_t length)
 {
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	size_t j;
 
@@ -20,8 +20,8 @@ void qsc_transpose_bytes_to_native(uint32_t* output, const uint8_t* input, size_
 
 void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 {
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	uint8_t idx0;
 	uint8_t idx1;
@@ -46,8 +46,8 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 
 void qsc_transpose_native_to_bytes(uint8_t* output, const uint32_t* input, size_t length)
 {
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	for (size_t i = 0; i < length; ++i)
 	{
@@ -58,8 +58,8 @@ void qsc_transpose_native_to_bytes(uint8_t* output, const uint32_t* input, size_
 
 void qsc_transpose_string_to_scalar(uint32_t* output, const char* input, size_t length)
 {
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	const size_t HEXLEN = strlen(input);
 	uint8_t* tmp;

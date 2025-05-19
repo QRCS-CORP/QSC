@@ -24,7 +24,7 @@ static const uint32_t sha256_iv[8] =
 
 static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	ctx->t += msglen;
 }
@@ -32,7 +32,7 @@ static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha256_dispose(qsc_sha256_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
@@ -45,8 +45,8 @@ void qsc_sha256_dispose(qsc_sha256_state* ctx)
 
 void qsc_sha256_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_sha256_state ctx;
 
@@ -57,10 +57,10 @@ void qsc_sha256_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 
 void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
-	uint8_t pad[QSC_SHA2_256_RATE] = { 0 };
+	uint8_t pad[QSC_SHA2_256_RATE] = { 0U };
 	uint64_t bitLen;
 
 	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
@@ -107,7 +107,7 @@ void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output)
 
 void qsc_sha256_initialize(qsc_sha256_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	qsc_memutils_copy((uint8_t*)ctx->state, (const uint8_t*)sha256_iv, sizeof(ctx->state));
 	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
@@ -118,8 +118,8 @@ void qsc_sha256_initialize(qsc_sha256_state* ctx)
 #if defined(QSC_SHA2_SHANI_ENABLED)
 void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	__m128i s0;
 	__m128i s1;
@@ -296,8 +296,8 @@ void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 #else
 void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	uint32_t a;
 	uint32_t b;
@@ -608,8 +608,8 @@ void qsc_sha256_permute(uint32_t* output, const uint8_t* message)
 
 void qsc_sha256_update(qsc_sha256_state* ctx, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	if (msglen != 0)
 	{
@@ -663,7 +663,7 @@ static const uint64_t sha384_iv[8] =
 
 static void sha384_increase(qsc_sha384_state* ctx, size_t length)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	ctx->t[0] += length;
 
@@ -676,8 +676,8 @@ static void sha384_increase(qsc_sha384_state* ctx, size_t length)
 
 void qsc_sha384_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_sha384_state ctx;
 
@@ -689,7 +689,7 @@ void qsc_sha384_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha384_dispose(qsc_sha384_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 	
 	if (ctx != NULL)
 	{
@@ -704,10 +704,10 @@ QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
-	uint8_t pad[QSC_SHA2_384_RATE] = { 0 };
+	uint8_t pad[QSC_SHA2_384_RATE] = { 0U };
 	uint64_t bitLen;
 
 	sha384_increase(ctx, ctx->position);
@@ -754,7 +754,7 @@ void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output)
 
 void qsc_sha384_initialize(qsc_sha384_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	qsc_memutils_copy((uint8_t*)ctx->state, sha384_iv, sizeof(ctx->state));
 	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
@@ -765,8 +765,8 @@ void qsc_sha384_initialize(qsc_sha384_state* ctx)
 
 void qsc_sha384_update(qsc_sha384_state* ctx, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	if (msglen != 0)
 	{
@@ -820,7 +820,7 @@ static const uint64_t sha512_iv[8] =
 
 static void sha512_increase(qsc_sha512_state* ctx, size_t length)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	ctx->t[0] += length;
 
@@ -833,8 +833,8 @@ static void sha512_increase(qsc_sha512_state* ctx, size_t length)
 
 void qsc_sha512_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_sha512_state ctx;
 
@@ -846,7 +846,7 @@ void qsc_sha512_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha512_dispose(qsc_sha512_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 	
 	if (ctx != NULL)
 	{
@@ -861,10 +861,10 @@ QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
-	uint8_t pad[QSC_SHA2_512_RATE] = { 0 };
+	uint8_t pad[QSC_SHA2_512_RATE] = { 0U };
 	uint64_t bitLen;
 
 	sha512_increase(ctx, ctx->position);
@@ -911,7 +911,7 @@ void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output)
 
 void qsc_sha512_initialize(qsc_sha512_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	qsc_memutils_copy((uint8_t*)ctx->state, sha512_iv, sizeof(ctx->state));
 	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
@@ -922,8 +922,8 @@ void qsc_sha512_initialize(qsc_sha512_state* ctx)
 
 void qsc_sha512_permute(uint64_t* output, const uint8_t* message)
 {
-	assert(output != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
 
 	uint64_t a;
 	uint64_t b;
@@ -1298,8 +1298,8 @@ void qsc_sha512_permute(uint64_t* output, const uint8_t* message)
 
 void qsc_sha512_update(qsc_sha512_state* ctx, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	if (msglen != 0)
 	{
@@ -1341,9 +1341,9 @@ void qsc_sha512_update(qsc_sha512_state* ctx, const uint8_t* message, size_t msg
 
 void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_hmac256_state ctx;
 
@@ -1355,7 +1355,7 @@ void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_hmac256_dispose(qsc_hmac256_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 	
 	if (ctx != NULL)
 	{
@@ -1368,10 +1368,10 @@ QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
-	uint8_t tmpv[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	uint8_t tmpv[QSC_SHA2_256_HASH_SIZE] = { 0U };
 
 	qsc_sha256_finalize(&ctx->pstate, tmpv);
 	qsc_sha256_initialize(&ctx->pstate);
@@ -1383,8 +1383,8 @@ void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output)
 
 void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t keylen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const uint8_t IPAD = 0x36;
 	const uint8_t OPAD = 0x5C;
@@ -1412,8 +1412,8 @@ void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t k
 
 void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_sha256_update(&ctx->pstate, message, msglen);
 }
@@ -1422,9 +1422,9 @@ void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t m
 
 void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)
 {
-	assert(output != NULL);
-	assert(message != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_hmac512_state ctx;
 
@@ -1436,7 +1436,7 @@ void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_hmac512_dispose(qsc_hmac512_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 	
 	if (ctx != NULL)
 	{
@@ -1449,10 +1449,10 @@ QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output)
 {
-	assert(ctx != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
 
-	uint8_t tmpv[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	uint8_t tmpv[QSC_SHA2_512_HASH_SIZE] = { 0U };
 
 	qsc_sha512_finalize(&ctx->pstate, tmpv);
 	qsc_sha512_initialize(&ctx->pstate);
@@ -1464,8 +1464,8 @@ void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output)
 
 void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t keylen)
 {
-	assert(ctx != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
 
 	const uint8_t IPAD = 0x36;
 	const uint8_t OPAD = 0x5C;
@@ -1493,8 +1493,8 @@ void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t k
 
 void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t msglen)
 {
-	assert(ctx != NULL);
-	assert(message != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
 
 	qsc_sha512_update(&ctx->pstate, message, msglen);
 }
@@ -1503,12 +1503,12 @@ void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t m
 
 void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_hmac256_state ctx;
-	uint8_t buf[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t ctr[1] = { 0 };
+	uint8_t buf[QSC_SHA2_256_HASH_SIZE] = { 0U };
+	uint8_t ctr[1] = { 0U };
 
 	while (otplen != 0)
 	{
@@ -1538,8 +1538,8 @@ void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size
 
 void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	if (otplen >= 32)
     {
@@ -1551,7 +1551,7 @@ void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, siz
         }
         else
         {
-            uint8_t tmp[QSC_HMAC_256_MAC_SIZE] = { 0 };
+            uint8_t tmp[QSC_HMAC_256_MAC_SIZE] = { 0U };
             qsc_hmac256_initialize(&ctx, tmp, sizeof(tmp));
         }
 
@@ -1564,12 +1564,12 @@ void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, siz
 
 void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
 	qsc_hmac512_state ctx;
-	uint8_t buf[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t ctr[1] = { 0 };
+	uint8_t buf[QSC_SHA2_512_HASH_SIZE] = { 0U };
+	uint8_t ctr[1] = { 0U };
 
 	while (otplen != 0)
 	{
@@ -1599,8 +1599,8 @@ void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size
 
 void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
 {
-	assert(output != NULL);
-	assert(key != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(key != NULL);
 
     if (otplen >= 64)
     {
@@ -1612,7 +1612,7 @@ void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, siz
         }
         else
         {
-            uint8_t tmp[QSC_HMAC_512_MAC_SIZE] = { 0 };
+            uint8_t tmp[QSC_HMAC_512_MAC_SIZE] = { 0U };
             qsc_hmac512_initialize(&ctx, tmp, sizeof(tmp));
         }
 

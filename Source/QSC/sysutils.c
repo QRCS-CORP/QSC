@@ -83,8 +83,8 @@ size_t qsc_sysutils_computer_name(char* name)
 
 void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state* state)
 {
-	assert(drive != NULL);
-	assert(state != NULL);
+	QSC_ASSERT(drive != NULL);
+	QSC_ASSERT(state != NULL);
 
 	state->free = 0;
 	state->total = 0;
@@ -120,7 +120,7 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 {
-	assert(state != NULL);
+	QSC_ASSERT(state != NULL);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
@@ -216,7 +216,7 @@ bool qsc_sysutils_rdtsc_available()
 
 size_t qsc_sysutils_user_name(char* name)
 {
-	assert(name != NULL);
+	QSC_ASSERT(name != NULL);
 
 	size_t res;
 
@@ -362,14 +362,14 @@ uint64_t qsc_sysutils_system_timestamp()
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 void qsc_sysutils_user_identity(const char* name, char* id)
 {
-	assert(name != NULL);
-	assert(id != NULL);
+	QSC_ASSERT(name != NULL);
+	QSC_ASSERT(id != NULL);
 
 	LPCSTR accname = TEXT(name);
 	LPTSTR domname = (LPTSTR)GlobalAlloc(GPTR, sizeof(TCHAR) * 1024);
 	DWORD cchdomname = 1024;
 	SID_NAME_USE esidtype;
-	char sidbuf[1024] = { 0 };
+	char sidbuf[1024] = { 0U };
 	DWORD cbsid = 1024;
 	SID* sid = (SID*)sidbuf;
 
@@ -384,7 +384,7 @@ void qsc_sysutils_user_identity(const char* name, char* id)
 void qsc_system_values_print()
 {
 	const char* drv = "C:";
-	char tname[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0 };
+	char tname[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
 	qsc_sysutils_drive_space_state dstate;
 	qsc_sysutils_memory_statistics_state mstate;
 	uint64_t ts;

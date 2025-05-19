@@ -4,9 +4,9 @@
 
 bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {
-	assert(secret != NULL);
-	assert(ciphertext != NULL);
-	assert(privatekey != NULL);
+	QSC_ASSERT(secret != NULL);
+	QSC_ASSERT(ciphertext != NULL);
+	QSC_ASSERT(privatekey != NULL);
 
 	bool res;
 
@@ -22,9 +22,9 @@ bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const 
 
 bool qsc_mceliece_decrypt(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {
-	assert(secret != NULL);
-	assert(ciphertext != NULL);
-	assert(privatekey != NULL);
+	QSC_ASSERT(secret != NULL);
+	QSC_ASSERT(ciphertext != NULL);
+	QSC_ASSERT(privatekey != NULL);
 
 	bool res;
 
@@ -40,10 +40,10 @@ bool qsc_mceliece_decrypt(uint8_t* secret, const uint8_t* ciphertext, const uint
 
 void qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t))
 {
-	assert(secret != NULL);
-	assert(ciphertext != NULL);
-	assert(publickey != NULL);
-	assert(rng_generate != NULL);
+	QSC_ASSERT(secret != NULL);
+	QSC_ASSERT(ciphertext != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(rng_generate != NULL);
 
 	if (secret != NULL && ciphertext != NULL && publickey != NULL && rng_generate != NULL)
 	{
@@ -53,10 +53,10 @@ void qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_
 
 void qsc_mceliece_encrypt(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_MCELIECE_SEED_SIZE])
 {
-	assert(secret != NULL);
-	assert(ciphertext != NULL);
-	assert(publickey != NULL);
-	assert(seed != NULL);
+	QSC_ASSERT(secret != NULL);
+	QSC_ASSERT(ciphertext != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(seed != NULL);
 
 	if (secret != NULL && ciphertext != NULL && publickey != NULL && seed != NULL)
 	{
@@ -68,9 +68,9 @@ void qsc_mceliece_encrypt(uint8_t* secret, uint8_t* ciphertext, const uint8_t* p
 
 void qsc_mceliece_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
-	assert(publickey != NULL);
-	assert(privatekey != NULL);
-	assert(rng_generate != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(rng_generate != NULL);
 
 	if (publickey != NULL && privatekey != NULL && rng_generate != NULL)
 	{

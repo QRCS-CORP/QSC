@@ -67,7 +67,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t key[QSC_CSX_KEY_SIZE] = { ... };
  * uint8_t msg[MSGLEN] = { ... };
  * uint8_t nonce[QSC_CSX_NONCE_SIZE] = { ... };
- * uint8_t cpt[MSGLEN + QSC_CSX_MAC_SIZE] = { 0 };
+ * uint8_t cpt[MSGLEN + QSC_CSX_MAC_SIZE] = { 0U };
  * qsc_csx_state state;
  * qsc_csx_keyparams kp = { key, QSC_CSX_KEY_SIZE, nonce, cust, CSTLEN };
  *

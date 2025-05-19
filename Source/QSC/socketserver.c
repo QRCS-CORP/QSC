@@ -189,7 +189,7 @@ qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* source, qsc_sock
 	return res;
 }
 
-static void qsc_socket_server_accept_invoke(void* state)
+static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state* state)
 {
 	assert(state != NULL);
 
@@ -204,22 +204,22 @@ static void qsc_socket_server_accept_invoke(void* state)
 
 		qsc_memutils_clear((char*)&ar, sizeof(qsc_socket_server_accept_result));
 
-		res = qsc_socket_accept(((qsc_socket_server_async_accept_state*)state)->source, &ar.target);
+		res = qsc_socket_accept(state->source, &ar.target);
 
 		if (res == qsc_socket_exception_success)
 		{
-			if (((qsc_socket_server_async_accept_state*)state)->callback != NULL)
+			if (state->callback != NULL)
 			{
-				((qsc_socket_server_async_accept_state*)state)->callback(&ar);
-				qsc_async_thread_create(&qsc_socket_server_accept_invoke, state);
+				state->callback(&ar);
+				qsc_async_thread_create((void*)&qsc_socket_server_accept_invoke, state);
 			}
 		}
 		else
 		{
-			if (((qsc_socket_server_async_accept_state*)state)->error != NULL)
+			if (state->error != NULL)
 			{
 				res = qsc_socket_get_last_error();
-				((qsc_socket_server_async_accept_state*)state)->error(((qsc_socket_server_async_accept_state*)state)->source, res);
+				state->error(state->source, res);
 			}
 		}
 	}
@@ -263,7 +263,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_server_async_acc
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(void* state, const qsc_ipinfo_ipv4_address* address, uint16_t port)
+qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv4_address* address, uint16_t port)
 {
 	assert(state != NULL);
 	assert(address != NULL);
@@ -274,20 +274,20 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(void* state, const qsc
 
 	if (state != NULL && address != NULL)
 	{
-		res = qsc_socket_create(((qsc_socket_server_async_accept_state*)state)->source, qsc_socket_address_family_ipv4, qsc_socket_transport_stream, qsc_socket_protocol_tcp);
+		res = qsc_socket_create(state->source, qsc_socket_address_family_ipv4, qsc_socket_transport_stream, qsc_socket_protocol_tcp);
 
 		if (res == qsc_socket_exception_success)
 		{
-			res = qsc_socket_bind_ipv4(((qsc_socket_server_async_accept_state*)state)->source, address, port);
+			res = qsc_socket_bind_ipv4(state->source, address, port);
 
 			if (res == qsc_socket_exception_success)
 			{
-				res = qsc_socket_listen(((qsc_socket_server_async_accept_state*)state)->source, QSC_SOCKET_SERVER_LISTEN_BACKLOG);
+				res = qsc_socket_listen(state->source, QSC_SOCKET_SERVER_LISTEN_BACKLOG);
 
 				if (res == qsc_socket_exception_success)
 				{
-					((qsc_socket_server_async_accept_state*)state)->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_create(&qsc_socket_server_accept_invoke, state);
+					state->source->connection_status = qsc_socket_state_listening;
+					qsc_async_thread_create((void*)&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}
@@ -296,7 +296,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(void* state, const qsc
 	return res;
 }
 
-qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(void* state, const qsc_ipinfo_ipv6_address* address, uint16_t port)
+qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_async_accept_state* state, const qsc_ipinfo_ipv6_address* address, uint16_t port)
 {
 	assert(state != NULL);
 	assert(address != NULL);
@@ -310,11 +310,11 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(void* state, const qsc
 #if defined(QSC_SOCKET_DUAL_IPV6_STACK)
 		res = qsc_socket_create(state->source, qsc_socket_address_family_none, qsc_socket_transport_stream, qsc_socket_protocol_tcp);
 #else
-		res = qsc_socket_create(((qsc_socket_server_async_accept_state*)state)->source, qsc_socket_address_family_ipv6, qsc_socket_transport_stream, qsc_socket_protocol_tcp);
+		res = qsc_socket_create(state->source, qsc_socket_address_family_ipv6, qsc_socket_transport_stream, qsc_socket_protocol_tcp);
 #endif
 		if (res == qsc_socket_exception_success)
 		{
-			res = qsc_socket_bind_ipv6(((qsc_socket_server_async_accept_state*)state)->source, address, port);
+			res = qsc_socket_bind_ipv6(state->source, address, port);
 
 #if defined(QSC_SOCKET_DUAL_IPV6_STACK)
 			int32_t code;
@@ -324,12 +324,12 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(void* state, const qsc
 
 			if (res == qsc_socket_exception_success)
 			{
-				res = qsc_socket_listen(((qsc_socket_server_async_accept_state*)state)->source, QSC_SOCKET_SERVER_LISTEN_BACKLOG);
+				res = qsc_socket_listen(state->source, QSC_SOCKET_SERVER_LISTEN_BACKLOG);
 
 				if (res == qsc_socket_exception_success)
 				{
-					((qsc_socket_server_async_accept_state*)state)->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_create(&qsc_socket_server_accept_invoke, state);
+					state->source->connection_status = qsc_socket_state_listening;
+					qsc_async_thread_create((void*)&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}

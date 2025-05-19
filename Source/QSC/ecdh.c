@@ -3,9 +3,9 @@
 
 bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey)
 {
-	assert(secret != NULL);
-	assert(privatekey != NULL);
-	assert(publickey != NULL);
+	QSC_ASSERT(secret != NULL);
+	QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(publickey != NULL);
 
 	bool res;
 
@@ -16,11 +16,11 @@ bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uin
 
 void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
-	assert(privatekey != NULL);
-	assert(publickey != NULL);
-	assert(rng_generate != NULL);
+	QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(rng_generate != NULL);
 
-	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0U };
 
 	rng_generate(seed, sizeof(seed));
 	qsc_ed25519_generate_keypair(publickey, privatekey, seed);
@@ -28,9 +28,9 @@ void qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 
 void qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
-	assert(privatekey != NULL);
-	assert(publickey != NULL);
-	assert(seed != NULL);
+	QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(seed != NULL);
 
 	qsc_ed25519_generate_keypair(publickey, privatekey, seed);
 }

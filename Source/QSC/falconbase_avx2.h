@@ -98,9 +98,9 @@ QSC_CPLUSPLUS_ENABLED_START
 
 #if defined(__GNUC__)
 #	if defined(FALCON_FMA)
-#		define FALCON_TARGET_AVX2 __attribute__((target("avx2,fma")))
+#		define FALCON_TARGET_AVX2 QSC_ATTRIBUTE((target("avx2,fma")))
 #	else
-#		define FALCON_TARGET_AVX2 __attribute__((target("avx2")))
+#		define FALCON_TARGET_AVX2 QSC_ATTRIBUTE((target("avx2")))
 #	endif
 #elif defined(_MSC_VER)
 #	define FALCON_TARGET_AVX2
@@ -233,7 +233,7 @@ extern const falcon_fpr falcon_avx2_fpr_p2_tab[FALCON_FPR_GM_P2_SIZE];
 
 inline static falcon_fpr falcon_FPR(double v)
 {
-	falcon_fpr x = { 0 };
+	falcon_fpr x = { 0U };
 
 	x.v = v;
 

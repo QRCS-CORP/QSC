@@ -63,7 +63,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t info[32] = { ... };
  *
  * // random bytes
- * uint8_t rnd[200] = { 0 };
+ * uint8_t rnd[200] = { 0U };
  *
  * // initialize with seed and optional personalization; enable predictive resistance
  * qsc_csg_initialize(ctx, seed, sizeof(seed), info, sizeof(info), true);

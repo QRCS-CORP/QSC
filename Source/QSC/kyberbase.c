@@ -894,7 +894,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
     uint8_t buf[2 * QSC_KYBER_SYMBYTES];
     uint8_t cmp[QSC_KYBER_SYMBYTES + QSC_KYBER_CIPHERTEXT_BYTES];
     uint8_t kr[2 * QSC_KYBER_SYMBYTES];
-    qsc_keccak_state kctx = { 0 };
+    qsc_keccak_state kctx = { 0U };
     const uint8_t *pk = sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES;
     int32_t fail;
 

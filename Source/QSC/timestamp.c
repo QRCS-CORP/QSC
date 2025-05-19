@@ -8,7 +8,7 @@
 
 void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE], const struct tm* tstruct)
 {
-	assert(tstruct != NULL);
+	QSC_ASSERT(tstruct != NULL);
 
 	size_t pos;
 
@@ -99,9 +99,9 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 
 void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char output[QSC_TIMESTAMP_STRING_SIZE])
 {
-	assert(tstruct != NULL);
+	QSC_ASSERT(tstruct != NULL);
 
-	char tmp[5] = { 0 };
+	char tmp[5] = { 0U };
 
 	qsc_memutils_clear(tstruct, sizeof(struct tm));
 
@@ -127,8 +127,8 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
-	struct tm nt = { 0 };
+	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
+	struct tm nt = { 0U };
 	time_t lt;
 	errno_t err;
 	size_t len;
@@ -150,7 +150,7 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 #else
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
+	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
 	struct tm* nt;
 	time_t lt;
 	size_t len;
@@ -207,7 +207,7 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
+	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
 	struct tm nt;
 	time_t lt;
 	errno_t err;
@@ -299,7 +299,7 @@ uint64_t qsc_timestamp_datetime_utc()
 {
     time_t lt;
     time_t ut;
-    struct tm ptm = { 0 };
+    struct tm ptm = { 0U };
 
     lt = 0;
     ut = 0;
@@ -376,8 +376,8 @@ uint64_t qsc_timestamp_epochtime_seconds()
 #if defined(QSC_DEBUG_MODE)
 void qsc_timestamp_print_values()
 {
-	char stpo[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
-	struct tm tstamp = { 0 };
+	char stpo[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
+	struct tm tstamp = { 0U };
 	uint64_t tms;
 
 	qsc_consoleutils_print_line("Time-stamp visual verification test");

@@ -20,7 +20,7 @@
 
 void qsc_memutils_flush_cache_line(void *address) 
 {
-	assert(address != NULL);
+	QSC_ASSERT(address != NULL);
 
 #if defined(__GNUC__) || defined(__clang__)
     __builtin___clear_cache((char*)address, (char*)address + QSC_MEMUTILS_CACHE_LINE_SIZE);
@@ -31,8 +31,8 @@ void qsc_memutils_flush_cache_line(void *address)
 
 void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)
 {
-	assert(address != NULL);
-	assert(length != 0);
+	QSC_ASSERT(address != NULL);
+	QSC_ASSERT(length != 0);
 
 	if (address != NULL)
 	{
@@ -54,8 +54,8 @@ void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)
 
 void qsc_memutils_prefetch_l2(uint8_t* address, size_t length)
 {
-	assert(address != NULL);
-	assert(length != 0);
+	QSC_ASSERT(address != NULL);
+	QSC_ASSERT(length != 0);
 
 	if (address != NULL)
 	{
@@ -77,8 +77,8 @@ void qsc_memutils_prefetch_l2(uint8_t* address, size_t length)
 
 void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
 {
-	assert(address != NULL);
-	assert(length != 0);
+	QSC_ASSERT(address != NULL);
+	QSC_ASSERT(length != 0);
 
 	if (address != NULL)
 	{
@@ -100,7 +100,7 @@ void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
 
 void* qsc_memutils_malloc(size_t length)
 {
-	assert(length != 0);
+	QSC_ASSERT(length != 0);
 
 	void* ret;
 
@@ -138,8 +138,8 @@ size_t qsc_memutils_page_size()
 
 void* qsc_memutils_realloc(void* block, size_t length)
 {
-	assert(block != NULL);
-	assert(length != 0);
+	QSC_ASSERT(block != NULL);
+	QSC_ASSERT(length != 0);
 
 	void* ret;
 
@@ -155,7 +155,7 @@ void* qsc_memutils_realloc(void* block, size_t length)
 
 void qsc_memutils_alloc_free(void* block)
 {
-	assert(block != NULL);
+	QSC_ASSERT(block != NULL);
 
 	if (block != NULL)
 	{
@@ -165,8 +165,8 @@ void qsc_memutils_alloc_free(void* block)
 
 void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 {
-	assert(align != 0);
-	assert(length != 0);
+	QSC_ASSERT(align != 0);
+	QSC_ASSERT(length != 0);
 
 	void* ret;
 
@@ -195,8 +195,8 @@ void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 
 void* qsc_memutils_aligned_realloc(void* block, size_t length)
 {
-	assert(block != NULL);
-	assert(length != 0);
+	QSC_ASSERT(block != NULL);
+	QSC_ASSERT(length != 0);
 
 	void* ret;
 
@@ -216,7 +216,7 @@ void* qsc_memutils_aligned_realloc(void* block, size_t length)
 
 void qsc_memutils_aligned_free(void* block)
 {
-	assert(block != NULL);
+	QSC_ASSERT(block != NULL);
 
 	if (block != NULL)
 	{
@@ -259,8 +259,8 @@ static void memutils_clear512(volatile void* output)
 
 void qsc_memutils_clear(void* output, size_t length)
 {
-	assert(output != NULL);
-	assert(length != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t pctr;
 
@@ -331,7 +331,7 @@ static bool memutils_equal128(const uint8_t* a, const uint8_t* b)
 	__m128i wa;
 	__m128i wb;
 	__m128i wc;
-	uint64_t ra[sizeof(__m128i) / sizeof(uint64_t)] = { 0 };
+	uint64_t ra[sizeof(__m128i) / sizeof(uint64_t)] = { 0U };
 
 	wa = _mm_loadu_si128((const __m128i*)a);
 	wb = _mm_loadu_si128((const __m128i*)b);
@@ -363,7 +363,7 @@ static bool memutils_equal256(const uint8_t* a, const uint8_t* b)
 	__m256i wa;
 	__m256i wb;
 	__m256i wc;
-	uint64_t ra[sizeof(__m256i) / sizeof(uint64_t)] = { 0 };
+	uint64_t ra[sizeof(__m256i) / sizeof(uint64_t)] = { 0U };
 
 	wa = _mm256_loadu_si256((const __m256i*)a);
 	wb = _mm256_loadu_si256((const __m256i*)b);
@@ -391,7 +391,7 @@ static bool memutils_equal512(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_array_uniform(const uint8_t* input, size_t length)
 {
-	assert(input != NULL);
+	QSC_ASSERT(input != NULL);
 	
     uint8_t ref;
     uint8_t res;
@@ -413,9 +413,9 @@ bool qsc_memutils_array_uniform(const uint8_t* input, size_t length)
 
 bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 {
-	assert(a != NULL);
-	assert(b != NULL);
-	assert(length > 0);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
+	QSC_ASSERT(length > 0);
 
 	size_t pctr;
 	int32_t mctr;
@@ -467,8 +467,8 @@ bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 
 bool qsc_memutils_are_equal_128(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 #if defined(QSC_SYSTEM_HAS_AVX)
 
@@ -492,8 +492,8 @@ bool qsc_memutils_are_equal_128(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_are_equal_256(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
@@ -522,8 +522,8 @@ bool qsc_memutils_are_equal_256(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_are_equal_512(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
@@ -586,8 +586,8 @@ static void memutils_copy512(void* output, const void* input)
 
 void qsc_memutils_copy(void* output, const void* input, size_t length)
 {
-	assert(output != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
 
 	size_t pctr;
 
@@ -749,9 +749,9 @@ void qsc_memutils_clmulepi64_si256_avx(__m128i r[4], const __m128i a[2], const _
 
 void qsc_memutils_clmulepi64_si256(uint64_t r[8], const uint64_t a[4], const uint64_t b[4])
 {
-	__m128i ma[2] = { 0 };
-	__m128i mb[2] = { 0 };
-	__m128i mr[4] = { 0 };
+	__m128i ma[2] = { 0U };
+	__m128i mb[2] = { 0U };
+	__m128i mr[4] = { 0U };
 
     /* load 256-bit operands as two 128-bit pieces each */
     ma[0] = _mm_loadu_si128((const __m128i*)(a));      /* lower 128 bits of A */
@@ -877,8 +877,8 @@ void qsc_memutils_clmulepi64_si256(uint64_t r[8], const uint64_t a[4], const uin
 
 bool qsc_memutils_greater_than_be128(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	bool res;
 
@@ -926,8 +926,8 @@ bool qsc_memutils_greater_than_be128(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_greater_than_be256(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	bool res;
 
@@ -962,8 +962,8 @@ bool qsc_memutils_greater_than_be256(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_greater_than_be512(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	bool res;
 
@@ -984,8 +984,8 @@ bool qsc_memutils_greater_than_be512(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_greater_than_le128(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	bool res;
 
@@ -1033,8 +1033,8 @@ bool qsc_memutils_greater_than_le128(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_greater_than_le256(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	bool res;
 
@@ -1071,8 +1071,8 @@ bool qsc_memutils_greater_than_le256(const uint8_t* a, const uint8_t* b)
 
 bool qsc_memutils_greater_than_le512(const uint8_t* a, const uint8_t* b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	QSC_ASSERT(a != NULL);
+	QSC_ASSERT(b != NULL);
 
 	bool res;
 
@@ -1093,9 +1093,9 @@ bool qsc_memutils_greater_than_le512(const uint8_t* a, const uint8_t* b)
 
 void qsc_memutils_move(void* output, const void* input, size_t length)
 {
-	assert(output != NULL);
-	assert(input != NULL);
-	assert(length != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	memmove_s(output, length, input, length);
@@ -1133,8 +1133,8 @@ static void memutils_setval512(void* output, uint8_t value)
 
 void qsc_memutils_set_value(void* output, size_t length, uint8_t value)
 {
-	assert(output != NULL);
-	assert(length != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t pctr;
 
@@ -1229,9 +1229,9 @@ static void memutils_xor512(uint8_t* output, const uint8_t* input)
 
 void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size_t length)
 {
-	assert(output != NULL);
-	assert(input != NULL);
-	assert(length != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t pctr;
 
@@ -1314,7 +1314,7 @@ static void memutils_xorv128(uint8_t* output, const uint8_t value)
 
 void qsc_memutils_secure_erase(void* block, size_t length)
 {
-	assert(block != NULL);
+	QSC_ASSERT(block != NULL);
 
 #if defined(QSC_RTL_SECURE_MEMORY)
 	RtlSecureZeroMemory(block, length);
@@ -1327,8 +1327,8 @@ void qsc_memutils_secure_erase(void* block, size_t length)
 
 void qsc_memutils_secure_free(void* block, size_t length)
 {
-	assert(block != NULL);
-	assert(length != 0);
+	QSC_ASSERT(block != NULL);
+	QSC_ASSERT(length != 0);
 
 	if (block != NULL || length != 0)
 	{
@@ -1360,7 +1360,7 @@ void qsc_memutils_secure_free(void* block, size_t length)
 
 void* qsc_memutils_secure_malloc(size_t length)
 {
-	assert(length != 0);
+	QSC_ASSERT(length != 0);
 
 	const size_t PGESZE = qsc_memutils_page_size();
 	void* ptr;
@@ -1429,8 +1429,8 @@ void* qsc_memutils_secure_malloc(size_t length)
 
 void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
 {
-	assert(output != NULL);
-	assert(length != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t pctr;
 
@@ -1474,8 +1474,8 @@ void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
 
 bool qsc_memutils_zeroed(const void* input, size_t length)
 {
-	assert(input != NULL);
-	assert(length != 0);
+	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t i;
 	size_t j;

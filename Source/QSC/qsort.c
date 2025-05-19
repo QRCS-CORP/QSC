@@ -218,7 +218,7 @@ static int64_t qsort_partition_u64(int64_t* arr, int64_t start, int64_t end)
   
 void qsc_qsort_sort_i8(int8_t* arr8, int32_t start, int32_t end)
 {
-    assert(arr8 != NULL);
+    QSC_ASSERT(arr8 != NULL);
 
     int16_t p;
 
@@ -232,7 +232,7 @@ void qsc_qsort_sort_i8(int8_t* arr8, int32_t start, int32_t end)
  
 void qsc_qsort_sort_i16(int16_t* arr16, int32_t start, int32_t end)
 {
-    assert(arr16 != NULL);
+    QSC_ASSERT(arr16 != NULL);
 
     int16_t p;
 
@@ -246,7 +246,7 @@ void qsc_qsort_sort_i16(int16_t* arr16, int32_t start, int32_t end)
  
 void qsc_qsort_sort_i32(int32_t* arr32, int32_t start, int32_t end)
 {
-    assert(arr32 != NULL);
+    QSC_ASSERT(arr32 != NULL);
 
     int32_t p;
 
@@ -260,7 +260,7 @@ void qsc_qsort_sort_i32(int32_t* arr32, int32_t start, int32_t end)
  
 void qsc_qsort_sort_i64(int64_t* arr64, int64_t start, int64_t end)
 {
-    assert(arr64 != NULL);
+    QSC_ASSERT(arr64 != NULL);
 
     int64_t p;
 

@@ -68,7 +68,7 @@ void qsc_event_clear_listener(const char name[QSC_EVENT_NAME_SIZE])
 qsc_event_callback qsc_event_get_callback(const char name[QSC_EVENT_NAME_SIZE])
 {
 	qsc_event_handler* hndr;
-	qsc_event_callback hres = { 0 };
+	qsc_event_callback hres = { 0U };
 
 	for (size_t i = 0; i < m_event_state.lcount; ++i)
 	{

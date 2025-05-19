@@ -74,7 +74,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t key[QSC_RCS256_KEY_SIZE] = { ... };
  * uint8_t msg[MSGLEN] = { ... };
  * uint8_t nonce[QSC_RCS_BLOCK_SIZE] = { ... };
- * uint8_t cpt[MSGLEN + QSC_RCS256_MAC_SIZE] = { 0 };
+ * uint8_t cpt[MSGLEN + QSC_RCS256_MAC_SIZE] = { 0U };
  * qsc_rcs_state state;
  * qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nonce, cust, CSTLEN };
  *
@@ -87,7 +87,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t nonce[QSC_RCS_BLOCK_SIZE] = { ... };
  * uint8_t cust[CSTLEN] = { ... };
  * const size_t MSGLEN = CPTLEN - QSC_RCS256_MAC_SIZE;
- * uint8_t msg[MSGLEN] = { 0 };
+ * uint8_t msg[MSGLEN] = { 0U };
  * qsc_rcs_keyparams kp = { key, QSC_RCS256_KEY_SIZE, nonce, cust, CSTLEN };
  *
  * qsc_rcs_initialize(&state, &kp, false);

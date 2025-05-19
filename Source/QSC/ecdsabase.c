@@ -7,9 +7,9 @@
 
 static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk)
 {
-	uint8_t az[64] = { 0 };
-	uint8_t nonce[64] = { 0 };
-	uint8_t hram[64] = { 0 };
+	uint8_t az[64] = { 0U };
+	uint8_t nonce[64] = { 0U };
+	uint8_t hram[64] = { 0U };
 	qsc_sha512_state ctx;
 	ge25519_p3 R;
 
@@ -62,8 +62,8 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t mlen, const uint8_t* pk)
 {
 	qsc_sha512_state ctx;
-	uint8_t h[64] = { 0 };
-	uint8_t rcheck[32] = { 0 };
+	uint8_t h[64] = { 0U };
+	uint8_t rcheck[32] = { 0U };
 	ge25519_p3 A;
 	ge25519_p2 R;
 	bool res;
@@ -114,9 +114,9 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 
 void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
-	assert(publickey != NULL);
-	assert(privatekey != NULL);
-	assert(seed != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(seed != NULL);
 
 	ge25519_p3 A;
 
@@ -132,10 +132,10 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
 
 int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
 {
-	assert(signedmsg != NULL);
-	assert(smsglen != NULL);
-	assert(message != NULL);
-	assert(privatekey != NULL);
+	QSC_ASSERT(signedmsg != NULL);
+	QSC_ASSERT(smsglen != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(privatekey != NULL);
 
 	size_t slen;
 	int32_t res;
@@ -167,12 +167,12 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 
 int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
 {
-	assert(message != NULL);
-	assert(msglen != NULL);
-	assert(signedmsg != NULL);
-	assert(publickey != NULL);
-	assert(smsglen > EC25519_SIGNATURE_SIZE);
-	assert(smsglen - EC25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(msglen != NULL);
+	QSC_ASSERT(signedmsg != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(smsglen > EC25519_SIGNATURE_SIZE);
+	QSC_ASSERT(smsglen - EC25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
 
 	const size_t MSGLEN = smsglen - EC25519_SIGNATURE_SIZE;
 	int32_t res;

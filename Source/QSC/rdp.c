@@ -17,8 +17,8 @@
 
 bool qsc_rdp_generate(uint8_t* output, size_t length)
 {
-	assert(output != 0);
-	assert(length <= QSC_RDP_SEED_MAX);
+	QSC_ASSERT(output != 0);
+	QSC_ASSERT(length <= QSC_RDP_SEED_MAX);
 
 	bool res;
 
@@ -112,7 +112,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 
 uint16_t qsc_rdp_uint16()
 {
-	uint8_t arr[sizeof(uint16_t)] = { 0 };
+	uint8_t arr[sizeof(uint16_t)] = { 0U };
 	uint16_t num;
 
 	qsc_rdp_generate(arr, sizeof(arr));
@@ -125,7 +125,7 @@ uint16_t qsc_rdp_uint16()
 
 uint32_t qsc_rdp_uint32()
 {
-	uint8_t arr[sizeof(uint32_t)] = { 0 };
+	uint8_t arr[sizeof(uint32_t)] = { 0U };
 	uint32_t num;
 
 	qsc_rdp_generate(arr, sizeof(arr));
@@ -140,7 +140,7 @@ uint32_t qsc_rdp_uint32()
 
 uint64_t qsc_rdp_uint64()
 {
-	uint8_t arr[sizeof(uint64_t)] = { 0 };
+	uint8_t arr[sizeof(uint64_t)] = { 0U };
 	uint64_t num;
 
 	qsc_rdp_generate(arr, sizeof(arr));
