@@ -312,10 +312,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_DEBUG_MODE
 #endif
 
-#if defined(QSC_DEBUG_MODE)
-#   define QSC_ASSERT assert
+#ifdef QSC_DEBUG_MODE
+#  define QSC_ASSERT(expr)  assert(expr)
 #else
-#   define QSC_ASSERT
+#  define QSC_ASSERT(expr)  ((void)0)
 #endif
 
 /*==============================================================================
