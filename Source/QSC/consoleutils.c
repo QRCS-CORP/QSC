@@ -21,26 +21,18 @@
 #if !defined(QSC_SYSTEM_OS_WINDOWS)
 static char getch(void)
 {
-	/* TODO: not working in ubuntu */
-
     char buf = 0U;
     struct termios old = {0U};
     fflush(stdout);
 
-    if(tcgetattr(0U, &old) < 0U)
-    {
-        perror("tcsetattr()");
-    }
+    tcgetattr(0U, &old);
 
     old.c_lflag &= ~ICANON;
     old.c_lflag &= ~ECHO;
     old.c_cc[VMIN] = 1;
     old.c_cc[VTIME] = 0U;
 
-    if(tcsetattr(0U, TCSANOW, &old) < 0U)
-    {
-        perror("tcsetattr ICANON");
-    }
+    tcsetattr(0U, TCSANOW, &old);
 
     if(read(0U, &buf, 1) < 0U)
     {
@@ -50,10 +42,7 @@ static char getch(void)
     old.c_lflag |= ICANON;
     old.c_lflag |= ECHO;
 
-    if(tcsetattr(0U, TCSADRAIN, &old) < 0U)
-    {
-        perror("tcsetattr ~ICANON");
-    }
+    tcsetattr(0U, TCSADRAIN, &old);
 
     //printf("%c\n", buf);
     return buf;

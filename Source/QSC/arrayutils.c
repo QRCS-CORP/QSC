@@ -54,6 +54,10 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
         {
             hi = (uint8_t)(c - 'a' + 10U);
         }
+        else
+        {
+            hi = 0;
+        }
 
         c = str[1];
 
@@ -68,6 +72,10 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
         else if ((c >= 'a') && (c <= 'f'))
         {
             lo = (uint8_t)(c - 'a' + 10U);
+        }
+        else
+        {
+            lo = 0;
         }
 
         res = (uint8_t)((hi << 4U) | lo);

@@ -5,9 +5,9 @@ static void Mul64x64To128(uint64_t x, uint64_t y, uint64_t* low, uint64_t* high)
 	QSC_ASSERT(low != NULL);
 	QSC_ASSERT(high != NULL);
 
-#if defined(QSC_SYSTEM_FAST_64X64_MUL)
-	QSC_SYSTEM_FAST_64X64_MUL(x, y, low, high);
-#else
+//#if defined(QSC_SYSTEM_FAST_64X64_MUL)
+//	QSC_SYSTEM_FAST_64X64_MUL(x, y, low, high);
+//#else
 
 	const size_t HWORD_BITS = 32;
 	const uint32_t HWORD_MASK = 0xFFFFFFFFUL;
@@ -34,7 +34,7 @@ static void Mul64x64To128(uint64_t x, uint64_t y, uint64_t* low, uint64_t* high)
 
 	*high = x0 + (x2 >> HWORD_BITS);
 	*low = ((x2 & HWORD_MASK) << HWORD_BITS) + (x3 & HWORD_MASK);
-#endif
+//#endif
 }
 
 uint128 qsc_donna128_shift_right(const uint128* x, size_t shift)
