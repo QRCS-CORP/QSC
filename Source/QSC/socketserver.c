@@ -211,7 +211,7 @@ static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state
 			if (state->callback != NULL)
 			{
 				state->callback(&ar);
-				qsc_async_thread_create(&qsc_socket_server_accept_invoke, state);
+				qsc_async_thread_create((void(*)(void*))&qsc_socket_server_accept_invoke, state);
 			}
 		}
 		else
@@ -287,7 +287,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv4(qsc_socket_server_asyn
 				if (res == qsc_socket_exception_success)
 				{
 					state->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_create(&qsc_socket_server_accept_invoke, state);
+					qsc_async_thread_create((void(*)(void*))&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}
@@ -329,7 +329,7 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_asyn
 				if (res == qsc_socket_exception_success)
 				{
 					state->source->connection_status = qsc_socket_state_listening;
-					qsc_async_thread_create(&qsc_socket_server_accept_invoke, state);
+					qsc_async_thread_create((void(*)(void*))&qsc_socket_server_accept_invoke, state);
 				}
 			}
 		}
