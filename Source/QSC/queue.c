@@ -10,7 +10,7 @@ void qsc_queue_dispose(qsc_queue_state* ctx)
 
 	if (ctx != NULL)
 	{
-		for (size_t i = 0; i < ctx->depth; ++i)
+		for (size_t i = 0U; i < ctx->depth; ++i)
 		{
 			if (ctx->queue[i] != NULL)
 			{
@@ -35,7 +35,7 @@ void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output)
 
 	if (ctx->queue != NULL)
 	{
-		for (size_t i = 0; i < ctx->position; ++i)
+		for (size_t i = 0U; i < ctx->position; ++i)
 		{
 			if (ctx->queue[i] != NULL)
 			{
@@ -59,7 +59,7 @@ void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width)
 
 	if (ctx->queue != NULL)
 	{
-		for (size_t i = 0; i < depth; ++i)
+		for (size_t i = 0U; i < depth; ++i)
 		{
 			ctx->queue[i] = qsc_memutils_aligned_alloc(QSC_QUEUE_ALIGNMENT, width);
 

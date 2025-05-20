@@ -6,23 +6,23 @@
 \def RCS256_ROUND_COUNT
 * The number of Rijndael mixing rounds used by RCS-256.
 */
-#define RCS256_ROUND_COUNT 22ULL
+#define RCS256_ROUND_COUNT 22UL
 
 /*!
 \def RCS512_ROUND_COUNT
 * The number of Rijndael ming rounds used by RCS-512.
 */
-#define RCS512_ROUND_COUNT 30ULL
+#define RCS512_ROUND_COUNT 30UL
 
 /*!
 \def RCS_ROUNDKEY_ELEMENT_SIZE
 * The round key element size in bytes.
 */
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
-#	define RCS_ROUNDKEY_ELEMENT_SIZE 16ULL
-#	define RCS_AVX512_BLOCK 64ULL
+#	define RCS_ROUNDKEY_ELEMENT_SIZE 16UL
+#	define RCS_AVX512_BLOCK 64UL
 #else
-#	define RCS_ROUNDKEY_ELEMENT_SIZE 4ULL
+#	define RCS_ROUNDKEY_ELEMENT_SIZE 4UL
 #	define RCS_PREFETCH_TABLES
 #endif
 
@@ -31,72 +31,72 @@
 * The size of the RCS-256 internal round-key array in bytes.
 * Use this macro to define the size of the round-key array in an qsc_rcs_state struct.
 */
-#define RCS256_ROUNDKEY_SIZE ((RCS256_ROUND_COUNT + 1) * (QSC_RCS_BLOCK_SIZE / RCS_ROUNDKEY_ELEMENT_SIZE))
+#define RCS256_ROUNDKEY_SIZE ((RCS256_ROUND_COUNT + 1U) * (QSC_RCS_BLOCK_SIZE / RCS_ROUNDKEY_ELEMENT_SIZE))
 
 /*!
 \def RCS512_ROUNDKEY_SIZE
 * The size of the RCS-512 internal round-key array in bytes.
 * Use this macro to define the size of the round-key array in an qsc_rcs_state struct.
 */
-#define RCS512_ROUNDKEY_SIZE ((RCS512_ROUND_COUNT + 1) * (QSC_RCS_BLOCK_SIZE / RCS_ROUNDKEY_ELEMENT_SIZE))
+#define RCS512_ROUNDKEY_SIZE ((RCS512_ROUND_COUNT + 1U) * (QSC_RCS_BLOCK_SIZE / RCS_ROUNDKEY_ELEMENT_SIZE))
 
 /*!
 \def RCS256_MKEY_LENGTH
 * The size of the hba-rhx256 mac key array
 */
-#define RCS256_MKEY_LENGTH 32ULL
+#define RCS256_MKEY_LENGTH 32UL
 
 /*!
 \def RCS512_MKEY_LENGTH
 * The size of the hba-rhx512 mac key array
 */
-#define RCS512_MKEY_LENGTH 64ULL
+#define RCS512_MKEY_LENGTH 64UL
 
 /*!
 \def RCS_NAME_LENGTH
 * The HBA implementation specific name array length.
 */
 #if defined(QSC_RCS_AUTHENTICATED)
-#define RCS_NAME_LENGTH 17ULL
+#define RCS_NAME_LENGTH 17UL
 #else
-#define RCS_NAME_LENGTH 13ULL
+#define RCS_NAME_LENGTH 13UL
 #endif
 
 /*!
 \def RCS_INFO_DEFLEN
 * The size in bytes of the internal default information string.
 */
-#define RCS_INFO_DEFLEN 9ULL
+#define RCS_INFO_DEFLEN 9UL
 
 #if defined(QSC_RCS_AUTHENTICATED)
 
 static const uint8_t rcs256_name[RCS_NAME_LENGTH] =
 {
-	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x52, 0x43, 0x53, 0x4B, 0x32, 0x35,
-	0x36
+	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x52U, 0x43U, 0x53U, 0x4BU, 0x32U, 0x35U,
+	0x36U
 };
 
 static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 {
-	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x52, 0x43, 0x53, 0x4B, 0x35, 0x31,
-	0x32
+	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x02U, 0x52U, 0x43U, 0x53U, 0x4BU, 0x35U, 0x31U,
+	0x32U
 };
 
 #	if defined(QSC_RCS_AUTH_KMACR12)
-#		define RCS_KMACR12_NAME_LENGTH 7
-		static const uint8_t rcs_kmacr12_name[RCS_KMACR12_NAME_LENGTH] = { 0x4B, 0x4D, 0x41, 0x43, 0x52, 0x31, 0x32 };
+#		define RCS_KMACR12_NAME_LENGTH 7UL
+		static const uint8_t rcs_kmacr12_name[RCS_KMACR12_NAME_LENGTH] = { 0x4BU, 0x4DU, 0x41U, 0x43U, 0x52U, 0x31U, 0x32U };
 #	endif
 
 #else
 
 static const uint8_t rcs256_name[RCS_NAME_LENGTH] =
 {
-	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x52, 0x43, 0x53
+	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x52U, 0x43U, 0x53U
 };
 
 static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 {
-	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x52, 0x43, 0x53
+	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x02U, 0x52U, 0x43U, 0x53U
 };
 
 #endif
@@ -112,12 +112,12 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2], const
 	const size_t RNDCNT = ctx->roundkeylen - 3;
 	size_t kctr;
 
-	__m128i blk1 = _mm_loadu_si128(&input[0]);
-	__m128i blk2 = _mm_loadu_si128(&input[1]);
+	__m128i blk1 = _mm_loadu_si128(&input[0U]);
+	__m128i blk2 = _mm_loadu_si128(&input[1U]);
 	__m128i tmp1;
 	__m128i tmp2;
 
-	kctr = 0;
+	kctr = 0U;
 	blk1 = _mm_xor_si128(blk1, ctx->roundkeys[kctr]);
 	++kctr;
 	blk2 = _mm_xor_si128(blk2, ctx->roundkeys[kctr]);
@@ -149,8 +149,8 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2], const
 	blk2 = _mm_aesenclast_si128(tmp2, ctx->roundkeys[kctr]);
 
 	/* store in output */
-	_mm_storeu_si128(&output[0], blk1);
-	_mm_storeu_si128(&output[1], blk2);
+	_mm_storeu_si128(&output[0U], blk1);
+	_mm_storeu_si128(&output[1U], blk2);
 }
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
@@ -158,10 +158,10 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2], const
 static void rcs_load2x128to512(const __m128i* k1, const __m128i* k2, __m512i* output)
 {
 	*output = _mm512_setzero_si512();
-	*output = _mm512_inserti32x4(*output, *k1, 0);
-	*output = _mm512_inserti32x4(*output, *k2, 1);
-	*output = _mm512_inserti32x4(*output, *k1, 2);
-	*output = _mm512_inserti32x4(*output, *k2, 3);
+	*output = _mm512_inserti32x4(*output, *k1, 0U);
+	*output = _mm512_inserti32x4(*output, *k2, 1U);
+	*output = _mm512_inserti32x4(*output, *k1, 2U);
+	*output = _mm512_inserti32x4(*output, *k2, 3U);
 }
 
 __m512i rcs_shuffle512(const __m512i* value, const __m512i* k0, const __m512i* k1, const __m512i* mask)
@@ -181,11 +181,11 @@ static void rcs_transform_512(qsc_rcs_state* ctx, __m512i* output, const __m512i
 		3, 2, 29, 28, 15, 30, 25, 24, 11, 10, 21, 20, 7, 6, 1, 16,
 		19, 18, 13, 12, 31, 14, 9, 8, 27, 26, 5, 4, 23, 22, 17, 0);
 
-	const size_t RNDCNT = (ctx->roundkeylen / 2) - 2;
+	const size_t RNDCNT = (ctx->roundkeylen / 2U) - 2U;
 	size_t kctr;
 	__m512i x;
 
-	kctr = 0;
+	kctr = 0U;
 	x = *input;
 	x = _mm512_xor_si512(x, ctx->roundkeysw[kctr]);
 
@@ -209,10 +209,10 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	const size_t HLFBLK = QSC_RCS_BLOCK_SIZE / 2;
+	const size_t HLFBLK = QSC_RCS_BLOCK_SIZE / 2U;
 	size_t oft;
 
-	oft = 0;
+	oft = 0U;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
@@ -257,39 +257,39 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 	while (length >= QSC_RCS_BLOCK_SIZE)
 	{
-		__m128i tmpn[2] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
-		__m128i tmpo[2] = { 0U };
+		__m128i tmpn[2U] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
+		__m128i tmpo[2U] = { 0U };
 
 		rcs_transform_256(ctx, tmpo, tmpn);
 
-		__m128i tmpi[2] = { _mm_loadu_si128((const __m128i*)(input + oft)) , _mm_loadu_si128((const __m128i*)(input + HLFBLK + oft)) };
+		__m128i tmpi[2U] = { _mm_loadu_si128((const __m128i*)(input + oft)) , _mm_loadu_si128((const __m128i*)(input + HLFBLK + oft)) };
 
-		tmpo[0] = _mm_xor_si128(tmpo[0], tmpi[0]);
-		tmpo[1] = _mm_xor_si128(tmpo[1], tmpi[1]);
+		tmpo[0U] = _mm_xor_si128(tmpo[0], tmpi[0]);
+		tmpo[1U] = _mm_xor_si128(tmpo[1], tmpi[1]);
 
 		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
 
 		/* store in output */
-		_mm_storeu_si128((__m128i*)(output + oft), tmpo[0]);
-		_mm_storeu_si128((__m128i*)(output + HLFBLK + oft), tmpo[1]);
+		_mm_storeu_si128((__m128i*)(output + oft), tmpo[0U]);
+		_mm_storeu_si128((__m128i*)(output + HLFBLK + oft), tmpo[1U]);
 
 		length -= QSC_RCS_BLOCK_SIZE;
 		oft += QSC_RCS_BLOCK_SIZE;
 	}
 
-	if (length != 0)
+	if (length != 0U)
 	{
-		__m128i tmpn[2] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
-		__m128i tmpo[2] = { 0U };
+		__m128i tmpn[2U] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
+		__m128i tmpo[2U] = { 0U };
 		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0U };
 
 		rcs_transform_256(ctx, tmpo, tmpn);
 
 		/* store in tmp */
-		_mm_storeu_si128((__m128i*)tmpb, tmpo[0]);
+		_mm_storeu_si128((__m128i*)tmpb, tmpo[0U]);
 		_mm_storeu_si128((__m128i*)((uint8_t*)tmpb + HLFBLK), tmpo[1]);
 
-		for (size_t i = 0; i < length; ++i)
+		for (size_t i = 0U; i < length; ++i)
 		{
 			output[oft + i] = tmpb[i] ^ input[oft + i];
 		}
@@ -311,37 +311,37 @@ static inline void rcs_swapn(uint32_t cl, uint32_t ch, uint32_t s, uint32_t* x, 
 static inline void rcs_swap2(uint32_t* x, uint32_t* y)
 {
 	/* 0101… / 1010…  (1-bit lanes) */
-	rcs_swapn(0x55555555U, 0xAAAAAAAAU, 1, x, y);
+	rcs_swapn(0x55555555U, 0xAAAAAAAAU, 1U, x, y);
 }
 
 static inline void rcs_swap4(uint32_t* x, uint32_t* y)
 {
 	/* 0011… / 1100…  (2-bit lanes) */
-	rcs_swapn(0x33333333U, 0xCCCCCCCCU, 2, x, y);
+	rcs_swapn(0x33333333U, 0xCCCCCCCCU, 2U, x, y);
 }
 
 static inline void rcs_swap8(uint32_t* x, uint32_t* y)
 {
 	/* 0000 1111… / 1111 0000…  (4-bit lanes) */
-	rcs_swapn(0x0F0F0F0FU, 0xF0F0F0F0U, 4, x, y);
+	rcs_swapn(0x0F0F0F0FU, 0xF0F0F0F0U, 4U, x, y);
 }
 
 static void rcs_ct_ortho(uint32_t* q)
 {
-	rcs_swap2(&q[0], &q[1]);
-	rcs_swap2(&q[2], &q[3]);
-	rcs_swap2(&q[4], &q[5]);
-	rcs_swap2(&q[6], &q[7]);
+	rcs_swap2(&q[0U], &q[1U]);
+	rcs_swap2(&q[2U], &q[3U]);
+	rcs_swap2(&q[4U], &q[5U]);
+	rcs_swap2(&q[6U], &q[7U]);
 
-	rcs_swap4(&q[0], &q[2]);
-	rcs_swap4(&q[1], &q[3]);
-	rcs_swap4(&q[4], &q[6]);
-	rcs_swap4(&q[5], &q[7]);
+	rcs_swap4(&q[0U], &q[2U]);
+	rcs_swap4(&q[1U], &q[3U]);
+	rcs_swap4(&q[4U], &q[6U]);
+	rcs_swap4(&q[5U], &q[7U]);
 
-	rcs_swap8(&q[0], &q[4]);
-	rcs_swap8(&q[1], &q[5]);
-	rcs_swap8(&q[2], &q[6]);
-	rcs_swap8(&q[3], &q[7]);
+	rcs_swap8(&q[0U], &q[4U]);
+	rcs_swap8(&q[1U], &q[5U]);
+	rcs_swap8(&q[2U], &q[6U]);
+	rcs_swap8(&q[3U], &q[7U]);
 }
 
 static void rcs_ct_sbox(uint32_t* q)
@@ -481,14 +481,14 @@ static void rcs_ct_sbox(uint32_t* q)
 	uint32_t z16;
 	uint32_t z17;
 
-	x0 = q[7];
-	x1 = q[6];
-	x2 = q[5];
-	x3 = q[4];
-	x4 = q[3];
-	x5 = q[2];
-	x6 = q[1];
-	x7 = q[0];
+	x0 = q[7U];
+	x1 = q[6U];
+	x2 = q[5U];
+	x3 = q[4U];
+	x4 = q[3U];
+	x5 = q[2U];
+	x6 = q[1U];
+	x7 = q[0U];
 
 	/* top linear transformation */
 	y14 = x3 ^ x5;
@@ -625,109 +625,109 @@ static void rcs_ct_sbox(uint32_t* q)
 
 static void rcs_sub_bytes(uint8_t* ctx)
 {
-	uint32_t q[8] = { 0U };
+	uint32_t q[8U] = { 0U };
 
-	q[0] = ctx[0];
-	q[1] = ctx[1];
-	q[2] = ctx[2];
-	q[3] = ctx[3];
-	q[4] = ctx[4];
-	q[5] = ctx[5];
-	q[6] = ctx[6];
-	q[7] = ctx[7];
-
-	rcs_ct_ortho(q);
-	rcs_ct_sbox(q);
-	rcs_ct_ortho(q);
-
-	ctx[0] = (uint8_t)q[0];
-	ctx[1] = (uint8_t)q[1];
-	ctx[2] = (uint8_t)q[2];
-	ctx[3] = (uint8_t)q[3];
-	ctx[4] = (uint8_t)q[4];
-	ctx[5] = (uint8_t)q[5];
-	ctx[6] = (uint8_t)q[6];
-	ctx[7] = (uint8_t)q[7];
-
-	q[0] = ctx[8];
-	q[1] = ctx[9];
-	q[2] = ctx[10];
-	q[3] = ctx[11];
-	q[4] = ctx[12];
-	q[5] = ctx[13];
-	q[6] = ctx[14];
-	q[7] = ctx[15];
+	q[0U] = ctx[0U];
+	q[1U] = ctx[1U];
+	q[2U] = ctx[2U];
+	q[3U] = ctx[3U];
+	q[4U] = ctx[4U];
+	q[5U] = ctx[5U];
+	q[6U] = ctx[6U];
+	q[7U] = ctx[7U];
 
 	rcs_ct_ortho(q);
 	rcs_ct_sbox(q);
 	rcs_ct_ortho(q);
 
-	ctx[8] = (uint8_t)q[0];
-	ctx[9] = (uint8_t)q[1];
-	ctx[10] = (uint8_t)q[2];
-	ctx[11] = (uint8_t)q[3];
-	ctx[12] = (uint8_t)q[4];
-	ctx[13] = (uint8_t)q[5];
-	ctx[14] = (uint8_t)q[6];
-	ctx[15] = (uint8_t)q[7];
+	ctx[0U] = (uint8_t)q[0U];
+	ctx[1U] = (uint8_t)q[1U];
+	ctx[2U] = (uint8_t)q[2U];
+	ctx[3U] = (uint8_t)q[3U];
+	ctx[4U] = (uint8_t)q[4U];
+	ctx[5U] = (uint8_t)q[5U];
+	ctx[6U] = (uint8_t)q[6U];
+	ctx[7U] = (uint8_t)q[7U];
 
-
-	q[0] = ctx[16];
-	q[1] = ctx[17];
-	q[2] = ctx[18];
-	q[3] = ctx[19];
-	q[4] = ctx[20];
-	q[5] = ctx[21];
-	q[6] = ctx[22];
-	q[7] = ctx[23];
-
-	rcs_ct_ortho(q);
-	rcs_ct_sbox(q);
-	rcs_ct_ortho(q);
-
-	ctx[16] = (uint8_t)q[0];
-	ctx[17] = (uint8_t)q[1];
-	ctx[18] = (uint8_t)q[2];
-	ctx[19] = (uint8_t)q[3];
-	ctx[20] = (uint8_t)q[4];
-	ctx[21] = (uint8_t)q[5];
-	ctx[22] = (uint8_t)q[6];
-	ctx[23] = (uint8_t)q[7];
-
-	q[0] = ctx[24];
-	q[1] = ctx[25];
-	q[2] = ctx[26];
-	q[3] = ctx[27];
-	q[4] = ctx[28];
-	q[5] = ctx[29];
-	q[6] = ctx[30];
-	q[7] = ctx[31];
+	q[0U] = ctx[8U];
+	q[1U] = ctx[9U];
+	q[2U] = ctx[10U];
+	q[3U] = ctx[11U];
+	q[4U] = ctx[12U];
+	q[5U] = ctx[13U];
+	q[6U] = ctx[14U];
+	q[7U] = ctx[15U];
 
 	rcs_ct_ortho(q);
 	rcs_ct_sbox(q);
 	rcs_ct_ortho(q);
 
-	ctx[24] = (uint8_t)q[0];
-	ctx[25] = (uint8_t)q[1];
-	ctx[26] = (uint8_t)q[2];
-	ctx[27] = (uint8_t)q[3];
-	ctx[28] = (uint8_t)q[4];
-	ctx[29] = (uint8_t)q[5];
-	ctx[30] = (uint8_t)q[6];
-	ctx[31] = (uint8_t)q[7];
+	ctx[8U] = (uint8_t)q[0U];
+	ctx[9U] = (uint8_t)q[1U];
+	ctx[10U] = (uint8_t)q[2U];
+	ctx[11U] = (uint8_t)q[3U];
+	ctx[12U] = (uint8_t)q[4U];
+	ctx[13U] = (uint8_t)q[5U];
+	ctx[14U] = (uint8_t)q[6U];
+	ctx[15U] = (uint8_t)q[7U];
+
+
+	q[0U] = ctx[16U];
+	q[1U] = ctx[17U];
+	q[2U] = ctx[18U];
+	q[3U] = ctx[19U];
+	q[4U] = ctx[20U];
+	q[5U] = ctx[21U];
+	q[6U] = ctx[22U];
+	q[7U] = ctx[23U];
+
+	rcs_ct_ortho(q);
+	rcs_ct_sbox(q);
+	rcs_ct_ortho(q);
+
+	ctx[16U] = (uint8_t)q[0U];
+	ctx[17U] = (uint8_t)q[1U];
+	ctx[18U] = (uint8_t)q[2U];
+	ctx[19U] = (uint8_t)q[3U];
+	ctx[20U] = (uint8_t)q[4U];
+	ctx[21U] = (uint8_t)q[5U];
+	ctx[22U] = (uint8_t)q[6U];
+	ctx[23U] = (uint8_t)q[7U];
+
+	q[0U] = ctx[24U];
+	q[1U] = ctx[25U];
+	q[2U] = ctx[26U];
+	q[3U] = ctx[27U];
+	q[4U] = ctx[28U];
+	q[5U] = ctx[29U];
+	q[6U] = ctx[30U];
+	q[7U] = ctx[31U];
+
+	rcs_ct_ortho(q);
+	rcs_ct_sbox(q);
+	rcs_ct_ortho(q);
+
+	ctx[24U] = (uint8_t)q[0U];
+	ctx[25U] = (uint8_t)q[1U];
+	ctx[26U] = (uint8_t)q[2U];
+	ctx[27U] = (uint8_t)q[3U];
+	ctx[28U] = (uint8_t)q[4U];
+	ctx[29U] = (uint8_t)q[5U];
+	ctx[30U] = (uint8_t)q[6U];
+	ctx[31U] = (uint8_t)q[7U];
 }
 
 static void rcs_add_roundkey(uint8_t* state, const uint32_t *skeys)
 {
 	uint32_t k;
 
-	for (size_t i = 0; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
+	for (size_t i = 0U; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
 	{
 		k = *skeys;
 		state[i] ^= (uint8_t)(k >> 24);
-		state[i + 1] ^= (uint8_t)(k >> 16) & 0xFFU;
-		state[i + 2] ^= (uint8_t)(k >> 8) & 0xFFU;
-		state[i + 3] ^= (uint8_t)k & 0xFFU;
+		state[i + 1U] ^= (uint8_t)(k >> 16) & 0xFFU;
+		state[i + 2U] ^= (uint8_t)(k >> 8) & 0xFFU;
+		state[i + 3U] ^= (uint8_t)k & 0xFFU;
 		++skeys;
 	}
 }
@@ -743,22 +743,22 @@ static void rcs_mix_columns(uint8_t* state)
 	uint32_t t2;
 	uint32_t t3;
 
-	for (size_t i = 0; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
+	for (size_t i = 0U; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
 	{
-		s0 = state[i + 0];
-		s1 = state[i + 1];
-		s2 = state[i + 2];
-		s3 = state[i + 3];
+		s0 = state[i + 0U];
+		s1 = state[i + 1U];
+		s2 = state[i + 2U];
+		s3 = state[i + 3U];
 
 		t0 = (s0 << 1) ^ s1 ^ (s1 << 1) ^ s2 ^ s3;
 		t1 = s0 ^ (s1 << 1) ^ s2 ^ (s2 << 1) ^ s3;
 		t2 = s0 ^ s1 ^ (s2 << 1) ^ s3 ^ (s3 << 1);
 		t3 = s0 ^ (s0 << 1) ^ s1 ^ s2 ^ (s3 << 1);
 
-		state[i + 0] = (uint8_t)(t0 ^ ((~(t0 >> 8) + 1) & 0x0000011BUL));
-		state[i + 1] = (uint8_t)(t1 ^ ((~(t1 >> 8) + 1) & 0x0000011BUL));
-		state[i + 2] = (uint8_t)(t2 ^ ((~(t2 >> 8) + 1) & 0x0000011BUL));
-		state[i + 3] = (uint8_t)(t3 ^ ((~(t3 >> 8) + 1) & 0x0000011BUL));
+		state[i + 0U] = (uint8_t)(t0 ^ ((~(t0 >> 8) + 1) & 0x0000011BUL));
+		state[i + 1U] = (uint8_t)(t1 ^ ((~(t1 >> 8) + 1) & 0x0000011BUL));
+		state[i + 2U] = (uint8_t)(t2 ^ ((~(t2 >> 8) + 1) & 0x0000011BUL));
+		state[i + 3U] = (uint8_t)(t3 ^ ((~(t3 >> 8) + 1) & 0x0000011BUL));
 	}
 }
 
@@ -766,41 +766,41 @@ static void rcs_shift_rows(uint8_t* state)
 {
 	uint8_t tmp;
 
-	tmp = state[1];
-	state[1] = state[5];
-	state[5] = state[9];
-	state[9] = state[13];
-	state[13] = state[17];
-	state[17] = state[21];
-	state[21] = state[25];
-	state[25] = state[29];
-	state[29] = tmp;
+	tmp = state[1U];
+	state[1U] = state[5U];
+	state[5U] = state[9U];
+	state[9U] = state[13U];
+	state[13U] = state[17U];
+	state[17U] = state[21U];
+	state[21U] = state[25U];
+	state[25U] = state[29U];
+	state[29U] = tmp;
 
-	tmp = state[2];
-	state[2] = state[14];
-	state[14] = state[26];
-	state[26] = state[6];
-	state[6] = state[18];
-	state[18] = state[30];
-	state[30] = state[10];
-	state[10] = state[22];
-	state[22] = tmp;
+	tmp = state[2U];
+	state[2U] = state[14U];
+	state[14U] = state[26U];
+	state[26U] = state[6U];
+	state[6U] = state[18U];
+	state[18U] = state[30U];
+	state[30U] = state[10U];
+	state[10U] = state[22U];
+	state[22U] = tmp;
 
-	tmp = state[3];
-	state[3] = state[19];
-	state[19] = tmp;
+	tmp = state[3U];
+	state[3U] = state[19U];
+	state[19U] = tmp;
 
-	tmp = state[7];
-	state[7] = state[23];
-	state[23] = tmp;
+	tmp = state[7U];
+	state[7U] = state[23U];
+	state[23U] = tmp;
 
-	tmp = state[11];
-	state[11] = state[27];
-	state[27] = tmp;
+	tmp = state[11U];
+	state[11U] = state[27U];
+	state[27U] = tmp;
 
-	tmp = state[15];
-	state[15] = state[31];
-	state[31] = tmp;
+	tmp = state[15U];
+	state[15U] = state[31U];
+	state[31U] = tmp;
 }
 
 static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input)
@@ -810,7 +810,7 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const u
 	qsc_memutils_copy(buf, input, QSC_RCS_BLOCK_SIZE);
 	rcs_add_roundkey(buf, ctx->roundkeys);
 
-	for (size_t i = 1; i < ctx->rounds; ++i)
+	for (size_t i = 1U; i < ctx->rounds; ++i)
 	{
 		rcs_sub_bytes(buf);
 		rcs_shift_rows(buf);
@@ -832,7 +832,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 	size_t oft;
 
-	oft = 0;
+	oft = 0U;
 
 	while (length >= QSC_RCS_BLOCK_SIZE)
 	{
@@ -844,13 +844,13 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 		oft += QSC_RCS_BLOCK_SIZE;
 	}
 
-	if (length != 0)
+	if (length != 0U)
 	{
 		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0U };
 
 		rcs_transform_256(ctx, tmpb, ctx->nonce);
 
-		for (size_t i = 0; i < length; ++i)
+		for (size_t i = 0U; i < length; ++i)
 		{
 			output[oft + i] = tmpb[i] ^ input[oft + i];
 		}
@@ -939,13 +939,13 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		/* initialize an instance of cSHAKE */
 		qsc_cshake_initialize(&kstate, qsc_keccak_rate_256, keyparams->key, keyparams->keylen, rcs256_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
 
-		oft = 0;
+		oft = 0U;
 		rlen = RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE;
 
-		while (rlen != 0)
+		while (rlen != 0U)
 		{
 			const size_t BLKLEN = (rlen > QSC_KECCAK_256_RATE) ? QSC_KECCAK_256_RATE : rlen;
-			qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1);
+			qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1U);
 			qsc_memutils_copy(tmpr + oft, sbuf, BLKLEN);
 
 			oft += BLKLEN;
@@ -953,17 +953,17 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		}
 
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
-		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1);
+		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1U);
 
 		/* copy p-rand bytes to round keys */
-		for (i = 0; i < RNKLEN; ++i)
+		for (i = 0U; i < RNKLEN; ++i)
 		{
 			ctx->roundkeys[i] = _mm_loadu_si128((const __m128i*)(tmpr + (i * sizeof(__m128i))));
 		}
 
 #else
 		/* realign in big endian format for ACS test vectors; RCS is the fallback to the AES-NI implementation */
-		for (i = 0; i < RCS256_ROUNDKEY_SIZE; ++i)
+		for (i = 0U; i < RCS256_ROUNDKEY_SIZE; ++i)
 		{
 			ctx->roundkeys[i] = qsc_intutils_be8to32(tmpr + (i * sizeof(uint32_t)));
 		}
@@ -971,18 +971,18 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 #if defined(QSC_RCS_AUTHENTICATED)
 		/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
-		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1);
+		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1U);
 		uint8_t mkey[RCS256_MKEY_LENGTH];
 		qsc_memutils_copy(mkey, sbuf, RCS256_MKEY_LENGTH);
 
 #	if defined(QSC_RCS_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
-		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0, 
+		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0U, 
 			rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #	elif defined(QSC_RCS_AUTH_KMACR24)
-		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0);
+		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0U);
 #	else
-		qsc_qmac_keyparams pk = { mkey, RCS256_MKEY_LENGTH, keyparams->nonce, QSC_RCS_NONCE_SIZE, NULL, 0, qsc_qmac_mode_256 };
+		qsc_qmac_keyparams pk = { mkey, RCS256_MKEY_LENGTH, keyparams->nonce, QSC_RCS_NONCE_SIZE, NULL, 0U, qsc_qmac_mode_256 };
 		qsc_qmac_initialize(&ctx->kstate, &pk);
 #	endif
 		/* clear the shake buffer */
@@ -996,29 +996,29 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		/* initialize an instance of cSHAKE */
 		qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, rcs512_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
 
-		oft = 0;
+		oft = 0U;
 		rlen = RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE;
 
-		while (rlen != 0)
+		while (rlen != 0U)
 		{
 			const size_t BLKLEN = (rlen > QSC_KECCAK_512_RATE) ? QSC_KECCAK_512_RATE : rlen;
-			qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1);
+			qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1U);
 			qsc_memutils_copy(tmpr + oft, sbuf, BLKLEN);
 			oft += BLKLEN;
 			rlen -= BLKLEN;
 		}
 
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
-		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1);
+		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1U);
 
 		/* copy p-rand bytes to round keys */
-		for (i = 0; i < RNKLEN; ++i)
+		for (i = 0U; i < RNKLEN; ++i)
 		{
 			ctx->roundkeys[i] = _mm_loadu_si128((const __m128i*)(tmpr + (i * sizeof(__m128i))));
 		}
 #else
 		/* realign in big endian format for ACS test vectors; RCS is the fallback to the AES-NI implementation */
-		for (i = 0; i < RCS512_ROUNDKEY_SIZE; ++i)
+		for (i = 0U; i < RCS512_ROUNDKEY_SIZE; ++i)
 		{
 			ctx->roundkeys[i] = qsc_intutils_be8to32(tmpr + (i * sizeof(uint32_t)));
 		}
@@ -1027,17 +1027,17 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #if defined(QSC_RCS_AUTHENTICATED)
 		uint8_t mkey[RCS512_MKEY_LENGTH];
 		/* use two permutation calls (no buffering) to seperate the cipher/mac key outputs to match the CEX implementation */
-		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1);
+		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1U);
 		qsc_memutils_copy(mkey, sbuf, RCS512_MKEY_LENGTH);
 
 #	if defined(QSC_RCS_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
-		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0, 
+		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0U, 
 			rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #	elif defined(QSC_RCS_AUTH_KMACR24)
-		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0);
+		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0U);
 #	else
-		qsc_qmac_keyparams pk = { mkey, RCS256_MKEY_LENGTH, keyparams->nonce, QSC_RCS_NONCE_SIZE, NULL, 0, qsc_qmac_mode_512 };
+		qsc_qmac_keyparams pk = { mkey, RCS256_MKEY_LENGTH, keyparams->nonce, QSC_RCS_NONCE_SIZE, NULL, 0U, qsc_qmac_mode_512 };
 		qsc_qmac_initialize(&ctx->kstate, &pk);
 #	endif
 		/* clear the shake buffer */
@@ -1050,9 +1050,9 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 	/* store the avx-512 round keys qsc_keccak_initialize_state*/
 	qsc_memutils_clear((uint8_t*)ctx->roundkeysw, sizeof(ctx->roundkeysw));
 
-	for (i = 0; i < ctx->roundkeylen; i += 2)
+	for (i = 0U; i < ctx->roundkeylen; i += 2U)
 	{
-		rcs_load2x128to512(&ctx->roundkeys[i], &ctx->roundkeys[i + 1], &ctx->roundkeysw[i / 2]);
+		rcs_load2x128to512(&ctx->roundkeys[i], &ctx->roundkeys[i + 1], &ctx->roundkeysw[i / 2U]);
 	}
 #	endif
 #endif
@@ -1082,10 +1082,10 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 
 		qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
 		qsc_memutils_clear(ctx->nonce, sizeof(ctx->nonce));
-		ctx->counter = 0;
+		ctx->counter = 0U;
 		ctx->ctype = RCS256;
-		ctx->roundkeylen = 0;
-		ctx->rounds = 0;
+		ctx->roundkeylen = 0U;
+		ctx->rounds = 0U;
 		ctx->encrypt = false;
 	}
 }
@@ -1100,7 +1100,7 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 	ctx->ctype = keyparams->keylen == QSC_RCS512_KEY_SIZE ? RCS512 : RCS256;
 	qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
 	qsc_memutils_copy(ctx->nonce, keyparams->nonce, QSC_RCS_NONCE_SIZE);
-	ctx->counter = 1;
+	ctx->counter = 1U;
 	ctx->encrypt = encryption;
 
 	if (ctx->ctype == RCS256)
@@ -1124,9 +1124,9 @@ void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t leng
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(data != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
-	if (length != 0)
+	if (length != 0U)
 	{
 		uint8_t code[sizeof(uint32_t)] = { 0U };
 

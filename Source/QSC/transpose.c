@@ -11,7 +11,7 @@ void qsc_transpose_bytes_to_native(uint32_t* output, const uint8_t* input, size_
 
 	qsc_intutils_clear32(output, (length + (sizeof(uint32_t) - 1)) / sizeof(uint32_t));
 
-	for (size_t i = 0; i < length; ++i)
+	for (size_t i = 0U; i < length; ++i)
 	{
 		j = length - 1 - i;
 		output[j / sizeof(uint32_t)] |= (uint32_t)input[i] << (8 * (j % sizeof(uint32_t)));
@@ -49,7 +49,7 @@ void qsc_transpose_native_to_bytes(uint8_t* output, const uint32_t* input, size_
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
 
-	for (size_t i = 0; i < length; ++i)
+	for (size_t i = 0U; i < length; ++i)
 	{
 		uint8_t b = (uint8_t)(length - 1 - i);
 		output[i] = (uint8_t)input[b / sizeof(uint32_t)] >> (8 * (b % sizeof(uint32_t)));

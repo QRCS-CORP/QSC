@@ -1001,7 +1001,7 @@ static void falcon_prng_init(falcon_prng_state* pctx, qsc_keccak_state* kctx)
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
 	qsc_memutils_copy(pctx->state, tmp, 14 * sizeof(uint32_t));
 #else
-	for (size_t i = 0; i < 14; i++)
+	for (size_t i = 0U; i < 14; i++)
 	{
 		uint32_t w;
 

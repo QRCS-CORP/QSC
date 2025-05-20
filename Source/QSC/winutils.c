@@ -250,7 +250,7 @@ static void winutils_get_error_description(char* result, size_t reslen)
 
     if (err != 0)
     {
-        for (size_t i = 0; i < sizeof(winutils_error_descriptions); ++i)
+        for (size_t i = 0U; i < sizeof(winutils_error_descriptions); ++i)
         {
             if (err == winutils_error_descriptions[i].error)
             {
@@ -302,7 +302,7 @@ size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char*
 
         first = true;
 
-        for (size_t i = 0; i < WINUTILS_ATTRIBUTE_SIZE; ++i)
+        for (size_t i = 0U; i < WINUTILS_ATTRIBUTE_SIZE; ++i)
         {
             if (attr & winutils_attribute_descriptions[i].attribute)
             {
@@ -764,7 +764,7 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
 
                     if (bval != NULL)
                     {
-                        for (size_t i = 0; i < slen / 2; ++i)
+                        for (size_t i = 0U; i < slen / 2; ++i)
                         {
                             sscanf_s(value + 2 * i, "%2hhx", &bval[i]);
                         }

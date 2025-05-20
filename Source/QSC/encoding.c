@@ -289,7 +289,7 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
 
                 len = 0;
 
-                for (size_t i = 0; i < bnum; ++i)
+                for (size_t i = 0U; i < bnum; ++i)
                 {
                     len = (len << 8) | buffer[1 + i];
                 }
@@ -532,7 +532,7 @@ size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buf
             {
                 buffer[0] = 0x80 | (uint8_t)bnum;
 
-                for (size_t i = 0; i < bnum; i++)
+                for (size_t i = 0U; i < bnum; i++)
                 {
                     /* big-endian order */
                     buffer[1 + i] = alen[bnum - 1 - i];
@@ -627,7 +627,7 @@ void encoding_ber_free_element(qsc_encoding_ber_element* element)
     {
         if (element->constructed)
         {
-            for (size_t i = 0; i < element->ccount; ++i) 
+            for (size_t i = 0U; i < element->ccount; ++i) 
             {
                 encoding_ber_free_element(element->children[i]);
             }
@@ -976,7 +976,7 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
     {
         res = true;
 
-        for (size_t i = 0; i < req; i++)
+        for (size_t i = 0U; i < req; i++)
         {
             char c1;
             char c2;
@@ -1046,7 +1046,7 @@ bool qsc_encoding_hex_encode(const uint8_t* input, size_t inplen, char* output, 
     {
         static const char hex_digits[] = "0123456789ABCDEF";
 
-        for (size_t i = 0; i < inplen; i++)
+        for (size_t i = 0U; i < inplen; i++)
         {
             output[2 * i] = hex_digits[(input[i] >> 4) & 0x0F];
             output[2 * i + 1] = hex_digits[input[i] & 0x0F];
@@ -1226,7 +1226,7 @@ bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, con
                 pidx += hdrlen;
 
                 /* write the base64 data, inserting newline characters every LINE_LENGTH characters */
-                for (size_t i = 0; i < b64len; i += LINE_LENGTH)
+                for (size_t i = 0U; i < b64len; i += LINE_LENGTH)
                 {
                     cnklen = (b64len - i >= LINE_LENGTH) ? LINE_LENGTH : (b64len - i);
 

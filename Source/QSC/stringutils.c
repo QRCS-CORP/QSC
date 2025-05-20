@@ -131,7 +131,7 @@ bool qsc_stringutils_compare_strings(const char* str1, const char* str2, size_t 
 
 	c = 0;
 
-	for (size_t i = 0; i < length; ++i)
+	for (size_t i = 0U; i < length; ++i)
 	{
 		c += str1[i] ^ str2[i];
 	}
@@ -282,7 +282,7 @@ size_t qsc_stringutils_formatting_count(const char* dest, size_t dstlen)
 
 	if (dest != NULL && dstlen > 0)
 	{
-		for (size_t i = 0; i < dstlen; ++i)
+		for (size_t i = 0U; i < dstlen; ++i)
 		{
 			if (dest[i] != ' ' && dest[i] != '\t' && dest[i] != '\n' && dest[i] != '\r')
 			{
@@ -305,7 +305,7 @@ size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char
 
 	if (source != NULL && dest != NULL && srclen > 0)
 	{
-		for (size_t i = 0; i < srclen; ++i)
+		for (size_t i = 0U; i < srclen; ++i)
 		{
 			if (dest[i] != ' ' && dest[i] != '\t' && dest[i] != '\n' && dest[i] != '\r')
 			{
@@ -478,7 +478,7 @@ bool qsc_stringutils_is_hex(const char* source, size_t srclen)
 	{
 		res = true;
 
-		for (size_t i = 0; i < srclen; ++i)
+		for (size_t i = 0U; i < srclen; ++i)
 		{
 			c = source[i];
 
@@ -508,7 +508,7 @@ bool qsc_stringutils_is_numeric(const char* source, size_t srclen)
 	{
 		res = true;
 
-		for (size_t i = 0; i < srclen; ++i)
+		for (size_t i = 0U; i < srclen; ++i)
 		{
 			c = source[i];
 
@@ -580,7 +580,7 @@ size_t qsc_stringutils_remove_null_chars(char* source, size_t srclen)
 	{
 		qsc_memutils_clear(scpy, srclen);
 
-		for (size_t i = 0; i < srclen; ++i)
+		for (size_t i = 0U; i < srclen; ++i)
 		{
 			if (source[i] != 0)
 			{
@@ -784,7 +784,7 @@ bool qsc_stringutils_string_compare(const char* str1, const char* str2, size_t l
 
 	if (strlen(str1) == strlen(str2))
 	{
-		for (size_t i = 0; i < length; ++i)
+		for (size_t i = 0U; i < length; ++i)
 		{
 			if (str1[i] != str2[i])
 			{
@@ -853,7 +853,7 @@ bool qsc_stringutils_strings_equal(const char* str1, const char* str2)
 
 	if (res == true)
 	{
-		for (size_t i = 0; i < slen; ++i)
+		for (size_t i = 0U; i < slen; ++i)
 		{
 			if (str1[i] != str2[i])
 			{
@@ -881,7 +881,7 @@ int32_t qsc_stringutils_string_to_int(const char* source)
 	len = strlen(source);
 #endif
 
-	for (size_t i = 0; i < len; ++i)
+	for (size_t i = 0U; i < len; ++i)
 	{
 		if (source[i] == '\0' || source[i] < 48 || source[i] > 57)
 		{
@@ -943,7 +943,7 @@ void qsc_stringutils_to_lowercase(char* source)
 		slen = qsc_stringutils_string_size(source) + 1;
 		_strlwr_s(source, slen);
 #else
-		for(size_t i = 0; i < strlen(source); ++i)
+		for(size_t i = 0U; i < strlen(source); ++i)
 		{
 			source[i] = tolower(source[i]);
 		}
@@ -1001,7 +1001,7 @@ void qsc_stringutils_to_uppercase(char* source)
 		slen = qsc_stringutils_string_size(source) + 1;
 		_strupr_s(source, slen);
 #else
-		for(size_t i = 0; i < strlen(source); ++i)
+		for(size_t i = 0U; i < strlen(source); ++i)
 		{
 			source[i] = toupper(source[i]);
 		}
@@ -1019,7 +1019,7 @@ size_t qsc_stringutils_whitespace_count(const char* source, size_t srclen)
 
 	if (source != NULL && srclen > 0)
 	{
-		for (size_t i = 0; i < srclen; ++i)
+		for (size_t i = 0U; i < srclen; ++i)
 		{
 			if (source[i] != ' ')
 			{
@@ -1042,7 +1042,7 @@ size_t qsc_stringutils_whitespace_filter(const char* source, size_t srclen, char
 
 	if (source != NULL && dest != NULL && srclen > 0)
 	{
-		for (size_t i = 0; i < srclen; ++i)
+		for (size_t i = 0U; i < srclen; ++i)
 		{
 			if (source[i] != ' ')
 			{

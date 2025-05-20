@@ -156,7 +156,7 @@ uint32_t qsc_netutils_atoi(const char* source)
 		len = strlen(source);
 #endif
 
-		for (size_t i = 0; i < len; ++i)
+		for (size_t i = 0U; i < len; ++i)
 		{
 			if (source[i] == '\0' || source[i] < 48 || source[i] > 57)
 			{

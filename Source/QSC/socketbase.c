@@ -632,7 +632,7 @@ uint32_t qsc_socket_receive_poll(const qsc_socket_receive_poll_state* state)
 
 	if (state != NULL)
 	{
-		for (size_t i = 0; i < state->count; ++i)
+		for (size_t i = 0U; i < state->count; ++i)
 		{
 			if (qsc_socket_is_connected(state->sockarr[i]))
 			{

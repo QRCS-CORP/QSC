@@ -235,7 +235,7 @@ bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qs
 
 	if (a != NULL && b != NULL)
 	{
-		for (size_t i = 0; i < sizeof(a->ipv4); ++i)
+		for (size_t i = 0U; i < sizeof(a->ipv4); ++i)
 		{
 			if (a->ipv4[i] != b->ipv4[i])
 			{
@@ -512,7 +512,7 @@ uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLE
 	int64_t pos;
 	uint8_t bits;
 
-	for (size_t i = 0; i < 4; ++i)
+	for (size_t i = 0U; i < 4; ++i)
 	{
 		pos = qsc_stringutils_find_string(tmp, ".");
 		ta[i] += qsc_stringutils_string_to_int(tmp);
@@ -542,7 +542,7 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 	{
 		const char tail[] = ".0.0.0";
 
-		for (size_t i = 0; i < 8; ++i)
+		for (size_t i = 0U; i < 8; ++i)
 		{
 			if (cidr == 0)
 			{
@@ -564,7 +564,7 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 
 		cidr -= 8;
 
-		for (size_t i = 0; i < 8; ++i)
+		for (size_t i = 0U; i < 8; ++i)
 		{
 			if (cidr == 0)
 			{
@@ -588,7 +588,7 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 
 		cidr -= 16;
 
-		for (size_t i = 0; i < 8; ++i)
+		for (size_t i = 0U; i < 8; ++i)
 		{
 			if (cidr == 0)
 			{
@@ -611,7 +611,7 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 
 		cidr -= 24;
 
-		for (size_t i = 0; i < 8; ++i)
+		for (size_t i = 0U; i < 8; ++i)
 		{
 			if (cidr == 0)
 			{
@@ -737,7 +737,7 @@ bool qsc_ipinfo_ipv6_address_is_equal(const qsc_ipinfo_ipv6_address* a, const qs
 
 	if (a != NULL && b != NULL)
 	{
-		for (size_t i = 0; i < sizeof(a->ipv6); ++i)
+		for (size_t i = 0U; i < sizeof(a->ipv6); ++i)
 		{
 			if (a->ipv6[i] != b->ipv6[i])
 			{

@@ -86,19 +86,19 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_CSG_256_SEED_SIZE
  * \brief The CSG-256 seed size in bytes.
  */
-#define QSC_CSG_256_SEED_SIZE 32ULL
+#define QSC_CSG_256_SEED_SIZE 32UL
 
 /*!
  * \def QSC_CSG_512_SEED_SIZE
  * \brief The CSG-512 seed size in bytes.
  */
-#define QSC_CSG_512_SEED_SIZE 64ULL
+#define QSC_CSG_512_SEED_SIZE 64UL
 
 /*!
  * \def QSC_CSG_RESEED_THRESHHOLD
  * \brief The re-seed threshold interval in bytes.
  */
-#define QSC_CSG_RESEED_THRESHHOLD 1024000ULL
+#define QSC_CSG_RESEED_THRESHHOLD 1024000UL
 
 /*!
  * \struct qsc_csg_state

@@ -5,7 +5,9 @@
 #include "sha3.h"
 #include "sysutils.h"
 
-static void acp_collect_statistics(uint8_t* seed)
+#define ACP_PRESEED_SIZE 64
+
+static void acp_collect_statistics(uint8_t stat[ACP_PRESEED_SIZE])
 {
 	const char* drv = "C:";
 	uint8_t buffer[1024U] = { 0U };
@@ -21,7 +23,7 @@ static void acp_collect_statistics(uint8_t* seed)
 	ts = qsc_sysutils_system_timestamp();
 
 	/* interspersed with time-stamps, as return from system calls has some entropy variability */
-	qsc_memutils_copy(buffer, (const uint8_t*)&ts, sizeof(uint64_t));
+	qsc_memutils_copy(buffer, &ts, sizeof(uint64_t));
 	oft = sizeof(uint64_t);
 	len = qsc_sysutils_computer_name(tname);
 
@@ -35,7 +37,7 @@ static void acp_collect_statistics(uint8_t* seed)
 
 	if ((oft + sizeof(uint32_t)) <= sizeof(buffer))
 	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&id, sizeof(uint32_t));
+		qsc_memutils_copy(buffer + oft, &id, sizeof(uint32_t));
 		oft += sizeof(uint32_t);
 	}
 
@@ -51,7 +53,7 @@ static void acp_collect_statistics(uint8_t* seed)
 
 	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
 	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
+		qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
 		oft += sizeof(uint64_t);
 	}
 
@@ -60,7 +62,7 @@ static void acp_collect_statistics(uint8_t* seed)
 
 	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
 	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
+		qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
 		oft += sizeof(uint64_t);
 	}
 
@@ -68,7 +70,7 @@ static void acp_collect_statistics(uint8_t* seed)
 
 	if ((oft + sizeof(dstate)) <= sizeof(buffer))
 	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&dstate, sizeof(dstate));
+		qsc_memutils_copy(buffer + oft, &dstate, sizeof(dstate));
 		oft += sizeof(dstate);
 	}
 
@@ -77,7 +79,7 @@ static void acp_collect_statistics(uint8_t* seed)
 
 	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
 	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
+		qsc_memutils_copy(buffer + oft, &ts, sizeof(uint64_t));
 		oft += sizeof(uint64_t);
 	}
 
@@ -85,23 +87,24 @@ static void acp_collect_statistics(uint8_t* seed)
 
 	if ((oft + sizeof(mstate)) <= sizeof(buffer))
 	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&mstate, sizeof(mstate));
+		qsc_memutils_copy(buffer + oft, &mstate, sizeof(mstate));
 	}
 
 	len = oft + sizeof(mstate);
 
 	/* compress the statistics */
-	qsc_sha3_compute512(seed, buffer, len);
+	qsc_sha3_compute512(stat, buffer, len);
 }
 
 bool qsc_acp_generate(uint8_t* output, size_t length)
 {
-	QSC_ASSERT(output != 0U);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0U);
 	QSC_ASSERT(length <= QSC_ACP_SEED_MAX);
 
 	uint8_t cust[64U] = { 0U };
 	uint8_t key[64U] = { 0U };
-	uint8_t stat[64U] = { 0U };
+	uint8_t stat[ACP_PRESEED_SIZE] = { 0U };
 	bool res;
 
 	/* collect timers and system stats, compressed as tertiary seed */

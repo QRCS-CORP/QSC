@@ -50,7 +50,7 @@ void qsc_threadpool_clear(qsc_threadpool_state* ctx)
 	{
 		if (ctx->tcount != 0)
 		{
-			for (size_t i = 0; i < ctx->tcount; ++i)
+			for (size_t i = 0U; i < ctx->tcount; ++i)
 			{
 				qsc_async_thread_terminate(ctx->tpool[i]);
 			}
@@ -70,7 +70,7 @@ void qsc_threadpool_initialize(qsc_threadpool_state* ctx)
 		qsc_memutils_clear(ctx->tpool, QSC_THREADPOOL_THREADS_MAX * sizeof(int32_t));
 		ctx->tcount = 0;
 
-		for (size_t i = 0; i < ctx->tcount; ++i)
+		for (size_t i = 0U; i < ctx->tcount; ++i)
 		{
 			ctx->tpool[i] = 0;
 		}
@@ -88,7 +88,7 @@ void qsc_threadpool_sort(qsc_threadpool_state* ctx)
 	{
 		cnt = 0;
 
-		for (size_t i = 0; i < QSC_THREADPOOL_THREADS_MAX; ++i)
+		for (size_t i = 0U; i < QSC_THREADPOOL_THREADS_MAX; ++i)
 		{
 			if (ctx->tpool[i] != 0)
 			{

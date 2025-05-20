@@ -103,7 +103,7 @@ static gf gf_sq2(gf in)
 	x = (x | (x << 6)) & Bf[1];
 	x = (x | (x << 3)) & Bf[0];
 
-	for (size_t i = 0; i < 4; ++i)
+	for (size_t i = 0U; i < 4; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -135,7 +135,7 @@ static gf gf_sq2mul(gf in, gf m)
 	x ^= (t1 * (t0 & 0x0000000100000010ULL)) << 12;
 	x ^= (t1 * (t0 & 0x0000000200000020ULL)) << 15;
 
-	for (size_t i = 0; i < 6; ++i)
+	for (size_t i = 0U; i < 6; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -315,7 +315,7 @@ static gf gf_sqmul(gf in, gf m)
 	x ^= (t1 * (t0 & 0x0000000000040010ULL)) << 4;
 	x ^= (t1 * (t0 & 0x0000000000080020ULL)) << 5;
 
-	for (size_t i = 0; i < 3; ++i)
+	for (size_t i = 0U; i < 3; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -615,7 +615,7 @@ static void root(gf* out, const gf* f, const gf* L)
 	/* input: polynomial f and list of field elements L
 	   output: out = [ f(a) for a in L ] */
 
-	for (size_t i = 0; i < MCELIECE_SYS_N; ++i)
+	for (size_t i = 0U; i < MCELIECE_SYS_N; ++i)
 	{
 		out[i] = eval(f, L[i]);
 	}
@@ -634,7 +634,7 @@ static void synd(gf* out, const gf* f, const gf* L, const uint8_t* r)
 
 	qsc_memutils_clear(out, 2 * MCELIECE_SYS_T * sizeof(gf));
 
-	for (size_t i = 0; i < MCELIECE_SYS_N; ++i)
+	for (size_t i = 0U; i < MCELIECE_SYS_N; ++i)
 	{
 		c = (r[i / 8] >> (i % 8)) & 1;
 		e = eval(f, L[i]);
@@ -675,7 +675,7 @@ static void transpose_64x64(uint64_t* out, const uint64_t* in)
 	{
 		s = 1 << d;
 
-		for (size_t i = 0; i < 64; i += (size_t)s * 2)
+		for (size_t i = 0U; i < 64; i += (size_t)s * 2)
 		{
 			for (size_t j = i; j < i + s; ++j)
 			{
@@ -810,7 +810,7 @@ static void layer_in(uint64_t data[2][64], const uint64_t* bits, int32_t lgs)
 
 	s = 1 << lgs;
 
-	for (size_t i = 0; i < 64; i += (size_t)s * 2)
+	for (size_t i = 0U; i < 64; i += (size_t)s * 2)
 	{
 		for (size_t j = i; j < i + (size_t)s; ++j)
 		{
@@ -837,7 +837,7 @@ static void layer_ex(uint64_t* data, const uint64_t* bits, int32_t lgs)
 
 	s = 1 << lgs;
 
-	for (size_t i = 0; i < 128; i += (size_t)s * 2)
+	for (size_t i = 0U; i < 128; i += (size_t)s * 2)
 	{
 		for (size_t j = i; j < i + (size_t)s; j++)
 		{
@@ -1303,7 +1303,7 @@ static void cblayer(int16_t* p, const uint8_t* cb, int32_t s, int32_t n)
 
 	index = 0;
 
-	for (size_t i = 0; i < (size_t)n; i += stride * 2)
+	for (size_t i = 0U; i < (size_t)n; i += stride * 2)
 	{
 		for (size_t j = 0; j < (size_t)stride; ++j)
 		{
@@ -1569,7 +1569,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 
 	qsc_memutils_clear(s, MCELIECE_SYND_BYTES);
 
-	for (size_t i = 0; i < MCELIECE_PK_NROWS; ++i)
+	for (size_t i = 0U; i < MCELIECE_PK_NROWS; ++i)
 	{
 		qsc_memutils_clear(row, MCELIECE_SYS_N / 8);
 
@@ -1637,7 +1637,7 @@ static int32_t check_pk_padding(const uint8_t* pk)
 
 	b = 0;
 
-	for (size_t i = 0; i < MCELIECE_PK_NROWS; i++)
+	for (size_t i = 0U; i < MCELIECE_PK_NROWS; i++)
 	{
 		b |= pk[i * MCELIECE_PK_ROW_BYTES + MCELIECE_PK_ROW_BYTES - 1];
 	}

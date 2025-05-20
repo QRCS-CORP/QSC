@@ -12,7 +12,7 @@ static int32_t ecdsabase_is_zero(const uint8_t* n, const size_t nlen)
 
 	d = 0;
 
-	for (size_t i = 0; i < nlen; ++i)
+	for (size_t i = 0U; i < nlen; ++i)
 	{
 		d |= n[i];
 	}
@@ -121,7 +121,7 @@ int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 
 	d = 0;
 
-	for (size_t i = 0; i < n; ++i)
+	for (size_t i = 0U; i < n; ++i)
 	{
 		d |= x[i] ^ y[i];
 	}

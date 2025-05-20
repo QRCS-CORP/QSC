@@ -23,7 +23,7 @@ static int32_t crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t
     ge25519_p3 A;
     fe25519 pk;
 
-    for (size_t i = 0; i < 32; ++i)
+    for (size_t i = 0U; i < 32; ++i)
     {
         t[i] = n[i];
     }
@@ -61,7 +61,7 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
 
     if (ed25519_small_order(p) == 0)
     {
-        for (size_t i = 0; i < 32; ++i)
+        for (size_t i = 0U; i < 32; ++i)
         {
             t[i] = n[i];
         }
@@ -134,7 +134,7 @@ static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const 
         return -1;
     }
 
-    for (size_t i = 0; i < EC25519_CURVE_SIZE; ++i)
+    for (size_t i = 0U; i < EC25519_CURVE_SIZE; ++i)
     {
         d |= q[i];
     }

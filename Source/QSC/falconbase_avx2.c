@@ -77,7 +77,7 @@ static void falcon_prng_refill(falcon_prng_state* p)
 	state[15] = init[15] = _mm256_xor_si256(_mm256_broadcastd_epi32(_mm_cvtsi32_si128(sw[11])), _mm256_loadu_si256((const __m256i*)&w[8]));
 
 	/* Do all rounds */
-	for (size_t i = 0; i < 10; ++i)
+	for (size_t i = 0U; i < 10; ++i)
 	{
 		chacha_quarter_round(state, 0, 4, 8, 12);
 		chacha_quarter_round(state, 1, 5, 9, 13);

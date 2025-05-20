@@ -480,7 +480,7 @@ bool qsc_memutils_are_equal_128(const uint8_t* a, const uint8_t* b)
 
 	mctr = 0;
 
-	for (size_t i = 0; i < 16; ++i)
+	for (size_t i = 0U; i < 16; ++i)
 	{
 		mctr |= (a[i] ^ b[i]);
 	}
@@ -510,7 +510,7 @@ bool qsc_memutils_are_equal_256(const uint8_t* a, const uint8_t* b)
 
 	mctr = 0;
 
-	for (size_t i = 0; i < 32; ++i)
+	for (size_t i = 0U; i < 32; ++i)
 	{
 		mctr |= (a[i] ^ b[i]);
 	}
@@ -547,7 +547,7 @@ bool qsc_memutils_are_equal_512(const uint8_t* a, const uint8_t* b)
 
 	mctr = 0;
 
-	for (size_t i = 0; i < 64; ++i)
+	for (size_t i = 0U; i < 64; ++i)
 	{
 		mctr |= (a[i] ^ b[i]);
 	}
@@ -663,7 +663,7 @@ static inline void memutils_clmulepi64(uint64_t r[2], uint64_t x, uint64_t y)
     r[0] = 0;
     r[1] = 0;
 
-    for (size_t i = 0; i < 64; ++i)
+    for (size_t i = 0U; i < 64; ++i)
     {
         bit  = (x >> i) & 1ULL;
         mask = 0 - bit;
@@ -1012,7 +1012,7 @@ bool qsc_memutils_greater_than_le128(const uint8_t* a, const uint8_t* b)
 
 #else
 
-	for (size_t i = 0; i < 16; ++i)
+	for (size_t i = 0U; i < 16; ++i)
 	{
 		if (a[i] > b[i])
 		{

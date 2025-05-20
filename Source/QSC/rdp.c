@@ -4,20 +4,15 @@
 #include "intutils.h"
 #include "sysutils.h"
 
-#include "consoleutils.h"
-
-/* the number of times to read from the RDRAND/RDSEED RNGs; each read generates 32 bits of output */
-#define RDP_RNG_POLLS 32ULL
 /* RDRAND is guaranteed to generate a random number within 10 retries on a working CPU */
-#define RDP_RDR_RETRY 10ULL
-/* RDSEED is not guaranteed to generate a random number within a specific number of retries */
-#define RDP_RDS_RETRY 1000ULL
+#define RDP_RDR_RETRY 10U
 /* successful return of a rdrand step call */
-#define RDP_RDR_SUCCESS 1ULL
+#define RDP_RDR_SUCCESS 1L
 
 bool qsc_rdp_generate(uint8_t* output, size_t length)
 {
-	QSC_ASSERT(output != 0);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0U);
 	QSC_ASSERT(length <= QSC_RDP_SEED_MAX);
 
 	bool res;
@@ -27,19 +22,22 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 	qsc_cpuidex_cpu_features cfeat;
 	size_t ectr;
 	size_t pos;
+	size_t rmd;
 	int32_t fret;
 	bool hrand;
 	bool hfeat;
 
-	ectr = 0;
-	pos = 0;
-	res = true;
 	hfeat = qsc_cpuidex_features_set(&cfeat);
 	hrand = cfeat.rdrand;
 
-	if (hrand == true && hfeat == true)
+	if (hrand && hfeat)
 	{
-		while (length != 0)
+		ectr = 0U;
+		pos = 0U;
+		rmd = length;
+		res = true;
+
+		while (rmd != 0U)
 		{
 #	if defined(QSC_SYSTEM_IS_X64)
 			uint64_t rnd64;
@@ -48,22 +46,22 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 
 			if (fret == RDP_RDR_SUCCESS)
 			{
-				const size_t RMDLEN = qsc_intutils_min(sizeof(uint64_t), length);
+				const size_t RMDLEN = qsc_intutils_min(sizeof(uint64_t), rmd);
 
-				for (size_t i = 0; i < RMDLEN; ++i)
+				for (size_t i = 0U; i < RMDLEN; ++i)
 				{
-					output[pos + i] = (uint8_t)(rnd64 >> (i * 8));
+					output[pos + i] = (uint8_t)(rnd64 >> (i * 8U));
 				}
 
 				pos += RMDLEN;
-				length -= RMDLEN;
-				ectr = 0;
+				rmd -= RMDLEN;
+				ectr = 0U;
 			}
 			else
 			{
 				++ectr;
 
-				if (ectr > RDP_RDS_RETRY)
+				if (ectr > RDP_RDR_RETRY)
 				{
 					res = false;
 					break;
@@ -76,22 +74,22 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 
 			if (fret == RDP_RDR_SUCCESS)
 			{
-				const size_t RMDLEN = qsc_intutils_min(sizeof(uint32_t), length);
+				const size_t RMDLEN = qsc_intutils_min(sizeof(uint32_t), rmd);
 
-				for (size_t i = 0; i < RMDLEN; ++i)
+				for (size_t i = 0U; i < RMDLEN; ++i)
 				{
-					output[pos + i] = (uint8_t)(rnd32 >> (i * 8));
+					output[pos + i] = (uint8_t)(rnd32 >> (i * 8U));
 				}
 
 				pos += RMDLEN;
-				length -= RMDLEN;
-				ectr = 0;
+				rmd -= RMDLEN;
+				ectr = 0U;
 			}
 			else
 			{
 				++ectr;
 
-				if (ectr > RDP_RDS_RETRY)
+				if (ectr > RDP_RDR_RETRY)
 				{
 					res = false;
 					break;
@@ -99,6 +97,10 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 			}
 #	endif
 		}
+	}
+	else
+	{
+		res = false;
 	}
 
 #else
@@ -118,7 +120,7 @@ uint16_t qsc_rdp_uint16()
 	qsc_rdp_generate(arr, sizeof(arr));
 
 	num = (((uint16_t)arr[1]) | 
-		(uint16_t)((uint16_t)arr[0] << 8U));
+		(uint16_t)((uint16_t)arr[0U] << 8U));
 
 	return num;
 }
@@ -130,10 +132,10 @@ uint32_t qsc_rdp_uint32()
 
 	qsc_rdp_generate(arr, sizeof(arr));
 
-	num = (uint32_t)(arr[3]) |
-		(((uint32_t)(arr[2])) << 8) |
-		(((uint32_t)(arr[1])) << 16) |
-		(((uint32_t)(arr[0])) << 24);
+	num = (uint32_t)(arr[3U]) |
+		(((uint32_t)(arr[2U])) << 8) |
+		(((uint32_t)(arr[1U])) << 16) |
+		(((uint32_t)(arr[0U])) << 24);
 
 	return num;
 }
@@ -145,14 +147,14 @@ uint64_t qsc_rdp_uint64()
 
 	qsc_rdp_generate(arr, sizeof(arr));
 
-	num = (uint64_t)(arr[7]) |
-		(((uint64_t)(arr[6])) << 8) |
-		(((uint64_t)(arr[5])) << 16) |
-		(((uint64_t)(arr[4])) << 24) |
-		(((uint64_t)(arr[3])) << 32) |
-		(((uint64_t)(arr[2])) << 40) |
-		(((uint64_t)(arr[1])) << 48) |
-		(((uint64_t)(arr[0])) << 56);
+	num = (uint64_t)(arr[7U]) |
+		(((uint64_t)(arr[6U])) << 8) |
+		(((uint64_t)(arr[5U])) << 16) |
+		(((uint64_t)(arr[4U])) << 24) |
+		(((uint64_t)(arr[3U])) << 32) |
+		(((uint64_t)(arr[2U])) << 40) |
+		(((uint64_t)(arr[1U])) << 48) |
+		(((uint64_t)(arr[0U])) << 56);
 
 	return num;
 }

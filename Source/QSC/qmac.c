@@ -12,7 +12,7 @@
 
 static inline __m256i qmac_shift256_left_19(__m256i x)
 {
-    uint64_t lanes[4];
+    uint64_t lanes[4U];
     uint64_t carry;
 
     carry = 0;
@@ -22,7 +22,7 @@ static inline __m256i qmac_shift256_left_19(__m256i x)
     {
         uint64_t tmp = lanes[i];
         lanes[i] = (tmp << 19) | carry;
-        carry = tmp >> (64 - 19);
+        carry = tmp >> (64U - 19U);
     }
 
     /* The final carry contains the bits that overflowed past bit 255.
@@ -37,15 +37,15 @@ static inline __m256i qmac_shift256_left_19(__m256i x)
     return _mm256_loadu_si256((const __m256i*)lanes);
 }
 
-static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint64_t b[4])
+static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uint64_t b[4U])
 {
-    uint64_t prod[8] = { 0U };
+    uint64_t prod[8U] = { 0U };
 
     qsc_memutils_clmulepi64_si256(prod, a, b);
 
     /* load the lower 256 bits(prod[0..3]) and upper 256 bits(prod[4..7]) into __m256i vectors */
     __m256i L = _mm256_loadu_si256((const __m256i*)prod);
-    __m256i H = _mm256_loadu_si256((const __m256i*)(prod + 4));
+    __m256i H = _mm256_loadu_si256((const __m256i*)(prod + 4U));
 
     /* compute H << 19, with the fixed function that folds in the final carry */
     __m256i H_shift = qmac_shift256_left_19(H);
@@ -60,31 +60,31 @@ static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint6
 
 static inline void qmac_shift256_left_19(__m128i in[2], __m128i out[2])
 {
-    uint64_t lanes[4];
-    uint64_t carry = 0;
+    uint64_t lanes[4U];
+    uint64_t carry = 0U;
     
     /* extract the 256-bit value into four 64-bit lanes */
-    _mm_storeu_si128((__m128i*)lanes, in[0]);
-    _mm_storeu_si128((__m128i*)(lanes + 2), in[1]);
+    _mm_storeu_si128((__m128i*)lanes, in[0U]);
+    _mm_storeu_si128((__m128i*)(lanes + 2U), in[1U]);
     
-    for (int32_t i = 0; i < 4; i++) 
+    for (int32_t i = 0U; i < 4U; ++i) 
     {
         uint64_t tmp = lanes[i];
         lanes[i] = (tmp << 19) | carry;
-        carry = tmp >> (64 - 19);
+        carry = tmp >> (64U - 19U);
     }
     
     /* fold the final carry (overflow from lane 3) into lane 0
      * in GF(2) addition is xor; so we xor in the carry and carry<<19 */
-    lanes[0] ^= carry;
-    lanes[0] ^= carry << 19;
+    lanes[0U] ^= carry;
+    lanes[0U] ^= carry << 19;
     
     /* reload the lanes into two __m128i registers */
-    out[0] = _mm_loadu_si128((const __m128i*)lanes);
-    out[1] = _mm_loadu_si128((const __m128i*)(lanes + 2));
+    out[0U] = _mm_loadu_si128((const __m128i*)lanes);
+    out[1U] = _mm_loadu_si128((const __m128i*)(lanes + 2U));
 }
 
-static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint64_t b[4])
+static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uint64_t b[4U])
 {
     uint64_t prod[8] = { 0U };
     
@@ -92,59 +92,59 @@ static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint6
     qsc_memutils_clmulepi64_si256(prod, a, b);
     
     /* load the lower 256 bits(prod[0..3]) into two __m128i registers */
-    __m128i L[2];
+    __m128i L[2U];
     /* loads prod[0] and prod[1] */
     L[0] = _mm_loadu_si128((const __m128i*) prod);
     /* loads prod[2] and prod[3] */
-    L[1] = _mm_loadu_si128((const __m128i*)(prod + 2));
+    L[1] = _mm_loadu_si128((const __m128i*)(prod + 2U));
     
     /* load the upper 256 bits(prod[4..7]) into two __m128i registers */
-    __m128i H[2];
+    __m128i H[2U];
     /* loads prod[4] and prod[5] */
-    H[0] = _mm_loadu_si128((const __m128i*)(prod + 4));
+    H[0U] = _mm_loadu_si128((const __m128i*)(prod + 4U));
     /* loads prod[6] and prod[7] */
-    H[1] = _mm_loadu_si128((const __m128i*)(prod + 6));
+    H[1U] = _mm_loadu_si128((const __m128i*)(prod + 6U));
     
     /* compute H << 19 with proper carry propagation */
-    __m128i H_shift[2];
+    __m128i H_shift[2U];
     qmac_shift256_left_19(H, H_shift);
     
     /* reduction: compute red = H xor (H << 19) */
-    __m128i red0 = _mm_xor_si128(H[0], H_shift[0]);
-    __m128i red1 = _mm_xor_si128(H[1], H_shift[1]);
+    __m128i red0 = _mm_xor_si128(H[0U], H_shift[0U]);
+    __m128i red1 = _mm_xor_si128(H[1U], H_shift[1U]);
     
     /* final result : res = L xor red */
-    __m128i res0 = _mm_xor_si128(L[0], red0);
-    __m128i res1 = _mm_xor_si128(L[1], red1);
+    __m128i res0 = _mm_xor_si128(L[0U], red0);
+    __m128i res1 = _mm_xor_si128(L[1U], red1);
     
     /* store the final 256-bit result into the output array r */
     _mm_storeu_si128((__m128i*)r, res0);
-    _mm_storeu_si128((__m128i*)(r + 2), res1);
+    _mm_storeu_si128((__m128i*)(r + 2U), res1);
 }
 
 #else
 
 static void qmac_shift256_left_19_fold(const uint64_t in[4], int32_t shift, uint64_t out[4])
 {
-    uint64_t tmp[5];
-    uint64_t carry = 0;
+    uint64_t tmp[5U];
+    uint64_t carry = 0U;
 
-    for (size_t i = 0; i < 4; i++) 
+    for (size_t i = 0U; i < 4U; i++) 
     {
         uint64_t t = in[i];
         tmp[i] = (t << shift) | carry;
-        carry = t >> (64 - shift);
+        carry = t >> (64U - shift);
     }
 
-    tmp[4] = carry;
+    tmp[4U] = carry;
     /* fold the final carry into lane 0
      * in GF(2), addition is xor. Thus, for the final carry 'c', we do:
      * tmp[0] ^= c  and  tmp[0] ^= c << shift */
-    tmp[0] ^= tmp[4];
-    tmp[0] ^= tmp[4] << shift;
+    tmp[0U] ^= tmp[4U];
+    tmp[0U] ^= tmp[4U] << shift;
     
     /* return the lower 256 bits (words 0..3) */
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0U; i < 4U; i++)
     {
         out[i] = tmp[i];
     }
@@ -174,67 +174,67 @@ static void qmac_reduce_320_to_256_poly19(uint64_t x[5])
             x[word] ^= (1ULL << bit);
             shift = i - deg;
 
-            uint64_t poly320[5] = { 0U };
+            uint64_t poly320[5U] = { 0U };
             /* poly fits in one word */
-            poly320[0] = poly;
-            uint64_t pshift[5] = { 0U };
-            carry = 0;
+            poly320[0U] = poly;
+            uint64_t pshift[5U] = { 0U };
+            carry = 0U;
             
-            for (j = 0; j < 5; j++)
+            for (j = 0U; j < 5U; j++)
             {
                 tmp = poly320[j];
                 pshift[j] = (tmp << shift) | carry;
-                carry = tmp >> (64 - shift);
+                carry = tmp >> (64U - shift);
             }
             
-            for (j = 0; j < 5; j++)
+            for (j = 0U; j < 5U; j++)
             {
                 x[j] ^= pshift[j];
             }
         }
     }
 
-    x[4] = 0;
+    x[4] = 0U;
 }
 
 static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint64_t b[4])
 {
-    uint64_t prod[8] = { 0U };
+    uint64_t prod[8U] = { 0U };
 
     qsc_memutils_clmulepi64_si256(prod, a, b);
     
-    uint64_t pa[4];
-    uint64_t pb[4];
+    uint64_t pa[4U];
+    uint64_t pb[4U];
 
-    for (size_t i = 0; i < 4; ++i) 
+    for (size_t i = 0U; i < 4U; ++i) 
     {
         pa[i] = prod[i];
-        pb[i] = prod[i + 4];
+        pb[i] = prod[i + 4U];
     }
     
     /* build a 320-bit container for pb */
-    uint64_t b320[5] = { pb[0], pb[1], pb[2], pb[3], 0 };
+    uint64_t b320[5U] = { pb[0U], pb[1U], pb[2U], pb[3U], 0U };
     
     /* compute t19 = b320 << 19, with folding of the final carry */
-    uint64_t t19[4] = { 0U };
+    uint64_t t19[4U] = { 0U };
     qmac_shift256_left_19_fold(b320, 19, t19);
     
     /* form q320 = b320 xor t19. We build a 5-word result */
-    uint64_t q320[5];
+    uint64_t q320[5U];
 
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0U; i < 4U; i++)
     {
         q320[i] = b320[i] ^ t19[i];
     }
 
     /* typically zero after the shift and fold */
-    q320[4] = b320[4];
+    q320[4U] = b320[4U];
     
     /* reduce q320 modulo m(x) = x^256 + x^19 + 1 */
     qmac_reduce_320_to_256_poly19(q320);
     
     /* final result is r = pa xor (the reduced q320's lower 256 bits) */
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0U; i < 4U; i++)
     {
         r[i] = pa[i] ^ q320[i];
     }
@@ -244,18 +244,34 @@ static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint6
 
 static void qmac_block_update(qsc_qmac_state* ctx, const uint64_t* x)
 {
+#if defined(QSC_MISRA_FULL_COMPLIANCE)
+    for (size_t i = 0U; i < QSC_QMAC_BLOCK_SIZE / sizeof(uint64_t); ++i)
+    {
+        ctx->Y[i] ^= x[i];
+    }
+#else
 	/* y = y ^ x */
     qsc_memutils_xor((uint8_t*)ctx->Y, (uint8_t*)x, QSC_QMAC_BLOCK_SIZE);
+#endif
+
 	/* y = (y * h) mod P(y) */
     qmac_gfmul256_poly19(ctx->Y, ctx->H, ctx->Y);
 }
 
 static void qmac_compute_final(uint8_t* tag, qsc_qmac_state* ctx)
 {
+#if defined(QSC_MISRA_FULL_COMPLIANCE)
+    for (size_t i = 0U; i < QSC_QMAC_BLOCK_SIZE / sizeof(uint64_t); ++i)
+    {
+        ctx->Y[i] ^= ctx->F[i];
+    }
+#else
     /* apply the finalization key: y = y ^ f */
     qsc_memutils_xor((uint8_t*)ctx->Y, (uint8_t*)ctx->F, QSC_QMAC_BLOCK_SIZE);
+#endif
+
     /* copy the tag: t = y */
-	qsc_memutils_copy(tag, (uint8_t*)ctx->Y, QSC_QMAC_BLOCK_SIZE);
+	qsc_memutils_copy(tag, ctx->Y, QSC_QMAC_BLOCK_SIZE);
 }
 
 void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keyparams, const uint8_t* message, size_t msglen)
@@ -265,7 +281,7 @@ void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keyparams, const uint
     QSC_ASSERT(message != NULL);
     QSC_ASSERT(msglen != 0);
 
-    if (output != NULL && keyparams != NULL && message != NULL && msglen != 0)
+    if (output != NULL && keyparams != NULL && message != NULL && msglen != 0U)
     {
         qsc_qmac_state ctx = { 0U };
 
@@ -281,9 +297,9 @@ void qsc_qmac_dispose(qsc_qmac_state* ctx)
 
     if (ctx != NULL)
     {
-        qsc_memutils_clear((uint8_t*)ctx->F, QSC_QMAC_BLOCK_SIZE);
-        qsc_memutils_clear((uint8_t*)ctx->H, QSC_QMAC_BLOCK_SIZE);
-        qsc_memutils_clear((uint8_t*)ctx->Y, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_clear(ctx->F, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_clear(ctx->H, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_clear(ctx->Y, QSC_QMAC_BLOCK_SIZE);
         ctx->initialized = false;
     }
 }
@@ -310,7 +326,7 @@ void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
         qsc_keccak_state kstate = { 0U };
 	    uint8_t sbuf[QSC_KECCAK_256_RATE] = { 0U };
 
-        qsc_memutils_clear((uint8_t*)ctx->Y, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_clear(ctx->Y, QSC_QMAC_BLOCK_SIZE);
 
         if (keyparams->mode == qsc_qmac_mode_512)
         {
@@ -326,9 +342,9 @@ void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
         }
 
         /* copy the hash subkey */
-        qsc_memutils_copy((uint8_t*)ctx->H, sbuf, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_copy(ctx->H, sbuf, QSC_QMAC_BLOCK_SIZE);
         /* copy the finalization key */
-        qsc_memutils_copy((uint8_t*)ctx->F, sbuf + QSC_QMAC_BLOCK_SIZE, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_copy(ctx->F, sbuf + QSC_QMAC_BLOCK_SIZE, QSC_QMAC_BLOCK_SIZE);
 
         ctx->initialized = true;
     }
@@ -338,7 +354,7 @@ void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen)
 {
     QSC_ASSERT(ctx != NULL);
     QSC_ASSERT(message != NULL);
-    QSC_ASSERT(msglen != 0);
+    QSC_ASSERT(msglen != 0U);
 
 	size_t mlen;
 	size_t mpos;
@@ -347,13 +363,13 @@ void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen)
 
     if (ctx != NULL && message != NULL && msglen != 0 && ctx->initialized == true)
     {
-        while (msglen > 0)
+        while (msglen > 0U)
         {
-            uint64_t x[QSC_QMAC_STATE_SIZE] = { 0, 0, 0, 0 };
+            uint64_t x[QSC_QMAC_STATE_SIZE] = { 0U, 0U, 0U, 0U };
 
             /* copy the message bytes */
             mlen = msglen >= QSC_QMAC_BLOCK_SIZE ? QSC_QMAC_BLOCK_SIZE : msglen;
-            qsc_memutils_copy((uint8_t*)x, message + mpos, mlen);
+            qsc_memutils_copy(x, message + mpos, mlen);
             /* run the permutation */
             qmac_block_update(ctx, x);
             msglen -= mlen;

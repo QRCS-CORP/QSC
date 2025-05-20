@@ -1,32 +1,25 @@
 #include "csp.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#	include <Windows.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC) && !defined(__GNUC__)
-#	    pragma comment(lib, "advapi32.lib")
-#   endif
+#    pragma comment(lib, "Bcrypt.lib")
+#  include <Windows.h>
+#  include <bcrypt.h>
+#elif defined(QSC_SYSTEM_OS_LINUX)
+#  include <sys/random.h>
+#  include <errno.h>
+#  include <unistd.h>
+#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_APPLE)
+#  include <stdlib.h>
 #else
-#	include <sys/types.h>
-#	include <sys/stat.h>
-#	include <errno.h>
-#	include <fcntl.h>
-#	include <limits.h>
-#	include <stdlib.h>
-#	include <stdio.h>
-#	include <sys/types.h>
-#	include <unistd.h>
-#	if !defined(O_NOCTTY)
-#		define O_NOCTTY 0U
-#	endif
-#endif
-
-#if defined(__OpenBSD__) || defined(__CloudABI__) || defined(__wasi__)
-#	define HAVE_SAFE_ARC4RANDOM
+#  include <fcntl.h>
+#  include <unistd.h>
+#  include <errno.h>
 #endif
 
 bool qsc_csp_generate(uint8_t* output, size_t length)
 {
-	QSC_ASSERT(output != 0U);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0U);
 	QSC_ASSERT(length <= QSC_CSP_SEED_MAX);
 
 	bool res;
@@ -35,47 +28,88 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	HCRYPTPROV hprov;
-
-	if (CryptAcquireContextW(&hprov, 0U, 0U, PROV_RSA_FULL, (CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) == true)
-	{
-		if (CryptGenRandom(hprov, (DWORD)length, output) == false)
-		{
-			res = false;
-		}
-	}
-	else
+	if (BCryptGenRandom(NULL, output, (ULONG)length, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0)
 	{
 		res = false;
 	}
 
-	if (hprov != 0U)
-	{
-		CryptReleaseContext(hprov, 0U);
-	}
+#elif defined(QSC_SYSTEM_OS_LINUX)
 
-#elif defined(HAVE_SAFE_ARC4RANDOM)
+    ssize_t pos;
+    size_t  rmd;
+    uint8_t* ptr;
+
+	rmd = length;
+	ptr = output;
+
+    while (rmd > 0U)
+    {
+        pos = getrandom(ptr, rmd, 0U);
+
+        if (pos < 0)
+        {
+            if (errno == EINTR)
+            {
+                continue;
+            }
+
+            res = false;
+            break;
+        }
+
+        ptr  += (size_t)pos;
+        rmd -= (size_t)pos;
+    }
+
+#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_APPLE)
 
 	arc4random_buf(output, length);
 
 #else
 
-	int32_t fd = open("/dev/urandom", O_RDONLY);
+	int fd;
 
-	if (fd <= 0U)
+	/* fallback: read from /dev/urandom */
+
+	do
+	{
+		fd = open("/dev/urandom", O_RDONLY);
+	}
+	while ((fd < 0) && (errno == EINTR));
+
+	if (fd < 0)
 	{
 		res = false;
 	}
 	else
 	{
-		int32_t r = read(fd, output, length);
+		ssize_t pos;
+		size_t rmd;
+		uint8_t* ptr;
 
-		if (r != length)
+		rmd = length;
+		ptr = output;
+
+		while (rmd > 0U)
 		{
-			res = false;
+			pos = read(fd, ptr, rmd);
+
+			if (pos < 0)
+			{
+				if (errno == EINTR)
+				{
+					continue;
+				}
+
+				res = false;
+				break;
+			}
+
+			ptr += (size_t)pos;
+			rmd -= (size_t)pos;
 		}
 
-		close(fd);
+		(void)close(fd);
 	}
 
 #endif
@@ -90,7 +124,7 @@ uint16_t qsc_csp_uint16()
 
 	qsc_csp_generate(arr, sizeof(arr));
 
-	num = (((uint16_t)arr[1]) | 
+	num = (((uint16_t)arr[1U]) | 
 		(uint16_t)((uint16_t)arr[0U] << 8U));
 
 	return num;
@@ -103,9 +137,9 @@ uint32_t qsc_csp_uint32()
 
 	qsc_csp_generate(arr, sizeof(arr));
 
-	num = (uint32_t)(arr[3]) |
-		(((uint32_t)(arr[2])) << 8) |
-		(((uint32_t)(arr[1])) << 16) |
+	num = (uint32_t)(arr[3U]) |
+		(((uint32_t)(arr[2U])) << 8) |
+		(((uint32_t)(arr[1U])) << 16) |
 		(((uint32_t)(arr[0U])) << 24);
 
 	return num;
@@ -118,13 +152,13 @@ uint64_t qsc_csp_uint64()
 
 	qsc_csp_generate(arr, sizeof(arr));
 
-	num = (uint64_t)(arr[7]) |
-		(((uint64_t)(arr[6])) << 8) |
-		(((uint64_t)(arr[5])) << 16) |
-		(((uint64_t)(arr[4])) << 24) |
-		(((uint64_t)(arr[3])) << 32) |
-		(((uint64_t)(arr[2])) << 40) |
-		(((uint64_t)(arr[1])) << 48) |
+	num = (uint64_t)(arr[7U]) |
+		(((uint64_t)(arr[6U])) << 8) |
+		(((uint64_t)(arr[5U])) << 16) |
+		(((uint64_t)(arr[4U])) << 24) |
+		(((uint64_t)(arr[3U])) << 32) |
+		(((uint64_t)(arr[2U])) << 40) |
+		(((uint64_t)(arr[1U])) << 48) |
 		(((uint64_t)(arr[0U])) << 56);
 
 	return num;

@@ -178,7 +178,7 @@ void qsc_list_rshuffle(qsc_list_state* ctx)
 
 		if (pitm != NULL)
 		{
-			for (size_t i = 0; i < ctx->count; ++i)
+			for (size_t i = 0U; i < ctx->count; ++i)
 			{
 				/* random index in range current index to max index */
 				idx = (uint32_t)qsc_secrand_next_int32_maxmin((int32_t)ctx->count - 1, (int32_t)i);
@@ -293,7 +293,7 @@ void qsc_list_sort(qsc_list_state* ctx)
 		if (tmp != NULL)
 		{
 			/* sort the list as a little endian array */
-			for (size_t i = 0; i < ctx->count - 1; ++i)
+			for (size_t i = 0U; i < ctx->count - 1; ++i)
 			{
 				for (size_t j = i + 1; j < ctx->count; ++j)
 				{

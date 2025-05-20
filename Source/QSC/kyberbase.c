@@ -88,7 +88,7 @@ static void kyber_cbd2(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA2 * QSC
     int16_t a;
     int16_t b;
 
-    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 8; ++i)
     {
         t = qsc_intutils_le8to32(buf + (4 * i));
         d = t & 0x55555555UL;
@@ -238,7 +238,7 @@ static void kyber_poly_compress(uint8_t* r, const qsc_kyber_poly* a)
     int16_t u;
 
 #if (QSC_KYBER_POLYCOMPRESSED_BYTES == 128)
-    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 8; ++i)
     {
         for (size_t j = 0; j < 8; ++j)
         {
@@ -255,7 +255,7 @@ static void kyber_poly_compress(uint8_t* r, const qsc_kyber_poly* a)
         r += 4;
     }
 #elif (QSC_KYBER_POLYCOMPRESSED_BYTES == 160)
-    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 8; ++i)
     {
         for (size_t j = 0; j < 8; ++j)
         {
@@ -278,7 +278,7 @@ static void kyber_poly_compress(uint8_t* r, const qsc_kyber_poly* a)
 static void kyber_poly_decompress(qsc_kyber_poly* r, const uint8_t* a)
 {
 #if (QSC_KYBER_POLYCOMPRESSED_BYTES == 128)
-    for (size_t i = 0; i < QSC_KYBER_N / 2; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 2; ++i)
     {
         r->coeffs[2 * i] = (int16_t)((((uint16_t)(a[0] & 15) * QSC_KYBER_Q) + 8) >> 4);
         r->coeffs[(2 * i) + 1] = (int16_t)((((uint16_t)(a[0] >> 4) * QSC_KYBER_Q) + 8) >> 4);
@@ -287,7 +287,7 @@ static void kyber_poly_decompress(qsc_kyber_poly* r, const uint8_t* a)
 #elif (QSC_KYBER_POLYCOMPRESSED_BYTES == 160)
     uint8_t t[8];
 
-    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 8; ++i)
     {
         t[0] = (uint8_t)(a[0] >> 0);
         t[1] = (uint8_t)((a[0] >> 5) | (a[1] << 3));
@@ -312,7 +312,7 @@ static void kyber_poly_to_bytes(uint8_t r[QSC_KYBER_POLYBYTES], const qsc_kyber_
     uint16_t t0;
     uint16_t t1;
 
-    for (size_t i = 0; i < QSC_KYBER_N / 2; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 2; ++i)
     {
         /* map to positive standard representatives */
         t0 = a->coeffs[2 * i];
@@ -327,7 +327,7 @@ static void kyber_poly_to_bytes(uint8_t r[QSC_KYBER_POLYBYTES], const qsc_kyber_
 
 static void kyber_poly_from_bytes(qsc_kyber_poly* r, const uint8_t a[QSC_KYBER_POLYBYTES])
 {
-    for (size_t i = 0; i < QSC_KYBER_N / 2; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 2; ++i)
     {
         r->coeffs[2 * i] = (((a[3 * i] >> 0) | ((uint16_t)a[3 * i + 1] << 8)) & 0x0FFF);
         r->coeffs[(2 * i) + 1] = (((a[(3 * i) + 1] >> 4) | ((uint16_t)a[(3 * i) + 2] << 4)) & 0x0FFF);
@@ -338,7 +338,7 @@ static void kyber_poly_from_msg(qsc_kyber_poly* r, const uint8_t msg[QSC_KYBER_S
 {
     int16_t mask;
 
-    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 8; ++i)
     {
         for (size_t j = 0; j < 8; ++j)
         {
@@ -352,7 +352,7 @@ static void kyber_poly_to_msg(uint8_t msg[QSC_KYBER_SYMBYTES], const qsc_kyber_p
 {
     uint16_t t;
 
-    for (size_t i = 0; i < QSC_KYBER_N / 8; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 8; ++i)
     {
         msg[i] = 0;
 
@@ -392,7 +392,7 @@ static void kyber_poly_get_noise_eta2(qsc_kyber_poly* r, const uint8_t seed[QSC_
 
 static void kyber_poly_reduce(qsc_kyber_poly* r)
 {
-    for (size_t i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = kyber_barrett_reduce(r->coeffs[i]);
     }
@@ -411,7 +411,7 @@ static void kyber_poly_invntt_to_mont(qsc_kyber_poly* r)
 
 static void kyber_poly_basemul_montgomery(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
-    for (size_t i = 0; i < QSC_KYBER_N / 4; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N / 4; ++i)
     {
         kyber_basemul(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i], (int16_t)kyber_zetas[64 + i]);
         kyber_basemul(&r->coeffs[(4 * i) + 2], &a->coeffs[(4 * i) + 2], &b->coeffs[(4 * i) + 2], -(int16_t)kyber_zetas[64 + i]);
@@ -422,7 +422,7 @@ static void kyber_poly_to_mont(qsc_kyber_poly* r)
 {
     const int16_t F = (1ULL << 32) % QSC_KYBER_Q;
 
-    for (size_t i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = kyber_montgomery_reduce((int32_t)r->coeffs[i] * F);
     }
@@ -430,7 +430,7 @@ static void kyber_poly_to_mont(qsc_kyber_poly* r)
 
 static void kyber_poly_add(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
-    for (size_t i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
     }
@@ -438,7 +438,7 @@ static void kyber_poly_add(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc
 
 static void kyber_poly_sub(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
-    for (size_t i = 0; i < QSC_KYBER_N; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
     }
@@ -451,7 +451,7 @@ static void kyber_polyvec_compress(uint8_t r[QSC_KYBER_POLYVEC_COMPRESSED_BYTES]
 #if (QSC_KYBER_K == 4 || QSC_KYBER_K == 5)
 	uint16_t t[8];
 
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         for (size_t j = 0; j < QSC_KYBER_N / 8; ++j)
         {
@@ -479,7 +479,7 @@ static void kyber_polyvec_compress(uint8_t r[QSC_KYBER_POLYVEC_COMPRESSED_BYTES]
 #elif (QSC_KYBER_K == 2 || QSC_KYBER_K == 3)
 	uint16_t t[4];
 
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         for (size_t j = 0; j < QSC_KYBER_N / 4; ++j)
         {
@@ -507,7 +507,7 @@ static void kyber_polyvec_decompress(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
 
     uint16_t t[8];
 
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         for (size_t j = 0; j < QSC_KYBER_N / 8; ++j)
         {
@@ -532,7 +532,7 @@ static void kyber_polyvec_decompress(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
 
 	uint16_t t[4];
 
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         for (size_t j = 0; j < QSC_KYBER_N / 4; ++j)
         {
@@ -554,7 +554,7 @@ static void kyber_polyvec_decompress(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
 
 static void kyber_polyvec_to_bytes(uint8_t r[QSC_KYBER_POLYVEC_BYTES], const qsc_kyber_polyvec* a)
 {
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_to_bytes(r + (i * QSC_KYBER_POLYBYTES), &a->vec[i]);
     }
@@ -562,7 +562,7 @@ static void kyber_polyvec_to_bytes(uint8_t r[QSC_KYBER_POLYVEC_BYTES], const qsc
 
 static void kyber_polyvec_from_bytes(qsc_kyber_polyvec* r, const uint8_t a[QSC_KYBER_POLYVEC_BYTES])
 {
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_from_bytes(&r->vec[i], a + (i * QSC_KYBER_POLYBYTES));
     }
@@ -570,7 +570,7 @@ static void kyber_polyvec_from_bytes(qsc_kyber_polyvec* r, const uint8_t a[QSC_K
 
 static void kyber_polyvec_ntt(qsc_kyber_polyvec* r)
 {
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_ntt(&r->vec[i]);
     }
@@ -578,7 +578,7 @@ static void kyber_polyvec_ntt(qsc_kyber_polyvec* r)
 
 static void kyber_polyvec_invntt_to_mont(qsc_kyber_polyvec* r)
 {
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_invntt_to_mont(&r->vec[i]);
     }
@@ -601,7 +601,7 @@ static void kyber_polyvec_basemul_acc_montgomery(qsc_kyber_poly* r, const qsc_ky
 
 static void kyber_polyvec_reduce(qsc_kyber_polyvec* r)
 {
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_reduce(&r->vec[i]);
     }
@@ -609,7 +609,7 @@ static void kyber_polyvec_reduce(qsc_kyber_polyvec* r)
 
 static void kyber_polyvec_add(qsc_kyber_polyvec* r, const qsc_kyber_polyvec* a, const qsc_kyber_polyvec* b)
 {
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         kyber_poly_add(&r->vec[i], &a->vec[i], &b->vec[i]);
     }
@@ -694,7 +694,7 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
 
     qsc_memutils_copy(extseed, seed, QSC_KYBER_SYMBYTES);
 
-    for (size_t i = 0; i < QSC_KYBER_K; ++i)
+    for (size_t i = 0U; i < QSC_KYBER_K; ++i)
     {
         for (size_t j = 0; j < QSC_KYBER_K; ++j)
         {
@@ -916,7 +916,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
 	qsc_memutils_copy(ss, (uint8_t*)kctx.state, QSC_KYBER_SYMBYTES);
 #else
-	for (size_t i = 0; i < QSC_KYBER_SYMBYTES / sizeof(uint64_t); ++i)
+	for (size_t i = 0U; i < QSC_KYBER_SYMBYTES / sizeof(uint64_t); ++i)
 	{
 		qsc_intutils_le64to8((output + sizeof(uint64_t) * i), ctx->state[i]);
 	}

@@ -59,7 +59,7 @@ static const char* fileutils_file_get_attribute_string(DWORD attr)
 
     satr = NULL;
 
-    for (size_t i = 0; i < sizeof(fileutils_attribute_descriptions) / sizeof(fileutils_attribute_descriptions[0]); ++i)
+    for (size_t i = 0U; i < sizeof(fileutils_attribute_descriptions) / sizeof(fileutils_attribute_descriptions[0]); ++i)
     {
         if (attr & fileutils_attribute_descriptions[i].attribute)
         {

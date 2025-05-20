@@ -55,7 +55,7 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* con
             res = true;
 
             /* Process each task on a new thread */
-            for (size_t i = 0; i < nthreads; ++i)
+            for (size_t i = 0U; i < nthreads; ++i)
             {
                 tasks[i].task = task;
                 tasks[i].context = context;
@@ -79,7 +79,7 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* con
             }
 
             /* Wait for all threads to finish */
-            for (size_t i = 0; i < nthreads; ++i)
+            for (size_t i = 0U; i < nthreads; ++i)
             {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
                 if (threads[i] != NULL)
@@ -130,7 +130,7 @@ void qsc_async_launch_parallel_threads(void (*func)(void*), size_t count, ...)
         mtx = qsc_async_mutex_lock_ex();
         va_start(list, count);
 
-        for (size_t i = 0; i < count; ++i)
+        for (size_t i = 0U; i < count; ++i)
         {
             thds[i] = qsc_async_thread_create(func, va_arg(list, void*));
         }
@@ -381,7 +381,7 @@ void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)
         WaitForMultipleObjects((DWORD)count, handles, TRUE, INFINITE);
 #elif defined(QSC_SYSTEM_OS_POSIX)
         void* stg;
-        for (size_t i = 0; i < count; ++i)
+        for (size_t i = 0U; i < count; ++i)
         {
             pthread_join(handles[i], &stg);
         }

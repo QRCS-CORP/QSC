@@ -2,7 +2,6 @@
 #include "acp.h"
 #include "intutils.h"
 #include "memutils.h"
-#include "consoleutils.h"
 
 #define QSC_SCB_NAME_SIZE 8ULL
 
@@ -10,6 +9,8 @@ static char scb_name[QSC_SCB_NAME_SIZE] = "SCB v1.d";
 
 static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 {
+	QSC_ASSERT(indice != NULL);
+    QSC_ASSERT(count != 0U);
 	/* Calculates an indice that is always l2 cache-size distance between consecutive memory address indices.
 	   The number of lanes varies based on memcost, which is a multiple of MiB.
 	   A setting of 1 MiB will create 4 lanes, 2 MiB 8 lanes, 10 MiB is 40 lanes, etc. */
@@ -22,9 +23,9 @@ static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 	/* number of cache lines in each lane */
 	ccnt = count / lmul;
 
-	for (size_t i = 0; i < ccnt; ++i)
+	for (size_t i = 0U; i < ccnt; ++i)
 	{
-		for (size_t j = 0; j < lmul; ++j)
+		for (size_t j = 0U; j < lmul; ++j)
 		{
 			indice[(lmul * i) + j] = i + (j * ccnt);
 		}
@@ -33,13 +34,16 @@ static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 
 static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, qsc_keccak_state* hstate) 
 {
+	QSC_ASSERT(ctx != NULL);
+    QSC_ASSERT(buffer != NULL);
+
 	qsc_keccak_state kstate = { 0U };
 	size_t* indice;
 	size_t lcnt;
 	size_t oft;
 
     /* initialize SHAKE with the key */
-    qsc_cshake_initialize(&kstate, ctx->rate, ctx->ckey, ctx->klen, NULL, 0, NULL, 0);
+    qsc_cshake_initialize(&kstate, ctx->rate, ctx->ckey, ctx->klen, NULL, 0U, NULL, 0U);
 
 	/* get the number of cache lines */
 	lcnt = buflen / QSC_MEMUTILS_CACHE_LINE_SIZE;
@@ -59,7 +63,7 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 		scb_scatter_index_dynamic(indice, lcnt);
 
 		/* fill the buffer using the scattering pattern */
-		for (size_t i = 0; i < lcnt; ++i)
+		for (size_t i = 0U; i < lcnt; ++i)
 		{
 			qsc_shake_squeezeblocks(&kstate, ctx->rate, kblk, 1);
 			oft = indice[i] * QSC_MEMUTILS_CACHE_LINE_SIZE;
@@ -78,7 +82,7 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 			qsc_intutils_le64to8(bnum, lidx);
 			qsc_sha3_update(hstate, ctx->rate, bnum, sizeof(bnum));
 
-			if ((i + 1) % (QSC_SCB_L2CACHE_DEFAULT_SIZE / QSC_MEMUTILS_CACHE_LINE_SIZE) == 0)
+			if ((i + 1U) % (QSC_SCB_L2CACHE_DEFAULT_SIZE / QSC_MEMUTILS_CACHE_LINE_SIZE) == 0U)
 			{
 				/* at l2 cache-size intervals, add the entire buffer to the hash */
 				qsc_sha3_update(hstate, ctx->rate, buffer, buflen);
@@ -97,9 +101,9 @@ void qsc_scb_dispose(qsc_scb_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear(ctx->ckey, ctx->klen);
-		ctx->cpuc = 0;
-		ctx->klen = 0;
-		ctx->memc = 0;
+		ctx->cpuc = 0U;
+		ctx->klen = 0U;
+		ctx->memc = 0U;
 		ctx->rate = qsc_keccak_rate_none;
 	}
 }
@@ -139,7 +143,7 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 
 		/* intialize shake */
 		qsc_cshake_initialize(&kstate, ctx->rate, seed, seedlen, (uint8_t*)scb_name, QSC_SCB_NAME_SIZE, info, infolen);
-		qsc_shake_squeezeblocks(&kstate, ctx->rate, kbuf, 1);
+		qsc_shake_squeezeblocks(&kstate, ctx->rate, kbuf, 1U);
 		qsc_keccak_dispose(&kstate);
 		qsc_memutils_copy(ctx->ckey, kbuf, ctx->klen);
 		qsc_memutils_clear(kbuf, QSC_KECCAK_256_RATE);
@@ -150,9 +154,9 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(otplen != 0);
+	QSC_ASSERT(otplen != 0U);
 
-	if (ctx != NULL && output != NULL && otplen != 0)
+	if (ctx != NULL && output != NULL && otplen != 0U)
 	{
 		qsc_keccak_state hstate = { 0U };
 		uint8_t* cbuf;
@@ -168,7 +172,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 			qsc_memutils_clear(cbuf, clen);
 			qsc_sha3_initialize(&hstate);
 
-			for (size_t i = 0; i < ctx->cpuc; ++i)
+			for (size_t i = 0U; i < ctx->cpuc; ++i)
 			{
 				/* update the SHA3 hash with the key */
 				qsc_sha3_update(&hstate, ctx->rate, ctx->ckey, ctx->klen);
@@ -180,7 +184,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 
 			qsc_memutils_clear(cbuf, clen);
 			qsc_memutils_alloc_free(cbuf);
-			pos = 0;
+			pos = 0U;
 
 			/* initialize SHAKE with the derived key */
 			qsc_shake_initialize(&hstate, ctx->rate, ctx->ckey, ctx->klen);
@@ -191,7 +195,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 				const size_t plen = (otplen - pos > ctx->rate) ? ctx->rate : otplen - pos;
 
 				/* copy SHAKE blocks to the output */
-				qsc_shake_squeezeblocks(&hstate, ctx->rate, kblk, 1);
+				qsc_shake_squeezeblocks(&hstate, ctx->rate, kblk, 1U);
 				qsc_memutils_copy(output + pos, kblk, plen);
 				pos += plen;
 			}

@@ -275,7 +275,7 @@ static uint64_t sphincsplus_bytes_to_ull(const uint8_t* in, uint32_t inlen)
 
     ret = 0;
 
-    for (size_t i = 0; i < inlen; ++i)
+    for (size_t i = 0U; i < inlen; ++i)
     {
         ret |= ((uint64_t)in[i]) << (8 * (inlen - 1 - i));
     }
@@ -463,7 +463,7 @@ static void sphincsplus_thash(uint8_t* out, const uint8_t* in, uint32_t inblocks
         qsc_shake256_compute(bitmask, BLKLEN, buf, KEYLEN);
 #endif
 
-        for (size_t i = 0; i < BLKLEN; ++i)
+        for (size_t i = 0U; i < BLKLEN; ++i)
         {
             buf[KEYLEN + i] = in[i] ^ bitmask[i];
         }
@@ -501,7 +501,7 @@ static void sphincsplus_compute_root(uint8_t* root, const uint8_t* leaf, uint32_
 
     auth_path += SPX_N;
 
-    for (size_t i = 0; i < tree_height - 1; ++i)
+    for (size_t i = 0U; i < tree_height - 1; ++i)
     {
         leaf_idx >>= 1;
         idx_offset >>= 1;
@@ -639,7 +639,7 @@ static void sphincsplus_message_to_indices(uint32_t* indices, const uint8_t* m)
 
     oft = 0;
 
-    for (size_t i = 0; i < SPX_FORS_TREES; ++i)
+    for (size_t i = 0U; i < SPX_FORS_TREES; ++i)
     {
         indices[i] = 0;
 
@@ -808,7 +808,7 @@ static void sphincsplus_wots_checksum(uint32_t* csum_base_w, const uint32_t* msg
     csum = 0;
 
     /* Compute checksum. */
-    for (size_t i = 0; i < SPX_WOTS_LEN1; ++i)
+    for (size_t i = 0U; i < SPX_WOTS_LEN1; ++i)
     {
         csum += SPX_WOTS_W - 1 - msg_base_w[i];
     }
@@ -836,7 +836,7 @@ static void sphincsplus_wots_gen_pk(uint8_t* pk, const uint8_t* sk_seed, const u
        and the address of this WOTS key pair.
        Writes the computed public key to 'pk'. */
 
-    for (size_t i = 0; i < SPX_WOTS_LEN; ++i)
+    for (size_t i = 0U; i < SPX_WOTS_LEN; ++i)
     {
         sphincsplus_set_chain_addr(addr, (uint32_t)i);
         sphincsplus_wots_gen_sk(pk + i * SPX_N, sk_seed, addr);
@@ -852,7 +852,7 @@ static void sphincsplus_wots_sign(uint8_t* sig, const uint8_t* msg, const uint8_
 
     sphincsplus_chain_lengths(lengths, msg);
 
-    for (size_t i = 0; i < SPX_WOTS_LEN; ++i)
+    for (size_t i = 0U; i < SPX_WOTS_LEN; ++i)
     {
         sphincsplus_set_chain_addr(addr, (uint32_t)i);
         sphincsplus_wots_gen_sk(sig + i * SPX_N, sk_seed, addr);
@@ -869,7 +869,7 @@ static void sphincsplus_wots_pk_from_sig(uint8_t* pk, const uint8_t* sig, const 
 
     sphincsplus_chain_lengths(lengths, msg);
 
-    for (size_t i = 0; i < SPX_WOTS_LEN; ++i)
+    for (size_t i = 0U; i < SPX_WOTS_LEN; ++i)
     {
         sphincsplus_set_chain_addr(addr, (uint32_t)i);
         sphincsplus_gen_chain(pk + i * SPX_N, sig + i * SPX_N, lengths[i], SPX_WOTS_W - 1 - lengths[i], pubseed, addr);
@@ -1004,7 +1004,7 @@ void sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t*
     sphincsplus_fors_sign(sig, root, mhash, sk_seed, pubseed, wots_addr);
     sig += SPX_FORS_BYTES;
 
-    for (size_t i = 0; i < SPX_D; ++i)
+    for (size_t i = 0U; i < SPX_D; ++i)
     {
         sphincsplus_set_layer_addr(tree_addr, (uint32_t)i);
         sphincsplus_set_tree_addr(tree_addr, tree);

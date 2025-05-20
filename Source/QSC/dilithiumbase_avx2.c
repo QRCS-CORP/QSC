@@ -269,7 +269,7 @@ static void dilithium_avx2_power2round(int32_t* restrict a1, int32_t* restrict a
     const __m256i mask = _mm256_set1_epi32(-(int32_t)(1U << DILITHIUM_D));
     const __m256i half = _mm256_set1_epi32((1U << (DILITHIUM_D - 1)) - 1);
 
-    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
     {
         f = _mm256_load_si256((__m256i*)&a[8 * i]);
         f1 = _mm256_add_epi32(f, half);
@@ -295,7 +295,7 @@ static void dilithium_avx2_decompose(int32_t* restrict a1, int32_t* restrict a0,
     __m256i f0;
     __m256i f1;
 
-    for (size_t i = 0; i < DILITHIUM_N / 8; i++)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; i++)
     {
         f = _mm256_load_si256((__m256i*)&a[8 * i]);
         f1 = _mm256_add_epi32(f, off);
@@ -328,7 +328,7 @@ static void dilithium_avx2_decompose(int32_t* restrict a1, int32_t* restrict a0,
     __m256i f1;
     __m256i t;
 
-    for (size_t i = 0; i < DILITHIUM_N / 8; i++)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; i++)
     {
         f = _mm256_load_si256((__m256i*)&a[8 * i]);
         f1 = _mm256_add_epi32(f, off);
@@ -393,7 +393,7 @@ static uint32_t dilithium_avx2_make_hint(uint8_t hint[DILITHIUM_N], const dilith
 //
 //    dilithium_avx2_decompose(b, a0, a);
 //
-//    for (size_t i = 0; i < DILITHIUM_N / 8; i++)
+//    for (size_t i = 0U; i < DILITHIUM_N / 8; i++)
 //    {
 //        f = _mm256_load_si256((__m256i*)&a0[8 * i]);
 //        g = _mm256_load_si256((__m256i*)&b[8 * i]);
@@ -430,7 +430,7 @@ static void dilithium_avx2_use_hint(int32_t* b, const int32_t* a, const int32_t*
 
     dilithium_avx2_decompose(b, a0, a);
 
-    for (size_t i = 0; i < DILITHIUM_N / 8; i++)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; i++)
     {
         f = _mm256_load_si256((const __m256i*)&a0[i * 8]);
         g = _mm256_load_si256((const __m256i*)&b[i * 8]);
@@ -821,7 +821,7 @@ static void dilithium_avx2_poly_reduce(dilithium_poly* a)
     __m256i f;
     __m256i g;
 
-    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
     {
         f = _mm256_load_si256((__m256i*)&a->coeffs[8 * i]);
         g = _mm256_add_epi32(f, off);
@@ -839,7 +839,7 @@ static void dilithium_avx2_poly_caddq(dilithium_poly* a)
     __m256i f;
     __m256i g;
 
-    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
     {
         f = _mm256_load_si256((__m256i*)&a->coeffs[8 * i]);
         g = _mm256_blendv_epi32(zero, q, f);
@@ -853,7 +853,7 @@ static void dilithium_avx2_poly_add(dilithium_poly* c, const dilithium_poly* a, 
     __m256i vec0;
     __m256i vec1;
 
-    for (size_t i = 0; i < DILITHIUM_N; i += 8)
+    for (size_t i = 0U; i < DILITHIUM_N; i += 8)
     {
         vec0 = _mm256_load_si256((__m256i*)&a->coeffs[i]);
         vec1 = _mm256_load_si256((__m256i*)&b->coeffs[i]);
@@ -867,7 +867,7 @@ static void dilithium_avx2_poly_sub(dilithium_poly* c, const dilithium_poly* a, 
     __m256i vec0;
     __m256i vec1;
 
-    for (size_t i = 0; i < DILITHIUM_N; i += 8)
+    for (size_t i = 0U; i < DILITHIUM_N; i += 8)
     {
         vec0 = _mm256_load_si256((__m256i*)&a->coeffs[i]);
         vec1 = _mm256_load_si256((__m256i*)&b->coeffs[i]);
@@ -880,7 +880,7 @@ static void dilithium_avx2_poly_shiftl(dilithium_poly* a)
 {
     __m256i vec;
 
-    for (size_t i = 0; i < DILITHIUM_N; i += 8)
+    for (size_t i = 0U; i < DILITHIUM_N; i += 8)
     {
         vec = _mm256_load_si256((__m256i*)&a->coeffs[i]);
         vec = _mm256_slli_epi32(vec, DILITHIUM_D);
@@ -918,7 +918,7 @@ static int32_t dilithium_avx2_poly_chknorm(const dilithium_poly* a, int32_t B)
     {
         t = _mm256_setzero_si256();
 
-        for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+        for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
         {
             f = _mm256_load_si256((__m256i*)&a->coeffs[8 * i]);
             f = _mm256_abs_epi32(f);
@@ -981,7 +981,7 @@ static void dilithium_avx2_poly_uniform_eta_4x(dilithium_poly* a0, dilithium_pol
 static void dilithium_polyz_unpack(dilithium_poly* r, const uint8_t* a)
 {
 #if (DILITHIUM_GAMMA1 == (1 << 17))
-    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 4; ++i)
     {
         r->coeffs[4 * i] = a[9 * i];
         r->coeffs[4 * i] |= (uint32_t)a[(9 * i) + 1] << 8;
@@ -1009,7 +1009,7 @@ static void dilithium_polyz_unpack(dilithium_poly* r, const uint8_t* a)
         r->coeffs[(4 * i) + 3] = DILITHIUM_GAMMA1 - r->coeffs[(4 * i) + 3];
     }
 #elif (DILITHIUM_GAMMA1 == (1 << 19))
-    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 2; ++i)
     {
         r->coeffs[2 * i] = a[5 * i];
         r->coeffs[2 * i] |= (uint32_t)a[(5 * i) + 1] << 8;
@@ -1077,7 +1077,7 @@ void dilithium_avx2_polyw1_pack(uint8_t *r, const dilithium_poly * restrict a)
     const __m256i shufbidx = _mm256_set_epi8(-1, -1, -1, -1, 14, 13, 12, 10, 9, 8, 6, 5, 4, 2, 1, 0,
         -1, -1, -1, -1, 14, 13, 12, 10, 9, 8, 6, 5, 4, 2, 1, 0);
 
-    for (size_t i = 0; i < DILITHIUM_N / 32; i++) 
+    for (size_t i = 0U; i < DILITHIUM_N / 32; i++) 
     {
         f0 = _mm256_load_si256((__m256i*)&a->coeffs[32 * i]);
         f1 = _mm256_load_si256((__m256i*)&a->coeffs[32 * i + 8]);
@@ -1111,7 +1111,7 @@ void dilithium_avx2_polyw1_pack(uint8_t *r, const dilithium_poly * restrict a)
     const __m256i shufbidx = _mm256_set_epi8(15, 14, 7, 6, 13, 12, 5, 4, 11, 10, 3, 2, 9, 8, 1, 0,
         15, 14, 7, 6, 13, 12, 5, 4, 11, 10, 3, 2, 9, 8, 1, 0);
 
-    for (size_t i = 0; i < DILITHIUM_N / 64; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 64; ++i)
     {
         f0 = _mm256_load_si256((__m256i*)&a->coeffs[64 * i]);
         f1 = _mm256_load_si256((__m256i*)&a->coeffs[64 * i + 8]);
@@ -1224,7 +1224,7 @@ static void dilithium_poly_invntt_to_mont(dilithium_poly* a)
 
 static void dilithium_poly_pointwise_montgomery(dilithium_poly* c, const dilithium_poly* a, const dilithium_poly* b)
 {
-    for (size_t i = 0; i < DILITHIUM_N; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N; ++i)
     {
         c->coeffs[i] = dilithium_montgomery_reduce((int64_t)a->coeffs[i] * b->coeffs[i]);
     }
@@ -1283,7 +1283,7 @@ static void dilithium_polyeta_pack(uint8_t* r, const dilithium_poly* a)
     uint8_t t[8];
 
 #if DILITHIUM_ETA == 2
-    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
     {
         t[0] = DILITHIUM_ETA - a->coeffs[8 * i];
         t[1] = DILITHIUM_ETA - a->coeffs[8 * i + 1];
@@ -1299,7 +1299,7 @@ static void dilithium_polyeta_pack(uint8_t* r, const dilithium_poly* a)
         r[3 * i + 2] = (t[5] >> 1) | (t[6] << 2) | (t[7] << 5);
     }
 #elif DILITHIUM_ETA == 4
-    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 2; ++i)
     {
         t[0] = DILITHIUM_ETA - a->coeffs[2 * i];
         t[1] = DILITHIUM_ETA - a->coeffs[2 * i + 1];
@@ -1311,7 +1311,7 @@ static void dilithium_polyeta_pack(uint8_t* r, const dilithium_poly* a)
 static void dilithium_polyeta_unpack(dilithium_poly* r, const uint8_t* a)
 {
 #if (DILITHIUM_ETA == 2)
-    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
     {
         r->coeffs[8 * i] = (a[3 * i] >> 0) & 7;
         r->coeffs[(8 * i) + 1] = (a[3 * i] >> 3) & 7;
@@ -1332,7 +1332,7 @@ static void dilithium_polyeta_unpack(dilithium_poly* r, const uint8_t* a)
         r->coeffs[(8 * i) + 7] = DILITHIUM_ETA - r->coeffs[(8 * i) + 7];
     }
 #elif (DILITHIUM_ETA == 4)
-    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 2; ++i)
     {
         r->coeffs[2 * i] = a[i] & 0x0F;
         r->coeffs[(2 * i) + 1] = a[i] >> 4;
@@ -1344,7 +1344,7 @@ static void dilithium_polyeta_unpack(dilithium_poly* r, const uint8_t* a)
 
 static void dilithium_polyt1_pack(uint8_t* r, const dilithium_poly* a)
 {
-    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 4; ++i)
     {
         r[5 * i] = (uint8_t)(a->coeffs[4 * i] >> 0);
         r[(5 * i) + 1] = (uint8_t)((a->coeffs[4 * i] >> 8) | (a->coeffs[(4 * i) + 1] << 2));
@@ -1356,7 +1356,7 @@ static void dilithium_polyt1_pack(uint8_t* r, const dilithium_poly* a)
 
 static void dilithium_polyt1_unpack(dilithium_poly* r, const uint8_t* a)
 {
-    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 4; ++i)
     {
         r->coeffs[4 * i] = ((a[5 * i] >> 0) | ((uint32_t)a[(5 * i) + 1] << 8)) & 0x000003FF;
         r->coeffs[(4 * i) + 1] = ((a[(5 * i) + 1] >> 2) | ((uint32_t)a[(5 * i) + 2] << 6)) & 0x000003FF;
@@ -1369,7 +1369,7 @@ static void dilithium_polyt0_pack(uint8_t* r, const dilithium_poly* a)
 {
     uint32_t t[8];
 
-    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
     {
         t[0] = (1 << (DILITHIUM_D - 1)) - a->coeffs[8 * i];
         t[1] = (1 << (DILITHIUM_D - 1)) - a->coeffs[(8 * i) + 1];
@@ -1405,7 +1405,7 @@ static void dilithium_polyt0_pack(uint8_t* r, const dilithium_poly* a)
 
 static void dilithium_polyt0_unpack(dilithium_poly* r, const uint8_t* a)
 {
-    for (size_t i = 0; i < DILITHIUM_N / 8; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 8; ++i)
     {
         r->coeffs[8 * i] = a[13 * i];
         r->coeffs[8 * i] |= (uint32_t)a[(13 * i) + 1] << 8;
@@ -1459,7 +1459,7 @@ static void dilithium_polyz_pack(uint8_t* r, const dilithium_poly* a)
     uint32_t t[4];
 
 #if (DILITHIUM_GAMMA1 == (1 << 17))
-    for (size_t i = 0; i < DILITHIUM_N / 4; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 4; ++i)
     {
         t[0] = DILITHIUM_GAMMA1 - a->coeffs[4 * i];
         t[1] = DILITHIUM_GAMMA1 - a->coeffs[(4 * i) + 1];
@@ -1480,7 +1480,7 @@ static void dilithium_polyz_pack(uint8_t* r, const dilithium_poly* a)
         r[(9 * i) + 8] = (uint8_t)(t[3] >> 10);
     }
 #elif (DILITHIUM_GAMMA1 == (1 << 19))
-    for (size_t i = 0; i < DILITHIUM_N / 2; ++i)
+    for (size_t i = 0U; i < DILITHIUM_N / 2; ++i)
     {
         t[0] = DILITHIUM_GAMMA1 - a->coeffs[2 * i];
         t[1] = DILITHIUM_GAMMA1 - a->coeffs[(2 * i) + 1];
@@ -1702,7 +1702,7 @@ static void dilithium_polyvecl_pointwise_acc_montgomery(dilithium_poly* w, const
 
 static void dilithium_polyvecl_ntt(dilithium_polyvecl* v)
 {
-    for (size_t i = 0; i < DILITHIUM_L; ++i)
+    for (size_t i = 0U; i < DILITHIUM_L; ++i)
     {
         dilithium_poly_ntt(&v->vec[i]);
     }
@@ -1710,7 +1710,7 @@ static void dilithium_polyvecl_ntt(dilithium_polyvecl* v)
 
 static void dilithium_polyveck_ntt(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < DILITHIUM_K; ++i)
+    for (size_t i = 0U; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_ntt(&v->vec[i]);
     }
@@ -1754,7 +1754,7 @@ static void dilithium_unpack_sk(uint8_t rho[DILITHIUM_SEEDBYTES], uint8_t tr[DIL
 
 void polyvec_matrix_pointwise_montgomery(dilithium_polyveck* t, const dilithium_polyvecl mat[DILITHIUM_K], const dilithium_polyvecl* v)
 {
-  for (size_t i = 0; i < DILITHIUM_K; ++i)
+  for (size_t i = 0U; i < DILITHIUM_K; ++i)
   {
       dilithium_polyvecl_pointwise_acc_montgomery(&t->vec[i], &mat[i], v);
   }
@@ -1762,7 +1762,7 @@ void polyvec_matrix_pointwise_montgomery(dilithium_polyveck* t, const dilithium_
 
 static void dilithium_polyveck_invntt_to_mont(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < DILITHIUM_K; ++i)
+    for (size_t i = 0U; i < DILITHIUM_K; ++i)
     {
         dilithium_poly_invntt_to_mont(&v->vec[i]);
     }
@@ -1770,7 +1770,7 @@ static void dilithium_polyveck_invntt_to_mont(dilithium_polyveck* v)
 
 static void dilithium_avx2_polyveck_caddq(dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < DILITHIUM_K; ++i)
+    for (size_t i = 0U; i < DILITHIUM_K; ++i)
     {
         dilithium_avx2_poly_caddq(&v->vec[i]);
     }
@@ -1778,7 +1778,7 @@ static void dilithium_avx2_polyveck_caddq(dilithium_polyveck* v)
 
 static void dilithium_avx2_polyveck_decompose(dilithium_polyveck* v1, dilithium_polyveck* v0, const dilithium_polyveck* v)
 {
-    for (size_t i = 0; i < DILITHIUM_K; ++i)
+    for (size_t i = 0U; i < DILITHIUM_K; ++i)
     {
         dilithium_avx2_poly_decompose(&v1->vec[i], &v0->vec[i], &v->vec[i]);
     }
@@ -1786,7 +1786,7 @@ static void dilithium_avx2_polyveck_decompose(dilithium_polyveck* v1, dilithium_
 
 static void dilithium_avx2_polyveck_pack_w1(uint8_t r[DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES], const dilithium_polyveck* w1)
 {
-    for (size_t i = 0; i < DILITHIUM_K; ++i)
+    for (size_t i = 0U; i < DILITHIUM_K; ++i)
     {
         dilithium_avx2_polyw1_pack(&r[i * DILITHIUM_POLYW1_PACKEDBYTES], &w1->vec[i]);
     }
@@ -2070,7 +2070,7 @@ void qsc_dilithium_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_
             qsc_memutils_copy(prec + 2, context, contextlen);
         }
 
-        for (size_t i = 0; i < mlen; ++i)
+        for (size_t i = 0U; i < mlen; ++i)
         {
             sm[DILITHIUM_SIGNATURE_SIZE + mlen - 1 - i] = m[mlen - 1 - i];
         }

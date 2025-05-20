@@ -10,7 +10,7 @@ bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 
 	status = true;
 
-	for (size_t i = 0; i < length; ++i)
+	for (size_t i = 0U; i < length; ++i)
 	{
 		if (a[i] != b[i])
 		{
@@ -140,7 +140,7 @@ size_t qsc_intutils_bit_reverse(size_t x, uint32_t bits)
 {
     size_t y = 0;
 
-    for (size_t i = 0; i < bits; ++i) 
+    for (size_t i = 0U; i < bits; ++i) 
     {
         y = (y << 1) | (x & 1);
         x >>= 1;
@@ -157,7 +157,7 @@ void qsc_intutils_bswap32(uint32_t* dest, const uint32_t* source, size_t length)
 
 	__m128i mask = _mm_set_epi8(12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3);
 
-	for (size_t i = 0; i < length; i += 4)
+	for (size_t i = 0U; i < length; i += 4)
 	{
 		_mm_storeu_si128((__m128i*)&dest[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)&source[i]), mask));
 	}
@@ -170,7 +170,7 @@ void qsc_intutils_bswap64(uint64_t* dest, const uint64_t* source, size_t length)
 
 	__m128i mask = _mm_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7);
 
-	for (size_t i = 0; i < length; i += 2)
+	for (size_t i = 0U; i < length; i += 2)
 	{
 		_mm_storeu_si128((__m128i*)&dest[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)&source[i]), mask));
 	}
@@ -400,7 +400,7 @@ void qsc_intutils_clear8(uint8_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
 	
-	for (size_t i = 0; i < count; ++i)
+	for (size_t i = 0U; i < count; ++i)
 	{
 		a[i] = 0;
 	}
@@ -410,7 +410,7 @@ void qsc_intutils_clear16(uint16_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
 
-	for (size_t i = 0; i < count; ++i)
+	for (size_t i = 0U; i < count; ++i)
 	{
 		a[i] = 0;
 	}
@@ -420,7 +420,7 @@ void qsc_intutils_clear32(uint32_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
 
-	for (size_t i = 0; i < count; ++i)
+	for (size_t i = 0U; i < count; ++i)
 	{
 		a[i] = 0;
 	}
@@ -430,7 +430,7 @@ void qsc_intutils_clear64(uint64_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
 
-	for (size_t i = 0; i < count; ++i)
+	for (size_t i = 0U; i < count; ++i)
 	{
 		a[i] = 0;
 	}
@@ -453,7 +453,7 @@ void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint
 
 	cond = ~cond + 1;
 
-	for (size_t i = 0; i < length; i++)
+	for (size_t i = 0U; i < length; i++)
 	{
 		dest[i] ^= (uint8_t)(cond & (uint8_t)(source[i] ^ dest[i]));
 	}
@@ -502,7 +502,7 @@ void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t inplen)
 
 	ctr = 0;
 
-	for (size_t i = 0; i < inplen; ++i)
+	for (size_t i = 0U; i < inplen; ++i)
 	{
 		vct = input[i];
 		hexstr[ctr] = ENCODING_TABLE[vct >> 4];
@@ -716,7 +716,7 @@ int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length)
 
 	d = 0;
 
-	for (size_t i = 0; i < length; ++i)
+	for (size_t i = 0U; i < length; ++i)
 	{
 		d |= (a[i] ^ b[i]);
 	}
