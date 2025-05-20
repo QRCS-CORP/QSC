@@ -1,7 +1,9 @@
 #include "csp.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#    pragma comment(lib, "Bcrypt.lib")
+#	if defined(QSC_SYSTEM_COMPILER_MSC)
+#		pragma comment(lib, "Bcrypt.lib")
+#	endif
 #  include <Windows.h>
 #  include <bcrypt.h>
 #elif defined(QSC_SYSTEM_OS_LINUX)
