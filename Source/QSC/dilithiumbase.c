@@ -1067,7 +1067,7 @@ static int32_t dilithium_polyvecl_chknorm(const dilithium_polyvecl* v, int32_t b
     return res;
 }
 
-static void dilithium_polyveck_uniform_eta(dilithium_polyveck* v, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
+static void dilithium_polyveck_uniform_eta(dilithium_polyveck* v, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
 {
     for (size_t i = 0; i < DILITHIUM_K; ++i)
     {
