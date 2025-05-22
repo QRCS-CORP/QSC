@@ -71,7 +71,7 @@ static void acp_collect_statistics(uint8_t stat[ACP_PRESEED_SIZE])
 	drv[0] = qsc_sysutils_get_os_drive_letter();
 	drv[1] = ':';
 	qsc_sysutils_drive_space(drv, &dstate);
-#else
+#elif defined(QSC_SYSTEM_OS_POSIX)
 	qsc_sysutils_drive_space('/', &dstate);
 #endif
 

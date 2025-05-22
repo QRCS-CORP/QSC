@@ -33,10 +33,10 @@ static char getch(void)
 
     newt = oldt;
 
-    old.c_lflag &= ~ICANON;
-    old.c_lflag &= ~ECHO;
-    old.c_cc[VMIN] = 1;
-    old.c_cc[VTIME] = 0U;
+    oldt.c_lflag &= ~ICANON;
+    oldt.c_lflag &= ~ECHO;
+    oldt.c_cc[VMIN] = 1;
+    oldt.c_cc[VTIME] = 0U;
 
     if (tcsetattr(STDIN_FILENO, TCSANOW, &newt) != 0)
     {
@@ -49,8 +49,8 @@ static char getch(void)
         perror("read()");
     }
 
-    old.c_lflag |= ICANON;
-    old.c_lflag |= ECHO;
+    oldt.c_lflag |= ICANON;
+    oldt.c_lflag |= ECHO;
 
     if (tcsetattr(STDIN_FILENO, TCSADRAIN, &oldt) != 0)
     {

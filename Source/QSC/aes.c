@@ -434,7 +434,7 @@ void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* inp
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(length != 0);
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		__m128i inp;
 		__m128i ivt;
@@ -627,7 +627,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(length != 0);
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		__m128i inp;
 		__m128i nce;
@@ -1624,7 +1624,7 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(length != 0);
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
 		size_t nlen;
@@ -1653,7 +1653,7 @@ void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* inp
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(length != 0);
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		size_t oft;
 
@@ -1733,7 +1733,7 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	size_t i;
 	size_t oft;
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		oft = 0U;
 
@@ -1778,7 +1778,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	size_t i;
 	size_t oft;
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		oft = 0U;
 
@@ -1859,7 +1859,7 @@ void qsc_pkcs7_add_padding(uint8_t* input, size_t length)
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(length != 0);
 
-	if (input != NULL, length != 0)
+	if (input != NULL && length != 0)
 	{
 		const size_t PADOFT = QSC_AES_BLOCK_SIZE - length;
 		size_t ctr;
@@ -2106,7 +2106,7 @@ bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t* output, const 
 
 	res = false;
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		/* update the processed bytes counter */
 		ctx->counter += length;
@@ -2312,7 +2312,7 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 
 	res = false;
 
-	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
 		uint8_t ctag[QSC_AES_BLOCK_SIZE] = { 0U };
 		uint8_t kstream[QSC_AES_BLOCK_SIZE] = { 0U };
