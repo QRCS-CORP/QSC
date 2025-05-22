@@ -430,9 +430,9 @@ static void cpuidex_arm_features(qsc_cpuidex_cpu_features* features)
 static void cpuidex_cpu_info(int32_t info[4], const uint32_t infotype)
 {
 #if defined(QSC_SYSTEM_COMPILER_MSC) || defined(QSC_SYSTEM_COMPILER_INTEL)
-	__cpuid((uint32_t*)info, infotype);
+	__cpuid(info, infotype);
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)
-	__get_cpuid(infotype, &info[0U], &info[1U], &info[2U], &info[3U]);
+	__get_cpuid(infotype, (uint32_t*)&info[0U], (uint32_t*)&info[1U], (uint32_t*)&info[2U], (uint32_t*)&info[3U]);
 #endif
 }
 

@@ -289,6 +289,7 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
 #elif defined(QSC_SYSTEM_OS_POSIX)
     pthread_mutex_lock(&tsusp);
     suspended = false;
+    res = 0;
     pthread_cond_signal(&tcond);
     pthread_mutex_unlock(&tsusp);
 #endif
@@ -323,6 +324,7 @@ int32_t qsc_async_thread_suspend(qsc_thread handle)
 #elif defined(QSC_SYSTEM_OS_POSIX)
     pthread_mutex_lock(&tsusp);
     suspended = true;
+    res = 0;
 
     while (suspended)
     {
