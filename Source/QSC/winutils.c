@@ -1066,7 +1066,7 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
                     &hres,
                     NULL);
 
-                if (pinfo && res == true || (!res && GetLastError() == ERROR_MORE_DATA))
+                if ((pinfo && res) || (!res && GetLastError() == ERROR_MORE_DATA))
                 {
                     for (DWORD i = 0; i < dret; i++)
                     {
