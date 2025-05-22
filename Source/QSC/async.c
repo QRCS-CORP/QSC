@@ -168,30 +168,24 @@ bool qsc_async_mutex_destroy(qsc_mutex mtx)
 
     res = false;
 
-    if (mtx)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        res = (bool)CloseHandle(mtx);
+    res = (bool)CloseHandle(mtx);
 #else
-        /* Note: mtx is passed by value; this may work if the caller holds the mutex in a variable.
-           This implementation calls pthread_mutex_destroy on the address of the local copy. */
-        res = (pthread_mutex_destroy(&mtx) == 0);
+    /* Note: mtx is passed by value; this may work if the caller holds the mutex in a variable.
+        This implementation calls pthread_mutex_destroy on the address of the local copy. */
+    res = (pthread_mutex_destroy(&mtx) == 0);
 #endif
-    }
 
     return res;
 }
 
 void qsc_async_mutex_lock(qsc_mutex mtx)
 {
-    if (mtx)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        WaitForSingleObject(mtx, INFINITE);
+    WaitForSingleObject(mtx, INFINITE);
 #else
-        pthread_mutex_lock(&mtx);
+    pthread_mutex_lock(&mtx);
 #endif
-    }
 }
 
 qsc_mutex qsc_async_mutex_lock_ex(void)
@@ -206,23 +200,17 @@ qsc_mutex qsc_async_mutex_lock_ex(void)
 
 void qsc_async_mutex_unlock(qsc_mutex mtx)
 {
-    if (mtx)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        ReleaseMutex(mtx);
+    ReleaseMutex(mtx);
 #else
-        pthread_mutex_unlock(&mtx);
+    pthread_mutex_unlock(&mtx);
 #endif
-    }
 }
 
 void qsc_async_mutex_unlock_ex(qsc_mutex mtx)
 {
-    if (mtx)
-    {
-        qsc_async_mutex_unlock(mtx);
-        qsc_async_mutex_destroy(mtx);
-    }
+    qsc_async_mutex_unlock(mtx);
+    qsc_async_mutex_destroy(mtx);
 }
 
 size_t qsc_async_processor_count(void)
