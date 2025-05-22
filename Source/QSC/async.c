@@ -282,23 +282,16 @@ qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
 
 int32_t qsc_async_thread_resume(qsc_thread handle)
 {
-    QSC_ASSERT(handle != NULL);
-
     int32_t res;
 
-    res = 0;
-
-    if (handle != NULL)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        res = ResumeThread(handle);
+    res = ResumeThread(handle);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_mutex_lock(&tsusp);
-        suspended = false;
-        pthread_cond_signal(&tcond);
-        pthread_mutex_unlock(&tsusp);
+    pthread_mutex_lock(&tsusp);
+    suspended = false;
+    pthread_cond_signal(&tcond);
+    pthread_mutex_unlock(&tsusp);
 #endif
-    }
 
     return res;
 }
@@ -325,24 +318,19 @@ int32_t qsc_async_thread_suspend(qsc_thread handle)
 
     int32_t res;
 
-    res = -1;
-
-    if (handle != NULL)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        res = SuspendThread(handle);
+    res = SuspendThread(handle);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_mutex_lock(&tsusp);
-        suspended = true;
+    pthread_mutex_lock(&tsusp);
+    suspended = true;
 
-        while (suspended)
-        {
-            pthread_cond_wait(&tcond, &tsusp);
-        }
-
-        pthread_mutex_unlock(&tsusp);
-#endif
+    while (suspended)
+    {
+        pthread_cond_wait(&tcond, &tsusp);
     }
+
+    pthread_mutex_unlock(&tsusp);
+#endif
 
     return res;
 }
@@ -353,48 +341,33 @@ bool qsc_async_thread_terminate(qsc_thread handle)
 
     bool res;
 
-    res = false;
-
-    if (handle != NULL)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        res = CloseHandle(handle);
+    res = CloseHandle(handle);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        res = (pthread_cancel(handle) == 0);
+    res = (pthread_cancel(handle) == 0);
 #endif
-    }
 
     return res;
 }
 
 void qsc_async_thread_wait(qsc_thread handle)
 {
-    QSC_ASSERT(handle != 0);
-
-    if (handle != NULL)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        WaitForSingleObject(handle, INFINITE);
+    WaitForSingleObject(handle, INFINITE);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        void* stg;
-        pthread_join(handle, &stg);
+    void* stg;
+    pthread_join(handle, &stg);
 #endif
-    }
 }
 
 void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
 {
-    QSC_ASSERT(handle != 0);
-
-    if (handle != NULL)
-    {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        WaitForSingleObject(handle, msec);
+    WaitForSingleObject(handle, msec);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        /* Use usleep for a timed wait */
-        usleep(msec * 1000);
+    /* Use usleep for a timed wait */
+    usleep(msec * 1000);
 #endif
-    }
 }
 
 void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)

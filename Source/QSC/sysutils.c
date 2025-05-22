@@ -63,6 +63,8 @@ size_t qsc_sysutils_computer_name(char* name)
 {
 	size_t res;
 
+	res = 0;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	char buf[MAX_COMPUTERNAME_LENGTH + 1U];
 	DWORD bufflen = sizeof(buf) / sizeof(TCHAR);

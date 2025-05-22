@@ -89,7 +89,7 @@ void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width)
 				}
 			}
 
-			if (success = true)
+			if (success == true)
 			{
 				ctx->count = 0U;
 				ctx->depth = depth;
