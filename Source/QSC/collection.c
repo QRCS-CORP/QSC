@@ -23,7 +23,7 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 
 		mtx = qsc_async_mutex_lock_ex();
 
-		if (mtx != NULL)
+		if (mtx)
 		{
 			ncnt = ctx->count + 1;
 
@@ -142,7 +142,7 @@ bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const u
 
 		mtx = qsc_async_mutex_lock_ex();
 
-		if (mtx != NULL)
+		if (mtx)
 		{
 			for (size_t i = 0U; i < (size_t)ctx->count; ++i)
 			{
@@ -218,7 +218,7 @@ void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item, size_t index)
 		qsc_mutex mtx;
 		const uint8_t* pitm;
 
-		if (mtx != NULL)
+		if (mtx)
 		{
 			mtx = qsc_async_mutex_lock_ex();
 			pitm = ctx->items + (index * ctx->width);
@@ -244,7 +244,7 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 		mtx = qsc_async_mutex_lock_ex();
 
-		if (mtx != NULL)
+		if (mtx)
 		{
 			for (size_t i = 0U; i < (size_t)ctx->count; ++i)
 			{

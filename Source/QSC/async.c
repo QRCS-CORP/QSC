@@ -164,13 +164,11 @@ qsc_mutex qsc_async_mutex_create(void)
 
 bool qsc_async_mutex_destroy(qsc_mutex mtx)
 {
-    QSC_ASSERT(mtx != NULL);
-
     bool res;
 
     res = false;
 
-    if (mtx != NULL)
+    if (mtx)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         res = (bool)CloseHandle(mtx);
@@ -186,9 +184,7 @@ bool qsc_async_mutex_destroy(qsc_mutex mtx)
 
 void qsc_async_mutex_lock(qsc_mutex mtx)
 {
-    QSC_ASSERT(mtx != NULL);
-
-    if (mtx != NULL)
+    if (mtx)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         WaitForSingleObject(mtx, INFINITE);
@@ -210,9 +206,7 @@ qsc_mutex qsc_async_mutex_lock_ex(void)
 
 void qsc_async_mutex_unlock(qsc_mutex mtx)
 {
-    QSC_ASSERT(mtx != NULL);
-
-    if (mtx != NULL)
+    if (mtx)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         ReleaseMutex(mtx);
@@ -224,9 +218,7 @@ void qsc_async_mutex_unlock(qsc_mutex mtx)
 
 void qsc_async_mutex_unlock_ex(qsc_mutex mtx)
 {
-    QSC_ASSERT(mtx != NULL);
-
-    if (mtx != NULL)
+    if (mtx)
     {
         qsc_async_mutex_unlock(mtx);
         qsc_async_mutex_destroy(mtx);

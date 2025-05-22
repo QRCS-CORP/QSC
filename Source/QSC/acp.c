@@ -72,7 +72,7 @@ static void acp_collect_statistics(uint8_t stat[ACP_PRESEED_SIZE])
 	drv[1] = ':';
 	qsc_sysutils_drive_space(drv, &dstate);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-	qsc_sysutils_drive_space('/', &dstate);
+	qsc_sysutils_drive_space("/", &dstate);
 #endif
 
 	if ((oft + sizeof(dstate)) <= sizeof(buffer))
