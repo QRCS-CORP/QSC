@@ -34,7 +34,7 @@
 #	endif
 #endif
 
-static void netutils_format_mac(uint8_t macout[18U], const uint8_t macin[6U])
+static void netutils_format_mac(char macout[18U], const uint8_t macin[6U])
 {
 	QSC_ASSERT(macout != NULL);
 	QSC_ASSERT(macin != NULL);
@@ -129,10 +129,10 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 		{
 			if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_LINK)
 			{
-				unsigned char* maddr;
+				uint8_t* maddr;
 
 				maddr = (unsigned char*)LLADDR((struct sockaddr_dl*)(ifa)->ifa_addr);
-				netutils_format_mac(ctx->mac, (const uint8_t*)maddr);
+				netutils_format_mac(ctx->mac, maddr);
 				break;
 			}
 		}
