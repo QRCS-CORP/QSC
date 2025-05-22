@@ -10,7 +10,7 @@
 #	include <conio.h>
 #	include <tchar.h>
 #	include <Windows.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC) && !defined(__GNUC__)
+#   if defined(QSC_SYSTEM_COMPILER_MSC)
 #	    pragma comment(lib, "user32.lib")
 #   endif
 #else
@@ -22,19 +22,29 @@
 static char getch(void)
 {
     char buf = 0U;
-    struct termios old = {0U};
+    struct termios oldt, newt;
     fflush(stdout);
 
-    tcgetattr(0U, &old);
+    if (tcgetattr(STDIN_FILENO, &oldt) != 0)
+    {
+        perror("tcgetattr");
+        return 0;
+    }
+
+    newt = oldt;
 
     old.c_lflag &= ~ICANON;
     old.c_lflag &= ~ECHO;
     old.c_cc[VMIN] = 1;
     old.c_cc[VTIME] = 0U;
 
-    tcsetattr(0U, TCSANOW, &old);
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &newt) != 0)
+    {
+        perror("tcsetattr");
+        return 0;
+    }
 
-    if(read(0U, &buf, 1) < 0U)
+    if (read(STDIN_FILENO, &buf, 1) < 0)
     {
         perror("read()");
     }
@@ -42,9 +52,11 @@ static char getch(void)
     old.c_lflag |= ICANON;
     old.c_lflag |= ECHO;
 
-    tcsetattr(0U, TCSADRAIN, &old);
+    if (tcsetattr(STDIN_FILENO, TCSADRAIN, &oldt) != 0)
+    {
+        perror("tcsetattr restore");
+    }
 
-    //printf("%c\n", buf);
     return buf;
  }
 #endif
@@ -197,7 +209,7 @@ size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_
 			{
 				if (input[i] == 39)
 				{
-					pos = i + 1;
+					pos = i + 1U;
 					break;
 				}
 			}
@@ -236,26 +248,29 @@ void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t len
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(length != 0U);
 
-	uint8_t idx0;
-	uint8_t idx1;
-
-	const uint8_t hashmap[] =
-	{
-		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-		0x08, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
-
 	if (hexstr != NULL && output != NULL && length != 0U)
 	{
-		qsc_memutils_clear(output, length);
+		uint8_t idx0;
+		uint8_t idx1;
 
-		for (size_t  pos = 0U; pos < (length * 2); pos += 2)
+		const uint8_t hashmap[] =
 		{
-			idx0 = ((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U;
-			idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
-			output[pos / 2] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
+			0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U,
+			0x08U, 0x09U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x0AU, 0x0BU, 0x0CU, 0x0DU, 0x0EU, 0x0FU, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
+		};
+
+		if (hexstr != NULL && output != NULL && length != 0U)
+		{
+			qsc_memutils_clear(output, length);
+
+			for (size_t pos = 0U; pos < (length * 2U); pos += 2U)
+			{
+				idx0 = ((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U;
+				idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
+				output[pos / 2U] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
+			}
 		}
 	}
 }
@@ -271,7 +286,7 @@ bool qsc_consoleutils_line_contains(const char* line, const char* token)
 
 	if (line != NULL && token != NULL)
 	{
-		res = (qsc_stringutils_find_string(line, token) != -1);
+		res = (qsc_stringutils_find_string(line, token) != QSC_CONSOLE_STRING_NOT_FOUND);
 	}
 
 	return res;
@@ -310,7 +325,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 	char c;
 
 	ctr = 0U;
-	mlen = otplen - 1;
+	mlen = otplen - 1U;
 
 	if (output != NULL && otplen != 0U)
 	{
@@ -339,7 +354,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 					if (ctr > 0U)
 					{
 						qsc_consoleutils_print_safe("\b \b");
-						output[ctr] = '0';
+						output[ctr - 1] = '0';
 						--ctr;
 					}
 				}
@@ -349,6 +364,8 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 				break;
 			}
 		};
+
+		output[ctr] = '\0';
 	}
 
 	qsc_consoleutils_print_line("");
@@ -586,7 +603,7 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 	const char schr[] = { "-\\|/-\\|/-" };
 	size_t cnt;
 
-	cnt = (size_t)seconds * 10;
+	cnt = (size_t)seconds * 10U;
 
 	for (size_t i = 0U; i < cnt; ++i)
 	{

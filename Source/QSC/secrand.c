@@ -26,7 +26,7 @@ double qsc_secrand_next_double()
 
 	res = 0.0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy(&res, smp, sizeof(double));
+	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(double));
 
 	return res;
 }
@@ -38,7 +38,7 @@ int16_t qsc_secrand_next_int16()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy(&res, smp, sizeof(int16_t));
+	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(int16_t));
 
 	return res;
 }
@@ -86,7 +86,7 @@ uint16_t qsc_secrand_next_uint16()
 
 	res = 0U;
 	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy(&res, smp, sizeof(uint16_t));
+	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(uint16_t));
 
 	return res;
 }
@@ -134,7 +134,7 @@ int32_t qsc_secrand_next_int32()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy(&res, smp, sizeof(int32_t));
+	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(int32_t));
 
 	return res;
 }
@@ -182,7 +182,7 @@ uint32_t qsc_secrand_next_uint32()
 
 	res = 0U;
 	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy(&res, smp, sizeof(uint32_t));
+	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(uint32_t));
 
 	return res;
 }
@@ -230,7 +230,7 @@ int64_t qsc_secrand_next_int64()
 
 	res = 0;
 	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy(&res, smp, sizeof(int64_t));
+	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(int64_t));
 
 	return res;
 }
@@ -278,7 +278,7 @@ uint64_t qsc_secrand_next_uint64()
 
 	res = 0U;
 	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy(&res, smp, sizeof(uint64_t));
+	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(uint64_t));
 
 	return res;
 }

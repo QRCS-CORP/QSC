@@ -6,7 +6,7 @@
 qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
     QSC_ASSERT(buffer != NULL);
-    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(buflen != 0U);
     QSC_ASSERT(consumed != NULL);
 
     qsc_encoding_ber_element* relem;
@@ -115,7 +115,7 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
                                             achildren = achildren * 2U;
                                         }
 
-                                        tmp = (qsc_encoding_ber_element**)realloc(elem->children, achildren * sizeof(qsc_encoding_ber_element*));
+                                        tmp = (qsc_encoding_ber_element**)qsc_memutils_realloc(elem->children, achildren * sizeof(qsc_encoding_ber_element*));
 
                                         if (tmp == (qsc_encoding_ber_element**)NULL)
                                         {
@@ -245,28 +245,28 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
 size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size_t* length, bool* indef)
 {
     QSC_ASSERT(buffer != NULL);
-    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(buflen != 0U);
     QSC_ASSERT(length != NULL);
     QSC_ASSERT(indef != NULL);
 
     size_t res;
 
-    res = 0;
+    res = 0U;
 
     if (buffer != NULL && buflen >= 1 && length != NULL && indef != NULL)
     {
         uint8_t first;
 
-        first = buffer[0];
+        first = buffer[0U];
 
-        if (first == 0x80)
+        if (first == 0x80U)
         {
             *indef = true;
             /* for indefinite lengths the length isn't pre-known */
-            *length = 0;
+            *length = 0U;
             res = 1;
         }
-        else if ((first & 0x80) == 0)
+        else if ((first & 0x80U) == 0U)
         {
             *indef = false;
             *length = first;
@@ -277,17 +277,17 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
             uint8_t bnum;
 
             *indef = false;
-            bnum = first & 0x7F;
+            bnum = first & 0x7FU;
 
             if (buflen < 1 + bnum)
             {
-                res = 0;
+                res = 0U;
             }
             else
             {
                 size_t len;
 
-                len = 0;
+                len = 0U;
 
                 for (size_t i = 0U; i < bnum; ++i)
                 {
@@ -307,27 +307,27 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
 size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t buflen, uint8_t* tagclass, bool* construct, uint32_t* tagnum)
 {
     QSC_ASSERT(buffer != NULL);
-    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(buflen != 0U);
     QSC_ASSERT(tagclass != NULL);
     QSC_ASSERT(construct != NULL);
     QSC_ASSERT(tagnum != NULL);
 
     size_t pos;
 
-    pos = 0;
+    pos = 0U;
 
-    if (buffer != NULL && buflen > 0 && tagclass != NULL && construct != NULL && tagnum != NULL)
+    if (buffer != NULL && buflen > 0U && tagclass != NULL && construct != NULL && tagnum != NULL)
     {
         uint8_t first;
         uint8_t tagval;
 
-        first = buffer[0];
-        *tagclass = first & 0xC0;
-        *construct = (first & 0x20) ? true : false;
-        tagval = first & 0x1F;
-        pos = 1;
+        first = buffer[0U];
+        *tagclass = first & 0xC0U;
+        *construct = (first & 0x20U) ? true : false;
+        tagval = first & 0x1FU;
+        pos = 1U;
 
-        if (tagval != 0x1F)
+        if (tagval != 0x1FU)
         {
             *tagnum = tagval;
         }
@@ -336,7 +336,7 @@ size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t buflen, uint8_t
             /* extended tag number: read base-128 encoded bytes */
             uint32_t num;
 
-            num = 0;
+            num = 0U;
 
             while (pos < buflen) 
             {
@@ -344,9 +344,9 @@ size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t buflen, uint8_t
 
                 b = buffer[pos];
                 ++pos;
-                num = (num << 7) | (b & 0x7F);
+                num = (num << 7) | (b & 0x7FU);
 
-                if ((b & 0x80) == 0)
+                if ((b & 0x80U) == 0U)
                 {
                     break;
                 }
@@ -363,10 +363,10 @@ size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_
 {
     QSC_ASSERT(element != NULL);
     QSC_ASSERT(buffer != NULL);
-    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(buflen != 0U);
 
-    uint8_t alen[10] = { 0U };
-    uint8_t tagbuf[10] = { 0U };
+    uint8_t alen[10U] = { 0U };
+    uint8_t tagbuf[10U] = { 0U };
     size_t ret;
     size_t total;
     size_t taglen;
@@ -388,7 +388,7 @@ size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_
             {
                 if ((buflen - total) >= 1U)
                 {
-                    alen[0] = 0x80U;
+                    alen[0U] = 0x80U;
                     llen = 1U;
                 }
                 else
@@ -489,7 +489,7 @@ size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_
 size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buflen)
 {
     QSC_ASSERT(buffer != NULL);
-    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(buflen != 0U);
 
     size_t res;
 
@@ -500,45 +500,45 @@ size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buf
         if (length == QSC_BER_ENCODING_INDEFINITE_LENGTH)
         {
             /* indefinite length: one byte 0x80 */
-            buffer[0] = 0x80;
+            buffer[0U] = 0x80U;
         }
-        else if (length < 128)
+        else if (length < 128U)
         {
             /* short form */
-            buffer[0] = (uint8_t)length;
+            buffer[0U] = (uint8_t)length;
         }
         else
         {
             /* long form: determine the number of bytes needed to encode the length */
-            uint8_t alen[8] = { 0U };
+            uint8_t alen[8U] = { 0U };
             size_t bnum;
             size_t tlen;
 
-            bnum = 0;
+            bnum = 0U;
             tlen = length;
 
-            while (tlen > 0)
+            while (tlen > 0U)
             {
-                alen[bnum] = tlen & 0xFF;
+                alen[bnum] = tlen & 0xFFU;
                 ++bnum;
                 tlen >>= 8;
             }
 
             if (buflen < 1 + bnum)
             {
-                res = 0;
+                res = 0U;
             }
             else
             {
-                buffer[0] = 0x80 | (uint8_t)bnum;
+                buffer[0U] = 0x80U | (uint8_t)bnum;
 
                 for (size_t i = 0U; i < bnum; i++)
                 {
                     /* big-endian order */
-                    buffer[1 + i] = alen[bnum - 1 - i];
+                    buffer[1U + i] = alen[bnum - 1U - i];
                 }
 
-                res = 1 + bnum;
+                res = 1U + bnum;
             }
         }
     }
@@ -549,26 +549,26 @@ size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buf
 size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t tagnum, uint8_t* buffer, size_t buflen)
 {
     QSC_ASSERT(buffer != NULL);
-    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(buflen != 0U);
 
     size_t pos;
     uint8_t first;
 
-    pos = 0;
+    pos = 0U;
 
-    if (buffer != NULL && buflen > 0)
+    if (buffer != NULL && buflen > 0U)
     {
         first = tagclass;
 
         if (construct)
         {
             /* set the constructed bit */
-            first |= 0x20;
+            first |= 0x20U;
         }
 
         if (tagnum < 31)
         {
-            first |= (uint8_t)(tagnum & 0x1F);
+            first |= (uint8_t)(tagnum & 0x1FU);
             buffer[pos] = first;
             ++pos;
         }
@@ -578,19 +578,19 @@ size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t ta
             size_t tmplen;
 
             /* indicate long-form tag */
-            first |= 0x1F;
+            first |= 0x1FU;
             buffer[pos] = first;
             ++pos;
-            tmplen = 0;
+            tmplen = 0U;
 
             /* encode tagnumber in base-128 (big-endian, with continuation bits) */
             do 
             {
-                temp[tmplen] = tagnum & 0x7F;
+                temp[tmplen] = tagnum & 0x7FU;
                 ++tmplen;
                 tagnum >>= 7;
             } 
-            while (tagnum > 0);
+            while (tagnum > 0U);
 
             for (int32_t i = (int32_t)tmplen - 1; i >= 0; --i)
             {
@@ -601,12 +601,12 @@ size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t ta
                 if (i != 0)
                 {
                     /* set continuation bit on all but the last byte */
-                    b |= 0x80;
+                    b |= 0x80U;
                 }
 
                 if (pos >= buflen)
                 {
-                    pos = 0;
+                    pos = 0U;
                     break;
                 }
 
@@ -633,13 +633,16 @@ void encoding_ber_free_element(qsc_encoding_ber_element* element)
             }
             
             qsc_memutils_alloc_free(element->children);
+            element->children = NULL;
         }
         else 
         {
             qsc_memutils_alloc_free(element->value);
+            element->value = NULL;
         }
 
         qsc_memutils_alloc_free(element);
+        element = NULL;
     }
 }
 
@@ -647,7 +650,7 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
 {
     QSC_ASSERT(output != NULL);
     QSC_ASSERT(input != NULL);
-    QSC_ASSERT(inplen != 0);
+    QSC_ASSERT(inplen != 0U);
 
 	const int32_t DECTBL[80] = 
 	{
@@ -666,18 +669,18 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
 
     res = false;
 
-    if (output != NULL && input != NULL && inplen != 0)
+    if (output != NULL && input != NULL && inplen != 0U)
     {
         res = true;
 
-        if (otplen < qsc_encoding_base64_decoded_size(input, inplen) || inplen % 4 != 0)
+        if (otplen < qsc_encoding_base64_decoded_size(input, inplen) || inplen % 4U != 0U)
         {
             res = false;
         }
 
         if (res == true)
         {
-            for (i = 0; i < inplen; i++)
+            for (i = 0U; i < inplen; i++)
             {
                 if (qsc_encoding_base64_is_valid_char(input[i]) == false)
                 {
@@ -688,22 +691,22 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
 
             if (res == true)
             {
-                for (i = 0, j = 0; i < inplen; i += 4, j += 3)
+                for (i = 0U, j = 0U; i < inplen; i += 4, j += 3)
                 {
-                    v = DECTBL[input[i] - 43];
-                    v = ((uint32_t)v << 6) | DECTBL[input[i + 1] - 43];
-                    v = input[i + 2] == '=' ? (uint32_t)v << 6 : ((uint32_t)v << 6) | DECTBL[input[i + 2] - 43];
-                    v = input[i + 3] == '=' ? (uint32_t)v << 6 : ((uint32_t)v << 6) | DECTBL[input[i + 3] - 43];
-                    output[j] = (v >> 16) & 0xFF;
+                    v = DECTBL[input[i] - 43U];
+                    v = ((uint32_t)v << 6) | DECTBL[input[i + 1U] - 43U];
+                    v = input[i + 2U] == '=' ? (uint32_t)v << 6 : ((uint32_t)v << 6) | DECTBL[input[i + 2U] - 43U];
+                    v = input[i + 3U] == '=' ? (uint32_t)v << 6 : ((uint32_t)v << 6) | DECTBL[input[i + 3U] - 43U];
+                    output[j] = (v >> 16) & 0xFFU;
 
-                    if (input[i + 2] != '=')
+                    if (input[i + 2U] != '=')
                     {
-                        output[j + 1] = (v >> 8) & 0xFF;
+                        output[j + 1U] = (v >> 8) & 0xFFU;
                     }
 
-                    if (input[i + 3] != '=')
+                    if (input[i + 3U] != '=')
                     {
-                        output[j + 2] = v & 0xFF;
+                        output[j + 2U] = v & 0xFFU;
                     }
                 }
             }
@@ -716,23 +719,23 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
 size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 {
     QSC_ASSERT(input != NULL);
-    QSC_ASSERT(length != 0);
+    QSC_ASSERT(length != 0U);
 
 	size_t res;
 
-	res = 0;
+	res = 0U;
 
-	if (input != NULL && length != 0)
+	if (input != NULL && length != 0U)
 	{
-		res = (length / 4) * 3;
+		res = (length / 4U) * 3U;
 
-		for (size_t i = length - 1; i > 0; --i)
+		for (size_t i = length - 1U; i > 0U; --i)
 		{
 			if (input[i] == '=')
 			{
 				--res;
 
-				if (input[i - 1] == '=')
+				if (input[i - 1U] == '=')
 				{
 					--res;
 				}
@@ -748,9 +751,9 @@ size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 void qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* input, size_t inplen)
 {
     QSC_ASSERT(output != NULL);
-    QSC_ASSERT(otplen != 0);
+    QSC_ASSERT(otplen != 0U);
     QSC_ASSERT(input != NULL);
-    QSC_ASSERT(inplen != 0);
+    QSC_ASSERT(inplen != 0U);
 
 	const char ENCTBL[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -758,33 +761,33 @@ void qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* inpu
 	size_t j;
 	size_t v;
 
-	if (output != NULL && input != NULL && inplen != 0 && qsc_encoding_base64_encoded_size(inplen) <= otplen)
+	if (output != NULL && input != NULL && inplen != 0U && qsc_encoding_base64_encoded_size(inplen) <= otplen)
 	{
-		for (i = 0, j = 0; i < inplen; i += 3, j += 4)
+		for (i = 0U, j = 0; i < inplen; i += 3U, j += 4U)
 		{
 			v = input[i];
-			v = i + 1 < inplen ? v << 8 | input[i + 1] : v << 8;
-			v = i + 2 < inplen ? v << 8 | input[i + 2] : v << 8;
+			v = i + 1U < inplen ? (v << 8) | input[i + 1U] : (v << 8);
+			v = i + 2U < inplen ? (v << 8) | input[i + 2U] : (v << 8);
 
-			output[j] = ENCTBL[(v >> 18) & 0x3F];
-			output[j + 1] = ENCTBL[(v >> 12) & 0x3F];
+			output[j] = ENCTBL[(v >> 18) & 0x3FU];
+			output[j + 1U] = ENCTBL[(v >> 12) & 0x3FU];
 
-			if (i + 1 < inplen)
+			if (i + 1U < inplen)
 			{
-				output[j + 2] = ENCTBL[(v >> 6) & 0x3F];
+				output[j + 2U] = ENCTBL[(v >> 6) & 0x3FU];
 			}
 			else
 			{
-				output[j + 2] = '=';
+				output[j + 2U] = '=';
 			}
 
-			if (i + 2 < inplen)
+			if (i + 2U < inplen)
 			{
-				output[j + 3] = ENCTBL[v & 0x3F];
+				output[j + 3U] = ENCTBL[v & 0x3FU];
 			}
 			else
 			{
-				output[j + 3] = '=';
+				output[j + 3U] = '=';
 			}
 		}
 	}
@@ -792,19 +795,19 @@ void qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* inpu
 
 size_t qsc_encoding_base64_encoded_size(size_t length)
 {
-    QSC_ASSERT(length != 0);
+    QSC_ASSERT(length != 0U);
 
 	size_t ret;
 
 	ret = length;
 
-	if (length % 3 != 0)
+	if (length % 3U != 0U)
 	{
-		ret += 3 - (length % 3);
+		ret += 3U - (length % 3U);
 	}
 
-	ret /= 3;
-	ret *= 4;
+	ret /= 3U;
+	ret *= 4U;
 
 	return ret;
 }
@@ -840,14 +843,14 @@ bool qsc_encoding_base64_is_valid_char(char value)
 qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
     QSC_ASSERT(buffer != NULL);
-    QSC_ASSERT(buflen != 0);
+    QSC_ASSERT(buflen != 0U);
     QSC_ASSERT(consumed != NULL);
 
     qsc_encoding_ber_element* elem;
 
     elem = NULL;
 
-    if (buffer != NULL && buflen != 0 && consumed != NULL)
+    if (buffer != NULL && buflen != 0U && consumed != NULL)
     {
         elem = qsc_encoding_ber_decode_element(buffer, buflen, consumed);
 
@@ -951,6 +954,7 @@ size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_
                 }
 
                 qsc_memutils_alloc_free(contbuf);
+                contbuf = NULL;
             }
         }
     }
@@ -961,9 +965,9 @@ size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_
 bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, size_t otplen, size_t* declen)
 {
     QSC_ASSERT(input != NULL);
-    QSC_ASSERT(inplen != 0);
+    QSC_ASSERT(inplen != 0U);
     QSC_ASSERT(output != NULL);
-    QSC_ASSERT(otplen != 0);
+    QSC_ASSERT(otplen != 0U);
     QSC_ASSERT(declen != NULL);
 
     size_t req;
@@ -972,7 +976,7 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
     req = inplen / 2;
     res = false;
 
-    if (inplen % 2 == 0 && req >= otplen && input != NULL && output != NULL && declen != NULL)
+    if (inplen % 2 == 0U && req <= otplen && input != NULL && output != NULL && declen != NULL)
     {
         res = true;
 
@@ -983,8 +987,8 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
             uint8_t nibble1;
             uint8_t nibble2;
 
-            c1 = input[2 * i];
-            c2 = input[2 * i + 1];
+            c1 = input[2U * i];
+            c2 = input[(2U * i) + 1U];
 
             if (c1 >= '0' && c1 <= '9')
             {
@@ -992,11 +996,11 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
             }
             else if (c1 >= 'A' && c1 <= 'F')
             {
-                nibble1 = c1 - 'A' + 10;
+                nibble1 = c1 - 'A' + 10U;
             }
             else if (c1 >= 'a' && c1 <= 'f')
             {
-                nibble1 = c1 - 'a' + 10;
+                nibble1 = c1 - 'a' + 10U;
             }
             else
             {
@@ -1010,11 +1014,11 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
             }
             else if (c2 >= 'A' && c2 <= 'F')
             {
-                nibble2 = c2 - 'A' + 10;
+                nibble2 = c2 - 'A' + 10U;
             }
             else if (c2 >= 'a' && c2 <= 'f')
             {
-                nibble2 = c2 - 'a' + 10;
+                nibble2 = c2 - 'a' + 10U;
             }
             else
             {
@@ -1034,25 +1038,25 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
 bool qsc_encoding_hex_encode(const uint8_t* input, size_t inplen, char* output, size_t otplen)
 {
     QSC_ASSERT(input != NULL);
-    QSC_ASSERT(inplen != 0);
+    QSC_ASSERT(inplen != 0U);
     QSC_ASSERT(output != NULL);
-    QSC_ASSERT(otplen != 0);
+    QSC_ASSERT(otplen != 0U);
 
     bool res;
 
     res = false;
 
-    if (output != NULL && input != NULL && otplen >= (inplen * 2) + 1)
+    if (output != NULL && input != NULL && otplen >= (inplen * 2U) + 1U)
     {
         static const char hex_digits[] = "0123456789ABCDEF";
 
         for (size_t i = 0U; i < inplen; i++)
         {
-            output[2 * i] = hex_digits[(input[i] >> 4) & 0x0F];
-            output[2 * i + 1] = hex_digits[input[i] & 0x0F];
+            output[2U * i] = hex_digits[(input[i] >> 4) & 0x0FU];
+            output[(2U * i) + 1U] = hex_digits[input[i] & 0x0FU];
         }
 
-        output[inplen * 2] = '\0';
+        output[inplen * 2U] = '\0';
         res = true;
     }
 
@@ -1108,7 +1112,7 @@ bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, 
                         }
                     }
 
-                    lstart = ppos + 1;
+                    lstart = ppos + 1U;
                 }
 
                 ++ppos;
@@ -1121,7 +1125,7 @@ bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, 
 
                 if (linelen > 0U)
                 {
-                    if (lstart[0] != '-')
+                    if (lstart[0U] != '-')
                     {
                         for (size_t i = 0U; i < linelen; i++)
                         {
@@ -1144,7 +1148,7 @@ bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, 
                 size_t pad;
                 size_t rmd;
 
-                rmd = b64idx % 4;
+                rmd = b64idx % 4U;
 
                 if (rmd != 0U)
                 {
@@ -1179,6 +1183,7 @@ bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, 
             }
 
             qsc_memutils_alloc_free(b64data);
+            b64data = NULL;
         }
     }
 
@@ -1188,9 +1193,9 @@ bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, 
 bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, const uint8_t* data, size_t data_len)
 {
     /* insert newline every 64 base64 characters */
-    const size_t LINE_LENGTH = 64;
-    char header[128];
-    char footer[128];
+    const size_t LINE_LENGTH = 64U;
+    char header[128U];
+    char footer[128U];
     char* b64data;
     size_t b64len;
     size_t cnklen;
@@ -1217,7 +1222,7 @@ bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, con
         {
             qsc_memutils_clear(b64data, b64len + 1);
             qsc_encoding_base64_encode(b64data, b64len + 1, data, data_len);
-            pidx = 0;
+            pidx = 0U;
 
             /* write the header line */
             if (pidx + hdrlen < otplen)
@@ -1230,7 +1235,7 @@ bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, con
                 {
                     cnklen = (b64len - i >= LINE_LENGTH) ? LINE_LENGTH : (b64len - i);
 
-                    if (pidx + cnklen + 1 < otplen)
+                    if (pidx + cnklen + 1U < otplen)
                     {
                         qsc_memutils_copy(output + pidx, b64data + i, cnklen);
                         pidx += cnklen;
@@ -1256,6 +1261,7 @@ bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, con
             }
 
             qsc_memutils_alloc_free(b64data);
+            b64data = NULL;
         }
     }
 

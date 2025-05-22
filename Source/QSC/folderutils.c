@@ -14,7 +14,7 @@
 #	include <string.h>
 #	include <tchar.h>
 #	include <Windows.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC) && !defined(__GNUC__)
+#   if defined(QSC_SYSTEM_COMPILER_MSC)
 #	    pragma comment(lib, "Shlwapi.lib")
 #   endif
 #else
@@ -31,7 +31,7 @@ void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH])
 
 	len = qsc_stringutils_string_size(path);
 
-	if (len < QSC_SYSTEM_MAX_PATH - 1)
+	if (len < QSC_SYSTEM_MAX_PATH - 1U)
 	{
 		path[len] = QSC_FOLDERUTILS_DELIMITER;
 		++len;
@@ -100,7 +100,7 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 
 	size_t lctr;
 
-	lctr = 0;
+	lctr = 0U;
 
 	if (result != NULL && reslen != 0 && directory != NULL)
 	{
@@ -124,7 +124,7 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 				{
 					size_t ilen = strlen(wfd.cFileName);
 
-					if (lctr + ilen + 1 <= reslen)
+					if (lctr + ilen + 1U <= reslen)
 					{
 						SYSTEMTIME atime;
 						SYSTEMTIME ctime;
@@ -144,14 +144,14 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 						sprintf_s(result + lpos, reslen - lpos, "%02d-%02d-%d %02d:%02d:%02d\n",
 							atime.wMonth, atime.wDay, atime.wYear, atime.wHour, atime.wMinute, atime.wSecond);
 
-						lctr += ilen + 1;
+						lctr += ilen + 1U;
 					}
 					else
 					{
 						break;
 					}
 				}
-			} while (FindNextFile(hFind, &wfd) != 0);
+			} while (FindNextFile(hFind, &wfd) != 0U);
 
 			FindClose(hFind);
 		}
@@ -168,8 +168,8 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 			while ((entry = readdir(dir)) != NULL)
 			{
 				if (entry->d_type == DT_DIR &&
-					strcmp(entry->d_name, ".") != 0 &&
-					strcmp(entry->d_name, "..") != 0)
+					strcmp(entry->d_name, ".") != 0U &&
+					strcmp(entry->d_name, "..") != 0U)
 				{
 					size_t item_length = strlen(entry->d_name);
 
@@ -177,7 +177,7 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 					{
 						strcat(result, entry->d_name);
 						strcat(result, "\n");
-						lctr += item_length + 1;
+						lctr += item_length + 1U;
 					}
 					else
 					{
@@ -270,7 +270,7 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 	pstr = getenv("HOME");
 	len = qsc_stringutils_string_size(pstr);
 
-	if (len > 0)
+	if (len > 0U)
 	{
 		qsc_stringutils_copy_string(output, QSC_SYSTEM_MAX_PATH, pstr);
 	}
@@ -321,7 +321,7 @@ bool qsc_folderutils_directory_has_delimiter(const char path[QSC_SYSTEM_MAX_PATH
 
 	len = qsc_stringutils_string_size(path);
 
-	return (path[len - 1] == '\\');
+	return (path[len - 1U] == '\\');
 }
 
 #if defined(QSC_DEBUG_MODE)

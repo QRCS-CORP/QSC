@@ -23,6 +23,7 @@ static void csg_auto_reseed(qsc_hcg_state* ctx)
 			qsc_sha512_initialize(&sstate);
 			qsc_sha512_update(&sstate, ctx->key, QSC_HCG_KEY_SIZE);
 			qsc_sha512_update(&sstate, prnd, QSC_HCG_KEY_SIZE);
+			qsc_memutils_clear(prnd, sizeof(prnd));
 			/* update the key */
 			qsc_sha512_finalize(&sstate, ctx->key);
 			ctx->rpos = 0U;

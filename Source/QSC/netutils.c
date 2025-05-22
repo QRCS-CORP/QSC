@@ -18,7 +18,6 @@
 #   include <netdb.h>
 #   include <netinet/in.h>
 #   include <sys/socket.h>
-#	include <stdio.h>
 #	include <string.h>
 #	include <sys/types.h>
 #	include <unistd.h>
@@ -35,30 +34,52 @@
 #	endif
 #endif
 
+static void netutils_format_mac(uint8_t macout[18U], const uint8_t macin[6U])
+{
+	QSC_ASSERT(macout != NULL);
+	QSC_ASSERT(macin != NULL);
+
+    static const char hex[] = "0123456789abcdef";
+
+    for (size_t i = 0U; i < 6U; ++i)
+    {
+        macout[i * 3U] = hex[(macin[i] >> 4U) & 0xFU];
+        macout[i * 3U + 1] = hex[ macin[i] & 0xFU];
+
+        if (i < 5U)
+        {
+            macout[(i * 3U) + 2U] = ':';
+        }
+    }
+
+    macout[17U] = '\0';
+}
+
 void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* infname)
 {
 	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(infname != NULL);
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
-	if (ctx != NULL)
+	if (ctx != NULL && infname != NULL)
 	{
 		PIP_ADAPTER_INFO padapt;
 		PIP_ADAPTER_INFO pinfo;
 		ULONG otplen;
 		size_t pctr;
-		const size_t PINTMX = 32;
+		const size_t PINTMX = 32U;
 
-		qsc_memutils_clear((uint8_t*)ctx, sizeof(qsc_netutils_adaptor_info));
+		qsc_memutils_clear(ctx, sizeof(qsc_netutils_adaptor_info));
 		otplen = sizeof(IP_ADAPTER_INFO);
-		pinfo = (IP_ADAPTER_INFO*)malloc(sizeof(IP_ADAPTER_INFO));
+		pinfo = (IP_ADAPTER_INFO*)qsc_memutils_malloc(sizeof(IP_ADAPTER_INFO));
 
 		if (pinfo != NULL)
 		{
 			if (GetAdaptersInfo(pinfo, &otplen) == ERROR_BUFFER_OVERFLOW)
 			{
 				free(pinfo);
-				pinfo = (IP_ADAPTER_INFO*)malloc(otplen);
+				pinfo = (IP_ADAPTER_INFO*)qsc_memutils_malloc(otplen);
 			}
 
 			if (pinfo != NULL)
@@ -66,19 +87,19 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 				if (GetAdaptersInfo(pinfo, &otplen) == NO_ERROR)
 				{
 					padapt = pinfo;
-					pctr = 0;
+					pctr = 0U;
 
 					while (pinfo != NULL)
 					{
 						if (qsc_stringutils_string_contains((const char*)pinfo->AdapterName, infname) == true)
 						{
-							qsc_memutils_copy((uint8_t*)ctx->desc, (uint8_t*)pinfo->Description, strlen(pinfo->Description));
-							qsc_memutils_copy((uint8_t*)ctx->dhcp, (uint8_t*)pinfo->DhcpServer.IpAddress.String, strlen(pinfo->DhcpServer.IpAddress.String));
-							qsc_memutils_copy((uint8_t*)ctx->gateway, (uint8_t*)pinfo->GatewayList.IpAddress.String, strlen(pinfo->GatewayList.IpAddress.String));
-							qsc_memutils_copy((uint8_t*)ctx->ip, (uint8_t*)pinfo->IpAddressList.IpAddress.String, strlen(pinfo->IpAddressList.IpAddress.String));
-							qsc_memutils_copy((uint8_t*)ctx->name, (uint8_t*)pinfo->AdapterName, strlen((const char*)pinfo->AdapterName));
-							qsc_memutils_copy((uint8_t*)ctx->mac, (uint8_t*)pinfo->Address, strlen((const char*)pinfo->Address));
-							qsc_memutils_copy((uint8_t*)ctx->subnet, (uint8_t*)pinfo->IpAddressList.IpMask.String, strlen(pinfo->IpAddressList.IpMask.String));
+							qsc_memutils_copy(ctx->desc, pinfo->Description, strlen(pinfo->Description));
+							qsc_memutils_copy(ctx->dhcp, pinfo->DhcpServer.IpAddress.String, strlen(pinfo->DhcpServer.IpAddress.String));
+							qsc_memutils_copy(ctx->gateway, pinfo->GatewayList.IpAddress.String, strlen(pinfo->GatewayList.IpAddress.String));
+							qsc_memutils_copy(ctx->ip, pinfo->IpAddressList.IpAddress.String, strlen(pinfo->IpAddressList.IpAddress.String));
+							qsc_memutils_copy(ctx->name, pinfo->AdapterName, strlen((const char*)pinfo->AdapterName));
+							qsc_memutils_copy(ctx->mac, pinfo->Address, sizeof(pinfo->Address));
+							qsc_memutils_copy(ctx->subnet, pinfo->IpAddressList.IpMask.String, strlen(pinfo->IpAddressList.IpMask.String));
 							break;
 						}
 
@@ -108,9 +129,10 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 		{
 			if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_LINK)
 			{
-				unsigned char* ptr;
-				ptr = (unsigned char*)LLADDR((struct sockaddr_dl*)(ifa)->ifa_addr);
-				sprintf(ctx->mac, "%02x:%02x:%02x:%02x:%02x:%02x", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4), *(ptr + 5));
+				unsigned char* maddr;
+
+				maddr = (unsigned char*)LLADDR((struct sockaddr_dl*)(ifa)->ifa_addr);
+				netutils_format_mac(ctx->mac, maddr);
 				break;
 			}
 		}
@@ -120,7 +142,8 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 			if ((ifa->ifa_addr) && (ifa->ifa_addr->sa_family == AF_PACKET))
 			{
 				struct sockaddr_ll *s = (struct sockaddr_ll*)ifa->ifa_addr;
-				sprintf((char*)ctx->mac, "%02x:%02x:%02x:%02x:%02x:%02x", s->sll_addr[0], s->sll_addr[1], s->sll_addr[2], s->sll_addr[3], s->sll_addr[4], s->sll_addr[5]);
+
+				netutils_format_mac(ctx->mac, s->sll_addr);
 				break;
 			}
 		}
@@ -151,7 +174,7 @@ uint32_t qsc_netutils_atoi(const char* source)
 	if (source != NULL)
 	{
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-		len = strnlen_s(source, 10);
+		len = strnlen_s(source, 10U);
 #else
 		len = strlen(source);
 #endif
@@ -163,7 +186,7 @@ uint32_t qsc_netutils_atoi(const char* source)
 				break;
 			}
 
-			res = res * 10 + source[i] - '0';
+			res = res * 10U + source[i] - '0';
 		}
 	}
 
@@ -175,20 +198,20 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
 	DWORD blen;
-	TCHAR dbuf[QSC_SYSTEM_MAX_PATH + 1] = { 0U };
+	TCHAR dbuf[QSC_SYSTEM_MAX_PATH + 1U] = { 0U };
 
-	blen = QSC_SYSTEM_MAX_PATH + 1;
+	blen = QSC_SYSTEM_MAX_PATH + 1U;
 	GetComputerNameEx(ComputerNameDnsDomain, dbuf, &blen);
 
-	if (blen != 0)
+	if (blen != 0U)
 	{
-		qsc_memutils_copy((uint8_t*)output, (uint8_t*)dbuf, blen);
+		qsc_memutils_copy(output, dbuf, blen);
 	}
 	else
 	{
-		blen = QSC_SYSTEM_MAX_PATH + 1;
+		blen = QSC_SYSTEM_MAX_PATH + 1U;
 		GetComputerNameEx(ComputerNameNetBIOS, dbuf, &blen);
-		qsc_memutils_copy((uint8_t*)output, (uint8_t*)dbuf, blen);
+		qsc_memutils_copy(output, dbuf, blen);
 	}
 
 	return blen;
@@ -200,7 +223,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 	struct hostent* hp;
 	size_t dlen;
 
-    dlen = 0;
+    dlen = 0U;
 	gethostname(hn, sizeof(hn));
 	hp = gethostbyname(hn);
 
@@ -208,10 +231,10 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
     {
         dn = strchr(hp->h_name, '.');
 
-        if (dn != NULL && dlen != 0)
+        if (dn != NULL && dlen != 0U)
         {
             dlen = strlen(dn);
-            qsc_memutils_copy((uint8_t*)output, (uint8_t*)dn, dlen);
+            qsc_memutils_copy(output, dn, dlen);
         }
     }
 
@@ -242,7 +265,7 @@ bool qsc_netutils_get_host_name(char host[QSC_NETUTILS_HOSTS_NAME_SIZE])
 
     if (slen == 0)
     {
-        host[QSC_NETUTILS_HOSTS_NAME_SIZE - 1] = '\0';
+        host[QSC_NETUTILS_HOSTS_NAME_SIZE - 1U] = '\0';
     }
 
     return (slen == 0);
@@ -253,67 +276,71 @@ void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* addr
 {
 	QSC_ASSERT(address != NULL);
 
+	if (address != NULL)
+	{
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
-    WSADATA  wsd;
-    int32_t  err;
+		WSADATA  wsd;
+		int32_t  err;
 
-    if (WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd) == 0)
-    {
-        struct sockaddr_in insock4 = { 0U };
-        int32_t            slen    = (int32_t)sizeof(insock4);   /* correct size */
+		if (WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd) == 0)
+		{
+			struct sockaddr_in insock4 = { 0U };
+			int32_t slen;
 
-        insock4.sin_family = AF_INET;
+			slen = (int32_t)sizeof(insock4);
+			insock4.sin_family = AF_INET;
 
-        err = WSAStringToAddressW((LPWSTR)address->ipv4,
-                                  AF_INET,
-                                  NULL,
-                                  (LPSOCKADDR)&insock4,
-                                  &slen);
+			err = WSAStringToAddressW((LPWSTR)address->ipv4,
+				AF_INET,
+				NULL,
+				(LPSOCKADDR)&insock4,
+				&slen);
 
-        if (err == 0)
-        {
-            char aurl[NI_MAXSERV] = { 0U };
+			if (err == 0)
+			{
+				char aurl[NI_MAXSERV] = { 0U };
 
-            if (getnameinfo((const SOCKADDR*)&insock4,
-                            (socklen_t)sizeof(insock4),
-                            (PCHAR)aurl,
-                            (DWORD)sizeof(aurl),
-                            NULL, 0, NI_NAMEREQD) == 0)
-            {
-                qsc_stringutils_copy_string(host,
-                                            QSC_NETUTILS_HOSTS_NAME_SIZE,
-                                            aurl);
-            }
-        }
-        (void)WSACleanup();
-    }
-	
+				if (getnameinfo((const SOCKADDR*)&insock4,
+					(socklen_t)sizeof(insock4),
+					(PCHAR)aurl,
+					(DWORD)sizeof(aurl),
+					NULL, 0, NI_NAMEREQD) == 0)
+				{
+					qsc_stringutils_copy_string(host,
+						QSC_NETUTILS_HOSTS_NAME_SIZE,
+						aurl);
+				}
+			}
+			(void)WSACleanup();
+		}
+
 #else
 
-    struct sockaddr_in insock4;
-    socklen_t addrlen;
-    char aurl[NI_MAXHOST] = { 0U };
-    char sip[QSC_IPINFO_IPV4_STRNLEN] = { 0U };
+		struct sockaddr_in insock4;
+		socklen_t addrlen;
+		char aurl[NI_MAXHOST] = { 0U };
+		char sip[QSC_IPINFO_IPV4_STRNLEN] = { 0U };
 
-    // Initialize sockaddr_in struct for IPv4
-    qsc_memutils_clear(&insock4, sizeof(insock4));
-    insock4.sin_family = AF_INET;
+		// Initialize sockaddr_in struct for IPv4
+		qsc_memutils_clear(&insock4, sizeof(insock4));
+		insock4.sin_family = AF_INET;
 
-    qsc_ipinfo_ipv4_address_to_string(sip, address);
+		qsc_ipinfo_ipv4_address_to_string(sip, address);
 
-    //address.ipv4
-    inet_pton(AF_INET, sip, &insock4.sin_addr);
+		//address.ipv4
+		inet_pton(AF_INET, sip, &insock4.sin_addr);
 
-    // Set the address length to sizeof(sockaddr_in) for getnameinfo
-    addrlen = sizeof(insock4);
+		// Set the address length to sizeof(sockaddr_in) for getnameinfo
+		addrlen = sizeof(insock4);
 
-    // Call getnameinfo to resolve the hostname
-    if (getnameinfo((struct sockaddr*)&insock4, addrlen, aurl, sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
-    {
-        qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
-    }
+		// Call getnameinfo to resolve the hostname
+		if (getnameinfo((struct sockaddr*)&insock4, addrlen, aurl, sizeof(aurl), NULL, 0, NI_NAMEREQD) == 0)
+		{
+			qsc_stringutils_copy_string(host, QSC_NETUTILS_HOSTS_NAME_SIZE, aurl);
+		}
 #endif
+	}
 }
 
 bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
@@ -322,126 +349,131 @@ bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd)
 
 	qsc_socket_exceptions serr;
 
+	serr = qsc_socket_exception_error;
+
+	if (padd != NULL)
+	{
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
-	char hname[INET_ADDRSTRLEN] = { 0U };
-	struct addrinfo hints = { 0U };
-	struct sockaddr_in insock4 = { 0U };
-	WSADATA wsd = { 0U };
-	struct addrinfo* hres;
-	struct addrinfo* ralloc;
-	size_t pctr;
+		char hname[INET_ADDRSTRLEN] = { 0U };
+		struct addrinfo hints = { 0U };
+		struct sockaddr_in insock4 = { 0U };
+		WSADATA wsd = { 0U };
+		struct addrinfo* hres;
+		struct addrinfo* ralloc;
+		size_t pctr;
 
-	hres = NULL;
-	ralloc = NULL;
-	serr = (qsc_socket_exceptions)WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
-
-	if (serr == qsc_socket_exception_success)
-	{
-		qsc_memutils_clear(&hints, sizeof(hints));
-		qsc_memutils_clear(&insock4, sizeof(struct sockaddr_in));
-		hints.ai_family = AF_INET;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_flags = AI_PASSIVE;
-
-		serr = (qsc_socket_exceptions)gethostname(hname, sizeof(hname));
+		hres = NULL;
+		ralloc = NULL;
+		serr = (qsc_socket_exceptions)WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 
 		if (serr == qsc_socket_exception_success)
 		{
-			serr = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
+			qsc_memutils_clear(&hints, sizeof(hints));
+			qsc_memutils_clear(&insock4, sizeof(struct sockaddr_in));
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_flags = AI_PASSIVE;
+
+			serr = (qsc_socket_exceptions)gethostname(hname, sizeof(hname));
 
 			if (serr == qsc_socket_exception_success)
 			{
-				const size_t ADDMAX = 32;
+				serr = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
 
-				ralloc = hres;
-				pctr = 0;
-
-				while (hres)
+				if (serr == qsc_socket_exception_success)
 				{
-					if (hres->ai_family == AF_INET)
-					{
-						qsc_memutils_copy(&insock4, hres->ai_addr, hres->ai_addrlen);
-						insock4.sin_port = htons(9);
-						insock4.sin_family = AF_INET;
+					const size_t ADDMAX = 32U;
 
-						if (inet_ntop(AF_INET, &insock4.sin_addr, hname, INET_ADDRSTRLEN) != NULL)
+					ralloc = hres;
+					pctr = 0;
+
+					while (hres)
+					{
+						if (hres->ai_family == AF_INET)
 						{
-							if (inet_pton(AF_INET, hname, padd->ipv4) == NETUTILS_INET_PTON_SUCCESS)
+							qsc_memutils_copy((uint8_t*)&insock4, (const uint8_t*)hres->ai_addr, hres->ai_addrlen);
+							insock4.sin_port = htons(9);
+							insock4.sin_family = AF_INET;
+
+							if (inet_ntop(AF_INET, &insock4.sin_addr, hname, INET_ADDRSTRLEN) != NULL)
 							{
-								serr = qsc_socket_exception_success;
-								break;
+								if (inet_pton(AF_INET, hname, padd->ipv4) == NETUTILS_INET_PTON_SUCCESS)
+								{
+									serr = qsc_socket_exception_success;
+									break;
+								}
+								else
+								{
+									serr = qsc_socket_exception_error;
+								}
 							}
 							else
 							{
 								serr = qsc_socket_exception_error;
 							}
 						}
-						else
+
+						hres = hres->ai_next;
+						++pctr;
+
+						if (pctr > ADDMAX)
 						{
-							serr = qsc_socket_exception_error;
+							break;
 						}
 					}
 
-					hres = hres->ai_next;
-					++pctr;
-
-					if (pctr > ADDMAX)
-					{
-						break;
-					}
+					freeaddrinfo(ralloc);
 				}
-
-				freeaddrinfo(ralloc);
 			}
-		}
 
-		WSACleanup();
-	}
+			WSACleanup();
+		}
 
 #else
 
-	struct ifaddrs* ifas;
-	struct ifaddrs* ifa;
-	void* pva;
+		struct ifaddrs* ifas;
+		struct ifaddrs* ifa;
+		void* pva;
 
-	ifas = NULL;
-	ifa = NULL;
-	pva = NULL;
+		ifas = NULL;
+		ifa = NULL;
+		pva = NULL;
 
-	serr = qsc_socket_exception_error;
+		serr = qsc_socket_exception_error;
 
-	getifaddrs(&ifas);
+		getifaddrs(&ifas);
 
-	if (ifas != NULL)
-	{
-        for (ifa = ifas; ifa != NULL; ifa = ifa->ifa_next)
-        {
-            if (!ifa->ifa_addr)
-            {
-                continue;
-            }
+		if (ifas != NULL)
+		{
+			for (ifa = ifas; ifa != NULL; ifa = ifa->ifa_next)
+			{
+				if (!ifa->ifa_addr)
+				{
+					continue;
+				}
 
-            if (ifa->ifa_addr->sa_family == AF_INET)
-            {
-                pva = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
-				char buf[INET_ADDRSTRLEN] = { 0U };
+				if (ifa->ifa_addr->sa_family == AF_INET)
+				{
+					pva = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+					char buf[INET_ADDRSTRLEN] = { 0U };
 
-                if (inet_ntop(AF_INET, pva, buf, INET_ADDRSTRLEN) != NULL)
-                {
-					if (inet_pton(AF_INET, buf, padd->ipv4) == 1)
+					if (inet_ntop(AF_INET, pva, buf, INET_ADDRSTRLEN) != NULL)
 					{
-						serr = qsc_socket_exception_success;
-						break;
+						if (inet_pton(AF_INET, buf, padd->ipv4) == 1)
+						{
+							serr = qsc_socket_exception_success;
+							break;
+						}
 					}
-                }
-            }
-        }
+				}
+			}
 
-		freeifaddrs(ifas);
-	}
+			freeifaddrs(ifas);
+		}
 
 #endif
+	}
 
 	return (serr == qsc_socket_exception_success);
 }
@@ -452,125 +484,130 @@ bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd)
 
 	qsc_socket_exceptions serr;
 
-#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-	char hname[INET6_ADDRSTRLEN] = { 0U };
-	struct addrinfo hints = { 0U };
-	struct sockaddr_in6 insock6 = { 0U };
-	WSADATA wsd = { 0U };
-	struct addrinfo* hres;
-	struct addrinfo* ralloc;
-	size_t pctr;
-	
-	hres = NULL;
-	ralloc = NULL;
-	serr = (qsc_socket_exceptions)WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
+	serr = qsc_socket_exception_error;
 
-	if (serr == qsc_socket_exception_success)
+	if (padd != NULL)
 	{
-		qsc_memutils_clear(&hints, sizeof(hints));
-		qsc_memutils_clear(&insock6, sizeof(struct sockaddr_in6));
-		hints.ai_family = AF_INET6;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_flags = AI_PASSIVE;
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+		char hname[INET6_ADDRSTRLEN] = { 0U };
+		struct addrinfo hints = { 0U };
+		struct sockaddr_in6 insock6 = { 0U };
+		WSADATA wsd = { 0U };
+		struct addrinfo* hres;
+		struct addrinfo* ralloc;
+		size_t pctr;
 
-		serr = (qsc_socket_exceptions)gethostname(hname, sizeof(hname));
+		hres = NULL;
+		ralloc = NULL;
+		serr = (qsc_socket_exceptions)WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 
 		if (serr == qsc_socket_exception_success)
 		{
-			serr = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
+			qsc_memutils_clear(&hints, sizeof(hints));
+			qsc_memutils_clear(&insock6, sizeof(struct sockaddr_in6));
+			hints.ai_family = AF_INET6;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_flags = AI_PASSIVE;
+
+			serr = (qsc_socket_exceptions)gethostname(hname, sizeof(hname));
 
 			if (serr == qsc_socket_exception_success)
 			{
-				const size_t ADDMAX = 32;
+				serr = (qsc_socket_exceptions)getaddrinfo(hname, NULL, &hints, &hres);
 
-				pctr = 0;
-				ralloc = hres;
-
-				while (hres != NULL)
+				if (serr == qsc_socket_exception_success)
 				{
-					if (hres->ai_family == AF_INET6)
-					{
-						qsc_memutils_copy(&insock6, hres->ai_addr, hres->ai_addrlen);
-						insock6.sin6_port = htons(9);
-						insock6.sin6_family = AF_INET6;
+					const size_t ADDMAX = 32U;
 
-						if (inet_ntop(AF_INET6, &insock6.sin6_addr, hname, INET6_ADDRSTRLEN) != NULL)
+					pctr = 0;
+					ralloc = hres;
+
+					while (hres != NULL)
+					{
+						if (hres->ai_family == AF_INET6)
 						{
-							if (inet_pton(AF_INET6, hname, padd->ipv6) == NETUTILS_INET_PTON_SUCCESS)
+							qsc_memutils_copy((uint8_t*)&insock6, (const uint8_t*)hres->ai_addr, hres->ai_addrlen);
+							insock6.sin6_port = htons(9U);
+							insock6.sin6_family = AF_INET6;
+
+							if (inet_ntop(AF_INET6, &insock6.sin6_addr, hname, INET6_ADDRSTRLEN) != NULL)
 							{
-								serr = qsc_socket_exception_success;
-								break;
+								if (inet_pton(AF_INET6, hname, padd->ipv6) == NETUTILS_INET_PTON_SUCCESS)
+								{
+									serr = qsc_socket_exception_success;
+									break;
+								}
+								else
+								{
+									serr = qsc_socket_exception_error;
+								}
 							}
 							else
 							{
 								serr = qsc_socket_exception_error;
 							}
 						}
-						else
+
+						hres = hres->ai_next;
+						++pctr;
+
+						if (pctr > ADDMAX)
 						{
-							serr = qsc_socket_exception_error;
+							break;
 						}
 					}
 
-					hres = hres->ai_next;
-					++pctr;
-
-					if (pctr > ADDMAX)
-					{
-						break;
-					}
+					freeaddrinfo(ralloc);
 				}
-
-				freeaddrinfo(ralloc);
 			}
-		}
 
-		WSACleanup();
-	}
+			WSACleanup();
+		}
 
 #else
 
-	struct ifaddrs* ifas;
-	struct ifaddrs* ifa;
-	void* pva;
+		struct ifaddrs* ifas;
+		struct ifaddrs* ifa;
+		void* pva;
 
-	ifas = NULL;
-	ifa = NULL;
-	pva = NULL;
+		ifas = NULL;
+		ifa = NULL;
+		pva = NULL;
 
-	serr = qsc_socket_exception_error;
+		serr = qsc_socket_exception_error;
 
-	getifaddrs(&ifas);
+		getifaddrs(&ifas);
 
-    if (ifas != NULL)
-	{
-        for (ifa = ifas; ifa != NULL; ifa = ifa->ifa_next)
-        {
-            if (!ifa->ifa_addr)
-            {
-                continue;
-            }
+		if (ifas != NULL)
+		{
+			for (ifa = ifas; ifa != NULL; ifa = ifa->ifa_next)
+			{
+				if (!ifa->ifa_addr)
+				{
+					continue;
+				}
 
-            if (ifa->ifa_addr->sa_family == AF_INET6)
-            {
-                pva = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
-				char buf[INET6_ADDRSTRLEN] = { 0U };
+				if (ifa->ifa_addr->sa_family == AF_INET6)
+				{
+					pva = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
+					char buf[INET6_ADDRSTRLEN] = { 0U };
 
-                if (inet_ntop(AF_INET6, pva, buf, INET6_ADDRSTRLEN) != NULL)
-                {
-					if (inet_pton(AF_INET6, buf, padd->ipv6) == 1)
+					if (inet_ntop(AF_INET6, pva, buf, INET6_ADDRSTRLEN) != NULL)
 					{
-						serr = qsc_socket_exception_success;
-						break;
+						if (inet_pton(AF_INET6, buf, padd->ipv6) == 1)
+						{
+							serr = qsc_socket_exception_success;
+							break;
+						}
 					}
-                }
-            }
-        }
+				}
+			}
 
-		freeifaddrs(ifas);
-	}
+			freeifaddrs(ifas);
+		}
 
 #endif
+	}
 
 	return (serr == qsc_socket_exception_success);
 }
@@ -581,45 +618,48 @@ void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char* host, c
 	QSC_ASSERT(host != NULL);
 	QSC_ASSERT(service != NULL);
 
-	char hname[INET_ADDRSTRLEN] = { 0U };
-	struct addrinfo hints;
-	struct addrinfo* hres = NULL;
-	qsc_socket_exceptions ex;
-	int32_t res;
+	if (pinfo != NULL && host != NULL && service != NULL)
+	{
+		char hname[INET_ADDRSTRLEN] = { 0U };
+		struct addrinfo hints;
+		struct addrinfo* hres = NULL;
+		qsc_socket_exceptions ex;
+		int32_t res;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-    WSADATA wsd;
-    res = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
+		WSADATA wsd;
+		res = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 #else
-    res = 0;
+		res = 0;
 #endif
 
-	if (res == 0)
-	{
-		qsc_memutils_clear(&hints, sizeof(hints));
-		hints.ai_family = AF_INET;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_flags = AI_PASSIVE;
-
-		ex = (qsc_socket_exceptions)getaddrinfo(host, service, &hints, &hres);
-
-		if (ex == qsc_socket_exception_success)
+		if (res == 0)
 		{
-			if (hres != NULL)
+			qsc_memutils_clear(&hints, sizeof(hints));
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_flags = AI_PASSIVE;
+
+			ex = (qsc_socket_exceptions)getaddrinfo(host, service, &hints, &hres);
+
+			if (ex == qsc_socket_exception_success)
 			{
-				if (inet_ntop(AF_INET, ((char*)hres->ai_addr->sa_data + 2), hname, INET_ADDRSTRLEN) != 0)
+				if (hres != NULL)
 				{
-					inet_pton(AF_INET, hname, pinfo->address.ipv4);
-					pinfo->port = ntohs(((struct sockaddr_in*)hres->ai_addr)->sin_port);
-					pinfo->mask = qsc_ipinfo_ipv4_address_get_cidr_mask(&pinfo->address);
-					freeaddrinfo(hres);
+					if (inet_ntop(AF_INET, ((char*)hres->ai_addr->sa_data + 2), hname, INET_ADDRSTRLEN) != 0)
+					{
+						inet_pton(AF_INET, hname, pinfo->address.ipv4);
+						pinfo->port = ntohs(((struct sockaddr_in*)hres->ai_addr)->sin_port);
+						pinfo->mask = qsc_ipinfo_ipv4_address_get_cidr_mask(&pinfo->address);
+						freeaddrinfo(hres);
+					}
 				}
 			}
-		}
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-		WSACleanup();
+			WSACleanup();
 #endif
+		}
 	}
 }
 
@@ -629,52 +669,55 @@ void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char* host, c
 	QSC_ASSERT(host != NULL);
 	QSC_ASSERT(service != NULL);
 
-	char buf[INET6_ADDRSTRLEN] = { 0U };
-	struct addrinfo hints;
-	struct sockaddr_in6 insock6 = { 0U };
-	struct addrinfo* haddr = NULL;
-	qsc_socket_exceptions ex;
-	int32_t res;
+	if (pinfo != NULL && host != NULL && service != NULL)
+	{
+		char buf[INET6_ADDRSTRLEN] = { 0U };
+		struct addrinfo hints;
+		struct sockaddr_in6 insock6 = { 0U };
+		struct addrinfo* haddr = NULL;
+		qsc_socket_exceptions ex;
+		int32_t res;
 
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-    WSADATA wsd;
-    res = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
+		WSADATA wsd;
+		res = WSAStartup(NETUTILS_WSA_STARTUP_SEQUENCE, &wsd);
 #else
-    res = 0;
+		res = 0;
 #endif
 
-	if (res == 0)
-	{
-		qsc_memutils_clear(&hints, sizeof(hints));
-		qsc_memutils_clear(&insock6, sizeof(struct sockaddr_in6));
-		hints.ai_family = AF_INET6;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_flags = AI_PASSIVE;
-
-		ex = (qsc_socket_exceptions)getaddrinfo(host, service, &hints, &haddr);
-
-		if (ex == qsc_socket_exception_success)
+		if (res == 0)
 		{
-			if (haddr->ai_family == AF_INET6)
-			{
-				qsc_memutils_copy(&insock6, haddr->ai_addr, haddr->ai_addrlen);
-				insock6.sin6_port = htons(9);
-				insock6.sin6_family = AF_INET6;
+			qsc_memutils_clear(&hints, sizeof(hints));
+			qsc_memutils_clear(&insock6, sizeof(struct sockaddr_in6));
+			hints.ai_family = AF_INET6;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_flags = AI_PASSIVE;
 
-				if (inet_ntop(AF_INET6, &insock6.sin6_addr, buf, INET6_ADDRSTRLEN) != 0)
+			ex = (qsc_socket_exceptions)getaddrinfo(host, service, &hints, &haddr);
+
+			if (ex == qsc_socket_exception_success)
+			{
+				if (haddr->ai_family == AF_INET6)
 				{
-					inet_pton(AF_INET6, buf, pinfo->address.ipv6);
-					pinfo->port = ntohs(((struct sockaddr_in6*)haddr->ai_addr)->sin6_port);
-					pinfo->mask = qsc_ipinfo_ipv6_address_get_cidr_mask(&pinfo->address);
+					qsc_memutils_copy((uint8_t*)&insock6, (const uint8_t*)haddr->ai_addr, haddr->ai_addrlen);
+					insock6.sin6_port = htons(9);
+					insock6.sin6_family = AF_INET6;
+
+					if (inet_ntop(AF_INET6, &insock6.sin6_addr, buf, INET6_ADDRSTRLEN) != 0)
+					{
+						inet_pton(AF_INET6, buf, pinfo->address.ipv6);
+						pinfo->port = ntohs(((struct sockaddr_in6*)haddr->ai_addr)->sin6_port);
+						pinfo->mask = qsc_ipinfo_ipv6_address_get_cidr_mask(&pinfo->address);
+					}
 				}
+
+				freeaddrinfo(haddr);
 			}
 
-			freeaddrinfo(haddr);
-		}
-
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-		WSACleanup();
+			WSACleanup();
 #endif
+		}
 	}
 }
 
@@ -688,12 +731,12 @@ void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_SIZE], const
 		socklen_t psalen;
 		int32_t res;
 
-		psalen = 0;
+		psalen = 0U;
 		res = getpeername(sock->connection, &psa, &psalen);
 
 		if (res != QSC_SOCKET_RET_ERROR && psalen > 0)
 		{
-			qsc_memutils_copy((uint8_t*)output, (uint8_t*)psa.sa_data, (size_t)psalen);
+			qsc_memutils_copy(output, psa.sa_data, (size_t)psalen);
 		}
 	}
 }
@@ -714,7 +757,7 @@ void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_SIZE], co
 
 		if (res != QSC_SOCKET_RET_ERROR && psalen > 0)
 		{
-			qsc_memutils_copy((uint8_t*)output, (uint8_t*)psa.sa_data, (size_t)psalen);
+			qsc_memutils_copy(output, psa.sa_data, (size_t)psalen);
 		}
 	}
 }
@@ -724,19 +767,25 @@ uint16_t qsc_netutils_port_name_to_number(const char* portname, const char* prot
 	QSC_ASSERT(portname != NULL);
 	QSC_ASSERT(protocol != NULL);
 
-	const struct servent* se;
 	uint16_t port;
 
-	port = (uint16_t)qsc_netutils_atoi(portname);
+	port = 0;
 
-	if (port == 0)
+	if (portname != NULL && protocol != NULL)
 	{
+		const struct servent* se;
 
-		se = getservbyname(portname, protocol);
+		port = (uint16_t)qsc_netutils_atoi(portname);
 
-		if (se != NULL)
+		if (port == 0)
 		{
-			port = ntohs(se->s_port);
+
+			se = getservbyname(portname, protocol);
+
+			if (se != NULL)
+			{
+				port = ntohs(se->s_port);
+			}
 		}
 	}
 
@@ -761,7 +810,8 @@ void qsc_netutils_values_print()
 
 	qsc_consoleutils_print_safe("Domain name: ");
 	rlen = qsc_netutils_get_domain_name(domain);
-	if (rlen > 0)
+
+	if (rlen > 0U)
 	{
 		qsc_consoleutils_print_line(domain);
 	}

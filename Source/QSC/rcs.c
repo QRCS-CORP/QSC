@@ -226,7 +226,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 		/* initialize and pre-set the nonce */
 		ctrw = _mm512_set1_epi64(0);
 		qsc_memutils_copy(ctrblk, ctx->nonce, QSC_RCS_BLOCK_SIZE);
-		qsc_memutils_copy(((uint8_t*)ctrblk + QSC_RCS_BLOCK_SIZE), ctx->nonce, QSC_RCS_BLOCK_SIZE);
+		qsc_memutils_copy((ctrblk + QSC_RCS_BLOCK_SIZE), ctx->nonce, QSC_RCS_BLOCK_SIZE);
 		ctrw = _mm512_load_si512(ctrblk);
 		ctrw = _mm512_add_epi64(ctrw, _mm512_set_epi64(0, 0, 0, 1, 0, 0, 0, 0));
 
@@ -970,9 +970,10 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #endif
 
 #if defined(QSC_RCS_AUTHENTICATED)
+		uint8_t mkey[RCS256_MKEY_LENGTH];
+
 		/* use two permutation calls to seperate the cipher/mac key outputs to match the CEX implementation */
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1U);
-		uint8_t mkey[RCS256_MKEY_LENGTH];
 		qsc_memutils_copy(mkey, sbuf, RCS256_MKEY_LENGTH);
 
 #	if defined(QSC_RCS_AUTH_KMACR12)
@@ -985,9 +986,13 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_qmac_keyparams pk = { mkey, RCS256_MKEY_LENGTH, keyparams->nonce, QSC_RCS_NONCE_SIZE, NULL, 0U, qsc_qmac_mode_256 };
 		qsc_qmac_initialize(&ctx->kstate, &pk);
 #	endif
-		/* clear the shake buffer */
-		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
+
+		qsc_memutils_clear(mkey, sizeof(mkey));
 #endif
+
+		qsc_memutils_clear(sbuf, sizeof(sbuf));
+		/* clear the shake buffer */
+		qsc_keccak_dispose(&kstate);
 	}
 	else
 	{
@@ -1026,6 +1031,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 #if defined(QSC_RCS_AUTHENTICATED)
 		uint8_t mkey[RCS512_MKEY_LENGTH];
+
 		/* use two permutation calls (no buffering) to seperate the cipher/mac key outputs to match the CEX implementation */
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1U);
 		qsc_memutils_copy(mkey, sbuf, RCS512_MKEY_LENGTH);
@@ -1040,15 +1046,19 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_qmac_keyparams pk = { mkey, RCS256_MKEY_LENGTH, keyparams->nonce, QSC_RCS_NONCE_SIZE, NULL, 0U, qsc_qmac_mode_512 };
 		qsc_qmac_initialize(&ctx->kstate, &pk);
 #	endif
-		/* clear the shake buffer */
-		qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
+
+		qsc_memutils_clear(mkey, sizeof(mkey));
 #endif
+
+		qsc_memutils_clear(sbuf, sizeof(sbuf));
+		/* clear the shake buffer */
+		qsc_keccak_dispose(&kstate);
 	}
 
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
 	/* store the avx-512 round keys qsc_keccak_initialize_state*/
-	qsc_memutils_clear((uint8_t*)ctx->roundkeysw, sizeof(ctx->roundkeysw));
+	qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 
 	for (i = 0U; i < ctx->roundkeylen; i += 2U)
 	{
@@ -1076,11 +1086,11 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		qsc_memutils_clear((uint8_t*)ctx->roundkeysw, sizeof(ctx->roundkeysw));
+		qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 #	endif
 #endif
 
-		qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
 		qsc_memutils_clear(ctx->nonce, sizeof(ctx->nonce));
 		ctx->counter = 0U;
 		ctx->ctype = RCS256;
@@ -1097,27 +1107,30 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 	QSC_ASSERT(keyparams->key != NULL);
 	QSC_ASSERT(keyparams->keylen == QSC_RCS256_KEY_SIZE || keyparams->keylen == QSC_RCS512_KEY_SIZE);
 
-	ctx->ctype = keyparams->keylen == QSC_RCS512_KEY_SIZE ? RCS512 : RCS256;
-	qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
-	qsc_memutils_copy(ctx->nonce, keyparams->nonce, QSC_RCS_NONCE_SIZE);
-	ctx->counter = 1U;
-	ctx->encrypt = encryption;
-
-	if (ctx->ctype == RCS256)
+	if (ctx != NULL && keyparams != NULL)
 	{
-		/* initialize rcs state */
-		ctx->roundkeylen = RCS256_ROUNDKEY_SIZE;
-		ctx->rounds = RCS256_ROUND_COUNT;
-	}
-	else
-	{
-		/* initialize rcs state */
-		ctx->roundkeylen = RCS512_ROUNDKEY_SIZE;
-		ctx->rounds = RCS512_ROUND_COUNT;
-	}
+		ctx->ctype = keyparams->keylen == QSC_RCS512_KEY_SIZE ? RCS512 : RCS256;
+		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_copy(ctx->nonce, keyparams->nonce, QSC_RCS_NONCE_SIZE);
+		ctx->counter = 1U;
+		ctx->encrypt = encryption;
 
-	/* generate the cipher and mac keys */
-	rcs_secure_expand(ctx, keyparams);
+		if (ctx->ctype == RCS256)
+		{
+			/* initialize rcs state */
+			ctx->roundkeylen = RCS256_ROUNDKEY_SIZE;
+			ctx->rounds = RCS256_ROUND_COUNT;
+		}
+		else
+		{
+			/* initialize rcs state */
+			ctx->roundkeylen = RCS512_ROUNDKEY_SIZE;
+			ctx->rounds = RCS512_ROUND_COUNT;
+		}
+
+		/* generate the cipher and mac keys */
+		rcs_secure_expand(ctx, keyparams);
+	}
 }
 
 void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t length)
@@ -1126,7 +1139,7 @@ void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t leng
 	QSC_ASSERT(data != NULL);
 	QSC_ASSERT(length != 0U);
 
-	if (length != 0U)
+	if (ctx != NULL && data != NULL && length != 0U)
 	{
 		uint8_t code[sizeof(uint32_t)] = { 0U };
 
@@ -1142,7 +1155,10 @@ void qsc_rcs_store_nonce(const qsc_rcs_state* ctx, uint8_t nonce[QSC_RCS_NONCE_S
 {
 	QSC_ASSERT(ctx != NULL);
 
-	qsc_memutils_copy(nonce, ctx->nonce, QSC_RCS_NONCE_SIZE);
+	if (ctx != NULL)
+	{
+		qsc_memutils_copy(nonce, ctx->nonce, QSC_RCS_NONCE_SIZE);
+	}
 }
 
 bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
@@ -1153,113 +1169,35 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 
 	bool res;
 
-#if defined(QSC_RCS_AUTHENTICATED)
-
 	res = false;
 
-	/* update the processed bytes counter */
-	ctx->counter += length;
-
-	/* update the mac with the current nonce position */
-	rcs_mac_update(ctx, ctx->nonce, QSC_RCS_BLOCK_SIZE);
-
-	if (ctx->encrypt)
+	if (ctx != NULL && output != NULL && input != NULL)
 	{
-		/* transform the plain-text with the counter-mode cipher */
-		rcs_ctr_transform(ctx, output, input, length);
+#if defined(QSC_RCS_AUTHENTICATED)
 
-		/* update the mac with the cipher-text */
-		rcs_mac_update(ctx, output, length);
+		/* update the processed bytes counter */
+		ctx->counter += length;
 
-		/* mac the cipher-text appending the code to the end of the array */
-		rcs_mac_finalize(ctx, output + length);
-		res = true;
-	}
-	else
-	{
-		/* update the mac with the cipher-text */
-		rcs_mac_update(ctx, input, length);
+		/* update the mac with the current nonce position */
+		rcs_mac_update(ctx, ctx->nonce, QSC_RCS_BLOCK_SIZE);
 
-		if (ctx->ctype == RCS256)
+		if (ctx->encrypt)
 		{
-			uint8_t code[QSC_RCS256_MAC_SIZE] = { 0U };
+			/* transform the plain-text with the counter-mode cipher */
+			rcs_ctr_transform(ctx, output, input, length);
 
-			/* mac the cipher-text to a temp array for comparison */
-			rcs_mac_finalize(ctx, code);
+			/* update the mac with the cipher-text */
+			rcs_mac_update(ctx, output, length);
 
-			/* test the mac for equality, bypassing the transform if the mac check fails */
-			if (qsc_intutils_verify(code, input + length, QSC_RCS256_MAC_SIZE) == 0)
-			{
-				/* transform the plain-text with the counter-mode cipher */
-				rcs_ctr_transform(ctx, output, input, length);
-				res = true;
-			}
+			/* mac the cipher-text appending the code to the end of the array */
+			rcs_mac_finalize(ctx, output + length);
+			res = true;
 		}
 		else
 		{
-			uint8_t code[QSC_RCS512_MAC_SIZE] = { 0U };
+			/* update the mac with the cipher-text */
+			rcs_mac_update(ctx, input, length);
 
-			rcs_mac_finalize(ctx, code);
-
-			if (qsc_intutils_verify(code, input + length, QSC_RCS512_MAC_SIZE) == 0)
-			{
-				rcs_ctr_transform(ctx, output, input, length);
-				res = true;
-			}
-		}
-	}
-
-#else
-
-	rcs_ctr_transform(ctx, output, input, length);
-	res = true;
-
-#endif
-
-	return res;
-}
-
-bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize)
-{
-	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(input != NULL);
-
-	bool res;
-
-#if defined(QSC_RCS_AUTHENTICATED)
-
-	res = false;
-
-	/* update the processed bytes counter */
-	ctx->counter += length;
-
-	/* update the mac with the current nonce position */
-	rcs_mac_update(ctx, ctx->nonce, QSC_RCS_BLOCK_SIZE);
-
-	if (ctx->encrypt == true)
-	{
-		/* transform the plain-text with the counter-mode cipher */
-		rcs_ctr_transform(ctx, output, input, length);
-
-		/* update the mac with the cipher-text */
-		rcs_mac_update(ctx, output, length);
-
-		if (finalize == true)
-		{
-			/* mac the cipher-text appending the code to the end of the array */
-			rcs_mac_finalize(ctx, output + length);
-		}
-
-		res = true;
-	}
-	else
-	{
-		/* update the mac with the cipher-text */
-		rcs_mac_update(ctx, input, length);
-
-		if (finalize == true)
-		{
 			if (ctx->ctype == RCS256)
 			{
 				uint8_t code[QSC_RCS256_MAC_SIZE] = { 0U };
@@ -1288,20 +1226,104 @@ bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8
 				}
 			}
 		}
-		else
-		{
-			/* transform the plain-text with the counter-mode cipher */
-			rcs_ctr_transform(ctx, output, input, length);
-			res = true;
-		}
-	}
 
 #else
 
-	rcs_ctr_transform(ctx, output, input, length);
-	res = true;
+		rcs_ctr_transform(ctx, output, input, length);
+		res = true;
 
 #endif
+	}
+
+	return res;
+}
+
+bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize)
+{
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
+
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL && output != NULL && input != NULL)
+	{
+#if defined(QSC_RCS_AUTHENTICATED)
+
+		/* update the processed bytes counter */
+		ctx->counter += length;
+
+		/* update the mac with the current nonce position */
+		rcs_mac_update(ctx, ctx->nonce, QSC_RCS_BLOCK_SIZE);
+
+		if (ctx->encrypt == true)
+		{
+			/* transform the plain-text with the counter-mode cipher */
+			rcs_ctr_transform(ctx, output, input, length);
+
+			/* update the mac with the cipher-text */
+			rcs_mac_update(ctx, output, length);
+
+			if (finalize == true)
+			{
+				/* mac the cipher-text appending the code to the end of the array */
+				rcs_mac_finalize(ctx, output + length);
+			}
+
+			res = true;
+		}
+		else
+		{
+			/* update the mac with the cipher-text */
+			rcs_mac_update(ctx, input, length);
+
+			if (finalize == true)
+			{
+				if (ctx->ctype == RCS256)
+				{
+					uint8_t code[QSC_RCS256_MAC_SIZE] = { 0U };
+
+					/* mac the cipher-text to a temp array for comparison */
+					rcs_mac_finalize(ctx, code);
+
+					/* test the mac for equality, bypassing the transform if the mac check fails */
+					if (qsc_intutils_verify(code, input + length, QSC_RCS256_MAC_SIZE) == 0)
+					{
+						/* transform the plain-text with the counter-mode cipher */
+						rcs_ctr_transform(ctx, output, input, length);
+						res = true;
+					}
+				}
+				else
+				{
+					uint8_t code[QSC_RCS512_MAC_SIZE] = { 0U };
+
+					rcs_mac_finalize(ctx, code);
+
+					if (qsc_intutils_verify(code, input + length, QSC_RCS512_MAC_SIZE) == 0)
+					{
+						rcs_ctr_transform(ctx, output, input, length);
+						res = true;
+					}
+				}
+			}
+			else
+			{
+				/* transform the plain-text with the counter-mode cipher */
+				rcs_ctr_transform(ctx, output, input, length);
+				res = true;
+			}
+		}
+
+#else
+
+		rcs_ctr_transform(ctx, output, input, length);
+		res = true;
+
+#endif
+	}
 
 	return res;
 }

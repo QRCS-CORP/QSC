@@ -6,6 +6,8 @@
 
 void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
+	QSC_ASSERT(output != NULL);
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	struct tm nt = { 0U };
 	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
@@ -38,19 +40,25 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	time(&rt);
 
 	ti = localtime(&rt);
-	strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%F", ti);
 
-	len = strlen(buf);
-
-	if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
+	if (ti != NULL)
 	{
-		qsc_memutils_copy(output, buf, len);
+		strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%F", ti);
+
+		len = strlen(buf);
+
+		if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		{
+			qsc_memutils_copy(output, buf, len);
+		}
 	}
 #endif
 }
 
 void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
+	QSC_ASSERT(output != NULL);
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	struct tm nt;
 	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
@@ -84,18 +92,24 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 	rt = time(NULL);
 	ti = localtime(&rt);
-	ct = asctime(ti);
 
-	if (ct != NULL)
+	if (ti != NULL)
 	{
-		len = strlen(ct);
-		qsc_memutils_copy(output, ct, len);
+		ct = asctime(ti);
+
+		if (ct != NULL)
+		{
+			len = strlen(ct);
+			qsc_memutils_copy(output, ct, len);
+		}
 	}
 #endif
 }
 
 void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
+	QSC_ASSERT(output != NULL);
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	struct tm nt;
 	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
@@ -113,7 +127,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	{
 		len = strftime(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, "%H:%M:%S", &nt);
 
-		if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
 		{
 			qsc_memutils_copy(output, tbuf, len);
 		}
@@ -127,13 +141,17 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 	time(&rt);
 	ti = localtime(&rt);
-	strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%T", ti);
 
-	len = strlen(buf);
-
-	if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
+	if (ti != NULL)
 	{
-		qsc_memutils_copy(output, buf, len);
+		strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%T", ti);
+
+		len = strlen(buf);
+
+		if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		{
+			qsc_memutils_copy(output, buf, len);
+		}
 	}
 #endif
 }
@@ -154,7 +172,7 @@ uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start)
 
 	msec = clock();
 	diff = msec - start;
-	msec = (diff * 1000) / CLOCKS_PER_SEC;
+	msec = (diff * 1000U) / CLOCKS_PER_SEC;
 
 	return msec;
 }

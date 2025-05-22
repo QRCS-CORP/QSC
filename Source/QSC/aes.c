@@ -273,62 +273,64 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(keyparams != NULL);
 
-	if (keyparams->nonce != NULL)
+	if (ctx != NULL && keyparams != NULL)
 	{
-		ctx->nonce = (uint8_t*)keyparams->nonce;
-	}
-
-	qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
-
-	if (ctype == qsc_aes_cipher_256)
-	{
-		ctx->roundkeylen = AES256_ROUNDKEY_SIZE;
-		ctx->rounds = 14U;
-		aes_standard_expand(ctx, keyparams);
-	}
-	else if (ctype == qsc_aes_cipher_128)
-	{
-		ctx->roundkeylen = AES128_ROUNDKEY_SIZE;
-		ctx->rounds = 10U;
-		aes_standard_expand(ctx, keyparams);
-	}
-	else
-	{
-		ctx->roundkeylen = 0U;
-	}
-
-	/* inverse cipher */
-	if (encryption == false && ctx->roundkeylen != 0U)
-	{
-		__m128i tmp;
-		size_t i;
-		size_t j;
-
-		tmp = ctx->roundkeys[0U];
-		ctx->roundkeys[0U] = ctx->roundkeys[ctx->roundkeylen - 1U];
-		ctx->roundkeys[ctx->roundkeylen - 1U] = tmp;
-
-		for (i = 1U, j = ctx->roundkeylen - 2U; i < j; ++i, --j)
+		if (keyparams->nonce != NULL)
 		{
-			tmp = _mm_aesimc_si128(ctx->roundkeys[i]);
-			ctx->roundkeys[i] = _mm_aesimc_si128(ctx->roundkeys[j]);
-			ctx->roundkeys[j] = tmp;
+			ctx->nonce = (uint8_t*)keyparams->nonce;
 		}
 
-		ctx->roundkeys[i] = _mm_aesimc_si128(ctx->roundkeys[i]);
-	}
+		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
+
+		if (ctype == qsc_aes_cipher_256)
+		{
+			ctx->roundkeylen = AES256_ROUNDKEY_SIZE;
+			ctx->rounds = 14U;
+			aes_standard_expand(ctx, keyparams);
+		}
+		else if (ctype == qsc_aes_cipher_128)
+		{
+			ctx->roundkeylen = AES128_ROUNDKEY_SIZE;
+			ctx->rounds = 10U;
+			aes_standard_expand(ctx, keyparams);
+		}
+		else
+		{
+			ctx->roundkeylen = 0U;
+		}
+
+		/* inverse cipher */
+		if (encryption == false && ctx->roundkeylen != 0U)
+		{
+			__m128i tmp;
+			size_t i;
+			size_t j;
+
+			tmp = ctx->roundkeys[0U];
+			ctx->roundkeys[0U] = ctx->roundkeys[ctx->roundkeylen - 1U];
+			ctx->roundkeys[ctx->roundkeylen - 1U] = tmp;
+
+			for (i = 1U, j = ctx->roundkeylen - 2U; i < j; ++i, --j)
+			{
+				tmp = _mm_aesimc_si128(ctx->roundkeys[i]);
+				ctx->roundkeys[i] = _mm_aesimc_si128(ctx->roundkeys[j]);
+				ctx->roundkeys[j] = tmp;
+			}
+
+			ctx->roundkeys[i] = _mm_aesimc_si128(ctx->roundkeys[i]);
+		}
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-	size_t i;
+		size_t i;
 
-	qsc_memutils_clear((uint8_t*)ctx->roundkeysw, sizeof(ctx->roundkeysw));
+		qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 
-	for (i = 0U; i < ctx->rounds + 1U; ++i)
-	{
-		aes_load128to512(&ctx->roundkeys[i], &ctx->roundkeysw[i]);
-	}
+		for (i = 0U; i < ctx->rounds + 1U; ++i)
+		{
+			aes_load128to512(&ctx->roundkeys[i], &ctx->roundkeysw[i]);
+		}
 #endif
-
+	}
 }
 
 /* cbc mode */
@@ -338,86 +340,91 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(outputlen != NULL);
+	QSC_ASSERT(length != 0);
 
-	__m128i inp;
-	__m128i ivt;
-	__m128i otp;
-	size_t len;
-	size_t oft;
+	if (ctx != NULL && input != NULL && output != NULL && outputlen != NULL, length != 0)
+	{
+		__m128i inp;
+		__m128i ivt;
+		__m128i otp;
+		size_t len;
+		size_t oft;
 
-	oft = 0U;
+		oft = 0U;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	if (length > AVX512_BLOCK_SIZE)
-	{
-		__m512i inpw;
-		__m512i ivtw;
-		__m512i otpw;
-		uint8_t ivtb[AVX512_BLOCK_SIZE] = { 0U };
-
-		/* assemble the first block in the chain */
-		qsc_memutils_copy(ivtb, ctx->nonce, QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy((uint8_t*)(ivtb + QSC_AES_BLOCK_SIZE), input, 3U * QSC_AES_BLOCK_SIZE);
-		ivtw = _mm512_loadu_si512((const __m512i*)ivtb);
-
-		/* process the first block */
-		inpw = _mm512_loadu_si512((const __m512i*)input);
-		aes_decrypt_blockw(ctx, &otpw, &inpw);
-		otpw = _mm512_xor_si512(otpw, ivtw);
-
-		/* store to output */
-		_mm512_storeu_si512((__m512i*)output, otpw);
-		length -= AVX512_BLOCK_SIZE;
-		oft += AVX512_BLOCK_SIZE;
-
-		/* process remaining blocks */
-		while (length > AVX512_BLOCK_SIZE)
+		if (length > AVX512_BLOCK_SIZE)
 		{
-			qsc_memutils_copy(ivtb, (uint8_t*)(input + (oft - QSC_AES_BLOCK_SIZE)), AVX512_BLOCK_SIZE);
-			ivtw = _mm512_loadu_si512((const __m512i*)ivtb);
-			inpw = _mm512_loadu_si512((const __m512i*)((uint8_t*)(input + oft)));
+			__m512i inpw;
+			__m512i ivtw;
+			__m512i otpw;
+			uint8_t ivtb[AVX512_BLOCK_SIZE] = { 0U };
 
+			/* assemble the first block in the chain */
+			qsc_memutils_copy(ivtb, ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_copy(ivtb + QSC_AES_BLOCK_SIZE, input, 3U * QSC_AES_BLOCK_SIZE);
+			ivtw = _mm512_loadu_si512((const __m512i*)ivtb);
+
+			/* process the first block */
+			inpw = _mm512_loadu_si512((const __m512i*)input);
 			aes_decrypt_blockw(ctx, &otpw, &inpw);
 			otpw = _mm512_xor_si512(otpw, ivtw);
 
-			_mm512_storeu_si512((__m512i*)(uint8_t*)(output + oft), otpw);
+			/* store to output */
+			_mm512_storeu_si512((__m512i*)output, otpw);
 			length -= AVX512_BLOCK_SIZE;
 			oft += AVX512_BLOCK_SIZE;
-		}
 
-		qsc_memutils_copy(ctx->nonce, (uint8_t*)(input + (oft - QSC_AES_BLOCK_SIZE)), QSC_AES_BLOCK_SIZE);
-	}
+			/* process remaining blocks */
+			while (length > AVX512_BLOCK_SIZE)
+			{
+				qsc_memutils_copy(ivtb, input + (oft - QSC_AES_BLOCK_SIZE), AVX512_BLOCK_SIZE);
+				ivtw = _mm512_loadu_si512((const __m512i*)ivtb);
+				inpw = _mm512_loadu_si512((const __m512i*)((uint8_t*)(input + oft)));
+
+				aes_decrypt_blockw(ctx, &otpw, &inpw);
+				otpw = _mm512_xor_si512(otpw, ivtw);
+
+				_mm512_storeu_si512((__m512i*)(uint8_t*)(output + oft), otpw);
+				length -= AVX512_BLOCK_SIZE;
+				oft += AVX512_BLOCK_SIZE;
+			}
+
+			qsc_memutils_copy(ctx->nonce, input + (oft - QSC_AES_BLOCK_SIZE), QSC_AES_BLOCK_SIZE);
+		}
 
 #endif
 
-	if (length > QSC_AES_BLOCK_SIZE)
-	{
-		ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
-		inp = _mm_setzero_si128();
-
-		while (length > QSC_AES_BLOCK_SIZE)
+		if (length > QSC_AES_BLOCK_SIZE)
 		{
-			inp = _mm_loadu_si128((const __m128i*)(input + oft));
+			ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
+			inp = _mm_setzero_si128();
 
-			aes_decrypt_block(ctx, &otp, &inp);
-			otp = _mm_xor_si128(otp, ivt);
+			while (length > QSC_AES_BLOCK_SIZE)
+			{
+				inp = _mm_loadu_si128((const __m128i*)(input + oft));
 
-			_mm_storeu_si128(&ivt, inp);
-			_mm_storeu_si128((__m128i*)(output + oft), otp);
+				aes_decrypt_block(ctx, &otp, &inp);
+				otp = _mm_xor_si128(otp, ivt);
 
-			length -= QSC_AES_BLOCK_SIZE;
-			oft += QSC_AES_BLOCK_SIZE;
+				_mm_storeu_si128(&ivt, inp);
+				_mm_storeu_si128((__m128i*)(output + oft), otp);
+
+				length -= QSC_AES_BLOCK_SIZE;
+				oft += QSC_AES_BLOCK_SIZE;
+			}
+
+			_mm_storeu_si128((__m128i*)ctx->nonce, inp);
 		}
 
-		_mm_storeu_si128((__m128i*)ctx->nonce, inp);
+		uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+		qsc_aes_cbc_decrypt_block(ctx, tmpb, (input + oft));
+		len = qsc_pkcs7_padding_length(tmpb);
+		qsc_memutils_copy((output + oft), tmpb, QSC_AES_BLOCK_SIZE - len);
+		*outputlen = oft + (QSC_AES_BLOCK_SIZE - len);
 	}
-
-	uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-	qsc_aes_cbc_decrypt_block(ctx, tmpb, (input + oft));
-	len = qsc_pkcs7_padding_length(tmpb);
-	qsc_memutils_copy((output + oft), tmpb, QSC_AES_BLOCK_SIZE - len);
-	*outputlen = oft + (QSC_AES_BLOCK_SIZE - len);
 }
 
 void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
@@ -425,40 +432,44 @@ void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* inp
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
-	__m128i inp;
-	__m128i ivt;
-	__m128i otp;
-	size_t oft;
-
-	oft = 0U;
-
-	while (length > QSC_AES_BLOCK_SIZE)
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
 	{
-		inp = _mm_loadu_si128((const __m128i*)(input + oft));
-		ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
+		__m128i inp;
+		__m128i ivt;
+		__m128i otp;
+		size_t oft;
 
-		ivt = _mm_xor_si128(ivt, inp);
-		aes_encrypt_block(ctx, &otp, &ivt);
+		oft = 0U;
 
-		_mm_storeu_si128((__m128i*)ctx->nonce, otp);
-		_mm_storeu_si128((__m128i*)(output + oft), otp);
-
-		length -= QSC_AES_BLOCK_SIZE;
-		oft += QSC_AES_BLOCK_SIZE;
-	}
-
-	if (length != 0U)
-	{
-		uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-		qsc_memutils_copy(tmpb, (input + oft), length);
-
-		if (length < QSC_AES_BLOCK_SIZE)
+		while (length > QSC_AES_BLOCK_SIZE)
 		{
-			qsc_pkcs7_add_padding(tmpb, QSC_AES_BLOCK_SIZE - length);
+			inp = _mm_loadu_si128((const __m128i*)(input + oft));
+			ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
+
+			ivt = _mm_xor_si128(ivt, inp);
+			aes_encrypt_block(ctx, &otp, &ivt);
+
+			_mm_storeu_si128((__m128i*)ctx->nonce, otp);
+			_mm_storeu_si128((__m128i*)(output + oft), otp);
+
+			length -= QSC_AES_BLOCK_SIZE;
+			oft += QSC_AES_BLOCK_SIZE;
 		}
 
-		qsc_aes_cbc_encrypt_block(ctx, (output + oft), tmpb);
+		if (length != 0U)
+		{
+			uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+			qsc_memutils_copy(tmpb, (input + oft), length);
+
+			if (length < QSC_AES_BLOCK_SIZE)
+			{
+				qsc_pkcs7_add_padding(tmpb, QSC_AES_BLOCK_SIZE - length);
+			}
+
+			qsc_aes_cbc_encrypt_block(ctx, (output + oft), tmpb);
+		}
 	}
 }
 
@@ -468,18 +479,21 @@ void qsc_aes_cbc_decrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	__m128i inp;
-	__m128i ivt;
-	__m128i otp;
+	if (ctx != NULL && input != NULL && output != NULL)
+	{
+		__m128i inp;
+		__m128i ivt;
+		__m128i otp;
 
-	inp = _mm_loadu_si128((const __m128i*)input);
-	ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
+		inp = _mm_loadu_si128((const __m128i*)input);
+		ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
 
-	aes_decrypt_block(ctx, &otp, &inp);
-	otp = _mm_xor_si128(otp, ivt);
+		aes_decrypt_block(ctx, &otp, &inp);
+		otp = _mm_xor_si128(otp, ivt);
 
-	_mm_storeu_si128((__m128i*)ctx->nonce, inp);
-	_mm_storeu_si128((__m128i*)output, otp);
+		_mm_storeu_si128((__m128i*)ctx->nonce, inp);
+		_mm_storeu_si128((__m128i*)output, otp);
+	}
 }
 
 void qsc_aes_cbc_encrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input)
@@ -488,18 +502,21 @@ void qsc_aes_cbc_encrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	__m128i inp;
-	__m128i ivt;
-	__m128i otp;
+	if (ctx != NULL && input != NULL && output != NULL)
+	{
+		__m128i inp;
+		__m128i ivt;
+		__m128i otp;
 
-	inp = _mm_loadu_si128((const __m128i*)input);
-	ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
+		inp = _mm_loadu_si128((const __m128i*)input);
+		ivt = _mm_loadu_si128((const __m128i*)ctx->nonce);
 
-	ivt = _mm_xor_si128(ivt, inp);
-	aes_encrypt_block(ctx, &otp, &ivt);
+		ivt = _mm_xor_si128(ivt, inp);
+		aes_encrypt_block(ctx, &otp, &ivt);
 
-	_mm_storeu_si128((__m128i*)ctx->nonce, otp);
-	_mm_storeu_si128((__m128i*)output, otp);
+		_mm_storeu_si128((__m128i*)ctx->nonce, otp);
+		_mm_storeu_si128((__m128i*)output, otp);
+	}
 }
 
 /* ctr mode */
@@ -510,92 +527,96 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
-	__m128i inp;
-	__m128i nce;
-	__m128i otp;
-	size_t oft;
+	if (ctx != NULL && input != NULL && output != NULL && length != 0)
+	{
+		__m128i inp;
+		__m128i nce;
+		__m128i otp;
+		size_t oft;
 
-	oft = 0U;
+		oft = 0U;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	if (length >= AVX512_BLOCK_SIZE)
-	{
-		__m512i inpw;
-		__m512i ncew;
-		__m512i otpw;
-		__m512i tmpn;
-		uint8_t nceb[AVX512_BLOCK_SIZE];
-
-		/* load the ctr nonce block */
-		qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy((uint8_t*)(nceb + 16U), ctx->nonce, QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy((uint8_t*)(nceb + 32U), ctx->nonce, QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy((uint8_t*)(nceb + 48U), ctx->nonce, QSC_AES_BLOCK_SIZE);
-
-		ncew = _mm512_loadu_si512((const __m512i*)nceb);
-
-		qsc_intutils_reverse_bytes_x512(&ncew, &tmpn);
-		tmpn = _mm512_add_epi64(tmpn, _mm512_set_epi64(0, 3, 0, 2, 0, 1, 0, 0));
-		qsc_intutils_reverse_bytes_x512(&tmpn, &ncew);
-
-		while (length >= AVX512_BLOCK_SIZE)
+		if (length >= AVX512_BLOCK_SIZE)
 		{
-			/* encrypt the nonce block */
-			aes_encrypt_blockw(ctx, &otpw, &ncew);
-			inpw = _mm512_loadu_si512((const __m512i*)((uint8_t*)input + oft));
-			/* xor encrypted nonce with the ctx */
-			otpw = _mm512_xor_si512(otpw, inpw);
-			/* store in output */
-			_mm512_storeu_si512((__m512i*)((uint8_t*)output + oft), otpw);
+			__m512i inpw;
+			__m512i ncew;
+			__m512i otpw;
+			__m512i tmpn;
+			uint8_t nceb[AVX512_BLOCK_SIZE];
 
-			length -= AVX512_BLOCK_SIZE;
-			oft += AVX512_BLOCK_SIZE;
+			/* load the ctr nonce block */
+			qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_copy(nceb + 16U, ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_copy(nceb + 32U, ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_copy(nceb + 48U, ctx->nonce, QSC_AES_BLOCK_SIZE);
 
-			/* increment the low 64 bits across 4 blocks */
-			aes_beincrement_x512(&ncew);
+			ncew = _mm512_loadu_si512((const __m512i*)nceb);
+
+			qsc_intutils_reverse_bytes_x512(&ncew, &tmpn);
+			tmpn = _mm512_add_epi64(tmpn, _mm512_set_epi64(0, 3, 0, 2, 0, 1, 0, 0));
+			qsc_intutils_reverse_bytes_x512(&tmpn, &ncew);
+
+			while (length >= AVX512_BLOCK_SIZE)
+			{
+				/* encrypt the nonce block */
+				aes_encrypt_blockw(ctx, &otpw, &ncew);
+				inpw = _mm512_loadu_si512((const __m512i*)((uint8_t*)input + oft));
+				/* xor encrypted nonce with the ctx */
+				otpw = _mm512_xor_si512(otpw, inpw);
+				/* store in output */
+				_mm512_storeu_si512((__m512i*)((uint8_t*)output + oft), otpw);
+
+				length -= AVX512_BLOCK_SIZE;
+				oft += AVX512_BLOCK_SIZE;
+
+				/* increment the low 64 bits across 4 blocks */
+				aes_beincrement_x512(&ncew);
+			}
+
+			/* store the nonce */
+			_mm512_storeu_si512((__m512i*)nceb, ncew);
+			qsc_memutils_copy(ctx->nonce, nceb, QSC_AES_BLOCK_SIZE);
 		}
-
-		/* store the nonce */
-		_mm512_storeu_si512((__m512i*)nceb, ncew);
-		qsc_memutils_copy(ctx->nonce, nceb, QSC_AES_BLOCK_SIZE);
-	}
 
 #endif
 
-	if (length >= QSC_AES_BLOCK_SIZE)
-	{
-		nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
-
-		while (length >= QSC_AES_BLOCK_SIZE)
+		if (length >= QSC_AES_BLOCK_SIZE)
 		{
+			nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
+
+			while (length >= QSC_AES_BLOCK_SIZE)
+			{
+				aes_encrypt_block(ctx, &otp, &nce);
+				inp = _mm_loadu_si128((const __m128i*)(input + oft));
+				otp = _mm_xor_si128(inp, otp);
+				_mm_storeu_si128((__m128i*)(output + oft), otp);
+				aes_beincrement_x128(&nce);
+
+				length -= QSC_AES_BLOCK_SIZE;
+				oft += QSC_AES_BLOCK_SIZE;
+			}
+
+			_mm_storeu_si128((__m128i*)ctx->nonce, nce);
+		}
+
+		if (length != 0U)
+		{
+			QSC_ALIGN(16U) uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+
+			nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
+			qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+
 			aes_encrypt_block(ctx, &otp, &nce);
 			inp = _mm_loadu_si128((const __m128i*)(input + oft));
 			otp = _mm_xor_si128(inp, otp);
-			_mm_storeu_si128((__m128i*)(output + oft), otp);
-			aes_beincrement_x128(&nce);
 
-			length -= QSC_AES_BLOCK_SIZE;
-			oft += QSC_AES_BLOCK_SIZE;
+			_mm_storeu_si128((__m128i*)tmpb, otp);
+			qsc_memutils_copy((output + oft), tmpb, length);
 		}
-
-		_mm_storeu_si128((__m128i*)ctx->nonce, nce);
-	}
-
-	if (length != 0U)
-	{
-		QSC_ALIGN(16U) uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-
-		nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
-		qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
-
-		aes_encrypt_block(ctx, &otp, &nce);
-		inp = _mm_loadu_si128((const __m128i*)(input + oft));
-		otp = _mm_xor_si128(inp, otp);
-
-		_mm_storeu_si128((__m128i*)tmpb, otp);
-		qsc_memutils_copy((output + oft), tmpb, length);
 	}
 }
 
@@ -604,88 +625,92 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
-	__m128i inp;
-	__m128i nce;
-	__m128i otp;
-	size_t oft;
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
+	{
+		__m128i inp;
+		__m128i nce;
+		__m128i otp;
+		size_t oft;
 
-	oft = 0U;
+		oft = 0U;
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	if (length >= AVX512_BLOCK_SIZE)
-	{
-		__m512i inpw;
-		__m512i ncew;
-		__m512i otpw;
-		uint8_t nceb[AVX512_BLOCK_SIZE] = { 0U };
-
-		/* load the ctr nonce block */
-		qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy((uint8_t*)(nceb + 16U), ctx->nonce, QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy((uint8_t*)(nceb + 32U), ctx->nonce, QSC_AES_BLOCK_SIZE);
-		qsc_memutils_copy((uint8_t*)(nceb + 48U), ctx->nonce, QSC_AES_BLOCK_SIZE);
-
-		ncew = _mm512_loadu_si512((const __m512i*)nceb);
-		ncew = _mm512_add_epi64(ncew, _mm512_set_epi64(0, 3, 0, 2, 0, 1, 0, 0));
-
-		while (length >= AVX512_BLOCK_SIZE)
+		if (length >= AVX512_BLOCK_SIZE)
 		{
-			/* encrypt the nonce block */
-			aes_encrypt_blockw(ctx, &otpw, &ncew);
-			inpw = _mm512_loadu_si512((const __m512i*)(uint8_t*)(input + oft));
-			/* xor encrypted nonce with the ctx */
-			otpw = _mm512_xor_si512(otpw, inpw);
-			/* store in output */
-			_mm512_storeu_si512((__m512i*)(uint8_t*)(output + oft), otpw);
+			__m512i inpw;
+			__m512i ncew;
+			__m512i otpw;
+			uint8_t nceb[AVX512_BLOCK_SIZE] = { 0U };
 
-			length -= AVX512_BLOCK_SIZE;
-			oft += AVX512_BLOCK_SIZE;
+			/* load the ctr nonce block */
+			qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_copy(nceb + 16U, ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_copy(nceb + 32U, ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_copy(nceb + 48U, ctx->nonce, QSC_AES_BLOCK_SIZE);
 
-			/* increment the low 64 bits across 4 blocks */
-			qsc_intutils_leincrement_x512(&ncew);
+			ncew = _mm512_loadu_si512((const __m512i*)nceb);
+			ncew = _mm512_add_epi64(ncew, _mm512_set_epi64(0, 3, 0, 2, 0, 1, 0, 0));
+
+			while (length >= AVX512_BLOCK_SIZE)
+			{
+				/* encrypt the nonce block */
+				aes_encrypt_blockw(ctx, &otpw, &ncew);
+				inpw = _mm512_loadu_si512((const __m512i*)(uint8_t*)(input + oft));
+				/* xor encrypted nonce with the ctx */
+				otpw = _mm512_xor_si512(otpw, inpw);
+				/* store in output */
+				_mm512_storeu_si512((__m512i*)(uint8_t*)(output + oft), otpw);
+
+				length -= AVX512_BLOCK_SIZE;
+				oft += AVX512_BLOCK_SIZE;
+
+				/* increment the low 64 bits across 4 blocks */
+				qsc_intutils_leincrement_x512(&ncew);
+			}
+
+			/* store the nonce */
+			_mm512_storeu_si512((__m512i*)nceb, ncew);
+			qsc_memutils_copy(ctx->nonce, nceb, QSC_AES_BLOCK_SIZE);
 		}
-
-		/* store the nonce */
-		_mm512_storeu_si512((__m512i*)nceb, ncew);
-		qsc_memutils_copy(ctx->nonce, nceb, QSC_AES_BLOCK_SIZE);
-	}
 
 #endif
 
-	if (length >= QSC_AES_BLOCK_SIZE)
-	{
-		nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
-
-		while (length >= QSC_AES_BLOCK_SIZE)
+		if (length >= QSC_AES_BLOCK_SIZE)
 		{
+			nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
+
+			while (length >= QSC_AES_BLOCK_SIZE)
+			{
+				aes_encrypt_block(ctx, &otp, &nce);
+				inp = _mm_loadu_si128((const __m128i*)(input + oft));
+				otp = _mm_xor_si128(inp, otp);
+				_mm_storeu_si128((__m128i*)(output + oft), otp);
+				qsc_intutils_leincrement_x128(&nce);
+
+				length -= QSC_AES_BLOCK_SIZE;
+				oft += QSC_AES_BLOCK_SIZE;
+			}
+
+			_mm_storeu_si128((__m128i*)ctx->nonce, nce);
+		}
+
+		if (length != 0U)
+		{
+			QSC_ALIGN(16U) uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+
+			nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
+			qsc_intutils_le8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+
 			aes_encrypt_block(ctx, &otp, &nce);
 			inp = _mm_loadu_si128((const __m128i*)(input + oft));
 			otp = _mm_xor_si128(inp, otp);
-			_mm_storeu_si128((__m128i*)(output + oft), otp);
-			qsc_intutils_leincrement_x128(&nce);
 
-			length -= QSC_AES_BLOCK_SIZE;
-			oft += QSC_AES_BLOCK_SIZE;
+			_mm_storeu_si128((__m128i*)tmpb, otp);
+			qsc_memutils_copy((output + oft), tmpb, length);
 		}
-
-		_mm_storeu_si128((__m128i*)ctx->nonce, nce);
-	}
-
-	if (length != 0U)
-	{
-		QSC_ALIGN(16U) uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-
-		nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
-		qsc_intutils_le8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
-
-		aes_encrypt_block(ctx, &otp, &nce);
-		inp = _mm_loadu_si128((const __m128i*)(input + oft));
-		otp = _mm_xor_si128(inp, otp);
-
-		_mm_storeu_si128((__m128i*)tmpb, otp);
-		qsc_memutils_copy((output + oft), tmpb, length);
 	}
 }
 
@@ -697,12 +722,15 @@ void qsc_aes_ecb_decrypt_block(const qsc_aes_state* ctx, uint8_t* output, const 
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	__m128i inp;
-	__m128i otp;
+	if (ctx != NULL && input != NULL && output != NULL)
+	{
+		__m128i inp;
+		__m128i otp;
 
-	inp = _mm_loadu_si128((const __m128i*)input);
-	aes_decrypt_block(ctx, &otp, &inp);
-	_mm_storeu_si128((__m128i*)output, otp);
+		inp = _mm_loadu_si128((const __m128i*)input);
+		aes_decrypt_block(ctx, &otp, &inp);
+		_mm_storeu_si128((__m128i*)output, otp);
+	}
 }
 
 void qsc_aes_ecb_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input)
@@ -711,12 +739,15 @@ void qsc_aes_ecb_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const 
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	__m128i inp;
-	__m128i otp;
+	if (ctx != NULL && input != NULL && output != NULL)
+	{
+		__m128i inp;
+		__m128i otp;
 
-	inp = _mm_loadu_si128((const __m128i*)input);
-	aes_encrypt_block(ctx, &otp, &inp);
-	_mm_storeu_si128((__m128i*)output, otp);
+		inp = _mm_loadu_si128((const __m128i*)input);
+		aes_encrypt_block(ctx, &otp, &inp);
+		_mm_storeu_si128((__m128i*)output, otp);
+	}
 }
 
 void qsc_aes_dispose(qsc_aes_state* ctx)
@@ -727,10 +758,10 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-		qsc_memutils_clear((uint8_t*)ctx->roundkeysw, sizeof(ctx->roundkeysw));
+		qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 #endif
 		ctx->roundkeylen = 0U;
 	}
@@ -1555,29 +1586,32 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(keyparams != NULL);
 
-	if (keyparams->nonce != NULL)
+	if (ctx != NULL && keyparams != NULL)
 	{
-		ctx->nonce = keyparams->nonce;
-	}
+		if (keyparams->nonce != NULL)
+		{
+			ctx->nonce = keyparams->nonce;
+		}
 
-	qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
 
-	if (ctype == qsc_aes_cipher_256)
-	{
-		ctx->roundkeylen = AES256_ROUNDKEY_SIZE;
-		ctx->rounds = 14U;
-		aes_standard_expand(ctx, keyparams);
-	}
-	else if (ctype == qsc_aes_cipher_128)
-	{
-		ctx->roundkeylen = AES128_ROUNDKEY_SIZE;
-		ctx->rounds = 10U;
-		aes_standard_expand(ctx, keyparams);
-	}
-	else
-	{
-		ctx->rounds = 0U;
-		ctx->roundkeylen = 0U;
+		if (ctype == qsc_aes_cipher_256)
+		{
+			ctx->roundkeylen = AES256_ROUNDKEY_SIZE;
+			ctx->rounds = 14U;
+			aes_standard_expand(ctx, keyparams);
+		}
+		else if (ctype == qsc_aes_cipher_128)
+		{
+			ctx->roundkeylen = AES128_ROUNDKEY_SIZE;
+			ctx->rounds = 10U;
+			aes_standard_expand(ctx, keyparams);
+		}
+		else
+		{
+			ctx->rounds = 0U;
+			ctx->roundkeylen = 0U;
+		}
 	}
 }
 
@@ -1588,24 +1622,28 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
-	uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-	size_t nlen;
-	size_t oft;
-
-	oft = 0U;
-
-	while (length > QSC_AES_BLOCK_SIZE)
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
 	{
-		qsc_aes_cbc_decrypt_block(ctx, output + oft, input + oft);
-		length -= QSC_AES_BLOCK_SIZE;
-		oft += QSC_AES_BLOCK_SIZE;
-	}
+		uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+		size_t nlen;
+		size_t oft;
 
-	qsc_aes_cbc_decrypt_block(ctx, tmpb, input + oft);
-	nlen = qsc_pkcs7_padding_length(tmpb);
-	qsc_memutils_copy(output + oft, tmpb, QSC_AES_BLOCK_SIZE - nlen);
-	*outputlen = oft + (QSC_AES_BLOCK_SIZE - nlen);
+		oft = 0U;
+
+		while (length > QSC_AES_BLOCK_SIZE)
+		{
+			qsc_aes_cbc_decrypt_block(ctx, output + oft, input + oft);
+			length -= QSC_AES_BLOCK_SIZE;
+			oft += QSC_AES_BLOCK_SIZE;
+		}
+
+		qsc_aes_cbc_decrypt_block(ctx, tmpb, input + oft);
+		nlen = qsc_pkcs7_padding_length(tmpb);
+		qsc_memutils_copy(output + oft, tmpb, QSC_AES_BLOCK_SIZE - nlen);
+		*outputlen = oft + (QSC_AES_BLOCK_SIZE - nlen);
+	}
 }
 
 void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
@@ -1613,29 +1651,33 @@ void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* inp
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
-	size_t oft;
-
-	oft = 0U;
-
-	while (length > QSC_AES_BLOCK_SIZE)
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
 	{
-		qsc_aes_cbc_encrypt_block(ctx, output + oft, input + oft);
-		length -= QSC_AES_BLOCK_SIZE;
-		oft += QSC_AES_BLOCK_SIZE;
-	}
+		size_t oft;
 
-	if (length != 0U)
-	{
-		uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-		qsc_memutils_copy(tmpb, input + oft, length);
+		oft = 0U;
 
-		if (length < QSC_AES_BLOCK_SIZE)
+		while (length > QSC_AES_BLOCK_SIZE)
 		{
-			qsc_pkcs7_add_padding(tmpb, QSC_AES_BLOCK_SIZE - length);
+			qsc_aes_cbc_encrypt_block(ctx, output + oft, input + oft);
+			length -= QSC_AES_BLOCK_SIZE;
+			oft += QSC_AES_BLOCK_SIZE;
 		}
 
-		qsc_aes_cbc_encrypt_block(ctx, output + oft, tmpb);
+		if (length != 0U)
+		{
+			uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+			qsc_memutils_copy(tmpb, input + oft, length);
+
+			if (length < QSC_AES_BLOCK_SIZE)
+			{
+				qsc_pkcs7_add_padding(tmpb, QSC_AES_BLOCK_SIZE - length);
+			}
+
+			qsc_aes_cbc_encrypt_block(ctx, output + oft, tmpb);
+		}
 	}
 }
 
@@ -1645,17 +1687,20 @@ void qsc_aes_cbc_decrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	uint8_t tmpv[QSC_AES_BLOCK_SIZE] = { 0U };
-
-	qsc_memutils_copy(tmpv, input, QSC_AES_BLOCK_SIZE);
-	aes_decrypt_block(ctx, output, input);
-
-	for (size_t i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+	if (ctx != NULL && input != NULL && output != NULL)
 	{
-		output[i] ^= ctx->nonce[i];
-	}
+		uint8_t tmpv[QSC_AES_BLOCK_SIZE] = { 0U };
 
-	qsc_memutils_copy(ctx->nonce, tmpv, QSC_AES_BLOCK_SIZE);
+		qsc_memutils_copy(tmpv, input, QSC_AES_BLOCK_SIZE);
+		aes_decrypt_block(ctx, output, input);
+
+		for (size_t i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+		{
+			output[i] ^= ctx->nonce[i];
+		}
+
+		qsc_memutils_copy(ctx->nonce, tmpv, QSC_AES_BLOCK_SIZE);
+	}
 }
 
 void qsc_aes_cbc_encrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input)
@@ -1664,13 +1709,16 @@ void qsc_aes_cbc_encrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	for (size_t i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+	if (ctx != NULL && input != NULL && output != NULL)
 	{
-		ctx->nonce[i] ^= input[i];
-	}
+		for (size_t i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+		{
+			ctx->nonce[i] ^= input[i];
+		}
 
-	aes_encrypt_block(ctx, output, ctx->nonce);
-	qsc_memutils_copy(ctx->nonce, output, QSC_AES_BLOCK_SIZE);
+		aes_encrypt_block(ctx, output, ctx->nonce);
+		qsc_memutils_copy(ctx->nonce, output, QSC_AES_BLOCK_SIZE);
+	}
 }
 
 /* ctr mode */
@@ -1680,39 +1728,43 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t i;
 	size_t oft;
 
-	oft = 0U;
-
-	while (length >= QSC_AES_BLOCK_SIZE)
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
 	{
-		aes_encrypt_block(ctx, output + oft, ctx->nonce);
+		oft = 0U;
 
-		for (i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+		while (length >= QSC_AES_BLOCK_SIZE)
 		{
-			output[oft + i] ^= input[oft + i];
+			aes_encrypt_block(ctx, output + oft, ctx->nonce);
+
+			for (i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+			{
+				output[oft + i] ^= input[oft + i];
+			}
+
+			qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+
+			length -= QSC_AES_BLOCK_SIZE;
+			oft += QSC_AES_BLOCK_SIZE;
 		}
 
-		qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
-
-		length -= QSC_AES_BLOCK_SIZE;
-		oft += QSC_AES_BLOCK_SIZE;
-	}
-
-	if (length != 0U)
-	{
-		uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-
-		aes_encrypt_block(ctx, tmpb, ctx->nonce);
-
-		for (i = 0U; i < length; ++i)
+		if (length != 0U)
 		{
-			output[oft + i] = tmpb[i] ^ input[oft + i];
-		}
+			uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
 
-		qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+			aes_encrypt_block(ctx, tmpb, ctx->nonce);
+
+			for (i = 0U; i < length; ++i)
+			{
+				output[oft + i] = tmpb[i] ^ input[oft + i];
+			}
+
+			qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+		}
 	}
 }
 
@@ -1721,39 +1773,43 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(length != 0);
 
 	size_t i;
 	size_t oft;
 
-	oft = 0U;
-
-	while (length >= QSC_AES_BLOCK_SIZE)
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
 	{
-		aes_encrypt_block(ctx, output + oft, ctx->nonce);
+		oft = 0U;
 
-		for (i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+		while (length >= QSC_AES_BLOCK_SIZE)
 		{
-			output[oft + i] ^= input[oft + i];
+			aes_encrypt_block(ctx, output + oft, ctx->nonce);
+
+			for (i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+			{
+				output[oft + i] ^= input[oft + i];
+			}
+
+			qsc_intutils_le8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+
+			length -= QSC_AES_BLOCK_SIZE;
+			oft += QSC_AES_BLOCK_SIZE;
 		}
 
-		qsc_intutils_le8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
-
-		length -= QSC_AES_BLOCK_SIZE;
-		oft += QSC_AES_BLOCK_SIZE;
-	}
-
-	if (length != 0U)
-	{
-		uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
-
-		aes_encrypt_block(ctx, tmpb, ctx->nonce);
-
-		for (i = 0U; i < length; ++i)
+		if (length != 0U)
 		{
-			output[oft + i] = tmpb[i] ^ input[oft + i];
-		}
+			uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
 
-		qsc_intutils_le8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+			aes_encrypt_block(ctx, tmpb, ctx->nonce);
+
+			for (i = 0U; i < length; ++i)
+			{
+				output[oft + i] = tmpb[i] ^ input[oft + i];
+			}
+
+			qsc_intutils_le8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+		}
 	}
 }
 
@@ -1765,7 +1821,10 @@ void qsc_aes_ecb_decrypt_block(const qsc_aes_state* ctx, uint8_t* output, const 
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	aes_decrypt_block(ctx, output, input);
+	if (ctx != NULL && input != NULL && output != NULL)
+	{
+		aes_decrypt_block(ctx, output, input);
+	}
 }
 
 void qsc_aes_ecb_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input)
@@ -1774,7 +1833,10 @@ void qsc_aes_ecb_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const 
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
-	aes_encrypt_block(ctx, output, input);
+	if (ctx != NULL && input != NULL && output != NULL)
+	{
+		aes_encrypt_block(ctx, output, input);
+	}
 }
 
 void qsc_aes_dispose(qsc_aes_state* ctx)
@@ -1783,7 +1845,7 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear((uint8_t*)ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
 		ctx->roundkeylen = 0U;
 	}
 }
@@ -1795,18 +1857,22 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 void qsc_pkcs7_add_padding(uint8_t* input, size_t length)
 {
 	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
-	const size_t PADOFT = QSC_AES_BLOCK_SIZE - length;
-	size_t ctr;
-	uint8_t code;
-
-	code = (uint8_t)length;
-	ctr = PADOFT;
-
-	while (ctr != QSC_AES_BLOCK_SIZE)
+	if (input != NULL, length != 0)
 	{
-		input[ctr] = code;
-		++ctr;
+		const size_t PADOFT = QSC_AES_BLOCK_SIZE - length;
+		size_t ctr;
+		uint8_t code;
+
+		code = (uint8_t)length;
+		ctr = PADOFT;
+
+		while (ctr != QSC_AES_BLOCK_SIZE)
+		{
+			input[ctr] = code;
+			++ctr;
+		}
 	}
 }
 
@@ -1816,17 +1882,22 @@ size_t qsc_pkcs7_padding_length(const uint8_t* input)
 
 	size_t count;
 
-	count = (size_t)input[QSC_AES_BLOCK_SIZE - 1U];
-	count = (count < QSC_AES_BLOCK_SIZE) ? count : 0U;
+	count = 0;
 
-	if (count != 0U)
+	if (input != NULL)
 	{
-		for (size_t i = 2U; i <= count; ++i)
+		count = (size_t)input[QSC_AES_BLOCK_SIZE - 1U];
+		count = (count < QSC_AES_BLOCK_SIZE) ? count : 0U;
+
+		if (count != 0U)
 		{
-			if (input[QSC_AES_BLOCK_SIZE - i] != count)
+			for (size_t i = 2U; i <= count; ++i)
 			{
-				count = 0U;
-				break;
+				if (input[QSC_AES_BLOCK_SIZE - i] != count)
+				{
+					count = 0U;
+					break;
+				}
 			}
 		}
 	}
@@ -1970,37 +2041,40 @@ void qsc_aes_hba256_initialize(qsc_aes_hba256_state* ctx, const qsc_aes_keyparam
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(keyparams != NULL);
 
-	uint8_t cprk[QSC_AES256_KEY_SIZE] = { 0U };
-
-	ctx->custlen = qsc_intutils_min(keyparams->infolen, sizeof(ctx->cust));
-
-	if (ctx->custlen != 0U)
+	if (ctx != NULL && keyparams != NULL)
 	{
-		qsc_memutils_clear(ctx->cust, sizeof(ctx->cust));
-		qsc_memutils_copy(ctx->cust, keyparams->info, ctx->custlen);
-	}
+		uint8_t cprk[QSC_AES256_KEY_SIZE] = { 0U };
 
-	qsc_intutils_clear8(ctx->mkey, sizeof(ctx->mkey));
+		ctx->custlen = qsc_intutils_min(keyparams->infolen, sizeof(ctx->cust));
 
-	/* generate the cipher and mac keys */
-	aes_hba256_genkeys(keyparams, cprk, ctx->mkey);
+		if (ctx->custlen != 0U)
+		{
+			qsc_memutils_clear(ctx->cust, sizeof(ctx->cust));
+			qsc_memutils_copy(ctx->cust, keyparams->info, ctx->custlen);
+		}
 
-	/* initialize the mac ctx */
+		qsc_intutils_clear8(ctx->mkey, sizeof(ctx->mkey));
+
+		/* generate the cipher and mac keys */
+		aes_hba256_genkeys(keyparams, cprk, ctx->mkey);
+
+		/* initialize the mac ctx */
 #if defined(QSC_HBA_KMAC_EXTENSION)
-	qsc_kmac_initialize(&ctx->kstate, QSC_KECCAK_256_RATE, ctx->mkey, HBA256_MKEY_SIZE, NULL, 0U);
+		qsc_kmac_initialize(&ctx->kstate, QSC_KECCAK_256_RATE, ctx->mkey, HBA256_MKEY_SIZE, NULL, 0U);
 #else
-	qsc_hmac256_initialize(&ctx->kstate, ctx->mkey, HBA256_MKEY_SIZE);
+		qsc_hmac256_initialize(&ctx->kstate, ctx->mkey, HBA256_MKEY_SIZE);
 #endif
 
-	/* initialize the key parameters struct, info is optional */
-	qsc_aes_keyparams kp = { .key = cprk, .keylen = QSC_AES256_KEY_SIZE, .nonce = keyparams->nonce, .noncelen = keyparams->noncelen };
-	/* initialize the cipher ctx */
-	qsc_aes_initialize(&ctx->cstate, &kp, true, qsc_aes_cipher_256);
+		/* initialize the key parameters struct, info is optional */
+		qsc_aes_keyparams kp = { .key = cprk, .keylen = QSC_AES256_KEY_SIZE, .nonce = keyparams->nonce, .noncelen = keyparams->noncelen };
+		/* initialize the cipher ctx */
+		qsc_aes_initialize(&ctx->cstate, &kp, true, qsc_aes_cipher_256);
 
-	/* populate the hba ctx structure with mac-key and counter */
-	/* the ctx counter always initializes at 1 */
-	ctx->counter = 1U;
-	ctx->encrypt = encrypt;
+		/* populate the hba ctx structure with mac-key and counter */
+		/* the ctx counter always initializes at 1 */
+		ctx->counter = 1U;
+		ctx->encrypt = encrypt;
+	}
 }
 
 void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* ctx, const uint8_t* data, size_t datalen)
@@ -2009,7 +2083,7 @@ void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* ctx, const uint8_t* dat
 	QSC_ASSERT(data != NULL);
 
 	/* process the additional data */
-	if (datalen != 0U)
+	if (ctx != NULL && data != NULL && datalen != 0U)
 	{
 		uint8_t actr[sizeof(uint32_t)] = { 0U };
 
@@ -2026,43 +2100,47 @@ bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t* output, const 
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
 	bool res;
 
 	res = false;
 
-	/* update the processed bytes counter */
-	ctx->counter += length;
-
-	if (ctx->encrypt)
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
 	{
-		/* update the mac with the nonce */
-		aes_hba256_update(ctx, ctx->cstate.nonce, QSC_AES_BLOCK_SIZE);
-		/* use aes counter-mode to encrypt the array */
-		qsc_aes_ctrle_transform(&ctx->cstate, output, input, length);
-		/* update the mac with the cipher-text */
-		aes_hba256_update(ctx, output, length);
-		/* mac the cipher-text appending the code to the end of the array */
-		aes_hba256_finalize(ctx, output + length);
-		res = true;
-	}
-	else
-	{
-		uint8_t code[QSC_HBA256_MAC_SIZE] = { 0U };
+		/* update the processed bytes counter */
+		ctx->counter += length;
 
-		/* update the mac with the nonce */
-		aes_hba256_update(ctx, ctx->cstate.nonce, QSC_AES_BLOCK_SIZE);
-		/* update the mac with the cipher-text */
-		aes_hba256_update(ctx, input, length);
-		/* mac the cipher-text to the mac */
-		aes_hba256_finalize(ctx, code);
-
-		/* test the mac for equality, bypassing the transform if the mac check fails */
-		if (qsc_intutils_verify(code, (input + length), QSC_HBA256_MAC_SIZE) == 0U)
+		if (ctx->encrypt)
 		{
-			/* use aes counter-mode to decrypt the array */
+			/* update the mac with the nonce */
+			aes_hba256_update(ctx, ctx->cstate.nonce, QSC_AES_BLOCK_SIZE);
+			/* use aes counter-mode to encrypt the array */
 			qsc_aes_ctrle_transform(&ctx->cstate, output, input, length);
+			/* update the mac with the cipher-text */
+			aes_hba256_update(ctx, output, length);
+			/* mac the cipher-text appending the code to the end of the array */
+			aes_hba256_finalize(ctx, output + length);
 			res = true;
+		}
+		else
+		{
+			uint8_t code[QSC_HBA256_MAC_SIZE] = { 0U };
+
+			/* update the mac with the nonce */
+			aes_hba256_update(ctx, ctx->cstate.nonce, QSC_AES_BLOCK_SIZE);
+			/* update the mac with the cipher-text */
+			aes_hba256_update(ctx, input, length);
+			/* mac the cipher-text to the mac */
+			aes_hba256_finalize(ctx, code);
+
+			/* test the mac for equality, bypassing the transform if the mac check fails */
+			if (qsc_intutils_verify(code, (input + length), QSC_HBA256_MAC_SIZE) == 0U)
+			{
+				/* use aes counter-mode to decrypt the array */
+				qsc_aes_ctrle_transform(&ctx->cstate, output, input, length);
+				res = true;
+			}
 		}
 	}
 
@@ -2228,65 +2306,72 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
-    uint8_t ctag[QSC_AES_BLOCK_SIZE] = { 0U };
-    uint8_t kstream[QSC_AES_BLOCK_SIZE] = { 0U };
-	uint8_t lblock[QSC_AES_BLOCK_SIZE] = { 0U };
-    uint8_t tblock[QSC_AES_BLOCK_SIZE] = { 0U };
-	size_t i;
-	size_t clen;
 	bool res;
 
-	clen = length - QSC_GCM256_MAC_SIZE;
+	res = false;
 
-    for (i = 0U; i + QSC_AES_BLOCK_SIZE <= clen; i += QSC_AES_BLOCK_SIZE)
+	if (ctx != NULL && input != NULL && output != NULL, length != 0)
 	{
-        ghash_update(ctx->S, input + i, ctx->H);
-        qsc_aes_ecb_encrypt_block(&ctx->cstate, kstream, ctx->C);
+		uint8_t ctag[QSC_AES_BLOCK_SIZE] = { 0U };
+		uint8_t kstream[QSC_AES_BLOCK_SIZE] = { 0U };
+		uint8_t lblock[QSC_AES_BLOCK_SIZE] = { 0U };
+		uint8_t tblock[QSC_AES_BLOCK_SIZE] = { 0U };
+		size_t i;
+		size_t clen;
 
-        for (size_t j = 0U; j < QSC_AES_BLOCK_SIZE; ++j)
+		clen = length - QSC_GCM256_MAC_SIZE;
+
+		for (i = 0U; i + QSC_AES_BLOCK_SIZE <= clen; i += QSC_AES_BLOCK_SIZE)
 		{
-            output[i + j] = input[i + j] ^ kstream[j];
-        }
+			ghash_update(ctx->S, input + i, ctx->H);
+			qsc_aes_ecb_encrypt_block(&ctx->cstate, kstream, ctx->C);
 
-        qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
-    }
+			for (size_t j = 0U; j < QSC_AES_BLOCK_SIZE; ++j)
+			{
+				output[i + j] = input[i + j] ^ kstream[j];
+			}
 
-    if (i < clen)
-	{
-        uint8_t block[QSC_AES_BLOCK_SIZE] = { 0U };
-        size_t rem;
+			qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
+		}
 
-		rem = clen - i;
-        qsc_memutils_copy(block, input + i, rem);
-        ghash_update(ctx->S, block, ctx->H);
-        qsc_aes_ecb_encrypt_block(&ctx->cstate, kstream, ctx->C);
-
-        for (size_t j = 0U; j < rem; j++) 
+		if (i < clen)
 		{
-            output[i + j] = block[j] ^ kstream[j];
-        }
+			uint8_t block[QSC_AES_BLOCK_SIZE] = { 0U };
+			size_t rem;
 
-        qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
-    }
+			rem = clen - i;
+			qsc_memutils_copy(block, input + i, rem);
+			ghash_update(ctx->S, block, ctx->H);
+			qsc_aes_ecb_encrypt_block(&ctx->cstate, kstream, ctx->C);
 
-    ctx->ctlen += ((uint64_t)clen) * sizeof(uint64_t);
+			for (size_t j = 0U; j < rem; j++)
+			{
+				output[i + j] = block[j] ^ kstream[j];
+			}
 
-    for (i = 0U; i < sizeof(uint64_t); i++)
-	{
-        lblock[i] = (uint8_t)(ctx->aadlen >> (56U - sizeof(uint64_t) * i));
-        lblock[sizeof(uint64_t) + i] = (uint8_t)(ctx->ctlen  >> (56U - sizeof(uint64_t) * i));
-    }
+			qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
+		}
 
-    ghash_update(ctx->S, lblock, ctx->H);
-    qsc_aes_ecb_encrypt_block(&ctx->cstate, tblock, ctx->J0);
+		ctx->ctlen += ((uint64_t)clen) * sizeof(uint64_t);
 
-    for (i = 0U; i < QSC_AES_BLOCK_SIZE; ++i) 
-	{
-        ctag[i] = tblock[i] ^ ctx->S[i];
-    }
+		for (i = 0U; i < sizeof(uint64_t); i++)
+		{
+			lblock[i] = (uint8_t)(ctx->aadlen >> (56U - sizeof(uint64_t) * i));
+			lblock[sizeof(uint64_t) + i] = (uint8_t)(ctx->ctlen >> (56U - sizeof(uint64_t) * i));
+		}
 
-	res = (qsc_intutils_verify(ctag, input + clen, QSC_GCM256_MAC_SIZE) == 0U);
+		ghash_update(ctx->S, lblock, ctx->H);
+		qsc_aes_ecb_encrypt_block(&ctx->cstate, tblock, ctx->J0);
+
+		for (i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
+		{
+			ctag[i] = tblock[i] ^ ctx->S[i];
+		}
+
+		res = (qsc_intutils_verify(ctag, input + clen, QSC_GCM256_MAC_SIZE) == 0U);
+	}
 
     return res;
 }
@@ -2312,102 +2397,109 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(length != 0);
 
-    uint8_t keystream[QSC_AES_BLOCK_SIZE] = { 0U };
-    size_t i;
-
-    for (i = 0U; i + QSC_AES_BLOCK_SIZE <= length; i += QSC_AES_BLOCK_SIZE)
+	if (ctx != NULL && output != NULL && input != NULL && length != 0)
 	{
-        qsc_aes_ecb_encrypt_block(&ctx->cstate, keystream, ctx->C);
+		uint8_t keystream[QSC_AES_BLOCK_SIZE] = { 0U };
+		size_t i;
 
-        for (size_t j = 0U; j < QSC_AES_BLOCK_SIZE; ++j)
+		for (i = 0U; i + QSC_AES_BLOCK_SIZE <= length; i += QSC_AES_BLOCK_SIZE)
 		{
-            output[i + j] = input[i + j] ^ keystream[j];
-        }
+			qsc_aes_ecb_encrypt_block(&ctx->cstate, keystream, ctx->C);
 
-        ghash_update(ctx->S, output + i, ctx->H);
-        qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
-    }
+			for (size_t j = 0U; j < QSC_AES_BLOCK_SIZE; ++j)
+			{
+				output[i + j] = input[i + j] ^ keystream[j];
+			}
 
-    if (i < length)
-	{
-        uint8_t block[QSC_AES_BLOCK_SIZE] = { 0U };
-        size_t rem;
+			ghash_update(ctx->S, output + i, ctx->H);
+			qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
+		}
 
-		rem = length - i;
-        qsc_memutils_clear(keystream, QSC_AES_BLOCK_SIZE);
-        qsc_aes_ecb_encrypt_block(&ctx->cstate, keystream, ctx->C);
-
-        for (size_t j = 0U; j < rem; ++j)
+		if (i < length)
 		{
-            block[j] = input[i + j] ^ keystream[j];
-            output[i + j] = block[j];
-        }
+			uint8_t block[QSC_AES_BLOCK_SIZE] = { 0U };
+			size_t rem;
 
-        ghash_update(ctx->S, block, ctx->H);
-        qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
-    }
+			rem = length - i;
+			qsc_memutils_clear(keystream, QSC_AES_BLOCK_SIZE);
+			qsc_aes_ecb_encrypt_block(&ctx->cstate, keystream, ctx->C);
 
-    ctx->ctlen += ((uint64_t)length) * sizeof(uint64_t);
+			for (size_t j = 0U; j < rem; ++j)
+			{
+				block[j] = input[i + j] ^ keystream[j];
+				output[i + j] = block[j];
+			}
 
-	aes_gcm256_finalize(ctx, output + length);
+			ghash_update(ctx->S, block, ctx->H);
+			qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
+		}
+
+		ctx->ctlen += ((uint64_t)length) * sizeof(uint64_t);
+
+		aes_gcm256_finalize(ctx, output + length);
+	}
 }
-#define MAX_IV_BUF_SIZE (numblk + 1) * QSC_AES_BLOCK_SIZE
+
 void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparams* keyparams, bool encryption)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(keyparams != NULL);
 
-    uint8_t zero[QSC_AES_BLOCK_SIZE] = { 0U };
-
-	/* initialize AES */
-	ctx->encrypt = encryption;
-    qsc_aes_initialize(&ctx->cstate, keyparams, true, qsc_aes_cipher_256);
-
-    /* compute hash subkey: H = AES(K, 0U^128) */
-    qsc_aes_ecb_encrypt_block(&ctx->cstate, ctx->H, zero);
-
-    /* compute pre–counter block J0 based on IV length */
-    if (keyparams->noncelen == 12U) 
+	if (ctx != NULL && keyparams != NULL)
 	{
-        qsc_memutils_copy(ctx->J0, keyparams->nonce, keyparams->noncelen);
-        qsc_memutils_clear(ctx->J0 + keyparams->noncelen, QSC_AES_BLOCK_SIZE - keyparams->noncelen);
-        ctx->J0[QSC_AES_BLOCK_SIZE - 1U] = 0x01U;
-    } 
-	else
-	{
-		uint64_t ivbits;
-		size_t numblk;
-		size_t buflen;
-		uint8_t ivbuf[2U * QSC_AES_BLOCK_SIZE] = { 0 };
+		uint8_t zero[QSC_AES_BLOCK_SIZE] = { 0U };
 
-		/* initialize the buffer */
-		numblk = ((keyparams->noncelen + QSC_AES_BLOCK_SIZE - 1U) / QSC_AES_BLOCK_SIZE);
-		buflen = (numblk + 1U) * QSC_AES_BLOCK_SIZE;
-		qsc_memutils_copy(ivbuf, keyparams->nonce, keyparams->noncelen);
+		/* initialize AES */
+		ctx->encrypt = encryption;
+		qsc_aes_initialize(&ctx->cstate, keyparams, true, qsc_aes_cipher_256);
 
-		ivbits = keyparams->noncelen * sizeof(uint64_t);
+		/* compute hash subkey: H = AES(K, 0U^128) */
+		qsc_aes_ecb_encrypt_block(&ctx->cstate, ctx->H, zero);
 
-		for (size_t i = 0U; i < sizeof(uint64_t); ++i)
+		/* compute pre–counter block J0 based on IV length */
+		if (keyparams->noncelen == 12U)
 		{
-			ivbuf[buflen - sizeof(uint64_t) + i] = (uint8_t)(ivbits >> (56U - sizeof(uint64_t) * i));
+			qsc_memutils_copy(ctx->J0, keyparams->nonce, keyparams->noncelen);
+			qsc_memutils_clear(ctx->J0 + keyparams->noncelen, QSC_AES_BLOCK_SIZE - keyparams->noncelen);
+			ctx->J0[QSC_AES_BLOCK_SIZE - 1U] = 0x01U;
+		}
+		else
+		{
+			uint64_t ivbits;
+			size_t numblk;
+			size_t buflen;
+			uint8_t ivbuf[2U * QSC_AES_BLOCK_SIZE] = { 0 };
+
+			/* initialize the buffer */
+			numblk = ((keyparams->noncelen + QSC_AES_BLOCK_SIZE - 1U) / QSC_AES_BLOCK_SIZE);
+			buflen = (numblk + 1U) * QSC_AES_BLOCK_SIZE;
+			qsc_memutils_copy(ivbuf, keyparams->nonce, keyparams->noncelen);
+
+			ivbits = keyparams->noncelen * sizeof(uint64_t);
+
+			for (size_t i = 0U; i < sizeof(uint64_t); ++i)
+			{
+				ivbuf[buflen - sizeof(uint64_t) + i] = (uint8_t)(ivbits >> (56U - sizeof(uint64_t) * i));
+			}
+
+			qsc_memutils_clear(ctx->J0, QSC_AES_BLOCK_SIZE);
+
+			for (size_t i = 0U; i < buflen; i += QSC_AES_BLOCK_SIZE)
+			{
+				ghash_update(ctx->J0, ivbuf + i, ctx->H);
+			}
 		}
 
-		qsc_memutils_clear(ctx->J0, QSC_AES_BLOCK_SIZE);
+		qsc_memutils_clear(ctx->S, QSC_AES_BLOCK_SIZE);
+		ctx->aadlen = 0U;
+		ctx->ctlen = 0U;
 
-		for (size_t i = 0U; i < buflen; i += QSC_AES_BLOCK_SIZE)
-		{
-			ghash_update(ctx->J0, ivbuf + i, ctx->H);
-		}
-    }
-
-    qsc_memutils_clear(ctx->S, QSC_AES_BLOCK_SIZE);
-    ctx->aadlen = 0U;
-    ctx->ctlen  = 0U;
-
-    /* set counter = inc(J0) */
-    qsc_memutils_copy(ctx->C, ctx->J0, QSC_AES_BLOCK_SIZE);
-    qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
+		/* set counter = inc(J0) */
+		qsc_memutils_copy(ctx->C, ctx->J0, QSC_AES_BLOCK_SIZE);
+		qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
+	}
 }
 
 void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* data, size_t datalen)
@@ -2415,36 +2507,50 @@ void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* dat
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(data != NULL);
 
-    size_t i;
-
-    for (i = 0U; i + QSC_AES_BLOCK_SIZE <= datalen; i += QSC_AES_BLOCK_SIZE) 
+	if (ctx != NULL && data != NULL && datalen != 0)
 	{
-        ghash_update(ctx->S, data + i, ctx->H);
-    }
+		size_t i;
 
-    if (i < datalen) 
-	{
-        uint8_t block[QSC_AES_BLOCK_SIZE] = { 0U };
+		for (i = 0U; i + QSC_AES_BLOCK_SIZE <= datalen; i += QSC_AES_BLOCK_SIZE)
+		{
+			ghash_update(ctx->S, data + i, ctx->H);
+		}
 
-        qsc_memutils_copy(block, data + i, datalen - i);
-        ghash_update(ctx->S, block, ctx->H);
-    }
+		if (i < datalen)
+		{
+			uint8_t block[QSC_AES_BLOCK_SIZE] = { 0U };
 
-    ctx->aadlen += ((uint64_t)datalen) * sizeof(uint64_t);
+			qsc_memutils_copy(block, data + i, datalen - i);
+			ghash_update(ctx->S, block, ctx->H);
+		}
+
+		ctx->aadlen += ((uint64_t)datalen) * sizeof(uint64_t);
+	}
 }
 
 bool qsc_aes_gcm256_transform(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
 	bool res;
 
-	if (ctx->encrypt == true)
+	res = false;
+
+	if (ctx != NULL && input != NULL && output != NULL)
 	{
-		qsc_aes_gcm256_encrypt(ctx, output, input, length);
-		res = true;
-	}
-	else
-	{
-		res = qsc_aes_gcm256_decrypt(ctx, output, input, length + QSC_GCM256_MAC_SIZE);
+		if (ctx->encrypt == true)
+		{
+			qsc_aes_gcm256_encrypt(ctx, output, input, length);
+			res = true;
+		}
+		else
+		{
+			res = qsc_aes_gcm256_decrypt(ctx, output, input, length + QSC_GCM256_MAC_SIZE);
+
+			if (!res)
+		     {
+		         /* erase any leaked plaintext on auth failure */
+		         qsc_memutils_clear(output, length);
+		     }
+		}
 	}
 
 	return res;

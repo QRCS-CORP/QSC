@@ -94,6 +94,18 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_COLLECTION_KEY_WIDTH 16ULL
 
 /*!
+ * \def QSC_COLLECTION_MAX_ENTRIES
+ * \brief The maximum collection entries.
+ */
+#define QSC_COLLECTION_MAX_ENTRIES 32768
+
+/*!
+ * \def QSC_COLLECTION_MAX_WIDTH
+ * \brief The maximum collection item width.
+ */
+#define QSC_COLLECTION_MAX_WIDTH 102400000
+
+/*!
  * \struct qsc_collection_state
  * \brief Collection state structure.
  *
@@ -179,9 +191,9 @@ QSC_EXPORT_API bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t
  * Sets up the collection state for use by specifying the byte size of each item.
  *
  * \param ctx:      [qsc_collection_state*] Pointer to the collection state to initialize.
- * \param width:    [size_t] The fixed byte size of each item in the collection.
+ * \param width:    [uint32_t] The fixed byte size of each item in the collection.
  */
-QSC_EXPORT_API void qsc_collection_initialize(qsc_collection_state* ctx, size_t width);
+QSC_EXPORT_API void qsc_collection_initialize(qsc_collection_state* ctx, uint32_t width);
 
 /**
  * \brief Retrieve a collection item by index.

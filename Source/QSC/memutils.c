@@ -22,19 +22,22 @@ void qsc_memutils_flush_cache_line(void *address)
 {
 	QSC_ASSERT(address != NULL);
 
+	if (address != NULL)
+	{
 #if defined(__GNUC__) || defined(__clang__)
-    __builtin___clear_cache((char*)address, (char*)address + QSC_MEMUTILS_CACHE_LINE_SIZE);
+		__builtin___clear_cache((char*)address, (char*)address + QSC_MEMUTILS_CACHE_LINE_SIZE);
 #elif defined(_MSC_VER)
-    _mm_clflush(address);
+		_mm_clflush(address);
 #endif
+	}
 }
 
 void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)
 {
 	QSC_ASSERT(address != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
-	if (address != NULL)
+	if (address != NULL && length != 0U)
 	{
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 		_mm_prefetch(((char*)address + length), _MM_HINT_T0);
@@ -42,9 +45,9 @@ void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)
 		volatile uint8_t tmp;
 		size_t i;
 
-		tmp = 0;
+		tmp = 0U;
 
-		for (i = 0; i < length; ++i)
+		for (i = 0U; i < length; ++i)
 		{
 			tmp |= address[i];
 		}
@@ -55,9 +58,9 @@ void qsc_memutils_prefetch_l1(uint8_t* address, size_t length)
 void qsc_memutils_prefetch_l2(uint8_t* address, size_t length)
 {
 	QSC_ASSERT(address != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
-	if (address != NULL)
+	if (address != NULL && length != 0U)
 	{
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 		_mm_prefetch(((char*)address + length), _MM_HINT_T1);
@@ -65,9 +68,9 @@ void qsc_memutils_prefetch_l2(uint8_t* address, size_t length)
 		volatile uint8_t tmp;
 		size_t i;
 
-		tmp = 0;
+		tmp = 0U;
 
-		for (i = 0; i < length; ++i)
+		for (i = 0U; i < length; ++i)
 		{
 			tmp |= address[i];
 		}
@@ -78,9 +81,9 @@ void qsc_memutils_prefetch_l2(uint8_t* address, size_t length)
 void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
 {
 	QSC_ASSERT(address != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
-	if (address != NULL)
+	if (address != NULL && length != 0U)
 	{
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 		_mm_prefetch(((char*)address + length), _MM_HINT_T2);
@@ -88,9 +91,9 @@ void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
 		volatile uint8_t tmp;
 		size_t i;
 
-		tmp = 0;
+		tmp = 0U;
 
-		for (i = 0; i < length; ++i)
+		for (i = 0U; i < length; ++i)
 		{
 			tmp |= address[i];
 		}
@@ -100,13 +103,13 @@ void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
 
 void* qsc_memutils_malloc(size_t length)
 {
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	void* ret;
 
 	ret = NULL;
 
-	if (length != 0)
+	if (length != 0U)
 	{
 		ret = malloc(length);
 	}
@@ -139,13 +142,13 @@ size_t qsc_memutils_page_size()
 void* qsc_memutils_realloc(void* block, size_t length)
 {
 	QSC_ASSERT(block != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	void* ret;
 
 	ret = NULL;
 
-	if (block != NULL && length != 0)
+	if (block != NULL && length != 0U)
 	{
 		ret = realloc(block, length);
 	}
@@ -166,13 +169,13 @@ void qsc_memutils_alloc_free(void* block)
 void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 {
 	QSC_ASSERT(align != 0);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	void* ret;
 
 	ret = NULL;
 
-	if (length != 0)
+	if (align != 0 && length != 0U)
 	{
 #if defined(QSC_SYSTEM_AVX_INTRINSICS) && defined(QSC_SYSTEM_OS_WINDOWS)
 		ret = _aligned_malloc(length, align);
@@ -196,13 +199,13 @@ void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 void* qsc_memutils_aligned_realloc(void* block, size_t length)
 {
 	QSC_ASSERT(block != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	void* ret;
 
 	ret = NULL;
 
-	if (block != NULL && length != 0)
+	if (block != NULL && length != 0U)
 	{
 #if defined(QSC_SYSTEM_AVX_INTRINSICS) && defined(QSC_SYSTEM_OS_WINDOWS)
 		ret = _aligned_realloc(block, length, QSC_SIMD_ALIGNMENT);
@@ -260,21 +263,21 @@ static void memutils_clear512(volatile void* output)
 void qsc_memutils_clear(void* output, size_t length)
 {
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	size_t pctr;
 
-	if (output != NULL && length != 0)
+	if (output != NULL && length != 0U)
 	{
-		pctr = 0;
+		pctr = 0U;
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
 		const size_t SMDBLK = 64;
 #	elif defined(QSC_SYSTEM_HAS_AVX2)
-		const size_t SMDBLK = 32;
+		const size_t SMDBLK = 32U;
 #	else
-		const size_t SMDBLK = 16;
+		const size_t SMDBLK = 16U;
 #	endif
 
 		if (length >= SMDBLK)
@@ -284,11 +287,11 @@ void qsc_memutils_clear(void* output, size_t length)
 			while (pctr != ALNLEN)
 			{
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-				memutils_clear512(((volatile uint8_t*)output + pctr));
+				memutils_clear512((volatile uint8_t*)output + pctr);
 #	elif defined(QSC_SYSTEM_HAS_AVX2)
-				memutils_clear256(((volatile uint8_t*)output + pctr));
-#	elif defined(QSC_SYSTEM_HAS_AVX)
-				memutils_clear128(((volatile uint8_t*)output + pctr));
+				memutils_clear256((volatile uint8_t*)output + pctr);
+#	elif defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+				memutils_clear128((volatile uint8_t*)output + pctr);
 #	endif
 				pctr += SMDBLK;
 			}
@@ -296,21 +299,21 @@ void qsc_memutils_clear(void* output, size_t length)
 #endif
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-		if (length - pctr >= 32)
+		if (length - pctr >= 32U)
 		{
-			memutils_clear256(((volatile uint8_t*)output + pctr));
-			pctr += 32;
+			memutils_clear256((volatile uint8_t*)output + pctr);
+			pctr += 32U;
 		}
-		else if (length - pctr >= 16)
+		else if (length - pctr >= 16U)
 		{
-			memutils_clear128(((volatile uint8_t*)output + pctr));
-			pctr += 16;
+			memutils_clear128((volatile uint8_t*)output + pctr);
+			pctr += 16U;
 		}
-#elif defined(QSC_SYSTEM_HAS_AVX2)
-		if (length - pctr >= 16)
+#elif defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+		if (length - pctr >= 16U)
 		{
-			memutils_clear128(((volatile uint8_t*)output + pctr));
-			pctr += 16;
+			memutils_clear128((volatile uint8_t*)output + pctr);
+			pctr += 16U;
 		}
 #endif
 
@@ -318,7 +321,7 @@ void qsc_memutils_clear(void* output, size_t length)
 		{
 			for (size_t i = pctr; i < length; ++i)
 			{
-				((volatile uint8_t*)output)[i] = 0x00;
+				((volatile uint8_t*)output)[i] = 0x00U;
 			}
 		}
 	}
@@ -338,7 +341,7 @@ static bool memutils_equal128(const uint8_t* a, const uint8_t* b)
 	wc = _mm_cmpeq_epi64(wa, wb);
 	_mm_storeu_si128((__m128i*)ra, wc);
 
-	return ((~ra[0] + ~ra[1]) == 0);
+	return ((~ra[0U] + ~ra[1U]) == 0);
 }
 #elif defined(QSC_SYSTEM_HAS_ARM_NEON)
 static bool memutils_equal128(const uint8_t* a, const uint8_t* b)
@@ -351,9 +354,9 @@ static bool memutils_equal128(const uint8_t* a, const uint8_t* b)
     uint8x16_t cmp = vceqq_u8(va, vb);
 
     // Compute the minimum value of all lanes. If all lanes are 0xFF then the minimum will be 0xFF.
-    uint8_t min_val = vminvq_u8(cmp);
+    uint8_t minval = vminvq_u8(cmp);
 
-    return (min_val == 0xFF);
+    return (minval == 0xFFU);
 }
 #endif
 
@@ -370,7 +373,7 @@ static bool memutils_equal256(const uint8_t* a, const uint8_t* b)
 	wc = _mm256_cmpeq_epi64(wa, wb);
 	_mm256_storeu_si256((__m256i*)ra, wc);
 
-	return ((~ra[0] + ~ra[1] + ~ra[2] + ~ra[3]) == 0);
+	return ((~ra[0U] + ~ra[1U] + ~ra[2U] + ~ra[3U]) == 0);
 }
 #endif
 
@@ -383,7 +386,7 @@ static bool memutils_equal512(const uint8_t* a, const uint8_t* b)
 
 	wa = _mm512_loadu_si512((const __m512i*)a);
 	wb = _mm512_loadu_si512((const __m512i*)b);
-	mr = _mm512_cmpeq_epi64_mask(wa, wb); // NOTE: test this.
+	mr = _mm512_cmpeq_epi64_mask(wa, wb);
 
 	return ((const char)mr == 0);
 }
@@ -396,43 +399,45 @@ bool qsc_memutils_array_uniform(const uint8_t* input, size_t length)
     uint8_t ref;
     uint8_t res;
 
-    res = 0;
+    res = 0U;
 
-	if (length > 0)
+	if (length > 0U)
 	{
-		ref = input[0];
+		ref = input[0U];
 
-		for (size_t i = 1; i < length; ++i)
+		for (size_t i = 1U; i < length; ++i)
 		{
 			res |= (input[i] ^ ref);
 		}
 	}
 
-    return (res == 0);
+    return (res == 0U);
 }
 
 bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 {
 	QSC_ASSERT(a != NULL);
 	QSC_ASSERT(b != NULL);
-	QSC_ASSERT(length > 0);
+	QSC_ASSERT(length > 0U);
 
 	size_t pctr;
 	int32_t mctr;
+	bool res;
 
 	mctr = 0;
-	pctr = 0;
+	pctr = 0U;
+	res = false;
 
 	if (a != NULL && b != NULL && length != 0)
 	{
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		const size_t SMDBLK = 64;
+		const size_t SMDBLK = 64U;
 #	elif defined(QSC_SYSTEM_HAS_AVX2)
-		const size_t SMDBLK = 32;
+		const size_t SMDBLK = 32U;
 #	else
-		const size_t SMDBLK = 16;
+		const size_t SMDBLK = 16U;
 #	endif
 
 		if (length >= SMDBLK)
@@ -445,7 +450,7 @@ bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 				mctr |= ((int32_t)memutils_equal512(a + pctr, b + pctr) - 1);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 				mctr |= ((int32_t)memutils_equal256(a + pctr, b + pctr) - 1);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#elif defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_ARM_NEON)
 				mctr |= ((int32_t)memutils_equal128(a + pctr, b + pctr) - 1);
 #endif
 				pctr += SMDBLK;
@@ -460,9 +465,11 @@ bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 				mctr |= (a[i] ^ b[i]);
 			}
 		}
+
+		res = (mctr == 0U);
 	}
 
-	return (mctr == 0);
+	return res;
 }
 
 bool qsc_memutils_are_equal_128(const uint8_t* a, const uint8_t* b)
@@ -470,24 +477,29 @@ bool qsc_memutils_are_equal_128(const uint8_t* a, const uint8_t* b)
 	QSC_ASSERT(a != NULL);
 	QSC_ASSERT(b != NULL);
 
-#if defined(QSC_SYSTEM_HAS_AVX)
+	bool res;
 
-	return memutils_equal128(a, b);
+	res = false;
 
-#else
-
-	int32_t mctr;
-
-	mctr = 0;
-
-	for (size_t i = 0U; i < 16; ++i)
+	if (a != NULL && b != NULL)
 	{
-		mctr |= (a[i] ^ b[i]);
+#if defined(QSC_SYSTEM_HAS_AVX)
+		res = memutils_equal128(a, b);
+#else
+		int32_t mctr;
+
+		mctr = 0;
+
+		for (size_t i = 0U; i < 16U; ++i)
+		{
+			mctr |= (a[i] ^ b[i]);
+		}
+
+		res = (mctr == 0);
+#endif
 	}
 
-	return (mctr == 0);
-
-#endif
+	return res;
 }
 
 bool qsc_memutils_are_equal_256(const uint8_t* a, const uint8_t* b)
@@ -495,29 +507,32 @@ bool qsc_memutils_are_equal_256(const uint8_t* a, const uint8_t* b)
 	QSC_ASSERT(a != NULL);
 	QSC_ASSERT(b != NULL);
 
-#if defined(QSC_SYSTEM_HAS_AVX2)
+	bool res;
 
-	return memutils_equal256(a, b);
+	res = false;
 
-#elif defined(QSC_SYSTEM_HAS_AVX)
-
-	return (memutils_equal128(a, b) && 
-		memutils_equal128(a + sizeof(__m128i), b + sizeof(__m128i)));
-
-#else
-
-	int32_t mctr;
-
-	mctr = 0;
-
-	for (size_t i = 0U; i < 32; ++i)
+	if (a != NULL && b != NULL)
 	{
-		mctr |= (a[i] ^ b[i]);
+#if defined(QSC_SYSTEM_HAS_AVX2)
+		res = memutils_equal256(a, b);
+#elif defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+		res = (memutils_equal128(a, b) &&
+			memutils_equal128(a + sizeof(__m128i), b + sizeof(__m128i)));
+#else
+		int32_t mctr;
+
+		mctr = 0;
+
+		for (size_t i = 0U; i < 32U; ++i)
+		{
+			mctr |= (a[i] ^ b[i]);
+		}
+
+		res = (mctr == 0);
+#endif
 	}
 
-	return (mctr == 0);
-
-#endif
+	return res;
 }
 
 bool qsc_memutils_are_equal_512(const uint8_t* a, const uint8_t* b)
@@ -525,36 +540,39 @@ bool qsc_memutils_are_equal_512(const uint8_t* a, const uint8_t* b)
 	QSC_ASSERT(a != NULL);
 	QSC_ASSERT(b != NULL);
 
+	bool res;
+
+	res = false;
+
+	if (a != NULL && b != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
-
-	return memutils_equal512(a, b);
-
+		res = memutils_equal512(a, b);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
-
-	return memutils_equal256(a, b) && 
-		memutils_equal256(a + sizeof(__m256i), b + sizeof(__m256i));
-
-#elif defined(QSC_SYSTEM_HAS_AVX)
-
-	return (memutils_equal128(a, b) && 
-		memutils_equal128(a + sizeof(__m128i), b + sizeof(__m128i)) &&
-		memutils_equal128(a + (2 * sizeof(__m128i)), b + (2 * sizeof(__m128i))) &&
-		memutils_equal128(a + (3 * sizeof(__m128i)), b + (3 * sizeof(__m128i))));
-
+		res = memutils_equal256(a, b) &&
+			memutils_equal256(a + sizeof(__m256i), b + sizeof(__m256i));
+#elif defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+		res = (memutils_equal128(a, b) &&
+			memutils_equal128(a + sizeof(__m128i), b + sizeof(__m128i)) &&
+			memutils_equal128(a + (2 * sizeof(__m128i)), b + (2 * sizeof(__m128i))) &&
+			memutils_equal128(a + (3 * sizeof(__m128i)), b + (3 * sizeof(__m128i))));
 #else
 
-	int32_t mctr;
+		int32_t mctr;
 
-	mctr = 0;
+		mctr = 0;
 
-	for (size_t i = 0U; i < 64; ++i)
-	{
-		mctr |= (a[i] ^ b[i]);
-	}
+		for (size_t i = 0U; i < 64U; ++i)
+		{
+			mctr |= (a[i] ^ b[i]);
+		}
 
-	return (mctr == 0);
+		res = (mctr == 0);
 
 #endif
+	}
+
+	return res;
 }
 
 #if defined(QSC_SYSTEM_HAS_AVX)
@@ -591,17 +609,17 @@ void qsc_memutils_copy(void* output, const void* input, size_t length)
 
 	size_t pctr;
 
-	if (length != 0)
+	if (output != NULL && input != NULL && length != 0U)
 	{
-		pctr = 0;
+		pctr = 0U;
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		const size_t SMDBLK = 64;
+		const size_t SMDBLK = 64U;
 #	elif defined(QSC_SYSTEM_HAS_AVX2)
-		const size_t SMDBLK = 32;
+		const size_t SMDBLK = 32U;
 #	else
-		const size_t SMDBLK = 16;
+		const size_t SMDBLK = 16U;
 #	endif
 
 		if (length >= SMDBLK)
@@ -614,7 +632,7 @@ void qsc_memutils_copy(void* output, const void* input, size_t length)
 				memutils_copy512((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 				memutils_copy256((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#elif defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_ARM_NEON)
 				memutils_copy128((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
 #endif
 				pctr += SMDBLK;
@@ -623,21 +641,21 @@ void qsc_memutils_copy(void* output, const void* input, size_t length)
 #endif
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-		if (length - pctr >= 32)
+		if (length - pctr >= 32U)
 		{
 			memutils_copy256((uint8_t*)output + pctr, (uint8_t*)input + pctr);
-			pctr += 32;
+			pctr += 32U;
 		}
-		else if (length - pctr >= 16)
+		else if (length - pctr >= 16U)
 		{
 			memutils_copy128((uint8_t*)output + pctr, (uint8_t*)input + pctr);
-			pctr += 16;
+			pctr += 16U;
 		}
-#elif defined(QSC_SYSTEM_HAS_AVX2)
-		if (length - pctr >= 16)
+#elif defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+		if (length - pctr >= 16U)
 		{
 			memutils_copy128((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
-			pctr += 16;
+			pctr += 16U;
 		}
 #endif
 
@@ -651,7 +669,7 @@ void qsc_memutils_copy(void* output, const void* input, size_t length)
 	}
 }
 
-static inline void memutils_clmulepi64(uint64_t r[2], uint64_t x, uint64_t y) 
+static inline void memutils_clmulepi64(uint64_t r[2U], uint64_t x, uint64_t y) 
 {
     uint64_t bit;
     uint64_t hc;
@@ -660,30 +678,30 @@ static inline void memutils_clmulepi64(uint64_t r[2], uint64_t x, uint64_t y)
     uint64_t nz;
     uint64_t ss;
 
-    r[0] = 0;
-    r[1] = 0;
+    r[0U] = 0U;
+    r[1U] = 0U;
 
-    for (size_t i = 0U; i < 64; ++i)
+    for (size_t i = 0U; i < 64U; ++i)
     {
         bit  = (x >> i) & 1ULL;
-        mask = 0 - bit;
+        mask = 0U - bit;
         /* add the contribution of y shifted left by i */
-        r[0] ^= (y << i) & mask;
+        r[0U] ^= (y << i) & mask;
 
         /* compute the overflow (high) contribution in constant time. */
-        nz = (uint64_t)(i != 0);
-        mi = 0 - nz;
-        ss = (64 - i) & mi;
+        nz = (uint64_t)(i != 0U);
+        mi = 0U - nz;
+        ss = (64U - i) & mi;
         hc = (y >> ss) & mi;
 
-        r[1] ^= hc & mask;
+        r[1U] ^= hc & mask;
     }
 }
 
-void qsc_memutils_clmulepi64_si128(uint64_t r[2], const uint64_t a[2], const uint64_t b[2], int32_t imm8) 
+void qsc_memutils_clmulepi64_si128(uint64_t r[2U], const uint64_t a[2U], const uint64_t b[2U], int32_t imm8) 
 {
-    size_t inda = (imm8 & 0x01)  ? 1 : 0;
-    size_t indb = (imm8 & 0x10) ? 1 : 0;
+    size_t inda = (imm8 & 0x01)  ? 1U : 0U;
+    size_t indb = (imm8 & 0x10) ? 1U : 0U;
 
     memutils_clmulepi64(r, a[inda], b[indb]);
 }
@@ -710,22 +728,22 @@ static inline void memutils_clmul128(__m128i a, __m128i b, __m128i* low, __m128i
     *high = _mm_xor_si128(p11, mid_hi);
 }
 
-void qsc_memutils_clmulepi64_si256_avx(__m128i r[4], const __m128i a[2], const __m128i b[2])
+void qsc_memutils_clmulepi64_si256_avx(__m128i r[4U], const __m128i a[2U], const __m128i b[2U])
 {
 	/* compute the three partial products */
     __m128i p0low = _mm_setzero_si128();
     __m128i p0high = _mm_setzero_si128();
 
     // p0 = a0 * b0
-    memutils_clmul128(a[0], b[0], &p0low, &p0high);
+    memutils_clmul128(a[0U], b[0U], &p0low, &p0high);
 
     __m128i p1low = _mm_setzero_si128();
     __m128i p1high = _mm_setzero_si128();
     // p1 = a1 * b1
-    memutils_clmul128(a[1], b[1], &p1low, &p1high);
+    memutils_clmul128(a[1U], b[1U], &p1low, &p1high);
 
-    __m128i a0xa1 = _mm_xor_si128(a[0], a[1]);
-    __m128i b0xb1 = _mm_xor_si128(b[0], b[1]);
+    __m128i a0xa1 = _mm_xor_si128(a[0U], a[1U]);
+    __m128i b0xb1 = _mm_xor_si128(b[0U], b[1U]);
     __m128i p2low = _mm_setzero_si128();
     __m128i p2high = _mm_setzero_si128();
 
@@ -738,139 +756,139 @@ void qsc_memutils_clmulepi64_si256_avx(__m128i r[4], const __m128i a[2], const _
 
     /* assemble the final 512-bit product from 4× 128-bit pieces */
     /* r0 = lower 128 bits of p0 */
-    r[0] = p0low;
+    r[0U] = p0low;
     /* r1 = (upper 128 bits of p0) ^ (lower 128 bits of m) */
-    r[1] = _mm_xor_si128(p0high, mlow);
+    r[1U] = _mm_xor_si128(p0high, mlow);
     /* r2 = (upper 128 bits of m) ^ (lower 128 bits of p1) */
-    r[2] = _mm_xor_si128(mhigh, p1low);
+    r[2U] = _mm_xor_si128(mhigh, p1low);
     /* r3 = upper 128 bits of p1 */
-    r[3] = p1high;
+    r[3U] = p1high;
 }
 
-void qsc_memutils_clmulepi64_si256(uint64_t r[8], const uint64_t a[4], const uint64_t b[4])
+void qsc_memutils_clmulepi64_si256(uint64_t r[8U], const uint64_t a[4U], const uint64_t b[4U])
 {
-	__m128i ma[2] = { 0U };
-	__m128i mb[2] = { 0U };
-	__m128i mr[4] = { 0U };
+	__m128i ma[2U] = { 0U };
+	__m128i mb[2U] = { 0U };
+	__m128i mr[4U] = { 0U };
 
     /* load 256-bit operands as two 128-bit pieces each */
-    ma[0] = _mm_loadu_si128((const __m128i*)(a));      /* lower 128 bits of A */
-    ma[1] = _mm_loadu_si128((const __m128i*)(a + 2));  /* upper 128 bits of A */
-    mb[0] = _mm_loadu_si128((const __m128i*)(b));      /* lower 128 bits of B */
-    mb[1] = _mm_loadu_si128((const __m128i*)(b + 2));  /* upper 128 bits of B */
+    ma[0U] = _mm_loadu_si128((const __m128i*)(a));      /* lower 128 bits of A */
+    ma[1U] = _mm_loadu_si128((const __m128i*)(a + 2U));  /* upper 128 bits of A */
+    mb[0U] = _mm_loadu_si128((const __m128i*)(b));      /* lower 128 bits of B */
+    mb[1U] = _mm_loadu_si128((const __m128i*)(b + 2U));  /* upper 128 bits of B */
 
 	qsc_memutils_clmulepi64_si256_avx(mr, ma, mb);
 
     /* store the result */
-    _mm_storeu_si128((__m128i*)(r + 0), mr[0]);
-    _mm_storeu_si128((__m128i*)(r + 2), mr[1]);
-    _mm_storeu_si128((__m128i*)(r + 4), mr[2]);
-    _mm_storeu_si128((__m128i*)(r + 6), mr[3]);
+    _mm_storeu_si128((__m128i*)(r + 0U), mr[0U]);
+    _mm_storeu_si128((__m128i*)(r + 2U), mr[1U]);
+    _mm_storeu_si128((__m128i*)(r + 4U), mr[2U]);
+    _mm_storeu_si128((__m128i*)(r + 6U), mr[3U]);
 }
 
 #else
 
-static inline void memutils_clmul128(uint64_t r[4], const uint64_t a[2], const uint64_t b[2])
+static inline void memutils_clmul128(uint64_t r[4U], const uint64_t a[2U], const uint64_t b[2U])
 {
-    uint64_t p00[2];
-    uint64_t p11[2];
-    uint64_t p10[2];
-    uint64_t p01[2];
-    uint64_t t2[2];
-    uint64_t t2l[2];
-    uint64_t t2r[2];
-    uint64_t low[2];
-    uint64_t high[2];
+    uint64_t p00[2U];
+    uint64_t p11[2U];
+    uint64_t p10[2U];
+    uint64_t p01[2U];
+    uint64_t t2[2U];
+    uint64_t t2l[2U];
+    uint64_t t2r[2U];
+    uint64_t low[2U];
+    uint64_t high[2U];
 
     /* compute partial products. */
-    memutils_clmulepi64(p00, a[0], b[0]);
-    memutils_clmulepi64(p11, a[1], b[1]);
-    memutils_clmulepi64(p10, a[1], b[0]);
-    memutils_clmulepi64(p01, a[0], b[1]);
+    memutils_clmulepi64(p00, a[0U], b[0U]);
+    memutils_clmulepi64(p11, a[1U], b[1U]);
+    memutils_clmulepi64(p10, a[1U], b[0U]);
+    memutils_clmulepi64(p01, a[0U], b[1U]);
 
     /* t2 = p10 xor p01 */
-    t2[0] = p10[0] ^ p01[0];
-    t2[1] = p10[1] ^ p01[1];
+    t2[0U] = p10[0U] ^ p01[0U];
+    t2[1U] = p10[1U] ^ p01[1U];
 
     /* xor in (p00 ^ p11) */
-    t2[0] ^= p00[0] ^ p11[0];
-    t2[1] ^= p00[1] ^ p11[1];
+    t2[0U] ^= p00[0U] ^ p11[0U];
+    t2[1U] ^= p00[1U] ^ p11[1U];
 
-    /* shift t2 left by 64 bits: lower word becomes 0, upper word becomes t2[0] */
-    t2l[0] = 0;
-    t2l[1] = t2[0];
+    /* shift t2 left by 64 bits: lower word becomes 0, upper word becomes t2[0U] */
+    t2l[0U] = 0U;
+    t2l[1U] = t2[0U];
 
-    /* shift t2 right by 64 bits: lower word becomes t2[1], upper word becomes 0 */
-    t2r[0] = t2[1];
-    t2r[1] = 0;
+    /* shift t2 right by 64 bits: lower word becomes t2[1U], upper word becomes 0 */
+    t2r[0U] = t2[1U];
+    t2r[1U] = 0U;
 
     /* combine the lower 128 bits is p00; the upper 128 bits is p11 */
     /* the cross term 'mid' is split between the two */
-    low[0]  = p00[0] ^ t2l[0];
-    low[1]  = p00[1] ^ t2l[1];
-    high[0] = p11[0] ^ t2r[0];
-    high[1] = p11[1] ^ t2r[1];
+    low[0U]  = p00[0U] ^ t2l[0U];
+    low[1U]  = p00[1U] ^ t2l[1U];
+    high[0U] = p11[0U] ^ t2r[0U];
+    high[1U] = p11[1U] ^ t2r[1U];
 
-    r[0] = low[0];
-    r[1] = low[1];
-    r[2] = high[0];
-    r[3] = high[1];
+    r[0U] = low[0U];
+    r[1U] = low[1U];
+    r[2U] = high[0U];
+    r[3U] = high[1U];
 }
 
-void qsc_memutils_clmulepi64_si256(uint64_t r[8], const uint64_t a[4], const uint64_t b[4])
+void qsc_memutils_clmulepi64_si256(uint64_t r[8U], const uint64_t a[4U], const uint64_t b[4U])
 {
     /* split the 256-bit operands into 128-bit halves */
-    uint64_t a0[2] = { a[0], a[1] };  /* lower 128 bits of a */
-    uint64_t a1[2] = { a[2], a[3] };  /* upper 128 bits of a */
-    uint64_t b0[2] = { b[0], b[1] };  /* lower 128 bits of b */
-    uint64_t b1[2] = { b[2], b[3] };  /* upper 128 bits of b */
-    uint64_t p0[4];  /* p0 = a0 * b0, 256 bits */
-    uint64_t p1[4];  /* p1 = a1 * b1, 256 bits */
-    uint64_t p2[4];  /* p2 = (a0 ^ a1) * (b0 ^ b1), 256 bits */
-    uint64_t mid[4];   /* middle term */
+    uint64_t a0[2U] = { a[0U], a[1U] };  /* lower 128 bits of a */
+    uint64_t a1[2U] = { a[2U], a[3U] };  /* upper 128 bits of a */
+    uint64_t b0[2U] = { b[0U], b[1U] };  /* lower 128 bits of b */
+    uint64_t b1[2U] = { b[2U], b[3U] };  /* upper 128 bits of b */
+    uint64_t p0[4U];  /* p0 = a0 * b0, 256 bits */
+    uint64_t p1[4U];  /* p1 = a1 * b1, 256 bits */
+    uint64_t p2[4U];  /* p2 = (a0 ^ a1) * (b0 ^ b1), 256 bits */
+    uint64_t mid[4U];   /* middle term */
 
     /* Compute the three 256-bit partial products using clmul128. */
     memutils_clmul128(p0, a0, b0);
     memutils_clmul128(p1, a1, b1);
 
-    uint64_t a0xa1[2] = { a0[0] ^ a1[0], a0[1] ^ a1[1] };
-    uint64_t b0xb1[2] = { b0[0] ^ b1[0], b0[1] ^ b1[1] };
+    uint64_t a0xa1[2U] = { a0[0U] ^ a1[0U], a0[1U] ^ a1[1U] };
+    uint64_t b0xb1[2U] = { b0[0U] ^ b1[0U], b0[1U] ^ b1[1U] };
     memutils_clmul128(p2, a0xa1, b0xb1);
 
     /* compute mid = p0 ^ p1 ^ p2 */
-    mid[0] = p0[0] ^ p1[0] ^ p2[0];
-    mid[1] = p0[1] ^ p1[1] ^ p2[1];
-    mid[2] = p0[2] ^ p1[2] ^ p2[2];
-    mid[3] = p0[3] ^ p1[3] ^ p2[3];
+    mid[0U] = p0[0U] ^ p1[0U] ^ p2[0U];
+    mid[1U] = p0[1U] ^ p1[1U] ^ p2[1U];
+    mid[2U] = p0[2U] ^ p1[2U] ^ p2[2U];
+    mid[3U] = p0[3U] ^ p1[3U] ^ p2[3U];
 
-    uint64_t r0[2];
-    uint64_t r1[2];
-    uint64_t r2[2];
-    uint64_t r3[2];
+    uint64_t r0[2U];
+    uint64_t r1[2U];
+    uint64_t r2[2U];
+    uint64_t r3[2U];
 
     /* assemble the final 512‑bit product as four 128‑bit words */
-    /* r0 = lower 128 bits of p0 = { p0[0], p0[1] } */
-    r0[0] = p0[0];
-    r0[1] = p0[1];
-    /* r1 = (upper 128 bits of p0) ^ (lower 128 bits of mid) = { p0[2] ^ mid[0], p0[3] ^ mid[1] } */
-    r1[0] = p0[2] ^ mid[0];
-    r1[1] = p0[3] ^ mid[1];
-    /* r2 = (upper 128 bits of mid) ^ (lower 128 bits of p1) = { mid[2] ^ p1[0], mid[3] ^ p1[1] } */
-    r2[0] = mid[2]  ^ p1[0];
-    r2[1] = mid[3] ^ p1[1];
-    /* r3 = upper 128 bits of p1 = { p1[2], p1[3] } */
-    r3[0] = p1[2];
-    r3[1] = p1[3];
+    /* r0 = lower 128 bits of p0 = { p0[0U], p0[1U] } */
+    r0[0U] = p0[0U];
+    r0[1U] = p0[1U];
+    /* r1 = (upper 128 bits of p0) ^ (lower 128 bits of mid) = { p0[2U] ^ mid[0U], p0[3U] ^ mid[1U] } */
+    r1[0U] = p0[2U] ^ mid[0U];
+    r1[1U] = p0[3U] ^ mid[1U];
+    /* r2 = (upper 128 bits of mid) ^ (lower 128 bits of p1) = { mid[2U] ^ p1[0U], mid[3U] ^ p1[1U] } */
+    r2[0U] = mid[2U]  ^ p1[0U];
+    r2[1U] = mid[3U] ^ p1[1U];
+    /* r3 = upper 128 bits of p1 = { p1[2U], p1[3U] } */
+    r3[0U] = p1[2U];
+    r3[1U] = p1[3U];
 
-    /* pack the four 128-bit words into the 512-bit result r[8] */
-    r[0] = r0[0];
-    r[1] = r0[1];
-    r[2] = r1[0];
-    r[3] = r1[1];
-    r[4] = r2[0];
-    r[5] = r2[1];
-    r[6] = r3[0];
-    r[7] = r3[1];
+    /* pack the four 128-bit words into the 512-bit result r[8U] */
+    r[0U] = r0[0U];
+    r[1U] = r0[1U];
+    r[2U] = r1[0U];
+    r[3U] = r1[1U];
+    r[4U] = r2[0U];
+    r[5U] = r2[1U];
+    r[6U] = r3[0U];
+    r[7U] = r3[1U];
 }
 
 #endif
@@ -884,42 +902,45 @@ bool qsc_memutils_greater_than_be128(const uint8_t* a, const uint8_t* b)
 
 	res = false;
 
+	if (a != NULL && b != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX)
 
-    __m128i ge;
-	__m128i im;
-    __m128i le;
-	__m128i wa;
-	__m128i wb;
-	uint32_t m1;
-	uint32_t m2;
+		__m128i ge;
+		__m128i im;
+		__m128i le;
+		__m128i wa;
+		__m128i wb;
+		uint32_t m1;
+		uint32_t m2;
 
-	wa = _mm_loadu_si128((const __m128i*)a);
-	wb = _mm_loadu_si128((const __m128i*)b);
-	im = _mm_min_epu8(wa, wb);
-	le = _mm_cmpeq_epi8(im, wa);
-	ge = _mm_cmpeq_epi8(im, wb);
-	m1 = (uint32_t)_mm_movemask_epi8(le);
-    m2 = (uint32_t)_mm_movemask_epi8(ge);
-    res = (m2 >= m1);
+		wa = _mm_loadu_si128((const __m128i*)a);
+		wb = _mm_loadu_si128((const __m128i*)b);
+		im = _mm_min_epu8(wa, wb);
+		le = _mm_cmpeq_epi8(im, wa);
+		ge = _mm_cmpeq_epi8(im, wb);
+		m1 = (uint32_t)_mm_movemask_epi8(le);
+		m2 = (uint32_t)_mm_movemask_epi8(ge);
+		res = (m2 >= m1);
 
 #else
 
-	for (int32_t i = 15; i >= 0; --i)
-	{
-		if (a[i] > b[i])
+		for (int32_t i = 15; i >= 0; --i)
 		{
-			res = true;
-			break;
+			if (a[i] > b[i])
+			{
+				res = true;
+				break;
+			}
+			else if (a[i] < b[i])
+			{
+				res = false;
+				break;
+			}
 		}
-		else if (a[i] < b[i])
-		{
-			res = false;
-			break;
-		}
-	}
 
 #endif
+	}
 
 	return res;
 }
@@ -933,29 +954,32 @@ bool qsc_memutils_greater_than_be256(const uint8_t* a, const uint8_t* b)
 
 	res = false;
 
+	if (a != NULL && b != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-    __m256i ge;
-	__m256i im;
-    __m256i le;
-	__m256i wa;
-	__m256i wb;
-	uint32_t m1;
-	uint32_t m2;
+		__m256i ge;
+		__m256i im;
+		__m256i le;
+		__m256i wa;
+		__m256i wb;
+		uint32_t m1;
+		uint32_t m2;
 
-	wa = _mm256_loadu_si256((const __m256i*)a);
-	wb = _mm256_loadu_si256((const __m256i*)b);
-	im = _mm256_min_epu8(wa, wb);
-	le = _mm256_cmpeq_epi8(im, wa);
-	ge = _mm256_cmpeq_epi8(im, wb);
-	m1 = (uint32_t)_mm256_movemask_epi8(le);
-    m2 = (uint32_t)_mm256_movemask_epi8(ge);
-    res = (m2 >= m1);
+		wa = _mm256_loadu_si256((const __m256i*)a);
+		wb = _mm256_loadu_si256((const __m256i*)b);
+		im = _mm256_min_epu8(wa, wb);
+		le = _mm256_cmpeq_epi8(im, wa);
+		ge = _mm256_cmpeq_epi8(im, wb);
+		m1 = (uint32_t)_mm256_movemask_epi8(le);
+		m2 = (uint32_t)_mm256_movemask_epi8(ge);
+		res = (m2 >= m1);
 
 #else
-	res = qsc_memutils_greater_than_be128(a, b);
-	res |= qsc_memutils_greater_than_be128(a + 16, b + 16);
+		res = qsc_memutils_greater_than_be128(a, b);
+		res |= qsc_memutils_greater_than_be128(a + 16, b + 16);
 #endif
+	}
 
 	return res;
 }
@@ -969,15 +993,18 @@ bool qsc_memutils_greater_than_be512(const uint8_t* a, const uint8_t* b)
 
 	res = false;
 
+	if (a != NULL && b != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
-	res = qsc_memutils_greater_than_be256(a, b);
-	res |= qsc_memutils_greater_than_be256(a + 32, b + 32);
+		res = qsc_memutils_greater_than_be256(a, b);
+		res |= qsc_memutils_greater_than_be256(a + 32U, b + 32U);
 #else
-	res = qsc_memutils_greater_than_be128(a, b);
-	res |= qsc_memutils_greater_than_be128(a + 16, b + 16);
-	res |= qsc_memutils_greater_than_be128(a + 32, b + 32);
-	res |= qsc_memutils_greater_than_be128(a + 48, b + 48);
+		res = qsc_memutils_greater_than_be128(a, b);
+		res |= qsc_memutils_greater_than_be128(a + 16U, b + 16U);
+		res |= qsc_memutils_greater_than_be128(a + 32U, b + 32U);
+		res |= qsc_memutils_greater_than_be128(a + 48U, b + 48U);
 #endif
+	}
 
 	return res;
 }
@@ -991,42 +1018,45 @@ bool qsc_memutils_greater_than_le128(const uint8_t* a, const uint8_t* b)
 
 	res = false;
 
+	if (a != NULL && b != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX)
 
-    __m128i ge;
-	__m128i im;
-    __m128i le;
-	__m128i wa;
-	__m128i wb;
-	uint32_t m1;
-	uint32_t m2;
+		__m128i ge;
+		__m128i im;
+		__m128i le;
+		__m128i wa;
+		__m128i wb;
+		uint32_t m1;
+		uint32_t m2;
 
-	wa = _mm_set_epi8(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15]);
-	wb = _mm_set_epi8(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]);
-	im = _mm_min_epu8(wa, wb);
-	le = _mm_cmpeq_epi8(im, wa);
-	ge = _mm_cmpeq_epi8(im, wb);
-	m1 = (uint32_t)_mm_movemask_epi8(le);
-    m2 = (uint32_t)_mm_movemask_epi8(ge);
-    res = (m2 >= m1);
+		wa = _mm_set_epi8(a[0U], a[1U], a[2U], a[3U], a[4U], a[5U], a[6U], a[7U], a[8U], a[9U], a[10U], a[11U], a[12U], a[13U], a[14U], a[15U]);
+		wb = _mm_set_epi8(b[0U], b[1U], b[2U], b[3U], b[4U], b[5U], b[6U], b[7U], b[8U], b[9U], b[10U], b[11U], b[12U], b[13U], b[14U], b[15U]);
+		im = _mm_min_epu8(wa, wb);
+		le = _mm_cmpeq_epi8(im, wa);
+		ge = _mm_cmpeq_epi8(im, wb);
+		m1 = (uint32_t)_mm_movemask_epi8(le);
+		m2 = (uint32_t)_mm_movemask_epi8(ge);
+		res = (m2 >= m1);
 
 #else
 
-	for (size_t i = 0U; i < 16; ++i)
-	{
-		if (a[i] > b[i])
+		for (size_t i = 0U; i < 16U; ++i)
 		{
-			res = true;
-			break;
+			if (a[i] > b[i])
+			{
+				res = true;
+				break;
+			}
+			else if (a[i] < b[i])
+			{
+				res = false;
+				break;
+			}
 		}
-		else if (a[i] < b[i])
-		{
-			res = false;
-			break;
-		}
-	}
 
 #endif
+	}
 
 	return res;
 }
@@ -1040,31 +1070,34 @@ bool qsc_memutils_greater_than_le256(const uint8_t* a, const uint8_t* b)
 
 	res = false;
 
+	if (a != NULL && b != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-    __m256i ge;
-	__m256i im;
-    __m256i le;
-	__m256i wa;
-	__m256i wb;
-	uint32_t m1;
-	uint32_t m2;
+		__m256i ge;
+		__m256i im;
+		__m256i le;
+		__m256i wa;
+		__m256i wb;
+		uint32_t m1;
+		uint32_t m2;
 
-	wa = _mm256_set_epi8(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15],
-		a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24], a[25], a[26], a[27], a[28], a[29], a[30], a[31]);
-	wb = _mm256_set_epi8(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15],
-		b[16], b[17], b[18], b[19], b[20], b[21], b[22], b[23], b[24], b[25], b[26], b[27], b[28], b[29], b[30], b[31]);
-	im = _mm256_min_epu8(wa, wb);
-	le = _mm256_cmpeq_epi8(im, wa);
-	ge = _mm256_cmpeq_epi8(im, wb);
-	m1 = (uint32_t)_mm256_movemask_epi8(le);
-    m2 = (uint32_t)_mm256_movemask_epi8(ge);
-    res = (m2 >= m1);
+		wa = _mm256_set_epi8(a[0U], a[1U], a[2U], a[3U], a[4U], a[5U], a[6U], a[7U], a[8U], a[9U], a[10U], a[11U], a[12U], a[13U], a[14U], a[15U],
+			a[16U], a[17U], a[18U], a[19U], a[20U], a[21U], a[22U], a[23U], a[24U], a[25U], a[26U], a[27U], a[28U], a[29U], a[30U], a[31U]);
+		wb = _mm256_set_epi8(b[0U], b[1U], b[2U], b[3U], b[4U], b[5U], b[6U], b[7U], b[8U], b[9U], b[10U], b[11U], b[12U], b[13U], b[14U], b[15U],
+			b[16U], b[17U], b[18U], b[19U], b[20U], b[21U], b[22U], b[23U], b[24U], b[25U], b[26U], b[27U], b[28U], b[29U], b[30U], b[31U]);
+		im = _mm256_min_epu8(wa, wb);
+		le = _mm256_cmpeq_epi8(im, wa);
+		ge = _mm256_cmpeq_epi8(im, wb);
+		m1 = (uint32_t)_mm256_movemask_epi8(le);
+		m2 = (uint32_t)_mm256_movemask_epi8(ge);
+		res = (m2 >= m1);
 
 #else
-	res = qsc_memutils_greater_than_be128(a, b);
-	res |= qsc_memutils_greater_than_be128(a + 16, b + 16);
+		res = qsc_memutils_greater_than_be128(a, b);
+		res |= qsc_memutils_greater_than_be128(a + 16U, b + 16U);
 #endif
+	}
 
 	return res;
 }
@@ -1078,15 +1111,18 @@ bool qsc_memutils_greater_than_le512(const uint8_t* a, const uint8_t* b)
 
 	res = false;
 
+	if (a != NULL && b != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
-	res = qsc_memutils_greater_than_le256(a, b);
-	res |= qsc_memutils_greater_than_le256(a + 32, b + 32);
+		res = qsc_memutils_greater_than_le256(a, b);
+		res |= qsc_memutils_greater_than_le256(a + 32U, b + 32U);
 #else
-	res = qsc_memutils_greater_than_le128(a, b);
-	res |= qsc_memutils_greater_than_le128(a + 16, b + 16);
-	res |= qsc_memutils_greater_than_le128(a + 32, b + 32);
-	res |= qsc_memutils_greater_than_le128(a + 48, b + 48);
+		res = qsc_memutils_greater_than_le128(a, b);
+		res |= qsc_memutils_greater_than_le128(a + 16U, b + 16U);
+		res |= qsc_memutils_greater_than_le128(a + 32U, b + 32U);
+		res |= qsc_memutils_greater_than_le128(a + 48U, b + 48U);
 #endif
+	}
 
 	return res;
 }
@@ -1095,13 +1131,16 @@ void qsc_memutils_move(void* output, const void* input, size_t length)
 {
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
+	if (output != NULL && input != NULL && length != 0U)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	memmove_s(output, length, input, length);
+		memmove_s(output, length, input, length);
 #else
-	memmove(output, input, length);
+		memmove(output, input, length);
 #endif
+	}
 }
 
 #if defined(QSC_SYSTEM_HAS_AVX)
@@ -1134,21 +1173,21 @@ static void memutils_setval512(void* output, uint8_t value)
 void qsc_memutils_set_value(void* output, size_t length, uint8_t value)
 {
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	size_t pctr;
 
-	if (output != NULL && length != 0)
+	if (output != NULL && length != 0U)
 	{
-		pctr = 0;
+		pctr = 0U;
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		const size_t SMDBLK = 64;
+		const size_t SMDBLK = 64U;
 #	elif defined(QSC_SYSTEM_HAS_AVX2)
-		const size_t SMDBLK = 32;
+		const size_t SMDBLK = 32U;
 #	else
-		const size_t SMDBLK = 16;
+		const size_t SMDBLK = 16U;
 #	endif
 
 		if (length >= SMDBLK)
@@ -1161,7 +1200,7 @@ void qsc_memutils_set_value(void* output, size_t length, uint8_t value)
 				memutils_setval512((uint8_t*)output + pctr, value);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 				memutils_setval256((uint8_t*)output + pctr, value);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#elif defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_ARM_NEON)
 				memutils_setval128((uint8_t*)output + pctr, value);
 #endif
 				pctr += SMDBLK;
@@ -1170,21 +1209,21 @@ void qsc_memutils_set_value(void* output, size_t length, uint8_t value)
 #endif
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-		if (length - pctr >= 32)
+		if (length - pctr >= 32U)
 		{
 			memutils_setval256((uint8_t*)output + pctr, value);
-			pctr += 32;
+			pctr += 32U;
 		}
-		else if (length - pctr >= 16)
+		else if (length - pctr >= 16U)
 		{
 			memutils_setval128((uint8_t*)output + pctr, value);
-			pctr += 16;
+			pctr += 16U;
 		}
 #elif defined(QSC_SYSTEM_HAS_AVX2)
-		if (length - pctr >= 16)
+		if (length - pctr >= 16U)
 		{
 			memutils_setval128((uint8_t*)output + pctr, value);
-			pctr += 16;
+			pctr += 16U;
 		}
 #endif
 
@@ -1231,63 +1270,66 @@ void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size_t length)
 {
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	size_t pctr;
 
-	pctr = 0;
+	if (output != NULL && input != NULL && length != 0U)
+	{
+		pctr = 0U;
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-	const size_t SMDBLK = 64;
+		const size_t SMDBLK = 64U;
 #	elif defined(QSC_SYSTEM_HAS_AVX2)
-	const size_t SMDBLK = 32;
+		const size_t SMDBLK = 32U;
 #	else
-	const size_t SMDBLK = 16;
+		const size_t SMDBLK = 16U;
 #	endif
 
-	if (output != NULL && input != NULL && length >= SMDBLK)
-	{
-		const size_t ALNLEN = length - (length % SMDBLK);
-
-		while (pctr != ALNLEN)
+		if (output != NULL && input != NULL && length >= SMDBLK)
 		{
+			const size_t ALNLEN = length - (length % SMDBLK);
+
+			while (pctr != ALNLEN)
+			{
 #if defined(QSC_SYSTEM_HAS_AVX512)
-			memutils_xor512(output + pctr, input + pctr);
+				memutils_xor512(output + pctr, input + pctr);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
-			memutils_xor256(output + pctr, input + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX)
-			memutils_xor128(output + pctr, input + pctr);
+				memutils_xor256(output + pctr, input + pctr);
+#elif defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+				memutils_xor128(output + pctr, input + pctr);
 #endif
-			pctr += SMDBLK;
+				pctr += SMDBLK;
+			}
 		}
-	}
 #endif
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-	if (length - pctr >= 32)
-	{
-		memutils_xor256(output + pctr, input + pctr);
-		pctr += 32;
-	}
-	else if (length - pctr >= 16)
-	{
-		memutils_xor128(output + pctr, input + pctr);
-		pctr += 16;
-	}
-#elif defined(QSC_SYSTEM_HAS_AVX2)
-	if (length - pctr >= 16)
-	{
-		memutils_xor128(output + pctr, input + pctr);
-		pctr += 16;
-	}
+		if (length - pctr >= 32U)
+		{
+			memutils_xor256(output + pctr, input + pctr);
+			pctr += 32U;
+		}
+		else if (length - pctr >= 16U)
+		{
+			memutils_xor128(output + pctr, input + pctr);
+			pctr += 16U;
+		}
+#elif defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+		if (length - pctr >= 16U)
+		{
+			memutils_xor128(output + pctr, input + pctr);
+			pctr += 16U;
+		}
 #endif
 
-	if (pctr != length)
-	{
-		for (size_t i = pctr; i < length; ++i)
+		if (pctr != length)
 		{
-			output[i] ^= input[i];
+			for (size_t i = pctr; i < length; ++i)
+			{
+				output[i] ^= input[i];
+			}
 		}
 	}
 }
@@ -1315,26 +1357,30 @@ static void memutils_xorv128(uint8_t* output, const uint8_t value)
 void qsc_memutils_secure_erase(void* block, size_t length)
 {
 	QSC_ASSERT(block != NULL);
+	QSC_ASSERT(length != 0U);
 
+	if (block != NULL && length != 0U)
+	{
 #if defined(QSC_RTL_SECURE_MEMORY)
-	RtlSecureZeroMemory(block, length);
+		RtlSecureZeroMemory(block, length);
 #elif defined(QSC_OS_OPENBSD)
-	explicit_bzero(block, length);
+		explicit_bzero(block, length);
 #else
-	qsc_memutils_clear(block, length);
+		qsc_memutils_clear(block, length);
 #endif
+	}
 }
 
 void qsc_memutils_secure_free(void* block, size_t length)
 {
 	QSC_ASSERT(block != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
-	if (block != NULL || length != 0)
+	if (block != NULL && length != 0U)
 	{
 #if defined(QSC_SYSTEM_OS_POSIX)
 
-		memset(block,  0x00, length);
+		memset(block,  0x00U, length);
 
 #	if defined(QSC_SYSTEM_POSIX_MLOCK)
 		munlock(block, length);
@@ -1349,7 +1395,7 @@ void qsc_memutils_secure_free(void* block, size_t length)
 		if (block != NULL)
 		{
 			VirtualUnlock(block, length);
-			VirtualFree(block, 0, MEM_RELEASE);
+			VirtualFree(block, 0U, MEM_RELEASE);
 		}
 
 #else
@@ -1360,17 +1406,19 @@ void qsc_memutils_secure_free(void* block, size_t length)
 
 void* qsc_memutils_secure_malloc(size_t length)
 {
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	const size_t PGESZE = qsc_memutils_page_size();
 	void* ptr;
 
 	ptr = NULL;
 
-	if (length % PGESZE != 0)
+	if (length != 0U)
 	{
-		length = (length + PGESZE - (length % PGESZE));
-	}
+		if (length % PGESZE != 0U)
+		{
+			length = (length + PGESZE - (length % PGESZE));
+		}
 
 #if defined(QSC_SYSTEM_OS_POSIX)
 
@@ -1382,47 +1430,46 @@ void* qsc_memutils_secure_malloc(size_t length)
 #		define MAP_ANONYMOUS 0x0002
 #	endif
 
-	ptr = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED | MAP_NOCORE, -1, 0);
+		ptr = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED | MAP_NOCORE, -1, 0);
 
-	if (ptr == MAP_FAILED)
-	{
-		ptr = NULL;
-	}
+		if (ptr == MAP_FAILED)
+		{
+			ptr = NULL;
+		}
 
-	if (ptr != NULL)
-	{
+		if (ptr != NULL)
+		{
 #	if defined(MADV_DONTDUMP)
-		madvise(ptr, length, MADV_DONTDUMP);
+			madvise(ptr, length, MADV_DONTDUMP);
 #	endif
 
 #	if defined(QSC_SYSTEM_POSIX_MLOCK)
-		if (mlock(ptr, length) != 0)
-		{
-			qsc_memutils_clear(ptr, length);
-			munmap(ptr, length);
+			if (mlock(ptr, length) != 0)
+			{
+				qsc_memutils_clear(ptr, length);
+				munmap(ptr, length);
 
-			/* failed to lock */
-			ptr = NULL;
-		}
+				/* failed to lock */
+				ptr = NULL;
+			}
 #	endif
-	}
+		}
 
 #elif defined(QSC_SYSTEM_VIRTUAL_LOCK)
 
-	ptr = VirtualAlloc(NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+		ptr = VirtualAlloc(NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
-	/* test virtual lock */
-	if (ptr != NULL && VirtualLock((LPVOID)ptr, length) == 0)
-	{
-		VirtualFree((LPVOID)ptr, 0, MEM_RELEASE);
-		ptr = NULL;
-	}
+		/* test virtual lock */
+		if (ptr != NULL && VirtualLock((LPVOID)ptr, length) == 0U)
+		{
+			VirtualFree((LPVOID)ptr, 0U, MEM_RELEASE);
+			ptr = NULL;
+		}
 
 #else
-
-	ptr = malloc(length);
-
+		ptr = malloc(length);
 #endif
+	}
 
 	return ptr;
 }
@@ -1430,44 +1477,47 @@ void* qsc_memutils_secure_malloc(size_t length)
 void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
 {
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	size_t pctr;
 
-	pctr = 0;
+	if (output != NULL && length != 0U)
+	{
+		pctr = 0U;
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-	const size_t SMDBLK = 64;
+		const size_t SMDBLK = 64U;
 #	elif defined(QSC_SYSTEM_HAS_AVX2)
-	const size_t SMDBLK = 32;
+		const size_t SMDBLK = 32U;
 #	else
-	const size_t SMDBLK = 16;
+		const size_t SMDBLK = 16U;
 #	endif
 
-	if (output != NULL && length >= SMDBLK)
-	{
-		const size_t ALNLEN = length - (length % SMDBLK);
-
-		while (pctr != ALNLEN)
+		if (output != NULL && length >= SMDBLK)
 		{
+			const size_t ALNLEN = length - (length % SMDBLK);
+
+			while (pctr != ALNLEN)
+			{
 #if defined(QSC_SYSTEM_HAS_AVX512)
-			memutils_xorv512(output + pctr, value);
+				memutils_xorv512(output + pctr, value);
 #elif defined(QSC_SYSTEM_HAS_AVX2)
-			memutils_xorv256(output + pctr, value);
+				memutils_xorv256(output + pctr, value);
 #elif defined(QSC_SYSTEM_HAS_AVX)
-			memutils_xorv128(output + pctr, value);
+				memutils_xorv128(output + pctr, value);
 #endif
-			pctr += SMDBLK;
+				pctr += SMDBLK;
+			}
 		}
-	}
 #endif
 
-	if (pctr != length)
-	{
-		for (size_t i = pctr; i < length; ++i)
+		if (pctr != length)
 		{
-			output[i] ^= value;
+			for (size_t i = pctr; i < length; ++i)
+			{
+				output[i] ^= value;
+			}
 		}
 	}
 }
@@ -1475,25 +1525,29 @@ void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
 bool qsc_memutils_zeroed(const void* input, size_t length)
 {
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	size_t i;
 	size_t j;
+	bool res;
 
-	i = 0;
-	j = 0;
+	res = false;
 
-	if (input != NULL && length != 0)
+	if (input != NULL && length != 0U)
 	{
 		const uint8_t* pinp = (uint8_t*)input;
+		i = 0U;
+		j = 0U;
 
 		while (i < length)
 		{
 			j |= pinp[i];
 			++i;
 		}
+
+		res = (j == 0U);
 	}
 
-	return (j == 0);
+	return res;
 }
 

@@ -937,8 +937,8 @@ static void falcon_prng_refill(falcon_prng_state* pctx)
 		size_t v;
 		int32_t i;
 
-		qsc_memutils_copy(&state[0], CW, sizeof(CW));
-		qsc_memutils_copy(&state[4], pctx->state, 48);
+		qsc_memutils_copy((uint8_t*)&state[0], (const uint8_t*)CW, sizeof(CW));
+		qsc_memutils_copy((uint8_t*)&state[4], pctx->state, 48);
 		state[14] ^= (uint32_t)cc;
 		state[15] ^= (uint32_t)(cc >> 32);
 
@@ -5022,8 +5022,8 @@ static int32_t falcon_zint_bezout(uint32_t* restrict u, uint32_t* restrict v, co
 	 *  b = y   u1 = y   v1 = x-1
 	 * Note that x is odd, so computing x-1 is easy.
 	 */
-	qsc_memutils_copy(a, x, len * sizeof(*x));
-	qsc_memutils_copy(b, y, len * sizeof(*y));
+	qsc_memutils_copy((uint8_t*)a, (const uint8_t*)x, len * sizeof(*x));
+	qsc_memutils_copy((uint8_t*)b, (const uint8_t*)y, len * sizeof(*y));
 	u0[0] = 1;
 	qsc_memutils_clear(u0 + 1, (len - 1) * sizeof(*u0));
 	qsc_memutils_clear(v0, len * sizeof(*v0));
@@ -8673,7 +8673,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 	 * b01 and b11 can be discarded, so we move back (t0,t1).
 	 * Memory layout is now: g00 g01 g11 t0 t1
 	 */
-	qsc_memutils_copy(b11, t0, n * 2 * sizeof(*t0));
+	qsc_memutils_copy((uint8_t*)b11, (const uint8_t*)t0, n * 2 * sizeof(*t0));
 	t0 = g11 + n;
 	t1 = t0 + n;
 

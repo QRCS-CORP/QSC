@@ -150,12 +150,12 @@ static const fe25519 ed25519_d2 =
 
 void fe25519_0(fe25519 h)
 {
-	qsc_memutils_clear((uint8_t*)h, 10 * sizeof(int32_t));
+	qsc_memutils_clear(h, 10 * sizeof(int32_t));
 }
 
 void fe25519_1(fe25519 h)
 {
-	qsc_memutils_clear((uint8_t*)h, 10 * sizeof(int32_t));
+	qsc_memutils_clear(h, 10 * sizeof(int32_t));
 	h[0] = 1;
 }
 

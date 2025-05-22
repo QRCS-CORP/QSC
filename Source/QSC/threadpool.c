@@ -4,9 +4,9 @@
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), void* state)
 {
-	assert(ctx != NULL);
-	assert(func != NULL);
-	assert(state != NULL);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(func != NULL);
+	QSC_ASSERT(state != NULL);
 
 	qsc_thread thd;
 	qsc_mutex mtx;
@@ -23,7 +23,7 @@ bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), voi
 		{
 			thd = qsc_async_thread_create(func, state);
 
-			if (thd != 0)
+			if (thd != NULL)
 			{
 				ctx->tpool[ctx->tcount] = thd;
 				idx = ctx->tcount;
@@ -31,7 +31,7 @@ bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), voi
 				res = true;
 
 				qsc_async_thread_wait(thd);
-				ctx->tpool[idx] = 0;
+				ctx->tpool[idx] = NULL;
 				--ctx->tcount;
 			}
 		}
@@ -44,11 +44,11 @@ bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), voi
 
 void qsc_threadpool_clear(qsc_threadpool_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
-		if (ctx->tcount != 0)
+		if (ctx->tcount != 0U)
 		{
 			for (size_t i = 0U; i < ctx->tcount; ++i)
 			{
@@ -57,40 +57,40 @@ void qsc_threadpool_clear(qsc_threadpool_state* ctx)
 		}
 
 		qsc_memutils_clear(ctx->tpool, QSC_THREADPOOL_THREADS_MAX * sizeof(qsc_thread));
-		ctx->tcount = 0;
+		ctx->tcount = 0U;
 	}
 }
 
 void qsc_threadpool_initialize(qsc_threadpool_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear(ctx->tpool, QSC_THREADPOOL_THREADS_MAX * sizeof(int32_t));
-		ctx->tcount = 0;
+		ctx->tcount = 0U;
 
 		for (size_t i = 0U; i < ctx->tcount; ++i)
 		{
-			ctx->tpool[i] = 0;
+			ctx->tpool[i] = NULL;
 		}
 	}
 }
 
 void qsc_threadpool_sort(qsc_threadpool_state* ctx)
 {
-	assert(ctx != NULL);
+	QSC_ASSERT(ctx != NULL);
 
-	qsc_thread pool[QSC_THREADPOOL_THREADS_MAX] = { 0 };
+	qsc_thread pool[QSC_THREADPOOL_THREADS_MAX] = { 0U };
 	size_t cnt;
 
 	if (ctx != NULL)
 	{
-		cnt = 0;
+		cnt = 0U;
 
 		for (size_t i = 0U; i < QSC_THREADPOOL_THREADS_MAX; ++i)
 		{
-			if (ctx->tpool[i] != 0)
+			if (ctx->tpool[i] != NULL)
 			{
 				pool[cnt] = ctx->tpool[i];
 				++cnt;
@@ -99,7 +99,7 @@ void qsc_threadpool_sort(qsc_threadpool_state* ctx)
 
 		if (cnt != 0)
 		{
-			qsc_memutils_copy(ctx->tpool, pool, sizeof(pool));
+			qsc_memutils_copy((uint8_t*)ctx->tpool, (const uint8_t*)pool, sizeof(pool));
 		}
 
 		ctx->tcount = cnt;
@@ -108,16 +108,16 @@ void qsc_threadpool_sort(qsc_threadpool_state* ctx)
 
 bool qsc_threadpool_thread_active(const qsc_threadpool_state* ctx, size_t index)
 {
-	assert(ctx != NULL);
-	assert(index <= ctx->tcount);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(index <= ctx->tcount);
 
 	bool res;
 
 	res = false;
 
-	if (ctx != NULL && ctx->tcount != 0 && index <= ctx->tcount)
+	if (ctx != NULL && ctx->tcount != 0U && index < ctx->tcount)
 	{
-		res = (ctx->tpool[index] != 0);
+		res = (ctx->tpool[index] != NULL);
 	}
 
 	return res;
@@ -125,14 +125,14 @@ bool qsc_threadpool_thread_active(const qsc_threadpool_state* ctx, size_t index)
 
 void qsc_threadpool_remove_task(qsc_threadpool_state* ctx, size_t index)
 {
-	assert(ctx != NULL);
-	assert(ctx->tcount != 0);
-	assert(index < ctx->tcount);
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(ctx->tcount != 0U);
+	QSC_ASSERT(index < ctx->tcount);
 
 	if (ctx != NULL && ctx->tcount != 0 && index < ctx->tcount && ctx->tpool[index] != 0)
 	{
 		qsc_async_thread_terminate(ctx->tpool[index]);
-		ctx->tpool[index] = 0;
+		ctx->tpool[index] = NULL;
 		--ctx->tcount;
 	}
 }

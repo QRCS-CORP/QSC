@@ -129,6 +129,13 @@ qsc_sysutils_memory_statistics_state;
 QSC_EXPORT_API void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state);
 
 /**
+* \brief On Windows returns the drive letter containing the OS, on macOS/BSD/Linux returns '/'
+*
+* \return		[char] 'A'..'Z' on success (Windows), '/' on *nix, or \0
+*/
+QSC_EXPORT_API char qsc_sysutils_get_os_drive_letter(void);
+
+/**
 * \brief Get the current process id
 *
 * \return		[uint32_t] Returns the process id

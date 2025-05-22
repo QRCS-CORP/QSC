@@ -71,7 +71,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * // Example 1: Finding a token within a string.
  * const char* sample = "The quick brown fox jumps over the lazy dog";
  * size_t pos = qsc_arrayutils_find_string(sample, strlen(sample), "brown");
- * if (pos != QSC_ARRAYTILS_NPOS)
+ * if (pos != QSC_ARRAYUTILS_NPOS)
  * {
  *     // Token "brown" found at position 'pos'.
  * }
@@ -88,25 +88,25 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /*!
- * \def QSC_ARRAYTILS_NPOS
+ * \def QSC_ARRAYUTILS_NPOS
  * \brief The constant return value indicating that a search token was not found.
  *
  * This value is returned by qsc_arrayutils_find_string when the token cannot be located.
  */
-#define QSC_ARRAYTILS_NPOS -1LL
+#define QSC_ARRAYUTILS_NPOS -1LL
 
 /**
  * \brief Find the first instance of a token in a string.
  *
  * Searches for the first occurrence of a given token within a string and returns
  * the zero-based character position. If the token is not found, the function returns
- * QSC_ARRAYTILS_NPOS.
+ * QSC_ARRAYUTILS_NPOS.
  *
  * \param str:   [const char*] Pointer to the constant character string to be searched.
  * \param slen:  [size_t] The length of the string in bytes (excluding the null terminator).
  * \param token: [const char*] Pointer to the constant token string to search for.
  *
- * \return [size_t] The zero-based position of the token if found; otherwise QSC_ARRAYTILS_NPOS.
+ * \return [size_t] The zero-based position of the token if found; otherwise QSC_ARRAYUTILS_NPOS.
  *
  * \sa strstr
  */
@@ -221,6 +221,7 @@ QSC_EXPORT_API uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t 
  */
 QSC_EXPORT_API uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen);
 
+#if defined(QSC_DEBUG_MODE)
 /**
  * \brief Perform a self-test of the array utilities.
  *
@@ -229,6 +230,7 @@ QSC_EXPORT_API uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t 
  * \return [bool] \c true if all tests pass; otherwise \c false.
  */
 QSC_EXPORT_API bool qsc_arrayutils_self_test(void);
+#endif
 
 QSC_CPLUSPLUS_ENABLED_END
 

@@ -1107,27 +1107,27 @@ void qsc_keccak_absorb(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 		while (msglen >= (size_t)rate)
 		{
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-			qsc_memutils_xor((uint8_t*)ctx->state, message, rate);
+			qsc_memutils_xor((uint8_t*)ctx->state, message, (size_t)rate);
 #else
-			for (size_t i = 0U; i < rate / sizeof(uint64_t); ++i)
+			for (size_t i = 0U; i < (size_t)rate / sizeof(uint64_t); ++i)
 			{
 				ctx->state[i] ^= qsc_intutils_le8to64((message + (sizeof(uint64_t) * i)));
 			}
 #endif
 			qsc_keccak_permute(ctx, rounds);
-			msglen -= rate;
-			message += rate;
+			msglen -= (size_t)rate;
+			message += (size_t)rate;
 		}
 
 		qsc_memutils_copy(msg, message, msglen);
 		msg[msglen] = domain;
-		qsc_memutils_clear((msg + msglen + 1U), rate - msglen + 1U);
-		msg[rate - 1U] |= 128U;
+		qsc_memutils_clear((msg + msglen + 1U), (size_t)rate - msglen + 1U);
+		msg[(size_t)rate - 1U] |= 128U;
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-		qsc_memutils_xor((uint8_t*)ctx->state, msg, rate);
+		qsc_memutils_xor((uint8_t*)ctx->state, msg, (size_t)rate);
 #else
-		for (size_t i = 0U; i < rate / 8U; ++i)
+		for (size_t i = 0U; i < (size_t)rate / 8U; ++i)
 		{
 			ctx->state[i] ^= qsc_intutils_le8to64((msg + (8U * i)));
 		}
@@ -1143,16 +1143,16 @@ void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const
 	size_t i;
 	size_t oft;
 
-	oft = keccak_left_encode(pad, rate);
+	oft = keccak_left_encode(pad, (size_t)rate);
 	oft += keccak_left_encode((pad + oft), namelen * 8U);
 
 	if (name != NULL)
 	{
 		for (i = 0U; i < namelen; ++i)
 		{
-			if (oft == rate)
+			if (oft == (size_t)rate)
 			{
-				keccak_fast_absorb(ctx->state, pad, rate);
+				keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 				qsc_keccak_permute(ctx, rounds);
 				oft = 0U;
 			}
@@ -1168,9 +1168,9 @@ void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const
 	{
 		for (i = 0U; i < custlen; ++i)
 		{
-			if (oft == rate)
+			if (oft == (size_t)rate)
 			{
-				keccak_fast_absorb(ctx->state, pad, rate);
+				keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 				qsc_keccak_permute(ctx, rounds);
 				oft = 0U;
 			}
@@ -1180,8 +1180,8 @@ void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const
 		}
 	}
 
-	qsc_memutils_clear((pad + oft), rate - oft);
-	keccak_fast_absorb(ctx->state, pad, rate);
+	qsc_memutils_clear((pad + oft), (size_t)rate - oft);
+	keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 	qsc_keccak_permute(ctx, rounds);
 }
 
@@ -1199,7 +1199,7 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 
 	/* stage 1: name + custom */
 
-	oft = keccak_left_encode(pad, rate);
+	oft = keccak_left_encode(pad, (size_t)rate);
 	oft += keccak_left_encode((pad + oft), namelen * 8U);
 
 	if (name != NULL)
@@ -1217,9 +1217,9 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 	{
 		for (i = 0U; i < custlen; ++i)
 		{
-			if (oft == rate)
+			if (oft == (size_t)rate)
 			{
-				keccak_fast_absorb(ctx->state, pad, rate);
+				keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 				qsc_keccak_permute(ctx, rounds);
 				oft = 0U;
 			}
@@ -1229,25 +1229,25 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 		}
 	}
 
-	qsc_memutils_clear((pad + oft), rate - oft);
-	keccak_fast_absorb(ctx->state, pad, rate);
+	qsc_memutils_clear((pad + oft), (size_t)rate - oft);
+	keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 	qsc_keccak_permute(ctx, rounds);
 
 
 	/* stage 2: key */
 
-	qsc_memutils_clear(pad, rate);
+	qsc_memutils_clear(pad, (size_t)rate);
 
-	oft = keccak_left_encode(pad, rate);
+	oft = keccak_left_encode(pad, (size_t)rate);
 	oft += keccak_left_encode((pad + oft), keylen * 8U);
 
 	if (key != NULL)
 	{
 		for (i = 0U; i < keylen; ++i)
 		{
-			if (oft == rate)
+			if (oft == (size_t)rate)
 			{
-				keccak_fast_absorb(ctx->state, pad, rate);
+				keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 				qsc_keccak_permute(ctx, rounds);
 				oft = 0U;
 			}
@@ -1257,8 +1257,8 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 		}
 	}
 
-	qsc_memutils_clear((pad + oft), rate - oft);
-	keccak_fast_absorb(ctx->state, pad, rate);
+	qsc_memutils_clear((pad + oft), (size_t)rate - oft);
+	keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 	qsc_keccak_permute(ctx, rounds);
 }
 
@@ -1298,20 +1298,20 @@ void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* o
 	qsc_memutils_copy((pad + ctx->position), buf, bitlen);
 
 	pad[ctx->position + bitlen] = domain;
-	pad[rate - 1U] |= 128U;
-	keccak_fast_absorb(ctx->state, pad, rate);
+	pad[(size_t)rate - 1U] |= 128U;
+	keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 
 	while (outlen >= (size_t)rate)
 	{
-		qsc_keccak_squeezeblocks(ctx, pad, 1U, rate, rounds);
-		qsc_memutils_copy(output, pad, rate);
-		output += rate;
-		outlen -= rate;
+		qsc_keccak_squeezeblocks(ctx, pad, 1U, (size_t)rate, rounds);
+		qsc_memutils_copy(output, pad, (size_t)rate);
+		output += (size_t)rate;
+		outlen -= (size_t)rate;
 	}
 
 	if (outlen > 0U)
 	{
-		qsc_keccak_squeezeblocks(ctx, pad, 1U, rate, rounds);
+		qsc_keccak_squeezeblocks(ctx, pad, 1U, (size_t)rate, rounds);
 		qsc_memutils_copy(output, pad, outlen);
 	}
 
@@ -1343,28 +1343,28 @@ void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const u
 		ctx->state[(ctx->position - i) / 8U] ^= qsc_intutils_le8to64(t);
 	}
 
-	if (ctx->position && msglen >= rate - ctx->position)
+	if (ctx->position && msglen >= (size_t)rate - ctx->position)
 	{
-		for (i = 0U; i < (rate - ctx->position) / 8U; ++i)
+		for (i = 0U; i < ((size_t)rate - ctx->position) / 8U; ++i)
 		{
 			ctx->state[(ctx->position / 8U) + i] ^= qsc_intutils_le8to64(message + (8U * i));
 		}
 
-		message += rate - ctx->position;
-		msglen -= rate - ctx->position;
+		message += (size_t)rate - ctx->position;
+		msglen -= (size_t)rate - ctx->position;
 		ctx->position = 0U;
 		qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
 	}
 
-	while (msglen >= rate)
+	while (msglen >= (size_t)rate)
 	{
-		for (i = 0U; i < rate / 8U; i++)
+		for (i = 0U; i < (size_t)rate / 8U; i++)
 		{
 			ctx->state[i] ^= qsc_intutils_le8to64(message + (8U * i));
 		}
 
-		message += rate;
-		msglen -= rate;
+		message += (size_t)rate;
+		msglen -= (size_t)rate;
 		qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
 	}
 
@@ -1404,7 +1404,7 @@ void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8
 	i = ctx->position >> 3;
 	j = ctx->position & 7;
 	ctx->state[i] ^= ((uint64_t)domain << (8U * j));
-	ctx->state[(rate / 8U) - 1U] ^= 1ULL << 63;
+	ctx->state[((size_t)rate / 8U) - 1U] ^= 1ULL << 63;
 	ctx->position = 0U;
 }
 
@@ -1431,29 +1431,29 @@ void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t*
 		}
 	}
 
-	if (ctx->position && outlen >= rate - ctx->position)
+	if (ctx->position && outlen >= (size_t)rate - ctx->position)
 	{
-		for (i = 0U; i < (rate - ctx->position) / 8U; ++i)
+		for (i = 0U; i < ((size_t)rate - ctx->position) / 8U; ++i)
 		{
 			qsc_intutils_le64to8(output + (8U * i), ctx->state[(ctx->position / 8U) + i]);
 		}
 
-		output += rate - ctx->position;
-		outlen -= rate - ctx->position;
+		output += (size_t)rate - ctx->position;
+		outlen -= (size_t)rate - ctx->position;
 		ctx->position = 0U;
 	}
 
-	while (outlen >= rate)
+	while (outlen >= (size_t)rate)
 	{
 		qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
 
-		for (i = 0U; i < rate / 8U; ++i)
+		for (i = 0U; i < (size_t)rate / 8U; ++i)
 		{
 			qsc_intutils_le64to8(output + (8U * i), ctx->state[i]);
 		}
 
-		output += rate;
-		outlen -= rate;
+		output += (size_t)rate;
+		outlen -= (size_t)rate;
 	}
 
 	if (outlen > 0U)
@@ -4030,14 +4030,14 @@ void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nbl
 			qsc_keccak_permute(ctx, rounds);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-			qsc_memutils_copy(output, (uint8_t*)ctx->state, rate);
+			qsc_memutils_copy(output, (const uint8_t*)ctx->state, (size_t)rate);
 #else
-			for (size_t i = 0U; i < (rate >> 3); ++i)
+			for (size_t i = 0U; i < ((size_t)rate >> 3); ++i)
 			{
 				qsc_intutils_le64to8((output + sizeof(uint64_t) * i), ctx->state[i]);
 			}
 #endif
-			output += rate;
+			output += (size_t)rate;
 			nblocks--;
 		}
 	}
@@ -4064,7 +4064,7 @@ void qsc_keccak_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 	{
 		if (ctx->position != 0U && (ctx->position + msglen >= (size_t)rate))
 		{
-			const size_t RMDLEN = rate - ctx->position;
+			const size_t RMDLEN = (size_t)rate - ctx->position;
 
 			if (RMDLEN != 0U)
 			{
@@ -4081,10 +4081,10 @@ void qsc_keccak_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 		/* sequential loop through blocks */
 		while (msglen >= (size_t)rate)
 		{
-			keccak_fast_absorb(ctx->state, message, rate);
+			keccak_fast_absorb(ctx->state, message, (size_t)rate);
 			qsc_keccak_permute(ctx, rounds);
-			message += rate;
-			msglen -= rate;
+			message += (size_t)rate;
+			msglen -= (size_t)rate;
 		}
 
 		/* store unaligned bytes */
@@ -4150,15 +4150,15 @@ void qsc_sha3_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* out
 
 	size_t hlen;
 
-	hlen = (((QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)) - rate) / 2U);
+	hlen = (((QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)) - (size_t)rate) / 2U);
 	qsc_memutils_clear((ctx->buffer + ctx->position), sizeof(ctx->buffer) - ctx->position);
 	ctx->buffer[ctx->position] = QSC_KECCAK_SHA3_DOMAIN_ID;
-	ctx->buffer[rate - 1U] |= 128U;
-	keccak_fast_absorb(ctx->state, ctx->buffer, rate);
+	ctx->buffer[(size_t)rate - 1U] |= 128U;
+	keccak_fast_absorb(ctx->state, ctx->buffer, (size_t)rate);
 	qsc_keccak_permute(ctx, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-	qsc_memutils_copy(output, (uint8_t*)ctx->state, hlen);
+	qsc_memutils_copy(output, (const uint8_t*)ctx->state, hlen);
 #else
 	for (size_t i = 0U; i < hlen / sizeof(uint64_t); ++i)
 	{
@@ -4390,8 +4390,8 @@ void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 	{
 		keccak_fast_absorb(ctx->state, key, keylen);
 		qsc_keccak_permute(ctx, QSC_KECCAK_PERMUTATION_ROUNDS);
-		keylen -= rate;
-		key += rate;
+		keylen -= (size_t)rate;
+		key += (size_t)rate;
 	}
 
 	if (keylen != 0U)
@@ -4475,16 +4475,16 @@ static void kpa_absorb_leaves(uint64_t* state, qsc_keccak_rate rate, const uint8
 	while (inplen >= (size_t)rate)
 	{
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-		qsc_memutils_xor((uint8_t*)state, input, rate);
+		qsc_memutils_xor((uint8_t*)state, input, (size_t)rate);
 #else
-		for (size_t i = 0U; i < rate / sizeof(uint64_t); ++i)
+		for (size_t i = 0U; i < (size_t)rate / sizeof(uint64_t); ++i)
 		{
 			state[i] ^= qsc_intutils_le8to64(input + (sizeof(uint64_t) * i));
 		}
 #endif
 		qsc_keccak_permute_p1600c(state, QSC_KPA_ROUNDS);
-		inplen -= rate;
-		input += rate;
+		inplen -= (size_t)rate;
+		input += (size_t)rate;
 	}
 
 	if (inplen != 0U)
@@ -4597,12 +4597,12 @@ static void kpa_squeezeblocks(uint64_t* state, uint8_t* output, size_t nblocks, 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
 		qsc_memutils_copy(output, (uint8_t*)state, (size_t)rate);
 #else
-		for (size_t i = 0U; i < (rate >> 3); ++i)
+		for (size_t i = 0U; i < ((size_t)rate >> 3); ++i)
 		{
 			qsc_intutils_le64to8((output + sizeof(uint64_t) * i), state[i]);
 		}
 #endif
-		output += rate;
+		output += (size_t)rate;
 		nblocks--;
 	}
 }
@@ -4709,7 +4709,7 @@ void qsc_kpa_dispose(qsc_kpa_state* ctx)
 		ctx->rate = 0U;
 
 #if defined(QSC_KPA_AVX_PARALLEL)
-		qsc_memutils_clear((uint8_t*)ctx->statew, sizeof(ctx->statew));
+		qsc_memutils_clear(ctx->statew, sizeof(ctx->statew));
 #endif
 	}
 }
@@ -4720,8 +4720,8 @@ void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(outlen != 0U);
 
-	const size_t HASHLEN = (ctx->rate == QSC_KECCAK_512_RATE) ?
-		KPA_LEAF_HASH512 : (ctx->rate == QSC_KECCAK_256_RATE) ?
+	const size_t HASHLEN = ((size_t)ctx->rate == QSC_KECCAK_512_RATE) ?
+		KPA_LEAF_HASH512 : ((size_t)ctx->rate == QSC_KECCAK_256_RATE) ?
 		KPA_LEAF_HASH256 : KPA_LEAF_HASH128;
 
 	uint8_t fbuf[QSC_KPA_PARALLELISM * KPA_LEAF_HASH512] = { 0U };
@@ -4748,7 +4748,7 @@ void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 	for (size_t i = 0U; i < QSC_KPA_PARALLELISM; ++i)
 	{
 		/* copy each of the leaf hashes to the buffer */
-		qsc_memutils_copy((fbuf + (i * HASHLEN)), (uint8_t*)ctx->state[i], HASHLEN);
+		qsc_memutils_copy((fbuf + (i * HASHLEN)), (const uint8_t*)ctx->state[i], HASHLEN);
 	}
 
 	/* absorb the leaves into the root state and permute */
@@ -4769,15 +4769,15 @@ void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen)
 	ctx->buffer[(size_t)ctx->rate - 1U] |= 128U;
 
 	/* absorb the buffer into parent state */
-	keccak_fast_absorb(pstate, ctx->buffer, (size_t)ctx->rate);
+	keccak_fast_absorb(pstate, ctx->buffer, ctx->rate);
 
 	/* squeeze blocks to produce the output hash */
 	while (outlen >= (size_t)ctx->rate)
 	{
 		kpa_squeezeblocks(pstate, ctx->buffer, 1U, ctx->rate);
-		qsc_memutils_copy(output, ctx->buffer, ctx->rate);
-		output += ctx->rate;
-		outlen -= ctx->rate;
+		qsc_memutils_copy(output, ctx->buffer, (size_t)ctx->rate);
+		output += (size_t)ctx->rate;
+		outlen -= (size_t)ctx->rate;
 	}
 
 	/* add unaligned hash bytes */
@@ -4819,14 +4819,14 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 
 	if (custlen != 0U)
 	{
-		oft = keccak_left_encode(pad, ctx->rate);
+		oft = keccak_left_encode(pad, (size_t)ctx->rate);
 		oft += keccak_left_encode((pad + oft), custlen * 8U);
 
 		for (i = 0U; i < custlen; ++i)
 		{
 			if (oft == (size_t)ctx->rate)
 			{
-				keccak_fast_absorb(tmps, pad, ctx->rate);
+				keccak_fast_absorb(tmps, pad, (size_t)ctx->rate);
 				qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 				oft = 0U;
 			}
@@ -4839,7 +4839,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 		{
 			/* absorb custom and name, and permute state */
 			qsc_memutils_clear((pad + oft), (size_t)ctx->rate - oft);
-			keccak_fast_absorb(tmps, pad, ctx->rate);
+			keccak_fast_absorb(tmps, pad, (size_t)ctx->rate);
 			qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 		}
 	}
@@ -4848,15 +4848,15 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 
 	if (keylen != 0U)
 	{
-		qsc_memutils_clear(pad, ctx->rate);
-		oft = keccak_left_encode(pad, ctx->rate);
+		qsc_memutils_clear(pad, (size_t)ctx->rate);
+		oft = keccak_left_encode(pad, (size_t)ctx->rate);
 		oft += keccak_left_encode((pad + oft), keylen * 8U);
 
 		for (i = 0U; i < keylen; ++i)
 		{
 			if (oft == (size_t)ctx->rate)
 			{
-				keccak_fast_absorb(tmps, pad, ctx->rate);
+				keccak_fast_absorb(tmps, pad, (size_t)ctx->rate);
 				qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 				oft = 0U;
 			}
@@ -4869,7 +4869,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 		{
 			/* absorb the key and permute the state */
 			qsc_memutils_clear((pad + oft), (size_t)ctx->rate - oft);
-			keccak_fast_absorb(tmps, pad, ctx->rate);
+			keccak_fast_absorb(tmps, pad, (size_t)ctx->rate);
 			qsc_keccak_permute_p1600c(tmps, QSC_KPA_ROUNDS);
 		}
 	}
@@ -4930,7 +4930,7 @@ void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, c
 		/* copy the name to a 64-bit integer */
 		algn = qsc_intutils_be8to64(algb);
 		/* copy the state to each leaf node */
-		qsc_memutils_copy((uint8_t*)ctx->state[i], (uint8_t*)tmps, QSC_KECCAK_STATE_BYTE_SIZE);
+		qsc_memutils_copy((uint8_t*)ctx->state[i], tmps, QSC_KECCAK_STATE_BYTE_SIZE);
 		/* absorb the leafs unique index name */
 		ctx->state[i][0U] ^= algn;
 	}
@@ -5029,7 +5029,7 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 			}
 
 			qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
-			inplen -= rate;
+			inplen -= (size_t)rate;
 		}
 
 		i = 0U;
@@ -5075,7 +5075,7 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 		t = _mm256_set1_epi64x((int64_t)domain << (sizeof(uint64_t) * inplen));
 		state[i] = _mm256_xor_si256(state[i], t);
 		t = _mm256_set1_epi64x(1ULL << 63);
-		state[(rate / sizeof(uint64_t)) - 1U] = _mm256_xor_si256(state[(rate / sizeof(uint64_t)) - 1U], t);
+		state[((size_t)rate / sizeof(uint64_t)) - 1U] = _mm256_xor_si256(state[((size_t)rate / sizeof(uint64_t)) - 1U], t);
 	}
 }
 
@@ -5114,7 +5114,7 @@ void qsc_keccakx4_absorb_aligned(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_kecca
 		}
 
 		qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
-		inplen -= rate;
+		inplen -= (size_t)rate;
 	}
 
 	i = 0U;
@@ -5140,7 +5140,7 @@ void qsc_keccakx4_absorb_aligned(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_kecca
 	t = _mm256_set1_epi64x((int64_t)domain << (sizeof(uint64_t) * inplen));
 	state[i] = _mm256_xor_si256(state[i], t);
 	t = _mm256_set1_epi64x(1ULL << 63U);
-	state[(rate / sizeof(uint64_t)) - 1U] = _mm256_xor_si256(state[(rate / sizeof(uint64_t)) - 1U], t);
+	state[((size_t)rate / sizeof(uint64_t)) - 1U] = _mm256_xor_si256(state[((size_t)rate / sizeof(uint64_t)) - 1U], t);
 }
 
 void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
@@ -5239,7 +5239,7 @@ void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 			}
 
 			qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
-			inplen -= rate;
+			inplen -= (size_t)rate;
 		}
 
 		i = 0U;
@@ -5297,7 +5297,7 @@ void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 		t = _mm512_set1_epi64((int64_t)domain << (sizeof(uint64_t) * inplen));
 		state[i] = _mm512_xor_si512(state[i], t);
 		t = _mm512_set1_epi64(1ULL << 63);
-		state[(rate / sizeof(uint64_t)) - 1U] = _mm512_xor_si512(state[(rate / sizeof(uint64_t)) - 1U], t);
+		state[((size_t)rate / sizeof(uint64_t)) - 1U] = _mm512_xor_si512(state[((size_t)rate / sizeof(uint64_t)) - 1U], t);
 	}
 }
 
@@ -5349,7 +5349,7 @@ void qsc_keccakx8_absorb_aligned(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_kecca
 		}
 
 		qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
-		inplen -= rate;
+		inplen -= (size_t)rate;
 	}
 
 	i = 0U;
@@ -5375,7 +5375,7 @@ void qsc_keccakx8_absorb_aligned(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_kecca
 	t = _mm512_set1_epi64((int64_t)domain << (sizeof(uint64_t) * inplen));
 	state[i] = _mm512_xor_si512(state[i], t);
 	t = _mm512_set1_epi64(1ULL << 63);
-	state[(rate / sizeof(uint64_t)) - 1U] = _mm512_xor_si512(state[(rate / sizeof(uint64_t)) - 1U], t);
+	state[((size_t)rate / sizeof(uint64_t)) - 1U] = _mm512_xor_si512(state[((size_t)rate / sizeof(uint64_t)) - 1U], t);
 }
 
 void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
@@ -5934,7 +5934,7 @@ static void kmacx4_customize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 
 	for (i = 0U; i < cstlen; ++i)
 	{
-		if (oft == rate)
+		if (oft == (size_t)rate)
 		{
 			kmacx4_fast_absorb(state, pad[0U], pad[1U], pad[2U], pad[3U], (size_t)rate);
 			qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -5966,7 +5966,7 @@ static void kmacx4_customize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 
 	for (i = 0U; i < keylen; ++i)
 	{
-		if (oft == rate)
+		if (oft == (size_t)rate)
 		{
 			kmacx4_fast_absorb(state, pad[0U], pad[1U], pad[2U], pad[3U], (size_t)rate);
 			qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -6031,7 +6031,7 @@ static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 
 	qsc_memutils_copy((pad[0U] + pos), buf, bitlen);
 	pad[0U][pos + bitlen] = QSC_KECCAK_KMAC_DOMAIN_ID;
-	pad[0U][rate - 1U] |= 128U;
+	pad[0U][(size_t)rate - 1U] |= 128U;
 	qsc_memutils_copy((pad[1U] + pos), (pad[0U] + pos), (size_t)rate - pos);
 	qsc_memutils_copy((pad[2U] + pos), (pad[0U] + pos), (size_t)rate - pos);
 	qsc_memutils_copy((pad[3U] + pos), (pad[0U] + pos), (size_t)rate - pos);
@@ -6040,7 +6040,7 @@ static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 
 	if (outlen > (size_t)rate)
 	{
-		qsc_keccakx4_squeezeblocks(state, rate, out0, out1, out2, out3, BLKCNT);
+		qsc_keccakx4_squeezeblocks(state, (size_t)rate, out0, out1, out2, out3, BLKCNT);
 
 		out0 += BLKCNT * (size_t)rate;
 		out1 += BLKCNT * (size_t)rate;
@@ -6051,7 +6051,7 @@ static void kmacx4_finalize(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 
 	if (outlen != 0U)
 	{
-		qsc_keccakx4_squeezeblocks(state, rate, tmps[0U], tmps[1U], tmps[2U], tmps[3U], 1U);
+		qsc_keccakx4_squeezeblocks(state, (size_t)rate, tmps[0U], tmps[1U], tmps[2U], tmps[3U], 1U);
 
 		for (i = 0U; i < outlen; ++i)
 		{
@@ -6227,7 +6227,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 
 	/* stage 1: name + custom */
 
-	oft = keccak_left_encode(pad[0U], rate);
+	oft = keccak_left_encode(pad[0U], (size_t)rate);
 	oft += keccak_left_encode((pad[0U] + oft), nmelen * 8U);
 
 	for (i = 0U; i < nmelen; ++i)
@@ -6247,7 +6247,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 
 	for (i = 0U; i < cstlen; ++i)
 	{
-		if (oft == rate)
+		if (oft == (size_t)rate)
 		{
 			kmacx8_fast_absorb(state, pad[0U], pad[1U], pad[2U], pad[3U], pad[4U], pad[5U], pad[6U], pad[7U], (size_t)rate);
 			qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -6279,7 +6279,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 	qsc_memutils_clear(pad[6U], oft);
 	qsc_memutils_clear(pad[7U], oft);
 
-	oft = keccak_left_encode(pad[0U], rate);
+	oft = keccak_left_encode(pad[0U], (size_t)rate);
 	oft += keccak_left_encode((pad[0U] + oft), keylen * 8U);
 	qsc_memutils_copy(pad[1U], pad[0U], oft);
 	qsc_memutils_copy(pad[2U], pad[0U], oft);
@@ -6291,7 +6291,7 @@ static void kmacx8_customize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_ra
 
 	for (i = 0U; i < keylen; ++i)
 	{
-		if (oft == rate)
+		if (oft == (size_t)rate)
 		{
 			kmacx8_fast_absorb(state, pad[0U], pad[1U], pad[2U], pad[3U], pad[4U], pad[5U], pad[6U], pad[7U], rate);
 			qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -6363,7 +6363,7 @@ static void kmacx8_finalize(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rat
 
 	qsc_memutils_copy((pad[0U] + pos), buf, bitlen);
 	pad[0U][pos + bitlen] = QSC_KECCAK_KMAC_DOMAIN_ID;
-	pad[0U][rate - 1U] |= 128U;
+	pad[0U][(size_t)rate - 1U] |= 128U;
 
 	qsc_memutils_copy((pad[1U] + pos), (pad[0U] + pos), (size_t)rate - pos);
 	qsc_memutils_copy((pad[2U] + pos), (pad[0U] + pos), (size_t)rate - pos);

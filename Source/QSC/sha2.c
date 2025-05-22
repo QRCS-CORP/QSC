@@ -95,7 +95,7 @@ void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output)
 	qsc_sha256_permute(ctx->state, pad);
 
 #if defined(QSC_SYSTEM_IS_BIG_ENDIAN)
-	qsc_memutils_copy(output, (uint8_t*)ctx->state, QSC_SHA2_256_HASH_SIZE);
+	qsc_memutils_copy(output, (const uint8_t*)ctx->state, QSC_SHA2_256_HASH_SIZE);
 #else
 	for (size_t i = 0U; i < QSC_SHA2_256_HASH_SIZE; i += sizeof(uint32_t))
 	{
@@ -742,7 +742,7 @@ void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output)
 	qsc_sha512_permute(ctx->state, pad);
 
 #if defined(QSC_SYSTEM_IS_BIG_ENDIAN)
-	qsc_memutils_copy(output, (uint8_t*)ctx->state, QSC_SHA2_384_HASH_SIZE);
+	qsc_memutils_copy(output, (const uint8_t*)ctx->state, QSC_SHA2_384_HASH_SIZE);
 #else
 	for (size_t i = 0U; i < QSC_SHA2_384_HASH_SIZE; i += 8U)
 	{
@@ -757,7 +757,7 @@ void qsc_sha384_initialize(qsc_sha384_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
 
-	qsc_memutils_copy((uint8_t*)ctx->state, sha384_iv, sizeof(ctx->state));
+	qsc_memutils_copy((uint8_t*)ctx->state, (const uint8_t*)sha384_iv, sizeof(ctx->state));
 	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
 	ctx->t[0U] = 0U;
 	ctx->t[1U] = 0U;
@@ -899,7 +899,7 @@ void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output)
 	qsc_sha512_permute(ctx->state, pad);
 
 #if defined(QSC_SYSTEM_IS_BIG_ENDIAN)
-	qsc_memutils_copy(output, (uint8_t*)ctx->state, QSC_SHA2_512_HASH_SIZE);
+	qsc_memutils_copy(output, (const uint8_t*)ctx->state, QSC_SHA2_512_HASH_SIZE);
 #else
 	for (size_t i = 0U; i < QSC_SHA2_512_HASH_SIZE; i += 8U)
 	{
@@ -914,7 +914,7 @@ void qsc_sha512_initialize(qsc_sha512_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
 
-	qsc_memutils_copy((uint8_t*)ctx->state, sha512_iv, sizeof(ctx->state));
+	qsc_memutils_copy((uint8_t*)ctx->state, (const uint8_t*)sha512_iv, sizeof(ctx->state));
 	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
 	ctx->t[0U] = 0U;
 	ctx->t[1U] = 0U;

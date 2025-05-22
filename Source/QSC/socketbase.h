@@ -75,7 +75,7 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	include <objbase.h>
 #	include <inaddr.h>
 #	include <iphlpapi.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC) && defined(QSC_SYSTEM_MAX_PATH)
+#   if defined(QSC_SYSTEM_COMPILER_MSC)
 #	    pragma comment(lib, "iphlpapi.lib")
 #	    pragma comment(lib, "ws2_32.lib")
 #   endif

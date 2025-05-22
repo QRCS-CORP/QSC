@@ -71,7 +71,13 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_EVENT_NAME_SIZE
  * \brief The character length of the event name.
  */
-#define QSC_EVENT_NAME_SIZE 32ULL
+#define QSC_EVENT_NAME_SIZE 32UL
+
+/*!
+ * \def QSC_EVENT_MAX_LISTENERS
+ * \brief The maximum number of event listeners.
+ */
+#define QSC_EVENT_MAX_LISTENERS 16384
 
 /*!
  * \typedef qsc_event_callback

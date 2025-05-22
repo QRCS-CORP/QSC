@@ -320,7 +320,7 @@ static void sphincsplus_copy_subtree_addr(uint32_t out[8], const uint32_t in[8])
     /* Copy the layer and tree fields of the address structure.  This is used
        when we're doing multiple types of hashes within the same Merkle tree */
 
-    qsc_memutils_copy((uint8_t*)out, (const uint8_t*)in, SPX_OFFSET_TREE + 8);
+    qsc_memutils_copy(out, in, SPX_OFFSET_TREE + 8);
 }
 
 static void sphincsplus_set_keypair_addr(uint32_t addr[8], uint32_t keypair)
@@ -342,7 +342,7 @@ static void sphincsplus_copy_keypair_addr(uint32_t out[8], const uint32_t in[8])
     /* Copy the layer, tree and keypair fields of the address structure.
        This is used when we're doing multiple things within the same OTS keypair */
 
-    qsc_memutils_copy((uint8_t*)out, (const uint8_t*)in, SPX_OFFSET_TREE + 8);
+    qsc_memutils_copy(out, in, SPX_OFFSET_TREE + 8);
 
 #if (SPX_FULL_HEIGHT/SPX_D > 8)
     ((uint8_t*)out)[SPX_OFFSET_KP_ADDR2] = ((uint8_t*)in)[SPX_OFFSET_KP_ADDR2];
@@ -474,7 +474,9 @@ static void sphincsplus_thash(uint8_t* out, const uint8_t* in, uint32_t inblocks
         qsc_shake256_compute(out, SPX_N, buf, KEYLEN + BLKLEN);
 #endif
         qsc_memutils_alloc_free(bitmask);
+        bitmask = NULL;
         qsc_memutils_alloc_free(buf);
+        buf = NULL;
     }
 }
 
@@ -600,7 +602,9 @@ static void sphincsplus_treehash(uint8_t* root, uint8_t* auth_path, const uint8_
 
         qsc_memutils_copy(root, stack, SPX_N);
         qsc_memutils_alloc_free(heights);
+        heights = NULL;
         qsc_memutils_alloc_free(stack);
+        stack = NULL;
     }
 }
 

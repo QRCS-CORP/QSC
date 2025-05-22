@@ -2,7 +2,6 @@
 #include "consoleutils.h"
 #include "memutils.h"
 #include "stringutils.h"
-#include <stdio.h>
 
 /* bogus winbase.h error */
 QSC_SYSTEM_CONDITION_IGNORE(5105)
@@ -15,39 +14,53 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #		include <processthreadsapi.h>
 #	endif
 #elif defined(QSC_SYSTEM_OS_POSIX)
-#	if defined(QSC_SYSTEM_OS_BSD)
-#   	include <sys/param.h>
-#   	include <sys/sysctl.h>
-#		include <sys/types.h>
-#		include <unistd.h>
-#	else
-#		include <cpuid.h>
-#   	include <limits.h>
-#		include <x86intrin.h>
-#   	include <unistd.h>
-#		include <xsaveintrin.h>
-#	endif
-#	if defined(_AIX)
-#		include <sys/systemcfg.h>
-#	endif
+/* common POSIX headers */
+#   include <unistd.h>
+#   include <sys/types.h>
+/* for getauxval()/AT_HWCAP on Linux */
+#   if defined(QSC_SYSTEM_OS_LINUX)
+#       include <sys/auxv.h>
+#   endif
+#   if defined(QSC_SYSTEM_OS_BSD)
+/* BSD topology via sysctl */
+#       include <sys/param.h>
+#       include <sys/sysctl.h>
+#   endif
+/* only pull in x86 CPUID intrinsics on x86/Linux */
+#   if defined(QSC_SYSTEM_ARCH_IX86) && !defined(QSC_SYSTEM_OS_BSD)
+#       include <cpuid.h>
+#       include <limits.h>
+#       include <x86intrin.h>
+#       include <xsaveintrin.h>
+#   endif
+#   if defined(_AIX)
+#       include <sys/systemcfg.h>
+#   endif
 #endif
 
 static uint32_t cpuidex_cpu_count()
 {
-	uint32_t res;
-
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+	uint32_t res;
 	SYSTEM_INFO sysinfo;
+
 	GetSystemInfo(&sysinfo);
 	res = (uint32_t)sysinfo.dwNumberOfProcessors;
+
+	if (res < 1U)
+	{
+		res = 1U;
+	}
 #else
+	long res;
+
 	res = (uint32_t)sysconf(_SC_NPROCESSORS_CONF);
-#endif
 
 	if (res < 1)
 	{
 		res = 1;
 	}
+#endif
 
 	return res;
 }
@@ -78,7 +91,7 @@ static uint32_t cpuidex_cpu_count()
 #		define HWCAP_AES (1 << 3)
 #	endif
 #	if !defined(HWCAP2_AES)
-#		define HWCAP2_AES (1 << 0U)
+#		define HWCAP2_AES (1 << 0)
 #	endif
 #	if !defined(HWCAP_SHA1)
 #		define HWCAP_SHA1 (1 << 5)
@@ -382,6 +395,8 @@ static bool cpuidex_has_sha3()
 
 static void cpuidex_arm_features(qsc_cpuidex_cpu_features* features)
 {
+	QSC_ASSERT(features != NULL);
+
 	features->aesni = cpuidex_has_aes();
 	features->armv7 = cpuidex_is_armv7();
 	features->neon = cpuidex_has_neon();
@@ -412,12 +427,12 @@ static void cpuidex_arm_features(qsc_cpuidex_cpu_features* features)
 #	define XCR0_ZMM_HI256 0x00000040UL
 #	define XCR0_HI16_ZMM 0x00000080UL
 
-static void cpuidex_cpu_info(uint32_t info[4], const uint32_t infotype)
+static void cpuidex_cpu_info(int32_t info[4], const uint32_t infotype)
 {
-#if defined(QSC_SYSTEM_COMPILER_MSC)
-	__cpuid((int32_t*)info, infotype);
-#elif defined(QSC_SYSTEM_COMPILER_GCC)
-	__get_cpuid(infotype, &info[0U], &info[1], &info[2], &info[3]);
+#if defined(QSC_SYSTEM_COMPILER_MSC) || defined(QSC_SYSTEM_COMPILER_INTEL)
+	__cpuid(info, infotype);
+#elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)
+	__get_cpuid(infotype, &info[0U], &info[1U], &info[2U], &info[3U]);
 #endif
 }
 
@@ -430,18 +445,22 @@ static uint32_t cpuidex_read_bits(uint32_t value, int32_t index, int32_t length)
 
 static void cpuidex_vendor_name(qsc_cpuidex_cpu_features* features)
 {
-	uint32_t info[4] = { 0U };
+	QSC_ASSERT(features != NULL);
+
+	int32_t info[4U] = { 0U };
 
 	cpuidex_cpu_info(info, 0x00000000UL);
 	qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
-	qsc_memutils_copy(&features->vendor[0U], &info[1], sizeof(uint32_t));
-	qsc_memutils_copy(&features->vendor[4], &info[3], sizeof(uint32_t));
-	qsc_memutils_copy(&features->vendor[8], &info[2], sizeof(uint32_t));
+	qsc_memutils_copy(&features->vendor[0U], (const uint8_t*)&info[1U], sizeof(int32_t));
+	qsc_memutils_copy(&features->vendor[4U], (const uint8_t*)&info[3U], sizeof(int32_t));
+	qsc_memutils_copy(&features->vendor[8U], (const uint8_t*)&info[2U], sizeof(int32_t));
 }
 
 static void cpuidex_bus_info(qsc_cpuidex_cpu_features* features)
 {
-	uint32_t info[4] = { 0U };
+	QSC_ASSERT(features != NULL);
+
+	int32_t info[4U] = { 0U };
 	cpuidex_cpu_info(info, 0x00000000UL);
 
 	if (info[0U] >= 0x00000016UL)
@@ -449,48 +468,52 @@ static void cpuidex_bus_info(qsc_cpuidex_cpu_features* features)
 		qsc_memutils_clear(info, sizeof(info));
 		cpuidex_cpu_info(info, 0x00000016UL);
 		features->freqbase = info[0U];
-		features->freqmax = info[1];
-		features->freqref = info[2];
+		features->freqmax = info[1U];
+		features->freqref = info[2U];
 	}
 }
 
 static void cpuidex_cpu_cache(qsc_cpuidex_cpu_features* features)
 {
-	uint32_t info[4] = { 0U };
+	QSC_ASSERT(features != NULL);
+
+	int32_t info[4U] = { 0U };
 
 	cpuidex_cpu_info(info, 0x80000006UL);
 
-	features->l1cache = cpuidex_read_bits(info[2], 0U, 8);
-	features->l1cacheline = cpuidex_read_bits(info[2], 0U, 11);
-	features->l2associative = cpuidex_read_bits(info[2], 12, 4);
-	features->l2cache = cpuidex_read_bits(info[2], 16, 16);
+	features->l1cache = cpuidex_read_bits(info[2U], 0, 8);
+	features->l1cacheline = cpuidex_read_bits(info[2U], 0, 11);
+	features->l2associative = cpuidex_read_bits(info[2U], 12, 4);
+	features->l2cache = cpuidex_read_bits(info[2U], 16, 16);
 }
 
 static void cpuidex_cpu_topology(qsc_cpuidex_cpu_features* features)
 {
-	uint32_t info[4] = { 0U };
+	QSC_ASSERT(features != NULL);
+
+	int32_t info[4U] = { 0U };
 
 	/* total cpu cores */
 	features->cores = cpuidex_cpu_count();
 
 	/* hyperthreading and actual cpus */
 	cpuidex_cpu_info(info, 0x00000001UL);
-	features->hyperthread = cpuidex_read_bits(info[3], 28, 1) != 0U;
+	features->hyperthread = cpuidex_read_bits(info[3U], 28, 1) != 0U;
 	features->cpus = (features->hyperthread == true && features->cores > 1) ? (features->cores / 2) : features->cores;
 
 	/* cache line size */
 	cpuidex_cpu_info(info, 0x00000001UL);
 
 	/* cpu features */
-	features->pcmul = ((info[2] & CPUID_ECX_PCLMUL) != 0x00000000UL);
-	features->aesni = ((info[2] & CPUID_ECX_AESNI) != 0x00000000UL);
-	features->rdrand = ((info[2] & CPUID_ECX_RDRAND) != 0x00000000UL);
-	features->rdtcsp = ((info[3] & CPUID_EDX_RDTCSP) != 0x00000000UL);
+	features->pcmul = ((info[2U] & CPUID_ECX_PCLMUL) != 0x00000000UL);
+	features->aesni = ((info[2U] & CPUID_ECX_AESNI) != 0x00000000UL);
+	features->rdrand = ((info[2U] & CPUID_ECX_RDRAND) != 0x00000000UL);
+	features->rdtcsp = ((info[3U] & CPUID_EDX_RDTCSP) != 0x00000000UL);
 
 #if defined(QSC_SYSTEM_HAS_AVX)
 	bool havx;
 
-	havx = (info[2] & CPUID_ECX_AVX) != 0x00000000UL;
+	havx = (info[2U] & CPUID_ECX_AVX) != 0x00000000UL;
 
 	if (havx == true)
 	{
@@ -513,12 +536,12 @@ static void cpuidex_cpu_topology(qsc_cpuidex_cpu_features* features)
 
 	if (features->cputype == qsc_cpuid_intel)
 	{
-		features->cacheline = cpuidex_read_bits(info[1], 16, 8) * 8;
+		features->cacheline = cpuidex_read_bits(info[1U], 16, 8) * 8U;
 	}
 	else if (features->cputype == qsc_cpuid_amd)
 	{
 		cpuidex_cpu_info(info, 0x80000005UL);
-		features->cacheline = cpuidex_read_bits(info[2], 24, 8);
+		features->cacheline = cpuidex_read_bits(info[2U], 24, 8);
 	}
 
 	if (features->avx == true)
@@ -533,12 +556,12 @@ static void cpuidex_cpu_topology(qsc_cpuidex_cpu_features* features)
 		__builtin_cpu_init();
 		havx2 = __builtin_cpu_supports("avx2") != 0U;
 #	else
-		havx2 = ((info[1] & CPUID_EBX_AVX2) != 0x00000000UL);
+		havx2 = ((info[1U] & CPUID_EBX_AVX2) != 0x00000000UL);
 #	endif
 
-		features->adx = ((info[1] & CPUID_EBX_ADX) != 0x00000000UL);
+		features->adx = ((info[1U] & CPUID_EBX_ADX) != 0x00000000UL);
 		features->avx2 = havx2 && ((uint32_t)_xgetbv(0U) & 0x000000E6UL) != 0x00000000UL;
-		features->sha256 = ((info[1] & CPUID_EBX_SHA2) != 0x00000000UL);
+		features->sha256 = ((info[1U] & CPUID_EBX_SHA2) != 0x00000000UL);
 #endif
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
@@ -546,7 +569,7 @@ static void cpuidex_cpu_topology(qsc_cpuidex_cpu_features* features)
 #	if defined(QSC_SYSTEM_COMPILER_GCC)
 		havx512 = __builtin_cpu_supports("avx512f") != 0U;
 #	else
-		havx512 = ((info[1] & CPUID_EBX_AVX512F) != 0x00000000UL);
+		havx512 = ((info[1U] & CPUID_EBX_AVX512F) != 0x00000000UL);
 #	endif
 		if (havx512 == true)
 		{
@@ -564,7 +587,9 @@ static void cpuidex_cpu_topology(qsc_cpuidex_cpu_features* features)
 
 static void cpuidex_cpu_type(qsc_cpuidex_cpu_features* features)
 {
-	char tmpn[QSC_CPUIDEX_VENDOR_SIZE + 1] = { 0U };
+	QSC_ASSERT(features != NULL);
+
+	char tmpn[QSC_CPUIDEX_VENDOR_SIZE + 1U] = { 0U };
 
 	cpuidex_vendor_name(features);
 	qsc_memutils_copy(tmpn, features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
@@ -598,13 +623,15 @@ static void cpuidex_cpu_type(qsc_cpuidex_cpu_features* features)
 
 static void cpuidex_serial_number(qsc_cpuidex_cpu_features* features)
 {
-	uint32_t info[4] = { 0U };
+	QSC_ASSERT(features != NULL);
+
+	int32_t info[4U] = { 0U };
 
 	cpuidex_cpu_info(info, 0x00000003UL);
 	qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_SIZE);
-	qsc_memutils_copy(&features->serial[0U], &info[1], sizeof(uint32_t));
-	qsc_memutils_copy(&features->serial[4], &info[3], sizeof(uint32_t));
-	qsc_memutils_copy(&features->serial[8], &info[2], sizeof(uint32_t));
+	qsc_memutils_copy(&features->serial[0U], (const uint8_t*)&info[1U], sizeof(int32_t));
+	qsc_memutils_copy(&features->serial[4U], (const uint8_t*)&info[3U], sizeof(int32_t));
+	qsc_memutils_copy(&features->serial[8U], (const uint8_t*)&info[2U], sizeof(int32_t));
 }
 
 #endif
@@ -613,6 +640,8 @@ static void cpuidex_serial_number(qsc_cpuidex_cpu_features* features)
 
 static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 {
+	QSC_ASSERT(features != NULL);
+
 	size_t plen;
 	uint64_t pval;
 
@@ -750,12 +779,12 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 		features->rdrand = (pval == 1);
 	}
 
-	char vend[1024] = { 0U };
+	char vend[1024U] = { 0U };
 	plen = sizeof(vend);
 
 	if (sysctlbyname("machdep.cpu.brand_string", vend, &plen, NULL, 0U) >= 0U)
 	{
-		qsc_memutils_copy(features->vendor, vend, QSC_CPUIDEX_VENDOR_SIZE - 1);
+		qsc_memutils_copy(features->vendor, vend, QSC_CPUIDEX_VENDOR_SIZE - 1U);
 		qsc_stringutils_to_lowercase(vend);
 
 		if (qsc_stringutils_string_contains(vend, "intel") == true)
@@ -777,6 +806,8 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 static void cpuidex_posix_topology(qsc_cpuidex_cpu_features* features)
 {
+	QSC_ASSERT(features != NULL);
+
 #	if defined(QSC_SYSTEM_ARCH_IX86) && defined(QSC_SYSTEM_COMPILER_GCC)
 
 	cpuidex_cpu_type(features);
@@ -849,6 +880,8 @@ static void cpuidex_posix_topology(qsc_cpuidex_cpu_features* features)
 
 static void cpuidex_windows_topology(qsc_cpuidex_cpu_features* features)
 {
+	QSC_ASSERT(features != NULL);
+
 #	if defined(QSC_SYSTEM_ARCH_IX86)
 	cpuidex_cpu_type(features);
 
@@ -875,53 +908,58 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 
     bool res;
 
-    features->adx = false;
-    features->aesni = false;
-    features->pcmul = false;
-	/* ARM features */
-	features->armv7 = false;
-	features->neon = false;
-	features->sha256 = false;
-	features->sha512 = false;
-	features->sha3 = false;
-	/* Intel features */
-    features->avx = false;
-    features->avx2 = false;
-    features->avx512f = false;
-    features->hyperthread = false;
-    features->rdrand = false;
-    features->rdtcsp = false;
-	/* cpu topology */
-    features->cacheline = 0U;
-    features->cores = 0U;
-    features->cpus = 1;
-    features->freqbase = 0U;
-    features->freqmax = 0U;
-    features->freqref = 0U;
-    features->l1cache = 0U;
-    features->l1cacheline = 0U;
-    features->l2associative = 4;
-    features->l2cache = 0U;
-    qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_SIZE);
+	res = false;
+
+	if (features != NULL)
+	{
+		features->adx = false;
+		features->aesni = false;
+		features->pcmul = false;
+		/* ARM features */
+		features->armv7 = false;
+		features->neon = false;
+		features->sha256 = false;
+		features->sha512 = false;
+		features->sha3 = false;
+		/* Intel features */
+		features->avx = false;
+		features->avx2 = false;
+		features->avx512f = false;
+		features->hyperthread = false;
+		features->rdrand = false;
+		features->rdtcsp = false;
+		/* cpu topology */
+		features->cacheline = 0U;
+		features->cores = 0U;
+		features->cpus = 1;
+		features->freqbase = 0U;
+		features->freqmax = 0U;
+		features->freqref = 0U;
+		features->l1cache = 0U;
+		features->l1cacheline = 0U;
+		features->l2associative = 4U;
+		features->l2cache = 0U;
+		qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_SIZE);
 
 #if defined(QSC_SYSTEM_OS_POSIX)
 #	if defined(QSC_SYSTEM_OS_BSD)
-	cpuidex_bsd_topology(features);
-    res = true;
+		cpuidex_bsd_topology(features);
+		res = true;
 #	else
-	cpuidex_posix_topology(features);
-	res = true;
+		cpuidex_posix_topology(features);
+		res = true;
 #	endif
 #elif defined(QSC_SYSTEM_OS_WINDOWS)
-	cpuidex_windows_topology(features);
-	res = true;
+		cpuidex_windows_topology(features);
+		res = true;
 #else
-	res = false;
+		res = false;
 #endif
 
 #if defined(QSC_SYSTEM_ARCH_ARM)
-	cpuidex_arm_features(features);
+		cpuidex_arm_features(features);
 #endif
+	}
 
     return res;
 }
@@ -931,12 +969,12 @@ void qsc_cpuidex_print_stats()
 	qsc_cpuidex_cpu_features cfeat;
 	const char sf[] = "false";
 	const char st[] = "true";
-	char vstr[16] = { 0U };
+	char vstr[16U] = { 0U };
 	bool hfeat;
 
 	hfeat = qsc_cpuidex_features_set(&cfeat);
 
-	if (hfeat == true)
+	if (hfeat)
 	{
 		qsc_consoleutils_print_safe("ADX: ");
 		qsc_consoleutils_print_line(cfeat.adx == true ? st : sf);

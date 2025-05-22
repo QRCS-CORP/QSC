@@ -5,67 +5,88 @@
 
 static bool ipinfo_hexfield_valid(const char ** pp)
 {
-    uint32_t value  = 0U;
-    uint32_t digits = 0U;
-    const char * p  = *pp;
+	QSC_ASSERT(pp != NULL);
 
-    while ((digits < 4U) && (p[0] != '\0') && (p[0] != ':'))
-    {
-        unsigned int nibble;
+    uint32_t value;
+    uint32_t digits;
+    const char* p;
+	bool res;
 
-        if ((p[0] >= '0') && (p[0] <= '9'))
-        {
-            nibble = (unsigned int)(p[0] - '0');
-        }
-        else if ((p[0] >= 'A') && (p[0] <= 'F'))
-        {
-            nibble = (unsigned int)(10U + (p[0] - 'A'));
-        }
-        else if ((p[0] >= 'a') && (p[0] <= 'f'))
-        {
-            nibble = (unsigned int)(10U + (p[0] - 'a'));
-        }
-        else
-        {
-            break;
-        }
+	res = false;
 
-        value = (value << 4U) | nibble;
-        ++digits;
-        ++p;
-    }
+	if (pp != NULL)
+	{
+		value  = 0U;
+		digits = 0U;
+		p  = *pp;
 
-    if (digits > 0U)
-    {
-        *pp = p;                        /* advance caller’s pointer   */
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+		while ((digits < 4U) && (p[0U] != '\0') && (p[0U] != ':'))
+		{
+			unsigned int nibble;
+
+			if ((p[0U] >= '0') && (p[0U] <= '9'))
+			{
+				nibble = (unsigned int)(p[0U] - '0');
+			}
+			else if ((p[0U] >= 'A') && (p[0U] <= 'F'))
+			{
+				nibble = (unsigned int)(10U + (p[0U] - 'A'));
+			}
+			else if ((p[0U] >= 'a') && (p[0U] <= 'f'))
+			{
+				nibble = (unsigned int)(10U + (p[0U] - 'a'));
+			}
+			else
+			{
+				break;
+			}
+
+			value = (value << 4U) | nibble;
+			++digits;
+			++p;
+		}
+
+		if (digits > 0U)
+		{
+			*pp = p;
+			res = true;
+		}
+	}
+
+	return res;
 }
 
 static bool ipinfo_octet_valid(const char **p)
 {
-    int digits;
-	int val;
+	QSC_ASSERT(p != NULL);
 
-	digits = 0;
-	val = 0;
+    int32_t digits;
+	int32_t val;
+	bool res;
 
-    while (isdigit((unsigned char)**p))
-    {
-        val = val * 10 + (**p - '0');
-        (*p)++;
-        digits++;
+	res = false;
 
-		if (val > 255)
+	if (p != NULL)
+	{
+		digits = 0;
+		val = 0;
+
+		while (isdigit((unsigned char)**p))
 		{
-			return false;
+			val = val * 10 + (**p - '0');
+			(*p)++;
+			digits++;
+
+			if (val > 255)
+			{
+				res = false;
+				break;
+			}
 		}
-    }
-    return (digits > 0);
+	}
+	res = (digits > 0);
+
+	return res;
 }
 
 qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
@@ -76,26 +97,29 @@ qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
 
 	tadd = qsc_ipinfo_address_type_unknown;
 
-	if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV4_STRNLEN)
+	if (address != NULL)
 	{
-		qsc_ipinfo_ipv4_address ipv4;
-
-		ipv4 = qsc_ipinfo_ipv4_address_from_string(address);
-
-		if (qsc_ipinfo_ipv4_address_is_valid(&ipv4) == true)
+		if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV4_STRNLEN)
 		{
-			tadd = qsc_ipinfo_address_type_ipv4;
+			qsc_ipinfo_ipv4_address ipv4;
+
+			ipv4 = qsc_ipinfo_ipv4_address_from_string(address);
+
+			if (qsc_ipinfo_ipv4_address_is_valid(&ipv4) == true)
+			{
+				tadd = qsc_ipinfo_address_type_ipv4;
+			}
 		}
-	}
-	else if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV6_STRNLEN)
-	{
-		qsc_ipinfo_ipv6_address ipv6;
-
-		ipv6 = qsc_ipinfo_ipv6_address_from_string(address);
-
-		if (qsc_ipinfo_ipv6_address_is_valid(&ipv6) == true)
+		else if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV6_STRNLEN)
 		{
-			tadd = qsc_ipinfo_address_type_ipv6;
+			qsc_ipinfo_ipv6_address ipv6;
+
+			ipv6 = qsc_ipinfo_ipv6_address_from_string(address);
+
+			if (qsc_ipinfo_ipv6_address_is_valid(&ipv6) == true)
+			{
+				tadd = qsc_ipinfo_address_type_ipv6;
+			}
 		}
 	}
 
@@ -105,10 +129,11 @@ qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_any()
 {
 	qsc_ipinfo_ipv4_address res;
-	res.ipv4[0] = 0;
-    res.ipv4[1] = 0;
-    res.ipv4[2] = 0;
-    res.ipv4[3] = 0;
+
+	res.ipv4[0U] = 0U;
+    res.ipv4[1U] = 0U;
+    res.ipv4[2U] = 0U;
+    res.ipv4[3U] = 0U;
 
 	return res;
 }
@@ -139,89 +164,79 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_array(const uint8_t* addres
 
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_bytes(uint8_t a1, uint8_t a2, uint8_t a3, uint8_t a4)
 {
-	qsc_ipinfo_ipv4_address res = {
-		.ipv4[0] = a1,
-		.ipv4[1] = a2,
-		.ipv4[2] = a3,
-		.ipv4[3] = a4 };
+	qsc_ipinfo_ipv4_address res = 
+	{
+		.ipv4[0U] = a1,
+		.ipv4[1U] = a2,
+		.ipv4[2U] = a3,
+		.ipv4[3U] = a4 
+	};
 
 	return res;
 }
 
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC_IPINFO_IPV4_STRNLEN])
 {
-	QSC_ASSERT(input != NULL);
+    QSC_ASSERT(input != NULL);
 
-	qsc_ipinfo_ipv4_address res = { 0U };
-	size_t pos;
-	int32_t a;
-	int32_t cnt;
-	int32_t ret;
+    qsc_ipinfo_ipv4_address res = { 0U };
 
-	ret = 0;
-
-	if (input != NULL && strlen(input) >= 7)
+	if (input != NULL)
 	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		cnt = sscanf_s(input, "%d %n", &a, &ret);
+		size_t len = strlen(input);
 
-		if (cnt > 0)
+		/* Minimum length: "0.0.0.0" = 7 characters */
+		if (len < 7U)
 		{
-			res.ipv4[0] = (uint8_t)a;
-			pos = (size_t)ret + 1;
-			cnt = sscanf_s((input + pos), "%d %n", &a, &ret);
+			return res;
 		}
 
-		if (cnt > 0)
-		{
-			res.ipv4[1] = (uint8_t)a;
-			pos += (size_t)ret + 1;
-			cnt = sscanf_s((input + pos), "%d %n", &a, &ret);
-		}
+		const char* p = input;
 
-		if (cnt > 0)
+		for (size_t idx = 0U; idx < 4U; ++idx)
 		{
-			res.ipv4[2] = (uint8_t)a;
-			pos += (size_t)ret + 1;
-			cnt = sscanf_s((input + pos), "%d", &a);
+			uint32_t val = 0U;
+			size_t digits = 0U;
 
-			if (cnt > 0)
+			/* Parse up to three digits for this octet */
+			while ((*p != '\0') && (*p != '.'))
 			{
-				res.ipv4[3] = (uint8_t)a;
+				char c = *p;
+				if ((c < '0') || (c > '9'))
+				{
+					return res;
+				}
+				uint32_t digit = (uint32_t)(c - '0');
+				val = val * 10U + digit;
+				if (val > 255U)
+				{
+					return res;
+				}
+				++digits;
+				++p;
+			}
+
+			/* Require at least one digit */
+			if (digits == 0U)
+			{
+				return res;
+			}
+
+			res.ipv4[idx] = (uint8_t)val;
+
+			/* For all but the last octet, expect a dot separator */
+			if (idx < 3U)
+			{
+				if (*p != '.')
+				{
+					return res;
+				}
+				++p;
 			}
 		}
-#else
-		cnt = sscanf(input, "%d %n", &a, &ret);
-
-		if (cnt > 0)
-		{
-			res.ipv4[0] = (uint8_t)a;
-			pos = ret + 1;
-			cnt = sscanf((input + pos), "%d %n", &a, &ret);
-		}
-
-		if (cnt > 0)
-		{
-			res.ipv4[1] = (uint8_t)a;
-			pos += ret + 1;
-			cnt = sscanf((input + pos), "%d %n", &a, &ret);
-		}
-
-		if (cnt > 0)
-		{
-			res.ipv4[2] = (uint8_t)a;
-			pos += ret + 1;
-			cnt = sscanf((input + pos), "%d", &a);
-
-			if (cnt > 0)
-			{
-				res.ipv4[3] = (uint8_t)a;
-			}
-		}
-#endif
 	}
 
-	return res;
+    return res;
 }
 
 bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qsc_ipinfo_ipv4_address* b)
@@ -231,10 +246,12 @@ bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qs
 
 	bool res;
 
-	res = true;
+	res = false;
 
 	if (a != NULL && b != NULL)
 	{
+		res = true;
+
 		for (size_t i = 0U; i < sizeof(a->ipv4); ++i)
 		{
 			if (a->ipv4[i] != b->ipv4[i])
@@ -258,23 +275,23 @@ bool qsc_ipinfo_ipv4_address_is_routable(const qsc_ipinfo_ipv4_address* address)
 
 	if (address != NULL)
 	{
-		if (address->ipv4[0] == 192 && address->ipv4[1] == 168)
+		if (address->ipv4[0U] == 192U && address->ipv4[1U] == 168U)
 		{
 			res = false;
 		}
-		else if (address->ipv4[0] == 172 && (address->ipv4[1] >= 16 && address->ipv4[1] <= 31))
+		else if (address->ipv4[0U] == 172U && (address->ipv4[1U] >= 16U && address->ipv4[1U] <= 31U))
 		{
 			res = false;
 		}
-		else if (address->ipv4[0] == 10)
+		else if (address->ipv4[0U] == 10U)
 		{
 			res = false;
 		}
-		else if (address->ipv4[0] == 127)
+		else if (address->ipv4[0U] == 127U)
 		{
 			res = false;
 		}
-		else if (address->ipv4[0] > 223)
+		else if (address->ipv4[0U] > 223U)
 		{
 			res = false;
 		}
@@ -293,7 +310,12 @@ bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 
 	bool res;
 
-	res = (address != NULL && address->ipv4[0] <= 224 && address->ipv4[1] != 255 && address->ipv4[2] != 255 && address->ipv4[3] != 255);
+	res = false;
+
+	if (address != NULL)
+	{
+		res = (address != NULL && address->ipv4[0U] <= 224U && address->ipv4[1U] != 255U && address->ipv4[2U] != 255U && address->ipv4[3U] != 255U);
+	}
 
 	return res;
 }
@@ -310,13 +332,13 @@ bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address)
 	if (address != NULL)
 	{
 		const char* p = address;
-		i = 0;
+		i = 0U;
 
-		for (i = 0; i < 4; ++i)
+		for (i = 0U; i < 4U; ++i)
 		{
 			if (ipinfo_octet_valid(&p) == true)
 			{
-				if (i < 3)
+				if (i < 3U)
 				{
 					if (*p != '.')
 					{
@@ -332,7 +354,7 @@ bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address)
 			}
 		}
 
-		res = (*p == '\0' && i == 4);
+		res = (*p == '\0' && i == 4U);
 	}
 
 	return res;
@@ -344,7 +366,12 @@ bool qsc_ipinfo_ipv4_address_is_zeroed(const qsc_ipinfo_ipv4_address* address)
 
 	bool res;
 
-	res = (address != NULL && address->ipv4[0] == 0 && address->ipv4[1] == 0 && address->ipv4[2] == 0 && address->ipv4[3] == 0);
+	res = false;
+
+	if (address != NULL)
+	{
+		res = (address != NULL && address->ipv4[0U] == 0U && address->ipv4[1U] == 0U && address->ipv4[2U] == 0U && address->ipv4[3U] == 0U);
+	}
 
 	return res;
 }
@@ -352,10 +379,10 @@ bool qsc_ipinfo_ipv4_address_is_zeroed(const qsc_ipinfo_ipv4_address* address)
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loopback()
 {
 	qsc_ipinfo_ipv4_address res = {
-		.ipv4[0] = 127,
-		.ipv4[1] = 0,
-		.ipv4[2] = 0,
-		.ipv4[3] = 1 };
+		.ipv4[0U] = 127U,
+		.ipv4[1U] = 0U,
+		.ipv4[2U] = 0U,
+		.ipv4[3U] = 1U };
 
 	return res;
 }
@@ -363,24 +390,28 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loopback()
 void qsc_ipinfo_ipv4_address_get_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], const qsc_ipinfo_ipv4_address* address)
 {
 	QSC_ASSERT(address != NULL);
+	QSC_ASSERT(mask != NULL);
 
-	qsc_memutils_clear(mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
+	if (address != NULL && mask != NULL)
+	{
+		qsc_memutils_clear(mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
 
-	if (address->ipv4[0] > 0 && address->ipv4[0] < 127)
-	{
-		mask = "255.0.0.0";
-	}
-	else if (address->ipv4[0] > 127 && address->ipv4[0] < 192)
-	{
-		mask = "255.255.0.0";
-	}
-	else if (address->ipv4[0] > 191 && address->ipv4[0] < 224)
-	{
-		mask = "255.255.255.0";
-	}
-	else
-	{
-		mask = "255.255.255.255";
+		if (address->ipv4[0U] > 0U && address->ipv4[0U] < 127U)
+		{
+			qsc_stringutils_copy_string(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, "255.0.0.0");
+		}
+		else if (address->ipv4[0U] > 127U && address->ipv4[0U] < 192U)
+		{
+			qsc_stringutils_copy_string(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, "255.255.0.0");
+		}
+		else if (address->ipv4[0U] > 191U && address->ipv4[0U] < 224U)
+		{
+			qsc_stringutils_copy_string(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, "255.255.255.0");
+		}
+		else
+		{
+			qsc_stringutils_copy_string(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, "255.255.255.255");
+		}
 	}
 }
 
@@ -390,21 +421,26 @@ uint8_t qsc_ipinfo_ipv4_address_get_cidr_mask(const qsc_ipinfo_ipv4_address* add
 
 	uint8_t nmsk;
 
-	if (address->ipv4[0] > 0 && address->ipv4[0] < 127)
+	nmsk = 0;
+
+	if (address != NULL)
 	{
-		nmsk = 8;
-	}
-	else if (address->ipv4[0] > 127 && address->ipv4[0] < 192)
-	{
-		nmsk = 16;
-	}
-	else if (address->ipv4[0] > 191 && address->ipv4[0] < 224)
-	{
-		nmsk = 24;
-	}
-	else
-	{
-		nmsk = 32;
+		if (address->ipv4[0U] > 0U && address->ipv4[0U] < 127U)
+		{
+			nmsk = 8U;
+		}
+		else if (address->ipv4[0U] > 127U && address->ipv4[0U] < 192U)
+		{
+			nmsk = 16U;
+		}
+		else if (address->ipv4[0U] > 191U && address->ipv4[0U] < 224U)
+		{
+			nmsk = 24U;
+		}
+		else
+		{
+			nmsk = 32U;
+		}
 	}
 
 	return nmsk;
@@ -415,9 +451,6 @@ void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_add
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(address != NULL);
 
-	QSC_ASSERT(address != NULL);
-	QSC_ASSERT(output != NULL);
-
 	if (address != NULL && output != NULL)
 	{
 		qsc_memutils_copy(output, address->ipv4, sizeof(address->ipv4));
@@ -426,6 +459,7 @@ void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_add
 
 void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const qsc_ipinfo_ipv4_address* address)
 {
+	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(address != NULL);
 
 	if (address != NULL && output != NULL)
@@ -435,29 +469,29 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address->ipv4[0]);
+		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address->ipv4[0U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[1]);
+		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[1U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[2]);
+		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[2U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[3]);
+		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[3U]);
 
 #else
 
-		pos = (size_t)sprintf(output, "%d", address->ipv4[0]);
+		pos = (size_t)sprintf(output, "%d", address->ipv4[0U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[1]);
+		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[1U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[2]);
+		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[2U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += sprintf((output + pos), "%d", address->ipv4[3]);
+		pos += sprintf((output + pos), "%d", address->ipv4[3U]);
 
 #endif
 		qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
@@ -466,6 +500,7 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 
 void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const uint8_t* address)
 {
+	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(address != NULL);
 
 	if (address != NULL && output != NULL)
@@ -475,29 +510,29 @@ void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address[0]);
+		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address[0U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[1]);
+		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[1U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[2]);
+		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[2U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[3]);
+		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[3U]);
 
 #else
 
-		pos = (size_t)sprintf(output, "%d", address[0]);
+		pos = (size_t)sprintf(output, "%d", address[0U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address[1]);
+		pos += (size_t)sprintf((output + pos), "%d", address[1U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address[2]);
+		pos += (size_t)sprintf((output + pos), "%d", address[2U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += sprintf((output + pos), "%d", address[3]);
+		pos += sprintf((output + pos), "%d", address[3U]);
 
 #endif
 		qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
@@ -506,26 +541,33 @@ void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const
 
 uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLEN])
 {
-	uint32_t ta[4] = { 0U };
+	QSC_ASSERT(mask != NULL);
+
+	uint32_t ta[4U] = { 0U };
 	const char* tmp = mask;
 	uint32_t bmask;
 	int64_t pos;
 	uint8_t bits;
 
-	for (size_t i = 0U; i < 4; ++i)
-	{
-		pos = qsc_stringutils_find_string(tmp, ".");
-		ta[i] += qsc_stringutils_string_to_int(tmp);
-		tmp += (size_t)pos + 1;
-	}
-
 	bits = 0;
-	bmask = ((ta[0] << 24) + (ta[1] << 16) + (ta[2] << 8) + (ta[3]));
 
-	while (bmask != 0)
+	if (mask != NULL)
 	{
-		bits += bmask & 1;
-		bmask >>= 1;
+		for (size_t i = 0U; i < 4U; ++i)
+		{
+			pos = qsc_stringutils_find_string(tmp, ".");
+			ta[i] += qsc_stringutils_string_to_int(tmp);
+			tmp += (size_t)pos + 1;
+		}
+
+		bits = 0U;
+		bmask = ((ta[0U] << 24U) + (ta[1U] << 16U) + (ta[2U] << 8U) + (ta[3U]));
+
+		while (bmask != 0)
+		{
+			bits += bmask & 1U;
+			bmask >>= 1;
+		}
 	}
 
 	return bits;
@@ -533,98 +575,103 @@ uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLE
 
 void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8_t cidr)
 {
+	QSC_ASSERT(mask != NULL);
+
 	qsc_stringutils_clear_string(mask);
 	uint32_t tmpn;
 
-	tmpn = 0;
-
-	if (cidr <= 8)
+	if (mask != NULL)
 	{
-		const char tail[] = ".0.0.0";
+		tmpn = 0;
 
-		for (size_t i = 0U; i < 8; ++i)
+		if (cidr <= 8U)
 		{
-			if (cidr == 0)
+			const char tail[] = ".0.0.0";
+
+			for (size_t i = 0U; i < 8U; ++i)
 			{
-				break;
+				if (cidr == 0U)
+				{
+					break;
+				}
+
+				tmpn |= (1U << (7U - i));
+				--cidr;
 			}
 
-			tmpn |= 1 << (7 - i);
-			--cidr;
+			qsc_stringutils_int_to_string(tmpn, mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
 		}
-
-		qsc_stringutils_int_to_string(tmpn, mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
-	}
-	else if (cidr <= 16)
-	{
-		const char head[] = "255.";
-		const char tail[] = ".0.0";
-		char tmask[4] = { 0U };
-
-		cidr -= 8;
-
-		for (size_t i = 0U; i < 8; ++i)
+		else if (cidr <= 16U)
 		{
-			if (cidr == 0)
+			const char head[] = "255.";
+			const char tail[] = ".0.0";
+			char tmask[4] = { 0U };
+
+			cidr -= 8U;
+
+			for (size_t i = 0U; i < 8U; ++i)
 			{
-				break;
+				if (cidr == 0U)
+				{
+					break;
+				}
+
+				tmpn |= (1U << (7U - i));
+				--cidr;
 			}
 
-			tmpn |= 1 << (7 - i);
-			--cidr;
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+			qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
 		}
-
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
-	}
-	else if (cidr <= 24)
-	{
-		const char head[] = "255.255.";
-		const char tail[] = ".0";
-		char tmask[4] = { 0U };
-
-		cidr -= 16;
-
-		for (size_t i = 0U; i < 8; ++i)
+		else if (cidr <= 24)
 		{
-			if (cidr == 0)
+			const char head[] = "255.255.";
+			const char tail[] = ".0";
+			char tmask[4U] = { 0U };
+
+			cidr -= 16U;
+
+			for (size_t i = 0U; i < 8U; ++i)
 			{
-				break;
+				if (cidr == 0U)
+				{
+					break;
+				}
+
+				tmpn |= (1U << (7U - i));
+				--cidr;
 			}
 
-			tmpn |= 1 << (7 - i);
-			--cidr;
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+			qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
 		}
-
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
-	}
-	else
-	{
-		const char head[] = "255.255.255.";
-		char tmask[4] = { 0U };
-
-		cidr -= 24;
-
-		for (size_t i = 0U; i < 8; ++i)
+		else
 		{
-			if (cidr == 0)
+			const char head[] = "255.255.255.";
+			char tmask[4U] = { 0U };
+
+			cidr -= 24U;
+
+			for (size_t i = 0U; i < 8U; ++i)
 			{
-				break;
+				if (cidr == 0U)
+				{
+					break;
+				}
+
+				tmpn |= (1U << (7 - i));
+				--cidr;
 			}
 
-			tmpn |= 1 << (7 - i);
-			--cidr;
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
+			qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
+			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
 		}
-
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-		qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-		qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
 	}
 }
 
@@ -638,15 +685,15 @@ qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(const qsc_ipinfo_ipv6
 
 	if (address != NULL)
 	{
-		if (address->ipv6[0] == 0xFF)
+		if (address->ipv6[0U] == 0xFFU)
 		{
 			ptype = qsc_ipv6_prefix_multicast;
 		}
-		else if (address->ipv6[0] == 0xFE)
+		else if (address->ipv6[0U] == 0xFEU)
 		{
 			ptype = qsc_ipv6_prefix_link_local;
 		}
-		else if (address->ipv6[0] == 0xFD || address->ipv6[0] == 0xFC)
+		else if (address->ipv6[0U] == 0xFDU || address->ipv6[0U] == 0xFCU)
 		{
 			ptype = qsc_ipv6_prefix_unique_local;
 		}
@@ -704,22 +751,22 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_from_string(const char input[QSC
 		}
 		else
 		{
-			res.ipv6[0] = qsc_arrayutils_hex_to_uint8(input, 2);
-			res.ipv6[1] = qsc_arrayutils_hex_to_uint8((input + 2), 2);
-			res.ipv6[2] = qsc_arrayutils_hex_to_uint8((input + 5), 2);
-			res.ipv6[3] = qsc_arrayutils_hex_to_uint8((input + 7), 2);
-			res.ipv6[4] = qsc_arrayutils_hex_to_uint8((input + 10), 2);
-			res.ipv6[5] = qsc_arrayutils_hex_to_uint8((input + 12), 2);
-			res.ipv6[6] = qsc_arrayutils_hex_to_uint8((input + 15), 2);
-			res.ipv6[7] = qsc_arrayutils_hex_to_uint8((input + 17), 2);
-			res.ipv6[8] = qsc_arrayutils_hex_to_uint8((input + 20), 2);
-			res.ipv6[9] = qsc_arrayutils_hex_to_uint8((input + 22), 2);
-			res.ipv6[10] = qsc_arrayutils_hex_to_uint8((input + 25), 2);
-			res.ipv6[11] = qsc_arrayutils_hex_to_uint8((input + 27), 2);
-			res.ipv6[12] = qsc_arrayutils_hex_to_uint8((input + 30), 2);
-			res.ipv6[13] = qsc_arrayutils_hex_to_uint8((input + 32), 2);
-			res.ipv6[14] = qsc_arrayutils_hex_to_uint8((input + 35), 2);
-			res.ipv6[15] = qsc_arrayutils_hex_to_uint8((input + 37), 2);
+			res.ipv6[0U] = qsc_arrayutils_hex_to_uint8(input, 2U);
+			res.ipv6[1U] = qsc_arrayutils_hex_to_uint8((input + 2U), 2U);
+			res.ipv6[2U] = qsc_arrayutils_hex_to_uint8((input + 5U), 2U);
+			res.ipv6[3U] = qsc_arrayutils_hex_to_uint8((input + 7U), 2U);
+			res.ipv6[4U] = qsc_arrayutils_hex_to_uint8((input + 10U), 2U);
+			res.ipv6[5U] = qsc_arrayutils_hex_to_uint8((input + 12U), 2U);
+			res.ipv6[6U] = qsc_arrayutils_hex_to_uint8((input + 15U), 2U);
+			res.ipv6[7U] = qsc_arrayutils_hex_to_uint8((input + 17U), 2U);
+			res.ipv6[8U] = qsc_arrayutils_hex_to_uint8((input + 20U), 2U);
+			res.ipv6[9U] = qsc_arrayutils_hex_to_uint8((input + 22U), 2U);
+			res.ipv6[10U] = qsc_arrayutils_hex_to_uint8((input + 25U), 2U);
+			res.ipv6[11U] = qsc_arrayutils_hex_to_uint8((input + 27U), 2U);
+			res.ipv6[12U] = qsc_arrayutils_hex_to_uint8((input + 30U), 2U);
+			res.ipv6[13U] = qsc_arrayutils_hex_to_uint8((input + 32U), 2U);
+			res.ipv6[14U] = qsc_arrayutils_hex_to_uint8((input + 35U), 2U);
+			res.ipv6[15U] = qsc_arrayutils_hex_to_uint8((input + 37U), 2U);
 		}
 	}
 
@@ -760,19 +807,19 @@ bool qsc_ipinfo_ipv6_address_is_routable(const qsc_ipinfo_ipv6_address* address)
 
 	if (address != NULL)
 	{
-		if (address->ipv6[0] == 0)
+		if (address->ipv6[0U] == 0U)
 		{
 			res = false;
 		}
-		else if (address->ipv6[0] == 1)
+		else if (address->ipv6[0U] == 1U)
 		{
 			res = false;
 		}
-		else if (address->ipv6[0] == 255 && address->ipv6[1] == 0)
+		else if (address->ipv6[0U] == 255U && address->ipv6[1U] == 0U)
 		{
 			res = false;
 		}
-		else if (address->ipv6[0] == 254 && address->ipv6[1] == 128)
+		else if (address->ipv6[0U] == 254U && address->ipv6[1U] == 128U)
 		{
 			res = false;
 		}
@@ -798,15 +845,15 @@ bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address)
 
 	if (address != NULL)
 	{
-		if (address->ipv6[0] == 0)
+		if (address->ipv6[0U] == 0U)
 		{
 			res = false;
 		}
-		else if (address->ipv6[0] == 1)
+		else if (address->ipv6[0U] == 1U)
 		{
 			res = false;
 		}
-		else if (address->ipv6[2] == 219 && address->ipv6[3] == 128)
+		else if (address->ipv6[2U] == 219U && address->ipv6[3U] == 128U)
 		{
 			res = false;
 		}
@@ -828,18 +875,18 @@ bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address)
     bool dblcolon;
     bool bok;
 
-	fields = 0U;
-	bok = true;
-	dblcolon = false;
 	res = false;
 
     if (address != NULL)
     {
+		fields = 0U;
+		bok = true;
+		dblcolon = false;
         const char * p = address;
 
-        if (p[0] != '\0')
+        if (p[0U] != '\0')
         {
-            while ((bok == true) && (fields < 8U) && (p[0] != '\0'))
+            while ((bok == true) && (fields < 8U) && (p[0U] != '\0'))
             {
                 bok = ipinfo_hexfield_valid(&p);
 
@@ -847,9 +894,9 @@ bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address)
                 {
                     ++fields;
 
-                    if (p[0] == ':')
+                    if (p[0U] == ':')
                     {
-                        if (p[1] == ':')
+                        if (p[1U] == ':')
                         {
                             if (dblcolon == true)
                             {
@@ -882,7 +929,7 @@ bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address)
                     bfcount = (fields == 8U);
                 }
 
-                res = (bfcount == true) && (p[0] == '\0');
+                res = (bfcount == true) && (p[0U] == '\0');
             }
         }
     }
@@ -900,10 +947,10 @@ bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address)
 
 	if (address != NULL)
 	{
-		if (address->ipv6[0] == 0 && address->ipv6[1] == 0 && address->ipv6[2] == 0 && address->ipv6[3] == 0 &&
-			address->ipv6[4] == 0 && address->ipv6[5] == 0 && address->ipv6[6] == 0 && address->ipv6[7] == 0 &&
-			address->ipv6[8] == 0 && address->ipv6[9] == 0 && address->ipv6[10] == 0 && address->ipv6[11] == 0 &&
-			address->ipv6[12] == 0 && address->ipv6[13] == 0 && address->ipv6[14] == 0 && address->ipv6[15] == 0)
+		if (address->ipv6[0U] == 0U && address->ipv6[1U] == 0U && address->ipv6[2U] == 0U && address->ipv6[3U] == 0U &&
+			address->ipv6[4U] == 0U && address->ipv6[5U] == 0U && address->ipv6[6U] == 0U && address->ipv6[7U] == 0U &&
+			address->ipv6[8U] == 0U && address->ipv6[9U] == 0U && address->ipv6[10U] == 0U && address->ipv6[11U] == 0U &&
+			address->ipv6[12U] == 0U && address->ipv6[13U] == 0U && address->ipv6[14U] == 0U && address->ipv6[15U] == 0U)
 		{
 			res = true;
 		}
@@ -916,48 +963,51 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loopback()
 {
 	qsc_ipinfo_ipv6_address add;
 
-	add.ipv6[0] = 0;
-    add.ipv6[1] = 0;
-    add.ipv6[2] = 0;
-    add.ipv6[3] = 0;
-    add.ipv6[4] = 0;
-    add.ipv6[5] = 0;
-    add.ipv6[6] = 0;
-    add.ipv6[7] = 0;
-    add.ipv6[8] = 0;
-    add.ipv6[9] = 0;
-    add.ipv6[10] = 0;
-    add.ipv6[11] = 0;
-    add.ipv6[12] = 0;
-    add.ipv6[13] = 0;
-    add.ipv6[14] = 0;
-    add.ipv6[15] = 1;
+	add.ipv6[0U] = 0U;
+    add.ipv6[1U] = 0U;
+    add.ipv6[2U] = 0U;
+    add.ipv6[3U] = 0U;
+    add.ipv6[4U] = 0U;
+    add.ipv6[5U] = 0U;
+    add.ipv6[6U] = 0U;
+    add.ipv6[7U] = 0U;
+    add.ipv6[8U] = 0U;
+    add.ipv6[9U] = 0U;
+    add.ipv6[10U] = 0U;
+    add.ipv6[11U] = 0U;
+    add.ipv6[12U] = 0U;
+    add.ipv6[13U] = 0U;
+    add.ipv6[14U] = 0U;
+    add.ipv6[15U] = 1U;
 
 	return add;
 }
 
 void qsc_ipinfo_ipv6_address_get_mask(char mask[QSC_IPINFO_IPV6_MASK_STRNLEN], const qsc_ipinfo_ipv6_address* address)
 {
+	QSC_ASSERT(mask != NULL);
 	QSC_ASSERT(address != NULL);
 
 	size_t ctr;
 
-	ctr = QSC_IPINFO_IPV6_BYTELEN;
-
-	do
+	if (mask != NULL && address != NULL)
 	{
-		--ctr;
+		ctr = QSC_IPINFO_IPV6_BYTELEN;
 
-		if (address->ipv6[ctr] == 0)
+		do
 		{
-			mask[ctr] = 'f';
-		}
-		else
-		{
-			break;
-		}
+			--ctr;
+
+			if (address->ipv6[ctr] == 0U)
+			{
+				mask[ctr] = 'f';
+			}
+			else
+			{
+				break;
+			}
+		} while (ctr != 0U);
 	}
-	while (ctr != 0);
 }
 
 uint8_t qsc_ipinfo_ipv6_address_get_cidr_mask(const qsc_ipinfo_ipv6_address* address)
@@ -967,23 +1017,26 @@ uint8_t qsc_ipinfo_ipv6_address_get_cidr_mask(const qsc_ipinfo_ipv6_address* add
 	size_t ctr;
 	uint8_t nmsk;
 
-	nmsk = 0;
-	ctr = QSC_IPINFO_IPV6_BYTELEN;
+	nmsk = 0U;
 
-	do
+	if (address != NULL)
 	{
-		--ctr;
+		ctr = QSC_IPINFO_IPV6_BYTELEN;
 
-		if (address->ipv6[ctr] == 0)
+		do
 		{
-			++nmsk;
-		}
-		else
-		{
-			break;
-		}
+			--ctr;
+
+			if (address->ipv6[ctr] == 0U)
+			{
+				++nmsk;
+			}
+			else
+			{
+				break;
+			}
+		} while (ctr != 0U);
 	}
-	while (ctr != 0);
 
 	return nmsk;
 }
@@ -1001,6 +1054,7 @@ void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_add
 
 void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address)
 {
+	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(address != NULL);
 
 	if (address != NULL && output != NULL)
@@ -1010,34 +1064,35 @@ void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], con
 
 		qsc_memutils_clear(output, QSC_IPINFO_IPV6_STRNLEN);
 
-		n = qsc_intutils_be8to16(&address->ipv6[0]);
-		qsc_arrayutils_uint16_to_hex(&output[0], 5, n);
-		output[4] = DELIM;
-		n = qsc_intutils_be8to16(&address->ipv6[2]);
-		qsc_arrayutils_uint16_to_hex(&output[5], 5, n);
-		output[9] = DELIM;
-		n = qsc_intutils_be8to16(&address->ipv6[4]);
-		qsc_arrayutils_uint16_to_hex(&output[10], 5, n);
-		output[14] = DELIM;
-		n = qsc_intutils_be8to16(&address->ipv6[6]);
-		qsc_arrayutils_uint16_to_hex(&output[15], 5, n);
-		output[19] = DELIM;
-		n = qsc_intutils_be8to16(&address->ipv6[8]);
-		qsc_arrayutils_uint16_to_hex(&output[20], 5, n);
-		output[24] = DELIM;
-		n = qsc_intutils_be8to16(&address->ipv6[10]);
-		qsc_arrayutils_uint16_to_hex(&output[25], 5, n);
-		output[29] = DELIM;
-		n = qsc_intutils_be8to16(&address->ipv6[12]);
-		qsc_arrayutils_uint16_to_hex(&output[30], 5, n);
-		output[34] = DELIM;
-		n = qsc_intutils_be8to16(&address->ipv6[14]);
-		qsc_arrayutils_uint16_to_hex(&output[35], 5, n);
+		n = qsc_intutils_be8to16(&address->ipv6[0U]);
+		qsc_arrayutils_uint16_to_hex(&output[0U], 5, n);
+		output[4U] = DELIM;
+		n = qsc_intutils_be8to16(&address->ipv6[2U]);
+		qsc_arrayutils_uint16_to_hex(&output[5U], 5U, n);
+		output[9U] = DELIM;
+		n = qsc_intutils_be8to16(&address->ipv6[4U]);
+		qsc_arrayutils_uint16_to_hex(&output[10U], 5U, n);
+		output[14U] = DELIM;
+		n = qsc_intutils_be8to16(&address->ipv6[6U]);
+		qsc_arrayutils_uint16_to_hex(&output[15U], 5U, n);
+		output[19U] = DELIM;
+		n = qsc_intutils_be8to16(&address->ipv6[8U]);
+		qsc_arrayutils_uint16_to_hex(&output[20U], 5U, n);
+		output[24U] = DELIM;
+		n = qsc_intutils_be8to16(&address->ipv6[10U]);
+		qsc_arrayutils_uint16_to_hex(&output[25U], 5U, n);
+		output[29U] = DELIM;
+		n = qsc_intutils_be8to16(&address->ipv6[12U]);
+		qsc_arrayutils_uint16_to_hex(&output[30U], 5U, n);
+		output[34U] = DELIM;
+		n = qsc_intutils_be8to16(&address->ipv6[14U]);
+		qsc_arrayutils_uint16_to_hex(&output[35U], 5U, n);
 	}
 }
 
 void qsc_ipinfo_ipv6_array_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const uint8_t* address)
 {
+	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(address != NULL);
 
 	if (address != NULL && output != NULL)
@@ -1047,28 +1102,28 @@ void qsc_ipinfo_ipv6_array_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const
 
 		qsc_memutils_clear(output, QSC_IPINFO_IPV6_STRNLEN);
 
-		n = qsc_intutils_be8to16(&address[0]);
-		qsc_arrayutils_uint16_to_hex(&output[0], 5, n);
-		output[4] = DELIM;
-		n = qsc_intutils_be8to16(&address[2]);
-		qsc_arrayutils_uint16_to_hex(&output[5], 5, n);
-		output[9] = DELIM;
-		n = qsc_intutils_be8to16(&address[4]);
-		qsc_arrayutils_uint16_to_hex(&output[10], 5, n);
-		output[14] = DELIM;
-		n = qsc_intutils_be8to16(&address[6]);
-		qsc_arrayutils_uint16_to_hex(&output[15], 5, n);
-		output[19] = DELIM;
-		n = qsc_intutils_be8to16(&address[8]);
-		qsc_arrayutils_uint16_to_hex(&output[20], 5, n);
-		output[24] = DELIM;
-		n = qsc_intutils_be8to16(&address[10]);
-		qsc_arrayutils_uint16_to_hex(&output[25], 5, n);
-		output[29] = DELIM;
-		n = qsc_intutils_be8to16(&address[12]);
-		qsc_arrayutils_uint16_to_hex(&output[30], 5, n);
-		output[34] = DELIM;
-		n = qsc_intutils_be8to16(&address[14]);
-		qsc_arrayutils_uint16_to_hex(&output[35], 5, n);
+		n = qsc_intutils_be8to16(&address[0U]);
+		qsc_arrayutils_uint16_to_hex(&output[0U], 5, n);
+		output[4U] = DELIM;
+		n = qsc_intutils_be8to16(&address[2U]);
+		qsc_arrayutils_uint16_to_hex(&output[5U], 5U, n);
+		output[9U] = DELIM;
+		n = qsc_intutils_be8to16(&address[4U]);
+		qsc_arrayutils_uint16_to_hex(&output[10U], 5U, n);
+		output[14U] = DELIM;
+		n = qsc_intutils_be8to16(&address[6U]);
+		qsc_arrayutils_uint16_to_hex(&output[15U], 5U, n);
+		output[19U] = DELIM;
+		n = qsc_intutils_be8to16(&address[8U]);
+		qsc_arrayutils_uint16_to_hex(&output[20U], 5U, n);
+		output[24U] = DELIM;
+		n = qsc_intutils_be8to16(&address[10U]);
+		qsc_arrayutils_uint16_to_hex(&output[25U], 5U, n);
+		output[29U] = DELIM;
+		n = qsc_intutils_be8to16(&address[12U]);
+		qsc_arrayutils_uint16_to_hex(&output[30U], 5U, n);
+		output[34U] = DELIM;
+		n = qsc_intutils_be8to16(&address[14U]);
+		qsc_arrayutils_uint16_to_hex(&output[35U], 5U, n);
 	}
 }

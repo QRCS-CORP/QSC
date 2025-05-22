@@ -84,6 +84,13 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_CONSOLE_MAX_LINE 128ULL
 
+
+/*! 
+ * \def QSC_CONSOLE_MAX_LINE
+ * \brief The maximum length of a console string.
+ */
+#define QSC_CONSOLE_STRING_NOT_FOUND -1L
+
 /*!
  * \enum qsc_console_font_color
  * \brief The console font color choices.

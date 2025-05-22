@@ -99,7 +99,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_QUEUE_MAX_DEPTH
  * \brief The maximum queue depth.
  */
-#define QSC_QUEUE_MAX_DEPTH 64ULL
+#define QSC_QUEUE_MAX_DEPTH 64UL
 
 /*! \struct qsc_queue_state
  * \brief Contains the queue context state.

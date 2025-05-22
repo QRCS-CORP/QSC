@@ -1,4 +1,5 @@
 #include "event.h"
+#include "async.h"
 #include "memutils.h"
 #include "stringutils.h"
 
@@ -16,31 +17,41 @@ event_state m_event_state;
 
 int32_t qsc_event_register(const char name[QSC_EVENT_NAME_SIZE], qsc_event_callback callback)
 {
+	QSC_ASSERT(name != NULL);
+    QSC_ASSERT(callback != NULL);
+
 	qsc_event_handler* hndr;
 	size_t idx;
 	int32_t res;
 
 	res = -1;
 
-	if (m_event_state.listeners == NULL)
+	if (name != NULL && callback != NULL)
 	{
-		m_event_state.lcount = 1;
-		m_event_state.listeners = (qsc_event_handler*)qsc_memutils_malloc(sizeof(qsc_event_handler));
-	}
-	else
-	{
-		++m_event_state.lcount;
-		m_event_state.listeners = (qsc_event_handler*)qsc_memutils_realloc(m_event_state.listeners, m_event_state.lcount * sizeof(qsc_event_handler));
-	}
+		qsc_mutex mtx = qsc_async_mutex_lock_ex();
 
-	idx = m_event_state.lcount - 1;
-	hndr = &m_event_state.listeners[idx];
+		if (m_event_state.listeners == NULL)
+		{
+			m_event_state.lcount = 1U;
+			m_event_state.listeners = (qsc_event_handler*)qsc_memutils_malloc(sizeof(qsc_event_handler));
+		}
+		else
+		{
+			++m_event_state.lcount;
+			m_event_state.listeners = (qsc_event_handler*)qsc_memutils_realloc(m_event_state.listeners, m_event_state.lcount * sizeof(qsc_event_handler));
+		}
 
-	if (m_event_state.listeners != NULL && hndr != NULL)
-	{
-		hndr->callback = callback;
-		qsc_memutils_copy(hndr->name, name, QSC_EVENT_NAME_SIZE);
-		res = 0;
+		idx = m_event_state.lcount - 1U;
+		hndr = &m_event_state.listeners[idx];
+
+		if (m_event_state.listeners != NULL && hndr != NULL)
+		{
+			hndr->callback = callback;
+			qsc_memutils_copy(hndr->name, name, QSC_EVENT_NAME_SIZE);
+			res = 0;
+		}
+
+		qsc_async_mutex_unlock_ex(mtx);
 	}
 
 	return res;
@@ -48,40 +59,61 @@ int32_t qsc_event_register(const char name[QSC_EVENT_NAME_SIZE], qsc_event_callb
 
 void qsc_event_clear_listener(const char name[QSC_EVENT_NAME_SIZE])
 {
-	qsc_event_handler* hndr;
+	QSC_ASSERT(name != NULL);
+	QSC_ASSERT(m_event_state.lcount <= QSC_EVENT_MAX_LISTENERS);
 
-	for (size_t i = 0U; i < m_event_state.lcount; ++i)
+	if (name != NULL && m_event_state.lcount <= QSC_EVENT_MAX_LISTENERS)
 	{
-		hndr = &m_event_state.listeners[i];
+		qsc_event_handler* hndr;
 
-		if (hndr != NULL)
+		qsc_mutex mtx = qsc_async_mutex_lock_ex();
+
+		for (size_t i = 0U; i < m_event_state.lcount; ++i)
 		{
-			if (qsc_stringutils_compare_strings(name, hndr->name, QSC_EVENT_NAME_SIZE) == true)
+			hndr = &m_event_state.listeners[i];
+
+			if (hndr != NULL)
 			{
-				qsc_memutils_clear(hndr, sizeof(qsc_event_handler));
-				break;
+				if (qsc_stringutils_compare_strings(name, hndr->name, QSC_EVENT_NAME_SIZE))
+				{
+					qsc_memutils_clear(hndr, sizeof(qsc_event_handler));
+					break;
+				}
 			}
 		}
+
+		qsc_async_mutex_unlock_ex(mtx);
 	}
 }
 
 qsc_event_callback qsc_event_get_callback(const char name[QSC_EVENT_NAME_SIZE])
 {
-	qsc_event_handler* hndr;
+	QSC_ASSERT(name != NULL);
+	QSC_ASSERT(m_event_state.lcount <= QSC_EVENT_MAX_LISTENERS);
+
 	qsc_event_callback hres = { 0U };
 
-	for (size_t i = 0U; i < m_event_state.lcount; ++i)
+	if (name != NULL && m_event_state.lcount <= QSC_EVENT_MAX_LISTENERS)
 	{
-		hndr = &m_event_state.listeners[i];
+		qsc_event_handler* hndr;
 
-		if (hndr != NULL)
+		qsc_mutex mtx = qsc_async_mutex_lock_ex();
+
+		for (size_t i = 0U; i < m_event_state.lcount; ++i)
 		{
-			if (qsc_stringutils_compare_strings(name, hndr->name, QSC_EVENT_NAME_SIZE) == true)
+			hndr = &m_event_state.listeners[i];
+
+			if (hndr != NULL)
 			{
-				hres = hndr->callback;
-				break;
+				if (qsc_stringutils_compare_strings(name, hndr->name, QSC_EVENT_NAME_SIZE) == true)
+				{
+					hres = hndr->callback;
+					break;
+				}
 			}
 		}
+
+		qsc_async_mutex_unlock_ex(mtx);
 	}
 
 	return hres;
@@ -92,8 +124,9 @@ void qsc_event_destroy_listeners()
 	if (m_event_state.listeners != NULL)
 	{
 		qsc_memutils_clear(m_event_state.listeners, m_event_state.lcount * sizeof(qsc_event_handler));
-		m_event_state.lcount = 0;
-	}
+		m_event_state.lcount = 0U;
 
-	qsc_memutils_alloc_free(m_event_state.listeners);
+		qsc_memutils_alloc_free(m_event_state.listeners);
+		m_event_state.listeners = NULL;
+	}
 }

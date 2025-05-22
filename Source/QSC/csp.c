@@ -1,4 +1,5 @@
 #include "csp.h"
+#include "memutils.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #	if defined(QSC_SYSTEM_COMPILER_MSC)
@@ -26,67 +27,22 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 
 	bool res;
 
-	res = true;
+	res = false;
 
+	if (output != NULL && length != 0U && length <= QSC_CSP_SEED_MAX)
+	{
+		res = true;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	if (BCryptGenRandom(NULL, output, (ULONG)length, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0)
-	{
-		res = false;
-	}
+		if (BCryptGenRandom(NULL, output, (ULONG)length, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0)
+		{
+			res = false;
+		}
 
 #elif defined(QSC_SYSTEM_OS_LINUX)
 
-    ssize_t pos;
-    size_t  rmd;
-    uint8_t* ptr;
-
-	rmd = length;
-	ptr = output;
-
-    while (rmd > 0U)
-    {
-        pos = getrandom(ptr, rmd, 0U);
-
-        if (pos < 0)
-        {
-            if (errno == EINTR)
-            {
-                continue;
-            }
-
-            res = false;
-            break;
-        }
-
-        ptr  += (size_t)pos;
-        rmd -= (size_t)pos;
-    }
-
-#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_APPLE)
-
-	arc4random_buf(output, length);
-
-#else
-
-	int fd;
-
-	/* fallback: read from /dev/urandom */
-
-	do
-	{
-		fd = open("/dev/urandom", O_RDONLY);
-	}
-	while ((fd < 0) && (errno == EINTR));
-
-	if (fd < 0)
-	{
-		res = false;
-	}
-	else
-	{
 		ssize_t pos;
-		size_t rmd;
+		size_t  rmd;
 		uint8_t* ptr;
 
 		rmd = length;
@@ -94,7 +50,7 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 
 		while (rmd > 0U)
 		{
-			pos = read(fd, ptr, rmd);
+			pos = getrandom(ptr, rmd, 0U);
 
 			if (pos < 0)
 			{
@@ -111,10 +67,63 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 			rmd -= (size_t)pos;
 		}
 
-		(void)close(fd);
-	}
+#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_APPLE)
+
+		arc4random_buf(output, length);
+
+#else
+
+		int fd;
+
+		/* fallback: read from /dev/urandom */
+
+		do
+		{
+			fd = open("/dev/urandom", O_RDONLY);
+		} while ((fd < 0) && (errno == EINTR));
+
+		if (fd < 0)
+		{
+			res = false;
+		}
+		else
+		{
+			ssize_t pos;
+			size_t rmd;
+			uint8_t* ptr;
+
+			rmd = length;
+			ptr = output;
+
+			while (rmd > 0U)
+			{
+				pos = read(fd, ptr, rmd);
+
+				if (pos < 0)
+				{
+					if (errno == EINTR)
+					{
+						continue;
+					}
+
+					res = false;
+					break;
+				}
+
+				ptr += (size_t)pos;
+				rmd -= (size_t)pos;
+			}
+
+			(void)close(fd);
+		}
 
 #endif
+	}
+
+	if (!res)
+	{
+		qsc_memutils_clear(output, length);
+	}
 
 	return res;
 }
@@ -124,10 +133,15 @@ uint16_t qsc_csp_uint16()
 	uint8_t arr[sizeof(uint16_t)] = { 0U };
 	uint16_t num;
 
-	qsc_csp_generate(arr, sizeof(arr));
+	num = 0;
 
-	num = (((uint16_t)arr[1U]) | 
-		(uint16_t)((uint16_t)arr[0U] << 8U));
+	if (qsc_csp_generate(arr, sizeof(arr)))
+	{
+		num = (((uint16_t)arr[1U]) |
+			(uint16_t)((uint16_t)arr[0U] << 8U));
+
+			qsc_memutils_clear(arr, sizeof(arr));
+	}
 
 	return num;
 }
@@ -137,12 +151,17 @@ uint32_t qsc_csp_uint32()
 	uint8_t arr[sizeof(uint32_t)] = { 0U };
 	uint32_t num;
 
-	qsc_csp_generate(arr, sizeof(arr));
+	num = 0;
 
-	num = (uint32_t)(arr[3U]) |
-		(((uint32_t)(arr[2U])) << 8) |
-		(((uint32_t)(arr[1U])) << 16) |
-		(((uint32_t)(arr[0U])) << 24);
+	if (qsc_csp_generate(arr, sizeof(arr)))
+	{
+		num = (uint32_t)(arr[3U]) |
+			(((uint32_t)(arr[2U])) << 8) |
+			(((uint32_t)(arr[1U])) << 16) |
+			(((uint32_t)(arr[0U])) << 24);
+
+		qsc_memutils_clear(arr, sizeof(arr));
+	}
 
 	return num;
 }
@@ -152,16 +171,21 @@ uint64_t qsc_csp_uint64()
 	uint8_t arr[sizeof(uint64_t)] = { 0U };
 	uint64_t num;
 
-	qsc_csp_generate(arr, sizeof(arr));
+	num = 0;
 
-	num = (uint64_t)(arr[7U]) |
-		(((uint64_t)(arr[6U])) << 8) |
-		(((uint64_t)(arr[5U])) << 16) |
-		(((uint64_t)(arr[4U])) << 24) |
-		(((uint64_t)(arr[3U])) << 32) |
-		(((uint64_t)(arr[2U])) << 40) |
-		(((uint64_t)(arr[1U])) << 48) |
-		(((uint64_t)(arr[0U])) << 56);
+	if (qsc_csp_generate(arr, sizeof(arr)))
+	{
+		num = (uint64_t)(arr[7U]) |
+			(((uint64_t)(arr[6U])) << 8) |
+			(((uint64_t)(arr[5U])) << 16) |
+			(((uint64_t)(arr[4U])) << 24) |
+			(((uint64_t)(arr[3U])) << 32) |
+			(((uint64_t)(arr[2U])) << 40) |
+			(((uint64_t)(arr[1U])) << 48) |
+			(((uint64_t)(arr[0U])) << 56);
+
+		qsc_memutils_clear(arr, sizeof(arr));
+	}
 
 	return num;
 }

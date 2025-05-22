@@ -1490,7 +1490,7 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
     kyber_indcpa_dec(buf, ct, sk);
 
     /* Multitarget countermeasure for coins + contributory KEM */
-    qsc_memutils_copy(((uint8_t*)buf + QSC_KYBER_SYMBYTES), (sk + QSC_KYBER_SECRETKEY_BYTES - (2 * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
+    qsc_memutils_copy((buf + QSC_KYBER_SYMBYTES), (sk + QSC_KYBER_SECRETKEY_BYTES - (2 * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
     qsc_sha3_compute512(kr, buf, 2 * QSC_KYBER_SYMBYTES);
 
     /* coins are in kr+QSC_KYBER_SYMBYTES */
@@ -1503,7 +1503,7 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
     qsc_keccak_permute(&kctx, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
-	qsc_memutils_copy(ss, (uint8_t*)kctx.state, QSC_KYBER_SYMBYTES);
+	qsc_memutils_copy(ss, (const uint8_t*)kctx.state, QSC_KYBER_SYMBYTES);
 #else
 	for (size_t i = 0U; i < QSC_KYBER_SYMBYTES / sizeof(uint64_t); ++i)
 	{

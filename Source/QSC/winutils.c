@@ -17,7 +17,7 @@
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
 #   include <iphlpapi.h>
-#if !defined(__GNUC__)
+#if defined(QSC_SYSTEM_COMPILER_MSC)
 #   pragma comment(lib, "advapi32.lib")
 #   pragma comment(lib, "IPHLPAPI.lib")
 #   pragma comment(lib, "netapi32.lib")
@@ -197,12 +197,9 @@ static uint32_t winutils_process_pid_from_name(const char* name)
                     break;
                 }
             };
-
-            if (snap != 0)
-            {
-                CloseHandle(snap);
-            }
         }
+
+        CloseHandle(snap);
     }
 
     return pid;
@@ -250,7 +247,7 @@ static void winutils_get_error_description(char* result, size_t reslen)
 
     if (err != 0)
     {
-        for (size_t i = 0U; i < sizeof(winutils_error_descriptions); ++i)
+        for (size_t i = 0U; i < (sizeof(winutils_error_descriptions) / sizeof(winutils_error_descriptions[0])); ++i)
         {
             if (err == winutils_error_descriptions[i].error)
             {
@@ -278,7 +275,7 @@ static const char* winutils_service_state_to_string(DWORD state)
 
     if (state > 0 && state <= SERVICE_PAUSED)
     {
-        ret = WINUTILS_SERVICE_STATE_STRINGS[(size_t)state - 1];
+        ret = WINUTILS_SERVICE_STATE_STRINGS[(size_t)state - 1U];
     }
 
     return ret;
@@ -287,7 +284,7 @@ static const char* winutils_service_state_to_string(DWORD state)
 size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char* path) 
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
     QSC_ASSERT(path != NULL);
 
     size_t tlen;
@@ -295,6 +292,7 @@ size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char*
 
     tlen = 0;
     attr = GetFileAttributesA(path);
+    result[0] = '\0';
 
     if (attr != INVALID_FILE_ATTRIBUTES)
     {
@@ -310,12 +308,12 @@ size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char*
 
                 dlen = strlen(winutils_attribute_descriptions[i].description);
 
-                if (tlen + dlen + (first ? 0 : 1) < reslen)
+                if (tlen + dlen + (first ? 0U : 1U) < reslen)
                 {
                     if (!first)
                     {
                         strcat_s(result, reslen, ", ");
-                        tlen += 2;
+                        tlen += 2U;
                     }
 
                     strcat_s(result, reslen, winutils_attribute_descriptions[i].description);
@@ -356,20 +354,19 @@ static void winutils_wide_to_utf8(const wchar_t *wsrc, char *dst, size_t dstlen)
 {
     if ((wsrc != NULL) && (dst != NULL) && (dstlen > 0U))
     {
-        /* returns number of bytes written, incl. NUL, or 0 on failure */
         (void)WideCharToMultiByte(
-                CP_UTF8,                /* output in UTF-8            */
-                0,                      /* default flags              */
-                wsrc, -1,               /* source wide string         */
-                dst, (int)dstlen,       /* destination buffer         */
-                NULL, NULL);            /* no default char / used flag*/
+                CP_UTF8,
+                0,
+                wsrc, -1,
+                dst, (int)dstlen,
+                NULL, NULL);
     }
 }
 
 size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
     
     char cbuf[QSC_WINTOOLS_NETSTAT_NAME_SIZE] = { 0U };
     size_t tlen;
@@ -418,12 +415,12 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
     }
 
     ufam = AF_UNSPEC;
-    ulen = 15000;
+    ulen = 15000UL;
     padd = (IP_ADAPTER_ADDRESSES*)malloc(ulen);
 
     if (padd)
     {
-        rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
+        rval = GetAdaptersAddresses(ufam, 0U, NULL, padd, &ulen);
 
         if (rval == ERROR_BUFFER_OVERFLOW)
         {
@@ -452,8 +449,8 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
             {
                 tlen += snprintf(result + tlen, reslen - tlen, "\n");
                 PIP_ADAPTER_UNICAST_ADDRESS puni = cadd->FirstUnicastAddress;
-                char fname[128] = { 0U };
-                char desc [256] = { 0U };
+                char fname[128U] = { 0U };
+                char desc [256U] = { 0U };
 
                 winutils_wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
                 winutils_wide_to_utf8(cadd->Description , desc , sizeof(desc));
@@ -552,7 +549,7 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
         tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
     }
 
-    if (tlen == 0)
+    if (tlen == 0U)
     {
         winutils_get_error_description(result, reslen);
     }
@@ -572,9 +569,9 @@ size_t qsc_winutils_process_list(char* result, size_t reslen)
     HANDLE hproc;
     size_t slen;
 
-    slen = 0;
+    slen = 0U;
 
-    if (result != NULL || reslen != 0)
+    if (result != NULL && reslen != 0U)
     {
         hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
@@ -604,7 +601,7 @@ size_t qsc_winutils_process_list(char* result, size_t reslen)
                         CloseHandle(hproc);
                     }
 
-                    if (strlen(pdesc) < 2)
+                    if (strlen(pdesc) < 2U)
                     {
                         strncpy_s(pdesc, sizeof(pdesc), "[System Process]", _TRUNCATE);
                     }
@@ -632,7 +629,7 @@ size_t qsc_winutils_process_list(char* result, size_t reslen)
         }
     }
 
-    if (slen == 0)
+    if (slen == 0U)
     {
         winutils_get_error_description(result, reslen);
     }
@@ -655,10 +652,11 @@ bool qsc_winutils_process_token_elevate()
     
     if (status == TRUE)
     {
-        if (LookupPrivilegeValue(NULL, SE_CHANGE_NOTIFY_NAME, &luid) == true) //SeChangeNotifyPrivilegeSE_DEBUG_NAME
+        if (LookupPrivilegeValue(NULL, SE_CHANGE_NOTIFY_NAME, &luid) == true)
         {
             tpriv.PrivilegeCount = 1;
             tpriv.Privileges[0].Luid = luid;
+            tpriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
             if (AdjustTokenPrivileges(htok, FALSE, &tpriv, sizeof(TOKEN_PRIVILEGES), (PTOKEN_PRIVILEGES)NULL, (PDWORD)NULL) == true)
             {
@@ -668,6 +666,8 @@ bool qsc_winutils_process_token_elevate()
             {
                 printf("AdjustTokenPrivileges error: %lu\n", GetLastError());
             }
+            
+            CloseHandle(htok);
         }
     }
     
@@ -686,7 +686,7 @@ bool qsc_winutils_process_terminate(const char* name)
     res = false;
     pid = winutils_process_pid_from_name(name);
 
-    if (pid != 0)
+    if (pid != 0U)
     {
         hproc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, false, pid);
 
@@ -694,7 +694,9 @@ bool qsc_winutils_process_terminate(const char* name)
         {
             if (GetExitCodeProcess(hproc, &dwexit) == true)
             {
-                res = TerminateProcess(hproc, dwexit);
+                DWORD ecode = 1U;
+
+                res = TerminateProcess(hproc, ecode);
             }
 
             CloseHandle(hproc);
@@ -760,16 +762,16 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
                     BYTE* bval;
 
                     slen = strlen(value);
-                    bval = (BYTE*)malloc(slen / 2);
+                    bval = (BYTE*)malloc(slen / 2U);
 
                     if (bval != NULL)
                     {
-                        for (size_t i = 0U; i < slen / 2; ++i)
+                        for (size_t i = 0U; i < slen / 2U; ++i)
                         {
                             sscanf_s(value + 2 * i, "%2hhx", &bval[i]);
                         }
 
-                        lres = RegSetValueExA(hkey, NULL, 0, REG_BINARY, bval, (DWORD)(slen / 2));
+                        lres = RegSetValueExA(hkey, NULL, 0, REG_BINARY, bval, (DWORD)(slen / 2U));
                         free(bval);
                     }
 
@@ -835,7 +837,8 @@ size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* k
 
     ct = NULL;
     ctr = 0;
-    tlen = 0;
+    tlen = 0U;
+    result[0] = '\0';
 
     strncpy_s(lpath, sizeof(lpath), keypath, strlen(keypath));
     root = strtok_s(lpath, "\\", &ct);
@@ -885,7 +888,7 @@ size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* k
         }
     }
     
-    if (tlen == 0)
+    if (tlen == 0U)
     {
         winutils_get_error_description(result, reslen);
     }
@@ -907,6 +910,7 @@ bool qsc_winutils_run_executable(const char* expath)
     if (hres == S_OK)
     {
         pret = ShellExecuteA(GetDesktopWindow(), "open", expath, NULL, NULL, SW_SHOW);
+        CoUninitialize();
         res = ((INT_PTR)pret > 32);
     }
 
@@ -916,7 +920,7 @@ bool qsc_winutils_run_executable(const char* expath)
 bool qsc_winutils_run_as_user(const char* user, const char* password, const char* expath)
 {
     QSC_ASSERT(user != NULL);
-    QSC_ASSERT(password != 0);
+    QSC_ASSERT(password != NULL);
     QSC_ASSERT(expath != NULL);
 
     STARTUPINFOW si = { 0U };
@@ -1016,7 +1020,7 @@ bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states es
 size_t qsc_winutils_service_list(char* result, size_t reslen) 
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
     
     SC_HANDLE sch = { 0U };
     ENUM_SERVICE_STATUS_PROCESS* pinfo;
@@ -1031,7 +1035,8 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
     dret = 0;
     hres = 0;
     llen = 0;
-    tlen = 0;
+    tlen = 0U;
+    result[0] = '\0';
 
     sch = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
 
@@ -1061,7 +1066,7 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
                     &hres,
                     NULL);
 
-                if (pinfo && res == true)
+                if (pinfo && res == true || (!res && GetLastError() == ERROR_MORE_DATA))
                 {
                     for (DWORD i = 0; i < dret; i++)
                     {
@@ -1099,7 +1104,6 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
                         snprintf(sbuf, sizeof(sbuf), "%s\t%s\n", pinfo[i].lpServiceName, pstr);
 #   endif
 #endif
-
                         elen = strlen(sbuf);
 
                         if (tlen + elen > reslen)
@@ -1119,7 +1123,7 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
         CloseServiceHandle(sch);
     }
     
-    if (tlen == 0)
+    if (tlen == 0U)
     {
         winutils_get_error_description(result, reslen);
     }
@@ -1139,7 +1143,7 @@ size_t qsc_winutils_service_list_size()
     dexp = 0;
     dret = 0;
     hres = 0;
-    tlen = 0;
+    tlen = 0U;
     res = false;
 
     sch = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
@@ -1164,7 +1168,7 @@ size_t qsc_winutils_service_list_size()
 
         if (res == true)
         {
-            tlen = (size_t)dexp + (dret * 12) + 1;
+            tlen = (size_t)dexp + (dret * 12U) + 1U;
         }
 
         CloseServiceHandle(sch);
@@ -1215,7 +1219,7 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
 
             for (pctr = 0; (pctr < derd) && (tlen < reslen); ++pctr) 
             {
-                char uname[UNLEN + 1] = { 0U };
+                char uname[UNLEN + 1U] = { 0U };
                 size_t nlen;
                 size_t olen;
 
@@ -1259,23 +1263,23 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
 size_t qsc_winutils_current_user(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
     
-    char uname[UNLEN + 1] = { 0U };
+    char uname[UNLEN + 1U] = { 0U };
     size_t tlen;
     DWORD ulen;
 
-    tlen = 0;
+    tlen = 0U;
     ulen = UNLEN + 1;
     
     if (GetUserNameA(uname, &ulen) == true)
     {
         USER_INFO_1* uinfo = { 0U };
-        wchar_t wuser[UNLEN + 1] = { 0U };
+        wchar_t wuser[UNLEN + 1U] = { 0U };
         NET_API_STATUS stat;
         size_t olen;
 
-        olen = 0;
+        olen = 0U;
         mbstowcs_s(&olen, wuser, ulen, uname, sizeof(uname));
         stat = NetUserGetInfo(NULL, wuser, 1, (LPBYTE*)&uinfo);
 
@@ -1298,12 +1302,12 @@ size_t qsc_winutils_current_user(char* result, size_t reslen)
         }
     }
     
-    if (tlen == 0)
+    if (tlen == 0U)
     {
         winutils_get_error_description(result, reslen);
     }
 
-    return (tlen > 0);
+    return tlen;
 }
 
 #if defined(QSC_DEBUG_MODE)
@@ -1324,7 +1328,7 @@ void qsc_winutils_test()
 
     if (fp != NULL)
     {
-        qsc_fileutils_write(msg, sizeof(msg), 0, fp);
+        qsc_fileutils_write(msg, sizeof(msg), 0U, fp);
         qsc_fileutils_close(fp);
         qsc_consoleutils_print_line("Created a test file.");
 
@@ -1339,7 +1343,7 @@ void qsc_winutils_test()
 
         rlen = qsc_winutils_file_get_attributes(sbuf, sizeof(sbuf), path);
 
-        if (rlen > 0)
+        if (rlen > 0U)
         {
             qsc_consoleutils_print_safe("file attributes: ");
             qsc_consoleutils_print_line(sbuf);
@@ -1363,7 +1367,7 @@ void qsc_winutils_test()
 
     rlen = qsc_winutils_network_statistics(sbuf, sizeof(sbuf));
 
-    if (rlen > 0)
+    if (rlen > 0U)
     {
         qsc_consoleutils_print_line(sbuf);
     }
@@ -1495,7 +1499,7 @@ void qsc_winutils_test()
 
     rlen = qsc_winutils_user_list(sbuf, sizeof(sbuf));
 
-    if (rlen > 0)
+    if (rlen > 0U)
     {
         qsc_consoleutils_print_line(sbuf);
     }
@@ -1508,7 +1512,7 @@ void qsc_winutils_test()
 
     rlen = qsc_winutils_current_user(sbuf, sizeof(sbuf));
 
-    if (rlen > 0)
+    if (rlen > 0U)
     {
         qsc_consoleutils_print_line(sbuf);
     }

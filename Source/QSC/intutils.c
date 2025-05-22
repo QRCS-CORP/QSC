@@ -28,14 +28,14 @@ void qsc_intutils_be8increment(uint8_t* output, size_t otplen)
 
 	size_t i = otplen;
 
-	if (otplen > 0)
+	if (otplen > 0U)
 	{
 		do
 		{
 			--i;
 			++output[i];
 		} 
-		while (i != 0 && output[i] == 0);
+		while (i != 0U && output[i] == 0U);
 	}
 }
 
@@ -43,64 +43,64 @@ uint16_t qsc_intutils_be8to16(const uint8_t* input)
 {
 	QSC_ASSERT(input != NULL);
 
-	return (((uint16_t)input[1]) | 
-		(uint16_t)((uint16_t)input[0] << 8U));
+	return (((uint16_t)input[1U]) | 
+		(uint16_t)((uint16_t)input[0U] << 8));
 }
 
 uint32_t qsc_intutils_be8to32(const uint8_t* input)
 {
 	QSC_ASSERT(input != NULL);
 
-	return (uint32_t)(input[3]) |
-		(((uint32_t)(input[2])) << 8) |
-		(((uint32_t)(input[1])) << 16) |
-		(((uint32_t)(input[0])) << 24);
+	return (uint32_t)(input[3U]) |
+		(((uint32_t)(input[2U])) << 8) |
+		(((uint32_t)(input[1U])) << 16) |
+		(((uint32_t)(input[0U])) << 24);
 }
 
 uint64_t qsc_intutils_be8to64(const uint8_t* input)
 {
 	QSC_ASSERT(input != NULL);
 
-	return (uint64_t)(input[7]) |
-		(((uint64_t)(input[6])) << 8) |
-		(((uint64_t)(input[5])) << 16) |
-		(((uint64_t)(input[4])) << 24) |
-		(((uint64_t)(input[3])) << 32) |
-		(((uint64_t)(input[2])) << 40) |
-		(((uint64_t)(input[1])) << 48) |
-		(((uint64_t)(input[0])) << 56);
+	return (uint64_t)(input[7U]) |
+		(((uint64_t)(input[6U])) << 8U) |
+		(((uint64_t)(input[5U])) << 16U) |
+		(((uint64_t)(input[4U])) << 24U) |
+		(((uint64_t)(input[3U])) << 32U) |
+		(((uint64_t)(input[2U])) << 40U) |
+		(((uint64_t)(input[1U])) << 48U) |
+		(((uint64_t)(input[0U])) << 56U);
 }
 
 void qsc_intutils_be16to8(uint8_t* output, uint16_t value)
 {
 	QSC_ASSERT(output != NULL);
 
-	output[1] = (uint8_t)value & 0xFFU;
-	output[0] = (uint8_t)(value >> 8) & 0xFFU;
+	output[1U] = (uint8_t)value & 0xFFU;
+	output[0U] = (uint8_t)(value >> 8) & 0xFFU;
 }
 
 void qsc_intutils_be32to8(uint8_t* output, uint32_t value)
 {
 	QSC_ASSERT(output != NULL);
 
-	output[3] = (uint8_t)value & 0xFFU;
-	output[2] = (uint8_t)(value >> 8) & 0xFFU;
-	output[1] = (uint8_t)(value >> 16) & 0xFFU;
-	output[0] = (uint8_t)(value >> 24) & 0xFFU;
+	output[3U] = (uint8_t)value & 0xFFU;
+	output[2U] = (uint8_t)(value >> 8) & 0xFFU;
+	output[1U] = (uint8_t)(value >> 16) & 0xFFU;
+	output[0U] = (uint8_t)(value >> 24) & 0xFFU;
 }
 
 void qsc_intutils_be64to8(uint8_t* output, uint64_t value)
 {
 	QSC_ASSERT(output != NULL);
 
-	output[7] = (uint8_t)value & 0xFFU;
-	output[6] = (uint8_t)(value >> 8) & 0xFFU;
-	output[5] = (uint8_t)(value >> 16) & 0xFFU;
-	output[4] = (uint8_t)(value >> 24) & 0xFFU;
-	output[3] = (uint8_t)(value >> 32) & 0xFFU;
-	output[2] = (uint8_t)(value >> 40) & 0xFFU;
-	output[1] = (uint8_t)(value >> 48) & 0xFFU;
-	output[0] = (uint8_t)(value >> 56) & 0xFFU;
+	output[7U] = (uint8_t)value & 0xFFU;
+	output[6U] = (uint8_t)(value >> 8) & 0xFFU;
+	output[5U] = (uint8_t)(value >> 16) & 0xFFU;
+	output[4U] = (uint8_t)(value >> 24) & 0xFFU;
+	output[3U] = (uint8_t)(value >> 32) & 0xFFU;
+	output[2U] = (uint8_t)(value >> 40) & 0xFFU;
+	output[1U] = (uint8_t)(value >> 48) & 0xFFU;
+	output[0U] = (uint8_t)(value >> 56) & 0xFFU;
 }
 
 uint64_t qsc_intutils_bit_reverse_u64(uint64_t x)
@@ -117,10 +117,10 @@ uint64_t qsc_intutils_bit_reverse_u64(uint64_t x)
 
 uint32_t qsc_intutils_bit_reverse_u32(uint32_t x) 
 {
-    x = ((x >> 1) & 0x55555555) | ((x & 0x55555555) << 1);
-    x = ((x >> 2) & 0x33333333) | ((x & 0x33333333) << 2);
-    x = ((x >> 4) & 0x0F0F0F0F) | ((x & 0x0F0F0F0F) << 4);
-    x = ((x >> 8) & 0x00FF00FF) | ((x & 0x00FF00FF) << 8);
+    x = ((x >> 1) & 0x55555555UL) | ((x & 0x55555555UL) << 1);
+    x = ((x >> 2) & 0x33333333UL) | ((x & 0x33333333UL) << 2);
+    x = ((x >> 4) & 0x0F0F0F0FUL) | ((x & 0x0F0F0F0FUL) << 4);
+    x = ((x >> 8) & 0x00FF00FFUL) | ((x & 0x00FF00FFUL) << 8);
     x = (x >> 16) | (x << 16);
 
     return x;
@@ -128,9 +128,9 @@ uint32_t qsc_intutils_bit_reverse_u32(uint32_t x)
 
 uint16_t qsc_intutils_bit_reverse_u16(uint16_t x) 
 {
-    x = ((x >> 1) & 0x5555) | ((x & 0x5555) << 1);
-    x = ((x >> 2) & 0x3333) | ((x & 0x3333) << 2);
-    x = ((x >> 4) & 0x0F0F) | ((x & 0x0F0F) << 4);
+    x = ((x >> 1) & 0x5555U) | ((x & 0x5555U) << 1);
+    x = ((x >> 2) & 0x3333U) | ((x & 0x3333U) << 2);
+    x = ((x >> 4) & 0x0F0FU) | ((x & 0x0F0FU) << 4);
     x = (x >> 8) | (x << 8);
 
     return x;
@@ -140,7 +140,7 @@ size_t qsc_intutils_bit_reverse(size_t x, uint32_t bits)
 {
     size_t y = 0;
 
-    for (size_t i = 0U; i < bits; ++i) 
+    for (size_t i = 0U; i < (size_t)bits; ++i) 
     {
         y = (y << 1) | (x & 1);
         x >>= 1;
@@ -204,7 +204,7 @@ double qsc_intutils_calculate_exp(double x)
     {
         /* construct positive infinity by setting the IEEE-754 bit pattern */
         bits = 0x7FF0000000000000ULL;
-        qsc_memutils_copy(&result, &bits, sizeof(result));
+        qsc_memutils_copy((uint8_t*)&result, (const uint8_t*)&bits, sizeof(result));
     }
     else if (x < -745.133219101941)
     {
@@ -402,7 +402,7 @@ void qsc_intutils_clear8(uint8_t* a, size_t count)
 	
 	for (size_t i = 0U; i < count; ++i)
 	{
-		a[i] = 0;
+		a[i] = 0U;
 	}
 }
 
@@ -412,7 +412,7 @@ void qsc_intutils_clear16(uint16_t* a, size_t count)
 
 	for (size_t i = 0U; i < count; ++i)
 	{
-		a[i] = 0;
+		a[i] = 0U;
 	}
 }
 
@@ -422,7 +422,7 @@ void qsc_intutils_clear32(uint32_t* a, size_t count)
 
 	for (size_t i = 0U; i < count; ++i)
 	{
-		a[i] = 0;
+		a[i] = 0U;
 	}
 }
 
@@ -432,7 +432,7 @@ void qsc_intutils_clear64(uint64_t* a, size_t count)
 
 	for (size_t i = 0U; i < count; ++i)
 	{
-		a[i] = 0;
+		a[i] = 0U;
 	}
 }
 
@@ -451,7 +451,7 @@ void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint
   __asm__("" : "+dest"(cond) : /* no inputs */);
 #endif
 
-	cond = ~cond + 1;
+	cond = ~cond + 1U;
 
 	for (size_t i = 0U; i < length; i++)
 	{
@@ -466,25 +466,25 @@ size_t qsc_intutils_expand_mask(size_t x)
 	r = x;
 
 	/* fold r down to a single bit */
-	for (size_t i = 1; i != sizeof(size_t) * 8; i *= 2)
+	for (size_t i = 1U; i != sizeof(size_t) * 8U; i *= 2U)
 	{
 		r |= r >> i;
 	}
 
 	r &= 1;
-	r = ~(r - 1);
+	r = ~(r - 1U);
 
 	return r;
 }
 
 bool qsc_intutils_are_equal(size_t x, size_t y)
 {
-	return (bool)((x ^ y) == 0);
+	return ((x ^ y) == 0U);
 }
 
 bool qsc_intutils_is_gte(size_t x, size_t y)
 {
-	return (bool)(x >= y);
+	return (x >= y);
 }
 
 void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t inplen)
@@ -492,9 +492,9 @@ void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t inplen)
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(hexstr != NULL);
 
-	const uint8_t ENCODING_TABLE[16] =
+	const uint8_t ENCODING_TABLE[16U] =
 	{
-		0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66
+		0x30U, 0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U, 0x61U, 0x62U, 0x63U, 0x64U, 0x65U, 0x66U
 	};
 
 	size_t ctr;
@@ -507,7 +507,7 @@ void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t inplen)
 		vct = input[i];
 		hexstr[ctr] = ENCODING_TABLE[vct >> 4];
 		++ctr;
-		hexstr[ctr] = ENCODING_TABLE[vct & 0x0F];
+		hexstr[ctr] = ENCODING_TABLE[vct & 0x0FU];
 		++ctr;
 	}
 }
@@ -522,19 +522,19 @@ void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t outlen)
 
 	const uint8_t hashmap[] =
 	{
-		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-		0x08, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U,
+		0x08U, 0x09U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+		0x00U, 0x0AU, 0x0BU, 0x0CU, 0x0DU, 0x0EU, 0x0FU, 0x00U,
+		0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
 	};
 
 	qsc_memutils_clear(output, outlen);
 
-	for (size_t pos = 0; pos < (outlen * 2); pos += 2)
+	for (size_t pos = 0U; pos < (outlen * 2U); pos += 2U)
 	{
 		idx0 = ((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U;
-		idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
-		output[pos / 2] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
+		idx1 = ((uint8_t)hexstr[pos + 1U] & 0x1FU) ^ 0x10U;
+		output[pos / 2U] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
 	}
 }
 
@@ -544,13 +544,13 @@ void qsc_intutils_le8increment(uint8_t* output, size_t otplen)
 
 	size_t i;
 
-	i = 0;
+	i = 0U;
 
 	while (i < otplen)
 	{
 		++output[i];
 
-		if (output[i] != 0)
+		if (output[i] != 0U)
 		{
 			break;
 		}
@@ -581,64 +581,64 @@ uint16_t qsc_intutils_le8to16(const uint8_t* input)
 {
 	QSC_ASSERT(input != NULL);
 
-	return (((uint16_t)input[0]) |
-		(uint16_t)((uint16_t)input[1] << 8U));
+	return (((uint16_t)input[0U]) |
+		(uint16_t)((uint16_t)input[1U] << 8U));
 }
 
 uint32_t qsc_intutils_le8to32(const uint8_t* input)
 {
 	QSC_ASSERT(input != NULL);
 
-	return ((uint32_t)input[0]) |
-		((uint32_t)input[1] << 8) |
-		((uint32_t)input[2] << 16) |
-		((uint32_t)input[3] << 24);
+	return ((uint32_t)input[0U]) |
+		((uint32_t)input[1U] << 8) |
+		((uint32_t)input[2U] << 16) |
+		((uint32_t)input[3U] << 24);
 }
 
 uint64_t qsc_intutils_le8to64(const uint8_t* input)
 {
 	QSC_ASSERT(input != NULL);
 
-	return ((uint64_t)input[0]) |
-		((uint64_t)input[1] << 8) |
-		((uint64_t)input[2] << 16) |
-		((uint64_t)input[3] << 24) |
-		((uint64_t)input[4] << 32) |
-		((uint64_t)input[5] << 40) |
-		((uint64_t)input[6] << 48) |
-		((uint64_t)input[7] << 56);
+	return ((uint64_t)input[0U]) |
+		((uint64_t)input[1U] << 8) |
+		((uint64_t)input[2U] << 16) |
+		((uint64_t)input[3U] << 24) |
+		((uint64_t)input[4U] << 32) |
+		((uint64_t)input[5U] << 40) |
+		((uint64_t)input[6U] << 48) |
+		((uint64_t)input[7U] << 56);
 }
 
 void qsc_intutils_le16to8(uint8_t* output, uint16_t value)
 {
 	QSC_ASSERT(output != NULL);
 
-	output[0] = (uint8_t)value & 0xFFU;
-	output[1] = (uint8_t)(value >> 8) & 0xFFU;
+	output[0U] = (uint8_t)value & 0xFFU;
+	output[1U] = (uint8_t)(value >> 8) & 0xFFU;
 }
 
 void qsc_intutils_le32to8(uint8_t* output, uint32_t value)
 {
 	QSC_ASSERT(output != NULL);
 
-	output[0] = (uint8_t)value & 0xFFU;
-	output[1] = (uint8_t)(value >> 8) & 0xFFU;
-	output[2] = (uint8_t)(value >> 16) & 0xFFU;
-	output[3] = (uint8_t)(value >> 24) & 0xFFU;
+	output[0U] = (uint8_t)value & 0xFFU;
+	output[1U] = (uint8_t)(value >> 8) & 0xFFU;
+	output[2U] = (uint8_t)(value >> 16) & 0xFFU;
+	output[3U] = (uint8_t)(value >> 24) & 0xFFU;
 }
 
 void qsc_intutils_le64to8(uint8_t* output, uint64_t value)
 {
 	QSC_ASSERT(output != NULL);
 
-	output[0] = (uint8_t)value & 0xFFU;
-	output[1] = (uint8_t)(value >> 8) & 0xFFU;
-	output[2] = (uint8_t)(value >> 16) & 0xFFU;
-	output[3] = (uint8_t)(value >> 24) & 0xFFU;
-	output[4] = (uint8_t)(value >> 32) & 0xFFU;
-	output[5] = (uint8_t)(value >> 40) & 0xFFU;
-	output[6] = (uint8_t)(value >> 48) & 0xFFU;
-	output[7] = (uint8_t)(value >> 56) & 0xFFU;
+	output[0U] = (uint8_t)value & 0xFFU;
+	output[1U] = (uint8_t)(value >> 8) & 0xFFU;
+	output[2U] = (uint8_t)(value >> 16) & 0xFFU;
+	output[3U] = (uint8_t)(value >> 24) & 0xFFU;
+	output[4U] = (uint8_t)(value >> 32) & 0xFFU;
+	output[5U] = (uint8_t)(value >> 40) & 0xFFU;
+	output[6U] = (uint8_t)(value >> 48) & 0xFFU;
+	output[7U] = (uint8_t)(value >> 56) & 0xFFU;
 }
 
 size_t qsc_intutils_max(size_t a, size_t b)
@@ -653,10 +653,10 @@ size_t qsc_intutils_min(size_t a, size_t b)
 
 uint32_t qsc_intutils_popcount32(uint32_t v)
 {
-	v = v - ((v >> 1) & 0x55555555);
-	v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
+	v = v - ((v >> 1) & 0x55555555UL);
+	v = (v & 0x33333333UL) + ((v >> 2) & 0x33333333UL);
 
-	return (uint32_t)((v + ((v >> 4) & 0xF0F0F0F)) * 0x1010101) >> 24;
+	return (uint32_t)((v + ((v >> 4) & 0xF0F0F0FUL)) * 0x1010101UL) >> 24;
 }
 
 #if defined(QSC_SYSTEM_HAS_AVX)
@@ -689,22 +689,22 @@ void qsc_intutils_reverse_bytes_x512(const __m512i* input, __m512i* output)
 
 uint32_t qsc_intutils_rotl32(uint32_t value, size_t shift)
 {
-	return (value << shift) | (value >> ((sizeof(uint32_t) * 8) - shift));
+	return (value << shift) | (value >> ((sizeof(uint32_t) * 8U) - shift));
 }
 
 uint64_t qsc_intutils_rotl64(uint64_t value, size_t shift)
 {
-	return (value << shift) | (value >> ((sizeof(uint64_t) * 8) - shift));
+	return (value << shift) | (value >> ((sizeof(uint64_t) * 8U) - shift));
 }
 
 uint32_t qsc_intutils_rotr32(uint32_t value, size_t shift)
 {
-	return (value >> shift) | (value << ((sizeof(uint32_t) * 8) - shift));
+	return (value >> shift) | (value << ((sizeof(uint32_t) * 8U) - shift));
 }
 
 uint64_t qsc_intutils_rotr64(uint64_t value, size_t shift)
 {
-	return (value >> shift) | (value << ((sizeof(uint64_t) * 8) - shift));
+	return (value >> shift) | (value << ((sizeof(uint64_t) * 8U) - shift));
 }
 
 int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length)
@@ -714,7 +714,7 @@ int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length)
 
 	uint8_t d;
 
-	d = 0;
+	d = 0U;
 
 	for (size_t i = 0U; i < length; ++i)
 	{

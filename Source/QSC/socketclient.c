@@ -5,7 +5,7 @@
 
 qsc_socket_address_families qsc_socket_client_address_family(const qsc_socket* sock)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	qsc_socket_address_families res;
 
@@ -21,7 +21,7 @@ qsc_socket_address_families qsc_socket_client_address_family(const qsc_socket* s
 
 qsc_socket_protocols qsc_socket_client_socket_protocol(const qsc_socket* sock)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	qsc_socket_protocols res;
 
@@ -37,7 +37,7 @@ qsc_socket_protocols qsc_socket_client_socket_protocol(const qsc_socket* sock)
 
 qsc_socket_transports qsc_socket_client_socket_transport(const qsc_socket* sock)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	qsc_socket_transports res;
 
@@ -53,9 +53,9 @@ qsc_socket_transports qsc_socket_client_socket_transport(const qsc_socket* sock)
 
 qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const char* host, const char* service)
 {
-	assert(sock != NULL);
-	assert(host != NULL);
-	assert(service != NULL);
+	QSC_ASSERT(sock != NULL);
+	QSC_ASSERT(host != NULL);
+	QSC_ASSERT(service != NULL);
 
 	qsc_socket_exceptions res;
 
@@ -65,14 +65,14 @@ qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const cha
 	{
 		if (sock->address_family == qsc_socket_address_family_ipv4)
 		{
-			qsc_ipinfo_ipv4_info info = { 0 };
+			qsc_ipinfo_ipv4_info info = { 0U };
 
 			qsc_netutils_get_ipv4_info(&info, host, service);
 			res = qsc_socket_client_connect_ipv4(sock, &info.address, info.port);
 		}
 		else
 		{
-			qsc_ipinfo_ipv6_info info = { 0 };
+			qsc_ipinfo_ipv6_info info = { 0U };
 			
 			qsc_netutils_get_ipv6_info(&info, host, service);
 			res = qsc_socket_client_connect_ipv6(sock, &info.address, info.port);
@@ -84,8 +84,8 @@ qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const cha
 
 qsc_socket_exceptions qsc_socket_client_connect_ipv4(qsc_socket* sock, const qsc_ipinfo_ipv4_address* address, uint16_t port)
 {
-	assert(sock != NULL);
-	assert(address != NULL);
+	QSC_ASSERT(sock != NULL);
+	QSC_ASSERT(address != NULL);
 
 	qsc_socket_exceptions res;
 
@@ -108,8 +108,8 @@ qsc_socket_exceptions qsc_socket_client_connect_ipv4(qsc_socket* sock, const qsc
 
 qsc_socket_exceptions qsc_socket_client_connect_ipv6(qsc_socket* sock, const qsc_ipinfo_ipv6_address* address, uint16_t port)
 {
-	assert(sock != NULL);
-	assert(address != NULL);
+	QSC_ASSERT(sock != NULL);
+	QSC_ASSERT(address != NULL);
 
 	qsc_socket_exceptions res;
 
@@ -132,16 +132,16 @@ qsc_socket_exceptions qsc_socket_client_connect_ipv6(qsc_socket* sock, const qsc
 
 void qsc_socket_client_initialize(qsc_socket* sock)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	if (sock != NULL)
 	{
 		qsc_socket_start_sockets();
 
 		sock->connection = QSC_UNINITIALIZED_SOCKET;
-		qsc_memutils_clear((char*)sock->address, sizeof(sock->address));
-		sock->instance = 0;
-		sock->port = 0;
+		qsc_memutils_clear(sock->address, sizeof(sock->address));
+		sock->instance = 0U;
+		sock->port = 0U;
 		sock->address_family = qsc_socket_address_family_none;
 		sock->connection_status = qsc_socket_state_none;
 		sock->socket_protocol = qsc_socket_protocol_none;
@@ -151,12 +151,12 @@ void qsc_socket_client_initialize(qsc_socket* sock)
 
 size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t otplen, qsc_socket_receive_flags flag)
 {
-	assert(sock != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(sock != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t res;
 
-	res = 0;
+	res = 0U;
 
 	if (sock != NULL && output != NULL)
 	{
@@ -168,13 +168,13 @@ size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t ot
 
 size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t otplen, qsc_socket_receive_flags flag)
 {
-	assert(sock != NULL);
-	assert(address != NULL);
-	assert(output != NULL);
+	QSC_ASSERT(sock != NULL);
+	QSC_ASSERT(address != NULL);
+	QSC_ASSERT(output != NULL);
 
 	size_t res;
 
-	res = 0;
+	res = 0U;
 
 	if (sock != NULL && output != NULL)
 	{
@@ -186,11 +186,11 @@ size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t 
 
 size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t inlen, qsc_socket_send_flags flag)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	size_t res;
 
-	res = 0;
+	res = 0U;
 
 	if (sock != NULL)
 	{
@@ -202,13 +202,13 @@ size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t 
 
 size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, uint16_t port, const char* input, size_t inlen, qsc_socket_send_flags flag)
 {
-	assert(sock != NULL);
-	assert(address != NULL);
-	assert(input != NULL);
+	QSC_ASSERT(sock != NULL);
+	QSC_ASSERT(address != NULL);
+	QSC_ASSERT(input != NULL);
 
 	size_t res;
 
-	res = 0;
+	res = 0U;
 
 	if (sock != NULL && address != NULL && input != NULL)
 	{
@@ -220,7 +220,7 @@ size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, ui
 
 void qsc_socket_client_shut_down(qsc_socket* sock)
 {
-	assert(sock != NULL);
+	QSC_ASSERT(sock != NULL);
 
 	if (sock != NULL && sock->connection_status == qsc_socket_state_connected)
 	{

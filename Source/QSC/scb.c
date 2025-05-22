@@ -11,6 +11,7 @@ static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 {
 	QSC_ASSERT(indice != NULL);
     QSC_ASSERT(count != 0U);
+
 	/* Calculates an indice that is always l2 cache-size distance between consecutive memory address indices.
 	   The number of lanes varies based on memcost, which is a multiple of MiB.
 	   A setting of 1 MiB will create 4 lanes, 2 MiB 8 lanes, 10 MiB is 40 lanes, etc. */
@@ -91,6 +92,7 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 
 		qsc_keccak_dispose(&kstate);
 		qsc_memutils_alloc_free(indice);
+		indice = NULL;
 	}
 }
 
@@ -184,6 +186,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 
 			qsc_memutils_clear(cbuf, clen);
 			qsc_memutils_alloc_free(cbuf);
+			cbuf = NULL;
 			pos = 0U;
 
 			/* initialize SHAKE with the derived key */
@@ -209,13 +212,17 @@ void qsc_scb_update(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(seed != NULL);
+	QSC_ASSERT(seedlen != 0);
 
-	qsc_keccak_state kstate = { 0U };
+	if (ctx != NULL && seed != NULL && seedlen != 0)
+	{
+		qsc_keccak_state kstate = { 0U };
 
-	/* absorb and permute */
-	qsc_sha3_initialize(&kstate);
-	qsc_sha3_update(&kstate, ctx->rate, ctx->ckey, ctx->klen);
-	qsc_sha3_update(&kstate, ctx->rate, seed, seedlen);
-	qsc_sha3_finalize(&kstate, ctx->rate, ctx->ckey);
-	qsc_keccak_dispose(&kstate);
+		/* absorb and permute */
+		qsc_sha3_initialize(&kstate);
+		qsc_sha3_update(&kstate, ctx->rate, ctx->ckey, ctx->klen);
+		qsc_sha3_update(&kstate, ctx->rate, seed, seedlen);
+		qsc_sha3_finalize(&kstate, ctx->rate, ctx->ckey);
+		qsc_keccak_dispose(&kstate);
+	}
 }

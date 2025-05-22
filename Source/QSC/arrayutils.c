@@ -12,14 +12,14 @@ size_t qsc_arrayutils_find_string(const char* str, size_t slen, const char* toke
 
     res = 0U;
 
-    if (str != NULL && slen > 0 && token != NULL)
+    if (str != NULL && slen > 0U && token != NULL)
     {
-        res = (size_t)QSC_ARRAYTILS_NPOS;
+        res = (size_t)QSC_ARRAYUTILS_NPOS;
         fnd = strstr(str, token);
 
         if (fnd != NULL)
         {
-            res = slen - strlen(fnd);
+            res = (size_t)(fnd - str) + 1U;
         }
     }
 
@@ -40,7 +40,7 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
 
     if (str != NULL && slen > 1)
     {
-        c = str[0];
+        c = str[0U];
 
         if ((c >= '0') && (c <= '9'))
         {
@@ -56,10 +56,10 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
         }
         else
         {
-            hi = 0;
+            hi = 0U;
         }
 
-        c = str[1];
+        c = str[1U];
 
         if ((c >= '0') && (c <= '9'))
         {
@@ -75,7 +75,7 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
         }
         else
         {
-            lo = 0;
+            lo = 0U;
         }
 
         res = (uint8_t)((hi << 4U) | lo);
@@ -92,9 +92,9 @@ void qsc_arrayutils_uint8_to_hex(char* output, size_t otplen, uint8_t value)
     {
         static const char hexmap[] = "0123456789abcdef";
 
-        output[0] = hexmap[(value >> 4U) & 0xFU];
-        output[1] = hexmap[value & 0xFU];
-        output[2] = '\0';
+        output[0U] = hexmap[(value >> 4U) & 0x0FU];
+        output[1U] = hexmap[value & 0x0FU];
+        output[2U] = '\0';
     }
 }
 
@@ -108,10 +108,10 @@ void qsc_arrayutils_uint16_to_hex(char* output, size_t otplen, uint16_t value)
 
         for (uint8_t i = 0U; i < 4U; ++i)
         {
-            output[i] = hexmap[(value >> ((3U - i) * 4U)) & 0xFU];
+            output[i] = hexmap[(value >> ((3U - i) * 4U)) & 0x0FU];
         }
 
-        output[4] = '\0';
+        output[4U] = '\0';
     }
 }
 
@@ -125,10 +125,10 @@ void qsc_arrayutils_uint32_to_hex(char* output, size_t otplen, uint32_t value)
 
         for (uint8_t i = 0U; i < 8U; ++i)
         {
-            output[i] = hexmap[(value >> ((7U - i) * 4U)) & 0xFU];
+            output[i] = hexmap[(value >> ((7U - i) * 4U)) & 0x0FU];
         }
 
-        output[8] = '\0';
+        output[8U] = '\0';
     }
 }
 
@@ -142,10 +142,10 @@ void qsc_arrayutils_uint64_to_hex(char* output, size_t otplen, uint64_t value)
 
         for (uint8_t i = 0U; i < 16U; ++i)
         {
-            output[i] = hexmap[(uint8_t)((value >> ((15U - i) * 4U)) & 0xFU)];
+            output[i] = hexmap[(uint8_t)((value >> ((15U - i) * 4U)) & 0x0FU)];
         }
 
-        output[16] = '\0';
+        output[16U] = '\0';
     }
 }
 
@@ -158,7 +158,7 @@ uint8_t qsc_arrayutils_string_to_uint8(const char* str, size_t slen)
 
     res = 0U;
 
-    if (str != NULL)
+    if (str != NULL && slen != 0U)
     {
         for (size_t i = 0U; (i < slen) && (str[i] != '\0'); ++i)
         {
@@ -195,7 +195,16 @@ uint16_t qsc_arrayutils_string_to_uint16(const char* str, size_t slen)
 
             if ((c >= '0') && (c <= '9'))
             {
-                res = (uint16_t)(res * 10U + (uint16_t)(c - '0'));
+                uint16_t digit = (uint16_t)(c - '0');
+
+                if (res <= (UINT16_MAX - digit) / 10U)
+                {
+                    res = (uint16_t)(res * 10U + digit);
+                }
+                else
+                {
+                    break;
+                }
             }
             else
             {
@@ -265,6 +274,7 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
     return res;
 }
 
+#if defined(QSC_DEBUG_MODE)
 bool qsc_arrayutils_self_test()
 {
 	const char nstr[] = "1 192 32180 497683 189167334201522";
@@ -274,11 +284,11 @@ bool qsc_arrayutils_self_test()
 	const char schr1[] = "1";
 	const char schr2[] = "192";
 	char shex[3] = { 0U };
-	const uint64_t nlng = 189167334201522;
-	const uint32_t nint = 497683;
-	const uint16_t nsht = 32180;
-	const uint8_t nchr1 = 1;
-	const uint8_t nchr2 = 192;
+	const uint64_t nlng = 189167334201522U;
+	const uint32_t nint = 497683U;
+	const uint16_t nsht = 32180U;
+	const uint8_t nchr1 = 1U;
+	const uint8_t nchr2 = 192U;
 	uint64_t x64;
 	size_t pos;
 	uint32_t x32;
@@ -291,40 +301,40 @@ bool qsc_arrayutils_self_test()
 
 	pos = qsc_arrayutils_find_string(nstr, sizeof(nstr), schr1);
 
-	if (pos != 1)
+	if (pos != 1U)
 	{
 		res = false;
 	}
 
 	pos = qsc_arrayutils_find_string(nstr, sizeof(nstr), schr2);
 
-	if (pos != 3)
+	if (pos != 3U)
 	{
 		res = false;
 	}
 
 	pos = qsc_arrayutils_find_string(nstr, sizeof(nstr), ssht);
 
-	if (pos != 7)
+	if (pos != 7U)
 	{
 		res = false;
 	}
 
 	pos = qsc_arrayutils_find_string(nstr, sizeof(nstr), sint);
 
-	if (pos != 13)
+	if (pos != 13U)
 	{
 		res = false;
 	}
 
 	pos = qsc_arrayutils_find_string(nstr, sizeof(nstr), slng);
 
-	if (pos != 20)
+	if (pos != 20U)
 	{
 		res = false;
 	}
 
-	for (size_t i = 0U; i < 256; ++i)
+	for (size_t i = 0U; i < 256U; ++i)
 	{
 		x8 = (uint8_t)i;
 		qsc_arrayutils_uint8_to_hex(shex, sizeof(shex), x8);
@@ -374,3 +384,4 @@ bool qsc_arrayutils_self_test()
 
 	return res;
 }
+#endif

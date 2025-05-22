@@ -33,17 +33,19 @@ static void csg_auto_reseed(qsc_csg_state* ctx)
 			{
 				/* add a random seed to input seed and info */
 				uint8_t prand[QSC_CSG_512_SEED_SIZE];
-				qsc_acp_generate(prand, sizeof(prand));
 
+				qsc_acp_generate(prand, sizeof(prand));
 				qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_512, prand, sizeof(prand));
+				qsc_memutils_clear(prand, sizeof(prand));
 			}
 			else
 			{
 				/* add a random seed to input seed and info */
 				uint8_t prand[QSC_CSG_256_SEED_SIZE];
-				qsc_acp_generate(prand, sizeof(prand));
 
+				qsc_acp_generate(prand, sizeof(prand));
 				qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_256, prand, sizeof(prand));
+				qsc_memutils_clear(prand, sizeof(prand));
 			}
 
 			/* re-fill the buffer and reset counter */

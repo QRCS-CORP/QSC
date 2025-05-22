@@ -251,7 +251,7 @@ static void qmac_block_update(qsc_qmac_state* ctx, const uint64_t* x)
     }
 #else
 	/* y = y ^ x */
-    qsc_memutils_xor((uint8_t*)ctx->Y, (uint8_t*)x, QSC_QMAC_BLOCK_SIZE);
+    qsc_memutils_xor((uint8_t*)ctx->Y, (const uint8_t*)x, QSC_QMAC_BLOCK_SIZE);
 #endif
 
 	/* y = (y * h) mod P(y) */
@@ -267,11 +267,11 @@ static void qmac_compute_final(uint8_t* tag, qsc_qmac_state* ctx)
     }
 #else
     /* apply the finalization key: y = y ^ f */
-    qsc_memutils_xor((uint8_t*)ctx->Y, (uint8_t*)ctx->F, QSC_QMAC_BLOCK_SIZE);
+    qsc_memutils_xor((uint8_t*)ctx->Y, (const uint8_t*)ctx->F, QSC_QMAC_BLOCK_SIZE);
 #endif
 
     /* copy the tag: t = y */
-	qsc_memutils_copy(tag, ctx->Y, QSC_QMAC_BLOCK_SIZE);
+	qsc_memutils_copy(tag, (const uint8_t*)ctx->Y, QSC_QMAC_BLOCK_SIZE);
 }
 
 void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keyparams, const uint8_t* message, size_t msglen)
@@ -342,9 +342,11 @@ void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
         }
 
         /* copy the hash subkey */
-        qsc_memutils_copy(ctx->H, sbuf, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_copy((uint8_t*)ctx->H, sbuf, QSC_QMAC_BLOCK_SIZE);
         /* copy the finalization key */
-        qsc_memutils_copy(ctx->F, sbuf + QSC_QMAC_BLOCK_SIZE, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_copy((uint8_t*)ctx->F, sbuf + QSC_QMAC_BLOCK_SIZE, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_clear(sbuf, sizeof(sbuf));
+        qsc_keccak_dispose(&kstate);
 
         ctx->initialized = true;
     }
@@ -369,7 +371,7 @@ void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen)
 
             /* copy the message bytes */
             mlen = msglen >= QSC_QMAC_BLOCK_SIZE ? QSC_QMAC_BLOCK_SIZE : msglen;
-            qsc_memutils_copy(x, message + mpos, mlen);
+            qsc_memutils_copy((uint8_t*)x, message + mpos, mlen);
             /* run the permutation */
             qmac_block_update(ctx, x);
             msglen -= mlen;

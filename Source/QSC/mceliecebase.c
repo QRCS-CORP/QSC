@@ -385,7 +385,7 @@ static void GF_mul(gf* out, const gf* in0, const gf* in1)
 #endif
 	}
 
-	qsc_memutils_copy(out, prod, MCELIECE_SYS_T * sizeof(gf));
+	qsc_memutils_copy(out, (const uint8_t*)prod, MCELIECE_SYS_T * sizeof(gf));
 }
 
 /* util.c */
@@ -1035,7 +1035,7 @@ static void bm(gf* out, const gf* s)
 		mle -= 1;
 		mle &= mne;
 
-		qsc_memutils_copy(T, C, MCELIECE_SYS_T * sizeof(gf));
+		qsc_memutils_copy((uint8_t*)T, (const uint8_t*)C, MCELIECE_SYS_T * sizeof(gf));
 
 		f = gf_frac(b, d);
 
@@ -1379,7 +1379,9 @@ static void controlbits_from_permutation(uint8_t* out, const int16_t* pi, int64_
 		}
 
 		qsc_memutils_alloc_free(pi_test);
+		pi_test = NULL;
 		qsc_memutils_alloc_free(temp);
+		temp = NULL;
 	}
 }
 
@@ -1818,9 +1820,11 @@ static int32_t pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int1
 							for (i = 0; i < MCELIECE_PK_NROWS; ++i)
 							{
 								qsc_memutils_alloc_free(mat[i]);
+								mat[i] = NULL;
 							}
 
 							qsc_memutils_alloc_free(mat);
+							mat = NULL;
 
 							return -1;
 						}
@@ -1870,9 +1874,11 @@ static int32_t pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int1
 		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
 		{
 			qsc_memutils_alloc_free(mat[i]);
+			mat[i] = NULL;
 		}
 
 		qsc_memutils_alloc_free(mat);
+		mat = NULL;
 	}
 
 	return res;
