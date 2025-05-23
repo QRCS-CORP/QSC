@@ -149,7 +149,7 @@ void qsc_socket_client_initialize(qsc_socket* sock)
 	}
 }
 
-size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t otplen, qsc_socket_receive_flags flag)
+size_t qsc_socket_client_receive(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	QSC_ASSERT(sock != NULL);
 	QSC_ASSERT(output != NULL);
@@ -160,13 +160,13 @@ size_t qsc_socket_client_receive(const qsc_socket* sock, char* output, size_t ot
 
 	if (sock != NULL && output != NULL)
 	{
-		res = qsc_socket_receive(sock, (uint8_t*)output, otplen, flag);
+		res = qsc_socket_receive(sock, output, otplen, flag);
 	}
 
 	return res;
 }
 
-size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, char* output, size_t otplen, qsc_socket_receive_flags flag)
+size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	QSC_ASSERT(sock != NULL);
 	QSC_ASSERT(address != NULL);
@@ -178,13 +178,13 @@ size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t 
 
 	if (sock != NULL && output != NULL)
 	{
-		res = qsc_socket_receive_from(sock, address, port, (uint8_t*)output, otplen, flag);
+		res = qsc_socket_receive_from(sock, address, port, output, otplen, flag);
 	}
 
 	return res;
 }
 
-size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_client_send(const qsc_socket* sock, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
 {
 	QSC_ASSERT(sock != NULL);
 
@@ -194,13 +194,13 @@ size_t qsc_socket_client_send(const qsc_socket* sock, const char* input, size_t 
 
 	if (sock != NULL)
 	{
-		res = qsc_socket_send(sock, (const uint8_t*)input, inlen, flag);
+		res = qsc_socket_send(sock, input, inlen, flag);
 	}
 
 	return res;
 }
 
-size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, uint16_t port, const char* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, uint16_t port, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
 {
 	QSC_ASSERT(sock != NULL);
 	QSC_ASSERT(address != NULL);
@@ -212,7 +212,7 @@ size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, ui
 
 	if (sock != NULL && address != NULL && input != NULL)
 	{
-		res = qsc_socket_send_to(sock, (const uint8_t*)input, inlen, flag);
+		res = qsc_socket_send_to(sock, input, inlen, flag);
 	}
 
 	return res;

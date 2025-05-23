@@ -6,7 +6,7 @@ static void Mul64x64To128(uint64_t x, uint64_t y, uint64_t* low, uint64_t* high)
 	QSC_ASSERT(high != NULL);
 
 	const size_t HWORD_BITS = 32U;
-	const uint32_t HWORD_MASK = 0xFFFFFFFFUL;
+	const uint32_t HWORD_MASK = 0xFFFFFFFFU;
 	const uint32_t AH = (uint32_t)(x >> HWORD_BITS);
 	const uint32_t AL = (uint32_t)(x & HWORD_MASK);
 	const uint32_t BH = (uint32_t)(y >> HWORD_BITS);

@@ -25,37 +25,31 @@ static char getch(void)
     struct termios oldt, newt;
     fflush(stdout);
 
-    if (tcgetattr(STDIN_FILENO, &oldt) != 0)
-    {
-        perror("tcgetattr");
-        return 0;
-    }
+	if (tcgetattr(STDIN_FILENO, &oldt) == 0)
+	{
+		newt = oldt;
 
-    newt = oldt;
+		oldt.c_lflag &= ~ICANON;
+		oldt.c_lflag &= ~ECHO;
+		oldt.c_cc[VMIN] = 1;
+		oldt.c_cc[VTIME] = 0U;
 
-    oldt.c_lflag &= ~ICANON;
-    oldt.c_lflag &= ~ECHO;
-    oldt.c_cc[VMIN] = 1;
-    oldt.c_cc[VTIME] = 0U;
+		if (tcsetattr(STDIN_FILENO, TCSANOW, &newt) == 0)
+		{
+			if (read(STDIN_FILENO, &buf, 1) < 0)
+			{
+				perror("read()");
+			}
 
-    if (tcsetattr(STDIN_FILENO, TCSANOW, &newt) != 0)
-    {
-        perror("tcsetattr");
-        return 0;
-    }
+			oldt.c_lflag |= ICANON;
+			oldt.c_lflag |= ECHO;
 
-    if (read(STDIN_FILENO, &buf, 1) < 0)
-    {
-        perror("read()");
-    }
-
-    oldt.c_lflag |= ICANON;
-    oldt.c_lflag |= ECHO;
-
-    if (tcsetattr(STDIN_FILENO, TCSADRAIN, &oldt) != 0)
-    {
-        perror("tcsetattr restore");
-    }
+			if (tcsetattr(STDIN_FILENO, TCSADRAIN, &oldt) != 0)
+			{
+				perror("tcsetattr restore");
+			}
+		}
+	}
 
     return buf;
  }
@@ -131,7 +125,9 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 			}
 			else
 			{
-				while (fgets(line, (int32_t)maxlen, stdin) != NULL) 
+				int count = (maxlen > INT_MAX) ? INT_MAX : (int)maxlen;
+
+				while (fgets(line, count, stdin) != NULL) 
 				{
 					if (qsc_stringutils_string_contains(line, "\n") == true)
 					{
@@ -329,7 +325,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 
 	if (output != NULL && otplen != 0U)
 	{
-		while (true)
+		while (ctr < mlen)
 		{
 			if (ctr >= mlen)
 			{
@@ -354,7 +350,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 					if (ctr > 0U)
 					{
 						qsc_consoleutils_print_safe("\b \b");
-						output[ctr - 1] = '0';
+						output[ctr - 1] = '\0';
 						--ctr;
 					}
 				}

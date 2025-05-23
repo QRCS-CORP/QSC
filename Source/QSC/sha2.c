@@ -4,9 +4,9 @@
 #include "memutils.h"
 
 
-#define SHA2_256_ROUNDS_COUNT 64ULL
-#define SHA2_384_ROUNDS_COUNT 80ULL
-#define SHA2_512_ROUNDS_COUNT 80ULL
+#define SHA2_256_ROUNDS_COUNT 64U
+#define SHA2_384_ROUNDS_COUNT 80U
+#define SHA2_512_ROUNDS_COUNT 80U
 
 /* SHA2-256 */
 
@@ -1361,7 +1361,7 @@ void qsc_hmac256_dispose(qsc_hmac256_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear(ctx->ipad, sizeof(ctx->ipad));
-		qsc_memutils_clear(ctx->opad, sizeof(ctx->ipad));
+		qsc_memutils_clear(ctx->opad, sizeof(ctx->opad));
 		qsc_sha256_dispose(&ctx->pstate);
 	}
 }

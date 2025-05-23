@@ -29,8 +29,6 @@ bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), voi
 				idx = ctx->tcount;
 				++ctx->tcount;
 				res = true;
-
-				qsc_async_thread_wait(thd);
 				ctx->tpool[idx] = NULL;
 				--ctx->tcount;
 			}
@@ -67,13 +65,8 @@ void qsc_threadpool_initialize(qsc_threadpool_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->tpool, QSC_THREADPOOL_THREADS_MAX * sizeof(int32_t));
+		qsc_memutils_clear(ctx->tpool, QSC_THREADPOOL_THREADS_MAX * sizeof(qsc_thread));
 		ctx->tcount = 0U;
-
-		for (size_t i = 0U; i < ctx->tcount; ++i)
-		{
-			ctx->tpool[i] = NULL;
-		}
 	}
 }
 
@@ -99,7 +92,7 @@ void qsc_threadpool_sort(qsc_threadpool_state* ctx)
 
 		if (cnt != 0)
 		{
-			qsc_memutils_copy((uint8_t*)ctx->tpool, (const uint8_t*)pool, sizeof(pool));
+			qsc_memutils_copy(ctx->tpool, pool, sizeof(pool));
 		}
 
 		ctx->tcount = cnt;

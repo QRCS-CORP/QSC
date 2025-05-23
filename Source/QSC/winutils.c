@@ -29,7 +29,7 @@
 #   endif
 
 #if !defined(ERROR_TRANSACTIONAL_CONFLICT)
-#   define ERROR_TRANSACTIONAL_CONFLICT 6800  /* 0x1A90, same as MS SDK */
+#   define ERROR_TRANSACTIONAL_CONFLICT 6800
 #endif
 
 typedef struct AttributeDescription
@@ -123,47 +123,54 @@ static const char WINUTILS_SERVICE_STATE_STRINGS[9][12] =
 
 static DWORD winutils_attribute_from_string(const char* attr) 
 {
+    QSC_ASSERT(attr != NULL);
+
     DWORD res;
 
-    if (strcmp(attr, "readonly") == 0)
+    res = 0;
+
+    if (attr != NULL)
     {
-        res = FILE_ATTRIBUTE_READONLY;
-    }
-    else if (strcmp(attr, "hidden") == 0)
-    {
-        res = FILE_ATTRIBUTE_HIDDEN;
-    }
-    else if (strcmp(attr, "system") == 0)
-    {
-        res = FILE_ATTRIBUTE_SYSTEM;
-    }
-    else if (strcmp(attr, "archive") == 0)
-    {
-        res = FILE_ATTRIBUTE_ARCHIVE;
-    }
-    else if (strcmp(attr, "normal") == 0)
-    {
-        res = FILE_ATTRIBUTE_NORMAL;
-    }
-    else if (strcmp(attr, "temporary") == 0)
-    {
-        res = FILE_ATTRIBUTE_TEMPORARY;
-    }
-    else if (strcmp(attr, "offline") == 0)
-    {
-        res = FILE_ATTRIBUTE_OFFLINE;
-    }
-    else if (strcmp(attr, "not_content_indexed") == 0)
-    {
-        res = FILE_ATTRIBUTE_NOT_CONTENT_INDEXED;
-    }
-    else if (strcmp(attr, "encrypted") == 0)
-    {
-        res = FILE_ATTRIBUTE_ENCRYPTED;
-    }
-    else
-    {
-        res = INVALID_FILE_ATTRIBUTES;
+        if (strcmp(attr, "readonly") == 0)
+        {
+            res = FILE_ATTRIBUTE_READONLY;
+        }
+        else if (strcmp(attr, "hidden") == 0)
+        {
+            res = FILE_ATTRIBUTE_HIDDEN;
+        }
+        else if (strcmp(attr, "system") == 0)
+        {
+            res = FILE_ATTRIBUTE_SYSTEM;
+        }
+        else if (strcmp(attr, "archive") == 0)
+        {
+            res = FILE_ATTRIBUTE_ARCHIVE;
+        }
+        else if (strcmp(attr, "normal") == 0)
+        {
+            res = FILE_ATTRIBUTE_NORMAL;
+        }
+        else if (strcmp(attr, "temporary") == 0)
+        {
+            res = FILE_ATTRIBUTE_TEMPORARY;
+        }
+        else if (strcmp(attr, "offline") == 0)
+        {
+            res = FILE_ATTRIBUTE_OFFLINE;
+        }
+        else if (strcmp(attr, "not_content_indexed") == 0)
+        {
+            res = FILE_ATTRIBUTE_NOT_CONTENT_INDEXED;
+        }
+        else if (strcmp(attr, "encrypted") == 0)
+        {
+            res = FILE_ATTRIBUTE_ENCRYPTED;
+        }
+        else
+        {
+            res = INVALID_FILE_ATTRIBUTES;
+        }
     }
 
     return res;
@@ -171,35 +178,41 @@ static DWORD winutils_attribute_from_string(const char* attr)
 
 static uint32_t winutils_process_pid_from_name(const char* name) 
 {
+    QSC_ASSERT(name != NULL);
+
     PROCESSENTRY32 pe32 = { 0U };
     HANDLE snap;
     uint32_t pid;
 
     pid = 0;
-    snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-    if (snap != INVALID_HANDLE_VALUE)
+    if (name != NULL)
     {
-        pe32.dwSize = sizeof(PROCESSENTRY32);
+        snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-        if (Process32First(snap, &pe32) == true)
+        if (snap != INVALID_HANDLE_VALUE)
         {
-            while (true)
+            pe32.dwSize = sizeof(PROCESSENTRY32);
+
+            if (Process32First(snap, &pe32) == true)
             {
-                if (strcmp(pe32.szExeFile, name) == 0)
+                while (true)
                 {
-                    pid = pe32.th32ProcessID;
-                    break;
-                }
+                    if (strcmp(pe32.szExeFile, name) == 0)
+                    {
+                        pid = pe32.th32ProcessID;
+                        break;
+                    }
 
-                if (Process32Next(snap, &pe32) == false)
-                {
-                    break;
-                }
-            };
+                    if (Process32Next(snap, &pe32) == false)
+                    {
+                        break;
+                    }
+                };
+            }
+
+            CloseHandle(snap);
         }
-
-        CloseHandle(snap);
     }
 
     return pid;
@@ -207,6 +220,8 @@ static uint32_t winutils_process_pid_from_name(const char* name)
 
 static HKEY winutils_rkey_from_string(const char* root) 
 {
+    QSC_ASSERT(root != NULL);
+
     HKEY res;
 
     if (strcmp(root, "HKEY_CLASSES_ROOT") == 0)
@@ -239,6 +254,9 @@ static HKEY winutils_rkey_from_string(const char* root)
 
 static void winutils_get_error_description(char* result, size_t reslen)
 {
+    QSC_ASSERT(result != NULL);
+    QSC_ASSERT(reslen != 0);
+
     const char* desc;
     DWORD err;
 
@@ -291,38 +309,42 @@ size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char*
     DWORD attr;
 
     tlen = 0;
-    attr = GetFileAttributesA(path);
-    result[0] = '\0';
 
-    if (attr != INVALID_FILE_ATTRIBUTES)
+    if (result != NULL && reslen != 0U && path != NULL)
     {
-        bool first;
+        attr = GetFileAttributesA(path);
+        result[0] = '\0';
 
-        first = true;
-
-        for (size_t i = 0U; i < WINUTILS_ATTRIBUTE_SIZE; ++i)
+        if (attr != INVALID_FILE_ATTRIBUTES)
         {
-            if (attr & winutils_attribute_descriptions[i].attribute)
+            bool first;
+
+            first = true;
+
+            for (size_t i = 0U; i < WINUTILS_ATTRIBUTE_SIZE; ++i)
             {
-                size_t dlen;
-
-                dlen = strlen(winutils_attribute_descriptions[i].description);
-
-                if (tlen + dlen + (first ? 0U : 1U) < reslen)
+                if (attr & winutils_attribute_descriptions[i].attribute)
                 {
-                    if (!first)
+                    size_t dlen;
+
+                    dlen = strlen(winutils_attribute_descriptions[i].description);
+
+                    if (tlen + dlen + (first ? 0U : 1U) < reslen)
                     {
-                        strcat_s(result, reslen, ", ");
-                        tlen += 2U;
-                    }
+                        if (!first)
+                        {
+                            strcat_s(result, reslen, ", ");
+                            tlen += 2U;
+                        }
 
-                    strcat_s(result, reslen, winutils_attribute_descriptions[i].description);
-                    tlen += dlen;
-                    first = false;
-                }
-                else
-                {
-                    break;
+                        strcat_s(result, reslen, winutils_attribute_descriptions[i].description);
+                        tlen += dlen;
+                        first = false;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -340,18 +362,26 @@ bool qsc_winutils_file_set_attribute(const char* path, const char* attr)
     bool res;
 
     res = false;
-    datt = winutils_attribute_from_string(attr);
 
-    if (datt != INVALID_FILE_ATTRIBUTES)
+    if (path != NULL && attr != NULL)
     {
-        res = SetFileAttributesA(path, datt);
+        datt = winutils_attribute_from_string(attr);
+
+        if (datt != INVALID_FILE_ATTRIBUTES)
+        {
+            res = SetFileAttributesA(path, datt);
+        }
     }
 
     return res;
 }
 
-static void winutils_wide_to_utf8(const wchar_t *wsrc, char *dst, size_t dstlen)
+static void winutils_wide_to_utf8(const wchar_t* wsrc, char* dst, size_t dstlen)
 {
+    QSC_ASSERT(wsrc != NULL);
+    QSC_ASSERT(dst != NULL);
+    QSC_ASSERT(dstlen != NULL);
+
     if ((wsrc != NULL) && (dst != NULL) && (dstlen > 0U))
     {
         (void)WideCharToMultiByte(
@@ -377,181 +407,185 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
     DWORD rval;
 
     tlen = 0;
-    nlen = QSC_WINTOOLS_NETSTAT_NAME_SIZE;
 
-    if (GetComputerNameExA(ComputerNameDnsDomain, cbuf, &nlen) == true)
+    if (result != NULL && reslen != 0U)
     {
-        if (nlen > 0)
+        nlen = QSC_WINTOOLS_NETSTAT_NAME_SIZE;
+
+        if (GetComputerNameExA(ComputerNameDnsDomain, cbuf, &nlen) == true)
         {
-            tlen += snprintf(result + tlen, reslen - tlen, "Domain Name -%s\n", cbuf);
+            if (nlen > 0)
+            {
+                tlen += snprintf(result + tlen, reslen - tlen, "Domain Name -%s\n", cbuf);
+            }
+            else
+            {
+                tlen += snprintf(result + tlen, reslen - tlen, "Domain Name -Unknown\n");
+            }
         }
         else
         {
             tlen += snprintf(result + tlen, reslen - tlen, "Domain Name -Unknown\n");
         }
-    } 
-    else
-    {
-        tlen += snprintf(result + tlen, reslen - tlen, "Domain Name -Unknown\n");
-    }
 
-    qsc_memutils_clear(cbuf, sizeof(cbuf));
-    nlen = QSC_WINTOOLS_NETSTAT_NAME_SIZE;
+        qsc_memutils_clear(cbuf, sizeof(cbuf));
+        nlen = QSC_WINTOOLS_NETSTAT_NAME_SIZE;
 
-    if (GetComputerNameA(cbuf, &nlen) == true) 
-    {
-        if (nlen > 0)
+        if (GetComputerNameA(cbuf, &nlen) == true)
         {
-            tlen += snprintf(result + tlen, reslen - tlen, "Host Name -%s\n", cbuf);
+            if (nlen > 0)
+            {
+                tlen += snprintf(result + tlen, reslen - tlen, "Host Name -%s\n", cbuf);
+            }
+            else
+            {
+                tlen += snprintf(result + tlen, reslen - tlen, "Host Name -Unknown\n");
+            }
         }
         else
         {
             tlen += snprintf(result + tlen, reslen - tlen, "Host Name -Unknown\n");
         }
-    }
-    else 
-    {
-        tlen += snprintf(result + tlen, reslen - tlen, "Host Name -Unknown\n");
-    }
 
-    ufam = AF_UNSPEC;
-    ulen = 15000UL;
-    padd = (IP_ADAPTER_ADDRESSES*)malloc(ulen);
+        ufam = AF_UNSPEC;
+        ulen = 15000UL;
+        padd = (IP_ADAPTER_ADDRESSES*)qsc_memutils_malloc(ulen);
 
-    if (padd)
-    {
-        rval = GetAdaptersAddresses(ufam, 0U, NULL, padd, &ulen);
-
-        if (rval == ERROR_BUFFER_OVERFLOW)
+        if (padd)
         {
-            IP_ADAPTER_ADDRESSES* ptmp;
+            rval = GetAdaptersAddresses(ufam, 0U, NULL, padd, &ulen);
 
-            ptmp = (IP_ADAPTER_ADDRESSES*)realloc(padd, ulen);
-
-            if (ptmp != NULL)
+            if (rval == ERROR_BUFFER_OVERFLOW)
             {
-                padd = ptmp;
-                tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
-                rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
+                IP_ADAPTER_ADDRESSES* ptmp;
+
+                ptmp = (IP_ADAPTER_ADDRESSES*)realloc(padd, ulen);
+
+                if (ptmp != NULL)
+                {
+                    padd = ptmp;
+                    tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
+                    rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
+                }
+                else
+                {
+                    qsc_memutils_alloc_free(padd);
+                    padd = NULL;
+                }
+            }
+
+            if (rval == NO_ERROR)
+            {
+                PIP_ADAPTER_ADDRESSES cadd = padd;
+
+                while (cadd)
+                {
+                    tlen += snprintf(result + tlen, reslen - tlen, "\n");
+                    PIP_ADAPTER_UNICAST_ADDRESS puni = cadd->FirstUnicastAddress;
+                    char fname[128U] = { 0U };
+                    char desc[256U] = { 0U };
+
+                    winutils_wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
+                    winutils_wide_to_utf8(cadd->Description, desc, sizeof(desc));
+
+                    tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Adaptor Name:\t\t%s\n", fname);
+                    tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Description:\t\t%s\n", desc);
+                    tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", padd->AdapterName);
+                    tlen += snprintf(result + tlen, reslen - tlen, "Interface Addresses\n");
+
+                    while (puni)
+                    {
+                        if (puni->Address.lpSockaddr->sa_family == AF_INET)
+                        {
+                            struct sockaddr_in* sa_in = (struct sockaddr_in*)puni->Address.lpSockaddr;
+
+                            inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
+                            tlen += snprintf(result + tlen, reslen - tlen, "Ipv4 Address \t\t-%s\n", cbuf);
+                        }
+                        else if (puni->Address.lpSockaddr->sa_family == AF_INET6)
+                        {
+                            struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)puni->Address.lpSockaddr;
+
+                            inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
+                            tlen += snprintf(result + tlen, reslen - tlen, "Ipv6 Address \t\t-%s\n", cbuf);
+                        }
+
+                        puni = puni->Next;
+                    }
+
+                    PIP_ADAPTER_GATEWAY_ADDRESS_LH pgate = cadd->FirstGatewayAddress;
+
+                    if (pgate != NULL)
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "Gateway Addresses\n");
+
+                        while (pgate)
+                        {
+                            if (pgate->Address.lpSockaddr->sa_family == AF_INET)
+                            {
+                                struct sockaddr_in* sa_in = (struct sockaddr_in*)pgate->Address.lpSockaddr;
+
+                                inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
+                                tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
+                            }
+                            else if (pgate->Address.lpSockaddr->sa_family == AF_INET6)
+                            {
+                                struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)pgate->Address.lpSockaddr;
+
+                                inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
+                                tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
+                            }
+
+                            pgate = pgate->Next;
+                        }
+                    }
+
+                    PIP_ADAPTER_DNS_SERVER_ADDRESS pdns = cadd->FirstDnsServerAddress;
+
+                    if (pdns != NULL)
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "DNS Server Addresses\n");
+
+                        while (pdns)
+                        {
+                            if (pdns->Address.lpSockaddr->sa_family == AF_INET)
+                            {
+                                struct sockaddr_in* sa_in = (struct sockaddr_in*)pdns->Address.lpSockaddr;
+
+                                inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
+                                tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
+                            }
+                            else if (pdns->Address.lpSockaddr->sa_family == AF_INET6)
+                            {
+                                struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)pdns->Address.lpSockaddr;
+
+                                inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
+                                tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
+                            }
+
+                            pdns = pdns->Next;
+                        }
+                    }
+
+                    cadd = cadd->Next;
+                }
             }
             else
             {
-                free(padd);
-                padd = NULL;
+                tlen += snprintf(result + tlen, reslen - tlen, "Failed to get network addresses\n");
             }
-        }
 
-        if (rval == NO_ERROR)
-        {
-            PIP_ADAPTER_ADDRESSES cadd = padd;
-
-            while (cadd)
-            {
-                tlen += snprintf(result + tlen, reslen - tlen, "\n");
-                PIP_ADAPTER_UNICAST_ADDRESS puni = cadd->FirstUnicastAddress;
-                char fname[128U] = { 0U };
-                char desc [256U] = { 0U };
-
-                winutils_wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
-                winutils_wide_to_utf8(cadd->Description , desc , sizeof(desc));
-
-                tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Adaptor Name:\t\t%s\n", fname);
-                tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Description:\t\t%s\n", desc);
-                tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", padd->AdapterName);
-                tlen += snprintf(result + tlen, reslen - tlen, "Interface Addresses\n");
-
-                while (puni)
-                {
-                    if (puni->Address.lpSockaddr->sa_family == AF_INET)
-                    {
-                        struct sockaddr_in* sa_in = (struct sockaddr_in*)puni->Address.lpSockaddr;
-
-                        inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
-                        tlen += snprintf(result + tlen, reslen - tlen, "Ipv4 Address \t\t-%s\n", cbuf);
-                    }
-                    else if (puni->Address.lpSockaddr->sa_family == AF_INET6)
-                    {
-                        struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)puni->Address.lpSockaddr;
-
-                        inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
-                        tlen += snprintf(result + tlen, reslen - tlen, "Ipv6 Address \t\t-%s\n", cbuf);
-                    }
-
-                    puni = puni->Next;
-                }
-
-                PIP_ADAPTER_GATEWAY_ADDRESS_LH pgate = cadd->FirstGatewayAddress;
-
-                if (pgate != NULL)
-                {
-                    tlen += snprintf(result + tlen, reslen - tlen, "Gateway Addresses\n");
-
-                    while (pgate)
-                    {
-                        if (pgate->Address.lpSockaddr->sa_family == AF_INET)
-                        {
-                            struct sockaddr_in* sa_in = (struct sockaddr_in*)pgate->Address.lpSockaddr;
-
-                            inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
-                            tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
-                        }
-                        else if (pgate->Address.lpSockaddr->sa_family == AF_INET6)
-                        {
-                            struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)pgate->Address.lpSockaddr;
-
-                            inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
-                            tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
-                        }
-
-                        pgate = pgate->Next;
-                    }
-                }
-
-                PIP_ADAPTER_DNS_SERVER_ADDRESS pdns = cadd->FirstDnsServerAddress;
-
-                if (pdns != NULL)
-                {
-                    tlen += snprintf(result + tlen, reslen - tlen, "DNS Server Addresses\n");
-
-                    while (pdns)
-                    {
-                        if (pdns->Address.lpSockaddr->sa_family == AF_INET)
-                        {
-                            struct sockaddr_in* sa_in = (struct sockaddr_in*)pdns->Address.lpSockaddr;
-
-                            inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
-                            tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
-                        }
-                        else if (pdns->Address.lpSockaddr->sa_family == AF_INET6)
-                        {
-                            struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)pdns->Address.lpSockaddr;
-
-                            inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
-                            tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
-                        }
-
-                        pdns = pdns->Next;
-                    }
-                }
-
-                cadd = cadd->Next;
-            }
+            qsc_memutils_alloc_free(padd);
         }
         else
         {
-            tlen += snprintf(result + tlen, reslen - tlen, "Failed to get network addresses\n");
+            tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
         }
 
-        free(padd);
-    }
-    else
-    {
-        tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
-    }
-
-    if (tlen == 0U)
-    {
-        winutils_get_error_description(result, reslen);
+        if (tlen == 0U)
+        {
+            winutils_get_error_description(result, reslen);
+        }
     }
 
     return tlen;
@@ -662,13 +696,9 @@ bool qsc_winutils_process_token_elevate()
             {
                 res = true;
             }
-            else
-            {
-                printf("AdjustTokenPrivileges error: %lu\n", GetLastError());
-            }
-            
-            CloseHandle(htok);
         }
+            
+        CloseHandle(htok);
     }
     
     return res;
@@ -684,22 +714,26 @@ bool qsc_winutils_process_terminate(const char* name)
     bool res;
 
     res = false;
-    pid = winutils_process_pid_from_name(name);
 
-    if (pid != 0U)
+    if (name != NULL)
     {
-        hproc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, false, pid);
+        pid = winutils_process_pid_from_name(name);
 
-        if (hproc != NULL)
+        if (pid != 0U)
         {
-            if (GetExitCodeProcess(hproc, &dwexit) == true)
+            hproc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, false, pid);
+
+            if (hproc != NULL)
             {
-                DWORD ecode = 1U;
+                if (GetExitCodeProcess(hproc, &dwexit) == true)
+                {
+                    DWORD ecode = 1U;
 
-                res = TerminateProcess(hproc, ecode);
+                    res = TerminateProcess(hproc, ecode);
+                }
+
+                CloseHandle(hproc);
             }
-
-            CloseHandle(hproc);
         }
     }
 
@@ -720,21 +754,24 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
     DWORD disp;
     char* subkey;
 
-    ct = NULL;
-    lres = 0;
-    strncpy_s(lpath, sizeof(lpath), keypath, strlen(keypath));
-    root = strtok_s(lpath, "\\", &ct);
-    subkey = strtok_s(NULL, "", &ct);
-    rkey = winutils_rkey_from_string(root);
+    lres = -1;
 
-    if (rkey != NULL)
+    if (keypath != NULL && value != 0)
     {
-        lres = RegCreateKeyExA(rkey, subkey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &disp);
+        ct = NULL;
+        strncpy_s(lpath, sizeof(lpath), keypath, strlen(keypath));
+        root = strtok_s(lpath, "\\", &ct);
+        subkey = strtok_s(NULL, "", &ct);
+        rkey = winutils_rkey_from_string(root);
 
-        if (lres == ERROR_SUCCESS)
+        if (rkey != NULL)
         {
-            switch (vtype)
+            lres = RegCreateKeyExA(rkey, subkey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &disp);
+
+            if (lres == ERROR_SUCCESS)
             {
+                switch (vtype)
+                {
                 case REG_SZ_TYPE:
                 {
                     lres = RegSetValueExA(hkey, NULL, 0, REG_SZ, (const BYTE*)value, (DWORD)strlen(value) + 1);
@@ -762,7 +799,7 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
                     BYTE* bval;
 
                     slen = strlen(value);
-                    bval = (BYTE*)malloc(slen / 2U);
+                    bval = (BYTE*)qsc_memutils_malloc(slen / 2U);
 
                     if (bval != NULL)
                     {
@@ -772,7 +809,7 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
                         }
 
                         lres = RegSetValueExA(hkey, NULL, 0, REG_BINARY, bval, (DWORD)(slen / 2U));
-                        free(bval);
+                        qsc_memutils_alloc_free(bval);
                     }
 
                     break;
@@ -780,9 +817,10 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
                 default:
                 {
                 }
-            }
+                }
 
-            RegCloseKey(hkey);
+                RegCloseKey(hkey);
+            }
         }
     }
 
@@ -803,14 +841,17 @@ bool qsc_winutils_registry_key_delete(const char* keypath)
     ct = NULL;
     lret = ERROR_INVALID_DATA;
 
-    strncpy_s(lpath, sizeof(lpath), keypath, strlen(keypath));
-    root = strtok_s(lpath, "\\", &ct);
-    subkey = strtok_s(NULL, "", &ct);
-    rkey = winutils_rkey_from_string(root);
-
-    if (rkey != NULL)
+    if (keypath != NULL)
     {
-        lret = RegDeleteKey(rkey, subkey);
+        strncpy_s(lpath, sizeof(lpath), keypath, strlen(keypath));
+        root = strtok_s(lpath, "\\", &ct);
+        subkey = strtok_s(NULL, "", &ct);
+        rkey = winutils_rkey_from_string(root);
+
+        if (rkey != NULL)
+        {
+            lret = RegDeleteKey(rkey, subkey);
+        }
     }
 
     return (lret == ERROR_SUCCESS);
@@ -840,57 +881,60 @@ size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* k
     tlen = 0U;
     result[0] = '\0';
 
-    strncpy_s(lpath, sizeof(lpath), keypath, strlen(keypath));
-    root = strtok_s(lpath, "\\", &ct);
-    subkey = strtok_s(NULL, "", &ct);
-
-    rkey = winutils_rkey_from_string(root);
-
-    if (rkey != NULL)
+    if (result != NULL && reslen != 0 && keypath != NULL)
     {
-        lres = RegOpenKeyExA(rkey, subkey, 0, KEY_READ, &hkey);
+        strncpy_s(lpath, sizeof(lpath), keypath, strlen(keypath));
+        root = strtok_s(lpath, "\\", &ct);
+        subkey = strtok_s(NULL, "", &ct);
 
-        if (lres == ERROR_SUCCESS)
+        rkey = winutils_rkey_from_string(root);
+
+        if (rkey != NULL)
         {
-            while (true)
+            lres = RegOpenKeyExA(rkey, subkey, 0, KEY_READ, &hkey);
+
+            if (lres == ERROR_SUCCESS)
             {
-                klen = sizeof(kname);
-                lres = RegEnumKeyExA(hkey, ctr, kname, &klen, NULL, NULL, NULL, &lft);
-                ++ctr;
-
-                if (lres == ERROR_SUCCESS)
+                while (true)
                 {
-                    SYSTEMTIME tm = { 0U };
-                    char kbuf[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
-                    size_t lpos;
+                    klen = sizeof(kname);
+                    lres = RegEnumKeyExA(hkey, ctr, kname, &klen, NULL, NULL, NULL, &lft);
+                    ++ctr;
 
-                    lpos = sprintf_s(kbuf, sizeof(kbuf), "%s\t", kname);
+                    if (lres == ERROR_SUCCESS)
+                    {
+                        SYSTEMTIME tm = { 0U };
+                        char kbuf[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
+                        size_t lpos;
 
-                    FileTimeToSystemTime(&lft, &tm);
-                    sprintf_s(kbuf + lpos, sizeof(kbuf) - lpos, "%02d-%02d-%d %02d:%02d:%02d\n",
-								tm.wMonth, tm.wDay, tm.wYear, tm.wHour, tm.wMinute, tm.wSecond);
+                        lpos = sprintf_s(kbuf, sizeof(kbuf), "%s\t", kname);
 
-                    if (tlen + strlen(kbuf) > reslen)
+                        FileTimeToSystemTime(&lft, &tm);
+                        sprintf_s(kbuf + lpos, sizeof(kbuf) - lpos, "%02d-%02d-%d %02d:%02d:%02d\n",
+                            tm.wMonth, tm.wDay, tm.wYear, tm.wHour, tm.wMinute, tm.wSecond);
+
+                        if (tlen + strlen(kbuf) > reslen)
+                        {
+                            break;
+                        }
+
+                        strcat_s(result, reslen, kbuf);
+                        tlen += strlen(kbuf);
+                    }
+                    else
                     {
                         break;
                     }
+                }
 
-                    strcat_s(result, reslen, kbuf);
-                    tlen += strlen(kbuf);
-                }
-                else
-                {
-                    break;
-                }
+                RegCloseKey(hkey);
             }
-
-            RegCloseKey(hkey);
         }
-    }
-    
-    if (tlen == 0U)
-    {
-        winutils_get_error_description(result, reslen);
+
+        if (tlen == 0U)
+        {
+            winutils_get_error_description(result, reslen);
+        }
     }
 
     return tlen;
@@ -905,13 +949,17 @@ bool qsc_winutils_run_executable(const char* expath)
     bool res;
 
     res = false;
-    hres = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
-    if (hres == S_OK)
+    if (expath != NULL)
     {
-        pret = ShellExecuteA(GetDesktopWindow(), "open", expath, NULL, NULL, SW_SHOW);
-        CoUninitialize();
-        res = ((INT_PTR)pret > 32);
+        hres = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+
+        if (hres == S_OK)
+        {
+            pret = ShellExecuteA(GetDesktopWindow(), "open", expath, NULL, NULL, SW_SHOW);
+            CoUninitialize();
+            res = ((INT_PTR)pret > 32);
+        }
     }
 
     return res;
@@ -923,41 +971,48 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
     QSC_ASSERT(password != NULL);
     QSC_ASSERT(expath != NULL);
 
-    STARTUPINFOW si = { 0U };
-    PROCESS_INFORMATION pi = { 0U };
-    wchar_t wuser[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
-    wchar_t wpass[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
-    wchar_t wpath[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
-    wchar_t wdomain[sizeof(wchar_t)] = L".";
     bool res;
 
-    MultiByteToWideChar(CP_ACP, 0, user, -1, wuser, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
-    MultiByteToWideChar(CP_ACP, 0, password, -1, wpass, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
-    MultiByteToWideChar(CP_ACP, 0, expath, -1, wpath, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
+    res = false;
 
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
-    ZeroMemory(&pi, sizeof(pi));
-
-    res = CreateProcessWithLogonW(
-        wuser,
-        wdomain,
-        wpass,
-        LOGON_WITH_PROFILE,
-        NULL,
-        wpath,
-        CREATE_UNICODE_ENVIRONMENT,
-        NULL,
-        NULL,
-        &si,
-        &pi
-    );
-
-    if (res == true)
+    if (user != NULL && password != NULL && expath != NULL)
     {
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-    } 
+        STARTUPINFOW si = { 0U };
+        PROCESS_INFORMATION pi = { 0U };
+        wchar_t wuser[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
+        wchar_t wpass[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
+        wchar_t wpath[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
+        wchar_t wdomain[sizeof(wchar_t)] = L".";
+
+
+        MultiByteToWideChar(CP_ACP, 0, user, -1, wuser, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
+        MultiByteToWideChar(CP_ACP, 0, password, -1, wpass, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
+        MultiByteToWideChar(CP_ACP, 0, expath, -1, wpath, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
+
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        ZeroMemory(&pi, sizeof(pi));
+
+        res = CreateProcessWithLogonW(
+            wuser,
+            wdomain,
+            wpass,
+            LOGON_WITH_PROFILE,
+            NULL,
+            wpath,
+            CREATE_UNICODE_ENVIRONMENT,
+            NULL,
+            NULL,
+            &si,
+            &pi
+        );
+
+        if (res == true)
+        {
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+        }
+    }
 
     return res;
 }
@@ -972,16 +1027,19 @@ bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states es
     bool res;
     
     res = false;
-    scm = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
-    if (scm != NULL)
+    if (name != NULL)
     {
-        sch = OpenServiceA(scm, name, SERVICE_ALL_ACCESS);
-        
-        if (sch != NULL)
+        scm = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+
+        if (scm != NULL)
         {
-            switch (estate) 
+            sch = OpenServiceA(scm, name, SERVICE_ALL_ACCESS);
+
+            if (sch != NULL)
             {
+                switch (estate)
+                {
                 case QSC_WINUTILS_SERVICE_START:
                 {
                     res = StartServiceA(sch, 0, NULL);
@@ -1006,12 +1064,13 @@ bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states es
                 {
                     break;
                 }
+                }
+
+                CloseServiceHandle(sch);
             }
 
-            CloseServiceHandle(sch);
+            CloseServiceHandle(scm);
         }
-
-        CloseServiceHandle(scm);
     }
 
     return res;
@@ -1038,94 +1097,97 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
     tlen = 0U;
     result[0] = '\0';
 
-    sch = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
-
-    if (sch != NULL)
+    if (result != NULL && reslen != 0U)
     {
-        llen = (DWORD)qsc_winutils_service_list_size();
+        sch = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
 
-        if (llen > 0)
+        if (sch != NULL)
         {
-            pinfo = (ENUM_SERVICE_STATUS_PROCESS*)malloc(llen);
+            llen = (DWORD)qsc_winutils_service_list_size();
 
-            if (pinfo != NULL)
+            if (llen > 0)
             {
-                res = EnumServicesStatusEx(
-                    sch,
-                    SC_ENUM_PROCESS_INFO,
-                    SERVICE_WIN32,
-#if defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
-                    SERVICE_ACTIVE,
-#else
-                    SERVICE_STATE_ALL,
-#endif
-                    (LPBYTE)pinfo,
-                    llen,
-                    &dexp,
-                    &dret,
-                    &hres,
-                    NULL);
+                pinfo = (ENUM_SERVICE_STATUS_PROCESS*)qsc_memutils_malloc(llen);
 
-                if ((pinfo && res) || (!res && GetLastError() == ERROR_MORE_DATA))
+                if (pinfo != NULL)
                 {
-                    for (DWORD i = 0; i < dret; i++)
-                    {
-                        char sbuf[QSC_WINTOOLS_SERVICE_BUFFER_SIZE] = { 0U };
-                        size_t elen;
+                    res = EnumServicesStatusEx(
+                        sch,
+                        SC_ENUM_PROCESS_INFO,
+                        SERVICE_WIN32,
+#if defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
+                        SERVICE_ACTIVE,
+#else
+                        SERVICE_STATE_ALL,
+#endif
+                        (LPBYTE)pinfo,
+                        llen,
+                        &dexp,
+                        &dret,
+                        &hres,
+                        NULL);
 
-                        if (((i + 1U) * sizeof(ENUM_SERVICE_STATUS_PROCESS)) > llen)
+                    if ((pinfo && res) || (!res && GetLastError() == ERROR_MORE_DATA))
+                    {
+                        for (DWORD i = 0; i < dret; i++)
                         {
-                            break;
-                        }
+                            char sbuf[QSC_WINTOOLS_SERVICE_BUFFER_SIZE] = { 0U };
+                            size_t elen;
+
+                            if (((i + 1U) * sizeof(ENUM_SERVICE_STATUS_PROCESS)) > llen)
+                            {
+                                break;
+                            }
 
 #if !defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
-                        const char* pstr;
-                        DWORD dwp;
+                            const char* pstr;
+                            DWORD dwp;
 
-                        dwp = pinfo[i].ServiceStatusProcess.dwCurrentState;
-                        pstr = winutils_service_state_to_string(dwp);
+                            dwp = pinfo[i].ServiceStatusProcess.dwCurrentState;
+                            pstr = winutils_service_state_to_string(dwp);
 
-                        if (pstr == NULL)
-                        {
-                            pstr = WINUTILS_SERVICE_STATE_STRINGS[8];
-                        }                        
+                            if (pstr == NULL)
+                            {
+                                pstr = WINUTILS_SERVICE_STATE_STRINGS[8];
+                            }
 #endif
 
 #if defined(QSC_WINTOOLS_SERVICE_LIST_DESCRIPTION)
 #   if defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
-                        snprintf(sbuf, sizeof(sbuf), "%s%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName);
+                            snprintf(sbuf, sizeof(sbuf), "%s%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName);
 #   else
-                        snprintf(sbuf, sizeof(sbuf), "%s\t%s\t%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName, pstr);
+                            snprintf(sbuf, sizeof(sbuf), "%s\t%s\t%s\n", pinfo[i].lpServiceName, pinfo[i].lpDisplayName, pstr);
 #   endif
 #else
 #   if defined(QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY)
-                        snprintf(sbuf, sizeof(sbuf), "%s\n", pinfo[i].lpServiceName);
+                            snprintf(sbuf, sizeof(sbuf), "%s\n", pinfo[i].lpServiceName);
 #   else
-                        snprintf(sbuf, sizeof(sbuf), "%s\t%s\n", pinfo[i].lpServiceName, pstr);
+                            snprintf(sbuf, sizeof(sbuf), "%s\t%s\n", pinfo[i].lpServiceName, pstr);
 #   endif
 #endif
-                        elen = strlen(sbuf);
+                            elen = strlen(sbuf);
 
-                        if (tlen + elen > reslen)
-                        {
-                            break;
+                            if (tlen + elen > reslen)
+                            {
+                                break;
+                            }
+
+                            strcat_s(result, reslen, sbuf);
+                            tlen += elen;
                         }
-
-                        strcat_s(result, reslen, sbuf);
-                        tlen += elen;
                     }
-                }
 
-                free(pinfo);
+                    qsc_memutils_alloc_free(pinfo);
+                }
             }
+
+            CloseServiceHandle(sch);
         }
 
-        CloseServiceHandle(sch);
-    }
-    
-    if (tlen == 0U)
-    {
-        winutils_get_error_description(result, reslen);
+        if (tlen == 0U)
+        {
+            winutils_get_error_description(result, reslen);
+        }
     }
 
     return tlen;
@@ -1199,62 +1261,64 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
     tlen = 0;
     tote = 0;
 
-    do {
-        stat = NetUserEnum(
-            NULL,
-            dlvl,
-            FILTER_NORMAL_ACCOUNT,
-            (LPBYTE*)&pbuf,
-            prem,
-            &derd,
-            &tote,
-            &resh);
-
-        if ((pbuf != NULL) && ((stat == NERR_Success) || (stat == ERROR_MORE_DATA)))
-        {
-            USER_INFO_1 *ptmp;
-            DWORD pctr;
-
-            ptmp = pbuf;
-
-            for (pctr = 0; (pctr < derd) && (tlen < reslen); ++pctr) 
-            {
-                char uname[UNLEN + 1U] = { 0U };
-                size_t nlen;
-                size_t olen;
-
-                nlen = wcslen(ptmp->usri1_name);
-                olen = 0;
-                wcstombs_s(&olen, uname, sizeof(uname), ptmp->usri1_name, nlen);
-
-                if (ptmp->usri1_priv == USER_PRIV_ADMIN)
-                {
-                    tlen += snprintf(result + tlen, reslen - tlen, "%s %s -%s\n", "User Name:", uname, "Administrator");
-                }
-                else if (ptmp->usri1_priv == USER_PRIV_GUEST)
-                {
-                    tlen += snprintf(result + tlen, reslen - tlen, "%s %s -%s\n", "User Name:", uname, "Guest");
-                }
-                else
-                {
-                    tlen += snprintf(result + tlen, reslen - tlen, "%s %s -%s\n", "User Name:", uname, "User");
-                }
-
-                ++ptmp;
-            }
-        }
-
-        if (pbuf != NULL) 
-        {
-            NetApiBufferFree(pbuf);
-            pbuf = NULL;
-        }
-    } 
-    while (stat == ERROR_MORE_DATA);
-    
-    if (tlen == 0)
+    if (result != NULL && reslen != 0)
     {
-        winutils_get_error_description(result, reslen);
+        do {
+            stat = NetUserEnum(
+                NULL,
+                dlvl,
+                FILTER_NORMAL_ACCOUNT,
+                (LPBYTE*)&pbuf,
+                prem,
+                &derd,
+                &tote,
+                &resh);
+
+            if ((pbuf != NULL) && ((stat == NERR_Success) || (stat == ERROR_MORE_DATA)))
+            {
+                USER_INFO_1 *ptmp;
+                DWORD pctr;
+
+                ptmp = pbuf;
+
+                for (pctr = 0; (pctr < derd) && (tlen < reslen); ++pctr)
+                {
+                    char uname[UNLEN + 1U] = { 0U };
+                    size_t nlen;
+                    size_t olen;
+
+                    nlen = wcslen(ptmp->usri1_name);
+                    olen = 0;
+                    wcstombs_s(&olen, uname, sizeof(uname), ptmp->usri1_name, nlen);
+
+                    if (ptmp->usri1_priv == USER_PRIV_ADMIN)
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "%s %s -%s\n", "User Name:", uname, "Administrator");
+                    }
+                    else if (ptmp->usri1_priv == USER_PRIV_GUEST)
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "%s %s -%s\n", "User Name:", uname, "Guest");
+                    }
+                    else
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "%s %s -%s\n", "User Name:", uname, "User");
+                    }
+
+                    ++ptmp;
+                }
+            }
+
+            if (pbuf != NULL)
+            {
+                NetApiBufferFree(pbuf);
+                pbuf = NULL;
+            }
+        } while (stat == ERROR_MORE_DATA);
+
+        if (tlen == 0)
+        {
+            winutils_get_error_description(result, reslen);
+        }
     }
 
     return tlen;
@@ -1272,39 +1336,42 @@ size_t qsc_winutils_current_user(char* result, size_t reslen)
     tlen = 0U;
     ulen = UNLEN + 1;
     
-    if (GetUserNameA(uname, &ulen) == true)
+    if (result != NULL && reslen != 0U)
     {
-        USER_INFO_1* uinfo = { 0U };
-        wchar_t wuser[UNLEN + 1U] = { 0U };
-        NET_API_STATUS stat;
-        size_t olen;
-
-        olen = 0U;
-        mbstowcs_s(&olen, wuser, ulen, uname, sizeof(uname));
-        stat = NetUserGetInfo(NULL, wuser, 1, (LPBYTE*)&uinfo);
-
-        if (stat == NERR_Success)
+        if (GetUserNameA(uname, &ulen) == true)
         {
-            if (uinfo->usri1_priv == USER_PRIV_ADMIN)
-            {
-                tlen = snprintf(result, reslen, "%s %s -%s", "User Name:", uname, "Administrator");
-            }
-            else if (uinfo->usri1_priv == USER_PRIV_GUEST)
-            {
-                tlen = snprintf(result, reslen, "%s %s -%s", "User Name:", uname, "Guest");
-            }
-            else
-            {
-                tlen = snprintf(result, reslen, "%s %s -%s", "User Name:", uname, "User");
-            }
+            USER_INFO_1* uinfo = { 0U };
+            wchar_t wuser[UNLEN + 1U] = { 0U };
+            NET_API_STATUS stat;
+            size_t olen;
 
-            NetApiBufferFree(uinfo);
+            olen = 0U;
+            mbstowcs_s(&olen, wuser, ulen, uname, sizeof(uname));
+            stat = NetUserGetInfo(NULL, wuser, 1, (LPBYTE*)&uinfo);
+
+            if (stat == NERR_Success)
+            {
+                if (uinfo->usri1_priv == USER_PRIV_ADMIN)
+                {
+                    tlen = snprintf(result, reslen, "%s %s -%s", "User Name:", uname, "Administrator");
+                }
+                else if (uinfo->usri1_priv == USER_PRIV_GUEST)
+                {
+                    tlen = snprintf(result, reslen, "%s %s -%s", "User Name:", uname, "Guest");
+                }
+                else
+                {
+                    tlen = snprintf(result, reslen, "%s %s -%s", "User Name:", uname, "User");
+                }
+
+                NetApiBufferFree(uinfo);
+            }
         }
-    }
-    
-    if (tlen == 0U)
-    {
-        winutils_get_error_description(result, reslen);
+
+        if (tlen == 0U)
+        {
+            winutils_get_error_description(result, reslen);
+        }
     }
 
     return tlen;

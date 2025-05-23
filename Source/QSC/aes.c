@@ -343,7 +343,7 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 	QSC_ASSERT(outputlen != NULL);
 	QSC_ASSERT(length != 0);
 
-	if (ctx != NULL && input != NULL && output != NULL && outputlen != NULL, length != 0)
+	if (ctx != NULL && input != NULL && output != NULL && outputlen != NULL && length != 0)
 	{
 		__m128i inp;
 		__m128i ivt;

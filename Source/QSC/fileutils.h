@@ -286,9 +286,10 @@ QSC_EXPORT_API size_t qsc_fileutils_get_size(const char* fpath);
  * \brief Get the working directory fpath.
  *
  * \param fpath:        [char*] The output buffer for the current working directory.
+ * \param flen:         [size_t] The length of the fpath string.
  * \return              [bool] Returns true if the working directory was successfully retrieved.
  */
-QSC_EXPORT_API bool qsc_fileutils_get_working_directory(char* fpath);
+QSC_EXPORT_API bool qsc_fileutils_get_working_directory(char* fpath, size_t flen);
 
 /**
  * \brief Get the filenames in a directory delineated with a newline.

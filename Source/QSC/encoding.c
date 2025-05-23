@@ -173,7 +173,7 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
                                         {
                                             achildren = achildren * 2U;
                                         }
-                                        tmp = (qsc_encoding_ber_element**)realloc(elem->children, achildren * sizeof(qsc_encoding_ber_element*));
+                                        tmp = (qsc_encoding_ber_element**)qsc_memutils_realloc(elem->children, achildren * sizeof(qsc_encoding_ber_element*));
                                         if (tmp == (qsc_encoding_ber_element**)NULL)
                                         {
                                             break;
@@ -253,7 +253,7 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
 
     res = 0U;
 
-    if (buffer != NULL && buflen >= 1 && length != NULL && indef != NULL)
+    if (buffer != NULL && buflen >= 1U && length != NULL && indef != NULL)
     {
         uint8_t first;
 
@@ -264,13 +264,13 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
             *indef = true;
             /* for indefinite lengths the length isn't pre-known */
             *length = 0U;
-            res = 1;
+            res = 1U;
         }
         else if ((first & 0x80U) == 0U)
         {
             *indef = false;
             *length = first;
-            res = 1;
+            res = 1U;
         }
         else
         {
@@ -493,7 +493,7 @@ size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buf
 
     size_t res;
 
-    res = 1;
+    res = 1U;
 
     if (buffer != NULL && buflen >= 1)
     {
@@ -693,6 +693,22 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
             {
                 for (i = 0U, j = 0U; i < inplen; i += 4, j += 3)
                 {
+                    char c = input[i];
+
+                    if (c < '+' || c > 'z')
+                    {
+                        res = false;
+                        break;
+                    }
+
+                    int idx = c - 43U;
+
+                    if ((size_t)idx >= (sizeof(DECTBL)/sizeof(DECTBL[0])))
+                    {
+                        res = false;
+                        break;
+                    }
+
                     v = DECTBL[input[i] - 43U];
                     v = ((uint32_t)v << 6) | DECTBL[input[i + 1U] - 43U];
                     v = input[i + 2U] == '=' ? (uint32_t)v << 6 : ((uint32_t)v << 6) | DECTBL[input[i + 2U] - 43U];

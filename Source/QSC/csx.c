@@ -554,7 +554,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 		__m512i tmpin;
 		size_t i;
 
-		for (i = 0U; i < 16; ++i)
+		for (i = 0U; i < 16U; ++i)
 		{
 			uint64_t x = ctx->state[i];
 			ctxw.state[i] = _mm512_set1_epi64(x);
@@ -730,6 +730,8 @@ void qsc_csx_dispose(qsc_csx_state* ctx)
 
 void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, bool encryption)
 {
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(keyparams != NULL);
 	QSC_ASSERT(keyparams->nonce != NULL);
 	QSC_ASSERT(keyparams->key != NULL);
 	QSC_ASSERT(keyparams->keylen == QSC_CSX_KEY_SIZE);

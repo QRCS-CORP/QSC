@@ -8,152 +8,171 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
 	QSC_ASSERT(output != NULL);
 
+	if (output != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	struct tm nt = { 0U };
-	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
-	__time64_t lt = { 0U };
-	errno_t err;
-	size_t len;
+		struct tm nt = { 0U };
+		char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
+		__time64_t lt = { 0U };
+		errno_t err;
+		size_t len;
 
-	lt = 0;
-	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
+		lt = 0;
+		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
-	_time64(&lt);
-	err = localtime_s(&nt, &lt);
+		_time64(&lt);
+		err = localtime_s(&nt, &lt);
 
-	if (err == 0)
-	{
-		len = strftime(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, "%Y-%m-%d", &nt);
-
-		if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		if (err == 0)
 		{
-			qsc_memutils_copy(output, tbuf, len);
+			len = strftime(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, "%Y-%m-%d", &nt);
+
+			if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+			{
+				qsc_memutils_copy(output, tbuf, len);
+				output[len] = '\0';
+			}
 		}
-	}
 #else
-	time_t rt;
-	struct tm* ti;
-	char buf[QSC_TIMEREX_TIMESTAMP_MAX];
-	size_t len;
+		time_t rt;
+		struct tm* ti;
+		char buf[QSC_TIMEREX_TIMESTAMP_MAX];
+		size_t len;
 
-	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
-	time(&rt);
+		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
+		time(&rt);
 
-	ti = localtime(&rt);
+		ti = localtime(&rt);
 
-	if (ti != NULL)
-	{
-		strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%F", ti);
-
-		len = strlen(buf);
-
-		if (len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		if (ti != NULL)
 		{
-			qsc_memutils_copy(output, buf, len);
+			strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%F", ti);
+
+			len = strlen(buf);
+
+			if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+			{
+				qsc_memutils_copy(output, buf, len);
+				output[len] = '\0';
+			}
 		}
-	}
 #endif
+	}
 }
 
 void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
 	QSC_ASSERT(output != NULL);
 
+	if (output != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	struct tm nt;
-	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
-	__time64_t lt;
-	errno_t err;
-	size_t len;
+		struct tm nt;
+		char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
+		__time64_t lt;
+		errno_t err;
+		size_t len;
 
-	lt = 0;
-	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
+		lt = 0;
+		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
-	_time64(&lt);
-	err = _localtime64_s(&nt, &lt);
+		_time64(&lt);
+		err = _localtime64_s(&nt, &lt);
 
-	if (err == 0)
-	{
-		err = asctime_s(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, &nt);
-		len = strlen(tbuf);
-
-		if (err == 0 && len > 0 && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		if (err == 0)
 		{
-			qsc_memutils_copy(output, tbuf, len);
+			err = asctime_s(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, &nt);
+			len = strlen(tbuf);
+
+			if (err == 0 && len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+			{
+				qsc_memutils_copy(output, tbuf, len);
+				output[len] = '\0';
+			}
 		}
-	}
 #else
-	time_t rt;
-	struct tm* ti;
-	char* ct;
+		time_t rt;
+		struct tm* ti;
+		char* ct;
 
-	size_t len;
+		size_t len;
 
-	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
-	rt = time(NULL);
-	ti = localtime(&rt);
+		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
+		rt = time(NULL);
+		ti = localtime(&rt);
 
-	if (ti != NULL)
-	{
-		ct = asctime(ti);
-
-		if (ct != NULL)
+		if (ti != NULL)
 		{
-			len = strlen(ct);
-			qsc_memutils_copy(output, ct, len);
+			ct = asctime(ti);
+
+			if (ct != NULL)
+			{
+				len = strlen(ct);
+
+				if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+				{
+					qsc_memutils_copy(output, ct, len);
+					output[len] = '\0';
+				}
+			}
 		}
-	}
 #endif
+	}
 }
 
 void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 {
 	QSC_ASSERT(output != NULL);
 
+	if (output != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	struct tm nt;
-	char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
-	__time64_t lt;
-	errno_t err;
-	size_t len;
+		struct tm nt;
+		char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
+		__time64_t lt;
+		errno_t err;
+		size_t len;
 
-	lt = 0;
-	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
+		lt = 0;
+		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
-	_time64(&lt);
-	err = localtime_s(&nt, &lt);
+		_time64(&lt);
+		err = localtime_s(&nt, &lt);
 
-	if (err == 0)
-	{
-		len = strftime(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, "%H:%M:%S", &nt);
-
-		if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		if (err == 0)
 		{
-			qsc_memutils_copy(output, tbuf, len);
+			len = strftime(tbuf, QSC_TIMEREX_TIMESTAMP_MAX, "%H:%M:%S", &nt);
+
+			if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+			{
+				qsc_memutils_copy(output, tbuf, len);
+				output[len] = '\0';
+			}
 		}
-	}
 #else
-	time_t rt;
-	struct tm* ti;
-	char buf[QSC_TIMEREX_TIMESTAMP_MAX];
-	size_t len;
+		time_t rt;
+		struct tm* ti;
+		char buf[QSC_TIMEREX_TIMESTAMP_MAX];
+		size_t len;
 
-	qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
-	time(&rt);
-	ti = localtime(&rt);
+		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
+		time(&rt);
+		ti = localtime(&rt);
 
-	if (ti != NULL)
-	{
-		strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%T", ti);
-
-		len = strlen(buf);
-
-		if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+		if (ti != NULL)
 		{
-			qsc_memutils_copy(output, buf, len);
+			strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%T", ti);
+
+			len = strlen(buf);
+
+			if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
+			{
+				qsc_memutils_copy(output, buf, len);
+				output[len] = '\0';
+			}
 		}
-	}
 #endif
+	}
 }
 
 uint64_t qsc_timerex_stopwatch_start()

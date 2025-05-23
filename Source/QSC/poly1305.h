@@ -135,7 +135,7 @@ QSC_EXPORT_API void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* mac)
 * \param ctx: [struct] The function ctx
 * \param key: [const] The secret key byte array
 */
-QSC_EXPORT_API void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t* key);
+QSC_EXPORT_API void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t key[QSC_POLY1305_KEY_SIZE]);
 
 /**
 * \brief Reset the ctx values to zero.

@@ -136,21 +136,19 @@ bool qsc_stringutils_compare_strings(const char* str1, const char* str2, size_t 
 	QSC_ASSERT(str1 != NULL);
 	QSC_ASSERT(str2 != NULL);
 
-	char c;
+	uint8_t acc;
 
-	c = -1;
+	acc = 1U;
 
 	if (str1 != NULL && str2 != NULL)
 	{
-		c = 0;
-
 		for (size_t i = 0U; i < length; ++i)
 		{
-			c += str1[i] ^ str2[i];
+			acc = (uint8_t)(acc + (uint8_t)(str1[i] ^ str2[i]));
 		}
 	}
 
-	return (c == 0);
+	return (acc == 0);
 }
 
 size_t qsc_stringutils_concat_strings(char* dest, size_t dstlen, const char* source)
@@ -322,7 +320,7 @@ size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char
 		{
 			if (source[i] != ' ' && source[i] != '\t' && source[i] != '\n' && source[i] != '\r')
 			{
-				dest[ctr] = source[ctr];
+				dest[ctr] = source[i];
 				++ctr;
 			}
 		}
@@ -1006,7 +1004,7 @@ void qsc_stringutils_trim_spaces(char* source)
 	{
 		slen = qsc_stringutils_string_size(source);
 
-		if (source[slen - 1U] == ' ')
+		if (slen > 0U && source[slen - 1U] == ' ')
 		{
 			source[slen - 1U] = '\0';
 		}

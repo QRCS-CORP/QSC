@@ -12,261 +12,276 @@ void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE],
 
 	size_t pos;
 
-	qsc_stringutils_int_to_string(tstruct->tm_year + QSC_TIMESTAMP_EPOCH_START, output, QSC_TIMESTAMP_STRING_SIZE);
-	pos = 4U;
-	output[pos] = '-';
-	++pos;
-
-	if (tstruct->tm_mon + 1 < 10)
+	if (output != NULL && tstruct != NULL)
 	{
-		output[pos] = '0';
+		qsc_stringutils_int_to_string(tstruct->tm_year + QSC_TIMESTAMP_EPOCH_START, output, QSC_TIMESTAMP_STRING_SIZE);
+		pos = 4U;
+		output[pos] = '-';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		++pos;
-	}
-	else
-	{
-		qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		pos += 2U;
-	}
 
-	output[pos] = '-';
-	++pos;
+		if (tstruct->tm_mon + 1 < 10)
+		{
+			output[pos] = '0';
+			++pos;
+			qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			++pos;
+		}
+		else
+		{
+			qsc_stringutils_int_to_string(tstruct->tm_mon + 1, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			pos += 2U;
+		}
 
-	if (tstruct->tm_mday < 10)
-	{
-		output[pos] = '0';
+		output[pos] = '-';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		++pos;
-	}
-	else
-	{
-		qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		pos += 2U;
-	}
 
-	output[pos] = ' ';
-	++pos;
+		if (tstruct->tm_mday < 10)
+		{
+			output[pos] = '0';
+			++pos;
+			qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			++pos;
+		}
+		else
+		{
+			qsc_stringutils_int_to_string(tstruct->tm_mday, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			pos += 2U;
+		}
 
-	if (tstruct->tm_hour < 10)
-	{
-		output[pos] = '0';
+		output[pos] = ' ';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		++pos;
-	}
-	else
-	{
-		qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		pos += 2U;
-	}
 
-	output[pos] = '-';
-	++pos;
+		if (tstruct->tm_hour < 10)
+		{
+			output[pos] = '0';
+			++pos;
+			qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			++pos;
+		}
+		else
+		{
+			qsc_stringutils_int_to_string(tstruct->tm_hour, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			pos += 2U;
+		}
 
-	if (tstruct->tm_min < 10)
-	{
-		output[pos] = '0';
+		output[pos] = '-';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		++pos;
-	}
-	else
-	{
-		qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		pos += 2U;
-	}
 
-	output[pos] = '-';
-	++pos;
+		if (tstruct->tm_min < 10)
+		{
+			output[pos] = '0';
+			++pos;
+			qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			++pos;
+		}
+		else
+		{
+			qsc_stringutils_int_to_string(tstruct->tm_min, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			pos += 2U;
+		}
 
-	if (tstruct->tm_sec < 10)
-	{
-		output[pos] = '0';
+		output[pos] = '-';
 		++pos;
-		qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		++pos;
-	}
-	else
-	{
-		qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
-		pos += 2U;
-	}
 
-	qsc_memutils_clear(output + pos, 1U);
+		if (tstruct->tm_sec < 10)
+		{
+			output[pos] = '0';
+			++pos;
+			qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			++pos;
+		}
+		else
+		{
+			qsc_stringutils_int_to_string(tstruct->tm_sec, output + pos, QSC_TIMESTAMP_STRING_SIZE - pos);
+			pos += 2U;
+		}
+
+		qsc_memutils_clear(output + pos, 1U);
+	}
 }
 
 void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char output[QSC_TIMESTAMP_STRING_SIZE])
 {
-	QSC_ASSERT(tstruct != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(tstruct != NULL);
 
-	char tmp[5] = { 0U };
+	if (output != NULL && tstruct != NULL)
+	{
+		char tmp[5] = { 0U };
 
-	qsc_memutils_clear(tstruct, sizeof(struct tm));
+		qsc_memutils_clear(tstruct, sizeof(struct tm));
 
-	qsc_memutils_copy(tmp, output, 4U);
-	tstruct->tm_year = qsc_stringutils_string_to_int(tmp) - QSC_TIMESTAMP_EPOCH_START;
-	qsc_memutils_clear(tmp, sizeof(tmp));
-	qsc_memutils_copy(tmp, output + 5U, 2U);
-	tstruct->tm_mon = qsc_stringutils_string_to_int(tmp) - 1U;
-	qsc_memutils_copy(tmp, output + 8U, 2U);
-	tstruct->tm_mday = qsc_stringutils_string_to_int(tmp);
-	qsc_memutils_copy(tmp, output + 11U, 2U);
-	tstruct->tm_hour = qsc_stringutils_string_to_int(tmp);
-	qsc_memutils_copy(tmp, output + 14U, 2U);
-	tstruct->tm_min = qsc_stringutils_string_to_int(tmp);
-	qsc_memutils_copy(tmp, output + 17U, 2U);
-	tstruct->tm_sec = qsc_stringutils_string_to_int(tmp);
-	tstruct->tm_wday = 0;
-	tstruct->tm_yday = 0;
-	tstruct->tm_isdst = -1;
+		qsc_memutils_copy(tmp, output, 4U);
+		tstruct->tm_year = qsc_stringutils_string_to_int(tmp) - QSC_TIMESTAMP_EPOCH_START;
+		qsc_memutils_clear(tmp, sizeof(tmp));
+		qsc_memutils_copy(tmp, output + 5U, 2U);
+		tstruct->tm_mon = qsc_stringutils_string_to_int(tmp) - 1U;
+		qsc_memutils_copy(tmp, output + 8U, 2U);
+		tstruct->tm_mday = qsc_stringutils_string_to_int(tmp);
+		qsc_memutils_copy(tmp, output + 11U, 2U);
+		tstruct->tm_hour = qsc_stringutils_string_to_int(tmp);
+		qsc_memutils_copy(tmp, output + 14U, 2U);
+		tstruct->tm_min = qsc_stringutils_string_to_int(tmp);
+		qsc_memutils_copy(tmp, output + 17U, 2U);
+		tstruct->tm_sec = qsc_stringutils_string_to_int(tmp);
+		tstruct->tm_wday = 0;
+		tstruct->tm_yday = 0;
+		tstruct->tm_isdst = -1;
+	}
 }
 
 void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 {
 	QSC_ASSERT(output != NULL);
 
+	if (output != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
-	struct tm nt = { 0U };
-	time_t lt;
-	errno_t err;
-	size_t len;
+		char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
+		struct tm nt = { 0U };
+		time_t lt;
+		errno_t err;
+		size_t len;
 
-	lt = 0;
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	time(&lt);
-	err = localtime_s(&nt, &lt);
+		lt = 0;
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		time(&lt);
+		err = localtime_s(&nt, &lt);
 
-	if (err == 0)
-	{
-		len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%Y-%m-%d", &nt);
-
-		if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+		if (err == 0)
 		{
-			qsc_memutils_copy(output, tbuf, len);
+			len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%Y-%m-%d", &nt);
+
+			if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+			{
+				qsc_memutils_copy(output, tbuf, len);
+			}
 		}
-	}
 
 #else
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
-	struct tm* nt;
-	time_t lt;
-	size_t len;
+		char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
+		struct tm* nt;
+		time_t lt;
+		size_t len;
 
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	time(&lt);
-	nt = localtime(&lt);
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		time(&lt);
+		nt = localtime(&lt);
 
-	if (nt != NULL)
-	{
-		strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%F", nt);
-
-		len = strlen(tbuf);
-
-		if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+		if (nt != NULL)
 		{
-			qsc_memutils_copy(output, tbuf, len);
+			strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%F", nt);
+
+			len = strlen(tbuf);
+
+			if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+			{
+				qsc_memutils_copy(output, tbuf, len);
+			}
 		}
-	}
 
 #endif
+	}
 }
 
 void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STRING_SIZE])
 {
 	QSC_ASSERT(output != NULL);
 
+	if (output != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	struct tm nt;
-	time_t lt;
-	errno_t err;
+		struct tm nt;
+		time_t lt;
+		errno_t err;
 
-	lt = 0;
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	time(&lt);
-	err = _localtime64_s(&nt, &lt);
+		lt = 0;
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		time(&lt);
+		err = _localtime64_s(&nt, &lt);
 
-	if (err == 0)
-	{
-		qsc_timestamp_time_struct_to_string(output, &nt);
-		/* terminate the string */
-		output[QSC_TIMESTAMP_STRING_SIZE - 1] = 0;
-	}
+		if (err == 0)
+		{
+			qsc_timestamp_time_struct_to_string(output, &nt);
+			/* terminate the string */
+			output[QSC_TIMESTAMP_STRING_SIZE - 1] = 0;
+		}
 
 #else
 
-	time_t lt;
-	struct tm* nt;
+		time_t lt;
+		struct tm* nt;
 
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	lt = time(NULL);
-	nt = localtime(&lt);
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		lt = time(NULL);
+		nt = localtime(&lt);
 
-	if (nt != NULL)
-	{
-		qsc_timestamp_time_struct_to_string(output, nt);
-	}
+		if (nt != NULL)
+		{
+			qsc_timestamp_time_struct_to_string(output, nt);
+		}
 
 #endif
+	}
 }
 
 void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 {
 	QSC_ASSERT(output != NULL);
 
+	if (output != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
-	struct tm nt;
-	time_t lt;
-	errno_t err;
-	size_t len;
+		char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
+		struct tm nt;
+		time_t lt;
+		errno_t err;
+		size_t len;
 
-	lt = 0;
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	time(&lt);
-	err = localtime_s(&nt, &lt);
+		lt = 0;
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		time(&lt);
+		err = localtime_s(&nt, &lt);
 
-	if (err == 0)
-	{
-		len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%H:%M:%S", &nt);
-
-		if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+		if (err == 0)
 		{
-			qsc_memutils_copy(output, tbuf, len);
+			len = strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%H:%M:%S", &nt);
+
+			if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+			{
+				qsc_memutils_copy(output, tbuf, len);
+			}
 		}
-	}
 
 #else
 
-	struct tm* nt;
-	time_t lt;
-	char buf[QSC_TIMESTAMP_STRING_SIZE];
-	size_t len;
+		struct tm* nt;
+		time_t lt;
+		char buf[QSC_TIMESTAMP_STRING_SIZE];
+		size_t len;
 
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	time(&lt);
-	nt = localtime(&lt);
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		time(&lt);
+		nt = localtime(&lt);
 
-	if (nt != NULL)
-	{
-		strftime(buf, QSC_TIMESTAMP_STRING_SIZE, "%T", nt);
-
-		len = strlen(buf);
-
-		if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+		if (nt != NULL)
 		{
-			qsc_memutils_copy(output, buf, len);
+			strftime(buf, QSC_TIMESTAMP_STRING_SIZE, "%T", nt);
+
+			len = strlen(buf);
+
+			if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+			{
+				qsc_memutils_copy(output, buf, len);
+			}
 		}
-	}
 
 #endif
+	}
 }
 
 uint64_t qsc_timestamp_datetime_seconds_remaining(const char basetime[QSC_TIMESTAMP_STRING_SIZE], const char comptime[QSC_TIMESTAMP_STRING_SIZE])
@@ -274,28 +289,38 @@ uint64_t qsc_timestamp_datetime_seconds_remaining(const char basetime[QSC_TIMEST
 	QSC_ASSERT(basetime != NULL);
 	QSC_ASSERT(comptime != NULL);
 
-	struct tm bt;
-	struct tm ft;
 	double dtmp;
-	time_t bsec;
-	time_t csec;
 
-	qsc_timestamp_string_to_time_struct(&bt, basetime);
-	qsc_timestamp_string_to_time_struct(&ft, comptime);
+	dtmp = 0.0;
+
+	if (basetime != NULL && comptime != NULL)
+	{
+		struct tm bt;
+		struct tm ft;
+		time_t bsec;
+		time_t csec;
+
+		qsc_timestamp_string_to_time_struct(&bt, basetime);
+		qsc_timestamp_string_to_time_struct(&ft, comptime);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	bsec = _mktime64(&bt);
-	csec = _mktime64(&ft);
-	dtmp = _difftime64(csec, bsec);
+		bsec = _mktime64(&bt);
+		csec = _mktime64(&ft);
+
+		if (bsec != (time_t)-1 && csec != (time_t)-1)
+		{
+			dtmp = _difftime64(csec, bsec);
+		}
 #else
-	bsec = mktime(&bt);
-	csec = mktime(&ft);
-	dtmp = difftime(csec, bsec);
+		bsec = mktime(&bt);
+		csec = mktime(&ft);
+		dtmp = difftime(csec, bsec);
 #endif
 
-	if (dtmp < 0 || bsec > csec)
-	{
-		dtmp = 0;
+		if (dtmp < 0 || bsec > csec)
+		{
+			dtmp = 0;
+		}
 	}
 
 	return (uint64_t)dtmp;
@@ -308,13 +333,18 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 	struct tm dt;
 	time_t tsec;
 
-	qsc_timestamp_string_to_time_struct(&dt, input);
+	tsec = 0;
+
+	if (input != NULL)
+	{
+		qsc_timestamp_string_to_time_struct(&dt, input);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	tsec = _mktime64(&dt);
+		tsec = _mktime64(&dt);
 #else
-	tsec = mktime(&dt);
+		tsec = mktime(&dt);
 #endif
+	}
 
 	return (uint64_t)tsec;
 }
@@ -355,37 +385,40 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 {
 	QSC_ASSERT(output != NULL);
 
+	if (output != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	struct tm nt;
-	time_t lt;
-	errno_t err;
+		struct tm nt;
+		time_t lt;
+		errno_t err;
 
-	lt = (time_t)dtsec;
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	nt.tm_isdst = -1;
-	err = localtime_s(&nt, &lt);
+		lt = (time_t)dtsec;
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		nt.tm_isdst = -1;
+		err = localtime_s(&nt, &lt);
 
-	if (err == 0)
-	{
-		qsc_timestamp_time_struct_to_string(output, &nt);
-	}
+		if (err == 0)
+		{
+			qsc_timestamp_time_struct_to_string(output, &nt);
+		}
 
 #else
 
-	struct tm* nt;
-	time_t lt;
+		struct tm* nt;
+		time_t lt;
 
-	qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-	lt = (time_t)dtsec;
-	nt = localtime(&lt);
+		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
+		lt = (time_t)dtsec;
+		nt = localtime(&lt);
 
-	if (nt != NULL)
-	{
-		qsc_timestamp_time_struct_to_string(output, nt);
-	}
+		if (nt != NULL)
+		{
+			qsc_timestamp_time_struct_to_string(output, nt);
+		}
 
 #endif
+	}
 }
 
 uint64_t qsc_timestamp_epochtime_seconds()

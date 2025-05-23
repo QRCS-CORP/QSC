@@ -20,36 +20,39 @@ static bool ipinfo_hexfield_valid(const char ** pp)
 		digits = 0U;
 		p  = *pp;
 
-		while ((digits < 4U) && (p[0U] != '\0') && (p[0U] != ':'))
+		if (pp != NULL && *pp != NULL)
 		{
-			unsigned int nibble;
+			while ((digits < 4U) && (p[0U] != '\0') && (p[0U] != ':'))
+			{
+				unsigned int nibble;
 
-			if ((p[0U] >= '0') && (p[0U] <= '9'))
-			{
-				nibble = (unsigned int)(p[0U] - '0');
-			}
-			else if ((p[0U] >= 'A') && (p[0U] <= 'F'))
-			{
-				nibble = (unsigned int)(10U + (p[0U] - 'A'));
-			}
-			else if ((p[0U] >= 'a') && (p[0U] <= 'f'))
-			{
-				nibble = (unsigned int)(10U + (p[0U] - 'a'));
-			}
-			else
-			{
-				break;
+				if ((p[0U] >= '0') && (p[0U] <= '9'))
+				{
+					nibble = (unsigned int)(p[0U] - '0');
+				}
+				else if ((p[0U] >= 'A') && (p[0U] <= 'F'))
+				{
+					nibble = (unsigned int)(10U + (p[0U] - 'A'));
+				}
+				else if ((p[0U] >= 'a') && (p[0U] <= 'f'))
+				{
+					nibble = (unsigned int)(10U + (p[0U] - 'a'));
+				}
+				else
+				{
+					break;
+				}
+
+				value = (value << 4U) | nibble;
+				++digits;
+				++p;
 			}
 
-			value = (value << 4U) | nibble;
-			++digits;
-			++p;
-		}
-
-		if (digits > 0U)
-		{
-			*pp = p;
-			res = true;
+			if (digits > 0U)
+			{
+				*pp = p;
+				res = true;
+			}
 		}
 	}
 
@@ -175,69 +178,89 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_bytes(uint8_t a1, uint8_t a
 	return res;
 }
 
-qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC_IPINFO_IPV4_STRNLEN])
+qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char* input)
 {
+    qsc_ipinfo_ipv4_address res = { 0U };
+    bool bok;
+
     QSC_ASSERT(input != NULL);
 
-    qsc_ipinfo_ipv4_address res = { 0U };
+	bok = false;
 
-	if (input != NULL)
-	{
-		size_t len = strlen(input);
+    if (input != NULL)
+    {
+        size_t len = strlen(input);
 
-		/* Minimum length: "0.0.0.0" = 7 characters */
-		if (len < 7U)
-		{
-			return res;
-		}
+        /* minimum length: "0.0.0.0" = 7 characters */
+        if (len >= 7U)
+        {
+            const char* p = input;
+            size_t idx;
+            uint8_t tmp[4U] = { 0U };
 
-		const char* p = input;
+            bok = true;
+            for (idx = 0U; idx < 4U && bok; ++idx)
+            {
+                size_t digits = 0U;
+                uint32_t val  = 0U;
 
-		for (size_t idx = 0U; idx < 4U; ++idx)
-		{
-			uint32_t val = 0U;
-			size_t digits = 0U;
+                /* parse up to three digits */
+                while (*p != '\0' && *p != '.' && digits < 3U)
+                {
+                    char c = *p;
 
-			/* Parse up to three digits for this octet */
-			while ((*p != '\0') && (*p != '.'))
-			{
-				char c = *p;
-				if ((c < '0') || (c > '9'))
-				{
-					return res;
-				}
-				uint32_t digit = (uint32_t)(c - '0');
-				val = val * 10U + digit;
-				if (val > 255U)
-				{
-					return res;
-				}
-				++digits;
-				++p;
-			}
+                    if ((c < '0') || (c > '9'))
+                    {
+                        bok = false;
+                        break;
+                    }
 
-			/* Require at least one digit */
-			if (digits == 0U)
-			{
-				return res;
-			}
+                    val = val * 10U + (uint32_t)(c - '0');
 
-			res.ipv4[idx] = (uint8_t)val;
+                    if (val > 255U)
+                    {
+                        bok = false;
+                        break;
+                    }
 
-			/* For all but the last octet, expect a dot separator */
-			if (idx < 3U)
-			{
-				if (*p != '.')
-				{
-					return res;
-				}
-				++p;
-			}
-		}
-	}
+                    ++digits;
+                    ++p;
+                }
+
+                if (digits == 0U)
+                {
+                    bok = false;
+                }
+
+                if (bok)
+                {
+                    tmp[idx] = (uint8_t)val;
+                    if (idx < 3U)
+                    {
+                        if (*p != '.')
+                        {
+                            bok = false;
+                        }
+
+                        ++p;
+                    }
+                }
+            }
+
+            if (bok)
+            {
+                /* commit only on full success */
+                for (size_t i = 0U; i < 4U; ++i)
+                {
+                    res.ipv4[i] = tmp[i];
+                }
+            }
+        }
+    }
 
     return res;
 }
+
 
 bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qsc_ipinfo_ipv4_address* b)
 {
@@ -315,46 +338,6 @@ bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 	if (address != NULL)
 	{
 		res = (address != NULL && address->ipv4[0U] <= 224U && address->ipv4[1U] != 255U && address->ipv4[2U] != 255U && address->ipv4[3U] != 255U);
-	}
-
-	return res;
-}
-
-bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address)
-{
-	QSC_ASSERT(address != NULL);
-
-	size_t i;
-	bool res;
-
-	res = false;
-
-	if (address != NULL)
-	{
-		const char* p = address;
-		i = 0U;
-
-		for (i = 0U; i < 4U; ++i)
-		{
-			if (ipinfo_octet_valid(&p) == true)
-			{
-				if (i < 3U)
-				{
-					if (*p != '.')
-					{
-						break;
-					}
-
-					p++;
-				}
-			}
-			else
-			{
-				break;
-			}
-		}
-
-		res = (*p == '\0' && i == 4U);
 	}
 
 	return res;
@@ -468,17 +451,54 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 		size_t pos;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+		bool bok;
+		int32_t ret;
 
-		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address->ipv4[0U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[1U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[2U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address->ipv4[3U]);
+		bok = false;
+		pos = 0U;
+		ret = 0;
+
+        /* first octet */
+        ret = snprintf(output, QSC_IPINFO_IPV4_STRNLEN, "%u", address->ipv4[0U]);
+        if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN)
+        {
+            pos = (size_t)ret;
+            output[pos] = '.';
+			++pos;
+
+            /* second octet */
+            ret = snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos, "%u", address->ipv4[1U]);
+
+            if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
+            {
+                pos += (size_t)ret;
+                output[pos] = '.';
+				++pos;
+
+                /* third octet */
+                ret = snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos, "%u", address->ipv4[2U]);
+
+                if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
+                {
+                    pos += (size_t)ret;
+                    output[pos] = '.';
+					++pos;
+
+                    /* fourth octet */
+                    ret = snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos, "%u", address->ipv4[3U]);
+                    if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
+                    {
+                        pos += (size_t)ret;
+                        bok = true;
+                    }
+                }
+            }
+        }
+
+        if (bok)
+        {
+            qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
+        }
 
 #else
 

@@ -6,23 +6,23 @@
 \def RCS256_ROUND_COUNT
 * The number of Rijndael mixing rounds used by RCS-256.
 */
-#define RCS256_ROUND_COUNT 22UL
+#define RCS256_ROUND_COUNT 22U
 
 /*!
 \def RCS512_ROUND_COUNT
 * The number of Rijndael ming rounds used by RCS-512.
 */
-#define RCS512_ROUND_COUNT 30UL
+#define RCS512_ROUND_COUNT 30U
 
 /*!
 \def RCS_ROUNDKEY_ELEMENT_SIZE
 * The round key element size in bytes.
 */
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
-#	define RCS_ROUNDKEY_ELEMENT_SIZE 16UL
+#	define RCS_ROUNDKEY_ELEMENT_SIZE 16U
 #	define RCS_AVX512_BLOCK 64UL
 #else
-#	define RCS_ROUNDKEY_ELEMENT_SIZE 4UL
+#	define RCS_ROUNDKEY_ELEMENT_SIZE 4U
 #	define RCS_PREFETCH_TABLES
 #endif
 
@@ -109,7 +109,7 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2], const
 {
 	const __m128i BLEND_MASK = _mm_set_epi32(0x80000000UL, 0x80800000UL, 0x80800000UL, 0x80808000UL);
 	const __m128i SHIFT_MASK = _mm_set_epi8(3, 2, 13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0);
-	const size_t RNDCNT = ctx->roundkeylen - 3;
+	const size_t RNDCNT = ctx->roundkeylen - 3U;
 	size_t kctr;
 
 	__m128i blk1 = _mm_loadu_si128(&input[0U]);

@@ -7,19 +7,24 @@ size_t qsc_arrayutils_find_string(const char* str, size_t slen, const char* toke
 	QSC_ASSERT(token != NULL);
 	QSC_ASSERT(slen != 0U);
 
-	const char* fnd;
 	size_t res;
 
     res = 0U;
 
     if (str != NULL && slen > 0U && token != NULL)
     {
-        res = (size_t)QSC_ARRAYUTILS_NPOS;
-        fnd = strstr(str, token);
+        size_t tlen;
 
-        if (fnd != NULL)
+        res = (size_t)QSC_ARRAYUTILS_NPOS;
+        tlen = strlen(token);
+
+        for (size_t i = 0U; i + tlen <= slen; ++i)
         {
-            res = (size_t)(fnd - str) + 1U;
+            if (strncmp(&str[i], token, tlen) == 0)
+            {
+                res = i + 1U;
+                break;
+            }
         }
     }
 
@@ -38,7 +43,7 @@ uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
 
     res = 0U;
 
-    if (str != NULL && slen > 1)
+    if (str != NULL && slen > 1U)
     {
         c = str[0U];
 

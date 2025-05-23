@@ -6,17 +6,31 @@ qsc_secrand_state secrand_state;
 int8_t qsc_secrand_next_char()
 {
 	uint8_t smp[sizeof(int8_t)] = { 0U };
-	qsc_secrand_generate(smp, sizeof(smp));
+	int8_t res;
 
-	return (int8_t)smp[0U];
+	res = 0;
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		res = (int8_t)smp[0U];
+	}
+
+	return res;
 }
 
 uint8_t qsc_secrand_next_uchar()
 {
 	uint8_t smp[sizeof(uint8_t)] = { 0U };
-	qsc_secrand_generate(smp, sizeof(smp));
+	uint8_t res;
 
-	return smp[0U];
+	res = 0U;
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		res = smp[0U];
+	}
+
+	return res;
 }
 
 double qsc_secrand_next_double()
@@ -25,10 +39,13 @@ double qsc_secrand_next_double()
 	double res;
 
 	res = 0.0;
-	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(double));
+	
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		qsc_memutils_copy(&res, smp, sizeof(double));
+	}
 
-	return res;
+	return (double)res / (double)UINT64_MAX;
 }
 
 int16_t qsc_secrand_next_int16()
@@ -37,8 +54,11 @@ int16_t qsc_secrand_next_int16()
 	int16_t res;
 
 	res = 0;
-	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(int16_t));
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		qsc_memutils_copy(&res, smp, sizeof(int16_t));
+	}
 
 	return res;
 }
@@ -55,7 +75,7 @@ int16_t qsc_secrand_next_int16_max(int16_t maximum)
 	{
 		x = qsc_secrand_next_int16();
 		ret = x % maximum;
-	} while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX);
 
 	return ret;
 }
@@ -74,7 +94,7 @@ int16_t qsc_secrand_next_int16_maxmin(int16_t maximum, int16_t minimum)
 	{
 		x = qsc_secrand_next_int16();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX);
 
 	return minimum + ret;
 }
@@ -85,8 +105,11 @@ uint16_t qsc_secrand_next_uint16()
 	uint16_t res;
 
 	res = 0U;
-	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(uint16_t));
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		qsc_memutils_copy(&res, smp, sizeof(uint16_t));
+	}
 
 	return res;
 }
@@ -103,7 +126,7 @@ uint16_t qsc_secrand_next_uint16_max(uint16_t maximum)
 	{
 		x = qsc_secrand_next_uint16();
 		ret = x % maximum;
-	} while (x >= SMPMAX || ret == 0U);
+	} while (x >= SMPMAX);
 
 	return ret;
 }
@@ -122,7 +145,7 @@ uint16_t qsc_secrand_next_uint16_maxmin(uint16_t maximum, uint16_t minimum)
 	{
 		x = qsc_secrand_next_uint16();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX || ret == 0U);
+	} while (x >= SMPMAX);
 
 	return minimum + ret;
 }
@@ -133,8 +156,11 @@ int32_t qsc_secrand_next_int32()
 	int32_t res;
 
 	res = 0;
-	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(int32_t));
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		qsc_memutils_copy(&res, smp, sizeof(int32_t));
+	}
 
 	return res;
 }
@@ -151,7 +177,7 @@ int32_t qsc_secrand_next_int32_max(int32_t maximum)
 	{
 		x = qsc_secrand_next_int32();
 		ret = x % maximum;
-	} while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX);
 
 	return ret;
 }
@@ -170,7 +196,7 @@ int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum)
 	{
 		x = qsc_secrand_next_int32();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX);
 
 	return minimum + ret;
 }
@@ -181,8 +207,11 @@ uint32_t qsc_secrand_next_uint32()
 	uint32_t res;
 
 	res = 0U;
-	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(uint32_t));
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		qsc_memutils_copy(&res, smp, sizeof(uint32_t));
+	}
 
 	return res;
 }
@@ -199,7 +228,7 @@ uint32_t qsc_secrand_next_uint32_max(uint32_t maximum)
 	{
 		x = qsc_secrand_next_uint32();
 		ret = x % maximum;
-	} while (x >= SMPMAX || ret == 0U);
+	} while (x >= SMPMAX);
 
 	return ret;
 }
@@ -218,7 +247,7 @@ uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum)
 	{
 		x = qsc_secrand_next_uint32();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX || ret == 0U);
+	} while (x >= SMPMAX);
 
 	return minimum + ret;
 }
@@ -229,8 +258,11 @@ int64_t qsc_secrand_next_int64()
 	int64_t res;
 
 	res = 0;
-	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(int64_t));
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		qsc_memutils_copy(&res, smp, sizeof(int64_t));
+	}
 
 	return res;
 }
@@ -247,7 +279,7 @@ int64_t qsc_secrand_next_int64_max(int64_t maximum)
 	{
 		x = qsc_secrand_next_int64();
 		ret = x % maximum;
-	} while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX);
 
 	return ret;
 }
@@ -266,7 +298,7 @@ int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum)
 	{
 		x = qsc_secrand_next_int64();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX || ret < 0);
+	} while (x >= SMPMAX);
 
 	return minimum + ret;
 }
@@ -277,8 +309,11 @@ uint64_t qsc_secrand_next_uint64()
 	uint64_t res;
 
 	res = 0U;
-	qsc_secrand_generate(smp, sizeof(smp));
-	qsc_memutils_copy((uint8_t*)&res, smp, sizeof(uint64_t));
+
+	if (qsc_secrand_generate(smp, sizeof(smp)))
+	{
+		qsc_memutils_copy(&res, smp, sizeof(uint64_t));
+	}
 
 	return res;
 }
@@ -295,7 +330,7 @@ uint64_t qsc_secrand_next_uint64_max(uint64_t maximum)
 	{
 		x = qsc_secrand_next_uint64();
 		ret = x % maximum;
-	} while (x >= SMPMAX || ret == 0U);
+	} while (x >= SMPMAX);
 
 	return ret;
 }
@@ -314,7 +349,7 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 	{
 		x = qsc_secrand_next_uint64();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX || ret == 0U);
+	} while (x >= SMPMAX);
 
 	return minimum + ret;
 }
@@ -335,13 +370,16 @@ void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* 
 	QSC_ASSERT(seed != NULL);
 	QSC_ASSERT(seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE);
 
-	/* initialize the underlying generator */
-	qsc_csg_initialize(&secrand_state.hstate, seed, seedlen, custom, custlen, true);
+	if (seed != NULL && (seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE))
+	{
+		/* initialize the underlying generator */
+		qsc_csg_initialize(&secrand_state.hstate, seed, seedlen, custom, custlen, true);
 
-	/* pre-fill the cache */
-	qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
-	secrand_state.cpos = 0U;
-	secrand_state.init = true;
+		/* pre-fill the cache */
+		qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+		secrand_state.cpos = 0U;
+		secrand_state.init = true;
+	}
 }
 
 bool qsc_secrand_generate(uint8_t* output, size_t length)
@@ -356,13 +394,7 @@ bool qsc_secrand_generate(uint8_t* output, size_t length)
 
 	res = false;
 
-	if (secrand_state.init != true)
-	{
-		output = NULL;
-		length = 0U;
-	}
-
-	if (length != 0U)
+	if (output != NULL && length != 0 && secrand_state.init == true)
 	{
 		if (length > BUFLEN)
 		{

@@ -34,7 +34,9 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 		res = true;
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-		if (BCryptGenRandom(NULL, output, (ULONG)length, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0)
+		ULONG ulen = (ULONG)length;
+
+		if (BCryptGenRandom(NULL, output, ulen, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0)
 		{
 			res = false;
 		}
@@ -109,6 +111,12 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 					res = false;
 					break;
 				}
+				else if (pos == 0)
+				{
+					/* zero-length read—treat as failure */
+					res = false;
+					break;
+				}
 
 				ptr += (size_t)pos;
 				rmd -= (size_t)pos;
@@ -133,7 +141,7 @@ uint16_t qsc_csp_uint16()
 	uint8_t arr[sizeof(uint16_t)] = { 0U };
 	uint16_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_csp_generate(arr, sizeof(arr)))
 	{
@@ -151,7 +159,7 @@ uint32_t qsc_csp_uint32()
 	uint8_t arr[sizeof(uint32_t)] = { 0U };
 	uint32_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_csp_generate(arr, sizeof(arr)))
 	{
@@ -171,7 +179,7 @@ uint64_t qsc_csp_uint64()
 	uint8_t arr[sizeof(uint64_t)] = { 0U };
 	uint64_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_csp_generate(arr, sizeof(arr)))
 	{

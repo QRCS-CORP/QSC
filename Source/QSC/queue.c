@@ -70,6 +70,7 @@ void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width)
 		if (ctx->queue != NULL)
 		{
 			size_t i;
+			size_t j;
 			bool success;
 
 			success = true;
@@ -99,7 +100,7 @@ void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width)
 			}
 			else
 			{
-				for (size_t j = 0; j < i; ++j)
+				for (j = 0U; j < i; ++j)
 				{
 					qsc_memutils_aligned_free(ctx->queue[j]);
 					ctx->queue[j] = NULL;
@@ -165,33 +166,35 @@ uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(otplen != 0U);
+	QSC_ASSERT(otplen <= ctx->width);
 
 	uint64_t tag;
 
 	tag = 0U;
 
-	if (ctx != NULL && output != NULL && otplen != 0U)
-	{
-		if (!qsc_queue_empty(ctx) && otplen <= ctx->width)
-		{
-			qsc_memutils_copy(output, ctx->queue[0U], otplen);
-			qsc_memutils_clear(ctx->queue[0U], ctx->width);
-			tag = ctx->tags[ctx->position - 1U];
+    if (!qsc_queue_empty(ctx) && otplen <= ctx->width)
+    {
+        /* copy out oldest entry */
+        qsc_memutils_copy(output, ctx->queue[0U], otplen);
+        tag = ctx->tags[0U];
 
-			if (ctx->count > 1U)
-			{
-				for (size_t i = 1U; i < ctx->count; ++i)
-				{
-					qsc_memutils_copy(ctx->queue[i - 1U], ctx->queue[i], ctx->width);
-					ctx->tags[i - 1U] = ctx->tags[i];
-				}
-			}
+        if (ctx->count > 1U)
+        {
+            for (size_t i = 1U; i < ctx->count; ++i)
+            {
+                /* shift data buffers */
+                qsc_memutils_copy(ctx->queue[i - 1U], ctx->queue[i], ctx->width);
+                /* shift tags */
+                ctx->tags[i - 1U] = ctx->tags[i];
+            }
+        }
 
-			qsc_memutils_clear(ctx->queue[ctx->position - 1U], ctx->width);
-			ctx->tags[ctx->position - 1U] = 0U;
-			--ctx->count;
-			--ctx->position;
-		}
+        /* clear last slot */
+        qsc_memutils_clear(ctx->queue[ctx->count - 1U], ctx->width);
+        ctx->tags[ctx->count - 1U] = 0U;
+
+        --ctx->count;
+        --ctx->position;
 	}
 
 	return tag;
@@ -202,6 +205,7 @@ void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, ui
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(inlen != 0U);
+	QSC_ASSERT(inlen <= ctx->width);
 
 	if (ctx != NULL && input != NULL && inlen != 0U)
 	{

@@ -32,7 +32,9 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 
 	if (output != NULL && input != NULL && length != 0U)
 	{
-		if (strlen(input) < (length * 2U))
+		size_t inlen = strlen(input);
+
+		if (inlen >= (length * 2U))
 		{
 			const uint8_t HASHMAP[32] =
 			{

@@ -83,7 +83,7 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 		{
 			ctx->rate = QSC_KECCAK_512_RATE;
 		}
-		else
+		else if (seedlen == QSC_CSG_256_SEED_SIZE)
 		{
 			ctx->rate = QSC_KECCAK_256_RATE;
 		}
@@ -132,16 +132,17 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(otplen != 0);
+	QSC_ASSERT(otplen != 0U);
 
-	if (ctx != NULL && output != NULL && otplen != 0)
+	if (ctx != NULL && output != NULL && otplen != 0U)
 	{
+		size_t outpos;
+		size_t rmdlen;
+
 		ctx->bctr += otplen;
 
 		if (ctx->crmd < otplen)
 		{
-			size_t outpos;
-
 			outpos = 0U;
 
 			/* copy remaining bytes from the cache */
@@ -160,22 +161,22 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 				csg_fill_buffer(ctx);
 
 				/* copy to output */
-				const size_t RMDLEN = qsc_intutils_min(ctx->crmd, otplen);
-				qsc_memutils_copy(output + outpos, ctx->cache, RMDLEN);
+				rmdlen = qsc_intutils_min(ctx->crmd, otplen);
+				qsc_memutils_copy(output + outpos, ctx->cache, rmdlen);
 
-				otplen -= RMDLEN;
-				outpos += RMDLEN;
-				ctx->crmd -= RMDLEN;
-				ctx->cpos += RMDLEN;
+				otplen -= rmdlen;
+				outpos += rmdlen;
+				ctx->crmd -= rmdlen;
+				ctx->cpos += rmdlen;
 			}
 		}
 		else
 		{
 			/* copy from the state buffer to output */
-			const size_t RMDLEN = qsc_intutils_min(ctx->crmd, otplen);
-			qsc_memutils_copy(output, ctx->cache + ctx->cpos, RMDLEN);
-			ctx->crmd -= RMDLEN;
-			ctx->cpos += RMDLEN;
+			rmdlen = qsc_intutils_min(ctx->crmd, otplen);
+			qsc_memutils_copy(output, ctx->cache + ctx->cpos, rmdlen);
+			ctx->crmd -= rmdlen;
+			ctx->cpos += rmdlen;
 		}
 
 		/* clear used bytes */

@@ -1,6 +1,7 @@
 #include "async.h"
 #include "cpuidex.h"
 #include "memutils.h"
+#include <stdarg.h>
 #include <stdlib.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -38,68 +39,73 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* con
 {
     QSC_ASSERT(task != NULL);
     QSC_ASSERT(context != NULL);
-    QSC_ASSERT(nthreads != 0);
+    QSC_ASSERT(nthreads != 0U);
 
     bool res;
 
     res = false;
 
-    if (task != NULL && context != NULL && nthreads != 0)
+    if (task != NULL && context != NULL && nthreads != 0U)
     {
         qsc_thread* threads;
         async_thread_task_t* tasks;
 
         threads = (qsc_thread*)qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
-        tasks = (async_thread_task_t*)qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
 
-        if (threads != NULL && tasks != NULL)
+        if (threads != NULL)
         {
-            qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
-            qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
-            res = true;
+            tasks = (async_thread_task_t*)qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
 
-            /* Process each task on a new thread */
-            for (size_t i = 0U; i < nthreads; ++i)
+            if (tasks != NULL)
             {
-                tasks[i].task = task;
-                tasks[i].context = context;
-                tasks[i].index = i;
+                qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
+                qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
+                res = true;
+
+                /* Process each task on a new thread */
+                for (size_t i = 0U; i < nthreads; ++i)
+                {
+                    tasks[i].task = task;
+                    tasks[i].context = context;
+                    tasks[i].index = i;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-                threads[i] = (HANDLE)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
+                    threads[i] = (HANDLE)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
 
-                if (threads[i] == NULL)
-                {
-                    res = false;
-                    break;
-                }
+                    if (threads[i] == NULL)
+                    {
+                        res = false;
+                        break;
+                    }
 #elif defined(QSC_SYSTEM_OS_POSIX)
-                if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
-                {
-                    res = false;
-                    break;
-                }
+                    if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
+                    {
+                        res = false;
+                        break;
+                    }
 #endif
-            }
+                }
 
-            /* Wait for all threads to finish */
-            for (size_t i = 0U; i < nthreads; ++i)
-            {
+                /* Wait for all threads to finish */
+                for (size_t i = 0U; i < nthreads; ++i)
+                {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-                if (threads[i] != NULL)
-                {
-                    WaitForSingleObject(threads[i], INFINITE);
-                    CloseHandle(threads[i]);
-                }
+                    if (threads[i] != NULL)
+                    {
+                        WaitForSingleObject(threads[i], INFINITE);
+                        CloseHandle(threads[i]);
+                    }
 #elif defined(QSC_SYSTEM_OS_POSIX)
-                pthread_join(threads[i], NULL);
+                    pthread_join(threads[i], NULL);
 #endif
+                }
+
+                qsc_memutils_alloc_free(tasks);
+                tasks = NULL;
             }
 
             qsc_memutils_alloc_free(threads);
             threads = NULL;
-            qsc_memutils_alloc_free(tasks);
-            tasks = NULL;
         }
     }
 

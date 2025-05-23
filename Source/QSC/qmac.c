@@ -18,7 +18,7 @@ static inline __m256i qmac_shift256_left_19(__m256i x)
     carry = 0;
     _mm256_storeu_si256((__m256i*)lanes, x);
 
-    for (int32_t i = 0; i < 4; i++) 
+    for (size_t i = 0U; i < 4U; i++) 
     {
         uint64_t tmp = lanes[i];
         lanes[i] = (tmp << 19) | carry;
@@ -31,8 +31,8 @@ static inline __m256i qmac_shift256_left_19(__m256i x)
     * For each 1-bit in 'carry', we XOR in a 1 at position i and a 1 at position (i+19).
     * In our simplified fix we assume that 'carry' fits in 19 bits.
     * We fold it into the least significant lane. */
-    lanes[0] ^= carry;         /* fold the carry as if multiplied by 1 */
-    lanes[0] ^= carry << 19;   /* fold the carry as if multiplied by x ^ 19 */
+    lanes[0U] ^= carry;         /* fold the carry as if multiplied by 1 */
+    lanes[0U] ^= carry << 19;   /* fold the carry as if multiplied by x ^ 19 */
 
     return _mm256_loadu_si256((const __m256i*)lanes);
 }
@@ -94,9 +94,9 @@ static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uin
     /* load the lower 256 bits(prod[0..3]) into two __m128i registers */
     __m128i L[2U];
     /* loads prod[0] and prod[1] */
-    L[0] = _mm_loadu_si128((const __m128i*) prod);
+    L[0U] = _mm_loadu_si128((const __m128i*) prod);
     /* loads prod[2] and prod[3] */
-    L[1] = _mm_loadu_si128((const __m128i*)(prod + 2U));
+    L[1U] = _mm_loadu_si128((const __m128i*)(prod + 2U));
     
     /* load the upper 256 bits(prod[4..7]) into two __m128i registers */
     __m128i H[2U];
@@ -127,7 +127,9 @@ static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uin
 static void qmac_shift256_left_19_fold(const uint64_t in[4], int32_t shift, uint64_t out[4])
 {
     uint64_t tmp[5U];
-    uint64_t carry = 0U;
+    uint64_t carry;
+
+    carry = 0U;
 
     for (size_t i = 0U; i < 4U; i++) 
     {
@@ -150,7 +152,7 @@ static void qmac_shift256_left_19_fold(const uint64_t in[4], int32_t shift, uint
     }
 }
 
-static void qmac_reduce_320_to_256_poly19(uint64_t x[5])
+static void qmac_reduce_320_to_256_poly19(uint64_t x[5U])
 {
     const int32_t deg = 256;
     /* poly represents x^19 + 1 */
@@ -164,8 +166,8 @@ static void qmac_reduce_320_to_256_poly19(uint64_t x[5])
         int32_t shift;
         int32_t word;
 
-        word = i / 64;
-        bit = i % 64;
+        word = i / 64U;
+        bit = i % 64U;
 
         if (x[word] & (1ULL << bit)) 
         {
@@ -194,10 +196,10 @@ static void qmac_reduce_320_to_256_poly19(uint64_t x[5])
         }
     }
 
-    x[4] = 0U;
+    x[4U] = 0U;
 }
 
-static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint64_t b[4])
+static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uint64_t b[4U])
 {
     uint64_t prod[8U] = { 0U };
 
@@ -217,7 +219,7 @@ static void qmac_gfmul256_poly19(uint64_t r[4], const uint64_t a[4], const uint6
     
     /* compute t19 = b320 << 19, with folding of the final carry */
     uint64_t t19[4U] = { 0U };
-    qmac_shift256_left_19_fold(b320, 19, t19);
+    qmac_shift256_left_19_fold(b320, 19U, t19);
     
     /* form q320 = b320 xor t19. We build a 5-word result */
     uint64_t q320[5U];
@@ -279,7 +281,7 @@ void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keyparams, const uint
     QSC_ASSERT(output != NULL);
     QSC_ASSERT(keyparams != NULL);
     QSC_ASSERT(message != NULL);
-    QSC_ASSERT(msglen != 0);
+    QSC_ASSERT(msglen != 0U);
 
     if (output != NULL && keyparams != NULL && message != NULL && msglen != 0U)
     {
@@ -333,12 +335,12 @@ void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
             /* initialize the SHAKE instance */
             qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, keyparams->nonce, keyparams->noncelen, keyparams->info, keyparams->infolen);
             /* generate the subkeys H and F */
-            qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1);
+            qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1U);
         }
         else
         {
             qsc_cshake_initialize(&kstate, qsc_keccak_rate_256, keyparams->key, keyparams->keylen, keyparams->nonce, keyparams->noncelen, keyparams->info, keyparams->infolen);
-            qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1);
+            qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1U);
         }
 
         /* copy the hash subkey */
@@ -361,9 +363,9 @@ void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen)
 	size_t mlen;
 	size_t mpos;
 
-	mpos = 0;
+	mpos = 0U;
 
-    if (ctx != NULL && message != NULL && msglen != 0 && ctx->initialized == true)
+    if (ctx != NULL && message != NULL && msglen != 0U && ctx->initialized == true)
     {
         while (msglen > 0U)
         {

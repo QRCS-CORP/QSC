@@ -134,7 +134,7 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t* message, const uint8_t* expected)
 {
 	QSC_ASSERT(key != NULL);
-    QSC_ASSERT(iv != NULL);
+    QSC_ASSERT(nonce != NULL);
     QSC_ASSERT(message != NULL);
     QSC_ASSERT(expected != NULL);
 

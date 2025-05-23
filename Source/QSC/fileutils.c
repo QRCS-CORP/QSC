@@ -130,7 +130,6 @@ void qsc_fileutils_close(FILE* fp)
 	if (fp != NULL)
 	{
 		fclose(fp);
-		fp = NULL;
 	}
 }
 
@@ -555,7 +554,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 		{
 			*length = sizeof(chunk);
 
-			if ((*line = malloc(*length)) == NULL)
+			if ((*line = qsc_memutils_malloc(*length)) == NULL)
 			{
 				errno = ENOMEM;
 				return -1;
@@ -583,7 +582,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 					*length *= 2U;
 				}
 
-				tmpl = realloc(*line, *length);
+				tmpl = qsc_memutils_realloc(*line, *length);
 
 				if (tmpl != NULL)
 				{
@@ -647,7 +646,7 @@ size_t qsc_fileutils_get_size(const char* fpath)
 	return res;
 }
 
-bool qsc_fileutils_get_working_directory(char* fpath)
+bool qsc_fileutils_get_working_directory(char* fpath, size_t flen)
 {
 	QSC_ASSERT(fpath != NULL);
 
@@ -670,16 +669,12 @@ bool qsc_fileutils_get_working_directory(char* fpath)
 		if (sdir != NULL)
 		{
 			len = qsc_stringutils_string_size(buf);
-			res = qsc_stringutils_string_size(fpath) <= len;
+			res = flen <= len;
 
 			if (res == true)
 			{
 				qsc_memutils_copy(fpath, buf, len);
 			}
-		}
-		else
-		{
-			res = false;
 		}
 	}
 

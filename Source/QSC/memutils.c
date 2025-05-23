@@ -180,6 +180,9 @@ void* qsc_memutils_aligned_alloc(int32_t align, size_t length)
 #if defined(QSC_SYSTEM_AVX_INTRINSICS) && defined(QSC_SYSTEM_OS_WINDOWS)
 		ret = _aligned_malloc(length, align);
 #elif defined(QSC_SYSTEM_OS_POSIX)
+		QSC_ASSERT((align & (align - 1)) == 0);
+		QSC_ASSERT((size_t)align >= sizeof(void*));
+
 		int32_t res;
 
 		res = posix_memalign(&ret, align, length);
@@ -428,7 +431,7 @@ bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 	pctr = 0U;
 	res = false;
 
-	if (a != NULL && b != NULL && length != 0)
+	if (a != NULL && b != NULL && length != 0U)
 	{
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)

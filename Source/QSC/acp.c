@@ -158,7 +158,7 @@ uint16_t qsc_acp_uint16()
 	uint8_t arr[sizeof(uint16_t)] = { 0U };
 	uint16_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_acp_generate(arr, sizeof(arr)))
 	{
@@ -173,7 +173,7 @@ uint32_t qsc_acp_uint32()
 	uint8_t arr[sizeof(uint32_t)] = { 0U };
 	uint32_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_acp_generate(arr, sizeof(arr)))
 	{
@@ -191,7 +191,7 @@ uint64_t qsc_acp_uint64()
 	uint8_t arr[sizeof(uint64_t)] = { 0U };
 	uint64_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_acp_generate(arr, sizeof(arr)))
 	{

@@ -8,7 +8,7 @@
 /* RDRAND is guaranteed to generate a random number within 10 retries on a working CPU */
 #define RDP_RDR_RETRY 10U
 /* successful return of a rdrand step call */
-#define RDP_RDR_SUCCESS 1L
+#define RDP_RDR_SUCCESS 1
 
 bool qsc_rdp_generate(uint8_t* output, size_t length)
 {
@@ -24,13 +24,14 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 	{
 #if defined(QSC_RDRAND_COMPATIBLE)
 		qsc_cpuidex_cpu_features cfeat;
+
 		size_t ectr;
 		size_t pos;
 		size_t rmd;
+		size_t rmdlen;
 		int32_t fret;
 		bool hrand;
 		bool hfeat;
-
 		hfeat = qsc_cpuidex_features_set(&cfeat);
 		hrand = cfeat.rdrand;
 
@@ -41,7 +42,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 			rmd = length;
 			res = true;
 
-			while (rmd != 0U)
+			while (rmd != 0U && ectr <= RDP_RDR_RETRY)
 			{
 #	if defined(QSC_SYSTEM_IS_X64)
 				uint64_t rnd64;
@@ -50,15 +51,15 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 
 				if (fret == RDP_RDR_SUCCESS)
 				{
-					const size_t RMDLEN = qsc_intutils_min(sizeof(uint64_t), rmd);
+					rmdlen = qsc_intutils_min(sizeof(uint64_t), rmd);
 
-					for (size_t i = 0U; i < RMDLEN; ++i)
+					for (size_t i = 0U; i < rmdlen; ++i)
 					{
 						output[pos + i] = (uint8_t)(rnd64 >> (i * 8U));
 					}
 
-					pos += RMDLEN;
-					rmd -= RMDLEN;
+					pos += rmdlen;
+					rmd -= rmdlen;
 					ectr = 0U;
 				}
 				else
@@ -68,7 +69,6 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 					if (ectr > RDP_RDR_RETRY)
 					{
 						res = false;
-						break;
 					}
 				}
 #	else
@@ -78,15 +78,15 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 
 				if (fret == RDP_RDR_SUCCESS)
 				{
-					const size_t RMDLEN = qsc_intutils_min(sizeof(uint32_t), rmd);
+					rmdlen = qsc_intutils_min(sizeof(uint32_t), rmd);
 
-					for (size_t i = 0U; i < RMDLEN; ++i)
+					for (size_t i = 0U; i < rmdlen; ++i)
 					{
 						output[pos + i] = (uint8_t)(rnd32 >> (i * 8U));
 					}
 
-					pos += RMDLEN;
-					rmd -= RMDLEN;
+					pos += rmdlen;
+					rmd -= rmdlen;
 					ectr = 0U;
 				}
 				else
@@ -124,7 +124,7 @@ uint16_t qsc_rdp_uint16()
 	uint8_t arr[sizeof(uint16_t)] = { 0U };
 	uint16_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_rdp_generate(arr, sizeof(arr)))
 	{
@@ -140,7 +140,7 @@ uint32_t qsc_rdp_uint32()
 	uint8_t arr[sizeof(uint32_t)] = { 0U };
 	uint32_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_rdp_generate(arr, sizeof(arr)))
 	{
@@ -158,7 +158,7 @@ uint64_t qsc_rdp_uint64()
 	uint8_t arr[sizeof(uint64_t)] = { 0U };
 	uint64_t num;
 
-	num = 0;
+	num = 0U;
 
 	if (qsc_rdp_generate(arr, sizeof(arr)))
 	{

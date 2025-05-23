@@ -27,6 +27,8 @@
 
 void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH])
 {
+	QSC_ASSERT(path != NULL);
+
 	size_t len;
 
 	len = qsc_stringutils_string_size(path);
@@ -41,6 +43,8 @@ void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH])
 
 bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH])
 {
+	QSC_ASSERT(path != NULL);
+
 	int32_t res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -54,6 +58,8 @@ bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH])
 
 bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_MAX_PATH])
 {
+	QSC_ASSERT(path != NULL);
+
 	int32_t res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -67,6 +73,8 @@ bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_MAX_PATH])
 
 bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 {
+	QSC_ASSERT(path != NULL);
+
 	bool res;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -95,14 +103,14 @@ bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH])
 size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* directory)
 {
 	QSC_ASSERT(result != NULL);
-	QSC_ASSERT(reslen != 0);
+	QSC_ASSERT(reslen != 0U);
 	QSC_ASSERT(directory != NULL);
 
 	size_t lctr;
 
 	lctr = 0U;
 
-	if (result != NULL && reslen != 0 && directory != NULL)
+	if (result != NULL && reslen != 0U && directory != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
@@ -197,6 +205,8 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 
 void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char output[QSC_SYSTEM_MAX_PATH])
 {
+	QSC_ASSERT(output != NULL);
+
 	qsc_memutils_clear(output, QSC_SYSTEM_MAX_PATH);
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -268,15 +278,18 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 
 	qsc_stringutils_clear_string(output);
 	pstr = getenv("HOME");
-	len = qsc_stringutils_string_size(pstr);
 
-	if (len > 0U)
+	if (pstr != NULL)
 	{
-		qsc_stringutils_copy_string(output, QSC_SYSTEM_MAX_PATH, pstr);
-	}
+		len = qsc_stringutils_string_size(pstr);
 
-	switch (directory)
-	{
+		if (len > 0U)
+		{
+			qsc_stringutils_copy_string(output, QSC_SYSTEM_MAX_PATH, pstr);
+		}
+
+		switch (directory)
+		{
 		case qsc_folderutils_directories_user_desktop:
 		{
 			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Desktop");
@@ -311,17 +324,27 @@ void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char o
 		{
 			qsc_stringutils_concat_strings(output, QSC_SYSTEM_MAX_PATH, "/Documents");
 		}
+		}
 	}
 #endif
 }
 
 bool qsc_folderutils_directory_has_delimiter(const char path[QSC_SYSTEM_MAX_PATH])
 {
-	size_t len;
+	QSC_ASSERT(path != NULL);
 
+	size_t len;
+	bool res;
+
+	res = false;
 	len = qsc_stringutils_string_size(path);
 
-	return (path[len - 1U] == '\\');
+	if (len > 0U)
+	{
+		res = (path[len - 1U] == '\\');
+	}
+
+	return res;
 }
 
 #if defined(QSC_DEBUG_MODE)

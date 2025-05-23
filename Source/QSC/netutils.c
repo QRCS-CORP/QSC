@@ -93,13 +93,13 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 					{
 						if (qsc_stringutils_string_contains((const char*)pinfo->AdapterName, infname) == true)
 						{
-							qsc_memutils_copy(ctx->desc, pinfo->Description, strlen(pinfo->Description));
-							qsc_memutils_copy(ctx->dhcp, pinfo->DhcpServer.IpAddress.String, strlen(pinfo->DhcpServer.IpAddress.String));
-							qsc_memutils_copy(ctx->gateway, pinfo->GatewayList.IpAddress.String, strlen(pinfo->GatewayList.IpAddress.String));
-							qsc_memutils_copy(ctx->ip, pinfo->IpAddressList.IpAddress.String, strlen(pinfo->IpAddressList.IpAddress.String));
-							qsc_memutils_copy(ctx->name, pinfo->AdapterName, strlen((const char*)pinfo->AdapterName));
+							qsc_stringutils_copy_string(ctx->desc, sizeof(ctx->desc), pinfo->Description);
+							qsc_stringutils_copy_string(ctx->dhcp, sizeof(ctx->dhcp), pinfo->DhcpServer.IpAddress.String);
+							qsc_stringutils_copy_string(ctx->gateway, sizeof(ctx->gateway), pinfo->GatewayList.IpAddress.String);
+							qsc_stringutils_copy_string(ctx->ip, sizeof(ctx->ip), pinfo->IpAddressList.IpAddress.String);
+							qsc_stringutils_copy_string(ctx->name, sizeof(ctx->name), pinfo->AdapterName);
+							qsc_stringutils_copy_string(ctx->subnet, sizeof(ctx->subnet), pinfo->IpAddressList.IpMask.String);
 							qsc_memutils_copy(ctx->mac, pinfo->Address, sizeof(pinfo->Address));
-							qsc_memutils_copy(ctx->subnet, pinfo->IpAddressList.IpMask.String, strlen(pinfo->IpAddressList.IpMask.String));
 							break;
 						}
 
@@ -156,6 +156,8 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 
 void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 {
+	QSC_ASSERT(mac != NULL);
+
 	qsc_netutils_adaptor_info ctx = { 0U };
 
 	qsc_netutils_get_adaptor_info(&ctx, "wlan0");
@@ -224,19 +226,22 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 	size_t dlen;
 
     dlen = 0U;
-	gethostname(hn, sizeof(hn));
-	hp = gethostbyname(hn);
+    gethostname(hn, sizeof(hn));
+    hp = gethostbyname(hn);
 
-	if (hp != NULL)
-    {
-        dn = strchr(hp->h_name, '.');
-
-        if (dn != NULL && dlen != 0U)
-        {
-            dlen = strlen(dn);
-            qsc_memutils_copy(output, dn, dlen);
-        }
-    }
+    if (hp != NULL)
+	{
+		dn = strchr(hp->h_name, '.');
+		if (dn != NULL)
+		{
+			size_t len = strlen(dn);
+			if (len > 0U && len < QSC_NETUTILS_DOMAIN_NAME_SIZE)
+			{
+				qsc_memutils_copy(output, dn, len);
+				dlen = len;
+			}
+		}
+	}
 
 	return dlen;
 

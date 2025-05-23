@@ -61,29 +61,35 @@
 
 size_t qsc_sysutils_computer_name(char* name)
 {
+	QSC_ASSERT(name != NULL);
+
 	size_t res;
 
 	res = 0;
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-	char buf[MAX_COMPUTERNAME_LENGTH + 1U];
-	DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
-	GetComputerName(buf, &bufflen);
-	res = strlen(buf);
-	qsc_memutils_copy(name, (const char*)buf, res);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-	char buf[HOST_NAME_MAX];
-
-	if (gethostname(buf, HOST_NAME_MAX) != 0)
+	if (name != NULL)
 	{
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		char buf[MAX_COMPUTERNAME_LENGTH + 1U];
+		DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
+		GetComputerName(buf, &bufflen);
 		res = strlen(buf);
-		qsc_memutils_copy(name, buf, res);
-	}
+		qsc_memutils_copy(name, (const char*)buf, res);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		char buf[HOST_NAME_MAX];
+
+		if (gethostname(buf, HOST_NAME_MAX) == 0)
+		{
+			res = strlen(buf);
+			qsc_memutils_copy(name, buf, res);
+		}
 #else
-	res = 0U;
+		res = 0U;
 #endif
 
-	name[res] = '\0';
+		name[res] = '\0';
+	}
 
 	return res;
 }
@@ -93,102 +99,114 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 	QSC_ASSERT(drive != NULL);
 	QSC_ASSERT(state != NULL);
 
-	state->free = 0U;
-	state->total = 0U;
-	state->avail = 0U;
+	if (drive != NULL && state != NULL)
+	{
+		state->free = 0U;
+		state->total = 0U;
+		state->avail = 0U;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	ULARGE_INTEGER freebt;
-	ULARGE_INTEGER totalbt;
-	ULARGE_INTEGER availbt;
+		ULARGE_INTEGER freebt;
+		ULARGE_INTEGER totalbt;
+		ULARGE_INTEGER availbt;
 
-	UINT drvtype = GetDriveType(drive);
+		UINT drvtype = GetDriveType(drive);
 
-	if ((drvtype == 3U || drvtype == 6U) &&
-		GetDiskFreeSpaceEx(drive, &freebt, &totalbt, &availbt))
-	{
-		state->free = freebt.QuadPart;
-		state->total = totalbt.QuadPart;
-		state->avail = availbt.QuadPart;
-	}
+		if ((drvtype == 3U || drvtype == 6U) &&
+			GetDiskFreeSpaceEx(drive, &freebt, &totalbt, &availbt))
+		{
+			state->free = freebt.QuadPart;
+			state->total = totalbt.QuadPart;
+			state->avail = availbt.QuadPart;
+		}
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
-	struct statvfs fsinfo;
-	statvfs("/", &fsinfo);
+		struct statvfs fsinfo;
 
-	state->free = fsinfo.f_frsize * fsinfo.f_blocks;
-	state->total = fsinfo.f_bsize * fsinfo.f_bfree;
-	state->avail = state->total - state->free;
+		if statvfs("/", &fsinfo) == 0)
+		{
+			state->free = fsinfo.f_frsize * fsinfo.f_blocks;
+			state->total = fsinfo.f_bsize * fsinfo.f_bfree;
+			state->avail = state->total - state->free;
+		}
 
 #endif
+	}
 }
 
 void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 {
 	QSC_ASSERT(state != NULL);
 
+	if (state != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
-	MEMORYSTATUSEX memInfo;
+		MEMORYSTATUSEX memInfo;
 
-	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-	GlobalMemoryStatusEx(&memInfo);
+		memInfo.dwLength = sizeof(MEMORYSTATUSEX);
 
-	state->phystotal = memInfo.ullTotalPhys;
-	state->physavail = memInfo.ullAvailPhys;
-	state->virttotal = memInfo.ullTotalVirtual;
-	state->virtavail = memInfo.ullAvailVirtual;
+		if (GlobalMemoryStatusEx(&memInfo) != 0)
+		{
+			state->phystotal = memInfo.ullTotalPhys;
+			state->physavail = memInfo.ullAvailPhys;
+			state->virttotal = memInfo.ullTotalVirtual;
+			state->virtavail = memInfo.ullAvailVirtual;
+		}
 
 #elif defined(QSC_SYSTEM_OS_APPLE)
 
-	vm_size_t page_size;
-	mach_port_t mach_port;
-	mach_msg_type_number_t count;
-	vm_statistics64_data_t vm_stats;
+		vm_size_t page_size;
+		mach_port_t mach_port;
+		mach_msg_type_number_t count;
+		vm_statistics64_data_t vm_stats;
 
-	mach_port = mach_host_self();
-	count = sizeof(vm_stats) / sizeof(natural_t);
+		mach_port = mach_host_self();
+		count = sizeof(vm_stats) / sizeof(natural_t);
 
-	if (KERN_SUCCESS == host_page_size(mach_port, &page_size) && KERN_SUCCESS == host_statistics64(mach_port, HOST_VM_INFO, (host_info64_t)&vm_stats, &count))
-	{
-		state->physavail = (uint64_t)vm_stats.free_count * (uint64_t)page_size;
-		state->phystotal = state->physavail + ((uint64_t)vm_stats.active_count + (uint64_t)vm_stats.inactive_count + (uint64_t)vm_stats.wire_count) * (uint64_t)page_size;
-	}
-
-	size_t pgf;
-	size_t pgn;
-	size_t pgs;
-
-	pgn = 0;
-	pgs = 0;
-	pgf = 0;
-
-	if (sysctlbyname("vm.pages", &pgn, NULL, NULL, 0) == 0)
-	{
-		if (sysctlbyname("vm.pagesize", &pgs, NULL, NULL, 0) == 0)
+		if (KERN_SUCCESS == host_page_size(mach_port, &page_size) && KERN_SUCCESS == host_statistics64(mach_port, HOST_VM_INFO, (host_info64_t)&vm_stats, &count))
 		{
-			state->virttotal = pgn * pgs;
+			state->physavail = (uint64_t)vm_stats.free_count * (uint64_t)page_size;
+			state->phystotal = state->physavail + ((uint64_t)vm_stats.active_count + (uint64_t)vm_stats.inactive_count + (uint64_t)vm_stats.wire_count) * (uint64_t)page_size;
 		}
 
-		if (state->virttotal != 0 && sysctlbyname("vm.page_free_count", &pgf, NULL, NULL, 0) == 0)
+		size_t pgf;
+		size_t pgn;
+		size_t pgs;
+
+		pgn = 0;
+		pgs = 0;
+		pgf = 0;
+
+		if (sysctlbyname("vm.pages", &pgn, NULL, NULL, 0) == 0)
 		{
-			state->virtavail = state->virttotal - (pgf * pgs);
+			if (sysctlbyname("vm.pagesize", &pgs, NULL, NULL, 0) == 0)
+			{
+				state->virttotal = pgn * pgs;
+			}
+
+			if (state->virttotal != 0 && sysctlbyname("vm.page_free_count", &pgf, NULL, NULL, 0) == 0)
+			{
+				state->virtavail = state->virttotal - (pgf * pgs);
+			}
 		}
-	}
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
-	struct sysinfo memInfo;
+		struct sysinfo memInfo;
 
-	sysinfo(&memInfo);
-	state->phystotal = (uint64_t)memInfo.totalram * memInfo.mem_unit;
-	state->physavail = (uint64_t)((memInfo.totalram - memInfo.freeram) * memInfo.mem_unit);
-	state->virttotal = (uint64_t)((memInfo.totalram + memInfo.totalswap) * memInfo.mem_unit);
-	state->virtavail = (uint64_t)(((memInfo.totalram - memInfo.freeram) + (memInfo.totalswap - memInfo.freeswap)) * memInfo.mem_unit);
+		if (sysinfo(&memInfo) == 0)
+		{
+			state->phystotal = (uint64_t)memInfo.totalram * memInfo.mem_unit;
+			state->physavail = (uint64_t)((memInfo.totalram - memInfo.freeram) * memInfo.mem_unit);
+			state->virttotal = (uint64_t)((memInfo.totalram + memInfo.totalswap) * memInfo.mem_unit);
+			state->virtavail = (uint64_t)(((memInfo.totalram - memInfo.freeram) + (memInfo.totalswap - memInfo.freeswap)) * memInfo.mem_unit);
+		}
 
 #endif
+	}
 }
 
 char qsc_sysutils_get_os_drive_letter(void)
@@ -245,20 +263,25 @@ size_t qsc_sysutils_user_name(char* name)
 
 	size_t res;
 
+	res = 0;
+
+	if (name != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	TCHAR buf[UNLEN + 1U];
-	DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
-	GetUserName(buf, &bufflen);
-	res = strlen(buf);
-	qsc_memutils_copy(name, (char*)buf, res);
+		TCHAR buf[UNLEN + 1U];
+		DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
+		GetUserName(buf, &bufflen);
+		res = strlen(buf);
+		qsc_memutils_copy(name, (char*)buf, res);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-	char buf[LOGIN_NAME_MAX];
-	getlogin_r(buf, LOGIN_NAME_MAX);
-	res = strlen(buf);
-	qsc_memutils_copy(name, buf, res);
+		char buf[LOGIN_NAME_MAX];
+		getlogin_r(buf, LOGIN_NAME_MAX);
+		res = strlen(buf);
+		qsc_memutils_copy(name, buf, res);
 #endif
 
-	name[res] = '\0';
+		name[res] = '\0';
+	}
 
 	return res;
 }
@@ -360,7 +383,7 @@ uint64_t qsc_sysutils_system_timestamp()
 			id = CLOCK_HIGHRES;
 #		elif defined(CLOCK_MONOTONIC)
 			/* AIX, BSD, Linux, POSIX, Solaris */
-			const clockid_t id = CLOCK_MONOTONIC;
+			id = CLOCK_MONOTONIC;
 #		elif defined(CLOCK_REALTIME)
 			/* AIX, BSD, HP - UX, Linux, POSIX */
 			id = CLOCK_REALTIME;
@@ -385,17 +408,26 @@ void qsc_sysutils_user_identity(const char* name, char* id)
 	QSC_ASSERT(name != NULL);
 	QSC_ASSERT(id != NULL);
 
-	LPCSTR accname = TEXT(name);
-	LPTSTR domname = (LPTSTR)GlobalAlloc(GPTR, sizeof(TCHAR) * 1024U);
-	DWORD cchdomname = 1024;
-	SID_NAME_USE esidtype;
-	char sidbuf[1024U] = { 0U };
-	DWORD cbsid = 1024;
-	SID* sid = (SID*)sidbuf;
-
-	if (LookupAccountNameA(NULL, accname, sidbuf, &cbsid, domname, &cchdomname, &esidtype))
+	if (name != NULL && id != NULL)
 	{
-		ConvertSidToStringSidA(sid, (LPSTR*)id);
+		LPCSTR accname = TEXT(name);
+		LPTSTR domname = (LPTSTR)GlobalAlloc(GPTR, sizeof(TCHAR) * 1024U);
+
+		if (domname != NULL)
+		{
+			DWORD cchdomname = 1024;
+			SID_NAME_USE esidtype;
+			char sidbuf[1024U] = { 0U };
+			DWORD cbsid = 1024;
+			SID* sid = (SID*)sidbuf;
+
+			if (LookupAccountNameA(NULL, accname, sidbuf, &cbsid, domname, &cchdomname, &esidtype))
+			{
+				ConvertSidToStringSidA(sid, (LPSTR*)id);
+			}
+
+			GlobalFree(domname);
+		}
 	}
 }
 #endif

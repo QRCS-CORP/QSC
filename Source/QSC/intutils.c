@@ -689,21 +689,29 @@ void qsc_intutils_reverse_bytes_x512(const __m512i* input, __m512i* output)
 
 uint32_t qsc_intutils_rotl32(uint32_t value, size_t shift)
 {
+	QSC_ASSERT(shift < 32U);
+
 	return (value << shift) | (value >> ((sizeof(uint32_t) * 8U) - shift));
 }
 
 uint64_t qsc_intutils_rotl64(uint64_t value, size_t shift)
 {
+	QSC_ASSERT(shift < 64U);
+
 	return (value << shift) | (value >> ((sizeof(uint64_t) * 8U) - shift));
 }
 
 uint32_t qsc_intutils_rotr32(uint32_t value, size_t shift)
 {
+	QSC_ASSERT(shift < 32U);
+
 	return (value >> shift) | (value << ((sizeof(uint32_t) * 8U) - shift));
 }
 
 uint64_t qsc_intutils_rotr64(uint64_t value, size_t shift)
 {
+	QSC_ASSERT(shift < 64U);
+
 	return (value >> shift) | (value << ((sizeof(uint64_t) * 8U) - shift));
 }
 

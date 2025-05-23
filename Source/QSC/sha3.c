@@ -1121,7 +1121,7 @@ void qsc_keccak_absorb(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 
 		qsc_memutils_copy(msg, message, msglen);
 		msg[msglen] = domain;
-		qsc_memutils_clear((msg + msglen + 1U), (size_t)rate - msglen + 1U);
+		qsc_memutils_clear((msg + msglen + 1U), (size_t)rate - (msglen + 1U));
 		msg[(size_t)rate - 1U] |= 128U;
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)

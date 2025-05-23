@@ -118,7 +118,7 @@ QSC_EXPORT_API int16_t qsc_secrand_next_int16(void);
  * \brief Generate a signed 16-bit random integer of a maximum value.
  *
  * \param maximum:  [int16_t] The maximum value of the integer.
- * \return          [int16_t] Returns a signed 16-bit random integer in the range [0, maximum].
+ * \return          [int16_t] Returns a signed 16-bit random integer in the range [-maximum, maximum].
  */
 QSC_EXPORT_API int16_t qsc_secrand_next_int16_max(int16_t maximum);
 
@@ -166,7 +166,7 @@ QSC_EXPORT_API int32_t qsc_secrand_next_int32(void);
  * \brief Generate a signed 32-bit random integer of a maximum value.
  *
  * \param maximum:  [int32_t] The maximum value of the integer.
- * \return          [int32_t] Returns a signed 32-bit random integer in the range [0, maximum].
+ * \return          [int32_t] Returns a signed 32-bit random integer in the range [-minimum, maximum].
  */
 QSC_EXPORT_API int32_t qsc_secrand_next_int32_max(int32_t maximum);
 
@@ -214,7 +214,7 @@ QSC_EXPORT_API int64_t qsc_secrand_next_int64(void);
  * \brief Generate a signed 64-bit random integer of a maximum value.
  *
  * \param maximum:  [int64_t] The maximum value of the integer.
- * \return          [int64_t] Returns a signed 64-bit random integer in the range [0, maximum].
+ * \return          [int64_t] Returns a signed 64-bit random integer in the range [-minimum, maximum].
  */
 QSC_EXPORT_API int64_t qsc_secrand_next_int64_max(int64_t maximum);
 

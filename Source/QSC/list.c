@@ -173,7 +173,7 @@ void qsc_list_rshuffle(qsc_list_state* ctx)
 	uint8_t* ditm;
 	uint8_t* sitm;
 
-	if (ctx != NULL && ctx->count > 0 && ctx->width > 0U)
+	if (ctx != NULL && ctx->count > 0U && ctx->width > 0U)
 	{
 		uint8_t* pitm;
 

@@ -9,7 +9,7 @@ void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint8_t* message)
 
 	if (ctx != NULL && message != NULL)
 	{
-		const uint32_t HIBIT = (ctx->fnl != 0U) ? 0UL : (1UL << 24);
+		const uint32_t HIBIT = (ctx->fnl != 0U) ? 0UL : (1U << 24);
 		uint64_t b;
 		uint64_t t0;
 		uint64_t t1;
@@ -92,25 +92,27 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 
+	size_t i;
+	uint64_t f0;
+	uint64_t f1;
+	uint64_t f2;
+	uint64_t f3;
+	uint32_t b;
+	uint32_t g0;
+	uint32_t g1;
+	uint32_t g2;
+	uint32_t g3;
+	uint32_t g4;
+	uint32_t nb;
+
 	if (ctx != NULL && output != NULL)
 	{
-		uint64_t f0;
-		uint64_t f1;
-		uint64_t f2;
-		uint64_t f3;
-		uint32_t b;
-		uint32_t g0;
-		uint32_t g1;
-		uint32_t g2;
-		uint32_t g3;
-		uint32_t g4;
-		uint32_t nb;
 
 		if (ctx->rmd != 0U)
 		{
 			ctx->buf[ctx->rmd] = 1U;
 
-			for (size_t i = ctx->rmd + 1U; i < QSC_POLY1305_BLOCK_SIZE; i++)
+			for (i = ctx->rmd + 1U; i < QSC_POLY1305_BLOCK_SIZE; i++)
 			{
 				ctx->buf[i] = 0U;
 			}
@@ -147,7 +149,7 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 		g3 = ctx->h[3U] + b;
 		b = g3 >> 26;
 		g3 &= 0x3FFFFFFUL;
-		g4 = ctx->h[4U] + b - (1UL << 26);
+		g4 = ctx->h[4U] + b - (1U << 26);
 
 		b = (g4 >> 31) - 1U;
 		nb = ~b;
@@ -178,7 +180,7 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 	}
 }
 
-void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t* key)
+void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t key[QSC_POLY1305_KEY_SIZE])
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(key != NULL);
@@ -268,7 +270,7 @@ void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t
 
 		if (msglen != 0U)
 		{
-			for (i = 0; i < msglen; ++i)
+			for (i = 0U; i < msglen; ++i)
 			{
 				ctx->buf[ctx->rmd + i] = message[i];
 			}

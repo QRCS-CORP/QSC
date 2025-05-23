@@ -1,5 +1,6 @@
 #include "cpuidex.h"
 #include "consoleutils.h"
+#include "intutils.h"
 #include "memutils.h"
 #include "stringutils.h"
 
@@ -40,29 +41,33 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 static uint32_t cpuidex_cpu_count()
 {
+	uint32_t resu;
+
+	resu = 1U;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	uint32_t res;
+	uint32_t resl;
 	SYSTEM_INFO sysinfo;
 
 	GetSystemInfo(&sysinfo);
-	res = (uint32_t)sysinfo.dwNumberOfProcessors;
+	resl = (uint32_t)sysinfo.dwNumberOfProcessors;
 
-	if (res < 1U)
+	if (resl > 1U)
 	{
-		res = 1U;
+		resu = resl;
 	}
 #else
-	long res;
+    long resl;
+    
+	resl = sysconf(_SC_NPROCESSORS_CONF);
 
-	res = (uint32_t)sysconf(_SC_NPROCESSORS_CONF);
-
-	if (res < 1)
-	{
-		res = 1;
-	}
+    if (resl > 1L)
+    {
+        resu = (uint32_t)resl;
+    }
 #endif
 
-	return res;
+	return resu;
 }
 
 #if defined(QSC_SYSTEM_ARCH_ARM)
@@ -438,9 +443,18 @@ static void cpuidex_cpu_info(int32_t info[4], const uint32_t infotype)
 
 static uint32_t cpuidex_read_bits(uint32_t value, int32_t index, int32_t length)
 {
-	int32_t mask = ((1L << length) - 1) << index;
+	uint32_t mask;
+	uint32_t res;
 
-	return (value & mask) >> index;
+	res = 0U;
+
+	if (length > 0 && length < 31)
+	{
+		mask = ((1U << length) - 1U) << (uint32_t)index;
+		res = (value & mask) >> (uint32_t)index;
+	}
+
+	return res;
 }
 
 static void cpuidex_vendor_name(qsc_cpuidex_cpu_features* features)
@@ -451,9 +465,9 @@ static void cpuidex_vendor_name(qsc_cpuidex_cpu_features* features)
 
 	cpuidex_cpu_info(info, 0x00000000UL);
 	qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
-	qsc_memutils_copy(&features->vendor[0U], (const uint8_t*)&info[1U], sizeof(int32_t));
-	qsc_memutils_copy(&features->vendor[4U], (const uint8_t*)&info[3U], sizeof(int32_t));
-	qsc_memutils_copy(&features->vendor[8U], (const uint8_t*)&info[2U], sizeof(int32_t));
+	qsc_intutils_le32to8(&features->vendor[0U], (uint32_t)info[1U]);
+    qsc_intutils_le32to8(&features->vendor[4U], (uint32_t)info[3U]);
+    qsc_intutils_le32to8(&features->vendor[8U], (uint32_t)info[2U]);
 }
 
 static void cpuidex_bus_info(qsc_cpuidex_cpu_features* features)
@@ -931,7 +945,7 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 		/* cpu topology */
 		features->cacheline = 0U;
 		features->cores = 0U;
-		features->cpus = 1;
+		features->cpus = 1U;
 		features->freqbase = 0U;
 		features->freqmax = 0U;
 		features->freqref = 0U;

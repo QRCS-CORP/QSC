@@ -3,9 +3,9 @@
 #include "intutils.h"
 #include "memutils.h"
 
-#define QSC_SCB_NAME_SIZE 8ULL
+#define QSC_SCB_NAME_SIZE 8U
 
-static char scb_name[QSC_SCB_NAME_SIZE] = "SCB v1.d";
+static char scb_name[QSC_SCB_NAME_SIZE + 1U] = "SCB v1.d";
 
 static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 {

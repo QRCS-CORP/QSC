@@ -653,6 +653,7 @@ void qsc_chacha_dispose(qsc_chacha_state* ctx)
 void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chacha_keyparams* keyparams)
 {
 	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(keyparams != NULL);
 	QSC_ASSERT(keyparams->nonce != NULL);
 	QSC_ASSERT(keyparams->key != NULL);
 	QSC_ASSERT(keyparams->keylen == 16U || keyparams->keylen == 32U);

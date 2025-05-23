@@ -2,11 +2,10 @@
 
 static int32_t qsort_partition_u8(int8_t* arr, int32_t start, int32_t end)
 {
-    QSC_ASSERT(arr != NULL);
-
     int32_t count;
     int32_t i;
     int32_t j;
+    int32_t k;
     int32_t pindex;
     int8_t pivot;
     int8_t ntmp;
@@ -18,7 +17,7 @@ static int32_t qsort_partition_u8(int8_t* arr, int32_t start, int32_t end)
         count = 0;
         pivot = arr[start];
 
-        for (int32_t k = start + 1; k <= end; ++k)
+        for (k = start + 1; k <= end; ++k)
         {
             if (arr[k] <= pivot)
             {
@@ -63,11 +62,10 @@ static int32_t qsort_partition_u8(int8_t* arr, int32_t start, int32_t end)
  
 static int32_t qsort_partition_u16(int16_t* arr, int32_t start, int32_t end)
 {
-    QSC_ASSERT(arr != NULL);
-
     int32_t count;
     int32_t i;
     int32_t j;
+    int32_t k;
     int32_t pindex;
     int16_t pivot;
     int16_t ntmp;
@@ -79,7 +77,7 @@ static int32_t qsort_partition_u16(int16_t* arr, int32_t start, int32_t end)
         count = 0;
         pivot = arr[start];
 
-        for (int32_t k = start + 1; k <= end; ++k)
+        for (k = start + 1; k <= end; ++k)
         {
             if (arr[k] <= pivot)
             {
@@ -124,11 +122,10 @@ static int32_t qsort_partition_u16(int16_t* arr, int32_t start, int32_t end)
  
 static int32_t qsort_partition_u32(int32_t* arr, int32_t start, int32_t end)
 {
-    QSC_ASSERT(arr != NULL);
-
     int32_t count;
     int32_t i;
     int32_t j;
+    int32_t k;
     int32_t pindex;
     int32_t pivot;
     int32_t ntmp;
@@ -140,7 +137,7 @@ static int32_t qsort_partition_u32(int32_t* arr, int32_t start, int32_t end)
         count = 0;
         pivot = arr[start];
 
-        for (int32_t k = start + 1; k <= end; ++k)
+        for (k = start + 1; k <= end; ++k)
         {
             if (arr[k] <= pivot)
             {
@@ -185,11 +182,10 @@ static int32_t qsort_partition_u32(int32_t* arr, int32_t start, int32_t end)
  
 static int64_t qsort_partition_u64(int64_t* arr, int64_t start, int64_t end)
 {
-    QSC_ASSERT(arr != NULL);
-
     int64_t count;
     int64_t i;
     int64_t j;
+    int64_t k;
     int64_t pindex;
     int64_t pivot;
     int64_t ntmp;
@@ -200,7 +196,7 @@ static int64_t qsort_partition_u64(int64_t* arr, int64_t start, int64_t end)
         count = 0;
         pivot = arr[start];
 
-        for (int64_t k = start + 1; k <= end; ++k)
+        for (k = start + 1; k <= end; ++k)
         {
             if (arr[k] <= pivot)
             {

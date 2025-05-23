@@ -103,7 +103,7 @@ bool qsc_socket_ipv4_valid_address(const char* address)
 
 	res = false;
 
-	if (address != NULL && strlen(address) >= QSC_IPINFO_IPV4_STRNLEN)
+	if (address != NULL && strlen(address) <= QSC_IPINFO_IPV4_STRNLEN)
 	{
 		qsc_ipinfo_ipv4_address add;
 
@@ -610,6 +610,12 @@ static void qsc_socket_receive_async_invoke(qsc_socket_receive_async_state* stat
 	qsc_async_mutex_unlock_ex(mtx);
 }
 
+static void qsc_socket_receive_async_invoke_vp(void* vstate)
+{
+    qsc_socket_receive_async_state* state = (qsc_socket_receive_async_state*)vstate;
+	qsc_socket_receive_async_invoke(state);
+}
+
 qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive_async_state* state)
 {
 	QSC_ASSERT(state != NULL);
@@ -620,7 +626,7 @@ qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive_async_state* s
 
 	if (state != NULL && state->source != NULL)
 	{
-		qsc_async_thread_create((void(*)(void*))&qsc_socket_receive_async_invoke, state);
+		qsc_async_thread_create(&qsc_socket_receive_async_invoke_vp, state);
 	}
 
 	return res;
@@ -704,13 +710,12 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint
 
 	if (sock != NULL && dest != NULL && output != NULL)
 	{
-		len = 0;
-
 		if (sock->address_family == qsc_socket_address_family_ipv4)
 		{
 			char astr[INET_ADDRSTRLEN] = { 0U };
 			struct sockaddr_in d;
 
+			len = sizeof(d);
 			d.sin_family = AF_INET;
 			d.sin_port = htons(port);
 			d.sin_addr.s_addr = inet_pton(AF_INET, dest, &d.sin_addr);
@@ -730,6 +735,7 @@ size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint
 			char astr[INET6_ADDRSTRLEN] = { 0U };
 			struct sockaddr_in6 d;
 
+			len = sizeof(d);
 			d.sin6_family = AF_INET6;
 			d.sin6_port = htons(port);
 			inet_pton(AF_INET6, dest, &d.sin6_addr);
@@ -1136,21 +1142,21 @@ bool qsc_socket_receive_ready(const qsc_socket* sock, const struct timeval* time
 
 	res = qsc_socket_invalid_input;
 
-	if (sock != NULL && timeout != NULL)
+	if (sock != NULL)
 	{
 		fd_set fds;
 		FD_ZERO(&fds);
 		FD_SET(sock->connection, &fds);
 
 		if (timeout == NULL)
-		{
-			res = (qsc_socket_exceptions)select((int32_t)sock->connection + 1, &fds, NULL, NULL, NULL);
-		}
-		else
-		{
-			struct timeval* tcopy = (struct timeval*)timeout;
-			res = (qsc_socket_exceptions)select((int32_t)sock->connection + 1, &fds, NULL, NULL, tcopy);
-		}
+        {
+            res = select((int32_t)sock->connection + 1, &fds, NULL, NULL, NULL);
+        }
+        else
+        {
+            struct timeval tcopy = *timeout;
+            res = select((int32_t)sock->connection + 1, &fds, NULL, NULL, &tcopy);
+        }
 	}
 
 	return (res == qsc_socket_exception_success);
