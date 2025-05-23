@@ -463,7 +463,7 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
         if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN)
         {
             pos = (size_t)ret;
-            output[pos] = '.';
+            output[pos] = DELIM;
 			++pos;
 
             /* second octet */
@@ -472,7 +472,7 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
             if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
             {
                 pos += (size_t)ret;
-                output[pos] = '.';
+                output[pos] = DELIM;
 				++pos;
 
                 /* third octet */
@@ -481,7 +481,7 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
                 if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
                 {
                     pos += (size_t)ret;
-                    output[pos] = '.';
+                    output[pos] = DELIM;
 					++pos;
 
                     /* fourth octet */
