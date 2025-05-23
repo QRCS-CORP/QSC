@@ -8975,7 +8975,7 @@ static int32_t falcon_sampler(void* ctx, falcon_fpr mu, falcon_fpr isigma)
 		 * can be said to be constant-time.
 		 */
 		x = falcon_fpr_mul(falcon_fpr_sqr(falcon_fpr_sub(falcon_fpr_of(z), r)), dss);
-		x = falcon_fpr_sub(x, falcon_fpr_mul(falcon_fpr_of(z0 * z0), falcon_fpr_inv_2sqrsigma0));
+		x = falcon_fpr_sub(x, falcon_fpr_mul(falcon_fpr_of((int64_t)z0 * z0), falcon_fpr_inv_2sqrsigma0));
 
 		if (falcon_BerExp(&spc->p, x, ccs) != 0)
 		{

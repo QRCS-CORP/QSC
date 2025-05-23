@@ -380,7 +380,7 @@ static void winutils_wide_to_utf8(const wchar_t* wsrc, char* dst, size_t dstlen)
 {
     QSC_ASSERT(wsrc != NULL);
     QSC_ASSERT(dst != NULL);
-    QSC_ASSERT(dstlen != NULL);
+    QSC_ASSERT(dstlen != 0U);
 
     if ((wsrc != NULL) && (dst != NULL) && (dstlen > 0U))
     {
@@ -435,16 +435,25 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
         {
             if (nlen > 0)
             {
-                tlen += snprintf(result + tlen, reslen - tlen, "Host Name -%s\n", cbuf);
+                if (tlen < reslen)
+                {
+                    tlen += snprintf(result + tlen, reslen - tlen, "Host Name -%s\n", cbuf);
+                }
             }
             else
             {
-                tlen += snprintf(result + tlen, reslen - tlen, "Host Name -Unknown\n");
+                if (tlen < reslen)
+                {
+                    tlen += snprintf(result + tlen, reslen - tlen, "Host Name -Unknown\n");
+                }
             }
         }
         else
         {
-            tlen += snprintf(result + tlen, reslen - tlen, "Host Name -Unknown\n");
+            if (tlen < reslen)
+            {
+                tlen += snprintf(result + tlen, reslen - tlen, "Host Name -Unknown\n");
+            }
         }
 
         ufam = AF_UNSPEC;
@@ -463,9 +472,12 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
                 if (ptmp != NULL)
                 {
-                    padd = ptmp;
-                    tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
-                    rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
+                    if (tlen < reslen)
+                    {
+                        padd = ptmp;
+                        tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
+                        rval = GetAdaptersAddresses(ufam, 0, NULL, padd, &ulen);
+                    }
                 }
                 else
                 {
@@ -480,7 +492,10 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
                 while (cadd)
                 {
-                    tlen += snprintf(result + tlen, reslen - tlen, "\n");
+                    if (tlen < reslen)
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "\n");
+                    }
                     PIP_ADAPTER_UNICAST_ADDRESS puni = cadd->FirstUnicastAddress;
                     char fname[128U] = { 0U };
                     char desc[256U] = { 0U };
@@ -488,10 +503,22 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
                     winutils_wide_to_utf8(cadd->FriendlyName, fname, sizeof(fname));
                     winutils_wide_to_utf8(cadd->Description, desc, sizeof(desc));
 
-                    tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Adaptor Name:\t\t%s\n", fname);
-                    tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Description:\t\t%s\n", desc);
-                    tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", padd->AdapterName);
-                    tlen += snprintf(result + tlen, reslen - tlen, "Interface Addresses\n");
+                    if (tlen < reslen)
+                    {
+                        tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Adaptor Name:\t\t%s\n", fname);
+                    }
+                    if (tlen < reslen)
+                    {
+                        tlen += (size_t)snprintf(result + tlen, reslen - tlen, "Description:\t\t%s\n", desc);
+                    }
+                    if (tlen < reslen)
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", padd->AdapterName);
+                    }
+                    if (tlen < reslen)
+                    {
+                        tlen += snprintf(result + tlen, reslen - tlen, "Interface Addresses\n");
+                    }
 
                     while (puni)
                     {
@@ -500,14 +527,20 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
                             struct sockaddr_in* sa_in = (struct sockaddr_in*)puni->Address.lpSockaddr;
 
                             inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
-                            tlen += snprintf(result + tlen, reslen - tlen, "Ipv4 Address \t\t-%s\n", cbuf);
+                            if (tlen < reslen)
+                            {
+                                tlen += snprintf(result + tlen, reslen - tlen, "Ipv4 Address \t\t-%s\n", cbuf);
+                            }
                         }
                         else if (puni->Address.lpSockaddr->sa_family == AF_INET6)
                         {
                             struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)puni->Address.lpSockaddr;
 
                             inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
-                            tlen += snprintf(result + tlen, reslen - tlen, "Ipv6 Address \t\t-%s\n", cbuf);
+                            if (tlen < reslen)
+                            {
+                                tlen += snprintf(result + tlen, reslen - tlen, "Ipv6 Address \t\t-%s\n", cbuf);
+                            }
                         }
 
                         puni = puni->Next;
@@ -517,7 +550,10 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
                     if (pgate != NULL)
                     {
-                        tlen += snprintf(result + tlen, reslen - tlen, "Gateway Addresses\n");
+                        if (tlen < reslen)
+                        {
+                            tlen += snprintf(result + tlen, reslen - tlen, "Gateway Addresses\n");
+                        }
 
                         while (pgate)
                         {
@@ -526,14 +562,20 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
                                 struct sockaddr_in* sa_in = (struct sockaddr_in*)pgate->Address.lpSockaddr;
 
                                 inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
-                                tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
+                                if (tlen < reslen)
+                                {
+                                    tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
+                                }
                             }
                             else if (pgate->Address.lpSockaddr->sa_family == AF_INET6)
                             {
                                 struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)pgate->Address.lpSockaddr;
 
                                 inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
-                                tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
+                                if (tlen < reslen)
+                                {
+                                    tlen += snprintf(result + tlen, reslen - tlen, "Gateway \t\t-%s\n", cbuf);
+                                }
                             }
 
                             pgate = pgate->Next;
@@ -544,7 +586,10 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 
                     if (pdns != NULL)
                     {
-                        tlen += snprintf(result + tlen, reslen - tlen, "DNS Server Addresses\n");
+                        if (tlen < reslen)
+                        {
+                            tlen += snprintf(result + tlen, reslen - tlen, "DNS Server Addresses\n");
+                        }
 
                         while (pdns)
                         {
@@ -553,14 +598,20 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
                                 struct sockaddr_in* sa_in = (struct sockaddr_in*)pdns->Address.lpSockaddr;
 
                                 inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, sizeof(cbuf));
-                                tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
+                                if (tlen < reslen)
+                                {
+                                    tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
+                                }
                             }
                             else if (pdns->Address.lpSockaddr->sa_family == AF_INET6)
                             {
                                 struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*)pdns->Address.lpSockaddr;
 
                                 inet_ntop(AF_INET6, &(sa_in6->sin6_addr), cbuf, sizeof(cbuf));
-                                tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
+                                if (tlen < reslen)
+                                {
+                                    tlen += snprintf(result + tlen, reslen - tlen, "DNS Server \t\t-%s\n", cbuf);
+                                }
                             }
 
                             pdns = pdns->Next;
@@ -572,14 +623,20 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
             }
             else
             {
-                tlen += snprintf(result + tlen, reslen - tlen, "Failed to get network addresses\n");
+                if (tlen < reslen)
+                {
+                    tlen += snprintf(result + tlen, reslen - tlen, "Failed to get network addresses\n");
+                }
             }
 
             qsc_memutils_alloc_free(padd);
         }
         else
         {
-            tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
+            if (tlen < reslen)
+            {
+                tlen += snprintf(result + tlen, reslen - tlen, "Failed to allocate memory for adapter addresses\n");
+            }
         }
 
         if (tlen == 0U)

@@ -3,7 +3,7 @@
 #include "stringutils.h"
 #include <ctype.h>
 
-static bool ipinfo_hexfield_valid(const char ** pp)
+static bool ipinfo_hexfield_valid(const char** pp)
 {
 	QSC_ASSERT(pp != NULL);
 
@@ -20,7 +20,7 @@ static bool ipinfo_hexfield_valid(const char ** pp)
 		digits = 0U;
 		p  = *pp;
 
-		if (pp != NULL && *pp != NULL)
+		if (*pp != NULL)
 		{
 			while ((digits < 4U) && (p[0U] != '\0') && (p[0U] != ':'))
 			{

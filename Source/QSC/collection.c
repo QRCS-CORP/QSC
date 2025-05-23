@@ -60,7 +60,7 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 			ctx->items = itmp;
 			ctx->keys = ktmp;
 
-			pos = ctx->count * ctx->width;
+			pos = (size_t)ctx->count * ctx->width;
 			qsc_memutils_copy(ctx->items + pos, item, ctx->width);
 			pos = ctx->count * QSC_COLLECTION_KEY_WIDTH;
 			qsc_memutils_copy(ctx->keys + pos, key, QSC_COLLECTION_KEY_WIDTH);
@@ -110,7 +110,7 @@ void qsc_collection_dispose(qsc_collection_state* ctx)
 	{
 		if (ctx->items != NULL)
 		{
-			qsc_memutils_clear(ctx->items, ctx->count * ctx->width);
+			qsc_memutils_clear(ctx->items, (size_t)ctx->count * ctx->width);
 			qsc_memutils_alloc_free(ctx->items);
 			ctx->items = NULL;
 		}
@@ -284,7 +284,7 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 				if (ctx->count != 0U)
 				{
-					itmp = qsc_memutils_realloc(ctx->items, ctx->width * ctx->count);
+					itmp = qsc_memutils_realloc(ctx->items, (size_t)ctx->width * ctx->count);
 
 					if (itmp != NULL)
 					{
