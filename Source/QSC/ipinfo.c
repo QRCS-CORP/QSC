@@ -178,7 +178,7 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_bytes(uint8_t a1, uint8_t a
 	return res;
 }
 
-qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char* input)
+qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC_IPINFO_IPV4_STRNLEN])
 {
     qsc_ipinfo_ipv4_address res = { 0U };
     bool bok;

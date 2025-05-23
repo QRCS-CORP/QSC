@@ -125,7 +125,7 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 		struct statvfs fsinfo;
 
-		if statvfs("/", &fsinfo) == 0)
+		if (statvfs("/", &fsinfo) == 0)
 		{
 			state->free = fsinfo.f_frsize * fsinfo.f_blocks;
 			state->total = fsinfo.f_bsize * fsinfo.f_bfree;

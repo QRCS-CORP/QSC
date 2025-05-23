@@ -465,9 +465,9 @@ static void cpuidex_vendor_name(qsc_cpuidex_cpu_features* features)
 
 	cpuidex_cpu_info(info, 0x00000000UL);
 	qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
-	qsc_intutils_le32to8(&features->vendor[0U], (uint32_t)info[1U]);
-    qsc_intutils_le32to8(&features->vendor[4U], (uint32_t)info[3U]);
-    qsc_intutils_le32to8(&features->vendor[8U], (uint32_t)info[2U]);
+	qsc_intutils_le32to8((uint8_t*)&features->vendor[0U], (uint32_t)info[1U]);
+    qsc_intutils_le32to8((uint8_t*)&features->vendor[4U], (uint32_t)info[3U]);
+    qsc_intutils_le32to8((uint8_t*)&features->vendor[8U], (uint32_t)info[2U]);
 }
 
 static void cpuidex_bus_info(qsc_cpuidex_cpu_features* features)
