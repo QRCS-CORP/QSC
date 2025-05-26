@@ -74,8 +74,9 @@ size_t sphincsplus_ref_sign_seedbytes(void);
 * \param pk: The public verification key
 * \param sk: The private signature key
 * \param seed: A pointer to the seed array
+* \return Returns true for success
 */
-int32_t sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed);
+bool sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed);
 
 /**
 * \brief Generates a SphincsPlus public/private key-pair
@@ -84,7 +85,7 @@ int32_t sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const ui
 * \param sk: The private signature key
 * \param rng_generate: A pointer to the random generator function
 */
-void sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature
@@ -95,8 +96,9 @@ void sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gener
 * \param mlen: The message length
 * \param sk: The private signature key
 * \param rng_generate: A pointer to the random generator function
+* \return Returns true for success
 */
-void sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature-message pair with the public key
@@ -119,8 +121,9 @@ bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_
 * \param mlen: The message length
 * \param sk: The private signature key
 * \param rng_generate: A pointer to the random generator function
+* \return Returns true for success
 */
-void sphincsplus_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool sphincsplus_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature with the public key

@@ -85,6 +85,7 @@ bool qsctest_mceliece_kat_test()
 	sklen = 0;
 	sslen = 0;
 	ret = false;
+
 	pk = qsc_memutils_malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
 	kpk = qsc_memutils_malloc(QSC_MCELIECE_PUBLICKEY_SIZE);
 
@@ -113,50 +114,58 @@ bool qsctest_mceliece_kat_test()
 		qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
 		/* alice generates public and secret keys */
-		qsc_mceliece_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
+		if (!qsc_mceliece_generate_keypair(pk, sk, qsctest_nistrng_prng_generate))
+		{
+			qsc_consoleutils_print_line("Failure! mceliece kat: key generation random generation failure! -MKT0");
+			ret = false;
+		}
 
 		/* compare the public key to the expected output */
 		if (qsc_intutils_are_equal8(pk, kpk, QSC_MCELIECE_PUBLICKEY_SIZE) != true)
 		{
-			qsc_consoleutils_print_line("Failure! mceliece kat: public key does not match known answer! -MKT0");
+			qsc_consoleutils_print_line("Failure! mceliece kat: public key does not match known answer! -MKT1");
 			ret = false;
 		}
 
 		/* compare the secret key to the expected output */
 		if (qsc_intutils_are_equal8(sk, ksk, QSC_MCELIECE_PRIVATEKEY_SIZE) != true)
 		{
-			qsc_consoleutils_print_line("Failure! mceliece kat: private key does not match known answer! -MKT1");
+			qsc_consoleutils_print_line("Failure! mceliece kat: private key does not match known answer! -MKT2");
 			ret = false;
 		}
 
 		/* bob derives a shared-secret key and creates a response (in: pk | out: ct and ssk2) */
-		qsc_mceliece_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
+		if (!qsc_mceliece_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate))
+		{
+			qsc_consoleutils_print_line("Failure! mceliece kat: encapsulation random generation failure! -MKT3");
+			ret = false;
+		}
 
 		/* compare the cipher-text to the expected output */
 		if (qsc_intutils_are_equal8(ct, kct, QSC_MCELIECE_CIPHERTEXT_SIZE) != true)
 		{
-			qsctest_print_safe("Failure! mceliece kat: ciphertext does not match known answer -MKT2 \n");
+			qsc_consoleutils_print_line("Failure! mceliece kat: ciphertext does not match known answer -MKT4");
 			ret = false;
 		}
 
 		/* alice uses bobs response to get the shared-secret key (in: ct, sk | out: ssk1) */
 		if (qsc_mceliece_decapsulate(ssk1, ct, sk) != true)
 		{
-			qsctest_print_safe("Failure! mceliece kat: decapsulation failure -MKT3 \n");
+			qsc_consoleutils_print_line("Failure! mceliece kat: decapsulation failure -MKT5");
 			ret = false;
 		}
 
 		/* compare the two keys for equality */
 		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
 		{
-			qsctest_print_safe("Failure! mceliece kat: secret keys do not match -MKT4 \n");
+			qsc_consoleutils_print_line("Failure! mceliece kat: secret keys do not match -MKT6");
 			ret = false;
 		}
 
 		/* compare the key to the expected output */
 		if (qsc_intutils_are_equal8(ssk1, kss, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
 		{
-			qsctest_print_safe("Failure! mceliece kat: shared secret does not match the known answer -MKT5 \n");
+			qsc_consoleutils_print_line("Failure! mceliece kat: shared secret does not match the known answer -MKT7");
 			ret = false;
 		}
 
@@ -170,7 +179,6 @@ bool qsctest_mceliece_kat_test()
 bool qsctest_mceliece_operations_test()
 {
 	uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t esd[QSC_MCELIECE_SEED_SIZE] = { 0 };
 	uint8_t* pk;
 	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
@@ -202,23 +210,6 @@ bool qsctest_mceliece_operations_test()
 		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
 		{
 			qsctest_print_safe("Failure! mceliece operations: the two secret keys do not match -MOT2 \n");
-			ret = false;
-		}
-
-		/* test encrypt/decrypt api */
-
-		qsc_memutils_clear(ct, sizeof(ct));
-		qsc_memutils_clear(ssk1, sizeof(ssk1));
-		qsc_memutils_clear(ssk2, sizeof(ssk2));
-
-		qsc_csp_generate(esd, sizeof(esd));
-
-		qsc_mceliece_encrypt(ssk1, ct, pk, esd);
-		qsc_mceliece_decrypt(ssk2, ct, sk);
-
-		if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_MCELIECE_SHAREDSECRET_SIZE) != true)
-		{
-			qsctest_print_safe("Failure! mceliece operations: the two secret keys do not match -MOT3 \n");
 			ret = false;
 		}
 

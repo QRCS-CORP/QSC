@@ -1,4 +1,4 @@
-#include "ec25519.h"
+﻿#include "ec25519.h"
 #include "csp.h"
 #include "intutils.h"
 #include "memutils.h"
@@ -10,23 +10,23 @@ static int32_t ecdsabase_is_zero(const uint8_t* n, const size_t nlen)
 {
 	uint8_t d;
 
-	d = 0;
+	d = 0U;
 
 	for (size_t i = 0U; i < nlen; ++i)
 	{
 		d |= n[i];
 	}
 
-	return 1L & (int32_t)((uint32_t)(d - 1) >> 8);
+	return 1L & (int32_t)((uint32_t)(d - 1U) >> 8);
 }
 
 static uint64_t ecdsabase_load3(const uint8_t* in)
 {
 	uint64_t res;
 
-	res = (uint64_t)in[0];
-	res |= ((uint64_t)in[1]) << 8;
-	res |= ((uint64_t)in[2]) << 16;
+	res = (uint64_t)in[0U];
+	res |= ((uint64_t)in[1U]) << 8;
+	res |= ((uint64_t)in[2U]) << 16;
 
 	return res;
 }
@@ -35,10 +35,10 @@ static uint64_t ecdsabase_load4(const uint8_t* in)
 {
 	uint64_t res;
 
-	res = (uint64_t)in[0];
-	res |= ((uint64_t)in[1]) << 8;
-	res |= ((uint64_t)in[2]) << 16;
-	res |= ((uint64_t)in[3]) << 24;
+	res = (uint64_t)in[0U];
+	res |= ((uint64_t)in[1U]) << 8;
+	res |= ((uint64_t)in[2U]) << 16;
+	res |= ((uint64_t)in[3U]) << 24;
 
 	return res;
 }
@@ -59,12 +59,12 @@ static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 	int32_t cmp;
 	int32_t ribs;
 
-	for (i = 0; i < 256; ++i)
+	for (i = 0U; i < 256U; ++i)
 	{
-		r[i] = 1 & (a[i >> 3] >> (i & 7));
+		r[i] = 1U & (a[i >> 3] >> (i & 7));
 	}
 
-	for (i = 0; i < 256; ++i)
+	for (i = 0U; i < 256U; ++i)
 	{
 		if (r[i] == 0)
 		{
@@ -97,7 +97,7 @@ static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
 
 				r[i] = (int8_t)cmp;
 
-				for (size_t k = i + b; k < 256; ++k)
+				for (size_t k = i + b; k < 256U; ++k)
 				{
 					if (r[k] == 0)
 					{
@@ -119,7 +119,7 @@ int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 
 	uint16_t d;
 
-	d = 0;
+	d = 0U;
 
 	for (size_t i = 0U; i < n; ++i)
 	{
@@ -130,55 +130,55 @@ int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 }
 
 /* fe */
-static const fe25519 ed25519_d =
+static const qsc_fe25519 ed25519_d =
 {
 	/* 37095705934669439343138083508754565189542113879843219016388785533085940283555 */
 	-10913610, 13857413, -15372611, 6949391,   114729, -8787816, -6275908, -3247719, -18696448, -12055116
 };
 
-static const fe25519 fe25519_sqrtm1 =
+static const qsc_fe25519 fe25519_sqrtm1 =
 {
 	/* sqrt(-1) */
 	-32595792, -7943725,  9377950,  3500415, 12389472, -272473, -25146209, -2005654, 326686, 11406482
 };
 
-static const fe25519 ed25519_d2 =
+static const qsc_fe25519 ed25519_d2 =
 {
 	/* 2 * d = 16295367250680780974490674513165176452449235426866156013048779062215315747161 */
 	-21827239, -5839606,  -30745221, 13898782, 229458, 15978800, -12551817, -6495438, 29715968, 9444199
 };
 
-void fe25519_0(fe25519 h)
+void qsc_fe25519_0(qsc_fe25519 h)
 {
-	qsc_memutils_clear(h, 10 * sizeof(int32_t));
+	qsc_memutils_clear(h, 10U * sizeof(int32_t));
 }
 
-void fe25519_1(fe25519 h)
+void qsc_fe25519_1(qsc_fe25519 h)
 {
-	qsc_memutils_clear(h, 10 * sizeof(int32_t));
-	h[0] = 1;
+	qsc_memutils_clear(h, 10U * sizeof(int32_t));
+	h[0U] = 1;
 }
 
-void fe25519_copy(fe25519 h, const fe25519 f)
+void qsc_fe25519_copy(qsc_fe25519 h, const qsc_fe25519 f)
 {
-	qsc_memutils_copy((uint8_t*)h, (const uint8_t*)f, 10 * sizeof(int32_t));
+	qsc_memutils_copy((uint8_t*)h, (const uint8_t*)f, 10U * sizeof(int32_t));
 }
 
-void fe25519_add(fe25519 h, const fe25519 f, const fe25519 g)
+void qsc_fe25519_add(qsc_fe25519 h, const qsc_fe25519 f, const qsc_fe25519 g)
 {
-	h[0] = f[0] + g[0];
-	h[1] = f[1] + g[1];
-	h[2] = f[2] + g[2];
-	h[3] = f[3] + g[3];
-	h[4] = f[4] + g[4];
-	h[5] = f[5] + g[5];
-	h[6] = f[6] + g[6];
-	h[7] = f[7] + g[7];
-	h[8] = f[8] + g[8];
-	h[9] = f[9] + g[9];
+	h[0U] = f[0U] + g[0U];
+	h[1U] = f[1U] + g[1U];
+	h[2U] = f[2U] + g[2U];
+	h[3U] = f[3U] + g[3U];
+	h[4U] = f[4U] + g[4U];
+	h[5U] = f[5U] + g[5U];
+	h[6U] = f[6U] + g[6U];
+	h[7U] = f[7U] + g[7U];
+	h[8U] = f[8U] + g[8U];
+	h[9U] = f[9U] + g[9U];
 }
 
-void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b)
+void qsc_fe25519_cswap(qsc_fe25519 f, qsc_fe25519 g, uint32_t b)
 {
 	const int32_t MASK = -(int32_t)b;
 	int32_t f0;
@@ -212,27 +212,27 @@ void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b)
 	int32_t x8;
 	int32_t x9;
 
-	f0 = f[0];
-	f1 = f[1];
-	f2 = f[2];
-	f3 = f[3];
-	f4 = f[4];
-	f5 = f[5];
-	f6 = f[6];
-	f7 = f[7];
-	f8 = f[8];
-	f9 = f[9];
+	f0 = f[0U];
+	f1 = f[1U];
+	f2 = f[2U];
+	f3 = f[3U];
+	f4 = f[4U];
+	f5 = f[5U];
+	f6 = f[6U];
+	f7 = f[7U];
+	f8 = f[8U];
+	f9 = f[9U];
 
-	g0 = g[0];
-	g1 = g[1];
-	g2 = g[2];
-	g3 = g[3];
-	g4 = g[4];
-	g5 = g[5];
-	g6 = g[6];
-	g7 = g[7];
-	g8 = g[8];
-	g9 = g[9];
+	g0 = g[0U];
+	g1 = g[1U];
+	g2 = g[2U];
+	g3 = g[3U];
+	g4 = g[4U];
+	g5 = g[5U];
+	g6 = g[6U];
+	g7 = g[7U];
+	g8 = g[8U];
+	g9 = g[9U];
 
 	x0 = f0 ^ g0;
 	x1 = f1 ^ g1;
@@ -256,30 +256,30 @@ void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b)
 	x8 &= MASK;
 	x9 &= MASK;
 
-	f[0] = f0 ^ x0;
-	f[1] = f1 ^ x1;
-	f[2] = f2 ^ x2;
-	f[3] = f3 ^ x3;
-	f[4] = f4 ^ x4;
-	f[5] = f5 ^ x5;
-	f[6] = f6 ^ x6;
-	f[7] = f7 ^ x7;
-	f[8] = f8 ^ x8;
-	f[9] = f9 ^ x9;
+	f[0U] = f0 ^ x0;
+	f[1U] = f1 ^ x1;
+	f[2U] = f2 ^ x2;
+	f[3U] = f3 ^ x3;
+	f[4U] = f4 ^ x4;
+	f[5U] = f5 ^ x5;
+	f[6U] = f6 ^ x6;
+	f[7U] = f7 ^ x7;
+	f[8U] = f8 ^ x8;
+	f[9U] = f9 ^ x9;
 
-	g[0] = g0 ^ x0;
-	g[1] = g1 ^ x1;
-	g[2] = g2 ^ x2;
-	g[3] = g3 ^ x3;
-	g[4] = g4 ^ x4;
-	g[5] = g5 ^ x5;
-	g[6] = g6 ^ x6;
-	g[7] = g7 ^ x7;
-	g[8] = g8 ^ x8;
-	g[9] = g9 ^ x9;
+	g[0U] = g0 ^ x0;
+	g[1U] = g1 ^ x1;
+	g[2U] = g2 ^ x2;
+	g[3U] = g3 ^ x3;
+	g[4U] = g4 ^ x4;
+	g[5U] = g5 ^ x5;
+	g[6U] = g6 ^ x6;
+	g[7U] = g7 ^ x7;
+	g[8U] = g8 ^ x8;
+	g[9U] = g9 ^ x9;
 }
 
-void fe25519_sub(fe25519 h, const fe25519 f, const fe25519 g)
+void qsc_fe25519_sub(qsc_fe25519 h, const qsc_fe25519 f, const qsc_fe25519 g)
 {
 	/*
 	*h = f - g
@@ -290,33 +290,33 @@ void fe25519_sub(fe25519 h, const fe25519 f, const fe25519 g)
 	*Postconditions:
 	*|h| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
 	*/
-	h[0] = f[0] - g[0];
-	h[1] = f[1] - g[1];
-	h[2] = f[2] - g[2];
-	h[3] = f[3] - g[3];
-	h[4] = f[4] - g[4];
-	h[5] = f[5] - g[5];
-	h[6] = f[6] - g[6];
-	h[7] = f[7] - g[7];
-	h[8] = f[8] - g[8];
-	h[9] = f[9] - g[9];
+	h[0U] = f[0U] - g[0U];
+	h[1U] = f[1U] - g[1U];
+	h[2U] = f[2U] - g[2U];
+	h[3U] = f[3U] - g[3U];
+	h[4U] = f[4U] - g[4U];
+	h[5U] = f[5U] - g[5U];
+	h[6U] = f[6U] - g[6U];
+	h[7U] = f[7U] - g[7U];
+	h[8U] = f[8U] - g[8U];
+	h[9U] = f[9U] - g[9U];
 }
 
-void fe25519_neg(fe25519 h, const fe25519 f)
+void qsc_fe25519_neg(qsc_fe25519 h, const qsc_fe25519 f)
 {
-	h[0] = -f[0];
-	h[1] = -f[1];
-	h[2] = -f[2];
-	h[3] = -f[3];
-	h[4] = -f[4];
-	h[5] = -f[5];
-	h[6] = -f[6];
-	h[7] = -f[7];
-	h[8] = -f[8];
-	h[9] = -f[9];
+	h[0U] = -f[0U];
+	h[1U] = -f[1U];
+	h[2U] = -f[2U];
+	h[3U] = -f[3U];
+	h[4U] = -f[4U];
+	h[5U] = -f[5U];
+	h[6U] = -f[6U];
+	h[7U] = -f[7U];
+	h[8U] = -f[8U];
+	h[9U] = -f[9U];
 }
 
-void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
+void qsc_fe25519_cmov(qsc_fe25519 f, const qsc_fe25519 g, uint32_t b)
 {
 	const int32_t MASK = -(int32_t)b;
 	int32_t f0;
@@ -330,59 +330,59 @@ void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b)
 	int32_t f8;
 	int32_t f9;
 
-	f0 = f[0];
-	f1 = f[1];
-	f2 = f[2];
-	f3 = f[3];
-	f4 = f[4];
-	f5 = f[5];
-	f6 = f[6];
-	f7 = f[7];
-	f8 = f[8];
-	f9 = f[9];
+	f0 = f[0U];
+	f1 = f[1U];
+	f2 = f[2U];
+	f3 = f[3U];
+	f4 = f[4U];
+	f5 = f[5U];
+	f6 = f[6U];
+	f7 = f[7U];
+	f8 = f[8U];
+	f9 = f[9U];
 
-	f0 ^= ((f0 ^ g[0]) & MASK);
-	f1 ^= ((f1 ^ g[1]) & MASK);
-	f2 ^= ((f2 ^ g[2]) & MASK);
-	f3 ^= ((f3 ^ g[3]) & MASK);
-	f4 ^= ((f4 ^ g[4]) & MASK);
-	f5 ^= ((f5 ^ g[5]) & MASK);
-	f6 ^= ((f6 ^ g[6]) & MASK);
-	f7 ^= ((f7 ^ g[7]) & MASK);
-	f8 ^= ((f8 ^ g[8]) & MASK);
-	f9 ^= ((f9 ^ g[9]) & MASK);
+	f0 ^= ((f0 ^ g[0U]) & MASK);
+	f1 ^= ((f1 ^ g[1U]) & MASK);
+	f2 ^= ((f2 ^ g[2U]) & MASK);
+	f3 ^= ((f3 ^ g[3U]) & MASK);
+	f4 ^= ((f4 ^ g[4U]) & MASK);
+	f5 ^= ((f5 ^ g[5U]) & MASK);
+	f6 ^= ((f6 ^ g[6U]) & MASK);
+	f7 ^= ((f7 ^ g[7U]) & MASK);
+	f8 ^= ((f8 ^ g[8U]) & MASK);
+	f9 ^= ((f9 ^ g[9U]) & MASK);
 
-	f[0] = f0;
-	f[1] = f1;
-	f[2] = f2;
-	f[3] = f3;
-	f[4] = f4;
-	f[5] = f5;
-	f[6] = f6;
-	f[7] = f7;
-	f[8] = f8;
-	f[9] = f9;
+	f[0U] = f0;
+	f[1U] = f1;
+	f[2U] = f2;
+	f[3U] = f3;
+	f[4U] = f4;
+	f[5U] = f5;
+	f[6U] = f6;
+	f[7U] = f7;
+	f[8U] = f8;
+	f[9U] = f9;
 }
 
-int32_t fe25519_isnegative(const fe25519 f)
+int32_t qsc_fe25519_is_negative(const qsc_fe25519 f)
 {
-	uint8_t s[32] = { 0U };
+	uint8_t s[32U] = { 0U };
 
-	fe25519_tobytes(s, f);
+	qsc_fe25519_to_bytes(s, f);
 
-	return s[0] & 1;
+	return s[0U] & 1;
 }
 
-int32_t fe25519_iszero(const fe25519 f)
+int32_t qsc_fe25519_is_zero(const qsc_fe25519 f)
 {
-	uint8_t s[32] = { 0U };
+	uint8_t s[32U] = { 0U };
 
-	fe25519_tobytes(s, f);
+	qsc_fe25519_to_bytes(s, f);
 
-	return ecdsabase_is_zero(s, 32);
+	return ecdsabase_is_zero(s, 32U);
 }
 
-void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
+void qsc_fe25519_mul(qsc_fe25519 h, const qsc_fe25519 f, const qsc_fe25519 g)
 {
 	int64_t carry;
 	int64_t f0;
@@ -430,26 +430,26 @@ void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
 	int64_t h8;
 	int64_t h9;
 
-	f0 = (int64_t)f[0];
-	f1 = (int64_t)f[1];
-	f2 = (int64_t)f[2];
-	f3 = (int64_t)f[3];
-	f4 = (int64_t)f[4];
-	f5 = (int64_t)f[5];
-	f6 = (int64_t)f[6];
-	f7 = (int64_t)f[7];
-	f8 = (int64_t)f[8];
-	f9 = (int64_t)f[9];
-	g0 = (int64_t)g[0];
-	g1 = (int64_t)g[1];
-	g2 = (int64_t)g[2];
-	g3 = (int64_t)g[3];
-	g4 = (int64_t)g[4];
-	g5 = (int64_t)g[5];
-	g6 = (int64_t)g[6];
-	g7 = (int64_t)g[7];
-	g8 = (int64_t)g[8];
-	g9 = (int64_t)g[9];
+	f0 = (int64_t)f[0U];
+	f1 = (int64_t)f[1U];
+	f2 = (int64_t)f[2U];
+	f3 = (int64_t)f[3U];
+	f4 = (int64_t)f[4U];
+	f5 = (int64_t)f[5U];
+	f6 = (int64_t)f[6U];
+	f7 = (int64_t)f[7U];
+	f8 = (int64_t)f[8U];
+	f9 = (int64_t)f[9U];
+	g0 = (int64_t)g[0U];
+	g1 = (int64_t)g[1U];
+	g2 = (int64_t)g[2U];
+	g3 = (int64_t)g[3U];
+	g4 = (int64_t)g[4U];
+	g5 = (int64_t)g[5U];
+	g6 = (int64_t)g[6U];
+	g7 = (int64_t)g[7U];
+	g8 = (int64_t)g[8U];
+	g9 = (int64_t)g[9U];
 
 	/* 1.959375*2^29 */
 	g1x19 = 19 * g1;
@@ -544,19 +544,19 @@ void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g)
 	/* |h0| <= 2^25; from now on fits into int32 unchanged */
 	/* |h1| <= 1.01*2^24 */
 
-	h[0] = (int32_t)h0;
-	h[1] = (int32_t)h1;
-	h[2] = (int32_t)h2;
-	h[3] = (int32_t)h3;
-	h[4] = (int32_t)h4;
-	h[5] = (int32_t)h5;
-	h[6] = (int32_t)h6;
-	h[7] = (int32_t)h7;
-	h[8] = (int32_t)h8;
-	h[9] = (int32_t)h9;
+	h[0U] = (int32_t)h0;
+	h[1U] = (int32_t)h1;
+	h[2U] = (int32_t)h2;
+	h[3U] = (int32_t)h3;
+	h[4U] = (int32_t)h4;
+	h[5U] = (int32_t)h5;
+	h[6U] = (int32_t)h6;
+	h[7U] = (int32_t)h7;
+	h[8U] = (int32_t)h8;
+	h[9U] = (int32_t)h9;
 }
 
-void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
+void qsc_fe25519_mul32(qsc_fe25519 h, const qsc_fe25519 f, uint32_t n)
 {
 	int64_t carry;
 	int64_t h0;
@@ -572,16 +572,16 @@ void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
 	int64_t sn;
 
 	sn = (int64_t)n;
-	h0 = f[0] * sn;
-	h1 = f[1] * sn;
-	h2 = f[2] * sn;
-	h3 = f[3] * sn;
-	h4 = f[4] * sn;
-	h5 = f[5] * sn;
-	h6 = f[6] * sn;
-	h7 = f[7] * sn;
-	h8 = f[8] * sn;
-	h9 = f[9] * sn;
+	h0 = f[0U] * sn;
+	h1 = f[1U] * sn;
+	h2 = f[2U] * sn;
+	h3 = f[3U] * sn;
+	h4 = f[4U] * sn;
+	h5 = f[5U] * sn;
+	h6 = f[6U] * sn;
+	h7 = f[7U] * sn;
+	h8 = f[8U] * sn;
+	h9 = f[9U] * sn;
 
 	carry = (h9 + (1 << 24)) >> 25;
 	h0 += carry * 19;
@@ -615,19 +615,19 @@ void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n)
 	h9 += carry;
 	h8 -= carry * (1 << 26);
 
-	h[0] = (int32_t)h0;
-	h[1] = (int32_t)h1;
-	h[2] = (int32_t)h2;
-	h[3] = (int32_t)h3;
-	h[4] = (int32_t)h4;
-	h[5] = (int32_t)h5;
-	h[6] = (int32_t)h6;
-	h[7] = (int32_t)h7;
-	h[8] = (int32_t)h8;
-	h[9] = (int32_t)h9;
+	h[0U] = (int32_t)h0;
+	h[1U] = (int32_t)h1;
+	h[2U] = (int32_t)h2;
+	h[3U] = (int32_t)h3;
+	h[4U] = (int32_t)h4;
+	h[5U] = (int32_t)h5;
+	h[6U] = (int32_t)h6;
+	h[7U] = (int32_t)h7;
+	h[8U] = (int32_t)h8;
+	h[9U] = (int32_t)h9;
 }
 
-void fe25519_sq(fe25519 h, const fe25519 f)
+void qsc_fe25519_sq(qsc_fe25519 h, const qsc_fe25519 f)
 {
 	int64_t carry;
 	int64_t f0;
@@ -683,16 +683,16 @@ void fe25519_sq(fe25519 h, const fe25519 f)
 	int64_t h8;
 	int64_t h9;
 
-	f0 = (int64_t)f[0];
-	f1 = (int64_t)f[1];
-	f2 = (int64_t)f[2];
-	f3 = (int64_t)f[3];
-	f4 = (int64_t)f[4];
-	f5 = (int64_t)f[5];
-	f6 = (int64_t)f[6];
-	f7 = (int64_t)f[7];
-	f8 = (int64_t)f[8];
-	f9 = (int64_t)f[9];
+	f0 = (int64_t)f[0U];
+	f1 = (int64_t)f[1U];
+	f2 = (int64_t)f[2U];
+	f3 = (int64_t)f[3U];
+	f4 = (int64_t)f[4U];
+	f5 = (int64_t)f[5U];
+	f6 = (int64_t)f[6U];
+	f7 = (int64_t)f[7U];
+	f8 = (int64_t)f[8U];
+	f9 = (int64_t)f[9U];
 
 	f0x2 = 2 * f0;
 	f1x2 = 2 * f1;
@@ -787,19 +787,19 @@ void fe25519_sq(fe25519 h, const fe25519 f)
 	h1 += carry;
 	h0 -= carry * (1 << 26);
 
-	h[0] = (int32_t)h0;
-	h[1] = (int32_t)h1;
-	h[2] = (int32_t)h2;
-	h[3] = (int32_t)h3;
-	h[4] = (int32_t)h4;
-	h[5] = (int32_t)h5;
-	h[6] = (int32_t)h6;
-	h[7] = (int32_t)h7;
-	h[8] = (int32_t)h8;
-	h[9] = (int32_t)h9;
+	h[0U] = (int32_t)h0;
+	h[1U] = (int32_t)h1;
+	h[2U] = (int32_t)h2;
+	h[3U] = (int32_t)h3;
+	h[4U] = (int32_t)h4;
+	h[5U] = (int32_t)h5;
+	h[6U] = (int32_t)h6;
+	h[7U] = (int32_t)h7;
+	h[8U] = (int32_t)h8;
+	h[9U] = (int32_t)h9;
 }
 
-void fe25519_sq2(fe25519 h, const fe25519 f)
+void qsc_fe25519_sq2(qsc_fe25519 h, const qsc_fe25519 f)
 {
 	/*
 	* h = 2 * f * f
@@ -844,16 +844,16 @@ void fe25519_sq2(fe25519 h, const fe25519 f)
 	int64_t h8;
 	int64_t h9;
 
-	f0 = (int64_t)f[0];
-	f1 = (int64_t)f[1];
-	f2 = (int64_t)f[2];
-	f3 = (int64_t)f[3];
-	f4 = (int64_t)f[4];
-	f5 = (int64_t)f[5];
-	f6 = (int64_t)f[6];
-	f7 = (int64_t)f[7];
-	f8 = (int64_t)f[8];
-	f9 = (int64_t)f[9];
+	f0 = (int64_t)f[0U];
+	f1 = (int64_t)f[1U];
+	f2 = (int64_t)f[2U];
+	f3 = (int64_t)f[3U];
+	f4 = (int64_t)f[4U];
+	f5 = (int64_t)f[5U];
+	f6 = (int64_t)f[6U];
+	f7 = (int64_t)f[7U];
+	f8 = (int64_t)f[8U];
+	f9 = (int64_t)f[9U];
 
 	f0x2 = 2 * f0;
 	f1x2 = 2 * f1;
@@ -939,19 +939,19 @@ void fe25519_sq2(fe25519 h, const fe25519 f)
 	h1 += carry;
 	h0 -= carry * (1 << 26);
 
-	h[0] = (int32_t)h0;
-	h[1] = (int32_t)h1;
-	h[2] = (int32_t)h2;
-	h[3] = (int32_t)h3;
-	h[4] = (int32_t)h4;
-	h[5] = (int32_t)h5;
-	h[6] = (int32_t)h6;
-	h[7] = (int32_t)h7;
-	h[8] = (int32_t)h8;
-	h[9] = (int32_t)h9;
+	h[0U] = (int32_t)h0;
+	h[1U] = (int32_t)h1;
+	h[2U] = (int32_t)h2;
+	h[3U] = (int32_t)h3;
+	h[4U] = (int32_t)h4;
+	h[5U] = (int32_t)h5;
+	h[6U] = (int32_t)h6;
+	h[7U] = (int32_t)h7;
+	h[8U] = (int32_t)h8;
+	h[9U] = (int32_t)h9;
 }
 
-void fe25519_frombytes(fe25519 h, const uint8_t* s)
+void qsc_fe25519_from_bytes(qsc_fe25519 h, const uint8_t* s)
 {
 	int64_t carry;
 	int64_t h0;
@@ -1008,19 +1008,19 @@ void fe25519_frombytes(fe25519 h, const uint8_t* s)
 	h9 += carry;
 	h8 -= carry * (1 << 26);
 
-	h[0] = (int32_t)h0;
-	h[1] = (int32_t)h1;
-	h[2] = (int32_t)h2;
-	h[3] = (int32_t)h3;
-	h[4] = (int32_t)h4;
-	h[5] = (int32_t)h5;
-	h[6] = (int32_t)h6;
-	h[7] = (int32_t)h7;
-	h[8] = (int32_t)h8;
-	h[9] = (int32_t)h9;
+	h[0U] = (int32_t)h0;
+	h[1U] = (int32_t)h1;
+	h[2U] = (int32_t)h2;
+	h[3U] = (int32_t)h3;
+	h[4U] = (int32_t)h4;
+	h[5U] = (int32_t)h5;
+	h[6U] = (int32_t)h6;
+	h[7U] = (int32_t)h7;
+	h[8U] = (int32_t)h8;
+	h[9U] = (int32_t)h9;
 }
 
-void fe25519_reduce(fe25519 h, const fe25519 f)
+void qsc_fe25519_reduce(qsc_fe25519 h, const qsc_fe25519 f)
 {
 	/*
 	* Preconditions:
@@ -1053,16 +1053,16 @@ void fe25519_reduce(fe25519 h, const fe25519 f)
 	int32_t h9;
 	int32_t q;
 
-	h0 = f[0];
-	h1 = f[1];
-	h2 = f[2];
-	h3 = f[3];
-	h4 = f[4];
-	h5 = f[5];
-	h6 = f[6];
-	h7 = f[7];
-	h8 = f[8];
-	h9 = f[9];
+	h0 = f[0U];
+	h1 = f[1U];
+	h2 = f[2U];
+	h3 = f[3U];
+	h4 = f[4U];
+	h5 = f[5U];
+	h6 = f[6U];
+	h7 = f[7U];
+	h8 = f[8U];
+	h9 = f[9U];
 
 	q = (19 * h9 + (1UL << 24)) >> 25;
 	q = (h0 + q) >> 26;
@@ -1109,247 +1109,260 @@ void fe25519_reduce(fe25519 h, const fe25519 f)
 	carry = h9 >> 25;
 	h9 -= carry * (1UL << 25);
 
-	h[0] = h0;
-	h[1] = h1;
-	h[2] = h2;
-	h[3] = h3;
-	h[4] = h4;
-	h[5] = h5;
-	h[6] = h6;
-	h[7] = h7;
-	h[8] = h8;
-	h[9] = h9;
+	h[0U] = h0;
+	h[1U] = h1;
+	h[2U] = h2;
+	h[3U] = h3;
+	h[4U] = h4;
+	h[5U] = h5;
+	h[6U] = h6;
+	h[7U] = h7;
+	h[8U] = h8;
+	h[9U] = h9;
 }
 
-void fe25519_tobytes(uint8_t* s, const fe25519 h)
+void qsc_fe25519_to_bytes(uint8_t* s, const qsc_fe25519 h)
 {
-	fe25519 t = {0};
+	QSC_ASSERT(s != NULL);
 
-	fe25519_reduce(t, h);
+	qsc_fe25519 t = { 0 };
 
-	s[0] = (uint8_t)t[0];
-	s[1] = (uint8_t)(t[0] >> 8);
-	s[2] = (uint8_t)(t[0] >> 16);
-	s[3] = (uint8_t)((t[0] >> 24) | (t[1] * (1UL << 2)));
-	s[4] = (uint8_t)(t[1] >> 6);
-	s[5] = (uint8_t)(t[1] >> 14);
-	s[6] = (uint8_t)((t[1] >> 22) | (t[2] * (1UL << 3)));
-	s[7] = (uint8_t)(t[2] >> 5);
-	s[8] = (uint8_t)(t[2] >> 13);
-	s[9] = (uint8_t)((t[2] >> 21) | (t[3] * (1UL << 5)));
-	s[10] = (uint8_t)(t[3] >> 3);
-	s[11] = (uint8_t)(t[3] >> 11);
-	s[12] = (uint8_t)((t[3] >> 19) | (t[4] * (1UL << 6)));
-	s[13] = (uint8_t)(t[4] >> 2);
-	s[14] = (uint8_t)(t[4] >> 10);
-	s[15] = (uint8_t)(t[4] >> 18);
-	s[16] = (uint8_t)t[5];
-	s[17] = (uint8_t)(t[5] >> 8);
-	s[18] = (uint8_t)(t[5] >> 16);
-	s[19] = (uint8_t)((t[5] >> 24) | (t[6] * (1UL << 1)));
-	s[20] = (uint8_t)(t[6] >> 7);
-	s[21] = (uint8_t)(t[6] >> 15);
-	s[22] = (uint8_t)((t[6] >> 23) | (t[7] * (1UL << 3)));
-	s[23] = (uint8_t)(t[7] >> 5);
-	s[24] = (uint8_t)(t[7] >> 13);
-	s[25] = (uint8_t)((t[7] >> 21) | (t[8] * (1UL << 4)));
-	s[26] = (uint8_t)(t[8] >> 4);
-	s[27] = (uint8_t)(t[8] >> 12);
-	s[28] = (uint8_t)((t[8] >> 20) | (t[9] * (1UL << 6)));
-	s[29] = (uint8_t)(t[9] >> 2);
-	s[30] = (uint8_t)(t[9] >> 10);
-	s[31] = (uint8_t)(t[9] >> 18);
+	qsc_fe25519_reduce(t, h);
+
+	s[0U] = (uint8_t)t[0U];
+	s[1U] = (uint8_t)(t[0U] >> 8);
+	s[2U] = (uint8_t)(t[0U] >> 16);
+	s[3U] = (uint8_t)((t[0U] >> 24) | (t[1U] * (1UL << 2)));
+	s[4U] = (uint8_t)(t[1U] >> 6);
+	s[5U] = (uint8_t)(t[1U] >> 14);
+	s[6U] = (uint8_t)((t[1U] >> 22) | (t[2U] * (1UL << 3)));
+	s[7U] = (uint8_t)(t[2U] >> 5);
+	s[8U] = (uint8_t)(t[2U] >> 13);
+	s[9U] = (uint8_t)((t[2U] >> 21) | (t[3U] * (1UL << 5)));
+	s[10U] = (uint8_t)(t[3U] >> 3);
+	s[11U] = (uint8_t)(t[3U] >> 11);
+	s[12U] = (uint8_t)((t[3U] >> 19) | (t[4U] * (1UL << 6)));
+	s[13U] = (uint8_t)(t[4U] >> 2);
+	s[14U] = (uint8_t)(t[4U] >> 10);
+	s[15U] = (uint8_t)(t[4U] >> 18);
+	s[16U] = (uint8_t)t[5U];
+	s[17U] = (uint8_t)(t[5U] >> 8);
+	s[18U] = (uint8_t)(t[5U] >> 16);
+	s[19U] = (uint8_t)((t[5U] >> 24) | (t[6U] * (1UL << 1)));
+	s[20U] = (uint8_t)(t[6U] >> 7);
+	s[21U] = (uint8_t)(t[6U] >> 15);
+	s[22U] = (uint8_t)((t[6U] >> 23) | (t[7U] * (1UL << 3)));
+	s[23U] = (uint8_t)(t[7U] >> 5);
+	s[24U] = (uint8_t)(t[7U] >> 13);
+	s[25U] = (uint8_t)((t[7U] >> 21) | (t[8U] * (1UL << 4)));
+	s[26U] = (uint8_t)(t[8U] >> 4);
+	s[27U] = (uint8_t)(t[8U] >> 12);
+	s[28U] = (uint8_t)((t[8U] >> 20) | (t[9U] * (1UL << 6)));
+	s[29U] = (uint8_t)(t[9U] >> 2);
+	s[30U] = (uint8_t)(t[9U] >> 10);
+	s[31U] = (uint8_t)(t[9U] >> 18);
 }
 
-static void fe25519_pow22523(fe25519 out, const fe25519 z)
+static void fe25519_pow22523(qsc_fe25519 out, const qsc_fe25519 z)
 {
-	fe25519 t0 = {0};
-	fe25519 t1 = {0};
-	fe25519 t2 = {0};
+	qsc_fe25519 t0 = { 0 };
+	qsc_fe25519 t1 = { 0 };
+	qsc_fe25519 t2 = { 0 };
 	size_t i;
 
-	fe25519_sq(t0, z);
-	fe25519_sq(t1, t0);
-	fe25519_sq(t1, t1);
-	fe25519_mul(t1, z, t1);
-	fe25519_mul(t0, t0, t1);
-	fe25519_sq(t0, t0);
-	fe25519_mul(t0, t1, t0);
-	fe25519_sq(t1, t0);
+	qsc_fe25519_sq(t0, z);
+	qsc_fe25519_sq(t1, t0);
+	qsc_fe25519_sq(t1, t1);
+	qsc_fe25519_mul(t1, z, t1);
+	qsc_fe25519_mul(t0, t0, t1);
+	qsc_fe25519_sq(t0, t0);
+	qsc_fe25519_mul(t0, t1, t0);
+	qsc_fe25519_sq(t1, t0);
 
 	for (i = 1; i < 5; ++i)
 	{
-		fe25519_sq(t1, t1);
+		qsc_fe25519_sq(t1, t1);
 	}
 
-	fe25519_mul(t0, t1, t0);
-	fe25519_sq(t1, t0);
+	qsc_fe25519_mul(t0, t1, t0);
+	qsc_fe25519_sq(t1, t0);
 
 	for (i = 1; i < 10; ++i)
 	{
-		fe25519_sq(t1, t1);
+		qsc_fe25519_sq(t1, t1);
 	}
 
-	fe25519_mul(t1, t1, t0);
-	fe25519_sq(t2, t1);
+	qsc_fe25519_mul(t1, t1, t0);
+	qsc_fe25519_sq(t2, t1);
 
 	for (i = 1; i < 20; ++i)
 	{
-		fe25519_sq(t2, t2);
+		qsc_fe25519_sq(t2, t2);
 	}
 
-	fe25519_mul(t1, t2, t1);
+	qsc_fe25519_mul(t1, t2, t1);
 
 	for (i = 1; i < 11; ++i)
 	{
-		fe25519_sq(t1, t1);
+		qsc_fe25519_sq(t1, t1);
 	}
 
-	fe25519_mul(t0, t1, t0);
-	fe25519_sq(t1, t0);
+	qsc_fe25519_mul(t0, t1, t0);
+	qsc_fe25519_sq(t1, t0);
 
 	for (i = 1; i < 50; ++i)
 	{
-		fe25519_sq(t1, t1);
+		qsc_fe25519_sq(t1, t1);
 	}
 
-	fe25519_mul(t1, t1, t0);
-	fe25519_sq(t2, t1);
+	qsc_fe25519_mul(t1, t1, t0);
+	qsc_fe25519_sq(t2, t1);
 
 	for (i = 1; i < 100; ++i)
 	{
-		fe25519_sq(t2, t2);
+		qsc_fe25519_sq(t2, t2);
 	}
 
-	fe25519_mul(t1, t2, t1);
+	qsc_fe25519_mul(t1, t2, t1);
 
 	for (i = 1; i < 51; ++i)
 	{
-		fe25519_sq(t1, t1);
+		qsc_fe25519_sq(t1, t1);
 	}
 
-	fe25519_mul(t0, t1, t0);
-	fe25519_sq(t0, t0);
-	fe25519_sq(t0, t0);
-	fe25519_mul(out, t0, z);
+	qsc_fe25519_mul(t0, t1, t0);
+	qsc_fe25519_sq(t0, t0);
+	qsc_fe25519_sq(t0, t0);
+	qsc_fe25519_mul(out, t0, z);
 }
 
-void fe25519_invert(fe25519 out, const fe25519 z)
+void qsc_fe25519_invert(qsc_fe25519 out, const qsc_fe25519 z)
 {
 	/* Inversion - returns 0 if z=0 */
-	fe25519 t0 = {0};
-	fe25519 t1 = {0};
-	fe25519 t2 = {0};
-	fe25519 t3 = {0};
+	qsc_fe25519 t0 = { 0 };
+	qsc_fe25519 t1 = { 0 };
+	qsc_fe25519 t2 = { 0 };
+	qsc_fe25519 t3 = { 0 };
 	size_t i;
 
-	fe25519_sq(t0, z);
-	fe25519_sq(t1, t0);
-	fe25519_sq(t1, t1);
-	fe25519_mul(t1, z, t1);
-	fe25519_mul(t0, t0, t1);
-	fe25519_sq(t2, t0);
-	fe25519_mul(t1, t1, t2);
-	fe25519_sq(t2, t1);
+	qsc_fe25519_sq(t0, z);
+	qsc_fe25519_sq(t1, t0);
+	qsc_fe25519_sq(t1, t1);
+	qsc_fe25519_mul(t1, z, t1);
+	qsc_fe25519_mul(t0, t0, t1);
+	qsc_fe25519_sq(t2, t0);
+	qsc_fe25519_mul(t1, t1, t2);
+	qsc_fe25519_sq(t2, t1);
 
 	for (i = 1; i < 5; ++i)
 	{
-		fe25519_sq(t2, t2);
+		qsc_fe25519_sq(t2, t2);
 	}
 
-	fe25519_mul(t1, t2, t1);
-	fe25519_sq(t2, t1);
+	qsc_fe25519_mul(t1, t2, t1);
+	qsc_fe25519_sq(t2, t1);
 
 	for (i = 1; i < 10; ++i)
 	{
-		fe25519_sq(t2, t2);
+		qsc_fe25519_sq(t2, t2);
 	}
 
-	fe25519_mul(t2, t2, t1);
-	fe25519_sq(t3, t2);
+	qsc_fe25519_mul(t2, t2, t1);
+	qsc_fe25519_sq(t3, t2);
 
 	for (i = 1; i < 20; ++i)
 	{
-		fe25519_sq(t3, t3);
+		qsc_fe25519_sq(t3, t3);
 	}
 
-	fe25519_mul(t2, t3, t2);
+	qsc_fe25519_mul(t2, t3, t2);
 
 	for (i = 1; i < 11; ++i)
 	{
-		fe25519_sq(t2, t2);
+		qsc_fe25519_sq(t2, t2);
 	}
-	fe25519_mul(t1, t2, t1);
-	fe25519_sq(t2, t1);
+	qsc_fe25519_mul(t1, t2, t1);
+	qsc_fe25519_sq(t2, t1);
 
 	for (i = 1; i < 50; ++i)
 	{
-		fe25519_sq(t2, t2);
+		qsc_fe25519_sq(t2, t2);
 	}
 
-	fe25519_mul(t2, t2, t1);
-	fe25519_sq(t3, t2);
+	qsc_fe25519_mul(t2, t2, t1);
+	qsc_fe25519_sq(t3, t2);
 
 	for (i = 1; i < 100; ++i)
 	{
-		fe25519_sq(t3, t3);
+		qsc_fe25519_sq(t3, t3);
 	}
 
-	fe25519_mul(t2, t3, t2);
+	qsc_fe25519_mul(t2, t3, t2);
 
 	for (i = 1; i < 51; ++i)
 	{
-		fe25519_sq(t2, t2);
+		qsc_fe25519_sq(t2, t2);
 	}
 
-	fe25519_mul(t1, t2, t1);
+	qsc_fe25519_mul(t1, t2, t1);
 
 	for (i = 1; i < 6; ++i)
 	{
-		fe25519_sq(t1, t1);
+		qsc_fe25519_sq(t1, t1);
 	}
 
-	fe25519_mul(out, t1, t0);
+	qsc_fe25519_mul(out, t1, t0);
 }
 
 /* ge */
 
-static void ge25519_add_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_precomp* q)
+static void ge25519_add_precomp(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p, const qsc_ge25519_precomp* q)
 {
-	fe25519 t0 = {0};
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(p != NULL);
+	QSC_ASSERT(q != NULL);
 
-	fe25519_add(r->x, p->y, p->x);
-	fe25519_sub(r->y, p->y, p->x);
-	fe25519_mul(r->z, r->x, q->yplusx);
-	fe25519_mul(r->y, r->y, q->yminusx);
-	fe25519_mul(r->t, q->xy2d, p->t);
-	fe25519_add(t0, p->z, p->z);
-	fe25519_sub(r->x, r->z, r->y);
-	fe25519_add(r->y, r->z, r->y);
-	fe25519_add(r->z, t0, r->t);
-	fe25519_sub(r->t, t0, r->t);
+	qsc_fe25519 t0 = { 0 };
+
+	qsc_fe25519_add(r->x, p->y, p->x);
+	qsc_fe25519_sub(r->y, p->y, p->x);
+	qsc_fe25519_mul(r->z, r->x, q->yplusx);
+	qsc_fe25519_mul(r->y, r->y, q->yminusx);
+	qsc_fe25519_mul(r->t, q->xy2d, p->t);
+	qsc_fe25519_add(t0, p->z, p->z);
+	qsc_fe25519_sub(r->x, r->z, r->y);
+	qsc_fe25519_add(r->y, r->z, r->y);
+	qsc_fe25519_add(r->z, t0, r->t);
+	qsc_fe25519_sub(r->t, t0, r->t);
 }
 
-static void ge25519_p3_0(ge25519_p3* h)
+static void ge25519_p3_0(qsc_ge25519_p3* h)
 {
-	fe25519_0(h->x);
-	fe25519_1(h->y);
-	fe25519_1(h->z);
-	fe25519_0(h->t);
+	QSC_ASSERT(h != NULL);
+
+	qsc_fe25519_0(h->x);
+	qsc_fe25519_1(h->y);
+	qsc_fe25519_1(h->z);
+	qsc_fe25519_0(h->t);
 }
 
-static void ge25519_precomp_0(ge25519_precomp* h)
+static void ge25519_precomp_0(qsc_ge25519_precomp* h)
 {
-	fe25519_1(h->yplusx);
-	fe25519_1(h->yminusx);
-	fe25519_0(h->xy2d);
+	QSC_ASSERT(h != NULL);
+
+	qsc_fe25519_1(h->yplusx);
+	qsc_fe25519_1(h->yminusx);
+	qsc_fe25519_0(h->xy2d);
 }
 
-static void ge25519_cmov(ge25519_precomp* t, const ge25519_precomp* u, uint8_t b)
+static void ge25519_cmov(qsc_ge25519_precomp* t, const qsc_ge25519_precomp* u, uint8_t b)
 {
-	fe25519_cmov(t->yplusx, u->yplusx, b);
-	fe25519_cmov(t->yminusx, u->yminusx, b);
-	fe25519_cmov(t->xy2d, u->xy2d, b);
+	QSC_ASSERT(t != NULL);
+	QSC_ASSERT(u != NULL);
+
+	qsc_fe25519_cmov(t->yplusx, u->yplusx, b);
+	qsc_fe25519_cmov(t->yminusx, u->yminusx, b);
+	qsc_fe25519_cmov(t->xy2d, u->xy2d, b);
 }
 
 static uint8_t ge25519_equal(int8_t b, int8_t c)
@@ -1365,30 +1378,34 @@ static uint8_t ge25519_equal(int8_t b, int8_t c)
     return y;
 }
 
-static void ge25519_cmov8(ge25519_precomp* t, const ge25519_precomp precomp[8], const int8_t b)
+static void ge25519_cmov8(qsc_ge25519_precomp* t, const qsc_ge25519_precomp precomp[8U], const int8_t b)
 {
-    ge25519_precomp     minust;
+	QSC_ASSERT(t != NULL);
+
+    qsc_ge25519_precomp minust;
     const unsigned char bnegative = ecdsabase_negative(b);
-    const unsigned char babs      = b - (((-bnegative) & b) * ((signed char) 1 << 1));
+    const unsigned char babs = b - (((-bnegative) & b) * ((signed char) 1 << 1));
 
     ge25519_precomp_0(t);
-    ge25519_cmov(t, &precomp[0], ge25519_equal(babs, 1));
-    ge25519_cmov(t, &precomp[1], ge25519_equal(babs, 2));
-    ge25519_cmov(t, &precomp[2], ge25519_equal(babs, 3));
-    ge25519_cmov(t, &precomp[3], ge25519_equal(babs, 4));
-    ge25519_cmov(t, &precomp[4], ge25519_equal(babs, 5));
-    ge25519_cmov(t, &precomp[5], ge25519_equal(babs, 6));
-    ge25519_cmov(t, &precomp[6], ge25519_equal(babs, 7));
-    ge25519_cmov(t, &precomp[7], ge25519_equal(babs, 8));
-    fe25519_copy(minust.yplusx, t->yminusx);
-    fe25519_copy(minust.yminusx, t->yplusx);
-    fe25519_neg(minust.xy2d, t->xy2d);
+    ge25519_cmov(t, &precomp[0U], ge25519_equal(babs, 1));
+    ge25519_cmov(t, &precomp[1U], ge25519_equal(babs, 2));
+    ge25519_cmov(t, &precomp[2U], ge25519_equal(babs, 3));
+    ge25519_cmov(t, &precomp[3U], ge25519_equal(babs, 4));
+    ge25519_cmov(t, &precomp[4U], ge25519_equal(babs, 5));
+    ge25519_cmov(t, &precomp[5U], ge25519_equal(babs, 6));
+    ge25519_cmov(t, &precomp[6U], ge25519_equal(babs, 7));
+    ge25519_cmov(t, &precomp[7U], ge25519_equal(babs, 8));
+    qsc_fe25519_copy(minust.yplusx, t->yminusx);
+    qsc_fe25519_copy(minust.yminusx, t->yplusx);
+    qsc_fe25519_neg(minust.xy2d, t->xy2d);
     ge25519_cmov(t, &minust, bnegative);
 }
 
-static void ge25519_cmov8_base(ge25519_precomp* t, const int32_t pos, const int8_t b)
+static void ge25519_cmov8_base(qsc_ge25519_precomp* t, const int32_t pos, const int8_t b)
 {
-	static const ge25519_precomp base[32][8] =
+	QSC_ASSERT(t != NULL);
+
+	static const qsc_ge25519_precomp base[32U][8U] =
 	{
 		{ /* 0/31 */
 		  {
@@ -2739,65 +2756,74 @@ static void ge25519_cmov8_base(ge25519_precomp* t, const int32_t pos, const int8
 	ge25519_cmov8(t, base[pos], b);
 }
 
-static void ge25519_p2_dbl(ge25519_p1p1* r, const ge25519_p2* p)
+static void ge25519_p2_dbl(qsc_ge25519_p1p1* r, const qsc_ge25519_p2* p)
 {
-	fe25519 t0 = {0};
+	qsc_fe25519 t0 = { 0 };
 
-	fe25519_sq(r->x, p->x);
-	fe25519_sq(r->z, p->y);
-	fe25519_sq2(r->t, p->z);
-	fe25519_add(r->y, p->x, p->y);
-	fe25519_sq(t0, r->y);
-	fe25519_add(r->y, r->z, r->x);
-	fe25519_sub(r->z, r->z, r->x);
-	fe25519_sub(r->x, t0, r->y);
-	fe25519_sub(r->t, r->t, r->z);
+	qsc_fe25519_sq(r->x, p->x);
+	qsc_fe25519_sq(r->z, p->y);
+	qsc_fe25519_sq2(r->t, p->z);
+	qsc_fe25519_add(r->y, p->x, p->y);
+	qsc_fe25519_sq(t0, r->y);
+	qsc_fe25519_add(r->y, r->z, r->x);
+	qsc_fe25519_sub(r->z, r->z, r->x);
+	qsc_fe25519_sub(r->x, t0, r->y);
+	qsc_fe25519_sub(r->t, r->t, r->z);
 }
 
-static void ge25519_p3_to_p2(ge25519_p2* r, const ge25519_p3* p)
+static void ge25519_p3_to_p2(qsc_ge25519_p2* r, const qsc_ge25519_p3* p)
 {
-	fe25519_copy(r->x, p->x);
-	fe25519_copy(r->y, p->y);
-	fe25519_copy(r->z, p->z);
+	qsc_fe25519_copy(r->x, p->x);
+	qsc_fe25519_copy(r->y, p->y);
+	qsc_fe25519_copy(r->z, p->z);
 }
 
-static void ge25519_p3_dbl(ge25519_p1p1* r, const ge25519_p3* p)
+static void ge25519_p3_dbl(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p)
 {
-	ge25519_p2 q = {0};
+	qsc_ge25519_p2 q = { 0 };
 
 	ge25519_p3_to_p2(&q, p);
 	ge25519_p2_dbl(r, &q);
 }
 
-static void ge25519_p2_0(ge25519_p2* h)
+static void ge25519_p2_0(qsc_ge25519_p2* h)
 {
-	fe25519_0(h->x);
-	fe25519_1(h->y);
-	fe25519_1(h->z);
+	qsc_fe25519_0(h->x);
+	qsc_fe25519_1(h->y);
+	qsc_fe25519_1(h->z);
 }
 
-void ge25519_p1p1_to_p3(ge25519_p3* r, const ge25519_p1p1* p)
+void qsc_ge25519_p1p1_to_p3(qsc_ge25519_p3* r, const qsc_ge25519_p1p1* p)
 {
-	fe25519_mul(r->x, p->x, p->t);
-	fe25519_mul(r->y, p->y, p->z);
-	fe25519_mul(r->z, p->z, p->t);
-	fe25519_mul(r->t, p->x, p->y);
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(p != NULL);
+
+	qsc_fe25519_mul(r->x, p->x, p->t);
+	qsc_fe25519_mul(r->y, p->y, p->z);
+	qsc_fe25519_mul(r->z, p->z, p->t);
+	qsc_fe25519_mul(r->t, p->x, p->y);
 }
 
-void ge25519_p1p1_to_p2(ge25519_p2* r, const ge25519_p1p1* p)
+void qsc_ge25519_p1p1_to_p2(qsc_ge25519_p2* r, const qsc_ge25519_p1p1* p)
 {
-	fe25519_mul(r->x, p->x, p->t);
-	fe25519_mul(r->y, p->y, p->z);
-	fe25519_mul(r->z, p->z, p->t);
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(p != NULL);
+
+	qsc_fe25519_mul(r->x, p->x, p->t);
+	qsc_fe25519_mul(r->y, p->y, p->z);
+	qsc_fe25519_mul(r->z, p->z, p->t);
 }
 
-void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
+void qsc_ge25519_scalarmult_base(qsc_ge25519_p3* h, const uint8_t* a)
 {
-	signed char e[64] = {0};
+	QSC_ASSERT(h != NULL);
+	QSC_ASSERT(a != NULL);
+
+	signed char e[64] = { 0 };
 	signed char carry;
-	ge25519_p1p1 r = {0};
-	ge25519_p2 s = {0};
-	ge25519_precomp t = {0};
+	qsc_ge25519_p1p1 r = { 0 };
+	qsc_ge25519_p2 s = { 0 };
+	qsc_ge25519_precomp t = { 0 };
 	int32_t i;
 
 	for (i = 0; i < 32; ++i)
@@ -2826,45 +2852,50 @@ void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a)
 	{
 		ge25519_cmov8_base(&t, i / 2, e[i]);
 		ge25519_add_precomp(&r, h, &t);
-		ge25519_p1p1_to_p3(h, &r);
+		qsc_ge25519_p1p1_to_p3(h, &r);
 	}
 
 	ge25519_p3_dbl(&r, h);
-	ge25519_p1p1_to_p2(&s, &r);
+	qsc_ge25519_p1p1_to_p2(&s, &r);
 	ge25519_p2_dbl(&r, &s);
-	ge25519_p1p1_to_p2(&s, &r);
+	qsc_ge25519_p1p1_to_p2(&s, &r);
 	ge25519_p2_dbl(&r, &s);
-	ge25519_p1p1_to_p2(&s, &r);
+	qsc_ge25519_p1p1_to_p2(&s, &r);
 	ge25519_p2_dbl(&r, &s);
-	ge25519_p1p1_to_p3(h, &r);
+	qsc_ge25519_p1p1_to_p3(h, &r);
 
 	for (i = 0; i < 64; i += 2)
 	{
 		ge25519_cmov8_base(&t, i / 2, e[i]);
 		ge25519_add_precomp(&r, h, &t);
-		ge25519_p1p1_to_p3(h, &r);
+		qsc_ge25519_p1p1_to_p3(h, &r);
 	}
 }
 
-void ge25519_p3_tobytes(uint8_t* s, const ge25519_p3* h)
+void qsc_ge25519_p3_to_bytes(uint8_t* s, const qsc_ge25519_p3* h)
 {
-	fe25519 recip = {0};
-	fe25519 x = {0};
-	fe25519 y = {0};
+	QSC_ASSERT(s != NULL);
+	QSC_ASSERT(h != NULL);
 
-	fe25519_invert(recip, h->z);
-	fe25519_mul(x, h->x, recip);
-	fe25519_mul(y, h->y, recip);
-	fe25519_tobytes(s, y);
-	s[31] ^= (fe25519_isnegative(x) << 7);
+	qsc_fe25519 recip = { 0 };
+	qsc_fe25519 x = { 0 };
+	qsc_fe25519 y = { 0 };
+
+	qsc_fe25519_invert(recip, h->z);
+	qsc_fe25519_mul(x, h->x, recip);
+	qsc_fe25519_mul(y, h->y, recip);
+	qsc_fe25519_to_bytes(s, y);
+	s[31U] ^= (qsc_fe25519_is_negative(x) << 7);
 }
 
-int32_t ge25519_is_canonical(const uint8_t* s)
+int32_t qsc_ge25519_is_canonical(const uint8_t* s)
 {
+	QSC_ASSERT(s != NULL);
+
 	uint8_t c;
 	uint8_t d;
 
-	c = (s[31] & 0x7F) ^ 0x7F;
+	c = (s[31U] & 0x7F) ^ 0x7F;
 
 	for (int32_t i = 30; i > 0; i--)
 	{
@@ -2872,220 +2903,224 @@ int32_t ge25519_is_canonical(const uint8_t* s)
 	}
 
 	c = (uint8_t)((uint32_t)(c - 1UL) >> 8);
-	d = (uint8_t)((uint32_t)(0x000000EDUL - 1UL - (uint32_t)s[0]) >> 8);
+	d = (uint8_t)((uint32_t)(0x000000EDUL - 1UL - (uint32_t)s[0U]) >> 8);
 
 	return 1 - (c & d & 1);
 }
 
-int32_t ge25519_has_small_order(const uint8_t s[32])
+int32_t qsc_ge25519_has_small_order(const uint8_t s[32U])
 {
-	static const uint8_t blocklist[][32] =
+	static const uint8_t blocklist[][32U] =
 	{
 		/* 0 (order 4) */
 		{
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
 		},
 		/* 1 (order 1) */
 		{
-			0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+			0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
 		},
 		/* 2707385501144840649318225287225658788936804267575313519463743609750303402022
 		(order 8) */
 		{
-			0x26, 0xe8, 0x95, 0x8f, 0xc2, 0xb2, 0x27, 0xb0, 0x45, 0xc3, 0xf4,
-			0x89, 0xf2, 0xef, 0x98, 0xf0, 0xd5, 0xdf, 0xac, 0x05, 0xd3, 0xc6,
-			0x33, 0x39, 0xb1, 0x38, 0x02, 0x88, 0x6d, 0x53, 0xfc, 0x05
+			0x26U, 0xE8U, 0x95U, 0x8fU, 0xC2U, 0xB2U, 0x27U, 0xB0U, 0x45U, 0xC3U, 0xf4U,
+			0x89U, 0xf2U, 0xEfU, 0x98U, 0xf0U, 0xD5U, 0xDfU, 0xACU, 0x05U, 0xD3U, 0xC6U,
+			0x33U, 0x39U, 0xB1U, 0x38U, 0x02U, 0x88U, 0x6DU, 0x53U, 0xfCU, 0x05U
 		},
 		/* 55188659117513257062467267217118295137698188065244968500265048394206261417927
-		(order 8) */
+		(orDEr 8) */
 		{
-			0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b,
-			0x76, 0x0d, 0x10, 0x67, 0x0f, 0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39,
-			0xcc, 0xc6, 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0x7a
+			0xC7U, 0x17U, 0x6AU, 0x70U, 0x3DU, 0x4DU, 0xD8U, 0x4fU, 0xBAU, 0x3CU, 0x0BU,
+			0x76U, 0x0DU, 0x10U, 0x67U, 0x0fU, 0x2AU, 0x20U, 0x53U, 0xfAU, 0x2CU, 0x39U,
+			0xCCU, 0xC6U, 0x4EU, 0xC7U, 0xFDU, 0x77U, 0x92U, 0xACU, 0x03U, 0x7AU
 		},
-		/* p-1 (order 2) */
+		/* p-1 (orDEr 2) */
 		{
-			0xec, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
+			0xECU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x7FU
 		},
-		/* p (=0, order 4) */
+		/* p (=0, orDEr 4) */
 		{
-			0xed, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
+			0xED, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x7FU
 		},
-		/* p+1 (=1, order 1) */
+		/* p+1 (=1, orDEr 1) */
 		{
-			0xee, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
+			0xEEU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x7FU
 		}
 	};
 
-	uint8_t c[7] = { 0U };
+	uint8_t c[7U] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;
 
-	for (j = 0; j < 31; ++j)
+	for (j = 0U; j < 31U; ++j)
 	{
-		for (i = 0; i < sizeof(blocklist) / sizeof(blocklist[0]); ++i)
+		for (i = 0U; i < sizeof(blocklist) / sizeof(blocklist[0U]); ++i)
 		{
 			c[i] |= s[j] ^ blocklist[i][j];
 		}
 	}
 
-	for (i = 0; i < sizeof(blocklist) / sizeof(blocklist[0]); ++i)
+	for (i = 0U; i < sizeof(blocklist) / sizeof(blocklist[0U]); ++i)
 	{
 		c[i] |= (s[j] & 0x7f) ^ blocklist[i][j];
 	}
 
-	k = 0;
+	k = 0U;
 
-	for (i = 0; i < sizeof(blocklist) / sizeof(blocklist[0]); ++i)
+	for (i = 0U; i < sizeof(blocklist) / sizeof(blocklist[0U]); ++i)
 	{
-		k |= (c[i] - 1);
+		k |= (c[i] - 1U);
 	}
 
 	return (int32_t)((k >> 8) & 1);
 }
 
-int32_t ge25519_frombytes_negate_vartime(ge25519_p3* h, const uint8_t* s)
+int32_t qsc_ge25519_from_bytes_negate_vartime(qsc_ge25519_p3* h, const uint8_t* s)
 {
 	QSC_ASSERT(h != NULL);
 	QSC_ASSERT(s != NULL);
 
-	fe25519 u = {0};
-	fe25519 v = {0};
-	fe25519 v3 = {0};
-	fe25519 vxx = {0};
-	fe25519 mrcheck = {0};
-	fe25519 prcheck = {0};
+	qsc_fe25519 u = { 0 };
+	qsc_fe25519 v = { 0 };
+	qsc_fe25519 v3 = { 0 };
+	qsc_fe25519 vxx = { 0 };
+	qsc_fe25519 mrcheck = { 0 };
+	qsc_fe25519 prcheck = { 0 };
 	int32_t res;
 
 	res = 0;
-	fe25519_frombytes(h->y, s);
-	fe25519_1(h->z);
-	fe25519_sq(u, h->y);
-	fe25519_mul(v, u, ed25519_d);
+	qsc_fe25519_from_bytes(h->y, s);
+	qsc_fe25519_1(h->z);
+	qsc_fe25519_sq(u, h->y);
+	qsc_fe25519_mul(v, u, ed25519_d);
 	/* u = y^2-1 */
-	fe25519_sub(u, u, h->z);
+	qsc_fe25519_sub(u, u, h->z);
 	/* v = dy^2+1 */
-	fe25519_add(v, v, h->z);
+	qsc_fe25519_add(v, v, h->z);
 
-	fe25519_sq(v3, v);
+	qsc_fe25519_sq(v3, v);
 	/* v3 = v^3 */
-	fe25519_mul(v3, v3, v);
-	fe25519_sq(h->x, v3);
+	qsc_fe25519_mul(v3, v3, v);
+	qsc_fe25519_sq(h->x, v3);
 	/* x = uv^7 */
-	fe25519_mul(h->x, h->x, v);
-	fe25519_mul(h->x, h->x, u);
+	qsc_fe25519_mul(h->x, h->x, v);
+	qsc_fe25519_mul(h->x, h->x, u);
 	/* x = (uv^7)^((q-5)/8) */
 	fe25519_pow22523(h->x, h->x);
-	fe25519_mul(h->x, h->x, v3);
-	fe25519_mul(h->x, h->x, u);
+	qsc_fe25519_mul(h->x, h->x, v3);
+	qsc_fe25519_mul(h->x, h->x, u);
 	/* x = uv^3(uv^7)^((q-5)/8) */
-	fe25519_sq(vxx, h->x);
-	fe25519_mul(vxx, vxx, v);
+	qsc_fe25519_sq(vxx, h->x);
+	qsc_fe25519_mul(vxx, vxx, v);
 	/* vx^2-u */
-	fe25519_sub(mrcheck, vxx, u);
+	qsc_fe25519_sub(mrcheck, vxx, u);
 
-	if (fe25519_iszero(mrcheck) == 0)
+	if (qsc_fe25519_is_zero(mrcheck) == 0)
 	{
 		/* vx^2+u */
-		fe25519_add(prcheck, vxx, u);
+		qsc_fe25519_add(prcheck, vxx, u);
 
-		if (fe25519_iszero(prcheck) == 0)
+		if (qsc_fe25519_is_zero(prcheck) == 0)
 		{
 			res = -1;
 		}
 		else
 		{
-			fe25519_mul(h->x, h->x, fe25519_sqrtm1);
+			qsc_fe25519_mul(h->x, h->x, fe25519_sqrtm1);
 		}
 	}
 
 	if (res != -1)
 	{
-		if (fe25519_isnegative(h->x) == (s[31] >> 7))
+		if (qsc_fe25519_is_negative(h->x) == (s[31U] >> 7))
 		{
-			fe25519_neg(h->x, h->x);
+			qsc_fe25519_neg(h->x, h->x);
 		}
 
-		fe25519_mul(h->t, h->x, h->y);
+		qsc_fe25519_mul(h->t, h->x, h->y);
 	}
 
 	return res;
 }
 
-void ge25519_p3_to_cached(ge25519_cached* r, const ge25519_p3* p)
+void qsc_ge25519_p3_to_cached(qsc_ge25519_cached* r, const qsc_ge25519_p3* p)
 {
 	QSC_ASSERT(r != NULL);
 	QSC_ASSERT(p != NULL);
 
-	fe25519_add(r->yplusx, p->y, p->x);
-	fe25519_sub(r->yminusx, p->y, p->x);
-	fe25519_copy(r->z, p->z);
-	fe25519_mul(r->t2d, p->t, ed25519_d2);
+	qsc_fe25519_add(r->yplusx, p->y, p->x);
+	qsc_fe25519_sub(r->yminusx, p->y, p->x);
+	qsc_fe25519_copy(r->z, p->z);
+	qsc_fe25519_mul(r->t2d, p->t, ed25519_d2);
 }
 
-void ge25519_add_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q)
+void qsc_ge25519_add_cached(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p, const qsc_ge25519_cached* q)
 {
 	QSC_ASSERT(r != NULL);
 	QSC_ASSERT(p != NULL);
 	QSC_ASSERT(q != NULL);
 
-	fe25519 t0 = {0};
+	qsc_fe25519 t0 = { 0 };
 
-	fe25519_add(r->x, p->y, p->x);
-	fe25519_sub(r->y, p->y, p->x);
-	fe25519_mul(r->z, r->x, q->yplusx);
-	fe25519_mul(r->y, r->y, q->yminusx);
-	fe25519_mul(r->t, q->t2d, p->t);
-	fe25519_mul(r->x, p->z, q->z);
-	fe25519_add(t0, r->x, r->x);
-	fe25519_sub(r->x, r->z, r->y);
-	fe25519_add(r->y, r->z, r->y);
-	fe25519_add(r->z, t0, r->t);
-	fe25519_sub(r->t, t0, r->t);
+	qsc_fe25519_add(r->x, p->y, p->x);
+	qsc_fe25519_sub(r->y, p->y, p->x);
+	qsc_fe25519_mul(r->z, r->x, q->yplusx);
+	qsc_fe25519_mul(r->y, r->y, q->yminusx);
+	qsc_fe25519_mul(r->t, q->t2d, p->t);
+	qsc_fe25519_mul(r->x, p->z, q->z);
+	qsc_fe25519_add(t0, r->x, r->x);
+	qsc_fe25519_sub(r->x, r->z, r->y);
+	qsc_fe25519_add(r->y, r->z, r->y);
+	qsc_fe25519_add(r->z, t0, r->t);
+	qsc_fe25519_sub(r->t, t0, r->t);
 }
 
-void ge25519_sub_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_precomp* q)
+void qsc_ge25519_sub_precomp(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p, const qsc_ge25519_precomp* q)
 {
+	QSC_ASSERT(r != NULL);
+	QSC_ASSERT(p != NULL);
+	QSC_ASSERT(q != NULL);
+
 	/*
 	* r = a * A + b * B
-	* where a = a[0]+256*a[1]+...+256^31 a[31].
-	* and b = b[0]+256*b[1]+...+256^31 b[31].
+	* where a = a[0U]+256*a[1U]+...+256^31 a[31U].
+	* and b = b[0U]+256*b[1U]+...+256^31 b[31U].
 	* B is the Ed25519 base point (x,4/5) with x positive.
 	* Only used for signatures verification.
 	*/
-	fe25519 t0 = {0};
+	qsc_fe25519 t0 = { 0 };
 
-	fe25519_add(r->x, p->y, p->x);
-	fe25519_sub(r->y, p->y, p->x);
-	fe25519_mul(r->z, r->x, q->yminusx);
-	fe25519_mul(r->y, r->y, q->yplusx);
-	fe25519_mul(r->t, q->xy2d, p->t);
-	fe25519_add(t0, p->z, p->z);
-	fe25519_sub(r->x, r->z, r->y);
-	fe25519_add(r->y, r->z, r->y);
-	fe25519_sub(r->z, t0, r->t);
-	fe25519_add(r->t, t0, r->t);
+	qsc_fe25519_add(r->x, p->y, p->x);
+	qsc_fe25519_sub(r->y, p->y, p->x);
+	qsc_fe25519_mul(r->z, r->x, q->yminusx);
+	qsc_fe25519_mul(r->y, r->y, q->yplusx);
+	qsc_fe25519_mul(r->t, q->xy2d, p->t);
+	qsc_fe25519_add(t0, p->z, p->z);
+	qsc_fe25519_sub(r->x, r->z, r->y);
+	qsc_fe25519_add(r->y, r->z, r->y);
+	qsc_fe25519_sub(r->z, t0, r->t);
+	qsc_fe25519_add(r->t, t0, r->t);
 }
 
-void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge25519_p3* A, const uint8_t* b)
+void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, const qsc_ge25519_p3* A, const uint8_t* b)
 {
 	QSC_ASSERT(r != NULL);
 	QSC_ASSERT(a != NULL);
 	QSC_ASSERT(A != NULL);
 	QSC_ASSERT(b != NULL);
 
-	static const ge25519_precomp Bi[8] =
+	static const qsc_ge25519_precomp Bi[8U] =
 	{
 		{
 		  { 25967493, -14356035, 29566456, 3660896, -12694345, 4014787, 27544626, -11754271, -6079156, 2047605 },
@@ -3129,49 +3164,49 @@ void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge
 		}
 	};
 
-	int8_t aslide[256] = { 0U };
-	int8_t bslide[256] = { 0U };
-	ge25519_cached Ai[8] = { 0U };
-	ge25519_p1p1 t;
-	ge25519_p3 u;
-	ge25519_p3 A2;
+	int8_t aslide[256] = { 0 };
+	int8_t bslide[256] = { 0 };
+	qsc_ge25519_cached Ai[8U] = { 0 };
+	qsc_ge25519_p1p1 t;
+	qsc_ge25519_p3 u;
+	qsc_ge25519_p3 A2;
 	int32_t i;
 
 	ecdsabase_slide_vartime(aslide, a);
 	ecdsabase_slide_vartime(bslide, b);
 
-	ge25519_p3_to_cached(&Ai[0], A);
+	qsc_ge25519_p3_to_cached(&Ai[0U], A);
 
 	ge25519_p3_dbl(&t, A);
-	ge25519_p1p1_to_p3(&A2, &t);
+	qsc_ge25519_p1p1_to_p3(&A2, &t);
 
-	ge25519_add_cached(&t, &A2, &Ai[0]);
-	ge25519_p1p1_to_p3(&u, &t);
-	ge25519_p3_to_cached(&Ai[1], &u);
+	qsc_ge25519_add_cached(&t, &A2, &Ai[0U]);
+	qsc_ge25519_p1p1_to_p3(&u, &t);
+	qsc_ge25519_p3_to_cached(&Ai[1U], &u);
 
-	ge25519_add_cached(&t, &A2, &Ai[1]);
-	ge25519_p1p1_to_p3(&u, &t);
-	ge25519_p3_to_cached(&Ai[2], &u);
+	qsc_ge25519_add_cached(&t, &A2, &Ai[1U]);
+	qsc_ge25519_p1p1_to_p3(&u, &t);
+	qsc_ge25519_p3_to_cached(&Ai[2U], &u);
 
-	ge25519_add_cached(&t, &A2, &Ai[2]);
-	ge25519_p1p1_to_p3(&u, &t);
-	ge25519_p3_to_cached(&Ai[3], &u);
+	qsc_ge25519_add_cached(&t, &A2, &Ai[2U]);
+	qsc_ge25519_p1p1_to_p3(&u, &t);
+	qsc_ge25519_p3_to_cached(&Ai[3U], &u);
 
-	ge25519_add_cached(&t, &A2, &Ai[3]);
-	ge25519_p1p1_to_p3(&u, &t);
-	ge25519_p3_to_cached(&Ai[4], &u);
+	qsc_ge25519_add_cached(&t, &A2, &Ai[3U]);
+	qsc_ge25519_p1p1_to_p3(&u, &t);
+	qsc_ge25519_p3_to_cached(&Ai[4U], &u);
 
-	ge25519_add_cached(&t, &A2, &Ai[4]);
-	ge25519_p1p1_to_p3(&u, &t);
-	ge25519_p3_to_cached(&Ai[5], &u);
+	qsc_ge25519_add_cached(&t, &A2, &Ai[4U]);
+	qsc_ge25519_p1p1_to_p3(&u, &t);
+	qsc_ge25519_p3_to_cached(&Ai[5U], &u);
 
-	ge25519_add_cached(&t, &A2, &Ai[5]);
-	ge25519_p1p1_to_p3(&u, &t);
-	ge25519_p3_to_cached(&Ai[6], &u);
+	qsc_ge25519_add_cached(&t, &A2, &Ai[5U]);
+	qsc_ge25519_p1p1_to_p3(&u, &t);
+	qsc_ge25519_p3_to_cached(&Ai[6U], &u);
 
-	ge25519_add_cached(&t, &A2, &Ai[6]);
-	ge25519_p1p1_to_p3(&u, &t);
-	ge25519_p3_to_cached(&Ai[7], &u);
+	qsc_ge25519_add_cached(&t, &A2, &Ai[6U]);
+	qsc_ge25519_p1p1_to_p3(&u, &t);
+	qsc_ge25519_p3_to_cached(&Ai[7U], &u);
 
 	ge25519_p2_0(r);
 
@@ -3189,162 +3224,166 @@ void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge
 
 		if (aslide[i] > 0)
 		{
-			ge25519_p1p1_to_p3(&u, &t);
-			ge25519_add_cached(&t, &u, &Ai[aslide[i] / 2]);
+			qsc_ge25519_p1p1_to_p3(&u, &t);
+			qsc_ge25519_add_cached(&t, &u, &Ai[aslide[i] / 2]);
 		}
 		else if (aslide[i] < 0)
 		{
-			ge25519_p1p1_to_p3(&u, &t);
-			ge25519_sub_cached(&t, &u, &Ai[(-aslide[i]) / 2]);
+			qsc_ge25519_p1p1_to_p3(&u, &t);
+			qsc_ge25519_sub_cached(&t, &u, &Ai[(-aslide[i]) / 2]);
 		}
 
 		if (bslide[i] > 0)
 		{
-			ge25519_p1p1_to_p3(&u, &t);
+			qsc_ge25519_p1p1_to_p3(&u, &t);
 			ge25519_add_precomp(&t, &u, &Bi[bslide[i] / 2]);
 		}
 		else if (bslide[i] < 0)
 		{
-			ge25519_p1p1_to_p3(&u, &t);
-			ge25519_sub_precomp(&t, &u, &Bi[(-bslide[i]) / 2]);
+			qsc_ge25519_p1p1_to_p3(&u, &t);
+			qsc_ge25519_sub_precomp(&t, &u, &Bi[(-bslide[i]) / 2]);
 		}
 
-		ge25519_p1p1_to_p2(r, &t);
+		qsc_ge25519_p1p1_to_p2(r, &t);
 	}
 }
 
-void ge25519_sub_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q)
+void qsc_ge25519_sub_cached(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p, const qsc_ge25519_cached* q)
 {
 	QSC_ASSERT(r != NULL);
 	QSC_ASSERT(p != NULL);
 	QSC_ASSERT(q != NULL);
 
-	fe25519 t0 = {0};
+	qsc_fe25519 t0 = { 0 };
 
-	fe25519_add(r->x, p->y, p->x);
-	fe25519_sub(r->y, p->y, p->x);
-	fe25519_mul(r->z, r->x, q->yminusx);
-	fe25519_mul(r->y, r->y, q->yplusx);
-	fe25519_mul(r->t, q->t2d, p->t);
-	fe25519_mul(r->x, p->z, q->z);
-	fe25519_add(t0, r->x, r->x);
-	fe25519_sub(r->x, r->z, r->y);
-	fe25519_add(r->y, r->z, r->y);
-	fe25519_sub(r->z, t0, r->t);
-	fe25519_add(r->t, t0, r->t);
+	qsc_fe25519_add(r->x, p->y, p->x);
+	qsc_fe25519_sub(r->y, p->y, p->x);
+	qsc_fe25519_mul(r->z, r->x, q->yminusx);
+	qsc_fe25519_mul(r->y, r->y, q->yplusx);
+	qsc_fe25519_mul(r->t, q->t2d, p->t);
+	qsc_fe25519_mul(r->x, p->z, q->z);
+	qsc_fe25519_add(t0, r->x, r->x);
+	qsc_fe25519_sub(r->x, r->z, r->y);
+	qsc_fe25519_add(r->y, r->z, r->y);
+	qsc_fe25519_sub(r->z, t0, r->t);
+	qsc_fe25519_add(r->t, t0, r->t);
 }
 
-void ge25519_tobytes(uint8_t* s, const ge25519_p2* h)
+void qsc_ge25519_to_bytes(uint8_t* s, const qsc_ge25519_p2* h)
 {
-	fe25519 recip = {0};
-	fe25519 x = {0};
-	fe25519 y = {0};
+	QSC_ASSERT(s != NULL);
+	QSC_ASSERT(h != NULL);
 
-	fe25519_invert(recip, h->z);
-	fe25519_mul(x, h->x, recip);
-	fe25519_mul(y, h->y, recip);
-	fe25519_tobytes(s, y);
-	s[31] ^= (fe25519_isnegative(x) << 7);
+	qsc_fe25519 recip = { 0 };
+	qsc_fe25519 x = { 0 };
+	qsc_fe25519 y = { 0 };
+
+	qsc_fe25519_invert(recip, h->z);
+	qsc_fe25519_mul(x, h->x, recip);
+	qsc_fe25519_mul(y, h->y, recip);
+	qsc_fe25519_to_bytes(s, y);
+	s[31U] ^= (qsc_fe25519_is_negative(x) << 7);
 }
 
 /* main */
 
-void sc25519_clamp(uint8_t* t)
+void qsc_sc25519_clamp(uint8_t* t)
 {
 	QSC_ASSERT(t != NULL);
 
-	t[0] &= 248;
-	t[31] &= 127;
-	t[31] |= 64;
+	t[0U] &= 248;
+	t[31U] &= 127;
+	t[31U] |= 64;
 }
 
-int32_t ed25519_small_order(const uint8_t s[32])
+int32_t qsc_ed25519_small_order(const uint8_t s[32U])
 {
 	/*
 	 * Reject small order points early to mitigate the implications of
 	 * unexpected optimizations that would affect the ref10 code.
 	 * See https://eprint.iacr.org/2017/806.pdf for reference.
 	 */
-	static const uint8_t blocklist[][32] =
+	static const uint8_t blocklist[][32U] =
 	{
 		/* 0 (order 4) */
 		{
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
 		},
 		/* 1 (order 1) */
 		{
-			0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+			0x01, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+			0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
 		},
 			/* 325606250916557431795983626356110631294008115727848805560023387167927233504 (order 8) */
 		{
-			0xe0, 0xeb, 0x7a, 0x7c, 0x3b, 0x41, 0xb8, 0xae, 0x16, 0x56, 0xe3,
-			0xfa, 0xf1, 0x9f, 0xc4, 0x6a, 0xda, 0x09, 0x8d, 0xeb, 0x9c, 0x32,
-			0xb1, 0xfd, 0x86, 0x62, 0x05, 0x16, 0x5f, 0x49, 0xb8, 0x00 },
-		/* 39382357235489614581723060781553021112529911719440698176882885853963445705823 (order 8) */
+			0xE0U, 0xEBU, 0x7AU, 0x7CU, 0x3BU, 0x41U, 0xB8U, 0xAEU, 0x16U, 0x56U, 0xE3U,
+			0xFAU, 0xF1U, 0x9FU, 0xC4U, 0x6AU, 0xDAU, 0x09U, 0x8DU, 0xEBU, 0x9CU, 0x32U,
+			0xB1U, 0xFDU, 0x86U, 0x62U, 0x05U, 0x16U, 0x5FU, 0x49U, 0xB8U, 0x00U 
+		},
+		/* 39382357235489614581723060781553021112529911719440698176882885853963445705823 (orDEr 8) */
 		{
-			0x5f, 0x9c, 0x95, 0xbc, 0xa3, 0x50, 0x8c, 0x24, 0xb1, 0xd0, 0xb1,
-			0x55, 0x9c, 0x83, 0xef, 0x5b, 0x04, 0x44, 0x5c, 0xc4, 0x58, 0x1c,
-			0x8e, 0x86, 0xd8, 0x22, 0x4e, 0xdd, 0xd0, 0x9f, 0x11, 0x57
+			0x5FU, 0x9CU, 0x95U, 0xBCU, 0xA3U, 0x50U, 0x8CU, 0x24U, 0xB1U, 0xD0U, 0xB1U,
+			0x55U, 0x9CU, 0x83U, 0xEFU, 0x5BU, 0x04U, 0x44U, 0x5CU, 0xC4U, 0x58U, 0x1CU,
+			0x8EU, 0x86U, 0xD8U, 0x22U, 0x4EU, 0xDDU, 0xD0U, 0x9FU, 0x11U, 0x57U
 		},
 		/* p-1 (order 2) */
 		{
-			0xec, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f },
+			0xECU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x7FU },
 		/* p (=0, order 4) */
 		{
-			0xed, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f },
+			0xEDU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x7FU },
 		/* p+1 (=1, order 1) */
 		{
-			0xee, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
+			0xEEU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
+			0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x7FU
 		}
 	};
 
-	uint8_t c[7] = { 0U };
+	uint8_t c[7U] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;
 
-	QSC_ASSERT(7 == sizeof(blocklist) / sizeof(blocklist[0]));
+	QSC_ASSERT(7 == sizeof(blocklist) / sizeof(blocklist[0U]));
 
-	for (j = 0; j < 31; j++)
+	for (j = 0U; j < 31U; j++)
 	{
-		for (i = 0; i < sizeof(blocklist) / sizeof(blocklist[0]); ++i)
+		for (i = 0U; i < sizeof(blocklist) / sizeof(blocklist[0U]); ++i)
 		{
 			c[i] |= s[j] ^ blocklist[i][j];
 		}
 	}
 
-	for (i = 0; i < sizeof(blocklist) / sizeof(blocklist[0]); ++i)
+	for (i = 0U; i < sizeof(blocklist) / sizeof(blocklist[0U]); ++i)
 	{
 		c[i] |= (s[j] & 0x7f) ^ blocklist[i][j];
 	}
 
 	k = 0;
 
-	for (i = 0; i < sizeof(blocklist) / sizeof(blocklist[0]); ++i)
+	for (i = 0U; i < sizeof(blocklist) / sizeof(blocklist[0U]); ++i)
 	{
-		k |= (c[i] - 1);
+		k |= (c[i] - 1U);
 	}
 
 	return (int32_t)((k >> 8) & 1);
 }
 
-int32_t sc25519_is_canonical(const uint8_t s[32])
+int32_t qsc_sc25519_is_canonical(const uint8_t s[32U])
 {
-	static const uint8_t L[32] =
+	static const uint8_t L[32U] =
 	{
-		0xED, 0xD3, 0xF5, 0x5C, 0x1A, 0x63, 0x12, 0x58, 0xD6, 0x9C, 0xF7,
-		0xA2, 0xDE, 0xF9, 0xDE, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10
+		0xEDU, 0xD3U, 0xF5U, 0x5CU, 0x1AU, 0x63U, 0x12U, 0x58U, 0xD6U, 0x9CU, 0xF7U,
+		0xA2U, 0xDEU, 0xF9U, 0xDEU, 0x14U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+		0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x10U
 	};
 
 	uint8_t c;
@@ -3366,7 +3405,7 @@ int32_t sc25519_is_canonical(const uint8_t s[32])
 	return (c != 0);
 }
 
-void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], const uint8_t c[32])
+void qsc_sc25519_muladd(uint8_t s[32U], const uint8_t a[32U], const uint8_t b[32U], const uint8_t c[32U])
 {
 	int64_t a0;
 	int64_t a1;
@@ -3809,41 +3848,41 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
 	s11 += carry;
 	s10 -= carry * (1 << 21);
 
-	s[0] = (uint8_t)s0;
-	s[1] = (uint8_t)(s0 >> 8);
-	s[2] = (uint8_t)((s0 >> 16) | (s1 * (1 << 5)));
-	s[3] = (uint8_t)(s1 >> 3);
-	s[4] = (uint8_t)(s1 >> 11);
-	s[5] = (uint8_t)((s1 >> 19) | (s2 * (1 << 2)));
-	s[6] = (uint8_t)(s2 >> 6);
-	s[7] = (uint8_t)((s2 >> 14) | (s3 * (1 << 7)));
-	s[8] = (uint8_t)(s3 >> 1);
-	s[9] = (uint8_t)(s3 >> 9);
-	s[10] = (uint8_t)((s3 >> 17) | (s4 * (1 << 4)));
-	s[11] = (uint8_t)(s4 >> 4);
-	s[12] = (uint8_t)(s4 >> 12);
-	s[13] = (uint8_t)((s4 >> 20) | (s5 * (1 << 1)));
-	s[14] = (uint8_t)(s5 >> 7);
-	s[15] = (uint8_t)((s5 >> 15) | (s6 * (1 << 6)));
-	s[16] = (uint8_t)(s6 >> 2);
-	s[17] = (uint8_t)(s6 >> 10);
-	s[18] = (uint8_t)((s6 >> 18) | (s7 * (1 << 3)));
-	s[19] = (uint8_t)(s7 >> 5);
-	s[20] = (uint8_t)(s7 >> 13);
-	s[21] = (uint8_t)s8;
-	s[22] = (uint8_t)(s8 >> 8);
-	s[23] = (uint8_t)((s8 >> 16) | (s9 * (1 << 5)));
-	s[24] = (uint8_t)(s9 >> 3);
-	s[25] = (uint8_t)(s9 >> 11);
-	s[26] = (uint8_t)((s9 >> 19) | (s10 * (1 << 2)));
-	s[27] = (uint8_t)(s10 >> 6);
-	s[28] = (uint8_t)((s10 >> 14) | (s11 * (1 << 7)));
-	s[29] = (uint8_t)(s11 >> 1);
-	s[30] = (uint8_t)(s11 >> 9);
-	s[31] = (uint8_t)(s11 >> 17);
+	s[0U] = (uint8_t)s0;
+	s[1U] = (uint8_t)(s0 >> 8);
+	s[2U] = (uint8_t)((s0 >> 16) | (s1 * (1 << 5)));
+	s[3U] = (uint8_t)(s1 >> 3);
+	s[4U] = (uint8_t)(s1 >> 11);
+	s[5U] = (uint8_t)((s1 >> 19) | (s2 * (1 << 2)));
+	s[6U] = (uint8_t)(s2 >> 6);
+	s[7U] = (uint8_t)((s2 >> 14) | (s3 * (1 << 7)));
+	s[8U] = (uint8_t)(s3 >> 1);
+	s[9U] = (uint8_t)(s3 >> 9);
+	s[10U] = (uint8_t)((s3 >> 17) | (s4 * (1 << 4)));
+	s[11U] = (uint8_t)(s4 >> 4);
+	s[12U] = (uint8_t)(s4 >> 12);
+	s[13U] = (uint8_t)((s4 >> 20) | (s5 * (1 << 1)));
+	s[14U] = (uint8_t)(s5 >> 7);
+	s[15U] = (uint8_t)((s5 >> 15) | (s6 * (1 << 6)));
+	s[16U] = (uint8_t)(s6 >> 2);
+	s[17U] = (uint8_t)(s6 >> 10);
+	s[18U] = (uint8_t)((s6 >> 18) | (s7 * (1 << 3)));
+	s[19U] = (uint8_t)(s7 >> 5);
+	s[20U] = (uint8_t)(s7 >> 13);
+	s[21U] = (uint8_t)s8;
+	s[22U] = (uint8_t)(s8 >> 8);
+	s[23U] = (uint8_t)((s8 >> 16) | (s9 * (1 << 5)));
+	s[24U] = (uint8_t)(s9 >> 3);
+	s[25U] = (uint8_t)(s9 >> 11);
+	s[26U] = (uint8_t)((s9 >> 19) | (s10 * (1 << 2)));
+	s[27U] = (uint8_t)(s10 >> 6);
+	s[28U] = (uint8_t)((s10 >> 14) | (s11 * (1 << 7)));
+	s[29U] = (uint8_t)(s11 >> 1);
+	s[30U] = (uint8_t)(s11 >> 9);
+	s[31U] = (uint8_t)(s11 >> 17);
 }
 
-void sc25519_reduce(uint8_t s[64])
+void qsc_sc25519_reduce(uint8_t s[64U])
 {
 	int64_t carry;
 	int64_t s0;
@@ -4140,37 +4179,37 @@ void sc25519_reduce(uint8_t s[64])
 	s11 += carry;
 	s10 -= carry * (1 << 21);
 
-	s[0] = (uint8_t)s0;
-	s[1] = (uint8_t)(s0 >> 8);
-	s[2] = (uint8_t)((s0 >> 16) | (s1 * (1 << 5)));
-	s[3] = (uint8_t)(s1 >> 3);
-	s[4] = (uint8_t)(s1 >> 11);
-	s[5] = (uint8_t)((s1 >> 19) | (s2 * (1 << 2)));
-	s[6] = (uint8_t)(s2 >> 6);
-	s[7] = (uint8_t)((s2 >> 14) | (s3 * (1 << 7)));
-	s[8] = (uint8_t)(s3 >> 1);
-	s[9] = (uint8_t)(s3 >> 9);
-	s[10] = (uint8_t)((s3 >> 17) | (s4 * (1 << 4)));
-	s[11] = (uint8_t)(s4 >> 4);
-	s[12] = (uint8_t)(s4 >> 12);
-	s[13] = (uint8_t)((s4 >> 20) | (s5 * (1 << 1)));
-	s[14] = (uint8_t)(s5 >> 7);
-	s[15] = (uint8_t)((s5 >> 15) | (s6 * (1 << 6)));
-	s[16] = (uint8_t)(s6 >> 2);
-	s[17] = (uint8_t)(s6 >> 10);
-	s[18] = (uint8_t)((s6 >> 18) | (s7 * (1 << 3)));
-	s[19] = (uint8_t)(s7 >> 5);
-	s[20] = (uint8_t)(s7 >> 13);
-	s[21] = (uint8_t)s8;
-	s[22] = (uint8_t)(s8 >> 8);
-	s[23] = (uint8_t)((s8 >> 16) | (s9 * (1 << 5)));
-	s[24] = (uint8_t)(s9 >> 3);
-	s[25] = (uint8_t)(s9 >> 11);
-	s[26] = (uint8_t)((s9 >> 19) | (s10 * (1 << 2)));
-	s[27] = (uint8_t)(s10 >> 6);
-	s[28] = (uint8_t)((s10 >> 14) | (s11 * (1 << 7)));
-	s[29] = (uint8_t)(s11 >> 1);
-	s[30] = (uint8_t)(s11 >> 9);
-	s[31] = (uint8_t)(s11 >> 17);
+	s[0U] = (uint8_t)s0;
+	s[1U] = (uint8_t)(s0 >> 8);
+	s[2U] = (uint8_t)((s0 >> 16) | (s1 * (1 << 5)));
+	s[3U] = (uint8_t)(s1 >> 3);
+	s[4U] = (uint8_t)(s1 >> 11);
+	s[5U] = (uint8_t)((s1 >> 19) | (s2 * (1 << 2)));
+	s[6U] = (uint8_t)(s2 >> 6);
+	s[7U] = (uint8_t)((s2 >> 14) | (s3 * (1 << 7)));
+	s[8U] = (uint8_t)(s3 >> 1);
+	s[9U] = (uint8_t)(s3 >> 9);
+	s[10U] = (uint8_t)((s3 >> 17) | (s4 * (1 << 4)));
+	s[11U] = (uint8_t)(s4 >> 4);
+	s[12U] = (uint8_t)(s4 >> 12);
+	s[13U] = (uint8_t)((s4 >> 20) | (s5 * (1 << 1)));
+	s[14U] = (uint8_t)(s5 >> 7);
+	s[15U] = (uint8_t)((s5 >> 15) | (s6 * (1 << 6)));
+	s[16U] = (uint8_t)(s6 >> 2);
+	s[17U] = (uint8_t)(s6 >> 10);
+	s[18U] = (uint8_t)((s6 >> 18) | (s7 * (1 << 3)));
+	s[19U] = (uint8_t)(s7 >> 5);
+	s[20U] = (uint8_t)(s7 >> 13);
+	s[21U] = (uint8_t)s8;
+	s[22U] = (uint8_t)(s8 >> 8);
+	s[23U] = (uint8_t)((s8 >> 16) | (s9 * (1 << 5)));
+	s[24U] = (uint8_t)(s9 >> 3);
+	s[25U] = (uint8_t)(s9 >> 11);
+	s[26U] = (uint8_t)((s9 >> 19) | (s10 * (1 << 2)));
+	s[27U] = (uint8_t)(s10 >> 6);
+	s[28U] = (uint8_t)((s10 >> 14) | (s11 * (1 << 7)));
+	s[29U] = (uint8_t)(s11 >> 1);
+	s[30U] = (uint8_t)(s11 >> 9);
+	s[31U] = (uint8_t)(s11 >> 17);
 }
 

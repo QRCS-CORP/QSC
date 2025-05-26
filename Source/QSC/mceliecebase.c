@@ -3,6 +3,10 @@
 #include "memutils.h"
 #include "sha3.h"
 
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+#	pragma comment(linker, "/STACK:20480000,4096")
+#endif
+
 /* params.h */
 
 #define MCELIECE_SHAREDSECRET_SIZE 32ULL
@@ -75,8 +79,8 @@ static gf gf_is_zero(gf a)
 	uint32_t t;
 
 	t = a;
-	t -= 1;
-	t >>= 19;
+	t -= 1U;
+	t >>= 19U;
 
 	return (gf)t;
 }
@@ -92,18 +96,18 @@ static gf gf_sq2(gf in)
 	/* input: field element in
 	   return: (in^2)^2 */
 
-	const uint64_t Bf[] = { 0x1111111111111111ULL, 0x0303030303030303ULL, 0x000F000F000F000FULL, 0x000000FF000000FFULL };
-	const uint64_t M[] = { 0x0001FF0000000000ULL, 0x000000FF80000000ULL, 0x000000007FC00000ULL, 0x00000000003FE000ULL };
+	const uint64_t Bf[4U] = { 0x1111111111111111ULL, 0x0303030303030303ULL, 0x000F000F000F000FULL, 0x000000FF000000FFULL };
+	const uint64_t M[4U] = { 0x0001FF0000000000ULL, 0x000000FF80000000ULL, 0x000000007FC00000ULL, 0x00000000003FE000ULL };
 	uint64_t t;
 	uint64_t x;
 
 	x = in;
-	x = (x | (x << 24)) & Bf[3];
-	x = (x | (x << 12)) & Bf[2];
-	x = (x | (x << 6)) & Bf[1];
-	x = (x | (x << 3)) & Bf[0];
+	x = (x | (x << 24)) & Bf[3U];
+	x = (x | (x << 12)) & Bf[2U];
+	x = (x | (x << 6)) & Bf[1U];
+	x = (x | (x << 3)) & Bf[0U];
 
-	for (size_t i = 0U; i < 4; ++i)
+	for (size_t i = 0U; i < 4U; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -116,7 +120,7 @@ static gf gf_sq2mul(gf in, gf m)
 {
 	/* input: field element in, m
 	   return: ((in^2)^2)*m */
-	const uint64_t M[] = { 0x1FF0000000000000ULL, 0x000FF80000000000ULL, 0x000007FC00000000ULL,
+	const uint64_t M[6U] = { 0x1FF0000000000000ULL, 0x000FF80000000000ULL, 0x000007FC00000000ULL,
 		0x00000003FE000000ULL, 0x0000000001FE0000ULL, 0x000000000001E000ULL };
 	uint64_t x;
 	uint64_t t0;
@@ -135,7 +139,7 @@ static gf gf_sq2mul(gf in, gf m)
 	x ^= (t1 * (t0 & 0x0000000100000010ULL)) << 12;
 	x ^= (t1 * (t0 & 0x0000000200000020ULL)) << 15;
 
-	for (size_t i = 0U; i < 6; ++i)
+	for (size_t i = 0U; i < 6U; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -158,7 +162,7 @@ gf gf_mul(gf in0, gf in1)
 	t1 = in1;
 	tmp = t0 * (t1 & 1);
 
-	for (i = 1; i < MCELIECE_GFBITS; ++i)
+	for (i = 1U; i < MCELIECE_GFBITS; ++i)
 	{
 		tmp ^= (t0 * (t1 & (1 << i)));
 	}
@@ -171,20 +175,20 @@ gf gf_mul(gf in0, gf in1)
 	tmp ^= t >> 9;
 	tmp ^= t >> 12;
 
-	return tmp & ((1 << MCELIECE_GFBITS) - 1);
+	return tmp & ((1U << MCELIECE_GFBITS) - 1U);
 }
 
 static gf gf_sq(gf in)
 {
-	const uint32_t B[] = { 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF };
+	const uint32_t B[4U] = { 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF };
 
 	uint32_t x = in;
 	uint32_t t;
 
-	x = (x | (x << 8)) & B[3];
-	x = (x | (x << 4)) & B[2];
-	x = (x | (x << 2)) & B[1];
-	x = (x | (x << 1)) & B[0];
+	x = (x | (x << 8)) & B[3U];
+	x = (x | (x << 4)) & B[2U];
+	x = (x | (x << 2)) & B[1U];
+	x = (x | (x << 1)) & B[0U];
 
 	t = x & 0x7FC000;
 	x ^= t >> 9;
@@ -194,7 +198,7 @@ static gf gf_sq(gf in)
 	x ^= t >> 9;
 	x ^= t >> 12;
 
-	return x & ((1 << MCELIECE_GFBITS) - 1);
+	return x & ((1U << MCELIECE_GFBITS) - 1U);
 }
 
 static inline gf gf_sqmul(gf in, gf m)
@@ -204,9 +208,7 @@ static inline gf gf_sqmul(gf in, gf m)
 	uint64_t t1;
 	uint64_t t;
 	size_t i;
-	const uint64_t M[] = { 0x0000001FF0000000,
-						  0x000000000FF80000,
-						  0x000000000007E000 };
+	const uint64_t M[3U] = { 0x0000001FF0000000, 0x000000000FF80000, 0x000000000007E000 };
 
 	t0 = in;
 	t1 = m;
@@ -222,7 +224,7 @@ static inline gf gf_sqmul(gf in, gf m)
 	x ^= (t1 * (t0 & (0x40010))) << 4;
 	x ^= (t1 * (t0 & (0x80020))) << 5;
 
-	for (i = 0; i < 3; i++)
+	for (i = 0U; i < 3U; i++)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -279,7 +281,7 @@ static gf gf_mul(gf in0, gf in1)
 	t1 = in1;
 	tmp = t0 * (t1 & 1);
 
-	for (size_t i = 1; i < MCELIECE_GFBITS; ++i)
+	for (size_t i = 1U; i < MCELIECE_GFBITS; ++i)
 	{
 		tmp ^= (t0 * (t1 & (1ULL << i)));
 	}
@@ -297,7 +299,7 @@ static gf gf_sqmul(gf in, gf m)
 	/* input: field element in, m
 	   return: (in^2)*m */
 
-	const uint64_t M[] = { 0x0000001FF0000000ULL, 0x000000000FF80000ULL, 0x000000000007E000ULL };
+	const uint64_t M[3U] = { 0x0000001FF0000000ULL, 0x000000000FF80000ULL, 0x000000000007E000ULL };
 	uint64_t t;
 	uint64_t t0;
 	uint64_t t1;
@@ -315,7 +317,7 @@ static gf gf_sqmul(gf in, gf m)
 	x ^= (t1 * (t0 & 0x0000000000040010ULL)) << 4;
 	x ^= (t1 * (t0 & 0x0000000000080020ULL)) << 5;
 
-	for (size_t i = 0U; i < 3; ++i)
+	for (size_t i = 0U; i < 3U; ++i)
 	{
 		t = x & M[i];
 		x ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -352,57 +354,57 @@ static gf gf_inv(gf den)
 
 static void GF_mul(gf* out, const gf* in0, const gf* in1)
 {
-	gf prod[MCELIECE_SYS_T * 2 - 1] = { 0U };
+	gf prod[(MCELIECE_SYS_T * 2U) - 1U] = { 0U };
 	size_t i;
 
-	for (i = 0; i < MCELIECE_SYS_T; ++i)
+	for (i = 0U; i < MCELIECE_SYS_T; ++i)
 	{
-		for (size_t j = 0; j < MCELIECE_SYS_T; ++j)
+		for (size_t j = 0U; j < MCELIECE_SYS_T; ++j)
 		{
 			prod[i + j] ^= gf_mul(in0[i], in1[j]);
 		}
 	}
 
-	for (i = (MCELIECE_SYS_T - 1) * 2; i >= MCELIECE_SYS_T; --i)
+	for (i = (MCELIECE_SYS_T - 1U) * 2U; i >= MCELIECE_SYS_T; --i)
 	{
 #if defined(QSC_MCELIECE_S1N3488T64)
-		prod[i - MCELIECE_SYS_T + 3] ^= prod[i];
-		prod[i - MCELIECE_SYS_T + 1] ^= prod[i];
-		prod[i - MCELIECE_SYS_T] ^= gf_mul(prod[i], (gf)2);
+		prod[i - MCELIECE_SYS_T + 3U] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 1U] ^= prod[i];
+		prod[i - MCELIECE_SYS_T] ^= gf_mul(prod[i], (gf)2U);
 #elif defined(QSC_MCELIECE_S3N4608T96)
-		prod[i - MCELIECE_SYS_T + 10] ^= prod[i];
-		prod[i - MCELIECE_SYS_T + 9] ^= prod[i];
-		prod[i - MCELIECE_SYS_T + 6] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 10U] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 9U] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 6U] ^= prod[i];
 		prod[i - MCELIECE_SYS_T] ^= prod[i];
 #elif defined(QSC_MCELIECE_S5N6688T128) || defined(QSC_MCELIECE_S7N8192T128)
-		prod[i - MCELIECE_SYS_T + 7] ^= prod[i];
-		prod[i - MCELIECE_SYS_T + 2] ^= prod[i];
-		prod[i - MCELIECE_SYS_T + 1] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 7U] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 2U] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 1U] ^= prod[i];
 		prod[i - MCELIECE_SYS_T] ^= prod[i];
 #elif defined(QSC_MCELIECE_S6N6960T119)
-		prod[i - MCELIECE_SYS_T + 8] ^= prod[i];
+		prod[i - MCELIECE_SYS_T + 8U] ^= prod[i];
 		prod[i - MCELIECE_SYS_T] ^= prod[i];
 #endif
 	}
 
-	qsc_memutils_copy(out, (const uint8_t*)prod, MCELIECE_SYS_T * sizeof(gf));
+	qsc_memutils_copy(out, prod, MCELIECE_SYS_T * sizeof(gf));
 }
 
 /* util.c */
 
 static void store_gf(uint8_t* dest, gf a)
 {
-	dest[0] = a & 0x00FF;
-	dest[1] = a >> 8;
+	dest[0U] = a & 0x00FF;
+	dest[1U] = a >> 8;
 }
 
 static uint16_t load_gf(const uint8_t* src)
 {
 	uint16_t a;
 
-	a = src[1];
+	a = src[1U];
 	a <<= 8;
-	a |= src[0];
+	a |= src[0U];
 
 	return a & MCELIECE_GFMASK;
 }
@@ -411,7 +413,7 @@ static uint32_t load4(const uint8_t* in)
 {
 	uint32_t ret;
 
-	ret = in[3];
+	ret = in[3U];
 
 	for (int32_t i = 2; i >= 0; --i)
 	{
@@ -424,21 +426,21 @@ static uint32_t load4(const uint8_t* in)
 
 static void store8(uint8_t* out, uint64_t in)
 {
-	out[0] = in & 0xFF;
-	out[1] = (in >> 0x08) & 0xFF;
-	out[2] = (in >> 0x10) & 0xFF;
-	out[3] = (in >> 0x18) & 0xFF;
-	out[4] = (in >> 0x20) & 0xFF;
-	out[5] = (in >> 0x28) & 0xFF;
-	out[6] = (in >> 0x30) & 0xFF;
-	out[7] = (in >> 0x38) & 0xFF;
+	out[0U] = in & 0xFF;
+	out[1U] = (in >> 0x08) & 0xFFU;
+	out[2U] = (in >> 0x10) & 0xFFU;
+	out[3U] = (in >> 0x18) & 0xFFU;
+	out[4U] = (in >> 0x20) & 0xFFU;
+	out[5U] = (in >> 0x28) & 0xFFU;
+	out[6U] = (in >> 0x30) & 0xFFU;
+	out[7U] = (in >> 0x38) & 0xFFU;
 }
 
 static uint64_t load8(const uint8_t* in)
 {
 	uint64_t ret;
 
-	ret = in[7];
+	ret = in[7U];
 
 	for (int32_t i = 6; i >= 0; --i)
 	{
@@ -532,7 +534,7 @@ static void int64_minmax(uint64_t* a, uint64_t* b)
 	uint64_t c = *b - *a;
 
 	c >>= 63;
-	c = ~c + 1;
+	c = ~c + 1U;
 	c &= *a ^ *b;
 	*a ^= c;
 	*b ^= c;
@@ -605,7 +607,7 @@ static gf eval(const gf* f, gf a)
 		r = gf_mul(r, a);
 		r = gf_add(r, f[i]);
 	} 
-	while (i > 0);
+	while (i > 0U);
 
 	return r;
 }
@@ -632,15 +634,15 @@ static void synd(gf* out, const gf* f, const gf* L, const uint8_t* r)
 	gf e;
 	gf e_inv;
 
-	qsc_memutils_clear(out, 2 * MCELIECE_SYS_T * sizeof(gf));
+	qsc_memutils_clear(out, 2U * MCELIECE_SYS_T * sizeof(gf));
 
 	for (size_t i = 0U; i < MCELIECE_SYS_N; ++i)
 	{
-		c = (r[i / 8] >> (i % 8)) & 1;
+		c = (r[i / 8U] >> (i % 8U)) & 1U;
 		e = eval(f, L[i]);
 		e_inv = gf_inv(gf_mul(e, e));
 
-		for (size_t j = 0; j < 2 * MCELIECE_SYS_T; ++j)
+		for (size_t j = 0U; j < 2U * MCELIECE_SYS_T; ++j)
 		{
 			out[j] = gf_add(out[j], gf_mul(e_inv, c));
 			e_inv = gf_mul(e_inv, L[i]);
@@ -655,7 +657,7 @@ static void transpose_64x64(uint64_t* out, const uint64_t* in)
 	/* input: in, a 64x64 matrix over GF(2) */
 	/* output: out, transpose of in */
 
-	uint64_t masks[6][2] =
+	uint64_t masks[6U][2U] =
 	{
 		{0x5555555555555555ULL, 0xAAAAAAAAAAAAAAAAULL},
 		{0x3333333333333333ULL, 0xCCCCCCCCCCCCCCCCULL},
@@ -669,18 +671,18 @@ static void transpose_64x64(uint64_t* out, const uint64_t* in)
 	uint64_t y;
 	int32_t s;
 
-	qsc_memutils_copy(out, in, 64 * sizeof(uint64_t));
+	qsc_memutils_copy(out, in, 64U * sizeof(uint64_t));
 
 	for (int32_t d = 5; d >= 0; d--)
 	{
 		s = 1 << d;
 
-		for (size_t i = 0U; i < 64; i += (size_t)s * 2)
+		for (size_t i = 0U; i < 64U; i += (size_t)s * 2U)
 		{
 			for (size_t j = i; j < i + s; ++j)
 			{
-				x = (out[j] & masks[d][0]) | ((out[j + s] & masks[d][0]) << s);
-				y = ((out[j] & masks[d][1]) >> s) | (out[j + s] & masks[d][1]);
+				x = (out[j] & masks[d][0U]) | ((out[j + s] & masks[d][0U]) << s);
+				y = ((out[j] & masks[d][1U]) >> s) | (out[j + s] & masks[d][1U]);
 				out[j] = x;
 				out[j + s] = y;
 			}
@@ -695,17 +697,17 @@ static void transpose_64x64(uint64_t* out, const uint64_t* in)
 static void layer(uint64_t* data, uint64_t* bits, int32_t lgs)
 {
 	size_t i;
-	size_t  j;
-	size_t  s;
+	size_t j;
+	size_t s;
 	uint64_t d;
 
-	s = 1 << lgs;
+	s = 1ULL << lgs;
 
-	for (i = 0; i < 64; i += s * 2)
+	for (i = 0U; i < 64U; i += s * 2U)
 	{
 		for (j = i; j < i + s; j++)
 		{
-			d = (data[j + 0] ^ data[j + s]);
+			d = (data[j + 0U] ^ data[j + s]);
 			d &= (*bits);
 			++bits;
 			data[j] ^= d;
@@ -716,16 +718,16 @@ static void layer(uint64_t* data, uint64_t* bits, int32_t lgs)
 
 void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 {
-	uint64_t bs[64];
-	uint64_t cond[64];
+	uint64_t bs[64U];
+	uint64_t cond[64U];
 	const uint8_t* cond_ptr;
 	size_t i;
 	int32_t inc;
 	int32_t low;
 
-	for (i = 0; i < 64; i++)
+	for (i = 0U; i < 64U; i++)
 	{
-		bs[i] = load8(r + i * 8);
+		bs[i] = load8(r + i * 8U);
 	}
 
 	if (rev == 0)
@@ -736,7 +738,7 @@ void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 	else
 	{
 		inc = -256;
-		cond_ptr = bits + (2 * MCELIECE_GFBITS - 2) * 256;
+		cond_ptr = bits + (2U * MCELIECE_GFBITS - 2U) * 256U;
 	}
 
 	transpose_64x64(bs, bs);
@@ -757,9 +759,9 @@ void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (low = 0; low <= 5; low++)
 	{
-		for (i = 0; i < 32; i++)
+		for (i = 0U; i < 32U; i++)
 		{
-			cond[i] = load8(cond_ptr + i * 8);
+			cond[i] = load8(cond_ptr + i * 8U);
 		}
 
 		layer(bs, cond, low);
@@ -768,9 +770,9 @@ void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (low = 4; low >= 0; low--)
 	{
-		for (i = 0; i < 32; i++)
+		for (i = 0U; i < 32U; i++)
 		{
-			cond[i] = load8(cond_ptr + i * 8);
+			cond[i] = load8(cond_ptr + i * 8U);
 		}
 
 		layer(bs, cond, low);
@@ -781,9 +783,9 @@ void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (low = 5; low >= 0; low--)
 	{
-		for (i = 0; i < 64; i++)
+		for (i = 0U; i < 64U; i++)
 		{
-			cond[i] = load4(cond_ptr + i * 4);
+			cond[i] = load4(cond_ptr + i * 4U);
 		}
 
 		transpose_64x64(cond, cond);
@@ -793,15 +795,15 @@ void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	transpose_64x64(bs, bs);
 
-	for (i = 0; i < 64; i++)
+	for (i = 0U; i < 64U; i++)
 	{
-		store8(r + i * 8, bs[i]);
+		store8(r + i * 8U, bs[i]);
 	}
 }
 
 #else
 
-static void layer_in(uint64_t data[2][64], const uint64_t* bits, int32_t lgs)
+static void layer_in(uint64_t data[2U][64U], const uint64_t* bits, int32_t lgs)
 {
 	/* middle layers of the benes network */
 
@@ -810,21 +812,21 @@ static void layer_in(uint64_t data[2][64], const uint64_t* bits, int32_t lgs)
 
 	s = 1 << lgs;
 
-	for (size_t i = 0U; i < 64; i += (size_t)s * 2)
+	for (size_t i = 0U; i < 64U; i += (size_t)s * 2U)
 	{
 		for (size_t j = i; j < i + (size_t)s; ++j)
 		{
-			d = (data[0][j] ^ data[0][j + s]);
+			d = (data[0U][j] ^ data[0U][j + s]);
 			d &= (*bits);
 			++bits;
-			data[0][j] ^= d;
-			data[0][j + s] ^= d;
+			data[0U][j] ^= d;
+			data[0U][j + s] ^= d;
 
-			d = (data[1][j] ^ data[1][j + s]);
+			d = (data[1U][j] ^ data[1U][j + s]);
 			d &= (*bits);
 			++bits;
-			data[1][j] ^= d;
-			data[1][j + s] ^= d;
+			data[1U][j] ^= d;
+			data[1U][j + s] ^= d;
 		}
 	}
 }
@@ -837,7 +839,7 @@ static void layer_ex(uint64_t* data, const uint64_t* bits, int32_t lgs)
 
 	s = 1 << lgs;
 
-	for (size_t i = 0U; i < 128; i += (size_t)s * 2)
+	for (size_t i = 0U; i < 128U; i += (size_t)s * 2U)
 	{
 		for (size_t j = i; j < i + (size_t)s; j++)
 		{
@@ -855,10 +857,10 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 	/* input: r, sequence of bits to be permuted bits, condition bits of the Benes network rev,
 	0 for normal application, !0 for inverse output: r, permuted bits */
 
-	uint64_t r_int_v[2][64] = { 0U };
-	uint64_t r_int_h[2][64] = { 0U };
-	uint64_t b_int_v[64] = { 0U };
-	uint64_t b_int_h[64];
+	uint64_t r_int_v[2U][64U] = { 0U };
+	uint64_t r_int_h[2U][64U] = { 0U };
+	uint64_t b_int_v[64U] = { 0U };
+	uint64_t b_int_h[64U];
 	size_t i;
 	int32_t inc;
 	int32_t iter;
@@ -867,7 +869,7 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	if (rev != 0) 
 	{
-		bits_ptr = bits + 12288; 
+		bits_ptr = bits + 12288U; 
 		inc = -1024; 
 	}
 	else 
@@ -878,35 +880,35 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (i = 0; i < 64; ++i)
 	{
-		r_int_v[0][i] = load8(r_ptr + i * 16);
-		r_int_v[1][i] = load8(r_ptr + i * 16 + 8);
+		r_int_v[0U][i] = load8(r_ptr + i * 16U);
+		r_int_v[1U][i] = load8(r_ptr + i * 16U + 8U);
 	}
 
-	transpose_64x64(r_int_h[0], r_int_v[0]);
-	transpose_64x64(r_int_h[1], r_int_v[1]);
+	transpose_64x64(r_int_h[0U], r_int_v[0U]);
+	transpose_64x64(r_int_h[1U], r_int_v[1U]);
 
 	for (iter = 0; iter <= 6; ++iter)
 	{
-		for (i = 0; i < 64; ++i)
+		for (i = 0U; i < 64U; ++i)
 		{
 			b_int_v[i] = load8(bits_ptr); 
-			bits_ptr += 8;
+			bits_ptr += 8U;
 		}
 
 		bits_ptr += inc;
 		transpose_64x64(b_int_h, b_int_v);
-		layer_ex(r_int_h[0], b_int_h, iter);
+		layer_ex(r_int_h[0U], b_int_h, iter);
 	}
 
-	transpose_64x64(r_int_v[0], r_int_h[0]);
-	transpose_64x64(r_int_v[1], r_int_h[1]);
+	transpose_64x64(r_int_v[0U], r_int_h[0U]);
+	transpose_64x64(r_int_v[1U], r_int_h[1U]);
 
 	for (iter = 0; iter <= 5; ++iter)
 	{
-		for (i = 0; i < 64; ++i) 
+		for (i = 0U; i < 64U; ++i) 
 		{ 
 			b_int_v[i] = load8(bits_ptr); 
-			bits_ptr += 8;
+			bits_ptr += 8U;
 		}
 
 		bits_ptr += inc;
@@ -915,39 +917,39 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (iter = 4; iter >= 0; --iter)
 	{
-		for (i = 0; i < 64; ++i) 
+		for (i = 0U; i < 64U; ++i) 
 		{ 
 			b_int_v[i] = load8(bits_ptr); 
-			bits_ptr += 8; 
+			bits_ptr += 8U; 
 		}
 
 		bits_ptr += inc;
 		layer_in(r_int_v, b_int_v, iter);
 	}
 
-	transpose_64x64(r_int_h[0], r_int_v[0]);
-	transpose_64x64(r_int_h[1], r_int_v[1]);
+	transpose_64x64(r_int_h[0U], r_int_v[0U]);
+	transpose_64x64(r_int_h[1U], r_int_v[1U]);
 
 	for (iter = 6; iter >= 0; --iter)
 	{
-		for (i = 0; i < 64; ++i)
+		for (i = 0U; i < 64U; ++i)
 		{
 			b_int_v[i] = load8(bits_ptr);
-			bits_ptr += 8;
+			bits_ptr += 8U;
 		}
 
 		bits_ptr += inc;
 		transpose_64x64(b_int_h, b_int_v);
-		layer_ex(r_int_h[0], b_int_h, iter);
+		layer_ex(r_int_h[0U], b_int_h, iter);
 	}
 
-	transpose_64x64(r_int_v[0], r_int_h[0]);
-	transpose_64x64(r_int_v[1], r_int_h[1]);
+	transpose_64x64(r_int_v[0U], r_int_h[0U]);
+	transpose_64x64(r_int_v[1U], r_int_h[1U]);
 
 	for (i = 0; i < 64; ++i)
 	{
-		store8(r_ptr + i * 16, r_int_v[0][i]);
-		store8(r_ptr + i * 16 + 8, r_int_v[1][i]);
+		store8(r_ptr + i * 16U, r_int_v[0U][i]);
+		store8(r_ptr + i * 16U + 8U, r_int_v[1U][i]);
 	}
 }
 #endif
@@ -956,38 +958,38 @@ static void support_gen(gf* s, const uint8_t* c)
 {
 	/* input: condition bits c output: support s */
 
-	uint8_t L[MCELIECE_GFBITS][(1 << MCELIECE_GFBITS) / 8] = { 0U };
+	uint8_t L[MCELIECE_GFBITS][(1U << MCELIECE_GFBITS) / 8U] = { 0U };
 	size_t i;
 	size_t j;
 	gf a;
 
-	for (i = 0; i < (1 << MCELIECE_GFBITS); ++i)
+	for (i = 0U; i < (1U << MCELIECE_GFBITS); ++i)
 	{
 		a = bitrev((gf)i);
 
-		for (j = 0; j < MCELIECE_GFBITS; ++j)
+		for (j = 0U; j < MCELIECE_GFBITS; ++j)
 		{
-			L[j][i / 8] |= ((a >> j) & 1) << (i % 8);
+			L[j][i / 8U] |= ((a >> j) & 1) << (i % 8U);
 		}
 	}
 
-	for (j = 0; j < MCELIECE_GFBITS; ++j)
+	for (j = 0U; j < MCELIECE_GFBITS; ++j)
 	{
 		apply_benes(L[j], c, 0);
 	}
 
-	for (i = 0; i < MCELIECE_SYS_N; ++i)
+	for (i = 0U; i < MCELIECE_SYS_N; ++i)
 	{
-		s[i] = 0;
+		s[i] = 0U;
 		j = MCELIECE_GFBITS;
 
 		do
 		{
 			--j;
 			s[i] <<= 1;
-			s[i] |= (L[j][i / 8] >> (i % 8)) & 1;
+			s[i] |= (L[j][i / 8U] >> (i % 8U)) & 1;
 		} 
-		while (j != 0);
+		while (j != 0U);
 	}
 }
 
@@ -999,9 +1001,9 @@ static void bm(gf* out, const gf* s)
 	input: s, sequence of field elements
 	output: out, minimal polynomial of s */
 
-	gf T[MCELIECE_SYS_T + 1] = { 0U };
-	gf C[MCELIECE_SYS_T + 1] = { 0U };
-	gf B[MCELIECE_SYS_T + 1] = { 0U };
+	gf T[MCELIECE_SYS_T + 1U] = { 0U };
+	gf C[MCELIECE_SYS_T + 1U] = { 0U };
+	gf B[MCELIECE_SYS_T + 1U] = { 0U };
 	size_t i;
 	gf b;
 	gf d;
@@ -1011,57 +1013,57 @@ static void bm(gf* out, const gf* s)
 	uint16_t mle;
 	uint16_t mne;
 
-	b = 1;
-	L = 0;
-	B[1] = 1;
-	C[0] = 1;
+	b = 1U;
+	L = 0U;
+	B[1U] = 1U;
+	C[0U] = 1U;
 
-	for (N = 0; N < 2 * MCELIECE_SYS_T; ++N)
+	for (N = 0U; N < 2U * MCELIECE_SYS_T; ++N)
 	{
-		d = 0;
+		d = 0U;
 		
-		for (i = 0; i <= qsc_intutils_min((size_t)N, (size_t)MCELIECE_SYS_T); ++i)
+		for (i = 0U; i <= qsc_intutils_min((size_t)N, (size_t)MCELIECE_SYS_T); ++i)
 		{
 			d ^= gf_mul(C[i], s[N - i]);
 		}
 
 		mne = d; 
-		mne -= 1;   
+		mne -= 1U;   
 		mne >>= 15; 
-		mne -= 1;
+		mne -= 1U;
 		mle = N;
-		mle -= 2 * L; 
-		mle >>= 15; 
-		mle -= 1;
+		mle -= 2U * L; 
+		mle >>= 15U; 
+		mle -= 1U;
 		mle &= mne;
 
-		qsc_memutils_copy((uint8_t*)T, (const uint8_t*)C, MCELIECE_SYS_T * sizeof(gf));
+		qsc_memutils_copy(T, C, MCELIECE_SYS_T * sizeof(gf));
 
 		f = gf_frac(b, d);
 
-		for (i = 0; i <= MCELIECE_SYS_T; ++i)
+		for (i = 0U; i <= MCELIECE_SYS_T; ++i)
 		{
 			C[i] ^= gf_mul(f, B[i]) & mne;
 		}
 
-		L = (L & ~mle) | ((N + 1 - L) & mle);
+		L = (L & ~mle) | ((N + 1U - L) & mle);
 
-		for (i = 0; i <= MCELIECE_SYS_T; ++i)
+		for (i = 0U; i <= MCELIECE_SYS_T; ++i)
 		{
 			B[i] = (B[i] & ~mle) | (T[i] & mle);
 		}
 
 		b = (b & ~mle) | (d & mle);
 
-		for (i = MCELIECE_SYS_T; i >= 1; --i)
+		for (i = MCELIECE_SYS_T; i >= 1U; --i)
 		{
-			B[i] = B[i - 1];
+			B[i] = B[i - 1U];
 		}
 
-		B[0] = 0;
+		B[0U] = 0U;
 	}
 
-	for (i = 0; i <= MCELIECE_SYS_T; ++i)
+	for (i = 0U; i <= MCELIECE_SYS_T; ++i)
 	{
 		out[i] = C[MCELIECE_SYS_T - i];
 	}
@@ -1080,14 +1082,14 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 	int32_t* A = temp;
 	int32_t* B = (temp + n);
 	/* q can start anywhere between temp+n and temp+n/2 */
-	int16_t* q = ((int16_t*)(temp + n + n / 4));
+	int16_t* q = ((int16_t*)(temp + n + n / 4U));
 	int64_t i;
 	int64_t j;
 	int64_t x;
 
 	if (w == 1) 
 	{
-		out[pos >> 3] ^= pi[0] << (pos & 7);
+		out[pos >> 3U] ^= pi[0U] << (pos & 7);
 		return;
 	}
 
@@ -1280,8 +1282,8 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 
 	for (j = 0; j < n / 2; ++j)
 	{
-		q[j] = (A[2 * j] & 0x0000FFFFL) >> 1;
-		q[j + n / 2] = (A[2 * j + 1] & 0x0000FFFFL) >> 1;
+		q[j] = (A[2U * j] & 0x0000FFFFL) >> 1;
+		q[j + n / 2U] = (A[2U * j + 1] & 0x0000FFFFL) >> 1;
 	}
 
 	cbrecursion(out, pos, step * 2, q, w - 1, n / 2, temp);
@@ -1303,9 +1305,9 @@ static void cblayer(int16_t* p, const uint8_t* cb, int32_t s, int32_t n)
 
 	index = 0;
 
-	for (size_t i = 0U; i < (size_t)n; i += stride * 2)
+	for (size_t i = 0U; i < (size_t)n; i += stride * 2U)
 	{
-		for (size_t j = 0; j < (size_t)stride; ++j)
+		for (size_t j = 0U; j < (size_t)stride; ++j)
 		{
 			d = p[i + j] ^ p[i + j + stride];
 			m = (cb[index >> 3] >> (index & 7)) & 1;
@@ -1325,63 +1327,47 @@ static void controlbits_from_permutation(uint8_t* out, const int16_t* pi, int64_
 	   output: (2m-1)n/2 control bits at positions 0,1,...
 	   output position pos is by definition 1&(out[pos/8]>>(pos&7)) */
 
-	int32_t* temp;
-	int16_t* pi_test;
+	int32_t temp[(1 << MCELIECE_GFBITS) * 2U * sizeof(int32_t)] = { 0 };
+	int16_t pi_test[(1 << MCELIECE_GFBITS) * sizeof(int16_t)] = { 0 };
 	int32_t i;
 	int16_t diff;
 	const uint8_t* ptr;
 
-	temp = qsc_memutils_malloc((size_t)n * 2 * sizeof(int32_t));
-	pi_test = qsc_memutils_malloc((size_t)n * sizeof(int16_t));
-
-	QSC_ASSERT(temp != NULL);
-	QSC_ASSERT(pi_test != NULL);
-
-	if (temp != NULL && pi_test != NULL)
+	while (true)
 	{
-		while (true)
+		qsc_memutils_clear(out, (size_t)(((2 * w - 1) * n / 2) + 7) / 8U);
+		cbrecursion(out, 0, 1, pi, w, n, temp);
+
+		for (i = 0; i < n; ++i)
 		{
-			qsc_memutils_clear(out, (size_t)(((2 * w - 1) * n / 2) + 7) / 8);
-			cbrecursion(out, 0, 1, pi, w, n, temp);
-
-			// check for correctness
-
-			for (i = 0; i < n; ++i)
-			{
-				pi_test[i] = (int16_t)i;
-			}
-
-			ptr = out;
-
-			for (i = 0; i < w; ++i)
-			{
-				cblayer(pi_test, ptr, i, (int32_t)n);
-				ptr += n >> 4;
-			}
-
-			for (i = (int32_t)w - 2; i >= 0; --i)
-			{
-				cblayer(pi_test, ptr, i, (int32_t)n);
-				ptr += n >> 4;
-			}
-
-			diff = 0;
-
-			for (i = 0; i < n; ++i)
-			{
-				diff |= pi[i] ^ pi_test[i];
-			}
-
-			if (diff == 0)
-			{
-				break;
-			}
+			pi_test[i] = (int16_t)i;
 		}
 
-		qsc_memutils_alloc_free(pi_test);
-		pi_test = NULL;
-		qsc_memutils_alloc_free(temp);
-		temp = NULL;
+		ptr = out;
+
+		for (i = 0; i < w; ++i)
+		{
+			cblayer(pi_test, ptr, i, (int32_t)n);
+			ptr += n >> 4;
+		}
+
+		for (i = (int32_t)w - 2; i >= 0; --i)
+		{
+			cblayer(pi_test, ptr, i, (int32_t)n);
+			ptr += n >> 4;
+		}
+
+		diff = 0;
+
+		for (i = 0; i < n; ++i)
+		{
+			diff |= pi[i] ^ pi_test[i];
+		}
+
+		if (diff == 0)
+		{
+			break;
+		}
 	}
 }
 
@@ -1394,13 +1380,13 @@ static int32_t decrypt(uint8_t* e, const uint8_t* sk, const uint8_t* c)
 	   output: e, error vector
 	   return: 0 for success; 1 for failure */
 
-	gf g[MCELIECE_SYS_T + 1] = { 0U };
+	gf g[MCELIECE_SYS_T + 1U] = { 0U };
 	gf L[MCELIECE_SYS_N];
-	gf s[MCELIECE_SYS_T * 2];
-	gf s_cmp[MCELIECE_SYS_T * 2];
-	gf locator[MCELIECE_SYS_T + 1];
+	gf s[MCELIECE_SYS_T * 2U];
+	gf s_cmp[MCELIECE_SYS_T * 2U];
+	gf locator[MCELIECE_SYS_T + 1U];
 	gf images[MCELIECE_SYS_N];
-	uint8_t r[MCELIECE_SYS_N / 8];
+	uint8_t r[MCELIECE_SYS_N / 8U];
 	int32_t i;
 	int32_t w;
 	uint16_t check;
@@ -1408,26 +1394,26 @@ static int32_t decrypt(uint8_t* e, const uint8_t* sk, const uint8_t* c)
 
 	w = 0;
 	qsc_memutils_copy(r, c, MCELIECE_SYND_BYTES);
-	qsc_memutils_clear(r + MCELIECE_SYND_BYTES, (MCELIECE_SYS_N / 8) - MCELIECE_SYND_BYTES);
+	qsc_memutils_clear(r + MCELIECE_SYND_BYTES, (MCELIECE_SYS_N / 8U) - MCELIECE_SYND_BYTES);
 
 	for (i = 0; i < MCELIECE_SYS_T; ++i)
 	{
 		g[i] = load_gf(sk);
-		sk += 2;
+		sk += 2U;
 	} 
 	
-	g[MCELIECE_SYS_T] = 1;
+	g[MCELIECE_SYS_T] = 1U;
 	support_gen(L, sk);
 	synd(s, g, L, r);
 	bm(locator, s);
 	root(images, locator, L);
 
-	qsc_memutils_clear(e, MCELIECE_SYS_N / 8);
+	qsc_memutils_clear(e, MCELIECE_SYS_N / 8U);
 
-	for (i = 0; i < MCELIECE_SYS_N; ++i)
+	for (i = 0U; i < MCELIECE_SYS_N; ++i)
 	{
 		t = gf_is_zero(images[i]) & 1;
-		e[i / 8] |= t << (i % 8);
+		e[i / 8U] |= t << (i % 8U);
 		w += t;
 	}
 
@@ -1440,10 +1426,10 @@ static int32_t decrypt(uint8_t* e, const uint8_t* sk, const uint8_t* c)
 		check |= s[i] ^ s_cmp[i];
 	}
 
-	check -= 1;
+	check -= 1U;
 	check >>= 15;
 
-	return (check ^ 1);
+	return (check ^ 1U);
 }
 
 /* encrypt.c */
@@ -1453,14 +1439,14 @@ static uint8_t same_mask(uint16_t x, uint16_t y)
 	uint32_t mask;
 
 	mask = (uint32_t)(x ^ y);
-	mask -= 1;
-	mask >>= 31;
-	mask = ~mask + 1;
+	mask -= 1U;
+	mask >>= 31U;
+	mask = ~mask + 1U;
 
 	return mask & 0x000000FFUL;
 }
 
-static void gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
+static bool gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 {
 	/* output: e, an error vector of weight t */
 	uint16_t ind[MCELIECE_SYS_T] = { 0U };
@@ -1469,34 +1455,41 @@ static void gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 	size_t i;
 	size_t j;
 	uint8_t mask;
+	bool res;
 #if defined(QSC_MCELIECE_S7N8192T128)
 	uint8_t brnd[MCELIECE_SYS_T * sizeof(uint16_t)];
 #else
 	size_t count;
-	uint16_t nrnd[MCELIECE_SYS_T * 2] = { 0U };
-	uint8_t brnd[MCELIECE_SYS_T * 2 * sizeof(uint16_t)];
+	uint16_t nrnd[MCELIECE_SYS_T * 2U] = { 0U };
+	uint8_t brnd[MCELIECE_SYS_T * 2U * sizeof(uint16_t)];
 #endif
 
-	while (true)
+	res = true;
+
+	while (res)
 	{
-		rng_generate(brnd, sizeof(brnd));
+		if (!rng_generate(brnd, sizeof(brnd)))
+		{
+			res = false;
+			break;
+		}
 
 #if defined(QSC_MCELIECE_S7N8192T128)
-		for (i = 0; i < MCELIECE_SYS_T; ++i)
+		for (i = 0U; i < MCELIECE_SYS_T; ++i)
 		{
-			ind[i] = load_gf(brnd + i * 2);
+			ind[i] = load_gf(brnd + i * 2U);
 		}
 #else
-		for (i = 0; i < MCELIECE_SYS_T * 2; ++i)
+		for (i = 0U; i < MCELIECE_SYS_T * 2U; ++i)
 		{
-			nrnd[i] = load_gf(brnd + i * 2);
+			nrnd[i] = load_gf(brnd + i * 2U);
 		}
 
 		/* moving and counting indices in the correct range */
 
-		count = 0;
+		count = 0U;
 
-		for (i = 0; i < MCELIECE_SYS_T * 2; ++i)
+		for (i = 0U; i < MCELIECE_SYS_T * 2U; ++i)
 		{
 			if (nrnd[i] < MCELIECE_SYS_N)
 			{
@@ -1518,41 +1511,43 @@ static void gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 
 		/* check for repetition */
 
-		eq = 0;
+		eq = 0U;
 
-		for (i = 1; i < MCELIECE_SYS_T; ++i)
+		for (i = 1U; i < MCELIECE_SYS_T; ++i)
 		{
-			for (j = 0; j < i; ++j)
+			for (j = 0U; j < i; ++j)
 			{
 				if (ind[i] == ind[j])
 				{
-					eq = 1;
+					eq = 1U;
 					break;
 				}
 			}
 		}
 
-		if (eq == 0)
+		if (eq == 0U)
 		{
 			break;
 		}
 	}
 
-	for (j = 0; j < MCELIECE_SYS_T; ++j)
+	for (j = 0U; j < MCELIECE_SYS_T; ++j)
 	{
-		val[j] = (uint8_t)(1 << (ind[j] & 7));
+		val[j] = (uint8_t)(1U << (ind[j] & 7));
 	}
 
-	for (i = 0; i < MCELIECE_SYS_N / 8; ++i)
+	for (i = 0U; i < MCELIECE_SYS_N / 8U; ++i)
 	{
-		e[i] = 0;
+		e[i] = 0U;
 
-		for (j = 0; j < MCELIECE_SYS_T; ++j)
+		for (j = 0U; j < MCELIECE_SYS_T; ++j)
 		{
 			mask = same_mask((uint16_t)i, (ind[j] >> 3));
 			e[i] |= val[j] & mask;
 		}
 	}
+
+	return res;
 }
 
 static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
@@ -1560,7 +1555,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 	/* input: public key pk, error vector e
 	   output: syndrome s */
 
-	uint8_t row[MCELIECE_SYS_N / 8];
+	uint8_t row[MCELIECE_SYS_N / 8U];
 	const uint8_t *pk_ptr = pk;
 	size_t j;
 	uint8_t b;
@@ -1573,27 +1568,27 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 
 	for (size_t i = 0U; i < MCELIECE_PK_NROWS; ++i)
 	{
-		qsc_memutils_clear(row, MCELIECE_SYS_N / 8);
+		qsc_memutils_clear(row, MCELIECE_SYS_N / 8U);
 
-		for (j = 0; j < MCELIECE_PK_ROW_BYTES; ++j)
+		for (j = 0U; j < MCELIECE_PK_ROW_BYTES; ++j)
 		{
-			row[MCELIECE_SYS_N / 8 - MCELIECE_PK_ROW_BYTES + j] = pk_ptr[j];
+			row[MCELIECE_SYS_N / 8U - MCELIECE_PK_ROW_BYTES + j] = pk_ptr[j];
 		}
 
 #if defined(QSC_MCELIECE_S6N6960T119)
-		for (j = MCELIECE_SYS_N / 8 - 1; j >= MCELIECE_SYS_N / 8 - MCELIECE_PK_ROW_BYTES; --j)
+		for (j = MCELIECE_SYS_N / 8U - 1U; j >= MCELIECE_SYS_N / 8U - MCELIECE_PK_ROW_BYTES; --j)
 		{
-			row[j] = (uint8_t)((row[j] << tail) | (row[j - 1] >> (8 - tail)));
+			row[j] = (uint8_t)((row[j] << tail) | (row[j - 1U] >> (8U - tail)));
 		}
 
-		row[i / 8] |= 1 << (i % 8);
+		row[i / 8U] |= 1U << (i % 8U);
 #else
-		row[i / 8] |= 1 << (i % 8);
+		row[i / 8U] |= 1U << (i % 8U);
 #endif
 
-		b = 0;
+		b = 0U;
 
-		for (j = 0; j < MCELIECE_SYS_N / 8; ++j)
+		for (j = 0U; j < MCELIECE_SYS_N / 8U; ++j)
 		{
 			b ^= row[j] & e[j];
 		}
@@ -1602,16 +1597,20 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 		b ^= b >> 2;
 		b ^= b >> 1;
 		b &= 1;
-		s[i / 8] |= (b << (i % 8));
+		s[i / 8U] |= (b << (i % 8U));
 
 		pk_ptr += MCELIECE_PK_ROW_BYTES;
 	}
 }
 
-static void encrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, bool (*rng_generate)(uint8_t*, size_t))
+static bool encrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, bool (*rng_generate)(uint8_t*, size_t))
 {
-	gen_e(e, rng_generate);
+	bool res;
+
+	res = gen_e(e, rng_generate);
 	syndrome(s, pk, e);
+
+	return res;
 }
 
 /* operations.c */
@@ -1623,9 +1622,9 @@ static int32_t check_c_padding(const uint8_t* c)
 	uint8_t b;
 	int32_t ret;
 
-	b = c[MCELIECE_SYND_BYTES - 1] >> (MCELIECE_PK_NROWS % 8);
-	b -= 1;
-	b >>= 7;
+	b = c[MCELIECE_SYND_BYTES - 1U] >> (MCELIECE_PK_NROWS % 8U);
+	b -= 1U;
+	b >>= 7U;
 	ret = b;
 
 	return ret - 1;
@@ -1637,11 +1636,11 @@ static int32_t check_pk_padding(const uint8_t* pk)
 	uint8_t b;
 	int32_t ret;
 
-	b = 0;
+	b = 0U;
 
 	for (size_t i = 0U; i < MCELIECE_PK_NROWS; i++)
 	{
-		b |= pk[i * MCELIECE_PK_ROW_BYTES + MCELIECE_PK_ROW_BYTES - 1];
+		b |= pk[i * MCELIECE_PK_ROW_BYTES + MCELIECE_PK_ROW_BYTES - 1U];
 	}
 
 	b >>= (MCELIECE_PK_NCOLS % 8);
@@ -1655,231 +1654,187 @@ static int32_t check_pk_padding(const uint8_t* pk)
 
 /* pk_gen.c */
 
-static int32_t pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t* pi)
+static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t* pi)
 {
 	/* input: secret key sk output: public key pk */
 
-	uint64_t buf[1 << MCELIECE_GFBITS] = { 0U };
-	gf g[MCELIECE_SYS_T + 1] = { 0U };	/* Goppa polynomial */
+	/* Note: if it fails here with stackoverflow, increase the maximum stack size
+	* to +/- 20 MB to account for the large matrix array */
+	uint8_t mat[MCELIECE_PK_NROWS * sizeof(uint8_t*)][MCELIECE_SYS_N / 8U] = { 0 };
+	uint64_t buf[1U << MCELIECE_GFBITS] = { 0U };
+	gf g[MCELIECE_SYS_T + 1U] = { 0U };	/* Goppa polynomial */
 	gf L[MCELIECE_SYS_N] = { 0U };		/* support */
-	gf inv[MCELIECE_SYS_N];
-	uint8_t** mat;
+	gf inv[MCELIECE_SYS_N] = { 0U };
 	size_t i;
 	size_t j;
 	size_t k;
 	size_t col;
 	size_t row;
-	int32_t res;
 	uint8_t b;
 	uint8_t mask;
-	bool balc;
+	bool res;
 
 #if defined(QSC_MCELIECE_S6N6960T119)
 	uint8_t *pk_ptr = pk;
 	int32_t tail;
 #endif
 
-	res = -1;
+	res = true;
 
-	mat = (uint8_t**)qsc_memutils_malloc(MCELIECE_PK_NROWS * sizeof(uint8_t*));
-	QSC_ASSERT(mat != NULL);
+	g[MCELIECE_SYS_T] = 1U;
 
-	if (mat != NULL)
+	for (i = 0U; i < MCELIECE_SYS_T; ++i)
 	{
-		balc = true;
+		g[i] = load_gf(sk); 
+		sk += 2U;
+	}
 
-		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
+	for (i = 0U; i < (1U << MCELIECE_GFBITS); i++)
+	{
+		buf[i] = perm[i];
+		buf[i] <<= 31;
+		buf[i] |= i;
+	}
+
+	uint64_sort(buf, 1 << MCELIECE_GFBITS);
+
+	for (i = 1U; i < (1U << MCELIECE_GFBITS); ++i)
+	{
+		if ((buf[i - 1U] >> 31) == (buf[i] >> 31))
 		{
-			mat[i] = (uint8_t*)qsc_memutils_malloc(MCELIECE_SYS_N / 8);
+			return false;
+		}
+	}
 
-			if (mat[i] == NULL)
+	for (i = 0U; i < (1U << MCELIECE_GFBITS); ++i)
+	{
+		pi[i] = buf[i] & MCELIECE_GFMASK;
+	}
+
+	for (i = 0U; i < MCELIECE_SYS_N; ++i)
+	{
+		L[i] = bitrev(pi[i]);
+	}
+
+	/* filling the matrix */
+
+	root(inv, g, L);
+
+	for (i = 0U; i < MCELIECE_SYS_N; ++i)
+	{
+		inv[i] = gf_inv(inv[i]);
+	}
+
+	for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
+	{
+		for (j = 0U; j < MCELIECE_SYS_N / 8U; ++j)
+		{
+			mat[i][j] = 0U;
+		}
+	}
+
+	for (i = 0U; i < MCELIECE_SYS_T; ++i)
+	{
+		for (j = 0U; j < MCELIECE_SYS_N; j += 8U)
+		{
+			for (k = 0U; k < MCELIECE_GFBITS; ++k)
 			{
-				balc = false;
+				b = (inv[j + 7U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 6U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 5U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 4U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 3U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 2U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 1U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j] >> k) & 1;
+
+				mat[i * MCELIECE_GFBITS + k][j / 8U] = b;
+			}
+		}
+
+		for (j = 0U; j < MCELIECE_SYS_N; ++j)
+		{
+			inv[j] = gf_mul(inv[j], L[j]);
+		}
+	}
+
+	/* gaussian elimination */
+
+	for (i = 0U; i < (MCELIECE_PK_NROWS + 7U) / 8U; ++i)
+	{
+		for (j = 0U; j < 8U; ++j)
+		{
+			row = i * 8U + j;
+
+			if (row >= MCELIECE_PK_NROWS)
+			{
 				break;
 			}
+
+			for (k = row + 1U; k < MCELIECE_PK_NROWS; ++k)
+			{
+				mask = mat[row][i] ^ mat[k][i];
+				mask >>= j;
+				mask &= 1U;
+				mask = -mask;
+
+				for (col = 0U; col < MCELIECE_SYS_N / 8U; ++col)
+				{
+					mat[row][col] ^= mat[k][col] & mask;
+				}
+			}
+
+			/* return if not systematic */
+			if (((mat[row][i] >> j) & 1) == 0U)
+			{
+				return false;
+			}
+
+			for (k = 0U; k < MCELIECE_PK_NROWS; ++k)
+			{
+				if (k != row)
+				{
+					mask = mat[k][i] >> j;
+					mask &= 1;
+					mask = -mask;
+
+					for (col = 0U; col < MCELIECE_SYS_N / 8U; ++col)
+					{
+						mat[k][col] ^= mat[row][col] & mask;
+					}
+				}
+			}
 		}
+	}
 
-		if (balc == true)
-		{
-			g[MCELIECE_SYS_T] = 1;
-
-			for (i = 0; i < MCELIECE_SYS_T; ++i)
-			{
-				g[i] = load_gf(sk); 
-				sk += 2;
-			}
-
-			for (i = 0; i < (1 << MCELIECE_GFBITS); i++)
-			{
-				buf[i] = perm[i];
-				buf[i] <<= 31;
-				buf[i] |= i;
-			}
-
-			uint64_sort(buf, 1 << MCELIECE_GFBITS);
-
-			for (i = 1; i < (1 << MCELIECE_GFBITS); ++i)
-			{
-				if ((buf[i - 1] >> 31) == (buf[i] >> 31))
-				{
-					res = -2;
-					break;
-				}
-			}
-			
-			if (res != -2)
-			{
-				for (i = 0; i < (1 << MCELIECE_GFBITS); ++i)
-				{
-					pi[i] = buf[i] & MCELIECE_GFMASK;
-				}
-
-				for (i = 0; i < MCELIECE_SYS_N; ++i)
-				{
-					L[i] = bitrev(pi[i]);
-				}
-
-				/* filling the matrix */
-
-				root(inv, g, L);
-
-				for (i = 0; i < MCELIECE_SYS_N; ++i)
-				{
-					inv[i] = gf_inv(inv[i]);
-				}
-
-				for (i = 0; i < MCELIECE_PK_NROWS; ++i)
-				{
-					for (j = 0; j < MCELIECE_SYS_N / 8; ++j)
-					{
-						mat[i][j] = 0;
-					}
-				}
-
-				for (i = 0; i < MCELIECE_SYS_T; ++i)
-				{
-					for (j = 0; j < MCELIECE_SYS_N; j += 8)
-					{
-						for (k = 0; k < MCELIECE_GFBITS; ++k)
-						{
-							b = (inv[j + 7] >> k) & 1;
-							b <<= 1;
-							b |= (inv[j + 6] >> k) & 1;
-							b <<= 1;
-							b |= (inv[j + 5] >> k) & 1;
-							b <<= 1;
-							b |= (inv[j + 4] >> k) & 1;
-							b <<= 1;
-							b |= (inv[j + 3] >> k) & 1;
-							b <<= 1;
-							b |= (inv[j + 2] >> k) & 1;
-							b <<= 1;
-							b |= (inv[j + 1] >> k) & 1;
-							b <<= 1;
-							b |= (inv[j] >> k) & 1;
-
-							mat[i * MCELIECE_GFBITS + k][j / 8] = b;
-						}
-					}
-
-					for (j = 0; j < MCELIECE_SYS_N; ++j)
-					{
-						inv[j] = gf_mul(inv[j], L[j]);
-					}
-				}
-
-				/* gaussian elimination */
-
-				for (i = 0; i < (MCELIECE_PK_NROWS + 7) / 8; ++i)
-				{
-					for (j = 0; j < 8; ++j)
-					{
-						row = i * 8 + j;
-
-						if (row >= MCELIECE_PK_NROWS)
-						{
-							break;
-						}
-
-						for (k = row + 1; k < MCELIECE_PK_NROWS; ++k)
-						{
-							mask = mat[row][i] ^ mat[k][i];
-							mask >>= j;
-							mask &= 1;
-							mask = -mask;
-
-							for (col = 0; col < MCELIECE_SYS_N / 8; ++col)
-							{
-								mat[row][col] ^= mat[k][col] & mask;
-							}
-						}
-
-						/* return if not systematic */
-						if (((mat[row][i] >> j) & 1) == 0)
-						{
-							for (i = 0; i < MCELIECE_PK_NROWS; ++i)
-							{
-								qsc_memutils_alloc_free(mat[i]);
-								mat[i] = NULL;
-							}
-
-							qsc_memutils_alloc_free(mat);
-							mat = NULL;
-
-							return -1;
-						}
-
-						for (k = 0; k < MCELIECE_PK_NROWS; ++k)
-						{
-							if (k != row)
-							{
-								mask = mat[k][i] >> j;
-								mask &= 1;
-								mask = -mask;
-
-								for (col = 0; col < MCELIECE_SYS_N / 8; ++col)
-								{
-									mat[k][col] ^= mat[row][col] & mask;
-								}
-							}
-						}
-					}
-				}
 
 #if defined(QSC_MCELIECE_S6N6960T119)
-				tail = MCELIECE_PK_NROWS % 8;
+	tail = MCELIECE_PK_NROWS % 8;
 
-				for (i = 0; i < MCELIECE_PK_NROWS; ++i)
-				{
-					for (j = (MCELIECE_PK_NROWS - 1) / 8; j < MCELIECE_SYS_N / 8 - 1; ++j)
-					{
-						*pk_ptr = (uint8_t)((mat[i][j] >> tail) | (mat[i][j + 1] << (8 - tail)));
-						++pk_ptr;
-					}
-
-					*pk_ptr = (mat[i][j] >> tail);
-					++pk_ptr;
-				}
-#else
-				for (i = 0; i < MCELIECE_PK_NROWS; ++i)
-				{
-					qsc_memutils_copy(pk + i * MCELIECE_PK_ROW_BYTES, mat[i] + MCELIECE_PK_NROWS / 8, MCELIECE_PK_ROW_BYTES);
-				}
-#endif
-			}
-
-			res = 0;
-		}
-
-		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
+	for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
+	{
+		for (j = (MCELIECE_PK_NROWS - 1U) / 8U; j < MCELIECE_SYS_N / 8U - 1U; ++j)
 		{
-			qsc_memutils_alloc_free(mat[i]);
-			mat[i] = NULL;
+			*pk_ptr = (uint8_t)((mat[i][j] >> tail) | (mat[i][j + 1U] << (8U - tail)));
+			++pk_ptr;
 		}
 
-		qsc_memutils_alloc_free(mat);
-		mat = NULL;
+		*pk_ptr = (mat[i][j] >> tail);
+		++pk_ptr;
 	}
+#else
+	for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
+	{
+		qsc_memutils_copy(pk + i * MCELIECE_PK_ROW_BYTES, mat[i] + MCELIECE_PK_NROWS / 8U, MCELIECE_PK_ROW_BYTES);
+	}
+#endif
 
 	return res;
 }
@@ -1892,7 +1847,7 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 	   output: out, minimal polynomial of f
 	   return: 0 for success and -1 for failure */
 
-	gf mat[MCELIECE_SYS_T + 1][MCELIECE_SYS_T] = { 0U };
+	gf mat[MCELIECE_SYS_T + 1U][MCELIECE_SYS_T] = { 0U };
 	size_t c;
 	size_t i;
 	size_t j;
@@ -1905,48 +1860,48 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 	/* fill matrix */
 
 	res = 0;
-	mat[0][0] = 1;
+	mat[0U][0U] = 1U;
 
-	for (i = 0; i < MCELIECE_SYS_T; ++i)
+	for (i = 0U; i < MCELIECE_SYS_T; ++i)
 	{
-		mat[1][i] = f[i];
+		mat[1U][i] = f[i];
 	}
 
-	for (j = 2; j <= MCELIECE_SYS_T; ++j)
+	for (j = 2U; j <= MCELIECE_SYS_T; ++j)
 	{
-		GF_mul(mat[j], mat[j - 1], f);
+		GF_mul(mat[j], mat[j - 1U], f);
 	}
 
 	/* gaussian */
 
-	for (j = 0; j < MCELIECE_SYS_T; ++j)
+	for (j = 0U; j < MCELIECE_SYS_T; ++j)
 	{
-		for (k = j + 1; k < MCELIECE_SYS_T; ++k)
+		for (k = j + 1U; k < MCELIECE_SYS_T; ++k)
 		{
 			mask = gf_is_zero(mat[j][j]);
 
-			for (c = j; c < MCELIECE_SYS_T + 1; ++c)
+			for (c = j; c < MCELIECE_SYS_T + 1U; ++c)
 			{
 				mat[c][j] ^= mat[c][k] & mask;
 			}
 		}
 
-		if (mat[j][j] != 0)
+		if (mat[j][j] != 0U)
 		{
 			inv = gf_inv(mat[j][j]);
 
-			for (c = j; c < MCELIECE_SYS_T + 1; ++c)
+			for (c = j; c < MCELIECE_SYS_T + 1U; ++c)
 			{
 				mat[c][j] = gf_mul(mat[c][j], inv);
 			}
 
-			for (k = 0; k < MCELIECE_SYS_T; ++k)
+			for (k = 0U; k < MCELIECE_SYS_T; ++k)
 			{
 				if (k != j)
 				{
 					t = mat[j][k];
 
-					for (c = j; c < MCELIECE_SYS_T + 1; ++c)
+					for (c = j; c < MCELIECE_SYS_T + 1U; ++c)
 					{
 						mat[c][k] ^= gf_mul(mat[c][j], t);
 					}
@@ -1960,7 +1915,7 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 			break;
 		}
 
-		for (i = 0; i < MCELIECE_SYS_T; ++i)
+		for (i = 0U; i < MCELIECE_SYS_T; ++i)
 		{
 			out[i] = mat[MCELIECE_SYS_T][i];
 		}
@@ -1969,11 +1924,13 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 	return res;
 }
 
-int32_t qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, bool (*rng_generate)(uint8_t*, size_t))
+bool qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	uint8_t one_ec[1 + MCELIECE_SYS_N / 8 + (MCELIECE_SYND_BYTES + 32)] = { 0U };
-	uint8_t two_e[1 + MCELIECE_SYS_N / 8] = { 0U };
-	uint8_t *e = two_e + 1;
+	uint8_t one_ec[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
+	uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
+	uint8_t *e = two_e + 1U;
+	bool res;
+
 #if defined(QSC_MCELIECE_S6N6960T119)
 	uint8_t mask;
 	int32_t i;
@@ -1982,48 +1939,55 @@ int32_t qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk
 	padding_ok = check_pk_padding(pk);
 #endif
 
-	one_ec[0] = 1;
-	two_e[0] = 2;
-	encrypt(c, pk, e, rng_generate);
+	one_ec[0U] = 1U;
+	two_e[0U] = 2U;
 
-	qsc_shake256_compute(c + MCELIECE_SYND_BYTES, MCELIECE_SHAREDSECRET_SIZE, two_e, sizeof(two_e));
-	qsc_memutils_copy(one_ec + 1, e, MCELIECE_SYS_N / 8);
-	qsc_memutils_copy(one_ec + 1 + MCELIECE_SYS_N / 8, c, MCELIECE_SYND_BYTES + 32);
-	qsc_shake256_compute(key, MCELIECE_SHAREDSECRET_SIZE, one_ec, sizeof(one_ec));
+	res = encrypt(c, pk, e, rng_generate);
+
+	if (res)
+	{
+		qsc_shake256_compute(c + MCELIECE_SYND_BYTES, MCELIECE_SHAREDSECRET_SIZE, two_e, sizeof(two_e));
+		qsc_memutils_copy(one_ec + 1U, e, MCELIECE_SYS_N / 8U);
+		qsc_memutils_copy(one_ec + 1U + MCELIECE_SYS_N / 8U, c, MCELIECE_SYND_BYTES + 32U);
+		qsc_shake256_compute(key, MCELIECE_SHAREDSECRET_SIZE, one_ec, sizeof(one_ec));
 
 #if defined(QSC_MCELIECE_S6N6960T119)
-	/* clear outputs(set to all 0's) if padding bits are not all zero */
+		/* clear outputs(set to all 0's) if padding bits are not all zero */
+		mask = padding_ok;
+		mask ^= 0xFF;
 
-	mask = padding_ok;
-	mask ^= 0xFF;
+		for (i = 0U; i < MCELIECE_SYND_BYTES + 32U; ++i)
+		{
+			c[i] &= mask;
+		}
 
-	for (i = 0; i < MCELIECE_SYND_BYTES + 32; ++i)
-	{
-		c[i] &= mask;
-	}
+		for (i = 0U; i < 32U; ++i)
+		{
+			key[i] &= mask;
+		}
 
-	for (i = 0; i < 32; ++i)
-	{
-		key[i] &= mask;
-	}
-
-	return padding_ok;
-#else
-	return 0;
+		res = res && (padding_ok == 0);
 #endif
+	}
+	else
+	{
+		qsc_memutils_clear(c, MCELIECE_SYND_BYTES);
+	}
+
+	return res;
 }
 
-int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8_t* sk)
+bool qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8_t* sk)
 {
-	uint8_t conf[32];
-	uint8_t preimage[1 + MCELIECE_SYS_N / 8 + (MCELIECE_SYND_BYTES + 32)] = { 0U };
-	uint8_t two_e[1 + MCELIECE_SYS_N / 8] = { 0U };
-	const uint8_t *s = sk + 40 + MCELIECE_IRR_BYTES + MCELIECE_COND_BYTES;
+	uint8_t conf[32U];
+	uint8_t preimage[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
+	uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
+	const uint8_t *s = sk + 40U + MCELIECE_IRR_BYTES + MCELIECE_COND_BYTES;
 	size_t i;
 	uint16_t m;
 	uint8_t ret_confirm;
 	uint8_t ret_decrypt;
-	uint8_t *e = two_e + 1;
+	uint8_t *e = two_e + 1U;
 	uint8_t *x = preimage;
 #if defined(QSC_MCELIECE_S6N6960T119)
 	int32_t padding_ok;
@@ -2032,30 +1996,30 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8
 	padding_ok = check_c_padding(c);
 #endif
 
-	two_e[0] = 2;
-	ret_confirm = 0;
-	ret_decrypt = (uint8_t)decrypt(e, (sk + 40), c);
+	two_e[0U] = 2U;
+	ret_confirm = 0U;
+	ret_decrypt = (uint8_t)decrypt(e, (sk + 40U), c);
 	qsc_shake256_compute(conf, MCELIECE_SHAREDSECRET_SIZE, two_e, sizeof(two_e));
 
-	for (i = 0; i < 32; ++i)
+	for (i = 0U; i < 32U; ++i)
 	{
 		ret_confirm |= conf[i] ^ c[MCELIECE_SYND_BYTES + i];
 	}
 
 	m = ret_decrypt | ret_confirm;
-	m -= 1;
-	m >>= 8;
+	m -= 1U;
+	m >>= 8U;
 
-	*x = m & 1;
+	*x = m & 1U;
 	++x;
 
-	for (i = 0; i < MCELIECE_SYS_N / 8; ++i)
+	for (i = 0U; i < MCELIECE_SYS_N / 8U; ++i)
 	{
 		*x = (~m & s[i]) | (m & e[i]);
 		++x;
 	}
 
-	for (i = 0; i < MCELIECE_SYND_BYTES + 32; ++i)
+	for (i = 0U; i < MCELIECE_SYND_BYTES + 32U; ++i)
 	{
 		*x = c[i];
 		++x;
@@ -2068,91 +2032,99 @@ int32_t qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8
 
 	mask = (uint8_t)padding_ok;
 
-	for (i = 0; i < 32; ++i)
+	for (i = 0U; i < 32U; ++i)
 	{
 		key[i] |= mask;
 	}
 
-	return (ret_decrypt + ret_confirm + padding_ok);
+	return (ret_decrypt == 0U) && (ret_confirm == 0U) && (padding_ok == 0);
 #else
-	return (ret_decrypt + ret_confirm);
+	return (ret_decrypt == 0U) && (ret_confirm == 0U);
 #endif
 }
 
-int32_t qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
+bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	uint32_t perm[1 << MCELIECE_GFBITS] = { 0U };	/* random permutation as 32-bit integers */
-	int16_t pi[1 << MCELIECE_GFBITS];	/* random permutation */
+	uint32_t perm[1U << MCELIECE_GFBITS] = { 0U };	/* random permutation as 32-bit integers */
+	int16_t pi[1U << MCELIECE_GFBITS];	/* random permutation */
 	gf f[MCELIECE_SYS_T] = { 0U };		/* element in GF(2 ^ mt) */
 	gf irr[MCELIECE_SYS_T];				/* Goppa polynomial */
-	uint8_t r[(MCELIECE_SYS_N / 8) + ((1 << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2) + 32] = { 0U };
-	uint8_t seed[33] = { 0U };
+	uint8_t r[(MCELIECE_SYS_N / 8U) + ((1U << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2U) + 32U] = { 0U };
+	uint8_t seed[33U] = { 0U };
 	const uint8_t* rp;
 	uint8_t *skp;
 	int32_t i;
+	bool res;
 
-	seed[0] = 64;
-	rng_generate((seed + 1), 32);
+	seed[0U] = 64;
 
-	while (true)
+	if (rng_generate((seed + 1U), 32U))
 	{
-		rp = &r[sizeof(r) - 32];
-		skp = sk;
-
-		/* expanding and updating the seed */
-		qsc_shake256_compute(r, sizeof(r), seed, 33);
-		qsc_memutils_copy(skp, seed + 1, 32);
-		skp += 32 + 8;
-		qsc_memutils_copy(seed + 1, &r[sizeof(r) - 32], 32);
-
-		/* generating irreducible polynomial */
-
-		rp -= sizeof(f);
-
-		for (i = 0; i < MCELIECE_SYS_T; ++i)
+		while (true)
 		{
-			f[i] = load_gf(rp + i * 2);
+			rp = &r[sizeof(r) - 32U];
+			skp = sk;
+
+			/* expanding and updating the seed */
+			qsc_shake256_compute(r, sizeof(r), seed, 33U);
+			qsc_memutils_copy(skp, seed + 1U, 32U);
+			skp += 32U + 8U;
+			qsc_memutils_copy(seed + 1U, &r[sizeof(r) - 32U], 32U);
+
+			/* generating irreducible polynomial */
+
+			rp -= sizeof(f);
+
+			for (i = 0; i < MCELIECE_SYS_T; ++i)
+			{
+				f[i] = load_gf(rp + i * 2U);
+			}
+
+			if (genpoly_gen(irr, f) != 0)
+			{
+				continue;
+			}
+
+			for (i = 0; i < MCELIECE_SYS_T; ++i)
+			{
+				store_gf(skp + i * 2U, irr[i]);
+			}
+
+			skp += MCELIECE_IRR_BYTES;
+
+			/* generating permutation */
+
+			rp -= sizeof(perm);
+
+			for (i = 0; i < (1 << MCELIECE_GFBITS); ++i)
+			{
+				perm[i] = load4(rp + i * 4U);
+			}
+
+			if (!pk_gen(pk, skp - MCELIECE_IRR_BYTES, perm, pi))
+			{
+				continue;
+			}
+
+			controlbits_from_permutation(skp, pi, MCELIECE_GFBITS, 1 << MCELIECE_GFBITS);
+			skp += MCELIECE_COND_BYTES;
+
+			/* storing the random string s */
+			rp -= MCELIECE_SYS_N / 8U;
+			qsc_memutils_copy(skp, rp, MCELIECE_SYS_N / 8U);
+
+			/* storing positions of the 32 pivots */
+			store8(sk + 32U, 0x00000000FFFFFFFFULL);
+
+			break;
 		}
-
-		if (genpoly_gen(irr, f) != 0)
-		{
-			continue;
-		}
-
-		for (i = 0; i < MCELIECE_SYS_T; ++i)
-		{
-			store_gf(skp + i * 2, irr[i]);
-		}
-
-		skp += MCELIECE_IRR_BYTES;
-
-		/* generating permutation */
-
-		rp -= sizeof(perm);
-
-		for (i = 0; i < (1 << MCELIECE_GFBITS); ++i)
-		{
-			perm[i] = load4(rp + i * 4);
-		}
-
-		if (pk_gen(pk, skp - MCELIECE_IRR_BYTES, perm, pi) != 0)
-		{
-			continue;
-		}
-
-		controlbits_from_permutation(skp, pi, MCELIECE_GFBITS, 1 << MCELIECE_GFBITS);
-		skp += MCELIECE_COND_BYTES;
-
-		/* storing the random string s */
-		rp -= MCELIECE_SYS_N / 8;
-		qsc_memutils_copy(skp, rp, MCELIECE_SYS_N / 8);
-
-		/* storing positions of the 32 pivots */
-		store8(sk + 32, 0x00000000FFFFFFFFULL);
-
-		break;
+		res = true;
+	}
+	else
+	{
+		res = false;
 	}
 
-	return 0;
+	return res;
 }
 

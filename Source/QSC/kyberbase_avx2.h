@@ -191,8 +191,9 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
 * \param ss: Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
 * \param pk: [const] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
 * \param rng_generate: Pointer to the random generator function
+* \return Returns true for success
 */
-void qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
+bool qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
 	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
 
 /**
@@ -201,8 +202,9 @@ void qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t 
 * \param pk: Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
 * \param sk: Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 * \param rng_generate: Pointer to the random generator function
+* \return Returns true for success
 */
-void qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],
+bool qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],
 	bool (*rng_generate)(uint8_t*, size_t));
 
 #endif

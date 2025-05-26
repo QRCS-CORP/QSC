@@ -121,12 +121,6 @@
     <Filter Include="Source Files\Network">
       <UniqueIdentifier>{d8ecbcc0-bfe6-4fcd-9093-e9a9a2724b05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Asymmetric\Signature\Falcon">
-      <UniqueIdentifier>{b91f9597-6441-4580-b253-476e3c1caf77}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Signature\Falcon">
-      <UniqueIdentifier>{b3592f05-c821-4a76-9fb4-ba151faba479}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Asymmetric\Cipher\Kyber\Support">
       <UniqueIdentifier>{2a8d8ef1-94b9-4f1f-82bb-ba9c20567d72}</UniqueIdentifier>
     </Filter>
@@ -145,9 +139,6 @@
     <Filter Include="Header Files\Asymmetric\Signature\ECDSA\Support">
       <UniqueIdentifier>{97e23e08-e303-424d-8a8e-d561a1be9853}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Asymmetric\Signature\Falcon\Support">
-      <UniqueIdentifier>{5568de26-3d56-477c-9590-a61b141599d5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Asymmetric\Signature\SphincsPlus\Support">
       <UniqueIdentifier>{d82e819d-24e0-47bd-ab23-098c060cfb85}</UniqueIdentifier>
     </Filter>
@@ -162,9 +153,6 @@
     </Filter>
     <Filter Include="Source Files\Asymmetric\Signature\ECDSA\Support">
       <UniqueIdentifier>{026ca531-7993-4d59-917b-6da4c4f1e4c8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Signature\Falcon\Support">
-      <UniqueIdentifier>{685bb590-d199-4c62-aea4-2c4de6034553}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Asymmetric\Signature\SphincsPlus\Support">
       <UniqueIdentifier>{6a29f59c-2a8c-483a-957c-5cd73a8227f1}</UniqueIdentifier>
@@ -297,9 +285,6 @@
     <ClInclude Include="timestamp.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="falcon.h">
-      <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
-    </ClInclude>
     <ClInclude Include="event.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
@@ -344,12 +329,6 @@
     </ClInclude>
     <ClInclude Include="ecdsabase.h">
       <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
-    </ClInclude>
-    <ClInclude Include="falconbase.h">
-      <Filter>Header Files\Asymmetric\Signature\Falcon\Support</Filter>
-    </ClInclude>
-    <ClInclude Include="falconbase_avx2.h">
-      <Filter>Header Files\Asymmetric\Signature\Falcon\Support</Filter>
     </ClInclude>
     <ClInclude Include="sphincsplusbase.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
@@ -491,9 +470,6 @@
     <ClCompile Include="timestamp.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="falcon.c">
-      <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
-    </ClCompile>
     <ClCompile Include="event.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
@@ -541,12 +517,6 @@
     </ClCompile>
     <ClCompile Include="ecdsabase.c">
       <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
-    </ClCompile>
-    <ClCompile Include="falconbase.c">
-      <Filter>Source Files\Asymmetric\Signature\Falcon\Support</Filter>
-    </ClCompile>
-    <ClCompile Include="falconbase_avx2.c">
-      <Filter>Source Files\Asymmetric\Signature\Falcon\Support</Filter>
     </ClCompile>
     <ClCompile Include="sphincsplusbase.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>

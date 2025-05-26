@@ -66,7 +66,6 @@
 #include "ecdh_test.h"
 #include "ecdsa_test.h"
 #include "encoding_test.h"
-#include "falcon_test.h"
 #include "kyber_test.h"
 #include "mceliece_test.h"
 #include "netutils_test.h"
@@ -87,9 +86,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.6d (A6)                       *");
+	qsctest_print_line("* Release:   v1.0.0.7a (A7)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      May 17, 2025                         *");
+	qsctest_print_line("* Date:      May 25, 2025                         *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -126,6 +125,31 @@ static void random_sample_print()
 }
 #endif
 
+static void primitives_test(void)
+{
+	qsctest_aes_run();
+	qsctest_chacha_run();
+	qsctest_csx_run();
+	qsctest_rcs_run();
+
+	qsctest_sha3_run();
+	qsctest_sha3_run();
+
+	qsctest_poly1305_run();
+	qsctest_qmac_run();
+
+	qsctest_ecdh_run();
+	qsctest_kyber_run();
+	qsctest_mceliece_run();
+
+	qsctest_dilithium_run();
+	qsctest_ecdsa_run();
+	qsctest_sphincsplus_run();
+	
+	qsctest_secrand_run();
+	qsctest_scb_run();
+}
+
 int32_t main(void)
 {
 	qsc_cpuidex_cpu_features cfeat;
@@ -133,7 +157,7 @@ int32_t main(void)
 	bool hfeat;
 
 #if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
-	qsc_consoleutils_print_line("Loading visual pre-check...");
+	qsc_consoleutils_print_line("Loading pre-check...");
 	qsc_folderutils_test();
 	random_sample_print();
 	qsc_netutils_values_print();
@@ -144,9 +168,13 @@ int32_t main(void)
 	qsc_consoleutils_print_line("");
 #endif
 
+	//primitives_test();
+
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
-	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file */
+	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
+	 * by remming the QSC_SYSTEM_AESNI_ENABLED macro.
+	 */
 	valid = qsc_selftest_symmetric_run();
 
 	if (valid == true)
@@ -215,8 +243,11 @@ int32_t main(void)
 #endif
 
 		qsctest_print_line("");
-		qsctest_print_line("AVX-512 intrinsics have been fully integrated into this project.");
-		qsctest_print_line("On an AVX-512 capable CPU, enable AVX-512 in the project properties for best performance.");
+		qsctest_print_line("AVX-512 intrinsics have been integrated into this project.");
+		qsctest_print_line("On an AVX-512 capable CPU, enable AVX-512 in the project properties for best performance on symmetric ciphers.");
+		qsctest_print_line("if AVX-512 is enabled with some compilers (MSVC and possibly others) AVX2 functions are silently swapped for AVX-512, ");
+		qsctest_print_line("breaking some AVX2 projects (Kyber, Dilithium, SHA3). If you use the AVX-512 option, disable AVX2 by remming");
+		qsctest_print_line("the QSC_SYSTEM_HAS_AVX2 macro in the common.h file.");
 		qsctest_print_line("Enable the maximum available AVX feature set in the project properties (AVX/AVX2/AVX512).");
 		qsctest_print_line("");
 	}
@@ -278,6 +309,18 @@ int32_t main(void)
 			qsctest_encoding_run();
 			qsctest_print_line("");
 
+			qsctest_print_line("*** Test the Dilithium implementation using stress, validity checks, and known answer tests ***");
+			qsctest_dilithium_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the ECDSA implementation using stress, validity checks, and known answer tests ***");
+			qsctest_ecdsa_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the SPHINCS+ implementation using stress, validity checks, and known answer tests ***");
+			qsctest_sphincsplus_run();
+			qsctest_print_line("");
+			
 			qsctest_print_line("*** Test the ECDH implementation using stress, validity checks, and known answer tests ***");
 			qsctest_ecdh_run();
 			qsctest_print_line("");
@@ -287,23 +330,8 @@ int32_t main(void)
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the McEliece implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_line("Warning: McEliece uses large static arrays internally, increase maximum stack allocation to 10-20MB.");
 			qsctest_mceliece_run();
-			qsctest_print_line("");
-
-			qsctest_print_line("*** Test the Dilithium implementation using stress, validity checks, and known answer tests ***");
-			qsctest_dilithium_run();
-			qsctest_print_line("");
-
-			qsctest_print_line("*** Test the Falcon implementation using stress, validity checks, and known answer tests ***");
-			qsctest_falcon_run();
-			qsctest_print_line("");
-
-			qsctest_print_line("*** Test the ECDSA implementation using stress, validity checks, and known answer tests ***");
-			qsctest_ecdsa_run();
-			qsctest_print_line("");
-
-			qsctest_print_line("*** Test the SPHINCS+ implementation using stress, validity checks, and known answer tests ***");
-			qsctest_sphincsplus_run();
 			qsctest_print_line("");
 		}
 		else
@@ -321,8 +349,6 @@ int32_t main(void)
 			qsctest_benchmark_rcs_run();
 			qsctest_print_line("");
 			qsctest_print_line("Testing symmetric Keccak primitives..");
-			qsctest_benchmark_kpa_run();
-			qsctest_print_line("");
 			qsctest_benchmark_kmac_run();
 			qsctest_print_line("");
 			qsctest_benchmark_shake_run();

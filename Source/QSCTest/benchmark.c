@@ -704,93 +704,6 @@ static void kmac512x8_benchmark()
 }
 #endif
 
-static void kpa128_benchmark()
-{
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t tag[16] = { 0 };
-	uint8_t key[16] = { 0 };
-	qsc_kpa_state ctx;
-	size_t tctr;
-	uint64_t start;
-	uint64_t elapsed;
-
-	tctr = 0;
-	start = qsc_timerex_stopwatch_start();
-
-	qsc_kpa_initialize(&ctx, key, sizeof(key), NULL, 0);
-
-	while (tctr < SAMPLE_COUNT)
-	{
-		qsc_kpa_update(&ctx, msg, sizeof(msg));
-		++tctr;
-	}
-
-	qsc_kpa_finalize(&ctx, tag, sizeof(tag));
-
-	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("KPA-128 processed 1GB of data in ");
-	qsctest_print_double((double)elapsed / 1000.0);
-	qsctest_print_line(" seconds");
-}
-
-static void kpa256_benchmark()
-{
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t tag[32] = { 0 };
-	uint8_t key[32] = { 0 };
-	qsc_kpa_state ctx;
-	size_t tctr;
-	uint64_t start;
-	uint64_t elapsed;
-
-	tctr = 0;
-	start = qsc_timerex_stopwatch_start();
-
-	qsc_kpa_initialize(&ctx, key, sizeof(key), NULL, 0);
-
-	while (tctr < SAMPLE_COUNT)
-	{
-		qsc_kpa_update(&ctx, msg, sizeof(msg));
-		++tctr;
-	}
-
-	qsc_kpa_finalize(&ctx, tag, sizeof(tag));
-
-	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("KPA-256 processed 1GB of data in ");
-	qsctest_print_double((double)elapsed / 1000.0);
-	qsctest_print_line(" seconds");
-}
-
-static void kpa512_benchmark()
-{
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t tag[64] = { 0 };
-	uint8_t key[64] = { 0 };
-	qsc_kpa_state ctx;
-	size_t tctr;
-	uint64_t start;
-	uint64_t elapsed;
-
-	tctr = 0;
-	start = qsc_timerex_stopwatch_start();
-
-	qsc_kpa_initialize(&ctx, key, sizeof(key), NULL, 0);
-
-	while (tctr < SAMPLE_COUNT)
-	{
-		qsc_kpa_finalize(&ctx, tag, sizeof(tag));
-		++tctr;
-	}
-
-	qsc_kpa_update(&ctx, msg, sizeof(msg));
-
-	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("KPA-512 processed 1GB of data in ");
-	qsctest_print_double((double)elapsed / 1000.0);
-	qsctest_print_line(" seconds");
-}
-
 static void shake128_benchmark()
 {
 	uint8_t key[16] = { 0 };
@@ -944,7 +857,6 @@ static void qmac_benchmark()
 {
 	uint8_t key[QSC_QMAC_KEY_SIZE] = { 0x03, 0x05, 0x07, 0x0B };
 	uint8_t msg[QSC_QMAC_BLOCK_SIZE] = { 0x0D, 0x11, 0x13, 0x17 };
-	uint8_t otp[QSC_QMAC_MAC_SIZE] = { 0 };
 	qsc_qmac_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -1110,18 +1022,6 @@ void qsctest_benchmark_kmac_run()
 	qsctest_print_line("Running the AVX512 8X KMAC-512 performance benchmarks.");
 	kmac512x8_benchmark();
 #endif
-}
-
-void qsctest_benchmark_kpa_run()
-{
-	qsctest_print_line("Running the KPA-128 performance benchmarks.");
-	kpa128_benchmark();
-
-	qsctest_print_line("Running the KPA-256 performance benchmarks.");
-	kpa256_benchmark();
-
-	qsctest_print_line("Running the KPA-512 performance benchmarks.");
-	kpa512_benchmark();
 }
 
 void qsctest_benchmark_shake_run()

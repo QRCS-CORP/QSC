@@ -59,39 +59,6 @@ static bool ipinfo_hexfield_valid(const char** pp)
 	return res;
 }
 
-static bool ipinfo_octet_valid(const char **p)
-{
-	QSC_ASSERT(p != NULL);
-
-    int32_t digits;
-	int32_t val;
-	bool res;
-
-	res = false;
-
-	if (p != NULL)
-	{
-		digits = 0;
-		val = 0;
-
-		while (isdigit((unsigned char)**p))
-		{
-			val = val * 10 + (**p - '0');
-			(*p)++;
-			digits++;
-
-			if (val > 255)
-			{
-				res = false;
-				break;
-			}
-		}
-	}
-	res = (digits > 0);
-
-	return res;
-}
-
 qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
 {
 	QSC_ASSERT(address != NULL);

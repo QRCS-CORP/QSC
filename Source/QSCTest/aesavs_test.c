@@ -99,7 +99,6 @@ static bool aesavs_cbc128_kat(const char* filepath)
 				}
 			}
 		}
-
 	}
 	else
 	{

@@ -448,7 +448,7 @@ void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint
   // This is not necessary when verify.c and kem.c are separate translation
   // units, but we expect that downstream consumers will copy this code and/or
   // change how it is built.
-  __asm__("" : "+dest"(cond) : /* no inputs */);
+  //__asm__("" : "+dest"(cond) : /* no inputs */);
 #endif
 
 	cond = ~cond + 1U;

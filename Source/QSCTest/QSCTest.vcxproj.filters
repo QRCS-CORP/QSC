@@ -81,9 +81,6 @@
     <ClCompile Include="katparser.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="falcon_test.c">
-      <Filter>Source Files\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="aes_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>

@@ -533,7 +533,7 @@ size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* fpath)
 int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 {
 	QSC_ASSERT(line != NULL);
-	QSC_ASSERT(length != 0U);
+	QSC_ASSERT(length != NULL);
 	QSC_ASSERT(fp != NULL);
 
 	char* tmpl;

@@ -389,6 +389,7 @@ void qsctest_secrand_hcg_evaluate()
 	qsctest_secrand_evaluate("HCG", smp, sizeof(smp));
 }
 
+#if defined(QSC_RDRAND_COMPATIBLE)
 void qsctest_secrand_rdp_evaluate()
 {
 	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
@@ -396,6 +397,7 @@ void qsctest_secrand_rdp_evaluate()
 	qsc_rdp_generate(smp, sizeof(smp));
 	qsctest_secrand_evaluate("RDP", smp, sizeof(smp));
 }
+#endif
 
 void qsctest_secrand_scb_evaluate()
 {
@@ -422,34 +424,6 @@ bool qsctest_secrand_stress()
 	qsc_acp_generate(seed, sizeof(seed));
 	qsc_secrand_initialize(seed, 32, NULL, 0);
 
-	int8_t xs8 = qsc_secrand_next_char();
-
-	if (xs8 == 0)
-	{
-		res = false;
-	}
-
-	uint8_t xu8 = qsc_secrand_next_uchar();
-
-	if (xu8 == 0)
-	{
-		res = false;
-	}
-
-	double xd = qsc_secrand_next_double();
-
-	if (xd == 0.0)
-	{
-		res = false;
-	}
-
-	int16_t xs16 = qsc_secrand_next_int16();
-
-	if (xs16 == 0)
-	{
-		res = false;
-	}
-
 	int16_t xs16m = qsc_secrand_next_int16_max(1000);
 
 	if (xs16m > 1000)
@@ -460,13 +434,6 @@ bool qsctest_secrand_stress()
 	int16_t xs16mm = qsc_secrand_next_int16_maxmin(1000, 900);
 
 	if (xs16mm > 1000 || xs16mm < 900)
-	{
-		res = false;
-	}
-
-	uint16_t xu16 = qsc_secrand_next_uint16();
-
-	if (xu16 == 0)
 	{
 		res = false;
 	}
@@ -485,13 +452,6 @@ bool qsctest_secrand_stress()
 		res = false;
 	}
 
-	int32_t xs32 = qsc_secrand_next_int32();
-
-	if (xs32 == 0)
-	{
-		res = false;
-	}
-
 	int32_t xs32m = qsc_secrand_next_int32_max(1000);
 
 	if (xs32m > 1000)
@@ -502,13 +462,6 @@ bool qsctest_secrand_stress()
 	int32_t xs32mm = qsc_secrand_next_int32_maxmin(1000, 900);
 
 	if (xs32mm > 1000 || xs32mm < 900)
-	{
-		res = false;
-	}
-
-	uint32_t xu32 = qsc_secrand_next_uint32();
-
-	if (xu32 == 0)
 	{
 		res = false;
 	}
@@ -527,13 +480,6 @@ bool qsctest_secrand_stress()
 		res = false;
 	}
 
-	int64_t xs64 = qsc_secrand_next_int64();
-
-	if (xs64 == 0)
-	{
-		res = false;
-	}
-
 	int64_t xs64m = qsc_secrand_next_int64_max(1000);
 
 	if (xs64m > 1000)
@@ -544,13 +490,6 @@ bool qsctest_secrand_stress()
 	int64_t xs64mm = qsc_secrand_next_int64_maxmin(1000, 900);
 
 	if (xs64mm > 1000 || xs64mm < 900)
-	{
-		res = false;
-	}
-
-	uint64_t xu64 = qsc_secrand_next_uint64();
-
-	if (xu64 == 0)
 	{
 		res = false;
 	}

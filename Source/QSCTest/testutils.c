@@ -1,29 +1,28 @@
 #include "testutils.h"
+#include "../QSC/common.h"
 #include <stdio.h>
 
 char qsctest_get_char()
 {
 	char line[8] = { 0 };
+
 	fgets(line, sizeof(line), stdin);
 
 	return line[0];
 }
 
-#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-void qsctest_get_wait()
+char qsctest_get_wait()
 {
-	wint_t c;
+	char res;
 
-	c = getwchar();
-}
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	res = (char)getwchar();
 #else
-void qsctest_get_wait()
-{
-	char c;
-
-	c = getchar();
-}
+	res = getchar();
 #endif
+
+	return res;
+}
 
 void qsctest_hex_to_bin(const char* hexstr, uint8_t* output, size_t length)
 {

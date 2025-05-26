@@ -891,6 +891,11 @@ QSC_CPLUSPLUS_ENABLED_START
   /*!
    * \def QSC_SYSTEM_HAS_AVX512
    * \brief Defined if the system supports AVX512 instructions.
+   * \warning: MSVC (and possibly other compilers) silently promote AVX2 intrinsics when 
+   * AVX512 is enabled, causing failures in release mode builds of implementations using AVX2.
+   * It is an 'either/or' situation, if you  really need AVX512, split out the implementation from the library,
+   * the symmetric ciphers and SHA3 work fine in AVX512 alone, but AVX512 will break Dilithium, Kyber, 
+   * anything else using AVX2 intrinsics.
    */
 #	define QSC_SYSTEM_HAS_AVX512
 #endif
@@ -1097,32 +1102,6 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_MCELIECE_S7N8192T128
 
-/*** NTRU ***/
-
-///*!
-// * \def QSC_NTRU_S1HPS2048509
-// * \brief Enable the NTRU S1HPS2048509 parameter set.
-// */
-//#define QSC_NTRU_S1HPS2048509
-
-///*!
-// * \def QSC_NTRU_S3HPS2048677
-// * \brief Enable the NTRU S3HPS2048677 parameter set.
-// */
-//#define QSC_NTRU_S3HPS2048677
-
-/*!
- * \def QSC_NTRU_S5HPS4096821
- * \brief Enable the NTRU S5HPS4096821 parameter set.
- */
-#define QSC_NTRU_S5HPS4096821
-
-///*!
-// * \def QSC_NTRU_S5HRSS701
-// * \brief Enable the NTRU S5HRSS701 parameter set.
-// */
-//#define QSC_NTRU_S5HRSS701
-
 /*** Signature Schemes ***/
 
 ///*!
@@ -1150,20 +1129,6 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief Enable the ECDSA S1EC25519 parameter set.
  */
 #define QSC_ECDSA_S1EC25519
-
-/*** Falcon ***/
-
-///*!
-// * \def QSC_FALCON_S3SHAKE256F512
-// * \brief Enable the Falcon S3SHAKE256F512 parameter set.
-// */
-//#define QSC_FALCON_S3SHAKE256F512
-
-/*!
- * \def QSC_FALCON_S5SHAKE256F1024
- * \brief Enable the Falcon S5SHAKE256F1024 parameter set.
- */
-#define QSC_FALCON_S5SHAKE256F1024
 
 /*** SphincsPlus ***/
 

@@ -94,7 +94,7 @@ int16_t qsc_secrand_next_int16_maxmin(int16_t maximum, int16_t minimum)
 	{
 		x = qsc_secrand_next_int16();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX);
+	} while (x >= SMPMAX || x < minimum);
 
 	return minimum + ret;
 }
@@ -145,7 +145,7 @@ uint16_t qsc_secrand_next_uint16_maxmin(uint16_t maximum, uint16_t minimum)
 	{
 		x = qsc_secrand_next_uint16();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX);
+	} while (x >= SMPMAX || x < minimum);
 
 	return minimum + ret;
 }
@@ -196,7 +196,7 @@ int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum)
 	{
 		x = qsc_secrand_next_int32();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX);
+	} while (x >= SMPMAX || x < minimum);
 
 	return minimum + ret;
 }
@@ -247,7 +247,7 @@ uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum)
 	{
 		x = qsc_secrand_next_uint32();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX);
+	} while (x >= SMPMAX || x < minimum);
 
 	return minimum + ret;
 }
@@ -298,7 +298,7 @@ int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum)
 	{
 		x = qsc_secrand_next_int64();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX);
+	} while (x >= SMPMAX || x < minimum);
 
 	return minimum + ret;
 }
@@ -349,7 +349,7 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 	{
 		x = qsc_secrand_next_uint64();
 		ret = x % SMPTHR;
-	} while (x >= SMPMAX);
+	} while (x >= SMPMAX || x < minimum);
 
 	return minimum + ret;
 }

@@ -215,34 +215,15 @@ QSC_CPLUSPLUS_ENABLED_START
 QSC_EXPORT_API bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 
 /**
- * \brief Decrypts the shared secret for a given ciphertext using a private key.
- *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
- * \param ciphertext:	[const uint8_t*] Pointer to the ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
- * \param privatekey:	[const uint8_t*] Pointer to the private key array (size QSC_MCELIECE_PRIVATEKEY_SIZE).
- * \return				[bool] Returns true if decryption succeeds.
- */
-QSC_EXPORT_API bool qsc_mceliece_decrypt(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
-
-/**
  * \brief Encapsulates a shared secret key using a public key.
  *
  * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
  * \param ciphertext:	[uint8_t*] Pointer to the output ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
  * \param publickey:	[const uint8_t*] Pointer to the public key array (size QSC_MCELIECE_PUBLICKEY_SIZE).
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
+ * \return				[bool] Returns true if encapsulation succeeds.
  */
-QSC_EXPORT_API void qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
-
-/**
- * \brief Encrypts to encapsulate a shared secret key using a public key.
- *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
- * \param ciphertext:	[uint8_t*] Pointer to the output ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
- * \param publickey:	[const uint8_t*] Pointer to the public key array (size QSC_MCELIECE_PUBLICKEY_SIZE).
- * \param seed:			[const uint8_t[QSC_MCELIECE_SEED_SIZE]] Pointer to the random seed array.
- */
-QSC_EXPORT_API void qsc_mceliece_encrypt(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_MCELIECE_SEED_SIZE]);
+QSC_EXPORT_API bool qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Generates a McEliece public/private key pair.
@@ -250,8 +231,9 @@ QSC_EXPORT_API void qsc_mceliece_encrypt(uint8_t* secret, uint8_t* ciphertext, c
  * \param publickey:	[uint8_t*] Pointer to the output public key array (size QSC_MCELIECE_PUBLICKEY_SIZE).
  * \param privatekey:	[uint8_t*] Pointer to the output private key array (size QSC_MCELIECE_PRIVATEKEY_SIZE).
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
+ * \return				[bool] Returns true if key generation succeeds.
  */
-QSC_EXPORT_API void qsc_mceliece_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API bool qsc_mceliece_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 QSC_CPLUSPLUS_ENABLED_END
 

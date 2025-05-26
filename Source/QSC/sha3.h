@@ -238,9 +238,9 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 QSC_EXPORT_API typedef struct
 {
-	uint64_t state[QSC_KECCAK_STATE_SIZE];			/*!< The SHA3 state  */
-	uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];		/*!< The message buffer  */
-	size_t position;								/*!< The buffer position  */
+	QSC_ALIGN(64) uint64_t state[QSC_KECCAK_STATE_SIZE];		/*!< The SHA3 state  */
+	QSC_ALIGN(64) uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];	/*!< The message buffer  */
+	size_t position;											/*!< The buffer position  */
 } qsc_keccak_state;
 
 /*!
@@ -736,108 +736,6 @@ QSC_EXPORT_API void qsc_kmac_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rat
 * \param custlen:	[size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
-
-/* KPA - Keccak-based Parallel Authentication */
-
-#if defined(QSC_SYSTEM_HAS_AVX512) || defined(QSC_SYSTEM_HAS_AVX2)
-#define QSC_KPA_AVX_PARALLEL
-#endif
-
-/*!
-* \def QSC_KPA_128_KEY_SIZE
-* \brief The KPA-128 key size in bytes
-*/
-#define QSC_KPA_128_KEY_SIZE 16ULL
-
-/*!
-* \def QSC_KPA_256_KEY_SIZE
-* \brief The KPA-256 key size in bytes
-*/
-#define QSC_KPA_256_KEY_SIZE 32ULL
-
-/*!
-* \def QSC_KPA_512_KEY_SIZE
-* \brief The KPA-512 key size in bytes
-*/
-#define QSC_KPA_512_KEY_SIZE 64ULL
-
-/*!
-* \def QSC_KPA_ROUNDS
-* \brief The number of Keccak rounds used by a KPA permutation
-*/
-#define QSC_KPA_ROUNDS 12ULL
-
-/*!
-* \def QSC_KPA_PARALLELISM
-* \brief The KPA degree of parallelization
-*/
-#define QSC_KPA_PARALLELISM 8ULL
-
-/*!
-* \struct qsc_kpa_state
-* \brief The KPA state array; state array must be initialized by the caller
-*/
-QSC_EXPORT_API typedef struct
-{
-#if defined(QSC_SYSTEM_HAS_AVX512)
-	__m512i statew[QSC_KECCAK_STATE_SIZE];								/*!< The AVX512 state array  */
-#elif defined(QSC_SYSTEM_HAS_AVX2)
-	__m256i statew[2][QSC_KECCAK_STATE_SIZE];							/*!< The AVX2 state array  */
-#endif
-	uint64_t state[QSC_KPA_PARALLELISM][QSC_KECCAK_STATE_SIZE];			/*!< The long state array  */
-	uint8_t buffer[QSC_KPA_PARALLELISM * QSC_KECCAK_STATE_BYTE_SIZE];	/*!< The message buffer  */
-	size_t position;													/*!< The buffer position  */
-	size_t processed;													/*!< The number of message bytes processed  */
-	qsc_keccak_rate rate;												/*!< The absorption rate  */
-} qsc_kpa_state;
-
-/**
-* \brief The KPA finalize function.
-* Long form api: must be used in conjunction with the initialize and blockupdate functions.
-* Final processing and calculation of the MAC code.
-*
-* \warning The state must be initialized before calling.
-*
-* \param ctx:		[qsc_kpa_state*] A reference to the KPA state structure; must be initialized
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of bytes to extract
-*/
-QSC_EXPORT_API void qsc_kpa_finalize(qsc_kpa_state* ctx, uint8_t* output, size_t outlen);
-
-/**
-* \brief Initialize a KPA instance.
-* Long form api: must be used in conjunction with the blockupdate and finalize functions.
-* Key the MAC generator and initialize the internal state.
-*
-* \param ctx:		[qsc_kpa_state*] A reference to the KPA state structure; must be initialized
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
-*/
-QSC_EXPORT_API void qsc_kpa_initialize(qsc_kpa_state* ctx, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
-
-/**
-* \brief The KPA message update function.
-* Long form api: must be used in conjunction with the initialize and finalize functions.
-*
-* \warning The state must be initialized before calling.
-*
-* \param ctx:		[qsc_kpa_state*] A reference to the KPA state structure; must be initialized
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
-*/
-QSC_EXPORT_API void qsc_kpa_update(qsc_kpa_state* ctx, const uint8_t* message, size_t msglen);
-
-/**
-* \brief Dispose of the KPA state.
-*
-* \warning The dispose function must be called when disposing of the function state.
-* This function safely destroys the internal state.
-*
-* \param ctx:		[qsc_kpa_state*] A reference to the KPA state structure; must be initialized
-*/
-QSC_EXPORT_API void qsc_kpa_dispose(qsc_kpa_state* ctx);
 
 /* parallel Keccak x4 */
 

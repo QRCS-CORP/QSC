@@ -952,150 +952,6 @@ bool qsctest_kmac_512_kat()
 	return status;
 }
 
-bool qsctest_kpa_256_kat()
-{
-	uint8_t cust168[21] = { 0 };
-	uint8_t exp256a[32] = { 0 };
-	uint8_t exp256b[32] = { 0 };
-	uint8_t msg256[32] = { 0 };
-	uint8_t msg8704[1088] = { 0 };
-	uint8_t key256[32] = { 0 };
-	uint8_t output[32] = { 0 };
-	qsc_kpa_state ctx;
-	bool status;
-
-	qsctest_hex_to_bin("4D7920546167676564204170706C69636174696F6E", cust168, sizeof(cust168));
-	qsctest_hex_to_bin("EBEC64EBE52DA21D9465341CBDC4941F5141855F8B62312EBDFC015083315193", exp256a, sizeof(exp256a));
-	qsctest_hex_to_bin("36DB74619B441167575FCD69E4B4DFDEECFF97F99F49BB68B7EB7A4FDC5A9E20", exp256b, sizeof(exp256b));
-	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F", key256, sizeof(key256));
-	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F", msg256, sizeof(msg256));
-	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
-		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
-		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
-		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
-		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
-		"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF"
-		"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
-		"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
-		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
-		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
-		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
-		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
-		"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF"
-		"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
-		"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
-		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
-		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
-		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
-		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
-		"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF"
-		"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
-		"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
-		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
-		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
-		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
-		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
-		"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF"
-		"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
-		"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F", msg8704, sizeof(msg8704));
-
-	status = true;
-
-	qsc_kpa_initialize(&ctx, key256, sizeof(key256), cust168, sizeof(cust168));
-	qsc_kpa_update(&ctx, msg8704, sizeof(msg8704));
-	qsc_kpa_finalize(&ctx, output, sizeof(output));
-
-	if (qsc_intutils_are_equal8(output, exp256a, sizeof(exp256a)) == false)
-	{
-		qsctest_print_safe("Failure! kpa_256_kat: output does not match the known answer -KK1 \n");
-		status = false;
-	}
-
-	qsc_intutils_clear8(output, sizeof(output));
-	qsc_kpa_initialize(&ctx, key256, sizeof(key256), NULL, 0);
-	qsc_kpa_update(&ctx, msg256, sizeof(msg256));
-	qsc_kpa_finalize(&ctx, output, sizeof(output));
-
-	if (qsc_intutils_are_equal8(output, exp256b, sizeof(exp256b)) == false)
-	{
-		qsctest_print_safe("Failure! kpa_256_kat: output does not match the known answer -KK2 \n");
-		status = false;
-	}
-
-	return status;
-}
-
-bool qsctest_kpa_512_kat()
-{
-	uint8_t cust168[21] = { 0 };
-	uint8_t exp512a[64] = { 0 };
-	uint8_t exp512b[64] = { 0 };
-	uint8_t msg512[64] = { 0 };
-	uint8_t msg4608[576] = { 0 };
-	uint8_t key512[64] = { 0 };
-	uint8_t output[64] = { 0 };
-	qsc_kpa_state ctx;
-	bool status;
-
-	qsctest_hex_to_bin("4D7920546167676564204170706C69636174696F6E", cust168, sizeof(cust168));
-	qsctest_hex_to_bin("5A3A48CE2221347213A93A847EAEF6455351018E1239C130069DB1A71DCF28DC"
-		"8D9FB65193F1AB620752A4FEA0DDF0ED5824CAB50DD37BBC4A8909A91ADBC2C2", exp512a, sizeof(exp512a));
-	qsctest_hex_to_bin("D31EDF6ABD9B4497C98F065C398622E51DCC24B96DA9345D613757274472C612"
-		"165218DD0F15D86E93894289AD95081FF5CE80FFFAAB5625D3CBFAC4CEB88898", exp512b, sizeof(exp512b));
-	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F", key512, sizeof(key512));
-	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F", msg512, sizeof(msg512));
-	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
-		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
-		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
-		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
-		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
-		"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF"
-		"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
-		"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
-		"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F"
-		"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
-		"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
-		"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
-		"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF"
-		"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
-		"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
-		"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F", msg4608, sizeof(msg4608));
-
-	status = true;
-
-	qsc_kpa_initialize(&ctx, key512, sizeof(key512), cust168, sizeof(cust168));
-	qsc_kpa_update(&ctx, msg4608, sizeof(msg4608));
-	qsc_kpa_finalize(&ctx, output, sizeof(output));
-
-	if (qsc_intutils_are_equal8(output, exp512a, sizeof(exp512a)) == false)
-	{
-		qsctest_print_safe("Failure! kpa_512_kat: output does not match the known answer -KK1 \n");
-		status = false;
-	}
-
-	qsc_intutils_clear8(output, sizeof(output));
-	qsc_kpa_initialize(&ctx, key512, sizeof(key512), NULL, 0);
-	qsc_kpa_update(&ctx, msg512, sizeof(msg512));
-	qsc_kpa_finalize(&ctx, output, sizeof(output));
-
-	if (qsc_intutils_are_equal8(output, exp512b, sizeof(exp512b)) == false)
-	{
-		qsctest_print_safe("Failure! kpa_512_kat: output does not match the known answer -KK2 \n");
-		status = false;
-	}
-
-	return status;
-}
-
 #if defined(QSC_SYSTEM_HAS_AVX2)
 bool qsctest_kmac128x4_equality()
 {
@@ -1506,11 +1362,11 @@ bool qsctest_shake512x4_equality()
 #if defined(QSC_SYSTEM_HAS_AVX512)
 bool qsctest_kmac128x8_equality()
 {
-	uint8_t cst[8][16] = { 0 };
-	uint8_t key[8][18] = { 0 };
-	uint8_t msg[8][256] = { 0 };
-	uint8_t otp[8][16] = { 0 };
-	uint8_t exp[8][16] = { 0 };
+	QSC_ALIGN(64) uint8_t cst[8][16] = { 0 };
+	QSC_ALIGN(64) uint8_t key[8][18] = { 0 };
+	QSC_ALIGN(64) uint8_t msg[8][256] = { 0 };
+	QSC_ALIGN(64) uint8_t otp[8][16] = { 0 };
+	QSC_ALIGN(64) uint8_t exp[8][16] = { 0 };
 	size_t i;
 	bool status;
 
@@ -1631,11 +1487,11 @@ bool qsctest_kmac128x8_equality()
 
 bool qsctest_kmac256x8_equality()
 {
-	uint8_t cst[8][32] = { 0 };
-	uint8_t key[8][34] = { 0 };
-	uint8_t msg[8][256] = { 0 };
-	uint8_t otp[8][32] = { 0 };
-	uint8_t exp[8][32] = { 0 };
+	QSC_ALIGN(64) uint8_t cst[8][32] = { 0 };
+	QSC_ALIGN(64) uint8_t key[8][34] = { 0 };
+	QSC_ALIGN(64) uint8_t msg[8][256] = { 0 };
+	QSC_ALIGN(64) uint8_t otp[8][32] = { 0 };
+	QSC_ALIGN(64) uint8_t exp[8][32] = { 0 };
 	size_t i;
 	bool status;
 
@@ -1756,11 +1612,11 @@ bool qsctest_kmac256x8_equality()
 
 bool qsctest_kmac512x8_equality()
 {
-	uint8_t cst[8][64] = { 0 };
-	uint8_t key[8][66] = { 0 };
-	uint8_t msg[8][256] = { 0 };
-	uint8_t otp[8][64] = { 0 };
-	uint8_t exp[8][64] = { 0 };
+	QSC_ALIGN(64) uint8_t cst[8][64] = { 0 };
+	QSC_ALIGN(64) uint8_t key[8][66] = { 0 };
+	QSC_ALIGN(64) uint8_t msg[8][256] = { 0 };
+	QSC_ALIGN(64) uint8_t otp[8][64] = { 0 };
+	QSC_ALIGN(64) uint8_t exp[8][64] = { 0 };
 	size_t i;
 	bool status;
 
@@ -1881,9 +1737,9 @@ bool qsctest_kmac512x8_equality()
 
 bool qsctest_shake128x8_equality()
 {
-	uint8_t key[8][18] = { 0 };
-	uint8_t otp[8][168] = { 0 };
-	uint8_t exp[8][168] = { 0 };
+	QSC_ALIGN(64) uint8_t key[8][18] = { 0 };
+	QSC_ALIGN(64) uint8_t otp[8][168] = { 0 };
+	QSC_ALIGN(64) uint8_t exp[8][168] = { 0 };
 	size_t i;
 	bool status;
 
@@ -1982,9 +1838,9 @@ bool qsctest_shake128x8_equality()
 
 bool qsctest_shake256x8_equality()
 {
-	uint8_t key[8][34] = { 0 };
-	uint8_t otp[8][136] = { 0 };
-	uint8_t exp[8][136] = { 0 };
+	QSC_ALIGN(64) uint8_t key[8][34] = { 0 };
+	QSC_ALIGN(64) uint8_t otp[8][136] = { 0 };
+	QSC_ALIGN(64) uint8_t exp[8][136] = { 0 };
 	size_t i;
 	bool status;
 
@@ -2083,9 +1939,9 @@ bool qsctest_shake256x8_equality()
 
 bool qsctest_shake512x8_equality()
 {
-	uint8_t key[8][66] = { 0 };
-	uint8_t otp[8][72] = { 0 };
-	uint8_t exp[8][72] = { 0 };
+	QSC_ALIGN(64) uint8_t key[8][66] = { 0 };
+	QSC_ALIGN(64) uint8_t otp[8][72] = { 0 };
+	QSC_ALIGN(64) uint8_t exp[8][72] = { 0 };
 	size_t i;
 	bool status;
 
@@ -2264,24 +2120,6 @@ void qsctest_sha3_run()
 	else
 	{
 		qsctest_print_safe("Failure! Failed the SHAKE-512 KAT test. \n");
-	}
-
-	if (qsctest_kpa_256_kat() == true)
-	{
-		qsctest_print_safe("Success! Passed the KPA-256 KAT test. \n");
-	}
-	else
-	{
-		qsctest_print_safe("Failure! Failed the KPA-256 KAT test. \n");
-	}
-
-	if (qsctest_kpa_512_kat() == true)
-	{
-		qsctest_print_safe("Success! Passed the KPA-512 KAT test. \n");
-	}
-	else
-	{
-		qsctest_print_safe("Failure! Failed the KPA-512 KAT test. \n");
 	}
 
 #if defined(QSC_SYSTEM_HAS_AVX2)

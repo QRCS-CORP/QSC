@@ -80,53 +80,53 @@ QSC_CPLUSPLUS_ENABLED_START
 \def EC25519_SEED_SIZE
 * \brief The ecc seed cize
 */
-#define EC25519_SEED_SIZE 32ULL
+#define EC25519_SEED_SIZE 32U
 
 /*!
 \def EC25519_SIGNATURE_SIZE
 * \brief The ecc signature size
 */
-#define EC25519_SIGNATURE_SIZE 64ULL
+#define EC25519_SIGNATURE_SIZE 64U
 
 /*!
 \def EC25519_PUBLICKEY_SIZE
 * \brief The ecc public key size
 */
-#define EC25519_PUBLICKEY_SIZE 32ULL
+#define EC25519_PUBLICKEY_SIZE 32U
 
 /*!
 \def EC25519_PRIVATEKEY_SIZE
 * \brief The ecc private key size
 */
-#define EC25519_PRIVATEKEY_SIZE 64ULL
+#define EC25519_PRIVATEKEY_SIZE 64U
 
 /*!
 \def EC25519_CURVE_SIZE
 * \brief The ecc curve size
 */
-#define EC25519_CURVE_SIZE 32ULL
+#define EC25519_CURVE_SIZE 32U
 
 /*!
-\typedef fe25519
-* \brief The ecc fe25519 polynomial
+\typedef qsc_fe25519
+* \brief The ecc qsc_fe25519 polynomial
 */
-typedef QSC_SIMD_ALIGN int32_t fe25519[10];
+typedef QSC_SIMD_ALIGN int32_t qsc_fe25519[10U];
 
 /*! 
- * \struct ge25519_p2
+ * \struct qsc_ge25519_p2
  * \brief Projective coordinate representation.
  *
  * Represents a point on the Ed25519 curve in projective coordinates (X:Y:Z).
  */
 typedef struct 
 {
-    fe25519 x; /*!< [fe25519] The X-coordinate. */
-    fe25519 y; /*!< [fe25519] The Y-coordinate. */
-    fe25519 z; /*!< [fe25519] The Z-coordinate. */
-} ge25519_p2;
+    qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
+    qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
+    qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
+} qsc_ge25519_p2;
 
 /*! 
- * \struct ge25519_p3
+ * \struct qsc_ge25519_p3
  * \brief Extended projective coordinate representation.
  *
  * Represents a point on the Ed25519 curve in extended coordinates (X:Y:Z:T),
@@ -134,91 +134,91 @@ typedef struct
  */
 typedef struct 
 {
-    fe25519 x; /*!< [fe25519] The X-coordinate. */
-    fe25519 y; /*!< [fe25519] The Y-coordinate. */
-    fe25519 z; /*!< [fe25519] The Z-coordinate. */
-    fe25519 t; /*!< [fe25519] The T-coordinate. */
-} ge25519_p3;
+    qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
+    qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
+    qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
+    qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
+} qsc_ge25519_p3;
 
 /*! 
- * \struct ge25519_p1p1
+ * \struct qsc_ge25519_p1p1
  * \brief Intermediate coordinate representation.
  *
  * Used as an intermediate format during point addition and doubling operations.
  */
 typedef struct 
 {
-    fe25519 x; /*!< [fe25519] The X-coordinate. */
-    fe25519 y; /*!< [fe25519] The Y-coordinate. */
-    fe25519 z; /*!< [fe25519] The Z-coordinate. */
-    fe25519 t; /*!< [fe25519] The T-coordinate. */
-} ge25519_p1p1;
+    qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
+    qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
+    qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
+    qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
+} qsc_ge25519_p1p1;
 
 /*! 
- * \struct ge25519_precomp
+ * \struct qsc_ge25519_precomp
  * \brief Precomputed point representation.
  *
  * Stores precomputed values (y+x, y-x, and xy*2d) to accelerate scalar multiplication.
  */
 typedef struct 
 {
-    fe25519 yplusx;  /*!< [fe25519] The sum of Y and X coordinates. */
-    fe25519 yminusx; /*!< [fe25519] The difference of Y and X coordinates. */
-    fe25519 xy2d;    /*!< [fe25519] The product of X and Y, multiplied by 2d. */
-} ge25519_precomp;
+    qsc_fe25519 yplusx;  /*!< [qsc_fe25519] The sum of Y and X coordinates. */
+    qsc_fe25519 yminusx; /*!< [qsc_fe25519] The difference of Y and X coordinates. */
+    qsc_fe25519 xy2d;    /*!< [qsc_fe25519] The product of X and Y, multiplied by 2d. */
+} qsc_ge25519_precomp;
 
 /*! 
- * \struct ge25519_cached
+ * \struct qsc_ge25519_cached
  * \brief Cached point representation.
  *
  * Used to cache computed values during point addition for efficiency.
  */
 typedef struct 
 {
-    fe25519 yplusx; /*!< [fe25519] The sum of Y and X coordinates. */
-    fe25519 yminusx;/*!< [fe25519] The difference of Y and X coordinates. */
-    fe25519 z;      /*!< [fe25519] The Z-coordinate. */
-    fe25519 t2d;    /*!< [fe25519] The T-coordinate multiplied by 2d. */
-} ge25519_cached;
+    qsc_fe25519 yplusx; /*!< [qsc_fe25519] The sum of Y and X coordinates. */
+    qsc_fe25519 yminusx;/*!< [qsc_fe25519] The difference of Y and X coordinates. */
+    qsc_fe25519 z;      /*!< [qsc_fe25519] The Z-coordinate. */
+    qsc_fe25519 t2d;    /*!< [qsc_fe25519] The T-coordinate multiplied by 2d. */
+} qsc_ge25519_cached;
 
 /**
  * \brief Set a field element to zero.
  *
  * Sets all limbs of the field element \a h to 0.
  *
- * \param h: [fe25519] The field element to zero.
+ * \param h: [qsc_fe25519] The field element to zero.
  */
-void fe25519_0(fe25519 h);
+void qsc_fe25519_0(qsc_fe25519 h);
 
 /**
  * \brief Set a field element to one.
  *
  * Initializes the field element \a h to the multiplicative identity (1).
  *
- * \param h: [fe25519] The field element to set to one.
+ * \param h: [qsc_fe25519] The field element to set to one.
  */
-void fe25519_1(fe25519 h);
+void qsc_fe25519_1(qsc_fe25519 h);
 
 /**
  * \brief Copy a field element.
  *
  * Copies the field element \a f into \a h.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] Source field element.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] Source field element.
  */
-void fe25519_copy(fe25519 h, const fe25519 f);
+void qsc_fe25519_copy(qsc_fe25519 h, const qsc_fe25519 f);
 
 /**
  * \brief Add two field elements.
  *
  * Computes the sum \a h = \a f + \a g.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] First addend.
- * \param g: [const fe25519] Second addend.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] First addend.
+ * \param g: [const qsc_fe25519] Second addend.
  */
-void fe25519_add(fe25519 h, const fe25519 f, const fe25519 g);
+void qsc_fe25519_add(qsc_fe25519 h, const qsc_fe25519 f, const qsc_fe25519 g);
 
 /**
  * \brief Conditionally swap two field elements in constant time.
@@ -226,36 +226,36 @@ void fe25519_add(fe25519 h, const fe25519 f, const fe25519 g);
  * Conditionally swaps the field elements \a f and \a g if the condition bit \a b is nonzero.
  * This function operates in constant time to prevent timing attacks.
  *
- * \param f: [fe25519] First field element; may be swapped.
- * \param g: [fe25519] Second field element; may be swapped.
+ * \param f: [qsc_fe25519] First field element; may be swapped.
+ * \param g: [qsc_fe25519] Second field element; may be swapped.
  * \param b: [uint32_t] Condition bit; if nonzero, \a f and \a g are swapped.
  */
-void fe25519_cswap(fe25519 f, fe25519 g, uint32_t b);
+void qsc_fe25519_cswap(qsc_fe25519 f, qsc_fe25519 g, uint32_t b);
 
 /**
  * \brief Subtract one field element from another.
  *
  * Computes the difference \a h = \a f - \a g.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] Minuend field element.
- * \param g: [const fe25519] Subtrahend field element.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] Minuend field element.
+ * \param g: [const qsc_fe25519] Subtrahend field element.
  *
  * \remarks
  * Preconditions: \a f and \a g are bounded by specific constants.
  * Postconditions: \a h is bounded by specified limits.
  */
-void fe25519_sub(fe25519 h, const fe25519 f, const fe25519 g);
+void qsc_fe25519_sub(qsc_fe25519 h, const qsc_fe25519 f, const qsc_fe25519 g);
 
 /**
  * \brief Negate a field element.
  *
  * Computes the negation \a h = -\a f.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] Field element to negate.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] Field element to negate.
  */
-void fe25519_neg(fe25519 h, const fe25519 f);
+void qsc_fe25519_neg(qsc_fe25519 h, const qsc_fe25519 f);
 
 /**
  * \brief Conditionally move a field element in constant time.
@@ -263,85 +263,85 @@ void fe25519_neg(fe25519 h, const fe25519 f);
  * Conditionally moves the field element \a g into \a f if the condition bit \a b is set.
  * This operation is performed in constant time.
  *
- * \param f: [fe25519] Destination field element; modified in place.
- * \param g: [const fe25519] Source field element.
+ * \param f: [qsc_fe25519] Destination field element; modified in place.
+ * \param g: [const qsc_fe25519] Source field element.
  * \param b: [uint32_t] Condition bit; if set, \a g is moved into \a f.
  */
-void fe25519_cmov(fe25519 f, const fe25519 g, uint32_t b);
+void qsc_fe25519_cmov(qsc_fe25519 f, const qsc_fe25519 g, uint32_t b);
 
 /**
  * \brief Determine if a field element is negative.
  *
  * Converts the field element \a f to its 32-byte representation and returns the least significant bit.
  *
- * \param f: [const fe25519] The field element to check.
+ * \param f: [const qsc_fe25519] The field element to check.
  *
  * \return [int32_t] Returns nonzero if \a f is negative; otherwise, zero.
  */
-int32_t fe25519_isnegative(const fe25519 f);
+int32_t qsc_fe25519_is_negative(const qsc_fe25519 f);
 
 /**
  * \brief Determine if a field element is zero.
  *
  * Converts the field element \a f to its 32-byte representation and checks if all bytes are zero.
  *
- * \param f: [const fe25519] The field element to check.
+ * \param f: [const qsc_fe25519] The field element to check.
  *
  * \return [int32_t] Returns nonzero if \a f is zero; otherwise, zero.
  */
-int32_t fe25519_iszero(const fe25519 f);
+int32_t qsc_fe25519_is_zero(const qsc_fe25519 f);
 
 /**
  * \brief Multiply two field elements.
  *
  * Computes the product \a h = \a f * \a g.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] First factor.
- * \param g: [const fe25519] Second factor.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] First factor.
+ * \param g: [const qsc_fe25519] Second factor.
  */
-void fe25519_mul(fe25519 h, const fe25519 f, const fe25519 g);
+void qsc_fe25519_mul(qsc_fe25519 h, const qsc_fe25519 f, const qsc_fe25519 g);
 
 /**
  * \brief Multiply a field element by a scalar.
  *
  * Computes \a h = \a f * \a n, where \a n is a 32-bit scalar.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] Field element to be multiplied.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] Field element to be multiplied.
  * \param n: [uint32_t] Scalar multiplier.
  */
-void fe25519_mul32(fe25519 h, const fe25519 f, uint32_t n);
+void qsc_fe25519_mul32(qsc_fe25519 h, const qsc_fe25519 f, uint32_t n);
 
 /**
  * \brief Square a field element.
  *
  * Computes the square \a h = \a f^2.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] Field element to square.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] Field element to square.
  */
-void fe25519_sq(fe25519 h, const fe25519 f);
+void qsc_fe25519_sq(qsc_fe25519 h, const qsc_fe25519 f);
 
 /**
  * \brief Compute 2 * f^2.
  *
  * Computes \a h = 2 * (\a f^2).
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] Field element to square and double.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] Field element to square and double.
  */
-void fe25519_sq2(fe25519 h, const fe25519 f);
+void qsc_fe25519_sq2(qsc_fe25519 h, const qsc_fe25519 f);
 
 /**
  * \brief Convert a 32-byte array to a field element.
  *
  * Interprets a 32-byte little-endian array \a s as a field element and stores it in \a h.
  *
- * \param h: [fe25519] Destination field element.
+ * \param h: [qsc_fe25519] Destination field element.
  * \param s: [const uint8_t*] Source byte array.
  */
-void fe25519_frombytes(fe25519 h, const uint8_t* s);
+void qsc_fe25519_from_bytes(qsc_fe25519 h, const uint8_t* s);
 
 /**
  * \brief Reduce a field element modulo 2^255 - 19.
@@ -349,10 +349,10 @@ void fe25519_frombytes(fe25519 h, const uint8_t* s);
  * Computes the canonical representative of the field element \a f modulo (2^255 - 19)
  * and stores the result in \a h.
  *
- * \param h: [fe25519] Destination field element.
- * \param f: [const fe25519] Field element to reduce.
+ * \param h: [qsc_fe25519] Destination field element.
+ * \param f: [const qsc_fe25519] Field element to reduce.
  */
-void fe25519_reduce(fe25519 h, const fe25519 f);
+void qsc_fe25519_reduce(qsc_fe25519 h, const qsc_fe25519 f);
 
 /**
  * \brief Convert a field element to a 32-byte array.
@@ -360,9 +360,9 @@ void fe25519_reduce(fe25519 h, const fe25519 f);
  * Serializes the field element \a h into a 32-byte little-endian representation stored in \a s.
  *
  * \param s: [uint8_t*] Destination byte array.
- * \param h: [const fe25519] Field element to serialize.
+ * \param h: [const qsc_fe25519] Field element to serialize.
  */
-void fe25519_tobytes(uint8_t* s, const fe25519 h);
+void qsc_fe25519_to_bytes(uint8_t* s, const qsc_fe25519 h);
 
 /**
  * \brief Compute the multiplicative inverse of a field element.
@@ -370,40 +370,40 @@ void fe25519_tobytes(uint8_t* s, const fe25519 h);
  * Computes the multiplicative inverse of \a z in the field and stores the result in \a out.
  * If \a z is zero, the result is undefined.
  *
- * \param out: [fe25519] Destination field element for the inverse.
- * \param z: [const fe25519] Field element to invert.
+ * \param out: [qsc_fe25519] Destination field element for the inverse.
+ * \param z: [const qsc_fe25519] Field element to invert.
  */
-void fe25519_invert(fe25519 out, const fe25519 z);
+void qsc_fe25519_invert(qsc_fe25519 out, const qsc_fe25519 z);
 
 /**
  * \brief Convert a point from P1P1 to P3 coordinates.
  *
  * Converts a point in the intermediate P1P1 coordinate system to the extended P3 representation.
  *
- * \param r [ge25519_p3*] Pointer to the output point in P3 coordinates.
- * \param p [const ge25519_p1p1*] Pointer to the input point in P1P1 coordinates.
+ * \param r [qsc_ge25519_p3*] Pointer to the output point in P3 coordinates.
+ * \param p [const qsc_ge25519_p1p1*] Pointer to the input point in P1P1 coordinates.
  */
-void ge25519_p1p1_to_p3(ge25519_p3* r, const ge25519_p1p1* p);
+void qsc_ge25519_p1p1_to_p3(qsc_ge25519_p3* r, const qsc_ge25519_p1p1* p);
 
 /**
  * \brief Convert a point from P1P1 to P2 coordinates.
  *
  * Converts a point in the intermediate P1P1 coordinate system to the projective P2 representation.
  *
- * \param r [ge25519_p2*] Pointer to the output point in P2 coordinates.
- * \param p [const ge25519_p1p1*] Pointer to the input point in P1P1 coordinates.
+ * \param r [qsc_ge25519_p2*] Pointer to the output point in P2 coordinates.
+ * \param p [const qsc_ge25519_p1p1*] Pointer to the input point in P1P1 coordinates.
  */
-void ge25519_p1p1_to_p2(ge25519_p2* r, const ge25519_p1p1* p);
+void qsc_ge25519_p1p1_to_p2(qsc_ge25519_p2* r, const qsc_ge25519_p1p1* p);
 
 /**
  * \brief Multiply the base point by a scalar.
  *
  * Computes the scalar multiplication h = a * BasePoint, where a is a 32-byte scalar.
  *
- * \param h [ge25519_p3*] Pointer to the output point in P3 coordinates.
+ * \param h [qsc_ge25519_p3*] Pointer to the output point in P3 coordinates.
  * \param a [const uint8_t*] Pointer to a 32-byte scalar.
  */
-void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a);
+void qsc_ge25519_scalarmult_base(qsc_ge25519_p3* h, const uint8_t* a);
 
 /**
  * \brief Compress a point in P3 coordinates to a 32-byte representation.
@@ -411,9 +411,9 @@ void ge25519_scalarmult_base(ge25519_p3* h, const uint8_t* a);
  * Converts a point in extended P3 coordinates to its compressed 32-byte form.
  *
  * \param s [uint8_t*] Pointer to the output 32-byte array.
- * \param h [const ge25519_p3*] Pointer to the input point in P3 coordinates.
+ * \param h [const qsc_ge25519_p3*] Pointer to the input point in P3 coordinates.
  */
-void ge25519_p3_tobytes(uint8_t* s, const ge25519_p3* h);
+void qsc_ge25519_p3_to_bytes(uint8_t* s, const qsc_ge25519_p3* h);
 
 /**
  * \brief Check if a compressed point is canonical.
@@ -423,7 +423,7 @@ void ge25519_p3_tobytes(uint8_t* s, const ge25519_p3* h);
  * \param s [const uint8_t*] Pointer to the 32-byte compressed representation.
  * \return [int32_t] Returns 1 if the point is canonical; 0 otherwise.
  */
-int32_t ge25519_is_canonical(const uint8_t* s);
+int32_t qsc_ge25519_is_canonical(const uint8_t* s);
 
 /**
  * \brief Determine if a compressed point has small order.
@@ -433,7 +433,7 @@ int32_t ge25519_is_canonical(const uint8_t* s);
  * \param s [const uint8_t[32]] The 32-byte compressed point.
  * \return [int32_t] Returns 1 if the point has small order; 0 otherwise.
  */
-int32_t ge25519_has_small_order(const uint8_t s[32]);
+int32_t qsc_ge25519_has_small_order(const uint8_t s[32U]);
 
 /**
  * \brief Decode and conditionally negate a compressed point.
@@ -441,32 +441,32 @@ int32_t ge25519_has_small_order(const uint8_t s[32]);
  * Decodes a 32-byte compressed point into extended P3 coordinates and conditionally negates the X-coordinate
  * to enforce a canonical representation.
  *
- * \param h [ge25519_p3*] Pointer to the output point in P3 coordinates.
+ * \param h [qsc_ge25519_p3*] Pointer to the output point in P3 coordinates.
  * \param s [const uint8_t*] Pointer to the 32-byte compressed point.
  * \return [int32_t] Returns 0 on success, or -1 if the decoding fails.
  */
-int32_t ge25519_frombytes_negate_vartime(ge25519_p3* h, const uint8_t* s);
+int32_t qsc_ge25519_from_bytes_negate_vartime(qsc_ge25519_p3* h, const uint8_t* s);
 
 /**
  * \brief Convert a point from P3 coordinates to a cached representation.
  *
  * Converts a point in extended P3 coordinates into a cached format to accelerate point addition.
  *
- * \param r [ge25519_cached*] Pointer to the output cached point.
- * \param p [const ge25519_p3*] Pointer to the input point in P3 coordinates.
+ * \param r [qsc_ge25519_cached*] Pointer to the output cached point.
+ * \param p [const qsc_ge25519_p3*] Pointer to the input point in P3 coordinates.
  */
-void ge25519_p3_to_cached(ge25519_cached* r, const ge25519_p3* p);
+void qsc_ge25519_p3_to_cached(qsc_ge25519_cached* r, const qsc_ge25519_p3* p);
 
 /**
  * \brief Add a cached point to a point.
  *
  * Computes the sum of a point in P3 coordinates and a cached point, storing the result in the P1P1 representation.
  *
- * \param r [ge25519_p1p1*] Pointer to the output point in P1P1 coordinates.
- * \param p [const ge25519_p3*] Pointer to the input point in P3 coordinates.
- * \param q [const ge25519_cached*] Pointer to the cached point.
+ * \param r [qsc_ge25519_p1p1*] Pointer to the output point in P1P1 coordinates.
+ * \param p [const qsc_ge25519_p3*] Pointer to the input point in P3 coordinates.
+ * \param q [const qsc_ge25519_cached*] Pointer to the cached point.
  */
-void ge25519_add_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q);
+void qsc_ge25519_add_cached(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p, const qsc_ge25519_cached* q);
 
 /**
  * \brief Subtract a precomputed point from a point.
@@ -474,11 +474,11 @@ void ge25519_add_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cach
  * Computes the subtraction r = p - q, where p is in P3 coordinates and q is in precomputed form,
  * and stores the result in the P1P1 representation.
  *
- * \param r [ge25519_p1p1*] Pointer to the output point in P1P1 coordinates.
- * \param p [const ge25519_p3*] Pointer to the input point in P3 coordinates.
- * \param q [const ge25519_precomp*] Pointer to the precomputed point.
+ * \param r [qsc_ge25519_p1p1*] Pointer to the output point in P1P1 coordinates.
+ * \param p [const qsc_ge25519_p3*] Pointer to the input point in P3 coordinates.
+ * \param q [const qsc_ge25519_precomp*] Pointer to the precomputed point.
  */
-void ge25519_sub_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_precomp* q);
+void qsc_ge25519_sub_precomp(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p, const qsc_ge25519_precomp* q);
 
 /**
  * \brief Compute a double scalar multiplication.
@@ -486,12 +486,12 @@ void ge25519_sub_precomp(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_pre
  * Computes the expression r = a * A + b * B, where A is an arbitrary point and B is the base point.
  * The result is returned in the P2 coordinate representation using a variable-time algorithm.
  *
- * \param r [ge25519_p2*] Pointer to the output point in P2 coordinates.
+ * \param r [qsc_ge25519_p2*] Pointer to the output point in P2 coordinates.
  * \param a [const uint8_t*] Pointer to the scalar for point A.
- * \param A [const ge25519_p3*] Pointer to the point A in P3 coordinates.
+ * \param A [const qsc_ge25519_p3*] Pointer to the point A in P3 coordinates.
  * \param b [const uint8_t*] Pointer to the scalar for the base point.
  */
-void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge25519_p3* A, const uint8_t* b);
+void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, const qsc_ge25519_p3* A, const uint8_t* b);
 
 /**
  * \brief Subtract a cached point from a point.
@@ -499,11 +499,11 @@ void ge25519_double_scalarmult_vartime(ge25519_p2* r, const uint8_t* a, const ge
  * Computes the difference r = p - q, where p is in P3 coordinates and q is in cached form,
  * storing the result in the P1P1 representation.
  *
- * \param r [ge25519_p1p1*] Pointer to the output point in P1P1 coordinates.
- * \param p [const ge25519_p3*] Pointer to the input point in P3 coordinates.
- * \param q [const ge25519_cached*] Pointer to the cached point.
+ * \param r [qsc_ge25519_p1p1*] Pointer to the output point in P1P1 coordinates.
+ * \param p [const qsc_ge25519_p3*] Pointer to the input point in P3 coordinates.
+ * \param q [const qsc_ge25519_cached*] Pointer to the cached point.
  */
-void ge25519_sub_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cached* q);
+void qsc_ge25519_sub_cached(qsc_ge25519_p1p1* r, const qsc_ge25519_p3* p, const qsc_ge25519_cached* q);
 
 /**
  * \brief Compress a point in P2 coordinates to a 32-byte representation.
@@ -511,9 +511,9 @@ void ge25519_sub_cached(ge25519_p1p1* r, const ge25519_p3* p, const ge25519_cach
  * Converts a point in the P2 coordinate representation to its compressed 32-byte form.
  *
  * \param s [uint8_t*] Pointer to the output 32-byte array.
- * \param h [const ge25519_p2*] Pointer to the input point in P2 coordinates.
+ * \param h [const qsc_ge25519_p2*] Pointer to the input point in P2 coordinates.
  */
-void ge25519_tobytes(uint8_t* s, const ge25519_p2* h);
+void qsc_ge25519_to_bytes(uint8_t* s, const qsc_ge25519_p2* h);
 
 /**
  * \brief Clamp a secret scalar.
@@ -522,7 +522,7 @@ void ge25519_tobytes(uint8_t* s, const ge25519_p2* h);
  *
  * \param k [uint8_t*] Pointer to the 32-byte scalar to be clamped.
  */
-void sc25519_clamp(uint8_t* k);
+void qsc_sc25519_clamp(uint8_t* k);
 
 /**
  * \brief Check if a compressed point has small order.
@@ -533,7 +533,7 @@ void sc25519_clamp(uint8_t* k);
  * \param s [const uint8_t[32]] The 32-byte compressed point.
  * \return [int32_t] Returns non-zero if the point has small order, 0 otherwise.
  */
-int32_t ed25519_small_order(const uint8_t s[32]);
+int32_t qsc_ed25519_small_order(const uint8_t s[32U]);
 
 /**
  * \brief Check if a scalar is canonical.
@@ -543,7 +543,7 @@ int32_t ed25519_small_order(const uint8_t s[32]);
  * \param s [const uint8_t[32]] Pointer to the 32-byte scalar.
  * \return [int32_t] Returns non-zero if the scalar is canonical, 0 otherwise.
  */
-int32_t sc25519_is_canonical(const uint8_t s[32]);
+int32_t qsc_sc25519_is_canonical(const uint8_t s[32U]);
 
 /**
  * \brief Compute s = a * b + c for scalars.
@@ -556,7 +556,7 @@ int32_t sc25519_is_canonical(const uint8_t s[32]);
  * \param b [const uint8_t[32]] The second scalar operand.
  * \param c [const uint8_t[32]] The scalar addend.
  */
-void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], const uint8_t c[32]);
+void qsc_sc25519_muladd(uint8_t s[32U], const uint8_t a[32U], const uint8_t b[32U], const uint8_t c[32U]);
 
 /**
  * \brief Reduce a 64-byte scalar modulo 2^255 - 19.
@@ -573,7 +573,7 @@ void sc25519_muladd(uint8_t s[32], const uint8_t a[32], const uint8_t b[32], con
  *
  * \param s [uint8_t*] A pointer to a 64-byte array representing the scalar to be reduced.
  */
-void sc25519_reduce(uint8_t s[64]);
+void qsc_sc25519_reduce(uint8_t s[64U]);
 
 /**
  * \brief Performs a constant-time comparison of two byte arrays.

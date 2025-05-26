@@ -78,12 +78,6 @@ void qsctest_benchmark_csx_run(void);
 void qsctest_benchmark_kmac_run(void);
 
 /**
-* \brief Tests the KPA MAC implementations performance.
-* Tests the Keccak-based Parallel Authentication MACs for performance timing.
-*/
-void qsctest_benchmark_kpa_run(void);
-
-/**
 * \brief Tests the RCS implementations performance.
 * Tests the RCS authenticated stream cipher for performance timing.
 */

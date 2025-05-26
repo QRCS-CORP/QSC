@@ -120,50 +120,62 @@ bool qsctest_kyber_kat_test()
 		qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
 		/* generate public and secret keys */
-		qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
-
-		/* compare the public key to the expected output */
-		if (qsc_intutils_are_equal8(pk, kpk, QSC_KYBER_PUBLICKEY_SIZE) != true)
+		if (qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate))
 		{
-			qsc_consoleutils_print_line("Failure! kyber kat: public-key does not match known answer! -KAT0");
-			ret = false;
+			/* compare the public key to the expected output */
+			if (qsc_intutils_are_equal8(pk, kpk, QSC_KYBER_PUBLICKEY_SIZE) != true)
+			{
+				qsc_consoleutils_print_line("Failure! kyber kat: public-key does not match known answer! -KAT0");
+				ret = false;
+			}
+
+			/* compare the secret key to the expected output */
+			if (qsc_intutils_are_equal8(sk, ksk, QSC_KYBER_PRIVATEKEY_SIZE) != true)
+			{
+				qsc_consoleutils_print_line("Failure! kyber kat: private-key does not match known answer! -KAT1");
+				ret = false;
+			}
+
+			/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
+			if (qsc_kyber_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate))
+			{
+				/* compare the cipher-text to the expected output */
+				if (qsc_intutils_are_equal8(ct, kct, QSC_KYBER_CIPHERTEXT_SIZE) != true)
+				{
+					qsc_consoleutils_print_line("Failure! kyber kat: cipher-text does not match known answer! -KAT2");
+					ret = false;
+				}
+
+				/* a uses b's response to get the shared-secret key (in: ct, sk | out: ss1) */
+				if (qsc_kyber_decapsulate(ss1, ct, sk) != true)
+				{
+					qsc_consoleutils_print_line("Failure! kyber kat: decryption authentication failure! -KAT3");
+					ret = false;
+				}
+
+				/* compare the two keys for equality */
+				if (qsc_intutils_are_equal8(ss1, ss2, QSC_KYBER_SHAREDSECRET_SIZE) != true)
+				{
+					qsc_consoleutils_print_line("Failure! kyber kat: shared secrets do not match! -KAT4");
+					ret = false;
+				}
+
+				/* compare the key to the expected output */
+				if (qsc_intutils_are_equal8(ss1, kss, QSC_KYBER_SHAREDSECRET_SIZE) != true)
+				{
+					qsc_consoleutils_print_line("Failure! kyber kat: shared secret does not match known answer! -KAT5");
+					ret = false;
+				}
+			}
+			else
+			{
+				qsc_consoleutils_print_line("Failure! kyber kat: encapsulation has failed! -KAT6");
+				ret = false;
+			}
 		}
-
-		/* compare the secret key to the expected output */
-		if (qsc_intutils_are_equal8(sk, ksk, QSC_KYBER_PRIVATEKEY_SIZE) != true)
+		else
 		{
-			qsc_consoleutils_print_line("Failure! kyber kat: private-key does not match known answer! -KAT1");
-			ret = false;
-		}
-
-		/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-		qsc_kyber_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate);
-
-		/* compare the cipher-text to the expected output */
-		if (qsc_intutils_are_equal8(ct, kct, QSC_KYBER_CIPHERTEXT_SIZE) != true)
-		{
-			qsc_consoleutils_print_line("Failure! kyber kat: cipher-text does not match known answer! -KAT2");
-			ret = false;
-		}
-
-		/* a uses b's response to get the shared-secret key (in: ct, sk | out: ss1) */
-		if (qsc_kyber_decapsulate(ss1, ct, sk) != true)
-		{
-			qsc_consoleutils_print_line("Failure! kyber kat: decryption authentication failure! -KAT3");
-			ret = false;
-		}
-
-		/* compare the two keys for equality */
-		if (qsc_intutils_are_equal8(ss1, ss2, QSC_KYBER_SHAREDSECRET_SIZE) != true)
-		{
-			qsc_consoleutils_print_line("Failure! kyber kat: shared secrets do not match! -KAT4");
-			ret = false;
-		}
-
-		/* compare the key to the expected output */
-		if (qsc_intutils_are_equal8(ss1, kss, QSC_KYBER_SHAREDSECRET_SIZE) != true)
-		{
-			qsc_consoleutils_print_line("Failure! kyber kat: shared secret does not match known answer! -KAT5");
+			qsc_consoleutils_print_line("Failure! kyber kat: key generation has failed! -KAT7");
 			ret = false;
 		}
 	}
@@ -258,7 +270,6 @@ bool qsctest_kyber_publickey_integrity()
 bool qsctest_kyber_operations_test()
 {
 	uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t esd[QSC_KYBER_SEED_SIZE] = { 0 };
 	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
@@ -266,44 +277,41 @@ bool qsctest_kyber_operations_test()
 	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
 	bool res;
 
-	res = true;
+	res = false;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
 	/* generate public and secret keys */
-	qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
-
-	/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-	qsc_kyber_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
-
-	/* decapsulate the cipher-text and extract the shared secret */
-	if (qsc_kyber_decapsulate(ssk1, ct, sk) != true)
+	if (qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate))
 	{
-		qsc_consoleutils_print_line("Failure! kyber operations: decapsulation failure -KOT1");
-		res = false;
+		/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
+		if (qsc_kyber_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate))
+		{
+			/* decapsulate the cipher-text and extract the shared secret */
+			if (qsc_kyber_decapsulate(ssk1, ct, sk))
+			{
+				if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) == true)
+				{
+					res = true;
+				}
+				else
+				{
+					qsc_consoleutils_print_line("Failure! kyber operations: the shared secrets are not equal -KOT4");
+				}
+			}
+			else
+			{
+				qsc_consoleutils_print_line("Failure! kyber operations: decapsulation failure -KOT3");
+			}
+		}
+		else
+		{
+			qsc_consoleutils_print_line("Failure! kyber operations: encasulation failure -KOT2");
+		}
 	}
-
-	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) != true)
+	else
 	{
-		qsc_consoleutils_print_line("Failure! kyber operations: the shared secrets are not equal -KOT2");
-		res = false;
-	}
-
-	/* test encrypt/decrypt api */
-
-	qsc_memutils_clear(ct, sizeof(ct));
-	qsc_memutils_clear(ssk1, sizeof(ssk1));
-	qsc_memutils_clear(ssk2, sizeof(ssk2));
-
-	qsc_csp_generate(esd, sizeof(esd));
-
-	qsc_kyber_encrypt(ssk1, ct, pk, esd);
-	qsc_kyber_decrypt(ssk2, ct, sk);
-
-	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) != true)
-	{
-		qsc_consoleutils_print_line("Failure! kyber operations: the shared secrets are not equal -KOT3");
-		res = false;
+		qsc_consoleutils_print_line("Failure! kyber operations: key generation failure -KOT1");
 	}
 
 	return res;

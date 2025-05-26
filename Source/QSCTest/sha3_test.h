@@ -41,6 +41,7 @@
 #define QSCTEST_SHA3_TEST_H
 
 #include "common.h"
+#include "../QSC/common.h"
 
 /**
  * \file sha3_test.h
@@ -207,26 +208,6 @@ bool qsctest_kmac_256_kat(void);
  * \return Returns true if the KMAC-512 KAT tests pass; otherwise, false.
  */
 bool qsctest_kmac_512_kat(void);
-
-/**
- * \brief Tests the 256-bit version of the Keccak-based Parallel Authentication MAC (KPA) function.
- *
- * \details
- * Computes the KPA-256 output for a fixed key and message and compares the result with the known answer vector.
- *
- * \return Returns true if the KPA-256 test passes; otherwise, false.
- */
-bool qsctest_kpa_256_kat(void);
-
-/**
- * \brief Tests the 512-bit version of the Keccak-based Parallel Authentication MAC (KPA) function.
- *
- * \details
- * Computes the KPA-512 output using fixed inputs and verifies that the result matches the expected known answer.
- *
- * \return Returns true if the KPA-512 test passes; otherwise, false.
- */
-bool qsctest_kpa_512_kat(void);
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 /**

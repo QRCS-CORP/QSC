@@ -168,8 +168,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param publickey:	[uint8_t*] Pointer to the public verification-key array.
  * \param privatekey:	[uint8_t*] Pointer to the private signature-key array.
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to the random generator.
+ * \return				[bool] Returns true if the key pair was generated successfully.
  */
-QSC_EXPORT_API void qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API bool qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Takes the message as input and returns an array containing the signature followed by the message.
@@ -182,8 +183,9 @@ QSC_EXPORT_API void qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* 
  * \param msglen:		[size_t] The message array length.
  * \param privatekey:	[const uint8_t*] Pointer to the private signature-key.
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to the random generator.
+ * \return				[bool] Returns true if the message was signed successfully.
  */
-QSC_EXPORT_API void qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API bool qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Takes the message as input and returns an array containing the signature followed by the message.
@@ -198,8 +200,9 @@ QSC_EXPORT_API void qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, cons
  * \param contextlen:	[size_t] The context array length.
  * \param privatekey:	[const uint8_t*] Pointer to the private signature-key.
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to the random generator.
+ * \return				[bool] Returns true if the message was signed successfully.
  */
-QSC_EXPORT_API void qsc_dilithium_sign_ex(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t contextlen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API bool qsc_dilithium_sign_ex(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t contextlen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Verifies a signature-message pair with the public key.
@@ -209,8 +212,7 @@ QSC_EXPORT_API void qsc_dilithium_sign_ex(uint8_t* signedmsg, size_t* smsglen, c
  * \param signedmsg:	[const uint8_t*] Pointer to the signed message array.
  * \param smsglen:		[size_t] The signed message length.
  * \param publickey:	[const uint8_t*] Pointer to the public verification-key array.
- *
- * \return				[bool] Returns true if the signature is valid; otherwise, false.
+ * \return				[bool] Returns true if the signature is valid.
  */
 QSC_EXPORT_API bool qsc_dilithium_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
@@ -224,8 +226,7 @@ QSC_EXPORT_API bool qsc_dilithium_verify(uint8_t* message, size_t* msglen, const
  * \param context:		[const uint8_t*] Pointer to the context array.
  * \param contextlen:	[size_t] The context array length.
  * \param publickey:	[const uint8_t*] Pointer to the public verification-key array.
- *
- * \return				[bool] Returns true if the signature is valid; otherwise, false.
+ * \return				[bool] Returns true if the signature is valid.
  */
 QSC_EXPORT_API bool qsc_dilithium_verify_ex(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* context, size_t contextlen, const uint8_t* publickey);
 

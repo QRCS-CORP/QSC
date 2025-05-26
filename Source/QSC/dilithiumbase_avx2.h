@@ -53,8 +53,9 @@ QSC_CPLUSPLUS_ENABLED_START
 * \param pk: The public verification key
 * \param sk: The private signature key
 * \param rng_generate: The random generator
+* \return Returns true for success
 */
-void qsc_dilithium_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_dilithium_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature
@@ -67,8 +68,9 @@ void qsc_dilithium_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_ge
 * \param contextlen: The context length
 * \param sk: [const] The private signature key
 * \param rng_generate: The random generator
+* \return Returns true for success
 */
-void qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* context, size_t contextlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* context, size_t contextlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message
@@ -79,8 +81,9 @@ void qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
 * \param mlen: The message length
 * \param sk: [const] The private signature key
 * \param rng_generate: The random generator
+* \return Returns true for success
 */
-void qsc_dilithium_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* context, size_t contextlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_dilithium_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* context, size_t contextlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature-message pair with the public key.

@@ -11,7 +11,7 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 	uint8_t nonce[64] = { 0U };
 	uint8_t hram[64] = { 0U };
 	qsc_sha512_state ctx;
-	ge25519_p3 R;
+	qsc_ge25519_p3 R;
 
 	/* hash 1st half of sk to az */
 	qsc_sha512_compute(az, sk, 32);
@@ -27,11 +27,11 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 	/* move 2nd half of sk to 2nd half of sig */
 	qsc_memutils_copy(sm + 32, sk + 32, 32);
     /* reduce nonce */
-	sc25519_reduce(nonce);
+	qsc_sc25519_reduce(nonce);
     /* scalar on nonce */
-	ge25519_scalarmult_base(&R, nonce);
+	qsc_ge25519_scalarmult_base(&R, nonce);
 	/* scalar to 1st half of sig */
-	ge25519_p3_tobytes(sm, &R);
+	qsc_ge25519_p3_to_bytes(sm, &R);
 
 	qsc_sha512_initialize(&ctx);
 	/* update hash with sig */
@@ -41,11 +41,11 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 	/* finalize to hram */
 	qsc_sha512_finalize(&ctx, hram);
     /* reduce hram */
-	sc25519_reduce(hram);
+	qsc_sc25519_reduce(hram);
 	/* clamp az */
-	sc25519_clamp(az);
+	qsc_sc25519_clamp(az);
 	/* muladd hram, az, nonce to 2nd half of sig */
-	sc25519_muladd(sm + 32, hram, az, nonce);
+	qsc_sc25519_muladd(sm + 32, hram, az, nonce);
 
 	/* cleanup */
 	qsc_memutils_clear(az, sizeof(az));
@@ -64,23 +64,23 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 	qsc_sha512_state ctx;
 	uint8_t h[64] = { 0U };
 	uint8_t rcheck[32] = { 0U };
-	ge25519_p3 A;
-	ge25519_p2 R;
+	qsc_ge25519_p3 A;
+	qsc_ge25519_p2 R;
 	bool res;
 
-	if ((sig[63] & 240) && sc25519_is_canonical(sig + 32) == 0)
+	if ((sig[63] & 240) && qsc_sc25519_is_canonical(sig + 32) == 0)
 	{
 		res = false;
 	}
-	else if (ge25519_has_small_order(sig) != 0) 
+	else if (qsc_ge25519_has_small_order(sig) != 0) 
 	{
 		res = false;
 	}
-	else if (ge25519_is_canonical(pk) == 0 || ge25519_has_small_order(pk) != 0)
+	else if (qsc_ge25519_is_canonical(pk) == 0 || qsc_ge25519_has_small_order(pk) != 0)
 	{
 		res = false;
 	}
-	else if (ge25519_frombytes_negate_vartime(&A, pk) != 0)
+	else if (qsc_ge25519_from_bytes_negate_vartime(&A, pk) != 0)
 	{
 		res = false;
 	}
@@ -96,10 +96,10 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 		qsc_sha512_update(&ctx, pk, 32);
 		qsc_sha512_update(&ctx, m, mlen);
 		qsc_sha512_finalize(&ctx, h);
-		sc25519_reduce(h);
+		qsc_sc25519_reduce(h);
 
-		ge25519_double_scalarmult_vartime(&R, h, &A, sig + 32);
-		ge25519_tobytes(rcheck, &R);
+		qsc_ge25519_double_scalarmult_vartime(&R, h, &A, sig + 32);
+		qsc_ge25519_to_bytes(rcheck, &R);
 
 		if ((qsc_sc25519_verify(rcheck, sig, 32) | (-(rcheck == sig))) != 0 || qsc_intutils_are_equal8(sig, rcheck, 32) == false)
 		{
@@ -118,13 +118,13 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
 	QSC_ASSERT(privatekey != NULL);
 	QSC_ASSERT(seed != NULL);
 
-	ge25519_p3 A;
+	qsc_ge25519_p3 A;
 
 	qsc_sha512_compute(privatekey, seed, EC25519_SEED_SIZE);
-	sc25519_clamp(privatekey);
+	qsc_sc25519_clamp(privatekey);
 
-	ge25519_scalarmult_base(&A, privatekey);
-	ge25519_p3_tobytes(publickey, &A);
+	qsc_ge25519_scalarmult_base(&A, privatekey);
+	qsc_ge25519_p3_to_bytes(publickey, &A);
 
 	qsc_memutils_copy(privatekey, seed, EC25519_SEED_SIZE);
 	qsc_memutils_copy(privatekey + EC25519_SEED_SIZE, publickey, EC25519_PUBLICKEY_SIZE);

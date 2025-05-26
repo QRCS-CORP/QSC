@@ -265,8 +265,9 @@ QSC_CPLUSPLUS_ENABLED_START
 * \param publickey:		[uint8_t*] Pointer to the public verification-key array
 * \param privatekey:	[uint8_t*] Pointer to the private signature-key array
 * \param rng_generate:	[(uint8_t*, size_t)] Pointer to the random generator
+* \return				[bool] Returns true for success
 */
-QSC_EXPORT_API void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API bool qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message.
@@ -279,8 +280,9 @@ QSC_EXPORT_API void qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t
 * \param msglen:		[size_t] The message length
 * \param privatekey:	[const uint8_t*] Pointer to the private signature-key array
 * \param rng_generate:	[(uint8_t*, size_t)] Pointer to the random generator
+* \return				[bool] Returns true for success
 */
-QSC_EXPORT_API void qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API bool qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature-message pair with the public key.

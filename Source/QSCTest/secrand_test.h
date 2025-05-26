@@ -110,6 +110,7 @@ void qsctest_secrand_csp_evaluate(void);
  */
 void qsctest_secrand_hcg_evaluate(void);
 
+#if  defined(QSC_RDRAND_COMPATIBLE)
 /**
  * \brief Evaluates the output of the RDP random provider.
  *
@@ -118,6 +119,7 @@ void qsctest_secrand_hcg_evaluate(void);
  * performs statistical evaluations on the sample.
  */
 void qsctest_secrand_rdp_evaluate(void);
+#endif
 
 /**
  * \brief Evaluates the output of the SCB key derivation function.

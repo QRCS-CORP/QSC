@@ -52,8 +52,9 @@ char qsctest_get_char();
 
 /**
 * \brief Pause the console until user input is detected
+* \return Returns the character detected
 */
-void qsctest_get_wait();
+char qsctest_get_wait();
 
 /**
 * \brief Convert a hexadecimal character string to a binary byte array
