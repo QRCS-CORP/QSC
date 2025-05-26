@@ -13,6 +13,7 @@
 [QSC Help Documentation](https://qrcs-corp.github.io/QSC/)  
 [QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/QSC_Specification.pdf)  
 [QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/QSC_Summary.pdf)  
+[QSC Target Industries](https://qrcs-corp.github.io/QSC/pdf/QSC_High-Security_Cryptographic_Library_for_Critical_Domains.pdf) 
 
 ## Overview
 
