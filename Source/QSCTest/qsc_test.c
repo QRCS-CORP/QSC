@@ -245,9 +245,6 @@ int32_t main(void)
 		qsctest_print_line("");
 		qsctest_print_line("AVX-512 intrinsics have been integrated into this project.");
 		qsctest_print_line("On an AVX-512 capable CPU, enable AVX-512 in the project properties for best performance on symmetric ciphers.");
-		qsctest_print_line("if AVX-512 is enabled with some compilers (MSVC and possibly others) AVX2 functions are silently swapped for AVX-512, ");
-		qsctest_print_line("breaking some AVX2 projects (Kyber, Dilithium, SHA3). If you use the AVX-512 option, disable AVX2 by remming");
-		qsctest_print_line("the QSC_SYSTEM_HAS_AVX2 macro in the common.h file.");
 		qsctest_print_line("Enable the maximum available AVX feature set in the project properties (AVX/AVX2/AVX512).");
 		qsctest_print_line("");
 	}

@@ -120,19 +120,19 @@ QSC_CPLUSPLUS_ENABLED_START
 * \def QSC_KECCAK_PERMUTATION_ROUNDS
 * \brief The standard number of permutation rounds
 */
-#define QSC_KECCAK_PERMUTATION_ROUNDS 24ULL
+#define QSC_KECCAK_PERMUTATION_ROUNDS 24U
 
 /*!
 * \def QSC_KECCAK_PERMUTATION_MAX_ROUNDS
 * \brief The maximum number of permutation rounds
 */
-#define QSC_KECCAK_PERMUTATION_MAX_ROUNDS 48ULL
+#define QSC_KECCAK_PERMUTATION_MAX_ROUNDS 48U
 
 /*!
 * \def QSC_KECCAK_PERMUTATION_MIN_ROUNDS
 * \brief The minimum number of permutation rounds
 */
-#define QSC_KECCAK_PERMUTATION_MIN_ROUNDS 12ULL
+#define QSC_KECCAK_PERMUTATION_MIN_ROUNDS 12U
 
 /*!
 * \def QSC_KECCAK_SHA3_DOMAIN_ID
@@ -150,49 +150,49 @@ QSC_CPLUSPLUS_ENABLED_START
 * \def QSC_KECCAK_STATE_BYTE_SIZE
 * \brief The Keccak state array byte size
 */
-#define QSC_KECCAK_STATE_BYTE_SIZE 200ULL
+#define QSC_KECCAK_STATE_BYTE_SIZE 200U
 
 /*!
 * \def QSC_KECCAK_128_RATE
 * \brief The 128-bit absorption rate
 */
-#define QSC_KECCAK_128_RATE 168ULL
+#define QSC_KECCAK_128_RATE 168U
 
 /*!
 * \def QSC_KECCAK_256_RATE
 * \brief The 256-bit absorption rate
 */
-#define QSC_KECCAK_256_RATE 136ULL
+#define QSC_KECCAK_256_RATE 136U
 
 /*!
 * \def QSC_KECCAK_512_RATE
 * \brief The 512 bit absorption rate
 */
-#define QSC_KECCAK_512_RATE 72ULL
+#define QSC_KECCAK_512_RATE 72U
 
 /*!
 * \def QSC_KECCAK_STATE_SIZE
 * \brief The Keccak SHA3 uint64 state array size
 */
-#define QSC_KECCAK_STATE_SIZE 25ULL
+#define QSC_KECCAK_STATE_SIZE 25U
 
 /*!
 * \def QSC_KECCAK_STATE_BYTE_SIZE
 * \brief The Keccak SHA3 state size in bytes
 */
-#define QSC_KECCAK_STATE_BYTE_SIZE 200ULL
+#define QSC_KECCAK_STATE_BYTE_SIZE 200U
 
 /*!
 * \def QSC_KMAC_256_KEY_SIZE
 * \brief The KMAC-256 key size in bytes
 */
-#define QSC_KMAC_256_KEY_SIZE 32ULL
+#define QSC_KMAC_256_KEY_SIZE 32U
 
 /*!
 * \def QSC_KMAC_512_KEY_SIZE
 * \brief The KMAC-512 key size in bytes
 */
-#define QSC_KMAC_512_KEY_SIZE 64ULL
+#define QSC_KMAC_512_KEY_SIZE 64U
 
 /*!
 * \def QSC_KECCAK_SCBKDF_DOMAIN_ID
@@ -204,31 +204,31 @@ QSC_CPLUSPLUS_ENABLED_START
 * \def QSC_SHA3_128_HASH_SIZE
 * \brief The QSC_SHA3_128_HASH_SIZE hash size in bytes (16)
 */
-#define QSC_SHA3_128_HASH_SIZE 16ULL
+#define QSC_SHA3_128_HASH_SIZE 16U
 
 /*!
 * \def QSC_SHA3_256_HASH_SIZE
 * \brief The SHA-256 hash size in bytes (32)
 */
-#define QSC_SHA3_256_HASH_SIZE 32ULL
+#define QSC_SHA3_256_HASH_SIZE 32U
 
 /*!
 * \def QSC_SHA3_512_HASH_SIZE
 * \brief The SHA-512 hash size in bytes (64)
 */
-#define QSC_SHA3_512_HASH_SIZE 64ULL
+#define QSC_SHA3_512_HASH_SIZE 64U
 
 /*!
 * \def QSC_SHAKE_256_KEY_SIZE
 * \brief The SHAKE-256 key size in bytes
 */
-#define QSC_SHAKE_256_KEY_SIZE 32ULL
+#define QSC_SHAKE_256_KEY_SIZE 32U
 
 /*!
 * \def QSC_SHAKE512_KEY_SIZE
 * \brief The SHAKE-512 key size in bytes
 */
-#define QSC_SHAKE512_KEY_SIZE 64ULL
+#define QSC_SHAKE512_KEY_SIZE 64U
 
 /* common */
 
@@ -238,8 +238,8 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 QSC_EXPORT_API typedef struct
 {
-	QSC_ALIGN(64) uint64_t state[QSC_KECCAK_STATE_SIZE];		/*!< The SHA3 state  */
-	QSC_ALIGN(64) uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];	/*!< The message buffer  */
+	QSC_SIMD_ALIGN uint64_t state[QSC_KECCAK_STATE_SIZE];		/*!< The SHA3 state  */
+	QSC_SIMD_ALIGN uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];	/*!< The message buffer  */
 	size_t position;											/*!< The buffer position  */
 } qsc_keccak_state;
 
