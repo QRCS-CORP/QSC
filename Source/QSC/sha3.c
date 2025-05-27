@@ -83,7 +83,7 @@ static size_t keccak_right_encode(uint8_t* buffer, size_t value)
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
+static void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
 {
 	QSC_ASSERT(rounds % 2U == 0U);
 
@@ -384,7 +384,7 @@ void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rou
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
+static void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
 {
 	QSC_ASSERT(rounds % 2U == 0U);
 

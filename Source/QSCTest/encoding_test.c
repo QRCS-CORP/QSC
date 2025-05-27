@@ -56,7 +56,7 @@ bool qsctest_encoding_base64(void)
 bool qsctest_encoding_ber(void)
 {
     /* sample INTEGER value: 0x3039 (12345) */
-    QSC_SIMD_ALIGN uint8_t aint[] = { 0x30, 0x39 };
+    uint8_t aint[] = { 0x30, 0x39 };
     qsc_encoding_ber_element element;
     bool res;
 
@@ -109,7 +109,7 @@ bool qsctest_encoding_ber(void)
 bool qsctest_encoding_der(void)
 {
     /* Use a sample INTEGER value: 0x3039 (12345) */
-    QSC_SIMD_ALIGN uint8_t iarr[] = { 0x30, 0x39 };
+    uint8_t iarr[] = { 0x30, 0x39 };
     QSC_SIMD_ALIGN uint8_t derbuf[256];
     size_t derenclen;
     size_t dercons;
@@ -161,8 +161,8 @@ bool qsctest_encoding_der(void)
 
 bool qsctest_encoding_hex(void)
 {
-    QSC_SIMD_ALIGN uint8_t data[] = { 0xDE, 0xAD, 0xBE, 0xEF };
-    QSC_SIMD_ALIGN char hexenc[2 * sizeof(data) + 1];
+    uint8_t data[] = { 0xDE, 0xAD, 0xBE, 0xEF };
+    char hexenc[2 * sizeof(data) + 1];
     size_t datalen = sizeof(data);
     bool res;
 
@@ -190,7 +190,7 @@ bool qsctest_encoding_hex(void)
 
 bool qsctest_encoding_pem(void)
 {
-    QSC_SIMD_ALIGN uint8_t data[] = { 0x30, 0x82, 0x01, 0x0A, 0x02, 0x82, 0x01, 0x01 };
+    uint8_t data[] = { 0x30, 0x82, 0x01, 0x0A, 0x02, 0x82, 0x01, 0x01 };
     QSC_SIMD_ALIGN char pemout[1024];
     QSC_SIMD_ALIGN uint8_t pemdec[1024];
     size_t datalen = sizeof(data);

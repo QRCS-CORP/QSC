@@ -2958,7 +2958,7 @@ int32_t qsc_ge25519_has_small_order(const uint8_t s[32U])
 		}
 	};
 
-	QSC_SIMD_ALIGN uint8_t c[7U] = { 0U };
+	uint8_t c[7U] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;
@@ -3347,7 +3347,7 @@ int32_t qsc_ed25519_small_order(const uint8_t s[32U])
 		}
 	};
 
-	QSC_SIMD_ALIGN uint8_t c[7U] = { 0U };
+	uint8_t c[7U] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;

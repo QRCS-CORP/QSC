@@ -96,8 +96,8 @@ static gf gf_sq2(gf in)
 	/* input: field element in
 	   return: (in^2)^2 */
 
-	const QSC_SIMD_ALIGN uint64_t Bf[4U] = { 0x1111111111111111ULL, 0x0303030303030303ULL, 0x000F000F000F000FULL, 0x000000FF000000FFULL };
-	const QSC_SIMD_ALIGN uint64_t M[4U] = { 0x0001FF0000000000ULL, 0x000000FF80000000ULL, 0x000000007FC00000ULL, 0x00000000003FE000ULL };
+	const uint64_t Bf[4U] = { 0x1111111111111111ULL, 0x0303030303030303ULL, 0x000F000F000F000FULL, 0x000000FF000000FFULL };
+	const uint64_t M[4U] = { 0x0001FF0000000000ULL, 0x000000FF80000000ULL, 0x000000007FC00000ULL, 0x00000000003FE000ULL };
 	uint64_t t;
 	uint64_t x;
 
@@ -120,7 +120,7 @@ static gf gf_sq2mul(gf in, gf m)
 {
 	/* input: field element in, m
 	   return: ((in^2)^2)*m */
-	const QSC_SIMD_ALIGN uint64_t M[6U] = { 0x1FF0000000000000ULL, 0x000FF80000000000ULL, 0x000007FC00000000ULL,
+	const uint64_t M[6U] = { 0x1FF0000000000000ULL, 0x000FF80000000000ULL, 0x000007FC00000000ULL,
 		0x00000003FE000000ULL, 0x0000000001FE0000ULL, 0x000000000001E000ULL };
 	uint64_t x;
 	uint64_t t0;
@@ -180,7 +180,7 @@ gf gf_mul(gf in0, gf in1)
 
 static gf gf_sq(gf in)
 {
-	const QSC_SIMD_ALIGN uint32_t B[4U] = { 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF };
+	const uint32_t B[4U] = { 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF };
 
 	uint32_t x = in;
 	uint32_t t;
@@ -208,7 +208,7 @@ static inline gf gf_sqmul(gf in, gf m)
 	uint64_t t1;
 	uint64_t t;
 	size_t i;
-	const QSC_SIMD_ALIGN uint64_t M[3U] = { 0x0000001FF0000000, 0x000000000FF80000, 0x000000000007E000 };
+	const uint64_t M[3U] = { 0x0000001FF0000000, 0x000000000FF80000, 0x000000000007E000 };
 
 	t0 = in;
 	t1 = m;
@@ -299,7 +299,7 @@ static gf gf_sqmul(gf in, gf m)
 	/* input: field element in, m
 	   return: (in^2)*m */
 
-	const QSC_SIMD_ALIGN uint64_t M[3U] = { 0x0000001FF0000000ULL, 0x000000000FF80000ULL, 0x000000000007E000ULL };
+	const uint64_t M[3U] = { 0x0000001FF0000000ULL, 0x000000000FF80000ULL, 0x000000000007E000ULL };
 	uint64_t t;
 	uint64_t t0;
 	uint64_t t1;

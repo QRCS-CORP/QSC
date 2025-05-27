@@ -708,7 +708,7 @@ bool qsctest_aes256_hba_stress()
 	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t ncopy[QSC_AES_BLOCK_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
+	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	uint8_t* dec;
 	uint8_t* enc;
 	uint8_t* msg;
@@ -797,7 +797,7 @@ bool qsctest_aes256_hba_stress()
 bool qsctest_aes256_padding_test()
 {
 	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pmcnt[1] = { 0 };
+	uint8_t pmcnt[1] = { 0 };
 	size_t mlen;
 	size_t tctr;
 	bool status;

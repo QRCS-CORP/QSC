@@ -8,7 +8,7 @@ bool qsctest_hkdf_256_kat()
 {
 	QSC_SIMD_ALIGN uint8_t exp0[42] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp1[82] = { 0 };
-	QSC_SIMD_ALIGN uint8_t inf0[10] = { 0 };
+	uint8_t inf0[10] = { 0 };
 	QSC_SIMD_ALIGN uint8_t inf1[80] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key0[22] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key1[80] = { 0 };
@@ -114,7 +114,7 @@ bool qsctest_hmac_256_kat()
 	QSC_SIMD_ALIGN uint8_t key2[25] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key3[131] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key4[131] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[8] = { 0 };
+	uint8_t msg0[8] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1[50] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg2[50] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg3[54] = { 0 };
@@ -267,7 +267,7 @@ bool qsctest_hmac_512_kat()
 	QSC_SIMD_ALIGN uint8_t key2[25] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key3[131] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key4[131] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[8] = { 0 };
+	uint8_t msg0[8] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1[50] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg2[50] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg3[54] = { 0 };
@@ -414,8 +414,8 @@ bool qsctest_sha2_256_kat()
 	QSC_SIMD_ALIGN uint8_t exp1[QSC_SHA2_256_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp2[QSC_SHA2_256_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp3[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg1[3] = { 0 };
+	uint8_t msg0[1] = { 0 };
+	uint8_t msg1[3] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg2[56] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg3[112] = { 0 };
 	QSC_SIMD_ALIGN uint8_t otp[QSC_SHA2_256_HASH_SIZE] = { 0 };
@@ -535,8 +535,8 @@ bool qsctest_sha2_384_kat()
 	QSC_SIMD_ALIGN uint8_t exp1[QSC_SHA2_384_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp2[QSC_SHA2_384_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp3[QSC_SHA2_384_HASH_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg1[3] = { 0 };
+	uint8_t msg0[1] = { 0 };
+	uint8_t msg1[3] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg2[56] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg3[112] = { 0 };
 	QSC_SIMD_ALIGN uint8_t otp[QSC_SHA2_384_HASH_SIZE] = { 0 };
@@ -655,8 +655,8 @@ bool qsctest_sha2_512_kat()
 	QSC_SIMD_ALIGN uint8_t exp1[QSC_SHA2_512_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp2[QSC_SHA2_512_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp3[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg1[3] = { 0 };
+	uint8_t msg0[1] = { 0 };
+	uint8_t msg1[3] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg2[56] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg3[112] = { 0 };
 	QSC_SIMD_ALIGN uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };

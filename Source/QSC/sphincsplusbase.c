@@ -764,7 +764,7 @@ static void sphincsplus_fors_sk_to_leaf(uint8_t* leaf, const uint8_t* sk, const 
 
 static void sphincsplus_fors_gen_leaf(uint8_t* leaf, const uint8_t* sk_seed, const uint8_t* pubseed, uint32_t addr_idx, const uint32_t fors_tree_addr[8U])
 {
-    QSC_SIMD_ALIGN uint32_t fors_leaf_addr[8U] = { 0U };
+    uint32_t fors_leaf_addr[8U] = { 0U };
 
     /* Only copy the parts that must be kept in fors_leaf_addr. */
     sphincsplus_copy_keypair_addr(fors_leaf_addr, fors_tree_addr);
@@ -803,9 +803,9 @@ static void sphincsplus_fors_sign(uint8_t* sig, uint8_t* pk, const uint8_t* m, c
        Assumes m contains at least SPX_FORS_HEIGHT * SPX_FORS_TREES bits. */
     QSC_SIMD_ALIGN uint32_t indices[SPX_FORS_TREES];
     QSC_SIMD_ALIGN uint8_t roots[SPX_FORS_TREES * SPX_N] = { 0U };
-    QSC_SIMD_ALIGN uint32_t fors_tree_addr[8U] = { 0U };
-    QSC_SIMD_ALIGN uint32_t fors_pk_addr[8U] = { 0U };
-    QSC_SIMD_ALIGN uint32_t idx_offset;
+    uint32_t fors_tree_addr[8U] = { 0U };
+    uint32_t fors_pk_addr[8U] = { 0U };
+    uint32_t idx_offset;
 
     sphincsplus_copy_keypair_addr(fors_tree_addr, fors_addr);
     sphincsplus_copy_keypair_addr(fors_pk_addr, fors_addr);
@@ -848,8 +848,8 @@ static void sphincsplus_fors_pk_from_sig(uint8_t* pk, const uint8_t* sig, const 
     QSC_SIMD_ALIGN uint32_t indices[SPX_FORS_TREES];
     QSC_SIMD_ALIGN uint8_t roots[SPX_FORS_TREES * SPX_N] = { 0U };
     QSC_SIMD_ALIGN uint8_t leaf[SPX_N];
-    QSC_SIMD_ALIGN uint32_t fors_tree_addr[8U] = { 0U };
-    QSC_SIMD_ALIGN uint32_t fors_pk_addr[8U] = { 0U };
+    uint32_t fors_tree_addr[8U] = { 0U };
+    uint32_t fors_pk_addr[8U] = { 0U };
     uint32_t idx_offset;
 
     sphincsplus_copy_keypair_addr(fors_tree_addr, fors_addr);
@@ -948,7 +948,7 @@ static void sphincsplus_wots_checksum(uint32_t* csum_base_w, const uint32_t* msg
 {
     /* Computes the WOTS+ checksum over a message (in sphincsplus_base_w). */
 
-    QSC_SIMD_ALIGN uint8_t csum_bytes[(SPX_WOTS_LEN2 * SPX_WOTS_LOGW + 7U) / 8U];
+    uint8_t csum_bytes[(SPX_WOTS_LEN2 * SPX_WOTS_LOGW + 7U) / 8U];
     uint32_t csum;
 
     csum = 0U;
@@ -1028,8 +1028,8 @@ static void sphincsplus_wots_gen_leaf(uint8_t* leaf, const uint8_t* sk_seed, con
        then computes leaf by hashing horizontally. */
 
     QSC_SIMD_ALIGN uint8_t pk[SPX_WOTS_BYTES];
-    QSC_SIMD_ALIGN uint32_t wots_addr[8U] = { 0U };
-    QSC_SIMD_ALIGN uint32_t wots_pk_addr[8U] = { 0U };
+    uint32_t wots_addr[8U] = { 0U };
+    uint32_t wots_pk_addr[8U] = { 0U };
 
     sphincsplus_set_type(wots_addr, SPX_ADDR_TYPE_WOTS);
     sphincsplus_set_type(wots_pk_addr, SPX_ADDR_TYPE_WOTSPK);
@@ -1082,7 +1082,7 @@ bool sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const uint8
         in one function. */
 
     QSC_SIMD_ALIGN uint8_t auth_path[SPX_TREE_HEIGHT * SPX_N];
-    QSC_SIMD_ALIGN uint32_t top_tree_addr[8U] = { 0U };
+    uint32_t top_tree_addr[8U] = { 0U };
 
     sphincsplus_set_layer_addr(top_tree_addr, SPX_D - 1U);
     sphincsplus_set_type(top_tree_addr, SPX_ADDR_TYPE_HASHTREE);
@@ -1130,8 +1130,8 @@ bool sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t*
     QSC_SIMD_ALIGN uint8_t optrand[SPX_N];
     QSC_SIMD_ALIGN uint8_t mhash[SPX_FORS_MSG_BYTES];
     QSC_SIMD_ALIGN uint8_t root[SPX_N];
-    QSC_SIMD_ALIGN uint32_t wots_addr[8U] = { 0U };
-    QSC_SIMD_ALIGN uint32_t tree_addr[8U] = { 0U };
+    uint32_t wots_addr[8U] = { 0U };
+    uint32_t tree_addr[8U] = { 0U };
     uint64_t tree;
     uint32_t idx_leaf;
     bool res;
@@ -1199,9 +1199,9 @@ bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_
     QSC_SIMD_ALIGN uint8_t wots_pk[SPX_WOTS_BYTES];
     QSC_SIMD_ALIGN uint8_t root[SPX_N];
     QSC_SIMD_ALIGN uint8_t leaf[SPX_N];
-    QSC_SIMD_ALIGN uint32_t wots_addr[8U] = { 0U };
-    QSC_SIMD_ALIGN uint32_t tree_addr[8U] = { 0U };
-    QSC_SIMD_ALIGN uint32_t wots_pk_addr[8U] = { 0U };
+    uint32_t wots_addr[8U] = { 0U };
+    uint32_t tree_addr[8U] = { 0U };
+    uint32_t wots_pk_addr[8U] = { 0U };
     uint64_t tree;
     uint32_t idx_leaf;
     bool res;

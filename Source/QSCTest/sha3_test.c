@@ -10,8 +10,8 @@ bool qsctest_sha3_256_kat()
 	QSC_SIMD_ALIGN uint8_t exp448[QSC_SHA3_256_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp1600[QSC_SHA3_256_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hash[200] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg24[3] = { 0 };
+	uint8_t msg0[1] = { 0 };
+	uint8_t msg24[3] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg448[56] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[QSC_SHA3_256_HASH_SIZE] = { 0 };
@@ -135,8 +135,8 @@ bool qsctest_sha3_512_kat()
 	QSC_SIMD_ALIGN uint8_t exp448[QSC_SHA3_512_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp1600[QSC_SHA3_512_HASH_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hash[200] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg24[3] = { 0 };
+	uint8_t msg0[1] = { 0 };
+	uint8_t msg24[3] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg448[56] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[QSC_SHA3_512_HASH_SIZE] = { 0 };
@@ -261,7 +261,7 @@ bool qsctest_shake_128_kat()
 	QSC_SIMD_ALIGN uint8_t exp0[512] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp1600[512] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hash[qsc_keccak_rate_128 * 4] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
+	uint8_t msg0[1] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[512] = { 0 };
 	qsc_keccak_state state;
@@ -352,7 +352,7 @@ bool qsctest_shake_256_kat()
 	QSC_SIMD_ALIGN uint8_t exp0[512] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp1600[512] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hash[qsc_keccak_rate_256 * 4] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
+	uint8_t msg0[1] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[512] = { 0 };
 	qsc_keccak_state state;
@@ -443,7 +443,7 @@ bool qsctest_shake_512_kat()
 	QSC_SIMD_ALIGN uint8_t exp1[512] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp2[512] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hash[qsc_keccak_rate_512 * 8] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg1[64] = { 0 };
+	uint8_t msg1[64] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg2[200] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[512] = { 0 };
 	qsc_keccak_state state;
@@ -534,13 +534,13 @@ bool qsctest_shake_512_kat()
 
 bool qsctest_cshake_128_kat()
 {
-	QSC_SIMD_ALIGN uint8_t cust[15] = { 0 };
+	uint8_t cust[15] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256a[32] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256b[32] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hashb[qsc_keccak_rate_128] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg32[4] = { 0 };
+	uint8_t msg32[4] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
-	QSC_SIMD_ALIGN uint8_t name[1] = { 0 };
+	uint8_t name[1] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[32] = { 0 };
 	qsc_keccak_state state;
 	bool status;
@@ -597,13 +597,13 @@ bool qsctest_cshake_128_kat()
 
 bool qsctest_cshake_256_kat()
 {
-	QSC_SIMD_ALIGN uint8_t cust[15] = { 0 };
+	uint8_t cust[15] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp512a[64] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp512b[64] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hashb[qsc_keccak_rate_256] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg32[4] = { 0 };
+	uint8_t msg32[4] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
-	QSC_SIMD_ALIGN uint8_t name[1] = { 0 };
+	uint8_t name[1] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[64] = { 0 };
 	qsc_keccak_state state;
 	bool status;
@@ -664,7 +664,7 @@ bool qsctest_cshake_256_kat()
 bool qsctest_cshake_512_kat()
 {
 	QSC_SIMD_ALIGN uint8_t exp512[64] = { 0 };
-	QSC_SIMD_ALIGN uint8_t cust[15] = { 0 };
+	uint8_t cust[15] = { 0 };
 	QSC_SIMD_ALIGN uint8_t hashb[qsc_keccak_rate_512] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg512[64] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[64] = { 0 };
@@ -710,12 +710,12 @@ bool qsctest_cshake_512_kat()
 
 bool qsctest_kmac_128_kat()
 {
-	QSC_SIMD_ALIGN uint8_t cust0[1] = { 0 };
+	uint8_t cust0[1] = { 0 };
 	QSC_SIMD_ALIGN uint8_t cust168[21] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256a[32] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256b[32] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256c[32] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg32[4] = { 0 };
+	uint8_t msg32[4] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key256[32] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[32] = { 0 };
@@ -786,12 +786,12 @@ bool qsctest_kmac_128_kat()
 
 bool qsctest_kmac_256_kat()
 {
-	QSC_SIMD_ALIGN uint8_t cust0[1] = { 0 };
+	uint8_t cust0[1] = { 0 };
 	QSC_SIMD_ALIGN uint8_t cust168[21] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256a[64] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256b[64] = { 0 };
 	QSC_SIMD_ALIGN uint8_t exp256c[64] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg32[4] = { 0 };
+	uint8_t msg32[4] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg1600[200] = { 0 };
 	QSC_SIMD_ALIGN uint8_t key256[32] = { 0 };
 	QSC_SIMD_ALIGN uint8_t output[64] = { 0 };

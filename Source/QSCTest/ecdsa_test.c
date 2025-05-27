@@ -18,8 +18,8 @@ bool qsctest_ecdsa_kat_test()
 	QSC_SIMD_ALIGN uint8_t gpk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t gsk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t ksd[QSC_ECDSA_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kpk[5][QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ksk[5][QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t kpk[5][QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ksk[5][QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t kms0[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t kms1[QSCTEST_ECDSA_MSG1_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t kms2[QSCTEST_ECDSA_MSG2_SIZE] = { 0 };
