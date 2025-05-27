@@ -123,7 +123,7 @@ typedef struct
     qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
     qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
     qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
-} QSC_SIMD_ALIGN qsc_ge25519_p2;
+} qsc_ge25519_p2;
 
 /*! 
  * \struct qsc_ge25519_p3
@@ -138,7 +138,7 @@ typedef struct
     qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
     qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
     qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
-} QSC_SIMD_ALIGN qsc_ge25519_p3;
+} qsc_ge25519_p3;
 
 /*! 
  * \struct qsc_ge25519_p1p1
@@ -152,7 +152,7 @@ typedef struct
     qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
     qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
     qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
-} QSC_SIMD_ALIGN qsc_ge25519_p1p1;
+} qsc_ge25519_p1p1;
 
 /*! 
  * \struct qsc_ge25519_precomp
@@ -165,7 +165,7 @@ typedef struct
     qsc_fe25519 yplusx;  /*!< [qsc_fe25519] The sum of Y and X coordinates. */
     qsc_fe25519 yminusx; /*!< [qsc_fe25519] The difference of Y and X coordinates. */
     qsc_fe25519 xy2d;    /*!< [qsc_fe25519] The product of X and Y, multiplied by 2d. */
-} QSC_SIMD_ALIGN qsc_ge25519_precomp;
+} qsc_ge25519_precomp;
 
 /*! 
  * \struct qsc_ge25519_cached
@@ -179,7 +179,7 @@ typedef struct
     qsc_fe25519 yminusx;/*!< [qsc_fe25519] The difference of Y and X coordinates. */
     qsc_fe25519 z;      /*!< [qsc_fe25519] The Z-coordinate. */
     qsc_fe25519 t2d;    /*!< [qsc_fe25519] The T-coordinate multiplied by 2d. */
-} QSC_SIMD_ALIGN qsc_ge25519_cached;
+} qsc_ge25519_cached;
 
 /**
  * \brief Set a field element to zero.
