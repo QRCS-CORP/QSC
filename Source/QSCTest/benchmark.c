@@ -15,10 +15,10 @@
 
 static void aes128_cbc_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_AES128_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES128_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t olen;
 	size_t tctr;
@@ -72,10 +72,10 @@ static void aes128_cbc_benchmark_test()
 
 static void aes256_cbc_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t olen;
 	size_t tctr;
@@ -129,10 +129,10 @@ static void aes256_cbc_benchmark_test()
 
 static void aes128_ctrbe_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_AES128_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES128_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -165,10 +165,10 @@ static void aes128_ctrbe_benchmark_test()
 
 static void aes128_ctrle_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_AES128_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES128_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -201,10 +201,10 @@ static void aes128_ctrle_benchmark_test()
 
 static void aes256_ctrbe_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -237,10 +237,10 @@ static void aes256_ctrbe_benchmark_test()
 
 static void aes256_ctrle_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
 	qsc_aes_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -273,10 +273,10 @@ static void aes256_ctrle_benchmark_test()
 
 static void chacha128_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -309,10 +309,10 @@ static void chacha128_benchmark_test()
 
 static void chacha256_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE] = { 0 };
-	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -345,10 +345,10 @@ static void chacha256_benchmark_test()
 
 static void csx_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE + QSC_CSX_MAC_SIZE] = { 0 };
-	uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE + QSC_CSX_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
 	qsc_csx_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -383,10 +383,10 @@ static void csx_benchmark_test()
 
 static void rcs256_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE + QSC_RCS256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	qsc_rcs_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -421,10 +421,10 @@ static void rcs256_benchmark_test()
 
 static void rcs512_benchmark_test()
 {
-	uint8_t enc[BUFFER_SIZE + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE + QSC_RCS512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
 	qsc_rcs_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -459,9 +459,9 @@ static void rcs512_benchmark_test()
 
 static void kmac128_benchmark()
 {
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t tag[16] = { 0 };
-	uint8_t key[16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[16] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -488,9 +488,9 @@ static void kmac128_benchmark()
 
 static void kmac256_benchmark()
 {
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t tag[32] = { 0 };
-	uint8_t key[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[32] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -517,9 +517,9 @@ static void kmac256_benchmark()
 
 static void kmac512_benchmark()
 {
-	uint8_t msg[BUFFER_SIZE] = { 0 };
-	uint8_t tag[64] = { 0 };
-	uint8_t key[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[64] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -547,9 +547,9 @@ static void kmac512_benchmark()
 #if defined(QSC_SYSTEM_HAS_AVX2)
 static void kmac128x4_benchmark()
 {
-	uint8_t msg[4][BUFFER_SIZE] = { 0 };
-	uint8_t tag[4][16] = { 0 };
-	uint8_t key[4][16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[4][16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[4][16] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -572,9 +572,9 @@ static void kmac128x4_benchmark()
 
 static void kmac256x4_benchmark()
 {
-	uint8_t msg[4][BUFFER_SIZE] = { 0 };
-	uint8_t tag[4][32] = { 0 };
-	uint8_t key[4][32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[4][32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[4][32] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -597,9 +597,9 @@ static void kmac256x4_benchmark()
 
 static void kmac512x4_benchmark()
 {
-	uint8_t msg[4][BUFFER_SIZE] = { 0 };
-	uint8_t tag[4][64] = { 0 };
-	uint8_t key[4][64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[4][64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[4][64] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -624,9 +624,9 @@ static void kmac512x4_benchmark()
 #if defined(QSC_SYSTEM_HAS_AVX512)
 static void kmac128x8_benchmark()
 {
-	uint8_t msg[8][BUFFER_SIZE] = { 0 };
-	uint8_t tag[8][16] = { 0 };
-	uint8_t key[8][16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[8][BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[8][16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[8][16] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -651,9 +651,9 @@ static void kmac128x8_benchmark()
 
 static void kmac256x8_benchmark()
 {
-	uint8_t msg[8][BUFFER_SIZE] = { 0 };
-	uint8_t tag[8][32] = { 0 };
-	uint8_t key[8][32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[8][BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[8][32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[8][32] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -678,9 +678,9 @@ static void kmac256x8_benchmark()
 
 static void kmac512x8_benchmark()
 {
-	uint8_t msg[8][BUFFER_SIZE] = { 0 };
-	uint8_t tag[8][64] = { 0 };
-	uint8_t key[8][64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[8][BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[8][64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[8][64] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -706,8 +706,8 @@ static void kmac512x8_benchmark()
 
 static void shake128_benchmark()
 {
-	uint8_t key[16] = { 0 };
-	uint8_t otp[QSC_KECCAK_128_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_KECCAK_128_RATE] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -732,8 +732,8 @@ static void shake128_benchmark()
 
 static void shake256_benchmark()
 {
-	uint8_t key[32] = { 0 };
-	uint8_t otp[QSC_KECCAK_256_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_KECCAK_256_RATE] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -758,8 +758,8 @@ static void shake256_benchmark()
 
 static void shake512_benchmark()
 {
-	uint8_t key[64] = { 0 };
-	uint8_t otp[QSC_KECCAK_512_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_KECCAK_512_RATE] = { 0 };
 	qsc_keccak_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -785,8 +785,8 @@ static void shake512_benchmark()
 #if defined(QSC_SYSTEM_HAS_AVX2)
 static void shake128x4_benchmark()
 {
-	uint8_t key[4][16] = { 0 };
-	uint8_t otp[4][QSC_KECCAK_128_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[4][16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[4][QSC_KECCAK_128_RATE] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -808,8 +808,8 @@ static void shake128x4_benchmark()
 
 static void shake256x4_benchmark()
 {
-	uint8_t key[4][32] = { 0 };
-	uint8_t otp[4][QSC_KECCAK_256_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[4][32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[4][QSC_KECCAK_256_RATE] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -831,8 +831,8 @@ static void shake256x4_benchmark()
 
 static void shake512x4_benchmark()
 {
-	uint8_t key[4][64] = { 0 };
-	uint8_t otp[4][QSC_KECCAK_512_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[4][64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[4][QSC_KECCAK_512_RATE] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -855,8 +855,8 @@ static void shake512x4_benchmark()
 
 static void qmac_benchmark()
 {
-	uint8_t key[QSC_QMAC_KEY_SIZE] = { 0x03, 0x05, 0x07, 0x0B };
-	uint8_t msg[QSC_QMAC_BLOCK_SIZE] = { 0x0D, 0x11, 0x13, 0x17 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_QMAC_KEY_SIZE] = { 0x03, 0x05, 0x07, 0x0B };
+	QSC_SIMD_ALIGN uint8_t msg[QSC_QMAC_BLOCK_SIZE] = { 0x0D, 0x11, 0x13, 0x17 };
 	qsc_qmac_state ctx;
 	size_t tctr;
 	uint64_t start;
@@ -883,8 +883,8 @@ static void qmac_benchmark()
 #if defined(QSC_SYSTEM_HAS_AVX512)
 static void shake128x8_benchmark()
 {
-	uint8_t key[8][16] = { 0 };
-	uint8_t otp[8][QSC_KECCAK_128_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[8][16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[8][QSC_KECCAK_128_RATE] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -907,8 +907,8 @@ static void shake128x8_benchmark()
 
 static void shake256x8_benchmark()
 {
-	uint8_t key[8][32] = { 0 };
-	uint8_t otp[8][QSC_KECCAK_256_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[8][32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[8][QSC_KECCAK_256_RATE] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;
@@ -931,8 +931,8 @@ static void shake256x8_benchmark()
 
 static void shake512x8_benchmark()
 {
-	uint8_t key[8][64] = { 0 };
-	uint8_t otp[8][QSC_KECCAK_512_RATE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[8][64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[8][QSC_KECCAK_512_RATE] = { 0 };
 	size_t tctr;
 	uint64_t start;
 	uint64_t elapsed;

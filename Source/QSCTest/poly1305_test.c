@@ -6,13 +6,13 @@
 
 bool qsctest_poly1305_kat()
 {
-	uint8_t exp[4][16] = { 0 };
-	uint8_t key[4][32] = { 0 };
-	uint8_t out[16] = { 0 };
-	uint8_t msg1[34] = { 0 };
-	uint8_t msg2[12] = { 0 };
-	uint8_t msg3[64] = { 0 };
-	uint8_t msg4[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[4][16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[4][32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[16] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[34] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[12] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg4[64] = { 0 };
 	size_t i;
 	bool status;
 

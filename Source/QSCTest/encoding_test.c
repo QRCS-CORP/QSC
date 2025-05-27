@@ -1,6 +1,7 @@
 #include "encoding_test.h"
 #include "testutils.h"
 #include "../QSC/encoding.h"
+#include "../QSC/memutils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +23,7 @@ bool qsctest_encoding_base64(void)
 
     if (encoded != NULL)
     {
-        memset(encoded, 0, encbuflen);
+        qsc_memutils_clear(encoded, encbuflen);
 
         /* encode the plain text */
         qsc_encoding_base64_encode(encoded, encbuflen, (const uint8_t*)ptext, txtlen);
@@ -33,7 +34,7 @@ bool qsctest_encoding_base64(void)
 
         if (decoded != NULL)
         {
-            memset(decoded, 0, decbuflen + 1);
+            qsc_memutils_clear(decoded, decbuflen + 1);
 
             /* Decode the Base64 string */
             if (qsc_encoding_base64_decode(decoded, decbuflen, encoded, strlen(encoded)) == true)
@@ -54,18 +55,17 @@ bool qsctest_encoding_base64(void)
 
 bool qsctest_encoding_ber(void)
 {
+    /* sample INTEGER value: 0x3039 (12345) */
+    QSC_SIMD_ALIGN uint8_t aint[] = { 0x30, 0x39 };
     qsc_encoding_ber_element element;
     bool res;
 
     res = false;
-    memset(&element, 0, sizeof(element));
+    qsc_memutils_clear(&element, sizeof(element));
     element.tagclass = QSC_ENCODING_BER_CLASS_UNIVERSAL;
     element.constructed = false;
     element.tagnumber = BER_ASN1_INTEGER;  /* INTEGER */
     element.indefinite = false;
-
-    /* sample INTEGER value: 0x3039 (12345) */
-    uint8_t aint[] = { 0x30, 0x39 };
     element.length = sizeof(aint);
     element.value = (uint8_t*)malloc(sizeof(aint));
 
@@ -76,10 +76,10 @@ bool qsctest_encoding_ber(void)
         size_t berenclen;
         size_t bercons;
 
-        memcpy(element.value, aint, sizeof(aint));
+        qsc_memutils_copy(element.value, aint, sizeof(aint));
         element.children = NULL;
         element.ccount = 0;
-        memset(berbuf, 0, sizeof(berbuf));
+        qsc_memutils_clear(berbuf, sizeof(berbuf));
         berenclen = qsc_encoding_ber_encode_element(&element, berbuf, sizeof(berbuf));
 
         if (berenclen != 0)
@@ -108,38 +108,35 @@ bool qsctest_encoding_ber(void)
 
 bool qsctest_encoding_der(void)
 {
+    /* Use a sample INTEGER value: 0x3039 (12345) */
+    QSC_SIMD_ALIGN uint8_t iarr[] = { 0x30, 0x39 };
+    QSC_SIMD_ALIGN uint8_t derbuf[256];
+    size_t derenclen;
+    size_t dercons;
     qsc_encoding_ber_element element;
+    qsc_encoding_ber_element* decelem;
     bool res;
 
     res = false;
-    memset(&element, 0, sizeof(element));
+    qsc_memutils_clear(&element, sizeof(element));
     element.tagclass = QSC_ENCODING_BER_CLASS_UNIVERSAL;
     element.constructed = false;
     element.tagnumber = BER_ASN1_INTEGER;  /* INTEGER */
     element.indefinite = false;            /* DER disallows indefinite length */
-    
-    /* Use a sample INTEGER value: 0x3039 (12345) */
-    uint8_t iarr[] = { 0x30, 0x39 };
     element.length = sizeof(iarr);
     element.value = (uint8_t*)malloc(sizeof(iarr));
 
     if (element.value != NULL)
     {
-        uint8_t derbuf[256];
-        size_t derenclen;
-        size_t dercons;
-
-        memcpy(element.value, iarr, sizeof(iarr));
+        qsc_memutils_copy(element.value, iarr, sizeof(iarr));
         element.children = NULL;
         element.ccount = 0;
-        memset(derbuf, 0, sizeof(derbuf));
+        qsc_memutils_clear(derbuf, sizeof(derbuf));
 
         derenclen = qsc_encoding_der_encode_element(&element, derbuf, sizeof(derbuf));
 
         if (derenclen != 0)
         {
-            qsc_encoding_ber_element* decelem;
-
             dercons = 0;
             decelem = qsc_encoding_der_decode_element(derbuf, derenclen, &dercons);
 
@@ -164,13 +161,13 @@ bool qsctest_encoding_der(void)
 
 bool qsctest_encoding_hex(void)
 {
-    uint8_t data[] = { 0xDE, 0xAD, 0xBE, 0xEF };
-    char hexenc[2 * sizeof(data) + 1];
+    QSC_SIMD_ALIGN uint8_t data[] = { 0xDE, 0xAD, 0xBE, 0xEF };
+    QSC_SIMD_ALIGN char hexenc[2 * sizeof(data) + 1];
     size_t datalen = sizeof(data);
     bool res;
 
     res = false;
-    memset(hexenc, 0, sizeof(hexenc));
+    qsc_memutils_clear(hexenc, sizeof(hexenc));
 
     if (qsc_encoding_hex_encode(data, datalen, hexenc, sizeof(hexenc)))
     {
@@ -193,16 +190,18 @@ bool qsctest_encoding_hex(void)
 
 bool qsctest_encoding_pem(void)
 {
-    bool res = false;
-    uint8_t data[] = { 0x30, 0x82, 0x01, 0x0A, 0x02, 0x82, 0x01, 0x01 };
+    QSC_SIMD_ALIGN uint8_t data[] = { 0x30, 0x82, 0x01, 0x0A, 0x02, 0x82, 0x01, 0x01 };
+    QSC_SIMD_ALIGN char pemout[1024];
+    QSC_SIMD_ALIGN uint8_t pemdec[1024];
     size_t datalen = sizeof(data);
-    char pemout[1024];
-    uint8_t pemdec[1024];
-    size_t pemdeclen = 0;
+    size_t pemdeclen;
+    bool res;
 
+    res = false;
+    pemdeclen = 0;
     /* Clear output buffers */
-    memset(pemout, 0, sizeof(pemout));
-    memset(pemdec, 0, sizeof(pemdec));
+    qsc_memutils_clear(pemout, sizeof(pemout));
+    qsc_memutils_clear(pemdec, sizeof(pemdec));
 
     /* Encode the binary data into PEM format */
     if (qsc_encoding_pem_encode("TEST LABEL", pemout, sizeof(pemout), data, datalen) == true)

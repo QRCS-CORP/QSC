@@ -15,27 +15,27 @@
 
 bool qsctest_ecdsa_kat_test()
 {
-	uint8_t gpk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
-	uint8_t gsk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ksd[QSC_ECDSA_SEED_SIZE] = { 0 };
-	uint8_t kpk[5][QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
-	uint8_t ksk[5][QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t kms0[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t kms1[QSCTEST_ECDSA_MSG1_SIZE] = { 0 };
-	uint8_t kms2[QSCTEST_ECDSA_MSG2_SIZE] = { 0 };
-	uint8_t kms3[QSCTEST_ECDSA_MSG3_SIZE] = { 0 };
-	uint8_t ksg0[QSCTEST_ECDSA_MSG0_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
-	uint8_t ksg1[QSCTEST_ECDSA_MSG1_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
-	uint8_t ksg2[QSCTEST_ECDSA_MSG2_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
-	uint8_t ksg3[QSCTEST_ECDSA_MSG3_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
-	uint8_t msg0[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t msg1[QSCTEST_ECDSA_MSG1_SIZE] = { 0 };
-	uint8_t msg2[QSCTEST_ECDSA_MSG2_SIZE] = { 0 };
-	uint8_t msg3[QSCTEST_ECDSA_MSG3_SIZE] = { 0 };
-	uint8_t sig0[QSCTEST_ECDSA_MSG0_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
-	uint8_t sig1[QSCTEST_ECDSA_MSG1_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
-	uint8_t sig2[QSCTEST_ECDSA_MSG2_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
-	uint8_t sig3[QSCTEST_ECDSA_MSG3_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t gpk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t gsk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksd[QSC_ECDSA_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kpk[5][QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksk[5][QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kms0[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kms1[QSCTEST_ECDSA_MSG1_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kms2[QSCTEST_ECDSA_MSG2_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kms3[QSCTEST_ECDSA_MSG3_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksg0[QSCTEST_ECDSA_MSG0_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksg1[QSCTEST_ECDSA_MSG1_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksg2[QSCTEST_ECDSA_MSG2_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksg3[QSCTEST_ECDSA_MSG3_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg0[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[QSCTEST_ECDSA_MSG1_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[QSCTEST_ECDSA_MSG2_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[QSCTEST_ECDSA_MSG3_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig0[QSCTEST_ECDSA_MSG0_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig1[QSCTEST_ECDSA_MSG1_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig2[QSCTEST_ECDSA_MSG2_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig3[QSCTEST_ECDSA_MSG3_SIZE + QSC_ECDSA_SIGNATURE_SIZE] = { 0 };
 	size_t mlen;
 	size_t slen;
 	bool ret;
@@ -176,12 +176,12 @@ bool qsctest_ecdsa_kat_test()
 
 bool qsctest_ecdsa_privatekey_integrity()
 {
-	uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -216,12 +216,12 @@ bool qsctest_ecdsa_privatekey_integrity()
 
 bool qsctest_ecdsa_publickey_integrity()
 {
-	uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -253,12 +253,12 @@ bool qsctest_ecdsa_publickey_integrity()
 
 bool qsctest_ecdsa_signature_integrity()
 {
-	uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -306,12 +306,12 @@ bool qsctest_ecdsa_signature_integrity()
 
 bool qsctest_ecdsa_stress_test()
 {
-	uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
-	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_ECDSA_SIGNATURE_SIZE + QSCTEST_ECDSA_MSG0_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
