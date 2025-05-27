@@ -593,7 +593,7 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 		{
 			const char head[] = "255.";
 			const char tail[] = ".0.0";
-			char tmask[4] = { 0U };
+			char tmask[4U] = { 0U };
 
 			cidr -= 8U;
 

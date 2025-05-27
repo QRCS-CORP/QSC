@@ -11,12 +11,12 @@
 
 bool qsctest_chacha128_kat()
 {
-	uint8_t ctext[114] = { 0 };
-	uint8_t cexp[114] = { 0 };
-	uint8_t input[114] = { 0 };
-	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	uint8_t ptext[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ctext[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t cexp[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t input[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ptext[114] = { 0 };
 	bool status;
 
 	status = true;
@@ -63,12 +63,12 @@ bool qsctest_chacha128_kat()
 bool qsctest_chacha256_kat()
 {
 	/* RFC 7539 Vector, section 2.3.2: https://www.rfc-editor.org/rfc/rfc7539.html */
-	uint8_t ctext[114] = { 0 };
-	uint8_t cexp[114] = { 0 };
-	uint8_t input[114] = { 0 };
-	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	uint8_t ptext[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ctext[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t cexp[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t input[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ptext[114] = { 0 };
 	bool status;
 
 	status = true;
@@ -115,13 +115,13 @@ bool qsctest_chacha256_kat()
 bool qsctest_chacha256_poly1305_kat()
 {
 	/* RFC 7539 Vector, section 2.8.2: https://www.rfc-editor.org/rfc/rfc7539.html */
-	uint8_t aad[12] = { 0 };
-	uint8_t ctext[130] = { 0 };
-	uint8_t cexp[130] = { 0 };
-	uint8_t input[114] = { 0 };
-	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	uint8_t ptext[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad[12] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ctext[130] = { 0 };
+	QSC_SIMD_ALIGN uint8_t cexp[130] = { 0 };
+	QSC_SIMD_ALIGN uint8_t input[114] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ptext[114] = { 0 };
 	qsc_chacha_poly1305_state state = { 0 };
 	bool status;
 

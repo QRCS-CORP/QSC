@@ -371,10 +371,10 @@ size_t qsc_collection_size(const qsc_collection_state* ctx)
 #if defined(QSC_DEBUG_MODE)
 bool qsc_collection_test()
 {
-	uint8_t keys[10][16] = { 0U };
-	uint8_t items[10][16] = { 0U };
+	uint8_t keys[10U][16U] = { 0U };
+	uint8_t items[10U][16U] = { 0U };
 	qsc_collection_state cstate = { 0U };
-	uint8_t item[16] = { 0U };
+	uint8_t item[16U] = { 0U };
 	bool res;
 
 	res = true;

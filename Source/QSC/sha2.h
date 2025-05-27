@@ -79,91 +79,91 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_HKDF_256_KEY_SIZE
  * \brief The HKDF-256 key size in bytes.
  */
-#define QSC_HKDF_256_KEY_SIZE 32ULL
+#define QSC_HKDF_256_KEY_SIZE 32U
 
 /*!
  * \def QSC_HKDF_512_KEY_SIZE
  * \brief The HKDF-512 key size in bytes.
  */
-#define QSC_HKDF_512_KEY_SIZE 64ULL
+#define QSC_HKDF_512_KEY_SIZE 64U
 
 /*!
  * \def QSC_HMAC_256_KEY_SIZE
  * \brief The recommended HMAC(SHA2-256) key size, minimum is 32 bytes.
  */
-#define QSC_HMAC_256_KEY_SIZE 32ULL
+#define QSC_HMAC_256_KEY_SIZE 32U
 
 /*!
  * \def QSC_HMAC_512_KEY_SIZE
  * \brief The recommended HMAC(SHA2-512) key size, minimum is 64 bytes.
  */
-#define QSC_HMAC_512_KEY_SIZE 64ULL
+#define QSC_HMAC_512_KEY_SIZE 64U
 
 /*!
  * \def QSC_HMAC_256_MAC_SIZE
  * \brief The HMAC-256 mac-code size in bytes.
  */
-#define QSC_HMAC_256_MAC_SIZE 32ULL
+#define QSC_HMAC_256_MAC_SIZE 32U
 
 /*!
  * \def QSC_HMAC_512_MAC_SIZE
  * \brief The HMAC-512 mac-code size in bytes.
  */
-#define QSC_HMAC_512_MAC_SIZE 64ULL
+#define QSC_HMAC_512_MAC_SIZE 64U
 
 /*!
  * \def QSC_HMAC_256_RATE
  * \brief The HMAC-256 input rate size in bytes.
  */
-#define QSC_HMAC_256_RATE 64ULL
+#define QSC_HMAC_256_RATE 64U
 
 /*!
  * \def QSC_HMAC_512_RATE
  * \brief The HMAC-512 input rate size in bytes.
  */
-#define QSC_HMAC_512_RATE 128ULL
+#define QSC_HMAC_512_RATE 128U
 
 /*!
  * \def QSC_SHA2_256_HASH_SIZE
  * \brief The SHA2-256 hash size in bytes.
  */
-#define QSC_SHA2_256_HASH_SIZE 32ULL
+#define QSC_SHA2_256_HASH_SIZE 32U
 
 /*!
  * \def QSC_SHA2_384_HASH_SIZE
  * \brief The SHA2-384 hash size in bytes.
  */
-#define QSC_SHA2_384_HASH_SIZE 48ULL
+#define QSC_SHA2_384_HASH_SIZE 48U
 
 /*!
  * \def QSC_SHA2_512_HASH_SIZE
  * \brief The SHA2-512 hash size in bytes.
  */
-#define QSC_SHA2_512_HASH_SIZE 64ULL
+#define QSC_SHA2_512_HASH_SIZE 64U
 
 /*!
  * \def QSC_SHA2_256_RATE
  * \brief The SHA2-256 absorption rate in bytes.
  */
-#define QSC_SHA2_256_RATE 64ULL
+#define QSC_SHA2_256_RATE 64U
 
 /*!
  * \def QSC_SHA2_384_RATE
  * \brief The SHA2-384 absorption rate in bytes.
  */
-#define QSC_SHA2_384_RATE 128ULL
+#define QSC_SHA2_384_RATE 128U
 
 /*!
  * \def QSC_SHA2_512_RATE
  * \brief The SHA2-512 absorption rate in bytes.
  */
-#define QSC_SHA2_512_RATE 128ULL
+#define QSC_SHA2_512_RATE 128U
 
 /*!
  * \def QSC_SHA2_STATE_SIZE
  * \brief The SHA2 state array size.
  */
-#define QSC_SHA2_STATE_SIZE 8ULL
+#define QSC_SHA2_STATE_SIZE 8U
 
 /* SHA2-256 */
 
@@ -244,7 +244,7 @@ QSC_EXPORT_API void qsc_sha256_update(qsc_sha256_state* ctx, const uint8_t* mess
 QSC_EXPORT_API typedef struct
 {
     uint64_t state[QSC_SHA2_STATE_SIZE];    /*!< The SHA2-384 state. */
-    uint64_t t[2];                          /*!< The message size. */
+    uint64_t t[2U];                         /*!< The message size. */
     uint8_t  buffer[QSC_SHA2_384_RATE];     /*!< The message buffer. */
     size_t   position;                      /*!< The message position. */
 } qsc_sha384_state;
@@ -305,7 +305,7 @@ QSC_EXPORT_API void qsc_sha384_update(qsc_sha384_state* ctx, const uint8_t* mess
 QSC_EXPORT_API typedef struct
 {
     uint64_t state[QSC_SHA2_STATE_SIZE];    /*!< The SHA2-512 state. */
-    uint64_t t[2];                          /*!< The message length. */
+    uint64_t t[2U];                         /*!< The message length. */
     uint8_t  buffer[QSC_SHA2_512_RATE];     /*!< The message buffer. */
     size_t   position;                      /*!< The cache position. */
 } qsc_sha512_state;

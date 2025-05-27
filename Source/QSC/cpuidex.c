@@ -432,7 +432,7 @@ static void cpuidex_arm_features(qsc_cpuidex_cpu_features* features)
 #	define XCR0_ZMM_HI256 0x00000040UL
 #	define XCR0_HI16_ZMM 0x00000080UL
 
-static void cpuidex_cpu_info(int32_t info[4], const uint32_t infotype)
+static void cpuidex_cpu_info(int32_t info[4U], const uint32_t infotype)
 {
 #if defined(QSC_SYSTEM_COMPILER_MSC) || defined(QSC_SYSTEM_COMPILER_INTEL)
 	__cpuid(info, infotype);
@@ -535,7 +535,7 @@ static void cpuidex_cpu_topology(qsc_cpuidex_cpu_features* features)
 
 		xcr0 = 0U;
 
-		if ((info[2] & (CPUID_ECX_AVX | CPUID_ECX_XSAVE | CPUID_ECX_OSXSAVE)) ==
+		if ((info[2U] & (CPUID_ECX_AVX | CPUID_ECX_XSAVE | CPUID_ECX_OSXSAVE)) ==
 			(CPUID_ECX_AVX | CPUID_ECX_XSAVE | CPUID_ECX_OSXSAVE))
 		{
 			xcr0 = (uint32_t)_xgetbv(0U);
@@ -737,7 +737,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("hw.optional.adx", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->adx = (pval == 1);
+		features->adx = (pval == 1U);
 	}
 
 	pval = 0U;
@@ -745,7 +745,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("hw.optional.aes", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->aesni = (pval == 1);
+		features->aesni = (pval == 1U);
 	}
 
 	pval = 0U;
@@ -753,7 +753,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("hw.optional.avx1_0", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->avx = (pval == 1);
+		features->avx = (pval == 1U);
 	}
 
 
@@ -762,7 +762,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("hw.optional.avx2_0", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->avx2 = (pval == 1);
+		features->avx2 = (pval == 1U);
 	}
 
 	pval = 0U;
@@ -770,7 +770,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("hw.optional.avx512f", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->avx512f = (pval == 1);
+		features->avx512f = (pval == 1U);
 	}
 
 	features->pcmul = features->avx;
@@ -780,7 +780,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("hw.optional.rdrand", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->rdrand = (pval == 1);
+		features->rdrand = (pval == 1U);
 	}
 
 	features->rdtcsp = features->avx;
@@ -790,7 +790,7 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 
 	if (sysctlbyname("hw.optional.rdrand", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->rdrand = (pval == 1);
+		features->rdrand = (pval == 1U);
 	}
 
 	char vend[1024U] = { 0U };

@@ -121,7 +121,7 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 \def QSC_SOCKET_RECEIVE_BUFFER_SIZE
 * \brief The socket receive buffer size
 */
-#define QSC_SOCKET_RECEIVE_BUFFER_SIZE 1600ULL
+#define QSC_SOCKET_RECEIVE_BUFFER_SIZE 1600U
 
 /*! \enum qsc_socket_exceptions
 * \brief Socket code enumeration names

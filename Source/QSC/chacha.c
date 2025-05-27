@@ -154,8 +154,8 @@ static void chacha_permute_p512c(const qsc_chacha_state* ctx, uint8_t* output)
 
 typedef struct
 {
-	__m512i state[16U];
-	__m512i outw[16U];
+	QSC_ALIGN(64) __m512i state[16U];
+	QSC_ALIGN(64) __m512i outw[16U];
 } chacha_avx512_state;
 
 inline static __m512i chacha_rotl512(const __m512i x, uint32_t shift)
@@ -173,7 +173,7 @@ static __m512i chacha_load512(const uint8_t* v)
 
 static void chacha_store512(uint8_t* output, const __m512i x)
 {
-	QSC_ALIGN(64) uint32_t tmp[16];
+	QSC_ALIGN(64) uint32_t tmp[16U];
 
 	_mm512_storeu_si512((__m512i*)tmp, x);
 
@@ -324,8 +324,8 @@ static void chacha_permute_p16x512h(chacha_avx512_state* ctxw)
 
 typedef struct
 {
-	__m256i state[16];
-	__m256i outw[16];
+	QSC_ALIGN(32) __m256i state[16U];
+	QSC_ALIGN(32) __m256i outw[16U];
 } chacha_avx2_state;
 
 inline static __m256i chacha_rotl256(const __m256i x, uint32_t shift)
@@ -485,8 +485,8 @@ static void chacha_permute_p8x512h(chacha_avx2_state* ctxw)
 
 typedef struct
 {
-	__m128i state[16U];
-	__m128i outw[16U];
+	QSC_ALIGN(16) __m128i state[16U];
+	QSC_ALIGN(16) __m128i outw[16U];
 } chacha_avx_state;
 
 inline static __m128i chacha_rotl128(const __m128i x, uint32_t shift)

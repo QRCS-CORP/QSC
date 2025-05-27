@@ -828,7 +828,7 @@ static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], u
     qsc_memutils_copy(buf, coins, QSC_KYBER_SYMBYTES);
     buf[QSC_KYBER_SYMBYTES] = QSC_KYBER_K;
 
-    qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES + 1);
+    qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES + 1U);
 
     kyber_gen_matrix(a, publicseed, 0);
 

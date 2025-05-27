@@ -8,23 +8,23 @@
 bool qsctest_csx512_kat()
 {
 #if defined(QSC_CSX_AUTHENTICATED)
-	uint8_t ad[20] = { 0 };
-	uint8_t enc1[128 + QSC_CSX_MAC_SIZE] = { 0 };
-	uint8_t enc2[128 + QSC_CSX_MAC_SIZE] = { 0 };
-	uint8_t exp1[128 + QSC_CSX_MAC_SIZE] = { 0 };
-	uint8_t exp2[128 + QSC_CSX_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc1[128 + QSC_CSX_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc2[128 + QSC_CSX_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[128 + QSC_CSX_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[128 + QSC_CSX_MAC_SIZE] = { 0 };
 #else
-	uint8_t enc1[128] = { 0 };
-	uint8_t enc2[128] = { 0 };
-	uint8_t exp1[128] = { 0 };
-	uint8_t exp2[128] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc1[128] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc2[128] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[128] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[128] = { 0 };
 #endif
 
-	uint8_t dec[128] = { 0 };
-	uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
-	uint8_t msg[128] = { 0 };
-	uint8_t nce[QSC_CSX_NONCE_SIZE] = { 0 };
-	uint8_t ncpy[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec[128] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[128] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncpy[QSC_CSX_NONCE_SIZE] = { 0 };
 	bool status;
 	qsc_csx_state state;
 
@@ -167,15 +167,15 @@ bool qsctest_csx512_kat()
 bool qsctest_csx512_stress()
 {
 #if defined(QSC_CSX_AUTHENTICATED)
-	uint8_t aad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad[20] = { 0 };
 #endif
+	QSC_SIMD_ALIGN uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	uint8_t* dec;
 	uint8_t* enc;
-	uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
 	uint8_t* msg;
-	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
-	uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
-	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	size_t mlen;
 	size_t tctr;
 	bool status;
@@ -267,19 +267,19 @@ bool qsctest_csx512_stress()
 bool qsctest_csx_wide_equality()
 {
 	const size_t SMPMIN = 16 * 128;
-	uint8_t* dec;
-	uint8_t* enc;
-	uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
-	uint8_t* msg;
-	uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
-	uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CSX_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CSX_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	qsc_csx_state ctx1;
 	qsc_csx_state ctx2;
+	uint8_t* dec;
+	uint8_t* enc;
+	uint8_t* msg;
 	size_t mctr;
 	size_t moft;
 	size_t mlen;
 	size_t tctr;
-	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	bool status;
 
 	tctr = 0;

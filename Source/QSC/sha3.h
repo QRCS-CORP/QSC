@@ -825,30 +825,6 @@ void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen, uint8_t domain);
 
 /**
-* \brief Absorb 8 Keccak instances simultaneously using AVX512 instructions.
-* All memory must be aligned to AVX512 boundaries.
-*
-* \warning The input and output arrays must be of the same length.
-* This function requires the AVX512 instruction set.
-*
-* \param state:		[__m512i*] The Keccak state array
-* \param rate:		[qsc_keccak_rate] The shake rate
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inp4:		[const uint8_t*] The 5th input key array
-* \param inp5:		[const uint8_t*] The 6th input key array
-* \param inp6:		[const uint8_t*] The 7th input key array
-* \param inp7:		[const uint8_t*] The 8th input key array
-* \param inplen:	[size_t] The length of the input key arrays
-* \param domain		[uint8_t] The domain value
-*/
-void qsc_keccakx8_absorb_aligned(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
-	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
-	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, size_t inplen, uint8_t domain);
-
-/**
 * \brief Squeeze 8 Keccak instances simultaneously using AVX512 instructions.
 *
 * \warning The input and output arrays must be of the same length.

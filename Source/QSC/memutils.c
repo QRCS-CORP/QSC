@@ -383,15 +383,15 @@ static bool memutils_equal256(const uint8_t* a, const uint8_t* b)
 #if defined(QSC_SYSTEM_HAS_AVX512)
 static bool memutils_equal512(const uint8_t* a, const uint8_t* b)
 {
-	__m512i wa;
-	__m512i wb;
-	__mmask8 mr;
+	__m512i va;
+	__m512i vb;
+	__mmask8 eq64;
 
-	wa = _mm512_loadu_si512((const __m512i*)a);
-	wb = _mm512_loadu_si512((const __m512i*)b);
-	mr = _mm512_cmpeq_epi64_mask(wa, wb);
+    va = _mm512_loadu_si512(a);
+    vb = _mm512_loadu_si512(b);
+    eq64 = _mm512_cmpeq_epi64_mask(va, vb);
 
-	return ((const char)mr == 0);
+    return (eq64 == 0xFFU);
 }
 #endif
 

@@ -14,15 +14,15 @@ bool qsctest_dilithium_kat_test()
 
 #define TEST_MESSAGE_LEN 330
 
-	uint8_t msg[TEST_MESSAGE_LEN] = { 0 };
-	uint8_t kmsg[TEST_MESSAGE_LEN] = { 0 };
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
-	uint8_t kpk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ksk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
-	uint8_t ksig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[TEST_MESSAGE_LEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kmsg[TEST_MESSAGE_LEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t kpk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ksig[QSC_DILITHIUM_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
 	uint32_t i;
 	size_t msglen;
 	size_t pklen;
@@ -106,12 +106,12 @@ bool qsctest_dilithium_kat_test()
 
 bool qsctest_dilithium_privatekey_integrity()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -148,12 +148,12 @@ bool qsctest_dilithium_privatekey_integrity()
 
 bool qsctest_dilithium_publickey_integrity()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -189,12 +189,12 @@ bool qsctest_dilithium_publickey_integrity()
 
 bool qsctest_dilithium_signature_integrity()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -235,12 +235,12 @@ bool qsctest_dilithium_signature_integrity()
 
 bool qsctest_dilithium_stress_test()
 {
-	uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mout[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sig[QSC_DILITHIUM_SIGNATURE_SIZE + QSCTEST_DILITHIUM_MLEN] = { 0 };
+	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t sk[QSC_DILITHIUM_PRIVATEKEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pk[QSC_DILITHIUM_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;

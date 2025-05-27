@@ -78,12 +78,12 @@
  * \brief The number of Kyber KAT tests.
  */
 #if defined(QSC_KYBER_FIPS203)
-#	define QSCTEST_KYBER_TEST_COUNT 10ULL
+#	define QSCTEST_KYBER_TEST_COUNT 10U
 #else
 #	if defined(QSC_KYBER_S6P3936)
-#	define QSCTEST_KYBER_TEST_COUNT 10ULL
+#	define QSCTEST_KYBER_TEST_COUNT 10U
 #	else
-#	define QSCTEST_KYBER_TEST_COUNT 100ULL
+#	define QSCTEST_KYBER_TEST_COUNT 100U
 #	endif
 #endif
 

@@ -102,25 +102,25 @@ QSC_CPLUSPLUS_ENABLED_START
 * \def QSC_TIMESTAMP_SECONDS_PER_MINUTE
 * \brief The number of seconds in a minute
 */
-#define QSC_TIMESTAMP_SECONDS_PER_MINUTE 60ULL
+#define QSC_TIMESTAMP_SECONDS_PER_MINUTE 60U
 
 /*!
 * \def QSC_TIMESTAMP_SECONDS_PER_HOUR
 * \brief The number of seconds in an hour
 */
-#define QSC_TIMESTAMP_SECONDS_PER_HOUR (QSC_TIMESTAMP_SECONDS_PER_MINUTE * 60ULL)
+#define QSC_TIMESTAMP_SECONDS_PER_HOUR (QSC_TIMESTAMP_SECONDS_PER_MINUTE * 60U)
 
 /*!
 * \def QSC_TIMESTAMP_SECONDS_PER_DAY
 * \brief The number of seconds in a day
 */
-#define QSC_TIMESTAMP_SECONDS_PER_DAY (QSC_TIMESTAMP_SECONDS_PER_HOUR * 24ULL)
+#define QSC_TIMESTAMP_SECONDS_PER_DAY (QSC_TIMESTAMP_SECONDS_PER_HOUR * 24U)
 
 /*!
 * \def QSC_TIMESTAMP_STRING_SIZE
 * \brief The size of the time-stamp string
 */
-#define QSC_TIMESTAMP_STRING_SIZE 20ULL
+#define QSC_TIMESTAMP_STRING_SIZE 20U
 
 /**
 * \brief Get the calendar date from the current locale

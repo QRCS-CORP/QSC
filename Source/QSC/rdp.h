@@ -74,7 +74,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_RDP_SEED_MAX
  * \brief The maximum seed size that can be extracted from a single generate call.
  */
-#define QSC_RDP_SEED_MAX 1024000ULL
+#define QSC_RDP_SEED_MAX 1024000U
 
 /**
  * \brief Generate an array of random bytes using the RDRAND entropy provider.

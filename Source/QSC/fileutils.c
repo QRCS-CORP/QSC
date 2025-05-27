@@ -1187,7 +1187,7 @@ bool qsc_fileutils_write_line(const char* fpath, const char* input, size_t inple
 
 			if (res == true)
 			{
-				const char line[1] = { '\n' };
+				const char line[1U] = { '\n' };
 				res = (fwrite(line, sizeof(char), sizeof(line), fp) != 0U);
 			}
 

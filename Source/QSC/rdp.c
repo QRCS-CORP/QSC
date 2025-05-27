@@ -128,7 +128,7 @@ uint16_t qsc_rdp_uint16()
 
 	if (qsc_rdp_generate(arr, sizeof(arr)))
 	{
-		num = (((uint16_t)arr[1]) |
+		num = (((uint16_t)arr[1U]) |
 			(uint16_t)((uint16_t)arr[0U] << 8U));
 	}
 

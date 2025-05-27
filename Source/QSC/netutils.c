@@ -44,7 +44,7 @@ static void netutils_format_mac(char macout[18U], const uint8_t macin[6U])
     for (size_t i = 0U; i < 6U; ++i)
     {
         macout[i * 3U] = hex[(macin[i] >> 4U) & 0xFU];
-        macout[i * 3U + 1] = hex[ macin[i] & 0xFU];
+        macout[i * 3U + 1U] = hex[ macin[i] & 0xFU];
 
         if (i < 5U)
         {

@@ -20,7 +20,7 @@
 */
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 #	define RCS_ROUNDKEY_ELEMENT_SIZE 16U
-#	define RCS_AVX512_BLOCK 64UL
+#	define RCS_AVX512_BLOCK 64U
 #else
 #	define RCS_ROUNDKEY_ELEMENT_SIZE 4U
 #	define RCS_PREFETCH_TABLES
@@ -44,29 +44,29 @@
 \def RCS256_MKEY_LENGTH
 * The size of the hba-rhx256 mac key array
 */
-#define RCS256_MKEY_LENGTH 32UL
+#define RCS256_MKEY_LENGTH 32U
 
 /*!
 \def RCS512_MKEY_LENGTH
 * The size of the hba-rhx512 mac key array
 */
-#define RCS512_MKEY_LENGTH 64UL
+#define RCS512_MKEY_LENGTH 64U
 
 /*!
 \def RCS_NAME_LENGTH
 * The HBA implementation specific name array length.
 */
 #if defined(QSC_RCS_AUTHENTICATED)
-#define RCS_NAME_LENGTH 17UL
+#define RCS_NAME_LENGTH 17U
 #else
-#define RCS_NAME_LENGTH 13UL
+#define RCS_NAME_LENGTH 13U
 #endif
 
 /*!
 \def RCS_INFO_DEFLEN
 * The size in bytes of the internal default information string.
 */
-#define RCS_INFO_DEFLEN 9UL
+#define RCS_INFO_DEFLEN 9U
 
 #if defined(QSC_RCS_AUTHENTICATED)
 
@@ -105,7 +105,7 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 
-static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2], const __m128i input[2])
+static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2U], const __m128i input[2U])
 {
 	const __m128i BLEND_MASK = _mm_set_epi32(0x80000000UL, 0x80800000UL, 0x80800000UL, 0x80808000UL);
 	const __m128i SHIFT_MASK = _mm_set_epi8(3, 2, 13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0);
@@ -218,7 +218,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 	if (length >= RCS_AVX512_BLOCK)
 	{
-		QSC_SIMD_ALIGN uint8_t ctrblk[64];
+		QSC_ALIGN(64) uint8_t ctrblk[64U];
 		__m512i ctrw;
 		__m512i inpw;
 		__m512i otpw;
@@ -264,8 +264,8 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 		__m128i tmpi[2U] = { _mm_loadu_si128((const __m128i*)(input + oft)) , _mm_loadu_si128((const __m128i*)(input + HLFBLK + oft)) };
 
-		tmpo[0U] = _mm_xor_si128(tmpo[0], tmpi[0]);
-		tmpo[1U] = _mm_xor_si128(tmpo[1], tmpi[1]);
+		tmpo[0U] = _mm_xor_si128(tmpo[0U], tmpi[0U]);
+		tmpo[1U] = _mm_xor_si128(tmpo[1U], tmpi[1U]);
 
 		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
 
@@ -287,7 +287,7 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 		/* store in tmp */
 		_mm_storeu_si128((__m128i*)tmpb, tmpo[0U]);
-		_mm_storeu_si128((__m128i*)((uint8_t*)tmpb + HLFBLK), tmpo[1]);
+		_mm_storeu_si128((__m128i*)((uint8_t*)tmpb + HLFBLK), tmpo[1U]);
 
 		for (size_t i = 0U; i < length; ++i)
 		{
@@ -613,14 +613,14 @@ static void rcs_ct_sbox(uint32_t* q)
 	s1 = t64 ^ ~s3;
 	s2 = t55 ^ ~t67;
 
-	q[7] = s0;
-	q[6] = s1;
-	q[5] = s2;
-	q[4] = s3;
-	q[3] = s4;
-	q[2] = s5;
-	q[1] = s6;
-	q[0] = s7;
+	q[7U] = s0;
+	q[6U] = s1;
+	q[5U] = s2;
+	q[4U] = s3;
+	q[3U] = s4;
+	q[2U] = s5;
+	q[1U] = s6;
+	q[0U] = s7;
 }
 
 static void rcs_sub_bytes(uint8_t* ctx)
@@ -1062,7 +1062,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 	for (i = 0U; i < ctx->roundkeylen; i += 2U)
 	{
-		rcs_load2x128to512(&ctx->roundkeys[i], &ctx->roundkeys[i + 1], &ctx->roundkeysw[i / 2U]);
+		rcs_load2x128to512(&ctx->roundkeys[i], &ctx->roundkeys[i + 1U], &ctx->roundkeysw[i / 2U]);
 	}
 #	endif
 #endif

@@ -6,22 +6,22 @@
 \def AES128_ROUND_COUNT
 * The number of Rijndael mixing rounds used by AES-128.
 */
-#define AES128_ROUND_COUNT 10ULL
+#define AES128_ROUND_COUNT 10U
 
 /*!
 \def AES256_ROUND_COUNT
 * The number of Rijndael mixing rounds used by AES-256.
 */
-#define AES256_ROUND_COUNT 14ULL
+#define AES256_ROUND_COUNT 14U
 
 /*!
 \def ROUNDKEY_ELEMENT_SIZE
 * The round key element size in bytes.
 */
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
-#	define ROUNDKEY_ELEMENT_SIZE 16UL
+#	define ROUNDKEY_ELEMENT_SIZE 16U
 #else
-#	define ROUNDKEY_ELEMENT_SIZE 4UL
+#	define ROUNDKEY_ELEMENT_SIZE 4U
 #	define AES_PREFETCH_TABLES
 #endif
 
@@ -36,14 +36,14 @@
 * The size of the AES-128 internal round-key array in bytes.
 * Use this macro to define the size of the round-key array in an qsc_aes_state struct.
 */
-#define AES128_ROUNDKEY_SIZE ((AES128_ROUND_COUNT + 1UL) * (QSC_AES_BLOCK_SIZE / ROUNDKEY_ELEMENT_SIZE))
+#define AES128_ROUNDKEY_SIZE ((AES128_ROUND_COUNT + 1U) * (QSC_AES_BLOCK_SIZE / ROUNDKEY_ELEMENT_SIZE))
 
 /*!
 \def AES256_ROUNDKEY_SIZE
 * The size of the AES-256 internal round-key array in bytes.
 * Use this macro to define the size of the round-key array in an qsc_aes_state struct.
 */
-#define AES256_ROUNDKEY_SIZE ((AES256_ROUND_COUNT + 1UL) * (QSC_AES_BLOCK_SIZE / ROUNDKEY_ELEMENT_SIZE))
+#define AES256_ROUNDKEY_SIZE ((AES256_ROUND_COUNT + 1U) * (QSC_AES_BLOCK_SIZE / ROUNDKEY_ELEMENT_SIZE))
 
 /* AVX512 */
 
@@ -59,28 +59,28 @@
 \def HBA_INFO_SIZE
 * The HBA version information array length.
 */
-#define HBA_INFO_SIZE 16ULL
+#define HBA_INFO_SIZE 16U
 
 /*!
 \def HBA256_MKEY_SIZE
 * The size of the hba-256 mac key array
 */
-#define HBA256_MKEY_SIZE 32ULL
+#define HBA256_MKEY_SIZE 32U
 
 /*!
 \def HBA512_MKEY_SIZE
 * The size of the hba-512 mac key array
 */
-#define HBA512_MKEY_SIZE 64ULL
+#define HBA512_MKEY_SIZE 64U
 
 /*!
 \def HBA_NAME_SIZE
 * The HBA implementation specific name array length.
 */
 #if defined(QSC_HBA_KMAC_EXTENSION)
-#	define HBA_NAME_SIZE 29ULL
+#	define HBA_NAME_SIZE 29U
 #else
-#	define HBA_NAME_SIZE 33ULL
+#	define HBA_NAME_SIZE 33U
 #endif
 
 /* aes-ni and table-based fallback functions */
@@ -220,20 +220,20 @@ static void aes_standard_expand(qsc_aes_state* ctx, const qsc_aes_keyparams* key
 	if (kwords == 8U)
 	{
 		ctx->roundkeys[0U] = _mm_loadu_si128((const __m128i*)keyparams->key);
-		ctx->roundkeys[1U] = _mm_loadu_si128((const __m128i*)(keyparams->key + 16));
-		ctx->roundkeys[2U] = _mm_aeskeygenassist_si128(ctx->roundkeys[1], 0x01);
+		ctx->roundkeys[1U] = _mm_loadu_si128((const __m128i*)(keyparams->key + 16U));
+		ctx->roundkeys[2U] = _mm_aeskeygenassist_si128(ctx->roundkeys[1U], 0x01);
 		aes_expand_rot(ctx->roundkeys, 2U, 2U);
 		aes_expand_sub(ctx->roundkeys, 3U, 2U);
-		ctx->roundkeys[4U] = _mm_aeskeygenassist_si128(ctx->roundkeys[3], 0x02);
+		ctx->roundkeys[4U] = _mm_aeskeygenassist_si128(ctx->roundkeys[3U], 0x02);
 		aes_expand_rot(ctx->roundkeys, 4U, 2U);
 		aes_expand_sub(ctx->roundkeys, 5U, 2U);
-		ctx->roundkeys[6U] = _mm_aeskeygenassist_si128(ctx->roundkeys[5], 0x04);
+		ctx->roundkeys[6U] = _mm_aeskeygenassist_si128(ctx->roundkeys[5U], 0x04);
 		aes_expand_rot(ctx->roundkeys, 6U, 2U);
 		aes_expand_sub(ctx->roundkeys, 7U, 2U);
-		ctx->roundkeys[8U] = _mm_aeskeygenassist_si128(ctx->roundkeys[7], 0x08);
+		ctx->roundkeys[8U] = _mm_aeskeygenassist_si128(ctx->roundkeys[7U], 0x08);
 		aes_expand_rot(ctx->roundkeys, 8U, 2U);
 		aes_expand_sub(ctx->roundkeys, 9U, 2U);
-		ctx->roundkeys[10U] = _mm_aeskeygenassist_si128(ctx->roundkeys[9], 0x10);
+		ctx->roundkeys[10U] = _mm_aeskeygenassist_si128(ctx->roundkeys[9U], 0x10);
 		aes_expand_rot(ctx->roundkeys, 10U, 2U);
 		aes_expand_sub(ctx->roundkeys, 11U, 2U);
 		ctx->roundkeys[12U] = _mm_aeskeygenassist_si128(ctx->roundkeys[11U], 0x20);
@@ -245,25 +245,25 @@ static void aes_standard_expand(qsc_aes_state* ctx, const qsc_aes_keyparams* key
 	else
 	{
 		ctx->roundkeys[0U] = _mm_loadu_si128((const __m128i*)keyparams->key);
-		ctx->roundkeys[1U] = _mm_aeskeygenassist_si128(ctx->roundkeys[0], 0x01);
+		ctx->roundkeys[1U] = _mm_aeskeygenassist_si128(ctx->roundkeys[0U], 0x01);
 		aes_expand_rot(ctx->roundkeys, 1U, 1U);
-		ctx->roundkeys[2U] = _mm_aeskeygenassist_si128(ctx->roundkeys[1], 0x02);
+		ctx->roundkeys[2U] = _mm_aeskeygenassist_si128(ctx->roundkeys[1U], 0x02);
 		aes_expand_rot(ctx->roundkeys, 2U, 1U);
-		ctx->roundkeys[3U] = _mm_aeskeygenassist_si128(ctx->roundkeys[2], 0x04);
+		ctx->roundkeys[3U] = _mm_aeskeygenassist_si128(ctx->roundkeys[2U], 0x04);
 		aes_expand_rot(ctx->roundkeys, 3U, 1U);
-		ctx->roundkeys[4U] = _mm_aeskeygenassist_si128(ctx->roundkeys[3], 0x08);
+		ctx->roundkeys[4U] = _mm_aeskeygenassist_si128(ctx->roundkeys[3U], 0x08);
 		aes_expand_rot(ctx->roundkeys, 4U, 1U);
-		ctx->roundkeys[5U] = _mm_aeskeygenassist_si128(ctx->roundkeys[4], 0x10);
+		ctx->roundkeys[5U] = _mm_aeskeygenassist_si128(ctx->roundkeys[4U], 0x10);
 		aes_expand_rot(ctx->roundkeys, 5U, 1U);
-		ctx->roundkeys[6U] = _mm_aeskeygenassist_si128(ctx->roundkeys[5], 0x20);
+		ctx->roundkeys[6U] = _mm_aeskeygenassist_si128(ctx->roundkeys[5U], 0x20);
 		aes_expand_rot(ctx->roundkeys, 6U, 1U);
-		ctx->roundkeys[7U] = _mm_aeskeygenassist_si128(ctx->roundkeys[6], 0x40);
+		ctx->roundkeys[7U] = _mm_aeskeygenassist_si128(ctx->roundkeys[6U], 0x40);
 		aes_expand_rot(ctx->roundkeys, 7U, 1U);
-		ctx->roundkeys[8U] = _mm_aeskeygenassist_si128(ctx->roundkeys[7], 0x80);
+		ctx->roundkeys[8U] = _mm_aeskeygenassist_si128(ctx->roundkeys[7U], 0x80);
 		aes_expand_rot(ctx->roundkeys, 8U, 1U);
-		ctx->roundkeys[9U] = _mm_aeskeygenassist_si128(ctx->roundkeys[8], 0x1B);
+		ctx->roundkeys[9U] = _mm_aeskeygenassist_si128(ctx->roundkeys[8U], 0x1B);
 		aes_expand_rot(ctx->roundkeys, 9U, 1U);
-		ctx->roundkeys[10U] = _mm_aeskeygenassist_si128(ctx->roundkeys[9], 0x36);
+		ctx->roundkeys[10U] = _mm_aeskeygenassist_si128(ctx->roundkeys[9U], 0x36);
 		aes_expand_rot(ctx->roundkeys, 10U, 1U);
 	}
 }
@@ -341,7 +341,7 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(outputlen != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	if (ctx != NULL && input != NULL && output != NULL && outputlen != NULL && length != 0)
 	{
@@ -360,7 +360,7 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 			__m512i inpw;
 			__m512i ivtw;
 			__m512i otpw;
-			uint8_t ivtb[AVX512_BLOCK_SIZE] = { 0U };
+			QSC_ALIGN(64) uint8_t ivtb[AVX512_BLOCK_SIZE] = { 0U };
 
 			/* assemble the first block in the chain */
 			qsc_memutils_copy(ivtb, ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -432,7 +432,7 @@ void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* inp
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
@@ -527,7 +527,7 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
@@ -546,7 +546,7 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 			__m512i ncew;
 			__m512i otpw;
 			__m512i tmpn;
-			uint8_t nceb[AVX512_BLOCK_SIZE];
+			QSC_ALIGN(64) uint8_t nceb[AVX512_BLOCK_SIZE];
 
 			/* load the ctr nonce block */
 			qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -625,7 +625,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
@@ -643,7 +643,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 			__m512i inpw;
 			__m512i ncew;
 			__m512i otpw;
-			uint8_t nceb[AVX512_BLOCK_SIZE] = { 0U };
+			QSC_ALIGN(64) uint8_t nceb[AVX512_BLOCK_SIZE] = { 0U };
 
 			/* load the ctr nonce block */
 			qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -699,7 +699,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 
 		if (length != 0U)
 		{
-			QSC_ALIGN(16U) uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+			uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
 
 			nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
 			qsc_intutils_le8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -771,7 +771,7 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 
 /* rijndael rcon, and s-box constant tables */
 
-static const uint32_t rcon[30] =
+static const uint32_t rcon[30U] =
 {
 	0x00000000UL, 0x01000000UL, 0x02000000UL, 0x04000000UL, 0x08000000UL, 0x10000000UL, 0x20000000UL, 0x40000000UL,
 	0x80000000UL, 0x1B000000UL, 0x36000000UL, 0x6C000000UL, 0xD8000000UL, 0xAB000000UL, 0x4D000000UL, 0x9A000000UL,
@@ -1622,7 +1622,7 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
@@ -1651,7 +1651,7 @@ void qsc_aes_cbc_encrypt(qsc_aes_state* ctx, uint8_t* output, const uint8_t* inp
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	if (ctx != NULL && input != NULL && output != NULL && length != 0)
 	{
@@ -1728,7 +1728,7 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	size_t i;
 	size_t oft;
@@ -1773,7 +1773,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	size_t i;
 	size_t oft;
@@ -1857,9 +1857,9 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 void qsc_pkcs7_add_padding(uint8_t* input, size_t length)
 {
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
-	if (input != NULL && length != 0)
+	if (input != NULL && length != 0U)
 	{
 		const size_t PADOFT = QSC_AES_BLOCK_SIZE - length;
 		size_t ctr;
@@ -2100,7 +2100,7 @@ bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t* output, const 
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	bool res;
 
@@ -2251,7 +2251,7 @@ static void gcm_mult(const uint8_t* x, const uint8_t* y, uint8_t* result)
 				}
 			}
 
-			lsb = v[QSC_AES_BLOCK_SIZE - 1] & 1;
+			lsb = v[QSC_AES_BLOCK_SIZE - 1U] & 1;
 
 			for (size_t j = QSC_AES_BLOCK_SIZE - 1U; j > 0U; j--)
 			{
@@ -2306,7 +2306,7 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	bool res;
 
@@ -2397,7 +2397,7 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(length != 0);
+	QSC_ASSERT(length != 0U);
 
 	if (ctx != NULL && output != NULL && input != NULL && length != 0)
 	{

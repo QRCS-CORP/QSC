@@ -842,7 +842,7 @@ static void shake512x4_benchmark()
 
 	while (tctr < ONE_GIGABYTE)
 	{
-		qsc_shake_512x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_512_RATE, key[0], key[1], key[2], key[3], 64);
+		qsc_shake_512x4(otp[0], otp[1], otp[2], otp[3], QSC_KECCAK_512_RATE, key[0], key[1], key[2], key[3], 64U);
 		tctr += (4 * QSC_KECCAK_512_RATE);
 	}
 
@@ -943,7 +943,7 @@ static void shake512x8_benchmark()
 	while (tctr < ONE_GIGABYTE)
 	{
 		qsc_shake_512x8(otp[0], otp[1], otp[2], otp[3], otp[4], otp[5], otp[6], otp[7], QSC_KECCAK_512_RATE,
-			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 64);
+			key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7], 64U);
 		tctr += (8 * QSC_KECCAK_512_RATE);
 	}
 

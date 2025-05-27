@@ -6,14 +6,14 @@
 
 bool qsctest_hkdf_256_kat() 
 {
-	uint8_t exp0[42] = { 0 };
-	uint8_t exp1[82] = { 0 };
-	uint8_t inf0[10] = { 0 };
-	uint8_t inf1[80] = { 0 };
-	uint8_t key0[22] = { 0 };
-	uint8_t key1[80] = { 0 };
-	uint8_t otp0[42] = { 0 };
-	uint8_t otp1[82] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp0[42] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[82] = { 0 };
+	QSC_SIMD_ALIGN uint8_t inf0[10] = { 0 };
+	QSC_SIMD_ALIGN uint8_t inf1[80] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key0[22] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key1[80] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp0[42] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp1[82] = { 0 };
 	bool status;
 
 	qsctest_hex_to_bin("D03C9AB82C884B1DCFD3F4CFFD0E4AD1501915E5D72DF0E6D846D59F6CF78047"
@@ -55,14 +55,14 @@ bool qsctest_hkdf_256_kat()
 
 bool qsctest_hkdf_512_kat()
 {
-	uint8_t exp0[42] = { 0 };
-	uint8_t exp1[82] = { 0 };
-	uint8_t inf0[10] = { 0 };
-	uint8_t inf1[80] = { 0 };
-	uint8_t key0[22] = { 0 };
-	uint8_t key1[80] = { 0 };
-	uint8_t otp0[42] = { 0 };
-	uint8_t otp1[82] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp0[42] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[82] = { 0 };
+	QSC_SIMD_ALIGN uint8_t inf0[10] = { 0 };
+	QSC_SIMD_ALIGN uint8_t inf1[80] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key0[22] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key1[80] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp0[42] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp1[82] = { 0 };
 	bool status;
 
 	qsctest_hex_to_bin("7CE212EEB2A92270C4460A4728944B9B0EE9E060DE13C197853D37A20CE7184F"
@@ -104,22 +104,22 @@ bool qsctest_hkdf_512_kat()
 
 bool qsctest_hmac_256_kat()
 {
-	uint8_t exp0[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp1[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp2[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp3[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t exp4[QSC_HMAC_256_MAC_SIZE] = { 0 };
-	uint8_t key0[20] = { 0 };
-	uint8_t key1[20] = { 0 };
-	uint8_t key2[25] = { 0 };
-	uint8_t key3[131] = { 0 };
-	uint8_t key4[131] = { 0 };
-	uint8_t msg0[8] = { 0 };
-	uint8_t msg1[50] = { 0 };
-	uint8_t msg2[50] = { 0 };
-	uint8_t msg3[54] = { 0 };
-	uint8_t msg4[152] = { 0 };
-	uint8_t otp[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp0[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp3[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp4[QSC_HMAC_256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key0[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key1[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key2[25] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key3[131] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key4[131] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg0[8] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[50] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[50] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[54] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg4[152] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_HMAC_256_MAC_SIZE] = { 0 };
 	qsc_hmac256_state state;
 	bool status;
 
@@ -257,22 +257,22 @@ bool qsctest_hmac_256_kat()
 
 bool qsctest_hmac_512_kat()
 {
-	uint8_t exp0[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp1[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp2[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp3[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t exp4[QSC_HMAC_512_MAC_SIZE] = { 0 };
-	uint8_t key0[20] = { 0 };
-	uint8_t key1[20] = { 0 };
-	uint8_t key2[25] = { 0 };
-	uint8_t key3[131] = { 0 };
-	uint8_t key4[131] = { 0 };
-	uint8_t msg0[8] = { 0 };
-	uint8_t msg1[50] = { 0 };
-	uint8_t msg2[50] = { 0 };
-	uint8_t msg3[54] = { 0 };
-	uint8_t msg4[152] = { 0 };
-	uint8_t otp[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp0[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp3[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp4[QSC_HMAC_512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key0[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key1[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key2[25] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key3[131] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key4[131] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg0[8] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[50] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[50] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[54] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg4[152] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_HMAC_512_MAC_SIZE] = { 0 };
 	qsc_hmac512_state state;
 	bool status;
 
@@ -410,15 +410,15 @@ bool qsctest_hmac_512_kat()
 
 bool qsctest_sha2_256_kat()
 {
-	uint8_t exp0[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp1[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp2[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t exp3[QSC_SHA2_256_HASH_SIZE] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg1[3] = { 0 };
-	uint8_t msg2[56] = { 0 };
-	uint8_t msg3[112] = { 0 };
-	uint8_t otp[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp0[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp3[QSC_SHA2_256_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[3] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[56] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[112] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_SHA2_256_HASH_SIZE] = { 0 };
 	qsc_sha256_state state;
 	bool status;
 
@@ -531,15 +531,15 @@ bool qsctest_sha2_256_kat()
 
 bool qsctest_sha2_384_kat()
 {
-	uint8_t exp0[QSC_SHA2_384_HASH_SIZE] = { 0 };
-	uint8_t exp1[QSC_SHA2_384_HASH_SIZE] = { 0 };
-	uint8_t exp2[QSC_SHA2_384_HASH_SIZE] = { 0 };
-	uint8_t exp3[QSC_SHA2_384_HASH_SIZE] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg1[3] = { 0 };
-	uint8_t msg2[56] = { 0 };
-	uint8_t msg3[112] = { 0 };
-	uint8_t otp[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp0[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp3[QSC_SHA2_384_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[3] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[56] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[112] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_SHA2_384_HASH_SIZE] = { 0 };
 	qsc_sha384_state state;
 	bool status;
 
@@ -651,15 +651,15 @@ bool qsctest_sha2_384_kat()
 
 bool qsctest_sha2_512_kat()
 {
-	uint8_t exp0[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp1[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp2[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t exp3[QSC_SHA2_512_HASH_SIZE] = { 0 };
-	uint8_t msg0[1] = { 0 };
-	uint8_t msg1[3] = { 0 };
-	uint8_t msg2[56] = { 0 };
-	uint8_t msg3[112] = { 0 };
-	uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp0[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp3[QSC_SHA2_512_HASH_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg0[1] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[3] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[56] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[112] = { 0 };
+	QSC_SIMD_ALIGN uint8_t otp[QSC_SHA2_512_HASH_SIZE] = { 0 };
 	qsc_sha512_state state;
 	bool status;
 

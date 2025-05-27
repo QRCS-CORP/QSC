@@ -46,7 +46,7 @@
  * \def QSCTEST_DILITHIUM_TEST_COUNT
  * \brief The number of Dilithium KAT tests.
  */
-#define QSCTEST_DILITHIUM_TEST_COUNT 10ULL
+#define QSCTEST_DILITHIUM_TEST_COUNT 10U
 
 /*!
  * \def QSCTEST_DILITHIUM_FULL_KAT

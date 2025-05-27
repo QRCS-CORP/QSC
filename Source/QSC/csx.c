@@ -174,8 +174,8 @@ static void csx_permute_p1024c(const qsc_csx_state* ctx, uint8_t* output)
 
 typedef struct
 {
-	__m512i state[16];
-	__m512i outw[16];
+	QSC_ALIGN(64) __m512i state[16U];
+	QSC_ALIGN(64) __m512i outw[16U];
 } csx_avx512_state;
 
 inline static __m512i csx_rotl512(const __m512i x, uint32_t shift)
@@ -192,7 +192,7 @@ static __m512i csx_load512(const uint8_t* v)
 
 static void csx_store512(uint8_t* output, const __m512i x)
 {
-	uint64_t tmp[8U];
+	QSC_ALIGN(64) uint64_t tmp[8U];
 
 	_mm512_storeu_si512((__m512i*)tmp, x);
 
@@ -355,8 +355,8 @@ static void csx_permute_p8x1024h(csx_avx512_state* ctx)
 
 typedef struct
 {
-	__m256i state[16];
-	__m256i outw[16];
+	QSC_ALIGN(32) __m256i state[16U];
+	QSC_ALIGN(32) __m256i outw[16U];
 } csx_avx256_state;
 
 static __m256i csx_rotl256(const __m256i x, size_t shift)
@@ -580,7 +580,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 			length -= CSX_AVX512_BLOCK;
 		}
 
-		uint8_t ctrblk[64];
+		uint8_t ctrblk[64U];
 		/* store the nonce */
 		_mm512_storeu_si512((__m512i*)ctrblk, ctxw.state[12U]);
 		ctx->state[12U] = qsc_intutils_le8to64((ctrblk + 56U));

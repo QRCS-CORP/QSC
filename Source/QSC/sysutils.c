@@ -219,7 +219,7 @@ char qsc_sysutils_get_os_drive_letter(void)
         return '\0';
     }
 
-    return buffer[0];
+    return buffer[0U];
 #else
     return '/';
 #endif

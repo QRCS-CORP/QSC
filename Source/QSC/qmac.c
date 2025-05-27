@@ -58,7 +58,7 @@ static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uin
 
 #elif defined(QSC_SYSTEM_HAS_AVX)
 
-static inline void qmac_shift256_left_19(__m128i in[2], __m128i out[2])
+static inline void qmac_shift256_left_19(__m128i in[2U], __m128i out[2U])
 {
     uint64_t lanes[4U];
     uint64_t carry = 0U;
@@ -86,23 +86,23 @@ static inline void qmac_shift256_left_19(__m128i in[2], __m128i out[2])
 
 static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uint64_t b[4U])
 {
-    uint64_t prod[8] = { 0U };
+    uint64_t prod[8U] = { 0U };
     
     /* compute the full 512 - bit product using the verified cmul function */
     qsc_memutils_clmulepi64_si256(prod, a, b);
     
     /* load the lower 256 bits(prod[0..3]) into two __m128i registers */
     __m128i L[2U];
-    /* loads prod[0] and prod[1] */
+    /* loads prod[0U] and prod[1U] */
     L[0U] = _mm_loadu_si128((const __m128i*) prod);
-    /* loads prod[2] and prod[3] */
+    /* loads prod[2U] and prod[3U] */
     L[1U] = _mm_loadu_si128((const __m128i*)(prod + 2U));
     
     /* load the upper 256 bits(prod[4..7]) into two __m128i registers */
     __m128i H[2U];
-    /* loads prod[4] and prod[5] */
+    /* loads prod[4U] and prod[5U] */
     H[0U] = _mm_loadu_si128((const __m128i*)(prod + 4U));
-    /* loads prod[6] and prod[7] */
+    /* loads prod[6U] and prod[7U] */
     H[1U] = _mm_loadu_si128((const __m128i*)(prod + 6U));
     
     /* compute H << 19 with proper carry propagation */
@@ -124,7 +124,7 @@ static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uin
 
 #else
 
-static void qmac_shift256_left_19_fold(const uint64_t in[4], int32_t shift, uint64_t out[4])
+static void qmac_shift256_left_19_fold(const uint64_t in[4U], int32_t shift, uint64_t out[4U])
 {
     uint64_t tmp[5U];
     uint64_t carry;

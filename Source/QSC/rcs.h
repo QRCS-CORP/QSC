@@ -156,45 +156,45 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_RCS_BLOCK_SIZE
  * \brief The internal block size in bytes, required by the encryption and decryption functions.
  */
-#define QSC_RCS_BLOCK_SIZE 32ULL
+#define QSC_RCS_BLOCK_SIZE 32U
 
 /*!
  * \def QSC_RCS256_KEY_SIZE
  * \brief The size in bytes of the RCS-256 input cipher-key.
  */
-#define QSC_RCS256_KEY_SIZE 32ULL
+#define QSC_RCS256_KEY_SIZE 32U
 
 /*!
  * \def QSC_RCS256_MAC_SIZE
  * \brief The RCS-256 MAC code array length in bytes.
  */
-#define QSC_RCS256_MAC_SIZE 32ULL
+#define QSC_RCS256_MAC_SIZE 32U
 
 /*!
  * \def QSC_RCS512_KEY_SIZE
  * \brief The size in bytes of the RCS-512 input cipher-key.
  */
-#define QSC_RCS512_KEY_SIZE 64ULL
+#define QSC_RCS512_KEY_SIZE 64U
 
 #if defined(QSC_RCS_AUTH_QMAC)
 /*!
  * \def QSC_RCS512_MAC_SIZE
  * \brief The RCS-512 MAC code array length in bytes.
  */
-#define QSC_RCS512_MAC_SIZE 32ULL
+#define QSC_RCS512_MAC_SIZE 32U
 #else
 /*!
  * \def QSC_RCS512_MAC_SIZE
  * \brief The RCS-512 MAC code array length in bytes.
  */
-#define QSC_RCS512_MAC_SIZE 64ULL
+#define QSC_RCS512_MAC_SIZE 64U
 #endif
 
 /*!
  * \def QSC_RCS_NONCE_SIZE
  * \brief The nonce size in bytes.
  */
-#define QSC_RCS_NONCE_SIZE 32ULL
+#define QSC_RCS_NONCE_SIZE 32U
 
 /*! \enum rcs_cipher_type
  * \brief The pre-defined cipher mode implementations.
@@ -229,12 +229,12 @@ QSC_EXPORT_API typedef struct
 {
 	rcs_cipher_type ctype;				/*!< The cipher type; RCS-256 or RCS-512. */
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
-	__m128i roundkeys[62];				/*!< The 128-bit integer round-key array. */
+	__m128i roundkeys[62U];				/*!< The 128-bit integer round-key array. */
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		__m512i roundkeysw[31];			/*!< The 512-bit integer round-key array. */
+		QSC_ALIGN(64) __m512i roundkeysw[31U];			/*!< The 512-bit integer round-key array. */
 #	endif
 #else
-	uint32_t roundkeys[248];			/*!< The round-keys 32-bit sub-key array. */
+	uint32_t roundkeys[248U];			/*!< The round-keys 32-bit sub-key array. */
 #endif
 	size_t roundkeylen;					/*!< The round-key array length. */
 	size_t rounds;						/*!< The number of transformation rounds. */

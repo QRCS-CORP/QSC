@@ -80,13 +80,13 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_SCB_256_SEED_SIZE
  * \brief The SCB-256 seed size.
  */
-#define QSC_SCB_256_SEED_SIZE 32ULL
+#define QSC_SCB_256_SEED_SIZE 32U
 
 /*!
  * \def QSC_SCB_512_SEED_SIZE
  * \brief The SCB-512 seed size.
  */
-#define QSC_SCB_512_SEED_SIZE 64ULL
+#define QSC_SCB_512_SEED_SIZE 64U
 
 /*!
  * \def QSC_SCB_L2CACHE_DEFAULT_SIZE
@@ -104,25 +104,25 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_SCB_MEMORY_MAXIMUM
  * \brief The maximum memory cost.
  */
-#define QSC_SCB_MEMORY_MAXIMUM 128ULL
+#define QSC_SCB_MEMORY_MAXIMUM 128U
 
 /*!
  * \def QSC_SCB_MEMORY_MINIMUM
  * \brief The minimum memory cost.
  */
-#define QSC_SCB_MEMORY_MINIMUM 1ULL
+#define QSC_SCB_MEMORY_MINIMUM 1U
 
 /*!
  * \def QSC_SCB_CPU_MINIMUM
  * \brief The minimum CPU cost multiplier.
  */
-#define QSC_SCB_CPU_MINIMUM 1ULL
+#define QSC_SCB_CPU_MINIMUM 1U
 
 /*!
  * \def QSC_SCB_CPU_MAXIMUM
  * \brief The maximum CPU cost multiplier.
  */
-#define QSC_SCB_CPU_MAXIMUM 1000ULL
+#define QSC_SCB_CPU_MAXIMUM 1000U
 
 /*!
  * \struct qsc_scb_state

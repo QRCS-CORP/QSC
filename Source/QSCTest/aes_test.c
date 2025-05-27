@@ -13,10 +13,10 @@
 
 static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
-	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t expf[4 * QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t inpf[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t expf[4 * QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t inpf[4 * QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -73,8 +73,8 @@ static bool aes128_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
-	uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ivc[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -122,8 +122,8 @@ static bool aes256_cbc_monte_carlo(const uint8_t* key, const uint8_t* iv, const 
 
 static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
-	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -174,8 +174,8 @@ static bool aes128_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
-	uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -225,7 +225,7 @@ static bool aes256_ctr_monte_carlo(const uint8_t* key, const uint8_t* nonce, con
 
 static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -273,7 +273,7 @@ static bool aes128_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 
 static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[16], const uint8_t (*expected)[16])
 {
-	uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t out[QSC_AES_BLOCK_SIZE] = { 0 };
 	size_t i;
 	bool status;
 	qsc_aes_state state;
@@ -318,10 +318,10 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t (*message)[
 
 bool qsctest_fips_aes128_cbc()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	/* SP800-38a F2.1 */
 	
@@ -343,10 +343,10 @@ bool qsctest_fips_aes128_cbc()
 
 bool qsctest_fips_aes256_cbc()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 
 	/* SP800-38a F2.5 */
 
@@ -368,10 +368,10 @@ bool qsctest_fips_aes256_cbc()
 
 bool qsctest_fips_aes128_ctr()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	/* SP800-38a F5.1 */
 
@@ -393,10 +393,10 @@ bool qsctest_fips_aes128_ctr()
 
 bool qsctest_fips_aes256_ctr()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	/* SP800-38a F5.5 */
 
@@ -418,9 +418,9 @@ bool qsctest_fips_aes256_ctr()
 
 bool qsctest_fips_aes128_ecb()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES_BLOCK_SIZE] = { 0 };
 
 	/* SP800-38a F1.1 */
 
@@ -441,9 +441,9 @@ bool qsctest_fips_aes128_ecb()
 
 bool qsctest_fips_aes256_ecb()
 {
-	uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[4][QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 
 	/* SP800-38a F1.5 */
 
@@ -466,14 +466,14 @@ bool qsctest_aes256_gcm_kat()
 {
     /* Test vector parameters from NIST SP800-38D for AES-256 GCM */
 	qsc_aes_gcm256_state state = { 0 };
-    uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
-    uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };
-    uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
-	uint8_t exp2[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
-    uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 }; /* 96-bit IV */
-    uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t shdr[QSC_AES256_KEY_SIZE] = { 0x80 };
-    uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0 }; /* 16-byte plaintext (all zeros) */
+    QSC_SIMD_ALIGN uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+    QSC_SIMD_ALIGN uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };
+    QSC_SIMD_ALIGN uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+    QSC_SIMD_ALIGN uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 }; /* 96-bit IV */
+    QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t shdr[QSC_AES256_KEY_SIZE] = { 0x80 };
+    QSC_SIMD_ALIGN uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0 }; /* 16-byte plaintext (all zeros) */
     bool status;
 
 	status = true;
@@ -548,28 +548,28 @@ bool qsctest_aes256_gcm_kat()
 
 bool qsctest_aes256_hba_kat()
 {
-	uint8_t aad1[20] = { 0 };
-	uint8_t aad2[20] = { 0 };
-	uint8_t aad3[20] = { 0 };
-	uint8_t dec1[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t dec2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
-	uint8_t dec3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
-	uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
-	uint8_t msg1[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t msg2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
-	uint8_t msg3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
-	uint8_t nce1[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t nce2[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t nce3[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t n1copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t n2copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t n3copy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
-	uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad1[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad2[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad3[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec1[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg1[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg2[QSC_AES_BLOCK_SIZE * 2] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg3[QSC_AES_BLOCK_SIZE * 4] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce1[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce2[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce3[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t n1copy[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t n2copy[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t n3copy[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc1[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc2[(QSC_AES_BLOCK_SIZE * 2) + QSC_HBA256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc3[(QSC_AES_BLOCK_SIZE * 4) + QSC_HBA256_MAC_SIZE] = { 0 };
 	bool status;
 
 	/* vectors from CEX */
@@ -704,14 +704,14 @@ bool qsctest_aes256_hba_kat()
 
 bool qsctest_aes256_hba_stress()
 {
-	uint8_t aad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncopy[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	uint8_t* dec;
 	uint8_t* enc;
-	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 	uint8_t* msg;
-	uint8_t ncopy[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	uint16_t mlen;
 	size_t tctr;
 	bool status;
@@ -796,8 +796,8 @@ bool qsctest_aes256_hba_stress()
 
 bool qsctest_aes256_padding_test()
 {
-	uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
-	uint8_t pmcnt[1] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_AES_BLOCK_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pmcnt[1] = { 0 };
 	size_t mlen;
 	size_t tctr;
 	bool status;

@@ -66,10 +66,10 @@ static void acp_collect_statistics(uint8_t stat[ACP_PRESEED_SIZE])
 	}
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	char drv[3] = { 0 };
+	char drv[3U] = { 0 };
 
-	drv[0] = qsc_sysutils_get_os_drive_letter();
-	drv[1] = ':';
+	drv[0U] = qsc_sysutils_get_os_drive_letter();
+	drv[1U] = ':';
 	qsc_sysutils_drive_space(drv, &dstate);
 #elif defined(QSC_SYSTEM_OS_POSIX)
 	qsc_sysutils_drive_space("/", &dstate);

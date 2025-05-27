@@ -27,7 +27,7 @@ static const uint64_t KECCAK_ROUND_CONSTANTS[QSC_KECCAK_PERMUTATION_MAX_ROUNDS] 
 
 static void keccak_fast_absorb(uint64_t* state, const uint8_t* message, size_t msglen)
 {
-#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN) && !defined(QSC_MISRA_FULL_COMPLIANCE)
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
 	qsc_memutils_xor((uint8_t*)state, message, msglen);
 #else
 	for (size_t i = 0U; i < msglen / sizeof(uint64_t); ++i)
@@ -286,7 +286,7 @@ void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rou
 		e24 = _mm512_xor_si512(e24, d4);
 		c4 = _mm512_or_si512(_mm512_slli_epi64(e24, 14), _mm512_srli_epi64(e24, 64 - 14));
 		a0 = _mm512_xor_si512(c0, _mm512_and_si512(_mm512_xor_epi64(c1, _mm512_set1_epi64(-1)), c2));
-		a0 = _mm512_xor_si512(a0, _mm512_set1_epi64(KECCAK_ROUND_CONSTANTS[i + 1]));
+		a0 = _mm512_xor_si512(a0, _mm512_set1_epi64(KECCAK_ROUND_CONSTANTS[i + 1U]));
 		a1 = _mm512_xor_si512(c1, _mm512_and_si512(_mm512_xor_epi64(c2, _mm512_set1_epi64(-1)), c3));
 		a2 = _mm512_xor_si512(c2, _mm512_and_si512(_mm512_xor_epi64(c3, _mm512_set1_epi64(-1)), c4));
 		a3 = _mm512_xor_si512(c3, _mm512_and_si512(_mm512_xor_epi64(c4, _mm512_set1_epi64(-1)), c0));
@@ -589,7 +589,7 @@ void qsc_keccak_permute_p4x1600(__m256i state[QSC_KECCAK_STATE_SIZE], size_t rou
 		e24 = _mm256_xor_si256(e24, d4);
 		c4 = _mm256_or_si256(_mm256_slli_epi64(e24, 14), _mm256_srli_epi64(e24, 64 - 14));
 		a0 = _mm256_xor_si256(c0, _mm256_and_si256(_mm256_xor_si256(c1, _mm256_set1_epi64x(-1)), c2));
-		a0 = _mm256_xor_si256(a0, _mm256_set1_epi64x(KECCAK_ROUND_CONSTANTS[i + 1]));
+		a0 = _mm256_xor_si256(a0, _mm256_set1_epi64x(KECCAK_ROUND_CONSTANTS[i + 1U]));
 		a1 = _mm256_xor_si256(c1, _mm256_and_si256(_mm256_xor_si256(c2, _mm256_set1_epi64x(-1)), c3));
 		a2 = _mm256_xor_si256(c2, _mm256_and_si256(_mm256_xor_si256(c3, _mm256_set1_epi64x(-1)), c4));
 		a3 = _mm256_xor_si256(c3, _mm256_and_si256(_mm256_xor_si256(c4, _mm256_set1_epi64x(-1)), c0));
@@ -877,38 +877,41 @@ void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* o
 	uint8_t pad[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 	size_t bitlen;
 
-	qsc_memutils_copy(pad, ctx->buffer, ctx->position);
-	bitlen = keccak_right_encode(buf, outlen * 8U);
-
-	if (ctx->position + bitlen >= (size_t)rate)
+	if (ctx != NULL && output != NULL)
 	{
-		keccak_fast_absorb(ctx->state, pad, ctx->position);
-		qsc_keccak_permute(ctx, rounds);
+		qsc_memutils_copy(pad, ctx->buffer, ctx->position);
+		bitlen = keccak_right_encode(buf, outlen * 8U);
+
+		if (ctx->position + bitlen >= (size_t)rate)
+		{
+			keccak_fast_absorb(ctx->state, pad, ctx->position);
+			qsc_keccak_permute(ctx, rounds);
+			ctx->position = 0U;
+		}
+
+		qsc_memutils_copy((pad + ctx->position), buf, bitlen);
+
+		pad[ctx->position + bitlen] = domain;
+		pad[(size_t)rate - 1U] |= 128U;
+		keccak_fast_absorb(ctx->state, pad, (size_t)rate);
+
+		while (outlen >= (size_t)rate)
+		{
+			qsc_keccak_squeezeblocks(ctx, pad, 1U, (size_t)rate, rounds);
+			qsc_memutils_copy(output, pad, (size_t)rate);
+			output += (size_t)rate;
+			outlen -= (size_t)rate;
+		}
+
+		if (outlen > 0U)
+		{
+			qsc_keccak_squeezeblocks(ctx, pad, 1U, (size_t)rate, rounds);
+			qsc_memutils_copy(output, pad, outlen);
+		}
+
+		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
 		ctx->position = 0U;
 	}
-
-	qsc_memutils_copy((pad + ctx->position), buf, bitlen);
-
-	pad[ctx->position + bitlen] = domain;
-	pad[(size_t)rate - 1U] |= 128U;
-	keccak_fast_absorb(ctx->state, pad, (size_t)rate);
-
-	while (outlen >= (size_t)rate)
-	{
-		qsc_keccak_squeezeblocks(ctx, pad, 1U, (size_t)rate, rounds);
-		qsc_memutils_copy(output, pad, (size_t)rate);
-		output += (size_t)rate;
-		outlen -= (size_t)rate;
-	}
-
-	if (outlen > 0U)
-	{
-		qsc_keccak_squeezeblocks(ctx, pad, 1U, (size_t)rate, rounds);
-		qsc_memutils_copy(output, pad, outlen);
-	}
-
-	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
-	ctx->position = 0U;
 }
 
 void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const uint8_t* message, size_t msglen)
@@ -919,70 +922,73 @@ void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const u
 	uint8_t t[8U] = { 0U };
 	size_t i;
 
-	if ((ctx->position & 7U) > 0U)
+	if (ctx != NULL && message != NULL)
 	{
-		i = ctx->position & 7U;
-
-		while (i < 8U && msglen > 0U)
+		if ((ctx->position & 7U) > 0U)
 		{
-			t[i] = *message;
-			message++;
-			i++;
-			msglen--;
-			ctx->position++;
+			i = ctx->position & 7U;
+
+			while (i < 8U && msglen > 0U)
+			{
+				t[i] = *message;
+				message++;
+				i++;
+				msglen--;
+				ctx->position++;
+			}
+
+			ctx->state[(ctx->position - i) / 8U] ^= qsc_intutils_le8to64(t);
 		}
 
-		ctx->state[(ctx->position - i) / 8U] ^= qsc_intutils_le8to64(t);
-	}
+		if (ctx->position && msglen >= (size_t)rate - ctx->position)
+		{
+			for (i = 0U; i < ((size_t)rate - ctx->position) / 8U; ++i)
+			{
+				ctx->state[(ctx->position / 8U) + i] ^= qsc_intutils_le8to64(message + (8U * i));
+			}
 
-	if (ctx->position && msglen >= (size_t)rate - ctx->position)
-	{
-		for (i = 0U; i < ((size_t)rate - ctx->position) / 8U; ++i)
+			message += (size_t)rate - ctx->position;
+			msglen -= (size_t)rate - ctx->position;
+			ctx->position = 0U;
+			qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
+		}
+
+		while (msglen >= (size_t)rate)
+		{
+			for (i = 0U; i < (size_t)rate / 8U; i++)
+			{
+				ctx->state[i] ^= qsc_intutils_le8to64(message + (8U * i));
+			}
+
+			message += (size_t)rate;
+			msglen -= (size_t)rate;
+			qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
+		}
+
+		for (i = 0U; i < msglen / 8U; ++i)
 		{
 			ctx->state[(ctx->position / 8U) + i] ^= qsc_intutils_le8to64(message + (8U * i));
 		}
 
-		message += (size_t)rate - ctx->position;
-		msglen -= (size_t)rate - ctx->position;
-		ctx->position = 0U;
-		qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
-	}
+		message += 8U * i;
+		msglen -= 8U * i;
+		ctx->position += 8U * i;
 
-	while (msglen >= (size_t)rate)
-	{
-		for (i = 0U; i < (size_t)rate / 8U; i++)
+		if (msglen > 0U)
 		{
-			ctx->state[i] ^= qsc_intutils_le8to64(message + (8U * i));
+			for (i = 0U; i < 8U; ++i)
+			{
+				t[i] = 0U;
+			}
+
+			for (i = 0U; i < msglen; ++i)
+			{
+				t[i] = message[i];
+			}
+
+			ctx->state[ctx->position / 8U] ^= qsc_intutils_le8to64(t);
+			ctx->position += msglen;
 		}
-
-		message += (size_t)rate;
-		msglen -= (size_t)rate;
-		qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
-	}
-
-	for (i = 0U; i < msglen / 8U; ++i)
-	{
-		ctx->state[(ctx->position / 8U) + i] ^= qsc_intutils_le8to64(message + (8U * i));
-	}
-
-	message += 8U * i;
-	msglen -= 8U * i;
-	ctx->position += 8U * i;
-
-	if (msglen > 0U)
-	{
-		for (i = 0U; i < 8U; ++i)
-		{
-			t[i] = 0U;
-		}
-
-		for (i = 0U; i < msglen; ++i)
-		{
-			t[i] = message[i];
-		}
-
-		ctx->state[ctx->position / 8U] ^= qsc_intutils_le8to64(t);
-		ctx->position += msglen;
 	}
 }
 
@@ -993,11 +999,14 @@ void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8
 	size_t i;
 	size_t j;
 
-	i = ctx->position >> 3;
-	j = ctx->position & 7;
-	ctx->state[i] ^= ((uint64_t)domain << (8U * j));
-	ctx->state[((size_t)rate / 8U) - 1U] ^= 1ULL << 63;
-	ctx->position = 0U;
+	if (ctx != NULL)
+	{
+		i = ctx->position >> 3;
+		j = ctx->position & 7;
+		ctx->state[i] ^= ((uint64_t)domain << (8U * j));
+		ctx->state[((size_t)rate / 8U) - 1U] ^= 1ULL << 63;
+		ctx->position = 0U;
+	}
 }
 
 void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t* output, size_t outlen)
@@ -1008,70 +1017,73 @@ void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t*
 	size_t i;
 	uint8_t t[8U];
 
-	if ((ctx->position & 7) > 0U)
+	if (ctx != NULL && output != NULL)
 	{
-		qsc_intutils_le64to8(t, ctx->state[ctx->position / 8U]);
-		i = ctx->position & 7;
-
-		while (i < 8U && outlen > 0U)
+		if ((ctx->position & 7) > 0U)
 		{
-			*output = t[i];
-			output++;
-			i++;
-			outlen--;
-			ctx->position++;
-		}
-	}
+			qsc_intutils_le64to8(t, ctx->state[ctx->position / 8U]);
+			i = ctx->position & 7;
 
-	if (ctx->position && outlen >= (size_t)rate - ctx->position)
-	{
-		for (i = 0U; i < ((size_t)rate - ctx->position) / 8U; ++i)
-		{
-			qsc_intutils_le64to8(output + (8U * i), ctx->state[(ctx->position / 8U) + i]);
+			while (i < 8U && outlen > 0U)
+			{
+				*output = t[i];
+				output++;
+				i++;
+				outlen--;
+				ctx->position++;
+			}
 		}
 
-		output += (size_t)rate - ctx->position;
-		outlen -= (size_t)rate - ctx->position;
-		ctx->position = 0U;
-	}
-
-	while (outlen >= (size_t)rate)
-	{
-		qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
-
-		for (i = 0U; i < (size_t)rate / 8U; ++i)
+		if (ctx->position && outlen >= (size_t)rate - ctx->position)
 		{
-			qsc_intutils_le64to8(output + (8U * i), ctx->state[i]);
+			for (i = 0U; i < ((size_t)rate - ctx->position) / 8U; ++i)
+			{
+				qsc_intutils_le64to8(output + (8U * i), ctx->state[(ctx->position / 8U) + i]);
+			}
+
+			output += (size_t)rate - ctx->position;
+			outlen -= (size_t)rate - ctx->position;
+			ctx->position = 0U;
 		}
 
-		output += (size_t)rate;
-		outlen -= (size_t)rate;
-	}
-
-	if (outlen > 0U)
-	{
-		if (ctx->position == 0U)
+		while (outlen >= (size_t)rate)
 		{
 			qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
+
+			for (i = 0U; i < (size_t)rate / 8U; ++i)
+			{
+				qsc_intutils_le64to8(output + (8U * i), ctx->state[i]);
+			}
+
+			output += (size_t)rate;
+			outlen -= (size_t)rate;
 		}
 
-		for (i = 0U; i < outlen / 8U; ++i)
+		if (outlen > 0U)
 		{
-			qsc_intutils_le64to8(output + (8U * i), ctx->state[(ctx->position / 8U) + i]);
+			if (ctx->position == 0U)
+			{
+				qsc_keccak_permute_p1600c(ctx->state, QSC_KECCAK_PERMUTATION_ROUNDS);
+			}
+
+			for (i = 0U; i < outlen / 8U; ++i)
+			{
+				qsc_intutils_le64to8(output + (8U * i), ctx->state[(ctx->position / 8U) + i]);
+			}
+
+			output += 8U * i;
+			outlen -= 8U * i;
+			ctx->position += 8U * i;
+
+			qsc_intutils_le64to8(t, ctx->state[ctx->position / 8U]);
+
+			for (i = 0U; i < outlen; ++i)
+			{
+				output[i] = t[i];
+			}
+
+			ctx->position += outlen;
 		}
-
-		output += 8U * i;
-		outlen -= 8U * i;
-		ctx->position += 8U * i;
-
-		qsc_intutils_le64to8(t, ctx->state[ctx->position / 8U]);
-
-		for (i = 0U; i < outlen; ++i)
-		{
-			output[i] = t[i];
-		}
-
-		ctx->position += outlen;
 	}
 }
 
@@ -1155,252 +1167,255 @@ void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds)
 	uint64_t Eso;
 	uint64_t Esu;
 
-	/* copyFromState(A, state) */
-	Aba = state[0U];
-	Abe = state[1U];
-	Abi = state[2U];
-	Abo = state[3U];
-	Abu = state[4U];
-	Aga = state[5U];
-	Age = state[6U];
-	Agi = state[7U];
-	Ago = state[8U];
-	Agu = state[9U];
-	Aka = state[10U];
-	Ake = state[11U];
-	Aki = state[12U];
-	Ako = state[13U];
-	Aku = state[14U];
-	Ama = state[15U];
-	Ame = state[16U];
-	Ami = state[17U];
-	Amo = state[18U];
-	Amu = state[19U];
-	Asa = state[20U];
-	Ase = state[21U];
-	Asi = state[22U];
-	Aso = state[23U];
-	Asu = state[24U];
-
-	for (size_t i = 0U; i < rounds; i += 2U)
+	if (state != NULL && rounds % 2U == 0U)
 	{
-		/* prepareTheta */
-		BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-		BCe = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-		BCi = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-		BCo = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-		BCu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		/* copyFromState(A, state) */
+		Aba = state[0U];
+		Abe = state[1U];
+		Abi = state[2U];
+		Abo = state[3U];
+		Abu = state[4U];
+		Aga = state[5U];
+		Age = state[6U];
+		Agi = state[7U];
+		Ago = state[8U];
+		Agu = state[9U];
+		Aka = state[10U];
+		Ake = state[11U];
+		Aki = state[12U];
+		Ako = state[13U];
+		Aku = state[14U];
+		Ama = state[15U];
+		Ame = state[16U];
+		Ami = state[17U];
+		Amo = state[18U];
+		Amu = state[19U];
+		Asa = state[20U];
+		Ase = state[21U];
+		Asi = state[22U];
+		Aso = state[23U];
+		Asu = state[24U];
 
-		/* thetaRhoPiChiIotaPrepareTheta */
-		Da = BCu ^ qsc_intutils_rotl64(BCe, 1U);
-		De = BCa ^ qsc_intutils_rotl64(BCi, 1U);
-		Di = BCe ^ qsc_intutils_rotl64(BCo, 1U);
-		Do = BCi ^ qsc_intutils_rotl64(BCu, 1U);
-		Du = BCo ^ qsc_intutils_rotl64(BCa, 1U);
+		for (size_t i = 0U; i < rounds; i += 2U)
+		{
+			/* prepareTheta */
+			BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+			BCe = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+			BCi = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+			BCo = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+			BCu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
 
-		Aba ^= Da;
-		BCa = Aba;
-		Age ^= De;
-		BCe = qsc_intutils_rotl64(Age, 44U);
-		Aki ^= Di;
-		BCi = qsc_intutils_rotl64(Aki, 43U);
-		Amo ^= Do;
-		BCo = qsc_intutils_rotl64(Amo, 21U);
-		Asu ^= Du;
-		BCu = qsc_intutils_rotl64(Asu, 14U);
-		Eba = BCa ^ ((~BCe) & BCi);
-		Eba ^= KECCAK_ROUND_CONSTANTS[i];
-		Ebe = BCe ^ ((~BCi) & BCo);
-		Ebi = BCi ^ ((~BCo) & BCu);
-		Ebo = BCo ^ ((~BCu) & BCa);
-		Ebu = BCu ^ ((~BCa) & BCe);
+			/* thetaRhoPiChiIotaPrepareTheta */
+			Da = BCu ^ qsc_intutils_rotl64(BCe, 1U);
+			De = BCa ^ qsc_intutils_rotl64(BCi, 1U);
+			Di = BCe ^ qsc_intutils_rotl64(BCo, 1U);
+			Do = BCi ^ qsc_intutils_rotl64(BCu, 1U);
+			Du = BCo ^ qsc_intutils_rotl64(BCa, 1U);
 
-		Abo ^= Do;
-		BCa = qsc_intutils_rotl64(Abo, 28U);
-		Agu ^= Du;
-		BCe = qsc_intutils_rotl64(Agu, 20U);
-		Aka ^= Da;
-		BCi = qsc_intutils_rotl64(Aka, 3U);
-		Ame ^= De;
-		BCo = qsc_intutils_rotl64(Ame, 45U);
-		Asi ^= Di;
-		BCu = qsc_intutils_rotl64(Asi, 61U);
-		Ega = BCa ^ ((~BCe) & BCi);
-		Ege = BCe ^ ((~BCi) & BCo);
-		Egi = BCi ^ ((~BCo) & BCu);
-		Ego = BCo ^ ((~BCu) & BCa);
-		Egu = BCu ^ ((~BCa) & BCe);
+			Aba ^= Da;
+			BCa = Aba;
+			Age ^= De;
+			BCe = qsc_intutils_rotl64(Age, 44U);
+			Aki ^= Di;
+			BCi = qsc_intutils_rotl64(Aki, 43U);
+			Amo ^= Do;
+			BCo = qsc_intutils_rotl64(Amo, 21U);
+			Asu ^= Du;
+			BCu = qsc_intutils_rotl64(Asu, 14U);
+			Eba = BCa ^ ((~BCe) & BCi);
+			Eba ^= KECCAK_ROUND_CONSTANTS[i];
+			Ebe = BCe ^ ((~BCi) & BCo);
+			Ebi = BCi ^ ((~BCo) & BCu);
+			Ebo = BCo ^ ((~BCu) & BCa);
+			Ebu = BCu ^ ((~BCa) & BCe);
 
-		Abe ^= De;
-		BCa = qsc_intutils_rotl64(Abe, 1U);
-		Agi ^= Di;
-		BCe = qsc_intutils_rotl64(Agi, 6U);
-		Ako ^= Do;
-		BCi = qsc_intutils_rotl64(Ako, 25U);
-		Amu ^= Du;
-		BCo = qsc_intutils_rotl64(Amu, 8U);
-		Asa ^= Da;
-		BCu = qsc_intutils_rotl64(Asa, 18U);
-		Eka = BCa ^ ((~BCe) & BCi);
-		Eke = BCe ^ ((~BCi) & BCo);
-		Eki = BCi ^ ((~BCo) & BCu);
-		Eko = BCo ^ ((~BCu) & BCa);
-		Eku = BCu ^ ((~BCa) & BCe);
+			Abo ^= Do;
+			BCa = qsc_intutils_rotl64(Abo, 28U);
+			Agu ^= Du;
+			BCe = qsc_intutils_rotl64(Agu, 20U);
+			Aka ^= Da;
+			BCi = qsc_intutils_rotl64(Aka, 3U);
+			Ame ^= De;
+			BCo = qsc_intutils_rotl64(Ame, 45U);
+			Asi ^= Di;
+			BCu = qsc_intutils_rotl64(Asi, 61U);
+			Ega = BCa ^ ((~BCe) & BCi);
+			Ege = BCe ^ ((~BCi) & BCo);
+			Egi = BCi ^ ((~BCo) & BCu);
+			Ego = BCo ^ ((~BCu) & BCa);
+			Egu = BCu ^ ((~BCa) & BCe);
 
-		Abu ^= Du;
-		BCa = qsc_intutils_rotl64(Abu, 27U);
-		Aga ^= Da;
-		BCe = qsc_intutils_rotl64(Aga, 36U);
-		Ake ^= De;
-		BCi = qsc_intutils_rotl64(Ake, 10U);
-		Ami ^= Di;
-		BCo = qsc_intutils_rotl64(Ami, 15U);
-		Aso ^= Do;
-		BCu = qsc_intutils_rotl64(Aso, 56U);
-		Ema = BCa ^ ((~BCe) & BCi);
-		Eme = BCe ^ ((~BCi) & BCo);
-		Emi = BCi ^ ((~BCo) & BCu);
-		Emo = BCo ^ ((~BCu) & BCa);
-		Emu = BCu ^ ((~BCa) & BCe);
+			Abe ^= De;
+			BCa = qsc_intutils_rotl64(Abe, 1U);
+			Agi ^= Di;
+			BCe = qsc_intutils_rotl64(Agi, 6U);
+			Ako ^= Do;
+			BCi = qsc_intutils_rotl64(Ako, 25U);
+			Amu ^= Du;
+			BCo = qsc_intutils_rotl64(Amu, 8U);
+			Asa ^= Da;
+			BCu = qsc_intutils_rotl64(Asa, 18U);
+			Eka = BCa ^ ((~BCe) & BCi);
+			Eke = BCe ^ ((~BCi) & BCo);
+			Eki = BCi ^ ((~BCo) & BCu);
+			Eko = BCo ^ ((~BCu) & BCa);
+			Eku = BCu ^ ((~BCa) & BCe);
 
-		Abi ^= Di;
-		BCa = qsc_intutils_rotl64(Abi, 62U);
-		Ago ^= Do;
-		BCe = qsc_intutils_rotl64(Ago, 55U);
-		Aku ^= Du;
-		BCi = qsc_intutils_rotl64(Aku, 39U);
-		Ama ^= Da;
-		BCo = qsc_intutils_rotl64(Ama, 41U);
-		Ase ^= De;
-		BCu = qsc_intutils_rotl64(Ase, 2U);
-		Esa = BCa ^ ((~BCe) & BCi);
-		Ese = BCe ^ ((~BCi) & BCo);
-		Esi = BCi ^ ((~BCo) & BCu);
-		Eso = BCo ^ ((~BCu) & BCa);
-		Esu = BCu ^ ((~BCa) & BCe);
+			Abu ^= Du;
+			BCa = qsc_intutils_rotl64(Abu, 27U);
+			Aga ^= Da;
+			BCe = qsc_intutils_rotl64(Aga, 36U);
+			Ake ^= De;
+			BCi = qsc_intutils_rotl64(Ake, 10U);
+			Ami ^= Di;
+			BCo = qsc_intutils_rotl64(Ami, 15U);
+			Aso ^= Do;
+			BCu = qsc_intutils_rotl64(Aso, 56U);
+			Ema = BCa ^ ((~BCe) & BCi);
+			Eme = BCe ^ ((~BCi) & BCo);
+			Emi = BCi ^ ((~BCo) & BCu);
+			Emo = BCo ^ ((~BCu) & BCa);
+			Emu = BCu ^ ((~BCa) & BCe);
 
-		/* prepareTheta */
-		BCa = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-		BCe = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-		BCi = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-		BCo = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-		BCu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+			Abi ^= Di;
+			BCa = qsc_intutils_rotl64(Abi, 62U);
+			Ago ^= Do;
+			BCe = qsc_intutils_rotl64(Ago, 55U);
+			Aku ^= Du;
+			BCi = qsc_intutils_rotl64(Aku, 39U);
+			Ama ^= Da;
+			BCo = qsc_intutils_rotl64(Ama, 41U);
+			Ase ^= De;
+			BCu = qsc_intutils_rotl64(Ase, 2U);
+			Esa = BCa ^ ((~BCe) & BCi);
+			Ese = BCe ^ ((~BCi) & BCo);
+			Esi = BCi ^ ((~BCo) & BCu);
+			Eso = BCo ^ ((~BCu) & BCa);
+			Esu = BCu ^ ((~BCa) & BCe);
 
-		/* thetaRhoPiChiIotaPrepareTheta */
-		Da = BCu ^ qsc_intutils_rotl64(BCe, 1U);
-		De = BCa ^ qsc_intutils_rotl64(BCi, 1U);
-		Di = BCe ^ qsc_intutils_rotl64(BCo, 1U);
-		Do = BCi ^ qsc_intutils_rotl64(BCu, 1U);
-		Du = BCo ^ qsc_intutils_rotl64(BCa, 1U);
+			/* prepareTheta */
+			BCa = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+			BCe = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+			BCi = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+			BCo = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+			BCu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
 
-		Eba ^= Da;
-		BCa = Eba;
-		Ege ^= De;
-		BCe = qsc_intutils_rotl64(Ege, 44U);
-		Eki ^= Di;
-		BCi = qsc_intutils_rotl64(Eki, 43U);
-		Emo ^= Do;
-		BCo = qsc_intutils_rotl64(Emo, 21U);
-		Esu ^= Du;
-		BCu = qsc_intutils_rotl64(Esu, 14U);
-		Aba = BCa ^ ((~BCe) & BCi);
-		Aba ^= KECCAK_ROUND_CONSTANTS[i + 1U];
-		Abe = BCe ^ ((~BCi) & BCo);
-		Abi = BCi ^ ((~BCo) & BCu);
-		Abo = BCo ^ ((~BCu) & BCa);
-		Abu = BCu ^ ((~BCa) & BCe);
+			/* thetaRhoPiChiIotaPrepareTheta */
+			Da = BCu ^ qsc_intutils_rotl64(BCe, 1U);
+			De = BCa ^ qsc_intutils_rotl64(BCi, 1U);
+			Di = BCe ^ qsc_intutils_rotl64(BCo, 1U);
+			Do = BCi ^ qsc_intutils_rotl64(BCu, 1U);
+			Du = BCo ^ qsc_intutils_rotl64(BCa, 1U);
 
-		Ebo ^= Do;
-		BCa = qsc_intutils_rotl64(Ebo, 28U);
-		Egu ^= Du;
-		BCe = qsc_intutils_rotl64(Egu, 20U);
-		Eka ^= Da;
-		BCi = qsc_intutils_rotl64(Eka, 3U);
-		Eme ^= De;
-		BCo = qsc_intutils_rotl64(Eme, 45U);
-		Esi ^= Di;
-		BCu = qsc_intutils_rotl64(Esi, 61U);
-		Aga = BCa ^ ((~BCe) & BCi);
-		Age = BCe ^ ((~BCi) & BCo);
-		Agi = BCi ^ ((~BCo) & BCu);
-		Ago = BCo ^ ((~BCu) & BCa);
-		Agu = BCu ^ ((~BCa) & BCe);
+			Eba ^= Da;
+			BCa = Eba;
+			Ege ^= De;
+			BCe = qsc_intutils_rotl64(Ege, 44U);
+			Eki ^= Di;
+			BCi = qsc_intutils_rotl64(Eki, 43U);
+			Emo ^= Do;
+			BCo = qsc_intutils_rotl64(Emo, 21U);
+			Esu ^= Du;
+			BCu = qsc_intutils_rotl64(Esu, 14U);
+			Aba = BCa ^ ((~BCe) & BCi);
+			Aba ^= KECCAK_ROUND_CONSTANTS[i + 1U];
+			Abe = BCe ^ ((~BCi) & BCo);
+			Abi = BCi ^ ((~BCo) & BCu);
+			Abo = BCo ^ ((~BCu) & BCa);
+			Abu = BCu ^ ((~BCa) & BCe);
 
-		Ebe ^= De;
-		BCa = qsc_intutils_rotl64(Ebe, 1U);
-		Egi ^= Di;
-		BCe = qsc_intutils_rotl64(Egi, 6U);
-		Eko ^= Do;
-		BCi = qsc_intutils_rotl64(Eko, 25U);
-		Emu ^= Du;
-		BCo = qsc_intutils_rotl64(Emu, 8U);
-		Esa ^= Da;
-		BCu = qsc_intutils_rotl64(Esa, 18U);
-		Aka = BCa ^ ((~BCe) & BCi);
-		Ake = BCe ^ ((~BCi) & BCo);
-		Aki = BCi ^ ((~BCo) & BCu);
-		Ako = BCo ^ ((~BCu) & BCa);
-		Aku = BCu ^ ((~BCa) & BCe);
+			Ebo ^= Do;
+			BCa = qsc_intutils_rotl64(Ebo, 28U);
+			Egu ^= Du;
+			BCe = qsc_intutils_rotl64(Egu, 20U);
+			Eka ^= Da;
+			BCi = qsc_intutils_rotl64(Eka, 3U);
+			Eme ^= De;
+			BCo = qsc_intutils_rotl64(Eme, 45U);
+			Esi ^= Di;
+			BCu = qsc_intutils_rotl64(Esi, 61U);
+			Aga = BCa ^ ((~BCe) & BCi);
+			Age = BCe ^ ((~BCi) & BCo);
+			Agi = BCi ^ ((~BCo) & BCu);
+			Ago = BCo ^ ((~BCu) & BCa);
+			Agu = BCu ^ ((~BCa) & BCe);
 
-		Ebu ^= Du;
-		BCa = qsc_intutils_rotl64(Ebu, 27U);
-		Ega ^= Da;
-		BCe = qsc_intutils_rotl64(Ega, 36U);
-		Eke ^= De;
-		BCi = qsc_intutils_rotl64(Eke, 10U);
-		Emi ^= Di;
-		BCo = qsc_intutils_rotl64(Emi, 15U);
-		Eso ^= Do;
-		BCu = qsc_intutils_rotl64(Eso, 56U);
-		Ama = BCa ^ ((~BCe) & BCi);
-		Ame = BCe ^ ((~BCi) & BCo);
-		Ami = BCi ^ ((~BCo) & BCu);
-		Amo = BCo ^ ((~BCu) & BCa);
-		Amu = BCu ^ ((~BCa) & BCe);
+			Ebe ^= De;
+			BCa = qsc_intutils_rotl64(Ebe, 1U);
+			Egi ^= Di;
+			BCe = qsc_intutils_rotl64(Egi, 6U);
+			Eko ^= Do;
+			BCi = qsc_intutils_rotl64(Eko, 25U);
+			Emu ^= Du;
+			BCo = qsc_intutils_rotl64(Emu, 8U);
+			Esa ^= Da;
+			BCu = qsc_intutils_rotl64(Esa, 18U);
+			Aka = BCa ^ ((~BCe) & BCi);
+			Ake = BCe ^ ((~BCi) & BCo);
+			Aki = BCi ^ ((~BCo) & BCu);
+			Ako = BCo ^ ((~BCu) & BCa);
+			Aku = BCu ^ ((~BCa) & BCe);
 
-		Ebi ^= Di;
-		BCa = qsc_intutils_rotl64(Ebi, 62U);
-		Ego ^= Do;
-		BCe = qsc_intutils_rotl64(Ego, 55U);
-		Eku ^= Du;
-		BCi = qsc_intutils_rotl64(Eku, 39U);
-		Ema ^= Da;
-		BCo = qsc_intutils_rotl64(Ema, 41U);
-		Ese ^= De;
-		BCu = qsc_intutils_rotl64(Ese, 2U);
-		Asa = BCa ^ ((~BCe) & BCi);
-		Ase = BCe ^ ((~BCi) & BCo);
-		Asi = BCi ^ ((~BCo) & BCu);
-		Aso = BCo ^ ((~BCu) & BCa);
-		Asu = BCu ^ ((~BCa) & BCe);
+			Ebu ^= Du;
+			BCa = qsc_intutils_rotl64(Ebu, 27U);
+			Ega ^= Da;
+			BCe = qsc_intutils_rotl64(Ega, 36U);
+			Eke ^= De;
+			BCi = qsc_intutils_rotl64(Eke, 10U);
+			Emi ^= Di;
+			BCo = qsc_intutils_rotl64(Emi, 15U);
+			Eso ^= Do;
+			BCu = qsc_intutils_rotl64(Eso, 56U);
+			Ama = BCa ^ ((~BCe) & BCi);
+			Ame = BCe ^ ((~BCi) & BCo);
+			Ami = BCi ^ ((~BCo) & BCu);
+			Amo = BCo ^ ((~BCu) & BCa);
+			Amu = BCu ^ ((~BCa) & BCe);
+
+			Ebi ^= Di;
+			BCa = qsc_intutils_rotl64(Ebi, 62U);
+			Ego ^= Do;
+			BCe = qsc_intutils_rotl64(Ego, 55U);
+			Eku ^= Du;
+			BCi = qsc_intutils_rotl64(Eku, 39U);
+			Ema ^= Da;
+			BCo = qsc_intutils_rotl64(Ema, 41U);
+			Ese ^= De;
+			BCu = qsc_intutils_rotl64(Ese, 2U);
+			Asa = BCa ^ ((~BCe) & BCi);
+			Ase = BCe ^ ((~BCi) & BCo);
+			Asi = BCi ^ ((~BCo) & BCu);
+			Aso = BCo ^ ((~BCu) & BCa);
+			Asu = BCu ^ ((~BCa) & BCe);
+		}
+
+		/* copy to state */
+		state[0U] = Aba;
+		state[1U] = Abe;
+		state[2U] = Abi;
+		state[3U] = Abo;
+		state[4U] = Abu;
+		state[5U] = Aga;
+		state[6U] = Age;
+		state[7U] = Agi;
+		state[8U] = Ago;
+		state[9U] = Agu;
+		state[10U] = Aka;
+		state[11U] = Ake;
+		state[12U] = Aki;
+		state[13U] = Ako;
+		state[14U] = Aku;
+		state[15U] = Ama;
+		state[16U] = Ame;
+		state[17U] = Ami;
+		state[18U] = Amo;
+		state[19U] = Amu;
+		state[20U] = Asa;
+		state[21U] = Ase;
+		state[22U] = Asi;
+		state[23U] = Aso;
+		state[24U] = Asu;
 	}
-
-	/* copy to state */
-	state[0U] = Aba;
-	state[1U] = Abe;
-	state[2U] = Abi;
-	state[3U] = Abo;
-	state[4U] = Abu;
-	state[5U] = Aga;
-	state[6U] = Age;
-	state[7U] = Agi;
-	state[8U] = Ago;
-	state[9U] = Agu;
-	state[10U] = Aka;
-	state[11U] = Ake;
-	state[12U] = Aki;
-	state[13U] = Ako;
-	state[14U] = Aku;
-	state[15U] = Ama;
-	state[16U] = Ame;
-	state[17U] = Ami;
-	state[18U] = Amo;
-	state[19U] = Amu;
-	state[20U] = Asa;
-	state[21U] = Ase;
-	state[22U] = Asi;
-	state[23U] = Aso;
-	state[24U] = Asu;
 }
 
 void qsc_keccak_permute_p1600u(uint64_t* state)
@@ -1468,2146 +1483,2149 @@ void qsc_keccak_permute_p1600u(uint64_t* state)
 	uint64_t Eso;
 	uint64_t Esu;
 
-	Aba = state[0U];
-	Abe = state[1U];
-	Abi = state[2U];
-	Abo = state[3U];
-	Abu = state[4U];
-	Aga = state[5U];
-	Age = state[6U];
-	Agi = state[7U];
-	Ago = state[8U];
-	Agu = state[9U];
-	Aka = state[10U];
-	Ake = state[11U];
-	Aki = state[12U];
-	Ako = state[13U];
-	Aku = state[14U];
-	Ama = state[15U];
-	Ame = state[16U];
-	Ami = state[17U];
-	Amo = state[18U];
-	Amu = state[19U];
-	Asa = state[20U];
-	Ase = state[21U];
-	Asi = state[22U];
-	Aso = state[23U];
-	Asu = state[24U];
+	if (state != NULL)
+	{
+		Aba = state[0U];
+		Abe = state[1U];
+		Abi = state[2U];
+		Abo = state[3U];
+		Abu = state[4U];
+		Aga = state[5U];
+		Age = state[6U];
+		Agi = state[7U];
+		Ago = state[8U];
+		Agu = state[9U];
+		Aka = state[10U];
+		Ake = state[11U];
+		Aki = state[12U];
+		Ako = state[13U];
+		Aku = state[14U];
+		Ama = state[15U];
+		Ame = state[16U];
+		Ami = state[17U];
+		Amo = state[18U];
+		Amu = state[19U];
+		Asa = state[20U];
+		Ase = state[21U];
+		Asi = state[22U];
+		Aso = state[23U];
+		Asu = state[24U];
 
-	/* round 1 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x0000000000000001ULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 2 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x0000000000008082ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 3 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x800000000000808AULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 4 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x8000000080008000ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 5 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x000000000000808BULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 6 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x0000000080000001ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 7 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x8000000080008081ULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 8 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x8000000000008009ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 9 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x000000000000008AULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 10 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x0000000000000088ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 11 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x0000000080008009ULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 12 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x000000008000000AULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 13 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x000000008000808BULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 14 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x800000000000008BULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 15 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x8000000000008089ULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 16 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x8000000000008003ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 17 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x8000000000008002ULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 18 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x8000000000000080ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 19 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x000000000000800AULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 20 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x800000008000000AULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 21 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x8000000080008081ULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 22 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x8000000000008080ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
-	/* round 23 */
-	Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
-	Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
-	Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
-	Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
-	Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Aba ^= Da;
-	Ca = Aba;
-	Age ^= De;
-	Ce = qsc_intutils_rotl64(Age, 44U);
-	Aki ^= Di;
-	Ci = qsc_intutils_rotl64(Aki, 43U);
-	Amo ^= Do;
-	Co = qsc_intutils_rotl64(Amo, 21U);
-	Asu ^= Du;
-	Cu = qsc_intutils_rotl64(Asu, 14U);
-	Eba = Ca ^ ((~Ce) & Ci);
-	Eba ^= 0x0000000080000001ULL;
-	Ebe = Ce ^ ((~Ci) & Co);
-	Ebi = Ci ^ ((~Co) & Cu);
-	Ebo = Co ^ ((~Cu) & Ca);
-	Ebu = Cu ^ ((~Ca) & Ce);
-	Abo ^= Do;
-	Ca = qsc_intutils_rotl64(Abo, 28U);
-	Agu ^= Du;
-	Ce = qsc_intutils_rotl64(Agu, 20U);
-	Aka ^= Da;
-	Ci = qsc_intutils_rotl64(Aka, 3U);
-	Ame ^= De;
-	Co = qsc_intutils_rotl64(Ame, 45U);
-	Asi ^= Di;
-	Cu = qsc_intutils_rotl64(Asi, 61U);
-	Ega = Ca ^ ((~Ce) & Ci);
-	Ege = Ce ^ ((~Ci) & Co);
-	Egi = Ci ^ ((~Co) & Cu);
-	Ego = Co ^ ((~Cu) & Ca);
-	Egu = Cu ^ ((~Ca) & Ce);
-	Abe ^= De;
-	Ca = qsc_intutils_rotl64(Abe, 1U);
-	Agi ^= Di;
-	Ce = qsc_intutils_rotl64(Agi, 6U);
-	Ako ^= Do;
-	Ci = qsc_intutils_rotl64(Ako, 25U);
-	Amu ^= Du;
-	Co = qsc_intutils_rotl64(Amu, 8U);
-	Asa ^= Da;
-	Cu = qsc_intutils_rotl64(Asa, 18U);
-	Eka = Ca ^ ((~Ce) & Ci);
-	Eke = Ce ^ ((~Ci) & Co);
-	Eki = Ci ^ ((~Co) & Cu);
-	Eko = Co ^ ((~Cu) & Ca);
-	Eku = Cu ^ ((~Ca) & Ce);
-	Abu ^= Du;
-	Ca = qsc_intutils_rotl64(Abu, 27U);
-	Aga ^= Da;
-	Ce = qsc_intutils_rotl64(Aga, 36U);
-	Ake ^= De;
-	Ci = qsc_intutils_rotl64(Ake, 10U);
-	Ami ^= Di;
-	Co = qsc_intutils_rotl64(Ami, 15U);
-	Aso ^= Do;
-	Cu = qsc_intutils_rotl64(Aso, 56U);
-	Ema = Ca ^ ((~Ce) & Ci);
-	Eme = Ce ^ ((~Ci) & Co);
-	Emi = Ci ^ ((~Co) & Cu);
-	Emo = Co ^ ((~Cu) & Ca);
-	Emu = Cu ^ ((~Ca) & Ce);
-	Abi ^= Di;
-	Ca = qsc_intutils_rotl64(Abi, 62U);
-	Ago ^= Do;
-	Ce = qsc_intutils_rotl64(Ago, 55U);
-	Aku ^= Du;
-	Ci = qsc_intutils_rotl64(Aku, 39U);
-	Ama ^= Da;
-	Co = qsc_intutils_rotl64(Ama, 41U);
-	Ase ^= De;
-	Cu = qsc_intutils_rotl64(Ase, 2U);
-	Esa = Ca ^ ((~Ce) & Ci);
-	Ese = Ce ^ ((~Ci) & Co);
-	Esi = Ci ^ ((~Co) & Cu);
-	Eso = Co ^ ((~Cu) & Ca);
-	Esu = Cu ^ ((~Ca) & Ce);
-	/* round 24 */
-	Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
-	Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
-	Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
-	Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
-	Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
-	Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
-	De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
-	Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
-	Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
-	Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
-	Eba ^= Da;
-	Ca = Eba;
-	Ege ^= De;
-	Ce = qsc_intutils_rotl64(Ege, 44U);
-	Eki ^= Di;
-	Ci = qsc_intutils_rotl64(Eki, 43U);
-	Emo ^= Do;
-	Co = qsc_intutils_rotl64(Emo, 21U);
-	Esu ^= Du;
-	Cu = qsc_intutils_rotl64(Esu, 14U);
-	Aba = Ca ^ ((~Ce) & Ci);
-	Aba ^= 0x8000000080008008ULL;
-	Abe = Ce ^ ((~Ci) & Co);
-	Abi = Ci ^ ((~Co) & Cu);
-	Abo = Co ^ ((~Cu) & Ca);
-	Abu = Cu ^ ((~Ca) & Ce);
-	Ebo ^= Do;
-	Ca = qsc_intutils_rotl64(Ebo, 28U);
-	Egu ^= Du;
-	Ce = qsc_intutils_rotl64(Egu, 20U);
-	Eka ^= Da;
-	Ci = qsc_intutils_rotl64(Eka, 3U);
-	Eme ^= De;
-	Co = qsc_intutils_rotl64(Eme, 45U);
-	Esi ^= Di;
-	Cu = qsc_intutils_rotl64(Esi, 61U);
-	Aga = Ca ^ ((~Ce) & Ci);
-	Age = Ce ^ ((~Ci) & Co);
-	Agi = Ci ^ ((~Co) & Cu);
-	Ago = Co ^ ((~Cu) & Ca);
-	Agu = Cu ^ ((~Ca) & Ce);
-	Ebe ^= De;
-	Ca = qsc_intutils_rotl64(Ebe, 1U);
-	Egi ^= Di;
-	Ce = qsc_intutils_rotl64(Egi, 6U);
-	Eko ^= Do;
-	Ci = qsc_intutils_rotl64(Eko, 25U);
-	Emu ^= Du;
-	Co = qsc_intutils_rotl64(Emu, 8U);
-	Esa ^= Da;
-	Cu = qsc_intutils_rotl64(Esa, 18U);
-	Aka = Ca ^ ((~Ce) & Ci);
-	Ake = Ce ^ ((~Ci) & Co);
-	Aki = Ci ^ ((~Co) & Cu);
-	Ako = Co ^ ((~Cu) & Ca);
-	Aku = Cu ^ ((~Ca) & Ce);
-	Ebu ^= Du;
-	Ca = qsc_intutils_rotl64(Ebu, 27U);
-	Ega ^= Da;
-	Ce = qsc_intutils_rotl64(Ega, 36U);
-	Eke ^= De;
-	Ci = qsc_intutils_rotl64(Eke, 10U);
-	Emi ^= Di;
-	Co = qsc_intutils_rotl64(Emi, 15U);
-	Eso ^= Do;
-	Cu = qsc_intutils_rotl64(Eso, 56U);
-	Ama = Ca ^ ((~Ce) & Ci);
-	Ame = Ce ^ ((~Ci) & Co);
-	Ami = Ci ^ ((~Co) & Cu);
-	Amo = Co ^ ((~Cu) & Ca);
-	Amu = Cu ^ ((~Ca) & Ce);
-	Ebi ^= Di;
-	Ca = qsc_intutils_rotl64(Ebi, 62U);
-	Ego ^= Do;
-	Ce = qsc_intutils_rotl64(Ego, 55U);
-	Eku ^= Du;
-	Ci = qsc_intutils_rotl64(Eku, 39U);
-	Ema ^= Da;
-	Co = qsc_intutils_rotl64(Ema, 41U);
-	Ese ^= De;
-	Cu = qsc_intutils_rotl64(Ese, 2U);
-	Asa = Ca ^ ((~Ce) & Ci);
-	Ase = Ce ^ ((~Ci) & Co);
-	Asi = Ci ^ ((~Co) & Cu);
-	Aso = Co ^ ((~Cu) & Ca);
-	Asu = Cu ^ ((~Ca) & Ce);
+		/* round 1 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x0000000000000001ULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 2 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x0000000000008082ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 3 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x800000000000808AULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 4 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x8000000080008000ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 5 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x000000000000808BULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 6 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x0000000080000001ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 7 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x8000000080008081ULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 8 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x8000000000008009ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 9 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x000000000000008AULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 10 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x0000000000000088ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 11 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x0000000080008009ULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 12 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x000000008000000AULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 13 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x000000008000808BULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 14 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x800000000000008BULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 15 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x8000000000008089ULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 16 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x8000000000008003ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 17 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x8000000000008002ULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 18 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x8000000000000080ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 19 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x000000000000800AULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 20 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x800000008000000AULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 21 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x8000000080008081ULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 22 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x8000000000008080ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
+		/* round 23 */
+		Ca = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
+		Ce = Abe ^ Age ^ Ake ^ Ame ^ Ase;
+		Ci = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
+		Co = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
+		Cu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Aba ^= Da;
+		Ca = Aba;
+		Age ^= De;
+		Ce = qsc_intutils_rotl64(Age, 44U);
+		Aki ^= Di;
+		Ci = qsc_intutils_rotl64(Aki, 43U);
+		Amo ^= Do;
+		Co = qsc_intutils_rotl64(Amo, 21U);
+		Asu ^= Du;
+		Cu = qsc_intutils_rotl64(Asu, 14U);
+		Eba = Ca ^ ((~Ce) & Ci);
+		Eba ^= 0x0000000080000001ULL;
+		Ebe = Ce ^ ((~Ci) & Co);
+		Ebi = Ci ^ ((~Co) & Cu);
+		Ebo = Co ^ ((~Cu) & Ca);
+		Ebu = Cu ^ ((~Ca) & Ce);
+		Abo ^= Do;
+		Ca = qsc_intutils_rotl64(Abo, 28U);
+		Agu ^= Du;
+		Ce = qsc_intutils_rotl64(Agu, 20U);
+		Aka ^= Da;
+		Ci = qsc_intutils_rotl64(Aka, 3U);
+		Ame ^= De;
+		Co = qsc_intutils_rotl64(Ame, 45U);
+		Asi ^= Di;
+		Cu = qsc_intutils_rotl64(Asi, 61U);
+		Ega = Ca ^ ((~Ce) & Ci);
+		Ege = Ce ^ ((~Ci) & Co);
+		Egi = Ci ^ ((~Co) & Cu);
+		Ego = Co ^ ((~Cu) & Ca);
+		Egu = Cu ^ ((~Ca) & Ce);
+		Abe ^= De;
+		Ca = qsc_intutils_rotl64(Abe, 1U);
+		Agi ^= Di;
+		Ce = qsc_intutils_rotl64(Agi, 6U);
+		Ako ^= Do;
+		Ci = qsc_intutils_rotl64(Ako, 25U);
+		Amu ^= Du;
+		Co = qsc_intutils_rotl64(Amu, 8U);
+		Asa ^= Da;
+		Cu = qsc_intutils_rotl64(Asa, 18U);
+		Eka = Ca ^ ((~Ce) & Ci);
+		Eke = Ce ^ ((~Ci) & Co);
+		Eki = Ci ^ ((~Co) & Cu);
+		Eko = Co ^ ((~Cu) & Ca);
+		Eku = Cu ^ ((~Ca) & Ce);
+		Abu ^= Du;
+		Ca = qsc_intutils_rotl64(Abu, 27U);
+		Aga ^= Da;
+		Ce = qsc_intutils_rotl64(Aga, 36U);
+		Ake ^= De;
+		Ci = qsc_intutils_rotl64(Ake, 10U);
+		Ami ^= Di;
+		Co = qsc_intutils_rotl64(Ami, 15U);
+		Aso ^= Do;
+		Cu = qsc_intutils_rotl64(Aso, 56U);
+		Ema = Ca ^ ((~Ce) & Ci);
+		Eme = Ce ^ ((~Ci) & Co);
+		Emi = Ci ^ ((~Co) & Cu);
+		Emo = Co ^ ((~Cu) & Ca);
+		Emu = Cu ^ ((~Ca) & Ce);
+		Abi ^= Di;
+		Ca = qsc_intutils_rotl64(Abi, 62U);
+		Ago ^= Do;
+		Ce = qsc_intutils_rotl64(Ago, 55U);
+		Aku ^= Du;
+		Ci = qsc_intutils_rotl64(Aku, 39U);
+		Ama ^= Da;
+		Co = qsc_intutils_rotl64(Ama, 41U);
+		Ase ^= De;
+		Cu = qsc_intutils_rotl64(Ase, 2U);
+		Esa = Ca ^ ((~Ce) & Ci);
+		Ese = Ce ^ ((~Ci) & Co);
+		Esi = Ci ^ ((~Co) & Cu);
+		Eso = Co ^ ((~Cu) & Ca);
+		Esu = Cu ^ ((~Ca) & Ce);
+		/* round 24 */
+		Ca = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
+		Ce = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
+		Ci = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
+		Co = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
+		Cu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
+		Da = Cu ^ qsc_intutils_rotl64(Ce, 1U);
+		De = Ca ^ qsc_intutils_rotl64(Ci, 1U);
+		Di = Ce ^ qsc_intutils_rotl64(Co, 1U);
+		Do = Ci ^ qsc_intutils_rotl64(Cu, 1U);
+		Du = Co ^ qsc_intutils_rotl64(Ca, 1U);
+		Eba ^= Da;
+		Ca = Eba;
+		Ege ^= De;
+		Ce = qsc_intutils_rotl64(Ege, 44U);
+		Eki ^= Di;
+		Ci = qsc_intutils_rotl64(Eki, 43U);
+		Emo ^= Do;
+		Co = qsc_intutils_rotl64(Emo, 21U);
+		Esu ^= Du;
+		Cu = qsc_intutils_rotl64(Esu, 14U);
+		Aba = Ca ^ ((~Ce) & Ci);
+		Aba ^= 0x8000000080008008ULL;
+		Abe = Ce ^ ((~Ci) & Co);
+		Abi = Ci ^ ((~Co) & Cu);
+		Abo = Co ^ ((~Cu) & Ca);
+		Abu = Cu ^ ((~Ca) & Ce);
+		Ebo ^= Do;
+		Ca = qsc_intutils_rotl64(Ebo, 28U);
+		Egu ^= Du;
+		Ce = qsc_intutils_rotl64(Egu, 20U);
+		Eka ^= Da;
+		Ci = qsc_intutils_rotl64(Eka, 3U);
+		Eme ^= De;
+		Co = qsc_intutils_rotl64(Eme, 45U);
+		Esi ^= Di;
+		Cu = qsc_intutils_rotl64(Esi, 61U);
+		Aga = Ca ^ ((~Ce) & Ci);
+		Age = Ce ^ ((~Ci) & Co);
+		Agi = Ci ^ ((~Co) & Cu);
+		Ago = Co ^ ((~Cu) & Ca);
+		Agu = Cu ^ ((~Ca) & Ce);
+		Ebe ^= De;
+		Ca = qsc_intutils_rotl64(Ebe, 1U);
+		Egi ^= Di;
+		Ce = qsc_intutils_rotl64(Egi, 6U);
+		Eko ^= Do;
+		Ci = qsc_intutils_rotl64(Eko, 25U);
+		Emu ^= Du;
+		Co = qsc_intutils_rotl64(Emu, 8U);
+		Esa ^= Da;
+		Cu = qsc_intutils_rotl64(Esa, 18U);
+		Aka = Ca ^ ((~Ce) & Ci);
+		Ake = Ce ^ ((~Ci) & Co);
+		Aki = Ci ^ ((~Co) & Cu);
+		Ako = Co ^ ((~Cu) & Ca);
+		Aku = Cu ^ ((~Ca) & Ce);
+		Ebu ^= Du;
+		Ca = qsc_intutils_rotl64(Ebu, 27U);
+		Ega ^= Da;
+		Ce = qsc_intutils_rotl64(Ega, 36U);
+		Eke ^= De;
+		Ci = qsc_intutils_rotl64(Eke, 10U);
+		Emi ^= Di;
+		Co = qsc_intutils_rotl64(Emi, 15U);
+		Eso ^= Do;
+		Cu = qsc_intutils_rotl64(Eso, 56U);
+		Ama = Ca ^ ((~Ce) & Ci);
+		Ame = Ce ^ ((~Ci) & Co);
+		Ami = Ci ^ ((~Co) & Cu);
+		Amo = Co ^ ((~Cu) & Ca);
+		Amu = Cu ^ ((~Ca) & Ce);
+		Ebi ^= Di;
+		Ca = qsc_intutils_rotl64(Ebi, 62U);
+		Ego ^= Do;
+		Ce = qsc_intutils_rotl64(Ego, 55U);
+		Eku ^= Du;
+		Ci = qsc_intutils_rotl64(Eku, 39U);
+		Ema ^= Da;
+		Co = qsc_intutils_rotl64(Ema, 41U);
+		Ese ^= De;
+		Cu = qsc_intutils_rotl64(Ese, 2U);
+		Asa = Ca ^ ((~Ce) & Ci);
+		Ase = Ce ^ ((~Ci) & Co);
+		Asi = Ci ^ ((~Co) & Cu);
+		Aso = Co ^ ((~Cu) & Ca);
+		Asu = Cu ^ ((~Ca) & Ce);
 
-	state[0U] = Aba;
-	state[1U] = Abe;
-	state[2U] = Abi;
-	state[3U] = Abo;
-	state[4U] = Abu;
-	state[5U] = Aga;
-	state[6U] = Age;
-	state[7U] = Agi;
-	state[8U] = Ago;
-	state[9U] = Agu;
-	state[10U] = Aka;
-	state[11U] = Ake;
-	state[12U] = Aki;
-	state[13U] = Ako;
-	state[14U] = Aku;
-	state[15U] = Ama;
-	state[16U] = Ame;
-	state[17U] = Ami;
-	state[18U] = Amo;
-	state[19U] = Amu;
-	state[20U] = Asa;
-	state[21U] = Ase;
-	state[22U] = Asi;
-	state[23U] = Aso;
-	state[24U] = Asu;
+		state[0U] = Aba;
+		state[1U] = Abe;
+		state[2U] = Abi;
+		state[3U] = Abo;
+		state[4U] = Abu;
+		state[5U] = Aga;
+		state[6U] = Age;
+		state[7U] = Agi;
+		state[8U] = Ago;
+		state[9U] = Agu;
+		state[10U] = Aka;
+		state[11U] = Ake;
+		state[12U] = Aki;
+		state[13U] = Ako;
+		state[14U] = Aku;
+		state[15U] = Ama;
+		state[16U] = Ame;
+		state[17U] = Ami;
+		state[18U] = Amo;
+		state[19U] = Amu;
+		state[20U] = Asa;
+		state[21U] = Ase;
+		state[22U] = Asi;
+		state[23U] = Aso;
+		state[24U] = Asu;
+	}
 }
 
 void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks, qsc_keccak_rate rate, size_t rounds)
@@ -4070,7 +4088,6 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 	QSC_ASSERT(inp2 != NULL);
 	QSC_ASSERT(inp3 != NULL);
 
-    // Validate input pointers
 	if (inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL)
 	{
 		__m256i t;
@@ -4150,70 +4167,6 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 	}
 }
 
-void qsc_keccakx4_absorb_aligned(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
-	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain)
-{
-	QSC_ASSERT(inp0 != NULL);
-	QSC_ASSERT(inp1 != NULL);
-	QSC_ASSERT(inp2 != NULL);
-	QSC_ASSERT(inp3 != NULL);
-
-	__m256i t;
-	__m256i idx = { 0U };
-	int64_t p0;
-	int64_t p1;
-	int64_t p2;
-	int64_t p3;
-	int64_t pos;
-	size_t i;
-
-	pos = 0U;
-	p0 = (int64_t)(uintptr_t)inp0;
-	p1 = (int64_t)(uintptr_t)inp1;
-	p2 = (int64_t)(uintptr_t)inp2;
-	p3 = (int64_t)(uintptr_t)inp3;
-
-	idx = _mm256_set_epi64x(p3, p2, p1, p0);
-
-	while (inplen >= (size_t)rate)
-	{
-		for (i = 0U; i < (size_t)rate / sizeof(uint64_t); ++i)
-		{
-			t = _mm256_i64gather_epi64((int64_t*)pos, idx, 1);
-			state[i] = _mm256_xor_si256(state[i], t);
-			pos += sizeof(uint64_t);
-		}
-
-		qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
-		inplen -= (size_t)rate;
-	}
-
-	i = 0U;
-
-	while (inplen >= sizeof(uint64_t))
-	{
-		t = _mm256_i64gather_epi64((int64_t*)pos, idx, 1);
-		state[i] = _mm256_xor_si256(state[i], t);
-
-		i++;
-		pos += sizeof(uint64_t);
-		inplen -= sizeof(uint64_t);
-	}
-
-	if (inplen != 0U)
-	{
-		t = _mm256_i64gather_epi64((int64_t*)pos, idx, 1U);
-		idx = _mm256_set1_epi64x((1ULL << (sizeof(uint64_t) * inplen)) - 1U);
-		t = _mm256_and_si256(t, idx);
-		state[i] = _mm256_xor_si256(state[i], t);
-	}
-
-	t = _mm256_set1_epi64x((int64_t)domain << (sizeof(uint64_t) * inplen));
-	state[i] = _mm256_xor_si256(state[i], t);
-	t = _mm256_set1_epi64x(1ULL << 63U);
-	state[((size_t)rate / sizeof(uint64_t)) - 1U] = _mm256_xor_si256(state[((size_t)rate / sizeof(uint64_t)) - 1U], t);
-}
-
 void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t nblocks)
 {
@@ -4222,28 +4175,31 @@ void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 	QSC_ASSERT(out2 != NULL);
 	QSC_ASSERT(out3 != NULL);
 
-	QSC_ALIGN(32) uint64_t tmp[4] = { 0 };
+	QSC_ALIGN(32) uint64_t tmp[4U] = { 0 };
 
-	while (nblocks > 0U)
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL)
 	{
-		qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
-
-		for (size_t i = 0U; i < (size_t)rate / sizeof(uint64_t); ++i)
+		while (nblocks > 0U)
 		{
-			_mm256_store_si256((__m256i*)tmp, state[i]);
+			qsc_keccak_permute_p4x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 
-			qsc_intutils_le64to8(out0, tmp[0]);
-			qsc_intutils_le64to8(out1, tmp[1]);
-			qsc_intutils_le64to8(out2, tmp[2]);
-			qsc_intutils_le64to8(out3, tmp[3]);
+			for (size_t i = 0U; i < (size_t)rate / sizeof(uint64_t); ++i)
+			{
+				_mm256_store_si256((__m256i*)tmp, state[i]);
 
-			out0 += sizeof(uint64_t);
-			out1 += sizeof(uint64_t);
-			out2 += sizeof(uint64_t);
-			out3 += sizeof(uint64_t);
+				qsc_intutils_le64to8(out0, tmp[0U]);
+				qsc_intutils_le64to8(out1, tmp[1U]);
+				qsc_intutils_le64to8(out2, tmp[2U]);
+				qsc_intutils_le64to8(out3, tmp[3U]);
+
+				out0 += sizeof(uint64_t);
+				out1 += sizeof(uint64_t);
+				out2 += sizeof(uint64_t);
+				out3 += sizeof(uint64_t);
+			}
+
+			--nblocks;
 		}
-
-		--nblocks;
 	}
 }
 
@@ -4377,36 +4333,39 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 
 	size_t i;
 
-	while (nblocks > 0U)
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && out4 != NULL && out5 != NULL && out6 != NULL && out7 != NULL)
 	{
-		qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
-
-		QSC_ALIGN(64) uint64_t tmp[8] = { 0 };
-
-		for (i = 0U; i < (size_t)rate / sizeof(uint64_t); ++i)
+		while (nblocks > 0U)
 		{
-			_mm512_store_si512((__m512i*)tmp, state[i]);
+			qsc_keccak_permute_p8x1600(state, QSC_KECCAK_PERMUTATION_ROUNDS);
 
-			qsc_intutils_le64to8(out0, tmp[0]);
-			qsc_intutils_le64to8(out1, tmp[1]);
-			qsc_intutils_le64to8(out2, tmp[2]);
-			qsc_intutils_le64to8(out3, tmp[3]);
-			qsc_intutils_le64to8(out4, tmp[4]);
-			qsc_intutils_le64to8(out5, tmp[5]);
-			qsc_intutils_le64to8(out6, tmp[6]);
-			qsc_intutils_le64to8(out7, tmp[7]);
+			QSC_ALIGN(64) uint64_t tmp[8U] = { 0U };
 
-			out0 += sizeof(uint64_t);
-			out1 += sizeof(uint64_t);
-			out2 += sizeof(uint64_t);
-			out3 += sizeof(uint64_t);
-			out4 += sizeof(uint64_t);
-			out5 += sizeof(uint64_t);
-			out6 += sizeof(uint64_t);
-			out7 += sizeof(uint64_t);
+			for (i = 0U; i < (size_t)rate / sizeof(uint64_t); ++i)
+			{
+				_mm512_store_si512((__m512i*)tmp, state[i]);
+
+				qsc_intutils_le64to8(out0, tmp[0U]);
+				qsc_intutils_le64to8(out1, tmp[1U]);
+				qsc_intutils_le64to8(out2, tmp[2U]);
+				qsc_intutils_le64to8(out3, tmp[3U]);
+				qsc_intutils_le64to8(out4, tmp[4U]);
+				qsc_intutils_le64to8(out5, tmp[5U]);
+				qsc_intutils_le64to8(out6, tmp[6U]);
+				qsc_intutils_le64to8(out7, tmp[7U]);
+
+				out0 += sizeof(uint64_t);
+				out1 += sizeof(uint64_t);
+				out2 += sizeof(uint64_t);
+				out3 += sizeof(uint64_t);
+				out4 += sizeof(uint64_t);
+				out5 += sizeof(uint64_t);
+				out6 += sizeof(uint64_t);
+				out7 += sizeof(uint64_t);
+			}
+
+			--nblocks;
 		}
-
-		--nblocks;
 	}
 }
 
@@ -4426,47 +4385,50 @@ void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(inplen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	size_t i;
-	size_t nblocks = outlen / QSC_KECCAK_128_RATE;
-	QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_128_RATE] = { 0U };
-	QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		size_t i;
+		size_t nblocks = outlen / QSC_KECCAK_128_RATE;
+		QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_128_RATE] = { 0U };
+		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
-	qsc_keccakx4_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		qsc_keccakx4_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
-	if (outlen >= QSC_KECCAK_128_RATE)
-	{
-		qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_128, out0, out1, out2, out3, nblocks);
-
-		out0 += nblocks * QSC_KECCAK_128_RATE;
-		out1 += nblocks * QSC_KECCAK_128_RATE;
-		out2 += nblocks * QSC_KECCAK_128_RATE;
-		out3 += nblocks * QSC_KECCAK_128_RATE;
-		outlen -= nblocks * QSC_KECCAK_128_RATE;
-	}
-
-	if (outlen != 0U)
-	{
-		qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_128, t[0U], t[1U], t[2U], t[3U], 1U);
-
-		for (i = 0U; i < outlen; ++i)
+		if (outlen >= QSC_KECCAK_128_RATE)
 		{
-			out0[i] = t[0U][i];
-			out1[i] = t[1U][i];
-			out2[i] = t[2U][i];
-			out3[i] = t[3U][i];
+			qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_128, out0, out1, out2, out3, nblocks);
+
+			out0 += nblocks * QSC_KECCAK_128_RATE;
+			out1 += nblocks * QSC_KECCAK_128_RATE;
+			out2 += nblocks * QSC_KECCAK_128_RATE;
+			out3 += nblocks * QSC_KECCAK_128_RATE;
+			outlen -= nblocks * QSC_KECCAK_128_RATE;
 		}
-	}
+
+		if (outlen != 0U)
+		{
+			qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_128, t[0U], t[1U], t[2U], t[3U], 1U);
+
+			for (i = 0U; i < outlen; ++i)
+			{
+				out0[i] = t[0U][i];
+				out1[i] = t[1U][i];
+				out2[i] = t[2U][i];
+				out3[i] = t[3U][i];
+			}
+		}
 
 #else
 
-	qsc_shake128_compute(out0, outlen, inp0, inplen);
-	qsc_shake128_compute(out1, outlen, inp1, inplen);
-	qsc_shake128_compute(out2, outlen, inp2, inplen);
-	qsc_shake128_compute(out3, outlen, inp3, inplen);
+		qsc_shake128_compute(out0, outlen, inp0, inplen);
+		qsc_shake128_compute(out1, outlen, inp1, inplen);
+		qsc_shake128_compute(out2, outlen, inp2, inplen);
+		qsc_shake128_compute(out3, outlen, inp3, inplen);
 
 #endif
+	}
 }
 
 void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
@@ -4483,46 +4445,49 @@ void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(inplen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	size_t nblocks = outlen / QSC_KECCAK_256_RATE;
-	QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_256_RATE] = { 0U };
-	QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		size_t nblocks = outlen / QSC_KECCAK_256_RATE;
+		QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_256_RATE] = { 0U };
+		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
-	qsc_keccakx4_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		qsc_keccakx4_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
-	if (outlen >= QSC_KECCAK_256_RATE)
-	{
-		qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_256, out0, out1, out2, out3, nblocks);
-
-		out0 += nblocks * QSC_KECCAK_256_RATE;
-		out1 += nblocks * QSC_KECCAK_256_RATE;
-		out2 += nblocks * QSC_KECCAK_256_RATE;
-		out3 += nblocks * QSC_KECCAK_256_RATE;
-		outlen -= nblocks * QSC_KECCAK_256_RATE;
-	}
-
-	if (outlen != 0U)
-	{
-		qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_256, t[0U], t[1U], t[2U], t[3U], 1U);
-
-		for (size_t i = 0U; i < outlen; ++i)
+		if (outlen >= QSC_KECCAK_256_RATE)
 		{
-			out0[i] = t[0U][i];
-			out1[i] = t[1U][i];
-			out2[i] = t[2U][i];
-			out3[i] = t[3U][i];
+			qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_256, out0, out1, out2, out3, nblocks);
+
+			out0 += nblocks * QSC_KECCAK_256_RATE;
+			out1 += nblocks * QSC_KECCAK_256_RATE;
+			out2 += nblocks * QSC_KECCAK_256_RATE;
+			out3 += nblocks * QSC_KECCAK_256_RATE;
+			outlen -= nblocks * QSC_KECCAK_256_RATE;
 		}
-	}
+
+		if (outlen != 0U)
+		{
+			qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_256, t[0U], t[1U], t[2U], t[3U], 1U);
+
+			for (size_t i = 0U; i < outlen; ++i)
+			{
+				out0[i] = t[0U][i];
+				out1[i] = t[1U][i];
+				out2[i] = t[2U][i];
+				out3[i] = t[3U][i];
+			}
+		}
 
 #else
 
-	qsc_shake256_compute(out0, outlen, inp0, inplen);
-	qsc_shake256_compute(out1, outlen, inp1, inplen);
-	qsc_shake256_compute(out2, outlen, inp2, inplen);
-	qsc_shake256_compute(out3, outlen, inp3, inplen);
+		qsc_shake256_compute(out0, outlen, inp0, inplen);
+		qsc_shake256_compute(out1, outlen, inp1, inplen);
+		qsc_shake256_compute(out2, outlen, inp2, inplen);
+		qsc_shake256_compute(out3, outlen, inp3, inplen);
 
 #endif
+	}
 }
 
 void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
@@ -4539,46 +4504,49 @@ void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(inplen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	size_t nblocks = outlen / QSC_KECCAK_512_RATE;
-	QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_512_RATE] = { 0U };
-	QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		size_t nblocks = outlen / QSC_KECCAK_512_RATE;
+		QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_512_RATE] = { 0U };
+		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
-	qsc_keccakx4_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		qsc_keccakx4_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
-	if (outlen >= QSC_KECCAK_512_RATE)
-	{
-		qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_512, out0, out1, out2, out3, nblocks);
-
-		out0 += nblocks * QSC_KECCAK_512_RATE;
-		out1 += nblocks * QSC_KECCAK_512_RATE;
-		out2 += nblocks * QSC_KECCAK_512_RATE;
-		out3 += nblocks * QSC_KECCAK_512_RATE;
-		outlen -= nblocks * QSC_KECCAK_512_RATE;
-	}
-
-	if (outlen != 0U)
-	{
-		qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_512, t[0U], t[1U], t[2U], t[3U], 1U);
-
-		for (size_t i = 0U; i < outlen; ++i)
+		if (outlen >= QSC_KECCAK_512_RATE)
 		{
-			out0[i] = t[0U][i];
-			out1[i] = t[1U][i];
-			out2[i] = t[2U][i];
-			out3[i] = t[3U][i];
+			qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_512, out0, out1, out2, out3, nblocks);
+
+			out0 += nblocks * QSC_KECCAK_512_RATE;
+			out1 += nblocks * QSC_KECCAK_512_RATE;
+			out2 += nblocks * QSC_KECCAK_512_RATE;
+			out3 += nblocks * QSC_KECCAK_512_RATE;
+			outlen -= nblocks * QSC_KECCAK_512_RATE;
 		}
-	}
+
+		if (outlen != 0U)
+		{
+			qsc_keccakx4_squeezeblocks(state, qsc_keccak_rate_512, t[0U], t[1U], t[2U], t[3U], 1U);
+
+			for (size_t i = 0U; i < outlen; ++i)
+			{
+				out0[i] = t[0U][i];
+				out1[i] = t[1U][i];
+				out2[i] = t[2U][i];
+				out3[i] = t[3U][i];
+			}
+		}
 
 #else
 
-	qsc_shake512_compute(out0, outlen, inp0, inplen);
-	qsc_shake512_compute(out1, outlen, inp1, inplen);
-	qsc_shake512_compute(out2, outlen, inp2, inplen);
-	qsc_shake512_compute(out3, outlen, inp3, inplen);
+		qsc_shake512_compute(out0, outlen, inp0, inplen);
+		qsc_shake512_compute(out1, outlen, inp1, inplen);
+		qsc_shake512_compute(out2, outlen, inp2, inplen);
+		qsc_shake512_compute(out3, outlen, inp3, inplen);
 
 #endif
+	}
 }
 
 /* parallel shake x8 */
@@ -4607,63 +4575,67 @@ void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(inplen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && out4 != NULL && out5 != NULL && out6 != NULL && out7 != NULL &&
+		inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL && inp4 != NULL && inp5 != NULL && inp6 != NULL && inp7 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	size_t nblocks = outlen / QSC_KECCAK_128_RATE;
-	QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_128_RATE] = { 0U };
-	QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		size_t nblocks = outlen / QSC_KECCAK_128_RATE;
+		QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_128_RATE] = { 0U };
+		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
-	qsc_keccakx8_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		qsc_keccakx8_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
-	if (outlen >= QSC_KECCAK_128_RATE)
-	{
-		qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_128, out0, out1, out2, out3, out4, out5, out6, out7, nblocks);
-
-		out0 += nblocks * QSC_KECCAK_128_RATE;
-		out1 += nblocks * QSC_KECCAK_128_RATE;
-		out2 += nblocks * QSC_KECCAK_128_RATE;
-		out3 += nblocks * QSC_KECCAK_128_RATE;
-		out4 += nblocks * QSC_KECCAK_128_RATE;
-		out5 += nblocks * QSC_KECCAK_128_RATE;
-		out6 += nblocks * QSC_KECCAK_128_RATE;
-		out7 += nblocks * QSC_KECCAK_128_RATE;
-		outlen -= nblocks * QSC_KECCAK_128_RATE;
-	}
-
-	if (outlen != 0U)
-	{
-		qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_128, t[0U], t[1U], t[2U], t[3U], t[4U], t[5U], t[6U], t[7U], 1U);
-
-		for (size_t i = 0U; i < outlen; ++i)
+		if (outlen >= QSC_KECCAK_128_RATE)
 		{
-			out0[i] = t[0U][i];
-			out1[i] = t[1U][i];
-			out2[i] = t[2U][i];
-			out3[i] = t[3U][i];
-			out4[i] = t[4U][i];
-			out5[i] = t[5U][i];
-			out6[i] = t[6U][i];
-			out7[i] = t[7U][i];
+			qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_128, out0, out1, out2, out3, out4, out5, out6, out7, nblocks);
+
+			out0 += nblocks * QSC_KECCAK_128_RATE;
+			out1 += nblocks * QSC_KECCAK_128_RATE;
+			out2 += nblocks * QSC_KECCAK_128_RATE;
+			out3 += nblocks * QSC_KECCAK_128_RATE;
+			out4 += nblocks * QSC_KECCAK_128_RATE;
+			out5 += nblocks * QSC_KECCAK_128_RATE;
+			out6 += nblocks * QSC_KECCAK_128_RATE;
+			out7 += nblocks * QSC_KECCAK_128_RATE;
+			outlen -= nblocks * QSC_KECCAK_128_RATE;
 		}
-	}
+
+		if (outlen != 0U)
+		{
+			qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_128, t[0U], t[1U], t[2U], t[3U], t[4U], t[5U], t[6U], t[7U], 1U);
+
+			for (size_t i = 0U; i < outlen; ++i)
+			{
+				out0[i] = t[0U][i];
+				out1[i] = t[1U][i];
+				out2[i] = t[2U][i];
+				out3[i] = t[3U][i];
+				out4[i] = t[4U][i];
+				out5[i] = t[5U][i];
+				out6[i] = t[6U][i];
+				out7[i] = t[7U][i];
+			}
+		}
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	qsc_shake_128x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
-	qsc_shake_128x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
+		qsc_shake_128x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
+		qsc_shake_128x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
 
 #else
 
-	qsc_shake128_compute(out0, outlen, inp0, inplen);
-	qsc_shake128_compute(out1, outlen, inp1, inplen);
-	qsc_shake128_compute(out2, outlen, inp2, inplen);
-	qsc_shake128_compute(out3, outlen, inp3, inplen);
-	qsc_shake128_compute(out4, outlen, inp4, inplen);
-	qsc_shake128_compute(out5, outlen, inp5, inplen);
-	qsc_shake128_compute(out6, outlen, inp6, inplen);
-	qsc_shake128_compute(out7, outlen, inp7, inplen);
+		qsc_shake128_compute(out0, outlen, inp0, inplen);
+		qsc_shake128_compute(out1, outlen, inp1, inplen);
+		qsc_shake128_compute(out2, outlen, inp2, inplen);
+		qsc_shake128_compute(out3, outlen, inp3, inplen);
+		qsc_shake128_compute(out4, outlen, inp4, inplen);
+		qsc_shake128_compute(out5, outlen, inp5, inplen);
+		qsc_shake128_compute(out6, outlen, inp6, inplen);
+		qsc_shake128_compute(out7, outlen, inp7, inplen);
 
 #endif
+	}
 }
 
 void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
@@ -4690,63 +4662,67 @@ void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(inplen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && out4 != NULL && out5 != NULL && out6 != NULL && out7 != NULL &&
+		inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL && inp4 != NULL && inp5 != NULL && inp6 != NULL && inp7 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	size_t nblocks = outlen / QSC_KECCAK_256_RATE;
-	QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_256_RATE] = { 0U };
-	QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		size_t nblocks = outlen / QSC_KECCAK_256_RATE;
+		QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_256_RATE] = { 0U };
+		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
-	qsc_keccakx8_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		qsc_keccakx8_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
-	if (outlen >= QSC_KECCAK_256_RATE)
-	{
-		qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_256, out0, out1, out2, out3, out4, out5, out6, out7, nblocks);
-
-		out0 += nblocks * QSC_KECCAK_256_RATE;
-		out1 += nblocks * QSC_KECCAK_256_RATE;
-		out2 += nblocks * QSC_KECCAK_256_RATE;
-		out3 += nblocks * QSC_KECCAK_256_RATE;
-		out4 += nblocks * QSC_KECCAK_256_RATE;
-		out5 += nblocks * QSC_KECCAK_256_RATE;
-		out6 += nblocks * QSC_KECCAK_256_RATE;
-		out7 += nblocks * QSC_KECCAK_256_RATE;
-		outlen -= nblocks * QSC_KECCAK_256_RATE;
-	}
-
-	if (outlen != 0U)
-	{
-		qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_256, t[0U], t[1U], t[2U], t[3U], t[4U], t[5U], t[6U], t[7U], 1U);
-
-		for (size_t i = 0U; i < outlen; ++i)
+		if (outlen >= QSC_KECCAK_256_RATE)
 		{
-			out0[i] = t[0U][i];
-			out1[i] = t[1U][i];
-			out2[i] = t[2U][i];
-			out3[i] = t[3U][i];
-			out4[i] = t[4U][i];
-			out5[i] = t[5U][i];
-			out6[i] = t[6U][i];
-			out7[i] = t[7U][i];
+			qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_256, out0, out1, out2, out3, out4, out5, out6, out7, nblocks);
+
+			out0 += nblocks * QSC_KECCAK_256_RATE;
+			out1 += nblocks * QSC_KECCAK_256_RATE;
+			out2 += nblocks * QSC_KECCAK_256_RATE;
+			out3 += nblocks * QSC_KECCAK_256_RATE;
+			out4 += nblocks * QSC_KECCAK_256_RATE;
+			out5 += nblocks * QSC_KECCAK_256_RATE;
+			out6 += nblocks * QSC_KECCAK_256_RATE;
+			out7 += nblocks * QSC_KECCAK_256_RATE;
+			outlen -= nblocks * QSC_KECCAK_256_RATE;
 		}
-	}
+
+		if (outlen != 0U)
+		{
+			qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_256, t[0U], t[1U], t[2U], t[3U], t[4U], t[5U], t[6U], t[7U], 1U);
+
+			for (size_t i = 0U; i < outlen; ++i)
+			{
+				out0[i] = t[0U][i];
+				out1[i] = t[1U][i];
+				out2[i] = t[2U][i];
+				out3[i] = t[3U][i];
+				out4[i] = t[4U][i];
+				out5[i] = t[5U][i];
+				out6[i] = t[6U][i];
+				out7[i] = t[7U][i];
+			}
+		}
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	qsc_shake_256x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
-	qsc_shake_256x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
+		qsc_shake_256x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
+		qsc_shake_256x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
 
 #else
 
-	qsc_shake256_compute(out0, outlen, inp0, inplen);
-	qsc_shake256_compute(out1, outlen, inp1, inplen);
-	qsc_shake256_compute(out2, outlen, inp2, inplen);
-	qsc_shake256_compute(out3, outlen, inp3, inplen);
-	qsc_shake256_compute(out4, outlen, inp4, inplen);
-	qsc_shake256_compute(out5, outlen, inp5, inplen);
-	qsc_shake256_compute(out6, outlen, inp6, inplen);
-	qsc_shake256_compute(out7, outlen, inp7, inplen);
+		qsc_shake256_compute(out0, outlen, inp0, inplen);
+		qsc_shake256_compute(out1, outlen, inp1, inplen);
+		qsc_shake256_compute(out2, outlen, inp2, inplen);
+		qsc_shake256_compute(out3, outlen, inp3, inplen);
+		qsc_shake256_compute(out4, outlen, inp4, inplen);
+		qsc_shake256_compute(out5, outlen, inp5, inplen);
+		qsc_shake256_compute(out6, outlen, inp6, inplen);
+		qsc_shake256_compute(out7, outlen, inp7, inplen);
 
 #endif
+	}
 }
 
 void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
@@ -4773,63 +4749,67 @@ void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(inplen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && out4 != NULL && out5 != NULL && out6 != NULL && out7 != NULL &&
+		inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL && inp4 != NULL && inp5 != NULL && inp6 != NULL && inp7 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	size_t nblocks = outlen / QSC_KECCAK_512_RATE;
-	QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_512_RATE] = { 0U };
-	QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		size_t nblocks = outlen / QSC_KECCAK_512_RATE;
+		QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_512_RATE] = { 0U };
+		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
-	qsc_keccakx8_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		qsc_keccakx8_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
-	if (outlen >= QSC_KECCAK_512_RATE)
-	{
-		qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_512, out0, out1, out2, out3, out4, out5, out6, out7, nblocks);
-
-		out0 += nblocks * QSC_KECCAK_512_RATE;
-		out1 += nblocks * QSC_KECCAK_512_RATE;
-		out2 += nblocks * QSC_KECCAK_512_RATE;
-		out3 += nblocks * QSC_KECCAK_512_RATE;
-		out4 += nblocks * QSC_KECCAK_512_RATE;
-		out5 += nblocks * QSC_KECCAK_512_RATE;
-		out6 += nblocks * QSC_KECCAK_512_RATE;
-		out7 += nblocks * QSC_KECCAK_512_RATE;
-		outlen -= nblocks * QSC_KECCAK_512_RATE;
-	}
-
-	if (outlen != 0U)
-	{
-		qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_512, t[0U], t[1U], t[2U], t[3U], t[4U], t[5U], t[6U], t[7U], 1U);
-
-		for (size_t i = 0U; i < outlen; ++i)
+		if (outlen >= QSC_KECCAK_512_RATE)
 		{
-			out0[i] = t[0U][i];
-			out1[i] = t[1U][i];
-			out2[i] = t[2U][i];
-			out3[i] = t[3U][i];
-			out4[i] = t[4U][i];
-			out5[i] = t[5U][i];
-			out6[i] = t[6U][i];
-			out7[i] = t[7U][i];
+			qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_512, out0, out1, out2, out3, out4, out5, out6, out7, nblocks);
+
+			out0 += nblocks * QSC_KECCAK_512_RATE;
+			out1 += nblocks * QSC_KECCAK_512_RATE;
+			out2 += nblocks * QSC_KECCAK_512_RATE;
+			out3 += nblocks * QSC_KECCAK_512_RATE;
+			out4 += nblocks * QSC_KECCAK_512_RATE;
+			out5 += nblocks * QSC_KECCAK_512_RATE;
+			out6 += nblocks * QSC_KECCAK_512_RATE;
+			out7 += nblocks * QSC_KECCAK_512_RATE;
+			outlen -= nblocks * QSC_KECCAK_512_RATE;
 		}
-	}
+
+		if (outlen != 0U)
+		{
+			qsc_keccakx8_squeezeblocks(state, qsc_keccak_rate_512, t[0U], t[1U], t[2U], t[3U], t[4U], t[5U], t[6U], t[7U], 1U);
+
+			for (size_t i = 0U; i < outlen; ++i)
+			{
+				out0[i] = t[0U][i];
+				out1[i] = t[1U][i];
+				out2[i] = t[2U][i];
+				out3[i] = t[3U][i];
+				out4[i] = t[4U][i];
+				out5[i] = t[5U][i];
+				out6[i] = t[6U][i];
+				out7[i] = t[7U][i];
+			}
+		}
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	qsc_shake_512x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
-	qsc_shake_512x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
+		qsc_shake_512x4(out0, out1, out2, out3, outlen, inp0, inp1, inp2, inp3, inplen);
+		qsc_shake_512x4(out4, out5, out6, out7, outlen, inp4, inp5, inp6, inp7, inplen);
 
 #else
 
-	qsc_shake512_compute(out0, outlen, inp0, inplen);
-	qsc_shake512_compute(out1, outlen, inp1, inplen);
-	qsc_shake512_compute(out2, outlen, inp2, inplen);
-	qsc_shake512_compute(out3, outlen, inp3, inplen);
-	qsc_shake512_compute(out4, outlen, inp4, inplen);
-	qsc_shake512_compute(out5, outlen, inp5, inplen);
-	qsc_shake512_compute(out6, outlen, inp6, inplen);
-	qsc_shake512_compute(out7, outlen, inp7, inplen);
+		qsc_shake512_compute(out0, outlen, inp0, inplen);
+		qsc_shake512_compute(out1, outlen, inp1, inplen);
+		qsc_shake512_compute(out2, outlen, inp2, inplen);
+		qsc_shake512_compute(out3, outlen, inp3, inplen);
+		qsc_shake512_compute(out4, outlen, inp4, inplen);
+		qsc_shake512_compute(out5, outlen, inp5, inplen);
+		qsc_shake512_compute(out6, outlen, inp6, inplen);
+		qsc_shake512_compute(out7, outlen, inp7, inplen);
 
 #endif
+	}
 }
 
 /* parallel kmac x4 */
@@ -5037,22 +5017,26 @@ void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	QSC_ASSERT(msglen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (key0 != NULL && key1 != NULL && key2 != NULL && key3 != NULL && msg0 != NULL && msg1 != NULL &&
+		msg2 != NULL && msg3 != NULL && out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
-	QSC_ALIGN(32) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
+		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		QSC_ALIGN(32) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
-	kmacx4_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
-	kmacx4_finalize(state, qsc_keccak_rate_128, msg0, msg1, msg2, msg3, msglen, out0, out1, out2, out3, outlen);
+		kmacx4_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
+		kmacx4_finalize(state, qsc_keccak_rate_128, msg0, msg1, msg2, msg3, msglen, out0, out1, out2, out3, outlen);
 
 #else
 
-	qsc_kmac128_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
-	qsc_kmac128_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
-	qsc_kmac128_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
-	qsc_kmac128_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
+		qsc_kmac128_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
+		qsc_kmac128_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
+		qsc_kmac128_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
+		qsc_kmac128_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
 
 #endif
+	}
 }
 
 void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
@@ -5076,22 +5060,26 @@ void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	QSC_ASSERT(msglen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (key0 != NULL && key1 != NULL && key2 != NULL && key3 != NULL && msg0 != NULL && msg1 != NULL &&
+		msg2 != NULL && msg3 != NULL && out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
-	QSC_ALIGN(32) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
+		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		QSC_ALIGN(32) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
-	kmacx4_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
-	kmacx4_finalize(state, qsc_keccak_rate_256, msg0, msg1, msg2, msg3, msglen, out0, out1, out2, out3, outlen);
+		kmacx4_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
+		kmacx4_finalize(state, qsc_keccak_rate_256, msg0, msg1, msg2, msg3, msglen, out0, out1, out2, out3, outlen);
 
 #else
 
-	qsc_kmac256_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
-	qsc_kmac256_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
-	qsc_kmac256_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
-	qsc_kmac256_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
+		qsc_kmac256_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
+		qsc_kmac256_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
+		qsc_kmac256_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
+		qsc_kmac256_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
 
 #endif
+	}
 }
 
 void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
@@ -5115,22 +5103,26 @@ void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	QSC_ASSERT(msglen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (key0 != NULL && key1 != NULL && key2 != NULL && key3 != NULL && msg0 != NULL && msg1 != NULL &&
+		msg2 != NULL && msg3 != NULL && out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-	QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
-	QSC_ALIGN(32) const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
+		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		QSC_ALIGN(32) const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
-	kmacx4_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
-	kmacx4_finalize(state, qsc_keccak_rate_512, msg0, msg1, msg2, msg3, msglen, out0, out1, out2, out3, outlen);
+		kmacx4_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
+		kmacx4_finalize(state, qsc_keccak_rate_512, msg0, msg1, msg2, msg3, msglen, out0, out1, out2, out3, outlen);
 
 #else
 
-	qsc_kmac512_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
-	qsc_kmac512_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
-	qsc_kmac512_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
-	qsc_kmac512_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
+		qsc_kmac512_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
+		qsc_kmac512_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
+		qsc_kmac512_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
+		qsc_kmac512_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
 
 #endif
+	}
 }
 
 /* parallel kmac x8 */
@@ -5398,35 +5390,40 @@ void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(msglen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (key0 != NULL && key1 != NULL && key2 != NULL && key3 != NULL && key4 != NULL && key5 != NULL && key6 != NULL && key7 != NULL &&
+		msg0 != NULL && msg1 != NULL && msg2 != NULL && msg3 != NULL && msg4 != NULL && msg5 != NULL && msg6 != NULL && msg7 != NULL &&
+		out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && out4 != NULL && out5 != NULL && out6 != NULL && out7 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
-	QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
+		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
-	kmacx8_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
-		cst0, cst1, cst2, cst3, cst4, cst5, cst6, cst7, cstlen, name, sizeof(name));
-	kmacx8_finalize(state, qsc_keccak_rate_128, msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msglen,
-		out0, out1, out2, out3, out4, out5, out6, out7, outlen);
+		kmacx8_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
+			cst0, cst1, cst2, cst3, cst4, cst5, cst6, cst7, cstlen, name, sizeof(name));
+		kmacx8_finalize(state, qsc_keccak_rate_128, msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msglen,
+			out0, out1, out2, out3, out4, out5, out6, out7, outlen);
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	qsc_kmac_128x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
-		cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
-	qsc_kmac_128x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
-		cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
+		qsc_kmac_128x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
+			cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
+		qsc_kmac_128x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
+			cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
 
 #else
 
-	qsc_kmac128_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
-	qsc_kmac128_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
-	qsc_kmac128_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
-	qsc_kmac128_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
-	qsc_kmac128_compute(out4, outlen, msg4, msglen, key4, keylen, cst4, cstlen);
-	qsc_kmac128_compute(out5, outlen, msg5, msglen, key5, keylen, cst5, cstlen);
-	qsc_kmac128_compute(out6, outlen, msg6, msglen, key6, keylen, cst6, cstlen);
-	qsc_kmac128_compute(out7, outlen, msg7, msglen, key7, keylen, cst7, cstlen);
+		qsc_kmac128_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
+		qsc_kmac128_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
+		qsc_kmac128_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
+		qsc_kmac128_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
+		qsc_kmac128_compute(out4, outlen, msg4, msglen, key4, keylen, cst4, cstlen);
+		qsc_kmac128_compute(out5, outlen, msg5, msglen, key5, keylen, cst5, cstlen);
+		qsc_kmac128_compute(out6, outlen, msg6, msglen, key6, keylen, cst6, cstlen);
+		qsc_kmac128_compute(out7, outlen, msg7, msglen, key7, keylen, cst7, cstlen);
 
 #endif
+	}
 }
 
 void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
@@ -5466,35 +5463,40 @@ void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(msglen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (key0 != NULL && key1 != NULL && key2 != NULL && key3 != NULL && key4 != NULL && key5 != NULL && key6 != NULL && key7 != NULL &&
+		msg0 != NULL && msg1 != NULL && msg2 != NULL && msg3 != NULL && msg4 != NULL && msg5 != NULL && msg6 != NULL && msg7 != NULL &&
+		out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && out4 != NULL && out5 != NULL && out6 != NULL && out7 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
-	QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
+		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
-	kmacx8_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
-		cst0, cst1, cst2, cst3, cst4, cst5, cst6, cst7, cstlen, name, sizeof(name));
-	kmacx8_finalize(state, qsc_keccak_rate_256, msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msglen,
-		out0, out1, out2, out3, out4, out5, out6, out7, outlen);
+		kmacx8_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
+			cst0, cst1, cst2, cst3, cst4, cst5, cst6, cst7, cstlen, name, sizeof(name));
+		kmacx8_finalize(state, qsc_keccak_rate_256, msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msglen,
+			out0, out1, out2, out3, out4, out5, out6, out7, outlen);
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	qsc_kmac_256x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
-		cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
-	qsc_kmac_256x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
-		cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
+		qsc_kmac_256x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
+			cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
+		qsc_kmac_256x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
+			cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
 
 #else
 
-	qsc_kmac256_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
-	qsc_kmac256_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
-	qsc_kmac256_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
-	qsc_kmac256_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
-	qsc_kmac256_compute(out4, outlen, msg4, msglen, key4, keylen, cst4, cstlen);
-	qsc_kmac256_compute(out5, outlen, msg5, msglen, key5, keylen, cst5, cstlen);
-	qsc_kmac256_compute(out6, outlen, msg6, msglen, key6, keylen, cst6, cstlen);
-	qsc_kmac256_compute(out7, outlen, msg7, msglen, key7, keylen, cst7, cstlen);
+		qsc_kmac256_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
+		qsc_kmac256_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
+		qsc_kmac256_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
+		qsc_kmac256_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
+		qsc_kmac256_compute(out4, outlen, msg4, msglen, key4, keylen, cst4, cstlen);
+		qsc_kmac256_compute(out5, outlen, msg5, msglen, key5, keylen, cst5, cstlen);
+		qsc_kmac256_compute(out6, outlen, msg6, msglen, key6, keylen, cst6, cstlen);
+		qsc_kmac256_compute(out7, outlen, msg7, msglen, key7, keylen, cst7, cstlen);
 
 #endif
+	}
 }
 
 void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
@@ -5534,34 +5536,39 @@ void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	QSC_ASSERT(msglen != 0U);
 	QSC_ASSERT(outlen != 0U);
 
+	if (key0 != NULL && key1 != NULL && key2 != NULL && key3 != NULL && key4 != NULL && key5 != NULL && key6 != NULL && key7 != NULL &&
+		msg0 != NULL && msg1 != NULL && msg2 != NULL && msg3 != NULL && msg4 != NULL && msg5 != NULL && msg6 != NULL && msg7 != NULL &&
+		out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL && out4 != NULL && out5 != NULL && out6 != NULL && out7 != NULL)
+	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-	QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
-	QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
+		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
-	kmacx8_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
-		cst0, cst1, cst2, cst3, cst4, cst5, cst6, cst7, cstlen, name, sizeof(name));
-	kmacx8_finalize(state, qsc_keccak_rate_512, msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msglen,
-		out0, out1, out2, out3, out4, out5, out6, out7, outlen);
+		kmacx8_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
+			cst0, cst1, cst2, cst3, cst4, cst5, cst6, cst7, cstlen, name, sizeof(name));
+		kmacx8_finalize(state, qsc_keccak_rate_512, msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msglen,
+			out0, out1, out2, out3, out4, out5, out6, out7, outlen);
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
-	qsc_kmac_512x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
-		cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
-	qsc_kmac_512x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
-		cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
+		qsc_kmac_512x4(out0, out1, out2, out3, outlen, key0, key1, key2, key3, keylen,
+			cst0, cst1, cst2, cst3, cstlen, msg0, msg1, msg2, msg3, msglen);
+		qsc_kmac_512x4(out4, out5, out6, out7, outlen, key4, key5, key6, key7, keylen,
+			cst4, cst5, cst6, cst7, cstlen, msg4, msg5, msg6, msg7, msglen);
 
 #else
 
-	qsc_kmac512_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
-	qsc_kmac512_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
-	qsc_kmac512_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
-	qsc_kmac512_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
-	qsc_kmac512_compute(out4, outlen, msg4, msglen, key4, keylen, cst4, cstlen);
-	qsc_kmac512_compute(out5, outlen, msg5, msglen, key5, keylen, cst5, cstlen);
-	qsc_kmac512_compute(out6, outlen, msg6, msglen, key6, keylen, cst6, cstlen);
-	qsc_kmac512_compute(out7, outlen, msg7, msglen, key7, keylen, cst7, cstlen);
+		qsc_kmac512_compute(out0, outlen, msg0, msglen, key0, keylen, cst0, cstlen);
+		qsc_kmac512_compute(out1, outlen, msg1, msglen, key1, keylen, cst1, cstlen);
+		qsc_kmac512_compute(out2, outlen, msg2, msglen, key2, keylen, cst2, cstlen);
+		qsc_kmac512_compute(out3, outlen, msg3, msglen, key3, keylen, cst3, cstlen);
+		qsc_kmac512_compute(out4, outlen, msg4, msglen, key4, keylen, cst4, cstlen);
+		qsc_kmac512_compute(out5, outlen, msg5, msglen, key5, keylen, cst5, cstlen);
+		qsc_kmac512_compute(out6, outlen, msg6, msglen, key6, keylen, cst6, cstlen);
+		qsc_kmac512_compute(out7, outlen, msg7, msglen, key7, keylen, cst7, cstlen);
 
 #endif
+	}
 }
 

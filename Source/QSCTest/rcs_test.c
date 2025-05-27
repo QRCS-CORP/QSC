@@ -7,21 +7,21 @@
 bool qsctest_rcs256_kat()
 {
 #if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t ad[20] = { 0 };
-	uint8_t dec[32] = { 0 };
-	uint8_t enc1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t enc2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t exp1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t exp2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
-	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[32 + QSC_RCS256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
 #else
-	uint8_t enc1[32] = { 0 };
-	uint8_t exp1[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc1[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[32] = { 0 };
 #endif
 
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
-	uint8_t msg[32] = { 0 };
-	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
 
 	bool status;
 	qsc_rcs_state state;
@@ -125,21 +125,21 @@ bool qsctest_rcs256_kat()
 bool qsctest_rcs512_kat()
 {
 #if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t ad[20] = { 0 };
-	uint8_t dec[64] = { 0 };
-	uint8_t enc1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t enc2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t exp1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t exp2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
-	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t dec[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp2[64 + QSC_RCS512_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0 };
 #else
-	uint8_t enc1[64] = { 0 };
-	uint8_t exp1[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc1[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t exp1[64] = { 0 };
 #endif
 
-	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
-	uint8_t msg[64] = { 0 };
-	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[64] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0 };
 	bool status;
 	qsc_rcs_state state;
 
@@ -254,15 +254,15 @@ bool qsctest_rcs512_kat()
 bool qsctest_rcs256_stress_test()
 {
 #if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t aad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad[20] = { 0 };
 #endif
-	uint8_t* dec;
-	uint8_t* enc;
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
-	uint8_t* msg;
-	uint8_t ncopy[QSC_RCS_NONCE_SIZE] = { 0 };
-	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
-	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
+	QSC_SIMD_ALIGN uint8_t* dec;
+	QSC_SIMD_ALIGN uint8_t* enc;
+	QSC_SIMD_ALIGN uint8_t key[QSC_RCS256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t* msg;
+	QSC_SIMD_ALIGN uint8_t ncopy[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	size_t mlen;
 	size_t tctr;
 	bool status;
@@ -362,15 +362,15 @@ bool qsctest_rcs256_stress_test()
 bool qsctest_rcs512_stress_test()
 {
 #if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t aad[20] = { 0 };
+	QSC_SIMD_ALIGN uint8_t aad[20] = { 0 };
 #endif
+	QSC_SIMD_ALIGN uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t ncopy[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	uint8_t* dec;
 	uint8_t* enc;
-	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0 };
 	uint8_t* msg;
-	uint8_t ncopy[QSC_RCS_NONCE_SIZE] = { 0 };
-	uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0 };
-	uint8_t pmcnt[sizeof(uint16_t)] = { 0 };
 	size_t mlen;
 	size_t tctr;
 	bool status;

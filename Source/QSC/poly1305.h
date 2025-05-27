@@ -80,10 +80,10 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 QSC_EXPORT_API typedef struct qsc_poly1305_state
 {
-	uint32_t h[5];							/*!< The h parameter */
-	uint32_t k[4];							/*!< The k parameter */
-	uint32_t r[5];							/*!< The r parameter */
-	uint32_t s[4];							/*!< The s parameter */
+	uint32_t h[5U];							/*!< The h parameter */
+	uint32_t k[4U];							/*!< The k parameter */
+	uint32_t r[5U];							/*!< The r parameter */
+	uint32_t s[4U];							/*!< The s parameter */
 	uint8_t buf[QSC_POLY1305_BLOCK_SIZE];	/*!< The buffer parameter */
 	size_t fnl;								/*!< The fnl size */
 	size_t rmd;								/*!< The rmd size */

@@ -132,45 +132,45 @@ QSC_CPLUSPLUS_ENABLED_START
 \def QSC_CSX_BLOCK_SIZE
 * \brief The internal block size in bytes, required by the encryption and decryption functions
 */
-#define QSC_CSX_BLOCK_SIZE 128ULL
+#define QSC_CSX_BLOCK_SIZE 128U
 
 /*!
 \def QSC_CSX_INFO_SIZE
 * \brief The maximum byte length of the info string
 */
-#define QSC_CSX_INFO_SIZE 48ULL
+#define QSC_CSX_INFO_SIZE 48U
 
 /*!
 \def QSC_CSX_KEY_SIZE
 * \brief The size in bytes of the CSX-512 input cipher-key
 */
-#define QSC_CSX_KEY_SIZE 64ULL
+#define QSC_CSX_KEY_SIZE 64U
 
 #if defined(QSC_CSX_AUTH_QMAC)
 /*!
 * \def QSC_CSX_MAC_SIZE
 * \brief The CSX MAC code array length in bytes.
 */
-#define QSC_CSX_MAC_SIZE 32ULL
+#define QSC_CSX_MAC_SIZE 32U
 #else
 /*!
 \def QSC_CSX_MAC_SIZE
 * \brief The CSX-512 MAC code array length in bytes
 */
-#define QSC_CSX_MAC_SIZE 64ULL
+#define QSC_CSX_MAC_SIZE 64U
 #endif
 
 /*!
 \def QSC_CSX_NONCE_SIZE
 * \brief The byte size of the nonce array
 */
-#define QSC_CSX_NONCE_SIZE 16ULL
+#define QSC_CSX_NONCE_SIZE 16U
 
 /*!
 \def QSC_CSX_STATE_SIZE
 * \brief The uint64 size of the internal state array
 */
-#define QSC_CSX_STATE_SIZE 16ULL
+#define QSC_CSX_STATE_SIZE 16U
 
 /*! 
 * \struct qsc_csx_keyparams

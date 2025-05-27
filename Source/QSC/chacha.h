@@ -82,31 +82,31 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_CHACHA_BLOCK_SIZE
  * \brief The internal block size used by the ChaCha20 cipher (in bytes).
  */
-#define QSC_CHACHA_BLOCK_SIZE 64ULL
+#define QSC_CHACHA_BLOCK_SIZE 64U
 
 /*!
  * \def QSC_CHACHA_KEY128_SIZE
  * \brief The size of the 128-bit secret key (in bytes).
  */
-#define QSC_CHACHA_KEY128_SIZE 16ULL
+#define QSC_CHACHA_KEY128_SIZE 16U
 
 /*!
  * \def QSC_CHACHA_KEY256_SIZE
  * \brief The size of the 256-bit secret key (in bytes).
  */
-#define QSC_CHACHA_KEY256_SIZE 32ULL
+#define QSC_CHACHA_KEY256_SIZE 32U
 
 /*!
  * \def QSC_CHACHA_NONCE_SIZE
  * \brief The size of the nonce in bytes.
  */
-#define QSC_CHACHA_NONCE_SIZE 12ULL
+#define QSC_CHACHA_NONCE_SIZE 12U
 
 /*!
  * \def QSC_CHACHA_ROUND_COUNT
  * \brief The number of mixing rounds used by ChaCha20.
  */
-#define QSC_CHACHA_ROUND_COUNT 20ULL
+#define QSC_CHACHA_ROUND_COUNT 20U
 
 /*!
  * \struct qsc_chacha_state
@@ -116,7 +116,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 QSC_EXPORT_API typedef struct
 {
-    uint32_t state[16]; /*!< [uint32_t] The internal state array used by the cipher. */
+    uint32_t state[16U]; /*!< [uint32_t] The internal state array used by the cipher. */
 } qsc_chacha_state;
 
 /*!

@@ -109,7 +109,7 @@ static ErrorDescription winutils_error_descriptions[] =
     { NERR_UserNotFound, "Error: The user name could not be found." }
 };
 
-static const char WINUTILS_SERVICE_STATE_STRINGS[9][12] =
+static const char WINUTILS_SERVICE_STATE_STRINGS[9U][12U] =
 {
     "Stopped",
     "Starting",
@@ -265,7 +265,7 @@ static void winutils_get_error_description(char* result, size_t reslen)
 
     if (err != 0)
     {
-        for (size_t i = 0U; i < (sizeof(winutils_error_descriptions) / sizeof(winutils_error_descriptions[0])); ++i)
+        for (size_t i = 0U; i < (sizeof(winutils_error_descriptions) / sizeof(winutils_error_descriptions[0U])); ++i)
         {
             if (err == winutils_error_descriptions[i].error)
             {
@@ -313,7 +313,7 @@ size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char*
     if (result != NULL && reslen != 0U && path != NULL)
     {
         attr = GetFileAttributesA(path);
-        result[0] = '\0';
+        result[0U] = '\0';
 
         if (attr != INVALID_FILE_ATTRIBUTES)
         {
@@ -746,8 +746,8 @@ bool qsc_winutils_process_token_elevate()
         if (LookupPrivilegeValue(NULL, SE_CHANGE_NOTIFY_NAME, &luid) == true)
         {
             tpriv.PrivilegeCount = 1;
-            tpriv.Privileges[0].Luid = luid;
-            tpriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+            tpriv.Privileges[0U].Luid = luid;
+            tpriv.Privileges[0U].Attributes = SE_PRIVILEGE_ENABLED;
 
             if (AdjustTokenPrivileges(htok, FALSE, &tpriv, sizeof(TOKEN_PRIVILEGES), (PTOKEN_PRIVILEGES)NULL, (PDWORD)NULL) == true)
             {
@@ -936,7 +936,7 @@ size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* k
     ct = NULL;
     ctr = 0;
     tlen = 0U;
-    result[0] = '\0';
+    result[0U] = '\0';
 
     if (result != NULL && reslen != 0 && keypath != NULL)
     {
@@ -1152,7 +1152,7 @@ size_t qsc_winutils_service_list(char* result, size_t reslen)
     hres = 0;
     llen = 0;
     tlen = 0U;
-    result[0] = '\0';
+    result[0U] = '\0';
 
     if (result != NULL && reslen != 0U)
     {

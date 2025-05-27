@@ -107,7 +107,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * This constant limits the output size to ensure that the internal entropy aggregation and key 
  * derivation process remains within safe operational parameters.
  */
-#define QSC_ACP_SEED_MAX 10240000ULL
+#define QSC_ACP_SEED_MAX 10240000U
 
 /**
  * \brief Generate cryptographically secure random bytes.

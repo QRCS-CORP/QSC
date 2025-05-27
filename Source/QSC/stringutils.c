@@ -646,7 +646,7 @@ int64_t qsc_stringutils_reverse_find_string(const char* source, const char* toke
 			{
 				if (strncmp(&source[i - 1U], token, tlen) == 0) 
 				{
-					res = (int64_t)(i - 1);
+					res = (int64_t)(i - 1U);
 					break;
 				}
 			}
@@ -669,7 +669,7 @@ const char* qsc_stringutils_reverse_sub_string(const char* source, const char* t
 
 	if (source != NULL && token != NULL)
 	{
-		pch = strrchr(source, token[0]);
+		pch = strrchr(source, token[0U]);
 
 		if (pch != NULL)
 		{

@@ -146,7 +146,7 @@ typedef enum
  *
  * All AES operations use a fixed block size of 16 bytes.
  */
-#define QSC_AES_BLOCK_SIZE 16ULL
+#define QSC_AES_BLOCK_SIZE 16U
 
 /*!
  * \def QSC_AES_IV_SIZE
@@ -154,55 +154,55 @@ typedef enum
  *
  * The IV (or nonce) size is equal to the block size.
  */
-#define QSC_AES_IV_SIZE 16ULL
+#define QSC_AES_IV_SIZE 16U
 
 /*!
  * \def QSC_AES128_KEY_SIZE
  * \brief Key size in bytes for AES-128.
  */
-#define QSC_AES128_KEY_SIZE 16ULL
+#define QSC_AES128_KEY_SIZE 16U
 
 /*!
  * \def QSC_AES256_KEY_SIZE
  * \brief Key size in bytes for AES-256.
  */
-#define QSC_AES256_KEY_SIZE 32ULL
+#define QSC_AES256_KEY_SIZE 32U
 
 /*!
  * \def QSC_GCM256_MAC_SIZE
  * \brief Size in bytes of the MAC code for GCM-AES-256.
  */
-#define QSC_GCM256_MAC_SIZE 16ULL
+#define QSC_GCM256_MAC_SIZE 16U
 
 /*!
  * \def QSC_GCM_MAXAAD_SIZE
  * \brief Maximum allowed size (in bytes) for Associated Additional Data (AAD) in GCM.
  */
-#define QSC_GCM_MAXAAD_SIZE 256ULL
+#define QSC_GCM_MAXAAD_SIZE 256U
 
 /*!
  * \def QSC_GCM_NONCE_SIZE
  * \brief The standard nonce size used by GCM-AES-256.
  */
-#define QSC_GCM_NONCE_SIZE 12ULL
+#define QSC_GCM_NONCE_SIZE 12U
 
 /*!
  * \def QSC_HBA256_MAC_SIZE
  * \brief Size in bytes of the MAC code for HBA-256.
  */
-#define QSC_HBA256_MAC_SIZE 32ULL
+#define QSC_HBA256_MAC_SIZE 32U
 
 /*!
  * \def QSC_HBA_MAXAAD_SIZE
  * \brief Maximum allowed size (in bytes) for Associated Additional Data (AAD) in HBA.
  */
-#define QSC_HBA_MAXAAD_SIZE 256ULL
+#define QSC_HBA_MAXAAD_SIZE 256U
 
 /*!
  * \def QSC_HBA_MAXINFO_SIZE
  * \brief Maximum allowed size (in bytes) for key information tweaks in HBA.
  */
-#define QSC_HBA_MAXINFO_SIZE 256ULL
+#define QSC_HBA_MAXINFO_SIZE 256U
 
 /*!
  * \def QSC_HBA_KMAC_AUTH
@@ -244,12 +244,12 @@ QSC_EXPORT_API typedef struct
 QSC_EXPORT_API typedef struct
 {
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
-	__m128i roundkeys[31];			/*!< [__m128i] Round-key array for hardware accelerated AES */
+	__m128i roundkeys[31U];			/*!< [__m128i] Round-key array for hardware accelerated AES */
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		__m512i roundkeysw[31];		/*!< [__m512i] Extended round-key array for AVX-512 optimizations */
+		QSC_ALIGN(64) __m512i roundkeysw[31U];		/*!< [__m512i] Extended round-key array for AVX-512 optimizations */
 #	endif
 #else
-	uint32_t roundkeys[124];		/*!< [uint32_t] Round-key array as 32-bit sub-keys for software-based AES */
+	uint32_t roundkeys[124U];		/*!< [uint32_t] Round-key array as 32-bit sub-keys for software-based AES */
 #endif
 	size_t roundkeylen;				/*!< [size_t] Number of round-key elements */
 	size_t rounds;					/*!< [size_t] Number of transformation rounds */
@@ -532,10 +532,10 @@ QSC_EXPORT_API bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t*
 QSC_EXPORT_API typedef struct qsc_aes_gcm256_state 
 {
     qsc_aes_state cstate;                   /*!< [struct] Underlying AES cipher ctx */
-    uint8_t C[QSC_AES_BLOCK_SIZE];			/*!< uint8_t[QSC_AES_BLOCK_SIZE] Current counter block */
-    uint8_t H[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] Hash subkey H = AES(K,0U) */
-    uint8_t J0[QSC_AES_BLOCK_SIZE];         /*!< uint8_t[QSC_AES_BLOCK_SIZE] Pre-counter block */
-    uint8_t S[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
+    QSC_SIMD_ALIGN uint8_t C[QSC_AES_BLOCK_SIZE];			/*!< uint8_t[QSC_AES_BLOCK_SIZE] Current counter block */
+    QSC_SIMD_ALIGN uint8_t H[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] Hash subkey H = AES(K,0U) */
+    QSC_SIMD_ALIGN uint8_t J0[QSC_AES_BLOCK_SIZE];         /*!< uint8_t[QSC_AES_BLOCK_SIZE] Pre-counter block */
+    QSC_SIMD_ALIGN uint8_t S[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
     uint64_t aadlen;						/*!< [uint64_t] AAD length in bits */
     uint64_t ctlen;							/*!< [uint64_t] Ciphertext length in bits */
 	bool encrypt;							/*!< [bool] Initialized for encryption */

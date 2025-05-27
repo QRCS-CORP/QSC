@@ -107,7 +107,7 @@ void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char output[Q
 
 	if (output != NULL && tstruct != NULL)
 	{
-		char tmp[5] = { 0U };
+		char tmp[5U] = { 0U };
 
 		qsc_memutils_clear(tstruct, sizeof(struct tm));
 
@@ -207,7 +207,7 @@ void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STRING_SIZE])
 		{
 			qsc_timestamp_time_struct_to_string(output, &nt);
 			/* terminate the string */
-			output[QSC_TIMESTAMP_STRING_SIZE - 1] = 0;
+			output[QSC_TIMESTAMP_STRING_SIZE - 1U] = 0;
 		}
 
 #else

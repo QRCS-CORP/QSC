@@ -78,13 +78,13 @@ QSC_CPLUSPLUS_ENABLED_START
 \def QSC_SOCKET_TERMINATOR_SIZE
 * The length of the message string terminator character
 */
-#define QSC_SOCKET_TERMINATOR_SIZE 1ULL
+#define QSC_SOCKET_TERMINATOR_SIZE 1U
 
 /*!
 \def QSC_SOCKET_TIMEOUT_MSEC
 * The default number of seconds to wait for a connection
 */
-#define QSC_SOCKET_TIMEOUT_MSEC 10000ULL
+#define QSC_SOCKET_TIMEOUT_MSEC 10000U
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 /*!

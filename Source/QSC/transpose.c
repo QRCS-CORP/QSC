@@ -36,7 +36,7 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 
 		if (inlen >= (length * 2U))
 		{
-			const uint8_t HASHMAP[32] =
+			const uint8_t HASHMAP[32U] =
 			{
 				0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U,
 				0x08U, 0x09U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
@@ -49,7 +49,7 @@ void qsc_transpose_hex_to_bin(uint8_t* output, const char* input, size_t length)
 			for (size_t pos = 0U; pos < (length * 2U); pos += 2U)
 			{
 				idx0 = ((uint8_t)input[pos] & 0x1FU) ^ 0x10U;
-				idx1 = ((uint8_t)input[pos + 1] & 0x1FU) ^ 0x10U;
+				idx1 = ((uint8_t)input[pos + 1U] & 0x1FU) ^ 0x10U;
 				output[pos / 2U] = (uint8_t)(HASHMAP[idx0] << 4) | HASHMAP[idx1];
 			}
 		}

@@ -245,7 +245,7 @@ QSC_EXPORT_API void qsc_memutils_copy(void* output, const void* input, size_t le
  * \param b:		[const uint64_t[2]] Input 128-bit operand, represented as an array of two 64-bit values.
  * \param imm8:		[int32_t] Controls which 64-bit halves to use.
  */
-QSC_EXPORT_API void qsc_memutils_clmulepi64_si128(uint64_t r[2], const uint64_t a[2], const uint64_t b[2], int32_t imm8);
+QSC_EXPORT_API void qsc_memutils_clmulepi64_si128(uint64_t r[2U], const uint64_t a[2U], const uint64_t b[2U], int32_t imm8);
 
 /**
  * \brief Multiply two 256-bit field elements (each represented as two 128-bit integers) 
@@ -255,7 +255,7 @@ QSC_EXPORT_API void qsc_memutils_clmulepi64_si128(uint64_t r[2], const uint64_t 
  * \param a:		[const __m128i[2]] First 256-bit operand (a[0] = lower 128 bits, a[1] = upper 128 bits).
  * \param b:		[const __m128i[2]] Second 256-bit operand (same ordering).
  */
-QSC_EXPORT_API void qsc_memutils_clmulepi64_si256_avx(__m128i r[4], const __m128i a[2], const __m128i b[2]);
+QSC_EXPORT_API void qsc_memutils_clmulepi64_si256_avx(__m128i r[4U], const __m128i a[2U], const __m128i b[2U]);
 
 /**
  * \brief Multiply two 256-bit field elements (each represented as two 128-bit integers) 
@@ -265,7 +265,7 @@ QSC_EXPORT_API void qsc_memutils_clmulepi64_si256_avx(__m128i r[4], const __m128
  * \param a:		[const uint64_t[4]]  First 256-bit operand (a[0] = lower 64 bits, a[3] = upper 64 bits).
  * \param b:		[const uint64_t[4]]  Second 256-bit operand (same ordering).
  */
-QSC_EXPORT_API void qsc_memutils_clmulepi64_si256(uint64_t r[8], const uint64_t a[4], const uint64_t b[4]);
+QSC_EXPORT_API void qsc_memutils_clmulepi64_si256(uint64_t r[8U], const uint64_t a[4U], const uint64_t b[4U]);
 
 /**
  * \brief Compare two 16-byte arrays as 128-bit big-endian integers to determine if A is greater than B.

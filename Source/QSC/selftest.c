@@ -539,9 +539,9 @@ static bool aes_gcm256_kat()
 
 static bool aes256_hba_kat()
 {
-	uint8_t aad1[20] = { 0U };
-	uint8_t aad2[20] = { 0U };
-	uint8_t aad3[20] = { 0U };
+	uint8_t aad1[20U] = { 0U };
+	uint8_t aad2[20U] = { 0U };
+	uint8_t aad3[20U] = { 0U };
 	uint8_t dec1[QSC_AES_BLOCK_SIZE] = { 0U };
 	uint8_t dec2[QSC_AES_BLOCK_SIZE * 2U] = { 0U };
 	uint8_t dec3[QSC_AES_BLOCK_SIZE * 4U] = { 0U };
@@ -865,7 +865,7 @@ static bool csx512_kat()
 		"9B063993F5D019CDDE4A8AA02D440C19A4A08AD7A0CD3F2FDFEF61D0383314B5"
 		"3285521CBCDC258DD1C8621606EA76D846A9E7272E3294BBF02DF3C546A46CD7", exp2, sizeof(exp2));
 #	endif
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
+	qsc_memutils_set_value(ad, sizeof(ad), 0x01U);
 #else
 	qsc_consoleutils_hex_to_bin("E1E27CD3CF085080363AC3903D31C2AE5E51D4CCF8FB9278FEFB24077A72C2AC"
 		"671249C32DED5F96CBC31702CED6B3575F3B562BA9FF9E6467DE7C687AEDA54C"
@@ -1128,7 +1128,7 @@ bool rcs512_kat()
 		"D1285FAB37A6821DA524F3F7FF7EFCB39C5B59E3897B177E45D6AA7F4BB5BE77"
 		"6D714E62EDB8571B72B8D5E94B2F4E42E46EEF3DBBECFFF894759881EDA744AA", exp2, sizeof(exp2));
 #	endif
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
+	qsc_memutils_set_value(ad, sizeof(ad), 0x01U);
 	qsc_memutils_copy(ncpy, nce, sizeof(nce));
 #else
 	qsc_consoleutils_hex_to_bin("8643251F3880261010BF195886C0496CC2EB07BB68D9F13BCBD266890467F47F"
@@ -2491,7 +2491,7 @@ static bool cshake_256_kat()
 
 	qsc_intutils_clear64(state.state, QSC_KECCAK_STATE_SIZE);
 	qsc_cshake_initialize(&state, qsc_keccak_rate_256, msg1600, sizeof(msg1600), name, 0U, cust, sizeof(cust));
-	qsc_cshake_squeezeblocks(&state, qsc_keccak_rate_256, hashb, 1);
+	qsc_cshake_squeezeblocks(&state, qsc_keccak_rate_256, hashb, 1U);
 
 	if (qsc_intutils_are_equal8(hashb, exp512b, sizeof(exp512b)) == false)
 	{

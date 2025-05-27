@@ -121,7 +121,7 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 			if (qsc_stringutils_string_contains(line, "\n") == true)
 			{
 				slen = qsc_stringutils_string_size(line);
-				line[slen - 1] = '\0';
+				line[slen - 1U] = '\0';
 			}
 			else
 			{
@@ -264,7 +264,7 @@ void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t len
 			for (size_t pos = 0U; pos < (length * 2U); pos += 2U)
 			{
 				idx0 = ((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U;
-				idx1 = ((uint8_t)hexstr[pos + 1] & 0x1FU) ^ 0x10U;
+				idx1 = ((uint8_t)hexstr[pos + 1U] & 0x1FU) ^ 0x10U;
 				output[pos / 2U] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
 			}
 		}
@@ -350,7 +350,7 @@ size_t qsc_consoleutils_masked_password(char* output, size_t otplen)
 					if (ctr > 0U)
 					{
 						qsc_consoleutils_print_safe("\b \b");
-						output[ctr - 1] = '\0';
+						output[ctr - 1U] = '\0';
 						--ctr;
 					}
 				}

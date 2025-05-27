@@ -595,7 +595,7 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 #if !defined(QSC_ALIGN)
 #	if defined(__GNUC__) || defined(__clang__)
-#		define QSC_ALIGN(x)  QSC_ATTRIBUTE((aligned(x)))
+#		define QSC_ALIGN(x)  __attribute__((aligned(x)))
 #	elif defined(_MSC_VER)
 #		define QSC_ALIGN(x)  __declspec(align(x))
 #	else
@@ -930,56 +930,36 @@ QSC_CPLUSPLUS_ENABLED_START
 * \def QSC_MISRA_FULL_COMPLIANCE
 * \brief Enable full MISRA compliant cryptographic module compliance.
 */
-//#define QSC_MISRA_FULL_COMPLIANCE
+#define QSC_MISRA_FULL_COMPLIANCE
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS) && defined(QSC_SYSTEM_COMPILER_GCC) && defined(QSC_ASM_ENABLED)
   // #define QSC_GCC_ASM_ENABLED  /* Uncomment to enable GCC ASM processing */
 #endif
 
+  /*!
+   * \def QSC_SIMD_ALIGNMENT
+   * \brief Alignment value for enabled intrinsic.
+   */
 #if defined(QSC_SYSTEM_HAS_AVX512)
-  /*!
-   * \def QSC_SIMD_ALIGN
-   * \brief Macro to align data on a 64-byte boundary for AVX512.
-   */
-#	define QSC_SIMD_ALIGN QSC_ALIGN(64)
-  /*!
-   * \def QSC_SIMD_ALIGNMENT
-   * \brief Alignment value for AVX512 (64 bytes).
-   */
-#	define QSC_SIMD_ALIGNMENT 64
+#  define QSC_SIMD_ALIGNMENT 64
 #elif defined(QSC_SYSTEM_HAS_AVX2)
-  /*!
-   * \def QSC_SIMD_ALIGN
-   * \brief Macro to align data on a 32-byte boundary for AVX2.
-   */
-#	define QSC_SIMD_ALIGN QSC_ALIGN(32)
-  /*!
-   * \def QSC_SIMD_ALIGNMENT
-   * \brief Alignment value for AVX2 (32 bytes).
-   */
-#	define QSC_SIMD_ALIGNMENT 32
+#  define QSC_SIMD_ALIGNMENT 32
 #elif defined(QSC_SYSTEM_HAS_AVX)
-  /*!
-   * \def QSC_SIMD_ALIGN
-   * \brief Macro to align data on a 16-byte boundary for AVX.
-   */
-#	define QSC_SIMD_ALIGN QSC_ALIGN(16)
-  /*!
-   * \def QSC_SIMD_ALIGNMENT
-   * \brief Alignment value for AVX (16 bytes).
-   */
-#	define QSC_SIMD_ALIGNMENT 16
+#  define QSC_SIMD_ALIGNMENT 16
 #else
+#  define QSC_SIMD_ALIGNMENT 8
+#endif
+
   /*!
    * \def QSC_SIMD_ALIGN
-   * \brief Fallback macro for SIMD alignment (no specific alignment).
+   * \brief Macro to align data on supported intrinsics size
    */
-#	define QSC_SIMD_ALIGN
-  /*!
-   * \def QSC_SIMD_ALIGNMENT
-   * \brief Fallback alignment value (8 bytes).
-   */
-#	define QSC_SIMD_ALIGNMENT 8
+#if defined(_MSC_VER)
+#  define QSC_SIMD_ALIGN __declspec(align(QSC_SIMD_ALIGNMENT))
+#elif defined(__GNUC__) || defined(__clang__)
+#  define QSC_SIMD_ALIGN _Alignas(QSC_SIMD_ALIGNMENT)
+#else
+#  define QSC_SIMD_ALIGN
 #endif
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)

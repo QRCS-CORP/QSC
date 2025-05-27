@@ -104,21 +104,21 @@ static void random_sample_print()
 
 	qsc_consoleutils_print_line("CSP sample: ");
 	qsc_csp_generate(smp, sizeof(smp));
-	qsc_consoleutils_print_array(smp, sizeof(smp), 64);
+	qsc_consoleutils_print_array(smp, sizeof(smp), 64U);
 	qsc_memutils_clear(smp, sizeof(smp));
 	qsc_consoleutils_print_line("");
 
 #if defined(QSC_RDRAND_COMPATIBLE)
 	qsc_consoleutils_print_line("RDP sample: ");
 	qsc_rdp_generate(smp, sizeof(smp));
-	qsc_consoleutils_print_array(smp, sizeof(smp), 64);
+	qsc_consoleutils_print_array(smp, sizeof(smp), 64U);
 	qsc_memutils_clear(smp, sizeof(smp));
 	qsc_consoleutils_print_line("");
 #endif
 
 	qsc_consoleutils_print_line("ACP sample: ");
 	qsc_acp_generate(smp, sizeof(smp));
-	qsc_consoleutils_print_array(smp, sizeof(smp), 64);
+	qsc_consoleutils_print_array(smp, sizeof(smp), 64U);
 	qsc_memutils_clear(smp, sizeof(smp));
 	qsc_consoleutils_print_line("");
 	qsc_consoleutils_print_line("");
@@ -169,6 +169,7 @@ int32_t main(void)
 #endif
 
 	//primitives_test();
+	qsctest_mceliece_run();
 
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.

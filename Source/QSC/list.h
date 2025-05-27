@@ -100,7 +100,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_LIST_MAX_DEPTH
  * \brief The maximum list depth.
  */
-#define QSC_LIST_MAX_DEPTH 102400ULL
+#define QSC_LIST_MAX_DEPTH 102400U
 
 /*!
  * \struct qsc_list_state

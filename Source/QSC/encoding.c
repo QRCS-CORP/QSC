@@ -574,7 +574,7 @@ size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t ta
         }
         else 
         {
-            uint8_t temp[5] = { 0U };
+            uint8_t temp[5U] = { 0U };
             size_t tmplen;
 
             /* indicate long-form tag */
@@ -652,7 +652,7 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
     QSC_ASSERT(input != NULL);
     QSC_ASSERT(inplen != 0U);
 
-	const int32_t DECTBL[80] = 
+	const int32_t DECTBL[80U] = 
 	{
 		62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58,
 		59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
@@ -703,7 +703,7 @@ bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* inpu
 
                     int idx = c - 43U;
 
-                    if ((size_t)idx >= (sizeof(DECTBL)/sizeof(DECTBL[0])))
+                    if ((size_t)idx >= (sizeof(DECTBL)/sizeof(DECTBL[0U])))
                     {
                         res = false;
                         break;
@@ -1113,7 +1113,7 @@ bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, 
                     if (linelen > 0U)
                     {
                         /* skip the line if its first non-whitespace character is '-' */
-                        if (lstart[0] != '-')
+                        if (lstart[0U] != '-')
                         {
                             for (size_t i = 0U; i < linelen; i++)
                             {
@@ -1232,11 +1232,11 @@ bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, con
         b64len = qsc_encoding_base64_encoded_size(data_len);
         /* allocate a temporary buffer for the Base64 encoded data */
         /* +1 for null terminator */
-        b64data = qsc_memutils_malloc(b64len + 1);
+        b64data = qsc_memutils_malloc(b64len + 1U);
 
         if (b64data != NULL)
         {
-            qsc_memutils_clear(b64data, b64len + 1);
+            qsc_memutils_clear(b64data, b64len + 1U);
             qsc_encoding_base64_encode(b64data, b64len + 1, data, data_len);
             pidx = 0U;
 

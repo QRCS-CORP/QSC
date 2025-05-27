@@ -130,19 +130,19 @@ int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 }
 
 /* fe */
-static const qsc_fe25519 ed25519_d =
+static const QSC_SIMD_ALIGN qsc_fe25519 ed25519_d =
 {
 	/* 37095705934669439343138083508754565189542113879843219016388785533085940283555 */
 	-10913610, 13857413, -15372611, 6949391,   114729, -8787816, -6275908, -3247719, -18696448, -12055116
 };
 
-static const qsc_fe25519 fe25519_sqrtm1 =
+static const QSC_SIMD_ALIGN qsc_fe25519 fe25519_sqrtm1 =
 {
 	/* sqrt(-1) */
 	-32595792, -7943725,  9377950,  3500415, 12389472, -272473, -25146209, -2005654, 326686, 11406482
 };
 
-static const qsc_fe25519 ed25519_d2 =
+static const QSC_SIMD_ALIGN qsc_fe25519 ed25519_d2 =
 {
 	/* 2 * d = 16295367250680780974490674513165176452449235426866156013048779062215315747161 */
 	-21827239, -5839606,  -30745221, 13898782, 229458, 15978800, -12551817, -6495438, 29715968, 9444199
@@ -375,7 +375,7 @@ int32_t qsc_fe25519_is_negative(const qsc_fe25519 f)
 
 int32_t qsc_fe25519_is_zero(const qsc_fe25519 f)
 {
-	uint8_t s[32U] = { 0U };
+	QSC_SIMD_ALIGN uint8_t s[32U] = { 0U };
 
 	qsc_fe25519_to_bytes(s, f);
 
@@ -1405,7 +1405,7 @@ static void ge25519_cmov8_base(qsc_ge25519_precomp* t, const int32_t pos, const 
 {
 	QSC_ASSERT(t != NULL);
 
-	static const qsc_ge25519_precomp base[32U][8U] =
+	static const QSC_SIMD_ALIGN qsc_ge25519_precomp base[32U][8U] =
 	{
 		{ /* 0/31 */
 		  {
@@ -2819,7 +2819,7 @@ void qsc_ge25519_scalarmult_base(qsc_ge25519_p3* h, const uint8_t* a)
 	QSC_ASSERT(h != NULL);
 	QSC_ASSERT(a != NULL);
 
-	signed char e[64] = { 0 };
+	QSC_SIMD_ALIGN signed char e[64U] = { 0 };
 	signed char carry;
 	qsc_ge25519_p1p1 r = { 0 };
 	qsc_ge25519_p2 s = { 0 };
@@ -2829,7 +2829,7 @@ void qsc_ge25519_scalarmult_base(qsc_ge25519_p3* h, const uint8_t* a)
 	for (i = 0; i < 32; ++i)
 	{
 		e[2 * i] = a[i] & 15;
-		e[2 * i + 1] = (a[i] >> 4) & 15;
+		e[2 * i + 1U] = (a[i] >> 4) & 15;
 	}
 
 	/* each e[i] is between 0 and 15, e[63] is between 0 and 7 */
@@ -2843,7 +2843,7 @@ void qsc_ge25519_scalarmult_base(qsc_ge25519_p3* h, const uint8_t* a)
 		e[i] -= carry * ((signed char)1 << 4);
 	}
 
-	e[63] += carry;
+	e[63U] += carry;
 
 	/* each e[i] is between -8 and 8 */
 	ge25519_p3_0(h);
@@ -2910,7 +2910,7 @@ int32_t qsc_ge25519_is_canonical(const uint8_t* s)
 
 int32_t qsc_ge25519_has_small_order(const uint8_t s[32U])
 {
-	static const uint8_t blocklist[][32U] =
+	static const QSC_SIMD_ALIGN uint8_t blocklist[][32U] =
 	{
 		/* 0 (order 4) */
 		{
@@ -2958,7 +2958,7 @@ int32_t qsc_ge25519_has_small_order(const uint8_t s[32U])
 		}
 	};
 
-	uint8_t c[7U] = { 0U };
+	QSC_SIMD_ALIGN uint8_t c[7U] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;
@@ -3120,7 +3120,7 @@ void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, 
 	QSC_ASSERT(A != NULL);
 	QSC_ASSERT(b != NULL);
 
-	static const qsc_ge25519_precomp Bi[8U] =
+	static const QSC_SIMD_ALIGN qsc_ge25519_precomp Bi[8U] =
 	{
 		{
 		  { 25967493, -14356035, 29566456, 3660896, -12694345, 4014787, 27544626, -11754271, -6079156, 2047605 },
@@ -3164,8 +3164,8 @@ void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, 
 		}
 	};
 
-	int8_t aslide[256] = { 0 };
-	int8_t bslide[256] = { 0 };
+	QSC_SIMD_ALIGN int8_t aslide[256U] = { 0 };
+	QSC_SIMD_ALIGN int8_t bslide[256U] = { 0 };
 	qsc_ge25519_cached Ai[8U] = { 0 };
 	qsc_ge25519_p1p1 t;
 	qsc_ge25519_p3 u;
@@ -3225,23 +3225,23 @@ void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, 
 		if (aslide[i] > 0)
 		{
 			qsc_ge25519_p1p1_to_p3(&u, &t);
-			qsc_ge25519_add_cached(&t, &u, &Ai[aslide[i] / 2]);
+			qsc_ge25519_add_cached(&t, &u, &Ai[aslide[i] / 2U]);
 		}
 		else if (aslide[i] < 0)
 		{
 			qsc_ge25519_p1p1_to_p3(&u, &t);
-			qsc_ge25519_sub_cached(&t, &u, &Ai[(-aslide[i]) / 2]);
+			qsc_ge25519_sub_cached(&t, &u, &Ai[(-aslide[i]) / 2U]);
 		}
 
 		if (bslide[i] > 0)
 		{
 			qsc_ge25519_p1p1_to_p3(&u, &t);
-			ge25519_add_precomp(&t, &u, &Bi[bslide[i] / 2]);
+			ge25519_add_precomp(&t, &u, &Bi[bslide[i] / 2U]);
 		}
 		else if (bslide[i] < 0)
 		{
 			qsc_ge25519_p1p1_to_p3(&u, &t);
-			qsc_ge25519_sub_precomp(&t, &u, &Bi[(-bslide[i]) / 2]);
+			qsc_ge25519_sub_precomp(&t, &u, &Bi[(-bslide[i]) / 2U]);
 		}
 
 		qsc_ge25519_p1p1_to_p2(r, &t);
@@ -3303,7 +3303,7 @@ int32_t qsc_ed25519_small_order(const uint8_t s[32U])
 	 * unexpected optimizations that would affect the ref10 code.
 	 * See https://eprint.iacr.org/2017/806.pdf for reference.
 	 */
-	static const uint8_t blocklist[][32U] =
+	static const QSC_SIMD_ALIGN uint8_t blocklist[][32U] =
 	{
 		/* 0 (order 4) */
 		{
@@ -3347,7 +3347,7 @@ int32_t qsc_ed25519_small_order(const uint8_t s[32U])
 		}
 	};
 
-	uint8_t c[7U] = { 0U };
+	QSC_SIMD_ALIGN uint8_t c[7U] = { 0U };
 	uint32_t k;
 	size_t i;
 	size_t j;
@@ -3379,7 +3379,7 @@ int32_t qsc_ed25519_small_order(const uint8_t s[32U])
 
 int32_t qsc_sc25519_is_canonical(const uint8_t s[32U])
 {
-	static const uint8_t L[32U] =
+	static const QSC_SIMD_ALIGN uint8_t L[32U] =
 	{
 		0xEDU, 0xD3U, 0xF5U, 0x5CU, 0x1AU, 0x63U, 0x12U, 0x58U, 0xD6U, 0x9CU, 0xF7U,
 		0xA2U, 0xDEU, 0xF9U, 0xDEU, 0x14U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,

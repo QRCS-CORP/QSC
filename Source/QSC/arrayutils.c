@@ -288,7 +288,7 @@ bool qsc_arrayutils_self_test()
 	const char ssht[] = "32180";
 	const char schr1[] = "1";
 	const char schr2[] = "192";
-	char shex[3] = { 0U };
+	char shex[3U] = { 0U };
 	const uint64_t nlng = 189167334201522U;
 	const uint32_t nint = 497683U;
 	const uint16_t nsht = 32180U;

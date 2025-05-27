@@ -66,7 +66,7 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 		/* fill the buffer using the scattering pattern */
 		for (size_t i = 0U; i < lcnt; ++i)
 		{
-			qsc_shake_squeezeblocks(&kstate, ctx->rate, kblk, 1);
+			qsc_shake_squeezeblocks(&kstate, ctx->rate, kblk, 1U);
 			oft = indice[i] * QSC_MEMUTILS_CACHE_LINE_SIZE;
 
 			QSC_MEMUTILS_MEMORY_FENCE();
