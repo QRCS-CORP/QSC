@@ -2470,7 +2470,7 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 			uint64_t ivbits;
 			size_t numblk;
 			size_t buflen;
-			uint8_t ivbuf[2U * QSC_AES_BLOCK_SIZE] = { 0 };
+			uint8_t ivbuf[2U * QSC_AES_BLOCK_SIZE] = { 0U };
 
 			/* initialize the buffer */
 			numblk = ((keyparams->noncelen + QSC_AES_BLOCK_SIZE - 1U) / QSC_AES_BLOCK_SIZE);

@@ -1673,7 +1673,7 @@ static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t
 #if defined(QSC_MISRA_FULL_COMPLIANCE)
 	/* Note: if it fails here with stackoverflow, increase the maximum stack size
 	* to +/- 20 MB to account for the large matrix array */
-	QSC_SIMD_ALIGN uint8_t mat[MCELIECE_PK_NROWS * sizeof(uint8_t*)][MCELIECE_SYS_N / 8U] = { 0 };
+	QSC_SIMD_ALIGN uint8_t mat[MCELIECE_PK_NROWS * sizeof(uint8_t*)][MCELIECE_SYS_N / 8U] = { 0U };
 	res = true;
 #else
 	uint8_t** mat;

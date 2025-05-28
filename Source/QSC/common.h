@@ -589,20 +589,6 @@ QSC_CPLUSPLUS_ENABLED_START
 #	endif
 #endif
 
-/*!
-* \def QSC_ALIGN(x)
-* \brief Macro for aligning data to 'x' bytes using GCC/Clang.
-*/
-#if !defined(QSC_ALIGN)
-#	if defined(__GNUC__) || defined(__clang__)
-#		define QSC_ALIGN(x)  __attribute__((aligned(x)))
-#	elif defined(_MSC_VER)
-#		define QSC_ALIGN(x)  __declspec(align(x))
-#	else
-#		define QSC_ALIGN(x)
-#	endif
-#endif
-
 #if defined(__SIZEOF_INT128__) && defined(QSC_SYSTEM_IS_X64) && !defined(__xlc__) && !defined(uint128_t)
   /*!
    * \def QSC_SYSTEM_NATIVE_UINT128
@@ -934,6 +920,20 @@ QSC_CPLUSPLUS_ENABLED_START
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS) && defined(QSC_SYSTEM_COMPILER_GCC) && defined(QSC_ASM_ENABLED)
   // #define QSC_GCC_ASM_ENABLED  /* Uncomment to enable GCC ASM processing */
+#endif
+
+/*!
+* \def QSC_ALIGN(x)
+* \brief Macro for aligning data to 'x' bytes using GCC/Clang.
+*/
+#if !defined(QSC_ALIGN)
+#	if defined(_MSC_VER)
+#		define QSC_ALIGN(x) __declspec(align(x))
+#	elif defined(__GNUC__) || defined(__clang__)
+#		define QSC_ALIGN(x) __attribute__((aligned(x)))
+#	else
+#		define QSC_ALIGN(x)
+#	endif
 #endif
 
   /*!

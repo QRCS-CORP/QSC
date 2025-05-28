@@ -36,7 +36,7 @@ uint128 qsc_donna128_shift_right(const uint128* x, size_t shift)
 {
 	QSC_ASSERT(x != NULL);
 
-	uint128 r = { 0 };
+	uint128 r = { 0U };
 
 	if (x != NULL)
 	{
@@ -52,7 +52,7 @@ uint128 qsc_donna128_shift_left(const uint128* x, size_t shift)
 {
 	QSC_ASSERT(x != NULL);
 
-	uint128 r = { 0 };
+	uint128 r = { 0U };
 
 	if (x != NULL)
 	{
@@ -83,7 +83,7 @@ uint128 qsc_donna128_add(const uint128* x, const uint128* y)
 	QSC_ASSERT(x != NULL);
 	QSC_ASSERT(y != NULL);
 
-	uint128 r = { 0 };
+	uint128 r = { 0U };
 
 	if (x != NULL && y != NULL)
 	{
@@ -103,7 +103,7 @@ uint128 qsc_donna128_multiply(const uint128* x, uint64_t Y)
 
 	uint64_t low;
 	uint64_t high;
-	uint128 r = { 0 };
+	uint128 r = { 0U };
 
 	if (x != NULL)
 	{
@@ -123,7 +123,7 @@ uint128 qsc_donna128_or(const uint128 * x, const uint128 * y)
 	QSC_ASSERT(x != NULL);
 	QSC_ASSERT(y != NULL);
 
-	uint128 r = { 0 };
+	uint128 r = { 0U };
 
 	if (x != NULL && y != NULL)
 	{

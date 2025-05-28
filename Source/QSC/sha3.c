@@ -4175,7 +4175,7 @@ void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 	QSC_ASSERT(out2 != NULL);
 	QSC_ASSERT(out3 != NULL);
 
-	QSC_ALIGN(32) uint64_t tmp[4U] = { 0 };
+	QSC_ALIGN(32) uint64_t tmp[4U] = { 0U };
 
 	if (out0 != NULL && out1 != NULL && out2 != NULL && out3 != NULL)
 	{

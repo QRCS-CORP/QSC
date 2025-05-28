@@ -1728,7 +1728,7 @@ bool qsc_dilithium_ref_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t 
 
     if (contextlen <= 255U)
     {
-        uint8_t prec[DILITHIUM_CONTEXT_SIZE] = { 0 };
+        uint8_t prec[DILITHIUM_CONTEXT_SIZE] = { 0U };
 
         /* prepare pre = (0, ctxlen, ctx) */
         prec[0U] = 0U;

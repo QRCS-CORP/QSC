@@ -142,9 +142,11 @@ bool qsc_stringutils_compare_strings(const char* str1, const char* str2, size_t 
 
 	if (str1 != NULL && str2 != NULL)
 	{
+		acc = 0U;
+
 		for (size_t i = 0U; i < length; ++i)
 		{
-			acc = (uint8_t)(acc + (uint8_t)(str1[i] ^ str2[i]));
+			acc |= (uint8_t)(acc + (uint8_t)(str1[i] ^ str2[i]));
 		}
 	}
 
