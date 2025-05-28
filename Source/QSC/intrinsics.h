@@ -49,8 +49,8 @@
 
 #include "qsccommon.h"
 
-#if defined(QSC_SYSTEM_COMPILER_MSC)
-#	if defined(QSC_SYSTEM_ARCH_ARM)
+#if defined(_MSC_VER)
+#	if defined(__CC_ARM)
 #		include <arm_neon.h>
 #	else
 #		include <intrin.h>	/* Microsoft C/C++ compatible compiler */
