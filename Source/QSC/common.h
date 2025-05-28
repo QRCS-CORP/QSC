@@ -916,7 +916,7 @@ QSC_CPLUSPLUS_ENABLED_START
 * \def QSC_MISRA_FULL_COMPLIANCE
 * \brief Enable full MISRA compliant cryptographic module compliance.
 */
-#define QSC_MISRA_FULL_COMPLIANCE
+//#define QSC_MISRA_FULL_COMPLIANCE
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS) && defined(QSC_SYSTEM_COMPILER_GCC) && defined(QSC_ASM_ENABLED)
   // #define QSC_GCC_ASM_ENABLED  /* Uncomment to enable GCC ASM processing */

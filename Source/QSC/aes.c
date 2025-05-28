@@ -1586,6 +1586,8 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(keyparams != NULL);
 
+	(void)encryption;
+
 	if (ctx != NULL && keyparams != NULL)
 	{
 		if (keyparams->nonce != NULL)

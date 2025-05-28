@@ -168,9 +168,6 @@ int32_t main(void)
 	qsc_consoleutils_print_line("");
 #endif
 
-	//primitives_test();
-	qsctest_mceliece_run();
-
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
@@ -327,7 +324,9 @@ int32_t main(void)
 			qsctest_kyber_run();
 			qsctest_print_line("");
 
+#if defined(QSC_MISRA_FULL_COMPLIANCE)
 			qsctest_print_line("*** Test the McEliece implementation using stress, validity checks, and known answer tests ***");
+#endif
 			qsctest_print_line("Warning: McEliece uses large static arrays internally, increase maximum stack allocation to 10-20MB.");
 			qsctest_mceliece_run();
 			qsctest_print_line("");

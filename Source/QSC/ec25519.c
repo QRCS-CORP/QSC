@@ -1375,7 +1375,7 @@ static uint8_t ge25519_equal(int8_t b, int8_t c)
     y -= 1;   /* 4294967295: yes; 0..254: no */
     y >>= 31; /* 1: yes; 0: no */
 
-    return y;
+    return (uint8_t)(y & 0xFFU);
 }
 
 static void ge25519_cmov8(qsc_ge25519_precomp* t, const qsc_ge25519_precomp precomp[8U], const int8_t b)
