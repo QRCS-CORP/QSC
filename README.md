@@ -201,7 +201,6 @@ cmake --build build
 
 - Continued ASM/SIMD integration and optimization.
 - Wrapper library for Java.
-- Development of a post-quantum TLS 1.3 implementation.
 - Expansion of testing and benchmarking frameworks.
 - Integration of emerging cryptographic research and standards.
 
