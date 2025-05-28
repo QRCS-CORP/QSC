@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(
     QSC
-    VERSION 1.0.0                              # update for every tagged release
+    VERSION 1.0.0
     DESCRIPTION "Quantum-Secure Cryptographic Library"
     LANGUAGES C)
 
@@ -26,7 +26,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Silence CMP0135 warning but keep NEW behaviour
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
@@ -34,10 +33,8 @@ endif()
 # ─── Warning flags ────────────────────────────────────────────────────────────
 if(QSC_STRICT_WARNINGS)
   if(MSVC)
-    # /WX = treat warnings as errors in MSVC
     add_compile_options(/W4 /WX)
   elseif(CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang)$")
-    # Keep high warning level but DO NOT turn them into errors on GCC/Clang
     add_compile_options(
         -Wall -Wextra -Wpedantic
         -Wno-unused-parameter
@@ -47,6 +44,17 @@ if(QSC_STRICT_WARNINGS)
   endif()
 endif()
 
+# ─── OS Platform Definitions ──────────────────────────────────────────────────
+if(WIN32)
+  add_definitions(-DQSC_SYSTEM_OS_WINDOWS)
+elseif(APPLE)
+  add_definitions(-DQSC_SYSTEM_OS_POSIX)
+elseif(UNIX)
+  add_definitions(-DQSC_SYSTEM_OS_POSIX)
+else()
+  message(FATAL_ERROR "Unsupported operating system.")
+endif()
+
 # ─── Source collection ────────────────────────────────────────────────────────
 set(QSC_SOURCE_DIR ${PROJECT_SOURCE_DIR}/Source/QSC)
 
@@ -54,30 +62,21 @@ file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS
      "${QSC_SOURCE_DIR}/*.c"
      "${QSC_SOURCE_DIR}/*.h")
 
-# ─── Source collection ────────────────────────────────────────────────────────
-set(QSC_SOURCE_DIR ${PROJECT_SOURCE_DIR}/Source/QSC)
-
-file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS
-     "${QSC_SOURCE_DIR}/*.c"
-     "${QSC_SOURCE_DIR}/*.h")
-
-# ----------------------------------------------------------------------------- 
-# Remove Intel-specific NASM files on non-x86 targets (e.g., Apple Silicon)
-# -----------------------------------------------------------------------------
+# Remove Intel NASM assembly files on non-x86 platforms
 if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|i[3-6]86)$")
   list(FILTER QSC_SOURCES EXCLUDE REGEX ".*/NASM/.*\\.c$")
 endif()
 
 add_library(qsc ${QSC_SOURCES})
 
-# Public headers: build interface vs install interface (CMP0135 compliant)
+# Public headers
 target_include_directories(qsc
   PUBLIC
         $<BUILD_INTERFACE:${QSC_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include/qsc>
 )
 
-# OS-specific compile definitions
+# Compiler OS macros
 if(WIN32)
   target_compile_definitions(qsc PRIVATE QSC_WINDOWS)
 elseif(APPLE)
