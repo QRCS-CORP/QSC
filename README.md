@@ -160,12 +160,10 @@ QSC has been thoroughly tested on:
 - **Language Interoperability:**  
   Interoperability with C++, and .NET via the QSCNETCW wrapper library.
 
-
 ## Compilation
 
 QSC is a standalone, portable, and MISRA-aligned cryptographic library written in C. It supports platform-optimized builds across **Windows**, **macOS**, and **Linux** via [CMake](https://cmake.org/), and includes support for modern hardware acceleration such as AES-NI, AVX2/AVX-512, and RDRAND.
 
----
 
 ### Prerequisites
 
@@ -175,7 +173,6 @@ QSC is a standalone, portable, and MISRA-aligned cryptographic library written i
   - **macOS**: Clang via Xcode or Homebrew
   - **Ubuntu**: GCC or Clang
 
----
 
 ### Building QSC
 
