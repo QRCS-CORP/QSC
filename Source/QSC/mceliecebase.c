@@ -1689,10 +1689,13 @@ static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t
 
 			if (mat[i] == NULL)
 			{
-				for (size_t j = 0; j < i; ++j)
+				for (j = 0U; j < i; ++j)
 				{
-					qsc_memutils_aligned_free(mat[j]);
-					mat[j] = NULL;
+					if (mat[j] != NULL)
+					{
+						qsc_memutils_aligned_free(mat[j]);
+						mat[j] = NULL;
+					}
 				}
 
 				qsc_memutils_aligned_free(mat);
@@ -1867,7 +1870,7 @@ static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t
 #endif
 
 #if !defined(QSC_MISRA_FULL_COMPLIANCE)
-		for (size_t i = 0; i < MCELIECE_PK_NROWS; ++i)
+		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
 		{
 			qsc_memutils_aligned_free(mat[i]);
 			mat[i] = NULL;
