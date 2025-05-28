@@ -161,6 +161,35 @@ QSC has been thoroughly tested on:
   Interoperability with C++, and .NET via the QSCNETCW wrapper library.
 
 
+## 📦 Compilation
+
+QSC is a standalone, portable, and MISRA-aligned cryptographic library written in C. It supports platform-optimized builds across **Windows**, **macOS**, and **Linux** via [CMake](https://cmake.org/), and includes support for modern hardware acceleration such as AES-NI, AVX2/AVX-512, and RDRAND.
+
+---
+
+### 🔧 Prerequisites
+
+- CMake 3.15 or newer
+- A C11-compatible C compiler:
+  - **Windows**: Visual Studio 2022 or newer
+  - **macOS**: Clang via Xcode or Homebrew
+  - **Ubuntu**: GCC or Clang
+
+---
+
+### 🚀 Building QSC
+
+#### ✅ Windows (MSVC)
+
+```powershell
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+
+#### ✅ macOS / Ubuntu
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_AESNI=ON -DENABLE_AVX2=ON -DENABLE_RDRAND=ON
+cmake --build build
+
 ## Roadmap
 
 - Continued ASM/SIMD integration and optimization.
