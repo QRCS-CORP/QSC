@@ -178,6 +178,8 @@ QSC is a standalone, portable, and MISRA-aligned cryptographic library written i
 
 #### Windows (MSVC)
 
+Use the Visual Studio solution to create the library and test project QSC Test.
+
 powershell:
 cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
