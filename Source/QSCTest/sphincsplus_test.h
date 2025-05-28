@@ -40,7 +40,7 @@
 #ifndef QSCTEST_SPHINCSPLUS_TEST_H
 #define QSCTEST_SPHINCSPLUS_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /**
  * \file sphincsplus_test.h

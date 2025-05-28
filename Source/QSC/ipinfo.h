@@ -43,7 +43,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "common.h"
+#include "qsccommon.h"
 #include "arrayutils.h"
 #include "intutils.h"
 #include "memutils.h"

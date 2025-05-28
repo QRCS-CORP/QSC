@@ -40,8 +40,8 @@
 #ifndef QSCTEST_CSX_TEST_H
 #define QSCTEST_CSX_TEST_H
 
-#include "../QSC/common.h"
-#include "../QSC/csx.h"
+#include "qsccommon.h"
+#include "csx.h"
 
 /**
  * \file csx_test.h

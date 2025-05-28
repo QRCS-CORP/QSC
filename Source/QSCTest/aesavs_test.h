@@ -40,7 +40,7 @@
 #ifndef QSCTEST_AESAVS_TEST_H
 #define QSCTEST_AESAVS_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /**
  * \file aesavs_test.h

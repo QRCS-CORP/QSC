@@ -1,9 +1,9 @@
 #include "aes_test.h"
-#include "../QSC/csp.h"
-#include "../QSC/intutils.h"
-#include "../QSC/memutils.h"
-#include "../QSC/sha2.h"
-#include "../QSC/sha3.h"
+#include "csp.h"
+#include "intutils.h"
+#include "memutils.h"
+#include "sha2.h"
+#include "sha3.h"
 #include "testutils.h"
 
 #define AES_TEST_CYCLES 100

@@ -40,7 +40,7 @@
 #ifndef QSCTEST_MCELIECE_TEST_H
 #define QSCTEST_MCELIECE_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /**
  * \file mceliece_test.h

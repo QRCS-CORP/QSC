@@ -40,7 +40,7 @@
 #ifndef QSCTEST_SECRAND_TEST_H
 #define QSCTEST_SECRAND_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /**
  * \file secrand_test.h

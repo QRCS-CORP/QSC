@@ -40,7 +40,7 @@
 #ifndef QSC_TIMEREX_H
 #define QSC_TIMEREX_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include <time.h>
 
 QSC_CPLUSPLUS_ENABLED_START

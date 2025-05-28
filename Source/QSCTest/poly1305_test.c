@@ -1,8 +1,8 @@
 #include "poly1305_test.h"
-#include "common.h"
+#include "qsccommon.h"
 #include "testutils.h"
-#include "../QSC/intutils.h"
-#include "../QSC/poly1305.h"
+#include "intutils.h"
+#include "poly1305.h"
 
 bool qsctest_poly1305_kat()
 {

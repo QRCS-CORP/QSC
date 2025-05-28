@@ -41,7 +41,7 @@
 #ifndef QSC_CHACHA20_H
 #define QSC_CHACHA20_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "poly1305.h"
 
 QSC_CPLUSPLUS_ENABLED_START

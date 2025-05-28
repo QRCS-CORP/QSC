@@ -40,7 +40,7 @@
 #ifndef QSC_TIMESTAMP_H
 #define QSC_TIMESTAMP_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include <time.h>
 
 QSC_CPLUSPLUS_ENABLED_START

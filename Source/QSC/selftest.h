@@ -40,7 +40,7 @@
 #ifndef QSC_SELFTEST_H
 #define QSC_SELFTEST_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 /*!
  * \file selftest.h

@@ -40,8 +40,8 @@
 #ifndef QSCTEST_KYBER_TEST_H
 #define QSCTEST_KYBER_TEST_H
 
-#include "common.h"
-#include "../QSC/common.h"
+#include "qsctestcommon.h"
+#include "qsccommon.h"
 
 /**
  * \file kyber_test.h

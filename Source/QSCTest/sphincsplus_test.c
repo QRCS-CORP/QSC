@@ -2,8 +2,8 @@
 #include "katparser.h"
 #include "nistrng.h"
 #include "testutils.h"
-#include "../QSC/intutils.h"
-#include "../QSC/sphincsplus.h"
+#include "intutils.h"
+#include "sphincsplus.h"
 
 #if defined(QSC_SPHINCSPLUS_EXTENDED)
 

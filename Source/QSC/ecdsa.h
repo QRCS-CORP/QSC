@@ -40,7 +40,7 @@
 #ifndef QSC_ECDSA_H
 #define QSC_ECDSA_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

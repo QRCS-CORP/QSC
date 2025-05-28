@@ -40,7 +40,7 @@
 #ifndef QSC_THREADPOOL_H
 #define QSC_THREADPOOL_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "async.h"
 
 QSC_CPLUSPLUS_ENABLED_START

@@ -1,7 +1,7 @@
 #include "sha2_test.h"
 #include "testutils.h"
-#include "../QSC/intutils.h"
-#include "../QSC/sha2.h"
+#include "intutils.h"
+#include "sha2.h"
 #include <stdio.h>
 
 bool qsctest_hkdf_256_kat() 

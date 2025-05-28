@@ -1,8 +1,8 @@
 #include "csx_test.h"
-#include "../QSC/intutils.h"
-#include "../QSC/memutils.h"
-#include "../QSC/sha3.h"
-#include "../QSC/csp.h"
+#include "intutils.h"
+#include "memutils.h"
+#include "sha3.h"
+#include "csp.h"
 #include "testutils.h"
 
 bool qsctest_csx512_kat()

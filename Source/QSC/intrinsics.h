@@ -47,7 +47,7 @@
 * \brief SIMD include files
 */
 
-#include "common.h"
+#include "qsccommon.h"
 
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #	if defined(QSC_SYSTEM_ARCH_ARM)

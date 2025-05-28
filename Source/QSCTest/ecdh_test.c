@@ -1,9 +1,9 @@
 #include "ecdh_test.h"
 #include "nistrng.h"
 #include "testutils.h"
-#include "../QSC/csp.h"
-#include "../QSC/ecdh.h"
-#include "../QSC/intutils.h"
+#include "csp.h"
+#include "ecdh.h"
+#include "intutils.h"
 
 bool qsctest_ecdh_kat_test()
 {

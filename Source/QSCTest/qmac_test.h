@@ -40,7 +40,7 @@
 #ifndef QSCTEST_QMAC_TEST_H
 #define QSCTEST_QMAC_TEST_H
 
-#include "../QSC/common.h"
+#include "qsccommon.h"
 
 /**
  * \file qmac_test.h

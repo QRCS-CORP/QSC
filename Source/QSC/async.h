@@ -41,7 +41,7 @@
 #ifndef QSC_THREADS_H
 #define QSC_THREADS_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include <stdarg.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)

@@ -40,8 +40,8 @@
 #ifndef QSCTEST_AES_TEST_H
 #define QSCTEST_AES_TEST_H
 
-#include "common.h"
-#include "../QSC/aes.h"
+#include "qsctestcommon.h"
+#include "aes.h"
 
 /**
  * \file aes_test.h

@@ -40,7 +40,7 @@
 #ifndef QSC_SOCKETCLIENT_H
 #define QSC_SOCKETCLIENT_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "ipinfo.h"
 #include "socketbase.h"
 

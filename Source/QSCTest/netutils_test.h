@@ -40,7 +40,7 @@
 #ifndef QSCTEST_NETUTILS_TEST_H
 #define QSCTEST_NETUTILS_TEST_H
 
-#include "../QSC/common.h"
+#include "qsccommon.h"
 
 /**
  * \file netutils_test.h

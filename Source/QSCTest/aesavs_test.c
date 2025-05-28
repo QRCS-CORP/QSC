@@ -1,8 +1,8 @@
 #include "aesavs_test.h"
-#include "../QSC/aes.h"
-#include "../QSC/fileutils.h"
-#include "../QSC/intutils.h"
-#include "../QSC/memutils.h"
+#include "aes.h"
+#include "fileutils.h"
+#include "intutils.h"
+#include "memutils.h"
 #include "testutils.h"
 
 static bool aesavs_cbc128_kat(const char* filepath)

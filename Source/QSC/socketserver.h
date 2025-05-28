@@ -40,7 +40,7 @@
 #ifndef QSC_SOCKETSERVER_H
 #define QSC_SOCKETSERVER_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "socketbase.h"
 
 QSC_CPLUSPLUS_ENABLED_START

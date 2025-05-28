@@ -40,7 +40,7 @@
 #ifndef QSC_SHA3_H
 #define QSC_SHA3_H
 
-#include "common.h"
+#include "qsccommon.h"
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	include "intrinsics.h"
 #endif

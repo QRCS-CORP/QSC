@@ -40,7 +40,7 @@
 #ifndef QSC_SOCKET_H
 #define QSC_SOCKET_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "socketflags.h"
 
 QSC_CPLUSPLUS_ENABLED_START

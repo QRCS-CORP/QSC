@@ -40,8 +40,8 @@
 #ifndef QSCTEST_SHA3_TEST_H
 #define QSCTEST_SHA3_TEST_H
 
-#include "common.h"
-#include "../QSC/common.h"
+#include "qsctestcommon.h"
+#include "qsccommon.h"
 
 /**
  * \file sha3_test.h

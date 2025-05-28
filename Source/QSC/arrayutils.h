@@ -42,7 +42,7 @@
 #ifndef QSC_ARRAYUTILS_H
 #define QSC_ARRAYUTILS_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include <stdio.h>
 
 QSC_CPLUSPLUS_ENABLED_START

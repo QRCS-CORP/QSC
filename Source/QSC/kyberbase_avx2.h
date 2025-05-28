@@ -40,7 +40,7 @@
 #ifndef QSC_KYBERBASE_AVX2_H
 #define QSC_KYBERBASE_AVX2_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 /* \cond */
 

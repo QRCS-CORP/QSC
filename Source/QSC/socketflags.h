@@ -40,7 +40,7 @@
 #ifndef QSC_SOCKFLAGS_H
 #define QSC_SOCKFLAGS_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

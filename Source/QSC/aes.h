@@ -42,7 +42,7 @@
 #ifndef QSC_AES_H
 #define QSC_AES_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "intrinsics.h"
 
 /*! \def QSC_HBA_KMAC_EXTENSION

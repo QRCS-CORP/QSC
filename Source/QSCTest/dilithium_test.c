@@ -1,10 +1,10 @@
 #include "dilithium_test.h"
-#include "common.h"
+#include "qsctestcommon.h"
 #include "katparser.h"
 #include "nistrng.h"
 #include "testutils.h"
-#include "../QSC/dilithium.h"
-#include "../QSC/intutils.h"
+#include "dilithium.h"
+#include "intutils.h"
 
 bool qsctest_dilithium_kat_test()
 {

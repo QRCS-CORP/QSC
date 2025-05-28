@@ -1,5 +1,5 @@
 #include "async_test.h"
-#include "../QSC/async.h"
+#include "async.h"
 #include "testutils.h"
 
 /* \cond */

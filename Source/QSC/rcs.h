@@ -41,7 +41,7 @@
 #ifndef QSC_RCS_H
 #define QSC_RCS_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "sha3.h"
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 #	include "intrinsics.h"

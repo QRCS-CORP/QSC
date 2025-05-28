@@ -41,7 +41,7 @@
 #ifndef QSC_COLLECTION_H
 #define QSC_COLLECTION_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

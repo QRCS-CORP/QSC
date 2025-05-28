@@ -1,6 +1,6 @@
 #include "netutils_test.h"
-#include "../QSC/netutils.h"
-#include "../QSC/socketclient.h"
+#include "netutils.h"
+#include "socketclient.h"
 #include "testutils.h"
 
 static bool qsctest_address_info()

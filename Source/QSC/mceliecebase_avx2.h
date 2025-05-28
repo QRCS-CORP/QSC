@@ -42,7 +42,7 @@
 
  /* \cond */
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

@@ -48,7 +48,7 @@
 * \brief This is not a secure RNG, and should be used for testing purposes only.
 */
 
-#include "../QSC/common.h"
+#include "qsccommon.h"
 
 /*!
 * \def QSCTEST_NIST_RNG_SEED_SIZE

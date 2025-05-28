@@ -41,7 +41,7 @@
 #ifndef QSC_LIST_H
 #define QSC_LIST_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

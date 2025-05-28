@@ -19,7 +19,7 @@
 #ifndef QSCTEST_POLY1305_TEST_H
 #define QSCTEST_POLY1305_TEST_H
 
-#include "../QSC/common.h"
+#include "qsccommon.h"
 
 /**
 * \file poly1305_test.h

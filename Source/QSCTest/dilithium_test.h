@@ -40,7 +40,7 @@
 #ifndef QSCTEST_DILITHIUM_TEST_H
 #define QSCTEST_DILITHIUM_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /*!
  * \def QSCTEST_DILITHIUM_TEST_COUNT

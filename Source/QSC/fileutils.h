@@ -41,7 +41,7 @@
 #ifndef QSC_FILEUTILS_H
 #define QSC_FILEUTILS_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include <stdio.h>
 
 QSC_CPLUSPLUS_ENABLED_START

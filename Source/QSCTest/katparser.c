@@ -1,8 +1,8 @@
 #include "katparser.h"
 #include <stdlib.h>
-#include "../QSC/fileutils.h"
-#include "../QSC/intutils.h"
-#include "../QSC/stringutils.h"
+#include "fileutils.h"
+#include "intutils.h"
+#include "stringutils.h"
 
 static char* file_to_string(const char* path, size_t* flen)
 {

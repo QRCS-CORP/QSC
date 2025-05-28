@@ -40,7 +40,7 @@
 #ifndef QSC_SPHINCSPLUS_H
 #define QSC_SPHINCSPLUS_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

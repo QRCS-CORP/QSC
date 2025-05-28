@@ -41,7 +41,7 @@
 #ifndef QSCTEST_KATPARSER_H
 #define QSCTEST_KATPARSER_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /* \cond */
 

@@ -1,6 +1,6 @@
 #include "nistrng.h"
-#include "../QSC/intutils.h"
-#include "../QSC/aes.h"
+#include "intutils.h"
+#include "aes.h"
 
 /*lint -e747 */
 

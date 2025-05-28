@@ -40,7 +40,7 @@
 #ifndef QSCTEST_SHA2_TEST_H
 #define QSCTEST_SHA2_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /**
  * \file sha2_test.h

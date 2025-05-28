@@ -40,7 +40,7 @@
 #ifndef QSCTEST_SCB_TEST_H
 #define QSCTEST_SCB_TEST_H
 
-#include "../QSC/common.h"
+#include "qsccommon.h"
 
 /**
  * \file scb_test.h

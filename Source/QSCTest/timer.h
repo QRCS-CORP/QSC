@@ -41,7 +41,7 @@
 #ifndef QSCTEST_TIMER_H
 #define QSCTEST_TIMER_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 #include <time.h>
 
 /* \cond */

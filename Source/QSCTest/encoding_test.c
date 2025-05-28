@@ -1,7 +1,7 @@
 #include "encoding_test.h"
 #include "testutils.h"
-#include "../QSC/encoding.h"
-#include "../QSC/memutils.h"
+#include "encoding.h"
+#include "memutils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

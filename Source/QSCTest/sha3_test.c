@@ -1,7 +1,7 @@
 #include "sha3_test.h"
 #include "testutils.h"
-#include "../QSC/intutils.h"
-#include "../QSC/sha3.h"
+#include "intutils.h"
+#include "sha3.h"
 
 bool qsctest_sha3_256_kat()
 {

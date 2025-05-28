@@ -41,7 +41,7 @@
 #ifndef QSCTEST_ENCODING_TEST_H
 #define QSCTEST_ENCODING_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /*!
  * \file encoding_test.h

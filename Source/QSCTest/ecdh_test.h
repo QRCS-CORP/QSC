@@ -40,7 +40,7 @@
 #ifndef QSCTEST_ECDH_TEST_H
 #define QSCTEST_ECDH_TEST_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /**
  * \file ecdh_test.h

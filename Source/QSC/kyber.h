@@ -41,7 +41,7 @@
 #ifndef QSC_KYBER_H
 #define QSC_KYBER_H
 
-#include "common.h"
+#include "qsccommon.h"
 #if defined(QSC_SYSTEM_HAS_AVX2)
 	#include "kyberbase_avx2.h"
 #else

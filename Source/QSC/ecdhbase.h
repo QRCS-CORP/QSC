@@ -41,7 +41,7 @@
 #ifndef QSC_ECDHBASE_H
 #define QSC_ECDHBASE_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

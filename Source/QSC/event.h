@@ -41,7 +41,7 @@
 #ifndef QSC_EVENT_H
 #define QSC_EVENT_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include <stdarg.h>
 
 QSC_CPLUSPLUS_ENABLED_START

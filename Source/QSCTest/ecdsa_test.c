@@ -1,12 +1,12 @@
 #include "ecdsa_test.h"
-#include "common.h"
+#include "qsctestcommon.h"
 #include "nistrng.h"
 #include "testutils.h"
-#include "../QSC/ec25519.h"
-#include "../QSC/ecdsa.h"
-#include "../QSC/intutils.h"
-#include "../QSC/sha2.h"
-#include "../QSC/transpose.h"
+#include "ec25519.h"
+#include "ecdsa.h"
+#include "intutils.h"
+#include "sha2.h"
+#include "transpose.h"
 
 #define QSCTEST_ECDSA_MSG0_SIZE 32
 #define QSCTEST_ECDSA_MSG1_SIZE 64

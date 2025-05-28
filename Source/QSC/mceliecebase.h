@@ -40,7 +40,7 @@
 #ifndef QSC_MCELIECEBASE_H
 #define QSC_MCELIECEBASE_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 /* \cond */
 

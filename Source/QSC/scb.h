@@ -40,7 +40,7 @@
 #ifndef QSC_SCB_H
 #define QSC_SCB_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "sha3.h"
 
 QSC_CPLUSPLUS_ENABLED_START

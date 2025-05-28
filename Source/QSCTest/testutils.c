@@ -1,5 +1,5 @@
 #include "testutils.h"
-#include "../QSC/common.h"
+#include "qsccommon.h"
 #include <stdio.h>
 
 char qsctest_get_char()

@@ -1,13 +1,13 @@
 #include "benchmark.h"
 #include "testutils.h"
-#include "../QSC/aes.h"
-#include "../QSC/chacha.h"
-#include "../QSC/csp.h"
-#include "../QSC/csx.h"
-#include "../QSC/qmac.h"
-#include "../QSC/rcs.h"
-#include "../QSC/sha3.h"
-#include "../QSC/timerex.h"
+#include "aes.h"
+#include "chacha.h"
+#include "csp.h"
+#include "csx.h"
+#include "qmac.h"
+#include "rcs.h"
+#include "sha3.h"
+#include "timerex.h"
 
 #define BUFFER_SIZE 1024
 #define SAMPLE_COUNT 1000000

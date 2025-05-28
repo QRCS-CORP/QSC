@@ -1,8 +1,8 @@
 #include "qmac_test.h"
-#include "common.h"
+#include "qsctestcommon.h"
 #include "testutils.h"
-#include "../QSC/intutils.h"
-#include "../QSC/qmac.h"
+#include "intutils.h"
+#include "qmac.h"
 
 bool qsctest_qmac_kat()
 {

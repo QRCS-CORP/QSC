@@ -41,7 +41,7 @@
 #ifndef QSC_HCG_H
 #define QSC_HCG_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "sha2.h"
 
 QSC_CPLUSPLUS_ENABLED_START

@@ -40,7 +40,7 @@
 #ifndef QSCTEST_BENCHMARK_H
 #define QSCTEST_BENCHMARK_H
 
-#include "common.h"
+#include "qsctestcommon.h"
 
 /**
 * \file benchmark.h

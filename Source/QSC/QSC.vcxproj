@@ -223,7 +223,7 @@
     <ClInclude Include="arrayutils.h" />
     <ClInclude Include="chacha.h" />
     <ClInclude Include="collection.h" />
-    <ClInclude Include="common.h" />
+    <ClInclude Include="qsccommon.h" />
     <ClInclude Include="consoleutils.h" />
     <ClInclude Include="cpuidex.h" />
     <ClInclude Include="csg.h" />

@@ -40,7 +40,7 @@
 #ifndef QSCTEST_ASYNC_TEST_H
 #define QSCTEST_ASYNC_TEST_H
 
-#include "../QSC/common.h"
+#include "qsccommon.h"
 
 /**
  * \file async_test.h

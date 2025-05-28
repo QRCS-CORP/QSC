@@ -1,8 +1,8 @@
 ﻿#include "chacha_test.h"
-#include "../QSC/chacha.h"
-#include "../QSC/csp.h"
-#include "../QSC/intutils.h"
-#include "../QSC/memutils.h"
+#include "chacha.h"
+#include "csp.h"
+#include "intutils.h"
+#include "memutils.h"
 #include "testutils.h"
 #include <stdio.h>
 #include <string.h>

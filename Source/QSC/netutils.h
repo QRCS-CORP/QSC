@@ -40,7 +40,7 @@
 #ifndef QSC_NETUTILS_H
 #define QSC_NETUTILS_H
 
-#include "common.h"
+#include "qsccommon.h"
 #include "ipinfo.h"
 #include "socket.h"
 #include "socketbase.h"

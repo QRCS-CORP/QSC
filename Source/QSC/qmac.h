@@ -41,7 +41,7 @@
 #ifndef QSC_QMAC_H
 #define QSC_QMAC_H
 
-#include "common.h"
+#include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 

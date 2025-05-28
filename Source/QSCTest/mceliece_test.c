@@ -2,11 +2,11 @@
 #include "katparser.h"
 #include "nistrng.h"
 #include "testutils.h"
-#include "../QSC/consoleutils.h"
-#include "../QSC/csp.h"
-#include "../QSC/intutils.h"
-#include "../QSC/mceliece.h"
-#include "../QSC/memutils.h"
+#include "consoleutils.h"
+#include "csp.h"
+#include "intutils.h"
+#include "mceliece.h"
+#include "memutils.h"
 
 bool qsctest_mceliece_ciphertext_integrity()
 {

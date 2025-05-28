@@ -1,8 +1,8 @@
 #include "csx_test.h"
-#include "../QSC/scb.h"
-#include "../QSC/intutils.h"
-#include "../QSC/memutils.h"
-#include "../QSC/csp.h"
+#include "scb.h"
+#include "intutils.h"
+#include "memutils.h"
+#include "csp.h"
 #include "testutils.h"
 
 bool qsctest_scb_256_kat()

@@ -40,8 +40,8 @@
 #ifndef QSCTEST_RCS_TEST_H
 #define QSCTEST_RCS_TEST_H
 
-#include "common.h"
-#include "../QSC/rcs.h"
+#include "qsctestcommon.h"
+#include "rcs.h"
 
 /**
  * \file rcs_test.h

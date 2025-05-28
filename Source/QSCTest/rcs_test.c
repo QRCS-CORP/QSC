@@ -1,7 +1,7 @@
 #include "rcs_test.h"
-#include "../QSC/csp.h"
-#include "../QSC/intutils.h"
-#include "../QSC/memutils.h"
+#include "csp.h"
+#include "intutils.h"
+#include "memutils.h"
 #include "testutils.h"
 
 bool qsctest_rcs256_kat()

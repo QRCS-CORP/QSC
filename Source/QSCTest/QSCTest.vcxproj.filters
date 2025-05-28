@@ -110,7 +110,7 @@
     <ClInclude Include="mceliece_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
-    <ClInclude Include="common.h">
+    <ClInclude Include="qsctestcommon.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="chacha_test.h">
