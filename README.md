@@ -189,6 +189,16 @@ cmake --build build --config Release
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_AESNI=ON -DENABLE_AVX2=ON -DENABLE_RDRAND=ON
 cmake --build build
 
+#### Optional CMake Feature Flags
+
+-DENABLE_AESNI	Enables AES-NI acceleration
+-DENABLE_AVX2	Enables AVX2 intrinsics
+-DENABLE_AVX512	Enables AVX-512 performance optimizations
+-DENABLE_RDRAND	Enables use of Intel RDRAND entropy
+-DENABLE_SHA3	Enables SHA-3 (Keccak) hashing
+-DENABLE_SPX	Enables SPHINCS+ signature support
+-DENABLE_KYBER	Enables Kyber KEM support
+-DCMAKE_BUILD_TYPE=Release	Enables compiler optimizations
 
 ## Roadmap
 
