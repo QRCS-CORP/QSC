@@ -280,7 +280,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #   endif
 #endif
 
-#if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION) || defined(QSC_SYSTEM_OS_APPLE)
+#if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION) || defined(QSC_SYSTEM_OS_APPLE) || defined(QSC_SYSTEM_OS_UNIX) || defined(QSC_SYSTEM_OS_LINUX) || defined(QSC_SYSTEM_OS_BSD)
   /*!
    * \def QSC_SYSTEM_OS_POSIX
    * \brief Defined when the operating system is POSIX-compliant.
