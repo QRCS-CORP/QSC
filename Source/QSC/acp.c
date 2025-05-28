@@ -1,5 +1,6 @@
 #include "acp.h"
 #include "csp.h"
+#include "intrinsics.h"
 #include "memutils.h"
 #include "rdp.h"
 #include "sha3.h"
