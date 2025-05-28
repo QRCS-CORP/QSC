@@ -1522,6 +1522,7 @@ bool qsc_dilithium_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_
 #if defined(QSC_DILITHIUM_RANDOMIZED_SIGNING)
     res = rng_generate(rnd, DILITHIUM_CRHBYTES);
 #else
+    (void)rng_generate;
     res = true;
 #endif
 

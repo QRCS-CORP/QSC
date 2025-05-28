@@ -200,17 +200,16 @@ size_t qsc_socket_client_send(const qsc_socket* sock, const uint8_t* input, size
 	return res;
 }
 
-size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, uint16_t port, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
+size_t qsc_socket_client_send_to(const qsc_socket* sock, const uint8_t* input, size_t inlen, qsc_socket_send_flags flag)
 {
 	QSC_ASSERT(sock != NULL);
-	QSC_ASSERT(address != NULL);
 	QSC_ASSERT(input != NULL);
 
 	size_t res;
 
 	res = 0U;
 
-	if (sock != NULL && address != NULL && input != NULL)
+	if (sock != NULL && input != NULL)
 	{
 		res = qsc_socket_send_to(sock, input, inlen, flag);
 	}

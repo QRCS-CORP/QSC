@@ -193,15 +193,13 @@ QSC_EXPORT_API size_t qsc_socket_client_send(const qsc_socket* sock, const uint8
 * \brief Sends UDP data to a remote host
 *
 * \param sock:		[const qsc_socket*] A pointer to the initialized socket
-* \param address:	[const char*] The remote host address
-* \param port:		[uint16_t] The remote port
 * \param input:		[const uint8_t*] The input buffer containing the data to be transmitted
 * \param inplen:	[size_t] The number of bytes to send
 * \param flag:		[qsc_socket_send_flags] Flag that influence the behavior of the send function
 *
 * \return			[size_t] Returns the number of bytes sent to the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_send_to(const qsc_socket* sock, const char* address, uint16_t port, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_send_to(const qsc_socket* sock, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag);
 
 /**
 * \brief Shut down channels and close the socket
