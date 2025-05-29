@@ -47,14 +47,15 @@
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     /* Windows-specific thread and mutex definitions */
     QSC_SYSTEM_CONDITION_IGNORE(5105)
-    #include <process.h>
-    #include <Windows.h>
+#   include <process.h>
+#   include <Windows.h>
     typedef HANDLE qsc_mutex;
     typedef HANDLE qsc_thread;
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    #include <sys/types.h>
-    #include <unistd.h>
-    #include <pthread.h>
+#   include <unistd.h>
+#   include <sys/types.h>
+#   include <unistd.h>
+#   include <pthread.h>
     typedef pthread_mutex_t qsc_mutex;
     typedef pthread_t qsc_thread;
 #else

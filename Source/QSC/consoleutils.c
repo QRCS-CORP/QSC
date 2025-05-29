@@ -14,6 +14,7 @@
 #	    pragma comment(lib, "user32.lib")
 #   endif
 #else
+#   include <unistd.h>
 #	include <termios.h>
 #	include <unistd.h>
 #endif
