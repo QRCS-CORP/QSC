@@ -41,13 +41,6 @@
 #ifndef QSC_COMMON_H
 #define QSC_COMMON_H
 
-#include <assert.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #if defined(__cplusplus)
 #   define QSC_CPLUSPLUS_ENABLED_START extern "C" {
 #   define QSC_CPLUSPLUS_ENABLED_END }
@@ -173,6 +166,13 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_SYSTEM_COMPILER_TURBO
 #endif
 
+#include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 /*==============================================================================
     Operating System Identification Macros
 ==============================================================================*/
@@ -217,10 +217,15 @@ QSC_CPLUSPLUS_ENABLED_START
 #if defined(__APPLE__) || defined(__MACH__)
 #   include "TargetConditionals.h"
   /*!
-   * \def QSC_SYSTEM_OS_APPLE
+   * \def QSC_SYSTEM_OS_MAC
    * \brief Defined when the target operating system is Apple (macOS or iOS).
    */
-#	define QSC_SYSTEM_OS_APPLE
+#	define QSC_SYSTEM_OS_MAC
+
+#   define _DARWIN_C_SOURCE
+#   define _LARGEFILE_SOURCE
+#   define _XOPEN_SOURCE 700
+
   /*!
    * \def QSC_SYSTEM_OS_BSD
    * \brief Also defined for BSD-based operating systems (macOS is BSD-based).
@@ -285,12 +290,15 @@ QSC_CPLUSPLUS_ENABLED_START
 #   endif
 #endif
 
-#if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION) || defined(QSC_SYSTEM_OS_APPLE) || defined(QSC_SYSTEM_OS_UNIX) || defined(QSC_SYSTEM_OS_LINUX) || defined(QSC_SYSTEM_OS_BSD)
+#if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION) || defined(QSC_SYSTEM_OS_UNIX) || defined(QSC_SYSTEM_OS_LINUX) || defined(QSC_SYSTEM_OS_BSD)
   /*!
    * \def QSC_SYSTEM_OS_POSIX
    * \brief Defined when the operating system is POSIX-compliant.
    */
 #	define QSC_SYSTEM_OS_POSIX
+
+#   define _LARGEFILE_SOURCE
+#   define _XOPEN_SOURCE 700
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
