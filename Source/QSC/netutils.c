@@ -12,7 +12,7 @@
 #	define NETUTILS_INET_PTON_SUCCESS 1
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 #	include <unistd.h>
 #	include <string.h>
 #	include <stdio.h>
@@ -25,27 +25,12 @@
 #	include <net/if_dl.h>
 #	include <netinet/in.h>
 #	include <sys/socket.h>
-#	if !defined(AF_PACKET)
-#		define AF_PACKET PF_INET
-#	endif
 #else
-#	if defined(QSC_SYSTEM_OS_BSD)
-#		if !defined(_BSD_SOURCE)
-#			define _BSD_SOURCE
-#		endif
-#	else
-#		if !defined(_GNU_SOURCE)
-#			define _GNU_SOURCE
-#		endif
-#		if !defined(_DEFAULT_SOURCE)
-#			define _DEFAULT_SOURCE
-#		endif
-#	endif
-#	define _XOPEN_SOURCE 700
 #	include <unistd.h>
 #	include <string.h>
 #	include <stdio.h>
 #	include <sys/types.h>
+#	include <linux/if_packet.h>
 #   include <ifaddrs.h>
 #   include <arpa/inet.h>
 #   include <netdb.h>
@@ -147,6 +132,15 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 	if (getifaddrs(&ifaddr) != -1)
 	{
 #if defined(QSC_SYSTEM_OS_APPLE)
+    if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK)
+    {
+        uint8_t *maddr = (uint8_t *)LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
+
+        netutils_format_mac(ctx->mac, maddr);
+        break;
+    }
+
+#elif defined(QSC_SYSTEM_OS_LINUX)
 		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
 		{
 			if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_LINK)
