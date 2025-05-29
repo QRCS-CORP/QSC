@@ -220,7 +220,7 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
 
                                 if (elem->value != (uint8_t*)NULL)
                                 {
-                                    (void)memcpy(elem->value, buffer + pos, length);
+                                    qsc_memutils_copy(elem->value, buffer + pos, length);
                                     pos = pos + length;
                                     relem = elem;
                                     elem = (qsc_encoding_ber_element*)NULL;
@@ -381,7 +381,7 @@ size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_
             
         if ((taglen != 0U) && (taglen <= buflen))
         {
-            (void)memcpy(buffer, tagbuf, taglen);
+            qsc_memutils_copy(buffer, tagbuf, taglen);
             total = total + taglen;
 
             if ((element->constructed == true) && (element->indefinite == true))
@@ -403,7 +403,7 @@ size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_
 
             if ((llen != 0U) && ((total + llen) <= buflen))
             {
-                (void)memcpy(buffer + total, alen, llen);
+                qsc_memutils_copy(buffer + total, alen, llen);
                 total = total + llen;
 
                 if (element->constructed == true)
