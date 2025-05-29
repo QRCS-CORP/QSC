@@ -26,9 +26,6 @@
 #	include <netinet/in.h>
 #	include <sys/socket.h>
 #else
-#if defined(QSC_SYSTEM_OS_LINUX)
-#  include <netpacket/packet.h>
-#endif
 #	include <unistd.h>
 #   include <netdb.h>
 #	include <string.h>
@@ -38,6 +35,9 @@
 #   include <arpa/inet.h>
 #   include <netinet/in.h>
 #   include <sys/socket.h>
+#if defined(QSC_SYSTEM_OS_LINUX)
+#  include <netpacket/packet.h>
+#endif
 #	if !defined(AF_LINK)
 #		define AF_LINK AF_PACKET
 #	endif

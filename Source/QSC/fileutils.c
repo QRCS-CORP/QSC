@@ -19,10 +19,8 @@
 #  include <sys/types.h>
 #  include <stdlib.h>
 #elif defined(QSC_SYSTEM_OS_POSIX)
-#	if defined(QSC_SYSTEM_OS_LINUX)
-#		if !defined(_LARGEFILE_SOURCE)
-#			define _LARGEFILE_SOURCE
-#		endif
+#	if !defined(_LARGEFILE_SOURCE)
+#		define _LARGEFILE_SOURCE
 #	endif
 #  include <unistd.h>
 #  include <stdio.h>
@@ -1123,7 +1121,7 @@ bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 				res = true;
 			}
 #else
-			if (ftruncate(filen(fp), length) == 0)
+			if (ftruncate(fileno(fp), length) == 0)
 			{
 				res = true;
 			}
