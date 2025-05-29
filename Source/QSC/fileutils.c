@@ -12,8 +12,8 @@
 #  define _DARWIN_C_SOURCE
 #  define _LARGEFILE_SOURCE
 #  define _XOPEN_SOURCE 700
-#  include <stdio.h>
 #  include <unistd.h>
+#  include <stdio.h>
 #  include <dirent.h>
 #  include <sys/stat.h>
 #  include <sys/types.h>
@@ -22,8 +22,8 @@
 /* Linux-specific feature macros */
 #  define _LARGEFILE_SOURCE
 #  define _XOPEN_SOURCE 700
-#  include <stdio.h>
 #  include <unistd.h>
+#  include <stdio.h>
 #  include <dirent.h>
 #  include <sys/stat.h>
 #  include <sys/types.h>
@@ -646,6 +646,9 @@ size_t qsc_fileutils_get_size(const char* fpath)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 			_fseeki64(fp, 0L, SEEK_END);
 			res = (size_t)_ftelli64(fp);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+			fseek(fp, 0L, SEEK_END);
+			res = (size_t)ftell(fp);
 #else
 			fseeko(fp, 0L, SEEK_END);
 			res = (size_t)ftello(fp);
@@ -1073,6 +1076,8 @@ bool qsc_fileutils_seekto(FILE* fp, size_t position)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		res = _fseeki64(fp, (long long)position, SEEK_SET);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		res = fseeko(fp, (off_t)position, SEEK_SET);
 #else
 		res = fseeko(fp, (off_t)position, SEEK_SET);
 #endif

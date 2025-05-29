@@ -30,10 +30,16 @@
 #	endif
 #else
 #	if defined(QSC_SYSTEM_OS_BSD)
-#	define _BSD_SOURCE
+#		if !defined(_BSD_SOURCE)
+#			define _BSD_SOURCE
+#		endif
 #	else
-#	define _GNU_SOURCE
-#	define _DEFAULT_SOURCE
+#		if !defined(_GNU_SOURCE)
+#			define _GNU_SOURCE
+#		endif
+#		if !defined(_DEFAULT_SOURCE)
+#			define _DEFAULT_SOURCE
+#		endif
 #	endif
 #	define _XOPEN_SOURCE 700
 #	include <unistd.h>
