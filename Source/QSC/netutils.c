@@ -1,3 +1,15 @@
+#if !defined(_GNU_SOURCE)
+#  define _GNU_SOURCE
+#endif
+
+#if !defined(_DEFAULT_SOURCE)
+#  define _DEFAULT_SOURCE
+#endif
+
+#if !defined(_XOPEN_SOURCE)
+#  define _XOPEN_SOURCE 700
+#endif
+
 #include "netutils.h"
 #include "memutils.h"
 #include "stringutils.h"
@@ -13,9 +25,6 @@
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
 #else
-#  define _GNU_SOURCE
-#  define _DEFAULT_SOURCE
-#  define _XOPEN_SOURCE 700
 #  include <unistd.h>
 #  include <string.h>
 #  include <sys/types.h>
