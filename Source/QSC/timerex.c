@@ -1,5 +1,6 @@
 #include "timerex.h"
 #include "memutils.h"
+#include <string.h>
 #if defined(QSC_DEBUG_MODE)
 #	include "consoleutils.h"
 #endif
