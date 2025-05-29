@@ -1603,7 +1603,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 	}
 }
 
-static bool encrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, bool (*rng_generate)(uint8_t*, size_t))
+static bool mencrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, bool (*rng_generate)(uint8_t*, size_t))
 {
 	bool res;
 
@@ -1987,7 +1987,7 @@ bool qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, b
 	one_ec[0U] = 1U;
 	two_e[0U] = 2U;
 
-	res = encrypt(c, pk, e, rng_generate);
+	res = mencrypt(c, pk, e, rng_generate);
 
 	if (res)
 	{
