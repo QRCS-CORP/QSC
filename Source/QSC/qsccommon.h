@@ -227,23 +227,24 @@ QSC_CPLUSPLUS_ENABLED_START
    * \brief Also defined for BSD-based operating systems (macOS is BSD-based).
    */
 #	define QSC_SYSTEM_OS_BSD
+
 #   if defined(TARGET_OS_IPHONE) && defined(TARGET_IPHONE_SIMULATOR)
-    /*!
-     * \def QSC_SYSTEM_ISIPHONESIM
-     * \brief Defined when building for the iPhone Simulator.
-     */
+        /*!
+         * \def QSC_SYSTEM_ISIPHONESIM
+         * \brief Defined when building for the iPhone Simulator.
+         */
 #		define QSC_SYSTEM_ISIPHONESIM
-#   elif TARGET_OS_IPHONE
-    /*!
-     * \def QSC_SYSTEM_ISIPHONE
-     * \brief Defined when building for iPhone.
-     */
+#   elif defined(TARGET_OS_IPHONE)
+        /*!
+         * \def QSC_SYSTEM_ISIPHONE
+         * \brief Defined when building for iPhone.
+         */
 #		define QSC_SYSTEM_ISIPHONE
 #   else
-    /*!
-     * \def QSC_SYSTEM_ISOSX
-     * \brief Defined when building for macOS.
-     */
+        /*!
+         * \def QSC_SYSTEM_ISOSX
+         * \brief Defined when building for macOS.
+         */
 #		define QSC_SYSTEM_ISOSX
 #   endif
 #endif
