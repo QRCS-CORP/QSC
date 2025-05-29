@@ -131,7 +131,7 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 
 	if (getifaddrs(&ifaddr) != -1)
 	{
-#if defined(QSC_SYSTEM_OS_APPLE)
+#if defined(QSC_SYSTEM_OS_MAC)
     if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK)
     {
         uint8_t *maddr = (uint8_t *)LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
