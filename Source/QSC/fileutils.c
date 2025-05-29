@@ -1,4 +1,6 @@
 #include "fileutils.h"
+#include "memutils.h"
+#include "stringutils.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #  include <direct.h>
