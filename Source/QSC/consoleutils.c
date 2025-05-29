@@ -617,7 +617,7 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		Sleep(100);
 #else
-		sleep((msec + 999) / 1000);
+		sleep(100);
 #endif
 	}
 }
