@@ -294,13 +294,14 @@ bool qsc_sysutils_rdtsc_available()
 	bool ret;
 
 	ret = false;
+#if defined(QSC_HAS_CPUID)
 	hfeat = qsc_cpuidex_features_set(&cfeat);
 
 	if (hfeat == true)
 	{
 		ret = cfeat.rdtcsp;
 	}
-
+#endif
 	return ret;
 }
 
