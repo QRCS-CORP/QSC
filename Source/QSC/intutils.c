@@ -1,5 +1,6 @@
 #include "intutils.h"
 #include "memutils.h"
+#include <string.h>
 
 bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 {
