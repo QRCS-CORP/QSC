@@ -41,6 +41,13 @@
 #ifndef QSC_COMMON_H
 #define QSC_COMMON_H
 
+#include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #if defined(__cplusplus)
 #   define QSC_CPLUSPLUS_ENABLED_START extern "C" {
 #   define QSC_CPLUSPLUS_ENABLED_END }
@@ -165,13 +172,6 @@ QSC_CPLUSPLUS_ENABLED_START
    */
 #	define QSC_SYSTEM_COMPILER_TURBO
 #endif
-
-#include <assert.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 
 /*==============================================================================
     Operating System Identification Macros
@@ -299,6 +299,18 @@ QSC_CPLUSPLUS_ENABLED_START
 
 #   define _LARGEFILE_SOURCE
 #   define _XOPEN_SOURCE 700
+#	if defined(QSC_SYSTEM_OS_BSD)
+#		if !defined(_BSD_SOURCE)
+#			define _BSD_SOURCE
+#		endif
+#	else
+#		if !defined(_GNU_SOURCE)
+#			define _GNU_SOURCE
+#		endif
+#		if !defined(_DEFAULT_SOURCE)
+#			define _DEFAULT_SOURCE
+#		endif
+#	endif
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
