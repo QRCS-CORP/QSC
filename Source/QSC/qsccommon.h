@@ -41,7 +41,9 @@
 #ifndef QSC_COMMON_H
 #define QSC_COMMON_H
 
-#if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION)
+#if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION) || defined(__MACH__) || \
+    defined(__linux) || defined(__linux__) || defined(__gnu_linux__) || defined(__unix) || defined(__unix__) || \
+    defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__DragonFly__)
 #   if defined(__linux__)
 #       if !defined(_DEFAULT_SOURCE)
 #           define _DEFAULT_SOURCE
