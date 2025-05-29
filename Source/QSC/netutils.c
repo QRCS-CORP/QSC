@@ -13,14 +13,14 @@
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
 #else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
 #   include <ifaddrs.h>
-#   include <arpa/inet.h>
-#   include <netdb.h>
-#   include <netinet/in.h>
-#   include <sys/socket.h>
-#	include <string.h>
-#	include <sys/types.h>
-#	include <unistd.h>
 #	if !defined(AF_LINK)
 #		define AF_LINK AF_PACKET
 #	endif

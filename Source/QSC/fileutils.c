@@ -1,8 +1,5 @@
-#	define _LARGEFILE_SOURCE
-#	define _XOPEN_SOURCE 700
-#	define _DARWIN_C_SOURCE
-
 #include "fileutils.h"
+
 #if defined(QSC_DEBUG_MODE)
 #	include "consoleutils.h"
 #	include "csp.h"
@@ -18,6 +15,9 @@
 #	include <stdio.h>
 #	include <windows.h>
 #else
+#	define _LARGEFILE_SOURCE
+#	define _XOPEN_SOURCE 700
+#	define _DARWIN_C_SOURCE
 #	include <stdio.h>
 #	include <unistd.h>
 #	include <dirent.h>

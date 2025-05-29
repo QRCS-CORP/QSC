@@ -296,7 +296,7 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
     return res;
 }
 
-/* Corrected: Use Sleep for Windows and usleep for POSIX */
+/* Corrected: Use Sleep for Windows and sleep for POSIX */
 void qsc_async_thread_sleep(uint32_t msec)
 {
     QSC_ASSERT(msec != 0);
@@ -306,8 +306,7 @@ void qsc_async_thread_sleep(uint32_t msec)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         Sleep(msec);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        /* usleep takes microseconds */
-        usleep(msec * 1000);
+        sleep((msec + 999) / 1000);
 #endif
     }
 }
@@ -366,8 +365,8 @@ void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     WaitForSingleObject(handle, msec);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    /* Use usleep for a timed wait */
-    usleep(msec * 1000);
+    /* Use sleep for a timed wait */
+    sleep((msec + 999) / 1000);
 #endif
 }
 
