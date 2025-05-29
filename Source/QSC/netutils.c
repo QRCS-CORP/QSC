@@ -1,19 +1,3 @@
-#if !defined(_GNU_SOURCE)
-#  define _GNU_SOURCE
-#endif
-#if !defined(_DEFAULT_SOURCE)
-#  define _DEFAULT_SOURCE
-#endif
-#if !defined(_XOPEN_SOURCE)
-#  define _XOPEN_SOURCE 700
-#endif
-#if defined(QSC_SYSTEM_OS_APPLE)
-#  define _DARWIN_C_SOURCE
-#  define _XOPEN_SOURCE 700
-#  include <sys/types.h>     /* u_char, u_short, AF_LINK */
-#  include <errno.h>         /* just in case socketbase.h missed it */
-#endif
-
 #include "netutils.h"
 #include "memutils.h"
 #include "stringutils.h"
@@ -23,31 +7,31 @@
 #	include "consoleutils.h"
 #endif
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 #	define NETUTILS_WSA_STARTUP_SEQUENCE 0x0202
 #	define NETUTILS_INET_PTON_SUCCESS 1
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
-#elif defined(QSC_SYSTEM_OS_APPLE)
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <arpa/inet.h>
-#  include <unistd.h>
-#  include <string.h>
-#  include <netdb.h>
-#  include <ifaddrs.h>
-#  include <net/if_dl.h>
-#  include <errno.h> 
 #else
-#  include <unistd.h>
-#  include <string.h>
-#  include <sys/types.h>
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <arpa/inet.h>
-#  include <netdb.h>
-#  include <ifaddrs.h>
-#  include <errno.h> 
+#   include <ifaddrs.h>
+#   include <arpa/inet.h>
+#   include <netdb.h>
+#   include <netinet/in.h>
+#   include <sys/socket.h>
+#	include <string.h>
+#	include <sys/types.h>
+#	include <unistd.h>
+#	if !defined(AF_LINK)
+#		define AF_LINK AF_PACKET
+#	endif
+#	if defined(QSC_SYSTEM_OS_APPLE)
+#		include <net/if_dl.h>
+#		include <netinet/in.h>
+#		include <sys/socket.h>
+#		if !defined(AF_PACKET)
+#			define AF_PACKET PF_INET
+#		endif
+#	endif
 #endif
 
 static void netutils_format_mac(char macout[18U], const uint8_t macin[6U])

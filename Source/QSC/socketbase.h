@@ -40,7 +40,6 @@
 #ifndef QSC_SOCKETBASE_H
 #define QSC_SOCKETBASE_H
 
-#include <errno.h>
 #include "qsccommon.h"
 #include "intutils.h"
 #include "ipinfo.h"
