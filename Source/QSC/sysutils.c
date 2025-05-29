@@ -30,6 +30,7 @@
 #	include <time.h>
 #endif
 #if defined(QSC_SYSTEM_OS_POSIX)
+#	include <string.h>
 #	if defined(QSC_HAS_CPUID)
 #		include <cpuid.h>
 #	endif
@@ -54,7 +55,7 @@
 #		include <mach/mach_init.h>
 #		include <mach/mach_host.h>
 #	else
-//#		include <sys/sysinfo.h>
+#		include <sys/sysinfo.h>
 #	endif
 #	include <sys/time.h>
 #	include <sys/types.h>

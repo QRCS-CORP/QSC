@@ -148,8 +148,8 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 		{
 			if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_LINK)
 			{
-				const struct sockaddr_ll* maddr = (const struct sockaddr_ll *)ifa->ifa_addr;
-				netutils_format_mac(ctx->mac, maddr);
+				const struct sockaddr_ll* s = (const struct sockaddr_ll *)ifa->ifa_addr;
+				netutils_format_mac(ctx->mac, s->sll_addr);
 				break;
 			}
 		}
