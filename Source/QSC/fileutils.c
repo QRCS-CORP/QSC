@@ -14,10 +14,14 @@
 #	include <stdio.h>
 #	include <windows.h>
 #else
+#	define _LARGEFILE_SOURCE
+#	define _DEFAULT_SOURCE
 #	include <stdio.h>
-#	include <sys/types.h>
-#	include <dirent.h>
 #	include <unistd.h>
+#	include <dirent.h>
+#	include <sys/stat.h>
+#   include <stdlib.h>
+#   include <sys/types.h>
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)

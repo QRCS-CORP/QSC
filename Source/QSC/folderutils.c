@@ -18,11 +18,14 @@
 #	    pragma comment(lib, "Shlwapi.lib")
 #   endif
 #else
-#   include <dirent.h>
-#   include <sys/stat.h>
+#	define _LARGEFILE_SOURCE
+#	define _DEFAULT_SOURCE
+#	include <stdio.h>
+#	include <unistd.h>
+#	include <dirent.h>
+#	include <sys/stat.h>
 #   include <stdlib.h>
 #   include <sys/types.h>
-#   include <unistd.h>
 #endif
 
 void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH])
