@@ -1,20 +1,21 @@
 ﻿#include "memutils.h"
-#include <stdlib.h>
+
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
 #	include "intrinsics.h"
 #endif
-#if defined(QSC_SYSTEM_OS_OPENBSD)
-#	include <string.h>
-#endif
 #if defined(QSC_SYSTEM_OS_POSIX)
+#	include <errno.h>
+#	include <unistd.h>
+#	include <string.h>
+#	include <stdlib.h>
 #	include <sys/types.h>
 #	include <sys/resource.h>
 #	include <sys/mman.h>
 #	include <signal.h>
 #	include <setjmp.h>
-#	include <unistd.h>
-#	include <errno.h>
 #elif defined(QSC_SYSTEM_OS_WINDOWS)
+#	include <stdlib.h>
+#	include <string.h>
 #	include <windows.h>
 #endif
 
