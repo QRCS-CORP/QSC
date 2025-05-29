@@ -215,13 +215,13 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #if defined(__APPLE__) || defined(__MACH__)
-#   include "TargetConditionals.h"
-  /*!
-   * \def QSC_SYSTEM_OS_MAC
-   * \brief Defined when the target operating system is Apple (macOS or iOS).
-   */
-#	define QSC_SYSTEM_OS_MAC
-
+#   if defined(defined(__MACH__))
+      /*!
+       * \def QSC_SYSTEM_OS_MAC
+       * \brief Defined when the target operating system is Apple (macOS or iOS).
+       */
+    #	define QSC_SYSTEM_OS_MAC
+#   endif
   /*!
    * \def QSC_SYSTEM_OS_BSD
    * \brief Also defined for BSD-based operating systems (macOS is BSD-based).
@@ -294,6 +294,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_SYSTEM_OS_POSIX
 
 #   if defined(__linux__)
+#       if !defined(_DEFAULT_SOURCE)
+#           define _DEFAULT_SOURCE
+#       endif
+#       if !defined(_XOPEN_SOURCE)
+#           define _XOPEN_SOURCE 700
+#       endif
 #       if !defined(_GNU_SOURCE)
 #           define _GNU_SOURCE
 #       endif

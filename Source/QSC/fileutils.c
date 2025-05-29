@@ -7,7 +7,7 @@
 #  include <io.h>
 #  include <stdio.h>
 #  include <windows.h>
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 /* _DARWIN_C_SOURCE must be defined before headers */
 #  define _DARWIN_C_SOURCE
 #  define _LARGEFILE_SOURCE
@@ -19,9 +19,11 @@
 #  include <sys/types.h>
 #  include <stdlib.h>
 #elif defined(QSC_SYSTEM_OS_POSIX)
-/* Linux-specific feature macros */
-#  define _LARGEFILE_SOURCE
-#  define _XOPEN_SOURCE 700
+#	if defined(QSC_SYSTEM_OS_LINUX)
+#		if !defined(_LARGEFILE_SOURCE)
+#			define _LARGEFILE_SOURCE
+#		endif
+#	endif
 #  include <unistd.h>
 #  include <stdio.h>
 #  include <dirent.h>
@@ -646,7 +648,7 @@ size_t qsc_fileutils_get_size(const char* fpath)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 			_fseeki64(fp, 0L, SEEK_END);
 			res = (size_t)_ftelli64(fp);
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 			fseeko(fp, 0L, SEEK_END);
 			res = (size_t)ftello(fp);
 #else
@@ -1076,10 +1078,10 @@ bool qsc_fileutils_seekto(FILE* fp, size_t position)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		res = _fseeki64(fp, (long long)position, SEEK_SET);
-#elif defined(QSC_SYSTEM_OS_POSIX)
+#elif defined(QSC_SYSTEM_OS_MAC)
 		res = fseeko(fp, (off_t)position, SEEK_SET);
 #else
-		res = fseeko(fp, (off_t)position, SEEK_SET);
+		res = fseek(fp, (off_t)position, SEEK_SET);
 #endif
 	}
 
@@ -1100,9 +1102,12 @@ bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		_fseeki64(fp, 0L, SEEK_END);
 		flen = (size_t)_ftelli64(fp);
-#else
+#elif defined(QSC_SYSTEM_OS_MAC)
 		fseeko(fp, 0L, SEEK_END);
 		flen = (size_t)ftello(fp);
+#else
+		fseek(fp, 0L, SEEK_END);
+		flen = (size_t)ftell(fp);
 #endif
 		
 		if (length < flen)
