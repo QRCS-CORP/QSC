@@ -8,9 +8,10 @@
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#  include <winsock2.h>
-#  include <ws2tcpip.h>
-#  include <iphlpapi.h>
+#	define NETUTILS_WSA_STARTUP_SEQUENCE 0x0202
+#	define NETUTILS_INET_PTON_SUCCESS 1
+#   include "arrayutils.h"
+#   include <ws2ipdef.h>
 #else
 #  define _GNU_SOURCE
 #  define _DEFAULT_SOURCE
