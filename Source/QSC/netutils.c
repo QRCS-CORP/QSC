@@ -137,7 +137,6 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
         uint8_t *maddr = (uint8_t *)LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
 
         netutils_format_mac(ctx->mac, maddr);
-        break;
     }
 
 #elif defined(QSC_SYSTEM_OS_LINUX)
