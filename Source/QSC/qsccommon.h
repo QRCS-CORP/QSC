@@ -297,7 +297,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #       if !defined(_GNU_SOURCE)
 #           define _GNU_SOURCE
 #       endif
-#   if defined(__APPLE__) && defined(__MACH__)
+#   elif defined(__APPLE__) && defined(__MACH__)
 #       if !defined(_DARWIN_C_SOURCE
 #           define _DARWIN_C_SOURCE
 #       endif
