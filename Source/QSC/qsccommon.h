@@ -215,7 +215,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #if defined(__APPLE__) || defined(__MACH__)
-#   if defined(defined(__MACH__))
+#   if defined(__MACH__)
       /*!
        * \def QSC_SYSTEM_OS_MAC
        * \brief Defined when the target operating system is Apple (macOS or iOS).
