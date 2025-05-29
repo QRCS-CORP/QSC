@@ -41,11 +41,11 @@
 #ifndef QSC_CPUIDEX_H
 #define QSC_CPUIDEX_H
 
-#if defined (QSC_HAS_CPUID)
-
 #include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
+
+#if defined (QSC_HAS_CPUID)
 
 /*!
  * \file cpuidex.h
@@ -165,8 +165,13 @@ QSC_EXPORT_API bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* const fea
  */
 QSC_EXPORT_API void qsc_cpuidex_print_stats(void);
 
+#else
+
+/* avoid warning C4206 : translation unit is empty */
+typedef int dummy_cpuidex_translation_unit;
+
+#endif
 
 QSC_CPLUSPLUS_ENABLED_END
 
-#endif
 #endif
