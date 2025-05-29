@@ -29,8 +29,12 @@
 #		define AF_PACKET PF_INET
 #	endif
 #else
+#	if defined(QSC_SYSTEM_OS_BSD)
+#	define _BSD_SOURCE
+#	else
 #	define _GNU_SOURCE
 #	define _DEFAULT_SOURCE
+#	endif
 #	define _XOPEN_SOURCE 700
 #	include <unistd.h>
 #	include <string.h>
