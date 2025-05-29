@@ -1,30 +1,33 @@
 #include "fileutils.h"
 
-#if defined(QSC_DEBUG_MODE)
-#	include "consoleutils.h"
-#	include "csp.h"
-#endif
-#include "stringutils.h"
-#include "intutils.h"
-#include "memutils.h"
-#include "stringutils.h"
-#include <stdlib.h>
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#	include <direct.h>
-#	include <io.h>
-#	include <stdio.h>
-#	include <windows.h>
-#else
-#	define _LARGEFILE_SOURCE
-#	define _XOPEN_SOURCE 700
-#	define _DARWIN_C_SOURCE
-#	include <stdio.h>
-#	include <unistd.h>
-#	include <dirent.h>
-#	include <sys/stat.h>
-#   include <stdlib.h>
-#   include <sys/types.h>
+#  include <direct.h>
+#  include <io.h>
+#  include <stdio.h>
+#  include <windows.h>
+#elif defined(QSC_SYSTEM_OS_APPLE)
+/* _DARWIN_C_SOURCE must be defined before headers */
+#  define _DARWIN_C_SOURCE
+#  define _LARGEFILE_SOURCE
+#  define _XOPEN_SOURCE 700
+#  include <stdio.h>
+#  include <unistd.h>
+#  include <dirent.h>
+#  include <sys/stat.h>
+#  include <sys/types.h>
+#  include <stdlib.h>
+#elif defined(QSC_SYSTEM_OS_POSIX)
+/* Linux-specific feature macros */
+#  define _LARGEFILE_SOURCE
+#  define _XOPEN_SOURCE 700
+#  include <stdio.h>
+#  include <unistd.h>
+#  include <dirent.h>
+#  include <sys/stat.h>
+#  include <sys/types.h>
+#  include <stdlib.h>
 #endif
+
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 typedef struct FileAttributeDescription
