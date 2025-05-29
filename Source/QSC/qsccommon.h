@@ -255,7 +255,6 @@ QSC_CPLUSPLUS_ENABLED_START
    * \brief Defined when the target operating system is Linux.
    */
 #	define QSC_SYSTEM_OS_LINUX
-    typedef int32_t errno_t;
 #endif
 
 #if defined(__unix) || defined(__unix__)
@@ -286,6 +285,7 @@ QSC_CPLUSPLUS_ENABLED_START
    * \brief Defined when the operating system is POSIX-compliant.
    */
 #	define QSC_SYSTEM_OS_POSIX
+    typedef int32_t errno_t;
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
