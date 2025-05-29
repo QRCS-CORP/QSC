@@ -150,7 +150,7 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 			{
 				uint8_t* maddr;
 
-				const struct sockaddr_ll *s = (const struct sockaddr_ll *)ifa->ifa_addr;
+				const struct sockaddr_ll* maddr = (const struct sockaddr_ll *)ifa->ifa_addr;
 				netutils_format_mac(ctx->mac, maddr);
 				break;
 			}
@@ -160,7 +160,7 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 		{
 			if ((ifa->ifa_addr) && (ifa->ifa_addr->sa_family == AF_PACKET))
 			{
-				struct sockaddr_ll *s = (struct sockaddr_ll*)ifa->ifa_addr;
+				struct sockaddr_ll* s = (struct sockaddr_ll*)ifa->ifa_addr;
 
 				netutils_format_mac(ctx->mac, s->sll_addr);
 				break;

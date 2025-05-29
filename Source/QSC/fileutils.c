@@ -8,10 +8,9 @@
 #  include <stdio.h>
 #  include <windows.h>
 #elif defined(QSC_SYSTEM_OS_MAC)
-/* _DARWIN_C_SOURCE must be defined before headers */
-#  define _DARWIN_C_SOURCE
-#  define _LARGEFILE_SOURCE
-#  define _XOPEN_SOURCE 700
+#	if !defined(_LARGEFILE_SOURCE)
+#		define _LARGEFILE_SOURCE
+#	endif
 #  include <unistd.h>
 #  include <stdio.h>
 #  include <dirent.h>
@@ -19,6 +18,9 @@
 #  include <sys/types.h>
 #  include <stdlib.h>
 #elif defined(QSC_SYSTEM_OS_POSIX)
+#	define _GNU_SOURCE
+#	define _DEFAULT_SOURCE
+#	define _XOPEN_SOURCE 700
 #	if !defined(_LARGEFILE_SOURCE)
 #		define _LARGEFILE_SOURCE
 #	endif

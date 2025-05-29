@@ -41,13 +41,6 @@
 #ifndef QSC_COMMON_H
 #define QSC_COMMON_H
 
-#include <assert.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #if defined(__cplusplus)
 #   define QSC_CPLUSPLUS_ENABLED_START extern "C" {
 #   define QSC_CPLUSPLUS_ENABLED_END }
@@ -321,8 +314,15 @@ QSC_CPLUSPLUS_ENABLED_START
 #   if !defined(_POSIX_C_SOURCE)
 #           define _POSIX_C_SOURCE 200809L
 #   endif
-#	include <unistd.h>
+
 #endif
+
+#include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
   /*!
