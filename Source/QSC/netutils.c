@@ -132,13 +132,15 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 	if (getifaddrs(&ifaddr) != -1)
 	{
 #if defined(QSC_SYSTEM_OS_MAC)
-    if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK)
-    {
-        uint8_t *maddr = (uint8_t *)LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
-
-        netutils_format_mac(ctx->mac, maddr);
-    }
-
+		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+		{
+			if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK)
+			{
+				uint8_t *maddr = (uint8_t *)LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
+				netutils_format_mac(ctx->mac, maddr);
+				break;
+			}
+		}
 #elif defined(QSC_SYSTEM_OS_LINUX)
 		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
 		{

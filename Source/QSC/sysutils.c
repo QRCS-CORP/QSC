@@ -21,7 +21,7 @@
 #elif defined(QSC_SYSTEM_OS_UNIX)
 #	include <time.h>
 #	include <unistd.h>
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 #	include <stdio.h>
 #	include <sys/types.h>
 #	include <mach/mach.h>
@@ -31,7 +31,7 @@
 #endif
 #if defined(QSC_SYSTEM_OS_POSIX)
 #	if defined(QSC_HAS_CPUID)
-#	include <cpuid.h>
+#		include <cpuid.h>
 #	endif
 #	include <dirent.h>
 #	include <time.h>
@@ -47,14 +47,14 @@
 #	include <stdlib.h>
 #	include <sys/resource.h>
 #	include <sys/statvfs.h>
-#	if defined(QSC_SYSTEM_OS_APPLE)
+#	if defined(QSC_SYSTEM_OS_MAC)
 #		include <sys/sysctl.h>
 #		include <mach/vm_statistics.h>
 #		include <mach/mach_types.h>
 #		include <mach/mach_init.h>
 #		include <mach/mach_host.h>
 #	else
-#		include <sys/sysinfo.h>
+//#		include <sys/sysinfo.h>
 #	endif
 #	include <sys/time.h>
 #	include <sys/types.h>
@@ -107,7 +107,7 @@ size_t qsc_sysutils_cpu_count(void)
     GetSystemInfo(&sysinfo);
     count = (size_t)sysinfo.dwNumberOfProcessors;
 
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
     int nm[2U];
     size_t len;
 	uint32_t tmpc;
@@ -203,7 +203,7 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 			state->virtavail = memInfo.ullAvailVirtual;
 		}
 
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 
 		vm_size_t page_size;
 		mach_port_t mach_port;
@@ -412,7 +412,7 @@ uint64_t qsc_sysutils_system_timestamp()
 	/* HP-UX, Solaris */
 	rtme = (uint64_t)gethrtime();
 
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 	/* OSX */
 	static double timeConvert = 0.0;
 	mach_timebase_info_data_t timeBase;
