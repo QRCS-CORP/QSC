@@ -1,8 +1,7 @@
-#include "cpuidex.h"
-
 /* only supported on I386 */
 #if defined(QSC_HAS_CPUID)
 
+#include "cpuidex.h"
 #include "consoleutils.h"
 #include "intutils.h"
 #include "memutils.h"

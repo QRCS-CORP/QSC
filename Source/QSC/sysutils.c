@@ -100,7 +100,7 @@ size_t qsc_sysutils_cpu_count(void)
 {
 	size_t count;
 
-	count = 1;
+	count = 1U;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     SYSTEM_INFO sysinfo;
@@ -108,28 +108,34 @@ size_t qsc_sysutils_cpu_count(void)
     count = (size_t)sysinfo.dwNumberOfProcessors;
 
 #elif defined(QSC_SYSTEM_OS_APPLE)
-    int nm[2];
+    int nm[2U];
     size_t len;
+	uint32_t tmpc;
 
-	len = 4;
-    nm[0] = CTL_HW;
-    nm[1] = HW_AVAILCPU;
+	tmpc = 0U;
+	len = 4U;
+    nm[0U] = CTL_HW;
+    nm[1U] = HW_AVAILCPU;
 
-    sysctl(nm, 2, (uint32_t)&count, &len, NULL, 0);
+    sysctl(nm, 2, &tmpc, &len, NULL, 0);
 
     if (count < 1) 
 	{
         nm[1] = HW_NCPU;
-        sysctl(nm, 2, (uint32_t)&count, &len, NULL, 0);
+        sysctl(nm, 2, &tmpc, &len, NULL, 0);
 
-        if (count < 1) 
+        if (tmpc < 1U) 
 		{
-            count = 1;
+            count = 1U;
         }
+		else
+		{
+			count = (size_t)tmpc;
+		}
     }
 #elif defined(QSC_SYSTEM_OS_POSIX)
     long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
-    count = (nprocs > 0) ? (size_t)nprocs : 1;
+    count = (nprocs > 0U) ? (size_t)nprocs : 1U;
 #endif
 
 	return count;
