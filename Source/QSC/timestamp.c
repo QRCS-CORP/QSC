@@ -1,6 +1,7 @@
 #include "timestamp.h"
 #include "memutils.h"
 #include "stringutils.h"
+#include <string.h>
 #if defined(QSC_DEBUG_MODE)
 #	include "consoleutils.h"
 #endif
