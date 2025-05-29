@@ -289,19 +289,26 @@ uint32_t qsc_sysutils_process_id()
 
 bool qsc_sysutils_rdtsc_available()
 {
-	qsc_cpuidex_cpu_features cfeat;
 	bool hfeat;
 	bool ret;
 
-	ret = false;
 #if defined(QSC_HAS_CPUID)
+	qsc_cpuidex_cpu_features cfeat;
+
 	hfeat = qsc_cpuidex_features_set(&cfeat);
 
 	if (hfeat == true)
 	{
 		ret = cfeat.rdtcsp;
 	}
+	else
+	{
+		ret = false;
+	}
+#else
+	ret = false;
 #endif
+
 	return ret;
 }
 
