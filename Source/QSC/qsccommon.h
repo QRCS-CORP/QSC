@@ -321,7 +321,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #   if !defined(_POSIX_C_SOURCE)
 #           define _POSIX_C_SOURCE 200809L
 #   endif
-
+#	include <unistd.h>
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
