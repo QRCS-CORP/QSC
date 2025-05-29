@@ -41,6 +41,43 @@
 #ifndef QSC_COMMON_H
 #define QSC_COMMON_H
 
+#if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION)
+#   if defined(__linux__)
+#       if !defined(_DEFAULT_SOURCE)
+#           define _DEFAULT_SOURCE
+#       endif
+#       if !defined(_XOPEN_SOURCE)
+#           define _XOPEN_SOURCE 700
+#       endif
+#       if !defined(_GNU_SOURCE)
+#           define _GNU_SOURCE
+#       endif
+#   elif defined(__APPLE__) && defined(__MACH__)
+#       if !defined(_DARWIN_C_SOURCE)
+#           define _DARWIN_C_SOURCE
+#       endif
+#   elif defined(__sun) && defined(__SVR4)
+#       if !defined(__EXTENSIONS__)
+#           define __EXTENSIONS__
+#       endif
+#   elif defined(__FreeBSD__)   || defined(__NetBSD__) || defined(__OpenBSD__)   || defined(__DragonFly__)
+#       if !defined(_BSD_SOURCE)
+#           define _BSD_SOURCE
+#       endif
+#endif
+
+#   if !defined(_POSIX_C_SOURCE)
+#           define _POSIX_C_SOURCE 200809L
+#   endif
+#endif
+
+#include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #if defined(__cplusplus)
 #   define QSC_CPLUSPLUS_ENABLED_START extern "C" {
 #   define QSC_CPLUSPLUS_ENABLED_END }
@@ -287,42 +324,7 @@ QSC_CPLUSPLUS_ENABLED_START
    */
 #	define QSC_SYSTEM_OS_POSIX
 
-#   if defined(__linux__)
-#       if !defined(_DEFAULT_SOURCE)
-#           define _DEFAULT_SOURCE
-#       endif
-#       if !defined(_XOPEN_SOURCE)
-#           define _XOPEN_SOURCE 700
-#       endif
-#       if !defined(_GNU_SOURCE)
-#           define _GNU_SOURCE
-#       endif
-#   elif defined(__APPLE__) && defined(__MACH__)
-#       if !defined(_DARWIN_C_SOURCE)
-#           define _DARWIN_C_SOURCE
-#       endif
-#   elif defined(__sun) && defined(__SVR4)
-#       if !defined(__EXTENSIONS__)
-#           define __EXTENSIONS__
-#       endif
-#   elif defined(__FreeBSD__)   || defined(__NetBSD__) || defined(__OpenBSD__)   || defined(__DragonFly__)
-#       if !defined(_BSD_SOURCE)
-#           define _BSD_SOURCE
-#       endif
 #endif
-
-#   if !defined(_POSIX_C_SOURCE)
-#           define _POSIX_C_SOURCE 200809L
-#   endif
-
-#endif
-
-#include <assert.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
   /*!
