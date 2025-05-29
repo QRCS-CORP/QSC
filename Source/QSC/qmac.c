@@ -8,7 +8,7 @@
 
 /* irreducible polynomial trinomial GF(2^256) : x^256 + x^19 + 1 */
 
-#if defined(QSC_SYSTEM_HAS_AVX2)
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_X86)
 
 static inline __m256i qmac_shift256_left_19(__m256i x)
 {
@@ -56,7 +56,7 @@ static void qmac_gfmul256_poly19(uint64_t r[4U], const uint64_t a[4U], const uin
     _mm256_storeu_si256((__m256i*)r, res);
 }
 
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#elif defined(QSC_SYSTEM_HAS_AVX) && defined(QSC_SYSTEM_X86)
 
 static inline void qmac_shift256_left_19(__m128i in[2U], __m128i out[2U])
 {

@@ -454,6 +454,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #   endif
 #endif
 
+#if (defined(__x86_64__) || defined(_M_X64))
+#   define QSC_SYSTEM_X86
+#endif
+
 /*==============================================================================
     Sockets and Other System Macros
 ==============================================================================*/

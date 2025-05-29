@@ -709,7 +709,7 @@ void qsc_memutils_clmulepi64_si128(uint64_t r[2U], const uint64_t a[2U], const u
     memutils_clmulepi64(r, a[inda], b[indb]);
 }
 
-#if defined(QSC_SYSTEM_HAS_AVX)
+#if defined(QSC_SYSTEM_HAS_AVX) && defined(QSC_SYSTEM_X86)
 
 static inline void memutils_clmul128(__m128i a, __m128i b, __m128i* low, __m128i* high)
 {
