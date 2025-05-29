@@ -30,7 +30,9 @@
 #	include <time.h>
 #endif
 #if defined(QSC_SYSTEM_OS_POSIX)
+#	if defined(QSC_HAS_CPUID)
 #	include <cpuid.h>
+#	endif
 #	include <dirent.h>
 #	include <time.h>
 #if !defined(HOST_NAME_MAX)
@@ -92,6 +94,45 @@ size_t qsc_sysutils_computer_name(char* name)
 	}
 
 	return res;
+}
+
+size_t qsc_sysutils_cpu_count(void) 
+{
+	size_t count;
+
+	count = 1;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    count = (size_t)sysinfo.dwNumberOfProcessors;
+
+#elif defined(QSC_SYSTEM_OS_APPLE)
+    int nm[2];
+    size_t len;
+
+	len = 4;
+    nm[0] = CTL_HW;
+    nm[1] = HW_AVAILCPU;
+
+    sysctl(nm, 2, (uint32_t)&count, &len, NULL, 0);
+
+    if (count < 1) 
+	{
+        nm[1] = HW_NCPU;
+        sysctl(nm, 2, (uint32_t)&count, &len, NULL, 0);
+
+        if (count < 1) 
+		{
+            count = 1;
+        }
+    }
+#elif defined(QSC_SYSTEM_OS_POSIX)
+    long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
+    count = (nprocs > 0) ? (size_t)nprocs : 1;
+#endif
+
+	return count;
 }
 
 void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state* state)

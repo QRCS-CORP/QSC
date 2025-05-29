@@ -1,4 +1,8 @@
 #include "cpuidex.h"
+
+/* only supported on I386 */
+#if defined(QSC_HAS_CPUID)
+
 #include "consoleutils.h"
 #include "intutils.h"
 #include "memutils.h"
@@ -1086,3 +1090,4 @@ void qsc_cpuidex_print_stats()
 		qsc_consoleutils_print_line(cfeat.vendor);
 	}
 }
+#endif

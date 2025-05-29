@@ -1,6 +1,6 @@
 #include "async.h"
-#include "cpuidex.h"
 #include "memutils.h"
+#include "sysutils.h"
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -221,16 +221,9 @@ void qsc_async_mutex_unlock_ex(qsc_mutex mtx)
 
 size_t qsc_async_processor_count(void)
 {
-    qsc_cpuidex_cpu_features feat = { 0 };
     size_t cpus;
 
-    qsc_cpuidex_features_set(&feat);
-    cpus = 1;
-
-    if (feat.cores != 0)
-    {
-        cpus = feat.cores;
-    }
+    cpus = qsc_sysutils_cpu_count();
 
     return cpus;
 }

@@ -39,7 +39,9 @@
 
 #include "qsccommon.h"
 #include "consoleutils.h"
-#include "cpuidex.h"
+#if defined(QSC_HAS_CPUID)
+#	include "cpuidex.h"
+#endif
 #include "memutils.h"
 #include "selftest.h"
 #include "stringutils.h"
@@ -152,7 +154,9 @@ static void primitives_test(void)
 
 int32_t main(void)
 {
+#if defined(QSC_HAS_CPUID)
 	qsc_cpuidex_cpu_features cfeat;
+#endif
 	bool valid;
 	bool hfeat;
 
@@ -181,6 +185,7 @@ int32_t main(void)
 
 		qsctest_print_line("Passed the internal symmetric primitive self-checks.");
 
+#if defined(QSC_HAS_CPUID)
 		hfeat = qsc_cpuidex_features_set(&cfeat);
 
 		if (hfeat == false)
@@ -216,6 +221,7 @@ int32_t main(void)
 			qsctest_print_line("The AVX intrinsics functions have not been detected or are not enabled.");
 			qsctest_print_line("For best performance, enable the maximum available AVX feature set in the project properties (AVX/AVX2/AVX512).");
 		}
+#endif
 
 #if defined(QSC_SYSTEM_ARCH_IX86_32)
 		qsctest_print_line("The system is running in X86 mode; for best performance, compile as X64.");

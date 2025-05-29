@@ -198,6 +198,12 @@ QSC_CPLUSPLUS_ENABLED_START
      */
 #		define QSC_SYSTEM_ISWIN32
 #   endif
+#else
+    typedef int errno_t;
+#endif
+
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64)
+#   define QSC_HAS_CPUID
 #endif
 
 #if defined(__ANDROID__)
@@ -285,7 +291,6 @@ QSC_CPLUSPLUS_ENABLED_START
    * \brief Defined when the operating system is POSIX-compliant.
    */
 #	define QSC_SYSTEM_OS_POSIX
-    typedef int32_t errno_t;
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)

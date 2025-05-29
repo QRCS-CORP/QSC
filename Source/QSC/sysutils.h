@@ -88,6 +88,13 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 */
 QSC_EXPORT_API size_t qsc_sysutils_computer_name(char* name);
 
+/**
+* \brief Get the CPU count
+*
+* \return Returns the number of cpus on the system
+*/
+QSC_EXPORT_API size_t qsc_sysutils_cpu_count(void);
+
 /*!
 * \struct qsc_sysutils_drive_space_state
 * \brief The drive_space state structure
