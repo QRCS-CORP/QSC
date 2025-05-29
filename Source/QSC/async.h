@@ -41,6 +41,9 @@
 #ifndef QSC_THREADS_H
 #define QSC_THREADS_H
 
+#define _XOPEN_SOURCE 700
+#define _DARWIN_C_SOURCE
+
 #include "qsccommon.h"
 #include <stdarg.h>
 
@@ -52,8 +55,6 @@
     typedef HANDLE qsc_mutex;
     typedef HANDLE qsc_thread;
 #elif defined(QSC_SYSTEM_OS_POSIX)
-#   define _XOPEN_SOURCE 700
-#   define _DARWIN_C_SOURCE
 #   include <unistd.h>
 #   include <sys/types.h>
 #   include <unistd.h>
