@@ -258,6 +258,8 @@ QSC_EXPORT_API void qsc_memutils_clmulepi64_si128(uint64_t r[2U], const uint64_t
  */
 QSC_EXPORT_API void qsc_memutils_clmulepi64_si256_avx(__m128i r[4U], const __m128i a[2U], const __m128i b[2U]);
 
+#else
+
 /**
  * \brief Multiply two 256-bit field elements (each represented as two 128-bit integers) 
  * to produce a 512-bit product.
