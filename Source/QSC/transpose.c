@@ -1,5 +1,6 @@
 #include "transpose.h"
 #include "memutils.h"
+#include <string.h>
 
 void qsc_transpose_bytes_to_native(uint32_t* output, const uint8_t* input, size_t length)
 {
