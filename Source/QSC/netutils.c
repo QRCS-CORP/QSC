@@ -1,13 +1,17 @@
 #if !defined(_GNU_SOURCE)
 #  define _GNU_SOURCE
 #endif
-
 #if !defined(_DEFAULT_SOURCE)
 #  define _DEFAULT_SOURCE
 #endif
-
 #if !defined(_XOPEN_SOURCE)
 #  define _XOPEN_SOURCE 700
+#endif
+#if defined(QSC_SYSTEM_OS_APPLE)
+#  define _DARWIN_C_SOURCE
+#  define _XOPEN_SOURCE 700
+#  include <sys/types.h>     /* u_char, u_short, AF_LINK */
+#  include <errno.h>         /* just in case socketbase.h missed it */
 #endif
 
 #include "netutils.h"
@@ -25,9 +29,6 @@
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
 #elif defined(QSC_SYSTEM_OS_APPLE)
-#  define _DARWIN_C_SOURCE
-#  define _XOPEN_SOURCE 700
-#  include <sys/types.h>
 #  include <sys/socket.h>
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
