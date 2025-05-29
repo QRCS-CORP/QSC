@@ -18,7 +18,8 @@
 #	    pragma comment(lib, "Shlwapi.lib")
 #   endif
 #else
-#	define _LARGEFILE_SOURCE
+#	define _XOPEN_SOURCE 700
+#	define _DARWIN_C_SOURCE
 #	define _DEFAULT_SOURCE
 #	include <stdio.h>
 #	include <unistd.h>

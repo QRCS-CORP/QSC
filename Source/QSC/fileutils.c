@@ -15,7 +15,8 @@
 #	include <windows.h>
 #else
 #	define _LARGEFILE_SOURCE
-#	define _DEFAULT_SOURCE
+#	define _XOPEN_SOURCE 700
+#	define _DARWIN_C_SOURCE
 #	include <stdio.h>
 #	include <unistd.h>
 #	include <dirent.h>

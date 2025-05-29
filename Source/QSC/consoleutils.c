@@ -14,6 +14,8 @@
 #	    pragma comment(lib, "user32.lib")
 #   endif
 #else
+#	define _XOPEN_SOURCE 700
+#	define _DARWIN_C_SOURCE
 #   include <unistd.h>
 #	include <termios.h>
 #	include <unistd.h>
