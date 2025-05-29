@@ -1117,8 +1117,13 @@ bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 			{
 				res = true;
 			}
-#else
+#elif defined(QSC_SYSTEM_OS_MAC)
 			if (ftruncate(fileno(fp), length) == 0)
+			{
+				res = true;
+			}
+#else
+			if (ftruncate(filen(fp), length) == 0)
 			{
 				res = true;
 			}

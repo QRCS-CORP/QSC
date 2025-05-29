@@ -150,7 +150,7 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 			{
 				uint8_t* maddr;
 
-				maddr = (unsigned char*)LLADDR((struct sockaddr_dl*)(ifa)->ifa_addr);
+				const struct sockaddr_ll *s = (const struct sockaddr_ll *)ifa->ifa_addr;
 				netutils_format_mac(ctx->mac, maddr);
 				break;
 			}
