@@ -12,20 +12,15 @@
 #		define _LARGEFILE_SOURCE
 #	endif
 #  include <unistd.h>
-#  include <stdio.h>
 #  include <dirent.h>
 #  include <sys/stat.h>
 #  include <sys/types.h>
 #  include <stdlib.h>
 #elif defined(QSC_SYSTEM_OS_POSIX)
-#	define _GNU_SOURCE
-#	define _DEFAULT_SOURCE
-#	define _XOPEN_SOURCE 700
 #	if !defined(_LARGEFILE_SOURCE)
 #		define _LARGEFILE_SOURCE
 #	endif
 #  include <unistd.h>
-#  include <stdio.h>
 #  include <dirent.h>
 #  include <sys/stat.h>
 #  include <sys/types.h>
