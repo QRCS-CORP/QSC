@@ -24,6 +24,18 @@
 #	define NETUTILS_INET_PTON_SUCCESS 1
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
+#elif defined(QSC_SYSTEM_OS_APPLE)
+#  define _DARWIN_C_SOURCE  // Required for macOS visibility
+#  include <sys/types.h>    // Defines u_char, u_short, etc.
+#  include <sys/socket.h>
+#  include <netinet/in.h>
+#  include <arpa/inet.h>
+#  include <netdb.h>
+#  include <unistd.h>
+#  include <ifaddrs.h>
+#  include <net/if_dl.h>    // AFTER <sys/types.h>
+#  include <string.h>
+#  include <errno.h>  
 #else
 #  include <unistd.h>
 #  include <string.h>
