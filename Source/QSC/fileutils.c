@@ -646,12 +646,12 @@ size_t qsc_fileutils_get_size(const char* fpath)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 			_fseeki64(fp, 0L, SEEK_END);
 			res = (size_t)_ftelli64(fp);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-			fseek(fp, 0L, SEEK_END);
-			res = (size_t)ftell(fp);
-#else
+#elif defined(QSC_SYSTEM_OS_APPLE)
 			fseeko(fp, 0L, SEEK_END);
 			res = (size_t)ftello(fp);
+#else
+			fseek(fp, 0L, SEEK_END);
+			res = (size_t)ftell(fp);
 #endif
 			fclose(fp);
 		}

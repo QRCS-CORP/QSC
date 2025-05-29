@@ -46,7 +46,6 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 #if defined(__cplusplus)
 #   define QSC_CPLUSPLUS_ENABLED_START extern "C" {
