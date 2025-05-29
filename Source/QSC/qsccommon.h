@@ -803,107 +803,106 @@ QSC_CPLUSPLUS_ENABLED_START
     AVX512 Capabilities
 ==============================================================================*/
 
-/* Enable this define to support AVX512 on a compatible system */
-/*#define CEX_AVX512_SUPPORTED*/
+#if defined(QSC_SYSTEM_X86)
 
-#if defined(__AVX512F__) && (__AVX512F__ == 1)
-  /*!
-   * \def __AVX512__
-   * \brief Defined when the system supports AVX512 instructions.
-   */
-#	include <immintrin.h>
-#	if (!defined(__AVX512__))
-#		define __AVX512__
-#	endif
+#   if defined(__AVX512F__) && (__AVX512F__ == 1)
+      /*!
+       * \def __AVX512__
+       * \brief Defined when the system supports AVX512 instructions.
+       */
+#	    include <immintrin.h>
+#	    if (!defined(__AVX512__))
+#		    define __AVX512__
+#	    endif
+#   endif
+
+#   if defined(__SSE2__)
+      /*!
+       * \def QSC_SYSTEM_HAS_SSE2
+       * \brief Defined if the system supports SSE2 instructions.
+       */
+#	    define QSC_SYSTEM_HAS_SSE2
+#   endif
+
+#   if defined(__SSE3__)
+      /*!
+       * \def QSC_SYSTEM_HAS_SSE3
+       * \brief Defined if the system supports SSE3 instructions.
+       */
+#	    define QSC_SYSTEM_HAS_SSE3
+#   endif
+
+#   if defined(__SSSE3__)
+      /*!
+       * \def QSC_SYSTEM_HAS_SSSE3
+       * \brief Defined if the system supports SSSE3 instructions.
+       */
+#	    define QSC_SYSTEM_HAS_SSSE3
+#   endif
+
+#   if defined(__SSE4_1__)
+      /*!
+       * \def QSC_SYSTEM_HAS_SSE41
+       * \brief Defined if the system supports SSE4.1 instructions.
+       */
+#	    define QSC_SYSTEM_HAS_SSE41
+#   endif
+
+#   if defined(__SSE4_2__)
+      /*!
+       * \def QSC_SYSTEM_HAS_SSE42
+       * \brief Defined if the system supports SSE4.2 instructions.
+       */
+#	    define QSC_SYSTEM_HAS_SSE42
+#   endif
+
+#   if defined(__ARM_NEON__)
+      /*!
+       * \def QSC_SYSTEM_HAS_ARM_NEON
+       * \brief Defined if the system supports ARM NEON instructions.
+       */
+#       define QSC_SYSTEM_HAS_ARM_NEON
+    #endif
+
+#   if defined(__AVX__)
+      /*!
+       * \def QSC_SYSTEM_HAS_AVX
+       * \brief Defined if the system supports AVX instructions.
+       */
+#	    define QSC_SYSTEM_HAS_AVX
+#   endif
+
+#   if defined(__AVX2__)
+      /*!
+       * \def QSC_SYSTEM_HAS_AVX2
+       * \brief Defined if the system supports AVX2 instructions.
+       */
+#	    define QSC_SYSTEM_HAS_AVX2
+#   endif
+
+#   if defined(__AVX512__)
+      /*!
+       * \def QSC_SYSTEM_HAS_AVX512
+       * \brief Defined if the system supports AVX512 instructions.
+       */
+#	    define QSC_SYSTEM_HAS_AVX512
+#   endif
+
+#   if defined(__XOP__)
+      /*!
+       * \def QSC_SYSTEM_HAS_XOP
+       * \brief Defined if the system supports XOP instructions.
+       */
+#	    define QSC_SYSTEM_HAS_XOP
 #endif
 
-#if defined(__SSE2__)
-  /*!
-   * \def QSC_SYSTEM_HAS_SSE2
-   * \brief Defined if the system supports SSE2 instructions.
-   */
-#	define QSC_SYSTEM_HAS_SSE2
-#endif
-
-#if defined(__SSE3__)
-  /*!
-   * \def QSC_SYSTEM_HAS_SSE3
-   * \brief Defined if the system supports SSE3 instructions.
-   */
-#	define QSC_SYSTEM_HAS_SSE3
-#endif
-
-#if defined(__SSSE3__)
-  /*!
-   * \def QSC_SYSTEM_HAS_SSSE3
-   * \brief Defined if the system supports SSSE3 instructions.
-   */
-#	define QSC_SYSTEM_HAS_SSSE3
-#endif
-
-#if defined(__SSE4_1__)
-  /*!
-   * \def QSC_SYSTEM_HAS_SSE41
-   * \brief Defined if the system supports SSE4.1 instructions.
-   */
-#	define QSC_SYSTEM_HAS_SSE41
-#endif
-
-#if defined(__SSE4_2__)
-  /*!
-   * \def QSC_SYSTEM_HAS_SSE42
-   * \brief Defined if the system supports SSE4.2 instructions.
-   */
-#	define QSC_SYSTEM_HAS_SSE42
-#endif
-
-#if defined(__ARM_NEON__)
-#   define QSC_SYSTEM_HAS_ARM_NEON
-#endif
-
-#if defined(__AVX__)
-  /*!
-   * \def QSC_SYSTEM_HAS_AVX
-   * \brief Defined if the system supports AVX instructions.
-   */
-#	define QSC_SYSTEM_HAS_AVX
-#endif
-
-#if defined(__AVX2__)
-  /*!
-   * \def QSC_SYSTEM_HAS_AVX2
-   * \brief Defined if the system supports AVX2 instructions.
-   */
-#	define QSC_SYSTEM_HAS_AVX2
-#endif
-
-#if defined(__AVX512__)
-  /*!
-   * \def QSC_SYSTEM_HAS_AVX512
-   * \brief Defined if the system supports AVX512 instructions.
-   * \warning: MSVC (and possibly other compilers) silently promote AVX2 intrinsics when 
-   * AVX512 is enabled, causing failures in release mode builds of implementations using AVX2.
-   * It is an 'either/or' situation, if you  really need AVX512, split out the implementation from the library,
-   * the symmetric ciphers and SHA3 work fine in AVX512 alone, but AVX512 will break Dilithium, Kyber, 
-   * anything else using AVX2 intrinsics.
-   */
-#	define QSC_SYSTEM_HAS_AVX512
-#endif
-
-#if defined(__XOP__)
-  /*!
-   * \def QSC_SYSTEM_HAS_XOP
-   * \brief Defined if the system supports XOP instructions.
-   */
-#	define QSC_SYSTEM_HAS_XOP
-#endif
-
-#if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_AVX512)
-  /*!
-   * \def QSC_SYSTEM_AVX_INTRINSICS
-   * \brief Defined if the system supports AVX intrinsics.
-   */
+#   if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_AVX512)
+      /*!
+       * \def QSC_SYSTEM_AVX_INTRINSICS
+       * \brief Defined if the system supports AVX intrinsics.
+       */
 #	define QSC_SYSTEM_AVX_INTRINSICS
+#   endif
 #endif
 
 /*==============================================================================

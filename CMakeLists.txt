@@ -64,13 +64,6 @@ file(GLOB_RECURSE QSC_SOURCES CONFIGURE_DEPENDS
 # ----------------------------------------------------------------------------- 
 # Remove Intel-specific NASM files on non-x86 targets (e.g., Apple Silicon)
 # -----------------------------------------------------------------------------
-include(CheckCCompilerFlag)
-
-check_c_compiler_flag("-mavx2" HAS_AVX2_SUPPORT)
-if(HAS_AVX2_SUPPORT)
-  add_compile_options(-mavx2)
-  add_definitions(-DQSC_SYSTEM_HAS_AVX2)
-endif()
 
 if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|i[3-6]86)$")
   list(FILTER QSC_SOURCES EXCLUDE REGEX ".*/NASM/.*\\.c$")
