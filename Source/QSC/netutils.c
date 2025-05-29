@@ -12,25 +12,37 @@
 #	define NETUTILS_INET_PTON_SUCCESS 1
 #   include "arrayutils.h"
 #   include <ws2ipdef.h>
-#else
+#elif defined(QSC_SYSTEM_OS_APPLE)
+#	include <unistd.h>
+#	include <string.h>
+#	include <stdio.h>
+#	include <sys/types.h>
 #   include <ifaddrs.h>
 #   include <arpa/inet.h>
 #   include <netdb.h>
 #   include <netinet/in.h>
 #   include <sys/socket.h>
-#	include <string.h>
-#	include <sys/types.h>
+#	include <net/if_dl.h>
+#	include <netinet/in.h>
+#	include <sys/socket.h>
+#	if !defined(AF_PACKET)
+#		define AF_PACKET PF_INET
+#	endif
+#else
+#	define _GNU_SOURCE
+#	define _DEFAULT_SOURCE
+#	define _XOPEN_SOURCE 700
 #	include <unistd.h>
+#	include <string.h>
+#	include <stdio.h>
+#	include <sys/types.h>
+#   include <ifaddrs.h>
+#   include <arpa/inet.h>
+#   include <netdb.h>
+#   include <netinet/in.h>
+#   include <sys/socket.h>
 #	if !defined(AF_LINK)
 #		define AF_LINK AF_PACKET
-#	endif
-#	if defined(QSC_SYSTEM_OS_APPLE)
-#		include <net/if_dl.h>
-#		include <netinet/in.h>
-#		include <sys/socket.h>
-#		if !defined(AF_PACKET)
-#			define AF_PACKET PF_INET
-#		endif
 #	endif
 #endif
 
