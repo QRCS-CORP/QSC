@@ -93,6 +93,29 @@ if(QSC_ENABLE_TESTS AND EXISTS "${PROJECT_SOURCE_DIR}/tests/CMakeLists.txt")
   add_subdirectory(tests)
 endif()
 
+# ─── QSCTest (demo / verification) ───────────────────────────────────────────
+if(QSC_ENABLE_QSCTEST)
+  set(QSCTEST_DIR ${PROJECT_SOURCE_DIR}/Source/QSCTest)
+
+  file(GLOB QSCTEST_SOURCES CONFIGURE_DEPENDS
+       "${QSCTEST_DIR}/*.c"
+       "${QSCTEST_DIR}/*.h")
+
+  if(QSCTEST_SOURCES)
+    add_executable(qsctest ${QSCTEST_SOURCES})
+    target_link_libraries(qsctest PRIVATE qsc)
+    target_include_directories(qsctest PRIVATE ${QSCTEST_DIR})
+
+    # Enable `ctest` integration
+    enable_testing()
+    add_test(NAME QSCTest COMMAND qsctest)
+
+    message(STATUS "QSCTest enabled – executable target 'qsctest' added")
+  else()
+    message(WARNING "QSC_ENABLE_QSCTEST is ON but no sources found in ${QSCTEST_DIR}")
+  endif()
+endif()
+
 # ─── Install rules ────────────────────────────────────────────────────────────
 include(GNUInstallDirs)
 
