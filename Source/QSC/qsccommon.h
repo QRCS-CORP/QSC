@@ -222,10 +222,6 @@ QSC_CPLUSPLUS_ENABLED_START
    */
 #	define QSC_SYSTEM_OS_MAC
 
-#   define _DARWIN_C_SOURCE
-#   define _LARGEFILE_SOURCE
-#   define _XOPEN_SOURCE 700
-
   /*!
    * \def QSC_SYSTEM_OS_BSD
    * \brief Also defined for BSD-based operating systems (macOS is BSD-based).
@@ -297,20 +293,28 @@ QSC_CPLUSPLUS_ENABLED_START
    */
 #	define QSC_SYSTEM_OS_POSIX
 
-#   define _LARGEFILE_SOURCE
-#   define _XOPEN_SOURCE 700
-#	if defined(QSC_SYSTEM_OS_BSD)
-#		if !defined(_BSD_SOURCE)
-#			define _BSD_SOURCE
-#		endif
-#	else
-#		if !defined(_GNU_SOURCE)
-#			define _GNU_SOURCE
-#		endif
-#		if !defined(_DEFAULT_SOURCE)
-#			define _DEFAULT_SOURCE
-#		endif
-#	endif
+#   if defined(__linux__)
+#       if !defined(_GNU_SOURCE)
+#           define _GNU_SOURCE
+#       endif
+#   if defined(__APPLE__) && defined(__MACH__)
+#       if !defined(_DARWIN_C_SOURCE
+#           define _DARWIN_C_SOURCE
+#       endif
+#   elif defined(__sun) && defined(__SVR4)
+#       if !defined(__EXTENSIONS__)
+#           define __EXTENSIONS__
+#       endif
+#   elif defined(__FreeBSD__)   || defined(__NetBSD__) || defined(__OpenBSD__)   || defined(__DragonFly__)
+#       if !defined(_BSD_SOURCE)
+#           define _BSD_SOURCE
+#       endif
+#endif
+
+#   if !defined(_POSIX_C_SOURCE)
+#           define _POSIX_C_SOURCE 200809L
+#   endif
+
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
