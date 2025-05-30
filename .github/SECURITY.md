@@ -13,7 +13,7 @@ We support the latest release of QSC. Previous versions may not receive security
 
 If you discover a security vulnerability in this library, **please report it responsibly**:
 
-- Email: [contact@qrcscorp.ca]  
+- Email: [contact@qrcscorp.ca](mailto:contact@qrcscorp.ca) 
 - GitHub Issues: _Do not use public issues to disclose vulnerabilities._  
 - Please provide:
   - A description of the issue
