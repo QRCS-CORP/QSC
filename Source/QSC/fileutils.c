@@ -1243,6 +1243,10 @@ void qsc_fileutils_zeroise(const char* fpath)
 }
 
 #if defined(QSC_DEBUG_MODE)
+#include "csp.h"
+#include "consoleutils.h"
+#include "intutils.h"
+
 void qsc_fileutils_test(const char* fpath)
 {
 	QSC_ASSERT(fpath != NULL);

@@ -11,7 +11,7 @@
 #  include <sys/random.h>
 #  include <errno.h>
 #  include <unistd.h>
-#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_MAC)
 #  include <stdlib.h>
 #else
 #  include <fcntl.h>
@@ -69,7 +69,7 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 			rmd -= (size_t)pos;
 		}
 
-#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_BSD) || defined(QSC_SYSTEM_OS_MAC)
 
 		arc4random_buf(output, length);
 

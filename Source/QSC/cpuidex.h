@@ -82,7 +82,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_CPUIDEX_SERIAL_SIZE 12ULL
 
-#if defined(QSC_SYSTEM_OS_APPLE) && defined(QSC_SYSTEM_COMPILER_GCC)
+#if defined(QSC_SYSTEM_OS_MAC) && defined(QSC_SYSTEM_COMPILER_GCC)
 	/*!
 	 * \def QSC_CPUIDEX_VENDOR_SIZE
 	 * \brief The CPU vendor name length for Apple systems using GCC.

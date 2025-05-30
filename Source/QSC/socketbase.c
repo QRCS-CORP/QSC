@@ -254,7 +254,7 @@ qsc_socket_exceptions qsc_socket_bind_ipv4(qsc_socket* sock, const qsc_ipinfo_ip
 		sa.sin_port = htons(port);
 		ip4u = qsc_intutils_le8to32(address->ipv4);
 		sa.sin_addr.s_addr = ip4u;
-#if defined(QSC_SYSTEM_OS_APPLE)
+#if defined(QSC_SYSTEM_OS_MAC)
 		sa.sin_len = sizeof(sa);
 #endif
 
@@ -298,7 +298,7 @@ qsc_socket_exceptions qsc_socket_bind_ipv6(qsc_socket* sock, const qsc_ipinfo_ip
 		qsc_memutils_copy((uint8_t*)sa.sin6_addr.u.Byte, (const uint8_t*)address->ipv6, 16);
 #elif defined(QSC_SYSTEM_OS_LINUX)
 		qsc_memutils_copy((uint8_t*)sa.sin6_addr.__in6_u.__u6_addr8, (const uint8_t*)address->ipv6, 16);
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 		qsc_memutils_copy((uint8_t*)sa.sin6_addr.__u6_addr.__u6_addr8, (const uint8_t*)address->ipv6, 16);
 		sa.sin6_len = sizeof(sa);
 #endif

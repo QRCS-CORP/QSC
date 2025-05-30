@@ -93,7 +93,7 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	include <unistd.h>
 #	if defined(QSC_SYSTEM_OS_LINUX)
 #		include <netpacket/packet.h>
-#	elif defined(QSC_SYSTEM_OS_APPLE)
+#	elif defined(QSC_SYSTEM_OS_MAC)
 #		include <net/if_dl.h>
 #		include <netinet/in.h>
 //#		include <netinet/in6.h>

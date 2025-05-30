@@ -130,7 +130,7 @@ typedef enum
 	qsc_socket_receive_flag_peek = 0x00000002L,			/*!< Peeks at the incoming data MSG_PEEK */ //0x40
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	qsc_socket_receive_flag_wait_all = 0x00000008L		/*!< Request completes only when buffer is full MSG_WAITALL */
-#elif defined(QSC_SYSTEM_OS_APPLE)
+#elif defined(QSC_SYSTEM_OS_MAC)
 	qsc_socket_receive_flag_wait_all = 0x00000040L		/*!< Request completes only when buffer is full MSG_WAITALL */
 #else
 	qsc_socket_receive_flag_wait_all = 0x00000100L		/*!< Request completes only when buffer is full MSG_WAITALL */

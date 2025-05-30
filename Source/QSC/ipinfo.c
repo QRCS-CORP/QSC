@@ -228,7 +228,6 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC
     return res;
 }
 
-
 bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qsc_ipinfo_ipv4_address* b)
 {
 	QSC_ASSERT(a != NULL);
@@ -306,6 +305,19 @@ bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 	{
 		res = (address != NULL && address->ipv4[0U] <= 224U && address->ipv4[1U] != 255U && address->ipv4[2U] != 255U && address->ipv4[3U] != 255U);
 	}
+
+	return res;
+}
+
+bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address)
+{
+	QSC_ASSERT(address != NULL);
+
+	bool res;
+	qsc_ipinfo_ipv4_address add = { 0 };
+
+	add = qsc_ipinfo_ipv4_address_from_string(address);
+	res = (address != NULL && (uint8_t)add.ipv4[0] < 224 && (uint8_t)add.ipv4[1] != 255 && (uint8_t)add.ipv4[2] != 255 && (uint8_t)add.ipv4[3] != 255);
 
 	return res;
 }
