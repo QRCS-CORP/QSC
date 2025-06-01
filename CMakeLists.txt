@@ -1,6 +1,5 @@
 # ──────────────────────────────────────────────────────────────────────────────
 #  QSC Cryptographic Library – CMake build script
-#  Place this file at the repository root (same level as Source/).
 # ──────────────────────────────────────────────────────────────────────────────
 
 cmake_minimum_required(VERSION 3.15)
