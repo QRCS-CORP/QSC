@@ -34,7 +34,7 @@
  * in the LICENSE.txt file distributed with this software.
  *
  * Written by: John G. Underhill
- * Contact: john.underhill@protonmail.com
+ * Contact: contact@qrcscorp.ca
  */
 
 #ifndef QSC_SOCKETBASE_H
@@ -96,15 +96,10 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #	elif defined(QSC_SYSTEM_OS_MAC)
 #		include <net/if_dl.h>
 #		include <netinet/in.h>
-//#		include <netinet/in6.h>
 #		if !defined(AF_PACKET)
 #			define AF_PACKET PF_INET
 #		endif
-#	elif defined(QSC_SYSTEM_OS_UNIX)
-
 #	endif
-//#else
-//#	error "The operating system is not supported!"
 #endif
 
 ///*!

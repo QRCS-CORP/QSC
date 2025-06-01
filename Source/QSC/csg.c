@@ -195,7 +195,7 @@ void qsc_csg_update(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(seed != NULL);
 
-	if (ctx != NULL && seed != NULL && seedlen != 0)
+	if (ctx != NULL && seed != NULL && seedlen != 0U)
 	{
 		/* absorb and permute */
 

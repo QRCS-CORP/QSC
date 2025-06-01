@@ -114,7 +114,7 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
         qsc_fe25519_mul32(z2, e, EC25519_A24);
         qsc_fe25519_add(z2, z2, bb);
         qsc_fe25519_mul(z2, z2, e);
-    } while (pos > 0);
+    } while (pos > 0U);
 
     qsc_fe25519_cswap(x2, x3, swap);
     qsc_fe25519_cswap(z2, z3, swap);

@@ -36,7 +36,7 @@
  * in the LICENSE.txt file distributed with this software.
  *
  * Written by: John G. Underhill
- * Contact: john.underhill@protonmail.com
+ * Contact: contact@qrcscorp.ca
  */
 
 #ifndef QSC_ARRAYUTILS_H

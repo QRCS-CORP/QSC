@@ -710,7 +710,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 	size_t i;
 	size_t oft;
 
-	if (ctx != NULL && output != NULL && input != NULL && length != 0)
+	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
 	{
 		oft = 0U;
 
@@ -956,7 +956,7 @@ bool qsc_chacha_poly1305_decrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 
 	res = false;
 
-	if (ctx != NULL && output != NULL && input != NULL && length != 0)
+	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
 	{
 		uint8_t tag[QSC_POLY1305_MAC_SIZE] = { 0U };
 		size_t mlen;
@@ -1012,7 +1012,7 @@ void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
 
-	if (ctx != NULL && output != NULL && input != NULL && length != 0)
+	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
 	{
 		qsc_chacha_transform(&ctx->cstate, output, input, length);
 		chacha_poly1305_aligned_update(&ctx->pstate, output, length);

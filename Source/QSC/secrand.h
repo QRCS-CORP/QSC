@@ -35,7 +35,7 @@
  * in the LICENSE.txt file distributed with this software.
  *
  * Written by: John Underhill
- * Contact: john.underhill@protonmail.com
+ * Contact: contact@qrcscorp.ca
  */
 
 #ifndef QSC_SECRAND_H

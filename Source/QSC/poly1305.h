@@ -12,7 +12,7 @@
  * from Quantum Resistant Cryptographic Solutions Incorporated.
  *
  * Written by John G. Underhill
- * Contact: john.underhill@protonmail.com
+ * Contact: contact@qrcscorp.ca
  */
 
 #ifndef QSC_POLY1305_H

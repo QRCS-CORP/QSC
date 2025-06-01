@@ -35,7 +35,7 @@
  * in the LICENSE.txt file distributed with this software.
  *
  * Written by: John G. Underhill
- * Contact: john.underhill@protonmail.com
+ * Contact: contact@qrcscorp.ca
  */
 
 #ifndef QSC_COMMON_H
@@ -353,9 +353,13 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #ifdef QSC_DEBUG_MODE
-#  define QSC_ASSERT(expr)  assert(expr)
+  /*!
+   * \def QSC_ASSERT
+   * \brief Define the assert function and guarantee it as debug only.
+   */
+#  define QSC_ASSERT(expr) assert(expr)
 #else
-#  define QSC_ASSERT(expr)  ((void)0)
+#  define QSC_ASSERT(expr) ((void)0)
 #endif
 
 /*==============================================================================

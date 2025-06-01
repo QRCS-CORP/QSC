@@ -299,14 +299,14 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
 /* Corrected: Use Sleep for Windows and sleep for POSIX */
 void qsc_async_thread_sleep(uint32_t msec)
 {
-    QSC_ASSERT(msec != 0);
+    QSC_ASSERT(msec != 0U);
 
-    if (msec != 0)
+    if (msec != 0U)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         Sleep(msec);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        sleep((msec + 999) / 1000);
+        sleep(msec);
 #endif
     }
 }
@@ -374,7 +374,7 @@ void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)
 {
     QSC_ASSERT(handles != NULL);
 
-    if (handles != NULL && count != 0)
+    if (handles != NULL && count != 0U)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         WaitForMultipleObjects((DWORD)count, handles, TRUE, INFINITE);
