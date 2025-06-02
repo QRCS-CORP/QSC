@@ -279,7 +279,7 @@ qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
     return res;
 }
 
-qsc_thread qsc_async_thread_create_noargs(void (*func)(void*))
+qsc_thread qsc_async_thread_create_noargs(void (*func))
 {
     QSC_ASSERT(func != NULL);
 
