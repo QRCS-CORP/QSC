@@ -212,6 +212,16 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create(void (*func)(void*), void* sta
 QSC_EXPORT_API qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args);
 
 /**
+ * \brief Create a thread with no arguments parameter.
+ *
+ * Creates a new thread that executes the specified function with multiple arguments.
+ *
+ * \param func:     [void (*)(void**)] Pointer to the function to execute in the new thread.
+ * \return          [qsc_thread] Returns a handle to the created thread, or NULL on failure.
+ */
+QSC_EXPORT_API qsc_thread qsc_async_thread_create_noargs(void (*func)(void*));
+
+/**
  * \brief Resume a suspended thread.
  *
  * Resumes execution of a thread that has been suspended.

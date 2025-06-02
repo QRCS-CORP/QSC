@@ -279,6 +279,30 @@ qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
     return res;
 }
 
+qsc_thread qsc_async_thread_create_noargs(void (*func)(void*))
+{
+    QSC_ASSERT(func != NULL);
+
+    qsc_thread res;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+    res = NULL;
+#else
+    res = 0;
+#endif
+
+    if (func != NULL)
+    {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+        uint32_t id = 0;
+        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, NULL, 0, (LPDWORD)&id);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+        pthread_create(&res, NULL, (void *(*) (void *))func, NULL);
+#endif
+    }
+
+    return res;
+}
+
 int32_t qsc_async_thread_resume(qsc_thread handle)
 {
     int32_t res;
