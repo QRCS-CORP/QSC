@@ -120,7 +120,7 @@ typedef int32_t socket_t;
 QSC_EXPORT_API typedef struct
 {
 	socket_t connection;							/*!< A socket connection pointer */
-	int8_t address[QSC_SOCKET_ADDRESS_MAX_SIZE];	/*!< The sockets string address */
+	char address[QSC_SOCKET_ADDRESS_MAX_SIZE];		/*!< The sockets string address */
 	uint32_t instance;								/*!< The sockets instance count */
 	uint16_t port;									/*!< The sockets port number */
 	qsc_socket_address_families address_family;		/*!< The sockets address family type */
