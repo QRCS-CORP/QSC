@@ -219,7 +219,7 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void*
  * \param func:     [void (*)(void**)] Pointer to the function to execute in the new thread.
  * \return          [qsc_thread] Returns a handle to the created thread, or NULL on failure.
  */
-QSC_EXPORT_API qsc_thread qsc_async_thread_create_noargs(void (*func));
+QSC_EXPORT_API qsc_thread qsc_async_thread_create_noargs(void (*func)(void));
 
 /**
  * \brief Resume a suspended thread.
