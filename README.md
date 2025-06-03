@@ -189,39 +189,39 @@ Compile the QSC library (right-click and choose build), then set the QSCTest pro
 
 The QSC library and QSCTest project have been tested using the Eclipse IDE on Ubuntu and MacOS.  
 In the Eclipse folder there are subfolders for Ubuntu and MacOS that contain the **.project**, **.cproject**, and **.settings** Eclipse files.  Copy those files directly into the folders containing the code files, ex. in the **Eclipse\Ubuntu\QSC** folder, and do the same for the QSCTest project.  
-Create a new project for QSC, select C/C++ project, and then Create an empty project with the same name as the folder with the files, ex. QSCTest.  
+Create a new project for QSC, select C/C++ project, and then **Create an empty project** with the same name as the folder with the files, ex. QSCTest.  
 Eclipse should load the project with all of the settings into the project view window. The same proceedure is true for **MacOS and Ubuntu**, but some settings are different (GCC/Clang), so choose the project files that correspond to the operating system.  
 The default projects use minimal flags, but are set to use AVX2, AES-NI, and RDRand by default.
 
 Sample flag sets and their meanings:
--AVX Support: -msse2 -mavx -maes -mpclmul -mrdrnd -mbmi2
--msse2        # baseline for x86_64  
--mavx         # 256-bit FP/SIMD  
--maes         # AES-NI (128-bit AES rounds)  
--mpclmul      # PCLMUL (carry-less multiply)  
--mrdrnd       # RDRAND (hardware RNG)  
--mbmi2        # BMI2 (PEXT/PDEP, bit-manipulation)  
+-**AVX Support**: -msse2 -mavx -maes -mpclmul -mrdrnd -mbmi2
+-**msse2**        # baseline for x86_64  
+-**mavx**         # 256-bit FP/SIMD  
+-**maes**         # AES-NI (128-bit AES rounds)  
+-**mpclmul**      # PCLMUL (carry-less multiply)  
+-**mrdrnd**       # RDRAND (hardware RNG)  
+-**mbmi2**        # BMI2 (PEXT/PDEP, bit-manipulation)  
 
--AVX2 Support: -msse2 -mavx -mavx2 -mpclmul -maes -mrdrnd -mbmi2
--msse2        # baseline for x86_64  
--mavx         # AVX baseline  
--mavx2        # 256-bit integer + FP SIMD  
--mpclmul      # PCLMUL (carry-less multiply for AES-GCM, GHASH, etc.)  
--maes         # AES-NI (128-bit AES rounds)  
--mrdrnd       # RDRAND (hardware RNG)  
--mbmi2        # BMI2 (PEXT/PDEP, bit-manipulation)  
+-**AVX2 Support**: -msse2 -mavx -mavx2 -mpclmul -maes -mrdrnd -mbmi2
+-**msse2**        # baseline for x86_64  
+-**mavx**         # AVX baseline  
+-**mavx2**        # 256-bit integer + FP SIMD  
+-**mpclmul**      # PCLMUL (carry-less multiply for AES-GCM, GHASH, etc.)  
+-**maes**         # AES-NI (128-bit AES rounds)  
+-**mrdrnd**       # RDRAND (hardware RNG)  
+-**mbmi2**        # BMI2 (PEXT/PDEP, bit-manipulation)  
 
--AVX512 Support: -msse2 -mavx -mavx2 -mavx512f -mavx512bw -mvaes -mpclmul -mrdrnd -mbmi2 -maes
--msse2        # baseline for x86_64  
--mavx         # AVX baseline  
--mavx2        # AVX2 baseline (implied by AVX-512 but explicit is safer)  
--mavx512f     # 512-bit Foundation instructions  
--mavx512bw    # 512-bit Byte/Word integer instructions  
--mvaes        # Vector-AES (VAES) in 512-bit registers  
--mpclmul      # PCLMUL (carry-less multiply for GF(2ⁿ))  
--mrdrnd       # RDRAND (hardware RNG)  
--mbmi2        # BMI2 (PEXT/PDEP, bit-manipulation)  
--maes         # AES-NI (128-bit AES rounds; optional if VAES covers your AES use)  
+-**AVX-512 Support**: -msse2 -mavx -mavx2 -mavx512f -mavx512bw -mvaes -mpclmul -mrdrnd -mbmi2 -maes
+-**msse2**        # baseline for x86_64  
+-**mavx**         # AVX baseline  
+-**mavx2**        # AVX2 baseline (implied by AVX-512 but explicit is safer)  
+-**mavx512f**     # 512-bit Foundation instructions  
+-**mavx512bw**    # 512-bit Byte/Word integer instructions  
+-**mvaes**        # Vector-AES (VAES) in 512-bit registers  
+-**mpclmul**      # PCLMUL (carry-less multiply for GF(2ⁿ))  
+-**mrdrnd**       # RDRAND (hardware RNG)  
+-**mbmi2**        # BMI2 (PEXT/PDEP, bit-manipulation)  
+-**maes**         # AES-NI (128-bit AES rounds; optional if VAES covers your AES use)  
 
 
 ## Roadmap
