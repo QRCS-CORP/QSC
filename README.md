@@ -194,7 +194,7 @@ Eclipse should load the project with all of the settings into the project view w
 The default projects use minimal flags, but are set to use AVX2, AES-NI, and RDRand by default.
 
 Sample flag sets and their meanings:  
--**AVX Support**: -msse2 -mavx -maes -mpclmul -mrdrnd -mbmi2
+-**AVX Support**: -msse2 -mavx -maes -mpclmul -mrdrnd -mbmi2  
 -**msse2**        # baseline for x86_64  
 -**mavx**         # 256-bit FP/SIMD  
 -**maes**         # AES-NI (128-bit AES rounds)  
@@ -202,7 +202,7 @@ Sample flag sets and their meanings:
 -**mrdrnd**       # RDRAND (hardware RNG)  
 -**mbmi2**        # BMI2 (PEXT/PDEP, bit-manipulation)  
 
--**AVX2 Support**: -msse2 -mavx -mavx2 -mpclmul -maes -mrdrnd -mbmi2
+-**AVX2 Support**: -msse2 -mavx -mavx2 -mpclmul -maes -mrdrnd -mbmi2  
 -**msse2**        # baseline for x86_64  
 -**mavx**         # AVX baseline  
 -**mavx2**        # 256-bit integer + FP SIMD  
