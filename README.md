@@ -164,7 +164,6 @@ QSC has been thoroughly tested on:
 
 QSC is a standalone, portable, and MISRA-aligned cryptographic library written in C. It supports platform-optimized builds across **Windows**, **macOS**, and **Linux** via [CMake](https://cmake.org/), and includes support for modern hardware acceleration such as AES-NI, AVX2/AVX-512, and RDRAND.
 
-
 ### Prerequisites
 
 - CMake 3.15 or newer
@@ -174,28 +173,51 @@ QSC is a standalone, portable, and MISRA-aligned cryptographic library written i
   - **Ubuntu**: GCC or Clang
 
 
-### Building QSC
+### Building QSC and QSCTest
 
 #### Windows (MSVC)
 
 Use the Visual Studio solution to create the library and test project QSC Test.
+Extract the files, and open the QSCTest project. The QSC library has a default location in a folder parallel to the QSCTest folder.
+The QSCTest addtional files is set to: $(SolutionDir)..\QSC\QSC, if this is not the location of the library files, change it by going to QSTest project properties Configuration Properties->C/C++->General->Additional Include Directories and set the library file location. Ensure that the QSCTest->References property contains a reference to the QSC library. QSC supports every AVX instruction family. Set the QSC library and the QSCTest project to the same AVX family setting in Configuration Properties->C/C++->All Options->Enable Enhanced Instruction Set. Set both QSC and QSCTest to the same instruction set in Debug and Release Solution Configurations. 
+Compile the QSC library (right-click and choose build), then set the QSCTest project as the startup project (right-click Set as Startup Project), and run the project.
 
-powershell:
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+#### MacOS / Ubuntu (Eclipse)
 
-#### macOS / Ubuntu
+The QSC library and QSCTest project have been tested using Eclipse on Ubuntu and MacOS. 
+In the Eclipse folder there are subfolders for Ubuntu and MacOS that contain the .project, .cproject, and .settings Eclipse files. Copy those files directly into the folders containing the code files, ex. in the Eclipse\Ubuntu\QSC folder, copy the files directly into the directory containing the header and implementation files for QSC, and do the same for QSCTest. Create a new project for QSC, select C/C++ project, and then Create an empty project with the same name as the folder with the files, ex. QSCTest. Eclipse should load the project with all of the settings into the project view window. The same proceedure is true for MacOS and Ubuntu, but some settings are different (GCC/Clang), so choose the project files that correspond to the operating system.
+The default projects use minimal flags, but are set to use AVX2, AES-NI, and RDRand by default.
 
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_AESNI=ON -DENABLE_AVX2=ON -DENABLE_RDRAND=ON
-cmake --build build
+Sample flag sets and their meanings:
+-AVX Support: -msse2 -mavx -maes -mpclmul -mrdrnd -mbmi2
+-msse2        # baseline for x86_64  
+-mavx         # 256-bit FP/SIMD  
+-maes         # AES-NI (128-bit AES rounds)  
+-mpclmul      # PCLMUL (carry-less multiply)  
+-mrdrnd       # RDRAND (hardware RNG)  
+-mbmi2        # BMI2 (PEXT/PDEP, bit-manipulation)  
 
-#### Optional CMake Feature Flags
+-AVX2 Support: -msse2 -mavx -mavx2 -mpclmul -maes -mrdrnd -mbmi2
+-msse2        # baseline for x86_64  
+-mavx         # AVX baseline  
+-mavx2        # 256-bit integer + FP SIMD  
+-mpclmul      # PCLMUL (carry-less multiply for AES-GCM, GHASH, etc.)  
+-maes         # AES-NI (128-bit AES rounds)  
+-mrdrnd       # RDRAND (hardware RNG)  
+-mbmi2        # BMI2 (PEXT/PDEP, bit-manipulation)  
 
--DENABLE_AESNI	Enables AES-NI acceleration  
--DENABLE_AVX2	Enables AVX2 intrinsics  
--DENABLE_AVX512	Enables AVX-512 performance optimizations  
--DENABLE_RDRAND	Enables use of Intel RDRAND entropy  
--DCMAKE_BUILD_TYPE=Release	Enables compiler optimizations  
+-AVX512 Support: -msse2 -mavx -mavx2 -mavx512f -mavx512bw -mvaes -mpclmul -mrdrnd -mbmi2 -maes
+-msse2        # baseline for x86_64  
+-mavx         # AVX baseline  
+-mavx2        # AVX2 baseline (implied by AVX-512 but explicit is safer)  
+-mavx512f     # 512-bit Foundation instructions  
+-mavx512bw    # 512-bit Byte/Word integer instructions  
+-mvaes        # Vector-AES (VAES) in 512-bit registers  
+-mpclmul      # PCLMUL (carry-less multiply for GF(2ⁿ))  
+-mrdrnd       # RDRAND (hardware RNG)  
+-mbmi2        # BMI2 (PEXT/PDEP, bit-manipulation)  
+-maes         # AES-NI (128-bit AES rounds; optional if VAES covers your AES use)  
+
 
 ## Roadmap
 
