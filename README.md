@@ -211,7 +211,7 @@ Sample flag sets and their meanings:
 -**mrdrnd**       # RDRAND (hardware RNG)  
 -**mbmi2**        # BMI2 (PEXT/PDEP, bit-manipulation)  
 
--**AVX-512 Support**: -msse2 -mavx -mavx2 -mavx512f -mavx512bw -mvaes -mpclmul -mrdrnd -mbmi2 -maes
+-**AVX-512 Support**: -msse2 -mavx -mavx2 -mavx512f -mavx512bw -mvaes -mpclmul -mrdrnd -mbmi2 -maes  
 -**msse2**        # baseline for x86_64  
 -**mavx**         # AVX baseline  
 -**mavx2**        # AVX2 baseline (implied by AVX-512 but explicit is safer)  
