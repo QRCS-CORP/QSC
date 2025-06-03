@@ -193,7 +193,7 @@ Create a new project for QSC, select C/C++ project, and then **Create an empty p
 Eclipse should load the project with all of the settings into the project view window. The same proceedure is true for **MacOS and Ubuntu**, but some settings are different (GCC/Clang), so choose the project files that correspond to the operating system.  
 The default projects use minimal flags, but are set to use AVX2, AES-NI, and RDRand by default.
 
-Sample flag sets and their meanings:
+Sample flag sets and their meanings:  
 -**AVX Support**: -msse2 -mavx -maes -mpclmul -mrdrnd -mbmi2
 -**msse2**        # baseline for x86_64  
 -**mavx**         # 256-bit FP/SIMD  
