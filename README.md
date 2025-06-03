@@ -166,11 +166,10 @@ QSC is a standalone, portable, and MISRA-aligned cryptographic library written i
 
 ### Prerequisites
 
-- CMake 3.15 or newer
-- A C11-compatible C compiler:
-  - **Windows**: Visual Studio 2022 or newer
-  - **macOS**: Clang via Xcode or Homebrew
-  - **Ubuntu**: GCC or Clang
+- **CMake**: 3.15 or newer
+- **Windows**: Visual Studio 2022 or newer
+- **macOS**: Clang via Xcode or Homebrew
+- **Ubuntu**: GCC or Clang
 
 
 ### Building QSC and QSCTest
