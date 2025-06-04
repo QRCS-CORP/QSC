@@ -43,37 +43,6 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #   endif
 #endif
 
-static uint32_t cpuidex_cpu_count()
-{
-	uint32_t resu;
-
-	resu = 1U;
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-	uint32_t resl;
-	SYSTEM_INFO sysinfo;
-
-	GetSystemInfo(&sysinfo);
-	resl = (uint32_t)sysinfo.dwNumberOfProcessors;
-
-	if (resl > 1U)
-	{
-		resu = resl;
-	}
-#else
-    long resl;
-    
-	resl = sysconf(_SC_NPROCESSORS_CONF);
-
-    if (resl > 1L)
-    {
-        resu = (uint32_t)resl;
-    }
-#endif
-
-	return resu;
-}
-
 #if defined(QSC_SYSTEM_ARCH_ARM)
 #	if !defined(HWCAP_ARMv7)
 #		define HWCAP_ARMv7 (1 << 29)
@@ -443,6 +412,37 @@ static void cpuidex_cpu_info(int32_t info[4U], const uint32_t infotype)
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)
 	__get_cpuid(infotype, (uint32_t*)&info[0U], (uint32_t*)&info[1U], (uint32_t*)&info[2U], (uint32_t*)&info[3U]);
 #endif
+}
+
+static uint32_t cpuidex_cpu_count()
+{
+	uint32_t resu;
+
+	resu = 1U;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	uint32_t resl;
+	SYSTEM_INFO sysinfo;
+
+	GetSystemInfo(&sysinfo);
+	resl = (uint32_t)sysinfo.dwNumberOfProcessors;
+
+	if (resl > 1U)
+	{
+		resu = resl;
+	}
+#else
+    long resl;
+    
+	resl = sysconf(_SC_NPROCESSORS_CONF);
+
+    if (resl > 1L)
+    {
+        resu = (uint32_t)resl;
+    }
+#endif
+
+	return resu;
 }
 
 static uint32_t cpuidex_read_bits(uint32_t value, int32_t index, int32_t length)
