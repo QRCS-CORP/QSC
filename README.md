@@ -240,8 +240,7 @@ Sample flag sets and their meanings:
 
 ACQUISITION INQUIRIES:
 QRCS is currently seeking a corporate acquirer for this technology.
-Parties interested in exclusive licensing or acquisition should contact:
-john.underhill@protonmail.com  
+Parties interested in exclusive licensing or acquisition should contact: contact@qrcscorp.ca   
 
 PATENT NOTICE:
 One or more patent applications (provisional and/or non-provisional) covering aspects of this software have been filed with the United States Patent and 
