@@ -349,7 +349,7 @@ static void sphincsplus_prf_addr(uint8_t* out, const spx_ctx* ctx, const uint32_
 #endif
 }
 
-static void sphincsplus_gen_message_random(uint8_t* R, const uint8_t* sk_prf, const uint8_t* optrand, const uint8_t* m, size_t mlen, const uint8_t* c, size_t clen, const spx_ctx *ctx)
+static void sphincsplus_gen_message_random(uint8_t* R, const uint8_t* sk_prf, const uint8_t* optrand, const uint8_t* m, size_t mlen, const uint8_t* c, size_t clen)
 {
     /* Computes the message-dependent randomness R, using a secret seed and an
        optional randomization value as well as the message. */
@@ -368,7 +368,7 @@ static void sphincsplus_gen_message_random(uint8_t* R, const uint8_t* sk_prf, co
     qsc_keccak_incremental_squeeze(&kctx, SPX_HASH_RATE, R, SPX_N);
 }
 
-static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* leaf_idx, const uint8_t* R, const uint8_t* pk, const uint8_t* m, size_t mlen, const uint8_t* c, size_t clen, const spx_ctx* ctx)
+static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* leaf_idx, const uint8_t* R, const uint8_t* pk, const uint8_t* m, size_t mlen, const uint8_t* c, size_t clen)
 {
     /* Computes the message hash using R, the public key, and the message.
      * Outputs the message digest and the index of the leaf. The index is split in
@@ -397,14 +397,8 @@ static void sphincsplus_hash_message(uint8_t* digest, uint64_t* tree, uint32_t* 
 #error For given height and depth, 64 bits cannot represent all subtrees
 #endif
 
-    if (SPX_D == 1U)
-    {
-        *tree = 0U;
-    } else 
-    {
-        *tree = sphincsplus_bytes_to_ull(bufp, SPX_TREE_BYTES);
-        *tree &= (~(uint64_t)0) >> (64U - SPX_TREE_BITS);
-    }
+    *tree = sphincsplus_bytes_to_ull(bufp, SPX_TREE_BYTES);
+    *tree &= (~(uint64_t)0) >> (64U - SPX_TREE_BITS);
     bufp += SPX_TREE_BYTES;
 
     *leaf_idx = (uint32_t)sphincsplus_bytes_to_ull(bufp, (uint32_t)SPX_LEAF_BYTES);
@@ -1151,10 +1145,10 @@ bool sphincsplus_ref_sign_signature(uint8_t* signedmsg, size_t* smsglen, const u
     sphincsplus_set_type(tree_addr, SPX_ADDR_TYPE_HASHTREE);
 
     /* Compute the digest randomization value. */
-    sphincsplus_gen_message_random(signedmsg, sk_prf, seed, message, msglen, context, ctxlen, &sctx);
+    sphincsplus_gen_message_random(signedmsg, sk_prf, seed, message, msglen, context, ctxlen);
 
     /* Derive the message digest and leaf index from R, PK and M. */
-    sphincsplus_hash_message(mhash, &tree, &idx_leaf, signedmsg, pk, message, msglen, context, ctxlen, &sctx);
+    sphincsplus_hash_message(mhash, &tree, &idx_leaf, signedmsg, pk, message, msglen, context, ctxlen);
     signedmsg += SPX_N;
 
     sphincsplus_set_tree_addr(wots_addr, tree);
@@ -1212,7 +1206,7 @@ bool sphincsplus_ref_verify(const uint8_t* signedmsg, size_t smsglen, const uint
 
         /* Derive the message digest and leaf index from R || PK || M. */
         /* The additional SPX_N is a result of the hash domain separator. */
-        sphincsplus_hash_message(mhash, &tree, &idx_leaf, signedmsg, pk, message, msglen, context, ctxlen, &sctx);
+        sphincsplus_hash_message(mhash, &tree, &idx_leaf, signedmsg, pk, message, msglen, context, ctxlen);
         signedmsg += SPX_N;
 
         /* Layer correctly defaults to 0, so no need to set_layer_addr */
