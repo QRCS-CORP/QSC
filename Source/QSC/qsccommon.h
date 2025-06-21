@@ -974,7 +974,10 @@ QSC_CPLUSPLUS_ENABLED_START
 * \brief Macro for aligning data to 'x' bytes using GCC/Clang.
 */
 #if !defined(QSC_ALIGN)
-#	if defined(_MSC_VER)
+    /* If compiling in C23 or later, use the built-in 'alignas' keyword. */
+    #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 202311L)
+        #define QSC_ALIGN(x) alignas(x)
+#	elif defined(_MSC_VER)
 #		define QSC_ALIGN(x) __declspec(align(x))
 #	elif defined(__GNUC__) || defined(__clang__)
 #		define QSC_ALIGN(x) __attribute__((aligned(x)))
@@ -1059,43 +1062,31 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_ECDH_S1EC25519
 
-/*** Kyber ***/
+/*** ML-KEM Kyber ***/
+
+///*!
+// * \def QSC_KYBER_S1K2P512
+// * \brief Enable the Kyber S1K2P512 parameter set.
+// */
+//#define QSC_KYBER_S1K2P512
+
+///*!
+// * \def QSC_KYBER_S3K3P768
+// * \brief Enable the Kyber S3K3P768 parameter set.
+// */
+//#define QSC_KYBER_S3K3P768
 
 /*!
- * \def QSC_KYBER_FIPS203
- * \brief Use the official FIPS 203 version of Kyber.
- * \description
- * The FIPS 203 implementation of Kyber differs significantly from the
- * version of Kyber that was judged by the worlds cryptographic community.
- * It is recommended that a strong source of entropy is used with the FIPS version to
- * offset the changes made to the cipher. By default, QSC uses the ACP entropy provider, 
- * a strong combinatory source of system entropy.
+ * \def QSC_KYBER_S5K4P1024
+ * \brief Enable the Kyber S5K5P1024 parameter set.
  */
-#define QSC_KYBER_FIPS203
+#define QSC_KYBER_S5K4P1024
 
 ///*!
-// * \def QSC_KYBER_S1P1632
-// * \brief Enable the Kyber S1-P1632 parameter set.
+// * \def QSC_KYBER_S6K5P1280
+// * \brief Enable the Kyber S6K5P1280 parameter set (experimental).
 // */
-//#define QSC_KYBER_S1P1632
-
-///*!
-// * \def QSC_KYBER_S3P2400
-// * \brief Enable the Kyber S3-P2400 parameter set.
-// */
-//#define QSC_KYBER_S3P2400
-
-/*!
- * \def QSC_KYBER_S5P3168
- * \brief Enable the Kyber S5-P3168 parameter set.
- */
-#define QSC_KYBER_S5P3168
-
-///*!
-// * \def QSC_KYBER_S6P3936
-// * \brief Enable the Kyber S6-P3936 parameter set (experimental).
-// */
-//#define QSC_KYBER_S6P3936
+//#define QSC_KYBER_S6K5P1280
 
 /*** McEliece ***/
 
@@ -1132,22 +1123,22 @@ QSC_CPLUSPLUS_ENABLED_START
 /*** Signature Schemes ***/
 
 ///*!
-// * \def QSC_DILITHIUM_S1P2544
-// * \brief Enable the Dilithium S1P2544 parameter set.
+// * \def QSC_DILITHIUM_S1P44
+// * \brief Enable the Dilithium S1P44 parameter set.
 // */
-//#define QSC_DILITHIUM_S1P2544
+//#define QSC_DILITHIUM_S1P44
 
 ///*!
-// * \def QSC_DILITHIUM_S3P4016
-// * \brief Enable the Dilithium S3P4016 parameter set.
+// * \def QSC_DILITHIUM_S3P65
+// * \brief Enable the Dilithium S3P65 parameter set.
 // */
-//#define QSC_DILITHIUM_S3P4016
+//#define QSC_DILITHIUM_S3P65
 
 /*!
- * \def QSC_DILITHIUM_S5P4880
- * \brief Enable the Dilithium S5P4880 parameter set.
+ * \def QSC_DILITHIUM_S5P87
+ * \brief Enable the Dilithium S5P87 parameter set.
  */
-#define QSC_DILITHIUM_S5P4880
+#define QSC_DILITHIUM_S5P87
 
 /*** ECDSA ***/
 
@@ -1160,22 +1151,10 @@ QSC_CPLUSPLUS_ENABLED_START
 /*** SphincsPlus ***/
 
 ///*!
-// * \def QSC_SPHINCSPLUS_S1S128SHAKERF
-// * \brief Enable the SphincsPlus S1S128SHAKERF robust fast parameter set.
-// */
-//#define QSC_SPHINCSPLUS_S1S128SHAKERF
-
-///*!
 // * \def QSC_SPHINCSPLUS_S1S128SHAKERS
 // * \brief Enable the SphincsPlus S1S128SHAKERS robust small parameter set.
 // */
 //#define QSC_SPHINCSPLUS_S1S128SHAKERS
-
-///*!
-// * \def QSC_SPHINCSPLUS_S3S192SHAKERF
-// * \brief Enable the SphincsPlus S3S192SHAKERF robust fast parameter set.
-// */
-//#define QSC_SPHINCSPLUS_S3S192SHAKERF
 
 ///*!
 // * \def QSC_SPHINCSPLUS_S3S192SHAKERS
@@ -1183,23 +1162,11 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_SPHINCSPLUS_S3S192SHAKERS
 
-/*!
- * \def QSC_SPHINCSPLUS_S5S256SHAKERF
- * \brief Enable the SphincsPlus S5S256SHAKERF robust fast parameter set.
- */
-#define QSC_SPHINCSPLUS_S5S256SHAKERF
-
 ///*!
 // * \def QSC_SPHINCSPLUS_S5S256SHAKERS
 // * \brief Enable the SphincsPlus S5S256SHAKERS robust small parameter set.
 // */
-//#define QSC_SPHINCSPLUS_S5S256SHAKERS
-
-///*!
-// * \def QSC_SPHINCSPLUS_S6S512SHAKERF
-// * \brief Enable the SphincsPlus S6S512SHAKERF robust fast parameter set.
-// */
-//#define QSC_SPHINCSPLUS_S6S512SHAKERF
+#define QSC_SPHINCSPLUS_S5S256SHAKERS
 
 ///*!
 // * \def QSC_SPHINCSPLUS_S6S512SHAKERS

@@ -50,13 +50,13 @@ QSC_CPLUSPLUS_ENABLED_START
  \def QSC_KYBER_K
  * Read Only: The k level
  */
-#if defined(QSC_KYBER_S1P1632)
+#if defined(QSC_KYBER_S1K2P512)
 #	define QSC_KYBER_K 2
-#elif defined(QSC_KYBER_S3P2400)
+#elif defined(QSC_KYBER_S3K3P768)
 #	define QSC_KYBER_K 3
-#elif defined(QSC_KYBER_S5P3168)
+#elif defined(QSC_KYBER_S5K4P1024)
 #	define QSC_KYBER_K 4
-#elif defined(QSC_KYBER_S6P3936)
+#elif defined(QSC_KYBER_S6K5P1280)
 #	define QSC_KYBER_K 5
 #else
 #	error "The Kyber parameter set is invalid!"
@@ -190,6 +190,18 @@ bool qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t s
 	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
 
 /**
+* \brief Generates cipher text and shared secret for given public key and a random seed
+* \note Used exclusively for the NIST ACVP KAT tests, use the other call to encapsulate a key
+* 
+* \param ct:	[uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param ss:	[uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param pk:	[const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param m:		[const uint8_t*] Pointer to the random coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+*/
+void qsc_kyber_ref_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
+	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], const uint8_t m[QSC_KYBER_SYMBYTES]);
+
+/**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
 *
 * \param pk:	[uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
@@ -199,6 +211,18 @@ bool qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t s
 */
 bool qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], 
 	bool (*rng_generate)(uint8_t*, size_t));
+
+/**
+* \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism using input seeds
+* \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair
+*
+* \param pk: Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk: Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param d: Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param z: Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+*/
+void qsc_kyber_ref_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],
+	uint8_t d[QSC_KYBER_SYMBYTES], uint8_t z[QSC_KYBER_SYMBYTES]);
 
 QSC_CPLUSPLUS_ENABLED_END
 

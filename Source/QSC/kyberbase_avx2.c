@@ -1325,8 +1325,6 @@ static void kyber_indcpa_dec(uint8_t m[QSC_KYBER_MSGBYTES], const uint8_t c[QSC_
 
 /* kem.c */
 
-#if defined(QSC_KYBER_FIPS203)
-
 void kyber_cmov_avx2(uint8_t* restrict r, const uint8_t* x, size_t len, uint8_t b)
 {
     __m256i xvec;
@@ -1468,6 +1466,16 @@ bool qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint
     return res;
 }
 
+void qsc_kyber_avx2_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], uint8_t d[QSC_KYBER_SYMBYTES], uint8_t z[QSC_KYBER_SYMBYTES])
+{
+    kyber_indcpa_keypair(pk, sk, d);
+    qsc_memutils_copy((sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES), pk, QSC_KYBER_INDCPA_PUBLICKEY_BYTES);
+
+    qsc_sha3_compute256(sk + QSC_KYBER_SECRETKEY_BYTES - (2U * QSC_KYBER_SYMBYTES), pk, QSC_KYBER_PUBLICKEY_BYTES);
+    /* Value z for pseudo-random output on reject */
+    qsc_memutils_copy(sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, z, QSC_KYBER_SYMBYTES);
+}
+
 bool qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
 {
     QSC_ALIGN(32) uint8_t buf[2U * QSC_KYBER_SYMBYTES];
@@ -1490,6 +1498,23 @@ bool qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t 
     }
 
     return res;
+}
+
+void qsc_kyber_avx2_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], const uint8_t m[QSC_KYBER_SYMBYTES])
+{
+    QSC_ALIGN(32) uint8_t buf[2U * QSC_KYBER_SYMBYTES];
+    QSC_ALIGN(32) uint8_t kr[2U * QSC_KYBER_SYMBYTES];
+
+    qsc_memutils_copy(buf, m, QSC_KYBER_SYMBYTES);
+
+    /* multitarget countermeasure for coins + contributory KEM */
+    qsc_sha3_compute256(buf + QSC_KYBER_SYMBYTES, pk, QSC_KYBER_PUBLICKEY_BYTES);
+    qsc_sha3_compute512(kr, buf, 2U * QSC_KYBER_SYMBYTES);
+
+    /* coins are in kr + QSC_KYBER_SYMBYTES */
+    kyber_indcpa_enc(ct, buf, pk, kr + QSC_KYBER_SYMBYTES);
+    qsc_memutils_copy(ss, kr, QSC_KYBER_SYMBYTES);
+
 }
 
 bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES])
@@ -1529,194 +1554,5 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
 
     return (fail == 0);
 }
-
-#else
-
-void kyber_cmov_avx2(uint8_t* restrict r, const uint8_t* restrict x, size_t len, uint8_t b)
-{
-    __m256i xvec;
-    __m256i rvec;
-    __m256i bvec;
-    size_t pos;
-
-    b = -b;
-    bvec = _mm256_set1_epi8(b);
-
-    for (pos = 0U; pos + 32U <= len; pos += 32U)
-    {
-        rvec = _mm256_loadu_si256((const __m256i*)&r[pos]);
-        xvec = _mm256_loadu_si256((const __m256i*)&x[pos]);
-        xvec = _mm256_xor_si256(xvec, rvec);
-        xvec = _mm256_and_si256(xvec, bvec);
-        rvec = _mm256_xor_si256(rvec, xvec);
-        _mm256_storeu_si256((__m256i*)&r[pos], rvec);
-    }
-
-    while (pos < len)
-    {
-        r[pos] ^= b & (x[pos] ^ r[pos]);
-        pos += 1;
-    }
-}
-
-int32_t kyber_verify_avx2(const uint8_t* a, const uint8_t* b, size_t len)
-{
-    __m256i avec;
-    __m256i bvec;
-    __m256i cvec;
-    uint64_t r;
-    size_t pos;
-
-    cvec = _mm256_setzero_si256();
-
-    for (pos = 0U; pos + 32U <= len; pos += 32U)
-    {
-        avec = _mm256_loadu_si256((const __m256i*)&a[pos]);
-        bvec = _mm256_loadu_si256((const __m256i*)&b[pos]);
-        avec = _mm256_xor_si256(avec, bvec);
-        cvec = _mm256_or_si256(cvec, avec);
-    }
-
-    r = 1U - _mm256_testz_si256(cvec, cvec);
-
-    if (pos < len)
-    {
-        avec = _mm256_loadu_si256((const __m256i*)&a[pos]);
-        bvec = _mm256_loadu_si256((const __m256i*)&b[pos]);
-        cvec = _mm256_cmpeq_epi8(avec, bvec);
-        r |= _mm256_movemask_epi8(cvec) & ((uint32_t)-1L >> (32U + pos - len));
-    }
-
-    r = (uint64_t)(-(int64_t)r) >> 63;
-
-    return (uint32_t)r;
-}
-
-static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_INDCPA_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
-{
-    qsc_kyber_polyvec a[QSC_KYBER_K];
-    qsc_kyber_polyvec e;
-    qsc_kyber_polyvec pkpv;
-    qsc_kyber_polyvec skpv;
-    uint8_t buf[2U * QSC_KYBER_SYMBYTES];
-    const uint8_t* publicseed = buf;
-    const uint8_t* noiseseed = buf + QSC_KYBER_SYMBYTES;
-    size_t i;
-    uint8_t nonce;
-
-    nonce = 0U;
-
-    if (rng_generate(buf, QSC_KYBER_SYMBYTES))
-    {
-        qsc_sha3_compute512(buf, buf, QSC_KYBER_SYMBYTES);
-
-        kyber_gen_matrix_avx2(a, publicseed, 0);
-
-        for (i = 0U; i < QSC_KYBER_K; ++i)
-        {
-            kyber_poly_get_noise_eta1(&skpv.vec[i], noiseseed, nonce);
-            ++nonce;
-        }
-
-        for (i = 0U; i < QSC_KYBER_K; ++i)
-        {
-            kyber_poly_get_noise_eta1(&e.vec[i], noiseseed, nonce);
-            ++nonce;
-        }
-
-        kyber_polyvec_ntt(&skpv);
-        kyber_polyvec_ntt(&e);
-
-        for (i = 0U; i < QSC_KYBER_K; ++i)
-        {
-            kyber_polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
-            kyber_poly_to_mont(&pkpv.vec[i]);
-        }
-
-        kyber_polyvec_add(&pkpv, &pkpv, &e);
-        kyber_polyvec_reduce(&pkpv);
-
-        kyber_pack_sk(sk, &skpv);
-        kyber_pack_pk(pk, &pkpv, publicseed);
-    }
-}
-
-bool qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
-{
-    bool res;
-
-    kyber_indcpa_keypair(pk, sk, rng_generate);
-    qsc_memutils_copy((sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES), pk, QSC_KYBER_INDCPA_PUBLICKEY_BYTES);
-
-    qsc_sha3_compute256((sk + QSC_KYBER_SECRETKEY_BYTES - 2U * QSC_KYBER_SYMBYTES), pk, QSC_KYBER_PUBLICKEY_BYTES);
-    /* Value z for pseudo-random output on reject */
-    res = rng_generate((sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES), QSC_KYBER_SYMBYTES);
-
-    return res;
-}
-
-bool qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
-{
-    QSC_ALIGN(32)uint8_t buf[2U * QSC_KYBER_SYMBYTES];
-    QSC_ALIGN(32)uint8_t kr[2U * QSC_KYBER_SYMBYTES];
-
-    bool res;
-
-    res = false;
-
-    if (rng_generate(buf, QSC_KYBER_SYMBYTES))
-    {
-        /* Don't release system RNG output */
-        qsc_sha3_compute256(buf, buf, QSC_KYBER_SYMBYTES);
-
-        /* Multitarget countermeasure for coins + contributory KEM */
-        qsc_sha3_compute256((buf + QSC_KYBER_SYMBYTES), pk, QSC_KYBER_PUBLICKEY_BYTES);
-        qsc_sha3_compute512(kr, buf, 2U * QSC_KYBER_SYMBYTES);
-
-        /* coins are in kr+QSC_KYBER_SYMBYTES */
-        kyber_indcpa_enc(ct, buf, pk, (kr + QSC_KYBER_SYMBYTES));
-
-        /* overwrite coins in kr with H(c) */
-        qsc_sha3_compute256((kr + QSC_KYBER_SYMBYTES), ct, QSC_KYBER_CIPHERTEXT_BYTES);
-        /* hash concatenation of pre-k and H(c) to k */
-        qsc_shake256_compute(ss, QSC_KYBER_MSGBYTES, kr, 2U * QSC_KYBER_SYMBYTES);
-        res = true;
-    }
-
-    return res;
-}
-
-bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES])
-{
-    QSC_ALIGN(32)uint8_t buf[2U * QSC_KYBER_SYMBYTES];
-    QSC_ALIGN(32)uint8_t cmp[QSC_KYBER_CIPHERTEXT_BYTES];
-    QSC_ALIGN(32)uint8_t kr[2U * QSC_KYBER_SYMBYTES];
-    const uint8_t *pk = sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES;
-    int32_t fail;
-
-    kyber_indcpa_dec(buf, ct, sk);
-
-    /* Multitarget countermeasure for coins + contributory KEM */
-    qsc_memutils_copy((buf + QSC_KYBER_SYMBYTES), (sk + QSC_KYBER_SECRETKEY_BYTES - (2U * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
-    qsc_sha3_compute512(kr, buf, 2U * QSC_KYBER_SYMBYTES);
-
-    /* coins are in kr+QSC_KYBER_SYMBYTES */
-    kyber_indcpa_enc(cmp, buf, pk, (kr + QSC_KYBER_SYMBYTES));
-
-    fail = kyber_verify_avx2(ct, cmp, QSC_KYBER_CIPHERTEXT_BYTES);
-
-    /* overwrite coins in kr with H(c) */
-    qsc_sha3_compute256((kr + QSC_KYBER_SYMBYTES), ct, QSC_KYBER_CIPHERTEXT_BYTES);
-
-    /* Overwrite pre-k with z on re-encryption failure */
-    kyber_cmov_avx2(kr, (sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES), QSC_KYBER_SYMBYTES, (uint8_t)fail);
-
-    /* hash concatenation of pre-k and H(c) to k */
-    qsc_shake256_compute(ss, QSC_KYBER_MSGBYTES, kr, 2U * QSC_KYBER_SYMBYTES);
-
-    return (fail == 0);
-}
-
-#endif
 
 #endif

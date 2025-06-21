@@ -713,7 +713,12 @@ void qsc_keccak_absorb(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_
 
 		qsc_memutils_copy(msg, message, msglen);
 		msg[msglen] = domain;
-		qsc_memutils_clear((msg + msglen + 1U), (size_t)rate - (msglen + 1U));
+
+		if ((size_t)rate - (msglen + 1U) != 0)
+		{
+			qsc_memutils_clear((msg + msglen + 1U), (size_t)rate - (msglen + 1U));
+		}
+
 		msg[(size_t)rate - 1U] |= 128U;
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
@@ -4073,6 +4078,21 @@ void qsc_kmac_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t*
 	QSC_ASSERT(message != NULL);
 
 	qsc_keccak_update(ctx, rate, message, msglen, QSC_KECCAK_PERMUTATION_ROUNDS);
+}
+
+void qsc_kmac_xof128_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen)
+{
+	qsc_kmac128_compute(kout, koutlen, x, xlen, kin, kinlen, s, slen);
+}
+
+void qsc_kmac_xof256_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen)
+{
+	qsc_kmac256_compute(kout, koutlen, x, xlen, kin, kinlen, s, slen);
+}
+
+void qsc_kmac_xof512_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen)
+{
+	qsc_kmac512_compute(kout, koutlen, x, xlen, kin, kinlen, s, slen);
 }
 
 /* parallel SHAKE x4 */

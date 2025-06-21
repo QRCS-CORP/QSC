@@ -12,6 +12,7 @@ namespace QSCNETCW
     HCG::~HCG()
     {
         Destroy();
+        GC::SuppressFinalize(this);
     }
 
     HCG::!HCG()

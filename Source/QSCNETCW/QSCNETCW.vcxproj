@@ -88,6 +88,8 @@
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\QSC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <AdditionalDependencies>
@@ -109,6 +111,7 @@
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\QSC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <AdditionalDependencies>qsc.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -127,6 +130,7 @@
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\QSC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <AdditionalDependencies>QSC.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -145,6 +149,8 @@
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\QSC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
@@ -170,7 +176,6 @@
     <ClCompile Include="Kyber.cpp" />
     <ClCompile Include="McEliece.cpp" />
     <ClCompile Include="MemUtils.cpp" />
-    <ClCompile Include="NTRU.cpp" />
     <ClCompile Include="Poly1305.cpp" />
     <ClCompile Include="QMAC.cpp" />
     <ClCompile Include="RCS.cpp" />
@@ -205,7 +210,6 @@
     <ClInclude Include="Kyber.h" />
     <ClInclude Include="McEliece.h" />
     <ClInclude Include="MemUtils.h" />
-    <ClInclude Include="NTRU.h" />
     <ClInclude Include="Poly1305.h" />
     <ClInclude Include="QMAC.h" />
     <ClInclude Include="RCS.h" />

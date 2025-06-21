@@ -96,6 +96,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * - <a href="http://keccak.noekeon.org/Keccak-submission-3.pdf">NIST: SHA3 Keccak Submission</a>
  * - <a href="http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf">NIST: SHA3 Keccak Slides</a>
  * - <a href="https://keccak.team/keccak_specs_summary.html">Team Keccak: Specifications Summary</a>
+ * - <a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-108r1-upd1.pdf">Recommendation for Key Derivation Using Pseudorandom Functions</a>
  */
 
 /*!
@@ -665,6 +666,55 @@ QSC_EXPORT_API void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rat
 QSC_EXPORT_API void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
 /**
+* \brief Key a KMAC-128 XOF instance and generate an output key.
+* Short form api: processes the keyin, x, and s inputs and generates the output key with a single call.
+* Key the XOF generator process a message and output the key.
+*
+* \param kout:		[uint8_t*] The pointer to output key byte array
+* \param koutlen:	[size_t] The number of key bytes to generate
+* \param x:			[const uint8_t*] The context string containing the information related to the derived keying material.
+* \param xlen:		[size_t] The number of context string bytes to process
+* \param kin:		[const uint8_t*] The input key byte array
+* \param kinlen:	[size_t] The number of key bytes to process
+* \param s:			[const uint8_t*] The optional label customization string
+* \param slen:		[size_t] The byte length of the customization string
+*/
+QSC_EXPORT_API void qsc_kmac_xof128_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen);
+
+/**
+* \brief Key a KMAC-256 XOF instance and generate an output key.
+* Short form api: processes the keyin, x, and s inputs and generates the output key with a single call.
+* Key the XOF generator process a message and output the key.
+*
+* \param kout:		[uint8_t*] The pointer to output key byte array
+* \param koutlen:	[size_t] The number of key bytes to generate
+* \param x:			[const uint8_t*] The context string containing the information related to the derived keying material.
+* \param xlen:		[size_t] The number of context string bytes to process
+* \param kin:		[const uint8_t*] The input key byte array
+* \param kinlen:	[size_t] The number of key bytes to process
+* \param s:			[const uint8_t*] The optional label customization string
+* \param slen:		[size_t] The byte length of the customization string
+*/
+QSC_EXPORT_API void qsc_kmac_xof256_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen);
+
+/**
+* \brief Key a KMAC-512 XOF instance and generate an output key.
+* The KMAC XOF as specified in SP800-108r1.
+* Short form api: processes the keyin, x, and s inputs and generates the output key with a single call.
+* Key the XOF generator process a message and output the key.
+*
+* \param kout:		[uint8_t*] The pointer to output key byte array
+* \param koutlen:	[size_t] The number of key bytes to generate
+* \param x:			[const uint8_t*] The context string containing the information related to the derived keying material.
+* \param xlen:		[size_t] The number of context string bytes to process
+* \param kin:		[const uint8_t*] The input key byte array
+* \param kinlen:	[size_t] The number of key bytes to process
+* \param s:			[const uint8_t*] The optional label customization string
+* \param slen:		[size_t] The byte length of the customization string
+*/
+QSC_EXPORT_API void qsc_kmac_xof512_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen);
+
+/**
 * \brief Key a KMAC-256 instance and generate a MAC code.
 * Short form api: processes the key and custom inputs and generates the MAC code with a single call.
 * Key the MAC generator process a message and output the MAC code.
@@ -757,25 +807,6 @@ QSC_EXPORT_API void qsc_kmac_initialize(qsc_keccak_state* ctx, qsc_keccak_rate r
 * \param domain		[uint8_t] The domain value
 */
 void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
-	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain);
-
-/**
-* \brief Absorb 4 Keccak instances simultaneously using AVX2 instructions. 
-* All memory must be aligned to AVX2 boundaries.
-*
-* \warning The input and output arrays muct be of the same length.
-* This function requires the AVX2 instruction set.
-*
-* \param state:		[__m256i*] The Keccak state array
-* \param rate:		[qsc_keccak_rate] The shake rate
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inplen:	[size_t] The length of the input key arrays
-* \param domain		[uint8_t] The domain value
-*/
-void qsc_keccakx4_absorb_aligned(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain);
 
 /**

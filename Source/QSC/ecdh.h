@@ -81,6 +81,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * constant-time elliptic curve operations.
  *
  * \section ecdh_links Reference Links:
+ *  - <a href="https://github.com/jedisct1/libsodium/tree/master">Adapted from libsodium source by Frank Denis</a>
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Official ECurve25519 ECDH Specificationd25519 Documentation</a>
  *  - <a href="https://cr.yp.to/ecdh.html"></a>
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 Field Operations</a>

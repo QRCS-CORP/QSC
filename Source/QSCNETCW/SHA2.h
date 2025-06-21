@@ -47,44 +47,11 @@
 namespace QSCNETCW
 {
     /// <summary>
-    /// An instance-based class for SHA2-256 incremental usage.
+    /// An static class for SHA2-256 usage.
     /// </summary>
-    public ref class SHA256
+    public ref class SHA256 abstract sealed
     {
     public:
-        /// <summary>
-        /// Constructs and initializes the SHA2-256 state.
-        /// </summary>
-        SHA256();
-
-        /// <summary>
-        /// Destructor that calls <see cref="Dispose"/>.
-        /// </summary>
-        ~SHA256();
-
-        /// <summary>
-        /// Finalizer that calls <see cref="Dispose"/>.
-        /// </summary>
-        !SHA256();
-
-        /// <summary>
-        /// Updates the hash state with message bytes.
-        /// </summary>
-        /// <param name="message">The data to be hashed.</param>
-        /// <param name="msgLen">Number of bytes from <paramref name="message"/> to process.</param>
-        void Update(array<Byte>^ message, size_t msgLen);
-
-        /// <summary>
-        /// Finalizes the hash, writing 32 bytes to <paramref name="output"/>. 
-        /// This resets the instance.
-        /// </summary>
-        /// <param name="output">A 32-byte array to receive the hash.</param>
-        void Finalize(array<Byte>^ output);
-
-        /// <summary>
-        /// Disposes the internal state. The instance cannot be used afterward.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// Computes a SHA2-256 digest in one call.
@@ -93,52 +60,15 @@ namespace QSCNETCW
         /// <param name="message">Data to hash.</param>
         /// <param name="msgLen">Length of <paramref name="message"/>.</param>
         static void Compute(array<Byte>^ output, array<Byte>^ message, size_t msgLen);
-
-    private:
-        qsc_sha256_state* m_state;
-        bool m_isInitialized;
     };
 
     /// <summary>
-    /// An instance-based class for SHA2-384 incremental usage.
+    /// An static class for SHA2-384 usage.
     /// </summary>
-    public ref class SHA384
+    public ref class SHA384 abstract sealed
     {
     public:
-        /// <summary>
-        /// Constructs and initializes the SHA2-384 state.
-        /// </summary>
-        SHA384();
-        
-        /// <summary>
-        /// Destructor that calls <see cref="Dispose"/>.
-        /// </summary>
-        ~SHA384();
-        
-        /// <summary>
-        /// Finalizer that calls <see cref="Dispose"/>.
-        /// </summary>
-        !SHA384();
-        
-        /// <summary>
-        /// Updates the hash state with message bytes.
-        /// </summary>
-        /// <param name="message">The data to be hashed.</param>
-        /// <param name="msgLen">Number of bytes from <paramref name="message"/> to process.</param>
-        void Update(array<Byte>^ message, size_t msgLen);
-        
-        /// <summary>
-        /// Finalizes the hash, writing 48 bytes to <paramref name="output"/>. 
-        /// This resets the instance.
-        /// </summary>
-        /// <param name="output">A 48-byte array to receive the hash.</param>
-        void Finalize(array<Byte>^ output);
 
-        /// <summary>
-        /// Disposes the internal state. The instance cannot be used afterward.
-        /// </summary>
-        void Destroy();
-        
         /// <summary>
         /// Computes a SHA2-384 digest in one call.
         /// </summary>
@@ -146,51 +76,14 @@ namespace QSCNETCW
         /// <param name="message">Data to hash.</param>
         /// <param name="msgLen">Length of <paramref name="message"/>.</param>
         static void Compute(array<Byte>^ output, array<Byte>^ message, size_t msgLen);
-
-    private:
-        qsc_sha384_state* m_state;
-        bool m_isInitialized;
     };
 
     /// <summary>
-    /// An instance-based class for SHA2-512 incremental usage.
+    /// An static class for SHA2-512 usage.
     /// </summary>
-    public ref class SHA512
+    public ref class SHA512 abstract sealed
     {
     public:
-        /// <summary>
-        /// Constructs and initializes the SHA2-512 state.
-        /// </summary>
-        SHA512();
-                
-        /// <summary>
-        /// Destructor that calls <see cref="Dispose"/>.
-        /// </summary>
-        ~SHA512();
-                
-        /// <summary>
-        /// Finalizer that calls <see cref="Dispose"/>.
-        /// </summary>
-        !SHA512();
-                
-        /// <summary>
-        /// Updates the hash state with message bytes.
-        /// </summary>
-        /// <param name="message">The data to be hashed.</param>
-        /// <param name="msgLen">Number of bytes from <paramref name="message"/> to process.</param>
-        void Update(array<Byte>^ message, size_t msgLen);
-                
-        /// <summary>
-        /// Finalizes the hash, writing 64 bytes to <paramref name="output"/>. 
-        /// This resets the instance.
-        /// </summary>
-        /// <param name="output">A 64-byte array to receive the hash.</param>
-        void Finalize(array<Byte>^ output);
-
-        /// <summary>
-        /// Disposes the internal state. The instance cannot be used afterward.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// Computes a SHA2-512 digest in one call.
@@ -199,53 +92,14 @@ namespace QSCNETCW
         /// <param name="message">Data to hash.</param>
         /// <param name="msgLen">Length of <paramref name="message"/>.</param>
         static void Compute(array<Byte>^ output, array<Byte>^ message, size_t msgLen);
-
-    private:
-        qsc_sha512_state* m_state;
-        bool m_isInitialized;
     };
 
     /// <summary>
-    /// An instance-based class for HMAC(SHA2-256) usage.
+    /// An static class for HMAC(SHA2-256) usage.
     /// </summary>
-    public ref class HMAC256
+    public ref class HMAC256 abstract sealed
     {
     public:
-        /// <summary>
-        /// Initializes an HMAC(SHA2-256) with the given key.
-        /// </summary>
-        /// <param name="key">HMAC key array.</param>
-        /// <param name="keyLen">Number of bytes in <paramref name="key"/>.</param>
-        HMAC256(array<Byte>^ key, size_t keyLen);
-
-        /// <summary>
-        /// Destructor that calls <see cref="Dispose"/>.
-        /// </summary>
-        ~HMAC256();
-
-        /// <summary>
-        /// Finalizer that calls <see cref="Dispose"/>.
-        /// </summary>
-        !HMAC256();
-
-        /// <summary>
-        /// Updates the hash state with message bytes.
-        /// </summary>
-        /// <param name="message">The data to be hashed.</param>
-        /// <param name="msgLen">Number of bytes from <paramref name="message"/> to process.</param>
-        void Update(array<Byte>^ message, size_t msgLen);
-
-        /// <summary>
-        /// Finalizes the hash, writing 32 bytes to <paramref name="output"/>. 
-        /// This resets the instance.
-        /// </summary>
-        /// <param name="output">A 32-byte array to receive the hash.</param>
-        void Finalize(array<Byte>^ output);
-
-        /// <summary>
-        /// Disposes the internal state. The instance cannot be used afterward.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// Computes a HMAC-256 MAC in one call.
@@ -254,53 +108,14 @@ namespace QSCNETCW
         /// <param name="message">Data to hash.</param>
         /// <param name="msgLen">Length of <paramref name="message"/>.</param>
         static void Compute(array<Byte>^ output, array<Byte>^ message, size_t msgLen, array<Byte>^ key, size_t keyLen);
-
-    private:
-        qsc_hmac256_state* m_state;
-        bool m_isInitialized;
     };
 
     /// <summary>
-    /// An instance-based class for HMAC(SHA2-512) usage.
+    /// An static class for HMAC(SHA2-512) usage.
     /// </summary>
-    public ref class HMAC512
+    public ref class HMAC512 abstract sealed
     {
     public:
-        /// <summary>
-        /// Initializes an HMAC(SHA2-512) with the given key.
-        /// </summary>
-        /// <param name="key">HMAC key array.</param>
-        /// <param name="keyLen">Number of bytes in <paramref name="key"/>.</param>
-        HMAC512(array<Byte>^ key, size_t keyLen);
-
-        /// <summary>
-        /// Destructor that calls <see cref="Dispose"/>.
-        /// </summary>
-        ~HMAC512();
-
-        /// <summary>
-        /// Finalizer that calls <see cref="Dispose"/>.
-        /// </summary>
-        !HMAC512();
-
-        /// <summary>
-        /// Updates the hash state with message bytes.
-        /// </summary>
-        /// <param name="message">The data to be hashed.</param>
-        /// <param name="msgLen">Number of bytes from <paramref name="message"/> to process.</param>
-        void Update(array<Byte>^ message, size_t msgLen);
-
-        /// <summary>
-        /// Finalizes the hash, writing 32 bytes to <paramref name="output"/>. 
-        /// This resets the instance.
-        /// </summary>
-        /// <param name="output">A 32-byte array to receive the hash.</param>
-        void Finalize(array<Byte>^ output);
-
-        /// <summary>
-        /// Disposes the internal state. The instance cannot be used afterward.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// Computes a HMAC-512 MAC in one call.
@@ -309,10 +124,6 @@ namespace QSCNETCW
         /// <param name="message">Data to hash.</param>
         /// <param name="msgLen">Length of <paramref name="message"/>.</param>
         static void Compute(array<Byte>^ output, array<Byte>^ message, size_t msgLen, array<Byte>^ key, size_t keyLen);
-
-    private:
-        qsc_hmac512_state* m_state;
-        bool m_isInitialized;
     };
 
     /// <summary>

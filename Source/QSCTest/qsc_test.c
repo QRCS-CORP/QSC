@@ -88,9 +88,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.7a (A7)                       *");
+	qsctest_print_line("* Release:   v1.0.0.8a (A7)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      May 25, 2025                         *");
+	qsctest_print_line("* Date:      June 20, 2025                        *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -156,10 +156,10 @@ int32_t main(void)
 {
 #if defined(QSC_HAS_CPUID)
 	qsc_cpuidex_cpu_features cfeat;
+	bool hfeat;
 #endif
 	bool valid;
-	bool hfeat;
-
+	
 #if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
 	qsc_consoleutils_print_line("Loading pre-check...");
 	qsc_folderutils_test();
@@ -230,6 +230,7 @@ int32_t main(void)
 #if defined(_DEBUG)
 		qsctest_print_line("The system is running in Debug mode; for best performance, compile as Release.");
 #endif
+
 #if defined(QSC_CSX_AUTHENTICATED)
 		qsctest_print_line("The CSX authentication flag was detected.");
 		qsctest_print_line("Remove the QSC_CSX_AUTHENTICATED definition from the preprocessor definitions in csx.h to disable CSX authentication.");
@@ -331,9 +332,9 @@ int32_t main(void)
 			qsctest_print_line("");
 
 #if defined(QSC_MISRA_FULL_COMPLIANCE)
-			qsctest_print_line("*** Test the McEliece implementation using stress, validity checks, and known answer tests ***");
-#endif
 			qsctest_print_line("Warning: McEliece uses large static arrays internally, increase maximum stack allocation to 10-20MB.");
+#endif
+			qsctest_print_line("*** Test the McEliece implementation using stress, validity checks, and known answer tests ***");
 			qsctest_mceliece_run();
 			qsctest_print_line("");
 		}

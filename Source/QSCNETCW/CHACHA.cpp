@@ -10,7 +10,8 @@ namespace QSCNETCW
 
     CHACHA::~CHACHA()
     {
-        this->!CHACHA();
+        Destroy();
+        GC::SuppressFinalize(this);
     }
 
     CHACHA::!CHACHA()
@@ -70,7 +71,7 @@ namespace QSCNETCW
 
     void CHACHA::Destroy()
     {
-        if (m_isInitialized == true && m_state != nullptr)
+        if (m_state != nullptr)
         {
             qsc_chacha_dispose(m_state);
             delete m_state;

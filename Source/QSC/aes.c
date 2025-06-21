@@ -527,9 +527,10 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != output);
 	QSC_ASSERT(length != 0U);
 
-	if (ctx != NULL && input != NULL && output != NULL && length != 0U)
+	if (ctx != NULL && input != NULL && output != NULL && input != output && length != 0U)
 	{
 		__m128i inp;
 		__m128i nce;
@@ -1730,12 +1731,13 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != output);
 	QSC_ASSERT(length != 0U);
 
 	size_t i;
 	size_t oft;
 
-	if (ctx != NULL && input != NULL && output != NULL && length != 0U)
+	if (ctx != NULL && input != NULL && output != NULL && input != output && length != 0U)
 	{
 		oft = 0U;
 

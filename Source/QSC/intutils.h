@@ -198,6 +198,16 @@ QSC_EXPORT_API void qsc_intutils_be64to8(uint8_t* output, uint64_t value);
 QSC_EXPORT_API void qsc_intutils_be8increment(uint8_t* output, size_t otplen);
 
 /**
+ * Increment only the low 32 bits (last 4 bytes) of a BE counter block, per RFC 3686:
+ *   CTRBLK := NONCE(32) ? IV(64) ? COUNT(32)
+ *   COUNT ? (COUNT + 1) mod 2^32
+ *
+ * \param output   [uint8_t*] The pointer to the counter block (length ? 4)
+ * \param otplen   [size_t] The total length of the counter buffer in bytes
+ */
+void qsc_intutils_be8increment_rfc3686(uint8_t* output, size_t otplen);
+
+/**
  * \brief Reverse the bits of an integer.
  *
  * \param x: The integer.

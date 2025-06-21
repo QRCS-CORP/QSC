@@ -330,9 +330,6 @@
     <ClInclude Include="ecdsabase.h">
       <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
     </ClInclude>
-    <ClInclude Include="sphincsplusbase.h">
-      <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
-    </ClInclude>
     <ClInclude Include="sphincsplusbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClInclude>
@@ -359,6 +356,9 @@
     </ClInclude>
     <ClInclude Include="dilithiumbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\Dilithium\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="sphincsplusbase.h">
+      <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -518,9 +518,6 @@
     <ClCompile Include="ecdsabase.c">
       <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
     </ClCompile>
-    <ClCompile Include="sphincsplusbase.c">
-      <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
-    </ClCompile>
     <ClCompile Include="sphincsplusbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClCompile>
@@ -545,8 +542,8 @@
     <ClCompile Include="dilithiumbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="QRCS-PL License.txt" />
+    <ClCompile Include="sphincsplusbase.c">
+      <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

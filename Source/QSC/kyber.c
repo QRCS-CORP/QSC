@@ -47,6 +47,23 @@ bool qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* 
 	return res;
 }
 
+void qsc_kyber_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t m[QSC_KYBER_SYMBYTES])
+{
+	QSC_ASSERT(secret != NULL);
+	QSC_ASSERT(ciphertext != NULL);
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(m != NULL);
+
+	if (secret != NULL && ciphertext != NULL && publickey != NULL && m != NULL)
+	{
+#if defined(QSC_SYSTEM_HAS_AVX2)
+		qsc_kyber_avx2_seeded_encapsulate(ciphertext, secret, publickey, m);
+#else
+		qsc_kyber_ref_seeded_encapsulate(ciphertext, secret, publickey, m);
+#endif
+	}
+}
+
 bool qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	QSC_ASSERT(publickey != NULL);
@@ -67,4 +84,13 @@ bool qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*
 	}
 	
 	return res;
+}
+
+void qsc_kyber_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* d, uint8_t* z)
+{
+#if defined(QSC_SYSTEM_HAS_AVX2)
+	qsc_kyber_avx2_generate_seeded_keypair(publickey, privatekey, d, z);
+#else
+	qsc_kyber_ref_generate_seeded_keypair(publickey, privatekey, d, z);
+#endif
 }

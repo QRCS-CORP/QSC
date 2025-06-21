@@ -37,8 +37,8 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSC_SPHINCSPLUSBASE_H
-#define QSC_SPHINCSPLUSBASE_H
+#ifndef QSC_SPHINCSPLUSBASE2_H
+#define QSC_SPHINCSPLUSBASE2_H
 
 /* \cond */
 
@@ -76,7 +76,7 @@ size_t sphincsplus_ref_sign_seedbytes(void);
 * \param seed: A pointer to the seed array
 * \return Returns true for success
 */
-bool sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed);
+bool sphincsplus_ref_generate_seeded_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed);
 
 /**
 * \brief Generates a SphincsPlus public/private key-pair
@@ -88,54 +88,62 @@ bool sphincsplus_ref_generate_seed_keypair(uint8_t* pk, uint8_t* sk, const uint8
 bool sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
+* \brief Takes the message and context array as input and returns an array containing the signature followed by the message.
+*
+* \param signedmsg: The signed message
+* \param smsglen: The signed message length
+* \param message: The message to be signed
+* \param msglen: The message length
+* \param context: [const] The context string
+* \param ctxlen: The context length
+* \param sk: The private signature key
+* \param rng_generate: A pointer to the random generator function
+* \return Returns true for success
+*/
+bool sphincsplus_ref_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, const uint8_t* seed);
+
+/**
 * \brief Takes the message as input and returns an array containing the signature
 *
-* \param sig: The signature
-* \param siglen: The signature length
-* \param m: The message to be signed
-* \param mlen: The message length
+* \param signedmsg: The signature
+* \param smsglen: The signature length
+* \param message: The message to be signed
+* \param msglen: The message length
+* \param context: [const] The context string
+* \param ctxlen: The context length
 * \param sk: The private signature key
-* \param rng_generate: A pointer to the random generator function
+* \param seed: A pointer to the random seed
 * \return Returns true for success
 */
-bool sphincsplus_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
-
-/**
-* \brief Verifies a signature-message pair with the public key
-*
-* \param sig: The signature array
-* \param siglen: The length of the signature array
-* \param m: The message array
-* \param mlen: The length of the message array
-* \param pk: The public verification key
-* \return Returns true for success
-*/
-bool sphincsplus_ref_sign_verify(const uint8_t* sig, size_t siglen, const uint8_t* m, size_t mlen, const uint8_t* pk);
-
-/**
-* \brief Takes the message as input and returns an array containing the signature followed by the message.
-*
-* \param sm: The signed message
-* \param smlen: The signed message length
-* \param m: The message to be signed
-* \param mlen: The message length
-* \param sk: The private signature key
-* \param rng_generate: A pointer to the random generator function
-* \return Returns true for success
-*/
-bool sphincsplus_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool sphincsplus_ref_sign_signature(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, const uint8_t* seed);
 
 /**
 * \brief Verifies a signature with the public key
 *
-* \param m: The message to be signed
-* \param mlen: The message length
-* \param sm: The signed message
-* \param smlen: The signed message length
+* \param message: The message to be signed
+* \param msglen: The message length
+* \param context: [const] The context string
+* \param ctxlen: The context length
+* \param signedmsg: The signed message
+* \param smsglen: The signed message length
 * \param pk: The public verification key
 * \return Returns true for success
 */
-bool sphincsplus_ref_sign_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* pk);
+bool sphincsplus_ref_open(uint8_t* message, size_t* msglen, const uint8_t* context, size_t cxtlen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* pk);
+
+/**
+* \brief Verifies a signature-message pair with the public key
+*
+* \param signedmsg: The signature array
+* \param smsglen: The length of the signature array
+* \param message: The message array
+* \param msglen: The length of the message array
+* \param context: [const] The context string
+* \param ctxlen: The context length
+* \param pk: The public verification key
+* \return Returns true for success
+*/
+bool sphincsplus_ref_verify(const uint8_t* signedmsg, size_t smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* pk);
 
 QSC_CPLUSPLUS_ENABLED_END
 

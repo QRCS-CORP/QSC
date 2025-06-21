@@ -40,6 +40,24 @@ void qsc_intutils_be8increment(uint8_t* output, size_t otplen)
 	}
 }
 
+void qsc_intutils_be8increment_rfc3686(uint8_t* output, size_t otplen)
+{
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(otplen >= 4U);
+
+    /* point to the first byte of the 32-bit counter field */
+    uint8_t* ctr = output + (otplen - 4);
+    size_t  i   = 4U;
+
+    /* big-endian increment of those 4 bytes, with wrap */
+    do
+    {
+        --i;
+        ++ctr[i];
+    }
+    while (i != 0U && ctr[i] == 0U);
+}
+
 uint16_t qsc_intutils_be8to16(const uint8_t* input)
 {
 	QSC_ASSERT(input != NULL);

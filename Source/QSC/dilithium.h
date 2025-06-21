@@ -84,7 +84,14 @@ QSC_CPLUSPLUS_ENABLED_START
  * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">FIPS 202: SHA-3 Standard</a>
  */
 
-#if defined(QSC_DILITHIUM_S1P2544)
+
+/*!
+ * \def QSC_DILITHIUM_GENERATE_SEED_SIZE
+ * \brief The byte size of the seeded generator seed array.
+ */
+#define QSC_DILITHIUM_GENERATE_SEED_SIZE 32
+
+#if defined(QSC_DILITHIUM_S1P44)
 
 /*!
  * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
@@ -104,7 +111,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #	define QSC_DILITHIUM_SIGNATURE_SIZE 2420
 
-#elif defined(QSC_DILITHIUM_S3P4016)
+#elif defined(QSC_DILITHIUM_S3P65)
 
 /*!
  * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
@@ -124,7 +131,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #	define QSC_DILITHIUM_SIGNATURE_SIZE 3309
 
-#elif defined(QSC_DILITHIUM_S5P4880)
+#elif defined(QSC_DILITHIUM_S5P87)
 
 /*!
  * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
@@ -173,6 +180,18 @@ QSC_CPLUSPLUS_ENABLED_START
 QSC_EXPORT_API bool qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
+ * \brief Generates a Dilithium public/private key-pair using a random input seed.
+* \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair.
+ *
+ * \warning Arrays must be sized to QSC_DILITHIUM_PUBLICKEY_SIZE, QSC_DILITHIUM_PRIVATEKEY_SIZE, and the seed to DILITHIUM_SEEDBYTES.
+ *
+ * \param publickey:	[uint8_t*] Pointer to the public verification-key array.
+ * \param privatekey:	[uint8_t*] Pointer to the private signature-key array.
+ * \param seed:			[const uint8_t*] Pointer to the random seed.
+ */
+QSC_EXPORT_API void qsc_dilithium_seeded_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+/**
  * \brief Takes the message as input and returns an array containing the signature followed by the message.
  *
  * \warning The signed-message array must be sized to the size of the message plus QSC_DILITHIUM_SIGNATURE_SIZE.
@@ -188,7 +207,7 @@ QSC_EXPORT_API bool qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* 
 QSC_EXPORT_API bool qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
- * \brief Takes the message as input and returns an array containing the signature followed by the message.
+ * \brief Takes the message as input with the additional context parameter, and returns an array containing the signature followed by the message.
  *
  * \warning The signed-message array must be sized to the size of the message plus QSC_DILITHIUM_SIGNATURE_SIZE.
  *
@@ -197,12 +216,12 @@ QSC_EXPORT_API bool qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, cons
  * \param message:		[const uint8_t*] Pointer to the message array.
  * \param msglen:		[size_t] The message array length.
  * \param context:		[const uint8_t*] Pointer to the context array.
- * \param contextlen:	[size_t] The context array length.
+ * \param ctxlen:		[size_t] The context array length.
  * \param privatekey:	[const uint8_t*] Pointer to the private signature-key.
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to the random generator.
  * \return				[bool] Returns true if the message was signed successfully.
  */
-QSC_EXPORT_API bool qsc_dilithium_sign_ex(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t contextlen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+QSC_EXPORT_API bool qsc_dilithium_sign_ex(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Verifies a signature-message pair with the public key.
@@ -217,18 +236,18 @@ QSC_EXPORT_API bool qsc_dilithium_sign_ex(uint8_t* signedmsg, size_t* smsglen, c
 QSC_EXPORT_API bool qsc_dilithium_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
 /**
- * \brief Verifies a signature-message pair with the public key.
+ * \brief Verifies a signature-message pair and context parameter with the public key.
  *
  * \param message:		[uint8_t*] Pointer to the message output array.
  * \param msglen:		[size_t*] Pointer to the length of the message array.
+ * \param context:		[const uint8_t*] Pointer to the context array.
+ * \param ctxlen:		[size_t] The context array length.
  * \param signedmsg:	[const uint8_t*] Pointer to the signed message array.
  * \param smsglen:		[size_t] The signed message length.
- * \param context:		[const uint8_t*] Pointer to the context array.
- * \param contextlen:	[size_t] The context array length.
  * \param publickey:	[const uint8_t*] Pointer to the public verification-key array.
  * \return				[bool] Returns true if the signature is valid.
  */
-QSC_EXPORT_API bool qsc_dilithium_verify_ex(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* context, size_t contextlen, const uint8_t* publickey);
+QSC_EXPORT_API bool qsc_dilithium_verify_ex(uint8_t* message, size_t* msglen, const uint8_t* context, size_t ctxlen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END
 

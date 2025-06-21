@@ -12,7 +12,8 @@ namespace QSCNETCW
 
     RCS::~RCS()
     {
-        this->!RCS();
+        Destroy();
+        GC::SuppressFinalize(this);
     }
 
     RCS::!RCS()

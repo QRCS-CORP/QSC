@@ -1,4 +1,4 @@
-#include "ecdhbase.h"
+﻿#include "ecdhbase.h"
 #include "consoleutils.h"
 #include "csp.h"
 #include "ec25519.h"
@@ -143,7 +143,7 @@ static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const 
         d |= q[i];
     }
 
-    success = (uint32_t)(err == 0);
+    success = (uint32_t)(err == 0) && (d != 0);
 
     return -((int32_t)1 - (int32_t)success);
 }

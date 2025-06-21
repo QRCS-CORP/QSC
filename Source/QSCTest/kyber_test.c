@@ -55,6 +55,9 @@ bool qsctest_kyber_ciphertext_integrity()
 
 bool qsctest_kyber_kat_test()
 {
+	/* note: the kat files were generated using the NIST post quantum competition format, 
+	   for the NIST ACVP KAT vector test, run the CAVP project. */
+
 	QSC_SIMD_ALIGN uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t kct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
 	QSC_SIMD_ALIGN uint8_t kpk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
@@ -70,114 +73,91 @@ bool qsctest_kyber_kat_test()
 	size_t seedlen;
 	size_t sklen;
 	size_t sslen;
-	uint32_t i;
 	bool ret;
 
 	ctlen = 0;
-	i = 0;
 	pklen = 0;
 	seedlen = 0;
 	sklen = 0;
 	sslen = 0;
 	ret = true;
 
-#if defined(QSC_KYBER_FIPS203)
 	/* NIST FIPS 203 KATs */
-	#	if defined(QSC_KYBER_S1P1632)
-	char path[] = "FIPS/kyber-1632.rsp";
-#	elif defined(QSC_KYBER_S3P2400)
-	char path[] = "FIPS/kyber-2400.rsp";
-#	elif defined(QSC_KYBER_S5P3168)
-	char path[] = "FIPS/kyber-3168.rsp";
-#	elif defined(QSC_KYBER_S6P3936)
+#	if defined(QSC_KYBER_S1K2P512)
+	char path[] = "NPQC/kyber-1632.rsp";
+#	elif defined(QSC_KYBER_S3K3P768)
+	char path[] = "NPQC/kyber-2400.rsp";
+#	elif defined(QSC_KYBER_S5K4P1024)
+	char path[] = "NPQC/kyber-3168.rsp";
+#	elif defined(QSC_KYBER_S6K5P1280)
 	/* Note: custom K6 parameter */
-	char path[] = "FIPS/kyber-3936.rsp";
+	char path[] = "NPQC/kyber-3936.rsp";
 #	else
 #	error The parameter set is invalid!
 #	endif
-#else
-	/* NIST PQC Finalist KATs */
-#	if defined(QSC_KYBER_S1P1632)
-	char path[] = "NPQCR3/kyber-1632.rsp";
-#	elif defined(QSC_KYBER_S3P2400)
-	char path[] = "NPQCR3/kyber-2400.rsp";
-#	elif defined(QSC_KYBER_S5P3168)
-	char path[] = "NPQCR3/kyber-3168.rsp";
-#	elif defined(QSC_KYBER_S6P3936)
-	/* Note: custom K6 parameter */
-	char path[] = "NPQCR3/kyber-3936.rsp";
-#	else
-#	error The parameter set is invalid!
-#	endif
-#endif
 
-#if defined(QSCTEST_KYBER_FULL_KAT)
-	for (i = 0; i < QSCTEST_KYBER_TEST_COUNT; ++i)
-#endif
+	parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, 0);
+
+	qsctest_nistrng_prng_initialize(seed, NULL, 0);
+
+	/* generate public and secret keys */
+	if (qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate))
 	{
-		parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, i);
-
-		qsctest_nistrng_prng_initialize(seed, NULL, 0);
-
-		/* generate public and secret keys */
-		if (qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate))
+		/* compare the public key to the expected output */
+		if (qsc_intutils_are_equal8(pk, kpk, QSC_KYBER_PUBLICKEY_SIZE) != true)
 		{
-			/* compare the public key to the expected output */
-			if (qsc_intutils_are_equal8(pk, kpk, QSC_KYBER_PUBLICKEY_SIZE) != true)
+			qsc_consoleutils_print_line("Failure! kyber kat: public-key does not match known answer! -KAT0");
+			ret = false;
+		}
+
+		/* compare the secret key to the expected output */
+		if (qsc_intutils_are_equal8(sk, ksk, QSC_KYBER_PRIVATEKEY_SIZE) != true)
+		{
+			qsc_consoleutils_print_line("Failure! kyber kat: private-key does not match known answer! -KAT1");
+			ret = false;
+		}
+
+		/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
+		if (qsc_kyber_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate))
+		{
+			/* compare the cipher-text to the expected output */
+			if (qsc_intutils_are_equal8(ct, kct, QSC_KYBER_CIPHERTEXT_SIZE) != true)
 			{
-				qsc_consoleutils_print_line("Failure! kyber kat: public-key does not match known answer! -KAT0");
+				qsc_consoleutils_print_line("Failure! kyber kat: cipher-text does not match known answer! -KAT2");
 				ret = false;
 			}
 
-			/* compare the secret key to the expected output */
-			if (qsc_intutils_are_equal8(sk, ksk, QSC_KYBER_PRIVATEKEY_SIZE) != true)
+			/* a uses b's response to get the shared-secret key (in: ct, sk | out: ss1) */
+			if (qsc_kyber_decapsulate(ss1, ct, sk) != true)
 			{
-				qsc_consoleutils_print_line("Failure! kyber kat: private-key does not match known answer! -KAT1");
+				qsc_consoleutils_print_line("Failure! kyber kat: decryption authentication failure! -KAT3");
 				ret = false;
 			}
 
-			/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-			if (qsc_kyber_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate))
+			/* compare the two keys for equality */
+			if (qsc_intutils_are_equal8(ss1, ss2, QSC_KYBER_SHAREDSECRET_SIZE) != true)
 			{
-				/* compare the cipher-text to the expected output */
-				if (qsc_intutils_are_equal8(ct, kct, QSC_KYBER_CIPHERTEXT_SIZE) != true)
-				{
-					qsc_consoleutils_print_line("Failure! kyber kat: cipher-text does not match known answer! -KAT2");
-					ret = false;
-				}
-
-				/* a uses b's response to get the shared-secret key (in: ct, sk | out: ss1) */
-				if (qsc_kyber_decapsulate(ss1, ct, sk) != true)
-				{
-					qsc_consoleutils_print_line("Failure! kyber kat: decryption authentication failure! -KAT3");
-					ret = false;
-				}
-
-				/* compare the two keys for equality */
-				if (qsc_intutils_are_equal8(ss1, ss2, QSC_KYBER_SHAREDSECRET_SIZE) != true)
-				{
-					qsc_consoleutils_print_line("Failure! kyber kat: shared secrets do not match! -KAT4");
-					ret = false;
-				}
-
-				/* compare the key to the expected output */
-				if (qsc_intutils_are_equal8(ss1, kss, QSC_KYBER_SHAREDSECRET_SIZE) != true)
-				{
-					qsc_consoleutils_print_line("Failure! kyber kat: shared secret does not match known answer! -KAT5");
-					ret = false;
-				}
+				qsc_consoleutils_print_line("Failure! kyber kat: shared secrets do not match! -KAT4");
+				ret = false;
 			}
-			else
+
+			/* compare the key to the expected output */
+			if (qsc_intutils_are_equal8(ss1, kss, QSC_KYBER_SHAREDSECRET_SIZE) != true)
 			{
-				qsc_consoleutils_print_line("Failure! kyber kat: encapsulation has failed! -KAT6");
+				qsc_consoleutils_print_line("Failure! kyber kat: shared secret does not match known answer! -KAT5");
 				ret = false;
 			}
 		}
 		else
 		{
-			qsc_consoleutils_print_line("Failure! kyber kat: key generation has failed! -KAT7");
+			qsc_consoleutils_print_line("Failure! kyber kat: encapsulation has failed! -KAT6");
 			ret = false;
 		}
+	}
+	else
+	{
+		qsc_consoleutils_print_line("Failure! kyber kat: key generation has failed! -KAT7");
+		ret = false;
 	}
 
 	return ret;

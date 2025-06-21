@@ -17,6 +17,7 @@
 #   if defined(QSC_SYSTEM_COMPILER_MSC)
 #	    pragma intrinsic(__cpuid)
 #	    pragma comment(lib, "IPHLPAPI.lib")
+#		pragma comment(lib, "advapi32.lib")
 #   endif
 #elif defined(QSC_SYSTEM_OS_UNIX)
 #	include <time.h>
@@ -477,9 +478,9 @@ void qsc_sysutils_user_identity(const char* name, char* id)
 			DWORD cbsid = 1024;
 			SID* sid = (SID*)sidbuf;
 
-			if (LookupAccountNameA(NULL, accname, sidbuf, &cbsid, domname, &cchdomname, &esidtype))
+			if (LookupAccountName(NULL, accname, sidbuf, &cbsid, domname, &cchdomname, &esidtype))
 			{
-				ConvertSidToStringSidA(sid, (LPSTR*)id);
+				ConvertSidToStringSid(sid, (LPSTR*)id);
 			}
 
 			GlobalFree(domname);

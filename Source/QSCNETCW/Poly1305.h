@@ -61,6 +61,11 @@ namespace QSCNETCW
         void BlockUpdate(array<Byte>^ block);
 
         /// <summary>
+        /// Erases the native Poly1305 state, clearing sensitive information.
+        /// </summary>
+        void Destroy();
+
+        /// <summary>
         /// Updates the MAC state with additional message data in any size.
         /// </summary>
         /// <param name="message">

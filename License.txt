@@ -1,0 +1,74 @@
+Quantum Resistant Cryptographic Solutions Proprietary License (QRCS-PL)
+Version 1.2 - 2025
+
+1. Definitions
+For the purposes of this License Agreement:
+"Software" refers to the cryptographic software library, including all source code, binaries, documentation, and any accompanying materials.
+"Licensor" refers to Quantum Resistant Cryptographic Solutions Corporation (QRCS).
+"Licensee" refers to any individual or entity that has been granted permission by QRCS to use the Software under this License.
+"Commercial Use" refers to any use of the Software that directly or indirectly generates revenue, is used in production environments, or is incorporated into a product or service offered for sale, license, or subscription.
+
+2. License Grant
+QRCS grants the Licensee a limited, non-exclusive, non-transferable, revocable license to use the Software solely for non-commercial, educational, and research purposes under the following conditions:
+No Redistribution: Licensee may not distribute, sublicense, publish, share, sell, lease, rent, or otherwise transfer the Software, in whole or in part, to any third party without prior written permission from QRCS.
+No Modification or Derivative Works: Licensee may not modify, adapt, decompile, reverse engineer, or create derivative works of the Software.
+No Commercial Use: Licensee may not use the Software in any commercial setting, including but not limited to:
+Integrating it into a product or service offered for sale.
+Using it in a production environment for any business operation.
+Including it in any software that is distributed, whether freely or for a fee.
+No Public Disclosure: Licensee may not publicly disclose any part of the Software, including its source code, algorithms, or implementation details, without prior written consent from QRCS.
+Authorized Distribution Only: The Software may only be distributed and licensed by QRCS under separate agreements. Unauthorized distribution is strictly prohibited.
+
+3. Original Works and Intellectual Property Ownership
+This library contains original cryptographic works, including unique implementations of cryptographic protocols and algorithms, wholly owned by the author and QRCS.
+All source code, optimizations, and implementations are the exclusive intellectual property of QRCS and John G. Underhill, the primary author.
+The Software is protected under U.S. and international copyright, patent, trade secret, and intellectual property laws.
+This License does not grant Licensee any ownership, title, or interest in the Software.
+QRCS reserves all rights not expressly granted in this License.
+3.1 Patent Notice
+Certain elements of this Software are subject to one or more provisional or pending U.S. patent applications filed by QRCS and/or John G. Underhill. 
+Unauthorized use, reproduction, or distribution of such elements may result in liability under applicable patent laws. 
+A full list of filed patent applications is available upon request.
+
+4. Cryptographic Standards & Third-Party Components
+This software includes implementations of cryptographic algorithms such as SHA3, AES, and others that are public domain or standardized by organizations such as NIST, ISO, or other international bodies.
+QRCS does not claim ownership over the mathematical algorithms themselves, but all source code, optimizations, and implementations in this library are original works and proprietary to QRCS and the author.
+The use of these cryptographic algorithms in this software does not override the restrictions of this proprietary license. The QRCS implementation of these algorithms remains subject to the terms of this license.
+If you require a cryptographic algorithm for unrestricted use, you should seek an independent implementation of the algorithm outside of this library.
+
+5. Disclaimer of Warranties
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+QRCS DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+QRCS DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE, UNINTERRUPTED, OR FREE OF VULNERABILITIES.
+LICENSEE ASSUMES ALL RISKS ASSOCIATED WITH USING THE SOFTWARE.
+
+6. Limitation of Liability
+UNDER NO CIRCUMSTANCES SHALL QRCS, JOHN G. UNDERHILL, OR THEIR AFFILIATES BE LIABLE FOR:
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO THE USE OR INABILITY TO USE THE SOFTWARE.
+LOSS OF DATA, PROFITS, BUSINESS, OR REPUTATION.
+SECURITY BREACHES, VULNERABILITIES, OR MISUSE RESULTING FROM LICENSEE'S USE OF THE SOFTWARE.
+LICENSEE AGREES TO INDEMNIFY AND HOLD QRCS AND THE AUTHOR HARMLESS FROM ANY CLAIMS, DAMAGES, OR LIABILITY RESULTING FROM LICENSEE'S VIOLATION OF THIS LICENSE AGREEMENT.
+
+7. Termination
+This License is effective until terminated by QRCS. QRCS may terminate this License immediately if:
+Licensee violates any terms of this agreement.
+QRCS discontinues the Software.
+Upon termination, Licensee must:
+Cease all use of the Software.
+Permanently delete and destroy all copies of the Software in their possession.
+QRCS reserves the right to pursue legal action for any unauthorized use, distribution, or modification of the Software.
+
+8. Governing Law and Jurisdiction
+This License Agreement shall be governed by and construed in accordance with the laws of Canada and the Province of Ontario, without regard to conflict of law principles.
+Any disputes arising under this License shall be resolved exclusively in the courts of Ontario.
+
+9. Miscellaneous
+Severability: If any provision of this License is found to be invalid or unenforceable, the remaining provisions shall remain in full force and effect.
+No Waiver: Failure by QRCS to enforce any provision of this License shall not be construed as a waiver of its rights.
+Entire Agreement: This License constitutes the entire agreement between QRCS and Licensee and supersedes all prior agreements, written or oral, relating to the Software.
+
+10. Contact Information
+For licensing inquiries or permissions, contact:
+Quantum Resistant Cryptographic Solutions Corporation
+Attn: Licensing Department
+Email: john.underhill@protonmail.com

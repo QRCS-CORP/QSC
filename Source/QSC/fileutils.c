@@ -538,7 +538,7 @@ size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* fpath)
 	return (len - pos);
 }
 
-int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
+int64_t qsc_fileutils_get_line_old(char** line, size_t* length, FILE* fp)
 {
 	QSC_ASSERT(line != NULL);
 	QSC_ASSERT(length != NULL);
@@ -577,7 +577,8 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 			size_t lenused = qsc_stringutils_string_size(*line);
 			size_t chunkused = qsc_stringutils_string_size(chunk);
 
-			if (*length - lenused < chunkused)
+			//if (*length - lenused < chunkused)
+			if (*length - lenused <= chunkused)
 			{
 				/* Check for overflow */
 				if (*length > SIZE_MAX / 2U)
@@ -587,7 +588,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 				}
 				else
 				{
-					*length *= 2U;
+					*length += 128U; // *= 2U
 				}
 
 				tmpl = qsc_memutils_realloc(*line, *length);
@@ -617,6 +618,76 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 
 		return -1;
 	}
+}
+
+int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
+{
+	QSC_ASSERT(line != NULL);
+	QSC_ASSERT(length != NULL);
+	QSC_ASSERT(fp != NULL);
+
+	char chunk[128U + 1U] = { 0U };
+	char* tmpl;
+	size_t llen;
+	int64_t ilen;
+	int64_t cpos;
+	int64_t lpos;
+
+	ilen = -1;
+
+	if (line != NULL && length != NULL && fp != NULL)
+	{
+		lpos = 0U;
+		llen = sizeof(chunk);
+		*line = qsc_memutils_malloc(llen);
+
+		if (*line != NULL)
+		{
+			qsc_memutils_clear(*line, llen);
+
+			while (fgets(chunk, sizeof(chunk), fp) != NULL)
+			{
+				cpos = qsc_stringutils_find_char(chunk, '\n');
+
+				if (cpos != QSC_STRINGUTILS_TOKEN_NOT_FOUND)
+				{
+					qsc_memutils_copy(*line + lpos, chunk, cpos);
+					lpos += cpos;
+					ilen = lpos + 1U;
+					*length = llen;
+					break;
+				}
+				else
+				{
+					qsc_memutils_copy(*line + lpos, chunk, 128U);
+					lpos += 128U;
+					llen += 128U;
+					tmpl = qsc_memutils_realloc(*line, llen);
+
+					if (tmpl != NULL)
+					{
+						*line = tmpl;
+						qsc_memutils_clear(*line + lpos, llen - lpos);
+					}
+					else
+					{
+						ilen = -1;
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			ilen = -1;
+		}
+	}
+	else
+	{
+		ilen = -1;
+	}
+
+	return ilen;
 }
 
 size_t qsc_fileutils_get_size(const char* fpath)

@@ -5,6 +5,8 @@
 #include "intutils.h"
 #include "sphincsplus.h"
 
+#define TEST_MESSAGE_LEN 33
+
 #if defined(QSC_SPHINCSPLUS_EXTENDED)
 
 bool qsctest_sphincsplus_extended_test()
@@ -64,10 +66,8 @@ bool qsctest_sphincsplus_extended_test()
 
 bool qsctest_sphincsplus_operations_test()
 {
-	/* note: test message size increase as the kat number increments, ex. 0=33, 1=66, 2=99...
-	   If testing other kats other than zero, make sure to increase the message size accordingly. */
-
-#define TEST_MESSAGE_LEN 33
+	/* note: the kat files were generated using the NIST post quantum competition format, 
+	for the NIST ACVP KAT vector test, run the CAVP project. */
 
 	QSC_SIMD_ALIGN uint8_t ksig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
 	QSC_SIMD_ALIGN uint8_t msg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
@@ -92,25 +92,18 @@ bool qsctest_sphincsplus_operations_test()
 	siglen = 0;
 	sklen = 0;
 
-#if defined(QSC_SPHINCSPLUS_S1S128SHAKERF)
-	char path[] = "NPQCR3/sphincs-shake256-128f-robust.rsp";
-#elif defined(QSC_SPHINCSPLUS_S1S128SHAKERS)
-	char path[] = "NPQCR3/sphincs-shake256-128s-robust.rsp";
-#elif defined(QSC_SPHINCSPLUS_S3S192SHAKERF)
-	char path[] = "NPQCR3/sphincs-shake256-192f-robust.rsp";
+#if defined(QSC_SPHINCSPLUS_S1S128SHAKERS)
+	char path[] = "NPQC/sphincs-shake256-128s-robust.rsp";
 #elif defined(QSC_SPHINCSPLUS_S3S192SHAKERS)
-	char path[] = "NPQCR3/sphincs-shake256-192s-robust.rsp";
-#elif defined(QSC_SPHINCSPLUS_S5S256SHAKERF)
-	char path[] = "NPQCR3/sphincs-shake256-256f-robust.rsp";
+	char path[] = "NPQC/sphincs-shake256-192s-robust.rsp";
 #elif defined(QSC_SPHINCSPLUS_S5S256SHAKERS)
-	char path[] = "NPQCR3/sphincs-shake256-256s-robust.rsp";
+	char path[] = "NPQC/sphincs-shake256-256s-robust.rsp";
 #else
-#	error The parameter set is invalid!
+#	error The parameter set is not supported for testing!
 #endif
 
 	/* NIST FIPS 205 KATs */
 	parse_nist_signature_kat(path, seed, &seedlen, kmsg, &msglen, kpk, &pklen, ksk, &sklen, ksig, &siglen, 0);
-
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
 	/* generate public and secret keys */

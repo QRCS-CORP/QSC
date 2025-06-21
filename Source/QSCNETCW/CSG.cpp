@@ -11,6 +11,7 @@ namespace QSCNETCW
     CSG::~CSG()
     {
         Destroy();
+        GC::SuppressFinalize(this);
     }
 
     CSG::!CSG()

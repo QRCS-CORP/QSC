@@ -83,9 +83,9 @@
  *   operation under extended use. This test also verifies that the signature length and the recovered message are as expected.
  *
  * The known answer test uses one of the NIST FIPS 204 test vector files, selected based on the active parameter set:
- * - If `QSC_DILITHIUM_S1P2544` is defined, the file `"NPQCR3/dilithium-2544.rsp"` is used.
- * - If `QSC_DILITHIUM_S3P4016` is defined, the file `"NPQCR3/dilithium-4016.rsp"` is used.
- * - If `QSC_DILITHIUM_S5P4880` is defined, the file `"NPQCR3/dilithium-4880.rsp"` is used.
+ * - If `QSC_DILITHIUM_S1P44` is defined, the file `"NPQC/dilithium-2544.rsp"` is used.
+ * - If `QSC_DILITHIUM_S3P65` is defined, the file `"NPQC/dilithium-4016.rsp"` is used.
+ * - If `QSC_DILITHIUM_S5P87` is defined, the file `"NPQC/dilithium-4880.rsp"` is used.
  *
  * \section dilithium_test_links Reference Links
  * - <a href="https://csrc.nist.gov/pubs/fips/204/final">NIST Dilithium FIPS 204 Main page</a>

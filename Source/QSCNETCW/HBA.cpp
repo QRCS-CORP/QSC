@@ -11,6 +11,7 @@ namespace QSCNETCW
     HBA256::~HBA256()
     {
         Destroy();
+        GC::SuppressFinalize(this);
     }
 
     HBA256::!HBA256()

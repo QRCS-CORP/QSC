@@ -54,22 +54,22 @@ namespace QSCNETCW
         /// <summary>
         /// No bit rate was selected
         /// </summary>
-        None = 0x00,
+        None = qsc_keccak_rate_none,
 
         /// <summary>
         /// Keccak 128-bit rate (168 bytes)
         /// </summary>
-        Rate128 = 0xA8,
+        Rate128 = qsc_keccak_rate_128,
 
         /// <summary>
         /// Keccak 256-bit rate (136 bytes)
         /// </summary>
-        Rate256 = 0x88,
+        Rate256 = qsc_keccak_rate_256,
 
         /// <summary>
         /// Keccak 512-bit rate (72 bytes)
         /// </summary>
-        Rate512 = 0x48
+        Rate512 = qsc_keccak_rate_512
     };
 
     //-------------------------
@@ -77,51 +77,11 @@ namespace QSCNETCW
     //-------------------------
 
     /// <summary>
-    /// Non-static class for an incremental SHA3 process.
-    /// Use <c>Initialize</c>, <c>Update</c>, then <c>Finalize</c>.
+    /// Static class for an SHA3 process.
     /// </summary>
-    public ref class SHA3
+    public ref class SHA3 abstract sealed
     {
     public:
-        /// <summary>
-        /// Constructs an uninitialized SHA3 instance. Must call <c>Initialize</c> before use.
-        /// </summary>
-        SHA3();
-
-        /// <summary>
-        /// Destructor calls <c>Dispose</c>.
-        /// </summary>
-        ~SHA3();
-
-        /// <summary>
-        /// Finalizer calls <c>Dispose</c>.
-        /// </summary>
-        !SHA3();
-
-        /// <summary>
-        /// Initializes the internal state for a given rate (128, 256, or 512).
-        /// </summary>
-        /// <param name="rate">One of the <see cref="KeccakRate"/> values.</param>
-        void Initialize(KeccakRate rate);
-
-        /// <summary>
-        /// Updates the hash with the specified message data.
-        /// </summary>
-        /// <param name="message">Data array.</param>
-        /// <param name="msgLen">Number of bytes to process.</param>
-        void Update(array<Byte>^ message, size_t msgLen);
-
-        /// <summary>
-        /// Finalizes the hash, writing the digest to <paramref name="output"/>.
-        /// Resets the instance.
-        /// </summary>
-        /// <param name="output">Byte array to receive the digest. Must be sized to match the rate: 16,32, or 64 bytes if you want the entire output.</param>
-        void Finalize(array<Byte>^ output);
-
-        /// <summary>
-        /// Disposes the internal state. The instance cannot be reused.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// One-shot compute for short form SHA3-128, producing a 16-byte digest.
@@ -137,11 +97,6 @@ namespace QSCNETCW
         /// One-shot compute for short form SHA3-512, producing a 64-byte digest.
         /// </summary>
         static void Compute512(array<Byte>^ output, array<Byte>^ message, size_t msgLen);
-
-    private:
-        qsc_keccak_state* m_state;
-        KeccakRate m_rate;
-        bool m_isInitialized;
     };
 
     //-------------------------
@@ -149,33 +104,11 @@ namespace QSCNETCW
     //-------------------------
 
     /// <summary>
-    /// Non-static class for an incremental SHAKE usage (long form).
-    /// Use <c>Initialize</c>, then <c>SqueezeBlocks</c> to generate output.
+    /// Static class for SHAKE usage.
     /// </summary>
-    public ref class SHAKE
+    public ref class SHAKE abstract sealed
     {
     public:
-        SHAKE();
-        ~SHAKE();
-        !SHAKE();
-
-        /// <summary>
-        /// Initializes the SHAKE state with the specified key and rate.
-        /// </summary>
-        void Initialize(KeccakRate rate, array<Byte>^ key, size_t keyLen);
-
-        /// <summary>
-        /// Squeezes output blocks from the state, writing to <paramref name="output"/>.
-        /// Each block is <c>rate</c> bytes for the chosen bit rate.
-        /// </summary>
-        /// <param name="output">Byte array to receive the data, must be multiple of block size.</param>
-        /// <param name="nblocks">Number of blocks to output.</param>
-        void SqueezeBlocks(array<Byte>^ output, size_t nblocks);
-
-        /// <summary>
-        /// Disposes the internal Keccak state.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// Short-form compute for SHAKE-128. 
@@ -191,11 +124,6 @@ namespace QSCNETCW
         /// Short-form compute for SHAKE-512. 
         /// </summary>
         static void Compute512(array<Byte>^ output, size_t outLen, array<Byte>^ key, size_t keyLen);
-
-    private:
-        qsc_keccak_state* m_state;
-        KeccakRate m_rate;
-        bool m_isInitialized;
     };
 
     //-------------------------
@@ -203,36 +131,11 @@ namespace QSCNETCW
     //-------------------------
 
     /// <summary>
-    /// Non-static class for an incremental cSHAKE usage (long form).
-    /// Allows user to absorb name, custom, and key, then squeeze output blocks.
+    /// Static class for cSHAKE usage.
     /// </summary>
-    public ref class CSHAKE
+    public ref class CSHAKE abstract sealed
     {
     public:
-        CSHAKE();
-        ~CSHAKE();
-        !CSHAKE();
-
-        /// <summary>
-        /// Initializes the cSHAKE state with key, name, and custom arrays.
-        /// </summary>
-        void Initialize(KeccakRate rate, array<Byte>^ key, size_t keyLen, array<Byte>^ name, size_t nameLen, array<Byte>^ custom, size_t custLen);
-
-        /// <summary>
-        /// Squeezes output blocks from the cSHAKE state.
-        /// </summary>
-        void SqueezeBlocks(array<Byte>^ output, size_t nblocks);
-
-        /// <summary>
-        /// Update the cSHAKE state (absorbing more key data).
-        /// Typically called before final squeezes.
-        /// </summary>
-        void Update(array<Byte>^ key, size_t keyLen);
-
-        /// <summary>
-        /// Disposes the internal state.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// Short-form cSHAKE-128 with name + custom.
@@ -248,11 +151,6 @@ namespace QSCNETCW
         /// Short-form cSHAKE-512 with name + custom.
         /// </summary>
         static void Compute512(array<Byte>^ output, size_t outLen, array<Byte>^ key, size_t keyLen, array<Byte>^ name, size_t nameLen, array<Byte>^ custom, size_t custLen);
-
-    private:
-        qsc_keccak_state* m_state;
-        KeccakRate m_rate;
-        bool m_isInitialized;
     };
 
     //-------------------------
@@ -260,35 +158,11 @@ namespace QSCNETCW
     //-------------------------
 
     /// <summary>
-    /// Non-static class for an incremental KMAC usage.
-    /// Allows user to absorb message in multiple updates, then finalize to produce the MAC.
+    /// Static class for KMAC usage.
     /// </summary>
-    public ref class KMAC
+    public ref class KMAC abstract sealed
     {
     public:
-        KMAC();
-        ~KMAC();
-        !KMAC();
-
-        /// <summary>
-        /// Initializes the KMAC state with a key + custom string, e.g. KMAC-256 or KMAC-512.
-        /// </summary>
-        void Initialize(KeccakRate rate, array<Byte>^ key, size_t keyLen, array<Byte>^ custom, size_t custLen);
-
-        /// <summary>
-        /// Updates the KMAC state with message data.
-        /// </summary>
-        void Update(array<Byte>^ message, size_t msgLen);
-
-        /// <summary>
-        /// Finalizes the MAC, writing up to <paramref name="outLen"/> bytes into <paramref name="output"/>.
-        /// </summary>
-        bool Finalize(array<Byte>^ output, size_t outLen);
-
-        /// <summary>
-        /// Disposes the internal state.
-        /// </summary>
-        void Destroy();
 
         /// <summary>
         /// Short-form KMAC-128.
@@ -304,11 +178,6 @@ namespace QSCNETCW
         /// Short-form KMAC-512.
         /// </summary>
         static void Compute512(array<Byte>^ output, size_t outLen, array<Byte>^ message, size_t msgLen, array<Byte>^ key, size_t keyLen, array<Byte>^ custom, size_t custLen);
-
-    private:
-        qsc_keccak_state* m_state;
-        KeccakRate m_rate;
-        bool m_isInitialized;
     };
 }
 

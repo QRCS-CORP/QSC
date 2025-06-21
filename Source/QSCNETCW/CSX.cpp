@@ -11,6 +11,7 @@ namespace QSCNETCW
     CSX::~CSX()
     {
         Destroy();
+        GC::SuppressFinalize(this);
     }
 
     CSX::!CSX()

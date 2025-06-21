@@ -257,8 +257,7 @@ QSC_EXPORT_API void qsc_memutils_clmulepi64_si128(uint64_t r[2U], const uint64_t
  * \param b:		[const __m128i[2]] Second 256-bit operand (same ordering).
  */
 QSC_EXPORT_API void qsc_memutils_clmulepi64_si256_avx(__m128i r[4U], const __m128i a[2U], const __m128i b[2U]);
-
-#else
+#endif
 
 /**
  * \brief Multiply two 256-bit field elements (each represented as two 128-bit integers) 
@@ -269,7 +268,6 @@ QSC_EXPORT_API void qsc_memutils_clmulepi64_si256_avx(__m128i r[4U], const __m12
  * \param b:		[const uint64_t[4]]  Second 256-bit operand (same ordering).
  */
 QSC_EXPORT_API void qsc_memutils_clmulepi64_si256(uint64_t r[8U], const uint64_t a[4U], const uint64_t b[4U]);
-#endif
 
 /**
  * \brief Compare two 16-byte arrays as 128-bit big-endian integers to determine if A is greater than B.

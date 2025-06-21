@@ -79,11 +79,6 @@ namespace QSCNETCW
         static bool Decapsulate(array<Byte>^ secret, array<Byte>^ ciphertext, array<Byte>^ privateKey);
 
         /// <summary>
-        /// Alternative name for key decapsulation (functionally identical).
-        /// </summary>
-        static bool Decrypt(array<Byte>^ secret, array<Byte>^ ciphertext, array<Byte>^ privateKey);
-
-        /// <summary>
         /// Encapsulates a shared secret, producing a ciphertext from a public key.
         /// </summary>
         /// <param name="secret">Output array for the 32-byte shared secret.</param>
@@ -91,11 +86,6 @@ namespace QSCNETCW
         /// <param name="publicKey">Public key array (size <c>QSC_KYBER_PUBLICKEY_SIZE</c>).</param>
         /// <returns><c>true</c> on success; otherwise <c>false</c>.</returns>
         static bool Encapsulate(array<Byte>^ secret, array<Byte>^ ciphertext, array<Byte>^ publicKey);
-
-        /// <summary>
-        /// Encrypts to encapsulate a shared secret using a seed rather than an RNG callback.
-        /// </summary>
-        static bool Encrypt(array<Byte>^ secret, array<Byte>^ ciphertext, array<Byte>^ publicKey, array<Byte>^ seed);
 
         /// <summary>
         /// Generates a public/private key pair for the Kyber KEM.

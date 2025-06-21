@@ -88,30 +88,36 @@ namespace QSCNETCWTEST
         public static bool TestChaCha256()
         {
             const int BLOCK_SIZE = 64;
-            const int NONCE_SIZE = 8;
+            const int NONCE_SIZE = 12;
 
-            byte[] key = Utilities.HexToBin("0053A6F94C9FF24598EB3E91E4378ADD3083D6297CCF2275C81B6EC11467BA0D");
-            byte[] iv = Utilities.HexToBin("0D74DB42A91077DE");
-            byte[] exp = Utilities.HexToBin("57459975BC46799394788DE80B928387862985A269B9E8E77801DE9D874B3F51" +
-                "AC4610B9F9BEE8CF8CACD8B5AD0BF17D3DDF23FD7424887EB3F81405BD498CC3");
-            byte[] msg = new byte[BLOCK_SIZE];
-            byte[] cblks = new byte[BLOCK_SIZE];
+            byte[] key = Utilities.HexToBin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F");
+            byte[] iv = Utilities.HexToBin("000000090000004A00000000");
+            byte[] exp = Utilities.HexToBin("C6BDF594FA87D094756B8D179A7BA25B816398CC26A334E7F7CF2720335074F1" +
+                "BEB85C505D2D6DEC471CD7FFAF002E85F3D6207BD9865FC130F6E554067F15BB" +
+                "7E9D9EC4BE553C352466AD3FC54F03E4B3B991E755B51C76764786BAB0A1023D" +
+                 "B1F0012369BFDD6661AEB325BBEE22CBC13C");
+
+            byte[] msg = Utilities.HexToBin("4C616469657320616E642047656E746C656D656E206F662074686520636C6173" +
+                "73206F66202739393A204966204920636F756C64206F6666657220796F75206F" +
+                "6E6C79206F6E652074697020666F7220746865206675747572652C2073756E73" +
+                "637265656E20776F756C642062652069742E");
+            byte[] cblks = new byte[114];
             byte[] iv2 = new byte[NONCE_SIZE];
-            byte[] pblks = new byte[BLOCK_SIZE];
+            byte[] pblks = new byte[114];
             bool success;
 
             Utilities.ArrayCopy(iv, iv2);
 
             QSCNETCW.CHACHA chacha = new QSCNETCW.CHACHA();
             chacha.Initialize(key, iv);
-            chacha.Transform(cblks, msg, BLOCK_SIZE);
+            chacha.Transform(cblks, msg, 114);
 
             success = Utilities.ArraysEqual(cblks, exp);
 
             if (success == true)
             {
                 chacha.Initialize(key, iv2);
-                chacha.Transform(pblks, cblks, BLOCK_SIZE);
+                chacha.Transform(pblks, cblks, 114);
 
                 success = Utilities.ArraysEqual(pblks, msg);
             }
@@ -131,12 +137,8 @@ namespace QSCNETCWTEST
             byte[] res = new byte[BLOCK_SIZE];
             bool success;
 
-            QSCNETCW.SHA256 sha2 = new QSCNETCW.SHA256();
-            sha2.Update(msg, (ulong)msg.LongLength);
-            sha2.Finalize(res);
-
+            QSCNETCW.SHA256.Compute(res, msg, (ulong)msg.LongLength);
             success = Utilities.ArraysEqual(res, exp);
-            sha2.Destroy();
 
             return success;
         }
@@ -152,12 +154,8 @@ namespace QSCNETCWTEST
             byte[] res = new byte[BLOCK_SIZE];
             bool success;
 
-            QSCNETCW.SHA512 sha2 = new QSCNETCW.SHA512();
-            sha2.Update(msg, (ulong)msg.LongLength);
-            sha2.Finalize(res);
-
+            QSCNETCW.SHA512.Compute(res, msg, (ulong)msg.LongLength);
             success = Utilities.ArraysEqual(res, exp);
-            sha2.Destroy();
 
             return success;
         }
@@ -174,7 +172,6 @@ namespace QSCNETCWTEST
             bool success;
 
             QSCNETCW.HKDF.HKDF256Expand(otp, OUTPUT_SIZE, key, (ulong)key.LongLength, inf, (ulong)inf.LongLength);
-
             success = Utilities.ArraysEqual(otp, exp);
 
             return success;
@@ -192,7 +189,6 @@ namespace QSCNETCWTEST
             bool success;
 
             QSCNETCW.HKDF.HKDF512Expand(otp, OUTPUT_SIZE, key, (ulong)key.LongLength, inf, (ulong)inf.LongLength);
-
             success = Utilities.ArraysEqual(otp, exp);
 
             return success;
@@ -208,12 +204,8 @@ namespace QSCNETCWTEST
             byte[] otp = new byte[MAC_SIZE];
             bool success;
 
-            QSCNETCW.HMAC256 hmac = new QSCNETCW.HMAC256(key, (ulong)key.LongLength);
-            hmac.Update(msg, (ulong)msg.LongLength);
-            hmac.Finalize(otp);
-
+            QSCNETCW.HMAC256.Compute(otp, msg, (ulong)msg.LongLength, key, (ulong)key.LongLength);
             success = Utilities.ArraysEqual(otp, exp);
-            hmac.Destroy();
 
             return success;
         }
@@ -229,12 +221,8 @@ namespace QSCNETCWTEST
             byte[] otp = new byte[MAC_SIZE];
             bool success;
 
-            QSCNETCW.HMAC512 hmac = new QSCNETCW.HMAC512(key, (ulong)key.LongLength);
-            hmac.Update(msg, (ulong)msg.LongLength);
-            hmac.Finalize(otp);
-
+            QSCNETCW.HMAC512.Compute(otp, msg, (ulong)msg.LongLength, key, (ulong)key.LongLength);
             success = Utilities.ArraysEqual(otp, exp);
-            hmac.Destroy();
 
             return success;
         }
@@ -249,13 +237,8 @@ namespace QSCNETCWTEST
             byte[] res = new byte[BLOCK_SIZE];
             bool success;
 
-            QSCNETCW.SHA3 sha3 = new QSCNETCW.SHA3();
-            sha3.Initialize(KeccakRate.Rate256);
-            sha3.Update(msg, (ulong)msg.LongLength);
-            sha3.Finalize(res);
-
+            QSCNETCW.SHA3.Compute256(res, msg, (ulong)msg.LongLength);
             success = Utilities.ArraysEqual(res, exp);
-            sha3.Destroy();
 
             return success;
         }
@@ -271,13 +254,8 @@ namespace QSCNETCWTEST
             byte[] res = new byte[BLOCK_SIZE];
             bool success;
 
-            QSCNETCW.SHA3 sha3 = new QSCNETCW.SHA3();
-            sha3.Initialize(KeccakRate.Rate512);
-            sha3.Update(msg, (ulong)msg.LongLength);
-            sha3.Finalize(res);
-
+            QSCNETCW.SHA3.Compute512(res, msg, (ulong)msg.LongLength);
             success = Utilities.ArraysEqual(res, exp);
-            sha3.Destroy();
 
             return success;
         }
@@ -294,13 +272,8 @@ namespace QSCNETCWTEST
             byte[] otp = new byte[BLOCK_SIZE];
             bool success;
 
-            QSCNETCW.KMAC kmac = new QSCNETCW.KMAC();
-            kmac.Initialize(KeccakRate.Rate256, key, (ulong)key.LongLength, cust, (ulong)cust.LongLength);
-            kmac.Update(msg, (ulong)msg.LongLength);
-            kmac.Finalize(otp, (ulong)otp.LongLength);
-
+            QSCNETCW.KMAC.Compute256(otp, (ulong)otp.LongLength, msg, (ulong)msg.LongLength, key, (ulong)key.LongLength, cust, (ulong)cust.LongLength);
             success = Utilities.ArraysEqual(otp, exp);
-            kmac.Destroy();
 
             return success;
         }
@@ -318,13 +291,8 @@ namespace QSCNETCWTEST
             byte[] otp = new byte[BLOCK_SIZE];
             bool success;
 
-            QSCNETCW.KMAC kmac = new QSCNETCW.KMAC();
-            kmac.Initialize(KeccakRate.Rate512, key, (ulong)key.LongLength, cust, (ulong)cust.LongLength);
-            kmac.Update(msg, (ulong)msg.LongLength);
-            kmac.Finalize(otp, (ulong)otp.LongLength);
-
+            QSCNETCW.KMAC.Compute512(otp, (ulong)otp.LongLength, msg, (ulong)msg.LongLength, key, (ulong)key.LongLength, cust, (ulong)cust.LongLength);
             success = Utilities.ArraysEqual(otp, exp);
-            kmac.Destroy();
 
             return success;
         }
@@ -360,7 +328,6 @@ namespace QSCNETCWTEST
             bool success;
 
             QSCNETCW.SHAKE.Compute256(otp, (ulong)otp.LongLength, msg, (ulong)msg.LongLength);
-
             success = Utilities.ArraysEqual(otp, exp);
 
             return success;
@@ -397,7 +364,6 @@ namespace QSCNETCWTEST
             bool success;
 
             QSCNETCW.SHAKE.Compute512(otp, (ulong)otp.LongLength, msg, (ulong)msg.LongLength);
-
             success = Utilities.ArraysEqual(otp, exp);
 
             return success;

@@ -75,9 +75,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ACP.cpp">
-      <Filter>Source Files\Provider</Filter>
-    </ClCompile>
     <ClCompile Include="AES.cpp">
       <Filter>Source Files\Cipher</Filter>
     </ClCompile>
@@ -126,9 +123,6 @@
     <ClCompile Include="IntUtils.cpp">
       <Filter>Source Files\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="NTRU.cpp">
-      <Filter>Source Files\Asymmetric\Cipher</Filter>
-    </ClCompile>
     <ClCompile Include="Poly1305.cpp">
       <Filter>Source Files\MAC</Filter>
     </ClCompile>
@@ -156,6 +150,9 @@
     <ClCompile Include="SphincsPlus.cpp">
       <Filter>Source Files\Asymmetric\Signature</Filter>
     </ClCompile>
+    <ClCompile Include="ACP.cpp">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc">
@@ -168,9 +165,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ACP.h">
-      <Filter>Header Files\Provider</Filter>
-    </ClInclude>
     <ClInclude Include="AES.h">
       <Filter>Header Files\Cipher</Filter>
     </ClInclude>
@@ -219,9 +213,6 @@
     <ClInclude Include="IntUtils.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="NTRU.h">
-      <Filter>Header Files\Asymmetric\Cipher</Filter>
-    </ClInclude>
     <ClInclude Include="Poly1305.h">
       <Filter>Header Files\MAC</Filter>
     </ClInclude>
@@ -248,6 +239,9 @@
     </ClInclude>
     <ClInclude Include="SphincsPlus.h">
       <Filter>Header Files\Asymmetric\Signature</Filter>
+    </ClInclude>
+    <ClInclude Include="ACP.h">
+      <Filter>Header Files\Provider</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

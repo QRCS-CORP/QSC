@@ -18,12 +18,18 @@ namespace QSCNETCW
 
     Poly1305::~Poly1305()
     {
-        this->!Poly1305();
+        Destroy();
+        GC::SuppressFinalize(this);
     }
 
     Poly1305::!Poly1305()
     {
-        if (m_isInitialized && m_state != nullptr)
+        Destroy();
+    }
+
+    void Poly1305::Destroy()
+    {
+        if (m_state != nullptr)
         {
             // Optionally call reset to wipe the internal state
             qsc_poly1305_reset(m_state);

@@ -14,8 +14,8 @@
 #   include <psapi.h>
 #   include <ShellApi.h>
 #   include <tlhelp32.h>
-#   define WIN32_LEAN_AND_MEAN
-#   include <windows.h>
+//#   define WIN32_LEAN_AND_MEAN
+#   include <Windows.h>
 #   include <iphlpapi.h>
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #   pragma comment(lib, "advapi32.lib")
@@ -252,7 +252,7 @@ static HKEY winutils_rkey_from_string(const char* root)
 static void winutils_get_error_description(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
 
     const char* desc;
     DWORD err;
@@ -648,7 +648,7 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 size_t qsc_winutils_process_list(char* result, size_t reslen) 
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
     
     PROCESSENTRY32 pe32 = { 0U };
     char pname[MAX_PATH] = { 0U };
@@ -797,7 +797,7 @@ bool qsc_winutils_process_terminate(const char* name)
 bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_winutils_registry_value_types vtype)
 {
     QSC_ASSERT(keypath != NULL);
-    QSC_ASSERT(value != 0);
+    QSC_ASSERT(value != NULL);
     
     HKEY hkey = { 0U };
     HKEY rkey = { 0U };
@@ -914,7 +914,7 @@ bool qsc_winutils_registry_key_delete(const char* keypath)
 size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* keypath) 
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
     QSC_ASSERT(keypath != NULL);
 
     HKEY hkey = { 0U };
@@ -1296,7 +1296,7 @@ size_t qsc_winutils_service_list_size()
 size_t qsc_winutils_user_list(char* result, size_t reslen) 
 {
     QSC_ASSERT(result != NULL);
-    QSC_ASSERT(reslen != 0);
+    QSC_ASSERT(reslen != 0U);
     
     USER_INFO_1* pbuf;
     DWORD derd;
@@ -1392,7 +1392,7 @@ size_t qsc_winutils_current_user(char* result, size_t reslen)
     
     if (result != NULL && reslen != 0U)
     {
-        if (GetUserNameA(uname, &ulen) == true)
+        if (GetUserName(uname, &ulen) == true)
         {
             USER_INFO_1* uinfo = { 0U };
             wchar_t wuser[UNLEN + 1U] = { 0U };

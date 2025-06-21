@@ -6,11 +6,11 @@
 /* params.h */
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-#if defined(QSC_DILITHIUM_S1P2544)
+#if defined(QSC_DILITHIUM_S1P44)
 #   define DILITHIUM_MODE 2
-#elif defined(QSC_DILITHIUM_S3P4016) 
+#elif defined(QSC_DILITHIUM_S3P65) 
 #   define DILITHIUM_MODE 3
-#elif defined(QSC_DILITHIUM_S5P4880)
+#elif defined(QSC_DILITHIUM_S5P87)
 #   define DILITHIUM_MODE 5
 #else
 #   error The dilithium mode is not supported!
@@ -374,9 +374,9 @@ static uint32_t dilithium_avx2_make_hint(uint8_t hint[DILITHIUM_N], const dilith
         g0 = _mm256_or_si256(g0, g1);
 
         bad = _mm256_movemask_ps(_mm256_castsi256_ps(g0));
-        memcpy(&idx, dilithium_rej_avx2[bad], 8);
+        qsc_memutils_copy(&idx, dilithium_rej_avx2[bad], 8);
         idx += (uint64_t)0x0808080808080808 * i;
-        memcpy(&hint[n], &idx, 8);
+        qsc_memutils_copy(&hint[n], &idx, 8);
         n += _mm_popcnt_u32(bad);
     }
 
@@ -1769,7 +1769,7 @@ bool qsc_dilithium_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_ge
     dilithium_polyveck s2;
     dilithium_poly t0;
     dilithium_poly t1;
-    QSC_ALIGN(32)uint8_t seedbuf[2U * DILITHIUM_SEEDBYTES + DILITHIUM_CRHBYTES];
+    QSC_ALIGN(32) uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_CRHBYTES];
     const uint8_t* key;
     const uint8_t* rho;
     const uint8_t* rhoprime;
@@ -1846,7 +1846,85 @@ bool qsc_dilithium_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_ge
     return res;
 }
 
-bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* m, size_t mlen, const uint8_t* context, size_t contextlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
+void qsc_dilithium_avx2_seeded_generate_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed)
+{
+    QSC_ALIGN(32) dilithium_polyvecl mat[DILITHIUM_K];
+    dilithium_polyvecl s1;
+    dilithium_polyveck s2;
+    dilithium_poly t0;
+    dilithium_poly t1;
+    QSC_ALIGN(32) uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_CRHBYTES];
+    const uint8_t* key;
+    const uint8_t* rho;
+    const uint8_t* rhoprime;
+    size_t i;
+
+    /* Get randomness for rho, rhoprime and key */
+    qsc_memutils_copy(seedbuf, seed, DILITHIUM_SEEDBYTES);
+
+    seedbuf[DILITHIUM_SEEDBYTES] = DILITHIUM_K;
+    seedbuf[DILITHIUM_SEEDBYTES + 1U] = DILITHIUM_L;
+    qsc_shake256_compute(seedbuf, 2U * DILITHIUM_SEEDBYTES + DILITHIUM_CRHBYTES, seedbuf, DILITHIUM_SEEDBYTES + 2U);
+    rho = seedbuf;
+    rhoprime = rho + DILITHIUM_SEEDBYTES;
+    key = rhoprime + DILITHIUM_CRHBYTES;
+
+    /* Store rho, key */
+    qsc_memutils_copy(pk, rho, DILITHIUM_SEEDBYTES);
+    qsc_memutils_copy(sk, rho, DILITHIUM_SEEDBYTES);
+    qsc_memutils_copy(sk + DILITHIUM_SEEDBYTES, key, DILITHIUM_SEEDBYTES);
+
+    /* Sample short vectors s1 and s2 */
+#if DILITHIUM_K == 4 && DILITHIUM_L == 4
+    dilithium_avx2_poly_uniform_eta_4x(&s1.vec[0U], &s1.vec[1U], &s1.vec[2U], &s1.vec[3U], rhoprime, 0U, 1U, 2U, 3U);
+    dilithium_avx2_poly_uniform_eta_4x(&s2.vec[0U], &s2.vec[1U], &s2.vec[2U], &s2.vec[3U], rhoprime, 4U, 5U, 6U, 7U);
+#elif DILITHIUM_K == 6 && DILITHIUM_L == 5
+    dilithium_avx2_poly_uniform_eta_4x(&s1.vec[0U], &s1.vec[1U], &s1.vec[2U], &s1.vec[3U], rhoprime, 0U, 1U, 2U, 3U);
+    dilithium_avx2_poly_uniform_eta_4x(&s1.vec[4U], &s2.vec[0U], &s2.vec[1U], &s2.vec[2U], rhoprime, 4U, 5U, 6U, 7U);
+    dilithium_avx2_poly_uniform_eta_4x(&s2.vec[3U], &s2.vec[4U], &s2.vec[5U], &t0, rhoprime, 8U, 9U, 10U, 11U);
+#elif DILITHIUM_K == 8 && DILITHIUM_L == 7
+    dilithium_avx2_poly_uniform_eta_4x(&s1.vec[0U], &s1.vec[1U], &s1.vec[2U], &s1.vec[3U], rhoprime, 0U, 1U, 2U, 3U);
+    dilithium_avx2_poly_uniform_eta_4x(&s1.vec[4U], &s1.vec[5U], &s1.vec[6U], &s2.vec[0U], rhoprime, 4U, 5U, 6U, 7U);
+    dilithium_avx2_poly_uniform_eta_4x(&s2.vec[1U], &s2.vec[2U], &s2.vec[3U], &s2.vec[4U], rhoprime, 8U, 9U, 10U, 11U);
+    dilithium_avx2_poly_uniform_eta_4x(&s2.vec[5U], &s2.vec[6U], &s2.vec[7U], &t0, rhoprime, 12U, 13U, 14U, 15U);
+#else
+#   error
+#endif
+
+    /* Pack secret vectors */
+    for (i = 0U; i < DILITHIUM_L; i++)
+    {
+        dilithium_polyeta_pack(sk + (2U * DILITHIUM_SEEDBYTES) + DILITHIUM_TRBYTES + (i * DILITHIUM_POLYETA_PACKEDBYTES), &s1.vec[i]);
+    }
+
+    for (i = 0U; i < DILITHIUM_K; i++)
+    {
+        dilithium_polyeta_pack(sk + (2U * DILITHIUM_SEEDBYTES) + DILITHIUM_TRBYTES + (DILITHIUM_L + i) * DILITHIUM_POLYETA_PACKEDBYTES, &s2.vec[i]);
+    }
+
+    /* Transform s1 */
+    dilithium_polyvecl_ntt(&s1);
+
+    for (i = 0U; i < DILITHIUM_K; i++)
+    {
+        dilithium_avx2_polyvec_matrix_expand_row(mat, rho, i);
+        /* Compute inner-product */
+        dilithium_polyvecl_pointwise_acc_montgomery(&t1, &mat[i], &s1);
+        dilithium_poly_invntt_to_mont(&t1);
+        /* Add error polynomial */
+        dilithium_avx2_poly_add(&t1, &t1, &s2.vec[i]);
+        /* Round t and pack t1, t0 */
+        dilithium_avx2_poly_caddq(&t1);
+        dilithium_avx2_poly_power2round(&t1, &t0, &t1);
+        dilithium_polyt1_pack(pk + DILITHIUM_SEEDBYTES + (i * DILITHIUM_POLYT1_PACKEDBYTES), &t1);
+        dilithium_polyt0_pack(sk + (2U * DILITHIUM_SEEDBYTES) + DILITHIUM_TRBYTES + (DILITHIUM_L + DILITHIUM_K) * DILITHIUM_POLYETA_PACKEDBYTES + (i * DILITHIUM_POLYT0_PACKEDBYTES), &t0);
+    }
+
+    /* Compute CRH(rho, t1) and store in secret key */
+    qsc_shake256_compute(sk + (2U * DILITHIUM_SEEDBYTES), DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
+}
+
+bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     QSC_ALIGN(32) dilithium_polyvecl mat[DILITHIUM_K];
     dilithium_polyvecl s1;
@@ -1888,8 +1966,8 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     /* Compute CRH(tr, msg) */
     qsc_keccak_initialize_state(&kctx);
     qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, tr, DILITHIUM_TRBYTES);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, context, contextlen);
-    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
+    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, context, ctxlen);
+    qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, message, msglen);
     qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
     qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
@@ -2035,38 +2113,38 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     return res;
 }
 
-bool qsc_dilithium_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* context, size_t contextlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
+bool qsc_dilithium_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
     bool res;
 
     res = false;
 
-    if (contextlen <= 255U)
+    if (ctxlen <= 255U)
     {
         QSC_ALIGN(32) uint8_t prec[DILITHIUM_CONTEXT_SIZE] = { 0U };
 
         /* prepare pre = (0, contextlen, ctx) */
         prec[0U] = 0U;
-        prec[1U] = (uint8_t)contextlen;
+        prec[1U] = (uint8_t)ctxlen;
 
-        if (context != NULL)
+        if (context != NULL && ctxlen != 0)
         {
-            qsc_memutils_copy(prec + 2U, context, contextlen);
+            qsc_memutils_copy(prec + 2U, context, ctxlen);
         }
 
-        for (size_t i = 0U; i < mlen; ++i)
+        for (size_t i = 0U; i < msglen; ++i)
         {
-            sm[DILITHIUM_SIGNATURE_SIZE + mlen - 1U - i] = m[mlen - 1U - i];
+            sm[DILITHIUM_SIGNATURE_SIZE + msglen - 1U - i] = message[msglen - 1U - i];
         }
 
-        res = qsc_dilithium_avx2_sign_signature(sm, smlen, sm + DILITHIUM_SIGNATURE_SIZE, mlen, prec, contextlen + 2U, sk, rng_generate);
-        *smlen += mlen;
+        res = qsc_dilithium_avx2_sign_signature(sm, smlen, sm + DILITHIUM_SIGNATURE_SIZE, msglen, prec, ctxlen + 2U, sk, rng_generate);
+        *smlen += msglen;
     }
 
     return res;
 }
 
-bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t* m, size_t mlen, const uint8_t* context, size_t contextlen, const uint8_t* pk)
+bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* pk)
 {
     dilithium_polyvecl mat[DILITHIUM_K];
     dilithium_polyvecl z;
@@ -2094,8 +2172,8 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
 
         qsc_keccak_initialize_state(&kctx);
         qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
-        qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, context, contextlen);
-        qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
+        qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, context, ctxlen);
+        qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, message, msglen);
         qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
         qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
@@ -2199,42 +2277,42 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
     return res;
 }
 
-bool qsc_dilithium_avx2_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* context, size_t contextlen, const uint8_t* pk)
+bool qsc_dilithium_avx2_open(uint8_t* message, size_t* msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sm, size_t smlen, const uint8_t* pk)
 {
     bool res;
 
-    *mlen = 0U;
+    *msglen = 0U;
     res = false;
 
-    if (contextlen <= 255)
+    if (ctxlen <= 255)
     {
         QSC_ALIGN(32) uint8_t prec[DILITHIUM_CONTEXT_SIZE] = { 0U };
 
         /* prepare pre = (0, ctxlen, ctx) */
         prec[0U] = 0U;
-        prec[1U] = (uint8_t)contextlen;
+        prec[1U] = (uint8_t)ctxlen;
 
-        if (context != NULL)
+        if (context != NULL && ctxlen != 0)
         {
-            qsc_memutils_copy(prec + 2U, context, contextlen);
+            qsc_memutils_copy(prec + 2U, context, ctxlen);
         }
 
         if (smlen >= DILITHIUM_SIGNATURE_SIZE)
         {
-            *mlen = smlen - DILITHIUM_SIGNATURE_SIZE;
-            res = qsc_dilithium_avx2_verify(sm, DILITHIUM_SIGNATURE_SIZE, sm + DILITHIUM_SIGNATURE_SIZE, *mlen, prec, contextlen + 2U, pk);
+            *msglen = smlen - DILITHIUM_SIGNATURE_SIZE;
+            res = qsc_dilithium_avx2_verify(sm, DILITHIUM_SIGNATURE_SIZE, sm + DILITHIUM_SIGNATURE_SIZE, *msglen, prec, ctxlen + 2U, pk);
 
             if (res == true)
             {
                 /* All good, copy msg, return 0 */
-                qsc_memutils_copy(m, sm + DILITHIUM_SIGNATURE_SIZE, *mlen);
+                qsc_memutils_copy(message, sm + DILITHIUM_SIGNATURE_SIZE, *msglen);
             }
         }
     }
 
     if (res == false)
     {
-        qsc_memutils_clear(m, smlen - DILITHIUM_SIGNATURE_SIZE);
+        qsc_memutils_clear(message, smlen - DILITHIUM_SIGNATURE_SIZE);
     }
 
     return res;
