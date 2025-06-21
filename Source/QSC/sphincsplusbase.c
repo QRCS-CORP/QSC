@@ -922,6 +922,7 @@ static void sphincsplus_base_w(uint32_t* output, const int out_len, const uint8_
     in = 0;
     out = 0;
     bits = 0;
+    total = 0;
 
     for (consumed = 0; consumed < out_len; consumed++) 
     {
