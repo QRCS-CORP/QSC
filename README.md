@@ -32,6 +32,8 @@ QSC is a compact and self-contained library written in C. It has been developed 
 
 This implementation uses both a base reference code and optimized AVX/AVX2/AVX512 intrinsics for maximum performance. For best results, set your project properties to utilize the highest available SIMD instruction set supported by your CPU—AVX-512 instructions are fully supported and offer the best performance profile.
 
+Written to high-security standards (MISRA), and intended as a solution for environments that require a strong guarantee of long-term security and implementation correctness. The QSC library is set apart from the alternatives, incorporating the strongest cryptographic primitives available in the world today.
+
 
 ## Version
 
@@ -46,7 +48,7 @@ _All asymmetric ciphers and signature schemes have been updated to new FIPS stan
 ## Projects
 Included in the distrubution are three Visual Studio projects.   
 ### QSCTEST 
-Tests all of the **cryptographic primitives**, asymmetric ciphers, signature schemes, symmetric ciphers, MAC functions, DRBGs and random Providers.  
+Tests all of the **cryptographic primitives**, asymmetric ciphers, signature schemes, symmetric ciphers, MAC functions, DRBGs and random Providers. Runs for known answer tests, fuzzing, stress testing, and function correctness across the entire library.  
 
 ### QSCCAVP 
 Tests NIST certified components using the vector sets from the current CAVP and ACVP test vectors.
