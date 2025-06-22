@@ -72,7 +72,6 @@ A **C#** .NET wrapper written in **managed C++**. The wrapper allows .NET access
 - **Digital Signature Schemes:**  
   - **Sphincs+:** Post-quantum secure signature scheme (updated to NIST FIPS-205 standards).  
   - **Dilithium:** Lattice-based signature scheme (updated to NIST FIPS-204 standards).  
-  - **Falcon:** NTRU-based signature scheme.  
   - **ECDSA (Ed25519):** Elliptic Curve Digital Signature Algorithm.
 
 ### Symmetric Cryptography
