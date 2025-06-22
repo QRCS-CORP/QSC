@@ -44,13 +44,13 @@ Tested on:
 _All asymmetric ciphers and signature schemes have been updated to new FIPS standards for the winners, and NIST PQC Round 3 standards for last round contenders._
 
 ## Projects
-Included in the distrubution are three Visual Studio projects:  
+Included in the distrubution are three Visual Studio projects.   
 ### QSCTEST 
 Tests all of the cryptographic primitives, asymmetric ciphers, signature schemes, symmetric ciphers, MAC functions, DRBGs and random Providers.  
 
 ### QSCCAVP 
 Tests NIST certified components using the vector sets from the current CAVP and ACVP test vectors.
-This includes the symmetric primitives: 
+This includes the symmetric primitives:  
 **Hash, MAC, and XOF Functions:** SHA2, HMAC, SHA3, SHAKE, cSHAKE, and KMAC.  
 **Symmetric Cipher:** AES, GMAC, and GCM, CTR, CBC modes.  
 **Asymmetric Signature Schemes:** ML-DSA (Dilithium) and SLH-DSA (SPHINCS+) both tested with the ACVP FIPS-204 and FIPS-205 vector sets.  
