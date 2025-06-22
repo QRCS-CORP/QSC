@@ -65,8 +65,7 @@ A **C#** .NET wrapper written in **managed C++**. The wrapper allows .NET access
 
 - **Key Encapsulation Mechanisms:**  
   - **McEliece:** Niederreiter dual form of the McEliece public key crypto-system.  
-  - **Kyber:** Module-LWE based key encapsulation (updated to NIST FIPS-203 standards).  
-  - **NTRU:** Asymmetric cipher implementation.  
+  - **Kyber:** Module-LWE based key encapsulation (updated to NIST FIPS-203 standards).   
   - **ECDH:** Elliptic Curve Diffie-Hellman key exchange.
 
 - **Digital Signature Schemes:**  
