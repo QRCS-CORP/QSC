@@ -1250,6 +1250,9 @@ static void kyber_gen_matrix_avx2(qsc_kyber_polyvec* a, const uint8_t seed[QSC_K
 
         qsc_memutils_clear(ksa, sizeof(ksa));
     }
+
+    qsc_memutils_clear(buf, sizeof(buf));
+    qsc_memutils_clear(extseed, sizeof(extseed));
 }
 
 static void kyber_indcpa_enc(uint8_t c[QSC_KYBER_INDCPA_BYTES], const uint8_t m[QSC_KYBER_MSGBYTES],
@@ -1271,6 +1274,7 @@ static void kyber_indcpa_enc(uint8_t c[QSC_KYBER_INDCPA_BYTES], const uint8_t m[
     kyber_unpack_pk(&pkpv, seed, pk);
     kyber_poly_from_msg_avx2(&k, m);
     kyber_gen_matrix_avx2(at, seed, 1);
+    qsc_memutils_clear(seed, sizeof(seed));
 
     for (i = 0U; i < QSC_KYBER_K; ++i)
     {
@@ -1443,6 +1447,7 @@ static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], u
 
     kyber_pack_sk(sk, &skpv);
     kyber_pack_pk(pk, &pkpv, publicseed);
+    qsc_memutils_clear(buf, sizeof(buf));
 }
 
 bool qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
@@ -1460,6 +1465,7 @@ bool qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint
         qsc_sha3_compute256(sk + QSC_KYBER_SECRETKEY_BYTES - 2U * QSC_KYBER_SYMBYTES, pk, QSC_KYBER_PUBLICKEY_BYTES);
         /* Value z for pseudo-random output on reject */
         qsc_memutils_copy(sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, coins + QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
+        qsc_memutils_clear(coins, sizeof(coins));
         res = true;
     }
 
@@ -1492,8 +1498,10 @@ bool qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t 
 
         /* coins are in kr+QSC_KYBER_SYMBYTES */
         kyber_indcpa_enc(ct, buf, pk, kr + QSC_KYBER_SYMBYTES);
+        qsc_memutils_clear(buf, sizeof(buf));
 
         qsc_memutils_copy(ss, kr, QSC_KYBER_SYMBYTES);
+        qsc_memutils_clear(kr, sizeof(kr));
         res = true;
     }
 
@@ -1513,7 +1521,9 @@ void qsc_kyber_avx2_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], u
 
     /* coins are in kr + QSC_KYBER_SYMBYTES */
     kyber_indcpa_enc(ct, buf, pk, kr + QSC_KYBER_SYMBYTES);
+    qsc_memutils_clear(buf, sizeof(buf));
     qsc_memutils_copy(ss, kr, QSC_KYBER_SYMBYTES);
+    qsc_memutils_clear(kr, sizeof(kr));
 
 }
 
@@ -1534,11 +1544,13 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
 
     /* coins are in kr+QSC_KYBER_SYMBYTES */
     kyber_indcpa_enc(cmp + QSC_KYBER_SYMBYTES, buf, pk, kr + QSC_KYBER_SYMBYTES);
+    qsc_memutils_clear(buf, sizeof(buf));
 
     fail = kyber_verify_avx2(ct, cmp + QSC_KYBER_SYMBYTES, QSC_KYBER_CIPHERTEXT_BYTES);
 
     qsc_memutils_copy(cmp, sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
     qsc_keccak_absorb(&kctx, qsc_keccak_rate_256, cmp, sizeof(cmp), QSC_KECCAK_SHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
+    qsc_memutils_clear(cmp, sizeof(cmp));
     qsc_keccak_permute(&kctx, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)
@@ -1551,6 +1563,7 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
 #endif
 
     kyber_cmov_avx2(ss, kr, QSC_KYBER_SYMBYTES, (uint8_t)!fail);
+    qsc_memutils_clear(kr, sizeof(kr));
 
     return (fail == 0);
 }

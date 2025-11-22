@@ -117,35 +117,25 @@ QSC_CPLUSPLUS_ENABLED_START
 /* Enable one of the authentication options: 
    a 24 round KMAC, a reduced rounds KMAC, or the QMAC post quantum GMAC function */
 #if defined(QSC_RCS_AUTHENTICATED)
-///*!
-// * \def QSC_RCS_AUTH_KMACR24
-// * \brief Sets the authentication mode to standard KMAC-R24.
-// * Remove this definition to enable the reduced rounds version using KMAC-R12.
-// */
-//#	define QSC_RCS_AUTH_KMACR24
+/*!
+ * \def QSC_RCS_AUTH_KMACR24
+ * \brief Sets the authentication mode to standard KMAC-R24.
+ * Remove this definition to enable the reduced rounds version using KMAC-R12.
+ */
+#	define QSC_RCS_AUTH_KMACR24
 
 ///*!
 // * \def QSC_RCS_AUTH_KMACR12
 // * \brief Enables the reduced rounds KMAC-R12 implementation.
 // */
 //#	define QSC_RCS_AUTH_KMACR12
-
-/*!
- * \def QSC_RCS_AUTH_QMAC
- * \brief Enables the reduced rounds QMAC implementation.
- */
- #	define QSC_RCS_AUTH_QMAC
 #endif
 
 /* The default authentication MAC */
 #if defined(QSC_RCS_AUTHENTICATED)
-#	if !defined(QSC_RCS_AUTH_KMACR24) && !defined(QSC_RCS_AUTH_KMACR12) && !defined(QSC_RCS_AUTH_QMAC)
+#	if !defined(QSC_RCS_AUTH_KMACR24) && !defined(QSC_RCS_AUTH_KMACR12)
 #		define QSC_RCS_AUTH_KMACR24
 #	endif
-#endif
-
-#if defined(QSC_RCS_AUTH_QMAC)
-#	include "qmac.h"
 #endif
 
 /***********************************
@@ -176,19 +166,11 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_RCS512_KEY_SIZE 64U
 
-#if defined(QSC_RCS_AUTH_QMAC)
-/*!
- * \def QSC_RCS512_MAC_SIZE
- * \brief The RCS-512 MAC code array length in bytes.
- */
-#define QSC_RCS512_MAC_SIZE 32U
-#else
 /*!
  * \def QSC_RCS512_MAC_SIZE
  * \brief The RCS-512 MAC code array length in bytes.
  */
 #define QSC_RCS512_MAC_SIZE 64U
-#endif
 
 /*!
  * \def QSC_RCS_NONCE_SIZE
@@ -238,11 +220,7 @@ QSC_EXPORT_API typedef struct
 #endif
 	size_t roundkeylen;					/*!< The round-key array length. */
 	size_t rounds;						/*!< The number of transformation rounds. */
-#if defined(QSC_RCS_AUTH_QMAC)
-	qsc_qmac_state kstate;				/*!< The QMAC state structure. */
-#else
 	qsc_keccak_state kstate;			/*!< The Keccak state structure. */
-#endif
 	uint8_t nonce[QSC_RCS_NONCE_SIZE];	/*!< The nonce or initialization vector. */
 	uint64_t counter;					/*!< The processed bytes counter. */
 	bool encrypt;						/*!< The transformation mode; true for encryption. */

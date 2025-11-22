@@ -1,5 +1,6 @@
 #include "ecdhbase.h"
 #include "ecdh.h"
+#include "memutils.h"
 
 bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey)
 {
@@ -25,7 +26,7 @@ bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 	QSC_ASSERT(publickey != NULL);
 	QSC_ASSERT(rng_generate != NULL);
 
-	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0U };
+	QSC_CACHE_ALIGNED uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0U };
 	bool res;
 
 	res = false;
@@ -35,6 +36,7 @@ bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 		if (rng_generate(seed, sizeof(seed)))
 		{
 			qsc_ed25519_generate_keypair(publickey, privatekey, seed);
+			qsc_memutils_clear(seed, QSC_ECDH_SEED_SIZE);
 			res = true;
 		}
 	}

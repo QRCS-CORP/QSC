@@ -535,8 +535,6 @@ static void csx_mac_update(qsc_csx_state* ctx, const uint8_t* input, size_t leng
 	qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 #elif defined(QSC_CSX_AUTH_KMAC24)
 	qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, input, length);
-#else
-	qsc_qmac_update(&ctx->kstate, input, length);
 #endif
 }
 
@@ -698,9 +696,6 @@ static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 #elif defined(QSC_CSX_AUTH_KMAC24)
 	/* finalize the mac and append code to output */
 	qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_CSX_MAC_SIZE);
-#else
-	/* finalize the mac and append code to output */
-	qsc_qmac_finalize(&ctx->kstate, output);
 #endif
 }
 #endif
@@ -715,11 +710,7 @@ void qsc_csx_dispose(qsc_csx_state* ctx)
 	if (ctx != NULL)
 	{
 #if defined(QSC_CSX_AUTHENTICATED)
-#	if defined(QSC_CSX_AUTH_QMAC)
-		qsc_qmac_dispose(&ctx->kstate);
-#	else
 		qsc_keccak_dispose(&ctx->kstate);
-#	endif
 #endif
 
 		qsc_intutils_clear64(ctx->state, QSC_CSX_STATE_SIZE);
@@ -783,10 +774,6 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 		qsc_memutils_clear(mck, sizeof(mck));
 #	elif defined(QSC_CSX_AUTH_KMAC24)
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0U);
-		qsc_memutils_clear(mck, sizeof(mck));
-#	else
-		qsc_qmac_keyparams pk = { mck, QSC_CSX_KEY_SIZE, keyparams->nonce, QSC_CSX_NONCE_SIZE, NULL, 0U, qsc_qmac_mode_512 };
-		qsc_qmac_initialize(&ctx->kstate, &pk);
 		qsc_memutils_clear(mck, sizeof(mck));
 #	endif
 

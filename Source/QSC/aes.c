@@ -772,7 +772,7 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 
 /* rijndael rcon, and s-box constant tables */
 
-static const uint32_t rcon[30U] =
+static const QSC_CACHE_ALIGNED uint32_t rcon[30U] =
 {
 	0x00000000UL, 0x01000000UL, 0x02000000UL, 0x04000000UL, 0x08000000UL, 0x10000000UL, 0x20000000UL, 0x40000000UL,
 	0x80000000UL, 0x1B000000UL, 0x36000000UL, 0x6C000000UL, 0xD8000000UL, 0xAB000000UL, 0x4D000000UL, 0x9A000000UL,
@@ -1974,6 +1974,7 @@ static void aes_hba256_finalize(qsc_aes_hba256_state* ctx, uint8_t* output)
 	qsc_hkdf256_extract(mkey, HBA256_MKEY_SIZE, ctx->mkey, sizeof(ctx->mkey), tmpn, HBA_NAME_SIZE);
 	/* key HKDF Expand and generate the next mac-key to ctx */
 	qsc_hkdf256_expand(ctx->mkey, sizeof(ctx->mkey), mkey, HBA256_MKEY_SIZE, ctx->cust, ctx->custlen);
+	qsc_memutils_clear(mkey, sizeof(mkey));
 #endif
 }
 
@@ -1996,6 +1997,7 @@ static void aes_hba256_genkeys(const qsc_aes_keyparams* keyparams, uint8_t* cprk
 	qsc_memutils_copy(mack, sbuf, HBA256_MKEY_SIZE);
 	/* clear the shake buffer */
 	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
+	qsc_memutils_clear(sbuf, sizeof(sbuf));
 
 #else
 
@@ -2013,6 +2015,7 @@ static void aes_hba256_genkeys(const qsc_aes_keyparams* keyparams, uint8_t* cprk
 	qsc_memutils_copy(mack, kbuf + QSC_AES256_KEY_SIZE, HBA256_MKEY_SIZE);
 
 	/* clear the buffer */
+	qsc_memutils_clear(genk, sizeof(genk));
 	qsc_memutils_clear(kbuf, sizeof(kbuf));
 
 #endif
@@ -2078,6 +2081,7 @@ void qsc_aes_hba256_initialize(qsc_aes_hba256_state* ctx, const qsc_aes_keyparam
 		/* the ctx counter always initializes at 1 */
 		ctx->counter = 1U;
 		ctx->encrypt = encrypt;
+		qsc_memutils_clear(cprk, sizeof(cprk));
 	}
 }
 
@@ -2443,6 +2447,7 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 		ctx->ctlen += ((uint64_t)length) * sizeof(uint64_t);
 
 		aes_gcm256_finalize(ctx, output + length);
+		qsc_memutils_clear(keystream, sizeof(keystream));
 	}
 }
 
@@ -2494,6 +2499,8 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 			{
 				ghash_update(ctx->J0, ivbuf + i, ctx->H);
 			}
+
+			qsc_memutils_clear(ivbuf, sizeof(ivbuf));
 		}
 
 		qsc_memutils_clear(ctx->S, QSC_AES_BLOCK_SIZE);

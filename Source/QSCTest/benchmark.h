@@ -89,10 +89,11 @@ void qsctest_benchmark_rcs_run(void);
 */
 void qsctest_benchmark_shake_run(void);
 
-/**
-* \brief Tests the QMAC implementations performance.
-* Tests the QMAC implementations for performance timing.
-*/
-void qsctest_benchmark_qmac_run(void);
+/* QMAC removed for further development */
+///**
+//* \brief Tests the QMAC implementations performance.
+//* Tests the QMAC implementations for performance timing.
+//*/
+//void qsctest_benchmark_qmac_run(void);
 
 #endif

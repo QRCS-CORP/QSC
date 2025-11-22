@@ -4,7 +4,7 @@
 #include "chacha.h"
 #include "csp.h"
 #include "csx.h"
-#include "qmac.h"
+//#include "qmac.h"
 #include "rcs.h"
 #include "sha3.h"
 #include "timerex.h"
@@ -853,32 +853,33 @@ static void shake512x4_benchmark()
 }
 #endif
 
-static void qmac_benchmark()
-{
-	QSC_SIMD_ALIGN uint8_t key[QSC_QMAC_KEY_SIZE] = { 0x03, 0x05, 0x07, 0x0B };
-	QSC_SIMD_ALIGN uint8_t msg[QSC_QMAC_BLOCK_SIZE] = { 0x0D, 0x11, 0x13, 0x17 };
-	qsc_qmac_state ctx;
-	size_t tctr;
-	uint64_t start;
-	uint64_t elapsed;
-
-	tctr = 0;
-	qsc_qmac_keyparams kp = { .key = key, .keylen = sizeof(key) };
-	start = qsc_timerex_stopwatch_start();
-
-	qsc_qmac_initialize(&ctx, &kp);
-
-	while (tctr < ONE_GIGABYTE)
-	{
-		qsc_qmac_update(&ctx, msg, QSC_QMAC_BLOCK_SIZE);
-		tctr += QSC_QMAC_BLOCK_SIZE;
-	}
-
-	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("QMAC processed 1GB of data in ");
-	qsctest_print_double((double)elapsed / 1000.0);
-	qsctest_print_line(" seconds");
-}
+/* QMAC removed for further development */
+//static void qmac_benchmark()
+//{
+//	QSC_SIMD_ALIGN uint8_t key[QSC_QMAC_KEY_SIZE] = { 0x03, 0x05, 0x07, 0x0B };
+//	QSC_SIMD_ALIGN uint8_t msg[QSC_QMAC_BLOCK_SIZE] = { 0x0D, 0x11, 0x13, 0x17 };
+//	qsc_qmac_state ctx;
+//	size_t tctr;
+//	uint64_t start;
+//	uint64_t elapsed;
+//
+//	tctr = 0;
+//	qsc_qmac_keyparams kp = { .key = key, .keylen = sizeof(key) };
+//	start = qsc_timerex_stopwatch_start();
+//
+//	qsc_qmac_initialize(&ctx, &kp);
+//
+//	while (tctr < ONE_GIGABYTE)
+//	{
+//		qsc_qmac_update(&ctx, msg, QSC_QMAC_BLOCK_SIZE);
+//		tctr += QSC_QMAC_BLOCK_SIZE;
+//	}
+//
+//	elapsed = qsc_timerex_stopwatch_elapsed(start);
+//	qsctest_print_safe("QMAC processed 1GB of data in ");
+//	qsctest_print_double((double)elapsed / 1000.0);
+//	qsctest_print_line(" seconds");
+//}
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 static void shake128x8_benchmark()
@@ -1058,8 +1059,8 @@ void qsctest_benchmark_shake_run()
 #endif
 }
 
-void qsctest_benchmark_qmac_run()
-{
-	qsctest_print_line("Running the QMAC performance benchmarks.");
-	qmac_benchmark();
-}
+//void qsctest_benchmark_qmac_run()
+//{
+//	qsctest_print_line("Running the QMAC performance benchmarks.");
+//	qmac_benchmark();
+//}

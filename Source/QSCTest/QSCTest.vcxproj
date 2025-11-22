@@ -279,7 +279,6 @@
     <ClCompile Include="netutils_test.c" />
     <ClCompile Include="nistrng.c" />
     <ClCompile Include="poly1305_test.c" />
-    <ClCompile Include="qmac_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
     <ClCompile Include="scb_test.c" />
@@ -309,7 +308,6 @@
     <ClInclude Include="netutils_test.h" />
     <ClInclude Include="nistrng.h" />
     <ClInclude Include="poly1305_test.h" />
-    <ClInclude Include="qmac_test.h" />
     <ClInclude Include="rcs_test.h" />
     <ClInclude Include="scb_test.h" />
     <ClInclude Include="secrand_test.h" />

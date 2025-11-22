@@ -1405,7 +1405,7 @@ static void ge25519_cmov8_base(qsc_ge25519_precomp* t, const int32_t pos, const 
 {
 	QSC_ASSERT(t != NULL);
 
-	static const QSC_SIMD_ALIGN qsc_ge25519_precomp base[32U][8U] =
+	static const QSC_CACHE_ALIGNED qsc_ge25519_precomp base[32U][8U] =
 	{
 		{ /* 0/31 */
 		  {
@@ -2819,7 +2819,7 @@ void qsc_ge25519_scalarmult_base(qsc_ge25519_p3* h, const uint8_t* a)
 	QSC_ASSERT(h != NULL);
 	QSC_ASSERT(a != NULL);
 
-	QSC_SIMD_ALIGN signed char e[64U] = { 0 };
+	QSC_CACHE_ALIGNED signed char e[64U] = { 0 };
 	signed char carry;
 	qsc_ge25519_p1p1 r = { 0 };
 	qsc_ge25519_p2 s = { 0 };
@@ -2910,7 +2910,7 @@ int32_t qsc_ge25519_is_canonical(const uint8_t* s)
 
 int32_t qsc_ge25519_has_small_order(const uint8_t s[32U])
 {
-	static const QSC_SIMD_ALIGN uint8_t blocklist[][32U] =
+	static const QSC_CACHE_ALIGNED uint8_t blocklist[][32U] =
 	{
 		/* 0 (order 4) */
 		{
@@ -3120,7 +3120,7 @@ void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, 
 	QSC_ASSERT(A != NULL);
 	QSC_ASSERT(b != NULL);
 
-	static const QSC_SIMD_ALIGN qsc_ge25519_precomp Bi[8U] =
+	static const QSC_CACHE_ALIGNED qsc_ge25519_precomp Bi[8U] =
 	{
 		{
 		  { 25967493, -14356035, 29566456, 3660896, -12694345, 4014787, 27544626, -11754271, -6079156, 2047605 },
@@ -3164,8 +3164,8 @@ void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, 
 		}
 	};
 
-	QSC_SIMD_ALIGN int8_t aslide[256U] = { 0 };
-	QSC_SIMD_ALIGN int8_t bslide[256U] = { 0 };
+	QSC_CACHE_ALIGNED int8_t aslide[256U] = { 0 };
+	QSC_CACHE_ALIGNED int8_t bslide[256U] = { 0 };
 	qsc_ge25519_cached Ai[8U] = { 0 };
 	qsc_ge25519_p1p1 t;
 	qsc_ge25519_p3 u;
@@ -3303,7 +3303,7 @@ int32_t qsc_ed25519_small_order(const uint8_t s[32U])
 	 * unexpected optimizations that would affect the ref10 code.
 	 * See https://eprint.iacr.org/2017/806.pdf for reference.
 	 */
-	static const QSC_SIMD_ALIGN uint8_t blocklist[][32U] =
+	static const QSC_CACHE_ALIGNED uint8_t blocklist[][32U] =
 	{
 		/* 0 (order 4) */
 		{
@@ -3379,7 +3379,7 @@ int32_t qsc_ed25519_small_order(const uint8_t s[32U])
 
 int32_t qsc_sc25519_is_canonical(const uint8_t s[32U])
 {
-	static const QSC_SIMD_ALIGN uint8_t L[32U] =
+	static const QSC_CACHE_ALIGNED uint8_t L[32U] =
 	{
 		0xEDU, 0xD3U, 0xF5U, 0x5CU, 0x1AU, 0x63U, 0x12U, 0x58U, 0xD6U, 0x9CU, 0xF7U,
 		0xA2U, 0xDEU, 0xF9U, 0xDEU, 0x14U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,

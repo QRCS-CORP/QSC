@@ -126,9 +126,6 @@
     <ClCompile Include="Poly1305.cpp">
       <Filter>Source Files\MAC</Filter>
     </ClCompile>
-    <ClCompile Include="QMAC.cpp">
-      <Filter>Source Files\MAC</Filter>
-    </ClCompile>
     <ClCompile Include="RCS.cpp">
       <Filter>Source Files\Cipher</Filter>
     </ClCompile>
@@ -214,9 +211,6 @@
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
     <ClInclude Include="Poly1305.h">
-      <Filter>Header Files\MAC</Filter>
-    </ClInclude>
-    <ClInclude Include="QMAC.h">
       <Filter>Header Files\MAC</Filter>
     </ClInclude>
     <ClInclude Include="RCS.h">

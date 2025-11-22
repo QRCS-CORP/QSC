@@ -402,7 +402,7 @@ bool qsc_fileutils_file_copy(const char* inpath, const char* outpath)
 
 				if (len > 0U)
 				{
-					if (qsc_fileutils_copy_stream_to_file(outpath, pfs, len) == false)
+					if (qsc_fileutils_copy_stream_to_file(outpath, (const char*)pfs, len) == false)
 					{
 						len = 0U;
 					}
@@ -1340,7 +1340,7 @@ void qsc_fileutils_test(const char* fpath)
 	{
 		qsc_csp_generate(rnd, sizeof(rnd));
 
-		if (qsc_fileutils_copy_stream_to_file(fpath, (char*)rnd, sizeof(rnd)) == true)
+		if (qsc_fileutils_copy_stream_to_file(fpath, (const char*)rnd, sizeof(rnd)) == true)
 		{
 			qsc_consoleutils_print_line("Success: copied random sample to file.");
 

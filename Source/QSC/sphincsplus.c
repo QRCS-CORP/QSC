@@ -1,5 +1,6 @@
 #include "sphincsplus.h"
 #include "sphincsplusbase.h"
+#include "memutils.h"
 
 bool qsc_sphincsplus_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
@@ -55,6 +56,7 @@ bool qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* me
 		if (rng_generate(seed, sizeof(seed)))
 		{
 			res = sphincsplus_ref_sign(signedmsg, smsglen, message, msglen, NULL, 0U, privatekey, seed);
+			qsc_memutils_clear(seed, sizeof(seed));
 		}
 	}
 
@@ -79,6 +81,7 @@ bool qsc_sphincsplus_sign_ex(uint8_t* signedmsg, size_t* smsglen, const uint8_t*
 		if (rng_generate(seed, sizeof(seed)))
 		{
 			res = sphincsplus_ref_sign(signedmsg, smsglen, message, msglen, context, cxtlen, privatekey, seed);
+			qsc_memutils_clear(seed, sizeof(seed));
 		}
 	}
 	

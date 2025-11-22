@@ -72,7 +72,7 @@
 #include "mceliece_test.h"
 #include "netutils_test.h"
 #include "poly1305_test.h"
-#include "qmac_test.h"
+//#include "qmac_test.h"
 #include "rcs_test.h"
 #include "scb_test.h"
 #include "secrand_test.h"
@@ -88,9 +88,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.8a (A7)                       *");
+	qsctest_print_line("* Release:   v1.0.0.8b (A7)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      June 20, 2025                        *");
+	qsctest_print_line("* Date:      November 21, 2025                    *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -138,7 +138,7 @@ static void primitives_test(void)
 	qsctest_sha3_run();
 
 	qsctest_poly1305_run();
-	qsctest_qmac_run();
+	//qsctest_qmac_run();
 
 	qsctest_ecdh_run();
 	qsctest_kyber_run();
@@ -295,9 +295,10 @@ int32_t main(void)
 			qsctest_poly1305_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the QMAC implementation using the official known answer tests ***");
-			qsctest_qmac_run();
-			qsctest_print_line("");
+			/* QMAC removed for further development */
+			//qsctest_print_line("*** Test the QMAC implementation using the official known answer tests ***");
+			//qsctest_qmac_run();
+			//qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Secure Random provider and entropy provider implementations ***");
 			qsctest_secrand_run();
@@ -345,6 +346,10 @@ int32_t main(void)
 
 		if (qsctest_test_confirm("Press 'Y' then Enter to run Symmetric Speed Tests, any other key to cancel: ") == true)
 		{
+#if !defined(QSC_SYSTEM_AVX_INTRINSICS)
+			qsctest_print_line("System intrinsics have not been enabled, timings will be significantly slower!");
+			qsctest_print_line("Enable the highest supported instruction set on the library and test project AVX/AVX2/AVX-512.");
+#endif
 			qsctest_print_line("Testing symmetric stream ciphers..");
 			qsctest_benchmark_chacha_run();
 			qsctest_print_line("");

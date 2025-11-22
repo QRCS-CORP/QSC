@@ -7,9 +7,9 @@
 
 static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk)
 {
-	QSC_SIMD_ALIGN uint8_t az[64U] = { 0U };
-	QSC_SIMD_ALIGN uint8_t nonce[64U] = { 0U };
-	QSC_SIMD_ALIGN uint8_t hram[64U] = { 0U };
+	QSC_CACHE_ALIGNED uint8_t az[64U] = { 0U };
+	QSC_CACHE_ALIGNED uint8_t nonce[64U] = { 0U };
+	QSC_CACHE_ALIGNED uint8_t hram[64U] = { 0U };
 	qsc_sha512_state ctx;
 	qsc_ge25519_p3 R;
 
@@ -62,8 +62,8 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t mlen, const uint8_t* pk)
 {
 	qsc_sha512_state ctx;
-	QSC_SIMD_ALIGN uint8_t h[64U] = { 0U };
-	QSC_SIMD_ALIGN uint8_t rcheck[32U] = { 0U };
+	QSC_CACHE_ALIGNED uint8_t h[64U] = { 0U };
+	QSC_CACHE_ALIGNED uint8_t rcheck[32U] = { 0U };
 	qsc_ge25519_p3 A;
 	qsc_ge25519_p2 R;
 	bool res;

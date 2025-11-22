@@ -1841,6 +1841,7 @@ bool qsc_dilithium_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_ge
 
         /* Compute CRH(rho, t1) and store in secret key */
         qsc_shake256_compute(sk + (2U * DILITHIUM_SEEDBYTES), DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
+        qsc_memutils_clear(seedbuf, sizeof(seedbuf));
     }
 
     return res;
@@ -1922,6 +1923,7 @@ void qsc_dilithium_avx2_seeded_generate_keypair(uint8_t* pk, uint8_t* sk, const 
 
     /* Compute CRH(rho, t1) and store in secret key */
     qsc_shake256_compute(sk + (2U * DILITHIUM_SEEDBYTES), DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
+    qsc_memutils_clear(seedbuf, sizeof(seedbuf));
 }
 
 bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
@@ -2109,6 +2111,7 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     }
     
     *siglen = DILITHIUM_SIGNATURE_SIZE;
+    qsc_memutils_clear(seedbuf, sizeof(seedbuf));
 
     return res;
 }

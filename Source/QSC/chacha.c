@@ -1003,6 +1003,7 @@ void qsc_chacha_poly1305_initialize(qsc_chacha_poly1305_state* ctx, const qsc_ch
 		qsc_chacha_initialize(&ctx->cstate, keyparams);
 		qsc_chacha_transform(&ctx->cstate, pkey, ptxt, sizeof(pkey));
 		qsc_poly1305_initialize(&ctx->pstate, pkey);
+		qsc_memutils_clear(pkey, sizeof(pkey));
 	}
 }
 

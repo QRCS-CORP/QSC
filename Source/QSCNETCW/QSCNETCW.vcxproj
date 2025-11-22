@@ -177,7 +177,6 @@
     <ClCompile Include="McEliece.cpp" />
     <ClCompile Include="MemUtils.cpp" />
     <ClCompile Include="Poly1305.cpp" />
-    <ClCompile Include="QMAC.cpp" />
     <ClCompile Include="RCS.cpp" />
     <ClCompile Include="RDP.cpp" />
     <ClCompile Include="SCB.cpp" />
@@ -211,7 +210,6 @@
     <ClInclude Include="McEliece.h" />
     <ClInclude Include="MemUtils.h" />
     <ClInclude Include="Poly1305.h" />
-    <ClInclude Include="QMAC.h" />
     <ClInclude Include="RCS.h" />
     <ClInclude Include="RDP.h" />
     <ClInclude Include="SCB.h" />

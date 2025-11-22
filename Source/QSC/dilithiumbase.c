@@ -125,7 +125,7 @@ typedef struct
     dilithium_poly vec[DILITHIUM_K];    /*!< The poly vector of K  */
 } dilithium_polyveck;
 
-static const int32_t dilithium_zetas[DILITHIUM_N] =
+static const QSC_CACHE_ALIGNED int32_t dilithium_zetas[DILITHIUM_N] =
 {
             0,    25847, -2608894,  -518909,   237124,  -777960,  -876248,   466468,
     1826347,  2353451,  -359251, -2091905,  3119733, -2884855,  3111497,  2680103,
@@ -278,6 +278,7 @@ static int32_t dilithium_use_hint(int32_t a, uint32_t hint)
 static void dilithium_shake128_stream_init(qsc_keccak_state* kctx, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
     uint8_t tn[2U];
+
     tn[0U] = (uint8_t)nonce;
     tn[1U] = nonce >> 8;
 
@@ -290,6 +291,7 @@ static void dilithium_shake128_stream_init(qsc_keccak_state* kctx, const uint8_t
 static void dilithium_shake256_stream_init(qsc_keccak_state* kctx, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
 {
     uint8_t tn[2U];
+
     tn[0U] = (uint8_t)nonce;
     tn[1U] = nonce >> 8;
 
@@ -521,7 +523,7 @@ static size_t dilithium_rej_uniform(int32_t* a, size_t len, const uint8_t* buf, 
 
 static void dilithium_poly_uniform(dilithium_poly* a, const uint8_t seed[DILITHIUM_SEEDBYTES], uint16_t nonce)
 {
-    uint8_t buf[DILITHIUM_POLY_UNIFORM_NBLOCKS * QSC_KECCAK_128_RATE + 2U];
+    QSC_CACHE_ALIGNED uint8_t buf[DILITHIUM_POLY_UNIFORM_NBLOCKS * QSC_KECCAK_128_RATE + 2U];
     qsc_keccak_state kctx;
     size_t ctr;
     size_t off;
@@ -597,7 +599,7 @@ static size_t dilithium_rej_eta(int32_t* a, size_t len, const uint8_t* buf, size
 
 static void dilithium_poly_challenge(dilithium_poly* c, const uint8_t seed[DILITHIUM_CTILDEBYTES])
 {
-    uint8_t buf[QSC_KECCAK_256_RATE];
+    QSC_CACHE_ALIGNED uint8_t buf[QSC_KECCAK_256_RATE];
     qsc_keccak_state kctx;
     uint64_t signs;
     size_t i;
@@ -931,7 +933,7 @@ static void dilithium_polyw1_pack(uint8_t* r, const dilithium_poly* a)
 
 static void dilithium_poly_uniform_eta(dilithium_poly* a, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
 {
-    uint8_t buf[DILITHIUM_POLY_UNIFORM_ETA_NBLOCKS * QSC_KECCAK_256_RATE];
+    QSC_CACHE_ALIGNED uint8_t buf[DILITHIUM_POLY_UNIFORM_ETA_NBLOCKS * QSC_KECCAK_256_RATE];
     qsc_keccak_state kctx;
     size_t ctr;
     size_t buflen;
@@ -951,7 +953,7 @@ static void dilithium_poly_uniform_eta(dilithium_poly* a, const uint8_t seed[DIL
 
 static void dilithium_poly_uniform_gamma1(dilithium_poly* a, const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce)
 {
-    uint8_t buf[DILITHIUM_POLY_UNIFORM_GAMMA1_NBLOCKS * QSC_KECCAK_256_RATE];
+    QSC_CACHE_ALIGNED uint8_t buf[DILITHIUM_POLY_UNIFORM_GAMMA1_NBLOCKS * QSC_KECCAK_256_RATE];
     qsc_keccak_state kctx;
 
     dilithium_shake256_stream_init(&kctx, seed, nonce);
@@ -1429,8 +1431,8 @@ bool qsc_dilithium_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
     dilithium_polyveck s2;
     dilithium_polyveck t1;
     dilithium_polyveck t0;
-    uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_CRHBYTES];
-    uint8_t tr[DILITHIUM_TRBYTES];
+    QSC_CACHE_ALIGNED uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_CRHBYTES];
+    QSC_CACHE_ALIGNED uint8_t tr[DILITHIUM_TRBYTES];
     const uint8_t* rho;
     const uint8_t* rhoprime;
     const uint8_t* key;
@@ -1473,6 +1475,7 @@ bool qsc_dilithium_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
         /* Compute CRH(rho, t1) and write secret key */
         qsc_shake256_compute(tr, DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
         dilithium_pack_sk(sk, rho, tr, key, &t0, &s1, &s2);
+        qsc_memutils_clear(seedbuf, sizeof(seedbuf));
     }
 
     return res;
@@ -1486,8 +1489,8 @@ void qsc_dilithium_ref_seeded_generate_keypair(uint8_t* pk, uint8_t* sk, const u
     dilithium_polyveck s2;
     dilithium_polyveck t1;
     dilithium_polyveck t0;
-    uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_CRHBYTES];
-    uint8_t tr[DILITHIUM_TRBYTES];
+    QSC_CACHE_ALIGNED uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_CRHBYTES];
+    QSC_CACHE_ALIGNED uint8_t tr[DILITHIUM_TRBYTES];
     const uint8_t* rho;
     const uint8_t* rhoprime;
     const uint8_t* key;
@@ -1527,6 +1530,7 @@ void qsc_dilithium_ref_seeded_generate_keypair(uint8_t* pk, uint8_t* sk, const u
     /* Compute CRH(rho, t1) and write secret key */
     qsc_shake256_compute(tr, DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
     dilithium_pack_sk(sk, rho, tr, key, &t0, &s1, &s2);
+    qsc_memutils_clear(seedbuf, sizeof(seedbuf));
 }
 
 bool qsc_dilithium_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
@@ -1562,8 +1566,8 @@ bool qsc_dilithium_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* message, 
 
 bool qsc_dilithium_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-    uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_TRBYTES + (2U * DILITHIUM_CRHBYTES)];
-    dilithium_polyvecl mat[DILITHIUM_K];
+    QSC_CACHE_ALIGNED uint8_t seedbuf[(2U * DILITHIUM_SEEDBYTES) + DILITHIUM_TRBYTES + (2U * DILITHIUM_CRHBYTES)];
+    QSC_CACHE_ALIGNED dilithium_polyvecl mat[DILITHIUM_K];
     dilithium_polyvecl s1;
     dilithium_polyvecl y;
     dilithium_polyvecl z;
@@ -1696,17 +1700,18 @@ bool qsc_dilithium_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_
     /* write signature */
     dilithium_pack_sig(sig, sig, &z, &h);
     *siglen = DILITHIUM_SIGNATURE_SIZE;
+    qsc_memutils_clear(seedbuf, sizeof(seedbuf));
 
     return res;
 }
 
 bool qsc_dilithium_ref_verify(const uint8_t* sig, size_t siglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* pk)
 {
-    uint8_t buf[DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES];
-    uint8_t rho[DILITHIUM_SEEDBYTES];
-    uint8_t mu[DILITHIUM_CRHBYTES];
-    uint8_t c[DILITHIUM_CTILDEBYTES];
-    uint8_t c2[DILITHIUM_CTILDEBYTES];
+    QSC_CACHE_ALIGNED uint8_t buf[DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES];
+    QSC_CACHE_ALIGNED uint8_t rho[DILITHIUM_SEEDBYTES];
+    QSC_CACHE_ALIGNED uint8_t mu[DILITHIUM_CRHBYTES];
+    QSC_CACHE_ALIGNED uint8_t c[DILITHIUM_CTILDEBYTES];
+    QSC_CACHE_ALIGNED uint8_t c2[DILITHIUM_CTILDEBYTES];
     dilithium_polyvecl mat[DILITHIUM_K];
     dilithium_polyvecl z;
     dilithium_polyveck h;

@@ -54,7 +54,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * stream cipher extension. CSX-512 is a vectorized, 64-bit, 40-round stream cipher that uses a 
  * 512-bit input key, a 16-byte nonce, and an optional tweak (info) parameter. The cipher employs
  * the Keccak cSHAKE-512 extended output function (XOF) to expand the input cipher-key into both
- * the cipher key and the MAC key. It integrates a post-quantum secure MAC function (QMAC or KMAC) for message authentication, 
+ * the cipher key and the MAC key. It integrates a post-quantum secure MAC function (KMAC) for message authentication, 
  * operating in an encrypt-then-MAC configuration to provide authenticated encryption with associated data (AEAD).
  * In decryption mode, the MAC code embedded in the ciphertext is verified prior to decryption, ensuring data integrity and authenticity.
  *
@@ -92,25 +92,19 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /* Enable one of the authentication options: 
-   a 24 round KMAC, a reduced rounds KMAC, or the QMAC post quantum GMAC function */
+   a 24 round KMAC, a reduced rounds KMAC */
 #if defined(QSC_CSX_AUTHENTICATED)
-///*!
-//* \def QSC_CSX_AUTH_KMAC24
-//* \brief Sets the authentication mode to standard KMAC-R24.
-//*/
-//#	define QSC_CSX_AUTH_KMAC24
+/*!
+* \def QSC_CSX_AUTH_KMAC24
+* \brief Sets the authentication mode to standard KMAC-R24.
+*/
+#	define QSC_CSX_AUTH_KMAC24
 
 ///*!
 //\def QSC_CSX_AUTH_KMACR12
 //* \brief Enables the reduced rounds KMAC-R12 implementation.
 //*/
 //#	define QSC_CSX_AUTH_KMACR12
-
-/*!
-\def QSC_CSX_AUTH_QMAC
-* \brief Enables the reduced rounds QMAC implementation.
-*/
-#	define QSC_CSX_AUTH_QMAC
 #endif
 
 /*!
@@ -119,13 +113,9 @@ QSC_CPLUSPLUS_ENABLED_START
 * Unrem this flag to enable the reduced rounds KMAC implementation.
 */
 #if	defined(QSC_CSX_AUTHENTICATED)
-#	if !defined(QSC_CSX_AUTH_KMAC24) && !defined(QSC_CSX_AUTH_KMACR12) && !defined(QSC_CSX_AUTH_QMAC)
+#	if !defined(QSC_CSX_AUTH_KMAC24) && !defined(QSC_CSX_AUTH_KMACR12)
 #		define QSC_CSX_AUTH_KMAC24
 #	endif
-#endif
-
-#if defined(QSC_CSX_AUTH_QMAC)
-#	include "qmac.h"
 #endif
 
 /*!
@@ -146,19 +136,11 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 #define QSC_CSX_KEY_SIZE 64U
 
-#if defined(QSC_CSX_AUTH_QMAC)
-/*!
-* \def QSC_CSX_MAC_SIZE
-* \brief The CSX MAC code array length in bytes.
-*/
-#define QSC_CSX_MAC_SIZE 32U
-#else
 /*!
 \def QSC_CSX_MAC_SIZE
 * \brief The CSX-512 MAC code array length in bytes
 */
 #define QSC_CSX_MAC_SIZE 64U
-#endif
 
 /*!
 \def QSC_CSX_NONCE_SIZE
@@ -178,7 +160,7 @@ QSC_CPLUSPLUS_ENABLED_START
 * Use this structure to load an input cipher-key and optional info tweak, using the qsc_csx_initialize function.
 * Keys must be random and secret, and align to the corresponding key size of the cipher implemented.
 * The info parameter is optional, and can be a salt or cryptographic key.
-* The nonce is always QSC_CSX_BLOCK_SIZE in length.
+* The nonce is always QSC_CSX_NONCE_SIZE in length.
 */
 QSC_EXPORT_API typedef struct
 {
@@ -196,11 +178,7 @@ QSC_EXPORT_API typedef struct
 QSC_EXPORT_API typedef struct
 {
 	uint64_t state[QSC_CSX_STATE_SIZE];	/*!< the primary state array */
-#if defined(QSC_CSX_AUTH_QMAC)
-	qsc_qmac_state kstate;				/*!< the QMAC state structure */
-#else
 	qsc_keccak_state kstate;			/*!< the KMAC state structure */
-#endif
 	uint64_t counter;					/*!< the processed bytes counter */
 	bool encrypt;						/*!< the transformation mode; true for encryption */
 } qsc_csx_state;

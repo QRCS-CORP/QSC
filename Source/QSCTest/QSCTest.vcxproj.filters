@@ -96,9 +96,6 @@
     <ClCompile Include="scb_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="qmac_test.c">
-      <Filter>Source Files\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="encoding_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
@@ -177,9 +174,6 @@
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="scb_test.h">
-      <Filter>Header Files\Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="qmac_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="encoding_test.h">

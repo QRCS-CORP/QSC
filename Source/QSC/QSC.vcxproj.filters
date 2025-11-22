@@ -348,9 +348,6 @@
     <ClInclude Include="doxymain.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="qmac.h">
-      <Filter>Header Files\MAC</Filter>
-    </ClInclude>
     <ClInclude Include="poly1305.h">
       <Filter>Header Files\MAC</Filter>
     </ClInclude>
@@ -532,9 +529,6 @@
     </ClCompile>
     <ClCompile Include="winutils.c">
       <Filter>Source Files\Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="qmac.c">
-      <Filter>Source Files\MAC</Filter>
     </ClCompile>
     <ClCompile Include="poly1305.c">
       <Filter>Source Files\MAC</Filter>
