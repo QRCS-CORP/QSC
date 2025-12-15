@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [master]
   schedule:
-    - cron: '0 0 * * 0'     # optional weekly
+    - cron: '0 0 * * 0'
 
 permissions:
   actions: read
@@ -18,38 +18,43 @@ jobs:
     name: CodeQL ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v4
         with:
-          languages: c
+          languages: cpp
+          build-mode: manual
 
       # ---------- Linux ----------
       - name: Install build tools (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y cmake ninja-build build-essential
 
-      # ---------- Windows ----------
-      - name: Set MinGW in PATH (Windows)
-        if: runner.os == 'Windows'
-        run: echo "C:\\msys64\\mingw64\\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
       # ---------- macOS ----------
       - name: Install Ninja (macOS)
         if: runner.os == 'macOS'
         run: brew install ninja
 
-      # ---------- Configure & Build ----------
+      # ---------- Windows ----------
+      - name: Install Ninja (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ninja -y
+
+      # Make sure we actually compile (avoid incremental no-op builds)
+      - name: Clean build dir
+        run: cmake -E rm -rf build
+
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --clean-first
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v4
