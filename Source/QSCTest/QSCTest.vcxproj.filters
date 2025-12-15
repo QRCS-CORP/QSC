@@ -102,6 +102,9 @@
     <ClCompile Include="poly1305_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="qmac_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -180,6 +183,9 @@
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="poly1305_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="qmac_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>

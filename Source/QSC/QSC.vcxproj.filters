@@ -357,6 +357,9 @@
     <ClInclude Include="sphincsplusbase.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClInclude>
+    <ClInclude Include="qmac.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -538,6 +541,9 @@
     </ClCompile>
     <ClCompile Include="sphincsplusbase.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="qmac.c">
+      <Filter>Source Files\MAC</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

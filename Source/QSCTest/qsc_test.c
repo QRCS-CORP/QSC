@@ -72,7 +72,7 @@
 #include "mceliece_test.h"
 #include "netutils_test.h"
 #include "poly1305_test.h"
-//#include "qmac_test.h"
+#include "qmac_test.h"
 #include "rcs_test.h"
 #include "scb_test.h"
 #include "secrand_test.h"
@@ -88,9 +88,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.0.0.8b (A7)                       *");
+	qsctest_print_line("* Release:   v1.0.0.8c (A7)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      November 21, 2025                    *");
+	qsctest_print_line("* Date:      December 15, 2025                    *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -138,7 +138,7 @@ static void primitives_test(void)
 	qsctest_sha3_run();
 
 	qsctest_poly1305_run();
-	//qsctest_qmac_run();
+	qsctest_qmac_run();
 
 	qsctest_ecdh_run();
 	qsctest_kyber_run();

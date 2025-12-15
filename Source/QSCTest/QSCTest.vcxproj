@@ -279,6 +279,7 @@
     <ClCompile Include="netutils_test.c" />
     <ClCompile Include="nistrng.c" />
     <ClCompile Include="poly1305_test.c" />
+    <ClCompile Include="qmac_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
     <ClCompile Include="scb_test.c" />
@@ -295,6 +296,7 @@
     <ClInclude Include="async_test.h" />
     <ClInclude Include="chacha_test.h" />
     <ClInclude Include="benchmark.h" />
+    <ClInclude Include="qmac_test.h" />
     <ClInclude Include="qsctestcommon.h" />
     <ClInclude Include="csx_test.h" />
     <ClInclude Include="dilithium_test.h" />
