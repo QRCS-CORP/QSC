@@ -30,7 +30,7 @@ QSC is designed to provide next-generation, post-quantum secure cryptographic pr
 
 QSC is a compact and self-contained library written in C. It has been developed to meet MISRA secure coding standards and is designed to be easy to read, verify, and implement. The library incorporates next-generation asymmetric and symmetric primitives with a strong emphasis on true long-term security. It forms the basis for future integration efforts as a compact, high-security, post-quantum secure communications platform.
 
-This implementation uses both a base reference code and optimized AVX/AVX2/AVX512 intrinsics for maximum performance. For best results, set your project properties to utilize the highest available SIMD instruction set supported by your CPU—AVX-512 instructions are fully supported and offer the best performance profile.
+This implementation uses both a base reference code and optimized AVX/AVX2/AVX512 intrinsics for maximum performance. For best results, set your project properties to utilize the highest available SIMD instruction set supported by your CPU; AVX-512 instructions are fully supported and offer the best performance profile.
 
 Written to high-security standards (MISRA), and intended as a solution for environments that require a strong guarantee of long-term security and implementation correctness. The QSC library is set apart from the alternatives, incorporating the strongest cryptographic primitives available in the world today.
 
