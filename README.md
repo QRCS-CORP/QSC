@@ -17,9 +17,20 @@
 **A compact, self-contained, and highly optimized post-quantum secure cryptographic library written in C.**
 
 [QSC Help Documentation](https://qrcs-corp.github.io/QSC/)  
-[QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/QSC_Specification.pdf)  
-[QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/QSC_Summary.pdf)  
-[QSC Target Industries](https://qrcs-corp.github.io/QSC/pdf/QSC_High-Security_Cryptographic_Library_for_Critical_Domains.pdf) 
+[QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qsc_specification.pdf)  
+[QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/qsc_summary.pdf)  
+[QSC Integration Guide](https://qrcs-corp.github.io/QSC/pdf/qsc_integration.pdf)  
+[QSC Target Industries](https://qrcs-corp.github.io/QSC/pdf/qsc_library_for_critical_domains.pdf) 
+
+**Related Specifications and Analysis Papers for proprietary components**
+[CSX Technical Specification](https://qrcs-corp.github.io/QSC/pdf/csx_specification.pdf)  
+[CSX Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/csx_formal.pdf) 
+[QMAC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qmac_specification.pdf)  
+[QMAC Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/qmac_formal.pdf) 
+[RCS Technical Specification](https://qrcs-corp.github.io/QSC/pdf/rcs_specification.pdf)  
+[RCS Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/rcs_formal.pdf) 
+[SCB Technical Specification](https://qrcs-corp.github.io/QSC/pdf/scb_specification.pdf)  
+[SCB Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/scb_formal.pdf) 
 
 ## Overview
 
@@ -254,9 +265,10 @@ Sample flag sets and their meanings:
 
 ## License
 
-ACQUISITION INQUIRIES:
-QRCS is currently seeking a corporate acquirer for this technology.
-Parties interested in exclusive licensing or acquisition should contact: contact@qrcscorp.ca   
+INVESTMENT INQUIRIES:
+QRCS is currently seeking a corporate investor for this technology.
+Parties interested in licensing or investment should connect to us at: contact@qrcscorp.ca  
+Visit https://www.qrcscorp.ca for a full inventory of our products and services.  
 
 PATENT NOTICE:
 One or more patent applications (provisional and/or non-provisional) covering aspects of this software have been filed with the United States Patent and 
