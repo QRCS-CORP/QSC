@@ -22,15 +22,15 @@
 [QSC Integration Guide](https://qrcs-corp.github.io/QSC/pdf/qsc_integration.pdf)  
 [QSC Target Industries](https://qrcs-corp.github.io/QSC/pdf/qsc_library_for_critical_domains.pdf) 
 
-**Related Specifications and Analysis Papers for proprietary components**
+**Related Specifications and Analysis Papers for proprietary components**  
 [CSX Technical Specification](https://qrcs-corp.github.io/QSC/pdf/csx_specification.pdf)  
-[CSX Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/csx_formal.pdf) 
+[CSX Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/csx_formal.pdf)  
 [QMAC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qmac_specification.pdf)  
-[QMAC Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/qmac_formal.pdf) 
+[QMAC Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/qmac_formal.pdf)  
 [RCS Technical Specification](https://qrcs-corp.github.io/QSC/pdf/rcs_specification.pdf)  
-[RCS Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/rcs_formal.pdf) 
+[RCS Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/rcs_formal.pdf)  
 [SCB Technical Specification](https://qrcs-corp.github.io/QSC/pdf/scb_specification.pdf)  
-[SCB Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/scb_formal.pdf) 
+[SCB Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/scb_formal.pdf)  
 
 ## Overview
 
