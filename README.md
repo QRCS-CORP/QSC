@@ -274,9 +274,12 @@ PATENT NOTICE:
 One or more patent applications (provisional and/or non-provisional) covering aspects of this software have been filed with the United States Patent and 
 Trademark Office (USPTO). Unauthorized use may result in patent infringement liability.  
 
-QRCS-PL private License. See license file for details.  
-Software is copyrighted and algorithms are patent pending.
-Written by John G. Underhill, under the QRCS-PL license, see the included license file for details. 
-Not to be redistributed or used commercially without the author's expressed written permission. 
-All rights reserved by QRCS Corp. 2025.
-
+License and Use Notice (2025-2026)  
+This repository contains cryptographic reference implementations, test code, and supporting materials published by Quantum Resistant Cryptographic Solutions Corporation (QRCS) for the purposes of public review, cryptographic analysis, interoperability testing, and evaluation.  
+All source code and materials in this repository are provided under the Quantum Resistant Cryptographic Solutions Public Research and Evaluation License (QRCS-PREL), 2025-2026, unless explicitly stated otherwise.  
+This license permits public access and non commercial research, evaluation, and testing use only. It does not permit production deployment, operational use, or incorporation into any commercial product or service without a separate written agreement executed with QRCS.  
+The public availability of this repository is intentional and is provided to support cryptographic transparency, independent security assessment, and compliance with applicable cryptographic publication and export regulations.  
+Commercial use, production deployment, supported builds, certified implementations, and integration into products or services require a separate commercial license and support agreement.  
+For licensing inquiries, supported implementations, or commercial use, contact: licensing@qrcscorp.ca  
+Quantum Resistant Cryptographic Solutions Corporation, 2026.  
+_All rights reserved by QRCS Corp. 2026._

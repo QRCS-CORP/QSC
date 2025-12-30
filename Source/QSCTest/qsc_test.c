@@ -81,6 +81,8 @@
 #include "sphincsplus_test.h"
 #include "testutils.h"
 
+#include "encoding.h"
+
 //#define QSCTEST_PRINT_STATS
 
 static void print_title(void)
@@ -171,6 +173,8 @@ int32_t main(void)
 	qsc_timestamp_print_values();
 	qsc_consoleutils_print_line("");
 #endif
+
+	qsc_encoding_tests();
 
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.

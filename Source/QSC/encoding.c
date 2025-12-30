@@ -3,6 +3,106 @@
 #include "stringutils.h"
 #include <stdio.h>
 
+static bool encoding_header_labels_check(const char* input, const char* header, const char* footer, const char* seperator)
+{
+    char lbla[128U] = { 0U };
+    char lblb[128U] = { 0U };
+    int64_t posa;
+    int64_t posb;
+    size_t sepl;
+    bool res;
+
+    res = false;
+    sepl = qsc_stringutils_string_size(header);
+
+    if (input != NULL && header != NULL && footer != NULL && seperator != NULL && sepl > 0U)
+    {
+        if (qsc_stringutils_string_contains(input, header) == true &&
+            qsc_stringutils_string_contains(input, footer) == true)
+        {
+            posa = sepl;
+            posb = qsc_stringutils_find_string(input + sepl, seperator);
+
+            if (posb > 0U)
+            {
+                qsc_stringutils_copy_substring(lbla, sizeof(lbla), input + posa, posb);
+
+                posa = qsc_stringutils_find_string(input, footer);
+
+                if (posa > 0U)
+                {
+                    posa += qsc_stringutils_string_size(footer);
+                    posb = qsc_stringutils_find_string(input + posa, seperator);
+
+                    if (posb > 0U)
+                    {
+                        qsc_stringutils_copy_substring(lblb, sizeof(lblb), input + posa, posb);
+
+                        res = qsc_memutils_are_equal(lbla, lblb, posb);
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool encoding_base64_length_valid(const char* input, const char* separator)
+{
+    int64_t posa;
+    int64_t posb;
+    size_t mod;
+    size_t pctr;
+    size_t sepl;
+    bool res;
+
+    res = false;
+    mod = 4U;
+    pctr = 0U;
+    sepl = qsc_stringutils_string_size(separator);
+
+    if (input != NULL && separator != NULL)
+    {
+        posa = qsc_stringutils_find_string(input, separator);
+
+        if (posa >= 0U)
+        {
+            posa += sepl;
+            posb = qsc_stringutils_find_string(input + posa, separator);
+
+            if (posb >= 0U)
+            {
+                posa += sepl + posb;
+                posb = qsc_stringutils_find_string(input + posa, separator);
+
+                if (posb >= 0U)
+                {
+                    posb += posa;
+
+                    for (int64_t i = posa; i < posb; ++i)
+                    {
+                        char c = input[i];
+
+                        if ((c >= 'A' && c <= 'Z') ||
+                            (c >= 'a' && c <= 'z') ||
+                            (c >= '0' && c <= '9') ||
+                            c == '+' || c == '/' || c == '=')
+                        {
+                            /* valid Base64 character */
+                            ++pctr;
+                        }
+                    }
+
+                    res = pctr % mod == 0U;
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
 qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
     QSC_ASSERT(buffer != NULL);
@@ -65,7 +165,6 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
                 {
                     pos = pos + llen;
                     elem = (qsc_encoding_ber_element*)qsc_memutils_malloc(sizeof(qsc_encoding_ber_element));
-                    qsc_memutils_clear(elem, sizeof(qsc_encoding_ber_element));
 
                     if (elem == (qsc_encoding_ber_element*)NULL)
                     {
@@ -73,6 +172,7 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
                     }
                     else
                     {
+                        qsc_memutils_clear(elem, sizeof(qsc_encoding_ber_element));
                         elem->tagclass = tagclass;
                         elem->constructed = constructed;
                         elem->tagnumber = tagnumber;
@@ -173,7 +273,9 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
                                         {
                                             achildren = achildren * 2U;
                                         }
+
                                         tmp = (qsc_encoding_ber_element**)qsc_memutils_realloc(elem->children, achildren * sizeof(qsc_encoding_ber_element*));
+                                        
                                         if (tmp == (qsc_encoding_ber_element**)NULL)
                                         {
                                             break;
@@ -887,7 +989,7 @@ qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer,
 size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_t* buffer, size_t buflen)
 {
     uint8_t* contbuf;
-    const size_t TEMP_BUF_SIZE = 4096U;
+    const size_t TEMP_BUF_SIZE = 16384;
     size_t total;
     size_t taglen;
     size_t lfield;
@@ -989,6 +1091,7 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
     size_t req;
     bool res;
 
+    *declen = 0U;
     req = inplen / 2;
     res = false;
 
@@ -1092,114 +1195,122 @@ bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, 
 
     res = false;
 
-    if ((input != NULL) && (output != NULL) && (otplen != 0U))
+    if (input != NULL && output != NULL && declen != NULL && otplen != 0U)
     {
-        pinplen = qsc_stringutils_string_size(input);
-        b64data = qsc_memutils_malloc(pinplen + 1U);
+        *declen = 0U;
 
-        if (b64data != NULL)
+        if (encoding_header_labels_check(input, "-----BEGIN ", "-----END ", "-----") == true)
         {
-            b64idx = 0U;
-            lstart = input;
-            ppos = input;
-
-            /* process the PEM input line by line */
-            while (*ppos != '\0')
+            if (encoding_base64_length_valid(input, "-----"))
             {
-                if (*ppos == '\n')
+                pinplen = qsc_stringutils_string_size(input);
+                b64data = qsc_memutils_malloc(pinplen + 1U);
+
+                if (b64data != NULL)
                 {
-                    linelen = (size_t)(ppos - lstart);
+                    b64idx = 0U;
+                    lstart = input;
+                    ppos = input;
 
-                    if (linelen > 0U)
+                    /* process the PEM input line by line */
+                    while (*ppos != '\0')
                     {
-                        /* skip the line if its first non-whitespace character is '-' */
-                        if (lstart[0U] != '-')
+                        if (*ppos == '\n')
                         {
-                            for (size_t i = 0U; i < linelen; i++)
-                            {
-                                ch = lstart[i];
+                            linelen = (size_t)(ppos - lstart);
 
-                                if ((ch != ' ') && (ch != '\r') && (ch != '\t'))
+                            if (linelen > 0U)
+                            {
+                                /* skip the line if its first non-whitespace character is '-' */
+                                if (lstart[0U] != '-')
                                 {
-                                    b64data[b64idx] = ch;
-                                    ++b64idx;
+                                    for (size_t i = 0U; i < linelen; i++)
+                                    {
+                                        ch = lstart[i];
+
+                                        if ((ch != ' ') && (ch != '\r') && (ch != '\t'))
+                                        {
+                                            b64data[b64idx] = ch;
+                                            ++b64idx;
+                                        }
+                                    }
+                                }
+                            }
+
+                            lstart = ppos + 1U;
+                        }
+
+                        ++ppos;
+                    }
+
+                    /* process any final line (if there is no trailing newline) */
+                    if (lstart < ppos)
+                    {
+                        linelen = (size_t)(ppos - lstart);
+
+                        if (linelen > 0U)
+                        {
+                            if (lstart[0U] != '-')
+                            {
+                                for (size_t i = 0U; i < linelen; i++)
+                                {
+                                    ch = lstart[i];
+
+                                    if ((ch != ' ') && (ch != '\r') && (ch != '\t'))
+                                    {
+                                        b64data[b64idx] = ch;
+                                        ++b64idx;
+                                    }
                                 }
                             }
                         }
                     }
 
-                    lstart = ppos + 1U;
-                }
+                    b64data[b64idx] = '\0';
 
-                ++ppos;
-            }
-
-            /* process any final line (if there is no trailing newline) */
-            if (lstart < ppos)
-            {
-                linelen = (size_t)(ppos - lstart);
-
-                if (linelen > 0U)
-                {
-                    if (lstart[0U] != '-')
+                    /* pad the Base64 string if necessary so that its length is a multiple of 4 */
                     {
-                        for (size_t i = 0U; i < linelen; i++)
-                        {
-                            ch = lstart[i];
+                        size_t pad;
+                        size_t rmd;
 
-                            if ((ch != ' ') && (ch != '\r') && (ch != '\t'))
+                        rmd = b64idx % 4U;
+
+                        if (rmd != 0U)
+                        {
+                            pad = 4U - rmd;
+
+                            /* assuming our temporary buffer is large enough */
+                            for (size_t i = 0U; i < pad; i++)
                             {
-                                b64data[b64idx] = ch;
+                                b64data[b64idx] = '=';
                                 ++b64idx;
+                            }
+
+                            b64data[b64idx] = '\0';
+                        }
+                    }
+
+                    /* determine the expected decoded size */
+                    {
+                        size_t dexp;
+
+                        dexp = qsc_encoding_base64_decoded_size(b64data, b64idx);
+
+                        if (dexp <= otplen)
+                        {
+                            res = qsc_encoding_base64_decode(output, otplen, b64data, b64idx);
+
+                            if (declen != NULL)
+                            {
+                                *declen = dexp;
                             }
                         }
                     }
+
+                    qsc_memutils_alloc_free(b64data);
+                    b64data = NULL;
                 }
             }
-
-            b64data[b64idx] = '\0';
-
-            /* pad the Base64 string if necessary so that its length is a multiple of 4 */
-            {
-                size_t pad;
-                size_t rmd;
-
-                rmd = b64idx % 4U;
-
-                if (rmd != 0U)
-                {
-                    pad = 4U - rmd;
-
-                    /* assuming our temporary buffer is large enough */
-                    for (size_t i = 0U; i < pad; i++)
-                    {
-                        b64data[b64idx] = '=';
-                        ++b64idx;
-                    }
-
-                    b64data[b64idx] = '\0';
-                }
-            }
-
-            /* determine the expected decoded size */
-            {
-                size_t dexp;
-
-                dexp = qsc_encoding_base64_decoded_size(b64data, b64idx);
-
-                if (dexp <= otplen)
-                {
-                    res = qsc_encoding_base64_decode(output, otplen, b64data, b64idx);
-
-                    if (declen != NULL)
-                    {
-                        *declen = dexp;
-                    }
-                }
-            }
-
-            qsc_memutils_alloc_free(b64data);
-            b64data = NULL;
         }
     }
 
@@ -1283,3 +1394,279 @@ bool qsc_encoding_pem_encode(const char* label, char* output, size_t otplen, con
 
     return res;
 }
+
+#if defined (QSC_DEBUG_MODE)
+
+static bool encoding_test_expect_pem_decode(const char* pem, const uint8_t* expected, size_t explen)
+{
+    uint8_t out[512] = { 0U };
+    size_t declen;
+    bool res;
+
+    res = false;
+    qsc_memutils_set_value(out, sizeof(out), 0xA5U);
+    declen = 777U;
+
+    if (qsc_encoding_pem_decode(pem, out, sizeof(out), &declen) == true)
+    {
+        if (declen == explen && qsc_memutils_are_equal(out, expected, explen) == true)
+        {
+            res = true;
+        }
+    }
+
+    return res;
+}
+
+static bool encoding_test_contains_substr(const char* s, const char* sub)
+{
+    size_t i;
+    size_t slen;
+    size_t sublen;
+    bool res;
+
+    res = false;
+
+    if (s != NULL && sub != NULL)
+    {
+        slen = qsc_stringutils_string_size(s);
+        sublen = qsc_stringutils_string_size(sub);
+
+        if (sublen != 0U || sublen <= slen)
+        {
+            for (i = 0U; i + sublen <= slen; ++i)
+            {
+                if (qsc_stringutils_string_compare(s + i, sub, sublen) == 0)
+                {
+                    res = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool encoding_test_pem_line_wrap(const char* pem, size_t maxline)
+{
+    /* checks that between header and footer, each base64 line has length <= 64, ignoring empty lines. */
+    const char* p;
+    const char* bol;
+    size_t linelen;
+    size_t i;
+    bool inpayload;
+    bool res;
+
+    res = false;
+
+    if (pem != NULL)
+    {
+        res = true;
+        p = pem;
+        bol = pem;
+        inpayload = false;
+
+        while (*p != '\0')
+        {
+            if (*p == '\n' || *(p + 1U) == '\0')
+            {
+                const char* eol;
+
+                eol = (*p == '\n') ? p : (p + 1U);
+                linelen = (size_t)(eol - bol);
+
+                /* detect boundary lines (no leading whitespace tolerance needed for encode output) */
+                if (linelen >= 11U && qsc_stringutils_string_compare(bol, "-----BEGIN ", 11U) == 0)
+                {
+                    inpayload = true;
+                }
+                else if (linelen >= 9U && qsc_stringutils_string_compare(bol, "-----END ", 9U) == 0)
+                {
+                    inpayload = false;
+                }
+                else if (inpayload == true)
+                {
+                    /* payload line: should be <= maxline unless empty */
+                    if (linelen > 0U && linelen > maxline)
+                    {
+                        res = false;
+                        break;
+                    }
+
+                    /* payload line should contain only base64 alphabet or '=' */
+                    for (i = 0U; i < linelen; ++i)
+                    {
+                        const char c = bol[i];
+
+                        if ((c >= 'A' && c <= 'Z') ||
+                            (c >= 'a' && c <= 'z') ||
+                            (c >= '0' && c <= '9') ||
+                            (c == '+') || (c == '/') || (c == '='))
+                        {
+                            continue;
+                        }
+
+                        res = false;
+                        break;
+                    }
+                }
+
+                bol = (*p == '\n') ? (p + 1U) : eol;
+            }
+
+            ++p;
+        }
+    }
+
+    return res;
+}
+
+static bool encoding_test_expect_pem_pass(const char* pem, const uint8_t* expected, size_t explen)
+{
+    uint8_t out[256] = { 0U };
+    size_t declen;
+    bool res;
+
+    res = false;
+    qsc_memutils_set_value(out, sizeof(out), 0xA5U);
+    declen = 777U;
+
+    if (qsc_encoding_pem_decode(pem, out, sizeof(out), &declen) == true)
+    {
+        res = (declen == explen && qsc_memutils_are_equal(out, expected, explen));
+    }
+
+    return res;
+}
+
+static bool encoding_expect_test_pem_fail(const char* pem)
+{
+    uint8_t out[256] = { 0U };
+    size_t declen;
+    bool res;
+
+    res = false;
+    qsc_memutils_set_value(out, sizeof(out), 0xA5U);
+    declen = 123U;
+
+    if (qsc_encoding_pem_decode(pem, out, sizeof(out), &declen) == false)
+    {
+        res = (declen == 0U);
+    }
+
+    return res;
+}
+
+static bool encoding_test_pem_decode(void)
+{
+    const char* valabc = "-----BEGIN CERTIFICATE-----\nYWJj\n-----END CERTIFICATE-----\n";
+    const uint8_t exp_abc[3] = { 0x61U, 0x62U, 0x63U };
+    const uint8_t exp_abcd[4] = { 0x61U, 0x62U, 0x63U, 0x64U };
+    uint8_t small[3] = { 0U };
+    size_t declen;
+    bool res;
+
+    res = false;
+    
+    if (encoding_test_expect_pem_pass(valabc, exp_abc, sizeof(exp_abc)) == true)
+    {
+        const char* valabcdws = "-----BEGIN CERTIFICATE-----\r\n  Y W J j Z A = =  \r\n\t\r\n-----END CERTIFICATE-----\r\n";
+
+        if (encoding_test_expect_pem_pass(valabcdws, exp_abcd, sizeof(exp_abcd)) == true)
+        {
+            const char* invlabel = "-----BEGIN CERTIFICATE-----\n YWJj\n-----END PUBLIC KEY-----\n";
+
+            if (encoding_expect_test_pem_fail(invlabel) == true)
+            {
+                const char* invlenmod4 = "-----BEGIN CERTIFICATE-----\nYWJ\n-----END CERTIFICATE-----\n";
+
+                if (encoding_expect_test_pem_fail(invlenmod4) == true)
+                {
+                    const char* invpad = "-----BEGIN CERTIFICATE-----\nYW=Jj\n-----END CERTIFICATE-----\n";
+
+                    if (encoding_expect_test_pem_fail(invpad) == true)
+                    {
+                        const char* invsmout = "-----BEGIN CERTIFICATE-----\nYWJjZA==\n-----END CERTIFICATE-----\n";
+
+                        qsc_memutils_set_value(small, sizeof(small), 0xA5U);
+                        declen = 999U;
+
+                        if (qsc_encoding_pem_decode(invsmout, small, sizeof(small), &declen) == false)
+                        {
+                            res = (declen == 0U);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool encoding_test_pem_encode(void)
+{
+    const char* lok = "CERTIFICATE";;
+    char pem[2048] = { 0U };
+    char pemsm[32] = { 0U };
+    uint8_t data1[3] = { 0x61U, 0x62U, 0x63U };
+    uint8_t data2[96] = { 0U };
+    bool res;
+
+    res = false;
+
+    for (size_t i = 0U; i < sizeof(data2); ++i)
+    {
+        data2[i] = (uint8_t)i;
+    }
+
+    /* 1) encode must succeed with a conforming label */
+    if (qsc_encoding_pem_encode(lok, pem, sizeof(pem), data1, sizeof(data1)) == true)
+    {
+        /* 2) header/footer correctness */
+        if (encoding_test_contains_substr(pem, "-----BEGIN CERTIFICATE-----\n") == true &&
+            encoding_test_contains_substr(pem, "-----END CERTIFICATE-----\n") == true)
+        {
+            /* 3) round-trip: encode then decode equals original */
+            if (encoding_test_expect_pem_decode(pem, data1, sizeof(data1)) == true)
+            {
+                /* 4) wrapping and alphabet constraints for a larger payload */
+                qsc_memutils_clear(pem, sizeof(pem));
+
+                if (qsc_encoding_pem_encode(lok, pem, sizeof(pem), data2, sizeof(data2)) == true &&
+                    encoding_test_pem_line_wrap(pem, 64U) == true &&
+                    encoding_test_expect_pem_decode(pem, data2, sizeof(data2)) == true)
+                {
+                    /* 5) output buffer too small must fail */
+                    qsc_memutils_clear(pemsm, sizeof(pemsm));
+
+                    if (qsc_encoding_pem_encode(lok, pemsm, sizeof(pemsm), data2, sizeof(data2)) == false)
+                    {
+                        res = true;
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+bool qsc_encoding_tests()
+{
+    bool res;
+
+    res = false;
+
+    if (encoding_test_pem_decode() == true)
+    {
+        if (encoding_test_pem_encode() == true)
+        {
+            res = true;
+        }
+    }
+
+    return res;
+}
+#endif

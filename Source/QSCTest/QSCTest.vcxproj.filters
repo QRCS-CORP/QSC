@@ -161,9 +161,6 @@
     <ClInclude Include="katparser.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="falcon_test.h">
-      <Filter>Header Files\Tests</Filter>
-    </ClInclude>
     <ClInclude Include="aes_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>

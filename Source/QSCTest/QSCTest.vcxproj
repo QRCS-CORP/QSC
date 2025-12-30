@@ -303,7 +303,6 @@
     <ClInclude Include="ecdh_test.h" />
     <ClInclude Include="ecdsa_test.h" />
     <ClInclude Include="encoding_test.h" />
-    <ClInclude Include="falcon_test.h" />
     <ClInclude Include="katparser.h" />
     <ClInclude Include="kyber_test.h" />
     <ClInclude Include="mceliece_test.h" />

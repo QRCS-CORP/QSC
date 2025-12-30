@@ -20,7 +20,7 @@ static void edwards_to_montgomery(qsc_fe25519 montgomeryX, const qsc_fe25519 edw
     qsc_fe25519_mul(montgomeryX, tempX, tempZ);
 }
 
-static int32_t crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n)
+int32_t qsc_crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n)
 {
     QSC_ASSERT(q != NULL);
     QSC_ASSERT(n != NULL);
@@ -44,7 +44,7 @@ static int32_t crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t
     return 0;
 }
 
-static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, const uint8_t* p)
+int32_t qsc_crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
     QSC_ASSERT(q != NULL);
     QSC_ASSERT(n != NULL);
@@ -125,7 +125,7 @@ static int32_t crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, 
     return (int32_t)(-((int32_t)valid) & 0);
 }
 
-static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
+int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
     QSC_ASSERT(q != NULL);
 	QSC_ASSERT(n != NULL);
@@ -135,7 +135,7 @@ static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const 
     int32_t err;
     uint32_t success;
 
-    err = crypto_scalarmult_curve25519_ref10(q, n, p);
+    err = qsc_crypto_scalarmult_curve25519_ref10(q, n, p);
     d = 0U;
 
     for (size_t i = 0U; i < EC25519_CURVE_SIZE; ++i)
@@ -148,7 +148,7 @@ static int32_t crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const 
     return -((int32_t)1 - (int32_t)success);
 }
 
-bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey)
+bool qsc_x25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey)
 {
 	QSC_ASSERT(secret != NULL);
     QSC_ASSERT(privatekey != NULL);
@@ -160,13 +160,13 @@ bool qsc_ed25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const u
 
     if (secret != NULL && privatekey != NULL && publickey != NULL)
     {
-        res = (crypto_scalarmult_curve25519(secret, privatekey, publickey));
+        res = (qsc_crypto_scalarmult_curve25519(secret, privatekey, publickey));
     }
 
     return (res == 0);
 }
 
-void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
+void qsc_x25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
     QSC_ASSERT(privatekey != NULL);
 	QSC_ASSERT(publickey != NULL);
@@ -176,7 +176,7 @@ void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const
 
     qsc_sha512_compute(tseed, seed, EC25519_SEED_SIZE);
     qsc_memutils_copy(privatekey, tseed, EC25519_SEED_SIZE);
-    crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
+    qsc_crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
 }
 
 

@@ -1,41 +1,52 @@
-/*
- * 2025 Quantum Resistant Cryptographic Solutions Corporation
+/* 2026 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
- * NOTICE: This software and all accompanying materials are the exclusive 
- * property of Quantum Resistant Cryptographic Solutions Corporation (QRCS).
- * The intellectual and technical concepts contained within this implementation 
- * are proprietary to QRCS and its authorized licensors and are protected under 
- * applicable U.S. and international copyright, patent, and trade secret laws.
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
  *
- * CRYPTOGRAPHIC STANDARDS:
- * - This software includes implementations of cryptographic algorithms such as 
- *   SHA3, AES, and others. These algorithms are public domain or standardized 
- *   by organizations such as NIST and are NOT the property of QRCS.
- * - However, all source code, optimizations, and implementations in this library 
- *   are original works of QRCS and are protected under this license.
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
  *
- * RESTRICTIONS:
- * - Redistribution, modification, or unauthorized distribution of this software, 
- *   in whole or in part, is strictly prohibited.
- * - This software is provided for non-commercial, educational, and research 
- *   purposes only. Commercial use in any form is expressly forbidden.
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
  * - Licensing and authorized distribution are solely at the discretion of QRCS.
- * - Any use of this software implies acceptance of these restrictions.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
  *
  * DISCLAIMER:
- * This software is provided "as is," without warranty of any kind, express or 
- * implied, including but not limited to warranties of merchantability or fitness 
- * for a particular purpose. QRCS disclaims all liability for any direct, indirect, 
- * incidental, or consequential damages resulting from the use or misuse of this software.
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
  *
  * FULL LICENSE:
- * This software is subject to the **Quantum Resistant Cryptographic Solutions 
- * Proprietary License (QRCS-PL)**. The complete license terms are included 
- * in the LICENSE.txt file distributed with this software.
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
  *
- * Written by: John Underhill
- * Contact: john.underhill@protonmail.com
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
  */
 
 #ifndef QSCNETCW_SHA2_H

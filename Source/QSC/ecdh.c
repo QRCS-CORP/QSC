@@ -14,7 +14,7 @@ bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uin
 
 	if (secret != NULL && privatekey != NULL && publickey != NULL)
 	{
-		res = qsc_ed25519_key_exchange(secret, publickey, privatekey);
+		res = qsc_x25519_key_exchange(secret, publickey, privatekey);
 	}
 
 	return res;
@@ -35,13 +35,26 @@ bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 	{
 		if (rng_generate(seed, sizeof(seed)))
 		{
-			qsc_ed25519_generate_keypair(publickey, privatekey, seed);
+			qsc_x25519_generate_keypair(publickey, privatekey, seed);
 			qsc_memutils_clear(seed, QSC_ECDH_SEED_SIZE);
 			res = true;
 		}
 	}
 
 	return res;
+}
+
+void qsc_x25519_public_from_private(uint8_t* publickey, const uint8_t* privatekey)
+{
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(privatekey != NULL);
+
+	if (publickey != NULL && privatekey != NULL)
+	{
+		/* Derive public key from private key using X25519 basepoint mult.
+		   This call clamps internally (it copies sk to a temp, clamps temp). */
+		(void)qsc_crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
+	}
 }
 
 bool qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
@@ -56,7 +69,7 @@ bool qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, c
 
 	if (privatekey != NULL && publickey != NULL && seed != NULL)
 	{
-		qsc_ed25519_generate_keypair(publickey, privatekey, seed);
+		qsc_x25519_generate_keypair(publickey, privatekey, seed);
 		res = true;
 	}
 
