@@ -38,7 +38,7 @@ static bool encoding_header_labels_check(const char* input, const char* header, 
                     {
                         qsc_stringutils_copy_substring(lblb, sizeof(lblb), input + posa, posb);
 
-                        res = qsc_memutils_are_equal(lbla, lblb, posb);
+                        res = qsc_memutils_are_equal((uint8_t*)lbla, (uint8_t*)lblb, posb);
                     }
                 }
             }
