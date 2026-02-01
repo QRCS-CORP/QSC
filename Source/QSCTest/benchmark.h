@@ -54,6 +54,12 @@
 
 #include "qsctestcommon.h"
 
+/*!
+ * \def QSCTEXT_RUNALL_BENCHMARKS
+ * \brief Run all internal benchmark tests.
+ */
+//#define QSCTEXT_RUNALL_BENCHMARKS
+
 /**
 * \file benchmark.h
 * \brief Symmetric primitives performance benchmarking.
@@ -102,10 +108,10 @@ void qsctest_benchmark_rcs_run(void);
 void qsctest_benchmark_shake_run(void);
 
 /* QMAC removed for further development */
-///**
-//* \brief Tests the QMAC implementations performance.
-//* Tests the QMAC implementations for performance timing.
-//*/
-//void qsctest_benchmark_qmac_run(void);
+/**
+* \brief Tests the QMAC implementations performance.
+* Tests the QMAC implementations for performance timing.
+*/
+void qsctest_benchmark_qmac_run(void);
 
 #endif

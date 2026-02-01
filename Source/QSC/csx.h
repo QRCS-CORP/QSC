@@ -103,32 +103,13 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_CSX_AUTHENTICATED
 #endif
 
-/* Enable one of the authentication options: 
-   a 24 round KMAC, a reduced rounds KMAC */
-#if defined(QSC_CSX_AUTHENTICATED)
 /*!
-* \def QSC_CSX_AUTH_KMAC24
-* \brief Sets the authentication mode to standard KMAC-R24.
+* \def QSC_CSX_REDUCED_ROUNDS
+* \brief Sets the internal transformation round count from 40 to 20,
+* and the KMAC rounds from 24 to 12.
+* Remove this definition to enable the standard rounds versions of CSX.
 */
-#	define QSC_CSX_AUTH_KMAC24
-
-///*!
-//\def QSC_CSX_AUTH_KMACR12
-//* \brief Enables the reduced rounds KMAC-R12 implementation.
-//*/
-//#	define QSC_CSX_AUTH_KMACR12
-#endif
-
-/*!
-\def QSC_CSX_KMAC_R12
-* \brief Enables the reduced rounds KMAC-R12 implementation.
-* Unrem this flag to enable the reduced rounds KMAC implementation.
-*/
-#if	defined(QSC_CSX_AUTHENTICATED)
-#	if !defined(QSC_CSX_AUTH_KMAC24) && !defined(QSC_CSX_AUTH_KMACR12)
-#		define QSC_CSX_AUTH_KMAC24
-#	endif
-#endif
+//#define QSC_CSX_REDUCED_ROUNDS
 
 /*!
 \def QSC_CSX_BLOCK_SIZE
@@ -176,11 +157,11 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 QSC_EXPORT_API typedef struct
 {
-	const uint8_t* key;		/*!< The input cipher key */
-	size_t keylen;			/*!< The length in bytes of the cipher key */
-	uint8_t* nonce;			/*!< The nonce or initialization vector */
-	const uint8_t* info;	/*!< The information tweak */
-	size_t infolen;			/*!< The length in bytes of the information tweak */
+	const uint8_t* key;					/*!< The input cipher key */
+	size_t keylen;						/*!< The length in bytes of the cipher key */
+	uint8_t* nonce;						/*!< The nonce or initialization vector */
+	const uint8_t* info;				/*!< The information tweak */
+	size_t infolen;						/*!< The length in bytes of the information tweak */
 } qsc_csx_keyparams;
 
 /*! 

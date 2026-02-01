@@ -2,6 +2,11 @@
 #include "memutils.h"
 #include <string.h>
 
+bool qsc_intutils_are_equal(size_t x, size_t y)
+{
+	return ((x ^ y) == 0U);
+}
+
 bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 {
 	QSC_ASSERT(a != NULL);
@@ -496,11 +501,6 @@ size_t qsc_intutils_expand_mask(size_t x)
 	return r;
 }
 
-bool qsc_intutils_are_equal(size_t x, size_t y)
-{
-	return ((x ^ y) == 0U);
-}
-
 bool qsc_intutils_is_gte(size_t x, size_t y)
 {
 	return (x >= y);
@@ -555,6 +555,25 @@ void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t outlen)
 		idx1 = ((uint8_t)hexstr[pos + 1U] & 0x1FU) ^ 0x10U;
 		output[pos / 2U] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
 	}
+}
+
+bool qsc_intutils_is_power_of_two(size_t x)
+{
+	return (x != 0U) && ((x & (x - 1U)) == 0U);
+}
+
+size_t qsc_intutils_next_power_of_2(size_t x)
+{
+	size_t power;
+
+	power = 1U;
+
+	while (power < x)
+	{
+		power <<= 1;
+	}
+
+	return power;
 }
 
 void qsc_intutils_le8increment(uint8_t* output, size_t otplen)
@@ -658,6 +677,11 @@ void qsc_intutils_le64to8(uint8_t* output, uint64_t value)
 	output[5U] = (uint8_t)(value >> 40) & 0xFFU;
 	output[6U] = (uint8_t)(value >> 48) & 0xFFU;
 	output[7U] = (uint8_t)(value >> 56) & 0xFFU;
+}
+
+bool qsc_intutils_lsb_is_set(size_t x)
+{
+	return ((x & 1U) != 0U);
 }
 
 size_t qsc_intutils_max(size_t a, size_t b)

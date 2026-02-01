@@ -81,8 +81,6 @@
 #include "sphincsplus_test.h"
 #include "testutils.h"
 
-#include "encoding.h"
-
 //#define QSCTEST_PRINT_STATS
 
 static void print_title(void)
@@ -174,8 +172,6 @@ int32_t main(void)
 	qsc_consoleutils_print_line("");
 #endif
 
-	qsc_encoding_tests();
-
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
@@ -225,6 +221,13 @@ int32_t main(void)
 			qsctest_print_line("The AVX intrinsics functions have not been detected or are not enabled.");
 			qsctest_print_line("For best performance, enable the maximum available AVX feature set in the project properties (AVX/AVX2/AVX512).");
 		}
+
+#	if defined(QSC_CSX_REDUCED_ROUNDS)
+		qsctest_print_line("The CSX reduced rounds mode has been enabled.");
+#	endif
+#	if defined(QSC_RCS_REDUCED_ROUNDS)
+		qsctest_print_line("The RCS reduced rounds mode has been enabled.");
+#	endif
 #endif
 
 #if defined(QSC_SYSTEM_ARCH_IX86_32)
@@ -359,9 +362,13 @@ int32_t main(void)
 			qsctest_print_line("");
 			qsctest_benchmark_csx_run();
 			qsctest_print_line("");
+			qsctest_benchmark_aes_run();
+			qsctest_print_line("");
 			qsctest_benchmark_rcs_run();
 			qsctest_print_line("");
-			qsctest_print_line("Testing symmetric Keccak primitives..");
+			qsctest_print_line("Testing MAC functions..");
+			qsctest_benchmark_qmac_run();
+			qsctest_print_line("");
 			qsctest_benchmark_kmac_run();
 			qsctest_print_line("");
 			qsctest_benchmark_shake_run();

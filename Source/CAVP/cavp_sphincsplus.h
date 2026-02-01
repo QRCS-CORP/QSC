@@ -53,25 +53,25 @@
 #define CAVP_SPHINCSPLUS_H
 
 /**
- * \file dilithium_test.h
- * \brief Dilithium Test Suite for the Digital Signature Scheme.
+ * \file sphincsplus_test.h
+ * \brief SPHINCS+ Test Suite for the Digital Signature Scheme.
  *
  * \details
- * This header defines a set of tests for the ML-DSA (Dilithium) digital signature scheme implementation.
- * The test suite is designed to verify the correct operation of the ML-DSA scheme by performing the following:
+ * This header defines a set of tests for the SLH-DSA (SPHINCS+) digital signature scheme implementation.
+ * The test suite is designed to verify the correct operation of the SLH-DSA scheme by performing the following:
  *
- * - **Known Answer Test (KAT)**:  
+ * - **Known Answer Test (KAT)**:
  *   Validates key pair generation, signing, and signature verification using expected test vectors from the
- *   NIST ACVP Dilithium FIPS 204 specification. It confirms that the generated public key, secret key, signature, and recovered
+ *   NIST ACVP SPHINCS+ FIPS 205 specification. It confirms that the generated public key, secret key, signature, and recovered
  *   message exactly match the expected values.
  *
- * The known answer test uses one of the NIST FIPS 204 ACVP test vector files, selected based on the active parameter set.
+ * The known answer test uses one of the NIST FIPS 205 ACVP test vector files, selected based on the active parameter set.
  *
- * \section dilithium_test_links Reference Links
- * - <a href="https://csrc.nist.gov/pubs/fips/204/final">NIST Dilithium FIPS 204 Main page</a>
- * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf">NIST Dilithium FIPS 204 Specification</a>
- * - <a href="https://github.com/usnistgov/ACVP-Server/blob/master/gen-val/json-files/ML-DSA-keyGen-FIPS204/expectedResults.json">The ACVP key generation known answer tests</a>
- * - <a href="https://github.com/usnistgov/ACVP-Server/blob/master/gen-val/json-files/ML-DSA-sigGen-FIPS204/expectedResults.json">The ACVP signature generation known answer tests</a>
+ * \section sphincs_test_links Reference Links
+ * - <a href="https://csrc.nist.gov/pubs/fips/205/final">NIST SPHINCS+ FIPS 205 Main page</a>
+ * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.205.pdf">NIST SPHINCS+ FIPS 205 Specification</a>
+ * - <a href="https://github.com/usnistgov/ACVP-Server/blob/master/gen-val/json-files/SLH-DSA-keyGen-FIPS205/expectedResults.json">The ACVP key generation known answer tests</a>
+ * - <a href="https://github.com/usnistgov/ACVP-Server/blob/master/gen-val/json-files/SLH-DSA-sigGen-FIPS205/expectedResults.json">The ACVP signature generation known answer tests</a>
  */
 
 static const char* CAVP_SLHDSA_KEYGEN_SHAKE128_KAT = "KAT/SLHDSA/SLHDSASHAKE128KeyGen.rsp";

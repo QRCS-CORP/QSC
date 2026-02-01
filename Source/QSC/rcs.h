@@ -120,34 +120,19 @@ QSC_CPLUSPLUS_ENABLED_START
 /*!
  * \def QSC_RCS_AUTHENTICATED
  * \brief Enables the AEAD cipher authentication mode.
+ * Disable this macro to run without authentication.
  */
 #if !defined(QSC_RCS_AUTHENTICATED)
 #	define QSC_RCS_AUTHENTICATED
 #endif
 
-/* Enable one of the authentication options: 
-   a 24 round KMAC, a reduced rounds KMAC, or the QMAC post quantum GMAC function */
-#if defined(QSC_RCS_AUTHENTICATED)
 /*!
- * \def QSC_RCS_AUTH_KMACR24
- * \brief Sets the authentication mode to standard KMAC-R24.
- * Remove this definition to enable the reduced rounds version using KMAC-R12.
+ * \def QSC_RCS_REDUCED_ROUNDS
+ * \brief Sets the internal transformation round counts to: RCS256=14, RCS512=21,
+ * and the KMAC rounds from 24 to 12.
+ * Remove this definition to enable the standard rounds versions of RCS.
  */
-#	define QSC_RCS_AUTH_KMACR24
-
-///*!
-// * \def QSC_RCS_AUTH_KMACR12
-// * \brief Enables the reduced rounds KMAC-R12 implementation.
-// */
-//#	define QSC_RCS_AUTH_KMACR12
-#endif
-
-/* The default authentication MAC */
-#if defined(QSC_RCS_AUTHENTICATED)
-#	if !defined(QSC_RCS_AUTH_KMACR24) && !defined(QSC_RCS_AUTH_KMACR12)
-#		define QSC_RCS_AUTH_KMACR24
-#	endif
-#endif
+//#define QSC_RCS_REDUCED_ROUNDS
 
 /***********************************
 *     RCS CONSTANTS AND SIZES      *
@@ -194,8 +179,8 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 typedef enum
 {
-	RCS256 = 0x01,	/*!< The RCS-256 cipher */
-	RCS512 = 0x02,	/*!< The RCS-512 cipher */
+	RCS256 = 0x01,			/*!< The RCS-256 cipher */
+	RCS512 = 0x02,			/*!< The RCS-512 cipher */
 } rcs_cipher_type;
 
 /*! \struct qsc_rcs_keyparams

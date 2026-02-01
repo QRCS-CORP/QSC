@@ -4,7 +4,7 @@
 #include "chacha.h"
 #include "csp.h"
 #include "csx.h"
-//#include "qmac.h"
+#include "qmac.h"
 #include "rcs.h"
 #include "sha3.h"
 #include "timerex.h"
@@ -45,7 +45,7 @@ static void aes128_cbc_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-128 qsc_aes_mode_cbc Encrypt processed 1GB of data in ");
+	qsctest_print_safe("AES-128 CBC Encryption Mode  processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 
@@ -63,7 +63,7 @@ static void aes128_cbc_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-128 qsc_aes_mode_cbc Decrypt processed 1GB of data in ");
+	qsctest_print_safe("AES-128 CBC Decryprion Mode processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 
@@ -102,7 +102,7 @@ static void aes256_cbc_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-256 qsc_aes_mode_cbc Encrypt processed 1GB of data in ");
+	qsctest_print_safe("AES-256 CBC Encryption Mode processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 
@@ -120,7 +120,7 @@ static void aes256_cbc_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-256 qsc_aes_mode_cbc Decrypt processed 1GB of data in ");
+	qsctest_print_safe("AES-256 CBC Decryption Mode processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 
@@ -158,7 +158,7 @@ static void aes128_ctrbe_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-128 qsc_aes_mode_ctr-BE processed 1GB of data in ");
+	qsctest_print_safe("AES-128 CTR-BE Mode processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 }
@@ -194,7 +194,7 @@ static void aes128_ctrle_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-128 qsc_aes_mode_ctr-LE processed 1GB of data in ");
+	qsctest_print_safe("AES-128 CTR-LE processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 }
@@ -230,7 +230,7 @@ static void aes256_ctrbe_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-256 qsc_aes_mode_ctr-BE processed 1GB of data in ");
+	qsctest_print_safe("AES-256 CTR-BE Mode processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 }
@@ -266,7 +266,45 @@ static void aes256_ctrle_benchmark_test()
 	}
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
-	qsctest_print_safe("AES-256 qsc_aes_mode_ctr-LE processed 1GB of data in ");
+	qsctest_print_safe("AES-256 CTR-LE Mode processed 1GB of data in ");
+	qsctest_print_double((double)elapsed / 1000.0);
+	qsctest_print_line(" seconds");
+}
+
+static void aes256_gmac_benchmark_test()
+{
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE + QSC_GCM256_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 };
+	qsc_aes_gcm256_state ctx;
+	size_t tctr;
+	uint64_t start;
+	uint64_t elapsed;
+
+	/* generate the message, key and iv */
+	qsc_csp_generate(key, sizeof(key));
+	qsc_csp_generate(iv, sizeof(iv));
+	qsc_csp_generate(msg, sizeof(msg));
+	qsc_aes_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv, .noncelen = sizeof(iv) };
+
+	/* encryption */
+
+	tctr = 0;
+	start = qsc_timerex_stopwatch_start();
+
+	qsc_aes_gcm256_initialize(&ctx, &kp, true);
+	
+	while (tctr < SAMPLE_COUNT)
+	{
+		qsc_aes_gcm256_encrypt(&ctx, enc, msg, sizeof(msg));
+		++tctr;
+	}
+
+	qsc_aes_gcm256_dispose(&ctx);
+
+	elapsed = qsc_timerex_stopwatch_elapsed(start);
+	qsctest_print_safe("AES-256 GMAC Encrypt Mode processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 }
@@ -339,6 +377,46 @@ static void chacha256_benchmark_test()
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("CHACHA-256 processed 1GB of data in ");
+	qsctest_print_double((double)elapsed / 1000.0);
+	qsctest_print_line(" seconds");
+}
+
+static void chacha_poly1305_benchmark_test()
+{
+	QSC_SIMD_ALIGN uint8_t aad[12] = { 0 };
+	QSC_SIMD_ALIGN uint8_t enc[BUFFER_SIZE + QSC_POLY1305_MAC_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t iv[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	qsc_chacha_poly1305_state ctx;
+	size_t tctr;
+	uint64_t start;
+	uint64_t elapsed;
+
+	qsctest_hex_to_bin("50515253C0C1C2C3C4C5C6C7", aad, sizeof(aad));
+	/* generate the message, key and iv */
+	qsc_csp_generate(key, sizeof(key));
+	qsc_csp_generate(iv, sizeof(iv));
+	qsc_csp_generate(msg, sizeof(msg));
+	qsc_chacha_keyparams kp = { .key = key, .keylen = sizeof(key), .nonce = iv };
+
+	/* encryption */
+
+	tctr = 0;
+	start = qsc_timerex_stopwatch_start();
+
+	qsc_chacha_poly1305_initialize(&ctx, &kp);
+
+	while (tctr < SAMPLE_COUNT)
+	{
+		qsc_chacha_poly1305_encrypt(&ctx, enc, msg, sizeof(msg));
+		++tctr;
+	}
+
+	qsc_chacha_poly1305_dispose(&ctx);
+
+	elapsed = qsc_timerex_stopwatch_elapsed(start);
+	qsctest_print_safe("Chacha Poly1305 256 Encrypt Mode processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 }
@@ -540,6 +618,36 @@ static void kmac512_benchmark()
 
 	elapsed = qsc_timerex_stopwatch_elapsed(start);
 	qsctest_print_safe("KMAC-512 processed 1GB of data in ");
+	qsctest_print_double((double)elapsed / 1000.0);
+	qsctest_print_line(" seconds");
+}
+
+static void qmac_benchmark()
+{
+	QSC_SIMD_ALIGN uint8_t msg[BUFFER_SIZE] = { 0 };
+	QSC_SIMD_ALIGN uint8_t tag[32] = { 0 };
+	QSC_SIMD_ALIGN uint8_t key[32] = { 0 };
+	qsc_qmac_state ctx = { 0 };;
+	size_t tctr;
+	uint64_t start;
+	uint64_t elapsed;
+
+	tctr = 0;
+	start = qsc_timerex_stopwatch_start();
+
+	qsc_qmac_keyparams kp = { .key = key, .keylen = sizeof(key) };
+	qsc_qmac_initialize(&ctx, &kp);
+
+	while (tctr < SAMPLE_COUNT)
+	{
+		qsc_qmac_update(&ctx, msg, sizeof(msg));
+		++tctr;
+	}
+
+	qsc_qmac_finalize(&ctx, tag);
+
+	elapsed = qsc_timerex_stopwatch_elapsed(start);
+	qsctest_print_safe("QMAC-256 processed 1GB of data in ");
 	qsctest_print_double((double)elapsed / 1000.0);
 	qsctest_print_line(" seconds");
 }
@@ -957,6 +1065,10 @@ static void shake512x8_benchmark()
 
 void qsctest_benchmark_aes_run()
 {
+	qsctest_print_line("Running the AES-256 GMAC performance benchmarks.");
+	aes256_gmac_benchmark_test();
+
+#if defined(QSCTEXT_RUNALL_BENCHMARKS)
 	qsctest_print_line("Running the AES-128 performance benchmarks.");
 	aes128_cbc_benchmark_test();
 	aes128_ctrbe_benchmark_test();
@@ -966,14 +1078,20 @@ void qsctest_benchmark_aes_run()
 	aes256_cbc_benchmark_test();
 	aes256_ctrbe_benchmark_test();
 	aes256_ctrle_benchmark_test();
+#endif
 }
 
 void qsctest_benchmark_chacha_run()
 {
+	qsctest_print_line("Running the CHACHA-256 Poly1305 encryption and authentication performance benchmarks.");
+	chacha_poly1305_benchmark_test();
+
+#if defined(QSCTEXT_RUNALL_BENCHMARKS)
 	qsctest_print_line("Running the CHACHA-128 encryption only performance benchmarks.");
 	chacha128_benchmark_test();
 	qsctest_print_line("Running the CHACHA-256 encryption only performance benchmarks.");
 	chacha256_benchmark_test();
+#endif
 }
 
 void qsctest_benchmark_csx_run()
@@ -1059,8 +1177,8 @@ void qsctest_benchmark_shake_run()
 #endif
 }
 
-//void qsctest_benchmark_qmac_run()
-//{
-//	qsctest_print_line("Running the QMAC performance benchmarks.");
-//	qmac_benchmark();
-//}
+void qsctest_benchmark_qmac_run()
+{
+	qsctest_print_line("Running the QMAC performance benchmarks.");
+	qmac_benchmark();
+}

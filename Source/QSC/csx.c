@@ -5,11 +5,35 @@
 #	include "intrinsics.h"
 #endif
 
-/*!
-\def CSX_ROUND_COUNT
-* \brief The number of mixing rounds used by CSX-512
-*/
-#define CSX_ROUND_COUNT 40UL
+#if defined(QSC_CSX_REDUCED_ROUNDS)
+	/*!
+	\def CSX_ROUND_COUNT
+	* \brief The number of mixing rounds used by reduced rounds CSX-512
+	*/
+#	define CSX_ROUND_COUNT 20UL
+
+#	if defined(QSC_CSX_AUTHENTICATED)
+		/*!
+		\def CSX_AUTH_KMACR12
+		* \brief Enables the reduced rounds KMAC-R12 implementation.
+		*/
+#		define CSX_AUTH_KMACR12
+#	endif
+#else
+	/*!
+	\def CSX_ROUND_COUNT
+	* \brief The number of mixing rounds used by CSX-512
+	*/
+#	define CSX_ROUND_COUNT 40UL
+
+#	if defined(QSC_CSX_AUTHENTICATED)
+		/*!
+		* \def CSX_AUTH_KMACR24
+		* \brief Sets the authentication mode to standard KMAC-R24.
+		*/
+#		define CSX_AUTH_KMACR24
+#	endif
+#endif
 
 /*!
 \def CSX_NAME_SIZE
@@ -33,7 +57,7 @@ static const uint8_t csx_name[CSX_NAME_SIZE] =
 	0x43U, 0x53U, 0x58U, 0x35U, 0x31U, 0x32U, 0x2DU, 0x4BU, 0x4DU, 0x41U, 0x43U, 0x35U, 0x31U, 0x32U
 };
 
-#	if defined(QSC_CSX_AUTH_KMACR12)
+#	if defined(CSX_AUTH_KMACR12)
 static const uint8_t csx_kmacr12_name[CSX_NAME_SIZE] =
 {
 	0x43U, 0x53U, 0x58U, 0x35U, 0x31U, 0x32U, 0x2DU, 0x4BU, 0x4DU, 0x41U, 0x43U, 0x52U, 0x31U, 0x32U
@@ -531,9 +555,9 @@ static void csx_permute_p4x1024h(csx_avx256_state* ctx)
 
 static void csx_mac_update(qsc_csx_state* ctx, const uint8_t* input, size_t length)
 {
-#if defined(QSC_CSX_AUTH_KMACR12)
+#if defined(CSX_AUTH_KMACR12)
 	qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(QSC_CSX_AUTH_KMAC24)
+#elif defined(CSX_AUTH_KMACR24)
 	qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, input, length);
 #endif
 }
@@ -688,12 +712,12 @@ static void csx_finalize(qsc_csx_state* ctx, uint8_t* output)
 	qsc_intutils_le64to8(ctr, ctx->counter);
 	csx_mac_update(ctx, ctr, sizeof(ctr));
 
-#if defined(QSC_CSX_AUTH_KMACR12)
+#if defined(CSX_AUTH_KMACR12)
 	/* update the counter */
 	qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 	/* finalize the mac and append code to output */
 	qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_CSX_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(QSC_CSX_AUTH_KMAC24)
+#elif defined(CSX_AUTH_KMACR24)
 	/* finalize the mac and append code to output */
 	qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_CSX_MAC_SIZE);
 #endif
@@ -768,11 +792,11 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 		/* initialize the mac generator state */
 		qsc_memutils_clear((uint8_t*)&ctx->kstate, sizeof(ctx->kstate));
 
-#	if defined(QSC_CSX_AUTH_KMACR12)
+#	if defined(CSX_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
 		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0U, csx_kmacr12_name, CSX_NAME_SIZE, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 		qsc_memutils_clear(mck, sizeof(mck));
-#	elif defined(QSC_CSX_AUTH_KMAC24)
+#	elif defined(CSX_AUTH_KMACR24)
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0U);
 		qsc_memutils_clear(mck, sizeof(mck));
 #	endif

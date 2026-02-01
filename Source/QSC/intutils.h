@@ -141,6 +141,15 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_INTUTILS_EIB_SIZE 1152921504606846976ULL
 
 /**
+* \brief Check if two integers are equal.
+*
+* \param x:		[size_t] The first integer.
+* \param y:		[size_t] The second integer.
+* \return			[bool] Returns true if x equals y.
+*/
+QSC_EXPORT_API bool qsc_intutils_are_equal(size_t x, size_t y);
+
+/**
  * \brief Compare two arrays of 8-bit integers for equality.
  * \ warning This function is not constant time. 
  * Use the \c qsc_intutils_verify for constant time operations.
@@ -397,15 +406,6 @@ QSC_EXPORT_API void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size
 QSC_EXPORT_API size_t qsc_intutils_expand_mask(size_t x);
 
 /**
- * \brief Check if two integers are equal.
- *
- * \param x:		[size_t] The first integer.
- * \param y:		[size_t] The second integer.
- * \return			[bool] Returns true if x equals y.
- */
-QSC_EXPORT_API bool qsc_intutils_are_equal(size_t x, size_t y);
-
-/**
  * \brief Check if an integer is greater than or equal to another.
  *
  * \param x:		[size_t] The base integer.
@@ -413,6 +413,24 @@ QSC_EXPORT_API bool qsc_intutils_are_equal(size_t x, size_t y);
  * \return			[bool] Returns true if x is greater than or equal to y.
  */
 QSC_EXPORT_API bool qsc_intutils_is_gte(size_t x, size_t y);
+
+/**
+ * \brief Check if the integer is a power of two.
+ *
+ * \param x:		[size_t] The base integer.
+ * 
+ * \return			[bool] Returns true if x is a power of two.
+ */
+QSC_EXPORT_API bool qsc_intutils_is_power_of_two(size_t x);
+
+/**
+ * \brief Find the next power of two.
+ *
+ * \param x:		[size_t] The base integer.
+ *
+ * \return			[bool] Returns the closest next power of two.
+ */
+QSC_EXPORT_API size_t qsc_intutils_next_power_of_2(size_t x);
 
 /**
  * \brief Convert a hexadecimal string to a byte array.
@@ -505,6 +523,15 @@ QSC_EXPORT_API void qsc_intutils_le32to8(uint8_t* output, uint32_t value);
  * \param value:	[uint64_t] The 64-bit integer.
  */
 QSC_EXPORT_API void qsc_intutils_le64to8(uint8_t* output, uint64_t value);
+
+/**
+ * \brief Check if the integer has the lsb set.
+ *
+ * \param x:		[size_t] The base integer.
+ *
+ * \return			[bool] Returns true if x has the lsb set.
+ */
+QSC_EXPORT_API bool qsc_intutils_lsb_is_set(size_t x);
 
 /**
  * \brief Return the larger of two integers.

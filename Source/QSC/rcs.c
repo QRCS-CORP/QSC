@@ -2,17 +2,49 @@
 #include "intutils.h"
 #include "memutils.h"
 
-/*!
-\def RCS256_ROUND_COUNT
-* The number of Rijndael mixing rounds used by RCS-256.
-*/
-#define RCS256_ROUND_COUNT 22U
+#if defined(QSC_RCS_REDUCED_ROUNDS)
+	/*!
+	\def RCS256_ROUND_COUNT
+	* The number of Rijndael mixing rounds used by reduced rounds RCS-256.
+	*/
+#	define RCS256_ROUND_COUNT 14U
 
-/*!
-\def RCS512_ROUND_COUNT
-* The number of Rijndael ming rounds used by RCS-512.
-*/
-#define RCS512_ROUND_COUNT 30U
+	/*!
+	\def RCS512_ROUND_COUNT
+	* The number of Rijndael mixing rounds used by reduced rounds RCS-512.
+	*/
+#	define RCS512_ROUND_COUNT 21U
+
+#	if defined(QSC_RCS_AUTHENTICATED)
+		/*!
+		 * \def RCS_AUTH_KMACR24
+		 * \brief Sets the authentication mode to standard KMAC-R24.
+		 * Remove this definition to enable the reduced rounds version using KMAC-R12.
+		 */
+#		define RCS_AUTH_KMACR12
+#	endif
+#else
+	/*!
+	\def RCS256_ROUND_COUNT
+	* The number of Rijndael mixing rounds used by RCS-256.
+	*/
+#	define RCS256_ROUND_COUNT 22U
+
+	/*!
+	\def RCS512_ROUND_COUNT
+	* The number of Rijndael mixing rounds used by RCS-512.
+	*/
+#	define RCS512_ROUND_COUNT 30U
+
+#	if defined(QSC_RCS_AUTHENTICATED)
+		/*!
+		 * \def RCS_AUTH_KMACR24
+		 * \brief Sets the authentication mode to standard KMAC-R24.
+		 * Remove this definition to enable the reduced rounds version using KMAC-R12.
+		 */
+#		define RCS_AUTH_KMACR24
+#	endif
+#endif
 
 /*!
 \def RCS_ROUNDKEY_ELEMENT_SIZE
@@ -82,7 +114,7 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 	0x32U
 };
 
-#	if defined(QSC_RCS_AUTH_KMACR12)
+#	if defined(RCS_AUTH_KMACR12)
 #		define RCS_KMACR12_NAME_LENGTH 7UL
 		static const uint8_t rcs_kmacr12_name[RCS_KMACR12_NAME_LENGTH] = { 0x4BU, 0x4DU, 0x41U, 0x43U, 0x52U, 0x31U, 0x32U };
 #	endif
@@ -871,12 +903,12 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 
 	if (ctx->ctype == RCS256)
 	{
-#if defined(QSC_RCS_AUTH_KMACR12)
+#if defined(RCS_AUTH_KMACR12)
 		/* update the counter */
 		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_256, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 		/* finalize the mac and append code to output */
 		qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_256, output, QSC_RCS256_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(QSC_RCS_AUTH_KMACR24)
+#elif defined(RCS_AUTH_KMACR24)
 		/* update the counter */
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_256, ctr, sizeof(ctr));
 		/* finalize the mac and append code to output */
@@ -885,10 +917,10 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 	}
 	else
 	{
-#if defined(QSC_RCS_AUTH_KMACR12)
+#if defined(RCS_AUTH_KMACR12)
 		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
 		qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_RCS512_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(QSC_RCS_AUTH_KMACR24)
+#elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr));
 		qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_RCS512_MAC_SIZE);
 #endif
@@ -900,17 +932,17 @@ static void rcs_mac_update(qsc_rcs_state* ctx, const uint8_t* input, size_t leng
 {
 	if (ctx->ctype == RCS256)
 	{
-#if defined(QSC_RCS_AUTH_KMACR12)
+#if defined(RCS_AUTH_KMACR12)
 		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_256, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(QSC_RCS_AUTH_KMACR24)
+#elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_256, input, length);
 #endif
 	}
 	else
 	{
-#if defined(QSC_RCS_AUTH_KMACR12)
+#if defined(RCS_AUTH_KMACR12)
 		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(QSC_RCS_AUTH_KMACR24)
+#elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, input, length);
 #endif
 	}
@@ -968,11 +1000,11 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1U);
 		qsc_memutils_copy(mkey, sbuf, RCS256_MKEY_LENGTH);
 
-#	if defined(QSC_RCS_AUTH_KMACR12)
+#	if defined(RCS_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
 		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0U, 
 			rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#	elif defined(QSC_RCS_AUTH_KMACR24)
+#	elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0U);
 #	endif
 
@@ -1025,11 +1057,11 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1U);
 		qsc_memutils_copy(mkey, sbuf, RCS512_MKEY_LENGTH);
 
-#	if defined(QSC_RCS_AUTH_KMACR12)
+#	if defined(RCS_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
 		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0U, 
 			rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#	elif defined(QSC_RCS_AUTH_KMACR24)
+#	elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0U);
 #	endif
 
