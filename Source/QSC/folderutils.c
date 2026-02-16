@@ -62,6 +62,64 @@ bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH])
 	return (res == 0);
 }
 
+bool qsc_folderutils_create_directory_tree(const char path[QSC_SYSTEM_MAX_PATH])
+{
+	char tmp[QSC_SYSTEM_MAX_PATH] = { 0U };
+	size_t len;
+	char* p;
+	char sch;
+	bool res;
+
+	res = false;
+
+	if (path != NULL)
+	{
+		qsc_memutils_copy(tmp, path, QSC_SYSTEM_MAX_PATH - 1U);
+		tmp[QSC_SYSTEM_MAX_PATH - 1U] = '\0';
+		len = strlen(tmp);
+
+		/* remove trailing delimiter if present */
+		if (len > 0U && tmp[len - 1U] == QSC_FOLDERUTILS_DELIMITER)
+		{
+			tmp[len - 1U] = '\0';
+		}
+
+		res = true;
+
+		/* iterate through path and create each component */
+		for (p = tmp + 1; *p != '\0' && res; p++)
+		{
+			if (*p == QSC_FOLDERUTILS_DELIMITER)
+			{
+				sch = *p;
+				*p = '\0';
+
+				if (qsc_folderutils_directory_exists(tmp) == false)
+				{
+					res = qsc_folderutils_create_directory(tmp);
+
+					if (res == false)
+					{
+						break;
+					}
+				}
+
+				*p = sch;
+			}
+		}
+
+		if (res == true)
+		{
+			if (qsc_folderutils_directory_exists(tmp) == false)
+			{
+				res = qsc_folderutils_create_directory(tmp);
+			}
+		}
+	}
+
+	return res;
+}
+
 bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_MAX_PATH])
 {
 	QSC_ASSERT(path != NULL);

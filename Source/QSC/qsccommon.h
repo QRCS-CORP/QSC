@@ -1133,11 +1133,11 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*** Signature Schemes ***/
 
-///*!
-// * \def QSC_DILITHIUM_S1P44
-// * \brief Enable the Dilithium S1P44 parameter set.
-// */
-//#define QSC_DILITHIUM_S1P44
+/*!
+ * \def QSC_DILITHIUM_S1P44
+ * \brief Enable the Dilithium S1P44 parameter set.
+ */
+#define QSC_DILITHIUM_S1P44
 
 ///*!
 // * \def QSC_DILITHIUM_S3P65
@@ -1173,10 +1173,10 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_SPHINCSPLUS_S3S192SHAKERS
 
-///*!
-// * \def QSC_SPHINCSPLUS_S5S256SHAKERS
-// * \brief Enable the SphincsPlus S5S256SHAKERS robust small parameter set.
-// */
+/*!
+ * \def QSC_SPHINCSPLUS_S5S256SHAKERS
+ * \brief Enable the SphincsPlus S5S256SHAKERS robust small parameter set.
+ */
 #define QSC_SPHINCSPLUS_S5S256SHAKERS
 
 ///*!

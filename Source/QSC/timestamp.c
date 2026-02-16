@@ -2,6 +2,9 @@
 #include "memutils.h"
 #include "stringutils.h"
 #include <string.h>
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+#	include <windows.h>
+#endif
 #if defined(QSC_DEBUG_MODE)
 #	include "consoleutils.h"
 #endif
@@ -434,6 +437,44 @@ uint64_t qsc_timestamp_epochtime_seconds()
 #endif
 
 	return (uint64_t)lt;
+}
+
+uint64_t qsc_timestamp_epochtime_milliseconds()
+{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	FILETIME ft;
+	ULARGE_INTEGER uli;
+
+	GetSystemTimeAsFileTime(&ft);
+	uli.LowPart = ft.dwLowDateTime;
+	uli.HighPart = ft.dwHighDateTime;
+
+	/* FILETIME is 100-nanosecond intervals since 1601-01-01 */
+	return (uli.QuadPart - 116444736000000000ULL) / 10000ULL;
+#else
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	return ((uint64_t)ts.tv_sec * 1000ULL) + (uint64_t)(ts.tv_nsec / 1000000ULL);
+#endif
+}
+
+uint64_t qsc_timestamp_epochtime_microseconds()
+{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	FILETIME ft;
+	ULARGE_INTEGER uli;
+
+	GetSystemTimeAsFileTime(&ft);
+	uli.LowPart = ft.dwLowDateTime;
+	uli.HighPart = ft.dwHighDateTime;
+
+	/* FILETIME is 100-nanosecond intervals since 1601-01-01 */
+	return (uli.QuadPart - 116444736000000000ULL) / 10ULL;
+#else
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	return ((uint64_t)ts.tv_sec * 1000000ULL) + (uint64_t)(ts.tv_nsec / 1000ULL);
+#endif
 }
 
 #if defined(QSC_DEBUG_MODE)

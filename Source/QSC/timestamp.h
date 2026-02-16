@@ -164,6 +164,20 @@ QSC_EXPORT_API void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_
 QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_seconds(void);
 
 /**
+* \brief Get the date and time from the current locale in milliseconds from epoch
+*
+* \return			[uint64_t] Return the date/time in seconds from epoch
+*/
+QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_milliseconds();
+
+/**
+* \brief Get the date and time from the current locale in microseconds from epoch
+*
+* \return			[uint64_t] Return the date/time in seconds from epoch
+*/
+QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_microseconds();
+
+/**
 * \brief Convert a time structure to a date and time string.
 * Time-stamp string format is YYYY-MM-DD HH-MM-SS.
 *

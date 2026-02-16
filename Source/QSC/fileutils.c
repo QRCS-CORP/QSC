@@ -353,6 +353,16 @@ bool qsc_fileutils_erase(const char* fpath)
 	return res;
 }
 
+void qsc_fileutils_flush(FILE* fp)
+{
+	QSC_ASSERT(fp != NULL);
+
+	if (fp != NULL)
+	{
+		fflush(fp);
+	}
+}
+
 bool qsc_fileutils_exists(const char* fpath)
 {
 	QSC_ASSERT(fpath != NULL);

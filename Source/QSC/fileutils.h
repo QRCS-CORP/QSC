@@ -226,6 +226,13 @@ QSC_EXPORT_API bool qsc_fileutils_delete(const char* fpath);
 QSC_EXPORT_API bool qsc_fileutils_erase(const char* fpath);
 
 /**
+ * \brief Flush a file's contents to disk.
+ *
+ * \param fp:           [FILE*] The file pointer.
+ */
+QSC_EXPORT_API void qsc_fileutils_flush(FILE* fp);
+
+/**
  * \brief Copy a file to a new location.
  *
  * \param inpath:       [const char*] The full fpath to the input file.

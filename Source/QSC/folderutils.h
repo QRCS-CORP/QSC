@@ -128,6 +128,16 @@ QSC_EXPORT_API void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PA
 QSC_EXPORT_API bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH]);
 
 /**
+ * \brief Create a new folder tree.
+ *
+ * Creates a directory path.
+ *
+ * \param path:         [const char*] The full path including the new folder names.
+ * \return              [bool] Returns true if the folder is created.
+ */
+QSC_EXPORT_API bool qsc_folderutils_create_directory_tree(const char path[QSC_SYSTEM_MAX_PATH]);
+
+/**
  * \brief Delete a folder.
  *
  * Deletes the directory at the specified path.
