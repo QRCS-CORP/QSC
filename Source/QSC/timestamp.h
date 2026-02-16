@@ -168,14 +168,14 @@ QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_seconds(void);
 *
 * \return			[uint64_t] Return the date/time in seconds from epoch
 */
-QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_milliseconds();
+QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_milliseconds(void);
 
 /**
 * \brief Get the date and time from the current locale in microseconds from epoch
 *
 * \return			[uint64_t] Return the date/time in seconds from epoch
 */
-QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_microseconds();
+QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_microseconds(void);
 
 /**
 * \brief Convert a time structure to a date and time string.

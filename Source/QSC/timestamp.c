@@ -353,7 +353,7 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 	return (uint64_t)tsec;
 }
 
-uint64_t qsc_timestamp_datetime_utc()
+uint64_t qsc_timestamp_datetime_utc(void)
 {
     time_t lt;
     time_t ut;
@@ -425,7 +425,7 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 	}
 }
 
-uint64_t qsc_timestamp_epochtime_seconds()
+uint64_t qsc_timestamp_epochtime_seconds(void)
 {
 	time_t lt;
 
@@ -439,7 +439,7 @@ uint64_t qsc_timestamp_epochtime_seconds()
 	return (uint64_t)lt;
 }
 
-uint64_t qsc_timestamp_epochtime_milliseconds()
+uint64_t qsc_timestamp_epochtime_milliseconds(void)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	FILETIME ft;
@@ -458,7 +458,7 @@ uint64_t qsc_timestamp_epochtime_milliseconds()
 #endif
 }
 
-uint64_t qsc_timestamp_epochtime_microseconds()
+uint64_t qsc_timestamp_epochtime_microseconds(void)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	FILETIME ft;
