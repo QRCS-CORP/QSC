@@ -122,7 +122,7 @@ int32_t qsc_crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, con
     qsc_fe25519_mul(x2, x2, z2);
     qsc_fe25519_to_bytes(q, x2);
 
-    return (int32_t)(-((int32_t)valid) & 0);
+    return (valid == 0) ? -1 : 0;
 }
 
 int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
@@ -172,11 +172,18 @@ void qsc_x25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const 
 	QSC_ASSERT(publickey != NULL);
     QSC_ASSERT(seed != NULL);
     
+#if defined (QSC_ECDH_RFC_7748_COMPLIANT)
+    /* RFC 7748 compliant method */
+    qsc_memutils_copy(privatekey, seed, EC25519_SEED_SIZE);
+    qsc_crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
+#else
+    /* the libsodium model, assuming that the seed is not pre-hashed */
     uint8_t tseed[QSC_SHA2_512_HASH_SIZE] = { 0U };
 
     qsc_sha512_compute(tseed, seed, EC25519_SEED_SIZE);
     qsc_memutils_copy(privatekey, tseed, EC25519_SEED_SIZE);
     qsc_crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
+#endif
 }
 
 

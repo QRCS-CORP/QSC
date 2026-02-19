@@ -1,7 +1,8 @@
 #include "secrand.h"
+#include "async.h"
 #include "memutils.h"
 
-qsc_secrand_state secrand_state;
+qsc_secrand_state m_secrand_state;
 
 int8_t qsc_secrand_next_char()
 {
@@ -10,7 +11,7 @@ int8_t qsc_secrand_next_char()
 
 	res = 0;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		res = (int8_t)smp[0U];
 	}
@@ -25,7 +26,7 @@ uint8_t qsc_secrand_next_uchar()
 
 	res = 0U;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		res = smp[0U];
 	}
@@ -40,7 +41,7 @@ double qsc_secrand_next_double()
 
 	res = 0.0;
 	
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		qsc_memutils_copy(&res, smp, sizeof(double));
 	}
@@ -55,7 +56,7 @@ int16_t qsc_secrand_next_int16()
 
 	res = 0;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		qsc_memutils_copy(&res, smp, sizeof(int16_t));
 	}
@@ -106,7 +107,7 @@ uint16_t qsc_secrand_next_uint16()
 
 	res = 0U;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		qsc_memutils_copy(&res, smp, sizeof(uint16_t));
 	}
@@ -157,7 +158,7 @@ int32_t qsc_secrand_next_int32()
 
 	res = 0;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		qsc_memutils_copy(&res, smp, sizeof(int32_t));
 	}
@@ -208,7 +209,7 @@ uint32_t qsc_secrand_next_uint32()
 
 	res = 0U;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		qsc_memutils_copy(&res, smp, sizeof(uint32_t));
 	}
@@ -259,7 +260,7 @@ int64_t qsc_secrand_next_int64()
 
 	res = 0;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		qsc_memutils_copy(&res, smp, sizeof(int64_t));
 	}
@@ -310,7 +311,7 @@ uint64_t qsc_secrand_next_uint64()
 
 	res = 0U;
 
-	if (qsc_secrand_generate(smp, sizeof(smp)))
+	if (qsc_secrand_generate(smp, sizeof(smp)) == true)
 	{
 		qsc_memutils_copy(&res, smp, sizeof(uint64_t));
 	}
@@ -356,13 +357,17 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 
 void qsc_secrand_dispose()
 {
-	if (secrand_state.init == true)
+	qsc_mutex mtx = qsc_async_mutex_lock_ex();
+
+	if (m_secrand_state.init == true)
 	{
-		qsc_memutils_clear(secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
-		qsc_csg_dispose(&secrand_state.hstate);
-		secrand_state.cpos = 0U;
-		secrand_state.init = false;
+		qsc_memutils_clear(m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+		qsc_csg_dispose(&m_secrand_state.hstate);
+		m_secrand_state.cpos = 0U;
+		m_secrand_state.init = false;
 	}
+
+	qsc_async_mutex_unlock_ex(mtx);
 }
 
 void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* custom, size_t custlen)
@@ -372,13 +377,17 @@ void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* 
 
 	if (seed != NULL && (seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE))
 	{
+		qsc_mutex mtx = qsc_async_mutex_lock_ex();
+
 		/* initialize the underlying generator */
-		qsc_csg_initialize(&secrand_state.hstate, seed, seedlen, custom, custlen, true);
+		qsc_csg_initialize(&m_secrand_state.hstate, seed, seedlen, custom, custlen, true);
 
 		/* pre-fill the cache */
-		qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
-		secrand_state.cpos = 0U;
-		secrand_state.init = true;
+		qsc_csg_generate(&m_secrand_state.hstate, m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+		m_secrand_state.cpos = 0U;
+		m_secrand_state.init = true;
+
+		qsc_async_mutex_unlock_ex(mtx);
 	}
 }
 
@@ -386,15 +395,18 @@ bool qsc_secrand_generate(uint8_t* output, size_t length)
 {
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(length != 0);
-	QSC_ASSERT(secrand_state.init == true);
 
-	const size_t BUFLEN = QSC_SECRAND_CACHE_SIZE - secrand_state.cpos;
+	qsc_mutex mtx = qsc_async_mutex_lock_ex();
+
+	QSC_ASSERT(m_secrand_state.init == true);
+
+	const size_t BUFLEN = QSC_SECRAND_CACHE_SIZE - m_secrand_state.cpos;
 	size_t poft;
 	bool res;
 
 	res = false;
 
-	if (output != NULL && length != 0 && secrand_state.init == true)
+	if (output != NULL && length != 0 && m_secrand_state.init == true)
 	{
 		if (length > BUFLEN)
 		{
@@ -402,40 +414,42 @@ bool qsc_secrand_generate(uint8_t* output, size_t length)
 
 			if (BUFLEN > 0U)
 			{
-				qsc_memutils_copy(output, secrand_state.cache + secrand_state.cpos, BUFLEN);
+				qsc_memutils_copy(output, m_secrand_state.cache + m_secrand_state.cpos, BUFLEN);
 				length -= BUFLEN;
 				poft += BUFLEN;
-				secrand_state.cpos = QSC_SECRAND_CACHE_SIZE;
+				m_secrand_state.cpos = QSC_SECRAND_CACHE_SIZE;
 			}
 
 			while (length >= QSC_SECRAND_CACHE_SIZE)
 			{
-				qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
-				qsc_memutils_copy(output + poft, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+				qsc_csg_generate(&m_secrand_state.hstate, m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+				qsc_memutils_copy(output + poft, m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
 				length -= QSC_SECRAND_CACHE_SIZE;
 				poft += QSC_SECRAND_CACHE_SIZE;
 			}
 
 			if (length != 0U)
 			{
-				qsc_csg_generate(&secrand_state.hstate, secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
-				qsc_memutils_copy(output + poft, secrand_state.cache, length);
-				secrand_state.cpos = length;
+				qsc_csg_generate(&m_secrand_state.hstate, m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+				qsc_memutils_copy(output + poft, m_secrand_state.cache, length);
+				m_secrand_state.cpos = length;
 			}
 		}
 		else
 		{
-			qsc_memutils_copy(output, secrand_state.cache + secrand_state.cpos, length);
-			secrand_state.cpos += length;
+			qsc_memutils_copy(output, m_secrand_state.cache + m_secrand_state.cpos, length);
+			m_secrand_state.cpos += length;
 		}
 
 		res = true;
 	}
 
-	if (secrand_state.cpos != 0U)
+	if (m_secrand_state.cpos != 0U)
 	{
-		qsc_memutils_clear(secrand_state.cache, secrand_state.cpos);
+		qsc_memutils_clear(m_secrand_state.cache, m_secrand_state.cpos);
 	}
+
+	qsc_async_mutex_unlock_ex(mtx);
 
 	return res;
 }

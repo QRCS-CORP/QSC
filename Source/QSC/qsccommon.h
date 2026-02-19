@@ -1067,6 +1067,35 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*** ECDH ***/
 
+/**
+* \def QSC_RFC_7748_COMPLIANT
+* \brief Controls the key derivation method used in qsc_x25519_generate_keypair.
+*
+* When defined, the function uses the RFC 7748 Section 6.1 compliant method:
+* the private key scalar is derived by copying the seed directly, with clamping
+* applied internally during scalar multiplication. This produces keypairs that are
+* interoperable with any standard-conforming X25519 implementation, including
+* OpenSSL, BoringSSL, and the Go standard library, when those implementations
+* are given the same 32-byte seed as raw key material.
+*
+* When not defined, the function uses the libsodium seeded-keypair convention:
+* the private key scalar is derived by computing SHA-512(seed) and taking the
+* first 32 bytes. This provides domain separation between the seed and the
+* scalar, ensuring that the private key is not trivially related to the seed
+* even if the seed has low entropy or is reused in another context. Keypairs
+* produced by this method are interoperable with libsodium's
+* crypto_box_seed_keypair function when given the same seed, but are NOT
+* interoperable with raw RFC 7748 implementations using the same seed.
+*
+* Note: both methods produce cryptographically secure keypairs. The choice
+* affects only interoperability and key derivation provenance, not security
+* strength. If keypairs must be compatible with a specific peer implementation,
+* the selection here must match the convention used by that implementation.
+*
+* https://www.rfc-editor.org/rfc/rfc7748
+*/
+#define QSC_ECDH_RFC_7748_COMPLIANT
+
 /*!
  * \def QSC_ECDH_S1EC25519
  * \brief Enable the ECDH S1EC25519 parameter set.

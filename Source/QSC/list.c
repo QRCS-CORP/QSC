@@ -378,7 +378,7 @@ bool qsc_list_self_test()
 		{
 			const uint8_t* ptmp = ctx.items+ i;
 
-			if (qsc_intutils_are_equal8(exp[i], ptmp, 16U) == false)
+			if (qsc_memutils_are_equal(exp[i], ptmp, 16U) == false)
 			{
 				ret = false;
 				break;

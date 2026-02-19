@@ -1362,7 +1362,7 @@ void qsc_fileutils_test(const char* fpath)
 
 				if (qsc_fileutils_copy_file_to_stream(fpath, smp, sizeof(smp)) == sizeof(rnd))
 				{
-					if (qsc_intutils_are_equal8((uint8_t*)smp, rnd, sizeof(rnd)) == true)
+					if (qsc_memutils_are_equal((uint8_t*)smp, rnd, sizeof(rnd)) == true)
 					{
 						qsc_consoleutils_print_line("Success: read file matches random input.");
 					}

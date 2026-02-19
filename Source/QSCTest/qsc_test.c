@@ -178,7 +178,7 @@ int32_t main(void)
 	 * by remming the QSC_SYSTEM_AESNI_ENABLED macro.
 	 */
 	valid = qsc_selftest_symmetric_run();
-
+	
 	if (valid == true)
 	{
 		print_title();
@@ -302,10 +302,9 @@ int32_t main(void)
 			qsctest_poly1305_run();
 			qsctest_print_line("");
 
-			/* QMAC removed for further development */
-			//qsctest_print_line("*** Test the QMAC implementation using the official known answer tests ***");
-			//qsctest_qmac_run();
-			//qsctest_print_line("");
+			qsctest_print_line("*** Test the QMAC implementation using the official known answer tests ***");
+			qsctest_qmac_run();
+			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Secure Random provider and entropy provider implementations ***");
 			qsctest_secrand_run();

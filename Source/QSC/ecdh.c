@@ -1,5 +1,5 @@
-#include "ecdhbase.h"
 #include "ecdh.h"
+#include "ecdhbase.h"
 #include "memutils.h"
 
 bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey)

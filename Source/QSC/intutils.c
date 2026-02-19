@@ -203,11 +203,18 @@ void qsc_intutils_bswap64(uint64_t* dest, const uint64_t* source, size_t length)
 
 double qsc_intutils_calculate_abs(double a)
 {
+	double r;
+
     if (a < 0.0)
     {
-        return -a;
+        r = -a;
     }
-    return a;
+	else
+	{
+		r = a;
+	}
+
+    return r;
 }
 
 double qsc_intutils_calculate_exp(double x)

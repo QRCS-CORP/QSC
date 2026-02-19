@@ -2379,6 +2379,11 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 		}
 
 		res = (qsc_intutils_verify(ctag, input + clen, QSC_GCM256_MAC_SIZE) == 0U);
+
+		if (res == false)
+		{
+			qsc_memutils_clear(output, clen);
+		}
 	}
 
     return res;

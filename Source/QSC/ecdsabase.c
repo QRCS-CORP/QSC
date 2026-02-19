@@ -101,7 +101,7 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 		qsc_ge25519_double_scalarmult_vartime(&R, h, &A, sig + 32U);
 		qsc_ge25519_to_bytes(rcheck, &R);
 
-		if ((qsc_sc25519_verify(rcheck, sig, 32) | (-(rcheck == sig))) != 0 || qsc_intutils_are_equal8(sig, rcheck, 32) == false)
+		if (qsc_sc25519_verify(rcheck, sig, 32U) || qsc_memutils_are_equal(sig, rcheck, 32U) == false)
 		{
 			res = false;
 		}

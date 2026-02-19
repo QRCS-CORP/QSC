@@ -268,7 +268,7 @@ bool qsc_queue_self_test()
 
 	for (i = 0U; i < 64U; ++i)
 	{
-		if (qsc_intutils_are_equal8(exp[i], otp2[i], 16U) == false)
+		if (qsc_memutils_are_equal(exp[i], otp2[i], 16U) == false)
 		{
 			ret = false;
 			break;
@@ -289,7 +289,7 @@ bool qsc_queue_self_test()
 
 	for (i = 0U; i < 64U; ++i)
 	{
-		if (qsc_intutils_are_equal8(exp[i], ((uint8_t*)otp1 + i * 16U), 16U) == false)
+		if (qsc_memutils_are_equal(exp[i], ((uint8_t*)otp1 + i * 16U), 16U) == false)
 		{
 			ret = false;
 			break;
