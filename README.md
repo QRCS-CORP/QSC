@@ -141,13 +141,14 @@ The wrapper is written in managed C++ and compiled as a mixed-mode assembly, all
 |---|---|
 | **RCS** | Wide-block Rijndael stream cipher with KMAC/QMAC authentication; 256 and 512-bit keys |
 | **CSX-512** | ChaCha-derived stream cipher with 512-bit keys and KMAC/QMAC authentication |
-| **AES-HBA** | AES in Hash-Based Authentication mode; combines AES-CTR with KMAC/QMAC |
+| **AES-GCM** | AES in GMAC Authentication mode; combines AES-CTR with GMAC |
+| **AES-HBA** | AES in Hash-Based Authentication mode; combines AES-CTR with KMAC |
 
 #### Classical Symmetric Ciphers
 
 | Algorithm | Modes / Notes |
 |---|---|
-| **AES** | CBC, CTR, ECB, GCM, HBA; hardware-accelerated via AES-NI |
+| **AES** | CBC, CTR, ECB, GCM, HBA, GCM; hardware-accelerated via AES-NI and SIMD |
 | **ChaCha20-Poly1305** | Standard 256-bit ChaCha stream cipher with Poly1305 MAC |
 
 #### Hash Functions
