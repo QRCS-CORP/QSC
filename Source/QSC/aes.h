@@ -256,7 +256,7 @@ QSC_EXPORT_API typedef struct
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 	__m128i roundkeys[31U];			/*!< [__m128i] Round-key array for hardware accelerated AES */
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		QSC_ALIGN(64) __m512i roundkeysw[31U];		/*!< [__m512i] Extended round-key array for AVX-512 optimizations */
+		__m512i roundkeysw[31U];		/*!< [__m512i] Extended round-key array for AVX-512 optimizations */
 #	endif
 #else
 	uint32_t roundkeys[124U];		/*!< [uint32_t] Round-key array as 32-bit sub-keys for software-based AES */
@@ -541,14 +541,14 @@ QSC_EXPORT_API bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t*
  */
 QSC_EXPORT_API typedef struct qsc_aes_gcm256_state 
 {
-    qsc_aes_state cstate;                   /*!< [struct] Underlying AES cipher ctx */
-    QSC_SIMD_ALIGN uint8_t C[QSC_AES_BLOCK_SIZE];			/*!< uint8_t[QSC_AES_BLOCK_SIZE] Current counter block */
-    QSC_SIMD_ALIGN uint8_t H[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] Hash subkey H = AES(K,0U) */
-    QSC_SIMD_ALIGN uint8_t J0[QSC_AES_BLOCK_SIZE];         /*!< uint8_t[QSC_AES_BLOCK_SIZE] Pre-counter block */
-    QSC_SIMD_ALIGN uint8_t S[QSC_AES_BLOCK_SIZE];          /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
-    uint64_t aadlen;						/*!< [uint64_t] AAD length in bits */
-    uint64_t ctlen;							/*!< [uint64_t] Ciphertext length in bits */
-	bool encrypt;							/*!< [bool] Initialized for encryption */
+    qsc_aes_state cstate;			/*!< [struct] Underlying AES cipher ctx */
+    uint8_t C[QSC_AES_BLOCK_SIZE];	/*!< uint8_t[QSC_AES_BLOCK_SIZE] Current counter block */
+    uint8_t H[QSC_AES_BLOCK_SIZE];  /*!< uint8_t[QSC_AES_BLOCK_SIZE] Hash subkey H = AES(K,0U) */
+    uint8_t J0[QSC_AES_BLOCK_SIZE]; /*!< uint8_t[QSC_AES_BLOCK_SIZE] Pre-counter block */
+    uint8_t S[QSC_AES_BLOCK_SIZE];  /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH accumulator */
+    uint64_t aadlen;				/*!< [uint64_t] AAD length in bits */
+    uint64_t ctlen;					/*!< [uint64_t] Ciphertext length in bits */
+	bool encrypt;					/*!< [bool] Initialized for encryption */
 } qsc_aes_gcm256_state;
 
 /**

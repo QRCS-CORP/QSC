@@ -11,10 +11,10 @@
 
 bool qsctest_sphincsplus_extended_test()
 {
-	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -69,15 +69,15 @@ bool qsctest_sphincsplus_operations_test()
 	/* note: the kat files were generated using the NIST post quantum competition format, 
 	for the NIST ACVP KAT vector test, run the CAVP project. */
 
-	QSC_SIMD_ALIGN uint8_t ksig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kmsg[TEST_MESSAGE_LEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kpk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ksk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t ksig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint8_t msg[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + TEST_MESSAGE_LEN] = { 0 };
+	uint8_t kmsg[TEST_MESSAGE_LEN] = { 0 };
+	uint8_t kpk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ksk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t pklen;
 	size_t seedlen;
@@ -152,11 +152,11 @@ bool qsctest_sphincsplus_operations_test()
 
 bool qsctest_sphincsplus_privatekey_integrity()
 {
-	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -189,11 +189,11 @@ bool qsctest_sphincsplus_privatekey_integrity()
 
 bool qsctest_sphincsplus_publickey_integrity()
 {
-	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -223,11 +223,11 @@ bool qsctest_sphincsplus_publickey_integrity()
 
 bool qsctest_sphincsplus_signature_integrity()
 {
-	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;
@@ -265,11 +265,11 @@ bool qsctest_sphincsplus_signature_integrity()
 
 bool qsctest_sphincsplus_stress_test()
 {
-	QSC_SIMD_ALIGN uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
+	uint8_t msg[QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t mout[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sig[QSC_SPHINCSPLUS_SIGNATURE_SIZE + QSCTEST_SPHINCSPLUS_MLEN] = { 0 };
+	uint8_t sk[QSC_SPHINCSPLUS_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pk[QSC_SPHINCSPLUS_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
 	size_t siglen;
 	bool ret;

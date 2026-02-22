@@ -101,7 +101,7 @@ static void kyber_cbd2_avx2(qsc_kyber_poly *r, const uint8_t buf[4 * QSC_KYBER_N
 
     for (size_t i = 0U; i < QSC_KYBER_N / 64U; ++i) 
     {
-        f0 = _mm256_load_si256((const __m256i*)&buf[32U * i]);
+        f0 = _mm256_loadu_si256((const __m256i*)&buf[32U * i]);
 
         f1 = _mm256_srli_epi16(f0, 1);
         f0 = _mm256_and_si256(mask55, f0);

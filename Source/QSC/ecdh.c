@@ -26,7 +26,7 @@ bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 	QSC_ASSERT(publickey != NULL);
 	QSC_ASSERT(rng_generate != NULL);
 
-	QSC_CACHE_ALIGNED uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0U };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0U };
 	bool res;
 
 	res = false;

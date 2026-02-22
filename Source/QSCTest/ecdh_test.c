@@ -7,19 +7,19 @@
 
 bool qsctest_ecdh_kat_test()
 {
-	QSC_SIMD_ALIGN uint8_t kpka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kpkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ksec[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kskb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seeda[QSC_ECDH_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seedb[QSC_ECDH_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t kpka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t kpkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ksec[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t kska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t kskb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t seeda[QSC_ECDH_SEED_SIZE] = { 0 };
+	uint8_t seedb[QSC_ECDH_SEED_SIZE] = { 0 };
+	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
 	bool ret;
 
 	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F", seeda, sizeof(seeda));
@@ -106,13 +106,13 @@ bool qsctest_ecdh_kat_test()
 
 bool qsctest_ecdh_operations_test()
 {
-	QSC_SIMD_ALIGN uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
+	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
 	bool res;
 
 	res = true;
@@ -156,13 +156,13 @@ bool qsctest_ecdh_operations_test()
 
 bool qsctest_ecdh_privatekey_integrity()
 {
-	QSC_SIMD_ALIGN uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
+	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
@@ -209,13 +209,13 @@ bool qsctest_ecdh_privatekey_integrity()
 
 bool qsctest_ecdh_publickey_integrity()
 {
-	QSC_SIMD_ALIGN uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
+	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;

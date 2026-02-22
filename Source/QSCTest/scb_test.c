@@ -7,9 +7,9 @@
 
 bool qsctest_scb_256_kat()
 {
-	QSC_SIMD_ALIGN uint8_t exp[32] = { 0 };
-	QSC_SIMD_ALIGN uint8_t hash[32] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seed[QSC_SCB_256_SEED_SIZE] = { 0 };
+	uint8_t exp[32] = { 0 };
+	uint8_t hash[32] = { 0 };
+	uint8_t seed[QSC_SCB_256_SEED_SIZE] = { 0 };
 	bool status;
 	qsc_scb_state ctx = { 0 };
 
@@ -38,9 +38,9 @@ bool qsctest_scb_256_kat()
 
 bool qsctest_scb_512_kat()
 {
-	QSC_SIMD_ALIGN uint8_t exp[64] = { 0 };
-	QSC_SIMD_ALIGN uint8_t hash[64] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seed[QSC_SCB_512_SEED_SIZE] = { 0 };
+	uint8_t exp[64] = { 0 };
+	uint8_t hash[64] = { 0 };
+	uint8_t seed[QSC_SCB_512_SEED_SIZE] = { 0 };
 	bool status;
 	qsc_scb_state ctx = { 0 };
 

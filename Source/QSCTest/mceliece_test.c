@@ -10,11 +10,11 @@
 
 bool qsctest_mceliece_ciphertext_integrity()
 {
-	QSC_SIMD_ALIGN uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t* pk;
 	bool ret;
 
@@ -62,14 +62,14 @@ bool qsctest_mceliece_ciphertext_integrity()
 
 bool qsctest_mceliece_kat_test()
 {
-	QSC_SIMD_ALIGN uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ksk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t kss[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
+	uint8_t kct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
+	uint8_t ksk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t kss[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t* kpk;
 	uint8_t* pk;
 	size_t ctlen;
@@ -178,10 +178,10 @@ bool qsctest_mceliece_kat_test()
 
 bool qsctest_mceliece_operations_test()
 {
-	QSC_SIMD_ALIGN uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
+	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t* pk;
 	bool ret;
 
@@ -221,11 +221,11 @@ bool qsctest_mceliece_operations_test()
 
 bool qsctest_mceliece_publickey_integrity()
 {
-	QSC_SIMD_ALIGN uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ct[QSC_MCELIECE_CIPHERTEXT_SIZE] = { 0 };
+	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
+	uint8_t sk[QSC_MCELIECE_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t ssk1[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk2[QSC_MCELIECE_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t* pk;
 	bool ret;
 

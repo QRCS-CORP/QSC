@@ -644,7 +644,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 			length -= CSX_AVX2_BLOCK;
 		}
 
-		QSC_ALIGN(32) uint8_t ctrblk[32U];
+		uint8_t ctrblk[32U];
 
 		/* store the nonce */
 		_mm256_storeu_si256((__m256i*)ctrblk, ctxw.state[12U]);

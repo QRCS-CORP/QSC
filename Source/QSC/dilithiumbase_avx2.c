@@ -907,7 +907,7 @@ static void dilithium_avx2_poly_uniform_eta_4x(dilithium_poly* a0, dilithium_pol
 {
 
     QSC_ALIGN(32) uint8_t buf[4U][DILITHIUM_POLY_UNIFORM_ETA_NBLOCKS * QSC_KECCAK_256_RATE];
-    QSC_ALIGN(32) __m256i ksi[QSC_KECCAK_STATE_SIZE] = { 0U };
+    __m256i ksi[QSC_KECCAK_STATE_SIZE] = { 0U };
     uint32_t ctr0;
     uint32_t ctr1; 
     uint32_t ctr2;
@@ -999,15 +999,15 @@ static void dilithium_avx2_poly_uniform_gamma1_4x(dilithium_poly* a0, dilithium_
     const uint8_t seed[DILITHIUM_CRHBYTES], uint16_t nonce0, uint16_t nonce1, uint16_t nonce2, uint16_t nonce3)
 {
     QSC_ALIGN(32) uint8_t buf[4U][DILITHIUM_POLY_UNIFORM_GAMMA1_NBLOCKS * QSC_KECCAK_256_RATE + 14U];
-    QSC_ALIGN(32) __m256i ksi[QSC_KECCAK_STATE_SIZE] = { 0U };
+    __m256i ksi[QSC_KECCAK_STATE_SIZE] = { 0U };
     __m256i f;
 
-    f = _mm256_load_si256((__m256i*)seed);
+    f = _mm256_loadu_si256((__m256i*)seed);
     _mm256_store_si256((__m256i*)buf[0U], f);
     _mm256_store_si256((__m256i*)buf[1U], f);
     _mm256_store_si256((__m256i*)buf[2U], f);
     _mm256_store_si256((__m256i*)buf[3U], f);
-    f = _mm256_load_si256((__m256i*)&seed[32U]);
+    f = _mm256_loadu_si256((__m256i*)&seed[32U]);
     _mm256_store_si256((__m256i*)&buf[0U][32U], f);
     _mm256_store_si256((__m256i*)&buf[1U][32U], f);
     _mm256_store_si256((__m256i*)&buf[2U][32U], f);
@@ -1467,7 +1467,7 @@ static void dilithium_avx2_poly_uniform_4x(dilithium_poly* a0, dilithium_poly* a
     const uint8_t seed[32U], uint16_t nonce0, uint16_t nonce1, uint16_t nonce2, uint16_t nonce3)
 {
     QSC_ALIGN(32) uint8_t buf[4U][DILITHIUM_REJ_UNIFORM_BUFLEN + 8U];
-    QSC_ALIGN(32) __m256i ksi[QSC_KECCAK_STATE_SIZE] = { 0U };
+    __m256i ksi[QSC_KECCAK_STATE_SIZE] = { 0U };
     __m256i f;
     uint32_t ctr0;
     uint32_t ctr1;

@@ -540,7 +540,7 @@ static void int64_minmax(uint64_t* a, uint64_t* b)
 	*b ^= c;
 }
 
-static void uint64_sort(uint64_t *x, int64_t n)
+static void uint64_sort(uint64_t* x, int64_t n)
 {
 	int64_t top;
 	int64_t r;
@@ -606,8 +606,7 @@ static gf eval(const gf* f, gf a)
 		--i;
 		r = gf_mul(r, a);
 		r = gf_add(r, f[i]);
-	} 
-	while (i > 0U);
+	} while (i > 0U);
 
 	return r;
 }
@@ -867,14 +866,14 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 	uint8_t* r_ptr = r;
 	const uint8_t* bits_ptr;
 
-	if (rev != 0) 
+	if (rev != 0)
 	{
-		bits_ptr = bits + 12288U; 
-		inc = -1024; 
+		bits_ptr = bits + 12288U;
+		inc = -1024;
 	}
-	else 
+	else
 	{
-		bits_ptr = bits;         
+		bits_ptr = bits;
 		inc = 0;
 	}
 
@@ -891,7 +890,7 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 	{
 		for (i = 0U; i < 64U; ++i)
 		{
-			b_int_v[i] = load8(bits_ptr); 
+			b_int_v[i] = load8(bits_ptr);
 			bits_ptr += 8U;
 		}
 
@@ -905,9 +904,9 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (iter = 0; iter <= 5; ++iter)
 	{
-		for (i = 0U; i < 64U; ++i) 
-		{ 
-			b_int_v[i] = load8(bits_ptr); 
+		for (i = 0U; i < 64U; ++i)
+		{
+			b_int_v[i] = load8(bits_ptr);
 			bits_ptr += 8U;
 		}
 
@@ -917,10 +916,10 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 
 	for (iter = 4; iter >= 0; --iter)
 	{
-		for (i = 0U; i < 64U; ++i) 
-		{ 
-			b_int_v[i] = load8(bits_ptr); 
-			bits_ptr += 8U; 
+		for (i = 0U; i < 64U; ++i)
+		{
+			b_int_v[i] = load8(bits_ptr);
+			bits_ptr += 8U;
 		}
 
 		bits_ptr += inc;
@@ -988,8 +987,7 @@ static void support_gen(gf* s, const uint8_t* c)
 			--j;
 			s[i] <<= 1;
 			s[i] |= (L[j][i / 8U] >> (i % 8U)) & 1;
-		} 
-		while (j != 0U);
+		} while (j != 0U);
 	}
 }
 
@@ -997,7 +995,7 @@ static void support_gen(gf* s, const uint8_t* c)
 
 static void bm(gf* out, const gf* s)
 {
-	/* the Berlekamp-Massey algorithm. 
+	/* the Berlekamp-Massey algorithm.
 	input: s, sequence of field elements
 	output: out, minimal polynomial of s */
 
@@ -1021,19 +1019,19 @@ static void bm(gf* out, const gf* s)
 	for (N = 0U; N < 2U * MCELIECE_SYS_T; ++N)
 	{
 		d = 0U;
-		
+
 		for (i = 0U; i <= qsc_intutils_min((size_t)N, (size_t)MCELIECE_SYS_T); ++i)
 		{
 			d ^= gf_mul(C[i], s[N - i]);
 		}
 
-		mne = d; 
-		mne -= 1U;   
-		mne >>= 15; 
+		mne = d;
+		mne -= 1U;
+		mne >>= 15;
 		mne -= 1U;
 		mle = N;
-		mle -= 2U * L; 
-		mle >>= 15U; 
+		mle -= 2U * L;
+		mle >>= 15U;
 		mle -= 1U;
 		mle &= mne;
 
@@ -1087,7 +1085,7 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 	int64_t j;
 	int64_t x;
 
-	if (w == 1) 
+	if (w == 1)
 	{
 		out[pos >> 3U] ^= pi[0U] << (pos & 7);
 		return;
@@ -1100,7 +1098,7 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 
 	int32_sort(A, n); /* A = (id<<16)+pibar */
 
-	for (x = 0; x < n; ++x) 
+	for (x = 0; x < n; ++x)
 	{
 		int32_t Ax = A[x];
 		int32_t px = Ax & 0x0000FFFFL;
@@ -1137,7 +1135,7 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 			B[x] = ((A[x] & 0x0000FFFFL) << 10) | (B[x] & 0x000003FFL);
 		}
 
-		for (i = 1; i < w - 1; ++i) 
+		for (i = 1; i < w - 1; ++i)
 		{
 			/* B = (p<<10)+c */
 
@@ -1199,7 +1197,7 @@ static void cbrecursion(uint8_t* out, int64_t pos, int64_t step, const int16_t* 
 
 			/* A = p^(-1)<<16+c */
 
-			if (i < w - 2) 
+			if (i < w - 2)
 			{
 				for (x = 0; x < n; ++x)
 				{
@@ -1400,8 +1398,8 @@ static int32_t decrypt(uint8_t* e, const uint8_t* sk, const uint8_t* c)
 	{
 		g[i] = load_gf(sk);
 		sk += 2U;
-	} 
-	
+	}
+
 	g[MCELIECE_SYS_T] = 1U;
 	support_gen(L, sk);
 	synd(s, g, L, r);
@@ -1556,7 +1554,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 	   output: syndrome s */
 
 	QSC_CACHE_ALIGNED uint8_t row[MCELIECE_SYS_N / 8U];
-	const uint8_t *pk_ptr = pk;
+	const uint8_t* pk_ptr = pk;
 	size_t j;
 	uint8_t b;
 #if defined(QSC_MCELIECE_S6N6960T119)
@@ -1603,7 +1601,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 	}
 }
 
-static bool mencrypt(uint8_t *s, const uint8_t *pk, uint8_t *e, bool (*rng_generate)(uint8_t*, size_t))
+static bool mencrypt(uint8_t* s, const uint8_t* pk, uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 {
 	bool res;
 
@@ -1711,7 +1709,7 @@ static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t
 	if (res)
 	{
 #if defined(QSC_MCELIECE_S6N6960T119)
-		uint8_t *pk_ptr = pk;
+		uint8_t* pk_ptr = pk;
 		int32_t tail;
 #endif
 		g[MCELIECE_SYS_T] = 1U;
@@ -1973,7 +1971,7 @@ bool qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, b
 {
 	QSC_CACHE_ALIGNED uint8_t one_ec[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
 	QSC_CACHE_ALIGNED uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
-	uint8_t *e = two_e + 1U;
+	uint8_t* e = two_e + 1U;
 	bool res;
 
 #if defined(QSC_MCELIECE_S6N6960T119)
@@ -2027,13 +2025,13 @@ bool qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8_t*
 	QSC_CACHE_ALIGNED uint8_t conf[32U];
 	QSC_CACHE_ALIGNED uint8_t preimage[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
 	QSC_CACHE_ALIGNED uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
-	const uint8_t *s = sk + 40U + MCELIECE_IRR_BYTES + MCELIECE_COND_BYTES;
+	const uint8_t* s = sk + 40U + MCELIECE_IRR_BYTES + MCELIECE_COND_BYTES;
 	size_t i;
 	uint16_t m;
 	uint8_t ret_confirm;
 	uint8_t ret_decrypt;
-	uint8_t *e = two_e + 1U;
-	uint8_t *x = preimage;
+	uint8_t* e = two_e + 1U;
+	uint8_t* x = preimage;
 #if defined(QSC_MCELIECE_S6N6960T119)
 	int32_t padding_ok;
 	uint8_t mask;
@@ -2097,7 +2095,7 @@ bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gene
 	QSC_CACHE_ALIGNED uint8_t r[(MCELIECE_SYS_N / 8U) + ((1U << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2U) + 32U] = { 0U };
 	QSC_CACHE_ALIGNED uint8_t seed[33U] = { 0U };
 	const uint8_t* rp;
-	uint8_t *skp;
+	uint8_t* skp;
 	int32_t i;
 	bool res;
 
@@ -2172,4 +2170,3 @@ bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gene
 
 	return res;
 }
-

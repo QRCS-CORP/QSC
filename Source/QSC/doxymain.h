@@ -52,7 +52,7 @@
 #ifndef DOXYMAIN_H
 #define DOXYMAIN_H
 
-/*! \mainpage QSC: Quantum Secure Cryptographic Solutions Library
+/*! \mainpage QSC: Quantum Secure Cryptographic Solutions Library Version 1.1
  *
  * \brief Main documentation page for the QSC Library.
  *
@@ -129,7 +129,7 @@
  * 
  * \author John G. Underhill
  * \date 2025-03-14
- * \version 1.0.0.6c
+ * \version 1.1.0.0 (1B)
  */
 
 #endif

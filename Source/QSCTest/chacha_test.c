@@ -11,12 +11,12 @@
 
 bool qsctest_chacha128_kat()
 {
-	QSC_SIMD_ALIGN uint8_t ctext[114] = { 0 };
-	QSC_SIMD_ALIGN uint8_t cexp[114] = { 0 };
-	QSC_SIMD_ALIGN uint8_t input[114] = { 0 };
-	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ptext[114] = { 0 };
+	uint8_t ctext[114] = { 0 };
+	uint8_t cexp[114] = { 0 };
+	uint8_t input[114] = { 0 };
+	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t ptext[114] = { 0 };
 	bool status;
 
 	status = true;
@@ -63,12 +63,12 @@ bool qsctest_chacha128_kat()
 bool qsctest_chacha256_kat()
 {
 	/* RFC 7539 Vector, section 2.3.2: https://www.rfc-editor.org/rfc/rfc7539.html */
-	QSC_SIMD_ALIGN uint8_t ctext[114] = { 0 };
-	QSC_SIMD_ALIGN uint8_t cexp[114] = { 0 };
-	QSC_SIMD_ALIGN uint8_t input[114] = { 0 };
-	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ptext[114] = { 0 };
+	uint8_t ctext[114] = { 0 };
+	uint8_t cexp[114] = { 0 };
+	uint8_t input[114] = { 0 };
+	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t ptext[114] = { 0 };
 	bool status;
 
 	status = true;
@@ -115,13 +115,13 @@ bool qsctest_chacha256_kat()
 bool qsctest_chacha256_poly1305_kat()
 {
 	/* RFC 7539 Vector, section 2.8.2: https://www.rfc-editor.org/rfc/rfc7539.html */
-	QSC_SIMD_ALIGN uint8_t aad[12] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ctext[130] = { 0 };
-	QSC_SIMD_ALIGN uint8_t cexp[130] = { 0 };
-	QSC_SIMD_ALIGN uint8_t input[114] = { 0 };
-	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ptext[114] = { 0 };
+	uint8_t aad[12] = { 0 };
+	uint8_t ctext[130] = { 0 };
+	uint8_t cexp[130] = { 0 };
+	uint8_t input[114] = { 0 };
+	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t ptext[114] = { 0 };
 	qsc_chacha_poly1305_state state = { 0 };
 	bool status;
 
@@ -174,12 +174,12 @@ bool qsctest_chacha256_poly1305_kat()
 #if defined(QSCTEST_CHACHA_WIDE_BLOCK_TESTS)
 bool qsctest_chacha128_wide_equality()
 {
-	QSC_SIMD_ALIGN uint8_t dec[CHACHA_TEST_SAMPLE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t enc[CHACHA_TEST_SAMPLE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg[CHACHA_TEST_SAMPLE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t dec[CHACHA_TEST_SAMPLE] = { 0 };
+	uint8_t enc[CHACHA_TEST_SAMPLE] = { 0 };
+	uint8_t msg[CHACHA_TEST_SAMPLE] = { 0 };
+	uint8_t key[QSC_CHACHA_KEY128_SIZE] = { 0 };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx1;
 	qsc_chacha_state ctx2;
 	size_t mctr;
@@ -244,12 +244,12 @@ bool qsctest_chacha128_wide_equality()
 
 bool qsctest_chacha256_wide_equality()
 {
-	QSC_SIMD_ALIGN uint8_t dec[CHACHA_TEST_SAMPLE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t enc[CHACHA_TEST_SAMPLE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg[CHACHA_TEST_SAMPLE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t dec[CHACHA_TEST_SAMPLE] = { 0 };
+	uint8_t enc[CHACHA_TEST_SAMPLE] = { 0 };
+	uint8_t msg[CHACHA_TEST_SAMPLE] = { 0 };
+	uint8_t key[QSC_CHACHA_KEY256_SIZE] = { 0 };
+	uint8_t nonce[QSC_CHACHA_NONCE_SIZE] = { 0 };
+	uint8_t ncopy[QSC_CHACHA_NONCE_SIZE] = { 0 };
 	qsc_chacha_state ctx1;
 	qsc_chacha_state ctx2;
 	size_t mctr;

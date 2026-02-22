@@ -251,8 +251,8 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 QSC_EXPORT_API typedef struct
 {
-	QSC_SIMD_ALIGN uint64_t state[QSC_KECCAK_STATE_SIZE];		/*!< The SHA3 state  */
-	QSC_SIMD_ALIGN uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];	/*!< The message buffer  */
+	uint64_t state[QSC_KECCAK_STATE_SIZE];		/*!< The SHA3 state  */
+	uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];	/*!< The message buffer  */
 	size_t position;											/*!< The buffer position  */
 } qsc_keccak_state;
 

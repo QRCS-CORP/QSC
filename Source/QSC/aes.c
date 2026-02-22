@@ -360,7 +360,7 @@ void qsc_aes_cbc_decrypt(qsc_aes_state* ctx, uint8_t* output, size_t *outputlen,
 			__m512i inpw;
 			__m512i ivtw;
 			__m512i otpw;
-			QSC_ALIGN(64) uint8_t ivtb[AVX512_BLOCK_SIZE] = { 0U };
+			uint8_t ivtb[AVX512_BLOCK_SIZE] = { 0U };
 
 			/* assemble the first block in the chain */
 			qsc_memutils_copy(ivtb, ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -547,7 +547,7 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 			__m512i ncew;
 			__m512i otpw;
 			__m512i tmpn;
-			QSC_ALIGN(64) uint8_t nceb[AVX512_BLOCK_SIZE];
+			uint8_t nceb[AVX512_BLOCK_SIZE];
 
 			/* load the ctr nonce block */
 			qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -606,7 +606,7 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 
 		if (length != 0U)
 		{
-			QSC_ALIGN(16U) uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
+			uint8_t tmpb[QSC_AES_BLOCK_SIZE] = { 0U };
 
 			nce = _mm_loadu_si128((const __m128i*)ctx->nonce);
 			qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
@@ -644,7 +644,7 @@ void qsc_aes_ctrle_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 			__m512i inpw;
 			__m512i ncew;
 			__m512i otpw;
-			QSC_ALIGN(64) uint8_t nceb[AVX512_BLOCK_SIZE] = { 0U };
+			uint8_t nceb[AVX512_BLOCK_SIZE] = { 0U };
 
 			/* load the ctr nonce block */
 			qsc_memutils_copy(nceb, ctx->nonce, QSC_AES_BLOCK_SIZE);

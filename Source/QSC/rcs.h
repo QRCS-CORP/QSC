@@ -209,7 +209,7 @@ QSC_EXPORT_API typedef struct
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 	__m128i roundkeys[62U];				/*!< The 128-bit integer round-key array. */
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		QSC_ALIGN(64) __m512i roundkeysw[31U];			/*!< The 512-bit integer round-key array. */
+		__m512i roundkeysw[31U];			/*!< The 512-bit integer round-key array. */
 #	endif
 #else
 	uint32_t roundkeys[248U];			/*!< The round-keys 32-bit sub-key array. */

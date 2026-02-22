@@ -6,14 +6,14 @@
 
 bool qsctest_qmac_kat()
 {
-	QSC_SIMD_ALIGN uint8_t exp[6][QSC_QMAC_MAC_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t key[4][QSC_QMAC_KEY_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t otp[QSC_QMAC_MAC_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t msg0[34];
-	QSC_SIMD_ALIGN uint8_t msg1[30];
-	QSC_SIMD_ALIGN uint8_t msg2[65];
-	QSC_SIMD_ALIGN uint8_t msg3[64];
-	QSC_SIMD_ALIGN uint8_t nonce[QSC_QMAC_NONCE_SIZE];
+	uint8_t exp[6][QSC_QMAC_MAC_SIZE] = { 0 };
+	uint8_t key[4][QSC_QMAC_KEY_SIZE] = { 0 };
+	uint8_t otp[QSC_QMAC_MAC_SIZE] = { 0 };
+	uint8_t msg0[34];
+	uint8_t msg1[30];
+	uint8_t msg2[65];
+	uint8_t msg3[64];
+	uint8_t nonce[QSC_QMAC_NONCE_SIZE];
 	bool status;
 
 	status = true;

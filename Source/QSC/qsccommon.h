@@ -517,6 +517,18 @@ QSC_CPLUSPLUS_ENABLED_START
     Sockets and Other System Macros
 ==============================================================================*/
 
+/*!
+ * \def QSC_NO_INLINE
+ * \brief Tells the compiler not to inline a function.
+ */
+#if defined(_MSC_VER)
+#   define QSC_NO_INLINE __declspec(noinline)
+#elif defined(__GNUC__) || defined(__clang__)
+#   define QSC_NO_INLINE __attribute__((noinline))
+#else
+#   define QSC_NO_INLINE
+#endif
+
 #if defined(_WIN64) || defined(_WIN32) || defined(__CYGWIN__)
   /*!
    * \def QSC_SYSTEM_SOCKETS_WINDOWS

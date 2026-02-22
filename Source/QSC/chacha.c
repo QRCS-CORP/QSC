@@ -154,8 +154,8 @@ static void chacha_permute_p512c(const qsc_chacha_state* ctx, uint8_t* output)
 
 typedef struct
 {
-	QSC_ALIGN(64) __m512i state[16U];
-	QSC_ALIGN(64) __m512i outw[16U];
+	__m512i state[16U];
+	__m512i outw[16U];
 } chacha_avx512_state;
 
 inline static __m512i chacha_rotl512(const __m512i x, uint32_t shift)
@@ -173,7 +173,7 @@ static __m512i chacha_load512(const uint8_t* v)
 
 static void chacha_store512(uint8_t* output, const __m512i x)
 {
-	QSC_ALIGN(64) uint32_t tmp[16U];
+	uint32_t tmp[16U];
 
 	_mm512_storeu_si512((__m512i*)tmp, x);
 
@@ -324,8 +324,8 @@ static void chacha_permute_p16x512h(chacha_avx512_state* ctxw)
 
 typedef struct
 {
-	QSC_ALIGN(32) __m256i state[16U];
-	QSC_ALIGN(32) __m256i outw[16U];
+	 __m256i state[16U];
+	__m256i outw[16U];
 } chacha_avx2_state;
 
 inline static __m256i chacha_rotl256(const __m256i x, uint32_t shift)
@@ -342,7 +342,7 @@ static __m256i chacha_load256(const uint8_t* v)
 
 static void chacha_store256(uint8_t* output, const __m256i x)
 {
-	QSC_ALIGN(32) uint32_t tmp[8U];
+	uint32_t tmp[8U];
 
 	_mm256_storeu_si256((__m256i*)tmp, x);
 
@@ -485,8 +485,8 @@ static void chacha_permute_p8x512h(chacha_avx2_state* ctxw)
 
 typedef struct
 {
-	QSC_ALIGN(16) __m128i state[16U];
-	QSC_ALIGN(16) __m128i outw[16U];
+	__m128i state[16U];
+	__m128i outw[16U];
 } chacha_avx_state;
 
 inline static __m128i chacha_rotl128(const __m128i x, uint32_t shift)
@@ -503,7 +503,7 @@ static __m128i chacha_load128(const uint8_t* v)
 
 static void chacha_store128(uint8_t* output, const __m128i x)
 {
-	QSC_ALIGN(16) uint32_t tmp[4U];
+	uint32_t tmp[4U];
 
 	_mm_storeu_si128((__m128i*)tmp, x);
 
@@ -719,7 +719,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 		if (length >= CHACHA_AVX512BLOCK_SIZE)
 		{
 			chacha_avx512_state ctxw;
-			QSC_ALIGN(64) uint8_t ctrblk[64U];
+			uint8_t ctrblk[64U];
 			__m512i tmpin;
 
 			for (i = 0U; i < 16U; ++i)
@@ -785,7 +785,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 		if (length >= CHACHA_AVX2BLOCK_SIZE)
 		{
 			chacha_avx2_state ctxw;
-			QSC_ALIGN(32) uint32_t ctrblk[8U];
+			uint32_t ctrblk[8U];
 			__m256i tmpin;
 
 			for (i = 0U; i < 16U; ++i)
@@ -833,7 +833,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 		if (length >= CHACHA_AVXBLOCK_SIZE)
 		{
 			chacha_avx_state ctxw;
-			QSC_ALIGN(16) uint32_t ctrblk[4U];
+			uint32_t ctrblk[4U];
 			__m128i tmpin;
 
 			for (i = 0U; i < 16U; ++i)

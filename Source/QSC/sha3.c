@@ -4412,7 +4412,7 @@ void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 		size_t i;
 		size_t nblocks = outlen / QSC_KECCAK_128_RATE;
 		QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_128_RATE] = { 0U };
-		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 		qsc_keccakx4_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -4471,7 +4471,7 @@ void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 		size_t nblocks = outlen / QSC_KECCAK_256_RATE;
 		QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_256_RATE] = { 0U };
-		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 		qsc_keccakx4_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -4530,7 +4530,7 @@ void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 		size_t nblocks = outlen / QSC_KECCAK_512_RATE;
 		QSC_ALIGN(32) uint8_t t[4U][QSC_KECCAK_512_RATE] = { 0U };
-		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 		qsc_keccakx4_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -4602,7 +4602,7 @@ void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 		size_t nblocks = outlen / QSC_KECCAK_128_RATE;
 		QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_128_RATE] = { 0U };
-		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 		qsc_keccakx8_absorb(state, qsc_keccak_rate_128, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -4689,7 +4689,7 @@ void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 		size_t nblocks = outlen / QSC_KECCAK_256_RATE;
 		QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_256_RATE] = { 0U };
-		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 		qsc_keccakx8_absorb(state, qsc_keccak_rate_256, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -4776,7 +4776,7 @@ void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 
 		size_t nblocks = outlen / QSC_KECCAK_512_RATE;
 		QSC_ALIGN(64) uint8_t t[8U][QSC_KECCAK_512_RATE] = { 0U };
-		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 
 		qsc_keccakx8_absorb(state, qsc_keccak_rate_512, inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inplen, QSC_KECCAK_SHAKE_DOMAIN_ID);
 
@@ -5042,7 +5042,7 @@ void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 		QSC_ALIGN(32) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
 		kmacx4_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
@@ -5085,7 +5085,7 @@ void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 		QSC_ALIGN(32) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
 		kmacx4_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
@@ -5128,7 +5128,7 @@ void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, 
 	{
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-		QSC_ALIGN(32) __m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m256i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 		QSC_ALIGN(32) const uint8_t name[] = { 0x4B, 0x4D, 0x41, 0x43 };
 
 		kmacx4_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, keylen, cst0, cst1, cst2, cst3, cstlen, name, sizeof(name));
@@ -5416,7 +5416,7 @@ void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 		QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
 		kmacx8_customize(state, qsc_keccak_rate_128, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
@@ -5489,7 +5489,7 @@ void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 		QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
 		kmacx8_customize(state, qsc_keccak_rate_256, key0, key1, key2, key3, key4, key5, key6, key7, keylen,
@@ -5562,7 +5562,7 @@ void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	{
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-		QSC_ALIGN(64) __m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
+		__m512i state[QSC_KECCAK_STATE_SIZE] = { 0U };
 		QSC_ALIGN(64) const uint8_t name[] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
 		kmacx8_customize(state, qsc_keccak_rate_512, key0, key1, key2, key3, key4, key5, key6, key7, keylen,

@@ -6,7 +6,6 @@
 #include "memutils.h"
 #include "sha2.h"
 
-
 #define EC25519_A24 121666U
 
 static void edwards_to_montgomery(qsc_fe25519 montgomeryX, const qsc_fe25519 edwardsY, const qsc_fe25519 edwardsZ)

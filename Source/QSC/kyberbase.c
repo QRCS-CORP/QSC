@@ -368,8 +368,8 @@ static void kyber_poly_to_msg(uint8_t msg[QSC_KYBER_SYMBYTES], const qsc_kyber_p
 
 static void kyber_poly_get_noise_eta1(qsc_kyber_poly* r, const uint8_t seed[QSC_KYBER_SYMBYTES], uint8_t nonce)
 {
-    QSC_CACHE_ALIGNED uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4U];
-    QSC_CACHE_ALIGNED uint8_t extkey[QSC_KYBER_SYMBYTES + 1U];
+    uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4U];
+    uint8_t extkey[QSC_KYBER_SYMBYTES + 1U];
 
     qsc_memutils_copy(extkey, seed, QSC_KYBER_SYMBYTES);
     extkey[QSC_KYBER_SYMBYTES] = nonce;
@@ -382,8 +382,8 @@ static void kyber_poly_get_noise_eta1(qsc_kyber_poly* r, const uint8_t seed[QSC_
 
 static void kyber_poly_get_noise_eta2(qsc_kyber_poly* r, const uint8_t seed[QSC_KYBER_SYMBYTES], uint8_t nonce)
 {
-    QSC_CACHE_ALIGNED uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4U];
-    QSC_CACHE_ALIGNED uint8_t extkey[QSC_KYBER_SYMBYTES + 1U];
+    uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4U];
+    uint8_t extkey[QSC_KYBER_SYMBYTES + 1U];
 
     qsc_memutils_copy(extkey, seed, QSC_KYBER_SYMBYTES);
     extkey[QSC_KYBER_SYMBYTES] = nonce;
@@ -692,8 +692,8 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
     QSC_ASSERT(seed != NULL);
 
     qsc_keccak_state state;
-    QSC_CACHE_ALIGNED uint8_t buf[KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2U];
-    QSC_CACHE_ALIGNED uint8_t extseed[QSC_KYBER_SYMBYTES + 2U];
+    uint8_t buf[KYBER_GEN_MATRIX_NBLOCKS * QSC_KECCAK_128_RATE + 2U];
+    uint8_t extseed[QSC_KYBER_SYMBYTES + 2U];
     uint32_t buflen;
     uint32_t ctr;
     uint32_t off;
@@ -755,7 +755,7 @@ static void kyber_indcpa_enc(uint8_t c[QSC_KYBER_INDCPA_BYTES], const uint8_t m[
     qsc_kyber_poly v;
     qsc_kyber_poly k;
     qsc_kyber_poly epp;
-    QSC_CACHE_ALIGNED uint8_t seed[QSC_KYBER_SYMBYTES];
+    uint8_t seed[QSC_KYBER_SYMBYTES];
     size_t i;
     uint8_t nonce;
 
@@ -824,7 +824,7 @@ static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], u
     qsc_kyber_polyvec e;
     qsc_kyber_polyvec pkpv;
     qsc_kyber_polyvec skpv;
-    QSC_CACHE_ALIGNED uint8_t buf[2U * QSC_KYBER_SYMBYTES];
+    uint8_t buf[2U * QSC_KYBER_SYMBYTES];
     const uint8_t* publicseed = buf;
     const uint8_t* noiseseed = buf + QSC_KYBER_SYMBYTES;
     size_t i;
@@ -870,7 +870,7 @@ static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], u
 
 bool qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
 {
-    QSC_CACHE_ALIGNED uint8_t coins[2U * QSC_KYBER_SYMBYTES];
+    uint8_t coins[2U * QSC_KYBER_SYMBYTES];
     
     bool res;
 
@@ -903,8 +903,8 @@ void qsc_kyber_ref_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES]
 
 bool qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
 {
-    QSC_CACHE_ALIGNED uint8_t buf[2U * QSC_KYBER_SYMBYTES];
-    QSC_CACHE_ALIGNED uint8_t kr[2U * QSC_KYBER_SYMBYTES];
+    uint8_t buf[2U * QSC_KYBER_SYMBYTES];
+    uint8_t kr[2U * QSC_KYBER_SYMBYTES];
 
     bool res;
 
@@ -930,8 +930,8 @@ bool qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t s
 
 void qsc_kyber_ref_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], const uint8_t m[QSC_KYBER_SYMBYTES])
 {
-    QSC_CACHE_ALIGNED uint8_t buf[2U * QSC_KYBER_SYMBYTES];
-    QSC_CACHE_ALIGNED uint8_t kr[2U * QSC_KYBER_SYMBYTES];
+    uint8_t buf[2U * QSC_KYBER_SYMBYTES];
+    uint8_t kr[2U * QSC_KYBER_SYMBYTES];
 
     qsc_memutils_copy(buf, m, QSC_KYBER_SYMBYTES);
 
@@ -950,9 +950,9 @@ void qsc_kyber_ref_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], ui
 
 bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES])
 {
-    QSC_CACHE_ALIGNED uint8_t buf[2U * QSC_KYBER_SYMBYTES];
-    QSC_CACHE_ALIGNED uint8_t cmp[QSC_KYBER_SYMBYTES + QSC_KYBER_CIPHERTEXT_BYTES];
-    QSC_CACHE_ALIGNED uint8_t kr[2U * QSC_KYBER_SYMBYTES];
+    uint8_t buf[2U * QSC_KYBER_SYMBYTES];
+    uint8_t cmp[QSC_KYBER_SYMBYTES + QSC_KYBER_CIPHERTEXT_BYTES];
+    uint8_t kr[2U * QSC_KYBER_SYMBYTES];
     qsc_keccak_state kctx = { 0U };
     const uint8_t *pk = sk + QSC_KYBER_INDCPA_SECRETKEY_BYTES;
     int32_t fail;

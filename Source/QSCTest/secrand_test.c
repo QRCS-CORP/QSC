@@ -155,7 +155,7 @@ static double secrand_po_chi_sq(const double ax, const int32_t df)
 
 static double secrand_chi_square(const uint8_t* input, size_t length)
 {
-	QSC_SIMD_ALIGN long count[256] = { 0 };
+	long count[256] = { 0 };
 	double a;
 	double cexp;
 	double chisq;
@@ -343,7 +343,7 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 
 void qsctest_secrand_acp_evaluate()
 {
-	QSC_SIMD_ALIGN uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 
 	qsc_acp_generate(smp, sizeof(smp));
 
@@ -352,8 +352,8 @@ void qsctest_secrand_acp_evaluate()
 
 void qsctest_secrand_csg_evaluate()
 {
-	QSC_SIMD_ALIGN uint8_t seed[QSC_CSG_256_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t seed[QSC_CSG_256_SEED_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 	qsc_csg_state ctx;
 
 	qsc_csp_generate(seed, sizeof(seed));
@@ -367,7 +367,7 @@ void qsctest_secrand_csg_evaluate()
 
 void qsctest_secrand_csp_evaluate()
 {
-	QSC_SIMD_ALIGN uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 
 	qsc_csp_generate(smp, sizeof(smp));
 
@@ -376,8 +376,8 @@ void qsctest_secrand_csp_evaluate()
 
 void qsctest_secrand_hcg_evaluate()
 {
-	QSC_SIMD_ALIGN uint8_t seed[QSC_HCG_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t seed[QSC_HCG_SEED_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 	qsc_hcg_state ctx;
 
 	qsc_csp_generate(seed, sizeof(seed));
@@ -392,7 +392,7 @@ void qsctest_secrand_hcg_evaluate()
 #if defined(QSC_RDRAND_COMPATIBLE)
 void qsctest_secrand_rdp_evaluate()
 {
-	QSC_SIMD_ALIGN uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 
 	qsc_rdp_generate(smp, sizeof(smp));
 	qsctest_secrand_evaluate("RDP", smp, sizeof(smp));
@@ -401,8 +401,8 @@ void qsctest_secrand_rdp_evaluate()
 
 void qsctest_secrand_scb_evaluate()
 {
-	QSC_SIMD_ALIGN uint8_t seed[QSC_SCB_256_SEED_SIZE] = { 0 };
-	QSC_SIMD_ALIGN uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t seed[QSC_SCB_256_SEED_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
 	qsc_scb_state ctx = { 0 };
 
 	qsc_csp_generate(seed, sizeof(seed));
@@ -416,7 +416,7 @@ void qsctest_secrand_scb_evaluate()
 
 bool qsctest_secrand_stress()
 {
-	QSC_SIMD_ALIGN uint8_t seed[32] = { 0 };
+	uint8_t seed[32] = { 0 };
 	bool res;
 
 	res = true;
