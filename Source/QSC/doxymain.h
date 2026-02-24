@@ -128,8 +128,8 @@
  * All rights reserved by QRCS Corporation, copyrighted and patents pending.
  * 
  * \author John G. Underhill
- * \date 2025-03-14
- * \version 1.1.0.0 (1B)
+ * \date 2026-02-23
+ * \version 1.1.0.0 (B1)
  */
 
 #endif
