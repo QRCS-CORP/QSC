@@ -56,34 +56,20 @@
 #include <stdarg.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    /* Windows-specific thread and mutex definitions */
-    QSC_SYSTEM_CONDITION_IGNORE(5105)
-#   include <process.h>
-#   include <Windows.h>
-    typedef HANDLE qsc_mutex;
-    typedef HANDLE qsc_thread;
-    typedef volatile LONG qsc_atomic_bool;
+	typedef void* qsc_mutex;
+	typedef void* qsc_thread;
 #elif defined(QSC_SYSTEM_OS_POSIX)
-#   define _XOPEN_SOURCE 700
-#   define _DARWIN_C_SOURCE
-#   include <stdatomic.h>
-#   include <unistd.h>
-#   include <sys/types.h>
-#   include <unistd.h>
+#   ifndef _XOPEN_SOURCE
+#       define _XOPEN_SOURCE 700
+#   endif
+#   ifndef _DARWIN_C_SOURCE
+#       define _DARWIN_C_SOURCE
+#   endif
 #   include <pthread.h>
-    typedef pthread_mutex_t qsc_mutex;
-    typedef pthread_t qsc_thread;
-    typedef _Atomic int qsc_atomic_bool;
+	typedef pthread_mutex_t* qsc_mutex;
+	typedef pthread_t qsc_thread;
 #else
-    #error your operating system is not supported!
-#endif
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-#   define qsc_atomic_store(ptr, val)  InterlockedExchange((ptr), (val))
-#   define qsc_atomic_load(ptr)        InterlockedOr((ptr), 0)
-#else
-#   define qsc_atomic_store(ptr, val)  atomic_store((ptr), (val))
-#   define qsc_atomic_load(ptr)        atomic_load((ptr))
+#   error your operating system is not supported!
 #endif
 
 QSC_CPLUSPLUS_ENABLED_START

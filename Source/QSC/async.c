@@ -5,13 +5,27 @@
 #include <stdlib.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    /* Windows-specific thread function definitions */
+#   if !defined(WIN32_LEAN_AND_MEAN)
+#       define WIN32_LEAN_AND_MEAN
+#   endif
+#   if !defined(VC_EXTRALEAN)
+#       define VC_EXTRALEAN
+#   endif
+#   if !defined(NOMINMAX)
+#       define NOMINMAX
+#   endif
+#   if !defined(_WINSOCKAPI_)
+#       define _WINSOCKAPI_
+#   endif
+#   include <windows.h>
+#   include <process.h>
     #define THREAD_FUNC_RETURN uint32_t __stdcall
     #define THREAD_FUNC_CALL __stdcall
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    #define THREAD_FUNC_RETURN void *
-    #define THREAD_FUNC_CALL
-    /* Properly initialize the static synchronization objects */
+#   include <time.h>
+#   include <unistd.h>
+#   define THREAD_FUNC_RETURN void*
+#   define THREAD_FUNC_CALL
     static pthread_mutex_t tsusp = PTHREAD_MUTEX_INITIALIZER;
     static pthread_cond_t tcond = PTHREAD_COND_INITIALIZER;
     static bool suspended = false;
@@ -41,8 +55,10 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* con
     QSC_ASSERT(context != NULL);
     QSC_ASSERT(nthreads != 0U);
 
+    size_t cnt;
     bool res;
 
+    cnt = 0U;
     res = false;
 
     if (task != NULL && context != NULL && nthreads != 0U)
@@ -84,10 +100,12 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* con
                         break;
                     }
 #endif
+
+                    ++cnt;
                 }
 
                 /* Wait for all threads to finish */
-                for (size_t i = 0U; i < nthreads; ++i)
+                for (size_t i = 0U; i < cnt; ++i)
                 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
                     if (threads[i] != NULL)
@@ -160,9 +178,11 @@ qsc_mutex qsc_async_mutex_create(void)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     mtx = CreateMutex(NULL, FALSE, NULL);
 #else
-    pthread_mutex_t temp;
-    pthread_mutex_init(&temp, NULL);
-    mtx = temp;
+    mtx = (pthread_mutex_t*)qsc_memutils_malloc(sizeof(pthread_mutex_t));
+    if (mtx != NULL)
+    {
+        pthread_mutex_init(mtx, NULL);
+    }
 #endif
 
     return mtx;
@@ -171,15 +191,16 @@ qsc_mutex qsc_async_mutex_create(void)
 bool qsc_async_mutex_destroy(qsc_mutex mtx)
 {
     bool res;
-
     res = false;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     res = (bool)CloseHandle(mtx);
 #else
-    /* Note: mtx is passed by value; this may work if the caller holds the mutex in a variable.
-        This implementation calls pthread_mutex_destroy on the address of the local copy. */
-    res = (pthread_mutex_destroy(&mtx) == 0);
+    if (mtx != NULL)
+    {
+        res = (pthread_mutex_destroy(mtx) == 0);
+        qsc_memutils_alloc_free(mtx);
+    }
 #endif
 
     return res;
@@ -190,7 +211,7 @@ void qsc_async_mutex_lock(qsc_mutex mtx)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     WaitForSingleObject(mtx, INFINITE);
 #else
-    pthread_mutex_lock(&mtx);
+    pthread_mutex_lock(mtx);
 #endif
 }
 
@@ -209,7 +230,7 @@ void qsc_async_mutex_unlock(qsc_mutex mtx)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     ReleaseMutex(mtx);
 #else
-    pthread_mutex_unlock(&mtx);
+    pthread_mutex_unlock(mtx);
 #endif
 }
 
@@ -320,7 +341,6 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
     return res;
 }
 
-/* Corrected: Use Sleep for Windows and sleep for POSIX */
 void qsc_async_thread_sleep(uint32_t msec)
 {
     QSC_ASSERT(msec != 0U);
@@ -330,7 +350,7 @@ void qsc_async_thread_sleep(uint32_t msec)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         Sleep(msec);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        sleep(msec);
+        usleep((useconds_t)msec * 1000U);
 #endif
     }
 }
@@ -388,9 +408,23 @@ void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     WaitForSingleObject(handle, msec);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-    /* Use sleep for a timed wait */
-    sleep((msec + 999) / 1000);
+#elif defined(QSC_SYSTEM_OS_POSIX) && defined(QSC_SYSTEM_OS_LINUX)
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_sec += msec / 1000U;
+    ts.tv_nsec += (msec % 1000U) * 1000000L;
+
+    if (ts.tv_nsec >= 1000000000L)
+    {
+        ts.tv_sec += 1;
+        ts.tv_nsec -= 1000000000L;
+    }
+
+    pthread_timedjoin_np(handle, NULL, &ts);
+#else
+    (void)msec;
+    void* stg;
+    pthread_join(handle, &stg);
 #endif
 }
 
