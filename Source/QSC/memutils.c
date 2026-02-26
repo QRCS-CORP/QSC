@@ -19,10 +19,6 @@
 #	include <windows.h>
 #endif
 
-#if defined(QSC_HAVE_EXPLICIT_BZERO)
-	void explicit_bzero(void* s, size_t n);
-#endif
-
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #	include <intrin.h>
 #	pragma intrinsic(_ReadWriteBarrier)
@@ -1384,8 +1380,6 @@ void qsc_memutils_secure_erase(void* block, size_t length)
 		(void)memset_s(output, length, 0, length);
 #elif defined(QSC_RTL_SECURE_MEMORY)
 		RtlSecureZeroMemory(block, length);
-#elif defined(QSC_HAVE_EXPLICIT_BZERO)
-		explicit_bzero(block, length);
 #else
 		volatile unsigned char* p = (volatile unsigned char*)block;
 
