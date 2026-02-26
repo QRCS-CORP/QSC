@@ -23,7 +23,7 @@ static void hcg_auto_reseed(qsc_hcg_state* ctx)
 			qsc_sha512_initialize(&sstate);
 			qsc_sha512_update(&sstate, ctx->key, QSC_HCG_KEY_SIZE);
 			qsc_sha512_update(&sstate, prnd, QSC_HCG_KEY_SIZE);
-			qsc_memutils_clear(prnd, sizeof(prnd));
+			qsc_memutils_secure_erase(prnd, sizeof(prnd));
 			/* update the key */
 			qsc_sha512_finalize(&sstate, ctx->key);
 			ctx->rpos = 0U;
@@ -66,8 +66,8 @@ void qsc_hcg_dispose(qsc_hcg_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_memutils_clear(ctx->info, QSC_HCG_MAX_INFO_SIZE);
-		qsc_memutils_clear(ctx->key, QSC_HCG_KEY_SIZE);
-		qsc_memutils_clear(ctx->nonce, QSC_HCG_NONCE_SIZE);
+		qsc_memutils_secure_erase(ctx->key, QSC_HCG_KEY_SIZE);
+		qsc_memutils_secure_erase(ctx->nonce, QSC_HCG_NONCE_SIZE);
 		ctx->inflen = 0U;
 		ctx->rpos = 0U;
 		ctx->pres = false;
@@ -85,8 +85,8 @@ void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen,
 		qsc_hmac512_state hstate = { 0U };
 
 		qsc_memutils_clear(ctx->info, QSC_HCG_MAX_INFO_SIZE);
-		qsc_memutils_clear(ctx->key, QSC_HCG_KEY_SIZE);
-		qsc_memutils_clear(ctx->nonce, QSC_HCG_NONCE_SIZE);
+		qsc_memutils_secure_erase(ctx->key, QSC_HCG_KEY_SIZE);
+		qsc_memutils_secure_erase(ctx->nonce, QSC_HCG_NONCE_SIZE);
 		ctx->rpos = 0U;
 		ctx->pres = predictive_resistance;
 

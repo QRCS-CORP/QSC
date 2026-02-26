@@ -790,8 +790,8 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 	size_t oft;
 	size_t i;
 
-	qsc_memutils_clear(ctx->state, sizeof(ctx->state));
-	qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+	qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
+	qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 	ctx->position = 0U;
 
 	/* stage 1: name + custom */
@@ -866,8 +866,8 @@ void qsc_keccak_dispose(qsc_keccak_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->state, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->position = 0U;
 	}
 }
@@ -914,7 +914,7 @@ void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* o
 			qsc_memutils_copy(output, pad, outlen);
 		}
 
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->position = 0U;
 	}
 }
@@ -3664,8 +3664,8 @@ void qsc_keccak_initialize_state(qsc_keccak_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->state, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->position = 0U;
 	}
 }
@@ -3766,7 +3766,7 @@ void qsc_sha3_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* out
 	size_t hlen;
 
 	hlen = (((QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)) - (size_t)rate) / 2U);
-	qsc_memutils_clear((ctx->buffer + ctx->position), sizeof(ctx->buffer) - ctx->position);
+	qsc_memutils_secure_erase((ctx->buffer + ctx->position), sizeof(ctx->buffer) - ctx->position);
 	ctx->buffer[ctx->position] = QSC_KECCAK_SHA3_DOMAIN_ID;
 	ctx->buffer[(size_t)rate - 1U] |= 128U;
 	keccak_fast_absorb(ctx->state, ctx->buffer, (size_t)rate);

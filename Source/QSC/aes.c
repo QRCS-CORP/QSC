@@ -280,7 +280,7 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 			ctx->nonce = (uint8_t*)keyparams->nonce;
 		}
 
-		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_secure_erase(ctx->roundkeys, sizeof(ctx->roundkeys));
 
 		if (ctype == qsc_aes_cipher_256)
 		{
@@ -323,7 +323,7 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 		size_t i;
 
-		qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
+		qsc_memutils_secure_erase(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 
 		for (i = 0U; i < ctx->rounds + 1U; ++i)
 		{
@@ -759,10 +759,10 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_secure_erase(ctx->roundkeys, sizeof(ctx->roundkeys));
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
-		qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
+		qsc_memutils_secure_erase(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 #endif
 		ctx->roundkeylen = 0U;
 	}
@@ -1596,7 +1596,7 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 			ctx->nonce = keyparams->nonce;
 		}
 
-		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_secure_erase(ctx->roundkeys, sizeof(ctx->roundkeys));
 
 		if (ctype == qsc_aes_cipher_256)
 		{
@@ -1849,7 +1849,7 @@ void qsc_aes_dispose(qsc_aes_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_secure_erase(ctx->roundkeys, sizeof(ctx->roundkeys));
 		ctx->roundkeylen = 0U;
 	}
 }
@@ -1974,7 +1974,7 @@ static void aes_hba256_finalize(qsc_aes_hba256_state* ctx, uint8_t* output)
 	qsc_hkdf256_extract(mkey, HBA256_MKEY_SIZE, ctx->mkey, sizeof(ctx->mkey), tmpn, HBA_NAME_SIZE);
 	/* key HKDF Expand and generate the next mac-key to ctx */
 	qsc_hkdf256_expand(ctx->mkey, sizeof(ctx->mkey), mkey, HBA256_MKEY_SIZE, ctx->cust, ctx->custlen);
-	qsc_memutils_clear(mkey, sizeof(mkey));
+	qsc_memutils_secure_erase(mkey, sizeof(mkey));
 #endif
 }
 
@@ -1997,7 +1997,7 @@ static void aes_hba256_genkeys(const qsc_aes_keyparams* keyparams, uint8_t* cprk
 	qsc_memutils_copy(mack, sbuf, HBA256_MKEY_SIZE);
 	/* clear the shake buffer */
 	qsc_intutils_clear64(kstate.state, QSC_KECCAK_STATE_SIZE);
-	qsc_memutils_clear(sbuf, sizeof(sbuf));
+	qsc_memutils_secure_erase(sbuf, sizeof(sbuf));
 
 #else
 
@@ -2015,8 +2015,8 @@ static void aes_hba256_genkeys(const qsc_aes_keyparams* keyparams, uint8_t* cprk
 	qsc_memutils_copy(mack, kbuf + QSC_AES256_KEY_SIZE, HBA256_MKEY_SIZE);
 
 	/* clear the buffer */
-	qsc_memutils_clear(genk, sizeof(genk));
-	qsc_memutils_clear(kbuf, sizeof(kbuf));
+	qsc_memutils_secure_erase(genk, sizeof(genk));
+	qsc_memutils_secure_erase(kbuf, sizeof(kbuf));
 
 #endif
 }
@@ -2034,8 +2034,8 @@ void qsc_aes_hba256_dispose(qsc_aes_hba256_state* ctx)
 #endif
 
 		qsc_aes_dispose(&ctx->cstate);
-		qsc_memutils_clear(ctx->cust, sizeof(ctx->cust));
-		qsc_memutils_clear(ctx->mkey, sizeof(ctx->mkey));
+		qsc_memutils_secure_erase(ctx->cust, sizeof(ctx->cust));
+		qsc_memutils_secure_erase(ctx->mkey, sizeof(ctx->mkey));
 
 		ctx->counter = 0U;
 		ctx->custlen = 0U;
@@ -2081,7 +2081,7 @@ void qsc_aes_hba256_initialize(qsc_aes_hba256_state* ctx, const qsc_aes_keyparam
 		/* the ctx counter always initializes at 1 */
 		ctx->counter = 1U;
 		ctx->encrypt = encrypt;
-		qsc_memutils_clear(cprk, sizeof(cprk));
+		qsc_memutils_secure_erase(cprk, sizeof(cprk));
 	}
 }
 
@@ -2396,10 +2396,10 @@ void qsc_aes_gcm256_dispose(qsc_aes_gcm256_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_aes_dispose(&ctx->cstate);
-		qsc_memutils_clear(ctx->C, sizeof(ctx->C));
-		qsc_memutils_clear(ctx->H, sizeof(ctx->H));
-		qsc_memutils_clear(ctx->J0, sizeof(ctx->J0));
-		qsc_memutils_clear(ctx->S, sizeof(ctx->S));
+		qsc_memutils_secure_erase(ctx->C, sizeof(ctx->C));
+		qsc_memutils_secure_erase(ctx->H, sizeof(ctx->H));
+		qsc_memutils_secure_erase(ctx->J0, sizeof(ctx->J0));
+		qsc_memutils_secure_erase(ctx->S, sizeof(ctx->S));
 		ctx->aadlen = 0U;
 		ctx->ctlen = 0U;
 	}
@@ -2436,7 +2436,7 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 			size_t rem;
 
 			rem = length - i;
-			qsc_memutils_clear(keystream, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_secure_erase(keystream, QSC_AES_BLOCK_SIZE);
 			qsc_aes_ecb_encrypt_block(&ctx->cstate, keystream, ctx->C);
 
 			for (size_t j = 0U; j < rem; ++j)
@@ -2452,7 +2452,7 @@ void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 		ctx->ctlen += ((uint64_t)length) * sizeof(uint64_t);
 
 		aes_gcm256_finalize(ctx, output + length);
-		qsc_memutils_clear(keystream, sizeof(keystream));
+		qsc_memutils_secure_erase(keystream, sizeof(keystream));
 	}
 }
 
@@ -2508,7 +2508,7 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 			qsc_memutils_clear(ivbuf, sizeof(ivbuf));
 		}
 
-		qsc_memutils_clear(ctx->S, QSC_AES_BLOCK_SIZE);
+		qsc_memutils_secure_erase(ctx->S, QSC_AES_BLOCK_SIZE);
 		ctx->aadlen = 0U;
 		ctx->ctlen = 0U;
 

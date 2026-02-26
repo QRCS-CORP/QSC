@@ -1008,10 +1008,10 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0U);
 #	endif
 
-		qsc_memutils_clear(mkey, sizeof(mkey));
+		qsc_memutils_secure_erase(mkey, sizeof(mkey));
 #endif
 
-		qsc_memutils_clear(sbuf, sizeof(sbuf));
+		qsc_memutils_secure_erase(sbuf, sizeof(sbuf));
 		/* clear the shake buffer */
 		qsc_keccak_dispose(&kstate);
 	}
@@ -1065,10 +1065,10 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0U);
 #	endif
 
-		qsc_memutils_clear(mkey, sizeof(mkey));
+		qsc_memutils_secure_erase(mkey, sizeof(mkey));
 #endif
 
-		qsc_memutils_clear(sbuf, sizeof(sbuf));
+		qsc_memutils_secure_erase(sbuf, sizeof(sbuf));
 		/* clear the shake buffer */
 		qsc_keccak_dispose(&kstate);
 	}
@@ -1076,7 +1076,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
 	/* store the avx-512 round keys qsc_keccak_initialize_state*/
-	qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
+	qsc_memutils_secure_erase(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 
 	for (i = 0U; i < ctx->roundkeylen; i += 2U)
 	{
@@ -1100,12 +1100,12 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 #	if defined(QSC_SYSTEM_HAS_AVX512)
-		qsc_memutils_clear(ctx->roundkeysw, sizeof(ctx->roundkeysw));
+		qsc_memutils_secure_erase(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 #	endif
 #endif
 
-		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
-		qsc_memutils_clear(ctx->nonce, sizeof(ctx->nonce));
+		qsc_memutils_secure_erase(ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_secure_erase(ctx->nonce, sizeof(ctx->nonce));
 		ctx->counter = 0U;
 		ctx->ctype = RCS256;
 		ctx->roundkeylen = 0U;
@@ -1124,7 +1124,7 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 	if (ctx != NULL && keyparams != NULL)
 	{
 		ctx->ctype = keyparams->keylen == QSC_RCS512_KEY_SIZE ? RCS512 : RCS256;
-		qsc_memutils_clear(ctx->roundkeys, sizeof(ctx->roundkeys));
+		qsc_memutils_secure_erase(ctx->roundkeys, sizeof(ctx->roundkeys));
 		qsc_memutils_copy(ctx->nonce, keyparams->nonce, QSC_RCS_NONCE_SIZE);
 		ctx->counter = 1U;
 		ctx->encrypt = encryption;

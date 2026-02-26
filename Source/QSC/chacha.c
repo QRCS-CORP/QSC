@@ -646,7 +646,7 @@ void qsc_chacha_dispose(qsc_chacha_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
 	}
 }
 
@@ -1003,7 +1003,7 @@ void qsc_chacha_poly1305_initialize(qsc_chacha_poly1305_state* ctx, const qsc_ch
 		qsc_chacha_initialize(&ctx->cstate, keyparams);
 		qsc_chacha_transform(&ctx->cstate, pkey, ptxt, sizeof(pkey));
 		qsc_poly1305_initialize(&ctx->pstate, pkey);
-		qsc_memutils_clear(pkey, sizeof(pkey));
+		qsc_memutils_secure_erase(pkey, sizeof(pkey));
 	}
 }
 

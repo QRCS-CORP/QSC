@@ -126,9 +126,9 @@ void qsc_qmac_dispose(qsc_qmac_state* ctx)
 
     if (ctx != NULL)
     {
-        qsc_memutils_clear(ctx->F, QSC_QMAC_BLOCK_SIZE);
-        qsc_memutils_clear(ctx->H, QSC_QMAC_BLOCK_SIZE);
-        qsc_memutils_clear(ctx->Y, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_secure_erase(ctx->F, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_secure_erase(ctx->H, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_secure_erase(ctx->Y, QSC_QMAC_BLOCK_SIZE);
         ctx->initialized = false;
     }
 }
@@ -155,7 +155,7 @@ void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
         qsc_keccak_state kstate = { 0U };
 	    uint8_t sbuf[QSC_KECCAK_256_RATE] = { 0U };
 
-        qsc_memutils_clear(ctx->Y, QSC_QMAC_BLOCK_SIZE);
+        qsc_memutils_secure_erase(ctx->Y, QSC_QMAC_BLOCK_SIZE);
 
         if (keyparams->mode == qsc_qmac_mode_512)
         {
@@ -174,7 +174,7 @@ void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams)
         qsc_memutils_copy((uint8_t*)ctx->H, sbuf, QSC_QMAC_BLOCK_SIZE);
         /* copy the finalization key */
         qsc_memutils_copy((uint8_t*)ctx->F, sbuf + QSC_QMAC_BLOCK_SIZE, QSC_QMAC_BLOCK_SIZE);
-        qsc_memutils_clear(sbuf, sizeof(sbuf));
+        qsc_memutils_secure_erase(sbuf, sizeof(sbuf));
         qsc_keccak_dispose(&kstate);
 
         ctx->initialized = true;

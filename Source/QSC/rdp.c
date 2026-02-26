@@ -111,9 +111,9 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 #endif
 	}
 
-	if (!res)
+	if (res == false)
 	{
-		qsc_memutils_clear(output, length);
+		qsc_memutils_secure_erase(output, length);
 	}
 
 	return res;
@@ -126,10 +126,12 @@ uint16_t qsc_rdp_uint16()
 
 	num = 0U;
 
-	if (qsc_rdp_generate(arr, sizeof(arr)))
+	if (qsc_rdp_generate(arr, sizeof(arr)) == true)
 	{
 		num = (((uint16_t)arr[1U]) |
 			(uint16_t)((uint16_t)arr[0U] << 8U));
+
+		qsc_memutils_secure_erase(arr, sizeof(arr));
 	}
 
 	return num;
@@ -142,12 +144,14 @@ uint32_t qsc_rdp_uint32()
 
 	num = 0U;
 
-	if (qsc_rdp_generate(arr, sizeof(arr)))
+	if (qsc_rdp_generate(arr, sizeof(arr)) == true)
 	{
 		num = (uint32_t)(arr[3U]) |
 			(((uint32_t)(arr[2U])) << 8) |
 			(((uint32_t)(arr[1U])) << 16) |
 			(((uint32_t)(arr[0U])) << 24);
+
+		qsc_memutils_secure_erase(arr, sizeof(arr));
 	}
 
 	return num;
@@ -160,7 +164,7 @@ uint64_t qsc_rdp_uint64()
 
 	num = 0U;
 
-	if (qsc_rdp_generate(arr, sizeof(arr)))
+	if (qsc_rdp_generate(arr, sizeof(arr)) == true)
 	{
 		num = (uint64_t)(arr[7U]) |
 			(((uint64_t)(arr[6U])) << 8) |
@@ -170,6 +174,8 @@ uint64_t qsc_rdp_uint64()
 			(((uint64_t)(arr[2U])) << 40) |
 			(((uint64_t)(arr[1U])) << 48) |
 			(((uint64_t)(arr[0U])) << 56);
+
+		qsc_memutils_secure_erase(arr, sizeof(arr));
 	}
 
 	return num;

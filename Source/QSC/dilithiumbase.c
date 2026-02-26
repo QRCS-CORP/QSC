@@ -1475,7 +1475,7 @@ bool qsc_dilithium_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
         /* Compute CRH(rho, t1) and write secret key */
         qsc_shake256_compute(tr, DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
         dilithium_pack_sk(sk, rho, tr, key, &t0, &s1, &s2);
-        qsc_memutils_clear(seedbuf, sizeof(seedbuf));
+        qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
     }
 
     return res;
@@ -1530,7 +1530,7 @@ void qsc_dilithium_ref_seeded_generate_keypair(uint8_t* pk, uint8_t* sk, const u
     /* Compute CRH(rho, t1) and write secret key */
     qsc_shake256_compute(tr, DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
     dilithium_pack_sk(sk, rho, tr, key, &t0, &s1, &s2);
-    qsc_memutils_clear(seedbuf, sizeof(seedbuf));
+    qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
 }
 
 bool qsc_dilithium_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
@@ -1700,7 +1700,7 @@ bool qsc_dilithium_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_
     /* write signature */
     dilithium_pack_sig(sig, sig, &z, &h);
     *siglen = DILITHIUM_SIGNATURE_SIZE;
-    qsc_memutils_clear(seedbuf, sizeof(seedbuf));
+    qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
 
     return res;
 }

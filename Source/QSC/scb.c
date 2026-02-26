@@ -102,7 +102,7 @@ void qsc_scb_dispose(qsc_scb_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->ckey, ctx->klen);
+		qsc_memutils_secure_erase(ctx->ckey, ctx->klen);
 		ctx->cpuc = 0U;
 		ctx->klen = 0U;
 		ctx->memc = 0U;
@@ -139,7 +139,7 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 		}
 
 		/* set the state parameters */
-		qsc_memutils_clear(ctx->ckey, ctx->klen);
+		qsc_memutils_secure_erase(ctx->ckey, ctx->klen);
 		ctx->cpuc = cpucost;
 		ctx->memc = memcost;
 
@@ -148,7 +148,7 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 		qsc_shake_squeezeblocks(&kstate, ctx->rate, kbuf, 1U);
 		qsc_keccak_dispose(&kstate);
 		qsc_memutils_copy(ctx->ckey, kbuf, ctx->klen);
-		qsc_memutils_clear(kbuf, QSC_KECCAK_256_RATE);
+		qsc_memutils_secure_erase(kbuf, QSC_KECCAK_256_RATE);
 	}
 }
 

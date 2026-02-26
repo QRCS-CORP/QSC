@@ -48,8 +48,8 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 	qsc_sc25519_muladd(sm + 32, hram, az, nonce);
 
 	/* cleanup */
-	qsc_memutils_clear(az, sizeof(az));
-	qsc_memutils_clear(nonce, sizeof(nonce));
+	qsc_memutils_secure_erase(az, sizeof(az));
+	qsc_memutils_secure_erase(nonce, sizeof(nonce));
 
 	if (smlen != NULL)
 	{

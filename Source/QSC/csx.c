@@ -782,23 +782,23 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, buf, 1U);
 		qsc_memutils_copy(cpk, buf, QSC_CSX_KEY_SIZE);
 		csx_load_key(ctx, cpk, keyparams->nonce, csx_info);
-		qsc_memutils_clear(cpk, sizeof(cpk));
+		qsc_memutils_secure_erase(cpk, sizeof(cpk));
 
 		/* extract the mac key */
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, buf, 1U);
 		qsc_memutils_copy(mck, buf, sizeof(mck));
-		qsc_memutils_clear(buf, sizeof(buf));
+		qsc_memutils_secure_erase(buf, sizeof(buf));
 
 		/* initialize the mac generator state */
-		qsc_memutils_clear((uint8_t*)&ctx->kstate, sizeof(ctx->kstate));
+		qsc_memutils_secure_erase((uint8_t*)&ctx->kstate, sizeof(ctx->kstate));
 
 #	if defined(CSX_AUTH_KMACR12)
 		qsc_keccak_initialize_state(&ctx->kstate);
 		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0U, csx_kmacr12_name, CSX_NAME_SIZE, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-		qsc_memutils_clear(mck, sizeof(mck));
+		qsc_memutils_secure_erase(mck, sizeof(mck));
 #	elif defined(CSX_AUTH_KMACR24)
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mck, sizeof(mck), NULL, 0U);
-		qsc_memutils_clear(mck, sizeof(mck));
+		qsc_memutils_secure_erase(mck, sizeof(mck));
 #	endif
 
 #else
@@ -816,7 +816,7 @@ void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, 
 			qsc_memutils_copy(inf, keyparams->info, INFLEN);
 		}
 
-		qsc_memutils_clear((uint8_t*)ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase((uint8_t*)ctx->state, sizeof(ctx->state));
 		csx_load_key(ctx, keyparams->key, keyparams->nonce, inf);
 
 #endif

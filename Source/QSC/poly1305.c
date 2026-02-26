@@ -78,10 +78,10 @@ void qsc_poly1305_dispose(qsc_poly1305_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->h, sizeof(ctx->h));
-		qsc_memutils_clear(ctx->r, sizeof(ctx->r));
-		qsc_memutils_clear(ctx->s, sizeof(ctx->s));
-		qsc_memutils_clear(ctx->buf, sizeof(ctx->buf));
+		qsc_memutils_secure_erase(ctx->h, sizeof(ctx->h));
+		qsc_memutils_secure_erase(ctx->r, sizeof(ctx->r));
+		qsc_memutils_secure_erase(ctx->s, sizeof(ctx->s));
+		qsc_memutils_secure_erase(ctx->buf, sizeof(ctx->buf));
 		ctx->fnl = 0U;
 		ctx->rmd = 0U;
 	}

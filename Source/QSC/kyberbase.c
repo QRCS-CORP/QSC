@@ -374,10 +374,10 @@ static void kyber_poly_get_noise_eta1(qsc_kyber_poly* r, const uint8_t seed[QSC_
     qsc_memutils_copy(extkey, seed, QSC_KYBER_SYMBYTES);
     extkey[QSC_KYBER_SYMBYTES] = nonce;
     qsc_shake256_compute(buf, sizeof(buf), extkey, sizeof(extkey));
-    qsc_memutils_clear(extkey, sizeof(extkey));
+    qsc_memutils_secure_erase(extkey, sizeof(extkey));
 
     kyber_poly_cbd_eta1(r, buf);
-    qsc_memutils_clear(buf, sizeof(buf));
+    qsc_memutils_secure_erase(buf, sizeof(buf));
 }
 
 static void kyber_poly_get_noise_eta2(qsc_kyber_poly* r, const uint8_t seed[QSC_KYBER_SYMBYTES], uint8_t nonce)
@@ -388,10 +388,10 @@ static void kyber_poly_get_noise_eta2(qsc_kyber_poly* r, const uint8_t seed[QSC_
     qsc_memutils_copy(extkey, seed, QSC_KYBER_SYMBYTES);
     extkey[QSC_KYBER_SYMBYTES] = nonce;
     qsc_shake256_compute(buf, sizeof(buf), extkey, sizeof(extkey));
-    qsc_memutils_clear(extkey, sizeof(extkey));
+    qsc_memutils_secure_erase(extkey, sizeof(extkey));
 
     kyber_poly_cbd_eta2(r, buf);
-    qsc_memutils_clear(buf, sizeof(buf));
+    qsc_memutils_secure_erase(buf, sizeof(buf));
 }
 
 static void kyber_poly_reduce(qsc_kyber_poly* r)
@@ -739,8 +739,8 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
         }
     }
 
-    qsc_memutils_clear(buf, sizeof(buf));
-    qsc_memutils_clear(extseed, sizeof(extseed));
+    qsc_memutils_secure_erase(buf, sizeof(buf));
+    qsc_memutils_secure_erase(extseed, sizeof(extseed));
     qsc_keccak_dispose(&state);
 }
 
@@ -763,7 +763,7 @@ static void kyber_indcpa_enc(uint8_t c[QSC_KYBER_INDCPA_BYTES], const uint8_t m[
     kyber_unpack_pk(&pkpv, seed, pk);
     kyber_poly_from_msg(&k, m);
     kyber_gen_matrix(at, seed, 1);
-    qsc_memutils_clear(seed, sizeof(seed));
+    qsc_memutils_secure_erase(seed, sizeof(seed));
 
     for (i = 0U; i < QSC_KYBER_K; ++i)
     {
@@ -865,7 +865,7 @@ static void kyber_indcpa_keypair(uint8_t pk[QSC_KYBER_INDCPA_PUBLICKEY_BYTES], u
 
     kyber_pack_sk(sk, &skpv);
     kyber_pack_pk(pk, &pkpv, publicseed);
-    qsc_memutils_clear(buf, sizeof(buf));
+    qsc_memutils_secure_erase(buf, sizeof(buf));
 }
 
 bool qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t))
@@ -884,7 +884,7 @@ bool qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8
         qsc_sha3_compute256(sk + QSC_KYBER_SECRETKEY_BYTES - (2U * QSC_KYBER_SYMBYTES), pk, QSC_KYBER_PUBLICKEY_BYTES);
         /* Value z for pseudo-random output on reject */
         qsc_memutils_copy(sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, coins + QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
-        qsc_memutils_clear(coins, sizeof(coins));
+        qsc_memutils_secure_erase(coins, sizeof(coins));
         res = true;
     }
 
@@ -918,10 +918,10 @@ bool qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t s
 
         /* coins are in kr+QSC_KYBER_SYMBYTES */
         kyber_indcpa_enc(ct, buf, pk, kr + QSC_KYBER_SYMBYTES);
-        qsc_memutils_clear(buf, sizeof(buf));
+        qsc_memutils_secure_erase(buf, sizeof(buf));
 
         qsc_memutils_copy(ss, kr, QSC_KYBER_SYMBYTES);
-        qsc_memutils_clear(kr, sizeof(kr));
+        qsc_memutils_secure_erase(kr, sizeof(kr));
         res = true;
     }
 
@@ -941,10 +941,10 @@ void qsc_kyber_ref_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], ui
 
     /* coins are in kr + QSC_KYBER_SYMBYTES */
     kyber_indcpa_enc(ct, buf, pk, kr + QSC_KYBER_SYMBYTES);
-    qsc_memutils_clear(buf, sizeof(buf));
+    qsc_memutils_secure_erase(buf, sizeof(buf));
 
     qsc_memutils_copy(ss, kr, QSC_KYBER_SYMBYTES);
-    qsc_memutils_clear(kr, sizeof(kr));
+    qsc_memutils_secure_erase(kr, sizeof(kr));
 
 }
 
@@ -965,7 +965,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 
     /* coins are in kr+QSC_KYBER_SYMBYTES */
     kyber_indcpa_enc(cmp + QSC_KYBER_SYMBYTES, buf, pk, kr + QSC_KYBER_SYMBYTES);
-    qsc_memutils_clear(buf, sizeof(buf));
+    qsc_memutils_secure_erase(buf, sizeof(buf));
 
     fail = qsc_intutils_verify(ct, cmp + QSC_KYBER_SYMBYTES, QSC_KYBER_CIPHERTEXT_BYTES);
 
@@ -984,7 +984,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 #endif
 
     qsc_intutils_cmov(ss, kr, QSC_KYBER_SYMBYTES, (uint8_t)!fail);
-    qsc_memutils_clear(kr, sizeof(kr));
+    qsc_memutils_secure_erase(kr, sizeof(kr));
 
     return (fail == 0);
 }

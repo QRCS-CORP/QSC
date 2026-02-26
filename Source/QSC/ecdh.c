@@ -36,7 +36,7 @@ bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 		if (rng_generate(seed, sizeof(seed)))
 		{
 			qsc_x25519_generate_keypair(publickey, privatekey, seed);
-			qsc_memutils_clear(seed, QSC_ECDH_SEED_SIZE);
+			qsc_memutils_secure_erase(seed, QSC_ECDH_SEED_SIZE);
 			res = true;
 		}
 	}

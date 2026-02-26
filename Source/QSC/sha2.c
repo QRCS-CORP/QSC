@@ -3,7 +3,6 @@
 #include "intutils.h"
 #include "memutils.h"
 
-
 #define SHA2_256_ROUNDS_COUNT 64U
 #define SHA2_384_ROUNDS_COUNT 80U
 #define SHA2_512_ROUNDS_COUNT 80U
@@ -36,8 +35,8 @@ void qsc_sha256_dispose(qsc_sha256_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->state, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->t = 0U;
 		ctx->position = 0U;
 	}
@@ -116,7 +115,7 @@ void qsc_sha256_initialize(qsc_sha256_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_memutils_copy((uint8_t*)ctx->state, (const uint8_t*)sha256_iv, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->t = 0U;
 		ctx->position = 0U;
 	}
@@ -706,8 +705,8 @@ void qsc_sha384_dispose(qsc_sha384_state* ctx)
 	
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->state, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->t[0U] = 0U;
 		ctx->t[1U] = 0U;
 		ctx->position = 0U;
@@ -775,7 +774,7 @@ void qsc_sha384_initialize(qsc_sha384_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_memutils_copy((uint8_t*)ctx->state, (const uint8_t*)sha384_iv, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->t[0U] = 0U;
 		ctx->t[1U] = 0U;
 		ctx->position = 0U;
@@ -869,8 +868,8 @@ void qsc_sha512_dispose(qsc_sha512_state* ctx)
 	
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->state, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->t[0U] = 0U;
 		ctx->t[1U] = 0U;
 		ctx->position = 0U;
@@ -938,7 +937,7 @@ void qsc_sha512_initialize(qsc_sha512_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_memutils_copy((uint8_t*)ctx->state, (const uint8_t*)sha512_iv, sizeof(ctx->state));
-		qsc_memutils_clear(ctx->buffer, sizeof(ctx->buffer));
+		qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
 		ctx->t[0U] = 0U;
 		ctx->t[1U] = 0U;
 		ctx->position = 0U;
@@ -1387,8 +1386,8 @@ void qsc_hmac256_dispose(qsc_hmac256_state* ctx)
 	
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->ipad, sizeof(ctx->ipad));
-		qsc_memutils_clear(ctx->opad, sizeof(ctx->opad));
+		qsc_memutils_secure_erase(ctx->ipad, sizeof(ctx->ipad));
+		qsc_memutils_secure_erase(ctx->opad, sizeof(ctx->opad));
 		qsc_sha256_dispose(&ctx->pstate);
 	}
 }
@@ -1422,7 +1421,7 @@ void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t k
 
 	if (ctx != NULL && key != NULL)
 	{
-		qsc_memutils_clear(ctx->ipad, QSC_SHA2_256_RATE);
+		qsc_memutils_secure_erase(ctx->ipad, QSC_SHA2_256_RATE);
 
 		if (keylen > QSC_SHA2_256_RATE)
 		{
@@ -1474,8 +1473,8 @@ void qsc_hmac512_dispose(qsc_hmac512_state* ctx)
 	
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->ipad, sizeof(ctx->ipad));
-		qsc_memutils_clear(ctx->opad, sizeof(ctx->ipad));
+		qsc_memutils_secure_erase(ctx->ipad, sizeof(ctx->ipad));
+		qsc_memutils_secure_erase(ctx->opad, sizeof(ctx->ipad));
 		qsc_sha512_dispose(&ctx->pstate);
 	}
 }
@@ -1509,7 +1508,7 @@ void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t k
 
 	if (ctx != NULL && key != NULL)
 	{
-		qsc_memutils_clear(ctx->ipad, QSC_SHA2_512_RATE);
+		qsc_memutils_secure_erase(ctx->ipad, QSC_SHA2_512_RATE);
 
 		if (keylen > QSC_SHA2_512_RATE)
 		{

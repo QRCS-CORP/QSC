@@ -361,7 +361,7 @@ void qsc_secrand_dispose()
 
 	if (m_secrand_state.init == true)
 	{
-		qsc_memutils_clear(m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
+		qsc_memutils_secure_erase(m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);
 		qsc_csg_dispose(&m_secrand_state.hstate);
 		m_secrand_state.cpos = 0U;
 		m_secrand_state.init = false;
@@ -446,7 +446,7 @@ bool qsc_secrand_generate(uint8_t* output, size_t length)
 
 	if (m_secrand_state.cpos != 0U)
 	{
-		qsc_memutils_clear(m_secrand_state.cache, m_secrand_state.cpos);
+		qsc_memutils_secure_erase(m_secrand_state.cache, m_secrand_state.cpos);
 	}
 
 	qsc_async_mutex_unlock_ex(mtx);
