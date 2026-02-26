@@ -116,103 +116,103 @@ QSC_CPLUSPLUS_ENABLED_START
 ==============================================================================*/
 
 #if defined(_MSC_VER)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_MSC
-   * \brief Defined when the Microsoft Visual C++ compiler is detected.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_MSC
+    * \brief Defined when the Microsoft Visual C++ compiler is detected.
+    */
 #	define QSC_SYSTEM_COMPILER_MSC
 #endif
 
 #if defined(__MINGW32__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_MINGW
-   * \brief Defined when using the MinGW compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_MINGW
+    * \brief Defined when using the MinGW compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_MINGW
-  /*!
-   * \def QSC_SYSTEM_COMPILER_GCC
-   * \brief Also defined for MinGW as it uses GCC.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_GCC
+    * \brief Also defined for MinGW as it uses GCC.
+    */
 #	define QSC_SYSTEM_COMPILER_GCC
 #endif
 
 #if defined(__CC_ARM)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_ARM
-   * \brief Defined when using the ARM Compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_ARM
+    * \brief Defined when using the ARM Compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_ARM
 #endif
 
 #if defined(__BORLANDC__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_BORLAND
-   * \brief Defined when using the Borland C compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_BORLAND
+    * \brief Defined when using the Borland C compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_BORLAND
 #endif
 
 #if defined(__GNUC__) && !defined(__MINGW32__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_GCC
-   * \brief Defined when the GNU Compiler Collection (GCC) is detected.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_GCC
+    * \brief Defined when the GNU Compiler Collection (GCC) is detected.
+    */
 #	define QSC_SYSTEM_COMPILER_GCC
 #endif
 
 #if defined(__clang__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_CLANG
-   * \brief Defined when the Clang compiler is detected.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_CLANG
+    * \brief Defined when the Clang compiler is detected.
+    */
 #	define QSC_SYSTEM_COMPILER_CLANG
 #endif
 
 #if defined(__IBMC__) || defined(__IBMCPP__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_IBM
-   * \brief Defined when using the IBM compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_IBM
+    * \brief Defined when using the IBM compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_IBM
 #endif
 
 #if defined(__INTEL_COMPILER) || defined(__ICL)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_INTEL
-   * \brief Defined when using the Intel compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_INTEL
+    * \brief Defined when using the Intel compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_INTEL
 #endif
 
 #if defined(__MWERKS__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_MWERKS
-   * \brief Defined when using the Metrowerks compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_MWERKS
+    * \brief Defined when using the Metrowerks compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_MWERKS
 #endif
 
 #if defined(__OPEN64__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_OPEN64
-   * \brief Defined when using the Open64 compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_OPEN64
+    * \brief Defined when using the Open64 compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_OPEN64
 #endif
 
 #if defined(__SUNPRO_C)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_SUNPRO
-   * \brief Defined when using the SunPro C compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_SUNPRO
+    * \brief Defined when using the SunPro C compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_SUNPRO
 #endif
 
 #if defined(__TURBOC__)
-  /*!
-   * \def QSC_SYSTEM_COMPILER_TURBO
-   * \brief Defined when using the Turbo C compiler.
-   */
+    /*!
+    * \def QSC_SYSTEM_COMPILER_TURBO
+    * \brief Defined when using the Turbo C compiler.
+    */
 #	define QSC_SYSTEM_COMPILER_TURBO
 #endif
 
@@ -221,24 +221,24 @@ QSC_CPLUSPLUS_ENABLED_START
 ==============================================================================*/
 
 #if defined(_WIN64) || defined(_WIN32) || defined(__WIN64__) || defined(__WIN32__)
-  /*!
-   * \def QSC_SYSTEM_OS_WINDOWS
-   * \brief Defined when the target operating system is Windows.
-   */
+    /*!
+    * \def QSC_SYSTEM_OS_WINDOWS
+    * \brief Defined when the target operating system is Windows.
+    */
 #	if !defined(QSC_SYSTEM_OS_WINDOWS)
 #		define QSC_SYSTEM_OS_WINDOWS
 #	endif
 #   if defined(_WIN64)
-    /*!
-     * \def QSC_SYSTEM_ISWIN64
-     * \brief Defined when building for 64-bit Windows.
-     */
+        /*!
+        * \def QSC_SYSTEM_ISWIN64
+        * \brief Defined when building for 64-bit Windows.
+        */
 #		define QSC_SYSTEM_ISWIN64
 #   elif defined(_WIN32)
-    /*!
-     * \def QSC_SYSTEM_ISWIN32
-     * \brief Defined when building for 32-bit Windows.
-     */
+        /*!
+        * \def QSC_SYSTEM_ISWIN32
+        * \brief Defined when building for 32-bit Windows.
+        */
 #		define QSC_SYSTEM_ISWIN32
 #   endif
 #else
@@ -250,124 +250,124 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #if defined(__ANDROID__)
-  /*!
-   * \def QSC_SYSTEM_OS_ANDROID
-   * \brief Defined when the target operating system is Android.
-   */
+    /*!
+    * \def QSC_SYSTEM_OS_ANDROID
+    * \brief Defined when the target operating system is Android.
+    */
 #	define QSC_SYSTEM_OS_ANDROID
 #endif
 
 #if defined(__APPLE__) || defined(__MACH__)
 #   if defined(__MACH__)
-      /*!
-       * \def QSC_SYSTEM_OS_MAC
-       * \brief Defined when the target operating system is Apple (macOS or iOS).
-       */
+        /*!
+        * \def QSC_SYSTEM_OS_MAC
+        * \brief Defined when the target operating system is Apple (macOS or iOS).
+        */
     #	define QSC_SYSTEM_OS_MAC
 #   endif
-  /*!
-   * \def QSC_SYSTEM_OS_BSD
-   * \brief Also defined for BSD-based operating systems (macOS is BSD-based).
-   */
+    /*!
+    * \def QSC_SYSTEM_OS_BSD
+    * \brief Also defined for BSD-based operating systems (macOS is BSD-based).
+    */
 #	define QSC_SYSTEM_OS_BSD
 
 #   if defined(TARGET_OS_IPHONE) && defined(TARGET_IPHONE_SIMULATOR)
         /*!
-         * \def QSC_SYSTEM_ISIPHONESIM
-         * \brief Defined when building for the iPhone Simulator.
-         */
+        * \def QSC_SYSTEM_ISIPHONESIM
+        * \brief Defined when building for the iPhone Simulator.
+        */
 #		define QSC_SYSTEM_ISIPHONESIM
 #   elif defined(TARGET_OS_IPHONE)
         /*!
-         * \def QSC_SYSTEM_ISIPHONE
-         * \brief Defined when building for iPhone.
-         */
+        * \def QSC_SYSTEM_ISIPHONE
+        * \brief Defined when building for iPhone.
+        */
 #		define QSC_SYSTEM_ISIPHONE
 #   else
         /*!
-         * \def QSC_SYSTEM_ISOSX
-         * \brief Defined when building for macOS.
-         */
+        * \def QSC_SYSTEM_ISOSX
+        * \brief Defined when building for macOS.
+        */
 #		define QSC_SYSTEM_ISOSX
 #   endif
 #endif
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__DragonFly__) || defined(QSC_SYSTEM_ISOSX)
-  /*!
-   * \def QSC_SYSTEM_OS_BSD
-   * \brief Defined when the target operating system is a BSD variant.
-   */
+    /*!
+    * \def QSC_SYSTEM_OS_BSD
+    * \brief Defined when the target operating system is a BSD variant.
+    */
 #	define QSC_SYSTEM_OS_BSD
 #endif
 
 #if defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
-  /*!
-   * \def QSC_SYSTEM_OS_LINUX
-   * \brief Defined when the target operating system is Linux.
-   */
+    /*!
+    * \def QSC_SYSTEM_OS_LINUX
+    * \brief Defined when the target operating system is Linux.
+    */
 #	define QSC_SYSTEM_OS_LINUX
 #endif
 
 #if defined(__unix) || defined(__unix__)
-  /*!
-   * \def QSC_SYSTEM_OS_UNIX
-   * \brief Defined when the target operating system is Unix.
-   */
+    /*!
+    * \def QSC_SYSTEM_OS_UNIX
+    * \brief Defined when the target operating system is Unix.
+    */
 #	define QSC_SYSTEM_OS_UNIX
 #   if defined(__hpux) || defined(hpux)
-    /*!
-     * \def QSC_SYSTEM_OS_HPUX
-     * \brief Defined when the target operating system is HP-UX.
-     */
+        /*!
+        * \def QSC_SYSTEM_OS_HPUX
+        * \brief Defined when the target operating system is HP-UX.
+        */
 #		define QSC_SYSTEM_OS_HPUX
 #   endif
 #   if defined(__sun__) || defined(__sun) || defined(sun)
-    /*!
-     * \def QSC_SYSTEM_OS_SUNUX
-     * \brief Defined when the target operating system is Solaris.
-     */
+        /*!
+        * \def QSC_SYSTEM_OS_SUNUX
+        * \brief Defined when the target operating system is Solaris.
+        */
 #		define QSC_SYSTEM_OS_SUNUX
 #   endif
 #endif
 
 #if defined(__posix) || defined(__posix__) || defined(__USE_POSIX) || defined(_POSIX_VERSION) || defined(QSC_SYSTEM_OS_UNIX) || defined(QSC_SYSTEM_OS_LINUX) || defined(QSC_SYSTEM_OS_BSD)
-  /*!
-   * \def QSC_SYSTEM_OS_POSIX
-   * \brief Defined when the operating system is POSIX-compliant.
-   */
+    /*!
+    * \def QSC_SYSTEM_OS_POSIX
+    * \brief Defined when the operating system is POSIX-compliant.
+    */
 #	define QSC_SYSTEM_OS_POSIX
 
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS) && defined(QSC_SYSTEM_COMPILER_MSC)
-  /*!
-   * \def QSC_WINDOWS_VSTUDIO_BUILD
-   * \brief Defined when building on Windows using Visual Studio.
-   */
+    /*!
+    * \def QSC_WINDOWS_VSTUDIO_BUILD
+    * \brief Defined when building on Windows using Visual Studio.
+    */
 #   define QSC_WINDOWS_VSTUDIO_BUILD
 #endif
 
 #if defined(_OPENMP)
-  /*!
-   * \def QSC_SYSTEM_OPENMP
-   * \brief Defined when OpenMP support is enabled.
-   */
+    /*!
+    * \def QSC_SYSTEM_OPENMP
+    * \brief Defined when OpenMP support is enabled.
+    */
 #	define QSC_SYSTEM_OPENMP
 #endif
 
 #if defined(DEBUG) || defined(_DEBUG) || defined(__DEBUG__) || (defined(__GNUC__) && !defined(__OPTIMIZE__))
-  /*!
-   * \def QSC_DEBUG_MODE
-   * \brief Defined when the build is in debug mode.
-   */
+    /*!
+    * \def QSC_DEBUG_MODE
+    * \brief Defined when the build is in debug mode.
+    */
 #	define QSC_DEBUG_MODE
 #endif
 
 #ifdef QSC_DEBUG_MODE
-  /*!
-   * \def QSC_ASSERT
-   * \brief Define the assert function and guarantee it as debug only.
-   */
+    /*!
+    * \def QSC_ASSERT
+    * \brief Define the assert function and guarantee it as debug only.
+    */
 #  define QSC_ASSERT(expr) assert(expr)
 #else
 #  define QSC_ASSERT(expr) ((void)0)
@@ -376,134 +376,141 @@ QSC_CPLUSPLUS_ENABLED_START
 /*==============================================================================
     CPU Architecture Identification Macros
 ==============================================================================*/
+
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || \
+    defined(__NetBSD__) || defined(__APPLE__) || \
+    (defined(__GLIBC__) && (__GLIBC__ >= 2 && __GLIBC_MINOR__ >= 25))
+#   define QSC_HAVE_EXPLICIT_BZERO 1
+#endif
+
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #   if defined(_M_X64) || defined(_M_AMD64)
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86_64
-     * \brief Defined when building for 64-bit x86 (AMD64/Intel 64).
-     */
-#		define QSC_SYSTEM_ARCH_IX86_64
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86
-     * \brief Also defined when building for x86 architectures.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86_64
+        * \brief Defined when building for 64-bit x86 (AMD64/Intel 64).
+        */
+#	    define QSC_SYSTEM_ARCH_IX86_64
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86
+        * \brief Also defined when building for x86 architectures.
+        */
 #		define QSC_SYSTEM_ARCH_IX86
 #   if defined(_M_AMD64)
-      /*!
-       * \def QSC_SYSTEM_ARCH_AMD64
-       * \brief Defined when the processor is AMD64.
-       */
-#			define QSC_SYSTEM_ARCH_AMD64
+        /*!
+        * \def QSC_SYSTEM_ARCH_AMD64
+        * \brief Defined when the processor is AMD64.
+        */
+#		define QSC_SYSTEM_ARCH_AMD64
 #   endif
 #   elif defined(_M_IX86) || defined(_X86_)
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86_32
-     * \brief Defined when building for 32-bit x86.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86_32
+        * \brief Defined when building for 32-bit x86.
+        */
 #		define QSC_SYSTEM_ARCH_IX86_32
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86
-     * \brief Also defined for x86 architectures.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86
+        * \brief Also defined for x86 architectures.
+        */
 #		define QSC_SYSTEM_ARCH_IX86
 #   elif defined(_M_ARM)
-    /*!
-     * \def QSC_SYSTEM_ARCH_ARM
-     * \brief Defined when building for ARM architectures.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_ARM
+        * \brief Defined when building for ARM architectures.
+        */
 #		define QSC_SYSTEM_ARCH_ARM
 #       if defined(_M_ARM_ARMV7VE)
-      /*!
-       * \def QSC_SYSTEM_ARCH_ARMV7VE
-       * \brief Defined when building for ARM V7VE.
-       */
+            /*!
+            * \def QSC_SYSTEM_ARCH_ARMV7VE
+            * \brief Defined when building for ARM V7VE.
+            */
 #			define QSC_SYSTEM_ARCH_ARMV7VE
 #       elif defined(_M_ARM_FP)
-      /*!
-       * \def QSC_SYSTEM_ARCH_ARMFP
-       * \brief Defined when building for ARM with floating point support.
-       */
+            /*!
+            * \def QSC_SYSTEM_ARCH_ARMFP
+            * \brief Defined when building for ARM with floating point support.
+            */
 #			define QSC_SYSTEM_ARCH_ARMFP
 #       elif defined(_M_ARM64)
-      /*!
-       * \def QSC_SYSTEM_ARCH_ARM64
-       * \brief Defined when building for ARM64.
-       */
+            /*!
+            * \def QSC_SYSTEM_ARCH_ARM64
+            * \brief Defined when building for ARM64.
+            */
 #			define QSC_SYSTEM_ARCH_ARM64
 #       endif
 #   elif defined(_M_IA64)
-    /*!
-     * \def QSC_SYSTEM_ARCH_IA64
-     * \brief Defined when building for Itanium (IA-64).
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IA64
+        * \brief Defined when building for Itanium (IA-64).
+        */
 #		define QSC_SYSTEM_ARCH_IA64
 #   endif
 #elif defined(QSC_SYSTEM_COMPILER_GCC)
 #   if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64)
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86_64
-     * \brief Defined when building for 64-bit x86 (AMD64/Intel 64) using GCC.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86_64
+        * \brief Defined when building for 64-bit x86 (AMD64/Intel 64) using GCC.
+        */
 #		define QSC_SYSTEM_ARCH_IX86_64
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86
-     * \brief Also defined for x86 architectures.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86
+        * \brief Also defined for x86 architectures.
+        */
 #		define QSC_SYSTEM_ARCH_IX86
-#       if defined(_M_AMD64)
-      /*!
-       * \def QSC_SYSTEM_ARCH_AMD64
-       * \brief Defined when the processor is AMD64.
-       */
+#       if defined(__amd64__) || defined(__amd64)
+            /*!
+            * \def QSC_SYSTEM_ARCH_AMD64
+            * \brief Defined when the processor is AMD64.
+            */
 #			define QSC_SYSTEM_ARCH_AMD64
 #       endif
 #   elif defined(i386) || defined(__i386) || defined(__i386__)
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86_32
-     * \brief Defined when building for 32-bit x86 using GCC.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86_32
+        * \brief Defined when building for 32-bit x86 using GCC.
+        */
 #		define QSC_SYSTEM_ARCH_IX86_32
-    /*!
-     * \def QSC_SYSTEM_ARCH_IX86
-     * \brief Also defined for x86 architectures.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IX86
+        * \brief Also defined for x86 architectures.
+        */
 #		define QSC_SYSTEM_ARCH_IX86
-#   elif defined(__arm__)
-    /*!
-     * \def QSC_SYSTEM_ARCH_ARM
-     * \brief Defined when building for ARM architectures using GCC.
-     */
+#   elif defined(__arm__) || defined(__aarch64__)
+        /*!
+        * \def QSC_SYSTEM_ARCH_ARM
+        * \brief Defined when building for ARM architectures using GCC.
+        */
 #		define QSC_SYSTEM_ARCH_ARM
 #       if defined(__aarch64__)
-      /*!
-       * \def QSC_SYSTEM_ARCH_ARM64
-       * \brief Defined when building for ARM64.
-       */
+            /*!
+            * \def QSC_SYSTEM_ARCH_ARM64
+            * \brief Defined when building for ARM64.
+            */
 #			define QSC_SYSTEM_ARCH_ARM64
 #       endif
 #   elif defined(__ia64) || defined(__ia64__) || defined(__itanium__)
-    /*!
-     * \def QSC_SYSTEM_ARCH_IA64
-     * \brief Defined when building for Itanium (IA-64) using GCC.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_IA64
+        * \brief Defined when building for Itanium (IA-64) using GCC.
+        */
 #		define QSC_SYSTEM_ARCH_IA64
 #   elif defined(__powerpc64__) || defined(__ppc64__) || defined(__PPC64__) || defined(__64BIT__) || defined(_LP64) || defined(__LP64__)
-    /*!
-     * \def QSC_SYSTEM_ARCH_PPC
-     * \brief Defined when building for PowerPC 64-bit.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_PPC
+        * \brief Defined when building for PowerPC 64-bit.
+        */
 #		define QSC_SYSTEM_ARCH_PPC
 #   elif defined(__sparc) || defined(__sparc__)
-    /*!
-     * \def QSC_SYSTEM_ARCH_SPARC
-     * \brief Defined when building for SPARC architectures.
-     */
+        /*!
+        * \def QSC_SYSTEM_ARCH_SPARC
+        * \brief Defined when building for SPARC architectures.
+        */
 #		define QSC_SYSTEM_ARCH_SPARC
 #       if defined(__sparc64__)
-      /*!
-       * \def QSC_SYSTEM_ARCH_SPARC64
-       * \brief Defined when building for 64-bit SPARC.
-       */
+            /*!
+            * \def QSC_SYSTEM_ARCH_SPARC64
+            * \brief Defined when building for 64-bit SPARC.
+            */
 #			define QSC_SYSTEM_ARCH_SPARC64
 #       endif
 #   endif
@@ -518,6 +525,12 @@ QSC_CPLUSPLUS_ENABLED_START
 ==============================================================================*/
 
 /*!
+ * \def QSC_PRAGMA_STR
+ * \brief The stringify function.
+ */
+#define QSC_PRAGMA_STR(x) _Pragma(#x)
+
+/*!
  * \def QSC_NO_INLINE
  * \brief Tells the compiler not to inline a function.
  */
@@ -530,30 +543,30 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #if defined(_WIN64) || defined(_WIN32) || defined(__CYGWIN__)
-  /*!
-   * \def QSC_SYSTEM_SOCKETS_WINDOWS
-   * \brief Defined when using Windows sockets.
-   */
+    /*!
+    * \def QSC_SYSTEM_SOCKETS_WINDOWS
+    * \brief Defined when using Windows sockets.
+    */
 #	define QSC_SYSTEM_SOCKETS_WINDOWS
 #else
-  /*!
-   * \def QSC_SYSTEM_SOCKETS_BERKELY
-   * \brief Defined when using Berkeley sockets.
-   */
-#	define QSC_SYSTEM_SOCKETS_BERKELY
+    /*!
+    * \def QSC_SYSTEM_SOCKETS_BERKELEY
+    * \brief Defined when using Berkeley sockets.
+    */
+#	define QSC_SYSTEM_SOCKETS_BERKELEY
 #endif
 
-#if defined(__attribute__)
+#if defined(__GNUC__) || defined(__clang__)
 #   define QSC_ATTRIBUTE __attribute__
 #else
 #   define QSC_ATTRIBUTE(a)
 #endif
 
 #if defined(_DLL)
-  /*!
-   * \def QSC_DLL_API
-   * \brief Defined when building as a DLL.
-   */
+    /*!
+    * \def QSC_DLL_API
+    * \brief Defined when building as a DLL.
+    */
 #	define QSC_DLL_API
 #endif
 
@@ -582,7 +595,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #       else
 #			define QSC_EXPORT_API QSC_ATTRIBUTE __global
 #       endif
-#   elif defined(_MSG_VER)
+#   elif defined(_MSC_VER)
 #		define QSC_EXPORT_API extern __declspec(dllexport)
 #   else
 #		define QSC_EXPORT_API QSC_ATTRIBUTE ((visibility ("default")))
@@ -603,30 +616,30 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #if defined(QSC_SYSTEM_ARCH_IX86_64) || defined(QSC_SYSTEM_ARCH_ARM64) || defined(QSC_SYSTEM_ARCH_IA64) || defined(QSC_SYSTEM_ARCH_AMD64) || defined(QSC_SYSTEM_ARCH_SPARC64)
-  /*!
-   * \def QSC_SYSTEM_IS_X64
-   * \brief Defined when the target system is 64-bit.
-   */
+    /*!
+    * \def QSC_SYSTEM_IS_X64
+    * \brief Defined when the target system is 64-bit.
+    */
 #	define QSC_SYSTEM_IS_X64
 #else
-  /*!
-   * \def QSC_SYSTEM_IS_X86
-   * \brief Defined when the target system is 32-bit.
-   */
+    /*!
+    * \def QSC_SYSTEM_IS_X86
+    * \brief Defined when the target system is 32-bit.
+    */
 #	define QSC_SYSTEM_IS_X86
 #endif
 
 #if defined(QSC_SYSTEM_IS_X64)
-  /*!
-   * \def QSC_SIZE_MAX
-   * \brief The maximum integer size for a 64-bit system.
-   */
+    /*!
+    * \def QSC_SIZE_MAX
+    * \brief The maximum integer size for a 64-bit system.
+    */
 #	define QSC_SIZE_MAX UINT64_MAX
 #else
-  /*!
-   * \def QSC_SIZE_MAX
-   * \brief The maximum integer size for a 32-bit system.
-   */
+    /*!
+    * \def QSC_SIZE_MAX
+    * \brief The maximum integer size for a 32-bit system.
+    */
 #	define QSC_SIZE_MAX UINT32_MAX
 #endif
 
@@ -646,32 +659,32 @@ QSC_CPLUSPLUS_ENABLED_START
 
 #if (!defined(QSC_SYSTEM_IS_LITTLE_ENDIAN))
 #	if defined(__sparc) || defined(__sparc__) || defined(__hppa__) || defined(__PPC__) || defined(__mips__) || (defined(__MWERKS__) && !defined(__INTEL__))
-    /*!
-     * \def QSC_SYSTEM_IS_BIG_ENDIAN
-     * \brief Defined if the system is big endian.
-     */
+        /*!
+        * \def QSC_SYSTEM_IS_BIG_ENDIAN
+        * \brief Defined if the system is big endian.
+        */
 #		define QSC_SYSTEM_IS_BIG_ENDIAN
 #	else
-    /*!
-     * \def QSC_SYSTEM_IS_LITTLE_ENDIAN
-     * \brief Defined if the system is little endian.
-     */
+        /*!
+        * \def QSC_SYSTEM_IS_LITTLE_ENDIAN
+        * \brief Defined if the system is little endian.
+        */
 #		define QSC_SYSTEM_IS_LITTLE_ENDIAN
 #	endif
 #endif
 
 #if defined(__SIZEOF_INT128__) && defined(QSC_SYSTEM_IS_X64) && !defined(__xlc__) && !defined(uint128_t)
-  /*!
-   * \def QSC_SYSTEM_NATIVE_UINT128
-   * \brief Defined when the system supports a native 128-bit integer type.
-   */
+    /*!
+    * \def QSC_SYSTEM_NATIVE_UINT128
+    * \brief Defined when the system supports a native 128-bit integer type.
+    */
 #	define QSC_SYSTEM_NATIVE_UINT128
 #	if defined(__GNUC__)
-    /*!
-     * \typedef uint128_t
-     * \brief A 128-bit unsigned integer type using GCC's mode(TI) attribute.
-     */
-		typedef uint32_t uint128_t QSC_ATTRIBUTE((mode(TI)));
+        /*!
+        * \typedef uint128_t
+        * \brief A 128-bit unsigned integer type using GCC's mode(TI) attribute.
+        */
+        typedef unsigned int uint128_t QSC_ATTRIBUTE((mode(TI)));
 #	else
 		typedef __int128 uint128_t;
 #	endif
@@ -699,24 +712,24 @@ QSC_CPLUSPLUS_ENABLED_START
 #	if defined(QSC_SYSTEM_ARCH_IX86)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							    \
 		do {																	    \
-		asm("mulq %3" : "=d" (*(High)), "=X" (*(Low)) : "X" (X), "rm" (Y) : "cc");	\
+		asm("mulq %3" : "=d" (*(High)), "=a" (*(Low)) : "a" (X), "rm" (Y) : "cc");	\
 		} while(0U)
 #	elif defined(QSC_SYSTEM_ARCH_ALPHA)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
 		do {																	\
-		asm("umulh %1,%2,%0U" : "=r" (*(High)) : "r" (X), "r" (Y));				\
+		asm("umulh %1,%2,%0" : "=r" (*(High)) : "r" (X), "r" (Y));				\
 		*(Low) = (X) * (Y);														\
 		} while(0U)
 #	elif defined(QSC_SYSTEM_ARCH_IA64)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
 		do {																	\
-		asm("xmpy.hu %0U=%1,%2" : "=f" (*(High)) : "f" (X), "f" (Y));			\
+		asm("xmpy.hu %0=%1,%2" : "=f" (*(High)) : "f" (X), "f" (Y));			\
 		*(Low) = (X) * (Y);														\
 		} while(0U)
 #	elif defined(QSC_SYSTEM_ARCH_PPC)
 #		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
 		do {																	\
-		asm("mulhdu %0U,%1,%2" : "=r" (*(High)) : "r" (X), "r" (Y) : "cc");		\
+		asm("mulhdu %0,%1,%2" : "=r" (*(High)) : "r" (X), "r" (Y) : "cc");		\
 		*(Low) = (X) * (Y);														\
 		} while(0U)
 #	endif
@@ -744,7 +757,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_SYSTEM_SECMEMALLOC_MAX
  * \brief Maximum secure memory allocation size (in bytes).
  */
-#define QSC_SYSTEM_SECMEMALLOC_MAX 128ULL
+#define QSC_SYSTEM_SECMEMALLOC_MAX 131072ULL
 
 /*!
  * \def QSC_SYSTEM_SECMEMALLOC_MAXKB
@@ -753,32 +766,32 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_SYSTEM_SECMEMALLOC_MAXKB 512ULL
 
 #if defined(_WIN32)
-  /*!
-   * \def QSC_SYSTEM_VIRTUAL_LOCK
-   * \brief Defined if the system supports virtual memory locking on Windows.
-   */
+    /*!
+    * \def QSC_SYSTEM_VIRTUAL_LOCK
+    * \brief Defined if the system supports virtual memory locking on Windows.
+    */
 #	define QSC_SYSTEM_VIRTUAL_LOCK
 
-  /*!
-   * \def QSC_RTL_SECURE_MEMORY
-   * \brief Defined if the system supports secure memory allocation on Windows.
-   */
+    /*!
+    * \def QSC_RTL_SECURE_MEMORY
+    * \brief Defined if the system supports secure memory allocation on Windows.
+    */
 #	define QSC_RTL_SECURE_MEMORY
 #endif
 
 #if defined(_POSIX_MEMLOCK_RANGE)
-  /*!
-   * \def QSC_SYSTEM_POSIX_MLOCK
-   * \brief Defined if the system supports the POSIX mlock function.
-   */
+    /*!
+    * \def QSC_SYSTEM_POSIX_MLOCK
+    * \brief Defined if the system supports the POSIX mlock function.
+    */
 #	define QSC_SYSTEM_POSIX_MLOCK
 #endif
 
 #if defined(QSC_SYSTEM_VIRTUAL_LOCK) || defined(QSC_SYSTEM_POSIX_MLOCK)
-  /*!
-   * \def QSC_SYSTEM_SECURE_ALLOCATOR
-   * \brief Defined if the system has a secure memory allocator.
-   */
+    /*!
+    * \def QSC_SYSTEM_SECURE_ALLOCATOR
+    * \brief Defined if the system has a secure memory allocator.
+    */
 #	define QSC_SYSTEM_SECURE_ALLOCATOR
 #endif
 
@@ -790,30 +803,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_SYSTEM_OPTIMIZE_IGNORE __pragma(optimize("", off))
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_MINGW)
 #   if defined(__clang__)
-    /*!
-     * \def QSC_SYSTEM_OPTIMIZE_IGNORE
-     * \brief Compiler hint to disable optimization in Clang.
-     */
 #		define QSC_SYSTEM_OPTIMIZE_IGNORE QSC_ATTRIBUTE((optnone))
 #   else
-    /*!
-     * \def QSC_SYSTEM_OPTIMIZE_IGNORE
-     * \brief Compiler hint to disable optimization in GCC.
-     */
 #		define QSC_SYSTEM_OPTIMIZE_IGNORE QSC_ATTRIBUTE((optimize("O0")))
 #   endif
-#elif defined(QSC_SYSTEM_COMPILER_CLANG)
-  /*!
-   * \def QSC_SYSTEM_OPTIMIZE_IGNORE
-   * \brief Compiler hint to disable optimization in Clang.
-   */
-#	define QSC_SYSTEM_OPTIMIZE_IGNORE QSC_ATTRIBUTE((optnone))
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
-  /*!
-   * \def QSC_SYSTEM_OPTIMIZE_IGNORE
-   * \brief Compiler hint to disable optimization in the Intel compiler.
-   */
-#	define QSC_SYSTEM_OPTIMIZE_IGNORE pragma optimize("", off)
+#	define QSC_SYSTEM_OPTIMIZE_IGNORE _Pragma("optimize(\"\", off)")
 #else
 #	define QSC_SYSTEM_OPTIMIZE_IGNORE
 #endif
@@ -828,41 +823,55 @@ QSC_CPLUSPLUS_ENABLED_START
 #   if defined(__clang__)
 #		define QSC_SYSTEM_OPTIMIZE_RESUME
 #   else
-#		define QSC_SYSTEM_OPTIMIZE_RESUME _Pragma("GCC diagnostic pop")
+#		define QSC_SYSTEM_OPTIMIZE_RESUME
 #   endif
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
-#	define QSC_SYSTEM_OPTIMIZE_RESUME pragma optimize("", on)
+#	define QSC_SYSTEM_OPTIMIZE_RESUME _Pragma("optimize(\"\", on)")
 #else
 #	define QSC_SYSTEM_OPTIMIZE_RESUME
 #endif
 
 /*!
 * \def QSC_SYSTEM_CONDITION_IGNORE(x)
-* \brief MSVC-specific macro to disable a specific warning condition.
+* \brief A macro to disable a specific warning condition.
 */
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #	define QSC_SYSTEM_CONDITION_IGNORE(x) __pragma(warning(disable : x))
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_MINGW)
-#	define QSC_SYSTEM_CONDITION_IGNORE(x) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
+#	define QSC_SYSTEM_CONDITION_IGNORE(x) _Pragma("GCC diagnostic push") _Pragma(QSC_STRINGIFY(GCC diagnostic ignored #x))
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
 #	define QSC_SYSTEM_CONDITION_IGNORE(x)
 #else
 #	define QSC_SYSTEM_CONDITION_IGNORE(x)
 #endif
 
-#if (_MSC_VER >= 1600)
-  /*!
-   * \def QSC_WMMINTRIN_H
-   * \brief Defined when the CPU supports SIMD instructions (MSVC).
-   */
+/*!
+* \def QSC_SYSTEM_CONDITION_RESUME(x)
+* \brief A macro to re-enable a specific warning condition.
+*/
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+#	define QSC_SYSTEM_CONDITION_RESUME(x) __pragma(warning(default : x))
+#elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_MINGW)
+#	define QSC_SYSTEM_CONDITION_RESUME(x) _Pragma("GCC diagnostic pop")
+#elif defined(QSC_SYSTEM_COMPILER_INTEL)
+#	define QSC_SYSTEM_CONDITION_RESUME(x)
+#else
+#	define QSC_SYSTEM_CONDITION_RESUME(x)
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+    /*!
+    * \def QSC_WMMINTRIN_H
+    * \brief Defined when the CPU supports SIMD instructions (MSVC).
+    */
 #	define QSC_WMMINTRIN_H 1
 #endif
 
-#if (_MSC_VER >= 1700) && (defined(_M_X64))
-  /*!
-   * \def QSC_HAVE_AVX2INTRIN_H
-   * \brief Defined when the CPU supports AVX2 (MSVC, 64-bit).
-   */
+#if defined(_MSC_VER) && (_MSC_VER >= 1700) && defined(_M_X64)
+    /*!
+    * \def QSC_HAVE_AVX2INTRIN_H
+    * \brief Defined when the CPU supports AVX2 (MSVC, 64-bit).
+    */
 #	define QSC_HAVE_AVX2INTRIN_H 1
 #endif
 
@@ -873,10 +882,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #if defined(QSC_SYSTEM_X86)
 
 #   if defined(__AVX512F__) && (__AVX512F__ == 1)
-      /*!
-       * \def __AVX512__
-       * \brief Defined when the system supports AVX512 instructions.
-       */
+        /*!
+        * \def __AVX512__
+        * \brief Defined when the system supports AVX512 instructions.
+        */
 #	    include <immintrin.h>
 #	    if (!defined(__AVX512__))
 #		    define __AVX512__
@@ -884,90 +893,90 @@ QSC_CPLUSPLUS_ENABLED_START
 #   endif
 
 #   if defined(__SSE2__)
-      /*!
-       * \def QSC_SYSTEM_HAS_SSE2
-       * \brief Defined if the system supports SSE2 instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_SSE2
+        * \brief Defined if the system supports SSE2 instructions.
+        */
 #	    define QSC_SYSTEM_HAS_SSE2
 #   endif
 
 #   if defined(__SSE3__)
-      /*!
-       * \def QSC_SYSTEM_HAS_SSE3
-       * \brief Defined if the system supports SSE3 instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_SSE3
+        * \brief Defined if the system supports SSE3 instructions.
+        */
 #	    define QSC_SYSTEM_HAS_SSE3
 #   endif
 
 #   if defined(__SSSE3__)
-      /*!
-       * \def QSC_SYSTEM_HAS_SSSE3
-       * \brief Defined if the system supports SSSE3 instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_SSSE3
+        * \brief Defined if the system supports SSSE3 instructions.
+        */
 #	    define QSC_SYSTEM_HAS_SSSE3
 #   endif
 
 #   if defined(__SSE4_1__)
-      /*!
-       * \def QSC_SYSTEM_HAS_SSE41
-       * \brief Defined if the system supports SSE4.1 instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_SSE41
+        * \brief Defined if the system supports SSE4.1 instructions.
+        */
 #	    define QSC_SYSTEM_HAS_SSE41
 #   endif
 
 #   if defined(__SSE4_2__)
-      /*!
-       * \def QSC_SYSTEM_HAS_SSE42
-       * \brief Defined if the system supports SSE4.2 instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_SSE42
+        * \brief Defined if the system supports SSE4.2 instructions.
+        */
 #	    define QSC_SYSTEM_HAS_SSE42
 #   endif
 
 #   if defined(__ARM_NEON__)
-      /*!
-       * \def QSC_SYSTEM_HAS_ARM_NEON
-       * \brief Defined if the system supports ARM NEON instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_ARM_NEON
+        * \brief Defined if the system supports ARM NEON instructions.
+        */
 #       define QSC_SYSTEM_HAS_ARM_NEON
-    #endif
+#   endif
 
 #   if defined(__AVX__)
-      /*!
-       * \def QSC_SYSTEM_HAS_AVX
-       * \brief Defined if the system supports AVX instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_AVX
+        * \brief Defined if the system supports AVX instructions.
+        */
 #	    define QSC_SYSTEM_HAS_AVX
 #   endif
 
 #   if defined(__AVX2__)
-      /*!
-       * \def QSC_SYSTEM_HAS_AVX2
-       * \brief Defined if the system supports AVX2 instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_AVX2
+        * \brief Defined if the system supports AVX2 instructions.
+        */
 #	    define QSC_SYSTEM_HAS_AVX2
 #   endif
 
 #   if defined(__AVX512__)
-      /*!
-       * \def QSC_SYSTEM_HAS_AVX512
-       * \brief Defined if the system supports AVX512 instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_AVX512
+        * \brief Defined if the system supports AVX512 instructions.
+        */
 #	    define QSC_SYSTEM_HAS_AVX512
 #   endif
 
 #   if defined(__XOP__)
-      /*!
-       * \def QSC_SYSTEM_HAS_XOP
-       * \brief Defined if the system supports XOP instructions.
-       */
+        /*!
+        * \def QSC_SYSTEM_HAS_XOP
+        * \brief Defined if the system supports XOP instructions.
+        */
 #	    define QSC_SYSTEM_HAS_XOP
 #endif
 
 #   if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_AVX512)
-      /*!
-       * \def QSC_SYSTEM_AVX_INTRINSICS
-       * \brief Defined if the system supports AVX intrinsics.
-       */
+    /*!
+    * \def QSC_SYSTEM_AVX_INTRINSICS
+    * \brief Defined if the system supports AVX intrinsics.
+    */
 #	define QSC_SYSTEM_AVX_INTRINSICS
 #   endif
 #endif
@@ -1009,10 +1018,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #	endif
 #endif
 
-  /*!
-   * \def QSC_SIMD_ALIGNMENT
-   * \brief Alignment value for enabled intrinsic.
-   */
+    /*!
+    * \def QSC_SIMD_ALIGNMENT
+    * \brief Alignment value for enabled intrinsic.
+    */
 #if defined(QSC_SYSTEM_HAS_AVX512)
 #  define QSC_SIMD_ALIGNMENT 64
 #elif defined(QSC_SYSTEM_HAS_AVX2)
@@ -1023,10 +1032,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #  define QSC_SIMD_ALIGNMENT 8
 #endif
 
-  /*!
-   * \def QSC_SIMD_ALIGN
-   * \brief Macro to align data on supported intrinsics size
-   */
+    /*!
+    * \def QSC_SIMD_ALIGN
+    * \brief Macro to align data on supported intrinsics size
+    */
 #if defined(_MSC_VER)
 #  define QSC_SIMD_ALIGN __declspec(align(QSC_SIMD_ALIGNMENT))
 #elif defined(__GNUC__) || defined(__clang__)
@@ -1036,10 +1045,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #if defined(QSC_SYSTEM_AVX_INTRINSICS)
-  /*!
-   * \def QSC_RDRAND_COMPATIBLE
-   * \brief Defined if the CPU is RDRAND compatible.
-   */
+    /*!
+    * \def QSC_RDRAND_COMPATIBLE
+    * \brief Defined if the CPU is RDRAND compatible.
+    */
 #	define QSC_RDRAND_COMPATIBLE
 #endif
 
@@ -1061,10 +1070,10 @@ QSC_CPLUSPLUS_ENABLED_START
 
 #if !defined(QSC_SYSTEM_AESNI_ENABLED)
 #	if defined(QSC_SYSTEM_AVX_INTRINSICS)
-    /*!
-     * \def QSC_SYSTEM_AESNI_ENABLED
-     * \brief Enable the use of intrinsics and the AES-NI implementation.
-     */
+        /*!
+        * \def QSC_SYSTEM_AESNI_ENABLED
+        * \brief Enable the use of intrinsics and the AES-NI implementation.
+        */
 #		define QSC_SYSTEM_AESNI_ENABLED
 #	endif
 #endif
@@ -1130,7 +1139,7 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \def QSC_KYBER_S5K4P1024
- * \brief Enable the Kyber S5K5P1024 parameter set.
+* \brief Enable the Kyber S5K4P1024 parameter set.
  */
 #define QSC_KYBER_S5K4P1024
 
