@@ -838,7 +838,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #	define QSC_SYSTEM_CONDITION_IGNORE(x) __pragma(warning(disable : x))
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_MINGW)
-#	define QSC_SYSTEM_CONDITION_IGNORE(x) _Pragma("GCC diagnostic push") _Pragma(QSC_STRINGIFY(GCC diagnostic ignored #x))
+#	define QSC_SYSTEM_CONDITION_IGNORE(x) ((void)0)
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
 #	define QSC_SYSTEM_CONDITION_IGNORE(x)
 #else
@@ -852,7 +852,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #	define QSC_SYSTEM_CONDITION_RESUME(x) __pragma(warning(default : x))
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_MINGW)
-#	define QSC_SYSTEM_CONDITION_RESUME(x) _Pragma("GCC diagnostic pop")
+#	define QSC_SYSTEM_CONDITION_RESUME(x) ((void)0)
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
 #	define QSC_SYSTEM_CONDITION_RESUME(x)
 #else
