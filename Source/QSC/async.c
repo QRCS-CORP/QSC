@@ -54,8 +54,12 @@ bool qsc_async_atomic_bool_load(volatile bool* target)
     if (target != NULL)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#   if defined(QSC_SYSTEM_COMPILER_MSC)
         /* OR with 0: reads atomically without modifying the value */
         res = (_InterlockedOr8((volatile char*)target, (char)0) != (char)0);
+#   else
+        __atomic_load(target, &res, __ATOMIC_SEQ_CST);
+#   endif
 #else
         res = __atomic_load_n(target, __ATOMIC_SEQ_CST);
 #endif
@@ -70,7 +74,7 @@ void qsc_async_atomic_bool_store(volatile bool* target, bool value)
 
     if (target != NULL)
     {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
+#if defined(QSC_SYSTEM_COMPILER_MSC)
         _InterlockedExchange8((volatile char*)target, (char)value);
 #else
         __atomic_store_n(target, value, __ATOMIC_SEQ_CST);
@@ -88,7 +92,7 @@ bool qsc_async_atomic_bool_exchange(volatile bool* target, bool value)
 
     if (target != NULL)
     {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
+#if defined(QSC_SYSTEM_COMPILER_MSC)
         res = (_InterlockedExchange8((volatile char*)target, (char)value) != (char)0);
 #else
         res = __atomic_exchange_n(target, value, __ATOMIC_SEQ_CST);
@@ -108,7 +112,7 @@ bool qsc_async_atomic_bool_compare_exchange(volatile bool* target, bool expected
 
     if (target != NULL)
     {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
+#if defined(QSC_SYSTEM_COMPILER_MSC)
         res = (_InterlockedCompareExchange8((volatile char*)target, (char)desired, (char)expected) == (char)expected);
 #else
         /* __atomic_compare_exchange_n writes back to expected on failure; use a copy */
