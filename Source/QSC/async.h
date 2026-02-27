@@ -111,6 +111,61 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_ASYNC_PARALLEL_MAX 128ULL
 
 /* Function Declarations */
+/**
+ * \brief Atomically load the current value of a boolean.
+ *
+ * \details
+ * Reads the value at \p target using a sequentially consistent atomic load.
+ * The operation is equivalent to acquiring the value without the possibility
+ * of observing a partial write from a concurrent store.
+ *
+ * \param target:   [volatile bool*] Pointer to the boolean to read. Must not be NULL.
+ * \return          [bool] The value held by \p target at the time of the load.
+ */
+	QSC_EXPORT_API bool qsc_async_atomic_bool_load(volatile bool* target);
+
+/**
+ * \brief Atomically store a value into a boolean.
+ *
+ * \details
+ * Writes \p value to \p target using a sequentially consistent atomic store.
+ * Any thread that subsequently calls qsc_async_atomic_bool_load on the same
+ * target is guaranteed to observe \p value or any later write.
+ *
+ * \param target:   [volatile bool*] Pointer to the boolean to write. Must not be NULL.
+ * \param value:    [bool] The value to store.
+ */
+QSC_EXPORT_API void qsc_async_atomic_bool_store(volatile bool* target, bool value);
+
+/**
+ * \brief Atomically swap a boolean with a new value.
+ *
+ * \details
+ * Stores \p value into \p target and returns the value that \p target held
+ * immediately before the swap. The read and the write occur as a single
+ * indivisible operation; no other thread can observe an intermediate state.
+ *
+ * \param target:   [volatile bool*] Pointer to the boolean to swap. Must not be NULL.
+ * \param value:    [bool] The new value to store.
+ * \return          [bool] The previous value of \p target before the swap.
+ */
+QSC_EXPORT_API bool qsc_async_atomic_bool_exchange(volatile bool* target, bool value);
+
+/**
+ * \brief Atomically compare a boolean and conditionally store a new value.
+ *
+ * \details
+ * Reads \p target and compares it to \p expected. If they are equal, \p desired
+ * is written to \p target and the function returns true. If they differ, the
+ * target is left unchanged and the function returns false. The comparison and
+ * the conditional store are performed as a single indivisible operation.
+ *
+ * \param target:   [volatile bool*] Pointer to the boolean to test and update. Must not be NULL.
+ * \param expected: [bool] The value the caller expects \p target to currently hold.
+ * \param desired:  [bool] The value to store if the comparison succeeds.
+ * \return          [bool] True if the store was performed; false if \p target did not equal \p expected.
+ */
+QSC_EXPORT_API bool qsc_async_atomic_bool_compare_exchange(volatile bool* target, bool expected, bool desired);
 
 /**
  * \brief Launch a function on a new thread.

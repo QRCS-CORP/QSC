@@ -42,6 +42,82 @@ typedef struct
     size_t index;                               /*!< Index for this thread */
 } async_thread_task_t;
 
+bool qsc_async_atomic_bool_load(volatile bool* target)
+{
+    QSC_ASSERT(target != NULL);
+
+    bool res;
+
+    res = false;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+        /* OR with 0: reads atomically without modifying the value */
+        res = (_InterlockedOr8((volatile char*)target, (char)0) != (char)0);
+#else
+        res = __atomic_load_n(target, __ATOMIC_SEQ_CST);
+#endif
+    }
+
+    return res;
+}
+
+void qsc_async_atomic_bool_store(volatile bool* target, bool value)
+{
+    QSC_ASSERT(target != NULL);
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+        _InterlockedExchange8((volatile char*)target, (char)value);
+#else
+        __atomic_store_n(target, value, __ATOMIC_SEQ_CST);
+#endif
+    }
+}
+
+bool qsc_async_atomic_bool_exchange(volatile bool* target, bool value)
+{
+    QSC_ASSERT(target != NULL);
+
+    bool res;
+
+    res = false;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+        res = (_InterlockedExchange8((volatile char*)target, (char)value) != (char)0);
+#else
+        res = __atomic_exchange_n(target, value, __ATOMIC_SEQ_CST);
+#endif
+    }
+
+    return res;
+}
+
+bool qsc_async_atomic_bool_compare_exchange(volatile bool* target, bool expected, bool desired)
+{
+    QSC_ASSERT(target != NULL);
+
+    bool res;
+
+    res = false;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+        res = (_InterlockedCompareExchange8((volatile char*)target, (char)desired, (char)expected) == (char)expected);
+#else
+        /* __atomic_compare_exchange_n writes back to expected on failure; use a copy */
+        res = __atomic_compare_exchange_n(target, &expected, desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+#endif
+    }
+
+    return res;
+}
+
 THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void *arg) 
 {
     async_thread_task_t *task = (async_thread_task_t*)arg;
