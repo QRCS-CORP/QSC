@@ -18,6 +18,7 @@
 #       define _WINSOCKAPI_
 #   endif
 #   include <windows.h>
+#   include <intrin.h>
 #   include <process.h>
     #define THREAD_FUNC_RETURN uint32_t __stdcall
     #define THREAD_FUNC_CALL __stdcall
