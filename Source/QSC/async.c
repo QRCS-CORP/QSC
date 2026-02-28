@@ -43,6 +43,13 @@ typedef struct
     size_t index;                               /*!< Index for this thread */
 } async_thread_task_t;
 
+THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void* arg)
+{
+    async_thread_task_t* task = (async_thread_task_t*)arg;
+    task->task(task->context, task->index);
+    return 0;
+}
+
 bool qsc_async_atomic_bool_load(volatile bool* target)
 {
     QSC_ASSERT(target != NULL);
@@ -122,90 +129,160 @@ bool qsc_async_atomic_bool_compare_exchange(volatile bool* target, bool expected
 
     return res;
 }
-
-THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void *arg) 
+int32_t qsc_async_atomic_int32_load(volatile int32_t* target)
 {
-    async_thread_task_t *task = (async_thread_task_t*)arg;
-    task->task(task->context, task->index);
-    return 0;
+    QSC_ASSERT(target != NULL);
+
+    int32_t res;
+
+    res = 0;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        /* OR with 0: reads atomically without modifying the value */
+        res = (int32_t)_InterlockedOr((volatile LONG*)target, 0L);
+#else
+        res = __atomic_load_n(target, __ATOMIC_SEQ_CST);
+#endif
+    }
+
+    return res;
 }
 
-bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* context, size_t nthreads)
+void qsc_async_atomic_int32_store(volatile int32_t* target, int32_t value)
 {
-    QSC_ASSERT(task != NULL);
-    QSC_ASSERT(context != NULL);
-    QSC_ASSERT(nthreads != 0U);
+    QSC_ASSERT(target != NULL);
 
-    size_t cnt;
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        _InterlockedExchange((volatile LONG*)target, (LONG)value);
+#else
+        __atomic_store_n(target, value, __ATOMIC_SEQ_CST);
+#endif
+    }
+}
+
+int32_t qsc_async_atomic_int32_exchange(volatile int32_t* target, int32_t value)
+{
+    QSC_ASSERT(target != NULL);
+
+    int32_t res;
+
+    res = 0;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        res = (int32_t)_InterlockedExchange((volatile LONG*)target, (LONG)value);
+#else
+        res = __atomic_exchange_n(target, value, __ATOMIC_SEQ_CST);
+#endif
+    }
+
+    return res;
+}
+
+bool qsc_async_atomic_int32_compare_exchange(volatile int32_t* target, int32_t expected, int32_t desired)
+{
+    QSC_ASSERT(target != NULL);
+
     bool res;
 
-    cnt = 0U;
     res = false;
 
-    if (task != NULL && context != NULL && nthreads != 0U)
+    if (target != NULL)
     {
-        qsc_thread* threads;
-        async_thread_task_t* tasks;
-
-        threads = (qsc_thread*)qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
-
-        if (threads != NULL)
-        {
-            tasks = (async_thread_task_t*)qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
-
-            if (tasks != NULL)
-            {
-                qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
-                qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
-                res = true;
-
-                /* Process each task on a new thread */
-                for (size_t i = 0U; i < nthreads; ++i)
-                {
-                    tasks[i].task = task;
-                    tasks[i].context = context;
-                    tasks[i].index = i;
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-                    threads[i] = (HANDLE)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
-
-                    if (threads[i] == NULL)
-                    {
-                        res = false;
-                        break;
-                    }
-#elif defined(QSC_SYSTEM_OS_POSIX)
-                    if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
-                    {
-                        res = false;
-                        break;
-                    }
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        res = (_InterlockedCompareExchange((volatile LONG*)target, (LONG)desired, (LONG)expected) == (LONG)expected);
+#else
+        res = __atomic_compare_exchange_n(target, &expected, desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 #endif
+    }
 
-                    ++cnt;
-                }
+    return res;
+}
 
-                /* Wait for all threads to finish */
-                for (size_t i = 0U; i < cnt; ++i)
-                {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-                    if (threads[i] != NULL)
-                    {
-                        WaitForSingleObject(threads[i], INFINITE);
-                        CloseHandle(threads[i]);
-                    }
-#elif defined(QSC_SYSTEM_OS_POSIX)
-                    pthread_join(threads[i], NULL);
+int32_t qsc_async_atomic_int32_add(volatile int32_t* target, int32_t value)
+{
+    QSC_ASSERT(target != NULL);
+
+    int32_t res;
+
+    res = 0;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        /* _InterlockedExchangeAdd returns the original value; add value to get the new value */
+        res = (int32_t)_InterlockedExchangeAdd((volatile LONG*)target, (LONG)value) + value;
+#else
+        res = __atomic_add_fetch(target, value, __ATOMIC_SEQ_CST);
 #endif
-                }
+    }
 
-                qsc_memutils_alloc_free(tasks);
-                tasks = NULL;
-            }
+    return res;
+}
 
-            qsc_memutils_alloc_free(threads);
-            threads = NULL;
-        }
+int32_t qsc_async_atomic_int32_subtract(volatile int32_t* target, int32_t value)
+{
+    QSC_ASSERT(target != NULL);
+
+    int32_t res;
+
+    res = 0;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        /* Negate value to perform subtraction; original - value = new value */
+        res = (int32_t)_InterlockedExchangeAdd((volatile LONG*)target, -(LONG)value) - value;
+#else
+        res = __atomic_sub_fetch(target, value, __ATOMIC_SEQ_CST);
+#endif
+    }
+
+    return res;
+}
+
+int32_t qsc_async_atomic_int32_increment(volatile int32_t* target)
+{
+    QSC_ASSERT(target != NULL);
+
+    int32_t res;
+
+    res = 0;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        /* _InterlockedIncrement returns the new value directly */
+        res = (int32_t)_InterlockedIncrement((volatile LONG*)target);
+#else
+        res = __atomic_add_fetch(target, 1, __ATOMIC_SEQ_CST);
+#endif
+    }
+
+    return res;
+}
+
+int32_t qsc_async_atomic_int32_decrement(volatile int32_t* target)
+{
+    QSC_ASSERT(target != NULL);
+
+    int32_t res;
+
+    res = 0;
+
+    if (target != NULL)
+    {
+#if defined(QSC_SYSTEM_COMPILER_MSC)
+        /* _InterlockedDecrement returns the new value directly */
+        res = (int32_t)_InterlockedDecrement((volatile LONG*)target);
+#else
+        res = __atomic_sub_fetch(target, 1, __ATOMIC_SEQ_CST);
+#endif
     }
 
     return res;
@@ -319,6 +396,87 @@ void qsc_async_mutex_unlock_ex(qsc_mutex mtx)
 {
     qsc_async_mutex_unlock(mtx);
     qsc_async_mutex_destroy(mtx);
+}
+
+bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* context, size_t nthreads)
+{
+    QSC_ASSERT(task != NULL);
+    QSC_ASSERT(context != NULL);
+    QSC_ASSERT(nthreads != 0U);
+
+    size_t cnt;
+    bool res;
+
+    cnt = 0U;
+    res = false;
+
+    if (task != NULL && context != NULL && nthreads != 0U)
+    {
+        qsc_thread* threads;
+        async_thread_task_t* tasks;
+
+        threads = (qsc_thread*)qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
+
+        if (threads != NULL)
+        {
+            tasks = (async_thread_task_t*)qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
+
+            if (tasks != NULL)
+            {
+                qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
+                qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
+                res = true;
+
+                /* Process each task on a new thread */
+                for (size_t i = 0U; i < nthreads; ++i)
+                {
+                    tasks[i].task = task;
+                    tasks[i].context = context;
+                    tasks[i].index = i;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+                    threads[i] = (HANDLE)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
+
+                    if (threads[i] == NULL)
+                    {
+                        res = false;
+                        break;
+                    }
+#elif defined(QSC_SYSTEM_OS_POSIX)
+                    if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
+                    {
+                        res = false;
+                        break;
+                    }
+#endif
+
+                    ++cnt;
+                }
+
+                /* Wait for all threads to finish */
+                for (size_t i = 0U; i < cnt; ++i)
+                {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+                    if (threads[i] != NULL)
+                    {
+                        WaitForSingleObject(threads[i], INFINITE);
+                        CloseHandle(threads[i]);
+                    }
+#elif defined(QSC_SYSTEM_OS_POSIX)
+                    pthread_join(threads[i], NULL);
+#endif
+                }
+
+                qsc_memutils_alloc_free(tasks);
+                tasks = NULL;
+            }
+
+            qsc_memutils_alloc_free(threads);
+            threads = NULL;
+        }
+    }
+
+    return res;
 }
 
 size_t qsc_async_processor_count(void)

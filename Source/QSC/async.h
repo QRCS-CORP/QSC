@@ -110,7 +110,6 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_ASYNC_PARALLEL_MAX 128ULL
 
-/* Function Declarations */
 /**
  * \brief Atomically load the current value of a boolean.
  *
@@ -122,7 +121,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param target:   [volatile bool*] Pointer to the boolean to read. Must not be NULL.
  * \return          [bool] The value held by \p target at the time of the load.
  */
-	QSC_EXPORT_API bool qsc_async_atomic_bool_load(volatile bool* target);
+QSC_EXPORT_API bool qsc_async_atomic_bool_load(volatile bool* target);
 
 /**
  * \brief Atomically store a value into a boolean.
@@ -166,6 +165,92 @@ QSC_EXPORT_API bool qsc_async_atomic_bool_exchange(volatile bool* target, bool v
  * \return          [bool] True if the store was performed; false if \p target did not equal \p expected.
  */
 QSC_EXPORT_API bool qsc_async_atomic_bool_compare_exchange(volatile bool* target, bool expected, bool desired);
+
+/**
+ * \brief Atomically load an int32_t value.
+ *
+ * Reads the current value of *target with sequential consistency.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \return          [int32_t] The current value.
+ */
+QSC_EXPORT_API int32_t qsc_async_atomic_int32_load(volatile int32_t* target);
+
+/**
+ * \brief Atomically store an int32_t value.
+ *
+ * Writes value to *target with sequential consistency.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \param value:    [int32_t] The value to store.
+ */
+QSC_EXPORT_API void qsc_async_atomic_int32_store(volatile int32_t* target, int32_t value);
+
+/**
+ * \brief Atomically exchange an int32_t value.
+ *
+ * Writes value to *target and returns the previous value.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \param value:    [int32_t] The new value to store.
+ * \return          [int32_t] The previous value of *target.
+ */
+QSC_EXPORT_API int32_t qsc_async_atomic_int32_exchange(volatile int32_t* target, int32_t value);
+
+/**
+ * \brief Atomically compare and conditionally exchange an int32_t value.
+ *
+ * If *target equals expected, stores desired into *target.
+ * The comparison and store occur as a single atomic operation.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \param expected: [int32_t] The value the caller expects *target to hold.
+ * \param desired:  [int32_t] The value to store if the comparison succeeds.
+ * \return          [bool] True if the exchange was performed; false otherwise.
+ */
+QSC_EXPORT_API bool qsc_async_atomic_int32_compare_exchange(volatile int32_t* target, int32_t expected, int32_t desired);
+
+/**
+ * \brief Atomically add a value to an int32_t.
+ *
+ * Adds value to *target and returns the value AFTER the addition.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \param value:    [int32_t] The amount to add.
+ * \return          [int32_t] The new value of *target after the addition.
+ */
+QSC_EXPORT_API int32_t qsc_async_atomic_int32_add(volatile int32_t* target, int32_t value);
+
+/**
+ * \brief Atomically subtract a value from an int32_t.
+ *
+ * Subtracts value from *target and returns the value AFTER the subtraction.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \param value:    [int32_t] The amount to subtract.
+ * \return          [int32_t] The new value of *target after the subtraction.
+ */
+QSC_EXPORT_API int32_t qsc_async_atomic_int32_subtract(volatile int32_t* target, int32_t value);
+
+/**
+ * \brief Atomically increment an int32_t by one.
+ *
+ * Increments *target by one and returns the value AFTER the increment.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \return          [int32_t] The new value of *target after the increment.
+ */
+QSC_EXPORT_API int32_t qsc_async_atomic_int32_increment(volatile int32_t* target);
+
+/**
+ * \brief Atomically decrement an int32_t by one.
+ *
+ * Decrements *target by one and returns the value AFTER the decrement.
+ *
+ * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \return          [int32_t] The new value of *target after the decrement.
+ */
+QSC_EXPORT_API int32_t qsc_async_atomic_int32_decrement(volatile int32_t* target);
 
 /**
  * \brief Launch a function on a new thread.
