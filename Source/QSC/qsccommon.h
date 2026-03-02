@@ -1183,11 +1183,11 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*** Signature Schemes ***/
 
-/*!
- * \def QSC_DILITHIUM_S1P44
- * \brief Enable the Dilithium S1P44 parameter set.
- */
-#define QSC_DILITHIUM_S1P44
+///*!
+// * \def QSC_DILITHIUM_S1P44
+// * \brief Enable the Dilithium S1P44 parameter set.
+// */
+//#define QSC_DILITHIUM_S1P44
 
 ///*!
 // * \def QSC_DILITHIUM_S3P65
