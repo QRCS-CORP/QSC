@@ -351,15 +351,16 @@ bool qsc_async_mutex_destroy(qsc_mutex mtx)
     bool res;
     res = false;
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-    res = (bool)CloseHandle(mtx);
-#else
     if (mtx != NULL)
     {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+        res = (bool)CloseHandle(mtx);
+#else
         res = (pthread_mutex_destroy(mtx) == 0);
         qsc_memutils_alloc_free(mtx);
-    }
 #endif
+        mtx = NULL;
+    }
 
     return res;
 }
