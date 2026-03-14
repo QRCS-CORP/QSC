@@ -7,42 +7,53 @@
 #	include "consoleutils.h"
 #endif
 
-#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
-#	define NETUTILS_WSA_STARTUP_SEQUENCE 0x0202
-#	define NETUTILS_INET_PTON_SUCCESS 1
-#   include "arrayutils.h"
-#   include <ws2ipdef.h>
-#elif defined(QSC_SYSTEM_OS_MAC)
-#	include <unistd.h>
-#	include <string.h>
-#	include <stdio.h>
-#	include <sys/types.h>
-#   include <ifaddrs.h>
-#   include <arpa/inet.h>
-#   include <netdb.h>
-#   include <netinet/in.h>
-#   include <sys/socket.h>
-#   include <net/if.h>
-#	include <net/if_dl.h>
-#	include <netinet/in.h>
-#	include <sys/socket.h>
-#else
-#	include <unistd.h>
-#   include <netdb.h>
-#	include <string.h>
-#	include <stdio.h>
-#	include <sys/types.h>
-#   include <ifaddrs.h>
-#   include <arpa/inet.h>
-#   include <net/if.h>
-#   include <netinet/in.h>
-#   include <sys/socket.h>
-#if defined(QSC_SYSTEM_OS_LINUX)
-#  include <netpacket/packet.h>
+#include "netutils.h"
+#include "memutils.h"
+#include "socketbase.h"    /* moved here from netutils.h — qsc_socket_exceptions */
+#include "stringutils.h"
+#include <stdlib.h>
+
+#if defined(QSC_DEBUG_MODE)
+#   include "consoleutils.h"
 #endif
-#	if !defined(AF_LINK)
-#		define AF_LINK AF_PACKET
-#	endif
+
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+#   define NETUTILS_WSA_STARTUP_SEQUENCE 0x0202
+#   define NETUTILS_INET_PTON_SUCCESS 1
+#   include "arrayutils.h"
+#   include <winsock2.h>           /* WSAStartup, WSACleanup, WSADATA — must come first */
+#   include <ws2tcpip.h>           /* getaddrinfo, freeaddrinfo, getnameinfo, inet_ntop, inet_pton */
+#   include <ws2ipdef.h>           /* supplemental ws2 types */
+#   include <iphlpapi.h>           /* GetAdaptersInfo, GetAdaptersAddresses, IP_ADAPTER_* */
+#   include <sysinfoapi.h>         /* GetComputerNameEx, ComputerNameDnsDomain */
+#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#       pragma comment(lib, "iphlpapi.lib")
+#       pragma comment(lib, "ws2_32.lib")
+#   endif
+#else
+#   include <arpa/inet.h>          /* inet_ntop, inet_pton, htons, ntohs */
+#   include <errno.h>              /* errno */
+#   include <ifaddrs.h>            /* getifaddrs, freeifaddrs, struct ifaddrs */
+#   include <net/if.h>             /* IFF_LOOPBACK, IFF_BROADCAST */
+#   include <netdb.h>              /* getaddrinfo, freeaddrinfo, getnameinfo, getservbyname, NI_* */
+#   include <netinet/in.h>         /* struct sockaddr_in, sockaddr_in6, IPPROTO_* */
+#   include <stdio.h>              /* printf, perror */
+#   include <string.h>             /* strchr, strlen */
+#   include <sys/socket.h>         /* struct sockaddr, getpeername, getsockname */
+#   include <sys/types.h>          /* socklen_t, ssize_t */
+#   include <unistd.h>             /* gethostname, close */
+#   if defined(QSC_SYSTEM_OS_LINUX)
+#       include <netpacket/packet.h>    /* struct sockaddr_ll, AF_PACKET */
+#       if !defined(AF_LINK)
+#           define AF_LINK AF_PACKET
+#       endif
+#   elif defined(QSC_SYSTEM_OS_MAC)  || \
+         defined(QSC_SYSTEM_OS_BSD)  || \
+         defined(QSC_SYSTEM_OS_FREEBSD) || \
+         defined(QSC_SYSTEM_OS_OPENBSD) || \
+         defined(QSC_SYSTEM_OS_NETBSD)
+#       include <net/if_dl.h>          /* struct sockaddr_dl, LLADDR */
+#   endif
 #endif
 
 static void netutils_format_mac(char macout[18U], const uint8_t macin[6U])

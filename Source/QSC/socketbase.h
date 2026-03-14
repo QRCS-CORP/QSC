@@ -81,37 +81,9 @@ QSC_CPLUSPLUS_ENABLED_START
 QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#	include <WinSock2.h>
-#	include <WS2tcpip.h>
-#	include <ws2def.h>
-#	include <objbase.h>
-#	include <inaddr.h>
-#	include <iphlpapi.h>
-#   if defined(QSC_SYSTEM_COMPILER_MSC)
-#	    pragma comment(lib, "iphlpapi.lib")
-#	    pragma comment(lib, "ws2_32.lib")
-#   endif
+#   include <WinSock2.h>
 #elif defined(QSC_SYSTEM_OS_POSIX)
-#	include <errno.h>
-#	include <netdb.h>
-#	include <ifaddrs.h>
-#	include <netinet/in.h>
-#	include <arpa/inet.h>
-#	include <sys/select.h>
-#	include <sys/socket.h>
-#	include <string.h>
-#	include <sys/types.h>
-#	include <sys/un.h>
-#	include <unistd.h>
-#	if defined(QSC_SYSTEM_OS_LINUX)
-#		include <netpacket/packet.h>
-#	elif defined(QSC_SYSTEM_OS_MAC)
-#		include <net/if_dl.h>
-#		include <netinet/in.h>
-#		if !defined(AF_PACKET)
-#			define AF_PACKET PF_INET
-#		endif
-#	endif
+#   include <sys/select.h>
 #endif
 
 ///*!
