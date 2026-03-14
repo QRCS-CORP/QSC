@@ -134,7 +134,7 @@ The wrapper is written in managed C++ and compiled as a mixed-mode assembly, all
 | **SLH-DSA** (SPHINCS+) | Stateless hash-based signatures | NIST FIPS-205 |
 | **Falcon** | NTRU lattice-based compact signatures | NIST PQC Round 3 |
 | **ECDSA** (P-256 / secp256r1) | Elliptic curve signatures over NIST P-256; RFC 6979 deterministic nonce; interoperable with TLS 1.2/1.3 and public CA certificates | FIPS 186-4, RFC 6979, RFC 8422 |
-| **Ed25519** | Edwards-curve digital signatures | RFC 8032 |
+| **EDDSA** | Edwards-curve digital signatures | RFC 8032 |
 
 ---
 
@@ -418,8 +418,8 @@ The default project configuration uses minimal flags with no enhanced instructio
 ## Roadmap
 
 - [ ] Continued ASM and SIMD integration and optimization
-- [ ] Extended X.509 signature algorithm bindings (Ed25519, ML-DSA)
-- [ ] Java wrapper library
+- [ ] Extended X.509 signature algorithm bindings
+- [ ] TLS 1.3
 - [ ] Expanded benchmarking framework with cross-platform performance reporting
 - [ ] Integration of emerging post-quantum research and forthcoming NIST standards
 
