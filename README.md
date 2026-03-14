@@ -27,19 +27,6 @@
 | [QSC Integration Guide](https://qrcs-corp.github.io/QSC/pdf/qsc_integration.pdf) | Practical guide for embedding QSC into your project |
 | [QSC Target Industries](https://qrcs-corp.github.io/QSC/pdf/qsc_library_for_critical_domains.pdf) | Application domains and deployment context |
 
-### Proprietary Component Specifications
-
-Each proprietary construction in QSC is accompanied by a full technical specification and an independent formal security analysis.
-
-| Component | Description | Specification | Formal Analysis |
-|---|---|---|---|
-| **CSX** | ChaCha-based authenticated AEAD stream cipher; 512-bit keys, 64-bit integers, KMAC/QMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/csx_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/csx_formal.pdf) |
-| **QMAC** | Wide-block GF(2²⁵⁶) polynomial MAC function | [Specification](https://qrcs-corp.github.io/QSC/pdf/qmac_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/qmac_formal.pdf) |
-| **RCS** | Rijndael-based authenticated AEAD stream cipher with KMAC/QMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/rcs_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/rcs_formal.pdf) |
-| **SCB** | SHAKE Cost-Based KDF; memory-hard passphrase derivation with configurable CPU and memory cost | [Specification](https://qrcs-corp.github.io/QSC/pdf/scb_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/scb_formal.pdf) |
-
----
-
 ## Overview
 
 QSC is a production-grade cryptographic library built for environments that demand verifiable correctness, long-term quantum resistance, and high throughput. The library combines NIST-standardized post-quantum algorithms with classical primitives, proprietary high-security constructions, and SIMD-accelerated implementations — all within a single, dependency-free C23 codebase.
@@ -226,6 +213,19 @@ The X.509 layer is intentionally split so that the structural and policy checks 
 | **ACP** (`acp.h`) | Auto Entropy Collection Provider; aggregates multiple entropy sources |
 | **CSP** (`csp.h`) | OS-native cryptographic entropy provider |
 | **RDP** (`rdp.h`) | Hardware entropy via RDRAND/RDSEED |
+
+---
+
+### Proprietary Component Specifications
+
+Each proprietary construction in QSC is accompanied by a full technical specification and an independent formal security analysis.
+
+| Component | Description | Specification | Formal Analysis |
+|---|---|---|---|
+| **CSX** | ChaCha-based authenticated AEAD stream cipher; 512-bit keys, 64-bit integers, KMAC/QMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/csx_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/csx_formal.pdf) |
+| **QMAC** | Wide-block GF(2²⁵⁶) polynomial MAC function | [Specification](https://qrcs-corp.github.io/QSC/pdf/qmac_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/qmac_formal.pdf) |
+| **RCS** | Rijndael-based authenticated AEAD stream cipher with KMAC/QMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/rcs_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/rcs_formal.pdf) |
+| **SCB** | SHAKE Cost-Based KDF; memory-hard passphrase derivation with configurable CPU and memory cost | [Specification](https://qrcs-corp.github.io/QSC/pdf/scb_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/scb_formal.pdf) |
 
 ---
 
