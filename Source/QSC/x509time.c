@@ -250,7 +250,7 @@ int32_t qsc_x509_time_compare(const qsc_x509_time* a, const qsc_x509_time* b)
 bool qsc_x509_validity_is_valid(const qsc_x509_validity* validity, const qsc_x509_time* tnow)
 {
     QSC_ASSERT(validity != NULL);
-    QSC_ASSERT(now != NULL);
+    QSC_ASSERT(tnow != NULL);
 
     bool res;
 
