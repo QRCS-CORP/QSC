@@ -13,7 +13,7 @@ project(
 # ─── Options ──────────────────────────────────────────────────────────────────
 option(BUILD_SHARED_LIBS      "Build shared instead of static library" OFF)
 option(QSC_ENABLE_TESTS       "Enable unit tests if tests/ exists"     OFF)
-#option(QSC_STRICT_WARNINGS    "Turn on pedantic compiler warnings"     ON)
+option(QSC_STRICT_WARNINGS    "Turn on pedantic compiler warnings"     ON)
 
 # ─── Build-type default ──────────────────────────────────────────────────────
 if(NOT CMAKE_BUILD_TYPE)

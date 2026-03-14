@@ -736,6 +736,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
+ * \def QSC_SYSTEM_MAX_NAME
+ * \brief The maximum system name length supported by the system.
+ */
+#define QSC_SYSTEM_MAX_NAME 260ULL
+
+/*!
  * \def QSC_SYSTEM_MAX_PATH
  * \brief The maximum path length supported by the system.
  */

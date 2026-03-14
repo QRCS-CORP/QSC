@@ -444,9 +444,9 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 #if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
 
 	DWORD blen;
-	TCHAR dbuf[QSC_SYSTEM_MAX_PATH + 1U] = { 0U };
+	TCHAR dbuf[QSC_SYSTEM_MAX_NAME + 1U] = { 0U };
 
-	blen = QSC_SYSTEM_MAX_PATH + 1U;
+	blen = QSC_SYSTEM_MAX_NAME + 1U;
 	GetComputerNameEx(ComputerNameDnsDomain, dbuf, &blen);
 
 	if (blen != 0U)
@@ -455,7 +455,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 	}
 	else
 	{
-		blen = QSC_SYSTEM_MAX_PATH + 1U;
+		blen = QSC_SYSTEM_MAX_NAME + 1U;
 		GetComputerNameEx(ComputerNameNetBIOS, dbuf, &blen);
 		qsc_memutils_copy(output, dbuf, blen);
 	}
@@ -464,7 +464,7 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 
 #else
 
-	char hn[QSC_NETUTILS_HOST_NAME_SIZE + 1U] = { 0 };
+	char hn[QSC_SYSTEM_MAX_NAME + 1U] = { 0 };
 	struct addrinfo hints = { 0 };
 	struct addrinfo* res = NULL;
 	size_t dlen;
