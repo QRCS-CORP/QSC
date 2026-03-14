@@ -22,6 +22,7 @@
 #   include <netdb.h>
 #   include <netinet/in.h>
 #   include <sys/socket.h>
+#   include <net/if.h >
 #	include <net/if_dl.h>
 #	include <netinet/in.h>
 #	include <sys/socket.h>
@@ -33,6 +34,7 @@
 #	include <sys/types.h>
 #   include <ifaddrs.h>
 #   include <arpa/inet.h>
+#   include <net/if.h >
 #   include <netinet/in.h>
 #   include <sys/socket.h>
 #if defined(QSC_SYSTEM_OS_LINUX)
@@ -462,14 +464,17 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 
 #else
 
+	char hn[QSC_NETUTILS_HOST_NAME_SIZE + 1U] = { 0 };
 	struct addrinfo hints = { 0 };
 	struct addrinfo* res = NULL;
 	size_t dlen;
 
+	dlen = 0U;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_flags = AI_CANONNAME;
 
-	if (getaddrinfo(hn, NULL, &hints, &res) == 0 && res != NULL)
+	if (gethostname(hn, sizeof(hn)) == 0 &&
+		getaddrinfo(hn, NULL, &hints, &res) == 0 && res != NULL)
 	{
 		if (res->ai_canonname != NULL)
 		{
@@ -477,14 +482,19 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 
 			if (dot != NULL)
 			{
-				size_t dlen = strlen(dot);
+				dlen = strlen(dot + 1U);    /* skip the leading '.' */
 
 				if (dlen < QSC_NETUTILS_DOMAIN_NAME_SIZE)
 				{
-					qsc_memutils_copy(output, dot, dlen);
+					qsc_memutils_copy(output, dot + 1U, dlen);
+				}
+				else
+				{
+					dlen = 0U;
 				}
 			}
 		}
+
 		freeaddrinfo(res);
 	}
 
