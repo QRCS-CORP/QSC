@@ -170,12 +170,13 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 		char tbuf[QSC_TIMESTAMP_STRING_SIZE] = { 0U };
 		struct tm* nt;
+		struct tm tmbuf;
 		time_t lt;
 		size_t len;
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 		time(&lt);
-		nt = localtime_r(&lt);
+		nt = localtime_r(&lt, &tmbuf);
 
 		if (nt != NULL)
 		{
@@ -221,10 +222,11 @@ void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 		time_t lt;
 		struct tm* nt;
+		struct tm tmbuf;
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 		lt = time(NULL);
-		nt = localtime_r(&lt);
+		nt = localtime_r(&lt, &tmbuf);
 
 		if (nt != NULL)
 		{
@@ -267,13 +269,14 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 #else
 
 		struct tm* nt;
+		struct tm tmbuf;
 		time_t lt;
 		char buf[QSC_TIMESTAMP_STRING_SIZE] = { 0 };
 		size_t len;
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 		time(&lt);
-		nt = localtime_r(&lt);
+		nt = localtime_r(&lt, &tmbuf);
 
 		if (nt != NULL)
 		{
@@ -416,11 +419,12 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 #else
 
 		struct tm* nt;
+		struct tm tmbuf;
 		time_t lt;
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 		lt = (time_t)dtsec;
-		nt = localtime_r(&lt);
+		nt = localtime_r(&lt, &tmbuf);
 
 		if (nt != NULL)
 		{

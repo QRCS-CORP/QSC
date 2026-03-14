@@ -29,7 +29,7 @@
 #	include <mach/mach_time.h>
 #	include <sys/sysctl.h>
 #	include <time.h>
-
+#	include <pthread.h>
 static pthread_once_t qsc_tc_once = PTHREAD_ONCE_INIT;
 static double qsc_tc_ratio = 1.0;
 
