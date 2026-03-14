@@ -22,7 +22,7 @@
 #   include <netdb.h>
 #   include <netinet/in.h>
 #   include <sys/socket.h>
-#   include <net/if.h >
+#   include <net/if.h>
 #	include <net/if_dl.h>
 #	include <netinet/in.h>
 #	include <sys/socket.h>
@@ -34,7 +34,7 @@
 #	include <sys/types.h>
 #   include <ifaddrs.h>
 #   include <arpa/inet.h>
-#   include <net/if.h >
+#   include <net/if.h>
 #   include <netinet/in.h>
 #   include <sys/socket.h>
 #if defined(QSC_SYSTEM_OS_LINUX)
