@@ -136,21 +136,6 @@ The wrapper is written in managed C++ and compiled as a mixed-mode assembly, all
 | **ECDSA** (P-256 / secp256r1) | Elliptic curve signatures over NIST P-256; RFC 6979 deterministic nonce; interoperable with TLS 1.2/1.3 and public CA certificates | FIPS 186-4, RFC 6979, RFC 8422 |
 | **Ed25519** | Edwards-curve digital signatures | RFC 8032 |
 
-**Falcon parameter sets:**
-
-| Parameter Set | Security Level | Public Key | Private Key | Signature |
-|---|---|---|---|---|
-| `QSC_FALCON_S3SHAKE256F512` | NIST Level 1 | 897 bytes | 1281 bytes | 658 bytes |
-| `QSC_FALCON_S5SHAKE256F1024` | NIST Level 5 | 1793 bytes | 2305 bytes | 1276 bytes |
-
-**ECDSA P-256 key and signature sizes:**
-
-| Element | Size | Encoding |
-|---|---|---|
-| Public key | 64 bytes | Uncompressed point (Qx‖Qy), big-endian; no 0x04 prefix |
-| Private key | 96 bytes | seed[32] ‖ Qx[32] ‖ Qy[32] |
-| Signature | 64 bytes | (r[32] ‖ s[32]), prepended to the signed message |
-
 ---
 
 ### X.509 Certificate Infrastructure
