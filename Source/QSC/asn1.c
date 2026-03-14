@@ -263,7 +263,7 @@ const qsc_encoding_ber_element* qsc_asn1_get_child(const qsc_encoding_ber_elemen
 {
     QSC_ASSERT(element != NULL);
 
-    qsc_encoding_ber_element* elem;
+    const qsc_encoding_ber_element* elem;
 
     if (element != NULL)
     {

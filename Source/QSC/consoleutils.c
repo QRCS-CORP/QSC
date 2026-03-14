@@ -24,17 +24,15 @@
 #if !defined(QSC_SYSTEM_OS_WINDOWS)
 static char getch(void)
 {
-    char buf = 0U;
-	struct termios;
-	struct oldt;
-	struct newt;
+	char buf = 0U;
+	struct termios oldt;
+	struct termios newt;
 
-    fflush(stdout);
+	fflush(stdout);
 
 	if (tcgetattr(STDIN_FILENO, &oldt) == 0)
 	{
 		newt = oldt;
-
 		newt.c_lflag &= ~ICANON;
 		newt.c_lflag &= ~ECHO;
 		newt.c_cc[VMIN] = 1;
@@ -57,8 +55,8 @@ static char getch(void)
 		}
 	}
 
-    return buf;
- }
+	return buf;
+}
 #endif
 
 void qsc_consoleutils_colored_message(const char* message, qsc_console_font_color color)

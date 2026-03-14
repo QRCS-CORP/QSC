@@ -17,7 +17,7 @@ static void acp_add_computer_name(qsc_keccak_state* kstate)
 
 	if (nlen > 0U)
 	{
-		qsc_sha3_update(kstate, qsc_keccak_rate_512, snm, nlen);
+		qsc_sha3_update(kstate, qsc_keccak_rate_512, (const uint8_t*)snm, nlen);
 		qsc_memutils_secure_erase(snm, nlen);
 	}
 }
@@ -87,7 +87,7 @@ static void acp_add_user_name(qsc_keccak_state* kstate)
 
 	if (nlen > 0U)
 	{
-		qsc_sha3_update(kstate, qsc_keccak_rate_512, snm, nlen);
+		qsc_sha3_update(kstate, qsc_keccak_rate_512, (const uint8_t*)snm, nlen);
 		qsc_memutils_secure_erase(snm, nlen);
 	}
 }
