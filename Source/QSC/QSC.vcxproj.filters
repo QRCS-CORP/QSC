@@ -97,18 +97,6 @@
     <Filter Include="Source Files\Asymmetric\Signature\Dilithium">
       <UniqueIdentifier>{885cbb17-54ee-4ee3-be72-3ff6ee8e99c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Asymmetric\Signature\ECDSA">
-      <UniqueIdentifier>{b2a24831-fbfb-48f2-9c5c-7fb5b1e53cb0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Asymmetric\Cipher\ECDH">
-      <UniqueIdentifier>{d52c8221-1bac-4e19-b5db-907a6353e61d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Cipher\ECDH">
-      <UniqueIdentifier>{61088951-c807-402d-a573-b05d086315f0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Signature\ECDSA">
-      <UniqueIdentifier>{947c204e-b1b1-43d0-8ef7-8b16f89b8e29}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Numerics">
       <UniqueIdentifier>{39b6b9b7-c246-412e-b70c-df1ddc48cb8b}</UniqueIdentifier>
     </Filter>
@@ -130,29 +118,17 @@
     <Filter Include="Source Files\Asymmetric\Signature\Dilithium\Support">
       <UniqueIdentifier>{8e3a3902-f3c4-4811-9869-d1613fe7f367}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Asymmetric\Cipher\ECDH\Support">
-      <UniqueIdentifier>{3fd8f977-27d4-4c47-a80b-2d3e548735cd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Asymmetric\Cipher\McEliece\Support">
       <UniqueIdentifier>{ec6da9b6-ca0b-45b0-94b7-a36d431e8c00}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Asymmetric\Signature\ECDSA\Support">
-      <UniqueIdentifier>{97e23e08-e303-424d-8a8e-d561a1be9853}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Asymmetric\Signature\SphincsPlus\Support">
       <UniqueIdentifier>{d82e819d-24e0-47bd-ab23-098c060cfb85}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Cipher\ECDH\Support">
-      <UniqueIdentifier>{65d9cf53-ed33-4e31-93bd-474351452446}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Asymmetric\Cipher\Kyber\Support">
       <UniqueIdentifier>{21942bba-ac1d-4f15-b24f-ad9d1aeb2e86}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Asymmetric\Cipher\McEliece\Support">
       <UniqueIdentifier>{97233bab-3642-491e-8fa6-32c616641938}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asymmetric\Signature\ECDSA\Support">
-      <UniqueIdentifier>{026ca531-7993-4d59-917b-6da4c4f1e4c8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Asymmetric\Signature\SphincsPlus\Support">
       <UniqueIdentifier>{6a29f59c-2a8c-483a-957c-5cd73a8227f1}</UniqueIdentifier>
@@ -162,6 +138,72 @@
     </Filter>
     <Filter Include="Source Files\MAC">
       <UniqueIdentifier>{940646ef-a66b-4a4e-8a89-8f30ab963662}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\X.509">
+      <UniqueIdentifier>{51c50189-7830-4218-9274-f1e0506bfca6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\X.509">
+      <UniqueIdentifier>{0fd12ce8-ac28-464e-9e06-37e37b3d2474}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\HQC">
+      <UniqueIdentifier>{befa4e8f-3205-4fc9-bc41-781461c08e39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\HQC\Support">
+      <UniqueIdentifier>{720135a8-302a-4e85-9f51-b64af10cf655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\Falcon">
+      <UniqueIdentifier>{48e725de-fb2c-44cf-85c6-9852fa3e24f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\Falcon\Support">
+      <UniqueIdentifier>{8ab71321-4b79-4e64-9960-e27dc092386a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\HQC">
+      <UniqueIdentifier>{cab46abd-4915-4bf5-a6d7-45e9b9a13f50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\HQC\Support">
+      <UniqueIdentifier>{3a02fa20-6c8c-4fbe-bf95-8977713bf4ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\Falcon">
+      <UniqueIdentifier>{a60e1af1-2079-453c-bc7d-d0a29379f9a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\Falcon\Support">
+      <UniqueIdentifier>{274b0c6c-9bbc-4cd1-a4eb-6006c275ca33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\EDDSA">
+      <UniqueIdentifier>{b2a24831-fbfb-48f2-9c5c-7fb5b1e53cb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\EDDSA\Support">
+      <UniqueIdentifier>{97e23e08-e303-424d-8a8e-d561a1be9853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\EDDSA">
+      <UniqueIdentifier>{947c204e-b1b1-43d0-8ef7-8b16f89b8e29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\EDDSA\Support">
+      <UniqueIdentifier>{026ca531-7993-4d59-917b-6da4c4f1e4c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\EDDH">
+      <UniqueIdentifier>{61088951-c807-402d-a573-b05d086315f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\EDDH\Support">
+      <UniqueIdentifier>{65d9cf53-ed33-4e31-93bd-474351452446}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\EDDH">
+      <UniqueIdentifier>{d52c8221-1bac-4e19-b5db-907a6353e61d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\EDDH\Support">
+      <UniqueIdentifier>{3fd8f977-27d4-4c47-a80b-2d3e548735cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\ECDSA">
+      <UniqueIdentifier>{a322c5a6-6f28-430c-9c2d-d59d0fdb4646}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Signature\ECDSA\Support">
+      <UniqueIdentifier>{7aecd3e4-0022-4bd7-921a-3e95e9ad7bf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\ECDSA">
+      <UniqueIdentifier>{eccdfdbb-1444-4c18-949b-65e904aff640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Signature\ECDSA\Support">
+      <UniqueIdentifier>{28bbf3f1-9f92-45ce-8883-b5c479023ef3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -222,11 +264,11 @@
     <ClInclude Include="chacha.h">
       <Filter>Header Files\Cipher</Filter>
     </ClInclude>
-    <ClInclude Include="ecdsa.h">
-      <Filter>Header Files\Asymmetric\Signature\ECDSA</Filter>
+    <ClInclude Include="eddsa.h">
+      <Filter>Header Files\Asymmetric\Signature\EDDSA</Filter>
     </ClInclude>
-    <ClInclude Include="ecdh.h">
-      <Filter>Header Files\Asymmetric\Cipher\ECDH</Filter>
+    <ClInclude Include="eddh.h">
+      <Filter>Header Files\Asymmetric\Cipher\EDDH</Filter>
     </ClInclude>
     <ClInclude Include="hcg.h">
       <Filter>Header Files\DRBG</Filter>
@@ -315,11 +357,11 @@
     <ClInclude Include="dilithiumbase.h">
       <Filter>Header Files\Asymmetric\Signature\Dilithium\Support</Filter>
     </ClInclude>
-    <ClInclude Include="ec25519.h">
-      <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    <ClInclude Include="ed25519.h">
+      <Filter>Header Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClInclude>
-    <ClInclude Include="ecdhbase.h">
-      <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    <ClInclude Include="eddhbase.h">
+      <Filter>Header Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClInclude>
     <ClInclude Include="mceliecebase.h">
       <Filter>Header Files\Asymmetric\Cipher\McEliece\Support</Filter>
@@ -327,8 +369,8 @@
     <ClInclude Include="mceliecebase_avx2.h">
       <Filter>Header Files\Asymmetric\Cipher\McEliece\Support</Filter>
     </ClInclude>
-    <ClInclude Include="ecdsabase.h">
-      <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    <ClInclude Include="eddsabase.h">
+      <Filter>Header Files\Asymmetric\Signature\EDDSA\Support</Filter>
     </ClInclude>
     <ClInclude Include="sphincsplusbase_avx2.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
@@ -359,6 +401,54 @@
     </ClInclude>
     <ClInclude Include="qmac.h">
       <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="asn1.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="oid.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509types.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509name.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509cert.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509ext.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509sig.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509spki.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509time.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509verify.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsa.h">
+      <Filter>Header Files\Asymmetric\Signature\ECDSA</Filter>
+    </ClInclude>
+    <ClInclude Include="x509sigver.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="falcon.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon</Filter>
+    </ClInclude>
+    <ClInclude Include="falconbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="falconbase.h">
+      <Filter>Header Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsap256base.h">
+      <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -413,11 +503,11 @@
     <ClCompile Include="chacha.c">
       <Filter>Source Files\Cipher</Filter>
     </ClCompile>
-    <ClCompile Include="ecdh.c">
-      <Filter>Source Files\Asymmetric\Cipher\ECDH</Filter>
+    <ClCompile Include="eddh.c">
+      <Filter>Source Files\Asymmetric\Cipher\EDDH</Filter>
     </ClCompile>
-    <ClCompile Include="ecdsa.c">
-      <Filter>Source Files\Asymmetric\Signature\ECDSA</Filter>
+    <ClCompile Include="eddsa.c">
+      <Filter>Source Files\Asymmetric\Signature\EDDSA</Filter>
     </ClCompile>
     <ClCompile Include="hcg.c">
       <Filter>Source Files\DRBG</Filter>
@@ -497,11 +587,11 @@
     <ClCompile Include="dilithiumbase.c">
       <Filter>Source Files\Asymmetric\Signature\Dilithium\Support</Filter>
     </ClCompile>
-    <ClCompile Include="ec25519.c">
-      <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    <ClCompile Include="ed25519.c">
+      <Filter>Source Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClCompile>
-    <ClCompile Include="ecdhbase.c">
-      <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    <ClCompile Include="eddhbase.c">
+      <Filter>Source Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClCompile>
     <ClCompile Include="kyberbase.c">
       <Filter>Source Files\Asymmetric\Cipher\Kyber\Support</Filter>
@@ -515,8 +605,8 @@
     <ClCompile Include="mceliecebase_avx2.c">
       <Filter>Source Files\Asymmetric\Cipher\McEliece\Support</Filter>
     </ClCompile>
-    <ClCompile Include="ecdsabase.c">
-      <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    <ClCompile Include="eddsabase.c">
+      <Filter>Source Files\Asymmetric\Signature\EDDSA\Support</Filter>
     </ClCompile>
     <ClCompile Include="sphincsplusbase_avx2.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
@@ -544,6 +634,51 @@
     </ClCompile>
     <ClCompile Include="qmac.c">
       <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="oid.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509name.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509cert.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509ext.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509sig.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509spki.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509time.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509verify.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa.c">
+      <Filter>Source Files\Asymmetric\Signature\ECDSA</Filter>
+    </ClCompile>
+    <ClCompile Include="x509sigver.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="falcon.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon</Filter>
+    </ClCompile>
+    <ClCompile Include="falconbase.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="falconbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Signature\Falcon\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsap256base.c">
+      <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -113,7 +113,7 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 typedef struct
 {
 	qsc_thread tpool[QSC_THREADPOOL_THREADS_MAX];	/*!< The thread pool */
-	size_t tcount;									/*!< The thread count */
+	volatile int32_t tcount;						/*!< The thread count */
 } qsc_threadpool_state;
 
 /**
@@ -126,11 +126,11 @@ typedef struct
 QSC_EXPORT_API bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), void* state);
 
 /**
-* \brief Clear all tasks from the thread-pool
+* \brief Clear all tasks from the thread-pool and dispose of the state
 *
 * \param ctx:	[qsc_threadpool_state*] The thread pool state
 */
-QSC_EXPORT_API void qsc_threadpool_clear(qsc_threadpool_state* ctx);
+QSC_EXPORT_API void qsc_threadpool_destroy(qsc_threadpool_state* ctx);
 
 /**
 * \brief Initialize the thread-pool

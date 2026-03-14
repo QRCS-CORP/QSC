@@ -86,24 +86,27 @@ void qsc_transpose_string_to_scalar(uint32_t* output, const char* input, size_t 
 
 	if (output != NULL && input != NULL && length != 0U && strn > 0U)
 	{
-		len = 4U * length;
-		tmp = (uint8_t*)qsc_memutils_malloc(len);
-
-		if (tmp != NULL)
+		if (length < (SIZE_MAX / 4U))
 		{
-			size_t expected = len * 2U;
+			len = 4U * length;
+			tmp = (uint8_t*)qsc_memutils_malloc(len);
 
-			pad = (expected > strn) ? (expected - strn) : 0U;
-			qsc_memutils_clear(tmp, pad / 2U);
+			if (tmp != NULL)
+			{
+				size_t expected = len * 2U;
 
-			qsc_transpose_hex_to_bin(tmp + (pad / 2U),
-				input + ((strn > (len * 2U)) ? (strn - (len * 2U)) : 0U),
-				((strn > (len * 2U)) ? (len * 2U) : strn) / 2U);
+				pad = (expected > strn) ? (expected - strn) : 0U;
+				qsc_memutils_clear(tmp, pad / 2U);
 
-			qsc_transpose_bytes_to_native(output, tmp, len);
+				qsc_transpose_hex_to_bin(tmp + (pad / 2U),
+					input + ((strn > (len * 2U)) ? (strn - (len * 2U)) : 0U),
+					((strn > (len * 2U)) ? (len * 2U) : strn) / 2U);
 
-			qsc_memutils_alloc_free(tmp);
-			tmp = NULL;
+				qsc_transpose_bytes_to_native(output, tmp, len);
+
+				qsc_memutils_alloc_free(tmp);
+				tmp = NULL;
+			}
 		}
 	}
 }

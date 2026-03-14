@@ -1,8 +1,8 @@
-#include "ecdh.h"
-#include "ecdhbase.h"
+#include "eddh.h"
+#include "eddhbase.h"
 #include "memutils.h"
 
-bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey)
+bool qsc_eddh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey)
 {
 	QSC_ASSERT(secret != NULL);
 	QSC_ASSERT(privatekey != NULL);
@@ -20,13 +20,13 @@ bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uin
 	return res;
 }
 
-bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
+bool qsc_eddh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	QSC_ASSERT(privatekey != NULL);
 	QSC_ASSERT(publickey != NULL);
 	QSC_ASSERT(rng_generate != NULL);
 
-	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0U };
+	uint8_t seed[QSC_EDDH_SEED_SIZE] = { 0U };
 	bool res;
 
 	res = false;
@@ -36,7 +36,7 @@ bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 		if (rng_generate(seed, sizeof(seed)))
 		{
 			qsc_x25519_generate_keypair(publickey, privatekey, seed);
-			qsc_memutils_secure_erase(seed, QSC_ECDH_SEED_SIZE);
+			qsc_memutils_secure_erase(seed, QSC_EDDH_SEED_SIZE);
 			res = true;
 		}
 	}
@@ -44,7 +44,7 @@ bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 	return res;
 }
 
-void qsc_x25519_public_from_private(uint8_t* publickey, const uint8_t* privatekey)
+void qsc_eddh_public_from_private(uint8_t* publickey, const uint8_t* privatekey)
 {
 	QSC_ASSERT(publickey != NULL);
 	QSC_ASSERT(privatekey != NULL);
@@ -57,7 +57,7 @@ void qsc_x25519_public_from_private(uint8_t* publickey, const uint8_t* privateke
 	}
 }
 
-bool qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
+bool qsc_eddh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
 	QSC_ASSERT(privatekey != NULL);
 	QSC_ASSERT(publickey != NULL);

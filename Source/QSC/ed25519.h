@@ -49,10 +49,12 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSC_EC25519_H
-#define QSC_EC25519_H
+#ifndef QSC_ED25519_H
+#define QSC_ED25519_H
 
 #include "qsccommon.h"
+
+ /* \cond NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -89,34 +91,34 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /*!
-\def EC25519_SEED_SIZE
+\def ED25519_SEED_SIZE
 * \brief The ecc seed cize
 */
-#define EC25519_SEED_SIZE 32U
+#define ED25519_SEED_SIZE 32U
 
 /*!
-\def EC25519_SIGNATURE_SIZE
+\def ED25519_SIGNATURE_SIZE
 * \brief The ecc signature size
 */
-#define EC25519_SIGNATURE_SIZE 64U
+#define ED25519_SIGNATURE_SIZE 64U
 
 /*!
-\def EC25519_PUBLICKEY_SIZE
+\def ED25519_PUBLICKEY_SIZE
 * \brief The ecc public key size
 */
-#define EC25519_PUBLICKEY_SIZE 32U
+#define ED25519_PUBLICKEY_SIZE 32U
 
 /*!
-\def EC25519_PRIVATEKEY_SIZE
+\def ED25519_PRIVATEKEY_SIZE
 * \brief The ecc private key size
 */
-#define EC25519_PRIVATEKEY_SIZE 64U
+#define ED25519_PRIVATEKEY_SIZE 64U
 
 /*!
-\def EC25519_CURVE_SIZE
+\def ED25519_CURVE_SIZE
 * \brief The ecc curve size
 */
-#define EC25519_CURVE_SIZE 32U
+#define ED25519_CURVE_SIZE 32U
 
 /*!
 \typedef qsc_fe25519
@@ -603,6 +605,8 @@ void qsc_sc25519_reduce(uint8_t s[64U]);
 int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n);
 
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond NO_DOCUMENT */
 
 #endif
 

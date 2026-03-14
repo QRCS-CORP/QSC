@@ -49,8 +49,8 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSCTEST_ECDH_TEST_H
-#define QSCTEST_ECDH_TEST_H
+#ifndef QSCTEST_EDDH_TEST_H
+#define QSCTEST_EDDH_TEST_H
 
 #include "qsctestcommon.h"
 
@@ -76,12 +76,12 @@
  */
 
 /**
- * \def QSCTEST_ECDH_ITERATIONS
+ * \def QSCTEST_EDDH_ITERATIONS
  * \brief The number of iterations for the ECDH stress test.
  *
  * This macro defines the number of iterations (100) to execute during the ECDH stress test.
  */
-#define QSCTEST_ECDH_ITERATIONS 100
+#define QSCTEST_EDDH_ITERATIONS 100
 
 /**
  * \brief Performs the ECDH Known Answer Test (KAT).
@@ -94,13 +94,13 @@
  *
  * \return Returns true if the generated keys and shared secret match the expected values.
  */
-bool qsctest_ecdh_kat_test(void);
+bool qsctest_eddh_kat_test(void);
 
 /**
  * \brief Performs a stress test on ECDH operations.
  *
  * \details
- * This function repeatedly (QSCTEST_ECDH_ITERATIONS times) executes the following steps:
+ * This function repeatedly (QSCTEST_EDDH_ITERATIONS times) executes the following steps:
  * - Generates key pairs for two parties.
  * - Derives the shared secret from each party's perspective using the corresponding private key and the other
  *   party's public key.
@@ -108,7 +108,7 @@ bool qsctest_ecdh_kat_test(void);
  *
  * \return Returns true if all key exchange operations are successful in every iteration.
  */
-bool qsctest_ecdh_operations_test(void);
+bool qsctest_eddh_operations_test(void);
 
 /**
  * \brief Tests the integrity of a mutated secret key in ECDH.
@@ -120,7 +120,7 @@ bool qsctest_ecdh_operations_test(void);
  *
  * \return Returns true if the altered secret key fails to produce the correct shared secret.
  */
-bool qsctest_ecdh_privatekey_integrity(void);
+bool qsctest_eddh_privatekey_integrity(void);
 
 /**
  * \brief Tests the integrity of a mutated public key in ECDH.
@@ -131,7 +131,7 @@ bool qsctest_ecdh_privatekey_integrity(void);
  *
  * \return Returns true if the altered public key fails to produce the correct shared secret.
  */
-bool qsctest_ecdh_publickey_integrity(void);
+bool qsctest_eddh_publickey_integrity(void);
 
 /**
  * \brief Runs all ECDH test functions.
@@ -144,6 +144,6 @@ bool qsctest_ecdh_publickey_integrity(void);
  *
  * The outcome of each test is printed to the console.
  */
-void qsctest_ecdh_run(void);
+void qsctest_eddh_run(void);
 
 #endif

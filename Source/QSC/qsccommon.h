@@ -932,12 +932,30 @@ QSC_CPLUSPLUS_ENABLED_START
 #	    define QSC_SYSTEM_HAS_SSE42
 #   endif
 
-#   if defined(__ARM_NEON__)
+#   if defined(__ARM_NEON) || defined(__ARM_NEON__)
         /*!
         * \def QSC_SYSTEM_HAS_ARM_NEON
         * \brief Defined if the system supports ARM NEON instructions.
         */
 #       define QSC_SYSTEM_HAS_ARM_NEON
+#   endif
+
+        /*!
+        * \def QSC_SYSTEM_HAS_ARM_SVE
+        * \brief Defined if the system supports ARM SVE
+        * ARMv8.2-A and later; GCC/Clang define __ARM_FEATURE_SVE
+        */
+#   if defined(__ARM_FEATURE_SVE)
+#       define QSC_SYSTEM_HAS_ARM_SVE
+#   endif
+
+        /*!
+        * \def QSC_SYSTEM_HAS_RVV
+        * \brief Defined if the system supports RISC-V RVV 1.0
+        * GCC/Clang define __riscv_vector when -march=rv64gcv
+        */
+#   if defined(__riscv_vector)
+#       define QSC_SYSTEM_HAS_RVV
 #   endif
 
 #   if defined(__AVX__)
@@ -1078,6 +1096,14 @@ QSC_CPLUSPLUS_ENABLED_START
 #	endif
 #endif
 
+/*!
+ * \def QSC_SHA2_SHANI_ENABLED
+ * \brief Enables the SHA-NI instruction sets.
+ */
+#if defined(__SHA__) || defined(__SHA256__) || defined(__SHA512__) || defined(__ISA_AVAILABLE_SHA)
+#   define QSC_SHA2_SHANI_ENABLED
+#endif
+
 ///*!
 // * \def QSC_KECCAK_UNROLLED_PERMUTATION
 // * \brief Define to use the unrolled form of the Keccak permutation function.
@@ -1115,13 +1141,13 @@ QSC_CPLUSPLUS_ENABLED_START
 *
 * https://www.rfc-editor.org/rfc/rfc7748
 */
-#define QSC_ECDH_RFC_7748_COMPLIANT
+#define QSC_EDDH_RFC_7748_COMPLIANT
 
 /*!
- * \def QSC_ECDH_S1EC25519
+ * \def QSC_EDDH_S1EC25519
  * \brief Enable the ECDH S1EC25519 parameter set.
  */
-#define QSC_ECDH_S1EC25519
+#define QSC_EDDH_S1EC25519
 
 /*** ML-KEM Kyber ***/
 
@@ -1204,10 +1230,24 @@ QSC_CPLUSPLUS_ENABLED_START
 /*** ECDSA ***/
 
 /*!
- * \def QSC_ECDSA_S1EC25519
+ * \def QSC_EDDSA_S1EC25519
  * \brief Enable the ECDSA S1EC25519 parameter set.
  */
-#define QSC_ECDSA_S1EC25519
+#define QSC_EDDSA_S1EC25519
+
+ /*** Falcon ***/
+
+///*!
+// * \def QSC_FALCON_S3SHAKE256F512
+// * \brief Enable the Falcon S3SHAKE256F512 parameter set.
+// */
+//#define QSC_FALCON_S3SHAKE256F512
+
+/*!
+ * \def QSC_FALCON_S5SHAKE256F1024
+ * \brief Enable the Falcon S5SHAKE256F1024 parameter set.
+ */
+#define QSC_FALCON_S5SHAKE256F1024
 
 /*** SphincsPlus ***/
 

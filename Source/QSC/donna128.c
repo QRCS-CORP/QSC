@@ -32,52 +32,6 @@ static void Mul64x64To128(uint64_t x, uint64_t y, uint64_t* low, uint64_t* high)
 	*low = ((x2 & HWORD_MASK) << HWORD_BITS) + (x3 & HWORD_MASK);
 }
 
-uint128 qsc_donna128_shift_right(const uint128* x, size_t shift)
-{
-	QSC_ASSERT(x != NULL);
-
-	uint128 r = { 0U };
-
-	if (x != NULL)
-	{
-		const uint64_t CARRY = x->high << (64U - shift);
-		r.high = (x->high >> shift);
-		r.low = (x->low >> shift) | CARRY;
-	}
-
-	return r;
-}
-
-uint128 qsc_donna128_shift_left(const uint128* x, size_t shift)
-{
-	QSC_ASSERT(x != NULL);
-
-	uint128 r = { 0U };
-
-	if (x != NULL)
-	{
-		const uint64_t CARRY = x->low >> (64U - shift);
-		r.low = (x->low << shift);
-		r.high = (x->high << shift) | CARRY;
-	}
-
-	return r;
-}
-
-uint64_t qsc_donna128_andl(const uint128* x, uint64_t mask)
-{
-	QSC_ASSERT(x != NULL);
-
-	return x->low & mask;
-}
-
-uint64_t qsc_donna128_andh(const uint128* x, uint64_t mask)
-{
-	QSC_ASSERT(x != NULL);
-
-	return x->high & mask;
-}
-
 uint128 qsc_donna128_add(const uint128* x, const uint128* y)
 {
 	QSC_ASSERT(x != NULL);
@@ -97,6 +51,38 @@ uint128 qsc_donna128_add(const uint128* x, const uint128* y)
 	return r;
 }
 
+uint64_t qsc_donna128_andl(const uint128* x, uint64_t mask)
+{
+	QSC_ASSERT(x != NULL);
+
+	uint64_t res;
+
+	res = 0U;
+
+	if (x != NULL)
+	{
+		res = x->low & mask;
+	}
+
+	return res;
+}
+
+uint64_t qsc_donna128_andh(const uint128* x, uint64_t mask)
+{
+	QSC_ASSERT(x != NULL);
+
+	uint64_t res;
+
+	res = 0U;
+
+	if (x != NULL)
+	{
+		res = x->high & mask;
+	}
+
+	return res;
+}
+
 uint128 qsc_donna128_multiply(const uint128* x, uint64_t Y)
 {
 	QSC_ASSERT(x != NULL);
@@ -112,7 +98,9 @@ uint128 qsc_donna128_multiply(const uint128* x, uint64_t Y)
 
 		Mul64x64To128(x->low, Y, &low, &high);
 		r.low = low;
-		r.high = high;
+
+		/* add the x->high * Y contribution (mod 2^64) */
+		r.high = high + (x->high * Y);
 	}
 
 	return r;
@@ -129,6 +117,82 @@ uint128 qsc_donna128_or(const uint128 * x, const uint128 * y)
 	{
 		r.low = x->low | y->low;
 		r.high = x->high | y->high;
+	}
+
+	return r;
+}
+
+uint128 qsc_donna128_shift_left(const uint128* x, size_t shift)
+{
+	QSC_ASSERT(x != NULL);
+	QSC_ASSERT(shift < 128U);
+
+	uint128 r = { 0U };
+
+	if (x != NULL && shift < 128U)
+	{
+		if (shift == 0U)
+		{
+			r = *x;
+		}
+		else if (shift < 64U)
+		{
+			r.low = x->low << shift;
+			r.high = (x->high << shift) | (x->low >> (64U - shift));  // >> not 
+		}
+		else
+		{
+			r.low = 0U;
+			r.high = x->low << (shift - 64U);
+		}
+	}
+
+	return r;
+}
+
+uint128 qsc_donna128_shift_right(const uint128* x, size_t shift)
+{
+	QSC_ASSERT(x != NULL);
+	QSC_ASSERT(shift < 128U);
+
+	uint128 r = { 0U };
+
+	if (x != NULL && shift < 128U)
+	{
+		if (shift == 0U)
+		{
+			r = *x;
+		}
+		else if (shift < 64U)
+		{
+			r.high = x->high >> shift;
+			r.low = (x->low >> shift) | (x->high << (64U - shift));
+		}
+		else
+		{
+			r.high = 0U;
+			r.low = x->high >> (shift - 64U);
+		}
+	}
+
+	return r;
+}
+
+uint128 qsc_donna128_subtract(const uint128* x, const uint128* y)
+{
+	QSC_ASSERT(x != NULL);
+	QSC_ASSERT(y != NULL);
+
+	uint128 r = { 0U };
+
+	if (x != NULL && y != NULL)
+	{
+		r.low = x->low - y->low;
+
+		/* borrow: if the low subtraction underflowed, the unsigned wrap
+		 * means x->low < y->low.  Propagate one borrow into the high word. */
+		const uint64_t BORROW = (x->low < y->low) ? 1U : 0U;
+		r.high = x->high - y->high - BORROW;
 	}
 
 	return r;

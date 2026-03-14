@@ -1,5 +1,4 @@
 #include "dilithiumbase.h"
-#include "intutils.h"
 #include "memutils.h"
 #include "sha3.h"
 
@@ -903,7 +902,7 @@ static void dilithium_polyz_unpack(dilithium_poly* r, const uint8_t* a)
         r->coeffs[(2U * i) + 1U] = a[(5U * i) + 2U] >> 4;
         r->coeffs[(2U * i) + 1U] |= (uint32_t)a[(5U * i) + 3U] << 4;
         r->coeffs[(2U * i) + 1U] |= (uint32_t)a[(5U * i) + 4U] << 12;
-        r->coeffs[2U * i] &= 0x000FFFFFL;
+        r->coeffs[(2U * i) + 1U] &= 0x000FFFFFL;
 
         r->coeffs[2U * i] = DILITHIUM_GAMMA1 - r->coeffs[2U * i];
         r->coeffs[(2U * i) + 1U] = DILITHIUM_GAMMA1 - r->coeffs[(2U * i) + 1U];
@@ -1700,7 +1699,12 @@ bool qsc_dilithium_ref_sign_signature(uint8_t* sig, size_t* siglen, const uint8_
     /* write signature */
     dilithium_pack_sig(sig, sig, &z, &h);
     *siglen = DILITHIUM_SIGNATURE_SIZE;
+
+    qsc_memutils_secure_erase(&s1, sizeof(s1));
+    qsc_memutils_secure_erase(&s2, sizeof(s2));
+    qsc_memutils_secure_erase(&t0, sizeof(t0));
     qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
+    qsc_keccak_dispose(&kctx);
 
     return res;
 }
@@ -1731,7 +1735,7 @@ bool qsc_dilithium_ref_verify(const uint8_t* sig, size_t siglen, const uint8_t* 
         {
             if (dilithium_polyvecl_chknorm(&z, DILITHIUM_GAMMA1 - DILITHIUM_BETA) == 0)
             {
-                /* Compute CRH(CRH(rho, t1), msg) */
+                /* compute CRH(CRH(rho, t1), msg) */
                 qsc_shake256_compute(mu, DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
 
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
@@ -1766,9 +1770,9 @@ bool qsc_dilithium_ref_verify(const uint8_t* sig, size_t siglen, const uint8_t* 
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, buf, DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
                 qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-                qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, c2, DILITHIUM_SEEDBYTES);
+                qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, c2, DILITHIUM_CTILDEBYTES);
 
-                res = (qsc_intutils_verify(c, c2, DILITHIUM_SEEDBYTES) == 0);
+                res = qsc_memutils_are_equal(c, c2, DILITHIUM_CTILDEBYTES);
             }
         }
     }
@@ -1809,7 +1813,7 @@ bool qsc_dilithium_ref_open(uint8_t* message, size_t* msglen, const uint8_t* con
         }
     }
 
-    if (res == false)
+    if (res == false && smlen >= DILITHIUM_SIGNATURE_SIZE)
     {
         qsc_memutils_clear(message, smlen - DILITHIUM_SIGNATURE_SIZE);
     }

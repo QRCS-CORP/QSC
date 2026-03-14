@@ -65,7 +65,7 @@ void qsc_hcg_dispose(qsc_hcg_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_clear(ctx->info, QSC_HCG_MAX_INFO_SIZE);
+		qsc_memutils_secure_erase(ctx->info, QSC_HCG_MAX_INFO_SIZE);
 		qsc_memutils_secure_erase(ctx->key, QSC_HCG_KEY_SIZE);
 		qsc_memutils_secure_erase(ctx->nonce, QSC_HCG_NONCE_SIZE);
 		ctx->inflen = 0U;
@@ -84,7 +84,7 @@ void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen,
 	{
 		qsc_hmac512_state hstate = { 0U };
 
-		qsc_memutils_clear(ctx->info, QSC_HCG_MAX_INFO_SIZE);
+		qsc_memutils_secure_erase(ctx->info, QSC_HCG_MAX_INFO_SIZE);
 		qsc_memutils_secure_erase(ctx->key, QSC_HCG_KEY_SIZE);
 		qsc_memutils_secure_erase(ctx->nonce, QSC_HCG_NONCE_SIZE);
 		ctx->rpos = 0U;
@@ -111,11 +111,12 @@ void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen,
 		/* predictive resistance enabled */
 		if (ctx->pres)
 		{
-			uint8_t prnd[QSC_HCG_KEY_SIZE];
+			uint8_t prnd[QSC_HCG_KEY_SIZE] = { 0U };
 
 			/* add a random seed to hmac message */
 			qsc_acp_generate(prnd, QSC_HCG_KEY_SIZE);
 			qsc_hmac512_update(&hstate, prnd, QSC_HCG_KEY_SIZE);
+			qsc_memutils_secure_erase(prnd, sizeof(prnd));
 		}
 
 		/* generate the key */
@@ -153,8 +154,7 @@ void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
 			pos += rmd;
 		}
 
-		/* reseed check */
-		hcg_auto_reseed(ctx);
+		qsc_memutils_secure_erase(buf, sizeof(buf));
 	}
 }
 

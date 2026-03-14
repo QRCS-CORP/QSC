@@ -32,12 +32,20 @@ static const QSC_CACHE_ALIGNED uint16_t kyber_zetas[KYBER_ZETA_SIZE] =
 
 static int16_t kyber_montgomery_reduce(int32_t a)
 {
-    int16_t t;
+    //int16_t t;
 
-    t = (int16_t)a * KYBER_QINV;
-    t = (a - (int32_t)t * QSC_KYBER_Q) >> 16;
+    //t = (int16_t)a * KYBER_QINV;
+    //t = (a - (int32_t)t * QSC_KYBER_Q) >> 16;
 
-    return (int16_t)t;
+    //return (int16_t)t;
+
+    int32_t t;
+
+    t = (int32_t)((int16_t)(a * (int32_t)KYBER_QINV));
+    t = a - t * (int32_t)QSC_KYBER_Q;
+
+    return (int16_t)(t >> 16);
+
 }
 
 static int16_t kyber_barrett_reduce(int16_t a)
@@ -309,17 +317,36 @@ static void kyber_poly_decompress(qsc_kyber_poly* r, const uint8_t* a)
 
 static void kyber_poly_to_bytes(uint8_t r[QSC_KYBER_POLYBYTES], const qsc_kyber_poly* a)
 {
+    /* Serialise a polynomial to 384 bytes (3 bytes per pair of 12-bit coefficients).
+     *
+     * Coefficients are in [-Q+1, Q-1] as int16_t.  Before packing they are
+     * mapped to [0, Q-1] by adding Q to any negative value.
+     *
+     * The conditional add uses a portable unsigned mask in place of a
+     * signed arithmetic right-shift, which is implementation-defined
+     * behaviour before C23:
+     *
+     *   mask = -(t >> 15)       -- 0x0000 if t >= 0, 0xFFFF if t < 0
+     *   t   += mask & Q         -- adds Q iff the coefficient was negative
+     *
+     * t >> 15 is an unsigned right-shift (t is uint16_t), always 0 or 1,
+     * so the negation wraps predictably under unsigned two's-complement. */
+
     uint16_t t0;
     uint16_t t1;
+    uint16_t mask;
 
     for (size_t i = 0U; i < QSC_KYBER_N / 2U; ++i)
     {
-        /* map to positive standard representatives */
-        t0 = a->coeffs[2U * i];
-        t0 += ((int16_t)t0 >> 15) & QSC_KYBER_Q;
-        t1 = a->coeffs[(2U * i) + 1U];
-        t1 += ((int16_t)t1 >> 15) & QSC_KYBER_Q;
-        r[3U * i] = (uint8_t)(t0 >> 0);
+        t0 = (uint16_t)a->coeffs[2U * i];
+        mask = (uint16_t)(-(t0 >> 15));
+        t0 += mask & (uint16_t)QSC_KYBER_Q;
+
+        t1 = (uint16_t)a->coeffs[(2U * i) + 1U];
+        mask = (uint16_t)(-(t1 >> 15));
+        t1 += mask & (uint16_t)QSC_KYBER_Q;
+
+        r[3U * i] = (uint8_t)t0;
         r[(3U * i) + 1U] = (uint8_t)((t0 >> 8) | (t1 << 4));
         r[(3U * i) + 2U] = (uint8_t)(t1 >> 4);
     }
@@ -739,7 +766,7 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
         }
     }
 
-    qsc_memutils_secure_erase(buf, sizeof(buf));
+    qsc_memutils_clear(buf, sizeof(buf));
     qsc_memutils_secure_erase(extseed, sizeof(extseed));
     qsc_keccak_dispose(&state);
 }
@@ -971,7 +998,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 
     qsc_memutils_copy(cmp, sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
     qsc_keccak_absorb(&kctx, qsc_keccak_rate_256, cmp, sizeof(cmp), QSC_KECCAK_SHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
-    qsc_memutils_clear(cmp, sizeof(cmp));
+    qsc_memutils_secure_erase(cmp, sizeof(cmp));
     qsc_keccak_permute(&kctx, QSC_KECCAK_PERMUTATION_ROUNDS);
 
 #if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN)

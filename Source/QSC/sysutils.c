@@ -29,6 +29,17 @@
 #	include <mach/mach_time.h>
 #	include <sys/sysctl.h>
 #	include <time.h>
+
+static pthread_once_t qsc_tc_once = PTHREAD_ONCE_INIT;
+static double qsc_tc_ratio = 1.0;
+
+static void qsc_tc_init(void)
+{
+	mach_timebase_info_data_t tb;
+	mach_timebase_info(&tb);
+	qsc_tc_ratio = (double)tb.numer / (double)tb.denom;
+}
+
 #endif
 #if defined(QSC_SYSTEM_OS_POSIX)
 #	include <string.h>
@@ -98,46 +109,50 @@ size_t qsc_sysutils_computer_name(char* name)
 	return res;
 }
 
-size_t qsc_sysutils_cpu_count(void) 
+size_t qsc_sysutils_cpu_count(void)
 {
 	size_t count;
 
 	count = 1U;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    count = (size_t)sysinfo.dwNumberOfProcessors;
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo(&sysinfo);
+	count = (size_t)sysinfo.dwNumberOfProcessors;
 
 #elif defined(QSC_SYSTEM_OS_MAC)
-    int nm[2U];
-    size_t len;
+	int nm[2U];
+	size_t len;
 	uint32_t tmpc;
 
 	tmpc = 0U;
 	len = 4U;
-    nm[0U] = CTL_HW;
-    nm[1U] = HW_AVAILCPU;
+	nm[0U] = CTL_HW;
+	nm[1U] = HW_AVAILCPU;
 
-    sysctl(nm, 2, &tmpc, &len, NULL, 0);
+	sysctl(nm, 2, &tmpc, &len, NULL, 0);
 
-    if (count < 1) 
+	if (tmpc < 1U)
 	{
-        nm[1] = HW_NCPU;
-        sysctl(nm, 2, &tmpc, &len, NULL, 0);
+		nm[1] = HW_NCPU;
+		sysctl(nm, 2, &tmpc, &len, NULL, 0);
 
-        if (tmpc < 1U) 
+		if (tmpc < 1U)
 		{
-            count = 1U;
-        }
+			count = 1U;
+		}
 		else
 		{
 			count = (size_t)tmpc;
 		}
-    }
+	}
+	else
+	{
+		count = (size_t)tmpc;
+	}
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
-    count = (nprocs > 0U) ? (size_t)nprocs : 1U;
+	long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
+	count = (nprocs > 0U) ? (size_t)nprocs : 1U;
 #endif
 
 	return count;
@@ -176,9 +191,9 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 		if (statvfs("/", &fsinfo) == 0)
 		{
-			state->free = fsinfo.f_frsize * fsinfo.f_blocks;
-			state->total = fsinfo.f_bsize * fsinfo.f_bfree;
-			state->avail = state->total - state->free;
+			state->total = (uint64_t)fsinfo.f_frsize * (uint64_t)fsinfo.f_blocks;
+			state->free = (uint64_t)fsinfo.f_frsize * (uint64_t)fsinfo.f_bfree;
+			state->avail = (uint64_t)fsinfo.f_frsize * (uint64_t)fsinfo.f_bavail;
 		}
 
 #endif
@@ -248,10 +263,10 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 
 		if (sysinfo(&memInfo) == 0)
 		{
-			state->phystotal = (uint64_t)memInfo.totalram * memInfo.mem_unit;
-			state->physavail = (uint64_t)((memInfo.totalram - memInfo.freeram) * memInfo.mem_unit);
-			state->virttotal = (uint64_t)((memInfo.totalram + memInfo.totalswap) * memInfo.mem_unit);
-			state->virtavail = (uint64_t)(((memInfo.totalram - memInfo.freeram) + (memInfo.totalswap - memInfo.freeswap)) * memInfo.mem_unit);
+			state->phystotal = (uint64_t)memInfo.totalram * (uint64_t)memInfo.mem_unit;
+			state->physavail = (uint64_t)memInfo.freeram * (uint64_t)memInfo.mem_unit;
+			state->virttotal = (uint64_t)(memInfo.totalram + memInfo.totalswap) * (uint64_t)memInfo.mem_unit;
+			state->virtavail = (uint64_t)(memInfo.freeram + memInfo.freeswap) * (uint64_t)memInfo.mem_unit;
 		}
 
 #endif
@@ -261,20 +276,20 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 char qsc_sysutils_get_os_drive_letter(void)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    char buffer[MAX_PATH] = { 0 };
+	char buffer[MAX_PATH] = { 0 };
 
-    if (GetWindowsDirectoryA(buffer, MAX_PATH) == 0)
-    {
-        return '\0';
-    }
+	if (GetWindowsDirectoryA(buffer, MAX_PATH) == 0)
+	{
+		return '\0';
+	}
 
-    return buffer[0U];
+	return buffer[0U];
 #else
-    return '/';
+	return '/';
 #endif
 }
 
-uint32_t qsc_sysutils_process_id()
+uint32_t qsc_sysutils_process_id(void)
 {
 	uint32_t res;
 
@@ -289,7 +304,7 @@ uint32_t qsc_sysutils_process_id()
 	return res;
 }
 
-bool qsc_sysutils_rdtsc_available()
+bool qsc_sysutils_rdtsc_available(void)
 {
 	bool hfeat;
 	bool ret;
@@ -332,9 +347,25 @@ size_t qsc_sysutils_user_name(char* name)
 		qsc_memutils_copy(name, (char*)buf, res);
 #elif defined(QSC_SYSTEM_OS_POSIX)
 		char buf[LOGIN_NAME_MAX];
-		getlogin_r(buf, LOGIN_NAME_MAX);
-		res = strlen(buf);
-		qsc_memutils_copy(name, buf, res);
+
+		buf[0] = '\0';
+		if (getlogin_r(buf, LOGIN_NAME_MAX) != 0 || buf[0] == '\0')
+		{
+			struct passwd* pw = getpwuid(getuid());
+			if (pw != NULL)
+			{
+				size_t plen = strlen(pw->pw_name);
+				if (plen < LOGIN_NAME_MAX)
+				{
+					qsc_memutils_copy(buf, pw->pw_name, plen + 1U);
+				}
+			}
+		}
+		if (buf[0] != '\0')
+		{
+			res = strlen(buf);
+			qsc_memutils_copy(name, buf, res);
+		}
 #endif
 
 		name[res] = '\0';
@@ -343,7 +374,7 @@ size_t qsc_sysutils_user_name(char* name)
 	return res;
 }
 
-uint64_t qsc_sysutils_system_uptime()
+uint64_t qsc_sysutils_system_uptime(void)
 {
 	uint64_t res;
 
@@ -367,7 +398,7 @@ uint64_t qsc_sysutils_system_uptime()
 	return res;
 }
 
-uint64_t qsc_sysutils_system_timestamp()
+uint64_t qsc_sysutils_system_timestamp(void)
 {
 	uint64_t rtme;
 
@@ -376,7 +407,7 @@ uint64_t qsc_sysutils_system_timestamp()
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 #if defined(QSC_SYSTEM_ARCH_IX86_32)
-	if (qsc_sysutils_rdtsc_available())
+	if (qsc_sysutils_rdtsc_available(void))
 	{
 		rtme = __rdtsc();
 	}
@@ -389,7 +420,7 @@ uint64_t qsc_sysutils_system_timestamp()
 		if (QueryPerformanceCounter((LARGE_INTEGER*)&ctr1))
 		{
 			QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-			
+
 			if (freq > 0)
 			{
 				rtme = (ctr1 * 1000LL / freq);
@@ -399,7 +430,7 @@ uint64_t qsc_sysutils_system_timestamp()
 		{
 			FILETIME ft;
 			LARGE_INTEGER li;
-			
+
 			GetSystemTimeAsFileTime(&ft);
 			li.LowPart = ft.dwLowDateTime;
 			li.HighPart = ft.dwHighDateTime;
@@ -415,12 +446,10 @@ uint64_t qsc_sysutils_system_timestamp()
 	rtme = (uint64_t)gethrtime();
 
 #elif defined(QSC_SYSTEM_OS_MAC)
+
 	/* OSX */
-	static double timeConvert = 0.0;
-	mach_timebase_info_data_t timeBase;
-	(void)mach_timebase_info(&timeBase);
-	timeConvert = timeBase.numer / timeBase.denom;
-	rtme = (uint64_t)(mach_absolute_time() * timeConvert);
+	pthread_once(&qsc_tc_once, qsc_tc_init);
+	rtme = (uint64_t)((double)mach_absolute_time() * qsc_tc_ratio);
 
 #elif defined(QSC_SYSTEM_OS_POSIX)
 
@@ -428,28 +457,27 @@ uint64_t qsc_sysutils_system_timestamp()
 #	if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
 	struct timespec ts;
 	clockid_t id = (clockid_t)-1;
-
 #		if defined(CLOCK_MONOTONIC_PRECISE)
-			/* BSD */
-			id = CLOCK_MONOTONIC_PRECISE;
+	/* BSD */
+	id = CLOCK_MONOTONIC_PRECISE;
 #		elif defined(CLOCK_MONOTONIC_RAW)
-			/* Linux */
-			id = CLOCK_MONOTONIC_RAW;
+	/* Linux */
+	id = CLOCK_MONOTONIC_RAW;
 #		elif defined(CLOCK_HIGHRES)
-			/* Solaris */
-			id = CLOCK_HIGHRES;
+	/* Solaris */
+	id = CLOCK_HIGHRES;
 #		elif defined(CLOCK_MONOTONIC)
-			/* AIX, BSD, Linux, POSIX, Solaris */
-			id = CLOCK_MONOTONIC;
+	/* AIX, BSD, Linux, POSIX, Solaris */
+	id = CLOCK_MONOTONIC;
 #		elif defined(CLOCK_REALTIME)
-			/* AIX, BSD, HP - UX, Linux, POSIX */
-			id = CLOCK_REALTIME;
+	/* AIX, BSD, HP - UX, Linux, POSIX */
+	id = CLOCK_REALTIME;
 #		endif
 #	endif
 
 	if (id != (clockid_t)-1 && clock_gettime(id, &ts) != -1)
 	{
-		rtme = (uint64_t)(ts.tv_sec + ts.tv_nsec);
+		rtme = (uint64_t)ts.tv_sec * 1000ULL + (uint64_t)ts.tv_nsec / 1000000ULL;
 	}
 
 #else
@@ -484,6 +512,27 @@ void qsc_sysutils_user_identity(const char* name, char* id)
 			}
 
 			GlobalFree(domname);
+		}
+	}
+}
+#else
+void qsc_sysutils_user_identity(const char* name, char* id)
+{
+	QSC_ASSERT(name != NULL);
+	QSC_ASSERT(id != NULL);
+
+	if (name != NULL && id != NULL)
+	{
+		/* POSIX: resolve numeric UID from the passwd database */
+		struct passwd* pw = getpwnam(name);
+
+		if (pw != NULL)
+		{
+			snprintf(id, QSC_SYSUTILS_SYSTEM_NAME_MAX, "%u", (unsigned int)pw->pw_uid);
+		}
+		else
+		{
+			id[0] = '\0';
 		}
 	}
 }

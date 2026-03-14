@@ -113,7 +113,7 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 				}
 				else if (pos == 0)
 				{
-					/* zero-length read—treat as failure */
+					/* zero-length read, treat as failure */
 					res = false;
 					break;
 				}

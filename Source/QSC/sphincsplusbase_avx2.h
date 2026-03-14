@@ -52,7 +52,7 @@
 #ifndef QSC_SPHINCSPLUSBASE_AVX2_H
 #define QSC_SPHINCSPLUSBASE_AVX2_H
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 #include "qsccommon.h"
 
@@ -62,6 +62,6 @@ QSC_CPLUSPLUS_ENABLED_START
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 	
 #endif

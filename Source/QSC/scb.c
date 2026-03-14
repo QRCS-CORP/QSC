@@ -5,7 +5,7 @@
 
 #define QSC_SCB_NAME_SIZE 8U
 
-static char scb_name[QSC_SCB_NAME_SIZE + 1U] = "SCB v1.d";
+static const char scb_name[QSC_SCB_NAME_SIZE + 1U] = "SCB v1.d";
 
 static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 {
@@ -21,6 +21,12 @@ static void scb_scatter_index_dynamic(size_t* indice, size_t count)
 
 	/* lane multiplier is total buffer size divided by L2 cache-size */
 	lmul = (count * QSC_MEMUTILS_CACHE_LINE_SIZE) / QSC_SCB_L2CACHE_DEFAULT_SIZE;
+
+	if (lmul == 0U) 
+	{ 
+		lmul = 1U; 
+	}
+
 	/* number of cache lines in each lane */
 	ccnt = count / lmul;
 
@@ -43,9 +49,6 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 	size_t lcnt;
 	size_t oft;
 
-    /* initialize SHAKE with the key */
-    qsc_cshake_initialize(&kstate, ctx->rate, ctx->ckey, ctx->klen, NULL, 0U, NULL, 0U);
-
 	/* get the number of cache lines */
 	lcnt = buflen / QSC_MEMUTILS_CACHE_LINE_SIZE;
 
@@ -53,10 +56,13 @@ static void scb_fill_memory(qsc_scb_state* ctx, uint8_t* buffer, size_t buflen, 
 
 	if (indice != NULL)
 	{
-		uint8_t kblk[QSC_KECCAK_256_RATE] = { 0U };
+		uint8_t kblk[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 		uint8_t bnum[sizeof(uint64_t)] = { 0U };
 		uint64_t lidx;
 		uint64_t litr;
+
+		/* initialize SHAKE with the key */
+		qsc_cshake_initialize(&kstate, ctx->rate, ctx->ckey, ctx->klen, NULL, 0U, NULL, 0U);
 
 		qsc_memutils_clear(indice, lcnt * sizeof(size_t));
 
@@ -125,7 +131,7 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 		memcost <= QSC_SCB_MEMORY_MAXIMUM && memcost >= QSC_SCB_MEMORY_MINIMUM)
 	{
 		qsc_keccak_state kstate = { 0U };
-		uint8_t kbuf[QSC_KECCAK_256_RATE] = { 0U };
+		uint8_t kbuf[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 
 		if (seedlen >= QSC_SCB_512_SEED_SIZE)
 		{
@@ -144,11 +150,11 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 		ctx->memc = memcost;
 
 		/* intialize shake */
-		qsc_cshake_initialize(&kstate, ctx->rate, seed, seedlen, (uint8_t*)scb_name, QSC_SCB_NAME_SIZE, info, infolen);
+		qsc_cshake_initialize(&kstate, ctx->rate, seed, seedlen, (const uint8_t*)scb_name, QSC_SCB_NAME_SIZE, info, infolen);
 		qsc_shake_squeezeblocks(&kstate, ctx->rate, kbuf, 1U);
 		qsc_keccak_dispose(&kstate);
 		qsc_memutils_copy(ctx->ckey, kbuf, ctx->klen);
-		qsc_memutils_secure_erase(kbuf, QSC_KECCAK_256_RATE);
+		qsc_memutils_secure_erase(kbuf, QSC_KECCAK_STATE_BYTE_SIZE);
 	}
 }
 
@@ -184,7 +190,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 				qsc_sha3_finalize(&hstate, ctx->rate, ctx->ckey);
 			}
 
-			qsc_memutils_clear(cbuf, clen);
+			qsc_memutils_secure_erase(cbuf, clen);
 			qsc_memutils_alloc_free(cbuf);
 			cbuf = NULL;
 			pos = 0U;
@@ -194,7 +200,7 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 
 			while (pos < otplen)
 			{
-				uint8_t kblk[QSC_KECCAK_256_RATE] = { 0U };
+				uint8_t kblk[QSC_KECCAK_STATE_BYTE_SIZE] = { 0U };
 				const size_t plen = (otplen - pos > ctx->rate) ? ctx->rate : otplen - pos;
 
 				/* copy SHAKE blocks to the output */

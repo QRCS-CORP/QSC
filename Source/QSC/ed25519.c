@@ -1,12 +1,32 @@
-﻿#include "ec25519.h"
+﻿#include "ed25519.h"
 #include "csp.h"
 #include "intutils.h"
 #include "memutils.h"
 #include "sha2.h"
 
+/* fe */
+
+static const qsc_fe25519 ed25519_d =
+{
+	/* 37095705934669439343138083508754565189542113879843219016388785533085940283555 */
+	-10913610, 13857413, -15372611, 6949391,   114729, -8787816, -6275908, -3247719, -18696448, -12055116
+};
+
+static const qsc_fe25519 fe25519_sqrtm1 =
+{
+	/* sqrt(-1) */
+	-32595792, -7943725,  9377950,  3500415, 12389472, -272473, -25146209, -2005654, 326686, 11406482
+};
+
+static const qsc_fe25519 ed25519_d2 =
+{
+	/* 2 * d = 16295367250680780974490674513165176452449235426866156013048779062215315747161 */
+	-21827239, -5839606,  -30745221, 13898782, 229458, 15978800, -12551817, -6495438, 29715968, 9444199
+};
+
 /* helper */
 
-static int32_t ecdsabase_is_zero(const uint8_t* n, const size_t nlen)
+static int32_t ed25518_is_zero(const uint8_t* n, const size_t nlen)
 {
 	uint8_t d;
 
@@ -20,7 +40,7 @@ static int32_t ecdsabase_is_zero(const uint8_t* n, const size_t nlen)
 	return 1L & (int32_t)((uint32_t)(d - 1U) >> 8);
 }
 
-static uint64_t ecdsabase_load3(const uint8_t* in)
+static uint64_t ed25518_load3(const uint8_t* in)
 {
 	uint64_t res;
 
@@ -31,7 +51,7 @@ static uint64_t ecdsabase_load3(const uint8_t* in)
 	return res;
 }
 
-static uint64_t ecdsabase_load4(const uint8_t* in)
+static uint64_t ed25518_load4(const uint8_t* in)
 {
 	uint64_t res;
 
@@ -43,7 +63,7 @@ static uint64_t ecdsabase_load4(const uint8_t* in)
 	return res;
 }
 
-static uint8_t ecdsabase_negative(int8_t b)
+static uint8_t ed25518_negative(int8_t b)
 {
 	uint64_t x;
 
@@ -53,7 +73,7 @@ static uint8_t ecdsabase_negative(int8_t b)
 	return (uint8_t)x;
 }
 
-static void ecdsabase_slide_vartime(int8_t* r, const uint8_t* a)
+static void ed25518_slide_vartime(int8_t* r, const uint8_t* a)
 {
 	size_t i;
 	int32_t cmp;
@@ -128,25 +148,6 @@ int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 
 	return (1L & ((d - 1) >> 8)) - 1;
 }
-
-/* fe */
-static const qsc_fe25519 ed25519_d =
-{
-	/* 37095705934669439343138083508754565189542113879843219016388785533085940283555 */
-	-10913610, 13857413, -15372611, 6949391,   114729, -8787816, -6275908, -3247719, -18696448, -12055116
-};
-
-static const qsc_fe25519 fe25519_sqrtm1 =
-{
-	/* sqrt(-1) */
-	-32595792, -7943725,  9377950,  3500415, 12389472, -272473, -25146209, -2005654, 326686, 11406482
-};
-
-static const qsc_fe25519 ed25519_d2 =
-{
-	/* 2 * d = 16295367250680780974490674513165176452449235426866156013048779062215315747161 */
-	-21827239, -5839606,  -30745221, 13898782, 229458, 15978800, -12551817, -6495438, 29715968, 9444199
-};
 
 void qsc_fe25519_0(qsc_fe25519 h)
 {
@@ -379,7 +380,7 @@ int32_t qsc_fe25519_is_zero(const qsc_fe25519 f)
 
 	qsc_fe25519_to_bytes(s, f);
 
-	return ecdsabase_is_zero(s, 32U);
+	return ed25518_is_zero(s, 32U);
 }
 
 void qsc_fe25519_mul(qsc_fe25519 h, const qsc_fe25519 f, const qsc_fe25519 g)
@@ -965,16 +966,16 @@ void qsc_fe25519_from_bytes(qsc_fe25519 h, const uint8_t* s)
 	int64_t h8;
 	int64_t h9;
 
-	h0 = ecdsabase_load4(s);
-	h1 = ecdsabase_load3(s + 4) << 6;
-	h2 = ecdsabase_load3(s + 7) << 5;
-	h3 = ecdsabase_load3(s + 10) << 3;
-	h4 = ecdsabase_load3(s + 13) << 2;
-	h5 = ecdsabase_load4(s + 16);
-	h6 = ecdsabase_load3(s + 20) << 7;
-	h7 = ecdsabase_load3(s + 23) << 5;
-	h8 = ecdsabase_load3(s + 26) << 4;
-	h9 = (ecdsabase_load3(s + 29) & 8388607) << 2;
+	h0 = ed25518_load4(s);
+	h1 = ed25518_load3(s + 4) << 6;
+	h2 = ed25518_load3(s + 7) << 5;
+	h3 = ed25518_load3(s + 10) << 3;
+	h4 = ed25518_load3(s + 13) << 2;
+	h5 = ed25518_load4(s + 16);
+	h6 = ed25518_load3(s + 20) << 7;
+	h7 = ed25518_load3(s + 23) << 5;
+	h8 = ed25518_load3(s + 26) << 4;
+	h9 = (ed25518_load3(s + 29) & 8388607) << 2;
 
 	carry = (h9 + (1 << 24)) >> 25;
 	h0 += carry * 19;
@@ -1383,7 +1384,7 @@ static void ge25519_cmov8(qsc_ge25519_precomp* t, const qsc_ge25519_precomp prec
 	QSC_ASSERT(t != NULL);
 
     qsc_ge25519_precomp minust;
-    const unsigned char bnegative = ecdsabase_negative(b);
+    const unsigned char bnegative = ed25518_negative(b);
     const unsigned char babs = b - (((-bnegative) & b) * ((signed char) 1 << 1));
 
     ge25519_precomp_0(t);
@@ -3172,8 +3173,8 @@ void qsc_ge25519_double_scalarmult_vartime(qsc_ge25519_p2* r, const uint8_t* a, 
 	qsc_ge25519_p3 A2;
 	int32_t i;
 
-	ecdsabase_slide_vartime(aslide, a);
-	ecdsabase_slide_vartime(bslide, b);
+	ed25518_slide_vartime(aslide, a);
+	ed25518_slide_vartime(bslide, b);
 
 	qsc_ge25519_p3_to_cached(&Ai[0U], A);
 
@@ -3469,44 +3470,44 @@ void qsc_sc25519_muladd(uint8_t s[32U], const uint8_t a[32U], const uint8_t b[32
 	int64_t s22;
 	int64_t s23;
 
-	a0 = 2097151 & ecdsabase_load3(a);
-	a1 = 2097151 & (ecdsabase_load4(a + 2) >> 5);
-	a2 = 2097151 & (ecdsabase_load3(a + 5) >> 2);
-	a3 = 2097151 & (ecdsabase_load4(a + 7) >> 7);
-	a4 = 2097151 & (ecdsabase_load4(a + 10) >> 4);
-	a5 = 2097151 & (ecdsabase_load3(a + 13) >> 1);
-	a6 = 2097151 & (ecdsabase_load4(a + 15) >> 6);
-	a7 = 2097151 & (ecdsabase_load3(a + 18) >> 3);
-	a8 = 2097151 & ecdsabase_load3(a + 21);
-	a9 = 2097151 & (ecdsabase_load4(a + 23) >> 5);
-	a10 = 2097151 & (ecdsabase_load3(a + 26) >> 2);
-	a11 = (ecdsabase_load4(a + 28) >> 7);
+	a0 = 2097151 & ed25518_load3(a);
+	a1 = 2097151 & (ed25518_load4(a + 2) >> 5);
+	a2 = 2097151 & (ed25518_load3(a + 5) >> 2);
+	a3 = 2097151 & (ed25518_load4(a + 7) >> 7);
+	a4 = 2097151 & (ed25518_load4(a + 10) >> 4);
+	a5 = 2097151 & (ed25518_load3(a + 13) >> 1);
+	a6 = 2097151 & (ed25518_load4(a + 15) >> 6);
+	a7 = 2097151 & (ed25518_load3(a + 18) >> 3);
+	a8 = 2097151 & ed25518_load3(a + 21);
+	a9 = 2097151 & (ed25518_load4(a + 23) >> 5);
+	a10 = 2097151 & (ed25518_load3(a + 26) >> 2);
+	a11 = (ed25518_load4(a + 28) >> 7);
 
-	b0 = 2097151 & ecdsabase_load3(b);
-	b1 = 2097151 & (ecdsabase_load4(b + 2) >> 5);
-	b2 = 2097151 & (ecdsabase_load3(b + 5) >> 2);
-	b3 = 2097151 & (ecdsabase_load4(b + 7) >> 7);
-	b4 = 2097151 & (ecdsabase_load4(b + 10) >> 4);
-	b5 = 2097151 & (ecdsabase_load3(b + 13) >> 1);
-	b6 = 2097151 & (ecdsabase_load4(b + 15) >> 6);
-	b7 = 2097151 & (ecdsabase_load3(b + 18) >> 3);
-	b8 = 2097151 & ecdsabase_load3(b + 21);
-	b9 = 2097151 & (ecdsabase_load4(b + 23) >> 5);
-	b10 = 2097151 & (ecdsabase_load3(b + 26) >> 2);
-	b11 = (ecdsabase_load4(b + 28) >> 7);
+	b0 = 2097151 & ed25518_load3(b);
+	b1 = 2097151 & (ed25518_load4(b + 2) >> 5);
+	b2 = 2097151 & (ed25518_load3(b + 5) >> 2);
+	b3 = 2097151 & (ed25518_load4(b + 7) >> 7);
+	b4 = 2097151 & (ed25518_load4(b + 10) >> 4);
+	b5 = 2097151 & (ed25518_load3(b + 13) >> 1);
+	b6 = 2097151 & (ed25518_load4(b + 15) >> 6);
+	b7 = 2097151 & (ed25518_load3(b + 18) >> 3);
+	b8 = 2097151 & ed25518_load3(b + 21);
+	b9 = 2097151 & (ed25518_load4(b + 23) >> 5);
+	b10 = 2097151 & (ed25518_load3(b + 26) >> 2);
+	b11 = (ed25518_load4(b + 28) >> 7);
 
-	c0 = 2097151 & ecdsabase_load3(c);
-	c1 = 2097151 & (ecdsabase_load4(c + 2) >> 5);
-	c2 = 2097151 & (ecdsabase_load3(c + 5) >> 2);
-	c3 = 2097151 & (ecdsabase_load4(c + 7) >> 7);
-	c4 = 2097151 & (ecdsabase_load4(c + 10) >> 4);
-	c5 = 2097151 & (ecdsabase_load3(c + 13) >> 1);
-	c6 = 2097151 & (ecdsabase_load4(c + 15) >> 6);
-	c7 = 2097151 & (ecdsabase_load3(c + 18) >> 3);
-	c8 = 2097151 & ecdsabase_load3(c + 21);
-	c9 = 2097151 & (ecdsabase_load4(c + 23) >> 5);
-	c10 = 2097151 & (ecdsabase_load3(c + 26) >> 2);
-	c11 = (ecdsabase_load4(c + 28) >> 7);
+	c0 = 2097151 & ed25518_load3(c);
+	c1 = 2097151 & (ed25518_load4(c + 2) >> 5);
+	c2 = 2097151 & (ed25518_load3(c + 5) >> 2);
+	c3 = 2097151 & (ed25518_load4(c + 7) >> 7);
+	c4 = 2097151 & (ed25518_load4(c + 10) >> 4);
+	c5 = 2097151 & (ed25518_load3(c + 13) >> 1);
+	c6 = 2097151 & (ed25518_load4(c + 15) >> 6);
+	c7 = 2097151 & (ed25518_load3(c + 18) >> 3);
+	c8 = 2097151 & ed25518_load3(c + 21);
+	c9 = 2097151 & (ed25518_load4(c + 23) >> 5);
+	c10 = 2097151 & (ed25518_load3(c + 26) >> 2);
+	c11 = (ed25518_load4(c + 28) >> 7);
 
 	s0 = c0 + (a0 * b0);
 	s1 = c1 + (a0 * b1) + (a1 * b0);
@@ -3910,30 +3911,30 @@ void qsc_sc25519_reduce(uint8_t s[64U])
 	int64_t s22;
 	int64_t s23;
 
-	s0 = 2097151 & ecdsabase_load3(s);
-	s1 = 2097151 & (ecdsabase_load4(s + 2) >> 5);
-	s2 = 2097151 & (ecdsabase_load3(s + 5) >> 2);
-	s3 = 2097151 & (ecdsabase_load4(s + 7) >> 7);
-	s4 = 2097151 & (ecdsabase_load4(s + 10) >> 4);
-	s5 = 2097151 & (ecdsabase_load3(s + 13) >> 1);
-	s6 = 2097151 & (ecdsabase_load4(s + 15) >> 6);
-	s7 = 2097151 & (ecdsabase_load3(s + 18) >> 3);
-	s8 = 2097151 & ecdsabase_load3(s + 21);
-	s9 = 2097151 & (ecdsabase_load4(s + 23) >> 5);
-	s10 = 2097151 & (ecdsabase_load3(s + 26) >> 2);
-	s11 = 2097151 & (ecdsabase_load4(s + 28) >> 7);
-	s12 = 2097151 & (ecdsabase_load4(s + 31) >> 4);
-	s13 = 2097151 & (ecdsabase_load3(s + 34) >> 1);
-	s14 = 2097151 & (ecdsabase_load4(s + 36) >> 6);
-	s15 = 2097151 & (ecdsabase_load3(s + 39) >> 3);
-	s16 = 2097151 & ecdsabase_load3(s + 42);
-	s17 = 2097151 & (ecdsabase_load4(s + 44) >> 5);
-	s18 = 2097151 & (ecdsabase_load3(s + 47) >> 2);
-	s19 = 2097151 & (ecdsabase_load4(s + 49) >> 7);
-	s20 = 2097151 & (ecdsabase_load4(s + 52) >> 4);
-	s21 = 2097151 & (ecdsabase_load3(s + 55) >> 1);
-	s22 = 2097151 & (ecdsabase_load4(s + 57) >> 6);
-	s23 = (ecdsabase_load4(s + 60) >> 3);
+	s0 = 2097151 & ed25518_load3(s);
+	s1 = 2097151 & (ed25518_load4(s + 2) >> 5);
+	s2 = 2097151 & (ed25518_load3(s + 5) >> 2);
+	s3 = 2097151 & (ed25518_load4(s + 7) >> 7);
+	s4 = 2097151 & (ed25518_load4(s + 10) >> 4);
+	s5 = 2097151 & (ed25518_load3(s + 13) >> 1);
+	s6 = 2097151 & (ed25518_load4(s + 15) >> 6);
+	s7 = 2097151 & (ed25518_load3(s + 18) >> 3);
+	s8 = 2097151 & ed25518_load3(s + 21);
+	s9 = 2097151 & (ed25518_load4(s + 23) >> 5);
+	s10 = 2097151 & (ed25518_load3(s + 26) >> 2);
+	s11 = 2097151 & (ed25518_load4(s + 28) >> 7);
+	s12 = 2097151 & (ed25518_load4(s + 31) >> 4);
+	s13 = 2097151 & (ed25518_load3(s + 34) >> 1);
+	s14 = 2097151 & (ed25518_load4(s + 36) >> 6);
+	s15 = 2097151 & (ed25518_load3(s + 39) >> 3);
+	s16 = 2097151 & ed25518_load3(s + 42);
+	s17 = 2097151 & (ed25518_load4(s + 44) >> 5);
+	s18 = 2097151 & (ed25518_load3(s + 47) >> 2);
+	s19 = 2097151 & (ed25518_load4(s + 49) >> 7);
+	s20 = 2097151 & (ed25518_load4(s + 52) >> 4);
+	s21 = 2097151 & (ed25518_load3(s + 55) >> 1);
+	s22 = 2097151 & (ed25518_load4(s + 57) >> 6);
+	s23 = (ed25518_load4(s + 60) >> 3);
 
 	s11 += s23 * 666643;
 	s12 += s23 * 470296;

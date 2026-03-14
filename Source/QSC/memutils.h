@@ -137,6 +137,13 @@ QSC_EXPORT_API void qsc_memutils_prefetch_l3(uint8_t* address, size_t length);
 QSC_EXPORT_API void* qsc_memutils_malloc(size_t length);
 
 /**
+ * \brief Get the system oage size.
+ *
+ * \return			[void*] Returns the system page size.
+ */
+QSC_EXPORT_API size_t qsc_memutils_page_size(void);
+
+/**
  * \brief Resize a block of memory.
  *
  * \param block:	[void*] The current memory block.

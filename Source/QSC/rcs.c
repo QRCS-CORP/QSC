@@ -1226,6 +1226,8 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 					rcs_ctr_transform(ctx, output, input, length);
 					res = true;
 				}
+
+				qsc_memutils_secure_erase(code, sizeof(code));
 			}
 			else
 			{
@@ -1238,6 +1240,8 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 					rcs_ctr_transform(ctx, output, input, length);
 					res = true;
 				}
+
+				qsc_memutils_secure_erase(code, sizeof(code));
 			}
 		}
 

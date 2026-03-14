@@ -1,5 +1,4 @@
 #include "collection.h"
-#include "async.h"
 #include "intutils.h"
 #include "memutils.h"
 #if defined(QSC_DEBUG_MODE)
@@ -12,7 +11,6 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 	QSC_ASSERT(item != NULL);
 	QSC_ASSERT(key != NULL);
 
-	qsc_mutex mtx;
 	uint8_t* itmp;
 	uint8_t* ktmp;
 	size_t ncnt;
@@ -20,8 +18,9 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 
 	if (ctx != NULL && item != NULL && key != NULL)
 	{
-		ktmp = 0;
-		mtx = qsc_async_mutex_lock_ex();
+		qsc_async_mutex_lock(ctx->opmtx);
+
+		ktmp = NULL;
 		ncnt = ctx->count + 1;
 
 		if (ctx->items == NULL)
@@ -31,43 +30,64 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 			if (itmp != NULL)
 			{
 				ktmp = qsc_memutils_malloc(ncnt * QSC_COLLECTION_KEY_WIDTH);
+
+				if (ktmp != NULL)
+				{
+					ctx->items = itmp;
+					ctx->keys = ktmp;
+					qsc_memutils_clear(ctx->items + (ctx->count * ctx->width), ctx->width);
+					qsc_memutils_clear(ctx->keys + (ctx->count * QSC_COLLECTION_KEY_WIDTH), QSC_COLLECTION_KEY_WIDTH);
+				}
+				else
+				{
+					qsc_memutils_alloc_free(itmp);
+					itmp = NULL;
+				}
 			}
 
-			if (ktmp == NULL)
+			if (ctx->items != NULL && ctx->keys != NULL)
 			{
-				qsc_memutils_alloc_free(itmp);
-				itmp = NULL;
+				pos = (size_t)ctx->count * ctx->width;
+				qsc_memutils_copy(ctx->items + pos, item, ctx->width);
+				pos = ctx->count * QSC_COLLECTION_KEY_WIDTH;
+				qsc_memutils_copy(ctx->keys + pos, key, QSC_COLLECTION_KEY_WIDTH);
+				ctx->count = (uint32_t)ncnt;
 			}
+
+			qsc_async_mutex_unlock(ctx->opmtx);
 		}
 		else
 		{
+			qsc_async_mutex_lock(ctx->opmtx);
+
 			itmp = qsc_memutils_realloc(ctx->items, ncnt * ctx->width);
 
 			if (itmp != NULL)
 			{
 				ktmp = qsc_memutils_realloc(ctx->keys, ncnt * QSC_COLLECTION_KEY_WIDTH);
-			}
-			
-			if (ktmp == NULL)
-			{
-				qsc_memutils_alloc_free(itmp);
-				itmp = NULL;
-			}
-		}
 
-		if (itmp != NULL && ktmp != NULL)
-		{
-			ctx->items = itmp;
-			ctx->keys = ktmp;
+				if (ktmp != NULL)
+				{
+					qsc_memutils_clear(itmp, ncnt * ctx->width);
+					ctx->items = itmp;
+					qsc_memutils_clear(ktmp, ncnt * QSC_COLLECTION_KEY_WIDTH);
+					ctx->keys = ktmp;
+				}
+				else
+				{
+					qsc_memutils_alloc_free(itmp);
+					itmp = NULL;
+				}
+			}
 
 			pos = (size_t)ctx->count * ctx->width;
 			qsc_memutils_copy(ctx->items + pos, item, ctx->width);
 			pos = ctx->count * QSC_COLLECTION_KEY_WIDTH;
 			qsc_memutils_copy(ctx->keys + pos, key, QSC_COLLECTION_KEY_WIDTH);
 			ctx->count = (uint32_t)ncnt;
+			
+			qsc_async_mutex_unlock(ctx->opmtx);
 		}
-
-		qsc_async_mutex_unlock_ex(mtx);
 	}
 }
 
@@ -88,7 +108,7 @@ void qsc_collection_deserialize(qsc_collection_state* ctx, const uint8_t* input)
 			pos = sizeof(uint32_t);
 			ctx->width = qsc_intutils_le8to32(input + pos);
 
-			if (ctx->width <= QSC_COLLECTION_MAX_ENTRIES)
+			if (ctx->width <= QSC_COLLECTION_MAX_WIDTH)
 			{
 				pos += sizeof(uint32_t);
 
@@ -108,22 +128,31 @@ void qsc_collection_dispose(qsc_collection_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
+
 		if (ctx->items != NULL)
 		{
-			qsc_memutils_clear(ctx->items, (size_t)ctx->count * ctx->width);
+			qsc_memutils_secure_erase(ctx->items, (size_t)ctx->count * ctx->width);
 			qsc_memutils_alloc_free(ctx->items);
 			ctx->items = NULL;
 		}
 
 		if (ctx->keys != NULL)
 		{
-			qsc_memutils_clear(ctx->keys, ctx->count * QSC_COLLECTION_KEY_WIDTH);
+			qsc_memutils_secure_erase(ctx->keys, ctx->count * QSC_COLLECTION_KEY_WIDTH);
 			qsc_memutils_alloc_free(ctx->keys);
 			ctx->keys = NULL;
 		}
 
 		ctx->count = 0U;
 		ctx->width = 0U;
+
+		qsc_async_mutex_unlock(ctx->opmtx);
+
+		if (ctx->opmtx)
+		{
+			qsc_async_mutex_destroy(ctx->opmtx);
+		}
 	}
 }
 
@@ -148,14 +177,13 @@ bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const u
 	QSC_ASSERT(key != NULL);
 
 	const uint8_t* pitm;
-	qsc_mutex mtx;
 	bool res;
 
 	res = false;
 
 	if (ctx != NULL && ctx->items != NULL && item != NULL && key != NULL)
 	{
-		mtx = qsc_async_mutex_lock_ex();
+		qsc_async_mutex_lock(ctx->opmtx);
 
 		for (size_t i = 0U; i < (size_t)ctx->count; ++i)
 		{
@@ -168,7 +196,7 @@ bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const u
 			}
 		}
 
-		qsc_async_mutex_unlock_ex(mtx);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -179,7 +207,6 @@ bool qsc_collection_item_exists(const qsc_collection_state* ctx, const uint8_t* 
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(key != NULL);
 
-	qsc_mutex mtx;
 	uint8_t* item;
 	bool res;
 
@@ -187,8 +214,6 @@ bool qsc_collection_item_exists(const qsc_collection_state* ctx, const uint8_t* 
 
 	if (ctx != NULL && ctx->items != NULL && key != NULL)
 	{
-		mtx = qsc_async_mutex_lock_ex();
-
 		item = (uint8_t*)qsc_memutils_malloc(ctx->width);
 
 		if (item != NULL)
@@ -197,8 +222,6 @@ bool qsc_collection_item_exists(const qsc_collection_state* ctx, const uint8_t* 
 			qsc_memutils_alloc_free(item);
 			item = NULL;
 		}
-
-		qsc_async_mutex_unlock_ex(mtx);
 	}
 
 	return res;
@@ -211,12 +234,12 @@ void qsc_collection_initialize(qsc_collection_state* ctx, uint32_t width)
 
 	if (ctx != NULL && width != 0U)
 	{
+		ctx->opmtx = qsc_async_mutex_create();
 		ctx->count = 0U;
 		ctx->width = width;
 
-		/* initialize the placeholders */
-		ctx->items = qsc_memutils_malloc(sizeof(uint8_t));
-		ctx->keys = qsc_memutils_malloc(sizeof(uint8_t));
+		ctx->items = NULL;
+		ctx->keys = NULL;
 	}
 }
 
@@ -225,16 +248,16 @@ void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item, size_t index)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(item != NULL);
 
-	qsc_mutex mtx;
-
 	if (ctx != NULL && ctx->items != NULL && index < ctx->count)
 	{
 		const uint8_t* pitm;
 
-		mtx = qsc_async_mutex_lock_ex();
+		qsc_async_mutex_lock(ctx->opmtx);
+
 		pitm = ctx->items + (index * ctx->width);
 		qsc_memutils_copy(item, pitm, ctx->width);
-		qsc_async_mutex_unlock_ex(mtx);
+
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 }
 
@@ -243,7 +266,6 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(key != NULL);
 
-	qsc_mutex mtx;
 	uint8_t *itmp;
 	uint8_t *ktmp;
 	size_t posi;
@@ -251,7 +273,7 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 	if (ctx != NULL && ctx->items != NULL && ctx->keys != NULL && key != NULL)
 	{
-		mtx = qsc_async_mutex_lock_ex();
+		qsc_async_mutex_lock(ctx->opmtx);
 
 		for (size_t i = 0U; i < (size_t)ctx->count; ++i)
 		{
@@ -265,19 +287,19 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 					posi = i * ctx->width;
 					posl = ITMCNT * ctx->width;
 					qsc_memutils_copy(ctx->items + posi, ctx->items + posl, ctx->width);
-					qsc_memutils_clear(ctx->items + posl, ctx->width);
+					qsc_memutils_secure_erase(ctx->items + posl, ctx->width);
 
 					/* swap the last key with the key being removed */
 					posi = i * QSC_COLLECTION_KEY_WIDTH;
 					posl = ITMCNT * QSC_COLLECTION_KEY_WIDTH;
 					qsc_memutils_copy(ctx->keys + posi, ctx->keys + posl, QSC_COLLECTION_KEY_WIDTH);
-					qsc_memutils_clear(ctx->keys + posl, QSC_COLLECTION_KEY_WIDTH);
+					qsc_memutils_secure_erase(ctx->keys + posl, QSC_COLLECTION_KEY_WIDTH);
 
 				}
 				else
 				{
-					qsc_memutils_clear(ctx->items, ctx->width);
-					qsc_memutils_clear(ctx->keys, QSC_COLLECTION_KEY_WIDTH);
+					qsc_memutils_secure_erase(ctx->items, ctx->width);
+					qsc_memutils_secure_erase(ctx->keys, QSC_COLLECTION_KEY_WIDTH);
 				}
 
 				--ctx->count;
@@ -288,12 +310,17 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 					if (itmp != NULL)
 					{
-						ctx->items = itmp;
 						ktmp = qsc_memutils_realloc(ctx->keys, QSC_COLLECTION_KEY_WIDTH * ctx->count);
 
 						if (ktmp != NULL)
 						{
+							ctx->items = itmp;
 							ctx->keys = ktmp;
+						}
+						else
+						{
+							qsc_memutils_alloc_free(itmp);
+							itmp = NULL;
 						}
 					}
 				}
@@ -303,19 +330,24 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 
 					if (itmp != NULL)
 					{
-						ctx->items = itmp;
 						ktmp = qsc_memutils_realloc(ctx->keys, 1U);
 
 						if (ktmp != NULL)
 						{
+							ctx->items = itmp;
 							ctx->keys = ktmp;
+						}
+						else
+						{
+							qsc_memutils_alloc_free(itmp);
+							itmp = NULL;
 						}
 					}
 				}
 			}
 		}
 
-		qsc_async_mutex_unlock_ex(mtx);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 }
 
@@ -324,14 +356,13 @@ size_t qsc_collection_serialize(uint8_t* output, const qsc_collection_state* ctx
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 
-	qsc_mutex mtx;
 	size_t pos;
 
 	pos = 0U;
 
 	if (ctx != NULL && ctx->items != NULL && output != NULL)
 	{
-		mtx = qsc_async_mutex_lock_ex();
+		qsc_async_mutex_lock(ctx->opmtx);
 
 		qsc_intutils_le32to8(output, ctx->count);
 		pos = sizeof(uint32_t);
@@ -346,7 +377,7 @@ size_t qsc_collection_serialize(uint8_t* output, const qsc_collection_state* ctx
 			pos += QSC_COLLECTION_KEY_WIDTH;
 		}
 
-		qsc_async_mutex_unlock_ex(mtx);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return pos;
@@ -362,7 +393,9 @@ size_t qsc_collection_size(const qsc_collection_state* ctx)
 
 	if (ctx != NULL && ctx->items != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = (ctx->count * ctx->width) + (ctx->count * QSC_COLLECTION_KEY_WIDTH) + sizeof(uint32_t) + sizeof(uint32_t);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;

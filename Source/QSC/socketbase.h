@@ -130,6 +130,12 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 */
 #define QSC_SOCKET_RECEIVE_BUFFER_SIZE 1600U
 
+/*!
+\def QSC_SOCKET_DEFAULT_SNDBUF_SIZE
+* \brief The default socket send buffer size
+*/
+#define QSC_SOCKET_DEFAULT_SNDBUF_SIZE 65536U  
+
 /*! \enum qsc_socket_exceptions
 * \brief Socket code enumeration names
 */
@@ -233,57 +239,7 @@ typedef enum
 /*! \brief The socket error strings array.
 * \brief Error messages corresponding to the qsc_socket_exceptions enumeration.
 */
-static const char QSC_SOCKET_ERROR_STRINGS[48][128] =
-{
-	"SUCCESS: The operation completed successfully.",
-	"ERROR: The operation has failed.",
-	"INVALID: The input parameters are incorrect.",
-	"EADDRINUSE: The socket's local address is in use and the socket was not marked to allow address reuse with SO_REUSEADDR.",
-	"EDESTADDRREQ: A destination address is required.",
-	"EAFNOSUPPORT: The address family is not supported.",
-	"EISCONN: The socket is already connected.",
-	"EINTR: A blocking sockets call was canceled.",
-	"EINPROGRESS: A blocking sockets call is in progress, or the service provider is still processing a callback function.",
-	"EACCES: The requested address is a broadcast address, but the appropriate flag was not set.",
-	"EFAULT: The buffer parameter is not completely contained in a valid part of the user address space.",
-	"ECONNRESET: The virtual circuit was reset by the remote side executing a hard or abortive close.",
-	"ECONNABORTED: The virtual circuit was terminated due to a time-out or other failure.",
-	"ETIMEDOUT: The connection has been dropped, because of a network failure.",
-	"ECONNREFUSED: The connection was refused.",
-	"ENOTSOCK: The descriptor is not a socket.",
-	"EDQUOT: The disk quota is exceeded.",
-	"ENETRESET: The connection has been broken due to the keep-alive activity detecting a failure.",
-	"EPFNOSUPPORT: The protocol family is not supported.",
-	"EHOSTDOWN: The destination host is down.",
-	"EHOSTUNREACH: The remote host cannot be reached from this host at this time.",
-	"EALREADY: Operation in progress.",
-	"EADDRNOTAVAIL: The address is not available.",
-	"INVALID_PARAMETER: One or more parameters are invalid.",
-	"EPROTOTYPE: The protocol type is invalid for the socket.",
-	"ENOPROTOOPT: The protocol option is invalid.",
-	"EINVALIDPROVIDER: The service provider is invalid.",
-	"EREMOTE: The item is not available locally.",
-	"EMSGSIZE: The message size is too long.",
-	"ENAMETOOLONG: The name is too long.",
-	"ENETDOWN: The network subsystem has failed.",
-	"ENETUNREACH: The network is unreachable.",
-	"ENOBUFS: No buffer space is available.",
-	"EMFILE: No more socket descriptors are available.",
-	"_NOT_ENOUGH_MEMORY: The system does not have enough memory available.",
-	"EINVAL: The socket has not been bound with bind, or MSG_OOB was specified for a socket with SO_OOBINLINE enabled.",
-	"ENOTCONN: The socket is not connected.",
-	"NOTINITIALISED: A successful Startup call must occur before using this function.",
-	"EOPNOTSUPP: The socket operation is not supported.",
-	"EPROTONOSUPPORT: The protocol is not supported.",
-	"ESHUTDOWN: The socket has been shut down.",
-	"ESOCKTNOSUPPORT: The socket type is not supported.",
-	"SYSNOTREADY: The subsystem is unavailable.",
-	"EPROCLIM: The host is using too many processes.",
-	"EUSERS: The user quota is exceeded.",
-	"ELOOP: Can not translate name.",
-	"EWOULDBLOCK: The socket is marked as nonblocking and the requested operation would block.",
-	"",
-};
+extern const char QSC_SOCKET_ERROR_STRINGS[48][128];
 
 /*! \struct qsc_socket_receive_async_state
 * \brief The socket async receive state structure.
@@ -317,7 +273,7 @@ typedef struct
 //* \brief The socket exception callback prototype
 //*
 //* \param source:	[qsc_socket*] The socket source
-//* \param error:		[qsc_socket_exceptions] The socket exception
+//* \param error:	[qsc_socket_exceptions] The socket exception
 //*/
 //QSC_EXPORT_API void qsc_socket_exception_callback(qsc_socket* source, qsc_socket_exceptions error);
 
@@ -334,7 +290,7 @@ typedef struct
 //* \brief The receive polling callback prototype
 //*
 //* \param source:	[const qsc_socket*] The socket source
-//* \param error:		[size_t] The socket exception
+//* \param error:	[size_t] The socket exception
 //*/
 //QSC_EXPORT_API void qsc_socket_receive_poll_callback(const qsc_socket* source, size_t error);
 
@@ -556,6 +512,7 @@ QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* ou
 *
 * \param sock:		[qsc_socket*] The local socket
 * \param dest:		[char*] The destination IP address string
+* \param destlen:	[size_t] The length of the destination buffer
 * \param port:		[uint16_t] The port receiving the data
 * \param output:	[uint8_t*] The output buffer
 * \param otplen:	[size_t] The length of the output buffer
@@ -563,7 +520,7 @@ QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* ou
 *
 * \return			[size_t] Returns the number of bytes received from the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, size_t destlen, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Polls an array of sockets.

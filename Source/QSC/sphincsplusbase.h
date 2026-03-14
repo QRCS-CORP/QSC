@@ -52,7 +52,7 @@
 #ifndef QSC_SPHINCSPLUSBASE2_H
 #define QSC_SPHINCSPLUSBASE2_H
 
-/* \cond */
+/* \cond NO_DOCUMENT */
 
 #include "qsccommon.h"
 
@@ -159,6 +159,6 @@ bool sphincsplus_ref_verify(const uint8_t* signedmsg, size_t smsglen, const uint
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 
 #endif

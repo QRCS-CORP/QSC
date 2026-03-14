@@ -235,9 +235,12 @@ QSC_EXPORT_API void qsc_rcs_dispose(qsc_rcs_state* ctx);
 /**
  * \brief Initialize the state with the input cipher-key and optional info tweak.
  *
- * \param ctx:			[qsc_rcs_state*] A pointer to the cipher state structure.
- * \param keyparams:	[const qsc_rcs_state*] A pointer to the secret input cipher-key and nonce structure.
- * \param encryption:	[bool] A flag that specifies true for encryption, false for decryption.
+ * \warning When using a CTR based construction the nonce must be unique for a given key.
+ * Re-using a nonce-key pair on a different plaintext input represents a catastrophic loss of security.
+ *
+ * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
+ * \param keyparams: [const qsc_rcs_state*] A pointer to the secret input cipher-key and nonce structure.
+ * \param encryption: [bool] A flag that specifies true for encryption, false for decryption.
  */
 QSC_EXPORT_API void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, bool encryption);
 
@@ -248,9 +251,9 @@ QSC_EXPORT_API void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keypara
  * The associated data must be set after initialization and before each transformation call.
  * The data is erased after each call to the transform.
  *
- * \param ctx:			[qsc_rcs_state*] A pointer to the cipher state structure.
- * \param data:			[const uint8_t*] A pointer to the associated data array.
- * \param length:		[size_t] The associated data array length.
+ * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
+ * \param data: [const uint8_t*] A pointer to the associated data array.
+ * \param length: [size_t] The associated data array length.
  */
 QSC_EXPORT_API void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t length);
 
@@ -259,8 +262,8 @@ QSC_EXPORT_API void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* da
 *
 * \warning If reusing a nonce/key, the nonce must be retrieved after the last finalized transform call.
 *
-* \param ctx:			[struct] The cipher state structure
-* \param nonce:			[uint8_t*] The output nonce array
+* \param ctx: [struct] The cipher state structure
+* \param nonce: [uint8_t*] The output nonce array
 */
 QSC_EXPORT_API void qsc_rcs_store_nonce(const qsc_rcs_state* ctx, uint8_t nonce[QSC_RCS_NONCE_SIZE]);
 
@@ -271,12 +274,12 @@ QSC_EXPORT_API void qsc_rcs_store_nonce(const qsc_rcs_state* ctx, uint8_t nonce[
  * to the cipher-text. In decryption mode, the input cipher-text is authenticated and compared to the MAC code.
  * If the codes do not match, the cipher-text is not decrypted and the call fails.
  *
- * \param ctx:			[qsc_rcs_state*] A pointer to the cipher state structure.
- * \param output:		[uint8_t*] A pointer to the output array.
- * \param input:		[const uint8_t*] A pointer to the input array.
- * \param length:		[size_t] The number of bytes to transform (not including the tag length).
+ * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
+ * \param output: [uint8_t*] A pointer to the output array.
+ * \param input: [const uint8_t*] A pointer to the input array.
+ * \param length: [size_t] The number of bytes to transform (not including the tag length).
  *
- * \return				[bool] Returns true if the data was transformed successfully, false on failure.
+ * \return [bool] Returns true if the data was transformed successfully, false on failure.
  */
 QSC_EXPORT_API bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
@@ -288,13 +291,13 @@ QSC_EXPORT_API bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const
  * In encryption mode, the plain-text is encrypted and the MAC code is appended.
  * In decryption mode, the cipher-text is authenticated; if the MAC codes do not match, the call fails.
  *
- * \param ctx:			[qsc_rcs_state*] A pointer to the cipher state structure.
- * \param output:		[uint8_t*] A pointer to the output array.
- * \param input:		[const uint8_t*] A pointer to the input array.
- * \param length:		[size_t] The number of bytes to transform.
- * \param finalize:		[bool] A flag to indicate if this is the final call.
+ * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
+ * \param output: [uint8_t*] A pointer to the output array.
+ * \param input: [const uint8_t*] A pointer to the input array.
+ * \param length: [size_t] The number of bytes to transform.
+ * \param finalize: [bool] A flag to indicate if this is the final call.
  *
- * \return				[bool] Returns true if the data was transformed successfully, false on failure.
+ * \return [bool] Returns true if the data was transformed successfully, false on failure.
  */
 QSC_EXPORT_API bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize);
 

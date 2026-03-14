@@ -136,11 +136,10 @@ int32_t qsc_crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, con
  */
 int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p);
 
-
 /**
  * \brief Combine an external public key with an internal private key to produce a shared secret.
  *
- * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_SECRETKEY_SIZE.
+ * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_SECRETKEY_SIZE.
  *
  * \param secret:	  [uint8_t*] Pointer to the shared secret.
  * \param publickey:  [const uint8_t*] Pointer to the public-key array.
@@ -153,7 +152,7 @@ bool qsc_x25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const ui
 /**
  * \brief Generates public and private keys for the ECDH key encapsulation mechanism.
  *
- * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_SECRETKEY_SIZE.
+ * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_SECRETKEY_SIZE.
  *
  * \param publickey:  [uint8_t*] Pointer to the output public-key array.
  * \param privatekey: [uint8_t*] Pointer to the output private-key array.

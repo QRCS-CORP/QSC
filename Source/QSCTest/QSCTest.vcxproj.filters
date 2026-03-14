@@ -66,10 +66,10 @@
     <ClCompile Include="csx_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="ecdh_test.c">
+    <ClCompile Include="eddh_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="ecdsa_test.c">
+    <ClCompile Include="eddsa_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
     <ClCompile Include="timer.c">
@@ -103,6 +103,12 @@
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
     <ClCompile Include="qmac_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="falcon_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,10 +152,10 @@
     <ClInclude Include="csx_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
-    <ClInclude Include="ecdh_test.h">
+    <ClInclude Include="eddh_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
-    <ClInclude Include="ecdsa_test.h">
+    <ClInclude Include="eddsa_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="timer.h">
@@ -183,6 +189,12 @@
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="qmac_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="falcon_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsa_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>

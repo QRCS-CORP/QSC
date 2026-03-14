@@ -80,38 +80,38 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
  * \brief Sort an array of 8-bit signed integers.
  *
- * \param arr8:		[int8_t*] The array of 8-bit signed integers to sort.
- * \param start:	[int32_t] The starting index of the sort.
- * \param end:		[int32_t] The end index of the sort.
+ * \param arr: [int8_t*] The array of 8-bit signed integers to sort.
+ * \param start: [int32_t] The starting index of the sort.
+ * \param end: [int32_t] The end index of the sort.
  */
-QSC_EXPORT_API void qsc_qsort_sort_i8(int8_t* arr8, int32_t start, int32_t end);
+QSC_EXPORT_API void qsc_qsort_sort_i8(int8_t* arr, int32_t start, int32_t end);
 
 /**
  * \brief Sort an array of 16-bit signed integers.
  *
- * \param arr16:	[int16_t*] The array of 16-bit signed integers to sort.
- * \param start:	[int32_t] The starting index of the sort.
- * \param end:		[int32_t] The end index of the sort.
+ * \param arr: [int16_t*] The array of 16-bit signed integers to sort.
+ * \param start: [int32_t] The starting index of the sort.
+ * \param end: [int32_t] The end index of the sort.
  */
-QSC_EXPORT_API void qsc_qsort_sort_i16(int16_t* arr16, int32_t start, int32_t end);
+QSC_EXPORT_API void qsc_qsort_sort_i16(int16_t* arr, int32_t start, int32_t end);
 
 /**
  * \brief Sort an array of 32-bit signed integers.
  *
- * \param arr32:	[int32_t*] The array of 32-bit signed integers to sort.
- * \param start:	[int32_t] The starting index of the sort.
- * \param end:		[int32_t] The end index of the sort.
+ * \param arr: [int32_t*] The array of 32-bit signed integers to sort.
+ * \param start: [int32_t] The starting index of the sort.
+ * \param end: [int32_t] The end index of the sort.
  */
-QSC_EXPORT_API void qsc_qsort_sort_i32(int32_t* arr32, int32_t start, int32_t end);
+QSC_EXPORT_API void qsc_qsort_sort_i32(int32_t* arr, int32_t start, int32_t end);
 
 /**
  * \brief Sort an array of 64-bit signed integers.
  *
- * \param arr64:	[int64_t*] The array of 64-bit signed integers to sort.
- * \param start:	[int64_t] The starting index of the sort.
- * \param end:		[int64_t] The end index of the sort.
+ * \param arr: [int64_t*] The array of 64-bit signed integers to sort.
+ * \param start: [int64_t] The starting index of the sort.
+ * \param end: [int64_t] The end index of the sort.
  */
-QSC_EXPORT_API void qsc_qsort_sort_i64(int64_t* arr64, int64_t start, int64_t end);
+QSC_EXPORT_API void qsc_qsort_sort_i64(int64_t* arr, int64_t start, int64_t end);
 
 QSC_CPLUSPLUS_ENABLED_END
 

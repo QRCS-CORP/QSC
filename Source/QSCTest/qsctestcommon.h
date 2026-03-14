@@ -52,7 +52,7 @@
 #ifndef QSCTEST_COMMON_H
 #define QSCTEST_COMMON_H
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 #include <assert.h>
 #include <errno.h>
@@ -62,6 +62,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 
 #endif

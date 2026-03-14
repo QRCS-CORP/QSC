@@ -116,7 +116,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_ACP_SEED_MAX
  * \brief The maximum number of bytes that can be generated in a single call to qsc_acp_generate.
  *
- * This constant limits the output size to ensure that the internal entropy aggregation and key 
+ * \details This constant limits the output size to ensure that the internal entropy aggregation and key
  * derivation process remains within safe operational parameters.
  */
 #define QSC_ACP_SEED_MAX 10240000U
@@ -124,7 +124,7 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
  * \brief Generate cryptographically secure random bytes.
  *
- * Aggregates entropy from multiple system sources including system statistics, hardware 
+ * \details Aggregates entropy from multiple system sources including system statistics, hardware
  * randomness (via RDRAND), and the system's cryptographic service provider. The collected 
  * entropy is then processed using the cSHAKE-512 algorithm to produce pseudorandom output.
  *
@@ -139,7 +139,7 @@ QSC_EXPORT_API bool qsc_acp_generate(uint8_t* output, size_t length);
 /**
  * \brief Generate a cryptographically secure random 16-bit unsigned integer.
  *
- * This function generates a 16-bit unsigned integer by calling qsc_acp_generate 
+ * \details This function generates a 16-bit unsigned integer by calling qsc_acp_generate
  * to obtain the necessary random bytes and assembling them in big-endian order.
  *
  * \return			[uint16_t] A 16-bit unsigned integer generated from high-quality random data.
@@ -151,7 +151,7 @@ QSC_EXPORT_API uint16_t qsc_acp_uint16(void);
 /**
  * \brief Generate a cryptographically secure random 32-bit unsigned integer.
  *
- * This function generates a 32-bit unsigned integer by calling qsc_acp_generate 
+ * \details This function generates a 32-bit unsigned integer by calling qsc_acp_generate
  * to obtain the necessary random bytes and assembling them in big-endian order.
  *
  * \return			[uint32_t] A 32-bit unsigned integer generated from high-quality random data.
@@ -163,7 +163,7 @@ QSC_EXPORT_API uint32_t qsc_acp_uint32(void);
 /**
  * \brief Generate a cryptographically secure random 64-bit unsigned integer.
  *
- * This function generates a 64-bit unsigned integer by calling qsc_acp_generate 
+ * \details This function generates a 64-bit unsigned integer by calling qsc_acp_generate
  * to obtain the necessary random bytes and assembling them in big-endian order.
  *
  * \return			[uint64_t] A 64-bit unsigned integer generated from high-quality random data.

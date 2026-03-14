@@ -23,6 +23,11 @@
 static void chacha_increment(qsc_chacha_state* ctx)
 {
 	++ctx->state[12U];
+
+	if (ctx->state[12U] == 0U) 
+	{ 
+		++ctx->state[13U]; 
+	}
 }
 
 static void chacha_permute_p512c(const qsc_chacha_state* ctx, uint8_t* output)
@@ -719,7 +724,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 		if (length >= CHACHA_AVX512BLOCK_SIZE)
 		{
 			chacha_avx512_state ctxw;
-			uint8_t ctrblk[64U];
+			uint32_t ctrblk[16U];
 			__m512i tmpin;
 
 			for (i = 0U; i < 16U; ++i)
@@ -899,31 +904,6 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 
 /* chacha-poly1305*/
 
-static void chacha_poly1305_aligned_update(qsc_poly1305_state* pstate, const uint8_t* message, size_t msglen)
-{
-	size_t len;
-	size_t oft;
-
-	len = msglen;
-	oft = 0U;
-
-	while (len >= QSC_POLY1305_BLOCK_SIZE)
-	{
-		qsc_poly1305_blockupdate(pstate, message + oft);
-
-		len -= QSC_POLY1305_BLOCK_SIZE;
-		oft += QSC_POLY1305_BLOCK_SIZE;
-	}
-
-	if (len != 0U)
-	{
-		uint8_t pad[QSC_POLY1305_BLOCK_SIZE] = { 0U };
-
-		qsc_memutils_copy(pad, message + oft, len);
-		qsc_poly1305_blockupdate(pstate, pad);
-	}
-}
-
 static void chacha_poly1305_finalize(qsc_chacha_poly1305_state* ctx, uint8_t* tag)
 {
 	uint8_t fblk[QSC_POLY1305_BLOCK_SIZE] = { 0U };
@@ -941,8 +921,17 @@ void qsc_chacha_poly1305_set_associated(qsc_chacha_poly1305_state* ctx, const ui
 
 	if (ctx != NULL && data != NULL)
 	{
-		chacha_poly1305_aligned_update(&ctx->pstate, data, datalen);
+		qsc_poly1305_update(&ctx->pstate, data, datalen);
 		ctx->aadlen = datalen;
+
+		/* RFC 8439 §2.8: zero-pad AAD to 16-byte boundary */
+		const size_t rem = datalen & 15U;
+
+		if (rem != 0U)
+		{
+			uint8_t pad[QSC_POLY1305_BLOCK_SIZE] = { 0U };
+			qsc_poly1305_update(&ctx->pstate, pad, QSC_POLY1305_BLOCK_SIZE - rem);
+		}
 	}
 }
 
@@ -959,11 +948,20 @@ bool qsc_chacha_poly1305_decrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
 	{
 		uint8_t tag[QSC_POLY1305_MAC_SIZE] = { 0U };
-		size_t mlen;
+		const size_t mlen = length - QSC_POLY1305_MAC_SIZE;
 
-		mlen = length - QSC_POLY1305_MAC_SIZE;
-		chacha_poly1305_aligned_update(&ctx->pstate, input, mlen);
+		qsc_poly1305_update(&ctx->pstate, input, mlen);
 		ctx->msglen = mlen;
+
+		/* RFC 8439 §2.8: zero-pad ciphertext to 16-byte boundary */
+		const size_t rem = mlen & 15U;
+
+		if (rem != 0U)
+		{
+			uint8_t pad[QSC_POLY1305_BLOCK_SIZE] = { 0U };
+			qsc_poly1305_update(&ctx->pstate, pad, QSC_POLY1305_BLOCK_SIZE - rem);
+		}
+
 		chacha_poly1305_finalize(ctx, tag);
 
 		if (qsc_intutils_verify(input + mlen, tag, QSC_POLY1305_MAC_SIZE) == 0U)
@@ -989,6 +987,31 @@ void qsc_chacha_poly1305_dispose(qsc_chacha_poly1305_state* ctx)
 	}
 }
 
+void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
+{
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(input != NULL);
+
+	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
+	{
+		qsc_chacha_transform(&ctx->cstate, output, input, length);
+		qsc_poly1305_update(&ctx->pstate, output, length);
+		ctx->msglen = length;
+
+		/* RFC 8439 §2.8: zero-pad ciphertext to 16-byte boundary */
+		const size_t rem = length & 15U;
+
+		if (rem != 0U)
+		{
+			uint8_t pad[QSC_POLY1305_BLOCK_SIZE] = { 0U };
+			qsc_poly1305_update(&ctx->pstate, pad, QSC_POLY1305_BLOCK_SIZE - rem);
+		}
+
+		chacha_poly1305_finalize(ctx, output + length);
+	}
+}
+
 void qsc_chacha_poly1305_initialize(qsc_chacha_poly1305_state* ctx, const qsc_chacha_keyparams* keyparams)
 {
 	QSC_ASSERT(ctx != NULL);
@@ -1004,21 +1027,6 @@ void qsc_chacha_poly1305_initialize(qsc_chacha_poly1305_state* ctx, const qsc_ch
 		qsc_chacha_transform(&ctx->cstate, pkey, ptxt, sizeof(pkey));
 		qsc_poly1305_initialize(&ctx->pstate, pkey);
 		qsc_memutils_secure_erase(pkey, sizeof(pkey));
-	}
-}
-
-void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
-{
-	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(input != NULL);
-
-	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
-	{
-		qsc_chacha_transform(&ctx->cstate, output, input, length);
-		chacha_poly1305_aligned_update(&ctx->pstate, output, length);
-		ctx->msglen = length;
-		chacha_poly1305_finalize(ctx, output + length);
 	}
 }
 

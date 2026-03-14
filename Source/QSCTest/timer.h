@@ -55,7 +55,7 @@
 #include "qsctestcommon.h"
 #include <time.h>
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 /**
 * \brief Returns the clock time at the start of a timed operation
@@ -71,6 +71,6 @@ clock_t qsctest_timer_start();
 */
 uint64_t qsctest_timer_elapsed(clock_t start);
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 
 #endif

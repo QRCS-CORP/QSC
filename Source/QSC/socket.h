@@ -121,9 +121,9 @@ typedef int32_t socket_t;
 * An uninitialized socket handle
 */
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	static const socket_t QSC_UNINITIALIZED_SOCKET = (uintptr_t)~0;
+#   define QSC_UNINITIALIZED_SOCKET ((socket_t)(uintptr_t)~0U)
 #else
-	static const int32_t QSC_UNINITIALIZED_SOCKET = -1;
+#   define QSC_UNINITIALIZED_SOCKET ((socket_t)-1)
 #endif
 
 /*! \struct qsc_socket

@@ -53,6 +53,7 @@
 #define QSC_SECRAND_H
 
 #include "qsccommon.h"
+#include "async.h"
 #include "csg.h"
 
 QSC_CPLUSPLUS_ENABLED_START
@@ -95,6 +96,7 @@ QSC_EXPORT_API typedef struct
     uint8_t cache[QSC_SECRAND_CACHE_SIZE];  /*!< The cache buffer. */
     size_t cpos;                            /*!< The cache position. */
     bool init;                              /*!< The initialized flag. */
+    qsc_mutex opmtx;                        /*!< The implementation mutex. */
 } qsc_secrand_state;
 
 /**

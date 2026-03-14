@@ -52,7 +52,7 @@
 #ifndef QSC_DILITHIUMBASE_AVX2_H
 #define QSC_DILITHIUMBASE_AVX2_H
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 #include "qsccommon.h"
 
@@ -139,6 +139,6 @@ bool qsc_dilithium_avx2_open(uint8_t* message, size_t* msglen, const uint8_t* co
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 
 #endif

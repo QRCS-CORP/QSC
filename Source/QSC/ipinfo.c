@@ -2,6 +2,15 @@
 #include "memutils.h"
 #include "stringutils.h"
 #include <ctype.h>
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+#	define WIN32_LEAN_AND_MEAN
+#	define VC_EXTRALEAN
+#	include <winsock2.h>
+#	include <ws2tcpip.h>
+#else
+#	include <arpa/inet.h>
+#	include <netinet/in.h>
+#endif
 
 static bool ipinfo_hexfield_valid(const char** pp)
 {
@@ -297,13 +306,27 @@ bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 {
 	QSC_ASSERT(address != NULL);
 
+	uint8_t a;
+	uint8_t b;
 	bool res;
 
 	res = false;
 
 	if (address != NULL)
 	{
-		res = (address != NULL && address->ipv4[0U] <= 224U && address->ipv4[1U] != 255U && address->ipv4[2U] != 255U && address->ipv4[3U] != 255U);
+		a = address->ipv4[0U];
+		b = address->ipv4[1U];
+
+		if (a != 0U && a != 127U)
+		{
+			if (a != 169U || b != 254U)
+			{
+				if (a < 224U)
+				{
+					res = true;
+				}
+			}
+		}
 	}
 
 	return res;
@@ -481,16 +504,16 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 
 #else
 
-		pos = (size_t)sprintf(output, "%d", address->ipv4[0U]);
+		pos = (size_t)snprintf(output, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[0U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[1U]);
+		pos += (size_t)snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[1U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address->ipv4[2U]);
+		pos += (size_t)snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[2U]);
 		output[pos] = DELIM;
 		++pos;
-		pos += sprintf((output + pos), "%d", address->ipv4[3U]);
+		pos += (size_t)snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[3U]);
 
 #endif
 		qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
@@ -545,19 +568,27 @@ uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLE
 	uint32_t ta[4U] = { 0U };
 	const char* tmp = mask;
 	uint32_t bmask;
-	int64_t pos;
 	uint8_t bits;
 
-	bits = 0;
+	bits = 0U;
 
 	if (mask != NULL)
 	{
 		for (size_t i = 0U; i < 4U; ++i)
 		{
-			pos = qsc_stringutils_find_string(tmp, ".");
-			ta[i] += qsc_stringutils_string_to_int(tmp);
-			tmp += (size_t)pos + 1;
+			ta[i] = (uint32_t)qsc_stringutils_string_to_int(tmp);
+
+			if (i < 3U)
+			{
+				const char* dot = strchr(tmp, '.');
+
+				if (dot != NULL)
+				{
+					tmp = dot + 1;
+				}
+			}
 		}
+
 
 		bits = 0U;
 		bmask = ((ta[0U] << 24U) + (ta[1U] << 16U) + (ta[2U] << 8U) + (ta[3U]));
@@ -744,29 +775,21 @@ qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_from_string(const char input[QSC
 
 	if (input != NULL)
 	{
-		if (qsc_stringutils_string_contains(input, "::1") == true)
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+		struct in6_addr tmp6;
+
+		if (InetPton(AF_INET6, input, &tmp6) == 1)
 		{
-			res = qsc_ipinfo_ipv6_address_loopback();
+			qsc_memutils_copy(res.ipv6, &tmp6, QSC_IPINFO_IPV6_BYTELEN);
 		}
-		else
+#else
+		struct in6_addr tmp6;
+
+		if (inet_pton(AF_INET6, input, &tmp6) == 1)
 		{
-			res.ipv6[0U] = qsc_arrayutils_hex_to_uint8(input, 2U);
-			res.ipv6[1U] = qsc_arrayutils_hex_to_uint8((input + 2U), 2U);
-			res.ipv6[2U] = qsc_arrayutils_hex_to_uint8((input + 5U), 2U);
-			res.ipv6[3U] = qsc_arrayutils_hex_to_uint8((input + 7U), 2U);
-			res.ipv6[4U] = qsc_arrayutils_hex_to_uint8((input + 10U), 2U);
-			res.ipv6[5U] = qsc_arrayutils_hex_to_uint8((input + 12U), 2U);
-			res.ipv6[6U] = qsc_arrayutils_hex_to_uint8((input + 15U), 2U);
-			res.ipv6[7U] = qsc_arrayutils_hex_to_uint8((input + 17U), 2U);
-			res.ipv6[8U] = qsc_arrayutils_hex_to_uint8((input + 20U), 2U);
-			res.ipv6[9U] = qsc_arrayutils_hex_to_uint8((input + 22U), 2U);
-			res.ipv6[10U] = qsc_arrayutils_hex_to_uint8((input + 25U), 2U);
-			res.ipv6[11U] = qsc_arrayutils_hex_to_uint8((input + 27U), 2U);
-			res.ipv6[12U] = qsc_arrayutils_hex_to_uint8((input + 30U), 2U);
-			res.ipv6[13U] = qsc_arrayutils_hex_to_uint8((input + 32U), 2U);
-			res.ipv6[14U] = qsc_arrayutils_hex_to_uint8((input + 35U), 2U);
-			res.ipv6[15U] = qsc_arrayutils_hex_to_uint8((input + 37U), 2U);
+			qsc_memutils_copy(res.ipv6, &tmp6, QSC_IPINFO_IPV6_BYTELEN);
 		}
+#endif
 	}
 
 	return res;

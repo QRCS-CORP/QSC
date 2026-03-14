@@ -54,7 +54,7 @@
 
 #include "qsccommon.h"
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -199,10 +199,10 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
 /**
 * \brief Generates cipher text and shared secret for given public key
 *
-* \param ct: Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param ss: Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk: [const] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param rng_generate: Pointer to the random generator function
+* \param ct:	[uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param ss:	[uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param pk:	[const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param rng_generate: [func*] Pointer to the random generator function
 * \return Returns true for success
 */
 bool qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
@@ -223,9 +223,9 @@ void qsc_kyber_avx2_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], u
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
 *
-* \param pk: Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk: Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
-* \param rng_generate: Pointer to the random generator function
+* \param pk:	[uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk:	[uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param rng_generate: [func*] Pointer to the random generator function
 * \return Returns true for success
 */
 bool qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],
@@ -234,10 +234,10 @@ bool qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism using input seeds
 *
-* \param pk: Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk: Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
-* \param d: Pointer to the random d coin
-* \param z: Pointer to the random z coin
+* \param pk:	[uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk:	[uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param d:		[uint8_t*] Pointer to the random d coin
+* \param z:		[uint8_t*] Pointer to the random z coin
 */
 void qsc_kyber_avx2_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],
 	uint8_t d[QSC_KYBER_SYMBYTES], uint8_t z[QSC_KYBER_SYMBYTES]);
@@ -246,6 +246,6 @@ void qsc_kyber_avx2_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond */
+/* \cond NO_DOCUMENT */
 
 #endif

@@ -1,5 +1,4 @@
 #include "sphincsplusbase.h"
-#include "intutils.h"
 #include "memutils.h"
 #include "sha3.h"
 
@@ -417,7 +416,11 @@ static void sphincsplus_thash_x1(uint8_t* out, const uint8_t* in, const spx_ctx*
     qsc_memutils_copy(buf + SPX_N, addr, SPX_ADDR_BYTES);
     qsc_memutils_copy(buf + SPX_N + SPX_ADDR_BYTES, in, SPX_N);
 
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+    qsc_shake512_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES + SPX_N);
+#else
     qsc_shake256_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES + SPX_N);
+#endif
 }
 
 static void sphincsplus_thash_x2(uint8_t* out, const uint8_t* in, const spx_ctx* ctx, uint32_t addr[8U])
@@ -430,7 +433,11 @@ static void sphincsplus_thash_x2(uint8_t* out, const uint8_t* in, const spx_ctx*
     qsc_memutils_copy(buf + SPX_N, addr, SPX_ADDR_BYTES);
     qsc_memutils_copy(buf + SPX_N + SPX_ADDR_BYTES, in, (SPX_N * 2U));
 
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+    qsc_shake512_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES + (SPX_N * 2U));
+#else
     qsc_shake256_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES + (SPX_N * 2U));
+#endif
 }
 
 static void sphincsplus_thash_fors(uint8_t* out, const uint8_t* in, const spx_ctx* ctx, uint32_t addr[8U])
@@ -456,7 +463,11 @@ static void sphincsplus_thash_wots(uint8_t* out, const uint8_t* in, const spx_ct
     qsc_memutils_copy(buf + SPX_N, addr, SPX_ADDR_BYTES);
     qsc_memutils_copy(buf + SPX_N + SPX_ADDR_BYTES, in, SPX_WOTS_LEN * SPX_N);
 
+#if defined(QSC_SPHINCSPLUS_EXTENDED)
+    qsc_shake512_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES + (SPX_WOTS_LEN * SPX_N));
+#else
     qsc_shake256_compute(out, SPX_N, buf, SPX_N + SPX_ADDR_BYTES + (SPX_WOTS_LEN * SPX_N));
+#endif
 }
 
 /* fors.c */
@@ -540,6 +551,7 @@ static void sphincsplus_treehash_fors(uint8_t* root, uint8_t* auth_path, const s
         uint32_t internal_idx = idx;
         uint32_t internal_leaf = leaf_idx;
         uint32_t h;     /* The height we are in the Merkle tree */
+        uint8_t* left;
 
         for (h=0U;; h++, internal_idx >>= 1U, internal_leaf >>= 1U) 
         {
@@ -579,7 +591,7 @@ static void sphincsplus_treehash_fors(uint8_t* root, uint8_t* auth_path, const s
             sphincsplus_set_tree_height(tree_addr, h + 1U);
             sphincsplus_set_tree_index(tree_addr, (internal_idx / 2U) + internal_idx_offset);
 
-            uint8_t* left = &stack[h * SPX_N];
+            left = &stack[h * SPX_N];
 
             qsc_memutils_copy(&current[0U], left, SPX_N);
             sphincsplus_thash_x2(&current[1U * SPX_N], &current[0U * SPX_N], ctx, tree_addr);
@@ -735,7 +747,7 @@ static void sphincsplus_fors_pk_from_sig(uint8_t* pk, const uint8_t* sig, const 
 
 /* wotsx1.c */
 
-void sphincsplus_wots_gen_leafx1(uint8_t* dest, const spx_ctx* ctx, uint32_t leaf_idx, leaf_info_x1* info)
+static void sphincsplus_wots_gen_leafx1(uint8_t* dest, const spx_ctx* ctx, uint32_t leaf_idx, leaf_info_x1* info)
 {
     uint8_t pk_buffer[SPX_WOTS_BYTES];
     uint32_t* leaf_addr;
@@ -824,6 +836,11 @@ static void sphincsplus_treehash_wots(uint8_t* root, uint8_t* auth_path, const s
     uint8_t stack[SPX_TREE_HEIGHT * SPX_N] = { 0U };
     uint32_t idx;
     uint32_t max_idx;
+    uint32_t internal_idx_offset;
+    uint32_t internal_idx;
+    uint32_t internal_leaf;
+    uint32_t h;     /* The height we are in the Merkle tree */
+    uint8_t* left;
 
     max_idx = (uint32_t)((1U << SPX_TREE_HEIGHT) - 1U);
 
@@ -835,10 +852,9 @@ static void sphincsplus_treehash_wots(uint8_t* root, uint8_t* auth_path, const s
         sphincsplus_wots_gen_leafx1(&current[SPX_N], ctx, idx + idx_offset, info);
 
         /* Now combine the freshly generated right node with previously generated left ones */
-        uint32_t internal_idx_offset = idx_offset;
-        uint32_t internal_idx = idx;
-        uint32_t internal_leaf = leaf_idx;
-        uint32_t h;     /* The height we are in the Merkle tree */
+        internal_idx_offset = idx_offset;
+        internal_idx = idx;
+        internal_leaf = leaf_idx;
 
         for (h=0U;; h++, internal_idx >>= 1U, internal_leaf >>= 1U) 
         {
@@ -878,7 +894,7 @@ static void sphincsplus_treehash_wots(uint8_t* root, uint8_t* auth_path, const s
             sphincsplus_set_tree_height(tree_addr, h + 1U);
             sphincsplus_set_tree_index(tree_addr, (internal_idx / 2U) + internal_idx_offset);
 
-            uint8_t* left = &stack[h * SPX_N];
+            left = &stack[h * SPX_N];
 
             qsc_memutils_copy(&current[0], left, SPX_N);
             sphincsplus_thash_x2(&current[1 * SPX_N], &current[0U * SPX_N], ctx, tree_addr);
@@ -961,7 +977,7 @@ static void sphincsplus_wots_checksum(uint32_t* csum_base_w, const uint32_t* msg
     sphincsplus_base_w(csum_base_w, SPX_WOTS_LEN2, csum_bytes);
 }
 
-void sphincsplus_chain_lengths(uint32_t* lengths, const uint8_t* msg)
+static void sphincsplus_chain_lengths(uint32_t* lengths, const uint8_t* msg)
 {
     /* Takes a message and derives the matching chain lengths. */
 
@@ -969,7 +985,7 @@ void sphincsplus_chain_lengths(uint32_t* lengths, const uint8_t* msg)
     sphincsplus_wots_checksum(lengths + SPX_WOTS_LEN1, lengths);
 }
 
-void sphincsplus_wots_pk_from_sig(uint8_t* pk, const uint8_t* sig, const uint8_t* msg, const spx_ctx *ctx, uint32_t addr[8U])
+static void sphincsplus_wots_pk_from_sig(uint8_t* pk, const uint8_t* sig, const uint8_t* msg, const spx_ctx *ctx, uint32_t addr[8U])
 {
     /* Takes a WOTS signature and an n-byte message, computes a WOTS public key.
      * Writes the computed public key to 'pk'. */
@@ -987,7 +1003,7 @@ void sphincsplus_wots_pk_from_sig(uint8_t* pk, const uint8_t* sig, const uint8_t
 
 /* merkle.c */
 
-void sphincsplus_merkle_sign(uint8_t* sig, uint8_t* root, const spx_ctx *ctx, uint32_t wots_addr[8U], uint32_t tree_addr[8U], uint32_t idx_leaf)
+static void sphincsplus_merkle_sign(uint8_t* sig, uint8_t* root, const spx_ctx *ctx, uint32_t wots_addr[8U], uint32_t tree_addr[8U], uint32_t idx_leaf)
 {
     /* This generates a Merkle signature (WOTS signature followed by the Merkle
      * authentication path).  This is in this file because most of the complexity
@@ -1013,7 +1029,7 @@ void sphincsplus_merkle_sign(uint8_t* sig, uint8_t* root, const spx_ctx *ctx, ui
     sphincsplus_treehash_wots(root, auth_path, ctx, idx_leaf, 0U, tree_addr, &info);
 }
 
-void sphincsplus_merkle_gen_root(uint8_t* root, const spx_ctx* ctx)
+static void sphincsplus_merkle_gen_root(uint8_t* root, const spx_ctx* ctx)
 {
     /* We do not need the auth path in key generation, but it simplifies the
        code to have just one treehash routine that computes both root and path
@@ -1064,14 +1080,14 @@ bool sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gener
        Format sk [SK_SEED || SK_PRF || PUB_SEED || root]
        Format pk [PUB_SEED || root] */
 
-    uint8_t seed[SPHINCSPLUS_CRYPTO_SEEDBYTES];
+    uint8_t seed[SPHINCSPLUS_CRYPTO_SEEDBYTES] = { 0U };
     bool res;
 
     res = rng_generate(seed, SPHINCSPLUS_CRYPTO_SEEDBYTES);
 
-    if (res)
+    if (res == true)
     {
-        sphincsplus_ref_generate_seeded_keypair(pk, sk, seed);
+        res = sphincsplus_ref_generate_seeded_keypair(pk, sk, seed);
     }
 
     return res;
@@ -1079,19 +1095,26 @@ bool sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gener
 
 bool sphincsplus_ref_generate_seeded_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed)
 {
-    spx_ctx ctx;
+    spx_ctx ctx = { 0U };
+    bool res;
 
-    /* Initialize SK_SEED, SK_PRF and PUB_SEED from seed. */
-    qsc_memutils_copy(sk, seed, SPHINCSPLUS_CRYPTO_SEEDBYTES);
-    qsc_memutils_copy(pk, sk + (2U * SPX_N), SPX_N);
-    qsc_memutils_copy(ctx.pub_seed, pk, SPX_N);
-    qsc_memutils_copy(ctx.sk_seed, sk, SPX_N);
+    res = false;
 
-    /* Compute root node of the top-most subtree. */
-    sphincsplus_merkle_gen_root(sk + (3 * SPX_N), &ctx);
-    qsc_memutils_copy(pk + SPX_N, sk + (3U * SPX_N), SPX_N);
+    if (pk != NULL && sk != NULL && seed != NULL)
+    {
+        /* Initialize SK_SEED, SK_PRF and PUB_SEED from seed. */
+        qsc_memutils_copy(sk, seed, SPHINCSPLUS_CRYPTO_SEEDBYTES);
+        qsc_memutils_copy(pk, sk + (2U * SPX_N), SPX_N);
+        qsc_memutils_copy(ctx.pub_seed, pk, SPX_N);
+        qsc_memutils_copy(ctx.sk_seed, sk, SPX_N);
 
-    return true;
+        /* Compute root node of the top-most subtree. */
+        sphincsplus_merkle_gen_root(sk + (3 * SPX_N), &ctx);
+        qsc_memutils_copy(pk + SPX_N, sk + (3U * SPX_N), SPX_N);
+        res = true;
+    }
+
+    return res;
 }
 
 bool sphincsplus_ref_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, const uint8_t* seed)
@@ -1127,76 +1150,84 @@ bool sphincsplus_ref_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* me
 
 bool sphincsplus_ref_sign_signature(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, const uint8_t* seed)
 {
-    spx_ctx sctx;
-    const uint8_t* sk_prf = sk + SPX_N;
-    const uint8_t* pk = sk + (2U * SPX_N);
-    uint8_t mhash[SPX_FORS_MSG_BYTES];
-    uint8_t root[SPX_N];
-    uint32_t i;
-    uint64_t tree;
-    uint32_t idx_leaf;
+    spx_ctx sctx = { 0U };
     uint32_t wots_addr[8U] = { 0U };
     uint32_t tree_addr[8U] = { 0U };
+    uint8_t mhash[SPX_FORS_MSG_BYTES] = { 0U };
+    uint8_t root[SPX_N] = { 0U };
+    uint64_t tree;
+    uint32_t i;
+    uint32_t idx_leaf;
+    bool res;
 
-    qsc_memutils_copy(sctx.sk_seed, sk, SPX_N);
-    qsc_memutils_copy(sctx.pub_seed, pk, SPX_N);
+    const uint8_t* sk_prf = sk + SPX_N;
+    const uint8_t* pk = sk + (2U * SPX_N);
+    res = false;
 
-    sphincsplus_set_type(wots_addr, SPX_ADDR_TYPE_WOTS);
-    sphincsplus_set_type(tree_addr, SPX_ADDR_TYPE_HASHTREE);
-
-    /* Compute the digest randomization value. */
-    sphincsplus_gen_message_random(signedmsg, sk_prf, seed, message, msglen, context, ctxlen);
-
-    /* Derive the message digest and leaf index from R, PK and M. */
-    sphincsplus_hash_message(mhash, &tree, &idx_leaf, signedmsg, pk, message, msglen, context, ctxlen);
-    signedmsg += SPX_N;
-
-    sphincsplus_set_tree_addr(wots_addr, tree);
-    sphincsplus_set_keypair_addr(wots_addr, idx_leaf);
-
-    /* Sign the message hash using FORS. */
-    sphincsplus_fors_sign(signedmsg, root, mhash, &sctx, wots_addr);
-    signedmsg += SPX_FORS_BYTES;
-
-    for (i = 0U; i < SPX_D; i++)
+    if (signedmsg != NULL && smsglen != NULL && message != NULL && context != NULL && sk != NULL && seed != NULL)
     {
-        sphincsplus_set_layer_addr(tree_addr, i);
-        sphincsplus_set_tree_addr(tree_addr, tree);
+        qsc_memutils_copy(sctx.sk_seed, sk, SPX_N);
+        qsc_memutils_copy(sctx.pub_seed, pk, SPX_N);
 
-        sphincsplus_copy_subtree_addr(wots_addr, tree_addr);
+        sphincsplus_set_type(wots_addr, SPX_ADDR_TYPE_WOTS);
+        sphincsplus_set_type(tree_addr, SPX_ADDR_TYPE_HASHTREE);
+
+        /* Compute the digest randomization value. */
+        sphincsplus_gen_message_random(signedmsg, sk_prf, seed, message, msglen, context, ctxlen);
+
+        /* Derive the message digest and leaf index from R, PK and M. */
+        sphincsplus_hash_message(mhash, &tree, &idx_leaf, signedmsg, pk, message, msglen, context, ctxlen);
+        signedmsg += SPX_N;
+
+        sphincsplus_set_tree_addr(wots_addr, tree);
         sphincsplus_set_keypair_addr(wots_addr, idx_leaf);
 
-        sphincsplus_merkle_sign(signedmsg, root, &sctx, wots_addr, tree_addr, idx_leaf);
-        signedmsg += SPX_WOTS_BYTES + SPX_TREE_HEIGHT * SPX_N;
+        /* Sign the message hash using FORS. */
+        sphincsplus_fors_sign(signedmsg, root, mhash, &sctx, wots_addr);
+        signedmsg += SPX_FORS_BYTES;
 
-        /* Update the indices for the next layer. */
-        idx_leaf = (tree & ((1 << SPX_TREE_HEIGHT) - 1U));
-        tree = tree >> SPX_TREE_HEIGHT;
+        for (i = 0U; i < SPX_D; i++)
+        {
+            sphincsplus_set_layer_addr(tree_addr, i);
+            sphincsplus_set_tree_addr(tree_addr, tree);
+
+            sphincsplus_copy_subtree_addr(wots_addr, tree_addr);
+            sphincsplus_set_keypair_addr(wots_addr, idx_leaf);
+
+            sphincsplus_merkle_sign(signedmsg, root, &sctx, wots_addr, tree_addr, idx_leaf);
+            signedmsg += SPX_WOTS_BYTES + SPX_TREE_HEIGHT * SPX_N;
+
+            /* Update the indices for the next layer. */
+            idx_leaf = (tree & ((1 << SPX_TREE_HEIGHT) - 1U));
+            tree = tree >> SPX_TREE_HEIGHT;
+        }
+
+        qsc_memutils_secure_erase(&sctx, sizeof(spx_ctx));
+        *smsglen = SPX_BYTES;
+        res = true;
     }
 
-    *smsglen = SPX_BYTES;
-
-    return true;
+    return res;
 }
 
 bool sphincsplus_ref_verify(const uint8_t* signedmsg, size_t smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* pk)
 {
-    spx_ctx sctx;
-    const uint8_t* pub_root = pk + SPX_N;
-    uint8_t mhash[SPX_FORS_MSG_BYTES];
-    uint8_t wots_pk[SPX_WOTS_BYTES];
-    uint8_t root[SPX_N];
-    uint8_t leaf[SPX_N];
-    uint64_t tree;
-    uint32_t idx_leaf;
+    spx_ctx sctx = { 0U };
+    uint8_t mhash[SPX_FORS_MSG_BYTES] = { 0U };
+    uint8_t wots_pk[SPX_WOTS_BYTES] = { 0U };
+    uint8_t root[SPX_N] = { 0U };
+    uint8_t leaf[SPX_N] = { 0U };
     uint32_t wots_addr[8U] = { 0U };
     uint32_t tree_addr[8U] = { 0U };
     uint32_t wots_pk_addr[8U] = { 0U };
+    uint64_t tree;
+    uint32_t idx_leaf;
     bool res;
 
+    const uint8_t* pub_root = pk + SPX_N;
     res = false;
 
-    if (smsglen >= SPX_BYTES)
+    if (signedmsg != NULL && message != NULL && context != NULL && pk != NULL && smsglen >= SPX_BYTES)
     {
         qsc_memutils_copy(sctx.pub_seed, pk, SPX_N);
 
@@ -1272,7 +1303,7 @@ bool sphincsplus_ref_open(uint8_t* message, size_t* msglen, const uint8_t* conte
             qsc_memutils_copy(prec + 2U, context, ctxlen);
         }
 
-        if (smsglen >= SPHINCSPLUS_CONTEXT_SIZE)
+        if (smsglen >= SPHINCSPLUS_SIGNATURE_SIZE)
         {
             *msglen = smsglen - SPHINCSPLUS_SIGNATURE_SIZE;
             res = sphincsplus_ref_verify(signedmsg, smsglen, signedmsg + SPHINCSPLUS_SIGNATURE_SIZE, *msglen, prec, ctxlen + 2U, pk);
@@ -1285,7 +1316,7 @@ bool sphincsplus_ref_open(uint8_t* message, size_t* msglen, const uint8_t* conte
         }
     }
 
-    if (res == false)
+    if (res == false && smsglen >= SPHINCSPLUS_SIGNATURE_SIZE)
     {
         qsc_memutils_clear(message, smsglen - SPHINCSPLUS_SIGNATURE_SIZE);
     }

@@ -95,20 +95,20 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
  * \def QSC_CSP_SEED_MAX
  * \brief The maximum number of seed bytes that can be extracted from a single generate call.
  */
-#define QSC_CSP_SEED_MAX 1024000U
+#define QSC_CSP_SEED_MAX (size_t)ULONG_MAX
 
 /**
  * \brief Retrieve pseudo-random bytes from the system entropy provider.
  *
- * This function fills the provided output array with pseudo-random bytes sourced from
+ * \details This function fills the provided output array with pseudo-random bytes sourced from
  * the operating system's entropy mechanism. On Windows systems, it utilizes the CryptGenRandom
  * function from the Windows API, whereas on Posix systems it reads from the /dev/urandom device.
  * In environments supporting arc4random_buf, that function is used directly.
  *
- * \param output:	[uint8_t*] Pointer to the byte array where the random data will be stored.
- * \param length:	[size_t] The number of random bytes to generate. Must not exceed QSC_CSP_SEED_MAX.
+ * \param output: [uint8_t*] Pointer to the byte array where the random data will be stored.
+ * \param length: [size_t] The number of random bytes to generate. Must not exceed QSC_CSP_SEED_MAX.
  *
- * \return			[bool] Returns true if the random data was successfully generated; otherwise, false.
+ * \return [bool] Returns true if the random data was successfully generated; otherwise, false.
  *
  * \see qsc_csp_uint16(), qsc_csp_uint32(), qsc_csp_uint64()
  */
@@ -117,10 +117,10 @@ QSC_EXPORT_API bool qsc_csp_generate(uint8_t* output, size_t length);
 /**
  * \brief Generate a random 16-bit unsigned integer.
  *
- * This function generates a pseudo-random 16-bit unsigned integer by retrieving the appropriate
+ * \details This function generates a pseudo-random 16-bit unsigned integer by retrieving the appropriate
  * number of bytes from the system entropy provider.
  *
- * \return			[uint16_t] Returns the pseudo-random 16-bit unsigned integer.
+ * \return [uint16_t] Returns the pseudo-random 16-bit unsigned integer.
  *
  * \see qsc_csp_generate()
  */
@@ -129,10 +129,10 @@ QSC_EXPORT_API uint16_t qsc_csp_uint16(void);
 /**
  * \brief Generate a random 32-bit unsigned integer.
  *
- * This function generates a pseudo-random 32-bit unsigned integer by retrieving the appropriate
+ * \details This function generates a pseudo-random 32-bit unsigned integer by retrieving the appropriate
  * number of bytes from the system entropy provider.
  *
- * \return			[uint32_t] Returns the pseudo-random 32-bit unsigned integer.
+ * \return [uint32_t] Returns the pseudo-random 32-bit unsigned integer.
  *
  * \see qsc_csp_generate()
  */
@@ -141,10 +141,10 @@ QSC_EXPORT_API uint32_t qsc_csp_uint32(void);
 /**
  * \brief Generate a random 64-bit unsigned integer.
  *
- * This function generates a pseudo-random 64-bit unsigned integer by retrieving the appropriate
+ * \details This function generates a pseudo-random 64-bit unsigned integer by retrieving the appropriate
  * number of bytes from the system entropy provider.
  *
- * \return			[uint64_t] Returns the pseudo-random 64-bit unsigned integer.
+ * \return [uint64_t] Returns the pseudo-random 64-bit unsigned integer.
  *
  * \see qsc_csp_generate()
  */

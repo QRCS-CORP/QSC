@@ -1,5 +1,4 @@
 #include "dilithiumbase_avx2.h"
-#include "intutils.h"
 #include "memutils.h"
 #include "sha3.h"
 
@@ -249,10 +248,8 @@ static const QSC_ALIGN(32) int32_t dilithium_zetas[DILITHIUM_N] =
     -554416,  3919660,   -48306, -1362209,  3937738,  1400424,  -846154,  1976782
 };
 
-static QSC_ALIGN(32) int32_t dilithium_q_avx2[8U] = { DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q,
+static const QSC_ALIGN(32) int32_t dilithium_q_avx2[8U] = { DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q,
 		DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q };
-//static dilithium_qinv_avx2[8U] = { DILITHIUM_QINV, DILITHIUM_QINV, DILITHIUM_QINV, DILITHIUM_QINV,
-//    DILITHIUM_QINV, DILITHIUM_QINV, DILITHIUM_QINV, DILITHIUM_Q };
 
 #define _mm256_blendv_epi32(a,b,mask) \
   _mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(a), \
@@ -987,7 +984,7 @@ static void dilithium_polyz_unpack(dilithium_poly* r, const uint8_t* a)
         r->coeffs[(2U * i) + 1U] = a[(5U * i) + 2U] >> 4;
         r->coeffs[(2U * i) + 1U] |= (uint32_t)a[(5U * i) + 3U] << 4;
         r->coeffs[(2U * i) + 1U] |= (uint32_t)a[(5U * i) + 4U] << 12;
-        r->coeffs[2U * i] &= 0x000FFFFFL;
+        r->coeffs[(2U * i) + 1U] &= 0x000FFFFFL;
 
         r->coeffs[2U * i] = DILITHIUM_GAMMA1 - r->coeffs[2U * i];
         r->coeffs[(2U * i) + 1U] = DILITHIUM_GAMMA1 - r->coeffs[(2U * i) + 1U];
@@ -1720,7 +1717,7 @@ static void dilithium_unpack_sk(uint8_t rho[DILITHIUM_SEEDBYTES], uint8_t tr[DIL
     }
 }
 
-void polyvec_matrix_pointwise_montgomery(dilithium_polyveck* t, const dilithium_polyvecl mat[DILITHIUM_K], const dilithium_polyvecl* v)
+static void polyvec_matrix_pointwise_montgomery(dilithium_polyveck* t, const dilithium_polyvecl mat[DILITHIUM_K], const dilithium_polyvecl* v)
 {
   for (size_t i = 0U; i < DILITHIUM_K; ++i)
   {
@@ -2111,7 +2108,11 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     }
     
     *siglen = DILITHIUM_SIGNATURE_SIZE;
+    qsc_memutils_secure_erase(&s1, sizeof(s1));
+    qsc_memutils_secure_erase(&s2, sizeof(s2));
+    qsc_memutils_secure_erase(&t0, sizeof(t0));
     qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
+    qsc_keccak_dispose(&kctx);
 
     return res;
 }
@@ -2164,13 +2165,15 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
     size_t i;
     size_t j;
     size_t pos;
+    bool cnt;
     bool res;
 
-    res = true;
+    cnt = true;
+    res = false;
 
     if (siglen == DILITHIUM_SIGNATURE_SIZE)
     {
-        /* Compute CRH(H(rho, t1), pre, msg) */
+        /* compute CRH(H(rho, t1), pre, msg) */
         qsc_shake256_compute(mu, DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
 
         qsc_keccak_initialize_state(&kctx);
@@ -2180,7 +2183,7 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
         qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
         qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
-        /* Expand challenge */
+        /* expand challenge */
         dilithium_poly_challenge(&cp, sig);
         dilithium_poly_ntt(&cp);
 
@@ -2191,14 +2194,14 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
             dilithium_poly_ntt(&z.vec[i]);
         }
 
-        pos = 0U; // NOTE: t1 is h now
+        pos = 0U;
 
         for (i = 0U; i < DILITHIUM_K; i++)
         {
-            /* Expand matrix row */
+            /* expand matrix row */
             dilithium_avx2_polyvec_matrix_expand_row(mat, pk, i);
 
-            /* Compute i-th row of Az - c2^Dt1 */
+            /* compute i-th row of Az - c2^Dt1 */
             dilithium_polyvecl_pointwise_acc_montgomery(&w1, &mat[i], &z);
 
             dilithium_polyt1_unpack(&t1, pk + DILITHIUM_SEEDBYTES + i * DILITHIUM_POLYT1_PACKEDBYTES);
@@ -2210,33 +2213,28 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
             dilithium_avx2_poly_reduce(&w1);
             dilithium_poly_invntt_to_mont(&w1);
 
-            /* Get hint polynomial and reconstruct w1 */
-            qsc_memutils_clear(h.coeffs, DILITHIUM_N);
-
-            /* Get hint polynomial and reconstruct w1 */
-            qsc_memutils_clear(h.coeffs, sizeof(dilithium_poly));
+            /* get hint polynomial and reconstruct w1 */
+            qsc_memutils_clear(h.coeffs, sizeof(h.coeffs));
 
             if(hint[DILITHIUM_OMEGA + i] < pos || hint[DILITHIUM_OMEGA + i] > DILITHIUM_OMEGA)
             {
-                res = false;
+                cnt = false;
                 break;
             }
 
             for(j = pos; j < hint[DILITHIUM_OMEGA + i]; ++j)
             {
-                /* Coefficients are ordered for strong unforgeability */
+                /* coefficients are ordered for strong unforgeability */
                 if(j > pos && hint[j] <= hint[j - 1U]) 
                 {
-                    res = false;
+                    cnt = false;
                     break;
                 }
 
                 h.coeffs[hint[j]] = 1;
             }
 
-            pos = hint[DILITHIUM_OMEGA + i];
-
-            if (res == false)
+            if (cnt == false)
             {
                 break;
             }
@@ -2248,31 +2246,28 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
             dilithium_avx2_polyw1_pack(buf + i * DILITHIUM_POLYW1_PACKEDBYTES, &w1);
         }
 
-        if (res == true)
+        if (cnt == true)
         {
-            /* Extra indices are zero for strong unforgeability */
+            /* extra indices are zero for strong unforgeability */
             for (j = pos; j < DILITHIUM_OMEGA; ++j)
             {
                 if (hint[j])
                 {
-                    res = false;
+                    cnt = false;
                     break;
                 }
             }
 
-            if (res == true)
+            if (cnt == true)
             {
-                /* Call random oracle and verify challenge */
+                /* call random oracle and verify challenge */
                 qsc_keccak_initialize_state(&kctx);
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
                 qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, buf, DILITHIUM_K * DILITHIUM_POLYW1_PACKEDBYTES);
                 qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
                 qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, c, DILITHIUM_CTILDEBYTES);
 
-                if (qsc_intutils_verify(c, sig, DILITHIUM_CTILDEBYTES) != 0)
-                {
-                    res = false;
-                }
+                res = qsc_memutils_are_equal(c, sig, DILITHIUM_CTILDEBYTES);
             }
         }
     }
@@ -2313,7 +2308,7 @@ bool qsc_dilithium_avx2_open(uint8_t* message, size_t* msglen, const uint8_t* co
         }
     }
 
-    if (res == false)
+    if (res == false && smlen >= DILITHIUM_SIGNATURE_SIZE)
     {
         qsc_memutils_clear(message, smlen - DILITHIUM_SIGNATURE_SIZE);
     }

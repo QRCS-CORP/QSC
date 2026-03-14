@@ -151,10 +151,7 @@ static bool cpuidex_has_neon()
 		res = true;
 	}
 #elif defined(__APPLE__) && defined(__aarch64__)
-	if (IsAppleMachineARMv8())
-	{
-		res = true;
-	}
+	res = true;
 #elif defined(_WIN32) && defined(_M_ARM64)
 	if (IsProcessorFeaturePresent(PF_ARM_V8_INSTRUCTIONS_AVAILABLE) != 0U)
 	{
@@ -194,11 +191,7 @@ static bool cpuidex_has_pmull()
 		res = true;
 	}
 #elif defined(__APPLE__) && defined(__aarch64__)
-	/* M1 processor */
-	if (IsAppleMachineARMv82())
-	{
-		res = true;
-	}
+	res = true;
 #elif defined(_WIN32) && defined(_M_ARM64)
 	if (IsProcessorFeaturePresent(PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE) != 0U)
 	{
@@ -238,10 +231,7 @@ static bool cpuidex_has_aes()
 		res = true;
 	}
 #elif defined(__APPLE__) && defined(__aarch64__)
-	if (IsAppleMachineARMv82())
-	{
-		res = true;
-	}
+	res = true;
 #elif defined(_WIN32) && defined(_M_ARM64)
 	if (IsProcessorFeaturePresent(PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE) != 0U)
 	{
@@ -281,10 +271,7 @@ static bool cpuidex_has_sha256()
 		res = true;
 	}
 #elif defined(__APPLE__) && defined(__aarch64__)
-	if (IsAppleMachineARMv82())
-	{
-		res = true;
-	}
+	res = true;
 #elif defined(_WIN32) && defined(_M_ARM64)
 	if (IsProcessorFeaturePresent(PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE) != 0U)
 	{
@@ -301,13 +288,13 @@ static bool cpuidex_has_sha512()
 
 	res = false;
 
-#if defined(__ANDROID__) && defined(__aarch64__) && 0U
+#if defined(__ANDROID__) && defined(__aarch64__)
 	if (((android_getCpuFamily() & ANDROID_CPU_FAMILY_ARM64) != 0U) &&
 		((android_getCpuFeatures() & ANDROID_CPU_ARM64_FEATURE_SHA512) != 0U))
 	{
 		res = true;
 	}
-#elif defined(__ANDROID__) && defined(__aarch32__) && 0U
+#elif defined(__ANDROID__) && defined(__aarch32__)
 	if (((android_getCpuFamily() & ANDROID_CPU_FAMILY_ARM) != 0U) &&
 		((android_getCpuFeatures() & ANDROID_CPU_ARM_FEATURE_SHA512) != 0U))
 	{
@@ -324,10 +311,7 @@ static bool cpuidex_has_sha512()
 		res = true;
 	}
 #elif defined(__APPLE__) && defined(__aarch64__)
-	if (IsAppleMachineARMv82())
-	{
-		res = true;
-}
+	res = true;
 #endif
 
 	return res;
@@ -362,10 +346,7 @@ static bool cpuidex_has_sha3()
 		res = true;
 	}
 #elif defined(__APPLE__) && defined(__aarch64__)
-	if (IsAppleMachineARMv82())
-	{
-		res = true;
-	}
+	res = true;
 #endif
 
 	return res;
@@ -432,14 +413,14 @@ static uint32_t cpuidex_cpu_count()
 		resu = resl;
 	}
 #else
-    long resl;
-    
-	resl = sysconf(_SC_NPROCESSORS_CONF);
+	long resl;
 
-    if (resl > 1L)
-    {
-        resu = (uint32_t)resl;
-    }
+	resl = sysconf(_SC_NPROCESSORS_ONLN);
+
+	if (resl > 1L)
+	{
+		resu = (uint32_t)resl;
+	}
 #endif
 
 	return resu;
@@ -470,8 +451,8 @@ static void cpuidex_vendor_name(qsc_cpuidex_cpu_features* features)
 	cpuidex_cpu_info(info, 0x00000000UL);
 	qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
 	qsc_intutils_le32to8((uint8_t*)&features->vendor[0U], (uint32_t)info[1U]);
-    qsc_intutils_le32to8((uint8_t*)&features->vendor[4U], (uint32_t)info[3U]);
-    qsc_intutils_le32to8((uint8_t*)&features->vendor[8U], (uint32_t)info[2U]);
+	qsc_intutils_le32to8((uint8_t*)&features->vendor[4U], (uint32_t)info[3U]);
+	qsc_intutils_le32to8((uint8_t*)&features->vendor[8U], (uint32_t)info[2U]);
 }
 
 static void cpuidex_bus_info(qsc_cpuidex_cpu_features* features)
@@ -787,14 +768,12 @@ static void cpuidex_bsd_topology(qsc_cpuidex_cpu_features* features)
 		features->rdrand = (pval == 1U);
 	}
 
-	features->rdtcsp = features->avx;
-
 	pval = 0U;
 	plen = sizeof(pval);
 
-	if (sysctlbyname("hw.optional.rdrand", &pval, &plen, NULL, 0U) == 0U)
+	if (sysctlbyname("hw.optional.tsc_invariant", &pval, &plen, NULL, 0U) == 0U)
 	{
-		features->rdrand = (pval == 1U);
+		features->rdtcsp = (pval == 1U);
 	}
 
 	char vend[1024U] = { 0U };
@@ -924,7 +903,7 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 {
 	QSC_ASSERT(features != NULL);
 
-    bool res;
+	bool res;
 
 	res = false;
 
@@ -958,6 +937,7 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 		features->l2associative = 4U;
 		features->l2cache = 0U;
 		qsc_memutils_clear(features->serial, QSC_CPUIDEX_SERIAL_SIZE);
+		qsc_memutils_clear(features->vendor, QSC_CPUIDEX_VENDOR_SIZE);
 
 #if defined(QSC_SYSTEM_OS_POSIX)
 #	if defined(QSC_SYSTEM_OS_BSD)
@@ -979,7 +959,7 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 #endif
 	}
 
-    return res;
+	return res;
 }
 
 void qsc_cpuidex_print_stats()

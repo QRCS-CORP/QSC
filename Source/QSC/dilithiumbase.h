@@ -52,7 +52,7 @@
 #ifndef QSC_DILITHIUMBASE_H
 #define QSC_DILITHIUMBASE_H
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 #include "qsccommon.h"
 
@@ -62,10 +62,10 @@ QSC_CPLUSPLUS_ENABLED_START
 * \brief Generates a Dilithium public/private key-pair.
 * Arrays must be sized to DILITHIUM_PUBLICKEY_SIZE and DILITHIUM_SECRETKEY_SIZE.
 *
-* \param pk: The public verification key
-* \param sk: The private signature key
-* \param rng_generate: The random generator
-* \return Returns true for success
+* \param pk:		[uint8_t*] The public verification key
+* \param sk:		[uint8_t*] The private signature key
+* \param rng_generate:	[bool (*)(uint8_t*, size_t)] The random generator
+* \return			[bool] Returns true for success
 */
 bool qsc_dilithium_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -73,72 +73,74 @@ bool qsc_dilithium_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 * \brief Generates a Dilithium public/private key-pair using a random seed.
 * Arrays must be sized to DILITHIUM_PUBLICKEY_SIZE and DILITHIUM_SECRETKEY_SIZE.
 *
-* \param pk: The public verification key
-* \param sk: The private signature key
-* \param seed: The random seed
+* \param pk:		[uint8_t*] The public verification key
+* \param sk:		[uint8_t*] The private signature key
+* \param seed:		[uint8_t*] The random seed
 */
 void qsc_dilithium_ref_seeded_generate_keypair(uint8_t* pk, uint8_t* sk, const uint8_t* seed);
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message
 *
-* \param signedmsg: The signed message
-* \param smglen: The signed message length
-* \param message: [const] The message to be signed
-* \param msglen: The message length
-* \param context: [const] The context string
-* \param ctxlen: The context length
-* \param sk: [const] The private signature key
-* \param rng_generate: The random generator
-* \return Returns true for success
+* \param signedmsg:	[uint8_t*] The signed message
+* \param smglen:	[size_t*] The signed message length
+* \param message:	[const uint8_t*]  The message to be signed
+* \param msglen:	[size_t] The message length
+* \param context:	[const uint8_t*]  The context string
+* \param ctxlen:	[size_t] The context length
+* \param sk:		[const uint8_t*] The private signature key
+* \param rng_generate:	[bool (*)(uint8_t*, size_t)]The random generator
+* \return			[bool] Returns true for success
 */
-bool qsc_dilithium_ref_sign(uint8_t* signedmsg, size_t* smglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_dilithium_ref_sign(uint8_t* signedmsg, size_t* smglen, const uint8_t* message, size_t msglen, const uint8_t* context, 
+	size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature
 *
-* \param signedmsg: The signed message
-* \param smglen: The signed message length
-* \param message: [const] The message to be signed
-* \param msglen: The message length
-* \param context: [const] The context string
-* \param ctxlen: The context length
-* \param sk: [const] The private signature key
-* \param rng_generate: The random generator
-* \return Returns true for success
+* \param signedmsg:	[uint8_t*] The signed message
+* \param smglen:	[size_t*] The signed message length
+* \param message:	[const uint8_t*] The message to be signed
+* \param msglen:	[size_t] The message length
+* \param context:	[const uint8_t*] The context string
+* \param ctxlen:	[size_t*] The context length
+* \param sk:		[const uint8_t*] The private signature key
+* \param rng_generate:	[bool (*)(uint8_t*, size_t)] The random generator
+* \return			[bool] Returns true for success
 */
-bool qsc_dilithium_ref_sign_signature(uint8_t* signedmsg, size_t* smglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_dilithium_ref_sign_signature(uint8_t* signedmsg, size_t* smglen, const uint8_t* message, size_t msglen, const uint8_t* context, 
+	size_t ctxlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Verifies a signature-message pair with the public key.
 *
-* \param signedmsg: [const] The message to be signed
-* \param smglen: The message length
-* \param message: [const] The signed message
-* \param msglen: The signed message length
-* \param context: [const] The context string
-* \param ctxlen: The context length
-* \param pk: [const] The public verification key
-* \return Returns true for success
+* \param signedmsg: [const uint8_t*] The message to be signed
+* \param smglen:	[size_t*] The message length
+* \param message:	[const uint8_t*] The signed message
+* \param msglen:	[size_t] The signed message length
+* \param context:	[const  uint8_t*] The context string
+* \param ctxlen:	[size_t] The context length
+* \param pk:		[const uint8_t*] The public verification key
+* \return			[bool] Returns true for success
 */
 bool qsc_dilithium_ref_verify(const uint8_t* signedmsg, size_t smglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* pk);
 
 /**
 * \brief Verifies a signature-message pair with the public key.
 *
-* \param message: The message to be signed
-* \param msglen: The message length
+* \param message:	[uint8_t*] The message to be signed
+* \param msglen:	[size_t] The message length
 * \param signedmsg: [const] The signed message
-* \param smglen: The signed message length
-* \param context: [const] The context string
-* \param ctxlen: The context length
-* \param pk: [const] The public verification key
-* \return Returns true for success
+* \param smglen:	[const uint8_t*] The signed message length
+* \param context:	[const uint8_t*] The context string
+* \param ctxlen:	[size_t] The context length
+* \param pk:		[const uint8_t*] The public verification key
+* \return			[bool] Returns true for success
 */
 bool qsc_dilithium_ref_open(uint8_t* message, size_t* msglen, const uint8_t* context, size_t ctxlen, const uint8_t* signedmsg, size_t smglen, const uint8_t* pk);
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 
 #endif

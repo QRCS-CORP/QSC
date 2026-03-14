@@ -82,25 +82,31 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \def QSC_FILEUTILS_CHUNK_SIZE
- * \brief [size_t] The default file chunk size.
+ * \brief The default file chunk size.
  */
-#define QSC_FILEUTILS_CHUNK_SIZE 4096ULL
+#define QSC_FILEUTILS_CHUNK_SIZE 128U
+
+/*!
+ * \def QSC_FILEUTILS_MAX_LINE_SIZE
+ * \brief The maximum line read size.
+ */
+#define QSC_FILEUTILS_MAX_LINE_SIZE (1024U * 1024U)
 
 /*!
  * \def QSC_FILEUTILS_MAX_EXTENSION
- * \brief [size_t] The maximum file extension size.
+ * \brief The maximum file extension size.
  */
-#define QSC_FILEUTILS_MAX_EXTENSION 16ULL
+#define QSC_FILEUTILS_MAX_EXTENSION 16U
 
 /*!
  * \def QSC_FILEUTILS_MAX_FILENAME
- * \brief [size_t] The maximum file name size.
+ * \brief The maximum file name size.
  */
 #define QSC_FILEUTILS_MAX_FILENAME QSC_SYSTEM_MAX_PATH
 
 /*!
  * \def QSC_FILEUTILS_MAX_PATH
- * \brief [size_t] The maximum file path size.
+ * \brief The maximum file path size.
  */
 #define QSC_FILEUTILS_MAX_PATH QSC_SYSTEM_MAX_PATH
 

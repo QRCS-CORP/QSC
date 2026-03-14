@@ -226,6 +226,7 @@ uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t slen)
     QSC_ASSERT(str != NULL);
     QSC_ASSERT(slen != 0U);
 
+    uint32_t digit;
     uint32_t res;
 
     res = 0U;
@@ -238,7 +239,15 @@ uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t slen)
 
             if ((c >= '0') && (c <= '9'))
             {
-                res = (uint32_t)(res * 10U + (uint32_t)(c - '0'));
+                digit = c - '0';
+
+                if (res > (UINT32_MAX - digit) / 10)
+                {
+                    res = UINT32_MAX;
+                    break;
+                }
+
+                res = (uint32_t)(res * 10U + digit);
             }
             else
             {
@@ -255,6 +264,7 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
     QSC_ASSERT(str != NULL);
     QSC_ASSERT(slen != 0U);
 
+    uint64_t digit;
     uint64_t res;
 
     res = 0U;
@@ -265,14 +275,15 @@ uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
         {
             char c = str[i];
 
-            if ((c >= '0') && (c <= '9'))
+            digit = c - '0';
+
+            if (res > (UINT64_MAX - digit) / 10)
             {
-                res = (uint64_t)(res * 10U + (uint64_t)(c - '0'));
-            }
-            else
-            {
+                res = UINT64_MAX;
                 break;
             }
+
+            res = (uint32_t)(res * 10U + digit);
         }
     }
 

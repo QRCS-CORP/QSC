@@ -96,7 +96,7 @@ bool qsctest_encoding_ber(void)
                     res = true;
                 }
 
-                encoding_ber_free_element(decelem);
+                qsc_encoding_ber_free_element(decelem);
             }
         }
 
@@ -149,7 +149,7 @@ bool qsctest_encoding_der(void)
                     res = true;
                 }
 
-                encoding_ber_free_element(decelem);
+                qsc_encoding_ber_free_element(decelem);
             }
         }
 

@@ -790,10 +790,6 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 	size_t oft;
 	size_t i;
 
-	qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
-	qsc_memutils_secure_erase(ctx->buffer, sizeof(ctx->buffer));
-	ctx->position = 0U;
-
 	/* stage 1: name + custom */
 
 	oft = keccak_left_encode(pad, (size_t)rate);
@@ -803,11 +799,18 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 	{
 		for (i = 0U; i < namelen; ++i)
 		{
-			pad[oft + i] = name[i];
+			if (oft == (size_t)rate)
+			{
+				keccak_fast_absorb(ctx->state, pad, (size_t)rate);
+				qsc_keccak_permute(ctx, rounds);
+				oft = 0U;
+			}
+
+			pad[oft] = name[i];
+			++oft;
 		}
 	}
 
-	oft += namelen;
 	oft += keccak_left_encode((pad + oft), custlen * 8U);
 
 	if (custom != NULL)
@@ -859,7 +862,6 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 	qsc_keccak_permute(ctx, rounds);
 }
 
-QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_keccak_dispose(qsc_keccak_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
@@ -871,7 +873,6 @@ void qsc_keccak_dispose(qsc_keccak_state* ctx)
 		ctx->position = 0U;
 	}
 }
-QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t outlen, uint8_t domain, size_t rounds)
 {
@@ -1000,7 +1001,7 @@ void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const u
 void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8_t domain)
 {
 	QSC_ASSERT(ctx != NULL);
-	
+
 	size_t i;
 	size_t j;
 
@@ -4069,6 +4070,7 @@ void qsc_kmac_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint
 
 	const uint8_t name[4U] = { 0x4BU, 0x4DU, 0x41U, 0x43U };
 
+	qsc_keccak_initialize_state(ctx);
 	qsc_keccak_absorb_key_custom(ctx, rate, key, keylen, custom, custlen, name, sizeof(name), QSC_KECCAK_PERMUTATION_ROUNDS);
 }
 
@@ -4100,7 +4102,7 @@ void qsc_kmac_xof512_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, si
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
 void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
-	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, 
+	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
 	size_t inplen, uint8_t domain)
 {
 	QSC_ASSERT(inp0 != NULL);
@@ -4231,14 +4233,14 @@ void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
         _mm_extract_epi64(_mm512_extracti64x2_epi64(b, i / 2U), i % 2U))
 
 void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
-    const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
-    const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7, 
+	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
+	const uint8_t* inp4, const uint8_t* inp5, const uint8_t* inp6, const uint8_t* inp7,
 	size_t inplen, uint8_t domain)
 {
 	QSC_ASSERT(((uintptr_t)inp0 % 64) == 0);
 
 	if (inp0 != NULL && inp1 != NULL && inp2 != NULL && inp3 != NULL &&
-		inp4 != NULL && inp5 != NULL && inp6 != NULL && inp7 != NULL) 
+		inp4 != NULL && inp5 != NULL && inp6 != NULL && inp7 != NULL)
 	{
 
 		__m512i t;
@@ -5591,4 +5593,3 @@ void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 #endif
 	}
 }
-

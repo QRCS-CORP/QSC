@@ -28,7 +28,6 @@ static void sha256_increase(qsc_sha256_state* ctx, size_t msglen)
 	ctx->t += msglen;
 }
 
-QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha256_dispose(qsc_sha256_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
@@ -41,7 +40,6 @@ void qsc_sha256_dispose(qsc_sha256_state* ctx)
 		ctx->position = 0U;
 	}
 }
-QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_sha256_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 {
@@ -104,6 +102,7 @@ void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output)
 		}
 #endif
 
+		qsc_memutils_secure_erase(pad, sizeof(pad));
 		qsc_sha256_dispose(ctx);
 	}
 }
@@ -698,7 +697,6 @@ void qsc_sha384_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 	qsc_sha384_finalize(&ctx, output);
 }
 
-QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha384_dispose(qsc_sha384_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
@@ -712,7 +710,6 @@ void qsc_sha384_dispose(qsc_sha384_state* ctx)
 		ctx->position = 0U;
 	}
 }
-QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output)
 {
@@ -763,6 +760,7 @@ void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output)
 		}
 #endif
 
+		qsc_memutils_secure_erase(pad, sizeof(pad));
 		qsc_sha384_dispose(ctx);
 	}
 }
@@ -861,7 +859,6 @@ void qsc_sha512_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 	qsc_sha512_finalize(&ctx, output);
 }
 
-QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_sha512_dispose(qsc_sha512_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
@@ -875,7 +872,6 @@ void qsc_sha512_dispose(qsc_sha512_state* ctx)
 		ctx->position = 0U;
 	}
 }
-QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output)
 {
@@ -926,6 +922,7 @@ void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output)
 		}
 #endif
 
+		qsc_memutils_secure_erase(pad, sizeof(pad));
 		qsc_sha512_dispose(ctx);
 	}
 }
@@ -1379,7 +1376,6 @@ void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 	qsc_hmac256_finalize(&ctx, output);
 }
 
-QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_hmac256_dispose(qsc_hmac256_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
@@ -1391,7 +1387,6 @@ void qsc_hmac256_dispose(qsc_hmac256_state* ctx)
 		qsc_sha256_dispose(&ctx->pstate);
 	}
 }
-QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output)
 {
@@ -1466,7 +1461,6 @@ void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen,
 	qsc_hmac512_finalize(&ctx, output);
 }
 
-QSC_SYSTEM_OPTIMIZE_IGNORE
 void qsc_hmac512_dispose(qsc_hmac512_state* ctx)
 {
 	QSC_ASSERT(ctx != NULL);
@@ -1474,11 +1468,10 @@ void qsc_hmac512_dispose(qsc_hmac512_state* ctx)
 	if (ctx != NULL)
 	{
 		qsc_memutils_secure_erase(ctx->ipad, sizeof(ctx->ipad));
-		qsc_memutils_secure_erase(ctx->opad, sizeof(ctx->ipad));
+		qsc_memutils_secure_erase(ctx->opad, sizeof(ctx->opad));
 		qsc_sha512_dispose(&ctx->pstate);
 	}
 }
-QSC_SYSTEM_OPTIMIZE_RESUME
 
 void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output)
 {
@@ -1543,6 +1536,7 @@ void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t m
 void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
 {
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(otplen <= 255U * QSC_SHA2_256_HASH_SIZE);
 	QSC_ASSERT(key != NULL);
 
 	qsc_hmac256_state ctx;
@@ -1551,29 +1545,32 @@ void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size
 
 	if (output != NULL && key != NULL)
 	{
-		while (otplen != 0U)
+		if (otplen <= 255U * QSC_SHA2_256_HASH_SIZE)
 		{
-			qsc_hmac256_initialize(&ctx, key, keylen);
-
-			if (ctr[0U] != 0U)
+			while (otplen != 0U)
 			{
-				qsc_hmac256_update(&ctx, buf, sizeof(buf));
+				qsc_hmac256_initialize(&ctx, key, keylen);
+
+				if (ctr[0U] != 0U)
+				{
+					qsc_hmac256_update(&ctx, buf, sizeof(buf));
+				}
+
+				if (infolen != 0U)
+				{
+					qsc_hmac256_update(&ctx, info, infolen);
+				}
+
+				++ctr[0U];
+				qsc_hmac256_update(&ctx, ctr, sizeof(ctr));
+				qsc_hmac256_finalize(&ctx, buf);
+
+				const size_t RMDLEN = qsc_intutils_min(otplen, (size_t)QSC_SHA2_256_HASH_SIZE);
+				qsc_memutils_copy(output, buf, RMDLEN);
+
+				otplen -= RMDLEN;
+				output += RMDLEN;
 			}
-
-			if (infolen != 0U)
-			{
-				qsc_hmac256_update(&ctx, info, infolen);
-			}
-
-			++ctr[0U];
-			qsc_hmac256_update(&ctx, ctr, sizeof(ctr));
-			qsc_hmac256_finalize(&ctx, buf);
-
-			const size_t RMDLEN = qsc_intutils_min(otplen, (size_t)QSC_SHA2_256_HASH_SIZE);
-			qsc_memutils_copy(output, buf, RMDLEN);
-
-			otplen -= RMDLEN;
-			output += RMDLEN;
 		}
 	}
 }
@@ -1581,6 +1578,7 @@ void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size
 void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
 {
 	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(otplen <= 255U * QSC_SHA2_256_HASH_SIZE);
 	QSC_ASSERT(key != NULL);
 
 	if (output != NULL && key != NULL && otplen >= 32U)
@@ -1615,29 +1613,32 @@ void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size
 
 	if (output != NULL && key != NULL)
 	{
-		while (otplen != 0U)
+		if (otplen <= 255U * QSC_SHA2_512_HASH_SIZE)
 		{
-			qsc_hmac512_initialize(&ctx, key, keylen);
-
-			if (ctr[0U] != 0U)
+			while (otplen != 0U)
 			{
-				qsc_hmac512_update(&ctx, buf, sizeof(buf));
+				qsc_hmac512_initialize(&ctx, key, keylen);
+
+				if (ctr[0U] != 0U)
+				{
+					qsc_hmac512_update(&ctx, buf, sizeof(buf));
+				}
+
+				if (infolen != 0U)
+				{
+					qsc_hmac512_update(&ctx, info, infolen);
+				}
+
+				++ctr[0U];
+				qsc_hmac512_update(&ctx, ctr, sizeof(ctr));
+				qsc_hmac512_finalize(&ctx, buf);
+
+				const size_t RMDLEN = qsc_intutils_min(otplen, (size_t)QSC_SHA2_512_HASH_SIZE);
+				qsc_memutils_copy(output, buf, RMDLEN);
+
+				otplen -= RMDLEN;
+				output += RMDLEN;
 			}
-
-			if (infolen != 0U)
-			{
-				qsc_hmac512_update(&ctx, info, infolen);
-			}
-
-			++ctr[0U];
-			qsc_hmac512_update(&ctx, ctr, sizeof(ctr));
-			qsc_hmac512_finalize(&ctx, buf);
-
-			const size_t RMDLEN = qsc_intutils_min(otplen, (size_t)QSC_SHA2_512_HASH_SIZE);
-			qsc_memutils_copy(output, buf, RMDLEN);
-
-			otplen -= RMDLEN;
-			output += RMDLEN;
 		}
 	}
 }

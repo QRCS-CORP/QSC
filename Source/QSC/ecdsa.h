@@ -57,130 +57,281 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /**
- * \file ecdsa.h
- * \brief Contains the primary public API for the ECDSA asymmetric signature scheme implementation.
+ * \file ecnistp256.h
+ * \brief Contains the primary public API for the ECDSA asymmetric signature scheme
+ *        implementation over the NIST P-256 (secp256r1) elliptic curve.
  *
  * \details
- * This header defines the API for the ECDSA (Elliptic Curve Digital Signature Algorithm) asymmetric signature scheme,
- * operating over the Ed25519 elliptic curve. It provides functions for generating key pairs (either randomly or via a seeded generator),
- * signing messages, and verifying signatures.
+ * This header defines the API for ECDSA operating over the NIST P-256 elliptic curve
+ * (also known as secp256r1 or prime256v1).  It provides functions for generating key
+ * pairs (either randomly or via a seeded generator), signing messages, and verifying
+ * signatures.  The implementation is interoperable with TLS 1.2/1.3, X.509 certificates
+ * issued by public CAs, and the CA/Browser Forum Baseline Requirements.
+ *
+ * \par Key and signature encoding:
+ * All external byte arrays use big-endian encoding compatible with X9.62 / SEC 1:
+ * - Public key:  64 bytes  – uncompressed point coordinates (Qx[32] || Qy[32]),
+ *                            no 0x04 prefix.
+ * - Private key: 96 bytes  – seed[32] || Qx[32] || Qy[32].
+ * - Signature:   64 bytes  – (r[32] || s[32]), prepended to the message in
+ *                            the signedmsg buffer.
+ *
+ * Signing uses a deterministic nonce generated per RFC 6979 (HMAC-SHA256), so no
+ * entropy source is required during the signing operation.
  *
  * \par Example:
  * \code
- * // An example of key-pair creation, signing, and verification using ECDSA
+ * // Key-pair creation, signing, and verification using ECDSA over P-256
  * #define MSGLEN 32
  * uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE];
- * uint8_t sk[QSC_ECDSA_SECRETKEY_SIZE];
- * uint8_t msg[32];
+ * uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE];
+ * uint8_t msg[MSGLEN];
  * uint8_t smsg[QSC_ECDSA_SIGNATURE_SIZE + MSGLEN];
- * uint8_t rmsg[32];
+ * uint8_t rmsg[MSGLEN];
+ * size_t  smsglen = 0;
+ * size_t  rmsglen = 0;
  *
- * uint32_t rmsglen = 0;
- * uint32_t smsglen = 0;
+ * // Generate key pair from a random seed
+ * qsc_ecdsa_generate_keypair(pk, sk, my_rng_function);
  *
- * // Create the public and secret keys using a seeded generator
- * qsc_ecdsa_generate_seeded_keypair(pk, sk, random_seed);
- * // Sign the message; the signature is prepended to the message
+ * // Sign: signature is prepended to the message
  * qsc_ecdsa_sign(smsg, &smsglen, msg, MSGLEN, sk);
- * // Verify the signature and retrieve the message bytes
+ *
+ * // Verify: recovers the message on success
  * if (qsc_ecdsa_verify(rmsg, &rmsglen, smsg, smsglen, pk) != true)
  * {
- *     // Authentication failed; handle error.
+ *     // Authentication failed
  * }
  * \endcode
  *
  * \remarks
- * This ECDSA implementation utilizes the Ed25519 elliptic curve along with its underlying field arithmetic over the prime field defined by 2^255 - 19.
- * It supports standard digital signature operations including key pair generation, signing, and verification.
- * The design emphasizes constant-time execution to mitigate timing attacks and is suitable for secure applications in modern cryptographic protocols.
+ * P-256 is defined by NIST in FIPS 186-4 (Digital Signature Standard) and is the
+ * curve required by the CA/Browser Forum Baseline Requirements for publicly trusted
+ * TLS certificates.  The field prime is p = 2^256 - 2^224 + 2^192 + 2^96 - 1 and
+ * the group order is n = 2^256 - 2^128 - 2^96 + 2^32 * … (see FIPS 186-4 D.1.2.3).
  *
- * \section ecdsa_links Reference Links
- *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Official Ed25519 Documentation</a>
- *  - <a href="https://cr.yp.to/ecdh.html">Curve25519 ECDH Specification</a>
- *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 Field Arithmetic Details</a>
+ * \section ecnistp256_links Reference Links
+ *  - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf">FIPS 186-4 Digital Signature Standard</a>
+ *  - <a href="https://www.secg.org/sec1-v2.pdf">SEC 1: Elliptic Curve Cryptography (Certicom)</a>
+ *  - <a href="https://www.rfc-editor.org/rfc/rfc6979">RFC 6979: Deterministic Usage of DSA/ECDSA</a>
+ *  - <a href="https://www.rfc-editor.org/rfc/rfc8422">RFC 8422: ECC Cipher Suites for TLS</a>
  */
 
-#if defined(QSC_ECDSA_S1EC25519)
+#define QSC_ECDSA_S1EC256
+
+#if defined(QSC_ECDSA_S1EC256)
 
 /*!
-* \def QSC_ECDSA_SIGNATURE_SIZE
-* \brief The byte size of the signature array
-*/
-#	define QSC_ECDSA_SIGNATURE_SIZE 64
+ * \def QSC_ECDSA_SIGNATURE_SIZE
+ * \brief The byte size of the signature array (r[32] || s[32]).
+ */
+#	define QSC_ECDSA_SIGNATURE_SIZE 64U
 
 /*!
-* \def QSC_ECDSA_PRIVATEKEY_SIZE
-* \brief The byte size of the secret private-key array
-*/
-#	define QSC_ECDSA_PRIVATEKEY_SIZE 64
+ * \def QSC_ECDSA_PRIVATEKEY_SIZE
+ * \brief The byte size of the private key array (seed[32] || Qx[32] || Qy[32]).
+ */
+#	define QSC_ECDSA_PRIVATEKEY_SIZE 96U
 
 /*!
-* \def QSC_ECDSA_PUBLICKEY_SIZE
-* \brief The byte size of the public-key array
-*/
-#	define QSC_ECDSA_PUBLICKEY_SIZE 32
+ * \def QSC_ECDSA_PUBLICKEY_SIZE
+ * \brief The byte size of the public key array (Qx[32] || Qy[32], big-endian).
+ */
+#	define QSC_ECDSA_PUBLICKEY_SIZE 64U
 
 #else
-#	error "The ECDSA parameter set is invalid!"
+#	error "The ECNISTP256 parameter set is invalid!  Define QSC_ECDSA_S1EC256."
 #endif
 
 /*!
-* \def QSC_ECDSA_SEED_SIZE
-* \brief The byte size of the random seed array
-*/
+ * \def QSC_ECDSA_SEED_SIZE
+ * \brief The byte size of the random seed / private scalar input array.
+ */
 #define QSC_ECDSA_SEED_SIZE 32ULL
 
 /*!
-* \def QSC_ECDSA_ALGNAME
-* \brief The formal algorithm name
-*/
-#define QSC_ECDSA_ALGNAME "ECDSA"
+ * \def QSC_ECDSA_ALGNAME
+ * \brief The formal algorithm name.
+ */
+#define QSC_ECDSA_ALGNAME "ECDSAP256"
+/*!
+ * \brief SEC 1 uncompressed EC point byte length for P-256.
+ */
+#define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 65U
+
+/*!
+ * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp256r1.
+ */
+#define QSC_ECDSA_SPKI_DER_SIZE 91U
+
+/*!
+ * \brief Maximum DER-encoded ECDSA signature size for P-256.
+ */
+#define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 72U
 
 /**
-* \brief Generates a ECDSA public/private key-pair.
-*
-* \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and QSC_ECDSA_SECRETKEY_SIZE.
-*
-* \param publickey:		[uint8_t*] Pointer to the public verification-key array
-* \param privatekey:	[uint8_t*] Pointer to the private signature-key array
-* \param seed:			[const uint8_t*] Pointer to the random 32-byte seed array
-*/
-QSC_EXPORT_API void qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+ * \brief Convert a raw public key (Qx || Qy) to SEC 1 uncompressed point form.
+ *
+ * \param secpub:		[uint8_t*] Output buffer of 65 bytes.
+ * \param publickey:	[const uint8_t*] Input raw public key of 64 bytes.
+ */
+QSC_EXPORT_API void qsc_ecdsa_publickey_to_sec1(uint8_t* secpub, const uint8_t* publickey);
 
 /**
-* \brief Generates a ECDSA public/private key-pair.
-*
-* \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and QSC_ECDSA_SECRETKEY_SIZE.
-*
-* \param publickey:		[uint8_t*] Pointer to the public verification-key array
-* \param privatekey:	[uint8_t*] Pointer to the private signature-key array
-* \param rng_generate:	[uint8_t*, size_t] Pointer to the random generator
-*/
-QSC_EXPORT_API void qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+ * \brief Derive a P-256 public key from a raw private scalar.
+ *
+ * \details
+ * This function derives the affine public point Q = dG from a 32-byte
+ * big-endian private scalar and serializes the result as the raw public-key
+ * form Qx || Qy.
+ *
+ * The private scalar must be in the range [1, n - 1], where n is the order
+ * of the P-256 base point.
+ *
+ * \param publickey:	[uint8_t*] Output buffer receiving the 64-byte public key.
+ * \param privatekey:	[const uint8_t*] Input 32-byte private scalar.
+ *
+ * \return				[int32_t] Returns 0 on success, or a negative error code on failure.
+ */
+QSC_EXPORT_API int32_t qsc_ecdsa_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
 
 /**
-* \brief Takes the message as input and returns an array containing the signature followed by the message.
-*
-* \warning Signature array must be sized to the size of the message plus QSC_ECDSA_SIGNATURE_SIZE.
-*
-* \param signedmsg:		[uint8_t*] Pointer to the signed-message array
-* \param smsglen:		[size_t*] Pointer to the signed message length
-* \param message:		[const uint8_t*] Pointer to the message array
-* \param msglen:		[size_t] The message length
-* \param privatekey:	[const uint8_t*] Pointer to the private signature-key array
-*/
-QSC_EXPORT_API void qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+ * \brief Convert a SEC 1 uncompressed point to the library raw public-key form.
+ *
+ * \param publickey:	[uint8_t*] Output raw public key of 64 bytes.
+ * \param secpub:		[const uint8_t*] Input SEC 1 public key of 65 bytes.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_publickey_from_sec1(uint8_t* publickey, const uint8_t* secpub);
 
 /**
-* \brief Verifies a signature-message pair with the public key.
-*
-* \param message:		[uint8_t*] Pointer to the message array to be signed
-* \param msglen:		[size_t*]Pointer to the message length
-* \param signedmsg:		[const uint8_t*] Pointer to the signed message array
-* \param smsglen:		[size_t] The signed message length
-* \param publickey:		[const uint8_t*] Pointer to the public verification-key array
-* \return				[bool] Returns true for success
-*/
+ * \brief Decode an X.509 SubjectPublicKeyInfo DER value for secp256r1.
+ *
+ * \param publickey:	[uint8_t*] Output raw public key of 64 bytes.
+ * \param spkider:		[const uint8_t*] Input DER buffer.
+ * \param spkilen:		[size_t] Input DER length in bytes.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_publickey_from_spki(uint8_t* publickey, const uint8_t* spkider, size_t spkilen);
+
+/**
+ * \brief Encode a raw public key (Qx || Qy) as X.509 SubjectPublicKeyInfo DER.
+ *
+ * \param spkider:		[uint8_t*] Output buffer of 91 bytes.
+ * \param publickey:	[const uint8_t*] Input raw public key of 64 bytes.
+ */
+QSC_EXPORT_API void qsc_ecdsa_publickey_to_spki(uint8_t* spkider, const uint8_t* publickey);
+
+/**
+ * \brief Encode a raw ECDSA signature (r || s) as ASN.1 DER.
+ *
+ * \param dersig:		[uint8_t*] Output DER buffer of at least 72 bytes.
+ * \param derlen:		[size_t*] Output DER length.
+ * \param signature:	[const uint8_t*] Input raw signature of 64 bytes.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_signature_to_der(uint8_t* dersig, size_t* derlen, const uint8_t* signature);
+
+/**
+ * \brief Decode an ASN.1 DER ECDSA signature into raw form (r || s).
+ *
+ * \param signature:	[uint8_t*] Output raw signature of 64 bytes.
+ * \param dersig:		[const uint8_t*] Input DER signature buffer.
+ * \param derlen:		[size_t] Input DER length.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_signature_from_der(uint8_t* signature, const uint8_t* dersig, size_t derlen);
+
+/**
+ * \brief Generate a P-256 public/private key pair from a 32-byte seed.
+ *
+ * \details
+ * Derives the private scalar d = SHA-256(seed) mod n, computes the public key
+ * Q = d*G, and stores both.  This function is deterministic: the same seed
+ * always produces the same key pair.
+ *
+ * \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and
+ *          QSC_ECDSA_PRIVATEKEY_SIZE respectively.
+ *
+ * \param publickey:	[uint8_t*] Pointer to the output public verification-key array.
+ * \param privatekey:	[uint8_t*] Pointer to the output private signature-key array.
+ * \param seed:			[const uint8_t*] Pointer to the random 32-byte seed array.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+/**
+ * \brief Generate a P-256 public/private key pair using a caller-supplied RNG.
+ *
+ * \details
+ * Fills a 32-byte seed from rng_generate, then calls
+ * qsc_ecdsa_generate_seeded_keypair.  The seed is erased from stack
+ * memory before returning.
+ *
+ * \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and
+ *          QSC_ECDSA_PRIVATEKEY_SIZE respectively.
+ *
+ * \param publickey:	[uint8_t*] Pointer to the public verification-key array.
+ * \param privatekey:	[uint8_t*] Pointer to the private signature-key array.
+ * \param rng_generate: [bool(*)(uint8_t*, size_t)] Pointer to the random generator function.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+/**
+ * \brief Sign a message with a P-256 private key.
+ *
+ * \details
+ * Computes a deterministic ECDSA signature (RFC 6979, HMAC-SHA256) over the
+ * SHA-256 digest of the message, then writes the 64-byte signature followed by
+ * the message into signedmsg. On success *smsglen = msglen + 64.
+ *
+ * \warning signedmsg must be at least msglen + QSC_ECDSA_SIGNATURE_SIZE bytes.
+ *
+ * \param signedmsg:	[uint8_t*] Pointer to the signed-message output array.
+ * \param smsglen:		[size_t*] Pointer to the signed-message length output.
+ * \param message:		[const uint8_t*] Pointer to the message to sign.
+ * \param msglen:		[size_t] Message length in bytes.
+ * \param privatekey:	[const uint8_t*] Pointer to the 96-byte private key array.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+
+/**
+ * \brief Sign a message with a P-256 private key, used primarily for RFC KAT testing).
+ *
+ * \details
+ * Computes a deterministic ECDSA signature using the private key scalar d, 
+ * (RFC KATs) then writes the 64-byte signature followed by
+ * the message into signedmsg. On success *smsglen = msglen + 64.
+ *
+ * \warning signedmsg must be at least msglen + QSC_ECDSA_SIGNATURE_SIZE bytes.
+ *
+ * \param signedmsg:	[uint8_t*] Pointer to the signed-message output array.
+ * \param smsglen:		[size_t*] Pointer to the signed-message length output.
+ * \param message:		[const uint8_t*] Pointer to the message to sign.
+ * \param msglen:		[size_t] Message length in bytes.
+ * \param privatekey:	[const uint8_t*] Pointer to the 96-byte private key array.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_ecdsa_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+
+/**
+ * \brief Verify a P-256 ECDSA signature and recover the message.
+ *
+ * \details
+ * Parses the 64-byte signature prepended to signedmsg, validates r and s are
+ * in [1, n-1], verifies that the public key lies on the curve, and checks the
+ * ECDSA equation.  On success the message bytes are copied into message and
+ * *msglen is set.  On failure message is zeroed and *msglen is set to 0.
+ *
+ * \param message:		[uint8_t*] Pointer to the recovered message output array.
+ * \param msglen:		[size_t*] Pointer to the recovered message length.
+ * \param signedmsg:	[const uint8_t*] Pointer to the signed-message input array.
+ * \param smsglen:		[size_t] Total signed-message length (signature + message).
+ * \param publickey:	[const uint8_t*] Pointer to the 64-byte public verification-key array.
+ * \return				[bool] Returns true if the signature is valid, false otherwise.
+ */
 QSC_EXPORT_API bool qsc_ecdsa_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END

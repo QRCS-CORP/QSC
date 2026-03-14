@@ -3,6 +3,9 @@
 #include "ipinfo.h"
 #include "memutils.h"
 
+static volatile int32_t qsc_server_thread_count = 0;
+static qsc_mutex qsc_server_thread_mutex = NULL;
+
 qsc_socket_address_families qsc_socket_server_address_family(const qsc_socket* sock)
 {
 	QSC_ASSERT(sock != NULL);
@@ -76,6 +79,7 @@ void qsc_socket_server_initialize(qsc_socket* sock)
 	sock->connection_status = qsc_socket_state_none;
 	sock->socket_protocol = qsc_socket_protocol_none;
 	sock->socket_transport = qsc_socket_transport_none;
+	qsc_server_thread_mutex = qsc_async_mutex_create();
 }
 
 qsc_socket_exceptions qsc_socket_server_listen(qsc_socket* source, qsc_socket* target, const char* address, uint16_t port, qsc_socket_address_families family)
@@ -131,6 +135,8 @@ qsc_socket_exceptions qsc_socket_server_listen_ipv4(qsc_socket* source, qsc_sock
 
 		if (res == qsc_socket_exception_success)
 		{
+			qsc_socket_set_option(source, qsc_socket_protocol_socket, qsc_socket_option_reuse_address, 1);
+
 			res = qsc_socket_bind_ipv4(source, address, port);
 
 			if (res == qsc_socket_exception_success)
@@ -172,6 +178,8 @@ qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* source, qsc_sock
 			code = 0;
 			qsc_socket_set_option(source, qsc_socket_protocol_ipv6, qsc_socket_option_ipv6_only, code);
 #endif
+			qsc_socket_set_option(source, qsc_socket_protocol_socket, qsc_socket_option_reuse_address, 1);
+
 			res = qsc_socket_bind_ipv6(source, address, port);
 
 			if (res == qsc_socket_exception_success)
@@ -189,13 +197,11 @@ qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* source, qsc_sock
 	return res;
 }
 
+static void qsc_socket_server_accept_invoke_vp(void* vstate);
+
 static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state* state)
 {
 	QSC_ASSERT(state != NULL);
-
-	qsc_mutex mtx;
-
-	mtx = qsc_async_mutex_lock_ex();
 
 	if (state != NULL)
 	{
@@ -203,34 +209,46 @@ static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state
 		qsc_socket_exceptions res;
 
 		qsc_memutils_clear(&ar, sizeof(qsc_socket_server_accept_result));
-
 		res = qsc_socket_accept(state->source, &ar.target);
 
 		if (res == qsc_socket_exception_success)
 		{
+			qsc_async_mutex_lock(qsc_server_thread_mutex);
+
 			if (state->callback != NULL)
 			{
 				state->callback(&ar);
-				qsc_async_thread_create((void(*)(void*))&qsc_socket_server_accept_invoke, state);
 			}
+
+			if (qsc_server_thread_count < QSC_SOCKET_SERVER_MAX_THREADS)
+			{
+				(void)qsc_async_atomic_int32_increment(&qsc_server_thread_count);
+
+				qsc_async_thread_create(&qsc_socket_server_accept_invoke_vp, state);
+			}
+
+			qsc_async_mutex_unlock(qsc_server_thread_mutex);
 		}
 		else
 		{
+			qsc_async_mutex_lock(qsc_server_thread_mutex);
+
+			(void)qsc_async_atomic_int32_decrement(&qsc_server_thread_count);
+
 			if (state->error != NULL)
 			{
-				res = qsc_socket_get_last_error();
-				state->error(state->source, res);
+				state->error(state->source, qsc_socket_get_last_error());
 			}
+
+			qsc_async_mutex_unlock(qsc_server_thread_mutex);
 		}
 	}
-
-	qsc_async_mutex_unlock_ex(mtx);
 }
 
 static void qsc_socket_server_accept_invoke_vp(void* vstate)
 {
-    qsc_socket_server_async_accept_state* state = (qsc_socket_server_async_accept_state*)vstate;
-    qsc_socket_server_accept_invoke(state);
+	qsc_socket_server_async_accept_state* state = (qsc_socket_server_async_accept_state*)vstate;
+	qsc_socket_server_accept_invoke(state);
 }
 
 qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_server_async_accept_state* state, const char* address, uint16_t port, qsc_socket_address_families family)
@@ -320,13 +338,13 @@ qsc_socket_exceptions qsc_socket_server_listen_async_ipv6(qsc_socket_server_asyn
 #endif
 		if (res == qsc_socket_exception_success)
 		{
-			res = qsc_socket_bind_ipv6(state->source, address, port);
-
 #if defined(QSC_SOCKET_DUAL_IPV6_STACK)
 			int32_t code;
 			code = 0;
 			qsc_socket_set_option(state->source, qsc_socket_protocol_ipv6, qsc_socket_option_ipv6_only, code);
 #endif
+
+			res = qsc_socket_bind_ipv6(state->source, address, port);
 
 			if (res == qsc_socket_exception_success)
 			{
@@ -357,6 +375,11 @@ void qsc_socket_server_set_options(const qsc_socket* sock, qsc_socket_protocols 
 void qsc_socket_server_shut_down(qsc_socket* sock)
 {
 	QSC_ASSERT(sock != NULL);
+
+	if (qsc_server_thread_mutex != NULL)
+	{
+		qsc_async_mutex_destroy(qsc_server_thread_mutex);
+	}
 
 	if (sock != NULL)
 	{

@@ -1,31 +1,31 @@
-#include "ecdh_test.h"
+#include "eddh_test.h"
 #include "nistrng.h"
 #include "testutils.h"
 #include "csp.h"
-#include "ecdh.h"
+#include "eddh.h"
 #include "intutils.h"
 
-bool qsctest_ecdh_kat_test()
+bool qsctest_eddh_kat_test()
 {
-	uint8_t kpka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t kpkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t ksec[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t kska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t kskb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seeda[QSC_ECDH_SEED_SIZE] = { 0 };
-	uint8_t seedb[QSC_ECDH_SEED_SIZE] = { 0 };
-	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t kpka[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t kpkb[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ksec[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t kska[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t kskb[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pka[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t seeda[QSC_EDDH_SEED_SIZE] = { 0 };
+	uint8_t seedb[QSC_EDDH_SEED_SIZE] = { 0 };
+	uint8_t ska[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
 	bool ret;
 
 	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F", seeda, sizeof(seeda));
 	qsctest_hex_to_bin("202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F", seedb, sizeof(seedb));
 
-#if defined(QSC_ECDH_RFC_7748_COMPLIANT)
+#if defined(QSC_EDDH_RFC_7748_COMPLIANT)
 	qsctest_hex_to_bin("9663AA1DA97E848A914A436D04163DFBB89178F107F1B5B77ED3854203382854", ksec, sizeof(ksec));
 	qsctest_hex_to_bin("8F40C5ADB68F25624AE5B214EA767A6EC94D829D3D7B5E1AD1BA6F3E2138285F", kpka, sizeof(kpka));
 	qsctest_hex_to_bin("358072D6365880D1AEEA329ADF9121383851ED21A28E3B75E965D0D2CD166254", kpkb, sizeof(kpkb));
@@ -42,9 +42,9 @@ bool qsctest_ecdh_kat_test()
 	ret = true;
 
 	/* alice generates a key-pair */
-	qsc_ecdh_generate_seeded_keypair(pka, ska, seeda);
+	qsc_eddh_generate_seeded_keypair(pka, ska, seeda);
 	/* bob generates a key-pair */
-	qsc_ecdh_generate_seeded_keypair(pkb, skb, seedb);
+	qsc_eddh_generate_seeded_keypair(pkb, skb, seedb);
 
 	/* test key generation */
 	if (qsc_intutils_are_equal8(pka, kpka, sizeof(pka)) != true)
@@ -74,14 +74,14 @@ bool qsctest_ecdh_kat_test()
 	/* compare the secret key to the expected output */
 
 	/* alice derives the secret key */
-	if (qsc_ecdh_key_exchange(seca, ska, pkb) != true)
+	if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 	{
 		qsctest_print_safe("Failure! ecdh_kat: key exchange a has failed -EK5 \n");
 		ret = false;
 	}
 
 	/* bob derives the secret key */
-	if (qsc_ecdh_key_exchange(secb, skb, pka) != true)
+	if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 	{
 		qsctest_print_safe("Failure! ecdh_kat: key exchange b has failed -EK6 \n");
 		ret = false;
@@ -104,30 +104,30 @@ bool qsctest_ecdh_kat_test()
 	return ret;
 }
 
-bool qsctest_ecdh_operations_test()
+bool qsctest_eddh_operations_test()
 {
-	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
-	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t pka[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t seed[QSC_EDDH_SEED_SIZE] = { 0 };
+	uint8_t ska[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
 	bool res;
 
 	res = true;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
-	for (size_t i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
+	for (size_t i = 0; i < QSCTEST_EDDH_ITERATIONS; i++)
 	{
 		/* alice generates a key-pair */
-		qsc_ecdh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
+		qsc_eddh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
 		/* bob generates a key-pair */
-		qsc_ecdh_generate_keypair(pkb, skb, qsctest_nistrng_prng_generate);
+		qsc_eddh_generate_keypair(pkb, skb, qsctest_nistrng_prng_generate);
 
 		/* alice derives the secret key */
-		if (qsc_ecdh_key_exchange(seca, ska, pkb) != true)
+		if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_operations: key exchange failure -EO1 \n");
 			res = false;
@@ -135,7 +135,7 @@ bool qsctest_ecdh_operations_test()
 		}
 
 		/* bob derives the secret key */
-		if (qsc_ecdh_key_exchange(secb, skb, pka) != true)
+		if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_operations: key exchange failure -EO2 \n");
 			res = false;
@@ -143,7 +143,7 @@ bool qsctest_ecdh_operations_test()
 		}
 
 		/* compare them for equality*/
-		if (qsc_intutils_are_equal8(seca, secb, QSC_ECDH_SHAREDSECRET_SIZE) != true)
+		if (qsc_intutils_are_equal8(seca, secb, QSC_EDDH_SHAREDSECRET_SIZE) != true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_operations: secret keys do not match -EO3 \n");
 			res = false;
@@ -154,33 +154,33 @@ bool qsctest_ecdh_operations_test()
 	return res;
 }
 
-bool qsctest_ecdh_privatekey_integrity()
+bool qsctest_eddh_privatekey_integrity()
 {
-	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
-	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t seed[QSC_EDDH_SEED_SIZE] = { 0 };
+	uint8_t pka[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ska[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
-	for (size_t i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
+	for (size_t i = 0; i < QSCTEST_EDDH_ITERATIONS; i++)
 	{
 		/* alice generates a key-pair */
-		qsc_ecdh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
+		qsc_eddh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
 		/* bob generates a key-pair */
-		qsc_ecdh_generate_keypair(pkb, skb, qsctest_nistrng_prng_generate);
+		qsc_eddh_generate_keypair(pkb, skb, qsctest_nistrng_prng_generate);
 
 		/* flip a bit in alices private key */
 		ska[1] ^= 1U;
 
 		/* alice derives the secret key */
-		if (qsc_ecdh_key_exchange(seca, ska, pkb) != true)
+		if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_privatekey: key exchange failure -ES1 \n");
 			res = false;
@@ -188,7 +188,7 @@ bool qsctest_ecdh_privatekey_integrity()
 		}
 
 		/* bob derives the secret key */
-		if (qsc_ecdh_key_exchange(secb, skb, pka) != true)
+		if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_privatekey: key exchange failure -ES2 \n");
 			res = false;
@@ -196,7 +196,7 @@ bool qsctest_ecdh_privatekey_integrity()
 		}
 
 		/* fail if equal */
-		if (qsc_intutils_are_equal8(seca, secb, QSC_ECDH_SHAREDSECRET_SIZE) == true)
+		if (qsc_intutils_are_equal8(seca, secb, QSC_EDDH_SHAREDSECRET_SIZE) == true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_privatekey: altered private key did not change secret -ES3 \n");
 			res = false;
@@ -207,33 +207,33 @@ bool qsctest_ecdh_privatekey_integrity()
 	return res;
 }
 
-bool qsctest_ecdh_publickey_integrity()
+bool qsctest_eddh_publickey_integrity()
 {
-	uint8_t seed[QSC_ECDH_SEED_SIZE] = { 0 };
-	uint8_t pka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t pkb[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
-	uint8_t ska[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t skb[QSC_ECDH_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t seca[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t secb[QSC_ECDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t seed[QSC_EDDH_SEED_SIZE] = { 0 };
+	uint8_t pka[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t pkb[QSC_EDDH_PUBLICKEY_SIZE] = { 0 };
+	uint8_t ska[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t skb[QSC_EDDH_PRIVATEKEY_SIZE] = { 0 };
+	uint8_t seca[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t secb[QSC_EDDH_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
-	for (size_t i = 0; i < QSCTEST_ECDH_ITERATIONS; i++)
+	for (size_t i = 0; i < QSCTEST_EDDH_ITERATIONS; i++)
 	{
 		/* alice generates a key-pair */
-		qsc_ecdh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
+		qsc_eddh_generate_keypair(pka, ska, qsctest_nistrng_prng_generate);
 		/* bob generates a key-pair */
-		qsc_ecdh_generate_keypair(pkb, skb, qsctest_nistrng_prng_generate);
+		qsc_eddh_generate_keypair(pkb, skb, qsctest_nistrng_prng_generate);
 
 		/* flip a bit in alices public key */
 		pka[0] ^= 1U;
 
 		/* alice derives the secret key */
-		if (qsc_ecdh_key_exchange(seca, ska, pkb) != true)
+		if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_publickey: key exchange failure -EP1 \n");
 			res = false;
@@ -241,7 +241,7 @@ bool qsctest_ecdh_publickey_integrity()
 		}
 
 		/* bob derives the secret key */
-		if (qsc_ecdh_key_exchange(secb, skb, pka) != true)
+		if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_publickey: key exchange failure -EP2 \n");
 			res = false;
@@ -249,7 +249,7 @@ bool qsctest_ecdh_publickey_integrity()
 		}
 
 		/* fail if equal */
-		if (qsc_intutils_are_equal8(seca, secb, QSC_ECDH_SHAREDSECRET_SIZE) == true)
+		if (qsc_intutils_are_equal8(seca, secb, QSC_EDDH_SHAREDSECRET_SIZE) == true)
 		{
 			qsctest_print_safe("Failure! ecdh_test_publickey: altered public key did not change secret -EP3 \n");
 			res = false;
@@ -260,9 +260,9 @@ bool qsctest_ecdh_publickey_integrity()
 	return res;
 }
 
-void qsctest_ecdh_run()
+void qsctest_eddh_run()
 {
-	if (qsctest_ecdh_kat_test() == true)
+	if (qsctest_eddh_kat_test() == true)
 	{
 		qsctest_print_safe("Success! Passed ECDH known answer test. \n");
 	}
@@ -271,7 +271,7 @@ void qsctest_ecdh_run()
 		qsctest_print_safe("Failure! Failed ECDH known answer test. \n");
 	}
 
-	if (qsctest_ecdh_operations_test() == true)
+	if (qsctest_eddh_operations_test() == true)
 	{
 		qsctest_print_safe("Success! Passed ECDH key generation, encryption, and decryption stress test. \n");
 	}
@@ -280,7 +280,7 @@ void qsctest_ecdh_run()
 		qsctest_print_safe("Failure! Failed ECDH the encryption stress tests. \n");
 	}
 
-	if (qsctest_ecdh_privatekey_integrity() == true)
+	if (qsctest_eddh_privatekey_integrity() == true)
 	{
 		qsctest_print_safe("Success! Passed ECDH secret-key tamper test. \n");
 	}
@@ -289,7 +289,7 @@ void qsctest_ecdh_run()
 		qsctest_print_safe("Failure! Failed ECDH secret-key tamper test. \n");
 	}
 
-	if (qsctest_ecdh_publickey_integrity() == true)
+	if (qsctest_eddh_publickey_integrity() == true)
 	{
 		qsctest_print_safe("Success! Passed ECDH public-key tamper test. \n");
 	}

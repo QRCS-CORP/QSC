@@ -153,6 +153,21 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 				break;
 			}
 		}
+#elif defined(QSC_SYSTEM_OS_FREEBSD) || defined(QSC_SYSTEM_OS_OPENBSD) || defined(QSC_SYSTEM_OS_NETBSD)
+		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+		{
+			if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK)
+			{
+				struct sockaddr_dl* sdl = (struct sockaddr_dl*)ifa->ifa_addr;
+
+				if (sdl->sdl_alen == 6)
+				{
+					netutils_format_mac(ctx->mac, (uint8_t*)LLADDR(sdl));
+				}
+
+				break;
+			}
+		}
 #else
 		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
 		{
@@ -175,10 +190,220 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 {
 	QSC_ASSERT(mac != NULL);
 
-	qsc_netutils_adaptor_info ctx = { 0U };
+	bool res;
 
-	qsc_netutils_get_adaptor_info(&ctx, "wlan0");
-	qsc_memutils_copy(mac, ctx.mac, QSC_NETUTILS_MAC_ADDRESS_SIZE);
+	res = false;
+
+	if (mac != NULL)
+	{
+		qsc_memutils_clear(mac, 6U);
+
+#if defined(QSC_SYSTEM_OS_LINUX)
+
+		struct ifaddrs* ifaddr;
+		struct ifaddrs* wlan;
+
+		ifaddr = NULL;
+		wlan = NULL;
+
+		if (getifaddrs(&ifaddr) == 0)
+		{
+			struct ifaddrs* cur;
+
+			/* pass 1: wired Ethernet (IFF_BROADCAST set, not loopback). */
+			cur = ifaddr;
+
+			while (cur != NULL && res == false)
+			{
+				if (cur->ifa_addr != NULL &&
+					cur->ifa_addr->sa_family == AF_PACKET &&
+					(cur->ifa_flags & IFF_LOOPBACK) == 0 &&
+					(cur->ifa_flags & IFF_BROADCAST) != 0)
+				{
+					struct sockaddr_ll* sll;
+
+					sll = (struct sockaddr_ll*)cur->ifa_addr;
+
+					if (sll->sll_halen == 6U)
+					{
+						qsc_memutils_copy(mac, sll->sll_addr, 6U);
+						res = true;
+					}
+				}
+
+				cur = cur->ifa_next;
+			}
+
+			/* pass 2: Wi-Fi fallback — any remaining AF_PACKET, non-loopback. */
+			if (res == false)
+			{
+				cur = ifaddr;
+
+				while (cur != NULL && res == false)
+				{
+					if (cur->ifa_addr != NULL &&
+						cur->ifa_addr->sa_family == AF_PACKET &&
+						(cur->ifa_flags & IFF_LOOPBACK) == 0)
+					{
+						struct sockaddr_ll* sll;
+
+						sll = (struct sockaddr_ll*)cur->ifa_addr;
+
+						if (sll->sll_halen == 6U)
+						{
+							qsc_memutils_copy(mac, sll->sll_addr, 6U);
+							res = true;
+						}
+					}
+
+					cur = cur->ifa_next;
+				}
+			}
+
+			freeifaddrs(ifaddr);
+			ifaddr = NULL;
+		}
+
+#elif defined(QSC_SYSTEM_OS_MAC) || defined(QSC_SYSTEM_OS_BSD)
+
+		struct ifaddrs* ifaddr;
+
+		ifaddr = NULL;
+
+		if (getifaddrs(&ifaddr) == 0)
+		{
+			struct ifaddrs* cur;
+
+			/* pass 1: wired Ethernet — IFF_BROADCAST set, not loopback. */
+			cur = ifaddr;
+
+			while (cur != NULL && res == false)
+			{
+				if (cur->ifa_addr != NULL &&
+					cur->ifa_addr->sa_family == AF_LINK &&
+					(cur->ifa_flags & IFF_LOOPBACK) == 0 &&
+					(cur->ifa_flags & IFF_BROADCAST) != 0)
+				{
+					struct sockaddr_dl* sdl;
+
+					sdl = (struct sockaddr_dl*)cur->ifa_addr;
+
+					if (sdl->sdl_alen == 6U)
+					{
+						qsc_memutils_copy(mac,
+							(const uint8_t*)sdl->sdl_data + sdl->sdl_nlen, 6U);
+						res = true;
+					}
+				}
+
+				cur = cur->ifa_next;
+			}
+
+			/* pass 2: Wi-Fi fallback — any AF_LINK, non-loopback. */
+			if (res == false)
+			{
+				cur = ifaddr;
+
+				while (cur != NULL && res == false)
+				{
+					if (cur->ifa_addr != NULL &&
+						cur->ifa_addr->sa_family == AF_LINK &&
+						(cur->ifa_flags & IFF_LOOPBACK) == 0)
+					{
+						struct sockaddr_dl* sdl;
+
+						sdl = (struct sockaddr_dl*)cur->ifa_addr;
+
+						if (sdl->sdl_alen == 6U)
+						{
+							qsc_memutils_copy(mac,
+								(const uint8_t*)sdl->sdl_data + sdl->sdl_nlen, 6U);
+							res = true;
+						}
+					}
+
+					cur = cur->ifa_next;
+				}
+			}
+
+			freeifaddrs(ifaddr);
+			ifaddr = NULL;
+		}
+
+#elif defined(QSC_SYSTEM_OS_WINDOWS)
+
+		IP_ADAPTER_ADDRESSES* adapters;
+		ULONG buflen;
+		ULONG ret;
+
+		adapters = NULL;
+		buflen = 0U;
+
+		ret = GetAdaptersAddresses(
+			AF_UNSPEC,
+			GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST |
+			GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
+			NULL, NULL, &buflen);
+
+		if (ret == ERROR_BUFFER_OVERFLOW && buflen > 0U)
+		{
+			adapters = (IP_ADAPTER_ADDRESSES*)qsc_memutils_malloc((size_t)buflen);
+
+			if (adapters != NULL)
+			{
+				ret = GetAdaptersAddresses(
+					AF_UNSPEC,
+					GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST |
+					GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
+					NULL, adapters, &buflen);
+
+				if (ret == NO_ERROR)
+				{
+					IP_ADAPTER_ADDRESSES* adapter;
+
+					/* pass 1: wired Ethernet. */
+					adapter = adapters;
+
+					while (adapter != NULL && res == false)
+					{
+						if (adapter->IfType == IF_TYPE_ETHERNET_CSMACD &&
+							adapter->OperStatus == IfOperStatusUp &&
+							adapter->PhysicalAddressLength == 6U)
+						{
+							qsc_memutils_copy(mac, adapter->PhysicalAddress, 6U);
+							res = true;
+						}
+
+						adapter = adapter->Next;
+					}
+
+					/* pass 2: Wi-Fi fallback. */
+					if (res == false)
+					{
+						adapter = adapters;
+
+						while (adapter != NULL && res == false)
+						{
+							if (adapter->IfType == IF_TYPE_IEEE80211 &&
+								adapter->OperStatus == IfOperStatusUp &&
+								adapter->PhysicalAddressLength == 6U)
+							{
+								qsc_memutils_copy(mac, adapter->PhysicalAddress, 6U);
+								res = true;
+							}
+
+							adapter = adapter->Next;
+						}
+					}
+				}
+
+				qsc_memutils_alloc_free(adapters);
+				adapters = NULL;
+			}
+		}
+
+#endif
+	}
 }
 
 uint32_t qsc_netutils_atoi(const char* source)
@@ -237,27 +462,30 @@ size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE])
 
 #else
 
-	char hn[QSC_NETUTILS_HOSTS_NAME_SIZE] = { 0U };
-	char* dn;
-	struct hostent* hp;
+	struct addrinfo hints = { 0 };
+	struct addrinfo* res = NULL;
 	size_t dlen;
 
-    dlen = 0U;
-    gethostname(hn, sizeof(hn));
-    hp = gethostbyname(hn);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_flags = AI_CANONNAME;
 
-    if (hp != NULL)
+	if (getaddrinfo(hn, NULL, &hints, &res) == 0 && res != NULL)
 	{
-		dn = strchr(hp->h_name, '.');
-		if (dn != NULL)
+		if (res->ai_canonname != NULL)
 		{
-			size_t len = strlen(dn);
-			if (len > 0U && len < QSC_NETUTILS_DOMAIN_NAME_SIZE)
+			const char* dot = strchr(res->ai_canonname, '.');
+
+			if (dot != NULL)
 			{
-				qsc_memutils_copy(output, dn, len);
-				dlen = len;
+				size_t dlen = strlen(dot);
+
+				if (dlen < QSC_NETUTILS_DOMAIN_NAME_SIZE)
+				{
+					qsc_memutils_copy(output, dot, dlen);
+				}
 			}
 		}
+		freeaddrinfo(res);
 	}
 
 	return dlen;
@@ -749,16 +977,17 @@ void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_SIZE], const
 
 	if (sock != NULL)
 	{
-		struct sockaddr psa;
+		struct sockaddr_storage psa = { 0 };
 		socklen_t psalen;
 		int32_t res;
 
-		psalen = 0U;
-		res = getpeername(sock->connection, &psa, &psalen);
+		psalen = (socklen_t)sizeof(psa);
+		res = getpeername(sock->connection, (struct sockaddr*)&psa, &psalen);
 
-		if (res != QSC_SOCKET_RET_ERROR && psalen > 0)
+		if (res == 0 && psalen > 0 && psalen <= (socklen_t)sizeof(psa))
 		{
-			qsc_memutils_copy(output, psa.sa_data, (size_t)psalen);
+			size_t copylen = (psalen < QSC_NETUTILS_HOSTS_NAME_SIZE) ? (size_t)psalen : (QSC_NETUTILS_HOSTS_NAME_SIZE - 1U);
+			qsc_memutils_copy(output, &psa, copylen);
 		}
 	}
 }

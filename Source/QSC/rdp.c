@@ -45,9 +45,9 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 			while (rmd != 0U && ectr <= RDP_RDR_RETRY)
 			{
 #	if defined(QSC_SYSTEM_IS_X64)
-				uint64_t rnd64;
+				unsigned long long rnd64;
 
-				fret = _rdrand64_step((unsigned long long*) & rnd64);
+				fret = _rdrand64_step(&rnd64);
 
 				if (fret == RDP_RDR_SUCCESS)
 				{
@@ -58,6 +58,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 						output[pos + i] = (uint8_t)(rnd64 >> (i * 8U));
 					}
 
+					rnd64 = 0U;
 					pos += rmdlen;
 					rmd -= rmdlen;
 					ectr = 0U;
@@ -69,6 +70,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 					if (ectr > RDP_RDR_RETRY)
 					{
 						res = false;
+						break;
 					}
 				}
 #	else
@@ -85,6 +87,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 						output[pos + i] = (uint8_t)(rnd32 >> (i * 8U));
 					}
 
+					rnd32 = 0U;
 					pos += rmdlen;
 					rmd -= rmdlen;
 					ectr = 0U;

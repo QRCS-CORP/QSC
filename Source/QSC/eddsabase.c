@@ -1,15 +1,15 @@
-#include "ecdsabase.h"
+#include "eddsabase.h"
 #include "csp.h"
-#include "ec25519.h"
+#include "ed25519.h"
 #include "intutils.h"
 #include "memutils.h"
 #include "sha2.h"
 
 static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk)
 {
-	QSC_CACHE_ALIGNED uint8_t az[64U] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t nonce[64U] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t hram[64U] = { 0U };
+	uint8_t az[64U] = { 0U };
+	uint8_t nonce[64U] = { 0U };
+	uint8_t hram[64U] = { 0U };
 	qsc_sha512_state ctx;
 	qsc_ge25519_p3 R;
 
@@ -46,7 +46,6 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 	qsc_sc25519_clamp(az);
 	/* muladd hram, az, nonce to 2nd half of sig */
 	qsc_sc25519_muladd(sm + 32, hram, az, nonce);
-
 	/* cleanup */
 	qsc_memutils_secure_erase(az, sizeof(az));
 	qsc_memutils_secure_erase(nonce, sizeof(nonce));
@@ -62,8 +61,8 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t mlen, const uint8_t* pk)
 {
 	qsc_sha512_state ctx;
-	QSC_CACHE_ALIGNED uint8_t h[64U] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t rcheck[32U] = { 0U };
+	uint8_t h[64U] = { 0U };
+	uint8_t rcheck[32U] = { 0U };
 	qsc_ge25519_p3 A;
 	qsc_ge25519_p2 R;
 	bool res;
@@ -120,14 +119,14 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
 
 	qsc_ge25519_p3 A;
 
-	qsc_sha512_compute(privatekey, seed, EC25519_SEED_SIZE);
+	qsc_sha512_compute(privatekey, seed, ED25519_SEED_SIZE);
 	qsc_sc25519_clamp(privatekey);
 
 	qsc_ge25519_scalarmult_base(&A, privatekey);
 	qsc_ge25519_p3_to_bytes(publickey, &A);
 
-	qsc_memutils_copy(privatekey, seed, EC25519_SEED_SIZE);
-	qsc_memutils_copy(privatekey + EC25519_SEED_SIZE, publickey, EC25519_PUBLICKEY_SIZE);
+	qsc_memutils_copy(privatekey, seed, ED25519_SEED_SIZE);
+	qsc_memutils_copy(privatekey + ED25519_SEED_SIZE, publickey, ED25519_PUBLICKEY_SIZE);
 }
 
 int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
@@ -140,16 +139,16 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 	size_t slen;
 	int32_t res;
 
-	qsc_memutils_copy(signedmsg + EC25519_SIGNATURE_SIZE, message, msglen);
+	qsc_memutils_copy(signedmsg + ED25519_SIGNATURE_SIZE, message, msglen);
 
-	if (ecdsa_ed25519_sign(signedmsg, &slen, signedmsg + EC25519_SIGNATURE_SIZE, msglen, privatekey) != 0 || slen != EC25519_SIGNATURE_SIZE)
+	if (ecdsa_ed25519_sign(signedmsg, &slen, signedmsg + ED25519_SIGNATURE_SIZE, msglen, privatekey) != 0 || slen != ED25519_SIGNATURE_SIZE)
 	{
 		if (smsglen != NULL)
 		{
 			*smsglen = 0;
 		}
 
-		qsc_memutils_clear(signedmsg, msglen + EC25519_SIGNATURE_SIZE);
+		qsc_memutils_clear(signedmsg, msglen + ED25519_SIGNATURE_SIZE);
 		res = -1;
 	}
 	else
@@ -171,39 +170,28 @@ int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* sign
 	QSC_ASSERT(msglen != NULL);
 	QSC_ASSERT(signedmsg != NULL);
 	QSC_ASSERT(publickey != NULL);
-	QSC_ASSERT(smsglen > EC25519_SIGNATURE_SIZE);
-	QSC_ASSERT(smsglen - EC25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
+	QSC_ASSERT(smsglen > ED25519_SIGNATURE_SIZE);
+	QSC_ASSERT(smsglen - ED25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
 
-	const size_t MSGLEN = smsglen - EC25519_SIGNATURE_SIZE;
 	int32_t res;
 
-	if (ecdsa_ed25519_verify(signedmsg, signedmsg + EC25519_SIGNATURE_SIZE, MSGLEN, publickey) == false)
+	if (message != NULL && msglen != NULL && signedmsg != NULL && publickey != NULL && 
+		smsglen > ED25519_SIGNATURE_SIZE && smsglen - ED25519_SIGNATURE_SIZE < QSC_SIZE_MAX)
 	{
-		if (message != NULL)
+		const size_t MSGLEN = smsglen - ED25519_SIGNATURE_SIZE;
+
+		if (ecdsa_ed25519_verify(signedmsg, signedmsg + ED25519_SIGNATURE_SIZE, MSGLEN, publickey) == false)
 		{
 			qsc_memutils_clear(message, MSGLEN);
-		}
-
-		if (msglen != NULL)
-		{
 			*msglen = 0;
+			res = -1;
 		}
-
-		res = -1;
-	}
-	else
-	{
-		if (msglen != NULL)
+		else
 		{
 			*msglen = MSGLEN;
+			qsc_memutils_copy(message, signedmsg + ED25519_SIGNATURE_SIZE, MSGLEN);
+			res = 0;
 		}
-
-		if (message != NULL)
-		{
-			qsc_memutils_copy(message, signedmsg + EC25519_SIGNATURE_SIZE, MSGLEN);
-		}
-
-		res = 0;
 	}
 
 	return res;

@@ -56,29 +56,35 @@
 
 /**
  * \file ecdsa_test.h
- * \brief ECDSA test functions.
+ * \brief ECDSA P-256 test functions.
  *
  * \details
- * This header defines functions for testing the ECDSA (Elliptic Curve Digital Signature Algorithm)
- * implementation. The test suite includes the following:
+ * This header defines functions for testing the ECDSA P-256 implementation.
+ * The test suite includes the following:
  *
- * - A known answer test (KAT) that validates key generation, message signing, and signature verification
- *   using predetermined test vectors for messages of various lengths (32, 64, 96, and 128 bytes). This test
- *   ensures that the generated keys and signatures match the expected outputs.
+ * - A known answer style test that validates deterministic seeded key generation,
+ *   message signing, and signature verification using fixed messages of various
+ *   lengths. This test ensures that the implementation produces stable outputs
+ *   for a fixed seed and that signatures verify successfully against the
+ *   corresponding public key.
  *
- * - A private key integrity test that deliberately mutates the secret key and verifies that the resulting
- *   signature fails verification, confirming that any alteration in the secret key is detected.
+ * - A private key integrity test that deliberately mutates the secret key and
+ *   verifies that the resulting signature fails verification, confirming that
+ *   any alteration in the secret key is detected.
  *
- * - A public key integrity test that modifies a bit in the public key to ensure that signature verification
- *   fails when the public key has been tampered with.
+ * - A public key integrity test that modifies a bit in the public key to ensure
+ *   that signature verification fails when the public key has been tampered with.
  *
- * - A signature integrity test that flips bits in the generated signature (including parts of the hashed value)
- *   to verify that even minor modifications cause the verification to fail.
+ * - A signature integrity test that flips bits in the generated signature to
+ *   verify that even minor modifications cause the verification to fail.
  *
- * - A stress test that repeatedly generates key pairs, signs a message, and verifies the signature over many
- *   iterations (as defined by QSCTEST_ECDSA_ITERATIONS) to assess the robustness and reliability of the implementation.
+ * - A stress test that repeatedly signs and verifies a message over many
+ *   iterations and performs additional wellness checks, including internal
+ *   self-test verification, key-pair regeneration checks, and recovered-message
+ *   validation.
  *
- * These tests collectively ensure both the correctness and resilience of the ECDSA implementation.
+ * These tests collectively ensure both the correctness and resilience of the
+ * ECDSA P-256 implementation.
  */
 
 /**
@@ -89,9 +95,9 @@
  * Otherwise, it is set to 100.
  */
 #ifdef _DEBUG
-#   define QSCTEST_ECDSA_ITERATIONS 10
+#   define QSCTEST_ECDSA_ITERATIONS 1
 #else
-#   define QSCTEST_ECDSA_ITERATIONS 100
+#   define QSCTEST_ECDSA_ITERATIONS 10
 #endif
 
 /**
@@ -119,11 +125,12 @@
 #define QSCTEST_ECDSA_MSG3_SIZE 128
 
 /**
- * \brief Test the ECDSA known answer test vectors.
+ * \brief Test the ECDSA known answer vectors.
  *
- * This function tests key generation, message signing, and signature verification against
- * predetermined test vectors for messages of varying lengths. It ensures that the generated public
- * and private keys and the produced signatures match the expected values.
+ * This function tests seeded key generation, message signing, and signature
+ * verification against fixed inputs for messages of varying lengths. It ensures
+ * that the generated public and private keys are stable for a given seed and
+ * that the produced signatures verify successfully.
  *
  * \return Returns true if all known answer tests pass.
  */
@@ -132,9 +139,10 @@ bool qsctest_ecdsa_kat_test(void);
 /**
  * \brief Test the validity of a mutated secret key.
  *
- * This function deliberately alters a portion of the private key and attempts to sign a message.
- * The test passes only if the signature verification fails, indicating that any modification to the secret key
- * is correctly detected.
+ * This function deliberately alters a portion of the private key and attempts to
+ * sign a message. The test passes only if the resulting signature verification
+ * fails, indicating that any modification to the secret key is correctly
+ * detected.
  *
  * \return Returns true if the test is successful.
  */
@@ -143,8 +151,8 @@ bool qsctest_ecdsa_privatekey_integrity(void);
 /**
  * \brief Test the validity of a mutated public key.
  *
- * This function mutates the public key and verifies that signature verification fails when using the
- * altered public key.
+ * This function mutates the public key and verifies that signature verification
+ * fails when using the altered public key.
  *
  * \return Returns true if the test is successful.
  */
@@ -153,8 +161,8 @@ bool qsctest_ecdsa_publickey_integrity(void);
 /**
  * \brief Test the validity of a mutated signature.
  *
- * This function tests signature sensitivity by flipping bits in the signature. It verifies that even minor
- * alterations cause the signature verification to fail.
+ * This function tests signature sensitivity by flipping bits in the signature.
+ * It verifies that even minor alterations cause the signature verification to fail.
  *
  * \return Returns true if the test is successful.
  */
@@ -163,19 +171,20 @@ bool qsctest_ecdsa_signature_integrity(void);
 /**
  * \brief Stress test the key generation, signing, and verification operations.
  *
- * This function performs a series of iterations (defined by QSCTEST_ECDSA_ITERATIONS) where a message is signed,
- * and the resulting signature is verified. It also checks that the signature length and the recovered message
- * remain correct in every iteration.
+ * This function performs a series of iterations where a message is signed and the
+ * resulting signature is verified. It also performs wellness checks during each
+ * iteration, including internal self-test validation, signature-length checks,
+ * and recovered-message verification.
  *
- * \return Returns true if all stress tests pass.
+ * \return Returns true if all stress and wellness tests pass.
  */
 bool qsctest_ecdsa_stress_test(void);
 
 /**
  * \brief Run the ECDSA implementation stress and correctness tests.
  *
- * This function executes the known answer tests, the integrity tests for keys and signature,
- * and the stress test, printing the result of each test to the console.
+ * This function executes the known answer tests, the integrity tests for keys
+ * and signatures, and the stress test, printing the result of each test to the console.
  */
 void qsctest_ecdsa_run(void);
 

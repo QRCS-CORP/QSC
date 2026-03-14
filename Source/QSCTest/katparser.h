@@ -54,7 +54,7 @@
 
 #include "qsctestcommon.h"
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 /**
 * \file katparser.h
@@ -99,6 +99,6 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 void parse_nist_cipher_kat(const char* path, uint8_t* seed, size_t* seedlen, uint8_t* pk, size_t* pklen,
 	uint8_t* sk, size_t* sklen, uint8_t* ct, size_t* ctlen, uint8_t* ss, size_t* sslen, uint32_t setnum);
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 
 #endif

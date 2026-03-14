@@ -10,13 +10,15 @@ void qsc_queue_dispose(qsc_queue_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
+
 		if (ctx->queue != NULL)
 		{
 			for (size_t i = 0U; i < ctx->depth; ++i)
 			{
 				if (ctx->queue[i] != NULL)
 				{
-					qsc_memutils_clear(ctx->queue[i], ctx->width);
+					qsc_memutils_secure_erase(ctx->queue[i], ctx->width);
 					qsc_memutils_aligned_free(ctx->queue[i]);
 				}
 			}
@@ -24,11 +26,18 @@ void qsc_queue_dispose(qsc_queue_state* ctx)
 
 		qsc_memutils_aligned_free(ctx->queue);
 		ctx->queue = NULL;
-		qsc_memutils_clear(ctx->tags, sizeof(ctx->tags));
+		qsc_memutils_secure_erase(ctx->tags, sizeof(ctx->tags));
 		ctx->count = 0U;
 		ctx->depth = 0U;
 		ctx->position = 0U;
 		ctx->width = 0U;
+
+		qsc_async_mutex_unlock(ctx->opmtx);
+
+		if (ctx->opmtx)
+		{
+			qsc_async_mutex_destroy(ctx->opmtx);
+		}
 	}
 }
 
@@ -39,6 +48,8 @@ void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output)
 
 	if (ctx != NULL && output != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
+
 		if (ctx->queue != NULL)
 		{
 			for (size_t i = 0U; i < ctx->position; ++i)
@@ -46,14 +57,16 @@ void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output)
 				if (ctx->queue[i] != NULL)
 				{
 					qsc_memutils_copy((output + (i * ctx->width)), ctx->queue[i], ctx->width);
-					qsc_memutils_clear(ctx->queue[i], ctx->width);
+					qsc_memutils_secure_erase(ctx->queue[i], ctx->width);
 				}
 			}
 		}
 
 		ctx->count = 0U;
 		ctx->position = 0U;
-		qsc_memutils_clear(ctx->tags, sizeof(ctx->tags));
+		qsc_memutils_secure_erase(ctx->tags, sizeof(ctx->tags));
+
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 }
 
@@ -63,8 +76,16 @@ void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width)
 	QSC_ASSERT(depth != 0U);
 	QSC_ASSERT(width != 0U);
 
+
 	if (ctx != NULL && depth != 0U && width != 0U)
 	{
+		if (depth > QSC_QUEUE_MAX_DEPTH) 
+		{
+			depth = QSC_QUEUE_MAX_DEPTH;
+		}
+
+		ctx->opmtx = qsc_async_mutex_create();
+
 		ctx->queue = (uint8_t**)qsc_memutils_aligned_alloc(QSC_QUEUE_ALIGNMENT, depth * sizeof(uint8_t*));
 
 		if (ctx->queue != NULL)
@@ -123,7 +144,9 @@ size_t qsc_queue_items(const qsc_queue_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = ctx->count;
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -139,7 +162,9 @@ bool qsc_queue_full(const qsc_queue_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = (ctx->count == ctx->depth);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -155,7 +180,9 @@ bool qsc_queue_empty(const qsc_queue_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = (ctx->count == 0U);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -172,29 +199,40 @@ uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen)
 
 	tag = 0U;
 
-    if (!qsc_queue_empty(ctx) && otplen <= ctx->width)
-    {
-        /* copy out oldest entry */
-        qsc_memutils_copy(output, ctx->queue[0U], otplen);
-        tag = ctx->tags[0U];
+	if (ctx != NULL && output != NULL && otplen != 0U)
+	{
+		if (!qsc_queue_empty(ctx) && otplen <= ctx->width)
+		{
+			qsc_async_mutex_lock(ctx->opmtx);
 
-        if (ctx->count > 1U)
-        {
-            for (size_t i = 1U; i < ctx->count; ++i)
-            {
-                /* shift data buffers */
-                qsc_memutils_copy(ctx->queue[i - 1U], ctx->queue[i], ctx->width);
-                /* shift tags */
-                ctx->tags[i - 1U] = ctx->tags[i];
-            }
-        }
+			/* copy out oldest entry */
+			qsc_memutils_copy(output, ctx->queue[0U], otplen);
+			tag = ctx->tags[0U];
 
-        /* clear last slot */
-        qsc_memutils_clear(ctx->queue[ctx->count - 1U], ctx->width);
-        ctx->tags[ctx->count - 1U] = 0U;
+			if (ctx->count > 1U)
+			{
+				for (size_t i = 1U; i < ctx->count; ++i)
+				{
+					/* shift data buffers */
+					qsc_memutils_copy(ctx->queue[i - 1U], ctx->queue[i], ctx->width);
+					/* shift tags */
+					ctx->tags[i - 1U] = ctx->tags[i];
+				}
+			}
 
-        --ctx->count;
-        --ctx->position;
+			/* clear last slot */
+			qsc_memutils_clear(ctx->queue[ctx->count - 1U], ctx->width);
+			ctx->tags[ctx->count - 1U] = 0U;
+
+			--ctx->count;
+			--ctx->position;
+
+			qsc_async_mutex_unlock(ctx->opmtx);
+		}
+		else
+		{
+			qsc_memutils_clear(output, otplen);
+		}
 	}
 
 	return tag;
@@ -211,10 +249,14 @@ void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, ui
 	{
 		if (!qsc_queue_full(ctx) && inlen <= ctx->width)
 		{
+			qsc_async_mutex_lock(ctx->opmtx);
+
 			qsc_memutils_copy(ctx->queue[ctx->position], input, inlen);
 			ctx->tags[ctx->position] = tag;
 			++ctx->position;
 			++ctx->count;
+
+			qsc_async_mutex_unlock(ctx->opmtx);
 		}
 	}
 }

@@ -52,7 +52,7 @@
 #ifndef QSCTEST_NISTRNG_H
 #define QSCTEST_NISTRNG_H
 
-/* \cond */
+ /* \cond NO_DOCUMENT */
 
 /**
 * \file nistrng.h
@@ -167,6 +167,6 @@ bool qsctest_nistrng_prng_generate(uint8_t* output, size_t outlen);
 */
 void qsctest_nistrng_prng_update(uint8_t* key, uint8_t* counter, const uint8_t* info, size_t infolen);
 
-/* \endcond */
+/* \endcond NO_DOCUMENT */
 
 #endif

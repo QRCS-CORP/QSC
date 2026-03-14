@@ -22,7 +22,7 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
 		_time64(&lt);
-		err = localtime_s(&nt, &lt);
+		err = _localtime64_s(&nt, &lt);
 
 		if (err == 0)
 		{
@@ -35,25 +35,23 @@ void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 			}
 		}
 #else
+		char abuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
 		time_t rt;
 		struct tm* ti;
-		char buf[QSC_TIMEREX_TIMESTAMP_MAX];
+		struct tm tmr;
 		size_t len;
 
 		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
-		time(&rt);
-
-		ti = localtime(&rt);
+		rt = time(NULL);
+		ti = localtime_r(&rt, &tmr);
 
 		if (ti != NULL)
 		{
-			strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%F", ti);
-
-			len = strlen(buf);
+			len = strftime(abuf, QSC_TIMEREX_TIMESTAMP_MAX, "%F", ti);
 
 			if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
 			{
-				qsc_memutils_copy(output, buf, len);
+				qsc_memutils_copy(output, abuf, len);
 				output[len] = '\0';
 			}
 		}
@@ -68,7 +66,7 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	if (output != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		struct tm nt;
+		struct tm nt = { 0U };
 		char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
 		__time64_t lt;
 		errno_t err;
@@ -92,23 +90,29 @@ void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 			}
 		}
 #else
+		char abuf[26U] = { 0U };
 		time_t rt;
 		struct tm* ti;
 		char* ct;
-
+		struct tm tmr;
 		size_t len;
 
 		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 		rt = time(NULL);
-		ti = localtime(&rt);
+		ti = localtime_r(&rt, &tmr);
 
-		if (ti != NULL)
+		if (ti != NULL) 
 		{
-			ct = asctime(ti);
+			ct = asctime_r(ti, abuf);
 
 			if (ct != NULL)
 			{
 				len = strlen(ct);
+
+				if (len > 0U && ct[len - 1U] == '\n')
+				{
+					--len;
+				}
 
 				if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
 				{
@@ -128,7 +132,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	if (output != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		struct tm nt;
+		struct tm nt = { 0U };
 		char tbuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
 		__time64_t lt;
 		errno_t err;
@@ -138,7 +142,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
 
 		_time64(&lt);
-		err = localtime_s(&nt, &lt);
+		err = _localtime64_s(&nt, &lt);
 
 		if (err == 0)
 		{
@@ -151,24 +155,23 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 			}
 		}
 #else
+		char abuf[QSC_TIMEREX_TIMESTAMP_MAX] = { 0 };
 		time_t rt;
 		struct tm* ti;
-		char buf[QSC_TIMEREX_TIMESTAMP_MAX];
+		struct tm tmr;
 		size_t len;
 
 		qsc_memutils_clear(output, QSC_TIMEREX_TIMESTAMP_MAX);
-		time(&rt);
-		ti = localtime(&rt);
+		rt = time(NULL);
+		ti = localtime_r(&rt, &tmr);
 
 		if (ti != NULL)
 		{
-			strftime(buf, QSC_TIMEREX_TIMESTAMP_MAX, "%T", ti);
-
-			len = strlen(buf);
+			len = strftime(abuf, QSC_TIMEREX_TIMESTAMP_MAX, "%T", ti);
 
 			if (len > 0U && len < QSC_TIMEREX_TIMESTAMP_MAX)
 			{
-				qsc_memutils_copy(output, buf, len);
+				qsc_memutils_copy(output, abuf, len);
 				output[len] = '\0';
 			}
 		}
@@ -178,23 +181,33 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 
 uint64_t qsc_timerex_stopwatch_start()
 {
-	uint64_t start;
+	clock_t ct;
+	uint64_t res;
 
-	start = (uint64_t)clock();
+	ct = clock();
+	res = (ct == (clock_t)-1) ? UINT64_MAX : (uint64_t)ct;
 
-	return start;
+	return res;
 }
 
 uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start)
 {
+	clock_t ct;
 	uint64_t diff;
-	uint64_t msec;
+	uint64_t now;
+	uint64_t res;
 
-	msec = clock();
-	diff = msec - start;
-	msec = (diff * 1000U) / CLOCKS_PER_SEC;
+	ct = clock();
+	res = 0U;
 
-	return msec;
+	if (ct != (clock_t)-1 && start != UINT64_MAX)
+	{
+		now = (uint64_t)ct;
+		diff = (now >= start) ? (now - start) : 0U;
+		res = (diff / (uint64_t)CLOCKS_PER_SEC) * 1000U + ((diff % (uint64_t)CLOCKS_PER_SEC) * 1000U) / (uint64_t)CLOCKS_PER_SEC;
+	}
+
+	return res;
 }
 
 #if defined(QSC_DEBUG_MODE)

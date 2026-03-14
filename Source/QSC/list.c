@@ -1,5 +1,4 @@
 #include "list.h"
-#include "async.h"
 #include "intutils.h"
 #include "memutils.h"
 #include "secrand.h"
@@ -15,21 +14,34 @@ void qsc_list_add(qsc_list_state* ctx, const void* item)
 
 	if (ctx != NULL && item != NULL)
 	{
-		qsc_mutex mtx;
+		qsc_async_mutex_lock(ctx->opmtx);
 
-		mtx = qsc_async_mutex_lock_ex();
 		cnt = ctx->count + 1U;
-		itmp = qsc_memutils_realloc(ctx->items, cnt * ctx->width);
 
-		if (itmp != NULL)
+		if (ctx->items == NULL)
 		{
-			ctx->items = itmp;
-			pos = ctx->count * ctx->width;
-			qsc_memutils_copy(ctx->items + pos, item, ctx->width);
-			ctx->count = (uint32_t)cnt;
+			ctx->items = qsc_memutils_malloc(cnt * ctx->width);
+
+			if (ctx->items  != NULL)
+			{
+				qsc_memutils_copy(ctx->items, item, ctx->width);
+				ctx->count = (uint32_t)cnt;
+			}
+		}
+		else
+		{
+			itmp = qsc_memutils_realloc(ctx->items, cnt * ctx->width);
+
+			if (itmp != NULL)
+			{
+				ctx->items = itmp;
+				pos = ctx->count * ctx->width;
+				qsc_memutils_copy(ctx->items + pos, item, ctx->width);
+				ctx->count = (uint32_t)cnt;
+			}
 		}
 
-		qsc_async_mutex_unlock_ex(mtx);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 }
 
@@ -41,13 +53,11 @@ void qsc_list_copy(const qsc_list_state* ctx, size_t index, void* item)
 
 	if (ctx != NULL && ctx->items != NULL && item != NULL)
 	{
-		qsc_mutex mtx;
-
 		if (index < ctx->count)
 		{
-			mtx = qsc_async_mutex_lock_ex();
+			qsc_async_mutex_lock(ctx->opmtx);
 			qsc_memutils_copy(item, ctx->items + (index * ctx->width), ctx->width);
-			qsc_async_mutex_unlock_ex(mtx);
+			qsc_async_mutex_unlock(ctx->opmtx);
 		}
 	}
 }
@@ -62,7 +72,9 @@ size_t qsc_list_count(const qsc_list_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = ctx->count;
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -74,16 +86,34 @@ void qsc_list_deserialize(qsc_list_state* ctx, const uint8_t* input)
 	QSC_ASSERT(ctx->items != NULL);
 	QSC_ASSERT(input != NULL);
 
-	size_t pos;
+	uint8_t* buf;
+	size_t total;
+	uint32_t cnt;
+	uint32_t wid;
 
 	if (ctx != NULL && ctx->items != NULL && input != NULL)
 	{
-		ctx->count = qsc_intutils_le8to32(input);
-		pos = sizeof(uint32_t);
-		ctx->width = qsc_intutils_le8to32(input + pos);
-		pos += sizeof(uint32_t);
+		cnt = qsc_intutils_le8to32(input);
+		wid = qsc_intutils_le8to32(input + sizeof(uint32_t)); 
 
-		qsc_memutils_copy(ctx->items, input + pos, ctx->count * ctx->width);
+		if (cnt != 0U && cnt <= QSC_LIST_MAX_DEPTH && wid != 0U && wid <= QSC_LIST_MAX_WIDTH)
+		{
+			qsc_async_mutex_lock(ctx->opmtx);
+
+			total = (size_t)cnt * (size_t)wid;
+
+			if (wid != 0 && total / wid == cnt)
+			{
+				buf = qsc_memutils_realloc(ctx->items, total);
+				if (buf == NULL) { return; }
+				ctx->items = buf;
+				ctx->count = cnt;
+				ctx->width = wid;
+				qsc_memutils_copy(ctx->items, input + 2U * sizeof(uint32_t), total);
+			}
+
+			qsc_async_mutex_unlock(ctx->opmtx);
+		}
 	}
 }
 
@@ -93,12 +123,21 @@ void qsc_list_dispose(qsc_list_state* ctx)
 
 	if (ctx != NULL && ctx->items != NULL && ctx->count > 0U)
 	{
-		qsc_memutils_clear(ctx->items, ctx->count * ctx->width);
+		qsc_async_mutex_lock(ctx->opmtx);
+
+		qsc_memutils_secure_erase(ctx->items, ctx->count * ctx->width);
 		qsc_memutils_alloc_free(ctx->items);
 
 		ctx->items = NULL;
 		ctx->count = 0U;
 		ctx->width = 0U;
+
+		qsc_async_mutex_unlock(ctx->opmtx);
+
+		if (ctx->opmtx)
+		{
+			qsc_async_mutex_destroy(ctx->opmtx);
+		}
 	}
 }
 
@@ -112,7 +151,9 @@ bool qsc_list_empty(const qsc_list_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = (ctx->count == 0U);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -128,7 +169,9 @@ bool qsc_list_full(const qsc_list_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = (ctx->count >= QSC_LIST_MAX_DEPTH);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -141,9 +184,10 @@ void qsc_list_initialize(qsc_list_state* ctx, size_t width)
 
 	if (ctx != NULL && width > 0U)
 	{
-		ctx->items = (uint8_t*)qsc_memutils_malloc(sizeof(uint8_t));
+		ctx->items = NULL;
 		ctx->count = 0U;
 		ctx->width = width;
+		ctx->opmtx = qsc_async_mutex_create();
 	}
 }
 
@@ -155,13 +199,12 @@ void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index)
 
 	if (ctx != NULL && item != NULL && ctx->items != NULL && index < ctx->count)
 	{
-		qsc_mutex mtx;
 		const uint8_t* pitm;
 
-		mtx = qsc_async_mutex_lock_ex();
+		qsc_async_mutex_lock(ctx->opmtx);
 		pitm = ctx->items + (index * ctx->width);
 		qsc_memutils_copy(item, pitm, ctx->width);
-		qsc_async_mutex_unlock_ex(mtx);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 }
 
@@ -177,7 +220,8 @@ void qsc_list_rshuffle(qsc_list_state* ctx)
 	{
 		uint8_t* pitm;
 
-		qsc_mutex mtx = qsc_async_mutex_lock_ex();
+		qsc_async_mutex_lock(ctx->opmtx);
+
 		pitm = qsc_memutils_malloc(ctx->width);
 
 		if (pitm != NULL)
@@ -189,8 +233,9 @@ void qsc_list_rshuffle(qsc_list_state* ctx)
 
 				sitm = ctx->items + ((size_t)idx * ctx->width);
 				ditm = ctx->items + (i * ctx->width);
+				
 				/* copy the current index item to temp */
-				qsc_memutils_copy(pitm, ditm, ctx->width);
+				qsc_memutils_copy(pitm, sitm, ctx->width);
 				/* copy the rand index item to the index item */
 				qsc_memutils_copy(sitm, ditm, ctx->width);
 				/* copy the temp item to the random index item */
@@ -199,7 +244,8 @@ void qsc_list_rshuffle(qsc_list_state* ctx)
 
 			qsc_memutils_alloc_free(pitm);
 			pitm = NULL;
-			qsc_async_mutex_unlock_ex(mtx);
+			
+			qsc_async_mutex_unlock(ctx->opmtx);
 		}
 	}
 }
@@ -212,11 +258,9 @@ void qsc_list_remove(qsc_list_state* ctx, size_t index)
 	{
 		if (index < ctx->count && ctx->items != NULL)
 		{
-			qsc_mutex mtx;
+			qsc_async_mutex_lock(ctx->opmtx);
 
-			mtx = qsc_async_mutex_lock_ex();
-
-			qsc_memutils_clear(ctx->items + (index * ctx->width), ctx->width);
+			qsc_memutils_secure_erase(ctx->items + (index * ctx->width), ctx->width);
 
 			/* shift last item into slot */
 			if (index < ctx->count - 1U)
@@ -226,7 +270,7 @@ void qsc_list_remove(qsc_list_state* ctx, size_t index)
 
 				ncnt = ctx->count - 1U;
 				qsc_memutils_copy(ctx->items + (index * ctx->width), ctx->items + (ncnt * ctx->width), ctx->width);
-				qsc_memutils_clear(ctx->items + (ncnt * ctx->width), ctx->width);
+				qsc_memutils_secure_erase(ctx->items + (ncnt * ctx->width), ctx->width);
 
 				itmp = qsc_memutils_realloc(ctx->items, ncnt * ctx->width);
 
@@ -236,8 +280,15 @@ void qsc_list_remove(qsc_list_state* ctx, size_t index)
 					ctx->count = ncnt;
 				}
 			}
+			else if (ctx->count - 1 == 0U)
+			{
+				/* last item in list */
+				qsc_memutils_alloc_free(ctx->items);
+				ctx->items = NULL;
+				ctx->count = 0U;
+			}
 
-			qsc_async_mutex_unlock_ex(mtx);
+			qsc_async_mutex_unlock(ctx->opmtx);
 		}
 	}
 }
@@ -253,6 +304,8 @@ size_t qsc_list_serialize(uint8_t* output, const qsc_list_state* ctx)
 
 	if (output != NULL && ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
+
 		qsc_intutils_le32to8(output, (uint32_t)ctx->count);
 		pos = sizeof(uint32_t);
 		qsc_intutils_le32to8(output + pos, (uint32_t)ctx->width);
@@ -260,6 +313,8 @@ size_t qsc_list_serialize(uint8_t* output, const qsc_list_state* ctx)
 
 		qsc_memutils_copy(output + pos, ctx->items, ctx->count * ctx->width);
 		pos += ctx->count * ctx->width;
+
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return pos;
@@ -275,7 +330,9 @@ size_t qsc_list_size(const qsc_list_state* ctx)
 
 	if (ctx != NULL)
 	{
+		qsc_async_mutex_lock(ctx->opmtx);
 		res = sizeof(uint32_t) + sizeof(uint32_t) + (ctx->count * ctx->width);
+		qsc_async_mutex_unlock(ctx->opmtx);
 	}
 
 	return res;
@@ -289,11 +346,10 @@ void qsc_list_sort(qsc_list_state* ctx)
 	uint8_t* pib;
 	uint8_t* tmp;
 
-	if (ctx != NULL)
+	if (ctx != NULL && ctx->items != NULL && ctx->count >= 2U)
 	{
-		qsc_mutex mtx;
+		qsc_async_mutex_lock(ctx->opmtx);
 
-		mtx = qsc_async_mutex_lock_ex();
 		tmp = qsc_memutils_malloc(ctx->width);
 
 		if (tmp != NULL)
@@ -306,7 +362,7 @@ void qsc_list_sort(qsc_list_state* ctx)
 					pia = ctx->items + (i * ctx->width);
 					pib = ctx->items + (j * ctx->width);
 
-					if (qsc_memutils_greater_than_le128(pib, pia) == true)
+					if (qsc_memutils_are_equal(pib, pia, ctx->width) == false)
 					{
 						qsc_memutils_copy(tmp, pia, ctx->width);
 						qsc_memutils_copy(pia, pib, ctx->width);
@@ -317,7 +373,8 @@ void qsc_list_sort(qsc_list_state* ctx)
 
 			qsc_memutils_alloc_free(tmp);
 			tmp = NULL;
-			qsc_async_mutex_unlock_ex(mtx);
+
+			qsc_async_mutex_unlock(ctx->opmtx);
 		}
 	}
 }

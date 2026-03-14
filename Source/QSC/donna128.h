@@ -108,34 +108,14 @@ QSC_EXPORT_API typedef struct
 } uint128;
 
 /**
- * \brief Right shift a 128-bit integer.
+ * \brief Add two 128-bit integers.
  *
- * \param x:        [const uint128*] Pointer to the input integer.
- * \param shift:    [size_t] Number of bits to shift right.
+ * \param x:        [const uint128*] Pointer to the first integer.
+ * \param y:        [const uint128*] Pointer to the second integer.
  *
- * \return [uint128] The shifted value.
+ * \return          [uint128] The sum of the two 128-bit integers.
  */
-QSC_EXPORT_API uint128 qsc_donna128_shift_right(const uint128* x, size_t shift);
-
-/**
- * \brief Left shift a 128-bit integer.
- *
- * \param x:        [const uint128*] Pointer to the input integer.
- * \param shift:    [size_t] Number of bits to shift left.
- *
- * \return          [uint128] The shifted value.
- */
-QSC_EXPORT_API uint128 qsc_donna128_shift_left(const uint128* x, size_t shift);
-
-/**
- * \brief Bitwise AND the low part of a 128-bit integer.
- *
- * \param x:        [const uint128*] Pointer to the input integer.
- * \param mask:     [uint64_t] The bitmask for the operation.
- *
- * \return          [uint64_t] The result of the AND operation on the low 64 bits.
- */
-QSC_EXPORT_API uint64_t qsc_donna128_andl(const uint128* x, uint64_t mask);
+QSC_EXPORT_API uint128 qsc_donna128_add(const uint128* x, const uint128* y);
 
 /**
  * \brief Bitwise AND the high part of a 128-bit integer.
@@ -148,14 +128,14 @@ QSC_EXPORT_API uint64_t qsc_donna128_andl(const uint128* x, uint64_t mask);
 QSC_EXPORT_API uint64_t qsc_donna128_andh(const uint128* x, uint64_t mask);
 
 /**
- * \brief Add two 128-bit integers.
+ * \brief Bitwise AND the low part of a 128-bit integer.
  *
- * \param x:        [const uint128*] Pointer to the first integer.
- * \param y:        [const uint128*] Pointer to the second integer.
+ * \param x:        [const uint128*] Pointer to the input integer.
+ * \param mask:     [uint64_t] The bitmask for the operation.
  *
- * \return          [uint128] The sum of the two 128-bit integers.
+ * \return          [uint64_t] The result of the AND operation on the low 64 bits.
  */
-QSC_EXPORT_API uint128 qsc_donna128_add(const uint128* x, const uint128* y);
+QSC_EXPORT_API uint64_t qsc_donna128_andl(const uint128* x, uint64_t mask);
 
 /**
  * \brief Multiply a 128-bit integer by a 64-bit integer.
@@ -176,6 +156,36 @@ QSC_EXPORT_API uint128 qsc_donna128_multiply(const uint128* x, uint64_t y);
  * \return          [uint128] The result of the OR operation.
  */
 QSC_EXPORT_API uint128 qsc_donna128_or(const uint128* x, const uint128* y);
+
+/**
+ * \brief Left shift a 128-bit integer.
+ *
+ * \param x:        [const uint128*] Pointer to the input integer.
+ * \param shift:    [size_t] Number of bits to shift left.
+ *
+ * \return          [uint128] The shifted value.
+ */
+QSC_EXPORT_API uint128 qsc_donna128_shift_left(const uint128* x, size_t shift);
+
+/**
+ * \brief Right shift a 128-bit integer.
+ *
+ * \param x:        [const uint128*] Pointer to the input integer.
+ * \param shift:    [size_t] Number of bits to shift right.
+ *
+ * \return [uint128] The shifted value.
+ */
+QSC_EXPORT_API uint128 qsc_donna128_shift_right(const uint128* x, size_t shift);
+
+/**
+ * \brief Subtract one 128-bit integer from another.
+ *
+ * \param x:        [const uint128*] Pointer to the minuend.
+ * \param y:        [const uint128*] Pointer to the subtrahend.
+ *
+ * \return          [uint128] The difference (x - y), wrapping on underflow.
+ */
+QSC_EXPORT_API uint128 qsc_donna128_subtract(const uint128* x, const uint128* y);
 
 QSC_CPLUSPLUS_ENABLED_END
 

@@ -65,9 +65,11 @@
 #include "qsctestcommon.h"
 #include "csx_test.h"
 #include "dilithium_test.h"
-#include "ecdh_test.h"
 #include "ecdsa_test.h"
+#include "eddh_test.h"
+#include "eddsa_test.h"
 #include "encoding_test.h"
+#include "falcon_test.h"
 #include "kyber_test.h"
 #include "mceliece_test.h"
 #include "netutils_test.h"
@@ -140,12 +142,12 @@ static void primitives_test(void)
 	qsctest_poly1305_run();
 	qsctest_qmac_run();
 
-	qsctest_ecdh_run();
+	qsctest_eddh_run();
 	qsctest_kyber_run();
 	qsctest_mceliece_run();
 
 	qsctest_dilithium_run();
-	qsctest_ecdsa_run();
+	qsctest_eddsa_run();
 	qsctest_sphincsplus_run();
 	
 	qsctest_secrand_run();
@@ -171,6 +173,15 @@ int32_t main(void)
 	qsc_timestamp_print_values();
 	qsc_consoleutils_print_line("");
 #endif
+
+	qsctest_ecdsa_run();
+	//qsctest_falcon_run();
+	//qsctest_eddh_run();
+	//qsctest_eddsa_run();
+	//qsctest_kyber_run();
+	//qsctest_dilithium_run();
+	//qsctest_mceliece_run();
+	//qsctest_sphincsplus_run();
 
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
@@ -323,7 +334,11 @@ int32_t main(void)
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the ECDSA implementation using stress, validity checks, and known answer tests ***");
-			qsctest_ecdsa_run();
+			qsctest_eddsa_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the Falcon implementation using stress, validity checks, and known answer tests ***");
+			qsctest_falcon_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the SPHINCS+ implementation using stress, validity checks, and known answer tests ***");
@@ -331,7 +346,7 @@ int32_t main(void)
 			qsctest_print_line("");
 			
 			qsctest_print_line("*** Test the ECDH implementation using stress, validity checks, and known answer tests ***");
-			qsctest_ecdh_run();
+			qsctest_eddh_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Kyber implementation using stress, validity checks, and known answer tests ***");

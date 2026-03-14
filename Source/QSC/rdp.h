@@ -90,31 +90,31 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
  * \brief Generate an array of random bytes using the RDRAND entropy provider.
  *
- * \param output:	[uint8_t*] Pointer to the output byte array.
- * \param length:	[size_t] The number of bytes to generate.
+ * \param output: [uint8_t*] Pointer to the output byte array.
+ * \param length: [size_t] The number of bytes to generate.
  *
- * \return			[bool] Returns true if the entropy generation was successful, false otherwise.
+ * \return [bool] Returns true if the entropy generation was successful, false otherwise.
  */
 QSC_EXPORT_API bool qsc_rdp_generate(uint8_t* output, size_t length);
 
 /**
  * \brief Generate a random 16-bit unsigned integer using the RDRAND entropy provider.
  *
- * \return			[uint16_t] Returns a random 16-bit unsigned integer.
+ * \return [uint16_t] Returns a random 16-bit unsigned integer.
  */
 QSC_EXPORT_API uint16_t qsc_rdp_uint16(void);
 
 /**
  * \brief Generate a random 32-bit unsigned integer using the RDRAND entropy provider.
  *
- * \return			[uint32_t] Returns a random 32-bit unsigned integer.
+ * \return [uint32_t] Returns a random 32-bit unsigned integer.
  */
 QSC_EXPORT_API uint32_t qsc_rdp_uint32(void);
 
 /**
  * \brief Generate a random 64-bit unsigned integer using the RDRAND entropy provider.
  *
- * \return			[uint64_t] Returns a random 64-bit unsigned integer.
+ * \return [uint64_t] Returns a random 64-bit unsigned integer.
  */
 QSC_EXPORT_API uint64_t qsc_rdp_uint64(void);
 

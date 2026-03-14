@@ -6,102 +6,129 @@
 #include "sha3.h"
 #include "sysutils.h"
 
-#define ACP_PRESEED_SIZE 64
+#define ACP_PRESEED_SIZE 64U
 
-static void acp_collect_statistics(uint8_t stat[ACP_PRESEED_SIZE])
+static void acp_add_computer_name(qsc_keccak_state* kstate)
 {
-	uint8_t buffer[1024U] = { 0U };
-	char tname[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
-	qsc_sysutils_drive_space_state dstate;
-	qsc_sysutils_memory_statistics_state mstate;
-	uint64_t ts;
-	size_t len;
-	size_t oft;
-	uint32_t id;
+	char snm[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
+	size_t nlen;
 
-	/* add user statistics */
-	ts = qsc_sysutils_system_timestamp();
+	nlen = qsc_sysutils_computer_name(snm);
 
-	/* interspersed with time-stamps, as return from system calls has some entropy variability */
-	qsc_memutils_copy(buffer, (const uint8_t*)&ts, sizeof(uint64_t));
-	oft = sizeof(uint64_t);
-	len = qsc_sysutils_computer_name(tname);
-
-	if ((oft + len) <= sizeof(buffer))
+	if (nlen > 0U)
 	{
-		qsc_memutils_copy(buffer + oft, tname, len);
-		oft += len;
+		qsc_sha3_update(kstate, qsc_keccak_rate_512, snm, nlen);
+		qsc_memutils_secure_erase(snm, nlen);
 	}
+}
 
-	id = qsc_sysutils_process_id();
-
-	if ((oft + sizeof(uint32_t)) <= sizeof(buffer))
-	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&id, sizeof(uint32_t));
-		oft += sizeof(uint32_t);
-	}
-
-	len = qsc_sysutils_user_name(tname);
-
-	if ((oft + len) <= sizeof(buffer))
-	{
-		qsc_memutils_copy(buffer + oft, tname, len);
-		oft += len;
-	}
-
-	ts = qsc_sysutils_system_uptime();
-
-	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
-	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
-		oft += sizeof(uint64_t);
-	}
-
-	/* add drive statistics */
-	ts = qsc_sysutils_system_timestamp();
-
-	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
-	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
-		oft += sizeof(uint64_t);
-	}
+static void acp_drive_statistics(qsc_keccak_state* kstate)
+{
+	uint8_t sds[sizeof(qsc_sysutils_drive_space_state)] = { 0U };
+	qsc_sysutils_drive_space_state dst;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	char drv[3U] = { 0 };
 
 	drv[0U] = qsc_sysutils_get_os_drive_letter();
 	drv[1U] = ':';
-	qsc_sysutils_drive_space(drv, &dstate);
+	qsc_sysutils_drive_space(drv, &dst);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-	qsc_sysutils_drive_space("/", &dstate);
+	qsc_sysutils_drive_space("/", &dst);
+#else
+	qsc_memutils_clear(&dst, sizeof(dst));
 #endif
 
-	if ((oft + sizeof(dstate)) <= sizeof(buffer))
-	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&dstate, sizeof(dstate));
-		oft += sizeof(dstate);
-	}
+	qsc_memutils_copy(sds, (const uint8_t*)&dst, sizeof(sds));
+	qsc_sha3_update(kstate, qsc_keccak_rate_512, sds, sizeof(sds));
+	qsc_memutils_secure_erase(sds, sizeof(sds));
+}
 
-	/* add memory statistics */
+static void acp_add_memory_statistics(qsc_keccak_state* kstate)
+{
+	qsc_sysutils_memory_statistics_state mst;
+	uint8_t sms[sizeof(qsc_sysutils_memory_statistics_state)] = { 0U };
+
+	qsc_sysutils_memory_statistics(&mst);
+	qsc_memutils_copy(sms, (const uint8_t*)&mst, sizeof(sms));
+	qsc_sha3_update(kstate, qsc_keccak_rate_512, sms, sizeof(sms));
+	qsc_memutils_secure_erase(sms, sizeof(sms));
+}
+
+static void acp_add_pid(qsc_keccak_state* kstate)
+{
+	uint8_t spd[sizeof(uint32_t)] = { 0U };
+	uint32_t pid;
+
+	pid = qsc_sysutils_process_id();
+	qsc_memutils_copy(spd, (const uint8_t*)&pid, sizeof(spd));
+	qsc_sha3_update(kstate, qsc_keccak_rate_512, spd, sizeof(spd));
+	pid = 0U;
+}
+
+static void acp_add_timestamp(qsc_keccak_state* kstate)
+{
+	uint8_t sts[sizeof(uint64_t)] = { 0U };
+	uint64_t ts;
+
 	ts = qsc_sysutils_system_timestamp();
+	qsc_memutils_copy(sts, (const uint8_t*)&ts, sizeof(uint64_t));
+	qsc_sha3_update(kstate, qsc_keccak_rate_512, sts, sizeof(sts));
+	qsc_memutils_secure_erase(sts, sizeof(sts));
+	ts = 0U;
+}
 
-	if ((oft + sizeof(uint64_t)) <= sizeof(buffer))
+static void acp_add_user_name(qsc_keccak_state* kstate)
+{
+	char snm[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
+	size_t nlen;
+
+	nlen = qsc_sysutils_user_name(snm);
+
+	if (nlen > 0U)
 	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&ts, sizeof(uint64_t));
-		oft += sizeof(uint64_t);
+		qsc_sha3_update(kstate, qsc_keccak_rate_512, snm, nlen);
+		qsc_memutils_secure_erase(snm, nlen);
 	}
+}
 
-	qsc_sysutils_memory_statistics(&mstate);
+static void acp_collect_statistics(uint8_t* output)
+{
+	qsc_keccak_state kstate = { 0U };
 
-	if ((oft + sizeof(mstate)) <= sizeof(buffer))
-	{
-		qsc_memutils_copy(buffer + oft, (const uint8_t*)&mstate, sizeof(mstate));
-		len = oft + sizeof(mstate);
-	}
+	acp_add_timestamp(&kstate);
+	acp_add_computer_name(&kstate);
+	acp_drive_statistics(&kstate);
+	acp_add_memory_statistics(&kstate);
+	acp_add_pid(&kstate);
+	acp_add_user_name(&kstate);
+	acp_add_timestamp(&kstate);
 
 	/* compress the statistics */
-	qsc_sha3_compute512(stat, buffer, len);
-	qsc_memutils_clear(buffer, sizeof(buffer));
+	qsc_sha3_finalize(&kstate, qsc_keccak_rate_512, output);
+	qsc_keccak_dispose(&kstate);
+}
+
+static void acp_squeeze_output(qsc_keccak_state* kstate, uint8_t* output, size_t length)
+{
+	size_t pos;
+
+	pos = 0U;
+
+	while (length >= QSC_KECCAK_512_RATE)
+	{
+		qsc_keccak_squeezeblocks(kstate, output + pos, 1U, qsc_keccak_rate_512, QSC_KECCAK_PERMUTATION_ROUNDS);
+		length -= QSC_KECCAK_512_RATE;
+		pos += QSC_KECCAK_512_RATE;
+	}
+
+	if (length > 0U)
+	{
+		uint8_t kbuff[QSC_KECCAK_512_RATE] = { 0U };
+
+		qsc_keccak_squeezeblocks(kstate, kbuff, 1U, qsc_keccak_rate_512, QSC_KECCAK_PERMUTATION_ROUNDS);
+		qsc_memutils_copy(output + pos, kbuff, length);
+	}
 }
 
 bool qsc_acp_generate(uint8_t* output, size_t length)
@@ -110,45 +137,34 @@ bool qsc_acp_generate(uint8_t* output, size_t length)
 	QSC_ASSERT(length != 0U);
 	QSC_ASSERT(length <= QSC_ACP_SEED_MAX);
 
-	uint8_t cust[64U] = { 0U };
-	uint8_t key[64U] = { 0U };
-	uint8_t stat[ACP_PRESEED_SIZE] = { 0U };
+	qsc_keccak_state kstate = { 0U };
+	uint8_t seed[ACP_PRESEED_SIZE] = { 0U };
 	bool res;
 
 	res = false;
 
 	if (output != NULL && length != 0U && length <= QSC_ACP_SEED_MAX)
 	{
-		/* collect timers and system stats, compressed as tertiary seed */
-		acp_collect_statistics(stat);
+		/* create the seed */
+		acp_collect_statistics(seed);
 
-		/* add a seed using RDRAND used as cSHAKE custom parameter */
-		res = qsc_rdp_generate(cust, sizeof(cust));
+		qsc_keccak_update(&kstate, qsc_keccak_rate_512, seed, sizeof(seed), QSC_KECCAK_PERMUTATION_ROUNDS);
 
-		if (res == false)
+		if (qsc_rdp_generate(seed, sizeof(seed)) == true)
 		{
-			/* fall-back to system provider */
-			res = qsc_csp_generate(cust, sizeof(cust));
+			qsc_keccak_update(&kstate, qsc_keccak_rate_512, seed, sizeof(seed), QSC_KECCAK_PERMUTATION_ROUNDS);
 		}
 
-		if (res == true)
+		if (qsc_csp_generate(seed, sizeof(seed)) == true)
 		{
-			/* generate primary key using system random provider */
-			res = qsc_csp_generate(key, sizeof(key));
+			qsc_keccak_update(&kstate, qsc_keccak_rate_512, seed, sizeof(seed), QSC_KECCAK_PERMUTATION_ROUNDS);
 		}
 
-		if (res == true)
-		{
-			/* key cSHAKE-512 to generate the pseudo-random output, using all three entropy sources */
-			qsc_cshake512_compute(output, length, key, sizeof(key), stat, sizeof(stat), cust, sizeof(cust));
-			qsc_memutils_secure_erase(key, sizeof(key));
-			qsc_memutils_secure_erase(stat, sizeof(stat));
-		}
-	}
-
-	if (res == false)
-	{
-		qsc_memutils_secure_erase(output, length);
+		/* finalize the seed */
+		acp_squeeze_output(&kstate, output, length);
+		qsc_keccak_dispose(&kstate);
+		qsc_memutils_secure_erase(seed, sizeof(seed));
+		res = true;
 	}
 
 	return res;

@@ -40,7 +40,7 @@ typedef struct AttributeDescription
 
 #define WINUTILS_ATTRIBUTE_SIZE 22
 
-static AttributeDescription winutils_attribute_descriptions[WINUTILS_ATTRIBUTE_SIZE] = 
+static AttributeDescription winutils_attribute_descriptions[WINUTILS_ATTRIBUTE_SIZE] =
 {
     { FILE_ATTRIBUTE_READONLY, "readonly" },
     { FILE_ATTRIBUTE_HIDDEN, "hidden" },
@@ -72,7 +72,7 @@ typedef struct ErrorDescription
     const char* description;
 } ErrorDescription;
 
-static ErrorDescription winutils_error_descriptions[] = 
+static ErrorDescription winutils_error_descriptions[] =
 {
     { ERROR_BAD_NETPATH, "Error: A network folder is not mapped." },
     { ERROR_TRANSACTIONAL_CONFLICT, "Error: The request is a transactional conflict." },
@@ -118,7 +118,7 @@ static const char WINUTILS_SERVICE_STATE_STRINGS[9U][12U] =
     "Unknown"
 };
 
-static DWORD winutils_attribute_from_string(const char* attr) 
+static DWORD winutils_attribute_from_string(const char* attr)
 {
     QSC_ASSERT(attr != NULL);
 
@@ -173,7 +173,7 @@ static DWORD winutils_attribute_from_string(const char* attr)
     return res;
 }
 
-static uint32_t winutils_process_pid_from_name(const char* name) 
+static uint32_t winutils_process_pid_from_name(const char* name)
 {
     QSC_ASSERT(name != NULL);
 
@@ -215,7 +215,7 @@ static uint32_t winutils_process_pid_from_name(const char* name)
     return pid;
 }
 
-static HKEY winutils_rkey_from_string(const char* root) 
+static HKEY winutils_rkey_from_string(const char* root)
 {
     QSC_ASSERT(root != NULL);
 
@@ -296,7 +296,7 @@ static const char* winutils_service_state_to_string(DWORD state)
     return ret;
 }
 
-size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char* path) 
+size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char* path)
 {
     QSC_ASSERT(result != NULL);
     QSC_ASSERT(reslen != 0U);
@@ -382,11 +382,11 @@ static void winutils_wide_to_utf8(const wchar_t* wsrc, char* dst, size_t dstlen)
     if ((wsrc != NULL) && (dst != NULL) && (dstlen > 0U))
     {
         (void)WideCharToMultiByte(
-                CP_UTF8,
-                0,
-                wsrc, -1,
-                dst, (int)dstlen,
-                NULL, NULL);
+            CP_UTF8,
+            0,
+            wsrc, -1,
+            dst, (int)dstlen,
+            NULL, NULL);
     }
 }
 
@@ -394,7 +394,7 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
     QSC_ASSERT(reslen != 0U);
-    
+
     char cbuf[QSC_WINTOOLS_NETSTAT_NAME_SIZE] = { 0U };
     size_t tlen;
     ULONG ufam;
@@ -510,7 +510,9 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
                     }
                     if (tlen < reslen)
                     {
-                        tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", padd->AdapterName);
+                        /* FIX WINUTILS-001: was padd->AdapterName (always the first adapter);
+                           must use cadd->AdapterName for the current iteration */
+                        tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", cadd->AdapterName);
                     }
                     if (tlen < reslen)
                     {
@@ -645,11 +647,11 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
     return tlen;
 }
 
-size_t qsc_winutils_process_list(char* result, size_t reslen) 
+size_t qsc_winutils_process_list(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
     QSC_ASSERT(reslen != 0U);
-    
+
     PROCESSENTRY32 pe32 = { 0U };
     char pname[MAX_PATH] = { 0U };
     char pdesc[MAX_PATH] = { 0U };
@@ -681,7 +683,7 @@ size_t qsc_winutils_process_list(char* result, size_t reslen)
                         HMODULE hmod;
                         DWORD cbn;
 
-                        if (EnumProcessModules(hproc, &hmod, sizeof(hmod), &cbn) > 0) 
+                        if (EnumProcessModules(hproc, &hmod, sizeof(hmod), &cbn) > 0)
                         {
                             GetModuleBaseNameA(hproc, hmod, pdesc, sizeof(pdesc));
                         }
@@ -737,7 +739,7 @@ bool qsc_winutils_process_token_elevate()
     res = false;
 
     status = OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &htok);
-    
+
     if (status == TRUE)
     {
         if (LookupPrivilegeValue(NULL, SE_CHANGE_NOTIFY_NAME, &luid) == true)
@@ -751,17 +753,17 @@ bool qsc_winutils_process_token_elevate()
                 res = true;
             }
         }
-            
+
         CloseHandle(htok);
     }
-    
+
     return res;
 }
 
-bool qsc_winutils_process_terminate(const char* name) 
+bool qsc_winutils_process_terminate(const char* name)
 {
     QSC_ASSERT(name != NULL);
-    
+
     HANDLE hproc;
     DWORD dwexit;
     uint32_t pid;
@@ -798,7 +800,7 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
 {
     QSC_ASSERT(keypath != NULL);
     QSC_ASSERT(value != NULL);
-    
+
     HKEY hkey = { 0U };
     HKEY rkey = { 0U };
     char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
@@ -881,10 +883,10 @@ bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_w
     return (lres == ERROR_SUCCESS);
 }
 
-bool qsc_winutils_registry_key_delete(const char* keypath) 
+bool qsc_winutils_registry_key_delete(const char* keypath)
 {
     QSC_ASSERT(keypath != NULL);
-    
+
     HKEY rkey = { 0U };
     char lpath[QSC_WINTOOLS_REGISTRY_BUFFER_SIZE] = { 0U };
     char* ct;
@@ -911,7 +913,7 @@ bool qsc_winutils_registry_key_delete(const char* keypath)
     return (lret == ERROR_SUCCESS);
 }
 
-size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* keypath) 
+size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* keypath)
 {
     QSC_ASSERT(result != NULL);
     QSC_ASSERT(reslen != 0U);
@@ -994,10 +996,10 @@ size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* k
     return tlen;
 }
 
-bool qsc_winutils_run_executable(const char* expath) 
+bool qsc_winutils_run_executable(const char* expath)
 {
     QSC_ASSERT(expath != NULL);
-    
+
     HRESULT hres;
     HINSTANCE pret;
     bool res;
@@ -1036,7 +1038,8 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
         wchar_t wuser[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
         wchar_t wpass[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
         wchar_t wpath[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
-        wchar_t wdomain[sizeof(wchar_t)] = L".";
+        /* FIX WINUTILS-004: sizeof(wchar_t) == 2 on Windows — array needs 2 elements for L"." + null */
+        wchar_t wdomain[2U] = L".";
 
 
         MultiByteToWideChar(CP_ACP, 0, user, -1, wuser, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
@@ -1061,6 +1064,10 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
             &pi
         );
 
+        /* FIX WINUTILS-003: zero the password buffer before leaving scope to prevent
+           credential leakage in crash dumps or memory forensics */
+        SecureZeroMemory(wpass, sizeof(wpass));
+
         if (res == true)
         {
             CloseHandle(pi.hProcess);
@@ -1071,15 +1078,15 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
     return res;
 }
 
-bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states estate) 
+bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states estate)
 {
     QSC_ASSERT(name != NULL);
-    
+
     SERVICE_STATUS_PROCESS ssp = { 0U };
     SC_HANDLE scm;
     SC_HANDLE sch;
     bool res;
-    
+
     res = false;
 
     if (name != NULL)
@@ -1130,11 +1137,11 @@ bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states es
     return res;
 }
 
-size_t qsc_winutils_service_list(char* result, size_t reslen) 
+size_t qsc_winutils_service_list(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
     QSC_ASSERT(reslen != 0U);
-    
+
     SC_HANDLE sch = { 0U };
     ENUM_SERVICE_STATUS_PROCESS* pinfo;
     DWORD dexp;
@@ -1282,9 +1289,9 @@ size_t qsc_winutils_service_list_size()
             &hres,
             NULL);
 
-        if (res == true)
+        if (!res && GetLastError() == ERROR_MORE_DATA)
         {
-            tlen = (size_t)dexp + (dret * 12U) + 1U;
+            tlen = (size_t)dexp + 1U;
         }
 
         CloseServiceHandle(sch);
@@ -1293,11 +1300,11 @@ size_t qsc_winutils_service_list_size()
     return tlen;
 }
 
-size_t qsc_winutils_user_list(char* result, size_t reslen) 
+size_t qsc_winutils_user_list(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
     QSC_ASSERT(reslen != 0U);
-    
+
     USER_INFO_1* pbuf;
     DWORD derd;
     DWORD dlvl;
@@ -1330,7 +1337,7 @@ size_t qsc_winutils_user_list(char* result, size_t reslen)
 
             if ((pbuf != NULL) && ((stat == NERR_Success) || (stat == ERROR_MORE_DATA)))
             {
-                USER_INFO_1 *ptmp;
+                USER_INFO_1* ptmp;
                 DWORD pctr;
 
                 ptmp = pbuf;
@@ -1382,14 +1389,14 @@ size_t qsc_winutils_current_user(char* result, size_t reslen)
 {
     QSC_ASSERT(result != NULL);
     QSC_ASSERT(reslen != 0U);
-    
+
     char uname[UNLEN + 1U] = { 0U };
     size_t tlen;
     DWORD ulen;
 
     tlen = 0U;
     ulen = UNLEN + 1;
-    
+
     if (result != NULL && reslen != 0U)
     {
         if (GetUserName(uname, &ulen) == true)
@@ -1542,7 +1549,7 @@ void qsc_winutils_test()
     {
         qsc_consoleutils_print_line("The executable could not be run.");
     }
-    
+
     /* system registry */
 
     qsc_consoleutils_print_line("Testing the system registry functions.");
@@ -1579,7 +1586,7 @@ void qsc_winutils_test()
     }
 
     /* system services */
-    
+
     qsc_consoleutils_print_line("Testing the system service functions.");
 
     rlen = qsc_winutils_service_list(sbuf, sizeof(sbuf));
@@ -1593,7 +1600,7 @@ void qsc_winutils_test()
         qsc_consoleutils_print_line("The service list function failed.");
     }
 
-    /* User specific function. */ 
+    /* User specific function. */
     qsc_stringutils_clear_string(sbuf);
 
     if (qsc_winutils_service_state("WpcMonSvc", QSC_WINUTILS_SERVICE_START) == true)
@@ -1645,8 +1652,3 @@ void qsc_winutils_test()
 #endif
 
 #endif
-
-
-
-
-

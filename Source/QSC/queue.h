@@ -53,6 +53,7 @@
 #define QSC_QUEUE_H
 
 #include "qsccommon.h"
+#include "async.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -123,6 +124,7 @@ QSC_EXPORT_API typedef struct
     size_t depth;                       /*!< The maximum number of items in the queue. */
     size_t position;                    /*!< The next empty slot in the queue. */
     size_t width;                       /*!< The maximum byte length of a queue item. */
+    qsc_mutex opmtx;                    /*!< The operations mutex. */
 } qsc_queue_state;
 
 /**

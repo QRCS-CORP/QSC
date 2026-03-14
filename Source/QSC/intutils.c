@@ -12,20 +12,16 @@ bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length)
 	QSC_ASSERT(a != NULL);
 	QSC_ASSERT(b != NULL);
 
-	bool status;
+	uint8_t acc;
 
-	status = true;
+	acc = 0U;
 
 	for (size_t i = 0U; i < length; ++i)
 	{
-		if (a[i] != b[i])
-		{
-			status = false;
-			break;
-		}
+		acc |= (a[i] ^ b[i]);
 	}
 
-	return status;
+	return (acc == 0U);
 }
 
 void qsc_intutils_be8increment(uint8_t* output, size_t otplen)
@@ -178,23 +174,26 @@ void qsc_intutils_bswap32(uint32_t* dest, const uint32_t* source, size_t length)
 {
 	QSC_ASSERT(dest != NULL);
 	QSC_ASSERT(source != NULL);
+	QSC_ASSERT((length % 4U) == 0U);
 
 	__m128i mask = _mm_set_epi8(12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3);
 
-	for (size_t i = 0U; i < length; i += 4)
+	for (size_t i = 0U; i + 4U <= length; i += 4U)
 	{
-		_mm_storeu_si128((__m128i*)&dest[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)&source[i]), mask));
+		_mm_storeu_si128((__m128i*) & dest[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*) & source[i]), mask));
 	}
+
 }
 
 void qsc_intutils_bswap64(uint64_t* dest, const uint64_t* source, size_t length)
 {
 	QSC_ASSERT(dest != NULL);
 	QSC_ASSERT(source != NULL);
+	QSC_ASSERT((length % 2U) == 0U);
 
 	__m128i mask = _mm_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7);
 
-	for (size_t i = 0U; i < length; i += 2)
+	for (size_t i = 0U; i + 2U <= length; i += 2)
 	{
 		_mm_storeu_si128((__m128i*)&dest[i], _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)&source[i]), mask));
 	}
@@ -430,41 +429,29 @@ double qsc_intutils_calculate_sqrt(double x)
 void qsc_intutils_clear8(uint8_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
-	
-	for (size_t i = 0U; i < count; ++i)
-	{
-		a[i] = 0U;
-	}
+
+	qsc_memutils_clear(a, count);
 }
 
 void qsc_intutils_clear16(uint16_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
 
-	for (size_t i = 0U; i < count; ++i)
-	{
-		a[i] = 0U;
-	}
+	qsc_memutils_clear(a, count * sizeof(uint16_t));
 }
 
 void qsc_intutils_clear32(uint32_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
 
-	for (size_t i = 0U; i < count; ++i)
-	{
-		a[i] = 0U;
-	}
+	qsc_memutils_clear(a, count * sizeof(uint32_t));
 }
 
 void qsc_intutils_clear64(uint64_t* a, size_t count)
 {
 	QSC_ASSERT(a != NULL);
 
-	for (size_t i = 0U; i < count; ++i)
-	{
-		a[i] = 0U;
-	}
+	qsc_memutils_clear(a, count * sizeof(uint64_t));
 }
 
 void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint8_t cond)
@@ -472,17 +459,12 @@ void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint
 	QSC_ASSERT(dest != NULL);
 	QSC_ASSERT(source != NULL);
 	
-#if defined(__GNUC__) || defined(__clang__)
-  // Prevent the compiler from
-  //    1) inferring that b is 0/1-valued, and
-  //    2) handling the two cases with a branch.
-  // This is not necessary when verify.c and kem.c are separate translation
-  // units, but we expect that downstream consumers will copy this code and/or
-  // change how it is built.
-  //__asm__("" : "+dest"(cond) : /* no inputs */);
-#endif
-
+	cond = (uint8_t)((cond | (uint8_t)(-(int8_t)cond)) >> 7);
 	cond = ~cond + 1U;
+
+#if defined(__GNUC__) || defined(__clang__)
+	__asm__ volatile ("" : "+r"(cond));
+#endif
 
 	for (size_t i = 0U; i < length; i++)
 	{

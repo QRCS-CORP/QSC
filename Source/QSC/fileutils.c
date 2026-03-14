@@ -31,52 +31,52 @@
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 typedef struct FileAttributeDescription
 {
-    DWORD attribute;
-    const char* description;
+	DWORD attribute;
+	const char* description;
 } FileAttributeDescription;
 
-static FileAttributeDescription fileutils_attribute_descriptions[] = 
+static FileAttributeDescription fileutils_attribute_descriptions[] =
 {
-    { FILE_ATTRIBUTE_READONLY, "readonly" },
-    { FILE_ATTRIBUTE_HIDDEN, "hidden" },
-    { FILE_ATTRIBUTE_SYSTEM, "system" },
-    { FILE_ATTRIBUTE_DIRECTORY, "directory" },
-    { FILE_ATTRIBUTE_ARCHIVE, "archive" },
-    { FILE_ATTRIBUTE_DEVICE, "device" },
-    { FILE_ATTRIBUTE_NORMAL, "normal" },
-    { FILE_ATTRIBUTE_TEMPORARY, "temporary" },
-    { FILE_ATTRIBUTE_SPARSE_FILE, "sparse_file" },
-    { FILE_ATTRIBUTE_REPARSE_POINT, "reparse_point" },
-    { FILE_ATTRIBUTE_COMPRESSED, "compressed" },
-    { FILE_ATTRIBUTE_OFFLINE, "offline" },
-    { FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, "not_content_indexed" },
-    { FILE_ATTRIBUTE_ENCRYPTED, "encrypted" },
-    { FILE_ATTRIBUTE_INTEGRITY_STREAM, "integrity_stream" },
-    { FILE_ATTRIBUTE_VIRTUAL, "virtual" },
-    { FILE_ATTRIBUTE_NO_SCRUB_DATA, "no_scrub_data" },
-    { FILE_ATTRIBUTE_EA, "ea" },
-    { FILE_ATTRIBUTE_PINNED, "pinned" },
-    { FILE_ATTRIBUTE_UNPINNED, "unpinned" },
-    { FILE_ATTRIBUTE_RECALL_ON_OPEN, "recall_on_open" },
-    { FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS, "recall_on_data_access" }
+	{ FILE_ATTRIBUTE_READONLY, "readonly" },
+	{ FILE_ATTRIBUTE_HIDDEN, "hidden" },
+	{ FILE_ATTRIBUTE_SYSTEM, "system" },
+	{ FILE_ATTRIBUTE_DIRECTORY, "directory" },
+	{ FILE_ATTRIBUTE_ARCHIVE, "archive" },
+	{ FILE_ATTRIBUTE_DEVICE, "device" },
+	{ FILE_ATTRIBUTE_NORMAL, "normal" },
+	{ FILE_ATTRIBUTE_TEMPORARY, "temporary" },
+	{ FILE_ATTRIBUTE_SPARSE_FILE, "sparse_file" },
+	{ FILE_ATTRIBUTE_REPARSE_POINT, "reparse_point" },
+	{ FILE_ATTRIBUTE_COMPRESSED, "compressed" },
+	{ FILE_ATTRIBUTE_OFFLINE, "offline" },
+	{ FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, "not_content_indexed" },
+	{ FILE_ATTRIBUTE_ENCRYPTED, "encrypted" },
+	{ FILE_ATTRIBUTE_INTEGRITY_STREAM, "integrity_stream" },
+	{ FILE_ATTRIBUTE_VIRTUAL, "virtual" },
+	{ FILE_ATTRIBUTE_NO_SCRUB_DATA, "no_scrub_data" },
+	{ FILE_ATTRIBUTE_EA, "ea" },
+	{ FILE_ATTRIBUTE_PINNED, "pinned" },
+	{ FILE_ATTRIBUTE_UNPINNED, "unpinned" },
+	{ FILE_ATTRIBUTE_RECALL_ON_OPEN, "recall_on_open" },
+	{ FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS, "recall_on_data_access" }
 };
 
 static const char* fileutils_file_get_attribute_string(DWORD attr)
 {
-    const char* satr;
+	const char* satr;
 
-    satr = NULL;
+	satr = NULL;
 
-    for (size_t i = 0U; i < sizeof(fileutils_attribute_descriptions) / sizeof(fileutils_attribute_descriptions[0U]); ++i)
-    {
-        if (attr & fileutils_attribute_descriptions[i].attribute)
-        {
-            satr = fileutils_attribute_descriptions[i].description;
+	for (size_t i = 0U; i < sizeof(fileutils_attribute_descriptions) / sizeof(fileutils_attribute_descriptions[0U]); ++i)
+	{
+		if (attr & fileutils_attribute_descriptions[i].attribute)
+		{
+			satr = fileutils_attribute_descriptions[i].description;
 			break;
-        }
-    }
+		}
+	}
 
-    return satr;
+	return satr;
 }
 #endif
 
@@ -430,7 +430,7 @@ bool qsc_fileutils_file_copy(const char* inpath, const char* outpath)
 bool qsc_fileutils_get_access(const char* fpath, qsc_fileutils_access_rights level)
 {
 	QSC_ASSERT(fpath != NULL);
-	
+
 	bool res;
 
 	res = false;
@@ -548,88 +548,6 @@ size_t qsc_fileutils_get_name(char* name, size_t namelen, const char* fpath)
 	return (len - pos);
 }
 
-int64_t qsc_fileutils_get_line_old(char** line, size_t* length, FILE* fp)
-{
-	QSC_ASSERT(line != NULL);
-	QSC_ASSERT(length != NULL);
-	QSC_ASSERT(fp != NULL);
-
-	char* tmpl;
-
-	/* check if either line, length or fp are NULL pointers */
-	if (line == NULL || length == NULL || fp == NULL)
-	{
-		errno = EINVAL;
-		return -1;
-	}
-	else
-	{
-		/* use a chunk array of 128 bytes as parameter for fgets */
-		char chunk[128U] = { 0U };
-
-		/* allocate a block of memory for *line if it is NULL or smaller than the chunk array */
-		if (*line == NULL || *length < sizeof(chunk))
-		{
-			*length = sizeof(chunk);
-
-			if ((*line = qsc_memutils_malloc(*length)) == NULL)
-			{
-				errno = ENOMEM;
-				return -1;
-			}
-		}
-
-		(*line)[0U] = '\0';
-
-		while (fgets(chunk, sizeof(chunk), fp) != NULL)
-		{
-			/* resize the line buffer if necessary */
-			size_t lenused = qsc_stringutils_string_size(*line);
-			size_t chunkused = qsc_stringutils_string_size(chunk);
-
-			//if (*length - lenused < chunkused)
-			if (*length - lenused <= chunkused)
-			{
-				/* Check for overflow */
-				if (*length > SIZE_MAX / 2U)
-				{
-					errno = EOVERFLOW;
-					return -1;
-				}
-				else
-				{
-					*length += 128U; // *= 2U
-				}
-
-				tmpl = qsc_memutils_realloc(*line, *length);
-
-				if (tmpl != NULL)
-				{
-					*line = tmpl;
-				}
-				else
-				{
-					errno = ENOMEM;
-					return -1;
-				}
-			}
-
-			/* copy the chunk to the end of the line buffer */
-			qsc_memutils_copy(*line + lenused, chunk, chunkused);
-			lenused += chunkused;
-			(*line)[lenused] = '\0';
-
-			/* check if *line contains '\n', if yes, return the *line length */
-			if ((*line)[lenused - 1U] == '\n')
-			{
-				return lenused;
-			}
-		}
-
-		return -1;
-	}
-}
-
 int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 {
 	QSC_ASSERT(line != NULL);
@@ -703,7 +621,7 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 size_t qsc_fileutils_get_size(const char* fpath)
 {
 	QSC_ASSERT(fpath != NULL);
-	
+
 	FILE* fp;
 	errno_t err;
 	size_t res;
@@ -773,7 +691,7 @@ bool qsc_fileutils_get_working_directory(char* fpath, size_t flen)
 	return res;
 }
 
-size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directory) 
+size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directory)
 {
 	QSC_ASSERT(result != NULL);
 	QSC_ASSERT(reslen != 0U);
@@ -806,7 +724,7 @@ size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directo
 		}
 
 		hfind = FindFirstFile(sdir, &wfd);
-		
+
 		if (hfind != INVALID_HANDLE_VALUE)
 		{
 			do
@@ -924,7 +842,7 @@ size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directo
 FILE* qsc_fileutils_open(const char* fpath, qsc_fileutils_mode mode, bool binary)
 {
 	QSC_ASSERT(fpath != NULL);
-	
+
 	FILE* fp;
 
 	fp = NULL;
@@ -977,7 +895,7 @@ FILE* qsc_fileutils_open(const char* fpath, qsc_fileutils_mode mode, bool binary
 #endif
 	}
 
-return fp;
+	return fp;
 }
 
 size_t qsc_fileutils_read(char* output, size_t otplen, size_t position, FILE* fp)
@@ -1037,10 +955,11 @@ int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, 
 			if (len > 0U)
 			{
 				sbuf = (char*)qsc_memutils_malloc(len);
-				qsc_memutils_clear(sbuf, len);
 
 				if (sbuf != NULL)
 				{
+					qsc_memutils_clear(sbuf, len);
+
 					len = fread(sbuf, sizeof(char), len, fp);
 
 					if (len > 0U)
@@ -1070,7 +989,7 @@ int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, 
 					}
 
 					qsc_memutils_alloc_free(sbuf);
-					sbuf  = NULL;
+					sbuf = NULL;
 				}
 			}
 
@@ -1145,7 +1064,7 @@ size_t qsc_fileutils_safe_write(const char* fpath, size_t position, const char* 
 bool qsc_fileutils_seekto(FILE* fp, size_t position)
 {
 	QSC_ASSERT(fp != NULL);
-	
+
 	int32_t res;
 
 	res = -1;
@@ -1185,7 +1104,7 @@ bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 		fseek(fp, 0L, SEEK_END);
 		flen = (size_t)ftell(fp);
 #endif
-		
+
 		if (length < flen)
 		{
 #if defined(QSC_SYSTEM_OS_WINDOWS)

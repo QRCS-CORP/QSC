@@ -4,12 +4,17 @@
 #include "sha3.h"
 
 #if defined(QSC_SYSTEM_COMPILER_MSC)
-#	pragma comment(linker, "/STACK:20480000,4096")
+#	pragma comment(linker, "/STACK:4194304")
+#elif defined(QSC_SYSTEM_COMPILER_GCC) && defined(QSC_SYSTEM_OS_WINDOWS)
+#	define QSC_MCELIECE_DYNAMIC_ALLOCATION
+#elif defined(QSC_SYSTEM_OS_MACOS) || defined(QSC_SYSTEM_LIBC_MUSL)
+#  define QSC_MCELIECE_DYNAMIC_ALLOCATION
 #endif
 
 /* params.h */
 
 #define MCELIECE_SHAREDSECRET_SIZE 32ULL
+#define MCELIECE_CB_MAX_ITERS 64U
 
 #if defined(QSC_MCELIECE_S1N3488T64)
 #	define MCELIECE_GFBITS 12U
@@ -120,7 +125,7 @@ static gf gf_sq2mul(gf in, gf m)
 {
 	/* input: field element in, m
 	   return: ((in^2)^2)*m */
-	const QSC_CACHE_ALIGNED uint64_t M[6U] = { 0x1FF0000000000000ULL, 0x000FF80000000000ULL, 0x000007FC00000000ULL,
+	const uint64_t M[6U] = { 0x1FF0000000000000ULL, 0x000FF80000000000ULL, 0x000007FC00000000ULL,
 		0x00000003FE000000ULL, 0x0000000001FE0000ULL, 0x000000000001E000ULL };
 	uint64_t x;
 	uint64_t t0;
@@ -281,10 +286,16 @@ static gf gf_mul(gf in0, gf in1)
 	t1 = in1;
 	tmp = t0 * (t1 & 1);
 
-	for (size_t i = 1U; i < MCELIECE_GFBITS; ++i)
+	for (size_t i = 1U; i < MCELIECE_GFBITS; ++i) 
 	{
-		tmp ^= (t0 * (t1 & (1ULL << i)));
+		uint32_t mask = (uint32_t)(-(int32_t)((t1 >> i) & 1U));
+		tmp ^= (t0 << i) & mask;
 	}
+
+	//for (size_t i = 1U; i < MCELIECE_GFBITS; ++i)
+	//{
+	//	tmp ^= (t0 * (t1 & (1ULL << i)));
+	//}
 
 	t = tmp & 0x0000000001FF0000ULL;
 	tmp ^= (t >> 9) ^ (t >> 10) ^ (t >> 12) ^ (t >> 13);
@@ -354,7 +365,7 @@ static gf gf_inv(gf den)
 
 static void GF_mul(gf* out, const gf* in0, const gf* in1)
 {
-	QSC_CACHE_ALIGNED gf prod[(MCELIECE_SYS_T * 2U) - 1U] = { 0U };
+	gf prod[(MCELIECE_SYS_T * 2U) - 1U] = { 0U };
 	size_t i;
 
 	for (i = 0U; i < MCELIECE_SYS_T; ++i)
@@ -475,10 +486,11 @@ static void int32_minmax(int32_t* a, int32_t* b)
 	ab = *b ^ *a;
 	c = *b - *a;
 	c ^= ab & (c ^ *b);
-	c >>= 31;
+	/* portable: arithmetic shift via unsigned cast */
+	c = (int32_t)((uint32_t)c >> 31);
+	c = -c;     /* 0 -> 0, 1 -> -1 (0xFFFFFFFF) */
 	c &= ab;
-	*a ^= c;
-	*b ^= c;
+	*a ^= c; *b ^= c;
 }
 
 static void int32_sort(int32_t* x, int64_t n)
@@ -656,7 +668,7 @@ static void transpose_64x64(uint64_t* out, const uint64_t* in)
 	/* input: in, a 64x64 matrix over GF(2) */
 	/* output: out, transpose of in */
 
-	QSC_CACHE_ALIGNED  uint64_t masks[6U][2U] =
+	 uint64_t masks[6U][2U] =
 	{
 		{0x5555555555555555ULL, 0xAAAAAAAAAAAAAAAAULL},
 		{0x3333333333333333ULL, 0xCCCCCCCCCCCCCCCCULL},
@@ -717,8 +729,8 @@ static void layer(uint64_t* data, uint64_t* bits, int32_t lgs)
 
 void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 {
-	QSC_CACHE_ALIGNED uint64_t bs[64U];
-	QSC_CACHE_ALIGNED uint64_t cond[64U];
+	uint64_t bs[64U];
+	uint64_t cond[64U];
 	const uint8_t* cond_ptr;
 	size_t i;
 	int32_t inc;
@@ -856,10 +868,10 @@ static void apply_benes(uint8_t* r, const uint8_t* bits, int32_t rev)
 	/* input: r, sequence of bits to be permuted bits, condition bits of the Benes network rev,
 	0 for normal application, !0 for inverse output: r, permuted bits */
 
-	QSC_CACHE_ALIGNED uint64_t r_int_v[2U][64U] = { 0U };
-	QSC_CACHE_ALIGNED uint64_t r_int_h[2U][64U] = { 0U };
-	QSC_CACHE_ALIGNED uint64_t b_int_v[64U] = { 0U };
-	QSC_CACHE_ALIGNED uint64_t b_int_h[64U];
+	uint64_t r_int_v[2U][64U] = { 0U };
+	uint64_t r_int_h[2U][64U] = { 0U };
+	uint64_t b_int_v[64U] = { 0U };
+	uint64_t b_int_h[64U];
 	size_t i;
 	int32_t inc;
 	int32_t iter;
@@ -957,7 +969,7 @@ static void support_gen(gf* s, const uint8_t* c)
 {
 	/* input: condition bits c output: support s */
 
-	QSC_CACHE_ALIGNED uint8_t L[MCELIECE_GFBITS][(1U << MCELIECE_GFBITS) / 8U] = { 0U };
+	uint8_t L[MCELIECE_GFBITS][(1U << MCELIECE_GFBITS) / 8U] = { 0U };
 	size_t i;
 	size_t j;
 	gf a;
@@ -999,9 +1011,9 @@ static void bm(gf* out, const gf* s)
 	input: s, sequence of field elements
 	output: out, minimal polynomial of s */
 
-	QSC_CACHE_ALIGNED gf T[MCELIECE_SYS_T + 1U] = { 0U };
-	QSC_CACHE_ALIGNED gf C[MCELIECE_SYS_T + 1U] = { 0U };
-	QSC_CACHE_ALIGNED gf B[MCELIECE_SYS_T + 1U] = { 0U };
+	gf T[MCELIECE_SYS_T + 1U] = { 0U };
+	gf C[MCELIECE_SYS_T + 1U] = { 0U };
+	gf B[MCELIECE_SYS_T + 1U] = { 0U };
 	size_t i;
 	gf b;
 	gf d;
@@ -1325,13 +1337,16 @@ static void controlbits_from_permutation(uint8_t* out, const int16_t* pi, int64_
 	   output: (2m-1)n/2 control bits at positions 0,1,...
 	   output position pos is by definition 1&(out[pos/8]>>(pos&7)) */
 
-	QSC_CACHE_ALIGNED int32_t temp[(1 << MCELIECE_GFBITS) * 2U * sizeof(int32_t)] = { 0 };
-	QSC_CACHE_ALIGNED int16_t pi_test[(1 << MCELIECE_GFBITS) * sizeof(int16_t)] = { 0 };
+	int32_t temp[(1 << MCELIECE_GFBITS) * 2U * sizeof(int32_t)] = { 0 };
+	int16_t pi_test[(1 << MCELIECE_GFBITS) * sizeof(int16_t)] = { 0 };
+	size_t iter;
 	int32_t i;
 	int16_t diff;
 	const uint8_t* ptr;
 
-	while (true)
+	iter = 0U;
+
+	while (iter < MCELIECE_CB_MAX_ITERS)
 	{
 		qsc_memutils_clear(out, (size_t)(((2 * w - 1) * n / 2) + 7) / 8U);
 		cbrecursion(out, 0, 1, pi, w, n, temp);
@@ -1366,6 +1381,8 @@ static void controlbits_from_permutation(uint8_t* out, const int16_t* pi, int64_
 		{
 			break;
 		}
+
+		++iter;
 	}
 }
 
@@ -1378,13 +1395,13 @@ static int32_t decrypt(uint8_t* e, const uint8_t* sk, const uint8_t* c)
 	   output: e, error vector
 	   return: 0 for success; 1 for failure */
 
-	QSC_CACHE_ALIGNED gf g[MCELIECE_SYS_T + 1U] = { 0U };
-	QSC_CACHE_ALIGNED gf L[MCELIECE_SYS_N];
-	QSC_CACHE_ALIGNED gf s[MCELIECE_SYS_T * 2U];
-	QSC_CACHE_ALIGNED gf s_cmp[MCELIECE_SYS_T * 2U];
-	QSC_CACHE_ALIGNED gf locator[MCELIECE_SYS_T + 1U];
-	QSC_CACHE_ALIGNED gf images[MCELIECE_SYS_N];
-	QSC_CACHE_ALIGNED uint8_t r[MCELIECE_SYS_N / 8U];
+	gf g[MCELIECE_SYS_T + 1U] = { 0U };
+	gf L[MCELIECE_SYS_N];
+	gf s[MCELIECE_SYS_T * 2U];
+	gf s_cmp[MCELIECE_SYS_T * 2U];
+	gf locator[MCELIECE_SYS_T + 1U];
+	gf images[MCELIECE_SYS_N];
+	uint8_t r[MCELIECE_SYS_N / 8U];
 	int32_t i;
 	int32_t w;
 	uint16_t check;
@@ -1447,18 +1464,18 @@ static uint8_t same_mask(uint16_t x, uint16_t y)
 static bool gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 {
 	/* output: e, an error vector of weight t */
-	QSC_CACHE_ALIGNED uint16_t ind[MCELIECE_SYS_T] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t val[MCELIECE_SYS_T] = { 0U };
+	uint16_t ind[MCELIECE_SYS_T] = { 0U };
+	uint8_t val[MCELIECE_SYS_T] = { 0U };
 	size_t eq;
 	size_t i;
 	size_t j;
 	uint8_t mask;
 	bool res;
 #if defined(QSC_MCELIECE_S7N8192T128)
-	QSC_CACHE_ALIGNED uint8_t brnd[MCELIECE_SYS_T * sizeof(uint16_t)];
+	uint8_t brnd[MCELIECE_SYS_T * sizeof(uint16_t)];
 #else
-	QSC_CACHE_ALIGNED uint16_t nrnd[MCELIECE_SYS_T * 2U] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t brnd[MCELIECE_SYS_T * 2U * sizeof(uint16_t)];
+	uint16_t nrnd[MCELIECE_SYS_T * 2U] = { 0U };
+	uint8_t brnd[MCELIECE_SYS_T * 2U * sizeof(uint16_t)];
 	size_t count;
 #endif
 
@@ -1511,15 +1528,13 @@ static bool gen_e(uint8_t* e, bool (*rng_generate)(uint8_t*, size_t))
 
 		eq = 0U;
 
-		for (i = 1U; i < MCELIECE_SYS_T; ++i)
+		for (i = 1U; i < MCELIECE_SYS_T; ++i) 
 		{
-			for (j = 0U; j < i; ++j)
+			for (j = 0U; j < i; ++j) 
 			{
-				if (ind[i] == ind[j])
-				{
-					eq = 1U;
-					break;
-				}
+				uint16_t diff = ind[i] ^ ind[j];
+
+				eq |= (uint16_t)(((uint32_t)diff - 1U) >> 16);
 			}
 		}
 
@@ -1553,7 +1568,7 @@ static void syndrome(uint8_t* s, const uint8_t* pk, const uint8_t* e)
 	/* input: public key pk, error vector e
 	   output: syndrome s */
 
-	QSC_CACHE_ALIGNED uint8_t row[MCELIECE_SYS_N / 8U];
+	uint8_t row[MCELIECE_SYS_N / 8U];
 	const uint8_t* pk_ptr = pk;
 	size_t j;
 	uint8_t b;
@@ -1655,10 +1670,10 @@ static int32_t check_pk_padding(const uint8_t* pk)
 static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t* pi)
 {
 	/* input: secret key sk output: public key pk */
-	QSC_CACHE_ALIGNED uint64_t buf[1U << MCELIECE_GFBITS] = { 0U };
-	QSC_CACHE_ALIGNED gf g[MCELIECE_SYS_T + 1U] = { 0U };	/* Goppa polynomial */
-	QSC_CACHE_ALIGNED gf L[MCELIECE_SYS_N] = { 0U };		/* support */
-	QSC_CACHE_ALIGNED gf inv[MCELIECE_SYS_N] = { 0U };
+	uint64_t buf[1U << MCELIECE_GFBITS] = { 0U };
+	gf g[MCELIECE_SYS_T + 1U] = { 0U };	/* Goppa polynomial */
+	gf L[MCELIECE_SYS_N] = { 0U };		/* support */
+	gf inv[MCELIECE_SYS_N] = { 0U };
 	size_t i;
 	size_t j;
 	size_t k;
@@ -1666,24 +1681,17 @@ static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t
 	size_t row;
 	uint8_t b;
 	uint8_t mask;
-	bool res;
 
-#if defined(QSC_MISRA_FULL_COMPLIANCE)
-	/* Note: if it fails here with stackoverflow, increase the maximum stack size
-	* to +/- 20 MB to account for the large matrix array */
-	QSC_CACHE_ALIGNED uint8_t mat[MCELIECE_PK_NROWS * sizeof(uint8_t*)][MCELIECE_SYS_N / 8U] = { 0U };
-	res = true;
-#else
+#if defined(QSC_MCELIECE_DYNAMIC_ALLOCATION)
 	uint8_t** mat;
 
-	res = false;
-	mat = (uint8_t**)qsc_memutils_aligned_alloc(QSC_SIMD_ALIGNMENT, MCELIECE_PK_NROWS * sizeof(uint8_t*));
+	mat = (uint8_t**)qsc_memutils_malloc(MCELIECE_PK_NROWS * sizeof(uint8_t*));
 
 	if (mat != NULL)
 	{
 		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
 		{
-			mat[i] = (uint8_t*)qsc_memutils_aligned_alloc(QSC_SIMD_ALIGNMENT, MCELIECE_SYS_N / 8);
+			mat[i] = (uint8_t*)qsc_memutils_malloc(MCELIECE_SYS_N / 8U);
 
 			if (mat[i] == NULL)
 			{
@@ -1691,195 +1699,227 @@ static bool pk_gen(uint8_t* pk, const uint8_t* sk, const uint32_t* perm, int16_t
 				{
 					if (mat[j] != NULL)
 					{
-						qsc_memutils_aligned_free(mat[j]);
+						qsc_memutils_alloc_free(mat[j]);
 						mat[j] = NULL;
 					}
 				}
 
-				qsc_memutils_aligned_free(mat);
+				qsc_memutils_alloc_free(mat);
 				mat = NULL;
-				break;
-			}
-		}
-
-		res = true;
-	}
-#endif
-
-	if (res)
-	{
-#if defined(QSC_MCELIECE_S6N6960T119)
-		uint8_t* pk_ptr = pk;
-		int32_t tail;
-#endif
-		g[MCELIECE_SYS_T] = 1U;
-
-		for (i = 0U; i < MCELIECE_SYS_T; ++i)
-		{
-			g[i] = load_gf(sk);
-			sk += 2U;
-		}
-
-		for (i = 0U; i < (1U << MCELIECE_GFBITS); i++)
-		{
-			buf[i] = perm[i];
-			buf[i] <<= 31;
-			buf[i] |= i;
-		}
-
-		uint64_sort(buf, 1 << MCELIECE_GFBITS);
-
-		for (i = 1U; i < (1U << MCELIECE_GFBITS); ++i)
-		{
-			if ((buf[i - 1U] >> 31) == (buf[i] >> 31))
-			{
 				return false;
 			}
 		}
+	}
+	else
+	{
+		return false;
+	}
+#else
+	/* Note: if it fails here with stackoverflow, increase the maximum stack size
+	* to +/- 20 MB to account for the large matrix array */
+	uint8_t mat[MCELIECE_PK_NROWS][MCELIECE_SYS_N / 8U] = { 0U };
+#endif
 
-		for (i = 0U; i < (1U << MCELIECE_GFBITS); ++i)
+#if defined(QSC_MCELIECE_S6N6960T119)
+	uint8_t* pk_ptr = pk;
+	int32_t tail;
+#endif
+	g[MCELIECE_SYS_T] = 1U;
+
+	for (i = 0U; i < MCELIECE_SYS_T; ++i)
+	{
+		g[i] = load_gf(sk);
+		sk += 2U;
+	}
+
+	for (i = 0U; i < (1U << MCELIECE_GFBITS); i++)
+	{
+		buf[i] = perm[i];
+		buf[i] <<= 31;
+		buf[i] |= i;
+	}
+
+	uint64_sort(buf, 1 << MCELIECE_GFBITS);
+
+	for (i = 1U; i < (1U << MCELIECE_GFBITS); ++i)
+	{
+		if ((buf[i - 1U] >> 31) == (buf[i] >> 31))
 		{
-			pi[i] = buf[i] & MCELIECE_GFMASK;
-		}
-
-		for (i = 0U; i < MCELIECE_SYS_N; ++i)
-		{
-			L[i] = bitrev(pi[i]);
-		}
-
-		/* filling the matrix */
-
-		root(inv, g, L);
-
-		for (i = 0U; i < MCELIECE_SYS_N; ++i)
-		{
-			inv[i] = gf_inv(inv[i]);
-		}
-
-		for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
-		{
-			for (j = 0U; j < MCELIECE_SYS_N / 8U; ++j)
+#if defined(QSC_MCELIECE_DYNAMIC_ALLOCATION)
+			for (size_t r = 0; r < MCELIECE_PK_NROWS; ++r)
 			{
-				mat[i][j] = 0U;
+				qsc_memutils_secure_erase(mat[r], MCELIECE_SYS_N / 8U);
+				qsc_memutils_alloc_free(mat[r]);
+				mat[r] = NULL;
+			}
+
+			qsc_memutils_alloc_free(mat);
+			mat = NULL;
+#endif
+
+			return false;
+		}
+	}
+
+	for (i = 0U; i < (1U << MCELIECE_GFBITS); ++i)
+	{
+		pi[i] = buf[i] & MCELIECE_GFMASK;
+	}
+
+	for (i = 0U; i < MCELIECE_SYS_N; ++i)
+	{
+		L[i] = bitrev(pi[i]);
+	}
+
+	/* filling the matrix */
+
+	root(inv, g, L);
+
+	for (i = 0U; i < MCELIECE_SYS_N; ++i)
+	{
+		inv[i] = gf_inv(inv[i]);
+	}
+
+	for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
+	{
+		for (j = 0U; j < MCELIECE_SYS_N / 8U; ++j)
+		{
+			mat[i][j] = 0U;
+		}
+	}
+
+	for (i = 0U; i < MCELIECE_SYS_T; ++i)
+	{
+		for (j = 0U; j < MCELIECE_SYS_N; j += 8U)
+		{
+			for (k = 0U; k < MCELIECE_GFBITS; ++k)
+			{
+				b = (inv[j + 7U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 6U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 5U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 4U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 3U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 2U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j + 1U] >> k) & 1;
+				b <<= 1;
+				b |= (inv[j] >> k) & 1;
+
+				mat[i * MCELIECE_GFBITS + k][j / 8U] = b;
 			}
 		}
 
-		for (i = 0U; i < MCELIECE_SYS_T; ++i)
+		for (j = 0U; j < MCELIECE_SYS_N; ++j)
 		{
-			for (j = 0U; j < MCELIECE_SYS_N; j += 8U)
-			{
-				for (k = 0U; k < MCELIECE_GFBITS; ++k)
-				{
-					b = (inv[j + 7U] >> k) & 1;
-					b <<= 1;
-					b |= (inv[j + 6U] >> k) & 1;
-					b <<= 1;
-					b |= (inv[j + 5U] >> k) & 1;
-					b <<= 1;
-					b |= (inv[j + 4U] >> k) & 1;
-					b <<= 1;
-					b |= (inv[j + 3U] >> k) & 1;
-					b <<= 1;
-					b |= (inv[j + 2U] >> k) & 1;
-					b <<= 1;
-					b |= (inv[j + 1U] >> k) & 1;
-					b <<= 1;
-					b |= (inv[j] >> k) & 1;
+			inv[j] = gf_mul(inv[j], L[j]);
+		}
+	}
 
-					mat[i * MCELIECE_GFBITS + k][j / 8U] = b;
+	/* gaussian elimination */
+
+	for (i = 0U; i < (MCELIECE_PK_NROWS + 7U) / 8U; ++i)
+	{
+		for (j = 0U; j < 8U; ++j)
+		{
+			row = i * 8U + j;
+
+			if (row >= MCELIECE_PK_NROWS)
+			{
+				break;
+			}
+
+			for (k = row + 1U; k < MCELIECE_PK_NROWS; ++k)
+			{
+				mask = mat[row][i] ^ mat[k][i];
+				mask >>= j;
+				mask &= 1U;
+				mask = -mask;
+
+				for (col = 0U; col < MCELIECE_SYS_N / 8U; ++col)
+				{
+					mat[row][col] ^= mat[k][col] & mask;
 				}
 			}
 
-			for (j = 0U; j < MCELIECE_SYS_N; ++j)
+			/* return if not systematic */
+			if (((mat[row][i] >> j) & 1) == 0U)
 			{
-				inv[j] = gf_mul(inv[j], L[j]);
-			}
-		}
-
-		/* gaussian elimination */
-
-		for (i = 0U; i < (MCELIECE_PK_NROWS + 7U) / 8U; ++i)
-		{
-			for (j = 0U; j < 8U; ++j)
-			{
-				row = i * 8U + j;
-
-				if (row >= MCELIECE_PK_NROWS)
+#if defined(QSC_MCELIECE_DYNAMIC_ALLOCATION)
+				for (size_t r = 0; r < MCELIECE_PK_NROWS; ++r)
 				{
-					break;
+					qsc_memutils_secure_erase(mat[r], MCELIECE_SYS_N / 8U);
+					qsc_memutils_alloc_free(mat[r]);
+					mat[r] = NULL;
 				}
 
-				for (k = row + 1U; k < MCELIECE_PK_NROWS; ++k)
+				qsc_memutils_alloc_free(mat);
+				mat = NULL;
+#else
+				qsc_memutils_secure_erase(mat, sizeof(mat));
+#endif
+
+				return false;
+			}
+
+			for (k = 0U; k < MCELIECE_PK_NROWS; ++k)
+			{
+				if (k != row)
 				{
-					mask = mat[row][i] ^ mat[k][i];
-					mask >>= j;
-					mask &= 1U;
+					mask = mat[k][i] >> j;
+					mask &= 1;
 					mask = -mask;
 
 					for (col = 0U; col < MCELIECE_SYS_N / 8U; ++col)
 					{
-						mat[row][col] ^= mat[k][col] & mask;
-					}
-				}
-
-				/* return if not systematic */
-				if (((mat[row][i] >> j) & 1) == 0U)
-				{
-					return false;
-				}
-
-				for (k = 0U; k < MCELIECE_PK_NROWS; ++k)
-				{
-					if (k != row)
-					{
-						mask = mat[k][i] >> j;
-						mask &= 1;
-						mask = -mask;
-
-						for (col = 0U; col < MCELIECE_SYS_N / 8U; ++col)
-						{
-							mat[k][col] ^= mat[row][col] & mask;
-						}
+						mat[k][col] ^= mat[row][col] & mask;
 					}
 				}
 			}
 		}
+	}
 
 
 #if defined(QSC_MCELIECE_S6N6960T119)
-		tail = MCELIECE_PK_NROWS % 8;
+	tail = MCELIECE_PK_NROWS % 8;
 
-		for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
+	for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
+	{
+		for (j = (MCELIECE_PK_NROWS - 1U) / 8U; j < MCELIECE_SYS_N / 8U - 1U; ++j)
 		{
-			for (j = (MCELIECE_PK_NROWS - 1U) / 8U; j < MCELIECE_SYS_N / 8U - 1U; ++j)
-			{
-				*pk_ptr = (uint8_t)((mat[i][j] >> tail) | (mat[i][j + 1U] << (8U - tail)));
-				++pk_ptr;
-			}
-
-			*pk_ptr = (mat[i][j] >> tail);
+			*pk_ptr = (uint8_t)((mat[i][j] >> tail) | (mat[i][j + 1U] << (8U - tail)));
 			++pk_ptr;
 		}
+
+		*pk_ptr = (mat[i][j] >> tail);
+		++pk_ptr;
+	}
 #else
-		for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
-		{
-			qsc_memutils_copy(pk + i * MCELIECE_PK_ROW_BYTES, mat[i] + MCELIECE_PK_NROWS / 8U, MCELIECE_PK_ROW_BYTES);
-		}
+	for (i = 0U; i < MCELIECE_PK_NROWS; ++i)
+	{
+		qsc_memutils_copy(pk + i * MCELIECE_PK_ROW_BYTES, mat[i] + MCELIECE_PK_NROWS / 8U, MCELIECE_PK_ROW_BYTES);
+	}
 #endif
 
-#if !defined(QSC_MISRA_FULL_COMPLIANCE)
-		for (i = 0; i < MCELIECE_PK_NROWS; ++i)
-		{
-			qsc_memutils_aligned_free(mat[i]);
-			mat[i] = NULL;
-		}
-
-		qsc_memutils_aligned_free(mat);
-		mat = NULL;
-#endif
+#if defined(QSC_MCELIECE_DYNAMIC_ALLOCATION)
+	for (size_t r = 0; r < MCELIECE_PK_NROWS; ++r)
+	{
+		qsc_memutils_secure_erase(mat[r], MCELIECE_SYS_N / 8U);
+		qsc_memutils_alloc_free(mat[r]);
+		mat[r] = NULL;
 	}
 
-	return res;
+	qsc_memutils_alloc_free(mat);
+	mat = NULL;
+#else
+	qsc_memutils_secure_erase(mat, sizeof(mat));
+#endif
+
+	return true;
 }
 
 /* sk_gen.c */
@@ -1890,7 +1930,7 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 	   output: out, minimal polynomial of f
 	   return: 0 for success and -1 for failure */
 
-	QSC_CACHE_ALIGNED gf mat[MCELIECE_SYS_T + 1U][MCELIECE_SYS_T] = { 0U };
+	gf mat[MCELIECE_SYS_T + 1U][MCELIECE_SYS_T] = { 0U };
 	size_t c;
 	size_t i;
 	size_t j;
@@ -1969,8 +2009,8 @@ static int32_t genpoly_gen(gf* out, const gf* f)
 
 bool qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	QSC_CACHE_ALIGNED uint8_t one_ec[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
+	uint8_t one_ec[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
+	uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
 	uint8_t* e = two_e + 1U;
 	bool res;
 
@@ -2011,10 +2051,13 @@ bool qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, b
 
 		res = res && (padding_ok == 0);
 #endif
+		qsc_memutils_secure_erase(one_ec, sizeof(one_ec));
+		qsc_memutils_secure_erase(two_e, sizeof(two_e));
 	}
 	else
 	{
-		qsc_memutils_clear(c, MCELIECE_SYND_BYTES);
+		qsc_memutils_secure_erase(two_e, sizeof(two_e));
+		qsc_memutils_secure_erase(c, MCELIECE_SYND_BYTES);
 	}
 
 	return res;
@@ -2022,9 +2065,9 @@ bool qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, b
 
 bool qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8_t* sk)
 {
-	QSC_CACHE_ALIGNED uint8_t conf[32U];
-	QSC_CACHE_ALIGNED uint8_t preimage[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
+	uint8_t conf[32U];
+	uint8_t preimage[1U + MCELIECE_SYS_N / 8U + (MCELIECE_SYND_BYTES + 32U)] = { 0U };
+	uint8_t two_e[1U + MCELIECE_SYS_N / 8U] = { 0U };
 	const uint8_t* s = sk + 40U + MCELIECE_IRR_BYTES + MCELIECE_COND_BYTES;
 	size_t i;
 	uint16_t m;
@@ -2070,6 +2113,10 @@ bool qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8_t*
 
 	qsc_shake256_compute(key, MCELIECE_SHAREDSECRET_SIZE, preimage, sizeof(preimage));
 
+	qsc_memutils_secure_erase(conf, sizeof(conf));
+	qsc_memutils_secure_erase(preimage, sizeof(preimage));
+	qsc_memutils_secure_erase(two_e, sizeof(two_e));
+
 #if defined(QSC_MCELIECE_S6N6960T119)
 	// clear outputs (set to all 1's) if padding bits are not all zero
 
@@ -2088,12 +2135,12 @@ bool qsc_mceliece_ref_decapsulate(uint8_t* key, const uint8_t* c, const uint8_t*
 
 bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
-	QSC_CACHE_ALIGNED uint32_t perm[1U << MCELIECE_GFBITS] = { 0U };	/* random permutation as 32-bit integers */
-	QSC_CACHE_ALIGNED int16_t pi[1U << MCELIECE_GFBITS];	/* random permutation */
-	QSC_CACHE_ALIGNED gf f[MCELIECE_SYS_T] = { 0U };		/* element in GF(2 ^ mt) */
-	QSC_CACHE_ALIGNED gf irr[MCELIECE_SYS_T];				/* Goppa polynomial */
-	QSC_CACHE_ALIGNED uint8_t r[(MCELIECE_SYS_N / 8U) + ((1U << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2U) + 32U] = { 0U };
-	QSC_CACHE_ALIGNED uint8_t seed[33U] = { 0U };
+	uint32_t perm[1U << MCELIECE_GFBITS] = { 0U };	/* random permutation as 32-bit integers */
+	int16_t pi[1U << MCELIECE_GFBITS];	/* random permutation */
+	gf f[MCELIECE_SYS_T] = { 0U };		/* element in GF(2 ^ mt) */
+	gf irr[MCELIECE_SYS_T];				/* Goppa polynomial */
+	uint8_t r[(MCELIECE_SYS_N / 8U) + ((1U << MCELIECE_GFBITS) * sizeof(uint32_t)) + (MCELIECE_SYS_T * 2U) + 32U] = { 0U };
+	uint8_t seed[33U] = { 0U };
 	const uint8_t* rp;
 	uint8_t* skp;
 	int32_t i;
@@ -2101,7 +2148,7 @@ bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gene
 
 	seed[0U] = 64;
 
-	if (rng_generate((seed + 1U), 32U))
+	if (rng_generate(seed + 1U, 32U) == true)
 	{
 		while (true)
 		{
@@ -2161,6 +2208,14 @@ bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gene
 
 			break;
 		}
+
+		qsc_memutils_secure_erase(irr, sizeof(irr));
+		qsc_memutils_secure_erase(f, sizeof(f));
+		qsc_memutils_secure_erase(perm, sizeof(perm));
+		qsc_memutils_secure_erase(pi, sizeof(pi));
+		qsc_memutils_secure_erase(r, sizeof(r));
+		qsc_memutils_secure_erase(seed, sizeof(seed));
+
 		res = true;
 	}
 	else

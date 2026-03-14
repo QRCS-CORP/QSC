@@ -98,8 +98,6 @@ qsc_socket_exceptions qsc_socket_client_connect_ipv4(qsc_socket* sock, const qsc
 		if (res == qsc_socket_exception_success)
 		{
 			res = qsc_socket_connect_ipv4(sock, address, port);
-			sock->port = port;
-			sock->connection_status = qsc_socket_state_connected;
 		}
 	}
 
@@ -122,8 +120,6 @@ qsc_socket_exceptions qsc_socket_client_connect_ipv6(qsc_socket* sock, const qsc
 		if (res == qsc_socket_exception_success)
 		{
 			res = qsc_socket_connect_ipv6(sock, address, port);
-			sock->port = port;
-			sock->connection_status = qsc_socket_state_connected;
 		}
 	}
 
@@ -166,7 +162,7 @@ size_t qsc_socket_client_receive(const qsc_socket* sock, uint8_t* output, size_t
 	return res;
 }
 
-size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
+size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, size_t addlen, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag)
 {
 	QSC_ASSERT(sock != NULL);
 	QSC_ASSERT(address != NULL);
@@ -178,7 +174,7 @@ size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t 
 
 	if (sock != NULL && output != NULL)
 	{
-		res = qsc_socket_receive_from(sock, address, port, output, otplen, flag);
+		res = qsc_socket_receive_from(sock, address, addlen, port, output, otplen, flag);
 	}
 
 	return res;

@@ -53,6 +53,7 @@
 #define QSC_COLLECTION_H
 
 #include "qsccommon.h"
+#include "async.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -126,10 +127,11 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 typedef struct
 {
-    uint8_t* items;   /*!< [uint8_t*] Pointer to the contiguous array storing collection items. */
-    uint8_t* keys;    /*!< [uint8_t*] Pointer to the array storing keys corresponding to each item. */
-    uint32_t count;   /*!< [uint32_t] Number of items currently stored in the collection. */
-    uint32_t width;   /*!< [uint32_t] Fixed byte size of an individual item in the collection. */
+    uint8_t* items;     /*!< [uint8_t*] Pointer to the contiguous array storing collection items. */
+    uint8_t* keys;      /*!< [uint8_t*] Pointer to the array storing keys corresponding to each item. */
+    uint32_t count;     /*!< [uint32_t] Number of items currently stored in the collection. */
+    uint32_t width;     /*!< [uint32_t] Fixed byte size of an individual item in the collection. */
+    qsc_mutex opmtx;    /*!< [mutex] The operations mutex. */
 } qsc_collection_state;
 
 /**

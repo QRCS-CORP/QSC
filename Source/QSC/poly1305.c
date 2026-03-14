@@ -92,7 +92,6 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 
-	size_t i;
 	uint64_t f0;
 	uint64_t f1;
 	uint64_t f2;
@@ -107,12 +106,11 @@ void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* output)
 
 	if (ctx != NULL && output != NULL)
 	{
-
 		if (ctx->rmd != 0U)
 		{
 			ctx->buf[ctx->rmd] = 1U;
 
-			for (i = ctx->rmd + 1U; i < QSC_POLY1305_BLOCK_SIZE; i++)
+			for (size_t i = ctx->rmd + 1U; i < QSC_POLY1305_BLOCK_SIZE; ++i)
 			{
 				ctx->buf[i] = 0U;
 			}
@@ -216,11 +214,11 @@ void qsc_poly1305_reset(qsc_poly1305_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_intutils_clear32(ctx->h, 5U);
-		qsc_intutils_clear32(ctx->k, 4U);
-		qsc_intutils_clear32(ctx->r, 5U);
-		qsc_intutils_clear32(ctx->s, 4U);
-		qsc_intutils_clear8(ctx->buf, QSC_POLY1305_BLOCK_SIZE);
+		qsc_memutils_secure_erase(ctx->h, sizeof(ctx->h));
+		qsc_memutils_secure_erase(ctx->k, sizeof(ctx->k));
+		qsc_memutils_secure_erase(ctx->r, sizeof(ctx->r));
+		qsc_memutils_secure_erase(ctx->s, sizeof(ctx->s));
+		qsc_memutils_secure_erase(ctx->buf, sizeof(ctx->buf));
 		ctx->rmd = 0U;
 		ctx->fnl = 0U;
 	}
@@ -296,6 +294,7 @@ int32_t qsc_poly1305_verify(const uint8_t* code, const uint8_t* message, size_t 
 
 		qsc_poly1305_compute(hash, message, msglen, key);
 		res = qsc_intutils_verify(code, hash, QSC_POLY1305_MAC_SIZE);
+		qsc_memutils_secure_erase(hash, sizeof(hash));
 	}
 
 	return res;

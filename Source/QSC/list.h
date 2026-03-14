@@ -53,6 +53,7 @@
 #define QSC_LIST_H
 
 #include "qsccommon.h"
+#include "async.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -111,7 +112,13 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_LIST_MAX_DEPTH
  * \brief The maximum list depth.
  */
-#define QSC_LIST_MAX_DEPTH 102400U
+#define QSC_LIST_MAX_DEPTH 10000U
+
+/*!
+ * \def QSC_LIST_MAX_WIDTH
+ * \brief The maximum list width.
+ */
+#define QSC_LIST_MAX_WIDTH 1024U
 
 /*!
  * \struct qsc_list_state
@@ -122,9 +129,10 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 QSC_EXPORT_API typedef struct
 {
-    uint8_t* items;   /*!< A pointer to the items array. */
-    size_t   count;   /*!< The number of list items. */
-    size_t   width;   /*!< The byte length of a list item. */
+    uint8_t* items;     /*!< A pointer to the items array. */
+    size_t count;       /*!< The number of list items. */
+    size_t width;       /*!< The byte length of a list item. */
+    qsc_mutex opmtx;    /*!< The operations mutex. */
 } qsc_list_state;
 
 /**

@@ -25,17 +25,20 @@
 static char getch(void)
 {
     char buf = 0U;
-    struct termios oldt, newt;
+	struct termios;
+	struct oldt;
+	struct newt;
+
     fflush(stdout);
 
 	if (tcgetattr(STDIN_FILENO, &oldt) == 0)
 	{
 		newt = oldt;
 
-		oldt.c_lflag &= ~ICANON;
-		oldt.c_lflag &= ~ECHO;
-		oldt.c_cc[VMIN] = 1;
-		oldt.c_cc[VTIME] = 0U;
+		newt.c_lflag &= ~ICANON;
+		newt.c_lflag &= ~ECHO;
+		newt.c_cc[VMIN] = 1;
+		newt.c_cc[VTIME] = 0U;
 
 		if (tcsetattr(STDIN_FILENO, TCSANOW, &newt) == 0)
 		{
@@ -91,7 +94,12 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 		SetConsoleTextAttribute(hcon, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 	}
 #else
-	/* TODO */
+	const char* codes[] = { "0", "34", "32", "31" };
+
+	if (message != NULL && (size_t)color < 4U)
+	{
+		fprintf(stdout, "\033[%sm%s\033[0m\n", codes[(size_t)color], message);
+	}
 #endif
 }
 
@@ -617,7 +625,7 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 		Sleep(100);
 #else
-		sleep(100);
+		usleep(100000U);
 #endif
 	}
 }
@@ -629,15 +637,20 @@ void qsc_consoleutils_send_enter()
 
 void qsc_consoleutils_set_window_buffer(size_t width, size_t height)
 {
+	if (width != 0U && height != 0U)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	RECT r;
-	HWND con = GetConsoleWindow();
-	GetWindowRect(con, &r);
-	COORD cd = { (SHORT)width, (SHORT)height };
-	SetConsoleScreenBufferSize(con, cd);
+		RECT r;
+
+		HWND con = GetConsoleWindow();
+		GetWindowRect(con, &r);
+		COORD cd = { (SHORT)width, (SHORT)height };
+		SetConsoleScreenBufferSize(con, cd);
 #else
-	/* TODO: */
+		fprintf(stdout, "\033[8;%zu;%zut", height, width);
+		fflush(stdout);
 #endif
+	}
 }
 
 void qsc_consoleutils_set_window_clear()
@@ -662,7 +675,8 @@ void qsc_consoleutils_set_window_clear()
 		}
 	}
 #else
-	printf("\033[H\033[J");
+	fprintf(stdout, "\033[H\033[2J\033[3J");
+	fflush(stdout);
 #endif
 }
 
@@ -689,7 +703,8 @@ void qsc_consoleutils_set_window_size(size_t width, size_t height)
 		GetWindowRect(con, &r);
 		MoveWindow(con, r.left, r.top, (int32_t)width, (int32_t)height, TRUE);
 #else
-		/* TODO: */
+		fprintf(stdout, "\033[8;%zu;%zut", height, width);
+		fflush(stdout);
 #endif
 	}
 }
@@ -698,14 +713,15 @@ void qsc_consoleutils_set_window_title(const char* title)
 {
 	QSC_ASSERT(title != NULL);
 
-#if defined(QSC_SYSTEM_OS_WINDOWS)
 	if (title != NULL)
 	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
 		SetConsoleTitle((LPCSTR)title);
-	}
 #else
-	/* TODO: */
+		fprintf(stdout, "\033]0;%s\007", title);
+		fflush(stdout);
 #endif
+	}
 }
 
 void qsc_consoleutils_set_virtual_terminal()
@@ -724,6 +740,7 @@ void qsc_consoleutils_set_virtual_terminal()
 		}
 	}
 #else
-	/* TODO: */
+	fprintf(stdout, "\033[0m");
+	fflush(stdout);
 #endif
 }

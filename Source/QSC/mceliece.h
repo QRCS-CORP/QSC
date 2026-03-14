@@ -56,8 +56,6 @@
 
 QSC_CPLUSPLUS_ENABLED_START
 
-// TODO: malloc large arrays and translate GAS to MASM and implement
-
 /*!
  * \file mceliece.h
  * \brief Contains the primary public API for the Niederreiter dual form of the McEliece asymmetric cipher implementation.
@@ -91,6 +89,20 @@ QSC_CPLUSPLUS_ENABLED_START
  * - <a href="https://classicmceliece.org/specification/">Classic McEliece Specification</a>
  * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">SHA3 Standard (FIPS 202)</a>
  */
+
+/**
+ * \def QSC_MCELIECE_KEYGEN_STACK_BYTES
+ * \brief Minimum stack size required to call qsc_mceliece_generate_keypair.
+ *
+ * Key generation allocates a ~1.7 MiB Gaussian-elimination matrix on the
+ * stack (matching the NIST round-4 reference implementation).  Callers
+ * running on threads with small default stacks (macOS secondary threads:
+ * 512 KiB, Windows default: 1 MiB, musl libc: 128 KiB) MUST either set
+ * a larger stack size before creating the thread, or use the provided
+ * qsc_mceliece_generate_keypair_ex() wrapper which spawns a dedicated
+ * thread with the correct stack size.
+ */
+#define QSC_MCELIECE_KEYGEN_STACK_BYTES  (4U * 1024U * 1024U)
 
 /* Parameter definitions for different McEliece parameter sets */
 #if defined(QSC_MCELIECE_S1N3488T64)

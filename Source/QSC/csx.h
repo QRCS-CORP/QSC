@@ -189,74 +189,77 @@ QSC_EXPORT_API typedef struct
 QSC_EXPORT_API void qsc_csx_dispose(qsc_csx_state* ctx);
 
 /**
-* \brief Initialize the state with the input cipher-key and optional info tweak.
-*
-* \param ctx:			[struct] The cipher state structure
-* \param keyparams:		[const][struct] The secret input cipher-key and nonce structure
-* \param encryption:	[bool] Initialize the cipher for encryption, or false for decryption mode
-*/
+ * \brief Initialize the state with the input cipher-key and optional info tweak.
+ *
+ * \warning When using a CTR based construction the nonce must be unique for a given key.
+ * Re-using a nonce-key pair on a different plaintext input represents a catastrophic loss of security.
+ * 
+ * \param ctx: [struct] The cipher state structure
+ * \param keyparams: [const struct] The secret input cipher-key and nonce structure
+ * \param encryption: [bool] Initialize the cipher for encryption, or false for decryption mode
+ */
 QSC_EXPORT_API void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keyparams* keyparams, bool encryption);
 
 /**
-* \brief Set the associated data string used in authenticating the message.
-* The associated data may be packet header information, domain specific data, or a secret shared by a group.
-* The associated data must be set after initialization, and before each transformation call.
-* The data is erased after each call to the transform.
-*
-* \warning The cipher must be initialized before this function can be called
-*
-* \param ctx:			[struct] The cipher state structure
-* \param data:			[const] The associated data array
-* \param length:		[size_t] The associated data array length
-*/
+ * \brief Set the associated data string used in authenticating the message.
+ * The associated data may be packet header information, domain specific data, or a secret shared by a group.
+ * The associated data must be set after initialization, and before each transformation call.
+ * The data is erased after each call to the transform.
+ *
+ * \warning The cipher must be initialized before this function can be called
+ *
+ * \param ctx: [struct] The cipher state structure
+ * \param data: [const] The associated data array
+ * \param length: [size_t] The associated data array length
+ */
 QSC_EXPORT_API void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t length);
 
 /**
-* \brief Retrieves the current nonce from the state
-*
-* \warning If reusing a nonce/key, the nonce must be retrieved after the last finalized transform call.
-*
-* \param ctx:			[struct] The cipher state structure
-* \param nonce:			[uint8_t*] The output nonce array
-*/
+ * \brief Retrieves the current nonce from the state
+ *
+ * \warning If reusing a nonce/key, the nonce must be retrieved after the last finalized transform call.
+ *
+ * \param ctx: [struct] The cipher state structure
+ * \param nonce: [uint8_t*] The output nonce array
+ */
 QSC_EXPORT_API void qsc_csx_store_nonce(const qsc_csx_state* ctx, uint8_t nonce[QSC_CSX_NONCE_SIZE]);
 
 /**
-* \brief Transform an array of bytes.
-* In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the cipher-text.
-* In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
-* if the codes to not match, the cipher-text is not decrypted and the call fails.
-*
-* \warning The cipher must be initialized before this function can be called
-*
-* \param ctx:			[struct] The cipher state structure.
-* \param output:		[uint8_t*] A pointer to the output array.
-* \param input:			[const] A pointer to the input array.
-* \param length:		[size_t] The number of bytes to transform (not including the tag length).
-*
-* \return:				[bool] Returns true if the cipher has been transformed the data successfully, false on failure
-*/
+ * \brief Transform an array of bytes.
+ * In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the cipher-text.
+ * In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
+ * if the codes to not match, the cipher-text is not decrypted and the call fails.
+ *
+ * \warning The cipher must be initialized before this function can be called
+ *
+ * \param ctx: [struct] The cipher state structure.
+ * \param output: [uint8_t*] A pointer to the output array.
+ * \param input: [const] A pointer to the input array.
+ * \param length: [size_t] The number of bytes to transform (not including the tag length).
+ *
+ * \return: [bool] Returns true if the cipher has been transformed the data successfully, false on failure
+ */
 QSC_EXPORT_API bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /**
-* \brief A multi-call transform for a large array of bytes, such as required by file encryption.
-* This call can be used to transform and authenticate a very large array of bytes (+1GB).
-* On the last call in the sequence, set the finalize parameter to true to complete authentication,
-* and write the MAC code to the end of the output array in encryption mode, 
-* or compare to the embedded MAC code and authenticate in decryption mode.
-* In encryption mode, the input plain-text is encrypted, then authenticated, and the MAC code is appended to the cipher-text.
-* In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
-* if the codes do not match, the cipher-text is not decrypted and the call fails.
-*
-* \warning The cipher must be initialized before this function can be called
-*
-* \param ctx:			[struct] The cipher state structure
-* \param output:		[uint8_t*] A pointer to the output array
-* \param input:			[const] A pointer to the input array
-* \param length:		[size_t] The number of bytes to transform
-* \param finalize:		[bool] Complete authentication on a stream if set to true
-*
-* \return:				[bool] Returns true if the cipher has been transformed the data successfully, false on failure
+ * \brief A multi-call transform for a large array of bytes, such as required by file encryption.
+ * This call can be used to transform and authenticate a very large array of bytes (+1GB).
+ * On the last call in the sequence, set the finalize parameter to true to complete authentication,
+ * and write the MAC code to the end of the output array in encryption mode, 
+ * or compare to the embedded MAC code and authenticate in decryption mode.
+ * In encryption mode, the input plain-text is encrypted, then authenticated, and the MAC code is appended to the cipher-text.
+ * In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
+ * if the codes do not match, the cipher-text is not decrypted and the call fails.
+ *
+ * \warning The cipher must be initialized before this function can be called
+ *
+ * \param ctx: [struct] The cipher state structure
+ * \param output: [uint8_t*] A pointer to the output array
+ * \param input: [const] A pointer to the input array
+ * \param length: [size_t] The number of bytes to transform
+ * \param finalize: [bool] Complete authentication on a stream if set to true
+ *
+ * \return: [bool] Returns true if the cipher has been transformed the data successfully, false on failure
 */
 QSC_EXPORT_API bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* input, size_t length, bool finalize);
 

@@ -239,9 +239,22 @@ size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* d
 		{
 			while ((entry = readdir(dir)) != NULL)
 			{
-				if (entry->d_type == DT_DIR &&
-					strcmp(entry->d_name, ".") != 0U &&
-					strcmp(entry->d_name, "..") != 0U)
+				bool isdir;
+
+				if (entry->d_type == DT_UNKNOWN) 
+				{
+					struct stat st;
+					char full[QSC_SYSTEM_MAX_PATH] = { 0U };
+
+					snprintf(full, sizeof(full), "%s/%s", directory, entry->d_name);
+					isdir = (stat(full, &st) == 0 && S_ISDIR(st.st_mode));
+				}
+				else
+				{
+					isdir = (entry->d_type == DT_DIR);
+				}
+
+				if (isdir && strcmp(entry->d_name, ".") != 0U && strcmp(entry->d_name, "..") != 0U)
 				{
 					size_t item_length = strlen(entry->d_name);
 
@@ -405,7 +418,7 @@ bool qsc_folderutils_directory_has_delimiter(const char path[QSC_SYSTEM_MAX_PATH
 
 	if (len > 0U)
 	{
-		res = (path[len - 1U] == '\\');
+		res = (path[len - 1U] == QSC_FOLDERUTILS_DELIMITER);
 	}
 
 	return res;

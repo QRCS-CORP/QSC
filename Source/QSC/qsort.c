@@ -239,66 +239,191 @@ static int64_t qsort_partition_u64(int64_t* arr, int64_t start, int64_t end)
     return pindex;
 }
   
-void qsc_qsort_sort_i8(int8_t* arr8, int32_t start, int32_t end)
+void qsc_qsort_sort_i8(int8_t* arr, int32_t start, int32_t end)
 {
-    QSC_ASSERT(arr8 != NULL);
+    QSC_ASSERT(arr != NULL);
     QSC_ASSERT(start >= 0);
     QSC_ASSERT(start <= end);
 
-    int32_t p;
-
-    if (arr8 != NULL && start >= 0 && start <= end)
+    if (arr != NULL && start >= 0 && start <= end)
     {
-        p = qsort_partition_u8(arr8, start, end);
-        qsc_qsort_sort_i8(arr8, start, p - 1);
-        qsc_qsort_sort_i8(arr8, p + 1, end);
+        while (start < end)
+        {
+            int8_t mid = start + (end - start) / 2;
+
+            /* median-of-three: sort arr[start], arr[mid], arr[end] */
+            if (arr[mid] < arr[start])
+            {
+                int8_t t = arr[mid];
+                arr[mid] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[end] < arr[start])
+            {
+                int8_t t = arr[end];
+                arr[end] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[mid] < arr[end])
+            {
+                int8_t t = arr[mid];
+                arr[mid] = arr[end];
+                arr[end] = t;
+            }
+
+            int8_t p = qsort_partition_u8(arr, start, end);
+
+            if (p - 1 - start < end - (p + 1))
+            {
+                qsc_qsort_sort_i8(arr, start, p - 1); start = p + 1;
+            }
+            else
+            {
+                qsc_qsort_sort_i8(arr, p + 1, end);   end = p - 1;
+            }
+        }
     }
 }
  
-void qsc_qsort_sort_i16(int16_t* arr16, int32_t start, int32_t end)
+void qsc_qsort_sort_i16(int16_t* arr, int32_t start, int32_t end)
 {
-    QSC_ASSERT(arr16 != NULL);
+    QSC_ASSERT(arr != NULL);
     QSC_ASSERT(start >= 0);
     QSC_ASSERT(start <= end);
 
-    int32_t p;
-
-    if (arr16 != NULL && start >= 0 && start <= end)
+    if (arr != NULL && start >= 0 && start <= end)
     {
-        p = qsort_partition_u16(arr16, start, end);
-        qsc_qsort_sort_i16(arr16, start, p - 1);
-        qsc_qsort_sort_i16(arr16, p + 1, end);
+        while (start < end)
+        {
+            int16_t mid = start + (end - start) / 2;
+
+            if (arr[mid] < arr[start])
+            {
+                int16_t t = arr[mid];
+                arr[mid] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[end] < arr[start])
+            {
+                int16_t t = arr[end];
+                arr[end] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[mid] < arr[end])
+            {
+                int16_t t = arr[mid];
+                arr[mid] = arr[end];
+                arr[end] = t;
+            }
+
+            int16_t p = qsort_partition_u16(arr, start, end);
+
+            if (p - 1 - start < end - (p + 1))
+            {
+                qsc_qsort_sort_i16(arr, start, p - 1); start = p + 1;
+            }
+            else
+            {
+                qsc_qsort_sort_i16(arr, p + 1, end);   end = p - 1;
+            }
+        }
     }
 }
- 
-void qsc_qsort_sort_i32(int32_t* arr32, int32_t start, int32_t end)
+
+void qsc_qsort_sort_i32(int32_t* arr, int32_t start, int32_t end) 
 {
-    QSC_ASSERT(arr32 != NULL);
+    QSC_ASSERT(arr != NULL);
     QSC_ASSERT(start >= 0);
     QSC_ASSERT(start <= end);
 
-    int32_t p;
-
-    if (arr32 != NULL && start >= 0 && start <= end)
+    if (arr != NULL && start >= 0 && start <= end)
     {
-        p = qsort_partition_u32(arr32, start, end);
-        qsc_qsort_sort_i32(arr32, start, p - 1);
-        qsc_qsort_sort_i32(arr32, p + 1, end);
+        while (start < end)
+        {
+            int32_t mid = start + (end - start) / 2;
+
+            if (arr[mid] < arr[start])
+            {
+                int32_t t = arr[mid];
+                arr[mid] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[end] < arr[start])
+            {
+                int32_t t = arr[end];
+                arr[end] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[mid] < arr[end])
+            {
+                int32_t t = arr[mid];
+                arr[mid] = arr[end];
+                arr[end] = t;
+            }
+
+            int32_t p = qsort_partition_u32(arr, start, end);
+
+            if (p - 1 - start < end - (p + 1))
+            {
+                qsc_qsort_sort_i32(arr, start, p - 1); start = p + 1;
+            }
+            else
+            {
+                qsc_qsort_sort_i32(arr, p + 1, end);   end = p - 1;
+            }
+        }
     }
 }
- 
-void qsc_qsort_sort_i64(int64_t* arr64, int64_t start, int64_t end)
+
+void qsc_qsort_sort_i64(int64_t* arr, int64_t start, int64_t end)
 {
-    QSC_ASSERT(arr64 != NULL);
+    QSC_ASSERT(arr != NULL);
     QSC_ASSERT(start >= 0);
     QSC_ASSERT(start <= end);
 
-    int64_t p;
-
-    if (arr64 != NULL && start >= 0 && start <= end)
+    if (arr != NULL && start >= 0 && start <= end)
     {
-        p = qsort_partition_u64(arr64, start, end);
-        qsc_qsort_sort_i64(arr64, start, p - 1);
-        qsc_qsort_sort_i64(arr64, p + 1, end);
+        while (start < end)
+        {
+            int64_t mid = start + (end - start) / 2;
+
+            if (arr[mid] < arr[start])
+            {
+                int64_t t = arr[mid];
+                arr[mid] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[end] < arr[start])
+            {
+                int64_t t = arr[end];
+                arr[end] = arr[start];
+                arr[start] = t;
+            }
+
+            if (arr[mid] < arr[end])
+            {
+                int64_t t = arr[mid];
+                arr[mid] = arr[end];
+                arr[end] = t;
+            }
+
+            int64_t p = qsort_partition_u64(arr, start, end);
+
+            if (p - 1 - start < end - (p + 1))
+            {
+                qsc_qsort_sort_i64(arr, start, p - 1); start = p + 1;
+            }
+            else
+            {
+                qsc_qsort_sort_i64(arr, p + 1, end);   end = p - 1;
+            }
+        }
     }
 }

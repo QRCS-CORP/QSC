@@ -180,6 +180,7 @@ QSC_EXPORT_API size_t qsc_socket_client_receive(const qsc_socket* sock, uint8_t*
 *
 * \param sock:		[qsc_socket*] A pointer to the initialized socket
 * \param address:	[char*] The remote host address
+* \param addlen:	[size_t] The length of the address string
 * \param port:		[uint16_t] The remote port
 * \param output:	[uint8_t*] The output buffer receiving the data
 * \param otplen:	[size_t] The number of bytes in the output buffer
@@ -187,7 +188,7 @@ QSC_EXPORT_API size_t qsc_socket_client_receive(const qsc_socket* sock, uint8_t*
 *
 * \return			[size_t] Returns the number of bytes sent by the remote host
 */
-QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
+QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, size_t addlen, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Sends data on a connected socket

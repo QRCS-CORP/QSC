@@ -177,10 +177,10 @@ QSC_EXPORT_API bool qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* priv
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism using input seeds.
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair.
 *
-* \param pk: Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk: Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
-* \param d: Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
-* \param z: Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param pk:	[uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk:	[uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param d:		[uint8_t*] Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param z:		[uint8_t*] Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 */
 QSC_EXPORT_API void qsc_kyber_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* d, uint8_t* z);
 

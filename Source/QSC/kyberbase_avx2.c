@@ -1,4 +1,4 @@
-#include "kyberbase_avx2.h"
+﻿#include "kyberbase_avx2.h"
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
@@ -200,21 +200,138 @@ static int16_t kyber_fqmul(int16_t a, int16_t b)
     return kyber_montgomery_reduce((int32_t)a * b);
 }
 
+ /* Montgomery multiply: a*b*R^{-1} mod Q,  R = 2^16,  Q = 3329
+  *
+  * Two-multiply form:
+  *   lo     = a*b mod 2^16                    [mullo]
+  *   u      = lo * QINV mod 2^16              [mullo]
+  *   v      = (u * Q) >> 16                   [mulhi]
+  *   result = (a*b >> 16) - v                 [mulhi - v]
+  *
+  * Proof: v = floor(u*Q / 2^16).  Since u = a*b*QINV mod 2^16 and
+  * Q*QINV ≡ 1 mod 2^16, u*Q ≡ a*b mod 2^16, so a*b - u*Q ≡ 0 mod 2^16
+  * and (a*b - u*Q) / 2^16 = a*b*R^{-1} mod Q (up to a multiple of Q).   */
+static inline __m256i kyber_montmul_avx2(const __m256i a, const __m256i b)
+{
+    const __m256i qinv = _mm256_set1_epi16((int16_t)KYBER_QINV);
+    const __m256i q = _mm256_set1_epi16((int16_t)QSC_KYBER_Q);
+    __m256i u;
+
+    u = _mm256_mullo_epi16(_mm256_mullo_epi16(a, b), qinv);
+    return _mm256_sub_epi16(_mm256_mulhi_epi16(a, b), _mm256_mulhi_epi16(u, q));
+}
+
+/* Barrett reduce: a - round(a/Q)*Q
+ *
+ * Matches the scalar implementation exactly:
+ *   t = (a * V + 2^25) >> 26  where V = 20159
+ *
+ * Must widen to 32-bit because the product a*V exceeds int16 range
+ * (max |a| * 20159 ≈ 32767 * 20159 ≈ 660M > 2^16).
+ *
+ * _mm256_packs_epi32 interleaves within 128-bit lanes; the permute
+ * restores linear order: [lo0..lo7 | hi0..hi7] → [0..15].              */
+static inline __m256i kyber_barrett_avx2(const __m256i a)
+{
+    const __m256i q = _mm256_set1_epi16((int16_t)QSC_KYBER_Q);
+    const __m256i vv = _mm256_set1_epi32(20159);
+    const __m256i rnd = _mm256_set1_epi32(1 << 25);
+
+    __m256i lo = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(a));
+    __m256i hi = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(a, 1));
+
+    lo = _mm256_srai_epi32(_mm256_add_epi32(_mm256_mullo_epi32(lo, vv), rnd), 26);
+    hi = _mm256_srai_epi32(_mm256_add_epi32(_mm256_mullo_epi32(hi, vv), rnd), 26);
+
+    /* pack int32 → int16 (t values fit: |t| ≤ 10), fix lane interleaving */
+    return _mm256_sub_epi16(a, _mm256_mullo_epi16(_mm256_permute4x64_epi64(_mm256_packs_epi32(lo, hi), 0xD8), q));
+}
+
+/* Forward NTT (Cooley-Tukey, in-place) 
+ *
+ * Layers 1-4 (len = 128, 64, 32, 16): fully vectorised.
+ *   At len = 16 each butterfly half is exactly one 256-bit register (16 × int16).
+ *   Layers 1-3 iterate the inner load/multiply/store loop over multiple vectors
+ *   per group with the same broadcast zeta.
+ *
+ * Layers 5-7 (len = 8, 4, 2): scalar.
+ *   Each group spans < 16 elements; non-trivial in-register shuffles would be
+ *   needed to pack multiple groups per vector.  The contribution of these three
+ *   layers to total runtime is small.
+ *
+ * Zeta indexing follows the scalar version exactly: k starts at 1 and
+ * increments once per group.                                               */
 static void kyber_ntt_avx(int16_t r[QSC_KYBER_N])
 {
     size_t j;
-    size_t k;
+    size_t start;
+    size_t ki;
     int16_t t;
     int16_t zeta;
 
-    k = 1U;
-
-    for (size_t len = 128U; len >= 2U; len >>= 1U)
+    /* Layer 1: len = 128, 1 zeta (k = 1) */
     {
-        for (size_t start = 0U; start < QSC_KYBER_N; start = (j + len))
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[1]);
+
+        for (j = 0; j < 128; j += 16)
         {
-            zeta = (int16_t)kyber_zetas[k];
-            ++k;
+            __m256i a = _mm256_loadu_si256((const __m256i*) & r[j]);
+            __m256i b = _mm256_loadu_si256((const __m256i*) & r[j + 128]);
+            __m256i x = kyber_montmul_avx2(zv, b);
+            _mm256_storeu_si256((__m256i*) & r[j], _mm256_add_epi16(a, x));
+            _mm256_storeu_si256((__m256i*) & r[j + 128], _mm256_sub_epi16(a, x));
+        }
+    }
+
+    /* Layer 2: len = 64, 2 zetas (k = 2..3) */
+    for (start = 0, ki = 2; start < 256; start += 128, ++ki)
+    {
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[ki]);
+
+        for (j = start; j < start + 64; j += 16)
+        {
+            __m256i a = _mm256_loadu_si256((const __m256i*) & r[j]);
+            __m256i b = _mm256_loadu_si256((const __m256i*) & r[j + 64]);
+            __m256i x = kyber_montmul_avx2(zv, b);
+            _mm256_storeu_si256((__m256i*) & r[j], _mm256_add_epi16(a, x));
+            _mm256_storeu_si256((__m256i*) & r[j + 64], _mm256_sub_epi16(a, x));
+        }
+    }
+
+    /* Layer 3: len = 32, 4 zetas (k = 4..7) */
+    for (start = 0, ki = 4; start < 256; start += 64, ++ki)
+    {
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[ki]);
+
+        for (j = start; j < start + 32; j += 16)
+        {
+            __m256i a = _mm256_loadu_si256((const __m256i*) & r[j]);
+            __m256i b = _mm256_loadu_si256((const __m256i*) & r[j + 32]);
+            __m256i x = kyber_montmul_avx2(zv, b);
+            _mm256_storeu_si256((__m256i*) & r[j], _mm256_add_epi16(a, x));
+            _mm256_storeu_si256((__m256i*) & r[j + 32], _mm256_sub_epi16(a, x));
+        }
+    }
+
+    /* Layer 4: len = 16, 8 zetas (k = 8..15) */
+    for (start = 0, ki = 8; start < 256; start += 32, ++ki)
+    {
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[ki]);
+        __m256i a = _mm256_loadu_si256((const __m256i*) & r[start]);
+        __m256i b = _mm256_loadu_si256((const __m256i*) & r[start + 16]);
+        __m256i x = kyber_montmul_avx2(zv, b);
+        _mm256_storeu_si256((__m256i*) & r[start], _mm256_add_epi16(a, x));
+        _mm256_storeu_si256((__m256i*) & r[start + 16], _mm256_sub_epi16(a, x));
+    }
+
+    /* Layers 5-7: len = 8, 4, 2 — scalar (k = 16..127) */
+    ki = 16;
+
+    for (size_t len = 8; len >= 2; len >>= 1)
+    {
+        for (start = 0; start < QSC_KYBER_N; start = j + len)
+        {
+            zeta = (int16_t)kyber_zetas[ki++];
 
             for (j = start; j < start + len; ++j)
             {
@@ -226,22 +343,36 @@ static void kyber_ntt_avx(int16_t r[QSC_KYBER_N])
     }
 }
 
+/* Inverse NTT (Gentleman-Sande, in-place)
+ *
+ * GS butterfly:
+ *   t         = r[j]
+ *   r[j]      = barrett_reduce(t + r[j+len])
+ *   r[j+len]  = fqmul(zeta, r[j+len] - t)
+ *
+ * Layers 7-5 (len = 2, 4, 8): scalar, k = 127..16.
+ * Layers 4-1 (len = 16, 32, 64, 128): AVX2, k = 15..1.
+ * Final pass: multiply all coefficients by F = 1441 (Montgomery form of
+ * n^{-1} mod Q, n = 256) — vectorised.
+ *
+ * Zeta indexing: k starts at 127 and decrements once per group, matching
+ * the scalar version exactly.                                              */
 static void kyber_invntt_avx(int16_t r[QSC_KYBER_N])
 {
     size_t j;
-    size_t k;
+    size_t start;
     int16_t t;
     int16_t zeta;
-    const int16_t F = 1441;
+    size_t ki;
 
-    k = 127U;
+    /* Layers 7-5: len = 2, 4, 8 — scalar (k = 127..16) */
+    ki = 127;
 
-    for (size_t len = 2U; len <= 128U; len <<= 1U)
+    for (size_t len = 2; len <= 8; len <<= 1)
     {
-        for (size_t start = 0; start < 256U; start = (j + len))
+        for (start = 0; start < QSC_KYBER_N; start = j + len)
         {
-            zeta = (int16_t)kyber_zetas[k];
-            --k;
+            zeta = (int16_t)kyber_zetas[ki--];
 
             for (j = start; j < start + len; ++j)
             {
@@ -253,9 +384,79 @@ static void kyber_invntt_avx(int16_t r[QSC_KYBER_N])
         }
     }
 
-    for (j = 0U; j < 256U; ++j)
+    /* ki is now 15 — layers 4 down to 1 follow */
+
+    /* Layer 4: len = 16, 8 zetas (k = 15..8) */
+    /* Groups process in reverse: start = 224, 192, ..., 0; k decrements */
+    for (start = 0; start < 256; start += 32, --ki)
     {
-        r[j] = kyber_fqmul(r[j], F);
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[ki]);
+        __m256i a = _mm256_loadu_si256((const __m256i*) & r[start]);
+        __m256i b = _mm256_loadu_si256((const __m256i*) & r[start + 16]);
+        __m256i s = kyber_barrett_avx2(_mm256_add_epi16(a, b));
+        __m256i d = kyber_montmul_avx2(zv, _mm256_sub_epi16(b, a));
+        _mm256_storeu_si256((__m256i*) & r[start], s);
+        _mm256_storeu_si256((__m256i*) & r[start + 16], d);
+    }
+
+    /* Layer 3: len = 32, 4 zetas (k = 7..4) */
+    for (start = 0; start < 256; start += 64, --ki)
+    {
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[ki]);
+
+        for (j = start; j < start + 32; j += 16)
+        {
+            __m256i a = _mm256_loadu_si256((const __m256i*) & r[j]);
+            __m256i b = _mm256_loadu_si256((const __m256i*) & r[j + 32]);
+            __m256i s = kyber_barrett_avx2(_mm256_add_epi16(a, b));
+            __m256i d = kyber_montmul_avx2(zv, _mm256_sub_epi16(b, a));
+            _mm256_storeu_si256((__m256i*) & r[j], s);
+            _mm256_storeu_si256((__m256i*) & r[j + 32], d);
+        }
+    }
+
+    /* Layer 2: len = 64, 2 zetas (k = 3..2) */
+    for (start = 0; start < 256; start += 128, --ki)
+    {
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[ki]);
+
+        for (j = start; j < start + 64; j += 16)
+        {
+            __m256i a = _mm256_loadu_si256((const __m256i*) & r[j]);
+            __m256i b = _mm256_loadu_si256((const __m256i*) & r[j + 64]);
+            __m256i s = kyber_barrett_avx2(_mm256_add_epi16(a, b));
+            __m256i d = kyber_montmul_avx2(zv, _mm256_sub_epi16(b, a));
+            _mm256_storeu_si256((__m256i*) & r[j], s);
+            _mm256_storeu_si256((__m256i*) & r[j + 64], d);
+        }
+    }
+
+    /* Layer 1: len = 128, 1 zeta (k = 1) */
+    {
+        const __m256i zv = _mm256_set1_epi16(kyber_zetas[1]);
+
+        for (j = 0; j < 128; j += 16)
+        {
+            __m256i a = _mm256_loadu_si256((const __m256i*) & r[j]);
+            __m256i b = _mm256_loadu_si256((const __m256i*) & r[j + 128]);
+            __m256i s = kyber_barrett_avx2(_mm256_add_epi16(a, b));
+            __m256i d = kyber_montmul_avx2(zv, _mm256_sub_epi16(b, a));
+            _mm256_storeu_si256((__m256i*) & r[j], s);
+            _mm256_storeu_si256((__m256i*) & r[j + 128], d);
+        }
+    }
+
+    /* Final scaling: multiply all coefficients by F = 1441 */
+    /* F is the Montgomery form of n^{-1} mod Q where n = 256:
+     * n^{-1} mod Q = 3303,  F = 3303 * R mod Q = 1441 */
+    {
+        const __m256i fv = _mm256_set1_epi16(1441);
+
+        for (j = 0; j < 256; j += 16)
+        {
+            __m256i a = _mm256_loadu_si256((const __m256i*) & r[j]);
+            _mm256_storeu_si256((__m256i*) & r[j], kyber_montmul_avx2(fv, a));
+        }
     }
 }
 

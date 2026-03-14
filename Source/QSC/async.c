@@ -20,26 +20,26 @@
 #   include <windows.h>
 #   include <intrin.h>
 #   include <process.h>
-    #define THREAD_FUNC_RETURN uint32_t __stdcall
-    #define THREAD_FUNC_CALL __stdcall
+#define THREAD_FUNC_RETURN uint32_t __stdcall
+#define THREAD_FUNC_CALL __stdcall
 #elif defined(QSC_SYSTEM_OS_POSIX)
 #   include <time.h>
 #   include <unistd.h>
 #   define THREAD_FUNC_RETURN void*
 #   define THREAD_FUNC_CALL
-    static pthread_mutex_t tsusp = PTHREAD_MUTEX_INITIALIZER;
-    static pthread_cond_t tcond = PTHREAD_COND_INITIALIZER;
-    static bool suspended = false;
+static pthread_mutex_t tsusp = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t tcond = PTHREAD_COND_INITIALIZER;
+static bool suspended = false;
 #endif
 
 /*!
  * \struct async_thread_task_t
  * \brief Contains the thread task context state.
  */
-typedef struct 
+typedef struct
 {
-    void (*task)(void *context, size_t index);  /*!< Function to execute */
-    void *context;                              /*!< Context to pass to the task */
+    void (*task)(void* context, size_t index);  /*!< Function to execute */
+    void* context;                              /*!< Context to pass to the task */
     size_t index;                               /*!< Index for this thread */
 } async_thread_task_t;
 
@@ -60,13 +60,9 @@ bool qsc_async_atomic_bool_load(volatile bool* target)
 
     if (target != NULL)
     {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-#   if defined(QSC_SYSTEM_COMPILER_MSC)
+#if defined(QSC_SYSTEM_COMPILER_MSC)
         /* OR with 0: reads atomically without modifying the value */
         res = (_InterlockedOr8((volatile char*)target, (char)0) != (char)0);
-#   else
-        __atomic_load(target, &res, __ATOMIC_SEQ_CST);
-#   endif
 #else
         res = __atomic_load_n(target, __ATOMIC_SEQ_CST);
 #endif
@@ -292,15 +288,12 @@ void qsc_async_launch_thread(void (*func)(void*), void* state)
 {
     QSC_ASSERT(func != NULL);
 
-    qsc_mutex mtx;
     qsc_thread thd;
 
     if (func != NULL)
     {
-        mtx = qsc_async_mutex_lock_ex();
         thd = qsc_async_thread_create(func, state);
         qsc_async_thread_wait(thd);
-        qsc_async_mutex_unlock_ex(mtx);
     }
 }
 
@@ -309,13 +302,11 @@ void qsc_async_launch_parallel_threads(void (*func)(void*), size_t count, ...)
     QSC_ASSERT(func != NULL);
     QSC_ASSERT(count <= QSC_ASYNC_PARALLEL_MAX);
 
-    qsc_mutex mtx;
     qsc_thread thds[QSC_ASYNC_PARALLEL_MAX] = { 0 };
     va_list list;
 
     if (func != NULL)
     {
-        mtx = qsc_async_mutex_lock_ex();
         va_start(list, count);
 
         for (size_t i = 0U; i < count; ++i)
@@ -325,7 +316,6 @@ void qsc_async_launch_parallel_threads(void (*func)(void*), size_t count, ...)
 
         qsc_async_thread_wait_all(thds, count);
         va_end(list);
-        qsc_async_mutex_unlock_ex(mtx);
     }
 }
 
@@ -399,7 +389,7 @@ void qsc_async_mutex_unlock_ex(qsc_mutex mtx)
     qsc_async_mutex_destroy(mtx);
 }
 
-bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* context, size_t nthreads)
+bool qsc_async_parallel_for(void (*task)(void* context, size_t index), void* context, size_t nthreads)
 {
     QSC_ASSERT(task != NULL);
     QSC_ASSERT(context != NULL);
@@ -428,7 +418,7 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* con
                 qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
                 res = true;
 
-                /* Process each task on a new thread */
+                /* process each task on a new thread */
                 for (size_t i = 0U; i < nthreads; ++i)
                 {
                     tasks[i].task = task;
@@ -454,7 +444,7 @@ bool qsc_async_parallel_for(void (*task)(void *context, size_t index), void* con
                     ++cnt;
                 }
 
-                /* Wait for all threads to finish */
+                /* wait for all threads to finish */
                 for (size_t i = 0U; i < cnt; ++i)
                 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -492,22 +482,22 @@ size_t qsc_async_processor_count(void)
 qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
 {
     QSC_ASSERT(func != NULL);
-    QSC_ASSERT(state != NULL);
 
     qsc_thread res;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     res = NULL;
 #else
     res = 0;
 #endif
 
-    if (func != NULL && state != NULL)
+    if (func != NULL)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        uint32_t id = 0;
-        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, state, 0, (LPDWORD)&id);
+        uint32_t id = 0U;
+        res = (HANDLE)_beginthreadex(NULL, 0, (unsigned int(__stdcall*)(void*))func, state, 0, &id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_create(&res, NULL, (void *(*) (void *))func, state);
+        pthread_create(&res, NULL, (void* (*) (void*))func, state);
 #endif
     }
 
@@ -517,7 +507,6 @@ qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
 qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
 {
     QSC_ASSERT(func != NULL);
-    QSC_ASSERT(args != NULL);
 
     qsc_thread res;
 
@@ -527,13 +516,15 @@ qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
     res = 0;
 #endif
 
-    if (func != NULL && args != NULL)
+    if (func != NULL)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        uint32_t id = 0;
-        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, args, 0, (LPDWORD)&id);
+        uint32_t id;
+
+        id = 0U;
+        res = (HANDLE)_beginthreadex(NULL, 0, (unsigned int(__stdcall*)(void*))func, (void*)args, 0, &id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_create(&res, NULL, (void *(*) (void *))func, args);
+        pthread_create(&res, NULL, (void* (*)(void*))func, args);
 #endif
     }
 
@@ -545,6 +536,7 @@ qsc_thread qsc_async_thread_create_noargs(void (*func)(void))
     QSC_ASSERT(func != NULL);
 
     qsc_thread res;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     res = NULL;
 #else
@@ -557,7 +549,7 @@ qsc_thread qsc_async_thread_create_noargs(void (*func)(void))
         uint32_t id = 0;
         res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, NULL, 0, (LPDWORD)&id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_create(&res, NULL, (void *(*) (void *))func, NULL);
+        pthread_create(&res, NULL, (void* (*) (void*))func, NULL);
 #endif
     }
 
@@ -590,7 +582,11 @@ void qsc_async_thread_sleep(uint32_t msec)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         Sleep(msec);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        usleep((useconds_t)msec * 1000U);
+        struct timespec ts;
+
+        ts.tv_sec = (time_t)(msec / 1000U);
+        ts.tv_nsec = (long)((msec % 1000U) * 1000000L);
+        nanosleep(&ts, NULL);
 #endif
     }
 }
@@ -625,8 +621,11 @@ bool qsc_async_thread_terminate(qsc_thread handle)
 
     bool res;
 
+    res = false;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    res = CloseHandle(handle);
+    res = (TerminateThread(handle, 0U) != 0);
+    CloseHandle(handle);
 #elif defined(QSC_SYSTEM_OS_POSIX)
     res = (pthread_cancel(handle) == 0);
 #endif
@@ -675,7 +674,14 @@ void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)
     if (handles != NULL && count != 0U)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        WaitForMultipleObjects((DWORD)count, handles, TRUE, INFINITE);
+        size_t i = 0U;
+
+        while (i < count) 
+        {
+            DWORD batch = (DWORD)((count - i) < MAXIMUM_WAIT_OBJECTS ? (count - i) : MAXIMUM_WAIT_OBJECTS);
+            WaitForMultipleObjects(batch, handles + i, TRUE, INFINITE);
+            i += batch;
+        }
 #elif defined(QSC_SYSTEM_OS_POSIX)
         void* stg;
 

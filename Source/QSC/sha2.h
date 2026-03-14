@@ -83,10 +83,6 @@ QSC_CPLUSPLUS_ENABLED_START
  * - <a href="https://software.intel.com/sites/default/files/m/b/9/b/aciicmez.pdf">Analysis of SIMD Applicability to SHA Algorithms</a>
  */
 
-#if !defined(QSC_SHA2_SHANI_ENABLED)
-//#define QSC_SHA2_SHANI_ENABLED
-#endif
-
 /*!
  * \def QSC_HKDF_256_KEY_SIZE
  * \brief The HKDF-256 key size in bytes.

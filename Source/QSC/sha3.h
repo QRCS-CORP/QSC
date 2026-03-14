@@ -67,6 +67,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * This header defines the public API and documentation for SHA3 digest, SHAKE, cSHAKE, and KMAC implementations.
  * The API supports both short-form functions (processing an entire message in one call) and long-form functions
  * (initialize, update, finalize) for incremental processing of data.
+ * 
+ * All qsc_keccak_*, qsc_sha3_*, qsc_shake_*, qsc_cshake_*, qsc_kmac_* functions are re-entrant and thread-safe 
+ * provided each thread uses a distinct state object. Never share a state between threads.
  *
  * \code
  * // Example: SHA3-512 hash computation using the long-form API
