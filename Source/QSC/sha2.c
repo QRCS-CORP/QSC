@@ -1446,6 +1446,91 @@ void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t m
 	qsc_sha256_update(&ctx->pstate, message, msglen);
 }
 
+/* HMAC-384 */
+
+void qsc_hmac384_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)
+{
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(key != NULL);
+
+	qsc_hmac384_state ctx;
+
+	qsc_hmac384_initialize(&ctx, key, keylen);
+	qsc_hmac384_update(&ctx, message, msglen);
+	qsc_hmac384_finalize(&ctx, output);
+}
+
+void qsc_hmac384_dispose(qsc_hmac384_state* ctx)
+{
+	QSC_ASSERT(ctx != NULL);
+
+	if (ctx != NULL)
+	{
+		qsc_memutils_secure_erase(ctx->ipad, sizeof(ctx->ipad));
+		qsc_memutils_secure_erase(ctx->opad, sizeof(ctx->opad));
+		qsc_sha384_dispose(&ctx->pstate);
+	}
+}
+
+void qsc_hmac384_finalize(qsc_hmac384_state* ctx, uint8_t* output)
+{
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(output != NULL);
+
+	uint8_t tmpv[QSC_SHA2_384_HASH_SIZE] = { 0U };
+
+	if (ctx != NULL && output != NULL)
+	{
+		qsc_sha384_finalize(&ctx->pstate, tmpv);
+		qsc_sha384_initialize(&ctx->pstate);
+		qsc_sha384_update(&ctx->pstate, ctx->opad, sizeof(ctx->opad));
+		qsc_sha384_update(&ctx->pstate, tmpv, sizeof(tmpv));
+		qsc_sha384_finalize(&ctx->pstate, output);
+		qsc_hmac384_dispose(ctx);
+	}
+}
+
+void qsc_hmac384_initialize(qsc_hmac384_state* ctx, const uint8_t* key, size_t keylen)
+{
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(key != NULL);
+
+	const uint8_t IPAD = 0x36U;
+	const uint8_t OPAD = 0x5CU;
+
+	if (ctx != NULL && key != NULL)
+	{
+		qsc_memutils_secure_erase(ctx->ipad, QSC_SHA2_384_RATE);
+
+		if (keylen > QSC_SHA2_384_RATE)
+		{
+			qsc_sha384_initialize(&ctx->pstate);
+			qsc_sha384_update(&ctx->pstate, key, keylen);
+			qsc_sha384_finalize(&ctx->pstate, ctx->ipad);
+		}
+		else
+		{
+			qsc_memutils_copy(ctx->ipad, key, keylen);
+		}
+
+		qsc_memutils_copy(ctx->opad, ctx->ipad, QSC_SHA2_384_RATE);
+		qsc_memutils_xorv(ctx->opad, OPAD, QSC_SHA2_384_RATE);
+		qsc_memutils_xorv(ctx->ipad, IPAD, QSC_SHA2_384_RATE);
+
+		qsc_sha384_initialize(&ctx->pstate);
+		qsc_sha384_update(&ctx->pstate, ctx->ipad, sizeof(ctx->ipad));
+	}
+}
+
+void qsc_hmac384_update(qsc_hmac384_state* ctx, const uint8_t* message, size_t msglen)
+{
+	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(message != NULL);
+
+	qsc_sha384_update(&ctx->pstate, message, msglen);
+}
+
 /* HMAC-512 */
 
 void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)

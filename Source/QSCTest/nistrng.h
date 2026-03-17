@@ -167,6 +167,31 @@ bool qsctest_nistrng_prng_generate(uint8_t* output, size_t outlen);
 */
 void qsctest_nistrng_prng_update(uint8_t* key, uint8_t* counter, const uint8_t* info, size_t infolen);
 
+/**
+* \brief Initialize the SHAKE256-based random provider state with a seed
+* and optional personalization string.
+* Implements the HQC next-release PRNG: SHAKE256(seed[48] || info || 0x00),
+* squeezing continuously on each generate call.
+*
+* \param seed 48 bytes of random seed
+* \param info the optional personalization string, or NULL
+* \param infolen the length of the personalization string in bytes, or 0
+*/
+void qsctest_nistrng2_prng_initialize(const uint8_t* seed, const uint8_t* info, size_t infolen);
+
+/**
+* \brief Generate pseudo-random bytes using the SHAKE256-based random provider.
+* qsctest_nistrng2_prng_initialize must first be called with a random seed.
+* Each call squeezes the requested bytes from the persistent SHAKE256 state;
+* no re-keying is performed between calls.
+*
+* \param output the pseudo-random output array
+* \param outlen the requested number of bytes to generate
+*
+* \return true for success, false if output is NULL or outlen is zero
+*/
+bool qsctest_nistrng2_prng_generate(uint8_t* output, size_t outlen);
+
 /* \endcond NO_DOCUMENT */
 
 #endif

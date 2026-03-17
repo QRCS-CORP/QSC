@@ -155,7 +155,7 @@ static double secrand_po_chi_sq(const double ax, const int32_t df)
 
 static double secrand_chi_square(const uint8_t* input, size_t length)
 {
-	long count[256] = { 0 };
+	long count[256U] = { 0 };
 	double a;
 	double cexp;
 	double chisq;
@@ -165,7 +165,7 @@ static double secrand_chi_square(const uint8_t* input, size_t length)
 	chisq = 0.0;
 	totalc = (long)length;
 
-	for (i = 0; i < length; ++i)
+	for (i = 0U; i < length; ++i)
 	{
 		count[input[i]]++;
 	}
@@ -188,7 +188,7 @@ static double secrand_mean_value(const uint8_t* input, size_t length)
 
 	ret = 0.0;
 
-	for (size_t i = 0; i < length; ++i)
+	for (size_t i = 0U; i < length; ++i)
 	{
 		ret += (double)input[i];
 	}
@@ -202,12 +202,12 @@ static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t thr
 	uint8_t val;
 	bool res;
 
-	c = 0;
+	c = 0U;
 	res = false;
-	val = input[0];
+	val = input[0U];
 
 	/* indicates zeroed output or bad run */
-	for (size_t i = 1; i < length; ++i)
+	for (size_t i = 1U; i < length; ++i)
 	{
 		if (input[i] == val)
 		{
@@ -222,24 +222,24 @@ static bool secrand_ordered_runs(const uint8_t* input, size_t length, size_t thr
 		else
 		{
 			val = input[i];
-			c = 0;
+			c = 0U;
 		}
 	}
 
 	return res;
 }
 
-static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t threshold)
+static bool secrand_succesive_zeros(const uint8_t* input, size_t length, size_t threshold)
 {
 	size_t c;
 	bool res;
 
-	c = 0;
+	c = 0U;
 	res = false;
 
-	for (size_t i = 0; i < length; ++i)
+	for (size_t i = 0U; i < length; ++i)
 	{
-		if (input[i] == 0x00)
+		if (input[i] == 0x00U)
 		{
 			++c;
 			if (c >= threshold)
@@ -250,7 +250,7 @@ static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t 
 		}
 		else
 		{
-			c = 0;
+			c = 0U;
 		}
 	}
 
@@ -260,12 +260,12 @@ static bool secrand_succesive_seros(const uint8_t* input, size_t length, size_t 
 static void secrand_print_double(double input)
 {
 	int32_t len = snprintf(NULL, 0, "%g", input);
-	char* str = qsc_memutils_malloc((size_t)len + 1);
+	char* str = qsc_memutils_malloc((size_t)len + 1U);
 
 	if (str != NULL)
 	{
 		qsc_memutils_clear(str, len);
-		snprintf(str, (size_t)len + 1, "%g", input);
+		snprintf(str, (size_t)len + 1U, "%g", input);
 		qsctest_print_safe(str);
 		qsc_memutils_alloc_free(str);
 	}
@@ -275,7 +275,7 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 {
 	double x;
 
-	// mean value test
+	/* mean value test */
 	x = secrand_mean_value(sample, length);
 
 	qsctest_print_safe(name);
@@ -296,7 +296,7 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 		qsctest_print_safe(": PASS \n");
 	}
 
-	// ChiSquare
+	/* ChiSquare */
 	x = secrand_chi_square(sample, length) * 100.0;
 	qsctest_print_safe(name);
 	qsctest_print_safe(": ChiSquare: random would exceed this value ");
@@ -316,7 +316,7 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 		qsctest_print_safe(": PASS \n");
 	}
 
-	// ordered runs
+	/* ordered runs */
 	if (secrand_ordered_runs(sample, length, 6))
 	{
 		qsctest_print_safe(name);
@@ -328,8 +328,8 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 		qsctest_print_safe(": Ordered runs test passed. \n");
 	}
 
-	// succesive zeroes
-	if (secrand_succesive_seros(sample, length, 4))
+	/* succesive zeroes */
+	if (secrand_succesive_zeros(sample, length, 4U))
 	{
 		qsctest_print_safe(name);
 		qsctest_print_safe(": Succesive zeroes test failure! \n");
@@ -343,7 +343,7 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 
 void qsctest_secrand_acp_evaluate()
 {
-	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0U };
 
 	qsc_acp_generate(smp, sizeof(smp));
 
@@ -352,13 +352,13 @@ void qsctest_secrand_acp_evaluate()
 
 void qsctest_secrand_csg_evaluate()
 {
-	uint8_t seed[QSC_CSG_256_SEED_SIZE] = { 0 };
-	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t seed[QSC_CSG_256_SEED_SIZE] = { 0U };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0U };
 	qsc_csg_state ctx;
 
 	qsc_csp_generate(seed, sizeof(seed));
 
-	qsc_csg_initialize(&ctx, seed, sizeof(seed), NULL, 0, false);
+	qsc_csg_initialize(&ctx, seed, sizeof(seed), NULL, 0U, false);
 	qsc_csg_generate(&ctx, smp, sizeof(smp));
 	qsc_csg_dispose(&ctx);
 
@@ -367,7 +367,7 @@ void qsctest_secrand_csg_evaluate()
 
 void qsctest_secrand_csp_evaluate()
 {
-	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0U };
 
 	qsc_csp_generate(smp, sizeof(smp));
 
@@ -376,13 +376,13 @@ void qsctest_secrand_csp_evaluate()
 
 void qsctest_secrand_hcg_evaluate()
 {
-	uint8_t seed[QSC_HCG_SEED_SIZE] = { 0 };
-	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t seed[QSC_HCG_SEED_SIZE] = { 0U };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0U };
 	qsc_hcg_state ctx;
 
 	qsc_csp_generate(seed, sizeof(seed));
 
-	qsc_hcg_initialize(&ctx, seed, sizeof(seed), NULL, 0, false);
+	qsc_hcg_initialize(&ctx, seed, sizeof(seed), NULL, 0U, false);
 	qsc_hcg_generate(&ctx, smp, sizeof(smp));
 	qsc_hcg_dispose(&ctx);
 
@@ -392,7 +392,7 @@ void qsctest_secrand_hcg_evaluate()
 #if defined(QSC_RDRAND_COMPATIBLE)
 void qsctest_secrand_rdp_evaluate()
 {
-	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0U };
 
 	qsc_rdp_generate(smp, sizeof(smp));
 	qsctest_secrand_evaluate("RDP", smp, sizeof(smp));
@@ -401,13 +401,13 @@ void qsctest_secrand_rdp_evaluate()
 
 void qsctest_secrand_scb_evaluate()
 {
-	uint8_t seed[QSC_SCB_256_SEED_SIZE] = { 0 };
-	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0 };
+	uint8_t seed[QSC_SCB_256_SEED_SIZE] = { 0U };
+	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0U };
 	qsc_scb_state ctx = { 0 };
 
 	qsc_csp_generate(seed, sizeof(seed));
 
-	qsc_scb_initialize(&ctx, seed, sizeof(seed), NULL, 0, 1, 1);
+	qsc_scb_initialize(&ctx, seed, sizeof(seed), NULL, 0U, 1U, 1U);
 	qsc_scb_generate(&ctx, smp, sizeof(smp));
 	qsc_scb_dispose(&ctx);
 
@@ -416,13 +416,13 @@ void qsctest_secrand_scb_evaluate()
 
 bool qsctest_secrand_stress()
 {
-	uint8_t seed[32] = { 0 };
+	uint8_t seed[32U] = { 0U };
 	bool res;
 
 	res = true;
 
 	qsc_acp_generate(seed, sizeof(seed));
-	qsc_secrand_initialize(seed, 32, NULL, 0);
+	qsc_secrand_initialize(seed, 32U, NULL, 0U);
 
 	int16_t xs16m = qsc_secrand_next_int16_max(1000);
 
@@ -438,16 +438,16 @@ bool qsctest_secrand_stress()
 		res = false;
 	}
 
-	uint16_t xu16m = qsc_secrand_next_uint16_max(1000);
+	uint16_t xu16m = qsc_secrand_next_uint16_max(1000U);
 
-	if (xu16m > 1000)
+	if (xu16m > 1000U)
 	{
 		res = false;
 	}
 
-	uint16_t xu16mm = qsc_secrand_next_uint16_maxmin(1000, 900);
+	uint16_t xu16mm = qsc_secrand_next_uint16_maxmin(1000U, 900U);
 
-	if (xu16mm > 1000 || xu16mm < 900)
+	if (xu16mm > 1000U || xu16mm < 900U)
 	{
 		res = false;
 	}
@@ -466,16 +466,16 @@ bool qsctest_secrand_stress()
 		res = false;
 	}
 
-	uint32_t xu32m = qsc_secrand_next_uint32_max(1000);
+	uint32_t xu32m = qsc_secrand_next_uint32_max(1000U);
 
-	if (xu32m > 1000)
+	if (xu32m > 1000U)
 	{
 		res = false;
 	}
 
-	uint32_t xu32mm = qsc_secrand_next_uint32_maxmin(1000, 900);
+	uint32_t xu32mm = qsc_secrand_next_uint32_maxmin(1000U, 900U);
 
-	if (xu32mm > 1000 || xu32mm < 900)
+	if (xu32mm > 1000U || xu32mm < 900U)
 	{
 		res = false;
 	}
@@ -494,16 +494,16 @@ bool qsctest_secrand_stress()
 		res = false;
 	}
 
-	uint64_t xu64m = qsc_secrand_next_uint64_max(1000);
+	uint64_t xu64m = qsc_secrand_next_uint64_max(1000U);
 
-	if (xu64m > 1000)
+	if (xu64m > 1000U)
 	{
 		res = false;
 	}
 
-	uint64_t xu64mm = qsc_secrand_next_uint64_maxmin(1000, 900);
+	uint64_t xu64mm = qsc_secrand_next_uint64_maxmin(1000U, 900U);
 
-	if (xu64mm > 1000 || xu64mm < 900)
+	if (xu64mm > 1000U || xu64mm < 900U)
 	{
 		res = false;
 	}

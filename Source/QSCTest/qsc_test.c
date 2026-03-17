@@ -70,6 +70,7 @@
 #include "eddsa_test.h"
 #include "encoding_test.h"
 #include "falcon_test.h"
+#include "hqc_test.h"
 #include "kyber_test.h"
 #include "mceliece_test.h"
 #include "netutils_test.h"
@@ -173,16 +174,7 @@ int32_t main(void)
 	qsc_timestamp_print_values();
 	qsc_consoleutils_print_line("");
 #endif
-
-	qsctest_ecdsa_run();
-	//qsctest_falcon_run();
-	//qsctest_eddh_run();
-	//qsctest_eddsa_run();
-	//qsctest_kyber_run();
-	//qsctest_dilithium_run();
-	//qsctest_mceliece_run();
-	//qsctest_sphincsplus_run();
-
+	
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
@@ -333,7 +325,11 @@ int32_t main(void)
 			qsctest_dilithium_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the ECDSA implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_line("*** Test the NIST ECDSA implementation using stress, validity checks, and known answer tests ***");
+			qsctest_ecdsa_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the Edwards 25519 EDDSA implementation using stress, validity checks, and known answer tests ***");
 			qsctest_eddsa_run();
 			qsctest_print_line("");
 
@@ -345,8 +341,12 @@ int32_t main(void)
 			qsctest_sphincsplus_run();
 			qsctest_print_line("");
 			
-			qsctest_print_line("*** Test the ECDH implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_line("*** Test the Edwards 25519 EDDH implementation using stress, validity checks, and known answer tests ***");
 			qsctest_eddh_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the HQC implementation using stress, validity checks, and known answer tests ***");
+			qsctest_hqc_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Kyber implementation using stress, validity checks, and known answer tests ***");

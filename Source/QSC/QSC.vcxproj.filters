@@ -450,6 +450,21 @@
     <ClInclude Include="ecdsap256base.h">
       <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
     </ClInclude>
+    <ClInclude Include="hqc.h">
+      <Filter>Header Files\Asymmetric\Cipher\HQC</Filter>
+    </ClInclude>
+    <ClInclude Include="hqcbase.h">
+      <Filter>Header Files\Asymmetric\Cipher\HQC\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="hqcbase_avx2.h">
+      <Filter>Header Files\Asymmetric\Cipher\HQC\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsap384base.h">
+      <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsap521base.h">
+      <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -678,6 +693,21 @@
       <Filter>Source Files\Asymmetric\Signature\Falcon\Support</Filter>
     </ClCompile>
     <ClCompile Include="ecdsap256base.c">
+      <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="hqc.c">
+      <Filter>Source Files\Asymmetric\Cipher\HQC</Filter>
+    </ClCompile>
+    <ClCompile Include="hqcbase.c">
+      <Filter>Source Files\Asymmetric\Cipher\HQC\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="hqcbase_avx2.c">
+      <Filter>Source Files\Asymmetric\Cipher\HQC\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsap384base.c">
+      <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsap521base.c">
       <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
     </ClCompile>
   </ItemGroup>

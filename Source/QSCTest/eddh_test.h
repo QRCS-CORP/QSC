@@ -55,11 +55,11 @@
 #include "qsctestcommon.h"
 
 /**
- * \file ecdh_test.h
- * \brief ECDH Test Functions.
+ * \file eddh_test.h
+ * \brief EDDH Test Functions.
  *
  * \details
- * This header defines functions to test the ECDH (Elliptic Curve Diffie-Hellman) implementation.
+ * This header defines functions to test the EDDH (Elliptic Curve Diffie-Hellman) implementation.
  * The test suite includes:
  *
  * - A Known Answer Test (KAT) that verifies the generated public and private keys, as well as the derived
@@ -71,20 +71,20 @@
  * - Integrity tests that check whether altering a secret key or a public key causes the derived shared secret
  *   to differ from the expected result.
  *
- * \section ecdh_test_links Reference Links
- * - ECDH Overview: <a href="https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman">Elliptic Curve Diffie-Hellman</a>
+ * \section eddh_test_links Reference Links
+ * - EDDH Overview: <a href="https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman">Elliptic Curve Diffie-Hellman</a>
  */
 
 /**
  * \def QSCTEST_EDDH_ITERATIONS
- * \brief The number of iterations for the ECDH stress test.
+ * \brief The number of iterations for the EDDH stress test.
  *
- * This macro defines the number of iterations (100) to execute during the ECDH stress test.
+ * This macro defines the number of iterations (100) to execute during the EDDH stress test.
  */
 #define QSCTEST_EDDH_ITERATIONS 100
 
 /**
- * \brief Performs the ECDH Known Answer Test (KAT).
+ * \brief Performs the EDDH Known Answer Test (KAT).
  *
  * \details
  * This test verifies that:
@@ -97,7 +97,7 @@
 bool qsctest_eddh_kat_test(void);
 
 /**
- * \brief Performs a stress test on ECDH operations.
+ * \brief Performs a stress test on EDDH operations.
  *
  * \details
  * This function repeatedly (QSCTEST_EDDH_ITERATIONS times) executes the following steps:
@@ -111,7 +111,7 @@ bool qsctest_eddh_kat_test(void);
 bool qsctest_eddh_operations_test(void);
 
 /**
- * \brief Tests the integrity of a mutated secret key in ECDH.
+ * \brief Tests the integrity of a mutated secret key in EDDH.
  *
  * \details
  * This test deliberately flips a bit in the secret key and then performs a key exchange. The test passes if
@@ -123,7 +123,7 @@ bool qsctest_eddh_operations_test(void);
 bool qsctest_eddh_privatekey_integrity(void);
 
 /**
- * \brief Tests the integrity of a mutated public key in ECDH.
+ * \brief Tests the integrity of a mutated public key in EDDH.
  *
  * \details
  * This test intentionally modifies a bit in the public key and performs key exchange. The test is successful if
@@ -134,10 +134,10 @@ bool qsctest_eddh_privatekey_integrity(void);
 bool qsctest_eddh_publickey_integrity(void);
 
 /**
- * \brief Runs all ECDH test functions.
+ * \brief Runs all EDDH test functions.
  *
  * \details
- * This function executes the complete set of ECDH tests, including:
+ * This function executes the complete set of EDDH tests, including:
  * - The Known Answer Test (KAT) for verifying key generation and shared secret derivation.
  * - A stress test for repeated key exchange operations.
  * - Integrity tests for both secret key and public key alterations.

@@ -1,10 +1,10 @@
 #include "nistrng.h"
 #include "intutils.h"
 #include "aes.h"
-
-/*lint -e747 */
+#include "sha3.h"
 
 qsctest_nist_aes256_state rng_ctx;
+static qsc_keccak_state rng2_ctx;
 
 static void aes256_ecb(const uint8_t* key, const uint8_t* counter, uint8_t* buffer)
 {
@@ -232,3 +232,35 @@ void qsctest_nistrng_prng_update(uint8_t* key, uint8_t* counter, const uint8_t* 
 		counter[i] = tmpk[32 + i];
 	}
 }
+
+void qsctest_nistrng2_prng_initialize(const uint8_t* seed, const uint8_t* info, size_t infolen)
+{
+	const uint8_t domain = 0x00U;
+
+	qsc_keccak_initialize_state(&rng2_ctx);
+	qsc_keccak_incremental_absorb(&rng2_ctx, QSC_KECCAK_256_RATE, seed, QSCTEST_NIST_RNG_SEED_SIZE);
+
+	if (info != NULL && infolen > 0U)
+	{
+		qsc_keccak_incremental_absorb(&rng2_ctx, QSC_KECCAK_256_RATE, info, infolen);
+	}
+
+	qsc_keccak_incremental_absorb(&rng2_ctx, QSC_KECCAK_256_RATE, &domain, 1U);
+	qsc_keccak_incremental_finalize(&rng2_ctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+}
+
+bool qsctest_nistrng2_prng_generate(uint8_t* output, size_t outlen)
+{
+	bool res;
+
+	res = false;
+
+	if (output != NULL && outlen != 0U)
+	{
+		qsc_keccak_incremental_squeeze(&rng2_ctx, QSC_KECCAK_256_RATE, output, outlen);
+		res = true;
+	}
+
+	return res;
+}
+

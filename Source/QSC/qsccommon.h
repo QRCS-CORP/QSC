@@ -263,7 +263,7 @@ QSC_CPLUSPLUS_ENABLED_START
         * \def QSC_SYSTEM_OS_MAC
         * \brief Defined when the target operating system is Apple (macOS or iOS).
         */
-    #	define QSC_SYSTEM_OS_MAC
+#	    define QSC_SYSTEM_OS_MAC
 #   endif
     /*!
     * \def QSC_SYSTEM_OS_BSD
@@ -1118,7 +1118,7 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*** Asymmetric Ciphers ***/
 
-/*** ECDH ***/
+/*** EDDH ***/
 
 /**
 * \def QSC_RFC_7748_COMPLIANT
@@ -1151,7 +1151,7 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \def QSC_EDDH_S1EC25519
- * \brief Enable the ECDH S1EC25519 parameter set.
+ * \brief Enable the EDDH S1EC25519 parameter set.
  */
 #define QSC_EDDH_S1EC25519
 
@@ -1171,7 +1171,7 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \def QSC_KYBER_S5K4P1024
-* \brief Enable the Kyber S5K4P1024 parameter set.
+ * \brief Enable the Kyber S5K4P1024 parameter set.
  */
 #define QSC_KYBER_S5K4P1024
 
@@ -1180,6 +1180,26 @@ QSC_CPLUSPLUS_ENABLED_START
 // * \brief Enable the Kyber S6K5P1280 parameter set (experimental).
 // */
 //#define QSC_KYBER_S6K5P1280
+
+/*** HQC ***/
+
+///*!
+// * \def QSC_HQC_S1N2321
+// * \brief Enable the HQC S1N17669 parameter set.
+// */
+//#define QSC_HQC_S1N2321
+
+///*!
+// * \def QSC_HQC_S3N4602
+// * \brief Enable the HQCS3N35851 parameter set.
+// */
+//#define QSC_HQC_S3N4602
+
+/*!
+ * \def QSC_HQC_S5N7333
+ * \brief Enable the HQC S5N57637 parameter set.
+ */
+#define QSC_HQC_S5N7333
 
 /*** McEliece ***/
 
@@ -1233,11 +1253,31 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_DILITHIUM_S5P87
 
-/*** ECDSA ***/
+ /*** ECDSA ***/
+
+///*!
+// * \def QSC_ECDSA_S1P256
+// * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
+// */
+//#define QSC_ECDSA_S1P256
+
+///*!
+// * \def QSC_ECDSA_S3P384
+// * \brief Enable the ECDSA S1P384 (NIST P-384) parameter set.
+// */
+//#define QSC_ECDSA_S3P384
+
+/*!
+ * \def QSC_ECDSA_S5P521
+ * \brief Enable the ECDSA S1P521 (NIST P-521) parameter set.
+ */
+#define QSC_ECDSA_S5P521
+
+/*** EDDSA ***/
 
 /*!
  * \def QSC_EDDSA_S1EC25519
- * \brief Enable the ECDSA S1EC25519 parameter set.
+ * \brief Enable the EDDSA S1EC25519 parameter set.
  */
 #define QSC_EDDSA_S1EC25519
 

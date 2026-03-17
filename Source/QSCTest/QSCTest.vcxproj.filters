@@ -111,6 +111,9 @@
     <ClCompile Include="ecdsa_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="hqc_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -195,6 +198,9 @@
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="ecdsa_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="hqc_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>

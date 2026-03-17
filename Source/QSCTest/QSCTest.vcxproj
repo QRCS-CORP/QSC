@@ -128,7 +128,7 @@
       </PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)QSC</AdditionalIncludeDirectories>
     </ClCompile>
@@ -150,7 +150,7 @@
       </PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)QSC</AdditionalIncludeDirectories>
@@ -173,7 +173,7 @@
       </PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)QSC</AdditionalIncludeDirectories>
     </ClCompile>
@@ -197,7 +197,7 @@
       </PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)QSC</AdditionalIncludeDirectories>
     </ClCompile>
@@ -223,7 +223,7 @@
       </PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)QSC</AdditionalIncludeDirectories>
@@ -250,7 +250,7 @@
       </PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)QSC</AdditionalIncludeDirectories>
     </ClCompile>
@@ -275,6 +275,7 @@
     <ClCompile Include="eddsa_test.c" />
     <ClCompile Include="encoding_test.c" />
     <ClCompile Include="falcon_test.c" />
+    <ClCompile Include="hqc_test.c" />
     <ClCompile Include="katparser.c" />
     <ClCompile Include="kyber_test.c" />
     <ClCompile Include="mceliece_test.c" />
@@ -300,6 +301,7 @@
     <ClInclude Include="benchmark.h" />
     <ClInclude Include="ecdsa_test.h" />
     <ClInclude Include="falcon_test.h" />
+    <ClInclude Include="hqc_test.h" />
     <ClInclude Include="qmac_test.h" />
     <ClInclude Include="qsctestcommon.h" />
     <ClInclude Include="csx_test.h" />

@@ -49,25 +49,25 @@ bool qsctest_eddh_kat_test()
 	/* test key generation */
 	if (qsc_intutils_are_equal8(pka, kpka, sizeof(pka)) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: public key a does not match expected -EK1 \n");
+		qsctest_print_safe("Failure! eddh_kat: public key a does not match expected -EK1 \n");
 		ret = false;
 	}
 
 	if (qsc_intutils_are_equal8(pkb, kpkb, sizeof(pkb)) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: public key b does not match expected -EK2 \n");
+		qsctest_print_safe("Failure! eddh_kat: public key b does not match expected -EK2 \n");
 		ret = false;
 	}
 
 	if (qsc_intutils_are_equal8(ska, kska, sizeof(ska)) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: private key a does not match expected -EK3 \n");
+		qsctest_print_safe("Failure! eddh_kat: private key a does not match expected -EK3 \n");
 		ret = false;
 	}
 	
 	if (qsc_intutils_are_equal8(skb, kskb, sizeof(skb)) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: private key b does not match expected -EK4 \n");
+		qsctest_print_safe("Failure! eddh_kat: private key b does not match expected -EK4 \n");
 		ret = false;
 	}
 
@@ -76,28 +76,28 @@ bool qsctest_eddh_kat_test()
 	/* alice derives the secret key */
 	if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: key exchange a has failed -EK5 \n");
+		qsctest_print_safe("Failure! eddh_kat: key exchange a has failed -EK5 \n");
 		ret = false;
 	}
 
 	/* bob derives the secret key */
 	if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: key exchange b has failed -EK6 \n");
+		qsctest_print_safe("Failure! eddh_kat: key exchange b has failed -EK6 \n");
 		ret = false;
 	}
 
 	/* fail if alice and bobs secret are not equal */
 	if (qsc_intutils_are_equal8(seca, secb, sizeof(seca)) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: secrets for a and b do not match -EK7 \n");
+		qsctest_print_safe("Failure! eddh_kat: secrets for a and b do not match -EK7 \n");
 		ret = false;
 	}
 
 	/* fail if secret does not match known answer */
 	if (qsc_intutils_are_equal8(seca, ksec, sizeof(seca)) != true)
 	{
-		qsctest_print_safe("Failure! ecdh_kat: secret does not match known answer -EK8 \n");
+		qsctest_print_safe("Failure! eddh_kat: secret does not match known answer -EK8 \n");
 		ret = false;
 	}
 
@@ -129,7 +129,7 @@ bool qsctest_eddh_operations_test()
 		/* alice derives the secret key */
 		if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_operations: key exchange failure -EO1 \n");
+			qsctest_print_safe("Failure! eddh_test_operations: key exchange failure -EO1 \n");
 			res = false;
 			break;
 		}
@@ -137,7 +137,7 @@ bool qsctest_eddh_operations_test()
 		/* bob derives the secret key */
 		if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_operations: key exchange failure -EO2 \n");
+			qsctest_print_safe("Failure! eddh_test_operations: key exchange failure -EO2 \n");
 			res = false;
 			break;
 		}
@@ -145,7 +145,7 @@ bool qsctest_eddh_operations_test()
 		/* compare them for equality*/
 		if (qsc_intutils_are_equal8(seca, secb, QSC_EDDH_SHAREDSECRET_SIZE) != true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_operations: secret keys do not match -EO3 \n");
+			qsctest_print_safe("Failure! eddh_test_operations: secret keys do not match -EO3 \n");
 			res = false;
 			break;
 		}
@@ -182,7 +182,7 @@ bool qsctest_eddh_privatekey_integrity()
 		/* alice derives the secret key */
 		if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_privatekey: key exchange failure -ES1 \n");
+			qsctest_print_safe("Failure! eddh_test_privatekey: key exchange failure -ES1 \n");
 			res = false;
 			break;
 		}
@@ -190,7 +190,7 @@ bool qsctest_eddh_privatekey_integrity()
 		/* bob derives the secret key */
 		if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_privatekey: key exchange failure -ES2 \n");
+			qsctest_print_safe("Failure! eddh_test_privatekey: key exchange failure -ES2 \n");
 			res = false;
 			break;
 		}
@@ -198,7 +198,7 @@ bool qsctest_eddh_privatekey_integrity()
 		/* fail if equal */
 		if (qsc_intutils_are_equal8(seca, secb, QSC_EDDH_SHAREDSECRET_SIZE) == true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_privatekey: altered private key did not change secret -ES3 \n");
+			qsctest_print_safe("Failure! eddh_test_privatekey: altered private key did not change secret -ES3 \n");
 			res = false;
 			break;
 		}
@@ -235,7 +235,7 @@ bool qsctest_eddh_publickey_integrity()
 		/* alice derives the secret key */
 		if (qsc_eddh_key_exchange(seca, ska, pkb) != true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_publickey: key exchange failure -EP1 \n");
+			qsctest_print_safe("Failure! eddh_test_publickey: key exchange failure -EP1 \n");
 			res = false;
 			break;
 		}
@@ -243,7 +243,7 @@ bool qsctest_eddh_publickey_integrity()
 		/* bob derives the secret key */
 		if (qsc_eddh_key_exchange(secb, skb, pka) != true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_publickey: key exchange failure -EP2 \n");
+			qsctest_print_safe("Failure! eddh_test_publickey: key exchange failure -EP2 \n");
 			res = false;
 			break;
 		}
@@ -251,7 +251,7 @@ bool qsctest_eddh_publickey_integrity()
 		/* fail if equal */
 		if (qsc_intutils_are_equal8(seca, secb, QSC_EDDH_SHAREDSECRET_SIZE) == true)
 		{
-			qsctest_print_safe("Failure! ecdh_test_publickey: altered public key did not change secret -EP3 \n");
+			qsctest_print_safe("Failure! eddh_test_publickey: altered public key did not change secret -EP3 \n");
 			res = false;
 			break;
 		}
@@ -264,37 +264,37 @@ void qsctest_eddh_run()
 {
 	if (qsctest_eddh_kat_test() == true)
 	{
-		qsctest_print_safe("Success! Passed ECDH known answer test. \n");
+		qsctest_print_safe("Success! Passed EDDH known answer test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH known answer test. \n");
+		qsctest_print_safe("Failure! Failed EDDH known answer test. \n");
 	}
 
 	if (qsctest_eddh_operations_test() == true)
 	{
-		qsctest_print_safe("Success! Passed ECDH key generation, encryption, and decryption stress test. \n");
+		qsctest_print_safe("Success! Passed EDDH key generation, encryption, and decryption stress test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH the encryption stress tests. \n");
+		qsctest_print_safe("Failure! Failed EDDH the encryption stress tests. \n");
 	}
 
 	if (qsctest_eddh_privatekey_integrity() == true)
 	{
-		qsctest_print_safe("Success! Passed ECDH secret-key tamper test. \n");
+		qsctest_print_safe("Success! Passed EDDH secret-key tamper test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH secret-key tamper test. \n");
+		qsctest_print_safe("Failure! Failed EDDH secret-key tamper test. \n");
 	}
 
 	if (qsctest_eddh_publickey_integrity() == true)
 	{
-		qsctest_print_safe("Success! Passed ECDH public-key tamper test. \n");
+		qsctest_print_safe("Success! Passed EDDH public-key tamper test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH public-key tamper test. \n");
+		qsctest_print_safe("Failure! Failed EDDH public-key tamper test. \n");
 	}
 }

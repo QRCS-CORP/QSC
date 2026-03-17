@@ -49,114 +49,112 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSCTEST_KYBER_TEST_H
-#define QSCTEST_KYBER_TEST_H
+#ifndef QSCTEST_HQC_TEST_H
+#define QSCTEST_HQC_TEST_H
 
 #include "qsctestcommon.h"
 #include "qsccommon.h"
 
 /**
- * \file kyber_test.h
- * \brief Kyber Test Functions.
+ * \file hqc_test.h
+ * \brief HQC test functions.
  *
  * \details
- * This file contains tests for the Kyber key encapsulation mechanism (KEM) implementation
- * as specified in the NIST FIPS 203 specification. The test suite includes:
+ * This file contains tests for the HQC key encapsulation mechanism implementation.
+ * The test suite includes:
  *
- * - A Known Answer Test (KAT) that verifies the generated public and private keys, the ciphertext,
- *   and the derived shared secret against expected test vectors.
+ * - A Known Answer Test (KAT) that verifies the generated public and private keys,
+ *   the ciphertext, and the derived shared secret against the official HQC response files.
  *
- * - A ciphertext integrity test that ensures that modifying the ciphertext results in an invalid shared secret.
+ * - A ciphertext integrity test that ensures that modifying the ciphertext results in
+ *   decapsulation failure or in a mismatched shared secret.
  *
- * - A stress test that repeatedly generates key pairs, encapsulates, and decapsulates to verify that both
- *   parties derive the same shared secret.
+ * - A stress test that repeatedly generates key pairs, encapsulates, and decapsulates
+ *   to verify that both parties derive the same shared secret.
  *
- * - Integrity tests that check whether altering the secret key or public key causes the derived shared secret
- *   to differ from the expected result.
- *
- * \section kyber_test_links Reference Links
- * - <a href="https://csrc.nist.gov/pubs/fips/203/final">NIST Kyber FIPS 203 Main page</a>
- * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf">NIST Kyber FIPS 203 Specification</a>
+ * - Integrity tests that check whether altering the secret key or public key causes the
+ *   derived shared secret to differ from the expected result.
  */
 
-/*!
- * \def QSCTEST_KYBER_TEST_COUNT
- * \brief The number of Kyber KAT tests.
- */
 #if defined(QSC_DEBUG_MODE)
-#	define QSCTEST_KYBER_TEST_COUNT 10U
+	/*!
+	 * \def QSCTEST_HQC_TEST_COUNT
+	 * \brief The number of HQC KAT tests.
+	 */
+#	define QSCTEST_HQC_TEST_COUNT 10U
 #else
-#	if defined(QSC_KYBER_S6P3936)
-#		define QSCTEST_KYBER_TEST_COUNT 10U
-#	else
-#		define QSCTEST_KYBER_TEST_COUNT 100U
-#	endif
+	/*!
+	 * \def QSCTEST_HQC_TEST_COUNT
+	 * \brief The number of HQC KAT tests.
+	 */
+#	define QSCTEST_HQC_TEST_COUNT 100U
 #endif
 
-/**
- * \brief Tests the validity of a mutated ciphertext.
- *
- * \details
- * This function generates a Kyber key pair and encapsulates a shared secret, then intentionally mutates the
- * ciphertext using random data. It attempts to decapsulate the altered ciphertext. The test passes if
- * decapsulation fails and the derived shared secret does not match the expected shared secret.
- *
- * \return Returns true if the mutated ciphertext is correctly detected as invalid; otherwise, false.
- */
-bool qsctest_kyber_ciphertext_integrity(void);
+ /**
+  * \brief Tests the validity of a mutated ciphertext.
+  *
+  * \details
+  * This function generates a HQC key pair and encapsulates a shared secret, then intentionally mutates the
+  * ciphertext using random data. It attempts to decapsulate the altered ciphertext. The test passes if
+  * decapsulation fails and the derived shared secret does not match the expected shared secret.
+  *
+  * \return Returns true if the mutated ciphertext is correctly detected as invalid; otherwise, false.
+  */
+bool qsctest_hqc_ciphertext_integrity(void);
 
 /**
- * \brief Performs the Kyber Known Answer Test (KAT).
+ * \brief Performs the HQC Known Answer Test (KAT).
  *
  * \details
- * This function verifies the correctness of the Kyber implementation by comparing the generated public key,
- * secret key, ciphertext, and shared secret with known answer test vectors from the NIST FIPS 203 test files.
+ * This function verifies the correctness of the HQC implementation by comparing the generated public key,
+ * secret key, ciphertext, and shared secret with known answer test vectors from the HQC test files, 
+ * available at: https://gitlab.com/pqc-hqc/hqc.
  * It parses the test vectors from the appropriate response file based on the active parameter set and compares
- * them against the output produced by the Kyber key encapsulation mechanism.
+ * them against the output produced by the HQC key encapsulation mechanism.
  *
  * \return Returns true if all generated values match the known answer test vectors; otherwise, false.
  */
-bool qsctest_kyber_kat_test(void);
+bool qsctest_hqc_kat_test(void);
 
 /**
- * \brief Performs a stress test on Kyber operations.
+ * \brief Performs a stress test on HQC operations.
  *
  * \details
- * This function tests the key generation, encapsulation, and decapsulation operations of the Kyber KEM.
+ * This function tests the key generation, encapsulation, and decapsulation operations of the HQC KEM.
  * It first generates a key pair, then encapsulates a shared secret, and decapsulates it.
  * The test also exercises an alternate encrypt/decrypt API by clearing buffers and using a different interface.
  * The test passes if the shared secrets derived from encapsulation and decapsulation match.
  *
  * \return Returns true if all operations yield the expected shared secret; otherwise, false.
  */
-bool qsctest_kyber_operations_test(void);
+bool qsctest_hqc_operations_test(void);
 
 /**
- * \brief Tests the integrity of an altered Kyber secret key.
+ * \brief Tests the integrity of an altered HQC secret key.
  *
  * \details
- * This test generates a Kyber key pair and encapsulates a shared secret. It then intentionally alters a portion
+ * This test generates a HQC key pair and encapsulates a shared secret. It then intentionally alters a portion
  * of the secret key with random data and attempts to decapsulate the ciphertext using the modified key.
  * The test is successful if decapsulation fails and the derived shared secret does not match the expected value.
  *
  * \return Returns true if the invalid secret key is correctly detected; otherwise, false.
  */
-bool qsctest_kyber_privatekey_integrity(void);
+bool qsctest_hqc_privatekey_integrity(void);
 
 /**
- * \brief Tests the integrity of an altered Kyber public key.
+ * \brief Tests the integrity of an altered HQC public key.
  *
  * \details
- * This function generates a Kyber key pair and then replaces part of the public key with random values.
+ * This function generates a HQC key pair and then replaces part of the public key with random values.
  * It then encapsulates a shared secret using the altered public key and attempts decapsulation using the valid secret key.
  * The test passes if decapsulation fails and the derived shared secret does not match the expected result.
  *
  * \return Returns true if the invalid public key is correctly detected; otherwise, false.
  */
-bool qsctest_kyber_publickey_integrity(void);
+bool qsctest_hqc_publickey_integrity(void);
 
 /**
- * \brief Runs all Kyber implementation tests.
+ * \brief Runs all HQC implementation tests.
  *
  * \details
  * This function sequentially executes the following tests:
@@ -168,7 +166,6 @@ bool qsctest_kyber_publickey_integrity(void);
  *
  * The results of each test are printed to the console.
  */
-void qsctest_kyber_run(void);
-
+void qsctest_hqc_run(void);
 
 #endif

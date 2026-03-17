@@ -440,6 +440,70 @@ QSC_EXPORT_API void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t
  */
 QSC_EXPORT_API void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t msglen);
 
+/* HMAC-384 */
+
+/*!
+ * \struct qsc_hmac384_state
+ * \brief The HMAC(SHA2-384) state array.
+ */
+QSC_EXPORT_API typedef struct
+{
+    qsc_sha384_state pstate;            /*!< The SHA2-384 state. */
+    uint8_t ipad[QSC_SHA2_384_RATE];    /*!< The input pad array. */
+    uint8_t opad[QSC_SHA2_384_RATE];    /*!< The output pad array. */
+} qsc_hmac384_state;
+
+/*!
+ * \brief Process a message with HMAC(SHA2-384) and return the MAC code in the output byte array.
+ *
+ * \warning The output array must be at least 64 bytes in length.
+ *
+ * \param output:   [uint8_t*] The output byte array; receives the MAC code.
+ * \param message:  [const uint8_t*] The message input byte array.
+ * \param msglen:   [size_t] The number of message bytes to process.
+ * \param key:      [const uint8_t*] The secret key array.
+ * \param keylen:   [size_t] The key array length.
+ */
+QSC_EXPORT_API void qsc_hmac384_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen);
+
+/*!
+ * \brief Dispose of the HMAC-384 state.
+ *
+ * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure.
+ */
+QSC_EXPORT_API void qsc_hmac384_dispose(qsc_hmac384_state* ctx);
+
+/*!
+ * \brief Finalize the HMAC-384 state and return the MAC code in the output byte array.
+ *
+ * \warning The output array must be sized correctly. Finalizes the message state; cannot be used in consecutive calls.
+ *          The state must be initialized by the caller.
+ *
+ * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure; must be initialized.
+ * \param output:   [uint8_t*] The output byte array; receives the MAC code.
+ */
+QSC_EXPORT_API void qsc_hmac384_finalize(qsc_hmac384_state* ctx, uint8_t* output);
+
+/*!
+ * \brief Initialize an HMAC-384 state structure with a key.
+ *
+ * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure.
+ * \param key:      [const uint8_t*] Pointer to the secret key array.
+ * \param keylen:   [size_t] The key array length.
+ */
+QSC_EXPORT_API void qsc_hmac384_initialize(qsc_hmac384_state* ctx, const uint8_t* key, size_t keylen);
+
+/*!
+ * \brief Update HMAC-384 with message input.
+ *
+ * \warning State must be initialized by the caller.
+ *
+ * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure.
+ * \param message:  [const uint8_t*] The input message byte array.
+ * \param msglen:   [size_t] The number of message bytes to process.
+ */
+QSC_EXPORT_API void qsc_hmac384_update(qsc_hmac384_state* ctx, const uint8_t* message, size_t msglen);
+
 /* HMAC-512 */
 
 /*!

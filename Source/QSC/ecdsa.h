@@ -57,69 +57,81 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /**
- * \file ecnistp256.h
- * \brief Contains the primary public API for the ECDSA asymmetric signature scheme
- *        implementation over the NIST P-256 (secp256r1) elliptic curve.
+ * \file ecdsa.h
+ * \brief Contains the public API for the Elliptic Curve Digital Signature Algorithm
+ * implementation over the NIST prime-field curves P-256, P-384, and P-521.
  *
  * \details
- * This header defines the API for ECDSA operating over the NIST P-256 elliptic curve
- * (also known as secp256r1 or prime256v1).  It provides functions for generating key
- * pairs (either randomly or via a seeded generator), signing messages, and verifying
- * signatures.  The implementation is interoperable with TLS 1.2/1.3, X.509 certificates
- * issued by public CAs, and the CA/Browser Forum Baseline Requirements.
+ * This header defines the external interface to the QSC ECDSA implementation. The
+ * module supports one NIST prime-field parameter set selected at compile time. The
+ * supported parameter sets are P-256, P-384, and P-521, corresponding to the widely
+ * deployed secp256r1, secp384r1, and secp521r1 domain parameters. The active curve
+ * selection determines all encoded key, scalar, coordinate, and signature lengths
+ * through the QSC_ECDSA_*_SIZE constants defined in this header.
  *
- * \par Key and signature encoding:
- * All external byte arrays use big-endian encoding compatible with X9.62 / SEC 1:
- * - Public key:  64 bytes  – uncompressed point coordinates (Qx[32] || Qy[32]),
- *                            no 0x04 prefix.
- * - Private key: 96 bytes  – seed[32] || Qx[32] || Qy[32].
- * - Signature:   64 bytes  – (r[32] || s[32]), prepended to the message in
- *                            the signedmsg buffer.
+ * The implementation exposes functions for key-pair generation, public-key derivation
+ * from a private scalar, deterministic and randomized signing, signature verification,
+ * public-key encoding and decoding, and DER conversion of ECDSA signatures. Public keys
+ * are represented internally in raw affine form as the concatenation Qx || Qy, where
+ * each coordinate is a fixed-width big-endian integer whose width is determined by the
+ * active parameter set. Signatures are represented in raw form as r || s, where both
+ * values are fixed-width big-endian integers of the active subgroup order size.
  *
- * Signing uses a deterministic nonce generated per RFC 6979 (HMAC-SHA256), so no
- * entropy source is required during the signing operation.
+ * The private-key container used by the high-level API is a serialized structure of the
+ * form seed || Qx || Qy. The seed field contains the curve-sized private scalar input in
+ * big-endian form. The public coordinates stored after the seed are the affine public key
+ * corresponding to that scalar. This format allows the module to retain the private scalar
+ * together with its associated public key in a compact fixed-size buffer. Functions that
+ * derive a public key directly from a private scalar expect the scalar alone, encoded as a
+ * curve-sized big-endian integer, rather than the full private-key container.
  *
- * \par Example:
- * \code
- * // Key-pair creation, signing, and verification using ECDSA over P-256
- * #define MSGLEN 32
- * uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE];
- * uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE];
- * uint8_t msg[MSGLEN];
- * uint8_t smsg[QSC_ECDSA_SIGNATURE_SIZE + MSGLEN];
- * uint8_t rmsg[MSGLEN];
- * size_t  smsglen = 0;
- * size_t  rmsglen = 0;
+ * The module supports conversion between the internal raw public-key format and SEC 1
+ * uncompressed point encoding. In SEC 1 form, a public key is serialized as the uncompressed
+ * point tag 0x04 followed by the fixed-width big-endian x and y affine coordinates. The
+ * module also supports conversion between the internal raw public-key form and the X.509
+ * SubjectPublicKeyInfo DER encoding for the selected curve. These conversion functions are
+ * intended for interoperability with certificate processing, public-key exchange, and other
+ * protocol layers that use standard ASN.1 encodings.
  *
- * // Generate key pair from a random seed
- * qsc_ecdsa_generate_keypair(pk, sk, my_rng_function);
+ * Signature conversion functions are provided for the ECDSA ASN.1 DER representation. The
+ * internal raw signature form is always fixed width and consists of the direct concatenation
+ * of r and s. The DER representation instead encodes r and s as signed ASN.1 INTEGER values
+ * wrapped in a SEQUENCE. Because DER INTEGER values may require a leading zero octet when the
+ * most significant bit would otherwise indicate a negative value, the encoded DER signature
+ * length is variable and depends on the specific signature values. The maximum DER size is
+ * therefore parameter-set dependent and is defined by QSC_ECDSA_SIGNATURE_DER_MAX_SIZE.
  *
- * // Sign: signature is prepended to the message
- * qsc_ecdsa_sign(smsg, &smsglen, msg, MSGLEN, sk);
+ * The implementation is intended for message authentication and public verification in systems
+ * that require standardized NIST elliptic-curve signatures. Verification functions recover the
+ * appended message from the signed-message format used by the QSC API, validate the signature,
+ * and return the recovered message on success. Signing functions produce the fixed-size raw
+ * signature followed by the original message, allowing the signed-message buffer to be processed
+ * as a single serialized object.
  *
- * // Verify: recovers the message on success
- * if (qsc_ecdsa_verify(rmsg, &rmsglen, smsg, smsglen, pk) != true)
- * {
- *     // Authentication failed
- * }
- * \endcode
+ * Deterministic signing support is included to enable reproducible signatures for known-answer
+ * testing and standards alignment. In deterministic mode, the ephemeral nonce is derived from
+ * the private scalar and message digest rather than obtained from an external random source.
+ * This behavior is required for compatibility with official RFC 6979 test vectors for the
+ * supported curves. Randomized signing is also supported through the standard high-level API
+ * when the implementation is configured to use an approved random generator. The exact digest
+ * and nonce-generation behavior is curve-dependent and must remain aligned with the active
+ * parameter-set implementation.
  *
- * \remarks
- * P-256 is defined by NIST in FIPS 186-4 (Digital Signature Standard) and is the
- * curve required by the CA/Browser Forum Baseline Requirements for publicly trusted
- * TLS certificates.  The field prime is p = 2^256 - 2^224 + 2^192 + 2^96 - 1 and
- * the group order is n = 2^256 - 2^128 - 2^96 + 2^32 * … (see FIPS 186-4 D.1.2.3).
+ * All externally visible byte arrays use big-endian encoding. All buffers passed to the API
+ * must be correctly sized for the active curve selection. The caller is responsible for
+ * supplying valid output buffers and, where required, a cryptographically secure random
+ * generator. Private-key material should be treated as sensitive and cleared from memory by
+ * the caller when no longer required. Public-key and signature validation is performed by the
+ * relevant decode and verify functions, but callers must still ensure that buffer lengths and
+ * calling conventions are consistent with the selected parameter set.
  *
- * \section ecnistp256_links Reference Links
- *  - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf">FIPS 186-4 Digital Signature Standard</a>
- *  - <a href="https://www.secg.org/sec1-v2.pdf">SEC 1: Elliptic Curve Cryptography (Certicom)</a>
- *  - <a href="https://www.rfc-editor.org/rfc/rfc6979">RFC 6979: Deterministic Usage of DSA/ECDSA</a>
- *  - <a href="https://www.rfc-editor.org/rfc/rfc8422">RFC 8422: ECC Cipher Suites for TLS</a>
+ * This header declares only the public interface and associated size constants. Curve-specific
+ * field arithmetic, scalar arithmetic, point operations, deterministic nonce generation, and
+ * internal validation routines are implemented in the corresponding ECDSA base modules for the
+ * selected parameter set.
  */
 
-#define QSC_ECDSA_S1EC256
-
-#if defined(QSC_ECDSA_S1EC256)
+#if defined(QSC_ECDSA_S1P256)
 
 /*!
  * \def QSC_ECDSA_SIGNATURE_SIZE
@@ -139,35 +151,130 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #	define QSC_ECDSA_PUBLICKEY_SIZE 64U
 
-#else
-#	error "The ECNISTP256 parameter set is invalid!  Define QSC_ECDSA_S1EC256."
-#endif
-
 /*!
  * \def QSC_ECDSA_SEED_SIZE
  * \brief The byte size of the random seed / private scalar input array.
  */
-#define QSC_ECDSA_SEED_SIZE 32ULL
+#	define QSC_ECDSA_SEED_SIZE 32ULL
 
 /*!
  * \def QSC_ECDSA_ALGNAME
  * \brief The formal algorithm name.
  */
-#define QSC_ECDSA_ALGNAME "ECDSAP256"
+#	define QSC_ECDSA_ALGNAME "ECDSAP256"
+
 /*!
  * \brief SEC 1 uncompressed EC point byte length for P-256.
  */
-#define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 65U
+#	define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 65U
 
 /*!
  * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp256r1.
  */
-#define QSC_ECDSA_SPKI_DER_SIZE 91U
+#	define QSC_ECDSA_SPKI_DER_SIZE 91U
 
 /*!
  * \brief Maximum DER-encoded ECDSA signature size for P-256.
  */
-#define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 72U
+#	define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 72U
+
+#elif defined(QSC_ECDSA_S3P384)
+
+/*!
+ * \def QSC_ECDSA_SIGNATURE_SIZE
+ * \brief The byte size of the signature array (r[48] || s[48]).
+ */
+#	define QSC_ECDSA_SIGNATURE_SIZE 96U
+
+/*!
+ * \def QSC_ECDSA_PRIVATEKEY_SIZE
+ * \brief The byte size of the private key array (seed[48] || Qx[48] || Qy[48]).
+ */
+#	define QSC_ECDSA_PRIVATEKEY_SIZE 144U
+
+/*!
+ * \def QSC_ECDSA_PUBLICKEY_SIZE
+ * \brief The byte size of the public key array (Qx[48] || Qy[48], big-endian).
+ */
+#	define QSC_ECDSA_PUBLICKEY_SIZE 96U
+
+/*!
+ * \def QSC_ECDSA_SEED_SIZE
+ * \brief The byte size of the random seed / private scalar input array.
+ */
+#	define QSC_ECDSA_SEED_SIZE 48ULL
+
+/*!
+ * \def QSC_ECDSA_ALGNAME
+ * \brief The formal algorithm name.
+ */
+#	define QSC_ECDSA_ALGNAME "ECDSAP384"
+
+/*!
+ * \brief SEC 1 uncompressed EC point byte length for P-384.
+ */
+#	define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 97U
+
+/*!
+ * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp384r1.
+ */
+#	define QSC_ECDSA_SPKI_DER_SIZE 120U
+
+/*!
+ * \brief Maximum DER-encoded ECDSA signature size for P-384.
+ */
+#	define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 104U
+
+#elif defined(QSC_ECDSA_S5P521)
+
+/*!
+ * \def QSC_ECDSA_SIGNATURE_SIZE
+ * \brief The byte size of the signature array (r[66] || s[66]).
+ */
+#	define QSC_ECDSA_SIGNATURE_SIZE 132U
+
+/*!
+ * \def QSC_ECDSA_PRIVATEKEY_SIZE
+ * \brief The byte size of the private key array (seed[66] || Qx[66] || Qy[66]).
+ */
+#	define QSC_ECDSA_PRIVATEKEY_SIZE 198U
+
+/*!
+ * \def QSC_ECDSA_PUBLICKEY_SIZE
+ * \brief The byte size of the public key array (Qx[66] || Qy[66], big-endian).
+ */
+#	define QSC_ECDSA_PUBLICKEY_SIZE 132U
+
+/*!
+ * \def QSC_ECDSA_SEED_SIZE
+ * \brief The byte size of the random seed / private scalar input array.
+ */
+#	define QSC_ECDSA_SEED_SIZE 66ULL
+
+/*!
+ * \def QSC_ECDSA_ALGNAME
+ * \brief The formal algorithm name.
+ */
+#	define QSC_ECDSA_ALGNAME "ECDSAP521"
+
+/*!
+ * \brief SEC 1 uncompressed EC point byte length for P-521.
+ */
+#	define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 133U
+
+/*!
+ * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp521r1.
+ */
+#	define QSC_ECDSA_SPKI_DER_SIZE 158U
+
+/*!
+ * \brief Maximum DER-encoded ECDSA signature size for P-521.
+ */
+#	define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 139U
+
+#else
+#	error "The ECDSA parameter set is invalid! Define QSC_ECDSA_S1EC256 or QSC_ECDSA_S3P384."
+#endif
 
 /**
  * \brief Convert a raw public key (Qx || Qy) to SEC 1 uncompressed point form.
@@ -203,44 +310,6 @@ QSC_EXPORT_API int32_t qsc_ecdsa_publickey_from_privatekey(uint8_t* publickey, c
  * \return				[bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdsa_publickey_from_sec1(uint8_t* publickey, const uint8_t* secpub);
-
-/**
- * \brief Decode an X.509 SubjectPublicKeyInfo DER value for secp256r1.
- *
- * \param publickey:	[uint8_t*] Output raw public key of 64 bytes.
- * \param spkider:		[const uint8_t*] Input DER buffer.
- * \param spkilen:		[size_t] Input DER length in bytes.
- * \return				[bool] Returns true on success.
- */
-QSC_EXPORT_API bool qsc_ecdsa_publickey_from_spki(uint8_t* publickey, const uint8_t* spkider, size_t spkilen);
-
-/**
- * \brief Encode a raw public key (Qx || Qy) as X.509 SubjectPublicKeyInfo DER.
- *
- * \param spkider:		[uint8_t*] Output buffer of 91 bytes.
- * \param publickey:	[const uint8_t*] Input raw public key of 64 bytes.
- */
-QSC_EXPORT_API void qsc_ecdsa_publickey_to_spki(uint8_t* spkider, const uint8_t* publickey);
-
-/**
- * \brief Encode a raw ECDSA signature (r || s) as ASN.1 DER.
- *
- * \param dersig:		[uint8_t*] Output DER buffer of at least 72 bytes.
- * \param derlen:		[size_t*] Output DER length.
- * \param signature:	[const uint8_t*] Input raw signature of 64 bytes.
- * \return				[bool] Returns true on success.
- */
-QSC_EXPORT_API bool qsc_ecdsa_signature_to_der(uint8_t* dersig, size_t* derlen, const uint8_t* signature);
-
-/**
- * \brief Decode an ASN.1 DER ECDSA signature into raw form (r || s).
- *
- * \param signature:	[uint8_t*] Output raw signature of 64 bytes.
- * \param dersig:		[const uint8_t*] Input DER signature buffer.
- * \param derlen:		[size_t] Input DER length.
- * \return				[bool] Returns true on success.
- */
-QSC_EXPORT_API bool qsc_ecdsa_signature_from_der(uint8_t* signature, const uint8_t* dersig, size_t derlen);
 
 /**
  * \brief Generate a P-256 public/private key pair from a 32-byte seed.
