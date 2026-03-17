@@ -306,11 +306,11 @@ uint32_t qsc_sysutils_process_id(void)
 
 bool qsc_sysutils_rdtsc_available(void)
 {
-	bool hfeat;
 	bool ret;
 
 #if defined(QSC_HAS_CPUID)
 	qsc_cpuidex_cpu_features cfeat;
+	bool hfeat;
 
 	hfeat = qsc_cpuidex_features_set(&cfeat);
 

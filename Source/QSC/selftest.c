@@ -340,7 +340,7 @@ static bool aes256_ecb_monte_carlo(const uint8_t* key, const uint8_t* message, c
 	return status;
 }
 
-static bool fips_aes128_cbc()
+static bool fips_aes128_cbc(void)
 {
 	uint8_t exp[4U * QSC_AES_BLOCK_SIZE] = { 0U };
 	uint8_t msg[4U * QSC_AES_BLOCK_SIZE] = { 0U };
@@ -365,7 +365,7 @@ static bool fips_aes128_cbc()
 	return aes128_cbc_monte_carlo(key, iv, msg, exp);
 }
 
-static bool fips_aes256_cbc()
+static bool fips_aes256_cbc(void)
 {
 	uint8_t exp[4U * QSC_AES_BLOCK_SIZE] = { 0U };
 	uint8_t msg[4U * QSC_AES_BLOCK_SIZE] = { 0U };
@@ -390,7 +390,7 @@ static bool fips_aes256_cbc()
 	return aes256_cbc_monte_carlo(key, iv, msg, exp);
 }
 
-static bool fips_aes128_ctr()
+static bool fips_aes128_ctr(void)
 {
 	uint8_t exp[4U * QSC_AES_BLOCK_SIZE] = { 0U };
 	uint8_t msg[4U * QSC_AES_BLOCK_SIZE] = { 0U };
@@ -415,7 +415,7 @@ static bool fips_aes128_ctr()
 	return aes128_ctr_monte_carlo(key, nonce, msg, exp);
 }
 
-static bool fips_aes256_ctr()
+static bool fips_aes256_ctr(void)
 {
 	uint8_t exp[4U * QSC_AES_BLOCK_SIZE] = { 0U };
 	uint8_t msg[4U * QSC_AES_BLOCK_SIZE] = { 0U };
@@ -440,7 +440,7 @@ static bool fips_aes256_ctr()
 	return aes256_ctr_monte_carlo(key, nonce, msg, exp);
 }
 
-static bool fips_aes128_ecb()
+static bool fips_aes128_ecb(void)
 {
 	uint8_t exp[4U * QSC_AES_BLOCK_SIZE] = { 0U };
 	uint8_t msg[4U * QSC_AES_BLOCK_SIZE] = { 0U };
@@ -463,7 +463,7 @@ static bool fips_aes128_ecb()
 	return aes128_ecb_monte_carlo(key, msg, exp);
 }
 
-static bool fips_aes256_ecb()
+static bool fips_aes256_ecb(void)
 {
 	uint8_t exp[4U * QSC_AES_BLOCK_SIZE] = { 0U };
 	uint8_t msg[4U * QSC_AES_BLOCK_SIZE] = { 0U };
@@ -486,7 +486,7 @@ static bool fips_aes256_ecb()
 	return aes256_ecb_monte_carlo(key, msg, exp);
 }
 
-static bool aes_gcm256_kat()
+static bool aes_gcm256_kat(void)
 {
     /* Test vector parameters from NIST SP 800-38D for AES-256 GCM */
 	qsc_aes_gcm256_state state = { 0U };
@@ -537,7 +537,7 @@ static bool aes_gcm256_kat()
     return status;
 }
 
-static bool aes256_hba_kat()
+static bool aes256_hba_kat(void)
 {
 	uint8_t aad1[20U] = { 0U };
 	uint8_t aad2[20U] = { 0U };
@@ -695,7 +695,7 @@ static bool aes256_hba_kat()
 
 /*** CHACHA ***/
 
-static bool chacha128_kat()
+static bool chacha128_kat(void)
 {
 	uint8_t ctext[114U] = { 0U };
 	uint8_t cexp[114U] = { 0U };
@@ -746,7 +746,7 @@ static bool chacha128_kat()
 	return status;
 }
 
-static bool chacha256_kat()
+static bool chacha256_kat(void)
 {
 	/* RFC?7539 Vector, section 2.3.2: https://www.rfc-editor.org/rfc/rfc7539.html */
 	uint8_t ctext[114U] = { 0U };
@@ -800,7 +800,7 @@ static bool chacha256_kat()
 
 /*** CSX ***/
 
-static bool csx512_kat()
+static bool csx512_kat(void)
 {
 	uint8_t ad[20U] = { 0U };
 	uint8_t dec[128U] = { 0U };
@@ -955,7 +955,7 @@ static bool csx512_kat()
 
 /*** RCS ***/
 
-bool rcs256_kat()
+bool rcs256_kat(void)
 {
 #if defined(QSC_RCS_AUTHENTICATED)
 	uint8_t ad[20U] = { 0U };
@@ -1069,7 +1069,7 @@ bool rcs256_kat()
 	return status;
 }
 
-bool rcs512_kat()
+bool rcs512_kat(void)
 {
 #if defined(QSC_RCS_AUTHENTICATED)
 	uint8_t ad[20U] = { 0U };
@@ -1196,7 +1196,7 @@ bool rcs512_kat()
 
 /*** SHA2 ***/
 
-static bool sha2_256_kat()
+static bool sha2_256_kat(void)
 {
 	uint8_t exp0[QSC_SHA2_256_HASH_SIZE] = { 0U };
 	uint8_t exp1[QSC_SHA2_256_HASH_SIZE] = { 0U };
@@ -1317,7 +1317,7 @@ static bool sha2_256_kat()
 	return status;
 }
 
-static bool sha2_512_kat()
+static bool sha2_512_kat(void)
 {
 	uint8_t exp0[QSC_SHA2_512_HASH_SIZE] = { 0U };
 	uint8_t exp1[QSC_SHA2_512_HASH_SIZE] = { 0U };
@@ -1437,7 +1437,7 @@ static bool sha2_512_kat()
 	return status;
 }
 
-static bool hkdf_256_kat()
+static bool hkdf_256_kat(void)
 {
 	uint8_t exp0[42U] = { 0U };
 	uint8_t exp1[82U] = { 0U };
@@ -1486,7 +1486,7 @@ static bool hkdf_256_kat()
 	return status;
 }
 
-static bool hkdf_512_kat()
+static bool hkdf_512_kat(void)
 {
 	uint8_t exp0[42U] = { 0U };
 	uint8_t exp1[82U] = { 0U };
@@ -1535,7 +1535,7 @@ static bool hkdf_512_kat()
 	return status;
 }
 
-static bool hmac_256_kat()
+static bool hmac_256_kat(void)
 {
 	uint8_t exp0[QSC_HMAC_256_MAC_SIZE] = { 0U };
 	uint8_t exp1[QSC_HMAC_256_MAC_SIZE] = { 0U };
@@ -1688,7 +1688,7 @@ static bool hmac_256_kat()
 	return status;
 }
 
-static bool hmac_512_kat()
+static bool hmac_512_kat(void)
 {
 	uint8_t exp0[QSC_HMAC_512_MAC_SIZE] = { 0U };
 	uint8_t exp1[QSC_HMAC_512_MAC_SIZE] = { 0U };
@@ -1843,7 +1843,7 @@ static bool hmac_512_kat()
 
 /*** SHA3 ***/
 
-static bool sha3_256_kat()
+static bool sha3_256_kat(void)
 {
 	uint8_t exp0[QSC_SHA3_256_HASH_SIZE] = { 0U };
 	uint8_t exp24[QSC_SHA3_256_HASH_SIZE] = { 0U };
@@ -1968,7 +1968,7 @@ static bool sha3_256_kat()
 	return status;
 }
 
-static bool sha3_512_kat()
+static bool sha3_512_kat(void)
 {
 	uint8_t exp0[QSC_SHA3_512_HASH_SIZE] = { 0U };
 	uint8_t exp24[QSC_SHA3_512_HASH_SIZE] = { 0U };
@@ -2096,7 +2096,7 @@ static bool sha3_512_kat()
 	return status;
 }
 
-static bool shake_128_kat()
+static bool shake_128_kat(void)
 {
 	uint8_t exp0[512U] = { 0U };
 	uint8_t exp1600[512U] = { 0U };
@@ -2187,7 +2187,7 @@ static bool shake_128_kat()
 	return status;
 }
 
-static bool shake_256_kat()
+static bool shake_256_kat(void)
 {
 	uint8_t exp0[512U] = { 0U };
 	uint8_t exp1600[512U] = { 0U };
@@ -2278,7 +2278,7 @@ static bool shake_256_kat()
 	return status;
 }
 
-static bool shake_512_kat()
+static bool shake_512_kat(void)
 {
 	uint8_t exp1[512U] = { 0U };
 	uint8_t exp2[512U] = { 0U };
@@ -2372,7 +2372,7 @@ static bool shake_512_kat()
 	return status;
 }
 
-static bool cshake_128_kat()
+static bool cshake_128_kat(void)
 {
 	uint8_t cust[15U] = { 0U };
 	uint8_t exp256a[32U] = { 0U };
@@ -2435,7 +2435,7 @@ static bool cshake_128_kat()
 	return status;
 }
 
-static bool cshake_256_kat()
+static bool cshake_256_kat(void)
 {
 	uint8_t cust[15U] = { 0U };
 	uint8_t exp512a[64U] = { 0U };
@@ -2500,7 +2500,7 @@ static bool cshake_256_kat()
 	return status;
 }
 
-static bool cshake_512_kat()
+static bool cshake_512_kat(void)
 {
 	uint8_t exp512[64U] = { 0U };
 	uint8_t cust[15U] = { 0U };
@@ -2547,7 +2547,7 @@ static bool cshake_512_kat()
 	return status;
 }
 
-static bool kmac_128_kat()
+static bool kmac_128_kat(void)
 {
 	uint8_t cust0[1U] = { 0U };
 	uint8_t cust168[21U] = { 0U };
@@ -2626,7 +2626,7 @@ static bool kmac_128_kat()
 	return status;
 }
 
-static bool kmac_256_kat()
+static bool kmac_256_kat(void)
 {
 	uint8_t cust0[1U] = { 0U };
 	uint8_t cust168[21U] = { 0U };
@@ -2708,7 +2708,7 @@ static bool kmac_256_kat()
 	return status;
 }
 
-static bool kmac_512_kat()
+static bool kmac_512_kat(void)
 {
 	uint8_t cust0[21U] = { 0U };
 	uint8_t cust1[42U] = { 0U };
@@ -2796,7 +2796,7 @@ static bool kmac_512_kat()
 
 /*** Public Tests ***/
 
-bool qsc_selftest_aes_test()
+bool qsc_selftest_aes_test(void)
 {
 	bool res;
 
@@ -2840,7 +2840,7 @@ bool qsc_selftest_aes_test()
 	return res;
 }
 
-bool qsc_selftest_chacha_test()
+bool qsc_selftest_chacha_test(void)
 {
 	bool res;
 
@@ -2860,7 +2860,7 @@ bool qsc_selftest_chacha_test()
 	return res;
 }
 
-bool qsc_selftest_csx_test()
+bool qsc_selftest_csx_test(void)
 {
 	bool res;
 
@@ -2869,7 +2869,7 @@ bool qsc_selftest_csx_test()
 	return res;
 }
 
-bool qsc_selftest_rcs_test()
+bool qsc_selftest_rcs_test(void)
 {
 	bool res;
 
@@ -2889,7 +2889,7 @@ bool qsc_selftest_rcs_test()
 	return res;
 }
 
-bool qsc_selftest_sha2_test()
+bool qsc_selftest_sha2_test(void)
 {
 	bool res;
 
@@ -2925,7 +2925,7 @@ bool qsc_selftest_sha2_test()
 	return res;
 }
 
-bool qsc_selftest_sha3_test()
+bool qsc_selftest_sha3_test(void)
 {
 	bool res;
 
@@ -2981,7 +2981,7 @@ bool qsc_selftest_sha3_test()
 	return res;
 }
 
-bool qsc_selftest_symmetric_run()
+bool qsc_selftest_symmetric_run(void)
 {
 	bool res;
 

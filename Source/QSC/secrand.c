@@ -3,7 +3,7 @@
 
 static qsc_secrand_state m_secrand_state;
 
-int8_t qsc_secrand_next_char()
+int8_t qsc_secrand_next_char(void)
 {
 	uint8_t smp[sizeof(int8_t)] = { 0U };
 	int8_t res;
@@ -18,7 +18,7 @@ int8_t qsc_secrand_next_char()
 	return res;
 }
 
-uint8_t qsc_secrand_next_uchar()
+uint8_t qsc_secrand_next_uchar(void)
 {
 	uint8_t smp[sizeof(uint8_t)] = { 0U };
 	uint8_t res;
@@ -33,7 +33,7 @@ uint8_t qsc_secrand_next_uchar()
 	return res;
 }
 
-double qsc_secrand_next_double()
+double qsc_secrand_next_double(void)
 {
 	uint8_t smp[sizeof(uint64_t)] = { 0U };
 	int64_t rnd;
@@ -49,7 +49,7 @@ double qsc_secrand_next_double()
 	return res;
 }
 
-int16_t qsc_secrand_next_int16()
+int16_t qsc_secrand_next_int16(void)
 {
 	uint8_t smp[sizeof(int16_t)] = { 0U };
 	int16_t res;
@@ -100,7 +100,7 @@ int16_t qsc_secrand_next_int16_maxmin(int16_t maximum, int16_t minimum)
 	return minimum + ret;
 }
 
-uint16_t qsc_secrand_next_uint16()
+uint16_t qsc_secrand_next_uint16(void)
 {
 	uint8_t smp[sizeof(uint16_t)] = { 0U };
 	uint16_t res;
@@ -151,7 +151,7 @@ uint16_t qsc_secrand_next_uint16_maxmin(uint16_t maximum, uint16_t minimum)
 	return minimum + ret;
 }
 
-int32_t qsc_secrand_next_int32()
+int32_t qsc_secrand_next_int32(void)
 {
 	uint8_t smp[sizeof(int32_t)] = { 0U };
 	int32_t res;
@@ -202,7 +202,7 @@ int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum)
 	return minimum + ret;
 }
 
-uint32_t qsc_secrand_next_uint32()
+uint32_t qsc_secrand_next_uint32(void)
 {
 	uint8_t smp[sizeof(uint32_t)] = { 0U };
 	uint32_t res;
@@ -253,7 +253,7 @@ uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum)
 	return minimum + ret;
 }
 
-int64_t qsc_secrand_next_int64()
+int64_t qsc_secrand_next_int64(void)
 {
 	uint8_t smp[sizeof(int64_t)] = { 0U };
 	int64_t res;
@@ -304,7 +304,7 @@ int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum)
 	return minimum + ret;
 }
 
-uint64_t qsc_secrand_next_uint64()
+uint64_t qsc_secrand_next_uint64(void)
 {
 	uint8_t smp[sizeof(uint64_t)] = { 0U };
 	uint64_t res;
@@ -355,7 +355,7 @@ uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 	return minimum + ret;
 }
 
-void qsc_secrand_dispose()
+void qsc_secrand_dispose(void)
 {
 	if (m_secrand_state.init == true)
 	{

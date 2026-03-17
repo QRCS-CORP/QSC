@@ -342,19 +342,19 @@ static inline void rcs_swapn(uint32_t cl, uint32_t ch, uint32_t s, uint32_t* x, 
 
 static inline void rcs_swap2(uint32_t* x, uint32_t* y)
 {
-	/* 0101… / 1010…  (1-bit lanes) */
+	/* 0101... / 1010...  (1-bit lanes) */
 	rcs_swapn(0x55555555U, 0xAAAAAAAAU, 1U, x, y);
 }
 
 static inline void rcs_swap4(uint32_t* x, uint32_t* y)
 {
-	/* 0011… / 1100…  (2-bit lanes) */
+	/* 0011... / 1100...  (2-bit lanes) */
 	rcs_swapn(0x33333333U, 0xCCCCCCCCU, 2U, x, y);
 }
 
 static inline void rcs_swap8(uint32_t* x, uint32_t* y)
 {
-	/* 0000 1111… / 1111 0000…  (4-bit lanes) */
+	/* 0000 1111... / 1111 0000...  (4-bit lanes) */
 	rcs_swapn(0x0F0F0F0FU, 0xF0F0F0F0U, 4U, x, y);
 }
 

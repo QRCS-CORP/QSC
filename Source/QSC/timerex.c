@@ -179,7 +179,7 @@ void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX])
 	}
 }
 
-uint64_t qsc_timerex_stopwatch_start()
+uint64_t qsc_timerex_stopwatch_start(void)
 {
 	clock_t ct;
 	uint64_t res;
@@ -211,14 +211,14 @@ uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start)
 }
 
 #if defined(QSC_DEBUG_MODE)
-void qsc_timerex_print_values()
+void qsc_timerex_print_values(void)
 {
 	char tmro[QSC_TIMEREX_TIMESTAMP_MAX] = { 0U };
 
 	uint64_t elps;
 	uint64_t tms;
 
-	elps = qsc_timerex_stopwatch_start();
+	elps = qsc_timerex_stopwatch_start(void);
 
 	qsc_consoleutils_print_line("Timer visual verification test");
 	qsc_consoleutils_print_line("Printing output from timer functions..");

@@ -220,7 +220,6 @@ bool qsc_socket_is_blocking(const qsc_socket* sock)
 {
 	QSC_ASSERT(sock != NULL);
 
-	int8_t b[1U] = { 0 };
 	int32_t res;
 
 	res = false;
@@ -228,6 +227,7 @@ bool qsc_socket_is_blocking(const qsc_socket* sock)
 	if (sock != NULL && sock->connection != QSC_UNINITIALIZED_SOCKET)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+		int8_t b[1U] = { 0 };
 		res = (recv(sock->connection, (char*)b, 0, 0) == QSC_SOCKET_RET_SUCCESS);
 #else
 		int32_t flags = fcntl(sock->connection, F_GETFL, 0);
@@ -1272,7 +1272,7 @@ const char* qsc_socket_error_to_string(qsc_socket_exceptions code)
 	return pmsg;
 }
 
-qsc_socket_exceptions qsc_socket_get_last_error()
+qsc_socket_exceptions qsc_socket_get_last_error(void)
 {
 	qsc_socket_exceptions res;
 
@@ -1378,7 +1378,7 @@ void qsc_socket_set_last_error(qsc_socket_exceptions error)
 #endif
 }
 
-qsc_socket_exceptions qsc_socket_shut_down_sockets()
+qsc_socket_exceptions qsc_socket_shut_down_sockets(void)
 {
 	qsc_socket_exceptions res;
 
@@ -1412,7 +1412,7 @@ qsc_socket_exceptions qsc_socket_set_option(const qsc_socket* sock, qsc_socket_p
 	return res;
 }
 
-bool qsc_socket_start_sockets()
+bool qsc_socket_start_sockets(void)
 {
 	qsc_socket_exceptions res;
 

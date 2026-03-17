@@ -9,7 +9,6 @@ bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), voi
 	QSC_ASSERT(func != NULL);
 
 	qsc_thread thd;
-	size_t idx;
 	bool res;
 
 	res = false;
@@ -25,7 +24,6 @@ bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), voi
 			if (thd != NULL)
 			{
 				ctx->tpool[ctx->tcount] = thd;
-				idx = ctx->tcount;
 				++ctx->tcount;
 				res = true;
 			}
