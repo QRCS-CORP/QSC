@@ -947,7 +947,7 @@ uint16_t gf_square(uint16_t a)
         s ^= b & (1 << 2 * i);
     }
 
-    return gf_reduce(s);
+    return gf_reduce((uint16_t)s);
 }
 
 uint16_t gf_inverse(uint16_t a)
@@ -1567,7 +1567,7 @@ static void reed_muller_decode(uint64_t* msg, const uint64_t* cdw)
         /* fix the first entry to get the half Hadamard transform */
         transform[0U] -= 64 * MULTIPLICITY;
         /* finish the decoding */
-        message_array[i] = find_peaks(&transform);
+        message_array[i] = (uint8_t)find_peaks(&transform);
     }
 }
 
@@ -1639,7 +1639,7 @@ static void reed_solomon_encode(uint64_t* cdw, const uint64_t* msg)
 
         for (k = PARAM_N1 - PARAM_K - 1U; k; --k) 
         {
-            cdw_bytes[k] = cdw_bytes[k - 1U] ^ tmp[k];
+            cdw_bytes[k] = cdw_bytes[k - 1U] ^ (uint8_t)tmp[k];
         }
 
         cdw_bytes[0U] = (uint8_t)tmp[0U];

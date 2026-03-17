@@ -905,6 +905,12 @@ qsc_asn1_status qsc_asn1_decode_time(const qsc_encoding_ber_element* element, qs
     uint16_t year;
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
+    month = 0U;
+    day = 0U;
+    hour = 0U;
+    minute = 0U;
+    second = 0U;
+    year = 0U;
 
     if (element != NULL && value != NULL)
     {

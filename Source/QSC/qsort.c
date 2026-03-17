@@ -249,7 +249,7 @@ void qsc_qsort_sort_i8(int8_t* arr, int32_t start, int32_t end)
     {
         while (start < end)
         {
-            int8_t mid = start + (end - start) / 2;
+            int8_t mid = start + (end - start) / (int8_t)2;
 
             /* median-of-three: sort arr[start], arr[mid], arr[end] */
             if (arr[mid] < arr[start])
@@ -273,15 +273,17 @@ void qsc_qsort_sort_i8(int8_t* arr, int32_t start, int32_t end)
                 arr[end] = t;
             }
 
-            int8_t p = qsort_partition_u8(arr, start, end);
+            int32_t p = qsort_partition_u8(arr, start, end);
 
             if (p - 1 - start < end - (p + 1))
             {
-                qsc_qsort_sort_i8(arr, start, p - 1); start = p + 1;
+                qsc_qsort_sort_i8(arr, start, p - 1);
+                start = p + 1;
             }
             else
             {
-                qsc_qsort_sort_i8(arr, p + 1, end);   end = p - 1;
+                qsc_qsort_sort_i8(arr, p + 1, end);
+                end = p - 1;
             }
         }
     }
@@ -320,15 +322,17 @@ void qsc_qsort_sort_i16(int16_t* arr, int32_t start, int32_t end)
                 arr[end] = t;
             }
 
-            int16_t p = qsort_partition_u16(arr, start, end);
+            int32_t p = qsort_partition_u16(arr, start, end);
 
             if (p - 1 - start < end - (p + 1))
             {
-                qsc_qsort_sort_i16(arr, start, p - 1); start = p + 1;
+                qsc_qsort_sort_i16(arr, start, p - 1);
+                start = p + 1;
             }
             else
             {
-                qsc_qsort_sort_i16(arr, p + 1, end);   end = p - 1;
+                qsc_qsort_sort_i16(arr, p + 1, end);
+                end = p - 1;
             }
         }
     }
@@ -371,11 +375,13 @@ void qsc_qsort_sort_i32(int32_t* arr, int32_t start, int32_t end)
 
             if (p - 1 - start < end - (p + 1))
             {
-                qsc_qsort_sort_i32(arr, start, p - 1); start = p + 1;
+                qsc_qsort_sort_i32(arr, start, p - 1);
+                start = p + 1;
             }
             else
             {
-                qsc_qsort_sort_i32(arr, p + 1, end);   end = p - 1;
+                qsc_qsort_sort_i32(arr, p + 1, end);
+                end = p - 1;
             }
         }
     }
@@ -418,11 +424,13 @@ void qsc_qsort_sort_i64(int64_t* arr, int64_t start, int64_t end)
 
             if (p - 1 - start < end - (p + 1))
             {
-                qsc_qsort_sort_i64(arr, start, p - 1); start = p + 1;
+                qsc_qsort_sort_i64(arr, start, p - 1);
+                start = p + 1;
             }
             else
             {
-                qsc_qsort_sort_i64(arr, p + 1, end);   end = p - 1;
+                qsc_qsort_sort_i64(arr, p + 1, end);
+                end = p - 1;
             }
         }
     }
