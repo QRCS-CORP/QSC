@@ -175,6 +175,8 @@ int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* sign
 
 	int32_t res;
 
+	res = -1;
+
 	if (message != NULL && msglen != NULL && signedmsg != NULL && publickey != NULL && 
 		smsglen > ED25519_SIGNATURE_SIZE && smsglen - ED25519_SIGNATURE_SIZE < QSC_SIZE_MAX)
 	{

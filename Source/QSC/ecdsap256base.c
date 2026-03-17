@@ -25,20 +25,6 @@ static const uint32_t P256_N[8U] =
     0xFFFFFFFFU, 0xFFFFFFFFU, 0x00000000U, 0xFFFFFFFFU
 };
 
-/* n-2 (for Fermat modular inverse mod n) */
-static const uint32_t P256_N2[8U] = 
-{
-    0xFC63254FU, 0xF3B9CAC2U, 0xA7179E84U, 0xBCE6FAADU,
-    0xFFFFFFFFU, 0xFFFFFFFFU, 0x00000000U, 0xFFFFFFFFU
-};
-
-/* p-2 (for Fermat field inversion mod p) */
-static const uint32_t P256_P2[8U] = 
-{
-    0xFFFFFFFDU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x00000000U,
-    0x00000000U, 0x00000000U, 0x00000001U, 0xFFFFFFFFU
-};
-
 /* base point Gx */
 static const uint32_t P256_GX[8U] = 
 {
@@ -60,17 +46,6 @@ static const uint32_t P256_B[8U] =
     0x769886BCU, 0xB3EBBD55U, 0xAA3A93E7U, 0x5AC635D8U
 };
 
-/*
- * barrett reduction constant: mu = floor(2^512 / n), 257 bits
- * mu[8] = 1 is the implicit high bit (word index 8).
- */
-static const uint32_t P256_MU[9U] = 
-{
-    0xEEDF9BFEU, 0x012FFD85U, 0xDF1A6C21U, 0x43190552U,
-    0xFFFFFFFFU, 0xFFFFFFFEU, 0xFFFFFFFFU, 0x00000000U,
-    0x00000001U
-};
-
 static void fe256_select(uint32_t* r, const uint32_t* a, const uint32_t* b, uint32_t mask)
 {
     /* mask must be either 0x00000000 or 0xFFFFFFFF */
@@ -79,6 +54,7 @@ static void fe256_select(uint32_t* r, const uint32_t* a, const uint32_t* b, uint
         r[i] = (a[i] & mask) | (b[i] & ~mask);
     }
 }
+
 static void fe256_copy(fe256 r, const fe256 a)
 {
     for (int32_t i = 0; i < 8; ++i) 

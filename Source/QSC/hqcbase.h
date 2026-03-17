@@ -50,7 +50,7 @@
  */
 
 /**
- * \file hqcbase_avx2.h
+ * \file hqcbase.h
  * \brief Defines the public AVX2 entry points, parameter constants, and data structures
  * for the QSC HQC implementation.
  *
@@ -440,7 +440,7 @@ typedef union
  * \return Returns true if decapsulation succeeds and the shared secret is produced.
  * Returns false if the ciphertext fails verification or the operation otherwise rejects.
  */
-bool qsc_hqc_avx2_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
+bool qsc_hqc_ref_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 
 /**
  * \brief Encapsulates a shared secret using the AVX2 implementation and an external RNG.
@@ -456,7 +456,7 @@ bool qsc_hqc_avx2_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const 
  *
  * \return Returns true on success. Returns false if random generation fails.
  */
-bool qsc_hqc_avx2_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_hqc_ref_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Encapsulates deterministically from a caller-supplied seed.
@@ -473,7 +473,7 @@ bool qsc_hqc_avx2_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_
  * This function is intended for deterministic testing, known-answer validation, and
  * other controlled uses where the encapsulation seed must be provided explicitly.
  */
-void qsc_hqc_avx2_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_HQC_SEED_SIZE]);
+void qsc_hqc_ref_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_HQC_SEED_SIZE]);
 
 /**
  * \brief Generates an HQC key pair using the AVX2 implementation and an external RNG.
@@ -487,7 +487,7 @@ void qsc_hqc_avx2_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const
  *
  * \return Returns true on success. Returns false if random generation fails.
  */
-bool qsc_hqc_avx2_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_hqc_ref_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Generates an HQC key pair deterministically from a caller-supplied seed.
@@ -503,7 +503,7 @@ bool qsc_hqc_avx2_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool
  * This entry point is intended for deterministic tests and reproducible vector
  * generation. The caller is responsible for protecting the seed material.
  */
-void qsc_hqc_avx2_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
+void qsc_hqc_ref_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
 
 /* \cond NO_DOCUMENT */
 

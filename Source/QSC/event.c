@@ -137,6 +137,7 @@ int32_t qsc_event_register(event_state* ctx, const char name[QSC_EVENT_NAME_SIZE
 	size_t ncnt;
 	int32_t res;
 
+	ncnt = 0U;
 	res = -1;
 
 	if (name != NULL && callback != NULL)
