@@ -31,13 +31,13 @@
 
 QSC is a production-grade cryptographic library built for environments that demand verifiable correctness, long-term quantum resistance, and high throughput. The library combines NIST-standardized post-quantum algorithms with classical primitives, proprietary high-security constructions, and SIMD-accelerated implementations — all within a single, dependency-free C23 codebase.
 
-Recent additions expand the library's reach into public-internet TLS and certificate infrastructure: a full NIST P-256 ECDSA implementation interoperable with the CA/Browser Forum Baseline Requirements, Falcon lattice-based signatures, and a comprehensive X.509 certificate parsing and verification layer built on a DER/BER-capable ASN.1 engine.
+Recent additions expand the library's reach into public-internet TLS and certificate infrastructure: full ECDSA implementations for NIST P-256, P-384, and P-521 interoperable with the CA/Browser Forum Baseline Requirements, Falcon lattice-based signatures, the HQC code-based key encapsulation mechanism, and a comprehensive X.509 certificate parsing and verification layer built on a DER/BER-capable ASN.1 engine.
 
 Key design goals:
 
 - **Long-term security** — all asymmetric algorithms are post-quantum secure; proprietary constructions target 256-bit or greater security levels.
 - **Standards compliance** — written to [MISRA C](https://misra.org.uk/) secure coding guidelines; asymmetric primitives updated to final FIPS-203, FIPS-204, and FIPS-205 standards.
-- **Public internet compatibility** — NIST P-256 ECDSA and X.509 certificate infrastructure enable deployment in TLS 1.2/1.3 stacks and compliance with CA/Browser Forum Baseline Requirements for publicly trusted certificates.
+- **Public internet compatibility** — NIST P-256, P-384, and P-521 ECDSA and X.509 certificate infrastructure enable deployment in TLS 1.2/1.3 stacks and compliance with CA/Browser Forum Baseline Requirements for publicly trusted certificates.
 - **Performance** — dual code paths: clean portable C reference implementations alongside AVX, AVX2, and AVX-512 intrinsic-optimized variants. Enable the highest instruction set supported by your target CPU for maximum throughput.
 - **Auditability** — thoroughly commented, well-structured source with a comprehensive test suite covering known-answer tests, NIST CAVP/ACVP vectors, fuzzing, and stress testing across every primitive.
 - **Portability** — compiles on Windows (MSVC), Linux (GCC), and macOS (Clang) with no external dependencies.
@@ -64,7 +64,7 @@ The primary validation suite for the QSC library. QSCTest exercises every crypto
 - **Stress Testing** — extended load testing to surface resource leaks, state corruption, and threading issues.
 - **Function Correctness** — round-trip and cross-function consistency checks (e.g., encrypt→decrypt, sign→verify).
 
-Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, ECDH), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256, Ed25519), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP), the X.509 certificate layer, and all utility modules.
+Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, HQC, ECDH), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256/P-384/P-521, Ed25519), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP), the X.509 certificate layer, and all utility modules.
 
 ---
 
@@ -111,6 +111,7 @@ The wrapper is written in managed C++ and compiled as a mixed-mode assembly, all
 |---|---|---|
 | **ML-KEM** (Kyber) | Module-LWE based KEM | NIST FIPS-203 |
 | **Classic McEliece** | Niederreiter dual-form code-based KEM | NIST PQC Round 3 |
+| **HQC** | QC-MDPC code-based KEM | NIST PQC Round 4 |
 | **ECDH** (X25519) | Elliptic Curve Diffie-Hellman | RFC 7748 |
 
 #### Digital Signature Schemes
@@ -120,7 +121,7 @@ The wrapper is written in managed C++ and compiled as a mixed-mode assembly, all
 | **ML-DSA** (Dilithium) | Module-lattice based signatures | NIST FIPS-204 |
 | **SLH-DSA** (SPHINCS+) | Stateless hash-based signatures | NIST FIPS-205 |
 | **Falcon** | NTRU lattice-based compact signatures | NIST PQC Round 3 |
-| **ECDSA** (P-256 / secp256r1) | Elliptic curve signatures over NIST P-256; RFC 6979 deterministic nonce; interoperable with TLS 1.2/1.3 and public CA certificates | FIPS 186-4, RFC 6979, RFC 8422 |
+| **ECDSA** (P-256 / P-384 / P-521) | Elliptic curve signatures over NIST P-256 (secp256r1), P-384 (secp384r1), and P-521 (secp521r1); RFC 6979 deterministic nonce; interoperable with TLS 1.2/1.3 and public CA certificates | FIPS 186-5, RFC 6979, RFC 8422 |
 | **EDDSA** | Edwards-curve digital signatures | RFC 8032 |
 
 ---
@@ -143,13 +144,15 @@ QSC includes a full X.509 certificate parsing and verification layer, enabling p
 | **Signature Algorithm** | `x509sig.h` | Decodes certificate and TBSCertificate signature AlgorithmIdentifiers; unpacks ECDSA DER SEQUENCE(INTEGER, INTEGER) signatures into fixed-width big-endian buffers |
 | **Extensions** | `x509ext.h` | Decodes and queries certificate extensions: BasicConstraints, KeyUsage, ExtendedKeyUsage, SubjectKeyIdentifier, AuthorityKeyIdentifier, SubjectAltName, CRLDistributionPoints, and unknown extensions |
 | **Certificate Verification** | `x509verify.h` | Semantic verification layer: TBSCertificate / outer signature algorithm consistency, validity interval evaluation, issuer–subject name linkage, BasicConstraints and KeyUsage checks for CAs; cryptographic signature verification is delegated through a caller-supplied callback |
-| **QSC Verification Adapter** | `x509sigver.h` | Binds the generic X.509 verification layer to QSC's ECDSA P-256 API; supports the `ecdsa-with-SHA256` / `id-ecPublicKey` / `prime256v1` certificate profile required for publicly trusted TLS certificates |
+| **QSC Verification Adapter** | `x509sigver.h` | Binds the generic X.509 verification layer to QSC's ECDSA P-256, P-384, and P-521 APIs; supports the `ecdsa-with-SHA256`, `ecdsa-with-SHA384`, and `ecdsa-with-SHA512` certificate profiles required for publicly trusted TLS certificates |
 
-**Supported certificate signature profile (initial pass):**
+**Supported certificate signature profiles:**
 
-- Algorithm: `ecdsa-with-SHA256`
-- Subject public key algorithm: `id-ecPublicKey`
-- Named curve: `prime256v1` (NIST P-256 / secp256r1)
+| Profile | Algorithm | Named Curve |
+|---|---|---|
+| `ecdsa-with-SHA256` | `id-ecPublicKey` | `prime256v1` (NIST P-256 / secp256r1) |
+| `ecdsa-with-SHA384` | `id-ecPublicKey` | `secp384r1` (NIST P-384) |
+| `ecdsa-with-SHA512` | `id-ecPublicKey` | `secp521r1` (NIST P-521) |
 
 The X.509 layer is intentionally split so that the structural and policy checks (`x509verify.h`) remain independent of the cryptographic backend, making it straightforward to add additional signature algorithm bindings in future releases.
 
@@ -303,7 +306,7 @@ The two paths share identical interfaces and produce identical output; the compi
 
 SIMD acceleration is applied across: AES (AES-NI), RCS, CSX, SHA3/SHAKE/Keccak, ML-KEM (Kyber), ML-DSA (Dilithium), SLH-DSA (SPHINCS+), and all memory utility operations.
 
-The ECDSA P-256 implementation uses Jacobian projective coordinates with the a=−3 doubling shortcut, Solinas reduction for field arithmetic, and Barrett reduction for scalar arithmetic mod n. RFC 6979 deterministic nonce generation (HMAC-SHA256) means no entropy source is required during signing.
+The ECDSA P-256, P-384, and P-521 implementations use Jacobian projective coordinates with the a=−3 doubling shortcut, Solinas reduction for field arithmetic, and Barrett reduction for scalar arithmetic mod n. RFC 6979 deterministic nonce generation (HMAC-SHA256/384/512 respectively) means no entropy source is required during signing.
 
 ---
 
@@ -402,10 +405,10 @@ The default project configuration uses minimal flags with no enhanced instructio
 
 | Feature | Details |
 |---|---|
-| **Post-Quantum Algorithms** | ML-KEM (FIPS-203), ML-DSA (FIPS-204), SLH-DSA (FIPS-205), Falcon (Round 3), Classic McEliece |
-| **Classical Algorithms** | AES, SHA-2/3, HMAC, ChaCha20-Poly1305, ECDH (X25519), ECDSA (P-256), Ed25519 |
+| **Post-Quantum Algorithms** | ML-KEM (FIPS-203), ML-DSA (FIPS-204), SLH-DSA (FIPS-205), Falcon (Round 3), Classic McEliece, HQC (Round 4) |
+| **Classical Algorithms** | AES, SHA-2/3, HMAC, ChaCha20-Poly1305, ECDH (X25519), ECDSA (P-256 / P-384 / P-521), Ed25519 |
 | **Proprietary Constructions** | RCS, CSX, QMAC, SCB — each with formal security analysis |
-| **X.509 / PKI Infrastructure** | Full DER certificate parser and verifier; ASN.1 and OID layers; TLS-compatible ECDSA P-256 signature profile |
+| **X.509 / PKI Infrastructure** | Full DER certificate parser and verifier; ASN.1 and OID layers; TLS-compatible ECDSA P-256, P-384, and P-521 signature profiles |
 | **SIMD Acceleration** | AVX, AVX2, AVX-512, AES-NI, RDRAND across all major primitives |
 | **Security Standard** | MISRA C compliant throughout |
 | **Testing** | KAT, NIST ACVP/CAVP, fuzzing, and stress tests for every primitive |
@@ -418,7 +421,6 @@ The default project configuration uses minimal flags with no enhanced instructio
 ## Roadmap
 
 - [ ] Continued ASM and SIMD integration and optimization
-- [ ] Extended X.509 signature algorithm bindings
 - [ ] TLS 1.3
 - [ ] Expanded benchmarking framework with cross-platform performance reporting
 - [ ] Integration of emerging post-quantum research and forthcoming NIST standards
@@ -462,3 +464,4 @@ For licensing inquiries, supported implementations, or commercial use:
 ---
 
 *Quantum Resistant Cryptographic Solutions Corporation — All rights reserved, 2026.*
+ 
