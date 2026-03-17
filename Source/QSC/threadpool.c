@@ -21,7 +21,7 @@ bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), voi
 		{
 			thd = qsc_async_thread_create(func, state);
 
-			if (thd != NULL)
+			if (thd)
 			{
 				ctx->tpool[ctx->tcount] = thd;
 				++ctx->tcount;
@@ -86,7 +86,7 @@ void qsc_threadpool_sort(qsc_threadpool_state* ctx)
 
 		for (size_t i = 0U; i < QSC_THREADPOOL_THREADS_MAX; ++i)
 		{
-			if (ctx->tpool[i] != NULL)
+			if (ctx->tpool[i])
 			{
 				pool[cnt] = ctx->tpool[i];
 				++cnt;
@@ -116,7 +116,7 @@ bool qsc_threadpool_thread_active(const qsc_threadpool_state* ctx, size_t index)
 
 	if (ctx != NULL && ctx->tcount != 0U && index < ctx->tcount)
 	{
-		res = (ctx->tpool[index] != NULL);
+		res = (ctx->tpool[index]);
 	}
 
 	qsc_async_mutex_unlock(qsc_threadpool_mutex);
@@ -129,13 +129,13 @@ void qsc_threadpool_remove_task(qsc_threadpool_state* ctx, size_t index)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(index < ctx->tcount);
 
-	if (ctx != NULL && ctx->tcount != 0 && index < ctx->tcount && ctx->tpool[index] != NULL)
+	if (ctx != NULL && ctx->tcount != 0 && index < ctx->tcount && ctx->tpool[index])
 	{
 		qsc_async_mutex_lock(qsc_threadpool_mutex);
 
 		qsc_async_thread_terminate(ctx->tpool[index]);
 		ctx->tpool[index] = ctx->tpool[ctx->tcount - 1U];
-		ctx->tpool[ctx->tcount - 1U] = NULL;
+		ctx->tpool[ctx->tcount - 1U] = (qsc_thread)0;
 		(void)qsc_async_atomic_int32_decrement(&ctx->tcount);
 
 		qsc_async_mutex_unlock(qsc_threadpool_mutex);

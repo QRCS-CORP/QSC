@@ -214,10 +214,8 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 #if defined(QSC_SYSTEM_OS_LINUX)
 
 		struct ifaddrs* ifaddr;
-		struct ifaddrs* wlan;
 
 		ifaddr = NULL;
-		wlan = NULL;
 
 		if (getifaddrs(&ifaddr) == 0)
 		{
