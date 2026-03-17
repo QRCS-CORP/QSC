@@ -1038,7 +1038,7 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
         wchar_t wuser[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
         wchar_t wpass[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
         wchar_t wpath[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
-        /* FIX WINUTILS-004: sizeof(wchar_t) == 2 on Windows — array needs 2 elements for L"." + null */
+        /* FIX WINUTILS-004: sizeof(wchar_t) == 2 on Windows - array needs 2 elements for L"." + null */
         wchar_t wdomain[2U] = L".";
 
 

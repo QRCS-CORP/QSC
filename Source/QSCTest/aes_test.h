@@ -83,7 +83,7 @@
  *   - `qsctest_fips_aes256_ecb()` tests AES-256 ECB mode (using test vector F1.5).
  *
  * - **HBA-RHX AEAD Mode KAT Test**: This test verifies the Hash Based Authentication (HBA-RHX) AEAD mode
- *   using a 256-bit key. It employs multiple test vectors—with various associated data and message lengths—to
+ *   using a 256-bit key. It employs multiple test vectors-with various associated data and message lengths-to
  *   ensure that both the encryption (which produces a ciphertext concatenated with a MAC) and the decryption processes
  *   function as expected.
  *   - `qsctest_aes256_hba_kat()` covers these known answer tests.

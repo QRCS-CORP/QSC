@@ -65,12 +65,12 @@
   * macros; no raw compiler or architecture predefined macros are referenced here.
   *
   * Compiler priority order (highest to lowest):
-  *   1. QSC_SYSTEM_COMPILER_MSC   — Microsoft Visual C++
-  *   2. QSC_SYSTEM_COMPILER_INTEL — Intel ICC / ICL (also defines QSC_SYSTEM_COMPILER_GCC)
-  *   3. QSC_SYSTEM_COMPILER_GCC   — GCC, Clang, MinGW, and all GCC-compatible front-ends
+  *   1. QSC_SYSTEM_COMPILER_MSC   - Microsoft Visual C++
+  *   2. QSC_SYSTEM_COMPILER_INTEL - Intel ICC / ICL (also defines QSC_SYSTEM_COMPILER_GCC)
+  *   3. QSC_SYSTEM_COMPILER_GCC   - GCC, Clang, MinGW, and all GCC-compatible front-ends
   *      QSC_SYSTEM_COMPILER_CLANG   (Clang sets both QSC_SYSTEM_COMPILER_GCC and QSC_SYSTEM_COMPILER_CLANG simultaneously)
-  *   4. QSC_SYSTEM_COMPILER_ARM   — Arm Compiler (armcc / armclang legacy)
-  *   5. QSC_SYSTEM_COMPILER_IBM   — IBM XL C / XL C++
+  *   4. QSC_SYSTEM_COMPILER_ARM   - Arm Compiler (armcc / armclang legacy)
+  *   5. QSC_SYSTEM_COMPILER_IBM   - IBM XL C / XL C++
   */
 
 #include "qsccommon.h"
@@ -148,7 +148,7 @@
 #       include <arm_neon.h>
 #   endif
 
-    /* ARM SVE — Scalable Vector Extension (ARMv8.2-A and later) */
+    /* ARM SVE - Scalable Vector Extension (ARMv8.2-A and later) */
 #   if defined(QSC_SYSTEM_HAS_ARM_SVE)
 #       include <arm_sve.h>
 #   endif

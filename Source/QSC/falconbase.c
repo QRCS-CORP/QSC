@@ -2816,13 +2816,13 @@ static void falcon_hash_to_point_ct(qsc_keccak_state* kctx, uint16_t* x, uint32_
 	n2 = n << 1;    /* 2n words = 4n bytes of oversampled SHAKE output */
 
 	/*
-	 * Step 1 — squeeze a fixed 4n bytes.
+	 * Step 1 - squeeze a fixed 4n bytes.
 	 * The byte count is invariant; no data-dependent SHAKE consumption.
 	 */
 	qsc_keccak_incremental_squeeze(kctx, QSC_KECCAK_256_RATE, tmp, n2 * 2U);
 
 	/*
-	 * Step 2 — constant-time conditional-assignment over all 2n words.
+	 * Step 2 - constant-time conditional-assignment over all 2n words.
 	 *
 	 * Each 16-bit word is decoded BIG-ENDIAN (tmp[2u] is the high byte)
 	 * to match the byte order used by falcon_hash_to_point_vartime:
@@ -2844,7 +2844,7 @@ static void falcon_hash_to_point_ct(qsc_keccak_state* kctx, uint16_t* x, uint32_
 		int32_t  sel;
 		uint32_t raw;
 
-		/* Big-endian 16-bit decode — MUST match the vartime version */
+		/* Big-endian 16-bit decode - MUST match the vartime version */
 		raw = ((uint32_t)tmp[u * 2U] << 8) | (uint32_t)tmp[u * 2U + 1U];
 
 		/*

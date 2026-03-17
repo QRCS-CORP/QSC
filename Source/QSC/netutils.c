@@ -9,7 +9,7 @@
 
 #include "netutils.h"
 #include "memutils.h"
-#include "socketbase.h"    /* moved here from netutils.h — qsc_socket_exceptions */
+#include "socketbase.h"    /* moved here from netutils.h - qsc_socket_exceptions */
 #include "stringutils.h"
 #include <stdlib.h>
 
@@ -21,7 +21,7 @@
 #   define NETUTILS_WSA_STARTUP_SEQUENCE 0x0202
 #   define NETUTILS_INET_PTON_SUCCESS 1
 #   include "arrayutils.h"
-#   include <winsock2.h>           /* WSAStartup, WSACleanup, WSADATA — must come first */
+#   include <winsock2.h>           /* WSAStartup, WSACleanup, WSADATA - must come first */
 #   include <ws2tcpip.h>           /* getaddrinfo, freeaddrinfo, getnameinfo, inet_ntop, inet_pton */
 #   include <ws2ipdef.h>           /* supplemental ws2 types */
 #   include <iphlpapi.h>           /* GetAdaptersInfo, GetAdaptersAddresses, IP_ADAPTER_* */
@@ -247,7 +247,7 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 				cur = cur->ifa_next;
 			}
 
-			/* pass 2: Wi-Fi fallback — any remaining AF_PACKET, non-loopback. */
+			/* pass 2: Wi-Fi fallback - any remaining AF_PACKET, non-loopback. */
 			if (res == false)
 			{
 				cur = ifaddr;
@@ -287,7 +287,7 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 		{
 			struct ifaddrs* cur;
 
-			/* pass 1: wired Ethernet — IFF_BROADCAST set, not loopback. */
+			/* pass 1: wired Ethernet - IFF_BROADCAST set, not loopback. */
 			cur = ifaddr;
 
 			while (cur != NULL && res == false)
@@ -312,7 +312,7 @@ void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE])
 				cur = cur->ifa_next;
 			}
 
-			/* pass 2: Wi-Fi fallback — any AF_LINK, non-loopback. */
+			/* pass 2: Wi-Fi fallback - any AF_LINK, non-loopback. */
 			if (res == false)
 			{
 				cur = ifaddr;

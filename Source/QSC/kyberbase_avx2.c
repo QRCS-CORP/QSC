@@ -326,7 +326,7 @@ static void kyber_ntt_avx(int16_t r[QSC_KYBER_N])
         _mm256_storeu_si256((__m256i*) & r[start + 16], _mm256_sub_epi16(a, x));
     }
 
-    /* Layers 5-7: len = 8, 4, 2 — scalar (k = 16..127) */
+    /* Layers 5-7: len = 8, 4, 2 - scalar (k = 16..127) */
     ki = 16;
 
     for (size_t len = 8; len >= 2; len >>= 1)
@@ -355,7 +355,7 @@ static void kyber_ntt_avx(int16_t r[QSC_KYBER_N])
  * Layers 7-5 (len = 2, 4, 8): scalar, k = 127..16.
  * Layers 4-1 (len = 16, 32, 64, 128): AVX2, k = 15..1.
  * Final pass: multiply all coefficients by F = 1441 (Montgomery form of
- * n^{-1} mod Q, n = 256) — vectorised.
+ * n^{-1} mod Q, n = 256) - vectorised.
  *
  * Zeta indexing: k starts at 127 and decrements once per group, matching
  * the scalar version exactly.                                              */
@@ -367,7 +367,7 @@ static void kyber_invntt_avx(int16_t r[QSC_KYBER_N])
     int16_t zeta;
     size_t ki;
 
-    /* Layers 7-5: len = 2, 4, 8 — scalar (k = 127..16) */
+    /* Layers 7-5: len = 2, 4, 8 - scalar (k = 127..16) */
     ki = 127;
 
     for (size_t len = 2; len <= 8; len <<= 1)
@@ -386,7 +386,7 @@ static void kyber_invntt_avx(int16_t r[QSC_KYBER_N])
         }
     }
 
-    /* ki is now 15 — layers 4 down to 1 follow */
+    /* ki is now 15 - layers 4 down to 1 follow */
 
     /* Layer 4: len = 16, 8 zetas (k = 15..8) */
     /* Groups process in reverse: start = 224, 192, ..., 0; k decrements */
