@@ -76,7 +76,6 @@
 /* \cond NO_DOCUMENT */
 
 #include "qsccommon.h"
-#include <immintrin.h>
 
 /**
  * \brief Selects HQC-3 when no explicit HQC parameter guard has been defined.

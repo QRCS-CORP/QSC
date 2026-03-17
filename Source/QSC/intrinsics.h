@@ -52,155 +52,145 @@
 #ifndef QSC_INTRINSICS_H
 #define QSC_INTRINSICS_H
 
- /* \cond NO_DOCUMENT */
+/* \cond NO_DOCUMENT */
 
- /*!
-  * \file intrinsics.h
-  * \brief SIMD and platform intrinsic header includes.
-  *
-  * \details
-  * Includes the appropriate SIMD intrinsic headers for the detected compiler
-  * and target architecture, as identified by the capability macros defined in
-  * qsccommon.h. All intrinsic header selection is driven exclusively by those
-  * macros; no raw compiler or architecture predefined macros are referenced here.
-  *
-  * Compiler priority order (highest to lowest):
-  *   1. QSC_SYSTEM_COMPILER_MSC   - Microsoft Visual C++
-  *   2. QSC_SYSTEM_COMPILER_INTEL - Intel ICC / ICL (also defines QSC_SYSTEM_COMPILER_GCC)
-  *   3. QSC_SYSTEM_COMPILER_GCC   - GCC, Clang, MinGW, and all GCC-compatible front-ends
-  *      QSC_SYSTEM_COMPILER_CLANG   (Clang sets both QSC_SYSTEM_COMPILER_GCC and QSC_SYSTEM_COMPILER_CLANG simultaneously)
-  *   4. QSC_SYSTEM_COMPILER_ARM   - Arm Compiler (armcc / armclang legacy)
-  *   5. QSC_SYSTEM_COMPILER_IBM   - IBM XL C / XL C++
-  */
+/*!
+ * \file intrinsics.h
+ * \brief SIMD and platform intrinsic header includes.
+ *
+ * \details
+ * Includes the appropriate SIMD intrinsic headers for the detected compiler
+ * and target architecture, as identified by the capability macros defined in
+ * qsccommon.h.
+ *
+ * This file must never include x86 SIMD headers when the target architecture
+ * is ARM or ARM64. Apple Clang on Apple Silicon will hard-fail if x86
+ * intrinsic umbrellas such as immintrin.h or x86intrin.h are included in an
+ * arm64 translation unit.
+ */
 
 #include "qsccommon.h"
 
-  /*==============================================================================
-      Microsoft Visual C++ (MSVC)
-      QSC_SYSTEM_COMPILER_MSC
-      -----------------------------------------------------------------------
-      <intrin.h> is MSVC's umbrella intrinsic header and implicitly pulls in
-      all SSE, AVX, AVX-512, AES-NI, PCLMUL, and platform intrinsics for the
-      current target.  No individual sub-headers are required.
-  ==============================================================================*/
+/*
+ * Architecture families.
+ *
+ * QSC_SYSTEM_ARCH_IX86 is assumed to mean the x86 family used elsewhere in the
+ * code base. If qsccommon.h distinguishes 32-bit and 64-bit x86 separately,
+ * add the x64 macro to QSC_X86_FAMILY below as needed.
+ */
+#if defined(QSC_SYSTEM_ARCH_IX86)
+#	define QSC_X86_FAMILY
+#endif
 
+#if defined(QSC_SYSTEM_ARCH_ARM) || defined(QSC_SYSTEM_ARCH_ARM64)
+#	define QSC_ARM_FAMILY
+#endif
+
+#if defined(QSC_SYSTEM_ARCH_PPC)
+#	define QSC_PPC_FAMILY
+#endif
+
+/*
+ * MSVC
+ *
+ * <intrin.h> is the MSVC umbrella for x86/x64 intrinsics.
+ * <arm_neon.h> provides ARM/ARM64 NEON intrinsics.
+ */
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 
-  /* x86 / x86-64: <intrin.h> covers SSE2 through AVX-512, AES-NI, CLMUL */
-#   if defined(QSC_SYSTEM_ARCH_IX86)
-#       include <intrin.h>
-#   endif
+#	if defined(QSC_X86_FAMILY)
+#		include <intrin.h>
+#	endif
 
-    /* ARM / ARM64: ARM NEON intrinsics */
-#   if defined(QSC_SYSTEM_ARCH_ARM) || defined(QSC_SYSTEM_ARCH_ARM64)
-#       include <arm_neon.h>
-#   endif
+#	if defined(QSC_ARM_FAMILY)
+#		include <arm_neon.h>
+#	endif
 
-/*==============================================================================
-    Intel C/C++ Compiler (ICC / ICL)
-    QSC_SYSTEM_COMPILER_INTEL
-    -----------------------------------------------------------------------
-    ICC defines __GNUC__ for compatibility, which would also set
-    QSC_SYSTEM_COMPILER_GCC.  This block must therefore precede the
-    GCC/Clang block so that ICC receives its own correct header set.
-
-    <immintrin.h> is ICC's comprehensive x86 intrinsic umbrella, covering
-    SSE through AVX-512, AES-NI, and CLMUL.
-==============================================================================*/
-
+/*
+ * Intel C/C++
+ *
+ * ICC/ICX on x86/x64 uses immintrin.h.
+ * Do not include x86 intrinsic headers for non-x86 targets.
+ */
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
 
-  /* x86 / x86-64: <immintrin.h> is the ICC umbrella for all SIMD levels */
-#   if defined(QSC_SYSTEM_ARCH_IX86)
-#       include <immintrin.h>
-#   endif
+#	if defined(QSC_X86_FAMILY)
+#		include <immintrin.h>
+#	endif
 
-    /* ARM NEON (cross-compilation with ICC) */
-#   if defined(QSC_SYSTEM_HAS_ARM_NEON)
-#       include <arm_neon.h>
-#   endif
+#	if defined(QSC_ARM_FAMILY) && defined(QSC_SYSTEM_HAS_ARM_NEON)
+#		include <arm_neon.h>
+#	endif
 
-/*==============================================================================
-    GCC, Clang, and all GCC-compatible compilers
-    QSC_SYSTEM_COMPILER_GCC  |  QSC_SYSTEM_COMPILER_CLANG
-    -----------------------------------------------------------------------
-    This block covers:
-      - GCC on Linux, macOS, *BSD
-      - Clang (defines both QSC_SYSTEM_COMPILER_GCC and QSC_SYSTEM_COMPILER_CLANG)
-      - MinGW (defines both QSC_SYSTEM_COMPILER_MINGW and QSC_SYSTEM_COMPILER_GCC)
-      - Open64 (defines QSC_SYSTEM_COMPILER_OPEN64 and is GCC-compatible)
-
-    <x86intrin.h> is the GCC/Clang umbrella for all x86 SIMD: it transitively
-    includes the individual SSE, AVX, AVX-512, AES-NI (wmmintrin.h), CLMUL,
-    and XOP headers that are enabled by the current -march / target flags.
-    Individual level headers are therefore not required here.
-==============================================================================*/
-
+/*
+ * GCC / Clang / GCC-compatible front-ends
+ *
+ * Use x86intrin.h only for x86-family targets.
+ * Use ARM/other vector headers only for those targets.
+ */
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)
 
-  /* x86 / x86-64: umbrella header for all x86 SIMD extensions */
-#   if defined(QSC_SYSTEM_ARCH_IX86)
-#       include <x86intrin.h>
-#   endif
+#	if defined(QSC_X86_FAMILY)
+#		include <x86intrin.h>
+#	endif
 
-    /* ARM NEON (AArch32 and AArch64) */
-#   if defined(QSC_SYSTEM_HAS_ARM_NEON)
-#       include <arm_neon.h>
-#   endif
+#	if defined(QSC_ARM_FAMILY) && defined(QSC_SYSTEM_HAS_ARM_NEON)
+#		include <arm_neon.h>
+#	endif
 
-    /* ARM SVE - Scalable Vector Extension (ARMv8.2-A and later) */
-#   if defined(QSC_SYSTEM_HAS_ARM_SVE)
-#       include <arm_sve.h>
-#   endif
+#	if defined(QSC_ARM_FAMILY) && defined(QSC_SYSTEM_HAS_ARM_SVE)
+#		include <arm_sve.h>
+#	endif
 
-    /* RISC-V Vector extension (RVV 1.0, requires -march=rv64gcv or equivalent) */
-#   if defined(QSC_SYSTEM_HAS_RVV)
-#       include <riscv_vector.h>
-#   endif
+#	if defined(QSC_SYSTEM_HAS_RVV)
+#		include <riscv_vector.h>
+#	endif
 
-    /* PowerPC AltiVec / VMX / VSX
-     * <altivec.h> injects the 'vector', 'pixel', and 'bool' keywords as macros,
-     * which conflict with standard C++ names.  They are undefined immediately
-     * after inclusion to prevent downstream macro contamination. */
-#   if defined(QSC_SYSTEM_ARCH_PPC)
-#       include <altivec.h>
-#       undef vector
-#       undef pixel
-#       undef bool
-#   endif
+#	if defined(QSC_PPC_FAMILY)
+#		include <altivec.h>
+#		undef vector
+#		undef pixel
+#		undef bool
+#	endif
 
-     /*==============================================================================
-         Arm Compiler (armcc / legacy armclang targeting bare-metal)
-         QSC_SYSTEM_COMPILER_ARM
-         -----------------------------------------------------------------------
-         The Arm Compiler toolchain targets ARM and ARM64 exclusively.
-         <arm_neon.h> provides NEON intrinsics for both AArch32 and AArch64.
-     ==============================================================================*/
-
+/*
+ * Arm Compiler
+ */
 #elif defined(QSC_SYSTEM_COMPILER_ARM)
 
-#   include <arm_neon.h>
+#	if defined(QSC_ARM_FAMILY)
+#		include <arm_neon.h>
+#	endif
 
-  /*==============================================================================
-      IBM XL C / XL C++
-      QSC_SYSTEM_COMPILER_IBM
-      -----------------------------------------------------------------------
-      IBM XL C targets PowerPC.  <altivec.h> provides AltiVec / VMX / VSX
-      intrinsics.  As with GCC, the injected AltiVec keyword macros are
-      undefined immediately after inclusion.
-  ==============================================================================*/
-
+/*
+ * IBM XL C / XL C++
+ */
 #elif defined(QSC_SYSTEM_COMPILER_IBM)
 
-#   if defined(QSC_SYSTEM_ARCH_PPC)
-#       include <altivec.h>
-#       undef vector
-#       undef pixel
-#       undef bool
-#   endif
+#	if defined(QSC_PPC_FAMILY)
+#		include <altivec.h>
+#		undef vector
+#		undef pixel
+#		undef bool
+#	endif
 
 #endif
 
-/* \cond NO_DOCUMENT */
+/*
+ * Internal helper cleanup.
+ */
+#if defined(QSC_X86_FAMILY)
+#	undef QSC_X86_FAMILY
+#endif
+
+#if defined(QSC_ARM_FAMILY)
+#	undef QSC_ARM_FAMILY
+#endif
+
+#if defined(QSC_PPC_FAMILY)
+#	undef QSC_PPC_FAMILY
+#endif
+
+/* \endcond */
 
 #endif

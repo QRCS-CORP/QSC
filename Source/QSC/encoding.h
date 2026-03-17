@@ -168,9 +168,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * \endcode
  *
  * \section encoding_refs Reference Documents
- * - Base64: RFC 4648 – <https://tools.ietf.org/html/rfc4648>
+ * - Base64: RFC 4648 - <https://tools.ietf.org/html/rfc4648>
  * - BER/DER: ISO/IEC 8825-1 (X.690)
- * - PEM format: RFC 7468 – <https://tools.ietf.org/html/rfc7468>
+ * - PEM format: RFC 7468 - <https://tools.ietf.org/html/rfc7468>
  * - ASN.1 modules: ISO/IEC 8824-1 (X.680)
  */
 
@@ -374,7 +374,7 @@ QSC_EXPORT_API size_t qsc_encoding_base64_decoded_size(const char* input, size_t
 /*!
  * \brief Encode a byte array to a Base64 string.
  *
- * Implements RFC 4648, 4, using the standard alphabet (A–Z, a–z, 0–9,
+ * Implements RFC 4648, 4, using the standard alphabet (A-Z, a-z, 0-9,
  * '+', '/') with '=' padding to ensure the output length is a multiple of
  * four. A null terminator is written after the encoded data.
  *
@@ -405,7 +405,7 @@ QSC_EXPORT_API size_t qsc_encoding_base64_encoded_size(size_t length);
 /*!
  * \brief Test whether a character belongs to the Base64 alphabet.
  *
- * Returns true for A–Z, a–z, 0–9, '+', '/', and the padding character '='. All other characters return false.
+ * Returns true for A-Z, a-z, 0-9, '+', '/', and the padding character '='. All other characters return false.
  *
  * \param value  [char]  The character to test.
  *
@@ -447,7 +447,7 @@ QSC_EXPORT_API qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const u
  *
  * Implements X.690 8.1.3.  All three length forms are supported:
  *   - Short definite form (1 byte, value < 128).
- *   - Long definite form (2–9 bytes; the first byte's low seven bits give
+ *   - Long definite form (2-9 bytes; the first byte's low seven bits give
  *     the count of subsequent length octets).
  *   - Indefinite form (single byte 0x80); \p *indef is set to true and
  *     \p *length is set to 0.
@@ -534,11 +534,11 @@ QSC_EXPORT_API size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buf
  * \brief Encode an ASN.1 tag to BER form.
  *
  * Implements X.690 8.1.2:
- *   - Composes the first byte from \p tagclass (bits 8–7), \p construct
- *     (bit 6), and the tag-number field (bits 5–1).
- *   - Short form: if \p tagnum < 31, the tag number occupies bits 5–1 of
+ *   - Composes the first byte from \p tagclass (bits 8-7), \p construct
+ *     (bit 6), and the tag-number field (bits 5-1).
+ *   - Short form: if \p tagnum < 31, the tag number occupies bits 5-1 of
  *     the first byte and encoding is complete.
- *   - Long form: bits 5–1 of the first byte are set to 11111; subsequent
+ *   - Long form: bits 5-1 of the first byte are set to 11111; subsequent
  *     bytes encode \p tagnum in base-128 big-endian with the continuation
  *     bit (bit 8) set on every byte except the last.
  *
@@ -614,7 +614,7 @@ QSC_EXPORT_API size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* 
 /*!
  * \brief Decode a hexadecimal string to binary data.
  *
- * Accepts both upper- and lower-case hexadecimal digits (0–9, A–F, a–f).
+ * Accepts both upper- and lower-case hexadecimal digits (0-9, A-F, a-f).
  * The input length must be even.  On any decode error (odd length, out-of-
  * range character, or insufficient output buffer) the function clears any
  * partial output it has written, sets \p *declen to 0, and returns false.

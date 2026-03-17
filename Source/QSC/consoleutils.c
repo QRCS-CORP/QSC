@@ -101,7 +101,7 @@ void qsc_consoleutils_colored_message(const char* message, qsc_console_font_colo
 #endif
 }
 
-char qsc_consoleutils_get_char()
+char qsc_consoleutils_get_char(void)
 {
 	char res;
 
@@ -238,7 +238,7 @@ size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_
 	return len;
 }
 
-char qsc_consoleutils_get_wait()
+char qsc_consoleutils_get_wait(void)
 {
 	char c;
 
@@ -628,7 +628,7 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 	}
 }
 
-void qsc_consoleutils_send_enter() 
+void qsc_consoleutils_send_enter(void) 
 {
     putchar('\n');
 }
@@ -651,7 +651,7 @@ void qsc_consoleutils_set_window_buffer(size_t width, size_t height)
 	}
 }
 
-void qsc_consoleutils_set_window_clear()
+void qsc_consoleutils_set_window_clear(void)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	HANDLE hcon;
@@ -722,7 +722,7 @@ void qsc_consoleutils_set_window_title(const char* title)
 	}
 }
 
-void qsc_consoleutils_set_virtual_terminal()
+void qsc_consoleutils_set_virtual_terminal(void)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
