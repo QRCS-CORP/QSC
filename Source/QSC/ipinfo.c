@@ -105,7 +105,7 @@ qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
 	return tadd;
 }
 
-qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_any()
+qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_any(void)
 {
 	qsc_ipinfo_ipv4_address res;
 
@@ -361,7 +361,7 @@ bool qsc_ipinfo_ipv4_address_is_zeroed(const qsc_ipinfo_ipv4_address* address)
 	return res;
 }
 
-qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loopback()
+qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loopback(void)
 {
 	qsc_ipinfo_ipv4_address res = {
 		.ipv4[0U] = 127U,
@@ -736,7 +736,7 @@ qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(const qsc_ipinfo_ipv6
 	return ptype;
 }
 
-qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_any()
+qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_any(void)
 {
 	qsc_ipinfo_ipv6_address res = { 0U };
 
@@ -981,7 +981,7 @@ bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address)
 	return res;
 }
 
-qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loopback()
+qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loopback(void)
 {
 	qsc_ipinfo_ipv6_address add;
 
