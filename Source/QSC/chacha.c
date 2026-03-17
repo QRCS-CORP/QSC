@@ -924,7 +924,7 @@ void qsc_chacha_poly1305_set_associated(qsc_chacha_poly1305_state* ctx, const ui
 		qsc_poly1305_update(&ctx->pstate, data, datalen);
 		ctx->aadlen = datalen;
 
-		/* RFC 8439 §2.8: zero-pad AAD to 16-byte boundary */
+		/* RFC 8439 2.8: zero-pad AAD to 16-byte boundary */
 		const size_t rem = datalen & 15U;
 
 		if (rem != 0U)
@@ -953,7 +953,7 @@ bool qsc_chacha_poly1305_decrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 		qsc_poly1305_update(&ctx->pstate, input, mlen);
 		ctx->msglen = mlen;
 
-		/* RFC 8439 §2.8: zero-pad ciphertext to 16-byte boundary */
+		/* RFC 8439 2.8: zero-pad ciphertext to 16-byte boundary */
 		const size_t rem = mlen & 15U;
 
 		if (rem != 0U)
@@ -999,7 +999,7 @@ void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 		qsc_poly1305_update(&ctx->pstate, output, length);
 		ctx->msglen = length;
 
-		/* RFC 8439 §2.8: zero-pad ciphertext to 16-byte boundary */
+		/* RFC 8439 2.8: zero-pad ciphertext to 16-byte boundary */
 		const size_t rem = length & 15U;
 
 		if (rem != 0U)

@@ -100,7 +100,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *     handling arbitrarily large structures (e.g. post-quantum X.509
  *     certificates).
  *   - DER decode delegates to the BER decoder and then rejects any element
- *     that used the indefinite-length form, as required by X.690 §11.1.
+ *     that used the indefinite-length form, as required by X.690 11.1.
  *
  * \par PEM (RFC 7468 / RFC 1421)
  * PEM wraps a Base64 payload between "-----BEGIN \<label\>-----" and
@@ -184,7 +184,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * Used for types that are common to all ASN.1 applications, such as INTEGER,
  * BOOLEAN, SEQUENCE, SET, BIT STRING, OCTET STRING, OBJECT IDENTIFIER, etc.
- * Defined in X.690 §8.1.2.2, Table 1.
+ * Defined in X.690 8.1.2.2, Table 1.
  */
 #define QSC_ENCODING_BER_CLASS_UNIVERSAL 0x00U
 
@@ -194,7 +194,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * Used for types whose meaning is specific to an application.  The
  * interpretation of the tag number is application-defined.
- * Defined in X.690 §8.1.2.2, Table 1.
+ * Defined in X.690 8.1.2.2, Table 1.
  */
 #define QSC_ENCODING_BER_CLASS_APPLICATION 0x40U
 
@@ -204,7 +204,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * Used to distinguish between data elements that appear at the same position
  * in different contexts within a structured type (e.g. OPTIONAL fields in a
- * SEQUENCE).  Defined in X.690 §8.1.2.2, Table 1.
+ * SEQUENCE).  Defined in X.690 8.1.2.2, Table 1.
  */
 #define QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC 0x80U
 
@@ -213,7 +213,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief ASN.1 private tag class (bits 8-7 = 11).
  *
  * Reserved for enterprise or vendor-specific extensions.
- * Defined in X.690 §8.1.2.2, Table 1.
+ * Defined in X.690 8.1.2.2, Table 1.
  */
 #define QSC_ENCODING_BER_CLASS_PRIVATE 0xC0U
 
@@ -223,7 +223,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * Pass this value as the \p length argument to
  * \c qsc_encoding_ber_encode_length to produce the single-byte indefinite-
- * length indicator (0x80) defined in X.690 §8.1.3.6.  Only valid for
+ * length indicator (0x80) defined in X.690 8.1.3.6.  Only valid for
  * constructed BER elements; DER (and primitive BER) always use definite-
  * length form.
  */
@@ -234,7 +234,7 @@ QSC_CPLUSPLUS_ENABLED_START
 /* ========================================================================== */
 
 /*!
- * \brief Universal ASN.1 tag numbers as defined in X.680 §8.6 and
+ * \brief Universal ASN.1 tag numbers as defined in X.680 8.6 and
  *        X.690 Table 1.
  *
  * These values occupy the low five bits of the first tag octet when the
@@ -339,7 +339,7 @@ QSC_EXPORT_API typedef struct qsc_encoding_ber_element
 /*!
  * \brief Decode a Base64-encoded string to a byte array.
  *
- * Implements RFC 4648, §4.  The function performs three sequential validation
+ * Implements RFC 4648, 4.  The function performs three sequential validation
  * passes before writing output:
  *   1. Checks that \p inplen is a non-zero multiple of four.
  *   2. Checks that every character belongs to the Base64 alphabet or is '='.
@@ -374,7 +374,7 @@ QSC_EXPORT_API size_t qsc_encoding_base64_decoded_size(const char* input, size_t
 /*!
  * \brief Encode a byte array to a Base64 string.
  *
- * Implements RFC 4648, §4, using the standard alphabet (A–Z, a–z, 0–9,
+ * Implements RFC 4648, 4, using the standard alphabet (A–Z, a–z, 0–9,
  * '+', '/') with '=' padding to ensure the output length is a multiple of
  * four. A null terminator is written after the encoded data.
  *
@@ -445,7 +445,7 @@ QSC_EXPORT_API qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const u
 /*!
  * \brief Decode a BER length field from an octet buffer.
  *
- * Implements X.690 §8.1.3.  All three length forms are supported:
+ * Implements X.690 8.1.3.  All three length forms are supported:
  *   - Short definite form (1 byte, value < 128).
  *   - Long definite form (2–9 bytes; the first byte's low seven bits give
  *     the count of subsequent length octets).
@@ -466,7 +466,7 @@ QSC_EXPORT_API size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size
 /*!
  * \brief Decode a BER tag field from an octet buffer.
  *
- * Implements X.690 §8.1.2.  Both short-form (1-byte, tag number < 31) and
+ * Implements X.690 8.1.2.  Both short-form (1-byte, tag number < 31) and
  * long-form (multi-byte base-128, continuation bit in bit 8) tags are
  * handled.  If the buffer is exhausted before the final base-128 octet
  * (bit 8 = 0) is found, the function returns 0 to indicate failure.
@@ -488,7 +488,7 @@ QSC_EXPORT_API size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t 
 /*!
  * \brief Encode a complete BER element (tag + length + value) to an octet buffer.
  *
- * Implements X.690 §8.  Behaviour depends on the element type:
+ * Implements X.690 8.  Behaviour depends on the element type:
  *
  * \par Primitive
  * Writes the tag, a definite-length field, and the raw value bytes from
@@ -514,7 +514,7 @@ QSC_EXPORT_API size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* 
 /*!
  * \brief Encode a length value to BER form.
  *
- * Implements X.690 §8.1.3:
+ * Implements X.690 8.1.3:
  *   - If \p length equals \c QSC_BER_ENCODING_INDEFINITE_LENGTH, writes the
  *     single-byte indefinite-length indicator 0x80.
  *   - If \p length is in the range [0, 127], writes it as a single byte
@@ -533,7 +533,7 @@ QSC_EXPORT_API size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buf
 /*!
  * \brief Encode an ASN.1 tag to BER form.
  *
- * Implements X.690 §8.1.2:
+ * Implements X.690 8.1.2:
  *   - Composes the first byte from \p tagclass (bits 8–7), \p construct
  *     (bit 6), and the tag-number field (bits 5–1).
  *   - Short form: if \p tagnum < 31, the tag number occupies bits 5–1 of
@@ -572,7 +572,7 @@ QSC_EXPORT_API void qsc_encoding_ber_free_element(qsc_encoding_ber_element* elem
  * \brief Decode a single DER element from an octet buffer.
  *
  * Delegates to \c qsc_encoding_ber_decode_element and then enforces the DER
- * constraint (X.690 §11.1) that indefinite-length encoding is forbidden.  If
+ * constraint (X.690 11.1) that indefinite-length encoding is forbidden.  If
  * the decoded element carries an indefinite length, it is freed and NULL is
  * returned with \p *consumed set to 0.
  *
@@ -590,7 +590,7 @@ QSC_EXPORT_API qsc_encoding_ber_element* qsc_encoding_der_decode_element(const u
 /*!
  * \brief Encode an ASN.1 element tree using DER.
  *
- * Implements X.690 §11 (DER).  Indefinite-length encoding is rejected.
+ * Implements X.690 11 (DER).  Indefinite-length encoding is rejected.
  * For constructed elements, the function performs a write-free recursive
  * size-computation pass over the child tree to determine the exact content
  * length before writing any output.  Child elements are then encoded
@@ -677,7 +677,7 @@ QSC_EXPORT_API bool qsc_encoding_pem_decode(const char* input, uint8_t* output, 
  *
  * Produces a RFC 7468-conformant PEM encapsulation:
  *   - Header line:  "-----BEGIN \<label\>-----\n"
- *   - Base64 data:  wrapped at exactly 64 characters per line (RFC 7468 §2).
+ *   - Base64 data:  wrapped at exactly 64 characters per line (RFC 7468 2).
  *   - Footer line:  "-----END \<label\>-----\n"
  *   - Null terminator appended to \p output.
  *

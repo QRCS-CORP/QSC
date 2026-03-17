@@ -742,3 +742,4 @@ void qsc_consoleutils_set_virtual_terminal()
 	fflush(stdout);
 #endif
 }
+

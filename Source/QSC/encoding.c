@@ -640,19 +640,19 @@ size_t qsc_encoding_ber_encode_length(size_t length, uint8_t* buffer, size_t buf
     {
         if (length == QSC_BER_ENCODING_INDEFINITE_LENGTH)
         {
-            /* indefinite-length form: single byte 0x80 (X.690 §8.1.3.6). */
+            /* indefinite-length form: single byte 0x80 (X.690 8.1.3.6). */
             buffer[0U] = 0x80U;
             res = 1U;
         }
         else if (length < 128U)
         {
-            /* short definite-length form (X.690 §8.1.3.4). */
+            /* short definite-length form (X.690 8.1.3.4). */
             buffer[0U] = (uint8_t)length;
             res = 1U;
         }
         else
         {
-            /* long definite-length form (X.690 §8.1.3.5).
+            /* long definite-length form (X.690 8.1.3.5).
              * determine the minimum number of octets required and emit them in big-endian order. */
             uint8_t alen[8U] = { 0U };
             size_t bnum;
@@ -716,7 +716,7 @@ size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t buflen, uint8_t
         }
         else
         {
-            /* long form (X.690 §8.1.2.4): tag number encoded in subsequent base-128 bytes, 
+            /* long form (X.690 8.1.2.4): tag number encoded in subsequent base-128 bytes, 
              * MSB of each byte is the continuation flag, 0 on the final byte. */
             uint32_t num;
             bool found_end;
@@ -773,7 +773,7 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
 
         if (first == 0x80U)
         {
-            /* indefinite-length form (X.690 §8.1.3.6).
+            /* indefinite-length form (X.690 8.1.3.6).
              * content length is unknown; caller locates the EOC. */
             *indef = true;
             *length = 0U;
@@ -781,21 +781,21 @@ size_t qsc_encoding_ber_decode_length(const uint8_t* buffer, size_t buflen, size
         }
         else if ((first & 0x80U) == 0U)
         {
-            /* short definite-length form (X.690 §8.1.3.4). */
+            /* short definite-length form (X.690 8.1.3.4). */
             *indef = false;
             *length = (size_t)first;
             res = 1U;
         }
         else
         {
-            /* long definite-length form (X.690 §8.1.3.5).
+            /* long definite-length form (X.690 8.1.3.5).
              * low seven bits of first byte give the count of subsequent length octets. */
             uint8_t bnum;
 
             *indef = false;
             bnum = first & 0x7FU;
 
-            /* per X.690 §8.1.3.5c, the value 0xFF is reserved.
+            /* per X.690 8.1.3.5c, the value 0xFF is reserved.
              * reject bnum == 0 (that is the 0x80 indefinite form already handled above, but guard it here for robustness).
              * Reject counts that would overflow a native size_t. */
             if ((bnum == 0U) || (bnum > (uint8_t)sizeof(size_t)) || (buflen < (size_t)(1U + bnum)))
@@ -1035,7 +1035,7 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
                     else
                     {
                         /* primitive element.
-                         * indefinite length is illegal for primitive types per X.690 §8.1.3.2. */
+                         * indefinite length is illegal for primitive types per X.690 8.1.3.2. */
                         if (indefinite == true)
                         {
                             qsc_encoding_ber_free_element(elem);
@@ -1221,7 +1221,7 @@ qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer,
 
         if (elem != NULL)
         {
-            /* DER (X.690 §11.1) forbids indefinite-length encoding. */
+            /* DER (X.690 11.1) forbids indefinite-length encoding. */
             if (elem->indefinite == true)
             {
                 qsc_encoding_ber_free_element(elem);
@@ -1246,7 +1246,7 @@ size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_
 
     if (element != NULL && buffer != NULL && buflen != 0U)
     {
-        /* DER (X.690 §11.1) forbids indefinite-length encoding. */
+        /* DER (X.690 11.1) forbids indefinite-length encoding. */
         if (element->indefinite == false)
         {
             size_t taglen;
