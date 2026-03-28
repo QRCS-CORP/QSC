@@ -546,7 +546,7 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_write_issuer_alt_name(const qsc_x509_iss
  * match the CRL to the correct issuer certificate during validation.
  *
  * The provided structure must be fully initialized by the caller. At minimum, the key identifier
- * field should be present and contain the issuer’s key identifier. Optional fields such as issuer
+ * field should be present and contain the issuer's key identifier. Optional fields such as issuer
  * name and serial number may also be included if required.
  *
  * If this function is not called, and no AKI is otherwise set, the CRL will be generated without

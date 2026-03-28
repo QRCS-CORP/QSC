@@ -1451,12 +1451,28 @@ void qsc_memutils_set_value(void* output, size_t length, uint8_t value)
         }
 
 #   if defined(QSC_SYSTEM_HAS_AVX512)
-        if (length - pctr >= 32U) { memutils_setval256((uint8_t*)output + pctr, value); pctr += 32U; }
-        else if (length - pctr >= 16U) { memutils_setval128((uint8_t*)output + pctr, value); pctr += 16U; }
+        if (length - pctr >= 32U) 
+        { 
+            memutils_setval256((uint8_t*)output + pctr, value); 
+            pctr += 32U; 
+        }
+        else if (length - pctr >= 16U) 
+        {
+            memutils_setval128((uint8_t*)output + pctr, value); 
+            pctr += 16U; 
+        }
 #   elif defined(QSC_SYSTEM_HAS_AVX2)
-        if (length - pctr >= 16U) { memutils_setval128((uint8_t*)output + pctr, value); pctr += 16U; }
+        if (length - pctr >= 16U)
+        {
+            memutils_setval128((uint8_t*)output + pctr, value); 
+            pctr += 16U; 
+        }
 #   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
-        if (length - pctr >= 16U) { memutils_setval128((uint8_t*)output + pctr, value); pctr += 16U; }
+        if (length - pctr >= 16U) 
+        { 
+            memutils_setval128((uint8_t*)output + pctr, value); 
+            pctr += 16U; 
+        }
 #   endif
 #endif
 
@@ -1576,35 +1592,47 @@ void qsc_memutils_xor(uint8_t* output, const uint8_t* input, size_t length)
 #   endif
 #elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         const size_t SMDBLK = 32U;
-#else
-        const size_t SMDBLK = 0U;
 #endif
 
+#if defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (SMDBLK > 0U && length >= SMDBLK)
         {
             const size_t ALNLEN = length - (length % SMDBLK);
 
             while (pctr != ALNLEN)
             {
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
                 memutils_xor512(output + pctr, input + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
                 memutils_xor256(output + pctr, input + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#   elif defined(QSC_SYSTEM_HAS_AVX)
                 memutils_xor128(output + pctr, input + pctr);
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
                 memutils_xor256_neon(output + pctr, input + pctr);
-#endif
+#   endif
                 pctr += SMDBLK;
             }
         }
-
-#if defined(QSC_SYSTEM_HAS_AVX512)
-        if (length - pctr >= 32U) { memutils_xor256(output + pctr, input + pctr); pctr += 32U; }
-        else if (length - pctr >= 16U) { memutils_xor128(output + pctr, input + pctr); pctr += 16U; }
-#elif defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_ARM_NEON)
-        if (length - pctr >= 16U) { memutils_xor128(output + pctr, input + pctr); pctr += 16U; }
 #endif
+
+#   if defined(QSC_SYSTEM_HAS_AVX512)
+        if (length - pctr >= 32U) 
+        {
+            memutils_xor256(output + pctr, input + pctr); 
+            pctr += 32U; 
+        }
+        else if (length - pctr >= 16U)
+        { 
+            memutils_xor128(output + pctr, input + pctr); 
+            pctr += 16U; 
+        }
+#   elif defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_ARM_NEON)
+        if (length - pctr >= 16U) 
+        {
+            memutils_xor128(output + pctr, input + pctr); 
+            pctr += 16U; 
+        }
+#   endif
 
         for (size_t i = pctr; i < length; ++i)
         {
@@ -1698,31 +1726,32 @@ void qsc_memutils_xorv(uint8_t* output, const uint8_t value, size_t length)
 #   endif
 #elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         const size_t SMDBLK = 32U;
-#else
-        const size_t SMDBLK = 0U;
 #endif
 
+#if defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (SMDBLK > 0U && length >= SMDBLK)
         {
             const size_t ALNLEN = length - (length % SMDBLK);
 
             while (pctr != ALNLEN)
             {
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
                 memutils_xorv512(output + pctr, value);
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
                 memutils_xorv256(output + pctr, value);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#   elif defined(QSC_SYSTEM_HAS_AVX)
                 memutils_xorv128(output + pctr, value);
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
                 memutils_xorv256_neon(output + pctr, value);
-#endif
+#   endif
                 pctr += SMDBLK;
             }
         }
 
-#if defined(QSC_SYSTEM_HAS_AVX2) || defined(QSC_SYSTEM_HAS_ARM_NEON)
-        if (length - pctr >= 16U) { memutils_xorv128(output + pctr, value); pctr += 16U; }
+        if (length - pctr >= 16U) 
+        { 
+            memutils_xorv128(output + pctr, value); pctr += 16U; 
+        }
 #endif
 
         for (size_t i = pctr; i < length; ++i)

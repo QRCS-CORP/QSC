@@ -94,7 +94,7 @@ static void print_title(void)
 	qsctest_print_line("*                                                 *");
 	qsctest_print_line("* Release:   v1.1.0.2b (B2)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      March 28, 2026						  *");
+	qsctest_print_line("* Date:      March 28, 2026                       *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
