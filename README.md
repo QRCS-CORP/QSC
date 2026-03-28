@@ -42,7 +42,7 @@ Key design goals:
 - **Auditability** - thoroughly commented, well-structured source with a comprehensive test suite covering known-answer tests, NIST CAVP/ACVP vectors, fuzzing, and stress testing across every primitive.
 - **Portability** - compiles on Windows (MSVC), Linux (GCC), and macOS (Clang) with no external dependencies.
 
-> **Version:** 1.0.0.6c  
+> **Version:** 1.1.0.1b  
 > **Tested on:** Windows 10 / 11 / Server · Ubuntu Linux · macOS  
 > _All asymmetric ciphers and signature schemes have been updated to the final NIST FIPS standards for standardized algorithms and to NIST PQC Round 3 specifications for remaining candidates._
 
