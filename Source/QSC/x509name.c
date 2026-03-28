@@ -1,7 +1,6 @@
 #include "x509name.h"
 #include "memutils.h"
 #include "stringutils.h"
-#include <stdio.h>
 
 #define QSC_X509_TAG_SEQUENCE 16U
 #define QSC_X509_TAG_SET 17U
@@ -233,9 +232,9 @@ static qsc_asn1_status x509_name_parse_attribute(const qsc_encoding_ber_element*
 {
     const qsc_encoding_ber_element* oidelem;
     const qsc_encoding_ber_element* valelem;
-    qsc_asn1_status status;
     qsc_asn1_oid oid;
     size_t outlen;
+    qsc_asn1_status status;
 
     status = QSC_ASN1_STATUS_FAILURE;
     outlen = 0U;
@@ -315,19 +314,14 @@ static qsc_asn1_status x509_name_append_attribute(qsc_x509_name* name, const qsc
 
 static bool x509_name_is_space_char(char c)
 {
-    return (c == ' ' ||
-        c == '\t' ||
-        c == '\r' ||
-        c == '\n' ||
-        c == '\f' ||
-        c == '\v');
+    return (c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\f' || c == '\v');
 }
 
-static char x509_name_fold_ascii(char c)
+static uint8_t x509_name_fold_ascii(uint8_t c)
 {
-    if (c >= 'A' && c <= 'Z')
+    if (c >= (uint8_t)'A' && c <= (uint8_t)'Z')
     {
-        c = (char)(c - 'A' + 'a');
+        c = (uint8_t)(c - (uint8_t)'A' + (uint8_t)'a');
     }
 
     return c;
@@ -335,117 +329,132 @@ static char x509_name_fold_ascii(char c)
 
 static bool x509_name_value_equals_canonical(const char* a, size_t alen, const char* b, size_t blen)
 {
+    /* Non-ASCII UTF-8 octets are compared byte-for-byte; ASCII letters are case-folded and ASCII whitespace is normalized. */
     size_t ia;
     size_t ib;
     size_t enda;
     size_t endb;
     bool inspacea;
     bool inspaceb;
+    bool res;
 
-    if (a == (const char*)NULL || b == (const char*)NULL)
+    res = false;
+
+    if (a != NULL && b != NULL)
     {
-        return false;
-    }
-
-    ia = 0U;
-    ib = 0U;
-    enda = alen;
-    endb = blen;
-
-    while (ia < enda && x509_name_is_space_char(a[ia]) == true)
-    {
-        ia += 1U;
-    }
-
-    while (ib < endb && x509_name_is_space_char(b[ib]) == true)
-    {
-        ib += 1U;
-    }
-
-    while (enda > ia && x509_name_is_space_char(a[enda - 1U]) == true)
-    {
-        enda -= 1U;
-    }
-
-    while (endb > ib && x509_name_is_space_char(b[endb - 1U]) == true)
-    {
-        endb -= 1U;
-    }
-
-    inspacea = false;
-    inspaceb = false;
-
-    for (;;)
-    {
-        char ca;
-        char cb;
+        ia = 0U;
+        ib = 0U;
+        enda = alen;
+        endb = blen;
 
         while (ia < enda && x509_name_is_space_char(a[ia]) == true)
         {
-            inspacea = true;
             ia += 1U;
         }
 
         while (ib < endb && x509_name_is_space_char(b[ib]) == true)
         {
-            inspaceb = true;
             ib += 1U;
         }
 
-        if (ia == enda || ib == endb)
+        while (enda > ia && x509_name_is_space_char(a[enda - 1U]) == true)
         {
-            break;
+            enda -= 1U;
         }
 
-        if (inspacea != inspaceb)
+        while (endb > ib && x509_name_is_space_char(b[endb - 1U]) == true)
         {
-            return false;
+            endb -= 1U;
         }
 
-        if (inspacea == true)
+        inspacea = false;
+        inspaceb = false;
+        res = true;
+
+        for (;;)
         {
-            inspacea = false;
-            inspaceb = false;
+            uint8_t ca;
+            uint8_t cb;
+
+            while (ia < enda && x509_name_is_space_char(a[ia]) == true)
+            {
+                inspacea = true;
+                ia += 1U;
+            }
+
+            while (ib < endb && x509_name_is_space_char(b[ib]) == true)
+            {
+                inspaceb = true;
+                ib += 1U;
+            }
+
+            if (ia == enda || ib == endb)
+            {
+                break;
+            }
+
+            if (inspacea != inspaceb)
+            {
+                res = false;
+                break;
+            }
+
+            if (inspacea == true)
+            {
+                inspacea = false;
+                inspaceb = false;
+            }
+
+            ca = x509_name_fold_ascii((uint8_t)a[ia]);
+            cb = x509_name_fold_ascii((uint8_t)b[ib]);
+
+            if (ca != cb)
+            {
+                res = false;
+                break;
+            }
+
+            ia += 1U;
+            ib += 1U;
         }
 
-        ca = x509_name_fold_ascii(a[ia]);
-        cb = x509_name_fold_ascii(b[ib]);
-
-        if (ca != cb)
+        if (res == true)
         {
-            return false;
-        }
+            while (ia < enda && x509_name_is_space_char(a[ia]) == true)
+            {
+                ia += 1U;
+            }
 
-        ia += 1U;
-        ib += 1U;
+            while (ib < endb && x509_name_is_space_char(b[ib]) == true)
+            {
+                ib += 1U;
+            }
+
+            res = (ia == enda && ib == endb);
+        }
     }
 
-    while (ia < enda && x509_name_is_space_char(a[ia]) == true)
-    {
-        ia += 1U;
-    }
-
-    while (ib < endb && x509_name_is_space_char(b[ib]) == true)
-    {
-        ib += 1U;
-    }
-
-    return (ia == enda && ib == endb);
+    return res;
 }
 
 static bool x509_name_attribute_equals(const qsc_x509_name_attribute* a, const qsc_x509_name_attribute* b)
 {
+    bool res;
+
     if (a == NULL || b == NULL)
     {
-        return false;
+        res = false;
     }
-
-    if (a->oid != b->oid || a->type != b->type)
+    else if (a->oid != b->oid || a->type != b->type)
     {
-        return false;
+        res = false;
+    }
+    else
+    {
+        res = x509_name_value_equals_canonical(a->value, a->length, b->value, b->length);
     }
 
-    return x509_name_value_equals_canonical(a->value, a->length, b->value, b->length);
+    return res;
 }
 
 static size_t x509_name_rdn_end(const qsc_x509_name* name, size_t start)
@@ -462,6 +471,52 @@ static size_t x509_name_rdn_end(const qsc_x509_name* name, size_t start)
     }
 
     return end;
+}
+
+static qsc_asn1_status x509_name_append_chars(char* output, size_t otplen, size_t* pos, const char* src, size_t srclen)
+{
+    qsc_asn1_status status;
+
+    status = QSC_ASN1_STATUS_INVALID_INPUT;
+
+    if (output != NULL && pos != NULL && src != NULL)
+    {
+        if (*pos >= otplen)
+        {
+            status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
+        }
+        else if ((srclen + 1U) > (otplen - *pos))
+        {
+            status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
+        }
+        else
+        {
+            if (srclen > 0U)
+            {
+                qsc_memutils_copy((uint8_t*)(output + *pos), (const uint8_t*)src, srclen);
+                *pos += srclen;
+            }
+
+            output[*pos] = '\0';
+            status = QSC_ASN1_STATUS_SUCCESS;
+        }
+    }
+
+    return status;
+}
+
+static qsc_asn1_status x509_name_append_cstring(char* output, size_t otplen, size_t* pos, const char* src)
+{
+    qsc_asn1_status status;
+
+    status = QSC_ASN1_STATUS_INVALID_INPUT;
+
+    if (src != NULL)
+    {
+        status = x509_name_append_chars(output, otplen, pos, src, qsc_stringutils_string_size(src));
+    }
+
+    return status;
 }
 
 void qsc_x509_name_clear(qsc_x509_name* name)
@@ -582,11 +637,15 @@ qsc_x509_name_attribute_type qsc_x509_name_attribute_type_from_oid(qsc_oid_id id
 
 const char* qsc_x509_name_attribute_short_name(qsc_x509_name_attribute_type type)
 {
+    QSC_ASSERT(type >= QSC_X509_NAME_ATTRIBUTE_UNKNOWN && type <= QSC_X509_NAME_ATTRIBUTE_EMAIL_ADDRESS);
+
     return x509_name_attribute_short_name_internal(type);
 }
 
 const char* qsc_x509_name_attribute_long_name(qsc_x509_name_attribute_type type)
 {
+    QSC_ASSERT(type >= QSC_X509_NAME_ATTRIBUTE_UNKNOWN && type <= QSC_X509_NAME_ATTRIBUTE_EMAIL_ADDRESS);
+
     return x509_name_attribute_long_name_internal(type);
 }
 
@@ -652,6 +711,11 @@ qsc_asn1_status qsc_x509_name_parse(const qsc_encoding_ber_element* element, qsc
                 }
             }
         }
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            qsc_x509_name_clear(name);
+        }
     }
     else
     {
@@ -692,72 +756,82 @@ bool qsc_x509_name_equals(const qsc_x509_name* a, const qsc_x509_name* b)
 
     size_t ia;
     size_t ib;
+    bool res;
 
-    if (a == NULL || b == NULL)
+    res = false;
+
+    if (a != NULL && b != NULL && a->count == b->count)
     {
-        return false;
-    }
+        ia = 0U;
+        ib = 0U;
+        res = true;
 
-    if (a->count != b->count)
-    {
-        return false;
-    }
-
-    ia = 0U;
-    ib = 0U;
-
-    while (ia < a->count && ib < b->count)
-    {
-        size_t enda;
-        size_t endb;
-        size_t acount;
-        size_t bcount;
-        bool matched[QSC_X509_NAME_ATTRIBUTES_MAX];
-
-        enda = x509_name_rdn_end(a, ia);
-        endb = x509_name_rdn_end(b, ib);
-        acount = enda - ia;
-        bcount = endb - ib;
-
-        if (acount != bcount)
+        while (ia < a->count && ib < b->count)
         {
-            return false;
-        }
+            size_t enda;
+            size_t endb;
+            size_t acount;
+            size_t bcount;
+            bool matched[QSC_X509_NAME_ATTRIBUTES_MAX];
+            size_t i;
 
-        qsc_memutils_clear((uint8_t*)matched, sizeof(matched));
+            enda = x509_name_rdn_end(a, ia);
+            endb = x509_name_rdn_end(b, ib);
+            acount = enda - ia;
+            bcount = endb - ib;
 
-        for (size_t i = ia; i < enda; ++i)
-        {
-            bool found;
-
-            found = false;
-
-            for (size_t j = ib; j < endb; ++j)
+            if (acount != bcount)
             {
-                size_t mj;
+                res = false;
+                break;
+            }
 
-                mj = j - ib;
+            qsc_memutils_clear((uint8_t*)matched, sizeof(matched));
 
-                if (matched[mj] == false &&
-                    x509_name_attribute_equals(&a->attributes[i], &b->attributes[j]) == true)
+            for (i = ia; i < enda; ++i)
+            {
+                bool found;
+                size_t j;
+
+                found = false;
+
+                for (j = ib; j < endb; ++j)
                 {
-                    matched[mj] = true;
-                    found = true;
+                    size_t mj;
+
+                    mj = j - ib;
+
+                    if (matched[mj] == false && x509_name_attribute_equals(&a->attributes[i], &b->attributes[j]) == true)
+                    {
+                        matched[mj] = true;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found == false)
+                {
+                    res = false;
                     break;
                 }
             }
 
-            if (found == false)
+            if (res == false)
             {
-                return false;
+                break;
             }
+
+            ia = enda;
+            ib = endb;
         }
 
-        ia = enda;
-        ib = endb;
+        if (res == true)
+        {
+            res = (ia == a->count && ib == b->count);
+        }
     }
 
-    return (ia == a->count && ib == b->count);
+    return res;
 }
 
 qsc_asn1_status qsc_x509_name_to_string(const qsc_x509_name* name, char* output, size_t otplen, size_t* outlen)
@@ -768,12 +842,13 @@ qsc_asn1_status qsc_x509_name_to_string(const qsc_x509_name* name, char* output,
 
     const char* label;
     size_t pos;
-    int32_t count;
     qsc_asn1_status status;
     char oidstr[96U] = { 0 };
+    size_t i;
 
     status = QSC_ASN1_STATUS_FAILURE;
     pos = 0U;
+    label = NULL;
 
     if (outlen != NULL)
     {
@@ -785,51 +860,56 @@ qsc_asn1_status qsc_x509_name_to_string(const qsc_x509_name* name, char* output,
         output[0U] = '\0';
         status = QSC_ASN1_STATUS_SUCCESS;
 
-        for (size_t i = 0U; i < name->count; ++i)
+        for (i = 0U; i < name->count; ++i)
         {
             if (i != 0U)
             {
-                if ((pos + 2U) >= otplen)
-                {
-                    status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
-                    break;
-                }
-
-                output[pos] = ',';
-                ++pos;
-                output[pos] = ' ';
-                ++pos;
-                output[pos] = '\0';
+                status = x509_name_append_cstring(output, otplen, &pos, ", ");
             }
 
-            label = x509_name_attribute_short_name_internal(name->attributes[i].type);
-
-            if (label == NULL)
+            if (status == QSC_ASN1_STATUS_SUCCESS)
             {
-                if (qsc_asn1_oid_to_string(&name->attributes[i].attribute_oid, oidstr, sizeof(oidstr)) != QSC_ASN1_STATUS_SUCCESS)
-                {
-                    status = QSC_ASN1_STATUS_FAILURE;
-                    break;
-                }
+                label = x509_name_attribute_short_name_internal(name->attributes[i].type);
 
-                label = oidstr;
+                if (label == NULL)
+                {
+                    status = qsc_asn1_oid_to_string(&name->attributes[i].attribute_oid, oidstr, sizeof(oidstr));
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        label = oidstr;
+                    }
+                }
             }
 
-            count = snprintf(output + pos, otplen - pos, "%s=%s", label, name->attributes[i].value);
-
-            if (count <= 0 || (size_t)count >= (otplen - pos))
+            if (status == QSC_ASN1_STATUS_SUCCESS)
             {
-                status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
+                status = x509_name_append_cstring(output, otplen, &pos, label);
+            }
+
+            if (status == QSC_ASN1_STATUS_SUCCESS)
+            {
+                status = x509_name_append_cstring(output, otplen, &pos, "=");
+            }
+
+            if (status == QSC_ASN1_STATUS_SUCCESS)
+            {
+                status = x509_name_append_chars(output, otplen, &pos, name->attributes[i].value, name->attributes[i].length);
+            }
+
+            if (status != QSC_ASN1_STATUS_SUCCESS)
+            {
                 break;
             }
-
-            pos += (size_t)count;
         }
 
         if (status == QSC_ASN1_STATUS_SUCCESS)
         {
-            output[pos] = '\0';
             *outlen = pos;
+        }
+        else
+        {
+            output[0U] = '\0';
         }
     }
     else

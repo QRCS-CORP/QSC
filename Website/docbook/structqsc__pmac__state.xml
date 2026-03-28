@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__pmac__state" xml:lang="en-US">
+<title>qsc_pmac_state Struct Reference</title>
+<indexterm><primary>qsc_pmac_state</primary></indexterm>
+<para>
+
+<para>The pmac state. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;pmac.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint64_t <link linkend="_structqsc__pmac__state_1a2e793485eba05329329aeb2601135ad2">F</link> [<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>]</para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__pmac__state_1ae6e9cff79325769593ee8f5f0849df30">H</link> [<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>]</para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__pmac__state_1a83da257cb11f18cb2632b9b7d238f33b">Y</link> [<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>]</para>
+</listitem>
+            <listitem><para>uint8_t * <link linkend="_structqsc__pmac__state_1a3da4e88c03c821f8b2dc28af618543bd">nonce</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__pmac__state_1ad5ec0a12837faf3f08ebeba9d2da69ae">noncelen</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__pmac__state_1aedeffc7d23da25d52b9a50045189fe2b">initialized</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The pmac state. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__pmac__state_1a2e793485eba05329329aeb2601135ad2"/><section>
+    <title>F</title>
+<indexterm><primary>F</primary><secondary>qsc_pmac_state</secondary></indexterm>
+<indexterm><primary>qsc_pmac_state</primary><secondary>F</secondary></indexterm>
+<para><computeroutput>uint64_t F[<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>]</computeroutput></para>
+<para>the finalization subkey </para>
+</section>
+<anchor xml:id="_structqsc__pmac__state_1ae6e9cff79325769593ee8f5f0849df30"/><section>
+    <title>H</title>
+<indexterm><primary>H</primary><secondary>qsc_pmac_state</secondary></indexterm>
+<indexterm><primary>qsc_pmac_state</primary><secondary>H</secondary></indexterm>
+<para><computeroutput>uint64_t H[<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>]</computeroutput></para>
+<para>the hash subkey </para>
+</section>
+<anchor xml:id="_structqsc__pmac__state_1aedeffc7d23da25d52b9a50045189fe2b"/><section>
+    <title>initialized</title>
+<indexterm><primary>initialized</primary><secondary>qsc_pmac_state</secondary></indexterm>
+<indexterm><primary>qsc_pmac_state</primary><secondary>initialized</secondary></indexterm>
+<para><computeroutput>bool initialized</computeroutput></para>
+<para>the initialized status </para>
+</section>
+<anchor xml:id="_structqsc__pmac__state_1a3da4e88c03c821f8b2dc28af618543bd"/><section>
+    <title>nonce</title>
+<indexterm><primary>nonce</primary><secondary>qsc_pmac_state</secondary></indexterm>
+<indexterm><primary>qsc_pmac_state</primary><secondary>nonce</secondary></indexterm>
+<para><computeroutput>uint8_t* nonce</computeroutput></para>
+<para>pointer to the nonce array </para>
+</section>
+<anchor xml:id="_structqsc__pmac__state_1ad5ec0a12837faf3f08ebeba9d2da69ae"/><section>
+    <title>noncelen</title>
+<indexterm><primary>noncelen</primary><secondary>qsc_pmac_state</secondary></indexterm>
+<indexterm><primary>qsc_pmac_state</primary><secondary>noncelen</secondary></indexterm>
+<para><computeroutput>size_t noncelen</computeroutput></para>
+<para>the nonce length </para>
+</section>
+<anchor xml:id="_structqsc__pmac__state_1a83da257cb11f18cb2632b9b7d238f33b"/><section>
+    <title>Y</title>
+<indexterm><primary>Y</primary><secondary>qsc_pmac_state</secondary></indexterm>
+<indexterm><primary>qsc_pmac_state</primary><secondary>Y</secondary></indexterm>
+<para><computeroutput>uint64_t Y[<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>]</computeroutput></para>
+<para>the hash state </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_pmac_8h">pmac.h</link></section>
+</section>

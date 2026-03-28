@@ -2,6 +2,7 @@ var socketbase_8h =
 [
     [ "qsc_socket_receive_async_state", "structqsc__socket__receive__async__state.html", "structqsc__socket__receive__async__state" ],
     [ "qsc_socket_receive_poll_state", "structqsc__socket__receive__poll__state.html", "structqsc__socket__receive__poll__state" ],
+    [ "QSC_SOCKET_DEFAULT_SNDBUF_SIZE", "socketbase_8h.html#ada07c3c98f451217f3e6129e0b8962d1", null ],
     [ "QSC_SOCKET_RECEIVE_BUFFER_SIZE", "socketbase_8h.html#a3c092ff125bea85e6e5715b4c010a331", null ],
     [ "qsc_socket_exceptions", "socketbase_8h.html#a31eef834848a4f642a5037b5a16055b4", [
       [ "qsc_socket_exception_success", "socketbase_8h.html#a31eef834848a4f642a5037b5a16055b4aafe14ce62f8af7479c91e3f8f0d79ed3", null ],
@@ -71,7 +72,7 @@ var socketbase_8h =
     [ "qsc_socket_receive", "socketbase_8h.html#a082ac00b04ca637095e706ccea282562", null ],
     [ "qsc_socket_receive_all", "socketbase_8h.html#a4e7127695f4b8ad2868ff8ca8d08a04a", null ],
     [ "qsc_socket_receive_async", "socketbase_8h.html#ac13b211ad3c967035bb69fc3a11394bb", null ],
-    [ "qsc_socket_receive_from", "socketbase_8h.html#a661e7656542665ee434f7beb34b64438", null ],
+    [ "qsc_socket_receive_from", "socketbase_8h.html#ad5d9fcd136ce55488ff70871f276216b", null ],
     [ "qsc_socket_receive_poll", "socketbase_8h.html#a67dd15ea325e3498bf8fd6ae7ddd97a9", null ],
     [ "qsc_socket_receive_ready", "socketbase_8h.html#aab36df1fea19c6875cced1077c268d0a", null ],
     [ "qsc_socket_send", "socketbase_8h.html#ad8f82c621093c6dde624cea6bb91c1b1", null ],
@@ -82,5 +83,6 @@ var socketbase_8h =
     [ "qsc_socket_set_option", "socketbase_8h.html#aee4dd3492102a2442543425303892dfc", null ],
     [ "qsc_socket_shut_down", "socketbase_8h.html#aa94bcf1c8d210aaf92f37f61964d5013", null ],
     [ "qsc_socket_shut_down_sockets", "socketbase_8h.html#aaf82c4589423dc7a17d73cb83655ef36", null ],
-    [ "qsc_socket_start_sockets", "socketbase_8h.html#a1bfbdd8510f616023d7ec1f47a71e7e3", null ]
+    [ "qsc_socket_start_sockets", "socketbase_8h.html#a1bfbdd8510f616023d7ec1f47a71e7e3", null ],
+    [ "QSC_SOCKET_ERROR_STRINGS", "socketbase_8h.html#a5a752109425d95ed8424701db74f9f94", null ]
 ];

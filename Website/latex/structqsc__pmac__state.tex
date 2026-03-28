@@ -1,0 +1,73 @@
+\doxysection{qsc\+\_\+pmac\+\_\+state Struct Reference}
+\hypertarget{structqsc__pmac__state}{}\label{structqsc__pmac__state}\index{qsc\_pmac\_state@{qsc\_pmac\_state}}
+
+
+The pmac state.  
+
+
+
+
+{\ttfamily \#include $<$pmac.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structqsc__pmac__state_a2e793485eba05329329aeb2601135ad2}{F}} \mbox{[}\mbox{\hyperlink{pmac_8h_a63848dd6f98c1064f381a18393e9f162}{QSC\+\_\+\+PMAC\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structqsc__pmac__state_ae6e9cff79325769593ee8f5f0849df30}{H}} \mbox{[}\mbox{\hyperlink{pmac_8h_a63848dd6f98c1064f381a18393e9f162}{QSC\+\_\+\+PMAC\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structqsc__pmac__state_a83da257cb11f18cb2632b9b7d238f33b}{Y}} \mbox{[}\mbox{\hyperlink{pmac_8h_a63848dd6f98c1064f381a18393e9f162}{QSC\+\_\+\+PMAC\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}
+\item 
+uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__pmac__state_a3da4e88c03c821f8b2dc28af618543bd}{nonce}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__pmac__state_ad5ec0a12837faf3f08ebeba9d2da69ae}{noncelen}}
+\item 
+bool \mbox{\hyperlink{structqsc__pmac__state_aedeffc7d23da25d52b9a50045189fe2b}{initialized}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The pmac state. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__pmac__state_a2e793485eba05329329aeb2601135ad2}\index{qsc\_pmac\_state@{qsc\_pmac\_state}!F@{F}}
+\index{F@{F}!qsc\_pmac\_state@{qsc\_pmac\_state}}
+\doxysubsubsection{\texorpdfstring{F}{F}}
+{\footnotesize\ttfamily \label{structqsc__pmac__state_a2e793485eba05329329aeb2601135ad2} 
+uint64\+\_\+t F\mbox{[}\mbox{\hyperlink{pmac_8h_a63848dd6f98c1064f381a18393e9f162}{QSC\+\_\+\+PMAC\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}}
+
+the finalization subkey \Hypertarget{structqsc__pmac__state_ae6e9cff79325769593ee8f5f0849df30}\index{qsc\_pmac\_state@{qsc\_pmac\_state}!H@{H}}
+\index{H@{H}!qsc\_pmac\_state@{qsc\_pmac\_state}}
+\doxysubsubsection{\texorpdfstring{H}{H}}
+{\footnotesize\ttfamily \label{structqsc__pmac__state_ae6e9cff79325769593ee8f5f0849df30} 
+uint64\+\_\+t H\mbox{[}\mbox{\hyperlink{pmac_8h_a63848dd6f98c1064f381a18393e9f162}{QSC\+\_\+\+PMAC\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}}
+
+the hash subkey \Hypertarget{structqsc__pmac__state_aedeffc7d23da25d52b9a50045189fe2b}\index{qsc\_pmac\_state@{qsc\_pmac\_state}!initialized@{initialized}}
+\index{initialized@{initialized}!qsc\_pmac\_state@{qsc\_pmac\_state}}
+\doxysubsubsection{\texorpdfstring{initialized}{initialized}}
+{\footnotesize\ttfamily \label{structqsc__pmac__state_aedeffc7d23da25d52b9a50045189fe2b} 
+bool initialized}
+
+the initialized status \Hypertarget{structqsc__pmac__state_a3da4e88c03c821f8b2dc28af618543bd}\index{qsc\_pmac\_state@{qsc\_pmac\_state}!nonce@{nonce}}
+\index{nonce@{nonce}!qsc\_pmac\_state@{qsc\_pmac\_state}}
+\doxysubsubsection{\texorpdfstring{nonce}{nonce}}
+{\footnotesize\ttfamily \label{structqsc__pmac__state_a3da4e88c03c821f8b2dc28af618543bd} 
+uint8\+\_\+t\texorpdfstring{$\ast$}{*} nonce}
+
+pointer to the nonce array \Hypertarget{structqsc__pmac__state_ad5ec0a12837faf3f08ebeba9d2da69ae}\index{qsc\_pmac\_state@{qsc\_pmac\_state}!noncelen@{noncelen}}
+\index{noncelen@{noncelen}!qsc\_pmac\_state@{qsc\_pmac\_state}}
+\doxysubsubsection{\texorpdfstring{noncelen}{noncelen}}
+{\footnotesize\ttfamily \label{structqsc__pmac__state_ad5ec0a12837faf3f08ebeba9d2da69ae} 
+size\+\_\+t noncelen}
+
+the nonce length \Hypertarget{structqsc__pmac__state_a83da257cb11f18cb2632b9b7d238f33b}\index{qsc\_pmac\_state@{qsc\_pmac\_state}!Y@{Y}}
+\index{Y@{Y}!qsc\_pmac\_state@{qsc\_pmac\_state}}
+\doxysubsubsection{\texorpdfstring{Y}{Y}}
+{\footnotesize\ttfamily \label{structqsc__pmac__state_a83da257cb11f18cb2632b9b7d238f33b} 
+uint64\+\_\+t Y\mbox{[}\mbox{\hyperlink{pmac_8h_a63848dd6f98c1064f381a18393e9f162}{QSC\+\_\+\+PMAC\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}}
+
+the hash state 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/\mbox{\hyperlink{pmac_8h}{pmac.\+h}}\end{DoxyCompactItemize}

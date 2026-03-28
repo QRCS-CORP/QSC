@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__scb__state" xml:lang="en-US">
+<title>qsc_scb_state Struct Reference</title>
+<indexterm><primary>qsc_scb_state</primary></indexterm>
+<para>
+
+<para>The CSG state structure. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;scb.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint8_t <link linkend="_structqsc__scb__state_1a5b2dc7078f33902684fc214634b600dd">ckey</link> [<link linkend="_scb_8h_1af04f804f5e916ce3fe92948a7d4a0eee">QSC_SCB_512_SEED_SIZE</link>]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__scb__state_1afbedac7945e381d987c3bac73bbd781a">cpuc</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__scb__state_1a54ed3e83de1a1a4e419a97d0afff6288">memc</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__scb__state_1a70d958290b8b8ebaff45365d4e5b9e54">klen</link></para>
+</listitem>
+            <listitem><para><link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> <link linkend="_structqsc__scb__state_1ac9a3da9c6d703bf06f29151437eeede9">rate</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The CSG state structure. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__scb__state_1a5b2dc7078f33902684fc214634b600dd"/><section>
+    <title>ckey</title>
+<indexterm><primary>ckey</primary><secondary>qsc_scb_state</secondary></indexterm>
+<indexterm><primary>qsc_scb_state</primary><secondary>ckey</secondary></indexterm>
+<para><computeroutput>uint8_t ckey[<link linkend="_scb_8h_1af04f804f5e916ce3fe92948a7d4a0eee">QSC_SCB_512_SEED_SIZE</link>]</computeroutput></para>
+<para>The cache generation key </para>
+</section>
+<anchor xml:id="_structqsc__scb__state_1afbedac7945e381d987c3bac73bbd781a"/><section>
+    <title>cpuc</title>
+<indexterm><primary>cpuc</primary><secondary>qsc_scb_state</secondary></indexterm>
+<indexterm><primary>qsc_scb_state</primary><secondary>cpuc</secondary></indexterm>
+<para><computeroutput>size_t cpuc</computeroutput></para>
+<para>The cpu cost </para>
+</section>
+<anchor xml:id="_structqsc__scb__state_1a70d958290b8b8ebaff45365d4e5b9e54"/><section>
+    <title>klen</title>
+<indexterm><primary>klen</primary><secondary>qsc_scb_state</secondary></indexterm>
+<indexterm><primary>qsc_scb_state</primary><secondary>klen</secondary></indexterm>
+<para><computeroutput>size_t klen</computeroutput></para>
+<para>The cache key length </para>
+</section>
+<anchor xml:id="_structqsc__scb__state_1a54ed3e83de1a1a4e419a97d0afff6288"/><section>
+    <title>memc</title>
+<indexterm><primary>memc</primary><secondary>qsc_scb_state</secondary></indexterm>
+<indexterm><primary>qsc_scb_state</primary><secondary>memc</secondary></indexterm>
+<para><computeroutput>size_t memc</computeroutput></para>
+<para>The memory cost </para>
+</section>
+<anchor xml:id="_structqsc__scb__state_1ac9a3da9c6d703bf06f29151437eeede9"/><section>
+    <title>rate</title>
+<indexterm><primary>rate</primary><secondary>qsc_scb_state</secondary></indexterm>
+<indexterm><primary>qsc_scb_state</primary><secondary>rate</secondary></indexterm>
+<para><computeroutput><link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate</computeroutput></para>
+<para>The absorption rate </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_scb_8h">scb.h</link></section>
+</section>

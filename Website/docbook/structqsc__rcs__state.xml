@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__rcs__state" xml:lang="en-US">
+<title>qsc_rcs_state Struct Reference</title>
+<indexterm><primary>qsc_rcs_state</primary></indexterm>
+<para>
+
+<para>The internal state structure containing the round-key array. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;rcs.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para><link linkend="_rcs_8h_1a1b672c28ae12a1d8fa576538fa4909c5">rcs_cipher_type</link> <link linkend="_structqsc__rcs__state_1a29d11ab8aade9c9b97c058c2a6aa54fc">ctype</link></para>
+</listitem>
+            <listitem><para>uint32_t <link linkend="_structqsc__rcs__state_1a9232ecb195cf082110caad41c6cc3bf8">roundkeys</link> [248]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__rcs__state_1a44bdbbaee0cf6de6912ae93ee8dc5702">roundkeylen</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__rcs__state_1a79c090aba458c743cdbf8585f7a058c9">rounds</link></para>
+</listitem>
+            <listitem><para><link linkend="_structqsc__pmac__state">qsc_pmac_state</link> <link linkend="_structqsc__rcs__state_1a16bc67e3e7cd6e690a86326d9dc4191d">kstate</link></para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__rcs__state_1a7e3e2a3d55ef5a060a4ea50ff088cc93">nonce</link> [<link linkend="_rcs_8h_1a790b62fe878b8e489d86da685a0f268e">QSC_RCS_NONCE_SIZE</link>]</para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__rcs__state_1a1944753ac8107ec537f75b7e0201d866">counter</link></para>
+</listitem>
+            <listitem><para>bool <link linkend="_structqsc__rcs__state_1af69c97ab299480b81e3f622d79777334">encrypt</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The internal state structure containing the round-key array. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__rcs__state_1a1944753ac8107ec537f75b7e0201d866"/><section>
+    <title>counter</title>
+<indexterm><primary>counter</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>counter</secondary></indexterm>
+<para><computeroutput>uint64_t counter</computeroutput></para>
+<para>the processed bytes counter </para>
+</section>
+<anchor xml:id="_structqsc__rcs__state_1a29d11ab8aade9c9b97c058c2a6aa54fc"/><section>
+    <title>ctype</title>
+<indexterm><primary>ctype</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>ctype</secondary></indexterm>
+<para><computeroutput><link linkend="_rcs_8h_1a1b672c28ae12a1d8fa576538fa4909c5">rcs_cipher_type</link> ctype</computeroutput></para>
+<para>The cipher type; RCS-256 or RCS-512 </para>
+</section>
+<anchor xml:id="_structqsc__rcs__state_1af69c97ab299480b81e3f622d79777334"/><section>
+    <title>encrypt</title>
+<indexterm><primary>encrypt</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>encrypt</secondary></indexterm>
+<para><computeroutput>bool encrypt</computeroutput></para>
+<para>the transformation mode; true for encryption </para>
+</section>
+<anchor xml:id="_structqsc__rcs__state_1a16bc67e3e7cd6e690a86326d9dc4191d"/><section>
+    <title>kstate</title>
+<indexterm><primary>kstate</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>kstate</secondary></indexterm>
+<para><computeroutput><link linkend="_structqsc__pmac__state">qsc_pmac_state</link> kstate</computeroutput></para>
+<para>The PMAC state structure </para>
+</section>
+<anchor xml:id="_structqsc__rcs__state_1a7e3e2a3d55ef5a060a4ea50ff088cc93"/><section>
+    <title>nonce</title>
+<indexterm><primary>nonce</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>nonce</secondary></indexterm>
+<para><computeroutput>uint8_t nonce[<link linkend="_rcs_8h_1a790b62fe878b8e489d86da685a0f268e">QSC_RCS_NONCE_SIZE</link>]</computeroutput></para>
+<para>The nonce or initialization vector </para>
+</section>
+<anchor xml:id="_structqsc__rcs__state_1a44bdbbaee0cf6de6912ae93ee8dc5702"/><section>
+    <title>roundkeylen</title>
+<indexterm><primary>roundkeylen</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>roundkeylen</secondary></indexterm>
+<para><computeroutput>size_t roundkeylen</computeroutput></para>
+<para>The round-key array length </para>
+</section>
+<anchor xml:id="_structqsc__rcs__state_1a9232ecb195cf082110caad41c6cc3bf8"/><section>
+    <title>roundkeys</title>
+<indexterm><primary>roundkeys</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>roundkeys</secondary></indexterm>
+<para><computeroutput>uint32_t roundkeys[248]</computeroutput></para>
+<para>The round-keys 32-bit sub-key array </para>
+</section>
+<anchor xml:id="_structqsc__rcs__state_1a79c090aba458c743cdbf8585f7a058c9"/><section>
+    <title>rounds</title>
+<indexterm><primary>rounds</primary><secondary>qsc_rcs_state</secondary></indexterm>
+<indexterm><primary>qsc_rcs_state</primary><secondary>rounds</secondary></indexterm>
+<para><computeroutput>size_t rounds</computeroutput></para>
+<para>The number of transformation rounds </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_rcs_8h">rcs.h</link></section>
+</section>

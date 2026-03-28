@@ -1,0 +1,594 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_common_8h_source" xml:lang="en-US">
+<title>common.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/common.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 
+42 <emphasis role="preprocessor">#ifndef&#32;QSC_COMMON_H</emphasis>
+43 <emphasis role="preprocessor">#define&#32;QSC_COMMON_H</emphasis>
+44 
+45 <emphasis role="preprocessor">#include&#32;&lt;assert.h&gt;</emphasis>
+46 <emphasis role="preprocessor">#include&#32;&lt;errno.h&gt;</emphasis>
+47 <emphasis role="preprocessor">#include&#32;&lt;stdbool.h&gt;</emphasis>
+48 <emphasis role="preprocessor">#include&#32;&lt;stdint.h&gt;</emphasis>
+49 <emphasis role="preprocessor">#include&#32;&lt;limits.h&gt;</emphasis>
+50 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>
+51 
+56 
+61 
+62 <emphasis role="comment">/*&#32;Quantum&#32;Secure&#32;Cryptographic&#32;library&#32;in&#32;C&#32;(QSC)&#32;*/</emphasis>
+63 
+68 
+73 <emphasis role="preprocessor">#if&#32;defined(_MSC_VER)</emphasis>
+74 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_MSC</emphasis>
+75 <emphasis role="preprocessor">#elif&#32;defined(__MINGW32__)</emphasis>
+76 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_MINGW</emphasis>
+77 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_GCC</emphasis>
+78 <emphasis role="preprocessor">#elif&#32;defined(__CC_ARM)</emphasis>
+79 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_ARM</emphasis>
+80 <emphasis role="preprocessor">#elif&#32;defined(__BORLANDC__)</emphasis>
+81 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_BORLAND</emphasis>
+82 <emphasis role="preprocessor">#elif&#32;defined(__GNUC__)</emphasis>
+83 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_GCC</emphasis>
+84 <emphasis role="preprocessor">#elif&#32;defined(__clang__)</emphasis>
+85 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_CLANG</emphasis>
+86 <emphasis role="preprocessor">#elif&#32;defined(__IBMC__)&#32;||&#32;defined(__IBMCPP__)</emphasis>
+87 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_IBM</emphasis>
+88 <emphasis role="preprocessor">#elif&#32;defined(__INTEL_COMPILER)&#32;||&#32;defined(__ICL)</emphasis>
+89 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_INTEL</emphasis>
+90 <emphasis role="preprocessor">#elif&#32;defined(__MWERKS__)</emphasis>
+91 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_MWERKS</emphasis>
+92 <emphasis role="preprocessor">#elif&#32;defined(__OPEN64__)</emphasis>
+93 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_OPEN64</emphasis>
+94 <emphasis role="preprocessor">#elif&#32;defined(__SUNPRO_C)</emphasis>
+95 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_SUNPRO</emphasis>
+96 <emphasis role="preprocessor">#elif&#32;defined(__TURBOC__)</emphasis>
+97 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_COMPILER_TURBO</emphasis>
+98 <emphasis role="preprocessor">#endif</emphasis>
+99 
+104 <emphasis role="preprocessor">#if&#32;defined(_WIN64)&#32;||&#32;defined(_WIN32)&#32;||&#32;defined(__WIN64__)&#32;||&#32;defined(__WIN32__)</emphasis>
+105 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;!defined(QSC_SYSTEM_OS_WINDOWS)</emphasis>
+106 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_WINDOWS</emphasis>
+107 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+108 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(_WIN64)</emphasis>
+109 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ISWIN64</emphasis>
+110 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(_WIN32)</emphasis>
+111 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ISWIN32</emphasis>
+112 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+113 <emphasis role="preprocessor">#elif&#32;defined(__ANDROID__)</emphasis>
+114 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_ANDROID</emphasis>
+115 <emphasis role="preprocessor">#elif&#32;defined(__APPLE__)&#32;||&#32;defined(__MACH__)</emphasis>
+116 <emphasis role="preprocessor">#&#32;&#32;&#32;include&#32;&quot;TargetConditionals.h&quot;</emphasis>
+117 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_APPLE</emphasis>
+118 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_BSD</emphasis>
+119 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(TARGET_OS_IPHONE)&#32;&amp;&amp;&#32;defined(TARGET_IPHONE_SIMULATOR)</emphasis>
+120 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ISIPHONESIM</emphasis>
+121 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;TARGET_OS_IPHONE</emphasis>
+122 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ISIPHONE</emphasis>
+123 <emphasis role="preprocessor">#&#32;&#32;&#32;else</emphasis>
+124 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ISOSX</emphasis>
+125 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+126 <emphasis role="preprocessor">#elif&#32;defined(__FreeBSD__)&#32;||&#32;defined(__NetBSD__)&#32;||&#32;defined(__OpenBSD__)&#32;||&#32;defined(__bsdi__)&#32;||&#32;defined(__DragonFly__)&#32;||&#32;defined(QSC_SYSTEM_ISOSX)</emphasis>
+127 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_BSD</emphasis>
+128 <emphasis role="preprocessor">#elif&#32;defined(__linux)&#32;||&#32;defined(__linux__)&#32;||&#32;defined(__gnu_linux__&#32;)</emphasis>
+129 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_LINUX</emphasis>
+130 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;errno_t;
+131 <emphasis role="preprocessor">#elif&#32;defined(__unix)&#32;||&#32;defined(__unix__)</emphasis>
+132 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_UNIX</emphasis>
+133 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(__hpux)&#32;||&#32;defined(hpux)</emphasis>
+134 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_HPUX</emphasis>
+135 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+136 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(__sun__)&#32;||&#32;defined(__sun)&#32;||&#32;defined(sun)</emphasis>
+137 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_SUNUX</emphasis>
+138 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+139 <emphasis role="preprocessor">#endif</emphasis>
+140 
+141 <emphasis role="preprocessor">#if&#32;defined(__posix)&#32;||&#32;defined(__posix__)&#32;||&#32;defined(__USE_POSIX)&#32;||&#32;defined(_POSIX_VERSION)&#32;||&#32;defined(QSC_SYSTEM_OS_APPLE)</emphasis><emphasis role="preprocessor"></emphasis>
+146 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OS_POSIX</emphasis>
+147 <emphasis role="preprocessor">#endif</emphasis>
+148 
+149 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_OS_WINDOWS)&#32;&amp;&amp;&#32;defined(QSC_SYSTEM_COMPILER_MSC)</emphasis><emphasis role="preprocessor"></emphasis>
+154 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_WINDOWS_VSTUDIO_BUILD</emphasis>
+155 <emphasis role="preprocessor">#endif</emphasis>
+156 
+157 <emphasis role="preprocessor">#if&#32;defined(_OPENMP)</emphasis>
+158 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPENMP</emphasis>
+159 <emphasis role="preprocessor">#endif</emphasis>
+160 
+161 <emphasis role="preprocessor">#if&#32;defined(DEBUG)&#32;||&#32;defined(_DEBUG)&#32;||&#32;defined(__DEBUG__)&#32;||&#32;(defined(__GNUC__)&#32;&amp;&amp;&#32;!defined(__OPTIMIZE__))</emphasis><emphasis role="preprocessor"></emphasis>
+166 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_DEBUG_MODE</emphasis>
+167 <emphasis role="preprocessor">#endif</emphasis>
+168 
+173 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_COMPILER_MSC)</emphasis>
+174 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(_M_X64)&#32;||&#32;defined(_M_AMD64)</emphasis>
+175 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86_64</emphasis>
+176 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86</emphasis>
+177 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(_M_AMD64)</emphasis>
+178 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_AMD64</emphasis>
+179 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+180 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(_M_IX86)&#32;||&#32;defined(_X86_)</emphasis>
+181 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86_32</emphasis>
+182 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86</emphasis>
+183 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(_M_ARM)</emphasis>
+184 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_ARM</emphasis>
+185 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(_M_ARM_ARMV7VE)</emphasis>
+186 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_ARMV7VE</emphasis>
+187 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif&#32;defined(_M_ARM_FP)</emphasis>
+188 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_ARMFP</emphasis>
+189 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif&#32;defined(_M_ARM64)</emphasis>
+190 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_ARM64</emphasis>
+191 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+192 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(_M_IA64)</emphasis>
+193 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IA64</emphasis>
+194 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+195 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_GCC)</emphasis>
+196 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(__amd64__)&#32;||&#32;defined(__amd64)&#32;||&#32;defined(__x86_64__)&#32;||&#32;defined(__x86_64)</emphasis>
+197 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86_64</emphasis>
+198 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86</emphasis>
+199 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(_M_AMD64)</emphasis>
+200 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_AMD64</emphasis>
+201 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+202 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(i386)&#32;||&#32;defined(__i386)&#32;||&#32;defined(__i386__)</emphasis>
+203 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86_32</emphasis>
+204 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IX86</emphasis>
+205 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(__arm__)</emphasis>
+206 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_ARM</emphasis>
+207 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(__aarch64__)</emphasis>
+208 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_ARM64</emphasis>
+209 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+210 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(__ia64)&#32;||&#32;defined(__ia64__)&#32;||&#32;defined(__itanium__)</emphasis>
+211 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_IA64</emphasis>
+212 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(__powerpc64__)&#32;||&#32;defined(__ppc64__)&#32;||&#32;defined(__PPC64__)&#32;||&#32;defined(__64BIT__)&#32;||&#32;defined(_LP64)&#32;||&#32;defined(__LP64__)</emphasis>
+213 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_PPC</emphasis>
+214 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(__sparc)&#32;||&#32;defined(__sparc__)</emphasis>
+215 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_SPARC</emphasis>
+216 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(__sparc64__)</emphasis>
+217 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_ARCH_SPARC64</emphasis>
+218 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+219 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+220 <emphasis role="preprocessor">#endif</emphasis>
+221 
+226 <emphasis role="preprocessor">#if&#32;defined(_WIN64)&#32;||&#32;defined(_WIN32)&#32;||&#32;defined(__CYGWIN__)</emphasis>
+227 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_SOCKETS_WINDOWS</emphasis>
+228 <emphasis role="preprocessor">#else</emphasis>
+229 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_SOCKETS_BERKELY</emphasis>
+230 <emphasis role="preprocessor">#endif</emphasis>
+231 
+236 <emphasis role="preprocessor">#if&#32;!defined(__clang__)&#32;&amp;&amp;&#32;!defined(__GNUC__)</emphasis>
+237 <emphasis role="preprocessor">#&#32;&#32;&#32;ifdef&#32;__attribute__</emphasis>
+238 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;undef&#32;__attribute__</emphasis>
+239 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+240 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;__attribute__(a)</emphasis>
+241 <emphasis role="preprocessor">#endif</emphasis>
+242 
+247 <emphasis role="preprocessor">#if&#32;defined(_DLL)</emphasis>
+248 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_DLL_API</emphasis>
+249 <emphasis role="preprocessor">#endif</emphasis><emphasis role="preprocessor"></emphasis>
+254 <emphasis role="preprocessor">#if&#32;defined(QSC_DLL_API)</emphasis>
+255 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(QSC_SYSTEM_COMPILER_MSC)</emphasis>
+256 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(QSC_DLL_IMPORT)</emphasis>
+257 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;__declspec(dllimport)</emphasis>
+258 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+259 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;__declspec(dllexport)</emphasis>
+260 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+261 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(QSC_SYSTEM_COMPILER_GCC)</emphasis>
+262 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(QSC_DLL_IMPORT)</emphasis>
+263 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;__attribute__((dllimport))</emphasis>
+264 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+265 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;__attribute__((dllexport))</emphasis>
+266 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+267 <emphasis role="preprocessor">#&#32;&#32;&#32;else</emphasis>
+268 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;defined(__SUNPRO_C)</emphasis>
+269 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;!defined(__GNU_C__)</emphasis>
+270 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;__attribute__&#32;(visibility(__global))</emphasis>
+271 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+272 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;__attribute__&#32;__global</emphasis>
+273 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+274 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif&#32;defined(_MSG_VER)</emphasis>
+275 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;extern&#32;__declspec(dllexport)</emphasis>
+276 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+277 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_EXPORT_API&#32;__attribute__&#32;((visibility&#32;(&quot;default&quot;)))</emphasis>
+278 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+279 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+280 <emphasis role="preprocessor">#else</emphasis>
+281 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_EXPORT_API</emphasis>
+282 <emphasis role="preprocessor">#endif</emphasis>
+283 
+288 <emphasis role="preprocessor">#if&#32;defined(__GNUC__)</emphasis>
+289 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_CACHE_ALIGNED&#32;__attribute__((aligned(64)))</emphasis>
+290 <emphasis role="preprocessor">#elif&#32;defined(_MSC_VER)</emphasis>
+291 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_CACHE_ALIGNED&#32;__declspec(align(64))</emphasis>
+292 <emphasis role="preprocessor">#endif</emphasis>
+293 
+294 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_ARCH_IX86_64)&#32;||&#32;defined(QSC_SYSTEM_ARCH_ARM64)&#32;||&#32;defined(QSC_SYSTEM_ARCH_IA64)&#32;||&#32;defined(QSC_SYSTEM_ARCH_AMD64)&#32;||&#32;defined(QSC_SYSTEM_ARCH_ARM64)&#32;||&#32;defined(QSC_SYSTEM_ARCH_SPARC64)</emphasis><emphasis role="preprocessor"></emphasis>
+299 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_IS_X64</emphasis>
+300 <emphasis role="preprocessor">#else</emphasis><emphasis role="preprocessor"></emphasis>
+305 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_IS_X86</emphasis>
+306 <emphasis role="preprocessor">#endif</emphasis>
+307 
+312 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_IS_X64)</emphasis>
+313 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIZE_MAX&#32;UINT64_MAX</emphasis>
+314 <emphasis role="preprocessor">#else</emphasis>
+315 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIZE_MAX&#32;UINT32_MAX</emphasis>
+316 <emphasis role="preprocessor">#endif</emphasis>
+317 
+322 <emphasis role="preprocessor">#define&#32;QSC_SYSTEM_IS_LITTLE_ENDIAN&#32;(((union&#32;{&#32;uint32_t&#32;x;&#32;uint8_t&#32;c;&#32;}){1}).c)</emphasis>
+323 
+324 <emphasis role="preprocessor">#if&#32;(!defined(QSC_SYSTEM_IS_LITTLE_ENDIAN))</emphasis>
+325 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(__sparc)&#32;||&#32;defined(__sparc__)&#32;||&#32;defined(__hppa__)&#32;||&#32;defined(__PPC__)&#32;||&#32;defined(__mips__)&#32;||&#32;defined(__MWERKS__)&#32;&amp;&amp;&#32;(!defined(__INTEL__))</emphasis><emphasis role="preprocessor"></emphasis>
+330 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_IS_BIG_ENDIAN</emphasis>
+331 <emphasis role="preprocessor">#&#32;&#32;&#32;else</emphasis><emphasis role="preprocessor"></emphasis>
+336 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_IS_LITTLE_ENDIAN</emphasis>
+337 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+338 <emphasis role="preprocessor">#endif</emphasis>
+339 
+344 <emphasis role="preprocessor">#if&#32;!defined(QSC_ALIGN)</emphasis>
+345 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(__GNUC__)&#32;||&#32;defined(__clang__)</emphasis>
+346 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_ALIGN(x)&#32;&#32;__attribute__((aligned(x)))</emphasis>
+347 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(_MSC_VER)</emphasis>
+348 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_ALIGN(x)&#32;&#32;__declspec(align(x))</emphasis>
+349 <emphasis role="preprocessor">#&#32;&#32;&#32;else</emphasis>
+350 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_ALIGN(x)</emphasis>
+351 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+352 <emphasis role="preprocessor">#endif</emphasis>
+353 
+358 <emphasis role="preprocessor">#if&#32;defined(__SIZEOF_INT128__)&#32;&amp;&amp;&#32;defined(QSC_SYSTEM_IS_X64)&#32;&amp;&amp;&#32;!defined(__xlc__)&#32;&amp;&amp;&#32;!&#32;defined(uint128_t)</emphasis>
+359 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_NATIVE_UINT128</emphasis>
+360 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Prefer&#32;TI&#32;mode&#32;over&#32;__int128&#32;as&#32;GCC&#32;rejects&#32;the&#32;latter&#32;in&#32;pedantic&#32;mode&#32;*/</emphasis>
+361 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(__GNUC__)&#32;</emphasis><emphasis role="comment">/*&#32;was&#32;__GNUG__?&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;uint32_t&#32;uint128_t&#32;__attribute__((mode(TI)));
+363 <emphasis role="preprocessor">#&#32;&#32;&#32;else</emphasis>
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__int128&#32;uint128_t;
+365 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+366 <emphasis role="preprocessor">#endif</emphasis>
+367 
+372 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_NATIVE_UINT128)</emphasis>
+373 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+374 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+375 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;const&#32;uint128_t&#32;r&#32;=&#32;(uint128_t)(X)&#32;*&#32;Y;&#32;&#32;&#32;\</emphasis>
+376 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;*High&#32;=&#32;(r&#32;&gt;&gt;&#32;64)&#32;&amp;&#32;0xFFFFFFFFFFFFFFFFULL;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+377 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;*Low&#32;=&#32;(r)&#32;&amp;&#32;0xFFFFFFFFFFFFFFFFULL;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+378 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;}&#32;while(0)</emphasis>
+379 
+380 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_MSC)&#32;&amp;&amp;&#32;defined(QSC_SYSTEM_IS_X64)</emphasis>
+381 <emphasis role="preprocessor">#&#32;&#32;&#32;include&#32;&lt;intrin.h&gt;</emphasis>
+382 <emphasis role="preprocessor">#&#32;&#32;&#32;pragma&#32;intrinsic(_umul128)</emphasis>
+383 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+384 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+385 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*Low&#32;=&#32;_umul128(X,&#32;Y,&#32;High);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+386 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;}&#32;while(0)</emphasis>
+387 
+388 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_GCC)</emphasis>
+389 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(QSC_SYSTEM_ARCH_IX86)</emphasis>
+390 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+391 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+392 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;asm(&quot;mulq&#32;%3&quot;&#32;:&#32;&quot;=d&quot;&#32;(*High),&#32;&quot;=X&quot;&#32;(*Low)&#32;:&#32;&quot;X&quot;&#32;(X),&#32;&quot;rm&quot;&#32;(Y)&#32;:&#32;&quot;cc&quot;);&#32;&#32;\</emphasis>
+393 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;while(0)</emphasis>
+394 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(QSC_SYSTEM_ARCH_ALPHA)</emphasis>
+395 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+396 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+397 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;asm(&quot;umulh&#32;%1,%2,%0&quot;&#32;:&#32;&quot;=r&quot;&#32;(*High)&#32;:&#32;&quot;r&quot;&#32;(X),&#32;&quot;r&quot;&#32;(Y));&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+398 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*Low&#32;=&#32;X&#32;*&#32;Y;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+399 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;while(0)</emphasis>
+400 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(QSC_SYSTEM_ARCH_IA64)</emphasis>
+401 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+402 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+403 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;asm(&quot;xmpy.hu&#32;%0=%1,%2&quot;&#32;:&#32;&quot;=f&quot;&#32;(*High)&#32;:&#32;&quot;f&quot;&#32;(X),&#32;&quot;f&quot;&#32;(Y));&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+404 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*Low&#32;=&#32;X&#32;*&#32;Y;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+405 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;while(0)</emphasis>
+406 <emphasis role="preprocessor">#&#32;&#32;&#32;elif&#32;defined(QSC_SYSTEM_ARCH_PPC)</emphasis>
+407 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+408 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+409 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;asm(&quot;mulhdu&#32;%0,%1,%2&quot;&#32;:&#32;&quot;=r&quot;&#32;(*High)&#32;:&#32;&quot;r&quot;&#32;(X),&#32;&quot;r&quot;&#32;(Y)&#32;:&#32;&quot;cc&quot;);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+410 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*Low&#32;=&#32;X&#32;*&#32;Y;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+411 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;while(0)</emphasis>
+412 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+413 <emphasis role="preprocessor">#endif</emphasis>
+414 
+419 <emphasis role="preprocessor">#define&#32;QSC_SYSTEM_MAX_PATH&#32;260</emphasis>
+420 
+425 <emphasis role="preprocessor">#define&#32;QSC_SYSTEM_SECMEMALLOC_DEFAULT&#32;4096</emphasis>
+426 
+431 <emphasis role="preprocessor">#define&#32;QSC_SYSTEM_SECMEMALLOC_MIN&#32;16</emphasis>
+432 
+437 <emphasis role="preprocessor">#define&#32;QSC_SYSTEM_SECMEMALLOC_MAX&#32;128</emphasis>
+438 
+443 <emphasis role="preprocessor">#define&#32;QSC_SYSTEM_SECMEMALLOC_MAXKB&#32;512</emphasis>
+444 
+445 <emphasis role="preprocessor">#if&#32;defined(_WIN32)</emphasis><emphasis role="preprocessor"></emphasis>
+450 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_VIRTUAL_LOCK</emphasis>
+451 
+456 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_RTL_SECURE_MEMORY</emphasis>
+457 <emphasis role="preprocessor">#endif</emphasis>
+458 
+459 <emphasis role="preprocessor">#if&#32;defined(_POSIX_MEMLOCK_RANGE)</emphasis><emphasis role="preprocessor"></emphasis>
+464 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_POSIX_MLOCK</emphasis>
+465 <emphasis role="preprocessor">#endif</emphasis>
+466 
+467 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_VIRTUAL_LOCK)&#32;||&#32;defined(QSC_SYSTEM_POSIX_MLOCK)</emphasis><emphasis role="preprocessor"></emphasis>
+472 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_SECURE_ALLOCATOR</emphasis>
+473 <emphasis role="preprocessor">#endif</emphasis>
+474 
+479 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_COMPILER_MSC)</emphasis>
+480 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_IGNORE&#32;__pragma(optimize(&quot;&quot;,&#32;off))</emphasis>
+481 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_GCC)&#32;||&#32;defined(QSC_SYSTEM_COMPILER_MINGW)</emphasis>
+482 <emphasis role="preprocessor">#if&#32;defined(__clang__)</emphasis>
+483 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_IGNORE&#32;__attribute__((optnone))</emphasis>
+484 <emphasis role="preprocessor">#else</emphasis>
+485 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_IGNORE&#32;__attribute__((optimize(&quot;O0&quot;)))</emphasis>
+486 <emphasis role="preprocessor">#endif</emphasis>
+487 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_CLANG)</emphasis>
+488 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_IGNORE&#32;__attribute__((optnone))</emphasis>
+489 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_INTEL)</emphasis>
+490 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_IGNORE&#32;pragma&#32;optimize(&quot;&quot;,&#32;off)</emphasis>
+491 <emphasis role="preprocessor">#else</emphasis>
+492 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_IGNORE</emphasis>
+493 <emphasis role="preprocessor">#endif</emphasis>
+494 
+499 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_COMPILER_MSC)</emphasis>
+500 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_RESUME&#32;__pragma(optimize(&quot;&quot;,&#32;on))</emphasis>
+501 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_GCC)&#32;||&#32;defined(QSC_SYSTEM_COMPILER_MINGW)</emphasis>
+502 <emphasis role="preprocessor">#if&#32;defined(__clang__)</emphasis>
+503 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_RESUME</emphasis>
+504 <emphasis role="preprocessor">#else</emphasis>
+505 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_RESUME&#32;_Pragma(&quot;GCC&#32;diagnostic&#32;pop&quot;)</emphasis>
+506 <emphasis role="preprocessor">#endif</emphasis>
+507 <emphasis role="preprocessor">#elif&#32;defined(CEX_COMPILER_INTEL)</emphasis>
+508 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_RESUME&#32;pragma&#32;optimize(&quot;&quot;,&#32;on)</emphasis>
+509 <emphasis role="preprocessor">#else</emphasis>
+510 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_OPTIMIZE_RESUME</emphasis>
+511 <emphasis role="preprocessor">#endif</emphasis>
+512 
+517 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_COMPILER_MSC)</emphasis>
+518 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_CONDITION_IGNORE(x)&#32;__pragma(warning(disable&#32;:&#32;x))</emphasis>
+519 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_COMPILER_GCC)&#32;||&#32;defined(QSC_SYSTEM_COMPILER_MINGW)</emphasis>
+520 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_CONDITION_IGNORE(x)&#32;_Pragma(&quot;GCC&#32;diagnostic&#32;push&quot;)&#32;_Pragma(&quot;GCC&#32;diagnostic&#32;ignored&#32;\&quot;-Wunused-parameter\&quot;&quot;)</emphasis>
+521 <emphasis role="preprocessor">#elif&#32;defined(CEX_COMPILER_INTEL)</emphasis>
+522 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_CONDITION_IGNORE(x)</emphasis>
+523 <emphasis role="preprocessor">#else</emphasis>
+524 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_CONDITION_IGNORE(x)</emphasis>
+525 <emphasis role="preprocessor">#endif</emphasis>
+526 
+527 <emphasis role="comment">/*&#32;intrinsics&#32;support&#32;level&#32;*/</emphasis>
+528 
+529 <emphasis role="preprocessor">#if&#32;(_MSC_VER&#32;&gt;=&#32;1600)</emphasis><emphasis role="preprocessor"></emphasis>
+534 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_WMMINTRIN_H&#32;1</emphasis>
+535 <emphasis role="preprocessor">#endif</emphasis>
+536 <emphasis role="preprocessor">#if&#32;(_MSC_VER&#32;&gt;=&#32;1700)&#32;&amp;&amp;&#32;(defined(_M_X64))</emphasis><emphasis role="preprocessor"></emphasis>
+541 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_HAVE_AVX2INTRIN_H&#32;1</emphasis>
+542 <emphasis role="preprocessor">#endif</emphasis>
+543 
+544 <emphasis role="comment">/*</emphasis>
+545 <emphasis role="comment">*&#32;AVX512&#32;Capabilities&#32;Check</emphasis>
+546 <emphasis role="comment">*&#32;https://software.intel.com/en-us/intel-cplusplus-compiler-16.0-user-and-reference-guide</emphasis>
+547 <emphasis role="comment">*&#32;https://software.intel.com/en-us/articles/compiling-for-the-intel-xeon-phi-processor-and-the-intel-avx-512-isa</emphasis>
+548 <emphasis role="comment">*&#32;https://colfaxresearch.com/knl-avx512/</emphasis>
+549 <emphasis role="comment">*</emphasis>
+550 <emphasis role="comment">*&#32;#include&#32;&lt;immintrin.h&gt;</emphasis>
+551 <emphasis role="comment">*&#32;supported&#32;is&#32;1:&#32;ex.&#32;__AVX512CD__&#32;1</emphasis>
+552 <emphasis role="comment">*&#32;F&#32;&#32;&#32;&#32;&#32;__AVX512F__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Foundation</emphasis>
+553 <emphasis role="comment">*&#32;CD&#32;&#32;&#32;&#32;__AVX512CD__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Conflict&#32;Detection&#32;Instructions(CDI)</emphasis>
+554 <emphasis role="comment">*&#32;ER&#32;&#32;&#32;&#32;__AVX512ER__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Exponential&#32;and&#32;Reciprocal&#32;Instructions(ERI)</emphasis>
+555 <emphasis role="comment">*&#32;PF&#32;&#32;&#32;&#32;__AVX512PF__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Pre-fetch&#32;Instructions(PFI)</emphasis>
+556 <emphasis role="comment">*&#32;DQ&#32;&#32;&#32;&#32;__AVX512DQ__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Double-word&#32;and&#32;Quadword&#32;Instructions(DQ)</emphasis>
+557 <emphasis role="comment">*&#32;BW&#32;&#32;&#32;&#32;__AVX512BW__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte&#32;and&#32;Word&#32;Instructions(BW)</emphasis>
+558 <emphasis role="comment">*&#32;VL&#32;&#32;&#32;&#32;__AVX512VL__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Vector&#32;Length&#32;Extensions(VL)</emphasis>
+559 <emphasis role="comment">*&#32;IFMA&#32;&#32;__AVX512IFMA__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Integer&#32;Fused&#32;Multiply&#32;Add(IFMA)</emphasis>
+560 <emphasis role="comment">*&#32;VBMI&#32;&#32;__AVX512VBMI__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Vector&#32;Byte&#32;Manipulation&#32;Instructions(VBMI)</emphasis>
+561 <emphasis role="comment">*&#32;VNNIW&#32;__AVX5124VNNIW__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Vector&#32;instructions&#32;for&#32;deep&#32;learning&#32;enhanced&#32;word&#32;variable&#32;precision</emphasis>
+562 <emphasis role="comment">*&#32;FMAPS&#32;__AVX5124FMAPS__&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Vector&#32;instructions&#32;for&#32;deep&#32;learning&#32;floating&#32;-&#32;point&#32;single&#32;precision</emphasis>
+563 <emphasis role="comment">*&#32;VPOPCNT&#32;&#32;&#32;__AVX512VPOPCNTDQ__&#32;&#32;&#32;&#32;&#32;?</emphasis>
+564 <emphasis role="comment">*</emphasis>
+565 <emphasis role="comment">*&#32;Note:&#32;AVX512&#32;is&#32;currently&#32;untested,&#32;this&#32;flag&#32;enables&#32;support&#32;on&#32;a&#32;compliant&#32;system</emphasis>
+566 <emphasis role="comment">*/</emphasis>
+567 
+568 <emphasis role="comment">/*&#32;Enable&#32;this&#32;define&#32;to&#32;support&#32;AVX512&#32;on&#32;a&#32;compatible&#32;system&#32;*/</emphasis>
+569 <emphasis role="comment">/*#define&#32;CEX_AVX512_SUPPORTED*/</emphasis>
+570 
+571 <emphasis role="preprocessor">#if&#32;defined(__AVX512F__)&#32;&amp;&amp;&#32;(__AVX512F__&#32;==&#32;1)</emphasis><emphasis role="preprocessor"></emphasis>
+576 <emphasis role="preprocessor">#&#32;&#32;&#32;include&#32;&lt;immintrin.h&gt;</emphasis>
+577 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;(!defined(__AVX512__))</emphasis>
+578 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;__AVX512__</emphasis>
+579 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+580 <emphasis role="preprocessor">#endif</emphasis>
+581 
+582 <emphasis role="preprocessor">#if&#32;defined(__SSE2__)</emphasis><emphasis role="preprocessor"></emphasis>
+587 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_SSE2</emphasis>
+588 <emphasis role="preprocessor">#endif</emphasis>
+589 
+590 <emphasis role="preprocessor">#if&#32;defined(__SSE3__)</emphasis><emphasis role="preprocessor"></emphasis>
+595 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_SSE3</emphasis>
+596 <emphasis role="preprocessor">#endif</emphasis>
+597 
+598 <emphasis role="preprocessor">#if&#32;defined(__SSSE3__)</emphasis><emphasis role="preprocessor"></emphasis>
+603 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_SSSE3</emphasis>
+604 <emphasis role="preprocessor">#endif</emphasis>
+605 
+606 <emphasis role="preprocessor">#if&#32;defined(__SSE4_1__)</emphasis><emphasis role="preprocessor"></emphasis>
+611 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_SSE41</emphasis>
+612 <emphasis role="preprocessor">#endif</emphasis>
+613 
+614 <emphasis role="preprocessor">#if&#32;defined(__SSE4_2__)</emphasis><emphasis role="preprocessor"></emphasis>
+619 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_SSE42</emphasis>
+620 <emphasis role="preprocessor">#endif</emphasis>
+621 
+622 <emphasis role="preprocessor">#if&#32;defined(__AVX__)</emphasis><emphasis role="preprocessor"></emphasis>
+627 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_AVX</emphasis>
+628 <emphasis role="preprocessor">#endif</emphasis>
+629 
+630 <emphasis role="preprocessor">#if&#32;defined(__AVX2__)</emphasis><emphasis role="preprocessor"></emphasis>
+635 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_AVX2</emphasis>
+636 <emphasis role="preprocessor">#endif</emphasis>
+637 
+638 <emphasis role="preprocessor">#if&#32;defined(__AVX512__)</emphasis><emphasis role="preprocessor"></emphasis>
+643 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_AVX512</emphasis>
+644 <emphasis role="preprocessor">#endif</emphasis>
+645 <emphasis role="preprocessor">#if&#32;defined(__XOP__)</emphasis>
+646 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_HAS_XOP</emphasis>
+647 <emphasis role="preprocessor">#endif</emphasis>
+648 
+649 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_HAS_AVX)&#32;||&#32;defined(QSC_SYSTEM_HAS_AVX2)&#32;||&#32;defined(QSC_SYSTEM_HAS_AVX512)</emphasis><emphasis role="preprocessor"></emphasis>
+654 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SYSTEM_AVX_INTRINSICS</emphasis>
+655 <emphasis role="preprocessor">#endif</emphasis>
+656 
+661 <emphasis role="comment">/*#define&#32;QSC_ASM_ENABLED*/</emphasis>
+662 
+667 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_AVX_INTRINSICS)&#32;&amp;&amp;&#32;defined(QSC_SYSTEM_COMPILER_GCC)&#32;&amp;&amp;&#32;defined(QSC_ASM_ENABLED)</emphasis>
+668 <emphasis role="comment">/*&#32;#&#32;&#32;&#32;&#32;define&#32;QSC_GCC_ASM_ENABLED&#32;*/</emphasis>
+669 <emphasis role="preprocessor">#endif</emphasis>
+670 
+675 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_HAS_AVX512)</emphasis>
+676 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGN&#32;QSC_ALIGN(64)</emphasis>
+677 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGNMENT&#32;64</emphasis>
+678 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_HAS_AVX2)</emphasis>
+679 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGN&#32;QSC_ALIGN(32)</emphasis>
+680 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGNMENT&#32;32</emphasis>
+681 <emphasis role="preprocessor">#elif&#32;defined(QSC_SYSTEM_HAS_AVX)</emphasis>
+682 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGN&#32;QSC_ALIGN(16)</emphasis>
+683 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGNMENT&#32;16</emphasis>
+684 <emphasis role="preprocessor">#else</emphasis>
+685 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGN</emphasis>
+686 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_SIMD_ALIGNMENT&#32;8</emphasis>
+687 <emphasis role="preprocessor">#endif</emphasis>
+688 
+689 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_AVX_INTRINSICS)</emphasis><emphasis role="preprocessor"></emphasis>
+694 <emphasis role="preprocessor">#&#32;&#32;&#32;define&#32;QSC_RDRAND_COMPATIBLE</emphasis>
+695 <emphasis role="preprocessor">#endif</emphasis>
+696 
+701 <emphasis role="preprocessor">#define&#32;QSC_STATUS_SUCCESS&#32;0</emphasis>
+702 
+707 <emphasis role="preprocessor">#define&#32;QSC_STATUS_FAILURE&#32;-1</emphasis>
+708 
+709 
+710 <emphasis role="comment">/*&#32;User&#32;Modifiable&#32;Values</emphasis>
+711 <emphasis role="comment">*&#32;Modifiable&#32;values&#32;that&#32;determine&#32;which&#32;parameter&#32;sets&#32;and&#32;options&#32;get&#32;compiled.</emphasis>
+712 <emphasis role="comment">*&#32;These&#32;values&#32;can&#32;be&#32;tuned&#32;by&#32;the&#32;user&#32;to&#32;enable/disable&#32;features&#32;for&#32;a&#32;specific&#32;environment,&#32;or&#32;hardware&#32;configuration.</emphasis>
+713 <emphasis role="comment">*&#32;This&#32;list&#32;also&#32;includes&#32;the&#32;asymmetric&#32;cipher&#32;and&#32;signature&#32;scheme&#32;parameter&#32;set&#32;options.</emphasis>
+714 <emphasis role="comment">*/</emphasis>
+715 
+721 <emphasis role="preprocessor">#if&#32;!defined(QSC_SYSTEM_AESNI_ENABLED)</emphasis>
+722 <emphasis role="preprocessor">#&#32;&#32;&#32;if&#32;defined(QSC_SYSTEM_AVX_INTRINSICS)</emphasis>
+723 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;define&#32;QSC_SYSTEM_AESNI_ENABLED</emphasis>
+724 <emphasis role="preprocessor">#&#32;&#32;&#32;endif</emphasis>
+725 <emphasis role="preprocessor">#endif</emphasis>
+726 
+732 <emphasis role="comment">/*#define&#32;QSC_KECCAK_UNROLLED_PERMUTATION*/</emphasis>
+733 
+734 <emphasis role="comment">/***&#32;Asymmetric&#32;Ciphers&#32;***/</emphasis>
+735 
+736 <emphasis role="comment">/***&#32;ECDH&#32;***/</emphasis>
+737 
+742 <emphasis role="preprocessor">#define&#32;QSC_ECDH_S1EC25519</emphasis>
+743 
+744 <emphasis role="comment">/***&#32;Kyber&#32;***/</emphasis>
+745 
+750 <emphasis role="comment">/*#define&#32;QSC_KYBER_S1P1632*/</emphasis>
+751 
+756 <emphasis role="comment">/*#define&#32;QSC_KYBER_S3P2400*/</emphasis>
+757 
+762 <emphasis role="preprocessor">#define&#32;QSC_KYBER_S5P3168</emphasis>
+763 
+769 <emphasis role="comment">/*#define&#32;QSC_KYBER_S6P3936*/</emphasis>
+770 
+771 <emphasis role="comment">/***&#32;McEliece&#32;***/</emphasis>
+772 
+777 <emphasis role="comment">/*#define&#32;QSC_MCELIECE_S1N3488T64*/</emphasis>
+778 
+783 <emphasis role="comment">/*#define&#32;QSC_MCELIECE_S3N4608T96*/</emphasis>
+784 
+789 <emphasis role="preprocessor">#define&#32;QSC_MCELIECE_S5N6688T128</emphasis>
+790 
+795 <emphasis role="comment">/*#define&#32;QSC_MCELIECE_S6N6960T119*/</emphasis>
+796 
+801 <emphasis role="comment">/*#define&#32;QSC_MCELIECE_S7N8192T128*/</emphasis>
+802 
+803 <emphasis role="comment">/***&#32;NTRU&#32;***/</emphasis>
+804 
+809 <emphasis role="comment">/*#define&#32;QSC_NTRU_S1HPS2048509*/</emphasis>
+810 
+815 <emphasis role="comment">/*#define&#32;QSC_NTRU_S3HPS2048677*/</emphasis>
+816 
+821 <emphasis role="preprocessor">#define&#32;QSC_NTRU_S5HPS4096821</emphasis>
+822 
+827 <emphasis role="comment">/*#define&#32;QSC_NTRU_S5HRSS701*/</emphasis>
+828 
+829 <emphasis role="comment">/***&#32;Signature&#32;Schemes&#32;***/</emphasis>
+830 
+831 <emphasis role="comment">/***&#32;Dilithium&#32;***/</emphasis>
+832 
+837 <emphasis role="comment">/*#define&#32;QSC_DILITHIUM_S1P2544*/</emphasis>
+838 
+843 <emphasis role="comment">/*#define&#32;QSC_DILITHIUM_S3P4016*/</emphasis>
+844 
+849 <emphasis role="preprocessor">#define&#32;QSC_DILITHIUM_S5P4880</emphasis>
+850 
+851 <emphasis role="comment">/***&#32;ECDSA&#32;***/</emphasis>
+852 
+857 <emphasis role="preprocessor">#define&#32;QSC_ECDSA_S1EC25519</emphasis>
+858 
+859 <emphasis role="comment">/***&#32;Falcon&#32;***/</emphasis>
+860 
+865 <emphasis role="comment">/*#define&#32;QSC_FALCON_S3SHAKE256F512*/</emphasis>
+866 
+871 <emphasis role="preprocessor">#define&#32;QSC_FALCON_S5SHAKE256F1024</emphasis>
+872 
+873 <emphasis role="comment">/***&#32;SphincsPlus&#32;***/</emphasis>
+874 
+879 <emphasis role="comment">/*#define&#32;QSC_SPHINCSPLUS_S1S128SHAKERF*/</emphasis>
+880 
+885 <emphasis role="comment">/*#define&#32;QSC_SPHINCSPLUS_S1S128SHAKERS*/</emphasis>
+886 
+891 <emphasis role="comment">/*#define&#32;QSC_SPHINCSPLUS_S3S192SHAKERF*/</emphasis>
+892 
+897 <emphasis role="comment">/*#define&#32;QSC_SPHINCSPLUS_S3S192SHAKERS*/</emphasis>
+898 
+903 <emphasis role="preprocessor">#define&#32;QSC_SPHINCSPLUS_S5S256SHAKERF</emphasis>
+904 
+909 <emphasis role="comment">/*#define&#32;QSC_SPHINCSPLUS_S5S256SHAKERS*/</emphasis>
+910 
+915 <emphasis role="comment">/*#define&#32;QSC_SPHINCSPLUS_S6S512SHAKERF*/</emphasis>
+916 
+921 <emphasis role="comment">/*#define&#32;QSC_SPHINCSPLUS_S6S512SHAKERS*/</emphasis>
+922 
+924 
+925 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

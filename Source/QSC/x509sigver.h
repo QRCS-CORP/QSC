@@ -49,86 +49,141 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSC_X509_QSC_VERIFY_H
-#define QSC_X509_QSC_VERIFY_H
+#ifndef QSC_X509_SIGVER_H
+#define QSC_X509_SIGVER_H
 
 #include "qsccommon.h"
-#include "x509verify.h"
-#include "x509sig.h"
-#include "x509spki.h"
-#include "ecdsa.h"
-#include "sha2.h"
-#include "sha3.h"
+#include "x509csr.h"
+#include "x509crl.h"
+#include "x509types.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file x509_qsc_verify.h
- * \brief QSC cryptographic verification adapter for the X.509 layer.
+ * \file x509sigver.h
+ * \brief QSC-backed X.509 certificate, CSR, CRL, and raw signed-data signature verification interface.
  *
  * \details
- * This header defines the callback adapter that binds the generic X.509
- * verification layer to the concrete QSC asymmetric and hash implementations
- * supplied by the library. The first implementation pass is intentionally
- * strict and supports only the X.509 signature profile that can be bound
- * directly and unambiguously to the current QSC NIST P-256 ECDSA API.
+ * This header defines the verification state container and helper functions used to verify signatures over X.509 certificates, 
+ * certificate revocation lists, certificate signing requests, and generic signed-data buffers using the QSC
+ * cryptographic back-end. The interface binds the X.509 object model to the underlying signature implementations 
+ * selected by the decoded signature algorithm and subject public key information.
  *
- * Supported certificate signature profile in this pass:
- *
- * - ecdsa-with-SHA256
- * - issuer public key algorithm id-ecPublicKey
- * - named curve prime256v1
- *
- * The current QSC P-256 verification API accepts a 64-byte raw signature
- * formatted as r[32] || s[32] prepended to the original message and verifies
- * the signature using an internal SHA2-256 digest computation. The adapter
- * therefore decodes the DER ECDSA signature value from the X.509 certificate,
- * converts it to raw fixed-width form, extracts the issuer public key
- * coordinates from SubjectPublicKeyInfo, builds the verification input buffer,
- * and calls qsc_ecnistp256_verify.
+ * The verification routines use a caller-supplied working buffer encapsulated by qsc_x509_verify_state so that signature 
+ * verification can reconstruct or stage the signed message representation without requiring internal dynamic allocation. 
+ * This is particularly important for DER-encoded TBS certificate, CRL, and CSR verification flows, and for large post-quantum signature schemes.
  */
 
 /*!
- * \brief The QSC X.509 crypto binding context.
+ * \struct qsc_x509_verify_state
+ * \brief Working state used by QSC-backed X.509 signature verification helpers.
  *
  * \details
- * The adapter uses caller supplied temporary storage to avoid dynamic
- * allocation. The signaturemessage buffer must be large enough to hold:
- *
- * QSC_ECNISTP256_SIGNATURE_SIZE + certificate->tbsdatalen
- *
- * for the largest certificate expected by the caller.
+ * This structure stores a caller-supplied scratch buffer used during signature
+ * verification. The verification routines use the preserved signed DER region
+ * supplied by the decoded object and stage algorithm-specific verification
+ * input in this buffer without treating normalized convenience fields as the
+ * canonical verification source.
  */
 typedef struct qsc_x509_verify_state_t
 {
-	uint8_t* signaturemessage;    /*!< The caller supplied verification input buffer. */
-	size_t signaturemessage_size; /*!< The size of the verification input buffer in bytes. */
+    uint8_t* signaturemessage;     /*!< Caller-supplied scratch buffer used to hold reconstructed or staged signed-message bytes. */
+    size_t signaturemessage_size;  /*!< The capacity of the \c signaturemessage buffer in bytes. */
 } qsc_x509_verify_state;
 
 /*!
- * \brief Initializes a QSC X.509 verification state structure.
+ * \brief Initialize a QSC X.509 verification state object.
  *
- * \param state: [qsc_x509_verify_state*] The verification state structure.
- * \param buffer: [uint8_t*] The caller supplied verification input buffer.
- * \param buflen: [size_t] The size of the verification input buffer in bytes.
+ * \details
+ * Associates the verification state with a caller-managed scratch buffer and
+ * records the available buffer capacity. This function shall be called before
+ * using the state object with the QSC-backed verification helpers.
+ *
+ * \param state: [struct] The verification state object to initialize.
+ * \param buffer: The caller-supplied scratch buffer.
+ * \param buflen: The capacity of the scratch buffer in bytes.
+ *
+ * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_qsc_verify_state_initialize(qsc_x509_verify_state* state, uint8_t* buffer, size_t buflen);
 
 /*!
- * \brief Verifies a certificate signature using the current QSC cryptographic bindings.
+ * \brief Verify a certificate signature using the issuer certificate and QSC back-end.
  *
  * \details
- * This function is intended to be passed as the callback argument to the
- * generic X.509 verification routines. The state argument must point to an
- * initialized qsc_x509_verify_state structure.
+ * Verifies the signature on the supplied certificate using the issuer
+ * certificate subject public key information and the signature algorithm
+ * declared by the certificate. Verification uses the preserved TBSCertificate
+ * DER bytes carried by the decoded certificate object and rejects inconsistent
+ * algorithm pairings before invoking the cryptographic back-end.
  *
- * \param certificate: [const qsc_x509_certificate*] The certificate being verified.
- * \param issuer: [const qsc_x509_certificate*] The issuer certificate.
- * \param state: [void*] A pointer to a qsc_x509_verify_state structure.
+ * \param certificate: [const][struct] The certificate whose signature is to be verified.
+ * \param issuer: [const][struct] The issuer certificate providing the verification public key.
+ * \param state: Caller-supplied verification state, typically a \ref qsc_x509_verify_state object.
  *
- * \return [bool] Returns true if the certificate signature is valid.
+ * \return Returns true if the certificate signature is valid; otherwise returns false.
  */
 QSC_EXPORT_API bool qsc_x509_qsc_signature_verify(const qsc_x509_certificate* certificate, const qsc_x509_certificate* issuer, void* state);
+
+/*!
+ * \brief Verify a CRL signature using the issuer certificate and QSC back-end.
+ *
+ * \details
+ * Verifies the signature on the supplied certificate revocation list using the
+ * issuer certificate subject public key information and the CRL signature
+ * algorithm metadata. Verification uses the preserved TBSCertList DER bytes
+ * carried by the decoded CRL object and rejects inconsistent algorithm
+ * pairings before invoking the cryptographic back-end.
+ *
+ * \param crl: [const][struct] The certificate revocation list whose signature is to be verified.
+ * \param issuer: [const][struct] The issuer certificate providing the verification public key.
+ * \param state: Caller-supplied verification state, typically a \ref qsc_x509_verify_state object.
+ *
+ * \return Returns true if the CRL signature is valid; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_qsc_crl_signature_verify(const qsc_x509_crl* crl, const qsc_x509_certificate* issuer, void* state);
+
+/*!
+ * \brief Verify a CSR signature using the CSR subject key and QSC back-end.
+ *
+ * \details
+ * Verifies the signature on the supplied certificate signing request using the
+ * subject public key information carried inside the CSR and the declared CSR
+ * signature algorithm. Verification uses the preserved CertificationRequestInfo
+ * DER bytes carried by the decoded CSR object and does not reconstruct the
+ * signed region from normalized fields.
+ *
+ * \param csr: [const][struct] The certificate signing request whose signature is to be verified.
+ * \param state: Caller-supplied verification state, typically a \ref qsc_x509_verify_state object.
+ *
+ * \return Returns true if the CSR signature is valid; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_qsc_csr_signature_verify(const qsc_x509_csr* csr, void* state);
+
+/*!
+ * \brief Verify a generic signed-data object using explicit signature metadata.
+ *
+ * \details
+ * Verifies a raw signed-data buffer using the supplied signature bytes,
+ * signature algorithm selector, and signer subject public key information.
+ * This helper provides the algorithm-dispatch core used by the higher-level
+ * certificate, CRL, and CSR verification wrappers. The object-specific wrappers
+ * enforce signed-region preservation and AlgorithmIdentifier consistency before
+ * delegating to this routine.
+ *
+ * \param data: [const] The signed-data message buffer.
+ * \param datalen: The length of the signed-data buffer in bytes.
+ * \param signature: [const] The signature bytes to verify.
+ * \param signaturelen: The length of the signature in bytes.
+ * \param unusedbits: The number of unused bits in the final signature octet when the signature originated from an ASN.1 BIT STRING.
+ * \param signaturealgorithm: [enum] The normalized signature algorithm identifier.
+ * \param spki: [const][struct] The signer subject public key information used for verification.
+ * \param state: Caller-supplied verification state, typically a \ref qsc_x509_verify_state object.
+ *
+ * \return Returns true if the signature is valid for the supplied data and public key; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_qsc_verify_signed_data(const uint8_t* data, size_t datalen, const uint8_t* signature, size_t signaturelen, 
+    uint8_t unusedbits, qsc_x509_signature_algorithm signaturealgorithm, const qsc_x509_subject_public_key_info* spki, void* state);
 
 QSC_CPLUSPLUS_ENABLED_END
 

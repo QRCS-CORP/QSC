@@ -64,10 +64,13 @@ QSC_CPLUSPLUS_ENABLED_START
  * \details
  * This header defines the public API used to decode DER encoded X.509
  * certificates into the normalized qsc_x509_certificate structure defined in
- * x509_types.h. The parser stores the original DER certificate pointer and the
- * exact TBSCertificate span from the caller supplied buffer so that the higher
- * verification layer can hash and validate the signed certificate body without
- * re-serialization.
+ * x509_types.h. The parser stores a borrowed reference to the original DER
+ * certificate buffer and preserves the exact encoded TBSCertificate child
+ * region from that input so that the higher verification layer can hash and
+ * validate the signed certificate body without re-serialization. The decode
+ * path is DER-strict and rejects trailing bytes. The caller must keep the DER
+ * buffer alive for at least as long as the decoded certificate object remains
+ * in use.
  */
 
 /*!
@@ -76,6 +79,13 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param certificate: [qsc_x509_certificate*] The certificate structure.
  */
 QSC_EXPORT_API void qsc_x509_certificate_clear(qsc_x509_certificate* certificate);
+
+/*!
+ * \brief Releases certificate-owned DER storage and clears the structure.
+ *
+ * \param certificate: [qsc_x509_certificate*] The certificate structure.
+ */
+QSC_EXPORT_API void qsc_x509_certificate_free(qsc_x509_certificate* certificate);
 
 /*!
  * \brief Decodes a DER encoded X.509 certificate.

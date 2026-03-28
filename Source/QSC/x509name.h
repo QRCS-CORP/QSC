@@ -84,10 +84,13 @@ QSC_CPLUSPLUS_ENABLED_START
  * - Compact text formatting for diagnostics and logging.
  *
  * The comparison and formatting logic operates on the normalized strings
- * produced by qsc_asn1_decode_string(). It does not implement the full LDAP or
- * RFC 5280 distinguished name canonicalization rules. The functions are
- * intended for a compact certificate validation layer rather than a general
- * directory service implementation.
+ * produced by qsc_asn1_decode_string(). Equality comparisons fold ASCII case
+ * and compress leading, trailing, and repeated ASCII whitespace within each
+ * attribute value, which is sufficient for common certificate validation and
+ * issuer-subject matching paths in this implementation. It does not implement
+ * the full LDAP or RFC 5280 distinguished name canonicalization rules. The
+ * functions are intended for a compact certificate validation layer rather than
+ * a general directory service implementation.
  */
 
 /*!
@@ -156,6 +159,11 @@ QSC_EXPORT_API bool qsc_x509_name_equals(const qsc_x509_name* a, const qsc_x509_
 
 /*!
  * \brief Formats a decoded distinguished name as a compact zero-terminated string.
+ *
+ * \details
+ * The formatter emits a comma-separated sequence of short-name assignments in
+ * the order stored in the decoded object, for example \c CN=example, \c O=Org.
+ * Unknown attribute types are rendered using the dotted-decimal attribute OID.
  *
  * \param name: [const qsc_x509_name*] The decoded distinguished name.
  * \param output: [char*] The destination character array.

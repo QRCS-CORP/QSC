@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_netutils_8h_source" xml:lang="en-US">
+<title>netutils.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/netutils.h</primary></indexterm>
+<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;QSC_NETUTILS_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&quot;ipinfo.h&quot;</emphasis>
+46 <emphasis role="preprocessor">#include&#32;&quot;socket.h&quot;</emphasis>
+47 <emphasis role="preprocessor">#include&#32;&quot;socketbase.h&quot;</emphasis>
+48 
+49 <emphasis role="comment">/*</emphasis>
+50 <emphasis role="comment">*&#32;\file&#32;netutils.h</emphasis>
+51 <emphasis role="comment">*&#32;\brief&#32;Network&#32;utilities;&#32;common&#32;networking&#32;support&#32;functions</emphasis>
+52 <emphasis role="comment">*/</emphasis>
+53 
+54 <emphasis role="comment">/*&#32;bogus&#32;winbase.h&#32;error&#32;*/</emphasis>
+55 QSC_SYSTEM_CONDITION_IGNORE(5105)
+56 
+57 
+61 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_ADAPTOR_NAME_SIZE&#32;0x104</emphasis>
+62 
+67 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_ADAPTOR_DESCRIPTION_SIZE&#32;0x84</emphasis>
+68 
+73 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_ADAPTOR_INFO_ARRAY_SIZE&#32;0x08</emphasis>
+74 
+79 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_DOMAIN_NAME_SIZE&#32;0x104</emphasis>
+80 
+85 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_HOSTS_NAME_SIZE&#32;0x104</emphasis>
+86 
+91 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_IP_STRING_SIZE&#32;0x80</emphasis>
+92 
+97 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_MAC_ADDRESS_SIZE&#32;0x12</emphasis>
+98 
+103 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_NAME_BUFFER_SIZE&#32;0x80</emphasis>
+104 
+109 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_SERVICE_NAME_BUFFER_SIZE&#32;0x80</emphasis>
+110 
+115 <emphasis role="preprocessor">#define&#32;QSC_NETUTILS_SUBNET_STRING_SIZE&#32;0x10</emphasis>
+116 
+120 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structqsc__netutils__adaptor__info">qsc_netutils_adaptor_info</link>
+121 {
+122 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structqsc__netutils__adaptor__info_1ad194f398e37e83c871d0f5187acf8c5c">desc</link>[QSC_NETUTILS_ADAPTOR_DESCRIPTION_SIZE];&#32;&#32;&#32;
+123 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structqsc__netutils__adaptor__info_1a7661ade92a27964dc3d61876f3752edb">dhcp</link>[QSC_NETUTILS_IP_STRING_SIZE];&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+124 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structqsc__netutils__adaptor__info_1a4a49728314ec8a226b0b0b599af5758f">gateway</link>[QSC_NETUTILS_IP_STRING_SIZE];&#32;&#32;&#32;&#32;&#32;&#32;
+125 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structqsc__netutils__adaptor__info_1a74ab18cc9dec0bb4bccaacde4c5e45f0">ip</link>[QSC_NETUTILS_IP_STRING_SIZE];&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+126 &#32;&#32;&#32;&#32;uint8_t&#32;<link linkend="_structqsc__netutils__adaptor__info_1af60188e63796ccf489a6035b58711a2b">mac</link>[QSC_NETUTILS_MAC_ADDRESS_SIZE];&#32;&#32;&#32;&#32;&#32;
+127 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structqsc__netutils__adaptor__info_1a3005f687a9043403135da090e26cc433">name</link>[QSC_NETUTILS_ADAPTOR_NAME_SIZE];&#32;&#32;&#32;&#32;&#32;&#32;
+128 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structqsc__netutils__adaptor__info_1a502ce67a9299d80e2bf23642c19f3000">subnet</link>[QSC_NETUTILS_IP_STRING_SIZE];&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+129 
+130 }&#32;<link linkend="_structqsc__netutils__adaptor__info">qsc_netutils_adaptor_info</link>;
+131 
+132 <emphasis role="comment">//~~~IP&#32;Address~~~//</emphasis>
+133 
+140 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_get_adaptor_info(<link linkend="_structqsc__netutils__adaptor__info">qsc_netutils_adaptor_info</link>*&#32;info,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;infname);
+141 
+147 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_get_mac_address(uint8_t&#32;mac[QSC_NETUTILS_MAC_ADDRESS_SIZE]);
+148 
+156 QSC_EXPORT_API&#32;uint32_t&#32;qsc_netutils_atoi(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;source);
+157 
+165 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;qsc_netutils_get_domain_name(<emphasis role="keywordtype">char</emphasis>&#32;output[QSC_NETUTILS_DOMAIN_NAME_SIZE]);
+166 
+174 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_netutils_get_host_name(<emphasis role="keywordtype">char</emphasis>&#32;host[QSC_NETUTILS_HOSTS_NAME_SIZE]);
+175 
+182 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_get_name_from_ipv4_address(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;address,&#32;<emphasis role="keywordtype">char</emphasis>&#32;host[QSC_NETUTILS_HOSTS_NAME_SIZE]);
+183 
+190 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_netutils_get_ipv4_address(<link linkend="_structqsc__ipinfo__ipv4__address">qsc_ipinfo_ipv4_address</link>*&#32;padd);
+191 
+198 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;qsc_netutils_get_ipv6_address(<link linkend="_structqsc__ipinfo__ipv6__address">qsc_ipinfo_ipv6_address</link>*&#32;padd);
+199 
+207 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_get_ipv4_info(<link linkend="_structqsc__ipinfo__ipv4__info">qsc_ipinfo_ipv4_info</link>*&#32;pinfo,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;host,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;service);
+208 
+216 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_get_ipv6_info(<link linkend="_structqsc__ipinfo__ipv6__info">qsc_ipinfo_ipv6_info</link>*&#32;pinfo,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;host,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;service);
+217 
+226 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_get_peer_name(<emphasis role="keywordtype">char</emphasis>&#32;output[QSC_NETUTILS_HOSTS_NAME_SIZE],&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__socket">qsc_socket</link>*&#32;sock);
+227 
+236 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_get_socket_name(<emphasis role="keywordtype">char</emphasis>&#32;output[QSC_NETUTILS_NAME_BUFFER_SIZE],&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqsc__socket">qsc_socket</link>*&#32;sock);
+237 
+246 QSC_EXPORT_API&#32;uint16_t&#32;qsc_netutils_port_name_to_number(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;portname,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;protocol);
+247 
+248 <emphasis role="preprocessor">#if&#32;defined(QSC_DEBUG_MODE)</emphasis><emphasis role="preprocessor"></emphasis>
+252 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_netutils_values_print(<emphasis role="keywordtype">void</emphasis>);
+253 <emphasis role="preprocessor">#endif</emphasis>
+254 
+255 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

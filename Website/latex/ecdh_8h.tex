@@ -1,0 +1,137 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/ecdh.h File Reference}
+\hypertarget{ecdh_8h}{}\label{ecdh_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ecdh.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ecdh.h}}
+
+
+Contains the primary public api for the Elliptic Curve Diffie Hellman key exchange.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+Include dependency graph for ecdh.\+h\+:
+% FIG 0
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{ecdh_8h_a74925f4eafe51cba2d994675df4741cc}\label{ecdh_8h_a74925f4eafe51cba2d994675df4741cc} 
+\#define {\bfseries QSC\+\_\+\+ECDH\+\_\+\+PRIVATEKEY\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The byte size of the secret private-\/key array. \end{DoxyCompactList}\item 
+\Hypertarget{ecdh_8h_ac2d938015864ac4e41d2d6d7dd3b7b21}\label{ecdh_8h_ac2d938015864ac4e41d2d6d7dd3b7b21} 
+\#define {\bfseries QSC\+\_\+\+ECDH\+\_\+\+PUBLICKEY\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The byte size of the public-\/key array. \end{DoxyCompactList}\item 
+\Hypertarget{ecdh_8h_a1746b5a10440f059dd066559ceafb660}\label{ecdh_8h_a1746b5a10440f059dd066559ceafb660} 
+\#define {\bfseries QSC\+\_\+\+ECDH\+\_\+\+SHAREDSECRET\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The byte size of the shared secret-\/key array. \end{DoxyCompactList}\item 
+\Hypertarget{ecdh_8h_a0a98b48b0fe33b1fa9ac610968927d78}\label{ecdh_8h_a0a98b48b0fe33b1fa9ac610968927d78} 
+\#define {\bfseries QSC\+\_\+\+ECDH\+\_\+\+SEED\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The byte size of the shared secret-\/key array. \end{DoxyCompactList}\item 
+\Hypertarget{ecdh_8h_a38679bd2fe0857e7df596729ee84a097}\label{ecdh_8h_a38679bd2fe0857e7df596729ee84a097} 
+\#define {\bfseries QSC\+\_\+\+ECDH\+\_\+\+ALGNAME}~"{}ECDH"{}
+\begin{DoxyCompactList}\small\item\em The formal algorithm name. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{ecdh_8h_acf8a0dd71a8090717a6958ee1b1103e5}{qsc\+\_\+ecdh\+\_\+key\+\_\+exchange}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}secret, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}privatekey, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}publickey)
+\begin{DoxyCompactList}\small\item\em Decapsulates the shared secret for a given cipher-\/text using a private-\/key. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{ecdh_8h_aabc35fd16d6ad86406261a8df6c30d11}{qsc\+\_\+ecdh\+\_\+generate\+\_\+keypair}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}publickey, uint8\+\_\+t \texorpdfstring{$\ast$}{*}privatekey, bool(\texorpdfstring{$\ast$}{*}rng\+\_\+generate)(uint8\+\_\+t \texorpdfstring{$\ast$}{*}, size\+\_\+t))
+\begin{DoxyCompactList}\small\item\em Generates public and private key for the ECDH key encapsulation mechanism. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{ecdh_8h_a63c73b113069f9817a50eb961f58a42d}{qsc\+\_\+ecdh\+\_\+generate\+\_\+seeded\+\_\+keypair}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}publickey, uint8\+\_\+t \texorpdfstring{$\ast$}{*}privatekey, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}seed)
+\begin{DoxyCompactList}\small\item\em Generates public and private key for the ECDH key encapsulation mechanism. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Contains the primary public api for the Elliptic Curve Diffie Hellman key exchange. 
+
+\begin{DoxyParagraph}{Example}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ An\ example\ of\ key-\/pair\ creation,\ encryption,\ and\ decryption}}
+\DoxyCodeLine{uint8\_t\ pk[\mbox{\hyperlink{ecdh_8h_ac2d938015864ac4e41d2d6d7dd3b7b21}{QSC\_ECDH\_PUBLICKEY\_SIZE}}];}
+\DoxyCodeLine{uint8\_t\ sk[\mbox{\hyperlink{ecdh_8h_a74925f4eafe51cba2d994675df4741cc}{QSC\_ECDH\_PRIVATEKEY\_SIZE}}];}
+\DoxyCodeLine{uint8\_t\ sec[\mbox{\hyperlink{ecdh_8h_a1746b5a10440f059dd066559ceafb660}{QSC\_ECDH\_SHAREDSECRET\_SIZE}}];}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ create\ the\ public\ and\ secret\ keys}}
+\DoxyCodeLine{qsc\_ecdh\_generate\_seeded\_keypair(pk,\ sk,\ random-\/seed);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ decrypt\ the\ cipher-\/text,\ and\ output\ the\ shared\ key}}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (qsc\_ecdh\_key\_exchange(sec,\ sk,\ external-\/\textcolor{keyword}{public}-\/key)\ ==\ \textcolor{keyword}{false})}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ key\ exchange\ failed,\ do\ something..}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+\end{DoxyParagraph}
+\begin{DoxyRemark}{Remarks}
+Reference implementations\+: Lib\+Sodium by Frank Denis \texorpdfstring{$<$}{<}a href="{}https\+://github.\+com/jedisct1/libsodium"{} /a\texorpdfstring{$>$}{>} curve25519-\/donna by Adam Langley \texorpdfstring{$<$}{<}a href="{}https\+://github.\+com/agl/curve25519-\/donna"{} /a\texorpdfstring{$>$}{>} Na\+CI by Daniel J. Bernstein, Tanja Lange, Peter Schwabe \texorpdfstring{$<$}{<}a href="{}https\+://nacl.\+cr.\+yp.\+to"{} /a\texorpdfstring{$>$}{>}
+\end{DoxyRemark}
+Rewritten for Misra compliance and optimizations by John G. Underhill September 21, 2020 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{ecdh_8h_aabc35fd16d6ad86406261a8df6c30d11}\index{ecdh.h@{ecdh.h}!qsc\_ecdh\_generate\_keypair@{qsc\_ecdh\_generate\_keypair}}
+\index{qsc\_ecdh\_generate\_keypair@{qsc\_ecdh\_generate\_keypair}!ecdh.h@{ecdh.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ecdh\_generate\_keypair()}{qsc\_ecdh\_generate\_keypair()}}
+{\footnotesize\ttfamily \label{ecdh_8h_aabc35fd16d6ad86406261a8df6c30d11} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+ecdh\+\_\+generate\+\_\+keypair (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{publickey}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{privatekey}{, }\item[{bool(\texorpdfstring{$\ast$}{*}}]{rng\+\_\+generate~}{)(uint8\+\_\+t \texorpdfstring{$\ast$}{*}, size\+\_\+t)}\end{DoxyParamCaption})}
+
+
+
+Generates public and private key for the ECDH key encapsulation mechanism. 
+
+\begin{DoxyWarning}{Warning}
+Arrays must be sized to QSC\+\_\+\+ECDH\+\_\+\+PUBLICKEY\+\_\+\+SIZE and QSC\+\_\+\+ECDH\+\_\+\+SECRETKEY\+\_\+\+SIZE.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em publickey} & Pointer to the output public-\/key array \\
+\hline
+{\em privatekey} & Pointer to output private-\/key array \\
+\hline
+{\em rng\+\_\+generate} & A pointer to the random generator \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ecdh_8h_a63c73b113069f9817a50eb961f58a42d}\index{ecdh.h@{ecdh.h}!qsc\_ecdh\_generate\_seeded\_keypair@{qsc\_ecdh\_generate\_seeded\_keypair}}
+\index{qsc\_ecdh\_generate\_seeded\_keypair@{qsc\_ecdh\_generate\_seeded\_keypair}!ecdh.h@{ecdh.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ecdh\_generate\_seeded\_keypair()}{qsc\_ecdh\_generate\_seeded\_keypair()}}
+{\footnotesize\ttfamily \label{ecdh_8h_a63c73b113069f9817a50eb961f58a42d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+ecdh\+\_\+generate\+\_\+seeded\+\_\+keypair (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{publickey}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{privatekey}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
+
+
+
+Generates public and private key for the ECDH key encapsulation mechanism. 
+
+\begin{DoxyWarning}{Warning}
+Arrays must be sized to QSC\+\_\+\+ECDH\+\_\+\+PUBLICKEY\+\_\+\+SIZE and QSC\+\_\+\+ECDH\+\_\+\+SECRETKEY\+\_\+\+SIZE.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em publickey} & Pointer to the output public-\/key array \\
+\hline
+{\em privatekey} & Pointer to output private-\/key array \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} A pointer to the random seed \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ecdh_8h_acf8a0dd71a8090717a6958ee1b1103e5}\index{ecdh.h@{ecdh.h}!qsc\_ecdh\_key\_exchange@{qsc\_ecdh\_key\_exchange}}
+\index{qsc\_ecdh\_key\_exchange@{qsc\_ecdh\_key\_exchange}!ecdh.h@{ecdh.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ecdh\_key\_exchange()}{qsc\_ecdh\_key\_exchange()}}
+{\footnotesize\ttfamily \label{ecdh_8h_acf8a0dd71a8090717a6958ee1b1103e5} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+ecdh\+\_\+key\+\_\+exchange (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{secret}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{privatekey}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{publickey}{}\end{DoxyParamCaption})}
+
+
+
+Decapsulates the shared secret for a given cipher-\/text using a private-\/key. 
+
+\begin{DoxyWarning}{Warning}
+The shared secret array must be sized to the QSC\+\_\+\+ECDH\+\_\+\+SHAREDSECRET\+\_\+\+SIZE.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em secret} & Pointer to a shared secret key, an array of QSC\+\_\+\+ECDH\+\_\+\+SHAREDSECRET\+\_\+\+SIZE \\
+\hline
+{\em privatekey} & \mbox{[}const\mbox{]} Pointer to the private-\/key array \\
+\hline
+{\em publickey} & \mbox{[}const\mbox{]} Pointer to the public-\/key array \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}

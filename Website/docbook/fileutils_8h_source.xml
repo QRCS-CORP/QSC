@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_fileutils_8h_source" xml:lang="en-US">
+<title>fileutils.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/fileutils.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;QSC_FILEUTILS_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;QSC_FILEUTILS_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+46 
+51 
+56 <emphasis role="preprocessor">#define&#32;QSC_FILEUTILS_CHUNK_SIZE&#32;4096</emphasis>
+57 
+62 <emphasis role="preprocessor">#define&#32;QSC_FILEUTILS_MAX_EXTENSION&#32;16</emphasis>
+63 
+68 <emphasis role="preprocessor">#define&#32;QSC_FILEUTILS_MAX_FILENAME&#32;QSC_SYSTEM_MAX_PATH</emphasis>
+69 
+74 <emphasis role="preprocessor">#define&#32;QSC_FILEUTILS_MAX_PATH&#32;QSC_SYSTEM_MAX_PATH</emphasis>
+75 
+80 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_OS_WINDOWS)</emphasis>
+81 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;QSC_FILEUTILS_DIRECTORY_SEPERATOR[]&#32;=&#32;<emphasis role="stringliteral">&quot;\\&quot;</emphasis>;
+82 <emphasis role="preprocessor">#else</emphasis>
+83 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;QSC_FILEUTILS_DIRECTORY_SEPERATOR[]&#32;=&#32;<emphasis role="stringliteral">&quot;/&quot;</emphasis>;
+84 <emphasis role="preprocessor">#endif</emphasis>
+85 
+89 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40">qsc_fileutils_access_rights</link>
+90 {
+91 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40a773ae94551358adbab1160d9c818077e">qsc_fileutils_access_exists</link>&#32;=&#32;0,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+92 <emphasis role="preprocessor">#if&#32;defined(QSC_SYSTEM_OS_WINDOWS)</emphasis>
+93 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40a444ee9a5670c3d6ce6c1fb41c0af0223">qsc_fileutils_access_read</link>&#32;=&#32;1,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+94 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40a39667676389de9d431ca692cf53138e3">qsc_fileutils_access_write</link>&#32;=&#32;2,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+95 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40ab6115624f3964e431556458f150d02d4">qsc_fileutils_access_execute</link>&#32;=&#32;3,&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+96 <emphasis role="preprocessor">#else</emphasis>
+97 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40a444ee9a5670c3d6ce6c1fb41c0af0223">qsc_fileutils_access_read</link>&#32;=&#32;4,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+98 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40a39667676389de9d431ca692cf53138e3">qsc_fileutils_access_write</link>&#32;=&#32;2,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+99 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40ab6115624f3964e431556458f150d02d4">qsc_fileutils_access_execute</link>&#32;=&#32;6,&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+100 <emphasis role="preprocessor">#endif</emphasis>
+101 }&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40">qsc_fileutils_access_rights</link>;
+102 
+106 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8">qsc_fileutils_mode</link>
+107 {
+108 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8ab6c70e7903e9cc9bab27664c6a12db3b">qsc_fileutils_mode_none</link>&#32;=&#32;0,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+109 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8a7e61a9786bad774ef9d26df321d241f0">qsc_fileutils_mode_read</link>&#32;=&#32;1,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+110 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8abc43ea15f2e7fe7aa54eab31555928eb">qsc_fileutils_mode_read_update</link>&#32;=&#32;2,&#32;&#32;&#32;&#32;&#32;
+111 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8a2a52b5ddf1782d1ea28602138cf077bd">qsc_fileutils_mode_write</link>&#32;=&#32;3,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+112 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8aa9260a118b1d329a4a8ee22adf5fcf7d">qsc_fileutils_mode_write_update</link>&#32;=&#32;4,&#32;&#32;&#32;&#32;
+113 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8a5f3709b901e05618bcaa51f87512e93d">qsc_fileutils_mode_append</link>&#32;=&#32;5,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+114 &#32;&#32;&#32;&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8a0e8584aaa835bd00e2f0ecd7ae9ce2d2">qsc_fileutils_mode_append_update</link>&#32;=&#32;6,&#32;&#32;&#32;
+115 
+116 }&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8">qsc_fileutils_mode</link>;
+117 
+127 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1aa6bca3f2094462b12405b2734e763428">qsc_fileutils_append_to_file</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;stream,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+128 
+137 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1add9cb29d0d98fd71dd39f819f06b6c15">qsc_fileutils_copy_file_to_object</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keywordtype">void</emphasis>*&#32;obj,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+138 
+147 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a3eb655510803b636c28dd007455f935b">qsc_fileutils_copy_file_to_stream</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keywordtype">char</emphasis>*&#32;stream,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+148 
+157 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a4a3089295cde5d695207f3c5a2846f94">qsc_fileutils_copy_object_to_file</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;obj,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+158 
+167 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1acb8d92b779d3074a6d67332f12f91629">qsc_fileutils_copy_stream_to_file</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;stream,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+168 
+175 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a38b929d1921edc1379a23c1577129612">qsc_fileutils_create</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+176 
+183 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1ad2fbe57dbc23543838e37729e31de9bc">qsc_fileutils_delete</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+184 
+191 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a5607e8280b4755b17b9768977929688c">qsc_fileutils_erase</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+192 
+200 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1af2fbcf540fad86252322cbf57fa380dd">qsc_fileutils_file_copy</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;inpath,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;outpath);
+201 
+209 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a7824f3efd0fa32f173b544baf7b0fbc0">qsc_fileutils_get_access</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<link linkend="_fileutils_8h_1a1d69e41d6c864c5cc6fbd8f14fa45b40">qsc_fileutils_access_rights</link>&#32;level);
+210 
+219 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a812585a8804111f11d13fe33a2044bb1">qsc_fileutils_get_directory</link>(<emphasis role="keywordtype">char</emphasis>*&#32;directory,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;dirlen,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+220 
+229 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a0569b55ebae69409c18432980875f14a">qsc_fileutils_get_extension</link>(<emphasis role="keywordtype">char</emphasis>*&#32;extension,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;extlen,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+230 
+239 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a2983498281859c8e9d9c309295919ace">qsc_fileutils_get_name</link>(<emphasis role="keywordtype">char</emphasis>*&#32;name,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;namelen,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+240 
+251 QSC_EXPORT_API&#32;int64_t&#32;<link linkend="_fileutils_8h_1a723a719d5e663bfabd5ae382c40d1b93">qsc_fileutils_get_line</link>(<emphasis role="keywordtype">char</emphasis>**&#32;line,&#32;<emphasis role="keywordtype">size_t</emphasis>*&#32;length,&#32;FILE*&#32;fp);
+252 
+259 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a4bf7a13fb30f0c0d48c22d377d1d9976">qsc_fileutils_get_size</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+260 
+267 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a44c84c8b25e33f70bf306336590c09de">qsc_fileutils_get_working_directory</link>(<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+268 
+278 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1ab69afb75a279d755beab01747a69c2a0">qsc_fileutils_list_files</link>(<emphasis role="keywordtype">char</emphasis>*&#32;result,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;reslen,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;directory);
+279 
+285 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_fileutils_8h_1a91a98d664848c1f56fefd73184628cb9">qsc_fileutils_close</link>(FILE*&#32;fp);
+286 
+293 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a25fe3e3b47c78cd540c5d397f5ec752b">qsc_fileutils_exists</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+294 
+303 QSC_EXPORT_API&#32;FILE*&#32;<link linkend="_fileutils_8h_1a1e886b5efc097391c3deac2ad447d23e">qsc_fileutils_open</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<link linkend="_fileutils_8h_1aafdf4e715557e8c284c13ea3c7e1e5d8">qsc_fileutils_mode</link>&#32;mode,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;binary);
+304 
+314 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1aec1b6a578c4fbc6f7c65eb53c8e8e821">qsc_fileutils_read</link>(<emphasis role="keywordtype">char</emphasis>*&#32;output,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;otplen,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;position,&#32;FILE*&#32;fp);
+315 
+325 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a4761e5e7fa706c2329ad59c5503e4de3">qsc_fileutils_safe_read</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;position,&#32;<emphasis role="keywordtype">char</emphasis>*&#32;output,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+326 
+336 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a1e5c01a7800b6966bd81ec47d90ec0ed">qsc_fileutils_safe_write</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;position,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;input,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+337 
+345 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1abd1997040f3b2527454526283f2a6a0a">qsc_fileutils_seekto</link>(FILE*&#32;fp,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;position);
+346 
+356 QSC_EXPORT_API&#32;int64_t&#32;<link linkend="_fileutils_8h_1a4284944057814d82269548c284103209">qsc_fileutils_read_line</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keywordtype">char</emphasis>*&#32;buffer,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;buflen,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;linenum);
+357 
+365 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a7a82a7c7a8933f8bc0df4d85f48b251f">qsc_fileutils_truncate_file</link>(FILE*&#32;fp,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;length);
+366 
+373 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1af11afff120957101ce8acc7afb492040">qsc_fileutils_valid_path</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+374 
+384 QSC_EXPORT_API&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_fileutils_8h_1a09307ee7ba9fba6ae2349407c49551e0">qsc_fileutils_write</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;input,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;inplen,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;position,&#32;FILE*&#32;fp);
+385 
+394 QSC_EXPORT_API&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_fileutils_8h_1a011607505e52be29a7ee70944dcdb514">qsc_fileutils_write_line</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;input,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;inplen);
+395 
+401 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_fileutils_8h_1a64dd593582102869fd5e0804992a1267">qsc_fileutils_zeroise</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+402 
+403 <emphasis role="preprocessor">#if&#32;defined(QSC_DEBUG_MODE)</emphasis><emphasis role="preprocessor"></emphasis>
+409 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;qsc_fileutils_test(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;fpath);
+410 <emphasis role="preprocessor">#endif</emphasis>
+411 
+412 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

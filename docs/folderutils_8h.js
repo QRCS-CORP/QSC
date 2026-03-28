@@ -14,6 +14,7 @@ var folderutils_8h =
     ] ],
     [ "qsc_folderutils_append_delimiter", "folderutils_8h.html#acfc8c70abde46626ec059c83fa09d2d6", null ],
     [ "qsc_folderutils_create_directory", "folderutils_8h.html#aef26a7df3794d6e7f32c25eff94ba66e", null ],
+    [ "qsc_folderutils_create_directory_tree", "folderutils_8h.html#a3d0dd73a5fae87dd5300e2b5b5a342fd", null ],
     [ "qsc_folderutils_delete_directory", "folderutils_8h.html#a0b59616493219bc9096915dc86be07f4", null ],
     [ "qsc_folderutils_directory_exists", "folderutils_8h.html#abea13960b4b2be9b54722b869744e1c5", null ],
     [ "qsc_folderutils_directory_has_delimiter", "folderutils_8h.html#af912fba5908dce7e649bba45c4afa2d5", null ],

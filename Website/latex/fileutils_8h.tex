@@ -1,0 +1,812 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/fileutils.h File Reference}
+\hypertarget{fileutils_8h}{}\label{fileutils_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/fileutils.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/fileutils.h}}
+
+
+File utilities contains common file related functions.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+Include dependency graph for fileutils.\+h\+:
+% FIG 0
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{fileutils_8h_a41ec836fbb906fb29c8fe49504d4ea58}\label{fileutils_8h_a41ec836fbb906fb29c8fe49504d4ea58} 
+\#define {\bfseries QSC\+\_\+\+FILEUTILS\+\_\+\+CHUNK\+\_\+\+SIZE}~4096
+\begin{DoxyCompactList}\small\item\em The default file chunk size. \end{DoxyCompactList}\item 
+\Hypertarget{fileutils_8h_ac4cb7ae3e51bd826affdd0a3923de037}\label{fileutils_8h_ac4cb7ae3e51bd826affdd0a3923de037} 
+\#define {\bfseries QSC\+\_\+\+FILEUTILS\+\_\+\+MAX\+\_\+\+EXTENSION}~16
+\begin{DoxyCompactList}\small\item\em The maximum file extension size. \end{DoxyCompactList}\item 
+\Hypertarget{fileutils_8h_aaa01d3fbb94e4bb455c6a57cf6b6ec28}\label{fileutils_8h_aaa01d3fbb94e4bb455c6a57cf6b6ec28} 
+\#define {\bfseries QSC\+\_\+\+FILEUTILS\+\_\+\+MAX\+\_\+\+FILENAME}~QSC\+\_\+\+SYSTEM\+\_\+\+MAX\+\_\+\+PATH
+\begin{DoxyCompactList}\small\item\em The maximum file name size. \end{DoxyCompactList}\item 
+\Hypertarget{fileutils_8h_aa572e0d83fae0404054d4cf1762654cb}\label{fileutils_8h_aa572e0d83fae0404054d4cf1762654cb} 
+\#define {\bfseries QSC\+\_\+\+FILEUTILS\+\_\+\+MAX\+\_\+\+PATH}~QSC\+\_\+\+SYSTEM\+\_\+\+MAX\+\_\+\+PATH
+\begin{DoxyCompactList}\small\item\em The maximum file path size. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{fileutils_8h_a1333fa340cfb762e9c38112a3664120e}\label{fileutils_8h_a1333fa340cfb762e9c38112a3664120e} 
+typedef enum \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\+\_\+fileutils\+\_\+access\+\_\+rights}} {\bfseries qsc\+\_\+fileutils\+\_\+access\+\_\+rights}
+\item 
+\Hypertarget{fileutils_8h_a7d4d5bd3b88e20f0b3d952ec99a04ad5}\label{fileutils_8h_a7d4d5bd3b88e20f0b3d952ec99a04ad5} 
+typedef enum \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\+\_\+fileutils\+\_\+mode}} {\bfseries qsc\+\_\+fileutils\+\_\+mode}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\+\_\+fileutils\+\_\+access\+\_\+rights}} \{ \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a773ae94551358adbab1160d9c818077e}{qsc\+\_\+fileutils\+\_\+access\+\_\+exists}} = 0
+, \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a444ee9a5670c3d6ce6c1fb41c0af0223}{qsc\+\_\+fileutils\+\_\+access\+\_\+read}} = 4
+, \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a39667676389de9d431ca692cf53138e3}{qsc\+\_\+fileutils\+\_\+access\+\_\+write}} = 2
+, \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40ab6115624f3964e431556458f150d02d4}{qsc\+\_\+fileutils\+\_\+access\+\_\+execute}} = 6
+ \}
+\item 
+enum \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\+\_\+fileutils\+\_\+mode}} \{ \newline
+\mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8ab6c70e7903e9cc9bab27664c6a12db3b}{qsc\+\_\+fileutils\+\_\+mode\+\_\+none}} = 0
+, \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a7e61a9786bad774ef9d26df321d241f0}{qsc\+\_\+fileutils\+\_\+mode\+\_\+read}} = 1
+, \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8abc43ea15f2e7fe7aa54eab31555928eb}{qsc\+\_\+fileutils\+\_\+mode\+\_\+read\+\_\+update}} = 2
+, \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a2a52b5ddf1782d1ea28602138cf077bd}{qsc\+\_\+fileutils\+\_\+mode\+\_\+write}} = 3
+, \newline
+\mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8aa9260a118b1d329a4a8ee22adf5fcf7d}{qsc\+\_\+fileutils\+\_\+mode\+\_\+write\+\_\+update}} = 4
+, \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a5f3709b901e05618bcaa51f87512e93d}{qsc\+\_\+fileutils\+\_\+mode\+\_\+append}} = 5
+, \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a0e8584aaa835bd00e2f0ecd7ae9ce2d2}{qsc\+\_\+fileutils\+\_\+mode\+\_\+append\+\_\+update}} = 6
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_aa6bca3f2094462b12405b2734e763428}{qsc\+\_\+fileutils\+\_\+append\+\_\+to\+\_\+file}} (const char \texorpdfstring{$\ast$}{*}fpath, const char \texorpdfstring{$\ast$}{*}stream, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Append an array of characters to a file. Writes new data to the end of a binary file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_add9cb29d0d98fd71dd39f819f06b6c15}{qsc\+\_\+fileutils\+\_\+copy\+\_\+file\+\_\+to\+\_\+object}} (const char \texorpdfstring{$\ast$}{*}fpath, void \texorpdfstring{$\ast$}{*}obj, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Copy a file to an object. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a3eb655510803b636c28dd007455f935b}{qsc\+\_\+fileutils\+\_\+copy\+\_\+file\+\_\+to\+\_\+stream}} (const char \texorpdfstring{$\ast$}{*}fpath, char \texorpdfstring{$\ast$}{*}stream, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Copy elements from a file to a byte array. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a4a3089295cde5d695207f3c5a2846f94}{qsc\+\_\+fileutils\+\_\+copy\+\_\+object\+\_\+to\+\_\+file}} (const char \texorpdfstring{$\ast$}{*}fpath, const void \texorpdfstring{$\ast$}{*}obj, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Copy an object to a file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_acb8d92b779d3074a6d67332f12f91629}{qsc\+\_\+fileutils\+\_\+copy\+\_\+stream\+\_\+to\+\_\+file}} (const char \texorpdfstring{$\ast$}{*}fpath, const char \texorpdfstring{$\ast$}{*}stream, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Copy the contents of a stream to a file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a38b929d1921edc1379a23c1577129612}{qsc\+\_\+fileutils\+\_\+create}} (const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Create a new file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_ad2fbe57dbc23543838e37729e31de9bc}{qsc\+\_\+fileutils\+\_\+delete}} (const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Delete a file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a5607e8280b4755b17b9768977929688c}{qsc\+\_\+fileutils\+\_\+erase}} (const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Erase a files contents. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_af2fbcf540fad86252322cbf57fa380dd}{qsc\+\_\+fileutils\+\_\+file\+\_\+copy}} (const char \texorpdfstring{$\ast$}{*}inpath, const char \texorpdfstring{$\ast$}{*}outpath)
+\begin{DoxyCompactList}\small\item\em Copy a file to a new location. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a7824f3efd0fa32f173b544baf7b0fbc0}{qsc\+\_\+fileutils\+\_\+get\+\_\+access}} (const char \texorpdfstring{$\ast$}{*}fpath, \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\+\_\+fileutils\+\_\+access\+\_\+rights}} level)
+\begin{DoxyCompactList}\small\item\em Test a users access right to a file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a812585a8804111f11d13fe33a2044bb1}{qsc\+\_\+fileutils\+\_\+get\+\_\+directory}} (char \texorpdfstring{$\ast$}{*}directory, size\+\_\+t dirlen, const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Get the file directory. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a0569b55ebae69409c18432980875f14a}{qsc\+\_\+fileutils\+\_\+get\+\_\+extension}} (char \texorpdfstring{$\ast$}{*}extension, size\+\_\+t extlen, const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Get the file extension. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a2983498281859c8e9d9c309295919ace}{qsc\+\_\+fileutils\+\_\+get\+\_\+name}} (char \texorpdfstring{$\ast$}{*}name, size\+\_\+t namelen, const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Get the file name. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API int64\+\_\+t \mbox{\hyperlink{fileutils_8h_a723a719d5e663bfabd5ae382c40d1b93}{qsc\+\_\+fileutils\+\_\+get\+\_\+line}} (char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}line, size\+\_\+t \texorpdfstring{$\ast$}{*}length, FILE \texorpdfstring{$\ast$}{*}fp)
+\begin{DoxyCompactList}\small\item\em Reads a line of text from a formatted file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a4bf7a13fb30f0c0d48c22d377d1d9976}{qsc\+\_\+fileutils\+\_\+get\+\_\+size}} (const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Get the files size in bytes. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a44c84c8b25e33f70bf306336590c09de}{qsc\+\_\+fileutils\+\_\+get\+\_\+working\+\_\+directory}} (char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Get the working directory fpath. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_ab69afb75a279d755beab01747a69c2a0}{qsc\+\_\+fileutils\+\_\+list\+\_\+files}} (char \texorpdfstring{$\ast$}{*}result, size\+\_\+t reslen, const char \texorpdfstring{$\ast$}{*}directory)
+\begin{DoxyCompactList}\small\item\em Get the filenames in a directory delineated with a newline. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{fileutils_8h_a91a98d664848c1f56fefd73184628cb9}{qsc\+\_\+fileutils\+\_\+close}} (FILE \texorpdfstring{$\ast$}{*}fp)
+\begin{DoxyCompactList}\small\item\em Close a file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a25fe3e3b47c78cd540c5d397f5ec752b}{qsc\+\_\+fileutils\+\_\+exists}} (const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Test to see if a file exists. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API FILE \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{fileutils_8h_a1e886b5efc097391c3deac2ad447d23e}{qsc\+\_\+fileutils\+\_\+open}} (const char \texorpdfstring{$\ast$}{*}fpath, \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\+\_\+fileutils\+\_\+mode}} mode, bool binary)
+\begin{DoxyCompactList}\small\item\em Open a file and return the handle. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_aec1b6a578c4fbc6f7c65eb53c8e8e821}{qsc\+\_\+fileutils\+\_\+read}} (char \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen, size\+\_\+t position, FILE \texorpdfstring{$\ast$}{*}fp)
+\begin{DoxyCompactList}\small\item\em Read data from a file to an output stream. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a4761e5e7fa706c2329ad59c5503e4de3}{qsc\+\_\+fileutils\+\_\+safe\+\_\+read}} (const char \texorpdfstring{$\ast$}{*}fpath, size\+\_\+t position, char \texorpdfstring{$\ast$}{*}output, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Read data to a binary file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a1e5c01a7800b6966bd81ec47d90ec0ed}{qsc\+\_\+fileutils\+\_\+safe\+\_\+write}} (const char \texorpdfstring{$\ast$}{*}fpath, size\+\_\+t position, const char \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Write data to a binary file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_abd1997040f3b2527454526283f2a6a0a}{qsc\+\_\+fileutils\+\_\+seekto}} (FILE \texorpdfstring{$\ast$}{*}fp, size\+\_\+t position)
+\begin{DoxyCompactList}\small\item\em Set the file pointer position. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API int64\+\_\+t \mbox{\hyperlink{fileutils_8h_a4284944057814d82269548c284103209}{qsc\+\_\+fileutils\+\_\+read\+\_\+line}} (const char \texorpdfstring{$\ast$}{*}fpath, char \texorpdfstring{$\ast$}{*}buffer, size\+\_\+t buflen, size\+\_\+t linenum)
+\begin{DoxyCompactList}\small\item\em Read a line of text from a file. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a7a82a7c7a8933f8bc0df4d85f48b251f}{qsc\+\_\+fileutils\+\_\+truncate\+\_\+file}} (FILE \texorpdfstring{$\ast$}{*}fp, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Reset the file size to a specified byte size. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_af11afff120957101ce8acc7afb492040}{qsc\+\_\+fileutils\+\_\+valid\+\_\+path}} (const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Checks if the fpath is valid. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{fileutils_8h_a09307ee7ba9fba6ae2349407c49551e0}{qsc\+\_\+fileutils\+\_\+write}} (const char \texorpdfstring{$\ast$}{*}input, size\+\_\+t inplen, size\+\_\+t position, FILE \texorpdfstring{$\ast$}{*}fp)
+\begin{DoxyCompactList}\small\item\em Open a file and return the handle. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{fileutils_8h_a011607505e52be29a7ee70944dcdb514}{qsc\+\_\+fileutils\+\_\+write\+\_\+line}} (const char \texorpdfstring{$\ast$}{*}fpath, const char \texorpdfstring{$\ast$}{*}input, size\+\_\+t inplen)
+\begin{DoxyCompactList}\small\item\em Open a file and append a line of text to the end. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{fileutils_8h_a64dd593582102869fd5e0804992a1267}{qsc\+\_\+fileutils\+\_\+zeroise}} (const char \texorpdfstring{$\ast$}{*}fpath)
+\begin{DoxyCompactList}\small\item\em Truncate a file to zero bytes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+File utilities contains common file related functions. 
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_access\_rights@{qsc\_fileutils\_access\_rights}}
+\index{qsc\_fileutils\_access\_rights@{qsc\_fileutils\_access\_rights}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_access\_rights}{qsc\_fileutils\_access\_rights}}
+{\footnotesize\ttfamily \label{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40} 
+enum \mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\+\_\+fileutils\+\_\+access\+\_\+rights}}}
+
+The access rights enumeration. \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_access\_exists@{qsc\_fileutils\_access\_exists}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_access\_exists@{qsc\_fileutils\_access\_exists}}}\Hypertarget{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a773ae94551358adbab1160d9c818077e}\label{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a773ae94551358adbab1160d9c818077e} 
+qsc\+\_\+fileutils\+\_\+access\+\_\+exists&No access right specified \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_access\_read@{qsc\_fileutils\_access\_read}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_access\_read@{qsc\_fileutils\_access\_read}}}\Hypertarget{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a444ee9a5670c3d6ce6c1fb41c0af0223}\label{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a444ee9a5670c3d6ce6c1fb41c0af0223} 
+qsc\+\_\+fileutils\+\_\+access\+\_\+read&The read access right \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_access\_write@{qsc\_fileutils\_access\_write}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_access\_write@{qsc\_fileutils\_access\_write}}}\Hypertarget{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a39667676389de9d431ca692cf53138e3}\label{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40a39667676389de9d431ca692cf53138e3} 
+qsc\+\_\+fileutils\+\_\+access\+\_\+write&The write access right \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_access\_execute@{qsc\_fileutils\_access\_execute}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_access\_execute@{qsc\_fileutils\_access\_execute}}}\Hypertarget{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40ab6115624f3964e431556458f150d02d4}\label{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40ab6115624f3964e431556458f150d02d4} 
+qsc\+\_\+fileutils\+\_\+access\+\_\+execute&The execute access right \\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode@{qsc\_fileutils\_mode}}
+\index{qsc\_fileutils\_mode@{qsc\_fileutils\_mode}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_mode}{qsc\_fileutils\_mode}}
+{\footnotesize\ttfamily \label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8} 
+enum \mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\+\_\+fileutils\+\_\+mode}}}
+
+The file mode enumeration. \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_mode\_none@{qsc\_fileutils\_mode\_none}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode\_none@{qsc\_fileutils\_mode\_none}}}\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8ab6c70e7903e9cc9bab27664c6a12db3b}\label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8ab6c70e7903e9cc9bab27664c6a12db3b} 
+qsc\+\_\+fileutils\+\_\+mode\+\_\+none&No mode was specified \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_mode\_read@{qsc\_fileutils\_mode\_read}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode\_read@{qsc\_fileutils\_mode\_read}}}\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a7e61a9786bad774ef9d26df321d241f0}\label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a7e61a9786bad774ef9d26df321d241f0} 
+qsc\+\_\+fileutils\+\_\+mode\+\_\+read&Open file for input operations \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_mode\_read\_update@{qsc\_fileutils\_mode\_read\_update}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode\_read\_update@{qsc\_fileutils\_mode\_read\_update}}}\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8abc43ea15f2e7fe7aa54eab31555928eb}\label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8abc43ea15f2e7fe7aa54eab31555928eb} 
+qsc\+\_\+fileutils\+\_\+mode\+\_\+read\+\_\+update&read/update\+: Open a file for update (both for input and output) \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_mode\_write@{qsc\_fileutils\_mode\_write}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode\_write@{qsc\_fileutils\_mode\_write}}}\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a2a52b5ddf1782d1ea28602138cf077bd}\label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a2a52b5ddf1782d1ea28602138cf077bd} 
+qsc\+\_\+fileutils\+\_\+mode\+\_\+write&Create an empty file for output operations \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_mode\_write\_update@{qsc\_fileutils\_mode\_write\_update}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode\_write\_update@{qsc\_fileutils\_mode\_write\_update}}}\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8aa9260a118b1d329a4a8ee22adf5fcf7d}\label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8aa9260a118b1d329a4a8ee22adf5fcf7d} 
+qsc\+\_\+fileutils\+\_\+mode\+\_\+write\+\_\+update&write/update\+: Create an empty file and open it for update \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_mode\_append@{qsc\_fileutils\_mode\_append}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode\_append@{qsc\_fileutils\_mode\_append}}}\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a5f3709b901e05618bcaa51f87512e93d}\label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a5f3709b901e05618bcaa51f87512e93d} 
+qsc\+\_\+fileutils\+\_\+mode\+\_\+append&Open file for output at the end of a file \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_fileutils\_mode\_append\_update@{qsc\_fileutils\_mode\_append\_update}!fileutils.h@{fileutils.h}}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_mode\_append\_update@{qsc\_fileutils\_mode\_append\_update}}}\Hypertarget{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a0e8584aaa835bd00e2f0ecd7ae9ce2d2}\label{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8a0e8584aaa835bd00e2f0ecd7ae9ce2d2} 
+qsc\+\_\+fileutils\+\_\+mode\+\_\+append\+\_\+update&append/update\+: Open a file for update (both for input and output) \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{fileutils_8h_aa6bca3f2094462b12405b2734e763428}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_append\_to\_file@{qsc\_fileutils\_append\_to\_file}}
+\index{qsc\_fileutils\_append\_to\_file@{qsc\_fileutils\_append\_to\_file}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_append\_to\_file()}{qsc\_fileutils\_append\_to\_file()}}
+{\footnotesize\ttfamily \label{fileutils_8h_aa6bca3f2094462b12405b2734e763428} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+append\+\_\+to\+\_\+file (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{stream}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Append an array of characters to a file. Writes new data to the end of a binary file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+{\em stream} & \mbox{[}const\mbox{]} The array to write to the file \\
+\hline
+{\em length} & the stream size \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the operation succeeded 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a91a98d664848c1f56fefd73184628cb9}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_close@{qsc\_fileutils\_close}}
+\index{qsc\_fileutils\_close@{qsc\_fileutils\_close}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_close()}{qsc\_fileutils\_close()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a91a98d664848c1f56fefd73184628cb9} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+fileutils\+\_\+close (\begin{DoxyParamCaption}\item[{FILE \texorpdfstring{$\ast$}{*}}]{fp}{}\end{DoxyParamCaption})}
+
+
+
+Close a file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fp} & The file pointer \\
+\hline
+\end{DoxyParams}
+\Hypertarget{fileutils_8h_add9cb29d0d98fd71dd39f819f06b6c15}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_copy\_file\_to\_object@{qsc\_fileutils\_copy\_file\_to\_object}}
+\index{qsc\_fileutils\_copy\_file\_to\_object@{qsc\_fileutils\_copy\_file\_to\_object}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_copy\_file\_to\_object()}{qsc\_fileutils\_copy\_file\_to\_object()}}
+{\footnotesize\ttfamily \label{fileutils_8h_add9cb29d0d98fd71dd39f819f06b6c15} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+copy\+\_\+file\+\_\+to\+\_\+object (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{void \texorpdfstring{$\ast$}{*}}]{obj}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Copy a file to an object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+{\em obj} & The object to write to the file \\
+\hline
+{\em length} & The size of the object \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of characters written to the byte array 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a3eb655510803b636c28dd007455f935b}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_copy\_file\_to\_stream@{qsc\_fileutils\_copy\_file\_to\_stream}}
+\index{qsc\_fileutils\_copy\_file\_to\_stream@{qsc\_fileutils\_copy\_file\_to\_stream}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_copy\_file\_to\_stream()}{qsc\_fileutils\_copy\_file\_to\_stream()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a3eb655510803b636c28dd007455f935b} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+copy\+\_\+file\+\_\+to\+\_\+stream (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{char \texorpdfstring{$\ast$}{*}}]{stream}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Copy elements from a file to a byte array. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the stream \\
+\hline
+{\em stream} & The stream receiving the file \\
+\hline
+{\em length} & The number of bytes to write to the stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of characters written to the stream 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a4a3089295cde5d695207f3c5a2846f94}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_copy\_object\_to\_file@{qsc\_fileutils\_copy\_object\_to\_file}}
+\index{qsc\_fileutils\_copy\_object\_to\_file@{qsc\_fileutils\_copy\_object\_to\_file}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_copy\_object\_to\_file()}{qsc\_fileutils\_copy\_object\_to\_file()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a4a3089295cde5d695207f3c5a2846f94} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+copy\+\_\+object\+\_\+to\+\_\+file (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{const void \texorpdfstring{$\ast$}{*}}]{obj}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Copy an object to a file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+{\em obj} & \mbox{[}const\mbox{]} The object to write to the file \\
+\hline
+{\em length} & The size of the object \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the operation succeeded 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_acb8d92b779d3074a6d67332f12f91629}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_copy\_stream\_to\_file@{qsc\_fileutils\_copy\_stream\_to\_file}}
+\index{qsc\_fileutils\_copy\_stream\_to\_file@{qsc\_fileutils\_copy\_stream\_to\_file}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_copy\_stream\_to\_file()}{qsc\_fileutils\_copy\_stream\_to\_file()}}
+{\footnotesize\ttfamily \label{fileutils_8h_acb8d92b779d3074a6d67332f12f91629} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+copy\+\_\+stream\+\_\+to\+\_\+file (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{stream}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Copy the contents of a stream to a file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+{\em stream} & \mbox{[}const\mbox{]} The array to write to the file \\
+\hline
+{\em length} & The length of the array \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the operation succeeded 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a38b929d1921edc1379a23c1577129612}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_create@{qsc\_fileutils\_create}}
+\index{qsc\_fileutils\_create@{qsc\_fileutils\_create}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_create()}{qsc\_fileutils\_create()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a38b929d1921edc1379a23c1577129612} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+create (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Create a new file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file to be created \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_ad2fbe57dbc23543838e37729e31de9bc}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_delete@{qsc\_fileutils\_delete}}
+\index{qsc\_fileutils\_delete@{qsc\_fileutils\_delete}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_delete()}{qsc\_fileutils\_delete()}}
+{\footnotesize\ttfamily \label{fileutils_8h_ad2fbe57dbc23543838e37729e31de9bc} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+delete (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Delete a file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file ro be deleted \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a5607e8280b4755b17b9768977929688c}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_erase@{qsc\_fileutils\_erase}}
+\index{qsc\_fileutils\_erase@{qsc\_fileutils\_erase}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_erase()}{qsc\_fileutils\_erase()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a5607e8280b4755b17b9768977929688c} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+erase (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Erase a files contents. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a25fe3e3b47c78cd540c5d397f5ec752b}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_exists@{qsc\_fileutils\_exists}}
+\index{qsc\_fileutils\_exists@{qsc\_fileutils\_exists}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_exists()}{qsc\_fileutils\_exists()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a25fe3e3b47c78cd540c5d397f5ec752b} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+exists (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Test to see if a file exists. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The fully qualified fpath to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the file exists 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_af2fbcf540fad86252322cbf57fa380dd}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_file\_copy@{qsc\_fileutils\_file\_copy}}
+\index{qsc\_fileutils\_file\_copy@{qsc\_fileutils\_file\_copy}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_file\_copy()}{qsc\_fileutils\_file\_copy()}}
+{\footnotesize\ttfamily \label{fileutils_8h_af2fbcf540fad86252322cbf57fa380dd} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+file\+\_\+copy (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{inpath}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{outpath}{}\end{DoxyParamCaption})}
+
+
+
+Copy a file to a new location. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em inpath} & \mbox{[}const\mbox{]} The full fpath to the input file \\
+\hline
+{\em outpath} & \mbox{[}const\mbox{]} The full fpath to the output file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the file was copied 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a7824f3efd0fa32f173b544baf7b0fbc0}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_get\_access@{qsc\_fileutils\_get\_access}}
+\index{qsc\_fileutils\_get\_access@{qsc\_fileutils\_get\_access}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_get\_access()}{qsc\_fileutils\_get\_access()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a7824f3efd0fa32f173b544baf7b0fbc0} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+get\+\_\+access (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{\mbox{\hyperlink{fileutils_8h_a1d69e41d6c864c5cc6fbd8f14fa45b40}{qsc\+\_\+fileutils\+\_\+access\+\_\+rights}}}]{level}{}\end{DoxyParamCaption})}
+
+
+
+Test a users access right to a file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The fully qualified fpath to the file \\
+\hline
+{\em level} & the access level to check \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the access level is present 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a812585a8804111f11d13fe33a2044bb1}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_get\_directory@{qsc\_fileutils\_get\_directory}}
+\index{qsc\_fileutils\_get\_directory@{qsc\_fileutils\_get\_directory}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_get\_directory()}{qsc\_fileutils\_get\_directory()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a812585a8804111f11d13fe33a2044bb1} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+get\+\_\+directory (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{directory}{, }\item[{size\+\_\+t}]{dirlen}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Get the file directory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em directory} & The output file extension \\
+\hline
+{\em dirlen} & The length of the directory buffer \\
+\hline
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the length of the file extension 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a0569b55ebae69409c18432980875f14a}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_get\_extension@{qsc\_fileutils\_get\_extension}}
+\index{qsc\_fileutils\_get\_extension@{qsc\_fileutils\_get\_extension}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_get\_extension()}{qsc\_fileutils\_get\_extension()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a0569b55ebae69409c18432980875f14a} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+get\+\_\+extension (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{extension}{, }\item[{size\+\_\+t}]{extlen}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Get the file extension. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em extension} & The output file extension \\
+\hline
+{\em extlen} & The length of the extension buffer \\
+\hline
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the length of the file extension 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a723a719d5e663bfabd5ae382c40d1b93}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_get\_line@{qsc\_fileutils\_get\_line}}
+\index{qsc\_fileutils\_get\_line@{qsc\_fileutils\_get\_line}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_get\_line()}{qsc\_fileutils\_get\_line()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a723a719d5e663bfabd5ae382c40d1b93} 
+QSC\+\_\+\+EXPORT\+\_\+\+API int64\+\_\+t qsc\+\_\+fileutils\+\_\+get\+\_\+line (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{line}{, }\item[{size\+\_\+t \texorpdfstring{$\ast$}{*}}]{length}{, }\item[{FILE \texorpdfstring{$\ast$}{*}}]{fp}{}\end{DoxyParamCaption})}
+
+
+
+Reads a line of text from a formatted file. 
+
+\begin{DoxyWarning}{Warning}
+line buffer must be freed after last call
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em line} & the line of text to read \\
+\hline
+{\em length} & the buffer size \\
+\hline
+{\em fp} & the file stream handle \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of characters read 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a2983498281859c8e9d9c309295919ace}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_get\_name@{qsc\_fileutils\_get\_name}}
+\index{qsc\_fileutils\_get\_name@{qsc\_fileutils\_get\_name}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_get\_name()}{qsc\_fileutils\_get\_name()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a2983498281859c8e9d9c309295919ace} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+get\+\_\+name (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{name}{, }\item[{size\+\_\+t}]{namelen}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Get the file name. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & The output file name \\
+\hline
+{\em namelen} & The length of the name buffer \\
+\hline
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the length of the file extension 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a4bf7a13fb30f0c0d48c22d377d1d9976}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_get\_size@{qsc\_fileutils\_get\_size}}
+\index{qsc\_fileutils\_get\_size@{qsc\_fileutils\_get\_size}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_get\_size()}{qsc\_fileutils\_get\_size()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a4bf7a13fb30f0c0d48c22d377d1d9976} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+get\+\_\+size (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Get the files size in bytes. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the length of the file 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a44c84c8b25e33f70bf306336590c09de}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_get\_working\_directory@{qsc\_fileutils\_get\_working\_directory}}
+\index{qsc\_fileutils\_get\_working\_directory@{qsc\_fileutils\_get\_working\_directory}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_get\_working\_directory()}{qsc\_fileutils\_get\_working\_directory()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a44c84c8b25e33f70bf306336590c09de} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+get\+\_\+working\+\_\+directory (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Get the working directory fpath. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & The current directory \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the fpath is found, false if the buffer is too small or fpath not found 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_ab69afb75a279d755beab01747a69c2a0}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_list\_files@{qsc\_fileutils\_list\_files}}
+\index{qsc\_fileutils\_list\_files@{qsc\_fileutils\_list\_files}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_list\_files()}{qsc\_fileutils\_list\_files()}}
+{\footnotesize\ttfamily \label{fileutils_8h_ab69afb75a279d755beab01747a69c2a0} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+list\+\_\+files (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{result}{, }\item[{size\+\_\+t}]{reslen}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{directory}{}\end{DoxyParamCaption})}
+
+
+
+Get the filenames in a directory delineated with a newline. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & The output result string \\
+\hline
+{\em reslen} & The length of the output string \\
+\hline
+{\em directory} & The starting directory\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the length of the output string 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a1e886b5efc097391c3deac2ad447d23e}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_open@{qsc\_fileutils\_open}}
+\index{qsc\_fileutils\_open@{qsc\_fileutils\_open}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_open()}{qsc\_fileutils\_open()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a1e886b5efc097391c3deac2ad447d23e} 
+QSC\+\_\+\+EXPORT\+\_\+\+API FILE \texorpdfstring{$\ast$}{*} qsc\+\_\+fileutils\+\_\+open (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{\mbox{\hyperlink{fileutils_8h_aafdf4e715557e8c284c13ea3c7e1e5d8}{qsc\+\_\+fileutils\+\_\+mode}}}]{mode}{, }\item[{bool}]{binary}{}\end{DoxyParamCaption})}
+
+
+
+Open a file and return the handle. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & The fully qualified file fpath \\
+\hline
+{\em mode} & The file access mode \\
+\hline
+{\em binary} & open the file in binary mode, false is ansi mode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the file handle, or NULL on failure 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_aec1b6a578c4fbc6f7c65eb53c8e8e821}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_read@{qsc\_fileutils\_read}}
+\index{qsc\_fileutils\_read@{qsc\_fileutils\_read}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_read()}{qsc\_fileutils\_read()}}
+{\footnotesize\ttfamily \label{fileutils_8h_aec1b6a578c4fbc6f7c65eb53c8e8e821} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+read (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{, }\item[{size\+\_\+t}]{position}{, }\item[{FILE \texorpdfstring{$\ast$}{*}}]{fp}{}\end{DoxyParamCaption})}
+
+
+
+Read data from a file to an output stream. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output buffer \\
+\hline
+{\em otplen} & The size of the output buffer \\
+\hline
+{\em position} & The starting position within the file \\
+\hline
+{\em fp} & The file pointer \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of bytes read 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a4284944057814d82269548c284103209}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_read\_line@{qsc\_fileutils\_read\_line}}
+\index{qsc\_fileutils\_read\_line@{qsc\_fileutils\_read\_line}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_read\_line()}{qsc\_fileutils\_read\_line()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a4284944057814d82269548c284103209} 
+QSC\+\_\+\+EXPORT\+\_\+\+API int64\+\_\+t qsc\+\_\+fileutils\+\_\+read\+\_\+line (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{char \texorpdfstring{$\ast$}{*}}]{buffer}{, }\item[{size\+\_\+t}]{buflen}{, }\item[{size\+\_\+t}]{linenum}{}\end{DoxyParamCaption})}
+
+
+
+Read a line of text from a file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+{\em buffer} & The string buffer \\
+\hline
+{\em buflen} & The size of the string buffer \\
+\hline
+{\em linenum} & The line number to read \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the length of the line or -\/1 at EOF 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a4761e5e7fa706c2329ad59c5503e4de3}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_safe\_read@{qsc\_fileutils\_safe\_read}}
+\index{qsc\_fileutils\_safe\_read@{qsc\_fileutils\_safe\_read}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_safe\_read()}{qsc\_fileutils\_safe\_read()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a4761e5e7fa706c2329ad59c5503e4de3} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+safe\+\_\+read (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{size\+\_\+t}]{position}{, }\item[{char \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Read data to a binary file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The file fpath \\
+\hline
+{\em position} & The position to start reading from \\
+\hline
+{\em output} & the output char stream \\
+\hline
+{\em length} & the number of bytes to read \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of characters read 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a1e5c01a7800b6966bd81ec47d90ec0ed}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_safe\_write@{qsc\_fileutils\_safe\_write}}
+\index{qsc\_fileutils\_safe\_write@{qsc\_fileutils\_safe\_write}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_safe\_write()}{qsc\_fileutils\_safe\_write()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a1e5c01a7800b6966bd81ec47d90ec0ed} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+safe\+\_\+write (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{size\+\_\+t}]{position}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Write data to a binary file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & The file fpath \\
+\hline
+{\em position} & The position to start writing to \\
+\hline
+{\em input} & the input character string \\
+\hline
+{\em length} & the number of bytes to write \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of characters written 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_abd1997040f3b2527454526283f2a6a0a}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_seekto@{qsc\_fileutils\_seekto}}
+\index{qsc\_fileutils\_seekto@{qsc\_fileutils\_seekto}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_seekto()}{qsc\_fileutils\_seekto()}}
+{\footnotesize\ttfamily \label{fileutils_8h_abd1997040f3b2527454526283f2a6a0a} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+seekto (\begin{DoxyParamCaption}\item[{FILE \texorpdfstring{$\ast$}{*}}]{fp}{, }\item[{size\+\_\+t}]{position}{}\end{DoxyParamCaption})}
+
+
+
+Set the file pointer position. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fp} & The file pointer \\
+\hline
+{\em position} & The position within the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the pointer has been moved 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a7a82a7c7a8933f8bc0df4d85f48b251f}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_truncate\_file@{qsc\_fileutils\_truncate\_file}}
+\index{qsc\_fileutils\_truncate\_file@{qsc\_fileutils\_truncate\_file}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_truncate\_file()}{qsc\_fileutils\_truncate\_file()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a7a82a7c7a8933f8bc0df4d85f48b251f} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+truncate\+\_\+file (\begin{DoxyParamCaption}\item[{FILE \texorpdfstring{$\ast$}{*}}]{fp}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Reset the file size to a specified byte size. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fp} & The file pointer \\
+\hline
+{\em length} & The new file size \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the pointer has been moved 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_af11afff120957101ce8acc7afb492040}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_valid\_path@{qsc\_fileutils\_valid\_path}}
+\index{qsc\_fileutils\_valid\_path@{qsc\_fileutils\_valid\_path}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_valid\_path()}{qsc\_fileutils\_valid\_path()}}
+{\footnotesize\ttfamily \label{fileutils_8h_af11afff120957101ce8acc7afb492040} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+valid\+\_\+path (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Checks if the fpath is valid. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & \mbox{[}const\mbox{]} The full fpath to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the fpath is formed properly 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a09307ee7ba9fba6ae2349407c49551e0}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_write@{qsc\_fileutils\_write}}
+\index{qsc\_fileutils\_write@{qsc\_fileutils\_write}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_write()}{qsc\_fileutils\_write()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a09307ee7ba9fba6ae2349407c49551e0} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+fileutils\+\_\+write (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{inplen}{, }\item[{size\+\_\+t}]{position}{, }\item[{FILE \texorpdfstring{$\ast$}{*}}]{fp}{}\end{DoxyParamCaption})}
+
+
+
+Open a file and return the handle. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & The input buffer \\
+\hline
+{\em inplen} & The size of the input buffer \\
+\hline
+{\em position} & The starting position within the file \\
+\hline
+{\em fp} & The file pointer \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of bytes written 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a011607505e52be29a7ee70944dcdb514}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_write\_line@{qsc\_fileutils\_write\_line}}
+\index{qsc\_fileutils\_write\_line@{qsc\_fileutils\_write\_line}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_write\_line()}{qsc\_fileutils\_write\_line()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a011607505e52be29a7ee70944dcdb514} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+fileutils\+\_\+write\+\_\+line (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{inplen}{}\end{DoxyParamCaption})}
+
+
+
+Open a file and append a line of text to the end. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & The file fpath \\
+\hline
+{\em input} & The input buffer \\
+\hline
+{\em inplen} & The size of the input buffer \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the number of bytes written 
+\end{DoxyReturn}
+\Hypertarget{fileutils_8h_a64dd593582102869fd5e0804992a1267}\index{fileutils.h@{fileutils.h}!qsc\_fileutils\_zeroise@{qsc\_fileutils\_zeroise}}
+\index{qsc\_fileutils\_zeroise@{qsc\_fileutils\_zeroise}!fileutils.h@{fileutils.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_fileutils\_zeroise()}{qsc\_fileutils\_zeroise()}}
+{\footnotesize\ttfamily \label{fileutils_8h_a64dd593582102869fd5e0804992a1267} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+fileutils\+\_\+zeroise (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{fpath}{}\end{DoxyParamCaption})}
+
+
+
+Truncate a file to zero bytes. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fpath} & The file fpath \\
+\hline
+\end{DoxyParams}

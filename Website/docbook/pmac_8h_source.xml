@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_pmac_8h_source" xml:lang="en-US">
+<title>pmac.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/pmac.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;QSC_PMAC_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;QSC_PMAC_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+45 
+90 
+95 <emphasis role="preprocessor">#define&#32;QSC_PMAC_BLOCK_SIZE&#32;32</emphasis>
+96 
+101 <emphasis role="preprocessor">#define&#32;QSC_PMAC_KEY_SIZE&#32;32</emphasis>
+102 
+107 <emphasis role="preprocessor">#define&#32;QSC_PMAC_MAC_SIZE&#32;32</emphasis>
+108 
+113 <emphasis role="preprocessor">#define&#32;QSC_PMAC_NONCE_SIZE&#32;32</emphasis>
+114 
+119 <emphasis role="preprocessor">#define&#32;QSC_PMAC_STATE_SIZE&#32;(QSC_PMAC_BLOCK_SIZE&#32;/&#32;sizeof(uint64_t))</emphasis>
+120 
+124 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;<link linkend="_pmac_8h_1a01bcf64c9786f328be722858e1af97e1">qsc_pmac_modes</link>
+125 {
+126 &#32;&#32;&#32;&#32;<link linkend="_pmac_8h_1a01bcf64c9786f328be722858e1af97e1a8baf5b4f47ea7d037a234507c3886fe8">qsc_pmac_mode_256</link>,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+127 &#32;&#32;&#32;&#32;<link linkend="_pmac_8h_1a01bcf64c9786f328be722858e1af97e1a137aef295e1eed125797b204a49b6437">qsc_pmac_mode_512</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+128 }&#32;<link linkend="_pmac_8h_1a01bcf64c9786f328be722858e1af97e1">qsc_pmac_modes</link>;
+129 
+134 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+135 {
+136 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__pmac__state_1a2e793485eba05329329aeb2601135ad2">F</link>[<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>];&#32;&#32;&#32;&#32;
+137 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__pmac__state_1ae6e9cff79325769593ee8f5f0849df30">H</link>[<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>];&#32;&#32;&#32;&#32;
+138 &#32;&#32;&#32;&#32;uint64_t&#32;<link linkend="_structqsc__pmac__state_1a83da257cb11f18cb2632b9b7d238f33b">Y</link>[<link linkend="_pmac_8h_1a63848dd6f98c1064f381a18393e9f162">QSC_PMAC_STATE_SIZE</link>];&#32;&#32;&#32;&#32;
+139 &#32;&#32;&#32;&#32;uint8_t*&#32;<link linkend="_structqsc__pmac__state_1a3da4e88c03c821f8b2dc28af618543bd">nonce</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+140 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_structqsc__pmac__state_1ad5ec0a12837faf3f08ebeba9d2da69ae">noncelen</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+141 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_structqsc__pmac__state_1aedeffc7d23da25d52b9a50045189fe2b">initialized</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+142 }&#32;<link linkend="_structqsc__pmac__state">qsc_pmac_state</link>;
+143 
+148 QSC_EXPORT_API&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+149 {
+150 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;<link linkend="_structqsc__pmac__keyparams_1aa60a0c39d29c4a6fdaac5bfc05f1dbec">key</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+151 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_structqsc__pmac__keyparams_1af347fae5dae0b613448c54f3dea76ad2">keylen</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+152 &#32;&#32;&#32;&#32;uint8_t*&#32;<link linkend="_structqsc__pmac__keyparams_1a3da4e88c03c821f8b2dc28af618543bd">nonce</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+153 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_structqsc__pmac__keyparams_1ad5ec0a12837faf3f08ebeba9d2da69ae">noncelen</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+154 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;<link linkend="_structqsc__pmac__keyparams_1af70030048884ad194b9870321e1cf792">info</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+155 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_structqsc__pmac__keyparams_1aeeac5f1dea8f8694bdf3d934c72ae872">infolen</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+156 &#32;&#32;&#32;&#32;<link linkend="_pmac_8h_1a01bcf64c9786f328be722858e1af97e1">qsc_pmac_modes</link>&#32;<link linkend="_structqsc__pmac__keyparams_1a16abf23343b72f3644695e195300e781">mode</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+157 }&#32;<link linkend="_structqsc__pmac__keyparams">qsc_pmac_keyparams</link>;
+158 
+169 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_pmac_8h_1a31301a069ce546f18ef5152e5892559b">qsc_pmac_compute</link>(uint8_t*&#32;output,&#32;<link linkend="_structqsc__pmac__keyparams">qsc_pmac_keyparams</link>*&#32;keyparams,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;message,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;msglen);
+170 
+176 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_pmac_8h_1ab0aee9e4aa722c7c2c1d2429c2762a68">qsc_pmac_dispose</link>(<link linkend="_structqsc__pmac__state">qsc_pmac_state</link>*&#32;ctx);
+177 
+185 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_pmac_8h_1af1ed45d96723eb6a9ae7ad9b089f3d99">qsc_pmac_finalize</link>(<link linkend="_structqsc__pmac__state">qsc_pmac_state</link>*&#32;ctx,&#32;uint8_t*&#32;output);
+186 
+193 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_pmac_8h_1a4ff51f093813a8628459c0019fc16fa2">qsc_pmac_initialize</link>(<link linkend="_structqsc__pmac__state">qsc_pmac_state</link>*&#32;ctx,&#32;<link linkend="_structqsc__pmac__keyparams">qsc_pmac_keyparams</link>*&#32;keyparams);
+194 
+205 QSC_EXPORT_API&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_pmac_8h_1a790e4cf68b673d10a5d9453bf970de31">qsc_pmac_update</link>(<link linkend="_structqsc__pmac__state">qsc_pmac_state</link>*&#32;ctx,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;message,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;msglen);
+206 
+207 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

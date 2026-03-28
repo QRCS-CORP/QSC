@@ -215,6 +215,172 @@ static qsc_asn1_status asn1_decode_universal_string(const qsc_encoding_ber_eleme
     return status;
 }
 
+
+static qsc_asn1_status asn1_decode_element_header(const uint8_t* der, size_t derlen, size_t* headerlen, size_t* contentlen)
+{
+    qsc_asn1_status status;
+    size_t llen;
+    size_t taglen;
+    size_t length;
+    uint8_t tagclass;
+    uint32_t tagnumber;
+    bool constructed;
+    bool indefinite;
+
+    status = QSC_ASN1_STATUS_INVALID_INPUT;
+
+    if (der != NULL && derlen >= 2U && headerlen != NULL && contentlen != NULL)
+    {
+        taglen = qsc_encoding_ber_decode_tag(der, derlen, &tagclass, &constructed, &tagnumber);
+
+        if (taglen == 0U)
+        {
+            status = QSC_ASN1_STATUS_INVALID_TAG;
+        }
+        else
+        {
+            llen = qsc_encoding_ber_decode_length(der + taglen, derlen - taglen, &length, &indefinite);
+
+            if (llen == 0U)
+            {
+                status = QSC_ASN1_STATUS_INVALID_LENGTH;
+            }
+            else if (indefinite == true)
+            {
+                status = QSC_ASN1_STATUS_INVALID_ENCODING;
+            }
+            else if ((taglen + llen) > derlen || length > (derlen - (taglen + llen)))
+            {
+                status = QSC_ASN1_STATUS_INVALID_LENGTH;
+            }
+            else
+            {
+                *headerlen = taglen + llen;
+                *contentlen = length;
+                status = QSC_ASN1_STATUS_SUCCESS;
+            }
+        }
+    }
+
+    return status;
+}
+
+qsc_asn1_status qsc_asn1_der_decode_exact(const uint8_t* der, size_t derlen, qsc_encoding_ber_element** element)
+{
+    qsc_asn1_status status;
+    qsc_encoding_ber_element* root;
+    size_t consumed;
+
+    status = QSC_ASN1_STATUS_INVALID_INPUT;
+
+    if (der != NULL && derlen != 0U && element != NULL)
+    {
+        *element = NULL;
+        consumed = 0U;
+        root = qsc_encoding_der_decode_element(der, derlen, &consumed);
+
+        if (root == NULL)
+        {
+            status = QSC_ASN1_STATUS_INVALID_ENCODING;
+        }
+        else if (consumed != derlen)
+        {
+            qsc_encoding_ber_free_element(root);
+            status = QSC_ASN1_STATUS_INVALID_LENGTH;
+        }
+        else
+        {
+            *element = root;
+            status = QSC_ASN1_STATUS_SUCCESS;
+        }
+    }
+
+    return status;
+}
+
+qsc_asn1_status qsc_asn1_der_get_child_region(const uint8_t* der, size_t derlen, size_t index, const uint8_t** child, size_t* childlen)
+{
+    qsc_asn1_status status;
+    qsc_encoding_ber_element* elem;
+    qsc_encoding_ber_element* relem;
+    size_t consumed;
+    size_t contentlen;
+    size_t end;
+    size_t headerlen;
+    size_t i;
+    size_t pos;
+
+    status = QSC_ASN1_STATUS_INVALID_INPUT;
+
+    if (der != NULL && derlen != 0U && child != NULL && childlen != NULL)
+    {
+        *child = NULL;
+        *childlen = 0U;
+        relem = NULL;
+
+        status = qsc_asn1_der_decode_exact(der, derlen, &relem);
+
+        if (status == QSC_ASN1_STATUS_SUCCESS)
+        {
+            elem = relem;
+
+            if (elem->constructed == false)
+            {
+                status = QSC_ASN1_STATUS_INVALID_TAG;
+            }
+            else if (index >= elem->ccount)
+            {
+                status = QSC_ASN1_STATUS_NOT_FOUND;
+            }
+            else
+            {
+                status = asn1_decode_element_header(der, derlen, &headerlen, &contentlen);
+
+                if (status == QSC_ASN1_STATUS_SUCCESS)
+                {
+                    pos = headerlen;
+                    end = headerlen + contentlen;
+
+                    for (i = 0U; i <= index && status == QSC_ASN1_STATUS_SUCCESS; ++i)
+                    {
+                        consumed = 0U;
+
+                        if (pos >= end)
+                        {
+                            status = QSC_ASN1_STATUS_INVALID_LENGTH;
+                        }
+                        else
+                        {
+                            qsc_encoding_ber_element* childelm;
+                            childelm = qsc_encoding_der_decode_element(der + pos, end - pos, &consumed);
+
+                            if (childelm == NULL || consumed == 0U || (pos + consumed) > end)
+                            {
+                                status = QSC_ASN1_STATUS_INVALID_ENCODING;
+                            }
+                            else
+                            {
+                                if (i == index)
+                                {
+                                    *child = der + pos;
+                                    *childlen = consumed;
+                                }
+
+                                pos += consumed;
+                                qsc_encoding_ber_free_element(childelm);
+                            }
+                        }
+                    }
+                }
+            }
+
+            qsc_encoding_ber_free_element(relem);
+        }
+    }
+
+    return status;
+}
+
 bool qsc_asn1_oid_compare(const qsc_asn1_oid* a, const qsc_asn1_oid* b)
 {
     QSC_ASSERT(a != NULL);

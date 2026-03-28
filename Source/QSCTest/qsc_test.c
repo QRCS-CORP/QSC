@@ -83,6 +83,7 @@
 #include "sha3_test.h"
 #include "sphincsplus_test.h"
 #include "testutils.h"
+#include "X509_test.h"
 
 //#define QSCTEST_PRINT_STATS
 
@@ -91,9 +92,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.1.0.0a (B1)                       *");
+	qsctest_print_line("* Release:   v1.1.0.2b (B2)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      February 23, 2026                    *");
+	qsctest_print_line("* Date:      March 28, 2026						  *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -319,6 +320,10 @@ int32_t main(void)
 			
 			qsctest_print_line("*** Test the BER, DER, HEX, and PEM encoding schemes ***");
 			qsctest_encoding_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the X.509 implementation; certificate parsing, validation, and encoding operations ***");
+			qsctest_x509_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Dilithium implementation using stress, validity checks, and known answer tests ***");

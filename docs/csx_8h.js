@@ -2,7 +2,6 @@ var csx_8h =
 [
     [ "qsc_csx_keyparams", "structqsc__csx__keyparams.html", "structqsc__csx__keyparams" ],
     [ "qsc_csx_state", "structqsc__csx__state.html", "structqsc__csx__state" ],
-    [ "QSC_CSX_AUTH_QMAC", "csx_8h.html#a80cbe37c9220b12278f66eb67cffc0ff", null ],
     [ "QSC_CSX_AUTHENTICATED", "csx_8h.html#a41abb38a317351ca70b7c29ae8edc25c", null ],
     [ "QSC_CSX_BLOCK_SIZE", "csx_8h.html#a801f494563418072c7cac15f53deea0d", null ],
     [ "QSC_CSX_INFO_SIZE", "csx_8h.html#a8966fccfdb20447b1c03ba7672e8f9e6", null ],

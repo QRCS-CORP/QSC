@@ -144,7 +144,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * uint8_t raw[256U] = { 0U };
  * size_t  rawlen    = 0U;
- * qsc_encoding_pem_decode(pem, raw, sizeof(raw), &rawlen);
+ * qsc_encoding_pem_decode(pem, sizeof(pem), raw, sizeof(raw), &rawlen);
  * \endcode
  *
  * \par Example: BER element encode/decode
@@ -664,13 +664,14 @@ QSC_EXPORT_API bool qsc_encoding_hex_encode(const uint8_t* input, size_t inplen,
  * On any failure \p *declen is set to 0 and the function returns false.
  *
  * \param input [const char*] Null-terminated PEM string (header + payload + footer).
+ * \param inplen [size_t] Size of \p input in bytes.
  * \param output [uint8_t*] Buffer that receives the decoded binary data.
  * \param otplen [size_t] Capacity of \p output in bytes.
  * \param declen [size_t*] Receives the number of decoded bytes on success, or 0 on failure.
  *
  * \return [bool] true on success; false on any validation or capacity error.
  */
-QSC_EXPORT_API bool qsc_encoding_pem_decode(const char* input, uint8_t* output, size_t otplen, size_t* declen);
+QSC_EXPORT_API bool qsc_encoding_pem_decode(const char* input, size_t inplen, uint8_t* output, size_t otplen, size_t* declen);
 
 /*!
  * \brief Encode binary data in PEM format.

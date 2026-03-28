@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__socket__receive__async__state" xml:lang="en-US">
+<title>qsc_socket_receive_async_state Struct Reference</title>
+<indexterm><primary>qsc_socket_receive_async_state</primary></indexterm>
+<para>
+
+<para>The socket async receive state structure. The structure contains pointers to the originating socket, message and error call-backs, and the message buffer. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;socketbase.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>void(* <link linkend="_structqsc__socket__receive__async__state_1a6c96dced05a0a25af218b3a978c74b87">callback</link> )(<link linkend="_structqsc__socket">qsc_socket</link> *sock, const uint8_t *message, size_t *msglen)</para>
+</listitem>
+            <listitem><para>void(* <link linkend="_structqsc__socket__receive__async__state_1a742fffe2ba7953e94857be1c87069d01">error</link> )(const <link linkend="_structqsc__socket">qsc_socket</link> *sock, qsc_socket_exceptions exception)</para>
+</listitem>
+            <listitem><para><link linkend="_structqsc__socket">qsc_socket</link> * <link linkend="_structqsc__socket__receive__async__state_1ab765a6774e0fdaf15d0905c2e3843476">source</link></para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__socket__receive__async__state_1a849c5562604b647d5ab064c5ee01a817">buffer</link> [QSC_SOCKET_RECEIVE_BUFFER_SIZE]</para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The socket async receive state structure. The structure contains pointers to the originating socket, message and error call-backs, and the message buffer. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__socket__receive__async__state_1a849c5562604b647d5ab064c5ee01a817"/><section>
+    <title>buffer</title>
+<indexterm><primary>buffer</primary><secondary>qsc_socket_receive_async_state</secondary></indexterm>
+<indexterm><primary>qsc_socket_receive_async_state</primary><secondary>buffer</secondary></indexterm>
+<para><computeroutput>uint8_t buffer[QSC_SOCKET_RECEIVE_BUFFER_SIZE]</computeroutput></para>
+<para>A pointer to the message buffer </para>
+</section>
+<anchor xml:id="_structqsc__socket__receive__async__state_1a6c96dced05a0a25af218b3a978c74b87"/><section>
+    <title>callback</title>
+<indexterm><primary>callback</primary><secondary>qsc_socket_receive_async_state</secondary></indexterm>
+<indexterm><primary>qsc_socket_receive_async_state</primary><secondary>callback</secondary></indexterm>
+<para><computeroutput>void(* callback) (<link linkend="_structqsc__socket">qsc_socket</link> *sock, const uint8_t *message, size_t *msglen)</computeroutput></para>
+<para>A pointer to a callback function </para>
+</section>
+<anchor xml:id="_structqsc__socket__receive__async__state_1a742fffe2ba7953e94857be1c87069d01"/><section>
+    <title>error</title>
+<indexterm><primary>error</primary><secondary>qsc_socket_receive_async_state</secondary></indexterm>
+<indexterm><primary>qsc_socket_receive_async_state</primary><secondary>error</secondary></indexterm>
+<para><computeroutput>void(* error) (const <link linkend="_structqsc__socket">qsc_socket</link> *sock, qsc_socket_exceptions exception)</computeroutput></para>
+<para>A pointer to an error function </para>
+</section>
+<anchor xml:id="_structqsc__socket__receive__async__state_1ab765a6774e0fdaf15d0905c2e3843476"/><section>
+    <title>source</title>
+<indexterm><primary>source</primary><secondary>qsc_socket_receive_async_state</secondary></indexterm>
+<indexterm><primary>qsc_socket_receive_async_state</primary><secondary>source</secondary></indexterm>
+<para><computeroutput><link linkend="_structqsc__socket">qsc_socket</link>* source</computeroutput></para>
+<para>A pointer to the originating socket </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/socketbase.h</section>
+</section>

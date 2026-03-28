@@ -1,0 +1,143 @@
+\doxysection{stringutils.\+h}
+\hypertarget{stringutils_8h_source}{}\label{stringutils_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/stringutils.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/stringutils.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_STRINGUTILS\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_STRINGUTILS\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00047\ \textcolor{comment}{*\ \(\backslash\)file\ stringutils.h}}
+\DoxyCodeLine{00048\ \textcolor{comment}{*\ \(\backslash\)brief\ String\ utilities;\ common\ string\ support\ functions}}
+\DoxyCodeLine{00049\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#define\ QSC\_STRINGUTILS\_TOKEN\_NOT\_FOUND\ -\/1}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\#define\ QSC\_STRINGUTILS\_HEX\_EXTENSION\_SIZE\ 2}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#define\ QSC\_STRINGUTILS\_HEX\_BYTE\_SIZE\ 2}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00077\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_formatting\_count(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00088\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_formatting\_filter(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen,\ \textcolor{keywordtype}{char}*\ dest);}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00101\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_add\_line\_breaks(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen,\ \textcolor{keywordtype}{size\_t}\ linelen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen);}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00113\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_remove\_line\_breaks(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen);}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00120\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_clear\_string(\textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00128\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_clear\_substring(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00139\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_stringutils\_compare\_strings(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str1,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str2,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00150\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_concat\_strings(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00162\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_concat\_and\_copy(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str1,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str2);}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00174\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_copy\_substring(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen);}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00185\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_copy\_string(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00195\ QSC\_EXPORT\_API\ int64\_t\ qsc\_stringutils\_find\_char(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ token);}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00205\ QSC\_EXPORT\_API\ int64\_t\ qsc\_stringutils\_find\_string(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ token);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00213\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_byte\_to\_hex(\textcolor{keywordtype}{char}*\ hex,\ uint8\_t\ input);}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00222\ QSC\_EXPORT\_API\ uint8\_t\ qsc\_stringutils\_hex\_to\_byte(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ hex);}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00234\ QSC\_EXPORT\_API\ int64\_t\ qsc\_stringutils\_insert\_string(\textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ offset);}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00243\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_stringutils\_is\_empty(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00253\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_stringutils\_is\_hex(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen);}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00263\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_stringutils\_is\_numeric(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen);}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00275\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{char}*\ qsc\_stringutils\_register\_string(\textcolor{keywordtype}{char}**\ source,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00285\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_remove\_null\_chars(\textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen);}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00296\ QSC\_EXPORT\_API\ int64\_t\ qsc\_stringutils\_reverse\_find\_string(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ token,\ \textcolor{keywordtype}{size\_t}\ start);}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00306\ QSC\_EXPORT\_API\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ qsc\_stringutils\_reverse\_sub\_string(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ token);}
+\DoxyCodeLine{00307\ }
+\DoxyCodeLine{00316\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_stringutils\_string\_contains(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ token);}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00326\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_stringutils\_strings\_equal(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str1,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str2);}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00339\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{char}**\ qsc\_stringutils\_split\_string(\textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ delim,\ \textcolor{keywordtype}{size\_t}*\ count);}
+\DoxyCodeLine{00340\ }
+\DoxyCodeLine{00350\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_split\_strings(\textcolor{keywordtype}{char}*\ dest1,\ \textcolor{keywordtype}{char}*\ dest2,\ \textcolor{keywordtype}{size\_t}\ destlen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ token);}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00362\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{char}*\ qsc\_stringutils\_sub\_string(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ token);}
+\DoxyCodeLine{00363\ }
+\DoxyCodeLine{00371\ QSC\_EXPORT\_API\ int32\_t\ qsc\_stringutils\_string\_to\_int(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00372\ }
+\DoxyCodeLine{00380\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_string\_size(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00389\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_int\_to\_string(int32\_t\ num,\ \textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ dstlen);}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00398\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_uint32\_to\_string(uint32\_t\ num,\ \textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ destlen);}
+\DoxyCodeLine{00399\ }
+\DoxyCodeLine{00407\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_int64\_to\_string(int64\_t\ num,\ \textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ destlen);}
+\DoxyCodeLine{00408\ }
+\DoxyCodeLine{00416\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_uint64\_to\_string(uint64\_t\ num,\ \textcolor{keywordtype}{char}*\ dest,\ \textcolor{keywordtype}{size\_t}\ destlen);}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00423\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_to\_lowercase(\textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00430\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_to\_uppercase(\textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00437\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_trim\_newline(\textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00438\ }
+\DoxyCodeLine{00444\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_stringutils\_trim\_spaces(\textcolor{keywordtype}{char}*\ source);}
+\DoxyCodeLine{00445\ }
+\DoxyCodeLine{00454\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_whitespace\_count(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen);}
+\DoxyCodeLine{00455\ }
+\DoxyCodeLine{00465\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_stringutils\_whitespace\_filter(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ source,\ \textcolor{keywordtype}{size\_t}\ srclen,\ \textcolor{keywordtype}{char}*\ dest);}
+\DoxyCodeLine{00466\ }
+\DoxyCodeLine{00467\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

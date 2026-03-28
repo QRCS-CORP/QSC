@@ -19,7 +19,7 @@ var ipinfo_8h =
       [ "qsc_ipinfo_address_type_ipv6", "ipinfo_8h.html#a1a3c11efaff8a09158096490f042ef62a9c551dc31f2a5ec3ec7a2a2cfd249c23", null ],
       [ "qsc_ipinfo_address_type_unknown", "ipinfo_8h.html#a1a3c11efaff8a09158096490f042ef62a507ed61c68d3b2207ee040f6afc959af", null ]
     ] ],
-    [ "qsc_ipinfo_get_address_type", "ipinfo_8h.html#aa008fc3641ce6a07cbf1bace62b15b09", null ],
+    [ "qsc_ipinfo_get_address_type", "ipinfo_8h.html#ae1d3713be4f1cb5e476c4fab26b0bf6f", null ],
     [ "qsc_ipinfo_ipv4_address_any", "ipinfo_8h.html#a50d7d337a5c1dcd7bd60952351327a00", null ],
     [ "qsc_ipinfo_ipv4_address_clear", "ipinfo_8h.html#a9824201f5554887844150cf11a09ea6b", null ],
     [ "qsc_ipinfo_ipv4_address_from_array", "ipinfo_8h.html#aae25f585eb5dd62a22a274d885cdcace", null ],

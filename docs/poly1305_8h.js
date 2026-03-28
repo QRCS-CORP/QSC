@@ -8,7 +8,7 @@ var poly1305_8h =
     [ "qsc_poly1305_compute", "poly1305_8h.html#a6d2f228dd24470602479b5ed876ab304", null ],
     [ "qsc_poly1305_dispose", "poly1305_8h.html#adce9f9302e681e8d038d31ed19286e65", null ],
     [ "qsc_poly1305_finalize", "poly1305_8h.html#a8f41cc104e8c8dd2aa0549491a4b119f", null ],
-    [ "qsc_poly1305_initialize", "poly1305_8h.html#a877ef2be917b79451e7cbaa201272a2c", null ],
+    [ "qsc_poly1305_initialize", "poly1305_8h.html#a50c320d5f4d74859c4dc8b7089f8d001", null ],
     [ "qsc_poly1305_reset", "poly1305_8h.html#a8144aefcb382ef0e274feba3cfd21966", null ],
     [ "qsc_poly1305_update", "poly1305_8h.html#a70934e3670d8eaa2be360a5e897ca347", null ],
     [ "qsc_poly1305_verify", "poly1305_8h.html#a4a67f21ff3c1b696cc6eaecc4e8e672f", null ]

@@ -1816,6 +1816,7 @@ bool qsc_dilithium_ref_open(uint8_t* message, size_t* msglen, const uint8_t* con
     if (res == false && smlen >= DILITHIUM_SIGNATURE_SIZE)
     {
         qsc_memutils_clear(message, smlen - DILITHIUM_SIGNATURE_SIZE);
+        *msglen = 0U;
     }
 
     return res;

@@ -38,10 +38,9 @@ var encoding_8h =
       [ "BER_ASN1_CHARACTER_STRING", "encoding_8h.html#ac0869f1cf3c3bf545684a9764726990fa3c34928bf689b5b948904e0689b529cb", null ],
       [ "BER_ASN1_BMP_STRING", "encoding_8h.html#ac0869f1cf3c3bf545684a9764726990fa98573539510ec1673102dbde0ec252b9", null ]
     ] ],
-    [ "encoding_ber_free_element", "encoding_8h.html#a6e69b6c4d0c11a12c1acfc4b46ec498e", null ],
-    [ "qsc_encoding_base64_decode", "encoding_8h.html#a75622d4b5e57e76145104740fde15537", null ],
+    [ "qsc_encoding_base64_decode", "encoding_8h.html#af90f712432308c7fa0c8bf5c7d9862f3", null ],
     [ "qsc_encoding_base64_decoded_size", "encoding_8h.html#a1f1b3619a303cb21420f4fb577ad8931", null ],
-    [ "qsc_encoding_base64_encode", "encoding_8h.html#ac5c72ed8050ae2a1c75b040fe9f6ea31", null ],
+    [ "qsc_encoding_base64_encode", "encoding_8h.html#ac3ffe061b2a74e351c8950c852f87de4", null ],
     [ "qsc_encoding_base64_encoded_size", "encoding_8h.html#abac998b554e0d284bd3835ed916bc646", null ],
     [ "qsc_encoding_base64_is_valid_char", "encoding_8h.html#a90237c5b55449dc53f7716376cb3f2a9", null ],
     [ "qsc_encoding_ber_decode_element", "encoding_8h.html#a161416a0ccf7de5558f13dd750d3ad61", null ],
@@ -50,10 +49,11 @@ var encoding_8h =
     [ "qsc_encoding_ber_encode_element", "encoding_8h.html#a2d37b30c6299030ae7e8fba1869140c7", null ],
     [ "qsc_encoding_ber_encode_length", "encoding_8h.html#a5198d469f8c69196957c401d50f1fdd8", null ],
     [ "qsc_encoding_ber_encode_tag", "encoding_8h.html#aeab3fea4654dc2ac4addaee64004911f", null ],
+    [ "qsc_encoding_ber_free_element", "encoding_8h.html#aba80377a1771a92c3e732af6ded5a11a", null ],
     [ "qsc_encoding_der_decode_element", "encoding_8h.html#aef3231ebce6341caf692eebe26133eb4", null ],
     [ "qsc_encoding_der_encode_element", "encoding_8h.html#a1f664f75b36419950b70c294ec68c5bf", null ],
     [ "qsc_encoding_hex_decode", "encoding_8h.html#acf05d2c4d111b68bdbdcd6f7edb13413", null ],
     [ "qsc_encoding_hex_encode", "encoding_8h.html#a561c069de04e3090405ca25663bcd840", null ],
-    [ "qsc_encoding_pem_decode", "encoding_8h.html#af8a71dc19fc839b257d1185a7ebba246", null ],
+    [ "qsc_encoding_pem_decode", "encoding_8h.html#a4e83055607fc4e2050152ff200ea667e", null ],
     [ "qsc_encoding_pem_encode", "encoding_8h.html#a36d1cb23e3f1e1edba3ea40a53f3be6a", null ]
 ];

@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__queue__state" xml:lang="en-US">
+<title>qsc_queue_state Struct Reference</title>
+<indexterm><primary>qsc_queue_state</primary></indexterm>
+<para>
+<computeroutput>#include &lt;queue.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint8_t ** <link linkend="_structqsc__queue__state_1ab92c679f5a4c8e2ca4242def8e365352">queue</link></para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__queue__state_1a08c0e1539af0e43f104b9c3b9ffbd93e">tags</link> [QSC_QUEUE_MAX_DEPTH]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__queue__state_1a76d971a3c552bc58ba9f0d5fceae9806">count</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__queue__state_1a820c167ceaaa9759b0ca2695d22db55c">depth</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__queue__state_1a7a04afe5347934be732ec70a70bd0a28">position</link></para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__queue__state_1a02bed8590a9ddf520e58a060059518ec">width</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Contains the queue context state </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__queue__state_1a76d971a3c552bc58ba9f0d5fceae9806"/><section>
+    <title>count</title>
+<indexterm><primary>count</primary><secondary>qsc_queue_state</secondary></indexterm>
+<indexterm><primary>qsc_queue_state</primary><secondary>count</secondary></indexterm>
+<para><computeroutput>size_t count</computeroutput></para>
+<para>The number of queue items </para>
+</section>
+<anchor xml:id="_structqsc__queue__state_1a820c167ceaaa9759b0ca2695d22db55c"/><section>
+    <title>depth</title>
+<indexterm><primary>depth</primary><secondary>qsc_queue_state</secondary></indexterm>
+<indexterm><primary>qsc_queue_state</primary><secondary>depth</secondary></indexterm>
+<para><computeroutput>size_t depth</computeroutput></para>
+<para>The maximum number of items in the queue </para>
+</section>
+<anchor xml:id="_structqsc__queue__state_1a7a04afe5347934be732ec70a70bd0a28"/><section>
+    <title>position</title>
+<indexterm><primary>position</primary><secondary>qsc_queue_state</secondary></indexterm>
+<indexterm><primary>qsc_queue_state</primary><secondary>position</secondary></indexterm>
+<para><computeroutput>size_t position</computeroutput></para>
+<para>The next empty slot in the queue </para>
+</section>
+<anchor xml:id="_structqsc__queue__state_1ab92c679f5a4c8e2ca4242def8e365352"/><section>
+    <title>queue</title>
+<indexterm><primary>queue</primary><secondary>qsc_queue_state</secondary></indexterm>
+<indexterm><primary>qsc_queue_state</primary><secondary>queue</secondary></indexterm>
+<para><computeroutput>uint8_t** queue</computeroutput></para>
+<para>The pointer to a 2 dimensional queue array </para>
+</section>
+<anchor xml:id="_structqsc__queue__state_1a08c0e1539af0e43f104b9c3b9ffbd93e"/><section>
+    <title>tags</title>
+<indexterm><primary>tags</primary><secondary>qsc_queue_state</secondary></indexterm>
+<indexterm><primary>qsc_queue_state</primary><secondary>tags</secondary></indexterm>
+<para><computeroutput>uint64_t tags[QSC_QUEUE_MAX_DEPTH]</computeroutput></para>
+<para>The 64-bit tag associated with each queue item </para>
+</section>
+<anchor xml:id="_structqsc__queue__state_1a02bed8590a9ddf520e58a060059518ec"/><section>
+    <title>width</title>
+<indexterm><primary>width</primary><secondary>qsc_queue_state</secondary></indexterm>
+<indexterm><primary>qsc_queue_state</primary><secondary>width</secondary></indexterm>
+<para><computeroutput>size_t width</computeroutput></para>
+<para>The maximum byte length of a queue item </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/queue.h</section>
+</section>

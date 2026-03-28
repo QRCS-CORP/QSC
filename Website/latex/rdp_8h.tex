@@ -1,0 +1,96 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/rdp.h File Reference}
+\hypertarget{rdp_8h}{}\label{rdp_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/rdp.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/rdp.h}}
+
+
+The RDRAND entropy Provider\+: RDP ~\newline
+Provides access to the Intel RDRAND entropy provider. This provider is not recommended for stand-\/alone use, but should be combined with another entropy provider to seed a MAC or DRBG function to provide quality random output. The ACP entropy provider is the recommended provider in this library.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+Include dependency graph for rdp.\+h\+:
+% FIG 0
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{rdp_8h_abaa8067299ca40a3b99ab3fd82084eed}\label{rdp_8h_abaa8067299ca40a3b99ab3fd82084eed} 
+\#define {\bfseries QSC\+\_\+\+RDP\+\_\+\+SEED\+\_\+\+MAX}~1024000
+\begin{DoxyCompactList}\small\item\em The maximum seed size that can be extracted from a single generate call. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{rdp_8h_ae9f76f7dbb7e3e4f7638331268428740}{qsc\+\_\+rdp\+\_\+generate}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Get an array of random bytes from the RDRAND entropy provider. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint16\+\_\+t \mbox{\hyperlink{rdp_8h_a2f447accd840498fca6b6a544c0326c7}{qsc\+\_\+rdp\+\_\+uint16}} ()
+\begin{DoxyCompactList}\small\item\em Get a random 16-\/bit unsigned integer. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint32\+\_\+t \mbox{\hyperlink{rdp_8h_a5075e233d1177fd4161a9ccdab9b02f7}{qsc\+\_\+rdp\+\_\+uint32}} ()
+\begin{DoxyCompactList}\small\item\em Get a random 32-\/bit unsigned integer. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t \mbox{\hyperlink{rdp_8h_ab4d5dbf7e798104cf2c4d12fad1ebd53}{qsc\+\_\+rdp\+\_\+uint64}} ()
+\begin{DoxyCompactList}\small\item\em Get a random 64-\/bit unsigned integer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The RDRAND entropy Provider\+: RDP ~\newline
+Provides access to the Intel RDRAND entropy provider. This provider is not recommended for stand-\/alone use, but should be combined with another entropy provider to seed a MAC or DRBG function to provide quality random output. The ACP entropy provider is the recommended provider in this library. 
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{rdp_8h_ae9f76f7dbb7e3e4f7638331268428740}\index{rdp.h@{rdp.h}!qsc\_rdp\_generate@{qsc\_rdp\_generate}}
+\index{qsc\_rdp\_generate@{qsc\_rdp\_generate}!rdp.h@{rdp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rdp\_generate()}{qsc\_rdp\_generate()}}
+{\footnotesize\ttfamily \label{rdp_8h_ae9f76f7dbb7e3e4f7638331268428740} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+rdp\+\_\+generate (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Get an array of random bytes from the RDRAND entropy provider. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & Pointer to the output byte array \\
+\hline
+{\em length} & The number of bytes to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{rdp_8h_a2f447accd840498fca6b6a544c0326c7}\index{rdp.h@{rdp.h}!qsc\_rdp\_uint16@{qsc\_rdp\_uint16}}
+\index{qsc\_rdp\_uint16@{qsc\_rdp\_uint16}!rdp.h@{rdp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rdp\_uint16()}{qsc\_rdp\_uint16()}}
+{\footnotesize\ttfamily \label{rdp_8h_a2f447accd840498fca6b6a544c0326c7} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint16\+\_\+t qsc\+\_\+rdp\+\_\+uint16 (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Get a random 16-\/bit unsigned integer. 
+
+\begin{DoxyReturn}{Returns}
+Returns the random integer 
+\end{DoxyReturn}
+\Hypertarget{rdp_8h_a5075e233d1177fd4161a9ccdab9b02f7}\index{rdp.h@{rdp.h}!qsc\_rdp\_uint32@{qsc\_rdp\_uint32}}
+\index{qsc\_rdp\_uint32@{qsc\_rdp\_uint32}!rdp.h@{rdp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rdp\_uint32()}{qsc\_rdp\_uint32()}}
+{\footnotesize\ttfamily \label{rdp_8h_a5075e233d1177fd4161a9ccdab9b02f7} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint32\+\_\+t qsc\+\_\+rdp\+\_\+uint32 (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Get a random 32-\/bit unsigned integer. 
+
+\begin{DoxyReturn}{Returns}
+Returns the random integer 
+\end{DoxyReturn}
+\Hypertarget{rdp_8h_ab4d5dbf7e798104cf2c4d12fad1ebd53}\index{rdp.h@{rdp.h}!qsc\_rdp\_uint64@{qsc\_rdp\_uint64}}
+\index{qsc\_rdp\_uint64@{qsc\_rdp\_uint64}!rdp.h@{rdp.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rdp\_uint64()}{qsc\_rdp\_uint64()}}
+{\footnotesize\ttfamily \label{rdp_8h_ab4d5dbf7e798104cf2c4d12fad1ebd53} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t qsc\+\_\+rdp\+\_\+uint64 (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Get a random 64-\/bit unsigned integer. 
+
+\begin{DoxyReturn}{Returns}
+Returns the random integer 
+\end{DoxyReturn}

@@ -1,0 +1,186 @@
+\doxysection{intutils.\+h}
+\hypertarget{intutils_8h_source}{}\label{intutils_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/intutils.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/intutils.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_INTUTILS\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ "{}intrinsics.h"{}}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00048\ \textcolor{comment}{*\ \(\backslash\)file\ intutils.h}}
+\DoxyCodeLine{00049\ \textcolor{comment}{*\ \(\backslash\)brief\ This\ file\ contains\ common\ integer\ functions}}
+\DoxyCodeLine{00050\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_KB\_SIZE\ 1000ULL}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_KIB\_SIZE\ 1024ULL}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_MB\_SIZE\ 1000000ULL}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_MIB\_SIZE\ 1048576ULL}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_GB\_SIZE\ 1000000000ULL}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00086\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_GIB\_SIZE\ 1073741824ULL}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_TB\_SIZE\ 1000000000000ULL}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_TIB\_SIZE\ 1099511627776ULL}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_PB\_SIZE\ 1000000000000000ULL}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_PIB\_SIZE\ 1125899906842624ULL}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_EB\_SIZE\ 1000000000000000000ULL}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#define\ QSC\_INTUTILS\_EIB\_SIZE\ 1152921504606846976ULL}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00132\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_intutils\_are\_equal8(\textcolor{keyword}{const}\ uint8\_t*\ a,\ \textcolor{keyword}{const}\ uint8\_t*\ b,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00140\ QSC\_EXPORT\_API\ uint16\_t\ qsc\_intutils\_be8to16(\textcolor{keyword}{const}\ uint8\_t*\ input);}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00148\ QSC\_EXPORT\_API\ uint32\_t\ qsc\_intutils\_be8to32(\textcolor{keyword}{const}\ uint8\_t*\ input);}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00156\ QSC\_EXPORT\_API\ uint64\_t\ qsc\_intutils\_be8to64(\textcolor{keyword}{const}\ uint8\_t*\ input);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00164\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_be16to8(uint8\_t*\ output,\ uint16\_t\ value);}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00172\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_be32to8(uint8\_t*\ output,\ uint32\_t\ value);}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00180\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_be64to8(uint8\_t*\ output,\ uint64\_t\ value);}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00188\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_be8increment(uint8\_t*\ output,\ \textcolor{keywordtype}{size\_t}\ otplen);}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00196\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_intutils\_bit\_reverse(\textcolor{keywordtype}{size\_t}\ x,\ uint32\_t\ bits);}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00205\ QSC\_EXPORT\_API\ uint64\_t\ qsc\_intutils\_bit\_reverse\_u64(uint64\_t\ x);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00214\ QSC\_EXPORT\_API\ uint32\_t\ qsc\_intutils\_bit\_reverse\_u32(uint32\_t\ x);}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00223\ QSC\_EXPORT\_API\ uint16\_t\ qsc\_intutils\_bit\_reverse\_u16(uint16\_t\ x);}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_HAS\_AVX)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00233\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_bswap32(uint32\_t*\ destination,\ \textcolor{keyword}{const}\ uint32\_t*\ source,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00242\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_bswap64(uint64\_t*\ destination,\ \textcolor{keyword}{const}\ uint64\_t*\ source,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00243\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00252\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{double}\ qsc\_intutils\_calculate\_exp(\textcolor{keywordtype}{double}\ x);}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00261\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{double}\ qsc\_intutils\_calculate\_fabs(\textcolor{keywordtype}{double}\ x);}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00270\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{double}\ qsc\_intutils\_calculate\_log(\textcolor{keywordtype}{double}\ x);}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00279\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{double}\ qsc\_intutils\_calculate\_sqrt(\textcolor{keywordtype}{double}\ x);}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00287\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_clear8(uint8\_t*\ a,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00295\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_clear16(uint16\_t*\ a,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00303\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_clear32(uint32\_t*\ a,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00311\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_clear64(uint64\_t*\ a,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00322\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_cmov(uint8\_t*\ dest,\ \textcolor{keyword}{const}\ uint8\_t*\ source,\ \textcolor{keywordtype}{size\_t}\ length,\ uint8\_t\ cond);}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00330\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_intutils\_expand\_mask(\textcolor{keywordtype}{size\_t}\ x);}
+\DoxyCodeLine{00331\ }
+\DoxyCodeLine{00339\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_intutils\_are\_equal(\textcolor{keywordtype}{size\_t}\ x,\ \textcolor{keywordtype}{size\_t}\ y);}
+\DoxyCodeLine{00340\ }
+\DoxyCodeLine{00348\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_intutils\_is\_gte(\textcolor{keywordtype}{size\_t}\ x,\ \textcolor{keywordtype}{size\_t}\ y);}
+\DoxyCodeLine{00349\ }
+\DoxyCodeLine{00357\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_hex\_to\_bin(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ hexstr,\ uint8\_t*\ output,\ \textcolor{keywordtype}{size\_t}\ otplen);}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00366\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_bin\_to\_hex(\textcolor{keyword}{const}\ uint8\_t*\ input,\ \textcolor{keywordtype}{char}*\ hexstr,\ \textcolor{keywordtype}{size\_t}\ inplen);}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00374\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_le8increment(uint8\_t*\ output,\ \textcolor{keywordtype}{size\_t}\ otplen);}
+\DoxyCodeLine{00375\ }
+\DoxyCodeLine{00376\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_HAS\_AVX)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00382\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_leincrement\_x128(\_\_m128i*\ counter);}
+\DoxyCodeLine{00383\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00384\ }
+\DoxyCodeLine{00385\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_HAS\_AVX512)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00391\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_leincrement\_x512(\_\_m512i*\ counter);}
+\DoxyCodeLine{00392\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00393\ }
+\DoxyCodeLine{00400\ QSC\_EXPORT\_API\ uint16\_t\ qsc\_intutils\_le8to16(\textcolor{keyword}{const}\ uint8\_t*\ input);}
+\DoxyCodeLine{00401\ }
+\DoxyCodeLine{00408\ QSC\_EXPORT\_API\ uint32\_t\ qsc\_intutils\_le8to32(\textcolor{keyword}{const}\ uint8\_t*\ input);}
+\DoxyCodeLine{00409\ }
+\DoxyCodeLine{00416\ QSC\_EXPORT\_API\ uint64\_t\ qsc\_intutils\_le8to64(\textcolor{keyword}{const}\ uint8\_t*\ input);}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00424\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_le16to8(uint8\_t*\ output,\ uint16\_t\ value);}
+\DoxyCodeLine{00425\ }
+\DoxyCodeLine{00432\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_le32to8(uint8\_t*\ output,\ uint32\_t\ value);}
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00440\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_le64to8(uint8\_t*\ output,\ uint64\_t\ value);}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00449\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_intutils\_max(\textcolor{keywordtype}{size\_t}\ a,\ \textcolor{keywordtype}{size\_t}\ b);}
+\DoxyCodeLine{00450\ }
+\DoxyCodeLine{00458\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_intutils\_min(\textcolor{keywordtype}{size\_t}\ a,\ \textcolor{keywordtype}{size\_t}\ b);}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00466\ QSC\_EXPORT\_API\ uint32\_t\ qsc\_intutils\_popcount32(uint32\_t\ v);}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_HAS\_AVX)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00475\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_reverse\_bytes\_x128(\textcolor{keyword}{const}\ \_\_m128i*\ input,\ \_\_m128i*\ output);}
+\DoxyCodeLine{00476\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00477\ }
+\DoxyCodeLine{00478\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_HAS\_AVX512)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00485\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_intutils\_reverse\_bytes\_x512(\textcolor{keyword}{const}\ \_\_m512i*\ input,\ \_\_m512i*\ output);}
+\DoxyCodeLine{00486\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00487\ }
+\DoxyCodeLine{00495\ QSC\_EXPORT\_API\ uint32\_t\ qsc\_intutils\_rotl32(uint32\_t\ value,\ \textcolor{keywordtype}{size\_t}\ shift);}
+\DoxyCodeLine{00496\ }
+\DoxyCodeLine{00504\ QSC\_EXPORT\_API\ uint64\_t\ qsc\_intutils\_rotl64(uint64\_t\ value,\ \textcolor{keywordtype}{size\_t}\ shift);}
+\DoxyCodeLine{00505\ }
+\DoxyCodeLine{00513\ QSC\_EXPORT\_API\ uint32\_t\ qsc\_intutils\_rotr32(uint32\_t\ value,\ \textcolor{keywordtype}{size\_t}\ shift);}
+\DoxyCodeLine{00514\ }
+\DoxyCodeLine{00522\ QSC\_EXPORT\_API\ uint64\_t\ qsc\_intutils\_rotr64(uint64\_t\ value,\ \textcolor{keywordtype}{size\_t}\ shift);}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00532\ QSC\_EXPORT\_API\ int32\_t\ qsc\_intutils\_verify(\textcolor{keyword}{const}\ uint8\_t*\ a,\ \textcolor{keyword}{const}\ uint8\_t*\ b,\ \textcolor{keywordtype}{size\_t}\ length);}
+\DoxyCodeLine{00533\ }
+\DoxyCodeLine{00534\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

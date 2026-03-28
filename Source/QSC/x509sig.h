@@ -58,46 +58,27 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file x509_sig.h
+ * \file x509sig.h
  * \brief X.509 signature algorithm and signature value helpers.
  *
  * \details
- * This header defines the public API used to decode certificate and
- * TBSCertificate signature AlgorithmIdentifier structures, classify the
- * associated public key and hash functions, and decode signature values in the
- * forms commonly used by DER-encoded X.509 certificates.
+ * This header defines the public API used to decode certificate, CRL, and CSR
+ * signature AlgorithmIdentifier structures, compare decoded signature algorithms,
+ * classify supported signature families, and decode signature values from the
+ * BIT STRING form used in DER encoded X.509 objects.
  *
- * The first implementation pass is focused on RSA and ECDSA algorithm
- * identifiers. ECDSA signature values are decoded from the DER SEQUENCE of
- * INTEGER values into fixed-width big-endian buffers suitable for conversion
- * into the internal verification format used by the higher verification layer.
- * RSA signature values are exposed as raw BIT STRING octets.
+ * The module supports the classical ECDSA families used elsewhere in the QSC
+ * tree and the pure ML-DSA signature identifiers used by the post-quantum path.
+ * ECDSA signatures are decoded from the DER SEQUENCE of INTEGER values into
+ * fixed-width big-endian component arrays. ML-DSA signatures are treated as raw
+ * opaque octet strings carried directly in the BIT STRING payload. The helper
+ * routines in this module are validation-oriented and do not allocate memory or
+ * retain references into caller-owned ASN.1 buffers.
  */
 
 /*!
  * \def QSC_X509_MAX_SIGNATURE_COMPONENT_SIZE
  * \brief The maximum size in bytes of an ECDSA signature component.
- *
- * \details
- * ECDSA signatures encoded in X.509 certificates are represented as a
- * DER sequence containing two INTEGER values, r and s. After decoding,
- * these values are stored in fixed-width buffers inside the
- * qsc_x509_ecdsa_signature structure.
- *
- * The maximum component size must accommodate the largest supported
- * elliptic curve scalar size. The current X.509 implementation supports
- * the following NIST curves:
- *
- * - prime256v1 (P-256)  -> 32 bytes
- * - secp384r1 (P-384)   -> 48 bytes
- * - secp521r1 (P-521)   -> 66 bytes
- *
- * P-521 requires ceil(521 / 8) = 66 bytes to represent a scalar value,
- * therefore the maximum signature component size is defined as 66 bytes.
- *
- * This value is used to size the r and s buffers in the
- * qsc_x509_ecdsa_signature structure and ensures that signatures for
- * all supported curves can be decoded without dynamic allocation.
  */
 #define QSC_X509_MAX_SIGNATURE_COMPONENT_SIZE 66U
 
@@ -138,6 +119,53 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_algorithm_decode(const qsc_enc
 QSC_EXPORT_API bool qsc_x509_signature_algorithm_equal(const qsc_x509_algorithm_identifier* left, const qsc_x509_algorithm_identifier* right);
 
 /*!
+ * \brief Tests whether a decoded signature algorithm is an ECDSA variant.
+ *
+ * \param algorithm: [qsc_x509_signature_algorithm] The decoded signature algorithm.
+ *
+ * \return [bool] Returns true for ECDSA-with-SHA1/SHA256/SHA384/SHA512.
+ */
+QSC_EXPORT_API bool qsc_x509_signature_algorithm_is_ecdsa(qsc_x509_signature_algorithm algorithm);
+
+/*!
+ * \brief Tests whether a decoded signature algorithm is an ML-DSA variant.
+ *
+ * \param algorithm: [qsc_x509_signature_algorithm] The decoded signature algorithm.
+ *
+ * \return [bool] Returns true for ML-DSA-44, ML-DSA-65, or ML-DSA-87.
+ */
+QSC_EXPORT_API bool qsc_x509_signature_algorithm_is_ml_dsa(qsc_x509_signature_algorithm algorithm);
+
+/*!
+ * \brief Tests whether a decoded signature algorithm is compatible with the
+ * supplied subject public key information.
+ *
+ * \param algorithm: [qsc_x509_signature_algorithm] The decoded signature algorithm.
+ * \param spki: [const qsc_x509_subject_public_key_info*] The public key information.
+ *
+ * \return [bool] Returns true if the signature algorithm and SPKI describe a
+ * compatible signing primitive and parameter set.
+ */
+QSC_EXPORT_API bool qsc_x509_signature_algorithm_matches_spki(qsc_x509_signature_algorithm algorithm, const qsc_x509_subject_public_key_info* spki);
+
+/*!
+ * \brief Gets the expected raw signature size in octets for a signature
+ * algorithm.
+ *
+ * \details
+ * For ECDSA this returns the size of the raw concatenated r || s form used by
+ * the internal QSC verification path. For ML-DSA this returns the compiled
+ * signature size when available. For unknown or unsupported algorithms, zero is
+ * returned.
+ *
+ * \param algorithm: [qsc_x509_signature_algorithm] The decoded signature algorithm.
+ * \param curve: [qsc_x509_named_curve] The named curve for ECDSA signatures.
+ *
+ * \return [size_t] Returns the expected raw signature size in octets, or zero.
+ */
+QSC_EXPORT_API size_t qsc_x509_signature_expected_size(qsc_x509_signature_algorithm algorithm, qsc_x509_named_curve curve);
+
+/*!
  * \brief Decodes a certificate signature BIT STRING as a raw octet sequence.
  *
  * \param element: [const qsc_encoding_ber_element*] The BIT STRING element
@@ -148,13 +176,14 @@ QSC_EXPORT_API bool qsc_x509_signature_algorithm_equal(const qsc_x509_algorithm_
  *
  * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
  */
-QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_raw(const qsc_encoding_ber_element* element, uint8_t* signature, size_t signaturelen, size_t* outlen);
+QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_raw(const qsc_encoding_ber_element* element, 
+	uint8_t* signature, size_t signaturelen, size_t* outlen);
 
 /*!
  * \brief Decodes a certificate ECDSA signature BIT STRING.
  *
  * \param element: [const qsc_encoding_ber_element*] The BIT STRING element
- * containing the DER-encoded ECDSA signature value.
+ * containing the DER encoded ECDSA signature value.
  * \param curve: [qsc_x509_named_curve] The named curve associated with the
  * signing key.
  * \param signature: [qsc_x509_ecdsa_signature*] Receives the decoded signature
@@ -162,7 +191,8 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_raw(const qsc_enc
  *
  * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
  */
-QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_ecdsa(const qsc_encoding_ber_element* element, qsc_x509_named_curve curve, qsc_x509_ecdsa_signature* signature);
+QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_ecdsa(const qsc_encoding_ber_element* element, 
+	qsc_x509_named_curve curve, qsc_x509_ecdsa_signature* signature);
 
 /*!
  * \brief Gets the expected maximum signature component size in octets for a

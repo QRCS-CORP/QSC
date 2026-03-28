@@ -510,8 +510,6 @@ size_t qsc_winutils_network_statistics(char* result, size_t reslen)
                     }
                     if (tlen < reslen)
                     {
-                        /* FIX WINUTILS-001: was padd->AdapterName (always the first adapter);
-                           must use cadd->AdapterName for the current iteration */
                         tlen += snprintf(result + tlen, reslen - tlen, "Identifier: \t\t-%s\n", cadd->AdapterName);
                     }
                     if (tlen < reslen)
@@ -1038,9 +1036,7 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
         wchar_t wuser[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
         wchar_t wpass[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
         wchar_t wpath[QSC_WINTOOLS_RUNAS_BUFFER_SIZE] = { 0U };
-        /* FIX WINUTILS-004: sizeof(wchar_t) == 2 on Windows - array needs 2 elements for L"." + null */
         wchar_t wdomain[2U] = L".";
-
 
         MultiByteToWideChar(CP_ACP, 0, user, -1, wuser, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
         MultiByteToWideChar(CP_ACP, 0, password, -1, wpass, QSC_WINTOOLS_RUNAS_BUFFER_SIZE);
@@ -1064,8 +1060,6 @@ bool qsc_winutils_run_as_user(const char* user, const char* password, const char
             &pi
         );
 
-        /* FIX WINUTILS-003: zero the password buffer before leaving scope to prevent
-           credential leakage in crash dumps or memory forensics */
         SecureZeroMemory(wpass, sizeof(wpass));
 
         if (res == true)
@@ -1122,9 +1116,7 @@ bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states es
                     break;
                 }
                 default:
-                {
-                    break;
-                }
+                    res = false;
                 }
 
                 CloseServiceHandle(sch);

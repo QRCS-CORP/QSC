@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__sysutils__memory__statistics__state" xml:lang="en-US">
+<title>qsc_sysutils_memory_statistics_state Struct Reference</title>
+<indexterm><primary>qsc_sysutils_memory_statistics_state</primary></indexterm>
+<para>
+
+<para>The memory_statistics state structure. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;sysutils.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint64_t <link linkend="_structqsc__sysutils__memory__statistics__state_1afa8c68c84ee36288f66c4dbc39cf92b9">phystotal</link></para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__sysutils__memory__statistics__state_1a57b41feb8df593d15c49fffa24e6ff12">physavail</link></para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__sysutils__memory__statistics__state_1abf05794d43756d7e67d711ccf94520c8">virttotal</link></para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__sysutils__memory__statistics__state_1a8d690ac26ec56109bc97ebbfde2d4868">virtavail</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The memory_statistics state structure. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__sysutils__memory__statistics__state_1a57b41feb8df593d15c49fffa24e6ff12"/><section>
+    <title>physavail</title>
+<indexterm><primary>physavail</primary><secondary>qsc_sysutils_memory_statistics_state</secondary></indexterm>
+<indexterm><primary>qsc_sysutils_memory_statistics_state</primary><secondary>physavail</secondary></indexterm>
+<para><computeroutput>uint64_t physavail</computeroutput></para>
+<para>The available physical memory </para>
+</section>
+<anchor xml:id="_structqsc__sysutils__memory__statistics__state_1afa8c68c84ee36288f66c4dbc39cf92b9"/><section>
+    <title>phystotal</title>
+<indexterm><primary>phystotal</primary><secondary>qsc_sysutils_memory_statistics_state</secondary></indexterm>
+<indexterm><primary>qsc_sysutils_memory_statistics_state</primary><secondary>phystotal</secondary></indexterm>
+<para><computeroutput>uint64_t phystotal</computeroutput></para>
+<para>The total physical memory </para>
+</section>
+<anchor xml:id="_structqsc__sysutils__memory__statistics__state_1a8d690ac26ec56109bc97ebbfde2d4868"/><section>
+    <title>virtavail</title>
+<indexterm><primary>virtavail</primary><secondary>qsc_sysutils_memory_statistics_state</secondary></indexterm>
+<indexterm><primary>qsc_sysutils_memory_statistics_state</primary><secondary>virtavail</secondary></indexterm>
+<para><computeroutput>uint64_t virtavail</computeroutput></para>
+<para>The available virtual memory </para>
+</section>
+<anchor xml:id="_structqsc__sysutils__memory__statistics__state_1abf05794d43756d7e67d711ccf94520c8"/><section>
+    <title>virttotal</title>
+<indexterm><primary>virttotal</primary><secondary>qsc_sysutils_memory_statistics_state</secondary></indexterm>
+<indexterm><primary>qsc_sysutils_memory_statistics_state</primary><secondary>virttotal</secondary></indexterm>
+<para><computeroutput>uint64_t virttotal</computeroutput></para>
+<para>The total virtual memory </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_sysutils_8h">sysutils.h</link></section>
+</section>

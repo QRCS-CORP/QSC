@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__hmac512__state" xml:lang="en-US">
+<title>qsc_hmac512_state Struct Reference</title>
+<indexterm><primary>qsc_hmac512_state</primary></indexterm>
+<para>
+
+<para>The HMAC(SHA2-512) state array. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;sha2.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para><link linkend="_structqsc__sha512__state">qsc_sha512_state</link> <link linkend="_structqsc__hmac512__state_1aede2b2af366378b78ab5c1032d298db4">pstate</link></para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__hmac512__state_1a84f181fb9ffb0c8b49b89a284281058b">ipad</link> [<link linkend="_sha2_8h_1a54cc35812b0c4ba419b3b5e0dca449a7">QSC_SHA2_512_RATE</link>]</para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__hmac512__state_1a765e063c1996e0e4c98a27c8bfcda666">opad</link> [<link linkend="_sha2_8h_1a54cc35812b0c4ba419b3b5e0dca449a7">QSC_SHA2_512_RATE</link>]</para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The HMAC(SHA2-512) state array. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__hmac512__state_1a84f181fb9ffb0c8b49b89a284281058b"/><section>
+    <title>ipad</title>
+<indexterm><primary>ipad</primary><secondary>qsc_hmac512_state</secondary></indexterm>
+<indexterm><primary>qsc_hmac512_state</primary><secondary>ipad</secondary></indexterm>
+<para><computeroutput>uint8_t ipad[<link linkend="_sha2_8h_1a54cc35812b0c4ba419b3b5e0dca449a7">QSC_SHA2_512_RATE</link>]</computeroutput></para>
+<para>The input pad array </para>
+</section>
+<anchor xml:id="_structqsc__hmac512__state_1a765e063c1996e0e4c98a27c8bfcda666"/><section>
+    <title>opad</title>
+<indexterm><primary>opad</primary><secondary>qsc_hmac512_state</secondary></indexterm>
+<indexterm><primary>qsc_hmac512_state</primary><secondary>opad</secondary></indexterm>
+<para><computeroutput>uint8_t opad[<link linkend="_sha2_8h_1a54cc35812b0c4ba419b3b5e0dca449a7">QSC_SHA2_512_RATE</link>]</computeroutput></para>
+<para>The output pad array </para>
+</section>
+<anchor xml:id="_structqsc__hmac512__state_1aede2b2af366378b78ab5c1032d298db4"/><section>
+    <title>pstate</title>
+<indexterm><primary>pstate</primary><secondary>qsc_hmac512_state</secondary></indexterm>
+<indexterm><primary>qsc_hmac512_state</primary><secondary>pstate</secondary></indexterm>
+<para><computeroutput><link linkend="_structqsc__sha512__state">qsc_sha512_state</link> pstate</computeroutput></para>
+<para>The SHA2-512 state </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_sha2_8h">sha2.h</link></section>
+</section>

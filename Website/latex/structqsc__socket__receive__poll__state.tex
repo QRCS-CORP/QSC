@@ -1,0 +1,61 @@
+\doxysection{qsc\+\_\+socket\+\_\+receive\+\_\+poll\+\_\+state Struct Reference}
+\hypertarget{structqsc__socket__receive__poll__state}{}\label{structqsc__socket__receive__poll__state}\index{qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}}
+
+
+The socket polling state structure. The structure contains an array of client sockets, and a socket counter with sockets that are ready to receive data.  
+
+
+
+
+{\ttfamily \#include $<$socketbase.\+h$>$}
+
+
+
+Collaboration diagram for qsc\+\_\+socket\+\_\+receive\+\_\+poll\+\_\+state\+:
+% FIG 0
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__socket__receive__poll__state_ac3634d09cd922d2bea518db2f9f89645}{sockarr}}
+\item 
+void(\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__socket__receive__poll__state_acea9459e7e1fe856fb05c9b9bba1bad9}{callback}} )(\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*}sock, size\+\_\+t id)
+\item 
+void(\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__socket__receive__poll__state_ab578ff3ac205a666bccf6a6d4ccac4ce}{error}} )(\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*}sock, qsc\+\_\+socket\+\_\+exceptions exception)
+\item 
+uint32\+\_\+t \mbox{\hyperlink{structqsc__socket__receive__poll__state_a86988a65e0d3ece7990c032c159786d6}{count}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The socket polling state structure. The structure contains an array of client sockets, and a socket counter with sockets that are ready to receive data. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__socket__receive__poll__state_acea9459e7e1fe856fb05c9b9bba1bad9}\index{qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}!callback@{callback}}
+\index{callback@{callback}!qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}}
+\doxysubsubsection{\texorpdfstring{callback}{callback}}
+{\footnotesize\ttfamily \label{structqsc__socket__receive__poll__state_acea9459e7e1fe856fb05c9b9bba1bad9} 
+void(\texorpdfstring{$\ast$}{*} callback) (\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*}sock, size\+\_\+t id)}
+
+A pointer to a callback function \Hypertarget{structqsc__socket__receive__poll__state_a86988a65e0d3ece7990c032c159786d6}\index{qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}!count@{count}}
+\index{count@{count}!qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}}
+\doxysubsubsection{\texorpdfstring{count}{count}}
+{\footnotesize\ttfamily \label{structqsc__socket__receive__poll__state_a86988a65e0d3ece7990c032c159786d6} 
+uint32\+\_\+t count}
+
+The number of active sockets \Hypertarget{structqsc__socket__receive__poll__state_ab578ff3ac205a666bccf6a6d4ccac4ce}\index{qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}!error@{error}}
+\index{error@{error}!qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}}
+\doxysubsubsection{\texorpdfstring{error}{error}}
+{\footnotesize\ttfamily \label{structqsc__socket__receive__poll__state_ab578ff3ac205a666bccf6a6d4ccac4ce} 
+void(\texorpdfstring{$\ast$}{*} error) (\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}} \texorpdfstring{$\ast$}{*}sock, qsc\+\_\+socket\+\_\+exceptions exception)}
+
+A pointer to an error function \Hypertarget{structqsc__socket__receive__poll__state_ac3634d09cd922d2bea518db2f9f89645}\index{qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}!sockarr@{sockarr}}
+\index{sockarr@{sockarr}!qsc\_socket\_receive\_poll\_state@{qsc\_socket\_receive\_poll\_state}}
+\doxysubsubsection{\texorpdfstring{sockarr}{sockarr}}
+{\footnotesize\ttfamily \label{structqsc__socket__receive__poll__state_ac3634d09cd922d2bea518db2f9f89645} 
+\mbox{\hyperlink{structqsc__socket}{qsc\+\_\+socket}}\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*} sockarr}
+
+A pointer to an array of sockets 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/socketbase.\+h\end{DoxyCompactItemize}

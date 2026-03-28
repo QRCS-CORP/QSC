@@ -1,0 +1,292 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/rcs.h File Reference}
+\hypertarget{rcs_8h}{}\label{rcs_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/rcs.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/rcs.h}}
+
+
+RCS function definitions ~\newline
+Rijndael-\/256 authenticated Cipher Stream.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+{\ttfamily \#include "{}sha3.\+h"{}}\newline
+{\ttfamily \#include "{}pmac.\+h"{}}\newline
+Include dependency graph for rcs.\+h\+:
+% FIG 0
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqsc__rcs__keyparams}{qsc\+\_\+rcs\+\_\+keyparams}}
+\begin{DoxyCompactList}\small\item\em The key parameters structure containing key, nonce, and info arrays and lengths. Use this structure to load an input cipher-\/key and optional info tweak, using the qsc\+\_\+rcs\+\_\+initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The info parameter is optional, and can be a salt or cryptographic key. The nonce is always QSC\+\_\+\+RCS\+\_\+\+BLOCK\+\_\+\+SIZE in length. \end{DoxyCompactList}\item 
+struct \mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The internal state structure containing the round-\/key array. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{rcs_8h_a3700c48a7e3b2f018100a58307b72ef6}\label{rcs_8h_a3700c48a7e3b2f018100a58307b72ef6} 
+\#define {\bfseries QSC\+\_\+\+RCS\+\_\+\+AUTHENTICATED}
+\begin{DoxyCompactList}\small\item\em Enables the AEAD cipher authentication mode. Use this flag to enable authenticated encryption for all modes. \end{DoxyCompactList}\item 
+\Hypertarget{rcs_8h_a2aa73ffe0195a73919e3de444ff1ed41}\label{rcs_8h_a2aa73ffe0195a73919e3de444ff1ed41} 
+\#define {\bfseries QSC\+\_\+\+RCS\+\_\+\+AUTH\+\_\+\+PMAC}
+\begin{DoxyCompactList}\small\item\em Enables the reduced rounds PMAC implementation. \end{DoxyCompactList}\item 
+\Hypertarget{rcs_8h_a8ca13533dd16794ce4a5bad88b38e899}\label{rcs_8h_a8ca13533dd16794ce4a5bad88b38e899} 
+\#define {\bfseries QSC\+\_\+\+RCS\+\_\+\+BLOCK\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The internal block size in bytes, required by the encryption and decryption functions. \end{DoxyCompactList}\item 
+\Hypertarget{rcs_8h_ad7e3b3a499154371f1324c4d44c7e55d}\label{rcs_8h_ad7e3b3a499154371f1324c4d44c7e55d} 
+\#define {\bfseries QSC\+\_\+\+RCS256\+\_\+\+KEY\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The size in bytes of the RCS-\/256 input cipher-\/key. \end{DoxyCompactList}\item 
+\Hypertarget{rcs_8h_a67477815acb80bfb0184c0808f48819f}\label{rcs_8h_a67477815acb80bfb0184c0808f48819f} 
+\#define {\bfseries QSC\+\_\+\+RCS256\+\_\+\+MAC\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The RCS-\/256 MAC code array length in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{rcs_8h_a422b6cffe311de8245916991a78cc433}\label{rcs_8h_a422b6cffe311de8245916991a78cc433} 
+\#define {\bfseries QSC\+\_\+\+RCS512\+\_\+\+KEY\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The size in bytes of the RCS-\/512 input cipher-\/key. \end{DoxyCompactList}\item 
+\Hypertarget{rcs_8h_a15fbf765981cad4c0a0a4f8160406c73}\label{rcs_8h_a15fbf765981cad4c0a0a4f8160406c73} 
+\#define {\bfseries QSC\+\_\+\+RCS512\+\_\+\+MAC\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The RCS-\/512 MAC code array length in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{rcs_8h_a790b62fe878b8e489d86da685a0f268e}\label{rcs_8h_a790b62fe878b8e489d86da685a0f268e} 
+\#define {\bfseries QSC\+\_\+\+RCS\+\_\+\+NONCE\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The nonce size in bytes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5}{rcs\+\_\+cipher\+\_\+type}} \{ \mbox{\hyperlink{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5a8066b8ef46ff1b2aa2c240b0971b1cd2}{RCS256}} = 1
+, \mbox{\hyperlink{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5a1fc6600960c152f07a407ea92b300070}{RCS512}} = 2
+ \}
+\begin{DoxyCompactList}\small\item\em The pre-\/defined cipher mode implementations. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{rcs_8h_ad3de70d3600ee6a2a3087b9c33393d9d}{qsc\+\_\+rcs\+\_\+dispose}} (\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the RCS cipher state. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{rcs_8h_a075b831a79637abb8ef4382f5aa11c17}{qsc\+\_\+rcs\+\_\+initialize}} (\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const \mbox{\hyperlink{structqsc__rcs__keyparams}{qsc\+\_\+rcs\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}keyparams, bool encryption)
+\begin{DoxyCompactList}\small\item\em Initialize the state with the input cipher-\/key and optional info tweak. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{rcs_8h_ab68fe248c655b06d6c13f1eb281abf38}{qsc\+\_\+rcs\+\_\+set\+\_\+associated}} (\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}data, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Set the associated data string used in authenticating the message. The associated data may be packet header information, domain specific data, or a secret shared by a group. The associated data must be set after initialization, and before each transformation call. The data is erased after each call to the transform. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{rcs_8h_a87a3085452232b535c745f711b4ebd2d}{qsc\+\_\+rcs\+\_\+transform}} (\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Transform an array of bytes. In encryption mode, the input plain-\/text is encrypted and then an authentication MAC code is appended to the cipher-\/text. In decryption mode, the input cipher-\/text is authenticated internally and compared to the MAC code appended to the cipher-\/text, if the codes to not match, the cipher-\/text is not decrypted and the call fails. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{rcs_8h_ac11273f4f473dd62b1d0866f848d1ce5}{qsc\+\_\+rcs\+\_\+extended\+\_\+transform}} (\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length, bool finalize)
+\begin{DoxyCompactList}\small\item\em A multi-\/call transform for a large array of bytes, such as required by file encryption. This call can be used to transform and authenticate a very large array of bytes (+1GB). On the last call in the sequence, set the finalize parameter to true to complete authentication, and write the MAC code to the end of the output array in encryption mode, or compare to the embedded MAC code and authenticate in decryption mode. In encryption mode, the input plain-\/text is encrypted, then authenticated, and the MAC code is appended to the cipher-\/text. In decryption mode, the input cipher-\/text is authenticated internally and compared to the MAC code appended to the cipher-\/text, if the codes to not match, the cipher-\/text is not decrypted and the call fails. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+RCS function definitions ~\newline
+Rijndael-\/256 authenticated Cipher Stream. 
+
+\begin{DoxyAuthor}{Author}
+John G. Underhill 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+1.\+0.\+0.\+0f 
+\end{DoxyVersion}
+\begin{DoxyDate}{Date}
+October 20, 2019 updated October 11, 2024 contact\+: \href{mailto:john.underhill@protonmail.com}{\texttt{ john.\+underhill@protonmail.\+com}}
+\end{DoxyDate}
+RCS-\/256 encryption example ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#define\ CSTLEN\ 20}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#define\ MSGLEN\ 200}}
+\DoxyCodeLine{uint8\_t\ cust[CSTLEN]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ key[\mbox{\hyperlink{rcs_8h_ad7e3b3a499154371f1324c4d44c7e55d}{QSC\_RCS256\_KEY\_SIZE}}]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ msg[MSGLEN]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ nonce[\mbox{\hyperlink{rcs_8h_a8ca13533dd16794ce4a5bad88b38e899}{QSC\_RCS\_BLOCK\_SIZE}}]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ cpt[MSGLEN\ +\ \mbox{\hyperlink{rcs_8h_a67477815acb80bfb0184c0808f48819f}{QSC\_RCS256\_MAC\_SIZE}}]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{\mbox{\hyperlink{structqsc__rcs__state}{qsc\_rcs\_state}}\ state;}
+\DoxyCodeLine{\mbox{\hyperlink{structqsc__rcs__keyparams}{qsc\_rcs\_keyparams}}\ kp\ =\ \{\ key,\ \mbox{\hyperlink{rcs_8h_ad7e3b3a499154371f1324c4d44c7e55d}{QSC\_RCS256\_KEY\_SIZE}},\ nonce,\ cust,\ CSTLEN\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{qsc\_rcs\_initialize(\&state,\ \&kp,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{qsc\_rcs\_transform(\&state,\ cpt,\ msg,\ MSGLEN)}
+
+\end{DoxyCode}
+
+
+RCS-\/256 decryption example ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{uint8\_t\ cpt[CPTLEN]\ =\ \{\ qsc\_rcs\_transform(k,p)\ \}}
+\DoxyCodeLine{uint8\_t\ key[\mbox{\hyperlink{rcs_8h_ad7e3b3a499154371f1324c4d44c7e55d}{QSC\_RCS256\_KEY\_SIZE}}]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ nonce[\mbox{\hyperlink{rcs_8h_a8ca13533dd16794ce4a5bad88b38e899}{QSC\_RCS\_BLOCK\_SIZE}}]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ cust[CSTLEN]\ =\ \{...\};}
+\DoxyCodeLine{\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ MSGLEN\ =\ CPTLEN\ -\/\ \mbox{\hyperlink{rcs_8h_a67477815acb80bfb0184c0808f48819f}{QSC\_RCS256\_MAC\_SIZE}};}
+\DoxyCodeLine{uint8\_t\ msg[MSGLEN]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{\mbox{\hyperlink{structqsc__rcs__keyparams}{qsc\_rcs\_keyparams}}\ kp\ =\ \{\ key,\ \mbox{\hyperlink{rcs_8h_ad7e3b3a499154371f1324c4d44c7e55d}{QSC\_RCS256\_KEY\_SIZE}},\ nonce,\ cust,\ CSTLEN\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{qsc\_rcs\_initialize(\&state,\ \&kp,\ \textcolor{keyword}{false});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (rcs256\_transform(\&state,\ msg,\ cpt,\ MSGLEN)\ ==\ \textcolor{keyword}{false})}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ authentication\ has\ failed,\ \textcolor{keywordflow}{do}\ something..}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+\begin{DoxyRemark}{Remarks}
+
+\end{DoxyRemark}
+\begin{DoxyParagraph}{}
+The RCS (Rijndael-\/256 authenticated Cipher Stream) encryption functions, are a hybrid of the Rijndael-\/256 rounds function, and a cryptographically strong pseudo-\/random generator function (c\+SHAKE) used to expand the round-\/key array (the key-\/schedule). ~\newline
+The cryptographic XOF, generates the round key array used by the Rijndael rounds function, enabling the safe addition of increased mixing rounds, and replacing the differentially-\/weak native Rijndael key-\/schedule expansion function. ~\newline
+The cipher increases the number of mixing rounds from 14 used by AES-\/256, to 22 used by RCS-\/256, twice the best known classical computer attack. ~\newline
+The cipher also has a 512-\/bit key configuration, which uses 30 rounds of mixing. ~\newline
+There are attacks now being proposed, that strongly indicate that larger key sizes will be necessary against future quantum-\/based attacks on symmetric ciphers.
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{}
+The pseudo-\/random bytes generator used by this cipher is the Keccak c\+SHAKE extended output function (XOF). The c\+SHAKE XOF is implemented in 256 and 512-\/bit forms of those functions, correlating to the input cipher-\/key size. The cipher has two base variants; RCS256 and RCS512, the 256 variant using a 256-\/bit input key, and RCS512 using a 512-\/bit key. This change in key schedule expansion functions to the stronger Keccak based XOF function, can now can safely produce a larger round-\/key array, unlocking an increased number of mixing rounds, and preventing many serious forms of attack on the Rijndael-\/based ciphers.
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{}
+This is a \textquotesingle{}tweakable cipher\textquotesingle{}, the initialization parameters; \doxylink{structqsc__rcs__keyparams}{qsc\+\_\+rcs\+\_\+keyparams}, include an info parameter that can be used as a secondary user input. Internally, the info parameter is used to customize the c\+SHAKE output, using the c\+SHAKE \textquotesingle{}custom\textquotesingle{} parameter to pre-\/initialize the SHAKE state. The info parameter can be tweaked, with a user defined string \textquotesingle{}info\textquotesingle{} in an \doxylink{structqsc__rcs__keyparams}{qsc\+\_\+rcs\+\_\+keyparams} structure passed to the rcs\+\_\+intitialize(state,keyparams,encrypt,mode). This tweak can be used as a \textquotesingle{}domain key\textquotesingle{}, or to differentiate cipher-\/text output from other implementations, or as a secondary secret-\/key input.
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{}
+RCS is an authenticated encryption with associated data (AEAD) stream cipher. It uses the hash-\/based key schedule extended form of Rijndael-\/256, wrapped in a segmented integer counter mode (CTR) for encryption. The c\+SHAKE key-\/schedule function also generates a key for the keyed hash-\/based MAC function; KMAC, used to generate the authentication code, which is appended to the cipher-\/text output of an encryption call.
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{}
+For authentication RCS can use either the standard form of KMAC, which uses 24 rounds, or the default authentication setting; a reduced-\/rounds version of KMAC that uses half the number of permutation rounds KMAC-\/\+R12. To enable the standard from of KMAC, pass the QSC\+\_\+\+RCS\+\_\+\+AUTH\+\_\+\+KMACR24 as a compiler definition, or unrem the definition in this header file. To run RCS without authentication, rem the QSC\+\_\+\+RCS\+\_\+\+AUTHENTICATED in this header file. RCS can use either a standard implementation of the Rijndael transformation functions, or one that implements CPU embedded AES-\/\+NI instructions. To enable AES-\/\+NI instructions, unrem the QSC\+\_\+\+SYSTEM\+\_\+\+AESNI\+\_\+\+ENABLED definition in the \doxylink{common_8h}{common.\+h} file.
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{}
+This implementation has both a C reference code, and an implementation that uses the AES-\/\+NI instructions that are used in the AES and RCS cipher variants. ~\newline
+The AES-\/\+NI implementation can be enabled by adding the QSC\+\_\+\+SYSTEM\+\_\+\+AESNI\+\_\+\+ENABLED constant to your preprocessor definitions. ~\newline
+The RCS-\/256, RCS-\/512, known answer vectors are taken from the CEX++ cryptographic library \href{https://github.com/Steppenwolfe65/CEX}{\texttt{ The CEX++ Cryptographic Library}}. ~\newline
+See the documentation and the rcs\+\_\+test.\+h tests for usage examples. To enable the AES-\/\+NI implementation, un-\/comment the definition in this file or add QSC\+\_\+\+SYSTEM\+\_\+\+AESNI\+\_\+\+ENABLED or add it to the compiler preprocessor definitions. ~\newline
+
+\end{DoxyParagraph}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5}\index{rcs.h@{rcs.h}!rcs\_cipher\_type@{rcs\_cipher\_type}}
+\index{rcs\_cipher\_type@{rcs\_cipher\_type}!rcs.h@{rcs.h}}
+\doxysubsubsection{\texorpdfstring{rcs\_cipher\_type}{rcs\_cipher\_type}}
+{\footnotesize\ttfamily \label{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5} 
+enum \mbox{\hyperlink{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5}{rcs\+\_\+cipher\+\_\+type}}}
+
+
+
+The pre-\/defined cipher mode implementations. 
+
+\begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{RCS256@{RCS256}!rcs.h@{rcs.h}}\index{rcs.h@{rcs.h}!RCS256@{RCS256}}}\Hypertarget{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5a8066b8ef46ff1b2aa2c240b0971b1cd2}\label{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5a8066b8ef46ff1b2aa2c240b0971b1cd2} 
+RCS256&The RCS-\/256 cipher \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{RCS512@{RCS512}!rcs.h@{rcs.h}}\index{rcs.h@{rcs.h}!RCS512@{RCS512}}}\Hypertarget{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5a1fc6600960c152f07a407ea92b300070}\label{rcs_8h_a1b672c28ae12a1d8fa576538fa4909c5a1fc6600960c152f07a407ea92b300070} 
+RCS512&The RCS-\/512 cipher \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{rcs_8h_ad3de70d3600ee6a2a3087b9c33393d9d}\index{rcs.h@{rcs.h}!qsc\_rcs\_dispose@{qsc\_rcs\_dispose}}
+\index{qsc\_rcs\_dispose@{qsc\_rcs\_dispose}!rcs.h@{rcs.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rcs\_dispose()}{qsc\_rcs\_dispose()}}
+{\footnotesize\ttfamily \label{rcs_8h_ad3de70d3600ee6a2a3087b9c33393d9d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+rcs\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the RCS cipher state. 
+
+\begin{DoxyWarning}{Warning}
+The dispose function must be called when disposing of the cipher. This function destroys the internal state of the cipher.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{rcs_8h_ac11273f4f473dd62b1d0866f848d1ce5}\index{rcs.h@{rcs.h}!qsc\_rcs\_extended\_transform@{qsc\_rcs\_extended\_transform}}
+\index{qsc\_rcs\_extended\_transform@{qsc\_rcs\_extended\_transform}!rcs.h@{rcs.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rcs\_extended\_transform()}{qsc\_rcs\_extended\_transform()}}
+{\footnotesize\ttfamily \label{rcs_8h_ac11273f4f473dd62b1d0866f848d1ce5} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+rcs\+\_\+extended\+\_\+transform (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{, }\item[{bool}]{finalize}{}\end{DoxyParamCaption})}
+
+
+
+A multi-\/call transform for a large array of bytes, such as required by file encryption. This call can be used to transform and authenticate a very large array of bytes (+1GB). On the last call in the sequence, set the finalize parameter to true to complete authentication, and write the MAC code to the end of the output array in encryption mode, or compare to the embedded MAC code and authenticate in decryption mode. In encryption mode, the input plain-\/text is encrypted, then authenticated, and the MAC code is appended to the cipher-\/text. In decryption mode, the input cipher-\/text is authenticated internally and compared to the MAC code appended to the cipher-\/text, if the codes to not match, the cipher-\/text is not decrypted and the call fails. 
+
+\begin{DoxyWarning}{Warning}
+The cipher must be initialized before this function can be called
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+{\em output} & A pointer to the output array \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} A pointer to the input array \\
+\hline
+{\em length} & The number of bytes to transform \\
+\hline
+{\em finalize} & Complete authentication on a stream if set to true\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: Returns true if the cipher has been transformed the data successfully, false on failure 
+\end{DoxyReturn}
+\Hypertarget{rcs_8h_a075b831a79637abb8ef4382f5aa11c17}\index{rcs.h@{rcs.h}!qsc\_rcs\_initialize@{qsc\_rcs\_initialize}}
+\index{qsc\_rcs\_initialize@{qsc\_rcs\_initialize}!rcs.h@{rcs.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rcs\_initialize()}{qsc\_rcs\_initialize()}}
+{\footnotesize\ttfamily \label{rcs_8h_a075b831a79637abb8ef4382f5aa11c17} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+rcs\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const \mbox{\hyperlink{structqsc__rcs__keyparams}{qsc\+\_\+rcs\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}}]{keyparams}{, }\item[{bool}]{encryption}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the state with the input cipher-\/key and optional info tweak. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+{\em keyparams} & \mbox{[}const\mbox{]}\mbox{[}struct\mbox{]} The secret input cipher-\/key and nonce structure \\
+\hline
+{\em encryption} & Initialize the cipher for encryption, or false for decryption mode \\
+\hline
+\end{DoxyParams}
+\Hypertarget{rcs_8h_ab68fe248c655b06d6c13f1eb281abf38}\index{rcs.h@{rcs.h}!qsc\_rcs\_set\_associated@{qsc\_rcs\_set\_associated}}
+\index{qsc\_rcs\_set\_associated@{qsc\_rcs\_set\_associated}!rcs.h@{rcs.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rcs\_set\_associated()}{qsc\_rcs\_set\_associated()}}
+{\footnotesize\ttfamily \label{rcs_8h_ab68fe248c655b06d6c13f1eb281abf38} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+rcs\+\_\+set\+\_\+associated (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Set the associated data string used in authenticating the message. The associated data may be packet header information, domain specific data, or a secret shared by a group. The associated data must be set after initialization, and before each transformation call. The data is erased after each call to the transform. 
+
+\begin{DoxyWarning}{Warning}
+The cipher must be initialized before this function can be called
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+{\em data} & \mbox{[}const\mbox{]} The associated data array \\
+\hline
+{\em length} & The associated data array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{rcs_8h_a87a3085452232b535c745f711b4ebd2d}\index{rcs.h@{rcs.h}!qsc\_rcs\_transform@{qsc\_rcs\_transform}}
+\index{qsc\_rcs\_transform@{qsc\_rcs\_transform}!rcs.h@{rcs.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_rcs\_transform()}{qsc\_rcs\_transform()}}
+{\footnotesize\ttfamily \label{rcs_8h_a87a3085452232b535c745f711b4ebd2d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+rcs\+\_\+transform (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__rcs__state}{qsc\+\_\+rcs\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Transform an array of bytes. In encryption mode, the input plain-\/text is encrypted and then an authentication MAC code is appended to the cipher-\/text. In decryption mode, the input cipher-\/text is authenticated internally and compared to the MAC code appended to the cipher-\/text, if the codes to not match, the cipher-\/text is not decrypted and the call fails. 
+
+\begin{DoxyWarning}{Warning}
+The cipher must be initialized before this function can be called
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+{\em output} & A pointer to the output array \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} A pointer to the input array \\
+\hline
+{\em length} & The number of bytes to transform\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: Returns true if the cipher has been transformed the data successfully, false on failure 
+\end{DoxyReturn}

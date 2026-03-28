@@ -1,0 +1,101 @@
+\doxysection{sysutils.\+h}
+\hypertarget{sysutils_8h_source}{}\label{sysutils_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sysutils.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sysutils.h}}
+\mbox{\hyperlink{sysutils_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00039\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#ifndef\ QSC\_SYSUTILS\_H}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#define\ QSC\_SYSUTILS\_H}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{comment}{/*\ bogus\ winbase.h\ error\ */}}
+\DoxyCodeLine{00053\ QSC\_SYSTEM\_CONDITION\_IGNORE(5105)}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#define\ QSC\_SYSUTILS\_SYSTEM\_NAME\_MAX\ 256}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\#define\ QSC\_USERNAME\_SYSTEM\_NAME\_MAX\ 256}}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00073\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{sysutils_8h_ad94319353cf20391c6c1544ef8f3100b}{qsc\_sysutils\_computer\_name}}(\textcolor{keywordtype}{char}*\ name);}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00079\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00080\ \{}
+\DoxyCodeLine{00081\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{structqsc__sysutils__drive__space__state_a42a93fee794a59c61c468508dcfcf940}{free}};\ \ \ \ \ \ }
+\DoxyCodeLine{00082\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{structqsc__sysutils__drive__space__state_a91271c136d08958b70aae29b0a0bbcad}{total}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00083\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{structqsc__sysutils__drive__space__state_aea74c286b8e42c85ca62fd2f9129e23e}{avail}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00084\ \}\ }
+\DoxyCodeLine{00085\ \mbox{\hyperlink{structqsc__sysutils__drive__space__state}{qsc\_sysutils\_drive\_space\_state}};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00093\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{sysutils_8h_aed8d7785fe076f03888289596c676eaa}{qsc\_sysutils\_drive\_space}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ drive,\ \mbox{\hyperlink{structqsc__sysutils__drive__space__state}{qsc\_sysutils\_drive\_space\_state}}*\ state);}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00099\ QSC\_EXPORT\_API\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00100\ \{}
+\DoxyCodeLine{00101\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{structqsc__sysutils__memory__statistics__state_afa8c68c84ee36288f66c4dbc39cf92b9}{phystotal}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00102\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{structqsc__sysutils__memory__statistics__state_a57b41feb8df593d15c49fffa24e6ff12}{physavail}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00103\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{structqsc__sysutils__memory__statistics__state_abf05794d43756d7e67d711ccf94520c8}{virttotal}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00104\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{structqsc__sysutils__memory__statistics__state_a8d690ac26ec56109bc97ebbfde2d4868}{virtavail}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00105\ \}}
+\DoxyCodeLine{00106\ \mbox{\hyperlink{structqsc__sysutils__memory__statistics__state}{qsc\_sysutils\_memory\_statistics\_state}};}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00113\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{sysutils_8h_a34d37e4bea4f54eec01316092c27f171}{qsc\_sysutils\_memory\_statistics}}(\mbox{\hyperlink{structqsc__sysutils__memory__statistics__state}{qsc\_sysutils\_memory\_statistics\_state}}*\ state);}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00120\ QSC\_EXPORT\_API\ uint32\_t\ \mbox{\hyperlink{sysutils_8h_ae8d2dda6cfceb77ef9afd901a8ffbc13}{qsc\_sysutils\_process\_id}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00127\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{sysutils_8h_a89244e2c1c6e48a979aaef6e03209b86}{qsc\_sysutils\_rdtsc\_available}}();}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00135\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{sysutils_8h_acc95d147c6fd027d09714f1ddf8d908c}{qsc\_sysutils\_user\_name}}(\textcolor{keywordtype}{char}*\ name);}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00142\ QSC\_EXPORT\_API\ uint64\_t\ \mbox{\hyperlink{sysutils_8h_acbfaf075895f6b7dd8039fd6f30cda4a}{qsc\_sysutils\_system\_uptime}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00149\ QSC\_EXPORT\_API\ uint64\_t\ \mbox{\hyperlink{sysutils_8h_a91c0e9ec066d44058975dad6feeffd02}{qsc\_sysutils\_system\_timestamp}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00157\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{sysutils_8h_aa9d6ed7b83d3003d80e36358e81af717}{qsc\_sysutils\_user\_identity}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ name,\ \textcolor{keywordtype}{char}*\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\#if\ defined(QSC\_DEBUG\_MODE)}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00163\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_system\_values\_print();}
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

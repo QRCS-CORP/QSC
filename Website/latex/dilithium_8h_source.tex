@@ -1,0 +1,91 @@
+\doxysection{dilithium.\+h}
+\hypertarget{dilithium_8h_source}{}\label{dilithium_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/dilithium.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/dilithium.h}}
+\mbox{\hyperlink{dilithium_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_DILITHIUM\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_DILITHIUM\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \textcolor{preprocessor}{\#if\ defined(QSC\_DILITHIUM\_S1P2544)}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00088\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_PRIVATEKEY\_SIZE\ 2544}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_PUBLICKEY\_SIZE\ 1312}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_SIGNATURE\_SIZE\ 2420}}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#elif\ defined(QSC\_DILITHIUM\_S3P4016)}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_PRIVATEKEY\_SIZE\ 4016}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_PUBLICKEY\_SIZE\ 1952}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_SIGNATURE\_SIZE\ 3293}}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#elif\ defined(QSC\_DILITHIUM\_S5P4880)}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_PRIVATEKEY\_SIZE\ 4880}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_PUBLICKEY\_SIZE\ 2592}}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00140\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_DILITHIUM\_SIGNATURE\_SIZE\ 4595}}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\#\ \ \ error\ "{}The\ Dilithium\ parameter\ set\ is\ invalid!"{}}}
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#define\ QSC\_DILITHIUM\_ALGNAME\ "{}DILITHIUM"{}}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00156\ \textcolor{comment}{/*\ \#define\ QSC\_DILITHIUM\_RANDOMIZED\_SIGNING\ */}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00167\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{dilithium_8h_ad10e76933ac05bda319ad04dc13f150b}{qsc\_dilithium\_generate\_keypair}}(uint8\_t*\ publickey,\ uint8\_t*\ privatekey,\ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00181\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{dilithium_8h_acf2512952ca0d01682821d5ccdfb9a24}{qsc\_dilithium\_sign}}(uint8\_t*\ signedmsg,\ \textcolor{keywordtype}{size\_t}*\ smsglen,\ \textcolor{keyword}{const}\ uint8\_t*\ message,\ \textcolor{keywordtype}{size\_t}\ msglen,\ \textcolor{keyword}{const}\ uint8\_t*\ privatekey,\ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00193\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{dilithium_8h_a21aa65b5873462ff3ae1d91fcc149c2d}{qsc\_dilithium\_verify}}(uint8\_t*\ message,\ \textcolor{keywordtype}{size\_t}*\ msglen,\ \textcolor{keyword}{const}\ uint8\_t*\ signedmsg,\ \textcolor{keywordtype}{size\_t}\ smsglen,\ \textcolor{keyword}{const}\ uint8\_t*\ publickey);}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

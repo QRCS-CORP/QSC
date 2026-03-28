@@ -7,5 +7,6 @@ var socket_8h =
     [ "QSC_SOCKET_RET_SUCCESS", "socket_8h.html#aa5af6ff5cbe52b88b08fb803cda44828", null ],
     [ "QSC_SOCKET_TERMINATOR_SIZE", "socket_8h.html#a4fd84c4dc349c575a04faab67d63f120", null ],
     [ "QSC_SOCKET_TIMEOUT_MSEC", "socket_8h.html#a26f2c5e5b1c2199391236ada7d0421eb", null ],
+    [ "QSC_UNINITIALIZED_SOCKET", "socket_8h.html#a2cebf529430c49f26394d78e34b88e67", null ],
     [ "socket_t", "socket_8h.html#ae944aa131cbbbaa9e79edc17b8a45c75", null ]
 ];

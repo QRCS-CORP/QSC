@@ -7,5 +7,6 @@ var donna128_8h =
     [ "qsc_donna128_multiply", "donna128_8h.html#a91263322039c713944d43fab450ef324", null ],
     [ "qsc_donna128_or", "donna128_8h.html#aa571873d6bf98021a1c6276fe7dfddb4", null ],
     [ "qsc_donna128_shift_left", "donna128_8h.html#ab41afe08309f86808f262262409c3081", null ],
-    [ "qsc_donna128_shift_right", "donna128_8h.html#ac81a9b15f7c894c2544157cbb0ed06d1", null ]
+    [ "qsc_donna128_shift_right", "donna128_8h.html#ac81a9b15f7c894c2544157cbb0ed06d1", null ],
+    [ "qsc_donna128_subtract", "donna128_8h.html#abbf1ae66770825648a5750345b1f47cb", null ]
 ];

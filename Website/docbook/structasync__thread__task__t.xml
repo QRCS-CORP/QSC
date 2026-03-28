@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structasync__thread__task__t" xml:lang="en-US">
+<title>async_thread_task_t Struct Reference</title>
+<indexterm><primary>async_thread_task_t</primary></indexterm>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_structasync__thread__task__t_1a5200fa1e298f59ab4e1c99cb5934b190"/>void(* <emphasis role="strong">task</emphasis> )(void *context, size_t index)</para>
+</listitem>
+            <listitem><para><anchor xml:id="_structasync__thread__task__t_1ae376f130b17d169ee51be68077a89ed0"/>void * <emphasis role="strong">context</emphasis></para>
+</listitem>
+            <listitem><para><anchor xml:id="_structasync__thread__task__t_1a3f42f10d93f6edb91d7d3f6edad25921"/>size_t <emphasis role="strong">index</emphasis></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/async.c</section>

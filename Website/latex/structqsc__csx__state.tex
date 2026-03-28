@@ -1,0 +1,61 @@
+\doxysection{qsc\+\_\+csx\+\_\+state Struct Reference}
+\hypertarget{structqsc__csx__state}{}\label{structqsc__csx__state}\index{qsc\_csx\_state@{qsc\_csx\_state}}
+
+
+The internal state structure containing the round-\/key array.  
+
+
+
+
+{\ttfamily \#include $<$csx.\+h$>$}
+
+
+
+Collaboration diagram for qsc\+\_\+csx\+\_\+state\+:
+% FIG 0
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structqsc__csx__state_ad4ff4e4c550e2bc050606f34b698864e}{state}} \mbox{[}\mbox{\hyperlink{csx_8h_a85063a4106ffb3e7972b618da25aee65}{QSC\+\_\+\+CSX\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}
+\item 
+\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} \mbox{\hyperlink{structqsc__csx__state_a16bc67e3e7cd6e690a86326d9dc4191d}{kstate}}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structqsc__csx__state_a1944753ac8107ec537f75b7e0201d866}{counter}}
+\item 
+bool \mbox{\hyperlink{structqsc__csx__state_af69c97ab299480b81e3f622d79777334}{encrypt}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The internal state structure containing the round-\/key array. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__csx__state_a1944753ac8107ec537f75b7e0201d866}\index{qsc\_csx\_state@{qsc\_csx\_state}!counter@{counter}}
+\index{counter@{counter}!qsc\_csx\_state@{qsc\_csx\_state}}
+\doxysubsubsection{\texorpdfstring{counter}{counter}}
+{\footnotesize\ttfamily \label{structqsc__csx__state_a1944753ac8107ec537f75b7e0201d866} 
+uint64\+\_\+t counter}
+
+the processed bytes counter \Hypertarget{structqsc__csx__state_af69c97ab299480b81e3f622d79777334}\index{qsc\_csx\_state@{qsc\_csx\_state}!encrypt@{encrypt}}
+\index{encrypt@{encrypt}!qsc\_csx\_state@{qsc\_csx\_state}}
+\doxysubsubsection{\texorpdfstring{encrypt}{encrypt}}
+{\footnotesize\ttfamily \label{structqsc__csx__state_af69c97ab299480b81e3f622d79777334} 
+bool encrypt}
+
+the transformation mode; true for encryption \Hypertarget{structqsc__csx__state_a16bc67e3e7cd6e690a86326d9dc4191d}\index{qsc\_csx\_state@{qsc\_csx\_state}!kstate@{kstate}}
+\index{kstate@{kstate}!qsc\_csx\_state@{qsc\_csx\_state}}
+\doxysubsubsection{\texorpdfstring{kstate}{kstate}}
+{\footnotesize\ttfamily \label{structqsc__csx__state_a16bc67e3e7cd6e690a86326d9dc4191d} 
+\mbox{\hyperlink{structqsc__pmac__state}{qsc\+\_\+pmac\+\_\+state}} kstate}
+
+the PMAC state structure \Hypertarget{structqsc__csx__state_ad4ff4e4c550e2bc050606f34b698864e}\index{qsc\_csx\_state@{qsc\_csx\_state}!state@{state}}
+\index{state@{state}!qsc\_csx\_state@{qsc\_csx\_state}}
+\doxysubsubsection{\texorpdfstring{state}{state}}
+{\footnotesize\ttfamily \label{structqsc__csx__state_ad4ff4e4c550e2bc050606f34b698864e} 
+uint64\+\_\+t state\mbox{[}\mbox{\hyperlink{csx_8h_a85063a4106ffb3e7972b618da25aee65}{QSC\+\_\+\+CSX\+\_\+\+STATE\+\_\+\+SIZE}}\mbox{]}}
+
+the primary state array 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/\mbox{\hyperlink{csx_8h}{csx.\+h}}\end{DoxyCompactItemize}

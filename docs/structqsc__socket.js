@@ -1,6 +1,6 @@
 var structqsc__socket =
 [
-    [ "address", "structqsc__socket.html#a23b96a07de642ce8cdf7cde04002616d", null ],
+    [ "address", "structqsc__socket.html#aa939c99e2ee7459cbb82d0151c6feb32", null ],
     [ "address_family", "structqsc__socket.html#a5dbb93a21c9ed934d8a60fa8a08c7b9e", null ],
     [ "connection", "structqsc__socket.html#aeebf1eb1d43df2887abee6cf427e66f3", null ],
     [ "connection_status", "structqsc__socket.html#ac29f29640bc43f09c0d448114bf3b8a9", null ],

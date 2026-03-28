@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structuint128" xml:lang="en-US">
+<title>uint128 Struct Reference</title>
+<indexterm><primary>uint128</primary></indexterm>
+<para>
+
+<para>The <link linkend="_structuint128">uint128</link> state structure. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;donna128.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint64_t <link linkend="_structuint128_1a9997109464efa7a7fc24efcaca7a9fb3">high</link></para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structuint128_1a8325b33af041490126f231fdfd194797">low</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The <link linkend="_structuint128">uint128</link> state structure. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structuint128_1a9997109464efa7a7fc24efcaca7a9fb3"/><section>
+    <title>high</title>
+<indexterm><primary>high</primary><secondary>uint128</secondary></indexterm>
+<indexterm><primary>uint128</primary><secondary>high</secondary></indexterm>
+<para><computeroutput>uint64_t high</computeroutput></para>
+<para>The high order bits </para>
+</section>
+<anchor xml:id="_structuint128_1a8325b33af041490126f231fdfd194797"/><section>
+    <title>low</title>
+<indexterm><primary>low</primary><secondary>uint128</secondary></indexterm>
+<indexterm><primary>uint128</primary><secondary>low</secondary></indexterm>
+<para><computeroutput>uint64_t low</computeroutput></para>
+<para>The low order bits </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/donna128.h</section>
+</section>

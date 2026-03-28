@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_ec25519_8h_source" xml:lang="en-US">
+<title>ec25519.h</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ec25519.h</primary></indexterm>
+<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*&#32;2025&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation</emphasis>
+2 <emphasis role="comment">&#32;*&#32;All&#32;Rights&#32;Reserved.</emphasis>
+3 <emphasis role="comment">&#32;*</emphasis>
+4 <emphasis role="comment">&#32;*&#32;NOTICE:&#32;This&#32;software&#32;and&#32;all&#32;accompanying&#32;materials&#32;are&#32;the&#32;exclusive&#32;</emphasis>
+5 <emphasis role="comment">&#32;*&#32;property&#32;of&#32;Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;Corporation&#32;(QRCS).</emphasis>
+6 <emphasis role="comment">&#32;*&#32;The&#32;intellectual&#32;and&#32;technical&#32;concepts&#32;contained&#32;within&#32;this&#32;implementation&#32;</emphasis>
+7 <emphasis role="comment">&#32;*&#32;are&#32;proprietary&#32;to&#32;QRCS&#32;and&#32;its&#32;authorized&#32;licensors&#32;and&#32;are&#32;protected&#32;under&#32;</emphasis>
+8 <emphasis role="comment">&#32;*&#32;applicable&#32;U.S.&#32;and&#32;international&#32;copyright,&#32;patent,&#32;and&#32;trade&#32;secret&#32;laws.</emphasis>
+9 <emphasis role="comment">&#32;*</emphasis>
+10 <emphasis role="comment">&#32;*&#32;CRYPTOGRAPHIC&#32;STANDARDS:</emphasis>
+11 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;includes&#32;implementations&#32;of&#32;cryptographic&#32;algorithms&#32;such&#32;as&#32;</emphasis>
+12 <emphasis role="comment">&#32;*&#32;&#32;&#32;SHA3,&#32;AES,&#32;and&#32;others.&#32;These&#32;algorithms&#32;are&#32;public&#32;domain&#32;or&#32;standardized&#32;</emphasis>
+13 <emphasis role="comment">&#32;*&#32;&#32;&#32;by&#32;organizations&#32;such&#32;as&#32;NIST&#32;and&#32;are&#32;NOT&#32;the&#32;property&#32;of&#32;QRCS.</emphasis>
+14 <emphasis role="comment">&#32;*&#32;-&#32;However,&#32;all&#32;source&#32;code,&#32;optimizations,&#32;and&#32;implementations&#32;in&#32;this&#32;library&#32;</emphasis>
+15 <emphasis role="comment">&#32;*&#32;&#32;&#32;are&#32;original&#32;works&#32;of&#32;QRCS&#32;and&#32;are&#32;protected&#32;under&#32;this&#32;license.</emphasis>
+16 <emphasis role="comment">&#32;*</emphasis>
+17 <emphasis role="comment">&#32;*&#32;RESTRICTIONS:</emphasis>
+18 <emphasis role="comment">&#32;*&#32;-&#32;Redistribution,&#32;modification,&#32;or&#32;unauthorized&#32;distribution&#32;of&#32;this&#32;software,&#32;</emphasis>
+19 <emphasis role="comment">&#32;*&#32;&#32;&#32;in&#32;whole&#32;or&#32;in&#32;part,&#32;is&#32;strictly&#32;prohibited.</emphasis>
+20 <emphasis role="comment">&#32;*&#32;-&#32;This&#32;software&#32;is&#32;provided&#32;for&#32;non-commercial,&#32;educational,&#32;and&#32;research&#32;</emphasis>
+21 <emphasis role="comment">&#32;*&#32;&#32;&#32;purposes&#32;only.&#32;Commercial&#32;use&#32;in&#32;any&#32;form&#32;is&#32;expressly&#32;forbidden.</emphasis>
+22 <emphasis role="comment">&#32;*&#32;-&#32;Licensing&#32;and&#32;authorized&#32;distribution&#32;are&#32;solely&#32;at&#32;the&#32;discretion&#32;of&#32;QRCS.</emphasis>
+23 <emphasis role="comment">&#32;*&#32;-&#32;Any&#32;use&#32;of&#32;this&#32;software&#32;implies&#32;acceptance&#32;of&#32;these&#32;restrictions.</emphasis>
+24 <emphasis role="comment">&#32;*</emphasis>
+25 <emphasis role="comment">&#32;*&#32;DISCLAIMER:</emphasis>
+26 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as&#32;is,&quot;&#32;without&#32;warranty&#32;of&#32;any&#32;kind,&#32;express&#32;or&#32;</emphasis>
+27 <emphasis role="comment">&#32;*&#32;implied,&#32;including&#32;but&#32;not&#32;limited&#32;to&#32;warranties&#32;of&#32;merchantability&#32;or&#32;fitness&#32;</emphasis>
+28 <emphasis role="comment">&#32;*&#32;for&#32;a&#32;particular&#32;purpose.&#32;QRCS&#32;disclaims&#32;all&#32;liability&#32;for&#32;any&#32;direct,&#32;indirect,&#32;</emphasis>
+29 <emphasis role="comment">&#32;*&#32;incidental,&#32;or&#32;consequential&#32;damages&#32;resulting&#32;from&#32;the&#32;use&#32;or&#32;misuse&#32;of&#32;this&#32;software.</emphasis>
+30 <emphasis role="comment">&#32;*</emphasis>
+31 <emphasis role="comment">&#32;*&#32;FULL&#32;LICENSE:</emphasis>
+32 <emphasis role="comment">&#32;*&#32;This&#32;software&#32;is&#32;subject&#32;to&#32;the&#32;**Quantum&#32;Resistant&#32;Cryptographic&#32;Solutions&#32;</emphasis>
+33 <emphasis role="comment">&#32;*&#32;Proprietary&#32;License&#32;(QRCS-PL)**.&#32;The&#32;complete&#32;license&#32;terms&#32;are&#32;included&#32;</emphasis>
+34 <emphasis role="comment">&#32;*&#32;in&#32;the&#32;LICENSE.txt&#32;file&#32;distributed&#32;with&#32;this&#32;software.</emphasis>
+35 <emphasis role="comment">&#32;*</emphasis>
+36 <emphasis role="comment">&#32;*&#32;Written&#32;by:&#32;John&#32;G.&#32;Underhill</emphasis>
+37 <emphasis role="comment">&#32;*&#32;Contact:&#32;john.underhill@protonmail.com</emphasis>
+38 <emphasis role="comment">&#32;*/</emphasis>
+39 
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;QSC_EC25519_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;QSC_EC25519_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_common_8h">common.h</link>&quot;</emphasis>
+45 
+46 <emphasis role="comment">/*&#32;\cond&#32;DOXYGEN_IGNORE&#32;*/</emphasis>
+47 
+48 <emphasis role="preprocessor">#define&#32;EC25519_SEED_SIZE&#32;32</emphasis>
+49 <emphasis role="preprocessor">#define&#32;EC25519_SIGNATURE_SIZE&#32;64</emphasis>
+50 <emphasis role="preprocessor">#define&#32;EC25519_PUBLICKEY_SIZE&#32;32</emphasis>
+51 <emphasis role="preprocessor">#define&#32;EC25519_PRIVATEKEY_SIZE&#32;64</emphasis>
+52 <emphasis role="preprocessor">#define&#32;EC25519_CURVE_SIZE&#32;32U</emphasis>
+53 
+54 <emphasis role="comment">/*&#32;fe&#32;*/</emphasis>
+55 <emphasis role="keyword">typedef</emphasis>&#32;QSC_SIMD_ALIGN&#32;int32_t&#32;fe25519[10];
+56 
+57 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_0(fe25519&#32;h);
+58 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_1(fe25519&#32;h);
+59 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_add(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;g);
+60 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_cswap(fe25519&#32;f,&#32;fe25519&#32;g,&#32;uint32_t&#32;b);
+61 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_sub(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;g);
+62 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_neg(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f);
+63 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_cmov(fe25519&#32;f,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;g,&#32;uint32_t&#32;b);
+64 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_copy(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f);
+65 int32_t&#32;fe25519_isnegative(<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f);
+66 int32_t&#32;fe25519_iszero(<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f);
+67 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_mul(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;g);
+68 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_mul32(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f,&#32;uint32_t&#32;n);
+69 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_sq(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f);
+70 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_sq2(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f);
+71 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_reduce(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;f);
+72 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_tobytes(uint8_t*&#32;s,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;h);
+73 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_invert(fe25519&#32;out,&#32;<emphasis role="keyword">const</emphasis>&#32;fe25519&#32;z);
+74 <emphasis role="keywordtype">void</emphasis>&#32;fe25519_frombytes(fe25519&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;s);
+75 
+76 <emphasis role="comment">/*&#32;ge&#32;*/</emphasis>
+77 
+78 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+79 {
+80 &#32;&#32;&#32;&#32;fe25519&#32;x;
+81 &#32;&#32;&#32;&#32;fe25519&#32;y;
+82 &#32;&#32;&#32;&#32;fe25519&#32;z;
+83 }&#32;ge25519_p2;
+84 
+85 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+86 {
+87 &#32;&#32;&#32;&#32;fe25519&#32;x;
+88 &#32;&#32;&#32;&#32;fe25519&#32;y;
+89 &#32;&#32;&#32;&#32;fe25519&#32;z;
+90 &#32;&#32;&#32;&#32;fe25519&#32;t;
+91 }&#32;ge25519_p3;
+92 
+93 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+94 {
+95 &#32;&#32;&#32;&#32;fe25519&#32;x;
+96 &#32;&#32;&#32;&#32;fe25519&#32;y;
+97 &#32;&#32;&#32;&#32;fe25519&#32;z;
+98 &#32;&#32;&#32;&#32;fe25519&#32;t;
+99 }&#32;ge25519_p1p1;
+100 
+101 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+102 {
+103 &#32;&#32;&#32;&#32;fe25519&#32;yplusx;
+104 &#32;&#32;&#32;&#32;fe25519&#32;yminusx;
+105 &#32;&#32;&#32;&#32;fe25519&#32;xy2d;
+106 }&#32;ge25519_precomp;
+107 
+108 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+109 {
+110 &#32;&#32;&#32;&#32;fe25519&#32;yplusx;
+111 &#32;&#32;&#32;&#32;fe25519&#32;yminusx;
+112 &#32;&#32;&#32;&#32;fe25519&#32;z;
+113 &#32;&#32;&#32;&#32;fe25519&#32;t2d;
+114 }&#32;ge25519_cached;
+115 
+116 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_p1p1_to_p3(ge25519_p3*&#32;r,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p1p1*&#32;p);
+117 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_p1p1_to_p2(ge25519_p2*&#32;r,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p1p1*&#32;p);
+118 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_scalarmult_base(ge25519_p3*&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;a);
+119 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_p3_tobytes(uint8_t*&#32;s,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p3*&#32;h);
+120 int32_t&#32;ge25519_is_canonical(<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;s);
+121 int32_t&#32;ge25519_has_small_order(<emphasis role="keyword">const</emphasis>&#32;uint8_t&#32;s[32]);
+122 int32_t&#32;ge25519_frombytes_negate_vartime(ge25519_p3*&#32;h,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;s);
+123 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_p3_to_cached(ge25519_cached*&#32;r,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p3*&#32;p);
+124 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_add_cached(ge25519_p1p1*&#32;r,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p3*&#32;p,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_cached*&#32;q);
+125 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_double_scalarmult_vartime(ge25519_p2*&#32;r,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;a,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p3*&#32;A,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;b);
+126 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_sub_cached(ge25519_p1p1*&#32;r,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p3*&#32;p,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_cached*&#32;q);
+127 <emphasis role="keywordtype">void</emphasis>&#32;ge25519_tobytes(uint8_t*&#32;s,&#32;<emphasis role="keyword">const</emphasis>&#32;ge25519_p2*&#32;h);
+128 
+129 <emphasis role="comment">/*&#32;sc&#32;*/</emphasis>
+130 
+131 <emphasis role="keywordtype">void</emphasis>&#32;sc25519_clamp(uint8_t*&#32;k);
+132 int32_t&#32;sc25519_is_canonical(<emphasis role="keyword">const</emphasis>&#32;uint8_t&#32;s[32]);
+133 <emphasis role="keywordtype">void</emphasis>&#32;sc25519_muladd(uint8_t&#32;s[32],&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t&#32;a[32],&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t&#32;b[32],&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t&#32;c[32]);
+134 <emphasis role="keywordtype">void</emphasis>&#32;sc25519_reduce(uint8_t&#32;s[64]);
+135 int32_t&#32;qsc_sc25519_verify(<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;x,&#32;<emphasis role="keyword">const</emphasis>&#32;uint8_t*&#32;y,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;n);
+136 int32_t&#32;ed25519_small_order(<emphasis role="keyword">const</emphasis>&#32;uint8_t&#32;s[32]);
+137 
+138 <emphasis role="comment">/*&#32;\endcond&#32;DOXYGEN_IGNORE&#32;*/</emphasis>
+139 
+140 <emphasis role="preprocessor">#endif</emphasis>
+141 
+</programlisting></section>

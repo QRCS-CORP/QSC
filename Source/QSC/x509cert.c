@@ -3,6 +3,7 @@
 #include "x509time.h"
 #include "x509spki.h"
 #include "x509sig.h"
+#include "asn1.h"
 #include "encoding.h"
 #include "memutils.h"
 
@@ -13,9 +14,31 @@
 #define QSC_ASN1_TAG_BIT_STRING 3U
 #define QSC_ASN1_TAG_SEQUENCE 16U
 
+static void x509_certificate_release_preserved_der(qsc_x509_certificate* certificate)
+{
+	if (certificate != (qsc_x509_certificate*)NULL)
+	{
+		if ((certificate->derowned == true) && (certificate->der != (const uint8_t*)NULL))
+		{
+			qsc_memutils_secure_erase((uint8_t*)certificate->der, certificate->derlen);
+			qsc_memutils_alloc_free((void*)certificate->der);
+		}
+
+		certificate->tbsdata = (const uint8_t*)NULL;
+		certificate->tbsdatalen = 0U;
+		certificate->der = (const uint8_t*)NULL;
+		certificate->derlen = 0U;
+		certificate->derowned = false;
+	}
+}
+
 static qsc_asn1_status x509_require_sequence(const qsc_encoding_ber_element* element)
 {
-	return qsc_asn1_require_tag(element, QSC_ASN1_CLASS_UNIVERSAL, true, QSC_ASN1_TAG_SEQUENCE);
+	qsc_asn1_status status;
+
+	status = qsc_asn1_require_tag(element, QSC_ASN1_CLASS_UNIVERSAL, true, QSC_ASN1_TAG_SEQUENCE);
+
+	return status;
 }
 
 static qsc_x509_extension_type x509_extension_type_from_oid(qsc_oid_id id)
@@ -27,6 +50,10 @@ static qsc_x509_extension_type x509_extension_type_from_oid(qsc_oid_id id)
 	if (id == QSC_OID_ID_SUBJECT_KEY_IDENTIFIER)
 	{
 		type = QSC_X509_EXTENSION_SUBJECT_KEY_IDENTIFIER;
+	}
+	else if (id == QSC_OID_ID_CRL_NUMBER)
+	{
+		type = QSC_X509_EXTENSION_CRL_NUMBER;
 	}
 	else if (id == QSC_OID_ID_KEY_USAGE)
 	{
@@ -72,6 +99,10 @@ static qsc_x509_extension_type x509_extension_type_from_oid(qsc_oid_id id)
 	{
 		type = QSC_X509_EXTENSION_SUBJECT_INFO_ACCESS;
 	}
+	else if (id == QSC_OID_ID_CRL_NUMBER)
+	{
+		type = QSC_X509_EXTENSION_CRL_NUMBER;
+	}
 
 	return type;
 }
@@ -81,10 +112,13 @@ static qsc_asn1_status x509_copy_unsigned_integer(const qsc_encoding_ber_element
 	qsc_asn1_status status;
 	size_t ofs;
 	size_t ilen;
+	size_t i;
+	bool nonzero;
 
 	status = QSC_ASN1_STATUS_FAILURE;
 	ofs = 0U;
 	ilen = 0U;
+	nonzero = false;
 
 	if (element == (const qsc_encoding_ber_element*)NULL || output == (uint8_t*)NULL || outlen == (size_t*)NULL)
 	{
@@ -102,17 +136,13 @@ static qsc_asn1_status x509_copy_unsigned_integer(const qsc_encoding_ber_element
 			}
 			else if ((element->value[0U] & 0x80U) != 0U)
 			{
-				/*
-				 * CertificateSerialNumber must be non-negative.
-				 */
+				/* CertificateSerialNumber must be non-negative. */
 				status = QSC_ASN1_STATUS_INVALID_ENCODING;
 			}
 			else
 			{
-				/*
-				 * DER INTEGER must be minimally encoded.
-				 * A leading 0x00 is permitted only when needed to keep the value positive.
-				 */
+				/* DER INTEGER must be minimally encoded.
+				 * A leading 0x00 is permitted only when needed to keep the value positive. */
 				if (element->length > 1U && element->value[0U] == 0x00U)
 				{
 					if ((element->value[1U] & 0x80U) == 0U)
@@ -139,10 +169,26 @@ static qsc_asn1_status x509_copy_unsigned_integer(const qsc_encoding_ber_element
 					}
 					else
 					{
-						qsc_memutils_clear(output, otplen);
-						qsc_memutils_copy(output, element->value + ofs, ilen);
-						*outlen = ilen;
-						status = QSC_ASN1_STATUS_SUCCESS;
+						for (i = ofs; i < element->length; ++i)
+						{
+							if (element->value[i] != 0U)
+							{
+								nonzero = true;
+								break;
+							}
+						}
+
+						if (nonzero == false)
+						{
+							status = QSC_ASN1_STATUS_INVALID_ENCODING;
+						}
+						else
+						{
+							qsc_memutils_clear(output, otplen);
+							qsc_memutils_copy(output, element->value + ofs, ilen);
+							*outlen = ilen;
+							status = QSC_ASN1_STATUS_SUCCESS;
+						}
 					}
 				}
 			}
@@ -154,7 +200,7 @@ static qsc_asn1_status x509_copy_unsigned_integer(const qsc_encoding_ber_element
 
 static uint16_t x509_map_key_usage_bits(const uint8_t* data, size_t datalen, uint8_t unused)
 {
-	uint16_t masktab[9] =
+	uint16_t masktab[9U] =
 	{
 		QSC_X509_KEY_USAGE_DIGITAL_SIGNATURE,
 		QSC_X509_KEY_USAGE_NON_REPUDIATION,
@@ -397,14 +443,13 @@ static qsc_asn1_status x509_parse_basic_constraints(const qsc_x509_extension* ex
 static qsc_asn1_status x509_parse_key_usage(const qsc_x509_extension* extension, qsc_x509_key_usage* usage)
 {
 	qsc_encoding_ber_element* root;
-	qsc_asn1_bit_string bitstr;
+	qsc_asn1_bit_string bitstr = { 0 };
 	size_t consumed;
 	qsc_asn1_status status;
 
 	root = (qsc_encoding_ber_element*)NULL;
 	consumed = 0U;
 	status = QSC_ASN1_STATUS_FAILURE;
-	qsc_memutils_clear((uint8_t*)&bitstr, sizeof(qsc_asn1_bit_string));
 
 	if (extension == (const qsc_x509_extension*)NULL || usage == (qsc_x509_key_usage*)NULL)
 	{
@@ -447,7 +492,7 @@ static qsc_asn1_status x509_parse_extended_key_usage(const qsc_x509_extension* e
 {
 	qsc_encoding_ber_element* root;
 	const qsc_encoding_ber_element* child;
-	qsc_asn1_oid oid;
+	qsc_asn1_oid oid = { 0 };
 	qsc_oid_id id;
 	size_t consumed;
 	qsc_asn1_status status;
@@ -457,7 +502,6 @@ static qsc_asn1_status x509_parse_extended_key_usage(const qsc_x509_extension* e
 	id = QSC_OID_ID_NONE;
 	consumed = 0U;
 	status = QSC_ASN1_STATUS_FAILURE;
-	qsc_memutils_clear((uint8_t*)&oid, sizeof(qsc_asn1_oid));
 
 	if (extension == (const qsc_x509_extension*)NULL || eku == (qsc_x509_extended_key_usage*)NULL)
 	{
@@ -747,7 +791,7 @@ static qsc_asn1_status x509_parse_general_names(const qsc_x509_extension* extens
 {
 	qsc_encoding_ber_element* root;
 	const qsc_encoding_ber_element* child;
-	qsc_asn1_oid oid;
+	qsc_asn1_oid oid = { 0 };
 	qsc_oid_id oidid;
 	size_t consumed;
 	size_t ecount;
@@ -759,7 +803,6 @@ static qsc_asn1_status x509_parse_general_names(const qsc_x509_extension* extens
 	consumed = 0U;
 	ecount = 0U;
 	status = QSC_ASN1_STATUS_FAILURE;
-	qsc_memutils_clear((uint8_t*)&oid, sizeof(qsc_asn1_oid));
 
 	if (extension == (const qsc_x509_extension*)NULL || entries == (qsc_x509_general_name*)NULL || count == (size_t*)NULL || present == (bool*)NULL || critical == (bool*)NULL)
 	{
@@ -957,7 +1000,6 @@ static qsc_asn1_status x509_parse_extensions(const qsc_encoding_ber_element* ele
 					break;
 				default:
 					status = QSC_ASN1_STATUS_SUCCESS;
-					break;
 				}
 
 				if (status != QSC_ASN1_STATUS_SUCCESS)
@@ -1032,14 +1074,12 @@ static qsc_asn1_status x509_parse_tbs_certificate(const qsc_encoding_ber_element
 	const qsc_encoding_ber_element* inner;
 	size_t index;
 	uint64_t version;
-	size_t tbslen;
 
 	status = QSC_ASN1_STATUS_FAILURE;
 	child = (const qsc_encoding_ber_element*)NULL;
 	inner = (const qsc_encoding_ber_element*)NULL;
 	index = 0U;
 	version = 0U;
-	tbslen = 0U;
 
 	if (tbs == (const qsc_encoding_ber_element*)NULL || certificate == (qsc_x509_certificate*)NULL)
 	{
@@ -1052,14 +1092,6 @@ static qsc_asn1_status x509_parse_tbs_certificate(const qsc_encoding_ber_element
 		if (status == QSC_ASN1_STATUS_SUCCESS)
 		{
 			certificate->version = 1U;
-
-			status = qsc_asn1_der_size(tbs, &tbslen);
-
-			if (status == QSC_ASN1_STATUS_SUCCESS)
-			{
-				certificate->tbsdatalen = tbslen;
-			}
-
 			child = qsc_asn1_child_at(tbs, 0U);
 
 			if (status == QSC_ASN1_STATUS_SUCCESS &&
@@ -1217,8 +1249,14 @@ void qsc_x509_certificate_clear(qsc_x509_certificate* certificate)
 
 	if (certificate != (qsc_x509_certificate*)NULL)
 	{
+		x509_certificate_release_preserved_der(certificate);
 		qsc_memutils_clear((uint8_t*)certificate, sizeof(qsc_x509_certificate));
 	}
+}
+
+void qsc_x509_certificate_free(qsc_x509_certificate* certificate)
+{
+	qsc_x509_certificate_clear(certificate);
 }
 
 qsc_asn1_status qsc_x509_certificate_decode_der(const uint8_t* der, size_t derlen, qsc_x509_certificate* certificate)
@@ -1228,15 +1266,14 @@ qsc_asn1_status qsc_x509_certificate_decode_der(const uint8_t* der, size_t derle
 
 	qsc_encoding_ber_element* root;
 	const qsc_encoding_ber_element* child;
-	qsc_asn1_bit_string bitstr;
-	size_t consumed;
+	const uint8_t* tbsraw;
+	qsc_asn1_bit_string bitstr = { 0 };
 	qsc_asn1_status status;
 
 	root = (qsc_encoding_ber_element*)NULL;
 	child = (const qsc_encoding_ber_element*)NULL;
-	consumed = 0U;
+	tbsraw = (const uint8_t*)NULL;
 	status = QSC_ASN1_STATUS_FAILURE;
-	qsc_memutils_clear((uint8_t*)&bitstr, sizeof(qsc_asn1_bit_string));
 
 	if (der == (const uint8_t*)NULL || derlen == 0U || certificate == (qsc_x509_certificate*)NULL)
 	{
@@ -1248,17 +1285,14 @@ qsc_asn1_status qsc_x509_certificate_decode_der(const uint8_t* der, size_t derle
 		certificate->der = der;
 		certificate->derlen = derlen;
 
-		root = qsc_encoding_der_decode_element(der, derlen, &consumed);
+		status = qsc_asn1_der_decode_exact(der, derlen, &root);
 
-		if (root == (qsc_encoding_ber_element*)NULL)
+		if (status == QSC_ASN1_STATUS_SUCCESS)
 		{
-			status = QSC_ASN1_STATUS_INVALID_ENCODING;
+			status = qsc_asn1_der_get_child_region(der, derlen, 0U, &tbsraw, &certificate->tbsdatalen);
 		}
-		else if (consumed != derlen)
-		{
-			status = QSC_ASN1_STATUS_INVALID_LENGTH;
-		}
-		else
+
+		if (status == QSC_ASN1_STATUS_SUCCESS)
 		{
 			status = x509_require_sequence(root);
 
@@ -1284,12 +1318,14 @@ qsc_asn1_status qsc_x509_certificate_decode_der(const uint8_t* der, size_t derle
 
 					if (status == QSC_ASN1_STATUS_SUCCESS)
 					{
-						/*
-						 * root->value points to the content octets of the outer
-						 * Certificate SEQUENCE. The first child in that content is the
-						 * encoded TBSCertificate element, so this is the correct signed span.
-						 */
-						certificate->tbsdata = root->value;
+						if (tbsraw == (const uint8_t*)NULL || certificate->tbsdatalen == 0U)
+						{
+							status = QSC_ASN1_STATUS_INVALID_ENCODING;
+						}
+						else
+						{
+							certificate->tbsdata = tbsraw;
+						}
 					}
 				}
 			}
@@ -1302,12 +1338,24 @@ qsc_asn1_status qsc_x509_certificate_decode_der(const uint8_t* der, size_t derle
 
 			if (status == QSC_ASN1_STATUS_SUCCESS)
 			{
+				if (qsc_x509_signature_algorithm_equal(&certificate->tbsignature, &certificate->signaturealgorithm) == false)
+				{
+					status = QSC_ASN1_STATUS_INVALID_ENCODING;
+				}
+			}
+
+			if (status == QSC_ASN1_STATUS_SUCCESS)
+			{
 				child = qsc_asn1_child_at(root, 2U);
 				status = qsc_asn1_decode_bit_string(child, &bitstr);
 
 				if (status == QSC_ASN1_STATUS_SUCCESS)
 				{
-					if (bitstr.length > sizeof(certificate->signature))
+					if (bitstr.unused != 0U)
+					{
+						status = QSC_ASN1_STATUS_INVALID_ENCODING;
+					}
+					else if (bitstr.length > sizeof(certificate->signature))
 					{
 						status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
 					}

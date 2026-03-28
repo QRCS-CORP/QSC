@@ -6,7 +6,6 @@ var rcs_8h =
     [ "QSC_RCS256_MAC_SIZE", "rcs_8h.html#a67477815acb80bfb0184c0808f48819f", null ],
     [ "QSC_RCS512_KEY_SIZE", "rcs_8h.html#a422b6cffe311de8245916991a78cc433", null ],
     [ "QSC_RCS512_MAC_SIZE", "rcs_8h.html#a15fbf765981cad4c0a0a4f8160406c73", null ],
-    [ "QSC_RCS_AUTH_QMAC", "rcs_8h.html#a57e70da86acceb740f400a466add04e2", null ],
     [ "QSC_RCS_AUTHENTICATED", "rcs_8h.html#a3700c48a7e3b2f018100a58307b72ef6", null ],
     [ "QSC_RCS_BLOCK_SIZE", "rcs_8h.html#a8ca13533dd16794ce4a5bad88b38e899", null ],
     [ "QSC_RCS_NONCE_SIZE", "rcs_8h.html#a790b62fe878b8e489d86da685a0f268e", null ],

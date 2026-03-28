@@ -25,7 +25,7 @@
 var NAVTREE =
 [
   [ "QSC Post Quantum Cryptographic Library", "index.html", [
-    [ "QSC: Quantum Secure Cryptographic Solutions Library", "index.html", null ],
+    [ "QSC: Quantum Secure Cryptographic Solutions Library Version 1.1", "index.html", null ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],
       [ "Data Structure Index", "classes.html", null ],
@@ -39,9 +39,10 @@ var NAVTREE =
       [ "Globals", "globals.html", [
         [ "All", "globals.html", "globals_dup" ],
         [ "Functions", "globals_func.html", "globals_func" ],
+        [ "Variables", "globals_vars.html", null ],
         [ "Typedefs", "globals_type.html", null ],
         [ "Enumerations", "globals_enum.html", null ],
-        [ "Enumerator", "globals_eval.html", null ],
+        [ "Enumerator", "globals_eval.html", "globals_eval" ],
         [ "Macros", "globals_defs.html", "globals_defs" ]
       ] ]
     ] ]
@@ -51,13 +52,17 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "acp_8h.html",
-"donna128_8h.html#a9533b473eb958f549433c3ea60874951",
-"functions_vars.html",
-"memutils_8h.html#ab271b19d7126c4a00ad124c6cc9ad7cd",
-"sha3_8h.html#a463021774cd48b812691642122b419b6",
-"sphincsplus_8h.html#a12c5ae73878dbe9f762db4c21d974772",
-"structqsc__netutils__adaptor__info.html#a7661ade92a27964dc3d61876f3752edb"
+"csx_8h.html#aaad87d0d2b87a9c27c9a6de576636de7",
+"functions_vars_j.html",
+"memutils_8h.html#a897c1ba64fdbceff12c1eb8fa75c0784",
+"secrand_8h.html#a4da9eecc3a7de9d93cac390afe809d22",
+"socketbase_8h.html#ad5d9fcd136ce55488ff70871f276216b",
+"structqsc__collection__state.html",
+"structqsc__x509__certificate__t.html#a83a2aefe08172c3b54ae8c12a63c8ccc",
+"transpose_8h.html#a414c7d6d973f0ab34d705a8e095f3f3b",
+"x509pem_8h.html#a5f6802f0885a2ff82060722db102d5c2"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';
 var SYNCOFFMSG = 'click to enable panel synchronization';
+var LISTOFALLMEMBERS = 'List of all members';

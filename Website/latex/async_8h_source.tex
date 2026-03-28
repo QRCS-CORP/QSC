@@ -1,0 +1,111 @@
+\doxysection{async.\+h}
+\hypertarget{async_8h_source}{}\label{async_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/async.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/async.h}}
+\mbox{\hyperlink{async_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#ifndef\ QSC\_THREADS\_H}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ QSC\_THREADS\_H}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ <stdarg.h>}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_OS\_WINDOWS)}}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{comment}{/*\ bogus\ winbase.h\ errors\ */}}
+\DoxyCodeLine{00048\ \ \ \ \ QSC\_SYSTEM\_CONDITION\_IGNORE(5105)}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#\ \ \ include\ <process.h>}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#\ \ \ include\ <Windows.h>}}
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keyword}{typedef}\ HANDLE\ qsc\_mutex;}
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keyword}{typedef}\ HANDLE\ qsc\_thread;}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#elif\ defined(QSC\_SYSTEM\_OS\_POSIX)}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#\ \ \ include\ <sys/types.h>}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#\ \ \ include\ <unistd.h>}}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#\ \ \ include\ <pthread.h>}}
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keyword}{typedef}\ pthread\_mutex\_t\ qsc\_mutex;}
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keyword}{typedef}\ pthread\_t\ qsc\_thread;}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00060\ \textcolor{preprocessor}{\#\ \ \ error\ your\ operating\ system\ is\ not\ supported!}}
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#define\ QSC\_ASYNC\_PARALLEL\_MAX\ 128}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00081\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_a7f8db684684526c71d4170dc21ff2ba9}{qsc\_async\_launch\_thread}}(\textcolor{keywordtype}{void}\ (*func)(\textcolor{keywordtype}{void}*),\ \textcolor{keywordtype}{void}*\ state);}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00089\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_aa3636877a217e7fae3a1b837a7565b11}{qsc\_async\_launch\_parallel\_threads}}(\textcolor{keywordtype}{void}\ (*func)(\textcolor{keywordtype}{void}*),\ \textcolor{keywordtype}{size\_t}\ count,\ ...);}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00096\ QSC\_EXPORT\_API\ qsc\_mutex\ \mbox{\hyperlink{async_8h_a4954963a0cadf0cb0e2c15c5ea054cad}{qsc\_async\_mutex\_create}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00104\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{async_8h_a64a9d5cffece1175d8a3ad34100408de}{qsc\_async\_mutex\_destroy}}(qsc\_mutex\ mtx);}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00111\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_acaf7453fb706fa1b0dec8d91a7fdf640}{qsc\_async\_mutex\_lock}}(qsc\_mutex\ mtx);}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00118\ QSC\_EXPORT\_API\ qsc\_mutex\ \mbox{\hyperlink{async_8h_a15617341f5c058f8983b43e932a11426}{qsc\_async\_mutex\_lock\_ex}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00125\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_a60bbbda56875a11753818efa9fe80ed7}{qsc\_async\_mutex\_unlock}}(qsc\_mutex\ mtx);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00133\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_ac0be47e75a8d1ecd00210cc66cb54b94}{qsc\_async\_mutex\_unlock\_ex}}(qsc\_mutex\ mtx);}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00145\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{async_8h_af5f02197d73d3ad1f1437e682179c156}{qsc\_async\_parallel\_for}}(\textcolor{keywordtype}{void}\ (*task)(\textcolor{keywordtype}{void}\ *context,\ \textcolor{keywordtype}{size\_t}\ index),\ \textcolor{keywordtype}{void}\ *context,\ \textcolor{keywordtype}{size\_t}\ nthreads);}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00150\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{async_8h_ad750b14b3b43754a4b16e453e1f9beef}{qsc\_async\_processor\_count}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00160\ QSC\_EXPORT\_API\ qsc\_thread\ \mbox{\hyperlink{async_8h_aa9e695f1a69adf60036a87c8c280d5f4}{qsc\_async\_thread\_create}}(\textcolor{keywordtype}{void}\ (*func)(\textcolor{keywordtype}{void}*),\ \textcolor{keywordtype}{void}*\ state);}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00169\ QSC\_EXPORT\_API\ qsc\_thread\ \mbox{\hyperlink{async_8h_a4b1ff875d3f39695ca7909c6abbc9147}{qsc\_async\_thread\_create\_ex}}(\textcolor{keywordtype}{void}\ (*func)(\textcolor{keywordtype}{void}**),\ \textcolor{keywordtype}{void}**\ args);}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00178\ QSC\_EXPORT\_API\ int32\_t\ \mbox{\hyperlink{async_8h_abc10be40896608e81479ec4af0a0cdd9}{qsc\_async\_thread\_resume}}(qsc\_thread\ handle);}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00185\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_a4ba5462b525beaa11606e01eeedce5b2}{qsc\_async\_thread\_sleep}}(uint32\_t\ msec);}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00192\ QSC\_EXPORT\_API\ int32\_t\ \mbox{\hyperlink{async_8h_a3777c21d4ae851fa3fe70e9e09646e13}{qsc\_async\_thread\_suspend}}(qsc\_thread\ handle);}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00199\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{async_8h_ab924af55d20d9d7c11ec895d197738bd}{qsc\_async\_thread\_terminate}}(qsc\_thread\ handle);}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00206\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_a4240fd2c10d323c1f7d3f17f55a1907d}{qsc\_async\_thread\_wait}}(qsc\_thread\ handle);}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00214\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_ab5f277e4e490c32c576a16ae4cbfe202}{qsc\_async\_thread\_wait\_time}}(qsc\_thread\ handle,\ uint32\_t\ msec);}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00222\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{async_8h_ab712d219a0fa8be5c6260ae53f41b428}{qsc\_async\_thread\_wait\_all}}(qsc\_thread*\ handles,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

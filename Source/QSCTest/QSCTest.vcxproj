@@ -292,6 +292,16 @@
     <ClCompile Include="sphincsplus_test.c" />
     <ClCompile Include="testutils.c" />
     <ClCompile Include="timer.c" />
+    <ClCompile Include="X509\x509_stage1_tests.c" />
+    <ClCompile Include="X509\x509_stage2a_csr_tests.c" />
+    <ClCompile Include="X509\x509_stage2b_pem_tests.c" />
+    <ClCompile Include="X509\x509_stage2c_crl_tests.c" />
+    <ClCompile Include="X509\x509_stage2d_negative_validation_tests.c" />
+    <ClCompile Include="X509\x509_stage3_positive_interop_tests.c" />
+    <ClCompile Include="X509\x509_stage4a_encoding_tests.c" />
+    <ClCompile Include="X509\x509_stage4b_pqc_tests.c" />
+    <ClCompile Include="X509\x509_test_helper.c" />
+    <ClCompile Include="x509_test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aesavs_test.h" />
@@ -323,6 +333,16 @@
     <ClInclude Include="sphincsplus_test.h" />
     <ClInclude Include="testutils.h" />
     <ClInclude Include="timer.h" />
+    <ClInclude Include="X509\x509_stage1_tests.h" />
+    <ClInclude Include="X509\x509_stage2a_csr_tests.h" />
+    <ClInclude Include="X509\x509_stage2b_pem_tests.h" />
+    <ClInclude Include="X509\x509_stage2c_crl_tests.h" />
+    <ClInclude Include="X509\x509_stage2d_negative_validation_tests.h" />
+    <ClInclude Include="X509\x509_stage3_positive_interop_tests.h" />
+    <ClInclude Include="X509\x509_stage4a_encoding_tests.h" />
+    <ClInclude Include="X509\x509_stage4b_pqc_tests.h" />
+    <ClInclude Include="X509\x509_test_helper.h" />
+    <ClInclude Include="x509_test.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QSC\QSC.vcxproj">

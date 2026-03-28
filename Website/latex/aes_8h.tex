@@ -1,0 +1,584 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/aes.h File Reference}
+\hypertarget{aes_8h}{}\label{aes_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/aes.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/aes.h}}
+
+
+An implementation of the AES symmetric cipher.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+{\ttfamily \#include "{}intrinsics.\+h"{}}\newline
+{\ttfamily \#include "{}sha3.\+h"{}}\newline
+Include dependency graph for aes.\+h\+:
+% FIG 0
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqsc__aes__keyparams}{qsc\+\_\+aes\+\_\+keyparams}}
+\item 
+struct \mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}}
+\item 
+struct \mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{aes_8h_a6653e5dba012e14cae8973ba6a99c16d}{QSC\+\_\+\+HBA\+\_\+\+KMAC\+\_\+\+EXTENSION}}
+\item 
+\#define \mbox{\hyperlink{aes_8h_a224a3b4ef83f52339961bdffbe386b20}{QSC\+\_\+\+HBA\+\_\+\+HKDF\+\_\+\+EXTENSION}}
+\item 
+\#define \mbox{\hyperlink{aes_8h_ac2aa9a63f78ad0410cfa1020cab1a8a2}{QSC\+\_\+\+AES\+\_\+\+BLOCK\+\_\+\+SIZE}}~16
+\item 
+\#define \mbox{\hyperlink{aes_8h_a4ff2acc2fb4a08316753e6a4a87705b8}{QSC\+\_\+\+AES\+\_\+\+IV\+\_\+\+SIZE}}~16
+\item 
+\#define \mbox{\hyperlink{aes_8h_a09aef5b95b52fec78f8199b583c65014}{QSC\+\_\+\+AES128\+\_\+\+KEY\+\_\+\+SIZE}}~16
+\item 
+\#define \mbox{\hyperlink{aes_8h_a90146a0952bb45baab83eb6aa2f58094}{QSC\+\_\+\+AES256\+\_\+\+KEY\+\_\+\+SIZE}}~32
+\item 
+\#define \mbox{\hyperlink{aes_8h_a7c4512dc0b52e3cc5458b2947f2aa8be}{QSC\+\_\+\+HBA256\+\_\+\+MAC\+\_\+\+SIZE}}~32
+\item 
+\#define \mbox{\hyperlink{aes_8h_a161fc435e9228c41d75010835e1b5226}{QSC\+\_\+\+HBA\+\_\+\+MAXAAD\+\_\+\+SIZE}}~256
+\item 
+\#define \mbox{\hyperlink{aes_8h_ad26e21759c9003561f5b7f4232ba588a}{QSC\+\_\+\+HBA\+\_\+\+MAXINFO\+\_\+\+SIZE}}~256
+\item 
+\#define \mbox{\hyperlink{aes_8h_a09b8cf5b1e05fabae7bbe350fe48debc}{HBA\+\_\+\+NAME\+\_\+\+SIZE}}~29
+\item 
+\#define \mbox{\hyperlink{aes_8h_a19d52a85cf593f5d89397fd1eade2479}{QSC\+\_\+\+HBA\+\_\+\+KMAC\+\_\+\+AUTH}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{aes_8h_a98e94a46ea4ebe253512f5002f1e69fd}\label{aes_8h_a98e94a46ea4ebe253512f5002f1e69fd} 
+typedef enum \mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738e}{qsc\+\_\+aes\+\_\+cipher\+\_\+type}} {\bfseries qsc\+\_\+aes\+\_\+cipher\+\_\+type}
+\item 
+\Hypertarget{aes_8h_ae30c97c860685cf9ad83421c2f702c27}\label{aes_8h_ae30c97c860685cf9ad83421c2f702c27} 
+typedef enum \mbox{\hyperlink{aes_8h_ae448b4228ce83fb47116ed16b8400741}{qsc\+\_\+aes\+\_\+cipher\+\_\+mode}} {\bfseries qsc\+\_\+aes\+\_\+cipher\+\_\+mode}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738e}{qsc\+\_\+aes\+\_\+cipher\+\_\+type}} \{ \mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738ea3fa28e6e7b813680875bd9e684d2d846}{qsc\+\_\+aes\+\_\+cipher\+\_\+128}} = 1
+, \mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65}{qsc\+\_\+aes\+\_\+cipher\+\_\+256}} = 2
+ \}
+\item 
+enum \mbox{\hyperlink{aes_8h_ae448b4228ce83fb47116ed16b8400741}{qsc\+\_\+aes\+\_\+cipher\+\_\+mode}} \{ \mbox{\hyperlink{aes_8h_ae448b4228ce83fb47116ed16b8400741a37bee5da46b7288cbbafb193ad2ea8cf}{qsc\+\_\+aes\+\_\+mode\+\_\+cbc}} = 1
+, \mbox{\hyperlink{aes_8h_ae448b4228ce83fb47116ed16b8400741a8d3b8ce37e4ac8626032d5efd303c3a0}{qsc\+\_\+aes\+\_\+mode\+\_\+ctr}} = 2
+, \mbox{\hyperlink{aes_8h_ae448b4228ce83fb47116ed16b8400741a25ae0c9efab177710193da72b08e1265}{qsc\+\_\+aes\+\_\+mode\+\_\+ecb}} = 3
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{aes_8h_acb1b9fd8437451657beca66abc728186}\label{aes_8h_acb1b9fd8437451657beca66abc728186} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void {\bfseries qsc\+\_\+aes\+\_\+dispose} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state)
+\begin{DoxyCompactList}\small\item\em Erase the round-\/key array and size. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a2bb21b64e1efb178d1f1ae57ce3e1ab2}{qsc\+\_\+aes\+\_\+initialize}} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, const \mbox{\hyperlink{structqsc__aes__keyparams}{qsc\+\_\+aes\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}keyparams, bool encryption, \mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738e}{qsc\+\_\+aes\+\_\+cipher\+\_\+type}} ctype)
+\begin{DoxyCompactList}\small\item\em Initialize the state with the input cipher-\/key and optional info tweak. The \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} round-\/key array must be initialized and size set before passing the state to this function. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a99ba803d35a7bfbf0e7e1df57214c901}{qsc\+\_\+aes\+\_\+cbc\+\_\+decrypt}} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t \texorpdfstring{$\ast$}{*}outputlen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Decrypt a length of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a8cdd54ccd033cf355c5f4a8967f4683c}{qsc\+\_\+aes\+\_\+cbc\+\_\+encrypt}} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Encrypt a length of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a7899343ed7871332a8adfec75d9e0e07}{qsc\+\_\+aes\+\_\+cbc\+\_\+decrypt\+\_\+block}} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input)
+\begin{DoxyCompactList}\small\item\em Decrypt one 16-\/byte block of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_aab3fef5311f4655e332b05d9a0d33493}{qsc\+\_\+aes\+\_\+cbc\+\_\+encrypt\+\_\+block}} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input)
+\begin{DoxyCompactList}\small\item\em Encrypt one 16-\/byte block of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a6d67695184a3f97172d0590002cb18d6}{qsc\+\_\+pkcs7\+\_\+add\+\_\+padding}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Add padding to a plain-\/text block pad before encryption. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t \mbox{\hyperlink{aes_8h_ab2833090995832e107a059fe012b56c0}{qsc\+\_\+pkcs7\+\_\+padding\+\_\+length}} (const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input)
+\begin{DoxyCompactList}\small\item\em Get the number of padded bytes in a block of decrypted cipher-\/text. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_aeb52bc95067e34098b8a27b0a0b80abf}{qsc\+\_\+aes\+\_\+ctrbe\+\_\+transform}} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Transform a length of data using a Big Endian block cipher Counter mode. ~\newline
+The qsc\+\_\+aes\+\_\+mode\+\_\+ctr mode will encrypt plain-\/text, and decrypt cipher-\/text. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a098c89f24df538f3b1d474dc264f4694}{qsc\+\_\+aes\+\_\+ctrle\+\_\+transform}} (\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Transform a length of data using a Little Endian block cipher Counter mode. ~\newline
+The qsc\+\_\+aes\+\_\+mode\+\_\+ctr mode will encrypt plain-\/text, and decrypt cipher-\/text. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a1bb23a27efad75b6906c44fd226087de}{qsc\+\_\+aes\+\_\+ecb\+\_\+decrypt\+\_\+block}} (const \mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input)
+\begin{DoxyCompactList}\small\item\em Decrypt one 16-\/byte block of cipher-\/text using Electronic Code\+Book Mode mode. ~\newline
+. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a8a9f6fd4a3763e223fc3eadb50f15643}{qsc\+\_\+aes\+\_\+ecb\+\_\+encrypt\+\_\+block}} (const \mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input)
+\begin{DoxyCompactList}\small\item\em Encrypt one 16-\/byte block of cipher-\/text using Electronic Code\+Book Mode mode. ~\newline
+. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a90515597a3277e357973ac456d853c8d}{qsc\+\_\+aes\+\_\+hba256\+\_\+dispose}} (\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}state)
+\begin{DoxyCompactList}\small\item\em Dispose of the HBA-\/256 cipher state. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_a33ddd7d27a86d775abc1bda63cd9e399}{qsc\+\_\+aes\+\_\+hba256\+\_\+initialize}} (\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}state, const \mbox{\hyperlink{structqsc__aes__keyparams}{qsc\+\_\+aes\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}keyparams, bool encrypt)
+\begin{DoxyCompactList}\small\item\em Initialize the cipher and load the keying material. Initializes the cipher state to an AES-\/256 instance. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{aes_8h_ac8404cb73e9e5f22dce09a989b9125d4}{qsc\+\_\+aes\+\_\+hba256\+\_\+set\+\_\+associated}} (\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}state, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}data, size\+\_\+t datalen)
+\begin{DoxyCompactList}\small\item\em Set the associated data string used in authenticating the message. The associated data may be packet header information, domain specific data, or a secret shared by a group. The associated data must be set after initialization, and before each transformation call. The data is erased after each call to the transform. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{aes_8h_a3ee9dce5cb91a8daff60b89a9eb0d4c5}{qsc\+\_\+aes\+\_\+hba256\+\_\+transform}} (\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}state, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input, size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Transform an array of bytes using an instance of AES-\/256. In encryption mode, the input plain-\/text is encrypted and then an authentication MAC code is appended to the cipher-\/text. In decryption mode, the input cipher-\/text is authenticated internally and compared to the mac code appended to the cipher-\/text, if the codes to not match, the cipher-\/text is not decrypted and the call fails. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+An implementation of the AES symmetric cipher. 
+
+AES-\/256 qsc\+\_\+aes\+\_\+mode\+\_\+ctr short-\/form api example ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ MSG\_LEN\ =\ 200;}
+\DoxyCodeLine{\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ CST\_LEN\ =\ 20;}
+\DoxyCodeLine{uint8\_t\ msg[MSG\_LEN]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ key[\mbox{\hyperlink{aes_8h_a90146a0952bb45baab83eb6aa2f58094}{QSC\_AES256\_KEY\_SIZE}}]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ nonce[\mbox{\hyperlink{aes_8h_ac2aa9a63f78ad0410cfa1020cab1a8a2}{QSC\_AES\_BLOCK\_SIZE}}]\ =\ \{...\};}
+\DoxyCodeLine{uint8\_t\ cust[CST\_LEN]\ =\ \{...\};}
+\DoxyCodeLine{}
+\DoxyCodeLine{uint8\_t\ output[MSG\_LEN]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{qsc\_hba\_state\ state;}
+\DoxyCodeLine{\mbox{\hyperlink{structqsc__aes__keyparams}{qsc\_aes\_keyparams}}\ kp\ =\ \{\ key,\ \mbox{\hyperlink{aes_8h_a90146a0952bb45baab83eb6aa2f58094}{QSC\_AES256\_KEY\_SIZE}},\ nonce,\ cust,\ CST\_LEN\ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{qsc\_aes\_initialize(\&state,\ \&kp,\ \textcolor{keyword}{true},\ \mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65}{qsc\_aes\_cipher\_256}});}
+\DoxyCodeLine{qsc\_aes\_ctr\_transform(\&state,\ output,\ msg,\ MSG\_LEN)}
+
+\end{DoxyCode}
+ 
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{aes_8h_a09b8cf5b1e05fabae7bbe350fe48debc}\index{aes.h@{aes.h}!HBA\_NAME\_SIZE@{HBA\_NAME\_SIZE}}
+\index{HBA\_NAME\_SIZE@{HBA\_NAME\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{HBA\_NAME\_SIZE}{HBA\_NAME\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_a09b8cf5b1e05fabae7bbe350fe48debc} 
+\#define HBA\+\_\+\+NAME\+\_\+\+SIZE~29}
+
+The HBA implementation specific name array length. \Hypertarget{aes_8h_a09aef5b95b52fec78f8199b583c65014}\index{aes.h@{aes.h}!QSC\_AES128\_KEY\_SIZE@{QSC\_AES128\_KEY\_SIZE}}
+\index{QSC\_AES128\_KEY\_SIZE@{QSC\_AES128\_KEY\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_AES128\_KEY\_SIZE}{QSC\_AES128\_KEY\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_a09aef5b95b52fec78f8199b583c65014} 
+\#define QSC\+\_\+\+AES128\+\_\+\+KEY\+\_\+\+SIZE~16}
+
+The size in bytes of the AES-\/128 input cipher-\/key. \Hypertarget{aes_8h_a90146a0952bb45baab83eb6aa2f58094}\index{aes.h@{aes.h}!QSC\_AES256\_KEY\_SIZE@{QSC\_AES256\_KEY\_SIZE}}
+\index{QSC\_AES256\_KEY\_SIZE@{QSC\_AES256\_KEY\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_AES256\_KEY\_SIZE}{QSC\_AES256\_KEY\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_a90146a0952bb45baab83eb6aa2f58094} 
+\#define QSC\+\_\+\+AES256\+\_\+\+KEY\+\_\+\+SIZE~32}
+
+The size in bytes of the AES-\/256 input cipher-\/key. \Hypertarget{aes_8h_ac2aa9a63f78ad0410cfa1020cab1a8a2}\index{aes.h@{aes.h}!QSC\_AES\_BLOCK\_SIZE@{QSC\_AES\_BLOCK\_SIZE}}
+\index{QSC\_AES\_BLOCK\_SIZE@{QSC\_AES\_BLOCK\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_AES\_BLOCK\_SIZE}{QSC\_AES\_BLOCK\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_ac2aa9a63f78ad0410cfa1020cab1a8a2} 
+\#define QSC\+\_\+\+AES\+\_\+\+BLOCK\+\_\+\+SIZE~16}
+
+The internal block size in bytes, required by the encryption and decryption functions. \Hypertarget{aes_8h_a4ff2acc2fb4a08316753e6a4a87705b8}\index{aes.h@{aes.h}!QSC\_AES\_IV\_SIZE@{QSC\_AES\_IV\_SIZE}}
+\index{QSC\_AES\_IV\_SIZE@{QSC\_AES\_IV\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_AES\_IV\_SIZE}{QSC\_AES\_IV\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_a4ff2acc2fb4a08316753e6a4a87705b8} 
+\#define QSC\+\_\+\+AES\+\_\+\+IV\+\_\+\+SIZE~16}
+
+The initialization vector size in bytes. \Hypertarget{aes_8h_a7c4512dc0b52e3cc5458b2947f2aa8be}\index{aes.h@{aes.h}!QSC\_HBA256\_MAC\_SIZE@{QSC\_HBA256\_MAC\_SIZE}}
+\index{QSC\_HBA256\_MAC\_SIZE@{QSC\_HBA256\_MAC\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_HBA256\_MAC\_SIZE}{QSC\_HBA256\_MAC\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_a7c4512dc0b52e3cc5458b2947f2aa8be} 
+\#define QSC\+\_\+\+HBA256\+\_\+\+MAC\+\_\+\+SIZE~32}
+
+The HBA-\/256 MAC code array length in bytes. \Hypertarget{aes_8h_a224a3b4ef83f52339961bdffbe386b20}\index{aes.h@{aes.h}!QSC\_HBA\_HKDF\_EXTENSION@{QSC\_HBA\_HKDF\_EXTENSION}}
+\index{QSC\_HBA\_HKDF\_EXTENSION@{QSC\_HBA\_HKDF\_EXTENSION}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_HBA\_HKDF\_EXTENSION}{QSC\_HBA\_HKDF\_EXTENSION}}
+{\footnotesize\ttfamily \label{aes_8h_a224a3b4ef83f52339961bdffbe386b20} 
+\#define QSC\+\_\+\+HBA\+\_\+\+HKDF\+\_\+\+EXTENSION}
+
+Enables the HKDF extensions for the HBA cipher-\/mode; alternative to HBA(c\+SHAKE) \Hypertarget{aes_8h_a19d52a85cf593f5d89397fd1eade2479}\index{aes.h@{aes.h}!QSC\_HBA\_KMAC\_AUTH@{QSC\_HBA\_KMAC\_AUTH}}
+\index{QSC\_HBA\_KMAC\_AUTH@{QSC\_HBA\_KMAC\_AUTH}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_HBA\_KMAC\_AUTH}{QSC\_HBA\_KMAC\_AUTH}}
+{\footnotesize\ttfamily \label{aes_8h_a19d52a85cf593f5d89397fd1eade2479} 
+\#define QSC\+\_\+\+HBA\+\_\+\+KMAC\+\_\+\+AUTH}
+
+Use KMAC to authenticate HBA; removing this macro is enabled when running in SHAKE extension mode. If the QSC\+\_\+\+HBA\+\_\+\+KMAC\+\_\+\+EXTENSION is disabled, HMAC(\+SHA2) is the default authentication mode in HBA. \Hypertarget{aes_8h_a6653e5dba012e14cae8973ba6a99c16d}\index{aes.h@{aes.h}!QSC\_HBA\_KMAC\_EXTENSION@{QSC\_HBA\_KMAC\_EXTENSION}}
+\index{QSC\_HBA\_KMAC\_EXTENSION@{QSC\_HBA\_KMAC\_EXTENSION}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_HBA\_KMAC\_EXTENSION}{QSC\_HBA\_KMAC\_EXTENSION}}
+{\footnotesize\ttfamily \label{aes_8h_a6653e5dba012e14cae8973ba6a99c16d} 
+\#define QSC\+\_\+\+HBA\+\_\+\+KMAC\+\_\+\+EXTENSION}
+
+Enables the c\+SHAKE extensions for the HBA cipher mode \Hypertarget{aes_8h_a161fc435e9228c41d75010835e1b5226}\index{aes.h@{aes.h}!QSC\_HBA\_MAXAAD\_SIZE@{QSC\_HBA\_MAXAAD\_SIZE}}
+\index{QSC\_HBA\_MAXAAD\_SIZE@{QSC\_HBA\_MAXAAD\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_HBA\_MAXAAD\_SIZE}{QSC\_HBA\_MAXAAD\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_a161fc435e9228c41d75010835e1b5226} 
+\#define QSC\+\_\+\+HBA\+\_\+\+MAXAAD\+\_\+\+SIZE~256}
+
+The maximum allowed AAD size. \Hypertarget{aes_8h_ad26e21759c9003561f5b7f4232ba588a}\index{aes.h@{aes.h}!QSC\_HBA\_MAXINFO\_SIZE@{QSC\_HBA\_MAXINFO\_SIZE}}
+\index{QSC\_HBA\_MAXINFO\_SIZE@{QSC\_HBA\_MAXINFO\_SIZE}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{QSC\_HBA\_MAXINFO\_SIZE}{QSC\_HBA\_MAXINFO\_SIZE}}
+{\footnotesize\ttfamily \label{aes_8h_ad26e21759c9003561f5b7f4232ba588a} 
+\#define QSC\+\_\+\+HBA\+\_\+\+MAXINFO\+\_\+\+SIZE~256}
+
+The maximum allowed key info size. 
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{aes_8h_ae448b4228ce83fb47116ed16b8400741}\index{aes.h@{aes.h}!qsc\_aes\_cipher\_mode@{qsc\_aes\_cipher\_mode}}
+\index{qsc\_aes\_cipher\_mode@{qsc\_aes\_cipher\_mode}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_cipher\_mode}{qsc\_aes\_cipher\_mode}}
+{\footnotesize\ttfamily \label{aes_8h_ae448b4228ce83fb47116ed16b8400741} 
+enum \mbox{\hyperlink{aes_8h_ae448b4228ce83fb47116ed16b8400741}{qsc\+\_\+aes\+\_\+cipher\+\_\+mode}}}
+
+The pre-\/defined cipher mode implementations \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_aes\_mode\_cbc@{qsc\_aes\_mode\_cbc}!aes.h@{aes.h}}\index{aes.h@{aes.h}!qsc\_aes\_mode\_cbc@{qsc\_aes\_mode\_cbc}}}\Hypertarget{aes_8h_ae448b4228ce83fb47116ed16b8400741a37bee5da46b7288cbbafb193ad2ea8cf}\label{aes_8h_ae448b4228ce83fb47116ed16b8400741a37bee5da46b7288cbbafb193ad2ea8cf} 
+qsc\+\_\+aes\+\_\+mode\+\_\+cbc&Cipher Block Chaining \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_aes\_mode\_ctr@{qsc\_aes\_mode\_ctr}!aes.h@{aes.h}}\index{aes.h@{aes.h}!qsc\_aes\_mode\_ctr@{qsc\_aes\_mode\_ctr}}}\Hypertarget{aes_8h_ae448b4228ce83fb47116ed16b8400741a8d3b8ce37e4ac8626032d5efd303c3a0}\label{aes_8h_ae448b4228ce83fb47116ed16b8400741a8d3b8ce37e4ac8626032d5efd303c3a0} 
+qsc\+\_\+aes\+\_\+mode\+\_\+ctr&segmented integer counter \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_aes\_mode\_ecb@{qsc\_aes\_mode\_ecb}!aes.h@{aes.h}}\index{aes.h@{aes.h}!qsc\_aes\_mode\_ecb@{qsc\_aes\_mode\_ecb}}}\Hypertarget{aes_8h_ae448b4228ce83fb47116ed16b8400741a25ae0c9efab177710193da72b08e1265}\label{aes_8h_ae448b4228ce83fb47116ed16b8400741a25ae0c9efab177710193da72b08e1265} 
+qsc\+\_\+aes\+\_\+mode\+\_\+ecb&Electronic Code\+Book mode (insecure) \\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{aes_8h_aa53a8230f3171dbb0958e240cb90738e}\index{aes.h@{aes.h}!qsc\_aes\_cipher\_type@{qsc\_aes\_cipher\_type}}
+\index{qsc\_aes\_cipher\_type@{qsc\_aes\_cipher\_type}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_cipher\_type}{qsc\_aes\_cipher\_type}}
+{\footnotesize\ttfamily \label{aes_8h_aa53a8230f3171dbb0958e240cb90738e} 
+enum \mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738e}{qsc\+\_\+aes\+\_\+cipher\+\_\+type}}}
+
+The pre-\/defined cipher types \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_aes\_cipher\_128@{qsc\_aes\_cipher\_128}!aes.h@{aes.h}}\index{aes.h@{aes.h}!qsc\_aes\_cipher\_128@{qsc\_aes\_cipher\_128}}}\Hypertarget{aes_8h_aa53a8230f3171dbb0958e240cb90738ea3fa28e6e7b813680875bd9e684d2d846}\label{aes_8h_aa53a8230f3171dbb0958e240cb90738ea3fa28e6e7b813680875bd9e684d2d846} 
+qsc\+\_\+aes\+\_\+cipher\+\_\+128&The AES-\/128 block cipher \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{qsc\_aes\_cipher\_256@{qsc\_aes\_cipher\_256}!aes.h@{aes.h}}\index{aes.h@{aes.h}!qsc\_aes\_cipher\_256@{qsc\_aes\_cipher\_256}}}\Hypertarget{aes_8h_aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65}\label{aes_8h_aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65} 
+qsc\+\_\+aes\+\_\+cipher\+\_\+256&The AES-\/256 block cipher \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{aes_8h_a99ba803d35a7bfbf0e7e1df57214c901}\index{aes.h@{aes.h}!qsc\_aes\_cbc\_decrypt@{qsc\_aes\_cbc\_decrypt}}
+\index{qsc\_aes\_cbc\_decrypt@{qsc\_aes\_cbc\_decrypt}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_cbc\_decrypt()}{qsc\_aes\_cbc\_decrypt()}}
+{\footnotesize\ttfamily \label{aes_8h_a99ba803d35a7bfbf0e7e1df57214c901} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+cbc\+\_\+decrypt (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t \texorpdfstring{$\ast$}{*}}]{outputlen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Decrypt a length of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. 
+
+\begin{DoxyWarning}{Warning}
+the qsc\+\_\+aes\+\_\+initialize function must be called first to initialize the state
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the decrypted plain-\/text \\
+\hline
+{\em outputlen} & The number of output cipher-\/text bytes to encrypt \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input cipher-\/text bytes \\
+\hline
+{\em length} & The number of input cipher-\/text bytes to decrypt \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a7899343ed7871332a8adfec75d9e0e07}\index{aes.h@{aes.h}!qsc\_aes\_cbc\_decrypt\_block@{qsc\_aes\_cbc\_decrypt\_block}}
+\index{qsc\_aes\_cbc\_decrypt\_block@{qsc\_aes\_cbc\_decrypt\_block}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_cbc\_decrypt\_block()}{qsc\_aes\_cbc\_decrypt\_block()}}
+{\footnotesize\ttfamily \label{aes_8h_a7899343ed7871332a8adfec75d9e0e07} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+cbc\+\_\+decrypt\+\_\+block (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{}\end{DoxyParamCaption})}
+
+
+
+Decrypt one 16-\/byte block of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. 
+
+\begin{DoxyWarning}{Warning}
+the qsc\+\_\+aes\+\_\+initialize function must be called first to initialize the state
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the decrypted plain-\/text \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input cipher-\/text block of bytes \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a8cdd54ccd033cf355c5f4a8967f4683c}\index{aes.h@{aes.h}!qsc\_aes\_cbc\_encrypt@{qsc\_aes\_cbc\_encrypt}}
+\index{qsc\_aes\_cbc\_encrypt@{qsc\_aes\_cbc\_encrypt}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_cbc\_encrypt()}{qsc\_aes\_cbc\_encrypt()}}
+{\footnotesize\ttfamily \label{aes_8h_a8cdd54ccd033cf355c5f4a8967f4683c} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+cbc\+\_\+encrypt (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Encrypt a length of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. 
+
+\begin{DoxyWarning}{Warning}
+the qsc\+\_\+aes\+\_\+initialize function must be called first to initialize the state
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the encrypted plain-\/text \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input plain-\/text bytes \\
+\hline
+{\em length} & The number of input plain-\/text bytes to encrypt \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_aab3fef5311f4655e332b05d9a0d33493}\index{aes.h@{aes.h}!qsc\_aes\_cbc\_encrypt\_block@{qsc\_aes\_cbc\_encrypt\_block}}
+\index{qsc\_aes\_cbc\_encrypt\_block@{qsc\_aes\_cbc\_encrypt\_block}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_cbc\_encrypt\_block()}{qsc\_aes\_cbc\_encrypt\_block()}}
+{\footnotesize\ttfamily \label{aes_8h_aab3fef5311f4655e332b05d9a0d33493} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+cbc\+\_\+encrypt\+\_\+block (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{}\end{DoxyParamCaption})}
+
+
+
+Encrypt one 16-\/byte block of cipher-\/text using Cipher Block Chaining mode. ~\newline
+. 
+
+\begin{DoxyWarning}{Warning}
+the qsc\+\_\+aes\+\_\+initialize function must be called first to initialize the state
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the encrypted cipher-\/text \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input plain-\/text block of bytes \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_aeb52bc95067e34098b8a27b0a0b80abf}\index{aes.h@{aes.h}!qsc\_aes\_ctrbe\_transform@{qsc\_aes\_ctrbe\_transform}}
+\index{qsc\_aes\_ctrbe\_transform@{qsc\_aes\_ctrbe\_transform}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_ctrbe\_transform()}{qsc\_aes\_ctrbe\_transform()}}
+{\footnotesize\ttfamily \label{aes_8h_aeb52bc95067e34098b8a27b0a0b80abf} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+ctrbe\+\_\+transform (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Transform a length of data using a Big Endian block cipher Counter mode. ~\newline
+The qsc\+\_\+aes\+\_\+mode\+\_\+ctr mode will encrypt plain-\/text, and decrypt cipher-\/text. 
+
+\begin{DoxyWarning}{Warning}
+the qsc\+\_\+aes\+\_\+initialize function must be called first to initialize the state
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the transformed text \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input data byte array \\
+\hline
+{\em length} & The number of input bytes to transform \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a098c89f24df538f3b1d474dc264f4694}\index{aes.h@{aes.h}!qsc\_aes\_ctrle\_transform@{qsc\_aes\_ctrle\_transform}}
+\index{qsc\_aes\_ctrle\_transform@{qsc\_aes\_ctrle\_transform}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_ctrle\_transform()}{qsc\_aes\_ctrle\_transform()}}
+{\footnotesize\ttfamily \label{aes_8h_a098c89f24df538f3b1d474dc264f4694} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+ctrle\+\_\+transform (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Transform a length of data using a Little Endian block cipher Counter mode. ~\newline
+The qsc\+\_\+aes\+\_\+mode\+\_\+ctr mode will encrypt plain-\/text, and decrypt cipher-\/text. 
+
+\begin{DoxyWarning}{Warning}
+the qsc\+\_\+aes\+\_\+initialize function must be called first to initialize the state
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the transformed text \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input data byte array \\
+\hline
+{\em length} & The number of input bytes to transform \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a1bb23a27efad75b6906c44fd226087de}\index{aes.h@{aes.h}!qsc\_aes\_ecb\_decrypt\_block@{qsc\_aes\_ecb\_decrypt\_block}}
+\index{qsc\_aes\_ecb\_decrypt\_block@{qsc\_aes\_ecb\_decrypt\_block}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_ecb\_decrypt\_block()}{qsc\_aes\_ecb\_decrypt\_block()}}
+{\footnotesize\ttfamily \label{aes_8h_a1bb23a27efad75b6906c44fd226087de} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+ecb\+\_\+decrypt\+\_\+block (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{}\end{DoxyParamCaption})}
+
+
+
+Decrypt one 16-\/byte block of cipher-\/text using Electronic Code\+Book Mode mode. ~\newline
+. 
+
+\begin{DoxyWarning}{Warning}
+qsc\+\_\+aes\+\_\+mode\+\_\+ecb is not a secure mode, and should be used only for testing, or building more complex primitives.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the decrypted plain-\/text \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input cipher-\/text block of bytes \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a8a9f6fd4a3763e223fc3eadb50f15643}\index{aes.h@{aes.h}!qsc\_aes\_ecb\_encrypt\_block@{qsc\_aes\_ecb\_encrypt\_block}}
+\index{qsc\_aes\_ecb\_encrypt\_block@{qsc\_aes\_ecb\_encrypt\_block}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_ecb\_encrypt\_block()}{qsc\_aes\_ecb\_encrypt\_block()}}
+{\footnotesize\ttfamily \label{aes_8h_a8a9f6fd4a3763e223fc3eadb50f15643} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+ecb\+\_\+encrypt\+\_\+block (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{}\end{DoxyParamCaption})}
+
+
+
+Encrypt one 16-\/byte block of cipher-\/text using Electronic Code\+Book Mode mode. ~\newline
+. 
+
+\begin{DoxyWarning}{Warning}
+qsc\+\_\+aes\+\_\+mode\+\_\+ecb is not a secure mode, and should be used only for testing, or building more complex primitives.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The initialized \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em output} & The output byte array; receives the encrypted cipher-\/text \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input plain-\/text block of bytes \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a90515597a3277e357973ac456d853c8d}\index{aes.h@{aes.h}!qsc\_aes\_hba256\_dispose@{qsc\_aes\_hba256\_dispose}}
+\index{qsc\_aes\_hba256\_dispose@{qsc\_aes\_hba256\_dispose}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_hba256\_dispose()}{qsc\_aes\_hba256\_dispose()}}
+{\footnotesize\ttfamily \label{aes_8h_a90515597a3277e357973ac456d853c8d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+hba256\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the HBA-\/256 cipher state. 
+
+\begin{DoxyWarning}{Warning}
+The dispose function must be called when disposing of the cipher. This function destroys internal arrays allocated on the heap, and must be called before the state goes out of scope.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The HBA state structure; contains internal state information \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a33ddd7d27a86d775abc1bda63cd9e399}\index{aes.h@{aes.h}!qsc\_aes\_hba256\_initialize@{qsc\_aes\_hba256\_initialize}}
+\index{qsc\_aes\_hba256\_initialize@{qsc\_aes\_hba256\_initialize}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_hba256\_initialize()}{qsc\_aes\_hba256\_initialize()}}
+{\footnotesize\ttfamily \label{aes_8h_a33ddd7d27a86d775abc1bda63cd9e399} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+hba256\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{const \mbox{\hyperlink{structqsc__aes__keyparams}{qsc\+\_\+aes\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}}]{keyparams}{, }\item[{bool}]{encrypt}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the cipher and load the keying material. Initializes the cipher state to an AES-\/256 instance. 
+
+\begin{DoxyWarning}{Warning}
+The initialize function must be called before either the associated data or transform functions are called.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The HBA state structure; contains internal state information \\
+\hline
+{\em keyparams} & \mbox{[}const\mbox{]}\mbox{[}struct\mbox{]} The HBA key parameters, includes the key, and optional AAD and user info arrays \\
+\hline
+{\em encrypt} & The cipher encryption mode; true for encryption, false for decryption \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_ac8404cb73e9e5f22dce09a989b9125d4}\index{aes.h@{aes.h}!qsc\_aes\_hba256\_set\_associated@{qsc\_aes\_hba256\_set\_associated}}
+\index{qsc\_aes\_hba256\_set\_associated@{qsc\_aes\_hba256\_set\_associated}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_hba256\_set\_associated()}{qsc\_aes\_hba256\_set\_associated()}}
+{\footnotesize\ttfamily \label{aes_8h_ac8404cb73e9e5f22dce09a989b9125d4} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+hba256\+\_\+set\+\_\+associated (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{datalen}{}\end{DoxyParamCaption})}
+
+
+
+Set the associated data string used in authenticating the message. The associated data may be packet header information, domain specific data, or a secret shared by a group. The associated data must be set after initialization, and before each transformation call. The data is erased after each call to the transform. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The HBA-\/256 state structure; contains internal state information \\
+\hline
+{\em data} & \mbox{[}const\mbox{]} The associated data array \\
+\hline
+{\em datalen} & The associated data array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_a3ee9dce5cb91a8daff60b89a9eb0d4c5}\index{aes.h@{aes.h}!qsc\_aes\_hba256\_transform@{qsc\_aes\_hba256\_transform}}
+\index{qsc\_aes\_hba256\_transform@{qsc\_aes\_hba256\_transform}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_hba256\_transform()}{qsc\_aes\_hba256\_transform()}}
+{\footnotesize\ttfamily \label{aes_8h_a3ee9dce5cb91a8daff60b89a9eb0d4c5} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+aes\+\_\+hba256\+\_\+transform (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__hba256__state}{qsc\+\_\+aes\+\_\+hba256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Transform an array of bytes using an instance of AES-\/256. In encryption mode, the input plain-\/text is encrypted and then an authentication MAC code is appended to the cipher-\/text. In decryption mode, the input cipher-\/text is authenticated internally and compared to the mac code appended to the cipher-\/text, if the codes to not match, the cipher-\/text is not decrypted and the call fails. 
+
+\begin{DoxyWarning}{Warning}
+The cipher must be initialized before this function can be called
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The HBA state structure; contains internal state information \\
+\hline
+{\em output} & The output byte array \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input byte array \\
+\hline
+{\em length} & The number of bytes to transform\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: Returns true if the cipher has been initialized successfully, false on failure 
+\end{DoxyReturn}
+\Hypertarget{aes_8h_a2bb21b64e1efb178d1f1ae57ce3e1ab2}\index{aes.h@{aes.h}!qsc\_aes\_initialize@{qsc\_aes\_initialize}}
+\index{qsc\_aes\_initialize@{qsc\_aes\_initialize}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_aes\_initialize()}{qsc\_aes\_initialize()}}
+{\footnotesize\ttfamily \label{aes_8h_a2bb21b64e1efb178d1f1ae57ce3e1ab2} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+aes\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{state}{, }\item[{const \mbox{\hyperlink{structqsc__aes__keyparams}{qsc\+\_\+aes\+\_\+keyparams}} \texorpdfstring{$\ast$}{*}}]{keyparams}{, }\item[{bool}]{encryption}{, }\item[{\mbox{\hyperlink{aes_8h_aa53a8230f3171dbb0958e240cb90738e}{qsc\+\_\+aes\+\_\+cipher\+\_\+type}}}]{ctype}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the state with the input cipher-\/key and optional info tweak. The \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} round-\/key array must be initialized and size set before passing the state to this function. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state} & \mbox{[}struct\mbox{]} The \doxylink{structqsc__aes__state}{qsc\+\_\+aes\+\_\+state} structure \\
+\hline
+{\em keyparams} & \mbox{[}const\mbox{]} The input cipher-\/key, expanded to the state round-\/key array \\
+\hline
+{\em encryption} & Initialize the cipher for encryption, false for decryption mode \\
+\hline
+{\em ctype} & The cipher type\\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+When using a qsc\+\_\+aes\+\_\+mode\+\_\+ctr mode, the cipher is always initialized for encryption. 
+\end{DoxyWarning}
+\Hypertarget{aes_8h_a6d67695184a3f97172d0590002cb18d6}\index{aes.h@{aes.h}!qsc\_pkcs7\_add\_padding@{qsc\_pkcs7\_add\_padding}}
+\index{qsc\_pkcs7\_add\_padding@{qsc\_pkcs7\_add\_padding}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pkcs7\_add\_padding()}{qsc\_pkcs7\_add\_padding()}}
+{\footnotesize\ttfamily \label{aes_8h_a6d67695184a3f97172d0590002cb18d6} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+pkcs7\+\_\+add\+\_\+padding (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{, }\item[{size\+\_\+t}]{length}{}\end{DoxyParamCaption})}
+
+
+
+Add padding to a plain-\/text block pad before encryption. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & The block of input plain-\/text \\
+\hline
+{\em length} & The length of the plain-\/text block \\
+\hline
+\end{DoxyParams}
+\Hypertarget{aes_8h_ab2833090995832e107a059fe012b56c0}\index{aes.h@{aes.h}!qsc\_pkcs7\_padding\_length@{qsc\_pkcs7\_padding\_length}}
+\index{qsc\_pkcs7\_padding\_length@{qsc\_pkcs7\_padding\_length}!aes.h@{aes.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_pkcs7\_padding\_length()}{qsc\_pkcs7\_padding\_length()}}
+{\footnotesize\ttfamily \label{aes_8h_ab2833090995832e107a059fe012b56c0} 
+QSC\+\_\+\+EXPORT\+\_\+\+API size\+\_\+t qsc\+\_\+pkcs7\+\_\+padding\+\_\+length (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{}\end{DoxyParamCaption})}
+
+
+
+Get the number of padded bytes in a block of decrypted cipher-\/text. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & \mbox{[}const\mbox{]} The block of input plain-\/text\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: The length of the block padding 
+\end{DoxyReturn}

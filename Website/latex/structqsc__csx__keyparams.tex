@@ -1,0 +1,65 @@
+\doxysection{qsc\+\_\+csx\+\_\+keyparams Struct Reference}
+\hypertarget{structqsc__csx__keyparams}{}\label{structqsc__csx__keyparams}\index{qsc\_csx\_keyparams@{qsc\_csx\_keyparams}}
+
+
+The key parameters structure containing key, nonce, and info arrays and lengths. Use this structure to load an input cipher-\/key and optional info tweak, using the qsc\+\_\+csx\+\_\+initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The info parameter is optional, and can be a salt or cryptographic key. The nonce is always QSC\+\_\+\+CSX\+\_\+\+BLOCK\+\_\+\+SIZE in length.  
+
+
+
+
+{\ttfamily \#include $<$csx.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__csx__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec}{key}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__csx__keyparams_af347fae5dae0b613448c54f3dea76ad2}{keylen}}
+\item 
+uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__csx__keyparams_a3da4e88c03c821f8b2dc28af618543bd}{nonce}}
+\item 
+const uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__csx__keyparams_af70030048884ad194b9870321e1cf792}{info}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__csx__keyparams_aeeac5f1dea8f8694bdf3d934c72ae872}{infolen}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The key parameters structure containing key, nonce, and info arrays and lengths. Use this structure to load an input cipher-\/key and optional info tweak, using the qsc\+\_\+csx\+\_\+initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The info parameter is optional, and can be a salt or cryptographic key. The nonce is always QSC\+\_\+\+CSX\+\_\+\+BLOCK\+\_\+\+SIZE in length. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__csx__keyparams_af70030048884ad194b9870321e1cf792}\index{qsc\_csx\_keyparams@{qsc\_csx\_keyparams}!info@{info}}
+\index{info@{info}!qsc\_csx\_keyparams@{qsc\_csx\_keyparams}}
+\doxysubsubsection{\texorpdfstring{info}{info}}
+{\footnotesize\ttfamily \label{structqsc__csx__keyparams_af70030048884ad194b9870321e1cf792} 
+const uint8\+\_\+t\texorpdfstring{$\ast$}{*} info}
+
+The information tweak \Hypertarget{structqsc__csx__keyparams_aeeac5f1dea8f8694bdf3d934c72ae872}\index{qsc\_csx\_keyparams@{qsc\_csx\_keyparams}!infolen@{infolen}}
+\index{infolen@{infolen}!qsc\_csx\_keyparams@{qsc\_csx\_keyparams}}
+\doxysubsubsection{\texorpdfstring{infolen}{infolen}}
+{\footnotesize\ttfamily \label{structqsc__csx__keyparams_aeeac5f1dea8f8694bdf3d934c72ae872} 
+size\+\_\+t infolen}
+
+The length in bytes of the information tweak \Hypertarget{structqsc__csx__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec}\index{qsc\_csx\_keyparams@{qsc\_csx\_keyparams}!key@{key}}
+\index{key@{key}!qsc\_csx\_keyparams@{qsc\_csx\_keyparams}}
+\doxysubsubsection{\texorpdfstring{key}{key}}
+{\footnotesize\ttfamily \label{structqsc__csx__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec} 
+const uint8\+\_\+t\texorpdfstring{$\ast$}{*} key}
+
+The input cipher key \Hypertarget{structqsc__csx__keyparams_af347fae5dae0b613448c54f3dea76ad2}\index{qsc\_csx\_keyparams@{qsc\_csx\_keyparams}!keylen@{keylen}}
+\index{keylen@{keylen}!qsc\_csx\_keyparams@{qsc\_csx\_keyparams}}
+\doxysubsubsection{\texorpdfstring{keylen}{keylen}}
+{\footnotesize\ttfamily \label{structqsc__csx__keyparams_af347fae5dae0b613448c54f3dea76ad2} 
+size\+\_\+t keylen}
+
+The length in bytes of the cipher key \Hypertarget{structqsc__csx__keyparams_a3da4e88c03c821f8b2dc28af618543bd}\index{qsc\_csx\_keyparams@{qsc\_csx\_keyparams}!nonce@{nonce}}
+\index{nonce@{nonce}!qsc\_csx\_keyparams@{qsc\_csx\_keyparams}}
+\doxysubsubsection{\texorpdfstring{nonce}{nonce}}
+{\footnotesize\ttfamily \label{structqsc__csx__keyparams_a3da4e88c03c821f8b2dc28af618543bd} 
+uint8\+\_\+t\texorpdfstring{$\ast$}{*} nonce}
+
+The nonce or initialization vector 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/\mbox{\hyperlink{csx_8h}{csx.\+h}}\end{DoxyCompactItemize}

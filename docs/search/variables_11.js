@@ -1,12 +1,23 @@
 var searchData=
 [
-  ['r_0',['r',['../structqsc__poly1305__state.html#a9faadd89d3d7902b2e16c5c21123c83a',1,'qsc_poly1305_state']]],
-  ['rate_1',['rate',['../structqsc__csg__state.html#a591a9837b83764fcc50ea7375c95ae9e',1,'qsc_csg_state::rate'],['../structqsc__scb__state.html#ac9a3da9c6d703bf06f29151437eeede9',1,'qsc_scb_state::rate'],['../structqsc__kpa__state.html#ac9a3da9c6d703bf06f29151437eeede9',1,'qsc_kpa_state::rate']]],
-  ['rdrand_2',['rdrand',['../structqsc__cpuidex__cpu__features.html#aacb61267caa3ed1f4015d2c532c0c733',1,'qsc_cpuidex_cpu_features']]],
-  ['rdtcsp_3',['rdtcsp',['../structqsc__cpuidex__cpu__features.html#ae4bd93d37a56e7388cfb45d825b7d343',1,'qsc_cpuidex_cpu_features']]],
-  ['rmd_4',['rmd',['../structqsc__poly1305__state.html#acea270e3fb5fc0f3bbd6404ca066a050',1,'qsc_poly1305_state']]],
-  ['roundkeylen_5',['roundkeylen',['../structqsc__aes__state.html#a44bdbbaee0cf6de6912ae93ee8dc5702',1,'qsc_aes_state::roundkeylen'],['../structqsc__rcs__state.html#a44bdbbaee0cf6de6912ae93ee8dc5702',1,'qsc_rcs_state::roundkeylen']]],
-  ['roundkeys_6',['roundkeys',['../structqsc__aes__state.html#a345a6390682918fd6852d2ed5da1c4b7',1,'qsc_aes_state::roundkeys'],['../structqsc__rcs__state.html#a9232ecb195cf082110caad41c6cc3bf8',1,'qsc_rcs_state::roundkeys']]],
-  ['rounds_7',['rounds',['../structqsc__aes__state.html#a79c090aba458c743cdbf8585f7a058c9',1,'qsc_aes_state::rounds'],['../structqsc__rcs__state.html#a79c090aba458c743cdbf8585f7a058c9',1,'qsc_rcs_state::rounds']]],
-  ['rpos_8',['rpos',['../structqsc__hcg__state.html#a0d9dffc575d511c355c40afdc84a2795',1,'qsc_hcg_state']]]
+  ['r_0',['r',['../structqsc__poly1305__state.html#a71dda0ad479e2c7fc4421580b7a8d8b0',1,'qsc_poly1305_state']]],
+  ['rate_1',['rate',['../structqsc__csg__state.html#a591a9837b83764fcc50ea7375c95ae9e',1,'qsc_csg_state::rate'],['../structqsc__scb__state.html#ac9a3da9c6d703bf06f29151437eeede9',1,'qsc_scb_state::rate']]],
+  ['rawextensions_2',['rawextensions',['../structqsc__x509__crl__entry__t.html#ac1704e5cdb742036656772feba20fe57',1,'qsc_x509_crl_entry_t']]],
+  ['rawextensionslen_3',['rawextensionslen',['../structqsc__x509__crl__entry__t.html#ad973c02a43cacff69ece8d4a3c313e1a',1,'qsc_x509_crl_entry_t']]],
+  ['rawextnvalue_4',['rawextnvalue',['../structqsc__x509__extension__t.html#afc741ce4de1d9be014e12828e2738769',1,'qsc_x509_extension_t']]],
+  ['rdn_5findex_5',['rdn_index',['../structqsc__x509__name__attribute__t.html#a2b6f623a9fbab61c8ebe27643b31a200',1,'qsc_x509_name_attribute_t']]],
+  ['registeredid_6',['registeredid',['../structqsc__x509__general__name__t.html#a6b6b27737159a684ac4f641c0486a786',1,'qsc_x509_general_name_t']]],
+  ['rejectunsupportedcriticalextensions_7',['rejectunsupportedcriticalextensions',['../structqsc__x509__verify__options__t.html#a81cdba055901cc2a64062847769953c7',1,'qsc_x509_verify_options_t']]],
+  ['resolver_8',['resolver',['../structqsc__x509__revocation__options__t.html#a5ab4e072200d0db023ef1f09cc2bb149',1,'qsc_x509_revocation_options_t']]],
+  ['resolvercontext_9',['resolvercontext',['../structqsc__x509__revocation__options__t.html#a5fc9f82c12a5920cc09817082b7a0c6d',1,'qsc_x509_revocation_options_t']]],
+  ['revocation_10',['revocation',['../structqsc__x509__verify__options__t.html#a16e0a1d637ddc1ffb0a12e472f56a9be',1,'qsc_x509_verify_options_t']]],
+  ['revocationdate_11',['revocationdate',['../structqsc__x509__crl__entry__t.html#aa36acadb15e2a5bba3e7799686bf7bc5',1,'qsc_x509_crl_entry_t']]],
+  ['revocationtime_12',['revocationtime',['../structqsc__x509__ocsp__response__t.html#a182b70b478665b8383a9ea9e4534f60a',1,'qsc_x509_ocsp_response_t']]],
+  ['revoked_13',['revoked',['../structqsc__x509__crl__t.html#abc111122a2fedf3e8b6758c47a7bf263',1,'qsc_x509_crl_t']]],
+  ['revokedcount_14',['revokedcount',['../structqsc__x509__crl__t.html#adfbc6d68e843de24fb9e0fc0173d1c3e',1,'qsc_x509_crl_t']]],
+  ['rmd_15',['rmd',['../structqsc__poly1305__state.html#acea270e3fb5fc0f3bbd6404ca066a050',1,'qsc_poly1305_state']]],
+  ['roundkeylen_16',['roundkeylen',['../structqsc__aes__state.html#a44bdbbaee0cf6de6912ae93ee8dc5702',1,'qsc_aes_state::roundkeylen'],['../structqsc__rcs__state.html#a44bdbbaee0cf6de6912ae93ee8dc5702',1,'qsc_rcs_state::roundkeylen']]],
+  ['roundkeys_17',['roundkeys',['../structqsc__aes__state.html#ae994669e6d5ddf3e493aa862a0cb4d9f',1,'qsc_aes_state::roundkeys'],['../structqsc__rcs__state.html#a13856139c3263e2903903ca72e41f3f1',1,'qsc_rcs_state::roundkeys']]],
+  ['rounds_18',['rounds',['../structqsc__aes__state.html#a79c090aba458c743cdbf8585f7a058c9',1,'qsc_aes_state::rounds'],['../structqsc__rcs__state.html#a79c090aba458c743cdbf8585f7a058c9',1,'qsc_rcs_state::rounds']]],
+  ['rpos_19',['rpos',['../structqsc__hcg__state.html#a0d9dffc575d511c355c40afdc84a2795',1,'qsc_hcg_state']]]
 ];

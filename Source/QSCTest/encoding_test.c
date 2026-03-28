@@ -207,7 +207,7 @@ bool qsctest_encoding_pem(void)
     if (qsc_encoding_pem_encode("TEST LABEL", pemout, sizeof(pemout), data, datalen) == true)
     {
         /* Decode the PEM-formatted string back into binary data */
-        if (qsc_encoding_pem_decode(pemout, pemdec, sizeof(pemdec), &pemdeclen) == true)
+        if (qsc_encoding_pem_decode(pemout, sizeof(pemout), pemdec, sizeof(pemdec), &pemdeclen) == true)
         {
             /* Check that the decoded length and data match the original */
             if ((pemdeclen == datalen) && (memcmp(data, pemdec, datalen) == 0))

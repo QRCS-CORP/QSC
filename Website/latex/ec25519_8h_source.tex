@@ -1,0 +1,147 @@
+\doxysection{ec25519.\+h}
+\hypertarget{ec25519_8h_source}{}\label{ec25519_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ec25519.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ec25519.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_EC25519\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_EC25519\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{comment}{/*\ \(\backslash\)cond\ DOXYGEN\_IGNORE\ */}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#define\ EC25519\_SEED\_SIZE\ 32}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#define\ EC25519\_SIGNATURE\_SIZE\ 64}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#define\ EC25519\_PUBLICKEY\_SIZE\ 32}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#define\ EC25519\_PRIVATEKEY\_SIZE\ 64}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#define\ EC25519\_CURVE\_SIZE\ 32U}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \textcolor{comment}{/*\ fe\ */}}
+\DoxyCodeLine{00055\ \textcolor{keyword}{typedef}\ QSC\_SIMD\_ALIGN\ int32\_t\ fe25519[10];}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{keywordtype}{void}\ fe25519\_0(fe25519\ h);}
+\DoxyCodeLine{00058\ \textcolor{keywordtype}{void}\ fe25519\_1(fe25519\ h);}
+\DoxyCodeLine{00059\ \textcolor{keywordtype}{void}\ fe25519\_add(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f,\ \textcolor{keyword}{const}\ fe25519\ g);}
+\DoxyCodeLine{00060\ \textcolor{keywordtype}{void}\ fe25519\_cswap(fe25519\ f,\ fe25519\ g,\ uint32\_t\ b);}
+\DoxyCodeLine{00061\ \textcolor{keywordtype}{void}\ fe25519\_sub(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f,\ \textcolor{keyword}{const}\ fe25519\ g);}
+\DoxyCodeLine{00062\ \textcolor{keywordtype}{void}\ fe25519\_neg(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f);}
+\DoxyCodeLine{00063\ \textcolor{keywordtype}{void}\ fe25519\_cmov(fe25519\ f,\ \textcolor{keyword}{const}\ fe25519\ g,\ uint32\_t\ b);}
+\DoxyCodeLine{00064\ \textcolor{keywordtype}{void}\ fe25519\_copy(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f);}
+\DoxyCodeLine{00065\ int32\_t\ fe25519\_isnegative(\textcolor{keyword}{const}\ fe25519\ f);}
+\DoxyCodeLine{00066\ int32\_t\ fe25519\_iszero(\textcolor{keyword}{const}\ fe25519\ f);}
+\DoxyCodeLine{00067\ \textcolor{keywordtype}{void}\ fe25519\_mul(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f,\ \textcolor{keyword}{const}\ fe25519\ g);}
+\DoxyCodeLine{00068\ \textcolor{keywordtype}{void}\ fe25519\_mul32(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f,\ uint32\_t\ n);}
+\DoxyCodeLine{00069\ \textcolor{keywordtype}{void}\ fe25519\_sq(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f);}
+\DoxyCodeLine{00070\ \textcolor{keywordtype}{void}\ fe25519\_sq2(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f);}
+\DoxyCodeLine{00071\ \textcolor{keywordtype}{void}\ fe25519\_reduce(fe25519\ h,\ \textcolor{keyword}{const}\ fe25519\ f);}
+\DoxyCodeLine{00072\ \textcolor{keywordtype}{void}\ fe25519\_tobytes(uint8\_t*\ s,\ \textcolor{keyword}{const}\ fe25519\ h);}
+\DoxyCodeLine{00073\ \textcolor{keywordtype}{void}\ fe25519\_invert(fe25519\ out,\ \textcolor{keyword}{const}\ fe25519\ z);}
+\DoxyCodeLine{00074\ \textcolor{keywordtype}{void}\ fe25519\_frombytes(fe25519\ h,\ \textcolor{keyword}{const}\ uint8\_t*\ s);}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \textcolor{comment}{/*\ ge\ */}}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00079\ \{}
+\DoxyCodeLine{00080\ \ \ \ \ fe25519\ x;}
+\DoxyCodeLine{00081\ \ \ \ \ fe25519\ y;}
+\DoxyCodeLine{00082\ \ \ \ \ fe25519\ z;}
+\DoxyCodeLine{00083\ \}\ ge25519\_p2;}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00086\ \{}
+\DoxyCodeLine{00087\ \ \ \ \ fe25519\ x;}
+\DoxyCodeLine{00088\ \ \ \ \ fe25519\ y;}
+\DoxyCodeLine{00089\ \ \ \ \ fe25519\ z;}
+\DoxyCodeLine{00090\ \ \ \ \ fe25519\ t;}
+\DoxyCodeLine{00091\ \}\ ge25519\_p3;}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00094\ \{}
+\DoxyCodeLine{00095\ \ \ \ \ fe25519\ x;}
+\DoxyCodeLine{00096\ \ \ \ \ fe25519\ y;}
+\DoxyCodeLine{00097\ \ \ \ \ fe25519\ z;}
+\DoxyCodeLine{00098\ \ \ \ \ fe25519\ t;}
+\DoxyCodeLine{00099\ \}\ ge25519\_p1p1;}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00102\ \{}
+\DoxyCodeLine{00103\ \ \ \ \ fe25519\ yplusx;}
+\DoxyCodeLine{00104\ \ \ \ \ fe25519\ yminusx;}
+\DoxyCodeLine{00105\ \ \ \ \ fe25519\ xy2d;}
+\DoxyCodeLine{00106\ \}\ ge25519\_precomp;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00109\ \{}
+\DoxyCodeLine{00110\ \ \ \ \ fe25519\ yplusx;}
+\DoxyCodeLine{00111\ \ \ \ \ fe25519\ yminusx;}
+\DoxyCodeLine{00112\ \ \ \ \ fe25519\ z;}
+\DoxyCodeLine{00113\ \ \ \ \ fe25519\ t2d;}
+\DoxyCodeLine{00114\ \}\ ge25519\_cached;}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \textcolor{keywordtype}{void}\ ge25519\_p1p1\_to\_p3(ge25519\_p3*\ r,\ \textcolor{keyword}{const}\ ge25519\_p1p1*\ p);}
+\DoxyCodeLine{00117\ \textcolor{keywordtype}{void}\ ge25519\_p1p1\_to\_p2(ge25519\_p2*\ r,\ \textcolor{keyword}{const}\ ge25519\_p1p1*\ p);}
+\DoxyCodeLine{00118\ \textcolor{keywordtype}{void}\ ge25519\_scalarmult\_base(ge25519\_p3*\ h,\ \textcolor{keyword}{const}\ uint8\_t*\ a);}
+\DoxyCodeLine{00119\ \textcolor{keywordtype}{void}\ ge25519\_p3\_tobytes(uint8\_t*\ s,\ \textcolor{keyword}{const}\ ge25519\_p3*\ h);}
+\DoxyCodeLine{00120\ int32\_t\ ge25519\_is\_canonical(\textcolor{keyword}{const}\ uint8\_t*\ s);}
+\DoxyCodeLine{00121\ int32\_t\ ge25519\_has\_small\_order(\textcolor{keyword}{const}\ uint8\_t\ s[32]);}
+\DoxyCodeLine{00122\ int32\_t\ ge25519\_frombytes\_negate\_vartime(ge25519\_p3*\ h,\ \textcolor{keyword}{const}\ uint8\_t*\ s);}
+\DoxyCodeLine{00123\ \textcolor{keywordtype}{void}\ ge25519\_p3\_to\_cached(ge25519\_cached*\ r,\ \textcolor{keyword}{const}\ ge25519\_p3*\ p);}
+\DoxyCodeLine{00124\ \textcolor{keywordtype}{void}\ ge25519\_add\_cached(ge25519\_p1p1*\ r,\ \textcolor{keyword}{const}\ ge25519\_p3*\ p,\ \textcolor{keyword}{const}\ ge25519\_cached*\ q);}
+\DoxyCodeLine{00125\ \textcolor{keywordtype}{void}\ ge25519\_double\_scalarmult\_vartime(ge25519\_p2*\ r,\ \textcolor{keyword}{const}\ uint8\_t*\ a,\ \textcolor{keyword}{const}\ ge25519\_p3*\ A,\ \textcolor{keyword}{const}\ uint8\_t*\ b);}
+\DoxyCodeLine{00126\ \textcolor{keywordtype}{void}\ ge25519\_sub\_cached(ge25519\_p1p1*\ r,\ \textcolor{keyword}{const}\ ge25519\_p3*\ p,\ \textcolor{keyword}{const}\ ge25519\_cached*\ q);}
+\DoxyCodeLine{00127\ \textcolor{keywordtype}{void}\ ge25519\_tobytes(uint8\_t*\ s,\ \textcolor{keyword}{const}\ ge25519\_p2*\ h);}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \textcolor{comment}{/*\ sc\ */}}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \textcolor{keywordtype}{void}\ sc25519\_clamp(uint8\_t*\ k);}
+\DoxyCodeLine{00132\ int32\_t\ sc25519\_is\_canonical(\textcolor{keyword}{const}\ uint8\_t\ s[32]);}
+\DoxyCodeLine{00133\ \textcolor{keywordtype}{void}\ sc25519\_muladd(uint8\_t\ s[32],\ \textcolor{keyword}{const}\ uint8\_t\ a[32],\ \textcolor{keyword}{const}\ uint8\_t\ b[32],\ \textcolor{keyword}{const}\ uint8\_t\ c[32]);}
+\DoxyCodeLine{00134\ \textcolor{keywordtype}{void}\ sc25519\_reduce(uint8\_t\ s[64]);}
+\DoxyCodeLine{00135\ int32\_t\ qsc\_sc25519\_verify(\textcolor{keyword}{const}\ uint8\_t*\ x,\ \textcolor{keyword}{const}\ uint8\_t*\ y,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ n);}
+\DoxyCodeLine{00136\ int32\_t\ ed25519\_small\_order(\textcolor{keyword}{const}\ uint8\_t\ s[32]);}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{comment}{/*\ \(\backslash\)endcond\ DOXYGEN\_IGNORE\ */}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00141\ }
+
+\end{DoxyCode}

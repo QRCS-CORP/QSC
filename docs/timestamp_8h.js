@@ -11,6 +11,8 @@ var timestamp_8h =
     [ "qsc_timestamp_datetime_seconds_remaining", "timestamp_8h.html#a3903d51482f9356c315cc229e570fbf5", null ],
     [ "qsc_timestamp_datetime_to_seconds", "timestamp_8h.html#a0f4db1927de13bbecbe566d89812845c", null ],
     [ "qsc_timestamp_datetime_utc", "timestamp_8h.html#ac6c953fd234c45853d168b74e76defbf", null ],
+    [ "qsc_timestamp_epochtime_microseconds", "timestamp_8h.html#a647893afa737bd32d24f1db017965576", null ],
+    [ "qsc_timestamp_epochtime_milliseconds", "timestamp_8h.html#af3306573f517774f3547ddca5c965099", null ],
     [ "qsc_timestamp_epochtime_seconds", "timestamp_8h.html#a21823e9d4bab002997d8591f9a109eef", null ],
     [ "qsc_timestamp_seconds_to_datetime", "timestamp_8h.html#adca029210fba1927158aa88b785fd1ac", null ],
     [ "qsc_timestamp_string_to_time_struct", "timestamp_8h.html#a76603c6ea90f434d220eea9099af0772", null ],

@@ -1,0 +1,49 @@
+\doxysection{qsc\+\_\+chacha\+\_\+keyparams Struct Reference}
+\hypertarget{structqsc__chacha__keyparams}{}\label{structqsc__chacha__keyparams}\index{qsc\_chacha\_keyparams@{qsc\_chacha\_keyparams}}
+
+
+The key parameters structure containing key, and nonce arrays and lengths. Use this structure to load an input cipher-\/key and nonce using the qsc\+\_\+chacha\+\_\+initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The key must be QSC\+\_\+\+CHACHA\+\_\+\+KEY128\+\_\+\+SIZE or QSC\+\_\+\+CHACHA\+\_\+\+KEY256\+\_\+\+SIZE in length. The nonce is always QSC\+\_\+\+CHACHA\+\_\+\+NONCE\+\_\+\+SIZE in length.  
+
+
+
+
+{\ttfamily \#include $<$chacha.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__chacha__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec}{key}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structqsc__chacha__keyparams_af347fae5dae0b613448c54f3dea76ad2}{keylen}}
+\item 
+uint8\+\_\+t \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structqsc__chacha__keyparams_a3da4e88c03c821f8b2dc28af618543bd}{nonce}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The key parameters structure containing key, and nonce arrays and lengths. Use this structure to load an input cipher-\/key and nonce using the qsc\+\_\+chacha\+\_\+initialize function. Keys must be random and secret, and align to the corresponding key size of the cipher implemented. The key must be QSC\+\_\+\+CHACHA\+\_\+\+KEY128\+\_\+\+SIZE or QSC\+\_\+\+CHACHA\+\_\+\+KEY256\+\_\+\+SIZE in length. The nonce is always QSC\+\_\+\+CHACHA\+\_\+\+NONCE\+\_\+\+SIZE in length. 
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structqsc__chacha__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec}\index{qsc\_chacha\_keyparams@{qsc\_chacha\_keyparams}!key@{key}}
+\index{key@{key}!qsc\_chacha\_keyparams@{qsc\_chacha\_keyparams}}
+\doxysubsubsection{\texorpdfstring{key}{key}}
+{\footnotesize\ttfamily \label{structqsc__chacha__keyparams_aa60a0c39d29c4a6fdaac5bfc05f1dbec} 
+const uint8\+\_\+t\texorpdfstring{$\ast$}{*} key}
+
+The input cipher key \Hypertarget{structqsc__chacha__keyparams_af347fae5dae0b613448c54f3dea76ad2}\index{qsc\_chacha\_keyparams@{qsc\_chacha\_keyparams}!keylen@{keylen}}
+\index{keylen@{keylen}!qsc\_chacha\_keyparams@{qsc\_chacha\_keyparams}}
+\doxysubsubsection{\texorpdfstring{keylen}{keylen}}
+{\footnotesize\ttfamily \label{structqsc__chacha__keyparams_af347fae5dae0b613448c54f3dea76ad2} 
+size\+\_\+t keylen}
+
+The length in bytes of the cipher key \Hypertarget{structqsc__chacha__keyparams_a3da4e88c03c821f8b2dc28af618543bd}\index{qsc\_chacha\_keyparams@{qsc\_chacha\_keyparams}!nonce@{nonce}}
+\index{nonce@{nonce}!qsc\_chacha\_keyparams@{qsc\_chacha\_keyparams}}
+\doxysubsubsection{\texorpdfstring{nonce}{nonce}}
+{\footnotesize\ttfamily \label{structqsc__chacha__keyparams_a3da4e88c03c821f8b2dc28af618543bd} 
+uint8\+\_\+t\texorpdfstring{$\ast$}{*} nonce}
+
+The nonce or initialization vector 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/\mbox{\hyperlink{chacha_8h}{chacha.\+h}}\end{DoxyCompactItemize}

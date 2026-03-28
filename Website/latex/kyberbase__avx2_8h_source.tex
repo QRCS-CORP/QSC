@@ -1,0 +1,153 @@
+\doxysection{kyberbase\+\_\+avx2.\+h}
+\hypertarget{kyberbase__avx2_8h_source}{}\label{kyberbase__avx2_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/kyberbase\_avx2.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/kyberbase\_avx2.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_KYBERBASE\_AVX2\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_KYBERBASE\_AVX2\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ \textcolor{comment}{/*\ \(\backslash\)cond\ DOXYGEN\_IGNORE\ */}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_HAS\_AVX2)}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#if\ defined(QSC\_KYBER\_S1P1632)}}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_K\ 2}}
+\DoxyCodeLine{00060\ \textcolor{preprocessor}{\#elif\ defined(QSC\_KYBER\_S3P2400)}}
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_K\ 3}}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#elif\ defined(QSC\_KYBER\_S5P3168)}}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_K\ 4}}
+\DoxyCodeLine{00064\ \textcolor{preprocessor}{\#elif\ defined(QSC\_KYBER\_S6P3936)}}
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_K\ 5}}
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#\ \ \ error\ "{}The\ Kyber\ parameter\ set\ is\ invalid!"{}}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_N\ 256}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_Q\ 3329}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00086\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_ETA2\ 2}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_MSGBYTES\ 32}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_SYMBYTES\ 32}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_POLYBYTES\ 384}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\#if\ (QSC\_KYBER\_K\ ==\ 2)}}
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYVECBASE\_BYTES\ 320}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYCOMPRESSED\_BYTES\ 128}}
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_ETA1\ 3}}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#elif\ (QSC\_KYBER\_K\ ==\ 3)}}
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYVECBASE\_BYTES\ 320}}
+\DoxyCodeLine{00112\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYCOMPRESSED\_BYTES\ 128}}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_ETA1\ 2}}
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\#elif\ (QSC\_KYBER\_K\ ==\ 4)}}
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYVECBASE\_BYTES\ 352}}
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYCOMPRESSED\_BYTES\ 160}}
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_ETA1\ 2}}
+\DoxyCodeLine{00118\ \textcolor{preprocessor}{\#elif\ (QSC\_KYBER\_K\ ==\ 5)}}
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYVECBASE\_BYTES\ 352}}
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_POLYCOMPRESSED\_BYTES\ 160}}
+\DoxyCodeLine{00121\ \textcolor{preprocessor}{\#\ \ \ define\ QSC\_KYBER\_ETA1\ 2}}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_POLYVEC\_COMPRESSED\_BYTES\ (QSC\_KYBER\_K\ *\ QSC\_KYBER\_POLYVECBASE\_BYTES)}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_POLYVEC\_BYTES\ (QSC\_KYBER\_K\ *\ QSC\_KYBER\_POLYBYTES)}}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00140\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_INDCPA\_PUBLICKEY\_BYTES\ (QSC\_KYBER\_POLYVEC\_BYTES\ +\ QSC\_KYBER\_SYMBYTES)}}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_INDCPA\_SECRETKEY\_BYTES\ (QSC\_KYBER\_POLYVEC\_BYTES)}}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00152\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_INDCPA\_BYTES\ (QSC\_KYBER\_POLYVEC\_COMPRESSED\_BYTES\ +\ QSC\_KYBER\_POLYCOMPRESSED\_BYTES)}}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00158\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_PUBLICKEY\_BYTES\ \ (QSC\_KYBER\_INDCPA\_PUBLICKEY\_BYTES)}}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_SECRETKEY\_BYTES\ \ (QSC\_KYBER\_INDCPA\_SECRETKEY\_BYTES\ +\ QSC\_KYBER\_INDCPA\_PUBLICKEY\_BYTES\ +\ 2\ *\ QSC\_KYBER\_SYMBYTES)}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00170\ \textcolor{preprocessor}{\#define\ QSC\_KYBER\_CIPHERTEXT\_BYTES\ (QSC\_KYBER\_INDCPA\_BYTES)}}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \textcolor{preprocessor}{\#if\ defined(QSC\_GCC\_ASM\_ENABLED)}}
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keywordtype}{void}\ ntt\_avx(\_\_m256i\ *r,\ \textcolor{keyword}{const}\ \_\_m256i\ *qdata);}
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{keywordtype}{void}\ invntt\_avx(\_\_m256i\ *r,\ \textcolor{keyword}{const}\ \_\_m256i\ *qdata);}
+\DoxyCodeLine{00175\ \ \ \ \ \textcolor{keywordtype}{void}\ nttpack\_avx(\_\_m256i\ *r,\ \textcolor{keyword}{const}\ \_\_m256i\ *qdata);}
+\DoxyCodeLine{00176\ \ \ \ \ \textcolor{keywordtype}{void}\ nttunpack\_avx(\_\_m256i\ *r,\ \textcolor{keyword}{const}\ \_\_m256i\ *qdata);}
+\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keywordtype}{void}\ basemul\_avx(\_\_m256i\ *r,\ \textcolor{keyword}{const}\ \_\_m256i\ *a,\ \textcolor{keyword}{const}\ \_\_m256i\ *b,\ \textcolor{keyword}{const}\ \_\_m256i\ *qdata);}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keywordtype}{void}\ ntttobytes\_avx(uint8\_t\ *r,\ \textcolor{keyword}{const}\ \_\_m256i\ *a,\ \textcolor{keyword}{const}\ \_\_m256i\ *qdata);}
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keywordtype}{void}\ nttfrombytes\_avx(\_\_m256i\ *r,\ \textcolor{keyword}{const}\ uint8\_t\ *a,\ \textcolor{keyword}{const}\ \_\_m256i\ *qdata);}
+\DoxyCodeLine{00180\ \ \ \ \ int16\_t\ reduce\_avx(int16\_t*\ r,\ \textcolor{keyword}{const}\ int16\_t*\ qdata);}
+\DoxyCodeLine{00181\ \ \ \ \ int16\_t\ csubq\_avx(int16\_t*\ r,\ \textcolor{keyword}{const}\ int16\_t*\ qdata);}
+\DoxyCodeLine{00182\ \ \ \ \ int16\_t\ tomont\_avx(int16\_t*\ r,\ \textcolor{keyword}{const}\ int16\_t*\ qdata);}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{/*void\ ntt\_avx(int16\_t\ r[QSC\_KYBER\_N]);}}
+\DoxyCodeLine{00185\ \textcolor{comment}{\ \ \ \ void\ invntt\_avx(int16\_t\ r[QSC\_KYBER\_N]);}}
+\DoxyCodeLine{00186\ \textcolor{comment}{\ \ \ \ extern\ const\ int16\_t\ qdata[];}}
+\DoxyCodeLine{00187\ \textcolor{comment}{\ \ \ \ void\ nttpack\_avx(int16\_t*\ r,\ const\ int16\_t*\ qdata);;}}
+\DoxyCodeLine{00188\ \textcolor{comment}{\ \ \ \ void\ nttunpack\_avx(int16\_t*\ r,\ const\ int16\_t*\ qdata);}}
+\DoxyCodeLine{00189\ \textcolor{comment}{\ \ \ \ void\ ntttobytes\_avx(uint8\_t*\ r,\ const\ int16\_t*\ a,\ const\ int16\_t*\ qdata);}}
+\DoxyCodeLine{00190\ \textcolor{comment}{\ \ \ \ void\ nttfrombytes\_avx(int16\_t*\ r,\ const\ uint8\_t*\ a,\ const\ int16\_t*\ qdata);}}
+\DoxyCodeLine{00191\ \textcolor{comment}{\ \ \ \ int16\_t\ reduce\_avx(int16\_t*\ r,\ const\ int16\_t*\ qdata);}}
+\DoxyCodeLine{00192\ \textcolor{comment}{\ \ \ \ int16\_t\ csubq\_avx(int16\_t*\ r,\ const\ int16\_t*\ qdata);}}
+\DoxyCodeLine{00193\ \textcolor{comment}{\ \ \ \ int16\_t\ tomont\_avx(int16\_t*\ r,\ const\ int16\_t*\ qdata);*/}}
+\DoxyCodeLine{00194\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \textcolor{comment}{/*\ kem.h\ */}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00206\ \textcolor{keywordtype}{bool}\ qsc\_kyber\_avx2\_decapsulate(uint8\_t\ ss[QSC\_KYBER\_MSGBYTES],\ \textcolor{keyword}{const}\ uint8\_t\ ct[QSC\_KYBER\_CIPHERTEXT\_BYTES],}
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keyword}{const}\ uint8\_t\ sk[QSC\_KYBER\_SECRETKEY\_BYTES]);}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00217\ \textcolor{keywordtype}{void}\ qsc\_kyber\_avx2\_encapsulate(uint8\_t\ ct[QSC\_KYBER\_CIPHERTEXT\_BYTES],\ uint8\_t\ ss[QSC\_KYBER\_MSGBYTES],}
+\DoxyCodeLine{00218\ \ \ \ \ \textcolor{keyword}{const}\ uint8\_t\ pk[QSC\_KYBER\_PUBLICKEY\_BYTES],\ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00227\ \textcolor{keywordtype}{void}\ qsc\_kyber\_avx2\_generate\_keypair(uint8\_t\ pk[QSC\_KYBER\_PUBLICKEY\_BYTES],\ uint8\_t\ sk[QSC\_KYBER\_SECRETKEY\_BYTES],}
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keywordtype}{bool}\ (*rng\_generate)(uint8\_t*,\ \textcolor{keywordtype}{size\_t}));}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \textcolor{comment}{/*\ \(\backslash\)endcond\ DOXYGEN\_IGNORE\ */}}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

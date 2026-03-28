@@ -1,0 +1,4180 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_sha3_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sha3.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sha3.h</primary></indexterm>
+<para>
+
+<para>SHA3 header definition <?linebreak?>Contains the public api and documentation for SHA3 digest, SHAKE, cSHAKE, and KMAC implementations. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Data Structures    </title>
+        <itemizedlist>
+            <listitem><para>struct <link linkend="_structqsc__keccak__state">qsc_keccak_state</link></para>
+
+<para>The Keccak state array; state array must be initialized by the caller. </para>
+</listitem>
+            <listitem><para>struct <link linkend="_structqsc__kpa__state">qsc_kpa_state</link></para>
+
+<para>The KPA state array; state array must be initialized by the caller. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Macros    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_sha3_8h_1aa215326285d299f4dea9eb0f1e48fac1"/>#define <emphasis role="strong">QSC_KECCAK_CSHAKE_DOMAIN_ID</emphasis>&#160;&#160;&#160;0x04</para>
+
+<para>The cSHAKE domain id. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a38b5941cfc9189bb2041e03d2160e688"/>#define <emphasis role="strong">QSC_KECCAK_KMAC_DOMAIN_ID</emphasis>&#160;&#160;&#160;0x04</para>
+
+<para>The KMAC domain id. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1aab380c0050a18b62cff16bad979c9fa8"/>#define <emphasis role="strong">QSC_KECCAK_KPA_DOMAIN_ID</emphasis>&#160;&#160;&#160;0x41</para>
+
+<para>The KPA domain id. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a2ef6b79bf6890bf2b4f017451cda9153"/>#define <emphasis role="strong">QSC_KECCAK_PERMUTATION_ROUNDS</emphasis>&#160;&#160;&#160;24</para>
+
+<para>The standard number of permutation rounds. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1acd1d640b891eacb8e6ab843535077856"/>#define <emphasis role="strong">QSC_KECCAK_PERMUTATION_MAX_ROUNDS</emphasis>&#160;&#160;&#160;48</para>
+
+<para>The maximum number of permutation rounds. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1adf4d29b8b48424f5118b6479f73be3c8"/>#define <emphasis role="strong">QSC_KECCAK_PERMUTATION_MIN_ROUNDS</emphasis>&#160;&#160;&#160;12</para>
+
+<para>The minimum number of permutation rounds. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a3c7c1515b40579affedc8639955f1544"/>#define <emphasis role="strong">QSC_KECCAK_SHA3_DOMAIN_ID</emphasis>&#160;&#160;&#160;0x06</para>
+
+<para>The SHA3 domain id. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a7b48b317cacb27161a4aea70766cbad1"/>#define <emphasis role="strong">QSC_KECCAK_SHAKE_DOMAIN_ID</emphasis>&#160;&#160;&#160;0x1F</para>
+
+<para>The SHAKE domain id. </para>
+</listitem>
+            <listitem><para>#define <link linkend="_sha3_8h_1a66f9f02e5abf8ad658e7a231444c4ee5">QSC_KECCAK_STATE_BYTE_SIZE</link>&#160;&#160;&#160;200</para>
+
+<para>The Keccak state array byte size. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1ab9ee5c7dfdd508dbba45370eb1214dad"/>#define <emphasis role="strong">QSC_KECCAK_128_RATE</emphasis>&#160;&#160;&#160;168</para>
+
+<para>The 128-bit absorption rate. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1af0de2745d4d9cf9915394520a45ee8ea"/>#define <emphasis role="strong">QSC_KECCAK_256_RATE</emphasis>&#160;&#160;&#160;136</para>
+
+<para>The 256-bit absorption rate. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a6d1b98687bbdc843558ef0a1a5b2bfbf"/>#define <emphasis role="strong">QSC_KECCAK_512_RATE</emphasis>&#160;&#160;&#160;72</para>
+
+<para>The 512 bit absorption rate. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a4a5209edb9ecb070655b876af085b66c"/>#define <emphasis role="strong">QSC_KECCAK_STATE_SIZE</emphasis>&#160;&#160;&#160;25</para>
+
+<para>The Keccak SHA3 uint64 state array size. </para>
+</listitem>
+            <listitem><para>#define <link linkend="_sha3_8h_1a66f9f02e5abf8ad658e7a231444c4ee5">QSC_KECCAK_STATE_BYTE_SIZE</link>&#160;&#160;&#160;200</para>
+
+<para>The Keccak state array byte size. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a6365997262cdbde9b76f59bb7225f8ec"/>#define <emphasis role="strong">QSC_KMAC_256_KEY_SIZE</emphasis>&#160;&#160;&#160;32</para>
+
+<para>The KMAC-256 key size in bytes. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a59363c95e4ed93fb6c0501fbc5d49ae9"/>#define <emphasis role="strong">QSC_KMAC_512_KEY_SIZE</emphasis>&#160;&#160;&#160;64</para>
+
+<para>The KMAC-512 key size in bytes. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1ab22951bf63d5624f2690cd0ddd0ab81b"/>#define <emphasis role="strong">QSC_KECCAK_SCBKDF_DOMAIN_ID</emphasis>&#160;&#160;&#160;0x42</para>
+
+<para>The SCBKDF domain id. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a30b034ca96f28b5af80525feb3fe76a0"/>#define <emphasis role="strong">QSC_SHA3_128_HASH_SIZE</emphasis>&#160;&#160;&#160;16</para>
+
+<para>The QSC_SHA3_128_HASH_SIZE hash size in bytes (16) </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a39efed8a0d8af7e45c639f9095c1dbb2"/>#define <emphasis role="strong">QSC_SHA3_256_HASH_SIZE</emphasis>&#160;&#160;&#160;32</para>
+
+<para>The SHA-256 hash size in bytes (32) </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1abddba4f156c079127c92142f27d25bee"/>#define <emphasis role="strong">QSC_SHA3_512_HASH_SIZE</emphasis>&#160;&#160;&#160;64</para>
+
+<para>The SHA-512 hash size in bytes (64) </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a3c1f029ec2d193e3f913040340f92bc5"/>#define <emphasis role="strong">QSC_SHAKE_256_KEY_SIZE</emphasis>&#160;&#160;&#160;32</para>
+
+<para>The SHAKE-256 key size in bytes. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a49fa83b963caf7cee84943d0ea25bfd7"/>#define <emphasis role="strong">QSC_SHAKE512_KEY_SIZE</emphasis>&#160;&#160;&#160;64</para>
+
+<para>The SHAKE-512 key size in bytes. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a1093884217e7909e7c8c1c6018a128c0"/>#define <emphasis role="strong">QSC_KPA_128_KEY_SIZE</emphasis>&#160;&#160;&#160;16</para>
+
+<para>The KPA-128 key size in bytes. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a021496bb016184773b043ae2e76b88cf"/>#define <emphasis role="strong">QSC_KPA_256_KEY_SIZE</emphasis>&#160;&#160;&#160;32</para>
+
+<para>The KPA-256 key size in bytes. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a99d287909799c4cba0c1ec20e8ee8a47"/>#define <emphasis role="strong">QSC_KPA_512_KEY_SIZE</emphasis>&#160;&#160;&#160;64</para>
+
+<para>The KPA-512 key size in bytes. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1ac4f5e0ca8afd034ad5be5c9ce15400df"/>#define <emphasis role="strong">QSC_KPA_ROUNDS</emphasis>&#160;&#160;&#160;12</para>
+
+<para>The number of Keccak rounds used by a KPA permutation. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1aff23e68acf93ef5b90d988d0ec6c5459"/>#define <emphasis role="strong">QSC_KPA_PARALLELISM</emphasis>&#160;&#160;&#160;8</para>
+
+<para>The KPA degree of parallelization. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Typedefs    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_sha3_8h_1ad5024d0921fd2a91fcd1d2ef72836b08"/>typedef QSC_EXPORT_API struct qsc_keccak_state <emphasis role="strong">qsc_keccak_state</emphasis></para>
+</listitem>
+            <listitem><para><anchor xml:id="_sha3_8h_1a5851fd21ddbb8940494ef2cd141a1356"/>typedef enum <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> <emphasis role="strong">qsc_keccak_rate</emphasis></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Enumerations    </title>
+        <itemizedlist>
+            <listitem><para>enum <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> { <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6ac804ad7f4afe342fe292518ebc3bdbb6">qsc_keccak_rate_none</link> = 0
+, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a372c0121e8261592a28f39b84cad155f">qsc_keccak_rate_128</link> = QSC_KECCAK_128_RATE
+, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a289112e15dcba1fcb421e3c1f5afb0e6">qsc_keccak_rate_256</link> = QSC_KECCAK_256_RATE
+, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a436b417cabc032bb4f5e3cf6f3876b6c">qsc_keccak_rate_512</link> = QSC_KECCAK_512_RATE
+ }</para>
+
+<para>The Keccak rate; determines which security strength is used by the function, 128, 256, or 512-bit. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aa5760b4f590a6908f4ce3ecb02425b95">qsc_keccak_absorb</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *message, size_t msglen, uint8_t domain, size_t rounds)</para>
+
+<para>Absorb an input message into the Keccak state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ab2fcc9bd9e0072d4e0144e9b84aad995">qsc_keccak_absorb_custom</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *custom, size_t custlen, const uint8_t *name, size_t namelen, size_t rounds)</para>
+
+<para>Absorb the custom, and name arrays into the Keccak state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1affff8a244c95763bfbf37ca2fa4f6775">qsc_keccak_absorb_key_custom</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *key, size_t keylen, const uint8_t *custom, size_t custlen, const uint8_t *name, size_t namelen, size_t rounds)</para>
+
+<para>Absorb the custom, name, and key arrays into the Keccak state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a341cdd637112e4de28f965120d9600d8">qsc_keccak_dispose</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx)</para>
+
+<para>Dispose of the Keccak state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ae518149e35d00a9fa18a513fef96d399">qsc_keccak_finalize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t *output, size_t outlen, uint8_t domain, size_t rounds)</para>
+
+<para>Finalize the Keccak state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a31f4ede93232e9a74de047cf9f8196ba">qsc_keccak_incremental_absorb</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, uint32_t rate, const uint8_t *message, size_t msglen)</para>
+
+<para>Absorb bytes into state incrementally. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aaf8d62a9abcdf338784d699695320221">qsc_keccak_incremental_finalize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, uint32_t rate, uint8_t domain)</para>
+
+<para>Finalize state added incrementally. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a1a6c84d9e3018c8a197cbdc81c2edb4b">qsc_keccak_incremental_squeeze</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, size_t rate, uint8_t *output, size_t outlen)</para>
+
+<para>Extract an array of bytes from the Keccak state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a9e3466050e60101139e43f357f6688ca">qsc_keccak_permute</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, size_t rounds)</para>
+
+<para>The Keccak permute function. Internal function: Permutes the state array, can be used in external constructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a4546645eff38ad66f1b88886f7cfb6c8">qsc_keccak_permute_p1600c</link> (uint64_t *state, size_t rounds)</para>
+
+<para>The compact Keccak permute function. Internal function: Permutes the state array, can be used in external constructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a220755805dd7869debcd96cf9720dec9">qsc_keccak_permute_p1600u</link> (uint64_t *state)</para>
+
+<para>The unrolled Keccak permute function. Internal function: Permutes the state array, can be used in external constructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aba170821d25f02507f60ed802f89ad99">qsc_keccak_squeezeblocks</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, uint8_t *output, size_t nblocks, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, size_t rounds)</para>
+
+<para>The Keccak squeeze function. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a48854cbaeed2945d29e2858642c45fa2">qsc_keccak_initialize_state</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx)</para>
+
+<para>Initializes a Keccak state structure, must be called before message processing. Long form api: must be used in conjunction with the block-update and finalize functions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ac5df385de621651304659b6f7d9eaf25">qsc_keccak_update</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *message, size_t msglen, size_t rounds)</para>
+
+<para>Update Keccak state with message input. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ac937d2baffe3ff4353ed21e4e6b78e54">qsc_sha3_compute128</link> (uint8_t *output, const uint8_t *message, size_t msglen)</para>
+
+<para>Process a message with SHA3-128 and return the hash code in the output byte array. Short form api: processes the entire message and computes the hash code with a single call. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aa58c463d10c8a9fac1cf09a166b2e2a8">qsc_sha3_compute256</link> (uint8_t *output, const uint8_t *message, size_t msglen)</para>
+
+<para>Process a message with SHA3-256 and return the hash code in the output byte array. Short form api: processes the entire message and computes the hash code with a single call. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a7edf8c0b0e93bbd35009ce03bed960b9">qsc_sha3_compute512</link> (uint8_t *output, const uint8_t *message, size_t msglen)</para>
+
+<para>Process a message with SHA3-512 and return the hash code in the output byte array. Short form api: processes the entire message and computes the hash code with a single call. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a1edd6ffaa95e3c28320c1e9673fb2bcf">qsc_sha3_finalize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t *output)</para>
+
+<para>Finalize the message state and returns the hash value in output. Long form api: must be used in conjunction with the initialize and block-update functions. Absorb the last block of message and create the hash value. Produces a 32 byte output code using QSC_KECCAK_256_RATE, 64 bytes with QSC_KECCAK_512_RATE. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1af3952171393684803e6867b3fd39ec82">qsc_sha3_initialize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx)</para>
+
+<para>Initialize the SHA3 state Long form api: Must be called before the update or finalize functions are called. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a43c7ccd7826ba688d405d4131644fac4">qsc_sha3_update</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *message, size_t msglen)</para>
+
+<para>Update SHA3 with message input. Long form api: must be used in conjunction with the initialize and finalize functions. Absorbs the input message into the state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1addf93e9a23130b64cc705794e2b40db8">qsc_shake128_compute</link> (uint8_t *output, size_t outlen, const uint8_t *key, size_t keylen)</para>
+
+<para>Key a SHAKE-128 instance, and generate an array of pseudo-random bytes. Short form api: processes the key and generates the pseudo-random output with a single call. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a49a90551b628f9a4afbf923dc3ccb827">qsc_shake256_compute</link> (uint8_t *output, size_t outlen, const uint8_t *key, size_t keylen)</para>
+
+<para>Key a SHAKE-256 instance, and generate an array of pseudo-random bytes. Short form api: processes the key and generates the pseudo-random output with a single call. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ae03e696f6e6b35acacdfd99ff0f21216">qsc_shake512_compute</link> (uint8_t *output, size_t outlen, const uint8_t *key, size_t keylen)</para>
+
+<para>Key a SHAKE-512 instance, and generate an array of pseudo-random bytes. Short form api: processes the key and generates the pseudo-random output with a single call. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1af45dfbdfe6be3d3b999632df70d64df6">qsc_shake_initialize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *key, size_t keylen)</para>
+
+<para>The SHAKE initialize function. Long form api: must be used in conjunction with the squeezeblocks function. Absorb and finalize an input key byte array. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aefee71079fe671bfac1740093ec70c9c">qsc_shake_squeezeblocks</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t *output, size_t nblocks)</para>
+
+<para>The SHAKE squeeze function. Long form api: must be used in conjunction with the initialize function. Permutes and extracts the state to an output byte array. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aa66a0f47fcbba7f4b8a86982f27a6d0c">qsc_cshake128_compute</link> (uint8_t *output, size_t outlen, const uint8_t *key, size_t keylen, const uint8_t *name, size_t namelen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Key a cSHAKE-128 instance and generate pseudo-random output. Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call. Permutes and extracts the state to an output byte array.. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1add024bcf20fc37e04ecf28d59cc17c79">qsc_cshake256_compute</link> (uint8_t *output, size_t outlen, const uint8_t *key, size_t keylen, const uint8_t *name, size_t namelen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Key a cSHAKE-256 instance and generate pseudo-random output. Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call. Permutes and extracts the state to an output byte array. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aef6159bd3a4517dd7fc1a822550790b6">qsc_cshake512_compute</link> (uint8_t *output, size_t outlen, const uint8_t *key, size_t keylen, const uint8_t *name, size_t namelen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Key a cSHAKE-512 instance and generate pseudo-random output. Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call. Permutes and extracts the state to an output byte array. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ad049973b17b0e348ab2a43f4ab85bb8a">qsc_cshake_initialize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *key, size_t keylen, const uint8_t *name, size_t namelen, const uint8_t *custom, size_t custlen)</para>
+
+<para>The cSHAKE initialize function. Long form api: must be used in conjunction with the squeezeblocks function. Initialize the name and customization strings into the state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1abcaf8bd84272ae9846e90fdec4f86130">qsc_cshake_squeezeblocks</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t *output, size_t nblocks)</para>
+
+<para>The cSHAKE squeeze function. Long form api: must be used in conjunction with the initialize function. Permutes and extracts blocks of state to an output byte array. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ac39508d3841cd3bf59d1cfcfdfffa98c">qsc_cshake_update</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *key, size_t keylen)</para>
+
+<para>The cSHAKE update function. Long form api: must be used in conjunction with the initialize and squeezeblocks functions. Finalize an input key directly into the state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1afd15cc06fd56e1fe728da09cab39560e">qsc_kmac128_compute</link> (uint8_t *output, size_t outlen, const uint8_t *message, size_t msglen, const uint8_t *key, size_t keylen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Key a KMAC-128 instance and generate a MAC code. Short form api: processes the key and custom inputs and generates the MAC code with a single call. Key the MAC generator process a message and output the MAC code. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a0650fcdcd7f89ab1d224fc43b5c6c4b8">qsc_kmac256_compute</link> (uint8_t *output, size_t outlen, const uint8_t *message, size_t msglen, const uint8_t *key, size_t keylen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Key a KMAC-256 instance and generate a MAC code. Short form api: processes the key and custom inputs and generates the MAC code with a single call. Key the MAC generator process a message and output the MAC code. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a31366aac3d7a3fe31eb8a8e7db314bbd">qsc_kmac512_compute</link> (uint8_t *output, size_t outlen, const uint8_t *message, size_t msglen, const uint8_t *key, size_t keylen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Key a KMAC-512 instance and generate a MAC code. Short form api: processes the key and custom inputs and generates the MAC code with a single call. Key the MAC generator process a message and output the MAC code. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ad03585c6b59ab05b24e9a8e101e31d56">qsc_kmac_update</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *message, size_t msglen)</para>
+
+<para>The KMAC message update function. Long form api: must be used in conjunction with the initialize and finalize functions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a0bf604224cd963ad1c03dc333da392b0">qsc_kmac_finalize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t *output, size_t outlen)</para>
+
+<para>The KMAC finalize function. Long form api: must be used in conjunction with the initialize and blockupdate functions. Final processing and calculation of the MAC code. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a7083c322daf2060be2598da058645bb8">qsc_kmac_initialize</link> (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> *ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t *key, size_t keylen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Initialize a KMAC instance. Long form api: must be used in conjunction with the blockupdate and finalize functions. Key the MAC generator and initialize the internal state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1af0442da464aa13390bfa5102a55f955b">qsc_kpa_finalize</link> (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> *ctx, uint8_t *output, size_t outlen)</para>
+
+<para>The KPA finalize function. Long form api: must be used in conjunction with the initialize and blockupdate functions. Final processing and calculation of the MAC code. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aaed3655e3ebcb5f36cc9a361a76be220">qsc_kpa_initialize</link> (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> *ctx, const uint8_t *key, size_t keylen, const uint8_t *custom, size_t custlen)</para>
+
+<para>Initialize a KPA instance. Long form api: must be used in conjunction with the blockupdate and finalize functions. Key the MAC generator and initialize the internal state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a6861b34e992924d310fc33b527e615bb">qsc_kpa_update</link> (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> *ctx, const uint8_t *message, size_t msglen)</para>
+
+<para>The KPA message update function. Long form api: must be used in conjunction with the initialize and finalize functions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a38e6430f30392e3190ea06eeee9fa707">qsc_kpa_dispose</link> (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> *ctx)</para>
+
+<para>Dispose of the KPA state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a463021774cd48b812691642122b419b6">qsc_shake_128x4</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, size_t outlen, const uint8_t *inp0, const uint8_t *inp1, const uint8_t *inp2, const uint8_t *inp3, size_t inplen)</para>
+
+<para>Process 4 SHAKE-128 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a1e7e526bc8ff821a91648a7e5b89315a">qsc_shake_256x4</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, size_t outlen, const uint8_t *inp0, const uint8_t *inp1, const uint8_t *inp2, const uint8_t *inp3, size_t inplen)</para>
+
+<para>Process 4 SHAKE-256 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1af84aff27589c4ba3df21282928f5827e">qsc_shake_512x4</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, size_t outlen, const uint8_t *inp0, const uint8_t *inp1, const uint8_t *inp2, const uint8_t *inp3, size_t inplen)</para>
+
+<para>Process 4 SHAKE-512 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ad0b13160d562fd32b6a143e8f8a32e1d">qsc_shake_128x8</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, uint8_t *out4, uint8_t *out5, uint8_t *out6, uint8_t *out7, size_t outlen, const uint8_t *inp0, const uint8_t *inp1, const uint8_t *inp2, const uint8_t *inp3, const uint8_t *inp4, const uint8_t *inp5, const uint8_t *inp6, const uint8_t *inp7, size_t inplen)</para>
+
+<para>Process 8 SHAKE-128 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a5afc7f12bde103c07e1d5ed53dd5613a">qsc_shake_256x8</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, uint8_t *out4, uint8_t *out5, uint8_t *out6, uint8_t *out7, size_t outlen, const uint8_t *inp0, const uint8_t *inp1, const uint8_t *inp2, const uint8_t *inp3, const uint8_t *inp4, const uint8_t *inp5, const uint8_t *inp6, const uint8_t *inp7, size_t inplen)</para>
+
+<para>Process 8 SHAKE-256 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1abe60f27ad2582a11f03c1b64817ce6d7">qsc_shake_512x8</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, uint8_t *out4, uint8_t *out5, uint8_t *out6, uint8_t *out7, size_t outlen, const uint8_t *inp0, const uint8_t *inp1, const uint8_t *inp2, const uint8_t *inp3, const uint8_t *inp4, const uint8_t *inp5, const uint8_t *inp6, const uint8_t *inp7, size_t inplen)</para>
+
+<para>Process 8 SHAKE-512 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a541212d3f21183b011d6f8c0e3861881">qsc_kmac_128x4</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, size_t outlen, const uint8_t *key0, const uint8_t *key1, const uint8_t *key2, const uint8_t *key3, size_t keylen, const uint8_t *cst0, const uint8_t *cst1, const uint8_t *cst2, const uint8_t *cst3, size_t cstlen, const uint8_t *msg0, const uint8_t *msg1, const uint8_t *msg2, const uint8_t *msg3, size_t msglen)</para>
+
+<para>Process 4 KMAC-128 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1adee310d60c00466918adf6182865d3a8">qsc_kmac_256x4</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, size_t outlen, const uint8_t *key0, const uint8_t *key1, const uint8_t *key2, const uint8_t *key3, size_t keylen, const uint8_t *cst0, const uint8_t *cst1, const uint8_t *cst2, const uint8_t *cst3, size_t cstlen, const uint8_t *msg0, const uint8_t *msg1, const uint8_t *msg2, const uint8_t *msg3, size_t msglen)</para>
+
+<para>Process 4 KMAC-256 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1aad60004f4f41b4b06085041e1713d400">qsc_kmac_512x4</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, size_t outlen, const uint8_t *key0, const uint8_t *key1, const uint8_t *key2, const uint8_t *key3, size_t keylen, const uint8_t *cst0, const uint8_t *cst1, const uint8_t *cst2, const uint8_t *cst3, size_t cstlen, const uint8_t *msg0, const uint8_t *msg1, const uint8_t *msg2, const uint8_t *msg3, size_t msglen)</para>
+
+<para>Process 4 KMAC-512 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a95df26492099e6157da0035e9a5c8ff8">qsc_kmac_128x8</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, uint8_t *out4, uint8_t *out5, uint8_t *out6, uint8_t *out7, size_t outlen, const uint8_t *key0, const uint8_t *key1, const uint8_t *key2, const uint8_t *key3, const uint8_t *key4, const uint8_t *key5, const uint8_t *key6, const uint8_t *key7, size_t keylen, const uint8_t *cst0, const uint8_t *cst1, const uint8_t *cst2, const uint8_t *cst3, const uint8_t *cst4, const uint8_t *cst5, const uint8_t *cst6, const uint8_t *cst7, size_t cstlen, const uint8_t *msg0, const uint8_t *msg1, const uint8_t *msg2, const uint8_t *msg3, const uint8_t *msg4, const uint8_t *msg5, const uint8_t *msg6, const uint8_t *msg7, size_t msglen)</para>
+
+<para>Process 8 KMAC-128 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1ac64e3f14a58f4da0122096d60bd4f401">qsc_kmac_256x8</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, uint8_t *out4, uint8_t *out5, uint8_t *out6, uint8_t *out7, size_t outlen, const uint8_t *key0, const uint8_t *key1, const uint8_t *key2, const uint8_t *key3, const uint8_t *key4, const uint8_t *key5, const uint8_t *key6, const uint8_t *key7, size_t keylen, const uint8_t *cst0, const uint8_t *cst1, const uint8_t *cst2, const uint8_t *cst3, const uint8_t *cst4, const uint8_t *cst5, const uint8_t *cst6, const uint8_t *cst7, size_t cstlen, const uint8_t *msg0, const uint8_t *msg1, const uint8_t *msg2, const uint8_t *msg3, const uint8_t *msg4, const uint8_t *msg5, const uint8_t *msg6, const uint8_t *msg7, size_t msglen)</para>
+
+<para>Process 8 KMAC-256 instances simultaneously using SIMD instructions. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_sha3_8h_1a7bcf8e653d758d204dda7c8648bd0b8f">qsc_kmac_512x8</link> (uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3, uint8_t *out4, uint8_t *out5, uint8_t *out6, uint8_t *out7, size_t outlen, const uint8_t *key0, const uint8_t *key1, const uint8_t *key2, const uint8_t *key3, const uint8_t *key4, const uint8_t *key5, const uint8_t *key6, const uint8_t *key7, size_t keylen, const uint8_t *cst0, const uint8_t *cst1, const uint8_t *cst2, const uint8_t *cst3, const uint8_t *cst4, const uint8_t *cst5, const uint8_t *cst6, const uint8_t *cst7, size_t cstlen, const uint8_t *msg0, const uint8_t *msg1, const uint8_t *msg2, const uint8_t *msg3, const uint8_t *msg4, const uint8_t *msg5, const uint8_t *msg6, const uint8_t *msg7, size_t msglen)</para>
+
+<para>Process 8 KMAC-512 instances simultaneously using SIMD instructions. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>SHA3 header definition <?linebreak?>Contains the public api and documentation for SHA3 digest, SHAKE, cSHAKE, and KMAC implementations. </para>
+
+<para><formalpara><title>Author</title>
+
+<para>John Underhill </para>
+</formalpara>
+<formalpara><title>Date</title>
+
+<para>October 27, 2019 updated October 19, 2021</para>
+</formalpara>
+</para>
+
+<para>Usage Examples <?linebreak?> SHA3-512 hash computation using long-form api <?linebreak?><literallayout><computeroutput><emphasis role="preprocessor">#define&#32;MSGLEN&#32;200</emphasis>
+uint8_t&#32;msg[MSGLEN]&#32;=&#32;{...};
+uint8_t&#32;hash[<link linkend="_sha3_8h_1abddba4f156c079127c92142f27d25bee">QSC_SHA3_512_HASH_SIZE</link>]&#32;=&#32;{&#32;0&#32;};
+<link linkend="_structqsc__keccak__state">qsc_keccak_state</link>&#32;ctx;
+
+qsc_sha3_initialize(ctx.<link linkend="_structqsc__keccak__state_1a39b941c644a0456196b54369d5d7d5f9">state</link>);
+
+qsc_sha3_update(&amp;ctx,&#32;<link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a436b417cabc032bb4f5e3cf6f3876b6c">qsc_keccak_rate_512</link>,&#32;msg,&#32;MSGLEN);
+
+qsc_sha3_finalize(&amp;ctx,&#32;<link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a436b417cabc032bb4f5e3cf6f3876b6c">qsc_keccak_rate_512</link>,&#32;hash);
+</computeroutput></literallayout></para>
+
+<para>KMAC-256 MAC code generation using long-form api <?linebreak?><literallayout><computeroutput><emphasis role="preprocessor">#define&#32;MSGLEN&#32;200</emphasis>
+uint8_t&#32;msg[MSGLEN]&#32;=&#32;{...};
+uint8_t&#32;key[<link linkend="_sha3_8h_1a6365997262cdbde9b76f59bb7225f8ec">QSC_KMAC_256_KEY_SIZE</link>]&#32;=&#32;{...};
+uint8_t&#32;cust[...]&#32;=&#32;{...};
+<link linkend="_structqsc__keccak__state">qsc_keccak_state</link>&#32;ctx;
+uint8_t&#32;code[QSC_KMAC_256_MAC_SIZE]&#32;=&#32;{&#32;0&#32;};
+
+qsc_kmac_initialize(&amp;ctx,&#32;<link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a289112e15dcba1fcb421e3c1f5afb0e6">qsc_keccak_rate_256</link>,&#32;key,&#32;<emphasis role="keyword">sizeof</emphasis>(key),&#32;cust,&#32;<emphasis role="keyword">sizeof</emphasis>(cust));
+&#32;&#32;&#32;&#32;qsc_kmac_update(&amp;ctx,&#32;<link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a289112e15dcba1fcb421e3c1f5afb0e6">qsc_keccak_rate_256</link>,&#32;msg,&#32;MSGLEN);
+qsc_kmac_finalize(&amp;ctx,&#32;<link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a289112e15dcba1fcb421e3c1f5afb0e6">qsc_keccak_rate_256</link>,&#32;code,&#32;<emphasis role="keyword">sizeof</emphasis>(code));
+</computeroutput></literallayout></para>
+
+<para>cSHAKE-512 pseudo-random generation using long-form api <?linebreak?><literallayout><computeroutput>uint8_t&#32;output[64]&#32;=&#32;{&#32;0&#32;};
+uint8_t&#32;key[<link linkend="_sha3_8h_1a59363c95e4ed93fb6c0501fbc5d49ae9">QSC_KMAC_512_KEY_SIZE</link>]&#32;=&#32;{...};
+uint8_t&#32;cust[...]&#32;=&#32;{...};
+uint8_t&#32;name[...]&#32;=&#32;{...};
+<link linkend="_structqsc__keccak__state">qsc_keccak_state</link>&#32;ctx;
+
+qsc_cshake_initialize(&amp;ctx,&#32;key,&#32;<emphasis role="keyword">sizeof</emphasis>(key),&#32;name,&#32;<emphasis role="keyword">sizeof</emphasis>(name),&#32;cust,&#32;<emphasis role="keyword">sizeof</emphasis>(cust));
+qsc_cshake_squeezeblocks(&amp;ctx,&#32;output,&#32;1);
+</computeroutput></literallayout></para>
+
+<para><formalpara><title>Remarks</title>
+
+<para></para>
+</formalpara>
+<para>
+
+<para>The SHA3, SHAKE, cSHAKE, and KMAC implementations all share two forms of api: short-form and long-form. <?linebreak?>The short-form api, which initializes the state, processes a message, and finalizes by producing output, all in a single function call, for example; <link linkend="_sha3_8h_1a7edf8c0b0e93bbd35009ce03bed960b9">qsc_sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen)</link>, the entire message array is processed and the hash code is written to the output array. <?linebreak?>The long-form api uses an initialization call to prepare the state, a blockupdate call if the message is longer than a single message block, and the finalize call, which finalizes the state and generates a hash, mac-code, or an array of pseudo-random. <?linebreak?>Each of the function families (SHA3, SHAKE, KMAC), have a corresponding set of reference constants associated with that member, example; SHAKE_256_KEY is the minimum expected SHAKE-256 key size in bytes, QSC_KMAC_512_MAC_SIZE is the minimum size of the KMAC-512 output mac-code output array, and QSC_KECCAK_512_RATE is the SHA3-512 message absorption rate.</para>
+</para>
+For additional usage examples, see sha3_test.h. <?linebreak?> <para>
+
+<para>NIST: SHA3 Fips202 <link xlink:href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf</link> <?linebreak?>NIST: SP800-185 <link xlink:href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf">http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf</link> <?linebreak?>NIST: SHA3 Keccak Submission <link xlink:href="http://keccak.noekeon.org/Keccak-submission-3.pdf">http://keccak.noekeon.org/Keccak-submission-3.pdf</link> <?linebreak?>NIST: SHA3 Keccak Slides <link xlink:href="http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf">http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf</link> <?linebreak?>NIST: SHA3 Third-Round Report <link xlink:href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf</link> <?linebreak?>Team Keccak: Specifications summary <link xlink:href="https://keccak.team/keccak_specs_summary.html">https://keccak.team/keccak_specs_summary.html</link> </para>
+</para>
+</para>
+</section>
+<section>
+<title>Macro Definition Documentation</title>
+<anchor xml:id="_sha3_8h_1a66f9f02e5abf8ad658e7a231444c4ee5"/><section>
+    <title>QSC_KECCAK_STATE_BYTE_SIZE<computeroutput>[1/2]</computeroutput></title>
+<indexterm><primary>QSC_KECCAK_STATE_BYTE_SIZE</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>QSC_KECCAK_STATE_BYTE_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_KECCAK_STATE_BYTE_SIZE&#160;&#160;&#160;200</computeroutput></para><para>
+
+<para>The Keccak state array byte size. </para>
+</para>
+
+<para>The Keccak SHA3 state size in bytes. </para>
+</section>
+<anchor xml:id="_sha3_8h_1a66f9f02e5abf8ad658e7a231444c4ee5"/><section>
+    <title>QSC_KECCAK_STATE_BYTE_SIZE<computeroutput>[2/2]</computeroutput></title>
+<indexterm><primary>QSC_KECCAK_STATE_BYTE_SIZE</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>QSC_KECCAK_STATE_BYTE_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_KECCAK_STATE_BYTE_SIZE&#160;&#160;&#160;200</computeroutput></para><para>
+
+<para>The Keccak state array byte size. </para>
+</para>
+
+<para>The Keccak SHA3 state size in bytes. </para>
+</section>
+</section>
+<section>
+<title>Enumeration Type Documentation</title>
+<anchor xml:id="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6"/><section>
+    <title>qsc_keccak_rate</title>
+<indexterm><primary>qsc_keccak_rate</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_rate</secondary></indexterm>
+<para><computeroutput>enum <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link></computeroutput></para><para>
+
+<para>The Keccak rate; determines which security strength is used by the function, 128, 256, or 512-bit. </para>
+</para>
+<informaltable frame="all">
+<title>Enumerator</title>
+    <tgroup cols="2" align="left" colsep="1" rowsep="1">
+      <colspec colname='c1'/>
+      <colspec colname='c2'/>
+<tbody>
+<row><entry><indexterm><primary>qsc_keccak_rate_none</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_rate_none</secondary></indexterm>
+<anchor xml:id="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6ac804ad7f4afe342fe292518ebc3bdbb6"/>qsc_keccak_rate_none</entry><entry>
+<para>No bit rate was selected </para>
+</entry></row><row><entry><indexterm><primary>qsc_keccak_rate_128</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_rate_128</secondary></indexterm>
+<anchor xml:id="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a372c0121e8261592a28f39b84cad155f"/>qsc_keccak_rate_128</entry><entry>
+<para>The Keccak 128-bit rate </para>
+</entry></row><row><entry><indexterm><primary>qsc_keccak_rate_256</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_rate_256</secondary></indexterm>
+<anchor xml:id="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a289112e15dcba1fcb421e3c1f5afb0e6"/>qsc_keccak_rate_256</entry><entry>
+<para>The Keccak 256-bit rate </para>
+</entry></row><row><entry><indexterm><primary>qsc_keccak_rate_512</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_rate_512</secondary></indexterm>
+<anchor xml:id="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6a436b417cabc032bb4f5e3cf6f3876b6c"/>qsc_keccak_rate_512</entry><entry>
+<para>The Keccak 512-bit rate </para>
+</entry></row>    </tbody>
+    </tgroup>
+</informaltable>
+</section>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_sha3_8h_1aa66a0f47fcbba7f4b8a86982f27a6d0c"/><section>
+    <title>qsc_cshake128_compute()</title>
+<indexterm><primary>qsc_cshake128_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_cshake128_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_cshake128_compute (uint8_t * output, size_t outlen, const uint8_t * key, size_t keylen, const uint8_t * name, size_t namelen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Key a cSHAKE-128 instance and generate pseudo-random output. Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call. Permutes and extracts the state to an output byte array.. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>name</entry><entry>
+<para>[const] The function name string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>namelen</entry><entry>
+<para>The byte length of the function name </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1add024bcf20fc37e04ecf28d59cc17c79"/><section>
+    <title>qsc_cshake256_compute()</title>
+<indexterm><primary>qsc_cshake256_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_cshake256_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_cshake256_compute (uint8_t * output, size_t outlen, const uint8_t * key, size_t keylen, const uint8_t * name, size_t namelen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Key a cSHAKE-256 instance and generate pseudo-random output. Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call. Permutes and extracts the state to an output byte array. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>name</entry><entry>
+<para>[const] The function name string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>namelen</entry><entry>
+<para>The byte length of the function name </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aef6159bd3a4517dd7fc1a822550790b6"/><section>
+    <title>qsc_cshake512_compute()</title>
+<indexterm><primary>qsc_cshake512_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_cshake512_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_cshake512_compute (uint8_t * output, size_t outlen, const uint8_t * key, size_t keylen, const uint8_t * name, size_t namelen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Key a cSHAKE-512 instance and generate pseudo-random output. Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call. Permutes and extracts the state to an output byte array. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>name</entry><entry>
+<para>[const] The function name string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>namelen</entry><entry>
+<para>The byte length of the function name </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ad049973b17b0e348ab2a43f4ab85bb8a"/><section>
+    <title>qsc_cshake_initialize()</title>
+<indexterm><primary>qsc_cshake_initialize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_cshake_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_cshake_initialize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * key, size_t keylen, const uint8_t * name, size_t namelen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>The cSHAKE initialize function. Long form api: must be used in conjunction with the squeezeblocks function. Initialize the name and customization strings into the state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>name</entry><entry>
+<para>[const] The function name string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>namelen</entry><entry>
+<para>The byte length of the function name </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1abcaf8bd84272ae9846e90fdec4f86130"/><section>
+    <title>qsc_cshake_squeezeblocks()</title>
+<indexterm><primary>qsc_cshake_squeezeblocks</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_cshake_squeezeblocks</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_cshake_squeezeblocks (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t * output, size_t nblocks)</computeroutput></para><para>
+
+<para>The cSHAKE squeeze function. Long form api: must be used in conjunction with the initialize function. Permutes and extracts blocks of state to an output byte array. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Output array must be initialized to a multiple of the byte rate. The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>nblocks</entry><entry>
+<para>The number of blocks to extract </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ac39508d3841cd3bf59d1cfcfdfffa98c"/><section>
+    <title>qsc_cshake_update()</title>
+<indexterm><primary>qsc_cshake_update</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_cshake_update</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_cshake_update (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * key, size_t keylen)</computeroutput></para><para>
+
+<para>The cSHAKE update function. Long form api: must be used in conjunction with the initialize and squeezeblocks functions. Finalize an input key directly into the state. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Finalizes the key state, should not be used in consecutive calls. The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aa5760b4f590a6908f4ce3ecb02425b95"/><section>
+    <title>qsc_keccak_absorb()</title>
+<indexterm><primary>qsc_keccak_absorb</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_absorb</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_absorb (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * message, size_t msglen, uint8_t domain, size_t rounds)</computeroutput></para><para>
+
+<para>Absorb an input message into the Keccak state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The input message byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>domain</entry><entry>
+<para>The function domain id </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default is 24, maximum is 48 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ab2fcc9bd9e0072d4e0144e9b84aad995"/><section>
+    <title>qsc_keccak_absorb_custom()</title>
+<indexterm><primary>qsc_keccak_absorb_custom</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_absorb_custom</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_absorb_custom (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * custom, size_t custlen, const uint8_t * name, size_t namelen, size_t rounds)</computeroutput></para><para>
+
+<para>Absorb the custom, and name arrays into the Keccak state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The Keccak state structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>name</entry><entry>
+<para>[const] The function name string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>namelen</entry><entry>
+<para>The byte length of the function name </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default is 24, maximum is 48 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1affff8a244c95763bfbf37ca2fa4f6775"/><section>
+    <title>qsc_keccak_absorb_key_custom()</title>
+<indexterm><primary>qsc_keccak_absorb_key_custom</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_absorb_key_custom</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_absorb_key_custom (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * key, size_t keylen, const uint8_t * custom, size_t custlen, const uint8_t * name, size_t namelen, size_t rounds)</computeroutput></para><para>
+
+<para>Absorb the custom, name, and key arrays into the Keccak state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The Keccak state structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>name</entry><entry>
+<para>[const] The function name string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>namelen</entry><entry>
+<para>The byte length of the function name </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default is 24, maximum is 48 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a341cdd637112e4de28f965120d9600d8"/><section>
+    <title>qsc_keccak_dispose()</title>
+<indexterm><primary>qsc_keccak_dispose</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_dispose</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_dispose (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx)</computeroutput></para><para>
+
+<para>Dispose of the Keccak state. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The dispose function must be called when disposing of the function state. This function safely destroys the internal state.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The Keccak state structure </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ae518149e35d00a9fa18a513fef96d399"/><section>
+    <title>qsc_keccak_finalize()</title>
+<indexterm><primary>qsc_keccak_finalize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_finalize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_finalize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t * output, size_t outlen, uint8_t domain, size_t rounds)</computeroutput></para><para>
+
+<para>Finalize the Keccak state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The Keccak state structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>domain</entry><entry>
+<para>The function domain id </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default is 24, maximum is 48 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a31f4ede93232e9a74de047cf9f8196ba"/><section>
+    <title>qsc_keccak_incremental_absorb()</title>
+<indexterm><primary>qsc_keccak_incremental_absorb</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_incremental_absorb</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_incremental_absorb (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, uint32_t rate, const uint8_t * message, size_t msglen)</computeroutput></para><para>
+
+<para>Absorb bytes into state incrementally. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>The function state </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The input message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aaf8d62a9abcdf338784d699695320221"/><section>
+    <title>qsc_keccak_incremental_finalize()</title>
+<indexterm><primary>qsc_keccak_incremental_finalize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_incremental_finalize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_incremental_finalize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, uint32_t rate, uint8_t domain)</computeroutput></para><para>
+
+<para>Finalize state added incrementally. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>The function state </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>domain</entry><entry>
+<para>The function domain id </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a1a6c84d9e3018c8a197cbdc81c2edb4b"/><section>
+    <title>qsc_keccak_incremental_squeeze()</title>
+<indexterm><primary>qsc_keccak_incremental_squeeze</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_incremental_squeeze</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_incremental_squeeze (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, size_t rate, uint8_t * output, size_t outlen)</computeroutput></para><para>
+
+<para>Extract an array of bytes from the Keccak state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>The function state </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a48854cbaeed2945d29e2858642c45fa2"/><section>
+    <title>qsc_keccak_initialize_state()</title>
+<indexterm><primary>qsc_keccak_initialize_state</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_initialize_state</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_initialize_state (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx)</computeroutput></para><para>
+
+<para>Initializes a Keccak state structure, must be called before message processing. Long form api: must be used in conjunction with the block-update and finalize functions. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a9e3466050e60101139e43f357f6688ca"/><section>
+    <title>qsc_keccak_permute()</title>
+<indexterm><primary>qsc_keccak_permute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_permute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_permute (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, size_t rounds)</computeroutput></para><para>
+
+<para>The Keccak permute function. Internal function: Permutes the state array, can be used in external constructions. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The function state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default and maximum is 24 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a4546645eff38ad66f1b88886f7cfb6c8"/><section>
+    <title>qsc_keccak_permute_p1600c()</title>
+<indexterm><primary>qsc_keccak_permute_p1600c</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_permute_p1600c</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_permute_p1600c (uint64_t * state, size_t rounds)</computeroutput></para><para>
+
+<para>The compact Keccak permute function. Internal function: Permutes the state array, can be used in external constructions. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>The state array; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default and maximum is 24 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a220755805dd7869debcd96cf9720dec9"/><section>
+    <title>qsc_keccak_permute_p1600u()</title>
+<indexterm><primary>qsc_keccak_permute_p1600u</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_permute_p1600u</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_permute_p1600u (uint64_t * state)</computeroutput></para><para>
+
+<para>The unrolled Keccak permute function. Internal function: Permutes the state array, can be used in external constructions. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>The state array; must be initialized </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aba170821d25f02507f60ed802f89ad99"/><section>
+    <title>qsc_keccak_squeezeblocks()</title>
+<indexterm><primary>qsc_keccak_squeezeblocks</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_squeezeblocks</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_squeezeblocks (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, uint8_t * output, size_t nblocks, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, size_t rounds)</computeroutput></para><para>
+
+<para>The Keccak squeeze function. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Output array must be initialized to a multiple of the byte rate.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>nblocks</entry><entry>
+<para>The number of blocks to extract </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default and maximum is 24 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ac5df385de621651304659b6f7d9eaf25"/><section>
+    <title>qsc_keccak_update()</title>
+<indexterm><primary>qsc_keccak_update</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_keccak_update</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_keccak_update (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * message, size_t msglen, size_t rounds)</computeroutput></para><para>
+
+<para>Update Keccak state with message input. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The state must be initialized before calling</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The input message byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rounds</entry><entry>
+<para>The number of permutation rounds, the default and maximum is 24 </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1afd15cc06fd56e1fe728da09cab39560e"/><section>
+    <title>qsc_kmac128_compute()</title>
+<indexterm><primary>qsc_kmac128_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac128_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac128_compute (uint8_t * output, size_t outlen, const uint8_t * message, size_t msglen, const uint8_t * key, size_t keylen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Key a KMAC-128 instance and generate a MAC code. Short form api: processes the key and custom inputs and generates the MAC code with a single call. Key the MAC generator process a message and output the MAC code. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The MAC code byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of MAC code bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a0650fcdcd7f89ab1d224fc43b5c6c4b8"/><section>
+    <title>qsc_kmac256_compute()</title>
+<indexterm><primary>qsc_kmac256_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac256_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac256_compute (uint8_t * output, size_t outlen, const uint8_t * message, size_t msglen, const uint8_t * key, size_t keylen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Key a KMAC-256 instance and generate a MAC code. Short form api: processes the key and custom inputs and generates the MAC code with a single call. Key the MAC generator process a message and output the MAC code. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The MAC code byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of MAC code bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a31366aac3d7a3fe31eb8a8e7db314bbd"/><section>
+    <title>qsc_kmac512_compute()</title>
+<indexterm><primary>qsc_kmac512_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac512_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac512_compute (uint8_t * output, size_t outlen, const uint8_t * message, size_t msglen, const uint8_t * key, size_t keylen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Key a KMAC-512 instance and generate a MAC code. Short form api: processes the key and custom inputs and generates the MAC code with a single call. Key the MAC generator process a message and output the MAC code. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The MAC code byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of MAC code bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a541212d3f21183b011d6f8c0e3861881"/><section>
+    <title>qsc_kmac_128x4()</title>
+<indexterm><primary>qsc_kmac_128x4</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_128x4</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_128x4 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, size_t outlen, const uint8_t * key0, const uint8_t * key1, const uint8_t * key2, const uint8_t * key3, size_t keylen, const uint8_t * cst0, const uint8_t * cst1, const uint8_t * cst2, const uint8_t * cst3, size_t cstlen, const uint8_t * msg0, const uint8_t * msg1, const uint8_t * msg2, const uint8_t * msg3, size_t msglen)</computeroutput></para><para>
+
+<para>Process 4 KMAC-128 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX2 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key0</entry><entry>
+<para>[const] The 1st key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key1</entry><entry>
+<para>[const] The 2nd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key2</entry><entry>
+<para>[const] The 3rd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key3</entry><entry>
+<para>[const] The 4th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst0</entry><entry>
+<para>[const] The 1st custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst1</entry><entry>
+<para>[const] The 2nd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst2</entry><entry>
+<para>[const] The 3rd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst3</entry><entry>
+<para>[const] The 4th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cstlen</entry><entry>
+<para>The length of the custom arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg0</entry><entry>
+<para>[const] The 1st message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg1</entry><entry>
+<para>[const] The 2nd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg2</entry><entry>
+<para>[const] The 3rd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg3</entry><entry>
+<para>[const] The 4th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The length of the message arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a95df26492099e6157da0035e9a5c8ff8"/><section>
+    <title>qsc_kmac_128x8()</title>
+<indexterm><primary>qsc_kmac_128x8</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_128x8</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_128x8 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, uint8_t * out4, uint8_t * out5, uint8_t * out6, uint8_t * out7, size_t outlen, const uint8_t * key0, const uint8_t * key1, const uint8_t * key2, const uint8_t * key3, const uint8_t * key4, const uint8_t * key5, const uint8_t * key6, const uint8_t * key7, size_t keylen, const uint8_t * cst0, const uint8_t * cst1, const uint8_t * cst2, const uint8_t * cst3, const uint8_t * cst4, const uint8_t * cst5, const uint8_t * cst6, const uint8_t * cst7, size_t cstlen, const uint8_t * msg0, const uint8_t * msg1, const uint8_t * msg2, const uint8_t * msg3, const uint8_t * msg4, const uint8_t * msg5, const uint8_t * msg6, const uint8_t * msg7, size_t msglen)</computeroutput></para><para>
+
+<para>Process 8 KMAC-128 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX512 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out4</entry><entry>
+<para>The 5th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out5</entry><entry>
+<para>The 6th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out6</entry><entry>
+<para>The 7th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out7</entry><entry>
+<para>The 8th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key0</entry><entry>
+<para>[const] The 1st key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key1</entry><entry>
+<para>[const] The 2nd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key2</entry><entry>
+<para>[const] The 3rd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key3</entry><entry>
+<para>[const] The 4th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key4</entry><entry>
+<para>[const] The 5th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key5</entry><entry>
+<para>[const] The 6th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key6</entry><entry>
+<para>[const] The 7th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key7</entry><entry>
+<para>[const] The 8th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The length of the key arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst0</entry><entry>
+<para>[const] The 1st custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst1</entry><entry>
+<para>[const] The 2nd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst2</entry><entry>
+<para>[const] The 3rd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst3</entry><entry>
+<para>[const] The 4th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst4</entry><entry>
+<para>[const] The 5th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst5</entry><entry>
+<para>[const] The 6th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst6</entry><entry>
+<para>[const] The 7th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst7</entry><entry>
+<para>[const] The 8th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cstlen</entry><entry>
+<para>The length of the custom arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg0</entry><entry>
+<para>[const] The 1st message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg1</entry><entry>
+<para>[const] The 2nd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg2</entry><entry>
+<para>[const] The 3rd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg3</entry><entry>
+<para>[const] The 4th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg4</entry><entry>
+<para>[const] The 5th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg5</entry><entry>
+<para>[const] The 6th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg6</entry><entry>
+<para>[const] The 7th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg7</entry><entry>
+<para>[const] The 8th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The length of the message arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1adee310d60c00466918adf6182865d3a8"/><section>
+    <title>qsc_kmac_256x4()</title>
+<indexterm><primary>qsc_kmac_256x4</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_256x4</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_256x4 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, size_t outlen, const uint8_t * key0, const uint8_t * key1, const uint8_t * key2, const uint8_t * key3, size_t keylen, const uint8_t * cst0, const uint8_t * cst1, const uint8_t * cst2, const uint8_t * cst3, size_t cstlen, const uint8_t * msg0, const uint8_t * msg1, const uint8_t * msg2, const uint8_t * msg3, size_t msglen)</computeroutput></para><para>
+
+<para>Process 4 KMAC-256 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX2 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key0</entry><entry>
+<para>[const] The 1st key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key1</entry><entry>
+<para>[const] The 2nd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key2</entry><entry>
+<para>[const] The 3rd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key3</entry><entry>
+<para>[const] The 4th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst0</entry><entry>
+<para>[const] The 1st custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst1</entry><entry>
+<para>[const] The 2nd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst2</entry><entry>
+<para>[const] The 3rd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst3</entry><entry>
+<para>[const] The 4th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cstlen</entry><entry>
+<para>The length of the custom arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg0</entry><entry>
+<para>[const] The 1st message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg1</entry><entry>
+<para>[const] The 2nd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg2</entry><entry>
+<para>[const] The 3rd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg3</entry><entry>
+<para>[const] The 4th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The length of the message arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ac64e3f14a58f4da0122096d60bd4f401"/><section>
+    <title>qsc_kmac_256x8()</title>
+<indexterm><primary>qsc_kmac_256x8</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_256x8</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_256x8 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, uint8_t * out4, uint8_t * out5, uint8_t * out6, uint8_t * out7, size_t outlen, const uint8_t * key0, const uint8_t * key1, const uint8_t * key2, const uint8_t * key3, const uint8_t * key4, const uint8_t * key5, const uint8_t * key6, const uint8_t * key7, size_t keylen, const uint8_t * cst0, const uint8_t * cst1, const uint8_t * cst2, const uint8_t * cst3, const uint8_t * cst4, const uint8_t * cst5, const uint8_t * cst6, const uint8_t * cst7, size_t cstlen, const uint8_t * msg0, const uint8_t * msg1, const uint8_t * msg2, const uint8_t * msg3, const uint8_t * msg4, const uint8_t * msg5, const uint8_t * msg6, const uint8_t * msg7, size_t msglen)</computeroutput></para><para>
+
+<para>Process 8 KMAC-256 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX512 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out4</entry><entry>
+<para>The 5th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out5</entry><entry>
+<para>The 6th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out6</entry><entry>
+<para>The 7th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out7</entry><entry>
+<para>The 8th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key0</entry><entry>
+<para>[const] The 1st key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key1</entry><entry>
+<para>[const] The 2nd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key2</entry><entry>
+<para>[const] The 3rd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key3</entry><entry>
+<para>[const] The 4th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key4</entry><entry>
+<para>[const] The 5th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key5</entry><entry>
+<para>[const] The 6th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key6</entry><entry>
+<para>[const] The 7th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key7</entry><entry>
+<para>[const] The 8th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The length of the key arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst0</entry><entry>
+<para>[const] The 1st custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst1</entry><entry>
+<para>[const] The 2nd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst2</entry><entry>
+<para>[const] The 3rd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst3</entry><entry>
+<para>[const] The 4th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst4</entry><entry>
+<para>[const] The 5th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst5</entry><entry>
+<para>[const] The 6th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst6</entry><entry>
+<para>[const] The 7th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst7</entry><entry>
+<para>[const] The 8th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cstlen</entry><entry>
+<para>The length of the custom arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg0</entry><entry>
+<para>[const] The 1st message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg1</entry><entry>
+<para>[const] The 2nd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg2</entry><entry>
+<para>[const] The 3rd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg3</entry><entry>
+<para>[const] The 4th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg4</entry><entry>
+<para>[const] The 5th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg5</entry><entry>
+<para>[const] The 6th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg6</entry><entry>
+<para>[const] The 7th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg7</entry><entry>
+<para>[const] The 8th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The length of the message arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aad60004f4f41b4b06085041e1713d400"/><section>
+    <title>qsc_kmac_512x4()</title>
+<indexterm><primary>qsc_kmac_512x4</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_512x4</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_512x4 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, size_t outlen, const uint8_t * key0, const uint8_t * key1, const uint8_t * key2, const uint8_t * key3, size_t keylen, const uint8_t * cst0, const uint8_t * cst1, const uint8_t * cst2, const uint8_t * cst3, size_t cstlen, const uint8_t * msg0, const uint8_t * msg1, const uint8_t * msg2, const uint8_t * msg3, size_t msglen)</computeroutput></para><para>
+
+<para>Process 4 KMAC-512 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX2 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key0</entry><entry>
+<para>[const] The 1st key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key1</entry><entry>
+<para>[const] The 2nd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key2</entry><entry>
+<para>[const] The 3rd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key3</entry><entry>
+<para>[const] The 4th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst0</entry><entry>
+<para>[const] The 1st custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst1</entry><entry>
+<para>[const] The 2nd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst2</entry><entry>
+<para>[const] The 3rd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst3</entry><entry>
+<para>[const] The 4th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cstlen</entry><entry>
+<para>The length of the custom arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg0</entry><entry>
+<para>[const] The 1st message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg1</entry><entry>
+<para>[const] The 2nd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg2</entry><entry>
+<para>[const] The 3rd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg3</entry><entry>
+<para>[const] The 4th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The length of the message arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a7bcf8e653d758d204dda7c8648bd0b8f"/><section>
+    <title>qsc_kmac_512x8()</title>
+<indexterm><primary>qsc_kmac_512x8</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_512x8</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_512x8 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, uint8_t * out4, uint8_t * out5, uint8_t * out6, uint8_t * out7, size_t outlen, const uint8_t * key0, const uint8_t * key1, const uint8_t * key2, const uint8_t * key3, const uint8_t * key4, const uint8_t * key5, const uint8_t * key6, const uint8_t * key7, size_t keylen, const uint8_t * cst0, const uint8_t * cst1, const uint8_t * cst2, const uint8_t * cst3, const uint8_t * cst4, const uint8_t * cst5, const uint8_t * cst6, const uint8_t * cst7, size_t cstlen, const uint8_t * msg0, const uint8_t * msg1, const uint8_t * msg2, const uint8_t * msg3, const uint8_t * msg4, const uint8_t * msg5, const uint8_t * msg6, const uint8_t * msg7, size_t msglen)</computeroutput></para><para>
+
+<para>Process 8 KMAC-512 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX512 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out4</entry><entry>
+<para>The 5th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out5</entry><entry>
+<para>The 6th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out6</entry><entry>
+<para>The 7th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out7</entry><entry>
+<para>The 8th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key0</entry><entry>
+<para>[const] The 1st key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key1</entry><entry>
+<para>[const] The 2nd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key2</entry><entry>
+<para>[const] The 3rd key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key3</entry><entry>
+<para>[const] The 4th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key4</entry><entry>
+<para>[const] The 5th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key5</entry><entry>
+<para>[const] The 6th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key6</entry><entry>
+<para>[const] The 7th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key7</entry><entry>
+<para>[const] The 8th key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The length of the key arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst0</entry><entry>
+<para>[const] The 1st custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst1</entry><entry>
+<para>[const] The 2nd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst2</entry><entry>
+<para>[const] The 3rd custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst3</entry><entry>
+<para>[const] The 4th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst4</entry><entry>
+<para>[const] The 5th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst5</entry><entry>
+<para>[const] The 6th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst6</entry><entry>
+<para>[const] The 7th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cst7</entry><entry>
+<para>[const] The 8th custom array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>cstlen</entry><entry>
+<para>The length of the custom arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg0</entry><entry>
+<para>[const] The 1st message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg1</entry><entry>
+<para>[const] The 2nd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg2</entry><entry>
+<para>[const] The 3rd message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg3</entry><entry>
+<para>[const] The 4th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg4</entry><entry>
+<para>[const] The 5th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg5</entry><entry>
+<para>[const] The 6th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg6</entry><entry>
+<para>[const] The 7th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msg7</entry><entry>
+<para>[const] The 8th message array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The length of the message arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a0bf604224cd963ad1c03dc333da392b0"/><section>
+    <title>qsc_kmac_finalize()</title>
+<indexterm><primary>qsc_kmac_finalize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_finalize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_finalize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t * output, size_t outlen)</computeroutput></para><para>
+
+<para>The KMAC finalize function. Long form api: must be used in conjunction with the initialize and blockupdate functions. Final processing and calculation of the MAC code. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of bytes to extract </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a7083c322daf2060be2598da058645bb8"/><section>
+    <title>qsc_kmac_initialize()</title>
+<indexterm><primary>qsc_kmac_initialize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_initialize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * key, size_t keylen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Initialize a KMAC instance. Long form api: must be used in conjunction with the blockupdate and finalize functions. Key the MAC generator and initialize the internal state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ad03585c6b59ab05b24e9a8e101e31d56"/><section>
+    <title>qsc_kmac_update()</title>
+<indexterm><primary>qsc_kmac_update</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kmac_update</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kmac_update (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * message, size_t msglen)</computeroutput></para><para>
+
+<para>The KMAC message update function. Long form api: must be used in conjunction with the initialize and finalize functions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a38e6430f30392e3190ea06eeee9fa707"/><section>
+    <title>qsc_kpa_dispose()</title>
+<indexterm><primary>qsc_kpa_dispose</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kpa_dispose</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kpa_dispose (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> * ctx)</computeroutput></para><para>
+
+<para>Dispose of the KPA state. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The dispose function must be called when disposing of the function state. This function safely destroys the internal state.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the KPA state structure; must be initialized </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1af0442da464aa13390bfa5102a55f955b"/><section>
+    <title>qsc_kpa_finalize()</title>
+<indexterm><primary>qsc_kpa_finalize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kpa_finalize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kpa_finalize (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> * ctx, uint8_t * output, size_t outlen)</computeroutput></para><para>
+
+<para>The KPA finalize function. Long form api: must be used in conjunction with the initialize and blockupdate functions. Final processing and calculation of the MAC code. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the KPA state structure; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of bytes to extract </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aaed3655e3ebcb5f36cc9a361a76be220"/><section>
+    <title>qsc_kpa_initialize()</title>
+<indexterm><primary>qsc_kpa_initialize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kpa_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kpa_initialize (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> * ctx, const uint8_t * key, size_t keylen, const uint8_t * custom, size_t custlen)</computeroutput></para><para>
+
+<para>Initialize a KPA instance. Long form api: must be used in conjunction with the blockupdate and finalize functions. Key the MAC generator and initialize the internal state. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the KPA state structure; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custom</entry><entry>
+<para>[const] The customization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>custlen</entry><entry>
+<para>The byte length of the customization string </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a6861b34e992924d310fc33b527e615bb"/><section>
+    <title>qsc_kpa_update()</title>
+<indexterm><primary>qsc_kpa_update</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_kpa_update</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_kpa_update (<link linkend="_structqsc__kpa__state">qsc_kpa_state</link> * ctx, const uint8_t * message, size_t msglen)</computeroutput></para><para>
+
+<para>The KPA message update function. Long form api: must be used in conjunction with the initialize and finalize functions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the KPA state structure; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ac937d2baffe3ff4353ed21e4e6b78e54"/><section>
+    <title>qsc_sha3_compute128()</title>
+<indexterm><primary>qsc_sha3_compute128</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_sha3_compute128</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sha3_compute128 (uint8_t * output, const uint8_t * message, size_t msglen)</computeroutput></para><para>
+
+<para>Process a message with SHA3-128 and return the hash code in the output byte array. Short form api: processes the entire message and computes the hash code with a single call. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The output array must be at least 16 bytes in length.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output, :</entry><entry>
+<para>The output byte array; receives the hash code </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aa58c463d10c8a9fac1cf09a166b2e2a8"/><section>
+    <title>qsc_sha3_compute256()</title>
+<indexterm><primary>qsc_sha3_compute256</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_sha3_compute256</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sha3_compute256 (uint8_t * output, const uint8_t * message, size_t msglen)</computeroutput></para><para>
+
+<para>Process a message with SHA3-256 and return the hash code in the output byte array. Short form api: processes the entire message and computes the hash code with a single call. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The output array must be at least 32 bytes in length.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output, :</entry><entry>
+<para>The output byte array; receives the hash code </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a7edf8c0b0e93bbd35009ce03bed960b9"/><section>
+    <title>qsc_sha3_compute512()</title>
+<indexterm><primary>qsc_sha3_compute512</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_sha3_compute512</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sha3_compute512 (uint8_t * output, const uint8_t * message, size_t msglen)</computeroutput></para><para>
+
+<para>Process a message with SHA3-512 and return the hash code in the output byte array. Short form api: processes the entire message and computes the hash code with a single call. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The output array must be at least 64 bytes in length.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the hash code </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The message input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a1edd6ffaa95e3c28320c1e9673fb2bcf"/><section>
+    <title>qsc_sha3_finalize()</title>
+<indexterm><primary>qsc_sha3_finalize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_sha3_finalize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sha3_finalize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t * output)</computeroutput></para><para>
+
+<para>Finalize the message state and returns the hash value in output. Long form api: must be used in conjunction with the initialize and block-update functions. Absorb the last block of message and create the hash value. Produces a 32 byte output code using QSC_KECCAK_256_RATE, 64 bytes with QSC_KECCAK_512_RATE. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The output array must be sized correctly corresponding to the absorption rate ((200 - rate) / 2). Finalizes the message state, can not be used in consecutive calls. The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the hash code </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1af3952171393684803e6867b3fd39ec82"/><section>
+    <title>qsc_sha3_initialize()</title>
+<indexterm><primary>qsc_sha3_initialize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_sha3_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sha3_initialize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx)</computeroutput></para><para>
+
+<para>Initialize the SHA3 state Long form api: Must be called before the update or finalize functions are called. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a43c7ccd7826ba688d405d4131644fac4"/><section>
+    <title>qsc_sha3_update()</title>
+<indexterm><primary>qsc_sha3_update</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_sha3_update</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_sha3_update (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * message, size_t msglen)</computeroutput></para><para>
+
+<para>Update SHA3 with message input. Long form api: must be used in conjunction with the initialize and finalize functions. Absorbs the input message into the state. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The state must be initialized before calling</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>message</entry><entry>
+<para>[const] The input message byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>msglen</entry><entry>
+<para>The number of message bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1addf93e9a23130b64cc705794e2b40db8"/><section>
+    <title>qsc_shake128_compute()</title>
+<indexterm><primary>qsc_shake128_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake128_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake128_compute (uint8_t * output, size_t outlen, const uint8_t * key, size_t keylen)</computeroutput></para><para>
+
+<para>Key a SHAKE-128 instance, and generate an array of pseudo-random bytes. Short form api: processes the key and generates the pseudo-random output with a single call. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The output array length must not be zero.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a49a90551b628f9a4afbf923dc3ccb827"/><section>
+    <title>qsc_shake256_compute()</title>
+<indexterm><primary>qsc_shake256_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake256_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake256_compute (uint8_t * output, size_t outlen, const uint8_t * key, size_t keylen)</computeroutput></para><para>
+
+<para>Key a SHAKE-256 instance, and generate an array of pseudo-random bytes. Short form api: processes the key and generates the pseudo-random output with a single call. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The output array length must not be zero.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ae03e696f6e6b35acacdfd99ff0f21216"/><section>
+    <title>qsc_shake512_compute()</title>
+<indexterm><primary>qsc_shake512_compute</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake512_compute</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake512_compute (uint8_t * output, size_t outlen, const uint8_t * key, size_t keylen)</computeroutput></para><para>
+
+<para>Key a SHAKE-512 instance, and generate an array of pseudo-random bytes. Short form api: processes the key and generates the pseudo-random output with a single call. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The output array length must not be zero.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The number of output bytes to generate </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a463021774cd48b812691642122b419b6"/><section>
+    <title>qsc_shake_128x4()</title>
+<indexterm><primary>qsc_shake_128x4</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_128x4</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_128x4 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, size_t outlen, const uint8_t * inp0, const uint8_t * inp1, const uint8_t * inp2, const uint8_t * inp3, size_t inplen)</computeroutput></para><para>
+
+<para>Process 4 SHAKE-128 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX2 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp0</entry><entry>
+<para>[const] The 1st input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp1</entry><entry>
+<para>[const] The 2nd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp2</entry><entry>
+<para>[const] The 3rd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp3</entry><entry>
+<para>[const] The 4th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inplen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1ad0b13160d562fd32b6a143e8f8a32e1d"/><section>
+    <title>qsc_shake_128x8()</title>
+<indexterm><primary>qsc_shake_128x8</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_128x8</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_128x8 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, uint8_t * out4, uint8_t * out5, uint8_t * out6, uint8_t * out7, size_t outlen, const uint8_t * inp0, const uint8_t * inp1, const uint8_t * inp2, const uint8_t * inp3, const uint8_t * inp4, const uint8_t * inp5, const uint8_t * inp6, const uint8_t * inp7, size_t inplen)</computeroutput></para><para>
+
+<para>Process 8 SHAKE-128 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX512 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out4</entry><entry>
+<para>The 5th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out5</entry><entry>
+<para>The 6th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out6</entry><entry>
+<para>The 7th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out7</entry><entry>
+<para>The 8th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp0</entry><entry>
+<para>[const] The 1st input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp1</entry><entry>
+<para>[const] The 2nd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp2</entry><entry>
+<para>[const] The 3rd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp3</entry><entry>
+<para>[const] The 4th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp4</entry><entry>
+<para>[const] The 5th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp5</entry><entry>
+<para>[const] The 6th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp6</entry><entry>
+<para>[const] The 7th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp7</entry><entry>
+<para>[const] The 8th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inplen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a1e7e526bc8ff821a91648a7e5b89315a"/><section>
+    <title>qsc_shake_256x4()</title>
+<indexterm><primary>qsc_shake_256x4</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_256x4</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_256x4 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, size_t outlen, const uint8_t * inp0, const uint8_t * inp1, const uint8_t * inp2, const uint8_t * inp3, size_t inplen)</computeroutput></para><para>
+
+<para>Process 4 SHAKE-256 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX2 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp0</entry><entry>
+<para>[const] The 1st input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp1</entry><entry>
+<para>[const] The 2nd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp2</entry><entry>
+<para>[const] The 3rd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp3</entry><entry>
+<para>[const] The 4th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inplen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1a5afc7f12bde103c07e1d5ed53dd5613a"/><section>
+    <title>qsc_shake_256x8()</title>
+<indexterm><primary>qsc_shake_256x8</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_256x8</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_256x8 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, uint8_t * out4, uint8_t * out5, uint8_t * out6, uint8_t * out7, size_t outlen, const uint8_t * inp0, const uint8_t * inp1, const uint8_t * inp2, const uint8_t * inp3, const uint8_t * inp4, const uint8_t * inp5, const uint8_t * inp6, const uint8_t * inp7, size_t inplen)</computeroutput></para><para>
+
+<para>Process 8 SHAKE-256 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX512 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out4</entry><entry>
+<para>The 5th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out5</entry><entry>
+<para>The 6th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out6</entry><entry>
+<para>The 7th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out7</entry><entry>
+<para>The 8th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp0</entry><entry>
+<para>[const] The 1st input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp1</entry><entry>
+<para>[const] The 2nd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp2</entry><entry>
+<para>[const] The 3rd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp3</entry><entry>
+<para>[const] The 4th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp4</entry><entry>
+<para>[const] The 5th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp5</entry><entry>
+<para>[const] The 6th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp6</entry><entry>
+<para>[const] The 7th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp7</entry><entry>
+<para>[const] The 8th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inplen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1af84aff27589c4ba3df21282928f5827e"/><section>
+    <title>qsc_shake_512x4()</title>
+<indexterm><primary>qsc_shake_512x4</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_512x4</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_512x4 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, size_t outlen, const uint8_t * inp0, const uint8_t * inp1, const uint8_t * inp2, const uint8_t * inp3, size_t inplen)</computeroutput></para><para>
+
+<para>Process 4 SHAKE-512 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX2 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp0</entry><entry>
+<para>[const] The 1st input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp1</entry><entry>
+<para>[const] The 2nd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp2</entry><entry>
+<para>[const] The 3rd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp3</entry><entry>
+<para>[const] The 4th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inplen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1abe60f27ad2582a11f03c1b64817ce6d7"/><section>
+    <title>qsc_shake_512x8()</title>
+<indexterm><primary>qsc_shake_512x8</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_512x8</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_512x8 (uint8_t * out0, uint8_t * out1, uint8_t * out2, uint8_t * out3, uint8_t * out4, uint8_t * out5, uint8_t * out6, uint8_t * out7, size_t outlen, const uint8_t * inp0, const uint8_t * inp1, const uint8_t * inp2, const uint8_t * inp3, const uint8_t * inp4, const uint8_t * inp5, const uint8_t * inp6, const uint8_t * inp7, size_t inplen)</computeroutput></para><para>
+
+<para>Process 8 SHAKE-512 instances simultaneously using SIMD instructions. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The input and output arrays must be of the same length. This function requires the AVX512 instruction set.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>out0</entry><entry>
+<para>The 1st output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out1</entry><entry>
+<para>The 2nd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out2</entry><entry>
+<para>The 3rd output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out3</entry><entry>
+<para>The 4th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out4</entry><entry>
+<para>The 5th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out5</entry><entry>
+<para>The 6th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out6</entry><entry>
+<para>The 7th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>out7</entry><entry>
+<para>The 8th output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outlen</entry><entry>
+<para>The length of the output arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp0</entry><entry>
+<para>[const] The 1st input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp1</entry><entry>
+<para>[const] The 2nd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp2</entry><entry>
+<para>[const] The 3rd input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp3</entry><entry>
+<para>[const] The 4th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp4</entry><entry>
+<para>[const] The 5th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp5</entry><entry>
+<para>[const] The 6th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp6</entry><entry>
+<para>[const] The 7th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inp7</entry><entry>
+<para>[const] The 8th input key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>inplen</entry><entry>
+<para>The length of the input key arrays </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1af45dfbdfe6be3d3b999632df70d64df6"/><section>
+    <title>qsc_shake_initialize()</title>
+<indexterm><primary>qsc_shake_initialize</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_initialize (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, const uint8_t * key, size_t keylen)</computeroutput></para><para>
+
+<para>The SHAKE initialize function. Long form api: must be used in conjunction with the squeezeblocks function. Absorb and finalize an input key byte array. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>key</entry><entry>
+<para>[const] The input key byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keylen</entry><entry>
+<para>The number of key bytes to process </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_sha3_8h_1aefee71079fe671bfac1740093ec70c9c"/><section>
+    <title>qsc_shake_squeezeblocks()</title>
+<indexterm><primary>qsc_shake_squeezeblocks</primary><secondary>sha3.h</secondary></indexterm>
+<indexterm><primary>sha3.h</primary><secondary>qsc_shake_squeezeblocks</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_shake_squeezeblocks (<link linkend="_structqsc__keccak__state">qsc_keccak_state</link> * ctx, <link linkend="_sha3_8h_1a3283a3326659d4e2e0679c6bd32b6cc6">qsc_keccak_rate</link> rate, uint8_t * output, size_t nblocks)</computeroutput></para><para>
+
+<para>The SHAKE squeeze function. Long form api: must be used in conjunction with the initialize function. Permutes and extracts the state to an output byte array. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Output array must be initialized to a multiple of the byte rate. The state must be initialized before calling.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] A reference to the Keccak state; must be initialized </para>
+</entry>
+                            </row>
+                            <row>
+<entry>rate</entry><entry>
+<para>The rate of absorption in bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>nblocks</entry><entry>
+<para>The number of blocks to extract </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+</section>
+</section>

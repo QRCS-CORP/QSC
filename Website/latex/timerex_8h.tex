@@ -1,0 +1,109 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/timerex.h File Reference}
+\hypertarget{timerex_8h}{}\label{timerex_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/timerex.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/timerex.h}}
+
+
+This file contains common time measurement functions.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+Include dependency graph for timerex.\+h\+:
+% FIG 0
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{timerex_8h_a0e7bf52316f6dd13a61b90607fa71d7c}\label{timerex_8h_a0e7bf52316f6dd13a61b90607fa71d7c} 
+\#define {\bfseries QSC\+\_\+\+TIMEREX\+\_\+\+TIMESTAMP\+\_\+\+MAX}~80
+\begin{DoxyCompactList}\small\item\em The maximum time-\/stamp array size. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{timerex_8h_a4fae6a1ec2f5f7bf9c14f19eb9b34539}{qsc\+\_\+timerex\+\_\+get\+\_\+date}} (char output\mbox{[}\mbox{\hyperlink{timerex_8h_a0e7bf52316f6dd13a61b90607fa71d7c}{QSC\+\_\+\+TIMEREX\+\_\+\+TIMESTAMP\+\_\+\+MAX}}\mbox{]})
+\begin{DoxyCompactList}\small\item\em Get the calendar date from the current locale. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{timerex_8h_a062943eb937d0f7ddc745c104da2e47e}{qsc\+\_\+timerex\+\_\+get\+\_\+datetime}} (char output\mbox{[}\mbox{\hyperlink{timerex_8h_a0e7bf52316f6dd13a61b90607fa71d7c}{QSC\+\_\+\+TIMEREX\+\_\+\+TIMESTAMP\+\_\+\+MAX}}\mbox{]})
+\begin{DoxyCompactList}\small\item\em Get the calendar date and time from the current locale. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{timerex_8h_a51495b0d16ee3f7a565c8febf40c7dfc}{qsc\+\_\+timerex\+\_\+get\+\_\+time}} (char output\mbox{[}\mbox{\hyperlink{timerex_8h_a0e7bf52316f6dd13a61b90607fa71d7c}{QSC\+\_\+\+TIMEREX\+\_\+\+TIMESTAMP\+\_\+\+MAX}}\mbox{]})
+\begin{DoxyCompactList}\small\item\em Get the local time. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t \mbox{\hyperlink{timerex_8h_a5508061b168734b95273fae54b353ffe}{qsc\+\_\+timerex\+\_\+stopwatch\+\_\+start}} ()
+\begin{DoxyCompactList}\small\item\em Returns the clock time at the start of a timed operation. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t \mbox{\hyperlink{timerex_8h_aad5e009fa2d0fe90957c5e17022f3a78}{qsc\+\_\+timerex\+\_\+stopwatch\+\_\+elapsed}} (uint64\+\_\+t start)
+\begin{DoxyCompactList}\small\item\em Returns the time difference between the start and current time in milliseconds. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file contains common time measurement functions. 
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{timerex_8h_a4fae6a1ec2f5f7bf9c14f19eb9b34539}\index{timerex.h@{timerex.h}!qsc\_timerex\_get\_date@{qsc\_timerex\_get\_date}}
+\index{qsc\_timerex\_get\_date@{qsc\_timerex\_get\_date}!timerex.h@{timerex.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_timerex\_get\_date()}{qsc\_timerex\_get\_date()}}
+{\footnotesize\ttfamily \label{timerex_8h_a4fae6a1ec2f5f7bf9c14f19eb9b34539} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+timerex\+\_\+get\+\_\+date (\begin{DoxyParamCaption}\item[{char}]{output}{\mbox{[}\+QSC\+\_\+\+TIMEREX\+\_\+\+TIMESTAMP\+\_\+\+MAX\mbox{]}}\end{DoxyParamCaption})}
+
+
+
+Get the calendar date from the current locale. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output date string \\
+\hline
+\end{DoxyParams}
+\Hypertarget{timerex_8h_a062943eb937d0f7ddc745c104da2e47e}\index{timerex.h@{timerex.h}!qsc\_timerex\_get\_datetime@{qsc\_timerex\_get\_datetime}}
+\index{qsc\_timerex\_get\_datetime@{qsc\_timerex\_get\_datetime}!timerex.h@{timerex.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_timerex\_get\_datetime()}{qsc\_timerex\_get\_datetime()}}
+{\footnotesize\ttfamily \label{timerex_8h_a062943eb937d0f7ddc745c104da2e47e} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+timerex\+\_\+get\+\_\+datetime (\begin{DoxyParamCaption}\item[{char}]{output}{\mbox{[}\+QSC\+\_\+\+TIMEREX\+\_\+\+TIMESTAMP\+\_\+\+MAX\mbox{]}}\end{DoxyParamCaption})}
+
+
+
+Get the calendar date and time from the current locale. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output time and date string \\
+\hline
+\end{DoxyParams}
+\Hypertarget{timerex_8h_a51495b0d16ee3f7a565c8febf40c7dfc}\index{timerex.h@{timerex.h}!qsc\_timerex\_get\_time@{qsc\_timerex\_get\_time}}
+\index{qsc\_timerex\_get\_time@{qsc\_timerex\_get\_time}!timerex.h@{timerex.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_timerex\_get\_time()}{qsc\_timerex\_get\_time()}}
+{\footnotesize\ttfamily \label{timerex_8h_a51495b0d16ee3f7a565c8febf40c7dfc} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+timerex\+\_\+get\+\_\+time (\begin{DoxyParamCaption}\item[{char}]{output}{\mbox{[}\+QSC\+\_\+\+TIMEREX\+\_\+\+TIMESTAMP\+\_\+\+MAX\mbox{]}}\end{DoxyParamCaption})}
+
+
+
+Get the local time. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output time string \\
+\hline
+\end{DoxyParams}
+\Hypertarget{timerex_8h_aad5e009fa2d0fe90957c5e17022f3a78}\index{timerex.h@{timerex.h}!qsc\_timerex\_stopwatch\_elapsed@{qsc\_timerex\_stopwatch\_elapsed}}
+\index{qsc\_timerex\_stopwatch\_elapsed@{qsc\_timerex\_stopwatch\_elapsed}!timerex.h@{timerex.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_timerex\_stopwatch\_elapsed()}{qsc\_timerex\_stopwatch\_elapsed()}}
+{\footnotesize\ttfamily \label{timerex_8h_aad5e009fa2d0fe90957c5e17022f3a78} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t qsc\+\_\+timerex\+\_\+stopwatch\+\_\+elapsed (\begin{DoxyParamCaption}\item[{uint64\+\_\+t}]{start}{}\end{DoxyParamCaption})}
+
+
+
+Returns the time difference between the start and current time in milliseconds. 
+
+\begin{DoxyReturn}{Returns}
+The time difference in milliseconds 
+\end{DoxyReturn}
+\Hypertarget{timerex_8h_a5508061b168734b95273fae54b353ffe}\index{timerex.h@{timerex.h}!qsc\_timerex\_stopwatch\_start@{qsc\_timerex\_stopwatch\_start}}
+\index{qsc\_timerex\_stopwatch\_start@{qsc\_timerex\_stopwatch\_start}!timerex.h@{timerex.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_timerex\_stopwatch\_start()}{qsc\_timerex\_stopwatch\_start()}}
+{\footnotesize\ttfamily \label{timerex_8h_a5508061b168734b95273fae54b353ffe} 
+QSC\+\_\+\+EXPORT\+\_\+\+API uint64\+\_\+t qsc\+\_\+timerex\+\_\+stopwatch\+\_\+start (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Returns the clock time at the start of a timed operation. 
+
+\begin{DoxyReturn}{Returns}
+The starting clock time 
+\end{DoxyReturn}

@@ -163,6 +163,43 @@ QSC_EXPORT_API typedef struct qsc_asn1_time_t
 } qsc_asn1_time;
 
 /*!
+ * \brief Decode a complete DER element and reject trailing octets.
+ *
+ * \details
+ * This helper wraps qsc_encoding_der_decode_element() and requires the input
+ * buffer to contain exactly one complete DER element. Inputs with trailing
+ * bytes are rejected so callers can fail closed on ambiguous or concatenated
+ * encodings.
+ *
+ * \param der: [const uint8_t*] Pointer to the DER input buffer.
+ * \param derlen: [size_t] Length of the DER input buffer in bytes.
+ * \param element: [qsc_encoding_ber_element**] Receives the decoded element tree on success.
+ *
+ * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_asn1_der_decode_exact(const uint8_t* der, size_t derlen, qsc_encoding_ber_element** element);
+
+/*!
+ * \brief Returns the exact encoded DER slice of a child element within a parent element.
+ *
+ * \details
+ * The parent buffer must contain exactly one DER element. The function walks
+ * the encoded child sequence inside the parent content and returns the exact
+ * byte range for the requested child element. This is intended for preserving
+ * signed substructures such as TBSCertificate, CertificationRequestInfo, and
+ * TBSCertList without reconstructing them from normalized fields.
+ *
+ * \param der: [const uint8_t*] Pointer to the complete parent DER element.
+ * \param derlen: [size_t] Length of the parent DER element in bytes.
+ * \param index: [size_t] Zero-based child index inside the parent content.
+ * \param child: [const uint8_t**] Receives a pointer to the exact child DER encoding.
+ * \param childlen: [size_t*] Receives the length of the child DER encoding in bytes.
+ *
+ * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_asn1_der_get_child_region(const uint8_t* der, size_t derlen, size_t index, const uint8_t** child, size_t* childlen);
+
+/*!
  * \brief Compares two decoded ASN.1 OBJECT IDENTIFIER values.
  *
  * This function performs an exact comparison of two OID structures.

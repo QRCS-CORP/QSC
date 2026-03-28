@@ -1,0 +1,270 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_csg_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/csg.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/csg.h</primary></indexterm>
+<para>
+
+<para>Contains the public api and documentation for the CSG pseudo-random bytes generator. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?>#include &quot;sha3.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Data Structures    </title>
+        <itemizedlist>
+            <listitem><para>struct <link linkend="_structqsc__csg__state">qsc_csg_state</link></para>
+
+<para>The CSG state structure. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Macros    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_csg_8h_1ac8686305ab0a5b86c0fd3cbf87e051fa"/>#define <emphasis role="strong">QSC_CSG_256_SEED_SIZE</emphasis>&#160;&#160;&#160;32</para>
+
+<para>The CSG-256 seed size. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_csg_8h_1af49b3e53cd60de9e1621ef20f95d04b7"/>#define <emphasis role="strong">QSC_CSG_512_SEED_SIZE</emphasis>&#160;&#160;&#160;64</para>
+
+<para>The CSG-512 seed size. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_csg_8h_1af8e1492c832330bb00ae64a4470d37d4"/>#define <emphasis role="strong">QSC_CSG_RESEED_THRESHHOLD</emphasis>&#160;&#160;&#160;1024000</para>
+
+<para>The CSG re-seed threshold interval. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_csg_8h_1aec897b8492bb1dd8e28779d6c37d0624">qsc_csg_dispose</link> (<link linkend="_structqsc__csg__state">qsc_csg_state</link> *ctx)</para>
+
+<para>Dispose of the DRBG state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_csg_8h_1a6ff098602de71c1c799bf950263dea47">qsc_csg_initialize</link> (<link linkend="_structqsc__csg__state">qsc_csg_state</link> *ctx, const uint8_t *seed, size_t seedlen, const uint8_t *info, size_t infolen, bool predres)</para>
+
+<para>Initialize the pseudo-random provider state with a seed and optional personalization string. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_csg_8h_1a83b7669982e8240fee85e5faf1416d9f">qsc_csg_generate</link> (<link linkend="_structqsc__csg__state">qsc_csg_state</link> *ctx, uint8_t *output, size_t otplen)</para>
+
+<para>Generate pseudo-random bytes using the random provider. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_csg_8h_1aa91ebadc6e643a002855b2fc28b41b72">qsc_csg_update</link> (<link linkend="_structqsc__csg__state">qsc_csg_state</link> *ctx, const uint8_t *seed, size_t seedlen)</para>
+
+<para>Update the random provider with new keying material. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Contains the public api and documentation for the CSG pseudo-random bytes generator. </para>
+
+<para>Usage Example <?linebreak?> Initialize the DRBG and generate output <?linebreak?><literallayout><computeroutput><emphasis role="comment">//&#32;external&#32;key&#32;and&#32;optional&#32;custom&#32;arrays</emphasis>
+uint8_t&#32;seed[32]&#32;=&#32;{&#32;...&#32;};
+uint8_t&#32;info[32]&#32;=&#32;{&#32;...&#32;};
+
+<emphasis role="comment">//&#32;random&#32;bytes</emphasis>
+uint8_t&#32;rnd[200]&#32;=&#32;{&#32;0&#32;};
+
+<emphasis role="comment">//&#32;initialize&#32;with&#32;seed,&#32;and&#32;optional&#32;customization&#32;array,&#32;with&#32;predictive&#32;resistance&#32;enabled</emphasis>
+qsc_csg_initialize(seed,&#32;<emphasis role="keyword">sizeof</emphasis>(seed),&#32;info,&#32;<emphasis role="keyword">sizeof</emphasis>(info),&#32;<emphasis role="keyword">true</emphasis>);
+
+<emphasis role="comment">//&#32;generate&#32;the&#32;pseudo-random</emphasis>
+qsc_csg_generate(rnd,&#32;<emphasis role="keyword">sizeof</emphasis>(rnd)));
+</computeroutput></literallayout></para>
+
+<para><formalpara><title>Remarks</title>
+
+<para></para>
+</formalpara>
+<para>
+
+<para>CSG uses the Keccak cSHAKE XOF function to produce pseudo-random bytes from a seeded custom SHAKE generator. <?linebreak?>If a 32-byte key is used, the implementation uses the cSHAKE-256 implementation for pseudo-random generation, if a 64-byte key is used, the generator uses cSHAKE-512. <?linebreak?>An optional predictive resistance feature, enabled through the initialize function, injects random bytes into the generator at initialization and 1MB intervals, creating a non-deterministic pseudo-random output. <?linebreak?>Pseudo random bytes are cached internally, and the generator can be initialized and then reused without requiring re-initialization in an online configuration. <?linebreak?>The generator can be updated with new seed material, which is absorbed into the Keccak state.</para>
+</para>
+For additional usage examples, see csg_test.h. <?linebreak?> NIST: SHA3 Fips202 <link xlink:href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf</link> NIST: SP800-185 <link xlink:href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pd">http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pd</link> NIST: SHA3 Keccak Submission <link xlink:href="http://keccak.noekeon.org/Keccak-submission-3.pdf">http://keccak.noekeon.org/Keccak-submission-3.pdf</link> NIST: SHA3 Keccak Slides <link xlink:href="http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf">http://csrc.nist.gov/groups/ST/hash/sha-3/documents/Keccak-slides-at-NIST.pdf</link> NIST: SHA3 Third-Round Report <link xlink:href="http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf">http://nvlpubs.nist.gov/nistpubs/ir/2012/NIST.IR.7896.pdf</link> Team Keccak: Specifications summary <link xlink:href="https://keccak.team/keccak_specs_summary.html">https://keccak.team/keccak_specs_summary.html</link> </para>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_csg_8h_1aec897b8492bb1dd8e28779d6c37d0624"/><section>
+    <title>qsc_csg_dispose()</title>
+<indexterm><primary>qsc_csg_dispose</primary><secondary>csg.h</secondary></indexterm>
+<indexterm><primary>csg.h</primary><secondary>qsc_csg_dispose</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_csg_dispose (<link linkend="_structqsc__csg__state">qsc_csg_state</link> * ctx)</computeroutput></para><para>
+
+<para>Dispose of the DRBG state. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The dispose function must be called when disposing of the cipher. This function destroys the internal state of the cipher.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The DRBG state structure </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_csg_8h_1a83b7669982e8240fee85e5faf1416d9f"/><section>
+    <title>qsc_csg_generate()</title>
+<indexterm><primary>qsc_csg_generate</primary><secondary>csg.h</secondary></indexterm>
+<indexterm><primary>csg.h</primary><secondary>qsc_csg_generate</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_csg_generate (<link linkend="_structqsc__csg__state">qsc_csg_state</link> * ctx, uint8_t * output, size_t otplen)</computeroutput></para><para>
+
+<para>Generate pseudo-random bytes using the random provider. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Initialize must first be called before this function can be used.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The function state </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The pseudo-random output array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>otplen</entry><entry>
+<para>The requested number of bytes to generate </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_csg_8h_1a6ff098602de71c1c799bf950263dea47"/><section>
+    <title>qsc_csg_initialize()</title>
+<indexterm><primary>qsc_csg_initialize</primary><secondary>csg.h</secondary></indexterm>
+<indexterm><primary>csg.h</primary><secondary>qsc_csg_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_csg_initialize (<link linkend="_structqsc__csg__state">qsc_csg_state</link> * ctx, const uint8_t * seed, size_t seedlen, const uint8_t * info, size_t infolen, bool predres)</computeroutput></para><para>
+
+<para>Initialize the pseudo-random provider state with a seed and optional personalization string. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The function state </para>
+</entry>
+                            </row>
+                            <row>
+<entry>seed</entry><entry>
+<para>[const] The random seed, 32 bytes of seed instantiates the 256-bit generator, 64 bytes the 512-bit generator </para>
+</entry>
+                            </row>
+                            <row>
+<entry>seedlen</entry><entry>
+<para>The length of the input seed </para>
+</entry>
+                            </row>
+                            <row>
+<entry>info</entry><entry>
+<para>[const] The optional personalization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>infolen</entry><entry>
+<para>The length of the personalization string </para>
+</entry>
+                            </row>
+                            <row>
+<entry>predres</entry><entry>
+<para>Enable periodic random injection; enables non deterministic pseudo-random generation </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_csg_8h_1aa91ebadc6e643a002855b2fc28b41b72"/><section>
+    <title>qsc_csg_update()</title>
+<indexterm><primary>qsc_csg_update</primary><secondary>csg.h</secondary></indexterm>
+<indexterm><primary>csg.h</primary><secondary>qsc_csg_update</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_csg_update (<link linkend="_structqsc__csg__state">qsc_csg_state</link> * ctx, const uint8_t * seed, size_t seedlen)</computeroutput></para><para>
+
+<para>Update the random provider with new keying material. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>Initialize must first be called before this function can be used.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>ctx</entry><entry>
+<para>[struct] The function state </para>
+</entry>
+                            </row>
+                            <row>
+<entry>seed</entry><entry>
+<para>[const] The random update seed </para>
+</entry>
+                            </row>
+                            <row>
+<entry>seedlen</entry><entry>
+<para>The length of the update seed </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+</section>
+</section>

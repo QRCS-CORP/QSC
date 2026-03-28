@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_selftest_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/selftest.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/selftest.h</primary></indexterm>
+<para>
+
+<para>Symmetric functions self-test. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_selftest_8h_1a95da7513976010a2eca109661cd242b0">qsc_selftest_aes_test</link> (void)</para>
+
+<para>Tests the AES cipher for correct operation. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_selftest_8h_1a3c66262cdb856b41547d9a2f09fd0c38">qsc_selftest_chacha_test</link> (void)</para>
+
+<para>Tests the ChaCha cipher for correct operation. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_selftest_8h_1af6de4fb73edebb4926efadc6dc498336">qsc_selftest_csx_test</link> (void)</para>
+
+<para>Tests the CSX cipher for correct operation. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_selftest_8h_1a303f26ca99f9c7b7ebcef630e04e09ac">qsc_selftest_rcs_test</link> (void)</para>
+
+<para>Tests the RCS cipher for correct operation. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_selftest_8h_1af174203e86977255bb751e1f82dfb738">qsc_selftest_sha2_test</link> (void)</para>
+
+<para>Tests the SHA2 digests, HKDF and HMAC for correct operation. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_selftest_8h_1a1be5f6ed69636690f410536c6b8606fb">qsc_selftest_sha3_test</link> (void)</para>
+
+<para>Tests the SHA3 digests, SHAKE, cSHAKE, and KMAC for correct operation. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_selftest_8h_1a63a75c90b299e5fdb107ee115b1204e5">qsc_selftest_symmetric_run</link> (void)</para>
+
+<para>Runs the library self tests. Tests the symmetric primitives with a set of known-answer tests. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Symmetric functions self-test. </para>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_selftest_8h_1a95da7513976010a2eca109661cd242b0"/><section>
+    <title>qsc_selftest_aes_test()</title>
+<indexterm><primary>qsc_selftest_aes_test</primary><secondary>selftest.h</secondary></indexterm>
+<indexterm><primary>selftest.h</primary><secondary>qsc_selftest_aes_test</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_selftest_aes_test (void )</computeroutput></para><para>
+
+<para>Tests the AES cipher for correct operation. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_selftest_8h_1a3c66262cdb856b41547d9a2f09fd0c38"/><section>
+    <title>qsc_selftest_chacha_test()</title>
+<indexterm><primary>qsc_selftest_chacha_test</primary><secondary>selftest.h</secondary></indexterm>
+<indexterm><primary>selftest.h</primary><secondary>qsc_selftest_chacha_test</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_selftest_chacha_test (void )</computeroutput></para><para>
+
+<para>Tests the ChaCha cipher for correct operation. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_selftest_8h_1af6de4fb73edebb4926efadc6dc498336"/><section>
+    <title>qsc_selftest_csx_test()</title>
+<indexterm><primary>qsc_selftest_csx_test</primary><secondary>selftest.h</secondary></indexterm>
+<indexterm><primary>selftest.h</primary><secondary>qsc_selftest_csx_test</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_selftest_csx_test (void )</computeroutput></para><para>
+
+<para>Tests the CSX cipher for correct operation. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_selftest_8h_1a303f26ca99f9c7b7ebcef630e04e09ac"/><section>
+    <title>qsc_selftest_rcs_test()</title>
+<indexterm><primary>qsc_selftest_rcs_test</primary><secondary>selftest.h</secondary></indexterm>
+<indexterm><primary>selftest.h</primary><secondary>qsc_selftest_rcs_test</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_selftest_rcs_test (void )</computeroutput></para><para>
+
+<para>Tests the RCS cipher for correct operation. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_selftest_8h_1af174203e86977255bb751e1f82dfb738"/><section>
+    <title>qsc_selftest_sha2_test()</title>
+<indexterm><primary>qsc_selftest_sha2_test</primary><secondary>selftest.h</secondary></indexterm>
+<indexterm><primary>selftest.h</primary><secondary>qsc_selftest_sha2_test</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_selftest_sha2_test (void )</computeroutput></para><para>
+
+<para>Tests the SHA2 digests, HKDF and HMAC for correct operation. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_selftest_8h_1a1be5f6ed69636690f410536c6b8606fb"/><section>
+    <title>qsc_selftest_sha3_test()</title>
+<indexterm><primary>qsc_selftest_sha3_test</primary><secondary>selftest.h</secondary></indexterm>
+<indexterm><primary>selftest.h</primary><secondary>qsc_selftest_sha3_test</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_selftest_sha3_test (void )</computeroutput></para><para>
+
+<para>Tests the SHA3 digests, SHAKE, cSHAKE, and KMAC for correct operation. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_selftest_8h_1a63a75c90b299e5fdb107ee115b1204e5"/><section>
+    <title>qsc_selftest_symmetric_run()</title>
+<indexterm><primary>qsc_selftest_symmetric_run</primary><secondary>selftest.h</secondary></indexterm>
+<indexterm><primary>selftest.h</primary><secondary>qsc_selftest_symmetric_run</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_selftest_symmetric_run (void )</computeroutput></para><para>
+
+<para>Runs the library self tests. Tests the symmetric primitives with a set of known-answer tests. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns true if all tests pass successfully </para>
+</formalpara>
+</para>
+</section>
+</section>
+</section>

@@ -1,0 +1,127 @@
+\doxysection{winutils.\+h}
+\hypertarget{winutils_8h_source}{}\label{winutils_8h_source}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/winutils.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/winutils.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ 2025\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ NOTICE:\ This\ software\ and\ all\ accompanying\ materials\ are\ the\ exclusive\ }}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ property\ of\ Quantum\ Resistant\ Cryptographic\ Solutions\ Corporation\ (QRCS).}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ The\ intellectual\ and\ technical\ concepts\ contained\ within\ this\ implementation\ }}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ are\ proprietary\ to\ QRCS\ and\ its\ authorized\ licensors\ and\ are\ protected\ under\ }}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ applicable\ U.S.\ and\ international\ copyright,\ patent,\ and\ trade\ secret\ laws.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ CRYPTOGRAPHIC\ STANDARDS:}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/\ This\ software\ includes\ implementations\ of\ cryptographic\ algorithms\ such\ as\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ SHA3,\ AES,\ and\ others.\ These\ algorithms\ are\ public\ domain\ or\ standardized\ }}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ by\ organizations\ such\ as\ NIST\ and\ are\ NOT\ the\ property\ of\ QRCS.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ -\/\ However,\ all\ source\ code,\ optimizations,\ and\ implementations\ in\ this\ library\ }}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ \ \ are\ original\ works\ of\ QRCS\ and\ are\ protected\ under\ this\ license.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ RESTRICTIONS:}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ -\/\ Redistribution,\ modification,\ or\ unauthorized\ distribution\ of\ this\ software,\ }}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ in\ whole\ or\ in\ part,\ is\ strictly\ prohibited.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ -\/\ This\ software\ is\ provided\ for\ non-\/commercial,\ educational,\ and\ research\ }}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ \ \ purposes\ only.\ Commercial\ use\ in\ any\ form\ is\ expressly\ forbidden.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ -\/\ Licensing\ and\ authorized\ distribution\ are\ solely\ at\ the\ discretion\ of\ QRCS.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ -\/\ Any\ use\ of\ this\ software\ implies\ acceptance\ of\ these\ restrictions.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ DISCLAIMER:}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ This\ software\ is\ provided\ "{}as\ is,"{}\ without\ warranty\ of\ any\ kind,\ express\ or\ }}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ implied,\ including\ but\ not\ limited\ to\ warranties\ of\ merchantability\ or\ fitness\ }}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ for\ a\ particular\ purpose.\ QRCS\ disclaims\ all\ liability\ for\ any\ direct,\ indirect,\ }}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ incidental,\ or\ consequential\ damages\ resulting\ from\ the\ use\ or\ misuse\ of\ this\ software.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ FULL\ LICENSE:}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ This\ software\ is\ subject\ to\ the\ **Quantum\ Resistant\ Cryptographic\ Solutions\ }}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Proprietary\ License\ (QRCS-\/PL)**.\ The\ complete\ license\ terms\ are\ included\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ in\ the\ LICENSE.txt\ file\ distributed\ with\ this\ software.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ Written\ by:\ John\ G.\ Underhill}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Contact:\ john.underhill@protonmail.com}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ QSC\_WINUTILLS\_H}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ QSC\_WINUTILLS\_H}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{common_8h}{common.h}}"{}}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#if\ defined(QSC\_SYSTEM\_OS\_WINDOWS)}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_ATTRIBUTES\_BUFFER\_SIZE\ 256}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_NETSTAT\_BUFFER\_SIZE\ 1024}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00064\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_NETSTAT\_NAME\_SIZE\ 256}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_PROCESS\_LIST\_SIZE\ 16384}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00076\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_REGISTRY\_BUFFER\_SIZE\ 1024}}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00082\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_REGISTRY\_LIST\_SIZE\ 8192}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00088\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_RUNAS\_BUFFER\_SIZE\ 260}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_SERVICE\_LIST\_SIZE\ 16384}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_SERVICE\_BUFFER\_SIZE\ 512}}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\#define\ QSC\_WINTOOLS\_SERVICE\_LIST\_DESCRIPTION}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00112\ \textcolor{comment}{//\#define\ QSC\_WINTOOLS\_SERVICE\_LIST\_ACTIVE\_ONLY}}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_winutils\_registry\_value\_types}
+\DoxyCodeLine{00115\ \{}
+\DoxyCodeLine{00116\ \ \ \ \ REG\_SZ\_TYPE,}
+\DoxyCodeLine{00117\ \ \ \ \ REG\_DWORD\_TYPE,}
+\DoxyCodeLine{00118\ \ \ \ \ REG\_QWORD\_TYPE,}
+\DoxyCodeLine{00119\ \ \ \ \ REG\_BINARY\_TYPE}
+\DoxyCodeLine{00120\ \}\ qsc\_winutils\_registry\_value\_types;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00125\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ qsc\_winutils\_service\_states}
+\DoxyCodeLine{00126\ \{}
+\DoxyCodeLine{00127\ \ \ \ \ QSC\_WINUTILS\_SERVICE\_START,\ \ \ \ \ }
+\DoxyCodeLine{00128\ \ \ \ \ QSC\_WINUTILS\_SERVICE\_STOP,\ \ \ \ \ \ }
+\DoxyCodeLine{00129\ \ \ \ \ QSC\_WINUTILS\_SERVICE\_PAUSE,\ \ \ \ \ }
+\DoxyCodeLine{00130\ \ \ \ \ QSC\_WINUTILS\_SERVICE\_RESUME\ \ \ \ \ }
+\DoxyCodeLine{00131\ \}\ qsc\_winutils\_service\_states;}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00142\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_file\_get\_attributes(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ path);}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00153\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_file\_set\_attribute(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ path,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ attr);}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00163\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_network\_statistics(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen);}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00173\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_process\_list(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen);}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00183\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_process\_token\_elevate();}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00192\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_process\_terminate(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ name);}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00203\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_registry\_key\_add(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ keypath,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ value,\ qsc\_winutils\_registry\_value\_types\ vtype);}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00212\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_registry\_key\_delete(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ keypath);}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00223\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_registry\_key\_list(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ keypath);}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00233\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_run\_executable(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ path);}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00244\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_run\_as\_user(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ user,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ password,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ expath);}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00254\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_service\_list(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen);}
+\DoxyCodeLine{00255\ }
+\DoxyCodeLine{00261\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_service\_list\_size();}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00271\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{bool}\ qsc\_winutils\_service\_state(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ name,\ qsc\_winutils\_service\_states\ state);}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00281\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_user\_list(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen);}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00291\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{size\_t}\ qsc\_winutils\_current\_user(\textcolor{keywordtype}{char}*\ result,\ \textcolor{keywordtype}{size\_t}\ reslen);}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00296\ QSC\_EXPORT\_API\ \textcolor{keywordtype}{void}\ qsc\_winutils\_test();}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00298\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00299\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

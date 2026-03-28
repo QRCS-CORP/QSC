@@ -1,0 +1,979 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_aes_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/aes.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/aes.h</primary></indexterm>
+<para>
+
+<para>An implementation of the AES symmetric cipher. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?>#include &quot;intrinsics.h&quot;<?linebreak?>#include &quot;sha3.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Data Structures    </title>
+        <itemizedlist>
+            <listitem><para>struct <link linkend="_structqsc__aes__keyparams">qsc_aes_keyparams</link></para>
+</listitem>
+            <listitem><para>struct <link linkend="_structqsc__aes__state">qsc_aes_state</link></para>
+</listitem>
+            <listitem><para>struct <link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Macros    </title>
+        <itemizedlist>
+            <listitem><para>#define <link linkend="_aes_8h_1a6653e5dba012e14cae8973ba6a99c16d">QSC_HBA_KMAC_EXTENSION</link></para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a224a3b4ef83f52339961bdffbe386b20">QSC_HBA_HKDF_EXTENSION</link></para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1ac2aa9a63f78ad0410cfa1020cab1a8a2">QSC_AES_BLOCK_SIZE</link>&#160;&#160;&#160;16</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a4ff2acc2fb4a08316753e6a4a87705b8">QSC_AES_IV_SIZE</link>&#160;&#160;&#160;16</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a09aef5b95b52fec78f8199b583c65014">QSC_AES128_KEY_SIZE</link>&#160;&#160;&#160;16</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a90146a0952bb45baab83eb6aa2f58094">QSC_AES256_KEY_SIZE</link>&#160;&#160;&#160;32</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a7c4512dc0b52e3cc5458b2947f2aa8be">QSC_HBA256_MAC_SIZE</link>&#160;&#160;&#160;32</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a161fc435e9228c41d75010835e1b5226">QSC_HBA_MAXAAD_SIZE</link>&#160;&#160;&#160;256</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1ad26e21759c9003561f5b7f4232ba588a">QSC_HBA_MAXINFO_SIZE</link>&#160;&#160;&#160;256</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a09b8cf5b1e05fabae7bbe350fe48debc">HBA_NAME_SIZE</link>&#160;&#160;&#160;29</para>
+</listitem>
+            <listitem><para>#define <link linkend="_aes_8h_1a19d52a85cf593f5d89397fd1eade2479">QSC_HBA_KMAC_AUTH</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Typedefs    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_aes_8h_1a98e94a46ea4ebe253512f5002f1e69fd"/>typedef enum <link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738e">qsc_aes_cipher_type</link> <emphasis role="strong">qsc_aes_cipher_type</emphasis></para>
+</listitem>
+            <listitem><para><anchor xml:id="_aes_8h_1ae30c97c860685cf9ad83421c2f702c27"/>typedef enum <link linkend="_aes_8h_1ae448b4228ce83fb47116ed16b8400741">qsc_aes_cipher_mode</link> <emphasis role="strong">qsc_aes_cipher_mode</emphasis></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Enumerations    </title>
+        <itemizedlist>
+            <listitem><para>enum <link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738e">qsc_aes_cipher_type</link> { <link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738ea3fa28e6e7b813680875bd9e684d2d846">qsc_aes_cipher_128</link> = 1
+, <link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65">qsc_aes_cipher_256</link> = 2
+ }</para>
+</listitem>
+            <listitem><para>enum <link linkend="_aes_8h_1ae448b4228ce83fb47116ed16b8400741">qsc_aes_cipher_mode</link> { <link linkend="_aes_8h_1ae448b4228ce83fb47116ed16b8400741a37bee5da46b7288cbbafb193ad2ea8cf">qsc_aes_mode_cbc</link> = 1
+, <link linkend="_aes_8h_1ae448b4228ce83fb47116ed16b8400741a8d3b8ce37e4ac8626032d5efd303c3a0">qsc_aes_mode_ctr</link> = 2
+, <link linkend="_aes_8h_1ae448b4228ce83fb47116ed16b8400741a25ae0c9efab177710193da72b08e1265">qsc_aes_mode_ecb</link> = 3
+ }</para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_aes_8h_1acb1b9fd8437451657beca66abc728186"/>QSC_EXPORT_API void <emphasis role="strong">qsc_aes_dispose</emphasis> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state)</para>
+
+<para>Erase the round-key array and size. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a2bb21b64e1efb178d1f1ae57ce3e1ab2">qsc_aes_initialize</link> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, const <link linkend="_structqsc__aes__keyparams">qsc_aes_keyparams</link> *keyparams, bool encryption, <link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738e">qsc_aes_cipher_type</link> ctype)</para>
+
+<para>Initialize the state with the input cipher-key and optional info tweak. The <link linkend="_structqsc__aes__state">qsc_aes_state</link> round-key array must be initialized and size set before passing the state to this function. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a99ba803d35a7bfbf0e7e1df57214c901">qsc_aes_cbc_decrypt</link> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, size_t *outputlen, const uint8_t *input, size_t length)</para>
+
+<para>Decrypt a length of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a8cdd54ccd033cf355c5f4a8967f4683c">qsc_aes_cbc_encrypt</link> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, const uint8_t *input, size_t length)</para>
+
+<para>Encrypt a length of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a7899343ed7871332a8adfec75d9e0e07">qsc_aes_cbc_decrypt_block</link> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, const uint8_t *input)</para>
+
+<para>Decrypt one 16-byte block of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1aab3fef5311f4655e332b05d9a0d33493">qsc_aes_cbc_encrypt_block</link> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, const uint8_t *input)</para>
+
+<para>Encrypt one 16-byte block of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a6d67695184a3f97172d0590002cb18d6">qsc_pkcs7_add_padding</link> (uint8_t *input, size_t length)</para>
+
+<para>Add padding to a plain-text block pad before encryption. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API size_t <link linkend="_aes_8h_1ab2833090995832e107a059fe012b56c0">qsc_pkcs7_padding_length</link> (const uint8_t *input)</para>
+
+<para>Get the number of padded bytes in a block of decrypted cipher-text. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1aeb52bc95067e34098b8a27b0a0b80abf">qsc_aes_ctrbe_transform</link> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, const uint8_t *input, size_t length)</para>
+
+<para>Transform a length of data using a Big Endian block cipher Counter mode. <?linebreak?>The qsc_aes_mode_ctr mode will encrypt plain-text, and decrypt cipher-text. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a098c89f24df538f3b1d474dc264f4694">qsc_aes_ctrle_transform</link> (<link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, const uint8_t *input, size_t length)</para>
+
+<para>Transform a length of data using a Little Endian block cipher Counter mode. <?linebreak?>The qsc_aes_mode_ctr mode will encrypt plain-text, and decrypt cipher-text. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a1bb23a27efad75b6906c44fd226087de">qsc_aes_ecb_decrypt_block</link> (const <link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, const uint8_t *input)</para>
+
+<para>Decrypt one 16-byte block of cipher-text using Electronic CodeBook Mode mode. <?linebreak?>. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a8a9f6fd4a3763e223fc3eadb50f15643">qsc_aes_ecb_encrypt_block</link> (const <link linkend="_structqsc__aes__state">qsc_aes_state</link> *state, uint8_t *output, const uint8_t *input)</para>
+
+<para>Encrypt one 16-byte block of cipher-text using Electronic CodeBook Mode mode. <?linebreak?>. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a90515597a3277e357973ac456d853c8d">qsc_aes_hba256_dispose</link> (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> *state)</para>
+
+<para>Dispose of the HBA-256 cipher state. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1a33ddd7d27a86d775abc1bda63cd9e399">qsc_aes_hba256_initialize</link> (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> *state, const <link linkend="_structqsc__aes__keyparams">qsc_aes_keyparams</link> *keyparams, bool encrypt)</para>
+
+<para>Initialize the cipher and load the keying material. Initializes the cipher state to an AES-256 instance. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API void <link linkend="_aes_8h_1ac8404cb73e9e5f22dce09a989b9125d4">qsc_aes_hba256_set_associated</link> (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> *state, const uint8_t *data, size_t datalen)</para>
+
+<para>Set the associated data string used in authenticating the message. The associated data may be packet header information, domain specific data, or a secret shared by a group. The associated data must be set after initialization, and before each transformation call. The data is erased after each call to the transform. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_aes_8h_1a3ee9dce5cb91a8daff60b89a9eb0d4c5">qsc_aes_hba256_transform</link> (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> *state, uint8_t *output, const uint8_t *input, size_t length)</para>
+
+<para>Transform an array of bytes using an instance of AES-256. In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the cipher-text. In decryption mode, the input cipher-text is authenticated internally and compared to the mac code appended to the cipher-text, if the codes to not match, the cipher-text is not decrypted and the call fails. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>An implementation of the AES symmetric cipher. </para>
+
+<para>AES-256 qsc_aes_mode_ctr short-form api example <?linebreak?><literallayout><computeroutput><emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;MSG_LEN&#32;=&#32;200;
+<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;CST_LEN&#32;=&#32;20;
+uint8_t&#32;msg[MSG_LEN]&#32;=&#32;{...};
+uint8_t&#32;key[<link linkend="_aes_8h_1a90146a0952bb45baab83eb6aa2f58094">QSC_AES256_KEY_SIZE</link>]&#32;=&#32;{...};
+uint8_t&#32;nonce[<link linkend="_aes_8h_1ac2aa9a63f78ad0410cfa1020cab1a8a2">QSC_AES_BLOCK_SIZE</link>]&#32;=&#32;{...};
+uint8_t&#32;cust[CST_LEN]&#32;=&#32;{...};
+
+uint8_t&#32;output[MSG_LEN]&#32;=&#32;{&#32;0&#32;};
+qsc_hba_state&#32;state;
+<link linkend="_structqsc__aes__keyparams">qsc_aes_keyparams</link>&#32;kp&#32;=&#32;{&#32;key,&#32;<link linkend="_aes_8h_1a90146a0952bb45baab83eb6aa2f58094">QSC_AES256_KEY_SIZE</link>,&#32;nonce,&#32;cust,&#32;CST_LEN&#32;};
+
+qsc_aes_initialize(&amp;state,&#32;&amp;kp,&#32;<emphasis role="keyword">true</emphasis>,&#32;<link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65">qsc_aes_cipher_256</link>);
+qsc_aes_ctr_transform(&amp;state,&#32;output,&#32;msg,&#32;MSG_LEN)
+</computeroutput></literallayout> </para>
+</section>
+<section>
+<title>Macro Definition Documentation</title>
+<anchor xml:id="_aes_8h_1a09b8cf5b1e05fabae7bbe350fe48debc"/><section>
+    <title>HBA_NAME_SIZE</title>
+<indexterm><primary>HBA_NAME_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>HBA_NAME_SIZE</secondary></indexterm>
+<para><computeroutput>#define HBA_NAME_SIZE&#160;&#160;&#160;29</computeroutput></para>
+<para>The HBA implementation specific name array length. </para>
+</section>
+<anchor xml:id="_aes_8h_1a09aef5b95b52fec78f8199b583c65014"/><section>
+    <title>QSC_AES128_KEY_SIZE</title>
+<indexterm><primary>QSC_AES128_KEY_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_AES128_KEY_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_AES128_KEY_SIZE&#160;&#160;&#160;16</computeroutput></para>
+<para>The size in bytes of the AES-128 input cipher-key. </para>
+</section>
+<anchor xml:id="_aes_8h_1a90146a0952bb45baab83eb6aa2f58094"/><section>
+    <title>QSC_AES256_KEY_SIZE</title>
+<indexterm><primary>QSC_AES256_KEY_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_AES256_KEY_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_AES256_KEY_SIZE&#160;&#160;&#160;32</computeroutput></para>
+<para>The size in bytes of the AES-256 input cipher-key. </para>
+</section>
+<anchor xml:id="_aes_8h_1ac2aa9a63f78ad0410cfa1020cab1a8a2"/><section>
+    <title>QSC_AES_BLOCK_SIZE</title>
+<indexterm><primary>QSC_AES_BLOCK_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_AES_BLOCK_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_AES_BLOCK_SIZE&#160;&#160;&#160;16</computeroutput></para>
+<para>The internal block size in bytes, required by the encryption and decryption functions. </para>
+</section>
+<anchor xml:id="_aes_8h_1a4ff2acc2fb4a08316753e6a4a87705b8"/><section>
+    <title>QSC_AES_IV_SIZE</title>
+<indexterm><primary>QSC_AES_IV_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_AES_IV_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_AES_IV_SIZE&#160;&#160;&#160;16</computeroutput></para>
+<para>The initialization vector size in bytes. </para>
+</section>
+<anchor xml:id="_aes_8h_1a7c4512dc0b52e3cc5458b2947f2aa8be"/><section>
+    <title>QSC_HBA256_MAC_SIZE</title>
+<indexterm><primary>QSC_HBA256_MAC_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_HBA256_MAC_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_HBA256_MAC_SIZE&#160;&#160;&#160;32</computeroutput></para>
+<para>The HBA-256 MAC code array length in bytes. </para>
+</section>
+<anchor xml:id="_aes_8h_1a224a3b4ef83f52339961bdffbe386b20"/><section>
+    <title>QSC_HBA_HKDF_EXTENSION</title>
+<indexterm><primary>QSC_HBA_HKDF_EXTENSION</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_HBA_HKDF_EXTENSION</secondary></indexterm>
+<para><computeroutput>#define QSC_HBA_HKDF_EXTENSION</computeroutput></para>
+<para>Enables the HKDF extensions for the HBA cipher-mode; alternative to HBA(cSHAKE) </para>
+</section>
+<anchor xml:id="_aes_8h_1a19d52a85cf593f5d89397fd1eade2479"/><section>
+    <title>QSC_HBA_KMAC_AUTH</title>
+<indexterm><primary>QSC_HBA_KMAC_AUTH</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_HBA_KMAC_AUTH</secondary></indexterm>
+<para><computeroutput>#define QSC_HBA_KMAC_AUTH</computeroutput></para>
+<para>Use KMAC to authenticate HBA; removing this macro is enabled when running in SHAKE extension mode. If the QSC_HBA_KMAC_EXTENSION is disabled, HMAC(SHA2) is the default authentication mode in HBA. </para>
+</section>
+<anchor xml:id="_aes_8h_1a6653e5dba012e14cae8973ba6a99c16d"/><section>
+    <title>QSC_HBA_KMAC_EXTENSION</title>
+<indexterm><primary>QSC_HBA_KMAC_EXTENSION</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_HBA_KMAC_EXTENSION</secondary></indexterm>
+<para><computeroutput>#define QSC_HBA_KMAC_EXTENSION</computeroutput></para>
+<para>Enables the cSHAKE extensions for the HBA cipher mode </para>
+</section>
+<anchor xml:id="_aes_8h_1a161fc435e9228c41d75010835e1b5226"/><section>
+    <title>QSC_HBA_MAXAAD_SIZE</title>
+<indexterm><primary>QSC_HBA_MAXAAD_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_HBA_MAXAAD_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_HBA_MAXAAD_SIZE&#160;&#160;&#160;256</computeroutput></para>
+<para>The maximum allowed AAD size. </para>
+</section>
+<anchor xml:id="_aes_8h_1ad26e21759c9003561f5b7f4232ba588a"/><section>
+    <title>QSC_HBA_MAXINFO_SIZE</title>
+<indexterm><primary>QSC_HBA_MAXINFO_SIZE</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>QSC_HBA_MAXINFO_SIZE</secondary></indexterm>
+<para><computeroutput>#define QSC_HBA_MAXINFO_SIZE&#160;&#160;&#160;256</computeroutput></para>
+<para>The maximum allowed key info size. </para>
+</section>
+</section>
+<section>
+<title>Enumeration Type Documentation</title>
+<anchor xml:id="_aes_8h_1ae448b4228ce83fb47116ed16b8400741"/><section>
+    <title>qsc_aes_cipher_mode</title>
+<indexterm><primary>qsc_aes_cipher_mode</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cipher_mode</secondary></indexterm>
+<para><computeroutput>enum <link linkend="_aes_8h_1ae448b4228ce83fb47116ed16b8400741">qsc_aes_cipher_mode</link></computeroutput></para>
+<para>The pre-defined cipher mode implementations </para>
+<informaltable frame="all">
+<title>Enumerator</title>
+    <tgroup cols="2" align="left" colsep="1" rowsep="1">
+      <colspec colname='c1'/>
+      <colspec colname='c2'/>
+<tbody>
+<row><entry><indexterm><primary>qsc_aes_mode_cbc</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_mode_cbc</secondary></indexterm>
+<anchor xml:id="_aes_8h_1ae448b4228ce83fb47116ed16b8400741a37bee5da46b7288cbbafb193ad2ea8cf"/>qsc_aes_mode_cbc</entry><entry>
+<para>Cipher Block Chaining </para>
+</entry></row><row><entry><indexterm><primary>qsc_aes_mode_ctr</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_mode_ctr</secondary></indexterm>
+<anchor xml:id="_aes_8h_1ae448b4228ce83fb47116ed16b8400741a8d3b8ce37e4ac8626032d5efd303c3a0"/>qsc_aes_mode_ctr</entry><entry>
+<para>segmented integer counter </para>
+</entry></row><row><entry><indexterm><primary>qsc_aes_mode_ecb</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_mode_ecb</secondary></indexterm>
+<anchor xml:id="_aes_8h_1ae448b4228ce83fb47116ed16b8400741a25ae0c9efab177710193da72b08e1265"/>qsc_aes_mode_ecb</entry><entry>
+<para>Electronic CodeBook mode (insecure) </para>
+</entry></row>    </tbody>
+    </tgroup>
+</informaltable>
+</section>
+<anchor xml:id="_aes_8h_1aa53a8230f3171dbb0958e240cb90738e"/><section>
+    <title>qsc_aes_cipher_type</title>
+<indexterm><primary>qsc_aes_cipher_type</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cipher_type</secondary></indexterm>
+<para><computeroutput>enum <link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738e">qsc_aes_cipher_type</link></computeroutput></para>
+<para>The pre-defined cipher types </para>
+<informaltable frame="all">
+<title>Enumerator</title>
+    <tgroup cols="2" align="left" colsep="1" rowsep="1">
+      <colspec colname='c1'/>
+      <colspec colname='c2'/>
+<tbody>
+<row><entry><indexterm><primary>qsc_aes_cipher_128</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cipher_128</secondary></indexterm>
+<anchor xml:id="_aes_8h_1aa53a8230f3171dbb0958e240cb90738ea3fa28e6e7b813680875bd9e684d2d846"/>qsc_aes_cipher_128</entry><entry>
+<para>The AES-128 block cipher </para>
+</entry></row><row><entry><indexterm><primary>qsc_aes_cipher_256</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cipher_256</secondary></indexterm>
+<anchor xml:id="_aes_8h_1aa53a8230f3171dbb0958e240cb90738eab6cc0d3d322b25b627840fb67b223e65"/>qsc_aes_cipher_256</entry><entry>
+<para>The AES-256 block cipher </para>
+</entry></row>    </tbody>
+    </tgroup>
+</informaltable>
+</section>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_aes_8h_1a99ba803d35a7bfbf0e7e1df57214c901"/><section>
+    <title>qsc_aes_cbc_decrypt()</title>
+<indexterm><primary>qsc_aes_cbc_decrypt</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cbc_decrypt</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_cbc_decrypt (<link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, size_t * outputlen, const uint8_t * input, size_t length)</computeroutput></para><para>
+
+<para>Decrypt a length of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>the qsc_aes_initialize function must be called first to initialize the state</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the decrypted plain-text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>outputlen</entry><entry>
+<para>The number of output cipher-text bytes to encrypt </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input cipher-text bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>length</entry><entry>
+<para>The number of input cipher-text bytes to decrypt </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a7899343ed7871332a8adfec75d9e0e07"/><section>
+    <title>qsc_aes_cbc_decrypt_block()</title>
+<indexterm><primary>qsc_aes_cbc_decrypt_block</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cbc_decrypt_block</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_cbc_decrypt_block (<link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, const uint8_t * input)</computeroutput></para><para>
+
+<para>Decrypt one 16-byte block of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>the qsc_aes_initialize function must be called first to initialize the state</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the decrypted plain-text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input cipher-text block of bytes </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a8cdd54ccd033cf355c5f4a8967f4683c"/><section>
+    <title>qsc_aes_cbc_encrypt()</title>
+<indexterm><primary>qsc_aes_cbc_encrypt</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cbc_encrypt</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_cbc_encrypt (<link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, const uint8_t * input, size_t length)</computeroutput></para><para>
+
+<para>Encrypt a length of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>the qsc_aes_initialize function must be called first to initialize the state</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the encrypted plain-text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input plain-text bytes </para>
+</entry>
+                            </row>
+                            <row>
+<entry>length</entry><entry>
+<para>The number of input plain-text bytes to encrypt </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1aab3fef5311f4655e332b05d9a0d33493"/><section>
+    <title>qsc_aes_cbc_encrypt_block()</title>
+<indexterm><primary>qsc_aes_cbc_encrypt_block</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_cbc_encrypt_block</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_cbc_encrypt_block (<link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, const uint8_t * input)</computeroutput></para><para>
+
+<para>Encrypt one 16-byte block of cipher-text using Cipher Block Chaining mode. <?linebreak?>. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>the qsc_aes_initialize function must be called first to initialize the state</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the encrypted cipher-text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input plain-text block of bytes </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1aeb52bc95067e34098b8a27b0a0b80abf"/><section>
+    <title>qsc_aes_ctrbe_transform()</title>
+<indexterm><primary>qsc_aes_ctrbe_transform</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_ctrbe_transform</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_ctrbe_transform (<link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, const uint8_t * input, size_t length)</computeroutput></para><para>
+
+<para>Transform a length of data using a Big Endian block cipher Counter mode. <?linebreak?>The qsc_aes_mode_ctr mode will encrypt plain-text, and decrypt cipher-text. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>the qsc_aes_initialize function must be called first to initialize the state</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the transformed text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input data byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>length</entry><entry>
+<para>The number of input bytes to transform </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a098c89f24df538f3b1d474dc264f4694"/><section>
+    <title>qsc_aes_ctrle_transform()</title>
+<indexterm><primary>qsc_aes_ctrle_transform</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_ctrle_transform</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_ctrle_transform (<link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, const uint8_t * input, size_t length)</computeroutput></para><para>
+
+<para>Transform a length of data using a Little Endian block cipher Counter mode. <?linebreak?>The qsc_aes_mode_ctr mode will encrypt plain-text, and decrypt cipher-text. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>the qsc_aes_initialize function must be called first to initialize the state</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the transformed text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input data byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>length</entry><entry>
+<para>The number of input bytes to transform </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a1bb23a27efad75b6906c44fd226087de"/><section>
+    <title>qsc_aes_ecb_decrypt_block()</title>
+<indexterm><primary>qsc_aes_ecb_decrypt_block</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_ecb_decrypt_block</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_ecb_decrypt_block (const <link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, const uint8_t * input)</computeroutput></para><para>
+
+<para>Decrypt one 16-byte block of cipher-text using Electronic CodeBook Mode mode. <?linebreak?>. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>qsc_aes_mode_ecb is not a secure mode, and should be used only for testing, or building more complex primitives.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the decrypted plain-text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input cipher-text block of bytes </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a8a9f6fd4a3763e223fc3eadb50f15643"/><section>
+    <title>qsc_aes_ecb_encrypt_block()</title>
+<indexterm><primary>qsc_aes_ecb_encrypt_block</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_ecb_encrypt_block</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_ecb_encrypt_block (const <link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, uint8_t * output, const uint8_t * input)</computeroutput></para><para>
+
+<para>Encrypt one 16-byte block of cipher-text using Electronic CodeBook Mode mode. <?linebreak?>. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>qsc_aes_mode_ecb is not a secure mode, and should be used only for testing, or building more complex primitives.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The initialized <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array; receives the encrypted cipher-text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input plain-text block of bytes </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a90515597a3277e357973ac456d853c8d"/><section>
+    <title>qsc_aes_hba256_dispose()</title>
+<indexterm><primary>qsc_aes_hba256_dispose</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_hba256_dispose</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_hba256_dispose (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> * state)</computeroutput></para><para>
+
+<para>Dispose of the HBA-256 cipher state. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The dispose function must be called when disposing of the cipher. This function destroys internal arrays allocated on the heap, and must be called before the state goes out of scope.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The HBA state structure; contains internal state information </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a33ddd7d27a86d775abc1bda63cd9e399"/><section>
+    <title>qsc_aes_hba256_initialize()</title>
+<indexterm><primary>qsc_aes_hba256_initialize</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_hba256_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_hba256_initialize (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> * state, const <link linkend="_structqsc__aes__keyparams">qsc_aes_keyparams</link> * keyparams, bool encrypt)</computeroutput></para><para>
+
+<para>Initialize the cipher and load the keying material. Initializes the cipher state to an AES-256 instance. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The initialize function must be called before either the associated data or transform functions are called.</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The HBA state structure; contains internal state information </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keyparams</entry><entry>
+<para>[const][struct] The HBA key parameters, includes the key, and optional AAD and user info arrays </para>
+</entry>
+                            </row>
+                            <row>
+<entry>encrypt</entry><entry>
+<para>The cipher encryption mode; true for encryption, false for decryption </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1ac8404cb73e9e5f22dce09a989b9125d4"/><section>
+    <title>qsc_aes_hba256_set_associated()</title>
+<indexterm><primary>qsc_aes_hba256_set_associated</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_hba256_set_associated</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_hba256_set_associated (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> * state, const uint8_t * data, size_t datalen)</computeroutput></para><para>
+
+<para>Set the associated data string used in authenticating the message. The associated data may be packet header information, domain specific data, or a secret shared by a group. The associated data must be set after initialization, and before each transformation call. The data is erased after each call to the transform. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The HBA-256 state structure; contains internal state information </para>
+</entry>
+                            </row>
+                            <row>
+<entry>data</entry><entry>
+<para>[const] The associated data array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>datalen</entry><entry>
+<para>The associated data array length </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1a3ee9dce5cb91a8daff60b89a9eb0d4c5"/><section>
+    <title>qsc_aes_hba256_transform()</title>
+<indexterm><primary>qsc_aes_hba256_transform</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_hba256_transform</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_aes_hba256_transform (<link linkend="_structqsc__aes__hba256__state">qsc_aes_hba256_state</link> * state, uint8_t * output, const uint8_t * input, size_t length)</computeroutput></para><para>
+
+<para>Transform an array of bytes using an instance of AES-256. In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the cipher-text. In decryption mode, the input cipher-text is authenticated internally and compared to the mac code appended to the cipher-text, if the codes to not match, the cipher-text is not decrypted and the call fails. </para>
+</para>
+
+<para><warning><title>Warning</title>
+
+<para>The cipher must be initialized before this function can be called</para>
+</warning>
+
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The HBA state structure; contains internal state information </para>
+</entry>
+                            </row>
+                            <row>
+<entry>output</entry><entry>
+<para>The output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The input byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>length</entry><entry>
+<para>The number of bytes to transform</para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>: Returns true if the cipher has been initialized successfully, false on failure </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_aes_8h_1a2bb21b64e1efb178d1f1ae57ce3e1ab2"/><section>
+    <title>qsc_aes_initialize()</title>
+<indexterm><primary>qsc_aes_initialize</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_aes_initialize</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_aes_initialize (<link linkend="_structqsc__aes__state">qsc_aes_state</link> * state, const <link linkend="_structqsc__aes__keyparams">qsc_aes_keyparams</link> * keyparams, bool encryption, <link linkend="_aes_8h_1aa53a8230f3171dbb0958e240cb90738e">qsc_aes_cipher_type</link> ctype)</computeroutput></para><para>
+
+<para>Initialize the state with the input cipher-key and optional info tweak. The <link linkend="_structqsc__aes__state">qsc_aes_state</link> round-key array must be initialized and size set before passing the state to this function. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>state</entry><entry>
+<para>[struct] The <link linkend="_structqsc__aes__state">qsc_aes_state</link> structure </para>
+</entry>
+                            </row>
+                            <row>
+<entry>keyparams</entry><entry>
+<para>[const] The input cipher-key, expanded to the state round-key array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>encryption</entry><entry>
+<para>Initialize the cipher for encryption, false for decryption mode </para>
+</entry>
+                            </row>
+                            <row>
+<entry>ctype</entry><entry>
+<para>The cipher type</para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <warning><title>Warning</title>
+
+<para>When using a qsc_aes_mode_ctr mode, the cipher is always initialized for encryption. </para>
+</warning>
+</para>
+</section>
+<anchor xml:id="_aes_8h_1a6d67695184a3f97172d0590002cb18d6"/><section>
+    <title>qsc_pkcs7_add_padding()</title>
+<indexterm><primary>qsc_pkcs7_add_padding</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_pkcs7_add_padding</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API void qsc_pkcs7_add_padding (uint8_t * input, size_t length)</computeroutput></para><para>
+
+<para>Add padding to a plain-text block pad before encryption. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>input</entry><entry>
+<para>The block of input plain-text </para>
+</entry>
+                            </row>
+                            <row>
+<entry>length</entry><entry>
+<para>The length of the plain-text block </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                </para>
+</section>
+<anchor xml:id="_aes_8h_1ab2833090995832e107a059fe012b56c0"/><section>
+    <title>qsc_pkcs7_padding_length()</title>
+<indexterm><primary>qsc_pkcs7_padding_length</primary><secondary>aes.h</secondary></indexterm>
+<indexterm><primary>aes.h</primary><secondary>qsc_pkcs7_padding_length</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API size_t qsc_pkcs7_padding_length (const uint8_t * input)</computeroutput></para><para>
+
+<para>Get the number of padded bytes in a block of decrypted cipher-text. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>input</entry><entry>
+<para>[const] The block of input plain-text</para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>: The length of the block padding </para>
+</formalpara>
+</para>
+</section>
+</section>
+</section>

@@ -2,9 +2,9 @@ var searchData=
 [
   ['qsc_5faes_5fcipher_5fmode_0',['qsc_aes_cipher_mode',['../aes_8h.html#ae448b4228ce83fb47116ed16b8400741',1,'aes.h']]],
   ['qsc_5faes_5fcipher_5ftype_1',['qsc_aes_cipher_type',['../aes_8h.html#aa53a8230f3171dbb0958e240cb90738e',1,'aes.h']]],
-  ['qsc_5fconsole_5ffont_5fcolor_2',['qsc_console_font_color',['../consoleutils_8h.html#a98313b87f0341b5f850cf6b3a2a60f78',1,'consoleutils.h']]],
-  ['qsc_5fconsole_5ffont_5fstyle_3',['qsc_console_font_style',['../consoleutils_8h.html#acfd1e3dd975d1aaf017d5a5832d9c093',1,'consoleutils.h']]],
-  ['qsc_5fcpuidex_5fcpu_5ftype_4',['qsc_cpuidex_cpu_type',['../cpuidex_8h.html#adba4ec2b3eb53db1f9edff8a14bb4295',1,'cpuidex.h']]],
+  ['qsc_5fasn1_5fstatus_5ft_2',['qsc_asn1_status_t',['../asn1_8h.html#ab9cb98c6ce4a64ec0a38644790a1b866',1,'asn1.h']]],
+  ['qsc_5fconsole_5ffont_5fcolor_3',['qsc_console_font_color',['../consoleutils_8h.html#a98313b87f0341b5f850cf6b3a2a60f78',1,'consoleutils.h']]],
+  ['qsc_5fconsole_5ffont_5fstyle_4',['qsc_console_font_style',['../consoleutils_8h.html#acfd1e3dd975d1aaf017d5a5832d9c093',1,'consoleutils.h']]],
   ['qsc_5fencoding_5fber_5fasn1_5ftag_5ft_5',['qsc_encoding_ber_asn1_tag_t',['../encoding_8h.html#ac0869f1cf3c3bf545684a9764726990f',1,'encoding.h']]],
   ['qsc_5ffileutils_5faccess_5frights_6',['qsc_fileutils_access_rights',['../fileutils_8h.html#a1d69e41d6c864c5cc6fbd8f14fa45b40',1,'fileutils.h']]],
   ['qsc_5ffileutils_5fmode_7',['qsc_fileutils_mode',['../fileutils_8h.html#aafdf4e715557e8c284c13ea3c7e1e5d8',1,'fileutils.h']]],
@@ -12,7 +12,7 @@ var searchData=
   ['qsc_5fipinfo_5faddress_5ftypes_9',['qsc_ipinfo_address_types',['../ipinfo_8h.html#a1a3c11efaff8a09158096490f042ef62',1,'ipinfo.h']]],
   ['qsc_5fipv6_5faddress_5fprefix_5ftypes_10',['qsc_ipv6_address_prefix_types',['../socketflags_8h.html#ac03ccc094cb323afd26dc66cb217bad2',1,'socketflags.h']]],
   ['qsc_5fkeccak_5frate_11',['qsc_keccak_rate',['../sha3_8h.html#a3283a3326659d4e2e0679c6bd32b6cc6',1,'sha3.h']]],
-  ['qsc_5fqmac_5fmodes_12',['qsc_qmac_modes',['../qmac_8h.html#aefa8bd597c9cefbc5b101a528acf4757',1,'qmac.h']]],
+  ['qsc_5foid_5fid_5ft_12',['qsc_oid_id_t',['../oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4',1,'oid.h']]],
   ['qsc_5fsocket_5faddress_5ffamilies_13',['qsc_socket_address_families',['../socketflags_8h.html#ac14a927b3d05c6bb54f3eb8f7c884376',1,'socketflags.h']]],
   ['qsc_5fsocket_5fexceptions_14',['qsc_socket_exceptions',['../socketbase_8h.html#a31eef834848a4f642a5037b5a16055b4',1,'socketbase.h']]],
   ['qsc_5fsocket_5foptions_15',['qsc_socket_options',['../socketflags_8h.html#a83c4fb3b2710885491deb96d753a167d',1,'socketflags.h']]],
@@ -23,5 +23,11 @@ var searchData=
   ['qsc_5fsocket_5fstates_20',['qsc_socket_states',['../socketflags_8h.html#abc6298301bfd676ebb9a0269b6f8e806',1,'socketflags.h']]],
   ['qsc_5fsocket_5ftransports_21',['qsc_socket_transports',['../socketflags_8h.html#a91c3dc091c0fbef87f8f0e1f23a6f6b5',1,'socketflags.h']]],
   ['qsc_5fwinutils_5fregistry_5fvalue_5ftypes_22',['qsc_winutils_registry_value_types',['../winutils_8h.html#a3921a89440ede4c003d574253d25e013',1,'winutils.h']]],
-  ['qsc_5fwinutils_5fservice_5fstates_23',['qsc_winutils_service_states',['../winutils_8h.html#a379c757f6997ca1c2bfacdddf6ca84fb',1,'winutils.h']]]
+  ['qsc_5fwinutils_5fservice_5fstates_23',['qsc_winutils_service_states',['../winutils_8h.html#a379c757f6997ca1c2bfacdddf6ca84fb',1,'winutils.h']]],
+  ['qsc_5fx509_5fcrl_5fverify_5fstatus_5ft_24',['qsc_x509_crl_verify_status_t',['../x509crl_8h.html#ae146ce86d9ac4917c9f480a01cb66c57',1,'x509crl.h']]],
+  ['qsc_5fx509_5focsp_5fcert_5fstatus_5ft_25',['qsc_x509_ocsp_cert_status_t',['../x509ocsp_8h.html#a346edcc93c729e23a53190a94f4253d5',1,'x509ocsp.h']]],
+  ['qsc_5fx509_5frevocation_5fmode_5ft_26',['qsc_x509_revocation_mode_t',['../x509rev_8h.html#aa1821882f0dcc7f5f6a666141b1f8fe6',1,'x509rev.h']]],
+  ['qsc_5fx509_5frevocation_5fstatus_5ft_27',['qsc_x509_revocation_status_t',['../x509rev_8h.html#a7401943f954020c9fd3afd560f8e00f5',1,'x509rev.h']]],
+  ['qsc_5fx509_5fverify_5fpurpose_5ft_28',['qsc_x509_verify_purpose_t',['../x509verify_8h.html#a170922ffe9599e19b0e188eb186cb814',1,'x509verify.h']]],
+  ['qsc_5fx509_5fverify_5fstatus_5ft_29',['qsc_x509_verify_status_t',['../x509verify_8h.html#af5cc8922295db7be8b1a734960884a09',1,'x509verify.h']]]
 ];

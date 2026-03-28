@@ -1,9 +1,8 @@
 var arrayutils_8h =
 [
-    [ "QSC_ARRAYTILS_NPOS", "arrayutils_8h.html#a1a598a2e3fa969f05288c9b9f5389a69", null ],
+    [ "QSC_ARRAYUTILS_NPOS", "arrayutils_8h.html#a6ff708dea985f8bfb63ffe8c33a827f2", null ],
     [ "qsc_arrayutils_find_string", "arrayutils_8h.html#af64e437213e67db5692c49aea90791a5", null ],
     [ "qsc_arrayutils_hex_to_uint8", "arrayutils_8h.html#abf2b4501cff58e5872edf755eb956af6", null ],
-    [ "qsc_arrayutils_self_test", "arrayutils_8h.html#ac2498e4ceaed2d8a3b977f24ecbe8b2c", null ],
     [ "qsc_arrayutils_string_to_uint16", "arrayutils_8h.html#ac6276221be7abe1edb1419fadb14bebf", null ],
     [ "qsc_arrayutils_string_to_uint32", "arrayutils_8h.html#abff8198ed535433db1a3fa2d1b46bcb8", null ],
     [ "qsc_arrayutils_string_to_uint64", "arrayutils_8h.html#a843aef65f1cac640f77881f9e1b8739e", null ],

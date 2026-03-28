@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_cpuidex_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/cpuidex.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/cpuidex.h</primary></indexterm>
+<para>
+
+<para>Retrieves CPU features and capabilities. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Data Structures    </title>
+        <itemizedlist>
+            <listitem><para>struct <link linkend="_structqsc__cpuidex__cpu__features">qsc_cpuidex_cpu_features</link></para>
+
+<para>Contains the CPU feature availability. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Macros    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_cpuidex_8h_1a2fbc340094576e7083f2bbdeaf818b87"/>#define <emphasis role="strong">QSC_CPUIDEX_SERIAL_SIZE</emphasis>&#160;&#160;&#160;12</para>
+
+<para>The CPU serial number length. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_cpuidex_8h_1a45a1ea191b047053a2c3ff958d9f893a"/>#define <emphasis role="strong">QSC_CPUIDEX_VENDOR_SIZE</emphasis>&#160;&#160;&#160;12</para>
+
+<para>The CPU vendor name length. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Typedefs    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_cpuidex_8h_1a80a08a3bf01af13433f6777b1eeddcec"/>typedef enum <link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295">qsc_cpuidex_cpu_type</link> <emphasis role="strong">qsc_cpuidex_cpu_type</emphasis></para>
+</listitem>
+            <listitem><para><anchor xml:id="_cpuidex_8h_1a02e0dd48fa19df2adbffcd2f0fbbdb74"/>typedef QSC_EXPORT_API struct qsc_cpuidex_cpu_features <emphasis role="strong">qsc_cpuidex_cpu_features</emphasis></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Enumerations    </title>
+        <itemizedlist>
+            <listitem><para>enum <link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295">qsc_cpuidex_cpu_type</link> { <?linebreak?><link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295a7196e65be97a844c64cb267b43d9623f">qsc_cpuid_unknown</link> = 0
+, <link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295a73172295c2dcd2df23e483b38d130be6">qsc_cpuid_amd</link> = 1
+, <link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295aa246f09dd9654f0146ee197f5ff8e90f">qsc_cpuid_intel</link> = 2
+, <link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295ab0e3337741f419cd1c229068cbf83d48">qsc_cpuid_via</link> = 3
+, <?linebreak?><link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295aeebe5803668d49dc6f269fc2d4b3f3f1">qsc_cpuid_hygion</link> = 4
+ }</para>
+
+<para>The detectable CPU architectures. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_cpuidex_8h_1a14f95329ccbe44af10c15e49f225ac77">qsc_cpuidex_features_set</link> (<link linkend="_structqsc__cpuidex__cpu__features">qsc_cpuidex_cpu_features</link> *const features)</para>
+
+<para>Get a list of supported CPU features. </para>
+</listitem>
+            <listitem><para><anchor xml:id="_cpuidex_8h_1a930b2ff794a921d7e41b22d81e509109"/>QSC_EXPORT_API void <emphasis role="strong">qsc_cpuidex_print_stats</emphasis> ()</para>
+
+<para>Print a list of supported CPU features. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>Retrieves CPU features and capabilities. </para>
+</section>
+<section>
+<title>Enumeration Type Documentation</title>
+<anchor xml:id="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295"/><section>
+    <title>qsc_cpuidex_cpu_type</title>
+<indexterm><primary>qsc_cpuidex_cpu_type</primary><secondary>cpuidex.h</secondary></indexterm>
+<indexterm><primary>cpuidex.h</primary><secondary>qsc_cpuidex_cpu_type</secondary></indexterm>
+<para><computeroutput>enum <link linkend="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295">qsc_cpuidex_cpu_type</link></computeroutput></para><para>
+
+<para>The detectable CPU architectures. </para>
+</para>
+<informaltable frame="all">
+<title>Enumerator</title>
+    <tgroup cols="2" align="left" colsep="1" rowsep="1">
+      <colspec colname='c1'/>
+      <colspec colname='c2'/>
+<tbody>
+<row><entry><indexterm><primary>qsc_cpuid_unknown</primary><secondary>cpuidex.h</secondary></indexterm>
+<indexterm><primary>cpuidex.h</primary><secondary>qsc_cpuid_unknown</secondary></indexterm>
+<anchor xml:id="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295a7196e65be97a844c64cb267b43d9623f"/>qsc_cpuid_unknown</entry><entry>
+<para>The CPU type is unknown </para>
+</entry></row><row><entry><indexterm><primary>qsc_cpuid_amd</primary><secondary>cpuidex.h</secondary></indexterm>
+<indexterm><primary>cpuidex.h</primary><secondary>qsc_cpuid_amd</secondary></indexterm>
+<anchor xml:id="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295a73172295c2dcd2df23e483b38d130be6"/>qsc_cpuid_amd</entry><entry>
+<para>The CPU type is AMD </para>
+</entry></row><row><entry><indexterm><primary>qsc_cpuid_intel</primary><secondary>cpuidex.h</secondary></indexterm>
+<indexterm><primary>cpuidex.h</primary><secondary>qsc_cpuid_intel</secondary></indexterm>
+<anchor xml:id="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295aa246f09dd9654f0146ee197f5ff8e90f"/>qsc_cpuid_intel</entry><entry>
+<para>The CPU type is Intel </para>
+</entry></row><row><entry><indexterm><primary>qsc_cpuid_via</primary><secondary>cpuidex.h</secondary></indexterm>
+<indexterm><primary>cpuidex.h</primary><secondary>qsc_cpuid_via</secondary></indexterm>
+<anchor xml:id="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295ab0e3337741f419cd1c229068cbf83d48"/>qsc_cpuid_via</entry><entry>
+<para>The CPU type is VIA </para>
+</entry></row><row><entry><indexterm><primary>qsc_cpuid_hygion</primary><secondary>cpuidex.h</secondary></indexterm>
+<indexterm><primary>cpuidex.h</primary><secondary>qsc_cpuid_hygion</secondary></indexterm>
+<anchor xml:id="_cpuidex_8h_1adba4ec2b3eb53db1f9edff8a14bb4295aeebe5803668d49dc6f269fc2d4b3f3f1"/>qsc_cpuid_hygion</entry><entry>
+<para>The CPU type is Hygion </para>
+</entry></row>    </tbody>
+    </tgroup>
+</informaltable>
+</section>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_cpuidex_8h_1a14f95329ccbe44af10c15e49f225ac77"/><section>
+    <title>qsc_cpuidex_features_set()</title>
+<indexterm><primary>qsc_cpuidex_features_set</primary><secondary>cpuidex.h</secondary></indexterm>
+<indexterm><primary>cpuidex.h</primary><secondary>qsc_cpuidex_features_set</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_cpuidex_features_set (<link linkend="_structqsc__cpuidex__cpu__features">qsc_cpuidex_cpu_features</link> *const features)</computeroutput></para><para>
+
+<para>Get a list of supported CPU features. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>features</entry><entry>
+<para>A <link linkend="_structqsc__cpuidex__cpu__features">qsc_cpuidex_cpu_features</link> structure </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>Returns true for success, false if CPU is not recognized </para>
+</formalpara>
+</para>
+</section>
+</section>
+</section>

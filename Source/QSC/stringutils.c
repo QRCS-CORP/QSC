@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define QSC_STRING_MAX_LEN 4096ULL
+#define QSC_STRING_MAX_LEN (1024U * 1024U * 10U)
 
 char* strsepex(char** stringp, const char* delim)
 {

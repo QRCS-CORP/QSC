@@ -131,6 +131,7 @@ typedef enum qsc_oid_id_t
     QSC_OID_ID_NAME_CONSTRAINTS,                    /*!< nameConstraints. */
     QSC_OID_ID_CRL_DISTRIBUTION_POINTS,             /*!< cRLDistributionPoints. */
     QSC_OID_ID_CERTIFICATE_POLICIES,                /*!< certificatePolicies. */
+    QSC_OID_ID_CRL_NUMBER,                          /*!< cRLNumber. */
     QSC_OID_ID_AUTHORITY_KEY_IDENTIFIER,            /*!< authorityKeyIdentifier. */
     QSC_OID_ID_EXTENDED_KEY_USAGE,                  /*!< extKeyUsage. */
     QSC_OID_ID_AUTHORITY_INFO_ACCESS,               /*!< authorityInfoAccess. */
@@ -145,7 +146,15 @@ typedef enum qsc_oid_id_t
     QSC_OID_ID_OCSP_SIGNING,                        /*!< id-kp-OCSPSigning. */
 
     QSC_OID_ID_OCSP,                                /*!< id-ad-ocsp. */
-    QSC_OID_ID_CA_ISSUERS                           /*!< id-ad-caIssuers. */
+    QSC_OID_ID_CA_ISSUERS,                          /*!< id-ad-caIssuers. */
+
+    QSC_OID_ID_ML_DSA_44,                           /*!< id-ml-dsa-44. */
+    QSC_OID_ID_ML_DSA_65,                           /*!< id-ml-dsa-65. */
+    QSC_OID_ID_ML_DSA_87,                           /*!< id-ml-dsa-87. */
+
+    QSC_OID_ID_ML_KEM_512,                          /*!< id-alg-ml-kem-512. */
+    QSC_OID_ID_ML_KEM_768,                          /*!< id-alg-ml-kem-768. */
+    QSC_OID_ID_ML_KEM_1024                          /*!< id-alg-ml-kem-1024. */
 } qsc_oid_id;
 
 /*!

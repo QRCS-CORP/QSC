@@ -1596,7 +1596,8 @@ bool aesavs_cbc_kat()
 	const char* CBC256_VARTXT = "AESAVS/CBC/KAT/CBCVarTxt256.rsp";
 	bool res;
 
-	if (qsc_fileutils_exists(CBC128_VARKEY) && qsc_fileutils_exists(CBC128_VARTXT) && qsc_fileutils_exists(CBC256_VARKEY) && qsc_fileutils_exists(CBC256_VARTXT) == true)
+	if (qsc_fileutils_exists(CBC128_VARKEY) && qsc_fileutils_exists(CBC128_VARTXT) && 
+		qsc_fileutils_exists(CBC256_VARKEY) && qsc_fileutils_exists(CBC256_VARTXT) == true)
 	{
 		res = true;
 
@@ -1640,7 +1641,8 @@ bool aesavs_ecb_kat()
 	const char* ECB256_VARTXT = "AESAVS/ECB/KAT/ECBVarTxt256.rsp";
 	bool res;
 
-	if (qsc_fileutils_exists(ECB128_VARKEY) && qsc_fileutils_exists(ECB128_VARTXT) && qsc_fileutils_exists(ECB256_VARKEY) && qsc_fileutils_exists(ECB256_VARTXT) == true)
+	if (qsc_fileutils_exists(ECB128_VARKEY) && qsc_fileutils_exists(ECB128_VARTXT) && 
+		qsc_fileutils_exists(ECB256_VARKEY) && qsc_fileutils_exists(ECB256_VARTXT) == true)
 	{
 		res = true;
 

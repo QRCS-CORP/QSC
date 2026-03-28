@@ -1,0 +1,185 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/ntru.h File Reference}
+\hypertarget{ntru_8h}{}\label{ntru_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ntru.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/ntru.h}}
+
+
+Contains the public api for the NTRU CCA-\/secure Key Encapsulation Mechanism implementation.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+{\ttfamily \#include "{}ntrubase.\+h"{}}\newline
+Include dependency graph for ntru.\+h\+:
+% FIG 0
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{ntru_8h_a6517986d39668036ce5b25c50b8673ef}\label{ntru_8h_a6517986d39668036ce5b25c50b8673ef} 
+\#define {\bfseries QSC\+\_\+\+NTRU\+\_\+\+SEED\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The byte size of the seed array. \end{DoxyCompactList}\item 
+\Hypertarget{ntru_8h_a7e965b3b7bd6a8e97030d4770b540af2}\label{ntru_8h_a7e965b3b7bd6a8e97030d4770b540af2} 
+\#define {\bfseries QSC\+\_\+\+NTRU\+\_\+\+SHAREDSECRET\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The byte size of the shared secret-\/key array. \end{DoxyCompactList}\item 
+\Hypertarget{ntru_8h_ac2479301d3e37d96591896c4d5ab62b7}\label{ntru_8h_ac2479301d3e37d96591896c4d5ab62b7} 
+\#define {\bfseries QSC\+\_\+\+NTRU\+\_\+\+ALGNAME}~"{}NTRU"{}
+\begin{DoxyCompactList}\small\item\em The formal algorithm name. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{ntru_8h_aff2ebda121b1e2f575ec7a70b043d9f8}{qsc\+\_\+ntru\+\_\+decapsulate}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}secret, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}ciphertext, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}privatekey)
+\begin{DoxyCompactList}\small\item\em Decapsulates the shared secret for a given cipher-\/text using a private-\/key. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool \mbox{\hyperlink{ntru_8h_a1e0bf3b594bdc45b053f4919e0091106}{qsc\+\_\+ntru\+\_\+decrypt}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}secret, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}ciphertext, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}privatekey)
+\begin{DoxyCompactList}\small\item\em Decrypts the shared secret for a given cipher-\/text using a private-\/key Used in conjunction with the encrypt function. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{ntru_8h_a05b4ef7106f91993163a11351c0f44fe}{qsc\+\_\+ntru\+\_\+encapsulate}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}secret, uint8\+\_\+t \texorpdfstring{$\ast$}{*}ciphertext, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}publickey, bool(\texorpdfstring{$\ast$}{*}rng\+\_\+generate)(uint8\+\_\+t \texorpdfstring{$\ast$}{*}, size\+\_\+t))
+\begin{DoxyCompactList}\small\item\em Generates cipher-\/text and encapsulates a shared secret key using a public-\/key. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{ntru_8h_a25236608a29ac5a094031269a0b61051}{qsc\+\_\+ntru\+\_\+encrypt}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}secret, uint8\+\_\+t \texorpdfstring{$\ast$}{*}ciphertext, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}publickey, const uint8\+\_\+t seed\mbox{[}\mbox{\hyperlink{ntru_8h_a6517986d39668036ce5b25c50b8673ef}{QSC\+\_\+\+NTRU\+\_\+\+SEED\+\_\+\+SIZE}}\mbox{]})
+\begin{DoxyCompactList}\small\item\em Generates cipher-\/text and encapsulates a shared secret key using a public-\/key Used in conjunction with the encrypt function. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{ntru_8h_af72adbf9fd319cefb87d3b556a9d81d9}{qsc\+\_\+ntru\+\_\+generate\+\_\+keypair}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}publickey, uint8\+\_\+t \texorpdfstring{$\ast$}{*}privatekey, bool(\texorpdfstring{$\ast$}{*}rng\+\_\+generate)(uint8\+\_\+t \texorpdfstring{$\ast$}{*}, size\+\_\+t))
+\begin{DoxyCompactList}\small\item\em Generates public and private key for the NTRU key encapsulation mechanism. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Contains the public api for the NTRU CCA-\/secure Key Encapsulation Mechanism implementation. 
+
+\begin{DoxyParagraph}{Example}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{uint8\_t\ ct[QSC\_NTRU\_CIPHERTEXT\_SIZE];}
+\DoxyCodeLine{uint8\_t\ pk[QSC\_NTRU\_PUBLICKEY\_SIZE];}
+\DoxyCodeLine{uint8\_t\ sk[QSC\_NTRU\_PRIVATEKEY\_SIZE];}
+\DoxyCodeLine{uint8\_t\ ssa[\mbox{\hyperlink{ntru_8h_a7e965b3b7bd6a8e97030d4770b540af2}{QSC\_NTRU\_SHAREDSECRET\_SIZE}}];}
+\DoxyCodeLine{uint8\_t\ ssb[\mbox{\hyperlink{ntru_8h_a7e965b3b7bd6a8e97030d4770b540af2}{QSC\_NTRU\_SHAREDSECRET\_SIZE}}];}
+\DoxyCodeLine{}
+\DoxyCodeLine{qsc\_ntru\_generate\_keypair(pk,\ sk);}
+\DoxyCodeLine{qsc\_ntru\_encapsulate(ssb,\ ct,\ pk);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (qsc\_ntru\_decapsulate(ssa,\ ct,\ sk)\ ==\ \textcolor{keyword}{false})}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ decapsulation\ failed,\ do\ something..}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+\end{DoxyParagraph}
+\begin{DoxyRemark}{Remarks}
+Based on the C reference branch of NIST PQC Round 3 submission; including base code, comments, and api. ~\newline
+The NIST Post Quantum Competition \href{https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions}{\texttt{ Round 3}} Finalists. ~\newline
+NIST PQC Round 3\+: \href{https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions}{\texttt{ NTRU}}. ~\newline
+The NTRU \href{https://ntru.org/f/ntru-20190330.pdf}{\texttt{ Algorithm.}} Specifications. ~\newline
+
+\end{DoxyRemark}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{ntru_8h_aff2ebda121b1e2f575ec7a70b043d9f8}\index{ntru.h@{ntru.h}!qsc\_ntru\_decapsulate@{qsc\_ntru\_decapsulate}}
+\index{qsc\_ntru\_decapsulate@{qsc\_ntru\_decapsulate}!ntru.h@{ntru.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ntru\_decapsulate()}{qsc\_ntru\_decapsulate()}}
+{\footnotesize\ttfamily \label{ntru_8h_aff2ebda121b1e2f575ec7a70b043d9f8} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+ntru\+\_\+decapsulate (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{secret}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{ciphertext}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{privatekey}{}\end{DoxyParamCaption})}
+
+
+
+Decapsulates the shared secret for a given cipher-\/text using a private-\/key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em secret} & Pointer to the output shared secret key, an array of QSC\+\_\+\+NTRU\+\_\+\+SHAREDSECRET\+\_\+\+SIZE constant size \\
+\hline
+{\em ciphertext} & \mbox{[}const\mbox{]} Pointer to the cipher-\/text array of QSC\+\_\+\+NTRU\+\_\+\+CIPHERTEXT\+\_\+\+SIZE constant size \\
+\hline
+{\em privatekey} & \mbox{[}const\mbox{]} Pointer to the secret-\/key array of QSC\+\_\+\+NTRU\+\_\+\+PRIVATEKEY\+\_\+\+SIZE constant size \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{ntru_8h_a1e0bf3b594bdc45b053f4919e0091106}\index{ntru.h@{ntru.h}!qsc\_ntru\_decrypt@{qsc\_ntru\_decrypt}}
+\index{qsc\_ntru\_decrypt@{qsc\_ntru\_decrypt}!ntru.h@{ntru.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ntru\_decrypt()}{qsc\_ntru\_decrypt()}}
+{\footnotesize\ttfamily \label{ntru_8h_a1e0bf3b594bdc45b053f4919e0091106} 
+QSC\+\_\+\+EXPORT\+\_\+\+API bool qsc\+\_\+ntru\+\_\+decrypt (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{secret}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{ciphertext}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{privatekey}{}\end{DoxyParamCaption})}
+
+
+
+Decrypts the shared secret for a given cipher-\/text using a private-\/key Used in conjunction with the encrypt function. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em secret} & Pointer to the output shared secret key, an array of QSC\+\_\+\+KYBER\+\_\+\+SHAREDSECRET\+\_\+\+SIZE constant size \\
+\hline
+{\em ciphertext} & \mbox{[}const\mbox{]} Pointer to the cipher-\/text array of QSC\+\_\+\+KYBER\+\_\+\+CIPHERTEXT\+\_\+\+SIZE constant size \\
+\hline
+{\em privatekey} & \mbox{[}const\mbox{]} Pointer to the secret-\/key array of QSC\+\_\+\+KYBER\+\_\+\+PRIVATEKEY\+\_\+\+SIZE constant size \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true for success 
+\end{DoxyReturn}
+\Hypertarget{ntru_8h_a05b4ef7106f91993163a11351c0f44fe}\index{ntru.h@{ntru.h}!qsc\_ntru\_encapsulate@{qsc\_ntru\_encapsulate}}
+\index{qsc\_ntru\_encapsulate@{qsc\_ntru\_encapsulate}!ntru.h@{ntru.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ntru\_encapsulate()}{qsc\_ntru\_encapsulate()}}
+{\footnotesize\ttfamily \label{ntru_8h_a05b4ef7106f91993163a11351c0f44fe} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+ntru\+\_\+encapsulate (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{secret}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{ciphertext}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{publickey}{, }\item[{bool(\texorpdfstring{$\ast$}{*}}]{rng\+\_\+generate~}{)(uint8\+\_\+t \texorpdfstring{$\ast$}{*}, size\+\_\+t)}\end{DoxyParamCaption})}
+
+
+
+Generates cipher-\/text and encapsulates a shared secret key using a public-\/key. 
+
+\begin{DoxyWarning}{Warning}
+Cipher-\/text array must be sized to the QSC\+\_\+\+NTRU\+\_\+\+CIPHERTEXT\+\_\+\+SIZE.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em secret} & Pointer to the shared secret key, a uint8\+\_\+t array of QSC\+\_\+\+NTRU\+\_\+\+SHAREDSECRET\+\_\+\+SIZE constant size \\
+\hline
+{\em ciphertext} & Pointer to the cipher-\/text array of QSC\+\_\+\+NTRU\+\_\+\+CIPHERTEXT\+\_\+\+SIZE constant size \\
+\hline
+{\em publickey} & \mbox{[}const\mbox{]} Pointer to the public-\/key array of QSC\+\_\+\+NTRU\+\_\+\+PUBLICKEY\+\_\+\+SIZE constant size \\
+\hline
+{\em rng\+\_\+generate} & A pointer to the random generator function \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ntru_8h_a25236608a29ac5a094031269a0b61051}\index{ntru.h@{ntru.h}!qsc\_ntru\_encrypt@{qsc\_ntru\_encrypt}}
+\index{qsc\_ntru\_encrypt@{qsc\_ntru\_encrypt}!ntru.h@{ntru.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ntru\_encrypt()}{qsc\_ntru\_encrypt()}}
+{\footnotesize\ttfamily \label{ntru_8h_a25236608a29ac5a094031269a0b61051} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+ntru\+\_\+encrypt (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{secret}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{ciphertext}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{publickey}{, }\item[{const uint8\+\_\+t}]{seed}{\mbox{[}\+QSC\+\_\+\+NTRU\+\_\+\+SEED\+\_\+\+SIZE\mbox{]}}\end{DoxyParamCaption})}
+
+
+
+Generates cipher-\/text and encapsulates a shared secret key using a public-\/key Used in conjunction with the encrypt function. 
+
+\begin{DoxyWarning}{Warning}
+Cipher-\/text array must be sized to the QSC\+\_\+\+KYBER\+\_\+\+CIPHERTEXT\+\_\+\+SIZE.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em secret} & Pointer to the shared secret key, a uint8\+\_\+t array of QSC\+\_\+\+KYBER\+\_\+\+SHAREDSECRET\+\_\+\+SIZE constant size \\
+\hline
+{\em ciphertext} & Pointer to the cipher-\/text array of QSC\+\_\+\+KYBER\+\_\+\+CIPHERTEXT\+\_\+\+SIZE constant size \\
+\hline
+{\em publickey} & \mbox{[}const\mbox{]} Pointer to the public-\/key array of QSC\+\_\+\+KYBER\+\_\+\+PUBLICKEY\+\_\+\+SIZE constant size \\
+\hline
+{\em seed} & \mbox{[}const\mbox{]} A pointer to the random seed array \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ntru_8h_af72adbf9fd319cefb87d3b556a9d81d9}\index{ntru.h@{ntru.h}!qsc\_ntru\_generate\_keypair@{qsc\_ntru\_generate\_keypair}}
+\index{qsc\_ntru\_generate\_keypair@{qsc\_ntru\_generate\_keypair}!ntru.h@{ntru.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_ntru\_generate\_keypair()}{qsc\_ntru\_generate\_keypair()}}
+{\footnotesize\ttfamily \label{ntru_8h_af72adbf9fd319cefb87d3b556a9d81d9} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+ntru\+\_\+generate\+\_\+keypair (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{publickey}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{privatekey}{, }\item[{bool(\texorpdfstring{$\ast$}{*}}]{rng\+\_\+generate~}{)(uint8\+\_\+t \texorpdfstring{$\ast$}{*}, size\+\_\+t)}\end{DoxyParamCaption})}
+
+
+
+Generates public and private key for the NTRU key encapsulation mechanism. 
+
+\begin{DoxyWarning}{Warning}
+Arrays must be sized to QSC\+\_\+\+NTRU\+\_\+\+PUBLICKEY\+\_\+\+SIZE and QSC\+\_\+\+NTRU\+\_\+\+SECRETKEY\+\_\+\+SIZE.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em publickey} & Pointer to the output public-\/key array of QSC\+\_\+\+NTRU\+\_\+\+PUBLICKEY\+\_\+\+SIZE constant size \\
+\hline
+{\em privatekey} & Pointer to output private-\/key array of QSC\+\_\+\+NTRU\+\_\+\+PRIVATEKEY\+\_\+\+SIZE constant size \\
+\hline
+{\em rng\+\_\+generate} & A pointer to the random generator function \\
+\hline
+\end{DoxyParams}

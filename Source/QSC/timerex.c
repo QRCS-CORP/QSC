@@ -218,7 +218,7 @@ void qsc_timerex_print_values(void)
 	uint64_t elps;
 	uint64_t tms;
 
-	elps = qsc_timerex_stopwatch_start(void);
+	elps = qsc_timerex_stopwatch_start();
 
 	qsc_consoleutils_print_line("Timer visual verification test");
 	qsc_consoleutils_print_line("Printing output from timer functions..");

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['qsc_3a_20quantum_20secure_20cryptographic_20solutions_20library_0',['QSC: Quantum Secure Cryptographic Solutions Library',['../index.html',1,'']]],
-  ['quantum_20secure_20cryptographic_20solutions_20library_1',['QSC: Quantum Secure Cryptographic Solutions Library',['../index.html',1,'']]]
+  ['details_0',['Implementation Details',['../acp_8h.html#details',1,'']]],
+  ['documents_1',['Reference Documents',['../encoding_8h.html#encoding_refs',1,'']]]
 ];

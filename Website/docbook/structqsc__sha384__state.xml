@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_structqsc__sha384__state" xml:lang="en-US">
+<title>qsc_sha384_state Struct Reference</title>
+<indexterm><primary>qsc_sha384_state</primary></indexterm>
+<para>
+
+<para>The SHA2-384 digest state array. </para>
+ 
+</para>
+<para>
+<computeroutput>#include &lt;sha2.h&gt;</computeroutput>
+</para>
+<simplesect>
+    <title>Data Fields    </title>
+        <itemizedlist>
+            <listitem><para>uint64_t <link linkend="_structqsc__sha384__state_1a9199feddac6329e019652f2e0fac9175">state</link> [<link linkend="_sha2_8h_1af98fa11b9259e84c51297c358b51b95e">QSC_SHA2_STATE_SIZE</link>]</para>
+</listitem>
+            <listitem><para>uint64_t <link linkend="_structqsc__sha384__state_1a2485b4a96e2159455f9defde68daed6b">t</link> [2]</para>
+</listitem>
+            <listitem><para>uint8_t <link linkend="_structqsc__sha384__state_1a10609be8d6813ecb17faebd025bc1ce0">buffer</link> [<link linkend="_sha2_8h_1ad6510c65fbebd47f35a76bf54b0f90a6">QSC_SHA2_384_RATE</link>]</para>
+</listitem>
+            <listitem><para>size_t <link linkend="_structqsc__sha384__state_1a7a04afe5347934be732ec70a70bd0a28">position</link></para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The SHA2-384 digest state array. </para>
+</section>
+<section>
+<title>Field Documentation</title>
+<anchor xml:id="_structqsc__sha384__state_1a10609be8d6813ecb17faebd025bc1ce0"/><section>
+    <title>buffer</title>
+<indexterm><primary>buffer</primary><secondary>qsc_sha384_state</secondary></indexterm>
+<indexterm><primary>qsc_sha384_state</primary><secondary>buffer</secondary></indexterm>
+<para><computeroutput>uint8_t buffer[<link linkend="_sha2_8h_1ad6510c65fbebd47f35a76bf54b0f90a6">QSC_SHA2_384_RATE</link>]</computeroutput></para>
+<para>The message buffer </para>
+</section>
+<anchor xml:id="_structqsc__sha384__state_1a7a04afe5347934be732ec70a70bd0a28"/><section>
+    <title>position</title>
+<indexterm><primary>position</primary><secondary>qsc_sha384_state</secondary></indexterm>
+<indexterm><primary>qsc_sha384_state</primary><secondary>position</secondary></indexterm>
+<para><computeroutput>size_t position</computeroutput></para>
+<para>The message position </para>
+</section>
+<anchor xml:id="_structqsc__sha384__state_1a9199feddac6329e019652f2e0fac9175"/><section>
+    <title>state</title>
+<indexterm><primary>state</primary><secondary>qsc_sha384_state</secondary></indexterm>
+<indexterm><primary>qsc_sha384_state</primary><secondary>state</secondary></indexterm>
+<para><computeroutput>uint64_t state[<link linkend="_sha2_8h_1af98fa11b9259e84c51297c358b51b95e">QSC_SHA2_STATE_SIZE</link>]</computeroutput></para>
+<para>The SHA2-384 state </para>
+</section>
+<anchor xml:id="_structqsc__sha384__state_1a2485b4a96e2159455f9defde68daed6b"/><section>
+    <title>t</title>
+<indexterm><primary>t</primary><secondary>qsc_sha384_state</secondary></indexterm>
+<indexterm><primary>qsc_sha384_state</primary><secondary>t</secondary></indexterm>
+<para><computeroutput>uint64_t t[2]</computeroutput></para>
+<para>The message size </para>
+</section>
+<para>
+The documentation for this struct was generated from the following file:</para>
+C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/<link linkend="_sha2_8h">sha2.h</link></section>
+</section>

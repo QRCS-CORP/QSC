@@ -57,68 +57,136 @@
 
 QSC_CPLUSPLUS_ENABLED_START
 
-/*
- * x509_time.h
+/*!
+ * \file x509time.h
+ * \brief X.509 time decoding, parsing, comparison, and validity helpers.
  *
- * X.509 time parsing and validation helpers for the QSC X.509 layer.
+ * \details
+ * This header defines the public interface used to decode and manipulate X.509
+ * time values and certificate validity intervals. The X.509 time alias is
+ * mapped directly to the ASN.1 time representation used by the underlying
+ * encoding layer.
  *
- * This module provides decoding of ASN.1 UTCTime and GeneralizedTime
- * values into the normalized qsc_x509_time structure defined in
- * x509_types.h, along with comparison and validation helpers.
- *
- * The implementation follows RFC 5280 requirements for certificate
- * validity evaluation.
+ * The interface supports decoding of ASN.1 Time elements, parsing of UTCTime
+ * and GeneralizedTime text forms, comparison of normalized time values, basic
+ * structural validity checks, and evaluation of whether a certificate validity
+ * interval is current at a supplied reference time.
  */
 
 /*!
- * \struct qsc_x509_time
- * \brief Represents an ASN.1 UTCTime or GeneralizedTime value normalized into a structured form.
+ * \typedef qsc_x509_time
+ * \brief Alias for the normalized ASN.1 time representation used by X.509 helpers.
  *
  * \details
- * X.509 certificates encode time values using either UTCTime (YYMMDDHHMMSSZ)
- * or GeneralizedTime (YYYYMMDDHHMMSSZ). During decoding these values are
- * converted into a normalized structure that stores each component separately.
- *
- * The generalized flag indicates whether the source encoding used
- * GeneralizedTime (true) or UTCTime (false).
+ * The X.509 time type is defined as a direct alias of \ref qsc_asn1_time so
+ * that X.509 validity processing and ASN.1 time parsing operate on the same
+ * canonical structure.
  */
 typedef qsc_asn1_time qsc_x509_time;
 
-/**
- * \brief Decode an ASN.1 time element (UTCTime or GeneralizedTime)
+/*!
+ * \brief Decode an ASN.1 X.509 time element.
  *
- * \param[out] out: The decoded time structure
- * \param[in] elem: ASN.1 element containing the time
- * \return Returns true on success
+ * \details
+ * Decodes an ASN.1 time element and normalizes the result into the supplied
+ * X.509 time object. The input element may represent either a UTCTime or a
+ * GeneralizedTime value.
+ *
+ * \param out: [struct] The destination decoded time object.
+ * \param elem: [const][struct] The ASN.1 element containing the encoded time value.
+ *
+ * \return Returns true if decoding completed successfully; otherwise returns false.
  */
-bool qsc_x509_time_decode(qsc_x509_time* out, const qsc_encoding_ber_element* elem);
+QSC_EXPORT_API bool qsc_x509_time_decode(qsc_x509_time* out, const qsc_encoding_ber_element* elem);
 
-/**
- * \brief Decode an ASN.1 Validity sequence
+/*!
+ * \brief Parse a UTCTime string.
  *
- * \param[out] validity: The decoded validity structure
- * \param[in] elem: ASN.1 element containing the validity sequence
- * \return Returns the asn1 status
+ * \details
+ * Parses a character string encoded in ASN.1 UTCTime textual form and writes
+ * the normalized result to the supplied X.509 time object. The accepted form is
+ * exactly \c YYMMDDHHMMSSZ as required by DER.
+ *
+ * \param s: [const] The input UTCTime character buffer.
+ * \param len: The length of the input buffer in bytes.
+ * \param out: [struct] The destination parsed time object.
+ *
+ * \return Returns true if parsing completed successfully; otherwise returns false.
  */
-qsc_asn1_status qsc_x509_validity_decode(qsc_x509_validity* validity, const qsc_encoding_ber_element* elem);
+QSC_EXPORT_API bool qsc_x509_time_parse_utctime(const char* s, size_t len, qsc_x509_time* out);
 
-/**
- * \brief Compare two X.509 times
+/*!
+ * \brief Parse a GeneralizedTime string.
  *
- * \param[in] a: First time
- * \param[in] b: Second time
- * \return -1 if a < b, 0 if equal, 1 if a > b
+ * \details
+ * Parses a character string encoded in ASN.1 GeneralizedTime textual form and
+ * writes the normalized result to the supplied X.509 time object. The accepted
+ * form is exactly \c YYYYMMDDHHMMSSZ as required by DER.
+ *
+ * \param s: [const] The input GeneralizedTime character buffer.
+ * \param len: The length of the input buffer in bytes.
+ * \param out: [struct] The destination parsed time object.
+ *
+ * \return Returns true if parsing completed successfully; otherwise returns false.
  */
-int32_t qsc_x509_time_compare(const qsc_x509_time* a, const qsc_x509_time* b);
+QSC_EXPORT_API bool qsc_x509_time_parse_generalizedtime(const char* s, size_t len, qsc_x509_time* out);
 
-/**
- * \brief Check whether a time lies within a validity interval
+/*!
+ * \brief Decode a certificate Validity sequence.
  *
- * \param[in] validity: Certificate validity interval
- * \param[in] tnow: Time to test
- * \return Returns true if valid
+ * \details
+ * Decodes an ASN.1 Validity sequence and writes the notBefore and notAfter
+ * values to the supplied X.509 validity structure. The function accepts only a
+ * two-element DER Validity sequence and rejects intervals where \c notBefore is
+ * later than \c notAfter.
+ *
+ * \param validity: [struct] The destination validity object.
+ * \param elem: [const][struct] The ASN.1 element containing the encoded Validity sequence.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
  */
-bool qsc_x509_validity_is_valid(const qsc_x509_validity* validity, const qsc_x509_time* tnow);
+QSC_EXPORT_API qsc_asn1_status qsc_x509_validity_decode(qsc_x509_validity* validity, const qsc_encoding_ber_element* elem);
+
+/*!
+ * \brief Compare two X.509 time values.
+ *
+ * \details
+ * Performs an ordered comparison of two normalized time values.
+ *
+ * \param a: [const][struct] The first time value.
+ * \param b: [const][struct] The second time value.
+ *
+ * \return Returns a negative value if \p a is earlier than \p b, zero if the values are equal, 
+ * or a positive value if \p a is later than \p b.
+ */
+QSC_EXPORT_API int32_t qsc_x509_time_compare(const qsc_x509_time* a, const qsc_x509_time* b);
+
+/*!
+ * \brief Test whether a normalized X.509 time value is structurally valid.
+ *
+ * \details
+ * Checks that the supplied time object contains a valid normalized calendar and
+ * clock representation suitable for X.509 validity evaluation.
+ *
+ * \param time: [const][struct] The time object to validate.
+ *
+ * \return Returns true if the time object is valid; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_time_is_valid(const qsc_x509_time* time);
+
+/*!
+ * \brief Test whether a validity interval is current at a supplied time.
+ *
+ * \details
+ * Evaluates whether the supplied reference time falls within the certificate
+ * validity interval described by the notBefore and notAfter fields.
+ *
+ * \param validity: [const][struct] The certificate validity interval.
+ * \param tnow: [const][struct] The reference time used for evaluation.
+ *
+ * \return Returns true if the reference time is within the validity interval; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_validity_is_valid(const qsc_x509_validity* validity, const qsc_x509_time* tnow);
 
 QSC_CPLUSPLUS_ENABLED_END
 

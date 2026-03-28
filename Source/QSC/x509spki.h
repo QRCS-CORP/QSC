@@ -58,85 +58,284 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file x509_spki.h
- * \brief SubjectPublicKeyInfo parsing helpers for the QSC X.509 layer.
+ * \file x509spki.h
+ * \brief X.509 AlgorithmIdentifier and SubjectPublicKeyInfo decoding, initialization, and validation interface.
  *
  * \details
- * This header defines the public API used to decode the X.509
- * SubjectPublicKeyInfo structure and the nested AlgorithmIdentifier structure
- * associated with certificate subject public keys. The functions in this
- * module convert the generic ASN.1 element tree produced by the DER decoder
- * into the normalized qsc_x509_algorithm_identifier and
- * qsc_x509_subject_public_key_info structures defined in x509_types.h.
+ * This header defines helper functions used to decode, initialize, validate,
+ * and query X.509 AlgorithmIdentifier and SubjectPublicKeyInfo objects. The
+ * interface supports classical elliptic-curve public keys together with
+ * post-quantum ML-DSA and ML-KEM parameter sets carried through OID-driven
+ * algorithm identifiers and raw public-key payloads.
  *
- * The first implementation pass is intentionally conservative. It is focused on
- * the algorithms and parameter encodings that are commonly encountered in
- * DER-encoded X.509 certificates, with primary emphasis on id-ecPublicKey and
- * named curve parameters used by elliptic curve certificates. The API also
- * recognizes common RSA identifiers so that the wider certificate layer can
- * classify unsupported subject public key types without misidentifying them.
+ * The decoding functions operate on ASN.1 BER/DER elements and populate the
+ * normalized X.509 type-layer structures. The initialization functions provide
+ * canonical construction helpers for EC, ML-DSA, and ML-KEM SPKI objects.
+ * Additional query helpers expose named-curve coordinate sizing, public-key
+ * sizing, algorithm classification, and coordinate extraction for uncompressed
+ * EC points.
  */
 
 /*!
- * \brief Decodes an AlgorithmIdentifier structure.
+ * \brief Decode an AlgorithmIdentifier object.
  *
- * \param element: [const qsc_encoding_ber_element*] The ASN.1 SEQUENCE element
- * containing the AlgorithmIdentifier structure.
- * \param algorithm: [qsc_x509_algorithm_identifier*] Receives the decoded
- * algorithm identifier data.
+ * \details
+ * Parses an ASN.1 DER encoded AlgorithmIdentifier sequence and populates the
+ * normalized qsc_x509_algorithm_identifier structure.
  *
- * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
+ * \param element: [const][struct] The ASN.1 element containing the AlgorithmIdentifier sequence.
+ * \param algorithm: [struct] The destination algorithm identifier object.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
  */
 QSC_EXPORT_API qsc_asn1_status qsc_x509_algorithm_identifier_decode(const qsc_encoding_ber_element* element, qsc_x509_algorithm_identifier* algorithm);
 
+
 /*!
- * \brief Decodes a SubjectPublicKeyInfo structure.
+ * brief Validate a normalized AlgorithmIdentifier object.
  *
- * \param element: [const qsc_encoding_ber_element*] The ASN.1 SEQUENCE element
- * containing the SubjectPublicKeyInfo structure.
- * \param spki: [qsc_x509_subject_public_key_info*] Receives the decoded subject
- * public key information.
+ * \details
+ * Performs strict OID-driven validation of an AlgorithmIdentifier, including
+ * parameter presence or absence rules, named-curve consistency, and ML-DSA or
+ * ML-KEM parameter-set consistency. This helper is intended for callers that
+ * need to validate decoded algorithm metadata independently of a full SPKI
+ * decode.
  *
- * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
+ * \param algorithm: [const][struct] The algorithm identifier object to validate.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_algorithm_identifier_validate(const qsc_x509_algorithm_identifier* algorithm);
+
+/*!
+ * \brief Decode a SubjectPublicKeyInfo object.
+ *
+ * \details
+ * Parses an ASN.1 DER encoded SubjectPublicKeyInfo sequence and populates the
+ * normalized qsc_x509_subject_public_key_info structure with the decoded
+ * algorithm identifier and subject public key bytes.
+ *
+ * \param element: [const][struct] The ASN.1 element containing the SubjectPublicKeyInfo sequence.
+ * \param spki: [struct] The destination subject public key information object.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
  */
 QSC_EXPORT_API qsc_asn1_status qsc_x509_subject_public_key_info_decode(const qsc_encoding_ber_element* element, qsc_x509_subject_public_key_info* spki);
 
 /*!
- * \brief Tests whether a decoded subject public key is encoded as an
- * uncompressed elliptic curve point.
+ * \brief Validate a normalized SubjectPublicKeyInfo object.
  *
- * \param spki: [const qsc_x509_subject_public_key_info*] The decoded subject
- * public key information.
+ * \details
+ * Performs structural and algorithm-specific validation of the supplied SPKI
+ * object, including parameter-set and public-key size consistency checks where
+ * applicable.
  *
- * \return [bool] Returns true if the key is an uncompressed elliptic curve
- * point.
+ * \param spki: [const][struct] The subject public key information object to validate.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_spki_validate(const qsc_x509_subject_public_key_info* spki);
+
+/*!
+ * \brief Test whether an SPKI contains an uncompressed EC point.
+ *
+ * \details
+ * Evaluates the subject public key payload and associated algorithm metadata to
+ * determine whether the encoded elliptic-curve public key uses the standard
+ * uncompressed point format.
+ *
+ * \param spki: [const][struct] The subject public key information object to inspect.
+ *
+ * \return Returns true if the SPKI contains an uncompressed EC point; otherwise returns false.
  */
 QSC_EXPORT_API bool qsc_x509_spki_is_uncompressed_ec_point(const qsc_x509_subject_public_key_info* spki);
 
 /*!
- * \brief Gets the expected field element size in octets for a named curve.
+ * \brief Get the coordinate size for a named elliptic curve.
  *
- * \param curve: [qsc_x509_named_curve] The named curve identifier.
+ * \details
+ * Returns the coordinate width in bytes for the supplied named curve. This
+ * helper is used when validating or extracting affine coordinates from EC
+ * public keys.
  *
- * \return [size_t] Returns the coordinate size in octets, or zero if the curve
- * is not recognized.
+ * \param curve: [enum] The named elliptic curve identifier.
+ *
+ * \return Returns the coordinate size in bytes, or zero if the curve is unsupported.
  */
 QSC_EXPORT_API size_t qsc_x509_named_curve_coordinate_size(qsc_x509_named_curve curve);
 
 /*!
- * \brief Extracts affine x and y coordinates from an uncompressed elliptic
- * curve point.
+ * \brief Get the encoded public-key size for a named elliptic curve.
  *
- * \param spki: [const qsc_x509_subject_public_key_info*] The decoded subject
- * public key information.
- * \param x: [uint8_t*] Receives the x coordinate octets.
- * \param xlen: [size_t] The size of the x output array in octets.
- * \param y: [uint8_t*] Receives the y coordinate octets.
- * \param ylen: [size_t] The size of the y output array in octets.
+ * \details
+ * Returns the expected byte length of an uncompressed EC public key for the
+ * supplied named curve.
  *
- * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
+ * \param curve: [enum] The named elliptic curve identifier.
+ *
+ * \return Returns the encoded public-key size in bytes, or zero if the curve is unsupported.
+ */
+QSC_EXPORT_API size_t qsc_x509_named_curve_public_key_size(qsc_x509_named_curve curve);
+
+/*!
+ * \brief Extract affine EC coordinates from an SPKI object.
+ *
+ * \details
+ * Reads the uncompressed elliptic-curve public-key payload from the supplied
+ * SPKI object and writes the affine x and y coordinates to the caller-supplied
+ * output buffers.
+ *
+ * \param spki: [const][struct] The subject public key information object containing the EC public key.
+ * \param x: The destination buffer receiving the x-coordinate bytes.
+ * \param xlen: The capacity of the x-coordinate buffer in bytes.
+ * \param y: The destination buffer receiving the y-coordinate bytes.
+ * \param ylen: The capacity of the y-coordinate buffer in bytes.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
  */
 QSC_EXPORT_API qsc_asn1_status qsc_x509_spki_get_ec_coordinates(const qsc_x509_subject_public_key_info* spki, uint8_t* x, size_t xlen, uint8_t* y, size_t ylen);
+
+/*!
+ * \brief Initialize an AlgorithmIdentifier object.
+ *
+ * \details
+ * Resets the supplied algorithm identifier object to a clean default state.
+ *
+ * \param algorithm: [struct] The algorithm identifier object to initialize.
+ *
+ * \return [void] This function does not return a value.
+ */
+QSC_EXPORT_API void qsc_x509_algorithm_identifier_initialize(qsc_x509_algorithm_identifier* algorithm);
+
+/*!
+ * \brief Initialize a SubjectPublicKeyInfo object.
+ *
+ * \details
+ * Resets the supplied subject public key information object to a clean default
+ * state.
+ *
+ * \param spki: [struct] The subject public key information object to initialize.
+ *
+ * \return [void] This function does not return a value.
+ */
+QSC_EXPORT_API void qsc_x509_subject_public_key_info_initialize(qsc_x509_subject_public_key_info* spki);
+
+/*!
+ * \brief Get the expected public-key size for a PQC parameter set.
+ *
+ * \details
+ * Returns the implementation-defined public-key size associated with the
+ * supplied ML-DSA or ML-KEM parameter set.
+ *
+ * \param parameterset: [enum] The post-quantum parameter-set identifier.
+ *
+ * \return Returns the expected public-key size in bytes, or zero if the parameter set is unsupported.
+ */
+QSC_EXPORT_API size_t qsc_x509_pqc_public_key_size(qsc_x509_pqc_parameter_set parameterset);
+
+/*!
+ * \brief Test whether an AlgorithmIdentifier denotes ML-DSA.
+ *
+ * \details
+ * Examines the object identifier and parameter-set metadata in the supplied
+ * algorithm identifier and reports whether it represents an ML-DSA algorithm.
+ *
+ * \param algorithm: [const][struct] The algorithm identifier to inspect.
+ *
+ * \return Returns true if the algorithm identifier represents ML-DSA; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_algorithm_identifier_is_mldsa(const qsc_x509_algorithm_identifier* algorithm);
+
+/*!
+ * \brief Test whether an AlgorithmIdentifier denotes ML-KEM.
+ *
+ * \details
+ * Examines the object identifier and parameter-set metadata in the supplied
+ * algorithm identifier and reports whether it represents an ML-KEM algorithm.
+ *
+ * \param algorithm: [const][struct] The algorithm identifier to inspect.
+ *
+ * \return Returns true if the algorithm identifier represents ML-KEM; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_algorithm_identifier_is_mlkem(const qsc_x509_algorithm_identifier* algorithm);
+
+/*!
+ * \brief Initialize an AlgorithmIdentifier for ML-DSA.
+ *
+ * \details
+ * Populates the supplied algorithm identifier object with the OID and
+ * parameter-set metadata corresponding to the selected ML-DSA parameter set.
+ *
+ * \param algorithm: [struct] The algorithm identifier object to initialize.
+ * \param parameterset: [enum] The ML-DSA parameter-set identifier.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_algorithm_identifier_initialize_mldsa(qsc_x509_algorithm_identifier* algorithm, qsc_x509_pqc_parameter_set parameterset);
+
+/*!
+ * \brief Initialize an AlgorithmIdentifier for ML-KEM.
+ *
+ * \details
+ * Populates the supplied algorithm identifier object with the OID and
+ * parameter-set metadata corresponding to the selected ML-KEM parameter set.
+ *
+ * \param algorithm: [struct] The algorithm identifier object to initialize.
+ * \param parameterset: [enum] The ML-KEM parameter-set identifier.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_algorithm_identifier_initialize_mlkem(qsc_x509_algorithm_identifier* algorithm, qsc_x509_pqc_parameter_set parameterset);
+
+/*!
+ * \brief Initialize an SPKI object for an elliptic-curve public key.
+ *
+ * \details
+ * Populates the supplied SubjectPublicKeyInfo object using the selected named
+ * curve and the supplied EC public-key bytes.
+ *
+ * \param spki: [struct] The destination subject public key information object.
+ * \param curve: [enum] The named elliptic curve identifier.
+ * \param publickey: [const] The raw encoded EC public-key bytes.
+ * \param publickeylen: The length of the public key in bytes.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_spki_initialize_ec(qsc_x509_subject_public_key_info* spki, qsc_x509_named_curve curve, const uint8_t* publickey, size_t publickeylen);
+
+/*!
+ * \brief Initialize an SPKI object for an ML-DSA public key.
+ *
+ * \details
+ * Populates the supplied SubjectPublicKeyInfo object using the selected
+ * ML-DSA parameter set and the supplied public-key bytes. This helper accepts
+ * only the ML-DSA parameter set supported by the current build.
+ *
+ * \param spki: [struct] The destination subject public key information object.
+ * \param parameterset: [enum] The ML-DSA parameter-set identifier.
+ * \param publickey: [const] The raw ML-DSA public-key bytes.
+ * \param publickeylen: The length of the public key in bytes.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_spki_initialize_ml_dsa(qsc_x509_subject_public_key_info* spki, qsc_x509_pqc_parameter_set parameterset, const uint8_t* publickey, size_t publickeylen);
+
+/*!
+ * \brief Initialize an SPKI object for an ML-KEM public key.
+ *
+ * \details
+ * Populates the supplied SubjectPublicKeyInfo object using the selected
+ * ML-KEM parameter set and the supplied public-key bytes. This helper accepts
+ * only the ML-KEM parameter set supported by the current build.
+ *
+ * \param spki: [struct] The destination subject public key information object.
+ * \param parameterset: [enum] The ML-KEM parameter-set identifier.
+ * \param publickey: [const] The raw ML-KEM public-key bytes.
+ * \param publickeylen: The length of the public key in bytes.
+ *
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_spki_initialize_ml_kem(qsc_x509_subject_public_key_info* spki, qsc_x509_pqc_parameter_set parameterset, const uint8_t* publickey, size_t publickeylen);
 
 QSC_CPLUSPLUS_ENABLED_END
 

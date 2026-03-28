@@ -25,6 +25,18 @@
     <Filter Include="Source Files\Tests">
       <UniqueIdentifier>{159adb40-c5f1-4aa3-8d4d-61399751937f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Tests\X509">
+      <UniqueIdentifier>{665a6eda-06a8-4daa-ad2f-8a1d1743b176}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tests\X509">
+      <UniqueIdentifier>{4636937c-18ea-4f6c-82b6-374e87777733}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tests\TLS">
+      <UniqueIdentifier>{1cb1da15-92cf-425f-ade3-2d8b307763f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tests\TLS">
+      <UniqueIdentifier>{a009dbe9-19af-4efc-af74-dbfb843b28ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qsc_test.c">
@@ -114,6 +126,36 @@
     <ClCompile Include="hqc_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="x509_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage1_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage2a_csr_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage2b_pem_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage2c_crl_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage2d_negative_validation_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage3_positive_interop_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_test_helper.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage4b_pqc_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage4a_encoding_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -202,6 +244,36 @@
     </ClInclude>
     <ClInclude Include="hqc_test.h">
       <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="x509_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage1_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage2a_csr_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage2b_pem_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage3_positive_interop_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage2d_negative_validation_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage2c_crl_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_test_helper.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage4b_pqc_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage4a_encoding_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

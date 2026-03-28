@@ -1,0 +1,807 @@
+\doxysection{C\+:/\+Users/stepp/\+Documents/\+Visual Studio 2022/\+Projects/\+C/\+QSC/\+QSC/sha2.h File Reference}
+\hypertarget{sha2_8h}{}\label{sha2_8h}\index{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sha2.h@{C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/sha2.h}}
+
+
+SHA2 header definition ~\newline
+Contains the public api and documentation for SHA2 digests, HMAC and HKDF implementations.  
+
+
+{\ttfamily \#include "{}common.\+h"{}}\newline
+Include dependency graph for sha2.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The SHA2-\/256 digest state array. \end{DoxyCompactList}\item 
+struct \mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The SHA2-\/384 digest state array. \end{DoxyCompactList}\item 
+struct \mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The SHA2-\/512 digest state array. \end{DoxyCompactList}\item 
+struct \mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The HMAC(SHA2-\/256) state array. \end{DoxyCompactList}\item 
+struct \mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}}
+\begin{DoxyCompactList}\small\item\em The HMAC(SHA2-\/512) state array. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{sha2_8h_a6461b629b7cfb1ad6f070ef522c1eb43}\label{sha2_8h_a6461b629b7cfb1ad6f070ef522c1eb43} 
+\#define {\bfseries QSC\+\_\+\+HKDF\+\_\+256\+\_\+\+KEY\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The HKDF-\/256 key size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_ac255b4d4a0f58638f817b75514c1ed04}\label{sha2_8h_ac255b4d4a0f58638f817b75514c1ed04} 
+\#define {\bfseries QSC\+\_\+\+HKDF\+\_\+512\+\_\+\+KEY\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The HKDF-\/512 key size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_a2ebdd4cd8b5a6a4131a772ff9dc8ba43}\label{sha2_8h_a2ebdd4cd8b5a6a4131a772ff9dc8ba43} 
+\#define {\bfseries QSC\+\_\+\+HMAC\+\_\+256\+\_\+\+KEY\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The recommended HMAC(SHA2-\/256) key size, minimum is 32 bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_a57d19828a4bf5be5da4f410320599540}\label{sha2_8h_a57d19828a4bf5be5da4f410320599540} 
+\#define {\bfseries QSC\+\_\+\+HMAC\+\_\+512\+\_\+\+KEY\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The recommended HMAC(SHA2-\/512) key size minimum is 64 bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_aff64f79a8925231ca3ffad45f8974f4f}\label{sha2_8h_aff64f79a8925231ca3ffad45f8974f4f} 
+\#define {\bfseries QSC\+\_\+\+HMAC\+\_\+256\+\_\+\+MAC\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The HMAC-\/256 mac-\/code size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_a11d8ada4a34ca95b073395598de77496}\label{sha2_8h_a11d8ada4a34ca95b073395598de77496} 
+\#define {\bfseries QSC\+\_\+\+HMAC\+\_\+512\+\_\+\+MAC\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The HMAC-\/512 mac-\/code size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_acc9bc7cab05c51e07a961f781e19d48b}\label{sha2_8h_acc9bc7cab05c51e07a961f781e19d48b} 
+\#define {\bfseries QSC\+\_\+\+HMAC\+\_\+256\+\_\+\+RATE}~64
+\begin{DoxyCompactList}\small\item\em The HMAC-\/256 input rate size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_ab8f65e5b375efc058079f6eae2591d3d}\label{sha2_8h_ab8f65e5b375efc058079f6eae2591d3d} 
+\#define {\bfseries QSC\+\_\+\+HMAC\+\_\+512\+\_\+\+RATE}~128
+\begin{DoxyCompactList}\small\item\em The HMAC-\/512 input rate size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_a8040542d5326a008843050709070dda9}\label{sha2_8h_a8040542d5326a008843050709070dda9} 
+\#define {\bfseries QSC\+\_\+\+SHA2\+\_\+256\+\_\+\+HASH\+\_\+\+SIZE}~32
+\begin{DoxyCompactList}\small\item\em The SHA2-\/256 hash size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_afaba48613b15ca13332f9c998bb4302c}\label{sha2_8h_afaba48613b15ca13332f9c998bb4302c} 
+\#define {\bfseries QSC\+\_\+\+SHA2\+\_\+384\+\_\+\+HASH\+\_\+\+SIZE}~48
+\begin{DoxyCompactList}\small\item\em The SHA2-\/384 hash size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_a6f81762376b25c0d0bbbb1461da19a67}\label{sha2_8h_a6f81762376b25c0d0bbbb1461da19a67} 
+\#define {\bfseries QSC\+\_\+\+SHA2\+\_\+512\+\_\+\+HASH\+\_\+\+SIZE}~64
+\begin{DoxyCompactList}\small\item\em The SHA2-\/512 hash size in bytes. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_a798cb6e28a04637a168d2860c29fb176}\label{sha2_8h_a798cb6e28a04637a168d2860c29fb176} 
+\#define {\bfseries QSC\+\_\+\+SHA2\+\_\+256\+\_\+\+RATE}~64
+\begin{DoxyCompactList}\small\item\em The SHA-\/256-\/bit absorption rate. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_ad6510c65fbebd47f35a76bf54b0f90a6}\label{sha2_8h_ad6510c65fbebd47f35a76bf54b0f90a6} 
+\#define {\bfseries QSC\+\_\+\+SHA2\+\_\+384\+\_\+\+RATE}~128
+\begin{DoxyCompactList}\small\item\em The SHA-\/384 byte absorption rate. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_a54cc35812b0c4ba419b3b5e0dca449a7}\label{sha2_8h_a54cc35812b0c4ba419b3b5e0dca449a7} 
+\#define {\bfseries QSC\+\_\+\+SHA2\+\_\+512\+\_\+\+RATE}~128
+\begin{DoxyCompactList}\small\item\em The SHA2-\/512-\/bit absorption rate. \end{DoxyCompactList}\item 
+\Hypertarget{sha2_8h_af98fa11b9259e84c51297c358b51b95e}\label{sha2_8h_af98fa11b9259e84c51297c358b51b95e} 
+\#define {\bfseries QSC\+\_\+\+SHA2\+\_\+\+STATE\+\_\+\+SIZE}~8
+\begin{DoxyCompactList}\small\item\em The SHA2-\/256 state array size. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_aab92d3ba44d23205bbc65c8f0ec3ea6d}{qsc\+\_\+sha256\+\_\+compute}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Process a message with SHA2-\/256 and returns the hash code in the output byte array. Short form api\+: processes the entire message and computes the hash code with a single call. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_ac3632316ad67480584980c8bb38179b7}{qsc\+\_\+sha256\+\_\+dispose}} (\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the SHA2-\/256 state. This function destroys the internal state of the cipher. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a08eaea44310521162ad00d2ee8124b08}{qsc\+\_\+sha256\+\_\+finalize}} (\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output)
+\begin{DoxyCompactList}\small\item\em Finalize the message state and returns the hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 32-\/byte output code. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a50767ebb1872df5f46fd2e9bd4c48519}{qsc\+\_\+sha256\+\_\+initialize}} (\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Initializes a SHA2-\/256 state structure, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_adcd579f4556e90b895b419334a4dea62}{qsc\+\_\+sha256\+\_\+permute}} (uint32\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input)
+\begin{DoxyCompactList}\small\item\em The SHA2-\/256 permutation function. Internal function\+: called by protocol hash and generation functions, or in the construction of other external protocols. Absorbs a message and permutes the state array. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a529f8a969165e97c245d5d65172cd634}{qsc\+\_\+sha256\+\_\+update}} (\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Update SHA2-\/256 with message input. Long form api\+: must be used in conjunction with the initialize and finalize functions. Absorbs a length of message input into the hash function. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_afcb6ddfdf25b91161060b57e12d0681d}{qsc\+\_\+sha384\+\_\+compute}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Process a message with SHA2-\/384 and returns the hash code in the output byte array. Short form api\+: processes the entire message and computes the hash code with a single call. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a268421256405301a45147f35345e9857}{qsc\+\_\+sha384\+\_\+dispose}} (\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the SHA2-\/384 state. This function destroys the internal state of the cipher. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a2336c915a8d35011f64540857ea8e52f}{qsc\+\_\+sha384\+\_\+finalize}} (\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output)
+\begin{DoxyCompactList}\small\item\em Finalize the message state and returns the SHA2-\/384 hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 48 byte output code. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a776de2966e9dd981f4c5a1fe49169bf2}{qsc\+\_\+sha384\+\_\+initialize}} (\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Initializes a SHA2-\/384 state structure, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a10a98e4b5369abe31c2f2940fc16bb1d}{qsc\+\_\+sha384\+\_\+update}} (\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Update SHA2-\/384 with blocks of input. Long form api\+: must be used in conjunction with the initialize and finalize functions. Absorbs a length of input into the hash function. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a5602305c5a0d7e022c82dfafa25e287f}{qsc\+\_\+sha512\+\_\+compute}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Process a message with SHA2-\/512 and returns the hash code in the output byte array. Short form api\+: processes the entire message and computes the hash code with a single call. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_af75dab61a62cddafe5d4a454c711a417}{qsc\+\_\+sha512\+\_\+dispose}} (\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the SHA2-\/512 state. This function destroys the internal state of the cipher. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_ada5a6439b4305b0e0e41838d1d58f73e}{qsc\+\_\+sha512\+\_\+finalize}} (\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output)
+\begin{DoxyCompactList}\small\item\em Finalize the message state and returns the SHA2-\/512 hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 64 byte output code. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a1191b73605a4f0491279babc53990bcc}{qsc\+\_\+sha512\+\_\+initialize}} (\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Initializes a SHA2-\/512 state structure, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_acf8e10cc6b29b94af4989dd5885ed5d5}{qsc\+\_\+sha512\+\_\+permute}} (uint64\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}input)
+\begin{DoxyCompactList}\small\item\em The SHA2-\/512 permutation function. Internal function\+: called by protocol hash and generation functions, or in the construction of other external protocols. Absorbs a message and permutes the state array. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_af0a8d6e0e724c05efc797f3e1f199219}{qsc\+\_\+sha512\+\_\+update}} (\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Update SHA2-\/512 with blocks of input. Long form api\+: must be used in conjunction with the initialize and finalize functions. Absorbs a length of input into the hash function. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a91d83a0e076585a28b9d18268b3ca993}{qsc\+\_\+hmac256\+\_\+compute}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen)
+\begin{DoxyCompactList}\small\item\em Process a message with HMAC(SHA2-\/256) and returns the hash code in the output byte array. Short form api\+: processes the key and complete message, and generates the MAC code with a single call. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_ad19d81e418c12695bc6475f8fa41a87f}{qsc\+\_\+hmac256\+\_\+dispose}} (\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the HMAC-\/256 state. This function destroys the internal state of the MAC. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a757cf2ba8342c295b97c11f60507bec8}{qsc\+\_\+hmac256\+\_\+finalize}} (\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output)
+\begin{DoxyCompactList}\small\item\em Finalize the HMAC-\/256 message state and return the hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 32 byte output code. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a29f09894b361edc0e623308daea5dbbb}{qsc\+\_\+hmac256\+\_\+initialize}} (\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen)
+\begin{DoxyCompactList}\small\item\em Initializes an HMAC-\/256 state structure with a key, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a6a46975b7c8e19883cac85e409432881}{qsc\+\_\+hmac256\+\_\+update}} (\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Update HMAC-\/256 with message input. Long form api\+: must be used in conjunction with the initialize and finalize functions. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_ae945ecc86192bedb2a51258404376d6f}{qsc\+\_\+hmac512\+\_\+compute}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen)
+\begin{DoxyCompactList}\small\item\em Process a message with SHA2-\/512 and returns the hash code in the output byte array. Short form api\+: processes the key and complete message, and generates the MAC code with a single call. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a5b7bed29f22b348a96a7f88b27bda597}{qsc\+\_\+hmac512\+\_\+dispose}} (\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx)
+\begin{DoxyCompactList}\small\item\em Dispose of the HMAC-\/512 state. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a77dae801c5a93ee3486c07a7a6f085ac}{qsc\+\_\+hmac512\+\_\+finalize}} (\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, uint8\+\_\+t \texorpdfstring{$\ast$}{*}output)
+\begin{DoxyCompactList}\small\item\em Finalize the HMAC-\/512 message state and return the hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 64 byte output code. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a82019377eb632c58b1b4b222d1c3a075}{qsc\+\_\+hmac512\+\_\+initialize}} (\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen)
+\begin{DoxyCompactList}\small\item\em Initializes an HMAC-\/512 state structure with a key, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a2d0b2707561bc1405cecc11104c030af}{qsc\+\_\+hmac512\+\_\+update}} (\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}ctx, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}message, size\+\_\+t msglen)
+\begin{DoxyCompactList}\small\item\em Update HMAC-\/512 with message input. Long form api\+: must be used in conjunction with the initialize and finalize functions. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a92dda9601e71e335d76f9e63e9709717}{qsc\+\_\+hkdf256\+\_\+expand}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}info, size\+\_\+t infolen)
+\begin{DoxyCompactList}\small\item\em Initialize an instance of HKDF(HMAC(SHA2-\/256)), and output an array of pseudo-\/random. Short form api\+: initializes with the key and user info, and generates the output pseudo-\/random with a single call. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a1af5af2b784ff891f154b9d78d743021}{qsc\+\_\+hkdf256\+\_\+extract}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}salt, size\+\_\+t saltlen)
+\begin{DoxyCompactList}\small\item\em Extract a key from a combined key and salt input using HMAC(SHA2-\/256). \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a99d9483d6a75e2cdaf69cdf6592d09df}{qsc\+\_\+hkdf512\+\_\+expand}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}info, size\+\_\+t infolen)
+\begin{DoxyCompactList}\small\item\em Initialize an instance of HKDF(HMAC(SHA2-\/512)), and output an array of pseudo-\/random. Short form api\+: initializes with the key and user info, and generates the output pseudo-\/random with a single call. \end{DoxyCompactList}\item 
+QSC\+\_\+\+EXPORT\+\_\+\+API void \mbox{\hyperlink{sha2_8h_a4a3f2811a273c2d7fc797de97e9e009d}{qsc\+\_\+hkdf512\+\_\+extract}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}output, size\+\_\+t otplen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}key, size\+\_\+t keylen, const uint8\+\_\+t \texorpdfstring{$\ast$}{*}salt, size\+\_\+t saltlen)
+\begin{DoxyCompactList}\small\item\em Extract a key from a combined key and salt input using HMAC(SHA2-\/512). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+SHA2 header definition ~\newline
+Contains the public api and documentation for SHA2 digests, HMAC and HKDF implementations. 
+
+\begin{DoxyAuthor}{Author}
+John Underhill 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+May 23, 2019 updated September 12, 2020
+\end{DoxyDate}
+
+
+SHA2-\/512 hash computation using long-\/form api ~\newline
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#define\ MSGLEN\ 200}}
+\DoxyCodeLine{uint8\_t\ msg[MSGLEN]\ =\ \{\ ...\ \};}
+\DoxyCodeLine{uint8\_t\ otp[\mbox{\hyperlink{sha2_8h_a6f81762376b25c0d0bbbb1461da19a67}{QSC\_SHA2\_512\_HASH\_SIZE}}]\ =\ \{\ 0\ \};}
+\DoxyCodeLine{\mbox{\hyperlink{structqsc__sha512__state}{qsc\_sha512\_state}}\ ctx;}
+\DoxyCodeLine{}
+\DoxyCodeLine{qsc\_sha512\_initialize(\&ctx);}
+\DoxyCodeLine{qsc\_sha512\_update(\&ctx,\ msg,\ MSGLEN);}
+\DoxyCodeLine{qsc\_sha512\_finalize(\&ctx,\ otp);}
+
+\end{DoxyCode}
+
+
+\begin{DoxyRemark}{Remarks}
+For usage examples, see sha3\+\_\+test.\+h. ~\newline
+ \textbackslash{} section Links NIST\+: The SHA-\/2 Standard \href{http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf}{\texttt{ http\+://csrc.\+nist.\+gov/publications/fips/fips180-\/4/fips-\/180-\/4.\+pdf}} ~\newline
+Analysis of SIMD Applicability to SHA Algorithms \href{https://software.intel.com/sites/default/files/m/b/9/b/aciicmez.pdf}{\texttt{ https\+://software.\+intel.\+com/sites/default/files/m/b/9/b/aciicmez.\+pdf}} ~\newline
+ 
+
+
+\end{DoxyRemark}
+\begin{DoxyParagraph}{}
+The SHA2 and HMAC implementations use two different forms of api\+: short-\/form and long-\/form. ~\newline
+The short-\/form api, which initializes the state, processes a message, and finalizes by producing output, all in a single function call, for example; \doxylink{sha2_8h_a5602305c5a0d7e022c82dfafa25e287f}{qsc\+\_\+sha512\+\_\+compute(uint8\+\_\+t\texorpdfstring{$\ast$}{*} output, const uint8\+\_\+t\texorpdfstring{$\ast$}{*} message, size\+\_\+t msglen)}, the entire message array is processed and the hash code is written to the output array. ~\newline
+The long-\/form api uses an initialization call to prepare the state, a update call to process the message, and the finalize call, which finalizes the state and generates a hash or mac-\/code. ~\newline
+The HKDF key derivation functions HKDF(HMAC(SHA2-\/256/512)), use only the short-\/form api, single-\/call functions, to generate pseudo-\/random to an output array. ~\newline
+Each of the function families (SHA2, HMAC, HKDF), have a corresponding set of reference constants associated with that member, example; QSC\+\_\+\+HKDF\+\_\+256\+\_\+\+KEY\+\_\+\+SIZE is the minimum expected HKDF-\/256 key size in bytes, QSC\+\_\+\+HMAC\+\_\+512\+\_\+\+MAC\+\_\+\+SIZE is the minimum size of the HMAC-\/512 output mac-\/code output array.
+\end{DoxyParagraph}
+For additional usage examples, see sha2\+\_\+test.\+h 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{sha2_8h_a92dda9601e71e335d76f9e63e9709717}\index{sha2.h@{sha2.h}!qsc\_hkdf256\_expand@{qsc\_hkdf256\_expand}}
+\index{qsc\_hkdf256\_expand@{qsc\_hkdf256\_expand}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hkdf256\_expand()}{qsc\_hkdf256\_expand()}}
+{\footnotesize\ttfamily \label{sha2_8h_a92dda9601e71e335d76f9e63e9709717} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hkdf256\+\_\+expand (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{info}{, }\item[{size\+\_\+t}]{infolen}{}\end{DoxyParamCaption})}
+
+
+
+Initialize an instance of HKDF(HMAC(SHA2-\/256)), and output an array of pseudo-\/random. Short form api\+: initializes with the key and user info, and generates the output pseudo-\/random with a single call. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output pseudo-\/random byte array \\
+\hline
+{\em otplen} & The output array length \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The HKDF key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+{\em info} & \mbox{[}const\mbox{]} The info array \\
+\hline
+{\em infolen} & The info array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a1af5af2b784ff891f154b9d78d743021}\index{sha2.h@{sha2.h}!qsc\_hkdf256\_extract@{qsc\_hkdf256\_extract}}
+\index{qsc\_hkdf256\_extract@{qsc\_hkdf256\_extract}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hkdf256\_extract()}{qsc\_hkdf256\_extract()}}
+{\footnotesize\ttfamily \label{sha2_8h_a1af5af2b784ff891f154b9d78d743021} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hkdf256\+\_\+extract (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{salt}{, }\item[{size\+\_\+t}]{saltlen}{}\end{DoxyParamCaption})}
+
+
+
+Extract a key from a combined key and salt input using HMAC(SHA2-\/256). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output pseudo-\/random byte array \\
+\hline
+{\em otplen} & The output array length \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The HKDF key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+{\em salt} & \mbox{[}const\mbox{]} The salt array \\
+\hline
+{\em saltlen} & The salt array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a99d9483d6a75e2cdaf69cdf6592d09df}\index{sha2.h@{sha2.h}!qsc\_hkdf512\_expand@{qsc\_hkdf512\_expand}}
+\index{qsc\_hkdf512\_expand@{qsc\_hkdf512\_expand}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hkdf512\_expand()}{qsc\_hkdf512\_expand()}}
+{\footnotesize\ttfamily \label{sha2_8h_a99d9483d6a75e2cdaf69cdf6592d09df} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hkdf512\+\_\+expand (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{info}{, }\item[{size\+\_\+t}]{infolen}{}\end{DoxyParamCaption})}
+
+
+
+Initialize an instance of HKDF(HMAC(SHA2-\/512)), and output an array of pseudo-\/random. Short form api\+: initializes with the key and user info, and generates the output pseudo-\/random with a single call. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output pseudo-\/random byte array \\
+\hline
+{\em otplen} & The output array length \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The HKDF key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+{\em info} & \mbox{[}const\mbox{]} The info array \\
+\hline
+{\em infolen} & The info array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a4a3f2811a273c2d7fc797de97e9e009d}\index{sha2.h@{sha2.h}!qsc\_hkdf512\_extract@{qsc\_hkdf512\_extract}}
+\index{qsc\_hkdf512\_extract@{qsc\_hkdf512\_extract}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hkdf512\_extract()}{qsc\_hkdf512\_extract()}}
+{\footnotesize\ttfamily \label{sha2_8h_a4a3f2811a273c2d7fc797de97e9e009d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hkdf512\+\_\+extract (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{size\+\_\+t}]{otplen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{salt}{, }\item[{size\+\_\+t}]{saltlen}{}\end{DoxyParamCaption})}
+
+
+
+Extract a key from a combined key and salt input using HMAC(SHA2-\/512). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output pseudo-\/random byte array \\
+\hline
+{\em otplen} & The output array length \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The HKDF key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+{\em salt} & \mbox{[}const\mbox{]} The salt array \\
+\hline
+{\em saltlen} & The salt array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a91d83a0e076585a28b9d18268b3ca993}\index{sha2.h@{sha2.h}!qsc\_hmac256\_compute@{qsc\_hmac256\_compute}}
+\index{qsc\_hmac256\_compute@{qsc\_hmac256\_compute}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac256\_compute()}{qsc\_hmac256\_compute()}}
+{\footnotesize\ttfamily \label{sha2_8h_a91d83a0e076585a28b9d18268b3ca993} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac256\+\_\+compute (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{}\end{DoxyParamCaption})}
+
+
+
+Process a message with HMAC(SHA2-\/256) and returns the hash code in the output byte array. Short form api\+: processes the key and complete message, and generates the MAC code with a single call. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be at least 32 bytes in length.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output byte array; receives the hash code \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The message input byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The secret key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_ad19d81e418c12695bc6475f8fa41a87f}\index{sha2.h@{sha2.h}!qsc\_hmac256\_dispose@{qsc\_hmac256\_dispose}}
+\index{qsc\_hmac256\_dispose@{qsc\_hmac256\_dispose}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac256\_dispose()}{qsc\_hmac256\_dispose()}}
+{\footnotesize\ttfamily \label{sha2_8h_ad19d81e418c12695bc6475f8fa41a87f} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac256\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the HMAC-\/256 state. This function destroys the internal state of the MAC. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a757cf2ba8342c295b97c11f60507bec8}\index{sha2.h@{sha2.h}!qsc\_hmac256\_finalize@{qsc\_hmac256\_finalize}}
+\index{qsc\_hmac256\_finalize@{qsc\_hmac256\_finalize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac256\_finalize()}{qsc\_hmac256\_finalize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a757cf2ba8342c295b97c11f60507bec8} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac256\+\_\+finalize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{}\end{DoxyParamCaption})}
+
+
+
+Finalize the HMAC-\/256 message state and return the hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 32 byte output code. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be sized correctly. Finalizes the message state, can not be used in consecutive calls. State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state; must be initialized \\
+\hline
+{\em output} & The output byte array; receives the hash code \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a29f09894b361edc0e623308daea5dbbb}\index{sha2.h@{sha2.h}!qsc\_hmac256\_initialize@{qsc\_hmac256\_initialize}}
+\index{qsc\_hmac256\_initialize@{qsc\_hmac256\_initialize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac256\_initialize()}{qsc\_hmac256\_initialize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a29f09894b361edc0e623308daea5dbbb} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac256\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{}\end{DoxyParamCaption})}
+
+
+
+Initializes an HMAC-\/256 state structure with a key, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The secret key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a6a46975b7c8e19883cac85e409432881}\index{sha2.h@{sha2.h}!qsc\_hmac256\_update@{qsc\_hmac256\_update}}
+\index{qsc\_hmac256\_update@{qsc\_hmac256\_update}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac256\_update()}{qsc\_hmac256\_update()}}
+{\footnotesize\ttfamily \label{sha2_8h_a6a46975b7c8e19883cac85e409432881} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac256\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac256__state}{qsc\+\_\+hmac256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Update HMAC-\/256 with message input. Long form api\+: must be used in conjunction with the initialize and finalize functions. 
+
+State must be initialized by the caller.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_ae945ecc86192bedb2a51258404376d6f}\index{sha2.h@{sha2.h}!qsc\_hmac512\_compute@{qsc\_hmac512\_compute}}
+\index{qsc\_hmac512\_compute@{qsc\_hmac512\_compute}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac512\_compute()}{qsc\_hmac512\_compute()}}
+{\footnotesize\ttfamily \label{sha2_8h_ae945ecc86192bedb2a51258404376d6f} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac512\+\_\+compute (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{}\end{DoxyParamCaption})}
+
+
+
+Process a message with SHA2-\/512 and returns the hash code in the output byte array. Short form api\+: processes the key and complete message, and generates the MAC code with a single call. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be at least 128 bytes in length.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output byte array; receives the hash code \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The message input byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The secret key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a5b7bed29f22b348a96a7f88b27bda597}\index{sha2.h@{sha2.h}!qsc\_hmac512\_dispose@{qsc\_hmac512\_dispose}}
+\index{qsc\_hmac512\_dispose@{qsc\_hmac512\_dispose}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac512\_dispose()}{qsc\_hmac512\_dispose()}}
+{\footnotesize\ttfamily \label{sha2_8h_a5b7bed29f22b348a96a7f88b27bda597} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac512\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the HMAC-\/512 state. 
+
+\begin{DoxyWarning}{Warning}
+The dispose function must be called when disposing of the cipher. This function destroys the internal state of the cipher.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a77dae801c5a93ee3486c07a7a6f085ac}\index{sha2.h@{sha2.h}!qsc\_hmac512\_finalize@{qsc\_hmac512\_finalize}}
+\index{qsc\_hmac512\_finalize@{qsc\_hmac512\_finalize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac512\_finalize()}{qsc\_hmac512\_finalize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a77dae801c5a93ee3486c07a7a6f085ac} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac512\+\_\+finalize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{}\end{DoxyParamCaption})}
+
+
+
+Finalize the HMAC-\/512 message state and return the hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 64 byte output code. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be sized correctly. Finalizes the message state, can not be used in consecutive calls. State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state; must be initialized \\
+\hline
+{\em output} & The output byte array; receives the hash code \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a82019377eb632c58b1b4b222d1c3a075}\index{sha2.h@{sha2.h}!qsc\_hmac512\_initialize@{qsc\_hmac512\_initialize}}
+\index{qsc\_hmac512\_initialize@{qsc\_hmac512\_initialize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac512\_initialize()}{qsc\_hmac512\_initialize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a82019377eb632c58b1b4b222d1c3a075} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac512\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{key}{, }\item[{size\+\_\+t}]{keylen}{}\end{DoxyParamCaption})}
+
+
+
+Initializes an HMAC-\/512 state structure with a key, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em key} & \mbox{[}const\mbox{]} The secret key array \\
+\hline
+{\em keylen} & The key array length \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a2d0b2707561bc1405cecc11104c030af}\index{sha2.h@{sha2.h}!qsc\_hmac512\_update@{qsc\_hmac512\_update}}
+\index{qsc\_hmac512\_update@{qsc\_hmac512\_update}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_hmac512\_update()}{qsc\_hmac512\_update()}}
+{\footnotesize\ttfamily \label{sha2_8h_a2d0b2707561bc1405cecc11104c030af} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+hmac512\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__hmac512__state}{qsc\+\_\+hmac512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Update HMAC-\/512 with message input. Long form api\+: must be used in conjunction with the initialize and finalize functions. 
+
+State must be initialized by the caller.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_aab92d3ba44d23205bbc65c8f0ec3ea6d}\index{sha2.h@{sha2.h}!qsc\_sha256\_compute@{qsc\_sha256\_compute}}
+\index{qsc\_sha256\_compute@{qsc\_sha256\_compute}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha256\_compute()}{qsc\_sha256\_compute()}}
+{\footnotesize\ttfamily \label{sha2_8h_aab92d3ba44d23205bbc65c8f0ec3ea6d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha256\+\_\+compute (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Process a message with SHA2-\/256 and returns the hash code in the output byte array. Short form api\+: processes the entire message and computes the hash code with a single call. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be at least 32 bytes in length.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output byte array; receives the hash code \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The message input byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_ac3632316ad67480584980c8bb38179b7}\index{sha2.h@{sha2.h}!qsc\_sha256\_dispose@{qsc\_sha256\_dispose}}
+\index{qsc\_sha256\_dispose@{qsc\_sha256\_dispose}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha256\_dispose()}{qsc\_sha256\_dispose()}}
+{\footnotesize\ttfamily \label{sha2_8h_ac3632316ad67480584980c8bb38179b7} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha256\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the SHA2-\/256 state. This function destroys the internal state of the cipher. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a08eaea44310521162ad00d2ee8124b08}\index{sha2.h@{sha2.h}!qsc\_sha256\_finalize@{qsc\_sha256\_finalize}}
+\index{qsc\_sha256\_finalize@{qsc\_sha256\_finalize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha256\_finalize()}{qsc\_sha256\_finalize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a08eaea44310521162ad00d2ee8124b08} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha256\+\_\+finalize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{}\end{DoxyParamCaption})}
+
+
+
+Finalize the message state and returns the hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 32-\/byte output code. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be sized correctly. Finalizes the message state, can not be used in consecutive calls. State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state; must be initialized \\
+\hline
+{\em output} & The output byte array; receives the hash code \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a50767ebb1872df5f46fd2e9bd4c48519}\index{sha2.h@{sha2.h}!qsc\_sha256\_initialize@{qsc\_sha256\_initialize}}
+\index{qsc\_sha256\_initialize@{qsc\_sha256\_initialize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha256\_initialize()}{qsc\_sha256\_initialize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a50767ebb1872df5f46fd2e9bd4c48519} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha256\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Initializes a SHA2-\/256 state structure, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_adcd579f4556e90b895b419334a4dea62}\index{sha2.h@{sha2.h}!qsc\_sha256\_permute@{qsc\_sha256\_permute}}
+\index{qsc\_sha256\_permute@{qsc\_sha256\_permute}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha256\_permute()}{qsc\_sha256\_permute()}}
+{\footnotesize\ttfamily \label{sha2_8h_adcd579f4556e90b895b419334a4dea62} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha256\+\_\+permute (\begin{DoxyParamCaption}\item[{uint32\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{}\end{DoxyParamCaption})}
+
+
+
+The SHA2-\/256 permutation function. Internal function\+: called by protocol hash and generation functions, or in the construction of other external protocols. Absorbs a message and permutes the state array. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The function output; must be initialized \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a529f8a969165e97c245d5d65172cd634}\index{sha2.h@{sha2.h}!qsc\_sha256\_update@{qsc\_sha256\_update}}
+\index{qsc\_sha256\_update@{qsc\_sha256\_update}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha256\_update()}{qsc\_sha256\_update()}}
+{\footnotesize\ttfamily \label{sha2_8h_a529f8a969165e97c245d5d65172cd634} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha256\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha256__state}{qsc\+\_\+sha256\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Update SHA2-\/256 with message input. Long form api\+: must be used in conjunction with the initialize and finalize functions. Absorbs a length of message input into the hash function. 
+
+\begin{DoxyWarning}{Warning}
+State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_afcb6ddfdf25b91161060b57e12d0681d}\index{sha2.h@{sha2.h}!qsc\_sha384\_compute@{qsc\_sha384\_compute}}
+\index{qsc\_sha384\_compute@{qsc\_sha384\_compute}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha384\_compute()}{qsc\_sha384\_compute()}}
+{\footnotesize\ttfamily \label{sha2_8h_afcb6ddfdf25b91161060b57e12d0681d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha384\+\_\+compute (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Process a message with SHA2-\/384 and returns the hash code in the output byte array. Short form api\+: processes the entire message and computes the hash code with a single call. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be at least 48 bytes in length.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output byte array; receives the hash code \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The message input byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a268421256405301a45147f35345e9857}\index{sha2.h@{sha2.h}!qsc\_sha384\_dispose@{qsc\_sha384\_dispose}}
+\index{qsc\_sha384\_dispose@{qsc\_sha384\_dispose}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha384\_dispose()}{qsc\_sha384\_dispose()}}
+{\footnotesize\ttfamily \label{sha2_8h_a268421256405301a45147f35345e9857} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha384\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the SHA2-\/384 state. This function destroys the internal state of the cipher. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a2336c915a8d35011f64540857ea8e52f}\index{sha2.h@{sha2.h}!qsc\_sha384\_finalize@{qsc\_sha384\_finalize}}
+\index{qsc\_sha384\_finalize@{qsc\_sha384\_finalize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha384\_finalize()}{qsc\_sha384\_finalize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a2336c915a8d35011f64540857ea8e52f} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha384\+\_\+finalize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{}\end{DoxyParamCaption})}
+
+
+
+Finalize the message state and returns the SHA2-\/384 hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 48 byte output code. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be sized correctly. Finalizes the message state, can not be used in consecutive calls. State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state; must be initialized \\
+\hline
+{\em output} & The output byte array; receives the hash code \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a776de2966e9dd981f4c5a1fe49169bf2}\index{sha2.h@{sha2.h}!qsc\_sha384\_initialize@{qsc\_sha384\_initialize}}
+\index{qsc\_sha384\_initialize@{qsc\_sha384\_initialize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha384\_initialize()}{qsc\_sha384\_initialize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a776de2966e9dd981f4c5a1fe49169bf2} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha384\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Initializes a SHA2-\/384 state structure, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a10a98e4b5369abe31c2f2940fc16bb1d}\index{sha2.h@{sha2.h}!qsc\_sha384\_update@{qsc\_sha384\_update}}
+\index{qsc\_sha384\_update@{qsc\_sha384\_update}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha384\_update()}{qsc\_sha384\_update()}}
+{\footnotesize\ttfamily \label{sha2_8h_a10a98e4b5369abe31c2f2940fc16bb1d} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha384\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha384__state}{qsc\+\_\+sha384\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Update SHA2-\/384 with blocks of input. Long form api\+: must be used in conjunction with the initialize and finalize functions. Absorbs a length of input into the hash function. 
+
+\begin{DoxyWarning}{Warning}
+State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a5602305c5a0d7e022c82dfafa25e287f}\index{sha2.h@{sha2.h}!qsc\_sha512\_compute@{qsc\_sha512\_compute}}
+\index{qsc\_sha512\_compute@{qsc\_sha512\_compute}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha512\_compute()}{qsc\_sha512\_compute()}}
+{\footnotesize\ttfamily \label{sha2_8h_a5602305c5a0d7e022c82dfafa25e287f} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha512\+\_\+compute (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Process a message with SHA2-\/512 and returns the hash code in the output byte array. Short form api\+: processes the entire message and computes the hash code with a single call. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be at least 64 bytes in length.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The output byte array; receives the hash code \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The message input byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_af75dab61a62cddafe5d4a454c711a417}\index{sha2.h@{sha2.h}!qsc\_sha512\_dispose@{qsc\_sha512\_dispose}}
+\index{qsc\_sha512\_dispose@{qsc\_sha512\_dispose}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha512\_dispose()}{qsc\_sha512\_dispose()}}
+{\footnotesize\ttfamily \label{sha2_8h_af75dab61a62cddafe5d4a454c711a417} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha512\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Dispose of the SHA2-\/512 state. This function destroys the internal state of the cipher. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The cipher state structure \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_ada5a6439b4305b0e0e41838d1d58f73e}\index{sha2.h@{sha2.h}!qsc\_sha512\_finalize@{qsc\_sha512\_finalize}}
+\index{qsc\_sha512\_finalize@{qsc\_sha512\_finalize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha512\_finalize()}{qsc\_sha512\_finalize()}}
+{\footnotesize\ttfamily \label{sha2_8h_ada5a6439b4305b0e0e41838d1d58f73e} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha512\+\_\+finalize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{}\end{DoxyParamCaption})}
+
+
+
+Finalize the message state and returns the SHA2-\/512 hash value in output. Long form api\+: must be used in conjunction with the initialize and update functions. Produces a 64 byte output code. 
+
+\begin{DoxyWarning}{Warning}
+The output array must be sized correctly. Finalizes the message state, can not be used in consecutive calls. State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state; must be initialized \\
+\hline
+{\em output} & The output byte array; receives the hash code \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_a1191b73605a4f0491279babc53990bcc}\index{sha2.h@{sha2.h}!qsc\_sha512\_initialize@{qsc\_sha512\_initialize}}
+\index{qsc\_sha512\_initialize@{qsc\_sha512\_initialize}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha512\_initialize()}{qsc\_sha512\_initialize()}}
+{\footnotesize\ttfamily \label{sha2_8h_a1191b73605a4f0491279babc53990bcc} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha512\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{}\end{DoxyParamCaption})}
+
+
+
+Initializes a SHA2-\/512 state structure, must be called before message processing. Long form api\+: must be used in conjunction with the update and finalize functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_acf8e10cc6b29b94af4989dd5885ed5d5}\index{sha2.h@{sha2.h}!qsc\_sha512\_permute@{qsc\_sha512\_permute}}
+\index{qsc\_sha512\_permute@{qsc\_sha512\_permute}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha512\_permute()}{qsc\_sha512\_permute()}}
+{\footnotesize\ttfamily \label{sha2_8h_acf8e10cc6b29b94af4989dd5885ed5d5} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha512\+\_\+permute (\begin{DoxyParamCaption}\item[{uint64\+\_\+t \texorpdfstring{$\ast$}{*}}]{output}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{input}{}\end{DoxyParamCaption})}
+
+
+
+The SHA2-\/512 permutation function. Internal function\+: called by protocol hash and generation functions, or in the construction of other external protocols. Absorbs a message and permutes the state array. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em output} & The function output; must be initialized \\
+\hline
+{\em input} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sha2_8h_af0a8d6e0e724c05efc797f3e1f199219}\index{sha2.h@{sha2.h}!qsc\_sha512\_update@{qsc\_sha512\_update}}
+\index{qsc\_sha512\_update@{qsc\_sha512\_update}!sha2.h@{sha2.h}}
+\doxysubsubsection{\texorpdfstring{qsc\_sha512\_update()}{qsc\_sha512\_update()}}
+{\footnotesize\ttfamily \label{sha2_8h_af0a8d6e0e724c05efc797f3e1f199219} 
+QSC\+\_\+\+EXPORT\+\_\+\+API void qsc\+\_\+sha512\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structqsc__sha512__state}{qsc\+\_\+sha512\+\_\+state}} \texorpdfstring{$\ast$}{*}}]{ctx}{, }\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{message}{, }\item[{size\+\_\+t}]{msglen}{}\end{DoxyParamCaption})}
+
+
+
+Update SHA2-\/512 with blocks of input. Long form api\+: must be used in conjunction with the initialize and finalize functions. Absorbs a length of input into the hash function. 
+
+\begin{DoxyWarning}{Warning}
+State must be initialized by the caller.
+\end{DoxyWarning}
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \mbox{[}struct\mbox{]} The function state \\
+\hline
+{\em message} & \mbox{[}const\mbox{]} The input message byte array \\
+\hline
+{\em msglen} & The number of message bytes to process \\
+\hline
+\end{DoxyParams}

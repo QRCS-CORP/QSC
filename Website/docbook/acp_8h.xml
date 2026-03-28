@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_acp_8h" xml:lang="en-US">
+<title>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/acp.h File Reference</title>
+<indexterm><primary>C:/Users/stepp/Documents/Visual Studio 2022/Projects/C/QSC/QSC/acp.h</primary></indexterm>
+<para>
+
+<para>The Auto entropy Collection Provider: ACP ACP is the recommended entropy provider. ACP uses a hashed collection of system timers, statistics, the RDRAND provider, and the system random provider, to seed an instance of cSHAKE-512. </para>
+ 
+</para>
+<programlisting linenumbering="unnumbered">#include &quot;common.h&quot;<?linebreak?></programlisting><simplesect>
+    <title>Macros    </title>
+        <itemizedlist>
+            <listitem><para><anchor xml:id="_acp_8h_1ad25efe032505a1bc74a324ddfe5a6d66"/>#define <emphasis role="strong">QSC_ACP_SEED_MAX</emphasis>&#160;&#160;&#160;10240000</para>
+
+<para>The maximum seed size that can be extracted from a single generate call. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<simplesect>
+    <title>Functions    </title>
+        <itemizedlist>
+            <listitem><para>QSC_EXPORT_API bool <link linkend="_acp_8h_1aa62d1695cd25163dcd52b434625d5efc">qsc_acp_generate</link> (uint8_t *output, size_t length)</para>
+
+<para>Get an array of random bytes from the auto entropy collection provider. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API uint16_t <link linkend="_acp_8h_1a371ef60b02ca3f5408d551821d5a7e7d">qsc_acp_uint16</link> ()</para>
+
+<para>Get a random 16-bit unsigned integer. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API uint32_t <link linkend="_acp_8h_1abc731ec49b80f1b4a227ac023b944093">qsc_acp_uint32</link> ()</para>
+
+<para>Get a random 32-bit unsigned integer. </para>
+</listitem>
+            <listitem><para>QSC_EXPORT_API uint64_t <link linkend="_acp_8h_1a177e779e6c0d05897d39d1c4c4cca1ff">qsc_acp_uint64</link> ()</para>
+
+<para>Get a random 64-bit unsigned integer. </para>
+</listitem>
+        </itemizedlist>
+</simplesect>
+<section>
+<title>Detailed Description</title>
+
+<para>The Auto entropy Collection Provider: ACP ACP is the recommended entropy provider. ACP uses a hashed collection of system timers, statistics, the RDRAND provider, and the system random provider, to seed an instance of cSHAKE-512. </para>
+
+<para><formalpara><title>Author</title>
+
+<para>John Underhill </para>
+</formalpara>
+<formalpara><title>Date</title>
+
+<para>August 17, 2020 </para>
+</formalpara>
+</para>
+</section>
+<section>
+<title>Function Documentation</title>
+<anchor xml:id="_acp_8h_1aa62d1695cd25163dcd52b434625d5efc"/><section>
+    <title>qsc_acp_generate()</title>
+<indexterm><primary>qsc_acp_generate</primary><secondary>acp.h</secondary></indexterm>
+<indexterm><primary>acp.h</primary><secondary>qsc_acp_generate</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API bool qsc_acp_generate (uint8_t * output, size_t length)</computeroutput></para><para>
+
+<para>Get an array of random bytes from the auto entropy collection provider. </para>
+</para>
+
+<para>
+                <formalpara>
+                    <title>
+Parameters</title>
+                    <para>
+                    <table frame="all">
+                        <tgroup cols="2" align="left" colsep="1" rowsep="1">
+                        <colspec colwidth="1*"/>
+                        <colspec colwidth="4*"/>
+                        <tbody>
+                            <row>
+<entry>output</entry><entry>
+<para>Pointer to the output byte array </para>
+</entry>
+                            </row>
+                            <row>
+<entry>length</entry><entry>
+<para>The number of bytes to copy </para>
+</entry>
+                            </row>
+                        </tbody>
+                        </tgroup>
+                    </table>
+                    </para>
+                </formalpara>
+                <formalpara><title>Returns</title>
+
+<para>Returns true for success </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_acp_8h_1a371ef60b02ca3f5408d551821d5a7e7d"/><section>
+    <title>qsc_acp_uint16()</title>
+<indexterm><primary>qsc_acp_uint16</primary><secondary>acp.h</secondary></indexterm>
+<indexterm><primary>acp.h</primary><secondary>qsc_acp_uint16</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API uint16_t qsc_acp_uint16 ( )</computeroutput></para><para>
+
+<para>Get a random 16-bit unsigned integer. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns the random integer </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_acp_8h_1abc731ec49b80f1b4a227ac023b944093"/><section>
+    <title>qsc_acp_uint32()</title>
+<indexterm><primary>qsc_acp_uint32</primary><secondary>acp.h</secondary></indexterm>
+<indexterm><primary>acp.h</primary><secondary>qsc_acp_uint32</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API uint32_t qsc_acp_uint32 ( )</computeroutput></para><para>
+
+<para>Get a random 32-bit unsigned integer. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns the random integer </para>
+</formalpara>
+</para>
+</section>
+<anchor xml:id="_acp_8h_1a177e779e6c0d05897d39d1c4c4cca1ff"/><section>
+    <title>qsc_acp_uint64()</title>
+<indexterm><primary>qsc_acp_uint64</primary><secondary>acp.h</secondary></indexterm>
+<indexterm><primary>acp.h</primary><secondary>qsc_acp_uint64</secondary></indexterm>
+<para><computeroutput>QSC_EXPORT_API uint64_t qsc_acp_uint64 ( )</computeroutput></para><para>
+
+<para>Get a random 64-bit unsigned integer. </para>
+</para>
+
+<para><formalpara><title>Returns</title>
+
+<para>Returns the random integer </para>
+</formalpara>
+</para>
+</section>
+</section>
+</section>

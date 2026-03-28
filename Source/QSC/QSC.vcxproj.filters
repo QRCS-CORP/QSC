@@ -465,6 +465,48 @@
     <ClInclude Include="ecdsap521base.h">
       <Filter>Header Files\Asymmetric\Signature\ECDSA\Support</Filter>
     </ClInclude>
+    <ClInclude Include="x509host.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509pem.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509store.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509certwrite.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509crl.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509crlwrite.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509csr.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509key.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509rev.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509write.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509keywrite.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509ocsp.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509pkcs12.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509aia.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -709,6 +751,54 @@
     </ClCompile>
     <ClCompile Include="ecdsap521base.c">
       <Filter>Source Files\Asymmetric\Signature\ECDSA\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="x509host.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509pem.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509store.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509certwrite.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509crl.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509crlwrite.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509csr.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509key.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509rev.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509write.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509keywrite.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509aia.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509ocsp.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509pkcs12.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509pkcs12crypto.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509revext.c">
+      <Filter>Source Files\X.509</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
