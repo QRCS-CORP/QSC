@@ -595,7 +595,7 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_crl_builder_set_crl_number(qsc_x509_crl_
  *
  * - If the issuer certificate contains a Subject Key Identifier (SKI) extension, that value is used
  *   directly as the key identifier.
- * - If no SKI is present, the key identifier is derived from the issuer’s Subject Public Key
+ * - If no SKI is present, the key identifier is derived from the issuer's Subject Public Key
  *   Information (SPKI), typically using a SHA-1 hash over the public key bit string as specified
  *   in RFC 5280.
  *

@@ -378,31 +378,30 @@ void qsc_memutils_clear(void* output, size_t length)
 #elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         /* use 32-byte blocks on NEON via the 256-bit helper */
         const size_t SMDBLK = 32U;
-#else
-        const size_t SMDBLK = 0U;
 #endif
 
+#if defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (SMDBLK > 0U && length >= SMDBLK)
         {
             const size_t ALNLEN = (length / SMDBLK) * SMDBLK;
 
             while (pctr != ALNLEN)
             {
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
                 memutils_clear512((volatile uint8_t*)output + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
                 memutils_clear256((volatile uint8_t*)output + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#   elif defined(QSC_SYSTEM_HAS_AVX)
                 memutils_clear128((volatile uint8_t*)output + pctr);
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
                 memutils_clear256_neon((volatile uint8_t*)output + pctr);
-#endif
+#   endif
                 pctr += SMDBLK;
             }
         }
 
         /* fill remaining bytes smaller than one SIMD block */
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
         if (length - pctr >= 32U)
         {
             memutils_clear256((volatile uint8_t*)output + pctr);
@@ -413,20 +412,20 @@ void qsc_memutils_clear(void* output, size_t length)
             memutils_clear128((volatile uint8_t*)output + pctr);
             pctr += 16U;
         }
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
         if (length - pctr >= 16U)
         {
             memutils_clear128((volatile uint8_t*)output + pctr);
             pctr += 16U;
         }
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (length - pctr >= 16U)
         {
             memutils_clear128((volatile uint8_t*)output + pctr);
             pctr += 16U;
         }
+#   endif
 #endif
-
         for (size_t i = pctr; i < length; ++i)
         {
             ((volatile uint8_t*)output)[i] = 0x00U;
@@ -588,10 +587,9 @@ bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
 #   endif
 #   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         const size_t SMDBLK = 32U;
-#   else
-        const size_t SMDBLK = 0U;
 #   endif
 
+#if defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (SMDBLK > 0U && length >= SMDBLK)
         {
             const size_t ALNLEN = (length / SMDBLK) * SMDBLK;
@@ -610,6 +608,7 @@ bool qsc_memutils_are_equal(const uint8_t* a, const uint8_t* b, size_t length)
                 pctr += SMDBLK;
             }
         }
+#endif
 
         for (size_t i = pctr; i < length; ++i)
         {
@@ -857,30 +856,29 @@ void qsc_memutils_copy(void* output, const void* input, size_t length)
 #   endif
 #elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         const size_t SMDBLK = 32U;
-#else
-        const size_t SMDBLK = 0U;
 #endif
 
+#if defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (SMDBLK > 0U && length >= SMDBLK)
         {
             const size_t ALNLEN = (length / SMDBLK) * SMDBLK;
 
             while (pctr != ALNLEN)
             {
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
                 memutils_copy512((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
                 memutils_copy256((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#   elif defined(QSC_SYSTEM_HAS_AVX)
                 memutils_copy128((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
                 memutils_copy256_neon((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
-#endif
+#   endif
                 pctr += SMDBLK;
             }
         }
 
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
         if (length - pctr >= 32U)
         {
             memutils_copy256((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
@@ -891,18 +889,19 @@ void qsc_memutils_copy(void* output, const void* input, size_t length)
             memutils_copy128((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
             pctr += 16U;
         }
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
         if (length - pctr >= 16U)
         {
             memutils_copy128((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
             pctr += 16U;
         }
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (length - pctr >= 16U)
         {
             memutils_copy128((uint8_t*)output + pctr, (const uint8_t*)input + pctr);
             pctr += 16U;
         }
+#   endif
 #endif
 
         for (size_t i = pctr; i < length; ++i)
@@ -1429,36 +1428,36 @@ void qsc_memutils_set_value(void* output, size_t length, uint8_t value)
 #   endif
 #elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         const size_t SMDBLK = 32U;
-#else
-        const size_t SMDBLK = 0U;
 #endif
 
+#if defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (SMDBLK > 0U && length >= SMDBLK)
         {
             const size_t ALNLEN = (length / SMDBLK) * SMDBLK;
 
             while (pctr != ALNLEN)
             {
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
                 memutils_setval512((uint8_t*)output + pctr, value);
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
                 memutils_setval256((uint8_t*)output + pctr, value);
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#   elif defined(QSC_SYSTEM_HAS_AVX)
                 memutils_setval128((uint8_t*)output + pctr, value);
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
                 memutils_setval256_neon((uint8_t*)output + pctr, value);
-#endif
+#   endif
                 pctr += SMDBLK;
             }
         }
 
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#   if defined(QSC_SYSTEM_HAS_AVX512)
         if (length - pctr >= 32U) { memutils_setval256((uint8_t*)output + pctr, value); pctr += 32U; }
         else if (length - pctr >= 16U) { memutils_setval128((uint8_t*)output + pctr, value); pctr += 16U; }
-#elif defined(QSC_SYSTEM_HAS_AVX2)
+#   elif defined(QSC_SYSTEM_HAS_AVX2)
         if (length - pctr >= 16U) { memutils_setval128((uint8_t*)output + pctr, value); pctr += 16U; }
-#elif defined(QSC_SYSTEM_HAS_ARM_NEON)
+#   elif defined(QSC_SYSTEM_HAS_ARM_NEON)
         if (length - pctr >= 16U) { memutils_setval128((uint8_t*)output + pctr, value); pctr += 16U; }
+#   endif
 #endif
 
         for (size_t i = pctr; i < length; ++i)
