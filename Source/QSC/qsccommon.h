@@ -1155,13 +1155,19 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_EDDH_S1EC25519
 
+///*!
+// * \def QSC_EDDH_S3EC448
+// * \brief Enable the EDDH S3EC448 parameter set.
+// */
+//#define QSC_EDDH_S3EC448
+
 /*** ML-KEM Kyber ***/
 
-///*!
-// * \def QSC_KYBER_S1K2P512
-// * \brief Enable the Kyber S1K2P512 parameter set.
-// */
-//#define QSC_KYBER_S1K2P512
+/*!
+ * \def QSC_KYBER_S1K2P512
+ * \brief Enable the Kyber S1K2P512 parameter set.
+ */
+#define QSC_KYBER_S1K2P512
 
 ///*!
 // * \def QSC_KYBER_S3K3P768
@@ -1169,11 +1175,11 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_KYBER_S3K3P768
 
-/*!
- * \def QSC_KYBER_S5K4P1024
- * \brief Enable the Kyber S5K4P1024 parameter set.
- */
-#define QSC_KYBER_S5K4P1024
+///*!
+// * \def QSC_KYBER_S5K4P1024
+// * \brief Enable the Kyber S5K4P1024 parameter set.
+// */
+//#define QSC_KYBER_S5K4P1024
 
 ///*!
 // * \def QSC_KYBER_S6K5P1280
@@ -1183,11 +1189,11 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*** HQC ***/
 
-///*!
-// * \def QSC_HQC_S1N2321
-// * \brief Enable the HQC S1N17669 parameter set.
-// */
-//#define QSC_HQC_S1N2321
+/*!
+ * \def QSC_HQC_S1N2321
+ * \brief Enable the HQC S1N17669 parameter set.
+ */
+#define QSC_HQC_S1N2321
 
 ///*!
 // * \def QSC_HQC_S3N4602
@@ -1195,19 +1201,19 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_HQC_S3N4602
 
-/*!
- * \def QSC_HQC_S5N7333
- * \brief Enable the HQC S5N57637 parameter set.
- */
-#define QSC_HQC_S5N7333
+///*!
+// * \def QSC_HQC_S5N7333
+// * \brief Enable the HQC S5N57637 parameter set.
+// */
+//#define QSC_HQC_S5N7333
 
 /*** McEliece ***/
 
-///*!
-// * \def QSC_MCELIECE_S1N3488T64
-// * \brief Enable the McEliece S1-N3488T64 parameter set.
-// */
-//#define QSC_MCELIECE_S1N3488T64
+/*!
+ * \def QSC_MCELIECE_S1N3488T64
+ * \brief Enable the McEliece S1-N3488T64 parameter set.
+ */
+#define QSC_MCELIECE_S1N3488T64
 
 ///*!
 // * \def QSC_MCELIECE_S3N4608T96
@@ -1215,11 +1221,11 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_MCELIECE_S3N4608T96
 
-/*!
- * \def QSC_MCELIECE_S5N6688T128
- * \brief Enable the McEliece S5-N6688T128 parameter set.
- */
-#define QSC_MCELIECE_S5N6688T128
+///*!
+// * \def QSC_MCELIECE_S5N6688T128
+// * \brief Enable the McEliece S5-N6688T128 parameter set.
+// */
+//#define QSC_MCELIECE_S5N6688T128
 
 ///*!
 // * \def QSC_MCELIECE_S6N6960T119
@@ -1235,11 +1241,11 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*** Signature Schemes ***/
 
-///*!
-// * \def QSC_DILITHIUM_S1P44
-// * \brief Enable the Dilithium S1P44 parameter set.
-// */
-//#define QSC_DILITHIUM_S1P44
+/*!
+ * \def QSC_DILITHIUM_S1P44
+ * \brief Enable the Dilithium S1P44 parameter set.
+ */
+#define QSC_DILITHIUM_S1P44
 
 ///*!
 // * \def QSC_DILITHIUM_S3P65
@@ -1247,19 +1253,19 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_DILITHIUM_S3P65
 
-/*!
- * \def QSC_DILITHIUM_S5P87
- * \brief Enable the Dilithium S5P87 parameter set.
- */
-#define QSC_DILITHIUM_S5P87
+///*!
+// * \def QSC_DILITHIUM_S5P87
+// * \brief Enable the Dilithium S5P87 parameter set.
+// */
+//#define QSC_DILITHIUM_S5P87
 
  /*** ECDSA ***/
 
-///*!
-// * \def QSC_ECDSA_S1P256
-// * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
-// */
-//#define QSC_ECDSA_S1P256
+/*!
+ * \def QSC_ECDSA_S1P256
+ * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
+ */
+#define QSC_ECDSA_S1P256
 
 ///*!
 // * \def QSC_ECDSA_S3P384
@@ -1267,11 +1273,11 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_ECDSA_S3P384
 
-/*!
- * \def QSC_ECDSA_S5P521
- * \brief Enable the ECDSA S1P521 (NIST P-521) parameter set.
- */
-#define QSC_ECDSA_S5P521
+///*!
+// * \def QSC_ECDSA_S5P521
+// * \brief Enable the ECDSA S1P521 (NIST P-521) parameter set.
+// */
+//#define QSC_ECDSA_S5P521
 
 /*** EDDSA ***/
 
@@ -1281,27 +1287,33 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_EDDSA_S1EC25519
 
+///*!
+// * \def QSC_EDDSA_S3EC448
+// * \brief Enable the EDDSA S3EC448 parameter set.
+// */
+//#define QSC_EDDSA_S3EC448
+
  /*** Falcon ***/
 
-///*!
-// * \def QSC_FALCON_S3SHAKE256F512
-// * \brief Enable the Falcon S3SHAKE256F512 parameter set.
-// */
-//#define QSC_FALCON_S3SHAKE256F512
-
 /*!
- * \def QSC_FALCON_S5SHAKE256F1024
- * \brief Enable the Falcon S5SHAKE256F1024 parameter set.
+ * \def QSC_FALCON_S3SHAKE256F512
+ * \brief Enable the Falcon S3SHAKE256F512 parameter set.
  */
-#define QSC_FALCON_S5SHAKE256F1024
+#define QSC_FALCON_S3SHAKE256F512
+
+///*!
+// * \def QSC_FALCON_S5SHAKE256F1024
+// * \brief Enable the Falcon S5SHAKE256F1024 parameter set.
+// */
+//#define QSC_FALCON_S5SHAKE256F1024
 
 /*** SphincsPlus ***/
 
-///*!
-// * \def QSC_SPHINCSPLUS_S1S128SHAKERS
-// * \brief Enable the SphincsPlus S1S128SHAKERS robust small parameter set.
-// */
-//#define QSC_SPHINCSPLUS_S1S128SHAKERS
+/*!
+ * \def QSC_SPHINCSPLUS_S1S128SHAKERS
+ * \brief Enable the SphincsPlus S1S128SHAKERS robust small parameter set.
+ */
+#define QSC_SPHINCSPLUS_S1S128SHAKERS
 
 ///*!
 // * \def QSC_SPHINCSPLUS_S3S192SHAKERS
@@ -1309,11 +1321,11 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_SPHINCSPLUS_S3S192SHAKERS
 
-/*!
- * \def QSC_SPHINCSPLUS_S5S256SHAKERS
- * \brief Enable the SphincsPlus S5S256SHAKERS robust small parameter set.
- */
-#define QSC_SPHINCSPLUS_S5S256SHAKERS
+///*!
+// * \def QSC_SPHINCSPLUS_S5S256SHAKERS
+// * \brief Enable the SphincsPlus S5S256SHAKERS robust small parameter set.
+// */
+//#define QSC_SPHINCSPLUS_S5S256SHAKERS
 
 ///*!
 // * \def QSC_SPHINCSPLUS_S6S512SHAKERS

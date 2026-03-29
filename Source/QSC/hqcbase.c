@@ -829,7 +829,7 @@ static void gf_generate(uint16_t* exp, uint16_t* log, const int16_t m)
     log[0U] = 0U;
 }
 
-uint16_t gf_reduce(uint16_t x)
+static uint16_t gf_reduce(uint16_t x)
 {
     uint64_t mod;
     uint16_t dist;
@@ -865,7 +865,7 @@ uint16_t gf_reduce(uint16_t x)
     return x;
 }
 
-void gf_carryless_mul(uint8_t* c, uint8_t a, uint8_t b)
+static void gf_carryless_mul(uint8_t* c, uint8_t a, uint8_t b)
 {
     uint16_t u[4U] = { 0U };
     uint16_t h;
@@ -922,7 +922,7 @@ void gf_carryless_mul(uint8_t* c, uint8_t a, uint8_t b)
     c[1U] = (uint8_t)h;
 }
 
-uint16_t gf_mul(uint16_t a, uint16_t b)
+static uint16_t gf_mul(uint16_t a, uint16_t b)
 {
     uint8_t c[2U] = { 0U };
     uint16_t tmp;
@@ -933,7 +933,7 @@ uint16_t gf_mul(uint16_t a, uint16_t b)
     return gf_reduce(tmp);
 }
 
-uint16_t gf_square(uint16_t a)
+static uint16_t gf_square(uint16_t a)
 {
     uint32_t b;
     uint32_t s;
@@ -950,7 +950,7 @@ uint16_t gf_square(uint16_t a)
     return gf_reduce((uint16_t)s);
 }
 
-uint16_t gf_inverse(uint16_t a)
+static uint16_t gf_inverse(uint16_t a)
 {
     uint16_t inv = a;
     uint16_t tmp1, tmp2;

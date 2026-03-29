@@ -155,7 +155,7 @@ static gf gf_sq2mul(gf in, gf m)
 
 #if defined(QSC_MCELIECE_S1N3488T64)
 
-gf gf_mul(gf in0, gf in1)
+static gf gf_mul(gf in0, gf in1)
 {
 	size_t i;
 	uint32_t tmp;
