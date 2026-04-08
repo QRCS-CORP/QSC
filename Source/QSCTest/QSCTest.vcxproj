@@ -270,6 +270,7 @@
     <ClCompile Include="benchmark.c" />
     <ClCompile Include="csx_test.c" />
     <ClCompile Include="dilithium_test.c" />
+    <ClCompile Include="ecdh_test.c" />
     <ClCompile Include="ecdsa_test.c" />
     <ClCompile Include="eddh_test.c" />
     <ClCompile Include="eddsa_test.c" />
@@ -292,6 +293,13 @@
     <ClCompile Include="sphincsplus_test.c" />
     <ClCompile Include="testutils.c" />
     <ClCompile Include="timer.c" />
+    <ClCompile Include="TLS\tls_stage1_codec_extension_tests.c" />
+    <ClCompile Include="TLS\tls_stage2_registry_policy_tests.c" />
+    <ClCompile Include="TLS\tls_stage3_transcript_tests.c" />
+    <ClCompile Include="TLS\tls_stage4_schedule_tests.c" />
+    <ClCompile Include="TLS\tls_stage5_record_tests.c" />
+    <ClCompile Include="TLS\tls_stage6_certificate_message_tests.c" />
+    <ClCompile Include="tls_test.c" />
     <ClCompile Include="X509\x509_stage1_tests.c" />
     <ClCompile Include="X509\x509_stage2a_csr_tests.c" />
     <ClCompile Include="X509\x509_stage2b_pem_tests.c" />
@@ -309,6 +317,7 @@
     <ClInclude Include="async_test.h" />
     <ClInclude Include="chacha_test.h" />
     <ClInclude Include="benchmark.h" />
+    <ClInclude Include="ecdh_test.h" />
     <ClInclude Include="ecdsa_test.h" />
     <ClInclude Include="falcon_test.h" />
     <ClInclude Include="hqc_test.h" />
@@ -333,6 +342,13 @@
     <ClInclude Include="sphincsplus_test.h" />
     <ClInclude Include="testutils.h" />
     <ClInclude Include="timer.h" />
+    <ClInclude Include="TLS\tls_stage1_codec_extension_tests.h" />
+    <ClInclude Include="TLS\tls_stage2_registry_policy_tests.h" />
+    <ClInclude Include="TLS\tls_stage3_transcript_tests.h" />
+    <ClInclude Include="TLS\tls_stage4_schedule_tests.h" />
+    <ClInclude Include="TLS\tls_stage5_record_tests.h" />
+    <ClInclude Include="TLS\tls_stage6_certificate_message_tests.h" />
+    <ClInclude Include="tls_test.h" />
     <ClInclude Include="X509\x509_stage1_tests.h" />
     <ClInclude Include="X509\x509_stage2a_csr_tests.h" />
     <ClInclude Include="X509\x509_stage2b_pem_tests.h" />

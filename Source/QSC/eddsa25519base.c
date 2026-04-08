@@ -1,4 +1,4 @@
-#include "eddsabase.h"
+#include "eddsa25519base.h"
 #include "csp.h"
 #include "ed25519.h"
 #include "intutils.h"
@@ -111,13 +111,41 @@ static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t ml
 
 /* public api */
 
-void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
+void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
+{
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(rng_generate != NULL);
+
+	qsc_ge25519_p3 A = { 0 };
+	uint8_t seed[ED25519_SEED_SIZE] = { 0U };
+
+	if (rng_generate(seed, ED25519_SEED_SIZE) == true)
+	{
+		qsc_sha512_compute(privatekey, seed, ED25519_SEED_SIZE);
+		qsc_sc25519_clamp(privatekey);
+
+		qsc_ge25519_scalarmult_base(&A, privatekey);
+		qsc_ge25519_p3_to_bytes(publickey, &A);
+
+		qsc_memutils_copy(privatekey, seed, ED25519_SEED_SIZE);
+		qsc_memutils_copy(privatekey + ED25519_SEED_SIZE, publickey, ED25519_PUBLICKEY_SIZE);
+		qsc_memutils_secure_erase(seed, sizeof(seed));
+	}
+	else
+	{
+		qsc_memutils_secure_erase(publickey, ED25519_PUBLICKEY_SIZE);
+		qsc_memutils_secure_erase(privatekey, ED25519_PRIVATEKEY_SIZE);
+	}
+}
+
+void qsc_ed25519_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
 {
 	QSC_ASSERT(publickey != NULL);
 	QSC_ASSERT(privatekey != NULL);
 	QSC_ASSERT(seed != NULL);
 
-	qsc_ge25519_p3 A;
+	qsc_ge25519_p3 A = { 0 };
 
 	qsc_sha512_compute(privatekey, seed, ED25519_SEED_SIZE);
 	qsc_sc25519_clamp(privatekey);
@@ -129,7 +157,7 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
 	qsc_memutils_copy(privatekey + ED25519_SEED_SIZE, publickey, ED25519_PUBLICKEY_SIZE);
 }
 
-int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
+bool qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
 {
 	QSC_ASSERT(signedmsg != NULL);
 	QSC_ASSERT(smsglen != NULL);
@@ -137,7 +165,9 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 	QSC_ASSERT(privatekey != NULL);
 
 	size_t slen;
-	int32_t res;
+	bool res;
+
+	res = false;
 
 	qsc_memutils_copy(signedmsg + ED25519_SIGNATURE_SIZE, message, msglen);
 
@@ -148,8 +178,7 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 			*smsglen = 0;
 		}
 
-		qsc_memutils_clear(signedmsg, msglen + ED25519_SIGNATURE_SIZE);
-		res = -1;
+		qsc_memutils_secure_erase(signedmsg, msglen + ED25519_SIGNATURE_SIZE);
 	}
 	else
 	{
@@ -158,13 +187,13 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
 			*smsglen = msglen + slen;
 		}
 
-		res = 0;
+		res = true;
 	}
 
 	return res;
 }
 
-int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
+bool qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
 {
 	QSC_ASSERT(message != NULL);
 	QSC_ASSERT(msglen != NULL);
@@ -173,26 +202,34 @@ int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* sign
 	QSC_ASSERT(smsglen > ED25519_SIGNATURE_SIZE);
 	QSC_ASSERT(smsglen - ED25519_SIGNATURE_SIZE < QSC_SIZE_MAX);
 
-	int32_t res;
+	size_t mlen;
+	bool res;
 
-	res = -1;
+	res = false;
 
 	if (message != NULL && msglen != NULL && signedmsg != NULL && publickey != NULL && 
 		smsglen > ED25519_SIGNATURE_SIZE && smsglen - ED25519_SIGNATURE_SIZE < QSC_SIZE_MAX)
 	{
-		const size_t MSGLEN = smsglen - ED25519_SIGNATURE_SIZE;
+		mlen = smsglen - ED25519_SIGNATURE_SIZE;
 
-		if (ecdsa_ed25519_verify(signedmsg, signedmsg + ED25519_SIGNATURE_SIZE, MSGLEN, publickey) == false)
+		if (ecdsa_ed25519_verify(signedmsg, signedmsg + ED25519_SIGNATURE_SIZE, mlen, publickey) == false)
 		{
-			qsc_memutils_clear(message, MSGLEN);
+			if (mlen > 0U)
+			{
+				qsc_memutils_secure_erase(message, mlen);
+			}
+			
 			*msglen = 0;
-			res = -1;
 		}
 		else
 		{
-			*msglen = MSGLEN;
-			qsc_memutils_copy(message, signedmsg + ED25519_SIGNATURE_SIZE, MSGLEN);
-			res = 0;
+			if (mlen > 0U)
+			{
+				qsc_memutils_copy(message, signedmsg + ED25519_SIGNATURE_SIZE, mlen);
+			}
+
+			*msglen = mlen;
+			res = true;
 		}
 	}
 

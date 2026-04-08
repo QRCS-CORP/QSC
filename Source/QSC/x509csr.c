@@ -1324,7 +1324,7 @@ qsc_asn1_status qsc_x509_csr_decode_der(qsc_x509_csr* csr, const uint8_t* input,
         qsc_encoding_ber_free_element(root);
     }
 
-    return status; /* FIX-01: was return QSC_ASN1_STATUS_SUCCESS — bypassed INVALID_INPUT for null/zero inputs */
+    return status; /* FIX-01: was return QSC_ASN1_STATUS_SUCCESS - bypassed INVALID_INPUT for null/zero inputs */
 }
 
 qsc_asn1_status qsc_x509_csr_decode_pem(qsc_x509_csr* csr, const char* input, size_t inputlen)

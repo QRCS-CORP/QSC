@@ -17,6 +17,53 @@
 
 ---
 
+## What's New in This Release
+
+This release introduces two major additions to the library:
+
+### Expanded Elliptic Curve Primitive Suite
+
+The EC primitive layer has been substantially extended beyond the existing ECDSA and Ed25519 coverage:
+
+- **ECDH over NIST P-curves** (`ecdh.h`, `ecdhp256base.*`, `ecdhp384base.*`, `ecdhp521base.*`) — Static and ephemeral ECDH key agreement over P-256, P-384, and P-521 per NIST SP 800-56A and FIPS 186-5. Constant-time scalar multiplication; public key validation per SP 800-56A requirements. Reuses field arithmetic from the existing ECDSA implementations to avoid code duplication.
+
+- **EdDH** (`eddh.h`, `eddh25519base.*`, `eddh448base.*`) — Edwards-curve Diffie-Hellman key exchange. Supports X25519 (Curve25519, parameter set `QSC_EDDH_S1EC25519`) and X448 (Goldilocks, parameter set `QSC_EDDH_S3EC448`). Designed for constant-time execution.
+
+- **EdDSA** (`eddsa.h`, `eddsa25519base.*`, `eddsa448base.*`) — Unified Edwards-curve digital signature interface. Supports Ed25519 and Ed448 (Goldilocks) via a common API; parameter set selected at compile time (`QSC_EDDSA_S1EC25519` or `QSC_EDDSA_S3EC448`).
+
+- **Ed448 / Goldilocks** (`ed448.h`, `ed448.c`) — Full implementation of the Ed448-Goldilocks Edwards curve, underpinning both EdDH-X448 and EdDSA-448.
+
+### TLS 1.3 Scaffolding
+
+A complete TLS 1.3 protocol stack has been added (all files dated 2026-04-07/08), advancing the roadmap item from planned to in-progress. The implementation is structured as a layered set of modules:
+
+| Module | Header | Description |
+|---|---|---|
+| **Type Definitions** | `tlstypes.h` | Core TLS 1.3 type definitions and structures |
+| **Protocol Constants** | `tlsdefs.h` | Fixed TLS protocol constants and HKDF label strings (TLS 1.2 legacy and TLS 1.3 version fields, record header sizes, AEAD tag/nonce sizes, HKDF label prefixes) |
+| **Protocol Limits** | `tlslimits.h` | Maximum sizes, buffer bounds, and protocol-enforced field limits |
+| **Error Codes** | `tlserrors.*` | TLS-layer error enumeration and description helpers |
+| **Alert Protocol** | `tlsalert.*` | TLS alert message encoding, decoding, and encrypted delivery |
+| **Record Layer** | `tlsrecord.*` | TLS record framing; plaintext and protected `TLSInnerPlaintext` encoding |
+| **Codec** | `tlscodec.*` | Low-level TLS record encode/decode primitives |
+| **I/O Layer** | `tlsio.*` | Socket-level send/receive integration for TLS records |
+| **Named Groups** | `tlsgroups.*` | TLS `NamedGroup` registry; key share generation and shared-secret derivation for supported groups |
+| **Signature Algorithms** | `tlssigalgs.*` | `SignatureScheme` registry; maps TLS signature algorithm identifiers to QSC signing backends |
+| **Extensions** | `tlsextensions.*` | Encoding and decoding of all standard TLS 1.3 extensions (supported_versions, key_share, supported_groups, signature_algorithms, pre_shared_key, early_data, session_ticket, etc.) |
+| **Key Schedule** | `tlsschedule.*` | TLS 1.3 HKDF-based key schedule; derives Early, Handshake, and Application traffic secrets and their associated keys and IVs |
+| **Transcript Hash** | `tlstranscript.*` | Running handshake transcript hash; supports SHA-256 and SHA-384 digest contexts as required by the negotiated cipher suite |
+| **Handshake State Machine** | `tlshandshake.h`, `tlshandshake_server.c` | Core TLS 1.3 connection-state container and state-machine entry points; ClientHello build/parse, server flight processing, HelloRetryRequest, Finished message generation and verification, application-data encryption/decryption, certificate and CertificateVerify configuration |
+| **Session Resumption** | `tlsresumption.*` | TLS 1.3 session ticket generation, parsing, and PSK-based resumption |
+| **Certificate Layer** | `tlscert.*` | TLS certificate chain management and selection |
+| **Certificate Messages** | `tlscertmsg.*` | Encoding and decoding of TLS Certificate and CertificateVerify handshake messages |
+| **Policy** | `tlspolicy.*` | Cipher suite and extension policy; drives what the client advertises and what the server accepts |
+| **TLS Client** | `tlsclient.*` | High-level TLS 1.3 client wrapper; integrates the handshake state machine, X.509 peer verification, certificate presentation, and session resumption into a single client-facing API |
+| **TLS Server** | `tlsserver.*` | High-level TLS 1.3 server wrapper; equivalent server-side interface with certificate configuration and peer validation hooks |
+
+The TLS layer integrates directly with the QSC X.509 certificate infrastructure through `tlshandshake`'s built-in QSC X.509 validation bridge, and with the EC and post-quantum primitive suite through `tlsgroups` and `tlssigalgs`.
+
+---
+
 ## Documentation
 
 | Resource | Description |
@@ -31,13 +78,13 @@
 
 QSC is a production-grade cryptographic library built for environments that demand verifiable correctness, long-term quantum resistance, and high throughput. The library combines NIST-standardized post-quantum algorithms with classical primitives, proprietary high-security constructions, and SIMD-accelerated implementations, all within a single, dependency-free C23 codebase.
 
-Recent additions expand the library's reach into public-internet TLS and certificate infrastructure: full ECDSA implementations for NIST P-256, P-384, and P-521 interoperable with the CA/Browser Forum Baseline Requirements, Falcon lattice-based signatures, the HQC code-based key encapsulation mechanism, and a comprehensive X.509 certificate infrastructure built on a strict DER/BER-capable ASN.1 engine. The X.509 layer now covers the full certificate lifecycle; parsing, validation, generation, revocation, OCSP, PKCS#12 key management, and post-quantum ML-DSA certificate profiles, without any external dependencies.
+Recent additions expand the library's reach into public-internet TLS and certificate infrastructure: full ECDSA implementations for NIST P-256, P-384, and P-521 interoperable with the CA/Browser Forum Baseline Requirements, ECDH key agreement over the same NIST P-curves, EdDH (X25519 and X448) and EdDSA (Ed25519 and Ed448) Edwards-curve primitives, Falcon lattice-based signatures, the HQC code-based key encapsulation mechanism, a comprehensive X.509 certificate infrastructure built on a strict DER/BER-capable ASN.1 engine, and an in-progress TLS 1.3 protocol stack. The X.509 layer covers the full certificate lifecycle: parsing, validation, generation, revocation, OCSP, PKCS#12 key management, and post-quantum ML-DSA certificate profiles, without any external dependencies.
 
 Key design goals:
 
 - **Long-term security** - all asymmetric algorithms are post-quantum secure; proprietary constructions target 256-bit or greater security levels.
 - **Standards compliance** - written to [MISRA C](https://misra.org.uk/) secure coding guidelines; asymmetric primitives updated to final FIPS-203, FIPS-204, and FIPS-205 standards.
-- **Public internet compatibility** - NIST P-256, P-384, and P-521 ECDSA and X.509 certificate infrastructure enable deployment in TLS 1.2/1.3 stacks and compliance with CA/Browser Forum Baseline Requirements for publicly trusted certificates.
+- **Public internet compatibility** - NIST P-256, P-384, and P-521 ECDSA and ECDH, Edwards-curve EdDH/EdDSA, and X.509 certificate infrastructure enable deployment in TLS 1.2/1.3 stacks and compliance with CA/Browser Forum Baseline Requirements for publicly trusted certificates.
 - **Performance** - dual code paths: clean portable C reference implementations alongside AVX, AVX2, and AVX-512 intrinsic-optimized variants. Enable the highest instruction set supported by your target CPU for maximum throughput.
 - **Auditability** - thoroughly commented, well-structured source with a comprehensive test suite covering known-answer tests, NIST CAVP/ACVP vectors, fuzzing, and stress testing across every primitive.
 - **Portability** - compiles on Windows (MSVC), Linux (GCC), and macOS (Clang) with no external dependencies.
@@ -64,7 +111,7 @@ The primary validation suite for the QSC library. QSCTest exercises every crypto
 - **Stress Testing** - extended load testing to surface resource leaks, state corruption, and threading issues.
 - **Function Correctness** - round-trip and cross-function consistency checks (e.g., encrypt→decrypt, sign→verify).
 
-Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, HQC, ECDH), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256/P-384/P-521, Ed25519), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP), the X.509 certificate layer, and all utility modules.
+Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, HQC, ECDH P-256/P-384/P-521, EdDH X25519/X448), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256/P-384/P-521, EdDSA Ed25519/Ed448), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP), the X.509 certificate layer, the TLS 1.3 protocol stack, and all utility modules.
 
 ---
 
@@ -112,7 +159,8 @@ The wrapper is written in managed C++ and compiled as a mixed-mode assembly, all
 | **ML-KEM** (Kyber) | Module-LWE based KEM | NIST FIPS-203 |
 | **Classic McEliece** | Niederreiter dual-form code-based KEM | NIST PQC Round 3 |
 | **HQC** | QC-MDPC code-based KEM | NIST PQC Round 4 |
-| **ECDH** (X25519) | Elliptic Curve Diffie-Hellman | RFC 7748 |
+| **ECDH** (P-256 / P-384 / P-521) | NIST prime-curve ECDH key agreement; constant-time scalar multiplication; public-key validation per SP 800-56A | NIST SP 800-56A, FIPS 186-5 |
+| **EdDH** (X25519 / X448) | Edwards-curve Diffie-Hellman; Curve25519 (`QSC_EDDH_S1EC25519`) and Goldilocks (`QSC_EDDH_S3EC448`) | RFC 7748 |
 
 #### Digital Signature Schemes
 
@@ -122,7 +170,40 @@ The wrapper is written in managed C++ and compiled as a mixed-mode assembly, all
 | **SLH-DSA** (SPHINCS+) | Stateless hash-based signatures | NIST FIPS-205 |
 | **Falcon** | NTRU lattice-based compact signatures | NIST PQC Round 3 |
 | **ECDSA** (P-256 / P-384 / P-521) | Elliptic curve signatures over NIST P-256 (secp256r1), P-384 (secp384r1), and P-521 (secp521r1); RFC 6979 deterministic nonce; interoperable with TLS 1.2/1.3 and public CA certificates | FIPS 186-5, RFC 6979, RFC 8422 |
-| **EDDSA** | Edwards-curve digital signatures | RFC 8032 |
+| **EdDSA** (Ed25519 / Ed448) | Edwards-curve digital signatures; Ed25519 and Ed448-Goldilocks parameter sets selectable at compile time (`QSC_EDDSA_S1EC25519` / `QSC_EDDSA_S3EC448`) | RFC 8032 |
+
+---
+
+### TLS 1.3 Protocol Stack *(in progress)*
+
+QSC now includes an in-progress TLS 1.3 implementation built entirely on the QSC cryptographic core, with no dependency on OpenSSL or any other external TLS library. The stack covers the full TLS 1.3 record and handshake layer, HKDF key schedule, session resumption, and integrates directly with the QSC X.509 certificate infrastructure for peer validation and certificate presentation.
+
+#### TLS Module Map
+
+| Module | Header | Description |
+|---|---|---|
+| **Type Definitions** | `tlstypes.h` | Core TLS 1.3 type definitions and connection-state structures |
+| **Protocol Constants** | `tlsdefs.h` | Fixed TLS protocol constants and HKDF label strings |
+| **Protocol Limits** | `tlslimits.h` | Maximum sizes and protocol-enforced field bounds |
+| **Error Codes** | `tlserrors.*` | TLS-layer error enumeration and description helpers |
+| **Alert Protocol** | `tlsalert.*` | Alert message encoding, decoding, and encrypted delivery |
+| **Record Layer** | `tlsrecord.*` | TLS record framing; `TLSInnerPlaintext` encoding and AEAD protection |
+| **Codec** | `tlscodec.*` | Low-level record encode/decode primitives |
+| **I/O Layer** | `tlsio.*` | Socket-level send/receive integration for TLS records |
+| **Named Groups** | `tlsgroups.*` | `NamedGroup` registry; key share generation and shared-secret derivation |
+| **Signature Algorithms** | `tlssigalgs.*` | `SignatureScheme` registry; maps TLS identifiers to QSC signing backends |
+| **Extensions** | `tlsextensions.*` | Encoding and decoding of all standard TLS 1.3 extensions |
+| **Key Schedule** | `tlsschedule.*` | HKDF-based TLS 1.3 key schedule; Early, Handshake, and Application traffic secrets |
+| **Transcript Hash** | `tlstranscript.*` | Running handshake transcript hash (SHA-256 and SHA-384) |
+| **Handshake State Machine** | `tlshandshake.h`, `tlshandshake_server.c` | Core connection-state container and state-machine entry points for client and server roles |
+| **Session Resumption** | `tlsresumption.*` | Session ticket generation, parsing, and PSK-based resumption |
+| **Certificate Layer** | `tlscert.*` | TLS certificate chain management and selection |
+| **Certificate Messages** | `tlscertmsg.*` | Certificate and CertificateVerify handshake message encoding/decoding |
+| **Policy** | `tlspolicy.*` | Cipher suite and extension policy configuration |
+| **TLS Client** | `tlsclient.*` | High-level TLS 1.3 client wrapper |
+| **TLS Server** | `tlsserver.*` | High-level TLS 1.3 server wrapper |
+
+The TLS layer's certificate validation path connects to QSC's X.509 infrastructure via the built-in QSC X.509 validation bridge exposed through `tlshandshake`. Key exchange is handled through `tlsgroups`, which dispatches to ECDH (P-256/P-384/P-521), EdDH (X25519/X448), and ML-KEM backends as supported by the negotiated group.
 
 ---
 
@@ -171,8 +252,10 @@ The X.509 implementation strictly enforces the requirements of RFC 5280, X.690, 
 | **Private Key** | `x509key.h` | Private key decoding, size validation, and certificate-key matching interface; decodes PKCS#8 OneAsymmetricKey and SEC 1 ECPrivateKey structures for ECDSA and ML-DSA key types |
 | **Key Serialisation** | `x509keywrite.h` | Private key encoding and PEM conversion interface; serialises ECDSA and ML-DSA private keys to PKCS#8 DER or SEC 1 DER and wraps the result in PEM armour |
 | **PKCS#12** | `x509pkcs12.h` | PKCS#12 bundle parsing and encrypted private-key decryption; decodes PFX structures containing certificate chains and password-protected private keys using AES-256-CBC or 3DES |
+| **PKCS#12 Crypto** | `x509pkcs12crypto.c` | AES-256-CBC and 3DES key derivation and decryption primitives for PKCS#12 PFX bundles |
 | **PEM Codec** | `x509pem.h` | PEM encode/decode for certificates, CRLs, CSRs, PKCS#8 private keys, SEC 1 EC keys, and ML-DSA / ML-KEM key types; validates header/footer label consistency and Base64 padding; supports multi-certificate PEM bundles and trust-store loading |
 | **DER Write Primitives** | `x509write.h` | Low-level ASN.1 DER writing helpers for primitive values, composite objects, SPKI structures, and standard extension payloads; used internally by the certificate and CRL builders |
+| **High-Level Wrapper** | `x509wrap.h` | Convenience wrapper exposing the most common X.509 operations (parse, verify, build, sign, export) through a simplified API surface |
 
 #### Supported Certificate Signature Profiles
 
@@ -337,7 +420,7 @@ The two paths share identical interfaces and produce identical output; the compi
 
 SIMD acceleration is applied across: AES (AES-NI), RCS, CSX, SHA3/SHAKE/Keccak, ML-KEM (Kyber), ML-DSA (Dilithium), SLH-DSA (SPHINCS+), and all memory utility operations.
 
-The ECDSA P-256, P-384, and P-521 implementations use Jacobian projective coordinates with the a=−3 doubling shortcut, Solinas reduction for field arithmetic, and Barrett reduction for scalar arithmetic mod n. RFC 6979 deterministic nonce generation (HMAC-SHA256/384/512 respectively) means no entropy source is required during signing.
+The ECDSA and ECDH P-256, P-384, and P-521 implementations use Jacobian projective coordinates with the a=−3 doubling shortcut, Solinas reduction for field arithmetic, and Barrett reduction for scalar arithmetic mod n. RFC 6979 deterministic nonce generation (HMAC-SHA256/384/512 respectively) means no entropy source is required during signing. EdDH and EdDSA implementations use constant-time field arithmetic over their respective Edwards-curve fields.
 
 ---
 
@@ -437,9 +520,10 @@ The default project configuration uses minimal flags with no enhanced instructio
 | Feature | Details |
 |---|---|
 | **Post-Quantum Algorithms** | ML-KEM (FIPS-203), ML-DSA (FIPS-204), SLH-DSA (FIPS-205), Falcon (Round 3), Classic McEliece, HQC (Round 4) |
-| **Classical Algorithms** | AES, SHA-2/3, HMAC, ChaCha20-Poly1305, ECDH (X25519), ECDSA (P-256 / P-384 / P-521), Ed25519 |
+| **Classical Algorithms** | AES, SHA-2/3, HMAC, ChaCha20-Poly1305, ECDH (P-256/P-384/P-521, X25519/X448), ECDSA (P-256/P-384/P-521), EdDSA (Ed25519/Ed448) |
 | **Proprietary Constructions** | RCS, CSX, QMAC, SCB - each with formal security analysis |
 | **X.509 / PKI Infrastructure** | Full certificate lifecycle: DER/PEM parsing and generation, chain verification, CRL and OCSP revocation, PKCS#10 CSR, PKCS#12 key bundles, trust store management; ECDSA P-256/P-384/P-521 and ML-DSA-44/65/87 certificate profiles; RFC 5280, RFC 6125, and X.690 strict DER compliance |
+| **TLS 1.3** *(in progress)* | Full record and handshake layer; HKDF key schedule; session resumption; ECDH and ML-KEM key exchange groups; ECDSA and ML-DSA signature schemes; integrated X.509 peer validation; no external TLS dependencies |
 | **SIMD Acceleration** | AVX, AVX2, AVX-512, AES-NI, RDRAND across all major primitives |
 | **Security Standard** | MISRA C compliant throughout |
 | **Testing** | KAT, NIST ACVP/CAVP, fuzzing, and stress tests for every primitive |
@@ -452,7 +536,7 @@ The default project configuration uses minimal flags with no enhanced instructio
 ## Roadmap
 
 - [ ] Continued ASM and SIMD integration and optimization
-- [ ] TLS 1.3
+- [x] TLS 1.3 *(scaffolding complete; handshake, record, key schedule, session resumption, and certificate integration landed April 2026)*
 - [ ] Expanded benchmarking framework with cross-platform performance reporting
 - [ ] Integration of emerging post-quantum research and forthcoming NIST standards
 

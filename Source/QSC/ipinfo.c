@@ -33,19 +33,19 @@ static bool ipinfo_hexfield_valid(const char** pp)
 		{
 			while ((digits < 4U) && (p[0U] != '\0') && (p[0U] != ':'))
 			{
-				unsigned int nibble;
+				uint32_t nibble;
 
 				if ((p[0U] >= '0') && (p[0U] <= '9'))
 				{
-					nibble = (unsigned int)(p[0U] - '0');
+					nibble = (uint32_t)(p[0U] - '0');
 				}
 				else if ((p[0U] >= 'A') && (p[0U] <= 'F'))
 				{
-					nibble = (unsigned int)(10U + (p[0U] - 'A'));
+					nibble = (uint32_t)(10U + (p[0U] - 'A'));
 				}
 				else if ((p[0U] >= 'a') && (p[0U] <= 'f'))
 				{
-					nibble = (unsigned int)(10U + (p[0U] - 'a'));
+					nibble = (uint32_t)(10U + (p[0U] - 'a'));
 				}
 				else
 				{

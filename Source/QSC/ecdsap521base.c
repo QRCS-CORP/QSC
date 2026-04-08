@@ -994,6 +994,10 @@ static bool p521_jac_to_aff(p521_aff_t* R, const p521_jac_t* P)
     fe_mul(R->X, P->X, zinv2);
     fe_mul(R->Y, P->Y, zinv3);
 
+    qsc_memutils_secure_erase(zinv, sizeof(fe521));
+    qsc_memutils_secure_erase(zinv2, sizeof(fe521));
+    qsc_memutils_secure_erase(zinv3, sizeof(fe521));
+
     return true;
 }
 

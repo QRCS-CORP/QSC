@@ -795,19 +795,19 @@ static inline void aes_swapn(uint32_t cl, uint32_t ch, uint32_t s, uint32_t* x, 
   
 static inline void aes_swap2(uint32_t* x, uint32_t* y)
 {
-	/* 0101… / 1010…  (1-bit lanes) */
+	/* 0101... / 1010...  (1-bit lanes) */
 	aes_swapn(0x55555555U, 0xAAAAAAAAU, 1U, x, y);
 }
 
 static inline void aes_swap4(uint32_t* x, uint32_t* y)
 {
-	/* 0011… / 1100…  (2-bit lanes) */
+	/* 0011... / 1100...  (2-bit lanes) */
 	aes_swapn(0x33333333U, 0xCCCCCCCCU, 2U, x, y);
 }
 
 static inline void aes_swap8(uint32_t* x, uint32_t* y)
 {
-	/* 0000 1111… / 1111 0000…  (4-bit lanes) */
+	/* 0000 1111... / 1111 0000...  (4-bit lanes) */
 	aes_swapn(0x0F0F0F0FU, 0xF0F0F0F0U, 4U, x, y);
 }
 
@@ -2461,7 +2461,7 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 		/* compute hash subkey: H = AES(K, 0U^128) */
 		qsc_aes_ecb_encrypt_block(&ctx->cstate, ctx->H, zero);
 
-		/* compute pre–counter block J0 based on IV length */
+		/* compute pre-counter block J0 based on IV length */
 		if (keyparams->noncelen == 12U)
 		{
 			qsc_memutils_copy(ctx->J0, keyparams->nonce, keyparams->noncelen);

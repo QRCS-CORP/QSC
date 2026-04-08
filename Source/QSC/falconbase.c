@@ -2857,7 +2857,7 @@ static void falcon_hash_to_point_ct(qsc_keccak_state* kctx, uint16_t* x, uint32_
 		 * Proof of coverage (worst case raw = 61444 = 4*12289 + 12288):
 		 *   61444 - 24578 = 36866  (>= 0, keep)
 		 *   36866 - 24578 = 12288  (>= 0, keep)
-		 *   12288 - 12289 =    -1  (< 0, restore) → 12288  ✓
+		 *   12288 - 12289 = -1  (< 0, restore) -> 12288
 		 */
 		w = (int32_t)raw;
 		w -= 24578;
@@ -8718,7 +8718,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 	falcon_poly_neg(b11, logn);
 
 	/*
-	 * Compute the Gram matrix G = B�B*. Formulas are:
+	 * Compute the Gram matrix G = BxB*. Formulas are:
 	 *   g00 = b00*adj(b00) + b01*adj(b01)
 	 *   g01 = b00*adj(b10) + b01*adj(b11)
 	 *   g10 = b10*adj(b00) + b11*adj(b01)

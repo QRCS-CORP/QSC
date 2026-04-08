@@ -88,7 +88,7 @@
  * When compiled in debug mode (_DEBUG defined), the number of iterations is set to 10.
  * Otherwise, it is set to 100.
  */
-#ifdef _DEBUG
+#if defined(QSC_DEBUG_MODE)
 #   define QSCTEST_EDDSA_ITERATIONS 10
 #else
 #   define QSCTEST_EDDSA_ITERATIONS 100

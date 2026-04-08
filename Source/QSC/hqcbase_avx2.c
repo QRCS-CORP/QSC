@@ -852,7 +852,7 @@ static uint16_t gf_reduce(uint16_t x)
     uint16_t z2;
 
     /* for deg(x) = 2 * (8 - 1) = 14, reduce twice to bring degree < 8 */
-    const int reduction_steps = 2;
+    const int32_t reduction_steps = 2;
     /* number of feedback positions */
     const size_t gf_reduction_tap_count = 3U;
 
@@ -939,8 +939,8 @@ static void gf_carryless_mul(uint8_t* c, uint8_t a, uint8_t b)
 
 static uint16_t gf_mul(uint16_t a, uint16_t b)
 {
-    __m128i va = _mm_cvtsi32_si128((int)a);
-    __m128i vb = _mm_cvtsi32_si128((int)b);
+    __m128i va = _mm_cvtsi32_si128((int32_t)a);
+    __m128i vb = _mm_cvtsi32_si128((int32_t)b);
     __m128i vp = _mm_clmulepi64_si128(va, vb, 0x00);
     uint32_t prod = (uint32_t)_mm_cvtsi128_si32(vp);
 

@@ -134,7 +134,7 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 			}
 			else
 			{
-				int count = (maxlen > INT_MAX) ? INT_MAX : (int)maxlen;
+				int32_t count = (maxlen > INT_MAX) ? INT_MAX : (int32_t)maxlen;
 
 				while (fgets(line, count, stdin) != NULL) 
 				{

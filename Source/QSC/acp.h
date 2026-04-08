@@ -89,7 +89,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \code
  * #include "acp.h"
  *
- * int main(void)
+ * int32_t main(void)
  * {
  *     uint8_t random_bytes[64];
  *     if (qsc_acp_generate(random_bytes, sizeof(random_bytes)))

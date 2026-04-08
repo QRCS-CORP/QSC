@@ -1366,8 +1366,8 @@ void qsc_sha512_update(qsc_sha512_state* ctx, const uint8_t* message, size_t msg
 void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)
 {
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(message != NULL);
-	QSC_ASSERT(key != NULL);
+	QSC_ASSERT(message != NULL || msglen == 0U);
+	QSC_ASSERT(key != NULL || keylen == 0U);
 
 	qsc_hmac256_state ctx;
 
@@ -1409,24 +1409,31 @@ void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output)
 void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t keylen)
 {
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(key != NULL);
+	QSC_ASSERT(key != NULL || keylen == 0U);
 
 	const uint8_t IPAD = 0x36U;
 	const uint8_t OPAD = 0x5CU;
+	static const uint8_t zkey[1U] = { 0U };
+	const uint8_t* kptr = key;
 
-	if (ctx != NULL && key != NULL)
+	if (ctx != NULL && (key != NULL || keylen == 0U))
 	{
+		if (kptr == NULL)
+		{
+			kptr = zkey;
+		}
+
 		qsc_memutils_secure_erase(ctx->ipad, QSC_SHA2_256_RATE);
 
 		if (keylen > QSC_SHA2_256_RATE)
 		{
 			qsc_sha256_initialize(&ctx->pstate);
-			qsc_sha256_update(&ctx->pstate, key, keylen);
+			qsc_sha256_update(&ctx->pstate, kptr, keylen);
 			qsc_sha256_finalize(&ctx->pstate, ctx->ipad);
 		}
-		else
+		else if (keylen != 0U)
 		{
-			qsc_memutils_copy(ctx->ipad, key, keylen);
+			qsc_memutils_copy(ctx->ipad, kptr, keylen);
 		}
 
 		qsc_memutils_copy(ctx->opad, ctx->ipad, QSC_SHA2_256_RATE);
@@ -1441,9 +1448,12 @@ void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t k
 void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t msglen)
 {
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(message != NULL || msglen == 0U);
 
-	qsc_sha256_update(&ctx->pstate, message, msglen);
+	if (ctx != NULL && msglen != 0U)
+	{
+		qsc_sha256_update(&ctx->pstate, message, msglen);
+	}
 }
 
 /* HMAC-384 */
@@ -1451,8 +1461,8 @@ void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t m
 void qsc_hmac384_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)
 {
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(message != NULL);
-	QSC_ASSERT(key != NULL);
+	QSC_ASSERT(message != NULL || msglen == 0U);
+	QSC_ASSERT(key != NULL || keylen == 0U);
 
 	qsc_hmac384_state ctx;
 
@@ -1494,24 +1504,31 @@ void qsc_hmac384_finalize(qsc_hmac384_state* ctx, uint8_t* output)
 void qsc_hmac384_initialize(qsc_hmac384_state* ctx, const uint8_t* key, size_t keylen)
 {
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(key != NULL);
+	QSC_ASSERT(key != NULL || keylen == 0U);
 
 	const uint8_t IPAD = 0x36U;
 	const uint8_t OPAD = 0x5CU;
+	static const uint8_t zkey[1U] = { 0U };
+	const uint8_t* kptr = key;
 
-	if (ctx != NULL && key != NULL)
+	if (ctx != NULL && (key != NULL || keylen == 0U))
 	{
+		if (kptr == NULL)
+		{
+			kptr = zkey;
+		}
+
 		qsc_memutils_secure_erase(ctx->ipad, QSC_SHA2_384_RATE);
 
 		if (keylen > QSC_SHA2_384_RATE)
 		{
 			qsc_sha384_initialize(&ctx->pstate);
-			qsc_sha384_update(&ctx->pstate, key, keylen);
+			qsc_sha384_update(&ctx->pstate, kptr, keylen);
 			qsc_sha384_finalize(&ctx->pstate, ctx->ipad);
 		}
-		else
+		else if (keylen != 0U)
 		{
-			qsc_memutils_copy(ctx->ipad, key, keylen);
+			qsc_memutils_copy(ctx->ipad, kptr, keylen);
 		}
 
 		qsc_memutils_copy(ctx->opad, ctx->ipad, QSC_SHA2_384_RATE);
@@ -1526,9 +1543,12 @@ void qsc_hmac384_initialize(qsc_hmac384_state* ctx, const uint8_t* key, size_t k
 void qsc_hmac384_update(qsc_hmac384_state* ctx, const uint8_t* message, size_t msglen)
 {
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(message != NULL || msglen == 0U);
 
-	qsc_sha384_update(&ctx->pstate, message, msglen);
+	if (ctx != NULL && msglen != 0U)
+	{
+		qsc_sha384_update(&ctx->pstate, message, msglen);
+	}
 }
 
 /* HMAC-512 */
@@ -1536,8 +1556,8 @@ void qsc_hmac384_update(qsc_hmac384_state* ctx, const uint8_t* message, size_t m
 void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen)
 {
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(message != NULL);
-	QSC_ASSERT(key != NULL);
+	QSC_ASSERT(message != NULL || msglen == 0U);
+	QSC_ASSERT(key != NULL || keylen == 0U);
 
 	qsc_hmac512_state ctx;
 
@@ -1579,24 +1599,31 @@ void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output)
 void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t keylen)
 {
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(key != NULL);
+	QSC_ASSERT(key != NULL || keylen == 0U);
 
 	const uint8_t IPAD = 0x36U;
 	const uint8_t OPAD = 0x5CU;
+	static const uint8_t zkey[1U] = { 0U };
+	const uint8_t* kptr = key;
 
-	if (ctx != NULL && key != NULL)
+	if (ctx != NULL && (key != NULL || keylen == 0U))
 	{
+		if (kptr == NULL)
+		{
+			kptr = zkey;
+		}
+
 		qsc_memutils_secure_erase(ctx->ipad, QSC_SHA2_512_RATE);
 
 		if (keylen > QSC_SHA2_512_RATE)
 		{
 			qsc_sha512_initialize(&ctx->pstate);
-			qsc_sha512_update(&ctx->pstate, key, keylen);
+			qsc_sha512_update(&ctx->pstate, kptr, keylen);
 			qsc_sha512_finalize(&ctx->pstate, ctx->ipad);
 		}
-		else
+		else if (keylen != 0U)
 		{
-			qsc_memutils_copy(ctx->ipad, key, keylen);
+			qsc_memutils_copy(ctx->ipad, kptr, keylen);
 		}
 
 		qsc_memutils_copy(ctx->opad, ctx->ipad, QSC_SHA2_512_RATE);
@@ -1611,9 +1638,12 @@ void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t k
 void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t msglen)
 {
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(message != NULL || msglen == 0U);
 
-	qsc_sha512_update(&ctx->pstate, message, msglen);
+	if (ctx != NULL && msglen != 0U)
+	{
+		qsc_sha512_update(&ctx->pstate, message, msglen);
+	}
 }
 
 /* HKDF-256 */
@@ -1664,25 +1694,109 @@ void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, siz
 {
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(otplen <= 255U * QSC_SHA2_256_HASH_SIZE);
+	QSC_ASSERT(key != NULL || keylen == 0U);
+	QSC_ASSERT(salt != NULL || saltlen == 0U);
+
+	if (output != NULL && (key != NULL || keylen == 0U) && otplen >= 32U)
+	{
+		qsc_hmac256_state ctx;
+		static const uint8_t zkey[1U] = { 0U };
+		const uint8_t* kptr = key;
+
+		if (kptr == NULL)
+		{
+			kptr = zkey;
+		}
+
+		if (saltlen != 0U)
+		{
+			qsc_hmac256_initialize(&ctx, salt, saltlen);
+		}
+		else
+		{
+			uint8_t tmp[QSC_HMAC_256_MAC_SIZE] = { 0U };
+			qsc_hmac256_initialize(&ctx, tmp, sizeof(tmp));
+		}
+
+		qsc_hmac256_update(&ctx, kptr, keylen);
+		qsc_hmac256_finalize(&ctx, output);
+	}
+}
+
+/* HKDF-512 */
+
+void qsc_hkdf384_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen)
+{
+	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(key != NULL);
 
-	if (output != NULL && key != NULL && otplen >= 32U)
-    {
-        qsc_hmac256_state ctx;
+	qsc_hmac384_state ctx;
+	uint8_t buf[QSC_SHA2_384_HASH_SIZE] = { 0U };
+	uint8_t ctr[1U] = { 0U };
 
-        if (saltlen != 0U)
-        {
-            qsc_hmac256_initialize(&ctx, salt, saltlen);
-        }
-        else
-        {
-            uint8_t tmp[QSC_HMAC_256_MAC_SIZE] = { 0U };
-            qsc_hmac256_initialize(&ctx, tmp, sizeof(tmp));
-        }
+	if (output != NULL && key != NULL)
+	{
+		if (otplen <= 255U * QSC_SHA2_384_HASH_SIZE)
+		{
+			while (otplen != 0U)
+			{
+				qsc_hmac384_initialize(&ctx, key, keylen);
 
-        qsc_hmac256_update(&ctx, key, keylen);
-        qsc_hmac256_finalize(&ctx, output);
-    }
+				if (ctr[0U] != 0U)
+				{
+					qsc_hmac384_update(&ctx, buf, sizeof(buf));
+				}
+
+				if (infolen != 0U)
+				{
+					qsc_hmac384_update(&ctx, info, infolen);
+				}
+
+				++ctr[0U];
+				qsc_hmac384_update(&ctx, ctr, sizeof(ctr));
+				qsc_hmac384_finalize(&ctx, buf);
+
+				const size_t RMDLEN = qsc_intutils_min(otplen, (size_t)QSC_SHA2_384_HASH_SIZE);
+				qsc_memutils_copy(output, buf, RMDLEN);
+
+				otplen -= RMDLEN;
+				output += RMDLEN;
+			}
+		}
+	}
+}
+
+void qsc_hkdf384_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
+{
+	QSC_ASSERT(output != NULL);
+	QSC_ASSERT(otplen <= 255U * QSC_SHA2_384_HASH_SIZE);
+	QSC_ASSERT(key != NULL || keylen == 0U);
+	QSC_ASSERT(salt != NULL || saltlen == 0U);
+
+	if (output != NULL && (key != NULL || keylen == 0U) && otplen >= QSC_SHA2_384_HASH_SIZE)
+	{
+		qsc_hmac384_state ctx;
+		static const uint8_t zkey[1U] = { 0U };
+		const uint8_t* kptr = key;
+
+		if (kptr == NULL)
+		{
+			kptr = zkey;
+		}
+
+		if (saltlen != 0U)
+		{
+			qsc_hmac384_initialize(&ctx, salt, saltlen);
+		}
+		else
+		{
+			uint8_t tmp[QSC_HMAC_384_MAC_SIZE] = { 0U };
+			qsc_hmac384_initialize(&ctx, tmp, sizeof(tmp));
+		}
+
+		qsc_hmac384_update(&ctx, kptr, keylen);
+		qsc_hmac384_finalize(&ctx, output);
+	}
 }
 
 /* HKDF-512 */
@@ -1731,23 +1845,32 @@ void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size
 void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen)
 {
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(key != NULL);
+	QSC_ASSERT(otplen <= 255U * QSC_SHA2_512_HASH_SIZE);
+	QSC_ASSERT(key != NULL || keylen == 0U);
+	QSC_ASSERT(salt != NULL || saltlen == 0U);
 
-    if (output != NULL && key != NULL && otplen >= 64U)
-    {
-        qsc_hmac512_state ctx;
+	if (output != NULL && (key != NULL || keylen == 0U) && otplen >= 64U)
+	{
+		qsc_hmac512_state ctx;
+		static const uint8_t zkey[1U] = { 0U };
+		const uint8_t* kptr = key;
 
-        if (saltlen != 0U)
-        {
-            qsc_hmac512_initialize(&ctx, salt, saltlen);
-        }
-        else
-        {
-            uint8_t tmp[QSC_HMAC_512_MAC_SIZE] = { 0U };
-            qsc_hmac512_initialize(&ctx, tmp, sizeof(tmp));
-        }
+		if (kptr == NULL)
+		{
+			kptr = zkey;
+		}
 
-        qsc_hmac512_update(&ctx, key, keylen);
-        qsc_hmac512_finalize(&ctx, output);
-    }
+		if (saltlen != 0U)
+		{
+			qsc_hmac512_initialize(&ctx, salt, saltlen);
+		}
+		else
+		{
+			uint8_t tmp[QSC_HMAC_512_MAC_SIZE] = { 0U };
+			qsc_hmac512_initialize(&ctx, tmp, sizeof(tmp));
+		}
+
+		qsc_hmac512_update(&ctx, kptr, keylen);
+		qsc_hmac512_finalize(&ctx, output);
+	}
 }

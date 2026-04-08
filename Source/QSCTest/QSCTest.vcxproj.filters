@@ -156,6 +156,30 @@
     <ClCompile Include="X509\x509_stage4a_encoding_tests.c">
       <Filter>Source Files\Tests\X509</Filter>
     </ClCompile>
+    <ClCompile Include="ecdh_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage1_codec_extension_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage2_registry_policy_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage3_transcript_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage4_schedule_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage5_record_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage6_certificate_message_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tls_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -274,6 +298,30 @@
     </ClInclude>
     <ClInclude Include="X509\x509_stage4a_encoding_tests.h">
       <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdh_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage1_codec_extension_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage2_registry_policy_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage3_transcript_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage4_schedule_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage5_record_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage6_certificate_message_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tls_test.h">
+      <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

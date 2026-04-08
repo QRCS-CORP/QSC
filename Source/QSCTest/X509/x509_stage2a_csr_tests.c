@@ -136,7 +136,7 @@ bool qsctest_x509_stage2a_csr_tests(void)
 	}
 	else
 	{
-		qsctest_print_line("[FAIL] PEM decoding  validation test.");
+		qsctest_print_line("[FAIL] PEM decoding validation test.");
 		res = false;
 	}
 

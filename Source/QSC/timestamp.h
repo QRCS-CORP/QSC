@@ -74,7 +74,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * #include "timestamp.h"
  * #include <stdio.h>
  *
- * int main(void)
+ * int32_t main(void)
  * {
  *     char date[QSC_TIMESTAMP_STRING_SIZE];
  *     char datetime[QSC_TIMESTAMP_STRING_SIZE];

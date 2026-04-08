@@ -385,7 +385,7 @@ static void winutils_wide_to_utf8(const wchar_t* wsrc, char* dst, size_t dstlen)
             CP_UTF8,
             0,
             wsrc, -1,
-            dst, (int)dstlen,
+            dst, (int32_t)dstlen,
             NULL, NULL);
     }
 }

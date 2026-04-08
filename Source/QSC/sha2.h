@@ -90,6 +90,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_HKDF_256_KEY_SIZE 32U
 
 /*!
+ * \def QSC_HKDF_384_KEY_SIZE
+ * \brief The HKDF-384 key size in bytes.
+ */
+#define QSC_HKDF_384_KEY_SIZE 48U
+
+/*!
  * \def QSC_HKDF_512_KEY_SIZE
  * \brief The HKDF-512 key size in bytes.
  */
@@ -100,6 +106,12 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief The recommended HMAC(SHA2-256) key size, minimum is 32 bytes.
  */
 #define QSC_HMAC_256_KEY_SIZE 32U
+
+/*!
+ * \def QSC_HMAC_384_KEY_SIZE
+ * \brief The recommended HMAC(SHA2-384) key size, minimum is 48 bytes.
+ */
+#define QSC_HMAC_384_KEY_SIZE 48U
 
 /*!
  * \def QSC_HMAC_512_KEY_SIZE
@@ -114,6 +126,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_HMAC_256_MAC_SIZE 32U
 
 /*!
+ * \def QSC_HMAC_384_MAC_SIZE
+ * \brief The HMAC-256 mac-code size in bytes.
+ */
+#define QSC_HMAC_384_MAC_SIZE 48U
+
+/*!
  * \def QSC_HMAC_512_MAC_SIZE
  * \brief The HMAC-512 mac-code size in bytes.
  */
@@ -124,6 +142,12 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief The HMAC-256 input rate size in bytes.
  */
 #define QSC_HMAC_256_RATE 64U
+
+/*!
+ * \def QSC_HMAC_384_RATE
+ * \brief The HMAC-384 input rate size in bytes.
+ */
+#define QSC_HMAC_384_RATE 96U
 
 /*!
  * \def QSC_HMAC_512_RATE
@@ -593,6 +617,30 @@ QSC_EXPORT_API void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uin
  * \param saltlen:  [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
+
+/*!
+ * \brief Initialize an instance of HKDF(HMAC(SHA2-384)) and generate pseudo-random output.
+ *
+ * \param output:   [uint8_t*] The output pseudo-random byte array.
+ * \param otplen:   [size_t] The output array length.
+ * \param key:      [const uint8_t*] The HKDF key array.
+ * \param keylen:   [size_t] The key array length.
+ * \param info:     [const uint8_t*] The info array.
+ * \param infolen:  [size_t] The info array length.
+ */
+QSC_EXPORT_API void qsc_hkdf384_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
+
+/*!
+ * \brief Extract a key from a combined key and salt input using HMAC(SHA2-384).
+ *
+ * \param output:   [uint8_t*] The output pseudo-random byte array.
+ * \param otplen:   [size_t] The output array length.
+ * \param key:      [const uint8_t*] The HKDF key array.
+ * \param keylen:   [size_t] The key array length.
+ * \param salt:     [const uint8_t*] The salt array.
+ * \param saltlen:  [size_t] The salt array length.
+ */
+QSC_EXPORT_API void qsc_hkdf384_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
 
 /*!
  * \brief Initialize an instance of HKDF(HMAC(SHA2-512)) and generate pseudo-random output.

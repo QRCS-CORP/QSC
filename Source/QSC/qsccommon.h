@@ -242,7 +242,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #		define QSC_SYSTEM_ISWIN32
 #   endif
 #else
-    typedef int errno_t;
+    typedef int32_t errno_t;
 #endif
 
 #if defined(__x86_64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64)
@@ -678,16 +678,20 @@ QSC_CPLUSPLUS_ENABLED_START
     * \def QSC_SYSTEM_NATIVE_UINT128
     * \brief Defined when the system supports a native 128-bit integer type.
     */
-#	define QSC_SYSTEM_NATIVE_UINT128
-#	if defined(__GNUC__)
+#   define QSC_SYSTEM_NATIVE_UINT128
+#   if defined(__GNUC__)
         /*!
         * \typedef uint128_t
-        * \brief A 128-bit unsigned integer type using GCC's mode(TI) attribute.
+        * \brief A 128-bit unsigned integer type.
         */
-        typedef unsigned int uint128_t QSC_ATTRIBUTE((mode(TI)));
-#	else
-		typedef __int128 uint128_t;
-#	endif
+        typedef unsigned __int128 uint128_t;
+#   else
+        /*!
+        * \typedef uint128_t
+        * \brief A 128-bit unsigned integer type.
+        */
+        typedef unsigned __int128 uint128_t;
+#   endif
 #endif
 
 /*!
@@ -1116,222 +1120,466 @@ QSC_CPLUSPLUS_ENABLED_START
 // */
 //#define QSC_KECCAK_UNROLLED_PERMUTATION
 
+/*!
+ * \def QSC_TLS_SECURITY_CLASS_1
+ * \brief Selects the QSC TLS Security Class 1 build profile.
+ *
+ * \details
+ * This profile enables the lowest predefined TLS-oriented parameter-set bundle
+ * in QSC. When this macro is defined, the header enables the following
+ * primitive parameter sets:
+ * - QSC_ECDH_S1P256
+ * - QSC_EDDH_S1EC25519
+ * - QSC_KYBER_S1K2P512
+ * - QSC_DILITHIUM_S1P44
+ * - QSC_ECDSA_S1P256
+ * - QSC_EDDSA_S1EC25519
+ *
+ * This profile is intended for compact builds that expose the 128-bit-class
+ * parameter selections associated with X25519, Ed25519, NIST P-256, ML-KEM-512,
+ * and ML-DSA-44.
+ *
+ * Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build.
+ */
+#define QSC_TLS_SECURITY_CLASS_1
+
+/*!
+ * \def QSC_TLS_SECURITY_CLASS_3
+ * \brief Selects the QSC TLS Security Class 3 build profile.
+ *
+ * \details
+ * This profile enables the middle predefined TLS-oriented parameter-set bundle
+ * in QSC. When this macro is defined, the header enables the following
+ * primitive parameter sets:
+ * - QSC_ECDH_S3P384
+ * - QSC_EDDH_S3EC448
+ * - QSC_KYBER_S3K3P768
+ * - QSC_DILITHIUM_S3P65
+ * - QSC_ECDSA_S3P384
+ * - QSC_EDDSA_S3EC448
+ *
+ * This profile is intended for builds that expose the higher-strength parameter
+ * selections associated with X448, Ed448, NIST P-384, ML-KEM-768, and
+ * ML-DSA-65.
+ *
+ * Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build.
+ */
+//#define QSC_TLS_SECURITY_CLASS_3
+
+ /*!
+  * \def QSC_TLS_SECURITY_CLASS_5
+  * \brief Selects the QSC TLS Security Class 5 build profile.
+  *
+  * \details
+  * This profile enables the highest predefined TLS-oriented parameter-set bundle
+  * currently defined in this header. When this macro is defined, the header
+  * enables the following primitive parameter sets:
+  * - QSC_ECDH_S5P521
+  * - QSC_EDDH_S3EC448
+  * - QSC_KYBER_S5K4P1024
+  * - QSC_DILITHIUM_S5P87
+  * - QSC_ECDSA_S5P521
+  * - QSC_EDDSA_S3EC448
+  *
+  * This profile exposes both the NIST P-521 classical path and the Edwards
+  * X448/Ed448 classical path alongside the highest predefined PQ parameter sets.
+  * The Edwards-family options are intentionally enabled in both the Security
+  * Class 3 and Security Class 5 TLS build profiles so that each higher-strength
+  * profile retains an Edwards-curve option.
+  *
+  * Implementations using this profile shall derive TLS and X.509 capability
+  * strictly from the resulting enabled primitive macros rather than from the
+  * security-class name alone.
+  *
+  * Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build.
+  */
+//#define QSC_TLS_SECURITY_CLASS_5
+
+#if defined(QSC_TLS_SECURITY_CLASS_1)
+
+    /*!
+     * \def QSC_ECDH_S1P256
+     * \brief Enable the ECDH S1P256 parameter set (NIST P-256 / secp256r1).
+     */
+#   define QSC_ECDH_S1P256
+
+    /*!
+     * \def QSC_EDDH_S1EC25519
+     * \brief Enable the EDDH S1EC25519 parameter set.
+     */
+#   define QSC_EDDH_S1EC25519
+
+    /*!
+     * \def QSC_KYBER_S1K2P512
+     * \brief Enable the Kyber S1K2P512 parameter set.
+     */
+#    define QSC_KYBER_S1K2P512
+
+    /*!
+     * \def QSC_DILITHIUM_S1P44
+     * \brief Enable the Dilithium S1P44 parameter set.
+     */
+#   define QSC_DILITHIUM_S1P44
+
+     /*!
+      * \def QSC_ECDSA_S1P256
+      * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
+      */
+#   define QSC_ECDSA_S1P256
+
+    /*!
+    * \def QSC_EDDSA_S1EC25519
+    * \brief Enable the EDDSA S1EC25519 parameter set.
+    */
+#   define QSC_EDDSA_S1EC25519
+
+#elif defined(QSC_TLS_SECURITY_CLASS_3)
+
+   /*!
+    * \def QSC_ECDH_S3P384
+    * \brief Enable the ECDH S3P384 parameter set (NIST P-384 / secp384r1).
+    */
+#   define QSC_ECDH_S3P384
+
+    /*!
+     * \def QSC_EDDH_S3EC448
+     * \brief Enable the EDDH S3EC448 parameter set.
+     */
+#   define QSC_EDDH_S3EC448
+
+    /*!
+    * \def QSC_KYBER_S3K3P768
+    * \brief Enable the Kyber S3K3P768 parameter set.
+    */
+#   define QSC_KYBER_S3K3P768
+
+    /*!
+    * \def QSC_DILITHIUM_S3P65
+    * \brief Enable the Dilithium S3P65 parameter set.
+    */
+#   define QSC_DILITHIUM_S3P65
+
+    /*!
+     * \def QSC_ECDSA_S3P384
+     * \brief Enable the ECDSA S1P384 (NIST P-384) parameter set.
+     */
+#   define QSC_ECDSA_S3P384
+
+    /*!
+     * \def QSC_EDDSA_S3EC448
+     * \brief Enable the EDDSA S3EC448 parameter set.
+     */
+#   define QSC_EDDSA_S3EC448
+
+#elif defined(QSC_TLS_SECURITY_CLASS_5)
+
+    /*!
+     * \def QSC_EDDH_S3EC448
+     * \brief Enable the EDDH S3EC448 parameter set.
+     */
+#   define QSC_EDDH_S3EC448
+
+    /*!
+     * \def QSC_ECDH_S5P521
+     * \brief Enable the ECDH S5P521 parameter set (NIST P-521 / secp521r1).
+     */
+#   define QSC_ECDH_S5P521
+
+    /*!
+     * \def QSC_KYBER_S5K4P1024
+     * \brief Enable the Kyber S5K4P1024 parameter set.
+     */
+#   define QSC_KYBER_S5K4P1024
+
+    /*!
+     * \def QSC_DILITHIUM_S5P87
+     * \brief Enable the Dilithium S5P87 parameter set.
+     */
+#   define QSC_DILITHIUM_S5P87
+
+    /*!
+     * \def QSC_ECDSA_S5P521
+     * \brief Enable the ECDSA S1P521 (NIST P-521) parameter set.
+     */
+#   define QSC_ECDSA_S5P521
+
+     /*!
+      * \def QSC_EDDSA_S3EC448
+      * \brief Enable the EDDSA S3EC448 parameter set.
+      */
+#   define QSC_EDDSA_S3EC448
+
+#endif
+
 /*** Asymmetric Ciphers ***/
+
+/*** ECDH ***/
+
+#if !defined(QSC_ECDH_S1P256) && !defined(QSC_ECDH_S3P384) && !defined(QSC_ECDH_S5P521)
+/*!
+ * \def QSC_ECDH_S1P256
+ * \brief Enable the ECDH S1P256 parameter set (NIST P-256 / secp256r1).
+ */
+#define QSC_ECDH_S1P256
+#endif
+
+#if !defined(QSC_ECDH_S1P256) && !defined(QSC_ECDH_S3P384) && !defined(QSC_ECDH_S5P521)
+ /*!
+  * \def QSC_ECDH_S3P384
+  * \brief Enable the ECDH S3P384 parameter set (NIST P-384 / secp384r1).
+  */
+#define QSC_ECDH_S3P384
+#endif
+
+#if !defined(QSC_ECDH_S1P256) && !defined(QSC_ECDH_S3P384) && !defined(QSC_ECDH_S5P521)
+/*!
+ * \def QSC_ECDH_S5P521
+ * \brief Enable the ECDH S5P521 parameter set (NIST P-521 / secp521r1).
+ */
+#define QSC_ECDH_S5P521
+#endif
 
 /*** EDDH ***/
 
-/**
-* \def QSC_RFC_7748_COMPLIANT
-* \brief Controls the key derivation method used in qsc_x25519_generate_keypair.
-*
-* When defined, the function uses the RFC 7748 Section 6.1 compliant method:
-* the private key scalar is derived by copying the seed directly, with clamping
-* applied internally during scalar multiplication. This produces keypairs that are
-* interoperable with any standard-conforming X25519 implementation, including
-* OpenSSL, BoringSSL, and the Go standard library, when those implementations
-* are given the same 32-byte seed as raw key material.
-*
-* When not defined, the function uses the libsodium seeded-keypair convention:
-* the private key scalar is derived by computing SHA-512(seed) and taking the
-* first 32 bytes. This provides domain separation between the seed and the
-* scalar, ensuring that the private key is not trivially related to the seed
-* even if the seed has low entropy or is reused in another context. Keypairs
-* produced by this method are interoperable with libsodium's
-* crypto_box_seed_keypair function when given the same seed, but are NOT
-* interoperable with raw RFC 7748 implementations using the same seed.
-*
-* Note: both methods produce cryptographically secure keypairs. The choice
-* affects only interoperability and key derivation provenance, not security
-* strength. If keypairs must be compatible with a specific peer implementation,
-* the selection here must match the convention used by that implementation.
-*
-* https://www.rfc-editor.org/rfc/rfc7748
-*/
-#define QSC_EDDH_RFC_7748_COMPLIANT
-
+#if !defined(QSC_EDDH_S1EC25519) && !defined(QSC_EDDH_S3EC448)
 /*!
  * \def QSC_EDDH_S1EC25519
  * \brief Enable the EDDH S1EC25519 parameter set.
  */
 #define QSC_EDDH_S1EC25519
+#endif
 
-///*!
-// * \def QSC_EDDH_S3EC448
-// * \brief Enable the EDDH S3EC448 parameter set.
-// */
-//#define QSC_EDDH_S3EC448
+#if !defined(QSC_EDDH_S1EC25519) && !defined(QSC_EDDH_S3EC448)
+/*!
+ * \def QSC_EDDH_S3EC448
+ * \brief Enable the EDDH S3EC448 parameter set.
+ */
+#define QSC_EDDH_S3EC448
+#endif
 
 /*** ML-KEM Kyber ***/
 
+#if !defined(QSC_KYBER_S1K2P512) && !defined(QSC_KYBER_S3K3P768) && !defined(QSC_KYBER_S5K4P1024) && !defined(QSC_KYBER_S6K5P1280)
 /*!
  * \def QSC_KYBER_S1K2P512
  * \brief Enable the Kyber S1K2P512 parameter set.
  */
 #define QSC_KYBER_S1K2P512
+#endif
 
-///*!
-// * \def QSC_KYBER_S3K3P768
-// * \brief Enable the Kyber S3K3P768 parameter set.
-// */
-//#define QSC_KYBER_S3K3P768
+#if !defined(QSC_KYBER_S1K2P512) && !defined(QSC_KYBER_S3K3P768) && !defined(QSC_KYBER_S5K4P1024) && !defined(QSC_KYBER_S6K5P1280)
+/*!
+ * \def QSC_KYBER_S3K3P768
+ * \brief Enable the Kyber S3K3P768 parameter set.
+ */
+#define QSC_KYBER_S3K3P768
+#endif
 
-///*!
-// * \def QSC_KYBER_S5K4P1024
-// * \brief Enable the Kyber S5K4P1024 parameter set.
-// */
-//#define QSC_KYBER_S5K4P1024
+#if !defined(QSC_KYBER_S1K2P512) && !defined(QSC_KYBER_S3K3P768) && !defined(QSC_KYBER_S5K4P1024) && !defined(QSC_KYBER_S6K5P1280)
+/*!
+ * \def QSC_KYBER_S5K4P1024
+ * \brief Enable the Kyber S5K4P1024 parameter set.
+ */
+#define QSC_KYBER_S5K4P1024
+#endif
 
-///*!
-// * \def QSC_KYBER_S6K5P1280
-// * \brief Enable the Kyber S6K5P1280 parameter set (experimental).
-// */
-//#define QSC_KYBER_S6K5P1280
+#if !defined(QSC_KYBER_S1K2P512) && !defined(QSC_KYBER_S3K3P768) && !defined(QSC_KYBER_S5K4P1024)
+/*!
+ * \def QSC_KYBER_S6K5P1280
+ * \brief Enable the Kyber S6K5P1280 parameter set (experimental).
+ */
+#define QSC_KYBER_S6K5P1280
+#endif
 
 /*** HQC ***/
 
+#if !defined(QSC_HQC_S3N4602) && !defined(QSC_HQC_S5N7333)
 /*!
  * \def QSC_HQC_S1N2321
  * \brief Enable the HQC S1N17669 parameter set.
  */
 #define QSC_HQC_S1N2321
+#endif
 
-///*!
-// * \def QSC_HQC_S3N4602
-// * \brief Enable the HQCS3N35851 parameter set.
-// */
-//#define QSC_HQC_S3N4602
+#if !defined(QSC_HQC_S1N2321) && !defined(QSC_HQC_S5N7333)
+/*!
+ * \def QSC_HQC_S3N4602
+ * \brief Enable the HQCS3N35851 parameter set.
+ */
+#define QSC_HQC_S3N4602
+#endif
 
-///*!
-// * \def QSC_HQC_S5N7333
-// * \brief Enable the HQC S5N57637 parameter set.
-// */
-//#define QSC_HQC_S5N7333
+#if !defined(QSC_HQC_S1N2321) && !defined(QSC_HQC_S3N4602)
+/*!
+ * \def QSC_HQC_S5N7333
+ * \brief Enable the HQC S5N57637 parameter set.
+ */
+#define QSC_HQC_S5N7333
+#endif
 
 /*** McEliece ***/
 
+#if !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
 /*!
  * \def QSC_MCELIECE_S1N3488T64
  * \brief Enable the McEliece S1-N3488T64 parameter set.
  */
 #define QSC_MCELIECE_S1N3488T64
+#endif
 
-///*!
-// * \def QSC_MCELIECE_S3N4608T96
-// * \brief Enable the McEliece S3-N4608T96 parameter set.
-// */
-//#define QSC_MCELIECE_S3N4608T96
+#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
+/*!
+ * \def QSC_MCELIECE_S3N4608T96
+ * \brief Enable the McEliece S3-N4608T96 parameter set.
+ */
+#define QSC_MCELIECE_S3N4608T96
+#endif
 
-///*!
-// * \def QSC_MCELIECE_S5N6688T128
-// * \brief Enable the McEliece S5-N6688T128 parameter set.
-// */
-//#define QSC_MCELIECE_S5N6688T128
+#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
+/*!
+ * \def QSC_MCELIECE_S5N6688T128
+ * \brief Enable the McEliece S5-N6688T128 parameter set.
+ */
+#define QSC_MCELIECE_S5N6688T128
+#endif
 
-///*!
-// * \def QSC_MCELIECE_S6N6960T119
-// * \brief Enable the McEliece S6-N6960T119 parameter set.
-// */
-//#define QSC_MCELIECE_S6N6960T119
+#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S7N8192T128)
+/*!
+ * \def QSC_MCELIECE_S6N6960T119
+ * \brief Enable the McEliece S6-N6960T119 parameter set.
+ */
+#define QSC_MCELIECE_S6N6960T119
+#endif
 
-///*!
-// * \def QSC_MCELIECE_S7N8192T128
-// * \brief Enable the McEliece S7-N8192T128 parameter set.
-// */
-//#define QSC_MCELIECE_S7N8192T128
+#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119)
+/*!
+ * \def QSC_MCELIECE_S7N8192T128
+ * \brief Enable the McEliece S7-N8192T128 parameter set.
+ */
+#define QSC_MCELIECE_S7N8192T128
+#endif
 
 /*** Signature Schemes ***/
 
+#if !defined(QSC_DILITHIUM_S1P44) && !defined(QSC_DILITHIUM_S3P65) && !defined(QSC_DILITHIUM_S5P87)
 /*!
  * \def QSC_DILITHIUM_S1P44
  * \brief Enable the Dilithium S1P44 parameter set.
  */
 #define QSC_DILITHIUM_S1P44
+#endif
 
-///*!
-// * \def QSC_DILITHIUM_S3P65
-// * \brief Enable the Dilithium S3P65 parameter set.
-// */
-//#define QSC_DILITHIUM_S3P65
+#if !defined(QSC_DILITHIUM_S1P44) && !defined(QSC_DILITHIUM_S3P65) && !defined(QSC_DILITHIUM_S5P87)
+/*!
+ * \def QSC_DILITHIUM_S3P65
+ * \brief Enable the Dilithium S3P65 parameter set.
+ */
+#define QSC_DILITHIUM_S3P65
+#endif
 
-///*!
-// * \def QSC_DILITHIUM_S5P87
-// * \brief Enable the Dilithium S5P87 parameter set.
-// */
-//#define QSC_DILITHIUM_S5P87
+#if !defined(QSC_DILITHIUM_S1P44) && !defined(QSC_DILITHIUM_S3P65) && !defined(QSC_DILITHIUM_S5P87)
+/*!
+ * \def QSC_DILITHIUM_S5P87
+ * \brief Enable the Dilithium S5P87 parameter set.
+ */
+#define QSC_DILITHIUM_S5P87
+#endif
 
  /*** ECDSA ***/
 
+#if !defined(QSC_ECDSA_S1P256) && !defined(QSC_ECDSA_S3P384) && !defined(QSC_ECDSA_S5P521)
 /*!
  * \def QSC_ECDSA_S1P256
  * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
  */
 #define QSC_ECDSA_S1P256
+#endif
 
-///*!
-// * \def QSC_ECDSA_S3P384
-// * \brief Enable the ECDSA S1P384 (NIST P-384) parameter set.
-// */
-//#define QSC_ECDSA_S3P384
+#if !defined(QSC_ECDSA_S1P256) && !defined(QSC_ECDSA_S3P384) && !defined(QSC_ECDSA_S5P521)
+/*!
+ * \def QSC_ECDSA_S3P384
+ * \brief Enable the ECDSA S1P384 (NIST P-384) parameter set.
+ */
+#define QSC_ECDSA_S3P384
+#endif
 
-///*!
-// * \def QSC_ECDSA_S5P521
-// * \brief Enable the ECDSA S1P521 (NIST P-521) parameter set.
-// */
-//#define QSC_ECDSA_S5P521
+#if !defined(QSC_ECDSA_S1P256) && !defined(QSC_ECDSA_S3P384) && !defined(QSC_ECDSA_S5P521)
+/*!
+ * \def QSC_ECDSA_S5P521
+ * \brief Enable the ECDSA S1P521 (NIST P-521) parameter set.
+ */
+#define QSC_ECDSA_S5P521
+#endif
 
 /*** EDDSA ***/
 
+#if !defined(QSC_EDDSA_S1EC25519) && !defined(QSC_EDDSA_S3EC448)
 /*!
  * \def QSC_EDDSA_S1EC25519
  * \brief Enable the EDDSA S1EC25519 parameter set.
  */
 #define QSC_EDDSA_S1EC25519
+#endif
 
-///*!
-// * \def QSC_EDDSA_S3EC448
-// * \brief Enable the EDDSA S3EC448 parameter set.
-// */
-//#define QSC_EDDSA_S3EC448
+#if !defined(QSC_EDDSA_S1EC25519) && !defined(QSC_EDDSA_S3EC448)
+/*!
+ * \def QSC_EDDSA_S3EC448
+ * \brief Enable the EDDSA S3EC448 parameter set.
+ */
+#define QSC_EDDSA_S3EC448
+#endif
 
  /*** Falcon ***/
 
+#if !defined(QSC_FALCON_S5SHAKE256F1024)
 /*!
  * \def QSC_FALCON_S3SHAKE256F512
  * \brief Enable the Falcon S3SHAKE256F512 parameter set.
  */
 #define QSC_FALCON_S3SHAKE256F512
+#endif
 
-///*!
-// * \def QSC_FALCON_S5SHAKE256F1024
-// * \brief Enable the Falcon S5SHAKE256F1024 parameter set.
-// */
-//#define QSC_FALCON_S5SHAKE256F1024
+#if !defined(QSC_FALCON_S3SHAKE256F512)
+/*!
+ * \def QSC_FALCON_S5SHAKE256F1024
+ * \brief Enable the Falcon S5SHAKE256F1024 parameter set.
+ */
+#define QSC_FALCON_S5SHAKE256F1024
+#endif
 
 /*** SphincsPlus ***/
 
+#if !defined(QSC_SPHINCSPLUS_S3S192SHAKERS) && !defined(QSC_SPHINCSPLUS_S5S256SHAKERS) && !defined(QSC_SPHINCSPLUS_S6S512SHAKERS)
 /*!
  * \def QSC_SPHINCSPLUS_S1S128SHAKERS
  * \brief Enable the SphincsPlus S1S128SHAKERS robust small parameter set.
  */
 #define QSC_SPHINCSPLUS_S1S128SHAKERS
+#endif
 
-///*!
-// * \def QSC_SPHINCSPLUS_S3S192SHAKERS
-// * \brief Enable the SphincsPlus S3S192SHAKERS robust small parameter set.
-// */
-//#define QSC_SPHINCSPLUS_S3S192SHAKERS
+#if !defined(QSC_SPHINCSPLUS_S1S128SHAKERS) && !defined(QSC_SPHINCSPLUS_S5S256SHAKERS) && !defined(QSC_SPHINCSPLUS_S6S512SHAKERS)
+/*!
+ * \def QSC_SPHINCSPLUS_S3S192SHAKERS
+ * \brief Enable the SphincsPlus S3S192SHAKERS robust small parameter set.
+ */
+#define QSC_SPHINCSPLUS_S3S192SHAKERS
+#endif
 
-///*!
-// * \def QSC_SPHINCSPLUS_S5S256SHAKERS
-// * \brief Enable the SphincsPlus S5S256SHAKERS robust small parameter set.
-// */
-//#define QSC_SPHINCSPLUS_S5S256SHAKERS
+#if !defined(QSC_SPHINCSPLUS_S1S128SHAKERS) && !defined(QSC_SPHINCSPLUS_S3S192SHAKERS) && !defined(QSC_SPHINCSPLUS_S6S512SHAKERS)
+/*!
+ * \def QSC_SPHINCSPLUS_S5S256SHAKERS
+ * \brief Enable the SphincsPlus S5S256SHAKERS robust small parameter set.
+ */
+#define QSC_SPHINCSPLUS_S5S256SHAKERS
+#endif
 
-///*!
-// * \def QSC_SPHINCSPLUS_S6S512SHAKERS
-// * \brief Enable the SphincsPlus S6S512SHAKERS robust small parameter set.
-// */
-//#define QSC_SPHINCSPLUS_S6S512SHAKERS
+#if !defined(QSC_SPHINCSPLUS_S1S128SHAKERS) && !defined(QSC_SPHINCSPLUS_S3S192SHAKERS) && !defined(QSC_SPHINCSPLUS_S5S256SHAKERS)
+/*!
+ * \def QSC_SPHINCSPLUS_S6S512SHAKERS
+ * \brief Enable the SphincsPlus S6S512SHAKERS robust small parameter set.
+ */
+#define QSC_SPHINCSPLUS_S6S512SHAKERS
+#endif
 
 QSC_CPLUSPLUS_ENABLED_END
 

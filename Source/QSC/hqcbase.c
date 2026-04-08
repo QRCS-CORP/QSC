@@ -837,7 +837,7 @@ static uint16_t gf_reduce(uint16_t x)
     uint16_t z2;
 
     /* for deg(x) = 2 * (8 - 1) = 14, reduce twice to bring degree < 8 */
-    const int reduction_steps = 2;
+    const int32_t reduction_steps = 2;
     /* number of feedback positions */
     const size_t gf_reduction_tap_count = 3U;
 

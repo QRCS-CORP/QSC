@@ -923,7 +923,7 @@ static void sphincsplus_gen_chain(uint8_t* out, const uint8_t* in, uint32_t star
     }
 }
 
-static void sphincsplus_base_w(uint32_t* output, const int out_len, const uint8_t* input)
+static void sphincsplus_base_w(uint32_t* output, const int32_t out_len, const uint8_t* input)
 {
     /* base_w algorithm as described in draft.
      * Interprets an array of bytes as integers in base w.

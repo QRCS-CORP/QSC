@@ -1247,7 +1247,7 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(
     QSC_ASSERT(buflen != 0U);
     QSC_ASSERT(consumed != NULL);
 
-    /* Defensive null check — returns cleanly even without NDEBUG. */
+    /* Defensive null check - returns cleanly even without NDEBUG. */
     if (buffer == NULL || buflen == 0U || consumed == NULL)
     {
         if (consumed != NULL) { *consumed = 0U; }

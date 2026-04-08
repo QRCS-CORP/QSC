@@ -211,7 +211,7 @@ static int16_t kyber_fqmul(int16_t a, int16_t b)
   *   result = (a*b >> 16) - v                 [mulhi - v]
   *
   * Proof: v = floor(u*Q / 2^16).  Since u = a*b*QINV mod 2^16 and
-  * Q*QINV ≡ 1 mod 2^16, u*Q ≡ a*b mod 2^16, so a*b - u*Q ≡ 0 mod 2^16
+  * Q*QINV = 1 mod 2^16, u*Q ≡ a*b mod 2^16, so a*b - u*Q ≡ 0 mod 2^16
   * and (a*b - u*Q) / 2^16 = a*b*R^{-1} mod Q (up to a multiple of Q).   */
 static inline __m256i kyber_montmul_avx2(const __m256i a, const __m256i b)
 {
@@ -229,10 +229,10 @@ static inline __m256i kyber_montmul_avx2(const __m256i a, const __m256i b)
  *   t = (a * V + 2^25) >> 26  where V = 20159
  *
  * Must widen to 32-bit because the product a*V exceeds int16 range
- * (max |a| * 20159 ≈ 32767 * 20159 ≈ 660M > 2^16).
+ * (max |a| * 20159 = 32767 * 20159 = 660M > 2^16).
  *
  * _mm256_packs_epi32 interleaves within 128-bit lanes; the permute
- * restores linear order: [lo0..lo7 | hi0..hi7] → [0..15].              */
+ * restores linear order: [lo0..lo7 | hi0..hi7] -> [0..15]. */
 static inline __m256i kyber_barrett_avx2(const __m256i a)
 {
     const __m256i q = _mm256_set1_epi16((int16_t)QSC_KYBER_Q);
@@ -245,14 +245,14 @@ static inline __m256i kyber_barrett_avx2(const __m256i a)
     lo = _mm256_srai_epi32(_mm256_add_epi32(_mm256_mullo_epi32(lo, vv), rnd), 26);
     hi = _mm256_srai_epi32(_mm256_add_epi32(_mm256_mullo_epi32(hi, vv), rnd), 26);
 
-    /* pack int32 → int16 (t values fit: |t| ≤ 10), fix lane interleaving */
+    /* pack int32 -> int16 (t values fit: |t| < 10), fix lane interleaving */
     return _mm256_sub_epi16(a, _mm256_mullo_epi16(_mm256_permute4x64_epi64(_mm256_packs_epi32(lo, hi), 0xD8), q));
 }
 
 /* Forward NTT (Cooley-Tukey, in-place) 
  *
  * Layers 1-4 (len = 128, 64, 32, 16): fully vectorised.
- *   At len = 16 each butterfly half is exactly one 256-bit register (16 × int16).
+ *   At len = 16 each butterfly half is exactly one 256-bit register (16 x int16).
  *   Layers 1-3 iterate the inner load/multiply/store loop over multiple vectors
  *   per group with the same broadcast zeta.
  *
@@ -262,7 +262,7 @@ static inline __m256i kyber_barrett_avx2(const __m256i a)
  *   layers to total runtime is small.
  *
  * Zeta indexing follows the scalar version exactly: k starts at 1 and
- * increments once per group.                                               */
+ * increments once per group. */
 static void kyber_ntt_avx(int16_t r[QSC_KYBER_N])
 {
     size_t j;

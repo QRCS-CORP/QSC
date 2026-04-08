@@ -65,6 +65,7 @@
 #include "qsctestcommon.h"
 #include "csx_test.h"
 #include "dilithium_test.h"
+#include "ecdh_test.h"
 #include "ecdsa_test.h"
 #include "eddh_test.h"
 #include "eddsa_test.h"
@@ -83,6 +84,7 @@
 #include "sha3_test.h"
 #include "sphincsplus_test.h"
 #include "testutils.h"
+#include "tls_test.h"
 #include "X509_test.h"
 
 //#define QSCTEST_PRINT_STATS
@@ -92,9 +94,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.1.0.2b (B2)                       *");
+	qsctest_print_line("* Release:   v1.1.0.3a (A3)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      March 28, 2026                       *");
+	qsctest_print_line("* Date:      April 09, 2026                       *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -175,7 +177,7 @@ int32_t main(void)
 	qsc_timestamp_print_values();
 	qsc_consoleutils_print_line("");
 #endif
-	
+
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
@@ -324,6 +326,10 @@ int32_t main(void)
 
 			qsctest_print_line("*** Test the X.509 implementation; certificate parsing, validation, and encoding operations ***");
 			qsctest_x509_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the TLS 1.3 scaffolding implementation; function validation, and support operations ***");
+			qsctest_tls_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test the Dilithium implementation using stress, validity checks, and known answer tests ***");

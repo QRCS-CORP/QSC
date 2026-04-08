@@ -205,6 +205,24 @@
     <Filter Include="Header Files\Asymmetric\Signature\ECDSA\Support">
       <UniqueIdentifier>{28bbf3f1-9f92-45ce-8883-b5c479023ef3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\TLS">
+      <UniqueIdentifier>{3cbaca0e-cd49-4770-b6af-faee1ab57b7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TLS">
+      <UniqueIdentifier>{c879e22e-ea0f-4693-88a6-d8b9ac5a5228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\ECDH">
+      <UniqueIdentifier>{5ec5e059-8bec-4f9b-ba9a-2018461b53a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\ECDH">
+      <UniqueIdentifier>{c7d2273d-8624-4d33-bf1d-39cabdfc9486}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Asymmetric\Cipher\ECDH\Support">
+      <UniqueIdentifier>{83e194dd-4e57-4628-a35b-684f37c45752}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Asymmetric\Cipher\ECDH\Support">
+      <UniqueIdentifier>{17c1f360-0ea3-4af3-ab92-96f12760ba7d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="qsccommon.h">
@@ -360,7 +378,7 @@
     <ClInclude Include="ed25519.h">
       <Filter>Header Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClInclude>
-    <ClInclude Include="eddhbase.h">
+    <ClInclude Include="eddh25519base.h">
       <Filter>Header Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClInclude>
     <ClInclude Include="mceliecebase.h">
@@ -369,7 +387,7 @@
     <ClInclude Include="mceliecebase_avx2.h">
       <Filter>Header Files\Asymmetric\Cipher\McEliece\Support</Filter>
     </ClInclude>
-    <ClInclude Include="eddsabase.h">
+    <ClInclude Include="eddsa25519base.h">
       <Filter>Header Files\Asymmetric\Signature\EDDSA\Support</Filter>
     </ClInclude>
     <ClInclude Include="sphincsplusbase_avx2.h">
@@ -506,6 +524,93 @@
     </ClInclude>
     <ClInclude Include="x509aia.h">
       <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509wrap.h">
+      <Filter>Header Files\X.509</Filter>
+    </ClInclude>
+    <ClInclude Include="ed448.h">
+      <Filter>Header Files\Asymmetric\Cipher\EDDH\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="eddh448base.h">
+      <Filter>Header Files\Asymmetric\Cipher\EDDH\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="eddsa448base.h">
+      <Filter>Header Files\Asymmetric\Signature\EDDSA\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdh.h">
+      <Filter>Header Files\Asymmetric\Cipher\ECDH</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdhp256base.h">
+      <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdhp384base.h">
+      <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdhp521base.h">
+      <Filter>Header Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="tlscert.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsdefs.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlserrors.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlslimits.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlssigalgs.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlstypes.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsalert.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsrecord.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsstate.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlscodec.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlscertmsg.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsclient.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsextensions.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsgroups.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlshandshake.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsio.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlspolicy.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsresumption.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsschedule.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsserver.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlstranscript.h">
+      <Filter>Header Files\TLS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -647,7 +752,7 @@
     <ClCompile Include="ed25519.c">
       <Filter>Source Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClCompile>
-    <ClCompile Include="eddhbase.c">
+    <ClCompile Include="eddh25519base.c">
       <Filter>Source Files\Asymmetric\Cipher\EDDH\Support</Filter>
     </ClCompile>
     <ClCompile Include="kyberbase.c">
@@ -662,7 +767,7 @@
     <ClCompile Include="mceliecebase_avx2.c">
       <Filter>Source Files\Asymmetric\Cipher\McEliece\Support</Filter>
     </ClCompile>
-    <ClCompile Include="eddsabase.c">
+    <ClCompile Include="eddsa25519base.c">
       <Filter>Source Files\Asymmetric\Signature\EDDSA\Support</Filter>
     </ClCompile>
     <ClCompile Include="sphincsplusbase_avx2.c">
@@ -799,6 +904,81 @@
     </ClCompile>
     <ClCompile Include="x509revext.c">
       <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509wrap.c">
+      <Filter>Source Files\X.509</Filter>
+    </ClCompile>
+    <ClCompile Include="ed448.c">
+      <Filter>Source Files\Asymmetric\Cipher\EDDH\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="eddh448base.c">
+      <Filter>Source Files\Asymmetric\Cipher\EDDH\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="eddsa448base.c">
+      <Filter>Source Files\Asymmetric\Signature\EDDSA\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdh.c">
+      <Filter>Source Files\Asymmetric\Cipher\ECDH</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdhp256base.c">
+      <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdhp384base.c">
+      <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdhp521base.c">
+      <Filter>Source Files\Asymmetric\Cipher\ECDH\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="tlscert.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlserrors.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlssigalgs.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsalert.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsrecord.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlscodec.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlscertmsg.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsclient.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsextensions.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsgroups.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsio.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlspolicy.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsresumption.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsschedule.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsserver.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlstranscript.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlshandshake_server.c">
+      <Filter>Source Files\TLS</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

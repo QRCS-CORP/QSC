@@ -495,7 +495,7 @@ qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
     {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
         uint32_t id = 0U;
-        res = (HANDLE)_beginthreadex(NULL, 0, (unsigned int(__stdcall*)(void*))func, state, 0, &id);
+        res = (HANDLE)_beginthreadex(NULL, 0, (uint32_t(__stdcall*)(void*))func, state, 0, &id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
         pthread_create(&res, NULL, (void* (*) (void*))func, state);
 #endif
@@ -522,7 +522,7 @@ qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
         uint32_t id;
 
         id = 0U;
-        res = (HANDLE)_beginthreadex(NULL, 0, (unsigned int(__stdcall*)(void*))func, (void*)args, 0, &id);
+        res = (HANDLE)_beginthreadex(NULL, 0, (uint32_t(__stdcall*)(void*))func, (void*)args, 0, &id);
 #elif defined(QSC_SYSTEM_OS_POSIX)
         pthread_create(&res, NULL, (void* (*)(void*))func, args);
 #endif

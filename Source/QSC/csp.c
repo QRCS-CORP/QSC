@@ -75,7 +75,7 @@ bool qsc_csp_generate(uint8_t* output, size_t length)
 
 #else
 
-		int fd;
+		int32_t fd;
 
 		/* fallback: read from /dev/urandom */
 

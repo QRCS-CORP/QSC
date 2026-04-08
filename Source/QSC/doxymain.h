@@ -134,7 +134,7 @@
  *   structure and preserves the raw TBSCertificate span for signature verification without
  *   re-serialisation.
  * - \b x509name.h: Issuer and subject Name parsing; decodes relative distinguished name sequences
- *   into typed attribute lists; supports multi-valued RDNs; RFC 5280 §7.1 canonical comparison
+ *   into typed attribute lists; supports multi-valued RDNs; RFC 5280 7.1 canonical comparison
  *   with Unicode NFC normalisation.
  * - \b x509time.h: Decodes ASN.1 UTCTime and GeneralizedTime into normalised \c qsc_x509_time
  *   structures; provides validity interval comparison.
@@ -308,8 +308,8 @@
  * - <b>RFC 7748 (X25519 / ECDH):</b> https://www.rfc-editor.org/rfc/rfc7748
  * - <b>RFC 8032 (EdDSA / Ed25519):</b> https://www.rfc-editor.org/rfc/rfc8032
  * - <b>RFC 8422 (ECDSA in TLS):</b> https://www.rfc-editor.org/rfc/rfc8422
- * - <b>ITU-T X.660 (OID arcs):</b> https://www.itu.int/rec/T-REC-X.660
- * - <b>ITU-T X.690 (DER/BER encoding):</b> https://www.itu.int/rec/T-REC-X.690
+ * - <b>ITU-T X.660 (OID arcs):</b> https://www.itu.int32_t/rec/T-REC-X.660
+ * - <b>ITU-T X.690 (DER/BER encoding):</b> https://www.itu.int32_t/rec/T-REC-X.690
  * - <b>PKCS#10 (CSR format):</b> https://www.rfc-editor.org/rfc/rfc2986
  * - <b>PKCS#12 (PFX bundles):</b> https://www.rfc-editor.org/rfc/rfc7292
  * - <b>Classic McEliece Specification:</b> https://www.randombit.net/mceliece/mceliece-spec.pdf

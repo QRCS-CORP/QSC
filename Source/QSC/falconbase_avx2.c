@@ -8991,7 +8991,7 @@ static int32_t falcon_do_sign_dyn(falcon_samplerZ samp, void* samp_ctx, int16_t*
 	falcon_poly_neg(b11, logn);
 
 	/*
-	 * Compute the Gram matrix G = B�B*. Formulas are:
+	 * Compute the Gram matrix G = BxB*. Formulas are:
 	 *   g00 = b00*adj(b00) + b01*adj(b01)
 	 *   g01 = b00*adj(b10) + b01*adj(b11)
 	 *   g10 = b10*adj(b00) + b11*adj(b01)

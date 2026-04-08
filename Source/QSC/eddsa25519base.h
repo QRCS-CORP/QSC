@@ -49,8 +49,8 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSC_ECDSABASE_H
-#define QSC_ECDSABASE_H
+#ifndef QSC_ECDSA25519BASE_H
+#define QSC_ECDSA25519BASE_H
 
 #include "qsccommon.h"
 
@@ -65,8 +65,20 @@ QSC_CPLUSPLUS_ENABLED_START
  * generating key pairs, signing messages, and verifying signature-message pairs.
  */
 
+
 /**
- * \brief Combine an external public key with an internal private key to produce a shared secret.
+ * \brief Generates public and private keys for the ECDSA key encapsulation mechanism using a random function pointer.
+ *
+ * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_SECRETKEY_SIZE.
+ *
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
+ * \param rng_generate: [bool (uint8_t*, size_t)] Pointer to the random generator function.
+ */
+void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+/**
+ * \brief Combine an external public key with an internal private key to produce a shared secret using a seed.
  *
  * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_SECRETKEY_SIZE.
  *
@@ -74,7 +86,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
  * \param seed:			[const uint8_t*] Pointer to the random seed.
  */
-void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+void qsc_ed25519_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 /**
  * \brief Takes the message as input and returns an array containing the signature followed by the message.
@@ -84,9 +96,9 @@ void qsc_ed25519_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
  * \param message:		[const uint8_t*] Pointer to the message to be signed.
  * \param msglen:		[size_t] The message length.
  * \param privatekey:	[const uint8_t*] Pointer to the private signature key.
- * \return				[int32_t] Returns 0 for success.
+ * \return				[bool] Returns true for success.
  */
-int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+bool qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
 /**
  * \brief Verifies a signature-message pair with the public key.
@@ -96,9 +108,9 @@ int32_t qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* mes
  * \param signedmsg:	[const uint8_t*] Pointer to the signed message.
  * \param smsglen:		[size_t] The signed message length.
  * \param publickey:	[const uint8_t*] Pointer to the public verification key.
- * \return				[int32_t]Returns 0 for success.
+ * \return				[bool] Returns true for success.
  */
-int32_t qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+bool qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END
 

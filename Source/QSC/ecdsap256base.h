@@ -57,7 +57,7 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file ecnistp256base.h
+ * \file ecdsap256base.h
  * \brief Internal API for NIST P-256 (secp256r1) ECDSA key exchange operations.
  *
  * \details
@@ -85,6 +85,9 @@ QSC_CPLUSPLUS_ENABLED_START
 /*! \brief Signature byte length (r[32] || s[32], big-endian) */
 #define EC_NISTP256_SIGNATURE_SIZE  64U
 
+/*! \brief Shared secret byte length derived from the affine X coordinate. */
+#define EC_NISTP256_SHAREDSECRET_SIZE 32U
+
 /**
  * \brief Derive a P-256 public key from a raw private scalar.
  *
@@ -96,10 +99,10 @@ QSC_CPLUSPLUS_ENABLED_START
  * The private scalar must be in the range [1, n - 1], where n is the order
  * of the P-256 base point.
  *
- * \param publickey:  [uint8_t*] Output buffer receiving the 64-byte public key.
+ * \param publickey: [uint8_t*] Output buffer receiving the 64-byte public key.
  * \param privatekey: [const uint8_t*] Input 32-byte private scalar.
  *
- * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 int32_t qsc_p256_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
 
@@ -111,9 +114,9 @@ int32_t qsc_p256_publickey_from_privatekey(uint8_t* publickey, const uint8_t* pr
  * Q = d*G using the P-256 base point, and stores both keys. The private key layout is
  * seed[32] || Qx[32] || Qy[32].
  *
- * \param publickey:  [uint8_t*] Output public key (64 bytes: Qx || Qy, big-endian).
+ * \param publickey: [uint8_t*] Output public key (64 bytes: Qx || Qy, big-endian).
  * \param privatekey: [uint8_t*] Output private key (96 bytes: seed || Qx || Qy).
- * \param seed:       [const uint8_t*] 32-byte random seed.
+ * \param seed: [const uint8_t*] 32-byte random seed.
  * 
  * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
  */
@@ -128,11 +131,11 @@ int32_t qsc_p256_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
  * using HMAC-SHA256, eliminating the need for a random number generator at signing time.
  *
  * \param signedmsg: [uint8_t*] Output signed-message buffer (msglen + 64 bytes).
- * \param smsglen:   [size_t*]  Set to msglen + EC_NISTP256_SIGNATURE_SIZE on success, 0 on failure.
- * \param message:   [const uint8_t*] Message to sign.
- * \param msglen:    [size_t] Message length in bytes.
+ * \param smsglen: [size_t*]  Set to msglen + EC_NISTP256_SIGNATURE_SIZE on success, 0 on failure.
+ * \param message: [const uint8_t*] Message to sign.
+ * \param msglen: [size_t] Message length in bytes.
  * \param privatekey:[const uint8_t*] 96-byte private key (seed || pubkey).
- * \return           [int32_t] 0 on success, -1 on failure.
+ * \return [int32_t] 0 on success, -1 on failure.
  */
 int32_t qsc_p256_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
@@ -145,11 +148,11 @@ int32_t qsc_p256_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* messag
  * using HMAC-SHA256, eliminating the need for a random number generator at signing time.
  *
  * \param signedmsg: [uint8_t*] Output signed-message buffer (msglen + 64 bytes).
- * \param smsglen:   [size_t*]  Set to msglen + EC_NISTP256_SIGNATURE_SIZE on success, 0 on failure.
- * \param message:   [const uint8_t*] Message to sign.
- * \param msglen:    [size_t] Message length in bytes.
- * \param privatekey:[const uint8_t*] 96-byte private key (seed || pubkey).
- * \return           [int32_t] 0 on success, -1 on failure.
+ * \param smsglen: [size_t*]  Set to msglen + EC_NISTP256_SIGNATURE_SIZE on success, 0 on failure.
+ * \param message: [const uint8_t*] Message to sign.
+ * \param msglen: [size_t] Message length in bytes.
+ * \param privatekey: [const uint8_t*] 96-byte private key (seed || pubkey).
+ * \return [int32_t] 0 on success, -1 on failure.
  */
 int32_t qsc_p256_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
@@ -161,14 +164,30 @@ int32_t qsc_p256_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t*
  * public key. On success the message bytes are copied into message and msglen is set.
  * On failure message is zeroed and msglen is set to 0.
  *
- * \param message:   [uint8_t*]  Output message buffer (at least smsglen - 64 bytes).
- * \param msglen:    [size_t*]   Set to the recovered message length on success.
+ * \param message: [uint8_t*]  Output message buffer (at least smsglen - 64 bytes).
+ * \param msglen: [size_t*]   Set to the recovered message length on success.
  * \param signedmsg: [const uint8_t*] Signed-message buffer (signature || message).
- * \param smsglen:   [size_t]    Total signed-message length.
+ * \param smsglen: [size_t]    Total signed-message length.
  * \param publickey: [const uint8_t*] 64-byte public key (Qx || Qy, big-endian).
- * \return           [int32_t] 0 on success, -1 on failure.
+ * \return [int32_t] 0 on success, -1 on failure.
  */
 bool qsc_p256_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+
+///**
+// * \brief Derive a P-256 ECDH shared secret from a local private key and peer public key.
+// *
+// * \details
+// * Re-derives the private scalar from the 96-byte private-key container, validates the
+// * supplied peer public point, computes the affine shared point dQ, and outputs the
+// * 32-byte big-endian X coordinate as the shared secret.
+// *
+// * \param sharedsecret:[uint8_t*] Output buffer receiving the 32-byte shared secret.
+// * \param privatekey: [const uint8_t*] Input 96-byte private key (seed || pubkey).
+// * \param publickey: [const uint8_t*] Input 64-byte peer public key (Qx || Qy).
+// *
+// * \return [int32_t] Returns 0 on success, or a negative error code on failure.
+// */
+//int32_t qsc_p256_key_exchange(uint8_t* sharedsecret, const uint8_t* privatekey, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END
 

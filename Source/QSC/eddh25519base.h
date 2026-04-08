@@ -49,8 +49,8 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSC_ECDHBASE_H
-#define QSC_ECDHBASE_H
+#ifndef QSC_ECDH25519BASE_H
+#define QSC_ECDH25519BASE_H
 
 #include "qsccommon.h"
 
@@ -67,23 +67,29 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /**
- * \brief Computes an X25519 public key by performing a Curve25519 basepoint scalar multiplication.
+ * \brief Computes an X25519 scalar multiplication on Curve25519.
  *
- * This function multiplies the Curve25519 standard basepoint by the scalar \p n and writes the
- * resulting u-coordinate to \p q, encoded as 32 bytes in little-endian form.
+ * This function is a Curve25519 scalar multiplication interface intended for use by higher-level
+ * ECDH and key encapsulation mechanisms. It computes the scalar multiplication of a point \p p
+ * by a scalar \p n and writes the resulting u-coordinate to \p q, encoded as 32 bytes in
+ * little-endian form.
  *
  * The scalar \p n is treated as a 32-byte X25519 private key and is clamped internally in
  * accordance with RFC 7748.
  *
- * \warning The output buffer \p q must be at least 32 bytes in length.
- * \warning The input buffer \p n must be at least 32 bytes in length.
+ * The input point \p p is interpreted as a Curve25519 u-coordinate encoded as 32 bytes in
+ * little-endian form.
  *
- * \param q: [uint8_t*] Pointer to the output public-key array (32 bytes).
+ * \warning The output buffer \p q must be at least 32 bytes in length.
+ * \warning The input buffers \p n and \p p must be at least 32 bytes in length.
+ *
+ * \param q: [uint8_t*] Pointer to the output u-coordinate array (32 bytes).
  * \param n: [const uint8_t*] Pointer to the input scalar/private-key array (32 bytes).
+ * \param p: [const uint8_t*] Pointer to the input u-coordinate array (32 bytes).
  *
  * \return   [int32_t] Returns 0 on success; a non-zero value indicates failure.
  */
-int32_t qsc_crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n);
+int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p);
 
 /**
  * \brief Computes an X25519 scalar multiplication on Curve25519.
@@ -112,53 +118,58 @@ int32_t qsc_crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n
 int32_t qsc_crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, const uint8_t* p);
 
 /**
- * \brief Computes an X25519 scalar multiplication on Curve25519.
+ * \brief Computes an X25519 public key by performing a Curve25519 basepoint scalar multiplication.
  *
- * This function is a Curve25519 scalar multiplication interface intended for use by higher-level
- * ECDH and key encapsulation mechanisms. It computes the scalar multiplication of a point \p p
- * by a scalar \p n and writes the resulting u-coordinate to \p q, encoded as 32 bytes in
- * little-endian form.
+ * This function multiplies the Curve25519 standard basepoint by the scalar \p n and writes the
+ * resulting u-coordinate to \p q, encoded as 32 bytes in little-endian form.
  *
  * The scalar \p n is treated as a 32-byte X25519 private key and is clamped internally in
  * accordance with RFC 7748.
  *
- * The input point \p p is interpreted as a Curve25519 u-coordinate encoded as 32 bytes in
- * little-endian form.
- *
  * \warning The output buffer \p q must be at least 32 bytes in length.
- * \warning The input buffers \p n and \p p must be at least 32 bytes in length.
+ * \warning The input buffer \p n must be at least 32 bytes in length.
  *
- * \param q: [uint8_t*] Pointer to the output u-coordinate array (32 bytes).
+ * \param q: [uint8_t*] Pointer to the output public-key array (32 bytes).
  * \param n: [const uint8_t*] Pointer to the input scalar/private-key array (32 bytes).
- * \param p: [const uint8_t*] Pointer to the input u-coordinate array (32 bytes).
  *
  * \return   [int32_t] Returns 0 on success; a non-zero value indicates failure.
  */
-int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p);
+int32_t qsc_crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n);
+
+/**
+ * \brief Generates public and private keys for the ECDH key encapsulation mechanism using a random function pointer.
+ *
+ * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_SECRETKEY_SIZE.
+ *
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
+ * \param rng_generate: [bool (uint8_t*, size_t)] Pointer to the random generator function.
+ */
+void qsc_x25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+/**
+ * \brief Generates public and private keys for the ECDH key encapsulation mechanism using a seed.
+ *
+ * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_SECRETKEY_SIZE using a seed.
+ *
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
+ * \param seed: [const uint8_t*] Pointer to the random seed.
+ */
+void qsc_x25519_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 /**
  * \brief Combine an external public key with an internal private key to produce a shared secret.
  *
  * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_SECRETKEY_SIZE.
  *
- * \param secret:	  [uint8_t*] Pointer to the shared secret.
- * \param publickey:  [const uint8_t*] Pointer to the public-key array.
+ * \param secret: [uint8_t*] Pointer to the shared secret.
+ * \param publickey: [const uint8_t*] Pointer to the public-key array.
  * \param privatekey: [const uint8_t*] Pointer to the private-key array.
  *
  * \return Returns true on success.
  */
 bool qsc_x25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey);
-
-/**
- * \brief Generates public and private keys for the ECDH key encapsulation mechanism.
- *
- * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_SECRETKEY_SIZE.
- *
- * \param publickey:  [uint8_t*] Pointer to the output public-key array.
- * \param privatekey: [uint8_t*] Pointer to the output private-key array.
- * \param seed:		  [const uint8_t*] Pointer to the random seed.
- */
-void qsc_x25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 QSC_CPLUSPLUS_ENABLED_END
 

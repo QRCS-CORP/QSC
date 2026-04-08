@@ -179,7 +179,7 @@ QSC_EXPORT_API void qsc_cpuidex_print_stats(void);
 #else
 
 /* avoid warning C4206 : translation unit is empty */
-typedef int dummy_cpuidex_translation_unit;
+typedef int32_t dummy_cpuidex_translation_unit;
 
 #endif
 

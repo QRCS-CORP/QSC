@@ -57,11 +57,11 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file ecdh.h
- * \brief Contains the primary public API for the Elliptic Curve Diffie-Hellman key exchange.
+ * \file eddh.h
+ * \brief Contains the primary public API for the Edwards Elliptic Curve Diffie-Hellman key exchange.
  *
  * \details
- * This header defines the API for the ECDH key encapsulation mechanism using the Curve25519/Ed25519 elliptic curve.
+ * This header defines the API for the EDDH key encapsulation mechanism using the Curve25519/Ed25519 elliptic curve.
  * It provides functions for generating key pairs (either randomly or seeded) and for performing the key exchange operation
  * (decapsulation) to derive a shared secret.
  *
@@ -71,7 +71,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \par Example:
  * \code
- * // An example of key-pair creation and shared secret derivation using ECDH
+ * // An example of key-pair creation and shared secret derivation using EDDH
  * uint8_t pk[QSC_EDDH_PUBLICKEY_SIZE];
  * uint8_t sk[QSC_EDDH_PRIVATEKEY_SIZE];
  * uint8_t sec[QSC_EDDH_SHAREDSECRET_SIZE];
@@ -87,70 +87,83 @@ QSC_CPLUSPLUS_ENABLED_START
  * \endcode
  *
  * \remarks
- * This ECDH implementation uses the Curve25519/Ed25519 elliptic curve for performing key exchange operations.
+ * This EDDH implementation uses the Curve25519/Ed25519 elliptic curve for performing key exchange operations.
  * It is intended for secure key encapsulation and is suitable for cryptographic protocols requiring robust,
  * constant-time elliptic curve operations.
  *
  * \section ecdh_links Reference Links:
  *  - <a href="https://github.com/jedisct1/libsodium/tree/master">Adapted from libsodium source by Frank Denis</a>
- *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Official ECurve25519 ECDH Specificationd25519 Documentation</a>
+ *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Official ECurve25519 EDDH Specificationd25519 Documentation</a>
  *  - <a href="https://cr.yp.to/ecdh.html"></a>
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 Field Operations</a>
  */
 
-/*!
- * \def QSC_EDDH_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#define QSC_EDDH_PRIVATEKEY_SIZE 32ULL
+#if defined(QSC_EDDH_S1EC25519)
+    /*!
+    * \def QSC_EDDH_PUBLICKEY_SIZE
+    * \brief The EDDH public-key size in bytes.
+    */
+#   define QSC_EDDH_PUBLICKEY_SIZE 32U
 
-/*!
- * \def QSC_EDDH_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#define QSC_EDDH_PUBLICKEY_SIZE 32ULL
+    /*!
+     * \def QSC_EDDH_PRIVATEKEY_SIZE
+     * \brief The EDDH private-key size in bytes.
+     */
+#   define QSC_EDDH_PRIVATEKEY_SIZE 32U
 
-/*!
- * \def QSC_EDDH_SHAREDSECRET_SIZE
- * \brief The byte size of the shared secret-key array.
- */
-#define QSC_EDDH_SHAREDSECRET_SIZE 32ULL
+    /*!
+     * \def QSC_EDDH_SECRET_SIZE
+     * \brief The EDDH shared-secret size in bytes.
+     */
+#   define QSC_EDDH_SHAREDSECRET_SIZE 32U
 
-/*!
- * \def QSC_EDDH_SEED_SIZE
- * \brief The byte size of the seed array.
- */
-#define QSC_EDDH_SEED_SIZE 32ULL
+     /*!
+      * \def QSC_EDDH_SEED_SIZE
+      * \brief The byte size of the seed array.
+      */
+#   define QSC_EDDH_SEED_SIZE 32U
 
-/*!
- * \def QSC_EDDH_ALGNAME
- * \brief The formal algorithm name.
- */
-#define QSC_EDDH_ALGNAME "ECDH"
+     /*!
+      * \def QSC_EDDH_ALGNAME
+      * \brief The formal algorithm name.
+      */
+#   define QSC_EDDH_ALGNAME "EDDH25519"
 
-/**
- * \brief Decapsulates the shared secret for a given cipher-text using a private-key.
- *
- * \warning The shared secret array must be sized to QSC_EDDH_SHAREDSECRET_SIZE.
- *
- * \param secret:		[uint8_t*] Pointer to the shared secret key array.
- * \param privatekey:	[const uint8_t*] Pointer to the private-key array.
- * \param publickey:	[const uint8_t*] Pointer to the public-key array.
- * \return				[bool] Returns true on success.
- */
-QSC_EXPORT_API bool qsc_eddh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey);
+#elif defined(QSC_EDDH_S3EC448)
 
-/**
- * \brief Generates public and private keys for the ECDH key encapsulation mechanism.
- *
- * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_PRIVATEKEY_SIZE.
- *
- * \param publickey:	[uint8_t*] Pointer to the output public-key array.
- * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
- * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to the random generator function.
- * \return				[bool] Returns true on success.
- */
-QSC_EXPORT_API bool qsc_eddh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+    /*!
+     * \def QSC_EDDH_PUBLICKEY_SIZE
+     * \brief The X448 public-key size in bytes.
+     */
+#   define QSC_EDDH_PUBLICKEY_SIZE 56U
+
+    /*!
+     * \def QSC_EDDH_PRIVATEKEY_SIZE
+     * \brief The X448 private-key size in bytes.
+     */
+#   define QSC_EDDH_PRIVATEKEY_SIZE 56U
+
+    /*!
+     * \def QSC_EDDH_SECRET_SIZE
+     * \brief The X448 shared-secret size in bytes.
+     */
+#   define QSC_EDDH_SHAREDSECRET_SIZE 56U
+
+     /*!
+      * \def QSC_EDDH_SEED_SIZE
+      * \brief The byte size of the seed array.
+      */
+#   define QSC_EDDH_SEED_SIZE 56U
+
+      /*!
+      * \def QSC_EDDH_ALGNAME
+      * \brief The formal algorithm name.
+      */
+#   define QSC_EDDH_ALGNAME "EDDH448"
+
+#else
+#   error "No EDDH parameter set defined. Define QSC_EDDH_S1EC25519 or QSC_EDDH_S3EC448."
+#endif
 
 /**
  * \brief Derives an X25519 public key from an existing private key.
@@ -170,7 +183,19 @@ QSC_EXPORT_API bool qsc_eddh_generate_keypair(uint8_t* publickey, uint8_t* priva
 QSC_EXPORT_API void qsc_eddh_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
 
 /**
- * \brief Generates public and private keys for the ECDH key encapsulation mechanism using a seed.
+ * \brief Generates public and private keys for the EDDH key encapsulation mechanism.
+ *
+ * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_PRIVATEKEY_SIZE.
+ *
+ * \param publickey:	[uint8_t*] Pointer to the output public-key array.
+ * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
+ * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to the random generator function.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_eddh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+/**
+ * \brief Generates public and private keys for the EDDH key encapsulation mechanism using a seed.
  *
  * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_PRIVATEKEY_SIZE.
  *
@@ -180,6 +205,18 @@ QSC_EXPORT_API void qsc_eddh_public_from_private(uint8_t* publickey, const uint8
  * \return				[bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_eddh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+/**
+ * \brief Decapsulates the shared secret for a given cipher-text using a private-key.
+ *
+ * \warning The shared secret array must be sized to QSC_EDDH_SHAREDSECRET_SIZE.
+ *
+ * \param secret:		[uint8_t*] Pointer to the shared secret key array.
+ * \param privatekey:	[const uint8_t*] Pointer to the private-key array.
+ * \param publickey:	[const uint8_t*] Pointer to the public-key array.
+ * \return				[bool] Returns true on success.
+ */
+QSC_EXPORT_API bool qsc_eddh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END
 

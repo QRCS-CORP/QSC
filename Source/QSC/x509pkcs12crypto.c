@@ -75,7 +75,7 @@ static bool x509_pkcs12_parse_pbkdf2_params(const qsc_encoding_ber_element* para
         }
     }
 
-    return res; /* FIX-02: was return true — ignored parse failure */
+    return res; /* FIX-02: was return true - ignored parse failure */
 }
 
 static bool x509_pkcs12_pbkdf2_hmac256(uint8_t* output, size_t outlen, const uint8_t* password, size_t passwordlen, const uint8_t* salt, size_t saltlen, uint64_t iterations)

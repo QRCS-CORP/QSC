@@ -621,7 +621,7 @@ static void fe_inv(uint32_t r[8U], const uint32_t a[8U])
 static void sc256_mul_raw(uint32_t c[16U], const uint32_t a[8U], const uint32_t b[8U])
 {
     /* 256x256 -> 512-bit schoolbook multiplication (same as fe256_mul_raw,
-     * reused for scalar field – separate alias for clarity). */
+     * reused for scalar field - separate alias for clarity). */
     fe256_mul_raw(c, a, b);
 }
 
@@ -1676,4 +1676,3 @@ bool qsc_p256_verify(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, 
 
     return res;
 }
-

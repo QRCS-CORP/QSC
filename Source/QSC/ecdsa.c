@@ -205,7 +205,7 @@ bool qsc_ecdsa_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg
 
     res = false;
 
-    if (message != NULL && msglen != NULL && signedmsg != NULL && smsglen > QSC_ECDSA_SIGNATURE_SIZE)
+    if (message != NULL && msglen != NULL && signedmsg != NULL && publickey != NULL && smsglen > QSC_ECDSA_SIGNATURE_SIZE)
     {
 #if defined(QSC_ECDSA_S1P256)
         res = qsc_p256_verify(message, msglen, signedmsg, smsglen, publickey);
