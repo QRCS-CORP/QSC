@@ -236,15 +236,8 @@ qsc_tls_status qsc_tls_certificate_message_parse(const uint8_t* input, size_t in
 
 		if (status == qsc_tls_status_success)
 		{
-			if ((size_t)ctxlen > QSC_TLS_CERTIFICATE_REQUEST_CONTEXT_MAX_SIZE)
-			{
-				status = qsc_tls_status_invalid_length;
-			}
-			else
-			{
-				message->requestcontextlen = (size_t)ctxlen;
-				status = qsc_tls_codec_read_bytes(input, inlen, &offset, message->requestcontext, message->requestcontextlen);
-			}
+			message->requestcontextlen = (size_t)ctxlen;
+			status = qsc_tls_codec_read_bytes(input, inlen, &offset, message->requestcontext, message->requestcontextlen);
 		}
 
 		if (status == qsc_tls_status_success)

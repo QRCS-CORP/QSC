@@ -210,7 +210,7 @@ const char* qsc_tls_alert_to_string(qsc_tls_alert_description description)
 	case qsc_tls_alert_bad_record_mac:
 	{
 		res = "bad_record_mac";
-
+		break;
 	}
 	case qsc_tls_alert_record_overflow:
 	{

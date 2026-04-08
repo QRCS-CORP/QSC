@@ -123,7 +123,7 @@ static uint32_t kyber_load24le(const uint8_t x[3U])
     return r;
 }
 
-static void kyber_cbd3(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4U])
+static void kyber_cbd3(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4U])
 {
     size_t i;
     size_t j;
