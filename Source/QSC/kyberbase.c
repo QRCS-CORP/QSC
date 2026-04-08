@@ -235,7 +235,7 @@ static void kyber_poly_cbd_eta1(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_E
 #endif
 }
 
-static void kyber_poly_cbd_eta2(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4U])
+static void kyber_poly_cbd_eta2(qsc_kyber_poly* r, const uint8_t* buf)
 {
     kyber_cbd2(r, buf);
 }
