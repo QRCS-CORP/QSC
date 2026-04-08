@@ -673,66 +673,6 @@ QSC_CPLUSPLUS_ENABLED_START
 #	endif
 #endif
 
-#if defined(QSC_SYSTEM_IS_X64) && !defined(__xlc__) && !defined(uint128_t) && \
-	((defined(__GNUC__) || defined(__clang__)) && defined(__SIZEOF_INT128__))
-        /*!
-         * \def QSC_SYSTEM_NATIVE_UINT128
-         * \brief Defined when the compiler supports a native 128-bit unsigned integer type.
-         */
-#	define QSC_SYSTEM_NATIVE_UINT128
-
-         /*!
-          * \typedef uint128_t
-          * \brief A native 128-bit unsigned integer type.
-          */
-typedef unsigned __int128 uint128_t;
-#endif
-
-/*!
-* \def QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)
-* \brief Performs fast 64-bit multiplication using a native 128-bit integer.
-*/
-#if defined(QSC_SYSTEM_NATIVE_UINT128)
-#	define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)			\
-	do {													\
-      const uint128_t r = (uint128_t)(X) * (Y);	\
-      *(High) = (r >> 64) & 0xFFFFFFFFFFFFFFFFULL;			\
-      *(Low) = (r) & 0xFFFFFFFFFFFFFFFFULL;					\
-	} while(0U)
-#elif defined(QSC_SYSTEM_COMPILER_MSC) && defined(QSC_SYSTEM_IS_X64)
-#	include <intrin.h>
-#	pragma intrinsic(_umul128)
-#	define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)			\
-	do {													\
-		*(Low) = _umul128((X), (Y), (High));				\
-	} while(0U)
-#elif defined(QSC_SYSTEM_COMPILER_GCC)
-#	if defined(QSC_SYSTEM_ARCH_IX86)
-#		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							    \
-		do {																	    \
-		asm("mulq %3" : "=d" (*(High)), "=a" (*(Low)) : "a" (X), "rm" (Y) : "cc");	\
-		} while(0U)
-#	elif defined(QSC_SYSTEM_ARCH_ALPHA)
-#		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
-		do {																	\
-		asm("umulh %1,%2,%0" : "=r" (*(High)) : "r" (X), "r" (Y));				\
-		*(Low) = (X) * (Y);														\
-		} while(0U)
-#	elif defined(QSC_SYSTEM_ARCH_IA64)
-#		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
-		do {																	\
-		asm("xmpy.hu %0=%1,%2" : "=f" (*(High)) : "f" (X), "f" (Y));			\
-		*(Low) = (X) * (Y);														\
-		} while(0U)
-#	elif defined(QSC_SYSTEM_ARCH_PPC)
-#		define QSC_SYSTEM_FAST_64X64_MUL(X,Y,Low,High)							\
-		do {																	\
-		asm("mulhdu %0,%1,%2" : "=r" (*(High)) : "r" (X), "r" (Y) : "cc");		\
-		*(Low) = (X) * (Y);														\
-		} while(0U)
-#	endif
-#endif
-
 /*!
  * \def QSC_SYSTEM_MAX_NAME
  * \brief The maximum system name length supported by the system.
