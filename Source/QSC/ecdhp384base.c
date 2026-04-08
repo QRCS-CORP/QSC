@@ -27,14 +27,6 @@ static const uint32_t P384_N[12U] =
     0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU
 };
 
-/* n-2 (for Fermat modular inverse mod n) */
-static const uint32_t P384_N2[12U] =
-{
-    0xCCC52971U, 0xECEC196AU, 0x48B0A77AU, 0x581A0DB2U,
-    0xF4372DDFU, 0xC7634D81U, 0xFFFFFFFFU, 0xFFFFFFFFU,
-    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU
-};
-
 /* p-2 (for Fermat field inversion mod p) */
 static const uint32_t P384_P2[12U] =
 {

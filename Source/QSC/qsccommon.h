@@ -673,25 +673,19 @@ QSC_CPLUSPLUS_ENABLED_START
 #	endif
 #endif
 
-#if defined(__SIZEOF_INT128__) && defined(QSC_SYSTEM_IS_X64) && !defined(__xlc__) && !defined(uint128_t)
-    /*!
-    * \def QSC_SYSTEM_NATIVE_UINT128
-    * \brief Defined when the system supports a native 128-bit integer type.
-    */
-#   define QSC_SYSTEM_NATIVE_UINT128
-#   if defined(__GNUC__)
+#if defined(QSC_SYSTEM_IS_X64) && !defined(__xlc__) && !defined(uint128_t) && \
+	((defined(__GNUC__) || defined(__clang__)) && defined(__SIZEOF_INT128__))
         /*!
-        * \typedef uint128_t
-        * \brief A 128-bit unsigned integer type.
-        */
-        typedef unsigned __int128 uint128_t;
-#   else
-        /*!
-        * \typedef uint128_t
-        * \brief A 128-bit unsigned integer type.
-        */
-        typedef unsigned __int128 uint128_t;
-#   endif
+         * \def QSC_SYSTEM_NATIVE_UINT128
+         * \brief Defined when the compiler supports a native 128-bit unsigned integer type.
+         */
+#	define QSC_SYSTEM_NATIVE_UINT128
+
+         /*!
+          * \typedef uint128_t
+          * \brief A native 128-bit unsigned integer type.
+          */
+typedef unsigned __int128 uint128_t;
 #endif
 
 /*!

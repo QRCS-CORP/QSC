@@ -1429,7 +1429,7 @@ qsc_x509w_status qsc_x509w_name_get_attribute_first(const qsc_x509_name* name, q
         return QSC_X509W_STATUS_NOT_FOUND;
     }
 
-    return x509w_copy_text_value(attr->value, attr->length, output, outputlen, written);
+    return x509w_copy_text_value((const uint8_t*)attr->value, attr->length, output, outputlen, written);
 }
 
 qsc_x509w_status qsc_x509w_certificate_subject_string(const qsc_x509_certificate* certificate, char* output, size_t outputlen, size_t* written)

@@ -108,7 +108,7 @@ qsc_tls_status qsc_tls_transcript_append(qsc_tls_transcript_state* state, const 
 
 	status = qsc_tls_status_success;
 
-	if (state == NULL || (message == NULL) && (msglen != 0U))
+	if (state == NULL || (message == NULL && msglen != 0U))
 	{
 		status = qsc_tls_status_invalid_input;
 	}
