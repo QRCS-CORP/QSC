@@ -1,8 +1,8 @@
 #include "x509spki.h"
-#include "memutils.h"
-#include "oid.h"
 #include "dilithium.h"
 #include "kyber.h"
+#include "memutils.h"
+#include "oid.h"
 
 static qsc_x509_pqc_parameter_set x509_spki_active_mldsa_parameter_set(void)
 {
@@ -19,21 +19,15 @@ static qsc_x509_pqc_parameter_set x509_spki_active_mldsa_parameter_set(void)
 
 static qsc_x509_pqc_parameter_set x509_spki_active_mlkem_parameter_set(void)
 {
-#if defined(QSC_KYBER_PUBLICKEY_SIZE)
-    if (QSC_KYBER_PUBLICKEY_SIZE == 800U)
-    {
-        return QSC_X509_PQC_PARAMETER_SET_ML_KEM_512;
-    }
-    else if (QSC_KYBER_PUBLICKEY_SIZE == 1184U)
-    {
-        return QSC_X509_PQC_PARAMETER_SET_ML_KEM_768;
-    }
-    else if (QSC_KYBER_PUBLICKEY_SIZE == 1568U)
-    {
-        return QSC_X509_PQC_PARAMETER_SET_ML_KEM_1024;
-    }
-#endif
+#if defined(QSC_KYBER_S1K2P512)
+    return QSC_X509_PQC_PARAMETER_SET_ML_KEM_512;
+#elif defined(QSC_KYBER_S3K3P768)
+    return QSC_X509_PQC_PARAMETER_SET_ML_KEM_768;
+#elif defined(QSC_KYBER_S5K4P1024)
+    return QSC_X509_PQC_PARAMETER_SET_ML_KEM_1024;
+#else
     return QSC_X509_PQC_PARAMETER_SET_NONE;
+#endif
 }
 
 static bool x509_spki_mldsa_parameter_set_matches_build(qsc_x509_pqc_parameter_set parameterset)
@@ -374,46 +368,16 @@ size_t qsc_x509_pqc_public_key_size(qsc_x509_pqc_parameter_set parameterset)
     switch (parameterset)
     {
         case QSC_X509_PQC_PARAMETER_SET_ML_DSA_44:
-#if defined(QSC_DILITHIUM_S1P44)
-            return QSC_DILITHIUM_PUBLICKEY_SIZE;
-#else
             return 1312U;
-#endif
         case QSC_X509_PQC_PARAMETER_SET_ML_DSA_65:
-#if defined(QSC_DILITHIUM_S3P65)
-            return QSC_DILITHIUM_PUBLICKEY_SIZE;
-#else
             return 1952U;
-#endif
         case QSC_X509_PQC_PARAMETER_SET_ML_DSA_87:
-#if defined(QSC_DILITHIUM_S5P87)
-            return QSC_DILITHIUM_PUBLICKEY_SIZE;
-#else
             return 2592U;
-#endif
         case QSC_X509_PQC_PARAMETER_SET_ML_KEM_512:
-#if defined(QSC_KYBER_PUBLICKEY_SIZE)
-            if (QSC_KYBER_PUBLICKEY_SIZE == 800U)
-            {
-                return QSC_KYBER_PUBLICKEY_SIZE;
-            }
-#endif
             return 800U;
         case QSC_X509_PQC_PARAMETER_SET_ML_KEM_768:
-#if defined(QSC_KYBER_PUBLICKEY_SIZE)
-            if (QSC_KYBER_PUBLICKEY_SIZE == 1184U)
-            {
-                return QSC_KYBER_PUBLICKEY_SIZE;
-            }
-#endif
             return 1184U;
         case QSC_X509_PQC_PARAMETER_SET_ML_KEM_1024:
-#if defined(QSC_KYBER_PUBLICKEY_SIZE)
-            if (QSC_KYBER_PUBLICKEY_SIZE == 1568U)
-            {
-                return QSC_KYBER_PUBLICKEY_SIZE;
-            }
-#endif
             return 1568U;
         default:
             return 0U;

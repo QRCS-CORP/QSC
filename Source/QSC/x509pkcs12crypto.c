@@ -249,7 +249,9 @@ bool qsc_x509_pkcs12_decrypt_encrypted_private_key_info(const uint8_t* data, siz
     ivel = NULL;
     kdfseq = NULL;
     params = NULL;
-
+    saltlen = 0U;
+    iterations = 0U;
+    keylength = 0U;
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
     if (data != NULL && password != NULL && privatekeyinfo != NULL && privatekeyinfolen != NULL)
