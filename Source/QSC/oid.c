@@ -204,11 +204,10 @@ static bool oid_decode_base128(const uint8_t* data, size_t length, qsc_asn1_oid*
                         arc1 = value - 80U;
                     }
 
-                    if (QSC_ASN1_OID_MAX_ARCS < 2U)
-                    {
+#if (QSC_ASN1_OID_MAX_ARCS < 2U)
                         arcidx = 0U;
                         break;
-                    }
+#endif
 
                     oid->arcs[0U] = arc0;
                     oid->arcs[1U] = arc1;

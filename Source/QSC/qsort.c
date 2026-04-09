@@ -249,7 +249,7 @@ void qsc_qsort_sort_i8(int8_t* arr, int32_t start, int32_t end)
     {
         while (start < end)
         {
-            int8_t mid = start + (end - start) / (int8_t)2;
+            int32_t mid = start + (end - start) / 2;
 
             /* median-of-three: sort arr[start], arr[mid], arr[end] */
             if (arr[mid] < arr[start])
@@ -299,7 +299,7 @@ void qsc_qsort_sort_i16(int16_t* arr, int32_t start, int32_t end)
     {
         while (start < end)
         {
-            int16_t mid = start + (end - start) / 2;
+            int32_t mid = start + (end - start) / 2;
 
             if (arr[mid] < arr[start])
             {

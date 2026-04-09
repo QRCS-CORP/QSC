@@ -875,6 +875,7 @@ qsc_asn1_status qsc_x509_csr_set_ml_dsa_signature_algorithm(qsc_x509_csr* csr, u
     qsc_x509_pqc_parameter_set parameterset;
     qsc_asn1_status status;
 
+    parameterset = QSC_X509_PQC_PARAMETER_SET_NONE;
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
     if (csr != NULL)
