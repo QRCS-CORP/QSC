@@ -962,7 +962,7 @@ bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* features)
 	return res;
 }
 
-void qsc_cpuidex_print_stats()
+void qsc_cpuidex_print_stats(void)
 {
 	qsc_cpuidex_cpu_features cfeat;
 	const char sf[] = "false";
