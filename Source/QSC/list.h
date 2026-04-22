@@ -138,112 +138,117 @@ QSC_EXPORT_API typedef struct
 /**
  * \brief Add an item to the list.
  *
- * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
- * \param item:     [void*] Pointer to the item to be added.
+ * \param ctx: [qsc_list_state*] Pointer to the list state structure.
+ * \param item: [void*] Pointer to the item to be added.
  */
 QSC_EXPORT_API void qsc_list_add(qsc_list_state* ctx, const void* item);
 
 /**
  * \brief Copy an item from the list.
  *
- * \param ctx:      [const qsc_list_state*] Pointer to the list state structure.
- * \param index:    [size_t] The index number of the list item.
- * \param item:     [void*] Pointer to the memory that receives the copy.
+ * \param ctx: [const qsc_list_state*] Pointer to the list state structure.
+ * \param index: [size_t] The index number of the list item.
+ * \param item: [void*] Pointer to the memory that receives the copy.
  */
 QSC_EXPORT_API void qsc_list_copy(const qsc_list_state* ctx, size_t index, void* item);
 
 /**
  * \brief Get the number of items in the list.
  *
- * \param ctx:      [const qsc_list_state*] Pointer to the list state structure.
- * \return          [size_t] Returns the number of items in the list.
+ * \param ctx: [const qsc_list_state*] Pointer to the list state structure.
+ * 
+ * \return [size_t] Returns the number of items in the list.
  */
 QSC_EXPORT_API size_t qsc_list_count(const qsc_list_state* ctx);
 
 /**
  * \brief Convert a serialized list into a list context.
  *
- * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
- * \param input:    [const uint8_t*]  Pointer to the serialized list.
+ * \param ctx: [qsc_list_state*] Pointer to the list state structure.
+ * \param input: [const uint8_t*]  Pointer to the serialized list.
  */
 QSC_EXPORT_API void qsc_list_deserialize(qsc_list_state* ctx, const uint8_t* input);
 
 /**
  * \brief Dispose of the list state.
  *
- * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
+ * \param ctx: [qsc_list_state*] Pointer to the list state structure.
  */
 QSC_EXPORT_API void qsc_list_dispose(qsc_list_state* ctx);
 
 /**
  * \brief Initialize the list state.
  *
- * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
- * \param width:    [size_t] The maximum size of each list item in bytes.
+ * \param ctx: [qsc_list_state*] Pointer to the list state structure.
+ * \param width: [size_t] The maximum size of each list item in bytes.
  */
 QSC_EXPORT_API void qsc_list_initialize(qsc_list_state* ctx, size_t width);
 
 /**
  * \brief Check if the list is empty.
  *
- * \param ctx:      [const qsc_list_state*] Pointer to the list state structure.
- * \return          [bool] Returns true if the list is empty.
+ * \param ctx: [const qsc_list_state*] Pointer to the list state structure.
+ * 
+ * \return [bool] Returns true if the list is empty.
  */
 QSC_EXPORT_API bool qsc_list_empty(const qsc_list_state* ctx);
 
 /**
  * \brief Check if the list is full.
  *
- * \param ctx:      [const qsc_list_state*] Pointer to the list state structure.
- * \return          [bool] Returns true if the list is full.
+ * \param ctx: [const qsc_list_state*] Pointer to the list state structure.
+ * 
+ * \return [bool] Returns true if the list is full.
  */
 QSC_EXPORT_API bool qsc_list_full(const qsc_list_state* ctx);
 
 /**
  * \brief Retrieve a pointer to a list item.
  *
- * \param ctx:      [const qsc_list_state*] Pointer to the list state structure.
- * \param item:     [uint8_t*] Pointer to the buffer that receives the item.
- * \param index:    [size_t] The index of the list item.
+ * \param ctx: [const qsc_list_state*] Pointer to the list state structure.
+ * \param item: [uint8_t*] Pointer to the buffer that receives the item.
+ * \param index: [size_t] The index of the list item.
  */
 QSC_EXPORT_API void qsc_list_item(const qsc_list_state* ctx, uint8_t* item, size_t index);
 
 /**
  * \brief Randomly shuffle the items in the list.
  *
- * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
+ * \param ctx: [qsc_list_state*] Pointer to the list state structure.
  */
 QSC_EXPORT_API void qsc_list_rshuffle(qsc_list_state* ctx);
 
 /**
  * \brief Remove an item from the list.
  *
- * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
- * \param index     [size_t] The index number of the item to remove.
+ * \param ctx: [qsc_list_state*] Pointer to the list state structure.
+ * \param index [size_t] The index number of the item to remove.
  */
 QSC_EXPORT_API void qsc_list_remove(qsc_list_state* ctx, size_t index);
 
 /**
  * \brief Serialize the list into a byte array.
  *
- * \param output:   [uint8_t*] Pointer to the output serialized array.
- * \param ctx:      [const qsc_list_state*] Pointer to the list state structure.
- * \return          [size_t] Returns the number of bytes in the serialized list.
+ * \param output: [uint8_t*] Pointer to the output serialized array.
+ * \param ctx: [const qsc_list_state*] Pointer to the list state structure.
+ * 
+ * \return [size_t] Returns the number of bytes in the serialized list.
  */
 QSC_EXPORT_API size_t qsc_list_serialize(uint8_t* output, const qsc_list_state* ctx);
 
 /**
  * \brief Get the serialized size of the list.
  *
- * \param ctx:      [const qsc_list_state*] Pointer to the list state structure.
- * \return          [size_t] Returns the byte size of the serialized list.
+ * \param ctx: [const qsc_list_state*] Pointer to the list state structure.
+ * 
+ * \return [size_t] Returns the byte size of the serialized list.
  */
 QSC_EXPORT_API size_t qsc_list_size(const qsc_list_state* ctx);
 
 /**
  * \brief Sort the items in the list.
  *
- * \param ctx:      [qsc_list_state*] Pointer to the list state structure.
+ * \param ctx: [qsc_list_state*] Pointer to the list state structure.
  */
 QSC_EXPORT_API void qsc_list_sort(qsc_list_state* ctx);
 
@@ -251,7 +256,7 @@ QSC_EXPORT_API void qsc_list_sort(qsc_list_state* ctx);
 /**
  * \brief Self-test for list functions.
  *
- * \return          [bool] Returns true if all tests pass.
+ * \return [bool] Returns true if all tests pass.
  */
 QSC_EXPORT_API bool qsc_list_self_test(void);
 #endif

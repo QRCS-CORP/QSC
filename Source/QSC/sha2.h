@@ -214,16 +214,16 @@ QSC_EXPORT_API typedef struct
 /*!
  * \brief Process a message with SHA2-256 and return the hash code in the output byte array.
  *
- * \param output:   [uint8_t*] The output byte array; receives the hash code.
- * \param message:  [const uint8_t*] The message input byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param output: [uint8_t*] The output byte array; receives the hash code.
+ * \param message: [const uint8_t*] The message input byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_sha256_compute(uint8_t* output, const uint8_t* message, size_t msglen);
 
 /*!
  * \brief Dispose of the SHA2-256 state.
  *
- * \param ctx:      [qsc_sha256_state*] Pointer to the cipher state structure.
+ * \param ctx: [qsc_sha256_state*] Pointer to the cipher state structure.
  */
 QSC_EXPORT_API void qsc_sha256_dispose(qsc_sha256_state* ctx);
 
@@ -233,15 +233,15 @@ QSC_EXPORT_API void qsc_sha256_dispose(qsc_sha256_state* ctx);
  * \warning The output array must be sized correctly. Finalizes the message state; cannot be used in consecutive calls.
  *          The state must be initialized by the caller.
  *
- * \param ctx:      [qsc_sha256_state*]  Pointer to the function state; must be initialized.
- * \param output:   [uint8_t*] The output byte array; receives the hash code.
+ * \param ctx: [qsc_sha256_state*]  Pointer to the function state; must be initialized.
+ * \param output: [uint8_t*] The output byte array; receives the hash code.
  */
 QSC_EXPORT_API void qsc_sha256_finalize(qsc_sha256_state* ctx, uint8_t* output);
 
 /*!
  * \brief Initialize a SHA2-256 state structure.
  *
- * \param ctx:      [qsc_sha256_state*] Pointer to the function state.
+ * \param ctx: [qsc_sha256_state*] Pointer to the function state.
  */
 QSC_EXPORT_API void qsc_sha256_initialize(qsc_sha256_state* ctx);
 
@@ -251,8 +251,8 @@ QSC_EXPORT_API void qsc_sha256_initialize(qsc_sha256_state* ctx);
  * Internal function: Called by protocol hash and generation functions, or in the construction of other external protocols.
  * Absorbs a message and permutes the state array.
  *
- * \param output:   [uint32_t*] The function output; must be initialized.
- * \param input:    [const uint8_t*] The input message byte array.
+ * \param output: [uint32_t*] The function output; must be initialized.
+ * \param input: [const uint8_t*] The input message byte array.
  */
 QSC_EXPORT_API void qsc_sha256_permute(uint32_t* output, const uint8_t* input);
 
@@ -261,9 +261,9 @@ QSC_EXPORT_API void qsc_sha256_permute(uint32_t* output, const uint8_t* input);
  *
  * \warning State must be initialized by the caller.
  *
- * \param ctx:      [qsc_sha256_state*] Pointer to the function state.
- * \param message:  [const uint8_t*] The input message byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param ctx: [qsc_sha256_state*] Pointer to the function state.
+ * \param message: [const uint8_t*] The input message byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_sha256_update(qsc_sha256_state* ctx, const uint8_t* message, size_t msglen);
 
@@ -286,16 +286,16 @@ QSC_EXPORT_API typedef struct
  *
  * \warning The output array must be at least 48 bytes in length.
  *
- * \param output:   [uint8_t*] The output byte array; receives the hash code.
- * \param message:  [const uint8_t*] The message input byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param output: [uint8_t*] The output byte array; receives the hash code.
+ * \param message: [const uint8_t*] The message input byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_sha384_compute(uint8_t* output, const uint8_t* message, size_t msglen);
 
 /*!
  * \brief Dispose of the SHA2-384 state.
  *
- * \param ctx:      [qsc_sha384_state*] Pointer to the cipher state structure.
+ * \param ctx: [qsc_sha384_state*] Pointer to the cipher state structure.
  */
 QSC_EXPORT_API void qsc_sha384_dispose(qsc_sha384_state* ctx);
 
@@ -305,15 +305,15 @@ QSC_EXPORT_API void qsc_sha384_dispose(qsc_sha384_state* ctx);
  * \warning The output array must be sized correctly. Finalizes the message state; cannot be used in consecutive calls.
  *          The state must be initialized by the caller.
  *
- * \param ctx:      [qsc_sha384_state*] Pointer to the function state; must be initialized.
- * \param output:   [uint8_t*] The output byte array; receives the hash code.
+ * \param ctx: [qsc_sha384_state*] Pointer to the function state; must be initialized.
+ * \param output: [uint8_t*] The output byte array; receives the hash code.
  */
 QSC_EXPORT_API void qsc_sha384_finalize(qsc_sha384_state* ctx, uint8_t* output);
 
 /*!
  * \brief Initialize a SHA2-384 state structure.
  *
- * \param ctx:      [qsc_sha384_state*] Pointer to the function state.
+ * \param ctx: [qsc_sha384_state*] Pointer to the function state.
  */
 QSC_EXPORT_API void qsc_sha384_initialize(qsc_sha384_state* ctx);
 
@@ -322,9 +322,9 @@ QSC_EXPORT_API void qsc_sha384_initialize(qsc_sha384_state* ctx);
  *
  * \warning State must be initialized by the caller.
  *
- * \param ctx:      [qsc_sha384_state*] Pointer to the function state.
- * \param message:  [const uint8_t*] The input message byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param ctx: [qsc_sha384_state*] Pointer to the function state.
+ * \param message: [const uint8_t*] The input message byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_sha384_update(qsc_sha384_state* ctx, const uint8_t* message, size_t msglen);
 
@@ -347,16 +347,16 @@ QSC_EXPORT_API typedef struct
  *
  * \warning The output array must be at least 64 bytes in length.
  *
- * \param output:   [uint8_t*] The output byte array; receives the hash code.
- * \param message:  [const uint8_t*] The message input byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param output: [uint8_t*] The output byte array; receives the hash code.
+ * \param message: [const uint8_t*] The message input byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_sha512_compute(uint8_t* output, const uint8_t* message, size_t msglen);
 
 /*!
  * \brief Dispose of the SHA2-512 state.
  *
- * \param ctx:      [qsc_sha512_state*] Pointer to the cipher state structure.
+ * \param ctx: [qsc_sha512_state*] Pointer to the cipher state structure.
  */
 QSC_EXPORT_API void qsc_sha512_dispose(qsc_sha512_state* ctx);
 
@@ -366,15 +366,15 @@ QSC_EXPORT_API void qsc_sha512_dispose(qsc_sha512_state* ctx);
  * \warning The output array must be sized correctly. Finalizes the message state; cannot be used in consecutive calls.
  *          The state must be initialized by the caller.
  *
- * \param ctx:      [qsc_sha512_state*] Pointer to the function state; must be initialized.
- * \param output:   [uint8_t*] The output byte array; receives the hash code.
+ * \param ctx: [qsc_sha512_state*] Pointer to the function state; must be initialized.
+ * \param output: [uint8_t*] The output byte array; receives the hash code.
  */
 QSC_EXPORT_API void qsc_sha512_finalize(qsc_sha512_state* ctx, uint8_t* output);
 
 /*!
  * \brief Initialize a SHA2-512 state structure.
  *
- * \param ctx:      [qsc_sha512_state*] Pointer to the function state.
+ * \param ctx: [qsc_sha512_state*] Pointer to the function state.
  */
 QSC_EXPORT_API void qsc_sha512_initialize(qsc_sha512_state* ctx);
 
@@ -384,8 +384,8 @@ QSC_EXPORT_API void qsc_sha512_initialize(qsc_sha512_state* ctx);
  * Internal function: Called by protocol hash and generation functions, or in the construction of other external protocols.
  * Absorbs a message and permutes the state array.
  *
- * \param output:   [uint64_t*] The function output; must be initialized.
- * \param input:    [const uint8_t*] The input message byte array.
+ * \param output: [uint64_t*] The function output; must be initialized.
+ * \param input: [const uint8_t*] The input message byte array.
  */
 QSC_EXPORT_API void qsc_sha512_permute(uint64_t* output, const uint8_t* input);
 
@@ -394,9 +394,9 @@ QSC_EXPORT_API void qsc_sha512_permute(uint64_t* output, const uint8_t* input);
  *
  * \warning State must be initialized by the caller.
  *
- * \param ctx:      [qsc_sha512_state*] Pointer to the function state.
- * \param message:  [const uint8_t*] The input message byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param ctx: [qsc_sha512_state*] Pointer to the function state.
+ * \param message: [const uint8_t*] The input message byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_sha512_update(qsc_sha512_state* ctx, const uint8_t* message, size_t msglen);
 
@@ -418,18 +418,18 @@ QSC_EXPORT_API typedef struct
  *
  * \warning The output array must be at least 32 bytes in length.
  *
- * \param output:   [uint8_t*] The output byte array; receives the MAC code.
- * \param message:  [const uint8_t*] The message input byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
- * \param key:      [const uint8_t*] The secret key array.
- * \param keylen:   [size_t] The key array length.
+ * \param output: [uint8_t*] The output byte array; receives the MAC code.
+ * \param message: [const uint8_t*] The message input byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
+ * \param key: [const uint8_t*] The secret key array.
+ * \param keylen: [size_t] The key array length.
  */
 QSC_EXPORT_API void qsc_hmac256_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen);
 
 /*!
  * \brief Dispose of the HMAC-256 state.
  *
- * \param ctx:      [qsc_hmac256_state*] Pointer to the MAC state structure.
+ * \param ctx: [qsc_hmac256_state*] Pointer to the MAC state structure.
  */
 QSC_EXPORT_API void qsc_hmac256_dispose(qsc_hmac256_state* ctx);
 
@@ -439,17 +439,17 @@ QSC_EXPORT_API void qsc_hmac256_dispose(qsc_hmac256_state* ctx);
  * \warning The output array must be sized correctly. Finalizes the message state; cannot be used in consecutive calls.
  *          The state must be initialized by the caller.
  *
- * \param ctx:      [qsc_hmac256_state*] Pointer to the MAC state structure; must be initialized.
- * \param output:   [uint8_t*] The output byte array; receives the MAC code.
+ * \param ctx: [qsc_hmac256_state*] Pointer to the MAC state structure; must be initialized.
+ * \param output: [uint8_t*] The output byte array; receives the MAC code.
  */
 QSC_EXPORT_API void qsc_hmac256_finalize(qsc_hmac256_state* ctx, uint8_t* output);
 
 /*!
  * \brief Initialize an HMAC-256 state structure with a key.
  *
- * \param ctx:      [qsc_hmac256_state*] Pointer to the MAC state structure.
- * \param key:      [const uint8_t*] Pointer to the secret key array.
- * \param keylen:   [size_t] The key array length.
+ * \param ctx: [qsc_hmac256_state*] Pointer to the MAC state structure.
+ * \param key: [const uint8_t*] Pointer to the secret key array.
+ * \param keylen: [size_t] The key array length.
  */
 QSC_EXPORT_API void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t* key, size_t keylen);
 
@@ -458,9 +458,9 @@ QSC_EXPORT_API void qsc_hmac256_initialize(qsc_hmac256_state* ctx, const uint8_t
  *
  * \warning State must be initialized by the caller.
  *
- * \param ctx:      [qsc_hmac256_state*] Pointer to the MAC state structure.
- * \param message:  [const uint8_t*] The input message byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param ctx: [qsc_hmac256_state*] Pointer to the MAC state structure.
+ * \param message: [const uint8_t*] The input message byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_hmac256_update(qsc_hmac256_state* ctx, const uint8_t* message, size_t msglen);
 
@@ -482,18 +482,18 @@ QSC_EXPORT_API typedef struct
  *
  * \warning The output array must be at least 64 bytes in length.
  *
- * \param output:   [uint8_t*] The output byte array; receives the MAC code.
- * \param message:  [const uint8_t*] The message input byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
- * \param key:      [const uint8_t*] The secret key array.
- * \param keylen:   [size_t] The key array length.
+ * \param output: [uint8_t*] The output byte array; receives the MAC code.
+ * \param message: [const uint8_t*] The message input byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
+ * \param key: [const uint8_t*] The secret key array.
+ * \param keylen: [size_t] The key array length.
  */
 QSC_EXPORT_API void qsc_hmac384_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen);
 
 /*!
  * \brief Dispose of the HMAC-384 state.
  *
- * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure.
+ * \param ctx: [qsc_hmac384_state*] Pointer to the MAC state structure.
  */
 QSC_EXPORT_API void qsc_hmac384_dispose(qsc_hmac384_state* ctx);
 
@@ -503,17 +503,17 @@ QSC_EXPORT_API void qsc_hmac384_dispose(qsc_hmac384_state* ctx);
  * \warning The output array must be sized correctly. Finalizes the message state; cannot be used in consecutive calls.
  *          The state must be initialized by the caller.
  *
- * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure; must be initialized.
- * \param output:   [uint8_t*] The output byte array; receives the MAC code.
+ * \param ctx: [qsc_hmac384_state*] Pointer to the MAC state structure; must be initialized.
+ * \param output: [uint8_t*] The output byte array; receives the MAC code.
  */
 QSC_EXPORT_API void qsc_hmac384_finalize(qsc_hmac384_state* ctx, uint8_t* output);
 
 /*!
  * \brief Initialize an HMAC-384 state structure with a key.
  *
- * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure.
- * \param key:      [const uint8_t*] Pointer to the secret key array.
- * \param keylen:   [size_t] The key array length.
+ * \param ctx: [qsc_hmac384_state*] Pointer to the MAC state structure.
+ * \param key: [const uint8_t*] Pointer to the secret key array.
+ * \param keylen: [size_t] The key array length.
  */
 QSC_EXPORT_API void qsc_hmac384_initialize(qsc_hmac384_state* ctx, const uint8_t* key, size_t keylen);
 
@@ -522,9 +522,9 @@ QSC_EXPORT_API void qsc_hmac384_initialize(qsc_hmac384_state* ctx, const uint8_t
  *
  * \warning State must be initialized by the caller.
  *
- * \param ctx:      [qsc_hmac384_state*] Pointer to the MAC state structure.
- * \param message:  [const uint8_t*] The input message byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param ctx: [qsc_hmac384_state*] Pointer to the MAC state structure.
+ * \param message: [const uint8_t*] The input message byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_hmac384_update(qsc_hmac384_state* ctx, const uint8_t* message, size_t msglen);
 
@@ -546,18 +546,18 @@ QSC_EXPORT_API typedef struct
  *
  * \warning The output array must be at least 64 bytes in length.
  *
- * \param output:   [uint8_t*] The output byte array; receives the MAC code.
- * \param message:  [const uint8_t*] The message input byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
- * \param key:      [const uint8_t*] The secret key array.
- * \param keylen:   [size_t] The key array length.
+ * \param output: [uint8_t*] The output byte array; receives the MAC code.
+ * \param message: [const uint8_t*] The message input byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
+ * \param key: [const uint8_t*] The secret key array.
+ * \param keylen: [size_t] The key array length.
  */
 QSC_EXPORT_API void qsc_hmac512_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen);
 
 /*!
  * \brief Dispose of the HMAC-512 state.
  *
- * \param ctx:      [qsc_hmac512_state*] Pointer to the MAC state structure.
+ * \param ctx: [qsc_hmac512_state*] Pointer to the MAC state structure.
  */
 QSC_EXPORT_API void qsc_hmac512_dispose(qsc_hmac512_state* ctx);
 
@@ -567,17 +567,17 @@ QSC_EXPORT_API void qsc_hmac512_dispose(qsc_hmac512_state* ctx);
  * \warning The output array must be sized correctly. Finalizes the message state; cannot be used in consecutive calls.
  *          The state must be initialized by the caller.
  *
- * \param ctx:      [qsc_hmac512_state*] Pointer to the MAC state structure; must be initialized.
- * \param output:   [uint8_t*] The output byte array; receives the MAC code.
+ * \param ctx: [qsc_hmac512_state*] Pointer to the MAC state structure; must be initialized.
+ * \param output: [uint8_t*] The output byte array; receives the MAC code.
  */
 QSC_EXPORT_API void qsc_hmac512_finalize(qsc_hmac512_state* ctx, uint8_t* output);
 
 /*!
  * \brief Initialize an HMAC-512 state structure with a key.
  *
- * \param ctx:      [qsc_hmac512_state*] Pointer to the MAC state structure.
- * \param key:      [const uint8_t*] Pointer to the secret key array.
- * \param keylen:   [size_t] The key array length.
+ * \param ctx: [qsc_hmac512_state*] Pointer to the MAC state structure.
+ * \param key: [const uint8_t*] Pointer to the secret key array.
+ * \param keylen: [size_t] The key array length.
  */
 QSC_EXPORT_API void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t* key, size_t keylen);
 
@@ -586,9 +586,9 @@ QSC_EXPORT_API void qsc_hmac512_initialize(qsc_hmac512_state* ctx, const uint8_t
  *
  * \warning State must be initialized by the caller.
  *
- * \param ctx:      [qsc_hmac512_state*] Pointer to the MAC state structure.
- * \param message:  [const uint8_t*] The input message byte array.
- * \param msglen:   [size_t] The number of message bytes to process.
+ * \param ctx: [qsc_hmac512_state*] Pointer to the MAC state structure.
+ * \param message: [const uint8_t*] The input message byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* message, size_t msglen);
 
@@ -597,72 +597,72 @@ QSC_EXPORT_API void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* me
 /*!
  * \brief Initialize an instance of HKDF(HMAC(SHA2-256)) and generate pseudo-random output.
  *
- * \param output:   [uint8_t*] The output pseudo-random byte array.
- * \param otplen:   [size_t] The output array length.
- * \param key:      [const uint8_t*] The HKDF key array.
- * \param keylen:   [size_t] The key array length.
- * \param info:     [const uint8_t*] The info array.
- * \param infolen:  [size_t] The info array length.
+ * \param output: [uint8_t*] The output pseudo-random byte array.
+ * \param otplen: [size_t] The output array length.
+ * \param key: [const uint8_t*] The HKDF key array.
+ * \param keylen: [size_t] The key array length.
+ * \param info: [const uint8_t*] The info array.
+ * \param infolen: [size_t] The info array length.
  */
 QSC_EXPORT_API void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
 
 /*!
  * \brief Extract a key from a combined key and salt input using HMAC(SHA2-256).
  *
- * \param output:   [uint8_t*] The output pseudo-random byte array.
- * \param otplen:   [size_t] The output array length.
- * \param key:      [const uint8_t*] The HKDF key array.
- * \param keylen:   [size_t] The key array length.
- * \param salt:     [const uint8_t*] The salt array.
- * \param saltlen:  [size_t] The salt array length.
+ * \param output: [uint8_t*] The output pseudo-random byte array.
+ * \param otplen: [size_t] The output array length.
+ * \param key: [const uint8_t*] The HKDF key array.
+ * \param keylen: [size_t] The key array length.
+ * \param salt: [const uint8_t*] The salt array.
+ * \param saltlen: [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
 
 /*!
  * \brief Initialize an instance of HKDF(HMAC(SHA2-384)) and generate pseudo-random output.
  *
- * \param output:   [uint8_t*] The output pseudo-random byte array.
- * \param otplen:   [size_t] The output array length.
- * \param key:      [const uint8_t*] The HKDF key array.
- * \param keylen:   [size_t] The key array length.
- * \param info:     [const uint8_t*] The info array.
- * \param infolen:  [size_t] The info array length.
+ * \param output: [uint8_t*] The output pseudo-random byte array.
+ * \param otplen: [size_t] The output array length.
+ * \param key: [const uint8_t*] The HKDF key array.
+ * \param keylen: [size_t] The key array length.
+ * \param info: [const uint8_t*] The info array.
+ * \param infolen: [size_t] The info array length.
  */
 QSC_EXPORT_API void qsc_hkdf384_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
 
 /*!
  * \brief Extract a key from a combined key and salt input using HMAC(SHA2-384).
  *
- * \param output:   [uint8_t*] The output pseudo-random byte array.
- * \param otplen:   [size_t] The output array length.
- * \param key:      [const uint8_t*] The HKDF key array.
- * \param keylen:   [size_t] The key array length.
- * \param salt:     [const uint8_t*] The salt array.
- * \param saltlen:  [size_t] The salt array length.
+ * \param output: [uint8_t*] The output pseudo-random byte array.
+ * \param otplen: [size_t] The output array length.
+ * \param key: [const uint8_t*] The HKDF key array.
+ * \param keylen: [size_t] The key array length.
+ * \param salt: [const uint8_t*] The salt array.
+ * \param saltlen: [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf384_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
 
 /*!
  * \brief Initialize an instance of HKDF(HMAC(SHA2-512)) and generate pseudo-random output.
  *
- * \param output:   [uint8_t*] The output pseudo-random byte array.
- * \param otplen:   [size_t] The output array length.
- * \param key:      [const uint8_t*] The HKDF key array.
- * \param keylen:   [size_t] The key array length.
- * \param info:     [const uint8_t*] The info array.
- * \param infolen:  [size_t] The info array length.
+ * \param output: [uint8_t*] The output pseudo-random byte array.
+ * \param otplen: [size_t] The output array length.
+ * \param key: [const uint8_t*] The HKDF key array.
+ * \param keylen: [size_t] The key array length.
+ * \param info: [const uint8_t*] The info array.
+ * \param infolen: [size_t] The info array length.
  */
 QSC_EXPORT_API void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
 
 /*!
  * \brief Extract a key from a combined key and salt input using HMAC(SHA2-512).
  *
- * \param output:   [uint8_t*] The output pseudo-random byte array.
- * \param otplen:   [size_t] The output array length.
- * \param key:      [const uint8_t*] The HKDF key array.
- * \param keylen:   [size_t] The key array length.
- * \param salt:     [const uint8_t*] The salt array.
- * \param saltlen:  [size_t] The salt array length.
+ * \param output: [uint8_t*] The output pseudo-random byte array.
+ * \param otplen: [size_t] The output array length.
+ * \param key: [const uint8_t*] The HKDF key array.
+ * \param keylen: [size_t] The key array length.
+ * \param salt: [const uint8_t*] The salt array.
+ * \param saltlen: [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
 

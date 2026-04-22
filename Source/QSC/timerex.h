@@ -95,35 +95,35 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
 * \brief Get the calendar date from the current locale
 *
-* \param output:	[char*] The output date string
+* \param output: [char*] The output date string
 */
 QSC_EXPORT_API void qsc_timerex_get_date(char output[QSC_TIMEREX_TIMESTAMP_MAX]);
 
 /**
 * \brief Get the calendar date and time from the current locale
 *
-* \param output:	[char*] The output time and date string
+* \param output: [char*] The output time and date string
 */
 QSC_EXPORT_API void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_MAX]);
 
 /**
 * \brief Get the local time
 *
-* \param output:	[char*] The output time string
+* \param output: [char*] The output time string
 */
 QSC_EXPORT_API void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX]);
 
 /**
 * \brief Returns the clock time at the start of a timed operation
 *
-* \return			[uint64_t] The starting clock time
+* \return [uint64_t] The starting clock time
 */
 QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_start(void);
 
 /**
 * \brief Returns the time difference between the start and current time in milliseconds
 *
-* \return			[uint64_t] The time difference in milliseconds
+* \return [uint64_t] The time difference in milliseconds
 */
 QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start);
 

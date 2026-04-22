@@ -150,52 +150,52 @@ QSC_EXPORT_API void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistic
 /**
 * \brief On Windows returns the drive letter containing the OS, on macOS/BSD/Linux returns '/'
 *
-* \return		[char] 'A'..'Z' on success (Windows), '/' on *nix, or \0
+* \return [char] 'A'..'Z' on success (Windows), '/' on *nix, or \0
 */
 QSC_EXPORT_API char qsc_sysutils_get_os_drive_letter(void);
 
 /**
 * \brief Get the current process id
 *
-* \return		[uint32_t] Returns the process id
+* \return [uint32_t] Returns the process id
 */
 QSC_EXPORT_API uint32_t qsc_sysutils_process_id(void);
 
 /**
 * \brief Get the RDTSC availability status
 *
-* \return		[bool] Returns true if RDTSC is available
+* \return [bool] Returns true if RDTSC is available
 */
 QSC_EXPORT_API bool qsc_sysutils_rdtsc_available(void);
 
 /**
 * \brief Get the systems logged-on user name string
 *
-* \param name:	[char*] The char array that holds the user name 
+* \param name: [char*] The char array that holds the user name 
 * 
-* \return		[size_t] Returns the size of the user name
+* \return [size_t] Returns the size of the user name
 */
 QSC_EXPORT_API size_t qsc_sysutils_user_name(char* name);
 
 /**
 * \brief Get the system up-time since boot
 *
-* \return		[uint64_t] Returns the system up-time
+* \return [uint64_t] Returns the system up-time
 */
 QSC_EXPORT_API uint64_t qsc_sysutils_system_uptime(void);
 
 /**
 * \brief Get the current high-resolution time-stamp
 *
-* \return		[uint64_t] Returns the system time-stamp
+* \return [uint64_t] Returns the system time-stamp
 */
 QSC_EXPORT_API uint64_t qsc_sysutils_system_timestamp(void);
 
 /**
 * \brief Get the users identity string
 *
-* \param name:	[const char*] The char array that holds the user name
-* \param id:	[char*] The output array containing the id string
+* \param name: [const char*] The char array that holds the user name
+* \param id: [char*] The output array containing the id string
 */
 QSC_EXPORT_API void qsc_sysutils_user_identity(const char* name, char* id);
 

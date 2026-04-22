@@ -24,9 +24,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * Parses the standard two-byte TLS alert payload and extracts the alert
  * description field.
  *
- * \param input        [const uint8_t*] The encoded alert payload.
- * \param inlen        [size_t] The length of the encoded input in bytes.
- * \param description  [enum*] Receives the decoded TLS alert description.
+ * \param input [const uint8_t*] The encoded alert payload.
+ * \param inlen [size_t] The length of the encoded input in bytes.
+ * \param description [enum*] Receives the decoded TLS alert description.
  *
  * \return [qsc_tls_status] Returns the operation status.
  */
@@ -40,9 +40,9 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_alert_decode(const uint8_t* input, size_t 
  * The severity level is implementation-defined by the encoder and the supplied
  * description is written as the alert description field.
  *
- * \param output       [uint8_t*] The destination buffer receiving the encoded alert payload.
- * \param outlen       [size_t] The length of the destination buffer in bytes.
- * \param description  [enum] The TLS alert description to encode.
+ * \param output [uint8_t*] The destination buffer receiving the encoded alert payload.
+ * \param outlen [size_t] The length of the destination buffer in bytes.
+ * \param description [enum] The TLS alert description to encode.
  *
  * \return [qsc_tls_status] Returns the operation status.
  */
@@ -56,10 +56,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_alert_encode(uint8_t* output, size_t outle
  * content type alert. This is used for alert transmission before encrypted
  * traffic keys are available.
  *
- * \param output       [uint8_t*] The destination buffer receiving the encoded record.
- * \param outlen       [size_t] The length of the destination buffer in bytes.
- * \param written      [size_t*] Receives the number of bytes written.
- * \param description  [enum] The TLS alert description to encode.
+ * \param output [uint8_t*] The destination buffer receiving the encoded record.
+ * \param outlen [size_t] The length of the destination buffer in bytes.
+ * \param written [size_t*] Receives the number of bytes written.
+ * \param description [enum] The TLS alert description to encode.
  *
  * 
  * \return [qsc_tls_status] Returns the operation status.

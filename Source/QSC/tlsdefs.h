@@ -51,6 +51,12 @@
 #define QSC_TLS_GCM_NONCE_SIZE 12U
 
 /*! 
+ * \def QSC_TLS_AES128_KEY_SIZE
+ * \brief Defines the AES-128 key size in bytes.
+ */
+#define QSC_TLS_AES128_KEY_SIZE 16U
+
+/*! 
  * \def QSC_TLS_AES256_KEY_SIZE
  * \brief Defines the AES-256 key size in bytes.
  */

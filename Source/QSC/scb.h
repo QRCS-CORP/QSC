@@ -161,31 +161,31 @@ QSC_EXPORT_API void qsc_scb_dispose(qsc_scb_state* ctx);
 /**
  * \brief [void] Initialize the pseudo-random provider state with a seed and optional personalization string.
  *
- * \param ctx:      [qsc_scb_state*] A pointer to the function state.
- * \param seed:     [const uint8_t*] A pointer to the random seed (32 bytes instantiates cSHAKE-256; 64 bytes instantiates cSHAKE-512).
- * \param seedlen:  [size_t] The length of the input seed in bytes.
- * \param info:     [const uint8_t*] A pointer to the optional personalization string.
- * \param infolen:  [size_t] The length of the personalization string in bytes.
- * \param cpucost:  [size_t] The number of iterations for the internal cost mechanism.
- * \param memcost:  [size_t] The memory cost in mebibytes (minimum 1, maximum 10000).
+ * \param ctx: [qsc_scb_state*] A pointer to the function state.
+ * \param seed: [const uint8_t*] A pointer to the random seed (32 bytes instantiates cSHAKE-256; 64 bytes instantiates cSHAKE-512).
+ * \param seedlen: [size_t] The length of the input seed in bytes.
+ * \param info: [const uint8_t*] A pointer to the optional personalization string.
+ * \param infolen: [size_t] The length of the personalization string in bytes.
+ * \param cpucost: [size_t] The number of iterations for the internal cost mechanism.
+ * \param memcost: [size_t] The memory cost in mebibytes (minimum 1, maximum 10000).
  */
 QSC_EXPORT_API void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, size_t cpucost, size_t memcost);
 
 /**
  * \brief [void] Generate pseudo-random bytes using the random provider.
  *
- * \param ctx:      [qsc_scb_state*] A pointer to the function state.
- * \param output:   [uint8_t*] A pointer to the pseudo-random output array.
- * \param otplen:   [size_t] The number of bytes to generate.
+ * \param ctx: [qsc_scb_state*] A pointer to the function state.
+ * \param output: [uint8_t*] A pointer to the pseudo-random output array.
+ * \param otplen: [size_t] The number of bytes to generate.
  */
 QSC_EXPORT_API void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen);
 
 /**
  * \brief [void] Update the random provider with new keying material.
  *
- * \param ctx:      [qsc_scb_state*] A pointer to the function state.
- * \param seed:     [const uint8_t*] A pointer to the random update seed.
- * \param seedlen:  [size_t] The length of the update seed in bytes.
+ * \param ctx: [qsc_scb_state*] A pointer to the function state.
+ * \param seed: [const uint8_t*] A pointer to the random update seed.
+ * \param seedlen: [size_t] The length of the update seed in bytes.
  */
 QSC_EXPORT_API void qsc_scb_update(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen);
 

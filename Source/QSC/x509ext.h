@@ -82,7 +82,8 @@ QSC_EXPORT_API void qsc_x509_extensions_initialize(qsc_x509_extensions* extensio
  *
  * \param ext: [const][struct] The decoded extension entry.
  *
- * eturn [enum] Returns a qsc_asn1_status code.
+ * 
+eturn [enum] Returns a qsc_asn1_status code.
  */
 QSC_EXPORT_API qsc_asn1_status qsc_x509_extension_validate(const qsc_x509_extension* ext);
 
@@ -95,7 +96,8 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_extension_validate(const qsc_x509_extens
  *
  * \param extensions: [const][struct] The decoded extension set.
  *
- * eturn [enum] Returns a qsc_asn1_status code.
+ * 
+eturn [enum] Returns a qsc_asn1_status code.
  */
 QSC_EXPORT_API qsc_asn1_status qsc_x509_extensions_validate(const qsc_x509_extensions* extensions);
 

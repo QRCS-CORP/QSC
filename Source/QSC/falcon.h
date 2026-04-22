@@ -89,53 +89,59 @@
 
 #if defined(QSC_FALCON_S3SHAKE256F512)
 
-/*!
-* \def QSC_FALCON_PRIVATEKEY_SIZE
-* \brief The byte size of the secret private-key array
-*/
+	/*!
+	* \def QSC_FALCON_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array
+	*/
 #	define QSC_FALCON_PRIVATEKEY_SIZE 1281
 
-/*!
-* \def QSC_FALCON_PUBLICKEY_SIZE
-* \brief The byte size of the public-key array
-*/
+	/*!
+	* \def QSC_FALCON_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array
+	*/
 #	define QSC_FALCON_PUBLICKEY_SIZE 897
 
-/*!
-* \def QSC_FALCON_SIGNATURE_SIZE
-* \brief The byte size of the signature array
-*/
+	/*!
+	* \def QSC_FALCON_SIGNATURE_SIZE
+	* \brief The byte size of the signature array
+	*/
 #	define QSC_FALCON_SIGNATURE_SIZE 658
+
+	/*!
+	* \def QSC_FALCON_ALGNAME
+	* \brief The formal algorithm name
+	*/
+#	define QSC_FALCON_ALGNAME "FALCON-P512"
 
 #elif defined(QSC_FALCON_S5SHAKE256F1024)
 
-/*!
-* \def QSC_FALCON_PRIVATEKEY_SIZE
-* \brief The byte size of the secret private-key array
-*/
+	/*!
+	* \def QSC_FALCON_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array
+	*/
 #	define QSC_FALCON_PRIVATEKEY_SIZE 2305
 
-/*!
-* \def QSC_FALCON_PUBLICKEY_SIZE
-* \brief The byte size of the public-key array
-*/
+	/*!
+	* \def QSC_FALCON_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array
+	*/
 #	define QSC_FALCON_PUBLICKEY_SIZE 1793
 
-/*!
-* \def QSC_FALCON_SIGNATURE_SIZE
-* \brief The byte size of the signature array
-*/
+	/*!
+	* \def QSC_FALCON_SIGNATURE_SIZE
+	* \brief The byte size of the signature array
+	*/
 #	define QSC_FALCON_SIGNATURE_SIZE 1276
+
+	/*!
+	* \def QSC_FALCON_ALGNAME
+	* \brief The formal algorithm name
+	*/
+#	define QSC_FALCON_ALGNAME "FALCON-P1024"
 
 #else
 #	error "The Falcon parameter set is invalid!"
 #endif
-
-/*!
-* \def QSC_FALCON_ALGNAME
-* \brief The formal algorithm name
-*/
-#define QSC_FALCON_ALGNAME "FALCON"
 
 /**
 * \brief Generates a Falcon public/private key-pair.

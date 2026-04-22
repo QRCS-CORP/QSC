@@ -101,44 +101,44 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
 * \brief Counts all white-spaces, line stops, and returns from a string
 *
-* \param dest:		[const char*] The string dest to check
-* \param dstlen:	[size_t] The size of the dest string
+* \param dest: [const char*] The string dest to check
+* \param dstlen: [size_t] The size of the dest string
 * 
-* \return			[size_t] Returns the number of line stops, carriage returns and white-spaces in the string
+* \return [size_t] Returns the number of line stops, carriage returns and white-spaces in the string
 */
 QSC_EXPORT_API size_t qsc_stringutils_formatting_count(const char* dest, size_t dstlen);
 
 /**
 * \brief Remove all white-spaces, lines stops, and returns from a string
 *
-* \param source:	[const char*] The source string to copy from
-* \param srclen:	[size_t] The size of the source string
-* \param dest:		[char*] The string receiving the filtered characters
+* \param source: [const char*] The source string to copy from
+* \param srclen: [size_t] The size of the source string
+* \param dest: [char*] The string receiving the filtered characters
 * 
-* \return			[size_t] Returns the number of characters copied
+* \return [size_t] Returns the number of characters copied
 */
 QSC_EXPORT_API size_t qsc_stringutils_formatting_filter(const char* source, size_t srclen, char* dest);
 
 /**
 * \brief Add line breaks to a string at a line length interval
 *
-* \param dest:		[char*] The string receiving the formatted text
-* \param dstlen:	[size_t] The size of the dest array
-* \param linelen:	[size_t] The line length where a new line character is placed
-* \param source:	[const char*] The source string to copy from
-* \param srclen:	[size_t] The length of the source array
+* \param dest: [char*] The string receiving the formatted text
+* \param dstlen: [size_t] The size of the dest array
+* \param linelen: [size_t] The line length where a new line character is placed
+* \param source: [const char*] The source string to copy from
+* \param srclen: [size_t] The length of the source array
 * 
-* \return			[size_t] Returns the size of the dest string
+* \return [size_t] Returns the size of the dest string
 */
 QSC_EXPORT_API size_t qsc_stringutils_add_line_breaks(char* dest, size_t dstlen, size_t linelen, const char* source, size_t srclen);
 
 /**
 * \brief Removes all line breaks from a string
 *
-* \param dest:		[char*] The string receiving the formatted text
-* \param dstlen:	[size_t] The size of the dest array
-* \param source:	[const char*] The source string to copy from
-* \param srclen:	[size_t] The length of the source array
+* \param dest: [char*] The string receiving the formatted text
+* \param dstlen: [size_t] The size of the dest array
+* \param source: [const char*] The source string to copy from
+* \param srclen: [size_t] The length of the source array
 * 
 * \return			[size_t] Returns the size of the dest string
 */
@@ -147,150 +147,150 @@ QSC_EXPORT_API size_t qsc_stringutils_remove_line_breaks(char* dest, size_t dstl
 /**
 * \brief Clear a string of data
 *
-* \param source:	[char*] The string to clear
+* \param source: [char*] The string to clear
 */
 QSC_EXPORT_API void qsc_stringutils_clear_string(char* source);
 
 /**
 * \brief Clear a length of data from a string
 *
-* \param dest:		[char*] The string dest to clear
-* \param length:	[size_t] The number of characters to clear
+* \param dest: [char*] The string dest to clear
+* \param length: [size_t] The number of characters to clear
 */
 QSC_EXPORT_API void qsc_stringutils_clear_substring(char* dest, size_t length);
 
 /**
 * \brief Compare two strings for equivalence
 *
-* \param str1:		[const char*] The first string
-* \param str2:		[const char*] The second string
-* \param length:	[size_t] The number of characters to compare
+* \param str1: [const char*] The first string
+* \param str2: [const char*] The second string
+* \param length: [size_t] The number of characters to compare
 * 
-* \return			[bool] Returns true if the strings are equal
+* \return [bool] Returns true if the strings are equal
 */
 QSC_EXPORT_API bool qsc_stringutils_compare_strings(const char* str1, const char* str2, size_t length);
 
 /**
 * \brief Concatenate two strings
 *
-* \param dest:		[char*] The destination dest
-* \param dstlen:	[size_t] The size of the destination dest
-* \param source:	[const char*] The source string to copy
+* \param dest: [char*] The destination dest
+* \param dstlen: [size_t] The size of the destination dest
+* \param source: [const char*] The source string to copy
 * 
-* \return			[size_t] Returns the size of the string
+* \return [size_t] Returns the size of the string
 */
 QSC_EXPORT_API size_t qsc_stringutils_concat_strings(char* dest, size_t dstlen, const char* source);
 
 /**
 * \brief Concatenate two strings and copy them to a third string
 *
-* \param dest:		[char*] The destination string to copy to
-* \param dstlen:	[size_t] The size of the destination dest
-* \param str1:		[const char*] The first string to copy from
-* \param str2:		[const char*] The second string to copy from
+* \param dest: [char*] The destination string to copy to
+* \param dstlen: [size_t] The size of the destination dest
+* \param str1: [const char*] The first string to copy from
+* \param str2: [const char*] The second string to copy from
 * 
-* \return			[size_t] Returns the size of the string
+* \return [size_t] Returns the size of the string
 */
 QSC_EXPORT_API size_t qsc_stringutils_concat_and_copy(char* dest, size_t dstlen, const char* str1, const char* str2);
 
 /**
 * \brief Copy a length of one string to another
 *
-* \param dest:		[char*] The destination string to copy to
-* \param dstlen:	[size_t] The size of the destination dest
-* \param source:	[const char*] The string to copy from
-* \param srclen:	[size_t] The substring length
+* \param dest: [char*] The destination string to copy to
+* \param dstlen: [size_t] The size of the destination dest
+* \param source: [const char*] The string to copy from
+* \param srclen: [size_t] The substring length
 * 
-* \return			[size_t] Returns the size of the string
+* \return [size_t] Returns the size of the string
 */
 QSC_EXPORT_API size_t qsc_stringutils_copy_substring(char* dest, size_t dstlen, const char* source, size_t srclen);
 
 /**
 * \brief Copy a source string to a destination string
 *
-* \param dest:		[char*] The destination string to copy to
-* \param dstlen:	[size_t] The size of the destination dest
-* \param source:	[const char*] The string to copy from
+* \param dest: [char*] The destination string to copy to
+* \param dstlen: [size_t] The size of the destination dest
+* \param source: [const char*] The string to copy from
 * 
-* \return			[size_t] Returns the size of the string
+* \return [size_t] Returns the size of the string
 */
 QSC_EXPORT_API size_t qsc_stringutils_copy_string(char* dest, size_t dstlen, const char* source);
 
 /**
 * \brief Find a character position within a string
 *
-* \param source:	[const char*] The string to check for the substring
-* \param token:		[char] The character to search for
+* \param source: [const char*] The string to check for the substring
+* \param token: [char] The character to search for
 * 
-* \return			[int64_t] Returns the character position within the string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the character is not found
+* \return [int64_t] Returns the character position within the string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the character is not found
 */
 QSC_EXPORT_API int64_t qsc_stringutils_find_char(const char* source, const char token);
 
 /**
 * \brief Find a substrings position within a string
 *
-* \param source:	[const char*] The string to check for the substring
-* \param token:		[const char*] The substring to search for
+* \param source: [const char*] The string to check for the substring
+* \param token: [const char*] The substring to search for
 * 
-* \return			[int64_t] Returns the character position within the string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the string is not found
+* \return [int64_t] Returns the character position within the string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the string is not found
 */
 QSC_EXPORT_API int64_t qsc_stringutils_find_string(const char* source, const char* token);
 
 /**
 * \brief Convert a byte to a hexidecimal string
 *
-* \param hex:		[char*] The hex string output
-* \param input:		[uint8_t] The byte to be converted
+* \param hex: [char*] The hex string output
+* \param input: [uint8_t] The byte to be converted
 */
 QSC_EXPORT_API void qsc_stringutils_byte_to_hex(char* hex, uint8_t input);
 
 /**
 * \brief Convert a hexidecimal string to a byte
 *
-* \param hex:		[const char*] The hex string
+* \param hex: [const char*] The hex string
 * 
-* \return			[uint8_t] Returns the byte value
+* \return [uint8_t] Returns the byte value
 */
 QSC_EXPORT_API uint8_t qsc_stringutils_hex_to_byte(const char* hex);
 
 /**
 * \brief Inserts a substring into a string
 *
-* \param dest:		[char*] The string receiving the substring
-* \param dstlen:	[size_t] The size of the source dest
-* \param source:	[const char*] The substring to insert
-* \param offset:	[size_t] The insertion starting position within the source string; position is ordinal, 0-n
+* \param dest: [char*] The string receiving the substring
+* \param dstlen: [size_t] The size of the source dest
+* \param source: [const char*] The substring to insert
+* \param offset: [size_t] The insertion starting position within the source string; position is ordinal, 0-n
 * 
-* \return			[int64_t] Returns the size of the new string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the string insert operation failed
+* \return [int64_t] Returns the size of the new string, or QSC_STRINGUTILS_TOKEN_NOT_FOUND if the string insert operation failed
 */
 QSC_EXPORT_API int64_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* source, size_t offset);
 
 /**
 * \brief Check if a string contains and characters
 *
-* \param source:	[const char*] The string to check for characters
+* \param source: [const char*] The string to check for characters
 * 
-* \return			[bool] Returns true if the string is empty
+* \return [bool] Returns true if the string is empty
 */
 QSC_EXPORT_API bool qsc_stringutils_is_empty(const char* source);
 
 /**
 * \brief Check that a string contains only hexadecimal ASCII characters
 *
-* \param source:	[const char*] The string to check for hexadecimal characters
-* \param srclen:	[size_t] The number of characters to check
+* \param source: [const char*] The string to check for hexadecimal characters
+* \param srclen: [size_t] The number of characters to check
 * 
-* \return			[bool] Returns true if the string is hexadecimal
+* \return [bool] Returns true if the string is hexadecimal
 */
 QSC_EXPORT_API bool qsc_stringutils_is_hex(const char* source, size_t srclen);
 
 /**
 * \brief Check that a string contains only numeric ASCII characters
 *
-* \param source:	[const char*] The string to check for numeric characters
-* \param srclen:	[size_t] The number of characters to check
+* \param source: [const char*] The string to check for numeric characters
+* \param srclen: [size_t] The number of characters to check
 * 
-* \return			[bool] Returns true if the string is numeric
+* \return [bool] Returns true if the string is numeric
 */
 QSC_EXPORT_API bool qsc_stringutils_is_numeric(const char* source, size_t srclen);
 
@@ -299,82 +299,82 @@ QSC_EXPORT_API bool qsc_stringutils_is_numeric(const char* source, size_t srclen
 *
 * \warning The string returned must be freed by the caller
 *
-* \param source:	[char**] The array of substrings
-* \param count:		[size_t] The number of substring arrays
+* \param source: [char**] The array of substrings
+* \param count: [size_t] The number of substring arrays
 * 
-* \return			[char*] Returns a concatenated string
+* \return [char*] Returns a concatenated string
 */
 QSC_EXPORT_API char* qsc_stringutils_register_string(char** source, size_t count);
 
 /**
 * \brief Remove null characters from an array
 *
-* \param source:	[char*] The string to check for null characters
-* \param srclen:	[size_t] The number of characters to check
+* \param source: [char*] The string to check for null characters
+* \param srclen: [size_t] The number of characters to check
 * 
-* \return			[size_t] The size of the cleaned string
+* \return [size_t] The size of the cleaned string
 */
 QSC_EXPORT_API size_t qsc_stringutils_remove_null_chars(char* source, size_t srclen);
 
 /**
 * \brief Find the position of a substring within a string, searching in reverse
 *
-* \param source:	[const char*] The string to check for the substring
-* \param token:		[const char*] The token separator
-* \param start:		[size_t] The starting position within the source string
+* \param source: [const char*] The string to check for the substring
+* \param token: [const char*] The token separator
+* \param start: [size_t] The starting position within the source string
 * 
-* \return			[int64_t] Returns the substring starting position, or -1 if not found
+* \return [int64_t] Returns the substring starting position, or -1 if not found
 */
 QSC_EXPORT_API int64_t qsc_stringutils_reverse_find_string(const char* source, const char* token, size_t start);
 
 /**
 * \brief Find a substring within a string, searching in reverse
 *
-* \param source:	[const char*] The string to check for the substring
-* \param token:		[const char*] The token separator
+* \param source: [const char*] The string to check for the substring
+* \param token: [const char*] The token separator
 * 
-* \return			[const char*] Returns the substring, or NULL if not found
+* \return [const char*] Returns the substring, or NULL if not found
 */
 QSC_EXPORT_API const char* qsc_stringutils_reverse_sub_string(const char* source, const char* token);
 
 /**
 * \brief Compare two strings for equality
 *
-* \param str1:	[const char*] The string to check for the substring
-* \param str2:		[const char*] The substring to search for
-* \param length:	[size_t] The string length
+* \param str1: [const char*] The string to check for the substring
+* \param str2: [const char*] The substring to search for
+* \param length: [size_t] The string length
 * 
-* \return			[bool] Returns true if the strings are equal 
+* \return [bool] Returns true if the strings are equal 
 */
 bool qsc_stringutils_string_compare(const char* str1, const char* str2, size_t length);
 
 /**
 * \brief Test if the string contains a substring
 *
-* \param source:	[const char*] The string to check for the substring
-* \param token:		[const char*] The substring to search for
+* \param source: [const char*] The string to check for the substring
+* \param token: [const char*] The substring to search for
 * 
-* \return			[int32_t] Returns zero if the strings are equal 
+* \return [int32_t] Returns zero if the strings are equal 
 */
 QSC_EXPORT_API int32_t qsc_stringutils_string_comparison(const char* source, const char* token);
 
 /**
 * \brief Test if the string contains a substring
 *
-* \param source:	[const char*] The string to check for the substring
-* \param token:		[const char*] The substring to search for
+* \param source: [const char*] The string to check for the substring
+* \param token: [const char*] The substring to search for
 * 
-* \return			[bool] Returns true if the substring is found
+* \return [bool] Returns true if the substring is found
 */
 QSC_EXPORT_API bool qsc_stringutils_string_contains(const char* source, const char* token);
 
 /**
 * \brief Compare two strings for equality
 *
-* \param str1:		[const char*] The first comparison string
-* \param str2:		[const char*] The second first comparison string
+* \param str1: [const char*] The first comparison string
+* \param str2: [const char*] The second first comparison string
 *
-* \return			[bool] Returns true if the two strings are identical
+* \return [bool] Returns true if the two strings are identical
 */
 QSC_EXPORT_API bool qsc_stringutils_strings_equal(const char* str1, const char* str2);
 
@@ -383,22 +383,22 @@ QSC_EXPORT_API bool qsc_stringutils_strings_equal(const char* str1, const char* 
 *
 * \warning The array of strings returned must be freed by the caller
 *
-* \param source:	[char*] The string to split
-* \param delim:		[const char*] The char delimiter used to split the string
-* \param count:		[size_t*] The number of substrings in the new array
+* \param source: [char*] The string to split
+* \param delim: [const char*] The char delimiter used to split the string
+* \param count: [size_t*] The number of substrings in the new array
 * 
-* \return			[char**] Returns a 2 dimensional character array of substrings
+* \return [char**] Returns a 2 dimensional character array of substrings
 */
 QSC_EXPORT_API char** qsc_stringutils_split_string(char* source, const char* delim, size_t* count);
 
 /**
 * \brief Split a string into two substrings
 *
-* \param dest1:		[char*] The first destination string
-* \param dest2:		[char*] The second destination string
-* \param destlen:	[size_t] The destination strings length
-* \param source:	[const char*] The source string
-* \param token:		[const char*] The search token
+* \param dest1: [char*] The first destination string
+* \param dest2: [char*] The second destination string
+* \param destlen: [size_t] The destination strings length
+* \param source: [const char*] The source string
+* \param token: [const char*] The search token
 */
 QSC_EXPORT_API void qsc_stringutils_split_strings(char* dest1, char* dest2, size_t destlen, const char* source, const char* token);
 
@@ -407,113 +407,113 @@ QSC_EXPORT_API void qsc_stringutils_split_strings(char* dest1, char* dest2, size
 *
 * \warning The string returned must be freed by the caller
 *
-* \param source:	[const char*] The string to check for the substring
-* \param token:		[const char*] The token separator
+* \param source: [const char*] The string to check for the substring
+* \param token: [const char*] The token separator
 * 
-* \return			[char*] Returns the substring, or NULL if not found
+* \return [char*] Returns the substring, or NULL if not found
 */
 QSC_EXPORT_API char* qsc_stringutils_sub_string(const char* source, const char* token);
 
 /**
 * \brief Convert a string to a 32-bit integer
 *
-* \param source:	[const char*] The string to convert to an integer
+* \param source: [const char*] The string to convert to an integer
 * 
-* \return			[int32_t] Returns the converted integer
+* \return [int32_t] Returns the converted integer
 */
 QSC_EXPORT_API int32_t qsc_stringutils_string_to_int(const char* source);
 
 /**
 * \brief Get the character length of a string
 *
-* \param source:	[const char*] The source string pointer
+* \param source: [const char*] The source string pointer
 * 
-* \return			[size_t] Returns the size of the string
+* \return [size_t] Returns the size of the string
 */
 QSC_EXPORT_API size_t qsc_stringutils_string_size(const char* source);
 
 /**
 * \brief Convert a 32-bit signed integer to a string
 *
-* \param num:		[int32_t] The integer to convert
-* \param dest:		[char*] The destination string
-* \param dstlen:	[size_t] The size of the output dest
+* \param num: [int32_t] The integer to convert
+* \param dest: [char*] The destination string
+* \param dstlen: [size_t] The size of the output dest
 */
 QSC_EXPORT_API void qsc_stringutils_int_to_string(int32_t num, char* dest, size_t dstlen);
 
 /**
 * \brief Convert a 32-bit unsigned integer to a string
 *
-* \param num:		[uint32_t] The integer to convert
-* \param dest:		[char*] The destination string
-* \param destlen:	[size_t] The size of the output dest
+* \param num: [uint32_t] The integer to convert
+* \param dest: [char*] The destination string
+* \param destlen: [size_t] The size of the output dest
 */
 QSC_EXPORT_API void qsc_stringutils_uint32_to_string(uint32_t num, char* dest, size_t destlen);
 
 /**
 * \brief Convert a 64-bit signed integer to a string
 *
-* \param num:		[int64_t] The integer to convert
-* \param dest:		[char*] The destination string
-* \param dstlen:	[size_t] The size of the output dest
+* \param num: [int64_t] The integer to convert
+* \param dest: [char*] The destination string
+* \param dstlen: [size_t] The size of the output dest
 */
 QSC_EXPORT_API void qsc_stringutils_int64_to_string(int64_t num, char* dest, size_t dstlen);
 
 /**
 * \brief Convert a 64-bit unsigned integer to a string
 *
-* \param num:		[uint64_t] The integer to convert
-* \param dest:		[char*] The destination string
-* \param dstlen:	[size_t] The size of the output dest
+* \param num: [uint64_t] The integer to convert
+* \param dest: [char*] The destination string
+* \param dstlen: [size_t] The size of the output dest
 */
 QSC_EXPORT_API void qsc_stringutils_uint64_to_string(uint64_t num, char* dest, size_t dstlen);
 
 /**
 * \brief Convert a string to all lower-case characters
 *
-* \param source:	[char*] The string to convert to lower-case
+* \param source: [char*] The string to convert to lower-case
 */
 QSC_EXPORT_API void qsc_stringutils_to_lowercase(char* source);
 
 /**
 * \brief Convert a string to all upper-case characters
 *
-* \param source:	[char*] The string to convert to upper-case
+* \param source: [char*] The string to convert to upper-case
 */
 QSC_EXPORT_API void qsc_stringutils_to_uppercase(char* source);
 
 /**
 * \brief Trim null and newline characters from a string
 *
-* \param source:	[char*] The string to trim
+* \param source: [char*] The string to trim
 */
 QSC_EXPORT_API void qsc_stringutils_trim_newline(char* source);
 
 /**
 * \brief Trim a trailing space character from a string
 *
-* \param source:	[char*] The string to trim
+* \param source: [char*] The string to trim
 */
 QSC_EXPORT_API void qsc_stringutils_trim_spaces(char* source);
 
 /**
 * \brief Count all the white-spaces in a string
 *
-* \param source:	[const char*] The string dest to check
-* \param srclen:	[size_t] The size of the dest string
+* \param source: [const char*] The string dest to check
+* \param srclen: [size_t] The size of the dest string
 * 
-* \return			[size_t] Returns the number of white-spaces in the string
+* \return [size_t] Returns the number of white-spaces in the string
 */
 QSC_EXPORT_API size_t qsc_stringutils_whitespace_count(const char* source, size_t srclen);
 
 /**
 * \brief Remove all the white-spaces from a string
 *
-* \param source:	[const char*] The source string to copy from
-* \param srclen:	[size_t] The size of the source string
-* \param dest:		[char*] The destination string receiving the filtered characters
+* \param source: [const char*] The source string to copy from
+* \param srclen: [size_t] The size of the source string
+* \param dest: [char*] The destination string receiving the filtered characters
 * 
-* \return			[size_t] Returns the number of characters copied
+* \return [size_t] Returns the number of characters copied
 */
 QSC_EXPORT_API size_t qsc_stringutils_whitespace_filter(const char* source, size_t srclen, char* dest);
 

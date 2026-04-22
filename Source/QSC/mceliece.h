@@ -107,103 +107,133 @@ QSC_CPLUSPLUS_ENABLED_START
 /* Parameter definitions for different McEliece parameter sets */
 #if defined(QSC_MCELIECE_S1N3488T64)
 
-/*!
- * \def QSC_MCELIECE_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
-#	define QSC_MCELIECE_CIPHERTEXT_SIZE 128
+	/*!
+	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
+#	define QSC_MCELIECE_CIPHERTEXT_SIZE 128U
 
-/*!
- * \def QSC_MCELIECE_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_MCELIECE_PRIVATEKEY_SIZE 6492
+	/*!
+	* \def QSC_MCELIECE_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
+#	define QSC_MCELIECE_PRIVATEKEY_SIZE 6492U
 
-/*!
- * \def QSC_MCELIECE_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_MCELIECE_PUBLICKEY_SIZE 261120
+	/*!
+	* \def QSC_MCELIECE_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
+#	define QSC_MCELIECE_PUBLICKEY_SIZE 261120U
+
+	/*!
+	* \def QSC_MCELIECE_ALGNAME
+	* \brief The formal algorithm name.
+	*/
+#	define QSC_MCELIECE_ALGNAME "MCELIECE-P3488T64"
 
 #elif defined(QSC_MCELIECE_S3N4608T96)
 
-/*!
- * \def QSC_MCELIECE_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
-#	define QSC_MCELIECE_CIPHERTEXT_SIZE 188
+	/*!
+	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
+#	define QSC_MCELIECE_CIPHERTEXT_SIZE 188U
 
-/*!
- * \def QSC_MCELIECE_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_MCELIECE_PRIVATEKEY_SIZE 13608
+	/*!
+	* \def QSC_MCELIECE_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
+#	define QSC_MCELIECE_PRIVATEKEY_SIZE 13608U
 
-/*!
- * \def QSC_MCELIECE_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_MCELIECE_PUBLICKEY_SIZE 524160
+	/*!
+	* \def QSC_MCELIECE_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
+#	define QSC_MCELIECE_PUBLICKEY_SIZE 524160U
+
+	/*!
+	* \def QSC_MCELIECE_ALGNAME
+	* \brief The formal algorithm name.
+	*/
+#	define QSC_MCELIECE_ALGNAME "MCELIECE-P4608T96"
 
 #elif defined(QSC_MCELIECE_S5N6688T128)
 
-/*!
- * \def QSC_MCELIECE_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
-#	define QSC_MCELIECE_CIPHERTEXT_SIZE 240
+	/*!
+	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
+#	define QSC_MCELIECE_CIPHERTEXT_SIZE 240U
 
-/*!
- * \def QSC_MCELIECE_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_MCELIECE_PRIVATEKEY_SIZE 13932
+	/*!
+	* \def QSC_MCELIECE_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
+#	define QSC_MCELIECE_PRIVATEKEY_SIZE 13932U
 
-/*!
- * \def QSC_MCELIECE_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_MCELIECE_PUBLICKEY_SIZE 1044992
+	/*!
+	* \def QSC_MCELIECE_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
+#	define QSC_MCELIECE_PUBLICKEY_SIZE 1044992U
+
+	/*!
+	* \def QSC_MCELIECE_ALGNAME
+	* \brief The formal algorithm name.
+	*/
+#	define QSC_MCELIECE_ALGNAME "MCELIECE-P6688T128"
 
 #elif defined(QSC_MCELIECE_S6N6960T119)
 
-/*!
- * \def QSC_MCELIECE_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
-#	define QSC_MCELIECE_CIPHERTEXT_SIZE 226
+	/*!
+	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
+#	define QSC_MCELIECE_CIPHERTEXT_SIZE 226U
 
-/*!
- * \def QSC_MCELIECE_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_MCELIECE_PRIVATEKEY_SIZE 13948
+	/*!
+	* \def QSC_MCELIECE_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
+#	define QSC_MCELIECE_PRIVATEKEY_SIZE 13948U
 
-/*!
- * \def QSC_MCELIECE_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_MCELIECE_PUBLICKEY_SIZE 1047319
+	/*!
+	* \def QSC_MCELIECE_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
+#	define QSC_MCELIECE_PUBLICKEY_SIZE 1047319U
+
+	/*!
+	* \def QSC_MCELIECE_ALGNAME
+	* \brief The formal algorithm name.
+	*/
+#	define QSC_MCELIECE_ALGNAME "MCELIECE-P6960T119"
 
 #elif defined(QSC_MCELIECE_S7N8192T128)
 
-/*!
- * \def QSC_MCELIECE_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
-#	define QSC_MCELIECE_CIPHERTEXT_SIZE 240 
+	/*!
+	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
+#	define QSC_MCELIECE_CIPHERTEXT_SIZE 240U
 
-/*!
- * \def QSC_MCELIECE_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_MCELIECE_PRIVATEKEY_SIZE 14120
+	/*!
+	* \def QSC_MCELIECE_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
+#	define QSC_MCELIECE_PRIVATEKEY_SIZE 14120U
 
-/*!
- * \def QSC_MCELIECE_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_MCELIECE_PUBLICKEY_SIZE 1357824
+	/*!
+	* \def QSC_MCELIECE_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
+#	define QSC_MCELIECE_PUBLICKEY_SIZE 1357824U
+
+	/*!
+	* \def QSC_MCELIECE_ALGNAME
+	* \brief The formal algorithm name.
+	*/
+#	define QSC_MCELIECE_ALGNAME "MCELIECE-P8192T128"
 
 #else
 #	error "The McEliece parameter set is invalid!"
@@ -221,40 +251,34 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_MCELIECE_SHAREDSECRET_SIZE 32ULL
 
-/*!
- * \def QSC_MCELIECE_ALGNAME
- * \brief The formal algorithm name.
- */
-#define QSC_MCELIECE_ALGNAME "MCELIECE"
-
 /**
  * \brief Decapsulates the shared secret for a given ciphertext using a private key.
  *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
- * \param ciphertext:	[const uint8_t*] Pointer to the ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
- * \param privatekey:	[const uint8_t*] Pointer to the private key array (size QSC_MCELIECE_PRIVATEKEY_SIZE).
- * \return				[bool] Returns true if decapsulation succeeds.
+ * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
+ * \param ciphertext: [const uint8_t*] Pointer to the ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
+ * \param privatekey: [const uint8_t*] Pointer to the private key array (size QSC_MCELIECE_PRIVATEKEY_SIZE).
+ * \return [bool] Returns true if decapsulation succeeds.
  */
 QSC_EXPORT_API bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 
 /**
  * \brief Encapsulates a shared secret key using a public key.
  *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
- * \param ciphertext:	[uint8_t*] Pointer to the output ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
- * \param publickey:	[const uint8_t*] Pointer to the public key array (size QSC_MCELIECE_PUBLICKEY_SIZE).
+ * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
+ * \param ciphertext: [uint8_t*] Pointer to the output ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
+ * \param publickey: [const uint8_t*] Pointer to the public key array (size QSC_MCELIECE_PUBLICKEY_SIZE).
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
- * \return				[bool] Returns true if encapsulation succeeds.
+ * \return [bool] Returns true if encapsulation succeeds.
  */
 QSC_EXPORT_API bool qsc_mceliece_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Generates a McEliece public/private key pair.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public key array (size QSC_MCELIECE_PUBLICKEY_SIZE).
- * \param privatekey:	[uint8_t*] Pointer to the output private key array (size QSC_MCELIECE_PRIVATEKEY_SIZE).
+ * \param publickey: [uint8_t*] Pointer to the output public key array (size QSC_MCELIECE_PUBLICKEY_SIZE).
+ * \param privatekey: [uint8_t*] Pointer to the output private key array (size QSC_MCELIECE_PRIVATEKEY_SIZE).
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
- * \return				[bool] Returns true if key generation succeeds.
+ * \return [bool] Returns true if key generation succeeds.
  */
 QSC_EXPORT_API bool qsc_mceliece_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 

@@ -1,4 +1,5 @@
 #include "eddh.h"
+#include "memutils.h"
 #if defined(QSC_EDDH_S1EC25519)
 #	include "eddh25519base.h"
 #elif defined(QSC_EDDH_S3EC448)
@@ -6,7 +7,6 @@
 #else
 #   error "No EDDH parameter set defined. Define QSC_EDDH_S1EC25519 or QSC_EDDH_S3EC448."
 #endif
-#include "memutils.h"
 
 bool qsc_eddh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {

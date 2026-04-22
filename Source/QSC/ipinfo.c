@@ -317,7 +317,7 @@ bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address)
 		a = address->ipv4[0U];
 		b = address->ipv4[1U];
 
-		if (a != 0U && a != 127U)
+		if (a != 0U)
 		{
 			if (a != 169U || b != 254U)
 			{

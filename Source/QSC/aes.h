@@ -179,6 +179,12 @@ typedef enum
 #define QSC_AES256_KEY_SIZE 32U
 
 /*!
+ * \def QSC_GCM128_MAC_SIZE
+ * \brief Size in bytes of the MAC tag produced by GCM-AES-128.
+ */
+#define QSC_GCM128_MAC_SIZE 16U
+
+/*!
  * \def QSC_GCM256_MAC_SIZE
  * \brief Size in bytes of the MAC code for GCM-AES-256.
  */
@@ -534,11 +540,180 @@ QSC_EXPORT_API void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* ctx, con
  * \param input: [const uint8_t*] Pointer to the input data (ciphertext with appended MAC in decryption mode, plaintext in encryption mode).
  * \param length: [size_t] Length of the input data in bytes (excluding the MAC for decryption).
  *
- * \return			[bool] Returns \c true if the transformation (and MAC verification in decryption mode) was successful; otherwise, \c false.
+ * \return [bool] Returns \c true if the transformation (and MAC verification in decryption mode) was successful; otherwise, \c false.
  *
  * \sa qsc_aes_hba256_initialize, qsc_aes_hba256_set_associated
  */
 QSC_EXPORT_API bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/* GCM-AES-128 RFC 5288/5116 */
+
+/*!
+ * \struct qsc_aes_gcm128_state
+ * \brief State structure for AES-based Galois Counter Mode (GCM-128).
+ *
+ * Combines an AES-128 cipher context with Galois/Counter Mode to implement
+ * an AEAD scheme. The internal layout is identical to qsc_aes_gcm256_state;
+ * the sole distinction is that the cipher context is keyed with a 128-bit key.
+ *
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
+ *     qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt,
+ *     qsc_aes_gcm128_transform, qsc_aes_gcm128_dispose
+ */
+QSC_EXPORT_API typedef struct qsc_aes_gcm128_state
+{
+	qsc_aes_state cstate;           /*!< [struct] Underlying AES-128 cipher context */
+	uint8_t C[QSC_AES_BLOCK_SIZE];  /*!< uint8_t[QSC_AES_BLOCK_SIZE] Current counter block (inc32 of J0) */
+	uint8_t H[QSC_AES_BLOCK_SIZE];  /*!< uint8_t[QSC_AES_BLOCK_SIZE] GHASH subkey H = AES(K, 0^128) */
+	uint8_t J0[QSC_AES_BLOCK_SIZE]; /*!< uint8_t[QSC_AES_BLOCK_SIZE] Pre-counter block derived from IV */
+	uint8_t S[QSC_AES_BLOCK_SIZE];  /*!< uint8_t[QSC_AES_BLOCK_SIZE] Running GHASH accumulator */
+	uint64_t aadlen;                /*!< [uint64_t] Total AAD length in bits */
+	uint64_t ctlen;                 /*!< [uint64_t] Total ciphertext length in bits */
+	bool encrypt;                   /*!< [bool] true when initialized for encryption, false for decryption */
+} qsc_aes_gcm128_state;
+
+/**
+ * \brief Decrypt ciphertext and verify the authentication tag using GCM-AES-128.
+ *
+ * Authenticates the ciphertext via GHASH, then decrypts it using AES-128 in
+ * GCTR mode.  The input buffer must contain the raw ciphertext immediately
+ * followed by the QSC_GCM128_MAC_SIZE-byte authentication tag.
+ * The plaintext is written to \p output only when authentication succeeds;
+ * on failure the output buffer is securely zeroed and the function returns
+ * \c false.
+ *
+ * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm128_state structure.
+ * \param output: [uint8_t*] Pointer to the plaintext output buffer.
+ *                Must be at least (\p length - QSC_GCM128_MAC_SIZE) bytes.
+ * \param input: [const uint8_t*] Pointer to the ciphertext buffer with the
+ *                appended MAC tag.  Length must equal (ciphertext length +
+ *                QSC_GCM128_MAC_SIZE).
+ * \param length: [size_t] Total number of bytes in \p input, including the
+ *                QSC_GCM128_MAC_SIZE-byte tag.
+ *
+ * \return [bool] \c true if authentication and decryption succeeded;
+ *                \c false if the tag did not match (output is zeroed).
+ *
+ * \warning The ctx must be initialized via qsc_aes_gcm128_initialize before use.
+ *
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
+ *     qsc_aes_gcm128_encrypt, qsc_aes_gcm128_transform
+ */
+QSC_EXPORT_API bool qsc_aes_gcm128_decrypt(qsc_aes_gcm128_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/**
+ * \brief Dispose of a GCM-128 context.
+ *
+ * Securely erases all key material and internal state held by the context,
+ * including the cipher round keys, counter block, GHASH subkey, pre-counter
+ * block, and accumulator.  Must be called when the context is no longer needed
+ * to prevent sensitive data from remaining in memory.
+ *
+ * \param ctx: [struct] Pointer to a qsc_aes_gcm128_state structure to dispose.
+ *
+ * \warning Must be called before the context goes out of scope.
+ *
+ * \sa qsc_aes_gcm128_initialize
+ */
+QSC_EXPORT_API void qsc_aes_gcm128_dispose(qsc_aes_gcm128_state* ctx);
+
+/**
+ * \brief Encrypt plaintext and append an authentication tag using GCM-AES-128.
+ *
+ * Encrypts \p length bytes of \p input using AES-128 in GCTR mode, then
+ * computes a GHASH-based authentication tag over the ciphertext (and any
+ * previously supplied AAD) and appends the QSC_GCM128_MAC_SIZE-byte tag
+ * immediately after the ciphertext in \p output.
+ *
+ * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm128_state structure.
+ * \param output: [uint8_t*] Pointer to the output buffer.  Must be at least
+ *                (\p length + QSC_GCM128_MAC_SIZE) bytes.
+ * \param input: [const uint8_t*] Pointer to the plaintext input buffer.
+ * \param length: [size_t] Number of plaintext bytes to encrypt (excluding the tag).
+ *
+ * \warning The ctx must be initialized via qsc_aes_gcm128_initialize before use.
+ * \warning The nonce used during initialization must never be reused with the
+ *          same key; doing so is a catastrophic loss of security.
+ *
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
+ *     qsc_aes_gcm128_decrypt, qsc_aes_gcm128_transform
+ */
+QSC_EXPORT_API void qsc_aes_gcm128_encrypt(qsc_aes_gcm128_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/**
+ * \brief Initialize the GCM-128 context for authenticated encryption or decryption.
+ *
+ * Performs full GCM initialization: expands the 128-bit key into AES round keys,
+ * computes the GHASH subkey H = AES(K, 0^128), and derives the pre-counter block
+ * J0 from the supplied nonce.  When the nonce is exactly 12 bytes it is used
+ * directly with a 32-bit counter suffix; any other length is processed through
+ * GHASH per the GCM specification.
+ *
+ * \param ctx: [struct] Pointer to a qsc_aes_gcm128_state structure to initialize.
+ * \param keyparams: [const struct] Pointer to a constant qsc_aes_keyparams structure
+ *                   supplying the 128-bit key (keylen == QSC_AES128_KEY_SIZE),
+ *                   the nonce (noncelen in [1, QSC_GCM_MAX_NONCE_SIZE]), and an
+ *                   optional info field (unused by GCM, may be NULL/0).
+ * \param encryption:[bool] \c true to prepare the context for encryption;
+ *                   \c false for decryption.
+ *
+ * \warning Must be called before qsc_aes_gcm128_set_associated,
+ *          qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt, or
+ *          qsc_aes_gcm128_transform.
+ * \warning A nonce must never be reused under the same key.
+ *
+ * \sa qsc_aes_gcm128_dispose, qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt
+ */
+QSC_EXPORT_API void qsc_aes_gcm128_initialize(qsc_aes_gcm128_state* ctx, const qsc_aes_keyparams* keyparams, bool encryption);
+
+/**
+ * \brief Supply associated additional data (AAD) to GCM-128.
+ *
+ * Feeds \p datalen bytes of unencrypted associated data into the GHASH
+ * accumulator so they are covered by the authentication tag.  Must be called
+ * after qsc_aes_gcm128_initialize and before qsc_aes_gcm128_encrypt or
+ * qsc_aes_gcm128_decrypt.  May be called multiple times; each call appends to
+ * the running AAD.
+ *
+ * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm128_state structure.
+ * \param data: [const uint8_t*] Pointer to the associated data buffer.
+ * \param datalen: [size_t] Length of the associated data in bytes.
+ *                 Must not exceed QSC_GCM_MAXAAD_SIZE per call.
+ *
+ * \warning Must be called before any call to qsc_aes_gcm128_encrypt or qsc_aes_gcm128_decrypt.
+ *
+ * \sa qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt
+ */
+QSC_EXPORT_API void qsc_aes_gcm128_set_associated(qsc_aes_gcm128_state* ctx, const uint8_t* data, size_t datalen);
+
+/**
+ * \brief Unified GCM-128 encrypt-or-decrypt transform.
+ *
+ * Dispatches to qsc_aes_gcm128_encrypt or qsc_aes_gcm128_decrypt according to
+ * the mode set during initialization.
+ *
+ * In \b encryption mode \p length is the number of plaintext bytes; the output
+ * buffer receives the ciphertext followed by the QSC_GCM128_MAC_SIZE-byte tag
+ * and the function returns \c true.
+ *
+ * In \b decryption mode \p length is the number of plaintext bytes (i.e. the
+ * ciphertext length \e excluding the tag); the function internally reads
+ * (\p length + QSC_GCM128_MAC_SIZE) bytes from \p input, verifies the tag,
+ * and returns \c true on success or \c false on authentication failure
+ * (output is securely zeroed on failure).
+ *
+ * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm128_state structure.
+ * \param output: [uint8_t*] Pointer to the output buffer.
+ * \param input: [const uint8_t*] Pointer to the input buffer.
+ * \param length: [size_t] Plaintext byte count (see above for per-mode semantics).
+ *
+ * \return [bool] \c true on success; \c false if authentication failed during
+ *                decryption.
+ *
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
+ *     qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt
+ */
+QSC_EXPORT_API bool qsc_aes_gcm128_transform(qsc_aes_gcm128_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /* GCM-AES-256 RFC 5288/5116 */
 

@@ -67,42 +67,42 @@
 /*!
  * \brief Tests the AES cipher for correct operation.
  *
- * \return	[bool] Returns true if the AES test passes.
+ * \return [bool] Returns true if the AES test passes.
  */
 QSC_EXPORT_API bool qsc_selftest_aes_test(void);
 
 /*!
  * \brief Tests the ChaCha cipher for correct operation.
  *
- * \return	[bool] Returns true if the ChaCha test passes.
+ * \return [bool] Returns true if the ChaCha test passes.
  */
 QSC_EXPORT_API bool qsc_selftest_chacha_test(void);
 
 /*!
  * \brief Tests the CSX cipher for correct operation.
  *
- * \return	[bool] Returns true if the CSX test passes.
+ * \return [bool] Returns true if the CSX test passes.
  */
 QSC_EXPORT_API bool qsc_selftest_csx_test(void);
 
 /*!
  * \brief Tests the RCS cipher for correct operation.
  *
- * \return	[bool] Returns true if the RCS test passes.
+ * \return [bool] Returns true if the RCS test passes.
  */
 QSC_EXPORT_API bool qsc_selftest_rcs_test(void);
 
 /*!
  * \brief Tests the SHA2 digests, HKDF and HMAC for correct operation.
  *
- * \return	[bool] Returns true if the SHA2 test passes.
+ * \return [bool] Returns true if the SHA2 test passes.
  */
 QSC_EXPORT_API bool qsc_selftest_sha2_test(void);
 
 /*!
  * \brief Tests the SHA3 digests, SHAKE, cSHAKE, and KMAC for correct operation.
  *
- * \return	[bool] Returns true if the SHA3 test passes.
+ * \return [bool] Returns true if the SHA3 test passes.
  */
 QSC_EXPORT_API bool qsc_selftest_sha3_test(void);
 
@@ -111,7 +111,7 @@ QSC_EXPORT_API bool qsc_selftest_sha3_test(void);
  *
  * Tests the symmetric primitives with a set of known-answer tests.
  *
- * \return	[bool] Returns true if all tests pass successfully.
+ * \return [bool] Returns true if all tests pass successfully.
  */
 QSC_EXPORT_API bool qsc_selftest_symmetric_run(void);
 

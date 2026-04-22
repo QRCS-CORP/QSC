@@ -100,8 +100,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \return [enum] Returns a qsc_asn1_status code.
  */
-QSC_EXPORT_API qsc_asn1_status qsc_x509_private_key_encode_sec1_der(const qsc_x509_private_key* key, bool includeparameters, 
-    bool includepublickey, uint8_t* output, size_t* outputlen);
+QSC_EXPORT_API qsc_asn1_status qsc_x509_private_key_encode_sec1_der(const qsc_x509_private_key* key, bool includeparameters, bool includepublickey, uint8_t* output, size_t* outputlen);
 
 /*!
  * \brief Encode a normalized private key object as SEC 1 PEM.

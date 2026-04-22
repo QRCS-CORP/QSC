@@ -53,11 +53,6 @@
 #define QSC_KYBER_H
 
 #include "qsccommon.h"
-#if defined(QSC_SYSTEM_HAS_AVX2)
-	#include "kyberbase_avx2.h"
-#else
-	#include "kyberbase.h"
-#endif
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -89,23 +84,113 @@ QSC_CPLUSPLUS_ENABLED_START
  * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf">Kyber Specification (FIPS 203) </a>
  */
 
+#if defined(QSC_KYBER_S1K2P512)
+
 /*!
  * \def QSC_KYBER_CIPHERTEXT_SIZE
  * \brief The byte size of the ciphertext array.
  */
-#define QSC_KYBER_CIPHERTEXT_SIZE (QSC_KYBER_INDCPA_BYTES)
+#define QSC_KYBER_CIPHERTEXT_SIZE 768U
 
 /*!
  * \def QSC_KYBER_PRIVATEKEY_SIZE
  * \brief The byte size of the secret private-key array.
  */
-#define QSC_KYBER_PRIVATEKEY_SIZE (QSC_KYBER_INDCPA_SECRETKEY_BYTES + QSC_KYBER_INDCPA_PUBLICKEY_BYTES + (2 * QSC_KYBER_SYMBYTES))
+#define QSC_KYBER_PRIVATEKEY_SIZE 1632U
 
 /*!
  * \def QSC_KYBER_PUBLICKEY_SIZE
  * \brief The byte size of the public-key array.
  */
-#define QSC_KYBER_PUBLICKEY_SIZE (QSC_KYBER_INDCPA_PUBLICKEY_BYTES)
+#define QSC_KYBER_PUBLICKEY_SIZE 800U
+
+/*!
+ * \def QSC_KYBER_ALGNAME
+ * \brief The formal algorithm name.
+ */
+#define QSC_KYBER_ALGNAME "KYBER-P512"
+
+#elif defined(QSC_KYBER_S3K3P768)
+
+/*!
+ * \def QSC_KYBER_CIPHERTEXT_SIZE
+ * \brief The byte size of the ciphertext array.
+ */
+#define QSC_KYBER_CIPHERTEXT_SIZE 1088U
+
+/*!
+ * \def QSC_KYBER_PRIVATEKEY_SIZE
+ * \brief The byte size of the secret private-key array.
+ */
+#define QSC_KYBER_PRIVATEKEY_SIZE 2400U
+
+/*!
+ * \def QSC_KYBER_PUBLICKEY_SIZE
+ * \brief The byte size of the public-key array.
+ */
+#define QSC_KYBER_PUBLICKEY_SIZE 1184U
+
+/*!
+ * \def QSC_KYBER_ALGNAME
+ * \brief The formal algorithm name.
+ */
+#define QSC_KYBER_ALGNAME "KYBER-P768"
+
+#elif defined(QSC_KYBER_S5K4P1024)
+
+/*!
+ * \def QSC_KYBER_CIPHERTEXT_SIZE
+ * \brief The byte size of the ciphertext array.
+ */
+#define QSC_KYBER_CIPHERTEXT_SIZE 1568U
+
+/*!
+ * \def QSC_KYBER_PRIVATEKEY_SIZE
+ * \brief The byte size of the secret private-key array.
+ */
+#define QSC_KYBER_PRIVATEKEY_SIZE 3168U
+
+/*!
+ * \def QSC_KYBER_PUBLICKEY_SIZE
+ * \brief The byte size of the public-key array.
+ */
+#define QSC_KYBER_PUBLICKEY_SIZE 1568U
+
+/*!
+ * \def QSC_KYBER_ALGNAME
+ * \brief The formal algorithm name.
+ */
+#define QSC_KYBER_ALGNAME "KYBER-P1024"
+
+#elif defined(QSC_KYBER_S6K5P1280)
+
+/*!
+ * \def QSC_KYBER_CIPHERTEXT_SIZE
+ * \brief The byte size of the ciphertext array.
+ */
+#define QSC_KYBER_CIPHERTEXT_SIZE 1920U
+
+/*!
+ * \def QSC_KYBER_PRIVATEKEY_SIZE
+ * \brief The byte size of the secret private-key array.
+ */
+#define QSC_KYBER_PRIVATEKEY_SIZE 3936U
+
+/*!
+ * \def QSC_KYBER_PUBLICKEY_SIZE
+ * \brief The byte size of the public-key array.
+ */
+#define QSC_KYBER_PUBLICKEY_SIZE 1952U
+
+/*!
+ * \def QSC_KYBER_ALGNAME
+ * \brief The formal algorithm name.
+ */
+#define QSC_KYBER_ALGNAME "KYBER-P1280"
+
+#else
+#	error "A parameter set has not been defined!"
+#endif
 
 /*!
  * \def QSC_KYBER_SEED_SIZE
@@ -119,21 +204,16 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_KYBER_SHAREDSECRET_SIZE 32U
 
-/*!
- * \def QSC_KYBER_ALGNAME
- * \brief The formal algorithm name.
- */
-#define QSC_KYBER_ALGNAME "KYBER"
-
 /**
  * \brief Decapsulates the shared secret for a given ciphertext using a private key.
  *
  * Combines the ciphertext with the private key to derive the shared secret.
  *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_KYBER_SHAREDSECRET_SIZE).
- * \param ciphertext:	[const uint8_t*] Pointer to the ciphertext array (size QSC_KYBER_CIPHERTEXT_SIZE).
- * \param privatekey:	[const uint8_t*] Pointer to the secret key array (size QSC_KYBER_PRIVATEKEY_SIZE).
- * \return				[bool] Returns true if decapsulation succeeds.
+ * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_KYBER_SHAREDSECRET_SIZE).
+ * \param ciphertext: [const uint8_t*] Pointer to the ciphertext array (size QSC_KYBER_CIPHERTEXT_SIZE).
+ * \param privatekey: [const uint8_t*] Pointer to the secret key array (size QSC_KYBER_PRIVATEKEY_SIZE).
+ * 
+ * \return [bool] Returns true if decapsulation succeeds.
  */
 QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 
@@ -142,11 +222,12 @@ QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* cipher
  *
  * Generates ciphertext and a shared secret; used for key encapsulation.
  *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_KYBER_SHAREDSECRET_SIZE).
- * \param ciphertext:	[uint8_t*] Pointer to the output ciphertext array (size QSC_KYBER_CIPHERTEXT_SIZE).
- * \param publickey:	[const uint8_t*] Pointer to the public key array (size QSC_KYBER_PUBLICKEY_SIZE).
+ * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_KYBER_SHAREDSECRET_SIZE).
+ * \param ciphertext: [uint8_t*] Pointer to the output ciphertext array (size QSC_KYBER_CIPHERTEXT_SIZE).
+ * \param publickey: [const uint8_t*] Pointer to the public key array (size QSC_KYBER_PUBLICKEY_SIZE).
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
- * \return				[bool] Returns true if encapsulation succeeds.
+ * 
+ * \return [bool] Returns true if encapsulation succeeds.
  */
 QSC_EXPORT_API bool qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -154,22 +235,23 @@ QSC_EXPORT_API bool qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, 
 * \brief Generates cipher text and shared secret for given public key and a random seed.
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to encapsulate a key.
 * 
-* \param ct:	[uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param ss:	[uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk:	[const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param m:		[const uint8_t*] Pointer to the random coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param m:	[const uint8_t*] Pointer to the random coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 */
-void qsc_kyber_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t m[QSC_KYBER_SYMBYTES]);
+void qsc_kyber_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t* m);
 
 /**
  * \brief Generates a Kyber public/private key pair.
  *
  * Produces a key pair for the Kyber key encapsulation mechanism.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public key array (size QSC_KYBER_PUBLICKEY_SIZE)
- * \param privatekey:	[uint8_t*] Pointer to the output private key array (size QSC_KYBER_PRIVATEKEY_SIZE)
+ * \param publickey: [uint8_t*] Pointer to the output public key array (size QSC_KYBER_PUBLICKEY_SIZE)
+ * \param privatekey: [uint8_t*] Pointer to the output private key array (size QSC_KYBER_PRIVATEKEY_SIZE)
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
- * \return				[bool] Returns true if key generation succeeds.
+ * 
+ * \return [bool] Returns true if key generation succeeds.
  */
 QSC_EXPORT_API bool qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -177,10 +259,10 @@ QSC_EXPORT_API bool qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* priv
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism using input seeds.
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair.
 *
-* \param pk:	[uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk:	[uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
-* \param d:		[uint8_t*] Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
-* \param z:		[uint8_t*] Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param pk: [uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk: [uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param d:	[uint8_t*] Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param z:	[uint8_t*] Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 */
 QSC_EXPORT_API void qsc_kyber_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* d, uint8_t* z);
 

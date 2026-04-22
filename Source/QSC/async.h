@@ -118,8 +118,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * The operation is equivalent to acquiring the value without the possibility
  * of observing a partial write from a concurrent store.
  *
- * \param target:   [volatile bool*] Pointer to the boolean to read. Must not be NULL.
- * \return          [bool] The value held by \p target at the time of the load.
+ * \param target: [volatile bool*] Pointer to the boolean to read. Must not be NULL.
+ * 
+ * \return [bool] The value held by \p target at the time of the load.
  */
 QSC_EXPORT_API bool qsc_async_atomic_bool_load(volatile bool* target);
 
@@ -131,8 +132,8 @@ QSC_EXPORT_API bool qsc_async_atomic_bool_load(volatile bool* target);
  * Any thread that subsequently calls qsc_async_atomic_bool_load on the same
  * target is guaranteed to observe \p value or any later write.
  *
- * \param target:   [volatile bool*] Pointer to the boolean to write. Must not be NULL.
- * \param value:    [bool] The value to store.
+ * \param target: [volatile bool*] Pointer to the boolean to write. Must not be NULL.
+ * \param value: [bool] The value to store.
  */
 QSC_EXPORT_API void qsc_async_atomic_bool_store(volatile bool* target, bool value);
 
@@ -144,9 +145,10 @@ QSC_EXPORT_API void qsc_async_atomic_bool_store(volatile bool* target, bool valu
  * immediately before the swap. The read and the write occur as a single
  * indivisible operation; no other thread can observe an intermediate state.
  *
- * \param target:   [volatile bool*] Pointer to the boolean to swap. Must not be NULL.
- * \param value:    [bool] The new value to store.
- * \return          [bool] The previous value of \p target before the swap.
+ * \param target: [volatile bool*] Pointer to the boolean to swap. Must not be NULL.
+ * \param value: [bool] The new value to store.
+ * 
+ * \return [bool] The previous value of \p target before the swap.
  */
 QSC_EXPORT_API bool qsc_async_atomic_bool_exchange(volatile bool* target, bool value);
 
@@ -159,10 +161,11 @@ QSC_EXPORT_API bool qsc_async_atomic_bool_exchange(volatile bool* target, bool v
  * target is left unchanged and the function returns false. The comparison and
  * the conditional store are performed as a single indivisible operation.
  *
- * \param target:   [volatile bool*] Pointer to the boolean to test and update. Must not be NULL.
+ * \param target: [volatile bool*] Pointer to the boolean to test and update. Must not be NULL.
  * \param expected: [bool] The value the caller expects \p target to currently hold.
- * \param desired:  [bool] The value to store if the comparison succeeds.
- * \return          [bool] True if the store was performed; false if \p target did not equal \p expected.
+ * \param desired: [bool] The value to store if the comparison succeeds.
+ * 
+ * \return [bool] True if the store was performed; false if \p target did not equal \p expected.
  */
 QSC_EXPORT_API bool qsc_async_atomic_bool_compare_exchange(volatile bool* target, bool expected, bool desired);
 
@@ -171,8 +174,9 @@ QSC_EXPORT_API bool qsc_async_atomic_bool_compare_exchange(volatile bool* target
  *
  * Reads the current value of *target with sequential consistency.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
- * \return          [int32_t] The current value.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
+ * 
+ * \return [int32_t] The current value.
  */
 QSC_EXPORT_API int32_t qsc_async_atomic_int32_load(volatile int32_t* target);
 
@@ -181,8 +185,8 @@ QSC_EXPORT_API int32_t qsc_async_atomic_int32_load(volatile int32_t* target);
  *
  * Writes value to *target with sequential consistency.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
- * \param value:    [int32_t] The value to store.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
+ * \param value: [int32_t] The value to store.
  */
 QSC_EXPORT_API void qsc_async_atomic_int32_store(volatile int32_t* target, int32_t value);
 
@@ -191,9 +195,10 @@ QSC_EXPORT_API void qsc_async_atomic_int32_store(volatile int32_t* target, int32
  *
  * Writes value to *target and returns the previous value.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
- * \param value:    [int32_t] The new value to store.
- * \return          [int32_t] The previous value of *target.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
+ * \param value: [int32_t] The new value to store.
+ * 
+ * \return [int32_t] The previous value of *target.
  */
 QSC_EXPORT_API int32_t qsc_async_atomic_int32_exchange(volatile int32_t* target, int32_t value);
 
@@ -203,10 +208,11 @@ QSC_EXPORT_API int32_t qsc_async_atomic_int32_exchange(volatile int32_t* target,
  * If *target equals expected, stores desired into *target.
  * The comparison and store occur as a single atomic operation.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
  * \param expected: [int32_t] The value the caller expects *target to hold.
- * \param desired:  [int32_t] The value to store if the comparison succeeds.
- * \return          [bool] True if the exchange was performed; false otherwise.
+ * \param desired: [int32_t] The value to store if the comparison succeeds.
+ * 
+ * \return [bool] True if the exchange was performed; false otherwise.
  */
 QSC_EXPORT_API bool qsc_async_atomic_int32_compare_exchange(volatile int32_t* target, int32_t expected, int32_t desired);
 
@@ -215,9 +221,10 @@ QSC_EXPORT_API bool qsc_async_atomic_int32_compare_exchange(volatile int32_t* ta
  *
  * Adds value to *target and returns the value AFTER the addition.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
- * \param value:    [int32_t] The amount to add.
- * \return          [int32_t] The new value of *target after the addition.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
+ * \param value: [int32_t] The amount to add
+ * 
+ * \return [int32_t] The new value of *target after the addition.
  */
 QSC_EXPORT_API int32_t qsc_async_atomic_int32_add(volatile int32_t* target, int32_t value);
 
@@ -226,9 +233,10 @@ QSC_EXPORT_API int32_t qsc_async_atomic_int32_add(volatile int32_t* target, int3
  *
  * Subtracts value from *target and returns the value AFTER the subtraction.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
- * \param value:    [int32_t] The amount to subtract.
- * \return          [int32_t] The new value of *target after the subtraction.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
+ * \param value: [int32_t] The amount to subtract.
+ * 
+ * \return [int32_t] The new value of *target after the subtraction.
  */
 QSC_EXPORT_API int32_t qsc_async_atomic_int32_subtract(volatile int32_t* target, int32_t value);
 
@@ -237,8 +245,9 @@ QSC_EXPORT_API int32_t qsc_async_atomic_int32_subtract(volatile int32_t* target,
  *
  * Increments *target by one and returns the value AFTER the increment.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
- * \return          [int32_t] The new value of *target after the increment.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
+ * 
+ * \return [int32_t] The new value of *target after the increment.
  */
 QSC_EXPORT_API int32_t qsc_async_atomic_int32_increment(volatile int32_t* target);
 
@@ -247,8 +256,9 @@ QSC_EXPORT_API int32_t qsc_async_atomic_int32_increment(volatile int32_t* target
  *
  * Decrements *target by one and returns the value AFTER the decrement.
  *
- * \param target:   [volatile int32_t*] Pointer to the atomic integer.
- * \return          [int32_t] The new value of *target after the decrement.
+ * \param target: [volatile int32_t*] Pointer to the atomic integer.
+ * 
+ * \return [int32_t] The new value of *target after the decrement.
  */
 QSC_EXPORT_API int32_t qsc_async_atomic_int32_decrement(volatile int32_t* target);
 
@@ -257,8 +267,8 @@ QSC_EXPORT_API int32_t qsc_async_atomic_int32_decrement(volatile int32_t* target
  *
  * Spawns a new thread to execute the provided function with a single argument.
  *
- * \param func:     [void (*)(void*)] Pointer to the function to execute.
- * \param state:    [void*] Pointer to the argument to pass to the function.
+ * \param func: [void (*)(void*)] Pointer to the function to execute.
+ * \param state: [void*] Pointer to the argument to pass to the function.
  */
 QSC_EXPORT_API void qsc_async_launch_thread(void (*func)(void*), void* state);
 
@@ -267,9 +277,9 @@ QSC_EXPORT_API void qsc_async_launch_thread(void (*func)(void*), void* state);
  *
  * Spawns several threads, each executing the provided function with its respective argument.
  *
- * \param func:     [void (*)(void*)] Pointer to the function to execute.
- * \param count:    [size_t] The number of threads (and corresponding arguments) to launch.
- * \param ...:      [variadic] Variadic arguments representing the state for each thread.
+ * \param func: [void (*)(void*)] Pointer to the function to execute.
+ * \param count: [size_t] The number of threads (and corresponding arguments) to launch.
+ * \param ...: [variadic] Variadic arguments representing the state for each thread.
  */
 QSC_EXPORT_API void qsc_async_launch_parallel_threads(void (*func)(void*), size_t count, ...);
 
@@ -278,7 +288,7 @@ QSC_EXPORT_API void qsc_async_launch_parallel_threads(void (*func)(void*), size_
  *
  * Creates a new mutex object for synchronizing threads.
  *
- * \return          [qsc_mutex] Returns a handle to the newly created mutex.
+ * \return [qsc_mutex] Returns a handle to the newly created mutex.
  */
 QSC_EXPORT_API qsc_mutex qsc_async_mutex_create(void);
 
@@ -287,8 +297,8 @@ QSC_EXPORT_API qsc_mutex qsc_async_mutex_create(void);
  *
  * Destroys the specified mutex object.
  *
- * \param mtx:      [qsc_mutex] The mutex handle to destroy.
- * \return          [bool] Returns true on successful destruction.
+ * \param mtx: [qsc_mutex] The mutex handle to destroy.
+ * \return [bool] Returns true on successful destruction.
  */
 QSC_EXPORT_API bool qsc_async_mutex_destroy(qsc_mutex mtx);
 
@@ -297,7 +307,7 @@ QSC_EXPORT_API bool qsc_async_mutex_destroy(qsc_mutex mtx);
  *
  * Blocks until the specified mutex is acquired.
  *
- * \param mtx:      [qsc_mutex] The mutex to lock.
+ * \param mtx: [qsc_mutex] The mutex to lock.
  */
 QSC_EXPORT_API void qsc_async_mutex_lock(qsc_mutex mtx);
 
@@ -306,7 +316,7 @@ QSC_EXPORT_API void qsc_async_mutex_lock(qsc_mutex mtx);
  *
  * Creates a mutex, locks it immediately, and returns the locked mutex.
  *
- * \return          [qsc_mutex] The locked mutex handle.
+ * \return [qsc_mutex] The locked mutex handle.
  */
 QSC_EXPORT_API qsc_mutex qsc_async_mutex_lock_ex(void);
 
@@ -315,7 +325,7 @@ QSC_EXPORT_API qsc_mutex qsc_async_mutex_lock_ex(void);
  *
  * Unlocks the specified mutex.
  *
- * \param mtx:      [qsc_mutex] The mutex to unlock.
+ * \param mtx: [qsc_mutex] The mutex to unlock.
  */
 QSC_EXPORT_API void qsc_async_mutex_unlock(qsc_mutex mtx);
 
@@ -324,7 +334,7 @@ QSC_EXPORT_API void qsc_async_mutex_unlock(qsc_mutex mtx);
  *
  * Unlocks the specified mutex and then destroys it.
  *
- * \param mtx:      [qsc_mutex] The mutex to unlock and destroy.
+ * \param mtx: [qsc_mutex] The mutex to unlock and destroy.
  */
 QSC_EXPORT_API void qsc_async_mutex_unlock_ex(qsc_mutex mtx);
 
@@ -333,7 +343,7 @@ QSC_EXPORT_API void qsc_async_mutex_unlock_ex(qsc_mutex mtx);
  *
  * Retrieves the number of CPU cores (including hyper-threads) available on the system.
  *
- * \return          [size_t] The number of processor cores.
+ * \return [size_t] The number of processor cores.
  */
 QSC_EXPORT_API size_t qsc_async_processor_count(void);
 
@@ -342,9 +352,10 @@ QSC_EXPORT_API size_t qsc_async_processor_count(void);
  *
  * Creates a new thread that executes the specified function with a single argument.
  *
- * \param func:     [void (*)(void*)] Pointer to the function to execute in the new thread.
- * \param state:    [void*] Pointer to the argument to pass to the thread function.
- * \return          [qsc_thread] Returns a handle to the created thread, or NULL on failure.
+ * \param func: [void (*)(void*)] Pointer to the function to execute in the new thread.
+ * \param state: [void*] Pointer to the argument to pass to the thread function.
+ * 
+ * \return [qsc_thread] Returns a handle to the created thread, or NULL on failure.
  */
 QSC_EXPORT_API qsc_thread qsc_async_thread_create(void (*func)(void*), void* state);
 
@@ -353,9 +364,10 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create(void (*func)(void*), void* sta
  *
  * Creates a new thread that executes the specified function with multiple arguments.
  *
- * \param func:     [void (*)(void**)] Pointer to the function to execute in the new thread.
- * \param args:     [void**] An array of pointers to the arguments.
- * \return          [qsc_thread] Returns a handle to the created thread, or NULL on failure.
+ * \param func: [void (*)(void**)] Pointer to the function to execute in the new thread.
+ * \param args: [void**] An array of pointers to the arguments.
+ * 
+ * \return [qsc_thread] Returns a handle to the created thread, or NULL on failure.
  */
 QSC_EXPORT_API qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args);
 
@@ -364,8 +376,9 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void*
  *
  * Creates a new thread that executes the specified function with multiple arguments.
  *
- * \param func:     [void (*)(void**)] Pointer to the function to execute in the new thread.
- * \return          [qsc_thread] Returns a handle to the created thread, or NULL on failure.
+ * \param func: [void (*)(void**)] Pointer to the function to execute in the new thread.
+ * 
+ * \return [qsc_thread] Returns a handle to the created thread, or NULL on failure.
  */
 QSC_EXPORT_API qsc_thread qsc_async_thread_create_noargs(void (*func)(void));
 
@@ -374,8 +387,9 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create_noargs(void (*func)(void));
  *
  * Resumes execution of a thread that has been suspended.
  *
- * \param handle:   [qsc_thread] The thread handle to resume.
- * \return          [int32_t] Returns zero on success.
+ * \param handle: [qsc_thread] The thread handle to resume.
+ * 
+ * \return [int32_t] Returns zero on success.
  */
 QSC_EXPORT_API int32_t qsc_async_thread_resume(qsc_thread handle);
 
@@ -384,7 +398,7 @@ QSC_EXPORT_API int32_t qsc_async_thread_resume(qsc_thread handle);
  *
  * Suspends execution of the calling thread for the given duration.
  *
- * \param msec:     [uint32_t] The number of milliseconds to sleep.
+ * \param msec: [uint32_t] The number of milliseconds to sleep.
  */
 QSC_EXPORT_API void qsc_async_thread_sleep(uint32_t msec);
 
@@ -393,8 +407,9 @@ QSC_EXPORT_API void qsc_async_thread_sleep(uint32_t msec);
  *
  * Suspends the execution of the specified thread.
  *
- * \param handle:   [qsc_thread] The thread handle to suspend.
- * \return          [int32_t] Returns a non-negative value on success.
+ * \param handle: [qsc_thread] The thread handle to suspend.
+ * 
+ * \return [int32_t] Returns a non-negative value on success.
  */
 QSC_EXPORT_API int32_t qsc_async_thread_suspend(qsc_thread handle);
 
@@ -403,8 +418,9 @@ QSC_EXPORT_API int32_t qsc_async_thread_suspend(qsc_thread handle);
  *
  * Terminates the specified thread. On Windows, this may terminate the calling thread.
  *
- * \param handle:   [qsc_thread] The thread handle to terminate.
- * \return          [bool] Returns true if termination was successful.
+ * \param handle: [qsc_thread] The thread handle to terminate.
+ * 
+ * \return [bool] Returns true if termination was successful.
  */
 QSC_EXPORT_API bool qsc_async_thread_terminate(qsc_thread handle);
 
@@ -413,7 +429,7 @@ QSC_EXPORT_API bool qsc_async_thread_terminate(qsc_thread handle);
  *
  * Blocks until the specified thread has finished executing.
  *
- * \param handle:   [qsc_thread] The thread handle to wait on.
+ * \param handle: [qsc_thread] The thread handle to wait on.
  */
 QSC_EXPORT_API void qsc_async_thread_wait(qsc_thread handle);
 
@@ -422,8 +438,8 @@ QSC_EXPORT_API void qsc_async_thread_wait(qsc_thread handle);
  *
  * Blocks until the specified thread has finished executing or the timeout expires.
  *
- * \param handle:   [qsc_thread] The thread handle to wait on.
- * \param msec:     [uint32_t] The maximum number of milliseconds to wait.
+ * \param handle: [qsc_thread] The thread handle to wait on.
+ * \param msec: [uint32_t] The maximum number of milliseconds to wait.
  */
 QSC_EXPORT_API void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec);
 
@@ -432,8 +448,8 @@ QSC_EXPORT_API void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
  *
  * Blocks until all threads in the provided array have finished executing.
  *
- * \param handles:  [qsc_thread*] An array of thread handles.
- * \param count:    [size_t] The number of threads in the array.
+ * \param handles: [qsc_thread*] An array of thread handles.
+ * \param count: [size_t] The number of threads in the array.
  */
 QSC_EXPORT_API void qsc_async_thread_wait_all(qsc_thread* handles, size_t count);
 

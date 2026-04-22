@@ -71,16 +71,28 @@ QSC_CPLUSPLUS_ENABLED_START
  * - Signature: 132 bytes (r[66] || s[66])
  */
 
-/*! \brief Seed and scalar byte length for P-521 */
+/*!
+* \def EC_NISTP521_SEED_SIZE
+* \brief Seed and scalar byte length for P-521 
+*/
 #define EC_NISTP521_SEED_SIZE 66U
 
-/*! \brief Public key byte length (Qx || Qy) */
+/*!
+* \def EC_NISTP521_PUBLICKEY_SIZE
+* \brief Public key byte length (Qx || Qy) 
+*/
 #define EC_NISTP521_PUBLICKEY_SIZE 132U
 
-/*! \brief Private key byte length (seed[66] || pubkey[132]) */
+/*!
+* \def EC_NISTP521_PRIVATEKEY_SIZE
+* \brief Private key byte length (seed[66] || pubkey[132]) 
+*/
 #define EC_NISTP521_PRIVATEKEY_SIZE 198U
 
-/*! \brief Signature byte length (r[66] || s[66]) */
+/*!
+* \def EC_NISTP521_SIGNATURE_SIZE
+* \brief Signature byte length (r[66] || s[66]) 
+*/
 #define EC_NISTP521_SIGNATURE_SIZE 132U
 
 /**
@@ -90,10 +102,10 @@ QSC_CPLUSPLUS_ENABLED_START
  * This function derives the affine public point Q = dG from a 66-byte
  * big-endian private scalar and serializes the result as Qx || Qy.
  *
- * \param publickey:  [uint8_t*] Output buffer receiving the 132-byte public key.
+ * \param publickey: [uint8_t*] Output buffer receiving the 132-byte public key.
  * \param privatekey: [const uint8_t*] Input 66-byte private scalar.
  *
- * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 int32_t qsc_p521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
 
@@ -105,11 +117,11 @@ int32_t qsc_p521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* pr
  * derive the signing scalar. The public key is then computed as Q = dG. The output
  * private key layout is seed[66] || Qx[66] || Qy[66].
  *
- * \param publickey:  [uint8_t*] Output public key (132 bytes).
+ * \param publickey: [uint8_t*] Output public key (132 bytes).
  * \param privatekey: [uint8_t*] Output private key (198 bytes).
- * \param seed:       [const uint8_t*] Input 66-byte seed.
+ * \param seed: [const uint8_t*] Input 66-byte seed.
  *
- * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 int32_t qsc_p521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -121,13 +133,13 @@ int32_t qsc_p521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
  * RFC 6979 with HMAC-SHA512. The output signed-message buffer contains the
  * 132-byte signature prepended to the message.
  *
- * \param signedmsg:  [uint8_t*] Output signed-message buffer.
- * \param smsglen:    [size_t*] Set to msglen + EC_NISTP521_SIGNATURE_SIZE on success.
- * \param message:    [const uint8_t*] Message to sign.
- * \param msglen:     [size_t] Message length in bytes.
+ * \param signedmsg: [uint8_t*] Output signed-message buffer.
+ * \param smsglen: [size_t*] Set to msglen + EC_NISTP521_SIGNATURE_SIZE on success.
+ * \param message: [const uint8_t*] Message to sign.
+ * \param msglen: [size_t] Message length in bytes.
  * \param privatekey: [const uint8_t*] 198-byte private key (seed || pubkey).
  *
- * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 int32_t qsc_p521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
@@ -139,26 +151,26 @@ int32_t qsc_p521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* messag
  * exists so the implementation can be tested directly against RFC 6979 known-answer
  * vectors, which specify the scalar explicitly.
  *
- * \param signedmsg:  [uint8_t*] Output signed-message buffer.
- * \param smsglen:    [size_t*] Set to msglen + EC_NISTP521_SIGNATURE_SIZE on success.
- * \param message:    [const uint8_t*] Message to sign.
- * \param msglen:     [size_t] Message length in bytes.
+ * \param signedmsg: [uint8_t*] Output signed-message buffer.
+ * \param smsglen: [size_t*] Set to msglen + EC_NISTP521_SIGNATURE_SIZE on success.
+ * \param message: [const uint8_t*] Message to sign.
+ * \param msglen: [size_t] Message length in bytes.
  * \param privatekey: [const uint8_t*] 66-byte private scalar.
  *
- * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 int32_t qsc_p521_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
 /**
  * \brief Verify a P-521 signed message and recover the message bytes.
  *
- * \param message:   [uint8_t*] Output message buffer.
- * \param msglen:    [size_t*] Set to the recovered message length on success.
+ * \param message: [uint8_t*] Output message buffer.
+ * \param msglen: [size_t*] Set to the recovered message length on success.
  * \param signedmsg: [const uint8_t*] Signed-message buffer (signature || message).
- * \param smsglen:   [size_t] Total signed-message length.
+ * \param smsglen: [size_t] Total signed-message length.
  * \param publickey: [const uint8_t*] 132-byte raw public key (Qx || Qy).
  *
- * \return           [bool] Returns true on success, false on failure.
+ * \return [bool] Returns true on success, false on failure.
  */
 bool qsc_p521_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 

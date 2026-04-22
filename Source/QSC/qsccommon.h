@@ -1131,37 +1131,19 @@ QSC_CPLUSPLUS_ENABLED_START
 
 #if defined(QSC_TLS_SECURITY_CLASS_1)
 
-    /*!
-     * \def QSC_ECDH_S1P256
-     * \brief Enable the ECDH S1P256 parameter set (NIST P-256 / secp256r1).
-     */
-#   define QSC_ECDH_S1P256
-
-    /*!
-     * \def QSC_EDDH_S1EC25519
-     * \brief Enable the EDDH S1EC25519 parameter set.
-     */
+   /*!
+    * \def QSC_EDDH_S1EC25519
+    * \brief Enable the EDDH S1EC25519 parameter set.
+    */
 #   define QSC_EDDH_S1EC25519
 
-    /*!
-     * \def QSC_KYBER_S1K2P512
-     * \brief Enable the Kyber S1K2P512 parameter set.
-     */
-#    define QSC_KYBER_S1K2P512
-
-    /*!
-     * \def QSC_DILITHIUM_S1P44
-     * \brief Enable the Dilithium S1P44 parameter set.
-     */
-#   define QSC_DILITHIUM_S1P44
-
-     /*!
-      * \def QSC_ECDSA_S1P256
-      * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
-      */
+   /*!
+    * \def QSC_ECDSA_S1P256
+    * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
+    */
 #   define QSC_ECDSA_S1P256
 
-    /*!
+   /*!
     * \def QSC_EDDSA_S1EC25519
     * \brief Enable the EDDSA S1EC25519 parameter set.
     */
@@ -1170,16 +1152,10 @@ QSC_CPLUSPLUS_ENABLED_START
 #elif defined(QSC_TLS_SECURITY_CLASS_3)
 
    /*!
-    * \def QSC_ECDH_S3P384
-    * \brief Enable the ECDH S3P384 parameter set (NIST P-384 / secp384r1).
+    * \def QSC_EDDH_S1EC25519
+    * \brief Enable the EDDH S1EC25519 parameter set.
     */
-#   define QSC_ECDH_S3P384
-
-    /*!
-     * \def QSC_EDDH_S3EC448
-     * \brief Enable the EDDH S3EC448 parameter set.
-     */
-#   define QSC_EDDH_S3EC448
+#   define QSC_EDDH_S1EC25519
 
     /*!
     * \def QSC_KYBER_S3K3P768
@@ -1194,54 +1170,30 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_DILITHIUM_S3P65
 
     /*!
-     * \def QSC_ECDSA_S3P384
-     * \brief Enable the ECDSA S1P384 (NIST P-384) parameter set.
+     * \def QSC_ECDSA_S1P256
+     * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
      */
-#   define QSC_ECDSA_S3P384
+#   define QSC_ECDSA_S1P256
 
-    /*!
-     * \def QSC_EDDSA_S3EC448
-     * \brief Enable the EDDSA S3EC448 parameter set.
-     */
-#   define QSC_EDDSA_S3EC448
+     /*!
+      * \def QSC_EDDSA_S1EC25519
+      * \brief Enable the EDDSA S1EC25519 parameter set.
+      */
+#   define QSC_EDDSA_S1EC25519
 
 #elif defined(QSC_TLS_SECURITY_CLASS_5)
 
-    /*!
-     * \def QSC_EDDH_S3EC448
-     * \brief Enable the EDDH S3EC448 parameter set.
-     */
-#   define QSC_EDDH_S3EC448
-
-    /*!
-     * \def QSC_ECDH_S5P521
-     * \brief Enable the ECDH S5P521 parameter set (NIST P-521 / secp521r1).
-     */
-#   define QSC_ECDH_S5P521
-
-    /*!
-     * \def QSC_KYBER_S5K4P1024
-     * \brief Enable the Kyber S5K4P1024 parameter set.
-     */
+   /*!
+    * \def QSC_KYBER_S5K4P1024
+    * \brief Enable the Kyber S5K4P1024 parameter set.
+    */
 #   define QSC_KYBER_S5K4P1024
 
-    /*!
-     * \def QSC_DILITHIUM_S5P87
-     * \brief Enable the Dilithium S5P87 parameter set.
-     */
+   /*!
+    * \def QSC_DILITHIUM_S5P87
+    * \brief Enable the Dilithium S5P87 parameter set.
+    */
 #   define QSC_DILITHIUM_S5P87
-
-    /*!
-     * \def QSC_ECDSA_S5P521
-     * \brief Enable the ECDSA S1P521 (NIST P-521) parameter set.
-     */
-#   define QSC_ECDSA_S5P521
-
-     /*!
-      * \def QSC_EDDSA_S3EC448
-      * \brief Enable the EDDSA S3EC448 parameter set.
-      */
-#   define QSC_EDDSA_S3EC448
 
 #endif
 

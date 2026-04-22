@@ -181,60 +181,58 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
 * \brief Generates shared secret for given cipher text and private key
 *
-* \param ss:	[uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_SECRET_BYTES bytes)
-* \param ct:	[const uint8_t*] Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param sk:	[const uint8_t*] Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
-* \return		[bool] Returns true for success
+* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_SECRET_BYTES bytes)
+* \param ct: [const uint8_t*] Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param sk: [const uint8_t*] Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* 
+* \return [bool] Returns true for success
 */
-bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES],
-	const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES]);
+bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES]);
 
 /**
 * \brief Generates cipher text and shared secret for given public key
 *
-* \param ct:	[uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param ss:	[uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk:	[const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
 * \param rng_generate: [uint8_t*, size_t] Pointer to the random generator function
-* \return		[bool] Returns true for success
+* 
+* \return [bool] Returns true for success
 */
-bool qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
-	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_kyber_ref_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates cipher text and shared secret for given public key and a random seed
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to encapsulate a key
 * 
-* \param ct:	[uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param ss:	[uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk:	[const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param m:		[const uint8_t*] Pointer to the random coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param m:	[const uint8_t*] Pointer to the random coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 */
-void qsc_kyber_ref_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],
-	const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], const uint8_t m[QSC_KYBER_SYMBYTES]);
+void qsc_kyber_ref_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], const uint8_t m[QSC_KYBER_SYMBYTES]);
 
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism
 *
-* \param pk:	[uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk:	[uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param pk: [uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk: [uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 * \param rng_generate: [uint8_t*, size_t] Pointer to the random generator function
-* \return		[bool] Returns true for success
+* 
+* \return [bool] Returns true for success
 */
-bool qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], 
-	bool (*rng_generate)(uint8_t*, size_t));
+bool qsc_kyber_ref_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism using input seeds
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair
 *
-* \param pk:	[uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk:	[uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
-* \param d:		[uint8_t*] Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
-* \param z:		[uint8_t*] Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param pk: [uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param sk: [uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param d:	[uint8_t*] Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
+* \param z:	[uint8_t*] Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 */
-void qsc_kyber_ref_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],
-	uint8_t d[QSC_KYBER_SYMBYTES], uint8_t z[QSC_KYBER_SYMBYTES]);
+void qsc_kyber_ref_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], uint8_t d[QSC_KYBER_SYMBYTES], uint8_t z[QSC_KYBER_SYMBYTES]);
 
 QSC_CPLUSPLUS_ENABLED_END
 

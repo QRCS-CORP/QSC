@@ -158,108 +158,108 @@ typedef struct
 /**
 * \brief Retrieves the address information on a named addressable interface
 *
-* \param info:		[qsc_netutils_adaptor_info*] The adaptor info structure
-* \param infname:	[const char*]The adaptor interface name, ex 'eth0' or 'wlan0'
+* \param info: [qsc_netutils_adaptor_info*] The adaptor info structure
+* \param infname: [const char*]The adaptor interface name, ex 'eth0' or 'wlan0'
 */
 QSC_EXPORT_API void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* info, const char* infname);
 
 /**
 * \brief Retrieves the mac address of the primary interface
 *
-* \param mac:		[uint8_t*] The output array receiving the MAC address
+* \param mac: [uint8_t*] The output array receiving the MAC address
 */
 QSC_EXPORT_API void qsc_netutils_get_mac_address(uint8_t mac[QSC_NETUTILS_MAC_ADDRESS_SIZE]);
 
 /**
 * \brief Parse a string for a number
 *
-* \param source:	[const char*] The string to convert
+* \param source: [const char*] The string to convert
 *
-* \return			[uint32_t] The number found in the string
+* \return [uint32_t] The number found in the string
 */
 QSC_EXPORT_API uint32_t qsc_netutils_atoi(const char* source);
 
 /**
 * \brief Retrieves the hosts domain name
 *
-* \param output:	[char*] The source socket instance
+* \param output: [char*] The source socket instance
 *
-* \return			[size_t] Returns the peers name string
+* \return [size_t] Returns the peers name string
 */
 QSC_EXPORT_API size_t qsc_netutils_get_domain_name(char output[QSC_NETUTILS_DOMAIN_NAME_SIZE]);
 
 /**
 * \brief Retrieves the host name of the local machine
 *
-* \param host:		[char*] The host-name string
+* \param host: [char*] The host-name string
 * 
-* \return			[bool] Returns true if the call succeeded
+* \return [bool] Returns true if the call succeeded
 */
 QSC_EXPORT_API bool qsc_netutils_get_host_name(char host[QSC_NETUTILS_HOSTS_NAME_SIZE]);
 
 /**
 * \brief Retrieves fully qualified name from an IPv4 address
 *
-* \param address:	[const qsc_ipinfo_ipv4_address*] The input IPv4 address string
-* \param host:		[char*] The output host name
+* \param address: [const qsc_ipinfo_ipv4_address*] The input IPv4 address string
+* \param host: [char*] The output host name
 */
 QSC_EXPORT_API void qsc_netutils_get_name_from_ipv4_address(const qsc_ipinfo_ipv4_address* address, char host[QSC_NETUTILS_HOSTS_NAME_SIZE]);
 
 /**
 * \brief Retrieves the local IPv4 address
 *
-* \param padd:		[qsc_ipinfo_ipv4_address*] The ipv6 address structure
-* \return			[bool] Returns true on function success
+* \param padd: [qsc_ipinfo_ipv4_address*] The ipv6 address structure
+* \return [bool] Returns true on function success
 */
 QSC_EXPORT_API bool qsc_netutils_get_ipv4_address(qsc_ipinfo_ipv4_address* padd);
 
 /**
 * \brief Retrieves the local IPv6 address
 *
-* \param padd:		[qsc_ipinfo_ipv6_address*] The ipv6 address structure
-* \return			[bool] Returns true on function success
+* \param padd: [qsc_ipinfo_ipv6_address*] The ipv6 address structure
+* \return [bool] Returns true on function success
 */
 QSC_EXPORT_API bool qsc_netutils_get_ipv6_address(qsc_ipinfo_ipv6_address* padd);
 
 /**
 * \brief Retrieves the IPv4 address information for a remote host
 *
-* \param pinfo:		[qsc_ipinfo_ipv4_info*] A pointer to the output ipinfo structure
-* \param host:		[const char*] The hosts qualified name
-* \param service:	[const char*] The service name
+* \param pinfo: [qsc_ipinfo_ipv4_info*] A pointer to the output ipinfo structure
+* \param host: [const char*] The hosts qualified name
+* \param service: [const char*] The service name
 */
 QSC_EXPORT_API void qsc_netutils_get_ipv4_info(qsc_ipinfo_ipv4_info* pinfo, const char* host, const char* service);
 
 /**
 * \brief Retrieves the IPv6 address information for a remote host
 *
-* \param pinfo:		[qsc_ipinfo_ipv6_info*] A pointer to the output ipinfo structure
-* \param host:		[const char*] The hosts qualified name
-* \param service:	[const char*] The service name
+* \param pinfo: [qsc_ipinfo_ipv6_info*] A pointer to the output ipinfo structure
+* \param host: [const char*] The hosts qualified name
+* \param service: [const char*] The service name
 */
 QSC_EXPORT_API void qsc_netutils_get_ipv6_info(qsc_ipinfo_ipv6_info* pinfo, const char* host, const char* service);
 
 /**
 * \brief Retrieves the host name of the connected peer
 *
-* \param output:	[char*] The output buffer
-* \param sock:		[const char*] The source socket instance
+* \param output: [char*] The output buffer
+* \param sock: [const char*] The source socket instance
 */
 QSC_EXPORT_API void qsc_netutils_get_peer_name(char output[QSC_NETUTILS_HOSTS_NAME_SIZE], const qsc_socket* sock);
 
 /**
 * \brief Retrieves the socket name of the connected peer
 *
-* \param output:	[char*] The output buffer
-* \param sock:		[const qsc_socket*] The source socket instance
+* \param output: [char*] The output buffer
+* \param sock: [const qsc_socket*] The source socket instance
 */
 QSC_EXPORT_API void qsc_netutils_get_socket_name(char output[QSC_NETUTILS_NAME_BUFFER_SIZE], const qsc_socket* sock);
 
 /**
 * \brief Get the port number using the connection parameters
 *
-* \param portname:	[const char*] The port name
-* \param protocol:	[const char*] The protocol name
+* \param portname: [const char*] The port name
+* \param protocol: [const char*] The protocol name
 *
 * \return The port number, or zero on failure
 */

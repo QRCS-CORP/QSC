@@ -95,61 +95,82 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 #if defined(QSC_HQC_S1N2321)
-/*!
- * \def QSC_HQC_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
+
+	/*!
+	* \def QSC_HQC_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
 #	define QSC_HQC_PUBLICKEY_SIZE 2241U
 
-/*!
- * \def QSC_HQC_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
+	/*!
+	* \def QSC_HQC_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
 #	define QSC_HQC_PRIVATEKEY_SIZE 2321U
 
-/*!
- * \def QSC_HQC_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
+	/*!
+	* \def QSC_HQC_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
 #	define QSC_HQC_CIPHERTEXT_SIZE 4433U
 
+	/*!
+	 * \def QSC_HQC_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_HQC_ALGNAME "HQC-2321"
+
 #elif defined(QSC_HQC_S3N4602)
-/*!
- * \def QSC_HQC_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
+
+	/*!
+	* \def QSC_HQC_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
 #	define QSC_HQC_PUBLICKEY_SIZE 4514U
 
-/*!
- * \def QSC_HQC_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
+	/*!
+	* \def QSC_HQC_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
 #	define QSC_HQC_PRIVATEKEY_SIZE 4602U
 
-/*!
- * \def QSC_HQC_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
+	/*!
+	* \def QSC_HQC_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
 #	define QSC_HQC_CIPHERTEXT_SIZE 8978U
 
+	/*!
+	 * \def QSC_HQC_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_HQC_ALGNAME "HQC-4602"
+
 #elif defined(QSC_HQC_S5N7333)
-/*!
- * \def QSC_HQC_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
+
+	/*!
+	* \def QSC_HQC_PUBLICKEY_SIZE
+	* \brief The byte size of the public-key array.
+	*/
 #	define QSC_HQC_PUBLICKEY_SIZE 7237U
 
-/*!
- * \def QSC_HQC_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
+	/*!
+	* \def QSC_HQC_PRIVATEKEY_SIZE
+	* \brief The byte size of the secret private-key array.
+	*/
 #	define QSC_HQC_PRIVATEKEY_SIZE 7333U
 
-/*!
- * \def QSC_HQC_CIPHERTEXT_SIZE
- * \brief The byte size of the ciphertext array.
- */
+	/*!
+	* \def QSC_HQC_CIPHERTEXT_SIZE
+	* \brief The byte size of the ciphertext array.
+	*/
 #	define QSC_HQC_CIPHERTEXT_SIZE 14421U
+
+	/*!
+	 * \def QSC_HQC_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_HQC_ALGNAME "HQC-7333"
 
 #else
 #	error "A valid HQC parameter set must be defined: QSC_HQC_S1N2321, QSC_HQC_S3N4602, or QSC_HQC_S5N7333."
@@ -167,21 +188,16 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_HQC_SHAREDSECRET_SIZE 32U
 
-/*!
- * \def QSC_HQC_ALGNAME
- * \brief The formal algorithm name.
- */
-#define QSC_HQC_ALGNAME "HQC"
-
 /**
  * \brief Decapsulates the shared secret for a given ciphertext using a private key.
  *
  * Combines the ciphertext with the private key to derive the shared secret.
  *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_HQC_SHAREDSECRET_SIZE).
- * \param ciphertext:	[const uint8_t*] Pointer to the ciphertext array (size QSC_HQC_CIPHERTEXT_SIZE).
- * \param privatekey:	[const uint8_t*] Pointer to the secret key array (size QSC_HQC_PRIVATEKEY_SIZE).
- * \return				[bool] Returns true if decapsulation succeeds.
+ * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_HQC_SHAREDSECRET_SIZE).
+ * \param ciphertext: [const uint8_t*] Pointer to the ciphertext array (size QSC_HQC_CIPHERTEXT_SIZE).
+ * \param privatekey: [const uint8_t*] Pointer to the secret key array (size QSC_HQC_PRIVATEKEY_SIZE).
+ * 
+ * \return [bool] Returns true if decapsulation succeeds.
  */
 QSC_EXPORT_API bool qsc_hqc_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 
@@ -190,11 +206,12 @@ QSC_EXPORT_API bool qsc_hqc_decapsulate(uint8_t* secret, const uint8_t* cipherte
  *
  * Generates ciphertext and a shared secret; used for key encapsulation.
  *
- * \param secret:		[uint8_t*] Pointer to the output shared secret key (array of QSC_HQC_SHAREDSECRET_SIZE).
- * \param ciphertext:	[uint8_t*] Pointer to the output ciphertext array (size QSC_HQC_CIPHERTEXT_SIZE).
- * \param publickey:	[const uint8_t*] Pointer to the public key array (size QSC_HQC_PUBLICKEY_SIZE).
+ * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_HQC_SHAREDSECRET_SIZE).
+ * \param ciphertext: [uint8_t*] Pointer to the output ciphertext array (size QSC_HQC_CIPHERTEXT_SIZE).
+ * \param publickey: [const uint8_t*] Pointer to the public key array (size QSC_HQC_PUBLICKEY_SIZE).
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
- * \return				[bool] Returns true if encapsulation succeeds.
+ * 
+ * \return [bool] Returns true if encapsulation succeeds.
  */
 QSC_EXPORT_API bool qsc_hqc_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -202,10 +219,10 @@ QSC_EXPORT_API bool qsc_hqc_encapsulate(uint8_t* secret, uint8_t* ciphertext, co
 * \brief Generates cipher text and shared secret for given public key and a random seed.
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to encapsulate a key.
 * 
-* \param ct:	[uint8_t*] Pointer to output cipher text (an already allocated array of HQC_CIPHERTEXT_SIZE bytes)
-* \param ss:	[uint8_t*] Pointer to output shared secret (an already allocated array of HQC_BYTES bytes)
-* \param pk:	[const uint8_t*] Pointer to input public key (an already allocated array of HQC_PUBLICKEY_SIZE bytes)
-* \param seed:	[const uint8_t*] Pointer to the random seed (a populated random array of QSC_HQC_SEED_SIZE bytes)
+* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of HQC_CIPHERTEXT_SIZE bytes)
+* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of HQC_BYTES bytes)
+* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of HQC_PUBLICKEY_SIZE bytes)
+* \param seed: [const uint8_t*] Pointer to the random seed (a populated random array of QSC_HQC_SEED_SIZE bytes)
 */
 void qsc_hqc_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_HQC_SEED_SIZE]);
 
@@ -214,10 +231,11 @@ void qsc_hqc_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint
  *
  * Produces a key pair for the Kyber key encapsulation mechanism.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public key array (size QSC_HQC_PUBLICKEY_SIZE)
- * \param privatekey:	[uint8_t*] Pointer to the output private key array (size QSC_HQC_PRIVATEKEY_SIZE)
+ * \param publickey: [uint8_t*] Pointer to the output public key array (size QSC_HQC_PUBLICKEY_SIZE)
+ * \param privatekey: [uint8_t*] Pointer to the output private key array (size QSC_HQC_PRIVATEKEY_SIZE)
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to a random generator function.
- * \return				[bool] Returns true if key generation succeeds.
+ * 
+ * \return [bool] Returns true if key generation succeeds.
  */
 QSC_EXPORT_API bool qsc_hqc_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -226,8 +244,8 @@ QSC_EXPORT_API bool qsc_hqc_generate_keypair(uint8_t* publickey, uint8_t* privat
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair.
 *
 * \param publickey:	[uint8_t*] Pointer to output public key (an already allocated array of HQC_PUBLICKEY_SIZE bytes)
-* \param privatekey:	[uint8_t*] Pointer to output private key (an already allocated array of HQC_SECRETKEY_SIZE bytes)
-* \param seed:	[uint8_t*] Pointer to the random seed
+* \param privatekey: [uint8_t*] Pointer to output private key (an already allocated array of HQC_SECRETKEY_SIZE bytes)
+* \param seed: [uint8_t*] Pointer to the random seed
 */
 QSC_EXPORT_API void qsc_hqc_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
 

@@ -133,143 +133,152 @@ QSC_CPLUSPLUS_ENABLED_START
 
 #if defined(QSC_ECDSA_S1P256)
 
-/*!
- * \def QSC_ECDSA_SIGNATURE_SIZE
- * \brief The byte size of the signature array (r[32] || s[32]).
- */
+	/*!
+	 * \def QSC_ECDSA_SIGNATURE_SIZE
+	 * \brief The byte size of the signature array (r[32] || s[32]).
+	 */
 #	define QSC_ECDSA_SIGNATURE_SIZE 64U
 
-/*!
- * \def QSC_ECDSA_PRIVATEKEY_SIZE
- * \brief The byte size of the private key array (seed[32] || Qx[32] || Qy[32]).
- */
+	/*!
+	 * \def QSC_ECDSA_PRIVATEKEY_SIZE
+	 * \brief The byte size of the private key array (seed[32] || Qx[32] || Qy[32]).
+	 */
 #	define QSC_ECDSA_PRIVATEKEY_SIZE 96U
 
-/*!
- * \def QSC_ECDSA_PUBLICKEY_SIZE
- * \brief The byte size of the public key array (Qx[32] || Qy[32], big-endian).
- */
+	/*!
+	 * \def QSC_ECDSA_PUBLICKEY_SIZE
+	 * \brief The byte size of the public key array (Qx[32] || Qy[32], big-endian).
+	 */
 #	define QSC_ECDSA_PUBLICKEY_SIZE 64U
 
-/*!
- * \def QSC_ECDSA_SEED_SIZE
- * \brief The byte size of the random seed / private scalar input array.
- */
+	/*!
+	 * \def QSC_ECDSA_SEED_SIZE
+	 * \brief The byte size of the random seed / private scalar input array.
+	 */
 #	define QSC_ECDSA_SEED_SIZE 32ULL
 
-/*!
- * \def QSC_ECDSA_ALGNAME
- * \brief The formal algorithm name.
- */
-#	define QSC_ECDSA_ALGNAME "ECDSAP256"
+	/*!
+	 * \def QSC_ECDSA_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_ECDSA_ALGNAME "ECDSA-P256"
 
-/*!
- * \brief SEC 1 uncompressed EC point byte length for P-256.
- */
+	/*!
+	 * \def QSC_ECDSA_SEC1_PUBLICKEY_SIZE
+	 * \brief SEC 1 uncompressed EC point byte length for P-384.
+	 */
 #	define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 65U
 
-/*!
- * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp256r1.
- */
+	/*!
+	* \def QSC_ECDSA_SPKI_DER_SIZE
+	* \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp384r1.
+	*/
 #	define QSC_ECDSA_SPKI_DER_SIZE 91U
 
-/*!
- * \brief Maximum DER-encoded ECDSA signature size for P-256.
- */
+	/*!
+	 * \def QSC_ECDSA_SIGNATURE_DER_MAX_SIZE
+	 * \brief Maximum DER-encoded ECDSA signature size for P-384.
+	 */
 #	define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 72U
 
 #elif defined(QSC_ECDSA_S3P384)
 
-/*!
- * \def QSC_ECDSA_SIGNATURE_SIZE
- * \brief The byte size of the signature array (r[48] || s[48]).
- */
+	/*!
+	 * \def QSC_ECDSA_SIGNATURE_SIZE
+	 * \brief The byte size of the signature array (r[48] || s[48]).
+	 */
 #	define QSC_ECDSA_SIGNATURE_SIZE 96U
 
-/*!
- * \def QSC_ECDSA_PRIVATEKEY_SIZE
- * \brief The byte size of the private key array (seed[48] || Qx[48] || Qy[48]).
- */
+	/*!
+	 * \def QSC_ECDSA_PRIVATEKEY_SIZE
+	 * \brief The byte size of the private key array (seed[48] || Qx[48] || Qy[48]).
+	 */
 #	define QSC_ECDSA_PRIVATEKEY_SIZE 144U
 
-/*!
- * \def QSC_ECDSA_PUBLICKEY_SIZE
- * \brief The byte size of the public key array (Qx[48] || Qy[48], big-endian).
- */
+	/*!
+	 * \def QSC_ECDSA_PUBLICKEY_SIZE
+	 * \brief The byte size of the public key array (Qx[48] || Qy[48], big-endian).
+	 */
 #	define QSC_ECDSA_PUBLICKEY_SIZE 96U
 
-/*!
- * \def QSC_ECDSA_SEED_SIZE
- * \brief The byte size of the random seed / private scalar input array.
- */
+	/*!
+	 * \def QSC_ECDSA_SEED_SIZE
+	 * \brief The byte size of the random seed / private scalar input array.
+	 */
 #	define QSC_ECDSA_SEED_SIZE 48ULL
 
-/*!
- * \def QSC_ECDSA_ALGNAME
- * \brief The formal algorithm name.
- */
-#	define QSC_ECDSA_ALGNAME "ECDSAP384"
+	/*!
+	 * \def QSC_ECDSA_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_ECDSA_ALGNAME "ECDSA-P384"
 
-/*!
- * \brief SEC 1 uncompressed EC point byte length for P-384.
- */
+	/*!
+	 * \def QSC_ECDSA_SEC1_PUBLICKEY_SIZE
+	 * \brief SEC 1 uncompressed EC point byte length for P-384.
+	 */
 #	define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 97U
 
-/*!
- * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp384r1.
- */
+	/*!
+	 * \def QSC_ECDSA_SPKI_DER_SIZE
+	 * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp384r1.
+	 */
 #	define QSC_ECDSA_SPKI_DER_SIZE 120U
 
-/*!
- * \brief Maximum DER-encoded ECDSA signature size for P-384.
- */
+	/*!
+	 * \def QSC_ECDSA_SIGNATURE_DER_MAX_SIZE
+	 * \brief Maximum DER-encoded ECDSA signature size for P-384.
+	 */
 #	define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 104U
 
 #elif defined(QSC_ECDSA_S5P521)
 
-/*!
- * \def QSC_ECDSA_SIGNATURE_SIZE
- * \brief The byte size of the signature array (r[66] || s[66]).
- */
+	/*!
+	 * \def QSC_ECDSA_SIGNATURE_SIZE
+	 * \brief The byte size of the signature array (r[66] || s[66]).
+	 */
 #	define QSC_ECDSA_SIGNATURE_SIZE 132U
 
-/*!
- * \def QSC_ECDSA_PRIVATEKEY_SIZE
- * \brief The byte size of the private key array (seed[66] || Qx[66] || Qy[66]).
- */
+	/*!
+	 * \def QSC_ECDSA_PRIVATEKEY_SIZE
+	 * \brief The byte size of the private key array (seed[66] || Qx[66] || Qy[66]).
+	 */
 #	define QSC_ECDSA_PRIVATEKEY_SIZE 198U
 
-/*!
- * \def QSC_ECDSA_PUBLICKEY_SIZE
- * \brief The byte size of the public key array (Qx[66] || Qy[66], big-endian).
- */
+	/*!
+	 * \def QSC_ECDSA_PUBLICKEY_SIZE
+	 * \brief The byte size of the public key array (Qx[66] || Qy[66], big-endian).
+	 */
 #	define QSC_ECDSA_PUBLICKEY_SIZE 132U
 
-/*!
- * \def QSC_ECDSA_SEED_SIZE
- * \brief The byte size of the random seed / private scalar input array.
- */
+	/*!
+	 * \def QSC_ECDSA_SEED_SIZE
+	 * \brief The byte size of the random seed / private scalar input array.
+	 */
 #	define QSC_ECDSA_SEED_SIZE 66ULL
 
-/*!
- * \def QSC_ECDSA_ALGNAME
- * \brief The formal algorithm name.
- */
-#	define QSC_ECDSA_ALGNAME "ECDSAP521"
+	/*!
+	 * \def QSC_ECDSA_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_ECDSA_ALGNAME "ECDSA-P521"
 
-/*!
- * \brief SEC 1 uncompressed EC point byte length for P-521.
- */
+	/*!
+	 * \def QSC_ECDSA_SEC1_PUBLICKEY_SIZE
+	 * \brief SEC 1 uncompressed EC point byte length for P-384.
+	 */
 #	define QSC_ECDSA_SEC1_PUBLICKEY_SIZE 133U
 
-/*!
- * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp521r1.
- */
+	/*!
+	 * \def QSC_ECDSA_SPKI_DER_SIZE
+	 * \brief SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp384r1.
+	 */
 #	define QSC_ECDSA_SPKI_DER_SIZE 158U
 
-/*!
- * \brief Maximum DER-encoded ECDSA signature size for P-521.
- */
+    /*!
+     * \def QSC_ECDSA_SIGNATURE_DER_MAX_SIZE
+     * \brief Maximum DER-encoded ECDSA signature size for P-384.
+     */
 #	define QSC_ECDSA_SIGNATURE_DER_MAX_SIZE 139U
 
 #else
@@ -279,8 +288,8 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
  * \brief Convert a raw public key (Qx || Qy) to SEC 1 uncompressed point form.
  *
- * \param secpub:		[uint8_t*] Output buffer of 65 bytes.
- * \param publickey:	[const uint8_t*] Input raw public key of 64 bytes.
+ * \param secpub: [uint8_t*] Output buffer of 65 bytes.
+ * \param publickey: [const uint8_t*] Input raw public key of 64 bytes.
  */
 QSC_EXPORT_API void qsc_ecdsa_publickey_to_sec1(uint8_t* secpub, const uint8_t* publickey);
 
@@ -295,19 +304,20 @@ QSC_EXPORT_API void qsc_ecdsa_publickey_to_sec1(uint8_t* secpub, const uint8_t* 
  * The private scalar must be in the range [1, n - 1], where n is the order
  * of the P-256 base point.
  *
- * \param publickey:	[uint8_t*] Output buffer receiving the 64-byte public key.
- * \param privatekey:	[const uint8_t*] Input 32-byte private scalar.
+ * \param publickey: [uint8_t*] Output buffer receiving the 64-byte public key.
+ * \param privatekey: [const uint8_t*] Input 32-byte private scalar.
  *
- * \return				[int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 QSC_EXPORT_API int32_t qsc_ecdsa_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
 
 /**
  * \brief Convert a SEC 1 uncompressed point to the library raw public-key form.
  *
- * \param publickey:	[uint8_t*] Output raw public key of 64 bytes.
- * \param secpub:		[const uint8_t*] Input SEC 1 public key of 65 bytes.
- * \return				[bool] Returns true on success.
+ * \param publickey: [uint8_t*] Output raw public key of 64 bytes.
+ * \param secpub: [const uint8_t*] Input SEC 1 public key of 65 bytes.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdsa_publickey_from_sec1(uint8_t* publickey, const uint8_t* secpub);
 
@@ -319,13 +329,13 @@ QSC_EXPORT_API bool qsc_ecdsa_publickey_from_sec1(uint8_t* publickey, const uint
  * Q = d*G, and stores both.  This function is deterministic: the same seed
  * always produces the same key pair.
  *
- * \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and
- *          QSC_ECDSA_PRIVATEKEY_SIZE respectively.
+ * \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and QSC_ECDSA_PRIVATEKEY_SIZE respectively.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public verification-key array.
- * \param privatekey:	[uint8_t*] Pointer to the output private signature-key array.
- * \param seed:			[const uint8_t*] Pointer to the random 32-byte seed array.
- * \return				[bool] Returns true on success.
+ * \param publickey: [uint8_t*] Pointer to the output public verification-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private signature-key array.
+ * \param seed: [const uint8_t*] Pointer to the random 32-byte seed array.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -337,13 +347,13 @@ QSC_EXPORT_API bool qsc_ecdsa_generate_seeded_keypair(uint8_t* publickey, uint8_
  * qsc_ecdsa_generate_seeded_keypair.  The seed is erased from stack
  * memory before returning.
  *
- * \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and
- *          QSC_ECDSA_PRIVATEKEY_SIZE respectively.
+ * \warning Arrays must be sized to QSC_ECDSA_PUBLICKEY_SIZE and QSC_ECDSA_PRIVATEKEY_SIZE respectively.
  *
- * \param publickey:	[uint8_t*] Pointer to the public verification-key array.
- * \param privatekey:	[uint8_t*] Pointer to the private signature-key array.
+ * \param publickey: [uint8_t*] Pointer to the public verification-key array.
+ * \param privatekey: [uint8_t*] Pointer to the private signature-key array.
  * \param rng_generate: [bool(*)(uint8_t*, size_t)] Pointer to the random generator function.
- * \return				[bool] Returns true on success.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -357,12 +367,13 @@ QSC_EXPORT_API bool qsc_ecdsa_generate_keypair(uint8_t* publickey, uint8_t* priv
  *
  * \warning signedmsg must be at least msglen + QSC_ECDSA_SIGNATURE_SIZE bytes.
  *
- * \param signedmsg:	[uint8_t*] Pointer to the signed-message output array.
- * \param smsglen:		[size_t*] Pointer to the signed-message length output.
- * \param message:		[const uint8_t*] Pointer to the message to sign.
- * \param msglen:		[size_t] Message length in bytes.
- * \param privatekey:	[const uint8_t*] Pointer to the 96-byte private key array.
- * \return				[bool] Returns true on success.
+ * \param signedmsg: [uint8_t*] Pointer to the signed-message output array.
+ * \param smsglen: [size_t*] Pointer to the signed-message length output.
+ * \param message: [const uint8_t*] Pointer to the message to sign.
+ * \param msglen: [size_t] Message length in bytes.
+ * \param privatekey: [const uint8_t*] Pointer to the 96-byte private key array.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
@@ -376,12 +387,13 @@ QSC_EXPORT_API bool qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const ui
  *
  * \warning signedmsg must be at least msglen + QSC_ECDSA_SIGNATURE_SIZE bytes.
  *
- * \param signedmsg:	[uint8_t*] Pointer to the signed-message output array.
- * \param smsglen:		[size_t*] Pointer to the signed-message length output.
- * \param message:		[const uint8_t*] Pointer to the message to sign.
- * \param msglen:		[size_t] Message length in bytes.
- * \param privatekey:	[const uint8_t*] Pointer to the 96-byte private key array.
- * \return				[bool] Returns true on success.
+ * \param signedmsg: [uint8_t*] Pointer to the signed-message output array.
+ * \param smsglen: [size_t*] Pointer to the signed-message length output.
+ * \param message: [const uint8_t*] Pointer to the message to sign.
+ * \param msglen: [size_t] Message length in bytes.
+ * \param privatekey: [const uint8_t*] Pointer to the 96-byte private key array.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdsa_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
@@ -394,12 +406,13 @@ QSC_EXPORT_API bool qsc_ecdsa_sign_scalar(uint8_t* signedmsg, size_t* smsglen, c
  * ECDSA equation.  On success the message bytes are copied into message and
  * *msglen is set.  On failure message is zeroed and *msglen is set to 0.
  *
- * \param message:		[uint8_t*] Pointer to the recovered message output array.
- * \param msglen:		[size_t*] Pointer to the recovered message length.
- * \param signedmsg:	[const uint8_t*] Pointer to the signed-message input array.
- * \param smsglen:		[size_t] Total signed-message length (signature + message).
- * \param publickey:	[const uint8_t*] Pointer to the 64-byte public verification-key array.
- * \return				[bool] Returns true if the signature is valid, false otherwise.
+ * \param message: [uint8_t*] Pointer to the recovered message output array.
+ * \param msglen: [size_t*] Pointer to the recovered message length.
+ * \param signedmsg: [const uint8_t*] Pointer to the signed-message input array.
+ * \param smsglen: [size_t] Total signed-message length (signature + message).
+ * \param publickey: [const uint8_t*] Pointer to the 64-byte public verification-key array.
+ * 
+ * \return [bool] Returns true if the signature is valid, false otherwise.
  */
 QSC_EXPORT_API bool qsc_ecdsa_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 

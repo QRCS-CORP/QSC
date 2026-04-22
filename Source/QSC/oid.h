@@ -90,6 +90,8 @@ typedef enum qsc_oid_id_t
     QSC_OID_ID_SHA512_WITH_RSA_ENCRYPTION,          /*!< sha512WithRSAEncryption. */
 
     QSC_OID_ID_EC_PUBLIC_KEY,                       /*!< id-ecPublicKey. */
+    QSC_OID_ID_ED25519,                             /*!< edwards 25519. */
+    QSC_OID_ID_ED448,                               /*!< edwards 448. */
     QSC_OID_ID_PRIME256V1,                          /*!< prime256v1. */
     QSC_OID_ID_SECP384R1,                           /*!< secp384r1. */
     QSC_OID_ID_SECP521R1,                           /*!< secp521r1. */

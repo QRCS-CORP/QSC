@@ -99,14 +99,8 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \return [enum] Returns a qsc_x509_crl_verify_status code indicating success or the reason the merge failed.
  */
-QSC_EXPORT_API qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(
-    qsc_x509_crl* mergedcrl,
-    const qsc_x509_crl* basecrl,
-    const qsc_x509_crl* deltacrl,
-    const qsc_x509_certificate* issuer,
-    const qsc_asn1_time* now,
-    qsc_x509_crl_signature_verify_callback callback,
-    void* state);
+QSC_EXPORT_API qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(qsc_x509_crl* mergedcrl, const qsc_x509_crl* basecrl, const qsc_x509_crl* deltacrl,
+    const qsc_x509_certificate* issuer, const qsc_asn1_time* now, qsc_x509_crl_signature_verify_callback callback, void* state);
 
 /*!
  * \brief Verify a stapled OCSP response for a certificate.

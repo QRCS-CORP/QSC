@@ -20,7 +20,7 @@
 
 extern void qsc_tls_client_set_certificate_interface(qsc_tls_client* client, const qsc_tls_certificate_interface* iface, const char* hostname, bool requirepeercertificate);
 extern void qsc_tls_server_set_certificate_interface(qsc_tls_server* server, const qsc_tls_certificate_interface* iface, const char* hostname, bool requirepeercertificate);
-extern qsc_tls_status qsc_tls_server_set_local_certificate(qsc_tls_server* server, const qsc_tls_certificate_view* chain, size_t chainlength, qsc_tls_signature_scheme verifyscheme, const uint8_t* verifysignature, size_t verifysignaturelen);
+extern qsc_tls_status qsc_tls_server_set_local_certificate(qsc_tls_server* server, const qsc_tls_certificate_view* chain, size_t chainlength, qsc_tls_signature_scheme verifyscheme, const uint8_t* privatekeydata, size_t privatekeylen);
 
 static void x509w_result_set_message(qsc_x509w_result* result, const char* message)
 {
@@ -782,6 +782,28 @@ void qsc_x509w_server_identity_clear(qsc_x509w_server_identity* identity)
         }
 
         qsc_memutils_clear(identity, sizeof(qsc_x509w_server_identity));
+    }
+}
+
+void qsc_x509w_deployment_config_initialize(qsc_x509w_deployment_config* config)
+{
+    QSC_ASSERT(config != NULL);
+
+    if (config != NULL)
+    {
+        qsc_memutils_clear(config, sizeof(qsc_x509w_deployment_config));
+
+        config->certificatechainpath = NULL;
+        config->privatekeypath = NULL;
+        config->trustanchorpath = NULL;
+        config->crlpath = NULL;
+        config->hostname = NULL;
+        config->purpose = QSC_X509_VERIFY_PURPOSE_TLS_SERVER;
+        config->requireclientauth = false;
+        config->loadtrustanchors = false;
+        config->loadcrls = false;
+        config->rejectunsupportedcriticalextensions = true;
+        config->requirerevocation = false;
     }
 }
 
@@ -2258,9 +2280,11 @@ qsc_x509w_status qsc_x509w_tls_bridge_set_server_validation(qsc_tls_server* serv
 }
 
 qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_server_identity* identity,
-    qsc_tls_signature_scheme verifyscheme, const uint8_t* verifysignature, size_t verifysignaturelen,
-    qsc_x509w_tls_local_certificate* localcert)
+    qsc_tls_signature_scheme verifyscheme, qsc_x509w_tls_local_certificate* localcert)
 {
+    /* C6 fix: no longer accepts a pre-computed signature.
+     * Extracts the private key directly from identity->privatekey so the
+     * CertificateVerify signature can be produced at build time over the live transcript. */
     qsc_x509w_status status;
     size_t i;
     size_t written;
@@ -2269,9 +2293,10 @@ qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_s
     i = 0U;
     written = 0U;
 
-    if (identity == NULL || localcert == NULL || identity->intermediatecount >= QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES ||
-        (verifysignature == NULL && verifysignaturelen != 0U) ||
-        verifysignaturelen > sizeof(localcert->verifysignature))
+    if (identity == NULL || localcert == NULL ||
+        identity->intermediatecount >= QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES ||
+        identity->privatekey.privatekeylen == 0U ||
+        identity->privatekey.privatekeylen > QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE)
     {
         status = QSC_X509W_STATUS_INVALID_INPUT;
     }
@@ -2304,12 +2329,11 @@ qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_s
 
         if (status == QSC_X509W_STATUS_SUCCESS)
         {
-            localcert->verifyscheme = verifyscheme;
-            localcert->verifysignaturelen = verifysignaturelen;
-            if (verifysignaturelen != 0U)
-            {
-                qsc_memutils_copy(localcert->verifysignature, verifysignature, verifysignaturelen);
-            }
+            localcert->verifyscheme  = verifyscheme;
+            localcert->privatekeylen = identity->privatekey.privatekeylen;
+            qsc_memutils_copy(localcert->privatekeydata,
+                identity->privatekey.privatekey,
+                identity->privatekey.privatekeylen);
         }
     }
 
@@ -2331,8 +2355,9 @@ qsc_x509w_status qsc_x509w_tls_server_set_local_certificate(qsc_tls_server* serv
     }
     else
     {
+        /* C6 fix: pass private key, not pre-computed signature */
         tstatus = qsc_tls_server_set_local_certificate(server, localcert->chain, localcert->chainlength,
-            localcert->verifyscheme, localcert->verifysignature, localcert->verifysignaturelen);
+            localcert->verifyscheme, localcert->privatekeydata, localcert->privatekeylen);
         status = x509w_map_tls_status(tstatus);
     }
 

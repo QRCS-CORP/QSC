@@ -228,7 +228,7 @@ QSC_EXPORT_API typedef struct
  * \warning The dispose function must be called when disposing of the cipher.
  * This function destroys the internal state of the cipher.
  *
- * \param ctx:			[qsc_rcs_state*] A pointer to the cipher state structure.
+ * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
  */
 QSC_EXPORT_API void qsc_rcs_dispose(qsc_rcs_state* ctx);
 

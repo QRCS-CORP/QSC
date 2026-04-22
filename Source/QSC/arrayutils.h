@@ -112,8 +112,8 @@ QSC_CPLUSPLUS_ENABLED_START
  * the zero-based character position. If the token is not found, the function returns
  * QSC_ARRAYUTILS_NPOS.
  *
- * \param str:   [const char*] Pointer to the constant character string to be searched.
- * \param slen:  [size_t] The length of the string in bytes (excluding the null terminator).
+ * \param str: [const char*] Pointer to the constant character string to be searched.
+ * \param slen: [size_t] The length of the string in bytes (excluding the null terminator).
  * \param token: [const char*] Pointer to the constant token string to search for.
  *
  * \return [size_t] The zero-based position of the token if found; otherwise QSC_ARRAYUTILS_NPOS.
@@ -128,8 +128,8 @@ QSC_EXPORT_API size_t qsc_arrayutils_find_string(const char* str, size_t slen, c
  * Reads up to two hexadecimal characters from the input string and converts them
  * into the corresponding \c uint8_t value.
  *
- * \param str:   [const char*] Pointer to the constant hexadecimal string.
- * \param slen:  [size_t] The length of the string in bytes (excluding the null terminator).
+ * \param str: [const char*] Pointer to the constant hexadecimal string.
+ * \param slen: [size_t] The length of the string in bytes (excluding the null terminator).
  *
  * \return [uint8_t] The resulting 8-bit unsigned integer.
  */
@@ -143,7 +143,7 @@ QSC_EXPORT_API uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
  *
  * \param output: [char*] Pointer to the output character array.
  * \param otplen: [size_t] The length of the output buffer in bytes.
- * \param value:  [uint8_t] The 8-bit unsigned integer to convert.
+ * \param value: [uint8_t] The 8-bit unsigned integer to convert.
  */
 QSC_EXPORT_API void qsc_arrayutils_uint8_to_hex(char* output, size_t otplen, uint8_t value);
 
@@ -155,7 +155,7 @@ QSC_EXPORT_API void qsc_arrayutils_uint8_to_hex(char* output, size_t otplen, uin
  *
  * \param output: [char*] Pointer to the output character array.
  * \param otplen: [size_t] The length of the output buffer in bytes.
- * \param value:  [uint16_t] The 16-bit unsigned integer to convert.
+ * \param value: [uint16_t] The 16-bit unsigned integer to convert.
  */
 QSC_EXPORT_API void qsc_arrayutils_uint16_to_hex(char* output, size_t otplen, uint16_t value);
 
@@ -167,7 +167,7 @@ QSC_EXPORT_API void qsc_arrayutils_uint16_to_hex(char* output, size_t otplen, ui
  *
  * \param output: [char*] Pointer to the output character array.
  * \param otplen: [size_t] The length of the output buffer in bytes.
- * \param value:  [uint32_t] The 32-bit unsigned integer to convert.
+ * \param value: [uint32_t] The 32-bit unsigned integer to convert.
  */
 QSC_EXPORT_API void qsc_arrayutils_uint32_to_hex(char* output, size_t otplen, uint32_t value);
 
@@ -179,7 +179,7 @@ QSC_EXPORT_API void qsc_arrayutils_uint32_to_hex(char* output, size_t otplen, ui
  *
  * \param output: [char*] Pointer to the output character array.
  * \param otplen: [size_t] The length of the output buffer in bytes.
- * \param value:  [uint64_t] The 64-bit unsigned integer to convert.
+ * \param value: [uint64_t] The 64-bit unsigned integer to convert.
  */
 QSC_EXPORT_API void qsc_arrayutils_uint64_to_hex(char* output, size_t otplen, uint64_t value);
 
@@ -188,7 +188,7 @@ QSC_EXPORT_API void qsc_arrayutils_uint64_to_hex(char* output, size_t otplen, ui
  *
  * Reads the input string and converts it to a \c uint8_t value.
  *
- * \param str:  [const char*] Pointer to the constant character string containing the number.
+ * \param str: [const char*] Pointer to the constant character string containing the number.
  * \param slen:	[size_t] The length of the string in bytes (excluding the null terminator).
  *
  * \return [uint8_t] The parsed 8-bit unsigned integer, or zero if parsing fails.
@@ -200,7 +200,7 @@ QSC_EXPORT_API uint8_t qsc_arrayutils_string_to_uint8(const char* str, size_t sl
  *
  * Reads the input string and converts it to a \c uint16_t value.
  *
- * \param str:  [const char*] Pointer to the constant character string containing the number.
+ * \param str: [const char*] Pointer to the constant character string containing the number.
  * \param slen:	[size_t] The length of the string in bytes (excluding the null terminator).
  *
  * \return [uint16_t] The parsed 16-bit unsigned integer, or zero if parsing fails.
@@ -212,7 +212,7 @@ QSC_EXPORT_API uint16_t qsc_arrayutils_string_to_uint16(const char* str, size_t 
  *
  * Reads the input string and converts it to a \c uint32_t value.
  *
- * \param str:  [const char*] Pointer to the constant character string containing the number.
+ * \param str: [const char*] Pointer to the constant character string containing the number.
  * \param slen:	[size_t] The length of the string in bytes (excluding the null terminator).
  *
  * \return [uint32_t] The parsed 32-bit unsigned integer, or zero if parsing fails.
@@ -224,7 +224,7 @@ QSC_EXPORT_API uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t 
  *
  * Reads the input string and converts it to a \c uint64_t value.
  *
- * \param str:  [const char*] Pointer to the constant character string containing the number.
+ * \param str: [const char*] Pointer to the constant character string containing the number.
  * \param slen:	[size_t] The length of the string in bytes (excluding the null terminator).
  *
  * \return [uint64_t] The parsed 64-bit unsigned integer, or zero if parsing fails.

@@ -111,25 +111,25 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 #if defined(QSC_ECDH_S1P256)
- /*!
- * \def QSC_ECDH_PUBLICKEY_SIZE
- * \brief The ECDH public-key size in bytes.
- */
+    /*!
+    * \def QSC_ECDH_PUBLICKEY_SIZE
+    * \brief The ECDH public-key size in bytes.
+    */
 #   define QSC_ECDH_PUBLICKEY_SIZE 64U
 
- /*!
-  * \def QSC_ECDH_PRIVATEKEY_SIZE
-  * \brief The ECDH private-key size in bytes.
-  */
+    /*!
+    * \def QSC_ECDH_PRIVATEKEY_SIZE
+    * \brief The ECDH private-key size in bytes.
+    */
 #   define QSC_ECDH_PRIVATEKEY_SIZE 32U
 
-  /*!
-   * \def QSC_ECDH_SECRET_SIZE
-   * \brief The ECDH shared-secret size in bytes.
-   */
+    /*!
+    * \def QSC_ECDH_SECRET_SIZE
+    * \brief The ECDH shared-secret size in bytes.
+    */
 #   define QSC_ECDH_SHAREDSECRET_SIZE 32U
 
-   /*!
+    /*!
     * \def QSC_ECDH_SEED_SIZE
     * \brief The byte size of the seed array.
     */
@@ -139,7 +139,7 @@ QSC_CPLUSPLUS_ENABLED_START
      * \def QSC_ECDH_ALGNAME
      * \brief The formal algorithm name.
      */
-#   define QSC_ECDH_ALGNAME "ECDHP256"
+#   define QSC_ECDH_ALGNAME "ECDH-P256"
 
 #elif defined(QSC_ECDH_S3P384)
 
@@ -171,7 +171,7 @@ QSC_CPLUSPLUS_ENABLED_START
     * \def QSC_ECDH_ALGNAME
     * \brief The formal algorithm name.
     */
-#   define QSC_ECDH_ALGNAME "ECDHP384"
+#   define QSC_ECDH_ALGNAME "ECDH-P384"
 
 #elif defined(QSC_ECDH_S5P521)
 
@@ -203,7 +203,7 @@ QSC_CPLUSPLUS_ENABLED_START
     * \def QSC_ECDH_ALGNAME
     * \brief The formal algorithm name.
     */
-#   define QSC_ECDH_ALGNAME "ECDHP521"
+#   define QSC_ECDH_ALGNAME "ECDH-P521"
 
 #else
 #   error "No ECDH parameter set defined. Define QSC_ECDH_S1EC25519 or QSC_ECDH_S3EC448."
@@ -221,8 +221,8 @@ QSC_CPLUSPLUS_ENABLED_START
   * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and
   * QSC_ECDH_PRIVATEKEY_SIZE.
   *
-  * \param publickey:  [uint8_t*] Pointer to the output public-key array.
-  * \param privatekey:[const uint8_t*] Pointer to the input private-key array.
+  * \param publickey: [uint8_t*] Pointer to the output public-key array.
+  * \param privatekey: [const uint8_t*] Pointer to the input private-key array.
   */
 QSC_EXPORT_API void qsc_ecdh_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
 
@@ -231,10 +231,11 @@ QSC_EXPORT_API void qsc_ecdh_public_from_private(uint8_t* publickey, const uint8
  *
  * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_PRIVATEKEY_SIZE.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public-key array.
- * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to the random generator function.
- * \return				[bool] Returns true on success.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -243,10 +244,11 @@ QSC_EXPORT_API bool qsc_ecdh_generate_keypair(uint8_t* publickey, uint8_t* priva
  *
  * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_PRIVATEKEY_SIZE.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public-key array.
- * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
- * \param seed:			[const uint8_t*] Pointer to the random seed.
- * \return				[bool] Returns true on success.
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
+ * \param seed: [const uint8_t*] Pointer to the random seed.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -255,10 +257,11 @@ QSC_EXPORT_API bool qsc_ecdh_generate_seeded_keypair(uint8_t* publickey, uint8_t
  *
  * \warning The shared secret array must be sized to QSC_ECDH_SHAREDSECRET_SIZE.
  *
- * \param secret:		[uint8_t*] Pointer to the shared secret key array.
- * \param privatekey:	[const uint8_t*] Pointer to the private-key array.
- * \param publickey:	[const uint8_t*] Pointer to the public-key array.
- * \return				[bool] Returns true on success.
+ * \param secret: [uint8_t*] Pointer to the shared secret key array.
+ * \param privatekey: [const uint8_t*] Pointer to the private-key array.
+ * \param publickey: [const uint8_t*] Pointer to the public-key array.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_ecdh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey);
 

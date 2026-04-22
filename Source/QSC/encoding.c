@@ -87,7 +87,6 @@ static const char QSC_BASE64_ENCODE_TABLE[65U] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcd
  * have a maximum practical depth of about 12 levels. */
 #define QSC_ENCODING_BER_MAX_DECODE_DEPTH 32U
 
-
 static qsc_encoding_ber_element* encoding_ber_alloc_element(void)
 {
     qsc_encoding_ber_element* elem;
@@ -352,6 +351,35 @@ bool qsc_encoding_base64_is_valid_char(char value)
     return res;
 }
 
+size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
+{
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(length != 0U);
+
+    size_t res;
+
+    res = 0U;
+
+    if (input != NULL && length != 0U && (length % 4U == 0U))
+    {
+        size_t pad = 0U;
+
+        if (input[length - 1U] == '=')
+        {
+            pad++;
+        }
+
+        if (input[length - 2U] == '=')
+        {
+            pad++;
+        }
+
+        res = (length / 4U) * 3U - pad;
+    }
+
+    return res;
+}
+
 size_t qsc_encoding_base64_encoded_size(size_t length)
 {
     QSC_ASSERT(length != 0U);
@@ -375,39 +403,6 @@ size_t qsc_encoding_base64_encoded_size(size_t length)
     return ret;
 }
 
-size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
-{
-    QSC_ASSERT(input != NULL);
-    QSC_ASSERT(length != 0U);
-
-    size_t res;
-
-    res = 0U;
-
-    if (input != NULL && length != 0U && (length % 4U == 0U))
-    {
-        res = (length / 4U) * 3U;
-
-        /* walk backward from the end to count padding characters. */
-        for (size_t i = length - 1U; i > 0U; --i)
-        {
-            if (input[i] == '=')
-            {
-                --res;
-
-                if (input[i - 1U] == '=')
-                {
-                    --res;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return res;
-}
-
 bool qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* input, size_t inplen)
 {
     QSC_ASSERT(output != NULL);
@@ -427,7 +422,7 @@ bool qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* inpu
     {
         enclen = qsc_encoding_base64_encoded_size(inplen);
 
-        if (enclen > 0U && (enclen + 1U) <= otplen)
+        if (enclen > 0U && enclen <= otplen)
         {
             for (i = 0U, j = 0U; i < inplen; i += 3U, j += 4U)
             {
@@ -441,7 +436,6 @@ bool qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* inpu
                 output[j + 3U] = (i + 2U < inplen) ? QSC_BASE64_ENCODE_TABLE[v & 0x3FU] : '=';
             }
 
-            output[enclen] = '\0';
             res = true;
         }
     }
@@ -878,8 +872,7 @@ void qsc_encoding_ber_free_element(qsc_encoding_ber_element* element)
     }
 }
 
-static qsc_encoding_ber_element* encoding_ber_decode_element_depth(
-    const uint8_t* buffer, size_t buflen, size_t* consumed, uint32_t depth)
+static qsc_encoding_ber_element* encoding_ber_decode_element_depth(const uint8_t* buffer, size_t buflen, size_t* consumed, uint32_t depth)
 {
     if (depth > QSC_ENCODING_BER_MAX_DECODE_DEPTH)
     {
@@ -1240,8 +1233,7 @@ size_t qsc_encoding_ber_encode_element(qsc_encoding_ber_element* element, uint8_
     return ret;
 }
 
-qsc_encoding_ber_element* qsc_encoding_ber_decode_element(
-    const uint8_t* buffer, size_t buflen, size_t* consumed)
+qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
     QSC_ASSERT(buffer != NULL);
     QSC_ASSERT(buflen != 0U);
@@ -1256,7 +1248,6 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(
 
     return encoding_ber_decode_element_depth(buffer, buflen, consumed, 0U);
 }
-
 
 static size_t encoding_der_tag_field_length(const uint8_t* buffer, size_t buflen)
 {
@@ -1313,6 +1304,7 @@ static bool encoding_der_has_minimal_length_encoding(const uint8_t* buffer, size
 
     return res;
 }
+
 qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
     QSC_ASSERT(buffer != NULL);

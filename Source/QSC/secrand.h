@@ -102,165 +102,177 @@ QSC_EXPORT_API typedef struct
 /**
  * \brief Generate a signed 8-bit random integer.
  *
- * \return          [int8_t] Returns a signed 8-bit random integer.
+ * \return [int8_t] Returns a signed 8-bit random integer.
  */
 QSC_EXPORT_API int8_t qsc_secrand_next_char(void);
 
 /**
  * \brief Generate an unsigned 8-bit random integer.
  *
- * \return          [uint8_t] Returns an unsigned 8-bit random integer.
+ * \return [uint8_t] Returns an unsigned 8-bit random integer.
  */
 QSC_EXPORT_API uint8_t qsc_secrand_next_uchar(void);
 
 /**
  * \brief Generate a random double-precision floating-point number.
  *
- * \return          [double] Returns a random double value.
+ * \return [double] Returns a random double value.
  */
 QSC_EXPORT_API double qsc_secrand_next_double(void);
 
 /**
  * \brief Generate a signed 16-bit random integer.
  *
- * \return          [int16_t] Returns a signed 16-bit random integer.
+ * \return [int16_t] Returns a signed 16-bit random integer.
  */
 QSC_EXPORT_API int16_t qsc_secrand_next_int16(void);
 
 /**
  * \brief Generate a signed 16-bit random integer of a maximum value.
  *
- * \param maximum:  [int16_t] The maximum value of the integer.
- * \return          [int16_t] Returns a signed 16-bit random integer in the range [-maximum, maximum].
+ * \param maximum: [int16_t] The maximum value of the integer.
+ * \return [int16_t] Returns a signed 16-bit random integer in the range [-maximum, maximum].
+ * 
  */
 QSC_EXPORT_API int16_t qsc_secrand_next_int16_max(int16_t maximum);
 
 /**
  * \brief Generate a signed 16-bit random integer of a maximum and minimum value.
  *
- * \param maximum:  [int16_t] The maximum value of the integer.
- * \param minimum:  [int16_t] The minimum value of the integer.
- * \return          [int16_t] Returns a signed 16-bit random integer in the range [minimum, maximum].
+ * \param maximum: [int16_t] The maximum value of the integer.
+ * \param minimum: [int16_t] The minimum value of the integer.
+ * 
+ * \return [int16_t] Returns a signed 16-bit random integer in the range [minimum, maximum].
  */
 QSC_EXPORT_API int16_t qsc_secrand_next_int16_maxmin(int16_t maximum, int16_t minimum);
 
 /**
  * \brief Generate an unsigned 16-bit random integer.
  *
- * \return          [uint16_t] Returns an unsigned 16-bit random integer.
+ * \return [uint16_t] Returns an unsigned 16-bit random integer.
  */
 QSC_EXPORT_API uint16_t qsc_secrand_next_uint16(void);
 
 /**
  * \brief Generate an unsigned 16-bit random integer of a maximum value.
  *
- * \param maximum:  [uint16_t] The maximum value of the integer.
- * \return          [uint16_t] Returns an unsigned 16-bit random integer in the range [0, maximum].
+ * \param maximum: [uint16_t] The maximum value of the integer.
+ * 
+ * \return [uint16_t] Returns an unsigned 16-bit random integer in the range [0, maximum].
  */
 QSC_EXPORT_API uint16_t qsc_secrand_next_uint16_max(uint16_t maximum);
 
 /**
  * \brief Generate an unsigned 16-bit random integer of a maximum and minimum value.
  *
- * \param maximum:  [uint16_t] The maximum value of the integer.
- * \param minimum:  [uint16_t] The minimum value of the integer.
- * \return          [uint16_t] Returns an unsigned 16-bit random integer in the range [minimum, maximum].
+ * \param maximum: [uint16_t] The maximum value of the integer.
+ * \param minimum: [uint16_t] The minimum value of the integer.
+ * 
+ * \return [uint16_t] Returns an unsigned 16-bit random integer in the range [minimum, maximum].
  */
 QSC_EXPORT_API uint16_t qsc_secrand_next_uint16_maxmin(uint16_t maximum, uint16_t minimum);
 
 /**
  * \brief Generate a signed 32-bit random integer.
  *
- * \return          [int32_t] Returns a signed 32-bit random integer.
+ * \return [int32_t] Returns a signed 32-bit random integer.
  */
 QSC_EXPORT_API int32_t qsc_secrand_next_int32(void);
 
 /**
  * \brief Generate a signed 32-bit random integer of a maximum value.
  *
- * \param maximum:  [int32_t] The maximum value of the integer.
- * \return          [int32_t] Returns a signed 32-bit random integer in the range [-minimum, maximum].
+ * \param maximum: [int32_t] The maximum value of the integer.
+ * 
+ * \return [int32_t] Returns a signed 32-bit random integer in the range [-minimum, maximum].
  */
 QSC_EXPORT_API int32_t qsc_secrand_next_int32_max(int32_t maximum);
 
 /**
  * \brief Generate a signed 32-bit random integer of a maximum and minimum value.
  *
- * \param maximum:  [int32_t] The maximum value of the integer.
- * \param minimum:  [int32_t] The minimum value of the integer.
- * \return          [int32_t] Returns a signed 32-bit random integer in the range [minimum, maximum].
+ * \param maximum: [int32_t] The maximum value of the integer.
+ * \param minimum: [int32_t] The minimum value of the integer.
+ * 
+ * \return [int32_t] Returns a signed 32-bit random integer in the range [minimum, maximum].
  */
 QSC_EXPORT_API int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum);
 
 /**
  * \brief Generate an unsigned 32-bit random integer.
  *
- * \return          [uint32_t] Returns an unsigned 32-bit random integer.
+ * \return [uint32_t] Returns an unsigned 32-bit random integer.
  */
 QSC_EXPORT_API uint32_t qsc_secrand_next_uint32(void);
 
 /**
  * \brief Generate an unsigned 32-bit random integer of a maximum value.
  *
- * \param maximum:  [uint32_t] The maximum value of the integer.
- * \return          [uint32_t] Returns an unsigned 32-bit random integer in the range [0, maximum].
+ * \param maximum: [uint32_t] The maximum value of the integer.
+ * 
+ * \return [uint32_t] Returns an unsigned 32-bit random integer in the range [0, maximum].
  */
 QSC_EXPORT_API uint32_t qsc_secrand_next_uint32_max(uint32_t maximum);
 
 /**
  * \brief Generate an unsigned 32-bit random integer of a maximum and minimum value.
  *
- * \param maximum:  [uint32_t] The maximum value of the integer.
- * \param minimum:  [uint32_t] The minimum value of the integer.
- * \return          [uint32_t] Returns an unsigned 32-bit random integer in the range [minimum, maximum].
+ * \param maximum: [uint32_t] The maximum value of the integer.
+ * \param minimum: [uint32_t] The minimum value of the integer.
+ * 
+ * \return [uint32_t] Returns an unsigned 32-bit random integer in the range [minimum, maximum].
  */
 QSC_EXPORT_API uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum);
 
 /**
  * \brief Generate a signed 64-bit random integer.
  *
- * \return          [int64_t] Returns a signed 64-bit random integer.
+ * \return [int64_t] Returns a signed 64-bit random integer.
  */
 QSC_EXPORT_API int64_t qsc_secrand_next_int64(void);
 
 /**
  * \brief Generate a signed 64-bit random integer of a maximum value.
  *
- * \param maximum:  [int64_t] The maximum value of the integer.
- * \return          [int64_t] Returns a signed 64-bit random integer in the range [-minimum, maximum].
+ * \param maximum: [int64_t] The maximum value of the integer.
+ * 
+ * \return [int64_t] Returns a signed 64-bit random integer in the range [-minimum, maximum].
  */
 QSC_EXPORT_API int64_t qsc_secrand_next_int64_max(int64_t maximum);
 
 /**
  * \brief Generate a signed 64-bit random integer of a maximum and minimum value.
  *
- * \param maximum:  [int64_t] The maximum value of the integer.
- * \param minimum:  [int64_t] The minimum value of the integer.
- * \return          [int64_t] Returns a signed 64-bit random integer in the range [minimum, maximum].
+ * \param maximum: [int64_t] The maximum value of the integer.
+ * \param minimum: [int64_t] The minimum value of the integer.
+ * 
+ * \return [int64_t] Returns a signed 64-bit random integer in the range [minimum, maximum].
  */
 QSC_EXPORT_API int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum);
 
 /**
  * \brief Generate an unsigned 64-bit random integer.
  *
- * \return          [uint64_t] Returns an unsigned 64-bit random integer.
+ * \return [uint64_t] Returns an unsigned 64-bit random integer.
  */
 QSC_EXPORT_API uint64_t qsc_secrand_next_uint64(void);
 
 /**
  * \brief Generate an unsigned 64-bit random integer of a maximum value.
  *
- * \param maximum:  [uint64_t] The maximum value of the integer.
- * \return          [uint64_t] Returns an unsigned 64-bit random integer in the range [0, maximum].
+ * \param maximum: [uint64_t] The maximum value of the integer.
+ * 
+ * \return [uint64_t] Returns an unsigned 64-bit random integer in the range [0, maximum].
  */
 QSC_EXPORT_API uint64_t qsc_secrand_next_uint64_max(uint64_t maximum);
 
 /**
  * \brief Generate an unsigned 64-bit random integer of a maximum and minimum value.
  *
- * \param maximum:  [uint64_t] The maximum value of the integer.
- * \param minimum:  [uint64_t] The minimum value of the integer.
- * \return          [uint64_t] Returns an unsigned 64-bit random integer in the range [minimum, maximum].
+ * \param maximum: [uint64_t] The maximum value of the integer.
+ * \param minimum: [uint64_t] The minimum value of the integer.
+ * 
+ * \return [uint64_t] Returns an unsigned 64-bit random integer in the range [minimum, maximum].
  */
 QSC_EXPORT_API uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum);
 
@@ -272,19 +284,20 @@ QSC_EXPORT_API void qsc_secrand_dispose(void);
 /**
  * \brief Initialize the random generator with a seed and optional customization array.
  *
- * \param seed:     [const uint8_t*] The primary seed; must be 32 or 64 bytes in length.
- * \param seedlen:  [size_t]           The byte length of the seed.
- * \param custom:   [const uint8_t*]   The optional customization parameter (can be NULL).
- * \param custlen:  [size_t]           The length of the customization array.
+ * \param seed: [const uint8_t*] The primary seed; must be 32 or 64 bytes in length.
+ * \param seedlen: [size_t]           The byte length of the seed.
+ * \param custom: [const uint8_t*]   The optional customization parameter (can be NULL).
+ * \param custlen: [size_t]           The length of the customization array.
  */
 QSC_EXPORT_API void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* custom, size_t custlen);
 
 /**
  * \brief Generate an array of pseudo-random bytes.
  *
- * \param output:   [uint8_t*] The destination array.
- * \param length:   [size_t]   The number of bytes to generate.
- * \return          [bool] Returns true if the operation succeeded.
+ * \param output: [uint8_t*] The destination array.
+ * \param length: [size_t]   The number of bytes to generate.
+ * 
+ * \return [bool] Returns true if the operation succeeded.
  */
 QSC_EXPORT_API bool qsc_secrand_generate(uint8_t* output, size_t length);
 

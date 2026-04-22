@@ -139,9 +139,9 @@ typedef struct
  *
  * Adds a new item to the collection and associates it with the specified key.
  *
- * \param ctx:      [qsc_collection_state*] Pointer to the collection state.
- * \param item:     [const uint8_t*] Pointer to the item data to be added.
- * \param key:      [const uint8_t*] Pointer to the key that uniquely identifies the item.
+ * \param ctx: [qsc_collection_state*] Pointer to the collection state.
+ * \param item: [const uint8_t*] Pointer to the item data to be added.
+ * \param key: [const uint8_t*] Pointer to the key that uniquely identifies the item.
  */
 QSC_EXPORT_API void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const uint8_t* key);
 
@@ -150,8 +150,8 @@ QSC_EXPORT_API void qsc_collection_add(qsc_collection_state* ctx, const uint8_t*
  *
  * Converts a serialized byte array into a collection state.
  *
- * \param ctx:      [qsc_collection_state*] Pointer to the collection state that will be populated.
- * \param input:    [const uint8_t*] Pointer to the serialized collection data.
+ * \param ctx: [qsc_collection_state*] Pointer to the collection state that will be populated.
+ * \param input: [const uint8_t*] Pointer to the serialized collection data.
  */
 QSC_EXPORT_API void qsc_collection_deserialize(qsc_collection_state* ctx, const uint8_t* input);
 
@@ -160,7 +160,7 @@ QSC_EXPORT_API void qsc_collection_deserialize(qsc_collection_state* ctx, const 
  *
  * Frees any allocated memory and clears the collection state.
  *
- * \param ctx:      [qsc_collection_state*] Pointer to the collection state to dispose.
+ * \param ctx: [qsc_collection_state*] Pointer to the collection state to dispose.
  */
 QSC_EXPORT_API void qsc_collection_dispose(qsc_collection_state* ctx);
 
@@ -169,7 +169,7 @@ QSC_EXPORT_API void qsc_collection_dispose(qsc_collection_state* ctx);
  *
  * Removes all items from the collection without deallocating the underlying storage.
  *
- * \param ctx:      [qsc_collection_state*] Pointer to the collection state to erase.
+ * \param ctx: [qsc_collection_state*] Pointer to the collection state to erase.
  */
 QSC_EXPORT_API void qsc_collection_erase(qsc_collection_state* ctx);
 
@@ -178,10 +178,10 @@ QSC_EXPORT_API void qsc_collection_erase(qsc_collection_state* ctx);
  *
  * Determines whether an item with the specified key exists in the collection.
  *
- * \param ctx:      [const qsc_collection_state*] Pointer to the collection state.
- * \param key:      [const uint8_t*] Pointer to the key of the item to check.
+ * \param ctx: [const qsc_collection_state*] Pointer to the collection state.
+ * \param key: [const uint8_t*] Pointer to the key of the item to check.
  *
- * \return          [bool] Returns true if the item exists; otherwise, false.
+ * \return [bool] Returns true if the item exists; otherwise, false.
  */
 QSC_EXPORT_API bool qsc_collection_item_exists(const qsc_collection_state* ctx, const uint8_t* key);
 
@@ -190,11 +190,11 @@ QSC_EXPORT_API bool qsc_collection_item_exists(const qsc_collection_state* ctx, 
  *
  * Searches for an item by its key and copies it into the provided output buffer.
  *
- * \param ctx:      [const qsc_collection_state*] Pointer to the collection state.
- * \param item:     [uint8_t*] Pointer to the destination array that will receive the item data.
- * \param key:      [const uint8_t*] Pointer to the key of the item to find.
+ * \param ctx: [const qsc_collection_state*] Pointer to the collection state.
+ * \param item: [uint8_t*] Pointer to the destination array that will receive the item data.
+ * \param key: [const uint8_t*] Pointer to the key of the item to find.
  *
- * \return          [bool] Returns true if the item was found; otherwise, false.
+ * \return [bool] Returns true if the item was found; otherwise, false.
  */
 QSC_EXPORT_API bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t* item, const uint8_t* key);
 
@@ -203,8 +203,8 @@ QSC_EXPORT_API bool qsc_collection_find(const qsc_collection_state* ctx, uint8_t
  *
  * Sets up the collection state for use by specifying the byte size of each item.
  *
- * \param ctx:      [qsc_collection_state*] Pointer to the collection state to initialize.
- * \param width:    [uint32_t] The fixed byte size of each item in the collection.
+ * \param ctx: [qsc_collection_state*] Pointer to the collection state to initialize.
+ * \param width: [uint32_t] The fixed byte size of each item in the collection.
  */
 QSC_EXPORT_API void qsc_collection_initialize(qsc_collection_state* ctx, uint32_t width);
 
@@ -213,9 +213,9 @@ QSC_EXPORT_API void qsc_collection_initialize(qsc_collection_state* ctx, uint32_
  *
  * Copies the item at the specified index into the provided output buffer.
  *
- * \param ctx:      [qsc_collection_state*] Pointer to the collection state.
- * \param item:     [uint8_t*] Pointer to the array that will receive the item data.
- * \param index:    [size_t] The zero-based index of the item to retrieve.
+ * \param ctx: [qsc_collection_state*] Pointer to the collection state.
+ * \param item: [uint8_t*] Pointer to the array that will receive the item data.
+ * \param index: [size_t] The zero-based index of the item to retrieve.
  */
 QSC_EXPORT_API void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item, size_t index);
 
@@ -224,8 +224,8 @@ QSC_EXPORT_API void qsc_collection_item(qsc_collection_state* ctx, uint8_t* item
  *
  * Removes the item associated with the specified key from the collection.
  *
- * \param ctx:      [qsc_collection_state*]  Pointer to the collection state.
- * \param key:      [const uint8_t*] Pointer to the key of the item to remove.
+ * \param ctx: [qsc_collection_state*]  Pointer to the collection state.
+ * \param key: [const uint8_t*] Pointer to the key of the item to remove.
  */
 QSC_EXPORT_API void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key);
 
@@ -234,10 +234,10 @@ QSC_EXPORT_API void qsc_collection_remove(qsc_collection_state* ctx, const uint8
  *
  * Converts the entire collection into a contiguous byte array for storage or transmission.
  *
- * \param output:   [uint8_t*]  Pointer to the output buffer that will receive the serialized data.
- * \param ctx:      [const qsc_collection_state*] Pointer to the collection state.
+ * \param output: [uint8_t*]  Pointer to the output buffer that will receive the serialized data.
+ * \param ctx: [const qsc_collection_state*] Pointer to the collection state.
  *
- * \return          [size_t] Returns the size in bytes of the serialized collection.
+ * \return [size_t] Returns the size in bytes of the serialized collection.
  */
 QSC_EXPORT_API size_t qsc_collection_serialize(uint8_t* output, const qsc_collection_state* ctx);
 
@@ -246,9 +246,9 @@ QSC_EXPORT_API size_t qsc_collection_serialize(uint8_t* output, const qsc_collec
  *
  * Calculates the total size in bytes that the serialized collection will occupy.
  *
- * \param ctx:      [const qsc_collection_state*] Pointer to the collection state.
+ * \param ctx: [const qsc_collection_state*] Pointer to the collection state.
  *
- * \return          [size_t] Returns the byte size of the serialized collection.
+ * \return [size_t] Returns the byte size of the serialized collection.
  */
 QSC_EXPORT_API size_t qsc_collection_size(const qsc_collection_state* ctx);
 
@@ -258,7 +258,7 @@ QSC_EXPORT_API size_t qsc_collection_size(const qsc_collection_state* ctx);
  *
  * Executes a series of tests to verify the correct operation of the collection API.
  *
- * \return          [bool] Returns true if all tests pass; otherwise, false.
+ * \return [bool] Returns true if all tests pass; otherwise, false.
  */
 QSC_EXPORT_API bool qsc_collection_test(void);
 #endif

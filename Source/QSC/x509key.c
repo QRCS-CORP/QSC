@@ -1,5 +1,6 @@
 #include "x509key.h"
 #include "asn1.h"
+#include "eddsa.h"
 #include "encoding.h"
 #include "memutils.h"
 #include "x509keywrite.h"
@@ -301,7 +302,76 @@ static qsc_asn1_status x509_decode_ec_private_key_element(const qsc_encoding_ber
     return status;
 }
 
-static qsc_asn1_status x509_private_key_decode_pkcs8_root_ex(const qsc_encoding_ber_element* root, qsc_x509_algorithm_identifier* algorithm, uint8_t* privatekey, 
+static qsc_asn1_status x509_decode_pkcs8_eddsa_seed_octets(const uint8_t* octets, size_t octetlen, uint8_t* privatekey, size_t privatekeycapacity, size_t* privatekeylen)
+{
+    qsc_encoding_ber_element* inner;
+    size_t consumed;
+    size_t seedlen;
+    qsc_asn1_status status;
+
+    status = QSC_ASN1_STATUS_FAILURE;
+    inner = (qsc_encoding_ber_element*)NULL;
+    consumed = 0U;
+    seedlen = 0U;
+
+    if ((octets == (const uint8_t*)NULL) || (privatekey == (uint8_t*)NULL) || (privatekeylen == (size_t*)NULL))
+    {
+        return QSC_ASN1_STATUS_INVALID_INPUT;
+    }
+
+    *privatekeylen = 0U;
+
+    /*
+     * RFC 8410 PKCS#8 stores CurvePrivateKey inside the outer PrivateKey OCTET STRING.
+     * For Ed25519 this is normally:
+     *   privateKey OCTET STRING -> inner OCTET STRING -> 32-byte seed
+     *
+     * Accept the standard wrapped form, and also tolerate a raw 32-byte seed form.
+     */
+    inner = qsc_encoding_der_decode_element(octets, octetlen, &consumed);
+
+    if ((inner != (qsc_encoding_ber_element*)NULL) && (consumed == octetlen))
+    {
+        status = qsc_asn1_decode_octet_string(inner, privatekey, privatekeycapacity, &seedlen);
+
+        if (status == QSC_ASN1_STATUS_SUCCESS)
+        {
+            if (seedlen != QSC_X509_EDDSA_SEED_SIZE)
+            {
+                status = QSC_ASN1_STATUS_INVALID_LENGTH;
+            }
+            else
+            {
+                *privatekeylen = seedlen;
+            }
+        }
+
+        qsc_encoding_ber_free_element(inner);
+        inner = (qsc_encoding_ber_element*)NULL;
+    }
+    else
+    {
+        /* Interop tolerance: some implementations expose the raw seed directly. */
+        if (octetlen != QSC_X509_EDDSA_SEED_SIZE)
+        {
+            status = QSC_ASN1_STATUS_INVALID_LENGTH;
+        }
+        else if (privatekeycapacity < QSC_X509_EDDSA_SEED_SIZE)
+        {
+            status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
+        }
+        else
+        {
+            qsc_memutils_copy(privatekey, octets, QSC_X509_EDDSA_SEED_SIZE);
+            *privatekeylen = QSC_X509_EDDSA_SEED_SIZE;
+            status = QSC_ASN1_STATUS_SUCCESS;
+        }
+    }
+
+    return status;
+}
+
+static qsc_asn1_status x509_private_key_decode_pkcs8_root_ex(const qsc_encoding_ber_element* root, qsc_x509_algorithm_identifier* algorithm, uint8_t* privatekey,
     size_t privatekeycapacity, size_t* privatekeylen, uint8_t* publickey, size_t publickeycapacity, size_t* publickeylen, bool* publickeypresent)
 {
     uint8_t* octets;
@@ -409,6 +479,7 @@ static qsc_asn1_status x509_private_key_decode_pkcs8_root_ex(const qsc_encoding_
                         {
                             qsc_memutils_copy(publickey, tmpkey.publickey, tmpkey.publickeylen);
                             *publickeylen = tmpkey.publickeylen;
+
                             if (publickeypresent != (bool*)NULL)
                             {
                                 *publickeypresent = true;
@@ -419,6 +490,56 @@ static qsc_asn1_status x509_private_key_decode_pkcs8_root_ex(const qsc_encoding_
             }
 
             qsc_memutils_secure_erase((uint8_t*)&tmpkey, sizeof(qsc_x509_private_key));
+        }
+        else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+        {
+            status = x509_decode_pkcs8_eddsa_seed_octets(octets, octetlen, privatekey, privatekeycapacity, privatekeylen);
+
+            for (i = 3U; status == QSC_ASN1_STATUS_SUCCESS && i < qsc_asn1_child_count(root); ++i)
+            {
+                qsc_asn1_bit_string bitstr = { 0 };
+                const qsc_encoding_ber_element* opt = qsc_asn1_get_child(root, i);
+
+                if (opt != (const qsc_encoding_ber_element*)NULL &&
+                    qsc_asn1_element_is_tag(opt, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 1U) == true &&
+                    publickey != (uint8_t*)NULL &&
+                    publickeylen != (size_t*)NULL)
+                {
+                    const qsc_encoding_ber_element* exchild = (const qsc_encoding_ber_element*)NULL;
+                    status = qsc_asn1_get_explicit_child(opt, &exchild);
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        status = qsc_asn1_decode_bit_string(exchild, &bitstr);
+                    }
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        if (bitstr.unused != 0U)
+                        {
+                            status = QSC_ASN1_STATUS_INVALID_ENCODING;
+                        }
+                        else if (bitstr.length != QSC_X509_EDDSA_PUBLIC_KEY_SIZE)
+                        {
+                            status = QSC_ASN1_STATUS_INVALID_LENGTH;
+                        }
+                        else if (publickeycapacity < bitstr.length)
+                        {
+                            status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
+                        }
+                        else
+                        {
+                            qsc_memutils_copy(publickey, bitstr.data, bitstr.length);
+                            *publickeylen = bitstr.length;
+
+                            if (publickeypresent != (bool*)NULL)
+                            {
+                                *publickeypresent = true;
+                            }
+                        }
+                    }
+                }
+            }
         }
         else
         {
@@ -462,6 +583,7 @@ static qsc_asn1_status x509_private_key_decode_pkcs8_root_ex(const qsc_encoding_
                         {
                             qsc_memutils_copy(publickey, bitstr.data, bitstr.length);
                             *publickeylen = bitstr.length;
+
                             if (publickeypresent != (bool*)NULL)
                             {
                                 *publickeypresent = true;
@@ -661,6 +783,11 @@ size_t qsc_x509_private_key_expected_private_size(const qsc_x509_algorithm_ident
     {
         klen = x509_curve_scalar_size(algorithm->curve);
     }
+    else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+    {
+        /* RFC 8410 PKCS#8 carries the 32-byte private seed. */
+        klen = QSC_X509_EDDSA_SEED_SIZE;
+    }
     else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA)
     {
         switch (algorithm->pqcparameter)
@@ -714,6 +841,10 @@ size_t qsc_x509_private_key_expected_public_size(const qsc_x509_algorithm_identi
     else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_EC)
     {
         klen = x509_curve_public_key_size(algorithm->curve);
+    }
+    else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+    {
+        klen = QSC_X509_EDDSA_PUBLIC_KEY_SIZE;
     }
     else
     {
@@ -1001,6 +1132,8 @@ bool qsc_x509_certificate_key_match(const qsc_x509_certificate* certificate, con
     uint8_t certx[X509_CERTIFICATE_KEY_MATCH] = { 0U };
     uint8_t certy[X509_CERTIFICATE_KEY_MATCH] = { 0U };
     uint8_t derived[QSC_X509_PRIVATE_KEY_PUBLIC_MAX] = { 0U };
+    uint8_t edpub[QSC_X509_EDDSA_PUBLIC_KEY_SIZE] = { 0U };
+    uint8_t edpriv[QSC_EDDSA_PRIVATEKEY_SIZE] = { 0U };
     const qsc_x509_subject_public_key_info* spki;
     size_t expectedpub;
     size_t flen;
@@ -1031,11 +1164,46 @@ bool qsc_x509_certificate_key_match(const qsc_x509_certificate* certificate, con
                 res = true;
             }
         }
+        else if ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) &&
+            (key->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) &&
+            (spki->algorithm.parameters_present == false) &&
+            (key->algorithm.parameters_present == false) &&
+            (spki->publickeylen == QSC_X509_EDDSA_PUBLIC_KEY_SIZE))
+        {
+            if ((key->publickey_present == true) && (key->publickeylen == QSC_X509_EDDSA_PUBLIC_KEY_SIZE))
+            {
+                if (qsc_memutils_are_equal(spki->publickey, key->publickey, QSC_X509_EDDSA_PUBLIC_KEY_SIZE) == true)
+                {
+                    res = true;
+                }
+            }
+            else if (key->privatekeylen == QSC_X509_EDDSA_SEED_SIZE)
+            {
+                qsc_memutils_clear(edpub, sizeof(edpub));
+                qsc_memutils_clear(edpriv, sizeof(edpriv));
+
+                qsc_eddsa_generate_seeded_keypair(edpub, edpriv, key->privatekey);
+
+                if (qsc_memutils_are_equal(spki->publickey, edpub, QSC_X509_EDDSA_PUBLIC_KEY_SIZE) == true)
+                {
+                    res = true;
+                }
+            }
+            else if (key->privatekeylen == QSC_EDDSA_PRIVATEKEY_SIZE)
+            {
+                if (qsc_memutils_are_equal(spki->publickey,
+                    key->privatekey + QSC_X509_EDDSA_SEED_SIZE,
+                    QSC_X509_EDDSA_PUBLIC_KEY_SIZE) == true)
+                {
+                    res = true;
+                }
+            }
+        }
         else if ((spki->algorithm.publickey == key->algorithm.publickey) &&
-                 ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA) ||
-                  (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_KEM)) &&
-                 (spki->algorithm.pqcparameter == key->algorithm.pqcparameter) &&
-                 (key->publickey_present == true))
+            ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA) ||
+                (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_KEM)) &&
+            (spki->algorithm.pqcparameter == key->algorithm.pqcparameter) &&
+            (key->publickey_present == true))
         {
             expectedpub = qsc_x509_private_key_expected_public_size(&key->algorithm);
 
@@ -1048,6 +1216,8 @@ bool qsc_x509_certificate_key_match(const qsc_x509_certificate* certificate, con
     }
 
     qsc_memutils_secure_erase(derived, sizeof(derived));
+    qsc_memutils_secure_erase(edpub, sizeof(edpub));
+    qsc_memutils_secure_erase(edpriv, sizeof(edpriv));
 
     return res;
 }

@@ -256,7 +256,7 @@ QSC_EXPORT_API typedef struct
 {
 	uint64_t state[QSC_KECCAK_STATE_SIZE];		/*!< The SHA3 state  */
 	uint8_t buffer[QSC_KECCAK_STATE_BYTE_SIZE];	/*!< The message buffer  */
-	size_t position;											/*!< The buffer position  */
+	size_t position;							/*!< The buffer position  */
 } qsc_keccak_state;
 
 /*!
@@ -274,40 +274,40 @@ typedef enum
 /**
 * \brief Absorb an input message into the Keccak state
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param message:	[const uint8_t*] The input message byte array
-* \param msglen:	[size_t] The number of message bytes to process
-* \param domain:	[uint8_t] The function domain id
-* \param rounds:	[size_t] The number of permutation rounds, the default is 24, maximum is 48
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param message: [const uint8_t*] The input message byte array
+* \param msglen: [size_t] The number of message bytes to process
+* \param domain: [uint8_t] The function domain id
+* \param rounds: [size_t] The number of permutation rounds, the default is 24, maximum is 48
 */
 QSC_EXPORT_API void qsc_keccak_absorb(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen, uint8_t domain, size_t rounds);
 
 /**
 * \brief Absorb the custom, and name arrays into the Keccak state
 *
-* \param ctx:		[qsc_keccak_state*] The Keccak state structure
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
-* \param name:		[const uint8_t*] The function name string
-* \param namelen:	[size_t] The byte length of the function name
-* \param rounds:	[size_t] The number of permutation rounds, the default is 24, maximum is 48
+* \param ctx: [qsc_keccak_state*] The Keccak state structure
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
+* \param name: [const uint8_t*] The function name string
+* \param namelen: [size_t] The byte length of the function name
+* \param rounds: [size_t] The number of permutation rounds, the default is 24, maximum is 48
 */
 QSC_EXPORT_API void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds);
 
 /**
 * \brief Absorb the custom, name, and key arrays into the Keccak state.
 *
-* \param ctx:		[qsc_keccak_state*] The Keccak state structure
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
-* \param name:		[const uint8_t*] The function name string
-* \param namelen:	[size_t] The byte length of the function name
-* \param rounds:	[size_t] The number of permutation rounds, the default is 24, maximum is 48
+* \param ctx: [qsc_keccak_state*] The Keccak state structure
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
+* \param name: [const uint8_t*] The function name string
+* \param namelen: [size_t] The byte length of the function name
+* \param rounds: [size_t] The number of permutation rounds, the default is 24, maximum is 48
 */
 QSC_EXPORT_API void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen, const uint8_t* name, size_t namelen, size_t rounds);
 
@@ -317,48 +317,48 @@ QSC_EXPORT_API void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_kecc
 * \warning The dispose function must be called when disposing of the function state.
 * This function safely destroys the internal state.
 *
-* \param ctx:		[qsc_keccak_state*] The Keccak state structure
+* \param ctx: [qsc_keccak_state*] The Keccak state structure
 */
 QSC_EXPORT_API void qsc_keccak_dispose(qsc_keccak_state* ctx);
 
 /**
 * \brief Finalize the Keccak state
 *
-* \param ctx:		[qsc_keccak_state*] The Keccak state structure
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
-* \param domain:	[size_t] The function domain id
-* \param rounds:	[size_t] The number of permutation rounds, the default is 24, maximum is 48
+* \param ctx: [qsc_keccak_state*] The Keccak state structure
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
+* \param domain: [size_t] The function domain id
+* \param rounds: [size_t] The number of permutation rounds, the default is 24, maximum is 48
 */
 QSC_EXPORT_API void qsc_keccak_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t outlen, uint8_t domain, size_t rounds);
 
 /**
 * \brief Absorb bytes into state incrementally
 *
-* \param ctx:		[qsc_keccak_state*] The function state
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param message:	[const uint8_t*] The input message array
-* \param msglen:	[size_t] The number of message bytes
+* \param ctx: [qsc_keccak_state*] The function state
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param message: [const uint8_t*] The input message array
+* \param msglen: [size_t] The number of message bytes
 */
 QSC_EXPORT_API void qsc_keccak_incremental_absorb(qsc_keccak_state* ctx, uint32_t rate, const uint8_t* message, size_t msglen);
 
 /**
 * \brief Finalize state added incrementally
 *
-* \param ctx:		[qsc_keccak_state*] The function state
-* \param rate:		[uint32_t] The rate of absorption in bytes
-* \param domain:	[uint8_t] The function domain id
+* \param ctx: [qsc_keccak_state*] The function state
+* \param rate: [uint32_t] The rate of absorption in bytes
+* \param domain: [uint8_t] The function domain id
 */
 QSC_EXPORT_API void qsc_keccak_incremental_finalize(qsc_keccak_state* ctx, uint32_t rate, uint8_t domain);
 
 /**
 * \brief Extract an array of bytes from the Keccak state
 *
-* \param ctx:		[qsc_keccak_state*] The function state
-* \param rate:		[size_t] The rate of absorption in bytes
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
+* \param ctx: [qsc_keccak_state*] The function state
+* \param rate: [size_t] The rate of absorption in bytes
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
 */
 QSC_EXPORT_API void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t rate, uint8_t* output, size_t outlen);
 
@@ -366,8 +366,8 @@ QSC_EXPORT_API void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t
 * \brief The Keccak permute function.
 * Internal function: Permutes the state array, can be used in external constructions.
 *
-* \param ctx:		[qsc_keccak_state*] The function state; must be initialized
-* \param rounds:	[size_t] The number of permutation rounds, the default and maximum is 24
+* \param ctx: [qsc_keccak_state*] The function state; must be initialized
+* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
 */
 QSC_EXPORT_API void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds);
 
@@ -375,8 +375,8 @@ QSC_EXPORT_API void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds);
 * \brief The compact Keccak permute function.
 * Internal function: Permutes the state array, can be used in external constructions.
 *
-* \param state:		[uint64_t*] The state array; must be initialized
-* \param rounds:	[size_t] The number of permutation rounds, the default and maximum is 24
+* \param state: [uint64_t*] The state array; must be initialized
+* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
 */
 QSC_EXPORT_API void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds);
 
@@ -384,7 +384,7 @@ QSC_EXPORT_API void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds);
 * \brief The unrolled Keccak permute function.
 * Internal function: Permutes the state array, can be used in external constructions.
 *
-* \param state:		[uint64_t*] The state array; must be initialized
+* \param state: [uint64_t*] The state array; must be initialized
 */
 QSC_EXPORT_API void qsc_keccak_permute_p1600u(uint64_t* state);
 
@@ -393,11 +393,11 @@ QSC_EXPORT_API void qsc_keccak_permute_p1600u(uint64_t* state);
 *
 * \warning Output array must be initialized to a multiple of the byte rate.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param output:	[uint8_t*] The output byte array
-* \param nblocks:	[size_t] The number of blocks to extract
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param rounds:	[size_t] The number of permutation rounds, the default and maximum is 24
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param output: [uint8_t*] The output byte array
+* \param nblocks: [size_t] The number of blocks to extract
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
 */
 QSC_EXPORT_API void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks, qsc_keccak_rate rate, size_t rounds);
 
@@ -405,7 +405,7 @@ QSC_EXPORT_API void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* out
 * \brief Initializes a Keccak state structure, must be called before message processing.
 * Long form api: must be used in conjunction with the block-update and finalize functions.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
 */
 QSC_EXPORT_API void qsc_keccak_initialize_state(qsc_keccak_state* ctx);
 
@@ -414,11 +414,11 @@ QSC_EXPORT_API void qsc_keccak_initialize_state(qsc_keccak_state* ctx);
 *
 * \warning The state must be initialized before calling
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param message:	[const uint8_t*] The input message byte array
-* \param msglen:	[size_t] The number of message bytes to process
-* \param rounds:	[size_t] The number of permutation rounds, the default and maximum is 24
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param message: [const uint8_t*] The input message byte array
+* \param msglen: [size_t] The number of message bytes to process
+* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
 */
 QSC_EXPORT_API void qsc_keccak_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen, size_t rounds);
 
@@ -430,9 +430,9 @@ QSC_EXPORT_API void qsc_keccak_update(qsc_keccak_state* ctx, qsc_keccak_rate rat
 *
 * \warning The output array must be at least 16 bytes in length.
 *
-* \param output:	[uint8_t*] The output byte array; receives the hash code
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
+* \param output: [uint8_t*] The output byte array; receives the hash code
+* \param message: [const uint8_t*] The message input byte array
+* \param msglen: [size_t] The number of message bytes to process
 */
 QSC_EXPORT_API void qsc_sha3_compute128(uint8_t* output, const uint8_t* message, size_t msglen);
 
@@ -442,9 +442,9 @@ QSC_EXPORT_API void qsc_sha3_compute128(uint8_t* output, const uint8_t* message,
 *
 * \warning The output array must be at least 32 bytes in length.
 *
-* \param output:	[uint8_t*] The output byte array; receives the hash code
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
+* \param output: [uint8_t*] The output byte array; receives the hash code
+* \param message: [const uint8_t*] The message input byte array
+* \param msglen: [size_t] The number of message bytes to process
 */
 QSC_EXPORT_API void qsc_sha3_compute256(uint8_t* output, const uint8_t* message, size_t msglen);
 
@@ -454,9 +454,9 @@ QSC_EXPORT_API void qsc_sha3_compute256(uint8_t* output, const uint8_t* message,
 *
 * \warning The output array must be at least 64 bytes in length.
 *
-* \param output:	[uint8_t*] The output byte array; receives the hash code
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
+* \param output: [uint8_t*] The output byte array; receives the hash code
+* \param message: [const uint8_t*] The message input byte array
+* \param msglen: [size_t] The number of message bytes to process
 */
 QSC_EXPORT_API void qsc_sha3_compute512(uint8_t* output, const uint8_t* message, size_t msglen);
 
@@ -470,9 +470,9 @@ QSC_EXPORT_API void qsc_sha3_compute512(uint8_t* output, const uint8_t* message,
 * Finalizes the message state, can not be used in consecutive calls.
 * The state must be initialized before calling.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param output:	[uint8_t*] The output byte array; receives the hash code
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param output: [uint8_t*] The output byte array; receives the hash code
 */
 QSC_EXPORT_API void qsc_sha3_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output);
 
@@ -480,7 +480,7 @@ QSC_EXPORT_API void qsc_sha3_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rat
 * \brief Initialize the SHA3 state
 * Long form api: Must be called before the update or finalize functions are called.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state
 */
 QSC_EXPORT_API void qsc_sha3_initialize(qsc_keccak_state* ctx);
 
@@ -491,10 +491,10 @@ QSC_EXPORT_API void qsc_sha3_initialize(qsc_keccak_state* ctx);
 *
 * \warning The state must be initialized before calling
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param message:	[const uint8_t*]  The input message byte array
-* \param msglen:	[size_t] The number of message bytes to process
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param message: [const uint8_t*]  The input message byte array
+* \param msglen: [size_t] The number of message bytes to process
 */
 QSC_EXPORT_API void qsc_sha3_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen);
 
@@ -506,10 +506,10 @@ QSC_EXPORT_API void qsc_sha3_update(qsc_keccak_state* ctx, qsc_keccak_rate rate,
 *
 * \warning The output array length must not be zero.
 *
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
 */
 QSC_EXPORT_API void qsc_shake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen);
 
@@ -519,10 +519,10 @@ QSC_EXPORT_API void qsc_shake128_compute(uint8_t* output, size_t outlen, const u
 *
 * \warning The output array length must not be zero.
 *
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
 */
 QSC_EXPORT_API void qsc_shake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen);
 
@@ -532,10 +532,10 @@ QSC_EXPORT_API void qsc_shake256_compute(uint8_t* output, size_t outlen, const u
 *
 * \warning The output array length must not be zero.
 *
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
 */
 QSC_EXPORT_API void qsc_shake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen);
 
@@ -544,10 +544,10 @@ QSC_EXPORT_API void qsc_shake512_compute(uint8_t* output, size_t outlen, const u
 * Long form api: must be used in conjunction with the squeezeblocks function.
 * Absorb and finalize an input key byte array.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
 */
 QSC_EXPORT_API void qsc_shake_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen);
 
@@ -559,10 +559,10 @@ QSC_EXPORT_API void qsc_shake_initialize(qsc_keccak_state* ctx, qsc_keccak_rate 
 * \warning Output array must be initialized to a multiple of the byte rate.
 * The state must be initialized before calling.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param output:	[uint8_t*] The output byte array
-* \param nblocks:	[size_t] The number of blocks to extract
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param output: [uint8_t*] The output byte array
+* \param nblocks: [size_t] The number of blocks to extract
 */
 QSC_EXPORT_API void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t nblocks);
 
@@ -573,14 +573,14 @@ QSC_EXPORT_API void qsc_shake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_ra
 * Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call.
 * Permutes and extracts the state to an output byte array..
 *
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param name:		[const uint8_t*] The function name string
-* \param namelen:	[size_t] The byte length of the function name
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param name: [const uint8_t*] The function name string
+* \param namelen: [size_t] The byte length of the function name
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_cshake128_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
 
@@ -589,14 +589,14 @@ QSC_EXPORT_API void qsc_cshake128_compute(uint8_t* output, size_t outlen, const 
 * Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call.
 * Permutes and extracts the state to an output byte array.
 *
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param name:		[const uint8_t*] The function name string
-* \param namelen:	[size_t] The byte length of the function name
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param name: [const uint8_t*] The function name string
+* \param namelen: [size_t] The byte length of the function name
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_cshake256_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
 
@@ -605,14 +605,14 @@ QSC_EXPORT_API void qsc_cshake256_compute(uint8_t* output, size_t outlen, const 
 * Short form api: processes the key, name, and custom inputs and generates the pseudo-random output with a single call.
 * Permutes and extracts the state to an output byte array.
 *
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of output bytes to generate
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param name:		[const uint8_t*] The function name string
-* \param namelen:	[size_t] The byte length of the function name
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of output bytes to generate
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param name: [const uint8_t*] The function name string
+* \param namelen: [size_t] The byte length of the function name
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_cshake512_compute(uint8_t* output, size_t outlen, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
 
@@ -621,14 +621,14 @@ QSC_EXPORT_API void qsc_cshake512_compute(uint8_t* output, size_t outlen, const 
 * Long form api: must be used in conjunction with the squeezeblocks function.
 * Initialize the name and customization strings into the state.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param name:		[const uint8_t*] The function name string
-* \param namelen:	[size_t] The byte length of the function name
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param name: [const uint8_t*] The function name string
+* \param namelen: [size_t] The byte length of the function name
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_cshake_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* name, size_t namelen, const uint8_t* custom, size_t custlen);
 
@@ -640,10 +640,10 @@ QSC_EXPORT_API void qsc_cshake_initialize(qsc_keccak_state* ctx, qsc_keccak_rate
 * \warning Output array must be initialized to a multiple of the byte rate.
 * The state must be initialized before calling.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param output:	[uint8_t*] The output byte array
-* \param nblocks:	[size_t] The number of blocks to extract
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param output: [uint8_t*] The output byte array
+* \param nblocks: [size_t] The number of blocks to extract
 */
 QSC_EXPORT_API void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t nblocks);
 
@@ -655,10 +655,10 @@ QSC_EXPORT_API void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_r
 * \warning Finalizes the key state, should not be used in consecutive calls.
 * The state must be initialized before calling.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
 */
 QSC_EXPORT_API void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen);
 
@@ -669,14 +669,14 @@ QSC_EXPORT_API void qsc_cshake_update(qsc_keccak_state* ctx, qsc_keccak_rate rat
 * Short form api: processes the key and custom inputs and generates the MAC code with a single call.
 * Key the MAC generator process a message and output the MAC code.
 *
-* \param output:	[uint8_t*] The MAC code byte array
-* \param outlen:	[size_t] The number of MAC code bytes to generate
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param output: [uint8_t*] The MAC code byte array
+* \param outlen: [size_t] The number of MAC code bytes to generate
+* \param message: [const uint8_t*] The message input byte array
+* \param msglen: [size_t] The number of message bytes to process
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac128_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
@@ -685,14 +685,14 @@ QSC_EXPORT_API void qsc_kmac128_compute(uint8_t* output, size_t outlen, const ui
 * Short form api: processes the keyin, x, and s inputs and generates the output key with a single call.
 * Key the XOF generator process a message and output the key.
 *
-* \param kout:		[uint8_t*] The pointer to output key byte array
-* \param koutlen:	[size_t] The number of key bytes to generate
-* \param x:			[const uint8_t*] The context string containing the information related to the derived keying material.
-* \param xlen:		[size_t] The number of context string bytes to process
-* \param kin:		[const uint8_t*] The input key byte array
-* \param kinlen:	[size_t] The number of key bytes to process
-* \param s:			[const uint8_t*] The optional label customization string
-* \param slen:		[size_t] The byte length of the customization string
+* \param kout: [uint8_t*] The pointer to output key byte array
+* \param koutlen: [size_t] The number of key bytes to generate
+* \param x: [const uint8_t*] The context string containing the information related to the derived keying material.
+* \param xlen: [size_t] The number of context string bytes to process
+* \param kin: [const uint8_t*] The input key byte array
+* \param kinlen: [size_t] The number of key bytes to process
+* \param s: [const uint8_t*] The optional label customization string
+* \param slen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac_xof128_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen);
 
@@ -701,14 +701,14 @@ QSC_EXPORT_API void qsc_kmac_xof128_compute(uint8_t* kout, size_t koutlen, const
 * Short form api: processes the keyin, x, and s inputs and generates the output key with a single call.
 * Key the XOF generator process a message and output the key.
 *
-* \param kout:		[uint8_t*] The pointer to output key byte array
-* \param koutlen:	[size_t] The number of key bytes to generate
-* \param x:			[const uint8_t*] The context string containing the information related to the derived keying material.
-* \param xlen:		[size_t] The number of context string bytes to process
-* \param kin:		[const uint8_t*] The input key byte array
-* \param kinlen:	[size_t] The number of key bytes to process
-* \param s:			[const uint8_t*] The optional label customization string
-* \param slen:		[size_t] The byte length of the customization string
+* \param kout: [uint8_t*] The pointer to output key byte array
+* \param koutlen: [size_t] The number of key bytes to generate
+* \param x: [const uint8_t*] The context string containing the information related to the derived keying material.
+* \param xlen: [size_t] The number of context string bytes to process
+* \param kin: [const uint8_t*] The input key byte array
+* \param kinlen: [size_t] The number of key bytes to process
+* \param s: [const uint8_t*] The optional label customization string
+* \param slen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac_xof256_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen);
 
@@ -718,14 +718,14 @@ QSC_EXPORT_API void qsc_kmac_xof256_compute(uint8_t* kout, size_t koutlen, const
 * Short form api: processes the keyin, x, and s inputs and generates the output key with a single call.
 * Key the XOF generator process a message and output the key.
 *
-* \param kout:		[uint8_t*] The pointer to output key byte array
-* \param koutlen:	[size_t] The number of key bytes to generate
-* \param x:			[const uint8_t*] The context string containing the information related to the derived keying material.
-* \param xlen:		[size_t] The number of context string bytes to process
-* \param kin:		[const uint8_t*] The input key byte array
-* \param kinlen:	[size_t] The number of key bytes to process
-* \param s:			[const uint8_t*] The optional label customization string
-* \param slen:		[size_t] The byte length of the customization string
+* \param kout: [uint8_t*] The pointer to output key byte array
+* \param koutlen: [size_t] The number of key bytes to generate
+* \param x: [const uint8_t*] The context string containing the information related to the derived keying material.
+* \param xlen: [size_t] The number of context string bytes to process
+* \param kin: [const uint8_t*] The input key byte array
+* \param kinlen: [size_t] The number of key bytes to process
+* \param s: [const uint8_t*] The optional label customization string
+* \param slen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac_xof512_compute(uint8_t* kout, size_t koutlen, const uint8_t* x, size_t xlen, const uint8_t* kin, size_t kinlen, const uint8_t* s, size_t slen);
 
@@ -734,14 +734,14 @@ QSC_EXPORT_API void qsc_kmac_xof512_compute(uint8_t* kout, size_t koutlen, const
 * Short form api: processes the key and custom inputs and generates the MAC code with a single call.
 * Key the MAC generator process a message and output the MAC code.
 *
-* \param output:	[uint8_t*] The MAC code byte array
-* \param outlen:	[size_t] The number of MAC code bytes to generate
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param output: [uint8_t*] The MAC code byte array
+* \param outlen: [size_t] The number of MAC code bytes to generate
+* \param message: [const uint8_t*] The message input byte array
+* \param msglen: [size_t] The number of message bytes to process
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac256_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
@@ -750,14 +750,14 @@ QSC_EXPORT_API void qsc_kmac256_compute(uint8_t* output, size_t outlen, const ui
 * Short form api: processes the key and custom inputs and generates the MAC code with a single call.
 * Key the MAC generator process a message and output the MAC code.
 *
-* \param output:	[uint8_t*] The MAC code byte array
-* \param outlen:	[size_t] The number of MAC code bytes to generate
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param output: [uint8_t*] The MAC code byte array
+* \param outlen: [size_t] The number of MAC code bytes to generate
+* \param message: [const uint8_t*] The message input byte array
+* \param msglen: [size_t] The number of message bytes to process
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac512_compute(uint8_t* output, size_t outlen, const uint8_t* message, size_t msglen, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
@@ -767,10 +767,10 @@ QSC_EXPORT_API void qsc_kmac512_compute(uint8_t* output, size_t outlen, const ui
 *
 * \warning The state must be initialized before calling.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param message:	[const uint8_t*] The message input byte array
-* \param msglen:	[size_t] The number of message bytes to process
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param message: [const uint8_t*] The message input byte array
+* \param msglen: [size_t] The number of message bytes to process
 */
 QSC_EXPORT_API void qsc_kmac_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen);
 
@@ -781,10 +781,10 @@ QSC_EXPORT_API void qsc_kmac_update(qsc_keccak_state* ctx, qsc_keccak_rate rate,
 *
 * \warning The state must be initialized before calling.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the Keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param output:	[uint8_t*] The output byte array
-* \param outlen:	[size_t] The number of bytes to extract
+* \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param output: [uint8_t*] The output byte array
+* \param outlen: [size_t] The number of bytes to extract
 */
 QSC_EXPORT_API void qsc_kmac_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rate, uint8_t* output, size_t outlen);
 
@@ -793,12 +793,12 @@ QSC_EXPORT_API void qsc_kmac_finalize(qsc_keccak_state* ctx, qsc_keccak_rate rat
 * Long form api: must be used in conjunction with the blockupdate and finalize functions.
 * Key the MAC generator and initialize the internal state.
 *
-* \param ctx:		[qsc_keccak_state*] A reference to the keccak state; must be initialized
-* \param rate:		[qsc_keccak_rate] The rate of absorption in bytes
-* \param key:		[const uint8_t*] The input key byte array
-* \param keylen:	[size_t] The number of key bytes to process
-* \param custom:	[const uint8_t*] The customization string
-* \param custlen:	[size_t] The byte length of the customization string
+* \param ctx: [qsc_keccak_state*] A reference to the keccak state; must be initialized
+* \param rate: [qsc_keccak_rate] The rate of absorption in bytes
+* \param key: [const uint8_t*] The input key byte array
+* \param keylen: [size_t] The number of key bytes to process
+* \param custom: [const uint8_t*] The customization string
+* \param custlen: [size_t] The byte length of the customization string
 */
 QSC_EXPORT_API void qsc_kmac_initialize(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* key, size_t keylen, const uint8_t* custom, size_t custlen);
 
@@ -812,14 +812,14 @@ QSC_EXPORT_API void qsc_kmac_initialize(qsc_keccak_state* ctx, qsc_keccak_rate r
 * \warning The input and output arrays muct be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param state:		[__m256i*] The Keccak state array
-* \param rate:		[qsc_keccak_rate] The shake rate
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inplen:	[size_t] The length of the input key arrays
-* \param domain		[uint8_t] The domain value
+* \param state: [__m256i*] The Keccak state array
+* \param rate: [qsc_keccak_rate] The shake rate
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inplen: [size_t] The length of the input key arrays
+* \param domain [uint8_t] The domain value
 */
 void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen, uint8_t domain);
@@ -830,13 +830,13 @@ void qsc_keccakx4_absorb(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param state:		[__m256i*] The Keccak state array
-* \param rate:		[qsc_keccak_rate] The shake rate
-* \param out0:		[uint8_t*] The 1st input key array
-* \param out1:		[uint8_t*] The 2nd input key array
-* \param out2:		[uint8_t*] The 3rd input key array
-* \param out3:		[uint8_t*] The 4th input key array
-* \param nblocks:	[size_t] The number of output blocks
+* \param state: [__m256i*] The Keccak state array
+* \param rate: [qsc_keccak_rate] The shake rate
+* \param out0: [uint8_t*] The 1st input key array
+* \param out1: [uint8_t*] The 2nd input key array
+* \param out2: [uint8_t*] The 3rd input key array
+* \param out3: [uint8_t*] The 4th input key array
+* \param nblocks: [size_t] The number of output blocks
 */
 void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t nblocks);
@@ -853,18 +853,18 @@ void qsc_keccakx4_squeezeblocks(__m256i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param state:		[__m512i*] The Keccak state array
-* \param rate:		[qsc_keccak_rate] The shake rate
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inp4:		[const uint8_t*] The 5th input key array
-* \param inp5:		[const uint8_t*] The 6th input key array
-* \param inp6:		[const uint8_t*] The 7th input key array
-* \param inp7:		[const uint8_t*] The 8th input key array
-* \param inplen:	[size_t] The length of the input key arrays
-* \param domain		[uint8_t] The domain value
+* \param state: [__m512i*] The Keccak state array
+* \param rate: [qsc_keccak_rate] The shake rate
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inp4: [const uint8_t*] The 5th input key array
+* \param inp5: [const uint8_t*] The 6th input key array
+* \param inp6: [const uint8_t*] The 7th input key array
+* \param inp7: [const uint8_t*] The 8th input key array
+* \param inplen: [size_t] The length of the input key arrays
+* \param domain	[uint8_t] The domain value
 */
 void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3,
@@ -876,13 +876,13 @@ void qsc_keccakx8_absorb(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate r
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param state:		[__m512i*] The Keccak state array
-* \param rate:		[qsc_keccak_rate] The shake rate
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param nblocks:	[size_t] The number of output blocks
+* \param state: [__m512i*] The Keccak state array
+* \param rate: [qsc_keccak_rate] The shake rate
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param nblocks: [size_t] The number of output blocks
 */
 void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak_rate rate,
 	uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, uint8_t* out4,
@@ -898,16 +898,16 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inplen:	[size_t] The length of the input key arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inplen: [size_t] The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
@@ -918,16 +918,16 @@ QSC_EXPORT_API void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inplen:	[size_t] The length of the input key arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inplen: [size_t] The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
@@ -938,16 +938,16 @@ QSC_EXPORT_API void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inplen:	[size_t] The length of the input key arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inplen: [size_t] The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* inp0, const uint8_t* inp1, const uint8_t* inp2, const uint8_t* inp3, size_t inplen);
@@ -960,24 +960,24 @@ QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*]  2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param out4:		[uint8_t*] The 5th output array
-* \param out5:		[uint8_t*] The 6th output array
-* \param out6:		[uint8_t*] The 7th output array
-* \param out7:		[uint8_t*] The 8th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inp4:		[const uint8_t*] The 5th input key array
-* \param inp5:		[const uint8_t*] The 6th input key array
-* \param inp6:		[const uint8_t*] The 7th input key array
-* \param inp7:		[const uint8_t*] The 8th input key array
-* \param inplen:	[size_t] The length of the input key arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*]  2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param out4: [uint8_t*] The 5th output array
+* \param out5: [uint8_t*] The 6th output array
+* \param out6: [uint8_t*] The 7th output array
+* \param out7: [uint8_t*] The 8th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inp4: [const uint8_t*] The 5th input key array
+* \param inp5: [const uint8_t*] The 6th input key array
+* \param inp6: [const uint8_t*] The 7th input key array
+* \param inp7: [const uint8_t*] The 8th input key array
+* \param inplen: [size_t] The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
@@ -990,24 +990,24 @@ QSC_EXPORT_API void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*]  2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param out4:		[uint8_t*] The 5th output array
-* \param out5:		[uint8_t*] The 6th output array
-* \param out6:		[uint8_t*] The 7th output array
-* \param out7:		[uint8_t*] The 8th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inp4:		[const uint8_t*] The 5th input key array
-* \param inp5:		[const uint8_t*] The 6th input key array
-* \param inp6:		[const uint8_t*] The 7th input key array
-* \param inp7:		[const uint8_t*] The 8th input key array
-* \param inplen:	[size_t] The length of the input key arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*]  2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param out4: [uint8_t*] The 5th output array
+* \param out5: [uint8_t*] The 6th output array
+* \param out6: [uint8_t*] The 7th output array
+* \param out7: [uint8_t*] The 8th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inp4: [const uint8_t*] The 5th input key array
+* \param inp5: [const uint8_t*] The 6th input key array
+* \param inp6: [const uint8_t*] The 7th input key array
+* \param inp7: [const uint8_t*] The 8th input key array
+* \param inplen: [size_t] The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
@@ -1020,24 +1020,24 @@ QSC_EXPORT_API void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*]  2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param out4:		[uint8_t*] The 5th output array
-* \param out5:		[uint8_t*] The 6th output array
-* \param out6:		[uint8_t*] The 7th output array
-* \param out7:		[uint8_t*] The 8th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param inp0:		[const uint8_t*] The 1st input key array
-* \param inp1:		[const uint8_t*] The 2nd input key array
-* \param inp2:		[const uint8_t*] The 3rd input key array
-* \param inp3:		[const uint8_t*] The 4th input key array
-* \param inp4:		[const uint8_t*] The 5th input key array
-* \param inp5:		[const uint8_t*] The 6th input key array
-* \param inp6:		[const uint8_t*] The 7th input key array
-* \param inp7:		[const uint8_t*] The 8th input key array
-* \param inplen:	[size_t] The length of the input key arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*]  2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param out4: [uint8_t*] The 5th output array
+* \param out5: [uint8_t*] The 6th output array
+* \param out6: [uint8_t*] The 7th output array
+* \param out7: [uint8_t*] The 8th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param inp0: [const uint8_t*] The 1st input key array
+* \param inp1: [const uint8_t*] The 2nd input key array
+* \param inp2: [const uint8_t*] The 3rd input key array
+* \param inp3: [const uint8_t*] The 4th input key array
+* \param inp4: [const uint8_t*] The 5th input key array
+* \param inp5: [const uint8_t*] The 6th input key array
+* \param inp6: [const uint8_t*] The 7th input key array
+* \param inp7: [const uint8_t*] The 8th input key array
+* \param inplen: [size_t] The length of the input key arrays
 */
 QSC_EXPORT_API void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
@@ -1052,26 +1052,26 @@ QSC_EXPORT_API void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param outlen:	[uint8_t*] The length of the output arrays
-* \param key0:		[const uint8_t*] The 1st key array
-* \param key1:		[const uint8_t*] The 2nd key array
-* \param key2:		[const uint8_t*] The 3rd key array
-* \param key3:		[const uint8_t*] The 4th key array
-* \param keylen:	[size_t] The length of the input key arrays
-* \param cst0:		[const uint8_t*] The 1st custom array
-* \param cst1:		[const uint8_t*] The 2nd custom array
-* \param cst2:		[const uint8_t*] The 3rd custom array
-* \param cst3:		[const uint8_t*] The 4th custom array
-* \param cstlen:	[size_t] The length of the custom arrays
-* \param msg0:		[const uint8_t*] The 1st message array
-* \param msg1:		[const uint8_t*] The 2nd message array
-* \param msg2:		[const uint8_t*] The 3rd message array
-* \param msg3:		[const uint8_t*] The 4th message array
-* \param msglen:	[size_t] The length of the message arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param outlen: [uint8_t*] The length of the output arrays
+* \param key0: [const uint8_t*] The 1st key array
+* \param key1: [const uint8_t*] The 2nd key array
+* \param key2: [const uint8_t*] The 3rd key array
+* \param key3: [const uint8_t*] The 4th key array
+* \param keylen: [size_t] The length of the input key arrays
+* \param cst0: [const uint8_t*] The 1st custom array
+* \param cst1: [const uint8_t*] The 2nd custom array
+* \param cst2: [const uint8_t*] The 3rd custom array
+* \param cst3: [const uint8_t*] The 4th custom array
+* \param cstlen: [size_t] The length of the custom arrays
+* \param msg0: [const uint8_t*] The 1st message array
+* \param msg1: [const uint8_t*] The 2nd message array
+* \param msg2: [const uint8_t*] The 3rd message array
+* \param msg3: [const uint8_t*] The 4th message array
+* \param msglen: [size_t] The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
@@ -1084,26 +1084,26 @@ QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param outlen:	[uint8_t*] The length of the output arrays
-* \param key0:		[const uint8_t*] The 1st key array
-* \param key1:		[const uint8_t*] The 2nd key array
-* \param key2:		[const uint8_t*] The 3rd key array
-* \param key3:		[const uint8_t*] The 4th key array
-* \param keylen:	[size_t] The length of the input key arrays
-* \param cst0:		[const uint8_t*] The 1st custom array
-* \param cst1:		[const uint8_t*] The 2nd custom array
-* \param cst2:		[const uint8_t*] The 3rd custom array
-* \param cst3:		[const uint8_t*] The 4th custom array
-* \param cstlen:	[size_t] The length of the custom arrays
-* \param msg0:		[const uint8_t*] The 1st message array
-* \param msg1:		[const uint8_t*] The 2nd message array
-* \param msg2:		[const uint8_t*] The 3rd message array
-* \param msg3:		[const uint8_t*] The 4th message array
-* \param msglen:	[size_t] The length of the message arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param outlen: [uint8_t*] The length of the output arrays
+* \param key0: [const uint8_t*] The 1st key array
+* \param key1: [const uint8_t*] The 2nd key array
+* \param key2: [const uint8_t*] The 3rd key array
+* \param key3: [const uint8_t*] The 4th key array
+* \param keylen: [size_t] The length of the input key arrays
+* \param cst0: [const uint8_t*] The 1st custom array
+* \param cst1: [const uint8_t*] The 2nd custom array
+* \param cst2: [const uint8_t*] The 3rd custom array
+* \param cst3: [const uint8_t*] The 4th custom array
+* \param cstlen: [size_t] The length of the custom arrays
+* \param msg0: [const uint8_t*] The 1st message array
+* \param msg1: [const uint8_t*] The 2nd message array
+* \param msg2: [const uint8_t*] The 3rd message array
+* \param msg3: [const uint8_t*] The 4th message array
+* \param msglen: [size_t] The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
@@ -1116,26 +1116,26 @@ QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX2 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param outlen:	[uint8_t*] The length of the output arrays
-* \param key0:		[const uint8_t*] The 1st key array
-* \param key1:		[const uint8_t*] The 2nd key array
-* \param key2:		[const uint8_t*] The 3rd key array
-* \param key3:		[const uint8_t*] The 4th key array
-* \param keylen:	[size_t] The length of the input key arrays
-* \param cst0:		[const uint8_t*] The 1st custom array
-* \param cst1:		[const uint8_t*] The 2nd custom array
-* \param cst2:		[const uint8_t*] The 3rd custom array
-* \param cst3:		[const uint8_t*] The 4th custom array
-* \param cstlen:	[size_t] The length of the custom arrays
-* \param msg0:		[const uint8_t*] The 1st message array
-* \param msg1:		[const uint8_t*] The 2nd message array
-* \param msg2:		[const uint8_t*] The 3rd message array
-* \param msg3:		[const uint8_t*] The 4th message array
-* \param msglen:	[size_t] The length of the message arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param outlen: [uint8_t*] The length of the output arrays
+* \param key0: [const uint8_t*] The 1st key array
+* \param key1: [const uint8_t*] The 2nd key array
+* \param key2: [const uint8_t*] The 3rd key array
+* \param key3: [const uint8_t*] The 4th key array
+* \param keylen: [size_t] The length of the input key arrays
+* \param cst0: [const uint8_t*] The 1st custom array
+* \param cst1: [const uint8_t*] The 2nd custom array
+* \param cst2: [const uint8_t*] The 3rd custom array
+* \param cst3: [const uint8_t*] The 4th custom array
+* \param cstlen: [size_t] The length of the custom arrays
+* \param msg0: [const uint8_t*] The 1st message array
+* \param msg1: [const uint8_t*] The 2nd message array
+* \param msg2: [const uint8_t*] The 3rd message array
+* \param msg3: [const uint8_t*] The 4th message array
+* \param msglen: [size_t] The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3, size_t outlen,
 	const uint8_t* key0, const uint8_t* key1, const uint8_t* key2, const uint8_t* key3, size_t keylen,
@@ -1150,42 +1150,42 @@ QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param out4:		[uint8_t*] The 5th output array
-* \param out5:		[uint8_t*] The 6th output array
-* \param out6:		[uint8_t*] The 7th output array
-* \param out7:		[uint8_t*] The 8th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param key0:		[const uint8_t*] The 1st key array
-* \param key1:		[const uint8_t*] The 2nd key array
-* \param key2:		[const uint8_t*] The 3rd key array
-* \param key3:		[const uint8_t*] The 4th key array
-* \param key4:		[const uint8_t*] The 5th key array
-* \param key5:		[const uint8_t*] The 6th key array
-* \param key6:		[const uint8_t* The 7th key array
-* \param key7:		[const uint8_t*] The 8th key array
-* \param keylen:	[size_t] The length of the key arrays
-* \param cst0:		[const uint8_t*] The 1st custom array
-* \param cst1:		[const uint8_t*] The 2nd custom array
-* \param cst2:		[const uint8_t*] The 3rd custom array
-* \param cst3:		[const uint8_t*] The 4th custom array
-* \param cst4:		[const uint8_t*] The 5th custom array
-* \param cst5:		[const uint8_t*] The 6th custom array
-* \param cst6:		[const uint8_t*] The 7th custom array
-* \param cst7:		[const uint8_t*] The 8th custom array
-* \param cstlen:	[size_t] The length of the custom arrays
-* \param msg0:		[const uint8_t* The 1st message array
-* \param msg1:		[const uint8_t*] The 2nd message array
-* \param msg2:		[const uint8_t*] The 3rd message array
-* \param msg3:		[const uint8_t*] The 4th message array
-* \param msg4:		[const uint8_t*] The 5th message array
-* \param msg5:		[const uint8_t*] The 6th message array
-* \param msg6:		[const uint8_t*] The 7th message array
-* \param msg7:		[const uint8_t*] The 8th message array
-* \param msglen:	[size_t] The length of the message arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param out4: [uint8_t*] The 5th output array
+* \param out5: [uint8_t*] The 6th output array
+* \param out6: [uint8_t*] The 7th output array
+* \param out7: [uint8_t*] The 8th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param key0: [const uint8_t*] The 1st key array
+* \param key1: [const uint8_t*] The 2nd key array
+* \param key2: [const uint8_t*] The 3rd key array
+* \param key3: [const uint8_t*] The 4th key array
+* \param key4: [const uint8_t*] The 5th key array
+* \param key5: [const uint8_t*] The 6th key array
+* \param key6: [const uint8_t* The 7th key array
+* \param key7: [const uint8_t*] The 8th key array
+* \param keylen: [size_t] The length of the key arrays
+* \param cst0: [const uint8_t*] The 1st custom array
+* \param cst1: [const uint8_t*] The 2nd custom array
+* \param cst2: [const uint8_t*] The 3rd custom array
+* \param cst3: [const uint8_t*] The 4th custom array
+* \param cst4: [const uint8_t*] The 5th custom array
+* \param cst5: [const uint8_t*] The 6th custom array
+* \param cst6: [const uint8_t*] The 7th custom array
+* \param cst7: [const uint8_t*] The 8th custom array
+* \param cstlen: [size_t] The length of the custom arrays
+* \param msg0: [const uint8_t* The 1st message array
+* \param msg1: [const uint8_t*] The 2nd message array
+* \param msg2: [const uint8_t*] The 3rd message array
+* \param msg3: [const uint8_t*] The 4th message array
+* \param msg4: [const uint8_t*] The 5th message array
+* \param msg5: [const uint8_t*] The 6th message array
+* \param msg6: [const uint8_t*] The 7th message array
+* \param msg7: [const uint8_t*] The 8th message array
+* \param msglen: [size_t] The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
@@ -1202,42 +1202,42 @@ QSC_EXPORT_API void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param out4:		[uint8_t*] The 5th output array
-* \param out5:		[uint8_t*] The 6th output array
-* \param out6:		[uint8_t*] The 7th output array
-* \param out7:		[uint8_t*] The 8th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param key0:		[const uint8_t*] The 1st key array
-* \param key1:		[const uint8_t*] The 2nd key array
-* \param key2:		[const uint8_t*] The 3rd key array
-* \param key3:		[const uint8_t*] The 4th key array
-* \param key4:		[const uint8_t*] The 5th key array
-* \param key5:		[const uint8_t*] The 6th key array
-* \param key6:		[const uint8_t* The 7th key array
-* \param key7:		[const uint8_t*] The 8th key array
-* \param keylen:	[size_t] The length of the key arrays
-* \param cst0:		[const uint8_t*] The 1st custom array
-* \param cst1:		[const uint8_t*] The 2nd custom array
-* \param cst2:		[const uint8_t*] The 3rd custom array
-* \param cst3:		[const uint8_t*] The 4th custom array
-* \param cst4:		[const uint8_t*] The 5th custom array
-* \param cst5:		[const uint8_t*] The 6th custom array
-* \param cst6:		[const uint8_t*] The 7th custom array
-* \param cst7:		[const uint8_t*] The 8th custom array
-* \param cstlen:	[size_t] The length of the custom arrays
-* \param msg0:		[const uint8_t* The 1st message array
-* \param msg1:		[const uint8_t*] The 2nd message array
-* \param msg2:		[const uint8_t*] The 3rd message array
-* \param msg3:		[const uint8_t*] The 4th message array
-* \param msg4:		[const uint8_t*] The 5th message array
-* \param msg5:		[const uint8_t*] The 6th message array
-* \param msg6:		[const uint8_t*] The 7th message array
-* \param msg7:		[const uint8_t*] The 8th message array
-* \param msglen:	[size_t] The length of the message arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param out4: [uint8_t*] The 5th output array
+* \param out5: [uint8_t*] The 6th output array
+* \param out6: [uint8_t*] The 7th output array
+* \param out7: [uint8_t*] The 8th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param key0: [const uint8_t*] The 1st key array
+* \param key1: [const uint8_t*] The 2nd key array
+* \param key2: [const uint8_t*] The 3rd key array
+* \param key3: [const uint8_t*] The 4th key array
+* \param key4: [const uint8_t*] The 5th key array
+* \param key5: [const uint8_t*] The 6th key array
+* \param key6: [const uint8_t* The 7th key array
+* \param key7: [const uint8_t*] The 8th key array
+* \param keylen: [size_t] The length of the key arrays
+* \param cst0: [const uint8_t*] The 1st custom array
+* \param cst1: [const uint8_t*] The 2nd custom array
+* \param cst2: [const uint8_t*] The 3rd custom array
+* \param cst3: [const uint8_t*] The 4th custom array
+* \param cst4: [const uint8_t*] The 5th custom array
+* \param cst5: [const uint8_t*] The 6th custom array
+* \param cst6: [const uint8_t*] The 7th custom array
+* \param cst7: [const uint8_t*] The 8th custom array
+* \param cstlen: [size_t] The length of the custom arrays
+* \param msg0: [const uint8_t* The 1st message array
+* \param msg1: [const uint8_t*] The 2nd message array
+* \param msg2: [const uint8_t*] The 3rd message array
+* \param msg3: [const uint8_t*] The 4th message array
+* \param msg4: [const uint8_t*] The 5th message array
+* \param msg5: [const uint8_t*] The 6th message array
+* \param msg6: [const uint8_t*] The 7th message array
+* \param msg7: [const uint8_t*] The 8th message array
+* \param msglen: [size_t] The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,
@@ -1254,42 +1254,42 @@ QSC_EXPORT_API void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \warning The input and output arrays must be of the same length.
 * This function requires the AVX512 instruction set.
 *
-* \param out0:		[uint8_t*] The 1st output array
-* \param out1:		[uint8_t*] The 2nd output array
-* \param out2:		[uint8_t*] The 3rd output array
-* \param out3:		[uint8_t*] The 4th output array
-* \param out4:		[uint8_t*] The 5th output array
-* \param out5:		[uint8_t*] The 6th output array
-* \param out6:		[uint8_t*] The 7th output array
-* \param out7:		[uint8_t*] The 8th output array
-* \param outlen:	[size_t] The length of the output arrays
-* \param key0:		[const uint8_t*] The 1st key array
-* \param key1:		[const uint8_t*] The 2nd key array
-* \param key2:		[const uint8_t*] The 3rd key array
-* \param key3:		[const uint8_t*] The 4th key array
-* \param key4:		[const uint8_t*] The 5th key array
-* \param key5:		[const uint8_t*] The 6th key array
-* \param key6:		[const uint8_t* The 7th key array
-* \param key7:		[const uint8_t*] The 8th key array
-* \param keylen:	[size_t] The length of the key arrays
-* \param cst0:		[const uint8_t*] The 1st custom array
-* \param cst1:		[const uint8_t*] The 2nd custom array
-* \param cst2:		[const uint8_t*] The 3rd custom array
-* \param cst3:		[const uint8_t*] The 4th custom array
-* \param cst4:		[const uint8_t*] The 5th custom array
-* \param cst5:		[const uint8_t*] The 6th custom array
-* \param cst6:		[const uint8_t*] The 7th custom array
-* \param cst7:		[const uint8_t*] The 8th custom array
-* \param cstlen:	[size_t] The length of the custom arrays
-* \param msg0:		[const uint8_t* The 1st message array
-* \param msg1:		[const uint8_t*] The 2nd message array
-* \param msg2:		[const uint8_t*] The 3rd message array
-* \param msg3:		[const uint8_t*] The 4th message array
-* \param msg4:		[const uint8_t*] The 5th message array
-* \param msg5:		[const uint8_t*] The 6th message array
-* \param msg6:		[const uint8_t*] The 7th message array
-* \param msg7:		[const uint8_t*] The 8th message array
-* \param msglen:	[size_t] The length of the message arrays
+* \param out0: [uint8_t*] The 1st output array
+* \param out1: [uint8_t*] The 2nd output array
+* \param out2: [uint8_t*] The 3rd output array
+* \param out3: [uint8_t*] The 4th output array
+* \param out4: [uint8_t*] The 5th output array
+* \param out5: [uint8_t*] The 6th output array
+* \param out6: [uint8_t*] The 7th output array
+* \param out7: [uint8_t*] The 8th output array
+* \param outlen: [size_t] The length of the output arrays
+* \param key0: [const uint8_t*] The 1st key array
+* \param key1: [const uint8_t*] The 2nd key array
+* \param key2: [const uint8_t*] The 3rd key array
+* \param key3: [const uint8_t*] The 4th key array
+* \param key4: [const uint8_t*] The 5th key array
+* \param key5: [const uint8_t*] The 6th key array
+* \param key6: [const uint8_t* The 7th key array
+* \param key7: [const uint8_t*] The 8th key array
+* \param keylen: [size_t] The length of the key arrays
+* \param cst0: [const uint8_t*] The 1st custom array
+* \param cst1: [const uint8_t*] The 2nd custom array
+* \param cst2: [const uint8_t*] The 3rd custom array
+* \param cst3: [const uint8_t*] The 4th custom array
+* \param cst4: [const uint8_t*] The 5th custom array
+* \param cst5: [const uint8_t*] The 6th custom array
+* \param cst6: [const uint8_t*] The 7th custom array
+* \param cst7: [const uint8_t*] The 8th custom array
+* \param cstlen: [size_t] The length of the custom arrays
+* \param msg0: [const uint8_t* The 1st message array
+* \param msg1: [const uint8_t*] The 2nd message array
+* \param msg2: [const uint8_t*] The 3rd message array
+* \param msg3: [const uint8_t*] The 4th message array
+* \param msg4: [const uint8_t*] The 5th message array
+* \param msg5: [const uint8_t*] The 6th message array
+* \param msg6: [const uint8_t*] The 7th message array
+* \param msg7: [const uint8_t*] The 8th message array
+* \param msglen: [size_t] The length of the message arrays
 */
 QSC_EXPORT_API void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 	uint8_t* out4, uint8_t* out5, uint8_t* out6, uint8_t* out7, size_t outlen,

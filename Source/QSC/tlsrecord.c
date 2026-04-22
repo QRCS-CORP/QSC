@@ -1,9 +1,10 @@
 #include "tlsrecord.h"
-#include "tlsdefs.h"
-#include "tlscodec.h"
 #include "aes.h"
+#include "chacha.h"
 #include "intutils.h"
 #include "memutils.h"
+#include "tlsdefs.h"
+#include "tlscodec.h"
 
 static bool tls_record_content_type_is_valid(uint8_t type)
 {
@@ -102,6 +103,28 @@ static void tls_record_build_nonce(const qsc_tls_record_state* state, uint8_t* n
 	}
 }
 
+static size_t tls_record_suite_key_size(qsc_tls_cipher_suite suite)
+{
+	size_t res;
+
+	res = 0U;
+
+	switch (suite)
+	{
+	case qsc_tls_cipher_suite_tls_aes_128_gcm_sha256:
+		res = QSC_TLS_AES128_KEY_SIZE;
+		break;
+	case qsc_tls_cipher_suite_tls_aes_256_gcm_sha384:
+	case qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256:
+		res = QSC_TLS_AES256_KEY_SIZE;
+		break;
+	default:
+		break;
+	}
+
+	return res;
+}
+
 static qsc_tls_status tls_record_build_header(uint8_t* output, size_t outlen, size_t* written, qsc_tls_record_content_type type, size_t payloadlen)
 {
 	size_t offset;
@@ -141,7 +164,7 @@ static qsc_tls_status tls_record_build_header(uint8_t* output, size_t outlen, si
 	return status;
 }
 
-void qsc_tls_record_state_initialize(qsc_tls_record_state* state, const uint8_t* key, size_t keylen, const uint8_t* iv, size_t ivlen)
+void qsc_tls_record_state_initialize(qsc_tls_record_state* state, qsc_tls_cipher_suite suite, const uint8_t* key, size_t keylen, const uint8_t* iv, size_t ivlen)
 {
 	QSC_ASSERT(state != NULL);
 
@@ -149,11 +172,20 @@ void qsc_tls_record_state_initialize(qsc_tls_record_state* state, const uint8_t*
 	{
 		qsc_memutils_clear(state, sizeof(qsc_tls_record_state));
 
-		if (key != NULL && iv != NULL && keylen == QSC_TLS_AES256_KEY_SIZE && ivlen == QSC_TLS_GCM_NONCE_SIZE)
+		if (key != NULL && iv != NULL && ivlen == QSC_TLS_GCM_NONCE_SIZE)
 		{
-			qsc_memutils_copy(state->key, key, QSC_TLS_AES256_KEY_SIZE);
-			qsc_memutils_copy(state->iv, iv, QSC_TLS_GCM_NONCE_SIZE);
-			state->initialized = true;
+			size_t ks;
+
+			ks = tls_record_suite_key_size(suite);
+
+			if (ks != 0U && keylen == ks)
+			{
+				state->suite = suite;
+				state->keylen = ks;
+				qsc_memutils_copy(state->key, key, ks);
+				qsc_memutils_copy(state->iv, iv, QSC_TLS_GCM_NONCE_SIZE);
+				state->initialized = true;
+			}
 		}
 	}
 }
@@ -267,7 +299,8 @@ qsc_tls_status qsc_tls_record_decode_plaintext(const uint8_t* input, size_t inle
 			{
 				status = qsc_tls_status_invalid_input;
 			}
-			else if (version != QSC_TLS_PROTOCOL_VERSION_12)
+			else if (version != QSC_TLS_PROTOCOL_VERSION_12 &&
+				!(ctype == (uint8_t)qsc_tls_record_content_handshake && version == 0x0301U))
 			{
 				status = qsc_tls_status_invalid_input;
 			}
@@ -337,18 +370,20 @@ qsc_tls_status qsc_tls_record_try_get_span_length(const uint8_t* input, size_t i
 	return status;
 }
 
-qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* output, size_t outlen, size_t* written, 
-	qsc_tls_record_content_type inner_type, const uint8_t* input, size_t inlen)
+qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* output, size_t outlen, size_t* written, qsc_tls_record_content_type inner_type, const uint8_t* input, size_t inlen)
 {
 	QSC_ASSERT(state != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(written != NULL);
 
 	qsc_aes_keyparams kp = { 0 };
-	qsc_aes_gcm256_state gcm = { 0 };
+	qsc_aes_gcm128_state gcm128 = { 0 };
+	qsc_aes_gcm256_state gcm256 = { 0 };
+	qsc_chacha_keyparams ckp = { 0 };
+	qsc_chacha_poly1305_state cpoly = { 0 };
 	uint8_t aad[QSC_TLS_RECORD_HEADER_SIZE] = { 0U };
 	uint8_t nonce[QSC_TLS_GCM_NONCE_SIZE] = { 0U };
-	uint8_t inner[QSC_TLS_RECORD_MAX_INNER_SIZE] = { 0U };
+	uint8_t* inner;
 	size_t hdrlen;
 	size_t innerlen;
 	qsc_tls_status status;
@@ -356,6 +391,7 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 	status = qsc_tls_status_success;
 	hdrlen = 0U;
 	innerlen = 0U;
+	inner = NULL;
 
 	if (written != NULL)
 	{
@@ -378,37 +414,106 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 	{
 		status = qsc_tls_status_invalid_length;
 	}
-	else if ((inlen + QSC_TLS_INNER_CONTENT_TYPE_SIZE) > sizeof(inner))
-	{
-		status = qsc_tls_status_invalid_length;
-	}
 	else
 	{
-		qsc_memutils_copy(inner, input, inlen);
-		inner[inlen] = (uint8_t)inner_type;
-		innerlen = inlen + QSC_TLS_INNER_CONTENT_TYPE_SIZE;
+		inner = (uint8_t*)qsc_memutils_malloc(QSC_TLS_RECORD_MAX_INNER_SIZE);
 
-		status = tls_record_build_header(aad, sizeof(aad), &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
-
-		if (status == qsc_tls_status_success)
+		if (inner == NULL)
 		{
-			status = tls_record_build_header(output, outlen, &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
+			status = qsc_tls_status_invalid_state;
 		}
-
-		if (status == qsc_tls_status_success)
+		else
 		{
-			tls_record_build_nonce(state, nonce);
-			kp.key = state->key;
-			kp.keylen = QSC_TLS_AES256_KEY_SIZE;
-			kp.nonce = nonce;
-			kp.noncelen = QSC_TLS_GCM_NONCE_SIZE;
-			kp.info = NULL;
-			kp.infolen = 0U;
-			qsc_aes_gcm256_initialize(&gcm, &kp, true);
-			qsc_aes_gcm256_set_associated(&gcm, aad, sizeof(aad));
-			qsc_aes_gcm256_encrypt(&gcm, output + QSC_TLS_RECORD_HEADER_SIZE, inner, innerlen);
-			qsc_aes_gcm256_dispose(&gcm);
-			state->sequence += 1U;
+			qsc_memutils_clear(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
+
+			if ((inlen + QSC_TLS_INNER_CONTENT_TYPE_SIZE) > QSC_TLS_RECORD_MAX_INNER_SIZE)
+			{
+				status = qsc_tls_status_invalid_length;
+			}
+			else
+			{
+				qsc_memutils_copy(inner, input, inlen);
+				inner[inlen] = (uint8_t)inner_type;
+				innerlen = inlen + QSC_TLS_INNER_CONTENT_TYPE_SIZE;
+
+				status = tls_record_build_header(aad, sizeof(aad), &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
+
+				if (status == qsc_tls_status_success)
+				{
+					status = tls_record_build_header(output, outlen, &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
+				}
+
+				if (status == qsc_tls_status_success)
+				{
+					/* Guard the full output range before any write: header + ciphertext + tag */
+					if (outlen < QSC_TLS_RECORD_HEADER_SIZE + innerlen + QSC_TLS_GCM_TAG_SIZE)
+					{
+						status = qsc_tls_status_buffer_too_small;
+					}
+				}
+
+				if (status == qsc_tls_status_success)
+				{
+					tls_record_build_nonce(state, nonce);
+
+					switch (state->suite)
+					{
+					case qsc_tls_cipher_suite_tls_aes_128_gcm_sha256:
+						kp.key = state->key;
+						kp.keylen = QSC_TLS_AES128_KEY_SIZE;
+						kp.nonce = nonce;
+						kp.noncelen = QSC_TLS_GCM_NONCE_SIZE;
+						kp.info = NULL;
+						kp.infolen = 0U;
+						qsc_aes_gcm128_initialize(&gcm128, &kp, true);
+						qsc_aes_gcm128_set_associated(&gcm128, aad, sizeof(aad));
+						qsc_aes_gcm128_encrypt(&gcm128, output + QSC_TLS_RECORD_HEADER_SIZE, inner, innerlen);
+						qsc_aes_gcm128_dispose(&gcm128);
+						break;
+					case qsc_tls_cipher_suite_tls_aes_256_gcm_sha384:
+						kp.key = state->key;
+						kp.keylen = QSC_TLS_AES256_KEY_SIZE;
+						kp.nonce = nonce;
+						kp.noncelen = QSC_TLS_GCM_NONCE_SIZE;
+						kp.info = NULL;
+						kp.infolen = 0U;
+						qsc_aes_gcm256_initialize(&gcm256, &kp, true);
+						qsc_aes_gcm256_set_associated(&gcm256, aad, sizeof(aad));
+						qsc_aes_gcm256_encrypt(&gcm256, output + QSC_TLS_RECORD_HEADER_SIZE, inner, innerlen);
+						qsc_aes_gcm256_dispose(&gcm256);
+						break;
+					case qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256:
+						ckp.key = state->key;
+						ckp.keylen = QSC_CHACHA_KEY256_SIZE;
+						ckp.nonce = nonce;
+						qsc_chacha_poly1305_initialize(&cpoly, &ckp);
+						qsc_chacha_poly1305_set_associated(&cpoly, aad, sizeof(aad));
+						qsc_chacha_poly1305_encrypt(&cpoly, output + QSC_TLS_RECORD_HEADER_SIZE, inner, innerlen);
+						qsc_chacha_poly1305_dispose(&cpoly);
+						break;
+					default:
+						status = qsc_tls_status_not_supported;
+						break;
+					}
+
+					if (status == qsc_tls_status_success)
+					{
+						if (state->sequence == UINT64_MAX)
+						{
+							qsc_tls_record_state_dispose(state);
+							status = qsc_tls_status_authentication_failure;
+						}
+						else
+						{
+							state->sequence += 1U;
+						}
+					}
+				}
+			}
+
+			qsc_memutils_secure_erase(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
+			qsc_memutils_alloc_free(inner);
+			inner = NULL;
 		}
 	}
 
@@ -419,9 +524,11 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 
 	qsc_memutils_secure_erase(aad, sizeof(aad));
 	qsc_memutils_secure_erase(nonce, sizeof(nonce));
-	qsc_memutils_secure_erase(inner, sizeof(inner));
 	qsc_memutils_secure_erase(&kp, sizeof(kp));
-	qsc_memutils_secure_erase(&gcm, sizeof(gcm));
+	qsc_memutils_secure_erase(&gcm128, sizeof(gcm128));
+	qsc_memutils_secure_erase(&gcm256, sizeof(gcm256));
+	qsc_memutils_secure_erase(&cpoly, sizeof(cpoly));
+	qsc_memutils_secure_erase(&ckp, sizeof(ckp));
 
 	return status;
 }
@@ -434,10 +541,14 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 	QSC_ASSERT(written != NULL);
 
 	qsc_aes_keyparams kp = { 0 };
-	qsc_aes_gcm256_state gcm = { 0 };
+	qsc_aes_gcm128_state gcm128 = { 0 };
+	qsc_aes_gcm256_state gcm256 = { 0 };
+	qsc_chacha_keyparams ckp = { 0 };
+	qsc_chacha_poly1305_state cpoly = { 0 };
 	uint8_t aad[QSC_TLS_RECORD_HEADER_SIZE] = { 0U };
 	uint8_t nonce[QSC_TLS_GCM_NONCE_SIZE] = { 0U };
-	uint8_t inner[QSC_TLS_RECORD_MAX_INNER_SIZE] = { 0U };
+	/* L3 fix: heap-allocate; see encrypt counterpart for full rationale. */
+	uint8_t* inner;
 	const uint8_t* payload;
 	size_t payloadlen;
 	size_t endpos;
@@ -451,6 +562,7 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 	payloadlen = 0U;
 	endpos = 0U;
 	decok = false;
+	inner = NULL;
 
 	if (written != NULL)
 	{
@@ -476,70 +588,128 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 	}
 	else
 	{
-		status = qsc_tls_record_decode_plaintext(input, inlen, &outer_type, &payload, &payloadlen);
+		inner = (uint8_t*)qsc_memutils_malloc(QSC_TLS_RECORD_MAX_INNER_SIZE);
 
-		if (status == qsc_tls_status_success)
+		if (inner == NULL)
 		{
-			if (outer_type != qsc_tls_record_content_application_data)
-			{
-				status = qsc_tls_status_invalid_input;
-			}
-			else if (payloadlen > sizeof(inner))
-			{
-				status = qsc_tls_status_invalid_length;
-			}
-			else
-			{
-				qsc_memutils_copy(aad, input, QSC_TLS_RECORD_HEADER_SIZE);
-				tls_record_build_nonce(state, nonce);
-				kp.key = state->key;
-				kp.keylen = QSC_TLS_AES256_KEY_SIZE;
-				kp.nonce = nonce;
-				kp.noncelen = QSC_TLS_GCM_NONCE_SIZE;
-				kp.info = NULL;
-				kp.infolen = 0U;
-				qsc_aes_gcm256_initialize(&gcm, &kp, false);
-				qsc_aes_gcm256_set_associated(&gcm, aad, sizeof(aad));
-				decok = qsc_aes_gcm256_decrypt(&gcm, inner, payload, payloadlen);
-				qsc_aes_gcm256_dispose(&gcm);
+			status = qsc_tls_status_invalid_state;
+		}
+		else
+		{
+			qsc_memutils_clear(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
 
-				if (decok == false)
+			status = qsc_tls_record_decode_plaintext(input, inlen, &outer_type, &payload, &payloadlen);
+
+			if (status == qsc_tls_status_success)
+			{
+				if (outer_type != qsc_tls_record_content_application_data)
 				{
-					status = qsc_tls_status_authentication_failure;
+					status = qsc_tls_status_invalid_input;
+				}
+				else if (payloadlen > QSC_TLS_RECORD_MAX_INNER_SIZE)
+				{
+					status = qsc_tls_status_invalid_length;
 				}
 				else
 				{
-					uint8_t contentbyte;
+					qsc_memutils_copy(aad, input, QSC_TLS_RECORD_HEADER_SIZE);
+					tls_record_build_nonce(state, nonce);
 
-					contentbyte = 0U;
-					endpos = tls_record_find_inner_content_end_constant_time(inner, payloadlen - QSC_TLS_GCM_TAG_SIZE, &contentbyte);
-
-					if (endpos == 0U)
+					switch (state->suite)
 					{
-						status = qsc_tls_status_invalid_length;
+					case qsc_tls_cipher_suite_tls_aes_128_gcm_sha256:
+						kp.key = state->key;
+						kp.keylen = QSC_TLS_AES128_KEY_SIZE;
+						kp.nonce = nonce;
+						kp.noncelen = QSC_TLS_GCM_NONCE_SIZE;
+						kp.info = NULL;
+						kp.infolen = 0U;
+						qsc_aes_gcm128_initialize(&gcm128, &kp, false);
+						qsc_aes_gcm128_set_associated(&gcm128, aad, sizeof(aad));
+						decok = qsc_aes_gcm128_decrypt(&gcm128, inner, payload, payloadlen);
+						qsc_aes_gcm128_dispose(&gcm128);
+						break;
+					case qsc_tls_cipher_suite_tls_aes_256_gcm_sha384:
+						kp.key = state->key;
+						kp.keylen = QSC_TLS_AES256_KEY_SIZE;
+						kp.nonce = nonce;
+						kp.noncelen = QSC_TLS_GCM_NONCE_SIZE;
+						kp.info = NULL;
+						kp.infolen = 0U;
+						qsc_aes_gcm256_initialize(&gcm256, &kp, false);
+						qsc_aes_gcm256_set_associated(&gcm256, aad, sizeof(aad));
+						decok = qsc_aes_gcm256_decrypt(&gcm256, inner, payload, payloadlen);
+						qsc_aes_gcm256_dispose(&gcm256);
+						break;
+					case qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256:
+						ckp.key = state->key;
+						ckp.keylen = QSC_CHACHA_KEY256_SIZE;
+						ckp.nonce = nonce;
+						qsc_chacha_poly1305_initialize(&cpoly, &ckp);
+						qsc_chacha_poly1305_set_associated(&cpoly, aad, sizeof(aad));
+						decok = qsc_chacha_poly1305_decrypt(&cpoly, inner, payload, payloadlen);
+						qsc_chacha_poly1305_dispose(&cpoly);
+						break;
+					default:
+						status = qsc_tls_status_not_supported;
+						decok = false;
+						break;
 					}
-					else if (tls_record_inner_content_type_is_valid((qsc_tls_record_content_type)contentbyte) == false)
+
+					if (decok == false)
 					{
-						status = qsc_tls_status_invalid_input;
+						if (status == qsc_tls_status_success)
+						{
+							status = qsc_tls_status_authentication_failure;
+						}
 					}
 					else
 					{
-						*inner_type = (qsc_tls_record_content_type)contentbyte;
-						endpos -= 1U;
+						uint8_t contentbyte;
 
-						if (endpos > outlen)
+						contentbyte = 0U;
+						endpos = tls_record_find_inner_content_end_constant_time(inner, payloadlen - QSC_TLS_GCM_TAG_SIZE, &contentbyte);
+
+						if (endpos == 0U)
 						{
-							status = qsc_tls_status_buffer_too_small;
+							status = qsc_tls_status_invalid_length;
+						}
+						else if (tls_record_inner_content_type_is_valid((qsc_tls_record_content_type)contentbyte) == false)
+						{
+							status = qsc_tls_status_invalid_input;
 						}
 						else
 						{
-							qsc_memutils_copy(output, inner, endpos);
-							*written = endpos;
-							state->sequence += 1U;
+							*inner_type = (qsc_tls_record_content_type)contentbyte;
+							endpos -= 1U;
+
+							if (endpos > outlen)
+							{
+								status = qsc_tls_status_buffer_too_small;
+							}
+							else
+							{
+								qsc_memutils_copy(output, inner, endpos);
+								*written = endpos;
+
+								if (state->sequence == UINT64_MAX)
+								{
+									qsc_tls_record_state_dispose(state);
+									status = qsc_tls_status_authentication_failure;
+								}
+								else
+								{
+									state->sequence += 1U;
+								}
+							}
 						}
 					}
 				}
 			}
+
+			qsc_memutils_secure_erase(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
+			qsc_memutils_alloc_free(inner);
+			inner = NULL;
 		}
 	}
 
@@ -550,9 +720,11 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 
 	qsc_memutils_secure_erase(aad, sizeof(aad));
 	qsc_memutils_secure_erase(nonce, sizeof(nonce));
-	qsc_memutils_secure_erase(inner, sizeof(inner));
 	qsc_memutils_secure_erase(&kp, sizeof(kp));
-	qsc_memutils_secure_erase(&gcm, sizeof(gcm));
+	qsc_memutils_secure_erase(&gcm128, sizeof(gcm128));
+	qsc_memutils_secure_erase(&gcm256, sizeof(gcm256));
+	qsc_memutils_secure_erase(&cpoly, sizeof(cpoly));
+	qsc_memutils_secure_erase(&ckp, sizeof(ckp));
 
 	return status;
 }

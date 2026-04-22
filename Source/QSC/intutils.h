@@ -143,9 +143,10 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
 * \brief Check if two integers are equal.
 *
-* \param x:		[size_t] The first integer.
-* \param y:		[size_t] The second integer.
-* \return			[bool] Returns true if x equals y.
+* \param x: [size_t] The first integer.
+* \param y: [size_t] The second integer.
+* 
+* \return [bool] Returns true if x equals y.
 */
 QSC_EXPORT_API bool qsc_intutils_are_equal(size_t x, size_t y);
 
@@ -154,18 +155,20 @@ QSC_EXPORT_API bool qsc_intutils_are_equal(size_t x, size_t y);
  * \ warning This function is not constant time. 
  * Use the \c qsc_intutils_verify for constant time operations.
  *
- * \param a:		[const uint8_t*] The first array.
- * \param b:		[const uint8_t*] The second array.
- * \param length:	[size_t] The number of bytes to compare.
- * \return			[bool] Returns true if the arrays are equal.
+ * \param a: [const uint8_t*] The first array.
+ * \param b: [const uint8_t*] The second array.
+ * \param length: [size_t] The number of bytes to compare.
+ * 
+ * \return [bool] Returns true if the arrays are equal.
  */
 QSC_EXPORT_API bool qsc_intutils_are_equal8(const uint8_t* a, const uint8_t* b, size_t length);
 
 /**
  * \brief Convert an 8-bit integer array to a 16-bit big-endian integer.
  *
- * \param input:	[const uint8_t*] The source 8-bit array.
- * \return			[uint16_t] Returns the 16-bit big-endian integer.
+ * \param input: [const uint8_t*] The source 8-bit array.
+ * 
+ * \return [uint16_t] Returns the 16-bit big-endian integer.
  */
 QSC_EXPORT_API uint16_t qsc_intutils_be8to16(const uint8_t* input);
 
@@ -180,40 +183,41 @@ QSC_EXPORT_API uint32_t qsc_intutils_be8to32(const uint8_t* input);
 /**
  * \brief Convert an 8-bit integer array to a 64-bit big-endian integer.
  *
- * \param input:	[const uint8_t*] The source 8-bit array.
- * \return			[uint64_t] Returns the 64-bit big-endian integer.
+ * \param input: [const uint8_t*] The source 8-bit array.
+ * 
+ * \return [uint64_t] Returns the 64-bit big-endian integer.
  */
 QSC_EXPORT_API uint64_t qsc_intutils_be8to64(const uint8_t* input);
 
 /**
  * \brief Convert a 16-bit integer to a big-endian 8-bit integer array.
  *
- * \param output:	[uint8_t*] The destination array.
- * \param value:	[uint16_t] The 16-bit integer.
+ * \param output: [uint8_t*] The destination array.
+ * \param value: [uint16_t] The 16-bit integer.
  */
 QSC_EXPORT_API void qsc_intutils_be16to8(uint8_t* output, uint16_t value);
 
 /**
  * \brief Convert a 32-bit integer to a big-endian 8-bit integer array.
  *
- * \param output:	[uint8_t*] The destination array.
- * \param value:	[uint32_t] The 32-bit integer.
+ * \param output: [uint8_t*] The destination array.
+ * \param value: [uint32_t] The 32-bit integer.
  */
 QSC_EXPORT_API void qsc_intutils_be32to8(uint8_t* output, uint32_t value);
 
 /**
  * \brief Convert a 64-bit integer to a big-endian 8-bit integer array.
  *
- * \param output:	[uint8_t*] The destination array.
- * \param value:	[uint64_t] The 64-bit integer.
+ * \param output: [uint8_t*] The destination array.
+ * \param value: [uint64_t] The 64-bit integer.
  */
 QSC_EXPORT_API void qsc_intutils_be64to8(uint8_t* output, uint64_t value);
 
 /**
  * \brief Increment an 8-bit integer array as a segmented big-endian integer.
  *
- * \param output:	[uint8_t*] The counter array.
- * \param otplen:	[size_t] The length of the counter array.
+ * \param output: [uint8_t*] The counter array.
+ * \param otplen: [size_t] The length of the counter array.
  */
 QSC_EXPORT_API void qsc_intutils_be8increment(uint8_t* output, size_t otplen);
 
@@ -222,8 +226,8 @@ QSC_EXPORT_API void qsc_intutils_be8increment(uint8_t* output, size_t otplen);
  *   CTRBLK := NONCE(32) ? IV(64) ? COUNT(32)
  *   COUNT ? (COUNT + 1) mod 2^32
  *
- * \param output   [uint8_t*] The pointer to the counter block (length ? 4)
- * \param otplen   [size_t] The total length of the counter buffer in bytes
+ * \param output: [uint8_t*] The pointer to the counter block (length ? 4)
+ * \param otplen: [size_t] The total length of the counter buffer in bytes
  */
 void qsc_intutils_be8increment_rfc3686(uint8_t* output, size_t otplen);
 
@@ -231,32 +235,36 @@ void qsc_intutils_be8increment_rfc3686(uint8_t* output, size_t otplen);
  * \brief Reverse the bits of an integer.
  *
  * \param x: The integer.
- * \param bits:		[size_t] The number of bits to reverse.
- * \return			[size_t] Returns the integer with its bits reversed.
+ * \param bits:	[size_t] The number of bits to reverse.
+ * 
+ * \return [size_t] Returns the integer with its bits reversed.
  */
 QSC_EXPORT_API size_t qsc_intutils_bit_reverse(size_t x, uint32_t bits);
 
 /**
  * \brief Reverse the bits of a 64-bit integer.
  *
- * \param x:		[uint64_t] The 64-bit integer.
- * \return			[uint64_t] Returns the 64-bit integer with its bits reversed.
+ * \param x: [uint64_t] The 64-bit integer.
+ * 
+ * \return [uint64_t] Returns the 64-bit integer with its bits reversed.
  */
 QSC_EXPORT_API uint64_t qsc_intutils_bit_reverse_u64(uint64_t x);
 
 /**
  * \brief Reverse the bits of a 32-bit integer.
  *
- * \param x:		[uint32_t] The 32-bit integer.
- * \return			[uint32_t] Returns the 32-bit integer with its bits reversed.
+ * \param x: [uint32_t] The 32-bit integer.
+ * 
+ * \return [uint32_t] Returns the 32-bit integer with its bits reversed.
  */
 QSC_EXPORT_API uint32_t qsc_intutils_bit_reverse_u32(uint32_t x);
 
 /**
  * \brief Reverse the bits of a 16-bit integer.
  *
- * \param x:		[uint16_t] The 16-bit integer.
- * \return			[uint16_t] Returns the 16-bit integer with its bits reversed.
+ * \param x: [uint16_t] The 16-bit integer.
+ * 
+ * \return [uint16_t] Returns the 16-bit integer with its bits reversed.
  */
 QSC_EXPORT_API uint16_t qsc_intutils_bit_reverse_u16(uint16_t x);
 
@@ -264,18 +272,18 @@ QSC_EXPORT_API uint16_t qsc_intutils_bit_reverse_u16(uint16_t x);
 /**
  * \brief Byte-swap an array of 32-bit integers.
  *
- * \param dest:		[uint32_t*] The destination array.
- * \param source:	[const uint32_t*] The source array.
- * \param length:	[size_t] The number of 32-bit integers to swap.
+ * \param dest: [uint32_t*] The destination array.
+ * \param source: [const uint32_t*] The source array.
+ * \param length: [size_t] The number of 32-bit integers to swap.
  */
 QSC_EXPORT_API void qsc_intutils_bswap32(uint32_t* dest, const uint32_t* source, size_t length);
 
 /**
  * \brief Byte-swap an array of 64-bit integers.
  *
- * \param dest:		[uint64_t*] The destination array.
- * \param source:	[const uint64_t*] The source array.
- * \param length:	[size_t] The number of 64-bit integers to swap.
+ * \param dest: [uint64_t*] The destination array.
+ * \param source: [const uint64_t*] The source array.
+ * \param length: [size_t] The number of 64-bit integers to swap.
  */
 QSC_EXPORT_API void qsc_intutils_bswap64(uint64_t* dest, const uint64_t* source, size_t length);
 #endif
@@ -283,9 +291,9 @@ QSC_EXPORT_API void qsc_intutils_bswap64(uint64_t* dest, const uint64_t* source,
 /*!
  * \brief Computes the absolute value of a double.
  *
- * \param a:		[double] The input value.
+ * \param a: [double] The input value.
  * 
- * \return			[double] The absolute value of \c a.
+ * \return [double] The absolute value of \c a.
  */
 QSC_EXPORT_API double qsc_intutils_calculate_abs(double a);
 
@@ -301,17 +309,18 @@ QSC_EXPORT_API double qsc_intutils_calculate_abs(double a);
  *   exp(x) = 1 + x/1! + x^2/2! + x^3/3! + ...
  * and stops when the absolute value of the term is less than a relative tolerance.
  *
- * \param x		[double] The exponent.
+ * \param x: [double] The exponent.
  * 
- * \return		[double] The computed exp(x) value.
+ * \return [double] The computed exp(x) value.
  */
 QSC_EXPORT_API double qsc_intutils_calculate_exp(double x);
 
 /**
  * \brief Return the absolute value of a double.
  *
- * \param x:		[double] The input double.
- * \return			[double] Returns the absolute value.
+ * \param x: [double] The input double.
+ * 
+ * \return [double] Returns the absolute value.
  */
 QSC_EXPORT_API double qsc_intutils_calculate_fabs(double x);
 
@@ -333,8 +342,9 @@ QSC_EXPORT_API double qsc_intutils_calculate_fabs(double x);
  * where y = (x - 1)/(x + 1). The series continues until the current term falls
  * below a fixed tolerance.
  *
- * \param x:		[double] The input value.
- * \return			[double] The natural logarithm of x.
+ * \param x: [double] The input value.
+ * 
+ * \return [double] The natural logarithm of x.
  */
 QSC_EXPORT_API double qsc_intutils_calculate_log(double x);
 
@@ -350,111 +360,113 @@ QSC_EXPORT_API double qsc_intutils_calculate_log(double x);
  * The iteration stops when the absolute difference between successive guesses is
  * less than a small fraction of the guess (relative tolerance).
  *
- * \param x:		[double] The input value.
- * \return			[double] The square root of x, or NaN if x is negative.
+ * \param x: [double] The input value.
+ * 
+ * \return [double] The square root of x, or NaN if x is negative.
  */
 QSC_EXPORT_API double qsc_intutils_calculate_sqrt(double x);
 
 /**
  * \brief Set an array of 8-bit integers to zero.
  *
- * \param a:		[uint8_t*] The array to zeroize.
- * \param count:	[size_t] The number of elements to zeroize.
+ * \param a: [uint8_t*] The array to zeroize.
+ * \param count: [size_t] The number of elements to zeroize.
  */
 QSC_EXPORT_API void qsc_intutils_clear8(uint8_t* a, size_t count);
 
 /**
  * \brief Set an array of 16-bit integers to zero.
  *
- * \param a:		[uint16_t*] The array to zeroize.
- * \param count:	[size_t] The number of elements to zeroize.
+ * \param a: [uint16_t*] The array to zeroize.
+ * \param count: [size_t] The number of elements to zeroize.
  */
 QSC_EXPORT_API void qsc_intutils_clear16(uint16_t* a, size_t count);
 
 /**
  * \brief Set an array of 32-bit integers to zero.
  *
- * \param a:		[uint32_t*] The array to zeroize.
- * \param count:	[size_t] The number of elements to zeroize.
+ * \param a: [uint32_t*] The array to zeroize.
+ * \param count: [size_t] The number of elements to zeroize.
  */
 QSC_EXPORT_API void qsc_intutils_clear32(uint32_t* a, size_t count);
 
 /**
  * \brief Set an array of 64-bit integers to zero.
  *
- * \param a:		[uint64_t*] The array to zeroize.
- * \param count:	[size_t] The number of elements to zeroize.
+ * \param a: [uint64_t*] The array to zeroize.
+ * \param count: [size_t] The number of elements to zeroize.
  */
 QSC_EXPORT_API void qsc_intutils_clear64(uint64_t* a, size_t count);
 
 /**
  * \brief Perform a constant-time conditional move on two arrays of 8-bit integers.
  *
- * \param dest:		[uint8_t*] The destination array.
- * \param source:	[const uint8_t*] The source array.
- * \param length:	[size_t] The number of bytes to move.
- * \param cond:		[uint8_t] The condition (1 to move, 0 to leave unchanged).
+ * \param dest: [uint8_t*] The destination array.
+ * \param source: [const uint8_t*] The source array.
+ * \param length: [size_t] The number of bytes to move.
+ * \param cond: [uint8_t] The condition (1 to move, 0 to leave unchanged).
  */
 QSC_EXPORT_API void qsc_intutils_cmov(uint8_t* dest, const uint8_t* source, size_t length, uint8_t cond);
 
 /**
  * \brief Expand an integer mask in constant time.
  *
- * \param x:		[size_t] The N-bit word.
- * \return			[size_t] Returns the expanded mask.
+ * \param x: [size_t] The N-bit word.
+ * \return [size_t] Returns the expanded mask.
  */
 QSC_EXPORT_API size_t qsc_intutils_expand_mask(size_t x);
 
 /**
  * \brief Check if an integer is greater than or equal to another.
  *
- * \param x:		[size_t] The base integer.
- * \param y:		[size_t] The comparison integer.
- * \return			[bool] Returns true if x is greater than or equal to y.
+ * \param x: [size_t] The base integer.
+ * \param y: [size_t] The comparison integer.
+ * 
+ * \return [bool] Returns true if x is greater than or equal to y.
  */
 QSC_EXPORT_API bool qsc_intutils_is_gte(size_t x, size_t y);
 
 /**
  * \brief Check if the integer is a power of two.
  *
- * \param x:		[size_t] The base integer.
+ * \param x: [size_t] The base integer.
  * 
- * \return			[bool] Returns true if x is a power of two.
+ * \return [bool] Returns true if x is a power of two.
  */
 QSC_EXPORT_API bool qsc_intutils_is_power_of_two(size_t x);
 
 /**
  * \brief Find the next power of two.
  *
- * \param x:		[size_t] The base integer.
+ * \param x: [size_t] The base integer.
  *
- * \return			[bool] Returns the closest next power of two.
+ * \return [bool] Returns the closest next power of two.
  */
 QSC_EXPORT_API size_t qsc_intutils_next_power_of_2(size_t x);
 
 /**
  * \brief Convert a hexadecimal string to a byte array.
  *
- * \param hexstr:	[const char*] The hexadecimal string.
- * \param output:	[uint8_t*] The output array.
- * \param otplen:	[size_t] The length of the output array.
+ * \param hexstr: [const char*] The hexadecimal string.
+ * \param output: [uint8_t*] The output array.
+ * \param otplen: [size_t] The length of the output array.
  */
 QSC_EXPORT_API void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t otplen);
 
 /**
  * \brief Convert a byte array to a hexadecimal string.
  *
- * \param input:	[const uint8_t*] The input array.
- * \param hexstr:	[char*] The output hexadecimal string; must be twice the size of the input array.
- * \param inplen:	[size_t] The length of the input array.
+ * \param input: [const uint8_t*] The input array.
+ * \param hexstr: [char*] The output hexadecimal string; must be twice the size of the input array.
+ * \param inplen: [size_t] The length of the input array.
  */
 QSC_EXPORT_API void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, size_t inplen);
 
 /**
  * \brief Increment an 8-bit integer array as a segmented little-endian integer.
  *
- * \param output:	[uint8_t*] The counter array.
- * \param otplen:	[size_t] The length of the counter array.
+ * \param output: [uint8_t*] The counter array.
+ * \param otplen: [size_t] The length of the counter array.
  */
 QSC_EXPORT_API void qsc_intutils_le8increment(uint8_t* output, size_t otplen);
 
@@ -462,7 +474,7 @@ QSC_EXPORT_API void qsc_intutils_le8increment(uint8_t* output, size_t otplen);
 /**
  * \brief Increment the low 64-bit integer of a 128-bit vector (little-endian) by one.
  *
- * \param counter:	[__m128i*] Pointer to the counter vector.
+ * \param counter: [__m128i*] Pointer to the counter vector.
  */
 QSC_EXPORT_API void qsc_intutils_leincrement_x128(__m128i* counter);
 #endif
@@ -471,7 +483,7 @@ QSC_EXPORT_API void qsc_intutils_leincrement_x128(__m128i* counter);
 /**
  * \brief Increment the low 64-bit integer of a 512-bit vector (little-endian) by one.
  *
- * \param counter:	[__m512i*] Pointer to the counter vector.
+ * \param counter: [__m512i*] Pointer to the counter vector.
  */
 QSC_EXPORT_API void qsc_intutils_leincrement_x512(__m512i* counter);
 #endif
@@ -479,83 +491,88 @@ QSC_EXPORT_API void qsc_intutils_leincrement_x512(__m512i* counter);
 /**
  * \brief Convert an 8-bit integer array to a 16-bit little-endian integer.
  *
- * \param input:	[const uint8_t*] The source array.
- * \return			[uint16_t] Returns the 16-bit little-endian integer.
+ * \param input: [const uint8_t*] The source array.
+ * 
+ * \return [uint16_t] Returns the 16-bit little-endian integer.
  */
 QSC_EXPORT_API uint16_t qsc_intutils_le8to16(const uint8_t* input);
 
 /**
  * \brief Convert an 8-bit integer array to a 32-bit little-endian integer.
  *
- * \param input:	[const uint8_t*] The source array.
- * \return			[uint32_t] Returns the 32-bit little-endian integer.
+ * \param input: [const uint8_t*] The source array.
+ * 
+ * \return [uint32_t] Returns the 32-bit little-endian integer.
  */
 QSC_EXPORT_API uint32_t qsc_intutils_le8to32(const uint8_t* input);
 
 /**
  * \brief Convert an 8-bit integer array to a 64-bit little-endian integer.
  *
- * \param input:	[const uint8_t*] The source array.
- * \return			[uint64_t] Returns the 64-bit little-endian integer.
+ * \param input: [const uint8_t*] The source array.
+ * 
+ * \return [uint64_t] Returns the 64-bit little-endian integer.
  */
 QSC_EXPORT_API uint64_t qsc_intutils_le8to64(const uint8_t* input);
 
 /**
  * \brief Convert a 16-bit integer to a little-endian 8-bit integer array.
  *
- * \param output:	[uint8_t*] The destination array.
- * \param value:	[uint16_t] The 16-bit integer.
+ * \param output: [uint8_t*] The destination array.
+ * \param value: [uint16_t] The 16-bit integer.
  */
 QSC_EXPORT_API void qsc_intutils_le16to8(uint8_t* output, uint16_t value);
 
 /**
  * \brief Convert a 32-bit integer to a little-endian 8-bit integer array.
  *
- * \param output:	[uint8_t*] The destination array.
- * \param value:	[uint32_t] The 32-bit integer.
+ * \param output: [uint8_t*] The destination array.
+ * \param value: [uint32_t] The 32-bit integer.
  */
 QSC_EXPORT_API void qsc_intutils_le32to8(uint8_t* output, uint32_t value);
 
 /**
  * \brief Convert a 64-bit integer to a little-endian 8-bit integer array.
  *
- * \param output:	[uint8_t*] The destination array.
- * \param value:	[uint64_t] The 64-bit integer.
+ * \param output: [uint8_t*] The destination array.
+ * \param value: [uint64_t] The 64-bit integer.
  */
 QSC_EXPORT_API void qsc_intutils_le64to8(uint8_t* output, uint64_t value);
 
 /**
  * \brief Check if the integer has the lsb set.
  *
- * \param x:		[size_t] The base integer.
+ * \param x: [size_t] The base integer.
  *
- * \return			[bool] Returns true if x has the lsb set.
+ * \return [bool] Returns true if x has the lsb set.
  */
 QSC_EXPORT_API bool qsc_intutils_lsb_is_set(size_t x);
 
 /**
  * \brief Return the larger of two integers.
  *
- * \param a:		[size_t] The first integer.
- * \param b:		[size_t] The second integer.
- * \return			[size_t] Returns the larger integer.
+ * \param a: [size_t] The first integer.
+ * \param b: [size_t] The second integer.
+ * \return [size_t] Returns the larger integer.
  */
 QSC_EXPORT_API size_t qsc_intutils_max(size_t a, size_t b);
 
 /**
  * \brief Return the smaller of two integers.
  *
- * \param a:		[size_t] The first integer.
- * \param b:		[size_t] The second integer.
- * \return			[size_t] Returns the smaller integer.
+ * \param a: [size_t] The first integer.
+ * \param b: [size_t] The second integer.
+ * 
+ * \return [size_t] Returns the smaller integer.
  */
 QSC_EXPORT_API size_t qsc_intutils_min(size_t a, size_t b);
 
 /**
  * \brief Count the number of bits set in a 32-bit unsigned integer.
  *
- * \param v:		[uint32_t] The 32-bit integer.
- * \return			[uint32_t] Returns the number of bits set.
+ * \param v: [uint32_t] The 32-bit integer.
+ * 
+ * \return [uint32_t] Returns the number of bits set.
  */
 QSC_EXPORT_API uint32_t qsc_intutils_popcount32(uint32_t v);
 
@@ -563,8 +580,8 @@ QSC_EXPORT_API uint32_t qsc_intutils_popcount32(uint32_t v);
 /**
  * \brief Reverse the bytes of a 128-bit integer vector.
  *
- * \param input:	[const __m128i*] The source vector.
- * \param output:	[__m128i*] The destination vector.
+ * \param input: [const __m128i*] The source vector.
+ * \param output: [__m128i*] The destination vector.
  */
 QSC_EXPORT_API void qsc_intutils_reverse_bytes_x128(const __m128i* input, __m128i* output);
 #endif
@@ -573,8 +590,8 @@ QSC_EXPORT_API void qsc_intutils_reverse_bytes_x128(const __m128i* input, __m128
 /**
  * \brief Reverse the bytes of a 512-bit integer vector.
  *
- * \param input:	[const __m512i*] The source vector.
- * \param output:	[__m512i*] The destination vector.
+ * \param input: [const __m512i*] The source vector.
+ * \param output: [__m512i*] The destination vector.
  */
 QSC_EXPORT_API void qsc_intutils_reverse_bytes_x512(const __m512i* input, __m512i* output);
 #endif
@@ -582,46 +599,51 @@ QSC_EXPORT_API void qsc_intutils_reverse_bytes_x512(const __m512i* input, __m512
 /**
  * \brief Rotate an unsigned 32-bit integer to the left.
  *
- * \param value:	[uint32_t] The integer value.
- * \param shift:	[size_t] The number of bits to shift.
- * \return			[uint32_t] Returns the rotated integer.
+ * \param value: [uint32_t] The integer value.
+ * \param shift: [size_t] The number of bits to shift.
+ * 
+ * \return [uint32_t] Returns the rotated integer.
  */
 QSC_EXPORT_API uint32_t qsc_intutils_rotl32(uint32_t value, size_t shift);
 
 /**
  * \brief Rotate an unsigned 64-bit integer to the left.
  *
- * \param value:	[uint64_t] The integer value.
- * \param shift:	[size_t] The number of bits to shift.
- * \return			[uint64_t] Returns the rotated integer.
+ * \param value: [uint64_t] The integer value.
+ * \param shift: [size_t] The number of bits to shift.
+ * 
+ * \return [uint64_t] Returns the rotated integer.
  */
 QSC_EXPORT_API uint64_t qsc_intutils_rotl64(uint64_t value, size_t shift);
 
 /**
  * \brief Rotate an unsigned 32-bit integer to the right.
  *
- * \param value:	[uint32_t] The integer value.
- * \param shift:	[size_t] The number of bits to shift.
- * \return			[uint32_t] Returns the rotated integer.
+ * \param value: [uint32_t] The integer value.
+ * \param shift: [size_t] The number of bits to shift.
+ * 
+ * \return [uint32_t] Returns the rotated integer.
  */
 QSC_EXPORT_API uint32_t qsc_intutils_rotr32(uint32_t value, size_t shift);
 
 /**
  * \brief Rotate an unsigned 64-bit integer to the right.
  *
- * \param value:	[uint64_t] The integer value.
- * \param shift:	[size_t] The number of bits to shift.
- * \return			[uint64_t] Returns the rotated integer.
+ * \param value: [uint64_t] The integer value.
+ * \param shift: [size_t] The number of bits to shift.
+ * 
+ * \return [uint64_t] Returns the rotated integer.
  */
 QSC_EXPORT_API uint64_t qsc_intutils_rotr64(uint64_t value, size_t shift);
 
 /**
  * \brief Constant-time comparison of two 8-bit integer arrays.
  *
- * \param a:		[const uint8_t*] The first array.
- * \param b:		[const uint8_t*] The second array.
- * \param length:	[size_t] The number of bytes to compare.
- * \return			[int32_t] Returns zero if the arrays are equivalent.
+ * \param a: [const uint8_t*] The first array.
+ * \param b: [const uint8_t*] The second array.
+ * \param length: [size_t] The number of bytes to compare.
+ * 
+ * \return [int32_t] Returns zero if the arrays are equivalent.
  */
 QSC_EXPORT_API int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length);
 

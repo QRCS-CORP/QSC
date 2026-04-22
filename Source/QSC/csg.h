@@ -133,7 +133,7 @@ QSC_EXPORT_API typedef struct
  *
  * Securely destroys the internal state of the DRBG.
  *
- * \param ctx:      [qsc_csg_state*] Pointer to the DRBG state structure.
+ * \param ctx: [qsc_csg_state*] Pointer to the DRBG state structure.
  */
 QSC_EXPORT_API void qsc_csg_dispose(qsc_csg_state* ctx);
 
@@ -143,12 +143,12 @@ QSC_EXPORT_API void qsc_csg_dispose(qsc_csg_state* ctx);
  * The seed must be either 32 bytes (for a 256-bit generator) or 64 bytes (for a 512-bit generator).
  * An optional personalization string and a predictive resistance flag may also be provided.
  *
- * \param ctx:      [qsc_csg_state*] Pointer to the DRBG state structure.
- * \param seed:     [const uint8_t*] Pointer to the random seed. (32 bytes instantiates cSHAKE-256; 64 bytes instantiates cSHAKE-512.)
- * \param seedlen:  [size_t] The length of the seed in bytes.
- * \param info:     [const uint8_t*] Pointer to the optional personalization string.
- * \param infolen:  [size_t] The length of the personalization string in bytes.
- * \param predres:  [bool] Enable predictive resistance; if true, random bytes are injected periodically.
+ * \param ctx: [qsc_csg_state*] Pointer to the DRBG state structure.
+ * \param seed: [const uint8_t*] Pointer to the random seed. (32 bytes instantiates cSHAKE-256; 64 bytes instantiates cSHAKE-512.)
+ * \param seedlen: [size_t] The length of the seed in bytes.
+ * \param info: [const uint8_t*] Pointer to the optional personalization string.
+ * \param infolen: [size_t] The length of the personalization string in bytes.
+ * \param predres: [bool] Enable predictive resistance; if true, random bytes are injected periodically.
  */
 QSC_EXPORT_API void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predres);
 
@@ -157,9 +157,9 @@ QSC_EXPORT_API void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, 
  *
  * Generates pseudo-random output using the DRBG. The generator must be initialized first.
  *
- * \param ctx:      [qsc_csg_state*] Pointer to the DRBG state structure.
- * \param output:   [uint8_t*] Pointer to the output array for pseudo-random bytes.
- * \param otplen:   [size_t] The number of bytes to generate.
+ * \param ctx: [qsc_csg_state*] Pointer to the DRBG state structure.
+ * \param output: [uint8_t*] Pointer to the output array for pseudo-random bytes.
+ * \param otplen: [size_t] The number of bytes to generate.
  */
 QSC_EXPORT_API void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen);
 
@@ -168,9 +168,9 @@ QSC_EXPORT_API void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t
  *
  * The new seed material is absorbed into the Keccak state.
  *
- * \param ctx:      [qsc_csg_state*] Pointer to the DRBG state structure.
- * \param seed:     [const uint8_t*] Pointer to the update seed.
- * \param seedlen:  [size_t] The length of the update seed in bytes.
+ * \param ctx: [qsc_csg_state*] Pointer to the DRBG state structure.
+ * \param seed:[const uint8_t*] Pointer to the update seed.
+ * \param seedlen: [size_t] The length of the update seed in bytes.
  */
 QSC_EXPORT_API void qsc_csg_update(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen);
 

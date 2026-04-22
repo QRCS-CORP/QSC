@@ -138,7 +138,7 @@ bool qsc_stringutils_compare_strings(const char* str1, const char* str2, size_t 
 
 	uint8_t acc;
 
-	acc = 1U;
+	acc = 0U;
 
 	if (str1 != NULL && str2 != NULL) 
 	{

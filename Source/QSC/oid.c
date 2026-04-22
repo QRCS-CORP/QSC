@@ -17,6 +17,8 @@ static const uint8_t OID_ML_KEM_768[] = { 0x60U, 0x86U, 0x48U, 0x01U, 0x65U, 0x0
 static const uint8_t OID_ML_KEM_1024[] = { 0x60U, 0x86U, 0x48U, 0x01U, 0x65U, 0x03U, 0x04U, 0x04U, 0x03U };
 
 static const uint8_t OID_EC_PUBLIC_KEY[] = { 0x2AU, 0x86U, 0x48U, 0xCEU, 0x3DU, 0x02U, 0x01U };
+static const uint8_t OID_ED25519[] = { 0x2BU, 0x65U, 0x70U };
+static const uint8_t OID_ED448[] = { 0x2BU, 0x65U, 0x71U };
 static const uint8_t OID_PRIME256V1[] = { 0x2AU, 0x86U, 0x48U, 0xCEU, 0x3DU, 0x03U, 0x01U, 0x07U };
 static const uint8_t OID_SECP384R1[] = { 0x2BU, 0x81U, 0x04U, 0x00U, 0x22U };
 static const uint8_t OID_SECP521R1[] = { 0x2BU, 0x81U, 0x04U, 0x00U, 0x23U };
@@ -93,6 +95,9 @@ static const qsc_oid_entry OID_REGISTRY[] =
     { QSC_OID_ID_ML_KEM_1024, OID_ML_KEM_1024, sizeof(OID_ML_KEM_1024), "2.16.840.1.101.3.4.4.3", "id-alg-ml-kem-1024" },
 
     { QSC_OID_ID_EC_PUBLIC_KEY, OID_EC_PUBLIC_KEY, sizeof(OID_EC_PUBLIC_KEY), "1.2.840.10045.2.1", "id-ecPublicKey" },
+
+    { QSC_OID_ID_ED25519, OID_ED25519, sizeof(OID_ED25519), "1.3.101.112", "id-Ed25519" },
+    { QSC_OID_ID_ED448, OID_ED448, sizeof(OID_ED448), "1.3.101.113", "id-Ed448" },
     { QSC_OID_ID_PRIME256V1, OID_PRIME256V1, sizeof(OID_PRIME256V1), "1.2.840.10045.3.1.7", "prime256v1" },
     { QSC_OID_ID_SECP384R1, OID_SECP384R1, sizeof(OID_SECP384R1), "1.3.132.0.34", "secp384r1" },
     { QSC_OID_ID_SECP521R1, OID_SECP521R1, sizeof(OID_SECP521R1), "1.3.132.0.35", "secp521r1" },

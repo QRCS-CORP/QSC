@@ -135,10 +135,10 @@ QSC_EXPORT_API typedef struct
  *
  * \details Computes the QMAC code for the provided message using the given key parameters.
  *
- * \param output:		[uint8_t*] Pointer to the output byte array; receives the MAC code.
- * \param keyparams:	[qsc_qmac_keyparams*] Pointer to the QMAC key parameters structure.
- * \param message:		[const uint8_t*] Pointer to the message input byte array.
- * \param msglen:		[size_t] The number of message bytes to process.
+ * \param output: [uint8_t*] Pointer to the output byte array; receives the MAC code.
+ * \param keyparams: [qsc_qmac_keyparams*] Pointer to the QMAC key parameters structure.
+ * \param message: [const uint8_t*] Pointer to the message input byte array.
+ * \param msglen: [size_t] The number of message bytes to process.
  */
 QSC_EXPORT_API void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keyparams, const uint8_t* message, size_t msglen);
 
@@ -147,7 +147,7 @@ QSC_EXPORT_API void qsc_qmac_compute(uint8_t* output, qsc_qmac_keyparams* keypar
  *
  * \details Erases all variables and resets the state.
  *
- * \param ctx:			[qsc_qmac_state*] Pointer to the QMAC state structure; must be initialized.
+ * \param ctx: [qsc_qmac_state*] Pointer to the QMAC state structure; must be initialized.
  */
 QSC_EXPORT_API void qsc_qmac_dispose(qsc_qmac_state* ctx);
 
@@ -158,8 +158,8 @@ QSC_EXPORT_API void qsc_qmac_dispose(qsc_qmac_state* ctx);
  * 
  * \warning Finalize calls dispose on the qmac state.
  *
- * \param ctx:			[qsc_qmac_state*] Pointer to the QMAC state structure; must be initialized.
- * \param output:		[uint8_t*] Pointer to the MAC output byte array.
+ * \param ctx: [qsc_qmac_state*] Pointer to the QMAC state structure; must be initialized.
+ * \param output: [uint8_t*] Pointer to the MAC output byte array.
  */
 QSC_EXPORT_API void qsc_qmac_finalize(qsc_qmac_state* ctx, uint8_t* output);
 
@@ -168,8 +168,8 @@ QSC_EXPORT_API void qsc_qmac_finalize(qsc_qmac_state* ctx, uint8_t* output);
  *
  * \details Initializes the QMAC state using the provided key parameters.
  *
- * \param ctx:			[qsc_qmac_state*] Pointer to the QMAC state structure.
- * \param keyparams:	[qsc_qmac_keyparams*] Pointer to the QMAC key parameters structure.
+ * \param ctx: [qsc_qmac_state*] Pointer to the QMAC state structure.
+ * \param keyparams: [qsc_qmac_keyparams*] Pointer to the QMAC key parameters structure.
  */
 QSC_EXPORT_API void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams* keyparams);
 
@@ -178,9 +178,9 @@ QSC_EXPORT_API void qsc_qmac_initialize(qsc_qmac_state* ctx, qsc_qmac_keyparams*
  *
  * \details Absorbs a block-sized portion of the input message into the QMAC state.
  *
- * \param ctx:			[qsc_qmac_state*] Pointer to the QMAC state structure; must be initialized.
- * \param message:		[const uint8_t*] Pointer to the input message byte array.
- * \param msglen:		[size_t] The length of the message; must equal one block (QSC_QMAC_BLOCK_SIZE).
+ * \param ctx: [qsc_qmac_state*] Pointer to the QMAC state structure; must be initialized.
+ * \param message: [const uint8_t*] Pointer to the input message byte array.
+ * \param msglen: [size_t] The length of the message; must equal one block (QSC_QMAC_BLOCK_SIZE).
  */
 QSC_EXPORT_API void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen);
 

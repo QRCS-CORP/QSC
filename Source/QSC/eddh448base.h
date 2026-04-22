@@ -52,8 +52,8 @@ QSC_CPLUSPLUS_ENABLED_START
  * Montgomery curve Curve448, returning the u-coordinate as the
  * 56-byte public key.
  *
- * \param q:  [uint8_t*]       Output 56-byte u-coordinate.
- * \param n:  [const uint8_t*] Input 56-byte clamped scalar.
+ * \param q: [uint8_t*] Output 56-byte u-coordinate.
+ * \param n: [const uint8_t*] Input 56-byte clamped scalar.
  */
 void qsc_crypto_scalarmult_curve448_ref10_base(uint8_t* q, const uint8_t* n);
 
@@ -63,9 +63,9 @@ void qsc_crypto_scalarmult_curve448_ref10_base(uint8_t* q, const uint8_t* n);
  * Performs variable-base scalar multiplication u = n * q on
  * Curve448, returning the 56-byte u-coordinate.
  *
- * \param r:  [uint8_t*]       Output 56-byte u-coordinate.
- * \param n:  [const uint8_t*] Input 56-byte clamped scalar.
- * \param q:  [const uint8_t*] Input 56-byte u-coordinate of the base.
+ * \param r: [uint8_t*] Output 56-byte u-coordinate.
+ * \param n: [const uint8_t*] Input 56-byte clamped scalar.
+ * \param q: [const uint8_t*] Input 56-byte u-coordinate of the base.
  */
 void qsc_crypto_scalarmult_curve448_ref10(uint8_t* r, const uint8_t* n, const uint8_t* q);
 
@@ -84,9 +84,9 @@ void qsc_crypto_sc448_clamp(uint8_t* k);
  * Wrapper around qsc_crypto_scalarmult_curve448_ref10 that applies
  * RFC 7748 clamping before the multiplication.
  *
- * \param q:  [uint8_t*]       Output 56-byte shared secret.
- * \param n:  [const uint8_t*] Input 56-byte private scalar (unclamped).
- * \param p:  [const uint8_t*] Input 56-byte peer public key.
+ * \param q: [uint8_t*] Output 56-byte shared secret.
+ * \param n: [const uint8_t*] Input 56-byte private scalar (unclamped).
+ * \param p: [const uint8_t*] Input 56-byte peer public key.
  */
 void qsc_crypto_scalarmult_curve448(uint8_t* q, const uint8_t* n, const uint8_t* p);
 

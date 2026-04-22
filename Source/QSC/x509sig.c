@@ -1,5 +1,6 @@
 #include "x509sig.h"
 #include "dilithium.h"
+#include "eddsa.h"
 #include "encoding.h"
 #include "memutils.h"
 #include "x509spki.h"
@@ -190,6 +191,11 @@ bool qsc_x509_signature_algorithm_matches_spki(qsc_x509_signature_algorithm algo
                     (spki->algorithm.curve == QSC_X509_NAMED_CURVE_SECP521R1));
             }
         }
+		else if (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519)
+		{
+			res = (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) &&
+				(spki->algorithm.parameters_present == false);
+		}
         else if (qsc_x509_signature_algorithm_is_ml_dsa(algorithm) == true)
         {
             if (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA)
@@ -217,6 +223,10 @@ size_t qsc_x509_signature_expected_size(qsc_x509_signature_algorithm algorithm, 
     {
         res = (2U * qsc_x509_signature_component_size(curve));
     }
+	else if (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519)
+	{
+		res = QSC_EDDSA_SIGNATURE_SIZE;
+	}
     else if (qsc_x509_signature_algorithm_is_ml_dsa(algorithm) == true)
     {
 #if defined(QSC_DILITHIUM_SIGNATURE_SIZE)

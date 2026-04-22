@@ -1,5 +1,10 @@
 #include "kyber.h"
 #include "sha3.h"
+#if defined(QSC_SYSTEM_HAS_AVX2)
+#	include "kyberbase_avx2.h"
+#else
+#	include "kyberbase.h"
+#endif
 
 bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {
@@ -31,7 +36,7 @@ bool qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* 
 	QSC_ASSERT(rng_generate != NULL);
 
 	bool res;
-
+	
 	res = false;
 
 	if (secret != NULL && ciphertext != NULL && publickey != NULL && rng_generate != NULL)
@@ -46,7 +51,7 @@ bool qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* 
 	return res;
 }
 
-void qsc_kyber_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t m[QSC_KYBER_SYMBYTES])
+void qsc_kyber_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t* m)
 {
 	QSC_ASSERT(secret != NULL);
 	QSC_ASSERT(ciphertext != NULL);

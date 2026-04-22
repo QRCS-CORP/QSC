@@ -131,15 +131,15 @@ typedef enum
  *
  * Changes the console text color, prints the message, then resets the color.
  *
- * \param message:	[const char*] A pointer to the constant message string.
- * \param color:	[qsc_console_font_color] The desired font color (from qsc_console_font_color).
+ * \param message: [const char*] A pointer to the constant message string.
+ * \param color: [qsc_console_font_color] The desired font color (from qsc_console_font_color).
  */
 QSC_EXPORT_API void qsc_consoleutils_colored_message(const char* message, qsc_console_font_color color);
 
 /**
  * \brief Get a character from the console in a blocking manner.
  *
- * \return Returns	[char] the character read from console input.
+ * \return Returns [char] the character read from console input.
  */
 QSC_EXPORT_API char qsc_consoleutils_get_char(void);
 
@@ -148,9 +148,10 @@ QSC_EXPORT_API char qsc_consoleutils_get_char(void);
  *
  * Reads a line of text from the console, converts it to lowercase, and trims trailing newline characters.
  *
- * \param line:		[char*] A pointer to the character array that receives the text.
- * \param maxlen:	[size_t] The maximum number of characters to read.
- * \return			[size_t] Returns the number of characters read.
+ * \param line: [char*] A pointer to the character array that receives the text.
+ * \param maxlen: [size_t] The maximum number of characters to read.
+ * 
+ * \return [size_t] Returns the number of characters read.
  */
 QSC_EXPORT_API size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen);
 
@@ -159,9 +160,10 @@ QSC_EXPORT_API size_t qsc_consoleutils_get_formatted_line(char* line, size_t max
  *
  * Reads a line of text from the console.
  *
- * \param line:		[char*] A pointer to the character array that receives the text.
- * \param maxlen:	[size_t] The maximum number of characters to read.
- * \return			[size_t] Returns the number of characters read.
+ * \param line: [char*] A pointer to the character array that receives the text.
+ * \param maxlen: [size_t] The maximum number of characters to read.
+ * 
+ * \return [size_t] Returns the number of characters read.
  */
 QSC_EXPORT_API size_t qsc_consoleutils_get_line(char* line, size_t maxlen);
 
@@ -171,10 +173,11 @@ QSC_EXPORT_API size_t qsc_consoleutils_get_line(char* line, size_t maxlen);
  * Searches the input for a quoted substring (using either double or single quotes)
  * and copies it to the output array.
  *
- * \param output:	[char*] A pointer to the destination array for the extracted string.
- * \param input:	[const char*] A pointer to the input string.
- * \param maxlen:	[size_t] The maximum number of characters to extract.
- * \return			[size_t] Returns the number of characters in the quoted string.
+ * \param output: [char*] A pointer to the destination array for the extracted string.
+ * \param input: [const char*] A pointer to the input string.
+ * \param maxlen: [size_t] The maximum number of characters to extract.
+ * 
+ * \return [size_t] Returns the number of characters in the quoted string.
  */
 QSC_EXPORT_API size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_t maxlen);
 
@@ -183,34 +186,36 @@ QSC_EXPORT_API size_t qsc_consoleutils_get_quoted_string(char* output, const cha
  *
  * Blocks until a character is input by the user.
  *
- * \return			[char] Returns the character read from console input.
+ * \return [char] Returns the character read from console input.
  */
 QSC_EXPORT_API char qsc_consoleutils_get_wait(void);
 
 /**
  * \brief Convert a hexadecimal string to a binary (byte) array.
  *
- * \param hexstr:	[const char*] A pointer to the constant hexadecimal string.
- * \param output:	[uint8_t*] A pointer to the output byte array.
- * \param length:	[size_t] The number of bytes to convert.
+ * \param hexstr: [const char*] A pointer to the constant hexadecimal string.
+ * \param output: [uint8_t*] A pointer to the output byte array.
+ * \param length: [size_t] The number of bytes to convert.
  */
 QSC_EXPORT_API void qsc_consoleutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t length);
 
 /**
  * \brief Check if a line of text contains a given token.
  *
- * \param line:		[const char*] A pointer to the constant input line.
- * \param token:	[const char*] A pointer to the constant token string to search for.
- * \return			[bool] Returns true if the token is found; otherwise, false.
+ * \param line: [const char*] A pointer to the constant input line.
+ * \param token: [const char*] A pointer to the constant token string to search for.
+ * 
+ * \return [bool] Returns true if the token is found; otherwise, false.
  */
 QSC_EXPORT_API bool qsc_consoleutils_line_contains(const char* line, const char* token);
 
 /**
  * \brief Compare two lines of text for equivalence.
  *
- * \param line1:	[const char*] A pointer to the first constant input string.
- * \param line2:	[const char*] A pointer to the second constant input string.
- * \return			[bool] Returns true if the strings are equal; otherwise, false.
+ * \param line1: [const char*] A pointer to the first constant input string.
+ * \param line2: [const char*] A pointer to the second constant input string.
+ * 
+ * \return [bool] Returns true if the strings are equal; otherwise, false.
  */
 QSC_EXPORT_API bool qsc_consoleutils_line_equals(const char* line1, const char* line2);
 
@@ -219,17 +224,19 @@ QSC_EXPORT_API bool qsc_consoleutils_line_equals(const char* line1, const char* 
  *
  * Displays masking characters (e.g., asterisks) as the user types and stores the password.
  *
- * \param output:	[char*] A pointer to the output character array to store the password.
- * \param otplen:	[size_t] The maximum size of the output array.
- * \return			[size_t] Returns the number of characters in the password.
+ * \param output: [char*] A pointer to the output character array to store the password.
+ * \param otplen: [size_t] The maximum size of the output array.
+ * 
+ * \return [size_t] Returns the number of characters in the password.
  */
 QSC_EXPORT_API size_t qsc_consoleutils_masked_password(char* output, size_t otplen);
 
 /**
  * \brief Display a confirmation message and wait for a Y/N response.
  *
- * \param message:	[const char*] A pointer to the confirmation dialog message.
- * \return			[bool] Returns true if the user confirms (Y/y), otherwise false.
+ * \param message: [const char*] A pointer to the confirmation dialog message.
+ * 
+ * \return [bool] Returns true if the user confirms (Y/y), otherwise false.
  */
 QSC_EXPORT_API bool qsc_consoleutils_message_confirm(const char* message);
 
@@ -238,8 +245,8 @@ QSC_EXPORT_API bool qsc_consoleutils_message_confirm(const char* message);
  *
  * Prints the array in a formatted manner with a specified number of characters per line.
  *
- * \param input:	[const uint8_t*] A pointer to the constant byte array.
- * \param inplen:	[size_t] The number of bytes in the array.
+ * \param input: [const uint8_t*] A pointer to the constant byte array.
+ * \param inplen: [size_t] The number of bytes in the array.
  * \param linelen:	[size_t] The number of bytes to print per line.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_array(const uint8_t* input, size_t inplen, size_t linelen);
@@ -247,25 +254,25 @@ QSC_EXPORT_API void qsc_consoleutils_print_array(const uint8_t* input, size_t in
 /**
  * \brief Print a byte array as hexadecimal values to the console.
  *
- * \param input:	[const uint8_t*] A pointer to the constant byte array.
- * \param inplen:	[size_t] The number of bytes in the array.
- * \param linelen:	[size_t] The number of bytes to print per line before starting a new line.
+ * \param input: [const uint8_t*] A pointer to the constant byte array.
+ * \param inplen: [size_t] The number of bytes in the array.
+ * \param linelen: [size_t] The number of bytes to print per line before starting a new line.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_hex(const uint8_t* input, size_t inplen, size_t linelen);
 
 /**
  * \brief Print a formatted string to the console, ignoring special characters.
  *
- * \param input:	[const char*] A pointer to the constant string.
- * \param inplen:	[size_t] The number of characters to print.
+ * \param input: [const char*] A pointer to the constant string.
+ * \param inplen: [size_t] The number of characters to print.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_formatted(const char* input, size_t inplen);
 
 /**
  * \brief Print a formatted string to the console with a line break.
  *
- * \param input:	[const char*] A pointer to the constant string.
- * \param inplen:	[size_t] The number of characters to print.
+ * \param input: [const char*] A pointer to the constant string.
+ * \param inplen: [size_t] The number of characters to print.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_formatted_line(const char* input, size_t inplen);
 
@@ -274,50 +281,50 @@ QSC_EXPORT_API void qsc_consoleutils_print_formatted_line(const char* input, siz
  *
  * Prints the string while ignoring any potentially unsafe characters.
  *
- * \param input:	[const char*] A pointer to the constant string.
+ * \param input: [const char*] A pointer to the constant string.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_safe(const char* input);
 
 /**
  * \brief Print a string to the console with a trailing line break.
  *
- * \param input:	[const char*] A pointer to the constant string.
+ * \param input: [const char*] A pointer to the constant string.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_line(const char* input);
 
 /**
  * \brief Print an unsigned 32-bit integer to the console.
  *
- * \param digit:	[uint32_t] The 32-bit unsigned integer to print.
+ * \param digit: [uint32_t] The 32-bit unsigned integer to print.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_uint(uint32_t digit);
 
 /**
  * \brief Print an unsigned 64-bit integer to the console.
  *
- * \param digit:	[uint64_t] The 64-bit unsigned integer to print.
+ * \param digit: [uint64_t] The 64-bit unsigned integer to print.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_ulong(uint64_t digit);
 
 /**
  * \brief Print a double-precision floating point number to the console.
  *
- * \param digit:	[double] The double value to print.
+ * \param digit: [double] The double value to print.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_double(double digit);
 
 /**
  * \brief Print a double-precision floating point number to the console.
  *
- * \param input:	[const char**] A pointer to the constant string array.
- * \param count:	[size_t] The number of strings in the array.
+ * \param input: [const char**] A pointer to the constant string array.
+ * \param count: [size_t] The number of strings in the array.
  */
 QSC_EXPORT_API void qsc_consoleutils_print_concatenated_line(const char** input, size_t count);
 
 /**
  * \brief Display a small spinning progress counter for a specified duration.
  *
- * \param seconds:	[int32_t] The number of seconds to run the progress counter.
+ * \param seconds: [int32_t] The number of seconds to run the progress counter.
  */
 QSC_EXPORT_API void qsc_consoleutils_progress_counter(int32_t seconds);
 
@@ -329,8 +336,8 @@ QSC_EXPORT_API void qsc_consoleutils_send_enter(void);
 /**
  * \brief Set the vertical scroll buffer size of the console window.
  *
- * \param width:	[size_t] The desired buffer width.
- * \param height:	[size_t] The desired buffer height.
+ * \param width: [size_t] The desired buffer width.
+ * \param height: [size_t] The desired buffer height.
  */
 QSC_EXPORT_API void qsc_consoleutils_set_window_buffer(size_t width, size_t height);
 
@@ -342,22 +349,22 @@ QSC_EXPORT_API void qsc_consoleutils_set_window_clear(void);
 /**
  * \brief Set the console window prompt string.
  *
- * \param prompt:	[const char*] A pointer to the prompt string.
+ * \param prompt: [const char*] A pointer to the prompt string.
  */
 QSC_EXPORT_API void qsc_consoleutils_set_window_prompt(const char* prompt);
 
 /**
  * \brief Set the size of the console window.
  *
- * \param width:	[size_t] The desired window width.
- * \param height:	[size_t] The desired window height.
+ * \param width: [size_t] The desired window width.
+ * \param height: [size_t] The desired window height.
  */
 QSC_EXPORT_API void qsc_consoleutils_set_window_size(size_t width, size_t height);
 
 /**
  * \brief Set the title of the console window.
  *
- * \param title:	[const char*] A pointer to the title string.
+ * \param title: [const char*] A pointer to the title string.
  */
 QSC_EXPORT_API void qsc_consoleutils_set_window_title(const char* title);
 

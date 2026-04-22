@@ -128,9 +128,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * randomness (via RDRAND), and the system's cryptographic service provider. The collected 
  * entropy is then processed using the cSHAKE-512 algorithm to produce pseudorandom output.
  *
- * \param output:	[uint8_t*] Pointer to the output buffer that will receive the random bytes.
- * \param length:	[size_t] The number of random bytes to generate. Must not exceed QSC_ACP_SEED_MAX.
- * \return			[bool] Returns true on success, or false if an error occurred during entropy collection or random byte generation.
+ * \param output: [uint8_t*] Pointer to the output buffer that will receive the random bytes.
+ * \param length: [size_t] The number of random bytes to generate. Must not exceed QSC_ACP_SEED_MAX.
+ * \return [bool] Returns true on success, or false if an error occurred during entropy collection or random byte generation.
  *
  * \sa qsc_acp_uint16, qsc_acp_uint32, qsc_acp_uint64, qsc_cshake512_compute, qsc_rdp_generate, qsc_csp_generate
  */
@@ -142,7 +142,7 @@ QSC_EXPORT_API bool qsc_acp_generate(uint8_t* output, size_t length);
  * \details This function generates a 16-bit unsigned integer by calling qsc_acp_generate
  * to obtain the necessary random bytes and assembling them in big-endian order.
  *
- * \return			[uint16_t] A 16-bit unsigned integer generated from high-quality random data.
+ * \return [uint16_t] A 16-bit unsigned integer generated from high-quality random data.
  *
  * \sa qsc_acp_generate
  */
@@ -154,7 +154,7 @@ QSC_EXPORT_API uint16_t qsc_acp_uint16(void);
  * \details This function generates a 32-bit unsigned integer by calling qsc_acp_generate
  * to obtain the necessary random bytes and assembling them in big-endian order.
  *
- * \return			[uint32_t] A 32-bit unsigned integer generated from high-quality random data.
+ * \return [uint32_t] A 32-bit unsigned integer generated from high-quality random data.
  *
  * \sa qsc_acp_generate
  */
@@ -166,7 +166,7 @@ QSC_EXPORT_API uint32_t qsc_acp_uint32(void);
  * \details This function generates a 64-bit unsigned integer by calling qsc_acp_generate
  * to obtain the necessary random bytes and assembling them in big-endian order.
  *
- * \return			[uint64_t] A 64-bit unsigned integer generated from high-quality random data.
+ * \return [uint64_t] A 64-bit unsigned integer generated from high-quality random data.
  *
  * \sa qsc_acp_generate
  */

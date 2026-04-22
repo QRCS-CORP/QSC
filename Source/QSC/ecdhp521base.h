@@ -75,37 +75,37 @@ QSC_CPLUSPLUS_ENABLED_START
  * reduces it modulo the group order n, and rejects the zero result.
  */
 
- /*! \def QSC_ECDHP521_PUBLICKEY_SIZE
-  *  \brief The ECDH P-521 public-key size in bytes (Qx || Qy).
-  */
+/*! \def QSC_ECDHP521_PUBLICKEY_SIZE
+ *  \brief The ECDH P-521 public-key size in bytes (Qx || Qy).
+ */
 #define QSC_ECDHP521_PUBLICKEY_SIZE 132U
 
-  /*! \def QSC_ECDHP521_PRIVATEKEY_SIZE
-   *  \brief The ECDH P-521 private-key size in bytes.
-   */
+/*! \def QSC_ECDHP521_PRIVATEKEY_SIZE
+ *  \brief The ECDH P-521 private-key size in bytes.
+ */
 #define QSC_ECDHP521_PRIVATEKEY_SIZE 66U
 
-   /*! \def QSC_ECDHP521_SHAREDSECRET_SIZE
-	*  \brief The ECDH P-521 shared-secret size in bytes.
-	*/
+/*! \def QSC_ECDHP521_SHAREDSECRET_SIZE
+ *  \brief The ECDH P-521 shared-secret size in bytes.
+ */
 #define QSC_ECDHP521_SHAREDSECRET_SIZE 66U
 
-	/*! \def QSC_ECDHP521_SEED_SIZE
-	 *  \brief The ECDH P-521 seed size in bytes.
-	 */
+/*! \def QSC_ECDHP521_SEED_SIZE
+ *  \brief The ECDH P-521 seed size in bytes.
+ */
 #define QSC_ECDHP521_SEED_SIZE 66U
 
-	 /**
-	  * \brief Derive an ECDH P-521 public key from an existing private key.
-	  *
-	  * \details
-	  * Computes Q = dG where d is a 66-byte big-endian scalar in the range [1, n - 1],
-	  * and serializes the affine public point as Qx || Qy.
-	  *
-	  * \param publickey:  [uint8_t*] Output 132-byte public key.
-	  * \param privatekey: [const uint8_t*] Input 66-byte private scalar.
-	  */
-	QSC_EXPORT_API void qsc_p521_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
+/**
+ * \brief Derive an ECDH P-521 public key from an existing private key.
+ *
+ * \details
+ * Computes Q = dG where d is a 66-byte big-endian scalar in the range [1, n - 1],
+ * and serializes the affine public point as Qx || Qy.
+ *
+ * \param publickey: [uint8_t*] Output 132-byte public key.
+ * \param privatekey: [const uint8_t*] Input 66-byte private scalar.
+ */
+QSC_EXPORT_API void qsc_p521_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
 
 /**
  * \brief Generate an ECDH P-521 key pair using a random generator callback.
@@ -114,8 +114,8 @@ QSC_CPLUSPLUS_ENABLED_START
  * The RNG fills a 66-byte seed which is reduced into a non-zero private scalar, then
  * the corresponding public key is derived by scalar multiplication of the base point.
  *
- * \param publickey:    [uint8_t*] Output 132-byte public key.
- * \param privatekey:   [uint8_t*] Output 66-byte private scalar.
+ * \param publickey: [uint8_t*] Output 132-byte public key.
+ * \param privatekey: [uint8_t*] Output 66-byte private scalar.
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Random generator callback.
  */
 QSC_EXPORT_API void qsc_p521_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
@@ -127,9 +127,9 @@ QSC_EXPORT_API void qsc_p521_generate_keypair(uint8_t* publickey, uint8_t* priva
  * Reduces the 66-byte seed into a valid non-zero private scalar and derives the
  * corresponding public key by scalar multiplication of the base point.
  *
- * \param publickey:  [uint8_t*] Output 132-byte public key.
+ * \param publickey: [uint8_t*] Output 132-byte public key.
  * \param privatekey: [uint8_t*] Output 66-byte private scalar.
- * \param seed:       [const uint8_t*] Input 66-byte seed.
+ * \param seed: [const uint8_t*] Input 66-byte seed.
  */
 QSC_EXPORT_API void qsc_p521_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -141,8 +141,8 @@ QSC_EXPORT_API void qsc_p521_generate_seeded_keypair(uint8_t* publickey, uint8_t
  * function returns false on invalid inputs, invalid peer points, or an all-zero shared
  * secret.
  *
- * \param secret:     [uint8_t*] Output 66-byte shared secret.
- * \param publickey:  [const uint8_t*] Input 132-byte peer public key.
+ * \param secret: [uint8_t*] Output 66-byte shared secret.
+ * \param publickey: [const uint8_t*] Input 132-byte peer public key.
  * \param privatekey: [const uint8_t*] Input 66-byte private scalar.
  *
  * \return [bool] Returns true on success.

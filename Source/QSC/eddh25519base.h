@@ -87,7 +87,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param n: [const uint8_t*] Pointer to the input scalar/private-key array (32 bytes).
  * \param p: [const uint8_t*] Pointer to the input u-coordinate array (32 bytes).
  *
- * \return   [int32_t] Returns 0 on success; a non-zero value indicates failure.
+ * \return [int32_t] Returns 0 on success; a non-zero value indicates failure.
  */
 int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p);
 
@@ -132,7 +132,7 @@ int32_t qsc_crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, con
  * \param q: [uint8_t*] Pointer to the output public-key array (32 bytes).
  * \param n: [const uint8_t*] Pointer to the input scalar/private-key array (32 bytes).
  *
- * \return   [int32_t] Returns 0 on success; a non-zero value indicates failure.
+ * \return [int32_t] Returns 0 on success; a non-zero value indicates failure.
  */
 int32_t qsc_crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n);
 

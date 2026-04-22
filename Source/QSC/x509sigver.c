@@ -1,9 +1,7 @@
 #include "x509sigver.h"
 #include "dilithium.h"
 #include "ecdsa.h"
-#include "ecdsap256base.h"
-#include "ecdsap384base.h"
-#include "ecdsap521base.h"
+#include "eddsa.h"
 #include "memutils.h"
 #include "x509sig.h"
 #include "x509spki.h"
@@ -104,17 +102,11 @@ static bool x509_qsc_verify_message(uint8_t* msgout, size_t* msglen, const uint8
 
     res = false;
 
-    if (curve == QSC_X509_NAMED_CURVE_PRIME256V1)
+    if (curve == QSC_X509_NAMED_CURVE_PRIME256V1 ||
+        curve == QSC_X509_NAMED_CURVE_SECP384R1 ||
+        curve == QSC_X509_NAMED_CURVE_SECP521R1)
     {
-        res = qsc_p256_verify(msgout, msglen, signedmsg, smsglen, publickey);
-    }
-    else if (curve == QSC_X509_NAMED_CURVE_SECP384R1)
-    {
-        res = qsc_p384_verify(msgout, msglen, signedmsg, smsglen, publickey);
-    }
-    else if (curve == QSC_X509_NAMED_CURVE_SECP521R1)
-    {
-        res = qsc_p521_verify(msgout, msglen, signedmsg, smsglen, publickey);
+        res = qsc_ecdsa_verify(msgout, msglen, signedmsg, smsglen, publickey);
     }
 
     return res;
@@ -326,6 +318,40 @@ bool qsc_x509_qsc_verify_signed_data(const uint8_t* data, size_t datalen, const 
             (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512))
         {
             res = x509_qsc_verify_ecdsa(data, datalen, signature, signaturelen, unusedbits, signaturealgorithm, spki, (qsc_x509_verify_state*)state);
+        }
+        else if (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519)
+        {
+            uint8_t* signedmsg;
+            uint8_t* recovered;
+            size_t msglen;
+            size_t required;
+
+            msglen = 0U;
+            required = 0U;
+            signedmsg = NULL;
+            recovered = NULL;
+
+            if ((unusedbits == 0U) &&
+                (signaturelen == QSC_EDDSA_SIGNATURE_SIZE) &&
+                (spki->publickeylen == QSC_EDDSA_PUBLICKEY_SIZE) &&
+                (x509_sigver_state_is_valid((qsc_x509_verify_state*)state) == true))
+            {
+                required = signaturelen + (2U * datalen);
+
+                if (((qsc_x509_verify_state*)state)->signaturemessage_size >= required)
+                {
+                    signedmsg = ((qsc_x509_verify_state*)state)->signaturemessage;
+                    recovered = signedmsg + signaturelen + datalen;
+                    qsc_memutils_copy(signedmsg, signature, signaturelen);
+                    qsc_memutils_copy(signedmsg + signaturelen, data, datalen);
+                    qsc_memutils_clear(recovered, datalen);
+
+                    if (qsc_eddsa_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey) == true)
+                    {
+                        res = (msglen == datalen) && (x509_sigver_ct_equal(recovered, data, datalen) == true);
+                    }
+                }
+            }
         }
         else if ((signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44) ||
                  (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_65) ||

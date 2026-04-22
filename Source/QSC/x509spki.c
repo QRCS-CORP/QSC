@@ -1,5 +1,6 @@
 #include "x509spki.h"
 #include "dilithium.h"
+#include "eddsa.h"
 #include "kyber.h"
 #include "memutils.h"
 #include "oid.h"
@@ -51,6 +52,10 @@ static qsc_x509_public_key_algorithm x509_map_public_key_algorithm(qsc_oid_id oi
     else if (oid == QSC_OID_ID_EC_PUBLIC_KEY)
     {
         return QSC_X509_PUBLIC_KEY_ALGORITHM_EC;
+    }
+    else if (oid == QSC_OID_ID_ED25519)
+    {
+        return QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519;
     }
     else if ((oid == QSC_OID_ID_ML_DSA_44) ||
              (oid == QSC_OID_ID_ML_DSA_65) ||
@@ -105,6 +110,10 @@ static qsc_x509_signature_algorithm x509_map_signature_algorithm(qsc_oid_id oid)
     else if (oid == QSC_OID_ID_ECDSA_WITH_SHA512)
     {
         return QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512;
+    }
+    else if (oid == QSC_OID_ID_ED25519)
+    {
+        return QSC_X509_SIGNATURE_ALGORITHM_ED25519;
     }
     else if (oid == QSC_OID_ID_ML_DSA_44)
     {
@@ -275,6 +284,18 @@ qsc_asn1_status qsc_x509_algorithm_identifier_validate(const qsc_x509_algorithm_
             (algorithm->curve == QSC_X509_NAMED_CURVE_NONE))
         {
             return (algorithm->curve == QSC_X509_NAMED_CURVE_NONE) ? QSC_ASN1_STATUS_UNSUPPORTED : QSC_ASN1_STATUS_INVALID_ENCODING;
+        }
+    }
+    else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+    {
+        if ((algorithm->oid != QSC_OID_ID_ED25519) ||
+            (algorithm->signature != QSC_X509_SIGNATURE_ALGORITHM_ED25519) ||
+            (algorithm->curve != QSC_X509_NAMED_CURVE_NONE) ||
+            (algorithm->hash != QSC_X509_HASH_ALGORITHM_NONE) ||
+            (algorithm->pqcparameter != QSC_X509_PQC_PARAMETER_SET_NONE) ||
+            (algorithm->parameters_present == true))
+        {
+            return QSC_ASN1_STATUS_INVALID_ENCODING;
         }
     }
     else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA)
@@ -682,6 +703,17 @@ qsc_asn1_status qsc_x509_spki_validate(const qsc_x509_subject_public_key_info* s
                     {
                         status = QSC_ASN1_STATUS_INVALID_LENGTH;
                     }
+                }
+            }
+            else if (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+            {
+                if (spki->publickeylen != QSC_EDDSA_PUBLICKEY_SIZE)
+                {
+                    status = QSC_ASN1_STATUS_INVALID_LENGTH;
+                }
+                else
+                {
+                    status = QSC_ASN1_STATUS_SUCCESS;
                 }
             }
             else if ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA) ||

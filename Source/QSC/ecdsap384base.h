@@ -73,16 +73,28 @@ QSC_CPLUSPLUS_ENABLED_START
  * - Signature: 48-byte r || 48-byte s
  */
 
-/*! \brief Seed and derived scalar byte length */
+/*! 
+* \def EC_NISTP384_SEED_SIZE
+* \brief Seed and derived scalar byte length 
+*/
 #define EC_NISTP384_SEED_SIZE 48U
 
-/*! \brief Public key byte length (X || Y, each 48 bytes big-endian) */
+/*!
+* \def EC_NISTP384_PUBLICKEY_SIZE
+* \brief Public key byte length (X || Y, each 48 bytes big-endian) 
+*/
 #define EC_NISTP384_PUBLICKEY_SIZE  96U
 
-/*! \brief Private key byte length (seed[48] || pubkey[96]) */
+/*! 
+* \def EC_NISTP384_PRIVATEKEY_SIZE
+* \brief Private key byte length (seed[48] || pubkey[96]) 
+*/
 #define EC_NISTP384_PRIVATEKEY_SIZE 144U
 
-/*! \brief Signature byte length (r[48] || s[48], big-endian) */
+/*!
+* \def EC_NISTP384_SIGNATURE_SIZE
+* \brief Signature byte length (r[48] || s[48], big-endian) 
+*/
 #define EC_NISTP384_SIGNATURE_SIZE  96U
 
 /**
@@ -96,10 +108,10 @@ QSC_CPLUSPLUS_ENABLED_START
  * The private scalar must be in the range [1, n - 1], where n is the order
  * of the P-384 base point.
  *
- * \param publickey:  [uint8_t*] Output buffer receiving the 96-byte public key.
+ * \param publickey: [uint8_t*] Output buffer receiving the 96-byte public key.
  * \param privatekey: [const uint8_t*] Input 48-byte private scalar.
  *
- * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 int32_t qsc_p384_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
 
@@ -111,11 +123,11 @@ int32_t qsc_p384_publickey_from_privatekey(uint8_t* publickey, const uint8_t* pr
  * Q = d*G using the P-384 base point, and stores both keys. The private key layout is
  * seed[48] || Qx[48] || Qy[48].
  *
- * \param publickey:  [uint8_t*] Output public key (96 bytes: Qx || Qy, big-endian).
+ * \param publickey: [uint8_t*] Output public key (96 bytes: Qx || Qy, big-endian).
  * \param privatekey: [uint8_t*] Output private key (144 bytes: seed || Qx || Qy).
- * \param seed:       [const uint8_t*] 48-byte random seed.
+ * \param seed: [const uint8_t*] 48-byte random seed.
  *
- * \return            [int32_t] Returns 0 on success, or a negative error code on failure.
+ * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
 int32_t qsc_p384_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -128,11 +140,12 @@ int32_t qsc_p384_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t*
  * using HMAC-SHA384, eliminating the need for a random number generator at signing time.
  *
  * \param signedmsg: [uint8_t*] Output signed-message buffer (msglen + 96 bytes).
- * \param smsglen:   [size_t*]  Set to msglen + EC_NISTP384_SIGNATURE_SIZE on success, 0 on failure.
- * \param message:   [const uint8_t*] Message to sign.
- * \param msglen:    [size_t] Message length in bytes.
- * \param privatekey:[const uint8_t*] 144-byte private key (seed || pubkey).
- * \return           [int32_t] 0 on success, -1 on failure.
+ * \param smsglen: [size_t*]  Set to msglen + EC_NISTP384_SIGNATURE_SIZE on success, 0 on failure.
+ * \param message: [const uint8_t*] Message to sign.
+ * \param msglen: [size_t] Message length in bytes.
+ * \param privatekey: [const uint8_t*] 144-byte private key (seed || pubkey).
+ * 
+ * \return [int32_t] 0 on success, -1 on failure.
  */
 int32_t qsc_p384_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
@@ -145,11 +158,12 @@ int32_t qsc_p384_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* messag
  * RFC 6979 using HMAC-SHA384.
  *
  * \param signedmsg: [uint8_t*] Output signed-message buffer (msglen + 96 bytes).
- * \param smsglen:   [size_t*]  Set to msglen + EC_NISTP384_SIGNATURE_SIZE on success, 0 on failure.
- * \param message:   [const uint8_t*] Message to sign.
- * \param msglen:    [size_t] Message length in bytes.
- * \param privatekey:[const uint8_t*] 48-byte private scalar.
- * \return           [int32_t] 0 on success, -1 on failure.
+ * \param smsglen: [size_t*]  Set to msglen + EC_NISTP384_SIGNATURE_SIZE on success, 0 on failure.
+ * \param message: [const uint8_t*] Message to sign.
+ * \param msglen: [size_t] Message length in bytes.
+ * \param privatekey: [const uint8_t*] 48-byte private scalar.
+ * 
+ * \return [int32_t] 0 on success, -1 on failure.
  */
 int32_t qsc_p384_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
@@ -161,12 +175,13 @@ int32_t qsc_p384_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t*
  * public key. On success the message bytes are copied into message and msglen is set.
  * On failure message is zeroed and msglen is set to 0.
  *
- * \param message:   [uint8_t*]  Output message buffer (at least smsglen - 96 bytes).
- * \param msglen:    [size_t*]   Set to the recovered message length on success.
+ * \param message: [uint8_t*]  Output message buffer (at least smsglen - 96 bytes).
+ * \param msglen: [size_t*]  Set to the recovered message length on success.
  * \param signedmsg: [const uint8_t*] Signed-message buffer (signature || message).
- * \param smsglen:   [size_t]    Total signed-message length.
+ * \param smsglen: [size_t] Total signed-message length.
  * \param publickey: [const uint8_t*] 96-byte public key (Qx || Qy, big-endian).
- * \return           [bool] Returns true on success, false on failure.
+ * 
+ * \return [bool] Returns true on success, false on failure.
  */
 bool qsc_p384_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 

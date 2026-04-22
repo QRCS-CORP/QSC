@@ -99,6 +99,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 #if defined(QSC_EDDH_S1EC25519)
+
     /*!
     * \def QSC_EDDH_PUBLICKEY_SIZE
     * \brief The EDDH public-key size in bytes.
@@ -106,60 +107,60 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_EDDH_PUBLICKEY_SIZE 32U
 
     /*!
-     * \def QSC_EDDH_PRIVATEKEY_SIZE
-     * \brief The EDDH private-key size in bytes.
-     */
+    * \def QSC_EDDH_PRIVATEKEY_SIZE
+    * \brief The EDDH private-key size in bytes.
+    */
 #   define QSC_EDDH_PRIVATEKEY_SIZE 32U
 
     /*!
-     * \def QSC_EDDH_SECRET_SIZE
-     * \brief The EDDH shared-secret size in bytes.
-     */
+    * \def QSC_EDDH_SECRET_SIZE
+    * \brief The EDDH shared-secret size in bytes.
+    */
 #   define QSC_EDDH_SHAREDSECRET_SIZE 32U
 
-     /*!
-      * \def QSC_EDDH_SEED_SIZE
-      * \brief The byte size of the seed array.
-      */
+    /*!
+    * \def QSC_EDDH_SEED_SIZE
+    * \brief The byte size of the seed array.
+    */
 #   define QSC_EDDH_SEED_SIZE 32U
 
-     /*!
-      * \def QSC_EDDH_ALGNAME
-      * \brief The formal algorithm name.
-      */
-#   define QSC_EDDH_ALGNAME "EDDH25519"
+    /*!
+    * \def QSC_EDDH_ALGNAME
+    * \brief The formal algorithm name.
+    */
+#   define QSC_EDDH_ALGNAME "EDDH-P25519"
 
 #elif defined(QSC_EDDH_S3EC448)
 
     /*!
-     * \def QSC_EDDH_PUBLICKEY_SIZE
-     * \brief The X448 public-key size in bytes.
-     */
+    * \def QSC_EDDH_PUBLICKEY_SIZE
+    * \brief The X448 public-key size in bytes.
+    */
 #   define QSC_EDDH_PUBLICKEY_SIZE 56U
 
     /*!
-     * \def QSC_EDDH_PRIVATEKEY_SIZE
-     * \brief The X448 private-key size in bytes.
-     */
+    * \def QSC_EDDH_PRIVATEKEY_SIZE
+    * \brief The X448 private-key size in bytes.
+    */
 #   define QSC_EDDH_PRIVATEKEY_SIZE 56U
 
     /*!
-     * \def QSC_EDDH_SECRET_SIZE
-     * \brief The X448 shared-secret size in bytes.
-     */
+    * \def QSC_EDDH_SECRET_SIZE
+    * \brief The X448 shared-secret size in bytes.
+    */
 #   define QSC_EDDH_SHAREDSECRET_SIZE 56U
 
-     /*!
-      * \def QSC_EDDH_SEED_SIZE
-      * \brief The byte size of the seed array.
-      */
+    /*!
+    * \def QSC_EDDH_SEED_SIZE
+    * \brief The byte size of the seed array.
+    */
 #   define QSC_EDDH_SEED_SIZE 56U
 
-      /*!
-      * \def QSC_EDDH_ALGNAME
-      * \brief The formal algorithm name.
-      */
-#   define QSC_EDDH_ALGNAME "EDDH448"
+    /*!
+    * \def QSC_EDDH_ALGNAME
+    * \brief The formal algorithm name.
+    */
+#   define QSC_EDDH_ALGNAME "EDDH-P448"
 
 #else
 #   error "No EDDH parameter set defined. Define QSC_EDDH_S1EC25519 or QSC_EDDH_S3EC448."
@@ -187,10 +188,11 @@ QSC_EXPORT_API void qsc_eddh_public_from_private(uint8_t* publickey, const uint8
  *
  * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_PRIVATEKEY_SIZE.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public-key array.
- * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Pointer to the random generator function.
- * \return				[bool] Returns true on success.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_eddh_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -199,10 +201,11 @@ QSC_EXPORT_API bool qsc_eddh_generate_keypair(uint8_t* publickey, uint8_t* priva
  *
  * \warning Arrays must be sized to QSC_EDDH_PUBLICKEY_SIZE and QSC_EDDH_PRIVATEKEY_SIZE.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public-key array.
- * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
- * \param seed:			[const uint8_t*] Pointer to the random seed.
- * \return				[bool] Returns true on success.
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
+ * \param seed: [const uint8_t*] Pointer to the random seed.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_eddh_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -211,10 +214,11 @@ QSC_EXPORT_API bool qsc_eddh_generate_seeded_keypair(uint8_t* publickey, uint8_t
  *
  * \warning The shared secret array must be sized to QSC_EDDH_SHAREDSECRET_SIZE.
  *
- * \param secret:		[uint8_t*] Pointer to the shared secret key array.
- * \param privatekey:	[const uint8_t*] Pointer to the private-key array.
- * \param publickey:	[const uint8_t*] Pointer to the public-key array.
- * \return				[bool] Returns true on success.
+ * \param secret: [uint8_t*] Pointer to the shared secret key array.
+ * \param privatekey: [const uint8_t*] Pointer to the private-key array.
+ * \param publickey: [const uint8_t*] Pointer to the public-key array.
+ * 
+ * \return [bool] Returns true on success.
  */
 QSC_EXPORT_API bool qsc_eddh_key_exchange(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey);
 

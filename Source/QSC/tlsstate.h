@@ -3,7 +3,6 @@
 
 #include "tlstypes.h"
 #include "tlscert.h"
-#include "tlsresumption.h"
 #include "sha2.h"
 #include "tlslimits.h"
 
@@ -36,10 +35,12 @@ typedef struct qsc_tls_transcript_state
  */
 typedef struct qsc_tls_record_state
 {
-	uint8_t key[32U];	/*!< Current record protection key bytes. */
-	uint8_t iv[12U];	/*!< Current static record IV bytes. */
-	uint64_t sequence;	/*!< Current record sequence number. */
-	bool initialized;	/*!< True when the record protection state is initialized. */
+	qsc_tls_cipher_suite suite;	/*!< Current record protection cipher suite. */
+	uint8_t key[32U];		/*!< Current record protection key bytes. */
+	size_t keylen;			/*!< Current record protection key length in bytes. */
+	uint8_t iv[12U];		/*!< Current static record IV bytes. */
+	uint64_t sequence;		/*!< Current record sequence number. */
+	bool initialized;		/*!< True when the record protection state is initialized. */
 } qsc_tls_record_state;
 
 /**
@@ -60,17 +61,23 @@ typedef struct qsc_tls_peer_capabilities
  * \struct qsc_tls_local_certificate_config
  * \brief Stores the configured local certificate chain and CertificateVerify signing configuration.
  */
+
 typedef struct qsc_tls_local_certificate_config
 {
 	qsc_tls_certificate_view chain[QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES];	/*!< Local certificate chain entries presented to the peer. */
 	size_t chainlength;														/*!< Number of valid certificates in the local chain. */
 	qsc_tls_signature_scheme verifyscheme;									/*!< Signature scheme used for CertificateVerify. */
-	uint8_t verifysignature[QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE];	/*!< Optional static CertificateVerify signature bytes. */
-	size_t verifysignaturelen;												/*!< Length of the static CertificateVerify signature in bytes. */
-	qsc_tls_certificate_sign_callback signcallback;							/*!< Optional callback used to generate the CertificateVerify signature. */
+	uint8_t verifysignature[QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE];	/*!< Reserved — no longer written by the public API. */
+	size_t verifysignaturelen;												/*!< Reserved. */
+	/* C6 fix: stored private key for the internal signing trampoline installed by
+	 * qsc_tls_handshake_set_local_certificate().  Zeroed by set_local_certificate
+	 * if a user-supplied callback is configured instead. */
+	uint8_t signprivatekey[QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE];			/*!< Private key bytes stored for the internal signer. */
+	size_t signprivatekeylen;												/*!< Length of the stored private key in bytes; zero if not used. */
+	qsc_tls_certificate_sign_callback signcallback;							/*!< Callback used to generate the CertificateVerify signature. */
 	void* signstate;														/*!< Caller-supplied state passed to the signing callback. */
 	bool configured;														/*!< True when a local certificate chain and signing mode are configured. */
-	bool staticsignature;													/*!< True when verifysignature contains the active CertificateVerify signature. */
+	bool staticsignature;													/*!< Reserved — always false in the current implementation. */
 } qsc_tls_local_certificate_config;
 
 /**
@@ -79,7 +86,7 @@ typedef struct qsc_tls_local_certificate_config
  */
 typedef struct qsc_tls_psk_state
 {
-	qsc_tls_session_ticket ticket;					/*!< Cached TLS 1.3 resumption ticket. */
+	//qsc_tls_session_ticket ticket;					/*!< Cached TLS 1.3 resumption ticket. */
 	uint8_t binder[QSC_TLS_PSK_BINDER_MAX_SIZE];	/*!< Computed PSK binder bytes. */
 	size_t binderlen;								/*!< Length of the PSK binder in bytes. */
 	bool enabled;									/*!< True when PSK resumption is enabled for the connection. */

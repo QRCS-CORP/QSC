@@ -119,8 +119,8 @@ typedef struct
 /**
 * \brief Add a task to the thread-pool
 *
-* \param ctx:	[qsc_threadpool_state*] The thread pool state
-* \param func:	[(*func)(void*)] A pointer to the thread function
+* \param ctx: [qsc_threadpool_state*] The thread pool state
+* \param func: [(*func)(void*)] A pointer to the thread function
 * \param state:	[void*] The thread state
 */
 QSC_EXPORT_API bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*func)(void*), void* state);
@@ -128,38 +128,38 @@ QSC_EXPORT_API bool qsc_threadpool_add_task(qsc_threadpool_state* ctx, void (*fu
 /**
 * \brief Clear all tasks from the thread-pool and dispose of the state
 *
-* \param ctx:	[qsc_threadpool_state*] The thread pool state
+* \param ctx: [qsc_threadpool_state*] The thread pool state
 */
 QSC_EXPORT_API void qsc_threadpool_destroy(qsc_threadpool_state* ctx);
 
 /**
 * \brief Initialize the thread-pool
 *
-* \param ctx:	[qsc_threadpool_state*] The thread pool state
+* \param ctx: [qsc_threadpool_state*] The thread pool state
 */
 QSC_EXPORT_API void qsc_threadpool_initialize(qsc_threadpool_state* ctx);
 
 /**
 * \brief Sort the threads in the pool, placing active threads at the start of the array
 *
-* \param ctx:	[qsc_threadpool_state*] The thread pool state
+* \param ctx: [qsc_threadpool_state*] The thread pool state
 */
 QSC_EXPORT_API void qsc_threadpool_sort(qsc_threadpool_state* ctx);
 
 /**
 * \brief Check if a thread is active
 *
-* \param ctx:	[const qsc_threadpool_state*] The thread pool state
+* \param ctx: [const qsc_threadpool_state*] The thread pool state
 * \param index:	[size_t] The thread index
 * 
-* \return		[bool] Returns true if the thread is currently used
+* \return [bool] Returns true if the thread is currently used
 */
 QSC_EXPORT_API bool qsc_threadpool_thread_active(const qsc_threadpool_state* ctx, size_t index);
 
 /**
 * \brief Remove a task from the thread-pool
 *
-* \param ctx:	[qsc_threadpool_state*] The thread pool state
+* \param ctx: [qsc_threadpool_state*] The thread pool state
 * \param index:	[size_t] The thread index
 */
 QSC_EXPORT_API void qsc_threadpool_remove_task(qsc_threadpool_state* ctx, size_t index);

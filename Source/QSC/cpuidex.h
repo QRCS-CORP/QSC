@@ -114,10 +114,10 @@ QSC_CPLUSPLUS_ENABLED_START
 typedef enum
 {
     qsc_cpuid_unknown = 0x00U,  /*!< The CPU type is unknown. */
-    qsc_cpuid_amd     = 0x01U,  /*!< The CPU type is AMD. */
-    qsc_cpuid_intel   = 0x02U,  /*!< The CPU type is Intel. */
-    qsc_cpuid_via     = 0x03U,  /*!< The CPU type is VIA. */
-    qsc_cpuid_hygion  = 0x04U   /*!< The CPU type is Hygion. */
+    qsc_cpuid_amd = 0x01U,      /*!< The CPU type is AMD. */
+    qsc_cpuid_intel = 0x02U,    /*!< The CPU type is Intel. */
+    qsc_cpuid_via = 0x03U,      /*!< The CPU type is VIA. */
+    qsc_cpuid_hygion = 0x04U    /*!< The CPU type is Hygion. */
 } qsc_cpuidex_cpu_type;
 
 /*!
@@ -164,15 +164,14 @@ QSC_EXPORT_API typedef struct
  *
  * \param features: [qsc_cpuidex_cpu_features* const] Pointer to a qsc_cpuidex_cpu_features structure to populate.
  *
- * \return      [bool] Returns true if the features were successfully detected; false otherwise.
+ * \return [bool] Returns true if the features were successfully detected; false otherwise.
  */
 QSC_EXPORT_API bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* const features);
 
 /**
  * \brief Print the detected CPU features to the console.
  *
- * This function outputs the CPU capabilities (for example, AVX, AESNI, cache size, vendor)
- * to the console.
+ * This function outputs the CPU capabilities (for example, AVX, AESNI, cache size, vendor) to the console.
  */
 QSC_EXPORT_API void qsc_cpuidex_print_stats(void);
 

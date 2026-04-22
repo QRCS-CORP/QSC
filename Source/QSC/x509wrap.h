@@ -305,17 +305,23 @@ typedef struct qsc_x509w_tls_bridge_t
 
 /**
  * \struct qsc_x509w_tls_local_certificate_t
- * \brief TLS-facing export container for a local certificate chain and optional
- * caller-supplied CertificateVerify signature bytes.
+ * \brief TLS-facing export container for a local certificate chain and private key
+ * for CertificateVerify generation.
+ *
+ * C6 fix: the previous version stored a pre-computed signature buffer, which is
+ * cryptographically invalid (RFC 8446 §4.4.3 — the signature must cover the live
+ * transcript hash).  This struct now stores the private key instead; the signature
+ * is produced at CertificateVerify build time by the internal trampoline installed
+ * by qsc_tls_handshake_set_local_certificate().
  */
 typedef struct qsc_x509w_tls_local_certificate_t
 {
     qsc_tls_certificate_view chain[QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES]; /*!< TLS certificate views referencing the embedded DER buffers. */
     uint8_t chainder[QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES][QSC_X509_CERTIFICATE_WRITE_MAX]; /*!< Embedded DER storage for the exported certificate chain. */
     size_t chainlength;                                                   /*!< Number of certificate views currently populated. */
-    qsc_tls_signature_scheme verifyscheme;                                /*!< TLS CertificateVerify signature scheme associated with the supplied signature bytes. */
-    uint8_t verifysignature[QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE]; /*!< Caller-supplied CertificateVerify signature bytes. */
-    size_t verifysignaturelen;                                            /*!< Length in bytes of the caller-supplied CertificateVerify signature. */
+    qsc_tls_signature_scheme verifyscheme;                                /*!< TLS CertificateVerify signature scheme. */
+    uint8_t privatekeydata[QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE];        /*!< Raw private key bytes for the signing scheme. */
+    size_t privatekeylen;                                                 /*!< Length in bytes of the private key. */
 } qsc_x509w_tls_local_certificate;
 
 /**
@@ -1078,16 +1084,20 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_bridge_set_server_validation(qsc_t
 /**
  * \brief Export a server identity into TLS local-certificate form.
  *
- * \param identity: The source server identity.
+ * Extracts the certificate chain and private key from the identity object and
+ * populates a qsc_x509w_tls_local_certificate ready for use with
+ * qsc_x509w_tls_server_set_local_certificate().
+ *
+ * \param identity: The source server identity (must contain a valid private key).
  * \param verifyscheme: The TLS CertificateVerify signature scheme identifier.
- * \param verifysignature: The caller-supplied CertificateVerify signature bytes.
- * \param verifysignaturelen: The length of the supplied signature in bytes.
  * \param localcert: The destination TLS local-certificate export object.
  * \return Returns the wrapper status code.
+ *
+ * \note C6 fix: the previous API accepted a pre-computed signature; this function
+ *       now extracts the private key directly from identity->privatekey so the
+ *       signature can be produced at CertificateVerify build time.
  */
-QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_server_identity* identity,
-    qsc_tls_signature_scheme verifyscheme, const uint8_t* verifysignature, size_t verifysignaturelen,
-    qsc_x509w_tls_local_certificate* localcert);
+QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_server_identity* identity, qsc_tls_signature_scheme verifyscheme, qsc_x509w_tls_local_certificate* localcert);
 
 /**
  * \brief Install a local certificate chain into a TLS server.
@@ -1096,8 +1106,7 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(co
  * \param localcert: The local-certificate export object.
  * \return Returns the wrapper status code.
  */
-QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_server_set_local_certificate(qsc_tls_server* server,
-    const qsc_x509w_tls_local_certificate* localcert);
+QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_server_set_local_certificate(qsc_tls_server* server, const qsc_x509w_tls_local_certificate* localcert);
 
 QSC_CPLUSPLUS_ENABLED_END
 

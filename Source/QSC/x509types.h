@@ -191,6 +191,7 @@ typedef enum qsc_x509_public_key_algorithm_t
     QSC_X509_PUBLIC_KEY_ALGORITHM_NONE = 0,                     /*!< No recognized public key algorithm was decoded. */
     QSC_X509_PUBLIC_KEY_ALGORITHM_RSA,                          /*!< The subject public key algorithm is RSA. */
     QSC_X509_PUBLIC_KEY_ALGORITHM_EC,                           /*!< The subject public key algorithm is elliptic curve public key. */
+    QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519,                      /*!< The subject public key algorithm is edwards elliptic curve public key. */
     QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA,                       /*!< The subject public key algorithm is ML-DSA. */
     QSC_X509_PUBLIC_KEY_ALGORITHM_ML_KEM                        /*!< The subject public key algorithm is ML-KEM. */
 } qsc_x509_public_key_algorithm;
@@ -227,14 +228,11 @@ typedef enum qsc_x509_signature_algorithm_t
     QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA256,                  /*!< The signature algorithm is ecdsa-with-SHA256. */
     QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384,                  /*!< The signature algorithm is ecdsa-with-SHA384. */
     QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512,                  /*!< The signature algorithm is ecdsa-with-SHA512. */
+    QSC_X509_SIGNATURE_ALGORITHM_ED25519,                       /*!< The signature algorithm is eddsa. */
     QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44,                     /*!< The signature algorithm is pure ML-DSA-44. */
     QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_65,                     /*!< The signature algorithm is pure ML-DSA-65. */
     QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_87                      /*!< The signature algorithm is pure ML-DSA-87. */
 } qsc_x509_signature_algorithm;
-
-/*!
- * \brief X.509 digest algorithm identifiers.
- */
 
 /*!
  * \brief Post-quantum parameter set identifiers used by ML-DSA and ML-KEM.
@@ -249,6 +247,10 @@ typedef enum qsc_x509_pqc_parameter_set_t
     QSC_X509_PQC_PARAMETER_SET_ML_KEM_768,                      /*!< The parameter set is ML-KEM-768. */
     QSC_X509_PQC_PARAMETER_SET_ML_KEM_1024,                     /*!< The parameter set is ML-KEM-1024. */
 } qsc_x509_pqc_parameter_set;
+
+/*!
+ * \brief X.509 digest algorithm identifiers.
+ */
 typedef enum qsc_x509_hash_algorithm_t
 {
     QSC_X509_HASH_ALGORITHM_NONE = 0,                           /*!< No recognized digest algorithm was decoded. */

@@ -130,68 +130,72 @@ QSC_EXPORT_API typedef struct
 /**
  * \brief Destroy the queue state.
  *
- * \param ctx:      [struct] A pointer to the queue state structure.
+ * \param ctx: [struct] A pointer to the queue state structure.
  */
 QSC_EXPORT_API void qsc_queue_dispose(qsc_queue_state* ctx);
 
 /**
  * \brief Flush the content of the queue to an array.
  *
- * \param ctx:      [qsc_queue_state*] A pointer to the queue state structure.
- * \param output:   [uint8_t*] A pointer to the array receiving the queue items.
+ * \param ctx: [qsc_queue_state*] A pointer to the queue state structure.
+ * \param output: [uint8_t*] A pointer to the array receiving the queue items.
  */
 QSC_EXPORT_API void qsc_queue_flush(qsc_queue_state* ctx, uint8_t* output);
 
 /**
  * \brief Initialize the queue state.
  *
- * \param ctx:      [qsc_queue_state*] A pointer to the queue state structure.
- * \param depth:    [size_t] The number of queue items to initialize, maximum is QSC_QUEUE_MAX_DEPTH.
- * \param width:    [size_t] The maximum size of each queue item in bytes.
+ * \param ctx: [qsc_queue_state*] A pointer to the queue state structure.
+ * \param depth: [size_t] The number of queue items to initialize, maximum is QSC_QUEUE_MAX_DEPTH.
+ * \param width: [size_t] The maximum size of each queue item in bytes.
  */
 QSC_EXPORT_API void qsc_queue_initialize(qsc_queue_state* ctx, size_t depth, size_t width);
 
 /**
  * \brief Get the number of items in the queue.
  *
- * \param ctx:      [const qsc_queue_state*] A pointer to the queue state structure.
- * \return          [size_t] The number of items in the queue.
+ * \param ctx: [const qsc_queue_state*] A pointer to the queue state structure.
+ * 
+ * \return [size_t] The number of items in the queue.
  */
 QSC_EXPORT_API size_t qsc_queue_items(const qsc_queue_state* ctx);
 
 /**
  * \brief Get the full status from the queue.
  *
- * \param ctx:      [const qsc_queue_state*] A pointer to the queue state structure.
- * \return          [bool] Returns true if the queue is full.
+ * \param ctx: [const qsc_queue_state*] A pointer to the queue state structure.
+ * 
+ * \return [bool] Returns true if the queue is full.
  */
 QSC_EXPORT_API bool qsc_queue_full(const qsc_queue_state* ctx);
 
 /**
  * \brief Get the empty status from the queue.
  *
- * \param ctx:      [const qsc_queue_state*] A pointer to the queue state structure.
- * \return          [bool] Returns true if the queue is empty.
+ * \param ctx: [const qsc_queue_state*] A pointer to the queue state structure.
+ * 
+ * \return [bool] Returns true if the queue is empty.
  */
 QSC_EXPORT_API bool qsc_queue_empty(const qsc_queue_state* ctx);
 
 /**
  * \brief Returns the first member of the queue, and erases that item from the queue.
  *
- * \param ctx:      [qsc_queue_state*] A pointer to the queue state structure.
- * \param output:   [uint8_t*] A pointer to the array receiving the queue item.
- * \param otplen:   [size_t] The number of bytes to copy from the queue item.
- * \return          [uint64_t] The tag associated with the removed item.
+ * \param ctx: [qsc_queue_state*] A pointer to the queue state structure.
+ * \param output: [uint8_t*] A pointer to the array receiving the queue item.
+ * \param otplen: [size_t] The number of bytes to copy from the queue item.
+ * 
+ * \return [uint64_t] The tag associated with the removed item.
  */
 QSC_EXPORT_API uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen);
 
 /**
  * \brief Add an item to the queue.
  *
- * \param ctx:      [qsc_queue_state*] A pointer to the queue state structure.
- * \param input:    [uint8_t*] A pointer to the array item to be added to the queue.
- * \param inplen:   [size_t] The byte size of the queue item to be added.
- * \param tag:      [uint64_t] The tag associated with the item.
+ * \param ctx: [qsc_queue_state*] A pointer to the queue state structure.
+ * \param input: [uint8_t*] A pointer to the array item to be added to the queue.
+ * \param inplen: [size_t] The byte size of the queue item to be added.
+ * \param tag: [uint64_t] The tag associated with the item.
  */
 QSC_EXPORT_API void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inplen, uint64_t tag);
 
@@ -199,7 +203,7 @@ QSC_EXPORT_API void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, s
 /**
  * \brief Self-test function for the queue operations.
  *
- * \return  [bool] Returns true upon success.
+ * \return [bool] Returns true upon success.
  */
 QSC_EXPORT_API bool qsc_queue_self_test(void);
 #endif

@@ -164,12 +164,12 @@ QSC_EXPORT_API void qsc_hcg_dispose(qsc_hcg_state* ctx);
 /**
  * \brief Initialize the pseudo-random provider state with a seed and optional personalization string.
  *
- * \param ctx:      [qsc_hcg_state*] A pointer to the HCG state structure.
- * \param seed:     [const uint8_t*] A pointer to the random seed. (32 bytes instantiates a 256-bit generator; 64 bytes instantiates a 512-bit generator.)
- * \param seedlen:  [size_t] The length of the input seed in bytes.
- * \param info:     [const uint8_t*] A pointer to the optional personalization string.
- * \param infolen:  [size_t] The length of the personalization string in bytes.
- * \param pres:     [bool] Enable predictive resistance; if true, random seed material is injected periodically.
+ * \param ctx: [qsc_hcg_state*] A pointer to the HCG state structure.
+ * \param seed: [const uint8_t*] A pointer to the random seed. (32 bytes instantiates a 256-bit generator; 64 bytes instantiates a 512-bit generator.)
+ * \param seedlen: [size_t] The length of the input seed in bytes.
+ * \param info: [const uint8_t*] A pointer to the optional personalization string.
+ * \param infolen: [size_t] The length of the personalization string in bytes.
+ * \param pres: [bool] Enable predictive resistance; if true, random seed material is injected periodically.
  */
 QSC_EXPORT_API void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool pres);
 
@@ -178,9 +178,9 @@ QSC_EXPORT_API void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, 
  *
  * \warning The generator must be initialized before calling this function.
  *
- * \param ctx:      [qsc_hcg_state*] A pointer to the HCG state structure.
- * \param output:   [uint8_t*] A pointer to the output buffer that will receive the pseudo-random bytes.
- * \param otplen:   [size_t] The requested number of bytes to generate.
+ * \param ctx: [qsc_hcg_state*] A pointer to the HCG state structure.
+ * \param output: [uint8_t*] A pointer to the output buffer that will receive the pseudo-random bytes.
+ * \param otplen: [size_t] The requested number of bytes to generate.
  */
 QSC_EXPORT_API void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen);
 
@@ -189,9 +189,9 @@ QSC_EXPORT_API void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t
  *
  * The new seed material is absorbed into the HMAC state.
  *
- * \param ctx:      [qsc_hcg_state*] A pointer to the HCG state structure.
- * \param seed:     [const uint8_t*] A pointer to the random update seed.
- * \param seedlen:  [size_t] The length of the update seed in bytes.
+ * \param ctx: [qsc_hcg_state*] A pointer to the HCG state structure.
+ * \param seed: [const uint8_t*] A pointer to the random update seed.
+ * \param seedlen: [size_t] The length of the update seed in bytes.
  */
 QSC_EXPORT_API void qsc_hcg_update(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen);
 

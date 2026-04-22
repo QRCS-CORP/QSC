@@ -99,116 +99,116 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
 * \brief Get the sockets address family, IPv4 or IPv6
 *
-* \param sock:		[const qsc_socket*] A pointer to the initialized socket
+* \param sock: [const qsc_socket*] A pointer to the initialized socket
 *
-* \return			[qsc_socket_address_families] The socket address family
+* \return [qsc_socket_address_families] The socket address family
 */
 QSC_EXPORT_API qsc_socket_address_families qsc_socket_client_address_family(const qsc_socket* sock);
 
 /**
 * \brief Get the socket protocol type
 *
-* \param sock:		[const qsc_socket*] A pointer to the initialized socket
+* \param sock: [const qsc_socket*] A pointer to the initialized socket
 *
-* \return			[qsc_socket_protocols] The socket protocol type
+* \return [qsc_socket_protocols] The socket protocol type
 */
 QSC_EXPORT_API qsc_socket_protocols qsc_socket_client_socket_protocol(const qsc_socket* sock);
 
 /**
 * \brief Connect to a remote host using the network host name and service name
 *
-* \param sock:		[qsc_socket*] A pointer to the initialized socket
-* \param host:		[const char*] The remote host name
-* \param service:	[const char*] The service name
+* \param sock: [qsc_socket*] A pointer to the initialized socket
+* \param host: [const char*] The remote host name
+* \param service: [const char*] The service name
 *
-* \return			[qsc_socket_exceptions] Returns an exception code on failure, or success(0)
+* \return [qsc_socket_exceptions] Returns an exception code on failure, or success(0)
 */
 QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_host(qsc_socket* sock, const char* host, const char* service);
 
 /**
 * \brief Establishes a socket connection to a remote host using IPv4 addressing
 *
-* \param sock:		[qsc_socket*] A pointer to the initialized socket
-* \param address:	[const qsc_ipinfo_ipv4_address*] The remote hosts IPv4 address
-* \param port:		[uint16_t] The remote hosts service port number
+* \param sock: [qsc_socket*] A pointer to the initialized socket
+* \param address: [const qsc_ipinfo_ipv4_address*] The remote hosts IPv4 address
+* \param port: [uint16_t] The remote hosts service port number
 *
-* \return			[qsc_socket_exceptions] Returns an exception code on failure, or success(0)
+* \return [qsc_socket_exceptions] Returns an exception code on failure, or success(0)
 */
 QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_ipv4(qsc_socket* sock, const qsc_ipinfo_ipv4_address* address, uint16_t port);
 
 /**
 * \brief Establishes a socket connection to a remote host using IPv6 addressing
 *
-* \param sock:		[qsc_socket*] A pointer to the initialized socket
-* \param address:	[const qsc_ipinfo_ipv6_address*] The remote hosts IPv6 address
-* \param port:		[uint16_t] The remote hosts service port number
+* \param sock: [qsc_socket*] A pointer to the initialized socket
+* \param address: [const qsc_ipinfo_ipv6_address*] The remote hosts IPv6 address
+* \param port: [uint16_t] The remote hosts service port number
 *
-* \return			[qsc_socket_exceptions] Returns an exception code on failure, or success(0)
+* \return [qsc_socket_exceptions] Returns an exception code on failure, or success(0)
 */
 QSC_EXPORT_API qsc_socket_exceptions qsc_socket_client_connect_ipv6(qsc_socket* sock, const qsc_ipinfo_ipv6_address* address, uint16_t port);
 
 /**
 * \brief Get the socket transport type
 *
-* \param sock:		[const qsc_socket*] A pointer to the initialized socket
+* \param sock: [const qsc_socket*] A pointer to the initialized socket
 *
-* \return			[qsc_socket_transports] The socket transport type
+* \return [qsc_socket_transports] The socket transport type
 */
 QSC_EXPORT_API qsc_socket_transports qsc_socket_client_socket_transport(const qsc_socket* sock);
 
 /**
 * \brief Initialize the server socket
 *
-* \param sock:		[qsc_socket*] A pointer to the socket structure
+* \param sock: [qsc_socket*] A pointer to the socket structure
 */
 QSC_EXPORT_API void qsc_socket_client_initialize(qsc_socket* sock);
 
 /**
 * \brief Receive data from a synchronous connected socket or a bound connectionless socket
 *
-* \param sock:		[const qsc_socket*] A pointer to the initialized socket
-* \param output:	[uint8_t*] The buffer that receives incoming data
-* \param otplen:	[size_t] The length of the output buffer
-* \param flag:		[qsc_socket_receive_flags] Flag that influences the behavior of the receive function
+* \param sock: [const qsc_socket*] A pointer to the initialized socket
+* \param output: [uint8_t*] The buffer that receives incoming data
+* \param otplen: [size_t] The length of the output buffer
+* \param flag: [qsc_socket_receive_flags] Flag that influences the behavior of the receive function
 *
-* \return			[size_t] Returns the number of bytes received from the remote host
+* \return [size_t] Returns the number of bytes received from the remote host
 */
 QSC_EXPORT_API size_t qsc_socket_client_receive(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Receive UDP data from a remote host
 *
-* \param sock:		[qsc_socket*] A pointer to the initialized socket
-* \param address:	[char*] The remote host address
-* \param addlen:	[size_t] The length of the address string
-* \param port:		[uint16_t] The remote port
-* \param output:	[uint8_t*] The output buffer receiving the data
-* \param otplen:	[size_t] The number of bytes in the output buffer
-* \param flag:		[qsc_socket_receive_flags] Flag that influence the behavior of the receive function
+* \param sock: [qsc_socket*] A pointer to the initialized socket
+* \param address: [char*] The remote host address
+* \param addlen: [size_t] The length of the address string
+* \param port: [uint16_t] The remote port
+* \param output: [uint8_t*] The output buffer receiving the data
+* \param otplen: [size_t] The number of bytes in the output buffer
+* \param flag: [qsc_socket_receive_flags] Flag that influence the behavior of the receive function
 *
-* \return			[size_t] Returns the number of bytes sent by the remote host
+* \return [size_t] Returns the number of bytes sent by the remote host
 */
 QSC_EXPORT_API size_t qsc_socket_client_receive_from(qsc_socket* sock, char* address, size_t addlen, uint16_t port, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
 * \brief Sends data on a connected socket
 *
-* \param sock:		[const qsc_socket*] A pointer to the initialized socket
-* \param input:		[const uint8_t*] The input buffer containing the data to be transmitted
-* \param inplen:	[size_t] The number of bytes to send
-* \param flag:		[qsc_socket_send_flags] Flag that influence the behavior of the send function
+* \param sock: [const qsc_socket*] A pointer to the initialized socket
+* \param input: [const uint8_t*] The input buffer containing the data to be transmitted
+* \param inplen: [size_t] The number of bytes to send
+* \param flag: [qsc_socket_send_flags] Flag that influence the behavior of the send function
 *
-* \return			[size_t] Returns the number of bytes sent to the remote host
+* \return [size_t] Returns the number of bytes sent to the remote host
 */
 QSC_EXPORT_API size_t qsc_socket_client_send(const qsc_socket* sock, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag);
 
 /**
 * \brief Sends UDP data to a remote host
 *
-* \param sock:		[const qsc_socket*] A pointer to the initialized socket
-* \param input:		[const uint8_t*] The input buffer containing the data to be transmitted
-* \param inplen:	[size_t] The number of bytes to send
-* \param flag:		[qsc_socket_send_flags] Flag that influence the behavior of the send function
+* \param sock: [const qsc_socket*] A pointer to the initialized socket
+* \param input: [const uint8_t*] The input buffer containing the data to be transmitted
+* \param inplen: [size_t] The number of bytes to send
+* \param flag: [qsc_socket_send_flags] Flag that influence the behavior of the send function
 *
 * \return			[size_t] Returns the number of bytes sent to the remote host
 */
@@ -217,7 +217,7 @@ QSC_EXPORT_API size_t qsc_socket_client_send_to(const qsc_socket* sock, const ui
 /**
 * \brief Shut down channels and close the socket
 *
-* \param sock:		[qsc_socket*] A pointer to the initialized socket
+* \param sock: [qsc_socket*] A pointer to the initialized socket
 */
 QSC_EXPORT_API void qsc_socket_client_shut_down(qsc_socket* sock);
 

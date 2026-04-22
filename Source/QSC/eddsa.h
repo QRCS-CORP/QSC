@@ -130,7 +130,7 @@ QSC_CPLUSPLUS_ENABLED_START
     * \def QSC_EDDSA_ALGNAME
     * \brief The formal algorithm name
     */
-#   define QSC_EDDSA_ALGNAME "EDDSA25519"
+#   define QSC_EDDSA_ALGNAME "EDDSA-25519"
 
 #elif defined(QSC_EDDH_S3EC448)
 
@@ -162,7 +162,7 @@ QSC_CPLUSPLUS_ENABLED_START
      * \def QSC_EDDSA_ALGNAME
      * \brief The formal algorithm name
      */
-#   define QSC_EDDSA_ALGNAME "EDDSA448"
+#   define QSC_EDDSA_ALGNAME "EDDSA-448"
 
 #else
 #   error "No EDDSA parameter set defined. Define QSC_EDDSA_S1EC25519 or QSC_EDDSA_S3EC448."

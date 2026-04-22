@@ -95,82 +95,93 @@ QSC_CPLUSPLUS_ENABLED_START
  * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">FIPS 202: SHA-3 Standard</a>
  */
 
-
 /*!
  * \def QSC_DILITHIUM_GENERATE_SEED_SIZE
  * \brief The byte size of the seeded generator seed array.
  */
-#define QSC_DILITHIUM_GENERATE_SEED_SIZE 32
+#define QSC_DILITHIUM_GENERATE_SEED_SIZE 32U
 
 #if defined(QSC_DILITHIUM_S1P44)
 
-/*!
- * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 2560
+	/*!
+	 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
+	 * \brief The byte size of the secret private-key array.
+	 */
+#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 2560U
 
-/*!
- * \def QSC_DILITHIUM_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1312
+	/*!
+	 * \def QSC_DILITHIUM_PUBLICKEY_SIZE
+	 * \brief The byte size of the public-key array.
+	 */
+#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1312U
 
-/*!
- * \def QSC_DILITHIUM_SIGNATURE_SIZE
- * \brief The byte size of the signature array.
- */
-#	define QSC_DILITHIUM_SIGNATURE_SIZE 2420
+	/*!
+	 * \def QSC_DILITHIUM_SIGNATURE_SIZE
+	 * \brief The byte size of the signature array.
+	 */
+#	define QSC_DILITHIUM_SIGNATURE_SIZE 2420U
+
+	/*!
+	 * \def QSC_DILITHIUM_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#define QSC_DILITHIUM_ALGNAME "DILITHIUM-P44"
 
 #elif defined(QSC_DILITHIUM_S3P65)
 
-/*!
- * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 4032
+	/*!
+	 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
+	 * \brief The byte size of the secret private-key array.
+	 */
+#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 4032U
 
-/*!
- * \def QSC_DILITHIUM_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1952
+	/*!
+	 * \def QSC_DILITHIUM_PUBLICKEY_SIZE
+	 * \brief The byte size of the public-key array.
+	 */
+#	define QSC_DILITHIUM_PUBLICKEY_SIZE 1952U
 
-/*!
- * \def QSC_DILITHIUM_SIGNATURE_SIZE
- * \brief The byte size of the signature array.
- */
-#	define QSC_DILITHIUM_SIGNATURE_SIZE 3309
+	/*!
+	 * \def QSC_DILITHIUM_SIGNATURE_SIZE
+	 * \brief The byte size of the signature array.
+	 */
+#	define QSC_DILITHIUM_SIGNATURE_SIZE 3309U
+
+	/*!
+	 * \def QSC_DILITHIUM_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_DILITHIUM_ALGNAME "DILITHIUM-P65"
 
 #elif defined(QSC_DILITHIUM_S5P87)
 
-/*!
- * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
- * \brief The byte size of the secret private-key array.
- */
-#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 4896
+	/*!
+	 * \def QSC_DILITHIUM_PRIVATEKEY_SIZE
+	 * \brief The byte size of the secret private-key array.
+	 */
+#	define QSC_DILITHIUM_PRIVATEKEY_SIZE 4896U
 
-/*!
- * \def QSC_DILITHIUM_PUBLICKEY_SIZE
- * \brief The byte size of the public-key array.
- */
-#	define QSC_DILITHIUM_PUBLICKEY_SIZE 2592
+	/*!
+	 * \def QSC_DILITHIUM_PUBLICKEY_SIZE
+	 * \brief The byte size of the public-key array.
+	 */
+#	define QSC_DILITHIUM_PUBLICKEY_SIZE 2592U
 
-/*!
- * \def QSC_DILITHIUM_SIGNATURE_SIZE
- * \brief The byte size of the signature array.
- */
-#	define QSC_DILITHIUM_SIGNATURE_SIZE 4627
+	/*!
+	 * \def QSC_DILITHIUM_SIGNATURE_SIZE
+	 * \brief The byte size of the signature array.
+	 */
+#	define QSC_DILITHIUM_SIGNATURE_SIZE 4627U
+
+	/*!
+	 * \def QSC_DILITHIUM_ALGNAME
+	 * \brief The formal algorithm name.
+	 */
+#	define QSC_DILITHIUM_ALGNAME "DILITHIUM-P87"
 
 #else
 #	error "The Dilithium parameter set is invalid!"
 #endif
-
-/*!
- * \def QSC_DILITHIUM_ALGNAME
- * \brief The formal algorithm name.
- */
-#define QSC_DILITHIUM_ALGNAME "DILITHIUM"
 
 ///*!
 // * \def QSC_DILITHIUM_RANDOMIZED_SIGNING
@@ -183,10 +194,11 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \warning Arrays must be sized to QSC_DILITHIUM_PUBLICKEY_SIZE and QSC_DILITHIUM_PRIVATEKEY_SIZE.
  *
- * \param publickey:	[uint8_t*] Pointer to the public verification-key array.
- * \param privatekey:	[uint8_t*] Pointer to the private signature-key array.
+ * \param publickey: [uint8_t*] Pointer to the public verification-key array.
+ * \param privatekey: [uint8_t*] Pointer to the private signature-key array.
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to the random generator.
- * \return				[bool] Returns true if the key pair was generated successfully.
+ * 
+ * \return [bool] Returns true if the key pair was generated successfully.
  */
 QSC_EXPORT_API bool qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -196,9 +208,9 @@ QSC_EXPORT_API bool qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* 
  *
  * \warning Arrays must be sized to QSC_DILITHIUM_PUBLICKEY_SIZE, QSC_DILITHIUM_PRIVATEKEY_SIZE, and the seed to DILITHIUM_SEEDBYTES.
  *
- * \param publickey:	[uint8_t*] Pointer to the public verification-key array.
- * \param privatekey:	[uint8_t*] Pointer to the private signature-key array.
- * \param seed:			[const uint8_t*] Pointer to the random seed.
+ * \param publickey: [uint8_t*] Pointer to the public verification-key array.
+ * \param privatekey: [uint8_t*] Pointer to the private signature-key array.
+ * \param seed: [const uint8_t*] Pointer to the random seed.
  */
 QSC_EXPORT_API void qsc_dilithium_seeded_generate_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -207,13 +219,14 @@ QSC_EXPORT_API void qsc_dilithium_seeded_generate_keypair(uint8_t* publickey, ui
  *
  * \warning The signed-message array must be sized to the size of the message plus QSC_DILITHIUM_SIGNATURE_SIZE.
  *
- * \param signedmsg:	[uint8_t*] Pointer to the signed-message array.
- * \param smsglen:		[size_t*] Pointer to the signed message length.
- * \param message:		[const uint8_t*] Pointer to the message array.
- * \param msglen:		[size_t] The message array length.
- * \param privatekey:	[const uint8_t*] Pointer to the private signature-key.
+ * \param signedmsg: [uint8_t*] Pointer to the signed-message array.
+ * \param smsglen: [size_t*] Pointer to the signed message length.
+ * \param message: [const uint8_t*] Pointer to the message array.
+ * \param msglen: [size_t] The message array length.
+ * \param privatekey: [const uint8_t*] Pointer to the private signature-key.
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to the random generator.
- * \return				[bool] Returns true if the message was signed successfully.
+ * 
+ * \return [bool] Returns true if the message was signed successfully.
  */
 QSC_EXPORT_API bool qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
@@ -222,41 +235,44 @@ QSC_EXPORT_API bool qsc_dilithium_sign(uint8_t* signedmsg, size_t* smsglen, cons
  *
  * \warning The signed-message array must be sized to the size of the message plus QSC_DILITHIUM_SIGNATURE_SIZE.
  *
- * \param signedmsg:	[uint8_t*] Pointer to the signed-message array.
- * \param smsglen:		[size_t*] Pointer to the signed message length.
- * \param message:		[const uint8_t*] Pointer to the message array.
- * \param msglen:		[size_t] The message array length.
- * \param context:		[const uint8_t*] Pointer to the context array.
- * \param ctxlen:		[size_t] The context array length.
- * \param privatekey:	[const uint8_t*] Pointer to the private signature-key.
+ * \param signedmsg: [uint8_t*] Pointer to the signed-message array.
+ * \param smsglen: [size_t*] Pointer to the signed message length.
+ * \param message: [const uint8_t*] Pointer to the message array.
+ * \param msglen: [size_t] The message array length.
+ * \param context: [const uint8_t*] Pointer to the context array.
+ * \param ctxlen: [size_t] The context array length.
+ * \param privatekey: [const uint8_t*] Pointer to the private signature-key.
  * \param rng_generate:	[bool (*)(uint8_t*, size_t)] Pointer to the random generator.
- * \return				[bool] Returns true if the message was signed successfully.
+ * 
+ * \return [bool] Returns true if the message was signed successfully.
  */
 QSC_EXPORT_API bool qsc_dilithium_sign_ex(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
  * \brief Verifies a signature-message pair with the public key.
  *
- * \param message:		[uint8_t*] Pointer to the message output array.
- * \param msglen:		[size_t*] Pointer to the length of the message array.
- * \param signedmsg:	[const uint8_t*] Pointer to the signed message array.
- * \param smsglen:		[size_t] The signed message length.
- * \param publickey:	[const uint8_t*] Pointer to the public verification-key array.
- * \return				[bool] Returns true if the signature is valid.
+ * \param message: [uint8_t*] Pointer to the message output array.
+ * \param msglen: [size_t*] Pointer to the length of the message array.
+ * \param signedmsg: [const uint8_t*] Pointer to the signed message array.
+ * \param smsglen: [size_t] The signed message length.
+ * \param publickey: [const uint8_t*] Pointer to the public verification-key array.
+ * 
+ * \return [bool] Returns true if the signature is valid.
  */
 QSC_EXPORT_API bool qsc_dilithium_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
 /**
  * \brief Verifies a signature-message pair and context parameter with the public key.
  *
- * \param message:		[uint8_t*] Pointer to the message output array.
- * \param msglen:		[size_t*] Pointer to the length of the message array.
- * \param context:		[const uint8_t*] Pointer to the context array.
- * \param ctxlen:		[size_t] The context array length.
- * \param signedmsg:	[const uint8_t*] Pointer to the signed message array.
- * \param smsglen:		[size_t] The signed message length.
- * \param publickey:	[const uint8_t*] Pointer to the public verification-key array.
- * \return				[bool] Returns true if the signature is valid.
+ * \param message: [uint8_t*] Pointer to the message output array.
+ * \param msglen: [size_t*] Pointer to the length of the message array.
+ * \param context: [const uint8_t*] Pointer to the context array.
+ * \param ctxlen: [size_t] The context array length.
+ * \param signedmsg: [const uint8_t*] Pointer to the signed message array.
+ * \param smsglen: [size_t] The signed message length.
+ * \param publickey: [const uint8_t*] Pointer to the public verification-key array.
+ * 
+ * \return [bool] Returns true if the signature is valid.
  */
 QSC_EXPORT_API bool qsc_dilithium_verify_ex(uint8_t* message, size_t* msglen, const uint8_t* context, size_t ctxlen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 

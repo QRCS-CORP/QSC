@@ -55,7 +55,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_TLS_MAX_SIGNATURE_SCHEMES
  * \brief Maximum number of signature schemes tracked per peer.
  */
-#define QSC_TLS_MAX_SIGNATURE_SCHEMES 16U
+#define QSC_TLS_MAX_SIGNATURE_SCHEMES 24U
 
 /*! 
  * \def QSC_TLS_MAX_CIPHER_SUITES
@@ -190,6 +190,15 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief Maximum CertificateVerify signature size in bytes across the registered signature schemes.
  */
 #define QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE QSC_DILITHIUM_SIGNATURE_SIZE
+
+/*!
+ * \def QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE
+ * \brief Maximum private-key size in bytes across all supported CertificateVerify signature schemes.
+ *        Sized to ML-DSA-87 (Dilithium level 5) at 4896 bytes, the largest supported scheme.
+ *        Used to size the inline private-key storage in qsc_tls_local_certificate_config and
+ *        qsc_x509w_tls_local_certificate.
+ */
+#define QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE 4896U
 
 /*! 
  * \def QSC_TLS_MAX_KEYSHARE_SIZE

@@ -72,6 +72,19 @@
  * certificate SubjectPublicKeyInfo corresponds to a supplied private key object.
  */
 
+
+/*!
+ * \def QSC_X509_EDDSA_SEED_SIZE
+ * \brief The EDDSA seed size in bytes.
+ */
+#define QSC_X509_EDDSA_SEED_SIZE 32U
+
+/*!
+ * \def QSC_X509_EDDSA_PUBLIC_KEY_SIZE
+ * \brief The EDDSA oublic key size in bytes.
+ */
+#define QSC_X509_EDDSA_PUBLIC_KEY_SIZE 32U
+
 /*!
  * \def QSC_X509_ML_DSA_44_PRIVATEKEY_SIZE
  * \brief The ML-DSA-44 private key size in bytes.

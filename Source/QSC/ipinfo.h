@@ -178,137 +178,147 @@ QSC_EXPORT_API typedef struct
 /**
  * \brief Determine the IP address type from a string.
  *
- * \param address:  [const char*] A pointer to the address string.
- * \return          [qsc_ipinfo_address_types] Returns the IP address type.
+ * \param address: [const char*] A pointer to the address string.
+ * 
+ * \return [qsc_ipinfo_address_types] Returns the IP address type.
  */
 qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address);
 
 /**
  * \brief Use the device's primary IPv4 address.
  *
- * \return          [qsc_ipinfo_ipv4_address] Returns the primary IPv4 address structure.
+ * \return [qsc_ipinfo_ipv4_address] Returns the primary IPv4 address structure.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_any(void);
 
 /**
  * \brief Clear the IPv4 address structure.
  *
- * \param address:  [qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * \param address: [qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_address_clear(qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Instantiate an IPv4 address structure from a byte array.
  *
- * \param address:  [const uint8_t*] A pointer to the byte array containing the serialized address.
- * \return          [qsc_ipinfo_ipv4_address] Returns the initialized IPv4 address structure.
+ * \param address: [const uint8_t*] A pointer to the byte array containing the serialized address.
+ * 
+ * \return [qsc_ipinfo_ipv4_address] Returns the initialized IPv4 address structure.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_array(const uint8_t* address);
 
 /**
  * \brief Instantiate an IPv4 address structure from individual bytes.
  *
- * \param a1:       [uint8_t] The first address octet.
- * \param a2:       [uint8_t] The second address octet.
- * \param a3:       [uint8_t] The third address octet.
- * \param a4:       [uint8_t] The fourth address octet.
- * \return          [qsc_ipinfo_ipv4_address] Returns the initialized IPv4 address structure.
+ * \param a1: [uint8_t] The first address octet.
+ * \param a2: [uint8_t] The second address octet.
+ * \param a3: [uint8_t] The third address octet.
+ * \param a4: [uint8_t] The fourth address octet.
+ * 
+ * \return [qsc_ipinfo_ipv4_address] Returns the initialized IPv4 address structure.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_bytes(uint8_t a1, uint8_t a2, uint8_t a3, uint8_t a4);
 
 /**
  * \brief Instantiate an IPv4 address structure from a string.
  *
- * \param input:    [const char*] A pointer to the serialized address string.
- * \return          [qsc_ipinfo_ipv4_address] Returns the initialized IPv4 address structure.
+ * \param input: [const char*] A pointer to the serialized address string.
+ * 
+ * \return [qsc_ipinfo_ipv4_address] Returns the initialized IPv4 address structure.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC_IPINFO_IPV4_STRNLEN]);
 
 /**
  * \brief Compare two IPv4 address structures for equality.
  *
- * \param a:        [const qsc_ipinfo_ipv4_address*] A pointer to the first IPv4 address structure.
- * \param b:        [const qsc_ipinfo_ipv4_address*] A pointer to the second IPv4 address structure.
- * \return          [bool] Returns true if the address structures are equal.
+ * \param a: [const qsc_ipinfo_ipv4_address*] A pointer to the first IPv4 address structure.
+ * \param b: [const qsc_ipinfo_ipv4_address*] A pointer to the second IPv4 address structure.
+ * 
+ * \return [bool] Returns true if the address structures are equal.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qsc_ipinfo_ipv4_address* b);
 
 /**
  * \brief Test if the IPv4 address is a valid public address.
  *
- * \param address:  [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
- * \return          [bool] Returns true if the address is valid.
+ * \param address: [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * 
+ * \return [bool] Returns true if the address is valid.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_routable(const qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Test if the IPv4 address is valid.
  *
- * \param address:  [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
- * \return          [bool] Returns true if the address is valid.
+ * \param address: [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * 
+ * \return [bool] Returns true if the address is valid.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_valid(const qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Test if the IPv4 address string is valid.
  *
- * \param address:  [const char*] A pointer to the IPv4 address string.
- * \return          [bool] Returns true if the address string is valid.
+ * \param address: [const char*] A pointer to the IPv4 address string.
+ * 
+ * \return [bool] Returns true if the address string is valid.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address);
 
 /**
  * \brief Test if the IPv4 address is zeroed.
  *
- * \param address:  [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
- * \return          [bool] Returns true if the address is zeroed.
+ * \param address: [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * 
+ * \return [bool] Returns true if the address is zeroed.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv4_address_is_zeroed(const qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Get a copy of the IPv4 loopback address.
  *
- * \return          [qsc_ipinfo_ipv4_address] Returns a copy of the IPv4 loopback address.
+ * \return [qsc_ipinfo_ipv4_address] Returns a copy of the IPv4 loopback address.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_loopback(void);
 
 /**
  * \brief Get the IPv4 network subnet mask string.
  *
- * \param mask:     [char*] The output mask string.
- * \param address:  [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * \param mask: [char*] The output mask string.
+ * \param address: [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_address_get_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], const qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Get the IPv4 network subnet CIDR length.
  *
- * \param address:  [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
- * \return          [uint8_t] Returns the mask length in bits.
+ * \param address: [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * 
+ * \return [uint8_t] Returns the mask length in bits.
  */
 QSC_EXPORT_API uint8_t qsc_ipinfo_ipv4_address_get_cidr_mask(const qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Serialize an IPv4 address structure to a byte array.
  *
- * \param output:   [uint8_t*] The address output byte array.
- * \param address:  [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * \param output: [uint8_t*] The address output byte array.
+ * \param address: [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_array(uint8_t* output, const qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Serialize an IPv4 address structure to a string.
  *
- * \param output:   [char*] The serialized address string output array.
- * \param address:  [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
+ * \param output: [char*] The serialized address string output array.
+ * \param address: [const qsc_ipinfo_ipv4_address*] A pointer to the IPv4 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const qsc_ipinfo_ipv4_address* address);
 
 /**
  * \brief Convert an IPv4 address array to a string.
  *
- * \param output:   [char*] The serialized address string output array.
- * \param address:  [const uint8_t*] A pointer to the IPv4 address array.
+ * \param output: [char*] The serialized address string output array.
+ * \param address: [const uint8_t*] A pointer to the IPv4 address array.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const uint8_t* address);
 
@@ -337,142 +347,152 @@ QSC_EXPORT_API typedef struct
 /**
  * \brief Get the IPv6 address routing prefix type.
  *
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
- * \return          [qsc_ipv6_address_prefix_types] Returns the IPv6 prefix type.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * 
+ * \return [qsc_ipv6_address_prefix_types] Returns the IPv6 prefix type.
  */
 QSC_EXPORT_API qsc_ipv6_address_prefix_types qsc_ipinfo_ipv6_address_type(const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Get a copy of the IPv6 loopback address.
  *
- * \return          [qsc_ipinfo_ipv6_address] Returns a copy of the IPv6 loopback address.
+ * \return [qsc_ipinfo_ipv6_address] Returns a copy of the IPv6 loopback address.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_any(void);
 
 /**
  * \brief Clear the IPv6 address structure.
  *
- * \param address:  [qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * \param address: [qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv6_address_clear(qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Instantiate an IPv6 address structure from a byte array.
  *
- * \param address:  [const uint8_t*] A pointer to the byte array containing the serialized address.
- * \return          [qsc_ipinfo_ipv6_address] Returns the initialized IPv6 address structure.
+ * \param address: [const uint8_t*] A pointer to the byte array containing the serialized address.
+ * 
+ * \return [qsc_ipinfo_ipv6_address] Returns the initialized IPv6 address structure.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_from_array(const uint8_t* address);
 
 /**
  * \brief Instantiate an IPv6 address structure from a string.
  *
- * \param input:    [const char*] A pointer to the serialized address string.
- * \return          [qsc_ipinfo_ipv6_address] Returns the initialized IPv6 address structure.
+ * \param input: [const char*] A pointer to the serialized address string.
+ * 
+ * \return [qsc_ipinfo_ipv6_address] Returns the initialized IPv6 address structure.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_from_string(const char input[QSC_IPINFO_IPV6_STRNLEN]);
 
 /**
  * \brief Compare two IPv6 address structures for equality.
  *
- * \param a:        [const qsc_ipinfo_ipv6_address*] A pointer to the first IPv6 address structure.
- * \param b:        [const qsc_ipinfo_ipv6_address*] A pointer to the second IPv6 address structure.
- * \return          [bool] Returns true if the address structures are equal.
+ * \param a: [const qsc_ipinfo_ipv6_address*] A pointer to the first IPv6 address structure.
+ * \param b: [const qsc_ipinfo_ipv6_address*] A pointer to the second IPv6 address structure.
+ * 
+ * \return [bool] Returns true if the address structures are equal.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_equal(const qsc_ipinfo_ipv6_address* a, const qsc_ipinfo_ipv6_address* b);
 
 /**
  * \brief Test if the IPv6 address is a valid public address.
  *
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
- * \return          [bool] Returns true if the address is valid.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * 
+ * \return [bool] Returns true if the address is valid.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_routable(const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Test if the IPv6 address is valid.
  *
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
- * \return          [bool] Returns true if the address is valid.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * 
+ * \return [bool] Returns true if the address is valid.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Test if the IPv6 address string is valid.
  *
- * \param address:  [const char*] A pointer to the IPv6 address string.
- * \return          [bool] Returns true if the address string is valid.
+ * \param address: [const char*] A pointer to the IPv6 address string.
+ * 
+ * \return [bool] Returns true if the address string is valid.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address);
 
 /**
  * \brief Test if the IPv6 address is zeroed.
  *
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
- * \return          [bool] Returns true if the address is zeroed.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * 
+ * \return [bool] Returns true if the address is zeroed.
  */
 QSC_EXPORT_API bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Get a copy of the IPv6 loopback address.
  *
- * \return          [qsc_ipinfo_ipv6_address] Returns a copy of the IPv6 loopback address.
+ * \return [qsc_ipinfo_ipv6_address] Returns a copy of the IPv6 loopback address.
  */
 QSC_EXPORT_API qsc_ipinfo_ipv6_address qsc_ipinfo_ipv6_address_loopback(void);
 
 /**
  * \brief Get the IPv6 network subnet mask string.
  *
- * \param mask:     [char*] The output mask string.
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * \param mask: [char*] The output mask string.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv6_address_get_mask(char mask[QSC_IPINFO_IPV6_MASK_STRNLEN], const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Get the IPv6 network subnet CIDR length.
  *
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
- * \return          [uint8_t] Returns the mask length in bits.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * 
+ * \return [uint8_t] Returns the mask length in bits.
  */
 QSC_EXPORT_API uint8_t qsc_ipinfo_ipv6_address_get_cidr_mask(const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Serialize an IPv6 address structure to a byte array.
  *
- * \param output:   [uint8_t*] The address output byte array.
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * \param output: [uint8_t*] The address output byte array.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv6_address_to_array(uint8_t* output, const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Serialize an IPv6 address structure to a string.
  *
- * \param output:   [char*] The address string output array.
- * \param address:  [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
+ * \param output: [char*] The address string output array.
+ * \param address: [const qsc_ipinfo_ipv6_address*] A pointer to the IPv6 address structure.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv6_address_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const qsc_ipinfo_ipv6_address* address);
 
 /**
  * \brief Convert an IPv6 address array to a string.
  *
- * \param output:   [char*] The address string output array.
- * \param address:  [const uint8_t*] A pointer to the IPv6 address array.
+ * \param output: [char*] The address string output array.
+ * \param address: [const uint8_t*] A pointer to the IPv6 address array.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv6_array_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const uint8_t* address);
 
 /**
  * \brief Convert a subnet mask string to a CIDR mask.
  *
- * \param mask:     [const char*] The subnet mask string.
- * \return          [uint8_t] Returns the mask length in bits.
+ * \param mask: [const char*] The subnet mask string.
+ * 
+ * \return [uint8_t] Returns the mask length in bits.
  */
 QSC_EXPORT_API uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLEN]);
 
 /**
  * \brief Convert a CIDR mask to a subnet mask string.
  *
- * \param mask:     [char*] The output mask string.
- * \param cidr:     [uint8_t] The input CIDR mask.
+ * \param mask: [char*] The output mask string.
+ * \param cidr: [uint8_t] The input CIDR mask.
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8_t cidr);
 

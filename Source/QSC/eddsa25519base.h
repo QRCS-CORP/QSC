@@ -65,7 +65,6 @@ QSC_CPLUSPLUS_ENABLED_START
  * generating key pairs, signing messages, and verifying signature-message pairs.
  */
 
-
 /**
  * \brief Generates public and private keys for the ECDSA key encapsulation mechanism using a random function pointer.
  *
@@ -82,33 +81,35 @@ void qsc_ed25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool 
  *
  * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_SECRETKEY_SIZE.
  *
- * \param publickey:	[uint8_t*] Pointer to the output public-key array.
- * \param privatekey:	[uint8_t*] Pointer to the output private-key array.
- * \param seed:			[const uint8_t*] Pointer to the random seed.
+ * \param publickey: [uint8_t*] Pointer to the output public-key array.
+ * \param privatekey: [uint8_t*] Pointer to the output private-key array.
+ * \param seed: [const uint8_t*] Pointer to the random seed.
  */
 void qsc_ed25519_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
 /**
  * \brief Takes the message as input and returns an array containing the signature followed by the message.
  *
- * \param signedmsg:	[uint8_t*] Pointer to the signed message.
- * \param smsglen:		[size_t*] Pointer to the signed message length.
- * \param message:		[const uint8_t*] Pointer to the message to be signed.
- * \param msglen:		[size_t] The message length.
- * \param privatekey:	[const uint8_t*] Pointer to the private signature key.
- * \return				[bool] Returns true for success.
+ * \param signedmsg: [uint8_t*] Pointer to the signed message.
+ * \param smsglen: [size_t*] Pointer to the signed message length.
+ * \param message: [const uint8_t*] Pointer to the message to be signed.
+ * \param msglen: [size_t] The message length.
+ * \param privatekey: [const uint8_t*] Pointer to the private signature key.
+ * 
+ * \return [bool] Returns true for success.
  */
 bool qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
 /**
  * \brief Verifies a signature-message pair with the public key.
  *
- * \param message:		[uint8_t*] Pointer to the message to be verified.
- * \param msglen:		[size_t*] Pointer to the message length.
- * \param signedmsg:	[const uint8_t*] Pointer to the signed message.
- * \param smsglen:		[size_t] The signed message length.
- * \param publickey:	[const uint8_t*] Pointer to the public verification key.
- * \return				[bool] Returns true for success.
+ * \param message: [uint8_t*] Pointer to the message to be verified.
+ * \param msglen: [size_t*] Pointer to the message length.
+ * \param signedmsg: [const uint8_t*] Pointer to the signed message.
+ * \param smsglen: [size_t] The signed message length.
+ * \param publickey: [const uint8_t*] Pointer to the public verification key.
+ * 
+ * \return [bool] Returns true for success.
  */
 bool qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 

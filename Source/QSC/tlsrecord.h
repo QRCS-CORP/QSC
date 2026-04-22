@@ -21,7 +21,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param iv: [const uint8_t*] The static traffic IV buffer.
  * \param ivlen: [size_t] The static traffic IV length in bytes.
  */
-QSC_EXPORT_API void qsc_tls_record_state_initialize(qsc_tls_record_state* state, const uint8_t* key, size_t keylen, const uint8_t* iv, size_t ivlen);
+QSC_EXPORT_API void qsc_tls_record_state_initialize(qsc_tls_record_state* state, qsc_tls_cipher_suite suite, const uint8_t* key, size_t keylen, const uint8_t* iv, size_t ivlen);
 
 /**
  * \brief Dispose of a TLS record protection state.
@@ -42,7 +42,8 @@ QSC_EXPORT_API void qsc_tls_record_state_dispose(qsc_tls_record_state* state);
  *
  * \return Returns a TLS status code.
  */
-QSC_EXPORT_API qsc_tls_status qsc_tls_record_encode_plaintext(uint8_t* output, size_t outlen, size_t* written, qsc_tls_record_content_type type, const uint8_t* input, size_t inlen);
+QSC_EXPORT_API qsc_tls_status qsc_tls_record_encode_plaintext(uint8_t* output, size_t outlen, size_t* written, qsc_tls_record_content_type type, 
+	const uint8_t* input, size_t inlen);
 
 /**
  * \brief Decode a plaintext TLS record.
@@ -55,7 +56,8 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_record_encode_plaintext(uint8_t* output, s
  *
  * \return Returns a TLS status code.
  */
-QSC_EXPORT_API qsc_tls_status qsc_tls_record_decode_plaintext(const uint8_t* input, size_t inlen, qsc_tls_record_content_type* type, const uint8_t** payload, size_t* payloadlen);
+QSC_EXPORT_API qsc_tls_status qsc_tls_record_decode_plaintext(const uint8_t* input, size_t inlen, qsc_tls_record_content_type* type, 
+	const uint8_t** payload, size_t* payloadlen);
 
 /**
  * \brief Determine the full span length of a TLS record.

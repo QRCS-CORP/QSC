@@ -164,11 +164,11 @@ typedef enum
 /**
 * \brief Get a list of file attributes
 *
-* \param result:    [char*] The result output string
-* \param reslen:    [size_t] The length of the result string
-* \param path:      [const char*] The file path
+* \param result: [char*] The result output string
+* \param reslen: [size_t] The length of the result string
+* \param path: [const char*] The file path
 *
-* \return           [size_t] Returns The length of the attribute string
+* \return [size_t] Returns The length of the attribute string
 */
 QSC_EXPORT_API size_t qsc_winutils_file_get_attributes(char* result, size_t reslen, const char* path);
 
@@ -176,144 +176,144 @@ QSC_EXPORT_API size_t qsc_winutils_file_get_attributes(char* result, size_t resl
 * \brief Set a file attribute.
 * Valid attributes are readonly, hidden, system, archive, normal, temporary, offline, noindex, encrypted
 *
-* \param path:      [const char*] The file path
-* \param attr:      [const char*] The file attribute
+* \param path: [const char*] The file path
+* \param attr: [const char*] The file attribute
 *
-* \return           [bool] Returns true if the attribute was applied
+* \return [bool] Returns true if the attribute was applied
 */
 QSC_EXPORT_API bool qsc_winutils_file_set_attribute(const char* path, const char* attr);
 
 /**
 * \brief Get a list of network statistics seperated by newline characters
 *
-* \param result:    [char*] The result output string
-* \param reslen:    [size_t] The length of the result string
+* \param result: [char*] The result output string
+* \param reslen: [size_t] The length of the result string
 *
-* \return           [size_t] Returns the size of the result string
+* \return [size_t] Returns the size of the result string
 */
 QSC_EXPORT_API size_t qsc_winutils_network_statistics(char* result, size_t reslen);
 
 /**
 * \brief Create a list of processes and their descriptions
 *
-* \param result:    [char*] The result output string
-* \param reslen:    [size_t] The length of the result string
+* \param result: [char*] The result output string
+* \param reslen: [size_t] The length of the result string
 *
-* \return           [size_t] Returns the length of the process list string
+* \return [size_t] Returns the length of the process list string
 */
 QSC_EXPORT_API size_t qsc_winutils_process_list(char* result, size_t reslen);
 
 /**
 * \brief Elevate the token access
 *
-* \return           [bool] Returns true if successful
+* \return [bool] Returns true if successful
 */
 QSC_EXPORT_API bool qsc_winutils_process_token_elevate(void);
 
 /**
 * \brief Terminate a process
 *
-* \param name:      [const char*] The process name
+* \param name: [const char*] The process name
 *
-* \return           [bool] Returns true if the process is terminated
+* \return [bool] Returns true if the process is terminated
 */
 QSC_EXPORT_API bool qsc_winutils_process_terminate(const char* name);
 
 /**
 * \brief Create a registry key and add a value
 *
-* \param keypath:   [const char*] The fully qualified path; root\subkey
-* \param value:     [const char*] The value to add
-* \param vtype:     [qsc_winutils_registry_value_types] The value type
+* \param keypath: [const char*] The fully qualified path; root\subkey
+* \param value: [const char*] The value to add
+* \param vtype: [qsc_winutils_registry_value_types] The value type
 *
-* \return           [bool] Returns true if the key was created
+* \return [bool] Returns true if the key was created
 */
 QSC_EXPORT_API bool qsc_winutils_registry_key_add(const char* keypath, const char* value, qsc_winutils_registry_value_types vtype);
 
 /**
 * \brief Delete a registry key
 *
-* \param keypath:   [const char*] The fully qualified path; root\subkey
+* \param keypath: [const char*] The fully qualified path; root\subkey
 *
-* \return           [bool] Returns true if the key was deleted
+* \return [bool] Returns true if the key was deleted
 */
 QSC_EXPORT_API bool qsc_winutils_registry_key_delete(const char* keypath);
 
 /**
 * \brief Create a list of registry keys under a starting key, ex. 'HKEY_CURRENT_USER\Software'
 *
-* \param result:    [char*] The result output string
-* \param reslen:    [size_t] The length of the result string
-* \param keypath:   [const char*] The path of the starting key
+* \param result: [char*] The result output string
+* \param reslen: [size_t] The length of the result string
+* \param keypath: [const char*] The path of the starting key
 *
-* \return           [size_t] Returns the size of the result string
+* \return [size_t] Returns the size of the result string
 */
 QSC_EXPORT_API size_t qsc_winutils_registry_key_list(char* result, size_t reslen, const char* keypath);
 
 /**
 * \brief Run an application using the executable path
 *
-* \param path:      [const char*] The executable path and name
+* \param path: [const char*] The executable path and name
 *
-* \return           [bool] Returns true if the application is started
+* \return [bool] Returns true if the application is started
 */
 QSC_EXPORT_API bool qsc_winutils_run_executable(const char* path);
 
 /**
 * \brief Run an application using the executable name and login credentials
 *
-* \param user:      [const char*] The user name
-* \param password:  [const char*] The users password
-* \param expath:    [const char*] The full path to the executable
+* \param user: [const char*] The user name
+* \param password: [const char*] The users password
+* \param expath: [const char*] The full path to the executable
 *
-* \return           [bool] Returns true if the application is started
+* \return [bool] Returns true if the application is started
 */
 QSC_EXPORT_API bool qsc_winutils_run_as_user(const char* user, const char* password, const char* expath);
 
 /**
 * \brief Create a list of running services
 *
-* \param result:    [char*] The result output string
-* \param reslen:    [size_t] The length of the result string
+* \param result: [char*] The result output string
+* \param reslen: [size_t] The length of the result string
 *
-* \return           [size_t] Returns The length of the services list string
+* \return [size_t] Returns The length of the services list string
 */
 QSC_EXPORT_API size_t qsc_winutils_service_list(char* result, size_t reslen);
 
 /**
 * \brief Get the size of the services list string
 *
-* \return           [size_t] Returns The length of the services list string
+* \return [size_t] Returns The length of the services list string
 */
 QSC_EXPORT_API size_t qsc_winutils_service_list_size(void);
 
 /**
 * \brief Change the running state of a system service
 *
-* \param name:      [const char*] The service name
-* \param state:     [qsc_winutils_service_states] The state enumeration
+* \param name: [const char*] The service name
+* \param state: [qsc_winutils_service_states] The state enumeration
 *
-* \return           [bool] Returns true if the action succeeded
+* \return [bool] Returns true if the action succeeded
 */
 QSC_EXPORT_API bool qsc_winutils_service_state(const char* name, qsc_winutils_service_states state);
 
 /**
 * \brief Create a list of system user accounts and their descriptions
 *
-* \param result:    [char*] The result output string
-* \param reslen:    [size_t] The length of the result string
+* \param result: [char*] The result output string
+* \param reslen: [size_t] The length of the result string
 *
-* \return           [size_t] Returns The length of the user list string
+* \return [size_t] Returns The length of the user list string
 */
 QSC_EXPORT_API size_t qsc_winutils_user_list(char* result, size_t reslen);
 
 /**
 * \brief Get the logged in user account name
 *
-* \param result:    [char*] The result output string
-* \param reslen:    [size_t] The length of the result string
+* \param result: [char*] The result output string
+* \param reslen: [size_t] The length of the result string
 *
-* \return           [size_t] Returns The length of the user string
+* \return [size_t] Returns The length of the user string
 */
 QSC_EXPORT_API size_t qsc_winutils_current_user(char* result, size_t reslen);
 

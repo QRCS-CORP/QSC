@@ -113,7 +113,7 @@ typedef enum
  *
  * Appends a directory delimiter to the provided path string if it is not already present.
  *
- * \param path:         [char*] The full path including the new folder name.
+ * \param path: [char*] The full path including the new folder name.
  */
 QSC_EXPORT_API void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PATH]);
 
@@ -122,8 +122,9 @@ QSC_EXPORT_API void qsc_folderutils_append_delimiter(char path[QSC_SYSTEM_MAX_PA
  *
  * Creates a directory at the specified path.
  *
- * \param path:         [const char*] The full path including the new folder name.
- * \return              [bool] Returns true if the folder is created.
+ * \param path: [const char*] The full path including the new folder name.
+ * 
+ * \return [bool] Returns true if the folder is created.
  */
 QSC_EXPORT_API bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_MAX_PATH]);
 
@@ -132,8 +133,9 @@ QSC_EXPORT_API bool qsc_folderutils_create_directory(const char path[QSC_SYSTEM_
  *
  * Creates a directory path.
  *
- * \param path:         [const char*] The full path including the new folder names.
- * \return              [bool] Returns true if the folder is created.
+ * \param path: [const char*] The full path including the new folder names.
+ * 
+ * \return [bool] Returns true if the folder is created.
  */
 QSC_EXPORT_API bool qsc_folderutils_create_directory_tree(const char path[QSC_SYSTEM_MAX_PATH]);
 
@@ -142,8 +144,9 @@ QSC_EXPORT_API bool qsc_folderutils_create_directory_tree(const char path[QSC_SY
  *
  * Deletes the directory at the specified path.
  *
- * \param path:         [const char*] The full path including the folder name.
- * \return              [bool] Returns true if the folder is deleted.
+ * \param path: [const char*] The full path including the folder name.
+ * 
+ * \return [bool] Returns true if the folder is deleted.
  */
 QSC_EXPORT_API bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_MAX_PATH]);
 
@@ -152,8 +155,9 @@ QSC_EXPORT_API bool qsc_folderutils_delete_directory(const char path[QSC_SYSTEM_
  *
  * Checks whether the specified folder exists.
  *
- * \param path:         [const char*] The full path including the folder name.
- * \return              [bool] Returns true if the folder is found.
+ * \param path: [const char*] The full path including the folder name.
+ * 
+ * \return [bool] Returns true if the folder is found.
  */
 QSC_EXPORT_API bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_MAX_PATH]);
 
@@ -162,10 +166,11 @@ QSC_EXPORT_API bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_
  *
  * Constructs a string listing the directories within the specified starting directory.
  *
- * \param result:       [char*] The output result string.
- * \param reslen:       [size_t] The length of the output string buffer.
- * \param directory:    [const char*] The starting directory.
- * \return              [size_t] Returns the length of the output string.
+ * \param result: [char*] The output result string.
+ * \param reslen: [size_t] The length of the output string buffer.
+ * \param directory: [const char*] The starting directory.
+ * 
+ * \return [size_t] Returns the length of the output string.
  */
 QSC_EXPORT_API size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* directory);
 
@@ -174,8 +179,8 @@ QSC_EXPORT_API size_t qsc_folderutils_directory_list(char* result, size_t reslen
  *
  * Retrieves the full directory path corresponding to the given special folder enumeration.
  *
- * \param directory:    [qsc_folderutils_directories] The enum value of the system folder.
- * \param output:       [char*] The output string containing the directory path.
+ * \param directory: [qsc_folderutils_directories] The enum value of the system folder.
+ * \param output: [char*] The output string containing the directory path.
  */
 QSC_EXPORT_API void qsc_folderutils_get_directory(qsc_folderutils_directories directory, char output[QSC_SYSTEM_MAX_PATH]);
 
@@ -184,8 +189,9 @@ QSC_EXPORT_API void qsc_folderutils_get_directory(qsc_folderutils_directories di
  *
  * Determines whether the provided folder path string ends with a directory delimiter.
  *
- * \param path:         [const char*] The full path including the folder name.
- * \return              [bool] Returns true if the folder path ends with a delimiter.
+ * \param path: [const char*] The full path including the folder name.
+ * 
+ * \return [bool] Returns true if the folder path ends with a delimiter.
  */
 QSC_EXPORT_API bool qsc_folderutils_directory_has_delimiter(const char path[QSC_SYSTEM_MAX_PATH]);
 
@@ -196,6 +202,7 @@ QSC_EXPORT_API bool qsc_folderutils_directory_has_delimiter(const char path[QSC_
  * Executes internal tests on folder utility functions.
  */
 QSC_EXPORT_API void qsc_folderutils_test(void);
+
 #endif
 
 QSC_CPLUSPLUS_ENABLED_END

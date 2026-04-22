@@ -351,8 +351,7 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_pem_encode_private_key_sec1(const uint8_
  *
  * \return [enum] Returns a qsc_asn1_status code.
  */
-QSC_EXPORT_API qsc_asn1_status qsc_x509_pem_encode_private_key_pkcs8_from_key(const qsc_x509_private_key* key, bool includepublickey, 
-    char* pem, size_t* pemlen);
+QSC_EXPORT_API qsc_asn1_status qsc_x509_pem_encode_private_key_pkcs8_from_key(const qsc_x509_private_key* key, bool includepublickey, char* pem, size_t* pemlen);
 
 /*!
  * \brief Encode a normalized private key object as SEC 1 PEM.

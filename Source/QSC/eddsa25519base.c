@@ -5,7 +5,7 @@
 #include "memutils.h"
 #include "sha2.h"
 
-static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk)
+static int32_t eddsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk)
 {
 	uint8_t az[64U] = { 0U };
 	uint8_t nonce[64U] = { 0U };
@@ -58,7 +58,7 @@ static int32_t ecdsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 	return 0;
 }
 
-static bool ecdsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t mlen, const uint8_t* pk)
+static bool eddsa_ed25519_verify(const uint8_t* sig, const uint8_t* m, size_t mlen, const uint8_t* pk)
 {
 	qsc_sha512_state ctx;
 	uint8_t h[64U] = { 0U };
@@ -171,7 +171,7 @@ bool qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* messag
 
 	qsc_memutils_copy(signedmsg + ED25519_SIGNATURE_SIZE, message, msglen);
 
-	if (ecdsa_ed25519_sign(signedmsg, &slen, signedmsg + ED25519_SIGNATURE_SIZE, msglen, privatekey) != 0 || slen != ED25519_SIGNATURE_SIZE)
+	if (eddsa_ed25519_sign(signedmsg, &slen, signedmsg + ED25519_SIGNATURE_SIZE, msglen, privatekey) != 0 || slen != ED25519_SIGNATURE_SIZE)
 	{
 		if (smsglen != NULL)
 		{
@@ -212,7 +212,7 @@ bool qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedm
 	{
 		mlen = smsglen - ED25519_SIGNATURE_SIZE;
 
-		if (ecdsa_ed25519_verify(signedmsg, signedmsg + ED25519_SIGNATURE_SIZE, mlen, publickey) == false)
+		if (eddsa_ed25519_verify(signedmsg, signedmsg + ED25519_SIGNATURE_SIZE, mlen, publickey) == false)
 		{
 			if (mlen > 0U)
 			{

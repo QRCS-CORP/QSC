@@ -102,7 +102,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * Computes Q = dG where d is a 32-byte big-endian scalar in the range [1, n - 1],
  * and serializes the affine public point as Qx || Qy.
  *
- * \param publickey:  [uint8_t*] Output 64-byte public key.
+ * \param publickey: [uint8_t*] Output 64-byte public key.
  * \param privatekey: [const uint8_t*] Input 32-byte private scalar.
  *
  * \return [int32_t] Returns 0 on success, or a negative error code on failure.
@@ -117,9 +117,9 @@ int32_t qsc_crypto_scalarmult_secp256r1_base(uint8_t* publickey, const uint8_t* 
  * and Q is a 64-byte affine public point encoded as Qx || Qy. On success the affine
  * X coordinate of S is returned as the 32-byte big-endian shared secret.
  *
- * \param secret:     [uint8_t*] Output 32-byte shared secret.
+ * \param secret: [uint8_t*] Output 32-byte shared secret.
  * \param privatekey: [const uint8_t*] Input 32-byte private scalar.
- * \param publickey:  [const uint8_t*] Input 64-byte peer public key.
+ * \param publickey: [const uint8_t*] Input 64-byte peer public key.
  *
  * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
@@ -128,7 +128,7 @@ int32_t qsc_crypto_scalarmult_secp256r1(uint8_t* secret, const uint8_t* privatek
 /**
  * \brief Derive an ECDH P-256 public key from an existing private key.
  *
- * \param publickey:  [uint8_t*] Output 64-byte public key.
+ * \param publickey: [uint8_t*] Output 64-byte public key.
  * \param privatekey: [const uint8_t*] Input 32-byte private scalar.
  */
 void qsc_p256_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
@@ -140,8 +140,8 @@ void qsc_p256_public_from_private(uint8_t* publickey, const uint8_t* privatekey)
  * The RNG fills a 32-byte seed which is reduced into a non-zero private scalar, then
  * the corresponding public key is derived by scalar multiplication of the base point.
  *
- * \param publickey:    [uint8_t*] Output 64-byte public key.
- * \param privatekey:   [uint8_t*] Output 32-byte private scalar.
+ * \param publickey: [uint8_t*] Output 64-byte public key.
+ * \param privatekey:  [uint8_t*] Output 32-byte private scalar.
  * \param rng_generate: [bool (*)(uint8_t*, size_t)] Random generator callback.
  */
 void qsc_p256_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
@@ -149,9 +149,9 @@ void qsc_p256_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
 /**
  * \brief Generate an ECDH P-256 key pair from a seed.
  *
- * \param publickey:  [uint8_t*] Output 64-byte public key.
+ * \param publickey: [uint8_t*] Output 64-byte public key.
  * \param privatekey: [uint8_t*] Output 32-byte private scalar.
- * \param seed:       [const uint8_t*] Input 32-byte seed.
+ * \param seed: [const uint8_t*] Input 32-byte seed.
  */
 void qsc_p256_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
@@ -163,8 +163,8 @@ void qsc_p256_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, c
  * function returns false on invalid inputs, invalid peer points, or an all-zero shared
  * secret.
  *
- * \param secret:     [uint8_t*] Output 32-byte shared secret.
- * \param publickey:  [const uint8_t*] Input 64-byte peer public key.
+ * \param secret: [uint8_t*] Output 32-byte shared secret.
+ * \param publickey: [const uint8_t*] Input 64-byte peer public key.
  * \param privatekey: [const uint8_t*] Input 32-byte private scalar.
  *
  * \return [bool] Returns true on success.
