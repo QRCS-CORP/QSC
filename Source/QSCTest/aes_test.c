@@ -462,6 +462,91 @@ bool qsctest_fips_aes256_ecb()
 	return aes256_ecb_monte_carlo(key, msg, exp);
 }
 
+bool qsctest_aes128_gcm_kat()
+{
+	/* Test vector parameters from NIST SP800-38D for AES-128 GCM (Test Case 2) */
+	qsc_aes_gcm128_state state = { 0 };
+	uint8_t ctxt[QSC_AES_BLOCK_SIZE + QSC_GCM128_MAC_SIZE] = { 0 };
+	uint8_t dec[QSC_AES_BLOCK_SIZE] = { 0 };
+	uint8_t exp[QSC_AES_BLOCK_SIZE + QSC_GCM128_MAC_SIZE] = { 0 };
+	uint8_t exp2[QSC_AES_BLOCK_SIZE + QSC_GCM128_MAC_SIZE] = { 0 };
+	uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0 };        /* 96-bit IV */
+	uint8_t key[QSC_AES128_KEY_SIZE] = { 0 };
+	uint8_t shdr[QSC_AES128_KEY_SIZE] = { 0x80 };  /* 16-byte AAD: 0x80 followed by zeros */
+	uint8_t ptxt[QSC_AES_BLOCK_SIZE] = { 0 };      /* 16-byte plaintext (all zeros) */
+	bool status;
+
+	status = true;
+
+	qsctest_hex_to_bin("00000000000000000000000000000000", key, sizeof(key));
+	qsctest_hex_to_bin("000000000000000000000000", iv, sizeof(iv));
+	qsctest_hex_to_bin("00000000000000000000000000000000", ptxt, sizeof(ptxt));
+	/* CT = 0388DACE60B6A392F328C2B971B2FE78, Tag = AB6E47D42CEC13BDF53A67B21257BDDF */
+	qsctest_hex_to_bin("0388DACE60B6A392F328C2B971B2FE78AB6E47D42CEC13BDF53A67B21257BDDF", exp, sizeof(exp));
+	/* CT = 0388DACE60B6A392F328C2B971B2FE78, Tag (with AAD) = 7004A3BB7A214A7B8691637A5D86179D */
+	qsctest_hex_to_bin("0388DACE60B6A392F328C2B971B2FE787004A3BB7A214A7B8691637A5D86179D", exp2, sizeof(exp2));
+
+	qsc_aes_keyparams kp = { .key = key, .keylen = QSC_AES128_KEY_SIZE, .nonce = iv, .noncelen = QSC_GCM_NONCE_SIZE, .info = NULL, .infolen = 0 };
+
+	/* encryption test */
+	qsc_aes_gcm128_initialize(&state, &kp, true);
+	qsc_aes_gcm128_encrypt(&state, ctxt, ptxt, sizeof(ptxt));
+
+	if (qsc_intutils_are_equal8(ctxt, exp, sizeof(exp)) == false)
+	{
+		status = false;
+	}
+
+	qsc_aes_gcm128_dispose(&state);
+
+	/* decryption test */
+
+	/* reinitialize the state (to reset the counter) for decryption */
+	qsc_memutils_clear(iv, sizeof(iv));
+	qsc_aes_gcm128_initialize(&state, &kp, false);
+
+	if (qsc_aes_gcm128_decrypt(&state, dec, ctxt, sizeof(ctxt)) == false)
+	{
+		status = false;
+	}
+
+	if (qsc_intutils_are_equal8(dec, ptxt, sizeof(ptxt)) == false)
+	{
+		status = false;
+	}
+
+	/* test the AEAD function */
+
+	/* encryption test */
+	qsc_aes_gcm128_initialize(&state, &kp, true);
+	qsc_aes_gcm128_set_associated(&state, shdr, sizeof(shdr));
+	qsc_aes_gcm128_transform(&state, ctxt, ptxt, sizeof(ptxt));
+
+	if (qsc_intutils_are_equal8(ctxt, exp2, sizeof(exp2)) == false)
+	{
+		status = false;
+	}
+
+	qsc_aes_gcm128_dispose(&state);
+
+	/* decryption test */
+	qsc_memutils_clear(iv, sizeof(iv));
+	qsc_aes_gcm128_initialize(&state, &kp, false);
+	qsc_aes_gcm128_set_associated(&state, shdr, sizeof(shdr));
+
+	if (qsc_aes_gcm128_transform(&state, dec, ctxt, sizeof(ptxt)) == false)
+	{
+		status = false;
+	}
+
+	if (qsc_intutils_are_equal8(dec, ptxt, sizeof(ptxt)) == false)
+	{
+		status = false;
+	}
+
+	return status;
+}
+
 bool qsctest_aes256_gcm_kat()
 {
     /* Test vector parameters from NIST SP800-38D for AES-256 GCM */
@@ -910,6 +995,15 @@ void qsctest_aes_run()
 	else
 	{
 		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-256) KAT test. \n");
+	}
+
+	if (qsctest_aes128_gcm_kat() == true)
+	{
+		qsctest_print_safe("Success! Passed the GCM-AES-128 AEAD mode KAT test. \n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed the GCM-AES-128 AEAD mode KAT test. \n");
 	}
 
 	if (qsctest_aes256_gcm_kat() == true)

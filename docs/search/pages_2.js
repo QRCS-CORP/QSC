@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['details_0',['Implementation Details',['../acp_8h.html#details',1,'']]],
-  ['documents_1',['Reference Documents',['../encoding_8h.html#encoding_refs',1,'']]]
+  ['cryptographic_20solutions_20library_20version_201_202_0',['QSC: Quantum Secure Cryptographic Solutions Library Version 1.2',['../index.html',1,'']]]
 ];

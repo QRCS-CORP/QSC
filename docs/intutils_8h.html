@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -267,7 +267,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">x</td><td>[size_t] The first integer. </td></tr>
-    <tr><td class="paramname">y</td><td>[size_t] The second integer. </td></tr>
+    <tr><td class="paramname">y</td><td>[size_t] The second integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -304,7 +304,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">a</td><td>[const uint8_t*] The first array. </td></tr>
     <tr><td class="paramname">b</td><td>[const uint8_t*] The second array. </td></tr>
-    <tr><td class="paramname">length</td><td>[size_t] The number of bytes to compare. </td></tr>
+    <tr><td class="paramname">length</td><td>[size_t] The number of bytes to compare.</td></tr>
   </table>
   </dd>
 </dl>
@@ -479,7 +479,7 @@ Functions</h2></td></tr>
 <p>Convert an 8-bit integer array to a 16-bit big-endian integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input</td><td>[const uint8_t*] The source 8-bit array. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] The source 8-bit array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -531,7 +531,7 @@ Functions</h2></td></tr>
 <p>Convert an 8-bit integer array to a 64-bit big-endian integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input</td><td>[const uint8_t*] The source 8-bit array. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] The source 8-bit array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -598,7 +598,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">x</td><td>The integer. </td></tr>
-    <tr><td class="paramname">bits</td><td>[size_t] The number of bits to reverse. </td></tr>
+    <tr><td class="paramname">bits</td><td>[size_t] The number of bits to reverse.</td></tr>
   </table>
   </dd>
 </dl>
@@ -624,7 +624,7 @@ Functions</h2></td></tr>
 <p>Reverse the bits of a 16-bit integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>[uint16_t] The 16-bit integer. </td></tr>
+    <tr><td class="paramname">x</td><td>[uint16_t] The 16-bit integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -650,7 +650,7 @@ Functions</h2></td></tr>
 <p>Reverse the bits of a 32-bit integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>[uint32_t] The 32-bit integer. </td></tr>
+    <tr><td class="paramname">x</td><td>[uint32_t] The 32-bit integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -676,7 +676,7 @@ Functions</h2></td></tr>
 <p>Reverse the bits of a 64-bit integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>[uint64_t] The 64-bit integer. </td></tr>
+    <tr><td class="paramname">x</td><td>[uint64_t] The 64-bit integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -760,7 +760,7 @@ Functions</h2></td></tr>
 <p>Return the absolute value of a double. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>[double] The input double. </td></tr>
+    <tr><td class="paramname">x</td><td>[double] The input double.</td></tr>
   </table>
   </dd>
 </dl>
@@ -795,7 +795,7 @@ Functions</h2></td></tr>
 <p>where y = (x - 1)/(x + 1). The series continues until the current term falls below a fixed tolerance.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>[double] The input value. </td></tr>
+    <tr><td class="paramname">x</td><td>[double] The input value.</td></tr>
   </table>
   </dd>
 </dl>
@@ -826,7 +826,7 @@ Functions</h2></td></tr>
 <p>For x &gt; 0, Newton-Raphson iteration is used: guess_{n+1} = 0.5 * (guess_n + x / guess_n) The iteration stops when the absolute difference between successive guesses is less than a small fraction of the guess (relative tolerance).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>[double] The input value. </td></tr>
+    <tr><td class="paramname">x</td><td>[double] The input value.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1081,7 +1081,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">x</td><td>[size_t] The base integer. </td></tr>
-    <tr><td class="paramname">y</td><td>[size_t] The comparison integer. </td></tr>
+    <tr><td class="paramname">y</td><td>[size_t] The comparison integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1253,7 +1253,7 @@ Functions</h2></td></tr>
 <p>Convert an 8-bit integer array to a 16-bit little-endian integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input</td><td>[const uint8_t*] The source array. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] The source array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1279,7 +1279,7 @@ Functions</h2></td></tr>
 <p>Convert an 8-bit integer array to a 32-bit little-endian integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input</td><td>[const uint8_t*] The source array. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] The source array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1305,7 +1305,7 @@ Functions</h2></td></tr>
 <p>Convert an 8-bit integer array to a 64-bit little-endian integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input</td><td>[const uint8_t*] The source array. </td></tr>
+    <tr><td class="paramname">input</td><td>[const uint8_t*] The source array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1393,7 +1393,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">a</td><td>[size_t] The first integer. </td></tr>
-    <tr><td class="paramname">b</td><td>[size_t] The second integer. </td></tr>
+    <tr><td class="paramname">b</td><td>[size_t] The second integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1445,7 +1445,7 @@ Functions</h2></td></tr>
 <p>Count the number of bits set in a 32-bit unsigned integer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">v</td><td>[uint32_t] The 32-bit integer. </td></tr>
+    <tr><td class="paramname">v</td><td>[uint32_t] The 32-bit integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1476,7 +1476,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">value</td><td>[uint32_t] The integer value. </td></tr>
-    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift. </td></tr>
+    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1507,7 +1507,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">value</td><td>[uint64_t] The integer value. </td></tr>
-    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift. </td></tr>
+    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1538,7 +1538,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">value</td><td>[uint32_t] The integer value. </td></tr>
-    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift. </td></tr>
+    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1569,7 +1569,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">value</td><td>[uint64_t] The integer value. </td></tr>
-    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift. </td></tr>
+    <tr><td class="paramname">shift</td><td>[size_t] The number of bits to shift.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1606,7 +1606,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">a</td><td>[const uint8_t*] The first array. </td></tr>
     <tr><td class="paramname">b</td><td>[const uint8_t*] The second array. </td></tr>
-    <tr><td class="paramname">length</td><td>[size_t] The number of bytes to compare. </td></tr>
+    <tr><td class="paramname">length</td><td>[size_t] The number of bytes to compare.</td></tr>
   </table>
   </dd>
 </dl>

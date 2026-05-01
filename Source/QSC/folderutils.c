@@ -9,6 +9,9 @@
 #include "memutils.h"
 #include "stringutils.h"
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#	if !defined(WIN32_LEAN_AND_MEAN)
+#		define WIN32_LEAN_AND_MEAN
+#	endif
 #	include <direct.h>
 #	include <initguid.h>
 #	include <KnownFolders.h>

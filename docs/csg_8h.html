@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -130,8 +130,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:aec897b8492bb1dd8e28779d6c37d0624"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispose of the DRBG state.  <br /></td></tr>
 <tr class="memitem:a6ff098602de71c1c799bf950263dea47" id="r_a6ff098602de71c1c799bf950263dea47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ff098602de71c1c799bf950263dea47">qsc_csg_initialize</a> (<a class="el" href="structqsc__csg__state.html">qsc_csg_state</a> *ctx, const uint8_t *seed, size_t seedlen, const uint8_t *info, size_t infolen, bool predres)</td></tr>
 <tr class="memdesc:a6ff098602de71c1c799bf950263dea47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the pseudo-random provider state with a seed and optional personalization string.  <br /></td></tr>
-<tr class="memitem:a83b7669982e8240fee85e5faf1416d9f" id="r_a83b7669982e8240fee85e5faf1416d9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83b7669982e8240fee85e5faf1416d9f">qsc_csg_generate</a> (<a class="el" href="structqsc__csg__state.html">qsc_csg_state</a> *ctx, uint8_t *output, size_t otplen)</td></tr>
-<tr class="memdesc:a83b7669982e8240fee85e5faf1416d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate pseudo-random bytes.  <br /></td></tr>
+<tr class="memitem:af5b8d2409599933f6d12b041d6f528a9" id="r_af5b8d2409599933f6d12b041d6f528a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5b8d2409599933f6d12b041d6f528a9">qsc_csg_generate</a> (<a class="el" href="structqsc__csg__state.html">qsc_csg_state</a> *ctx, uint8_t *output, size_t otplen)</td></tr>
+<tr class="memdesc:af5b8d2409599933f6d12b041d6f528a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate pseudo-random bytes.  <br /></td></tr>
 <tr class="memitem:aa91ebadc6e643a002855b2fc28b41b72" id="r_aa91ebadc6e643a002855b2fc28b41b72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa91ebadc6e643a002855b2fc28b41b72">qsc_csg_update</a> (<a class="el" href="structqsc__csg__state.html">qsc_csg_state</a> *ctx, const uint8_t *seed, size_t seedlen)</td></tr>
 <tr class="memdesc:aa91ebadc6e643a002855b2fc28b41b72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the DRBG with new seed material.  <br /></td></tr>
 </table>
@@ -185,14 +185,14 @@ Reference Links:</h1>
 
 </div>
 </div>
-<a id="a83b7669982e8240fee85e5faf1416d9f" name="a83b7669982e8240fee85e5faf1416d9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83b7669982e8240fee85e5faf1416d9f">&#9670;&#160;</a></span>qsc_csg_generate()</h2>
+<a id="af5b8d2409599933f6d12b041d6f528a9" name="af5b8d2409599933f6d12b041d6f528a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5b8d2409599933f6d12b041d6f528a9">&#9670;&#160;</a></span>qsc_csg_generate()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_csg_generate </td>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool qsc_csg_generate </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structqsc__csg__state.html">qsc_csg_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
@@ -215,10 +215,11 @@ Reference Links:</h1>
   <table class="params">
     <tr><td class="paramname">ctx</td><td>[qsc_csg_state*] Pointer to the DRBG state structure. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the output array for pseudo-random bytes. </td></tr>
-    <tr><td class="paramname">otplen</td><td>[size_t] The number of bytes to generate. </td></tr>
+    <tr><td class="paramname">otplen</td><td>[size_t] The number of bytes to generate.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>[bool] Returns true on success. </dd></dl>
 
 </div>
 </div>
@@ -306,7 +307,7 @@ Reference Links:</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ctx</td><td>[qsc_csg_state*] Pointer to the DRBG state structure. </td></tr>
-    <tr><td class="paramname">seed</td><td>[const uint8_t*] Pointer to the update seed. </td></tr>
+    <tr><td class="paramname">seed:[const</td><td>uint8_t*] Pointer to the update seed. </td></tr>
     <tr><td class="paramname">seedlen</td><td>[size_t] The length of the update seed in bytes. </td></tr>
   </table>
   </dd>

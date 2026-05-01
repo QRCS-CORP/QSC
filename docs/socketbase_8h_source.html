@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -309,23 +309,23 @@ $(function(){initNavTree('socketbase_8h_source.html','',''); });
 <div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span></div>
 <div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span><span class="comment">//* \brief The socket exception callback prototype</span></div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span><span class="comment">//*</span></div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span><span class="comment">//* \param source:  [qsc_socket*] The socket source</span></div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="comment">//* \param error:   [qsc_socket_exceptions] The socket exception</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span><span class="comment">//* \param source: [qsc_socket*] The socket source</span></div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="comment">//* \param error: [qsc_socket_exceptions] The socket exception</span></div>
 <div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span><span class="comment">//*/</span></div>
 <div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span><span class="comment">//QSC_EXPORT_API void qsc_socket_exception_callback(qsc_socket* source, qsc_socket_exceptions error);</span></div>
 <div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span></div>
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span><span class="comment">//* \brief The socket receive asynchronous callback prototype</span></div>
 <div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="comment">//*</span></div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="comment">//* \param source:  [qsc_socket*] The socket source</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="comment">//* \param source:v[qsc_socket*] The socket source</span></div>
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span><span class="comment">//* \param message: [const uint8_t*] The socket message buffer</span></div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span><span class="comment">//* \param msglen:  [size_t*] A pointer to the size of the message</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span><span class="comment">//* \param msglen:v[size_t*] A pointer to the size of the message</span></div>
 <div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="comment">//*/</span></div>
 <div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="comment">//QSC_EXPORT_API void qsc_socket_receive_async_callback(qsc_socket* source, const uint8_t* message, size_t* msglen);</span></div>
 <div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span></div>
 <div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="comment">//* \brief The receive polling callback prototype</span></div>
 <div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span><span class="comment">//*</span></div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="comment">//* \param source:  [const qsc_socket*] The socket source</span></div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="comment">//* \param error:   [size_t] The socket exception</span></div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="comment">//* \param source: [const qsc_socket*] The socket source</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="comment">//* \param error: [size_t] The socket exception</span></div>
 <div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="comment">//*/</span></div>
 <div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span><span class="comment">//QSC_EXPORT_API void qsc_socket_receive_poll_callback(const qsc_socket* source, size_t error);</span></div>
 <div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
@@ -413,7 +413,7 @@ $(function(){initNavTree('socketbase_8h_source.html','',''); });
 <div class="ttc" id="amemutils_8h_html"><div class="ttname"><a href="memutils_8h.html">memutils.h</a></div><div class="ttdoc">Contains common memory-related functions implemented using SIMD instructions.</div></div>
 <div class="ttc" id="aqsccommon_8h_html"><div class="ttname"><a href="qsccommon_8h.html">qsccommon.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
 <div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:605</div></div>
-<div class="ttc" id="aqsccommon_8h_html_a6ca37bf525f2b2a3da6484a3ce906f2a"><div class="ttname"><a href="qsccommon_8h.html#a6ca37bf525f2b2a3da6484a3ce906f2a">QSC_SYSTEM_CONDITION_IGNORE</a></div><div class="ttdeci">#define QSC_SYSTEM_CONDITION_IGNORE(x)</div><div class="ttdoc">A macro to disable a specific warning condition.</div><div class="ttdef"><b>Definition</b> qsccommon.h:851</div></div>
+<div class="ttc" id="aqsccommon_8h_html_a6ca37bf525f2b2a3da6484a3ce906f2a"><div class="ttname"><a href="qsccommon_8h.html#a6ca37bf525f2b2a3da6484a3ce906f2a">QSC_SYSTEM_CONDITION_IGNORE</a></div><div class="ttdeci">#define QSC_SYSTEM_CONDITION_IGNORE(x)</div><div class="ttdoc">A macro to disable a specific warning condition.</div><div class="ttdef"><b>Definition</b> qsccommon.h:791</div></div>
 <div class="ttc" id="asocket_8h_html"><div class="ttname"><a href="socket_8h.html">socket.h</a></div><div class="ttdoc">TCP/IP function constants and structures.</div></div>
 <div class="ttc" id="asocketbase_8h_html_a082ac00b04ca637095e706ccea282562"><div class="ttname"><a href="socketbase_8h.html#a082ac00b04ca637095e706ccea282562">qsc_socket_receive</a></div><div class="ttdeci">QSC_EXPORT_API size_t qsc_socket_receive(const qsc_socket *sock, uint8_t *output, size_t otplen, qsc_socket_receive_flags flag)</div><div class="ttdoc">Receive data from a synchronous connected socket or a bound connection-less socket....</div><div class="ttdef"><b>Definition</b> socketbase.c:706</div></div>
 <div class="ttc" id="asocketbase_8h_html_a144ffef541e8b998fae7acb98e5f59ec"><div class="ttname"><a href="socketbase_8h.html#a144ffef541e8b998fae7acb98e5f59ec">qsc_socket_ioctl</a></div><div class="ttdeci">QSC_EXPORT_API qsc_socket_exceptions qsc_socket_ioctl(const qsc_socket *sock, int32_t command, uint32_t *arguments)</div><div class="ttdoc">Sets the IO mode of the socket.</div><div class="ttdef"><b>Definition</b> socketbase.c:1288</div></div>
@@ -503,7 +503,7 @@ $(function(){initNavTree('socketbase_8h_source.html','',''); });
 <div class="ttc" id="asocketflags_8h_html_ae7e9db36cd9a195d2447ef5be28f9f9c"><div class="ttname"><a href="socketflags_8h.html#ae7e9db36cd9a195d2447ef5be28f9f9c">qsc_socket_send_flags</a></div><div class="ttdeci">qsc_socket_send_flags</div><div class="ttdoc">The socket send api flags.</div><div class="ttdef"><b>Definition</b> socketflags.h:182</div></div>
 <div class="ttc" id="asocketflags_8h_html_afff5c215a21dace0a4ef4722f9a17816"><div class="ttname"><a href="socketflags_8h.html#afff5c215a21dace0a4ef4722f9a17816">qsc_socket_protocols</a></div><div class="ttdeci">qsc_socket_protocols</div><div class="ttdoc">The socket IP protocol type.</div><div class="ttdef"><b>Definition</b> socketflags.h:142</div></div>
 <div class="ttc" id="astructqsc__ipinfo__ipv4__address_html"><div class="ttname"><a href="structqsc__ipinfo__ipv4__address.html">qsc_ipinfo_ipv4_address</a></div><div class="ttdoc">The IPv4 address structure.</div><div class="ttdef"><b>Definition</b> ipinfo.h:161</div></div>
-<div class="ttc" id="astructqsc__ipinfo__ipv6__address_html"><div class="ttname"><a href="structqsc__ipinfo__ipv6__address.html">qsc_ipinfo_ipv6_address</a></div><div class="ttdoc">The IPv6 address structure.</div><div class="ttdef"><b>Definition</b> ipinfo.h:320</div></div>
+<div class="ttc" id="astructqsc__ipinfo__ipv6__address_html"><div class="ttname"><a href="structqsc__ipinfo__ipv6__address.html">qsc_ipinfo_ipv6_address</a></div><div class="ttdoc">The IPv6 address structure.</div><div class="ttdef"><b>Definition</b> ipinfo.h:330</div></div>
 <div class="ttc" id="astructqsc__socket__receive__async__state_html"><div class="ttname"><a href="structqsc__socket__receive__async__state.html">qsc_socket_receive_async_state</a></div><div class="ttdoc">The socket async receive state structure. The structure contains pointers to the originating socket,...</div><div class="ttdef"><b>Definition</b> socketbase.h:222</div></div>
 <div class="ttc" id="astructqsc__socket__receive__async__state_html_a6c96dced05a0a25af218b3a978c74b87"><div class="ttname"><a href="structqsc__socket__receive__async__state.html#a6c96dced05a0a25af218b3a978c74b87">qsc_socket_receive_async_state::callback</a></div><div class="ttdeci">void(* callback)(qsc_socket *sock, const uint8_t *message, size_t *msglen)</div><div class="ttdef"><b>Definition</b> socketbase.h:223</div></div>
 <div class="ttc" id="astructqsc__socket__receive__async__state_html_a742fffe2ba7953e94857be1c87069d01"><div class="ttname"><a href="structqsc__socket__receive__async__state.html#a742fffe2ba7953e94857be1c87069d01">qsc_socket_receive_async_state::error</a></div><div class="ttdeci">void(* error)(const qsc_socket *sock, qsc_socket_exceptions exception)</div><div class="ttdef"><b>Definition</b> socketbase.h:224</div></div>

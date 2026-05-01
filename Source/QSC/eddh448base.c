@@ -149,7 +149,7 @@ void qsc_x448_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*r
             qsc_memutils_copy(ktmp, privatekey, QSC_X448_PRIVATEKEY_SIZE);
             qsc_sc448_clamp(ktmp);
             qsc_crypto_scalarmult_curve448_ref10_base(publickey, ktmp);
-            qsc_memutils_clear(ktmp, sizeof(ktmp));
+            qsc_memutils_secure_erase(ktmp, sizeof(ktmp));
         }
         else
         {
@@ -173,7 +173,7 @@ void qsc_x448_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, c
         qsc_memutils_copy(ktmp, seed, QSC_X448_PRIVATEKEY_SIZE);
         qsc_sc448_clamp(ktmp);
         qsc_crypto_scalarmult_curve448_ref10_base(publickey, ktmp);
-        qsc_memutils_clear(ktmp, sizeof(ktmp));
+        qsc_memutils_secure_erase(ktmp, sizeof(ktmp));
     }
 }
 

@@ -579,6 +579,42 @@
     <ClInclude Include="tlscert.h">
       <Filter>Header Files\TLS</Filter>
     </ClInclude>
+    <ClInclude Include="tlscertx509.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsecdsader.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsengine.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsextensions.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlskeyschedule.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlssession.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsclient.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsgroups.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlshandshake.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlsio.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlstranscript.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="tlssignerdefault.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -912,6 +948,45 @@
       <Filter>Source Files\TLS</Filter>
     </ClCompile>
     <ClCompile Include="tlscert.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlstranscript.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsio.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlssignerdefault.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlssession.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsserver.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlshandshake.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlskeyschedule.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsgroups.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsextensions.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsengine.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsecdsader.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsclient.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlscertx509.c">
       <Filter>Source Files\TLS</Filter>
     </ClCompile>
   </ItemGroup>

@@ -104,7 +104,7 @@ void qsc_eddh_public_from_private(uint8_t* publickey, const uint8_t* privatekey)
 		qsc_memutils_copy(ktmp, privatekey, QSC_EDDH_PRIVATEKEY_SIZE);
 		qsc_crypto_sc448_clamp(ktmp);
 		qsc_crypto_scalarmult_curve448_ref10_base(publickey, ktmp);
-		qsc_memutils_clear(ktmp, sizeof(ktmp));
+		qsc_memutils_secure_erase(ktmp, sizeof(ktmp));
 #endif
 	}
 }

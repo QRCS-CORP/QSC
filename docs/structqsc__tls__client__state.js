@@ -1,0 +1,25 @@
+var structqsc__tls__client__state =
+[
+    [ "changecipherspecreceived", "structqsc__tls__client__state.html#a9b6b0e8d5d9f4ede4cc5fae41fae4373", null ],
+    [ "clientrandom", "structqsc__tls__client__state.html#a0d42c8a8444ecb067f8eeb1e43c2aa93", null ],
+    [ "config", "structqsc__tls__client__state.html#a4ed87d8ce39a090df23db1a501b48f61", null ],
+    [ "earlydataaccepted", "structqsc__tls__client__state.html#afdfc9e807af593ef3cc7f9f8a67a919d", null ],
+    [ "earlydataoffered", "structqsc__tls__client__state.html#a269c135feab6e2ab1bfeb5876eaca5bd", null ],
+    [ "helloretryrequestconsumed", "structqsc__tls__client__state.html#a0257c93fd53640e4ce5c08732b3ee246", null ],
+    [ "keyexchange", "structqsc__tls__client__state.html#a6cdeabe9e3ad9d203b3f755738536840", null ],
+    [ "keyschedule", "structqsc__tls__client__state.html#ab8b5720f129f2a0878d6b60d2b57123a", null ],
+    [ "lastalert", "structqsc__tls__client__state.html#ac9f26b228ab69ada2ce142ead3a18daf", null ],
+    [ "negotiatedgroup", "structqsc__tls__client__state.html#a88129567a04a6399975ce26633661dd1", null ],
+    [ "negotiatedhash", "structqsc__tls__client__state.html#a937367bdec1478fe776913e4a2ae4e07", null ],
+    [ "negotiatedsigscheme", "structqsc__tls__client__state.html#a7046fde29e91c0e5133f469cd7f81aaf", null ],
+    [ "negotiatedsuite", "structqsc__tls__client__state.html#a865f5bceeb80d77937a7bac2645f74cc", null ],
+    [ "peercapabilities", "structqsc__tls__client__state.html#a3f9cd293d1fb2d6b378c6041db1c753f", null ],
+    [ "phase", "structqsc__tls__client__state.html#a40eea8af843c83880ec81ddaf52d3613", null ],
+    [ "pskaccepted", "structqsc__tls__client__state.html#a3e41eb0fc9adc602da5b05e1a8f86e22", null ],
+    [ "pskoffered", "structqsc__tls__client__state.html#afb2af22c5d57c41cb73a764485df0447", null ],
+    [ "readrecord", "structqsc__tls__client__state.html#ac177d2a23fa03eebdeedf861716b165f", null ],
+    [ "serverauthenticated", "structqsc__tls__client__state.html#a52a77c8cdb3c19861faba3d7cfe8776f", null ],
+    [ "serverrandom", "structqsc__tls__client__state.html#ab31234798e6ffe6759a7bec63335386a", null ],
+    [ "transcript", "structqsc__tls__client__state.html#aa461708ebea36405ceefc8de809de8f0", null ],
+    [ "writerecord", "structqsc__tls__client__state.html#aeb915420f0de616f8b705ec7de129dfb", null ]
+];

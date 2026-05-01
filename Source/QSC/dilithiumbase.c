@@ -1558,6 +1558,12 @@ bool qsc_dilithium_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* message, 
 
         res = qsc_dilithium_ref_sign_signature(sm, smlen, sm + DILITHIUM_SIGNATURE_SIZE, msglen, prec, ctxlen + 2U, sk, rng_generate);
         *smlen += msglen;
+        
+        if (res == false)
+        {
+            qsc_memutils_secure_erase(sm, *smlen + msglen);
+            smlen = 0U;
+        }
     }
 
     return res;
@@ -1815,7 +1821,7 @@ bool qsc_dilithium_ref_open(uint8_t* message, size_t* msglen, const uint8_t* con
 
     if (res == false && smlen >= DILITHIUM_SIGNATURE_SIZE)
     {
-        qsc_memutils_clear(message, smlen - DILITHIUM_SIGNATURE_SIZE);
+        qsc_memutils_secure_erase(message, smlen - DILITHIUM_SIGNATURE_SIZE);
         *msglen = 0U;
     }
 

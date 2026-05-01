@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -157,27 +157,27 @@ $(function(){initNavTree('ecdsap384base_8h_source.html','',''); });
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>QSC_CPLUSPLUS_ENABLED_START</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a94178ec3b8d5c97e2e7bd7434dd9ab47">   77</a></span><span class="preprocessor">#define EC_NISTP384_SEED_SIZE 48U</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a9594a4204597f4fd9863696a31ea6a87">   80</a></span><span class="preprocessor">#define EC_NISTP384_PUBLICKEY_SIZE  96U</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a94178ec3b8d5c97e2e7bd7434dd9ab47">   80</a></span><span class="preprocessor">#define EC_NISTP384_SEED_SIZE 48U</span></div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a857dad05c45ecfe401b3943109acc463">   83</a></span><span class="preprocessor">#define EC_NISTP384_PRIVATEKEY_SIZE 144U</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a1b98b9c9e2d7bab621f7a85a19cd684b">   86</a></span><span class="preprocessor">#define EC_NISTP384_SIGNATURE_SIZE  96U</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a9594a4204597f4fd9863696a31ea6a87">   86</a></span><span class="preprocessor">#define EC_NISTP384_PUBLICKEY_SIZE  96U</span></div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#a0660277410129523ec4cd27779f2a94b">qsc_p384_publickey_from_privatekey</a>(uint8_t* publickey, <span class="keyword">const</span> uint8_t* privatekey);</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span></div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#a3de27e588360639272ed0bc212742741">qsc_p384_keypair</a>(uint8_t* publickey, uint8_t* privatekey, <span class="keyword">const</span> uint8_t* seed);</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#ac2311bb99c1380d7b6bfed8e8d484ed1">qsc_p384_sign</a>(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span></div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#a68efa7e1d9718fec9120491a0ceb7a9f">qsc_p384_sign_scalar</a>(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span></div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="keywordtype">bool</span> <a class="code hl_function" href="ecdsap384base_8h.html#a19ceaf24d66bb7580c4be9884f585ffa">qsc_p384_verify</a>(uint8_t* message, <span class="keywordtype">size_t</span>* msglen, <span class="keyword">const</span> uint8_t* signedmsg, <span class="keywordtype">size_t</span> smsglen, <span class="keyword">const</span> uint8_t* publickey);</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>QSC_CPLUSPLUS_ENABLED_END</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a857dad05c45ecfe401b3943109acc463">   92</a></span><span class="preprocessor">#define EC_NISTP384_PRIVATEKEY_SIZE 144U</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="ecdsap384base_8h.html#a1b98b9c9e2d7bab621f7a85a19cd684b">   98</a></span><span class="preprocessor">#define EC_NISTP384_SIGNATURE_SIZE  96U</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#a0660277410129523ec4cd27779f2a94b">qsc_p384_publickey_from_privatekey</a>(uint8_t* publickey, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#a3de27e588360639272ed0bc212742741">qsc_p384_keypair</a>(uint8_t* publickey, uint8_t* privatekey, <span class="keyword">const</span> uint8_t* seed);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#ac2311bb99c1380d7b6bfed8e8d484ed1">qsc_p384_sign</a>(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>int32_t <a class="code hl_function" href="ecdsap384base_8h.html#a68efa7e1d9718fec9120491a0ceb7a9f">qsc_p384_sign_scalar</a>(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span><span class="keywordtype">bool</span> <a class="code hl_function" href="ecdsap384base_8h.html#a19ceaf24d66bb7580c4be9884f585ffa">qsc_p384_verify</a>(uint8_t* message, <span class="keywordtype">size_t</span>* msglen, <span class="keyword">const</span> uint8_t* signedmsg, <span class="keywordtype">size_t</span> smsglen, <span class="keyword">const</span> uint8_t* publickey);</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>QSC_CPLUSPLUS_ENABLED_END</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aecdsap384base_8h_html_a0660277410129523ec4cd27779f2a94b"><div class="ttname"><a href="ecdsap384base_8h.html#a0660277410129523ec4cd27779f2a94b">qsc_p384_publickey_from_privatekey</a></div><div class="ttdeci">int32_t qsc_p384_publickey_from_privatekey(uint8_t *publickey, const uint8_t *privatekey)</div><div class="ttdoc">Derive a P-384 public key from a raw private scalar.</div><div class="ttdef"><b>Definition</b> ecdsap384base.c:1015</div></div>
 <div class="ttc" id="aecdsap384base_8h_html_a19ceaf24d66bb7580c4be9884f585ffa"><div class="ttname"><a href="ecdsap384base_8h.html#a19ceaf24d66bb7580c4be9884f585ffa">qsc_p384_verify</a></div><div class="ttdeci">bool qsc_p384_verify(uint8_t *message, size_t *msglen, const uint8_t *signedmsg, size_t smsglen, const uint8_t *publickey)</div><div class="ttdoc">Verify a P-384 signed message and recover the message bytes.</div><div class="ttdef"><b>Definition</b> ecdsap384base.c:1286</div></div>
 <div class="ttc" id="aecdsap384base_8h_html_a3de27e588360639272ed0bc212742741"><div class="ttname"><a href="ecdsap384base_8h.html#a3de27e588360639272ed0bc212742741">qsc_p384_keypair</a></div><div class="ttdeci">int32_t qsc_p384_keypair(uint8_t *publickey, uint8_t *privatekey, const uint8_t *seed)</div><div class="ttdoc">Generate a P-384 public/private key pair from a 48-byte seed.</div><div class="ttdef"><b>Definition</b> ecdsap384base.c:1062</div></div>

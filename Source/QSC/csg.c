@@ -128,11 +128,15 @@ void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen,
 	}
 }
 
-void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
+bool qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(otplen != 0U);
+
+	bool res;
+
+	res = false;
 
 	if (ctx != NULL && output != NULL && otplen != 0U)
 	{
@@ -187,7 +191,10 @@ void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 
 		/* reseed check */
 		csg_auto_reseed(ctx);
+		res = true;
 	}
+
+	return res;
 }
 
 void qsc_csg_update(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen)

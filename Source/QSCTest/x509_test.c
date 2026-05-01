@@ -63,7 +63,7 @@ void qsctest_x509_run(void)
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed one or more X509 certificate, chain, and revocation validation tests.");
+		qsctest_print_line("Failure! Failed one or more X509 certificate, chain, and revocation validation tests.");
 	}
 
 	if (qsctest_x509_stage2a_run() == true)

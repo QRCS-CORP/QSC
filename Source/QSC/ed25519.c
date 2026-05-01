@@ -151,12 +151,12 @@ int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n)
 
 void qsc_fe25519_0(qsc_fe25519 h)
 {
-	qsc_memutils_clear(h, 10U * sizeof(int32_t));
+	qsc_memutils_secure_erase(h, 10U * sizeof(int32_t));
 }
 
 void qsc_fe25519_1(qsc_fe25519 h)
 {
-	qsc_memutils_clear(h, 10U * sizeof(int32_t));
+	qsc_memutils_secure_erase(h, 10U * sizeof(int32_t));
 	h[0U] = 1;
 }
 

@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -109,29 +109,29 @@ $(function(){initNavTree('ecdsa_8h.html','',''); });
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a5da31c8533d4211fc072a1b6a2db0276" id="r_a5da31c8533d4211fc072a1b6a2db0276"><td class="memItemLeft" align="right" valign="top"><a id="a5da31c8533d4211fc072a1b6a2db0276" name="a5da31c8533d4211fc072a1b6a2db0276"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SIGNATURE_SIZE</b>&#160;&#160;&#160;132U</td></tr>
-<tr class="memdesc:a5da31c8533d4211fc072a1b6a2db0276"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the signature array (r[66] || s[66]). <br /></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SIGNATURE_SIZE</b>&#160;&#160;&#160;64U</td></tr>
+<tr class="memdesc:a5da31c8533d4211fc072a1b6a2db0276"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the signature array (r[32] || s[32]). <br /></td></tr>
 <tr class="memitem:a05b0a3607310a01a1bb295390b8845c4" id="r_a05b0a3607310a01a1bb295390b8845c4"><td class="memItemLeft" align="right" valign="top"><a id="a05b0a3607310a01a1bb295390b8845c4" name="a05b0a3607310a01a1bb295390b8845c4"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_PRIVATEKEY_SIZE</b>&#160;&#160;&#160;198U</td></tr>
-<tr class="memdesc:a05b0a3607310a01a1bb295390b8845c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the private key array (seed[66] || Qx[66] || Qy[66]). <br /></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_PRIVATEKEY_SIZE</b>&#160;&#160;&#160;96U</td></tr>
+<tr class="memdesc:a05b0a3607310a01a1bb295390b8845c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the private key array (seed[32] || Qx[32] || Qy[32]). <br /></td></tr>
 <tr class="memitem:a9735eced8ea00351b1f3211674f68bba" id="r_a9735eced8ea00351b1f3211674f68bba"><td class="memItemLeft" align="right" valign="top"><a id="a9735eced8ea00351b1f3211674f68bba" name="a9735eced8ea00351b1f3211674f68bba"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_PUBLICKEY_SIZE</b>&#160;&#160;&#160;132U</td></tr>
-<tr class="memdesc:a9735eced8ea00351b1f3211674f68bba"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the public key array (Qx[66] || Qy[66], big-endian). <br /></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_PUBLICKEY_SIZE</b>&#160;&#160;&#160;64U</td></tr>
+<tr class="memdesc:a9735eced8ea00351b1f3211674f68bba"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the public key array (Qx[32] || Qy[32], big-endian). <br /></td></tr>
 <tr class="memitem:a1fc3152184153b6440699dc34a393147" id="r_a1fc3152184153b6440699dc34a393147"><td class="memItemLeft" align="right" valign="top"><a id="a1fc3152184153b6440699dc34a393147" name="a1fc3152184153b6440699dc34a393147"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SEED_SIZE</b>&#160;&#160;&#160;66ULL</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SEED_SIZE</b>&#160;&#160;&#160;32ULL</td></tr>
 <tr class="memdesc:a1fc3152184153b6440699dc34a393147"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the random seed / private scalar input array. <br /></td></tr>
 <tr class="memitem:ae44879dc24135a2e63d21aa3d61f2170" id="r_ae44879dc24135a2e63d21aa3d61f2170"><td class="memItemLeft" align="right" valign="top"><a id="ae44879dc24135a2e63d21aa3d61f2170" name="ae44879dc24135a2e63d21aa3d61f2170"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_ALGNAME</b>&#160;&#160;&#160;&quot;ECDSAP521&quot;</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_ALGNAME</b>&#160;&#160;&#160;&quot;ECDSA-P256&quot;</td></tr>
 <tr class="memdesc:ae44879dc24135a2e63d21aa3d61f2170"><td class="mdescLeft">&#160;</td><td class="mdescRight">The formal algorithm name. <br /></td></tr>
 <tr class="memitem:a0b438c6621a982387bad557e61ce8051" id="r_a0b438c6621a982387bad557e61ce8051"><td class="memItemLeft" align="right" valign="top"><a id="a0b438c6621a982387bad557e61ce8051" name="a0b438c6621a982387bad557e61ce8051"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SEC1_PUBLICKEY_SIZE</b>&#160;&#160;&#160;133U</td></tr>
-<tr class="memdesc:a0b438c6621a982387bad557e61ce8051"><td class="mdescLeft">&#160;</td><td class="mdescRight">SEC 1 uncompressed EC point byte length for P-521. <br /></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SEC1_PUBLICKEY_SIZE</b>&#160;&#160;&#160;65U</td></tr>
+<tr class="memdesc:a0b438c6621a982387bad557e61ce8051"><td class="mdescLeft">&#160;</td><td class="mdescRight">SEC 1 uncompressed EC point byte length for P-384. <br /></td></tr>
 <tr class="memitem:a9148c5ad706e9ed67c37f1830181b96b" id="r_a9148c5ad706e9ed67c37f1830181b96b"><td class="memItemLeft" align="right" valign="top"><a id="a9148c5ad706e9ed67c37f1830181b96b" name="a9148c5ad706e9ed67c37f1830181b96b"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SPKI_DER_SIZE</b>&#160;&#160;&#160;158U</td></tr>
-<tr class="memdesc:a9148c5ad706e9ed67c37f1830181b96b"><td class="mdescLeft">&#160;</td><td class="mdescRight">SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp521r1. <br /></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SPKI_DER_SIZE</b>&#160;&#160;&#160;91U</td></tr>
+<tr class="memdesc:a9148c5ad706e9ed67c37f1830181b96b"><td class="mdescLeft">&#160;</td><td class="mdescRight">SubjectPublicKeyInfo DER byte length for id-ecPublicKey + secp384r1. <br /></td></tr>
 <tr class="memitem:a31cc9f4e6740726442618748be2ca4eb" id="r_a31cc9f4e6740726442618748be2ca4eb"><td class="memItemLeft" align="right" valign="top"><a id="a31cc9f4e6740726442618748be2ca4eb" name="a31cc9f4e6740726442618748be2ca4eb"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SIGNATURE_DER_MAX_SIZE</b>&#160;&#160;&#160;139U</td></tr>
-<tr class="memdesc:a31cc9f4e6740726442618748be2ca4eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum DER-encoded ECDSA signature size for P-521. <br /></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_SIGNATURE_DER_MAX_SIZE</b>&#160;&#160;&#160;72U</td></tr>
+<tr class="memdesc:a31cc9f4e6740726442618748be2ca4eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum DER-encoded ECDSA signature size for P-384. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -154,7 +154,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Contains the public API for the Elliptic Curve Digital Signature Algorithm implementation over the NIST prime-field curves P-256, P-384, and P-521. </p>
-<p>Contains the primary public API for the ECDSA asymmetric signature scheme implementation.</p>
+<p>Contains the primary public API for the Edwards Curve EDDSA asymmetric signature scheme implementation.</p>
 <p>This header defines the external interface to the QSC ECDSA implementation. The module supports one NIST prime-field parameter set selected at compile time. The supported parameter sets are P-256, P-384, and P-521, corresponding to the widely deployed secp256r1, secp384r1, and secp521r1 domain parameters. The active curve selection determines all encoded key, scalar, coordinate, and signature lengths through the QSC_ECDSA_*_SIZE constants defined in this header.</p>
 <p>The implementation exposes functions for key-pair generation, public-key derivation from a private scalar, deterministic and randomized signing, signature verification, public-key encoding and decoding, and DER conversion of ECDSA signatures. Public keys are represented internally in raw affine form as the concatenation Qx || Qy, where each coordinate is a fixed-width big-endian integer whose width is determined by the active parameter set. Signatures are represented in raw form as r || s, where both values are fixed-width big-endian integers of the active subgroup order size.</p>
 <p>The private-key container used by the high-level API is a serialized structure of the form seed || Qx || Qy. The seed field contains the curve-sized private scalar input in big-endian form. The public coordinates stored after the seed are the affine public key corresponding to that scalar. This format allows the module to retain the private scalar together with its associated public key in a compact fixed-size buffer. Functions that derive a public key directly from a private scalar expect the scalar alone, encoded as a curve-sized big-endian integer, rather than the full private-key container.</p>
@@ -164,13 +164,13 @@ Functions</h2></td></tr>
 <p>Deterministic signing support is included to enable reproducible signatures for known-answer testing and standards alignment. In deterministic mode, the ephemeral nonce is derived from the private scalar and message digest rather than obtained from an external random source. This behavior is required for compatibility with official RFC 6979 test vectors for the supported curves. Randomized signing is also supported through the standard high-level API when the implementation is configured to use an approved random generator. The exact digest and nonce-generation behavior is curve-dependent and must remain aligned with the active parameter-set implementation.</p>
 <p>All externally visible byte arrays use big-endian encoding. All buffers passed to the API must be correctly sized for the active curve selection. The caller is responsible for supplying valid output buffers and, where required, a cryptographically secure random generator. Private-key material should be treated as sensitive and cleared from memory by the caller when no longer required. Public-key and signature validation is performed by the relevant decode and verify functions, but callers must still ensure that buffer lengths and calling conventions are consistent with the selected parameter set.</p>
 <p>This header declares only the public interface and associated size constants. Curve-specific field arithmetic, scalar arithmetic, point operations, deterministic nonce generation, and internal validation routines are implemented in the corresponding ECDSA base modules for the selected parameter set.</p>
-<p>This header defines the API for the ECDSA (Elliptic Curve Digital Signature Algorithm) asymmetric signature scheme, operating over the Ed25519 elliptic curve. It provides functions for generating key pairs (either randomly or via a seeded generator), signing messages, and verifying signatures.</p>
-<dl class="section user"><dt>Example:</dt><dd><div class="fragment"><div class="line"><span class="comment">// An example of key-pair creation, signing, and verification using ECDSA</span></div>
+<p>This header defines the API for the EDDSA (Elliptic Curve Digital Signature Algorithm) asymmetric signature scheme, operating over the Ed25519 elliptic curve. It provides functions for generating key pairs (either randomly or via a seeded generator), signing messages, and verifying signatures.</p>
+<dl class="section user"><dt>Example:</dt><dd><div class="fragment"><div class="line"><span class="comment">// An example of key-pair creation, signing, and verification using EDDSA</span></div>
 <div class="line"><span class="preprocessor">#define MSGLEN 32</span></div>
-<div class="line">uint8_t pk[<a class="code hl_define" href="#a9735eced8ea00351b1f3211674f68bba">QSC_ECDSA_PUBLICKEY_SIZE</a>];</div>
-<div class="line">uint8_t sk[QSC_ECDSA_SECRETKEY_SIZE];</div>
+<div class="line">uint8_t pk[QSC_EDDSA_PUBLICKEY_SIZE];</div>
+<div class="line">uint8_t sk[QSC_EDDSA_SECRETKEY_SIZE];</div>
 <div class="line">uint8_t msg[32];</div>
-<div class="line">uint8_t smsg[<a class="code hl_define" href="#a5da31c8533d4211fc072a1b6a2db0276">QSC_ECDSA_SIGNATURE_SIZE</a> + MSGLEN];</div>
+<div class="line">uint8_t smsg[QSC_EDDSA_SIGNATURE_SIZE + MSGLEN];</div>
 <div class="line">uint8_t rmsg[32];</div>
 <div class="line"> </div>
 <div class="line">uint32_t rmsglen = 0;</div>
@@ -185,10 +185,8 @@ Functions</h2></td></tr>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// Authentication failed; handle error.</span></div>
 <div class="line">}</div>
-<div class="ttc" id="aecdsa_8h_html_a5da31c8533d4211fc072a1b6a2db0276"><div class="ttname"><a href="#a5da31c8533d4211fc072a1b6a2db0276">QSC_ECDSA_SIGNATURE_SIZE</a></div><div class="ttdeci">#define QSC_ECDSA_SIGNATURE_SIZE</div><div class="ttdoc">The byte size of the signature array (r[66] || s[66]).</div><div class="ttdef"><b>Definition</b> ecdsa.h:234</div></div>
-<div class="ttc" id="aecdsa_8h_html_a9735eced8ea00351b1f3211674f68bba"><div class="ttname"><a href="#a9735eced8ea00351b1f3211674f68bba">QSC_ECDSA_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_ECDSA_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public key array (Qx[66] || Qy[66], big-endian).</div><div class="ttdef"><b>Definition</b> ecdsa.h:246</div></div>
 </div><!-- fragment --></dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>This ECDSA implementation utilizes the Ed25519 elliptic curve along with its underlying field arithmetic over the prime field defined by 2^255 - 19. It supports standard digital signature operations including key pair generation, signing, and verification. The design emphasizes constant-time execution to mitigate timing attacks and is suitable for secure applications in modern cryptographic protocols.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>This EDDSA implementation utilizes the Ed25519 elliptic curve along with its underlying field arithmetic over the prime field defined by 2^255 - 19. It supports standard digital signature operations including key pair generation, signing, and verification. The design emphasizes constant-time execution to mitigate timing attacks and is suitable for secure applications in modern cryptographic protocols.</dd></dl>
 <h1 class="doxsection"><a class="anchor" id="ecdsa_links"></a>
 Reference Links</h1>
 <ul>
@@ -228,7 +226,7 @@ Reference Links</h1>
   <table class="params">
     <tr><td class="paramname">publickey</td><td>[uint8_t*] Pointer to the public verification-key array. </td></tr>
     <tr><td class="paramname">privatekey</td><td>[uint8_t*] Pointer to the private signature-key array. </td></tr>
-    <tr><td class="paramname">rng_generate</td><td>[bool(*)(uint8_t*, size_t)] Pointer to the random generator function. </td></tr>
+    <tr><td class="paramname">rng_generate</td><td>[bool(*)(uint8_t*, size_t)] Pointer to the random generator function.</td></tr>
   </table>
   </dd>
 </dl>
@@ -267,7 +265,7 @@ Reference Links</h1>
   <table class="params">
     <tr><td class="paramname">publickey</td><td>[uint8_t*] Pointer to the output public verification-key array. </td></tr>
     <tr><td class="paramname">privatekey</td><td>[uint8_t*] Pointer to the output private signature-key array. </td></tr>
-    <tr><td class="paramname">seed</td><td>[const uint8_t*] Pointer to the random 32-byte seed array. </td></tr>
+    <tr><td class="paramname">seed</td><td>[const uint8_t*] Pointer to the random 32-byte seed array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -331,7 +329,7 @@ Reference Links</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">publickey</td><td>[uint8_t*] Output raw public key of 64 bytes. </td></tr>
-    <tr><td class="paramname">secpub</td><td>[const uint8_t*] Input SEC 1 public key of 65 bytes. </td></tr>
+    <tr><td class="paramname">secpub</td><td>[const uint8_t*] Input SEC 1 public key of 65 bytes.</td></tr>
   </table>
   </dd>
 </dl>
@@ -412,7 +410,7 @@ Reference Links</h1>
     <tr><td class="paramname">smsglen</td><td>[size_t*] Pointer to the signed-message length output. </td></tr>
     <tr><td class="paramname">message</td><td>[const uint8_t*] Pointer to the message to sign. </td></tr>
     <tr><td class="paramname">msglen</td><td>[size_t] Message length in bytes. </td></tr>
-    <tr><td class="paramname">privatekey</td><td>[const uint8_t*] Pointer to the 96-byte private key array. </td></tr>
+    <tr><td class="paramname">privatekey</td><td>[const uint8_t*] Pointer to the 96-byte private key array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -463,7 +461,7 @@ Reference Links</h1>
     <tr><td class="paramname">smsglen</td><td>[size_t*] Pointer to the signed-message length output. </td></tr>
     <tr><td class="paramname">message</td><td>[const uint8_t*] Pointer to the message to sign. </td></tr>
     <tr><td class="paramname">msglen</td><td>[size_t] Message length in bytes. </td></tr>
-    <tr><td class="paramname">privatekey</td><td>[const uint8_t*] Pointer to the 96-byte private key array. </td></tr>
+    <tr><td class="paramname">privatekey</td><td>[const uint8_t*] Pointer to the 96-byte private key array.</td></tr>
   </table>
   </dd>
 </dl>
@@ -513,7 +511,7 @@ Reference Links</h1>
     <tr><td class="paramname">msglen</td><td>[size_t*] Pointer to the recovered message length. </td></tr>
     <tr><td class="paramname">signedmsg</td><td>[const uint8_t*] Pointer to the signed-message input array. </td></tr>
     <tr><td class="paramname">smsglen</td><td>[size_t] Total signed-message length (signature + message). </td></tr>
-    <tr><td class="paramname">publickey</td><td>[const uint8_t*] Pointer to the 64-byte public verification-key array. </td></tr>
+    <tr><td class="paramname">publickey</td><td>[const uint8_t*] Pointer to the 64-byte public verification-key array.</td></tr>
   </table>
   </dd>
 </dl>

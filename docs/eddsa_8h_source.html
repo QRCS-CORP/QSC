@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -150,8 +150,8 @@ $(function(){initNavTree('eddsa_8h_source.html','',''); });
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment"> * Contact: contact@qrcscorp.ca</span></div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#ifndef QSC_ECDSA_H</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#define QSC_ECDSA_H</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#ifndef QSC_EDDSA_H</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#define QSC_EDDSA_H</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#include &quot;<a class="code" href="qsccommon_8h.html">qsccommon.h</a>&quot;</span></div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
@@ -160,31 +160,43 @@ $(function(){initNavTree('eddsa_8h_source.html','',''); });
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#if defined(QSC_EDDSA_S1EC25519)</span></div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#   define QSC_ECDSA_SIGNATURE_SIZE 64</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#   define QSC_EDDSA_SIGNATURE_SIZE 64U</span></div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#   define QSC_ECDSA_PRIVATEKEY_SIZE 64</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#   define QSC_EDDSA_PRIVATEKEY_SIZE 64U</span></div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span></div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#   define QSC_ECDSA_PUBLICKEY_SIZE 32</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#   error &quot;The ECDSA parameter set is invalid!&quot;</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">#define QSC_ECDSA_SEED_SIZE 32ULL</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">#define QSC_ECDSA_ALGNAME &quot;EDDSA&quot;</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span></div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> qsc_eddsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, <span class="keyword">const</span> uint8_t* seed);</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span></div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">bool</span> qsc_eddsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, <span class="keywordtype">bool</span> (*rng_generate)(uint8_t*, <span class="keywordtype">size_t</span>));</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span></div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> qsc_eddsa_sign(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span></div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">bool</span> qsc_eddsa_verify(uint8_t* message, <span class="keywordtype">size_t</span>* msglen, <span class="keyword">const</span> uint8_t* signedmsg, <span class="keywordtype">size_t</span> smsglen, <span class="keyword">const</span> uint8_t* publickey);</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>QSC_CPLUSPLUS_ENABLED_END</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#   define QSC_EDDSA_PUBLICKEY_SIZE 32U</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#   define QSC_EDDSA_SEED_SIZE 32U</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#   define QSC_EDDSA_ALGNAME &quot;EDDSA-25519&quot;</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#elif defined(QSC_EDDH_S3EC448)</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="preprocessor">#   define QSC_EDDSA_SIGNATURE_SIZE  114U</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="preprocessor">#   define QSC_EDDSA_PRIVATEKEY_SIZE 114U</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="preprocessor">#   define QSC_EDDSA_PUBLICKEY_SIZE  57U</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">#   define QSC_EDDSA_SEED_SIZE 57ULL</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span></div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span><span class="preprocessor">#   define QSC_EDDSA_ALGNAME &quot;EDDSA-448&quot;</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="preprocessor">#   error &quot;No EDDSA parameter set defined. Define QSC_EDDSA_S1EC25519 or QSC_EDDSA_S3EC448.&quot;</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> qsc_eddsa_generate_keypair(uint8_t* publickey, uint8_t* privatekey, <span class="keywordtype">bool</span> (*rng_generate)(uint8_t*, <span class="keywordtype">size_t</span>));</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> qsc_eddsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, <span class="keyword">const</span> uint8_t* seed);</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">void</span> qsc_eddsa_sign(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">bool</span> qsc_eddsa_verify(uint8_t* message, <span class="keywordtype">size_t</span>* msglen, <span class="keyword">const</span> uint8_t* signedmsg, <span class="keywordtype">size_t</span> smsglen, <span class="keyword">const</span> uint8_t* publickey);</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>QSC_CPLUSPLUS_ENABLED_END</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aqsccommon_8h_html"><div class="ttname"><a href="qsccommon_8h.html">qsccommon.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
 <div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:605</div></div>
 </div><!-- fragment --></div><!-- contents -->

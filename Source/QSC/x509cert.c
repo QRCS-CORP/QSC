@@ -1250,7 +1250,7 @@ void qsc_x509_certificate_clear(qsc_x509_certificate* certificate)
 	if (certificate != (qsc_x509_certificate*)NULL)
 	{
 		x509_certificate_release_preserved_der(certificate);
-		qsc_memutils_clear((uint8_t*)certificate, sizeof(qsc_x509_certificate));
+		qsc_memutils_secure_erase((uint8_t*)certificate, sizeof(qsc_x509_certificate));
 	}
 }
 

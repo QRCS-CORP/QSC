@@ -53,6 +53,7 @@
 #define QSC_SOCKETSERVER_H
 
 #include "qsccommon.h"
+#include "async.h"
 #include "socketbase.h"
 
 QSC_CPLUSPLUS_ENABLED_START
@@ -129,6 +130,8 @@ typedef struct
 	qsc_socket* source;													/*!< A pointer to the listener socket */
 	void (*callback)(qsc_socket_server_accept_result* result);			/*!< A pointer to a callback function */
 	void (*error)(qsc_socket* sock, qsc_socket_exceptions exception);	/*!< A pointer to an error function */
+	volatile int32_t tcount;											/*!< The running thread count */
+	qsc_mutex smutex;													/*!< The async server mutex */
 } qsc_socket_server_async_accept_state;
 
 /*** Function Prototypes ***/
@@ -176,6 +179,13 @@ QSC_EXPORT_API qsc_socket_protocols qsc_socket_server_socket_protocol(const qsc_
 * \return [qsc_socket_transports] The socket transport type
 */
 QSC_EXPORT_API qsc_socket_transports qsc_socket_server_socket_transport(const qsc_socket* sock);
+
+/**
+* \brief Releases the server mutex, disposes of the listener socket and state
+*
+* \param state: [qsc_socket_server_async_accept_state*] The asynchronous server state
+*/
+QSC_EXPORT_API void qsc_socket_server_async_dispose(qsc_socket_server_async_accept_state* state);
 
 /**
 * \brief Shut down channels and close the socket

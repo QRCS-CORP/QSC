@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #ifndef QSC_TLS_CERT_H
 #define QSC_TLS_CERT_H
 
@@ -112,6 +163,47 @@ typedef struct qsc_tls_qsc_x509_context
 } qsc_tls_qsc_x509_context;
 
 /**
+ * \brief Decode a TLS Certificate message
+ *
+ * \details
+ * Parses a TLS 1.3 Certificate handshake message and extracts the certificate
+ * request context and certificate chain entries as spans into the input buffer.
+ *
+ * \param input: [const uint8_t*] Pointer to encoded message buffer
+ * \param inlen: [size_t] Length of input buffer in bytes
+ * \param requestcontext: [const uint8_t**] Pointer to decoded request context span
+ * \param requestcontextlen: [size_t*] Length of request context
+ * \param chain: [struct] Output array of certificate views
+ * \param chaincapacity: [size_t] Maximum number of entries in chain array
+ * \param chainlength: [size_t*] Number of decoded certificates
+ *
+ * \return qsc_tls_status: Operation status code
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_certificate_decode_message(const uint8_t* input, size_t inlen, const uint8_t** requestcontext, size_t* requestcontextlen,
+    qsc_tls_certificate_view* chain, size_t chaincapacity, size_t* chainlength);
+
+/**
+ * \brief Encode a TLS Certificate message
+ *
+ * \details
+ * Serializes a TLS 1.3 Certificate handshake message containing a certificate
+ * request context and a certificate chain. Each certificate entry is encoded
+ * as a vector24 with an empty extensions block.
+ *
+ * \param requestcontext: [const uint8_t*] Pointer to the certificate request context buffer
+ * \param requestcontextlen: [size_t] Length of the request context in bytes (<= 255)
+ * \param chain: [const struct] Pointer to an array of certificate views
+ * \param chainlength: [size_t] Number of certificates in the chain
+ * \param output: [uint8_t*] Output buffer for encoded message
+ * \param outlen: [size_t] Size of the output buffer in bytes
+ * \param offset: [size_t*] Pointer to current write offset in output buffer
+ *
+ * \return qsc_tls_status: Operation status code
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_certificate_encode_message(const uint8_t* requestcontext, size_t requestcontextlen, const qsc_tls_certificate_view* chain,
+    size_t chainlength, uint8_t* output, size_t outlen, size_t* offset);
+
+/**
  * \brief Initialize a certificate callback interface.
  *
  * \param iface: [struct] The interface structure to initialize.
@@ -141,67 +233,9 @@ QSC_EXPORT_API bool qsc_tls_certificate_interface_is_valid(const qsc_tls_certifi
  * \param verifybuffer: [uint8_t*] Scratch buffer used during verification.
  * \param verifybufferlen: [size_t] The length of the scratch buffer in bytes.
  */
-QSC_EXPORT_API qsc_tls_status qsc_tls_qsc_x509_context_initialize(qsc_tls_qsc_x509_context* context, const qsc_x509_store* truststore,
+QSC_EXPORT_API qsc_tls_status qsc_tls_x509_context_initialize(qsc_tls_qsc_x509_context* context, const qsc_x509_store* truststore,
 	const qsc_x509_certificate* intermediates, size_t intermediatecount, const qsc_x509_time* validationtime,
 	uint8_t* verifybuffer, size_t verifybufferlen);
-
-/**
- * \brief Initialize a certificate callback interface using the QSC X.509 bridge.
- *
- * \param iface: [struct] The interface structure to initialize.
- * \param context: [struct] The X.509 bridge context.
- *
- * \return [qsc_tls_status] Returns the operation status.
- */
-QSC_EXPORT_API qsc_tls_status qsc_tls_certificate_interface_initialize_qsc_x509(qsc_tls_certificate_interface* iface, qsc_tls_qsc_x509_context* context);
-
-/**
- * \brief Map a TLS signature scheme to a QSC X.509 signature algorithm identifier.
- *
- * \param scheme: [enum] The TLS signature scheme.
- *
- * \return [qsc_x509_signature_algorithm] Returns the mapped X.509 algorithm identifier.
- */
-QSC_EXPORT_API qsc_x509_signature_algorithm qsc_tls_qsc_x509_signature_algorithm_from_tls(qsc_tls_signature_scheme scheme);
-
-/**
- * \brief Validate a peer certificate chain using the QSC X.509 bridge.
- *
- * \param chain: [struct*] The certificate chain entries in leaf-first order.
- * \param chainlength: [size_t] The number of certificate entries.
- * \param context: [struct*] The certificate validation context.
- * \param state: [void*] The caller-supplied bridge context.
- *
- * \return [bool] Returns true if the chain is accepted.
- */
-QSC_EXPORT_API bool qsc_tls_qsc_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength,
-	const qsc_tls_certificate_validation_context* context, void* state);
-
-/**
- * \brief Verify a TLS CertificateVerify signature using the QSC X.509 bridge.
- *
- * \param scheme: [enum] The TLS signature scheme.
- * \param transcript: [const uint8_t*] The transcript bytes covered by the signature.
- * \param transcriptlen: [size_t] The length of the transcript in bytes.
- * \param signature: [const uint8_t*] The encoded signature bytes.
- * \param signaturelen: [size_t] The length of the signature in bytes.
- * \param signer: [struct*] The signer certificate view.
- * \param state: [void*] The caller-supplied bridge context.
- *
- * \return [bool] Returns true if the signature is valid.
- */
-QSC_EXPORT_API bool qsc_tls_qsc_x509_verify_certificate_verify(qsc_tls_signature_scheme scheme, const uint8_t* input,
-	size_t inputlen, const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state);
-
-
-/**
- * \brief Map a QSC X.509 verification result to a TLS alert description.
- *
- * \param status: [enum] The QSC X.509 verification status.
- *
- * \return [enum] Returns the mapped TLS alert description.
- */
-QSC_EXPORT_API qsc_tls_alert_description qsc_tls_qsc_x509_alert_from_verify_status(qsc_x509_verify_status status);
 
 /**
  * \brief Query the most recent alert reason from a certificate interface.
@@ -217,6 +251,102 @@ QSC_EXPORT_API qsc_tls_alert_description qsc_tls_qsc_x509_alert_from_verify_stat
  * \return [enum] Returns the mapped TLS alert description.
  */
 QSC_EXPORT_API qsc_tls_alert_description qsc_tls_certificate_interface_get_last_alert(const qsc_tls_certificate_interface* iface, bool verifyphase);
+
+/**
+ * \brief Initialize a certificate callback interface using the QSC X.509 bridge.
+ *
+ * \param iface: [struct] The interface structure to initialize.
+ * \param context: [struct] The X.509 bridge context.
+ *
+ * \return [qsc_tls_status] Returns the operation status.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_certificate_interface_initialize_qsc_x509(qsc_tls_certificate_interface* iface, qsc_tls_qsc_x509_context* context);
+
+/**
+ * \brief Decode a TLS CertificateRequest message
+ *
+ * \details
+ * Parses a TLS 1.3 CertificateRequest handshake message and extracts the
+ * request context and extensions block as spans into the input buffer.
+ *
+ * \param input: [const uint8_t*] Pointer to encoded message buffer
+ * \param inlen: [size_t] Length of input buffer
+ * \param requestcontext: [const uint8_t**] Pointer to request context span
+ * \param requestcontextlen: [size_t*] Length of request context
+ * \param extensionsblock: [const uint8_t**] Pointer to extensions block span
+ * \param extensionsblocklen: [size_t*] Length of extensions block
+ *
+ * \return qsc_tls_status: Operation status code
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_certificate_request_decode(const uint8_t* input, size_t inlen, const uint8_t** requestcontext, size_t* requestcontextlen,
+	const uint8_t** extensionsblock, size_t* extensionsblocklen);
+
+/**
+ * \brief Encode a TLS CertificateRequest message
+ *
+ * \details
+ * Serializes a TLS 1.3 CertificateRequest handshake message containing a
+ * request context and a pre-encoded extensions block.
+ *
+ * \param requestcontext: [const uint8_t*] Pointer to request context buffer
+ * \param requestcontextlen: [size_t] Length of request context in bytes (<= 255)
+ * \param extensionsblock: [const uint8_t*] Pointer to extensions block buffer
+ * \param extensionsblocklen: [size_t] Length of extensions block in bytes
+ * \param output: [uint8_t*] Output buffer for encoded message
+ * \param outlen: [size_t] Size of output buffer
+ * \param offset: [size_t*] Pointer to current write offset
+ *
+ * \return qsc_tls_status: Operation status code
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_certificate_request_encode(const uint8_t* requestcontext, size_t requestcontextlen, const uint8_t* extensionsblock,
+	size_t extensionsblocklen, uint8_t* output, size_t outlen, size_t* offset);
+
+/**
+ * \brief Map a QSC X.509 verification result to a TLS alert description.
+ *
+ * \param status: [enum] The QSC X.509 verification status.
+ *
+ * \return [enum] Returns the mapped TLS alert description.
+ */
+QSC_EXPORT_API qsc_tls_alert_description qsc_tls_x509_alert_from_verify_status(qsc_x509_verify_status status);
+
+/**
+ * \brief Map a TLS signature scheme to a QSC X.509 signature algorithm identifier.
+ *
+ * \param scheme: [enum] The TLS signature scheme.
+ *
+ * \return [qsc_x509_signature_algorithm] Returns the mapped X.509 algorithm identifier.
+ */
+QSC_EXPORT_API qsc_x509_signature_algorithm qsc_tls_x509_signature_algorithm_from_tls(qsc_tls_signature_scheme scheme);
+
+/**
+ * \brief Validate a peer certificate chain using the QSC X.509 bridge.
+ *
+ * \param chain: [struct*] The certificate chain entries in leaf-first order.
+ * \param chainlength: [size_t] The number of certificate entries.
+ * \param context: [struct*] The certificate validation context.
+ * \param state: [void*] The caller-supplied bridge context.
+ *
+ * \return [bool] Returns true if the chain is accepted.
+ */
+QSC_EXPORT_API bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength,
+	const qsc_tls_certificate_validation_context* context, void* state);
+
+/**
+ * \brief Verify a TLS CertificateVerify signature using the QSC X.509 bridge.
+ *
+ * \param scheme: [enum] The TLS signature scheme.
+ * \param transcript: [const uint8_t*] The transcript bytes covered by the signature.
+ * \param transcriptlen: [size_t] The length of the transcript in bytes.
+ * \param signature: [const uint8_t*] The encoded signature bytes.
+ * \param signaturelen: [size_t] The length of the signature in bytes.
+ * \param signer: [struct*] The signer certificate view.
+ * \param state: [void*] The caller-supplied bridge context.
+ *
+ * \return [bool] Returns true if the signature is valid.
+ */
+QSC_EXPORT_API bool qsc_tls_x509_verify_certificate_verify(qsc_tls_signature_scheme scheme, const uint8_t* input,
+	size_t inputlen, const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state);
 
 QSC_CPLUSPLUS_ENABLED_END
 

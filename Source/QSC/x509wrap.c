@@ -781,7 +781,7 @@ void qsc_x509w_server_identity_clear(qsc_x509w_server_identity* identity)
             qsc_x509_certificate_free(&identity->intermediates[i]);
         }
 
-        qsc_memutils_clear(identity, sizeof(qsc_x509w_server_identity));
+        qsc_memutils_secure_erase(identity, sizeof(qsc_x509w_server_identity));
     }
 }
 
@@ -1064,7 +1064,7 @@ qsc_x509w_status qsc_x509w_trust_store_add_anchor(qsc_x509w_trust_store* store, 
     }
     else
     {
-        qsc_memutils_clear(&store->anchors[index], sizeof(qsc_x509_trust_anchor));
+        qsc_memutils_secure_erase(&store->anchors[index], sizeof(qsc_x509_trust_anchor));
     }
 
     return x509w_map_asn1_status(xstatus);
@@ -2209,7 +2209,7 @@ qsc_x509w_status qsc_x509w_tls_bridge_configure(qsc_x509w_tls_bridge* bridge, co
 
         if (status == QSC_X509W_STATUS_SUCCESS)
         {
-            qsc_tls_qsc_x509_context_initialize(&bridge->context, &store->store, NULL, 0U, bridge->profile.validationtime,
+            qsc_tls_x509_context_initialize(&bridge->context, &store->store, NULL, 0U, bridge->profile.validationtime,
                 bridge->verifybuffer, sizeof(bridge->verifybuffer));
             bridge->context.rejectunsupportedcriticalextensions = bridge->profile.rejectunsupportedcriticalextensions;
             tstatus = qsc_tls_certificate_interface_initialize_qsc_x509(&bridge->iface, &bridge->context);

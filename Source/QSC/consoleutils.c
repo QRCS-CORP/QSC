@@ -7,6 +7,9 @@
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	/* bogus winbase.h error */
 	QSC_SYSTEM_CONDITION_IGNORE(5105)
+#if !defined(WIN32_LEAN_AND_MEAN)
+#	define WIN32_LEAN_AND_MEAN
+#endif
 #	include <conio.h>
 #	include <tchar.h>
 #	include <Windows.h>

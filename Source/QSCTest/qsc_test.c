@@ -94,9 +94,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.1.0.3a (A3)                       *");
+	qsctest_print_line("* Release:   v1.2.0.0a (B1)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      April 09, 2026                       *");
+	qsctest_print_line("* Date:      May 01, 2026                         *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -328,7 +328,7 @@ int32_t main(void)
 			qsctest_x509_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the TLS 1.3 scaffolding implementation; function validation, and support operations ***");
+			qsctest_print_line("*** Test the TLS 1.3 implementation; key exchange, codecs, resumption, 0-RTT, and end-to-end tests ***");
 			qsctest_tls_run();
 			qsctest_print_line("");
 

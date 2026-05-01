@@ -6,6 +6,7 @@ var socketserver_8h =
     [ "QSC_SOCKET_SERVER_MAX_THREADS", "socketserver_8h.html#aa7507339fe18ab2dc87bee866c41dcba", null ],
     [ "qsc_socket_server_accept_callback", "socketserver_8h.html#a56f9f7326fbb9c09840663cd11b953c9", null ],
     [ "qsc_socket_server_address_family", "socketserver_8h.html#addbae63b8845c3012fb4061fe9f832b2", null ],
+    [ "qsc_socket_server_async_dispose", "socketserver_8h.html#aea3bcb84360c5605ae0ab6b6ff680e38", null ],
     [ "qsc_socket_server_close_socket", "socketserver_8h.html#ac8ff2f81ea51241991e6d2e8223ced50", null ],
     [ "qsc_socket_server_error_callback", "socketserver_8h.html#ad5302b5e0a9ab2c217b967addbd276e4", null ],
     [ "qsc_socket_server_initialize", "socketserver_8h.html#ac32067de13c0826b54438d0ce5d8288b", null ],

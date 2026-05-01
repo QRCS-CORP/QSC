@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #ifndef QSC_TLS_TYPES_H
 #define QSC_TLS_TYPES_H
 
@@ -139,6 +190,57 @@ typedef enum qsc_tls_signature_scheme
 	qsc_tls_sig_mldsa65 = 0x0905,					/*!< ML-DSA-65 signature scheme. */
 	qsc_tls_sig_mldsa87 = 0x0906					/*!< ML-DSA-87 signature scheme. */
 } qsc_tls_signature_scheme;
+
+/**
+ * \enum qsc_tls_handshake_type
+ * \brief TLS 1.3 handshake message type codes per RFC 8446 section B.3.
+ */
+typedef enum qsc_tls_handshake_type
+{
+	qsc_tls_handshake_type_hello_request = 0,			/*!< Legacy TLS 1.2 value, not used in TLS 1.3. */
+	qsc_tls_handshake_type_client_hello = 1,			/*!< ClientHello. */
+	qsc_tls_handshake_type_server_hello = 2,			/*!< ServerHello, including HelloRetryRequest with magic random. */
+	qsc_tls_handshake_type_new_session_ticket = 4,		/*!< NewSessionTicket. */
+	qsc_tls_handshake_type_end_of_early_data = 5,		/*!< EndOfEarlyData. */
+	qsc_tls_handshake_type_encrypted_extensions = 8,	/*!< EncryptedExtensions. */
+	qsc_tls_handshake_type_certificate = 11,			/*!< Certificate. */
+	qsc_tls_handshake_type_certificate_request = 13,	/*!< CertificateRequest. */
+	qsc_tls_handshake_type_certificate_verify = 15,		/*!< CertificateVerify. */
+	qsc_tls_handshake_type_finished = 20,				/*!< Finished. */
+	qsc_tls_handshake_type_key_update = 24,				/*!< KeyUpdate. */
+	qsc_tls_handshake_type_message_hash = 254			/*!< Synthetic message_hash for the HelloRetryRequest transcript transform. */
+} qsc_tls_handshake_type;
+
+/**
+ * \enum qsc_tls_psk_key_exchange_mode
+ * \brief psk_key_exchange_modes values per RFC 8446 section 4.2.9.
+ */
+typedef enum qsc_tls_psk_key_exchange_mode
+{
+	qsc_tls_psk_key_exchange_mode_psk_ke = 0,			/*!< PSK-only key exchange. */
+	qsc_tls_psk_key_exchange_mode_psk_dhe_ke = 1		/*!< PSK with (EC)DHE key exchange. */
+} qsc_tls_psk_key_exchange_mode;
+
+/**
+ * \enum qsc_tls_certificate_type
+ * \brief Certificate type values per RFC 7250 and RFC 8446.
+ */
+typedef enum qsc_tls_certificate_type
+{
+	qsc_tls_certificate_type_x509 = 0,					/*!< X.509 certificate. */
+	qsc_tls_certificate_type_raw_public_key = 2			/*!< Raw public key. */
+} qsc_tls_certificate_type;
+
+/**
+ * \enum qsc_tls_alert_level
+ * \brief TLS alert severity level per RFC 8446 section 6. In TLS 1.3 the level is advisory;
+ *        all alerts except close_notify and user_canceled are effectively fatal.
+ */
+typedef enum qsc_tls_alert_level
+{
+	qsc_tls_alert_level_warning = 1,					/*!< Warning-level alert. */
+	qsc_tls_alert_level_fatal = 2						/*!< Fatal-level alert. */
+} qsc_tls_alert_level;
 
 QSC_CPLUSPLUS_ENABLED_END
 

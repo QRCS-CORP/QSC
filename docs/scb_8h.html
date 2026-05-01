@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -145,8 +145,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:a12d0a4d316949c8e927055d7d8de97af"><td class="mdescLeft">&#160;</td><td class="mdescRight">[void] Dispose of the DRBG state.  <br /></td></tr>
 <tr class="memitem:a0d452fcb95ea81c7fc7e39910525321b" id="r_a0d452fcb95ea81c7fc7e39910525321b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d452fcb95ea81c7fc7e39910525321b">qsc_scb_initialize</a> (<a class="el" href="structqsc__scb__state.html">qsc_scb_state</a> *ctx, const uint8_t *seed, size_t seedlen, const uint8_t *info, size_t infolen, size_t cpucost, size_t memcost)</td></tr>
 <tr class="memdesc:a0d452fcb95ea81c7fc7e39910525321b"><td class="mdescLeft">&#160;</td><td class="mdescRight">[void] Initialize the pseudo-random provider state with a seed and optional personalization string.  <br /></td></tr>
-<tr class="memitem:a2c5f0aa797f606428c24c90121167ec9" id="r_a2c5f0aa797f606428c24c90121167ec9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c5f0aa797f606428c24c90121167ec9">qsc_scb_generate</a> (<a class="el" href="structqsc__scb__state.html">qsc_scb_state</a> *ctx, uint8_t *output, size_t otplen)</td></tr>
-<tr class="memdesc:a2c5f0aa797f606428c24c90121167ec9"><td class="mdescLeft">&#160;</td><td class="mdescRight">[void] Generate pseudo-random bytes using the random provider.  <br /></td></tr>
+<tr class="memitem:a059ea73744b887a542f667f82ab701a8" id="r_a059ea73744b887a542f667f82ab701a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a059ea73744b887a542f667f82ab701a8">qsc_scb_generate</a> (<a class="el" href="structqsc__scb__state.html">qsc_scb_state</a> *ctx, uint8_t *output, size_t otplen)</td></tr>
+<tr class="memdesc:a059ea73744b887a542f667f82ab701a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">[void] Generate pseudo-random bytes using the random provider.  <br /></td></tr>
 <tr class="memitem:a974f89f0ba4e953d66e92fcbeae568c4" id="r_a974f89f0ba4e953d66e92fcbeae568c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a974f89f0ba4e953d66e92fcbeae568c4">qsc_scb_update</a> (<a class="el" href="structqsc__scb__state.html">qsc_scb_state</a> *ctx, const uint8_t *seed, size_t seedlen)</td></tr>
 <tr class="memdesc:a974f89f0ba4e953d66e92fcbeae568c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">[void] Update the random provider with new keying material.  <br /></td></tr>
 </table>
@@ -198,14 +198,14 @@ Reference Links:</h1>
 
 </div>
 </div>
-<a id="a2c5f0aa797f606428c24c90121167ec9" name="a2c5f0aa797f606428c24c90121167ec9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2c5f0aa797f606428c24c90121167ec9">&#9670;&#160;</a></span>qsc_scb_generate()</h2>
+<a id="a059ea73744b887a542f667f82ab701a8" name="a059ea73744b887a542f667f82ab701a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a059ea73744b887a542f667f82ab701a8">&#9670;&#160;</a></span>qsc_scb_generate()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_scb_generate </td>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool qsc_scb_generate </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structqsc__scb__state.html">qsc_scb_state</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
@@ -227,10 +227,11 @@ Reference Links:</h1>
   <table class="params">
     <tr><td class="paramname">ctx</td><td>[qsc_scb_state*] A pointer to the function state. </td></tr>
     <tr><td class="paramname">output</td><td>[uint8_t*] A pointer to the pseudo-random output array. </td></tr>
-    <tr><td class="paramname">otplen</td><td>[size_t] The number of bytes to generate. </td></tr>
+    <tr><td class="paramname">otplen</td><td>[size_t] The number of bytes to generate.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>[bool] Returns true on success. </dd></dl>
 
 </div>
 </div>

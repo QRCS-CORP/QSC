@@ -1,5 +1,4 @@
 #include "hqc.h"
-#include "secrand.h"
 #include "sha3.h"
 
 bool qsc_hqc_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)

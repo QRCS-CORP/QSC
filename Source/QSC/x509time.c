@@ -213,7 +213,7 @@ qsc_asn1_status qsc_x509_validity_decode(qsc_x509_validity* validity, const qsc_
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
-            qsc_memutils_clear(validity, sizeof(qsc_x509_validity));
+            qsc_memutils_secure_erase(validity, sizeof(qsc_x509_validity));
         }
     }
     else

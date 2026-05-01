@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -99,7 +99,7 @@ $(function(){initNavTree('ecdsap256base_8h_source.html','',''); });
   <div class="headertitle"><div class="title">ecdsap256base.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation</span></div>
+<a href="ecdsap256base_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * All Rights Reserved.</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * NOTICE:</span></div>
@@ -157,27 +157,34 @@ $(function(){initNavTree('ecdsap256base_8h_source.html','',''); });
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>QSC_CPLUSPLUS_ENABLED_START</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#define EC_NISTP256_SEED_SIZE 32U</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#define EC_NISTP256_PUBLICKEY_SIZE  64U</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="ecdsap256base_8h.html#a7ece1f007c7fe1ce3f82785d7e5a2a2a">   80</a></span><span class="preprocessor">#define EC_NISTP256_SEED_SIZE 32U</span></div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="preprocessor">#define EC_NISTP256_PRIVATEKEY_SIZE 96U</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#define EC_NISTP256_SIGNATURE_SIZE  64U</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="ecdsap256base_8h.html#a7e430e02b3d1a6b874368400106eff30">   86</a></span><span class="preprocessor">#define EC_NISTP256_PUBLICKEY_SIZE  64U</span></div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>int32_t qsc_p256_publickey_from_privatekey(uint8_t* publickey, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="ecdsap256base_8h.html#ad7080af56c38a57fe1941e1c50fdcd84">   92</a></span><span class="preprocessor">#define EC_NISTP256_PRIVATEKEY_SIZE 96U</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="ecdsap256base_8h.html#a8e7704f9a656f201e5c1a6f7acf6f316">   98</a></span><span class="preprocessor">#define EC_NISTP256_SIGNATURE_SIZE  64U</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="ecdsap256base_8h.html#ac44e9fe6289fda37afb370d84039b4ac">  104</a></span><span class="preprocessor">#define EC_NISTP256_SHAREDSECRET_SIZE 32U</span></div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span></div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>int32_t qsc_p256_keypair(uint8_t* publickey, uint8_t* privatekey, <span class="keyword">const</span> uint8_t* seed);</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>int32_t qsc_p256_sign(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>int32_t <a class="code hl_function" href="ecdsap256base_8h.html#a61f87176376d7bb293fa677dbb30b9f5">qsc_p256_publickey_from_privatekey</a>(uint8_t* publickey, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>int32_t <a class="code hl_function" href="ecdsap256base_8h.html#aa98767d23913f5d474add271294e65de">qsc_p256_keypair</a>(uint8_t* publickey, uint8_t* privatekey, <span class="keyword">const</span> uint8_t* seed);</div>
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span></div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>int32_t qsc_p256_sign_scalar(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span></div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="keywordtype">bool</span> qsc_p256_verify(uint8_t* message, <span class="keywordtype">size_t</span>* msglen, <span class="keyword">const</span> uint8_t* signedmsg, <span class="keywordtype">size_t</span> smsglen, <span class="keyword">const</span> uint8_t* publickey);</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>QSC_CPLUSPLUS_ENABLED_END</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>int32_t <a class="code hl_function" href="ecdsap256base_8h.html#a7066eb5f6c8dc8b75b826a694736ed97">qsc_p256_sign</a>(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>int32_t <a class="code hl_function" href="ecdsap256base_8h.html#a1f050ef19291c5c8c2a4afb43b64fcb2">qsc_p256_sign_scalar</a>(uint8_t* signedmsg, <span class="keywordtype">size_t</span>* smsglen, <span class="keyword">const</span> uint8_t* message, <span class="keywordtype">size_t</span> msglen, <span class="keyword">const</span> uint8_t* privatekey);</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="keywordtype">bool</span> <a class="code hl_function" href="ecdsap256base_8h.html#aa8fb91d2575ce802f609e2a2a80a14d1">qsc_p256_verify</a>(uint8_t* message, <span class="keywordtype">size_t</span>* msglen, <span class="keyword">const</span> uint8_t* signedmsg, <span class="keywordtype">size_t</span> smsglen, <span class="keyword">const</span> uint8_t* publickey);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>QSC_CPLUSPLUS_ENABLED_END</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aecdsap256base_8h_html_a1f050ef19291c5c8c2a4afb43b64fcb2"><div class="ttname"><a href="ecdsap256base_8h.html#a1f050ef19291c5c8c2a4afb43b64fcb2">qsc_p256_sign_scalar</a></div><div class="ttdeci">int32_t qsc_p256_sign_scalar(uint8_t *signedmsg, size_t *smsglen, const uint8_t *message, size_t msglen, const uint8_t *privatekey)</div><div class="ttdoc">Sign a message using a P-256 private key (RFC 6979 deterministic k using scalar d).</div><div class="ttdef"><b>Definition</b> ecdsap256base.c:1486</div></div>
+<div class="ttc" id="aecdsap256base_8h_html_a61f87176376d7bb293fa677dbb30b9f5"><div class="ttname"><a href="ecdsap256base_8h.html#a61f87176376d7bb293fa677dbb30b9f5">qsc_p256_publickey_from_privatekey</a></div><div class="ttdeci">int32_t qsc_p256_publickey_from_privatekey(uint8_t *publickey, const uint8_t *privatekey)</div><div class="ttdoc">Derive a P-256 public key from a raw private scalar.</div><div class="ttdef"><b>Definition</b> ecdsap256base.c:1269</div></div>
+<div class="ttc" id="aecdsap256base_8h_html_a7066eb5f6c8dc8b75b826a694736ed97"><div class="ttname"><a href="ecdsap256base_8h.html#a7066eb5f6c8dc8b75b826a694736ed97">qsc_p256_sign</a></div><div class="ttdeci">int32_t qsc_p256_sign(uint8_t *signedmsg, size_t *smsglen, const uint8_t *message, size_t msglen, const uint8_t *privatekey)</div><div class="ttdoc">Sign a message using a P-256 private key.</div><div class="ttdef"><b>Definition</b> ecdsap256base.c:1390</div></div>
+<div class="ttc" id="aecdsap256base_8h_html_aa8fb91d2575ce802f609e2a2a80a14d1"><div class="ttname"><a href="ecdsap256base_8h.html#aa8fb91d2575ce802f609e2a2a80a14d1">qsc_p256_verify</a></div><div class="ttdeci">bool qsc_p256_verify(uint8_t *message, size_t *msglen, const uint8_t *signedmsg, size_t smsglen, const uint8_t *publickey)</div><div class="ttdoc">Verify a P-256 signed message and recover the message bytes.</div><div class="ttdef"><b>Definition</b> ecdsap256base.c:1581</div></div>
+<div class="ttc" id="aecdsap256base_8h_html_aa98767d23913f5d474add271294e65de"><div class="ttname"><a href="ecdsap256base_8h.html#aa98767d23913f5d474add271294e65de">qsc_p256_keypair</a></div><div class="ttdeci">int32_t qsc_p256_keypair(uint8_t *publickey, uint8_t *privatekey, const uint8_t *seed)</div><div class="ttdoc">Generate a P-256 public/private key pair from a 32-byte seed.</div><div class="ttdef"><b>Definition</b> ecdsap256base.c:1327</div></div>
 <div class="ttc" id="aqsccommon_8h_html"><div class="ttname"><a href="qsccommon_8h.html">qsccommon.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -185,7 +192,7 @@ $(function(){initNavTree('ecdsap256base_8h_source.html','',''); });
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="dir_e9ce06a8fabd9a65cddff1db044522c4.html">QSC</a></li><li class="navelem"><b>ecdsap256base.h</b></li>
+    <li class="navelem"><a href="dir_e9ce06a8fabd9a65cddff1db044522c4.html">QSC</a></li><li class="navelem"><a href="ecdsap256base_8h.html">ecdsap256base.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.14.0 </li>
   </ul>
 </div>

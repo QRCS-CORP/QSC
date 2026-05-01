@@ -192,15 +192,15 @@ bool qsc_ed448_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message,
 
         *smsglen = 114U + msglen;
 
-        qsc_memutils_clear(az, sizeof(az));
-        qsc_memutils_clear(nonce, sizeof(nonce));
-        qsc_memutils_clear(hram, sizeof(hram));
-        qsc_memutils_clear(seed, sizeof(seed));
-        qsc_memutils_clear(a, sizeof(a));
-        qsc_memutils_clear(R, sizeof(R));
-        qsc_memutils_clear(S, sizeof(S));
-        qsc_memutils_clear(&A, sizeof(A));
-        qsc_memutils_clear(&Rp, sizeof(Rp));
+        qsc_memutils_secure_erase(az, sizeof(az));
+        qsc_memutils_secure_erase(nonce, sizeof(nonce));
+        qsc_memutils_secure_erase(hram, sizeof(hram));
+        qsc_memutils_secure_erase(seed, sizeof(seed));
+        qsc_memutils_secure_erase(a, sizeof(a));
+        qsc_memutils_secure_erase(R, sizeof(R));
+        qsc_memutils_secure_erase(S, sizeof(S));
+        qsc_memutils_secure_erase(&A, sizeof(A));
+        qsc_memutils_secure_erase(&Rp, sizeof(Rp));
         res = true;
     }
 
@@ -271,10 +271,10 @@ bool qsc_ed448_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg
                                 res = true;
                             }
 
-                            qsc_memutils_clear(hram, sizeof(hram));
-                            qsc_memutils_clear(checker, sizeof(checker));
-                            qsc_memutils_clear(&A, sizeof(A));
-                            qsc_memutils_clear(&Rcheck, sizeof(Rcheck));
+                            qsc_memutils_secure_erase(hram, sizeof(hram));
+                            qsc_memutils_secure_erase(checker, sizeof(checker));
+                            qsc_memutils_secure_erase(&A, sizeof(A));
+                            qsc_memutils_secure_erase(&Rcheck, sizeof(Rcheck));
                         }
                     }
                 }

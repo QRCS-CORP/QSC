@@ -160,8 +160,10 @@ QSC_EXPORT_API void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, 
  * \param ctx: [qsc_csg_state*] Pointer to the DRBG state structure.
  * \param output: [uint8_t*] Pointer to the output array for pseudo-random bytes.
  * \param otplen: [size_t] The number of bytes to generate.
+ * 
+ * \return [bool] Returns true on success.
  */
-QSC_EXPORT_API void qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen);
+QSC_EXPORT_API bool qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen);
 
 /**
  * \brief Update the DRBG with new seed material.

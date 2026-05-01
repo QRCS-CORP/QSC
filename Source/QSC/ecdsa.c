@@ -147,7 +147,7 @@ bool qsc_ecdsa_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message,
 #endif
         if (res == false)
         {
-            qsc_memutils_clear(signedmsg, msglen + QSC_ECDSA_SIGNATURE_SIZE);
+            qsc_memutils_secure_erase(signedmsg, msglen + QSC_ECDSA_SIGNATURE_SIZE);
             
             if (smsglen != NULL)
             {
@@ -181,7 +181,7 @@ bool qsc_ecdsa_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* m
 #endif
         if (res == false)
         {
-            qsc_memutils_clear(signedmsg, msglen + QSC_ECDSA_SIGNATURE_SIZE);
+            qsc_memutils_secure_erase(signedmsg, msglen + QSC_ECDSA_SIGNATURE_SIZE);
 
             if (smsglen != NULL)
             {

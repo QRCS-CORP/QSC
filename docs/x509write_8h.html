@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -218,7 +218,7 @@ Functions</h2></td></tr>
 <p>This function derives an Authority Key Identifier structure from the provided issuer certificate. The AKI is constructed according to standard X.509 practices:</p>
 <ul>
 <li>If the issuer certificate contains a Subject Key Identifier (SKI) extension, that value is used directly as the key identifier.</li>
-<li>If no SKI is present, the key identifier is derived from the issuer’s Subject Public Key Information (SPKI), typically using a SHA-1 hash over the public key bit string as specified in RFC 5280.</li>
+<li>If no SKI is present, the key identifier is derived from the issuer's Subject Public Key Information (SPKI), typically using a SHA-1 hash over the public key bit string as specified in RFC 5280.</li>
 </ul>
 <p>The resulting structure is fully populated with the key identifier and marked as present. The caller may then pass the result to <a class="el" href="#ae52633004ad275391799ed3c04fe2c95" title="Sets the Authority Key Identifier (AKI) extension in the CRL builder.">qsc_x509_crl_builder_set_authority_key_identifier()</a> to include the extension in a CRL.</p>
 <p>This function does not modify the CRL builder directly.</p>
@@ -254,7 +254,7 @@ Functions</h2></td></tr>
 
 <p>Sets the Authority Key Identifier (AKI) extension in the CRL builder. </p>
 <p>This function assigns a fully populated Authority Key Identifier structure to the CRL builder. The AKI extension identifies the public key corresponding to the private key used to sign the CRL, and is typically derived from the issuer certificate. When present, it enables relying parties to match the CRL to the correct issuer certificate during validation.</p>
-<p>The provided structure must be fully initialized by the caller. At minimum, the key identifier field should be present and contain the issuer’s key identifier. Optional fields such as issuer name and serial number may also be included if required.</p>
+<p>The provided structure must be fully initialized by the caller. At minimum, the key identifier field should be present and contain the issuer's key identifier. Optional fields such as issuer name and serial number may also be included if required.</p>
 <p>If this function is not called, and no AKI is otherwise set, the CRL will be generated without an Authority Key Identifier extension.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

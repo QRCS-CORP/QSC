@@ -419,9 +419,9 @@ static void x509_ocsp_sha1_compute(uint8_t* output, const uint8_t* message, size
         output[(i * 4U) + 3U] = (uint8_t)h[i];
     }
 
-    qsc_memutils_clear((uint8_t*)h, sizeof(h));
-    qsc_memutils_clear((uint8_t*)w, sizeof(w));
-    qsc_memutils_clear((uint8_t*)block, sizeof(block));
+    qsc_memutils_secure_erase((uint8_t*)h, sizeof(h));
+    qsc_memutils_secure_erase((uint8_t*)w, sizeof(w));
+    qsc_memutils_secure_erase((uint8_t*)block, sizeof(block));
 }
 
 static bool x509_ocsp_hash_octets(const qsc_asn1_oid* hashoid, const uint8_t* data, size_t datalen, uint8_t* output, size_t* outputlen)

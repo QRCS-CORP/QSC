@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -185,40 +185,43 @@ Macros</h2></td></tr>
 <tr class="memitem:a3936df82f23af3637e9e77b07b57c64d" id="r_a3936df82f23af3637e9e77b07b57c64d"><td class="memItemLeft" align="right" valign="top"><a id="a3936df82f23af3637e9e77b07b57c64d" name="a3936df82f23af3637e9e77b07b57c64d"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_STATUS_FAILURE</b>&#160;&#160;&#160;-1LL</td></tr>
 <tr class="memdesc:a3936df82f23af3637e9e77b07b57c64d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function return value indicating failed operation. <br /></td></tr>
-<tr class="memitem:abd21876687917214872bce6d242d8dc1" id="r_abd21876687917214872bce6d242d8dc1"><td class="memItemLeft" align="right" valign="top"><a id="abd21876687917214872bce6d242d8dc1" name="abd21876687917214872bce6d242d8dc1"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_EDDH_RFC_7748_COMPLIANT</b></td></tr>
+<tr class="memitem:a80016bd302907e81315770daa0bd5f62" id="r_a80016bd302907e81315770daa0bd5f62"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a80016bd302907e81315770daa0bd5f62">QSC_TLS_SECURITY_CLASS_1</a></td></tr>
+<tr class="memdesc:a80016bd302907e81315770daa0bd5f62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects the QSC TLS Security Class 1 build profile.  <br /></td></tr>
 <tr class="memitem:acda36f6e30200731a020e8c8a85de0bf" id="r_acda36f6e30200731a020e8c8a85de0bf"><td class="memItemLeft" align="right" valign="top"><a id="acda36f6e30200731a020e8c8a85de0bf" name="acda36f6e30200731a020e8c8a85de0bf"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_EDDH_S1EC25519</b></td></tr>
 <tr class="memdesc:acda36f6e30200731a020e8c8a85de0bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the EDDH S1EC25519 parameter set. <br /></td></tr>
-<tr class="memitem:a7271c7b2c466e0dcc714551af9c57723" id="r_a7271c7b2c466e0dcc714551af9c57723"><td class="memItemLeft" align="right" valign="top"><a id="a7271c7b2c466e0dcc714551af9c57723" name="a7271c7b2c466e0dcc714551af9c57723"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_KYBER_S5K4P1024</b></td></tr>
-<tr class="memdesc:a7271c7b2c466e0dcc714551af9c57723"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the Kyber S5K4P1024 parameter set. <br /></td></tr>
-<tr class="memitem:ad132a8b96af12e0245b9684c70fb7918" id="r_ad132a8b96af12e0245b9684c70fb7918"><td class="memItemLeft" align="right" valign="top"><a id="ad132a8b96af12e0245b9684c70fb7918" name="ad132a8b96af12e0245b9684c70fb7918"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HQC_S5N7333</b></td></tr>
-<tr class="memdesc:ad132a8b96af12e0245b9684c70fb7918"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the HQC S5N57637 parameter set. <br /></td></tr>
-<tr class="memitem:a45ca7dd236d5ffa74d4ed894100fde96" id="r_a45ca7dd236d5ffa74d4ed894100fde96"><td class="memItemLeft" align="right" valign="top"><a id="a45ca7dd236d5ffa74d4ed894100fde96" name="a45ca7dd236d5ffa74d4ed894100fde96"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_MCELIECE_S5N6688T128</b></td></tr>
-<tr class="memdesc:a45ca7dd236d5ffa74d4ed894100fde96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the McEliece S5-N6688T128 parameter set. <br /></td></tr>
-<tr class="memitem:af7186147c253fddb3b04eaa7257eb8b0" id="r_af7186147c253fddb3b04eaa7257eb8b0"><td class="memItemLeft" align="right" valign="top"><a id="af7186147c253fddb3b04eaa7257eb8b0" name="af7186147c253fddb3b04eaa7257eb8b0"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_DILITHIUM_S5P87</b></td></tr>
-<tr class="memdesc:af7186147c253fddb3b04eaa7257eb8b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the Dilithium S5P87 parameter set. <br /></td></tr>
-<tr class="memitem:a4ccb42644d7fbac65fc120a291cb598f" id="r_a4ccb42644d7fbac65fc120a291cb598f"><td class="memItemLeft" align="right" valign="top"><a id="a4ccb42644d7fbac65fc120a291cb598f" name="a4ccb42644d7fbac65fc120a291cb598f"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_S5P521</b></td></tr>
-<tr class="memdesc:a4ccb42644d7fbac65fc120a291cb598f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the ECDSA S1P521 (NIST P-521) parameter set. <br /></td></tr>
+<tr class="memitem:a22c97504eb161f22f1ab424e27440274" id="r_a22c97504eb161f22f1ab424e27440274"><td class="memItemLeft" align="right" valign="top"><a id="a22c97504eb161f22f1ab424e27440274" name="a22c97504eb161f22f1ab424e27440274"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_KYBER_S3K3P768</b></td></tr>
+<tr class="memdesc:a22c97504eb161f22f1ab424e27440274"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the Kyber S3K3P768 parameter set. <br /></td></tr>
+<tr class="memitem:af1b4f467a130bdd2d8db59e49676e983" id="r_af1b4f467a130bdd2d8db59e49676e983"><td class="memItemLeft" align="right" valign="top"><a id="af1b4f467a130bdd2d8db59e49676e983" name="af1b4f467a130bdd2d8db59e49676e983"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_DILITHIUM_S3P65</b></td></tr>
+<tr class="memdesc:af1b4f467a130bdd2d8db59e49676e983"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the Dilithium S3P65 parameter set. <br /></td></tr>
+<tr class="memitem:aaab609bba68b7f5abbc36e0e8c17eaaa" id="r_aaab609bba68b7f5abbc36e0e8c17eaaa"><td class="memItemLeft" align="right" valign="top"><a id="aaab609bba68b7f5abbc36e0e8c17eaaa" name="aaab609bba68b7f5abbc36e0e8c17eaaa"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDSA_S1P256</b></td></tr>
+<tr class="memdesc:aaab609bba68b7f5abbc36e0e8c17eaaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the ECDSA S1EC256 (NIST P-256) parameter set. <br /></td></tr>
 <tr class="memitem:aa35eef50cb5b187caf501257c2e43b2d" id="r_aa35eef50cb5b187caf501257c2e43b2d"><td class="memItemLeft" align="right" valign="top"><a id="aa35eef50cb5b187caf501257c2e43b2d" name="aa35eef50cb5b187caf501257c2e43b2d"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_EDDSA_S1EC25519</b></td></tr>
 <tr class="memdesc:aa35eef50cb5b187caf501257c2e43b2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the EDDSA S1EC25519 parameter set. <br /></td></tr>
-<tr class="memitem:a0a3984c136eb31ce41a2a448f8ab649e" id="r_a0a3984c136eb31ce41a2a448f8ab649e"><td class="memItemLeft" align="right" valign="top"><a id="a0a3984c136eb31ce41a2a448f8ab649e" name="a0a3984c136eb31ce41a2a448f8ab649e"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_S5SHAKE256F1024</b></td></tr>
-<tr class="memdesc:a0a3984c136eb31ce41a2a448f8ab649e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the Falcon S5SHAKE256F1024 parameter set. <br /></td></tr>
-<tr class="memitem:abc520f14e51082e2e58f6558d15ed5d7" id="r_abc520f14e51082e2e58f6558d15ed5d7"><td class="memItemLeft" align="right" valign="top"><a id="abc520f14e51082e2e58f6558d15ed5d7" name="abc520f14e51082e2e58f6558d15ed5d7"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_SPHINCSPLUS_S5S256SHAKERS</b></td></tr>
-<tr class="memdesc:abc520f14e51082e2e58f6558d15ed5d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the SphincsPlus S5S256SHAKERS robust small parameter set. <br /></td></tr>
+<tr class="memitem:af38d8ad46124d37fb8fb7d194908a1f0" id="r_af38d8ad46124d37fb8fb7d194908a1f0"><td class="memItemLeft" align="right" valign="top"><a id="af38d8ad46124d37fb8fb7d194908a1f0" name="af38d8ad46124d37fb8fb7d194908a1f0"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_ECDH_S1P256</b></td></tr>
+<tr class="memdesc:af38d8ad46124d37fb8fb7d194908a1f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the ECDH S1P256 parameter set (NIST P-256 / secp256r1). <br /></td></tr>
+<tr class="memitem:a5b6e7f012f140365e9bd2aab0b73f0c0" id="r_a5b6e7f012f140365e9bd2aab0b73f0c0"><td class="memItemLeft" align="right" valign="top"><a id="a5b6e7f012f140365e9bd2aab0b73f0c0" name="a5b6e7f012f140365e9bd2aab0b73f0c0"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HQC_S1N2321</b></td></tr>
+<tr class="memdesc:a5b6e7f012f140365e9bd2aab0b73f0c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the HQC S1N17669 parameter set. <br /></td></tr>
+<tr class="memitem:ac7a002ea26fd6b7f373f310aab17ca5a" id="r_ac7a002ea26fd6b7f373f310aab17ca5a"><td class="memItemLeft" align="right" valign="top"><a id="ac7a002ea26fd6b7f373f310aab17ca5a" name="ac7a002ea26fd6b7f373f310aab17ca5a"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_MCELIECE_S1N3488T64</b></td></tr>
+<tr class="memdesc:ac7a002ea26fd6b7f373f310aab17ca5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the McEliece S1-N3488T64 parameter set. <br /></td></tr>
+<tr class="memitem:a00f253fed68e2c696b590c35511b120e" id="r_a00f253fed68e2c696b590c35511b120e"><td class="memItemLeft" align="right" valign="top"><a id="a00f253fed68e2c696b590c35511b120e" name="a00f253fed68e2c696b590c35511b120e"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_S3SHAKE256F512</b></td></tr>
+<tr class="memdesc:a00f253fed68e2c696b590c35511b120e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the Falcon S3SHAKE256F512 parameter set. <br /></td></tr>
+<tr class="memitem:a738a14dab259ebb460856049f48d3028" id="r_a738a14dab259ebb460856049f48d3028"><td class="memItemLeft" align="right" valign="top"><a id="a738a14dab259ebb460856049f48d3028" name="a738a14dab259ebb460856049f48d3028"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_SPHINCSPLUS_S1S128SHAKERS</b></td></tr>
+<tr class="memdesc:a738a14dab259ebb460856049f48d3028"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the SphincsPlus S1S128SHAKERS robust small parameter set. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a46a037236862ac1a534efbe605c10f42" id="r_a46a037236862ac1a534efbe605c10f42"><td class="memItemLeft" align="right" valign="top"><a id="a46a037236862ac1a534efbe605c10f42" name="a46a037236862ac1a534efbe605c10f42"></a>
-typedef int&#160;</td><td class="memItemRight" valign="bottom"><b>errno_t</b></td></tr>
+<tr class="memitem:ac1c9a4eeebfe29c9d96c4bda0183cbb7" id="r_ac1c9a4eeebfe29c9d96c4bda0183cbb7"><td class="memItemLeft" align="right" valign="top"><a id="ac1c9a4eeebfe29c9d96c4bda0183cbb7" name="ac1c9a4eeebfe29c9d96c4bda0183cbb7"></a>
+typedef int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>errno_t</b></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Contains common definitions for the Quantum Secure Cryptographic (QSC) library. </p>
@@ -259,6 +262,32 @@ typedef int&#160;</td><td class="memItemRight" valign="bottom"><b>errno_t</b></t
 <b>Value:</b><div class="fragment"><div class="line">_Pragma(#x)</div>
 </div><!-- fragment -->
 <p>The stringify function. </p>
+
+</div>
+</div>
+<a id="a80016bd302907e81315770daa0bd5f62" name="a80016bd302907e81315770daa0bd5f62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80016bd302907e81315770daa0bd5f62">&#9670;&#160;</a></span>QSC_TLS_SECURITY_CLASS_1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define QSC_TLS_SECURITY_CLASS_1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Selects the QSC TLS Security Class 1 build profile. </p>
+<p>This profile enables the lowest predefined TLS-oriented parameter-set bundle in QSC. When this macro is defined, the header enables the following primitive parameter sets:</p><ul>
+<li>QSC_ECDH_S1P256</li>
+<li>QSC_EDDH_S1EC25519</li>
+<li>QSC_KYBER_S1K2P512</li>
+<li>QSC_DILITHIUM_S1P44</li>
+<li>QSC_ECDSA_S1P256</li>
+<li>QSC_EDDSA_S1EC25519</li>
+</ul>
+<p>This profile is intended for compact builds that expose the 128-bit-class parameter selections associated with X25519, Ed25519, NIST P-256, ML-KEM-512, and ML-DSA-44.</p>
+<p>Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build. </p>
 
 </div>
 </div>

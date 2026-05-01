@@ -168,7 +168,7 @@ size_t qsc_stringutils_concat_strings(char* dest, size_t dstlen, const char* sou
 		dlen = strlen(dest);
 		slen = strlen(source);
 
-		if (slen > 0U && slen <= dstlen - dlen)
+		if (slen > 0U && slen < dstlen - dlen)
 		{
 			errno_t err;
 
@@ -243,7 +243,7 @@ size_t qsc_stringutils_copy_string(char* dest, size_t dstlen, const char* source
 		err = 0;
 		slen = strlen(source);
 
-		if (slen > 0U && slen <= dstlen)
+		if (slen > 0U && slen < dstlen)
 		{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 			err = strcpy_s(dest, slen + 1U, source);
@@ -572,6 +572,8 @@ char* qsc_stringutils_register_string(char** source, size_t count)
 
 		if (nstr != NULL)
 		{
+			qsc_memutils_clear(nstr, tlen);
+
 			for (i = 0U; i < count; ++i)
 			{
 #if defined(QSC_SYSTEM_OS_WINDOWS)

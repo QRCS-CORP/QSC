@@ -2310,7 +2310,7 @@ bool qsc_dilithium_avx2_open(uint8_t* message, size_t* msglen, const uint8_t* co
 
     if (res == false && smlen >= DILITHIUM_SIGNATURE_SIZE)
     {
-        qsc_memutils_clear(message, smlen - DILITHIUM_SIGNATURE_SIZE);
+        qsc_memutils_secure_erase(message, smlen - DILITHIUM_SIGNATURE_SIZE);
     }
 
     return res;

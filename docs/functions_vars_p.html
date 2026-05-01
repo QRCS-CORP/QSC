@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -105,6 +105,8 @@ $(function(){initNavTree('functions_vars_p.html','',''); });
 <li>parameters_present&#160;:&#160;<a class="el" href="structqsc__x509__algorithm__identifier__t.html#a76bb8e6306498b73f579179035872de9">qsc_x509_algorithm_identifier_t</a></li>
 <li>pathlen&#160;:&#160;<a class="el" href="structqsc__x509__basic__constraints__t.html#adbda5e31e53cf1f3f8e641bde255aea4">qsc_x509_basic_constraints_t</a></li>
 <li>pathlen_present&#160;:&#160;<a class="el" href="structqsc__x509__basic__constraints__t.html#a04cca0a1417859d146c5fc4c687e2545">qsc_x509_basic_constraints_t</a></li>
+<li>peercapabilities&#160;:&#160;<a class="el" href="structqsc__tls__client__state.html#a3f9cd293d1fb2d6b378c6041db1c753f">qsc_tls_client_state</a></li>
+<li>phase&#160;:&#160;<a class="el" href="structqsc__tls__client__state.html#a40eea8af843c83880ec81ddaf52d3613">qsc_tls_client_state</a></li>
 <li>physavail&#160;:&#160;<a class="el" href="structqsc__sysutils__memory__statistics__state.html#a57b41feb8df593d15c49fffa24e6ff12">qsc_sysutils_memory_statistics_state</a></li>
 <li>phystotal&#160;:&#160;<a class="el" href="structqsc__sysutils__memory__statistics__state.html#afa8c68c84ee36288f66c4dbc39cf92b9">qsc_sysutils_memory_statistics_state</a></li>
 <li>port&#160;:&#160;<a class="el" href="structqsc__ipinfo__ipv4__info.html#a8e0798404bf2cf5dabb84c5ba9a4f236">qsc_ipinfo_ipv4_info</a>, <a class="el" href="structqsc__ipinfo__ipv6__info.html#a8e0798404bf2cf5dabb84c5ba9a4f236">qsc_ipinfo_ipv6_info</a>, <a class="el" href="structqsc__socket.html#a8e0798404bf2cf5dabb84c5ba9a4f236">qsc_socket</a></li>
@@ -112,13 +114,25 @@ $(function(){initNavTree('functions_vars_p.html','',''); });
 <li>pqcparameter&#160;:&#160;<a class="el" href="structqsc__x509__algorithm__identifier__t.html#a7751bdb8524ada8f0b3eb61f4d56f960">qsc_x509_algorithm_identifier_t</a></li>
 <li>pres&#160;:&#160;<a class="el" href="structqsc__csg__state.html#ab149c2f8cc2711d915ec186839a93e69">qsc_csg_state</a>, <a class="el" href="structqsc__hcg__state.html#ab149c2f8cc2711d915ec186839a93e69">qsc_hcg_state</a></li>
 <li>present&#160;:&#160;<a class="el" href="structqsc__x509__authority__key__identifier__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_authority_key_identifier_t</a>, <a class="el" href="structqsc__x509__basic__constraints__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_basic_constraints_t</a>, <a class="el" href="structqsc__x509__crl__number__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_crl_number_t</a>, <a class="el" href="structqsc__x509__extended__key__usage__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_extended_key_usage_t</a>, <a class="el" href="structqsc__x509__issuer__alt__name__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_issuer_alt_name_t</a>, <a class="el" href="structqsc__x509__key__usage__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_key_usage_t</a>, <a class="el" href="structqsc__x509__subject__alt__name__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_subject_alt_name_t</a>, <a class="el" href="structqsc__x509__subject__key__identifier__t.html#aa84cc4dc60e16481b79b15b815aaea31">qsc_x509_subject_key_identifier_t</a></li>
-<li>privatekey&#160;:&#160;<a class="el" href="structqsc__x509__pkcs12__bundle__t.html#a44b9d90a7ac96d7c14db5c2cde0d5326">qsc_x509_pkcs12_bundle_t</a>, <a class="el" href="structqsc__x509__private__key__t.html#aeb42d30a9edf3a13ed0194aadaa24cea">qsc_x509_private_key_t</a></li>
-<li>privatekeylen&#160;:&#160;<a class="el" href="structqsc__x509__private__key__t.html#a75bf27f361a3d31872c7ebb6c779acfa">qsc_x509_private_key_t</a></li>
+<li>privatekey&#160;:&#160;<a class="el" href="structqsc__tls__key__exchange__state.html#aca95ecbcd6d1b699a4330845c083ce99">qsc_tls_key_exchange_state</a>, <a class="el" href="structqsc__tls__signer__default__context.html#a51c6663b4c8b707bfd9081320f6f2f56">qsc_tls_signer_default_context</a>, <a class="el" href="structqsc__x509__pkcs12__bundle__t.html#a44b9d90a7ac96d7c14db5c2cde0d5326">qsc_x509_pkcs12_bundle_t</a>, <a class="el" href="structqsc__x509__private__key__t.html#aeb42d30a9edf3a13ed0194aadaa24cea">qsc_x509_private_key_t</a>, <a class="el" href="structqsc__x509w__server__identity__t.html#a44b9d90a7ac96d7c14db5c2cde0d5326">qsc_x509w_server_identity_t</a></li>
+<li>privatekeydata&#160;:&#160;<a class="el" href="structqsc__x509w__tls__local__certificate__t.html#ab9eb60d8636df034dba92b72125796b3">qsc_x509w_tls_local_certificate_t</a></li>
+<li>privatekeylen&#160;:&#160;<a class="el" href="structqsc__tls__key__exchange__state.html#a75bf27f361a3d31872c7ebb6c779acfa">qsc_tls_key_exchange_state</a>, <a class="el" href="structqsc__tls__signer__default__context.html#a75bf27f361a3d31872c7ebb6c779acfa">qsc_tls_signer_default_context</a>, <a class="el" href="structqsc__x509__private__key__t.html#a75bf27f361a3d31872c7ebb6c779acfa">qsc_x509_private_key_t</a>, <a class="el" href="structqsc__x509w__tls__local__certificate__t.html#a75bf27f361a3d31872c7ebb6c779acfa">qsc_x509w_tls_local_certificate_t</a></li>
+<li>privatekeypath&#160;:&#160;<a class="el" href="structqsc__x509w__deployment__config__t.html#a5fd0bfece53525844e74f10fc71618cd">qsc_x509w_deployment_config_t</a></li>
+<li>privatekeysize&#160;:&#160;<a class="el" href="structqsc__tls__group__descriptor.html#aa999033a9155547da85c9adca1621986">qsc_tls_group_descriptor</a></li>
+<li>profile&#160;:&#160;<a class="el" href="structqsc__x509w__tls__bridge__t.html#a84c21e740f3e824be78f0f6944e6c07f">qsc_x509w_tls_bridge_t</a></li>
+<li>psk_ke_mask&#160;:&#160;<a class="el" href="structqsc__tls__extension__bitmap.html#a262700727196739ba40609779e51aacb">qsc_tls_extension_bitmap</a></li>
+<li>pskaccepted&#160;:&#160;<a class="el" href="structqsc__tls__client__state.html#a3e41eb0fc9adc602da5b05e1a8f86e22">qsc_tls_client_state</a>, <a class="el" href="structqsc__tls__server__state.html#a3e41eb0fc9adc602da5b05e1a8f86e22">qsc_tls_server_state</a></li>
+<li>psklookup&#160;:&#160;<a class="el" href="structqsc__tls__server__config.html#a8e6a62cc30a2ad19dd8b3e08a1cde083">qsc_tls_server_config</a></li>
+<li>psklookupstate&#160;:&#160;<a class="el" href="structqsc__tls__server__config.html#aa85a1273913978f2dfb63687df2819e9">qsc_tls_server_config</a></li>
+<li>pskoffered&#160;:&#160;<a class="el" href="structqsc__tls__client__state.html#afb2af22c5d57c41cb73a764485df0447">qsc_tls_client_state</a></li>
 <li>pstate&#160;:&#160;<a class="el" href="structqsc__chacha__poly1305__state.html#a1b008810f5fa30069de696babdf417c2">qsc_chacha_poly1305_state</a>, <a class="el" href="structqsc__hmac256__state.html#a27322c7732a5bcf681f318a32a927047">qsc_hmac256_state</a>, <a class="el" href="structqsc__hmac384__state.html#a7fc2c450107fb0341701729e65c07c7c">qsc_hmac384_state</a>, <a class="el" href="structqsc__hmac512__state.html#aede2b2af366378b78ab5c1032d298db4">qsc_hmac512_state</a></li>
 <li>publickey&#160;:&#160;<a class="el" href="structqsc__x509__algorithm__identifier__t.html#a8f4b62afc0e6489ac2f4a482357c5741">qsc_x509_algorithm_identifier_t</a>, <a class="el" href="structqsc__x509__private__key__t.html#a2ad4902230dc911c1ffb5d94d55f7f73">qsc_x509_private_key_t</a>, <a class="el" href="structqsc__x509__subject__public__key__info__t.html#ab161bef3e8914f6f0c3efed979c1cf12">qsc_x509_subject_public_key_info_t</a></li>
 <li>publickey_present&#160;:&#160;<a class="el" href="structqsc__x509__private__key__t.html#a8aef9bba226ea5a7ba89b38ca2227f06">qsc_x509_private_key_t</a></li>
 <li>publickeylen&#160;:&#160;<a class="el" href="structqsc__x509__private__key__t.html#aae7dd689955324b055434a2ea52adfda">qsc_x509_private_key_t</a>, <a class="el" href="structqsc__x509__subject__public__key__info__t.html#aae7dd689955324b055434a2ea52adfda">qsc_x509_subject_public_key_info_t</a></li>
-<li>purpose&#160;:&#160;<a class="el" href="structqsc__x509__verify__options__t.html#ac16cbbb2bd365574aa1a5f9a85a5f1a4">qsc_x509_verify_options_t</a></li>
+<li>publicshare&#160;:&#160;<a class="el" href="structqsc__tls__key__exchange__state.html#af96457546d0bbafd98dd872e93e4f8f3">qsc_tls_key_exchange_state</a></li>
+<li>publicsharelen&#160;:&#160;<a class="el" href="structqsc__tls__key__exchange__state.html#a86df3dd36e3bcf8cee3857adc974cbe3">qsc_tls_key_exchange_state</a></li>
+<li>purpose&#160;:&#160;<a class="el" href="structqsc__x509__verify__options__t.html#ac16cbbb2bd365574aa1a5f9a85a5f1a4">qsc_x509_verify_options_t</a>, <a class="el" href="structqsc__x509w__deployment__config__t.html#ac16cbbb2bd365574aa1a5f9a85a5f1a4">qsc_x509w_deployment_config_t</a>, <a class="el" href="structqsc__x509w__profile__t.html#ac16cbbb2bd365574aa1a5f9a85a5f1a4">qsc_x509w_profile_t</a></li>
+<li>purposevalid&#160;:&#160;<a class="el" href="structqsc__x509w__result__t.html#ab460239b6d11ba4152259a519a27ae39">qsc_x509w_result_t</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

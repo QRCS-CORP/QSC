@@ -2,6 +2,9 @@
 #include "memutils.h"
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#	if !defined(WIN32_LEAN_AND_MEAN)
+#		define WIN32_LEAN_AND_MEAN
+#	endif
 #	if defined(QSC_SYSTEM_COMPILER_MSC)
 #		pragma comment(lib, "Bcrypt.lib")
 #	endif

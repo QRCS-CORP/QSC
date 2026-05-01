@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.14.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>QSC Post Quantum Cryptographic Library: QSC: Quantum Secure Cryptographic Solutions Library Version 1.1</title>
+<title>QSC Post Quantum Cryptographic Library: QSC: Quantum Secure Cryptographic Solutions Library Version 1.2</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -96,12 +96,12 @@ $(function(){initNavTree('index.html','',''); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">QSC: Quantum Secure Cryptographic Solutions Library Version 1.1 </div></div>
+  <div class="headertitle"><div class="title">QSC: Quantum Secure Cryptographic Solutions Library Version 1.2 </div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Main documentation page for the QSC Library.  </p>
 <p>QSC (Quantum Secure Cryptographic Solutions) is a compact, self-contained, and highly optimized cryptographic library written in C23. It is designed to provide next-generation, post-quantum secure cryptographic primitives for applications requiring long-term security against both classical and quantum adversaries. The library adheres to MISRA secure coding standards and is structured for clarity, ease of verification, and integration into secure communication platforms, including public-internet TLS stacks and PKI certificate infrastructure.</p>
-<dl class="section user"><dt>Overview</dt><dd>The QSC Library provides a comprehensive suite of cryptographic algorithms, a complete X.509 certificate infrastructure, and a broad set of system utilities:</dd></dl>
+<dl class="section user"><dt>Overview</dt><dd>The QSC Library provides a comprehensive suite of cryptographic algorithms, a complete RFC 8446 TLS 1.3 protocol stack, a complete X.509 certificate infrastructure, and a broad set of system utilities:</dd></dl>
 <dl class="section user"><dt>Asymmetric Cryptography</dt><dd><b>Key</b> <b>Encapsulation</b> <b>Mechanisms</b> <b></b>(KEM):<ul>
 <li><b>ML-KEM</b> (Kyber): Module-LWE based key encapsulation, NIST FIPS-203. Parameter sets ML-KEM-512, ML-KEM-768, and ML-KEM-1024. AVX2-accelerated implementations available.</li>
 <li><b>Classic</b> <b>McEliece:</b> Niederreiter dual-form code-based KEM, NIST PQC Round 3.</li>
@@ -129,7 +129,7 @@ $(function(){initNavTree('index.html','',''); });
 </ul>
 <dl class="section user"><dt>Hash Functions and MACs</dt><dd><ul>
 <li><b>SHA3:</b> SHA3-256 and SHA3-512 (FIPS-202); SHAKE-128, SHAKE-256, and cSHAKE variants.</li>
-<li><b>SHA2:</b> SHA2-256 and SHA2-512 (FIPS-180-4).</li>
+<li><b>SHA2:</b> SHA2-256, SHA2-384, and SHA2-512 (FIPS-180-4).</li>
 <li><b>KMAC:</b> Keccak-based message authentication code (FIPS-202).</li>
 <li><b>QMAC:</b> Wide-block GF(2^256) polynomial MAC. A proprietary QRCS construction.</li>
 <li><b>HMAC:</b> SHA2-256 and SHA2-512 variants (FIPS-198-1).</li>
@@ -148,10 +148,152 @@ $(function(){initNavTree('index.html','',''); });
 <li><b>RDP:</b> Hardware entropy via Intel RDRAND and RDSEED (rdp.h).</li>
 </ul>
 </dd></dl>
+<dl class="section user"><dt>TLS 1.3 Protocol Stack</dt><dd>QSC includes a complete, dependency-free TLS 1.3 implementation conforming to RFC 8446. The stack is designed specifically to support hybrid post-quantum key exchange, combining classical ECDH with ML-KEM encapsulation in a single handshake flight. It integrates directly with the QSC X.509 certificate infrastructure, key schedule, and record-layer AEAD primitives, and exposes a clean engine interface that is independent of any particular socket or I/O framework.</dd></dl>
+<p><b>Protocol</b> <b>Coverage:</b> The TLS 1.3 stack implements the full RFC 8446 protocol surface:</p><ul>
+<li>1-RTT certificate-authenticated handshake (client and server)</li>
+<li>Mutual TLS (mTLS): server-initiated CertificateRequest and client certificate validation</li>
+<li>PSK resumption: 1-RTT and 0-RTT (early data) paths with NewSessionTicket emission and consumption, binder computation, and early-data EndOfEarlyData sequencing</li>
+<li>HelloRetryRequest: server-initiated group renegotiation with transcript message_hash transform per RFC 8446 section 4.4.1</li>
+<li>Post-handshake KeyUpdate: both update_not_requested and update_requested flows, with mandatory reciprocal update enforcement</li>
+<li>Post-handshake NewSessionTicket: server emission and client consumption with resumption PSK derivation from resumption_master_secret</li>
+<li>Encrypted close_notify alert construction and dispatch</li>
+<li>Compatibility ChangeCipherSpec record pass-through</li>
+</ul>
+<p><b>Cipher</b> <b>Suites:</b> </p><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Identifier  </th><th class="markdownTableHeadNone">IANA Value  </th><th class="markdownTableHeadNone">Hash  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">TLS_AES_128_GCM_SHA256  </td><td class="markdownTableBodyNone">0x1301  </td><td class="markdownTableBodyNone">SHA-256  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">TLS_AES_256_GCM_SHA384  </td><td class="markdownTableBodyNone">0x1302  </td><td class="markdownTableBodyNone">SHA-384  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">TLS_CHACHA20_POLY1305_SHA256  </td><td class="markdownTableBodyNone">0x1303  </td><td class="markdownTableBodyNone">SHA-256  </td></tr>
+</table>
+<p><b>Named</b> <b>Groups</b> <b>and</b> <b>Hybrid</b> <b>Key</b> <b>Exchange:</b> The group layer (tlsgroups.h) abstracts classical, pure-KEM, and hybrid named groups behind a uniform descriptor and key-exchange interface. Hybrid groups concatenate the ECDH shared secret with the ML-KEM shared secret in the order defined by draft-ietf-tls-hybrid-design and pass the combined value as the DHE input to HKDF-Extract. All key-share sizes are enforced at compile time via static assertions in tlslimits.h.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Group  </th><th class="markdownTableHeadNone">IANA Value  </th><th class="markdownTableHeadNone">Classical  </th><th class="markdownTableHeadNone">PQC Component  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">secp256r1  </td><td class="markdownTableBodyNone">0x0017  </td><td class="markdownTableBodyNone">P-256 ECDH  </td><td class="markdownTableBodyNone">-  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">secp384r1  </td><td class="markdownTableBodyNone">0x0018  </td><td class="markdownTableBodyNone">P-384 ECDH  </td><td class="markdownTableBodyNone">-  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">secp521r1  </td><td class="markdownTableBodyNone">0x0019  </td><td class="markdownTableBodyNone">P-521 ECDH  </td><td class="markdownTableBodyNone">-  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">x25519  </td><td class="markdownTableBodyNone">0x001D  </td><td class="markdownTableBodyNone">X25519  </td><td class="markdownTableBodyNone">-  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">x448  </td><td class="markdownTableBodyNone">0x001E  </td><td class="markdownTableBodyNone">X448  </td><td class="markdownTableBodyNone">-  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ML-KEM-512  </td><td class="markdownTableBodyNone">0x0200  </td><td class="markdownTableBodyNone">-  </td><td class="markdownTableBodyNone">ML-KEM-512  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">ML-KEM-768  </td><td class="markdownTableBodyNone">0x0201  </td><td class="markdownTableBodyNone">-  </td><td class="markdownTableBodyNone">ML-KEM-768  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ML-KEM-1024  </td><td class="markdownTableBodyNone">0x0202  </td><td class="markdownTableBodyNone">-  </td><td class="markdownTableBodyNone">ML-KEM-1024  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">x25519 + ML-KEM-512  </td><td class="markdownTableBodyNone">0x11EB  </td><td class="markdownTableBodyNone">X25519  </td><td class="markdownTableBodyNone">ML-KEM-512  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">x25519 + ML-KEM-768  </td><td class="markdownTableBodyNone">0x11EC  </td><td class="markdownTableBodyNone">X25519  </td><td class="markdownTableBodyNone">ML-KEM-768  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">secp256r1 + ML-KEM-768  </td><td class="markdownTableBodyNone">0x11ED  </td><td class="markdownTableBodyNone">P-256 ECDH  </td><td class="markdownTableBodyNone">ML-KEM-768  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">secp384r1 + ML-KEM-1024  </td><td class="markdownTableBodyNone">0x11EE  </td><td class="markdownTableBodyNone">P-384 ECDH  </td><td class="markdownTableBodyNone">ML-KEM-1024  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">x25519 + ML-KEM-1024  </td><td class="markdownTableBodyNone">0x11EF  </td><td class="markdownTableBodyNone">X25519  </td><td class="markdownTableBodyNone">ML-KEM-1024  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">secp256r1 + ML-KEM-512  </td><td class="markdownTableBodyNone">0x11F0  </td><td class="markdownTableBodyNone">P-256 ECDH  </td><td class="markdownTableBodyNone">ML-KEM-512  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">secp256r1 + ML-KEM-1024  </td><td class="markdownTableBodyNone">0x11F1  </td><td class="markdownTableBodyNone">P-256 ECDH  </td><td class="markdownTableBodyNone">ML-KEM-1024  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">secp384r1 + ML-KEM-768  </td><td class="markdownTableBodyNone">0x11F2  </td><td class="markdownTableBodyNone">P-384 ECDH  </td><td class="markdownTableBodyNone">ML-KEM-768  </td></tr>
+</table>
+<p><b>Signature</b> <b>Schemes:</b> </p><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Scheme  </th><th class="markdownTableHeadNone">IANA Value  </th><th class="markdownTableHeadNone">Standard  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">ecdsa_secp256r1_sha256  </td><td class="markdownTableBodyNone">0x0403  </td><td class="markdownTableBodyNone">FIPS 186-5  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ecdsa_secp384r1_sha384  </td><td class="markdownTableBodyNone">0x0503  </td><td class="markdownTableBodyNone">FIPS 186-5  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">ed25519  </td><td class="markdownTableBodyNone">0x0807  </td><td class="markdownTableBodyNone">RFC 8032  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ML-DSA-44  </td><td class="markdownTableBodyNone">0x0904  </td><td class="markdownTableBodyNone">NIST FIPS-204  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">ML-DSA-65  </td><td class="markdownTableBodyNone">0x0905  </td><td class="markdownTableBodyNone">NIST FIPS-204  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ML-DSA-87  </td><td class="markdownTableBodyNone">0x0906  </td><td class="markdownTableBodyNone">NIST FIPS-204  </td></tr>
+</table>
+<p><b>Key</b> <b>Schedule</b> <b></b>(tlskeyschedule.h): Implements the full RFC 8446 section 7.1 key schedule:</p><ul>
+<li>HKDF-Extract and HKDF-Expand-Label with label-length bounds checked at call time and verified against a 514-byte stack-allocated info buffer</li>
+<li>Derive-Secret for early, handshake, application, exporter, and resumption epochs</li>
+<li>Early secret extraction from PSK or zero IKM</li>
+<li>Handshake secret extraction from DHE shared secret</li>
+<li>Master secret derivation from zero IKM</li>
+<li>Client and server handshake traffic secret derivation from the CH..SH transcript hash</li>
+<li>Client and server application traffic secret derivation from the CH..SF transcript hash</li>
+<li>Traffic key and IV derivation via HKDF-Expand-Label("key") and ("iv")</li>
+<li>Write-side traffic-secret rotation for KeyUpdate via HKDF-Expand-Label("traffic upd")</li>
+<li>Finished MAC computation and constant-time verification using qsc_intutils_verify</li>
+<li>Binder key derivation, binder computation, and PSK binder patching for 0-RTT</li>
+<li>CertificateVerify input construction (64-byte pad + context string + 0x00 + transcript hash)</li>
+<li>Resumption PSK derivation from resumption_master_secret and ticket nonce</li>
+</ul>
+<p><b>Record</b> <b>Layer</b> <b></b>(tlsrecord.h): Implements RFC 8446 section 5 TLSPlaintext and TLSCiphertext record framing:</p><ul>
+<li>Plaintext record encode and decode with content-type and length validation</li>
+<li>AEAD encryption (AES-128-GCM, AES-256-GCM, ChaCha20-Poly1305) of TLSInnerPlaintext structures with per-record nonce construction via XOR of static IV and 64-bit sequence counter</li>
+<li>Constant-time inner content-type byte scanning using a mask-select backward scan that does not branch on payload byte values</li>
+<li>Sequence overflow enforcement: the 64-bit counter is checked for UINT64_MAX exhaustion before encryption or decryption begins, ensuring no record is ever processed under an exhausted nonce space (RFC 8446 section 5.5)</li>
+<li>Atomic key installation with secure erasure of prior key material on epoch transitions and KeyUpdate rotations</li>
+<li>Legacy record version field is accepted as-is on receive per RFC 8446 section 5.1; the outbound legacy_record_version is set to 0x0303 on all records</li>
+</ul>
+<p><b>Transcript</b> <b>Hash</b> <b></b>(tlstranscript.h):</p><ul>
+<li>Running SHA-256, SHA-384, or SHA-512 transcript hash maintained without copies</li>
+<li>Snapshot operation clones the internal hash state to produce an intermediate digest without disturbing the running hash; the clone is erased with secure_erase on return</li>
+<li>HelloRetryRequest message_hash transform: snapshots the CH1 transcript, reinitializes the hash, then injects a synthetic HandshakeType 254 (message_hash) header followed by the snapshot digest, per RFC 8446 section 4.4.1</li>
+</ul>
+<p><b>Extensions</b> <b></b>(tlsextensions.h): Encode and decode functions for all TLS 1.3 extensions used in ClientHello, ServerHello, HelloRetryRequest, and EncryptedExtensions messages:</p><ul>
+<li>supported_versions (client list and server selected-version forms)</li>
+<li>supported_groups and key_share (client offer and server response, including HelloRetryRequest key_share with a single requested group)</li>
+<li>signature_algorithms</li>
+<li>server_name (SNI)</li>
+<li>pre_shared_key (offer with binder placeholder and server selection index)</li>
+<li>psk_key_exchange_modes</li>
+<li>early_data (empty EncryptedExtensions confirmation and ClientHello request)</li>
+<li>NewSessionTicket early_data max_early_data_size field</li>
+</ul>
+<p><b>Handshake</b> <b>Messages</b> <b></b>(tlshandshake.h): Encode and decode helpers for all RFC 8446 handshake message body types: ClientHello, ServerHello, EncryptedExtensions, Certificate, CertificateRequest, CertificateVerify, Finished, KeyUpdate, NewSessionTicket, and EndOfEarlyData. The 4-byte handshake header (type + 24-bit length) is produced and consumed by uniform read/write header helpers used throughout the client and server state machines.</p>
+<p><b>Codec</b> <b></b>(tlscodec.h): All record and message serialization is performed through bounds-checked read and write helpers (u8, u16, u24, u32, bytes, vector8, vector16). Every access is guarded by a can_read / can_write check before any array indexing. No direct pointer arithmetic is performed without a prior length validation.</p>
+<p><b>Alert</b> <b>and</b> <b>Error</b> <b>Handling</b> <b></b>(tlsalert.h, tlserrors.h): The full RFC 8446 alert description enumeration is defined in tlstypes.h. Alert records are encoded and dispatched through the record layer. The client and server state machines record the last observed or generated alert in their state structures and propagate error codes through the engine interface.</p>
+<p><b>Signature</b> <b>Binding</b> <b></b>(tlssigalgs.h, tlssignerdefault.h): The TLS layer uses a caller-supplied certificate interface structure (qsc_tls_certificate_interface) to decouple the handshake from the certificate store and signing back-end. The default signer trampolines in tlssignerdefault.h connect this interface to the QSC ECDSA (P-256, P-384), Ed25519, and ML-DSA (44, 65, 87) signing APIs. The verifycertificateverify callback is mandatory; the engine returns an internal_error alert if it is absent.</p>
+<p><b>Certificate</b> <b>Integration</b> <b></b>(tlscert.h, tlscertx509.h): The TLS certificate layer decodes X.509 certificate chains received in Certificate messages and presents them to the caller-supplied chain validation callback. The layer preserves raw DER spans for signature verification without re-serialisation and is integrated with the full QSC X.509 verification infrastructure.</p>
+<p><b>Session</b> <b>Resumption</b> <b></b>(tlssession.h): Session tickets are represented as qsc_tls_session_ticket structures carrying the ticket opaque bytes, nonce, age-add value, lifetime, associated cipher suite, and the per-ticket resumption PSK. The engine provides serialization and deserialization helpers for persistent storage and transport of ticket material.</p>
+<p><b>Engine</b> <b>Interface</b> <b></b>(tlsengine.h): The engine wraps the client and server state machines behind a unified qsc_tls_connection handle. It provides:</p><ul>
+<li>qsc_tls_engine_initialize_client / qsc_tls_engine_initialize_server</li>
+<li>qsc_tls_engine_handshake: drives the handshake state machine from any phase</li>
+<li>qsc_tls_engine_write_application_data: encrypts and frames application records</li>
+<li>qsc_tls_engine_read_application_data: decrypts inbound records</li>
+<li>qsc_tls_engine_read_application_data_ex: decrypts and dispatches post-handshake messages (KeyUpdate, NewSessionTicket)</li>
+<li>qsc_tls_engine_request_key_update: initiates a local KeyUpdate</li>
+<li>qsc_tls_engine_emit_session_ticket: server-side NewSessionTicket emission</li>
+<li>qsc_tls_engine_consume_session_ticket: client-side NewSessionTicket consumption</li>
+<li>qsc_tls_engine_close: emits an encrypted close_notify record</li>
+<li>qsc_tls_engine_dispose: zeroizes all keying material and transient state</li>
+</ul>
+<p><b>I/O</b> <b>Adapter</b> <b></b>(tlsio.h): A thin blocking-socket adapter (qsc_tls_io_connection) binds a qsc_tls_connection to a qsc_socket and marshals bytes between the engine record interface and the QSC socket API. It provides qsc_tls_io_handshake, qsc_tls_io_send, qsc_tls_io_receive, and qsc_tls_io_shutdown. The adapter imposes a maximum handshake round-trip count to prevent unbounded looping on malicious HelloRetryRequest sequences.</p>
+<p><b>Compile-time</b> <b>Safety</b> <b></b>(tlslimits.h): All buffer capacity relationships (key-share sizes, hybrid key-share sizes, extension maximum sizes, private key sizes, signature sizes, and cipher suite sizes) are enforced by negative-size-array typedef assertions. Any change to an algorithm parameter set that violates a capacity invariant produces a compile-time error before any runtime code is produced.</p>
+<p><b>Security</b> <b>Properties:</b> </p><ul>
+<li>Forward secrecy: all session keys are derived from ephemeral key exchange material that is erased after the handshake epoch</li>
+<li>Hybrid post-quantum forward secrecy: the DHE input to HKDF-Extract is the concatenation of the classical ECDH shared secret and the ML-KEM shared secret; an attacker must break both to recover session keys</li>
+<li>Constant-time MAC verification: the Finished MAC is verified using qsc_intutils_verify, which XOR-accumulates all bytes without early exit</li>
+<li>Constant-time inner content-type scanning: the backward byte scan uses mask-select operations with no data-dependent branches</li>
+<li>Secure erasure: all traffic keys, transcript states, shared secrets, and handshake buffers are cleared with qsc_memutils_secure_erase at disposal; key material written during epoch transitions is erased before overwrite</li>
+<li>Version downgrade protection: the client verifies that supported_versions is present in ServerHello and that the selected version is exactly TLS 1.3 (0x0304); absence or a non-TLS-1.3 selection causes immediate rejection with the appropriate alert (missing_extension or illegal_parameter)</li>
+<li>Unknown extension rejection: any extension present in ServerHello that was not offered in ClientHello is rejected with unsupported_extension per RFC 8446 section 4.2</li>
+<li>Sequence exhaustion: the 64-bit record sequence counter is checked for UINT64_MAX before any AEAD operation, terminating the connection before nonce reuse can occur</li>
+</ul>
 <dl class="section user"><dt>X.509 Certificate Infrastructure</dt><dd>QSC provides a complete, dependency-free X.509 PKI layer covering the full certificate lifecycle. The implementation is built on a strict DER/BER-capable ASN.1 engine and enforces the requirements of RFC 5280, X.690, and RFC 6125. Both classical ECDSA and post-quantum ML-DSA certificate profiles are supported natively.</dd></dl>
 <p><b>Parsing</b> <b>and</b> <b>Decoding:</b> </p><ul>
 <li><b>x509cert.h:</b> DER-encoded X.509 certificate decoder. Populates a <code>qsc_x509_certificate</code> structure and preserves the raw TBSCertificate span for signature verification without re-serialisation.</li>
-<li><b>x509name.h:</b> Issuer and subject Name parsing; decodes relative distinguished name sequences into typed attribute lists; supports multi-valued RDNs; RFC 5280 §7.1 canonical comparison with Unicode NFC normalisation.</li>
+<li><b>x509name.h:</b> Issuer and subject Name parsing; decodes relative distinguished name sequences into typed attribute lists; supports multi-valued RDNs; RFC 5280 7.1 canonical comparison with Unicode NFC normalisation.</li>
 <li><b>x509time.h:</b> Decodes ASN.1 UTCTime and GeneralizedTime into normalised <code>qsc_x509_time</code> structures; provides validity interval comparison.</li>
 <li><b>x509spki.h:</b> Decodes SubjectPublicKeyInfo for ECDSA (P-256, P-384, P-521), ML-DSA (44/65/87), and ML-KEM (512/768/1024) key types; validates key sizes against expected parameter set sizes.</li>
 <li><b>x509sig.h:</b> Decodes certificate signature AlgorithmIdentifiers for ECDSA and ML-DSA profiles; unpacks ECDSA DER SEQUENCE(INTEGER, INTEGER) signatures into fixed-width buffers; validates ML-DSA signature length against the active parameter set.</li>
@@ -210,7 +352,7 @@ $(function(){initNavTree('index.html','',''); });
 <li><b>memutils.h:</b> SIMD-optimised memory operations: copy, clear, XOR, compare, and secure erase.</li>
 <li><b>arrayutils.h:</b> Byte array manipulation and conversion utilities.</li>
 <li><b>stringutils.h:</b> Safe string handling and conversion functions.</li>
-<li><b>intutils.h:</b> Integer endian conversion, bit manipulation, and arithmetic helpers.</li>
+<li><b>intutils.h:</b> Integer endian conversion, bit manipulation, arithmetic helpers, and constant-time comparison via qsc_intutils_verify.</li>
 <li><b>donna128.h:</b> Portable 128-bit integer arithmetic.</li>
 <li><b>fileutils.h:</b> File I/O, size, existence, and path operations.</li>
 <li><b>folderutils.h:</b> Directory creation, enumeration, and management.</li>
@@ -252,6 +394,7 @@ $(function(){initNavTree('index.html','',''); });
 </ul>
 </dd></dl>
 <p>The ECDSA P-256, P-384, and P-521 implementations use Jacobian projective coordinates with the a=-3 doubling shortcut, Solinas reduction for field arithmetic, and Barrett reduction for scalar arithmetic mod n. RFC 6979 deterministic nonce generation means no entropy source is required during signing.</p>
+<p>The TLS 1.3 engine is designed for minimal allocation: the record layer heap-allocates only the TLSInnerPlaintext scratch buffer (one allocation per encrypt or decrypt call) and all other working state lives in caller-supplied stack or heap structures. The engine does not retain any persistent state between calls beyond what is stored in the qsc_tls_connection or its embedded client/server state.</p>
 <dl class="section user"><dt>Supported Platforms</dt><dd>QSC has been thoroughly tested on:<ul>
 <li>Windows 10 / 11 / Server (Visual Studio 2022, MSVC v143+)</li>
 <li>Ubuntu Linux (GCC 11+)</li>
@@ -259,6 +402,8 @@ $(function(){initNavTree('index.html','',''); });
 </ul>
 </dd></dl>
 <dl class="section user"><dt>References and Standards</dt><dd><ul>
+<li><b>RFC 8446 (TLS 1.3):</b> <a href="https://www.rfc-editor.org/rfc/rfc8446">https://www.rfc-editor.org/rfc/rfc8446</a></li>
+<li><b>draft-ietf-tls-hybrid-design (Hybrid Key Exchange):</b> <a href="https://datatracker.ietf.org/doc/draft-ietf-tls-hybrid-design/">https://datatracker.ietf.org/doc/draft-ietf-tls-hybrid-design/</a></li>
 <li><b>NIST FIPS-202 (SHA-3/SHAKE):</b> <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf</a></li>
 <li><b>NIST FIPS-203 (ML-KEM / Kyber):</b> <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf">https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf</a></li>
 <li><b>NIST FIPS-204 (ML-DSA / Dilithium):</b> <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf">https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf</a></li>
@@ -269,6 +414,7 @@ $(function(){initNavTree('index.html','',''); });
 <li><b>NIST FIPS-198-1 (HMAC):</b> <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.198-1.pdf">https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.198-1.pdf</a></li>
 <li><b>NIST SP 800-38A/D (AES modes):</b> <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf">https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf</a></li>
 <li><b>RFC 5280 (X.509 Certificates):</b> <a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a></li>
+<li><b>RFC 5869 (HKDF):</b> <a href="https://www.rfc-editor.org/rfc/rfc5869">https://www.rfc-editor.org/rfc/rfc5869</a></li>
 <li><b>RFC 6125 (Hostname Verification):</b> <a href="https://www.rfc-editor.org/rfc/rfc6125">https://www.rfc-editor.org/rfc/rfc6125</a></li>
 <li><b>RFC 6960 (OCSP):</b> <a href="https://www.rfc-editor.org/rfc/rfc6960">https://www.rfc-editor.org/rfc/rfc6960</a></li>
 <li><b>RFC 6979 (Deterministic ECDSA):</b> <a href="https://www.rfc-editor.org/rfc/rfc6979">https://www.rfc-editor.org/rfc/rfc6979</a></li>
@@ -276,8 +422,8 @@ $(function(){initNavTree('index.html','',''); });
 <li><b>RFC 7748 (X25519 / ECDH):</b> <a href="https://www.rfc-editor.org/rfc/rfc7748">https://www.rfc-editor.org/rfc/rfc7748</a></li>
 <li><b>RFC 8032 (EdDSA / Ed25519):</b> <a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a></li>
 <li><b>RFC 8422 (ECDSA in TLS):</b> <a href="https://www.rfc-editor.org/rfc/rfc8422">https://www.rfc-editor.org/rfc/rfc8422</a></li>
-<li><b>ITU-T X.660 (OID arcs):</b> <a href="https://www.itu.int/rec/T-REC-X.660">https://www.itu.int/rec/T-REC-X.660</a></li>
-<li><b>ITU-T X.690 (DER/BER encoding):</b> <a href="https://www.itu.int/rec/T-REC-X.690">https://www.itu.int/rec/T-REC-X.690</a></li>
+<li><b>ITU-T X.660 (OID arcs):</b> <a href="https://www.itu.int32_t/rec/T-REC-X.660">https://www.itu.int32_t/rec/T-REC-X.660</a></li>
+<li><b>ITU-T X.690 (DER/BER encoding):</b> <a href="https://www.itu.int32_t/rec/T-REC-X.690">https://www.itu.int32_t/rec/T-REC-X.690</a></li>
 <li><b>PKCS#10 (CSR format):</b> <a href="https://www.rfc-editor.org/rfc/rfc2986">https://www.rfc-editor.org/rfc/rfc2986</a></li>
 <li><b>PKCS#12 (PFX bundles):</b> <a href="https://www.rfc-editor.org/rfc/rfc7292">https://www.rfc-editor.org/rfc/rfc7292</a></li>
 <li><b>Classic McEliece Specification:</b> <a href="https://www.randombit.net/mceliece/mceliece-spec.pdf">https://www.randombit.net/mceliece/mceliece-spec.pdf</a></li>
@@ -286,13 +432,13 @@ $(function(){initNavTree('index.html','',''); });
 <li><b>Intel Intrinsics Guide:</b> <a href="https://www.intel.com/content/www/us/en/develop/documentation/intrinsics-guide/">https://www.intel.com/content/www/us/en/develop/documentation/intrinsics-guide/</a></li>
 </ul>
 </dd></dl>
-<dl class="section user"><dt>Keywords</dt><dd>Cryptography, Post-Quantum, Asymmetric Cryptography, Symmetric Cryptography, Digital Signature, Key Encapsulation, Key Exchange, Hash Function, MAC, DRBG, Entropy, X.509, PKI, TLS, CRL, OCSP, PKCS10, PKCS12, ASN.1, DER, BER, PEM, OID, ML-KEM, ML-DSA, SLH-DSA, Falcon, McEliece, HQC, ECDSA, ECDH, EdDSA, AES, ChaCha20, SIMD, AVX, AVX2, AVX512, Secure Memory, MISRA, QSC.</dd></dl>
-<dl class="section user"><dt>Example</dt><dd>Refer to the module-specific headers (e.g., aes.h, sha3.h, kyber.h, dilithium.h, falcon.h, ecdsa.h, ecdh.h, x509cert.h, x509verify.h, x509pem.h, etc.) for detailed usage examples and API documentation.</dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>QSC is designed to serve as the foundational cryptographic solution for secure, post-quantum communications and is continuously updated to incorporate emerging cryptographic research and standards. The X.509 layer is intentionally structured so that structural and policy checks remain independent of the cryptographic backend, enabling straightforward extension to new signature algorithm profiles as post-quantum standards evolve.</dd></dl>
+<dl class="section user"><dt>Keywords</dt><dd>Cryptography, Post-Quantum, Asymmetric Cryptography, Symmetric Cryptography, Digital Signature, Key Encapsulation, Key Exchange, Hash Function, MAC, DRBG, Entropy, X.509, PKI, TLS, TLS 1.3, RFC 8446, Hybrid Key Exchange, Post-Quantum TLS, Key Schedule, HKDF, Record Layer, AEAD, KeyUpdate, NewSessionTicket, PSK, 0-RTT, HelloRetryRequest, CRL, OCSP, PKCS10, PKCS12, ASN.1, DER, BER, PEM, OID, ML-KEM, ML-DSA, SLH-DSA, Falcon, McEliece, HQC, ECDSA, ECDH, EdDSA, AES, ChaCha20, SIMD, AVX, AVX2, AVX512, Secure Memory, Constant-Time, Forward Secrecy, MISRA, QSC.</dd></dl>
+<dl class="section user"><dt>Example</dt><dd>Refer to the module-specific headers for detailed usage examples and API documentation. For the TLS 1.3 stack, start with tlsengine.h for the connection lifecycle, tlsclient.h and tlsserver.h for the handshake state machines, tlsio.h for the socket adapter, and tlsgroups.h for the supported named-group and hybrid-group descriptors. For the cryptographic layer, see aes.h, sha3.h, kyber.h, dilithium.h, falcon.h, ecdsa.h, ecdh.h, and the X.509 headers x509cert.h, x509verify.h, x509pem.h.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>QSC is designed to serve as the foundational cryptographic solution for secure, post-quantum communications and is continuously updated to incorporate emerging cryptographic research and standards. The TLS 1.3 stack is structured so that the key schedule, record layer, transcript hash, group descriptors, certificate binding, and I/O adapter are independently testable components; each layer can be driven directly from unit tests without instantiating a full client/server handshake. The X.509 layer is intentionally structured so that structural and policy checks remain independent of the cryptographic backend, enabling straightforward extension to new signature algorithm profiles as post-quantum standards evolve.</dd></dl>
 <p>QRCS-PREL License. See license file for details. All rights reserved by QRCS Corporation, copyrighted and patents pending.</p>
 <dl class="section author"><dt>Author</dt><dd>John G. Underhill </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>2026-03-28 </dd></dl>
-<dl class="section version"><dt>Version</dt><dd>1.1.0.2b </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>2026-05-01 </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.2.0.0 </dd></dl>
 </div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"></a>
 </div><!-- contents -->

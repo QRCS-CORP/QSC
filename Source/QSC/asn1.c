@@ -670,7 +670,18 @@ qsc_asn1_status qsc_asn1_decode_boolean(const qsc_encoding_ber_element* element,
             }
             else
             {
-                *value = (element->value[0U] != 0U);
+                if (element->value[0U] == 0x00U)
+                {
+                    *value = false;
+                }
+                else if (element->value[0U] == 0xFFU)
+                {
+                    *value = true;
+                }
+                else
+                {
+                    status = QSC_ASN1_STATUS_INVALID_ENCODING;
+                }
             }
         }
     }
@@ -699,25 +710,59 @@ qsc_asn1_status qsc_asn1_decode_uint64(const qsc_encoding_ber_element* element, 
             {
                 status = QSC_ASN1_STATUS_INVALID_INPUT;
             }
-            else if (element->length == 0U || element->length > sizeof(uint64_t) || element->value == NULL)
+            else if (element->length == 0U || element->value == NULL)
             {
+                /* zero-length INTEGER is malformed */
                 status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+            }
+            else if (element->length > (sizeof(uint64_t) + 1U))
+            {
+                /* too many bytes to fit in uint64_t even with DER positive-integer padding */
+                status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+            }
+            else if (element->length == (sizeof(uint64_t) + 1U))
+            {
+                if (element->value[0U] != 0x00U)
+                {
+                    /* high bit set without padding byte — negative or out of uint64_t range */
+                    status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+                }
+                else if ((element->value[1U] & 0x80U) == 0U)
+                {
+                    /* leading 0x00 is unnecessary — non-canonical BER encoding */
+                    status = QSC_ASN1_STATUS_INVALID_ENCODING;
+                }
+                else
+                {
+                    /* decode the 8 significant bytes, skipping the leading 0x00 */
+                    val = 0U;
+
+                    for (i = 1U; i <= sizeof(uint64_t); ++i)
+                    {
+                        val = (val << 8) | (uint64_t)element->value[i];
+                    }
+
+                    *value = val;
+                }
             }
             else if ((element->value[0U] & 0x80U) != 0U)
             {
+                /* negative integer — unsupported for uint64_t */
                 status = QSC_ASN1_STATUS_UNSUPPORTED;
             }
-            else if (element->length > 1U && element->value[0U] == 0U && (element->value[1U] & 0x80U) == 0U)
+            else if (element->length > 1U && element->value[0U] == 0x00U && (element->value[1U] & 0x80U) == 0U)
             {
+                /* redundant leading zero — not valid DER */
                 status = QSC_ASN1_STATUS_INVALID_ENCODING;
             }
             else
             {
+                /* normal 1–8 byte positive integer */
                 val = 0U;
 
                 for (i = 0U; i < element->length; ++i)
                 {
-                    val = (val << 8) | element->value[i];
+                    val = (val << 8) | (uint64_t)element->value[i];
                 }
 
                 *value = val;

@@ -32,10 +32,10 @@
       <UniqueIdentifier>{4636937c-18ea-4f6c-82b6-374e87777733}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Tests\TLS">
-      <UniqueIdentifier>{1cb1da15-92cf-425f-ade3-2d8b307763f8}</UniqueIdentifier>
+      <UniqueIdentifier>{9aadea40-a3df-42dc-9984-f2b1f2ebe26d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Tests\TLS">
-      <UniqueIdentifier>{a009dbe9-19af-4efc-af74-dbfb843b28ae}</UniqueIdentifier>
+      <UniqueIdentifier>{1c5ea0cb-897d-46d5-ac9b-9fc0bf7cb4be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -159,26 +159,62 @@
     <ClCompile Include="ecdh_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="tls_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
     <ClCompile Include="TLS\tls_stage1_codec_extension_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
-    <ClCompile Include="TLS\tls_stage2_registry_policy_tests.c">
+    <ClCompile Include="TLS\tls_stage2_certificate_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
-    <ClCompile Include="TLS\tls_stage3_transcript_tests.c">
+    <ClCompile Include="TLS\tls_stage3_keyupdate_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
-    <ClCompile Include="TLS\tls_stage4_schedule_tests.c">
+    <ClCompile Include="TLS\tls_stage4_enum_equivalence_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
-    <ClCompile Include="TLS\tls_stage5_record_tests.c">
+    <ClCompile Include="TLS\tls_stage5_subsystem_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
-    <ClCompile Include="TLS\tls_stage6_certificate_message_tests.c">
+    <ClCompile Include="TLS\tls_stage6_session_resumption_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
-    <ClCompile Include="tls_test.c">
-      <Filter>Source Files\Tests</Filter>
+    <ClCompile Include="TLS\tls_stage7_hrr_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage8_vector_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage9_tlscert_x509_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage10_0rtt_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage11_ecdsa_der_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage12_ecdsa_signer_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage13_secp256r1_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage14_e2e_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage15_truststore_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage16_psk_codec_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage17_multi_suite_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage18_0rtt_resumption_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -302,26 +338,62 @@
     <ClInclude Include="ecdh_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
+    <ClInclude Include="tls_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
     <ClInclude Include="TLS\tls_stage1_codec_extension_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
-    <ClInclude Include="TLS\tls_stage2_registry_policy_tests.h">
+    <ClInclude Include="TLS\tls_stage2_certificate_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
-    <ClInclude Include="TLS\tls_stage3_transcript_tests.h">
+    <ClInclude Include="TLS\tls_stage3_keyupdate_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
-    <ClInclude Include="TLS\tls_stage4_schedule_tests.h">
+    <ClInclude Include="TLS\tls_stage4_enum_equivalence_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
-    <ClInclude Include="TLS\tls_stage5_record_tests.h">
+    <ClInclude Include="TLS\tls_stage5_subsystem_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
-    <ClInclude Include="TLS\tls_stage6_certificate_message_tests.h">
+    <ClInclude Include="TLS\tls_stage6_session_resumption_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
-    <ClInclude Include="tls_test.h">
-      <Filter>Header Files\Tests</Filter>
+    <ClInclude Include="TLS\tls_stage7_hrr_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage9_tlscert_x509_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage8_vector_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage10_0rtt_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage11_ecdsa_der_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage14_e2e_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage13_secp256r1_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage12_ecdsa_signer_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage15_truststore_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage16_psk_codec_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage17_multi_suite_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage18_0rtt_resumption_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

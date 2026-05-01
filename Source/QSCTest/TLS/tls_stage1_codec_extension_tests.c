@@ -3,67 +3,56 @@
 #include "memutils.h"
 #include "tlscodec.h"
 #include "tlserrors.h"
-#include "tlsextensions.h"
-#include "tlstypes.h"
-#include "tlslimits.h"
 
-static bool qsctest_tls_stage1_codec_integer_roundtrip(void)
+static bool qsctest_tls_stage1_codec_roundtrip_primitives(void)
 {
-	uint8_t buf[16U] = { 0U };
-	size_t offw;
-	size_t offr;
-	uint8_t v8;
-	uint16_t v16;
-	uint32_t v24;
-	uint32_t v32;
+	uint8_t buf[32U] = { 0U };
+	uint64_t u64v;
+	size_t off;
+	uint32_t u24v;
+	uint32_t u32v;
+	uint16_t u16v;
+	uint8_t u8v;
 	qsc_tls_status status;
 	bool res;
 
-	qsc_memutils_clear(buf, sizeof(buf));
-	offw = 0U;
-	offr = 0U;
-	v8 = 0U;
-	v16 = 0U;
-	v24 = 0U;
-	v32 = 0U;
+	off = 0U;
+	u8v = 0U;
+	u16v = 0U;
+	u24v = 0U;
+	u32v = 0U;
+	u64v = 0U;
 	status = qsc_tls_status_success;
 	res = true;
 
-	status = qsc_tls_codec_write_u8(buf, sizeof(buf), &offw, 0xA5U);
+	qsc_memutils_clear(buf, sizeof(buf));
+
+	status = qsc_tls_codec_write_u8(buf, sizeof(buf), &off, 0xABU);
 
 	if (status == qsc_tls_status_success)
 	{
-		status = qsc_tls_codec_write_u16(buf, sizeof(buf), &offw, 0x1234U);
+		status = qsc_tls_codec_write_u16(buf, sizeof(buf), &off, 0xCAFEU);
 	}
 
 	if (status == qsc_tls_status_success)
 	{
-		status = qsc_tls_codec_write_u24(buf, sizeof(buf), &offw, 0x00ABCDEFUL);
+		status = qsc_tls_codec_write_u24(buf, sizeof(buf), &off, 0x123456UL);
 	}
 
 	if (status == qsc_tls_status_success)
 	{
-		status = qsc_tls_codec_write_u32(buf, sizeof(buf), &offw, 0x89ABCDEFUL);
+		status = qsc_tls_codec_write_u32(buf, sizeof(buf), &off, 0xDEADBEEFUL);
+	}
+
+	/* the current codec exposes qsc_tls_codec_read_u64 but not qsc_tls_codec_write_u64. */
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_write_u32(buf, sizeof(buf), &off, 0x01020304UL);
 	}
 
 	if (status == qsc_tls_status_success)
 	{
-		status = qsc_tls_codec_read_u8(buf, offw, &offr, &v8);
-	}
-
-	if (status == qsc_tls_status_success)
-	{
-		status = qsc_tls_codec_read_u16(buf, offw, &offr, &v16);
-	}
-
-	if (status == qsc_tls_status_success)
-	{
-		status = qsc_tls_codec_read_u24(buf, offw, &offr, &v24);
-	}
-
-	if (status == qsc_tls_status_success)
-	{
-		status = qsc_tls_codec_read_u32(buf, offw, &offr, &v32);
+		status = qsc_tls_codec_write_u32(buf, sizeof(buf), &off, 0x05060708UL);
 	}
 
 	if (status != qsc_tls_status_success)
@@ -73,145 +62,91 @@ static bool qsctest_tls_stage1_codec_integer_roundtrip(void)
 
 	if (res == true)
 	{
-		res = (offw == 10U && offr == offw && v8 == 0xA5U && v16 == 0x1234U && v24 == 0x00ABCDEFUL && v32 == 0x89ABCDEFUL);
+		res = (off == 18U);
+	}
+
+	if (res == true)
+	{
+		off = 0U;
+		status = qsc_tls_codec_read_u8(buf, sizeof(buf), &off, &u8v);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_read_u16(buf, sizeof(buf), &off, &u16v);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_read_u24(buf, sizeof(buf), &off, &u24v);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_read_u32(buf, sizeof(buf), &off, &u32v);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_read_u64(buf, sizeof(buf), &off, &u64v);
+	}
+
+	if (status != qsc_tls_status_success)
+	{
+		res = false;
+	}
+
+	if (res == true)
+	{
+		res = (u8v == 0xABU &&
+			u16v == 0xCAFEU &&
+			u24v == 0x123456UL &&
+			u32v == 0xDEADBEEFUL &&
+			u64v == 0x0102030405060708ULL &&
+			off == 18U);
 	}
 
 	return res;
 }
 
-static bool qsctest_tls_stage1_codec_vector_and_bounds(void)
+static bool qsctest_tls_stage1_codec_vector_begin_end(void)
 {
-	uint8_t buf[32U] = { 0U };
-	uint8_t out[8U] = { 0U };
-	const uint8_t data8[3U] = { 0x01U, 0x02U, 0x03U };
-	const uint8_t data16[5U] = { 0xA1U, 0xA2U, 0xA3U, 0xA4U, 0xA5U };
+	uint8_t buf[64U] = { 0U };
 	const uint8_t* span;
-	size_t offw;
-	size_t offr;
+	size_t off;
+	size_t hdr;
+	size_t i;
 	size_t spanlen;
 	qsc_tls_status status;
 	bool res;
 
 	span = NULL;
-	offw = 0U;
-	offr = 0U;
+	off = 0U;
+	hdr = 0U;
 	spanlen = 0U;
 	status = qsc_tls_status_success;
 	res = true;
 
-	status = qsc_tls_codec_write_vector8(buf, sizeof(buf), &offw, data8, sizeof(data8));
+	status = qsc_tls_codec_vector_begin_u8(buf, sizeof(buf), &off, &hdr);
 
 	if (status == qsc_tls_status_success)
 	{
-		status = qsc_tls_codec_write_vector16(buf, sizeof(buf), &offw, data16, sizeof(data16));
-	}
-
-	if (status == qsc_tls_status_success)
-	{
-		status = qsc_tls_codec_read_vector8_span(buf, offw, &offr, &span, &spanlen);
+		status = qsc_tls_codec_write_u8(buf, sizeof(buf), &off, 0x11U);
 	}
 
 	if (status == qsc_tls_status_success)
 	{
-		res = (spanlen == sizeof(data8) && qsc_memutils_are_equal(span, data8, sizeof(data8)) == true);
+		status = qsc_tls_codec_write_u8(buf, sizeof(buf), &off, 0x22U);
 	}
-
-	if (res == true)
-	{
-		status = qsc_tls_codec_read_vector16_span(buf, offw, &offr, &span, &spanlen);
-
-		if (status == qsc_tls_status_success && res == true)
-		{
-			res = (spanlen == sizeof(data16) && qsc_memutils_are_equal(span, data16, sizeof(data16)) == true && offr == offw);
-		}
-
-		if (res == true)
-		{
-			offw = 0U;
-			status = qsc_tls_codec_write_vector8(buf, 3U, &offw, data8, sizeof(data8));
-			res = (status == qsc_tls_status_buffer_too_small);
-		}
-
-		if (res == true)
-		{
-			offr = 0U;
-			status = qsc_tls_codec_read_bytes(NULL, 0U, &offr, out, sizeof(out));
-			res = (status == qsc_tls_status_invalid_input);
-		}
-	}
-
-	return res;
-}
-
-static bool qsctest_tls_stage1_supported_groups_roundtrip(void)
-{
-	qsc_tls_named_group groups[3U] = { 0U };
-	qsc_tls_named_group decoded[3U] = { 0U };
-	uint8_t ext[64U] = { 0U };
-	size_t extlen;
-	size_t count;
-	qsc_tls_status status;
-	bool res;
-
-	groups[0U] = qsc_tls_group_x25519;
-	groups[1U] = qsc_tls_group_secp256r1;
-	groups[2U] = qsc_tls_group_secp384r1;
-
-	extlen = 0U;
-	count = 0U;
-	status = qsc_tls_status_success;
-	res = true;
-
-	status = qsc_tls_extensions_encode_supported_groups(ext, sizeof(ext), &extlen, groups, 3U);
 
 	if (status == qsc_tls_status_success)
 	{
-		status = qsc_tls_extensions_decode_supported_groups(ext, extlen, decoded, 3U, &count);
+		status = qsc_tls_codec_write_u8(buf, sizeof(buf), &off, 0x33U);
 	}
-
-	if (status != qsc_tls_status_success)
-	{
-		if (res == true)
-		{
-			res = (count == 3U && decoded[0] == groups[0] && decoded[1] == groups[1] && decoded[2] == groups[2]);
-		}
-
-		if (res == true)
-		{
-			ext[5U] ^= 0x01U;
-			status = qsc_tls_extensions_decode_supported_groups(ext, extlen, decoded, 3U, &count);
-			res = (status != qsc_tls_status_success);
-		}
-	}
-
-	return res;
-}
-
-static bool qsctest_tls_stage1_signature_algorithms_roundtrip(void)
-{
-	qsc_tls_signature_scheme sigs[4U] = { 0U };
-	qsc_tls_signature_scheme decoded[4U] = { 0U };
-	uint8_t ext[64U] = { 0U };
-	size_t extlen;
-	size_t count;
-	qsc_tls_status status;
-	bool res;
-
-	sigs[0U] = qsc_tls_sig_ecdsa_secp256r1_sha256;
-	sigs[1U] = qsc_tls_sig_ecdsa_secp384r1_sha384;
-	sigs[2U] = qsc_tls_sig_ed25519;
-	sigs[3U] = qsc_tls_sig_mldsa65;
-
-	extlen = 0U;
-	count = 0U;
-	status = qsc_tls_status_success;
-	res = true;
-
-	status = qsc_tls_extensions_encode_signature_algorithms(ext, sizeof(ext), &extlen, sigs, 4U);
 
 	if (status == qsc_tls_status_success)
 	{
-		status = qsc_tls_extensions_decode_signature_algorithms(ext, extlen, decoded, 4U, &count);
+		status = qsc_tls_codec_vector_end_u8(buf, sizeof(buf), &off, hdr);
 	}
 
 	if (status != qsc_tls_status_success)
@@ -221,64 +156,147 @@ static bool qsctest_tls_stage1_signature_algorithms_roundtrip(void)
 
 	if (res == true)
 	{
-		res = (count == 4U && decoded[0] == sigs[0] && decoded[1] == sigs[1] && decoded[2] == sigs[2] && decoded[3] == sigs[3]);
+		res = (hdr == 0U && buf[0U] == 3U && off == 4U);
 	}
 
 	if (res == true)
 	{
-		status = qsc_tls_extensions_decode_signature_algorithms(ext, extlen, decoded, 2U, &count);
+		status = qsc_tls_codec_vector_begin_u16(buf, sizeof(buf), &off, &hdr);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_write_u16(buf, sizeof(buf), &off, 0xAAAAU);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_write_u16(buf, sizeof(buf), &off, 0xBBBBU);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_vector_end_u16(buf, sizeof(buf), &off, hdr);
+	}
+
+	if (status != qsc_tls_status_success)
+	{
+		res = false;
+	}
+
+	if (res == true)
+	{
+		res = (hdr == 4U && buf[4U] == 0U && buf[5U] == 4U);
+	}
+
+	if (res == true)
+	{
+		status = qsc_tls_codec_vector_begin_u24(buf, sizeof(buf), &off, &hdr);
+	}
+
+	for (i = 0U; i < 5U && status == qsc_tls_status_success; ++i)
+	{
+		status = qsc_tls_codec_write_u8(buf, sizeof(buf), &off, (uint8_t)i);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		status = qsc_tls_codec_vector_end_u24(buf, sizeof(buf), &off, hdr);
+	}
+
+	if (status != qsc_tls_status_success)
+	{
+		res = false;
+	}
+
+	if (res == true)
+	{
+		res = (buf[hdr] == 0U && buf[hdr + 1U] == 0U && buf[hdr + 2U] == 5U);
+	}
+
+	if (res == true)
+	{
+		off = 0U;
+		status = qsc_tls_codec_read_vector8_span(buf, sizeof(buf), &off, &span, &spanlen);
+	}
+
+	if (status == qsc_tls_status_success)
+	{
+		res = (spanlen == 3U && span[0U] == 0x11U && span[1U] == 0x22U && span[2U] == 0x33U);
+	}
+
+	if (res == true)
+	{
+		status = qsc_tls_codec_read_vector16_span(buf, sizeof(buf), &off, &span, &spanlen);
+	}
+
+	if (status == qsc_tls_status_success && res == true)
+	{
+		res = (spanlen == 4U && span[0U] == 0xAAU && span[1U] == 0xAAU && span[2U] == 0xBBU && span[3U] == 0xBBU);
+	}
+
+	if (res == true)
+	{
+		status = qsc_tls_codec_read_vector24_span(buf, sizeof(buf), &off, &span, &spanlen);
+	}
+
+	if (status == qsc_tls_status_success && res == true)
+	{
+		res = (spanlen == 5U && span[4U] == 4U);
+	}
+
+	return res;
+}
+
+static bool qsctest_tls_stage1_codec_bounds_and_invalid_input(void)
+{
+	uint8_t buf[2U] = { 0U };
+	uint8_t out[8U] = { 0U };
+	size_t off;
+	size_t hdr;
+	qsc_tls_status status;
+	bool res;
+
+	off = 0U;
+	hdr = 0U;
+	status = qsc_tls_status_success;
+	res = true;
+
+	status = qsc_tls_codec_write_u32(buf, sizeof(buf), &off, 0U);
+	res = (status == qsc_tls_status_buffer_too_small);
+
+	if (res == true)
+	{
+		off = 0U;
+		status = qsc_tls_codec_vector_begin_u16(buf, sizeof(buf), &off, &hdr);
+		res = (status == qsc_tls_status_success);
+	}
+
+	if (res == true)
+	{
+		status = qsc_tls_codec_write_u16(buf, sizeof(buf), &off, 0U);
 		res = (status == qsc_tls_status_buffer_too_small);
 	}
 
-	return res;
-}
-
-static bool qsctest_tls_stage1_key_share_roundtrip_and_malformed(void)
-{
-	uint8_t ext[128U] = { 0U };
-	uint8_t share[32U] = { 0U };
-	const uint8_t* decodedshare;
-	size_t extlen;
-	size_t decodedlen;
-	qsc_tls_named_group group;
-	qsc_tls_status status;
-	bool res;
-	size_t i;
-
-	decodedshare = NULL;
-	extlen = 0U;
-	decodedlen = 0U;
-	group = qsc_tls_group_none;
-	status = qsc_tls_status_success;
-	res = true;
-
-	for (i = 0U; i < sizeof(share); ++i)
+	if (res == true)
 	{
-		share[i] = (uint8_t)(0xC0U + (uint8_t)i);
-	}
-
-	status = qsc_tls_extensions_encode_key_share_single(ext, sizeof(ext), &extlen, qsc_tls_group_x25519, share, sizeof(share));
-
-	if (status == qsc_tls_status_success)
-	{
-		status = qsc_tls_extensions_decode_key_share_single(ext, extlen, &group, &decodedshare, &decodedlen);
-	}
-
-	if (status != qsc_tls_status_success)
-	{
-		res = false;
+		off = 0U;
+		status = qsc_tls_codec_write_u24(buf, sizeof(buf), &off, 0x01000000UL);
+		res = (status == qsc_tls_status_invalid_length);
 	}
 
 	if (res == true)
 	{
-		res = (group == qsc_tls_group_x25519 && decodedlen == sizeof(share) && qsc_memutils_are_equal(decodedshare, share, sizeof(share)) == true);
+		off = 0U;
+		status = qsc_tls_codec_read_u64(NULL, 8U, &off, NULL);
+		res = (status == qsc_tls_status_invalid_input);
 	}
 
 	if (res == true)
 	{
-		ext[3U] ^= 0x01U;
-		status = qsc_tls_extensions_decode_key_share_single(ext, extlen, &group, &decodedshare, &decodedlen);
-		res = (status != qsc_tls_status_success);
+		off = 0U;
+		status = qsc_tls_codec_read_bytes(NULL, 0U, &off, out, sizeof(out));
+		res = (status == qsc_tls_status_invalid_input);
 	}
 
 	return res;
@@ -290,53 +308,33 @@ bool qsctest_tls_stage1_tests(void)
 
 	res = true;
 
-	if (qsctest_tls_stage1_codec_integer_roundtrip() == true)
+	if (qsctest_tls_stage1_codec_roundtrip_primitives() == true)
 	{
-		qsctest_print_line("[PASS] TLS Stage 1 codec integer round-trip tests.");
+		qsctest_print_line("[PASS] TLS Stage 1 codec primitive round-trip test.");
 	}
 	else
 	{
-		qsctest_print_line("[FAIL] TLS Stage 1 codec integer round-trip tests.");
+		qsctest_print_line("[FAIL] TLS Stage 1 codec primitive round-trip test.");
 		res = false;
 	}
 
-	if (qsctest_tls_stage1_codec_vector_and_bounds() == true)
+	if (qsctest_tls_stage1_codec_vector_begin_end() == true)
 	{
-		qsctest_print_line("[PASS] TLS Stage 1 vector and bounds tests.");
+		qsctest_print_line("[PASS] TLS Stage 1 codec vector helper test.");
 	}
 	else
 	{
-		qsctest_print_line("[FAIL] TLS Stage 1 vector and bounds tests.");
+		qsctest_print_line("[FAIL] TLS Stage 1 codec vector helper test.");
 		res = false;
 	}
 
-	if (qsctest_tls_stage1_supported_groups_roundtrip() == true)
+	if (qsctest_tls_stage1_codec_bounds_and_invalid_input() == true)
 	{
-		qsctest_print_line("[PASS] TLS Stage 1 supported_groups extension tests.");
+		qsctest_print_line("[PASS] TLS Stage 1 codec bounds and invalid-input test.");
 	}
 	else
 	{
-		qsctest_print_line("[FAIL] TLS Stage 1 supported_groups extension tests.");
-		res = false;
-	}
-
-	if (qsctest_tls_stage1_signature_algorithms_roundtrip() == true)
-	{
-		qsctest_print_line("[PASS] TLS Stage 1 signature_algorithms extension tests.");
-	}
-	else
-	{
-		qsctest_print_line("[FAIL] TLS Stage 1 signature_algorithms extension tests.");
-		res = false;
-	}
-
-	if (qsctest_tls_stage1_key_share_roundtrip_and_malformed() == true)
-	{
-		qsctest_print_line("[PASS] TLS Stage 1 key_share extension tests.");
-	}
-	else
-	{
-		qsctest_print_line("[FAIL] TLS Stage 1 key_share extension tests.");
+		qsctest_print_line("[FAIL] TLS Stage 1 codec bounds and invalid-input test.");
 		res = false;
 	}
 

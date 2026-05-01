@@ -309,7 +309,7 @@ typedef struct qsc_x509w_tls_bridge_t
  * for CertificateVerify generation.
  *
  * C6 fix: the previous version stored a pre-computed signature buffer, which is
- * cryptographically invalid (RFC 8446 §4.4.3 — the signature must cover the live
+ * cryptographically invalid (RFC 8446 4.4.3, the signature must cover the live
  * transcript hash).  This struct now stores the private key instead; the signature
  * is produced at CertificateVerify build time by the internal trampoline installed
  * by qsc_tls_handshake_set_local_certificate().

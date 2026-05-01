@@ -25,7 +25,7 @@
 var NAVTREE =
 [
   [ "QSC Post Quantum Cryptographic Library", "index.html", [
-    [ "QSC: Quantum Secure Cryptographic Solutions Library Version 1.1", "index.html", null ],
+    [ "QSC: Quantum Secure Cryptographic Solutions Library Version 1.2", "index.html", null ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],
       [ "Data Structure Index", "classes.html", null ],
@@ -52,15 +52,19 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "acp_8h.html",
-"csx_8h.html#aaad87d0d2b87a9c27c9a6de576636de7",
-"functions_vars_j.html",
-"memutils_8h.html#a897c1ba64fdbceff12c1eb8fa75c0784",
-"secrand_8h.html#a4da9eecc3a7de9d93cac390afe809d22",
-"socketbase_8h.html#ad5d9fcd136ce55488ff70871f276216b",
-"structqsc__collection__state.html",
-"structqsc__x509__certificate__t.html#a83a2aefe08172c3b54ae8c12a63c8ccc",
-"transpose_8h.html#a414c7d6d973f0ab34d705a8e095f3f3b",
-"x509pem_8h.html#a5f6802f0885a2ff82060722db102d5c2"
+"csx_8h.html#a422344e80cc04e590c8a278a5a6263e5",
+"folderutils_8h.html#a76afdb00def33fc883c3dafa7c32b9ba",
+"list_8h.html",
+"queue_8h.html#a1fee554b7fa9d60b921d607254eb68a2",
+"socketbase_8h.html#a31eef834848a4f642a5037b5a16055b4a2ba63914e9b52fffc8f524053e4003f7",
+"structp256__jac__t.html",
+"structqsc__socket__receive__poll__state.html",
+"structqsc__x509__basic__constraints__t.html#adbda5e31e53cf1f3f8e641bde255aea4",
+"structqsc__x509w__result__t.html#aa46f2d8ab82480a359f975423b5940d9",
+"tlsgroups_8h.html#a356c235a6eefcf34dc34e0b133330569",
+"tlstypes_8h.html#ab66a099c720125e3f4e65d2df0d93b43af3a9fd834294df84843e99fcb229311d",
+"x509ocsp_8h.html#a2ab0990c03d45b09405752b8f26b9bd9",
+"x509wrap_8h.html#a5874dba4bba1fb7cde18f704cca6e0d3"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

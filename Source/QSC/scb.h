@@ -177,8 +177,10 @@ QSC_EXPORT_API void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, 
  * \param ctx: [qsc_scb_state*] A pointer to the function state.
  * \param output: [uint8_t*] A pointer to the pseudo-random output array.
  * \param otplen: [size_t] The number of bytes to generate.
+ * 
+ * \return [bool] Returns true on success.
  */
-QSC_EXPORT_API void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen);
+QSC_EXPORT_API bool qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen);
 
 /**
  * \brief [void] Update the random provider with new keying material.

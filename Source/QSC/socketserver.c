@@ -3,9 +3,6 @@
 #include "ipinfo.h"
 #include "memutils.h"
 
-static volatile int32_t qsc_server_thread_count = 0;
-static qsc_mutex qsc_server_thread_mutex = NULL;
-
 qsc_socket_address_families qsc_socket_server_address_family(const qsc_socket* sock)
 {
 	QSC_ASSERT(sock != NULL);
@@ -79,7 +76,6 @@ void qsc_socket_server_initialize(qsc_socket* sock)
 	sock->connection_status = qsc_socket_state_none;
 	sock->socket_protocol = qsc_socket_protocol_none;
 	sock->socket_transport = qsc_socket_transport_none;
-	qsc_server_thread_mutex = qsc_async_mutex_create();
 }
 
 qsc_socket_exceptions qsc_socket_server_listen(qsc_socket* source, qsc_socket* target, const char* address, uint16_t port, qsc_socket_address_families family)
@@ -213,34 +209,34 @@ static void qsc_socket_server_accept_invoke(qsc_socket_server_async_accept_state
 
 		if (res == qsc_socket_exception_success)
 		{
-			qsc_async_mutex_lock(qsc_server_thread_mutex);
+			qsc_async_mutex_lock(state->smutex);
 
 			if (state->callback != NULL)
 			{
 				state->callback(&ar);
 			}
 
-			if (qsc_server_thread_count < QSC_SOCKET_SERVER_MAX_THREADS)
+			if (state->tcount < QSC_SOCKET_SERVER_MAX_THREADS)
 			{
-				(void)qsc_async_atomic_int32_increment(&qsc_server_thread_count);
+				(void)qsc_async_atomic_int32_increment(&state->tcount);
 
 				qsc_async_thread_create(&qsc_socket_server_accept_invoke_vp, state);
 			}
 
-			qsc_async_mutex_unlock(qsc_server_thread_mutex);
+			qsc_async_mutex_unlock(state->smutex);
 		}
 		else
 		{
-			qsc_async_mutex_lock(qsc_server_thread_mutex);
+			qsc_async_mutex_lock(state->smutex);
 
-			(void)qsc_async_atomic_int32_decrement(&qsc_server_thread_count);
+			(void)qsc_async_atomic_int32_decrement(&state->tcount);
 
 			if (state->error != NULL)
 			{
 				state->error(state->source, qsc_socket_get_last_error());
 			}
 
-			qsc_async_mutex_unlock(qsc_server_thread_mutex);
+			qsc_async_mutex_unlock(state->smutex);
 		}
 	}
 }
@@ -249,6 +245,28 @@ static void qsc_socket_server_accept_invoke_vp(void* vstate)
 {
 	qsc_socket_server_async_accept_state* state = (qsc_socket_server_async_accept_state*)vstate;
 	qsc_socket_server_accept_invoke(state);
+}
+
+void qsc_socket_server_async_dispose(qsc_socket_server_async_accept_state* state)
+{
+	QSC_ASSERT(state != NULL);
+
+	if (state != NULL)
+	{
+		if (state->smutex != NULL)
+		{
+			qsc_async_mutex_destroy(state->smutex);
+		}
+
+		if (state->source != NULL)
+		{
+			qsc_socket_server_shut_down(state->source);
+		}
+
+		state->callback = NULL;
+		state->error = NULL;
+		state->tcount = 0U;
+	}
 }
 
 qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_server_async_accept_state* state, const char* address, uint16_t port, qsc_socket_address_families family)
@@ -262,6 +280,8 @@ qsc_socket_exceptions qsc_socket_server_listen_async(qsc_socket_server_async_acc
 
 	if (state != NULL && address != NULL)
 	{
+		state->smutex = qsc_async_mutex_create();
+
 		if (family == qsc_socket_address_family_ipv4)
 		{
 			qsc_ipinfo_ipv4_address addt;
@@ -375,11 +395,6 @@ void qsc_socket_server_set_options(const qsc_socket* sock, qsc_socket_protocols 
 void qsc_socket_server_shut_down(qsc_socket* sock)
 {
 	QSC_ASSERT(sock != NULL);
-
-	if (qsc_server_thread_mutex != NULL)
-	{
-		qsc_async_mutex_destroy(qsc_server_thread_mutex);
-	}
 
 	if (sock != NULL)
 	{

@@ -241,8 +241,8 @@ static void fe_add(fe256 r, const fe256 a, const fe256 b)
     fe256_copy(r, u);
     fe256_cond_sub(r, P256_P);
 
-    qsc_memutils_clear(t, sizeof(t));
-    qsc_memutils_clear(u, sizeof(u));
+    qsc_memutils_secure_erase(t, sizeof(t));
+    qsc_memutils_secure_erase(u, sizeof(u));
 }
 
 static void fe_sub(uint32_t* r, const uint32_t* a, const uint32_t* b)
@@ -751,8 +751,8 @@ static void sc_add(uint32_t* r, const uint32_t* a, const uint32_t* b)
         r[i] = (u[i] & mask) | (t[i] & ~mask);
     }
 
-    qsc_memutils_clear(t, sizeof(t));
-    qsc_memutils_clear(u, sizeof(u));
+    qsc_memutils_secure_erase(t, sizeof(t));
+    qsc_memutils_secure_erase(u, sizeof(u));
 }
 
 static void sc_mul(uint32_t r[8U], const uint32_t a[8U], const uint32_t b[8U])
@@ -1015,10 +1015,10 @@ static void p256_add(p256_jac_t* R, const p256_jac_t* P, const p256_jac_t* Q)
 
     *R = T;
 
-    qsc_memutils_clear(&Radd, sizeof(Radd));
-    qsc_memutils_clear(&Rdbl, sizeof(Rdbl));
-    qsc_memutils_clear(&Rinf, sizeof(Rinf));
-    qsc_memutils_clear(&T, sizeof(T));
+    qsc_memutils_secure_erase(&Radd, sizeof(Radd));
+    qsc_memutils_secure_erase(&Rdbl, sizeof(Rdbl));
+    qsc_memutils_secure_erase(&Rinf, sizeof(Rinf));
+    qsc_memutils_secure_erase(&T, sizeof(T));
 }
 
 static void p256_scalar_mult(p256_jac_t* R, const p256_aff_t* P, const uint32_t k[8U])
@@ -1071,11 +1071,11 @@ static void p256_scalar_mult(p256_jac_t* R, const p256_aff_t* P, const uint32_t 
 
     *R = R0;
 
-    qsc_memutils_clear(&R0, sizeof(R0));
-    qsc_memutils_clear(&R1, sizeof(R1));
-    qsc_memutils_clear(&A, sizeof(A));
-    qsc_memutils_clear(&D0, sizeof(D0));
-    qsc_memutils_clear(&D1, sizeof(D1));
+    qsc_memutils_secure_erase(&R0, sizeof(R0));
+    qsc_memutils_secure_erase(&R1, sizeof(R1));
+    qsc_memutils_secure_erase(&A, sizeof(A));
+    qsc_memutils_secure_erase(&D0, sizeof(D0));
+    qsc_memutils_secure_erase(&D1, sizeof(D1));
 }
 
 static bool p256_jac_to_aff(p256_aff_t* R, const p256_jac_t* P)

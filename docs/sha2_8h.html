@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -126,24 +126,36 @@ Macros</h2></td></tr>
 <tr class="memitem:a6461b629b7cfb1ad6f070ef522c1eb43" id="r_a6461b629b7cfb1ad6f070ef522c1eb43"><td class="memItemLeft" align="right" valign="top"><a id="a6461b629b7cfb1ad6f070ef522c1eb43" name="a6461b629b7cfb1ad6f070ef522c1eb43"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HKDF_256_KEY_SIZE</b>&#160;&#160;&#160;32U</td></tr>
 <tr class="memdesc:a6461b629b7cfb1ad6f070ef522c1eb43"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HKDF-256 key size in bytes. <br /></td></tr>
+<tr class="memitem:a811cb5d992ca1ec5b37723e8008c8ce0" id="r_a811cb5d992ca1ec5b37723e8008c8ce0"><td class="memItemLeft" align="right" valign="top"><a id="a811cb5d992ca1ec5b37723e8008c8ce0" name="a811cb5d992ca1ec5b37723e8008c8ce0"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HKDF_384_KEY_SIZE</b>&#160;&#160;&#160;48U</td></tr>
+<tr class="memdesc:a811cb5d992ca1ec5b37723e8008c8ce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HKDF-384 key size in bytes. <br /></td></tr>
 <tr class="memitem:ac255b4d4a0f58638f817b75514c1ed04" id="r_ac255b4d4a0f58638f817b75514c1ed04"><td class="memItemLeft" align="right" valign="top"><a id="ac255b4d4a0f58638f817b75514c1ed04" name="ac255b4d4a0f58638f817b75514c1ed04"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HKDF_512_KEY_SIZE</b>&#160;&#160;&#160;64U</td></tr>
 <tr class="memdesc:ac255b4d4a0f58638f817b75514c1ed04"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HKDF-512 key size in bytes. <br /></td></tr>
 <tr class="memitem:a2ebdd4cd8b5a6a4131a772ff9dc8ba43" id="r_a2ebdd4cd8b5a6a4131a772ff9dc8ba43"><td class="memItemLeft" align="right" valign="top"><a id="a2ebdd4cd8b5a6a4131a772ff9dc8ba43" name="a2ebdd4cd8b5a6a4131a772ff9dc8ba43"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_256_KEY_SIZE</b>&#160;&#160;&#160;32U</td></tr>
 <tr class="memdesc:a2ebdd4cd8b5a6a4131a772ff9dc8ba43"><td class="mdescLeft">&#160;</td><td class="mdescRight">The recommended HMAC(SHA2-256) key size, minimum is 32 bytes. <br /></td></tr>
+<tr class="memitem:a4f50604c29430917101a2b801f2188fa" id="r_a4f50604c29430917101a2b801f2188fa"><td class="memItemLeft" align="right" valign="top"><a id="a4f50604c29430917101a2b801f2188fa" name="a4f50604c29430917101a2b801f2188fa"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_384_KEY_SIZE</b>&#160;&#160;&#160;48U</td></tr>
+<tr class="memdesc:a4f50604c29430917101a2b801f2188fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">The recommended HMAC(SHA2-384) key size, minimum is 48 bytes. <br /></td></tr>
 <tr class="memitem:a57d19828a4bf5be5da4f410320599540" id="r_a57d19828a4bf5be5da4f410320599540"><td class="memItemLeft" align="right" valign="top"><a id="a57d19828a4bf5be5da4f410320599540" name="a57d19828a4bf5be5da4f410320599540"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_512_KEY_SIZE</b>&#160;&#160;&#160;64U</td></tr>
 <tr class="memdesc:a57d19828a4bf5be5da4f410320599540"><td class="mdescLeft">&#160;</td><td class="mdescRight">The recommended HMAC(SHA2-512) key size, minimum is 64 bytes. <br /></td></tr>
 <tr class="memitem:aff64f79a8925231ca3ffad45f8974f4f" id="r_aff64f79a8925231ca3ffad45f8974f4f"><td class="memItemLeft" align="right" valign="top"><a id="aff64f79a8925231ca3ffad45f8974f4f" name="aff64f79a8925231ca3ffad45f8974f4f"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_256_MAC_SIZE</b>&#160;&#160;&#160;32U</td></tr>
 <tr class="memdesc:aff64f79a8925231ca3ffad45f8974f4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HMAC-256 mac-code size in bytes. <br /></td></tr>
+<tr class="memitem:a7af3cbef91624670e714c83d26ddffea" id="r_a7af3cbef91624670e714c83d26ddffea"><td class="memItemLeft" align="right" valign="top"><a id="a7af3cbef91624670e714c83d26ddffea" name="a7af3cbef91624670e714c83d26ddffea"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_384_MAC_SIZE</b>&#160;&#160;&#160;48U</td></tr>
+<tr class="memdesc:a7af3cbef91624670e714c83d26ddffea"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HMAC-256 mac-code size in bytes. <br /></td></tr>
 <tr class="memitem:a11d8ada4a34ca95b073395598de77496" id="r_a11d8ada4a34ca95b073395598de77496"><td class="memItemLeft" align="right" valign="top"><a id="a11d8ada4a34ca95b073395598de77496" name="a11d8ada4a34ca95b073395598de77496"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_512_MAC_SIZE</b>&#160;&#160;&#160;64U</td></tr>
 <tr class="memdesc:a11d8ada4a34ca95b073395598de77496"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HMAC-512 mac-code size in bytes. <br /></td></tr>
 <tr class="memitem:acc9bc7cab05c51e07a961f781e19d48b" id="r_acc9bc7cab05c51e07a961f781e19d48b"><td class="memItemLeft" align="right" valign="top"><a id="acc9bc7cab05c51e07a961f781e19d48b" name="acc9bc7cab05c51e07a961f781e19d48b"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_256_RATE</b>&#160;&#160;&#160;64U</td></tr>
 <tr class="memdesc:acc9bc7cab05c51e07a961f781e19d48b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HMAC-256 input rate size in bytes. <br /></td></tr>
+<tr class="memitem:a6dea02e70f87b550ca645264dd8a9724" id="r_a6dea02e70f87b550ca645264dd8a9724"><td class="memItemLeft" align="right" valign="top"><a id="a6dea02e70f87b550ca645264dd8a9724" name="a6dea02e70f87b550ca645264dd8a9724"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_384_RATE</b>&#160;&#160;&#160;96U</td></tr>
+<tr class="memdesc:a6dea02e70f87b550ca645264dd8a9724"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HMAC-384 input rate size in bytes. <br /></td></tr>
 <tr class="memitem:ab8f65e5b375efc058079f6eae2591d3d" id="r_ab8f65e5b375efc058079f6eae2591d3d"><td class="memItemLeft" align="right" valign="top"><a id="ab8f65e5b375efc058079f6eae2591d3d" name="ab8f65e5b375efc058079f6eae2591d3d"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_HMAC_512_RATE</b>&#160;&#160;&#160;128U</td></tr>
 <tr class="memdesc:ab8f65e5b375efc058079f6eae2591d3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HMAC-512 input rate size in bytes. <br /></td></tr>
@@ -239,6 +251,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:a92dda9601e71e335d76f9e63e9709717"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize an instance of HKDF(HMAC(SHA2-256)) and generate pseudo-random output.  <br /></td></tr>
 <tr class="memitem:a1af5af2b784ff891f154b9d78d743021" id="r_a1af5af2b784ff891f154b9d78d743021"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1af5af2b784ff891f154b9d78d743021">qsc_hkdf256_extract</a> (uint8_t *output, size_t otplen, const uint8_t *key, size_t keylen, const uint8_t *salt, size_t saltlen)</td></tr>
 <tr class="memdesc:a1af5af2b784ff891f154b9d78d743021"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extract a key from a combined key and salt input using HMAC(SHA2-256).  <br /></td></tr>
+<tr class="memitem:a6275953c5448f23730311d885556f26f" id="r_a6275953c5448f23730311d885556f26f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6275953c5448f23730311d885556f26f">qsc_hkdf384_expand</a> (uint8_t *output, size_t otplen, const uint8_t *key, size_t keylen, const uint8_t *info, size_t infolen)</td></tr>
+<tr class="memdesc:a6275953c5448f23730311d885556f26f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize an instance of HKDF(HMAC(SHA2-384)) and generate pseudo-random output.  <br /></td></tr>
+<tr class="memitem:aeb8f45100026cdc3f855de2e36a968e1" id="r_aeb8f45100026cdc3f855de2e36a968e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb8f45100026cdc3f855de2e36a968e1">qsc_hkdf384_extract</a> (uint8_t *output, size_t otplen, const uint8_t *key, size_t keylen, const uint8_t *salt, size_t saltlen)</td></tr>
+<tr class="memdesc:aeb8f45100026cdc3f855de2e36a968e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extract a key from a combined key and salt input using HMAC(SHA2-384).  <br /></td></tr>
 <tr class="memitem:a99d9483d6a75e2cdaf69cdf6592d09df" id="r_a99d9483d6a75e2cdaf69cdf6592d09df"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a99d9483d6a75e2cdaf69cdf6592d09df">qsc_hkdf512_expand</a> (uint8_t *output, size_t otplen, const uint8_t *key, size_t keylen, const uint8_t *info, size_t infolen)</td></tr>
 <tr class="memdesc:a99d9483d6a75e2cdaf69cdf6592d09df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize an instance of HKDF(HMAC(SHA2-512)) and generate pseudo-random output.  <br /></td></tr>
 <tr class="memitem:a4a3f2811a273c2d7fc797de97e9e009d" id="r_a4a3f2811a273c2d7fc797de97e9e009d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a3f2811a273c2d7fc797de97e9e009d">qsc_hkdf512_extract</a> (uint8_t *output, size_t otplen, const uint8_t *key, size_t keylen, const uint8_t *salt, size_t saltlen)</td></tr>
@@ -255,8 +271,8 @@ Functions</h2></td></tr>
 <div class="line">qsc_sha512_initialize(&amp;ctx);</div>
 <div class="line">qsc_sha512_update(&amp;ctx, msg, MSGLEN);</div>
 <div class="line">qsc_sha512_finalize(&amp;ctx, otp);</div>
-<div class="ttc" id="asha2_8h_html_a6f81762376b25c0d0bbbb1461da19a67"><div class="ttname"><a href="#a6f81762376b25c0d0bbbb1461da19a67">QSC_SHA2_512_HASH_SIZE</a></div><div class="ttdeci">#define QSC_SHA2_512_HASH_SIZE</div><div class="ttdoc">The SHA2-512 hash size in bytes.</div><div class="ttdef"><b>Definition</b> sha2.h:150</div></div>
-<div class="ttc" id="astructqsc__sha512__state_html"><div class="ttname"><a href="structqsc__sha512__state.html">qsc_sha512_state</a></div><div class="ttdoc">The SHA2-512 digest state array.</div><div class="ttdef"><b>Definition</b> sha2.h:314</div></div>
+<div class="ttc" id="asha2_8h_html_a6f81762376b25c0d0bbbb1461da19a67"><div class="ttname"><a href="#a6f81762376b25c0d0bbbb1461da19a67">QSC_SHA2_512_HASH_SIZE</a></div><div class="ttdeci">#define QSC_SHA2_512_HASH_SIZE</div><div class="ttdoc">The SHA2-512 hash size in bytes.</div><div class="ttdef"><b>Definition</b> sha2.h:174</div></div>
+<div class="ttc" id="astructqsc__sha512__state_html"><div class="ttname"><a href="structqsc__sha512__state.html">qsc_sha512_state</a></div><div class="ttdoc">The SHA2-512 digest state array.</div><div class="ttdef"><b>Definition</b> sha2.h:338</div></div>
 </div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="sha2_links"></a>
 Reference Links:</h1>
 <ul>
@@ -358,6 +374,114 @@ Reference Links:</h1>
 </div><div class="memdoc">
 
 <p>Extract a key from a combined key and salt input using HMAC(SHA2-256). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">output</td><td>[uint8_t*] The output pseudo-random byte array. </td></tr>
+    <tr><td class="paramname">otplen</td><td>[size_t] The output array length. </td></tr>
+    <tr><td class="paramname">key</td><td>[const uint8_t*] The HKDF key array. </td></tr>
+    <tr><td class="paramname">keylen</td><td>[size_t] The key array length. </td></tr>
+    <tr><td class="paramname">salt</td><td>[const uint8_t*] The salt array. </td></tr>
+    <tr><td class="paramname">saltlen</td><td>[size_t] The salt array length. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6275953c5448f23730311d885556f26f" name="a6275953c5448f23730311d885556f26f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6275953c5448f23730311d885556f26f">&#9670;&#160;</a></span>qsc_hkdf384_expand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_hkdf384_expand </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>otplen</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>key</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>keylen</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>info</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>infolen</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize an instance of HKDF(HMAC(SHA2-384)) and generate pseudo-random output. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">output</td><td>[uint8_t*] The output pseudo-random byte array. </td></tr>
+    <tr><td class="paramname">otplen</td><td>[size_t] The output array length. </td></tr>
+    <tr><td class="paramname">key</td><td>[const uint8_t*] The HKDF key array. </td></tr>
+    <tr><td class="paramname">keylen</td><td>[size_t] The key array length. </td></tr>
+    <tr><td class="paramname">info</td><td>[const uint8_t*] The info array. </td></tr>
+    <tr><td class="paramname">infolen</td><td>[size_t] The info array length. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aeb8f45100026cdc3f855de2e36a968e1" name="aeb8f45100026cdc3f855de2e36a968e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb8f45100026cdc3f855de2e36a968e1">&#9670;&#160;</a></span>qsc_hkdf384_extract()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_hkdf384_extract </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>otplen</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>key</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>keylen</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>salt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>saltlen</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Extract a key from a combined key and salt input using HMAC(SHA2-384). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">output</td><td>[uint8_t*] The output pseudo-random byte array. </td></tr>

@@ -64,12 +64,12 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 
 			if (itmp != NULL)
 			{
+				ctx->items = itmp;
 				ktmp = qsc_memutils_realloc(ctx->keys, ncnt * QSC_COLLECTION_KEY_WIDTH);
 
 				if (ktmp != NULL)
 				{
 					qsc_memutils_clear(itmp, ncnt * ctx->width);
-					ctx->items = itmp;
 					qsc_memutils_clear(ktmp, ncnt * QSC_COLLECTION_KEY_WIDTH);
 					ctx->keys = ktmp;
 				}

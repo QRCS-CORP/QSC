@@ -1,6 +1,5 @@
 #include "mceliece.h"
 #include "mceliecebase.h"
-#include "secrand.h"
 
 bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {

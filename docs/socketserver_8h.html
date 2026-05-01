@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -103,6 +103,7 @@ $(function(){initNavTree('socketserver_8h.html','',''); });
 <p>The socket server function definitions.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="qsccommon_8h_source.html">qsccommon.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="async_8h_source.html">async.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="socketbase_8h_source.html">socketbase.h</a>&quot;</code><br />
 </div>
 <p><a href="socketserver_8h_source.html">Go to the source code of this file.</a></p>
@@ -135,6 +136,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:a03904e9dbfe5bd0bf4f62ebd879849e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the socket protocol type.  <br /></td></tr>
 <tr class="memitem:aad036f86ba456bbd48f589fade5f00ff" id="r_aad036f86ba456bbd48f589fade5f00ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="socketflags_8h.html#a91c3dc091c0fbef87f8f0e1f23a6f6b5">qsc_socket_transports</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad036f86ba456bbd48f589fade5f00ff">qsc_socket_server_socket_transport</a> (const <a class="el" href="structqsc__socket.html">qsc_socket</a> *sock)</td></tr>
 <tr class="memdesc:aad036f86ba456bbd48f589fade5f00ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the socket transport type.  <br /></td></tr>
+<tr class="memitem:aea3bcb84360c5605ae0ab6b6ff680e38" id="r_aea3bcb84360c5605ae0ab6b6ff680e38"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea3bcb84360c5605ae0ab6b6ff680e38">qsc_socket_server_async_dispose</a> (<a class="el" href="structqsc__socket__server__async__accept__state.html">qsc_socket_server_async_accept_state</a> *state)</td></tr>
+<tr class="memdesc:aea3bcb84360c5605ae0ab6b6ff680e38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases the server mutex, disposes of the listener socket and state.  <br /></td></tr>
 <tr class="memitem:ac8ff2f81ea51241991e6d2e8223ced50" id="r_ac8ff2f81ea51241991e6d2e8223ced50"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8ff2f81ea51241991e6d2e8223ced50">qsc_socket_server_close_socket</a> (<a class="el" href="structqsc__socket.html">qsc_socket</a> *sock)</td></tr>
 <tr class="memdesc:ac8ff2f81ea51241991e6d2e8223ced50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shut down channels and close the socket.  <br /></td></tr>
 <tr class="memitem:ac32067de13c0826b54438d0ce5d8288b" id="r_ac32067de13c0826b54438d0ce5d8288b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac32067de13c0826b54438d0ce5d8288b">qsc_socket_server_initialize</a> (<a class="el" href="structqsc__socket.html">qsc_socket</a> *sock)</td></tr>
@@ -180,14 +183,14 @@ Functions</h2></td></tr>
 <div class="line">    <span class="comment">// Handle asynchronous connection error.</span></div>
 <div class="line">}</div>
 <div class="ttc" id="asocket_8h_html_aa5af6ff5cbe52b88b08fb803cda44828"><div class="ttname"><a href="socket_8h.html#aa5af6ff5cbe52b88b08fb803cda44828">QSC_SOCKET_RET_SUCCESS</a></div><div class="ttdeci">#define QSC_SOCKET_RET_SUCCESS</div><div class="ttdef"><b>Definition</b> socket.h:87</div></div>
-<div class="ttc" id="asocketserver_8h_html_a07582d9ab8e672ae36cc9fe8547650de"><div class="ttname"><a href="#a07582d9ab8e672ae36cc9fe8547650de">qsc_socket_server_listen_ipv4</a></div><div class="ttdeci">QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_ipv4(qsc_socket *source, qsc_socket *target, const qsc_ipinfo_ipv4_address *address, uint16_t port)</div><div class="ttdoc">Places the source IPv4 socket in a blocking listening state, and waits for a connection....</div><div class="ttdef"><b>Definition</b> socketserver.c:122</div></div>
+<div class="ttc" id="asocketserver_8h_html_a07582d9ab8e672ae36cc9fe8547650de"><div class="ttname"><a href="#a07582d9ab8e672ae36cc9fe8547650de">qsc_socket_server_listen_ipv4</a></div><div class="ttdeci">QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_ipv4(qsc_socket *source, qsc_socket *target, const qsc_ipinfo_ipv4_address *address, uint16_t port)</div><div class="ttdoc">Places the source IPv4 socket in a blocking listening state, and waits for a connection....</div><div class="ttdef"><b>Definition</b> socketserver.c:118</div></div>
 <div class="ttc" id="asocketserver_8h_html_a56f9f7326fbb9c09840663cd11b953c9"><div class="ttname"><a href="#a56f9f7326fbb9c09840663cd11b953c9">qsc_socket_server_accept_callback</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_socket_server_accept_callback(qsc_socket_server_accept_result *ares)</div><div class="ttdoc">The socket server accept callback prototype.</div></div>
-<div class="ttc" id="asocketserver_8h_html_ac32067de13c0826b54438d0ce5d8288b"><div class="ttname"><a href="#ac32067de13c0826b54438d0ce5d8288b">qsc_socket_server_initialize</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_socket_server_initialize(qsc_socket *sock)</div><div class="ttdoc">Initialize the server socket.</div><div class="ttdef"><b>Definition</b> socketserver.c:68</div></div>
+<div class="ttc" id="asocketserver_8h_html_ac32067de13c0826b54438d0ce5d8288b"><div class="ttname"><a href="#ac32067de13c0826b54438d0ce5d8288b">qsc_socket_server_initialize</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_socket_server_initialize(qsc_socket *sock)</div><div class="ttdoc">Initialize the server socket.</div><div class="ttdef"><b>Definition</b> socketserver.c:65</div></div>
 <div class="ttc" id="asocketserver_8h_html_ad5302b5e0a9ab2c217b967addbd276e4"><div class="ttname"><a href="#ad5302b5e0a9ab2c217b967addbd276e4">qsc_socket_server_error_callback</a></div><div class="ttdeci">QSC_EXPORT_API void qsc_socket_server_error_callback(const qsc_socket *source, qsc_socket_exceptions error)</div><div class="ttdoc">The socket server error callback prototype.</div></div>
-<div class="ttc" id="astructqsc__socket__server__async__accept__state_html"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html">qsc_socket_server_async_accept_state</a></div><div class="ttdoc">The async listener-accept state structure. The structure contains a pointer to the listener socket,...</div><div class="ttdef"><b>Definition</b> socketserver.h:128</div></div>
-<div class="ttc" id="astructqsc__socket__server__async__accept__state_html_a4d05c72509d38f150d79cbc245e26109"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html#a4d05c72509d38f150d79cbc245e26109">qsc_socket_server_async_accept_state::callback</a></div><div class="ttdeci">void(* callback)(qsc_socket_server_accept_result *result)</div><div class="ttdef"><b>Definition</b> socketserver.h:130</div></div>
-<div class="ttc" id="astructqsc__socket__server__async__accept__state_html_ab578ff3ac205a666bccf6a6d4ccac4ce"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html#ab578ff3ac205a666bccf6a6d4ccac4ce">qsc_socket_server_async_accept_state::error</a></div><div class="ttdeci">void(* error)(qsc_socket *sock, qsc_socket_exceptions exception)</div><div class="ttdef"><b>Definition</b> socketserver.h:131</div></div>
-<div class="ttc" id="astructqsc__socket__server__async__accept__state_html_ab765a6774e0fdaf15d0905c2e3843476"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html#ab765a6774e0fdaf15d0905c2e3843476">qsc_socket_server_async_accept_state::source</a></div><div class="ttdeci">qsc_socket * source</div><div class="ttdef"><b>Definition</b> socketserver.h:129</div></div>
+<div class="ttc" id="astructqsc__socket__server__async__accept__state_html"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html">qsc_socket_server_async_accept_state</a></div><div class="ttdoc">The async listener-accept state structure. The structure contains a pointer to the listener socket,...</div><div class="ttdef"><b>Definition</b> socketserver.h:129</div></div>
+<div class="ttc" id="astructqsc__socket__server__async__accept__state_html_a4d05c72509d38f150d79cbc245e26109"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html#a4d05c72509d38f150d79cbc245e26109">qsc_socket_server_async_accept_state::callback</a></div><div class="ttdeci">void(* callback)(qsc_socket_server_accept_result *result)</div><div class="ttdef"><b>Definition</b> socketserver.h:131</div></div>
+<div class="ttc" id="astructqsc__socket__server__async__accept__state_html_ab578ff3ac205a666bccf6a6d4ccac4ce"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html#ab578ff3ac205a666bccf6a6d4ccac4ce">qsc_socket_server_async_accept_state::error</a></div><div class="ttdeci">void(* error)(qsc_socket *sock, qsc_socket_exceptions exception)</div><div class="ttdef"><b>Definition</b> socketserver.h:132</div></div>
+<div class="ttc" id="astructqsc__socket__server__async__accept__state_html_ab765a6774e0fdaf15d0905c2e3843476"><div class="ttname"><a href="structqsc__socket__server__async__accept__state.html#ab765a6774e0fdaf15d0905c2e3843476">qsc_socket_server_async_accept_state::source</a></div><div class="ttdeci">qsc_socket * source</div><div class="ttdef"><b>Definition</b> socketserver.h:130</div></div>
 <div class="ttc" id="astructqsc__socket_html"><div class="ttname"><a href="structqsc__socket.html">qsc_socket</a></div><div class="ttdoc">The socket instance structure.</div><div class="ttdef"><b>Definition</b> socket.h:133</div></div>
 </div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="socketserver_links"></a>
 Reference Links:</h1>
@@ -244,6 +247,31 @@ Reference Links:</h1>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="socketflags_8h.html#ac14a927b3d05c6bb54f3eb8f7c884376" title="The socket address family type.">qsc_socket_address_families</a>] The socket address family </dd></dl>
+
+</div>
+</div>
+<a id="aea3bcb84360c5605ae0ab6b6ff680e38" name="aea3bcb84360c5605ae0ab6b6ff680e38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea3bcb84360c5605ae0ab6b6ff680e38">&#9670;&#160;</a></span>qsc_socket_server_async_dispose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void qsc_socket_server_async_dispose </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__socket__server__async__accept__state.html">qsc_socket_server_async_accept_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Releases the server mutex, disposes of the listener socket and state. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>[qsc_socket_server_async_accept_state*] The asynchronous server state </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

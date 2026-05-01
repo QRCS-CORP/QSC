@@ -1,21 +1,22 @@
 var qsccommon_8h =
 [
     [ "QSC_ALIGN", "qsccommon_8h.html#af982e868390e2c3bc61c80ea79e16b5b", null ],
-    [ "QSC_DILITHIUM_S5P87", "qsccommon_8h.html#af7186147c253fddb3b04eaa7257eb8b0", null ],
-    [ "QSC_ECDSA_S5P521", "qsccommon_8h.html#a4ccb42644d7fbac65fc120a291cb598f", null ],
+    [ "QSC_DILITHIUM_S3P65", "qsccommon_8h.html#af1b4f467a130bdd2d8db59e49676e983", null ],
+    [ "QSC_ECDH_S1P256", "qsccommon_8h.html#af38d8ad46124d37fb8fb7d194908a1f0", null ],
+    [ "QSC_ECDSA_S1P256", "qsccommon_8h.html#aaab609bba68b7f5abbc36e0e8c17eaaa", null ],
     [ "QSC_EDDH_S1EC25519", "qsccommon_8h.html#acda36f6e30200731a020e8c8a85de0bf", null ],
     [ "QSC_EDDSA_S1EC25519", "qsccommon_8h.html#aa35eef50cb5b187caf501257c2e43b2d", null ],
     [ "QSC_EXPORT_API", "qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef", null ],
-    [ "QSC_FALCON_S5SHAKE256F1024", "qsccommon_8h.html#a0a3984c136eb31ce41a2a448f8ab649e", null ],
-    [ "QSC_HQC_S5N7333", "qsccommon_8h.html#ad132a8b96af12e0245b9684c70fb7918", null ],
-    [ "QSC_KYBER_S5K4P1024", "qsccommon_8h.html#a7271c7b2c466e0dcc714551af9c57723", null ],
-    [ "QSC_MCELIECE_S5N6688T128", "qsccommon_8h.html#a45ca7dd236d5ffa74d4ed894100fde96", null ],
+    [ "QSC_FALCON_S3SHAKE256F512", "qsccommon_8h.html#a00f253fed68e2c696b590c35511b120e", null ],
+    [ "QSC_HQC_S1N2321", "qsccommon_8h.html#a5b6e7f012f140365e9bd2aab0b73f0c0", null ],
+    [ "QSC_KYBER_S3K3P768", "qsccommon_8h.html#a22c97504eb161f22f1ab424e27440274", null ],
+    [ "QSC_MCELIECE_S1N3488T64", "qsccommon_8h.html#ac7a002ea26fd6b7f373f310aab17ca5a", null ],
     [ "QSC_NO_INLINE", "qsccommon_8h.html#a34bf12726de8fa7b95b7cfd3206494d7", null ],
     [ "QSC_PRAGMA_STR", "qsccommon_8h.html#a83c49e7fda85b1009970396c85e83406", null ],
     [ "QSC_SIMD_ALIGN", "qsccommon_8h.html#a320c2fdb95efc890242fe532f4ec5021", null ],
     [ "QSC_SIMD_ALIGNMENT", "qsccommon_8h.html#af245f0c2da8f8a29a3c23e2709029ccc", null ],
     [ "QSC_SIZE_MAX", "qsccommon_8h.html#a753f85c92a3b2de525ad25503c8cef31", null ],
-    [ "QSC_SPHINCSPLUS_S5S256SHAKERS", "qsccommon_8h.html#abc520f14e51082e2e58f6558d15ed5d7", null ],
+    [ "QSC_SPHINCSPLUS_S1S128SHAKERS", "qsccommon_8h.html#a738a14dab259ebb460856049f48d3028", null ],
     [ "QSC_STATUS_FAILURE", "qsccommon_8h.html#a3936df82f23af3637e9e77b07b57c64d", null ],
     [ "QSC_STATUS_SUCCESS", "qsccommon_8h.html#ab910ce62037d1dfaed66be602f5d4982", null ],
     [ "QSC_SYSTEM_CONDITION_IGNORE", "qsccommon_8h.html#a6ca37bf525f2b2a3da6484a3ce906f2a", null ],
@@ -30,5 +31,6 @@ var qsccommon_8h =
     [ "QSC_SYSTEM_SECMEMALLOC_MAX", "qsccommon_8h.html#a5a4ab2df0689ce50eb528bbefaa6bf9d", null ],
     [ "QSC_SYSTEM_SECMEMALLOC_MAXKB", "qsccommon_8h.html#a8035f53abf620d2fe092e718867922d0", null ],
     [ "QSC_SYSTEM_SECMEMALLOC_MIN", "qsccommon_8h.html#a9dbd63693051ea1fade015dcf921b875", null ],
-    [ "QSC_SYSTEM_SOCKETS_BERKELEY", "qsccommon_8h.html#a9d34ecb935d30ac1a135088a8faf68c8", null ]
+    [ "QSC_SYSTEM_SOCKETS_BERKELEY", "qsccommon_8h.html#a9d34ecb935d30ac1a135088a8faf68c8", null ],
+    [ "QSC_TLS_SECURITY_CLASS_1", "qsccommon_8h.html#a80016bd302907e81315770daa0bd5f62", null ]
 ];

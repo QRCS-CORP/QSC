@@ -12,6 +12,9 @@
 QSC_SYSTEM_CONDITION_IGNORE(5105)
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#if !defined(WIN32_LEAN_AND_MEAN)
+#	define WIN32_LEAN_AND_MEAN
+#endif
 #	include <Windows.h>
 #	if defined(QSC_SYSTEM_ARCH_IX86)
 #		include <intrin.h>

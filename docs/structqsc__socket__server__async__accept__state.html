@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -110,6 +110,8 @@ Data Fields</h2></td></tr>
 <tr class="memitem:ab765a6774e0fdaf15d0905c2e3843476" id="r_ab765a6774e0fdaf15d0905c2e3843476"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__socket.html">qsc_socket</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab765a6774e0fdaf15d0905c2e3843476">source</a></td></tr>
 <tr class="memitem:a4d05c72509d38f150d79cbc245e26109" id="r_a4d05c72509d38f150d79cbc245e26109"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d05c72509d38f150d79cbc245e26109">callback</a> )(<a class="el" href="structqsc__socket__server__accept__result.html">qsc_socket_server_accept_result</a> *result)</td></tr>
 <tr class="memitem:ab578ff3ac205a666bccf6a6d4ccac4ce" id="r_ab578ff3ac205a666bccf6a6d4ccac4ce"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab578ff3ac205a666bccf6a6d4ccac4ce">error</a> )(<a class="el" href="structqsc__socket.html">qsc_socket</a> *sock, <a class="el" href="socketbase_8h.html#a31eef834848a4f642a5037b5a16055b4">qsc_socket_exceptions</a> exception)</td></tr>
+<tr class="memitem:a653702cf1bec06dc294a7df5b367c10c" id="r_a653702cf1bec06dc294a7df5b367c10c"><td class="memItemLeft" align="right" valign="top">volatile int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a653702cf1bec06dc294a7df5b367c10c">tcount</a></td></tr>
+<tr class="memitem:a6d157f239d7eca63a191885e570d2d74" id="r_a6d157f239d7eca63a191885e570d2d74"><td class="memItemLeft" align="right" valign="top">qsc_mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d157f239d7eca63a191885e570d2d74">smutex</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The async listener-accept state structure. The structure contains a pointer to the listener socket, and pointers to a callback and error functions. The callback function returns a populated <a class="el" href="structqsc__socket__server__accept__result.html" title="The async socket result structure.">qsc_socket_server_accept_result</a> structure. The error function returns the listener socket and an <a class="el" href="socketbase_8h.html#a31eef834848a4f642a5037b5a16055b4" title="Socket code enumeration names.">qsc_socket_exceptions</a> error code. </p>
@@ -144,6 +146,21 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a6d157f239d7eca63a191885e570d2d74" name="a6d157f239d7eca63a191885e570d2d74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d157f239d7eca63a191885e570d2d74">&#9670;&#160;</a></span>smutex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">qsc_mutex smutex</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The async server mutex </p>
+
+</div>
+</div>
 <a id="ab765a6774e0fdaf15d0905c2e3843476" name="ab765a6774e0fdaf15d0905c2e3843476"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab765a6774e0fdaf15d0905c2e3843476">&#9670;&#160;</a></span>source</h2>
 
@@ -156,6 +173,21 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>A pointer to the listener socket </p>
+
+</div>
+</div>
+<a id="a653702cf1bec06dc294a7df5b367c10c" name="a653702cf1bec06dc294a7df5b367c10c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a653702cf1bec06dc294a7df5b367c10c">&#9670;&#160;</a></span>tcount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">volatile int32_t tcount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The running thread count </p>
 
 </div>
 </div>

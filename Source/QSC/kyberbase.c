@@ -766,7 +766,7 @@ static void kyber_gen_matrix(qsc_kyber_polyvec* a, const uint8_t seed[QSC_KYBER_
         }
     }
 
-    qsc_memutils_clear(buf, sizeof(buf));
+    qsc_memutils_secure_erase(buf, sizeof(buf));
     qsc_memutils_secure_erase(extseed, sizeof(extseed));
     qsc_keccak_dispose(&state);
 }

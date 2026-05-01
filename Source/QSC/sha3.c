@@ -777,7 +777,7 @@ void qsc_keccak_absorb_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, const
 		}
 	}
 
-	qsc_memutils_clear((pad + oft), (size_t)rate - oft);
+	qsc_memutils_secure_erase((pad + oft), (size_t)rate - oft);
 	keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 	qsc_keccak_permute(ctx, rounds);
 }
@@ -857,7 +857,7 @@ void qsc_keccak_absorb_key_custom(qsc_keccak_state* ctx, qsc_keccak_rate rate, c
 		}
 	}
 
-	qsc_memutils_clear((pad + oft), (size_t)rate - oft);
+	qsc_memutils_secure_erase((pad + oft), (size_t)rate - oft);
 	keccak_fast_absorb(ctx->state, pad, (size_t)rate);
 	qsc_keccak_permute(ctx, rounds);
 }

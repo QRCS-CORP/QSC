@@ -436,7 +436,8 @@ static bool qsc_x509_certwrite_signature_algorithm_is_supported(const qsc_x509_a
     }
 
     return (qsc_x509_signature_algorithm_is_ecdsa(signaturealgorithm->signature) == true) ||
-        (qsc_x509_signature_algorithm_is_ml_dsa(signaturealgorithm->signature) == true);
+        (qsc_x509_signature_algorithm_is_ml_dsa(signaturealgorithm->signature) == true) ||
+        (signaturealgorithm->signature == QSC_X509_SIGNATURE_ALGORITHM_ED25519);
 }
 
 static bool qsc_x509_certwrite_spki_is_signature_capable(const qsc_x509_subject_public_key_info* spki)
@@ -444,7 +445,8 @@ static bool qsc_x509_certwrite_spki_is_signature_capable(const qsc_x509_subject_
     return (spki != NULL) &&
         ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_RSA) ||
          (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_EC) ||
-         (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA));
+         (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA) ||
+         (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519));
 }
 
 static uint16_t qsc_x509_certwrite_default_tls_key_usage(const qsc_x509_subject_public_key_info* spki)
@@ -453,6 +455,14 @@ static uint16_t qsc_x509_certwrite_default_tls_key_usage(const qsc_x509_subject_
     {
         if (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA)
         {
+            return QSC_X509_KEY_USAGE_DIGITAL_SIGNATURE;
+        }
+
+        if (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+        {
+            /* RFC 8410 10.1: Ed25519 SPKI carries an EdDSA verification key.
+             * key encipherment is not defined for EdDSA, so only digital_signature
+             * is appropriate. */
             return QSC_X509_KEY_USAGE_DIGITAL_SIGNATURE;
         }
 

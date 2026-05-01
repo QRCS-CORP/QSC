@@ -98,11 +98,11 @@
  */
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 
-#	if defined(QSC_X86_FAMILY)
+#	if defined(QSC_X86_FAMILY) && defined(QSC_SYSTEM_AVX_INTRINSICS)
 #		include <intrin.h>
 #	endif
 
-#	if defined(QSC_ARM_FAMILY)
+#	if defined(QSC_ARM_FAMILY) && defined(QSC_SYSTEM_HAS_ARM_NEON)
 #		include <arm_neon.h>
 #	endif
 
@@ -114,7 +114,7 @@
  */
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
 
-#	if defined(QSC_X86_FAMILY)
+#	if defined(QSC_X86_FAMILY) && defined(QSC_SYSTEM_AVX_INTRINSICS)
 #		include <immintrin.h>
 #	endif
 
@@ -130,7 +130,7 @@
  */
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)
 
-#	if defined(QSC_X86_FAMILY)
+#	if defined(QSC_X86_FAMILY) && defined(QSC_SYSTEM_AVX_INTRINSICS)
 #		include <x86intrin.h>
 #	endif
 
@@ -156,7 +156,7 @@
 /*
  * Arm Compiler
  */
-#elif defined(QSC_SYSTEM_COMPILER_ARM)
+#elif defined(QSC_SYSTEM_COMPILER_ARM) && defined(QSC_SYSTEM_HAS_ARM_NEON)
 
 #	if defined(QSC_ARM_FAMILY)
 #		include <arm_neon.h>

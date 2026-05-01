@@ -654,6 +654,8 @@ QSC_CPLUSPLUS_ENABLED_START
 #       define QSC_SYSTEM_IS_LITTLE_ENDIAN 0U
 #   elif defined(_WIN32) || defined(__LITTLE_ENDIAN__)
 #       define QSC_SYSTEM_IS_LITTLE_ENDIAN 1U
+#   elif defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) || defined(__AARCH64EL__) || defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+#   define QSC_SYSTEM_IS_LITTLE_ENDIAN 1U
 #   endif
 #endif
 
@@ -1136,6 +1138,18 @@ QSC_CPLUSPLUS_ENABLED_START
     * \brief Enable the EDDH S1EC25519 parameter set.
     */
 #   define QSC_EDDH_S1EC25519
+
+    /*!
+    * \def QSC_KYBER_S3K3P768
+    * \brief Enable the Kyber S3K3P768 parameter set.
+    */
+#   define QSC_KYBER_S3K3P768
+
+    /*!
+    * \def QSC_DILITHIUM_S3P65
+    * \brief Enable the Dilithium S3P65 parameter set.
+    */
+#   define QSC_DILITHIUM_S3P65
 
    /*!
     * \def QSC_ECDSA_S1P256

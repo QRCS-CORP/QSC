@@ -1697,7 +1697,7 @@ void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, siz
 	QSC_ASSERT(key != NULL || keylen == 0U);
 	QSC_ASSERT(salt != NULL || saltlen == 0U);
 
-	if (output != NULL && (key != NULL || keylen == 0U) && otplen >= 32U)
+	if (output != NULL && (key != NULL || keylen == 0U) && otplen >= QSC_SHA2_256_HASH_SIZE)
 	{
 		qsc_hmac256_state ctx;
 		static const uint8_t zkey[1U] = { 0U };
@@ -1849,7 +1849,7 @@ void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, siz
 	QSC_ASSERT(key != NULL || keylen == 0U);
 	QSC_ASSERT(salt != NULL || saltlen == 0U);
 
-	if (output != NULL && (key != NULL || keylen == 0U) && otplen >= 64U)
+	if (output != NULL && (key != NULL || keylen == 0U) && otplen >= QSC_SHA2_512_HASH_SIZE)
 	{
 		qsc_hmac512_state ctx;
 		static const uint8_t zkey[1U] = { 0U };

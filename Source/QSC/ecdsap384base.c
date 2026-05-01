@@ -373,9 +373,9 @@ static void mod_reduce768_generic(uint32_t out[12U], const uint32_t in[24U], con
         out[j] = rem[j];
     }
 
-    qsc_memutils_clear(rem, sizeof(rem));
-    qsc_memutils_clear(sub, sizeof(sub));
-    qsc_memutils_clear(mod13, sizeof(mod13));
+    qsc_memutils_secure_erase(rem, sizeof(rem));
+    qsc_memutils_secure_erase(sub, sizeof(sub));
+    qsc_memutils_secure_erase(mod13, sizeof(mod13));
 }
 
 static void fe384_reduce768(fe384 r, const uint32_t c[24U])
@@ -465,7 +465,7 @@ static void fe_mul(fe384 r, const fe384 a, const fe384 b)
 
     fe384_mul_raw(c, a, b);
     fe384_reduce768(r, c);
-    qsc_memutils_clear(c, sizeof(c));
+    qsc_memutils_secure_erase(c, sizeof(c));
 }
 
 static void fe_sqr(fe384 r, const fe384 a)
@@ -497,7 +497,7 @@ static void fe_mul_small(fe384 r, const fe384 a, uint32_t k)
 
     c[12U] = (uint32_t)carry;
     fe384_reduce768(r, c);
-    qsc_memutils_clear(c, sizeof(c));
+    qsc_memutils_secure_erase(c, sizeof(c));
 }
 
 static void fe_inv(uint32_t r[12U], const uint32_t a[12U])
@@ -625,7 +625,7 @@ static void sc_mul(uint32_t r[12U], const uint32_t a[12U], const uint32_t b[12U]
 
     sc384_mul_raw(c, a, b);
     sc384_reduce768(r, c);
-    qsc_memutils_clear(c, sizeof(c));
+    qsc_memutils_secure_erase(c, sizeof(c));
 }
 
 static void sc_sqr(uint32_t r[12U], const uint32_t a[12U])
@@ -820,10 +820,10 @@ static void p384_add(p384_jac_t* R, const p384_jac_t* P, const p384_jac_t* Q)
 
     *R = T;
 
-    qsc_memutils_clear(&Radd, sizeof(Radd));
-    qsc_memutils_clear(&Rdbl, sizeof(Rdbl));
-    qsc_memutils_clear(&Rinf, sizeof(Rinf));
-    qsc_memutils_clear(&T, sizeof(T));
+    qsc_memutils_secure_erase(&Radd, sizeof(Radd));
+    qsc_memutils_secure_erase(&Rdbl, sizeof(Rdbl));
+    qsc_memutils_secure_erase(&Rinf, sizeof(Rinf));
+    qsc_memutils_secure_erase(&T, sizeof(T));
 }
 
 static void p384_scalar_mult(p384_jac_t* R, const p384_aff_t* P, const uint32_t k[12U])
@@ -854,11 +854,11 @@ static void p384_scalar_mult(p384_jac_t* R, const p384_aff_t* P, const uint32_t 
 
     *R = R0;
 
-    qsc_memutils_clear(&R0, sizeof(R0));
-    qsc_memutils_clear(&R1, sizeof(R1));
-    qsc_memutils_clear(&A, sizeof(A));
-    qsc_memutils_clear(&D0, sizeof(D0));
-    qsc_memutils_clear(&D1, sizeof(D1));
+    qsc_memutils_secure_erase(&R0, sizeof(R0));
+    qsc_memutils_secure_erase(&R1, sizeof(R1));
+    qsc_memutils_secure_erase(&A, sizeof(A));
+    qsc_memutils_secure_erase(&D0, sizeof(D0));
+    qsc_memutils_secure_erase(&D1, sizeof(D1));
 }
 
 static bool p384_jac_to_aff(p384_aff_t* R, const p384_jac_t* P)

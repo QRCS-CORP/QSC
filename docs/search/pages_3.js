@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['example_0',['Usage Example',['../acp_8h.html#usage',1,'']]]
+  ['details_0',['Implementation Details',['../acp_8h.html#details',1,'']]],
+  ['documents_1',['Reference Documents',['../encoding_8h.html#encoding_refs',1,'']]]
 ];

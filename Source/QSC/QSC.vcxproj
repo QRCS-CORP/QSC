@@ -181,7 +181,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>false</OpenMPSupport>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -302,13 +302,25 @@
     <ClInclude Include="timestamp.h" />
     <ClInclude Include="tlsalert.h" />
     <ClInclude Include="tlscert.h" />
+    <ClInclude Include="tlscertx509.h" />
+    <ClInclude Include="tlsclient.h" />
     <ClInclude Include="tlscodec.h" />
     <ClInclude Include="tlsdefs.h" />
+    <ClInclude Include="tlsecdsader.h" />
+    <ClInclude Include="tlsengine.h" />
     <ClInclude Include="tlserrors.h" />
+    <ClInclude Include="tlsextensions.h" />
+    <ClInclude Include="tlsgroups.h" />
+    <ClInclude Include="tlshandshake.h" />
+    <ClInclude Include="tlsio.h" />
+    <ClInclude Include="tlskeyschedule.h" />
     <ClInclude Include="tlslimits.h" />
     <ClInclude Include="tlsrecord.h" />
+    <ClInclude Include="tlssession.h" />
     <ClInclude Include="tlssigalgs.h" />
+    <ClInclude Include="tlssignerdefault.h" />
     <ClInclude Include="tlsstate.h" />
+    <ClInclude Include="tlstranscript.h" />
     <ClInclude Include="tlstypes.h" />
     <ClInclude Include="transpose.h" />
     <ClInclude Include="winutils.h" />
@@ -418,10 +430,23 @@
     <ClCompile Include="timestamp.c" />
     <ClCompile Include="tlsalert.c" />
     <ClCompile Include="tlscert.c" />
+    <ClCompile Include="tlscertx509.c" />
+    <ClCompile Include="tlsclient.c" />
     <ClCompile Include="tlscodec.c" />
+    <ClCompile Include="tlsecdsader.c" />
+    <ClCompile Include="tlsengine.c" />
     <ClCompile Include="tlserrors.c" />
+    <ClCompile Include="tlsextensions.c" />
+    <ClCompile Include="tlsgroups.c" />
+    <ClCompile Include="tlshandshake.c" />
+    <ClCompile Include="tlsio.c" />
+    <ClCompile Include="tlskeyschedule.c" />
     <ClCompile Include="tlsrecord.c" />
+    <ClCompile Include="tlsserver.c" />
+    <ClCompile Include="tlssession.c" />
     <ClCompile Include="tlssigalgs.c" />
+    <ClCompile Include="tlssignerdefault.c" />
+    <ClCompile Include="tlstranscript.c" />
     <ClCompile Include="transpose.c" />
     <ClCompile Include="winutils.c" />
     <ClCompile Include="x509aia.c" />

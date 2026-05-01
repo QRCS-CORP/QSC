@@ -795,7 +795,7 @@ void qsc_sc448_reduce(uint8_t s[114U])
             s[i] = rem[i];
         }
 
-        qsc_memutils_clear(s + 57U, 57U);
+        qsc_memutils_secure_erase(s + 57U, 57U);
     }
 }
 
@@ -849,8 +849,8 @@ void qsc_sc448_muladd(uint8_t s[57U], const uint8_t a[57U], const uint8_t b[57U]
             s[i] = tmp[i];
         }
 
-        qsc_memutils_clear(tmp, sizeof(tmp));
-        qsc_memutils_clear((uint8_t*)product, sizeof(product));
+        qsc_memutils_secure_erase(tmp, sizeof(tmp));
+        qsc_memutils_secure_erase((uint8_t*)product, sizeof(product));
     }
 }
 

@@ -1,4 +1,5 @@
 #include "list.h"
+#include "csp.h"
 #include "intutils.h"
 #include "memutils.h"
 #include "secrand.h"
@@ -125,6 +126,8 @@ void qsc_list_dispose(qsc_list_state* ctx)
 	{
 		qsc_async_mutex_lock(ctx->opmtx);
 
+		qsc_secrand_dispose();
+
 		qsc_memutils_secure_erase(ctx->items, ctx->count * ctx->width);
 		qsc_memutils_alloc_free(ctx->items);
 
@@ -184,6 +187,10 @@ void qsc_list_initialize(qsc_list_state* ctx, size_t width)
 
 	if (ctx != NULL && width > 0U)
 	{
+		uint8_t seed[32U] = { 0U };
+
+		qsc_csp_generate(seed, sizeof(seed));
+		qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
 		ctx->items = NULL;
 		ctx->count = 0U;
 		ctx->width = width;

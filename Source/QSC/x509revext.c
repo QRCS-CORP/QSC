@@ -361,7 +361,7 @@ static qsc_asn1_status x509_revext_decode_small_integer(const uint8_t* der, size
 }
 
 static qsc_asn1_status x509_revext_parse_crl_metadata(const qsc_x509_crl* crl, bool* iscrl, bool* isdelta, uint64_t* crlnumber, uint64_t* basecrlnumber,
-    uint8_t* idpbuf, size_t idpbufcap, size_t* idpvaluelen, bool* hasentryextensions) /* FIX-05 (BUG-NEW-06): caller-supplied copy buffer replaces pointer-to-stack */
+    uint8_t* idpbuf, size_t idpbufcap, size_t* idpvaluelen, bool* hasentryextensions)
 {
     qsc_x509_extension ext = { 0 };
     qsc_encoding_ber_element* root;
@@ -473,8 +473,6 @@ static qsc_asn1_status x509_revext_parse_crl_metadata(const qsc_x509_crl* crl, b
                 }
                 else if (x509_revext_oid_equal(&ext.extension_oid, X509_OID_ISSUING_DISTRIBUTION_POINT, sizeof(X509_OID_ISSUING_DISTRIBUTION_POINT)) == true)
                 {
-                    /* FIX-05 (BUG-NEW-06): copy IDP bytes into caller's buffer;
-                     * do NOT store a pointer into the stack-allocated ext.value. */
                     if (ext.valuelen > idpbufcap)
                     {
                         status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
@@ -912,6 +910,7 @@ static void x509_revext_sha1_compute(uint8_t* output, const uint8_t* message, si
             h[3U] += d;
             h[4U] += e;
         }
+
         qsc_memutils_clear(block, sizeof(block));
     }
 
@@ -994,8 +993,8 @@ static void x509_revext_sha1_compute(uint8_t* output, const uint8_t* message, si
         output[(i * 4U) + 3U] = (uint8_t)h[i];
     }
 
-    qsc_memutils_clear((uint8_t*)w, sizeof(w));
-    qsc_memutils_clear((uint8_t*)block, sizeof(block));
+    qsc_memutils_secure_erase((uint8_t*)w, sizeof(w));
+    qsc_memutils_secure_erase((uint8_t*)block, sizeof(block));
 }
 
 static bool x509_revext_hash_octets(const qsc_asn1_oid* hashoid, const uint8_t* data, size_t datalen, uint8_t* output, size_t* outputlen)
@@ -1491,7 +1490,7 @@ static bool x509_revext_ocsp_response_matches_certificate(const uint8_t* basicde
 qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(qsc_x509_crl* mergedcrl, const qsc_x509_crl* basecrl, const qsc_x509_crl* deltacrl, const qsc_x509_certificate* issuer,
     const qsc_asn1_time* now, qsc_x509_crl_signature_verify_callback callback, void* state)
 {
-    uint8_t baseidpbuf[QSC_X509_SPKI_MAX];   /* FIX-05: copy buffers replace dangling pointers */
+    uint8_t baseidpbuf[QSC_X509_SPKI_MAX];
     uint8_t deltaidpbuf[QSC_X509_SPKI_MAX];
     uint64_t basecrlnumber;
     uint64_t deltacrlnumber;

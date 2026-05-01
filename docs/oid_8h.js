@@ -12,6 +12,8 @@ var oid_8h =
       [ "QSC_OID_ID_SHA384_WITH_RSA_ENCRYPTION", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4abd598bd9b8225ce78236945c79dbf769", null ],
       [ "QSC_OID_ID_SHA512_WITH_RSA_ENCRYPTION", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4a616070bb449d93cb830ad7639f8e1334", null ],
       [ "QSC_OID_ID_EC_PUBLIC_KEY", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4a42d5f1fa5cc339242f7d3a958d039489", null ],
+      [ "QSC_OID_ID_ED25519", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4a111962ce50581fd07962de32ae7bb663", null ],
+      [ "QSC_OID_ID_ED448", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4a505c7c326bbb1b6e57ba4bef1756ae70", null ],
       [ "QSC_OID_ID_PRIME256V1", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4a711c9bfde83ca628c3ee563dbfd03324", null ],
       [ "QSC_OID_ID_SECP384R1", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4ac8b93f896491690ebd3ce3149678793e", null ],
       [ "QSC_OID_ID_SECP521R1", "oid_8h.html#a254dde5bde6784ce7077c0ce9fdfe6f4a615e9306475e1354475ca4d7a0a6d778", null ],

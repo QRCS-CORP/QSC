@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -236,7 +236,7 @@ Reference Links:</h1>
   <table class="params">
     <tr><td class="paramname">target</td><td>[volatile bool*] Pointer to the boolean to test and update. Must not be NULL. </td></tr>
     <tr><td class="paramname">expected</td><td>[bool] The value the caller expects <code class="param">target</code> to currently hold. </td></tr>
-    <tr><td class="paramname">desired</td><td>[bool] The value to store if the comparison succeeds. </td></tr>
+    <tr><td class="paramname">desired</td><td>[bool] The value to store if the comparison succeeds.</td></tr>
   </table>
   </dd>
 </dl>
@@ -268,7 +268,7 @@ Reference Links:</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">target</td><td>[volatile bool*] Pointer to the boolean to swap. Must not be NULL. </td></tr>
-    <tr><td class="paramname">value</td><td>[bool] The new value to store. </td></tr>
+    <tr><td class="paramname">value</td><td>[bool] The new value to store.</td></tr>
   </table>
   </dd>
 </dl>
@@ -295,7 +295,7 @@ Reference Links:</h1>
 <p>Reads the value at <code class="param">target</code> using a sequentially consistent atomic load. The operation is equivalent to acquiring the value without the possibility of observing a partial write from a concurrent store.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">target</td><td>[volatile bool*] Pointer to the boolean to read. Must not be NULL. </td></tr>
+    <tr><td class="paramname">target</td><td>[volatile bool*] Pointer to the boolean to read. Must not be NULL.</td></tr>
   </table>
   </dd>
 </dl>
@@ -358,7 +358,7 @@ Reference Links:</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer. </td></tr>
-    <tr><td class="paramname">value</td><td>[int32_t] The amount to add. </td></tr>
+    <tr><td class="paramname">value</td><td>[int32_t] The amount to add</td></tr>
   </table>
   </dd>
 </dl>
@@ -396,7 +396,7 @@ Reference Links:</h1>
   <table class="params">
     <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer. </td></tr>
     <tr><td class="paramname">expected</td><td>[int32_t] The value the caller expects *target to hold. </td></tr>
-    <tr><td class="paramname">desired</td><td>[int32_t] The value to store if the comparison succeeds. </td></tr>
+    <tr><td class="paramname">desired</td><td>[int32_t] The value to store if the comparison succeeds.</td></tr>
   </table>
   </dd>
 </dl>
@@ -423,7 +423,7 @@ Reference Links:</h1>
 <p>Decrements *target by one and returns the value AFTER the decrement.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer. </td></tr>
+    <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -455,7 +455,7 @@ Reference Links:</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer. </td></tr>
-    <tr><td class="paramname">value</td><td>[int32_t] The new value to store. </td></tr>
+    <tr><td class="paramname">value</td><td>[int32_t] The new value to store.</td></tr>
   </table>
   </dd>
 </dl>
@@ -482,7 +482,7 @@ Reference Links:</h1>
 <p>Increments *target by one and returns the value AFTER the increment.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer. </td></tr>
+    <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -509,7 +509,7 @@ Reference Links:</h1>
 <p>Reads the current value of *target with sequential consistency.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer. </td></tr>
+    <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer.</td></tr>
   </table>
   </dd>
 </dl>
@@ -572,7 +572,7 @@ Reference Links:</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">target</td><td>[volatile int32_t*] Pointer to the atomic integer. </td></tr>
-    <tr><td class="paramname">value</td><td>[int32_t] The amount to subtract. </td></tr>
+    <tr><td class="paramname">value</td><td>[int32_t] The amount to subtract.</td></tr>
   </table>
   </dd>
 </dl>
@@ -840,7 +840,7 @@ Reference Links:</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">func</td><td>[void (*)(void*)] Pointer to the function to execute in the new thread. </td></tr>
-    <tr><td class="paramname">state</td><td>[void*] Pointer to the argument to pass to the thread function. </td></tr>
+    <tr><td class="paramname">state</td><td>[void*] Pointer to the argument to pass to the thread function.</td></tr>
   </table>
   </dd>
 </dl>
@@ -872,7 +872,7 @@ Reference Links:</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">func</td><td>[void (*)(void**)] Pointer to the function to execute in the new thread. </td></tr>
-    <tr><td class="paramname">args</td><td>[void**] An array of pointers to the arguments. </td></tr>
+    <tr><td class="paramname">args</td><td>[void**] An array of pointers to the arguments.</td></tr>
   </table>
   </dd>
 </dl>
@@ -899,7 +899,7 @@ Reference Links:</h1>
 <p>Creates a new thread that executes the specified function with multiple arguments.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">func</td><td>[void (*)(void**)] Pointer to the function to execute in the new thread. </td></tr>
+    <tr><td class="paramname">func</td><td>[void (*)(void**)] Pointer to the function to execute in the new thread.</td></tr>
   </table>
   </dd>
 </dl>
@@ -926,7 +926,7 @@ Reference Links:</h1>
 <p>Resumes execution of a thread that has been suspended.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">handle</td><td>[qsc_thread] The thread handle to resume. </td></tr>
+    <tr><td class="paramname">handle</td><td>[qsc_thread] The thread handle to resume.</td></tr>
   </table>
   </dd>
 </dl>
@@ -979,7 +979,7 @@ Reference Links:</h1>
 <p>Suspends the execution of the specified thread.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">handle</td><td>[qsc_thread] The thread handle to suspend. </td></tr>
+    <tr><td class="paramname">handle</td><td>[qsc_thread] The thread handle to suspend.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1006,7 +1006,7 @@ Reference Links:</h1>
 <p>Terminates the specified thread. On Windows, this may terminate the calling thread.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">handle</td><td>[qsc_thread] The thread handle to terminate. </td></tr>
+    <tr><td class="paramname">handle</td><td>[qsc_thread] The thread handle to terminate.</td></tr>
   </table>
   </dd>
 </dl>

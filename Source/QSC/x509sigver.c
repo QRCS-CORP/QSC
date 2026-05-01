@@ -191,7 +191,7 @@ static bool x509_qsc_verify_ecdsa(const uint8_t* data, size_t datalen, const uin
                 qsc_memutils_copy(pubkey, x, coordlen);
                 qsc_memutils_copy(pubkey + coordlen, y, coordlen);
                 qsc_memutils_copy(signedmsg + sigrawlen, data, datalen);
-                qsc_memutils_clear(recovered, datalen);
+                qsc_memutils_secure_erase(recovered, datalen);
 
                 res = x509_qsc_verify_message(recovered, &msglen, signedmsg, signedmsglen, pubkey, spki->algorithm.curve);
 
@@ -242,7 +242,7 @@ static bool x509_qsc_verify_mldsa(const uint8_t* data, size_t datalen, const uin
             recovered = vstate->signaturemessage + signaturelen + datalen;
             qsc_memutils_copy(signedmsg, signature, signaturelen);
             qsc_memutils_copy(signedmsg + signaturelen, data, datalen);
-            qsc_memutils_clear(recovered, datalen);
+            qsc_memutils_secure_erase(recovered, datalen);
 
             if (qsc_dilithium_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey) == true)
             {
@@ -259,6 +259,7 @@ static bool x509_sigver_algorithm_is_supported(qsc_x509_signature_algorithm sign
     return (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA256) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512) ||
+           (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_65) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_87);
@@ -344,7 +345,7 @@ bool qsc_x509_qsc_verify_signed_data(const uint8_t* data, size_t datalen, const 
                     recovered = signedmsg + signaturelen + datalen;
                     qsc_memutils_copy(signedmsg, signature, signaturelen);
                     qsc_memutils_copy(signedmsg + signaturelen, data, datalen);
-                    qsc_memutils_clear(recovered, datalen);
+                    qsc_memutils_secure_erase(recovered, datalen);
 
                     if (qsc_eddsa_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey) == true)
                     {

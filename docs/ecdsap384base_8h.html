@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -257,7 +257,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">smsglen</td><td>[size_t*] Set to msglen + EC_NISTP384_SIGNATURE_SIZE on success, 0 on failure. </td></tr>
     <tr><td class="paramname">message</td><td>[const uint8_t*] Message to sign. </td></tr>
     <tr><td class="paramname">msglen</td><td>[size_t] Message length in bytes. </td></tr>
-    <tr><td class="paramname">privatekey:[const</td><td>uint8_t*] 144-byte private key (seed || pubkey). </td></tr>
+    <tr><td class="paramname">privatekey</td><td>[const uint8_t*] 144-byte private key (seed || pubkey).</td></tr>
   </table>
   </dd>
 </dl>
@@ -307,7 +307,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">smsglen</td><td>[size_t*] Set to msglen + EC_NISTP384_SIGNATURE_SIZE on success, 0 on failure. </td></tr>
     <tr><td class="paramname">message</td><td>[const uint8_t*] Message to sign. </td></tr>
     <tr><td class="paramname">msglen</td><td>[size_t] Message length in bytes. </td></tr>
-    <tr><td class="paramname">privatekey:[const</td><td>uint8_t*] 48-byte private scalar. </td></tr>
+    <tr><td class="paramname">privatekey</td><td>[const uint8_t*] 48-byte private scalar.</td></tr>
   </table>
   </dd>
 </dl>
@@ -357,7 +357,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">msglen</td><td>[size_t*] Set to the recovered message length on success. </td></tr>
     <tr><td class="paramname">signedmsg</td><td>[const uint8_t*] Signed-message buffer (signature || message). </td></tr>
     <tr><td class="paramname">smsglen</td><td>[size_t] Total signed-message length. </td></tr>
-    <tr><td class="paramname">publickey</td><td>[const uint8_t*] 96-byte public key (Qx || Qy, big-endian). </td></tr>
+    <tr><td class="paramname">publickey</td><td>[const uint8_t*] 96-byte public key (Qx || Qy, big-endian).</td></tr>
   </table>
   </dd>
 </dl>

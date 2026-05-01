@@ -194,7 +194,7 @@ typedef enum
  * \def QSC_GCM_MAXAAD_SIZE
  * \brief Maximum allowed size (in bytes) for Associated Additional Data (AAD) in GCM.
  */
-#define QSC_GCM_MAXAAD_SIZE 256U
+#define QSC_GCM_MAXAAD_SIZE 65536U
 
 /*!
  * \def QSC_GCM_NONCE_SIZE
@@ -737,20 +737,19 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm256_state
 	bool encrypt;					/*!< [bool] Initialized for encryption */
 } qsc_aes_gcm256_state;
 
-/**
- * \brief Decrypt data using the GCM-AES-256 authenticated encryption mode.
+/** * \brief Decrypt ciphertext and verify the authentication tag using GCM-AES-256.
+ * 
+ * Authenticates the ciphertext via GHASH, then decrypts it using AES-256 in GCTR mode. 
+ * The input buffer must contain the raw ciphertext immediately followed by the QSC_GCM256_MAC_SIZE-byte authentication tag.
+ * The plaintext is written to \p output only when authentication succeeds; on failure the output buffer is securely zeroed 
+ * and the function returns false.
  *
- * This function decrypts the plaintext using AES-256 in GCM-CTR mode, computes a MAC
- * over the nonce and ciphertext, and writes the MAC to the tag parameter.
- *
- * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm256_state structure.
- * \param output: [uint8_t*] Pointer to the plaintext buffer.
- * \param input: [const uint8_t*] Pointer to the ciphertext data with the appended MAC.
- * \param length: [size_t] Length of the input ciphertext in bytes including the MAC tag length.
- *
- * \return [bool] Returns \c true if the transformation and MAC verification was successful; otherwise, \c false.
- *
- * \sa qsc_aes_gcm256_initialize, qsc_aes_gcm256_set_associated
+ * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm256_state.
+ * \param output: [uint8_t*] Pointer to the plaintext output buffer. * Must be at least (\p length QSC_GCM256_MAC_SIZE) bytes.
+ * \param input: [const uint8_t*] Pointer to the ciphertext with appended MAC.
+ * Total length must be ciphertext_len QSC_GCM256_MAC_SIZE.
+ * \param length: [size_t] Total number of bytes in \p input including the tag.
+ * \return [bool] true if authentication and decryption succeeded; false otherwise. 
  */
 QSC_EXPORT_API bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
@@ -821,8 +820,14 @@ QSC_EXPORT_API void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, con
  * \param ctx: [qsc_aes_gcm256_state*] A pointer to the cipher state structure.
  * \param output: [uint8_t*] A pointer to the output array.
  * \param input: [const uint8_t*] A pointer to the input array.
- * \param length: [size_t] In encryption mode the number of bytes to encrypt not including the tag length.
- *						In decryption mode, the number of bytes to decrypt including the tag length.
+ * \param length: [size_t] Plaintext byte count (see per-mode semantics).
+ *
+ * In encryption mode: number of plaintext bytes to encrypt.
+ * The output buffer receives ciphertext followed by the QSC_GCM256_MAC_SIZE-byte tag;
+ * caller must allocate at least (length + QSC_GCM256_MAC_SIZE) bytes.
+ *
+ * In decryption mode: number of plaintext bytes to recover (\e excluding * the tag). 
+ * The function reads (length + QSC_GCM256_MAC_SIZE) bytes from input.
  *
  * \return [bool] Returns true if the data was transformed successfully, false on failure.
  */

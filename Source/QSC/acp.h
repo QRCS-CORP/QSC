@@ -130,6 +130,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \param output: [uint8_t*] Pointer to the output buffer that will receive the random bytes.
  * \param length: [size_t] The number of random bytes to generate. Must not exceed QSC_ACP_SEED_MAX.
+ * 
  * \return [bool] Returns true on success, or false if an error occurred during entropy collection or random byte generation.
  *
  * \sa qsc_acp_uint16, qsc_acp_uint32, qsc_acp_uint64, qsc_cshake512_compute, qsc_rdp_generate, qsc_csp_generate

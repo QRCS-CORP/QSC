@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -109,16 +109,16 @@ $(function(){initNavTree('falcon_8h.html','',''); });
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:afcc11caf32f4b963d2e12f478db2c651" id="r_afcc11caf32f4b963d2e12f478db2c651"><td class="memItemLeft" align="right" valign="top"><a id="afcc11caf32f4b963d2e12f478db2c651" name="afcc11caf32f4b963d2e12f478db2c651"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_PRIVATEKEY_SIZE</b>&#160;&#160;&#160;2305</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_PRIVATEKEY_SIZE</b>&#160;&#160;&#160;1281</td></tr>
 <tr class="memdesc:afcc11caf32f4b963d2e12f478db2c651"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the secret private-key array. <br /></td></tr>
 <tr class="memitem:a87fbecd92237c374b41ec74368a1ca2e" id="r_a87fbecd92237c374b41ec74368a1ca2e"><td class="memItemLeft" align="right" valign="top"><a id="a87fbecd92237c374b41ec74368a1ca2e" name="a87fbecd92237c374b41ec74368a1ca2e"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_PUBLICKEY_SIZE</b>&#160;&#160;&#160;1793</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_PUBLICKEY_SIZE</b>&#160;&#160;&#160;897</td></tr>
 <tr class="memdesc:a87fbecd92237c374b41ec74368a1ca2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the public-key array. <br /></td></tr>
 <tr class="memitem:a92a24b1ae917fc94e1d8a10eeb5235ee" id="r_a92a24b1ae917fc94e1d8a10eeb5235ee"><td class="memItemLeft" align="right" valign="top"><a id="a92a24b1ae917fc94e1d8a10eeb5235ee" name="a92a24b1ae917fc94e1d8a10eeb5235ee"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_SIGNATURE_SIZE</b>&#160;&#160;&#160;1276</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_SIGNATURE_SIZE</b>&#160;&#160;&#160;658</td></tr>
 <tr class="memdesc:a92a24b1ae917fc94e1d8a10eeb5235ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">The byte size of the signature array. <br /></td></tr>
 <tr class="memitem:adf7407d45b4967a666e0339a926dc361" id="r_adf7407d45b4967a666e0339a926dc361"><td class="memItemLeft" align="right" valign="top"><a id="adf7407d45b4967a666e0339a926dc361" name="adf7407d45b4967a666e0339a926dc361"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_ALGNAME</b>&#160;&#160;&#160;&quot;FALCON&quot;</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_FALCON_ALGNAME</b>&#160;&#160;&#160;&quot;FALCON-P512&quot;</td></tr>
 <tr class="memdesc:adf7407d45b4967a666e0339a926dc361"><td class="mdescLeft">&#160;</td><td class="mdescRight">The formal algorithm name. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
@@ -153,8 +153,8 @@ Functions</h2></td></tr>
 <div class="line">    <span class="comment">// authentication failed, do something..</span></div>
 <div class="line">}</div>
 <div class="ttc" id="afalcon_8h_html_a7d609dba718823e9ba023ca62864ce91"><div class="ttname"><a href="#a7d609dba718823e9ba023ca62864ce91">qsc_falcon_verify</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_falcon_verify(uint8_t *message, size_t *msglen, const uint8_t *signedmsg, size_t smsglen, const uint8_t *publickey)</div><div class="ttdoc">Verifies a signature-message pair with the public key.</div><div class="ttdef"><b>Definition</b> falcon.c:45</div></div>
-<div class="ttc" id="afalcon_8h_html_a87fbecd92237c374b41ec74368a1ca2e"><div class="ttname"><a href="#a87fbecd92237c374b41ec74368a1ca2e">QSC_FALCON_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_FALCON_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> falcon.h:122</div></div>
-<div class="ttc" id="afalcon_8h_html_a92a24b1ae917fc94e1d8a10eeb5235ee"><div class="ttname"><a href="#a92a24b1ae917fc94e1d8a10eeb5235ee">QSC_FALCON_SIGNATURE_SIZE</a></div><div class="ttdeci">#define QSC_FALCON_SIGNATURE_SIZE</div><div class="ttdoc">The byte size of the signature array.</div><div class="ttdef"><b>Definition</b> falcon.h:128</div></div>
+<div class="ttc" id="afalcon_8h_html_a87fbecd92237c374b41ec74368a1ca2e"><div class="ttname"><a href="#a87fbecd92237c374b41ec74368a1ca2e">QSC_FALCON_PUBLICKEY_SIZE</a></div><div class="ttdeci">#define QSC_FALCON_PUBLICKEY_SIZE</div><div class="ttdoc">The byte size of the public-key array.</div><div class="ttdef"><b>Definition</b> falcon.h:102</div></div>
+<div class="ttc" id="afalcon_8h_html_a92a24b1ae917fc94e1d8a10eeb5235ee"><div class="ttname"><a href="#a92a24b1ae917fc94e1d8a10eeb5235ee">QSC_FALCON_SIGNATURE_SIZE</a></div><div class="ttdeci">#define QSC_FALCON_SIGNATURE_SIZE</div><div class="ttdoc">The byte size of the signature array.</div><div class="ttdef"><b>Definition</b> falcon.h:108</div></div>
 <div class="ttc" id="afalcon_8h_html_ad38dd4495c82ca8565825934af1435e7"><div class="ttname"><a href="#ad38dd4495c82ca8565825934af1435e7">qsc_falcon_sign</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_falcon_sign(uint8_t *signedmsg, size_t *smsglen, const uint8_t *message, size_t msglen, const uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Takes the message as input and returns an array containing the signature followed by the message.</div><div class="ttdef"><b>Definition</b> falcon.c:26</div></div>
 </div><!-- fragment --></dd></dl>
 <p>Based entirely on the C reference branch of Falcon taken from the NIST Post Quantum Competition Round 3 submission. <br  />

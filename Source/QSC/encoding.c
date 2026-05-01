@@ -123,8 +123,7 @@ static bool encoding_ber_grow_children(qsc_encoding_ber_element* elem, size_t* p
     {
         if (newcap > *pcap)
         {
-            qsc_memutils_clear(((uint8_t*)tmp) + (*pcap * sizeof(qsc_encoding_ber_element*)),
-                (newcap - *pcap) * sizeof(qsc_encoding_ber_element*));
+            qsc_memutils_secure_erase(((uint8_t*)tmp) + (*pcap * sizeof(qsc_encoding_ber_element*)), (newcap - *pcap) * sizeof(qsc_encoding_ber_element*));
         }
 
         elem->children = tmp;
@@ -1577,7 +1576,7 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
                 else
                 {
                     /* clear any partial output to avoid leaking a half-decoded buffer to the caller. */
-                    qsc_memutils_clear(output, req);
+                    qsc_memutils_secure_erase(output, req);
                 }
             }
         }

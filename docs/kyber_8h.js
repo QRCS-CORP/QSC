@@ -10,5 +10,5 @@ var kyber_8h =
     [ "qsc_kyber_encapsulate", "kyber_8h.html#a316927f96f024c50f025cdb1cab7d2e1", null ],
     [ "qsc_kyber_generate_keypair", "kyber_8h.html#afead266f1f9cc8ce39dc36ff1e31bcc2", null ],
     [ "qsc_kyber_generate_seeded_keypair", "kyber_8h.html#afbff8b1b7f21bf40eba295a36929c99b", null ],
-    [ "qsc_kyber_seeded_encapsulate", "kyber_8h.html#a85973f753f43bb7946ed484630a8c991", null ]
+    [ "qsc_kyber_seeded_encapsulate", "kyber_8h.html#ad0dc8c9beb00f948ea753bd55d226762", null ]
 ];

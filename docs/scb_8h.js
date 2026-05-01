@@ -10,7 +10,7 @@ var scb_8h =
     [ "QSC_SCB_MEMORY_MAXIMUM", "scb_8h.html#a157dcb1b3b6d20d5adc776a5e76c4eb9", null ],
     [ "QSC_SCB_MEMORY_MINIMUM", "scb_8h.html#a43440e56d1124af033fb80f51e550771", null ],
     [ "qsc_scb_dispose", "scb_8h.html#a12d0a4d316949c8e927055d7d8de97af", null ],
-    [ "qsc_scb_generate", "scb_8h.html#a2c5f0aa797f606428c24c90121167ec9", null ],
+    [ "qsc_scb_generate", "scb_8h.html#a059ea73744b887a542f667f82ab701a8", null ],
     [ "qsc_scb_initialize", "scb_8h.html#a0d452fcb95ea81c7fc7e39910525321b", null ],
     [ "qsc_scb_update", "scb_8h.html#a974f89f0ba4e953d66e92fcbeae568c4", null ]
 ];

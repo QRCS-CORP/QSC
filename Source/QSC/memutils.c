@@ -35,7 +35,7 @@ void qsc_memutils_flush_cache_line(void* address)
 
     if (address != NULL)
     {
-#if defined(QSC_SYSTEM_ARCH_IX86)
+#if defined(QSC_SYSTEM_ARCH_IX86) && defined(QSC_SYSTEM_AVX_INTRINSICS)
         _mm_clflush(address);
 #elif defined(QSC_SYSTEM_ARCH_ARM) || defined(QSC_SYSTEM_ARCH_ARM64)
         __asm__ __volatile__("dc civac, %0" :: "r"(address) : "memory");
@@ -432,6 +432,8 @@ void qsc_memutils_clear(void* output, size_t length)
         }
 #endif
     }
+
+    QSC_COMPILER_BARRIER();
 }
 
 #if defined(QSC_SYSTEM_HAS_AVX)

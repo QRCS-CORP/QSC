@@ -1318,7 +1318,7 @@ bool sphincsplus_ref_open(uint8_t* message, size_t* msglen, const uint8_t* conte
 
     if (res == false && smsglen >= SPHINCSPLUS_SIGNATURE_SIZE)
     {
-        qsc_memutils_clear(message, smsglen - SPHINCSPLUS_SIGNATURE_SIZE);
+        qsc_memutils_secure_erase(message, smsglen - SPHINCSPLUS_SIGNATURE_SIZE);
     }
 
     return res;

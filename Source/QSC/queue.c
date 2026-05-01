@@ -221,7 +221,7 @@ uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen)
 			}
 
 			/* clear last slot */
-			qsc_memutils_clear(ctx->queue[ctx->count - 1U], ctx->width);
+			qsc_memutils_secure_erase(ctx->queue[ctx->count - 1U], ctx->width);
 			ctx->tags[ctx->count - 1U] = 0U;
 
 			--ctx->count;

@@ -1,6 +1,8 @@
 var x509key_8h =
 [
     [ "qsc_x509_private_key_t", "structqsc__x509__private__key__t.html", "structqsc__x509__private__key__t" ],
+    [ "QSC_X509_EDDSA_PUBLIC_KEY_SIZE", "x509key_8h.html#a576ce2e3efc6c2fc73a2a7417afa9e94", null ],
+    [ "QSC_X509_EDDSA_SEED_SIZE", "x509key_8h.html#adb2fe2c158bce82ccfca03ac1d970bb8", null ],
     [ "QSC_X509_ML_DSA_44_PRIVATEKEY_SIZE", "x509key_8h.html#ab1ace214f3ae13f999ae07f455adc81b", null ],
     [ "QSC_X509_ML_DSA_65_PRIVATEKEY_SIZE", "x509key_8h.html#acb76f50a8df8f0c444215c68ca5c72b4", null ],
     [ "QSC_X509_ML_DSA_87_PRIVATEKEY_SIZE", "x509key_8h.html#a5e6d440c84acd409bfed5e5a71bedfdc", null ],

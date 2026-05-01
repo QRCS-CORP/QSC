@@ -158,11 +158,15 @@ void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen,
 	}
 }
 
-void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
+bool qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(otplen != 0U);
+
+	bool res;
+
+	res = false;
 
 	if (ctx != NULL && output != NULL && otplen != 0U)
 	{
@@ -210,8 +214,11 @@ void qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen)
 			}
 
 			qsc_keccak_dispose(&hstate);
+			res = true;
 		}
 	}
+
+	return res;
 }
 
 void qsc_scb_update(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen)

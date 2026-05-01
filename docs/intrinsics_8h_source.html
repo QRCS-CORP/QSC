@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -185,11 +185,11 @@ $(function(){initNavTree('intrinsics_8h_source.html','',''); });
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#if defined(QSC_SYSTEM_COMPILER_MSC)</span></div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#   if defined(QSC_X86_FAMILY)</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#   if defined(QSC_X86_FAMILY) &amp;&amp; defined(QSC_SYSTEM_AVX_INTRINSICS)</span></div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">#       include &lt;intrin.h&gt;</span></div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#   endif</span></div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#   if defined(QSC_ARM_FAMILY)</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#   if defined(QSC_ARM_FAMILY) &amp;&amp; defined(QSC_SYSTEM_HAS_ARM_NEON)</span></div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="preprocessor">#       include &lt;arm_neon.h&gt;</span></div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#   endif</span></div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
@@ -201,7 +201,7 @@ $(function(){initNavTree('intrinsics_8h_source.html','',''); });
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#elif defined(QSC_SYSTEM_COMPILER_INTEL)</span></div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="preprocessor">#   if defined(QSC_X86_FAMILY)</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="preprocessor">#   if defined(QSC_X86_FAMILY) &amp;&amp; defined(QSC_SYSTEM_AVX_INTRINSICS)</span></div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#       include &lt;immintrin.h&gt;</span></div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#   endif</span></div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
@@ -217,7 +217,7 @@ $(function(){initNavTree('intrinsics_8h_source.html','',''); });
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">#elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)</span></div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#   if defined(QSC_X86_FAMILY)</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#   if defined(QSC_X86_FAMILY) &amp;&amp; defined(QSC_SYSTEM_AVX_INTRINSICS)</span></div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="preprocessor">#       include &lt;x86intrin.h&gt;</span></div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#   endif</span></div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
@@ -243,7 +243,7 @@ $(function(){initNavTree('intrinsics_8h_source.html','',''); });
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="comment"> * Arm Compiler</span></div>
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">#elif defined(QSC_SYSTEM_COMPILER_ARM)</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">#elif defined(QSC_SYSTEM_COMPILER_ARM) &amp;&amp; defined(QSC_SYSTEM_HAS_ARM_NEON)</span></div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="preprocessor">#   if defined(QSC_ARM_FAMILY)</span></div>
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="preprocessor">#       include &lt;arm_neon.h&gt;</span></div>

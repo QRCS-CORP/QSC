@@ -1,11 +1,21 @@
 var searchData=
 [
-  ['h_0',['H',['../structqsc__aes__gcm256__state.html#a9e8e7caa87ced4a67900288941024992',1,'qsc_aes_gcm256_state::H'],['../structqsc__qmac__state.html#a1102902b305f1d2bec9cec2e84852587',1,'qsc_qmac_state::H']]],
+  ['h_0',['H',['../structqsc__aes__gcm128__state.html#a9e8e7caa87ced4a67900288941024992',1,'qsc_aes_gcm128_state::H'],['../structqsc__aes__gcm256__state.html#a9e8e7caa87ced4a67900288941024992',1,'qsc_aes_gcm256_state::H'],['../structqsc__qmac__state.html#a1102902b305f1d2bec9cec2e84852587',1,'qsc_qmac_state::H']]],
   ['h_1',['h',['../structqsc__poly1305__state.html#a99ef106f48dd808b0d3d6731e5532ed0',1,'qsc_poly1305_state']]],
-  ['hash_2',['hash',['../structqsc__x509__algorithm__identifier__t.html#a4857bedc0d9c5f0aa070d88803ce1736',1,'qsc_x509_algorithm_identifier_t']]],
-  ['hasnonce_3',['hasnonce',['../structqsc__x509__ocsp__response__t.html#a216088fe30b5377d682d84c65bd110ab',1,'qsc_x509_ocsp_response_t']]],
-  ['hasprivatekey_4',['hasprivatekey',['../structqsc__x509__pkcs12__bundle__t.html#af71f74dcfa5fbb94b7faf19e9f0054c6',1,'qsc_x509_pkcs12_bundle_t']]],
-  ['high_5',['high',['../structuint128.html#a9997109464efa7a7fc24efcaca7a9fb3',1,'uint128']]],
-  ['hour_6',['hour',['../structqsc__asn1__time__t.html#ae5af4ff48939d13d480f87e56a9385d6',1,'qsc_asn1_time_t']]],
-  ['hstate_7',['hstate',['../structqsc__secrand__state.html#a9d66994a118feb83999ed41201131cdd',1,'qsc_secrand_state']]]
+  ['handshakebuffer_2',['handshakebuffer',['../structqsc__tls__connection.html#a46b526c909d3d2fbca33d1ab7b46b57d',1,'qsc_tls_connection']]],
+  ['handshakebufferlen_3',['handshakebufferlen',['../structqsc__tls__connection.html#aa303625e0f05dcd2f1938c5ab1f4c908',1,'qsc_tls_connection']]],
+  ['handshakedone_4',['handshakedone',['../structqsc__tls__key__schedule__state.html#a2b7103b97ede0cc0955e1d32fd1e00bb',1,'qsc_tls_key_schedule_state']]],
+  ['handshakesecret_5',['handshakesecret',['../structqsc__tls__key__schedule__state.html#a9d0e0386ee6e77f5ee6f8a547e452b66',1,'qsc_tls_key_schedule_state']]],
+  ['hash_6',['hash',['../structqsc__tls__key__schedule__state.html#a430bfdc7b13da90c7ab2e859dd446970',1,'qsc_tls_key_schedule_state::hash'],['../structqsc__tls__signature__scheme__descriptor.html#a430bfdc7b13da90c7ab2e859dd446970',1,'qsc_tls_signature_scheme_descriptor::hash'],['../structqsc__tls__transcript__state.html#a430bfdc7b13da90c7ab2e859dd446970',1,'qsc_tls_transcript_state::hash'],['../structqsc__x509__algorithm__identifier__t.html#a4857bedc0d9c5f0aa070d88803ce1736',1,'qsc_x509_algorithm_identifier_t::hash']]],
+  ['hasnonce_7',['hasnonce',['../structqsc__x509__ocsp__response__t.html#a216088fe30b5377d682d84c65bd110ab',1,'qsc_x509_ocsp_response_t']]],
+  ['hasprivatekey_8',['hasprivatekey',['../structqsc__x509__pkcs12__bundle__t.html#af71f74dcfa5fbb94b7faf19e9f0054c6',1,'qsc_x509_pkcs12_bundle_t']]],
+  ['helloretryrequestconsumed_9',['helloretryrequestconsumed',['../structqsc__tls__client__state.html#a0257c93fd53640e4ce5c08732b3ee246',1,'qsc_tls_client_state']]],
+  ['high_10',['high',['../structuint128.html#a9997109464efa7a7fc24efcaca7a9fb3',1,'uint128']]],
+  ['highmask_11',['highmask',['../structqsc__tls__extension__bitmap.html#a092683112826fc033e4e076aafd3d018',1,'qsc_tls_extension_bitmap']]],
+  ['hostname_12',['hostname',['../structqsc__tls__certificate__validation__context.html#aad01339e89106fdf68f57ef118956fa9',1,'qsc_tls_certificate_validation_context::hostname'],['../structqsc__tls__client__config.html#aad01339e89106fdf68f57ef118956fa9',1,'qsc_tls_client_config::hostname'],['../structqsc__x509w__profile__t.html#aad01339e89106fdf68f57ef118956fa9',1,'qsc_x509w_profile_t::hostname'],['../structqsc__x509w__deployment__config__t.html#aad01339e89106fdf68f57ef118956fa9',1,'qsc_x509w_deployment_config_t::hostname']]],
+  ['hostnamechecked_13',['hostnamechecked',['../structqsc__x509w__result__t.html#a9b8f4de49c71b190108258810695554d',1,'qsc_x509w_result_t']]],
+  ['hostnamevalid_14',['hostnamevalid',['../structqsc__x509w__result__t.html#a10f91897ce6b8c395053c32091b83091',1,'qsc_x509w_result_t']]],
+  ['hour_15',['hour',['../structqsc__asn1__time__t.html#ae5af4ff48939d13d480f87e56a9385d6',1,'qsc_asn1_time_t']]],
+  ['hrrgroup_16',['hrrgroup',['../structqsc__tls__server__state.html#ac80c6478d493a8949aabd589ebd1346d',1,'qsc_tls_server_state']]],
+  ['hstate_17',['hstate',['../structqsc__secrand__state.html#a9d66994a118feb83999ed41201131cdd',1,'qsc_secrand_state']]]
 ];

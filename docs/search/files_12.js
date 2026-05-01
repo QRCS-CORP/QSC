@@ -20,5 +20,6 @@ var searchData=
   ['x509store_2eh_17',['x509store.h',['../x509store_8h.html',1,'']]],
   ['x509time_2eh_18',['x509time.h',['../x509time_8h.html',1,'']]],
   ['x509verify_2eh_19',['x509verify.h',['../x509verify_8h.html',1,'']]],
-  ['x509write_2eh_20',['x509write.h',['../x509write_8h.html',1,'']]]
+  ['x509wrap_2eh_20',['x509wrap.h',['../x509wrap_8h.html',1,'']]],
+  ['x509write_2eh_21',['x509write.h',['../x509write_8h.html',1,'']]]
 ];

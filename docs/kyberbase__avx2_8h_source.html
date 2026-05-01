@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.1.0.2 (B2)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -225,25 +225,21 @@ $(function(){initNavTree('kyberbase__avx2_8h_source.html','',''); });
 <div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><span class="keywordtype">bool</span> qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], <span class="keyword">const</span> uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES],</div>
 <div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    <span class="keyword">const</span> uint8_t sk[QSC_KYBER_SECRETKEY_BYTES]);</div>
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span></div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="keywordtype">bool</span> qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <span class="keyword">const</span> uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], <span class="keywordtype">bool</span> (*rng_generate)(uint8_t*, <span class="keywordtype">size_t</span>));</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span></div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="keywordtype">void</span> qsc_kyber_avx2_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES],</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    <span class="keyword">const</span> uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], <span class="keyword">const</span> uint8_t m[QSC_KYBER_SYMBYTES]);</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span><span class="keywordtype">bool</span> qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keywordtype">bool</span> (*rng_generate)(uint8_t*, <span class="keywordtype">size_t</span>));</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span></div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span><span class="keywordtype">void</span> qsc_kyber_avx2_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES],</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    uint8_t d[QSC_KYBER_SYMBYTES], uint8_t z[QSC_KYBER_SYMBYTES]);</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="keywordtype">bool</span> qsc_kyber_avx2_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], <span class="keyword">const</span> uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], <span class="keywordtype">bool</span> (*rng_generate)(uint8_t*, <span class="keywordtype">size_t</span>));</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="keywordtype">void</span> qsc_kyber_avx2_seeded_encapsulate(uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], uint8_t ss[QSC_KYBER_MSGBYTES], <span class="keyword">const</span> uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], <span class="keyword">const</span> uint8_t m[QSC_KYBER_SYMBYTES]);</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span></div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span><span class="keywordtype">bool</span> qsc_kyber_avx2_generate_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], <span class="keywordtype">bool</span> (*rng_generate)(uint8_t*, <span class="keywordtype">size_t</span>));</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span></div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span><span class="keywordtype">void</span> qsc_kyber_avx2_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES], uint8_t sk[QSC_KYBER_SECRETKEY_BYTES], uint8_t d[QSC_KYBER_SYMBYTES], uint8_t z[QSC_KYBER_SYMBYTES]);</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>QSC_CPLUSPLUS_ENABLED_END</div>
 <div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span><span class="comment">/* \cond NO_DOCUMENT */</span></div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>QSC_CPLUSPLUS_ENABLED_END</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span><span class="comment">/* \cond NO_DOCUMENT */</span></div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aqsccommon_8h_html"><div class="ttname"><a href="qsccommon_8h.html">qsccommon.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

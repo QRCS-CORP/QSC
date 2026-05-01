@@ -126,10 +126,14 @@ void qsc_hcg_initialize(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen,
 	}
 }
 
-void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
+bool qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
+
+	bool res;
+
+	res = false;
 
 	if (ctx != NULL && output != NULL)
 	{
@@ -155,7 +159,10 @@ void qsc_hcg_generate(qsc_hcg_state* ctx, uint8_t* output, size_t otplen)
 		}
 
 		qsc_memutils_secure_erase(buf, sizeof(buf));
+		res = true;
 	}
+
+	return res;
 }
 
 void qsc_hcg_update(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen)

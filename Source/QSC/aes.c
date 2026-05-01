@@ -1773,6 +1773,7 @@ void qsc_aes_ctrbe_transform(qsc_aes_state* ctx, uint8_t* output, const uint8_t*
 			}
 
 			qsc_intutils_be8increment(ctx->nonce, QSC_AES_BLOCK_SIZE);
+			qsc_memutils_secure_erase(tmpb, sizeof(tmpb));
 		}
 	}
 }
@@ -2325,7 +2326,7 @@ bool qsc_aes_gcm128_decrypt(qsc_aes_gcm128_state* ctx, uint8_t* output, const ui
 
 	res = false;
 
-	if (ctx != NULL && input != NULL && output != NULL && length != 0U)
+	if (ctx != NULL && input != NULL && output != NULL && length >= QSC_GCM128_MAC_SIZE)
 	{
 		uint8_t ctag[QSC_AES_BLOCK_SIZE] = { 0U };
 		uint8_t kstream[QSC_AES_BLOCK_SIZE] = { 0U };
@@ -2461,7 +2462,7 @@ void qsc_aes_gcm128_initialize(qsc_aes_gcm128_state* ctx, const qsc_aes_keyparam
 	{
 		uint8_t zero[QSC_AES_BLOCK_SIZE] = { 0U };
 
-		/* initialize AES-128 — the only difference from GCM-256 */
+		/* initialize AES-128 - the only difference from GCM-256 */
 		ctx->encrypt = encryption;
 		qsc_aes_initialize(&ctx->cstate, keyparams, true, qsc_aes_cipher_128);
 
@@ -2512,7 +2513,7 @@ void qsc_aes_gcm128_initialize(qsc_aes_gcm128_state* ctx, const qsc_aes_keyparam
 		ctx->aadlen = 0U;
 		ctx->ctlen = 0U;
 
-		/* C = inc32(J0) — first counter block for GCTR */
+		/* C = inc32(J0) - first counter block for GCTR */
 		qsc_memutils_copy(ctx->C, ctx->J0, QSC_AES_BLOCK_SIZE);
 		qsc_intutils_be8increment(ctx->C, QSC_AES_BLOCK_SIZE);
 	}
@@ -2523,7 +2524,7 @@ void qsc_aes_gcm128_set_associated(qsc_aes_gcm128_state* ctx, const uint8_t* dat
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(data != NULL);
 
-	if (ctx != NULL && data != NULL && datalen != 0U)
+	if (ctx != NULL && data != NULL && datalen <= QSC_GCM_MAXAAD_SIZE)
 	{
 		size_t i;
 
@@ -2607,7 +2608,7 @@ bool qsc_aes_gcm256_decrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const ui
 
 	res = false;
 
-	if (ctx != NULL && input != NULL && output != NULL && length != 0U)
+	if (ctx != NULL && input != NULL && output != NULL && length >= QSC_GCM256_MAC_SIZE)
 	{
 		uint8_t ctag[QSC_AES_BLOCK_SIZE] = { 0U };
 		uint8_t kstream[QSC_AES_BLOCK_SIZE] = { 0U };
@@ -2774,14 +2775,14 @@ void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const qsc_aes_keyparam
 					ivbuf[buflen - GCM_BITS_PER_BYTE + i] = (uint8_t)(ivbits >> (56U - GCM_BITS_PER_BYTE * i));
 				}
 
-				qsc_memutils_clear(ctx->J0, QSC_AES_BLOCK_SIZE);
+				qsc_memutils_secure_erase(ctx->J0, QSC_AES_BLOCK_SIZE);
 
 				for (size_t i = 0U; i < buflen; i += QSC_AES_BLOCK_SIZE)
 				{
 					ghash_update(ctx->J0, ivbuf + i, ctx->H);
 				}
 
-				qsc_memutils_clear(ivbuf, sizeof(ivbuf));
+				qsc_memutils_secure_erase(ivbuf, sizeof(ivbuf));
 			}
 		}
 
@@ -2800,7 +2801,7 @@ void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* dat
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(data != NULL);
 
-	if (ctx != NULL && data != NULL && datalen != 0U)
+	if (ctx != NULL && data != NULL && datalen <= QSC_GCM_MAXAAD_SIZE)
 	{
 		size_t i;
 
