@@ -29,13 +29,13 @@ The TLS 1.3 implementation is now complete. The full RFC 8446 protocol surface i
 
 The EC primitive layer has been substantially extended beyond the existing ECDSA and Ed25519 coverage:
 
-- **ECDH over NIST P-curves** (`ecdh.h`, `ecdhp256base.*`, `ecdhp384base.*`, `ecdhp521base.*`) — Static and ephemeral ECDH key agreement over P-256, P-384, and P-521 per NIST SP 800-56A and FIPS 186-5. Constant-time scalar multiplication; public key validation per SP 800-56A requirements. Reuses field arithmetic from the existing ECDSA implementations to avoid code duplication.
+- **ECDH over NIST P-curves** (`ecdh.h`, `ecdhp256base.*`, `ecdhp384base.*`, `ecdhp521base.*`) - Static and ephemeral ECDH key agreement over P-256, P-384, and P-521 per NIST SP 800-56A and FIPS 186-5. Constant-time scalar multiplication; public key validation per SP 800-56A requirements. Reuses field arithmetic from the existing ECDSA implementations to avoid code duplication.
 
-- **EdDH** (`eddh.h`, `eddh25519base.*`, `eddh448base.*`) — Edwards-curve Diffie-Hellman key exchange. Supports X25519 (Curve25519, parameter set `QSC_EDDH_S1EC25519`) and X448 (Goldilocks, parameter set `QSC_EDDH_S3EC448`). Designed for constant-time execution.
+- **EdDH** (`eddh.h`, `eddh25519base.*`, `eddh448base.*`) - Edwards-curve Diffie-Hellman key exchange. Supports X25519 (Curve25519, parameter set `QSC_EDDH_S1EC25519`) and X448 (Goldilocks, parameter set `QSC_EDDH_S3EC448`). Designed for constant-time execution.
 
-- **EdDSA** (`eddsa.h`, `eddsa25519base.*`, `eddsa448base.*`) — Unified Edwards-curve digital signature interface. Supports Ed25519 and Ed448 (Goldilocks) via a common API; parameter set selected at compile time (`QSC_EDDSA_S1EC25519` or `QSC_EDDSA_S3EC448`).
+- **EdDSA** (`eddsa.h`, `eddsa25519base.*`, `eddsa448base.*`) - Unified Edwards-curve digital signature interface. Supports Ed25519 and Ed448 (Goldilocks) via a common API; parameter set selected at compile time (`QSC_EDDSA_S1EC25519` or `QSC_EDDSA_S3EC448`).
 
-- **Ed448 / Goldilocks** (`ed448.h`, `ed448.c`) — Full implementation of the Ed448-Goldilocks Edwards curve, underpinning both EdDH-X448 and EdDSA-448.
+- **Ed448 / Goldilocks** (`ed448.h`, `ed448.c`) - Full implementation of the Ed448-Goldilocks Edwards curve, underpinning both EdDH-X448 and EdDSA-448.
 
 ---
 
@@ -53,18 +53,18 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 
 QSC is a production-grade cryptographic library built for environments that demand verifiable correctness, long-term quantum resistance, and high throughput. The library combines NIST-standardized post-quantum algorithms with classical primitives, proprietary high-security constructions, and SIMD-accelerated implementations, all within a single, dependency-free C23 codebase.
 
-The library now includes a complete TLS 1.3 protocol stack (RFC 8446) built entirely on the QSC cryptographic core, with no dependency on OpenSSL or any other external TLS library. The stack implements the full handshake surface — 1-RTT certificate-authenticated, mutual TLS, PSK resumption with 0-RTT early data, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket — and supports hybrid post-quantum key exchange that combines classical ECDH with ML-KEM encapsulation in a single flight. It integrates directly with the QSC X.509 certificate infrastructure, key schedule, and AEAD record layer.
+The library now includes a complete TLS 1.3 protocol stack (RFC 8446) built entirely on the QSC cryptographic core, with no dependency on OpenSSL or any other external TLS library. The stack implements the full handshake surface - 1-RTT certificate-authenticated, mutual TLS, PSK resumption with 0-RTT early data, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket - and supports hybrid post-quantum key exchange that combines classical ECDH with ML-KEM encapsulation in a single flight. It integrates directly with the QSC X.509 certificate infrastructure, key schedule, and AEAD record layer.
 
 Additional recent additions include full ECDSA implementations for NIST P-256, P-384, and P-521 interoperable with the CA/Browser Forum Baseline Requirements, ECDH key agreement over the same NIST P-curves, EdDH (X25519 and X448) and EdDSA (Ed25519 and Ed448) Edwards-curve primitives, Falcon lattice-based signatures, the HQC code-based key encapsulation mechanism, and a comprehensive X.509 certificate infrastructure built on a strict DER/BER-capable ASN.1 engine. The X.509 layer covers the full certificate lifecycle: parsing, validation, generation, revocation, OCSP, PKCS#12 key management, and post-quantum ML-DSA certificate profiles, without any external dependencies.
 
 Key design goals:
 
-- **Long-term security** — all asymmetric algorithms are post-quantum secure or hybrid; proprietary constructions target 256-bit or greater security levels.
-- **Standards compliance** — written to [MISRA C](https://misra.org.uk/) secure coding guidelines; asymmetric primitives updated to final FIPS-203, FIPS-204, and FIPS-205 standards; TLS stack conforms to RFC 8446.
-- **Public internet compatibility** — NIST P-256, P-384, and P-521 ECDSA and ECDH, Edwards-curve EdDH/EdDSA, hybrid post-quantum groups, and X.509 certificate infrastructure enable deployment in TLS 1.3 stacks and compliance with CA/Browser Forum Baseline Requirements for publicly trusted certificates.
-- **Performance** — dual code paths: clean portable C reference implementations alongside AVX, AVX2, and AVX-512 intrinsic-optimized variants. Enable the highest instruction set supported by your target CPU for maximum throughput.
-- **Auditability** — thoroughly commented, well-structured source with a comprehensive test suite covering known-answer tests, NIST CAVP/ACVP vectors, fuzzing, and stress testing across every primitive.
-- **Portability** — compiles on Windows (MSVC), Linux (GCC), and macOS (Clang) with no external dependencies.
+- **Long-term security** - all asymmetric algorithms are post-quantum secure or hybrid; proprietary constructions target 256-bit or greater security levels.
+- **Standards compliance** - written to [MISRA C](https://misra.org.uk/) secure coding guidelines; asymmetric primitives updated to final FIPS-203, FIPS-204, and FIPS-205 standards; TLS stack conforms to RFC 8446.
+- **Public internet compatibility** - NIST P-256, P-384, and P-521 ECDSA and ECDH, Edwards-curve EdDH/EdDSA, hybrid post-quantum groups, and X.509 certificate infrastructure enable deployment in TLS 1.3 stacks and compliance with CA/Browser Forum Baseline Requirements for publicly trusted certificates.
+- **Performance** - dual code paths: clean portable C reference implementations alongside AVX, AVX2, and AVX-512 intrinsic-optimized variants. Enable the highest instruction set supported by your target CPU for maximum throughput.
+- **Auditability** - thoroughly commented, well-structured source with a comprehensive test suite covering known-answer tests, NIST CAVP/ACVP vectors, fuzzing, and stress testing across every primitive.
+- **Portability** - compiles on Windows (MSVC), Linux (GCC), and macOS (Clang) with no external dependencies.
 
 > **Version:** 1.2.0.0  
 > **Tested on:** Windows 10 / 11 / Server · Ubuntu Linux · macOS  
@@ -82,11 +82,11 @@ The primary validation suite for the QSC library. QSCTest exercises every crypto
 
 **Test coverage includes:**
 
-- **Known Answer Tests (KATs)** — output from every primitive is verified against pre-computed reference vectors.
-- **NIST ACVP Vectors** — asymmetric and symmetric primitives verified against official NIST Automated Cryptographic Validation Program test vectors.
-- **Fuzzing** — randomized input testing to detect edge-case failures and undefined behaviour.
-- **Stress Testing** — extended load testing to surface resource leaks, state corruption, and threading issues.
-- **Function Correctness** — round-trip and cross-function consistency checks (e.g., encrypt→decrypt, sign→verify).
+- **Known Answer Tests (KATs)** - output from every primitive is verified against pre-computed reference vectors.
+- **NIST ACVP Vectors** - asymmetric and symmetric primitives verified against official NIST Automated Cryptographic Validation Program test vectors.
+- **Fuzzing** - randomized input testing to detect edge-case failures and undefined behaviour.
+- **Stress Testing** - extended load testing to surface resource leaks, state corruption, and threading issues.
+- **Function Correctness** - round-trip and cross-function consistency checks (e.g., encrypt→decrypt, sign→verify).
 
 Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, HQC, ECDH P-256/P-384/P-521, EdDH X25519/X448), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256/P-384/P-521, EdDSA Ed25519/Ed448), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP), the X.509 certificate layer, the complete TLS 1.3 protocol stack, and all utility modules.
 
@@ -159,14 +159,14 @@ QSC includes a complete TLS 1.3 implementation conforming to RFC 8446, built ent
 
 The complete RFC 8446 protocol surface is implemented:
 
-- **1-RTT handshake** — certificate-authenticated client and server paths; full state machine from ClientHello through application data
-- **Mutual TLS (mTLS)** — server-initiated CertificateRequest; client certificate presentation and validation
-- **PSK resumption** — NewSessionTicket emission and consumption; binder computation; 1-RTT and 0-RTT (early data) paths with EndOfEarlyData sequencing
-- **HelloRetryRequest** — server-initiated group renegotiation with transcript message_hash transform per RFC 8446 §4.4.1; enforced one-HRR-per-handshake limit
-- **Post-handshake KeyUpdate** — both `update_not_requested` and `update_requested` flows; reciprocal update is mandatory when requested (RFC 8446 §4.6.3)
-- **Post-handshake NewSessionTicket** — server emission and client consumption with per-ticket PSK derivation from `resumption_master_secret`
-- **Closure** — encrypted `close_notify` alert construction and dispatch
-- **Compatibility** — ChangeCipherSpec pass-through for middlebox compatibility
+- **1-RTT handshake** - certificate-authenticated client and server paths; full state machine from ClientHello through application data
+- **Mutual TLS (mTLS)** - server-initiated CertificateRequest; client certificate presentation and validation
+- **PSK resumption** - NewSessionTicket emission and consumption; binder computation; 1-RTT and 0-RTT (early data) paths with EndOfEarlyData sequencing
+- **HelloRetryRequest** - server-initiated group renegotiation with transcript message_hash transform per RFC 8446 §4.4.1; enforced one-HRR-per-handshake limit
+- **Post-handshake KeyUpdate** - both `update_not_requested` and `update_requested` flows; reciprocal update is mandatory when requested (RFC 8446 §4.6.3)
+- **Post-handshake NewSessionTicket** - server emission and client consumption with per-ticket PSK derivation from `resumption_master_secret`
+- **Closure** - encrypted `close_notify` alert construction and dispatch
+- **Compatibility** - ChangeCipherSpec pass-through for middlebox compatibility
 
 #### Cipher Suites
 
@@ -182,14 +182,14 @@ The group layer abstracts classical, pure-KEM, and hybrid named groups behind a 
 
 | Group | IANA | Classical | PQC Component |
 |---|---|---|---|
-| secp256r1 | 0x0017 | P-256 ECDH | — |
-| secp384r1 | 0x0018 | P-384 ECDH | — |
-| secp521r1 | 0x0019 | P-521 ECDH | — |
-| x25519 | 0x001D | X25519 | — |
-| x448 | 0x001E | X448 | — |
-| ML-KEM-512 | 0x0200 | — | ML-KEM-512 |
-| ML-KEM-768 | 0x0201 | — | ML-KEM-768 |
-| ML-KEM-1024 | 0x0202 | — | ML-KEM-1024 |
+| secp256r1 | 0x0017 | P-256 ECDH | - |
+| secp384r1 | 0x0018 | P-384 ECDH | - |
+| secp521r1 | 0x0019 | P-521 ECDH | - |
+| x25519 | 0x001D | X25519 | - |
+| x448 | 0x001E | X448 | - |
+| ML-KEM-512 | 0x0200 | - | ML-KEM-512 |
+| ML-KEM-768 | 0x0201 | - | ML-KEM-768 |
+| ML-KEM-1024 | 0x0202 | - | ML-KEM-1024 |
 | x25519 + ML-KEM-512 | 0x11EB | X25519 | ML-KEM-512 |
 | x25519 + ML-KEM-768 | 0x11EC | X25519 | ML-KEM-768 |
 | secp256r1 + ML-KEM-768 | 0x11ED | P-256 ECDH | ML-KEM-768 |
@@ -240,14 +240,14 @@ The group layer abstracts classical, pure-KEM, and hybrid named groups behind a 
 
 #### Security Properties
 
-- **Hybrid post-quantum forward secrecy** — the DHE input to HKDF-Extract is the concatenation of the ECDH shared secret and the ML-KEM shared secret; an attacker must break both primitives to recover session keys
-- **Version downgrade protection** — the client verifies that `supported_versions` is present in ServerHello and that the selected version is exactly TLS 1.3 (0x0304); absence or a mismatched version causes immediate rejection with `missing_extension` or `illegal_parameter`
-- **Unknown extension rejection** — any extension present in ServerHello that was not offered in ClientHello is rejected with `unsupported_extension` per RFC 8446 §4.2
-- **Constant-time Finished verification** — the Finished MAC is verified using `qsc_intutils_verify`, which XOR-accumulates all bytes without early exit
-- **Constant-time content-type scanning** — the inner content-type backward byte scan uses mask-select operations with no data-dependent branches
-- **Sequence exhaustion enforcement** — the 64-bit record sequence counter is checked for UINT64_MAX exhaustion before any AEAD operation; no record is ever processed under an exhausted nonce space (RFC 8446 §5.5)
-- **Mandatory CertificateVerify callback** — the engine returns `internal_error` if `verifycertificateverify` is not configured; the handshake cannot complete without server authentication
-- **Secure erasure** — all traffic keys, transcript states, shared secrets, and handshake buffers are cleared with `qsc_memutils_secure_erase` at disposal; key material is erased before overwrite on epoch transitions
+- **Hybrid post-quantum forward secrecy** - the DHE input to HKDF-Extract is the concatenation of the ECDH shared secret and the ML-KEM shared secret; an attacker must break both primitives to recover session keys
+- **Version downgrade protection** - the client verifies that `supported_versions` is present in ServerHello and that the selected version is exactly TLS 1.3 (0x0304); absence or a mismatched version causes immediate rejection with `missing_extension` or `illegal_parameter`
+- **Unknown extension rejection** - any extension present in ServerHello that was not offered in ClientHello is rejected with `unsupported_extension` per RFC 8446 §4.2
+- **Constant-time Finished verification** - the Finished MAC is verified using `qsc_intutils_verify`, which XOR-accumulates all bytes without early exit
+- **Constant-time content-type scanning** - the inner content-type backward byte scan uses mask-select operations with no data-dependent branches
+- **Sequence exhaustion enforcement** - the 64-bit record sequence counter is checked for UINT64_MAX exhaustion before any AEAD operation; no record is ever processed under an exhausted nonce space (RFC 8446 §5.5)
+- **Mandatory CertificateVerify callback** - the engine returns `internal_error` if `verifycertificateverify` is not configured; the handshake cannot complete without server authentication
+- **Secure erasure** - all traffic keys, transcript states, shared secrets, and handshake buffers are cleared with `qsc_memutils_secure_erase` at disposal; key material is erased before overwrite on epoch transitions
 
 ---
 
@@ -259,13 +259,13 @@ QSC includes a complete X.509 PKI layer covering the full certificate lifecycle:
 
 The X.509 implementation strictly enforces the requirements of RFC 5280, X.690, and RFC 6125:
 
-- **Strict DER decoding** — the BER decoder rejects indefinite-length encodings for all DER contexts; BOOLEAN values must be `0x00` (FALSE) or `0xFF` (TRUE) per X.690 §11.1; INTEGER encodings are validated for minimal encoding and correct sign representation.
-- **OID validation** — the first OID arc is validated to the range `{0, 1, 2}` per X.660, preventing crafted OIDs from bypassing algorithm dispatch.
-- **Full 64-bit integer support** — ASN.1 INTEGER decoding correctly handles the 9-byte unsigned representation of values ≥ 2⁶³, covering the full range of CRL serial numbers and other large integer fields.
-- **RFC 6125-compliant hostname verification** — the Subject CN fallback is suppressed whenever any Subject Alternative Name extension is present, regardless of entry type, as required by RFC 6125 §6.4.4.
-- **Unicode name normalisation** — Distinguished Name attribute values are NFC-normalised before comparison, ensuring correct name matching for certificates issued with precomposed or decomposed Unicode characters (RFC 5280 §7.1).
-- **pathLen overflow protection** — the BasicConstraints `pathLenConstraint` field is range-checked against `UINT32_MAX` before assignment, rejecting malformed encodings that would silently truncate the constraint value.
-- **PQC-sized buffers** — DER and PEM decode buffers are sized to accommodate the largest current post-quantum certificate profile (ML-DSA-87: 2592-byte public key, 4627-byte signature), preventing silent decode failures for valid PQC certificates.
+- **Strict DER decoding** - the BER decoder rejects indefinite-length encodings for all DER contexts; BOOLEAN values must be `0x00` (FALSE) or `0xFF` (TRUE) per X.690 §11.1; INTEGER encodings are validated for minimal encoding and correct sign representation.
+- **OID validation** - the first OID arc is validated to the range `{0, 1, 2}` per X.660, preventing crafted OIDs from bypassing algorithm dispatch.
+- **Full 64-bit integer support** - ASN.1 INTEGER decoding correctly handles the 9-byte unsigned representation of values ≥ 2⁶³, covering the full range of CRL serial numbers and other large integer fields.
+- **RFC 6125-compliant hostname verification** - the Subject CN fallback is suppressed whenever any Subject Alternative Name extension is present, regardless of entry type, as required by RFC 6125 §6.4.4.
+- **Unicode name normalisation** - Distinguished Name attribute values are NFC-normalised before comparison, ensuring correct name matching for certificates issued with precomposed or decomposed Unicode characters (RFC 5280 §7.1).
+- **pathLen overflow protection** - the BasicConstraints `pathLenConstraint` field is range-checked against `UINT32_MAX` before assignment, rejecting malformed encodings that would silently truncate the constraint value.
+- **PQC-sized buffers** - DER and PEM decode buffers are sized to accommodate the largest current post-quantum certificate profile (ML-DSA-87: 2592-byte public key, 4627-byte signature), preventing silent decode failures for valid PQC certificates.
 
 #### X.509 Module Map
 
@@ -454,8 +454,8 @@ Each proprietary construction in QSC is accompanied by a full technical specific
 
 QSC uses a dual implementation strategy for all performance-critical algorithms:
 
-- **Reference path** — clean, portable C23 code that compiles on any conforming compiler and provides a readable, auditable baseline.
-- **SIMD-optimized path** — AVX, AVX2, and AVX-512 intrinsic implementations that activate automatically when the appropriate instruction set is enabled at compile time, providing substantial throughput improvements on modern x86-64 hardware.
+- **Reference path** - clean, portable C23 code that compiles on any conforming compiler and provides a readable, auditable baseline.
+- **SIMD-optimized path** - AVX, AVX2, and AVX-512 intrinsic implementations that activate automatically when the appropriate instruction set is enabled at compile time, providing substantial throughput improvements on modern x86-64 hardware.
 
 The two paths share identical interfaces and produce identical output; the compiler selects the appropriate implementation via preprocessor feature detection. For production deployments, enabling AVX-512 (where the target hardware supports it) yields the highest performance across all symmetric primitives, hash functions, and post-quantum algorithms.
 
@@ -463,7 +463,7 @@ SIMD acceleration is applied across: AES (AES-NI), RCS, CSX, SHA3/SHAKE/Keccak, 
 
 The ECDSA and ECDH P-256, P-384, and P-521 implementations use Jacobian projective coordinates with the a=−3 doubling shortcut, Solinas reduction for field arithmetic, and Barrett reduction for scalar arithmetic mod n. RFC 6979 deterministic nonce generation (HMAC-SHA256/384/512 respectively) means no entropy source is required during signing. EdDH and EdDSA implementations use constant-time field arithmetic over their respective Edwards-curve fields.
 
-The TLS 1.3 engine is designed for minimal allocation: the record layer heap-allocates only the TLSInnerPlaintext scratch buffer (one allocation per encrypt or decrypt call) and all other working state lives in caller-supplied structures. The engine does not retain persistent state between calls beyond what is stored in the `qsc_tls_connection` or its embedded client/server state. Each TLS layer component — key schedule, record layer, transcript hash, group descriptors, certificate binding, and I/O adapter — is independently testable without instantiating a full client/server handshake.
+The TLS 1.3 engine is designed for minimal allocation: the record layer heap-allocates only the TLSInnerPlaintext scratch buffer (one allocation per encrypt or decrypt call) and all other working state lives in caller-supplied structures. The engine does not retain persistent state between calls beyond what is stored in the `qsc_tls_connection` or its embedded client/server state. Each TLS layer component - key schedule, record layer, transcript hash, group descriptors, certificate binding, and I/O adapter - is independently testable without instantiating a full client/server handshake.
 
 ---
 
@@ -564,7 +564,7 @@ The default project configuration uses minimal flags with no enhanced instructio
 |---|---|
 | **Post-Quantum Algorithms** | ML-KEM (FIPS-203), ML-DSA (FIPS-204), SLH-DSA (FIPS-205), Falcon (Round 3), Classic McEliece, HQC (Round 4) |
 | **Classical Algorithms** | AES, SHA-2/3, HMAC, ChaCha20-Poly1305, ECDH (P-256/P-384/P-521, X25519/X448), ECDSA (P-256/P-384/P-521), EdDSA (Ed25519/Ed448) |
-| **Proprietary Constructions** | RCS, CSX, QMAC, SCB — each with formal security analysis |
+| **Proprietary Constructions** | RCS, CSX, QMAC, SCB - each with formal security analysis |
 | **X.509 / PKI Infrastructure** | Full certificate lifecycle: DER/PEM parsing and generation, chain verification, CRL and OCSP revocation, PKCS#10 CSR, PKCS#12 key bundles, trust store management; ECDSA and ML-DSA-44/65/87 certificate profiles; RFC 5280, RFC 6125, and X.690 strict DER compliance |
 | **TLS 1.3** | Complete RFC 8446 implementation: 1-RTT, mTLS, PSK resumption, 0-RTT early data, HelloRetryRequest, KeyUpdate, NewSessionTicket; 16 named groups including 8 hybrid post-quantum groups; 6 signature schemes including ML-DSA-44/65/87; no external TLS dependencies |
 | **Hybrid Post-Quantum Key Exchange** | ECDH + ML-KEM combined in a single TLS handshake flight; shared secrets concatenated per draft-ietf-tls-hybrid-design; 8 hybrid group configurations from secp256r1+ML-KEM-512 to secp384r1+ML-KEM-1024 |
@@ -580,7 +580,7 @@ The default project configuration uses minimal flags with no enhanced instructio
 ## Roadmap
 
 - [ ] Continued ASM and SIMD integration and optimization
-- [x] TLS 1.3 *(complete — RFC 8446 compliant; 1-RTT, mTLS, PSK/0-RTT, HRR, KeyUpdate, NewSessionTicket, hybrid post-quantum groups, landed April 2026)*
+- [x] TLS 1.3 *(complete - RFC 8446 compliant; 1-RTT, mTLS, PSK/0-RTT, HRR, KeyUpdate, NewSessionTicket, hybrid post-quantum groups, landed April 2026)*
 - [ ] Expanded benchmarking framework with cross-platform performance reporting
 - [ ] Integration of emerging post-quantum research and forthcoming NIST standards
 
@@ -622,4 +622,4 @@ For licensing inquiries, supported implementations, or commercial use:
 
 ---
 
-*Quantum Resistant Cryptographic Solutions Corporation — All rights reserved, 2026.*
+*Quantum Resistant Cryptographic Solutions Corporation - All rights reserved, 2026.*
