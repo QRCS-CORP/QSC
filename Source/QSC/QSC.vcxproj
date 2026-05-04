@@ -181,7 +181,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
       <PrecompiledHeaderFile />
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OpenMPSupport>false</OpenMPSupport>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -319,6 +319,7 @@
     <ClInclude Include="tlssession.h" />
     <ClInclude Include="tlssigalgs.h" />
     <ClInclude Include="tlssignerdefault.h" />
+    <ClInclude Include="tlssocket.h" />
     <ClInclude Include="tlsstate.h" />
     <ClInclude Include="tlstranscript.h" />
     <ClInclude Include="tlstypes.h" />
@@ -446,6 +447,7 @@
     <ClCompile Include="tlssession.c" />
     <ClCompile Include="tlssigalgs.c" />
     <ClCompile Include="tlssignerdefault.c" />
+    <ClCompile Include="tlssocket.c" />
     <ClCompile Include="tlstranscript.c" />
     <ClCompile Include="transpose.c" />
     <ClCompile Include="winutils.c" />

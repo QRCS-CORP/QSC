@@ -615,6 +615,9 @@
     <ClInclude Include="tlssignerdefault.h">
       <Filter>Header Files\TLS</Filter>
     </ClInclude>
+    <ClInclude Include="tlssocket.h">
+      <Filter>Header Files\TLS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -987,6 +990,9 @@
       <Filter>Source Files\TLS</Filter>
     </ClCompile>
     <ClCompile Include="tlscertx509.c">
+      <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="tlssocket.c">
       <Filter>Source Files\TLS</Filter>
     </ClCompile>
   </ItemGroup>

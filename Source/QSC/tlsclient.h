@@ -173,6 +173,25 @@ typedef struct qsc_tls_client_state
  *
  * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
  */
+
+/**
+ * \brief Copy a certificate-validation interface into a TLS client configuration.
+ *
+ * \details
+ * This setter is the TLS-side attachment point for certificate validation. X.509
+ * helpers prepare the qsc_tls_certificate_interface, but do not mutate TLS state
+ * objects directly. The hostname pointer is borrowed from the caller and must remain
+ * valid for the lifetime of configurations initialized from this object.
+ *
+ * \param config: [struct*] The client configuration to update.
+ * \param iface: [struct*] The certificate-validation interface to copy.
+ * \param hostname: [const char*] Optional server hostname for SNI and certificate validation.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_client_config_set_certificate_interface(qsc_tls_client_config* config,
+    const qsc_tls_certificate_interface* iface, const char* hostname);
+
 QSC_EXPORT_API qsc_tls_status qsc_tls_client_initialize(qsc_tls_client_state* state, const qsc_tls_client_config* config);
 
 /**

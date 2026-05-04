@@ -18,10 +18,6 @@
 #include <string.h>
 #include <time.h>
 
-extern void qsc_tls_client_set_certificate_interface(qsc_tls_client* client, const qsc_tls_certificate_interface* iface, const char* hostname, bool requirepeercertificate);
-extern void qsc_tls_server_set_certificate_interface(qsc_tls_server* server, const qsc_tls_certificate_interface* iface, const char* hostname, bool requirepeercertificate);
-extern qsc_tls_status qsc_tls_server_set_local_certificate(qsc_tls_server* server, const qsc_tls_certificate_view* chain, size_t chainlength, qsc_tls_signature_scheme verifyscheme, const uint8_t* privatekeydata, size_t privatekeylen);
-
 static void x509w_result_set_message(qsc_x509w_result* result, const char* message)
 {
     if (result != NULL && message != NULL)
@@ -342,8 +338,7 @@ static qsc_asn1_status x509w_resolve_crl(const qsc_x509_certificate* certificate
     return status;
 }
 
-static qsc_x509w_status x509w_verify_chain_internal(const qsc_x509_certificate* certificates, size_t certificatecount,
-    const qsc_x509w_trust_store* store, const qsc_x509w_profile* profile, qsc_x509w_result* result)
+static qsc_x509w_status x509w_verify_chain_internal(const qsc_x509_certificate* certificates, size_t certificatecount, const qsc_x509w_trust_store* store, const qsc_x509w_profile* profile, qsc_x509w_result* result)
 {
     qsc_x509_certificate built[QSC_X509W_CHAIN_MAX];
     qsc_x509_chain chain;
@@ -605,6 +600,63 @@ static void x509w_profile_apply_development_defaults(qsc_x509w_profile* profile)
     profile->revocationmode = QSC_X509W_REVOCATION_MODE_NONE;
     profile->aiaissuerpolicy = QSC_X509W_LOCATOR_POLICY_DISABLED;
     profile->ocsppolicy = QSC_X509W_LOCATOR_POLICY_DISABLED;
+}
+
+static qsc_x509w_status x509w_copy_text_value(const uint8_t* data, size_t datalen, char* output, size_t outputlen, size_t* written)
+{
+    qsc_x509w_status status;
+
+    status = QSC_X509W_STATUS_SUCCESS;
+
+    if (data == NULL || output == NULL || written == NULL || outputlen == 0U)
+    {
+        status = QSC_X509W_STATUS_INVALID_INPUT;
+    }
+    else if (datalen >= outputlen)
+    {
+        status = QSC_X509W_STATUS_BUFFER_TOO_SMALL;
+    }
+    else
+    {
+        qsc_memutils_copy((uint8_t*)output, data, datalen);
+        output[datalen] = '\0';
+        *written = datalen;
+    }
+
+    return status;
+}
+
+static qsc_x509w_status x509w_map_tls_status(qsc_tls_status status)
+{
+    qsc_x509w_status res;
+
+    res = QSC_X509W_STATUS_CALLBACK_ERROR;
+
+    switch (status)
+    {
+    case qsc_tls_status_success:
+    {
+        res = QSC_X509W_STATUS_SUCCESS;
+        break;
+    }
+    case qsc_tls_status_invalid_input:
+    {
+        res = QSC_X509W_STATUS_INVALID_INPUT;
+        break;
+    }
+    case qsc_tls_status_buffer_too_small:
+    case qsc_tls_status_invalid_length:
+    {
+        res = QSC_X509W_STATUS_BUFFER_TOO_SMALL;
+        break;
+    }
+    default:
+    {
+        break;
+    }
+    }
+
+    return res;
 }
 
 void qsc_x509w_profile_initialize(qsc_x509w_profile* profile)
@@ -1401,30 +1453,6 @@ qsc_x509w_status qsc_x509w_verify_peer_certificates(const qsc_x509_certificate* 
     return x509w_verify_chain_internal(certificates, certificatecount, store, profile, result);
 }
 
-static qsc_x509w_status x509w_copy_text_value(const uint8_t* data, size_t datalen, char* output, size_t outputlen, size_t* written)
-{
-    qsc_x509w_status status;
-
-    status = QSC_X509W_STATUS_SUCCESS;
-
-    if (data == NULL || output == NULL || written == NULL || outputlen == 0U)
-    {
-        status = QSC_X509W_STATUS_INVALID_INPUT;
-    }
-    else if (datalen >= outputlen)
-    {
-        status = QSC_X509W_STATUS_BUFFER_TOO_SMALL;
-    }
-    else
-    {
-        qsc_memutils_copy((uint8_t*)output, data, datalen);
-        output[datalen] = '\0';
-        *written = datalen;
-    }
-
-    return status;
-}
-
 qsc_x509w_status qsc_x509w_name_string(const qsc_x509_name* name, char* output, size_t outputlen, size_t* written)
 {
     if (name == NULL || output == NULL || written == NULL || outputlen == 0U)
@@ -1698,8 +1726,7 @@ const char* qsc_x509w_result_message(const qsc_x509w_result* result)
     return result->message;
 }
 
-qsc_x509w_status qsc_x509w_certificate_check_role(const qsc_x509_certificate* certificate, qsc_x509w_certificate_role role,
-    const char* hostname, qsc_x509w_result* result)
+qsc_x509w_status qsc_x509w_certificate_check_role(const qsc_x509_certificate* certificate, qsc_x509w_certificate_role role, const char* hostname, qsc_x509w_result* result)
 {
     qsc_x509_verify_status vstatus;
     qsc_x509w_status status;
@@ -1803,8 +1830,7 @@ qsc_x509w_status qsc_x509w_server_identity_get_chain(const qsc_x509w_server_iden
     return QSC_X509W_STATUS_SUCCESS;
 }
 
-qsc_x509w_status qsc_x509w_server_identity_verify(const qsc_x509w_server_identity* identity, const qsc_x509w_trust_store* store,
-    const qsc_x509w_profile* profile, qsc_x509w_result* result)
+qsc_x509w_status qsc_x509w_server_identity_verify(const qsc_x509w_server_identity* identity, const qsc_x509w_trust_store* store, const qsc_x509w_profile* profile, qsc_x509w_result* result)
 {
     if (identity == NULL)
     {
@@ -1932,8 +1958,7 @@ qsc_x509w_status qsc_x509w_csr_export_pem(const qsc_x509_csr* csr, char* output,
     return x509w_map_encode_status(xstatus);
 }
 
-qsc_x509w_status qsc_x509w_csr_create(qsc_x509_csr* csr, const qsc_x509_name* subject,
-    const qsc_x509_subject_public_key_info* spki, const qsc_x509_algorithm_identifier* signaturealgorithm)
+qsc_x509w_status qsc_x509w_csr_create(qsc_x509_csr* csr, const qsc_x509_name* subject, const qsc_x509_subject_public_key_info* spki, const qsc_x509_algorithm_identifier* signaturealgorithm)
 {
     qsc_asn1_status xstatus;
 
@@ -1968,8 +1993,7 @@ qsc_x509w_status qsc_x509w_csr_add_dns_name(qsc_x509_csr* csr, const char* dnsna
     return x509w_map_asn1_status(qsc_x509_csr_add_san_dns(csr, dnsname, strlen(dnsname)));
 }
 
-qsc_x509w_status qsc_x509w_csr_sign_der(const qsc_x509_csr* csr, qsc_x509_certificate_sign_callback signcallback,
-    void* context, uint8_t* output, size_t* outputlen)
+qsc_x509w_status qsc_x509w_csr_sign_der(const qsc_x509_csr* csr, qsc_x509_certificate_sign_callback signcallback, void* context, uint8_t* output, size_t* outputlen)
 {
     if (csr == NULL || signcallback == NULL || output == NULL || outputlen == NULL)
     {
@@ -1979,8 +2003,7 @@ qsc_x509w_status qsc_x509w_csr_sign_der(const qsc_x509_csr* csr, qsc_x509_certif
     return x509w_map_encode_status(qsc_x509_csr_sign(csr, signcallback, context, output, outputlen));
 }
 
-qsc_x509w_status qsc_x509w_csr_sign_pem(const qsc_x509_csr* csr, qsc_x509_certificate_sign_callback signcallback,
-    void* context, char* output, size_t* outputlen)
+qsc_x509w_status qsc_x509w_csr_sign_pem(const qsc_x509_csr* csr, qsc_x509_certificate_sign_callback signcallback, void* context, char* output, size_t* outputlen)
 {
     qsc_x509w_status status;
     uint8_t der[QSC_X509_CSR_WRITE_MAX];
@@ -2008,10 +2031,8 @@ qsc_x509w_status qsc_x509w_csr_verify(const qsc_x509_csr* csr)
     return (qsc_x509_csr_verify(csr) == true) ? QSC_X509W_STATUS_SUCCESS : QSC_X509W_STATUS_VERIFY_ERROR;
 }
 
-qsc_x509w_status qsc_x509w_certificate_issue_from_csr(const qsc_x509_csr* csr, const qsc_x509_certificate* issuer,
-    const qsc_x509_algorithm_identifier* signaturealgorithm, const uint8_t* serialnumber, size_t serialnumberlen,
-    const qsc_x509_validity* validity, uint32_t profile, uint32_t policyflags,
-    qsc_x509_certificate_sign_callback signcallback, void* context, uint8_t* output, size_t* outputlen)
+qsc_x509w_status qsc_x509w_certificate_issue_from_csr(const qsc_x509_csr* csr, const qsc_x509_certificate* issuer, const qsc_x509_algorithm_identifier* signaturealgorithm, const uint8_t* serialnumber, size_t serialnumberlen,
+    const qsc_x509_validity* validity, uint32_t profile, uint32_t policyflags, qsc_x509_certificate_sign_callback signcallback, void* context, uint8_t* output, size_t* outputlen)
 {
     qsc_asn1_status xstatus;
     qsc_x509_certificate_builder builder;
@@ -2085,7 +2106,6 @@ qsc_x509w_status qsc_x509w_certificate_issue_from_csr(const qsc_x509_csr* csr, c
     return QSC_X509W_STATUS_SUCCESS;
 }
 
-
 void qsc_x509w_tls_bridge_initialize(qsc_x509w_tls_bridge* bridge)
 {
     if (bridge != NULL)
@@ -2146,41 +2166,7 @@ bool qsc_x509w_tls_local_certificate_is_ready(const qsc_x509w_tls_local_certific
     return res;
 }
 
-static qsc_x509w_status x509w_map_tls_status(qsc_tls_status status)
-{
-    qsc_x509w_status res;
-
-    res = QSC_X509W_STATUS_CALLBACK_ERROR;
-
-    switch (status)
-    {
-        case qsc_tls_status_success:
-        {
-            res = QSC_X509W_STATUS_SUCCESS;
-            break;
-        }
-        case qsc_tls_status_invalid_input:
-        {
-            res = QSC_X509W_STATUS_INVALID_INPUT;
-            break;
-        }
-        case qsc_tls_status_buffer_too_small:
-        case qsc_tls_status_invalid_length:
-        {
-            res = QSC_X509W_STATUS_BUFFER_TOO_SMALL;
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-
-    return res;
-}
-
-qsc_x509w_status qsc_x509w_tls_bridge_configure(qsc_x509w_tls_bridge* bridge, const qsc_x509w_trust_store* store,
-    const qsc_x509w_profile* profile)
+qsc_x509w_status qsc_x509w_tls_bridge_configure(qsc_x509w_tls_bridge* bridge, const qsc_x509w_trust_store* store, const qsc_x509w_profile* profile)
 {
     qsc_tls_status tstatus;
     qsc_x509w_status status;
@@ -2225,62 +2211,7 @@ qsc_x509w_status qsc_x509w_tls_bridge_configure(qsc_x509w_tls_bridge* bridge, co
     return status;
 }
 
-qsc_x509w_status qsc_x509w_tls_bridge_attach_client_validation(qsc_tls_client* client, const qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate)
-{
-    qsc_x509w_status status;
-    const qsc_tls_certificate_interface* iface;
-
-    status = QSC_X509W_STATUS_SUCCESS;
-    iface = qsc_x509w_tls_bridge_get_interface(bridge);
-
-    if (client == NULL || iface == NULL)
-    {
-        status = QSC_X509W_STATUS_INVALID_INPUT;
-    }
-    else
-    {
-        qsc_tls_client_set_certificate_interface(client, iface, hostname, requirepeercertificate);
-    }
-
-    return status;
-}
-
-qsc_x509w_status qsc_x509w_tls_bridge_attach_server_validation(qsc_tls_server* server, const qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate)
-{
-    qsc_x509w_status status;
-    const qsc_tls_certificate_interface* iface;
-
-    status = QSC_X509W_STATUS_SUCCESS;
-    iface = qsc_x509w_tls_bridge_get_interface(bridge);
-
-    if (server == NULL || iface == NULL)
-    {
-        status = QSC_X509W_STATUS_INVALID_INPUT;
-    }
-    else
-    {
-        qsc_tls_server_set_certificate_interface(server, iface, hostname, requirepeercertificate);
-    }
-
-    return status;
-}
-
-qsc_x509w_status qsc_x509w_tls_bridge_set_client(qsc_tls_client* client, qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate)
-{
-    return qsc_x509w_tls_bridge_attach_client_validation(client, bridge, hostname, requirepeercertificate);
-}
-
-qsc_x509w_status qsc_x509w_tls_bridge_set_server_validation(qsc_tls_server* server, qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate)
-{
-    return qsc_x509w_tls_bridge_attach_server_validation(server, bridge, hostname, requirepeercertificate);
-}
-
-qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_server_identity* identity,
-    qsc_tls_signature_scheme verifyscheme, qsc_x509w_tls_local_certificate* localcert)
+qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_server_identity* identity, qsc_tls_signature_scheme verifyscheme, qsc_x509w_tls_local_certificate* localcert)
 {
     /* C6 fix: no longer accepts a pre-computed signature.
      * Extracts the private key directly from identity->privatekey so the
@@ -2335,30 +2266,6 @@ qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_s
                 identity->privatekey.privatekey,
                 identity->privatekey.privatekeylen);
         }
-    }
-
-    return status;
-}
-
-qsc_x509w_status qsc_x509w_tls_server_set_local_certificate(qsc_tls_server* server,
-    const qsc_x509w_tls_local_certificate* localcert)
-{
-    qsc_tls_status tstatus;
-    qsc_x509w_status status;
-
-    tstatus = qsc_tls_status_success;
-    status = QSC_X509W_STATUS_SUCCESS;
-
-    if (server == NULL || localcert == NULL || localcert->chainlength == 0U)
-    {
-        status = QSC_X509W_STATUS_INVALID_INPUT;
-    }
-    else
-    {
-        /* C6 fix: pass private key, not pre-computed signature */
-        tstatus = qsc_tls_server_set_local_certificate(server, localcert->chain, localcert->chainlength,
-            localcert->verifyscheme, localcert->privatekeydata, localcert->privatekeylen);
-        status = x509w_map_tls_status(tstatus);
     }
 
     return status;

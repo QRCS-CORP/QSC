@@ -64,11 +64,30 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief Blocking socket adapter around qsc_tls_connection.
  *
  * \details
- * This header provides a minimal transport adapter that binds a qsc_tls_connection to a
- * qsc_socket and drives the TLS engine using blocking send and receive calls. The adapter
- * does not allocate or own the engine or the socket. It only stores non-owning pointers and
- * marshals bytes between the engine record interface and the socket API.
+ * This header provides a transport adapter that binds a qsc_tls_connection to a
+ * qsc_socket and drives the TLS engine using blocking send and receive calls. The
+ * adapter does not allocate or own the engine or the socket. It only stores
+ * non-owning pointers and marshals bytes between the engine record interface and
+ * the socket API.
+ *
+ * The adapter maintains a persistent inbound stream buffer. TCP is a byte-stream
+ * transport and does not preserve TLS record boundaries. A single socket receive
+ * can return a partial record, exactly one record, or multiple coalesced records.
+ * The persistent buffer preserves any unconsumed bytes between handshake,
+ * application receive, post-handshake, and shutdown processing.
  */
+
+/**
+ * \def QSC_TLS_IO_RECV_CHUNK
+ * \brief Maximum number of socket bytes requested by one blocking receive call.
+ */
+#define QSC_TLS_IO_RECV_CHUNK 4096U
+
+/**
+ * \def QSC_TLS_IO_RX_BUFFER_SIZE
+ * \brief Persistent inbound TLS stream buffer size used by the socket adapter.
+ */
+#define QSC_TLS_IO_RX_BUFFER_SIZE QSC_TLS_STREAM_BUFFER_MAX_SIZE
 
 /**
  * \struct qsc_tls_io_connection
@@ -76,8 +95,10 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 typedef struct qsc_tls_io_connection
 {
-    qsc_tls_connection* engine;      /*!< The attached TLS engine instance. */
-    qsc_socket* socket;              /*!< The attached blocking socket. */
+    qsc_tls_connection* engine;                       /*!< The attached TLS engine instance. */
+    qsc_socket* socket;                               /*!< The attached blocking socket. */
+    uint8_t rxbuffer[QSC_TLS_IO_RX_BUFFER_SIZE];      /*!< Persistent inbound TLS stream buffer. */
+    size_t rxbufferlen;                               /*!< Number of valid bytes in the inbound stream buffer. */
 } qsc_tls_io_connection;
 
 /**
@@ -97,7 +118,9 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_io_attach(qsc_tls_io_connection* io, qsc_t
  * \details
  * Repeatedly calls the TLS engine handshake function, flushing any produced outbound flight
  * to the socket and receiving additional input whenever the engine requires more record bytes.
- * The call returns when the handshake completes or a fatal error occurs.
+ * The call returns when the handshake completes or a fatal error occurs. Any unconsumed bytes
+ * received during the handshake remain in the persistent stream buffer for later application or
+ * post-handshake processing.
  *
  * \param io: [struct*] The attached I/O adapter.
  *
@@ -121,8 +144,9 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_io_send(qsc_tls_io_connection* io, const u
  * \brief Receive and decrypt application data from the attached socket.
  *
  * \details
- * Receives socket bytes until at least one protected TLS record has been consumed and
- * any decrypted application payload has been written to the caller-supplied buffer.
+ * Receives socket bytes until at least one complete TLS record has been assembled and consumed.
+ * If the socket read also contains bytes from later TLS records, those bytes are preserved in
+ * the persistent stream buffer for the next call.
  *
  * \param io: [struct*] The attached I/O adapter.
  * \param output: [uint8_t*] The destination buffer for decrypted application data.

@@ -904,6 +904,23 @@ static qsc_tls_status client_install_app_keys(qsc_tls_client_state* state)
     return status;
 }
 
+qsc_tls_status qsc_tls_client_config_set_certificate_interface(qsc_tls_client_config* config,
+    const qsc_tls_certificate_interface* iface, const char* hostname)
+{
+    qsc_tls_status status;
+
+    status = qsc_tls_status_invalid_input;
+
+    if (config != NULL && iface != NULL && qsc_tls_certificate_interface_is_valid(iface) == true)
+    {
+        config->certinterface = *iface;
+        config->hostname = hostname;
+        status = qsc_tls_status_success;
+    }
+
+    return status;
+}
+
 qsc_tls_status qsc_tls_client_initialize(qsc_tls_client_state* state, const qsc_tls_client_config* config)
 {
     QSC_ASSERT(state != NULL);

@@ -9,6 +9,7 @@
 #include "tlskeyschedule.h"
 #include "tlsrecord.h"
 #include "tlstranscript.h"
+#include "tlssignerdefault.h"
 
 /* ============================================================================
  *  tlsserver.c - TLS 1.3 server handshake state machine.
@@ -42,6 +43,106 @@ static const uint8_t tls_hrr_special_random[32] = {
     0x07U, 0x9EU, 0x09U, 0xE2U, 0xC8U, 0xA8U, 0x33U, 0x9CU
 };
 
+static bool tls_server_local_certificate_sign(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen,
+    uint8_t* signature, size_t* signaturelen, void* state)
+{
+    qsc_tls_signer_default_context sctx;
+    const qsc_tls_local_certificate_config* localcert;
+    bool res;
+
+    res = false;
+
+    if (state != NULL)
+    {
+        localcert = (const qsc_tls_local_certificate_config*)state;
+
+        if (localcert->signprivatekeylen != 0U)
+        {
+            sctx.scheme = scheme;
+            sctx.privatekey = localcert->signprivatekey;
+            sctx.privatekeylen = localcert->signprivatekeylen;
+            res = qsc_tls_signer_default_sign(scheme, input, inputlen, signature, signaturelen, &sctx);
+        }
+    }
+
+    return res;
+}
+
+qsc_tls_status qsc_tls_server_config_set_certificate_interface(qsc_tls_server_config* config,
+    const qsc_tls_certificate_interface* iface, bool requestclientauth, bool requireclientauth)
+{
+    qsc_tls_status status;
+
+    status = qsc_tls_status_invalid_input;
+
+    if (config != NULL && ((requestclientauth == false && requireclientauth == false) ||
+        (iface != NULL && qsc_tls_certificate_interface_is_valid(iface) == true)))
+    {
+        if (iface != NULL)
+        {
+            config->clientcertinterface = *iface;
+        }
+        else
+        {
+            qsc_memutils_clear(&config->clientcertinterface, sizeof(config->clientcertinterface));
+        }
+
+        config->requestclientauth = requestclientauth;
+        config->requireclientauth = requireclientauth;
+        status = qsc_tls_status_success;
+    }
+
+    return status;
+}
+
+qsc_tls_status qsc_tls_server_config_set_local_certificate(qsc_tls_server_config* config,
+    const qsc_tls_certificate_view* chain, size_t chainlength, qsc_tls_signature_scheme verifyscheme,
+    const uint8_t* privatekeydata, size_t privatekeylen)
+{
+    qsc_tls_status status;
+    size_t i;
+
+    status = qsc_tls_status_invalid_input;
+
+    if (config != NULL && chain != NULL && chainlength != 0U &&
+        chainlength <= QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES &&
+        privatekeydata != NULL && privatekeylen != 0U &&
+        privatekeylen <= QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE)
+    {
+        status = qsc_tls_status_success;
+
+        for (i = 0U; i < chainlength; ++i)
+        {
+            if (chain[i].data == NULL || chain[i].datalen == 0U || chain[i].datalen > QSC_TLS_CERTIFICATE_MAX_SIZE)
+            {
+                status = qsc_tls_status_invalid_input;
+                break;
+            }
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            qsc_memutils_clear(&config->localcert, sizeof(config->localcert));
+
+            for (i = 0U; i < chainlength; ++i)
+            {
+                config->localcert.chain[i] = chain[i];
+            }
+
+            config->localcert.chainlength = chainlength;
+            config->localcert.verifyscheme = verifyscheme;
+            config->localcert.signprivatekeylen = privatekeylen;
+            qsc_memutils_copy(config->localcert.signprivatekey, privatekeydata, privatekeylen);
+            config->localcert.signcallback = tls_server_local_certificate_sign;
+            config->localcert.signstate = &config->localcert;
+            config->localcert.configured = true;
+            config->localcert.staticsignature = false;
+        }
+    }
+
+    return status;
+}
+
 qsc_tls_status qsc_tls_server_initialize(qsc_tls_server_state* state, const qsc_tls_server_config* config)
 {
     qsc_tls_status status;
@@ -60,6 +161,10 @@ qsc_tls_status qsc_tls_server_initialize(qsc_tls_server_state* state, const qsc_
     {
         qsc_memutils_clear(state, sizeof(*state));
         state->config = *config;
+        if (state->config.localcert.signcallback == tls_server_local_certificate_sign)
+        {
+            state->config.localcert.signstate = &state->config.localcert;
+        }
         state->phase = qsc_tls_server_phase_waiting_client_hello;
         state->negotiatedsuite = qsc_tls_cipher_suite_none;
         state->negotiatedhash = qsc_tls_hash_none;

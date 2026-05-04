@@ -110,6 +110,48 @@ typedef struct qsc_tls_server_state
     size_t legacy_session_id_len;
 } qsc_tls_server_state;
 
+
+/**
+ * \brief Copy a client-certificate validation interface into a TLS server configuration.
+ *
+ * \details
+ * This setter is the TLS-side attachment point for mutual-TLS peer validation.
+ * X.509 helpers prepare the qsc_tls_certificate_interface, but do not mutate TLS
+ * server state directly.
+ *
+ * \param config: [struct*] The server configuration to update.
+ * \param iface: [struct*] Optional certificate-validation interface. Required when
+ *                client authentication is requested or required.
+ * \param requestclientauth: [bool] Send CertificateRequest when true.
+ * \param requireclientauth: [bool] Reject an empty client Certificate when true.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_server_config_set_certificate_interface(qsc_tls_server_config* config,
+    const qsc_tls_certificate_interface* iface, bool requestclientauth, bool requireclientauth);
+
+/**
+ * \brief Copy a local certificate chain and private signing key into a TLS server configuration.
+ *
+ * \details
+ * The certificate views are copied as non-owning DER pointers. The pointed-to DER
+ * buffers must remain valid for the lifetime of handshakes initialized from this
+ * configuration. The private key bytes are copied into the configuration and are
+ * used by the TLS CertificateVerify signing callback at handshake time.
+ *
+ * \param config: [struct*] The server configuration to update.
+ * \param chain: [struct*] Certificate chain views in leaf-first order.
+ * \param chainlength: [size_t] Number of valid chain entries.
+ * \param verifyscheme: [enum] TLS CertificateVerify signature scheme.
+ * \param privatekeydata: [const uint8_t*] Raw private key bytes for the signing scheme.
+ * \param privatekeylen: [size_t] Length of the private key.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_server_config_set_local_certificate(qsc_tls_server_config* config,
+    const qsc_tls_certificate_view* chain, size_t chainlength, qsc_tls_signature_scheme verifyscheme,
+    const uint8_t* privatekeydata, size_t privatekeylen);
+
 QSC_EXPORT_API qsc_tls_status qsc_tls_server_initialize(qsc_tls_server_state* state, const qsc_tls_server_config* config);
 QSC_EXPORT_API void qsc_tls_server_dispose(qsc_tls_server_state* state);
 

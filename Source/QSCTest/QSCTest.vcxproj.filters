@@ -216,6 +216,9 @@
     <ClCompile Include="TLS\tls_stage18_0rtt_resumption_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
+    <ClCompile Include="TLS\tls_stage19_socket_wrapper_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -393,6 +396,9 @@
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
     <ClInclude Include="TLS\tls_stage18_0rtt_resumption_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage19_socket_wrapper_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
   </ItemGroup>

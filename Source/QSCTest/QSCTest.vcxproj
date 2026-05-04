@@ -302,6 +302,7 @@
     <ClCompile Include="TLS\tls_stage16_psk_codec_tests.c" />
     <ClCompile Include="TLS\tls_stage17_multi_suite_tests.c" />
     <ClCompile Include="TLS\tls_stage18_0rtt_resumption_tests.c" />
+    <ClCompile Include="TLS\tls_stage19_socket_wrapper_tests.c" />
     <ClCompile Include="TLS\tls_stage1_codec_extension_tests.c" />
     <ClCompile Include="TLS\tls_stage2_certificate_tests.c" />
     <ClCompile Include="TLS\tls_stage3_keyupdate_tests.c" />
@@ -363,6 +364,7 @@
     <ClInclude Include="TLS\tls_stage16_psk_codec_tests.h" />
     <ClInclude Include="TLS\tls_stage17_multi_suite_tests.h" />
     <ClInclude Include="TLS\tls_stage18_0rtt_resumption_tests.h" />
+    <ClInclude Include="TLS\tls_stage19_socket_wrapper_tests.h" />
     <ClInclude Include="TLS\tls_stage1_codec_extension_tests.h" />
     <ClInclude Include="TLS\tls_stage2_certificate_tests.h" />
     <ClInclude Include="TLS\tls_stage3_keyupdate_tests.h" />

@@ -191,6 +191,9 @@ bool x509_stage3_crl_verify_known_good(void)
 			qsctest_x509_current_time(&now);
 			qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
 
+			/* NOTE: for the test ONLY, the test certificate could be expired, so we change the date/time to now */
+			crl.nextupdate = now;
+
 			res = (qsc_x509_crl_verify(&crl, &issuer, &now, qsc_x509_qsc_crl_signature_verify, &vstate) == QSC_X509_CRL_VERIFY_STATUS_SUCCESS);
 		}
 

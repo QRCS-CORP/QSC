@@ -18,6 +18,7 @@
 #include "TLS/tls_stage16_psk_codec_tests.h"
 #include "TLS/tls_stage17_multi_suite_tests.h"
 #include "TLS/tls_stage18_0rtt_resumption_tests.h"
+#include "TLS/tls_stage19_socket_wrapper_tests.h"
 
 bool qsctest_tls_run(void)
 {
@@ -111,6 +112,11 @@ bool qsctest_tls_run(void)
 	}
 
 	if (qsctest_tls_stage18_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage19_tests() == false)
 	{
 		res = false;
 	}

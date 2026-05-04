@@ -240,16 +240,6 @@ typedef struct qsc_x509w_trust_store_t
 } qsc_x509w_trust_store;
 
 /**
- * \brief Forward declaration of the QSC TLS client type.
- */
-typedef struct qsc_tls_client qsc_tls_client;
-
-/**
- * \brief Forward declaration of the QSC TLS server type.
- */
-typedef struct qsc_tls_server qsc_tls_server;
-
-/**
  * \struct qsc_x509w_server_identity_t
  * \brief Wrapper-owned server identity consisting of a leaf certificate,
  * optional intermediates, and the associated private key.
@@ -1017,34 +1007,17 @@ QSC_EXPORT_API bool qsc_x509w_tls_bridge_is_ready(const qsc_x509w_tls_bridge* br
 /**
  * \brief Get the prepared TLS certificate interface from a configured bridge.
  *
+ * \details
+ * The returned interface is a borrowed view into \a bridge. TLS client and server
+ * configuration objects should copy this interface using TLS-layer configuration
+ * setters. The X.509 wrapper intentionally does not mutate TLS client or server
+ * state objects, preserving the dependency boundary between certificate handling
+ * and the TLS state machines.
+ *
  * \param bridge: The configured bridge.
  * \return Returns a pointer to the prepared TLS certificate interface.
  */
 QSC_EXPORT_API const qsc_tls_certificate_interface* qsc_x509w_tls_bridge_get_interface(const qsc_x509w_tls_bridge* bridge);
-
-/**
- * \brief Attach wrapper-backed peer validation to a TLS client.
- *
- * \param client: The TLS client to configure.
- * \param bridge: The configured bridge.
- * \param hostname: The caller-owned hostname for TLS validation.
- * \param requirepeercertificate: Set true to require a peer certificate.
- * \return Returns the wrapper status code.
- */
-QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_bridge_attach_client_validation(qsc_tls_client* client, const qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate);
-
-/**
- * \brief Attach wrapper-backed peer validation to a TLS server.
- *
- * \param server: The TLS server to configure.
- * \param bridge: The configured bridge.
- * \param hostname: The caller-owned hostname for TLS validation.
- * \param requirepeercertificate: Set true to require a peer certificate.
- * \return Returns the wrapper status code.
- */
-QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_bridge_attach_server_validation(qsc_tls_server* server, const qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate);
 
 /**
  * \brief Determine whether a TLS local-certificate export object is ready for
@@ -1056,37 +1029,11 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_bridge_attach_server_validation(qs
 QSC_EXPORT_API bool qsc_x509w_tls_local_certificate_is_ready(const qsc_x509w_tls_local_certificate* localcert);
 
 /**
- * \brief Backward-compatible helper that attaches wrapper-backed peer
- * validation to a TLS client.
- *
- * \param client: The TLS client to configure.
- * \param bridge: The configured bridge.
- * \param hostname: The caller-owned hostname for TLS validation.
- * \param requirepeercertificate: Set true to require a peer certificate.
- * \return Returns the wrapper status code.
- */
-QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_bridge_set_client(qsc_tls_client* client, qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate);
-
-/**
- * \brief Backward-compatible helper that attaches wrapper-backed peer
- * validation to a TLS server.
- *
- * \param server: The TLS server to configure.
- * \param bridge: The configured bridge.
- * \param hostname: The caller-owned hostname for TLS validation.
- * \param requirepeercertificate: Set true to require a peer certificate.
- * \return Returns the wrapper status code.
- */
-QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_bridge_set_server_validation(qsc_tls_server* server, qsc_x509w_tls_bridge* bridge,
-    const char* hostname, bool requirepeercertificate);
-
-/**
  * \brief Export a server identity into TLS local-certificate form.
  *
  * Extracts the certificate chain and private key from the identity object and
- * populates a qsc_x509w_tls_local_certificate ready for use with
- * qsc_x509w_tls_server_set_local_certificate().
+ * populates a qsc_x509w_tls_local_certificate ready for use by the TLS-layer
+ * server configuration local-certificate setter.
  *
  * \param identity: The source server identity (must contain a valid private key).
  * \param verifyscheme: The TLS CertificateVerify signature scheme identifier.
@@ -1099,14 +1046,6 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_bridge_set_server_validation(qsc_t
  */
 QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_server_identity* identity, qsc_tls_signature_scheme verifyscheme, qsc_x509w_tls_local_certificate* localcert);
 
-/**
- * \brief Install a local certificate chain into a TLS server.
- *
- * \param server: The TLS server to configure.
- * \param localcert: The local-certificate export object.
- * \return Returns the wrapper status code.
- */
-QSC_EXPORT_API qsc_x509w_status qsc_x509w_tls_server_set_local_certificate(qsc_tls_server* server, const qsc_x509w_tls_local_certificate* localcert);
 
 QSC_CPLUSPLUS_ENABLED_END
 
