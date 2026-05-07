@@ -11,15 +11,6 @@
 #include "tlstranscript.h"
 #include "tlssignerdefault.h"
 
-/* ============================================================================
- *  tlsserver.c - TLS 1.3 server handshake state machine.
- *
- *  Mirrors tlsclient.c. MVP covers the 1-RTT non-PSK non-HRR, non-mTLS path:
- *    initial                      -> waiting_client_hello
- *    process ClientHello          -> emit SH + EE + Cert + CV + Fin; waiting_client_finished
- *    process client Finished      -> derive app keys; established
- * ============================================================================ */
-
 static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* output, size_t outlen, size_t* written);
 static qsc_tls_status server_emit_hrr(qsc_tls_server_state* state, uint8_t* output, size_t outlen, size_t* written);
 static qsc_tls_status server_install_app_keys(qsc_tls_server_state* state, const uint8_t* thash_before_client_finished, size_t thashlen);
@@ -68,15 +59,13 @@ static bool tls_server_local_certificate_sign(qsc_tls_signature_scheme scheme, c
     return res;
 }
 
-qsc_tls_status qsc_tls_server_config_set_certificate_interface(qsc_tls_server_config* config,
-    const qsc_tls_certificate_interface* iface, bool requestclientauth, bool requireclientauth)
+qsc_tls_status qsc_tls_server_config_set_certificate_interface(qsc_tls_server_config* config, const qsc_tls_certificate_interface* iface, bool requestclientauth, bool requireclientauth)
 {
     qsc_tls_status status;
 
     status = qsc_tls_status_invalid_input;
 
-    if (config != NULL && ((requestclientauth == false && requireclientauth == false) ||
-        (iface != NULL && qsc_tls_certificate_interface_is_valid(iface) == true)))
+    if (config != NULL && ((requestclientauth == false && requireclientauth == false) || (iface != NULL && qsc_tls_certificate_interface_is_valid(iface) == true)))
     {
         if (iface != NULL)
         {
@@ -95,19 +84,16 @@ qsc_tls_status qsc_tls_server_config_set_certificate_interface(qsc_tls_server_co
     return status;
 }
 
-qsc_tls_status qsc_tls_server_config_set_local_certificate(qsc_tls_server_config* config,
-    const qsc_tls_certificate_view* chain, size_t chainlength, qsc_tls_signature_scheme verifyscheme,
-    const uint8_t* privatekeydata, size_t privatekeylen)
+qsc_tls_status qsc_tls_server_config_set_local_certificate(qsc_tls_server_config* config, const qsc_tls_certificate_view* chain, size_t chainlength, 
+    qsc_tls_signature_scheme verifyscheme, const uint8_t* privatekeydata, size_t privatekeylen)
 {
     qsc_tls_status status;
     size_t i;
 
     status = qsc_tls_status_invalid_input;
 
-    if (config != NULL && chain != NULL && chainlength != 0U &&
-        chainlength <= QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES &&
-        privatekeydata != NULL && privatekeylen != 0U &&
-        privatekeylen <= QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE)
+    if (config != NULL && chain != NULL && chainlength != 0U && chainlength <= QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES &&
+        privatekeydata != NULL && privatekeylen != 0U && privatekeylen <= QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE)
     {
         status = qsc_tls_status_success;
 
@@ -151,9 +137,8 @@ qsc_tls_status qsc_tls_server_initialize(qsc_tls_server_state* state, const qsc_
     {
         status = qsc_tls_status_invalid_input;
     }
-    else if (config->ciphersuitepreference == NULL || config->ciphersuitepreferencecount == 0U
-        || config->groupspreference == NULL || config->groupspreferencecount == 0U
-        || config->sigschemepreference == NULL || config->sigschemepreferencecount == 0U)
+    else if (config->ciphersuitepreference == NULL || config->ciphersuitepreferencecount == 0U || config->groupspreference == NULL || 
+        config->groupspreferencecount == 0U || config->sigschemepreference == NULL || config->sigschemepreferencecount == 0U)
     {
         status = qsc_tls_status_invalid_input;
     }
@@ -161,10 +146,12 @@ qsc_tls_status qsc_tls_server_initialize(qsc_tls_server_state* state, const qsc_
     {
         qsc_memutils_clear(state, sizeof(*state));
         state->config = *config;
+
         if (state->config.localcert.signcallback == tls_server_local_certificate_sign)
         {
             state->config.localcert.signstate = &state->config.localcert;
         }
+
         state->phase = qsc_tls_server_phase_waiting_client_hello;
         state->negotiatedsuite = qsc_tls_cipher_suite_none;
         state->negotiatedhash = qsc_tls_hash_none;
@@ -193,13 +180,16 @@ qsc_tls_status qsc_tls_server_process_record(qsc_tls_server_state* state, const 
     uint8_t decrypt_buf[QSC_TLS_MAX_RECORD_SIZE] = { 0U };
     const uint8_t* payload;
     const uint8_t* plaintext;
+    size_t off;
     size_t paylen;
     size_t reclen;
-    size_t decrypt_len = 0U;
+    size_t decryptlen;
     size_t plaintextlen;
     qsc_tls_record_content_type rtype;
     qsc_tls_status st;
     bool complete;
+
+    decryptlen = 0U;
 
     if (consumed != NULL) 
     { 
@@ -238,7 +228,8 @@ qsc_tls_status qsc_tls_server_process_record(qsc_tls_server_state* state, const 
     if (state->readrecord.initialized && rtype == qsc_tls_record_content_application_data)
     {
         qsc_tls_record_content_type inner = qsc_tls_record_content_invalid;
-        st = qsc_tls_record_decrypt(&state->readrecord, decrypt_buf, sizeof(decrypt_buf), &decrypt_len, &inner, input, reclen);
+
+        st = qsc_tls_record_decrypt(&state->readrecord, decrypt_buf, sizeof(decrypt_buf), &decryptlen, &inner, input, reclen);
 
         if (st != qsc_tls_status_success) 
         {
@@ -246,7 +237,7 @@ qsc_tls_status qsc_tls_server_process_record(qsc_tls_server_state* state, const 
         }
 
         plaintext = decrypt_buf;
-        plaintextlen = decrypt_len;
+        plaintextlen = decryptlen;
         rtype = inner;
     }
     else
@@ -281,7 +272,7 @@ qsc_tls_status qsc_tls_server_process_record(qsc_tls_server_state* state, const 
     }
 
     /* walk handshake messages inside this plaintext. */
-    size_t off = 0U;
+    off = 0U;
 
     while (off < plaintextlen)
     {
@@ -305,189 +296,190 @@ qsc_tls_status qsc_tls_server_process_record(qsc_tls_server_state* state, const 
 
         switch (type)
         {
-        case qsc_tls_handshake_type_client_hello:
-        {
-            if (state->phase != qsc_tls_server_phase_waiting_client_hello && state->phase != qsc_tls_server_phase_waiting_client_hello_2)
+            case qsc_tls_handshake_type_client_hello:
             {
-                return qsc_tls_status_invalid_state;
-            }
-
-            /* pick hash tentatively from first preferred suite so transcript is defined before
-             * we know the real suite. Will reinitialize after suite negotiation. On CH2 the
-             * transcript was already initialized and contains message_hash(CH1) + HRR. */
-            if (state->phase == qsc_tls_server_phase_waiting_client_hello)
-            {
-                state->negotiatedhash = qsc_tls_keyschedule_suite_hash(state->config.ciphersuitepreference[0U]);
-
-                if (state->negotiatedhash == qsc_tls_hash_none)
+                if (state->phase != qsc_tls_server_phase_waiting_client_hello && state->phase != qsc_tls_server_phase_waiting_client_hello_2)
                 {
-                    return qsc_tls_status_not_supported;
+                    return qsc_tls_status_invalid_state;
                 }
 
-                st = qsc_tls_transcript_initialize(&state->transcript, state->negotiatedhash);
-
-                if (st != qsc_tls_status_success)
+                /* pick hash tentatively from first preferred suite so transcript is defined before
+                 * we know the real suite. Will reinitialize after suite negotiation. On CH2 the
+                 * transcript was already initialized and contains message_hash(CH1) + HRR. */
+                if (state->phase == qsc_tls_server_phase_waiting_client_hello)
                 {
-                    return st;
-                }
-            }
+                    state->negotiatedhash = qsc_tls_keyschedule_suite_hash(state->config.ciphersuitepreference[0U]);
 
-            st = qsc_tls_transcript_update(&state->transcript, plaintext + hdroff, 4U + bodylen);
-
-            if (st == qsc_tls_status_success)
-            {
-                st = server_process_client_hello(state, body, bodylen);
-            }
-
-            if (st == qsc_tls_status_success)
-            {
-                if (state->helloretryrequestsent && state->phase == qsc_tls_server_phase_waiting_client_hello)
-                {
-                    /* first CH triggered HRR: emit the retry and wait for CH2. */
-                    st = server_emit_hrr(state, output, outlen, written);
-
-                    if (st == qsc_tls_status_success)
+                    if (state->negotiatedhash == qsc_tls_hash_none)
                     {
-                        state->phase = qsc_tls_server_phase_waiting_client_hello_2;
+                        return qsc_tls_status_not_supported;
+                    }
+
+                    st = qsc_tls_transcript_initialize(&state->transcript, state->negotiatedhash);
+
+                    if (st != qsc_tls_status_success)
+                    {
+                        return st;
                     }
                 }
-                else
-                {
-                    /* either a first CH that matched directly, or a CH2 after HRR.
-                     * either way, emit the full flight and advance to waiting-Finished. */
-                    st = server_emit_flight1(state, output, outlen, written);
 
-                    if (st == qsc_tls_status_success)
+                st = qsc_tls_transcript_update(&state->transcript, plaintext + hdroff, 4U + bodylen);
+
+                if (st == qsc_tls_status_success)
+                {
+                    st = server_process_client_hello(state, body, bodylen);
+                }
+
+                if (st == qsc_tls_status_success)
+                {
+                    if (state->helloretryrequestsent && state->phase == qsc_tls_server_phase_waiting_client_hello)
                     {
-                        /* When 0-RTT was accepted the client sends early application data
-                         * records followed by EndOfEarlyData under early keys; THEN sends
-                         * Finished under handshake keys. Our read record is currently
-                         * installed with the early traffic key (from CH processing).
-                         * We'll switch it to the handshake traffic key on EOED receipt. */
-                        state->phase = state->earlydataaccepted
-                            ? qsc_tls_server_phase_waiting_end_of_early_data
-                            : qsc_tls_server_phase_waiting_client_finished;
-                    }
-                }
-            }
+                        /* first CH triggered HRR: emit the retry and wait for CH2. */
+                        st = server_emit_hrr(state, output, outlen, written);
 
-            break;
-        }
-        case qsc_tls_handshake_type_end_of_early_data:
-        {
-            if (state->phase != qsc_tls_server_phase_waiting_end_of_early_data)
-            {
-                state->lastalert = qsc_tls_alert_unexpected_message;
-                return qsc_tls_status_invalid_state;
-            }
-
-            /* EOED body is empty per RFC 8446 4.5. Include in transcript, swap read key
-             * from early_traffic to client_handshake_traffic, advance phase to waiting_finished. */
-            if (bodylen != 0U) { return qsc_tls_status_invalid_length; }
-
-            st = qsc_tls_transcript_update(&state->transcript, plaintext + hdroff, 4U + bodylen);
-
-            if (st == qsc_tls_status_success)
-            {
-                size_t klen;
-                size_t ilen;
-                uint8_t hkey[32];
-                uint8_t hiv[12];
-                st = qsc_tls_keyschedule_suite_record_sizes(state->negotiatedsuite, &klen, &ilen);
-                if (st == qsc_tls_status_success)
-                {
-                    st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash,
-                        state->keyschedule.clienthandshaketrafficsecret, state->keyschedule.digestsize,
-                        klen, ilen, hkey, hiv);
-                }
-                if (st == qsc_tls_status_success)
-                {
-                    st = qsc_tls_record_state_install_keys(&state->readrecord,
-                        state->negotiatedsuite, hkey, klen, hiv, ilen);
-                }
-                qsc_memutils_secure_erase(hkey, sizeof(hkey));
-                qsc_memutils_secure_erase(hiv, sizeof(hiv));
-            }
-
-            if (st == qsc_tls_status_success)
-            {
-                state->earlydatadone = true;
-                state->phase = qsc_tls_server_phase_waiting_client_finished;
-            }
-            break;
-        }
-        case qsc_tls_handshake_type_finished:
-        {
-            if (state->phase != qsc_tls_server_phase_waiting_client_finished)
-            {
-                return qsc_tls_status_invalid_state;
-            }
-
-            /* snapshot the transcript BEFORE we include client Finished, this is the input to
-             * application traffic secret derivation per RFC 8446 7.1. */
-            {
-                uint8_t thash[QSC_TLS_HASH_MAX_SIZE] = { 0U };
-                size_t thashlen = 0U;
-                st = qsc_tls_transcript_snapshot(&state->transcript, thash, sizeof(thash), &thashlen);
-
-                if (st == qsc_tls_status_success)
-                {
-                    /* apply transcript including server's own previous Finished (already updated in flight1) and then
-                     * compare client Finished against expected. But client computes its Finished over
-                     * transcript CH..server Finished, which is exactly what we have right now. */
-                    st = server_process_client_finished(state, body, bodylen);
-                }
-
-                if (st == qsc_tls_status_success)
-                {
-                    st = qsc_tls_transcript_update(&state->transcript, plaintext + hdroff, 4U + bodylen);
-                }
-
-                if (st == qsc_tls_status_success)
-                {
-                    /* On 0-RTT-accepted flow the transcript currently contains EOED past the
-                     * server-Finished boundary. App keys must derive from CH..server_Finished
-                     * which we stashed in flight1. Otherwise (normal flow) the live snapshot
-                     * is the correct boundary. */
-                    if (state->earlydataaccepted && state->stashedserverfinhashlen > 0U)
-                    {
-                        st = server_install_app_keys(state, state->stashedserverfinhash, state->stashedserverfinhashlen);
+                        if (st == qsc_tls_status_success)
+                        {
+                            state->phase = qsc_tls_server_phase_waiting_client_hello_2;
+                        }
                     }
                     else
                     {
-                        st = server_install_app_keys(state, thash, thashlen);
+                        /* either a first CH that matched directly, or a CH2 after HRR.
+                         * either way, emit the full flight and advance to waiting-Finished. */
+                        st = server_emit_flight1(state, output, outlen, written);
+
+                        if (st == qsc_tls_status_success)
+                        {
+                            /* when 0-RTT was accepted the client sends early application data
+                             * records followed by EndOfEarlyData under early keys; THEN sends
+                             * Finished under handshake keys. Our read record is currently
+                             * installed with the early traffic key (from CH processing).
+                             * We'll switch it to the handshake traffic key on EOED receipt. */
+                            state->phase = state->earlydataaccepted ? qsc_tls_server_phase_waiting_end_of_early_data : qsc_tls_server_phase_waiting_client_finished;
+                        }
                     }
                 }
 
-                qsc_memutils_secure_erase(thash, sizeof(thash));
+                break;
             }
-
-            if (st == qsc_tls_status_success)
+            case qsc_tls_handshake_type_end_of_early_data:
             {
-                /* derive resumption_master_secret now that transcript includes client Finished. */
-                uint8_t thash_rms[QSC_TLS_HASH_MAX_SIZE] = { 0U };
-                size_t thash_rms_len = 0U;
+                if (state->phase != qsc_tls_server_phase_waiting_end_of_early_data)
+                {
+                    state->lastalert = qsc_tls_alert_unexpected_message;
+                    return qsc_tls_status_invalid_state;
+                }
 
-                st = qsc_tls_transcript_snapshot(&state->transcript, thash_rms, sizeof(thash_rms), &thash_rms_len);
+                /* EOED body is empty per RFC 8446 4.5. Include in transcript, swap read key
+                 * from early_traffic to client_handshake_traffic, advance phase to waiting_finished. */
+                if (bodylen != 0U) { return qsc_tls_status_invalid_length; }
+
+                st = qsc_tls_transcript_update(&state->transcript, plaintext + hdroff, 4U + bodylen);
 
                 if (st == qsc_tls_status_success)
                 {
-                    st = qsc_tls_keyschedule_derive_resumption_master_secret(&state->keyschedule, thash_rms, thash_rms_len);
+                    size_t klen;
+                    size_t ilen;
+                    uint8_t hkey[32];
+                    uint8_t hiv[12];
+
+                    st = qsc_tls_keyschedule_suite_record_sizes(state->negotiatedsuite, &klen, &ilen);
+
+                    if (st == qsc_tls_status_success)
+                    {
+                        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash,
+                            state->keyschedule.clienthandshaketrafficsecret, state->keyschedule.digestsize, klen, ilen, hkey, hiv);
+                    }
+                    if (st == qsc_tls_status_success)
+                    {
+                        st = qsc_tls_record_state_install_keys(&state->readrecord, state->negotiatedsuite, hkey, klen, hiv, ilen);
+                    }
+
+                    qsc_memutils_secure_erase(hkey, sizeof(hkey));
+                    qsc_memutils_secure_erase(hiv, sizeof(hiv));
                 }
 
-                qsc_memutils_secure_erase(thash_rms, sizeof(thash_rms));
-            }
-            if (st == qsc_tls_status_success)
-            {
-                state->phase = qsc_tls_server_phase_established;
-            }
+                if (st == qsc_tls_status_success)
+                {
+                    state->earlydatadone = true;
+                    state->phase = qsc_tls_server_phase_waiting_client_finished;
+                }
 
-            break;
-        }
-        default:
-        {
-            return qsc_tls_status_invalid_message;
-        }
+                break;
+            }
+            case qsc_tls_handshake_type_finished:
+            {
+                if (state->phase != qsc_tls_server_phase_waiting_client_finished)
+                {
+                    return qsc_tls_status_invalid_state;
+                }
+
+                /* snapshot the transcript BEFORE we include client Finished, this is the input to
+                 * application traffic secret derivation per RFC 8446 7.1. */
+                {
+                    uint8_t thash[QSC_TLS_HASH_MAX_SIZE] = { 0U };
+                    size_t thashlen = 0U;
+
+                    st = qsc_tls_transcript_snapshot(&state->transcript, thash, sizeof(thash), &thashlen);
+
+                    if (st == qsc_tls_status_success)
+                    {
+                        /* apply transcript including server's own previous Finished (already updated in flight1) and then
+                         * compare client Finished against expected. But client computes its Finished over
+                         * transcript CH..server Finished, which is exactly what we have right now. */
+                        st = server_process_client_finished(state, body, bodylen);
+                    }
+
+                    if (st == qsc_tls_status_success)
+                    {
+                        st = qsc_tls_transcript_update(&state->transcript, plaintext + hdroff, 4U + bodylen);
+                    }
+
+                    if (st == qsc_tls_status_success)
+                    {
+                        /* On 0-RTT-accepted flow the transcript currently contains EOED past the
+                         * server-Finished boundary. App keys must derive from CH..server_Finished
+                         * which we stashed in flight1. Otherwise (normal flow) the live snapshot
+                         * is the correct boundary. */
+                        if (state->earlydataaccepted && state->stashedserverfinhashlen > 0U)
+                        {
+                            st = server_install_app_keys(state, state->stashedserverfinhash, state->stashedserverfinhashlen);
+                        }
+                        else
+                        {
+                            st = server_install_app_keys(state, thash, thashlen);
+                        }
+                    }
+
+                    qsc_memutils_secure_erase(thash, sizeof(thash));
+                }
+
+                if (st == qsc_tls_status_success)
+                {
+                    /* derive resumption_master_secret now that transcript includes client Finished. */
+                    uint8_t thash_rms[QSC_TLS_HASH_MAX_SIZE] = { 0U };
+                    size_t thash_rms_len = 0U;
+
+                    st = qsc_tls_transcript_snapshot(&state->transcript, thash_rms, sizeof(thash_rms), &thash_rms_len);
+
+                    if (st == qsc_tls_status_success)
+                    {
+                        st = qsc_tls_keyschedule_derive_resumption_master_secret(&state->keyschedule, thash_rms, thash_rms_len);
+                    }
+
+                    qsc_memutils_secure_erase(thash_rms, sizeof(thash_rms));
+                }
+                if (st == qsc_tls_status_success)
+                {
+                    state->phase = qsc_tls_server_phase_established;
+                }
+
+                break;
+            }
+            default:
+            {
+                return qsc_tls_status_invalid_message;
+            }
         }
 
         if (st != qsc_tls_status_success)
@@ -550,7 +542,6 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
         return st; 
     }
 
-    /* --- TODO: CHECK NEW CODE BEGIN --- */
     if (sidlen > sizeof(state->legacy_session_id))
     {
         return qsc_tls_status_invalid_length;
@@ -562,9 +553,6 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
     }
 
     state->legacy_session_id_len = sidlen;
-
-    /* --- NEW CODE END --- */
-
     st = qsc_tls_codec_read_vector16_span(msg, msglen, &off, &suites_span, &suites_len);
 
     if (st != qsc_tls_status_success) 
@@ -597,8 +585,7 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
     }
 
     /* pick cipher suite. */
-    st = qsc_tls_extensions_select_cipher_suite(suites_span, suites_len,
-        state->config.ciphersuitepreference, state->config.ciphersuitepreferencecount, &state->negotiatedsuite);
+    st = qsc_tls_extensions_select_cipher_suite(suites_span, suites_len, state->config.ciphersuitepreference, state->config.ciphersuitepreferencecount, &state->negotiatedsuite);
 
     if (st != qsc_tls_status_success) 
     { 
@@ -617,7 +604,8 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
         {
             /* re-feed the full ClientHello record including its handshake header. We need
              * the 4 header bytes; the caller passed only the body. Reconstruct them. */
-            uint8_t hdr[4U];
+            uint8_t hdr[4U] = { 0U };
+
             hdr[0U] = (uint8_t)qsc_tls_handshake_type_client_hello;
             hdr[1U] = (uint8_t)((msglen >> 16) & 0xFFU);
             hdr[2U] = (uint8_t)((msglen >> 8) & 0xFFU);
@@ -640,15 +628,20 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
 
     /* walk extensions for supported_groups, signature_algorithms, key_share. */
     {
-        qsc_tls_named_group client_groups[QSC_TLS_MAX_GROUPS] = { 0 };
-        qsc_tls_signature_scheme client_sigs[QSC_TLS_MAX_SIGNATURE_SCHEMES] = { 0 };
-        qsc_tls_named_group ks_groups[QSC_TLS_MAX_GROUPS] = { 0 };
-        const uint8_t* ks_shares[QSC_TLS_MAX_GROUPS] = { 0 };
-        size_t ks_sharelens[QSC_TLS_MAX_GROUPS] = { 0 };
-        size_t client_groupcount = 0U;
-        size_t client_sigcount = 0U;
-        size_t eoff = 0U;
-        size_t ks_count = 0U;
+        qsc_tls_named_group clientgroups[QSC_TLS_MAX_GROUPS] = { 0 };
+        qsc_tls_signature_scheme clientsigs[QSC_TLS_MAX_SIGNATURE_SCHEMES] = { 0 };
+        qsc_tls_named_group ksgroups[QSC_TLS_MAX_GROUPS] = { 0 };
+        const uint8_t* ksshares[QSC_TLS_MAX_GROUPS] = { 0 };
+        size_t kssharelens[QSC_TLS_MAX_GROUPS] = { 0 };
+        size_t clientgroupcount;
+        size_t clientsigcount;
+        size_t eoff;
+        size_t kscount;
+
+        clientgroupcount = 0U;
+        clientsigcount = 0U;
+        eoff = 0U;
+        kscount = 0U;
 
         /* Compute offset of ext_block within msg: msg starts at legacy_version,
          * so absolute-within-msg offset = (ext_block - msg). */
@@ -659,7 +652,7 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
             uint16_t etype;
             const uint8_t* ebody;
             size_t eblen;
-            size_t ebody_eoff_before;
+            size_t ebodyeoffbefore;
 
             st = qsc_tls_codec_read_u16(ext_block, ext_block_len, &eoff, &etype);
 
@@ -669,7 +662,7 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
             }
 
             /* After reading 2-byte type + 2-byte length, eoff points at ebody. */
-            ebody_eoff_before = eoff + 2U;
+            ebodyeoffbefore = eoff + 2U;
             st = qsc_tls_codec_read_vector16_span(ext_block, ext_block_len, &eoff, &ebody, &eblen);
 
             if (st != qsc_tls_status_success) 
@@ -679,7 +672,7 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
 
             if (etype == (uint16_t)qsc_tls_extension_supported_groups)
             {
-                st = qsc_tls_extensions_decode_supported_groups(ebody, eblen, client_groups, QSC_TLS_MAX_GROUPS, &client_groupcount);
+                st = qsc_tls_extensions_decode_supported_groups(ebody, eblen, clientgroups, QSC_TLS_MAX_GROUPS, &clientgroupcount);
 
                 if (st != qsc_tls_status_success)
                 { 
@@ -688,7 +681,7 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
             }
             else if (etype == (uint16_t)qsc_tls_extension_signature_algorithms)
             {
-                st = qsc_tls_extensions_decode_signature_algorithms(ebody, eblen, client_sigs, QSC_TLS_MAX_SIGNATURE_SCHEMES, &client_sigcount);
+                st = qsc_tls_extensions_decode_signature_algorithms(ebody, eblen, clientsigs, QSC_TLS_MAX_SIGNATURE_SCHEMES, &clientsigcount);
 
                 if (st != qsc_tls_status_success) 
                 { 
@@ -697,7 +690,7 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
             }
             else if (etype == (uint16_t)qsc_tls_extension_key_share)
             {
-                st = qsc_tls_extensions_decode_key_share_client_hello(ebody, eblen, ks_groups, ks_shares, ks_sharelens, QSC_TLS_MAX_GROUPS, &ks_count);
+                st = qsc_tls_extensions_decode_key_share_client_hello(ebody, eblen, ksgroups, ksshares, kssharelens, QSC_TLS_MAX_GROUPS, &kscount);
 
                 if (st != qsc_tls_status_success)
                 { 
@@ -706,7 +699,7 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
             }
             else if (etype == (uint16_t)qsc_tls_extension_psk_key_exchange_modes)
             {
-                /* Body: opaque ke_modes<1..255>. We only support psk_dhe_ke = 0x01. */
+                /* body: opaque ke_modes<1..255>. We only support psk_dhe_ke = 0x01. */
                 if (eblen >= 2U)
                 {
                     uint8_t count = ebody[0];
@@ -724,37 +717,37 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
             {
                 psk_ext_body = ebody;
                 psk_ext_body_len = eblen;
-                psk_ext_abs_body_offset = ext_block_abs_offset + ebody_eoff_before;
+                psk_ext_abs_body_offset = ext_block_abs_offset + ebodyeoffbefore;
             }
             /* supported_versions and server_name accepted but not recorded in MVP. */
         }
 
         /* record client capabilities. */
-        state->clientcapabilities.groupcount = client_groupcount;
+        state->clientcapabilities.groupcount = clientgroupcount;
 
-        for (size_t i = 0; i < client_groupcount; ++i)
+        for (size_t i = 0; i < clientgroupcount; ++i)
         {
-            state->clientcapabilities.groups[i] = client_groups[i];
+            state->clientcapabilities.groups[i] = clientgroups[i];
         }
 
-        state->clientcapabilities.sigschemecount = client_sigcount;
+        state->clientcapabilities.sigschemecount = clientsigcount;
 
-        for (size_t i = 0; i < client_sigcount; ++i)
+        for (size_t i = 0; i < clientsigcount; ++i)
         {
-            state->clientcapabilities.sigschemes[i] = client_sigs[i];
+            state->clientcapabilities.sigschemes[i] = clientsigs[i];
         }
 
         /* select a key_share we can service: first server preference that the client offered
          * AND has a matching key_share entry for. */
         for (size_t i = 0; i < state->config.groupspreferencecount && client_group == qsc_tls_group_none; ++i)
         {
-            for (size_t j = 0; j < ks_count; ++j)
+            for (size_t j = 0; j < kscount; ++j)
             {
-                if (state->config.groupspreference[i] == ks_groups[j])
+                if (state->config.groupspreference[i] == ksgroups[j])
                 {
-                    client_group = ks_groups[j];
-                    client_keyshare = ks_shares[j];
-                    client_keyshare_len = ks_sharelens[j];
+                    client_group = ksgroups[j];
+                    client_keyshare = ksshares[j];
+                    client_keyshare_len = kssharelens[j];
                     break;
                 }
             }
@@ -773,86 +766,124 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
      *   4. Compute expected binder and constant-time compare to the received binder.
      *   5. If match: set pskaccepted, selectedpskidentity, install early keys if 0-RTT.
      */
-    if (psk_ext_body != NULL
-        && state->config.psklookup != NULL
-        && saw_psk_modes_dhe
-        && !state->helloretryrequestsent)
+    if (psk_ext_body != NULL && state->config.psklookup != NULL && saw_psk_modes_dhe && !state->helloretryrequestsent)
     {
-        qsc_tls_psk_identity_view ids[4];
-        const uint8_t* rx_binders[4];
-        size_t rx_binder_lens[4];
-        size_t id_count = 0U;
-        size_t binder_block_off = 0U;
+        qsc_tls_psk_identity_view ids[4U] = { 0 };
+        const uint8_t* rxbinders[4U] = { 0 };
+        size_t rxbinderlens[4U] = { 0 };
+        size_t idcount;
+        size_t binderblockoff;
 
-        st = qsc_tls_extensions_decode_pre_shared_key_offer(psk_ext_body, psk_ext_body_len,
-            ids, rx_binders, rx_binder_lens, 4U, &id_count, &binder_block_off);
+        idcount = 0U;
+        binderblockoff = 0U;
 
-        if (st != qsc_tls_status_success) { return st; }
-        if (id_count == 0U) { return qsc_tls_status_invalid_message; }
+        st = qsc_tls_extensions_decode_pre_shared_key_offer(psk_ext_body, psk_ext_body_len, ids, rxbinders, rxbinderlens, 4U, &idcount, &binderblockoff);
+
+        if (st != qsc_tls_status_success)
+        {
+            return st; 
+        }
+
+        if (idcount == 0U) 
+        { 
+            return qsc_tls_status_invalid_message; 
+        }
 
         /* Walk each identity; accept first that validates. */
-        for (size_t i = 0; i < id_count && !state->pskaccepted; ++i)
+        for (size_t i = 0; i < idcount && !state->pskaccepted; ++i)
         {
-            uint8_t psk[QSC_TLS_HASH_MAX_SIZE];
-            size_t psk_len = 0U;
-            qsc_tls_cipher_suite ticket_suite = qsc_tls_cipher_suite_none;
-            uint32_t max_early = 0U;
+            qsc_tls_key_schedule_state ks_scratch = { 0 };
+            qsc_tls_transcript_state scratch = { 0 };
+            uint8_t expectedbinder[QSC_TLS_HASH_MAX_SIZE] = { 0U };
+            uint8_t hdr[4U] = { 0U };
+            uint8_t psk[QSC_TLS_HASH_MAX_SIZE] = { 0U };
+            uint8_t trunchash[QSC_TLS_HASH_MAX_SIZE] = { 0U };
+            size_t expectedbinderlen;
+            size_t psklen;
+            size_t truncbodyoff;
+            size_t trunchashlen;
+            uint32_t maxearly;
+            qsc_tls_status vst;
+            qsc_tls_cipher_suite ticketsuite;
+            bool have;
 
-            bool have = state->config.psklookup(ids[i].identity, ids[i].identitylen,
-                psk, sizeof(psk), &psk_len, &ticket_suite, &max_early,
-                state->config.psklookupstate);
-            if (!have) { continue; }
+            expectedbinderlen = 0U;
+            maxearly = 0U;
+            psklen = 0U;
+            trunchashlen = 0U;
+            ticketsuite = qsc_tls_cipher_suite_none;
+            have = state->config.psklookup(ids[i].identity, ids[i].identitylen, psk, sizeof(psk), &psklen, &ticketsuite, &maxearly, state->config.psklookupstate);
+            
+            if (!have)
+            { 
+                continue; 
+            }
 
-            /* Ticket-bound suite must match negotiated suite so the hash algorithm is consistent. */
-            if (ticket_suite != state->negotiatedsuite)
+            /* ticket-bound suite must match negotiated suite so the hash algorithm is consistent. */
+            if (ticketsuite != state->negotiatedsuite)
             {
                 qsc_memutils_secure_erase(psk, sizeof(psk));
                 continue;
             }
 
-            /* Truncated-CH transcript hash. Truncation point within body:
-             *   trunc_body_off = psk_ext_abs_body_offset + binder_block_off
-             * Total truncated bytes = 4-byte handshake header + body[0..trunc_body_off). */
-            size_t trunc_body_off = psk_ext_abs_body_offset + binder_block_off;
-            if (trunc_body_off > msglen)
+            /* truncated-CH transcript hash. Truncation point within body: truncbodyoff = psk_ext_abs_body_offset + binderblockoff
+             * total truncated bytes = 4-byte handshake header + body[0..truncbodyoff). */
+            truncbodyoff = psk_ext_abs_body_offset + binderblockoff;
+
+            if (truncbodyoff > msglen)
             {
                 qsc_memutils_secure_erase(psk, sizeof(psk));
                 continue;
             }
 
-            uint8_t hdr[4];
-            hdr[0] = (uint8_t)qsc_tls_handshake_type_client_hello;
-            hdr[1] = (uint8_t)((msglen >> 16) & 0xFFU);
-            hdr[2] = (uint8_t)((msglen >> 8) & 0xFFU);
-            hdr[3] = (uint8_t)(msglen & 0xFFU);
+            hdr[0U] = (uint8_t)qsc_tls_handshake_type_client_hello;
+            hdr[1U] = (uint8_t)((msglen >> 16) & 0xFFU);
+            hdr[2U] = (uint8_t)((msglen >> 8) & 0xFFU);
+            hdr[3U] = (uint8_t)(msglen & 0xFFU);
 
-            qsc_tls_transcript_state scratch;
-            uint8_t trunc_hash[QSC_TLS_HASH_MAX_SIZE];
-            size_t trunc_hash_len = 0U;
-            qsc_tls_status vst = qsc_tls_transcript_initialize(&scratch, state->negotiatedhash);
-            if (vst == qsc_tls_status_success) { vst = qsc_tls_transcript_update(&scratch, hdr, 4U); }
-            if (vst == qsc_tls_status_success) { vst = qsc_tls_transcript_update(&scratch, msg, trunc_body_off); }
-            if (vst == qsc_tls_status_success) { vst = qsc_tls_transcript_snapshot(&scratch, trunc_hash, sizeof(trunc_hash), &trunc_hash_len); }
+            vst = qsc_tls_transcript_initialize(&scratch, state->negotiatedhash);
+
+            if (vst == qsc_tls_status_success)
+            { 
+                vst = qsc_tls_transcript_update(&scratch, hdr, 4U); 
+            }
+
+            if (vst == qsc_tls_status_success)
+            {
+                vst = qsc_tls_transcript_update(&scratch, msg, truncbodyoff); 
+            }
+
+            if (vst == qsc_tls_status_success)
+            {
+                vst = qsc_tls_transcript_snapshot(&scratch, trunchash, sizeof(trunchash), &trunchashlen); 
+            }
 
             /* Derive expected binder. Uses key schedule scratch copy to avoid disturbing the main schedule. */
-            qsc_tls_key_schedule_state ks_scratch;
-            if (vst == qsc_tls_status_success) { vst = qsc_tls_keyschedule_state_initialize(&ks_scratch, state->negotiatedhash); }
-            if (vst == qsc_tls_status_success) { vst = qsc_tls_keyschedule_extract_early_secret(&ks_scratch, psk, psk_len); }
-            if (vst == qsc_tls_status_success) { vst = qsc_tls_keyschedule_derive_binder_key(&ks_scratch, false); }
+            
+            if (vst == qsc_tls_status_success)
+            { 
+                vst = qsc_tls_keyschedule_state_initialize(&ks_scratch, state->negotiatedhash); 
+            }
 
-            uint8_t expected_binder[QSC_TLS_HASH_MAX_SIZE];
-            size_t expected_binder_len = 0U;
+            if (vst == qsc_tls_status_success)
+            { 
+                vst = qsc_tls_keyschedule_extract_early_secret(&ks_scratch, psk, psklen); 
+            }
+
+            if (vst == qsc_tls_status_success)
+            {
+                vst = qsc_tls_keyschedule_derive_binder_key(&ks_scratch, false); 
+            }
+
             if (vst == qsc_tls_status_success)
             {
                 vst = qsc_tls_keyschedule_compute_psk_binder(state->negotiatedhash,
                     ks_scratch.binderkey, ks_scratch.digestsize,
-                    trunc_hash, trunc_hash_len,
-                    expected_binder, sizeof(expected_binder), &expected_binder_len);
+                    trunchash, trunchashlen,
+                    expectedbinder, sizeof(expectedbinder), &expectedbinderlen);
             }
 
-            if (vst == qsc_tls_status_success
-                && rx_binder_lens[i] == expected_binder_len
-                && qsc_memutils_are_equal(expected_binder, rx_binders[i], expected_binder_len))
+            if (vst == qsc_tls_status_success && rxbinderlens[i] == expectedbinderlen && qsc_memutils_are_equal(expectedbinder, rxbinders[i], expectedbinderlen))
             {
                 /* PSK accepted. Install the PSK into the REAL key schedule, we need early_secret
                  * derived from THIS psk so that later handshake secret extraction continues from
@@ -860,26 +891,30 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
                 state->pskaccepted = true;
                 state->selectedpskidentity = (uint16_t)i;
 
-                /* Extract early secret into the main schedule now so later stages can use it. */
+                /* extract early secret into the main schedule now so later stages can use it. */
                 (void)qsc_tls_keyschedule_state_initialize(&state->keyschedule, state->negotiatedhash);
-                (void)qsc_tls_keyschedule_extract_early_secret(&state->keyschedule, psk, psk_len);
+                (void)qsc_tls_keyschedule_extract_early_secret(&state->keyschedule, psk, psklen);
 
-                /* If client offered early_data AND server accepts AND max_early > 0:
+                /* if client offered early_data AND server accepts AND maxearly > 0:
                  * derive client_early_traffic_secret and install as READ key. After that we
                  * expect application-data records from the client until EndOfEarlyData. */
-                if (saw_early_data_ext && state->config.acceptearlydata && max_early > 0U)
+                if (saw_early_data_ext && state->config.acceptearlydata && maxearly > 0U)
                 {
                     /* Full-CH transcript hash (main transcript was just populated at dispatcher level). */
-                    uint8_t ch_hash[QSC_TLS_HASH_MAX_SIZE];
-                    size_t ch_hash_len = 0U;
-                    if (qsc_tls_transcript_snapshot(&state->transcript, ch_hash, sizeof(ch_hash), &ch_hash_len) == qsc_tls_status_success)
+                    uint8_t chhash[QSC_TLS_HASH_MAX_SIZE] = { 0U };
+                    size_t chhashlen;
+
+                    chhashlen = 0U;
+
+                    if (qsc_tls_transcript_snapshot(&state->transcript, chhash, sizeof(chhash), &chhashlen) == qsc_tls_status_success)
                     {
-                        if (qsc_tls_keyschedule_derive_client_early_traffic_secret(&state->keyschedule, ch_hash, ch_hash_len) == qsc_tls_status_success)
+                        if (qsc_tls_keyschedule_derive_client_early_traffic_secret(&state->keyschedule, chhash, chhashlen) == qsc_tls_status_success)
                         {
-                            size_t klen;
+                            uint8_t ekey[32U] = { 0U };
+                            uint8_t eiv[12U] = { 0U };
                             size_t ilen;
-                            uint8_t ekey[32];
-                            uint8_t eiv[12];
+                            size_t klen;
+
                             if (qsc_tls_keyschedule_suite_record_sizes(state->negotiatedsuite, &klen, &ilen) == qsc_tls_status_success
                                 && qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash,
                                        state->keyschedule.clientearlytrafficsecret, state->keyschedule.digestsize,
@@ -889,17 +924,19 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
                             {
                                 state->earlydataaccepted = true;
                             }
+
                             qsc_memutils_secure_erase(ekey, sizeof(ekey));
                             qsc_memutils_secure_erase(eiv, sizeof(eiv));
                         }
                     }
-                    qsc_memutils_secure_erase(ch_hash, sizeof(ch_hash));
+
+                    qsc_memutils_secure_erase(chhash, sizeof(chhash));
                 }
             }
 
             qsc_memutils_secure_erase(psk, sizeof(psk));
-            qsc_memutils_secure_erase(expected_binder, sizeof(expected_binder));
-            qsc_memutils_secure_erase(trunc_hash, sizeof(trunc_hash));
+            qsc_memutils_secure_erase(expectedbinder, sizeof(expectedbinder));
+            qsc_memutils_secure_erase(trunchash, sizeof(trunchash));
         }
     }
 
@@ -1034,12 +1071,12 @@ static qsc_tls_status server_emit_hrr(qsc_tls_server_state* state, uint8_t* outp
     size_t boff;
     size_t exthdr;
     size_t hsoff;
-    size_t rec_written;
+    size_t recwritten;
     qsc_tls_status st;
 
     boff = 0U;
     hsoff = 0U;
-    rec_written = 0U;
+    recwritten = 0U;
 
     /* replace transcript with message_hash(ClientHello1) before HRR. */
     st = qsc_tls_transcript_replace_with_message_hash(&state->transcript);
@@ -1125,11 +1162,11 @@ static qsc_tls_status server_emit_hrr(qsc_tls_server_state* state, uint8_t* outp
         return st; 
     }
 
-    st = qsc_tls_record_encode_plaintext(output, outlen, &rec_written, qsc_tls_record_content_handshake, hs, hsoff);
+    st = qsc_tls_record_encode_plaintext(output, outlen, &recwritten, qsc_tls_record_content_handshake, hs, hsoff);
 
     if (st == qsc_tls_status_success)
     {
-        *written = rec_written;
+        *written = recwritten;
     }
 
     return st;
@@ -1149,12 +1186,12 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
         size_t boff;
         size_t exthdr;
         size_t hsoff;
-        size_t rec_written;
+        size_t recwritten;
         size_t suites_hdr_unused;
 
         boff = 0U;
         hsoff = 0U;
-        rec_written = 0U;
+        recwritten = 0U;
         (void)suites_hdr_unused;
 
         st = qsc_tls_codec_write_u16(body, sizeof(body), &boff, QSC_TLS_PROTOCOL_VERSION_12);
@@ -1175,11 +1212,6 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
         {
             return st; 
         }
-
-        /* TODO: CODE CHANGED */
-
-        ///* echo empty session_id */
-        //st = qsc_tls_codec_write_vector8(body, sizeof(body), &boff, (const uint8_t*)"", 0U);
 
         /* RFC 8446: ServerHello legacy_session_id_echo MUST equal the ClientHello legacy_session_id. */
         st = qsc_tls_codec_write_vector8(body, sizeof(body), &boff, state->legacy_session_id, state->legacy_session_id_len);
@@ -1220,8 +1252,7 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
         /* If we accepted a PSK, echo pre_shared_key(selected_identity) in ServerHello. */
         if (st == qsc_tls_status_success && state->pskaccepted)
         {
-            st = qsc_tls_extensions_encode_pre_shared_key_server(body, sizeof(body), &boff,
-                state->selectedpskidentity);
+            st = qsc_tls_extensions_encode_pre_shared_key_server(body, sizeof(body), &boff, state->selectedpskidentity);
         }
 
         if (st == qsc_tls_status_success)
@@ -1254,14 +1285,14 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
         }
 
         
-        st = qsc_tls_record_encode_plaintext(output + off, outlen - off, &rec_written, qsc_tls_record_content_handshake, hs, hsoff);
+        st = qsc_tls_record_encode_plaintext(output + off, outlen - off, &recwritten, qsc_tls_record_content_handshake, hs, hsoff);
 
         if (st != qsc_tls_status_success)
         {
             return st; 
         }
 
-        off += rec_written;
+        off += recwritten;
     }
 
     /* install handshake keys now (transcript = CH..SH). */
@@ -1276,41 +1307,63 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
     {
         /* Body = extensions<0..2^16-1>. When accepting 0-RTT, include early_data(empty)
          * per RFC 8446 4.2.10. Otherwise emit an empty extensions vector. */
-        uint8_t hs[4U + 2U + 4U] = { 0U };  /* 4-byte header + 2-byte len + up to 4 bytes early_data */
-        size_t hsoff = 0U;
-        size_t body_off = 0U;
         uint8_t body[4U] = { 0U };
-        size_t rec_written = 0U;
+        uint8_t hs[4U + 2U + 4U] = { 0U };  /* 4-byte header + 2-byte len + up to 4 bytes early_data */
+        size_t bodyoff;
+        size_t hsoff;
+        size_t recwritten;
 
-        /* Build extensions vector body first, then emit. */
+        hsoff = 0U;
+        bodyoff = 0U;
+        recwritten = 0U;
+
+        /* build extensions vector body first, then emit. */
         if (state->earlydataaccepted)
         {
             /* early_data extension in EE context = empty body: type(2)+length(2)=0. */
-            body[body_off++] = 0x00U;
-            body[body_off++] = 0x2AU;  /* extension_type = early_data (42) */
-            body[body_off++] = 0x00U;
-            body[body_off++] = 0x00U;  /* zero-length body */
+            body[bodyoff++] = 0x00U;
+            ++bodyoff;
+            body[bodyoff] = 0x2AU;  /* extension_type = early_data (42) */
+            ++bodyoff;
+            body[bodyoff] = 0x00U;
+            ++bodyoff;
+            body[bodyoff] = 0x00U;  /* zero-length body */
+            ++bodyoff;
         }
 
-        st = qsc_tls_handshake_write_header(hs, sizeof(hs), &hsoff,
-            qsc_tls_handshake_type_encrypted_extensions, 2U + body_off);
+        st = qsc_tls_handshake_write_header(hs, sizeof(hs), &hsoff, qsc_tls_handshake_type_encrypted_extensions, 2U + bodyoff);
 
         if (st != qsc_tls_status_success)
         {
             return st;
         }
 
-        hs[hsoff++] = (uint8_t)((body_off >> 8) & 0xFFU);
-        hs[hsoff++] = (uint8_t)(body_off & 0xFFU);
-        for (size_t i = 0; i < body_off; ++i) { hs[hsoff++] = body[i]; }
+        hs[hsoff++] = (uint8_t)((bodyoff >> 8) & 0xFFU);
+        ++hsoff;
+        hs[hsoff] = (uint8_t)(bodyoff & 0xFFU);
+        ++hsoff;
+
+        for (size_t i = 0; i < bodyoff; ++i)
+        {
+            hs[hsoff] = body[i]; 
+            ++hsoff;
+        }
 
         st = qsc_tls_transcript_update(&state->transcript, hs, hsoff);
-        if (st != qsc_tls_status_success) { return st; }
 
-        st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off,
-            &rec_written, qsc_tls_record_content_handshake, hs, hsoff);
-        if (st != qsc_tls_status_success) { return st; }
-        off += rec_written;
+        if (st != qsc_tls_status_success) 
+        { 
+            return st;
+        }
+
+        st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off,&recwritten, qsc_tls_record_content_handshake, hs, hsoff);
+        
+        if (st != qsc_tls_status_success)
+        {
+            return st; 
+        }
+
+        off += recwritten;
     }
 
     /* ---- certificate ---- (skipped on PSK resumption per RFC 8446 2.2) */
@@ -1338,7 +1391,6 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
             return qsc_tls_status_failure; 
         }
 
-        
         st = qsc_tls_handshake_write_header(hs, 4U + boff, &hsoff, qsc_tls_handshake_type_certificate, boff);
 
         if (st == qsc_tls_status_success)
@@ -1350,15 +1402,15 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
 
         if (st == qsc_tls_status_success)
         {
-            size_t rec_written;
+            size_t recwritten;
 
-            rec_written = 0U;
+            recwritten = 0U;
 
-            st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off, &rec_written, qsc_tls_record_content_handshake, hs, hsoff);
+            st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off, &recwritten, qsc_tls_record_content_handshake, hs, hsoff);
 
             if (st == qsc_tls_status_success) 
             {
-                off += rec_written; 
+                off += recwritten; 
             }
         }
 
@@ -1376,7 +1428,6 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
     {
         uint8_t cv_input[256U] = { 0U };
         uint8_t body[4U + QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE] = { 0U };
-        
         uint8_t sig[QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE] = { 0U };
         uint8_t thash[QSC_TLS_HASH_MAX_SIZE] = { 0U };
         size_t boff;
@@ -1389,7 +1440,6 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
         cv_input_len = 0U;
         siglen = sizeof(sig);
         thashlen = 0U;
-
 
         st = qsc_tls_transcript_snapshot(&state->transcript, thash, sizeof(thash), &thashlen);
 
@@ -1424,7 +1474,6 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
 
         /* CV body: scheme u16 + signature u16-vector */
 
-
         st = qsc_tls_handshake_encode_certificate_verify(body, sizeof(body), &boff, state->negotiatedsigscheme, sig, siglen);
 
         if (st == qsc_tls_status_success)
@@ -1451,15 +1500,15 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
 
                 if (st == qsc_tls_status_success)
                 {
-                    size_t rec_written;
+                    size_t recwritten;
 
-                    rec_written = 0U;
+                    recwritten = 0U;
 
-                    st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off, &rec_written, qsc_tls_record_content_handshake, hs, hsoff);
+                    st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off, &recwritten, qsc_tls_record_content_handshake, hs, hsoff);
                     
                     if (st == qsc_tls_status_success) 
                     { 
-                        off += rec_written; 
+                        off += recwritten; 
                     }
                 }
 
@@ -1517,21 +1566,19 @@ static qsc_tls_status server_emit_flight1(qsc_tls_server_state* state, uint8_t* 
             if (st == qsc_tls_status_success && state->earlydataaccepted)
             {
                 state->stashedserverfinhashlen = 0U;
-                st = qsc_tls_transcript_snapshot(&state->transcript,
-                    state->stashedserverfinhash, sizeof(state->stashedserverfinhash),
-                    &state->stashedserverfinhashlen);
+                st = qsc_tls_transcript_snapshot(&state->transcript, state->stashedserverfinhash, sizeof(state->stashedserverfinhash), &state->stashedserverfinhashlen);
             }
 
             if (st == qsc_tls_status_success)
             {
-                size_t rec_written = 0U;
+                size_t recwritten = 0U;
 
-                rec_written = 0U;
-                st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off, &rec_written, qsc_tls_record_content_handshake, hs, hsoff);
+                recwritten = 0U;
+                st = qsc_tls_record_encrypt(&state->writerecord, output + off, outlen - off, &recwritten, qsc_tls_record_content_handshake, hs, hsoff);
 
                 if (st == qsc_tls_status_success) 
                 {
-                    off += rec_written; 
+                    off += recwritten; 
                 }
             }
         }
@@ -1581,8 +1628,7 @@ static qsc_tls_status server_install_handshake_keys(qsc_tls_server_state* state)
     /* server write = server_hs_traffic; server read = client_hs_traffic. */
     if (st == qsc_tls_status_success)
     {
-        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash, state->keyschedule.serverhandshaketrafficsecret, 
-            state->keyschedule.digestsize, keylen, ivlen, key, iv);
+        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash, state->keyschedule.serverhandshaketrafficsecret, state->keyschedule.digestsize, keylen, ivlen, key, iv);
 
         if (st == qsc_tls_status_success)
         {
@@ -1592,12 +1638,11 @@ static qsc_tls_status server_install_handshake_keys(qsc_tls_server_state* state)
 
     if (st == qsc_tls_status_success && !state->earlydataaccepted)
     {
-        /* Normal flow: install client_hs_traffic as our READ key now.
+        /* normal flow: install client_hs_traffic as our READ key now.
          * On 0-RTT-accepted flow the read record holds the early_traffic key for
          * incoming 0-RTT app data and the EOED message; we swap to client_hs_traffic
          * inside the EOED handler. */
-        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash,
-            state->keyschedule.clienthandshaketrafficsecret, state->keyschedule.digestsize, keylen, ivlen, key, iv);
+        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash, state->keyschedule.clienthandshaketrafficsecret, state->keyschedule.digestsize, keylen, ivlen, key, iv);
 
         if (st == qsc_tls_status_success)
         {
@@ -1632,8 +1677,7 @@ static qsc_tls_status server_install_app_keys(qsc_tls_server_state* state, const
 
     if (st == qsc_tls_status_success)
     {
-        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash, state->keyschedule.serverapplicationtrafficsecret, 
-            state->keyschedule.digestsize, keylen, ivlen, key, iv);
+        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash, state->keyschedule.serverapplicationtrafficsecret, state->keyschedule.digestsize, keylen, ivlen, key, iv);
 
         if (st == qsc_tls_status_success)
         {
@@ -1642,8 +1686,7 @@ static qsc_tls_status server_install_app_keys(qsc_tls_server_state* state, const
     }
     if (st == qsc_tls_status_success)
     {
-        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash, state->keyschedule.clientapplicationtrafficsecret, 
-            state->keyschedule.digestsize, keylen, ivlen, key, iv);
+        st = qsc_tls_keyschedule_derive_traffic_keys(state->negotiatedhash, state->keyschedule.clientapplicationtrafficsecret, state->keyschedule.digestsize, keylen, ivlen, key, iv);
 
         if (st == qsc_tls_status_success)
         {
@@ -1669,8 +1712,7 @@ static qsc_tls_status server_process_client_finished(qsc_tls_server_state* state
 
     if (st == qsc_tls_status_success)
     {
-        st = qsc_tls_keyschedule_verify_finished(state->negotiatedhash, state->keyschedule.clienthandshaketrafficsecret, 
-            state->keyschedule.digestsize, thash, thashlen, msg, msglen);
+        st = qsc_tls_keyschedule_verify_finished(state->negotiatedhash, state->keyschedule.clienthandshaketrafficsecret, state->keyschedule.digestsize, thash, thashlen, msg, msglen);
     }
 
     qsc_memutils_secure_erase(thash, sizeof(thash));

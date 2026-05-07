@@ -151,6 +151,7 @@ qsc_tls_status qsc_tls_extensions_encode_supported_versions_client(uint8_t* outp
     size_t inner;
     qsc_tls_status status;
 
+    inner = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (output != NULL && offset != NULL)
@@ -219,6 +220,7 @@ qsc_tls_status qsc_tls_extensions_encode_supported_groups(uint8_t* output, size_
     size_t inner;
     qsc_tls_status status;
 
+    inner = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (groups != NULL && groupcount != 0U)
@@ -260,6 +262,7 @@ qsc_tls_status qsc_tls_extensions_encode_signature_algorithms(uint8_t* output, s
     size_t i;
     qsc_tls_status status;
 
+    inner = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (output != NULL && offset != NULL && schemes != NULL && schemecount != 0U)
@@ -301,6 +304,7 @@ qsc_tls_status qsc_tls_extensions_encode_signature_algorithms_cert(uint8_t* outp
     size_t i;
     qsc_tls_status status;
 
+    inner = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (output != NULL && offset != NULL && schemes != NULL && schemecount != 0U)
@@ -341,6 +345,7 @@ qsc_tls_status qsc_tls_extensions_encode_key_share_client(uint8_t* output, size_
     size_t listhdr;
     qsc_tls_status status;
 
+    listhdr = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (output != NULL && offset != NULL && publicshare != NULL && publicsharelen != 0U)
@@ -449,6 +454,7 @@ qsc_tls_status qsc_tls_extensions_encode_server_name(uint8_t* output, size_t out
     size_t hostlen;
     qsc_tls_status status;
 
+    listhdr = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (output != NULL && offset != NULL && hostname != NULL)
@@ -504,6 +510,7 @@ qsc_tls_status qsc_tls_extensions_encode_psk_key_exchange_modes(uint8_t* output,
     size_t i;
     qsc_tls_status status;
 
+    inner = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (output != NULL && offset != NULL && modes != NULL && modecount != 0U)
