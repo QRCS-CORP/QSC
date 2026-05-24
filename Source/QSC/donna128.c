@@ -44,7 +44,7 @@ uint128 qsc_donna128_add(const uint128* x, const uint128* y)
 		r.low = x->low + y->low;
 		r.high = x->high + y->high;
 
-		const uint64_t CARRY = (x->low < y->low);
+		const uint64_t CARRY = (r.low < x->low);
 		r.high += CARRY;
 	}
 

@@ -10,23 +10,23 @@
  *
  * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
  * - This software includes implementations of cryptographic primitives and
- *   algorithms that are standardized or in the public domain, such as AES
- *   and SHA-3, which are not proprietary to QRCS.
+ * algorithms that are standardized or in the public domain, such as AES
+ * and SHA-3, which are not proprietary to QRCS.
  * - This software also includes cryptographic primitives, constructions, and
- *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
- *   related components, which are proprietary to QRCS.
+ * algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ * related components, which are proprietary to QRCS.
  * - All source code, implementations, protocol compositions, optimizations,
- *   parameter selections, and engineering work contained in this software are
- *   original works of QRCS and are protected under this license.
+ * parameter selections, and engineering work contained in this software are
+ * original works of QRCS and are protected under this license.
  *
  * LICENSE AND USE RESTRICTIONS:
  * - This software is licensed under the Quantum Resistant Cryptographic Solutions
- *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026.
  * - Permission is granted solely for non-commercial evaluation, academic research,
- *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * cryptographic analysis, interoperability testing, and feasibility assessment.
  * - Commercial use, production deployment, commercial redistribution, or
- *   integration into products or services is strictly prohibited without a
- *   separate written license agreement executed with QRCS.
+ * integration into products or services is strictly prohibited without a
+ * separate written license agreement executed by QRCS.
  * - Licensing and authorized distribution are solely at the discretion of QRCS.
  *
  * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
@@ -49,81 +49,68 @@
  * Contact: contact@qrcscorp.ca
  */
 
-#ifndef QSC_RDP_H
-#define QSC_RDP_H
+#ifndef QSC_CJP_H
+#define QSC_CJP_H
 
 #include "qsccommon.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 
-/**
- * \file rdp.h
- * \brief RDRAND Entropy Provider (RDP).
+/*! \file cjp.h
+ *  \brief CPU Jitter Entropy Provider.
  *
- * \details
- * This module provides access to the Intel RDRAND entropy provider, which extracts 
- * hardware-generated random numbers from a CPU with RDRAND support. While RDP is 
- * suitable as an entropy source, it is recommended to be combined with other entropy 
- * providers to seed a MAC or DRBG function for higher quality random output.
+ *  \details
+ *  The CPU Jitter Provider collects timing variance produced by CPU execution,
+ *  memory/cache disturbance, and the active high-resolution platform timer. The
+ *  provider follows the QSC entropy-provider interface used by CSP, RDP, and ACP.
  *
- * The ACP entropy provider is the recommended alternative in this library for 
- * ensuring strong cryptographic randomness.
- *
- * \code
- * // Example usage:
- * uint8_t entropy[64];
- * if (qsc_rdp_generate(entropy, sizeof(entropy))) {
- *     // Use the entropy for seeding a DRBG or MAC function
- * }
- * \endcode
- *
- * \section rdp_links Reference Links:
- * - <a href="https://software.intel.com/en-us/articles/intel-digital-random-number-generator">Intel RDRAND Documentation</a>
+ *  The raw timing samples are subjected to online health checks and are never
+ *  returned directly. Accepted samples and auxiliary provider material are
+ *  concentrated through SHAKE-512 before output is produced.
  */
 
-/*!
- * \def QSC_RDP_SEED_MAX
- * \brief The maximum seed size that can be extracted from a single generate call.
+/*! \def QSC_CJP_SEED_MAX
+ *  \brief The maximum number of bytes that can be generated in one provider call.
  */
-#define QSC_RDP_SEED_MAX 1024000U
+#define QSC_CJP_SEED_MAX 1024000U
 
 /**
  * \brief Test whether the platform exposes a usable high-resolution timer.
  *
- * \return [bool] Returns true when the RDRAND functionality is available.
+ * \return [bool] Returns true when the CJP timing source passes the timer test.
  */
-QSC_EXPORT_API bool qsc_rdrand_available(void);
+QSC_EXPORT_API bool qsc_cjp_available(void);
 
 /**
- * \brief Generate an array of random bytes using the RDRAND entropy provider.
+ * \brief Generate an array of random bytes using the CPU jitter entropy provider.
  *
  * \param output: [uint8_t*] Pointer to the output byte array.
  * \param length: [size_t] The number of bytes to generate.
  *
- * \return [bool] Returns true if the entropy generation was successful, false otherwise.
+ * \return [bool] Returns true if the entropy generation was successful; false otherwise.
  */
-QSC_EXPORT_API bool qsc_rdp_generate(uint8_t* output, size_t length);
+QSC_EXPORT_API bool qsc_cjp_generate(uint8_t* output, size_t length);
 
 /**
- * \brief Generate a random 16-bit unsigned integer using the RDRAND entropy provider.
+ * \brief Generate a random 16-bit unsigned integer using the CPU jitter entropy provider.
  *
  * \return [uint16_t] Returns a random 16-bit unsigned integer.
  */
-QSC_EXPORT_API uint16_t qsc_rdp_uint16(void);
+QSC_EXPORT_API uint16_t qsc_cjp_uint16(void);
 
 /**
- * \brief Generate a random 32-bit unsigned integer using the RDRAND entropy provider.
+ * \brief Generate a random 32-bit unsigned integer using the CPU jitter entropy provider.
  *
  * \return [uint32_t] Returns a random 32-bit unsigned integer.
  */
-QSC_EXPORT_API uint32_t qsc_rdp_uint32(void);
+QSC_EXPORT_API uint32_t qsc_cjp_uint32(void);
 
 /**
- * \brief Generate a random 64-bit unsigned integer using the RDRAND entropy provider.
+ * \brief Generate a random 64-bit unsigned integer using the CPU jitter entropy provider.
  *
  * \return [uint64_t] Returns a random 64-bit unsigned integer.
  */
-QSC_EXPORT_API uint64_t qsc_rdp_uint64(void);
+QSC_EXPORT_API uint64_t qsc_cjp_uint64(void);
 
 QSC_CPLUSPLUS_ENABLED_END
 

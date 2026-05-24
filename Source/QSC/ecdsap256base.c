@@ -277,68 +277,6 @@ static void fe_sub(uint32_t* r, const uint32_t* a, const uint32_t* b)
     fe256_select(r, t, r, mask);
 }
 
-static int32_t u288_cmp(const uint32_t a[9], const uint32_t b[9])
-{
-    uint32_t gt;
-    uint32_t lt;
-    size_t i;
-
-    gt = 0U;
-    lt = 0U;
-
-    for (i = 9U; i-- > 0U;)
-    {
-        uint32_t x;
-        uint32_t y;
-        uint32_t x_gt_y;
-        uint32_t x_lt_y;
-        uint32_t undecided;
-
-        x = a[i];
-        y = b[i];
-
-        x_gt_y = (uint32_t)(((uint64_t)y - (uint64_t)x) >> 63);
-        x_lt_y = (uint32_t)(((uint64_t)x - (uint64_t)y) >> 63);
-        undecided = (uint32_t)((gt | lt) ^ 1U);
-
-        gt |= x_gt_y & undecided;
-        lt |= x_lt_y & undecided;
-    }
-
-    return (int32_t)gt - (int32_t)lt;
-}
-
-static void u288_sub(uint32_t r[9U], const uint32_t a[9U], const uint32_t b[9U])
-{
-    /* r = a - b for 9-word little-endian integers.
-     * assumes a >= b. */
-    uint64_t borrow = 0U;
-
-    for (int32_t i = 0; i < 9; ++i)
-    {
-        const uint64_t ai = (uint64_t)a[i];
-        const uint64_t bi = (uint64_t)b[i];
-        const uint64_t di = ai - bi - borrow;
-
-        r[i] = (uint32_t)di;
-        borrow = (di >> 32U) & 1U;
-    }
-}
-
-static void u288_shl1(uint32_t r[9U])
-{
-    /* shift a 9-word little-endian integer left by one bit */
-    uint32_t carry = 0U;
-
-    for (int32_t i = 0; i < 9; ++i)
-    {
-        const uint32_t next = r[i] >> 31U;
-
-        r[i] = (r[i] << 1U) | carry;
-        carry = next;
-    }
-}
-
 static uint32_t ct_select_u32(uint32_t a, uint32_t b, uint32_t mask)
 {
     return (a & ~mask) | (b & mask);
@@ -508,46 +446,6 @@ static void fe_sqr(fe256 r, const fe256 a)
     fe_mul(r, a, a);
 }
 
-static void fe_neg(fe256 r, const fe256 a)
-{
-    /*
-     * r = -a mod p
-     *
-     * Canonical field negation requires:
-     *   if a == 0 then r = 0
-     *   else        r = p - a
-     *
-     * The old implementation returned p when a == 0, which is not a
-     * canonical field element representation.
-     */
-    uint32_t tmp[8U] = { 0U };
-    uint64_t borrow = 0U;
-    uint32_t nz;
-    uint32_t mask;
-
-    for (int32_t i = 0; i < 8; ++i)
-    {
-        const uint64_t w = (uint64_t)P256_P[i] - (uint64_t)a[i] - borrow;
-        tmp[i] = (uint32_t)w;
-        borrow = (w >> 63U) & 1U;
-    }
-
-    /*
-     * nz = 0 if a == 0, else 1
-     * mask = 0xFFFFFFFF if a != 0, else 0x00000000
-     */
-    nz = a[0U] | a[1U] | a[2U] | a[3U] | a[4U] | a[5U] | a[6U] | a[7U];
-    nz = (uint32_t)(((uint64_t)nz | (uint64_t)(0U - nz)) >> 63U);
-    mask = (uint32_t)(0U - nz);
-
-    for (int32_t i = 0; i < 8; ++i)
-    {
-        r[i] = tmp[i] & mask;
-    }
-
-    qsc_memutils_secure_erase(tmp, sizeof(tmp));
-}
-
 static void fe_mul_small(fe256 r, const fe256 a, uint32_t k)
 {
     /*
@@ -623,46 +521,6 @@ static void sc256_mul_raw(uint32_t c[16U], const uint32_t a[8U], const uint32_t 
     /* 256x256 -> 512-bit schoolbook multiplication (same as fe256_mul_raw,
      * reused for scalar field - separate alias for clarity). */
     fe256_mul_raw(c, a, b);
-}
-
-static void sc256_mul_hi(uint32_t hi[9U], const uint32_t a[8U], const uint32_t b[9U])
-{
-    /* multiply a 256-bit value by a 257-bit value (9-word) and return only the
-     * top 256 bits (bits [512..257]) of the 513-bit product.  Used in Barrett.
-     * we compute all 8+9=17 partial-product columns and discard the low 8 words. */
-    uint64_t acc[17U] = { 0U };
-
-    for (int32_t i = 0; i < 17; ++i) 
-    { 
-        acc[i] = 0U; 
-    }
-
-    for (int32_t i = 0; i < 8; ++i)
-    {
-        uint64_t carry = 0U;
-
-        for (int32_t j = 0; j < 9; ++j)
-        {
-            acc[i + j] += (uint64_t)a[i] * b[j] + carry;
-            carry = acc[i + j] >> 32U;
-            acc[i + j] &= 0xFFFFFFFFU;
-        }
-
-        acc[i + 9U] += carry;
-    }
-
-    /* propagate */
-    for (int32_t i = 0; i < 16; ++i)
-    {
-        acc[i + 1U] += acc[i] >> 32U;
-        acc[i] &= 0xFFFFFFFFU;
-    }
-
-    /* return words [8..16] (the high 9 words) */
-    for (int32_t i = 0; i < 9; ++i)
-    {
-        hi[i] = (uint32_t)acc[i + 8];
-    }
 }
 
 static void sc256_reduce512(uint32_t r[8U], const uint32_t c[16U])
@@ -1250,18 +1108,6 @@ static void sc_from_bytes(uint32_t r[8U], const uint8_t s[32U])
             ((uint32_t)s[j + 2U] << 8) |
             ((uint32_t)s[j + 3U]);
     }
-}
-
-static bool sc_is_zero(const uint32_t a[8U])
-{
-    uint32_t r = 0U;
-
-    for (size_t i = 0; i < 8; ++i)
-    {
-        r |= a[i];
-    }
-
-    return (r == 0U);
 }
 
 /* Public API */

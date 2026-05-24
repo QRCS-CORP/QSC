@@ -223,6 +223,7 @@
     <ClInclude Include="arrayutils.h" />
     <ClInclude Include="asn1.h" />
     <ClInclude Include="chacha.h" />
+    <ClInclude Include="cjp.h" />
     <ClInclude Include="collection.h" />
     <ClInclude Include="ecdh.h" />
     <ClInclude Include="ecdhp256base.h" />
@@ -356,6 +357,7 @@
     <ClCompile Include="arrayutils.c" />
     <ClCompile Include="asn1.c" />
     <ClCompile Include="chacha.c" />
+    <ClCompile Include="cjp.c" />
     <ClCompile Include="collection.c" />
     <ClCompile Include="consoleutils.c" />
     <ClCompile Include="cpuidex.c" />

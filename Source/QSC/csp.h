@@ -95,7 +95,11 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
  * \def QSC_CSP_SEED_MAX
  * \brief The maximum number of seed bytes that can be extracted from a single generate call.
  */
-#define QSC_CSP_SEED_MAX (size_t)ULONG_MAX
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+#	define QSC_CSP_SEED_MAX ((size_t)ULONG_MAX)
+#else
+#	define QSC_CSP_SEED_MAX ((size_t)QSC_SIZE_MAX)
+#endif
 
 /**
  * \brief Retrieve pseudo-random bytes from the system entropy provider.

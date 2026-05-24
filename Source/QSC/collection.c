@@ -13,79 +13,110 @@ void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const ui
 
 	uint8_t* itmp;
 	uint8_t* ktmp;
+	uint8_t* inew;
+	uint8_t* knew;
 	size_t ncnt;
 	size_t pos;
+	size_t ilen;
+	size_t klen;
+	size_t olen;
+	size_t okln;
 
 	if (ctx != NULL && item != NULL && key != NULL)
 	{
-		qsc_async_mutex_lock(ctx->opmtx);
+		ncnt = (size_t)ctx->count + 1U;
 
-		ktmp = NULL;
-		ncnt = ctx->count + 1;
-
-		if (ctx->items == NULL)
-		{
-			itmp = qsc_memutils_malloc(ncnt * ctx->width);
-
-			if (itmp != NULL)
-			{
-				ktmp = qsc_memutils_malloc(ncnt * QSC_COLLECTION_KEY_WIDTH);
-
-				if (ktmp != NULL)
-				{
-					ctx->items = itmp;
-					ctx->keys = ktmp;
-					qsc_memutils_clear(ctx->items + (ctx->count * ctx->width), ctx->width);
-					qsc_memutils_clear(ctx->keys + (ctx->count * QSC_COLLECTION_KEY_WIDTH), QSC_COLLECTION_KEY_WIDTH);
-				}
-				else
-				{
-					qsc_memutils_alloc_free(itmp);
-					itmp = NULL;
-				}
-			}
-
-			if (ctx->items != NULL && ctx->keys != NULL)
-			{
-				pos = (size_t)ctx->count * ctx->width;
-				qsc_memutils_copy(ctx->items + pos, item, ctx->width);
-				pos = ctx->count * QSC_COLLECTION_KEY_WIDTH;
-				qsc_memutils_copy(ctx->keys + pos, key, QSC_COLLECTION_KEY_WIDTH);
-				ctx->count = (uint32_t)ncnt;
-			}
-
-			qsc_async_mutex_unlock(ctx->opmtx);
-		}
-		else
+		if (ctx->width != 0U && ncnt <= (size_t)QSC_COLLECTION_MAX_ENTRIES)
 		{
 			qsc_async_mutex_lock(ctx->opmtx);
 
-			itmp = qsc_memutils_realloc(ctx->items, ncnt * ctx->width);
-
-			if (itmp != NULL)
+			if (ctx->items == NULL && ctx->keys == NULL)
 			{
-				ctx->items = itmp;
-				ktmp = qsc_memutils_realloc(ctx->keys, ncnt * QSC_COLLECTION_KEY_WIDTH);
+				itmp = qsc_memutils_malloc(ncnt * (size_t)ctx->width);
 
-				if (ktmp != NULL)
+				if (itmp != NULL)
 				{
-					qsc_memutils_clear(itmp, ncnt * ctx->width);
-					qsc_memutils_clear(ktmp, ncnt * QSC_COLLECTION_KEY_WIDTH);
-					ctx->keys = ktmp;
+					ktmp = qsc_memutils_malloc(ncnt * QSC_COLLECTION_KEY_WIDTH);
+
+					if (ktmp != NULL)
+					{
+						ctx->items = itmp;
+						ctx->keys = ktmp;
+
+						qsc_memutils_clear(ctx->items, ncnt * (size_t)ctx->width);
+						qsc_memutils_clear(ctx->keys, ncnt * QSC_COLLECTION_KEY_WIDTH);
+
+						pos = (size_t)ctx->count * (size_t)ctx->width;
+						qsc_memutils_copy(ctx->items + pos, item, ctx->width);
+
+						pos = (size_t)ctx->count * QSC_COLLECTION_KEY_WIDTH;
+						qsc_memutils_copy(ctx->keys + pos, key, QSC_COLLECTION_KEY_WIDTH);
+
+						ctx->count = (uint32_t)ncnt;
+					}
+					else
+					{
+						qsc_memutils_alloc_free(itmp);
+						itmp = NULL;
+					}
 				}
-				else
+			}
+			else if (ctx->items != NULL && ctx->keys != NULL)
+			{
+				ilen = ncnt * (size_t)ctx->width;
+				klen = ncnt * QSC_COLLECTION_KEY_WIDTH;
+				olen = (size_t)ctx->count * (size_t)ctx->width;
+				okln = (size_t)ctx->count * QSC_COLLECTION_KEY_WIDTH;
+
+				inew = qsc_memutils_malloc(ilen);
+
+				if (inew != NULL)
 				{
-					qsc_memutils_alloc_free(itmp);
-					itmp = NULL;
+					knew = qsc_memutils_malloc(klen);
+
+					if (knew != NULL)
+					{
+						qsc_memutils_clear(inew, ilen);
+						qsc_memutils_clear(knew, klen);
+
+						if (olen != 0U)
+						{
+							qsc_memutils_copy(inew, ctx->items, olen);
+						}
+
+						if (okln != 0U)
+						{
+							qsc_memutils_copy(knew, ctx->keys, okln);
+						}
+
+						qsc_memutils_copy(inew + olen, item, ctx->width);
+						qsc_memutils_copy(knew + okln, key, QSC_COLLECTION_KEY_WIDTH);
+
+						if (olen != 0U)
+						{
+							qsc_memutils_secure_erase(ctx->items, olen);
+						}
+
+						if (okln != 0U)
+						{
+							qsc_memutils_secure_erase(ctx->keys, okln);
+						}
+
+						qsc_memutils_alloc_free(ctx->items);
+						qsc_memutils_alloc_free(ctx->keys);
+
+						ctx->items = inew;
+						ctx->keys = knew;
+						ctx->count = (uint32_t)ncnt;
+					}
+					else
+					{
+						qsc_memutils_alloc_free(inew);
+						inew = NULL;
+					}
 				}
 			}
 
-			pos = (size_t)ctx->count * ctx->width;
-			qsc_memutils_copy(ctx->items + pos, item, ctx->width);
-			pos = ctx->count * QSC_COLLECTION_KEY_WIDTH;
-			qsc_memutils_copy(ctx->keys + pos, key, QSC_COLLECTION_KEY_WIDTH);
-			ctx->count = (uint32_t)ncnt;
-			
 			qsc_async_mutex_unlock(ctx->opmtx);
 		}
 	}
@@ -132,14 +163,22 @@ void qsc_collection_dispose(qsc_collection_state* ctx)
 
 		if (ctx->items != NULL)
 		{
-			qsc_memutils_secure_erase(ctx->items, (size_t)ctx->count * ctx->width);
+			if (ctx->count > 0U)
+			{
+				qsc_memutils_secure_erase(ctx->items, (size_t)ctx->count * ctx->width);
+			}
+
 			qsc_memutils_alloc_free(ctx->items);
 			ctx->items = NULL;
 		}
 
 		if (ctx->keys != NULL)
 		{
-			qsc_memutils_secure_erase(ctx->keys, ctx->count * QSC_COLLECTION_KEY_WIDTH);
+			if (ctx->count > 0U)
+			{
+				qsc_memutils_secure_erase(ctx->keys, ctx->count * QSC_COLLECTION_KEY_WIDTH);
+			}
+
 			qsc_memutils_alloc_free(ctx->keys);
 			ctx->keys = NULL;
 		}
@@ -266,10 +305,12 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(key != NULL);
 
-	uint8_t *itmp;
-	uint8_t *ktmp;
+	uint8_t* inew;
+	uint8_t* knew;
 	size_t posi;
 	size_t posl;
+	size_t ilen;
+	size_t klen;
 
 	if (ctx != NULL && ctx->items != NULL && ctx->keys != NULL && key != NULL)
 	{
@@ -279,13 +320,13 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 		{
 			if (qsc_memutils_are_equal_128(ctx->keys + (i * QSC_COLLECTION_KEY_WIDTH), key) == true)
 			{
-				if (ctx->count > 1)
+				if (ctx->count > 1U)
 				{
-					const size_t ITMCNT = ctx->count - 1U;
+					const size_t ITMCNT = (size_t)ctx->count - 1U;
 
 					/* swap the last item with the item being removed */
-					posi = i * ctx->width;
-					posl = ITMCNT * ctx->width;
+					posi = i * (size_t)ctx->width;
+					posl = ITMCNT * (size_t)ctx->width;
 					qsc_memutils_copy(ctx->items + posi, ctx->items + posl, ctx->width);
 					qsc_memutils_secure_erase(ctx->items + posl, ctx->width);
 
@@ -295,55 +336,52 @@ void qsc_collection_remove(qsc_collection_state* ctx, const uint8_t* key)
 					qsc_memutils_copy(ctx->keys + posi, ctx->keys + posl, QSC_COLLECTION_KEY_WIDTH);
 					qsc_memutils_secure_erase(ctx->keys + posl, QSC_COLLECTION_KEY_WIDTH);
 
+					--ctx->count;
+
+					ilen = (size_t)ctx->width * (size_t)ctx->count;
+					klen = QSC_COLLECTION_KEY_WIDTH * (size_t)ctx->count;
+
+					inew = qsc_memutils_malloc(ilen);
+
+					if (inew != NULL)
+					{
+						knew = qsc_memutils_malloc(klen);
+
+						if (knew != NULL)
+						{
+							qsc_memutils_copy(inew, ctx->items, ilen);
+							qsc_memutils_copy(knew, ctx->keys, klen);
+
+							qsc_memutils_secure_erase(ctx->items, ilen + (size_t)ctx->width);
+							qsc_memutils_secure_erase(ctx->keys, klen + QSC_COLLECTION_KEY_WIDTH);
+
+							qsc_memutils_alloc_free(ctx->items);
+							qsc_memutils_alloc_free(ctx->keys);
+
+							ctx->items = inew;
+							ctx->keys = knew;
+						}
+						else
+						{
+							qsc_memutils_alloc_free(inew);
+							inew = NULL;
+						}
+					}
 				}
 				else
 				{
 					qsc_memutils_secure_erase(ctx->items, ctx->width);
 					qsc_memutils_secure_erase(ctx->keys, QSC_COLLECTION_KEY_WIDTH);
+
+					qsc_memutils_alloc_free(ctx->items);
+					qsc_memutils_alloc_free(ctx->keys);
+
+					ctx->items = NULL;
+					ctx->keys = NULL;
+					ctx->count = 0U;
 				}
 
-				--ctx->count;
-
-				if (ctx->count != 0U)
-				{
-					itmp = qsc_memutils_realloc(ctx->items, (size_t)ctx->width * ctx->count);
-
-					if (itmp != NULL)
-					{
-						ktmp = qsc_memutils_realloc(ctx->keys, QSC_COLLECTION_KEY_WIDTH * ctx->count);
-
-						if (ktmp != NULL)
-						{
-							ctx->items = itmp;
-							ctx->keys = ktmp;
-						}
-						else
-						{
-							qsc_memutils_alloc_free(itmp);
-							itmp = NULL;
-						}
-					}
-				}
-				else
-				{
-					itmp = qsc_memutils_realloc(ctx->items, 1U);
-
-					if (itmp != NULL)
-					{
-						ktmp = qsc_memutils_realloc(ctx->keys, 1U);
-
-						if (ktmp != NULL)
-						{
-							ctx->items = itmp;
-							ctx->keys = ktmp;
-						}
-						else
-						{
-							qsc_memutils_alloc_free(itmp);
-							itmp = NULL;
-						}
-					}
-				}
+				break;
 			}
 		}
 

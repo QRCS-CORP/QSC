@@ -907,7 +907,7 @@ static bool x509_nc_parse_subtrees(const uint8_t* der, size_t derlen, x509_nc_su
 
 static bool x509_nc_dns_in_subtree(const char* hostname, const char* subtree)
 {
-    /* RFC 5280 §4.2.1.10 DNS name constraint membership test.
+    /* RFC 5280 4.2.1.10 DNS name constraint membership test.
      * A constraint of "" matches any name (treat as unconstrained).
      * A constraint of ".example.com" requires a sub-domain: "a.example.com" matches, "example.com" does not.
      * A constraint of "example.com" (no leading dot) matches the domain itself and all sub-domains: "example.com", "a.example.com". */
@@ -959,7 +959,7 @@ static bool x509_nc_dns_in_subtree(const char* hostname, const char* subtree)
 
 static bool x509_nc_email_in_subtree(const char* email, const char* subtree)
 {
-    /* RFC 5280 §4.2.1.10 email constraint membership test.
+    /* RFC 5280 4.2.1.10 email constraint membership test.
      * if the constraint contains '@': require an exact match.
      * If the constraint has no '@': it is a domain constraint and the 
      * email's domain must match or be a sub-domain of the constraint. */
@@ -1053,7 +1053,7 @@ static bool x509_nc_email_in_subtree(const char* email, const char* subtree)
 
 static bool x509_nc_ip_in_subtree(const uint8_t* addr, size_t addrlen, const uint8_t* subtree_ip, size_t subtree_iplen)
 {
-    /* RFC 5280 §4.2.1.10 IP address constraint membership test.
+    /* RFC 5280 4.2.1.10 IP address constraint membership test.
      * The subtree entry is (address || mask): 8 bytes for IPv4, 32 for IPv6.
      * The subject SAN iPAddress is the raw address: 4 bytes IPv4, 16 bytes IPv6.
      * Membership: (addr[i] & mask[i]) == (constraint_addr[i] & mask[i]) for all i. */
@@ -1260,7 +1260,7 @@ static qsc_x509_verify_status x509_nc_check_one_name(const x509_nc_subtrees* per
     else
     {
         /* unrecognised name type in a critical extension — fail closed
-         * per RFC 5280 §6.1.3(d) if any unknown constraint exists. */
+         * per RFC 5280 6.1.3(d) if any unknown constraint exists. */
 
         if (nc_critical == true)
         {
@@ -1541,7 +1541,7 @@ static qsc_x509_verify_status x509_evaluate_name_constraints(const qsc_x509_cert
                         subject);
                 }
 
-                /* RFC 5280 §4.2 prohibits duplicate extensions */
+                /* RFC 5280 4.2 prohibits duplicate extensions */
                 break;
             }
         }

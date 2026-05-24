@@ -19,9 +19,6 @@
 #	    pragma comment(lib, "IPHLPAPI.lib")
 #		pragma comment(lib, "advapi32.lib")
 #   endif
-#elif defined(QSC_SYSTEM_OS_UNIX)
-#	include <time.h>
-#	include <unistd.h>
 #elif defined(QSC_SYSTEM_OS_MAC)
 #	include <stdio.h>
 #	include <sys/types.h>
@@ -40,6 +37,9 @@ static void qsc_tc_init(void)
 	qsc_tc_ratio = (double)tb.numer / (double)tb.denom;
 }
 
+#elif defined(QSC_SYSTEM_OS_UNIX)
+#	include <time.h>
+#	include <unistd.h>
 #endif
 #if defined(QSC_SYSTEM_OS_POSIX)
 #	include <string.h>
@@ -66,7 +66,9 @@ static void qsc_tc_init(void)
 #		include <mach/mach_types.h>
 #		include <mach/mach_init.h>
 #		include <mach/mach_host.h>
-#	else
+#	elif defined(QSC_SYSTEM_OS_BSD)
+#		include <sys/sysctl.h>
+#	elif defined(QSC_SYSTEM_OS_LINUX)
 #		include <sys/sysinfo.h>
 #	endif
 #	include <sys/time.h>
@@ -206,6 +208,8 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 
 	if (state != NULL)
 	{
+		qsc_memutils_clear(state, sizeof(qsc_sysutils_memory_statistics_state));
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 		MEMORYSTATUSEX memInfo;
@@ -257,7 +261,7 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 			}
 		}
 
-#elif defined(QSC_SYSTEM_OS_POSIX)
+#elif defined(QSC_SYSTEM_OS_LINUX)
 
 		struct sysinfo memInfo;
 
@@ -268,6 +272,37 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 			state->virttotal = (uint64_t)(memInfo.totalram + memInfo.totalswap) * (uint64_t)memInfo.mem_unit;
 			state->virtavail = (uint64_t)(memInfo.freeram + memInfo.freeswap) * (uint64_t)memInfo.mem_unit;
 		}
+
+#elif defined(QSC_SYSTEM_OS_BSD)
+
+		uint64_t phtotal;
+		size_t slen;
+
+		phtotal = 0U;
+		slen = sizeof(phtotal);
+
+		if (sysctlbyname("hw.physmem", &phtotal, &slen, NULL, 0) == 0)
+		{
+			state->phystotal = phtotal;
+			state->virttotal = phtotal;
+		}
+		else
+		{
+			unsigned long phtotal32;
+
+			phtotal32 = 0UL;
+			slen = sizeof(phtotal32);
+
+			if (sysctlbyname("hw.physmem", &phtotal32, &slen, NULL, 0) == 0)
+			{
+				state->phystotal = (uint64_t)phtotal32;
+				state->virttotal = (uint64_t)phtotal32;
+			}
+		}
+
+		/* Portable BSD free/swap accounting is OS-specific; leave unavailable fields zeroed if not provided. */
+		state->physavail = 0U;
+		state->virtavail = 0U;
 
 #endif
 	}

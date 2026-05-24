@@ -98,7 +98,7 @@
  */
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 
-#	if defined(QSC_X86_FAMILY) && defined(QSC_SYSTEM_AVX_INTRINSICS)
+#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED))
 #		include <intrin.h>
 #	endif
 
@@ -114,7 +114,7 @@
  */
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
 
-#	if defined(QSC_X86_FAMILY) && defined(QSC_SYSTEM_AVX_INTRINSICS)
+#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED))
 #		include <immintrin.h>
 #	endif
 
@@ -130,7 +130,7 @@
  */
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)
 
-#	if defined(QSC_X86_FAMILY) && defined(QSC_SYSTEM_AVX_INTRINSICS)
+#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED))
 #		include <x86intrin.h>
 #	endif
 

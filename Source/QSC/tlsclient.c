@@ -688,6 +688,8 @@ static qsc_tls_status client_process_certificate(qsc_tls_client_state* state, co
     qsc_tls_status status;
 
     chainlen = 0U;
+    rctx = NULL;
+    rctxlen = 0U;
 
     status = qsc_tls_certificate_decode_message(msg, msglen, &rctx, &rctxlen, chain, QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES, &chainlen);
 
@@ -695,11 +697,18 @@ static qsc_tls_status client_process_certificate(qsc_tls_client_state* state, co
     {
         if (chainlen != 0U)
         {
-            /* invoke peer chain validation if configured. */
-            if (state->config.certinterface.validatechain != NULL)
-            {
-                qsc_tls_certificate_validation_context vctx;
+            qsc_tls_certificate_validation_context vctx;
 
+            /* RFC 8446 requires the server certificate chain to be authenticated.
+             * A NULL validation callback means that no trust-anchor, path, or
+             * hostname verification can be performed by this client instance. */
+            if (state->config.certinterface.validatechain == NULL)
+            {
+                state->lastalert = qsc_tls_alert_bad_certificate;
+                status = qsc_tls_status_authentication_failure;
+            }
+            else
+            {
                 vctx.hostname = state->config.hostname;
                 vctx.clientauth = false;
                 vctx.requirepeercertificate = true;
@@ -707,15 +716,18 @@ static qsc_tls_status client_process_certificate(qsc_tls_client_state* state, co
                 if (!state->config.certinterface.validatechain(chain, chainlen, &vctx, state->config.certinterface.state))
                 {
                     state->lastalert = qsc_tls_alert_bad_certificate;
-                    return qsc_tls_status_authentication_failure;
+                    status = qsc_tls_status_authentication_failure;
+                }
+                else
+                {
+                    /* remember leaf cert view for CertificateVerify. */
+                    state->peercapabilities.groupcount = 0U;
                 }
             }
-
-            /* remember leaf cert view for CertificateVerify. */
-            state->peercapabilities.groupcount = 0U;
         }
         else
         {
+            state->lastalert = qsc_tls_alert_bad_certificate;
             status = qsc_tls_status_authentication_failure;
         }
     }

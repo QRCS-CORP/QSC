@@ -9166,52 +9166,54 @@ int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 	res = -1;
 
 	/* generate key pair */
-	rng_generate(seed, sizeof(seed));
-	qsc_keccak_initialize_state(&kctx);
-	qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
-	qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-	falcon_keygen(&kctx, f, g, F, NULL, h, 9, b);
-	qsc_keccak_dispose(&kctx);
-
-	/* encode private key */
-	sk[0U] = 0x50U + 9U;
-	u = 1;
-	v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, f, 9, falcon_max_fg_bits[9]);
-
-	if (v != 0U)
+	if (rng_generate(seed, sizeof(seed)) == true)
 	{
-		u += v;
-		v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, g, 9, falcon_max_fg_bits[9]);
+		qsc_keccak_initialize_state(&kctx);
+		qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
+		qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		falcon_keygen(&kctx, f, g, F, NULL, h, 9, b);
+		qsc_keccak_dispose(&kctx);
+
+		/* encode private key */
+		sk[0U] = 0x50U + 9U;
+		u = 1;
+		v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, f, 9, falcon_max_fg_bits[9]);
 
 		if (v != 0U)
 		{
 			u += v;
-			v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, F, 9, falcon_max_FG_bits[9]);
+			v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, g, 9, falcon_max_fg_bits[9]);
 
 			if (v != 0U)
 			{
 				u += v;
+				v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, F, 9, falcon_max_FG_bits[9]);
 
-				if (u == FALCON_CRYPTO_SECRETKEYBYTES)
+				if (v != 0U)
 				{
-					/* encode public key */
-					pk[0] = 0x00 + 9U;
-					v = falcon_modq_encode(pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1, h, 9);
+					u += v;
 
-					if (v == FALCON_CRYPTO_PUBLICKEY_BYTES - 1U)
+					if (u == FALCON_CRYPTO_SECRETKEYBYTES)
 					{
-						res = 0;
+						/* encode public key */
+						pk[0] = 0x00 + 9U;
+						v = falcon_modq_encode(pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1, h, 9);
+
+						if (v == FALCON_CRYPTO_PUBLICKEY_BYTES - 1U)
+						{
+							res = 0;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	qsc_memutils_secure_erase(f, sizeof(f));
-	qsc_memutils_secure_erase(g, sizeof(g));
-	qsc_memutils_secure_erase(F, sizeof(F));
-	qsc_memutils_secure_erase(h, sizeof(h));
-	qsc_memutils_secure_erase(seed, sizeof(seed));
+		qsc_memutils_secure_erase(f, sizeof(f));
+		qsc_memutils_secure_erase(g, sizeof(g));
+		qsc_memutils_secure_erase(F, sizeof(F));
+		qsc_memutils_secure_erase(h, sizeof(h));
+		qsc_memutils_secure_erase(seed, sizeof(seed));
+	}
 
 	return res;
 }
@@ -9261,45 +9263,54 @@ int32_t qsc_falcon_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t
 						if (falcon_complete_private(G, f, g, F, 9, b))
 						{
 							/* create a random nonce (40 bytes) */
-							rng_generate(nonce, sizeof(nonce));
-
-							/* hash message nonce + message into a vector */
-							qsc_keccak_initialize_state(&kctx);
-							qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, nonce, sizeof(nonce));
-							qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
-							qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-							falcon_hash_to_point_ct(&kctx, hm, 9, b);
-
-							/* initialize a RNG */
-							rng_generate(seed, sizeof(seed));
-							qsc_keccak_initialize_state(&kctx);
-							qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
-							qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-
-							/* compute the signature */
-							falcon_sign_dyn(sig, &kctx, f, g, F, G, hm, 9, b);
-							qsc_keccak_dispose(&kctx);
-
-							/*
-							 * Encode the signature and bundle it with the message. Format is:
-							 *   signature length     2 bytes, big-endian
-							 *   nonce                40 bytes
-							 *   message              mlen bytes
-							 *   signature            slen bytes
-							 */
-							esig[0U] = 0x20U + 9U;
-							siglen = falcon_comp_encode(esig + 1, (sizeof(esig)) - 1, sig, 9);
-
-							if (siglen != 0U)
+							if (rng_generate(nonce, sizeof(nonce)) == true)
 							{
-								siglen++;
-								qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
-								sm[0U] = (uint8_t)(siglen >> 8);
-								sm[1U] = (uint8_t)siglen;
-								qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
-								qsc_memutils_copy(sm + 2 + sizeof(nonce) + mlen, esig, siglen);
-								*smlen = 2U + sizeof(nonce) + mlen + siglen;
-								res = 0;
+								/* hash message nonce + message into a vector */
+								qsc_keccak_initialize_state(&kctx);
+								qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, nonce, sizeof(nonce));
+								qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
+								qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+								falcon_hash_to_point_ct(&kctx, hm, 9, b);
+
+								/* initialize a RNG */
+								if (rng_generate(seed, sizeof(seed)) == true)
+								{
+									qsc_keccak_initialize_state(&kctx);
+									qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
+									qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+
+									/* compute the signature */
+									falcon_sign_dyn(sig, &kctx, f, g, F, G, hm, 9, b);
+									qsc_keccak_dispose(&kctx);
+
+									/*
+									 * Encode the signature and bundle it with the message. Format is:
+									 *   signature length     2 bytes, big-endian
+									 *   nonce                40 bytes
+									 *   message              mlen bytes
+									 *   signature            slen bytes
+									 */
+									esig[0U] = 0x20U + 9U;
+									siglen = falcon_comp_encode(esig + 1, (sizeof(esig)) - 1, sig, 9);
+
+									if (siglen != 0U)
+									{
+										siglen++;
+										qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
+										sm[0U] = (uint8_t)(siglen >> 8);
+										sm[1U] = (uint8_t)siglen;
+										qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
+										qsc_memutils_copy(sm + 2 + sizeof(nonce) + mlen, esig, siglen);
+										*smlen = 2U + sizeof(nonce) + mlen + siglen;
+										res = 0;
+									}
+								}
+								else
+								{
+									qsc_keccak_dispose(&kctx);
+									qsc_memutils_secure_erase(hm, sizeof(hm));
+									qsc_memutils_secure_erase(b, sizeof(b));
+								}
 							}
 
 							qsc_memutils_secure_erase(b, sizeof(b));
@@ -9416,53 +9427,55 @@ int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 	res = -1;
 
 	/* generate key pair */
-	rng_generate(seed, sizeof(seed));
-	qsc_keccak_initialize_state(&kctx);
-	qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
-	qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-	falcon_keygen(&kctx, f, g, F, NULL, h, 10, b);
-	qsc_keccak_dispose(&kctx);
-
-	/*encode private key */
-	sk[0U] = 0x50U + 10U;
-	u = 1U;
-	v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, f, 10, falcon_max_fg_bits[10]);
-
-	if (v != 0U)
+	if (rng_generate(seed, sizeof(seed)) == true)
 	{
-		u += v;
-		v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, g, 10, falcon_max_fg_bits[10]);
+		qsc_keccak_initialize_state(&kctx);
+		qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
+		qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+		falcon_keygen(&kctx, f, g, F, NULL, h, 10, b);
+		qsc_keccak_dispose(&kctx);
+
+		/*encode private key */
+		sk[0U] = 0x50U + 10U;
+		u = 1U;
+		v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, f, 10, falcon_max_fg_bits[10]);
 
 		if (v != 0U)
 		{
 			u += v;
-			v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, F, 10, falcon_max_FG_bits[10]);
+			v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, g, 10, falcon_max_fg_bits[10]);
 
 			if (v != 0U)
 			{
 				u += v;
+				v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, F, 10, falcon_max_FG_bits[10]);
 
-				if (u == FALCON_CRYPTO_SECRETKEYBYTES)
+				if (v != 0U)
 				{
-					/* encode public key */
-					pk[0U] = 0x00 + 10U;
-					v = falcon_modq_encode(pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1, h, 10);
+					u += v;
 
-					if (v == FALCON_CRYPTO_PUBLICKEY_BYTES - 1)
+					if (u == FALCON_CRYPTO_SECRETKEYBYTES)
 					{
-						res = 0;
+						/* encode public key */
+						pk[0U] = 0x00 + 10U;
+						v = falcon_modq_encode(pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1, h, 10);
+
+						if (v == FALCON_CRYPTO_PUBLICKEY_BYTES - 1)
+						{
+							res = 0;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	qsc_memutils_secure_erase(b, sizeof(b));
-	qsc_memutils_secure_erase(f, sizeof(f));
-	qsc_memutils_secure_erase(F, sizeof(F));
-	qsc_memutils_secure_erase(g, sizeof(g));
-	qsc_memutils_secure_erase(h, sizeof(h));
-	qsc_memutils_secure_erase(seed, sizeof(seed));
+		qsc_memutils_secure_erase(b, sizeof(b));
+		qsc_memutils_secure_erase(f, sizeof(f));
+		qsc_memutils_secure_erase(F, sizeof(F));
+		qsc_memutils_secure_erase(g, sizeof(g));
+		qsc_memutils_secure_erase(h, sizeof(h));
+		qsc_memutils_secure_erase(seed, sizeof(seed));
+	}
 
 	return res;
 }
@@ -9512,51 +9525,60 @@ int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t
 						if (falcon_complete_private(G, f, g, F, 10, b))
 						{
 							/* create a random nonce (40 bytes) */
-							rng_generate(nonce, sizeof(nonce));
-
-							/* hash message nonce + message into a vector */
-							qsc_keccak_initialize_state(&kctx);
-							qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, nonce, sizeof(nonce));
-							qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
-							qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-							falcon_hash_to_point_ct(&kctx, hm, 10, b);
-
-							/* initialize a RNG */
-							rng_generate(seed, sizeof(seed));
-							qsc_keccak_initialize_state(&kctx);
-							qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
-							qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-
-							/* compute the signature */
-							falcon_sign_dyn(sig, &kctx, f, g, F, G, hm, 10, b);
-							qsc_keccak_dispose(&kctx);
-
-							/*
-							 * Encode the signature and bundle it with the message. Format is:
-							 *   signature length     2 bytes, big-endian
-							 *   nonce                40 bytes
-							 *   message              mlen bytes
-							 *   signature            slen bytes
-							 */
-							esig[0U] = 0x20U + 10U;
-							siglen = falcon_comp_encode(esig + 1, sizeof(esig) - 1, sig, 10);
-
-							if (siglen != 0U)
+							if (rng_generate(nonce, sizeof(nonce)) == true)
 							{
-								siglen++;
-								qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
-								sm[0U] = (uint8_t)(siglen >> 8);
-								sm[1U] = (uint8_t)siglen;
-								qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
-								qsc_memutils_copy(sm + 2 + sizeof(nonce) + mlen, esig, siglen);
-								*smlen = 2U + sizeof(nonce) + mlen + siglen;
-								res = 0;
-							}
+								/* hash message nonce + message into a vector */
+								qsc_keccak_initialize_state(&kctx);
+								qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, nonce, sizeof(nonce));
+								qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, m, mlen);
+								qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+								falcon_hash_to_point_ct(&kctx, hm, 10, b);
 
-							qsc_memutils_secure_erase(hm, sizeof(hm));
-							qsc_memutils_secure_erase(esig, sizeof(esig));
-							qsc_memutils_secure_erase(seed, sizeof(seed));
-							qsc_memutils_secure_erase(sig, sizeof(sig));
+								/* initialize a RNG */
+								if (rng_generate(seed, sizeof(seed)) == true)
+								{
+									qsc_keccak_initialize_state(&kctx);
+									qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
+									qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
+
+									/* compute the signature */
+									falcon_sign_dyn(sig, &kctx, f, g, F, G, hm, 10, b);
+									qsc_keccak_dispose(&kctx);
+
+									/*
+									 * Encode the signature and bundle it with the message. Format is:
+									 *   signature length     2 bytes, big-endian
+									 *   nonce                40 bytes
+									 *   message              mlen bytes
+									 *   signature            slen bytes
+									 */
+									esig[0U] = 0x20U + 10U;
+									siglen = falcon_comp_encode(esig + 1, sizeof(esig) - 1, sig, 10);
+
+									if (siglen != 0U)
+									{
+										siglen++;
+										qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
+										sm[0U] = (uint8_t)(siglen >> 8);
+										sm[1U] = (uint8_t)siglen;
+										qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
+										qsc_memutils_copy(sm + 2 + sizeof(nonce) + mlen, esig, siglen);
+										*smlen = 2U + sizeof(nonce) + mlen + siglen;
+										res = 0;
+									}
+
+									qsc_memutils_secure_erase(hm, sizeof(hm));
+									qsc_memutils_secure_erase(esig, sizeof(esig));
+									qsc_memutils_secure_erase(seed, sizeof(seed));
+									qsc_memutils_secure_erase(sig, sizeof(sig));
+								}
+								else
+								{
+									qsc_keccak_dispose(&kctx);
+									qsc_memutils_secure_erase(hm, sizeof(hm));
+									qsc_memutils_secure_erase(b, sizeof(b));
+								}
+							}
 						}
 
 						qsc_memutils_secure_erase(b, sizeof(b));

@@ -155,7 +155,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #if defined(__GNUC__) && !defined(__MINGW32__)
     /*!
     * \def QSC_SYSTEM_COMPILER_GCC
-    * \brief Defined when the GNU Compiler Collection (GCC) is detected.
+    * \brief Defined when GCC-compatible compiler extensions are available.
+    *
+    * Clang defines __GNUC__ for GCC compatibility; therefore Clang builds may
+    * define both QSC_SYSTEM_COMPILER_GCC and QSC_SYSTEM_COMPILER_CLANG. Code
+    * requiring Clang-specific behavior must test QSC_SYSTEM_COMPILER_CLANG
+    * before testing the GCC compatibility macro.
     */
 #	define QSC_SYSTEM_COMPILER_GCC
 #endif
@@ -164,6 +169,9 @@ QSC_CPLUSPLUS_ENABLED_START
     /*!
     * \def QSC_SYSTEM_COMPILER_CLANG
     * \brief Defined when the Clang compiler is detected.
+    *
+    * This macro is not mutually exclusive with QSC_SYSTEM_COMPILER_GCC, because
+    * Clang exposes the GCC compatibility preprocessor surface.
     */
 #	define QSC_SYSTEM_COMPILER_CLANG
 #endif
@@ -292,7 +300,39 @@ QSC_CPLUSPLUS_ENABLED_START
 #   endif
 #endif
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__DragonFly__) || defined(QSC_SYSTEM_ISOSX)
+#if defined(__FreeBSD__)
+    /*!
+    * \def QSC_SYSTEM_OS_FREEBSD
+    * \brief Defined when the target operating system is FreeBSD.
+    */
+#	define QSC_SYSTEM_OS_FREEBSD
+#endif
+
+#if defined(__OpenBSD__)
+    /*!
+    * \def QSC_SYSTEM_OS_OPENBSD
+    * \brief Defined when the target operating system is OpenBSD.
+    */
+#	define QSC_SYSTEM_OS_OPENBSD
+#endif
+
+#if defined(__NetBSD__)
+    /*!
+    * \def QSC_SYSTEM_OS_NETBSD
+    * \brief Defined when the target operating system is NetBSD.
+    */
+#	define QSC_SYSTEM_OS_NETBSD
+#endif
+
+#if defined(__DragonFly__)
+    /*!
+    * \def QSC_SYSTEM_OS_DRAGONFLY
+    * \brief Defined when the target operating system is DragonFly BSD.
+    */
+#	define QSC_SYSTEM_OS_DRAGONFLY
+#endif
+
+#if defined(QSC_SYSTEM_OS_FREEBSD) || defined(QSC_SYSTEM_OS_OPENBSD) || defined(QSC_SYSTEM_OS_NETBSD) || defined(QSC_SYSTEM_OS_DRAGONFLY) || defined(__bsdi__) || defined(QSC_SYSTEM_ISOSX)
     /*!
     * \def QSC_SYSTEM_OS_BSD
     * \brief Defined when the target operating system is a BSD variant.
@@ -725,10 +765,14 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_RTL_SECURE_MEMORY
 #endif
 
-#if defined(_POSIX_MEMLOCK_RANGE)
+#if defined(QSC_SYSTEM_OS_LINUX) || defined(QSC_SYSTEM_OS_MAC) || defined(QSC_SYSTEM_OS_BSD)
     /*!
     * \def QSC_SYSTEM_POSIX_MLOCK
-    * \brief Defined if the system supports the POSIX mlock function.
+    * \brief Defined when the target platform provides the POSIX mlock and munlock functions.
+    *
+    * This definition is based on the resolved operating-system target instead of
+    * _POSIX_MEMLOCK_RANGE so that secure-allocation page locking is not affected
+    * by the order in which system headers are included before qsccommon.h.
     */
 #	define QSC_SYSTEM_POSIX_MLOCK
 #endif
@@ -1044,10 +1088,25 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \def QSC_SHA2_SHANI_ENABLED
- * \brief Enables the SHA-NI instruction sets.
+ * \brief Enables the x86 SHA-NI SHA-256 compression path.
+ *
+ * \details
+ * The SHA-NI implementation in sha2.c uses the Intel SHA extensions together
+ * with SSSE3/SSE4.1 helper instructions such as _mm_shuffle_epi8,
+ * _mm_alignr_epi8, and _mm_blend_epi16. Therefore SHA-NI must not be enabled
+ * solely because the compiler defines __SHA__; a build such as -msha -msse2
+ * exposes the SHA feature macro but cannot compile the helper intrinsics.
+ *
+ * GCC and Clang define __SHA__, __SSSE3__, and __SSE4_1__ when the required
+ * instruction families are enabled explicitly, for example:
+ * -msha -mssse3 -msse4.1. The MSVC compatibility branch retains the existing
+ * QSC AVX-intrinsics umbrella for that toolchain.
  */
-#if defined(__SHA__) || defined(__SHA256__) || defined(__SHA512__) || defined(__ISA_AVAILABLE_SHA)
-#   define QSC_SHA2_SHANI_ENABLED
+#if defined(QSC_SYSTEM_ARCH_IX86)
+#	if ((defined(__SHA__) || defined(__SHA256__)) && defined(__SSSE3__) && defined(__SSE4_1__)) || \
+		(defined(__ISA_AVAILABLE_SHA) && defined(QSC_SYSTEM_AVX_INTRINSICS))
+#		define QSC_SHA2_SHANI_ENABLED
+#	endif
 #endif
 
 ///*!

@@ -260,23 +260,6 @@ static void fe_sub(uint32_t* r, const uint32_t* a, const uint32_t* b)
     fe384_select(r, t, r, mask);
 }
 
-static void u416_shl1(uint32_t r[13U])
-{
-    uint32_t carry;
-    size_t i;
-
-    carry = 0U;
-
-    for (i = 0U; i < 13U; ++i)
-    {
-        uint32_t next;
-
-        next = r[i] >> 31U;
-        r[i] = (r[i] << 1U) | carry;
-        carry = next;
-    }
-}
-
 static uint32_t ct_ge_13x32(const uint32_t a[13U], const uint32_t b[13U])
 {
     uint64_t diff;
@@ -307,16 +290,6 @@ static void ct_sub_13x32(uint32_t out[13U], const uint32_t a[13U], const uint32_
         diff = (uint64_t)a[i] - (uint64_t)b[i] - (uint64_t)borrow;
         out[i] = (uint32_t)diff;
         borrow = (uint32_t)((diff >> 63U) & 1U);
-    }
-}
-
-static void ct_select_12x32(uint32_t dst[12U], const uint32_t a[12U], const uint32_t b[12U], uint32_t mask)
-{
-    size_t i;
-
-    for (i = 0U; i < 12U; ++i)
-    {
-        dst[i] = (a[i] & ~mask) | (b[i] & mask);
     }
 }
 
@@ -471,11 +444,6 @@ static void fe_mul(fe384 r, const fe384 a, const fe384 b)
 static void fe_sqr(fe384 r, const fe384 a)
 {
     fe_mul(r, a, a);
-}
-
-static void fe_neg(fe384 r, const fe384 a)
-{
-    fe_sub(r, P384_P, a);
 }
 
 static void fe_mul_small(fe384 r, const fe384 a, uint32_t k)
@@ -995,21 +963,6 @@ static void sc_from_bytes(uint32_t r[12U], const uint8_t s[48U])
             ((uint32_t)s[j + 2U] << 8U) |
             ((uint32_t)s[j + 3U]);
     }
-}
-
-static bool sc_is_zero(const uint32_t a[12U])
-{
-    uint32_t r;
-    size_t i;
-
-    r = 0U;
-
-    for (i = 0U; i < 12U; ++i)
-    {
-        r |= a[i];
-    }
-
-    return (r == 0U);
 }
 
 int32_t qsc_p384_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey)

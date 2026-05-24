@@ -3,6 +3,9 @@
 #include "stringutils.h"
 #include <string.h>
 #if defined(QSC_SYSTEM_OS_WINDOWS)
+#   if !defined(WIN32_LEAN_AND_MEAN)
+#       define WIN32_LEAN_AND_MEAN
+#   endif
 #	include <windows.h>
 #endif
 #if defined(QSC_DEBUG_MODE)
@@ -111,11 +114,11 @@ void qsc_timestamp_string_to_time_struct(struct tm* tstruct, const char output[Q
 
 	if (output != NULL && tstruct != NULL)
 	{
+		qsc_memutils_clear(tstruct, sizeof(struct tm));
+
 		if (strnlen(output, QSC_TIMESTAMP_STRING_SIZE) >= (QSC_TIMESTAMP_STRING_SIZE - 1U))
 		{
 			char tmp[5U] = { 0U };
-
-			qsc_memutils_clear(tstruct, sizeof(struct tm));
 
 			qsc_memutils_copy(tmp, output, 4U);
 			tstruct->tm_year = qsc_stringutils_string_to_int(tmp) - QSC_TIMESTAMP_EPOCH_START;
@@ -175,18 +178,22 @@ void qsc_timestamp_current_date(char output[QSC_TIMESTAMP_STRING_SIZE])
 		size_t len;
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-		time(&lt);
-		nt = localtime_r(&lt, &tmbuf);
+		lt = time(NULL);
 
-		if (nt != NULL)
+		if (lt != (time_t)-1)
 		{
-			strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%F", nt);
+			nt = localtime_r(&lt, &tmbuf);
 
-			len = strlen(tbuf);
-
-			if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+			if (nt != NULL)
 			{
-				qsc_memutils_copy(output, tbuf, len);
+				strftime(tbuf, QSC_TIMESTAMP_STRING_SIZE, "%Y-%m-%d", nt);
+
+				len = strlen(tbuf);
+
+				if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+				{
+					qsc_memutils_copy(output, tbuf, len);
+				}
 			}
 		}
 
@@ -226,11 +233,15 @@ void qsc_timestamp_current_datetime(char output[QSC_TIMESTAMP_STRING_SIZE])
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 		lt = time(NULL);
-		nt = localtime_r(&lt, &tmbuf);
 
-		if (nt != NULL)
+		if (lt != (time_t)-1)
 		{
-			qsc_timestamp_time_struct_to_string(output, nt);
+			nt = localtime_r(&lt, &tmbuf);
+
+			if (nt != NULL)
+			{
+				qsc_timestamp_time_struct_to_string(output, nt);
+			}
 		}
 
 #endif
@@ -275,18 +286,22 @@ void qsc_timestamp_current_time(char output[QSC_TIMESTAMP_STRING_SIZE])
 		size_t len;
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
-		time(&lt);
-		nt = localtime_r(&lt, &tmbuf);
+		lt = time(NULL);
 
-		if (nt != NULL)
+		if (lt != (time_t)-1)
 		{
-			strftime(buf, QSC_TIMESTAMP_STRING_SIZE, "%T", nt);
+			nt = localtime_r(&lt, &tmbuf);
 
-			len = strlen(buf);
-
-			if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+			if (nt != NULL)
 			{
-				qsc_memutils_copy(output, buf, len);
+				strftime(buf, QSC_TIMESTAMP_STRING_SIZE, "%H:%M:%S", nt);
+
+				len = strlen(buf);
+
+				if (len > 0U && len < QSC_TIMESTAMP_STRING_SIZE)
+				{
+					qsc_memutils_copy(output, buf, len);
+				}
 			}
 		}
 
@@ -305,8 +320,8 @@ uint64_t qsc_timestamp_datetime_seconds_remaining(const char basetime[QSC_TIMEST
 
 	if (basetime != NULL && comptime != NULL)
 	{
-		struct tm bt;
-		struct tm ft;
+		struct tm bt = { 0U };
+		struct tm ft = { 0U };
 		time_t bsec;
 		time_t csec;
 
@@ -324,7 +339,11 @@ uint64_t qsc_timestamp_datetime_seconds_remaining(const char basetime[QSC_TIMEST
 #else
 		bsec = mktime(&bt);
 		csec = mktime(&ft);
-		dtmp = difftime(csec, bsec);
+
+		if (bsec != (time_t)-1 && csec != (time_t)-1)
+		{
+			dtmp = difftime(csec, bsec);
+		}
 #endif
 
 		if (dtmp < 0 || bsec > csec)
@@ -340,7 +359,7 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 {
 	QSC_ASSERT(input != NULL);
 
-	struct tm dt;
+	struct tm dt = { 0U };
 	time_t tsec;
 
 	tsec = 0;
@@ -354,6 +373,11 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 #else
 		tsec = mktime(&dt);
 #endif
+
+		if (tsec == (time_t)-1)
+		{
+			tsec = 0;
+		}
 	}
 
 	return (uint64_t)tsec;
@@ -361,37 +385,33 @@ uint64_t qsc_timestamp_datetime_to_seconds(const char input[QSC_TIMESTAMP_STRING
 
 uint64_t qsc_timestamp_datetime_utc(void)
 {
-    time_t lt;
-    time_t ut;
-    struct tm ptm = { 0U };
+	time_t lt;
+	time_t ut;
 
-    lt = 0;
-    ut = 0;
+	lt = 0;
+	ut = 0;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    errno_t err;
+	errno_t err;
+	struct tm ptm = { 0U };
 
-    _time64(&lt);
-    err = _gmtime64_s(&ptm, &lt);
+	_time64(&lt);
+	err = _gmtime64_s(&ptm, &lt);
 
-    if (err == 0)
-    {
-        ut = _mktime64(&ptm);
-    }
+	if (err == 0)
+	{
+		ut = _mkgmtime64(&ptm);
+	}
 #else
-    lt = time(NULL);
+	lt = time(NULL);
 
-    if (lt != -1)
-    {
-#if defined(__linux__) || defined(__BSD__) || defined(__APPLE__)
-		ut = timegm(&ptm);
-#else
+	if (lt != (time_t)-1)
+	{
 		ut = lt;
-#endif
-    }
+	}
 #endif
 
-    return (uint64_t)ut;
+	return (uint64_t)ut;
 }
 
 void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP_STRING_SIZE])
@@ -424,11 +444,15 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 
 		qsc_memutils_clear(output, QSC_TIMESTAMP_STRING_SIZE);
 		lt = (time_t)dtsec;
-		nt = localtime_r(&lt, &tmbuf);
 
-		if (nt != NULL)
+		if (lt != (time_t)-1)
 		{
-			qsc_timestamp_time_struct_to_string(output, nt);
+			nt = localtime_r(&lt, &tmbuf);
+
+			if (nt != NULL)
+			{
+				qsc_timestamp_time_struct_to_string(output, nt);
+			}
 		}
 
 #endif
@@ -438,6 +462,9 @@ void qsc_timestamp_seconds_to_datetime(uint64_t dtsec, char output[QSC_TIMESTAMP
 uint64_t qsc_timestamp_epochtime_seconds(void)
 {
 	time_t lt;
+	uint64_t res;
+
+	res = 0U;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	lt = 0;
@@ -446,11 +473,20 @@ uint64_t qsc_timestamp_epochtime_seconds(void)
 	lt = time(NULL);
 #endif
 
-	return (uint64_t)lt;
+	if (lt != (time_t)-1)
+	{
+		res = (uint64_t)lt;
+	}
+
+	return res;
 }
 
 uint64_t qsc_timestamp_epochtime_milliseconds(void)
 {
+	uint64_t res;
+
+	res = 0U;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	FILETIME ft;
 	ULARGE_INTEGER uli;
@@ -460,16 +496,28 @@ uint64_t qsc_timestamp_epochtime_milliseconds(void)
 	uli.HighPart = ft.dwHighDateTime;
 
 	/* FILETIME is 100-nanosecond intervals since 1601-01-01 */
-	return (uli.QuadPart - 116444736000000000ULL) / 10000ULL;
+	if (uli.QuadPart >= 116444736000000000ULL)
+	{
+		res = (uli.QuadPart - 116444736000000000ULL) / 10000ULL;
+	}
 #else
 	struct timespec ts;
-	clock_gettime(CLOCK_REALTIME, &ts);
-	return ((uint64_t)ts.tv_sec * 1000ULL) + (uint64_t)(ts.tv_nsec / 1000000ULL);
+
+	if (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+	{
+		res = ((uint64_t)ts.tv_sec * 1000ULL) + (uint64_t)(ts.tv_nsec / 1000000ULL);
+	}
 #endif
+
+	return res;
 }
 
 uint64_t qsc_timestamp_epochtime_microseconds(void)
 {
+	uint64_t res;
+
+	res = 0U;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	FILETIME ft;
 	ULARGE_INTEGER uli;
@@ -479,12 +527,20 @@ uint64_t qsc_timestamp_epochtime_microseconds(void)
 	uli.HighPart = ft.dwHighDateTime;
 
 	/* FILETIME is 100-nanosecond intervals since 1601-01-01 */
-	return (uli.QuadPart - 116444736000000000ULL) / 10ULL;
+	if (uli.QuadPart >= 116444736000000000ULL)
+	{
+		res = (uli.QuadPart - 116444736000000000ULL) / 10ULL;
+	}
 #else
 	struct timespec ts;
-	clock_gettime(CLOCK_REALTIME, &ts);
-	return ((uint64_t)ts.tv_sec * 1000000ULL) + (uint64_t)(ts.tv_nsec / 1000ULL);
+
+	if (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+	{
+		res = ((uint64_t)ts.tv_sec * 1000000ULL) + (uint64_t)(ts.tv_nsec / 1000ULL);
+	}
 #endif
+
+	return res;
 }
 
 #if defined(QSC_DEBUG_MODE)

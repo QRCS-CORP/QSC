@@ -10,6 +10,15 @@
 /* successful return of a rdrand step call */
 #define RDP_RDR_SUCCESS 1
 
+bool qsc_rdrand_available(void)
+{
+#if defined(QSC_RDRAND_COMPATIBLE)
+	return true;
+#else
+	return false;
+#endif
+}
+
 bool qsc_rdp_generate(uint8_t* output, size_t length)
 {
 	QSC_ASSERT(output != NULL);

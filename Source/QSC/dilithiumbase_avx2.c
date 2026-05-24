@@ -1971,7 +1971,7 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
 #if defined(QSC_DILITHIUM_RANDOMIZED_SIGNING)
-    res = rng_generate(rnd, DILITHIUM_CRHBYTES);
+    res = rng_generate(rnd, DILITHIUM_RNDBYTES);
 #else
     res = true;
 #endif

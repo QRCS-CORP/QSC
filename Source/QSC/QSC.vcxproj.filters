@@ -618,6 +618,9 @@
     <ClInclude Include="tlssocket.h">
       <Filter>Header Files\TLS</Filter>
     </ClInclude>
+    <ClInclude Include="cjp.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -994,6 +997,9 @@
     </ClCompile>
     <ClCompile Include="tlssocket.c">
       <Filter>Source Files\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="cjp.c">
+      <Filter>Source Files\Provider</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -533,18 +533,6 @@ static void sc256_reduce512(uint32_t r[8U], const uint32_t c[16U])
     mod_reduce512_generic(r, c, P256_N);
 }
 
-static void sc_set_one(uint32_t x[8U])
-{
-    size_t i;
-
-    x[0U] = 1U;
-
-    for (i = 1U; i < 8U; ++i)
-    {
-        x[i] = 0U;
-    }
-}
-
 static void sc_copy(uint32_t dst[8U], const uint32_t src[8U])
 {
     size_t i;
@@ -562,14 +550,6 @@ static void sc_mul(uint32_t r[8U], const uint32_t a[8U], const uint32_t b[8U])
 
     sc256_mul_raw(c, a, b);
     sc256_reduce512(r, c);
-}
-
-static void sc_sqr(uint32_t r[8U], const uint32_t a[8U])
-{
-    uint32_t t[8U] = { 0U };
-
-    sc_mul(t, a, a);
-    sc_copy(r, t);
 }
 
 static void sc_from_bytes_reduce(uint32_t r[8U], const uint8_t b[32U])

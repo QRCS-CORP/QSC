@@ -800,35 +800,6 @@ static void hash_j(uint8_t* output, const uint8_t hash_ek_kem[SEED_BYTES], const
     qsc_sha3_finalize(&ctx, QSC_KECCAK_256_RATE, output);
 }
 
-static void gf_generate(uint16_t* exp, uint16_t* log, const int16_t m)
-{
-    uint16_t elt;
-    uint16_t alpha;
-    uint16_t gf_poly;
-
-    elt = 1U;
-    alpha = 2U;
-    gf_poly = PARAM_GF_POLY;
-
-    for (size_t i = 0U; i < (1U << m) - 1U; ++i)
-    {
-        exp[i] = elt;
-        log[elt] = (uint16_t)i;
-
-        elt *= alpha;
-
-        if (elt >= 1 << m)
-        {
-            elt ^= gf_poly;
-        }
-    }
-
-    exp[((size_t)1 << m) - 1U] = 1U;
-    exp[(size_t)1 << m] = 2U;
-    exp[((size_t)1 << m) + 1U] = 4U;
-    log[0U] = 0U;
-}
-
 static uint16_t gf_reduce(uint16_t x)
 {
     uint64_t mod;
@@ -1582,31 +1553,6 @@ static uint16_t mod(uint16_t i, uint16_t modulus)
     mask = -(tmp >> 15);
 
     return tmp + (mask & modulus);
-}
-
-static void compute_generator_poly(uint16_t* poly) 
-{
-    /* Code length is 2^m-1. <br>
-     * PARAM_DELTA is the targeted correction capacity of the code
-     * and receives the real correction capacity (which is at least equal to the target). <br>
-     * gf_exp and gf_log are arrays giving antilog and log of GF(2^m) elements. */
-
-    poly[0U] = 1U;
-    int32_t tmp_degree;
-
-    tmp_degree = 0;
-
-    for (uint16_t i = 1; i < (2 * PARAM_DELTA + 1); ++i) 
-    {
-        for (size_t j = tmp_degree; j; --j) 
-        {
-            poly[j] = gf_exp[mod(gf_log[poly[j]] + i, PARAM_GF_MUL_ORDER)] ^ poly[j - 1U];
-        }
-
-        poly[0U] = gf_exp[mod(gf_log[poly[0U]] + i, PARAM_GF_MUL_ORDER)];
-        poly[tmp_degree] = 1U;
-        ++tmp_degree;
-    }
 }
 
 static void reed_solomon_encode(uint64_t* cdw, const uint64_t* msg)

@@ -126,14 +126,6 @@ static void fe448_p3_cmov(qsc_ge448_p3* r, const qsc_ge448_p3* p, uint32_t b)
     qsc_fe448_cmov(r->t, p->t, b);
 }
 
-static void fe448_p3_from_affine(qsc_ge448_p3* p, const qsc_fe448 x, const qsc_fe448 y)
-{
-    qsc_fe448_copy(p->x, x);
-    qsc_fe448_copy(p->y, y);
-    qsc_fe448_1(p->z);
-    qsc_fe448_mul(p->t, x, y);
-}
-
 static void fe448_p3_to_affine(qsc_fe448 x, qsc_fe448 y, const qsc_ge448_p3* p)
 {
     qsc_fe448 zinv;

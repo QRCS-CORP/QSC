@@ -128,6 +128,7 @@ static void acp_squeeze_output(qsc_keccak_state* kstate, uint8_t* output, size_t
 
 		qsc_keccak_squeezeblocks(kstate, kbuff, 1U, qsc_keccak_rate_512, QSC_KECCAK_PERMUTATION_ROUNDS);
 		qsc_memutils_copy(output + pos, kbuff, length);
+		qsc_memutils_secure_erase(kbuff, sizeof(kbuff));
 	}
 }
 
@@ -145,26 +146,35 @@ bool qsc_acp_generate(uint8_t* output, size_t length)
 
 	if (output != NULL && length != 0U && length <= QSC_ACP_SEED_MAX)
 	{
-		/* create the seed */
+		/* collect non-cryptographic system statistics only as supplemental input */
 		acp_collect_statistics(seed);
-
 		qsc_keccak_update(&kstate, qsc_keccak_rate_512, seed, sizeof(seed), QSC_KECCAK_PERMUTATION_ROUNDS);
 
-		if (qsc_rdp_generate(seed, sizeof(seed)) == true)
+		/* mix hardware random data if available; failure is not fatal if CSP succeeds */
+		if (qsc_rdrand_available() == true)
 		{
-			qsc_keccak_update(&kstate, qsc_keccak_rate_512, seed, sizeof(seed), QSC_KECCAK_PERMUTATION_ROUNDS);
+			if (qsc_rdp_generate(seed, sizeof(seed)) == true)
+			{
+				qsc_keccak_update(&kstate, qsc_keccak_rate_512, seed, sizeof(seed), QSC_KECCAK_PERMUTATION_ROUNDS);
+			}
 		}
 
+		/* the operating-system CSPRNG is mandatory.
+		 * host statistics and RDRAND are supplemental and must never be treated
+		 * as sufficient standalone entropy for ACP output. */
 		if (qsc_csp_generate(seed, sizeof(seed)) == true)
 		{
 			qsc_keccak_update(&kstate, qsc_keccak_rate_512, seed, sizeof(seed), QSC_KECCAK_PERMUTATION_ROUNDS);
+			acp_squeeze_output(&kstate, output, length);
+			res = true;
+		}
+		else
+		{
+			qsc_memutils_clear(output, length);
 		}
 
-		/* finalize the seed */
-		acp_squeeze_output(&kstate, output, length);
 		qsc_keccak_dispose(&kstate);
 		qsc_memutils_secure_erase(seed, sizeof(seed));
-		res = true;
 	}
 
 	return res;

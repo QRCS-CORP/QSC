@@ -530,27 +530,8 @@ static void mod_n_cond_sub(fe521 r)
     qsc_memutils_secure_erase(t, sizeof(t));
 }
 
-static void mod_n_add_small(fe521 r, uint32_t x)
-{
-    uint64_t t;
-    uint64_t carry;
-    size_t i;
-
-    t = (uint64_t)r[0U] + (uint64_t)x;
-    r[0U] = (uint32_t)t;
-    carry = t >> 32U;
-
-    for (i = 1U; i < 17U && carry != 0U; ++i)
-    {
-        t = (uint64_t)r[i] + carry;
-        r[i] = (uint32_t)t;
-        carry = t >> 32U;
-    }
-
-    mod_n_cond_sub(r);
-}
-
 static void sc_add(fe521 r, const fe521 a, const fe521 b);
+
 static void sc_add_one(fe521 r);
 
 static void sc_from_bytes(fe521 r, const uint8_t s[66U])

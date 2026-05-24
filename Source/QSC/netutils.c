@@ -166,7 +166,7 @@ void qsc_netutils_get_adaptor_info(qsc_netutils_adaptor_info* ctx, const char* i
 				break;
 			}
 		}
-#elif defined(QSC_SYSTEM_OS_FREEBSD) || defined(QSC_SYSTEM_OS_OPENBSD) || defined(QSC_SYSTEM_OS_NETBSD)
+#elif defined(QSC_SYSTEM_OS_BSD)
 		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
 		{
 			if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK)

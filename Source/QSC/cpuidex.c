@@ -1,7 +1,7 @@
 #include "cpuidex.h"
 
-/* only supported on I386 */
-#if defined(QSC_HAS_CPUID)
+/* Runtime feature detection is supported on x86 through CPUID and on ARM through OS feature interfaces. */
+#if defined(QSC_HAS_CPUID) || defined(QSC_SYSTEM_ARCH_ARM)
 
 #include "consoleutils.h"
 #include "intutils.h"

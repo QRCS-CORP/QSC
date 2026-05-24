@@ -1013,5 +1013,11 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
     qsc_intutils_cmov(ss, kr, QSC_KYBER_SYMBYTES, (uint8_t)!fail);
     qsc_memutils_secure_erase(kr, sizeof(kr));
 
+    /* Note: in the FIPS specification decapsulate always returns true even on failure,
+    * as a means to guard against a decryption oracle. In the real world however,
+    * that failure will propagate in tunnel failures which will reveal the decapsulation failure,
+    * but without any ability to defend against it or log it administratively. For this reason,
+    * this is an ineffective and unrealistic defense against the oracle,
+    * and implement the decapsulation failure signal. */
     return (fail == 0);
 }

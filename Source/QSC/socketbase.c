@@ -45,6 +45,22 @@
 #	endif
 #endif
 
+
+#if defined(QSC_SYSTEM_OS_POSIX)
+static int32_t socketbase_send_flags(qsc_socket_send_flags flag)
+{
+	int32_t res;
+
+	res = (int32_t)flag;
+
+#	if defined(MSG_NOSIGNAL)
+	res |= MSG_NOSIGNAL;
+#	endif
+
+	return res;
+}
+#endif
+
 const char QSC_SOCKET_ERROR_STRINGS[48][128] =
 {
 	"SUCCESS: The operation completed successfully.",
@@ -624,6 +640,16 @@ qsc_socket_exceptions qsc_socket_create(qsc_socket* sock, qsc_socket_address_fam
 		sock->socket_protocol = protocol;
 		sock->connection = socket((int32_t)family, (int32_t)transport, prot);
 		res = (sock->connection != QSC_UNINITIALIZED_SOCKET) ? qsc_socket_exception_success : qsc_socket_exception_error;
+
+#if defined(QSC_SYSTEM_OS_POSIX) && defined(SO_NOSIGPIPE)
+		if (res == qsc_socket_exception_success)
+		{
+			int32_t optval;
+
+			optval = 1;
+			(void)setsockopt(sock->connection, SOL_SOCKET, SO_NOSIGPIPE, &optval, sizeof(optval));
+		}
+#endif
 	}
 
 	if (res == qsc_socket_exception_error)
@@ -927,7 +953,11 @@ size_t qsc_socket_send(const qsc_socket* sock, const uint8_t* input, size_t inpl
 	if (sock != NULL && input != NULL)
 	{
 		slen = (inplen > (size_t)INT32_MAX) ? INT32_MAX : (int32_t)inplen;
+#if defined(QSC_SYSTEM_OS_POSIX)
+		res = send(sock->connection, (const char*)input, slen, socketbase_send_flags(flag));
+#else
 		res = send(sock->connection, (const char*)input, slen, (int32_t)flag);
+#endif
 		res = (res == qsc_socket_exception_error) ? 0 : res;
 	}
 
@@ -989,7 +1019,11 @@ size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t* input, size_t 
 		while (inplen > 0U)
 		{
 			chunk = (inplen > (size_t)INT32_MAX) ? INT32_MAX : (int32_t)inplen;
+#if defined(QSC_SYSTEM_OS_POSIX)
+			res = send(sock->connection, (const char*)(input + pos), (int32_t)chunk, socketbase_send_flags(flag));
+#else
 			res = send(sock->connection, (const char*)(input + pos), (int32_t)chunk, (int32_t)flag);
+#endif
 
 			if (res < 1)
 			{
