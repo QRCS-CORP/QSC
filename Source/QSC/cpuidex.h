@@ -56,8 +56,6 @@
 
 QSC_CPLUSPLUS_ENABLED_START
 
-#if defined (QSC_HAS_CPUID)
-
 /*!
  * \file cpuidex.h
  * \brief Retrieves CPU features and capabilities.
@@ -174,13 +172,6 @@ QSC_EXPORT_API bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* const fea
  * This function outputs the CPU capabilities (for example, AVX, AESNI, cache size, vendor) to the console.
  */
 QSC_EXPORT_API void qsc_cpuidex_print_stats(void);
-
-#else
-
-/* avoid warning C4206 : translation unit is empty */
-typedef int32_t dummy_cpuidex_translation_unit;
-
-#endif
 
 QSC_CPLUSPLUS_ENABLED_END
 

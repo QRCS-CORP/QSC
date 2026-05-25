@@ -85,7 +85,7 @@
 #include "sphincsplus_test.h"
 #include "testutils.h"
 #include "tls_test.h"
-#include "X509_test.h"
+#include "x509_test.h"
 
 //#define QSCTEST_PRINT_STATS
 

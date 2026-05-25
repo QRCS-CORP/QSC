@@ -93,7 +93,7 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #		define HWCAP_SM4 (1 << 19)
 #	endif
 
-static bool cpuidex_is_armv7()
+static bool cpuidex_is_armv7(void)
 {
 	bool res;
 
@@ -120,7 +120,7 @@ static bool cpuidex_is_armv7()
 	return res;
 }
 
-static bool cpuidex_has_neon()
+static bool cpuidex_has_neon(void)
 {
 	bool res;
 
@@ -165,7 +165,7 @@ static bool cpuidex_has_neon()
 	return res;
 }
 
-static bool cpuidex_has_pmull()
+static bool cpuidex_has_pmull(void)
 {
 	bool res;
 
@@ -205,7 +205,7 @@ static bool cpuidex_has_pmull()
 	return res;
 }
 
-static bool cpuidex_has_aes()
+static bool cpuidex_has_aes(void)
 {
 	bool res;
 
@@ -245,7 +245,7 @@ static bool cpuidex_has_aes()
 	return res;
 }
 
-static bool cpuidex_has_sha256()
+static bool cpuidex_has_sha256(void)
 {
 	bool res;
 
@@ -285,7 +285,7 @@ static bool cpuidex_has_sha256()
 	return res;
 }
 
-static bool cpuidex_has_sha512()
+static bool cpuidex_has_sha512(void)
 {
 	bool res;
 
@@ -320,7 +320,7 @@ static bool cpuidex_has_sha512()
 	return res;
 }
 
-static bool cpuidex_has_sha3()
+static bool cpuidex_has_sha3(void)
 {
 	bool res;
 
