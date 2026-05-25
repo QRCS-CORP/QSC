@@ -402,11 +402,13 @@ qsc_asn1_status qsc_x509_crl_encode_der(const qsc_x509_crl* crl, uint8_t* output
 
     uint8_t tbs[QSC_X509_CRL_WRITE_MAX] = { 0U };
     uint8_t content[QSC_X509_CRL_WRITE_MAX] = { 0U };
-    qsc_x509_crl_builder builder;
+    qsc_x509_crl_builder* builder;
     qsc_asn1_status status;
     size_t tbslen;
     size_t pos;
     size_t len;
+
+    builder = (qsc_x509_crl_builder*)NULL;
 
     if (crl == (const qsc_x509_crl*)NULL || outputlen == (size_t*)NULL)
     {
@@ -418,38 +420,50 @@ qsc_asn1_status qsc_x509_crl_encode_der(const qsc_x509_crl* crl, uint8_t* output
     }
     else
     {
-        x509_crl_copy_to_builder(crl, &builder);
-        tbslen = sizeof(tbs);
-        status = qsc_x509_crl_builder_encode_tbs_der(&builder, tbs, &tbslen);
+        builder = (qsc_x509_crl_builder*)qsc_memutils_malloc(sizeof(qsc_x509_crl_builder));
 
-        if (status == QSC_ASN1_STATUS_SUCCESS)
+        if (builder == (qsc_x509_crl_builder*)NULL)
         {
-            pos = 0U;
+            status = QSC_ASN1_STATUS_FAILURE;
+        }
+        else
+        {
+            x509_crl_copy_to_builder(crl, builder);
+            tbslen = sizeof(tbs);
+            status = qsc_x509_crl_builder_encode_tbs_der(builder, tbs, &tbslen);
 
-            if ((sizeof(content) - pos) < tbslen)
+            if (status == QSC_ASN1_STATUS_SUCCESS)
             {
-                status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
-            }
-            else
-            {
-                qsc_memutils_copy(content + pos, tbs, tbslen);
-                pos += tbslen;
-                len = sizeof(content) - pos;
-                status = qsc_x509_write_algorithm_identifier(&crl->signaturealgorithm, content + pos, &len);
+                pos = 0U;
 
-                if (status == QSC_ASN1_STATUS_SUCCESS)
+                if ((sizeof(content) - pos) < tbslen)
                 {
-                    pos += len;
+                    status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
+                }
+                else
+                {
+                    qsc_memutils_copy(content + pos, tbs, tbslen);
+                    pos += tbslen;
                     len = sizeof(content) - pos;
-                    status = qsc_x509_write_bit_string(crl->signature, crl->signaturelen, crl->signatureunusedbits, content + pos, &len);
+                    status = qsc_x509_write_algorithm_identifier(&crl->signaturealgorithm, content + pos, &len);
 
                     if (status == QSC_ASN1_STATUS_SUCCESS)
                     {
                         pos += len;
-                        status = qsc_x509_write_sequence(content, pos, output, outputlen);
+                        len = sizeof(content) - pos;
+                        status = qsc_x509_write_bit_string(crl->signature, crl->signaturelen, crl->signatureunusedbits, content + pos, &len);
+
+                        if (status == QSC_ASN1_STATUS_SUCCESS)
+                        {
+                            pos += len;
+                            status = qsc_x509_write_sequence(content, pos, output, outputlen);
+                        }
                     }
                 }
             }
+
+            qsc_x509_crl_builder_clear(builder);
+            qsc_memutils_alloc_free(builder);
         }
     }
 

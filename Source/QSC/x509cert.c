@@ -283,9 +283,9 @@ static uint32_t x509_map_eku_bits(qsc_oid_id id)
 
 static qsc_asn1_status x509_decode_raw_extension(const qsc_encoding_ber_element* element, qsc_x509_extension* extension)
 {
-	qsc_asn1_status status;
 	const qsc_encoding_ber_element* child;
 	size_t index;
+	qsc_asn1_status status;
 	qsc_oid_id oidid;
 
 	status = QSC_ASN1_STATUS_FAILURE;

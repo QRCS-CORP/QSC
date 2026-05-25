@@ -890,7 +890,7 @@ void qsc_tls_socket_context_dispose(qsc_tls_socket_context* context)
         qsc_x509w_trust_store_clear(&context->truststore);
         qsc_x509w_server_identity_clear(&context->identity);
         qsc_tls_session_ticket_dispose(&context->sessionticket);
-        qsc_memutils_clear(context, sizeof(*context));
+        qsc_memutils_secure_erase(context, sizeof(*context));
     }
 }
 
@@ -1353,7 +1353,7 @@ void qsc_tls_socket_connection_dispose(qsc_tls_socket_connection* connection)
             (void)qsc_socket_close_socket(&connection->socket);
         }
 
-        qsc_memutils_clear(connection, sizeof(*connection));
+        qsc_memutils_secure_erase(connection, sizeof(*connection));
     }
 }
 
@@ -2411,6 +2411,6 @@ void qsc_tls_socket_server_dispose(qsc_tls_socket_server* server)
             (void)qsc_async_mutex_destroy(server->poolmutex);
         }
 
-        qsc_memutils_clear(server, sizeof(*server));
+        qsc_memutils_secure_erase(server, sizeof(*server));
     }
 }

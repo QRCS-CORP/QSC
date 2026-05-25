@@ -5,11 +5,9 @@
 #include "kyber.h"
 #include "ecdh.h"
 
-/* Backend dispatch: each supported group maps to either a pure classical ECDH,
+/* backend dispatch: each supported group maps to either a pure classical ECDH,
  * a pure KEM, or a hybrid that concatenates both. The descriptor table encodes
- * the wire sizes so encoders can validate peer key shares before invoking the
- * primitive.
- */
+ * the wire sizes so encoders can validate peer key shares before invoking the primitive. */
 
 static const qsc_tls_group_descriptor tls_groups_x25519 = {
     qsc_tls_group_x25519,
@@ -26,7 +24,7 @@ static const qsc_tls_group_descriptor tls_groups_x25519 = {
 
 #if defined(QSC_ECDH_S1P256)
 /* secp256r1 wire format per RFC 8446 4.2.8.2: uncompressed SEC1 point
- *   0x04 || X(32) || Y(32) = 65 bytes on the wire.
+ * 0x04 || X(32) || Y(32) = 65 bytes on the wire.
  * QSC's qsc_ecdh stores the raw X||Y (64 bytes); we wrap with the 0x04 prefix
  * when emitting on the wire and strip it on receive. */
 static const qsc_tls_group_descriptor tls_groups_secp256r1 = {

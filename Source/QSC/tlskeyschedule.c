@@ -759,7 +759,7 @@ qsc_tls_status qsc_tls_keyschedule_verify_finished(qsc_tls_hash_algorithm hash, 
             }
         }
 
-        qsc_memutils_clear(expected, sizeof(expected));
+        qsc_memutils_secure_erase(expected, sizeof(expected));
     }
     else
     {

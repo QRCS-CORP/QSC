@@ -1,7 +1,3 @@
-/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
- * All Rights Reserved.
- */
-
 #include "x509keywrite.h"
 #include "encoding.h"
 #include "memutils.h"

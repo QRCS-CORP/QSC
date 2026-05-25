@@ -99,7 +99,7 @@ static qsc_asn1_status x509_revext_copy_unsigned_integer(const qsc_encoding_ber_
                     }
                     else
                     {
-                        qsc_memutils_clear(output, otplen);
+                        qsc_memutils_secure_erase(output, otplen);
                         qsc_memutils_copy(output, element->value + ofs, ilen);
                         *outlen = ilen;
                         status = QSC_ASN1_STATUS_SUCCESS;
@@ -589,7 +589,7 @@ static void x509_revext_remove_output_index(qsc_x509_crl* crl, size_t idx)
             crl->revoked[i - 1U] = crl->revoked[i];
         }
 
-        qsc_memutils_clear((uint8_t*)&crl->revoked[crl->revokedcount - 1U], sizeof(qsc_x509_crl_entry));
+        qsc_memutils_secure_erase((uint8_t*)&crl->revoked[crl->revokedcount - 1U], sizeof(qsc_x509_crl_entry));
         crl->revokedcount -= 1U;
     }
 }
@@ -842,10 +842,12 @@ static void x509_revext_sha1_compute(uint8_t* output, const uint8_t* message, si
     }
 
     qsc_memutils_clear(block, sizeof(block));
+
     if (msglen > pos)
     {
         qsc_memutils_copy(block, message + pos, msglen - pos);
     }
+
     block[msglen - pos] = 0x80U;
 
     if ((msglen - pos) >= 56U)
@@ -1269,7 +1271,7 @@ static bool x509_revext_ocsp_extract_basic_signature(const uint8_t* basicder, si
                 {
                     if (qsc_x509_certificate_decode_der(certder, certderlen, responder) != QSC_ASN1_STATUS_SUCCESS)
                     {
-                        qsc_memutils_clear((uint8_t*)responder, sizeof(qsc_x509_certificate));
+                        qsc_memutils_secure_erase((uint8_t*)responder, sizeof(qsc_x509_certificate));
                     }
                 }
             }

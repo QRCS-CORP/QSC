@@ -8,11 +8,9 @@
 #include "x509keywrite.h"
 #include "tlserrors.h"
 
-/*
- * qsc_x509w is intentionally offline-only. Network retrieval helpers are excluded
+/* qsc_x509w is intentionally offline-only. Network retrieval helpers are excluded
  * from this translation unit so certificate processing, validation, and TLS bridge
- * integration remain deterministic and non-blocking.
- */
+ * integration remain deterministic and non-blocking. */
 
 #include <stdio.h>
 #include <string.h>
@@ -340,24 +338,18 @@ static qsc_asn1_status x509w_resolve_crl(const qsc_x509_certificate* certificate
 
 static qsc_x509w_status x509w_verify_chain_internal(const qsc_x509_certificate* certificates, size_t certificatecount, const qsc_x509w_trust_store* store, const qsc_x509w_profile* profile, qsc_x509w_result* result)
 {
-    qsc_x509_certificate built[QSC_X509W_CHAIN_MAX];
-    qsc_x509_chain chain;
-    qsc_x509_verify_options options;
-    qsc_x509_revocation_options revocation;
-    qsc_x509_verify_state verifystate;
+    qsc_x509_certificate* built;
+    qsc_x509_chain chain = { 0 };
+    qsc_x509_verify_options options = { 0 };
+    qsc_x509_revocation_options revocation = { 0 };
+    qsc_x509_verify_state verifystate = { 0 };
     qsc_x509_verify_status vstatus;
     qsc_x509w_status status;
-    qsc_x509_time currenttime;
+    qsc_x509_time currenttime = { 0 };
     const qsc_x509_time* validationtime;
-    uint8_t verifybuffer[QSC_X509W_VERIFY_BUFFER_SIZE];
+    uint8_t verifybuffer[QSC_X509W_VERIFY_BUFFER_SIZE] = { 0U };
 
-    qsc_memutils_clear(built, sizeof(built));
-    qsc_memutils_clear(&chain, sizeof(chain));
-    qsc_memutils_clear(&options, sizeof(options));
-    qsc_memutils_clear(&revocation, sizeof(revocation));
-    qsc_memutils_clear(&verifystate, sizeof(verifystate));
-    qsc_memutils_clear(&currenttime, sizeof(currenttime));
-    qsc_memutils_clear(verifybuffer, sizeof(verifybuffer));
+    built = (qsc_x509_certificate*)NULL;
 
     status = QSC_X509W_STATUS_SUCCESS;
     validationtime = NULL;
@@ -387,15 +379,26 @@ static qsc_x509w_status x509w_verify_chain_internal(const qsc_x509_certificate* 
 
     if (status == QSC_X509W_STATUS_SUCCESS)
     {
-        vstatus = qsc_x509_chain_build(&certificates[0],
-            (certificatecount > 1U) ? &certificates[1] : NULL,
-            (certificatecount > 1U) ? (certificatecount - 1U) : 0U,
-            &store->store,
-            built,
-            QSC_X509W_CHAIN_MAX,
-            &chain);
+        built = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * QSC_X509W_CHAIN_MAX);
 
-        if (vstatus != QSC_X509_VERIFY_STATUS_SUCCESS)
+        if (built == (qsc_x509_certificate*)NULL)
+        {
+            status = QSC_X509W_STATUS_INVALID_INPUT;
+        }
+        else
+        {
+            qsc_memutils_clear(built, sizeof(qsc_x509_certificate) * QSC_X509W_CHAIN_MAX);
+
+            vstatus = qsc_x509_chain_build(&certificates[0U],
+                (certificatecount > 1U) ? &certificates[1U] : NULL,
+                (certificatecount > 1U) ? (certificatecount - 1U) : 0U,
+                &store->store,
+                built,
+                QSC_X509W_CHAIN_MAX,
+                &chain);
+        }
+
+        if (status == QSC_X509W_STATUS_SUCCESS && vstatus != QSC_X509_VERIFY_STATUS_SUCCESS)
         {
             status = QSC_X509W_STATUS_CHAIN_BUILD_ERROR;
             if (result != NULL)
@@ -545,6 +548,11 @@ static qsc_x509w_status x509w_verify_chain_internal(const qsc_x509_certificate* 
         {
             result->revocationstatus = (status == QSC_X509W_STATUS_SUCCESS) ? QSC_X509_REVOCATION_STATUS_GOOD : QSC_X509_REVOCATION_STATUS_UNCHECKED;
         }
+    }
+
+    if (built != (qsc_x509_certificate*)NULL)
+    {
+        qsc_memutils_alloc_free(built);
     }
 
     return status;
@@ -802,7 +810,7 @@ void qsc_x509w_trust_store_clear(qsc_x509w_trust_store* store)
             qsc_x509_crl_clear(&store->crls[i]);
         }
 
-        qsc_memutils_clear(store, sizeof(qsc_x509w_trust_store));
+        qsc_memutils_secure_erase(store, sizeof(qsc_x509w_trust_store));
         qsc_x509_store_initialize(&store->store, store->anchors, QSC_X509W_ANCHOR_MAX);
     }
 }
@@ -891,11 +899,10 @@ qsc_x509w_status qsc_x509w_certificate_load_memory(const uint8_t* data, size_t d
 
 qsc_x509w_status qsc_x509w_certificate_load_file(const char* path, qsc_x509_certificate* certificate)
 {
-    uint8_t data[QSC_X509_PEM_DER_MAX];
+    uint8_t data[QSC_X509_PEM_DER_MAX] = { 0U };
     size_t datalen;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(data, sizeof(data));
     datalen = 0U;
     status = x509w_read_file(path, data, sizeof(data), &datalen);
 
@@ -940,11 +947,10 @@ qsc_x509w_status qsc_x509w_certificate_chain_load_memory(const uint8_t* data, si
 
 qsc_x509w_status qsc_x509w_certificate_chain_load_file(const char* path, qsc_x509_certificate* certificates, size_t certificatecount, qsc_x509_chain* chain)
 {
-    uint8_t data[QSC_X509_PEM_DER_MAX];
+    uint8_t data[QSC_X509_PEM_DER_MAX] = { 0U };
     size_t datalen;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(data, sizeof(data));
     datalen = 0U;
     status = x509w_read_file(path, data, sizeof(data), &datalen);
 
@@ -958,11 +964,10 @@ qsc_x509w_status qsc_x509w_certificate_chain_load_file(const char* path, qsc_x50
 
 qsc_x509w_status qsc_x509w_private_key_load_file(const char* path, qsc_x509_private_key* privatekey)
 {
-    uint8_t data[QSC_X509_PEM_DER_MAX];
+    uint8_t data[QSC_X509_PEM_DER_MAX] = { 0U };
     size_t datalen;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(data, sizeof(data));
     datalen = 0U;
     status = x509w_read_file(path, data, sizeof(data), &datalen);
 
@@ -976,11 +981,10 @@ qsc_x509w_status qsc_x509w_private_key_load_file(const char* path, qsc_x509_priv
 
 qsc_x509w_status qsc_x509w_crl_load_file(const char* path, qsc_x509_crl* crl)
 {
-    uint8_t data[QSC_X509_PEM_DER_MAX];
+    uint8_t data[QSC_X509_PEM_DER_MAX] = { 0U };
     size_t datalen;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(data, sizeof(data));
     datalen = 0U;
     status = x509w_read_file(path, data, sizeof(data), &datalen);
 
@@ -1074,11 +1078,10 @@ qsc_x509w_status qsc_x509w_csr_load_memory(const uint8_t* data, size_t datalen, 
 
 qsc_x509w_status qsc_x509w_csr_load_file(const char* path, qsc_x509_csr* csr)
 {
-    uint8_t data[QSC_X509_PEM_DER_MAX];
+    uint8_t data[QSC_X509_PEM_DER_MAX] = { 0U };
     size_t datalen;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(data, sizeof(data));
     datalen = 0U;
     status = x509w_read_file(path, data, sizeof(data), &datalen);
 
@@ -1124,21 +1127,36 @@ qsc_x509w_status qsc_x509w_trust_store_add_anchor(qsc_x509w_trust_store* store, 
 
 qsc_x509w_status qsc_x509w_trust_store_add_anchor_bundle_memory(qsc_x509w_trust_store* store, const uint8_t* data, size_t datalen, bool selfsigned)
 {
-    qsc_x509_certificate certificates[QSC_X509W_CHAIN_MAX];
-    qsc_x509_chain chain;
+    qsc_x509_certificate* certificates;
+    qsc_x509_chain chain = { 0U };
     qsc_x509w_status status;
     size_t i;
 
-    qsc_memutils_clear(certificates, sizeof(certificates));
-    qsc_memutils_clear(&chain, sizeof(chain));
-    status = qsc_x509w_certificate_chain_load_memory(data, datalen, certificates, QSC_X509W_CHAIN_MAX, &chain);
+    certificates = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * QSC_X509W_CHAIN_MAX);
 
-    if (status == QSC_X509W_STATUS_SUCCESS)
+    if (certificates == (qsc_x509_certificate*)NULL)
     {
-        for (i = 0U; i < chain.count && status == QSC_X509W_STATUS_SUCCESS; ++i)
+        status = QSC_X509W_STATUS_INVALID_INPUT;
+    }
+    else
+    {
+        qsc_memutils_clear(certificates, sizeof(qsc_x509_certificate) * QSC_X509W_CHAIN_MAX);
+        status = qsc_x509w_certificate_chain_load_memory(data, datalen, certificates, QSC_X509W_CHAIN_MAX, &chain);
+
+        if (status == QSC_X509W_STATUS_SUCCESS)
         {
-            status = qsc_x509w_trust_store_add_anchor(store, &certificates[i], selfsigned);
+            for (i = 0U; i < chain.count && status == QSC_X509W_STATUS_SUCCESS; ++i)
+            {
+                status = qsc_x509w_trust_store_add_anchor(store, &certificates[i], selfsigned);
+            }
         }
+
+        for (i = 0U; i < chain.count && i < QSC_X509W_CHAIN_MAX; ++i)
+        {
+            qsc_x509_certificate_clear(&certificates[i]);
+        }
+
+        qsc_memutils_alloc_free(certificates);
     }
 
     return status;
@@ -1146,11 +1164,10 @@ qsc_x509w_status qsc_x509w_trust_store_add_anchor_bundle_memory(qsc_x509w_trust_
 
 qsc_x509w_status qsc_x509w_trust_store_add_anchor_bundle_file(qsc_x509w_trust_store* store, const char* path, bool selfsigned)
 {
-    uint8_t data[QSC_X509_PEM_DER_MAX];
+    uint8_t data[QSC_X509_PEM_DER_MAX] = { 0U };
     size_t datalen;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(data, sizeof(data));
     datalen = 0U;
     status = x509w_read_file(path, data, sizeof(data), &datalen);
 
@@ -1164,10 +1181,9 @@ qsc_x509w_status qsc_x509w_trust_store_add_anchor_bundle_file(qsc_x509w_trust_st
 
 qsc_x509w_status qsc_x509w_trust_store_add_anchor_memory(qsc_x509w_trust_store* store, const uint8_t* data, size_t datalen, bool selfsigned)
 {
-    qsc_x509_certificate certificate;
+    qsc_x509_certificate certificate = { 0U };
     qsc_x509w_status status;
 
-    qsc_memutils_clear(&certificate, sizeof(qsc_x509_certificate));
     status = qsc_x509w_certificate_load_memory(data, datalen, &certificate);
 
     if (status == QSC_X509W_STATUS_SUCCESS)
@@ -1197,15 +1213,27 @@ qsc_x509w_status qsc_x509w_trust_store_add_crl(qsc_x509w_trust_store* store, con
 
 qsc_x509w_status qsc_x509w_trust_store_add_crl_memory(qsc_x509w_trust_store* store, const uint8_t* data, size_t datalen)
 {
-    qsc_x509_crl crl;
+    qsc_x509_crl* crl;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(&crl, sizeof(qsc_x509_crl));
-    status = qsc_x509w_crl_load_memory(data, datalen, &crl);
+    crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 
-    if (status == QSC_X509W_STATUS_SUCCESS)
+    if (crl == (qsc_x509_crl*)NULL)
     {
-        status = qsc_x509w_trust_store_add_crl(store, &crl);
+        status = QSC_X509W_STATUS_DECODE_ERROR;
+    }
+    else
+    {
+        qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+        status = qsc_x509w_crl_load_memory(data, datalen, crl);
+
+        if (status == QSC_X509W_STATUS_SUCCESS)
+        {
+            status = qsc_x509w_trust_store_add_crl(store, crl);
+        }
+
+        qsc_x509_crl_clear(crl);
+        qsc_memutils_alloc_free(crl);
     }
 
     return status;
@@ -1213,10 +1241,9 @@ qsc_x509w_status qsc_x509w_trust_store_add_crl_memory(qsc_x509w_trust_store* sto
 
 qsc_x509w_status qsc_x509w_trust_store_add_anchor_file(qsc_x509w_trust_store* store, const char* path, bool selfsigned)
 {
-    qsc_x509_certificate certificate;
+    qsc_x509_certificate certificate = { 0U };
     qsc_x509w_status status;
 
-    qsc_memutils_clear(&certificate, sizeof(qsc_x509_certificate));
     status = qsc_x509w_certificate_load_file(path, &certificate);
 
     if (status == QSC_X509W_STATUS_SUCCESS)
@@ -1229,15 +1256,27 @@ qsc_x509w_status qsc_x509w_trust_store_add_anchor_file(qsc_x509w_trust_store* st
 
 qsc_x509w_status qsc_x509w_trust_store_add_crl_file(qsc_x509w_trust_store* store, const char* path)
 {
-    qsc_x509_crl crl;
+    qsc_x509_crl* crl;
     qsc_x509w_status status;
 
-    qsc_memutils_clear(&crl, sizeof(qsc_x509_crl));
-    status = qsc_x509w_crl_load_file(path, &crl);
+    crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 
-    if (status == QSC_X509W_STATUS_SUCCESS)
+    if (crl == (qsc_x509_crl*)NULL)
     {
-        status = qsc_x509w_trust_store_add_crl(store, &crl);
+        status = QSC_X509W_STATUS_DECODE_ERROR;
+    }
+    else
+    {
+        qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+        status = qsc_x509w_crl_load_file(path, crl);
+
+        if (status == QSC_X509W_STATUS_SUCCESS)
+        {
+            status = qsc_x509w_trust_store_add_crl(store, crl);
+        }
+
+        qsc_x509_crl_clear(crl);
+        qsc_memutils_alloc_free(crl);
     }
 
     return status;
@@ -1245,10 +1284,9 @@ qsc_x509w_status qsc_x509w_trust_store_add_crl_file(qsc_x509w_trust_store* store
 
 qsc_x509w_status qsc_x509w_server_identity_load_files(qsc_x509w_server_identity* identity, const char* certificatechainpath, const char* privatekeypath)
 {
-    qsc_x509_chain chain;
+    qsc_x509_chain chain = { 0U };
     qsc_x509w_status status;
 
-    qsc_memutils_clear(&chain, sizeof(chain));
     status = QSC_X509W_STATUS_SUCCESS;
 
     if (identity == NULL || certificatechainpath == NULL || privatekeypath == NULL)
@@ -2006,10 +2044,9 @@ qsc_x509w_status qsc_x509w_csr_sign_der(const qsc_x509_csr* csr, qsc_x509_certif
 qsc_x509w_status qsc_x509w_csr_sign_pem(const qsc_x509_csr* csr, qsc_x509_certificate_sign_callback signcallback, void* context, char* output, size_t* outputlen)
 {
     qsc_x509w_status status;
-    uint8_t der[QSC_X509_CSR_WRITE_MAX];
+    uint8_t der[QSC_X509_CSR_WRITE_MAX] = { 0U };
     size_t derlen;
 
-    qsc_memutils_clear(der, sizeof(der));
     derlen = sizeof(der);
     status = qsc_x509w_csr_sign_der(csr, signcallback, context, der, &derlen);
 

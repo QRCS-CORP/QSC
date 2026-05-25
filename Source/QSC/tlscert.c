@@ -605,9 +605,9 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 	QSC_ASSERT(chain != NULL);
 	QSC_ASSERT(context != NULL);
 
-	qsc_x509_certificate decoded[QSC_TLS_X509_CHAIN_MAX] = { 0 };
-	qsc_x509_certificate built[QSC_TLS_X509_CHAIN_MAX] = { 0 };
-	qsc_tls_qsc_x509_context* xctx = { 0 };
+	qsc_x509_certificate* decoded;
+	qsc_x509_certificate* built;
+	qsc_tls_qsc_x509_context* xctx;
 	qsc_tls_qsc_x509_local_state localstate = { 0 };
 	qsc_x509_chain builtchain = { 0 };
 	qsc_x509_verify_options options = { 0 };
@@ -615,6 +615,8 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 	qsc_tls_status status;
 	bool res;
 
+	decoded = (qsc_x509_certificate*)NULL;
+	built = (qsc_x509_certificate*)NULL;
 	qsc_x509_verify_options_initialize(&options);
 	vstatus = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
 	status = qsc_tls_status_success;
@@ -627,7 +629,19 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 	}
 	else
 	{
-		status = tls_x509_decode_chain(chain, chainlength, decoded, QSC_TLS_X509_CHAIN_MAX);
+		decoded = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * QSC_TLS_X509_CHAIN_MAX);
+		built = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * QSC_TLS_X509_CHAIN_MAX);
+
+		if (decoded == (qsc_x509_certificate*)NULL || built == (qsc_x509_certificate*)NULL)
+		{
+			status = qsc_tls_status_failure;
+		}
+		else
+		{
+			qsc_memutils_clear(decoded, sizeof(qsc_x509_certificate) * QSC_TLS_X509_CHAIN_MAX);
+			qsc_memutils_clear(built, sizeof(qsc_x509_certificate) * QSC_TLS_X509_CHAIN_MAX);
+			status = tls_x509_decode_chain(chain, chainlength, decoded, QSC_TLS_X509_CHAIN_MAX);
+		}
 	}
 
 	if (status == qsc_tls_status_success)
@@ -671,6 +685,21 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 	if (status == qsc_tls_status_success && vstatus == QSC_X509_VERIFY_STATUS_SUCCESS)
 	{
 		res = true;
+	}
+
+	if (decoded != (qsc_x509_certificate*)NULL)
+	{
+		for (size_t i = 0U; i < chainlength && i < QSC_TLS_X509_CHAIN_MAX; ++i)
+		{
+			qsc_x509_certificate_clear(&decoded[i]);
+		}
+
+		qsc_memutils_alloc_free(decoded);
+	}
+
+	if (built != (qsc_x509_certificate*)NULL)
+	{
+		qsc_memutils_alloc_free(built);
 	}
 
 	return res;

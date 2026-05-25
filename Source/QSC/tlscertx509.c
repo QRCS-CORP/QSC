@@ -18,10 +18,9 @@
  * signature-verify callback. That's a larger integration and is left to a
  * later iteration; this MVP covers the leaf-centric cases that account for
  * the vast majority of TLS deployments (pinned leaves, self-signed test
- * certs, and stacks that delegate path validation to OS trust stores).
- */
+ * certs, and stacks that delegate path validation to OS trust stores). */
 
-static void tls_cert_x509_time_now_from_epoch(qsc_x509_time* out)
+static void tls_cert_x509_time_now_from_epoch(qsc_x509_time* output)
 {
     /* build a qsc_x509_time (aliased to qsc_asn1_time) from the current UTC epoch. */
     uint64_t epoch;
@@ -37,7 +36,7 @@ static void tls_cert_x509_time_now_from_epoch(qsc_x509_time* out)
     uint32_t days_in_month;
     bool leap;
 
-    qsc_memutils_clear(out, sizeof(*out));
+    qsc_memutils_clear(output, sizeof(*output));
 
     epoch = (uint64_t)qsc_timestamp_epochtime_seconds();
     secs_per_day = 86400ULL;
@@ -69,15 +68,14 @@ static void tls_cert_x509_time_now_from_epoch(qsc_x509_time* out)
     (void)days_in_month;
     (void)leap;
 
-    out->year = (uint16_t)year;
-    out->month = (uint8_t)month;
-    out->day = (uint8_t)day;
-    out->hour = (uint8_t)hour;
-    out->minute = (uint8_t)minute;
-    out->second = (uint8_t)second;
-    out->generalized = (year >= 2050U || year < 1950U);
+    output->year = (uint16_t)year;
+    output->month = (uint8_t)month;
+    output->day = (uint8_t)day;
+    output->hour = (uint8_t)hour;
+    output->minute = (uint8_t)minute;
+    output->second = (uint8_t)second;
+    output->generalized = (year >= 2050U || year < 1950U);
 }
-
 
 static bool tls_cert_x509_spki_to_signer_key(const qsc_x509_subject_public_key_info* spki, qsc_tls_signature_scheme scheme, const uint8_t** outkey, size_t* outkeylen)
 {
@@ -150,10 +148,11 @@ static bool tls_cert_x509_validate_chain_cb(const qsc_tls_certificate_view* chai
 {
     bool res;
     qsc_tls_cert_x509_state* xstate;
-    qsc_x509_certificate leaf;
+    qsc_x509_certificate* leaf;
     qsc_x509_verify_status vs;
 
     xstate = (qsc_tls_cert_x509_state*)state;
+    leaf = (qsc_x509_certificate*)NULL;
     res = false;
 
     if (xstate == NULL || chain == NULL || chainlength == 0U || chain[0U].data == NULL)
@@ -166,198 +165,223 @@ static bool tls_cert_x509_validate_chain_cb(const qsc_tls_certificate_view* chai
     }
     else
     {
-        qsc_memutils_clear(&leaf, sizeof(leaf));
+        leaf = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate));
 
-        if (qsc_x509_certificate_decode_der(chain[0U].data, chain[0U].datalen, &leaf) != QSC_ASN1_STATUS_SUCCESS)
+        if (leaf == (qsc_x509_certificate*)NULL)
         {
-            xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_INVALID_CERTIFICATE;
-            xstate->lastalert = qsc_tls_alert_bad_certificate;
+            xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
+            xstate->lastalert = qsc_tls_alert_internal_error;
         }
         else
         {
-            res = true;
+            qsc_memutils_clear(leaf, sizeof(qsc_x509_certificate));
 
-            /* structural check. */
-            vs = qsc_x509_certificate_check_structure(&leaf);
-
-            if (vs != QSC_X509_VERIFY_STATUS_SUCCESS)
+            if (qsc_x509_certificate_decode_der(chain[0U].data, chain[0U].datalen, leaf) != QSC_ASN1_STATUS_SUCCESS)
             {
-                xstate->lastverifystatus = vs;
+                xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_INVALID_CERTIFICATE;
                 xstate->lastalert = qsc_tls_alert_bad_certificate;
-                res = false;
             }
-
-            /* validity period. */
-            if (res && xstate->enforcevalidityperiod)
+            else
             {
-                qsc_x509_time now;
-                tls_cert_x509_time_now_from_epoch(&now);
-                vs = qsc_x509_certificate_check_validity(&leaf, &now);
+                res = true;
 
-                if (vs != QSC_X509_VERIFY_STATUS_SUCCESS)
-                {
-                    xstate->lastverifystatus = vs;
-                    xstate->lastalert = (vs == QSC_X509_VERIFY_STATUS_EXPIRED)
-                        ? qsc_tls_alert_certificate_expired
-                        : qsc_tls_alert_bad_certificate;
+                /* structural check. */
+                vs = qsc_x509_certificate_check_structure(leaf);
 
-                    res = false;
-                }
-            }
-
-            /* hostname match. */
-            if (res && xstate->enforcehostname && context != NULL && context->hostname != NULL)
-            {
-                vs = qsc_x509_certificate_check_hostname(&leaf, context->hostname);
                 if (vs != QSC_X509_VERIFY_STATUS_SUCCESS)
                 {
                     xstate->lastverifystatus = vs;
                     xstate->lastalert = qsc_tls_alert_bad_certificate;
                     res = false;
                 }
-            }
 
-            /* Trust anchor / chain validation.
-             *
-             *   - No trust store + allowselfsigned: pinned-key/test mode (legacy MVP).
-             *   - No trust store + !allowselfsigned: refuse (unknown_ca).
-             *   - Trust store provided: run RFC 5280 chain validation via
-             *     qsc_x509_chain_verify, including signatures, validity,
-             *     issuer linkage, key identifiers, and termination at a
-             *     configured trust anchor. The leaf hostname/validity have
-             *     already been checked above; the chain walk re-checks them
-             *     against each link.
-             */
-            if (res)
-            {
-                if (xstate->truststore == NULL)
+                /* validity period. */
+                if (res && xstate->enforcevalidityperiod)
                 {
-                    if (xstate->allowselfsigned)
+                    qsc_x509_time now;
+                    tls_cert_x509_time_now_from_epoch(&now);
+                    vs = qsc_x509_certificate_check_validity(leaf, &now);
+
+                    if (vs != QSC_X509_VERIFY_STATUS_SUCCESS)
                     {
-                        xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_SUCCESS;
-                    }
-                    else
-                    {
-                        xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_TRUST_NOT_FOUND;
-                        xstate->lastalert = qsc_tls_alert_unknown_ca;
+                        xstate->lastverifystatus = vs;
+                        xstate->lastalert = (vs == QSC_X509_VERIFY_STATUS_EXPIRED)
+                            ? qsc_tls_alert_certificate_expired
+                            : qsc_tls_alert_bad_certificate;
+
                         res = false;
                     }
                 }
-                else
+
+                /* hostname match. */
+                if (res && xstate->enforcehostname && context != NULL && context->hostname != NULL)
                 {
-                    /* build a qsc_x509_chain from the TLS views by decoding each
-                     * DER blob in chainlen-order. The leaf is index 0; intermediates
-                     * follow. We allocate the certificate array on stack with a small
-                     * upper bound; the TLS interface caps chainlength at
-                     * QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES. */
-                    qsc_x509_certificate xchain[QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES] = { 0 };
-                    size_t decoded;
-                    bool decodeok;
-
-                    decoded = 0U;
-                    decodeok = true;
-
-                    for (size_t i = 0U; i < chainlength && i < QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES; ++i)
+                    vs = qsc_x509_certificate_check_hostname(leaf, context->hostname);
+                    if (vs != QSC_X509_VERIFY_STATUS_SUCCESS)
                     {
-                        qsc_memutils_clear(&xchain[i], sizeof(xchain[i]));
-                        qsc_asn1_status as = qsc_x509_certificate_decode_der(chain[i].data, chain[i].datalen, &xchain[i]);
-                        if (as != QSC_ASN1_STATUS_SUCCESS)
-                        {
-                            decodeok = false;
-                            break;
-                        }
-
-                        ++decoded;
-                    }
-
-                    if (decodeok == false)
-                    {
-                        xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_INVALID_CERTIFICATE;
+                        xstate->lastverifystatus = vs;
                         xstate->lastalert = qsc_tls_alert_bad_certificate;
                         res = false;
                     }
-                    else
+                }
+
+                /* Trust anchor / chain validation.
+                 *
+                 *   - No trust store + allowselfsigned: pinned-key/test mode (legacy MVP).
+                 *   - No trust store + !allowselfsigned: refuse (unknown_ca).
+                 *   - Trust store provided: run RFC 5280 chain validation via
+                 *     qsc_x509_chain_verify, including signatures, validity,
+                 *     issuer linkage, key identifiers, and termination at a
+                 *     configured trust anchor. The leaf hostname/validity have
+                 *     already been checked above; the chain walk re-checks them
+                 *     against each link.
+                 */
+                if (res)
+                {
+                    if (xstate->truststore == NULL)
                     {
-                        qsc_x509_chain xc;
-                        qsc_x509_time now;
-
-                        xc.certificates = xchain;
-                        xc.count = decoded;
-                        tls_cert_x509_time_now_from_epoch(&now);
-
-                        /* qsc_x509_signature_verify is QSC's ready-made callback that
-                         * dispatches signature verification on the issuer's SPKI for ed25519,
-                         * ecdsa-p256/384, dilithium, etc. State buffer is unused (NULL). */
-                        qsc_x509_verify_status vchain = qsc_x509_chain_verify(&xc, xstate->truststore, &now, qsc_x509_qsc_signature_verify, NULL);
-
-                        xstate->lastverifystatus = vchain;
-                        if (vchain == QSC_X509_VERIFY_STATUS_SUCCESS)
+                        if (xstate->allowselfsigned)
                         {
-                            /* res stays true */
+                            xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_SUCCESS;
                         }
                         else
                         {
+                            xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_TRUST_NOT_FOUND;
+                            xstate->lastalert = qsc_tls_alert_unknown_ca;
                             res = false;
-                            switch (vchain)
+                        }
+                    }
+                    else
+                    {
+                        /* build a qsc_x509_chain from the TLS views by decoding each
+                         * DER blob in chainlen-order. The leaf is index 0; intermediates
+                         * follow. The certificate array is heap-backed because
+                         * qsc_x509_certificate is a large aggregate object. */
+                        qsc_x509_certificate* xchain;
+                        size_t decoded;
+                        bool decodeok;
+
+                        xchain = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES);
+
+                        if (xchain == (qsc_x509_certificate*)NULL)
+                        {
+                            xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
+                            xstate->lastalert = qsc_tls_alert_internal_error;
+                            res = false;
+                        }
+                        else
+                        {
+                            qsc_memutils_clear(xchain, sizeof(qsc_x509_certificate) * QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES);
+                            decoded = 0U;
+                            decodeok = true;
+
+                            for (size_t i = 0U; i < chainlength && i < QSC_TLS_CERTIFICATE_LIST_MAX_ENTRIES; ++i)
                             {
-                                case QSC_X509_VERIFY_STATUS_EXPIRED:
-                                case QSC_X509_VERIFY_STATUS_NOT_YET_VALID:
+                                qsc_asn1_status as;
+
+                                as = qsc_x509_certificate_decode_der(chain[i].data, chain[i].datalen, &xchain[i]);
+                                if (as != QSC_ASN1_STATUS_SUCCESS)
                                 {
-                                    xstate->lastalert = qsc_tls_alert_certificate_expired;
+                                    decodeok = false;
                                     break;
                                 }
-                                case QSC_X509_VERIFY_STATUS_TRUST_NOT_FOUND:
-                                case QSC_X509_VERIFY_STATUS_ISSUER_MISMATCH:
-                                case QSC_X509_VERIFY_STATUS_KEY_IDENTIFIER_MISMATCH:
-                                case QSC_X509_VERIFY_STATUS_NOT_CA:
-                                case QSC_X509_VERIFY_STATUS_PATH_LENGTH_EXCEEDED:
-                                case QSC_X509_VERIFY_STATUS_CHAIN_LOOP:
+
+                                ++decoded;
+                            }
+
+                            if (decodeok == false)
+                            {
+                                xstate->lastverifystatus = QSC_X509_VERIFY_STATUS_INVALID_CERTIFICATE;
+                                xstate->lastalert = qsc_tls_alert_bad_certificate;
+                                res = false;
+                            }
+                            else
+                            {
+                                qsc_x509_chain xc;
+                                qsc_x509_time now;
+
+                                xc.certificates = xchain;
+                                xc.count = decoded;
+                                tls_cert_x509_time_now_from_epoch(&now);
+
+                                /* qsc_x509_signature_verify is QSC's ready-made callback that
+                                 * dispatches signature verification on the issuer's SPKI for ed25519,
+                                 * ecdsa-p256/384, dilithium, etc. State buffer is unused (NULL). */
+                                qsc_x509_verify_status vchain = qsc_x509_chain_verify(&xc, xstate->truststore, &now, qsc_x509_qsc_signature_verify, NULL);
+
+                                xstate->lastverifystatus = vchain;
+                                if (vchain == QSC_X509_VERIFY_STATUS_SUCCESS)
                                 {
-                                    xstate->lastalert = qsc_tls_alert_unknown_ca;
-                                    break;
+                                    /* res stays true */
                                 }
-                                case QSC_X509_VERIFY_STATUS_SIGNATURE_REJECTED:
+                                else
                                 {
-                                    xstate->lastalert = qsc_tls_alert_decrypt_error;
-                                    break;
-                                }
-                                case QSC_X509_VERIFY_STATUS_REVOKED:
-                                {
-                                    xstate->lastalert = qsc_tls_alert_certificate_revoked;
-                                    break;
-                                }
-                                case QSC_X509_VERIFY_STATUS_NAME_MISMATCH:
-                                case QSC_X509_VERIFY_STATUS_KEY_USAGE_REJECTED:
-                                case QSC_X509_VERIFY_STATUS_PURPOSE_REJECTED:
-                                {
-                                    xstate->lastalert = qsc_tls_alert_bad_certificate;
-                                    break;
-                                }
-                                case QSC_X509_VERIFY_STATUS_UNSUPPORTED:
-                                case QSC_X509_VERIFY_STATUS_UNSUPPORTED_CRITICAL_EXTENSION:
-                                case QSC_X509_VERIFY_STATUS_ALGORITHM_MISMATCH:
-                                {
-                                    xstate->lastalert = qsc_tls_alert_unsupported_certificate;
-                                    break;
-                                }
-                                default:
-                                {
-                                    xstate->lastalert = qsc_tls_alert_bad_certificate;
-                                    break;
+                                    res = false;
+                                    switch (vchain)
+                                    {
+                                        case QSC_X509_VERIFY_STATUS_EXPIRED:
+                                        case QSC_X509_VERIFY_STATUS_NOT_YET_VALID:
+                                        {
+                                            xstate->lastalert = qsc_tls_alert_certificate_expired;
+                                            break;
+                                        }
+                                        case QSC_X509_VERIFY_STATUS_TRUST_NOT_FOUND:
+                                        case QSC_X509_VERIFY_STATUS_ISSUER_MISMATCH:
+                                        case QSC_X509_VERIFY_STATUS_KEY_IDENTIFIER_MISMATCH:
+                                        case QSC_X509_VERIFY_STATUS_NOT_CA:
+                                        case QSC_X509_VERIFY_STATUS_PATH_LENGTH_EXCEEDED:
+                                        case QSC_X509_VERIFY_STATUS_CHAIN_LOOP:
+                                        {
+                                            xstate->lastalert = qsc_tls_alert_unknown_ca;
+                                            break;
+                                        }
+                                        case QSC_X509_VERIFY_STATUS_SIGNATURE_REJECTED:
+                                        {
+                                            xstate->lastalert = qsc_tls_alert_decrypt_error;
+                                            break;
+                                        }
+                                        case QSC_X509_VERIFY_STATUS_REVOKED:
+                                        {
+                                            xstate->lastalert = qsc_tls_alert_certificate_revoked;
+                                            break;
+                                        }
+                                        case QSC_X509_VERIFY_STATUS_NAME_MISMATCH:
+                                        case QSC_X509_VERIFY_STATUS_KEY_USAGE_REJECTED:
+                                        case QSC_X509_VERIFY_STATUS_PURPOSE_REJECTED:
+                                        {
+                                            xstate->lastalert = qsc_tls_alert_bad_certificate;
+                                            break;
+                                        }
+                                        case QSC_X509_VERIFY_STATUS_UNSUPPORTED:
+                                        case QSC_X509_VERIFY_STATUS_UNSUPPORTED_CRITICAL_EXTENSION:
+                                        case QSC_X509_VERIFY_STATUS_ALGORITHM_MISMATCH:
+                                        {
+                                            xstate->lastalert = qsc_tls_alert_unsupported_certificate;
+                                            break;
+                                        }
+                                        default:
+                                        {
+                                            xstate->lastalert = qsc_tls_alert_bad_certificate;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
-                        }
 
-                        for (size_t i = 0U; i < decoded; ++i)
-                        {
-                            qsc_x509_certificate_clear(&xchain[i]);
+                            for (size_t i = 0U; i < decoded; ++i)
+                            {
+                                qsc_x509_certificate_clear(&xchain[i]);
+                            }
+
+                            qsc_memutils_alloc_free(xchain);
                         }
                     }
                 }
             }
-        }
 
-        qsc_x509_certificate_clear(&leaf);
+            qsc_x509_certificate_clear(leaf);
+            qsc_memutils_alloc_free(leaf);
+        }
     }
 
     return res;
