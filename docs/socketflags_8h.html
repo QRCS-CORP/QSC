@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -143,7 +143,10 @@ Enumerations</h2></td></tr>
 , <br />
 &#160;&#160;<a class="el" href="#a83c4fb3b2710885491deb96d753a167daee15439289d96e4db9a2ee5e3211dc57">qsc_socket_option_receive_time_out</a> = 0x00001006L
 , <a class="el" href="#a83c4fb3b2710885491deb96d753a167dadf3301ff432ffd4ef66d38ec519db321">qsc_socket_option_send_time_out</a> = 0x00001005L
-, <a class="el" href="#a83c4fb3b2710885491deb96d753a167da19edc0e2fa7b96bc41e53fe7f572f82a">qsc_socket_option_tcp_no_delay</a> = 0x00000001L
+, <a class="el" href="#a83c4fb3b2710885491deb96d753a167da11df042a8675a4200e4cf598cba8fc5e">qsc_socket_option_receive_buffer_size</a> = 0x00001002L
+, <a class="el" href="#a83c4fb3b2710885491deb96d753a167da6cd741f5c388ea3d9091a8038f52682c">qsc_socket_option_send_buffer_size</a> = 0x00001001L
+, <br />
+&#160;&#160;<a class="el" href="#a83c4fb3b2710885491deb96d753a167da19edc0e2fa7b96bc41e53fe7f572f82a">qsc_socket_option_tcp_no_delay</a> = 0x00000001L
 <br />
  }</td></tr>
 <tr class="memdesc:a83c4fb3b2710885491deb96d753a167d"><td class="mdescLeft">&#160;</td><td class="mdescRight">TCP socket options.  <a href="#a83c4fb3b2710885491deb96d753a167d">More...</a><br /></td></tr>
@@ -284,6 +287,10 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="a83c4fb3b2710885491deb96d753a167daee15439289d96e4db9a2ee5e3211dc57" name="a83c4fb3b2710885491deb96d753a167daee15439289d96e4db9a2ee5e3211dc57"></a>qsc_socket_option_receive_time_out&#160;</td><td class="fielddoc"><p>The timeout, in milliseconds, for blocking receive calls SO_RCVTIMEO </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a83c4fb3b2710885491deb96d753a167dadf3301ff432ffd4ef66d38ec519db321" name="a83c4fb3b2710885491deb96d753a167dadf3301ff432ffd4ef66d38ec519db321"></a>qsc_socket_option_send_time_out&#160;</td><td class="fielddoc"><p>The timeout, in milliseconds, for blocking send calls SO_SNDTIMEO </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a83c4fb3b2710885491deb96d753a167da11df042a8675a4200e4cf598cba8fc5e" name="a83c4fb3b2710885491deb96d753a167da11df042a8675a4200e4cf598cba8fc5e"></a>qsc_socket_option_receive_buffer_size&#160;</td><td class="fielddoc"><p>The socket receive buffer size SO_RCVBUF </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a83c4fb3b2710885491deb96d753a167da6cd741f5c388ea3d9091a8038f52682c" name="a83c4fb3b2710885491deb96d753a167da6cd741f5c388ea3d9091a8038f52682c"></a>qsc_socket_option_send_buffer_size&#160;</td><td class="fielddoc"><p>The socket send buffer size SO_SNDBUF </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a83c4fb3b2710885491deb96d753a167da19edc0e2fa7b96bc41e53fe7f572f82a" name="a83c4fb3b2710885491deb96d753a167da19edc0e2fa7b96bc41e53fe7f572f82a"></a>qsc_socket_option_tcp_no_delay&#160;</td><td class="fielddoc"><p>Enables or disables the Nagle algorithm for TCP sockets TCP_NODELAY </p>
 </td></tr>

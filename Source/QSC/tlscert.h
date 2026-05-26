@@ -106,6 +106,11 @@ typedef bool (*qsc_tls_certificate_chain_validate_callback)(const qsc_tls_certif
 	const qsc_tls_certificate_validation_context* context, void* state);
 
 /**
+ * \brief Size in bytes of the retained peer certificate fingerprint.
+ */
+#define QSC_TLS_CERTIFICATE_FINGERPRINT_SIZE 32U
+
+/**
  * \brief Verify the TLS CertificateVerify signature.
  *
  * \param scheme: [enum] The negotiated TLS signature scheme.
@@ -147,6 +152,57 @@ typedef struct qsc_tls_certificate_interface
 } qsc_tls_certificate_interface;
 
 /**
+ * \brief Fixed peer-certificate identity summary retained by the built-in QSC X.509 TLS bridge.
+ *
+ * \details
+ * The summary contains bounded, zero-terminated diagnostic identity fields copied from
+ * the decoded leaf certificate during certificate-chain validation. The structure does
+ * not retain DER pointers or heap ownership. It is intended for post-handshake status
+ * inspection by higher-level TLS socket callers.
+ */
+typedef struct qsc_tls_peer_certificate_summary
+{
+	char subject[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];		/*!< The formatted peer certificate subject name, when available. */
+	char issuer[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];		/*!< The formatted peer certificate issuer name, when available. */
+	char commonname[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];	/*!< The first peer certificate commonName value, when available. */
+	char dnsname[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];		/*!< The matched DNS subjectAltName, or the first DNS subjectAltName when no hostname check was requested. */
+	qsc_x509_verify_status verifystatus;				/*!< The final certificate verification status. */
+	bool populated;									/*!< Indicates that the summary was populated from a decoded peer certificate. */
+	bool chainvalid;									/*!< Indicates that path validation succeeded before hostname evaluation. */
+	bool hostnamechecked;							/*!< Indicates that hostname validation was requested. */
+	bool hostnamevalid;								/*!< Indicates that hostname validation succeeded. */
+} qsc_tls_peer_certificate_summary;
+
+/**
+ * \struct qsc_tls_client_authorization_info
+ * \brief Bounded client-certificate identity information supplied to an mTLS authorization callback.
+ *
+ * \details
+ * The certificate summary is copied from the certificate-validation bridge when
+ * the built-in QSC X.509 validator is used. The certificate fingerprint is a
+ * SHA3-256 digest of the leaf certificate DER encoding. The structure does not
+ * retain caller-owned DER pointers.
+ */
+typedef struct qsc_tls_client_authorization_info
+{
+	qsc_tls_peer_certificate_summary summary;				/*!< Bounded peer certificate summary produced by certificate validation. */
+	uint8_t certificatefingerprint[QSC_TLS_CERTIFICATE_FINGERPRINT_SIZE];	/*!< SHA3-256 fingerprint of the leaf certificate DER encoding. */
+	size_t certificatefingerprintlen;					/*!< Length of the certificate fingerprint in bytes. */
+	qsc_x509_verify_status verifystatus;				/*!< X.509 verification status reported by the validation layer. */
+	bool chainvalid;								/*!< Indicates that certificate-chain validation succeeded. */
+} qsc_tls_client_authorization_info;
+
+/**
+ * \brief Authorize a cryptographically valid mTLS client certificate.
+ *
+ * \param info: [const struct*] Bounded peer-certificate authorization information.
+ * \param state: [void*] Caller-supplied authorization state.
+ *
+ * \return [bool] Returns true when the application authorizes the peer.
+ */
+typedef bool (*qsc_tls_client_authorization_callback)(const qsc_tls_client_authorization_info* info, void* state);
+
+/**
  * \brief Context for the built-in bridge between TLS and the QSC X.509 layer.
  */
 typedef struct qsc_tls_qsc_x509_context
@@ -157,6 +213,7 @@ typedef struct qsc_tls_qsc_x509_context
 	const qsc_x509_time* validationtime;		/*!< Validation time used during certificate verification. */
 	uint8_t* verifybuffer;						/*!< Scratch buffer used by X.509 verification helpers. */
 	size_t verifybufferlen;						/*!< The length of the scratch verification buffer in bytes. */
+	qsc_tls_peer_certificate_summary peersummary;	/*!< Most recent peer certificate identity and verification summary. */
 	bool rejectunsupportedcriticalextensions;	/*!< Set to true to reject certificates containing unsupported critical extensions. */
 	qsc_x509_verify_status lastverifystatus;	/*!< Most recent X.509 verification result reported by the built-in bridge. */
 	qsc_tls_alert_description lastalert;		/*!< Most recent TLS alert mapped from the built-in bridge verification result. */

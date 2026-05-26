@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -237,7 +237,7 @@ $(function(){initNavTree('sphincsplus_8h_source.html','',''); });
 <div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span> </div>
 <div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aqsccommon_8h_html"><div class="ttname"><a href="qsccommon_8h.html">qsccommon.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
-<div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:605</div></div>
+<div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:645</div></div>
 <div class="ttc" id="asphincsplus_8h_html_a24878a1d3d6e81cd852977f21dafb90f"><div class="ttname"><a href="sphincsplus_8h.html#a24878a1d3d6e81cd852977f21dafb90f">qsc_sphincsplus_seeded_sign_ex</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_sphincsplus_seeded_sign_ex(uint8_t *signedmsg, size_t *smsglen, const uint8_t *message, size_t msglen, const uint8_t *context, size_t ctxlen, const uint8_t *privatekey, const uint8_t *seed)</div><div class="ttdoc">Takes the message and a seed as input and returns an array containing the signature followed by the m...</div><div class="ttdef"><b>Definition</b> sphincsplus.c:91</div></div>
 <div class="ttc" id="asphincsplus_8h_html_a80b7777069c7bffb84e615bab83bdf6f"><div class="ttname"><a href="sphincsplus_8h.html#a80b7777069c7bffb84e615bab83bdf6f">qsc_sphincsplus_generate_keypair</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_sphincsplus_generate_keypair(uint8_t *publickey, uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Generates a Sphincs+ public/private key-pair.</div><div class="ttdef"><b>Definition</b> sphincsplus.c:5</div></div>
 <div class="ttc" id="asphincsplus_8h_html_ac257eb5c6e6903df718fe64853f047f1"><div class="ttname"><a href="sphincsplus_8h.html#ac257eb5c6e6903df718fe64853f047f1">qsc_sphincsplus_sign</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_sphincsplus_sign(uint8_t *signedmsg, size_t *smsglen, const uint8_t *message, size_t msglen, const uint8_t *privatekey, bool(*rng_generate)(uint8_t *, size_t))</div><div class="ttdoc">Takes the message as input and returns an array containing the signature followed by the message.</div><div class="ttdef"><b>Definition</b> sphincsplus.c:41</div></div>

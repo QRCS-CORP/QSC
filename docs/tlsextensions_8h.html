@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -150,6 +150,12 @@ Functions</h2></td></tr>
 <tr class="memdesc:a7257b5bd3f3db75ff5175e91f74ac86d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode the HelloRetryRequest key_share extension.  <br /></td></tr>
 <tr class="memitem:a568751850a8a2041d96a5ff9da248ea8" id="r_a568751850a8a2041d96a5ff9da248ea8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a568751850a8a2041d96a5ff9da248ea8">qsc_tls_extensions_encode_server_name</a> (uint8_t *output, size_t outlen, size_t *offset, const char *hostname)</td></tr>
 <tr class="memdesc:a568751850a8a2041d96a5ff9da248ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode the server_name extension.  <br /></td></tr>
+<tr class="memitem:ab413c59bb62ef5fc21d1d860529adc51" id="r_ab413c59bb62ef5fc21d1d860529adc51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab413c59bb62ef5fc21d1d860529adc51">qsc_tls_extensions_encode_alpn</a> (uint8_t *output, size_t outlen, size_t *offset, const <a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *alpn)</td></tr>
+<tr class="memdesc:ab413c59bb62ef5fc21d1d860529adc51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode the application_layer_protocol_negotiation extension.  <br /></td></tr>
+<tr class="memitem:a81f864ba8b13beffd9a1f020ea07d868" id="r_a81f864ba8b13beffd9a1f020ea07d868"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81f864ba8b13beffd9a1f020ea07d868">qsc_tls_extensions_decode_alpn</a> (const uint8_t *input, size_t inplen, <a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *alpn)</td></tr>
+<tr class="memdesc:a81f864ba8b13beffd9a1f020ea07d868"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decode the application_layer_protocol_negotiation extension body.  <br /></td></tr>
+<tr class="memitem:ad0c25946438a610c3160567e2f2b1f97" id="r_ad0c25946438a610c3160567e2f2b1f97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0c25946438a610c3160567e2f2b1f97">qsc_tls_extensions_select_alpn</a> (const <a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *clientalpn, const <a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *serveralpn, uint8_t *selected, size_t selectedcap, size_t *selectedlen)</td></tr>
+<tr class="memdesc:ad0c25946438a610c3160567e2f2b1f97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Select a mutually supported ALPN protocol.  <br /></td></tr>
 <tr class="memitem:a7ac36f612ff0e5437dd25a8ee909cfc6" id="r_a7ac36f612ff0e5437dd25a8ee909cfc6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ac36f612ff0e5437dd25a8ee909cfc6">qsc_tls_extensions_encode_psk_key_exchange_modes</a> (uint8_t *output, size_t outlen, size_t *offset, const uint8_t *modes, size_t modecount)</td></tr>
 <tr class="memdesc:a7ac36f612ff0e5437dd25a8ee909cfc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode the psk_key_exchange_modes extension.  <br /></td></tr>
 <tr class="memitem:a3238f707e157f49a02b4087db5910d1f" id="r_a3238f707e157f49a02b4087db5910d1f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3238f707e157f49a02b4087db5910d1f">qsc_tls_extensions_encode_early_data_empty</a> (uint8_t *output, size_t outlen, size_t *offset)</td></tr>
@@ -247,6 +253,44 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>[bool] Returns true if the extension was newly added; otherwise returns false if the extension was already present or the bitmap is NULL. </dd></dl>
+
+</div>
+</div>
+<a id="a81f864ba8b13beffd9a1f020ea07d868" name="a81f864ba8b13beffd9a1f020ea07d868"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81f864ba8b13beffd9a1f020ea07d868">&#9670;&#160;</a></span>qsc_tls_extensions_decode_alpn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_extensions_decode_alpn </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>inplen</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *</td>          <td class="paramname"><span class="paramname"><em>alpn</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Decode the application_layer_protocol_negotiation extension body. </p>
+<p>Parses an ALPN ProtocolNameList extension body into a bounded output policy container. Zero-length protocol identifiers, overlong identifiers, duplicate identifiers, and excess protocol entries are rejected.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the ALPN extension body. </td></tr>
+    <tr><td class="paramname">inplen</td><td>[size_t] Length, in bytes, of the ALPN extension body. </td></tr>
+    <tr><td class="paramname">alpn</td><td>[struct*] Pointer to the output ALPN protocol-list container.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
 
 </div>
 </div>
@@ -757,6 +801,50 @@ Functions</h2></td></tr>
     <tr><td class="paramname">input</td><td>[const uint8_t*] Pointer to the encoded supported_versions body. </td></tr>
     <tr><td class="paramname">inplen</td><td>[size_t] Length, in bytes, of the encoded body. </td></tr>
     <tr><td class="paramname">selectedversion</td><td>[uint16_t*] Pointer receiving the selected protocol version.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
+
+</div>
+</div>
+<a id="ab413c59bb62ef5fc21d1d860529adc51" name="ab413c59bb62ef5fc21d1d860529adc51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab413c59bb62ef5fc21d1d860529adc51">&#9670;&#160;</a></span>qsc_tls_extensions_encode_alpn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_extensions_encode_alpn </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>outlen</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>offset</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *</td>          <td class="paramname"><span class="paramname"><em>alpn</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Encode the application_layer_protocol_negotiation extension. </p>
+<p>Writes an ALPN extension containing the ordered protocol identifiers stored in the supplied bounded policy. Each protocol identifier is encoded as an opaque ProtocolName vector and must have non-zero length.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">output</td><td>[uint8_t*] Pointer to the destination extension buffer. </td></tr>
+    <tr><td class="paramname">outlen</td><td>[size_t] Size, in bytes, of the destination buffer. </td></tr>
+    <tr><td class="paramname">offset</td><td>[size_t*] Pointer to the current write offset; updated on success. </td></tr>
+    <tr><td class="paramname">alpn</td><td>[const struct*] Pointer to the bounded ALPN protocol-list policy.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1457,6 +1545,56 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>[bool] Returns true if the extension is permitted in the specified message; otherwise returns false. </dd></dl>
+
+</div>
+</div>
+<a id="ad0c25946438a610c3160567e2f2b1f97" name="ad0c25946438a610c3160567e2f2b1f97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0c25946438a610c3160567e2f2b1f97">&#9670;&#160;</a></span>qsc_tls_extensions_select_alpn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_extensions_select_alpn </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *</td>          <td class="paramname"><span class="paramname"><em>clientalpn</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> *</td>          <td class="paramname"><span class="paramname"><em>serveralpn</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>selected</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>selectedcap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>selectedlen</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Select a mutually supported ALPN protocol. </p>
+<p>Selects the first server-preferred protocol that appears in the client protocol list.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">clientalpn</td><td>[const struct*] Pointer to the decoded client ALPN list. </td></tr>
+    <tr><td class="paramname">serveralpn</td><td>[const struct*] Pointer to the server ALPN policy. </td></tr>
+    <tr><td class="paramname">selected</td><td>[uint8_t*] Pointer to the selected protocol output buffer. </td></tr>
+    <tr><td class="paramname">selectedcap</td><td>[size_t] Size, in bytes, of the selected protocol output buffer. </td></tr>
+    <tr><td class="paramname">selectedlen</td><td>[size_t*] Receives the selected protocol length in bytes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
 
 </div>
 </div>

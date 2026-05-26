@@ -692,7 +692,7 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 				{
 					status = qsc_tls_status_invalid_input;
 				}
-				else if (payloadlen > QSC_TLS_RECORD_MAX_INNER_SIZE)
+				else if (payloadlen > (QSC_TLS_RECORD_MAX_INNER_SIZE + QSC_TLS_GCM_TAG_SIZE))
 				{
 					status = qsc_tls_status_invalid_length;
 				}

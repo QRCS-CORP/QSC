@@ -499,6 +499,189 @@ qsc_tls_status qsc_tls_extensions_encode_server_name(uint8_t* output, size_t out
     return status;
 }
 
+static bool tls_extensions_alpn_protocol_equal(const uint8_t* left, size_t leftlen, const uint8_t* right, size_t rightlen)
+{
+    bool res;
+
+    res = false;
+
+    if (left != NULL && right != NULL && leftlen == rightlen)
+    {
+        res = (qsc_memutils_are_equal(left, right, leftlen) == true);
+    }
+
+    return res;
+}
+
+qsc_tls_status qsc_tls_extensions_encode_alpn(uint8_t* output, size_t outlen, size_t* offset, const qsc_tls_alpn_protocols* alpn)
+{
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(offset != NULL);
+    QSC_ASSERT(alpn != NULL);
+
+    size_t hdr;
+    size_t listhdr;
+    size_t i;
+    qsc_tls_status status;
+
+    hdr = 0U;
+    listhdr = 0U;
+    status = qsc_tls_status_invalid_input;
+
+    if (output != NULL && offset != NULL && alpn != NULL && alpn->protocolcount != 0U && alpn->protocolcount <= QSC_TLS_MAX_ALPN_PROTOCOLS)
+    {
+        status = ext_begin(output, outlen, offset, (uint16_t)qsc_tls_extension_application_layer_protocol_negotiation, &hdr);
+
+        if (status == qsc_tls_status_success)
+        {
+            status = qsc_tls_codec_vector_begin_u16(output, outlen, offset, &listhdr);
+        }
+
+        for (i = 0U; i < alpn->protocolcount && status == qsc_tls_status_success; ++i)
+        {
+            if (alpn->protocollens[i] != 0U && alpn->protocollens[i] <= QSC_TLS_MAX_ALPN_SIZE)
+            {
+                status = qsc_tls_codec_write_vector8(output, outlen, offset, alpn->protocols[i], alpn->protocollens[i]);
+            }
+            else
+            {
+                status = qsc_tls_status_invalid_length;
+            }
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            status = qsc_tls_codec_vector_end_u16(output, outlen, offset, listhdr);
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            status = ext_end(output, outlen, offset, hdr);
+        }
+    }
+
+    return status;
+}
+
+qsc_tls_status qsc_tls_extensions_decode_alpn(const uint8_t* input, size_t inplen, qsc_tls_alpn_protocols* alpn)
+{
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(alpn != NULL);
+
+    const uint8_t* list;
+    const uint8_t* proto;
+    size_t listlen;
+    size_t protolen;
+    size_t off;
+    size_t count;
+    size_t i;
+    qsc_tls_status status;
+
+    status = qsc_tls_status_invalid_input;
+
+    if (input != NULL && alpn != NULL)
+    {
+        qsc_memutils_clear(alpn, sizeof(*alpn));
+        off = 0U;
+        count = 0U;
+        status = qsc_tls_codec_read_vector16_span(input, inplen, &off, &list, &listlen);
+
+        if (status == qsc_tls_status_success)
+        {
+            if (off != inplen || listlen == 0U)
+            {
+                status = qsc_tls_status_invalid_length;
+            }
+        }
+
+        off = 0U;
+
+        while (status == qsc_tls_status_success && off < listlen)
+        {
+            status = qsc_tls_codec_read_vector8_span(list, listlen, &off, &proto, &protolen);
+
+            if (status == qsc_tls_status_success)
+            {
+                if (protolen == 0U || protolen > QSC_TLS_MAX_ALPN_SIZE || count >= QSC_TLS_MAX_ALPN_PROTOCOLS)
+                {
+                    status = qsc_tls_status_invalid_length;
+                }
+            }
+
+            if (status == qsc_tls_status_success)
+            {
+                for (i = 0U; i < count; ++i)
+                {
+                    if (tls_extensions_alpn_protocol_equal(alpn->protocols[i], alpn->protocollens[i], proto, protolen) == true)
+                    {
+                        status = qsc_tls_status_invalid_message;
+                        break;
+                    }
+                }
+            }
+
+            if (status == qsc_tls_status_success)
+            {
+                qsc_memutils_copy(alpn->protocols[count], proto, protolen);
+                alpn->protocollens[count] = protolen;
+                count += 1U;
+            }
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            alpn->protocolcount = count;
+            alpn->configured = (count != 0U);
+        }
+    }
+
+    return status;
+}
+
+qsc_tls_status qsc_tls_extensions_select_alpn(const qsc_tls_alpn_protocols* clientalpn, const qsc_tls_alpn_protocols* serveralpn, uint8_t* selected, size_t selectedcap, size_t* selectedlen)
+{
+    QSC_ASSERT(clientalpn != NULL);
+    QSC_ASSERT(serveralpn != NULL);
+    QSC_ASSERT(selected != NULL);
+    QSC_ASSERT(selectedlen != NULL);
+
+    size_t i;
+    size_t j;
+    qsc_tls_status status;
+
+    status = qsc_tls_status_invalid_input;
+
+    if (clientalpn != NULL && serveralpn != NULL && selected != NULL && selectedlen != NULL)
+    {
+        *selectedlen = 0U;
+        status = qsc_tls_status_not_supported;
+
+        for (i = 0U; i < serveralpn->protocolcount && status != qsc_tls_status_success; ++i)
+        {
+            for (j = 0U; j < clientalpn->protocolcount; ++j)
+            {
+                if (tls_extensions_alpn_protocol_equal(serveralpn->protocols[i], serveralpn->protocollens[i], clientalpn->protocols[j], clientalpn->protocollens[j]) == true)
+                {
+                    if (serveralpn->protocollens[i] <= selectedcap)
+                    {
+                        qsc_memutils_copy(selected, serveralpn->protocols[i], serveralpn->protocollens[i]);
+                        *selectedlen = serveralpn->protocollens[i];
+                        status = qsc_tls_status_success;
+                    }
+                    else
+                    {
+                        status = qsc_tls_status_invalid_length;
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+
+    return status;
+}
+
 qsc_tls_status qsc_tls_extensions_encode_psk_key_exchange_modes(uint8_t* output, size_t outlen, size_t* offset, const uint8_t* modes, size_t modecount)
 {
     QSC_ASSERT(output != NULL);
@@ -717,8 +900,7 @@ qsc_tls_status qsc_tls_extensions_decode_signature_algorithms(const uint8_t* inp
     return status;
 }
 
-qsc_tls_status qsc_tls_extensions_decode_key_share_client_hello(const uint8_t* input, size_t inplen, qsc_tls_named_group* groups, const uint8_t** shares, 
-    size_t* sharelens, size_t capacity, size_t* count)
+qsc_tls_status qsc_tls_extensions_decode_key_share_client_hello(const uint8_t* input, size_t inplen, qsc_tls_named_group* groups, const uint8_t** shares, size_t* sharelens, size_t capacity, size_t* count)
 {
     QSC_ASSERT(input != NULL);
     QSC_ASSERT(groups != NULL);
@@ -913,8 +1095,7 @@ qsc_tls_status qsc_tls_extensions_decode_server_name(const uint8_t* input, size_
     return status;
 }
 
-qsc_tls_status qsc_tls_extensions_select_cipher_suite(const uint8_t* clientsuites, size_t clientsuiteslen, const qsc_tls_cipher_suite* serverpreference, 
-    size_t serverpreferencecount, qsc_tls_cipher_suite* selected)
+qsc_tls_status qsc_tls_extensions_select_cipher_suite(const uint8_t* clientsuites, size_t clientsuiteslen, const qsc_tls_cipher_suite* serverpreference, size_t serverpreferencecount, qsc_tls_cipher_suite* selected)
 {
     QSC_ASSERT(clientsuites != NULL);
     QSC_ASSERT(serverpreference != NULL);
@@ -957,8 +1138,7 @@ qsc_tls_status qsc_tls_extensions_select_cipher_suite(const uint8_t* clientsuite
     return status;
 }
 
-qsc_tls_status qsc_tls_extensions_select_key_share(const qsc_tls_named_group* groups, size_t groupcount, const qsc_tls_named_group* serverpreference,
-    size_t serverpreferencecount, qsc_tls_named_group* selected)
+qsc_tls_status qsc_tls_extensions_select_key_share(const qsc_tls_named_group* groups, size_t groupcount, const qsc_tls_named_group* serverpreference, size_t serverpreferencecount, qsc_tls_named_group* selected)
 {
     size_t i;
     size_t j;
@@ -1062,8 +1242,7 @@ qsc_tls_status qsc_tls_extensions_decode_early_data_max(const uint8_t* input, si
     return status;
 }
 
-qsc_tls_status qsc_tls_extensions_encode_pre_shared_key_offer(uint8_t* output, size_t outlen, size_t* offset, 
-    const qsc_tls_psk_identity_view* identities, size_t identitycount, size_t binderlen, size_t* binderoffset)
+qsc_tls_status qsc_tls_extensions_encode_pre_shared_key_offer(uint8_t* output, size_t outlen, size_t* offset, const qsc_tls_psk_identity_view* identities, size_t identitycount, size_t binderlen, size_t* binderoffset)
 {
     QSC_ASSERT(output != NULL);
     QSC_ASSERT(offset != NULL);
@@ -1175,8 +1354,7 @@ qsc_tls_status qsc_tls_extensions_encode_pre_shared_key_server(uint8_t* output, 
     return status;
 }
 
-qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_offer(const uint8_t* input, size_t inplen, qsc_tls_psk_identity_view* identities, 
-    const uint8_t** binders, size_t* binderlens, size_t capacity, size_t* count, size_t* binderblockoffset)
+qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_offer(const uint8_t* input, size_t inplen, qsc_tls_psk_identity_view* identities, const uint8_t** binders, size_t* binderlens, size_t capacity, size_t* count, size_t* binderblockoffset)
 {
     QSC_ASSERT(input != NULL);
     QSC_ASSERT(identities != NULL);

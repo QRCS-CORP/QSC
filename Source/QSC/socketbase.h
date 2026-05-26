@@ -294,6 +294,20 @@ QSC_EXPORT_API bool qsc_socket_ipv6_valid_address(const char* address);
 QSC_EXPORT_API bool qsc_socket_is_blocking(const qsc_socket* sock);
 
 /**
+* \brief Set the socket blocking mode.
+*
+* This function enables or disables blocking behavior on an initialized socket.
+* A blocking socket waits for send, receive, accept, and connect operations to
+* complete. A non-blocking socket returns immediately when an operation would block.
+*
+* \param sock: [const qsc_socket*] The socket instance
+* \param enabled: [bool] Enable blocking mode when true, or non-blocking mode when false
+*
+* \return [qsc_socket_exceptions] Returns an exception code on failure, or success(0)
+*/
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_set_blocking(const qsc_socket* sock, bool enabled);
+
+/**
 * \brief Determines if the socket is connected
 *
 * \param sock: [const qsc_socket*] The socket instance

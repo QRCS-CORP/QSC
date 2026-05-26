@@ -215,7 +215,6 @@ static qsc_asn1_status asn1_decode_universal_string(const qsc_encoding_ber_eleme
     return status;
 }
 
-
 static qsc_asn1_status asn1_decode_element_header(const uint8_t* der, size_t derlen, size_t* headerlen, size_t* contentlen)
 {
     qsc_asn1_status status;

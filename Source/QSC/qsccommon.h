@@ -1136,7 +1136,9 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build.
  */
-#define QSC_TLS_SECURITY_CLASS_1
+#if !defined(QSC_TLS_NO_DEFAULT_SECURITY_CLASS) && !defined(QSC_TLS_SECURITY_CLASS_1) && !defined(QSC_TLS_SECURITY_CLASS_3) && !defined(QSC_TLS_SECURITY_CLASS_5)
+#   define QSC_TLS_SECURITY_CLASS_1
+#endif
 
 /*!
  * \def QSC_TLS_SECURITY_CLASS_3

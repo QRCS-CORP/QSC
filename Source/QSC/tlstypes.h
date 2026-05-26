@@ -166,14 +166,9 @@ typedef enum qsc_tls_named_group
 	qsc_tls_group_mlkem512 = 0x0200,				/*!< ML-KEM-512 named group. */
 	qsc_tls_group_mlkem768 = 0x0201,				/*!< ML-KEM-768 named group. */
 	qsc_tls_group_mlkem1024 = 0x0202,				/*!< ML-KEM-1024 named group. */
-	qsc_tls_group_x25519_mlkem512 = 0x11EB,			/*!< Hybrid x25519 plus ML-KEM-512 named group. */
 	qsc_tls_group_x25519_mlkem768 = 0x11EC,			/*!< Hybrid x25519 plus ML-KEM-768 named group. */
-	qsc_tls_group_secp256r1_mlkem768 = 0x11ED,		/*!< Hybrid secp256r1 plus ML-KEM-768 named group. */
-	qsc_tls_group_secp384r1_mlkem1024 = 0x11EE,		/*!< Hybrid secp384r1 plus ML-KEM-1024 named group. */
-	qsc_tls_group_x25519_mlkem1024 = 0x11EF,		/*!< Hybrid x25519 plus ML-KEM-1024 named group. */
-	qsc_tls_group_secp256r1_mlkem512 = 0x11F0,		/*!< Hybrid secp256r1 plus ML-KEM-512 named group. */
-	qsc_tls_group_secp256r1_mlkem1024 = 0x11F1,		/*!< Hybrid secp256r1 plus ML-KEM-1024 named group. */
-	qsc_tls_group_secp384r1_mlkem768 = 0x11F2		/*!< Hybrid secp384r1 plus ML-KEM-768 named group. */
+	qsc_tls_group_secp256r1_mlkem768 = 0x11EB,		/*!< Hybrid secp256r1 plus ML-KEM-768 named group. */
+	qsc_tls_group_secp384r1_mlkem1024 = 0x11ED		/*!< Hybrid secp384r1 plus ML-KEM-1024 named group. */
 } qsc_tls_named_group;
 
 /**

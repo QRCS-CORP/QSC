@@ -177,7 +177,7 @@ int32_t main(void)
 	qsc_timestamp_print_values();
 	qsc_consoleutils_print_line("");
 #endif
-
+	
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file

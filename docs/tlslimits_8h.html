@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -141,6 +141,12 @@ Macros</h2></td></tr>
 <tr class="memitem:a47dc9673c9e1e4ec9131d4dc49a8a82f" id="r_a47dc9673c9e1e4ec9131d4dc49a8a82f"><td class="memItemLeft" align="right" valign="top"><a id="a47dc9673c9e1e4ec9131d4dc49a8a82f" name="a47dc9673c9e1e4ec9131d4dc49a8a82f"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_MAX_ALPN_SIZE</b>&#160;&#160;&#160;255U</td></tr>
 <tr class="memdesc:a47dc9673c9e1e4ec9131d4dc49a8a82f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum ALPN identifier length in bytes. <br /></td></tr>
+<tr class="memitem:ae9cbf65335b7d07d59cf433587968c63" id="r_ae9cbf65335b7d07d59cf433587968c63"><td class="memItemLeft" align="right" valign="top"><a id="ae9cbf65335b7d07d59cf433587968c63" name="ae9cbf65335b7d07d59cf433587968c63"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_MAX_ALPN_PROTOCOLS</b>&#160;&#160;&#160;8U</td></tr>
+<tr class="memdesc:ae9cbf65335b7d07d59cf433587968c63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of ALPN identifiers stored in a TLS endpoint policy. <br /></td></tr>
+<tr class="memitem:abb82a1a8a9c96acf35a7e0358505f6e9" id="r_abb82a1a8a9c96acf35a7e0358505f6e9"><td class="memItemLeft" align="right" valign="top"><a id="abb82a1a8a9c96acf35a7e0358505f6e9" name="abb82a1a8a9c96acf35a7e0358505f6e9"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_MAX_SERVER_IDENTITIES</b>&#160;&#160;&#160;4U</td></tr>
+<tr class="memdesc:abb82a1a8a9c96acf35a7e0358505f6e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of SNI-selectable certificate identities stored by a TLS server configuration. <br /></td></tr>
 <tr class="memitem:a119c2b0875814f8e7eac82c365428e7b" id="r_a119c2b0875814f8e7eac82c365428e7b"><td class="memItemLeft" align="right" valign="top"><a id="a119c2b0875814f8e7eac82c365428e7b" name="a119c2b0875814f8e7eac82c365428e7b"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_CERTIFICATE_REQUEST_CONTEXT_MAX_SIZE</b>&#160;&#160;&#160;255U</td></tr>
 <tr class="memdesc:a119c2b0875814f8e7eac82c365428e7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum certificate request-context size. <br /></td></tr>
@@ -238,7 +244,7 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_SERVER_HELLO_EXTENSIONS_MAX_SIZE</b>&#160;&#160;&#160;(<a class="el" href="#ab91448d54054a2d368e674983b267ac2">QSC_TLS_SUPPORTED_VERSIONS_SERVER_EXTENSION_SIZE</a> + <a class="el" href="#ae1f1f7e02225d25389914b4017ce8ebc">QSC_TLS_KEY_SHARE_SERVER_EXTENSION_MAX_SIZE</a>)</td></tr>
 <tr class="memdesc:ac72b28d138b1fb2fd452de2491bca799"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum encoded ServerHello extension block size excluding the outer vector16 header. <br /></td></tr>
 <tr class="memitem:a57b99273a92944350f1359b1ad332ac7" id="r_a57b99273a92944350f1359b1ad332ac7"><td class="memItemLeft" align="right" valign="top"><a id="a57b99273a92944350f1359b1ad332ac7" name="a57b99273a92944350f1359b1ad332ac7"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE</b>&#160;&#160;&#160;(42U + <a class="el" href="#ac72b28d138b1fb2fd452de2491bca799">QSC_TLS_SERVER_HELLO_EXTENSIONS_MAX_SIZE</a>)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE</b>&#160;&#160;&#160;(72U + <a class="el" href="#ac72b28d138b1fb2fd452de2491bca799">QSC_TLS_SERVER_HELLO_EXTENSIONS_MAX_SIZE</a>)</td></tr>
 <tr class="memdesc:a57b99273a92944350f1359b1ad332ac7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum encoded ServerHello body size for the current TLS scaffolding. <br /></td></tr>
 <tr class="memitem:abf746f74fab63348ad1d320ebf181033" id="r_abf746f74fab63348ad1d320ebf181033"><td class="memItemLeft" align="right" valign="top"><a id="abf746f74fab63348ad1d320ebf181033" name="abf746f74fab63348ad1d320ebf181033"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_HKDF_LABEL_MAX_WIRE_SIZE</b>&#160;&#160;&#160;(2U + 1U + (<a class="el" href="tlsdefs_8h.html#af69440c0b6c6b80b98c892ff7e3e683b">QSC_TLS_HKDF_LABEL_PREFIX_SIZE</a> + <a class="el" href="tlsdefs_8h.html#ac6fea1e63f5d5072ff2961d9885799dc">QSC_TLS_LABEL_MAX_SIZE</a>) + 1U + <a class="el" href="tlsdefs_8h.html#a79d3551211358ac9df1d992f661e701c">QSC_TLS_CONTEXT_MAX_SIZE</a>)</td></tr>
@@ -252,8 +258,8 @@ typedef char&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_limit
 typedef char&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_limit_assert_extension</b>[(<a class="el" href="#ae2c485cc3f5125c1218bb5e32d0dc0d9">QSC_TLS_MAX_EXTENSION_SIZE</a> &gt;=<a class="el" href="#a2859613b61950b67fc77b6563230e245">QSC_TLS_CLIENT_HELLO_EXTENSIONS_MAX_SIZE</a>) ? 1 :-1]</td></tr>
 <tr class="memitem:a1531a62273a39b230a7259f01c7403f4" id="r_a1531a62273a39b230a7259f01c7403f4"><td class="memItemLeft" align="right" valign="top"><a id="a1531a62273a39b230a7259f01c7403f4" name="a1531a62273a39b230a7259f01c7403f4"></a>
 typedef char&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_limit_assert_client_hello</b>[(<a class="el" href="#ac4559cba13fa77013e75cf162a5df306">QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE</a> &gt;=(43U+<a class="el" href="#ab5dad48e568762f60b1e142a8c3d50ec">QSC_TLS_KEY_SHARE_CLIENT_EXTENSION_MAX_SIZE</a>)) ? 1 :-1]</td></tr>
-<tr class="memitem:a8e46f451922c1c83dcc59f3bee97cb7e" id="r_a8e46f451922c1c83dcc59f3bee97cb7e"><td class="memItemLeft" align="right" valign="top"><a id="a8e46f451922c1c83dcc59f3bee97cb7e" name="a8e46f451922c1c83dcc59f3bee97cb7e"></a>
-typedef char&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_limit_assert_server_hello</b>[(<a class="el" href="#a57b99273a92944350f1359b1ad332ac7">QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE</a> &gt;=(42U+<a class="el" href="#ae1f1f7e02225d25389914b4017ce8ebc">QSC_TLS_KEY_SHARE_SERVER_EXTENSION_MAX_SIZE</a>)) ? 1 :-1]</td></tr>
+<tr class="memitem:ad8e7057cd52ce18b95fcda92e9971299" id="r_ad8e7057cd52ce18b95fcda92e9971299"><td class="memItemLeft" align="right" valign="top"><a id="ad8e7057cd52ce18b95fcda92e9971299" name="ad8e7057cd52ce18b95fcda92e9971299"></a>
+typedef char&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_limit_assert_server_hello</b>[(<a class="el" href="#a57b99273a92944350f1359b1ad332ac7">QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE</a> &gt;=(72U+<a class="el" href="#ae1f1f7e02225d25389914b4017ce8ebc">QSC_TLS_KEY_SHARE_SERVER_EXTENSION_MAX_SIZE</a>)) ? 1 :-1]</td></tr>
 <tr class="memitem:adb5c3bfd45dfa3ccfe4fc08e2acfc014" id="r_adb5c3bfd45dfa3ccfe4fc08e2acfc014"><td class="memItemLeft" align="right" valign="top"><a id="adb5c3bfd45dfa3ccfe4fc08e2acfc014" name="adb5c3bfd45dfa3ccfe4fc08e2acfc014"></a>
 typedef char&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_limit_assert_private</b>[(<a class="el" href="#a8c946ce10171e78bd6ec73050f7b0366">QSC_TLS_MAX_PRIVATE_KEY_SIZE</a> &gt;=(<a class="el" href="#ae79b5e567f2c23e28137d86fbe708ba1">QSC_TLS_MAX_CLASSICAL_PRIVATE_KEY_SIZE</a>+<a class="el" href="#ac25ff8eb3e17873592aa433093459cbf">QSC_TLS_MAX_KEM_PRIVATE_KEY_SIZE</a>)) ? 1 :-1]</td></tr>
 <tr class="memitem:aabda56762e3d918e65ad53bbb5492975" id="r_aabda56762e3d918e65ad53bbb5492975"><td class="memItemLeft" align="right" valign="top"><a id="aabda56762e3d918e65ad53bbb5492975" name="aabda56762e3d918e65ad53bbb5492975"></a>

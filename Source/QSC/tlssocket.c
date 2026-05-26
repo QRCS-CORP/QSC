@@ -33,6 +33,7 @@ static const qsc_tls_named_group TLS_SOCKET_MLKEM_HYBRID_GROUPS[] =
 static const qsc_tls_named_group TLS_SOCKET_EXPERIMENTAL_PQC_GROUPS[] =
 {
     qsc_tls_group_x25519_mlkem768,
+    qsc_tls_group_secp256r1_mlkem768,
     qsc_tls_group_mlkem768,
     qsc_tls_group_x25519,
     qsc_tls_group_secp256r1
@@ -47,6 +48,8 @@ static const qsc_tls_signature_scheme TLS_SOCKET_EXPERIMENTAL_PQC_SIGSCHEMES[] =
     qsc_tls_sig_ecdsa_secp384r1_sha384,
     qsc_tls_sig_ed25519
 };
+
+static const uint32_t TLS_SOCKET_OPTION_INT32_MAX = 2147483647UL;
 
 static qsc_tls_socket_status tls_socket_status_from_tls(qsc_tls_status status)
 {
@@ -112,8 +115,168 @@ static qsc_tls_socket_status tls_socket_status_from_x509(qsc_x509w_status status
     return res;
 }
 
-static void tls_socket_set_result(qsc_tls_socket_result* result, qsc_tls_socket_status status, qsc_tls_status tlsstatus, qsc_socket_exceptions socketstatus, 
-    qsc_x509w_status x509status, qsc_x509_verify_status verifystatus, qsc_tls_alert_description alert)
+static qsc_x509w_status tls_socket_x509_status_from_verify(qsc_x509_verify_status status)
+{
+    qsc_x509w_status res;
+
+    res = QSC_X509W_STATUS_VERIFY_ERROR;
+
+    switch (status)
+    {
+        case QSC_X509_VERIFY_STATUS_SUCCESS:
+        {
+            res = QSC_X509W_STATUS_SUCCESS;
+            break;
+        }
+        case QSC_X509_VERIFY_STATUS_INVALID_INPUT:
+        {
+            res = QSC_X509W_STATUS_INVALID_INPUT;
+            break;
+        }
+        case QSC_X509_VERIFY_STATUS_NAME_MISMATCH:
+        {
+            res = QSC_X509W_STATUS_HOSTNAME_MISMATCH;
+            break;
+        }
+        case QSC_X509_VERIFY_STATUS_PURPOSE_REJECTED:
+        {
+            res = QSC_X509W_STATUS_PURPOSE_REJECTED;
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    return res;
+}
+
+static const qsc_tls_qsc_x509_context* tls_socket_get_x509_context(const qsc_tls_socket_connection* connection)
+{
+    const qsc_tls_certificate_interface* iface;
+    const qsc_tls_qsc_x509_context* xctx;
+
+    iface = NULL;
+    xctx = NULL;
+
+    if (connection != NULL)
+    {
+        if (connection->role == qsc_tls_role_client)
+        {
+            iface = &connection->engine.state.client.config.certinterface;
+        }
+        else
+        {
+            iface = &connection->engine.state.server.config.clientcertinterface;
+        }
+
+        if (iface != NULL && iface->state != NULL &&
+            iface->validatechain == qsc_tls_x509_validate_chain &&
+            iface->verifycertificateverify == qsc_tls_x509_verify_certificate_verify)
+        {
+            xctx = (const qsc_tls_qsc_x509_context*)iface->state;
+        }
+    }
+
+    return xctx;
+}
+
+static void tls_socket_copy_peer_text(char* output, size_t outputlen, const char* input)
+{
+    if (output != NULL && outputlen != 0U)
+    {
+        output[0U] = '\0';
+
+        if (input != NULL && input[0U] != '\0')
+        {
+            (void)qsc_stringutils_copy_string(output, outputlen, input);
+        }
+    }
+}
+
+static void tls_socket_update_peer_info(qsc_tls_socket_connection* connection)
+{
+    const qsc_tls_qsc_x509_context* xctx;
+    qsc_tls_socket_peer_info* peer;
+    qsc_x509_verify_status vstatus;
+    qsc_x509w_status xstatus;
+    qsc_tls_alert_description alert;
+
+    if (connection != NULL)
+    {
+        peer = &connection->peerinfo;
+        qsc_memutils_clear(peer, sizeof(*peer));
+        peer->cipher_suite = qsc_tls_socket_negotiated_cipher_suite(connection);
+        peer->named_group = qsc_tls_socket_negotiated_group(connection);
+        peer->signature_scheme = qsc_tls_socket_negotiated_signature_scheme(connection);
+        peer->result = connection->lastresult;
+        peer->x509_status = connection->lastresult.x509status;
+        peer->verify_status = connection->lastresult.verifystatus;
+
+        if (connection->role == qsc_tls_role_client)
+        {
+            peer->authenticated = connection->engine.state.client.serverauthenticated;
+            peer->psk_accepted = connection->engine.state.client.pskaccepted;
+            peer->early_data_accepted = connection->engine.state.client.earlydataaccepted;
+            peer->alpn_selected = connection->engine.state.client.alpnselected;
+
+            if (connection->engine.state.client.alpnselected == true)
+            {
+                qsc_memutils_copy(peer->selected_alpn, connection->engine.state.client.selectedalpn, connection->engine.state.client.selectedalpnlen);
+                peer->selected_alpn[connection->engine.state.client.selectedalpnlen] = '\0';
+            }
+        }
+        else
+        {
+            peer->authenticated = connection->engine.state.server.clientauthenticated;
+            peer->psk_accepted = connection->engine.state.server.pskaccepted;
+            peer->early_data_accepted = connection->engine.state.server.earlydataaccepted;
+            peer->alpn_selected = connection->engine.state.server.alpnselected;
+
+            if (connection->engine.state.server.alpnselected == true)
+            {
+                qsc_memutils_copy(peer->selected_alpn, connection->engine.state.server.selectedalpn, connection->engine.state.server.selectedalpnlen);
+                peer->selected_alpn[connection->engine.state.server.selectedalpnlen] = '\0';
+            }
+        }
+
+        xctx = tls_socket_get_x509_context(connection);
+
+        if (xctx != NULL)
+        {
+            vstatus = xctx->lastverifystatus;
+            xstatus = tls_socket_x509_status_from_verify(vstatus);
+            alert = xctx->lastalert;
+            peer->verify_status = vstatus;
+            peer->x509_status = xstatus;
+            peer->chain_valid = xctx->peersummary.chainvalid;
+            peer->hostname_checked = xctx->peersummary.hostnamechecked;
+            peer->hostname_matched = xctx->peersummary.hostnamevalid;
+
+            if (xctx->peersummary.populated == true)
+            {
+                tls_socket_copy_peer_text(peer->subject, sizeof(peer->subject), xctx->peersummary.subject);
+                tls_socket_copy_peer_text(peer->issuer, sizeof(peer->issuer), xctx->peersummary.issuer);
+                tls_socket_copy_peer_text(peer->common_name, sizeof(peer->common_name), xctx->peersummary.commonname);
+                tls_socket_copy_peer_text(peer->dns_name, sizeof(peer->dns_name), xctx->peersummary.dnsname);
+            }
+
+            connection->lastresult.x509status = xstatus;
+            connection->lastresult.verifystatus = vstatus;
+            connection->lastresult.alert = alert;
+            peer->result = connection->lastresult;
+        }
+        else
+        {
+            peer->chain_valid = peer->authenticated;
+            peer->hostname_matched = false;
+            peer->hostname_checked = false;
+        }
+    }
+}
+
+static void tls_socket_set_result(qsc_tls_socket_result* result, qsc_tls_socket_status status, qsc_tls_status tlsstatus, qsc_socket_exceptions socketstatus, qsc_x509w_status x509status, qsc_x509_verify_status verifystatus, qsc_tls_alert_description alert)
 {
     if (result != NULL)
     {
@@ -126,8 +289,7 @@ static void tls_socket_set_result(qsc_tls_socket_result* result, qsc_tls_socket_
     }
 }
 
-static void tls_socket_emit_log(qsc_tls_socket_log_callback callback, void* state, qsc_tls_socket_log_level level, qsc_tls_socket_event event, 
-    const qsc_tls_socket_result* result, const char* message)
+static void tls_socket_emit_log(qsc_tls_socket_log_callback callback, void* state, qsc_tls_socket_log_level level, qsc_tls_socket_event event, const qsc_tls_socket_result* result, const char* message)
 {
     if (callback != NULL)
     {
@@ -135,8 +297,7 @@ static void tls_socket_emit_log(qsc_tls_socket_log_callback callback, void* stat
     }
 }
 
-static void tls_socket_connection_log(qsc_tls_socket_connection* connection, qsc_tls_socket_log_level level,
-    qsc_tls_socket_event event, const char* message)
+static void tls_socket_connection_log(qsc_tls_socket_connection* connection, qsc_tls_socket_log_level level, qsc_tls_socket_event event, const char* message)
 {
     if (connection != NULL)
     {
@@ -144,8 +305,7 @@ static void tls_socket_connection_log(qsc_tls_socket_connection* connection, qsc
     }
 }
 
-static void tls_socket_server_log(qsc_tls_socket_server* server, qsc_tls_socket_log_level level,
-    qsc_tls_socket_event event, const qsc_tls_socket_result* result, const char* message)
+static void tls_socket_server_log(qsc_tls_socket_server* server, qsc_tls_socket_log_level level, qsc_tls_socket_event event, const qsc_tls_socket_result* result, const char* message)
 {
     if (server != NULL)
     {
@@ -153,22 +313,109 @@ static void tls_socket_server_log(qsc_tls_socket_server* server, qsc_tls_socket_
     }
 }
 
+static qsc_tls_socket_status tls_socket_validate_options(const qsc_tls_socket_options* options)
+{
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (options != NULL)
+    {
+        if (options->connect_timeout_ms <= TLS_SOCKET_OPTION_INT32_MAX &&
+            options->handshake_timeout_ms <= TLS_SOCKET_OPTION_INT32_MAX &&
+            options->receive_timeout_ms <= TLS_SOCKET_OPTION_INT32_MAX &&
+            options->send_timeout_ms <= TLS_SOCKET_OPTION_INT32_MAX &&
+            options->idle_timeout_ms <= TLS_SOCKET_OPTION_INT32_MAX &&
+            options->receive_buffer_size <= (size_t)TLS_SOCKET_OPTION_INT32_MAX &&
+            options->send_buffer_size <= (size_t)TLS_SOCKET_OPTION_INT32_MAX)
+        {
+            status = qsc_tls_socket_status_success;
+        }
+    }
+
+    return status;
+}
+
+static bool tls_socket_ticket_policy_is_valid(const qsc_tls_socket_ticket_policy* policy)
+{
+    bool res;
+
+    res = false;
+
+    if (policy != NULL)
+    {
+        if (policy->lifetime_seconds > 0U && policy->lifetime_seconds <= QSC_TLS_SOCKET_TICKET_LIFETIME_MAX)
+        {
+            if (policy->renewal_interval_seconds == 0U || policy->renewal_interval_seconds < policy->lifetime_seconds)
+            {
+                res = true;
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool tls_socket_session_ticket_is_valid_internal(const qsc_tls_session_ticket* ticket)
+{
+    bool res;
+
+    res = false;
+
+    if (ticket != NULL)
+    {
+        if (ticket->lifetime > 0U && ticket->lifetime <= QSC_TLS_SOCKET_TICKET_LIFETIME_MAX &&
+            ticket->noncelen <= QSC_TLS_TICKET_NONCE_MAX_SIZE &&
+            ticket->ticketlen > 0U && ticket->ticketlen <= QSC_TLS_TICKET_MAX_SIZE &&
+            ticket->resumptionsecretlen > 0U && ticket->resumptionsecretlen <= QSC_TLS_HASH_MAX_SIZE &&
+            ticket->suite != qsc_tls_cipher_suite_none)
+        {
+            res = true;
+        }
+    }
+
+    return res;
+}
+
+static qsc_tls_socket_status tls_socket_set_io_timeouts(qsc_socket* sock, uint32_t receivems, uint32_t sendms)
+{
+    qsc_socket_exceptions se;
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (sock != NULL && receivems <= TLS_SOCKET_OPTION_INT32_MAX && sendms <= TLS_SOCKET_OPTION_INT32_MAX)
+    {
+        se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_receive_time_out, (int32_t)receivems);
+        status = (se == (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS) ? qsc_tls_socket_status_success : qsc_tls_socket_status_io_failed;
+
+        if (status == qsc_tls_socket_status_success)
+        {
+            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_send_time_out, (int32_t)sendms);
+            status = (se == (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS) ? qsc_tls_socket_status_success : qsc_tls_socket_status_io_failed;
+        }
+    }
+
+    return status;
+}
+
 static qsc_tls_socket_status tls_socket_apply_options(qsc_socket* sock, qsc_socket_address_families family, const qsc_tls_socket_options* options, bool listener)
 {
     qsc_socket_exceptions se;
     qsc_tls_socket_status status;
 
-    status = qsc_tls_socket_status_success;
+    status = tls_socket_validate_options(options);
 
-    if (sock == NULL || options == NULL)
+    if (sock == NULL)
     {
         status = qsc_tls_socket_status_invalid_input;
     }
-    else
+
+    if (status == qsc_tls_socket_status_success)
     {
-        if (listener == true && options->reuse_address == true)
+        if (listener == true)
         {
-            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_reuse_address, 1);
+            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_reuse_address, options->reuse_address == true ? 1 : 0);
 
             if (se != (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS)
             {
@@ -176,9 +423,9 @@ static qsc_tls_socket_status tls_socket_apply_options(qsc_socket* sock, qsc_sock
             }
         }
 
-        if (status == qsc_tls_socket_status_success && options->no_delay == true)
+        if (status == qsc_tls_socket_status_success)
         {
-            se = qsc_socket_set_option(sock, qsc_socket_protocol_tcp, qsc_socket_option_tcp_no_delay, 1);
+            se = qsc_socket_set_option(sock, qsc_socket_protocol_tcp, qsc_socket_option_tcp_no_delay, options->no_delay == true ? 1 : 0);
 
             if (se != (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS)
             {
@@ -186,9 +433,9 @@ static qsc_tls_socket_status tls_socket_apply_options(qsc_socket* sock, qsc_sock
             }
         }
 
-        if (status == qsc_tls_socket_status_success && options->keep_alive == true)
+        if (status == qsc_tls_socket_status_success)
         {
-            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_keepalive, 1);
+            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_keepalive, options->keep_alive == true ? 1 : 0);
 
             if (se != (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS)
             {
@@ -196,9 +443,9 @@ static qsc_tls_socket_status tls_socket_apply_options(qsc_socket* sock, qsc_sock
             }
         }
 
-        if (status == qsc_tls_socket_status_success && family == qsc_socket_address_family_ipv6 && options->dual_stack == true)
+        if (status == qsc_tls_socket_status_success && family == qsc_socket_address_family_ipv6)
         {
-            se = qsc_socket_set_option(sock, qsc_socket_protocol_ipv6, qsc_socket_option_ipv6_only, 0);
+            se = qsc_socket_set_option(sock, qsc_socket_protocol_ipv6, qsc_socket_option_ipv6_only, options->dual_stack == true ? 0 : 1);
 
             if (se != (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS)
             {
@@ -206,9 +453,9 @@ static qsc_tls_socket_status tls_socket_apply_options(qsc_socket* sock, qsc_sock
             }
         }
 
-        if (status == qsc_tls_socket_status_success && options->receive_timeout_ms != 0U)
+        if (status == qsc_tls_socket_status_success && options->receive_buffer_size != 0U)
         {
-            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_receive_time_out, (int32_t)options->receive_timeout_ms);
+            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_receive_buffer_size, (int32_t)options->receive_buffer_size);
 
             if (se != (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS)
             {
@@ -216,9 +463,24 @@ static qsc_tls_socket_status tls_socket_apply_options(qsc_socket* sock, qsc_sock
             }
         }
 
-        if (status == qsc_tls_socket_status_success && options->send_timeout_ms != 0U)
+        if (status == qsc_tls_socket_status_success && options->send_buffer_size != 0U)
         {
-            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_send_time_out, (int32_t)options->send_timeout_ms);
+            se = qsc_socket_set_option(sock, qsc_socket_protocol_socket, qsc_socket_option_send_buffer_size, (int32_t)options->send_buffer_size);
+
+            if (se != (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS)
+            {
+                status = qsc_tls_socket_status_io_failed;
+            }
+        }
+
+        if (status == qsc_tls_socket_status_success)
+        {
+            status = tls_socket_set_io_timeouts(sock, options->receive_timeout_ms, options->send_timeout_ms);
+        }
+
+        if (status == qsc_tls_socket_status_success)
+        {
+            se = qsc_socket_set_blocking(sock, options->blocking);
 
             if (se != (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS)
             {
@@ -304,6 +566,55 @@ static qsc_tls_socket_status tls_socket_receive_exact(qsc_tls_socket_connection*
     return status;
 }
 
+static bool tls_socket_frame_send_input_valid(const uint8_t* input, size_t inlen)
+{
+    bool res;
+
+    res = false;
+
+    if (inlen <= QSC_TLS_SOCKET_FRAME_SIZE_MAX)
+    {
+        if (inlen == 0U || input != NULL)
+        {
+            res = true;
+        }
+    }
+
+    return res;
+}
+
+static bool tls_socket_frame_receive_output_valid(const uint8_t* output, size_t outlen)
+{
+    bool res;
+
+    res = false;
+
+    if (output != NULL || outlen == 0U)
+    {
+        res = true;
+    }
+
+    return res;
+}
+
+static qsc_tls_socket_status tls_socket_frame_status_from_length(uint32_t framelen, size_t outlen)
+{
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_success;
+
+    if (framelen > QSC_TLS_SOCKET_FRAME_SIZE_MAX)
+    {
+        status = qsc_tls_socket_status_io_failed;
+    }
+    else if ((size_t)framelen > outlen)
+    {
+        status = qsc_tls_socket_status_invalid_input;
+    }
+
+    return status;
+}
+
 static bool tls_socket_context_has_policy(const qsc_tls_socket_context* context)
 {
     bool res;
@@ -359,11 +670,30 @@ static qsc_tls_socket_status tls_socket_build_client_config(const qsc_tls_socket
             config->groupcount = context->groupcount;
             config->sigschemes = context->sigschemes;
             config->sigschemecount = context->sigschemecount;
+            config->alpn = context->alpn;
 
-            if (offered == NULL && context->hassessionticket == true && context->ticketpolicy.enabled == true)
+            if (context->ticketpolicy.enabled == true)
             {
-                offered = &context->sessionticket;
-                enableearlydata = context->ticketpolicy.allow_early_data;
+                if (offered == NULL && context->hassessionticket == true && tls_socket_session_ticket_is_valid_internal(&context->sessionticket) == true)
+                {
+                    offered = &context->sessionticket;
+                }
+
+                if (offered != NULL && tls_socket_session_ticket_is_valid_internal(offered) == false)
+                {
+                    offered = NULL;
+                    enableearlydata = false;
+                }
+
+                if (context->ticketpolicy.allow_early_data == false)
+                {
+                    enableearlydata = false;
+                }
+            }
+            else
+            {
+                offered = NULL;
+                enableearlydata = false;
             }
 
             config->offeredticket = offered;
@@ -408,6 +738,7 @@ static qsc_tls_socket_status tls_socket_build_server_config(const qsc_tls_socket
             config->groupspreferencecount = context->groupcount;
             config->sigschemepreference = context->sigschemes;
             config->sigschemepreferencecount = context->sigschemecount;
+            config->alpn = context->alpn;
             iface = qsc_x509w_tls_bridge_get_interface(&context->bridge);
 
             if (iface != NULL && context->localcert.chainlength != 0U && context->localcert.privatekeylen <= sizeof(config->localcert.signprivatekey))
@@ -415,16 +746,37 @@ static qsc_tls_socket_status tls_socket_build_server_config(const qsc_tls_socket
                 config->clientcertinterface = *iface;
                 config->requestclientauth = context->requestclientauth;
                 config->requireclientauth = context->requireclientauth;
-                qsc_memutils_copy(config->localcert.chain, context->localcert.chain, context->localcert.chainlength * sizeof(qsc_tls_certificate_view));
-                config->localcert.chainlength = context->localcert.chainlength;
-                config->localcert.verifyscheme = context->localcert.verifyscheme;
-                qsc_memutils_copy(config->localcert.signprivatekey, context->localcert.privatekeydata, context->localcert.privatekeylen);
-                config->localcert.signprivatekeylen = context->localcert.privatekeylen;
-                config->localcert.signcallback = qsc_tls_signer_default_sign;
-                config->localcert.signstate = NULL;
-                config->localcert.configured = true;
-                config->localcert.staticsignature = false;
-                status = qsc_tls_socket_status_success;
+                config->clientauthcallback = context->clientauthcallback;
+                config->clientauthstate = context->clientauthstate;
+                config->requireclientauthorization = context->requireclientauthorization;
+                config->requiresni = context->requiresni;
+
+                if (qsc_tls_server_config_set_local_certificate(config, context->localcert.chain, context->localcert.chainlength,
+                    context->localcert.verifyscheme, context->localcert.privatekeydata, context->localcert.privatekeylen) == qsc_tls_status_success)
+                {
+                    status = qsc_tls_socket_status_success;
+                }
+                else
+                {
+                    status = qsc_tls_socket_status_invalid_input;
+                }
+
+                for (size_t i = 0U; i < context->sniidentitycount && status == qsc_tls_socket_status_success; ++i)
+                {
+                    qsc_tls_server_config tcfg;
+
+                    qsc_memutils_clear(&tcfg, sizeof(tcfg));
+
+                    if (qsc_tls_server_config_set_local_certificate(&tcfg, context->snilocalcerts[i].chain, context->snilocalcerts[i].chainlength,
+                        context->snilocalcerts[i].verifyscheme, context->snilocalcerts[i].privatekeydata, context->snilocalcerts[i].privatekeylen) != qsc_tls_status_success)
+                    {
+                        status = qsc_tls_socket_status_invalid_input;
+                    }
+                    else if (qsc_tls_server_config_add_certificate_identity(config, context->snihostnames[i], &tcfg.localcert) != qsc_tls_status_success)
+                    {
+                        status = qsc_tls_socket_status_invalid_input;
+                    }
+                }
             }
             else
             {
@@ -454,18 +806,29 @@ static qsc_tls_socket_status tls_socket_connection_handshake(qsc_tls_socket_conn
 
         if (status == qsc_tls_socket_status_success)
         {
-            tls_socket_connection_log(connection, qsc_tls_socket_log_level_info, qsc_tls_socket_event_handshake_start, "TLS handshake started");
-            st = qsc_tls_io_handshake(&connection->io);
-            status = tls_socket_status_from_tls(st);
-            connection->handshaked = (status == qsc_tls_socket_status_success);
-
-            if (connection->handshaked == true)
+            if (connection->socketoptions.handshake_timeout_ms != 0U)
             {
-                tls_socket_connection_log(connection, qsc_tls_socket_log_level_info, qsc_tls_socket_event_handshake_complete, "TLS handshake completed");
+                status = tls_socket_set_io_timeouts(&connection->socket, connection->socketoptions.handshake_timeout_ms, connection->socketoptions.handshake_timeout_ms);
             }
+
+            if (status == qsc_tls_socket_status_success)
+            {
+                tls_socket_connection_log(connection, qsc_tls_socket_log_level_info, qsc_tls_socket_event_handshake_start, "TLS handshake started");
+                st = qsc_tls_io_handshake(&connection->io);
+                status = tls_socket_status_from_tls(st);
+                connection->handshaked = (status == qsc_tls_socket_status_success);
+
+                if (connection->handshaked == true)
+                {
+                    tls_socket_connection_log(connection, qsc_tls_socket_log_level_info, qsc_tls_socket_event_handshake_complete, "TLS handshake completed");
+                }
+            }
+
+            (void)tls_socket_set_io_timeouts(&connection->socket, connection->socketoptions.receive_timeout_ms, connection->socketoptions.send_timeout_ms);
         }
 
         tls_socket_set_result(&connection->lastresult, status, st, (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS, QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
+        tls_socket_update_peer_info(connection);
     }
 
     return status;
@@ -580,6 +943,32 @@ static size_t tls_socket_server_active_count(qsc_tls_socket_server* server)
     return count;
 }
 
+
+static bool tls_socket_thread_is_valid(qsc_thread thread)
+{
+    bool res;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+    res = (thread != NULL);
+#else
+    res = (thread != (qsc_thread)0);
+#endif
+
+    return res;
+}
+
+static void tls_socket_thread_clear(qsc_thread* thread)
+{
+    if (thread != NULL)
+    {
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+        *thread = NULL;
+#else
+        *thread = (qsc_thread)0;
+#endif
+    }
+}
+
 static bool tls_socket_server_acquire_slot(qsc_tls_socket_server* server, size_t* index)
 {
     bool res;
@@ -613,10 +1002,16 @@ static bool tls_socket_server_acquire_slot(qsc_tls_socket_server* server, size_t
             {
                 if (server->started[i] == true)
                 {
-                    qsc_async_thread_wait(server->workerthreads[i]);
+                    if (tls_socket_thread_is_valid(server->workerthreads[i]) == true)
+                    {
+                        qsc_async_thread_wait(server->workerthreads[i]);
+                    }
+
+                    tls_socket_thread_clear(&server->workerthreads[i]);
                     server->started[i] = false;
                 }
 
+                qsc_tls_socket_connection_initialize(&server->connections[i]);
                 server->active[i] = true;
                 server->workerstates[i].server = server;
                 server->workerstates[i].index = i;
@@ -645,6 +1040,8 @@ static void tls_socket_server_release_slot(qsc_tls_socket_server* server, size_t
         }
 
         server->active[index] = false;
+        server->workerstates[index].server = NULL;
+        server->workerstates[index].index = 0U;
         qsc_tls_socket_connection_dispose(&server->connections[index]);
 
         if (server->poolmutex != NULL)
@@ -681,8 +1078,10 @@ static void tls_socket_server_connection_worker(void* state)
 
         if (connection->role == qsc_tls_role_server && connection->ticketpolicy.enabled == true && connection->ticketpolicy.auto_send_server_ticket == true)
         {
-            (void)qsc_tls_socket_server_send_session_ticket(connection, connection->ticketpolicy.lifetime_seconds, &connection->lastticket);
-            connection->haslastticket = true;
+            if (qsc_tls_socket_server_send_session_ticket(connection, connection->ticketpolicy.lifetime_seconds, &connection->lastticket) == qsc_tls_socket_status_success)
+            {
+                connection->haslastticket = true;
+            }
         }
 
         while (server->running == true && connection->connected == true)
@@ -874,6 +1273,12 @@ void qsc_tls_socket_context_initialize(qsc_tls_socket_context* context)
         qsc_x509w_server_identity_initialize(&context->identity);
         qsc_x509w_tls_bridge_initialize(&context->bridge);
         qsc_x509w_tls_local_certificate_initialize(&context->localcert);
+
+        for (size_t i = 0U; i < QSC_TLS_SOCKET_SERVER_IDENTITY_MAX; ++i)
+        {
+            qsc_x509w_tls_local_certificate_initialize(&context->snilocalcerts[i]);
+        }
+
         qsc_x509w_profile_initialize(&context->certificateprofile);
         qsc_tls_socket_options_initialize_default(&context->socketoptions);
         qsc_tls_socket_ticket_policy_initialize_default(&context->ticketpolicy);
@@ -1016,7 +1421,6 @@ qsc_tls_socket_status qsc_tls_socket_context_set_default_server_policy(qsc_tls_s
 
     return status;
 }
-
 
 qsc_tls_socket_status qsc_tls_socket_context_set_mlkem_hybrid_policy(qsc_tls_socket_context* context)
 {
@@ -1219,6 +1623,72 @@ qsc_tls_socket_status qsc_tls_socket_context_load_server_identity_files(qsc_tls_
     return status;
 }
 
+qsc_tls_socket_status qsc_tls_socket_context_add_server_identity_files(qsc_tls_socket_context* context, const char* hostname, const char* certificatechainpath, const char* privatekeypath, qsc_tls_signature_scheme verifyscheme)
+{
+    QSC_ASSERT(context != NULL);
+    QSC_ASSERT(hostname != NULL);
+    QSC_ASSERT(certificatechainpath != NULL);
+    QSC_ASSERT(privatekeypath != NULL);
+
+    qsc_x509w_server_identity identity;
+    qsc_x509w_status xs;
+    qsc_tls_socket_status status;
+    size_t hostlen;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (context != NULL && hostname != NULL && certificatechainpath != NULL && privatekeypath != NULL && context->sniidentitycount < QSC_TLS_SOCKET_SERVER_IDENTITY_MAX)
+    {
+        hostlen = 0U;
+
+        while (hostname[hostlen] != '\0' && hostlen <= QSC_TLS_MAX_HOSTNAME_SIZE)
+        {
+            ++hostlen;
+        }
+
+        if (hostlen != 0U && hostlen <= QSC_TLS_MAX_HOSTNAME_SIZE)
+        {
+            qsc_x509w_server_identity_initialize(&identity);
+            xs = qsc_x509w_server_identity_load_files(&identity, certificatechainpath, privatekeypath);
+            status = tls_socket_status_from_x509(xs);
+
+            if (status == qsc_tls_socket_status_success)
+            {
+                xs = qsc_x509w_tls_local_certificate_from_identity(&identity, verifyscheme, &context->snilocalcerts[context->sniidentitycount]);
+                status = tls_socket_status_from_x509(xs);
+            }
+
+            if (status == qsc_tls_socket_status_success)
+            {
+                qsc_memutils_copy(context->snihostnames[context->sniidentitycount], hostname, hostlen);
+                context->snihostnames[context->sniidentitycount][hostlen] = '\0';
+                ++context->sniidentitycount;
+            }
+
+            qsc_x509w_server_identity_clear(&identity);
+        }
+    }
+
+    return status;
+}
+
+qsc_tls_socket_status qsc_tls_socket_context_set_sni_required(qsc_tls_socket_context* context, bool required)
+{
+    QSC_ASSERT(context != NULL);
+
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (context != NULL)
+    {
+        context->requiresni = required;
+        status = qsc_tls_socket_status_success;
+    }
+
+    return status;
+}
+
 qsc_tls_socket_status qsc_tls_socket_context_set_client_auth(qsc_tls_socket_context* context, bool requestclientauth, bool requireclientauth)
 {
     QSC_ASSERT(context != NULL);
@@ -1237,6 +1707,25 @@ qsc_tls_socket_status qsc_tls_socket_context_set_client_auth(qsc_tls_socket_cont
     return status;
 }
 
+qsc_tls_socket_status qsc_tls_socket_context_set_client_authorization(qsc_tls_socket_context* context, qsc_tls_client_authorization_callback callback, void* state, bool required)
+{
+    QSC_ASSERT(context != NULL);
+
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (context != NULL && (callback != NULL || required == false))
+    {
+        context->clientauthcallback = callback;
+        context->clientauthstate = state;
+        context->requireclientauthorization = required;
+        status = qsc_tls_socket_status_success;
+    }
+
+    return status;
+}
+
 qsc_tls_socket_status qsc_tls_socket_context_set_socket_options(qsc_tls_socket_context* context, const qsc_tls_socket_options* options)
 {
     QSC_ASSERT(context != NULL);
@@ -1248,9 +1737,110 @@ qsc_tls_socket_status qsc_tls_socket_context_set_socket_options(qsc_tls_socket_c
 
     if (context != NULL && options != NULL)
     {
-        context->socketoptions = *options;
+        status = tls_socket_validate_options(options);
+
+        if (status == qsc_tls_socket_status_success)
+        {
+            context->socketoptions = *options;
+            tls_socket_emit_log(context->logcallback, context->logstate, qsc_tls_socket_log_level_info, qsc_tls_socket_event_socket_options, NULL, "TLS socket options configured");
+        }
+    }
+
+    return status;
+}
+
+static qsc_tls_socket_status tls_socket_alpn_set(qsc_tls_alpn_protocols* alpn, const char* const* protocols, size_t protocolcount, bool required)
+{
+    size_t i;
+    size_t j;
+    size_t plen;
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (alpn != NULL && protocols != NULL && protocolcount != 0U && protocolcount <= QSC_TLS_SOCKET_ALPN_PROTOCOL_MAX)
+    {
+        qsc_memutils_clear(alpn, sizeof(*alpn));
         status = qsc_tls_socket_status_success;
-        tls_socket_emit_log(context->logcallback, context->logstate, qsc_tls_socket_log_level_info, qsc_tls_socket_event_socket_options, NULL, "TLS socket options configured");
+
+        for (i = 0U; i < protocolcount && status == qsc_tls_socket_status_success; ++i)
+        {
+            if (protocols[i] != NULL)
+            {
+                plen = qsc_stringutils_string_size(protocols[i]);
+
+                if (plen != 0U && plen <= QSC_TLS_SOCKET_ALPN_SIZE_MAX)
+                {
+                    for (j = 0U; j < i; ++j)
+                    {
+                        if (alpn->protocollens[j] == plen && qsc_memutils_are_equal(alpn->protocols[j], (const uint8_t*)protocols[i], plen) == true)
+                        {
+                            status = qsc_tls_socket_status_invalid_input;
+                            break;
+                        }
+                    }
+
+                    if (status == qsc_tls_socket_status_success)
+                    {
+                        qsc_memutils_copy(alpn->protocols[i], (const uint8_t*)protocols[i], plen);
+                        alpn->protocollens[i] = plen;
+                    }
+                }
+                else
+                {
+                    status = qsc_tls_socket_status_invalid_input;
+                }
+            }
+            else
+            {
+                status = qsc_tls_socket_status_invalid_input;
+            }
+        }
+
+        if (status == qsc_tls_socket_status_success)
+        {
+            alpn->protocolcount = protocolcount;
+            alpn->required = required;
+            alpn->configured = true;
+        }
+        else
+        {
+            qsc_memutils_clear(alpn, sizeof(*alpn));
+        }
+    }
+
+    return status;
+}
+
+qsc_tls_socket_status qsc_tls_socket_context_set_alpn_protocols(qsc_tls_socket_context* context, const char* const* protocols, size_t protocolcount, bool required)
+{
+    QSC_ASSERT(context != NULL);
+    QSC_ASSERT(protocols != NULL);
+
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (context != NULL && context->initialized == true)
+    {
+        status = tls_socket_alpn_set(&context->alpn, protocols, protocolcount, required);
+    }
+
+    return status;
+}
+
+qsc_tls_socket_status qsc_tls_socket_context_clear_alpn_protocols(qsc_tls_socket_context* context)
+{
+    QSC_ASSERT(context != NULL);
+
+    qsc_tls_socket_status status;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (context != NULL && context->initialized == true)
+    {
+        qsc_memutils_clear(&context->alpn, sizeof(context->alpn));
+        status = qsc_tls_socket_status_success;
     }
 
     return status;
@@ -1285,11 +1875,31 @@ qsc_tls_socket_status qsc_tls_socket_context_set_session_ticket_policy(qsc_tls_s
 
     if (context != NULL && policy != NULL)
     {
-        context->ticketpolicy = *policy;
-        status = qsc_tls_socket_status_success;
+        if (tls_socket_ticket_policy_is_valid(policy) == true)
+        {
+            context->ticketpolicy = *policy;
+
+            if (context->ticketpolicy.enabled == false)
+            {
+                qsc_tls_socket_context_clear_session_ticket(context);
+            }
+
+            status = qsc_tls_socket_status_success;
+        }
+        else
+        {
+            status = qsc_tls_socket_status_policy_rejected;
+        }
     }
 
     return status;
+}
+
+bool qsc_tls_socket_session_ticket_is_valid(const qsc_tls_session_ticket* ticket)
+{
+    QSC_ASSERT(ticket != NULL);
+
+    return tls_socket_session_ticket_is_valid_internal(ticket);
 }
 
 qsc_tls_socket_status qsc_tls_socket_context_set_session_ticket(qsc_tls_socket_context* context, const qsc_tls_session_ticket* ticket)
@@ -1303,10 +1913,31 @@ qsc_tls_socket_status qsc_tls_socket_context_set_session_ticket(qsc_tls_socket_c
 
     if (context != NULL && ticket != NULL)
     {
-        context->sessionticket = *ticket;
-        context->hassessionticket = true;
-        context->ticketpolicy.enabled = true;
-        status = qsc_tls_socket_status_success;
+        if (context->ticketpolicy.enabled == true)
+        {
+            context->sessionticket = *ticket;
+
+            if (context->sessionticket.lifetime == 0U)
+            {
+                context->sessionticket.lifetime = context->ticketpolicy.lifetime_seconds;
+            }
+
+            if (tls_socket_session_ticket_is_valid_internal(&context->sessionticket) == true)
+            {
+                context->hassessionticket = true;
+                status = qsc_tls_socket_status_success;
+            }
+            else
+            {
+                qsc_tls_socket_context_clear_session_ticket(context);
+                status = qsc_tls_socket_status_policy_rejected;
+            }
+        }
+        else
+        {
+            qsc_tls_socket_context_clear_session_ticket(context);
+            status = qsc_tls_socket_status_policy_rejected;
+        }
     }
 
     return status;
@@ -1412,8 +2043,7 @@ qsc_tls_socket_status qsc_tls_socket_send(qsc_tls_socket_connection* connection,
             status = qsc_tls_socket_status_not_initialized;
         }
 
-        tls_socket_set_result(&connection->lastresult, status, st, (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS,
-            QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
+        tls_socket_set_result(&connection->lastresult, status, st, (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS, QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
     }
 
     return status;
@@ -1477,8 +2107,7 @@ qsc_tls_socket_status qsc_tls_socket_shutdown(qsc_tls_socket_connection* connect
         (void)qsc_socket_close_socket(&connection->socket);
         connection->connected = false;
         connection->owns_socket = false;
-        tls_socket_set_result(&connection->lastresult, status, st, (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS,
-            QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
+        tls_socket_set_result(&connection->lastresult, status, st, (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS, QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
     }
 
     return status;
@@ -1545,8 +2174,18 @@ qsc_tls_socket_status qsc_tls_socket_server_send_session_ticket(qsc_tls_socket_c
 
     if (connection != NULL && ticketout != NULL)
     {
-        st = qsc_tls_engine_emit_session_ticket(&connection->engine, lifetime_seconds, outbuf, sizeof(outbuf), &written, ticketout);
-        status = tls_socket_status_from_tls(st);
+        qsc_tls_session_ticket_dispose(ticketout);
+
+        if (connection->ticketpolicy.enabled == false || lifetime_seconds == 0U || lifetime_seconds > QSC_TLS_SOCKET_TICKET_LIFETIME_MAX)
+        {
+            st = qsc_tls_status_invalid_input;
+            status = qsc_tls_socket_status_policy_rejected;
+        }
+        else
+        {
+            st = qsc_tls_engine_emit_session_ticket(&connection->engine, lifetime_seconds, outbuf, sizeof(outbuf), &written, ticketout);
+            status = tls_socket_status_from_tls(st);
+        }
 
         if (status == qsc_tls_socket_status_success && written > 0U)
         {
@@ -1590,15 +2229,19 @@ qsc_tls_socket_status qsc_tls_socket_connection_set_socket_options(qsc_tls_socke
 
     if (connection != NULL && options != NULL)
     {
-        connection->socketoptions = *options;
+        status = tls_socket_validate_options(options);
 
-        if (connection->connected == true)
+        if (status == qsc_tls_socket_status_success)
         {
-            status = tls_socket_apply_options(&connection->socket, connection->family, options, false);
-        }
-        else
-        {
-            status = qsc_tls_socket_status_success;
+            if (connection->connected == true)
+            {
+                status = tls_socket_apply_options(&connection->socket, connection->family, options, false);
+            }
+
+            if (status == qsc_tls_socket_status_success)
+            {
+                connection->socketoptions = *options;
+            }
         }
     }
 
@@ -1652,30 +2295,47 @@ qsc_tls_socket_status qsc_tls_socket_get_peer_info(const qsc_tls_socket_connecti
 
     if (connection != NULL && peerinfo != NULL)
     {
-        qsc_memutils_clear(peerinfo, sizeof(*peerinfo));
-        peerinfo->cipher_suite = qsc_tls_socket_negotiated_cipher_suite(connection);
-        peerinfo->named_group = qsc_tls_socket_negotiated_group(connection);
-        peerinfo->signature_scheme = qsc_tls_socket_negotiated_signature_scheme(connection);
-        peerinfo->verify_status = QSC_X509_VERIFY_STATUS_SUCCESS;
+        qsc_memutils_copy(peerinfo, &connection->peerinfo, sizeof(*peerinfo));
+        status = qsc_tls_socket_status_success;
+    }
 
-        if (connection->role == qsc_tls_role_client)
+    return status;
+}
+
+qsc_tls_socket_status qsc_tls_socket_get_selected_alpn(const qsc_tls_socket_connection* connection, char* protocol, size_t protocolcap, size_t* protocollen)
+{
+    QSC_ASSERT(connection != NULL);
+    QSC_ASSERT(protocol != NULL);
+    QSC_ASSERT(protocollen != NULL);
+
+    qsc_tls_socket_status status;
+    size_t plen;
+
+    status = qsc_tls_socket_status_invalid_input;
+
+    if (protocollen != NULL)
+    {
+        *protocollen = 0U;
+    }
+
+    if (connection != NULL && protocol != NULL && protocollen != NULL && protocolcap != 0U)
+    {
+        if (connection->peerinfo.alpn_selected == true)
         {
-            peerinfo->authenticated = connection->engine.state.client.serverauthenticated;
-            peerinfo->chain_valid = connection->engine.state.client.serverauthenticated;
-            peerinfo->hostname_matched = connection->engine.state.client.serverauthenticated;
-            peerinfo->psk_accepted = connection->engine.state.client.pskaccepted;
-            peerinfo->early_data_accepted = connection->engine.state.client.earlydataaccepted;
+            plen = qsc_stringutils_string_size(connection->peerinfo.selected_alpn);
+
+            if (plen + 1U <= protocolcap)
+            {
+                qsc_memutils_copy(protocol, connection->peerinfo.selected_alpn, plen + 1U);
+                *protocollen = plen;
+                status = qsc_tls_socket_status_success;
+            }
         }
         else
         {
-            peerinfo->authenticated = connection->engine.state.server.clientauthenticated;
-            peerinfo->chain_valid = connection->engine.state.server.clientauthenticated;
-            peerinfo->hostname_matched = false;
-            peerinfo->psk_accepted = connection->engine.state.server.pskaccepted;
-            peerinfo->early_data_accepted = connection->engine.state.server.earlydataaccepted;
+            protocol[0U] = '\0';
+            status = qsc_tls_socket_status_not_initialized;
         }
-
-        status = qsc_tls_socket_status_success;
     }
 
     return status;
@@ -1690,9 +2350,15 @@ qsc_tls_socket_status qsc_tls_socket_connection_get_session_ticket(const qsc_tls
 
     status = qsc_tls_socket_status_invalid_input;
 
+    if (ticketout != NULL)
+    {
+        qsc_tls_session_ticket_dispose(ticketout);
+    }
+
     if (connection != NULL && ticketout != NULL)
     {
-        if (connection->haslastticket == true)
+        if (connection->ticketpolicy.enabled == true && connection->haslastticket == true &&
+            tls_socket_session_ticket_is_valid_internal(&connection->lastticket) == true)
         {
             *ticketout = connection->lastticket;
             status = qsc_tls_socket_status_success;
@@ -1706,17 +2372,28 @@ qsc_tls_socket_status qsc_tls_socket_connection_get_session_ticket(const qsc_tls
     return status;
 }
 
+void qsc_tls_socket_connection_clear_session_ticket(qsc_tls_socket_connection* connection)
+{
+    QSC_ASSERT(connection != NULL);
+
+    if (connection != NULL)
+    {
+        qsc_tls_session_ticket_dispose(&connection->lastticket);
+        connection->haslastticket = false;
+    }
+}
+
 qsc_tls_socket_status qsc_tls_socket_send_frame(qsc_tls_socket_connection* connection, const uint8_t* input, size_t inlen)
 {
     QSC_ASSERT(connection != NULL);
-    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(input != NULL || inlen == 0U);
 
     uint8_t hdr[QSC_TLS_SOCKET_FRAME_HEADER_SIZE] = { 0U };
     qsc_tls_socket_status status;
 
     status = qsc_tls_socket_status_invalid_input;
 
-    if (connection != NULL && input != NULL && inlen <= QSC_TLS_SOCKET_FRAME_SIZE_MAX)
+    if (connection != NULL && tls_socket_frame_send_input_valid(input, inlen) == true)
     {
         qsc_intutils_be32to8(hdr, (uint32_t)inlen);
         status = tls_socket_send_all(connection, hdr, sizeof(hdr));
@@ -1736,7 +2413,7 @@ qsc_tls_socket_status qsc_tls_socket_send_frame(qsc_tls_socket_connection* conne
 qsc_tls_socket_status qsc_tls_socket_receive_frame(qsc_tls_socket_connection* connection, uint8_t* output, size_t outlen, size_t* read)
 {
     QSC_ASSERT(connection != NULL);
-    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(output != NULL || outlen == 0U);
     QSC_ASSERT(read != NULL);
 
     uint8_t hdr[QSC_TLS_SOCKET_FRAME_HEADER_SIZE] = { 0U };
@@ -1750,29 +2427,29 @@ qsc_tls_socket_status qsc_tls_socket_receive_frame(qsc_tls_socket_connection* co
         *read = 0U;
     }
 
-    if (connection != NULL && output != NULL && read != NULL)
+    if (connection != NULL && read != NULL && tls_socket_frame_receive_output_valid(output, outlen) == true)
     {
         status = tls_socket_receive_exact(connection, hdr, sizeof(hdr));
 
         if (status == qsc_tls_socket_status_success)
         {
             flen = qsc_intutils_be8to32(hdr);
+            status = tls_socket_frame_status_from_length(flen, outlen);
 
-            if (flen > QSC_TLS_SOCKET_FRAME_SIZE_MAX || (size_t)flen > outlen)
+            if (status == qsc_tls_socket_status_success)
             {
-                status = qsc_tls_socket_status_io_failed;
-            }
-            else if (flen == 0U)
-            {
-                *read = 0U;
-            }
-            else
-            {
-                status = tls_socket_receive_exact(connection, output, (size_t)flen);
-
-                if (status == qsc_tls_socket_status_success)
+                if (flen == 0U)
                 {
-                    *read = (size_t)flen;
+                    *read = 0U;
+                }
+                else
+                {
+                    status = tls_socket_receive_exact(connection, output, (size_t)flen);
+
+                    if (status == qsc_tls_socket_status_success)
+                    {
+                        *read = (size_t)flen;
+                    }
                 }
             }
         }
@@ -1934,15 +2611,19 @@ qsc_tls_socket_status qsc_tls_socket_listener_set_socket_options(qsc_tls_socket_
 
     if (listener != NULL && options != NULL)
     {
-        listener->socketoptions = *options;
+        status = tls_socket_validate_options(options);
 
-        if (listener->listening == true)
+        if (status == qsc_tls_socket_status_success)
         {
-            status = tls_socket_apply_options(&listener->socket, listener->family, &listener->socketoptions, true);
-        }
-        else
-        {
-            status = qsc_tls_socket_status_success;
+            if (listener->listening == true)
+            {
+                status = tls_socket_apply_options(&listener->socket, listener->family, options, true);
+            }
+
+            if (status == qsc_tls_socket_status_success)
+            {
+                listener->socketoptions = *options;
+            }
         }
     }
 
@@ -2058,6 +2739,7 @@ qsc_tls_socket_status qsc_tls_socket_listener_accept(qsc_tls_socket_listener* li
                         connection->signcontext.scheme = connection->engine.state.server.config.localcert.verifyscheme;
                         connection->signcontext.privatekey = connection->engine.state.server.config.localcert.signprivatekey;
                         connection->signcontext.privatekeylen = connection->engine.state.server.config.localcert.signprivatekeylen;
+                        connection->engine.state.server.config.localcert.signcallback = qsc_tls_signer_default_sign;
                         connection->engine.state.server.config.localcert.signstate = &connection->signcontext;
                         status = tls_socket_connection_handshake(connection);
                     }
@@ -2168,7 +2850,6 @@ qsc_tls_socket_status qsc_tls_socket_server_set_log_callback(qsc_tls_socket_serv
     return status;
 }
 
-
 qsc_tls_socket_status qsc_tls_socket_server_set_max_clients(qsc_tls_socket_server* server, size_t maxclients)
 {
     QSC_ASSERT(server != NULL);
@@ -2226,8 +2907,10 @@ qsc_tls_socket_status qsc_tls_socket_server_start(qsc_tls_socket_server* server)
 
                     if (connection.role == qsc_tls_role_server && connection.ticketpolicy.enabled == true && connection.ticketpolicy.auto_send_server_ticket == true)
                     {
-                        (void)qsc_tls_socket_server_send_session_ticket(&connection, connection.ticketpolicy.lifetime_seconds, &connection.lastticket);
-                        connection.haslastticket = true;
+                        if (qsc_tls_socket_server_send_session_ticket(&connection, connection.ticketpolicy.lifetime_seconds, &connection.lastticket) == qsc_tls_socket_status_success)
+                        {
+                            connection.haslastticket = true;
+                        }
                     }
 
                     while (server->running == true && connection.connected == true)
@@ -2278,7 +2961,6 @@ qsc_tls_socket_status qsc_tls_socket_server_start(qsc_tls_socket_server* server)
     return status;
 }
 
-
 qsc_tls_socket_status qsc_tls_socket_server_start_concurrent(qsc_tls_socket_server* server)
 {
     QSC_ASSERT(server != NULL);
@@ -2308,7 +2990,22 @@ qsc_tls_socket_status qsc_tls_socket_server_start_concurrent(qsc_tls_socket_serv
                         server->workerstates[index].server = server;
                         server->workerstates[index].index = index;
                         server->workerthreads[index] = qsc_async_thread_create(tls_socket_server_connection_worker, &server->workerstates[index]);
-                        server->started[index] = true;
+
+                        if (tls_socket_thread_is_valid(server->workerthreads[index]) == true)
+                        {
+                            server->started[index] = true;
+                        }
+                        else
+                        {
+                            status = qsc_tls_socket_status_internal_error;
+
+                            if (server->onerror != NULL)
+                            {
+                                server->onerror(&server->connections[index], status, server->callbackstate);
+                            }
+
+                            tls_socket_server_release_slot(server, index);
+                        }
                     }
                     else
                     {
@@ -2372,7 +3069,12 @@ void qsc_tls_socket_server_stop(qsc_tls_socket_server* server)
         {
             if (server->started[i] == true)
             {
-                qsc_async_thread_wait(server->workerthreads[i]);
+                if (tls_socket_thread_is_valid(server->workerthreads[i]) == true)
+                {
+                    qsc_async_thread_wait(server->workerthreads[i]);
+                }
+
+                tls_socket_thread_clear(&server->workerthreads[i]);
                 server->started[i] = false;
             }
         }
@@ -2388,6 +3090,9 @@ void qsc_tls_socket_server_stop(qsc_tls_socket_server* server)
             {
                 qsc_tls_socket_connection_dispose(&server->connections[i]);
                 server->active[i] = false;
+                server->workerstates[i].server = NULL;
+                server->workerstates[i].index = 0U;
+                tls_socket_thread_clear(&server->workerthreads[i]);
             }
         }
 

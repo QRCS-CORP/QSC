@@ -1,11 +1,13 @@
 #include "tlscert.h"
 #include "memutils.h"
+#include "stringutils.h"
 #include "tlsalert.h"
 #include "tlscodec.h"
 #include "tlslimits.h"
 #include "tlssigalgs.h"
 #include "x509cert.h"
 #include "x509host.h"
+#include "x509name.h"
 #include "x509sig.h"
 #include "x509sigver.h"
 #include "x509spki.h"
@@ -18,6 +20,89 @@ typedef struct qsc_tls_qsc_x509_local_state
 	qsc_x509_verify_state verifystate;
 	uint8_t localbuffer[QSC_X509_CERTIFICATE_WRITE_MAX];
 } qsc_tls_qsc_x509_local_state;
+
+static void tls_x509_copy_text(char* output, size_t outputlen, const char* input, size_t inputlen)
+{
+	size_t len;
+
+	if (output != NULL && outputlen != 0U)
+	{
+		output[0U] = '\0';
+
+		if (input != NULL && inputlen != 0U)
+		{
+			len = (inputlen < (outputlen - 1U)) ? inputlen : (outputlen - 1U);
+			qsc_memutils_copy(output, input, len);
+			output[len] = '\0';
+		}
+	}
+}
+
+static void tls_x509_store_dns_summary(qsc_tls_peer_certificate_summary* summary, const qsc_x509_certificate* certificate, const char* hostname)
+{
+	const qsc_x509_general_name* name;
+	size_t i;
+	bool stored;
+
+	stored = false;
+
+	if (summary != NULL && certificate != NULL && certificate->extensions.subjectaltname.present == true)
+	{
+		for (i = 0U; i < certificate->extensions.subjectaltname.count; ++i)
+		{
+			name = &certificate->extensions.subjectaltname.entries[i];
+
+			if (name->type == QSC_X509_GENERAL_NAME_DNS_NAME && name->length != 0U)
+			{
+				if (hostname != NULL && qsc_x509_dns_name_match((const char*)name->data, hostname) == true)
+				{
+					tls_x509_copy_text(summary->dnsname, sizeof(summary->dnsname), (const char*)name->data, name->length);
+					stored = true;
+					break;
+				}
+				else if (hostname == NULL && stored == false)
+				{
+					tls_x509_copy_text(summary->dnsname, sizeof(summary->dnsname), (const char*)name->data, name->length);
+					stored = true;
+				}
+			}
+		}
+	}
+}
+
+static void tls_x509_store_peer_summary(qsc_tls_qsc_x509_context* context, const qsc_x509_certificate* certificate, const char* hostname, bool chainvalid, qsc_x509_verify_status verifystatus)
+{
+	const qsc_x509_name_attribute* attr;
+	size_t outlen;
+
+	if (context != NULL)
+	{
+		qsc_memutils_clear(&context->peersummary, sizeof(context->peersummary));
+		context->peersummary.verifystatus = verifystatus;
+		context->peersummary.chainvalid = chainvalid;
+		context->peersummary.hostnamechecked = (hostname != NULL);
+		context->peersummary.hostnamevalid = (hostname != NULL && verifystatus == QSC_X509_VERIFY_STATUS_SUCCESS);
+
+		if (certificate != NULL)
+		{
+			outlen = 0U;
+			(void)qsc_x509_name_to_string(&certificate->subject, context->peersummary.subject, sizeof(context->peersummary.subject), &outlen);
+
+			outlen = 0U;
+			(void)qsc_x509_name_to_string(&certificate->issuer, context->peersummary.issuer, sizeof(context->peersummary.issuer), &outlen);
+
+			attr = qsc_x509_name_find_first(&certificate->subject, QSC_X509_NAME_ATTRIBUTE_COMMON_NAME);
+
+			if (attr != NULL)
+			{
+				tls_x509_copy_text(context->peersummary.commonname, sizeof(context->peersummary.commonname), attr->value, qsc_stringutils_string_size(attr->value));
+			}
+
+			tls_x509_store_dns_summary(&context->peersummary, certificate, hostname);
+			context->peersummary.populated = true;
+		}
+	}
+}
 
 static qsc_x509_verify_purpose tls_x509_purpose_from_context(const qsc_tls_certificate_validation_context* context)
 {
@@ -478,8 +563,7 @@ qsc_tls_status qsc_tls_certificate_request_decode(const uint8_t* input, size_t i
 	return status;
 }
 
-qsc_tls_status qsc_tls_certificate_request_encode(const uint8_t* requestcontext, size_t requestcontextlen, const uint8_t* extensionsblock,
-	size_t extensionsblocklen, uint8_t* output, size_t outlen, size_t* offset)
+qsc_tls_status qsc_tls_certificate_request_encode(const uint8_t* requestcontext, size_t requestcontextlen, const uint8_t* extensionsblock, size_t extensionsblocklen, uint8_t* output, size_t outlen, size_t* offset)
 {
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(offset != NULL);
@@ -534,6 +618,7 @@ qsc_tls_status qsc_tls_x509_context_initialize(qsc_tls_qsc_x509_context* context
 		context->validationtime = validationtime;
 		context->verifybuffer = verifybuffer;
 		context->verifybufferlen = verifybufferlen;
+		qsc_memutils_clear(&context->peersummary, sizeof(context->peersummary));
 		context->rejectunsupportedcriticalextensions = true;
 		context->lastverifystatus = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
 		context->lastalert = qsc_tls_alert_internal_error;
@@ -549,8 +634,7 @@ qsc_x509_signature_algorithm qsc_tls_x509_signature_algorithm_from_tls(qsc_tls_s
 	return qsc_tls_signature_scheme_x509_algorithm(scheme);
 }
 
-bool qsc_tls_x509_verify_certificate_verify(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, 
-	size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
+bool qsc_tls_x509_verify_certificate_verify(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
 {
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(signature != NULL);
@@ -613,6 +697,7 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 	qsc_x509_verify_options options = { 0 };
 	qsc_x509_verify_status vstatus;
 	qsc_tls_status status;
+	bool chainvalid;
 	bool res;
 
 	decoded = (qsc_x509_certificate*)NULL;
@@ -620,6 +705,7 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 	qsc_x509_verify_options_initialize(&options);
 	vstatus = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
 	status = qsc_tls_status_success;
+	chainvalid = false;
 	res = false;
 	xctx = (qsc_tls_qsc_x509_context*)state;
 
@@ -646,8 +732,7 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 
 	if (status == qsc_tls_status_success)
 	{
-		qsc_x509_chain_build(&decoded[0], (chainlength > 1U) ? &decoded[1] : xctx->intermediates,
-			(chainlength > 1U) ? (chainlength - 1U) : xctx->intermediatecount, xctx->truststore, built, QSC_TLS_X509_CHAIN_MAX, &builtchain);
+		qsc_x509_chain_build(&decoded[0], (chainlength > 1U) ? &decoded[1] : xctx->intermediates, (chainlength > 1U) ? (chainlength - 1U) : xctx->intermediatecount, xctx->truststore, built, QSC_TLS_X509_CHAIN_MAX, &builtchain);
 		
 		options.purpose = tls_x509_purpose_from_context(context);
 		options.rejectunsupportedcriticalextensions = xctx->rejectunsupportedcriticalextensions;
@@ -658,16 +743,19 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 			
 			qsc_x509_qsc_verify_state_initialize(&verifystate, xctx->verifybuffer, xctx->verifybufferlen);
 			
-			vstatus = qsc_x509_chain_verify_ex(&builtchain, xctx->truststore, xctx->validationtime,
-				qsc_x509_qsc_signature_verify, &verifystate, &options);
+			vstatus = qsc_x509_chain_verify_ex(&builtchain, xctx->truststore, xctx->validationtime, qsc_x509_qsc_signature_verify, &verifystate, &options);
 		}
 		else
 		{
 			qsc_x509_qsc_verify_state_initialize(&localstate.verifystate, localstate.localbuffer, sizeof(localstate.localbuffer));
 			
-			vstatus = qsc_x509_chain_verify_ex(&builtchain, xctx->truststore, xctx->validationtime,
-				qsc_x509_qsc_signature_verify, &localstate.verifystate, &options);
+			vstatus = qsc_x509_chain_verify_ex(&builtchain, xctx->truststore, xctx->validationtime, qsc_x509_qsc_signature_verify, &localstate.verifystate, &options);
 		}
+	}
+
+	if (status == qsc_tls_status_success && vstatus == QSC_X509_VERIFY_STATUS_SUCCESS)
+	{
+		chainvalid = true;
 	}
 
 	if (status == qsc_tls_status_success && vstatus == QSC_X509_VERIFY_STATUS_SUCCESS && context != NULL && context->hostname != NULL)
@@ -678,6 +766,15 @@ bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* chain, size_t c
 	if (status != qsc_tls_status_success)
 	{
 		vstatus = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
+	}
+
+	if (status == qsc_tls_status_success && builtchain.count != 0U)
+	{
+		tls_x509_store_peer_summary(xctx, &builtchain.certificates[0], (context != NULL) ? context->hostname : NULL, chainvalid, vstatus);
+	}
+	else
+	{
+		tls_x509_store_peer_summary(xctx, NULL, NULL, false, vstatus);
 	}
 
 	tls_x509_store_result(xctx, vstatus);

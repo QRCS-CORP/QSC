@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -114,6 +114,15 @@ Data Structures</h2></td></tr>
 <tr class="memitem:qsc_5Ftls_5Fio_5Fconnection" id="r_qsc_5Ftls_5Fio_5Fconnection"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__tls__io__connection.html">qsc_tls_io_connection</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the non-owning association between a TLS engine and a socket.  <a href="structqsc__tls__io__connection.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a13ed92817d91eb392ad406717410dce7" id="r_a13ed92817d91eb392ad406717410dce7"><td class="memItemLeft" align="right" valign="top"><a id="a13ed92817d91eb392ad406717410dce7" name="a13ed92817d91eb392ad406717410dce7"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_IO_RECV_CHUNK</b>&#160;&#160;&#160;4096U</td></tr>
+<tr class="memdesc:a13ed92817d91eb392ad406717410dce7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of socket bytes requested by one blocking receive call. <br /></td></tr>
+<tr class="memitem:af4663f4dbb96711cf11ff8eeaeb5e2b2" id="r_af4663f4dbb96711cf11ff8eeaeb5e2b2"><td class="memItemLeft" align="right" valign="top"><a id="af4663f4dbb96711cf11ff8eeaeb5e2b2" name="af4663f4dbb96711cf11ff8eeaeb5e2b2"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>QSC_TLS_IO_RX_BUFFER_SIZE</b>&#160;&#160;&#160;<a class="el" href="tlslimits_8h.html#a25c527046cace19cda26e99dcedc1435">QSC_TLS_STREAM_BUFFER_MAX_SIZE</a></td></tr>
+<tr class="memdesc:af4663f4dbb96711cf11ff8eeaeb5e2b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Persistent inbound TLS stream buffer size used by the socket adapter. <br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:af5f366d7f3376e11c12261b3d4ae865d" id="r_af5f366d7f3376e11c12261b3d4ae865d"><td class="memItemLeft" align="right" valign="top"><a id="af5f366d7f3376e11c12261b3d4ae865d" name="af5f366d7f3376e11c12261b3d4ae865d"></a>
@@ -134,7 +143,8 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Blocking socket adapter around <a class="el" href="structqsc__tls__connection.html" title="Unified TLS engine connection context.">qsc_tls_connection</a>. </p>
-<p>This header provides a minimal transport adapter that binds a <a class="el" href="structqsc__tls__connection.html" title="Unified TLS engine connection context.">qsc_tls_connection</a> to a <a class="el" href="structqsc__socket.html" title="The socket instance structure.">qsc_socket</a> and drives the TLS engine using blocking send and receive calls. The adapter does not allocate or own the engine or the socket. It only stores non-owning pointers and marshals bytes between the engine record interface and the socket API. </p>
+<p>This header provides a transport adapter that binds a <a class="el" href="structqsc__tls__connection.html" title="Unified TLS engine connection context.">qsc_tls_connection</a> to a <a class="el" href="structqsc__socket.html" title="The socket instance structure.">qsc_socket</a> and drives the TLS engine using blocking send and receive calls. The adapter does not allocate or own the engine or the socket. It only stores non-owning pointers and marshals bytes between the engine record interface and the socket API.</p>
+<p>The adapter maintains a persistent inbound stream buffer. TCP is a byte-stream transport and does not preserve TLS record boundaries. A single socket receive can return a partial record, exactly one record, or multiple coalesced records. The persistent buffer preserves any unconsumed bytes between handshake, application receive, post-handshake, and shutdown processing. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="ac265a04cc47ca4d1b72fdce790cdba67" name="ac265a04cc47ca4d1b72fdce790cdba67"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac265a04cc47ca4d1b72fdce790cdba67">&#9670;&#160;</a></span>qsc_tls_io_attach()</h2>
@@ -189,7 +199,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Drive the TLS handshake to completion over the attached blocking socket. </p>
-<p>Repeatedly calls the TLS engine handshake function, flushing any produced outbound flight to the socket and receiving additional input whenever the engine requires more record bytes. The call returns when the handshake completes or a fatal error occurs.</p>
+<p>Repeatedly calls the TLS engine handshake function, flushing any produced outbound flight to the socket and receiving additional input whenever the engine requires more record bytes. The call returns when the handshake completes or a fatal error occurs. Any unconsumed bytes received during the handshake remain in the persistent stream buffer for later application or post-handshake processing.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">io</td><td>[struct*] The attached I/O adapter.</td></tr>
@@ -230,7 +240,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Receive and decrypt application data from the attached socket. </p>
-<p>Receives socket bytes until at least one protected TLS record has been consumed and any decrypted application payload has been written to the caller-supplied buffer.</p>
+<p>Receives socket bytes until at least one complete TLS record has been assembled and consumed. If the socket read also contains bytes from later TLS records, those bytes are preserved in the persistent stream buffer for the next call.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">io</td><td>[struct*] The attached I/O adapter. </td></tr>

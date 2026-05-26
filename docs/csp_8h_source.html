@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -163,26 +163,30 @@ $(function(){initNavTree('csp_8h_source.html','',''); });
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span></div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="csp_8h.html#a8bdff8915c5e41cf83cd71a757730501">   98</a></span><span class="preprocessor">#define QSC_CSP_SEED_MAX (size_t)ULONG_MAX</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">bool</span> <a class="code hl_function" href="csp_8h.html#ad0f5075584956ab81d0ced0de73930f4">qsc_csp_generate</a>(uint8_t* output, <span class="keywordtype">size_t</span> length);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint16_t <a class="code hl_function" href="csp_8h.html#ace7201420cc01e56bbac8bb16c4d4a9b">qsc_csp_uint16</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span></div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint32_t <a class="code hl_function" href="csp_8h.html#aaa8dde03913dc5d9f77fac40641ddff1">qsc_csp_uint32</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span></div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint64_t <a class="code hl_function" href="csp_8h.html#ad5f83ca4a17e2ff49064c6a6b2df5a43">qsc_csp_uint64</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>QSC_CPLUSPLUS_ENABLED_END</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">#if defined(QSC_SYSTEM_OS_WINDOWS)</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#   define QSC_CSP_SEED_MAX ((size_t)ULONG_MAX)</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="csp_8h.html#a8bdff8915c5e41cf83cd71a757730501">  101</a></span><span class="preprocessor">#   define QSC_CSP_SEED_MAX ((size_t)QSC_SIZE_MAX)</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <span class="keywordtype">bool</span> <a class="code hl_function" href="csp_8h.html#ad0f5075584956ab81d0ced0de73930f4">qsc_csp_generate</a>(uint8_t* output, <span class="keywordtype">size_t</span> length);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint16_t <a class="code hl_function" href="csp_8h.html#ace7201420cc01e56bbac8bb16c4d4a9b">qsc_csp_uint16</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint32_t <a class="code hl_function" href="csp_8h.html#aaa8dde03913dc5d9f77fac40641ddff1">qsc_csp_uint32</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><a class="code hl_define" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> uint64_t <a class="code hl_function" href="csp_8h.html#ad5f83ca4a17e2ff49064c6a6b2df5a43">qsc_csp_uint64</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>QSC_CPLUSPLUS_ENABLED_END</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="acsp_8h_html_aaa8dde03913dc5d9f77fac40641ddff1"><div class="ttname"><a href="csp_8h.html#aaa8dde03913dc5d9f77fac40641ddff1">qsc_csp_uint32</a></div><div class="ttdeci">QSC_EXPORT_API uint32_t qsc_csp_uint32(void)</div><div class="ttdoc">Generate a random 32-bit unsigned integer.</div><div class="ttdef"><b>Definition</b> csp.c:160</div></div>
 <div class="ttc" id="acsp_8h_html_ace7201420cc01e56bbac8bb16c4d4a9b"><div class="ttname"><a href="csp_8h.html#ace7201420cc01e56bbac8bb16c4d4a9b">qsc_csp_uint16</a></div><div class="ttdeci">QSC_EXPORT_API uint16_t qsc_csp_uint16(void)</div><div class="ttdoc">Generate a random 16-bit unsigned integer.</div><div class="ttdef"><b>Definition</b> csp.c:142</div></div>
 <div class="ttc" id="acsp_8h_html_ad0f5075584956ab81d0ced0de73930f4"><div class="ttname"><a href="csp_8h.html#ad0f5075584956ab81d0ced0de73930f4">qsc_csp_generate</a></div><div class="ttdeci">QSC_EXPORT_API bool qsc_csp_generate(uint8_t *output, size_t length)</div><div class="ttdoc">Retrieve pseudo-random bytes from the system entropy provider.</div><div class="ttdef"><b>Definition</b> csp.c:25</div></div>
 <div class="ttc" id="acsp_8h_html_ad5f83ca4a17e2ff49064c6a6b2df5a43"><div class="ttname"><a href="csp_8h.html#ad5f83ca4a17e2ff49064c6a6b2df5a43">qsc_csp_uint64</a></div><div class="ttdeci">QSC_EXPORT_API uint64_t qsc_csp_uint64(void)</div><div class="ttdoc">Generate a random 64-bit unsigned integer.</div><div class="ttdef"><b>Definition</b> csp.c:180</div></div>
 <div class="ttc" id="aqsccommon_8h_html"><div class="ttname"><a href="qsccommon_8h.html">qsccommon.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
-<div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:605</div></div>
-<div class="ttc" id="aqsccommon_8h_html_a6ca37bf525f2b2a3da6484a3ce906f2a"><div class="ttname"><a href="qsccommon_8h.html#a6ca37bf525f2b2a3da6484a3ce906f2a">QSC_SYSTEM_CONDITION_IGNORE</a></div><div class="ttdeci">#define QSC_SYSTEM_CONDITION_IGNORE(x)</div><div class="ttdoc">A macro to disable a specific warning condition.</div><div class="ttdef"><b>Definition</b> qsccommon.h:791</div></div>
+<div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:645</div></div>
+<div class="ttc" id="aqsccommon_8h_html_a6ca37bf525f2b2a3da6484a3ce906f2a"><div class="ttname"><a href="qsccommon_8h.html#a6ca37bf525f2b2a3da6484a3ce906f2a">QSC_SYSTEM_CONDITION_IGNORE</a></div><div class="ttdeci">#define QSC_SYSTEM_CONDITION_IGNORE(x)</div><div class="ttdoc">A macro to disable a specific warning condition.</div><div class="ttdef"><b>Definition</b> qsccommon.h:835</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

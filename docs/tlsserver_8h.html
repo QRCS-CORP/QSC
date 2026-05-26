@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -116,6 +116,8 @@ $(function(){initNavTree('tlsserver_8h.html','',''); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
+<tr class="memitem:qsc_5Ftls_5Fserver_5Fcertificate_5Fidentity" id="r_qsc_5Ftls_5Fserver_5Fcertificate_5Fidentity"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__tls__server__certificate__identity.html">qsc_tls_server_certificate_identity</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A server certificate identity selectable by SNI.  <a href="structqsc__tls__server__certificate__identity.html#details">More...</a><br /></td></tr>
 <tr class="memitem:qsc_5Ftls_5Fserver_5Fconfig" id="r_qsc_5Ftls_5Fserver_5Fconfig"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Immutable server configuration.  <a href="structqsc__tls__server__config.html#details">More...</a><br /></td></tr>
 <tr class="memitem:qsc_5Ftls_5Fserver_5Fstate" id="r_qsc_5Ftls_5Fserver_5Fstate"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structqsc__tls__server__state.html">qsc_tls_server_state</a></td></tr>
@@ -127,6 +129,8 @@ Typedefs</h2></td></tr>
 typedef enum <a class="el" href="#a1aabfe5da6aef4b3ece376e3cf272723">qsc_tls_server_state_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_server_state_phase</b></td></tr>
 <tr class="memitem:a0e3a55d1fa82910385106a51178f8b2e" id="r_a0e3a55d1fa82910385106a51178f8b2e"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e3a55d1fa82910385106a51178f8b2e">qsc_tls_psk_lookup_callback</a>) (const uint8_t *identity, size_t identitylen, uint8_t *psk_out, size_t pskcap, size_t *psk_len_out, <a class="el" href="tlstypes_8h.html#a1a630f70840c80ee104ac5d496d3c4b1">qsc_tls_cipher_suite</a> *suite_out, uint32_t *max_early_data_out, void *state)</td></tr>
 <tr class="memdesc:a0e3a55d1fa82910385106a51178f8b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Server-side PSK lookup callback.  <br /></td></tr>
+<tr class="memitem:a9bc458a8c74e8a6b9fff26eb3db78c80" id="r_a9bc458a8c74e8a6b9fff26eb3db78c80"><td class="memItemLeft" align="right" valign="top"><a id="a9bc458a8c74e8a6b9fff26eb3db78c80" name="a9bc458a8c74e8a6b9fff26eb3db78c80"></a>
+typedef struct qsc_tls_server_certificate_identity&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_server_certificate_identity</b></td></tr>
 <tr class="memitem:addc86318beb5472ac8069265d137f270" id="r_addc86318beb5472ac8069265d137f270"><td class="memItemLeft" align="right" valign="top"><a id="addc86318beb5472ac8069265d137f270" name="addc86318beb5472ac8069265d137f270"></a>
 typedef struct qsc_tls_server_config&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_server_config</b></td></tr>
 <tr class="memitem:a3a76514b4ca9c58d746980eda0e9b822" id="r_a3a76514b4ca9c58d746980eda0e9b822"><td class="memItemLeft" align="right" valign="top"><a id="a3a76514b4ca9c58d746980eda0e9b822" name="a3a76514b4ca9c58d746980eda0e9b822"></a>
@@ -153,6 +157,18 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a3f472ce630167b74ceef56db34d9f10c" id="r_a3f472ce630167b74ceef56db34d9f10c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f472ce630167b74ceef56db34d9f10c">qsc_tls_server_config_set_certificate_interface</a> (<a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *config, const <a class="el" href="structqsc__tls__certificate__interface.html">qsc_tls_certificate_interface</a> *iface, bool requestclientauth, bool requireclientauth)</td></tr>
+<tr class="memdesc:a3f472ce630167b74ceef56db34d9f10c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy a client-certificate validation interface into a TLS server configuration.  <br /></td></tr>
+<tr class="memitem:a8058a0ec1886493b87e862fd41032232" id="r_a8058a0ec1886493b87e862fd41032232"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8058a0ec1886493b87e862fd41032232">qsc_tls_server_config_set_client_authorization</a> (<a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *config, <a class="el" href="tlscert_8h.html#a23b0ef82382f626d234dd9a9b2989fc0">qsc_tls_client_authorization_callback</a> callback, void *state, bool required)</td></tr>
+<tr class="memdesc:a8058a0ec1886493b87e862fd41032232"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the server-side mTLS application authorization callback.  <br /></td></tr>
+<tr class="memitem:a5afb493f8844e840bd5ed94ae2d57a75" id="r_a5afb493f8844e840bd5ed94ae2d57a75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5afb493f8844e840bd5ed94ae2d57a75">qsc_tls_server_authorize_client_certificate</a> (<a class="el" href="structqsc__tls__server__state.html">qsc_tls_server_state</a> *state, const <a class="el" href="structqsc__tls__certificate__view.html">qsc_tls_certificate_view</a> *chain, size_t chainlength)</td></tr>
+<tr class="memdesc:a5afb493f8844e840bd5ed94ae2d57a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate and authorize a presented mTLS client certificate chain.  <br /></td></tr>
+<tr class="memitem:ada96d4caf095be3104bc698a5721b2f6" id="r_ada96d4caf095be3104bc698a5721b2f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada96d4caf095be3104bc698a5721b2f6">qsc_tls_server_config_set_local_certificate</a> (<a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *config, const <a class="el" href="structqsc__tls__certificate__view.html">qsc_tls_certificate_view</a> *chain, size_t chainlength, <a class="el" href="tlstypes_8h.html#ad392f10c70e7ec977e3b533529fdd795">qsc_tls_signature_scheme</a> verifyscheme, const uint8_t *privatekeydata, size_t privatekeylen)</td></tr>
+<tr class="memdesc:ada96d4caf095be3104bc698a5721b2f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy a local certificate chain and private signing key into a TLS server configuration.  <br /></td></tr>
+<tr class="memitem:ad4186b6ff4c90ffff222b3f483ae267c" id="r_ad4186b6ff4c90ffff222b3f483ae267c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad4186b6ff4c90ffff222b3f483ae267c">qsc_tls_server_config_add_certificate_identity</a> (<a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *config, const char *hostname, const <a class="el" href="structqsc__tls__local__certificate__config.html">qsc_tls_local_certificate_config</a> *localcert)</td></tr>
+<tr class="memdesc:ad4186b6ff4c90ffff222b3f483ae267c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add an SNI-selectable certificate identity to a TLS server configuration.  <br /></td></tr>
+<tr class="memitem:a52623ffbf3c2bc77c2304043fd688d60" id="r_a52623ffbf3c2bc77c2304043fd688d60"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a52623ffbf3c2bc77c2304043fd688d60">qsc_tls_server_config_set_sni_required</a> (<a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *config, bool required)</td></tr>
+<tr class="memdesc:a52623ffbf3c2bc77c2304043fd688d60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure whether the server requires a recognized SNI hostname.  <br /></td></tr>
 <tr class="memitem:ace0eb26a42bd54863a0712ff20041d65" id="r_ace0eb26a42bd54863a0712ff20041d65"><td class="memItemLeft" align="right" valign="top"><a id="ace0eb26a42bd54863a0712ff20041d65" name="ace0eb26a42bd54863a0712ff20041d65"></a>
 <a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_server_initialize</b> (<a class="el" href="structqsc__tls__server__state.html">qsc_tls_server_state</a> *state, const <a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *config)</td></tr>
 <tr class="memitem:adc1e50cf779be36973be62ce6865beb9" id="r_adc1e50cf779be36973be62ce6865beb9"><td class="memItemLeft" align="right" valign="top"><a id="adc1e50cf779be36973be62ce6865beb9" name="adc1e50cf779be36973be62ce6865beb9"></a>
@@ -212,6 +228,257 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="a1aabfe5da6aef4b3ece376e3cf272723a35c3719b98df831147e8a95954017353" name="a1aabfe5da6aef4b3ece376e3cf272723a35c3719b98df831147e8a95954017353"></a>qsc_tls_server_phase_waiting_end_of_early_data&#160;</td><td class="fielddoc"><p>0-RTT accepted; waiting EndOfEarlyData before client Finished. </p>
 </td></tr>
 </table>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a5afb493f8844e840bd5ed94ae2d57a75" name="a5afb493f8844e840bd5ed94ae2d57a75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5afb493f8844e840bd5ed94ae2d57a75">&#9670;&#160;</a></span>qsc_tls_server_authorize_client_certificate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_server_authorize_client_certificate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__server__state.html">qsc_tls_server_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__certificate__view.html">qsc_tls_certificate_view</a> *</td>          <td class="paramname"><span class="paramname"><em>chain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>chainlength</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Validate and authorize a presented mTLS client certificate chain. </p>
+<p>This helper performs the server-side mTLS chain validation step, prepares a bounded authorization information structure, and then evaluates the configured application authorization callback. CertificateVerify possession checking is performed separately by the TLS handshake state machine.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>[struct*] The server handshake state. </td></tr>
+    <tr><td class="paramname">chain</td><td>[const struct*] Client certificate chain views in leaf-first order. </td></tr>
+    <tr><td class="paramname">chainlength</td><td>[size_t] Number of certificate views in the chain.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success when the certificate is valid and authorized. </dd></dl>
+
+</div>
+</div>
+<a id="ad4186b6ff4c90ffff222b3f483ae267c" name="ad4186b6ff4c90ffff222b3f483ae267c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4186b6ff4c90ffff222b3f483ae267c">&#9670;&#160;</a></span>qsc_tls_server_config_add_certificate_identity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_server_config_add_certificate_identity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>hostname</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__local__certificate__config.html">qsc_tls_local_certificate_config</a> *</td>          <td class="paramname"><span class="paramname"><em>localcert</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add an SNI-selectable certificate identity to a TLS server configuration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>[struct*] The server configuration to update. </td></tr>
+    <tr><td class="paramname">hostname</td><td>[const char*] The DNS name or wildcard pattern for this identity. </td></tr>
+    <tr><td class="paramname">localcert</td><td>[const struct*] The local certificate configuration for the identity.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
+
+</div>
+</div>
+<a id="a3f472ce630167b74ceef56db34d9f10c" name="a3f472ce630167b74ceef56db34d9f10c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f472ce630167b74ceef56db34d9f10c">&#9670;&#160;</a></span>qsc_tls_server_config_set_certificate_interface()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_server_config_set_certificate_interface </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__certificate__interface.html">qsc_tls_certificate_interface</a> *</td>          <td class="paramname"><span class="paramname"><em>iface</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>requestclientauth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>requireclientauth</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy a client-certificate validation interface into a TLS server configuration. </p>
+<p>This setter is the TLS-side attachment point for mutual-TLS peer validation. X.509 helpers prepare the <a class="el" href="structqsc__tls__certificate__interface.html" title="Certificate validation and signature verification callback set.">qsc_tls_certificate_interface</a>, but do not mutate TLS server state directly.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>[struct*] The server configuration to update. </td></tr>
+    <tr><td class="paramname">iface</td><td>[struct*] Optional certificate-validation interface. Required when client authentication is requested or required. </td></tr>
+    <tr><td class="paramname">requestclientauth</td><td>[bool] Send CertificateRequest when true. </td></tr>
+    <tr><td class="paramname">requireclientauth</td><td>[bool] Reject an empty client Certificate when true.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
+
+</div>
+</div>
+<a id="a8058a0ec1886493b87e862fd41032232" name="a8058a0ec1886493b87e862fd41032232"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8058a0ec1886493b87e862fd41032232">&#9670;&#160;</a></span>qsc_tls_server_config_set_client_authorization()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_server_config_set_client_authorization </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="tlscert_8h.html#a23b0ef82382f626d234dd9a9b2989fc0">qsc_tls_client_authorization_callback</a></td>          <td class="paramname"><span class="paramname"><em>callback</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>required</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configure the server-side mTLS application authorization callback. </p>
+<p>The callback is evaluated only after certificate-chain validation has accepted the client certificate. If required is true, a missing callback or a callback rejection denies the peer. If required is false, a missing callback leaves cryptographic certificate validation as the authorization boundary.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>[struct*] The server configuration to update. </td></tr>
+    <tr><td class="paramname">callback</td><td>[function] Optional application authorization callback. </td></tr>
+    <tr><td class="paramname">state</td><td>[void*] Caller-owned state passed to the callback. </td></tr>
+    <tr><td class="paramname">required</td><td>[bool] Require callback acceptance when true.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
+
+</div>
+</div>
+<a id="ada96d4caf095be3104bc698a5721b2f6" name="ada96d4caf095be3104bc698a5721b2f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada96d4caf095be3104bc698a5721b2f6">&#9670;&#160;</a></span>qsc_tls_server_config_set_local_certificate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_server_config_set_local_certificate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__certificate__view.html">qsc_tls_certificate_view</a> *</td>          <td class="paramname"><span class="paramname"><em>chain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>chainlength</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="tlstypes_8h.html#ad392f10c70e7ec977e3b533529fdd795">qsc_tls_signature_scheme</a></td>          <td class="paramname"><span class="paramname"><em>verifyscheme</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>privatekeydata</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>privatekeylen</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy a local certificate chain and private signing key into a TLS server configuration. </p>
+<p>The certificate views are copied as non-owning DER pointers. The pointed-to DER buffers must remain valid for the lifetime of handshakes initialized from this configuration. The private key bytes are copied into the configuration and are used by the TLS CertificateVerify signing callback at handshake time.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>[struct*] The server configuration to update. </td></tr>
+    <tr><td class="paramname">chain</td><td>[struct*] Certificate chain views in leaf-first order. </td></tr>
+    <tr><td class="paramname">chainlength</td><td>[size_t] Number of valid chain entries. </td></tr>
+    <tr><td class="paramname">verifyscheme</td><td>[enum] TLS CertificateVerify signature scheme. </td></tr>
+    <tr><td class="paramname">privatekeydata</td><td>[const uint8_t*] Raw private key bytes for the signing scheme. </td></tr>
+    <tr><td class="paramname">privatekeylen</td><td>[size_t] Length of the private key.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
+
+</div>
+</div>
+<a id="a52623ffbf3c2bc77c2304043fd688d60" name="a52623ffbf3c2bc77c2304043fd688d60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52623ffbf3c2bc77c2304043fd688d60">&#9670;&#160;</a></span>qsc_tls_server_config_set_sni_required()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_server_config_set_sni_required </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__server__config.html">qsc_tls_server_config</a> *</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>required</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configure whether the server requires a recognized SNI hostname. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>[struct*] The server configuration to update. </td></tr>
+    <tr><td class="paramname">required</td><td>[bool] Set to true to reject absent or unmatched SNI names.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
 
 </div>
 </div>

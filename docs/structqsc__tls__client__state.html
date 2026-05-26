@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -115,6 +115,9 @@ Data Fields</h2></td></tr>
 <tr class="memitem:a7046fde29e91c0e5133f469cd7f81aaf" id="r_a7046fde29e91c0e5133f469cd7f81aaf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="tlstypes_8h.html#ad392f10c70e7ec977e3b533529fdd795">qsc_tls_signature_scheme</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7046fde29e91c0e5133f469cd7f81aaf">negotiatedsigscheme</a></td></tr>
 <tr class="memitem:a0d42c8a8444ecb067f8eeb1e43c2aa93" id="r_a0d42c8a8444ecb067f8eeb1e43c2aa93"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d42c8a8444ecb067f8eeb1e43c2aa93">clientrandom</a> [32U]</td></tr>
 <tr class="memitem:ab31234798e6ffe6759a7bec63335386a" id="r_ab31234798e6ffe6759a7bec63335386a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab31234798e6ffe6759a7bec63335386a">serverrandom</a> [32U]</td></tr>
+<tr class="memitem:a4b4c4a71ac543907dc26bf57f9f80e28" id="r_a4b4c4a71ac543907dc26bf57f9f80e28"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b4c4a71ac543907dc26bf57f9f80e28">clienthello</a> [<a class="el" href="tlslimits_8h.html#ac4559cba13fa77013e75cf162a5df306">QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE</a>+4U]</td></tr>
+<tr class="memitem:ae7b57f8b882c9a642505c29f7a6ac08f" id="r_ae7b57f8b882c9a642505c29f7a6ac08f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae7b57f8b882c9a642505c29f7a6ac08f">retryclienthello</a> [<a class="el" href="tlslimits_8h.html#ac4559cba13fa77013e75cf162a5df306">QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE</a>+4U]</td></tr>
+<tr class="memitem:a9fccbc475eefbc509b89974c8171c4aa" id="r_a9fccbc475eefbc509b89974c8171c4aa"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9fccbc475eefbc509b89974c8171c4aa">helloretryrequest</a> [<a class="el" href="tlslimits_8h.html#a57b99273a92944350f1359b1ad332ac7">QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE</a>+4U]</td></tr>
 <tr class="memitem:aa461708ebea36405ceefc8de809de8f0" id="r_aa461708ebea36405ceefc8de809de8f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__transcript__state.html">qsc_tls_transcript_state</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa461708ebea36405ceefc8de809de8f0">transcript</a></td></tr>
 <tr class="memitem:ab8b5720f129f2a0878d6b60d2b57123a" id="r_ab8b5720f129f2a0878d6b60d2b57123a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__key__schedule__state.html">qsc_tls_key_schedule_state</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab8b5720f129f2a0878d6b60d2b57123a">keyschedule</a></td></tr>
 <tr class="memitem:ac177d2a23fa03eebdeedf861716b165f" id="r_ac177d2a23fa03eebdeedf861716b165f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__record__state.html">qsc_tls_record_state</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac177d2a23fa03eebdeedf861716b165f">readrecord</a></td></tr>
@@ -122,9 +125,18 @@ Data Fields</h2></td></tr>
 <tr class="memitem:a6cdeabe9e3ad9d203b3f755738536840" id="r_a6cdeabe9e3ad9d203b3f755738536840"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__key__exchange__state.html">qsc_tls_key_exchange_state</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6cdeabe9e3ad9d203b3f755738536840">keyexchange</a></td></tr>
 <tr class="memitem:a3f9cd293d1fb2d6b378c6041db1c753f" id="r_a3f9cd293d1fb2d6b378c6041db1c753f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__peer__capabilities.html">qsc_tls_peer_capabilities</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f9cd293d1fb2d6b378c6041db1c753f">peercapabilities</a></td></tr>
 <tr class="memitem:ac9f26b228ab69ada2ce142ead3a18daf" id="r_ac9f26b228ab69ada2ce142ead3a18daf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="tlstypes_8h.html#aa69a9b41b174773e73806998b095a040">qsc_tls_alert_description</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9f26b228ab69ada2ce142ead3a18daf">lastalert</a></td></tr>
+<tr class="memitem:a800c7cf169e7975880413d230ec148e4" id="r_a800c7cf169e7975880413d230ec148e4"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a800c7cf169e7975880413d230ec148e4">selectedalpn</a> [<a class="el" href="tlslimits_8h.html#a47dc9673c9e1e4ec9131d4dc49a8a82f">QSC_TLS_MAX_ALPN_SIZE</a>]</td></tr>
+<tr class="memitem:a45809bbacd5648bfa98f2b1c1d89a6c3" id="r_a45809bbacd5648bfa98f2b1c1d89a6c3"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45809bbacd5648bfa98f2b1c1d89a6c3">peercertificate</a> [<a class="el" href="tlslimits_8h.html#a8bbf31dc0dc82b9f7ec9806ccef36d65">QSC_TLS_CERTIFICATE_MAX_SIZE</a>]</td></tr>
+<tr class="memitem:a17a64d8117acd9bc39be9d923fd35e93" id="r_a17a64d8117acd9bc39be9d923fd35e93"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17a64d8117acd9bc39be9d923fd35e93">selectedalpnlen</a></td></tr>
+<tr class="memitem:a124f0009eff88d0920d260542d4bcf78" id="r_a124f0009eff88d0920d260542d4bcf78"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a124f0009eff88d0920d260542d4bcf78">peercertificatelen</a></td></tr>
+<tr class="memitem:aae0081e87231405cbf8e9824aaad5f41" id="r_aae0081e87231405cbf8e9824aaad5f41"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae0081e87231405cbf8e9824aaad5f41">clienthellolen</a></td></tr>
+<tr class="memitem:a6758e6dab062e548e9fbd93eb87bb533" id="r_a6758e6dab062e548e9fbd93eb87bb533"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6758e6dab062e548e9fbd93eb87bb533">retryclienthellolen</a></td></tr>
+<tr class="memitem:a79faa8a250ce11f8bb970fcfe26965a4" id="r_a79faa8a250ce11f8bb970fcfe26965a4"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a79faa8a250ce11f8bb970fcfe26965a4">helloretryrequestlen</a></td></tr>
+<tr class="memitem:aa03e795643130c7eb527d771aa5b3c7e" id="r_aa03e795643130c7eb527d771aa5b3c7e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa03e795643130c7eb527d771aa5b3c7e">alpnselected</a></td></tr>
 <tr class="memitem:a52a77c8cdb3c19861faba3d7cfe8776f" id="r_a52a77c8cdb3c19861faba3d7cfe8776f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a52a77c8cdb3c19861faba3d7cfe8776f">serverauthenticated</a></td></tr>
 <tr class="memitem:a9b6b0e8d5d9f4ede4cc5fae41fae4373" id="r_a9b6b0e8d5d9f4ede4cc5fae41fae4373"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b6b0e8d5d9f4ede4cc5fae41fae4373">changecipherspecreceived</a></td></tr>
 <tr class="memitem:a0257c93fd53640e4ce5c08732b3ee246" id="r_a0257c93fd53640e4ce5c08732b3ee246"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0257c93fd53640e4ce5c08732b3ee246">helloretryrequestconsumed</a></td></tr>
+<tr class="memitem:a6d97f2a863f1c4442a0405f49bb0e000" id="r_a6d97f2a863f1c4442a0405f49bb0e000"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d97f2a863f1c4442a0405f49bb0e000">clientrandomgenerated</a></td></tr>
 <tr class="memitem:afb2af22c5d57c41cb73a764485df0447" id="r_afb2af22c5d57c41cb73a764485df0447"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afb2af22c5d57c41cb73a764485df0447">pskoffered</a></td></tr>
 <tr class="memitem:a3e41eb0fc9adc602da5b05e1a8f86e22" id="r_a3e41eb0fc9adc602da5b05e1a8f86e22"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e41eb0fc9adc602da5b05e1a8f86e22">pskaccepted</a></td></tr>
 <tr class="memitem:a269c135feab6e2ab1bfeb5876eaca5bd" id="r_a269c135feab6e2ab1bfeb5876eaca5bd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a269c135feab6e2ab1bfeb5876eaca5bd">earlydataoffered</a></td></tr>
@@ -133,6 +145,21 @@ Data Fields</h2></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores the active TLS 1.3 client handshake and record state. </p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Field Documentation</h2>
+<a id="aa03e795643130c7eb527d771aa5b3c7e" name="aa03e795643130c7eb527d771aa5b3c7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa03e795643130c7eb527d771aa5b3c7e">&#9670;&#160;</a></span>alpnselected</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool alpnselected</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>True when the server selected an ALPN protocol. </p>
+
+</div>
+</div>
 <a id="a9b6b0e8d5d9f4ede4cc5fae41fae4373" name="a9b6b0e8d5d9f4ede4cc5fae41fae4373"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b6b0e8d5d9f4ede4cc5fae41fae4373">&#9670;&#160;</a></span>changecipherspecreceived</h2>
 
@@ -148,6 +175,36 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a4b4c4a71ac543907dc26bf57f9f80e28" name="a4b4c4a71ac543907dc26bf57f9f80e28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b4c4a71ac543907dc26bf57f9f80e28">&#9670;&#160;</a></span>clienthello</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t clienthello[<a class="el" href="tlslimits_8h.html#ac4559cba13fa77013e75cf162a5df306">QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE</a>+4U]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Serialized first ClientHello handshake message. </p>
+
+</div>
+</div>
+<a id="aae0081e87231405cbf8e9824aaad5f41" name="aae0081e87231405cbf8e9824aaad5f41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae0081e87231405cbf8e9824aaad5f41">&#9670;&#160;</a></span>clienthellolen</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t clienthellolen</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Length, in bytes, of the retained first ClientHello. </p>
+
+</div>
+</div>
 <a id="a0d42c8a8444ecb067f8eeb1e43c2aa93" name="a0d42c8a8444ecb067f8eeb1e43c2aa93"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0d42c8a8444ecb067f8eeb1e43c2aa93">&#9670;&#160;</a></span>clientrandom</h2>
 
@@ -160,6 +217,21 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>ClientHello random value. </p>
+
+</div>
+</div>
+<a id="a6d97f2a863f1c4442a0405f49bb0e000" name="a6d97f2a863f1c4442a0405f49bb0e000"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d97f2a863f1c4442a0405f49bb0e000">&#9670;&#160;</a></span>clientrandomgenerated</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool clientrandomgenerated</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>True once the ClientHello random has been generated for this handshake. </p>
 
 </div>
 </div>
@@ -208,6 +280,21 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a9fccbc475eefbc509b89974c8171c4aa" name="a9fccbc475eefbc509b89974c8171c4aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fccbc475eefbc509b89974c8171c4aa">&#9670;&#160;</a></span>helloretryrequest</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t helloretryrequest[<a class="el" href="tlslimits_8h.html#a57b99273a92944350f1359b1ad332ac7">QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE</a>+4U]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Serialized HelloRetryRequest handshake message. </p>
+
+</div>
+</div>
 <a id="a0257c93fd53640e4ce5c08732b3ee246" name="a0257c93fd53640e4ce5c08732b3ee246"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0257c93fd53640e4ce5c08732b3ee246">&#9670;&#160;</a></span>helloretryrequestconsumed</h2>
 
@@ -220,6 +307,21 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>True once a HelloRetryRequest path has been consumed for this handshake. </p>
+
+</div>
+</div>
+<a id="a79faa8a250ce11f8bb970fcfe26965a4" name="a79faa8a250ce11f8bb970fcfe26965a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79faa8a250ce11f8bb970fcfe26965a4">&#9670;&#160;</a></span>helloretryrequestlen</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t helloretryrequestlen</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Length, in bytes, of the retained HelloRetryRequest. </p>
 
 </div>
 </div>
@@ -343,6 +445,36 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a45809bbacd5648bfa98f2b1c1d89a6c3" name="a45809bbacd5648bfa98f2b1c1d89a6c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45809bbacd5648bfa98f2b1c1d89a6c3">&#9670;&#160;</a></span>peercertificate</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t peercertificate[<a class="el" href="tlslimits_8h.html#a8bbf31dc0dc82b9f7ec9806ccef36d65">QSC_TLS_CERTIFICATE_MAX_SIZE</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DER encoded peer leaf certificate retained for CertificateVerify validation. </p>
+
+</div>
+</div>
+<a id="a124f0009eff88d0920d260542d4bcf78" name="a124f0009eff88d0920d260542d4bcf78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a124f0009eff88d0920d260542d4bcf78">&#9670;&#160;</a></span>peercertificatelen</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t peercertificatelen</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Length, in bytes, of the retained peer leaf certificate. </p>
+
+</div>
+</div>
 <a id="a40eea8af843c83880ec81ddaf52d3613" name="a40eea8af843c83880ec81ddaf52d3613"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a40eea8af843c83880ec81ddaf52d3613">&#9670;&#160;</a></span>phase</h2>
 
@@ -400,6 +532,66 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Active inbound record protection state. </p>
+
+</div>
+</div>
+<a id="ae7b57f8b882c9a642505c29f7a6ac08f" name="ae7b57f8b882c9a642505c29f7a6ac08f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7b57f8b882c9a642505c29f7a6ac08f">&#9670;&#160;</a></span>retryclienthello</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t retryclienthello[<a class="el" href="tlslimits_8h.html#ac4559cba13fa77013e75cf162a5df306">QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE</a>+4U]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Serialized second ClientHello handshake message after HelloRetryRequest. </p>
+
+</div>
+</div>
+<a id="a6758e6dab062e548e9fbd93eb87bb533" name="a6758e6dab062e548e9fbd93eb87bb533"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6758e6dab062e548e9fbd93eb87bb533">&#9670;&#160;</a></span>retryclienthellolen</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t retryclienthellolen</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Length, in bytes, of the retained second ClientHello. </p>
+
+</div>
+</div>
+<a id="a800c7cf169e7975880413d230ec148e4" name="a800c7cf169e7975880413d230ec148e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a800c7cf169e7975880413d230ec148e4">&#9670;&#160;</a></span>selectedalpn</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t selectedalpn[<a class="el" href="tlslimits_8h.html#a47dc9673c9e1e4ec9131d4dc49a8a82f">QSC_TLS_MAX_ALPN_SIZE</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Selected ALPN protocol identifier without a terminating NULL byte. </p>
+
+</div>
+</div>
+<a id="a17a64d8117acd9bc39be9d923fd35e93" name="a17a64d8117acd9bc39be9d923fd35e93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17a64d8117acd9bc39be9d923fd35e93">&#9670;&#160;</a></span>selectedalpnlen</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t selectedalpnlen</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Length, in bytes, of selectedalpn. </p>
 
 </div>
 </div>

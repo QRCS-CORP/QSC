@@ -219,6 +219,36 @@
     <ClCompile Include="TLS\tls_stage19_socket_wrapper_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
+    <ClCompile Include="TLS\tls_stage20_alpn_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage21_sni_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage22_mtls_authorization_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage23_peer_info_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage24_ticket_policy_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage25_framed_message_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage26_record_fragmentation_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage27_socket_options_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage28_concurrent_shutdown_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage29_negative_x509_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -399,6 +429,36 @@
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
     <ClInclude Include="TLS\tls_stage19_socket_wrapper_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage20_alpn_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage21_sni_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage22_mtls_authorization_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage23_peer_info_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage24_ticket_policy_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage25_framed_message_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage26_record_fragmentation_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage27_socket_options_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage28_concurrent_shutdown_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage29_negative_x509_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
   </ItemGroup>

@@ -100,6 +100,24 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_TLS_SOCKET_SIGNATURE_SCHEME_MAX 16U
 
 /**
+ * \def QSC_TLS_SOCKET_SERVER_IDENTITY_MAX
+ * \brief The maximum number of SNI-selectable server identities stored in a TLS socket context.
+ */
+#define QSC_TLS_SOCKET_SERVER_IDENTITY_MAX QSC_TLS_MAX_SERVER_IDENTITIES
+
+/**
+ * \def QSC_TLS_SOCKET_ALPN_PROTOCOL_MAX
+ * \brief The maximum number of ALPN protocol identifiers stored in a TLS socket context.
+ */
+#define QSC_TLS_SOCKET_ALPN_PROTOCOL_MAX QSC_TLS_MAX_ALPN_PROTOCOLS
+
+/**
+ * \def QSC_TLS_SOCKET_ALPN_SIZE_MAX
+ * \brief The maximum ALPN protocol identifier length stored in a TLS socket context.
+ */
+#define QSC_TLS_SOCKET_ALPN_SIZE_MAX QSC_TLS_MAX_ALPN_SIZE
+
+/**
  * \def QSC_TLS_SOCKET_SERVER_BUFFER_SIZE
  * \brief The default per-connection application receive buffer size used by the blocking server loop.
  */
@@ -122,6 +140,12 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief The maximum payload size in bytes accepted by the framed application-message API.
  */
 #define QSC_TLS_SOCKET_FRAME_SIZE_MAX 16777216U
+
+/**
+ * \def QSC_TLS_SOCKET_TICKET_LIFETIME_MAX
+ * \brief The maximum accepted TLS session-ticket lifetime in seconds.
+ */
+#define QSC_TLS_SOCKET_TICKET_LIFETIME_MAX 604800U
 
 /**
  * \enum qsc_tls_socket_log_level
@@ -184,6 +208,11 @@ typedef struct qsc_tls_socket_options
 /**
  * \struct qsc_tls_socket_ticket_policy
  * \brief The session ticket policy used by TLS socket client and server operations.
+ *
+ * \details
+ * When enabled is false, tickets are not offered by clients, emitted by servers, or exposed
+ * through the socket ticket getter. A nonzero renewal_interval_seconds value is accepted
+ * only when it is less than lifetime_seconds; renewal scheduling remains caller-managed.
  */
 typedef struct qsc_tls_socket_ticket_policy
 {
@@ -251,8 +280,9 @@ typedef void (*qsc_tls_socket_log_callback)(qsc_tls_socket_log_level level, qsc_
  * \details
  * The negotiated cipher suite, named group, signature scheme, PSK state, and early-data state are
  * populated from the TLS connection state. The subject, issuer, common-name, and DNS-name fields are
- * reserved for deployments where the lower TLS and X.509 layers retain a parsed peer certificate
- * summary after verification.
+ * copied from the bounded peer certificate summary retained by the built-in X.509 bridge. The
+ * result field mirrors the last wrapper, TLS, socket, X.509, verification, and alert status values
+ * associated with the connection.
  */
 typedef struct qsc_tls_socket_peer_info
 {
@@ -260,15 +290,20 @@ typedef struct qsc_tls_socket_peer_info
     char issuer[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];      /*!< The peer certificate issuer string, when available. */
     char common_name[QSC_X509_NAME_ATTRIBUTE_STRING_MAX]; /*!< The peer certificate common name, when available. */
     char dns_name[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];    /*!< The matched peer DNS name, when available. */
+    qsc_tls_socket_result result;                         /*!< The last structured wrapper, TLS, socket, X.509, verification, and alert result. */
     qsc_tls_cipher_suite cipher_suite;                    /*!< The negotiated TLS cipher suite. */
     qsc_tls_named_group named_group;                      /*!< The negotiated TLS named group. */
     qsc_tls_signature_scheme signature_scheme;            /*!< The negotiated TLS signature scheme. */
+    qsc_x509w_status x509_status;                         /*!< The X.509 wrapper status for the peer certificate operation. */
     qsc_x509_verify_status verify_status;                 /*!< The X.509 verification status for the peer certificate. */
     bool authenticated;                                   /*!< Indicates whether the peer was authenticated. */
     bool hostname_matched;                                /*!< Indicates whether hostname verification succeeded. */
+    bool hostname_checked;                                /*!< Indicates whether hostname verification was requested. */
     bool chain_valid;                                     /*!< Indicates whether the peer certificate chain validated. */
     bool psk_accepted;                                    /*!< Indicates whether PSK resumption was accepted. */
     bool early_data_accepted;                             /*!< Indicates whether early data was accepted. */
+    bool alpn_selected;                                    /*!< Indicates whether ALPN selected a mutually supported application protocol. */
+    char selected_alpn[QSC_TLS_SOCKET_ALPN_SIZE_MAX + 1U]; /*!< The selected ALPN protocol as a null-terminated string when selected. */
 } qsc_tls_socket_peer_info;
 
 /**
@@ -281,9 +316,14 @@ typedef struct qsc_tls_socket_context
     qsc_x509w_server_identity identity;                                         /*!< The loaded server identity and private key material. */
     qsc_x509w_tls_bridge bridge;                                                /*!< The X.509-to-TLS certificate verification bridge. */
     qsc_x509w_tls_local_certificate localcert;                                  /*!< The TLS-facing local certificate exported from the server identity. */
+    qsc_x509w_tls_local_certificate snilocalcerts[QSC_TLS_SOCKET_SERVER_IDENTITY_MAX]; /*!< TLS-facing local certificates selected by SNI. */
+    char snihostnames[QSC_TLS_SOCKET_SERVER_IDENTITY_MAX][QSC_TLS_MAX_HOSTNAME_SIZE + 1U]; /*!< Hostname patterns for SNI-selectable identities. */
+    size_t sniidentitycount;                                                    /*!< The number of configured SNI-selectable identities. */
+    bool requiresni;                                                           /*!< Reject server handshakes without a recognized SNI name. */
     qsc_x509w_profile certificateprofile;                                       /*!< The X.509 validation profile. */
     qsc_tls_socket_options socketoptions;                                       /*!< The default socket options for connections derived from this context. */
     qsc_tls_socket_ticket_policy ticketpolicy;                                  /*!< The default session ticket policy. */
+    qsc_tls_alpn_protocols alpn;                                                /*!< The configured ALPN protocol list and required/optional policy. */
     qsc_tls_session_ticket sessionticket;                                       /*!< The configured client session ticket for resumption. */
     qsc_tls_socket_log_callback logcallback;                                    /*!< The context-level structured logging callback. */
     void* logstate;                                                             /*!< The context-level logging callback state. */
@@ -295,6 +335,9 @@ typedef struct qsc_tls_socket_context
     size_t sigschemecount;                                                      /*!< The number of signature schemes in the preference list. */
     bool hasidentity;                                                           /*!< Indicates that a server identity has been loaded. */
     bool hastruststore;                                                         /*!< Indicates that at least one trust anchor has been loaded. */
+    qsc_tls_client_authorization_callback clientauthcallback;                   /*!< Optional application authorization callback for validated client certificates. */
+    void* clientauthstate;                                                       /*!< Caller-owned state passed to the client authorization callback. */
+    bool requireclientauthorization;                                             /*!< Require application authorization callback acceptance for mTLS peers. */
     bool requireclientauth;                                                     /*!< Require client certificate authentication in server mode. */
     bool requestclientauth;                                                     /*!< Request client certificate authentication in server mode. */
     bool allowunverified;                                                       /*!< Permit unverified peer certificates in development policy mode. */
@@ -314,6 +357,7 @@ typedef struct qsc_tls_socket_connection
     qsc_tls_role role;                              /*!< The TLS role, client or server. */
     qsc_socket_address_families family;             /*!< The socket address family. */
     qsc_tls_socket_result lastresult;               /*!< The last structured result produced by this connection. */
+    qsc_tls_socket_peer_info peerinfo;              /*!< The retained peer identity and negotiated-parameter summary. */
     qsc_tls_socket_options socketoptions;           /*!< The active socket options for this connection. */
     qsc_tls_socket_ticket_policy ticketpolicy;      /*!< The active session ticket policy for this connection. */
     qsc_tls_session_ticket lastticket;              /*!< The last session ticket observed or emitted by this connection. */
@@ -607,6 +651,30 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_load_crl_file(qsc_tl
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_load_server_identity_files(qsc_tls_socket_context* context, const char* certificatechainpath, const char* privatekeypath, qsc_tls_signature_scheme verifyscheme);
 
 /**
+ * \brief Load an additional SNI-selectable server identity from certificate-chain and private-key files.
+ *
+ * \param context: [struct*] A pointer to the initialized context.
+ * \param hostname: [const char*] The DNS name or wildcard pattern used for SNI selection.
+ * \param certificatechainpath: [const char*] The certificate-chain file path.
+ * \param privatekeypath: [const char*] The private-key file path.
+ * \param verifyscheme: [enum] The TLS CertificateVerify signature scheme for the identity.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_add_server_identity_files(qsc_tls_socket_context* context, const char* hostname,
+    const char* certificatechainpath, const char* privatekeypath, qsc_tls_signature_scheme verifyscheme);
+
+/**
+ * \brief Configure whether server handshakes require a recognized SNI hostname.
+ *
+ * \param context: [struct*] A pointer to the initialized context.
+ * \param required: [bool] Set to true to reject absent or unmatched SNI names.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_sni_required(qsc_tls_socket_context* context, bool required);
+
+/**
  * \brief Configure server-side client certificate authentication policy.
  *
  * \param context: [struct*] A pointer to the initialized context.
@@ -618,6 +686,24 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_load_server_identity
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_client_auth(qsc_tls_socket_context* context, bool requestclientauth, bool requireclientauth);
 
 /**
+ * \brief Configure the server-side mTLS application authorization callback.
+ *
+ * \details
+ * The callback is invoked after client-certificate chain validation succeeds.
+ * If required is true, the handshake policy rejects a validated client
+ * certificate when no callback is configured or when the callback returns false.
+ *
+ * \param context: [struct*] The TLS socket context to update.
+ * \param callback: [function] Optional application authorization callback.
+ * \param state: [void*] Caller-owned state passed to the callback.
+ * \param required: [bool] Require callback acceptance when true.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_client_authorization(qsc_tls_socket_context* context,
+    qsc_tls_client_authorization_callback callback, void* state, bool required);
+
+/**
  * \brief Set the default socket options for the context.
  *
  * \param context: [struct*] A pointer to the initialized context.
@@ -626,6 +712,27 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_client_auth(qsc_
  * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
  */
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_socket_options(qsc_tls_socket_context* context, const qsc_tls_socket_options* options);
+
+/**
+ * \brief Set the ordered ALPN protocol list for the context.
+ *
+ * \param context: [struct*] A pointer to the initialized context.
+ * \param protocols: [const char**] A pointer to an ordered list of null-terminated protocol strings.
+ * \param protocolcount: [size_t] The number of protocol strings in the list.
+ * \param required: [bool] Require a mutually supported ALPN protocol when true.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_alpn_protocols(qsc_tls_socket_context* context, const char* const* protocols, size_t protocolcount, bool required);
+
+/**
+ * \brief Clear the ordered ALPN protocol list from the context.
+ *
+ * \param context: [struct*] A pointer to the initialized context.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_clear_alpn_protocols(qsc_tls_socket_context* context);
 
 /**
  * \brief Set the context-level structured logging callback.
@@ -647,6 +754,15 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_log_callback(qsc
  * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
  */
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_session_ticket_policy(qsc_tls_socket_context* context, const qsc_tls_socket_ticket_policy* policy);
+
+/**
+ * \brief Test whether a session ticket is structurally acceptable for resumption.
+ *
+ * \param ticket: [const struct*] A pointer to the session ticket to validate.
+ *
+ * \return [bool] Returns true when the ticket fields are structurally valid.
+ */
+QSC_EXPORT_API bool qsc_tls_socket_session_ticket_is_valid(const qsc_tls_session_ticket* ticket);
 
 /**
  * \brief Set the client session ticket used for resumption attempts.
@@ -826,6 +942,18 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_connection_cancel(qsc_tls_so
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_get_peer_info(const qsc_tls_socket_connection* connection, qsc_tls_socket_peer_info* peerinfo);
 
 /**
+ * \brief Retrieve the selected ALPN protocol for a TLS socket connection.
+ *
+ * \param connection: [const struct*] A pointer to the TLS socket connection.
+ * \param protocol: [char*] A pointer to the destination string buffer.
+ * \param protocolcap: [size_t] Size, in bytes, of the destination string buffer.
+ * \param protocollen: [size_t*] Receives the selected protocol length excluding the null terminator.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_get_selected_alpn(const qsc_tls_socket_connection* connection, char* protocol, size_t protocolcap, size_t* protocollen);
+
+/**
  * \brief Retrieve the most recent session ticket associated with a connection.
  *
  * \param connection: [const struct*] A pointer to the TLS socket connection.
@@ -836,14 +964,22 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_get_peer_info(const qsc_tls_
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_connection_get_session_ticket(const qsc_tls_socket_connection* connection, qsc_tls_session_ticket* ticketout);
 
 /**
+ * \brief Clear the most recent session ticket retained by a connection.
+ *
+ * \param connection: [struct*] A pointer to the TLS socket connection.
+ */
+QSC_EXPORT_API void qsc_tls_socket_connection_clear_session_ticket(qsc_tls_socket_connection* connection);
+
+/**
  * \brief Send a length-prefixed framed application message.
  *
  * \details
  * The frame format is a four-byte big-endian unsigned payload length followed by the payload bytes.
- * The payload length must not exceed QSC_TLS_SOCKET_FRAME_SIZE_MAX.
+ * The payload length must not exceed QSC_TLS_SOCKET_FRAME_SIZE_MAX. Zero-length
+ * frames are permitted and encode only the four-byte length header.
  *
  * \param connection: [struct*] A pointer to the established TLS socket connection.
- * \param input: [const uint8_t*] A pointer to the application payload.
+ * \param input: [const uint8_t*] A pointer to the application payload. This parameter may be NULL only when inlen is zero.
  * \param inlen: [size_t] The payload length in bytes.
  *
  * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
@@ -856,9 +992,10 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_send_frame(qsc_tls_socket_co
  * \details
  * The frame format is a four-byte big-endian unsigned payload length followed by the payload bytes.
  * If the encoded frame length exceeds the output capacity, the call returns an error.
+ * Zero-length frames are accepted and set read to zero.
  *
  * \param connection: [struct*] A pointer to the established TLS socket connection.
- * \param output: [uint8_t*] A pointer to the application payload output buffer.
+ * \param output: [uint8_t*] A pointer to the application payload output buffer. This parameter may be NULL only when outlen is zero.
  * \param outlen: [size_t] The output buffer length in bytes.
  * \param read: [size_t*] Receives the number of payload bytes written to output.
  *

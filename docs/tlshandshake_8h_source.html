@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -186,7 +186,7 @@ $(function(){initNavTree('tlshandshake_8h_source.html','',''); });
 <div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
 <div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aqsccommon_8h_html"><div class="ttname"><a href="qsccommon_8h.html">qsccommon.h</a></div><div class="ttdoc">Contains common definitions for the Quantum Secure Cryptographic (QSC) library.</div></div>
-<div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:605</div></div>
+<div class="ttc" id="aqsccommon_8h_html_a2ef395ab64e46f80b9e391669b062bef"><div class="ttname"><a href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a></div><div class="ttdeci">#define QSC_EXPORT_API</div><div class="ttdoc">API export macro for Microsoft compilers when importing from a DLL.</div><div class="ttdef"><b>Definition</b> qsccommon.h:645</div></div>
 <div class="ttc" id="atlscert_8h_html"><div class="ttname"><a href="tlscert_8h.html">tlscert.h</a></div><div class="ttdoc">TLS certificate bridge types and validation callbacks.</div></div>
 <div class="ttc" id="atlserrors_8h_html"><div class="ttname"><a href="tlserrors_8h.html">tlserrors.h</a></div><div class="ttdoc">TLS status code definitions and diagnostic string conversion.</div></div>
 <div class="ttc" id="atlserrors_8h_html_ade497ef768f1a9e1931914b0f33875bd"><div class="ttname"><a href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a></div><div class="ttdeci">qsc_tls_status</div><div class="ttdef"><b>Definition</b> tlserrors.h:65</div></div>
@@ -201,8 +201,8 @@ $(function(){initNavTree('tlshandshake_8h_source.html','',''); });
 <div class="ttc" id="atlshandshake_8h_html_ac63c9f7db191a5cc1eea7e25dfebe665"><div class="ttname"><a href="tlshandshake_8h.html#ac63c9f7db191a5cc1eea7e25dfebe665">qsc_tls_handshake_send_change_cipher_spec_compat</a></div><div class="ttdeci">QSC_EXPORT_API qsc_tls_status qsc_tls_handshake_send_change_cipher_spec_compat(uint8_t *output, size_t outlen, size_t *written)</div><div class="ttdoc">Encode the compatibility ChangeCipherSpec record used by TLS 1.3 middlebox mode.</div><div class="ttdef"><b>Definition</b> tlshandshake.c:67</div></div>
 <div class="ttc" id="atlshandshake_8h_html_ad45dbed274433f974713798fae74b6b2"><div class="ttname"><a href="tlshandshake_8h.html#ad45dbed274433f974713798fae74b6b2">qsc_tls_handshake_write_header</a></div><div class="ttdeci">QSC_EXPORT_API qsc_tls_status qsc_tls_handshake_write_header(uint8_t *output, size_t outlen, size_t *offset, qsc_tls_handshake_type type, size_t bodylen)</div><div class="ttdoc">Write a TLS handshake header.</div><div class="ttdef"><b>Definition</b> tlshandshake.c:6</div></div>
 <div class="ttc" id="atlstypes_8h_html"><div class="ttname"><a href="tlstypes_8h.html">tlstypes.h</a></div><div class="ttdoc">Public TLS type definitions.</div></div>
-<div class="ttc" id="atlstypes_8h_html_ab66a099c720125e3f4e65d2df0d93b43"><div class="ttname"><a href="tlstypes_8h.html#ab66a099c720125e3f4e65d2df0d93b43">qsc_tls_handshake_type</a></div><div class="ttdeci">qsc_tls_handshake_type</div><div class="ttdoc">TLS 1.3 handshake message type codes per RFC 8446 section B.3.</div><div class="ttdef"><b>Definition</b> tlstypes.h:199</div></div>
-<div class="ttc" id="atlstypes_8h_html_ad392f10c70e7ec977e3b533529fdd795"><div class="ttname"><a href="tlstypes_8h.html#ad392f10c70e7ec977e3b533529fdd795">qsc_tls_signature_scheme</a></div><div class="ttdeci">qsc_tls_signature_scheme</div><div class="ttdoc">TLS signature-scheme identifiers.</div><div class="ttdef"><b>Definition</b> tlstypes.h:184</div></div>
+<div class="ttc" id="atlstypes_8h_html_ab66a099c720125e3f4e65d2df0d93b43"><div class="ttname"><a href="tlstypes_8h.html#ab66a099c720125e3f4e65d2df0d93b43">qsc_tls_handshake_type</a></div><div class="ttdeci">qsc_tls_handshake_type</div><div class="ttdoc">TLS 1.3 handshake message type codes per RFC 8446 section B.3.</div><div class="ttdef"><b>Definition</b> tlstypes.h:194</div></div>
+<div class="ttc" id="atlstypes_8h_html_ad392f10c70e7ec977e3b533529fdd795"><div class="ttname"><a href="tlstypes_8h.html#ad392f10c70e7ec977e3b533529fdd795">qsc_tls_signature_scheme</a></div><div class="ttdeci">qsc_tls_signature_scheme</div><div class="ttdoc">TLS signature-scheme identifiers.</div><div class="ttdef"><b>Definition</b> tlstypes.h:179</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

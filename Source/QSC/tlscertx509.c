@@ -226,15 +226,12 @@ static bool tls_cert_x509_validate_chain_cb(const qsc_tls_certificate_view* chai
                 }
 
                 /* Trust anchor / chain validation.
-                 *
-                 *   - No trust store + allowselfsigned: pinned-key/test mode (legacy MVP).
-                 *   - No trust store + !allowselfsigned: refuse (unknown_ca).
-                 *   - Trust store provided: run RFC 5280 chain validation via
-                 *     qsc_x509_chain_verify, including signatures, validity,
-                 *     issuer linkage, key identifiers, and termination at a
-                 *     configured trust anchor. The leaf hostname/validity have
-                 *     already been checked above; the chain walk re-checks them
-                 *     against each link.
+                 * - No trust store + allowselfsigned: pinned-key/test mode (legacy MVP).
+                 * - No trust store + !allowselfsigned: refuse (unknown_ca).
+                 * - Trust store provided: run RFC 5280 chain validation via
+                 *   qsc_x509_chain_verify, including signatures, validity,
+                 *   issuer linkage, key identifiers, and termination at a configured trust anchor. 
+                 *   The leaf hostname/validity have already been checked above; the chain walk re-checks them against each link.
                  */
                 if (res)
                 {
@@ -253,10 +250,9 @@ static bool tls_cert_x509_validate_chain_cb(const qsc_tls_certificate_view* chai
                     }
                     else
                     {
-                        /* build a qsc_x509_chain from the TLS views by decoding each
-                         * DER blob in chainlen-order. The leaf is index 0; intermediates
-                         * follow. The certificate array is heap-backed because
-                         * qsc_x509_certificate is a large aggregate object. */
+                        /* build a qsc_x509_chain from the TLS views by decoding each DER blob in chainlen-order. 
+                         * the leaf is index 0; intermediates follow. 
+                         * the certificate array is heap-backed because qsc_x509_certificate is a large aggregate object. */
                         qsc_x509_certificate* xchain;
                         size_t decoded;
                         bool decodeok;
@@ -387,8 +383,7 @@ static bool tls_cert_x509_validate_chain_cb(const qsc_tls_certificate_view* chai
     return res;
 }
 
-static bool tls_cert_x509_verify_cv_cb(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, 
-    size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
+static bool tls_cert_x509_verify_cv_cb(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
 {
     qsc_x509_certificate leaf = { 0 };
     qsc_tls_certificate_view view;

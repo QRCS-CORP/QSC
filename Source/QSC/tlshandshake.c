@@ -158,7 +158,7 @@ qsc_tls_status qsc_tls_handshake_decode_certificate_verify(const uint8_t* input,
     QSC_ASSERT(input != NULL);
     QSC_ASSERT(scheme != NULL);
     QSC_ASSERT(signature != NULL);
-    QSC_ASSERT(signaturelen != 0U);
+    QSC_ASSERT(signaturelen != NULL);
 
     size_t oft;
     uint16_t s;

@@ -49,6 +49,7 @@ static size_t ecdsa_der_length_field_size(size_t content_length)
     {
         n = 3U;
     }
+
     return n;
 }
 

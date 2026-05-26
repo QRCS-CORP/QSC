@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['z_0',['z',['../structge25519__p2.html#ae6cca2c6d126b80daf71dee8b03889d1',1,'ge25519_p2::z'],['../structge25519__p3.html#ae6cca2c6d126b80daf71dee8b03889d1',1,'ge25519_p3::z'],['../structge25519__p1p1.html#ae6cca2c6d126b80daf71dee8b03889d1',1,'ge25519_p1p1::z'],['../structge25519__cached.html#ae6cca2c6d126b80daf71dee8b03889d1',1,'ge25519_cached::z']]]
+  ['y_0',['Y',['../structqsc__qmac__state.html#a663fc26ccd425cc70dc4a6727f675b7b',1,'qsc_qmac_state']]],
+  ['year_1',['year',['../structqsc__asn1__time__t.html#a57ca98d8f6d4baf0fe41c583c7dcb0d5',1,'qsc_asn1_time_t']]]
 ];

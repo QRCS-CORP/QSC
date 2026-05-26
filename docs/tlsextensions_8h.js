@@ -4,6 +4,7 @@ var tlsextensions_8h =
     [ "qsc_tls_psk_identity_view", "structqsc__tls__psk__identity__view.html", "structqsc__tls__psk__identity__view" ],
     [ "qsc_tls_extensions_bitmap_initialize", "tlsextensions_8h.html#a7b37ca07c6c5511fa8b8de8902fa9458", null ],
     [ "qsc_tls_extensions_bitmap_set", "tlsextensions_8h.html#ad22c767a69a260bc9a7e617ee44dbb9a", null ],
+    [ "qsc_tls_extensions_decode_alpn", "tlsextensions_8h.html#a81f864ba8b13beffd9a1f020ea07d868", null ],
     [ "qsc_tls_extensions_decode_early_data_max", "tlsextensions_8h.html#a57681745574aa6f6559a4a70f14274b3", null ],
     [ "qsc_tls_extensions_decode_key_share_client_hello", "tlsextensions_8h.html#a2c720672e8a12ce907758f187ef15f5c", null ],
     [ "qsc_tls_extensions_decode_key_share_hello_retry", "tlsextensions_8h.html#ab6d2346512daf4fbc4d00c3d3e4d33a3", null ],
@@ -15,6 +16,7 @@ var tlsextensions_8h =
     [ "qsc_tls_extensions_decode_supported_groups", "tlsextensions_8h.html#a917de3482180013295fcfecc1c70abd7", null ],
     [ "qsc_tls_extensions_decode_supported_versions_client", "tlsextensions_8h.html#a9bda388874395e15e60b015918ce4079", null ],
     [ "qsc_tls_extensions_decode_supported_versions_server", "tlsextensions_8h.html#a821ee4c1c0072bb7f0d27ed1ada5fc83", null ],
+    [ "qsc_tls_extensions_encode_alpn", "tlsextensions_8h.html#ab413c59bb62ef5fc21d1d860529adc51", null ],
     [ "qsc_tls_extensions_encode_early_data_empty", "tlsextensions_8h.html#a3238f707e157f49a02b4087db5910d1f", null ],
     [ "qsc_tls_extensions_encode_early_data_max", "tlsextensions_8h.html#a7bff9819d9692ec2ba3e46e3ba360f5d", null ],
     [ "qsc_tls_extensions_encode_key_share_client", "tlsextensions_8h.html#a4f3d19255e8fdec3bfac26b36d9c7191", null ],
@@ -30,6 +32,7 @@ var tlsextensions_8h =
     [ "qsc_tls_extensions_encode_supported_versions_client", "tlsextensions_8h.html#a22beb00159cf934e4bdba3784964bbb8", null ],
     [ "qsc_tls_extensions_encode_supported_versions_server", "tlsextensions_8h.html#a5f5ae143a38a4be45d00c57de41a32ab", null ],
     [ "qsc_tls_extensions_is_permitted", "tlsextensions_8h.html#a61764e988ba1f99c89799d31e67ab77d", null ],
+    [ "qsc_tls_extensions_select_alpn", "tlsextensions_8h.html#ad0c25946438a610c3160567e2f2b1f97", null ],
     [ "qsc_tls_extensions_select_cipher_suite", "tlsextensions_8h.html#ac709e727173b88ac4bdc4852a6f0cef7", null ],
     [ "qsc_tls_extensions_select_key_share", "tlsextensions_8h.html#aee2f4f1d92985904ee369ba0d8af43c5", null ]
 ];

@@ -18,8 +18,11 @@ var searchData=
   ['dilithium_5fpoly_15',['dilithium_poly',['../structdilithium__poly.html',1,'']]],
   ['dilithium_5fpolyveck_16',['dilithium_polyveck',['../structdilithium__polyveck.html',1,'']]],
   ['dilithium_5fpolyvecl_17',['dilithium_polyvecl',['../structdilithium__polyvecl.html',1,'']]],
-  ['documents_18',['Reference Documents',['../encoding_8h.html#encoding_refs',1,'']]],
-  ['donna128_2eh_19',['donna128.h',['../donna128_8h.html',1,'']]],
-  ['dotted_20',['dotted',['../structqsc__oid__entry__t.html#a24a3615986aed48efac53488b23b2384',1,'qsc_oid_entry_t']]],
-  ['duplicatesrejected_21',['duplicatesrejected',['../structqsc__x509__extensions__t.html#ab4a19124b392112a9a18e2ec52c5cef7',1,'qsc_x509_extensions_t']]]
+  ['dns_5fname_18',['dns_name',['../structqsc__tls__socket__peer__info.html#ab01062a4f9f97c5345cd10348abc6863',1,'qsc_tls_socket_peer_info']]],
+  ['dnsname_19',['dnsname',['../structqsc__tls__peer__certificate__summary.html#a8966c4e101f2af9a096f48e257042112',1,'qsc_tls_peer_certificate_summary']]],
+  ['documents_20',['Reference Documents',['../encoding_8h.html#encoding_refs',1,'']]],
+  ['donna128_2eh_21',['donna128.h',['../donna128_8h.html',1,'']]],
+  ['dotted_22',['dotted',['../structqsc__oid__entry__t.html#a24a3615986aed48efac53488b23b2384',1,'qsc_oid_entry_t']]],
+  ['dual_5fstack_23',['dual_stack',['../structqsc__tls__socket__options.html#a5b59fe12d5c04fd6e11f505e0f1ae92d',1,'qsc_tls_socket_options']]],
+  ['duplicatesrejected_24',['duplicatesrejected',['../structqsc__x509__extensions__t.html#ab4a19124b392112a9a18e2ec52c5cef7',1,'qsc_x509_extensions_t']]]
 ];

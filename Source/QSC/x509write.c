@@ -320,7 +320,6 @@ static qsc_asn1_status qsc_x509_write_build_oid_from_id(qsc_oid_id id, qsc_asn1_
     return QSC_ASN1_STATUS_SUCCESS;
 }
 
-
 static qsc_asn1_status qsc_x509_write_algorithm_identifier_core(const qsc_asn1_oid* algorithm_oid, bool parameters_present, bool parameters_null, bool parameters_oid, const qsc_asn1_oid* parameter_oid, uint8_t* output, size_t* outputlen)
 {
     uint8_t content[QSC_X509_WRITE_STACK_BUFFER] = { 0U };

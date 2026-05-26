@@ -236,7 +236,7 @@ bool qsc_socket_is_blocking(const qsc_socket* sock)
 {
 	QSC_ASSERT(sock != NULL);
 
-	int32_t res;
+	bool res;
 
 	res = false;
 
@@ -246,9 +246,59 @@ bool qsc_socket_is_blocking(const qsc_socket* sock)
 		int8_t b[1U] = { 0 };
 		res = (recv(sock->connection, (char*)b, 0, 0) == QSC_SOCKET_RET_SUCCESS);
 #else
-		int32_t flags = fcntl(sock->connection, F_GETFL, 0);
-		return (flags >= 0) && !(flags & O_NONBLOCK);
+		int32_t flags;
+
+		flags = fcntl(sock->connection, F_GETFL, 0);
+		res = (flags >= 0 && (flags & O_NONBLOCK) == 0);
 #endif
+	}
+
+	return res;
+}
+
+qsc_socket_exceptions qsc_socket_set_blocking(const qsc_socket* sock, bool enabled)
+{
+	QSC_ASSERT(sock != NULL);
+
+	qsc_socket_exceptions res;
+
+	res = qsc_socket_invalid_input;
+
+	if (sock != NULL && sock->connection != QSC_UNINITIALIZED_SOCKET)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		uint32_t mode;
+
+		mode = (enabled == true) ? 0U : 1U;
+		res = qsc_socket_ioctl(sock, FIONBIO, &mode);
+#else
+		int32_t flags;
+
+		flags = fcntl(sock->connection, F_GETFL, 0);
+
+		if (flags >= 0)
+		{
+			if (enabled == true)
+			{
+				flags &= ~O_NONBLOCK;
+			}
+			else
+			{
+				flags |= O_NONBLOCK;
+			}
+
+			res = (fcntl(sock->connection, F_SETFL, flags) == 0) ? qsc_socket_exception_success : qsc_socket_exception_error;
+		}
+		else
+		{
+			res = qsc_socket_exception_error;
+		}
+#endif
+	}
+
+	if (res == qsc_socket_exception_error)
+	{
+		res = qsc_socket_get_last_error();
 	}
 
 	return res;
@@ -1433,9 +1483,24 @@ qsc_socket_exceptions qsc_socket_set_option(const qsc_socket* sock, qsc_socket_p
 
 	res = qsc_socket_invalid_input;
 
-	if (sock != NULL)
+	if (sock != NULL && sock->connection != QSC_UNINITIALIZED_SOCKET)
 	{
+#if defined(QSC_SYSTEM_OS_POSIX)
+		if (option == qsc_socket_option_receive_time_out || option == qsc_socket_option_send_time_out)
+		{
+			struct timeval timeout;
+
+			timeout.tv_sec = optval / 1000;
+			timeout.tv_usec = (optval % 1000) * 1000;
+			res = (qsc_socket_exceptions)setsockopt(sock->connection, (int32_t)level, (int32_t)option, (void*)&timeout, sizeof(timeout));
+		}
+		else
+		{
+			res = (qsc_socket_exceptions)setsockopt(sock->connection, (int32_t)level, (int32_t)option, (void*)&optval, sizeof(optval));
+		}
+#else
 		res = (qsc_socket_exceptions)setsockopt(sock->connection, (int32_t)level, (int32_t)option, (void*)&optval, sizeof(optval));
+#endif
 	}
 
 	if (res == qsc_socket_exception_error)

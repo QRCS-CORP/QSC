@@ -79,6 +79,7 @@ var socketbase_8h =
     [ "qsc_socket_send_all", "socketbase_8h.html#a93264b3157396577f94be7f05d35e3b2", null ],
     [ "qsc_socket_send_ready", "socketbase_8h.html#a29ea078780306fc69bdf6c4a3739ffc8", null ],
     [ "qsc_socket_send_to", "socketbase_8h.html#ae5499812993a51143a21356303ace5ab", null ],
+    [ "qsc_socket_set_blocking", "socketbase_8h.html#a7e3343801527615051111483e7ef4303", null ],
     [ "qsc_socket_set_last_error", "socketbase_8h.html#a54c540e953733f4424eab4b3e7d63a84", null ],
     [ "qsc_socket_set_option", "socketbase_8h.html#aee4dd3492102a2442543425303892dfc", null ],
     [ "qsc_socket_shut_down", "socketbase_8h.html#aa94bcf1c8d210aaf92f37f61964d5013", null ],

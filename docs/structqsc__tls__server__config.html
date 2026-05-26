@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -121,7 +121,14 @@ const <a class="el" href="tlstypes_8h.html#ad392f10c70e7ec977e3b533529fdd795">qs
 size_t&#160;</td><td class="memItemRight" valign="bottom"><b>sigschemepreferencecount</b></td></tr>
 <tr class="memitem:ada55f91ad5dd1312900550555d0cf3ad" id="r_ada55f91ad5dd1312900550555d0cf3ad"><td class="memItemLeft" align="right" valign="top"><a id="ada55f91ad5dd1312900550555d0cf3ad" name="ada55f91ad5dd1312900550555d0cf3ad"></a>
 <a class="el" href="structqsc__tls__local__certificate__config.html">qsc_tls_local_certificate_config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>localcert</b></td></tr>
+<tr class="memitem:a5a76c30b5c32a3361e9c1e8c58b41da8" id="r_a5a76c30b5c32a3361e9c1e8c58b41da8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__server__certificate__identity.html">qsc_tls_server_certificate_identity</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a76c30b5c32a3361e9c1e8c58b41da8">identities</a> [<a class="el" href="tlslimits_8h.html#abb82a1a8a9c96acf35a7e0358505f6e9">QSC_TLS_MAX_SERVER_IDENTITIES</a>]</td></tr>
+<tr class="memitem:a8e3f4889d5aa0da7489fa0db71980e9f" id="r_a8e3f4889d5aa0da7489fa0db71980e9f"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e3f4889d5aa0da7489fa0db71980e9f">identitycount</a></td></tr>
+<tr class="memitem:a57926eb32a11149c203e28cb596be45a" id="r_a57926eb32a11149c203e28cb596be45a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57926eb32a11149c203e28cb596be45a">requiresni</a></td></tr>
 <tr class="memitem:a2d61f34660a557d2786c7d7a698c0c3b" id="r_a2d61f34660a557d2786c7d7a698c0c3b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__certificate__interface.html">qsc_tls_certificate_interface</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d61f34660a557d2786c7d7a698c0c3b">clientcertinterface</a></td></tr>
+<tr class="memitem:a3befdcfc45efae254a341bbd9fa97c74" id="r_a3befdcfc45efae254a341bbd9fa97c74"><td class="memItemLeft" align="right" valign="top"><a class="el" href="tlscert_8h.html#a23b0ef82382f626d234dd9a9b2989fc0">qsc_tls_client_authorization_callback</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3befdcfc45efae254a341bbd9fa97c74">clientauthcallback</a></td></tr>
+<tr class="memitem:a7170aec344ed5d1ef5ec002d44a0d532" id="r_a7170aec344ed5d1ef5ec002d44a0d532"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7170aec344ed5d1ef5ec002d44a0d532">clientauthstate</a></td></tr>
+<tr class="memitem:aac9c3c9e75437dc2badfb5510934fe99" id="r_aac9c3c9e75437dc2badfb5510934fe99"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aac9c3c9e75437dc2badfb5510934fe99">requireclientauthorization</a></td></tr>
+<tr class="memitem:a710194bab028506d0e78940487f7fc44" id="r_a710194bab028506d0e78940487f7fc44"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a710194bab028506d0e78940487f7fc44">alpn</a></td></tr>
 <tr class="memitem:a94c06239b40d413afab5c313d6e435b7" id="r_a94c06239b40d413afab5c313d6e435b7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94c06239b40d413afab5c313d6e435b7">requestclientauth</a></td></tr>
 <tr class="memitem:ac239446819580e91888d0f068d5210cf" id="r_ac239446819580e91888d0f068d5210cf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac239446819580e91888d0f068d5210cf">requireclientauth</a></td></tr>
 <tr class="memitem:a8e6a62cc30a2ad19dd8b3e08a1cde083" id="r_a8e6a62cc30a2ad19dd8b3e08a1cde083"><td class="memItemLeft" align="right" valign="top"><a class="el" href="tlsserver_8h.html#a0e3a55d1fa82910385106a51178f8b2e">qsc_tls_psk_lookup_callback</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e6a62cc30a2ad19dd8b3e08a1cde083">psklookup</a></td></tr>
@@ -146,6 +153,51 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>sigschemepreference
 
 </div>
 </div>
+<a id="a710194bab028506d0e78940487f7fc44" name="a710194bab028506d0e78940487f7fc44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a710194bab028506d0e78940487f7fc44">&#9670;&#160;</a></span>alpn</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structqsc__tls__alpn__protocols.html">qsc_tls_alpn_protocols</a> alpn</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Configured server ALPN protocol list and policy. </p>
+
+</div>
+</div>
+<a id="a3befdcfc45efae254a341bbd9fa97c74" name="a3befdcfc45efae254a341bbd9fa97c74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3befdcfc45efae254a341bbd9fa97c74">&#9670;&#160;</a></span>clientauthcallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="tlscert_8h.html#a23b0ef82382f626d234dd9a9b2989fc0">qsc_tls_client_authorization_callback</a> clientauthcallback</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Optional application authorization callback for validated mTLS client certificates. </p>
+
+</div>
+</div>
+<a id="a7170aec344ed5d1ef5ec002d44a0d532" name="a7170aec344ed5d1ef5ec002d44a0d532"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7170aec344ed5d1ef5ec002d44a0d532">&#9670;&#160;</a></span>clientauthstate</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void* clientauthstate</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Caller-owned state passed to the client authorization callback. </p>
+
+</div>
+</div>
 <a id="a2d61f34660a557d2786c7d7a698c0c3b" name="a2d61f34660a557d2786c7d7a698c0c3b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2d61f34660a557d2786c7d7a698c0c3b">&#9670;&#160;</a></span>clientcertinterface</h2>
 
@@ -158,6 +210,36 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>sigschemepreference
       </table>
 </div><div class="memdoc">
 <p>For validating optional client certificate. </p>
+
+</div>
+</div>
+<a id="a5a76c30b5c32a3361e9c1e8c58b41da8" name="a5a76c30b5c32a3361e9c1e8c58b41da8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a76c30b5c32a3361e9c1e8c58b41da8">&#9670;&#160;</a></span>identities</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structqsc__tls__server__certificate__identity.html">qsc_tls_server_certificate_identity</a> identities[<a class="el" href="tlslimits_8h.html#abb82a1a8a9c96acf35a7e0358505f6e9">QSC_TLS_MAX_SERVER_IDENTITIES</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Optional SNI-selectable server identities. </p>
+
+</div>
+</div>
+<a id="a8e3f4889d5aa0da7489fa0db71980e9f" name="a8e3f4889d5aa0da7489fa0db71980e9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e3f4889d5aa0da7489fa0db71980e9f">&#9670;&#160;</a></span>identitycount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t identitycount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Number of valid SNI-selectable identities. </p>
 
 </div>
 </div>
@@ -218,6 +300,36 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>sigschemepreference
       </table>
 </div><div class="memdoc">
 <p>Reject empty Certificate when true. </p>
+
+</div>
+</div>
+<a id="aac9c3c9e75437dc2badfb5510934fe99" name="aac9c3c9e75437dc2badfb5510934fe99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac9c3c9e75437dc2badfb5510934fe99">&#9670;&#160;</a></span>requireclientauthorization</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool requireclientauthorization</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Reject validated client certificates when no authorization callback is configured or when the callback rejects the peer. </p>
+
+</div>
+</div>
+<a id="a57926eb32a11149c203e28cb596be45a" name="a57926eb32a11149c203e28cb596be45a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57926eb32a11149c203e28cb596be45a">&#9670;&#160;</a></span>requiresni</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool requiresni</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Reject ClientHello messages without a recognized SNI name when true. </p>
 
 </div>
 </div>

@@ -95,6 +95,19 @@ typedef struct qsc_tls_record_state
 } qsc_tls_record_state;
 
 /**
+ * \struct qsc_tls_alpn_protocols
+ * \brief Stores a bounded ordered ALPN protocol list and its negotiation policy.
+ */
+typedef struct qsc_tls_alpn_protocols
+{
+	uint8_t protocols[QSC_TLS_MAX_ALPN_PROTOCOLS][QSC_TLS_MAX_ALPN_SIZE];	/*!< Ordered ALPN protocol identifiers without terminating NULL bytes. */
+	size_t protocollens[QSC_TLS_MAX_ALPN_PROTOCOLS];						/*!< Length, in bytes, of each ALPN protocol identifier. */
+	size_t protocolcount;											/*!< Number of valid protocol identifiers. */
+	bool required;											/*!< Require a mutually supported protocol when true. */
+	bool configured;											/*!< Indicates that ALPN policy has been configured. */
+} qsc_tls_alpn_protocols;
+
+/**
  * \struct qsc_tls_peer_capabilities
  * \brief Stores the peer-advertised supported groups and signature-scheme capabilities.
  */

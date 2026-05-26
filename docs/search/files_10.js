@@ -21,8 +21,9 @@ var searchData=
   ['tlssession_2eh_18',['tlssession.h',['../tlssession_8h.html',1,'']]],
   ['tlssigalgs_2eh_19',['tlssigalgs.h',['../tlssigalgs_8h.html',1,'']]],
   ['tlssignerdefault_2eh_20',['tlssignerdefault.h',['../tlssignerdefault_8h.html',1,'']]],
-  ['tlsstate_2eh_21',['tlsstate.h',['../tlsstate_8h.html',1,'']]],
-  ['tlstranscript_2eh_22',['tlstranscript.h',['../tlstranscript_8h.html',1,'']]],
-  ['tlstypes_2eh_23',['tlstypes.h',['../tlstypes_8h.html',1,'']]],
-  ['transpose_2eh_24',['transpose.h',['../transpose_8h.html',1,'']]]
+  ['tlssocket_2eh_21',['tlssocket.h',['../tlssocket_8h.html',1,'']]],
+  ['tlsstate_2eh_22',['tlsstate.h',['../tlsstate_8h.html',1,'']]],
+  ['tlstranscript_2eh_23',['tlstranscript.h',['../tlstranscript_8h.html',1,'']]],
+  ['tlstypes_2eh_24',['tlstypes.h',['../tlstypes_8h.html',1,'']]],
+  ['transpose_2eh_25',['transpose.h',['../transpose_8h.html',1,'']]]
 ];

@@ -99,8 +99,7 @@ static qsc_tls_status tls_keyschedule_expand(qsc_tls_hash_algorithm hash, const 
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_hkdf_extract(qsc_tls_hash_algorithm hash, const uint8_t* salt, size_t saltlen, const uint8_t* ikm, 
-    size_t ikmlen, uint8_t* output, size_t outlen)
+qsc_tls_status qsc_tls_keyschedule_hkdf_extract(qsc_tls_hash_algorithm hash, const uint8_t* salt, size_t saltlen, const uint8_t* ikm, size_t ikmlen, uint8_t* output, size_t outlen)
 {
     QSC_ASSERT(output != NULL);
 
@@ -142,8 +141,7 @@ qsc_tls_status qsc_tls_keyschedule_hkdf_extract(qsc_tls_hash_algorithm hash, con
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_hkdf_expand(qsc_tls_hash_algorithm hash, const uint8_t* prk, size_t prklen, const uint8_t* info, 
-    size_t infolen, uint8_t* output, size_t outlen)
+qsc_tls_status qsc_tls_keyschedule_hkdf_expand(qsc_tls_hash_algorithm hash, const uint8_t* prk, size_t prklen, const uint8_t* info, size_t infolen, uint8_t* output, size_t outlen)
 {
     QSC_ASSERT(output != NULL);
 
@@ -165,8 +163,7 @@ qsc_tls_status qsc_tls_keyschedule_hkdf_expand(qsc_tls_hash_algorithm hash, cons
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_hkdf_expand_label(qsc_tls_hash_algorithm hash, const uint8_t* secret, size_t secretlen, const char* label, 
-    size_t labellen, const uint8_t* context, size_t contextlen, uint8_t* output, size_t outlen)
+qsc_tls_status qsc_tls_keyschedule_hkdf_expand_label(qsc_tls_hash_algorithm hash, const uint8_t* secret, size_t secretlen, const char* label, size_t labellen, const uint8_t* context, size_t contextlen, uint8_t* output, size_t outlen)
 {
     QSC_ASSERT(output != NULL);
     QSC_ASSERT(secret != NULL);
@@ -231,8 +228,7 @@ qsc_tls_status qsc_tls_keyschedule_hkdf_expand_label(qsc_tls_hash_algorithm hash
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_derive_secret_with_hash(qsc_tls_hash_algorithm hash, const uint8_t* secret, size_t secretlen, const char* label, 
-    size_t labellen, const uint8_t* transcripthash, size_t transcripthashlen, uint8_t* output, size_t outlen)
+qsc_tls_status qsc_tls_keyschedule_derive_secret_with_hash(qsc_tls_hash_algorithm hash, const uint8_t* secret, size_t secretlen, const char* label, size_t labellen, const uint8_t* transcripthash, size_t transcripthashlen, uint8_t* output, size_t outlen)
 {
     size_t digest;
     qsc_tls_status status;
@@ -259,8 +255,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_secret_with_hash(qsc_tls_hash_algorith
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_derive_secret_empty(qsc_tls_hash_algorithm hash, const uint8_t* secret, size_t secretlen, const char* label, 
-    size_t labellen, uint8_t* output, size_t outlen)
+qsc_tls_status qsc_tls_keyschedule_derive_secret_empty(qsc_tls_hash_algorithm hash, const uint8_t* secret, size_t secretlen, const char* label, size_t labellen, uint8_t* output, size_t outlen)
 {
     uint8_t empty[64U] = { 0U };
     size_t digest;
@@ -314,8 +309,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_secret_empty(qsc_tls_hash_algorithm ha
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_build_certificate_verify_input(const char* contextstring, const uint8_t* transcripthash, size_t transcripthashlen,
-    uint8_t* output, size_t outlen, size_t* written)
+qsc_tls_status qsc_tls_keyschedule_build_certificate_verify_input(const char* contextstring, const uint8_t* transcripthash, size_t transcripthashlen, uint8_t* output, size_t outlen, size_t* written)
 {
     QSC_ASSERT(output != NULL);
     QSC_ASSERT(written != NULL);
@@ -544,13 +538,11 @@ qsc_tls_status qsc_tls_keyschedule_derive_handshake_traffic_secrets(qsc_tls_key_
 
     if (state != NULL && state->initialized == true && state->handshakedone == true)
     {
-        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->handshakesecret, state->digestsize, "c hs traffic", 12U, 
-            transcripthash, transcripthashlen, state->clienthandshaketrafficsecret, state->digestsize);
+        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->handshakesecret, state->digestsize, "c hs traffic", 12U, transcripthash, transcripthashlen, state->clienthandshaketrafficsecret, state->digestsize);
 
         if (status == qsc_tls_status_success)
         {
-            status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->handshakesecret, state->digestsize,
-                "s hs traffic", 12U, transcripthash, transcripthashlen, state->serverhandshaketrafficsecret, state->digestsize);
+            status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->handshakesecret, state->digestsize, "s hs traffic", 12U, transcripthash, transcripthashlen, state->serverhandshaketrafficsecret, state->digestsize);
         }
     }
     else
@@ -569,13 +561,11 @@ qsc_tls_status qsc_tls_keyschedule_derive_application_traffic_secrets(qsc_tls_ke
 
     if (state != NULL && state->initialized == true && state->masterdone == true)
     {
-        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize,
-            "c ap traffic", 12U, transcripthash, transcripthashlen, state->clientapplicationtrafficsecret, state->digestsize);
+        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize, "c ap traffic", 12U, transcripthash, transcripthashlen, state->clientapplicationtrafficsecret, state->digestsize);
 
         if (status == qsc_tls_status_success)
         {
-            status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize,
-                "s ap traffic", 12U, transcripthash, transcripthashlen, state->serverapplicationtrafficsecret, state->digestsize);
+            status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize, "s ap traffic", 12U, transcripthash, transcripthashlen, state->serverapplicationtrafficsecret, state->digestsize);
         }
     }
     else
@@ -594,8 +584,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_exporter_master_secret(qsc_tls_key_sch
 
     if (state != NULL && state->initialized == true && state->masterdone == true)
     {
-        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize,
-            "exp master", 10U, transcripthash, transcripthashlen, state->exportermastersecret, state->digestsize);
+        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize, "exp master", 10U, transcripthash, transcripthashlen, state->exportermastersecret, state->digestsize);
     }
     else
     {
@@ -613,8 +602,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_resumption_master_secret(qsc_tls_key_s
 
     if (state != NULL && state->initialized == true && state->masterdone == true)
     {
-        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize,
-            "res master", 10U, transcripthash, transcripthashlen, state->resumptionmastersecret, state->digestsize);
+        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->mastersecret, state->digestsize, "res master", 10U, transcripthash, transcripthashlen, state->resumptionmastersecret, state->digestsize);
     }
     else
     {
@@ -624,8 +612,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_resumption_master_secret(qsc_tls_key_s
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_derive_traffic_keys(qsc_tls_hash_algorithm hash, const uint8_t* trafficsecret, size_t trafficsecretlen, 
-    size_t keylen, size_t ivlen, uint8_t* keyoutput, uint8_t* ivoutput)
+qsc_tls_status qsc_tls_keyschedule_derive_traffic_keys(qsc_tls_hash_algorithm hash, const uint8_t* trafficsecret, size_t trafficsecretlen, size_t keylen, size_t ivlen, uint8_t* keyoutput, uint8_t* ivoutput)
 {
     QSC_ASSERT(trafficsecret != NULL);
     QSC_ASSERT(keyoutput != NULL);
@@ -655,8 +642,7 @@ qsc_tls_status qsc_tls_keyschedule_advance_traffic_secret(qsc_tls_hash_algorithm
     return qsc_tls_keyschedule_hkdf_expand_label(hash, currenttrafficsecret, trafficsecretlen, "traffic upd", 11U, NULL, 0U, nexttrafficsecret, trafficsecretlen);
 }
 
-qsc_tls_status qsc_tls_keyschedule_compute_finished(qsc_tls_hash_algorithm hash, const uint8_t* basekey, size_t basekeylen, const uint8_t* transcripthash, 
-    size_t transcripthashlen, uint8_t* output, size_t outlen, size_t* written)
+qsc_tls_status qsc_tls_keyschedule_compute_finished(qsc_tls_hash_algorithm hash, const uint8_t* basekey, size_t basekeylen, const uint8_t* transcripthash, size_t transcripthashlen, uint8_t* output, size_t outlen, size_t* written)
 {
     QSC_ASSERT(output != NULL);
     QSC_ASSERT(written != NULL);
@@ -735,8 +721,7 @@ qsc_tls_status qsc_tls_keyschedule_compute_finished(qsc_tls_hash_algorithm hash,
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_verify_finished(qsc_tls_hash_algorithm hash, const uint8_t* basekey, size_t basekeylen, const uint8_t* transcripthash, 
-    size_t transcripthashlen, const uint8_t* candidate, size_t candidatelen)
+qsc_tls_status qsc_tls_keyschedule_verify_finished(qsc_tls_hash_algorithm hash, const uint8_t* basekey, size_t basekeylen, const uint8_t* transcripthash, size_t transcripthashlen, const uint8_t* candidate, size_t candidatelen)
 {
     QSC_ASSERT(candidate != NULL);
 
@@ -916,8 +901,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_client_early_traffic_secret(qsc_tls_ke
 
     if (state != NULL && state->initialized == true && state->earlydone == true)
     {
-        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->earlysecret, state->digestsize, "c e traffic", 11U,
-            transcripthash, transcripthashlen, state->clientearlytrafficsecret, state->digestsize);
+        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->earlysecret, state->digestsize, "c e traffic", 11U, transcripthash, transcripthashlen, state->clientearlytrafficsecret, state->digestsize);
 
         if (status == qsc_tls_status_success)
         {
@@ -938,15 +922,13 @@ qsc_tls_status qsc_tls_keyschedule_derive_early_exporter_secret(qsc_tls_key_sche
 
     if (state != NULL && state->initialized == true && state->earlydone == true)
     {
-        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->earlysecret, state->digestsize,
-            "e exp master", 12U, transcripthash, transcripthashlen, state->earlyexportermastersecret, state->digestsize);
+        status = qsc_tls_keyschedule_derive_secret_with_hash(state->hash, state->earlysecret, state->digestsize, "e exp master", 12U, transcripthash, transcripthashlen, state->earlyexportermastersecret, state->digestsize);
     }
 
     return status;
 }
 
-qsc_tls_status qsc_tls_keyschedule_compute_psk_binder(qsc_tls_hash_algorithm hash, const uint8_t* binderkey, size_t binderkeylen, const uint8_t* partialtranshash, 
-    size_t transcripthashlen, uint8_t* output, size_t outlen, size_t* written)
+qsc_tls_status qsc_tls_keyschedule_compute_psk_binder(qsc_tls_hash_algorithm hash, const uint8_t* binderkey, size_t binderkeylen, const uint8_t* partialtranshash, size_t transcripthashlen, uint8_t* output, size_t outlen, size_t* written)
 {
     /* PSK binder = HMAC(finished_key, partialtranshash)
      * where finished_key = HKDF-Expand-Label(binder_key, "finished", "", Hash.length).

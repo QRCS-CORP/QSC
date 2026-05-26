@@ -13,6 +13,9 @@ var searchData=
   ['desc_10',['desc',['../structqsc__netutils__adaptor__info.html#ad194f398e37e83c871d0f5187acf8c5c',1,'qsc_netutils_adaptor_info']]],
   ['dhcp_11',['dhcp',['../structqsc__netutils__adaptor__info.html#a7661ade92a27964dc3d61876f3752edb',1,'qsc_netutils_adaptor_info']]],
   ['digestsize_12',['digestsize',['../structqsc__tls__key__schedule__state.html#a5027edf61abbc0a013a7716dc16e8248',1,'qsc_tls_key_schedule_state']]],
-  ['dotted_13',['dotted',['../structqsc__oid__entry__t.html#a24a3615986aed48efac53488b23b2384',1,'qsc_oid_entry_t']]],
-  ['duplicatesrejected_14',['duplicatesrejected',['../structqsc__x509__extensions__t.html#ab4a19124b392112a9a18e2ec52c5cef7',1,'qsc_x509_extensions_t']]]
+  ['dns_5fname_13',['dns_name',['../structqsc__tls__socket__peer__info.html#ab01062a4f9f97c5345cd10348abc6863',1,'qsc_tls_socket_peer_info']]],
+  ['dnsname_14',['dnsname',['../structqsc__tls__peer__certificate__summary.html#a8966c4e101f2af9a096f48e257042112',1,'qsc_tls_peer_certificate_summary']]],
+  ['dotted_15',['dotted',['../structqsc__oid__entry__t.html#a24a3615986aed48efac53488b23b2384',1,'qsc_oid_entry_t']]],
+  ['dual_5fstack_16',['dual_stack',['../structqsc__tls__socket__options.html#a5b59fe12d5c04fd6e11f505e0f1ae92d',1,'qsc_tls_socket_options']]],
+  ['duplicatesrejected_17',['duplicatesrejected',['../structqsc__x509__extensions__t.html#ab4a19124b392112a9a18e2ec52c5cef7',1,'qsc_x509_extensions_t']]]
 ];

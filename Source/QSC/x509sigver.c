@@ -95,8 +95,7 @@ static bool x509_qsc_copy_ecdsa_signature_raw(uint8_t* rawsig, size_t rawsiglen,
     return res;
 }
 
-static bool x509_qsc_verify_message(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen,
-    const uint8_t* publickey, qsc_x509_named_curve curve)
+static bool x509_qsc_verify_message(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, qsc_x509_named_curve curve)
 {
     bool res;
 

@@ -16,8 +16,7 @@ static bool x509_asn1_is_octet_string(const qsc_encoding_ber_element* element)
     return (qsc_asn1_require_tag(element, QSC_ENCODING_BER_CLASS_UNIVERSAL, false, BER_ASN1_OCTET_STRING) == QSC_ASN1_STATUS_SUCCESS);
 }
 
-static bool x509_pkcs12_pbkdf2_hmac256(uint8_t* output, size_t outlen, const uint8_t* password, size_t passwordlen,
-    const uint8_t* salt, size_t saltlen, uint64_t iterations)
+static bool x509_pkcs12_pbkdf2_hmac256(uint8_t* output, size_t outlen, const uint8_t* password, size_t passwordlen, const uint8_t* salt, size_t saltlen, uint64_t iterations)
 {
     qsc_hmac256_state ctx = { 0 };
     uint8_t u[QSC_SHA2_256_HASH_SIZE] = { 0U };

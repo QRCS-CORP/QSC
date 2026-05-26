@@ -1,5 +1,6 @@
 var structqsc__tls__client__config =
 [
+    [ "alpn", "structqsc__tls__client__config.html#a710194bab028506d0e78940487f7fc44", null ],
     [ "certinterface", "structqsc__tls__client__config.html#a22a184d85373cf6ff9e974cedccb7313", null ],
     [ "ciphersuitecount", "structqsc__tls__client__config.html#a99a2acdde10232789730780310b54c81", null ],
     [ "ciphersuites", "structqsc__tls__client__config.html#a627362dc8a92b94dfa4a0afb587b8078", null ],

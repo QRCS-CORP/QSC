@@ -24,6 +24,8 @@ var socketflags_8h =
       [ "qsc_socket_option_reuse_address", "socketflags_8h.html#a83c4fb3b2710885491deb96d753a167dadaa75a4448f65bb48f561c2cf2af878c", null ],
       [ "qsc_socket_option_receive_time_out", "socketflags_8h.html#a83c4fb3b2710885491deb96d753a167daee15439289d96e4db9a2ee5e3211dc57", null ],
       [ "qsc_socket_option_send_time_out", "socketflags_8h.html#a83c4fb3b2710885491deb96d753a167dadf3301ff432ffd4ef66d38ec519db321", null ],
+      [ "qsc_socket_option_receive_buffer_size", "socketflags_8h.html#a83c4fb3b2710885491deb96d753a167da11df042a8675a4200e4cf598cba8fc5e", null ],
+      [ "qsc_socket_option_send_buffer_size", "socketflags_8h.html#a83c4fb3b2710885491deb96d753a167da6cd741f5c388ea3d9091a8038f52682c", null ],
       [ "qsc_socket_option_tcp_no_delay", "socketflags_8h.html#a83c4fb3b2710885491deb96d753a167da19edc0e2fa7b96bc41e53fe7f572f82a", null ]
     ] ],
     [ "qsc_socket_protocols", "socketflags_8h.html#afff5c215a21dace0a4ef4722f9a17816", [

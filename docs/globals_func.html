@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -206,6 +206,11 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_chacha_poly1305_initialize()&#160;:&#160;<a class="el" href="chacha_8h.html#ae859a94487c4d39c3d8ffa4c20760ab0">chacha.h</a></li>
 <li>qsc_chacha_poly1305_set_associated()&#160;:&#160;<a class="el" href="chacha_8h.html#a77da31132027d9d2ec62a0abeacd078f">chacha.h</a></li>
 <li>qsc_chacha_transform()&#160;:&#160;<a class="el" href="chacha_8h.html#a2cc406c69bd6810302a37db43516f519">chacha.h</a></li>
+<li>qsc_cjp_available()&#160;:&#160;<a class="el" href="cjp_8h.html#a88d96d14058da5270ca4147b78cb36f9">cjp.h</a></li>
+<li>qsc_cjp_generate()&#160;:&#160;<a class="el" href="cjp_8h.html#a447d0129c81661e0d7b2a45b7f5058b7">cjp.h</a></li>
+<li>qsc_cjp_uint16()&#160;:&#160;<a class="el" href="cjp_8h.html#af12a0ee9d2c4070ab2e9cf7556ba8a30">cjp.h</a></li>
+<li>qsc_cjp_uint32()&#160;:&#160;<a class="el" href="cjp_8h.html#a420e4c7bdcd7ec00342885dfbb447212">cjp.h</a></li>
+<li>qsc_cjp_uint64()&#160;:&#160;<a class="el" href="cjp_8h.html#a31f8f1d81e0533fd8a64d866878633a1">cjp.h</a></li>
 <li>qsc_collection_add()&#160;:&#160;<a class="el" href="collection_8h.html#ae80ee4eed82ddfecc8befded44429f89">collection.h</a></li>
 <li>qsc_collection_deserialize()&#160;:&#160;<a class="el" href="collection_8h.html#a7e758a630dcf9a9cb2b54d95eee84296">collection.h</a></li>
 <li>qsc_collection_dispose()&#160;:&#160;<a class="el" href="collection_8h.html#a8fd3cbba34262dc44fa77b221f01de0e">collection.h</a></li>
@@ -246,6 +251,8 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_consoleutils_set_window_prompt()&#160;:&#160;<a class="el" href="consoleutils_8h.html#ab8d27c27093f3cdc3271f2cb7f309f33">consoleutils.h</a></li>
 <li>qsc_consoleutils_set_window_size()&#160;:&#160;<a class="el" href="consoleutils_8h.html#a3ae2203c1b4940fca1f50480baed0c7f">consoleutils.h</a></li>
 <li>qsc_consoleutils_set_window_title()&#160;:&#160;<a class="el" href="consoleutils_8h.html#ad5c9133fea51980405ecc02143082ee6">consoleutils.h</a></li>
+<li>qsc_cpuidex_features_set()&#160;:&#160;<a class="el" href="cpuidex_8h.html#a14f95329ccbe44af10c15e49f225ac77">cpuidex.h</a></li>
+<li>qsc_cpuidex_print_stats()&#160;:&#160;<a class="el" href="cpuidex_8h.html#a0e7399fc38fb95dab648e2a2d165dba5">cpuidex.h</a></li>
 <li>qsc_csg_dispose()&#160;:&#160;<a class="el" href="csg_8h.html#aec897b8492bb1dd8e28779d6c37d0624">csg.h</a></li>
 <li>qsc_csg_generate()&#160;:&#160;<a class="el" href="csg_8h.html#af5b8d2409599933f6d12b041d6f528a9">csg.h</a></li>
 <li>qsc_csg_initialize()&#160;:&#160;<a class="el" href="csg_8h.html#a6ff098602de71c1c799bf950263dea47">csg.h</a></li>
@@ -632,6 +639,7 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_rdp_uint16()&#160;:&#160;<a class="el" href="rdp_8h.html#a21e64c1bfc3f0aed5c9d9af33a9f7367">rdp.h</a></li>
 <li>qsc_rdp_uint32()&#160;:&#160;<a class="el" href="rdp_8h.html#a3a158f1e5303714e65db9cab7d71bed6">rdp.h</a></li>
 <li>qsc_rdp_uint64()&#160;:&#160;<a class="el" href="rdp_8h.html#aaeb6256cf0418f3c64157437d0a919e0">rdp.h</a></li>
+<li>qsc_rdrand_available()&#160;:&#160;<a class="el" href="rdp_8h.html#a7605775b4645df8501b0fd144578b869">rdp.h</a></li>
 <li>qsc_scb_dispose()&#160;:&#160;<a class="el" href="scb_8h.html#a12d0a4d316949c8e927055d7d8de97af">scb.h</a></li>
 <li>qsc_scb_generate()&#160;:&#160;<a class="el" href="scb_8h.html#a059ea73744b887a542f667f82ab701a8">scb.h</a></li>
 <li>qsc_scb_initialize()&#160;:&#160;<a class="el" href="scb_8h.html#a0d452fcb95ea81c7fc7e39910525321b">scb.h</a></li>
@@ -760,6 +768,7 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_socket_server_shut_down()&#160;:&#160;<a class="el" href="socketserver_8h.html#abacaa2b442e18b8473110fba0f6a5aa0">socketserver.h</a></li>
 <li>qsc_socket_server_socket_protocol()&#160;:&#160;<a class="el" href="socketserver_8h.html#a03904e9dbfe5bd0bf4f62ebd879849e1">socketserver.h</a></li>
 <li>qsc_socket_server_socket_transport()&#160;:&#160;<a class="el" href="socketserver_8h.html#aad036f86ba456bbd48f589fade5f00ff">socketserver.h</a></li>
+<li>qsc_socket_set_blocking()&#160;:&#160;<a class="el" href="socketbase_8h.html#a7e3343801527615051111483e7ef4303">socketbase.h</a></li>
 <li>qsc_socket_set_last_error()&#160;:&#160;<a class="el" href="socketbase_8h.html#a54c540e953733f4424eab4b3e7d63a84">socketbase.h</a></li>
 <li>qsc_socket_set_option()&#160;:&#160;<a class="el" href="socketbase_8h.html#aee4dd3492102a2442543425303892dfc">socketbase.h</a></li>
 <li>qsc_socket_shut_down()&#160;:&#160;<a class="el" href="socketbase_8h.html#aa94bcf1c8d210aaf92f37f61964d5013">socketbase.h</a></li>
@@ -864,9 +873,9 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_tls_certificate_interface_is_valid()&#160;:&#160;<a class="el" href="tlscert_8h.html#aad6934b6660252d08a65c459b5a5453d">tlscert.h</a></li>
 <li>qsc_tls_certificate_request_decode()&#160;:&#160;<a class="el" href="tlscert_8h.html#ada8b9ba2f4a05397f9fb9a3e33f817e8">tlscert.h</a></li>
 <li>qsc_tls_certificate_request_encode()&#160;:&#160;<a class="el" href="tlscert_8h.html#abf0b11dae3254066f6af74deef90c930">tlscert.h</a></li>
+<li>qsc_tls_client_config_set_certificate_interface()&#160;:&#160;<a class="el" href="tlsclient_8h.html#ab95299b78913553c68a5ae1457c43353">tlsclient.h</a></li>
 <li>qsc_tls_client_dispose()&#160;:&#160;<a class="el" href="tlsclient_8h.html#af1264137ef798bb90107fc802d912934">tlsclient.h</a></li>
 <li>qsc_tls_client_get_negotiated_cipher_suite()&#160;:&#160;<a class="el" href="tlsclient_8h.html#a531edf8dc7181f11d47f913aaa50e0b6">tlsclient.h</a></li>
-<li>qsc_tls_client_initialize()&#160;:&#160;<a class="el" href="tlsclient_8h.html#a8037b64fd58908af31ba5db05454b4f6">tlsclient.h</a></li>
 <li>qsc_tls_client_is_handshake_complete()&#160;:&#160;<a class="el" href="tlsclient_8h.html#a5672813c573133d1f1c0821b4d007d7d">tlsclient.h</a></li>
 <li>qsc_tls_client_process_record()&#160;:&#160;<a class="el" href="tlsclient_8h.html#adbdbda90e2096d510b32d706262229bf">tlsclient.h</a></li>
 <li>qsc_tls_client_send_hello()&#160;:&#160;<a class="el" href="tlsclient_8h.html#a122069226b63d40ee6256d1d98eaafec">tlsclient.h</a></li>
@@ -887,6 +896,7 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_tls_error_to_string()&#160;:&#160;<a class="el" href="tlserrors_8h.html#a06e1ffd9f5a6154f9b7084710ad0f29d">tlserrors.h</a></li>
 <li>qsc_tls_extensions_bitmap_initialize()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a7b37ca07c6c5511fa8b8de8902fa9458">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_bitmap_set()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#ad22c767a69a260bc9a7e617ee44dbb9a">tlsextensions.h</a></li>
+<li>qsc_tls_extensions_decode_alpn()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a81f864ba8b13beffd9a1f020ea07d868">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_decode_early_data_max()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a57681745574aa6f6559a4a70f14274b3">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_decode_key_share_client_hello()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a2c720672e8a12ce907758f187ef15f5c">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_decode_key_share_hello_retry()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#ab6d2346512daf4fbc4d00c3d3e4d33a3">tlsextensions.h</a></li>
@@ -898,6 +908,7 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_tls_extensions_decode_supported_groups()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a917de3482180013295fcfecc1c70abd7">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_decode_supported_versions_client()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a9bda388874395e15e60b015918ce4079">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_decode_supported_versions_server()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a821ee4c1c0072bb7f0d27ed1ada5fc83">tlsextensions.h</a></li>
+<li>qsc_tls_extensions_encode_alpn()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#ab413c59bb62ef5fc21d1d860529adc51">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_encode_early_data_empty()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a3238f707e157f49a02b4087db5910d1f">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_encode_early_data_max()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a7bff9819d9692ec2ba3e46e3ba360f5d">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_encode_key_share_client()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a4f3d19255e8fdec3bfac26b36d9c7191">tlsextensions.h</a></li>
@@ -913,6 +924,7 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_tls_extensions_encode_supported_versions_client()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a22beb00159cf934e4bdba3784964bbb8">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_encode_supported_versions_server()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a5f5ae143a38a4be45d00c57de41a32ab">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_is_permitted()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#a61764e988ba1f99c89799d31e67ab77d">tlsextensions.h</a></li>
+<li>qsc_tls_extensions_select_alpn()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#ad0c25946438a610c3160567e2f2b1f97">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_select_cipher_suite()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#ac709e727173b88ac4bdc4852a6f0cef7">tlsextensions.h</a></li>
 <li>qsc_tls_extensions_select_key_share()&#160;:&#160;<a class="el" href="tlsextensions_8h.html#aee2f4f1d92985904ee369ba0d8af43c5">tlsextensions.h</a></li>
 <li>qsc_tls_groups_client_derive_shared_secret()&#160;:&#160;<a class="el" href="tlsgroups_8h.html#a5494e641d49cfb1aef09e40196eecb60">tlsgroups.h</a></li>
@@ -971,6 +983,12 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_tls_record_state_initialize()&#160;:&#160;<a class="el" href="tlsrecord_8h.html#aff9251e0728ec6e035de6bae4db7a126">tlsrecord.h</a></li>
 <li>qsc_tls_record_state_install_keys()&#160;:&#160;<a class="el" href="tlsrecord_8h.html#a23c0a960695e1aef77b01327811b78e3">tlsrecord.h</a></li>
 <li>qsc_tls_record_try_get_span_length()&#160;:&#160;<a class="el" href="tlsrecord_8h.html#a4cf9b7a5a45fcd405fdbfc7dc2fa508c">tlsrecord.h</a></li>
+<li>qsc_tls_server_authorize_client_certificate()&#160;:&#160;<a class="el" href="tlsserver_8h.html#a5afb493f8844e840bd5ed94ae2d57a75">tlsserver.h</a></li>
+<li>qsc_tls_server_config_add_certificate_identity()&#160;:&#160;<a class="el" href="tlsserver_8h.html#ad4186b6ff4c90ffff222b3f483ae267c">tlsserver.h</a></li>
+<li>qsc_tls_server_config_set_certificate_interface()&#160;:&#160;<a class="el" href="tlsserver_8h.html#a3f472ce630167b74ceef56db34d9f10c">tlsserver.h</a></li>
+<li>qsc_tls_server_config_set_client_authorization()&#160;:&#160;<a class="el" href="tlsserver_8h.html#a8058a0ec1886493b87e862fd41032232">tlsserver.h</a></li>
+<li>qsc_tls_server_config_set_local_certificate()&#160;:&#160;<a class="el" href="tlsserver_8h.html#ada96d4caf095be3104bc698a5721b2f6">tlsserver.h</a></li>
+<li>qsc_tls_server_config_set_sni_required()&#160;:&#160;<a class="el" href="tlsserver_8h.html#a52623ffbf3c2bc77c2304043fd688d60">tlsserver.h</a></li>
 <li>qsc_tls_server_process_record()&#160;:&#160;<a class="el" href="tlsserver_8h.html#a5e49df416c60bbb2bc04aa8ada7b7e5a">tlsserver.h</a></li>
 <li>qsc_tls_session_ticket_decode()&#160;:&#160;<a class="el" href="tlssession_8h.html#a54ec752235417e26d15ca166a9eb2e0b">tlssession.h</a></li>
 <li>qsc_tls_session_ticket_dispose()&#160;:&#160;<a class="el" href="tlssession_8h.html#a305ad45b3a87495cc509dbba83fda4a8">tlssession.h</a></li>
@@ -990,6 +1008,77 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_tls_signature_scheme_x509_algorithm()&#160;:&#160;<a class="el" href="tlssigalgs_8h.html#a4fee5f846e3fdb34cea503a4608bef4d">tlssigalgs.h</a></li>
 <li>qsc_tls_signer_default_sign()&#160;:&#160;<a class="el" href="tlssignerdefault_8h.html#ac5bb8eb0dd84f85677fa7c417cd46c2e">tlssignerdefault.h</a></li>
 <li>qsc_tls_signer_default_verify()&#160;:&#160;<a class="el" href="tlssignerdefault_8h.html#a8739c9ef6254a5b14baf9d0447556992">tlssignerdefault.h</a></li>
+<li>qsc_tls_socket_client_connect_host()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a82bf7da630342ad1cb654d8c964d1e2c">tlssocket.h</a></li>
+<li>qsc_tls_socket_client_connect_host_ex()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a053311e2e5d0ef34aa6264aaca14af52">tlssocket.h</a></li>
+<li>qsc_tls_socket_client_connect_ipv4()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a65ad3a796a2d15b75797cb30c9ffc69b">tlssocket.h</a></li>
+<li>qsc_tls_socket_client_connect_ipv6()&#160;:&#160;<a class="el" href="tlssocket_8h.html#acec5cd32b78628b00fd44f13522aa2fa">tlssocket.h</a></li>
+<li>qsc_tls_socket_connection_cancel()&#160;:&#160;<a class="el" href="tlssocket_8h.html#aab32d0de1a8c77b1e12f22a68acd0d00">tlssocket.h</a></li>
+<li>qsc_tls_socket_connection_clear_session_ticket()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ad037094922da6aebdc4f3b10df7c2053">tlssocket.h</a></li>
+<li>qsc_tls_socket_connection_dispose()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a76bbaacf09839b8017bb53f7d0684ab2">tlssocket.h</a></li>
+<li>qsc_tls_socket_connection_get_session_ticket()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a3936e0414bd4ed97f42db249ab808e24">tlssocket.h</a></li>
+<li>qsc_tls_socket_connection_initialize()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ab285790481eef747d26d01e14341bfcc">tlssocket.h</a></li>
+<li>qsc_tls_socket_connection_set_log_callback()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a328c23a55e0c1a503a2ba6aa05032f0f">tlssocket.h</a></li>
+<li>qsc_tls_socket_connection_set_socket_options()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a6e7bc34547515a5e67feb8298868e461">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_add_server_identity_files()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a4187716d6403668b48f02321d16213d3">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_clear_alpn_protocols()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a9280cfe08f9c004d1de7dacb5a26ade9">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_clear_session_ticket()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a2caabd1c34d99ddf82ef63f48fc10862">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_dispose()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ae45a04e639afe7fe9356df7142c30941">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_initialize()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a88ce0e7b25d1cf28119461b1dbbb352a">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_load_crl_file()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ab2a0a507ebcdd4535133bfa8d458b8e6">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_load_server_identity_files()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a4ef5b9dded1b6201f4ffd38076f46a19">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_load_trust_anchor_bundle_file()&#160;:&#160;<a class="el" href="tlssocket_8h.html#aa9d4154b27bb5195cdf03b4a7847a360">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_load_trust_anchor_file()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ac250f79aa751b170d9f1ae4d6d5370c0">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_alpn_protocols()&#160;:&#160;<a class="el" href="tlssocket_8h.html#aa96e8894a9b41d5a0bc9e38e96c5c5a8">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_cipher_suites()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a3e365d870b4dd8542bfe05529bfeec02">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_client_auth()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a316200092efdac8020bf0da6c01af305">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_client_authorization()&#160;:&#160;<a class="el" href="tlssocket_8h.html#aa892ccc22ebe067e3cb98411488aad47">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_default_client_policy()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a1bd33befa6158ed32dc5d52c18db1cee">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_default_server_policy()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a06d664d05ff47d4692ed1f69c2237966">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_development_policy()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a9b66f71094fbc92d019a83c7bc1dc579">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_experimental_pqc_policy()&#160;:&#160;<a class="el" href="tlssocket_8h.html#aecdeacc6f1653c4ef29064bee6435411">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_log_callback()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ac5fdaafbb52837df994bd7f5cf1a35d1">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_mlkem_hybrid_policy()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a36c9ee1c3d3bc46add8d736452d2cb06">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_named_groups()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a6eaaab3e64e8aa96b637c416d1471a24">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_session_ticket()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a54c2a8d0384a3758cd7335fea6d0e88a">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_session_ticket_policy()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a395c7de72afcddd61756e04884a62133">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_signature_schemes()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a54e52fac4bbc753998d28507b2f48d97">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_sni_required()&#160;:&#160;<a class="el" href="tlssocket_8h.html#acfc204a02e1747ac75ab375241dca60d">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_socket_options()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a89ac46c6222feb24513d99e7c1614c43">tlssocket.h</a></li>
+<li>qsc_tls_socket_context_set_strict_policy()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a77b6f49cc1948c7804ba17fc7c6bf817">tlssocket.h</a></li>
+<li>qsc_tls_socket_get_peer_info()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ab490c67db357a4958eed3db0f25d8b7b">tlssocket.h</a></li>
+<li>qsc_tls_socket_get_selected_alpn()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a957cd860f4e3f727ea63ee837e69f77f">tlssocket.h</a></li>
+<li>qsc_tls_socket_is_connected()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a2ce59ce78965f757a248e3d17e32a0a2">tlssocket.h</a></li>
+<li>qsc_tls_socket_is_handshake_complete()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ad62f840550508f00cc9cfb6a75c08779">tlssocket.h</a></li>
+<li>qsc_tls_socket_key_update()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a661341d11d39ae7574c84c478f47f9bb">tlssocket.h</a></li>
+<li>qsc_tls_socket_listener_accept()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a3de37aad793e4781694fe21c5661d0a9">tlssocket.h</a></li>
+<li>qsc_tls_socket_listener_bind()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a4ed64d317296bb75d4d3c6bf79bda61d">tlssocket.h</a></li>
+<li>qsc_tls_socket_listener_close()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a7849f790a2dfb10848b484f8db70134f">tlssocket.h</a></li>
+<li>qsc_tls_socket_listener_initialize()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a44d3f1e0094c37951a883f8d6c11d84f">tlssocket.h</a></li>
+<li>qsc_tls_socket_listener_set_options()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a0bff9a9baf278b63c222cac1f6f30f50">tlssocket.h</a></li>
+<li>qsc_tls_socket_listener_set_socket_options()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a1bbecf4753e1c795e660fd5987a3520b">tlssocket.h</a></li>
+<li>qsc_tls_socket_negotiated_cipher_suite()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a10700b6d11231cfc6c180121c48bb925">tlssocket.h</a></li>
+<li>qsc_tls_socket_negotiated_group()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ac9057cac685ecf64d3a43488cb0790ce">tlssocket.h</a></li>
+<li>qsc_tls_socket_negotiated_signature_scheme()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ac197c64d7114aabfe6e1eea8e67cdbb2">tlssocket.h</a></li>
+<li>qsc_tls_socket_options_initialize_default()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a71e50d03bbe5a6d87e8e444681417de9">tlssocket.h</a></li>
+<li>qsc_tls_socket_receive()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a817d858e9aaa89691d35c8e56e1cb274">tlssocket.h</a></li>
+<li>qsc_tls_socket_receive_frame()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a435f0388eaa1a1138056b345d29439d9">tlssocket.h</a></li>
+<li>qsc_tls_socket_result_clear()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a2d73e08c83bee8adb452adc320f90a53">tlssocket.h</a></li>
+<li>qsc_tls_socket_send()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a2f3b155f1973b85b394e90e20ca5c7c4">tlssocket.h</a></li>
+<li>qsc_tls_socket_send_frame()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a73a2433edac23c3205191b45cf9e2ddd">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_configure()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a713b6a2b66b2db0bf2345ab041746bff">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_dispose()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a5fec6ab4073ffa41141ac526085b0a73">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_initialize()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a4229e626d7e9143c2b529907c248428d">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_send_session_ticket()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a6f77fddf375f618ebb3d347475dd334a">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_set_callbacks()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a09ffb3750935a98cd878969ad02f9d1f">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_set_log_callback()&#160;:&#160;<a class="el" href="tlssocket_8h.html#acc105f40b05a4df64195b849e2b4f75f">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_set_max_clients()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a56242b0008c093c125022139592b7af0">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_start()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a25fc9e36f817ba82579b3e95b78af7fb">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_start_concurrent()&#160;:&#160;<a class="el" href="tlssocket_8h.html#ae014e227df0327325c34d2518c69d60e">tlssocket.h</a></li>
+<li>qsc_tls_socket_server_stop()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a16c4ce7f08be595a74004dcdc7f89df3">tlssocket.h</a></li>
+<li>qsc_tls_socket_session_ticket_is_valid()&#160;:&#160;<a class="el" href="tlssocket_8h.html#aada59f59b07371f902e8aca8cb8b70b0">tlssocket.h</a></li>
+<li>qsc_tls_socket_shutdown()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a785fee75ea276dede85ebc20a48549f1">tlssocket.h</a></li>
+<li>qsc_tls_socket_status_string()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a6b82126f13bd4b4a53a9c0daa9f4d803">tlssocket.h</a></li>
+<li>qsc_tls_socket_ticket_policy_initialize_default()&#160;:&#160;<a class="el" href="tlssocket_8h.html#a78a94ca3601d292f92aa656914a79e84">tlssocket.h</a></li>
 <li>qsc_tls_transcript_digest_size()&#160;:&#160;<a class="el" href="tlstranscript_8h.html#a8861789b4f3dee4f6bfed0aadb300796">tlstranscript.h</a></li>
 <li>qsc_tls_transcript_dispose()&#160;:&#160;<a class="el" href="tlstranscript_8h.html#a1d62612e90aec90aca944add2329177b">tlstranscript.h</a></li>
 <li>qsc_tls_transcript_initialize()&#160;:&#160;<a class="el" href="tlstranscript_8h.html#a74254cba658e28b79d010c12803496a0">tlstranscript.h</a></li>
@@ -1335,18 +1424,13 @@ $(function(){initNavTree('globals_func.html','',''); });
 <li>qsc_x509w_server_identity_verify()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a20ebcd508f661acce91370b026adceb0">x509wrap.h</a></li>
 <li>qsc_x509w_stage_string()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a2249df712ef1b5064847ad9d4aeb1d84">x509wrap.h</a></li>
 <li>qsc_x509w_status_string()&#160;:&#160;<a class="el" href="x509wrap_8h.html#ab4268a09faf92ae0db1136a8cc5de3b0">x509wrap.h</a></li>
-<li>qsc_x509w_tls_bridge_attach_client_validation()&#160;:&#160;<a class="el" href="x509wrap_8h.html#ac3eeed64a6271a6a2ca9974cf74186dd">x509wrap.h</a></li>
-<li>qsc_x509w_tls_bridge_attach_server_validation()&#160;:&#160;<a class="el" href="x509wrap_8h.html#ab0ca4dc6bcff8f797d8cf19427e12454">x509wrap.h</a></li>
 <li>qsc_x509w_tls_bridge_configure()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a555594fe9f1fc7fc51aaaf2bc0df6866">x509wrap.h</a></li>
 <li>qsc_x509w_tls_bridge_get_interface()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a304a521ac54e15800d0354a9dc3b36c1">x509wrap.h</a></li>
 <li>qsc_x509w_tls_bridge_initialize()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a4daa7f735c88ce0f21e2389ad428e957">x509wrap.h</a></li>
 <li>qsc_x509w_tls_bridge_is_ready()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a47dbe4c76b8a70f2fa649725437aa767">x509wrap.h</a></li>
-<li>qsc_x509w_tls_bridge_set_client()&#160;:&#160;<a class="el" href="x509wrap_8h.html#aed96ba6c2ebb7d73c9567e32228a4f6d">x509wrap.h</a></li>
-<li>qsc_x509w_tls_bridge_set_server_validation()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a6117a547d0cd910139b13f8c623fb65c">x509wrap.h</a></li>
 <li>qsc_x509w_tls_local_certificate_from_identity()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a609f3de4369c53d2ad18f34500cd60f8">x509wrap.h</a></li>
 <li>qsc_x509w_tls_local_certificate_initialize()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a9603435e50d8945ecf6609d8397e301f">x509wrap.h</a></li>
 <li>qsc_x509w_tls_local_certificate_is_ready()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a5874dba4bba1fb7cde18f704cca6e0d3">x509wrap.h</a></li>
-<li>qsc_x509w_tls_server_set_local_certificate()&#160;:&#160;<a class="el" href="x509wrap_8h.html#adaafbfcfe46f0d2bd1b96e85beca244c">x509wrap.h</a></li>
 <li>qsc_x509w_trust_store_add_anchor()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a3ed85ae8e7a4222c6a37541d9e204f3a">x509wrap.h</a></li>
 <li>qsc_x509w_trust_store_add_anchor_bundle_file()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a79028620647e1ab2f5340451c94559f6">x509wrap.h</a></li>
 <li>qsc_x509w_trust_store_add_anchor_bundle_memory()&#160;:&#160;<a class="el" href="x509wrap_8h.html#a29b5ea39299f79389572e68d7fc5b97b">x509wrap.h</a></li>

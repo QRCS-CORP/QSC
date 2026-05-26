@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -193,6 +193,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:afbf4797cf092fdaea6e0201c6330cd76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detects if the string contains a valid IPV6 address.  <br /></td></tr>
 <tr class="memitem:a7eba8d01ae80882bd8c7b4cd3e3aad6a" id="r_a7eba8d01ae80882bd8c7b4cd3e3aad6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7eba8d01ae80882bd8c7b4cd3e3aad6a">qsc_socket_is_blocking</a> (const <a class="el" href="structqsc__socket.html">qsc_socket</a> *sock)</td></tr>
 <tr class="memdesc:a7eba8d01ae80882bd8c7b4cd3e3aad6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if the socket is in blocking mode.  <br /></td></tr>
+<tr class="memitem:a7e3343801527615051111483e7ef4303" id="r_a7e3343801527615051111483e7ef4303"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="#a31eef834848a4f642a5037b5a16055b4">qsc_socket_exceptions</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e3343801527615051111483e7ef4303">qsc_socket_set_blocking</a> (const <a class="el" href="structqsc__socket.html">qsc_socket</a> *sock, bool enabled)</td></tr>
+<tr class="memdesc:a7e3343801527615051111483e7ef4303"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the socket blocking mode.  <br /></td></tr>
 <tr class="memitem:ac556e0bea756f3f52927b874244707fa" id="r_ac556e0bea756f3f52927b874244707fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac556e0bea756f3f52927b874244707fa">qsc_socket_is_connected</a> (const <a class="el" href="structqsc__socket.html">qsc_socket</a> *sock)</td></tr>
 <tr class="memdesc:ac556e0bea756f3f52927b874244707fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if the socket is connected.  <br /></td></tr>
 <tr class="memitem:a1e2c9ef43162ae427a08a7a3381ee31c" id="r_a1e2c9ef43162ae427a08a7a3381ee31c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="#a31eef834848a4f642a5037b5a16055b4">qsc_socket_exceptions</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e2c9ef43162ae427a08a7a3381ee31c">qsc_socket_accept</a> (const <a class="el" href="structqsc__socket.html">qsc_socket</a> *source, <a class="el" href="structqsc__socket.html">qsc_socket</a> *target)</td></tr>
@@ -1447,6 +1449,38 @@ Reference Links:</h1>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>[size_t] Returns the number of bytes sent to the remote host </dd></dl>
+
+</div>
+</div>
+<a id="a7e3343801527615051111483e7ef4303" name="a7e3343801527615051111483e7ef4303"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e3343801527615051111483e7ef4303">&#9670;&#160;</a></span>qsc_socket_set_blocking()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="#a31eef834848a4f642a5037b5a16055b4">qsc_socket_exceptions</a> qsc_socket_set_blocking </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structqsc__socket.html">qsc_socket</a> *</td>          <td class="paramname"><span class="paramname"><em>sock</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>enabled</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the socket blocking mode. </p>
+<p>This function enables or disables blocking behavior on an initialized socket. A blocking socket waits for send, receive, accept, and connect operations to complete. A non-blocking socket returns immediately when an operation would block.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sock</td><td>[const qsc_socket*] The socket instance </td></tr>
+    <tr><td class="paramname">enabled</td><td>[bool] Enable blocking mode when true, or non-blocking mode when false</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="#a31eef834848a4f642a5037b5a16055b4" title="Socket code enumeration names.">qsc_socket_exceptions</a>] Returns an exception code on failure, or success(0) </dd></dl>
 
 </div>
 </div>

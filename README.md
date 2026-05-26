@@ -19,11 +19,15 @@
 
 ## What's New in This Release
 
-This release completes the TLS 1.3 protocol stack and extends the elliptic curve primitive suite.
+This release completes the TLS 1.3 protocol stack, strengthens TLS/X.509 policy handling, and extends the elliptic curve primitive suite.
 
 ### Complete TLS 1.3 Protocol Stack
 
-The TLS 1.3 implementation is now complete. The full RFC 8446 protocol surface is covered, including hybrid post-quantum key exchange, mutual TLS, PSK resumption with 0-RTT early data, post-handshake KeyUpdate and NewSessionTicket, and a blocking-socket I/O adapter. See the [TLS 1.3 Protocol Stack](#tls-13-protocol-stack) section for the full module map and feature detail.
+The TLS 1.3 implementation is now complete. The stack implements the RFC 8446 handshake, record layer, certificate authentication, mutual TLS, session-ticket policy controls, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket handling, ALPN negotiation, SNI-based certificate selection, and framed-message socket helpers. The TLS group layer supports classical ECDHE, pure ML-KEM, and the currently implemented IETF-aligned ECDHE+ML-KEM hybrid groups. See the [TLS 1.3 Protocol Stack](#tls-13-protocol-stack) section for the full module map and feature detail.
+
+### TLS/X.509 Interoperability and Regression Coverage
+
+The TLS/X.509 implementation has been expanded with peer-information inspection, structured verification-result reporting, socket option and timeout policy controls, concurrent shutdown cleanup, record fragmentation and coalescing handling, ALPN, SNI and multi-certificate support, mTLS authorization callbacks, framed-message helpers, session-ticket policy controls, and negative X.509 validation tests. The staged QSCTest suite now includes dedicated TLS regression stages for these features.
 
 ### Expanded Elliptic Curve Primitive Suite
 
@@ -53,7 +57,7 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 
 QSC is a production-grade cryptographic library built for environments that demand verifiable correctness, long-term quantum resistance, and high throughput. The library combines NIST-standardized post-quantum algorithms with classical primitives, proprietary high-security constructions, and SIMD-accelerated implementations, all within a single, dependency-free C23 codebase.
 
-The library now includes a complete TLS 1.3 protocol stack (RFC 8446) built entirely on the QSC cryptographic core, with no dependency on OpenSSL or any other external TLS library. The stack implements the full handshake surface - 1-RTT certificate-authenticated, mutual TLS, PSK resumption with 0-RTT early data, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket - and supports hybrid post-quantum key exchange that combines classical ECDH with ML-KEM encapsulation in a single flight. It integrates directly with the QSC X.509 certificate infrastructure, key schedule, and AEAD record layer.
+The library now includes a complete TLS 1.3 protocol stack (RFC 8446) built entirely on the QSC cryptographic core, with no dependency on OpenSSL or any other external TLS library. The stack implements the full handshake surface - 1-RTT certificate-authenticated, mutual TLS, PSK resumption with ticket-policy controls, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket, ALPN, SNI-based certificate selection, peer-information inspection, structured verification results, framed-message socket helpers, and hardened shutdown behaviour. It supports hybrid post-quantum key exchange that combines classical ECDH with ML-KEM encapsulation in a single flight. It integrates directly with the QSC X.509 certificate infrastructure, key schedule, AEAD record layer, and socket I/O adapter.
 
 Additional recent additions include full ECDSA implementations for NIST P-256, P-384, and P-521 interoperable with the CA/Browser Forum Baseline Requirements, ECDH key agreement over the same NIST P-curves, EdDH (X25519 and X448) and EdDSA (Ed25519 and Ed448) Edwards-curve primitives, Falcon lattice-based signatures, the HQC code-based key encapsulation mechanism, and a comprehensive X.509 certificate infrastructure built on a strict DER/BER-capable ASN.1 engine. The X.509 layer covers the full certificate lifecycle: parsing, validation, generation, revocation, OCSP, PKCS#12 key management, and post-quantum ML-DSA certificate profiles, without any external dependencies.
 
@@ -89,6 +93,8 @@ The primary validation suite for the QSC library. QSCTest exercises every crypto
 - **Function Correctness** - round-trip and cross-function consistency checks (e.g., encrypt→decrypt, sign→verify).
 
 Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, HQC, ECDH P-256/P-384/P-521, EdDH X25519/X448), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256/P-384/P-521, EdDSA Ed25519/Ed448), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP), the X.509 certificate layer, the complete TLS 1.3 protocol stack, and all utility modules.
+
+The TLS regression suite is organized into staged feature tests. Current TLS/X.509 stages include ALPN negotiation, SNI and multi-certificate policy, mTLS authorization callbacks, peer-info and verification-result inspection, session-ticket policy controls, framed-message helper policy, record fragmentation and coalescing, socket option and timeout policy, concurrent shutdown and worker cleanup, and negative X.509 certificate-purpose validation.
 
 ---
 
@@ -160,12 +166,17 @@ QSC includes a complete TLS 1.3 implementation conforming to RFC 8446, built ent
 The complete RFC 8446 protocol surface is implemented:
 
 - **1-RTT handshake** - certificate-authenticated client and server paths; full state machine from ClientHello through application data
-- **Mutual TLS (mTLS)** - server-initiated CertificateRequest; client certificate presentation and validation
-- **PSK resumption** - NewSessionTicket emission and consumption; binder computation; 1-RTT and 0-RTT (early data) paths with EndOfEarlyData sequencing
+- **Mutual TLS (mTLS)** - server-initiated CertificateRequest; client certificate presentation, validation, and authorization callback policy
+- **PSK resumption** - NewSessionTicket emission and consumption; binder computation; 1-RTT and 0-RTT policy controls
 - **HelloRetryRequest** - server-initiated group renegotiation with transcript message_hash transform per RFC 8446 §4.4.1; enforced one-HRR-per-handshake limit
+- **ALPN** - application-layer protocol negotiation with ordered protocol lists, strict vector decoding, selected-protocol inspection, and optional policy enforcement
+- **SNI and multi-certificate selection** - server_name extension processing and hostname-driven local certificate selection, including default-certificate fallback policy
 - **Post-handshake KeyUpdate** - both `update_not_requested` and `update_requested` flows; reciprocal update is mandatory when requested (RFC 8446 §4.6.3)
 - **Post-handshake NewSessionTicket** - server emission and client consumption with per-ticket PSK derivation from `resumption_master_secret`
-- **Closure** - encrypted `close_notify` alert construction and dispatch
+- **Peer inspection** - negotiated cipher suite, named group, signature scheme, selected ALPN, peer-certificate summary, and structured verification-result reporting
+- **Socket policy** - receive, send, connect, handshake, and idle timeout controls; socket buffer policy; no-delay, keep-alive, reuse-address, dual-stack, and blocking-mode controls
+- **Framed messages** - length-prefixed message helpers layered over TLS application data with deterministic bounds checking
+- **Closure and cleanup** - encrypted `close_notify` alert construction and dispatch, idempotent listener close, concurrent server stop cleanup, and worker state reset
 - **Compatibility** - ChangeCipherSpec pass-through for middlebox compatibility
 
 #### Cipher Suites
@@ -178,26 +189,20 @@ The complete RFC 8446 protocol surface is implemented:
 
 #### Named Groups and Hybrid Key Exchange
 
-The group layer abstracts classical, pure-KEM, and hybrid named groups behind a uniform descriptor and key-exchange interface. Hybrid groups concatenate the ECDH shared secret with the ML-KEM shared secret in the order specified by `draft-ietf-tls-hybrid-design` and pass the combined value as the DHE input to HKDF-Extract. All key-share buffer sizes are enforced at compile time via static assertions in `tlslimits.h`.
+The group layer abstracts classical, pure-KEM, and hybrid named groups behind a uniform descriptor and key-exchange interface. Hybrid groups use the component key-share and shared-secret ordering required by their corresponding IETF TLS profiles. All key-share buffer sizes are enforced at compile time via static assertions in `tlslimits.h`.
 
-| Group | IANA | Classical | PQC Component |
-|---|---|---|---|
-| secp256r1 | 0x0017 | P-256 ECDH | - |
-| secp384r1 | 0x0018 | P-384 ECDH | - |
-| secp521r1 | 0x0019 | P-521 ECDH | - |
-| x25519 | 0x001D | X25519 | - |
-| x448 | 0x001E | X448 | - |
-| ML-KEM-512 | 0x0200 | - | ML-KEM-512 |
-| ML-KEM-768 | 0x0201 | - | ML-KEM-768 |
-| ML-KEM-1024 | 0x0202 | - | ML-KEM-1024 |
-| x25519 + ML-KEM-512 | 0x11EB | X25519 | ML-KEM-512 |
-| x25519 + ML-KEM-768 | 0x11EC | X25519 | ML-KEM-768 |
-| secp256r1 + ML-KEM-768 | 0x11ED | P-256 ECDH | ML-KEM-768 |
-| secp384r1 + ML-KEM-1024 | 0x11EE | P-384 ECDH | ML-KEM-1024 |
-| x25519 + ML-KEM-1024 | 0x11EF | X25519 | ML-KEM-1024 |
-| secp256r1 + ML-KEM-512 | 0x11F0 | P-256 ECDH | ML-KEM-512 |
-| secp256r1 + ML-KEM-1024 | 0x11F1 | P-256 ECDH | ML-KEM-1024 |
-| secp384r1 + ML-KEM-768 | 0x11F2 | P-384 ECDH | ML-KEM-768 |
+| Group | IANA | Classical | PQC Component | Availability |
+|---|---:|---|---|---|
+| secp256r1 | 0x0017 | P-256 ECDH | - | `QSC_ECDH_S1P256` |
+| secp384r1 | 0x0018 | P-384 ECDH | - | enabled profile |
+| x25519 | 0x001D | X25519 | - | enabled profile |
+| x448 | 0x001E | X448 | - | enabled profile |
+| ML-KEM-512 | 0x0200 | - | ML-KEM-512 | `QSC_KYBER_S1K2P512` |
+| ML-KEM-768 | 0x0201 | - | ML-KEM-768 | `QSC_KYBER_S3K3P768` |
+| ML-KEM-1024 | 0x0202 | - | ML-KEM-1024 | `QSC_KYBER_S5K4P1024` |
+| X25519MLKEM768 | 0x11EC | X25519 | ML-KEM-768 | ML-KEM-768 profile |
+| SecP256r1MLKEM768 | 0x11EB | P-256 ECDH | ML-KEM-768 | ML-KEM-768 profile plus P-256 ECDH |
+| SecP384r1MLKEM1024 | 0x11ED | P-384 ECDH | ML-KEM-1024 | ML-KEM-1024 profile |
 
 #### Signature Schemes
 
@@ -224,7 +229,7 @@ The group layer abstracts classical, pure-KEM, and hybrid named groups behind a 
 | **I/O Adapter** | `tlsio.*` | Blocking-socket adapter (qsc_tls_io_connection) binding a TLS engine to a QSC socket; handshake drive loop with maximum round-trip limit; send, receive, and shutdown |
 | **Named Groups** | `tlsgroups.*` | NamedGroup descriptor table; keypair generation and shared-secret derivation for all classical, pure-KEM, and hybrid groups; compile-time size validation |
 | **Signature Algorithms** | `tlssigalgs.*` | SignatureScheme registry; maps TLS algorithm identifiers to QSC ECDSA, Ed25519, and ML-DSA signing backends |
-| **Extensions** | `tlsextensions.*` | Encode and decode for all TLS 1.3 extensions: supported_versions, key_share (client offer and server response), supported_groups, signature_algorithms, server_name (SNI), pre_shared_key, psk_key_exchange_modes, early_data, NewSessionTicket early_data |
+| **Extensions** | `tlsextensions.*` | Encode and decode for TLS 1.3 extensions: supported_versions, key_share (client offer and server response), supported_groups, signature_algorithms, signature_algorithms_cert where enabled, server_name (SNI), application_layer_protocol_negotiation (ALPN), pre_shared_key, psk_key_exchange_modes, early_data, and NewSessionTicket early_data |
 | **Key Schedule** | `tlskeyschedule.*` | Complete RFC 8446 §7.1 HKDF key schedule: HKDF-Extract and HKDF-Expand-Label; Derive-Secret for all epochs; traffic key and IV derivation; Finished MAC computation and constant-time verification; binder key derivation and PSK binder computation; KeyUpdate traffic-secret rotation; CertificateVerify input construction; resumption PSK derivation |
 | **Transcript Hash** | `tlstranscript.*` | Running SHA-256, SHA-384, or SHA-512 transcript hash; snapshot without disturbing running state; HelloRetryRequest message_hash transform (RFC 8446 §4.4.1); secure erasure of cloned hash state |
 | **Handshake Messages** | `tlshandshake.*` | Encode and decode helpers for all RFC 8446 handshake message body types: ClientHello, ServerHello, EncryptedExtensions, Certificate, CertificateRequest, CertificateVerify, Finished, KeyUpdate, NewSessionTicket, EndOfEarlyData |
@@ -235,7 +240,8 @@ The group layer abstracts classical, pure-KEM, and hybrid named groups behind a 
 | **ECDSA DER Helper** | `tlsecdsader.*` | ECDSA signature DER encode/decode helpers used by the TLS signature scheme layer |
 | **TLS Engine** | `tlsengine.*` | Unified client/server connection handle (qsc_tls_connection); handshake drive; application data encrypt/decrypt; post-handshake dispatch (KeyUpdate, NewSessionTicket); session ticket emission and consumption; close_notify; full keying-material zeroization on dispose |
 | **TLS Client** | `tlsclient.*` | Client handshake state machine: ClientHello emission; ServerHello supported_versions verification; HelloRetryRequest processing; EncryptedExtensions, Certificate, CertificateVerify, and Finished processing; PSK binder computation; early-data key installation; client Finished emission; application-key installation |
-| **TLS Server** | `tlsserver.*` | Server handshake state machine: ClientHello parsing with supported_versions validation; ServerHello and full server flight emission; HelloRetryRequest emission; client certificate handling (mTLS); PSK lookup callback interface; early-data acceptance; NewSessionTicket emission |
+| **TLS Server** | `tlsserver.*` | Server handshake state machine: ClientHello parsing with supported_versions validation; ServerHello and full server flight emission; HelloRetryRequest emission; SNI certificate selection; client certificate handling (mTLS); authorization callback processing; PSK lookup callback interface; early-data acceptance; NewSessionTicket emission |
+| **TLS Socket API** | `tlssocket.*` | Blocking socket integration, connection/listener wrappers, socket option propagation, timeout policy, selected ALPN accessors, peer-info accessors, framed-message helpers, and concurrent shutdown cleanup |
 | **Alert and State Types** | `tlsstate.h` | Internal state structures: qsc_tls_record_state, qsc_tls_transcript_state, qsc_tls_key_schedule_state, qsc_tls_peer_capabilities, qsc_tls_local_certificate_config |
 
 #### Security Properties
@@ -247,6 +253,9 @@ The group layer abstracts classical, pure-KEM, and hybrid named groups behind a 
 - **Constant-time content-type scanning** - the inner content-type backward byte scan uses mask-select operations with no data-dependent branches
 - **Sequence exhaustion enforcement** - the 64-bit record sequence counter is checked for UINT64_MAX exhaustion before any AEAD operation; no record is ever processed under an exhausted nonce space (RFC 8446 §5.5)
 - **Mandatory CertificateVerify callback** - the engine returns `internal_error` if `verifycertificateverify` is not configured; the handshake cannot complete without server authentication
+- **Certificate-bound signature selection** - the server selects a TLS signature scheme only when it is build-supported, CertificateVerify-capable, and compatible with the active local certificate identity
+- **TLS certificate-purpose enforcement** - TLS server and client leaf certificates are rejected when BasicConstraints, KeyUsage, ExtendedKeyUsage, SAN, hostname, validity, or critical-extension policy does not satisfy the configured purpose
+- **Structured verification reporting** - peer certificate, hostname, chain, X.509 wrapper, TLS status, and alert mappings are retained for inspection after success or failure
 - **Secure erasure** - all traffic keys, transcript states, shared secrets, and handshake buffers are cleared with `qsc_memutils_secure_erase` at disposal; key material is erased before overwrite on epoch transitions
 
 ---
@@ -566,11 +575,11 @@ The default project configuration uses minimal flags with no enhanced instructio
 | **Classical Algorithms** | AES, SHA-2/3, HMAC, ChaCha20-Poly1305, ECDH (P-256/P-384/P-521, X25519/X448), ECDSA (P-256/P-384/P-521), EdDSA (Ed25519/Ed448) |
 | **Proprietary Constructions** | RCS, CSX, QMAC, SCB - each with formal security analysis |
 | **X.509 / PKI Infrastructure** | Full certificate lifecycle: DER/PEM parsing and generation, chain verification, CRL and OCSP revocation, PKCS#10 CSR, PKCS#12 key bundles, trust store management; ECDSA and ML-DSA-44/65/87 certificate profiles; RFC 5280, RFC 6125, and X.690 strict DER compliance |
-| **TLS 1.3** | Complete RFC 8446 implementation: 1-RTT, mTLS, PSK resumption, 0-RTT early data, HelloRetryRequest, KeyUpdate, NewSessionTicket; 16 named groups including 8 hybrid post-quantum groups; 6 signature schemes including ML-DSA-44/65/87; no external TLS dependencies |
-| **Hybrid Post-Quantum Key Exchange** | ECDH + ML-KEM combined in a single TLS handshake flight; shared secrets concatenated per draft-ietf-tls-hybrid-design; 8 hybrid group configurations from secp256r1+ML-KEM-512 to secp384r1+ML-KEM-1024 |
+| **TLS 1.3** | Complete RFC 8446 implementation: 1-RTT, mTLS, PSK resumption, HelloRetryRequest, KeyUpdate, NewSessionTicket, ALPN, SNI/multi-certificate selection, peer-info inspection, verification-result reporting, socket timeout policy, framed-message helpers, and concurrent shutdown cleanup; no external TLS dependencies |
+| **Hybrid Post-Quantum Key Exchange** | ECDH + ML-KEM combined in a single TLS handshake flight; implemented IETF-aligned hybrid groups are X25519MLKEM768, SecP256r1MLKEM768, and SecP384r1MLKEM1024 |
 | **SIMD Acceleration** | AVX, AVX2, AVX-512, AES-NI, RDRAND across all major primitives |
 | **Security Standard** | MISRA C compliant throughout |
-| **Testing** | KAT, NIST ACVP/CAVP, fuzzing, and stress tests for every primitive including the full TLS 1.3 stack |
+| **Testing** | KAT, NIST ACVP/CAVP, fuzzing, stress tests, OpenSSL TLS interoperability tests, and staged TLS/X.509 regression tests for ALPN, SNI, mTLS authorization, peer-info inspection, session-ticket policy, framed messages, record fragmentation/coalescing, socket policy, concurrent shutdown, and negative X.509 validation |
 | **Platforms** | Windows (MSVC), Linux (GCC), macOS (Clang) |
 | **Language Interop** | C++, and .NET (C#/VB.NET/F#) via the QSCNETCW managed wrapper |
 | **Self-Contained** | No external runtime dependencies |
@@ -580,7 +589,7 @@ The default project configuration uses minimal flags with no enhanced instructio
 ## Roadmap
 
 - [ ] Continued ASM and SIMD integration and optimization
-- [x] TLS 1.3 *(complete - RFC 8446 compliant; 1-RTT, mTLS, PSK/0-RTT, HRR, KeyUpdate, NewSessionTicket, hybrid post-quantum groups, landed April 2026)*
+- [x] TLS 1.3 *(complete - RFC 8446 compliant; 1-RTT, mTLS, PSK policy, HRR, KeyUpdate, NewSessionTicket, ALPN, SNI, peer-info, framed-message helpers, OpenSSL interoperability, and hybrid post-quantum groups)*
 - [ ] Expanded benchmarking framework with cross-platform performance reporting
 - [ ] Integration of emerging post-quantum research and forthcoming NIST standards
 

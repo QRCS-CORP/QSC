@@ -121,6 +121,8 @@ typedef enum
 	qsc_socket_option_reuse_address = 2,				/*!< Enables or disables the reuse of a bound address SO_REUSEADDR */
 	qsc_socket_option_receive_time_out = 20,			/*!< The timeout, in milliseconds, for blocking receive calls SO_RCVTIMEO */
 	qsc_socket_option_send_time_out = 21,				/*!< The timeout, in milliseconds, for blocking send calls SO_SNDTIMEO */
+	qsc_socket_option_receive_buffer_size = 8,		/*!< The socket receive buffer size SO_RCVBUF */
+	qsc_socket_option_send_buffer_size = 7,			/*!< The socket send buffer size SO_SNDBUF */
 #else	/* Windows, macOS, BSD */
 	qsc_socket_option_broadcast = 0x00000020L,			/*!< Configures a socket for sending broadcast data SO_BROADCAST */
 	qsc_socket_option_ipv6_only = 0x0000001BL,			/*!< Flag used to enable a dual stack configuration IPV6_V6ONLY */
@@ -131,6 +133,8 @@ typedef enum
 	qsc_socket_option_reuse_address = 0x00000004L,		/*!< Enables or disables the reuse of a bound address SO_REUSEADDR */
 	qsc_socket_option_receive_time_out = 0x00001006L,	/*!< The timeout, in milliseconds, for blocking receive calls SO_RCVTIMEO */
 	qsc_socket_option_send_time_out = 0x00001005L,		/*!< The timeout, in milliseconds, for blocking send calls SO_SNDTIMEO */
+	qsc_socket_option_receive_buffer_size = 0x00001002L, /*!< The socket receive buffer size SO_RCVBUF */
+	qsc_socket_option_send_buffer_size = 0x00001001L,	/*!< The socket send buffer size SO_SNDBUF */
 #endif
 	qsc_socket_option_tcp_no_delay = 0x00000001L,		/*!< Enables or disables the Nagle algorithm for TCP sockets TCP_NODELAY */
 } qsc_socket_options;

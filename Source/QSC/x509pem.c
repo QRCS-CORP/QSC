@@ -74,7 +74,6 @@ static bool x509_pem_region_has_nested_begin(const char* begin, size_t regionlen
     return (next != NULL);
 }
 
-
 static const char* x509_find_begin_label(const char* pem, size_t pemlen, const char* label)
 {
     return x509_mem_find(pem, pemlen, label);

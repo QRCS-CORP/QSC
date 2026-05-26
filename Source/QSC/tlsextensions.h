@@ -305,6 +305,52 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_encode_key_share_hello_retry(ui
 QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_encode_server_name(uint8_t* output, size_t outlen, size_t* offset, const char* hostname);
 
 /**
+ * \brief Encode the application_layer_protocol_negotiation extension.
+ *
+ * \details
+ * Writes an ALPN extension containing the ordered protocol identifiers stored in the supplied bounded policy. Each protocol identifier is encoded as an opaque ProtocolName vector and must have non-zero length.
+ *
+ * \param output: [uint8_t*] Pointer to the destination extension buffer.
+ * \param outlen: [size_t] Size, in bytes, of the destination buffer.
+ * \param offset: [size_t*] Pointer to the current write offset; updated on success.
+ * \param alpn: [const struct*] Pointer to the bounded ALPN protocol-list policy.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_encode_alpn(uint8_t* output, size_t outlen, size_t* offset, const qsc_tls_alpn_protocols* alpn);
+
+/**
+ * \brief Decode the application_layer_protocol_negotiation extension body.
+ *
+ * \details
+ * Parses an ALPN ProtocolNameList extension body into a bounded output policy container. Zero-length protocol identifiers, overlong identifiers, duplicate identifiers, and excess protocol entries are rejected.
+ *
+ * \param input: [const uint8_t*] Pointer to the ALPN extension body.
+ * \param inplen: [size_t] Length, in bytes, of the ALPN extension body.
+ * \param alpn: [struct*] Pointer to the output ALPN protocol-list container.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_decode_alpn(const uint8_t* input, size_t inplen, qsc_tls_alpn_protocols* alpn);
+
+/**
+ * \brief Select a mutually supported ALPN protocol.
+ *
+ * \details
+ * Selects the first server-preferred protocol that appears in the client protocol list.
+ *
+ * \param clientalpn: [const struct*] Pointer to the decoded client ALPN list.
+ * \param serveralpn: [const struct*] Pointer to the server ALPN policy.
+ * \param selected: [uint8_t*] Pointer to the selected protocol output buffer.
+ * \param selectedcap: [size_t] Size, in bytes, of the selected protocol output buffer.
+ * \param selectedlen: [size_t*] Receives the selected protocol length in bytes.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_select_alpn(const qsc_tls_alpn_protocols* clientalpn, const qsc_tls_alpn_protocols* serveralpn,
+    uint8_t* selected, size_t selectedcap, size_t* selectedlen);
+
+/**
  * \brief Encode the psk_key_exchange_modes extension.
  *
  * \details

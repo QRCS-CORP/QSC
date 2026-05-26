@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -152,8 +152,10 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8037b64fd58908af31ba5db05454b4f6" id="r_a8037b64fd58908af31ba5db05454b4f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8037b64fd58908af31ba5db05454b4f6">qsc_tls_client_initialize</a> (<a class="el" href="structqsc__tls__client__state.html">qsc_tls_client_state</a> *state, const <a class="el" href="structqsc__tls__client__config.html">qsc_tls_client_config</a> *config)</td></tr>
-<tr class="memdesc:a8037b64fd58908af31ba5db05454b4f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a TLS client handshake state.  <br /></td></tr>
+<tr class="memitem:ab95299b78913553c68a5ae1457c43353" id="r_ab95299b78913553c68a5ae1457c43353"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab95299b78913553c68a5ae1457c43353">qsc_tls_client_config_set_certificate_interface</a> (<a class="el" href="structqsc__tls__client__config.html">qsc_tls_client_config</a> *config, const <a class="el" href="structqsc__tls__certificate__interface.html">qsc_tls_certificate_interface</a> *iface, const char *hostname)</td></tr>
+<tr class="memdesc:ab95299b78913553c68a5ae1457c43353"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a TLS client handshake state.  <br /></td></tr>
+<tr class="memitem:a8037b64fd58908af31ba5db05454b4f6" id="r_a8037b64fd58908af31ba5db05454b4f6"><td class="memItemLeft" align="right" valign="top"><a id="a8037b64fd58908af31ba5db05454b4f6" name="a8037b64fd58908af31ba5db05454b4f6"></a>
+<a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_client_initialize</b> (<a class="el" href="structqsc__tls__client__state.html">qsc_tls_client_state</a> *state, const <a class="el" href="structqsc__tls__client__config.html">qsc_tls_client_config</a> *config)</td></tr>
 <tr class="memitem:af1264137ef798bb90107fc802d912934" id="r_af1264137ef798bb90107fc802d912934"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af1264137ef798bb90107fc802d912934">qsc_tls_client_dispose</a> (<a class="el" href="structqsc__tls__client__state.html">qsc_tls_client_state</a> *state)</td></tr>
 <tr class="memdesc:af1264137ef798bb90107fc802d912934"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispose of a TLS client handshake state.  <br /></td></tr>
 <tr class="memitem:a122069226b63d40ee6256d1d98eaafec" id="r_a122069226b63d40ee6256d1d98eaafec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a122069226b63d40ee6256d1d98eaafec">qsc_tls_client_send_hello</a> (<a class="el" href="structqsc__tls__client__state.html">qsc_tls_client_state</a> *state, uint8_t *output, size_t outlen, size_t *written)</td></tr>
@@ -210,6 +212,54 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ab95299b78913553c68a5ae1457c43353" name="ab95299b78913553c68a5ae1457c43353"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab95299b78913553c68a5ae1457c43353">&#9670;&#160;</a></span>qsc_tls_client_config_set_certificate_interface()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_client_config_set_certificate_interface </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structqsc__tls__client__config.html">qsc_tls_client_config</a> *</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structqsc__tls__certificate__interface.html">qsc_tls_certificate_interface</a> *</td>          <td class="paramname"><span class="paramname"><em>iface</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>hostname</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize a TLS client handshake state. </p>
+<p>Clears the supplied state object, copies the client policy, selects the initial handshake phase, and prepares the client for ClientHello emission. The configuration arrays referenced by <code class="param">config</code> must remain valid for the lifetime of the client state.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>[struct*] The client state to initialize. </td></tr>
+    <tr><td class="paramname">config</td><td>[const struct*] The client configuration and algorithm policy.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success.</dd></dl>
+<p>Copy a certificate-validation interface into a TLS client configuration.</p>
+<p>This setter is the TLS-side attachment point for certificate validation. X.509 helpers prepare the <a class="el" href="structqsc__tls__certificate__interface.html" title="Certificate validation and signature verification callback set.">qsc_tls_certificate_interface</a>, but do not mutate TLS state objects directly. The hostname pointer is borrowed from the caller and must remain valid for the lifetime of configurations initialized from this object.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>[struct*] The client configuration to update. </td></tr>
+    <tr><td class="paramname">iface</td><td>[struct*] The certificate-validation interface to copy. </td></tr>
+    <tr><td class="paramname">hostname</td><td>[const char*] Optional server hostname for SNI and certificate validation.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
+
+</div>
+</div>
 <a id="af1264137ef798bb90107fc802d912934" name="af1264137ef798bb90107fc802d912934"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af1264137ef798bb90107fc802d912934">&#9670;&#160;</a></span>qsc_tls_client_dispose()</h2>
 
@@ -259,38 +309,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlstypes_8h.html#a1a630f70840c80ee104ac5d496d3c4b1" title="TLS 1.3 cipher-suite identifiers.">qsc_tls_cipher_suite</a>] Returns the negotiated cipher suite, or an unspecified value if negotiation has not completed. </dd></dl>
-
-</div>
-</div>
-<a id="a8037b64fd58908af31ba5db05454b4f6" name="a8037b64fd58908af31ba5db05454b4f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8037b64fd58908af31ba5db05454b4f6">&#9670;&#160;</a></span>qsc_tls_client_initialize()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> <a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a> qsc_tls_client_initialize </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structqsc__tls__client__state.html">qsc_tls_client_state</a> *</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structqsc__tls__client__config.html">qsc_tls_client_config</a> *</td>          <td class="paramname"><span class="paramname"><em>config</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Initialize a TLS client handshake state. </p>
-<p>Clears the supplied state object, copies the client policy, selects the initial handshake phase, and prepares the client for ClientHello emission. The configuration arrays referenced by <code class="param">config</code> must remain valid for the lifetime of the client state.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">state</td><td>[struct*] The client state to initialize. </td></tr>
-    <tr><td class="paramname">config</td><td>[const struct*] The client configuration and algorithm policy.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>[<a class="el" href="tlserrors_8h.html#ade497ef768f1a9e1931914b0f33875bd">qsc_tls_status</a>] Returns qsc_tls_status_success on success. </dd></dl>
 
 </div>
 </div>

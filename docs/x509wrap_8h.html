@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -179,12 +179,6 @@ typedef struct <a class="el" href="structqsc__x509w__profile__t.html">qsc_x509w_
 typedef struct <a class="el" href="structqsc__x509w__result__t.html">qsc_x509w_result_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_x509w_result</b></td></tr>
 <tr class="memitem:ab85a673cc0d0a39269e3799439d4805a" id="r_ab85a673cc0d0a39269e3799439d4805a"><td class="memItemLeft" align="right" valign="top"><a id="ab85a673cc0d0a39269e3799439d4805a" name="ab85a673cc0d0a39269e3799439d4805a"></a>
 typedef struct <a class="el" href="structqsc__x509w__trust__store__t.html">qsc_x509w_trust_store_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_x509w_trust_store</b></td></tr>
-<tr class="memitem:aaacddc9ffab8b9aced2df18769bbb98f" id="r_aaacddc9ffab8b9aced2df18769bbb98f"><td class="memItemLeft" align="right" valign="top"><a id="aaacddc9ffab8b9aced2df18769bbb98f" name="aaacddc9ffab8b9aced2df18769bbb98f"></a>
-typedef struct <a class="el" href="#aaacddc9ffab8b9aced2df18769bbb98f">qsc_tls_client</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_client</b></td></tr>
-<tr class="memdesc:aaacddc9ffab8b9aced2df18769bbb98f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward declaration of the QSC TLS client type. <br /></td></tr>
-<tr class="memitem:a09117b50b964be0e00dee16896276327" id="r_a09117b50b964be0e00dee16896276327"><td class="memItemLeft" align="right" valign="top"><a id="a09117b50b964be0e00dee16896276327" name="a09117b50b964be0e00dee16896276327"></a>
-typedef struct <a class="el" href="#a09117b50b964be0e00dee16896276327">qsc_tls_server</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_tls_server</b></td></tr>
-<tr class="memdesc:a09117b50b964be0e00dee16896276327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward declaration of the QSC TLS server type. <br /></td></tr>
 <tr class="memitem:aa45a31acf9c029940ace85adcea44b64" id="r_aa45a31acf9c029940ace85adcea44b64"><td class="memItemLeft" align="right" valign="top"><a id="aa45a31acf9c029940ace85adcea44b64" name="aa45a31acf9c029940ace85adcea44b64"></a>
 typedef struct <a class="el" href="structqsc__x509w__server__identity__t.html">qsc_x509w_server_identity_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>qsc_x509w_server_identity</b></td></tr>
 <tr class="memitem:abaf8554a54ccec8183a67be6a5278c87" id="r_abaf8554a54ccec8183a67be6a5278c87"><td class="memItemLeft" align="right" valign="top"><a id="abaf8554a54ccec8183a67be6a5278c87" name="abaf8554a54ccec8183a67be6a5278c87"></a>
@@ -434,20 +428,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:a47dbe4c76b8a70f2fa649725437aa767"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine whether a TLS bridge has been configured and is ready for use.  <br /></td></tr>
 <tr class="memitem:a304a521ac54e15800d0354a9dc3b36c1" id="r_a304a521ac54e15800d0354a9dc3b36c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> const <a class="el" href="structqsc__tls__certificate__interface.html">qsc_tls_certificate_interface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a304a521ac54e15800d0354a9dc3b36c1">qsc_x509w_tls_bridge_get_interface</a> (const <a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *bridge)</td></tr>
 <tr class="memdesc:a304a521ac54e15800d0354a9dc3b36c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the prepared TLS certificate interface from a configured bridge.  <br /></td></tr>
-<tr class="memitem:ac3eeed64a6271a6a2ca9974cf74186dd" id="r_ac3eeed64a6271a6a2ca9974cf74186dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac3eeed64a6271a6a2ca9974cf74186dd">qsc_x509w_tls_bridge_attach_client_validation</a> (<a class="el" href="#aaacddc9ffab8b9aced2df18769bbb98f">qsc_tls_client</a> *client, const <a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *bridge, const char *hostname, bool requirepeercertificate)</td></tr>
-<tr class="memdesc:ac3eeed64a6271a6a2ca9974cf74186dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach wrapper-backed peer validation to a TLS client.  <br /></td></tr>
-<tr class="memitem:ab0ca4dc6bcff8f797d8cf19427e12454" id="r_ab0ca4dc6bcff8f797d8cf19427e12454"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab0ca4dc6bcff8f797d8cf19427e12454">qsc_x509w_tls_bridge_attach_server_validation</a> (<a class="el" href="#a09117b50b964be0e00dee16896276327">qsc_tls_server</a> *server, const <a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *bridge, const char *hostname, bool requirepeercertificate)</td></tr>
-<tr class="memdesc:ab0ca4dc6bcff8f797d8cf19427e12454"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach wrapper-backed peer validation to a TLS server.  <br /></td></tr>
 <tr class="memitem:a5874dba4bba1fb7cde18f704cca6e0d3" id="r_a5874dba4bba1fb7cde18f704cca6e0d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5874dba4bba1fb7cde18f704cca6e0d3">qsc_x509w_tls_local_certificate_is_ready</a> (const <a class="el" href="structqsc__x509w__tls__local__certificate__t.html">qsc_x509w_tls_local_certificate</a> *localcert)</td></tr>
 <tr class="memdesc:a5874dba4bba1fb7cde18f704cca6e0d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine whether a TLS local-certificate export object is ready for use.  <br /></td></tr>
-<tr class="memitem:aed96ba6c2ebb7d73c9567e32228a4f6d" id="r_aed96ba6c2ebb7d73c9567e32228a4f6d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed96ba6c2ebb7d73c9567e32228a4f6d">qsc_x509w_tls_bridge_set_client</a> (<a class="el" href="#aaacddc9ffab8b9aced2df18769bbb98f">qsc_tls_client</a> *client, <a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *bridge, const char *hostname, bool requirepeercertificate)</td></tr>
-<tr class="memdesc:aed96ba6c2ebb7d73c9567e32228a4f6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Backward-compatible helper that attaches wrapper-backed peer validation to a TLS client.  <br /></td></tr>
-<tr class="memitem:a6117a547d0cd910139b13f8c623fb65c" id="r_a6117a547d0cd910139b13f8c623fb65c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6117a547d0cd910139b13f8c623fb65c">qsc_x509w_tls_bridge_set_server_validation</a> (<a class="el" href="#a09117b50b964be0e00dee16896276327">qsc_tls_server</a> *server, <a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *bridge, const char *hostname, bool requirepeercertificate)</td></tr>
-<tr class="memdesc:a6117a547d0cd910139b13f8c623fb65c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Backward-compatible helper that attaches wrapper-backed peer validation to a TLS server.  <br /></td></tr>
 <tr class="memitem:a609f3de4369c53d2ad18f34500cd60f8" id="r_a609f3de4369c53d2ad18f34500cd60f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a609f3de4369c53d2ad18f34500cd60f8">qsc_x509w_tls_local_certificate_from_identity</a> (const <a class="el" href="structqsc__x509w__server__identity__t.html">qsc_x509w_server_identity</a> *identity, <a class="el" href="tlstypes_8h.html#ad392f10c70e7ec977e3b533529fdd795">qsc_tls_signature_scheme</a> verifyscheme, <a class="el" href="structqsc__x509w__tls__local__certificate__t.html">qsc_x509w_tls_local_certificate</a> *localcert)</td></tr>
 <tr class="memdesc:a609f3de4369c53d2ad18f34500cd60f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Export a server identity into TLS local-certificate form.  <br /></td></tr>
-<tr class="memitem:adaafbfcfe46f0d2bd1b96e85beca244c" id="r_adaafbfcfe46f0d2bd1b96e85beca244c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adaafbfcfe46f0d2bd1b96e85beca244c">qsc_x509w_tls_server_set_local_certificate</a> (<a class="el" href="#a09117b50b964be0e00dee16896276327">qsc_tls_server</a> *server, const <a class="el" href="structqsc__x509w__tls__local__certificate__t.html">qsc_x509w_tls_local_certificate</a> *localcert)</td></tr>
-<tr class="memdesc:adaafbfcfe46f0d2bd1b96e85beca244c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Install a local certificate chain into a TLS server.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>High-level offline X.509 wrapper for certificate loading, validation, deployment configuration, trust-store management, provisioning, and TLS bridge integration. </p>
@@ -2646,92 +2630,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac3eeed64a6271a6a2ca9974cf74186dd" name="ac3eeed64a6271a6a2ca9974cf74186dd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3eeed64a6271a6a2ca9974cf74186dd">&#9670;&#160;</a></span>qsc_x509w_tls_bridge_attach_client_validation()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status qsc_x509w_tls_bridge_attach_client_validation </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="#aaacddc9ffab8b9aced2df18769bbb98f">qsc_tls_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *</td>          <td class="paramname"><span class="paramname"><em>bridge</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>hostname</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>requirepeercertificate</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Attach wrapper-backed peer validation to a TLS client. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">client</td><td>The TLS client to configure. </td></tr>
-    <tr><td class="paramname">bridge</td><td>The configured bridge. </td></tr>
-    <tr><td class="paramname">hostname</td><td>The caller-owned hostname for TLS validation. </td></tr>
-    <tr><td class="paramname">requirepeercertificate</td><td>Set true to require a peer certificate. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the wrapper status code. </dd></dl>
-
-</div>
-</div>
-<a id="ab0ca4dc6bcff8f797d8cf19427e12454" name="ab0ca4dc6bcff8f797d8cf19427e12454"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab0ca4dc6bcff8f797d8cf19427e12454">&#9670;&#160;</a></span>qsc_x509w_tls_bridge_attach_server_validation()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status qsc_x509w_tls_bridge_attach_server_validation </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="#a09117b50b964be0e00dee16896276327">qsc_tls_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *</td>          <td class="paramname"><span class="paramname"><em>bridge</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>hostname</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>requirepeercertificate</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Attach wrapper-backed peer validation to a TLS server. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">server</td><td>The TLS server to configure. </td></tr>
-    <tr><td class="paramname">bridge</td><td>The configured bridge. </td></tr>
-    <tr><td class="paramname">hostname</td><td>The caller-owned hostname for TLS validation. </td></tr>
-    <tr><td class="paramname">requirepeercertificate</td><td>Set true to require a peer certificate. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the wrapper status code. </dd></dl>
-
-</div>
-</div>
 <a id="a555594fe9f1fc7fc51aaaf2bc0df6866" name="a555594fe9f1fc7fc51aaaf2bc0df6866"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a555594fe9f1fc7fc51aaaf2bc0df6866">&#9670;&#160;</a></span>qsc_x509w_tls_bridge_configure()</h2>
 
@@ -2785,6 +2683,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the prepared TLS certificate interface from a configured bridge. </p>
+<p>The returned interface is a borrowed view into <em class="arg">bridge</em>. TLS client and server configuration objects should copy this interface using TLS-layer configuration setters. The X.509 wrapper intentionally does not mutate TLS client or server state objects, preserving the dependency boundary between certificate handling and the TLS state machines.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">bridge</td><td>The configured bridge. </td></tr>
@@ -2846,92 +2745,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aed96ba6c2ebb7d73c9567e32228a4f6d" name="aed96ba6c2ebb7d73c9567e32228a4f6d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed96ba6c2ebb7d73c9567e32228a4f6d">&#9670;&#160;</a></span>qsc_x509w_tls_bridge_set_client()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status qsc_x509w_tls_bridge_set_client </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="#aaacddc9ffab8b9aced2df18769bbb98f">qsc_tls_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *</td>          <td class="paramname"><span class="paramname"><em>bridge</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>hostname</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>requirepeercertificate</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Backward-compatible helper that attaches wrapper-backed peer validation to a TLS client. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">client</td><td>The TLS client to configure. </td></tr>
-    <tr><td class="paramname">bridge</td><td>The configured bridge. </td></tr>
-    <tr><td class="paramname">hostname</td><td>The caller-owned hostname for TLS validation. </td></tr>
-    <tr><td class="paramname">requirepeercertificate</td><td>Set true to require a peer certificate. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the wrapper status code. </dd></dl>
-
-</div>
-</div>
-<a id="a6117a547d0cd910139b13f8c623fb65c" name="a6117a547d0cd910139b13f8c623fb65c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6117a547d0cd910139b13f8c623fb65c">&#9670;&#160;</a></span>qsc_x509w_tls_bridge_set_server_validation()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status qsc_x509w_tls_bridge_set_server_validation </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="#a09117b50b964be0e00dee16896276327">qsc_tls_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structqsc__x509w__tls__bridge__t.html">qsc_x509w_tls_bridge</a> *</td>          <td class="paramname"><span class="paramname"><em>bridge</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>hostname</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>requirepeercertificate</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Backward-compatible helper that attaches wrapper-backed peer validation to a TLS server. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">server</td><td>The TLS server to configure. </td></tr>
-    <tr><td class="paramname">bridge</td><td>The configured bridge. </td></tr>
-    <tr><td class="paramname">hostname</td><td>The caller-owned hostname for TLS validation. </td></tr>
-    <tr><td class="paramname">requirepeercertificate</td><td>Set true to require a peer certificate. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the wrapper status code. </dd></dl>
-
-</div>
-</div>
 <a id="a609f3de4369c53d2ad18f34500cd60f8" name="a609f3de4369c53d2ad18f34500cd60f8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a609f3de4369c53d2ad18f34500cd60f8">&#9670;&#160;</a></span>qsc_x509w_tls_local_certificate_from_identity()</h2>
 
@@ -2957,7 +2770,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Export a server identity into TLS local-certificate form. </p>
-<p>Extracts the certificate chain and private key from the identity object and populates a qsc_x509w_tls_local_certificate ready for use with <a class="el" href="#adaafbfcfe46f0d2bd1b96e85beca244c" title="Install a local certificate chain into a TLS server.">qsc_x509w_tls_server_set_local_certificate()</a>.</p>
+<p>Extracts the certificate chain and private key from the identity object and populates a qsc_x509w_tls_local_certificate ready for use by the TLS-layer server configuration local-certificate setter.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">identity</td><td>The source server identity (must contain a valid private key). </td></tr>
@@ -3019,37 +2832,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns true if the object is ready. </dd></dl>
-
-</div>
-</div>
-<a id="adaafbfcfe46f0d2bd1b96e85beca244c" name="adaafbfcfe46f0d2bd1b96e85beca244c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adaafbfcfe46f0d2bd1b96e85beca244c">&#9670;&#160;</a></span>qsc_x509w_tls_server_set_local_certificate()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="qsccommon_8h.html#a2ef395ab64e46f80b9e391669b062bef">QSC_EXPORT_API</a> qsc_x509w_status qsc_x509w_tls_server_set_local_certificate </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="#a09117b50b964be0e00dee16896276327">qsc_tls_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structqsc__x509w__tls__local__certificate__t.html">qsc_x509w_tls_local_certificate</a> *</td>          <td class="paramname"><span class="paramname"><em>localcert</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Install a local certificate chain into a TLS server. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">server</td><td>The TLS server to configure. </td></tr>
-    <tr><td class="paramname">localcert</td><td>The local-certificate export object. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the wrapper status code. </dd></dl>
 
 </div>
 </div>

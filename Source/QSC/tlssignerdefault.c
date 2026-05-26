@@ -178,7 +178,7 @@ static bool tls_signer_default_ecdsa_matches_scheme(qsc_tls_signature_scheme sch
 #endif
 }
 
-static bool tls_signer_default_sign_ecdsa(const uint8_t* input, size_t inputlen, uint8_t* signature, size_t* signaturelen, const uint8_t* privatekey)
+static bool tls_signer_default_sign_ecdsa_internal(const uint8_t* input, size_t inputlen, uint8_t* signature, size_t* signaturelen, const uint8_t* privatekey, bool scalaronly)
 {
     uint8_t rs[QSC_ECDSA_SIGNATURE_SIZE] = { 0U };
     uint8_t* signedmsg;
@@ -195,7 +195,15 @@ static bool tls_signer_default_sign_ecdsa(const uint8_t* input, size_t inputlen,
     if (signedmsg != NULL)
     {
         smsglen = 0U;
-        res = qsc_ecdsa_sign(signedmsg, &smsglen, input, inputlen, privatekey);
+
+        if (scalaronly == true)
+        {
+            res = qsc_ecdsa_sign_scalar(signedmsg, &smsglen, input, inputlen, privatekey);
+        }
+        else
+        {
+            res = qsc_ecdsa_sign(signedmsg, &smsglen, input, inputlen, privatekey);
+        }
 
         if (res && smsglen == need)
         {
@@ -225,6 +233,16 @@ static bool tls_signer_default_sign_ecdsa(const uint8_t* input, size_t inputlen,
     qsc_memutils_secure_erase(rs, sizeof(rs));
 
     return res;
+}
+
+static bool tls_signer_default_sign_ecdsa(const uint8_t* input, size_t inputlen, uint8_t* signature, size_t* signaturelen, const uint8_t* privatekey)
+{
+    return tls_signer_default_sign_ecdsa_internal(input, inputlen, signature, signaturelen, privatekey, false);
+}
+
+static bool tls_signer_default_sign_ecdsa_scalar(const uint8_t* input, size_t inputlen, uint8_t* signature, size_t* signaturelen, const uint8_t* privatekey)
+{
+    return tls_signer_default_sign_ecdsa_internal(input, inputlen, signature, signaturelen, privatekey, true);
 }
 
 static bool tls_signer_default_verify_ecdsa(const uint8_t* input, size_t inputlen, const uint8_t* signature, size_t signaturelen, const uint8_t* publickey)
@@ -317,6 +335,10 @@ bool qsc_tls_signer_default_sign(qsc_tls_signature_scheme scheme, const uint8_t*
                     {
                         res = tls_signer_default_sign_ecdsa(input, inputlen, signature, signaturelen, ctx->privatekey);
                     }
+                    else if (tls_signer_default_ecdsa_matches_scheme(scheme) && ctx->privatekeylen == QSC_ECDSA_SEED_SIZE)
+                    {
+                        res = tls_signer_default_sign_ecdsa_scalar(input, inputlen, signature, signaturelen, ctx->privatekey);
+                    }
 
                     break;
                 }
@@ -341,8 +363,7 @@ bool qsc_tls_signer_default_sign(qsc_tls_signature_scheme scheme, const uint8_t*
     return res;
 }
 
-bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, size_t signaturelen, 
-    const qsc_tls_certificate_view* signer, void* state)
+bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
 {
     QSC_ASSERT(signer != NULL);
     QSC_ASSERT(input != NULL);
@@ -356,7 +377,7 @@ bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme, const uint8_
 
     if (signer != NULL && signer->data != NULL && signer->datalen != 0U)
     {
-        /* For Stage 10 the public key is assumed to be presented directly via the certificate data.
+        /* the public key is assumed to be presented directly via the certificate data.
          * Real integration with X.509 SPKI extraction is performed in Stage 11 (tlscert encode/decode);
          * this routine keeps the signer module independent of the X.509 DER decoder. If the caller
          * wants SPKI-aware verification, they can set up a qsc_tls_certificate_interface that pre-parses

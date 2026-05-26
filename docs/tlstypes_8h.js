@@ -85,14 +85,9 @@ var tlstypes_8h =
       [ "qsc_tls_group_mlkem512", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1fea06ec5edbc5c82dc084db696051f70343", null ],
       [ "qsc_tls_group_mlkem768", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1fea14ac7b3ee2447355a3ccef0a3ff6fb73", null ],
       [ "qsc_tls_group_mlkem1024", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1fea0dd4a35e80a4b9496bbd173faf5fcb57", null ],
-      [ "qsc_tls_group_x25519_mlkem512", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1feac0e59c559d9933866519a3e8faa98ab4", null ],
       [ "qsc_tls_group_x25519_mlkem768", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1feace427a7eae33b57af2ff302b08dd3991", null ],
       [ "qsc_tls_group_secp256r1_mlkem768", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1fea119aa180ec5d8a29ac05603069f46d67", null ],
-      [ "qsc_tls_group_secp384r1_mlkem1024", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1feaae312f85a07c404bb57f1e0d7a6c5c82", null ],
-      [ "qsc_tls_group_x25519_mlkem1024", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1fea224bdf7b9fe7524d82d821bd7750e04c", null ],
-      [ "qsc_tls_group_secp256r1_mlkem512", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1feabf0b788370f569a6293aaf9b825f133d", null ],
-      [ "qsc_tls_group_secp256r1_mlkem1024", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1fead2b0855262095aeb2172997c2ac64d4f", null ],
-      [ "qsc_tls_group_secp384r1_mlkem768", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1feaa6a424a41d0a98017c4e4a7bce4d6742", null ]
+      [ "qsc_tls_group_secp384r1_mlkem1024", "tlstypes_8h.html#a6c05b63a7cd55ba21b135b3b98f1b1feaae312f85a07c404bb57f1e0d7a6c5c82", null ]
     ] ],
     [ "qsc_tls_psk_key_exchange_mode", "tlstypes_8h.html#a76750fedba305dc43c87e34da294582f", [
       [ "qsc_tls_psk_key_exchange_mode_psk_ke", "tlstypes_8h.html#a76750fedba305dc43c87e34da294582fa8fc1aa4675d8e4ebf166d21d4c8d0c16", null ],

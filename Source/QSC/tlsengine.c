@@ -685,8 +685,7 @@ qsc_tls_status qsc_tls_engine_consume_session_ticket(qsc_tls_connection* connect
                                                 ticketout->suite = c->negotiatedsuite;
                                                 ticketout->resumptionsecretlen = c->keyschedule.digestsize;
 
-                                                status = qsc_tls_keyschedule_derive_resumption_psk(&c->keyschedule, ticketout->nonce, 
-                                                    ticketout->noncelen, ticketout->resumptionsecret, ticketout->resumptionsecretlen);
+                                                status = qsc_tls_keyschedule_derive_resumption_psk(&c->keyschedule, ticketout->nonce, ticketout->noncelen, ticketout->resumptionsecret, ticketout->resumptionsecretlen);
 
                                                 if (status == qsc_tls_status_success)
                                                 {

@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.2.0.0 (B1)</span>
+   <div id="projectname">QSC Post Quantum Cryptographic Library<span id="projectnumber">&#160;1.3.0.0 (C1)</span>
    </div>
    <div id="projectbrief">A post quantum secure library written in Ansi C</div>
   </td>
@@ -109,6 +109,8 @@ $(function(){initNavTree('structqsc__tls__io__connection.html','',''); });
 Data Fields</h2></td></tr>
 <tr class="memitem:aba90df7c4dfd9a6776d583f70cd5966f" id="r_aba90df7c4dfd9a6776d583f70cd5966f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__tls__connection.html">qsc_tls_connection</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba90df7c4dfd9a6776d583f70cd5966f">engine</a></td></tr>
 <tr class="memitem:aa6360a96ed63c518aaa2bda4a823e12f" id="r_aa6360a96ed63c518aaa2bda4a823e12f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structqsc__socket.html">qsc_socket</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6360a96ed63c518aaa2bda4a823e12f">socket</a></td></tr>
+<tr class="memitem:a74b11534b1ca3a787ce2658b06d5eae1" id="r_a74b11534b1ca3a787ce2658b06d5eae1"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74b11534b1ca3a787ce2658b06d5eae1">rxbuffer</a> [<a class="el" href="tlsio_8h.html#af4663f4dbb96711cf11ff8eeaeb5e2b2">QSC_TLS_IO_RX_BUFFER_SIZE</a>]</td></tr>
+<tr class="memitem:a9b4dd7268242b862ddb3f0f1b04af590" id="r_a9b4dd7268242b862ddb3f0f1b04af590"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b4dd7268242b862ddb3f0f1b04af590">rxbufferlen</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores the non-owning association between a TLS engine and a socket. </p>
@@ -125,6 +127,36 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>The attached TLS engine instance. </p>
+
+</div>
+</div>
+<a id="a74b11534b1ca3a787ce2658b06d5eae1" name="a74b11534b1ca3a787ce2658b06d5eae1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74b11534b1ca3a787ce2658b06d5eae1">&#9670;&#160;</a></span>rxbuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t rxbuffer[<a class="el" href="tlsio_8h.html#af4663f4dbb96711cf11ff8eeaeb5e2b2">QSC_TLS_IO_RX_BUFFER_SIZE</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Persistent inbound TLS stream buffer. </p>
+
+</div>
+</div>
+<a id="a9b4dd7268242b862ddb3f0f1b04af590" name="a9b4dd7268242b862ddb3f0f1b04af590"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b4dd7268242b862ddb3f0f1b04af590">&#9670;&#160;</a></span>rxbufferlen</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t rxbufferlen</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Number of valid bytes in the inbound stream buffer. </p>
 
 </div>
 </div>

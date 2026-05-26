@@ -14,11 +14,13 @@ var searchData=
   ['thisupdate_11',['thisupdate',['../structqsc__x509__crl__t.html#ad2e9b5eac4ce32128fd343e0d3af0976',1,'qsc_x509_crl_t']]],
   ['ticket_12',['ticket',['../structqsc__tls__session__ticket.html#a94a514a8c4da341d4e8096e045ef49fc',1,'qsc_tls_session_ticket']]],
   ['ticketlen_13',['ticketlen',['../structqsc__tls__session__ticket.html#a21c872a727e46c734d7e83fd1876df55',1,'qsc_tls_session_ticket']]],
-  ['timevalid_14',['timevalid',['../structqsc__x509w__result__t.html#a46fd246647a998533ed4302112f41502',1,'qsc_x509w_result_t']]],
-  ['total_15',['total',['../structqsc__sysutils__drive__space__state.html#a91271c136d08958b70aae29b0a0bbcad',1,'qsc_sysutils_drive_space_state']]],
-  ['tpool_16',['tpool',['../structqsc__threadpool__state.html#a2d54237320ee92cdb5b585d69a9aa237',1,'qsc_threadpool_state']]],
-  ['transcript_17',['transcript',['../structqsc__tls__client__state.html#aa461708ebea36405ceefc8de809de8f0',1,'qsc_tls_client_state']]],
-  ['trustanchorpath_18',['trustanchorpath',['../structqsc__x509w__deployment__config__t.html#a67c6fcafe24cb6ce79375b3fc05c6a60',1,'qsc_x509w_deployment_config_t']]],
-  ['truststore_19',['truststore',['../structqsc__tls__qsc__x509__context.html#aaf409b55ec0f9ff4cf97b90074088c7f',1,'qsc_tls_qsc_x509_context::truststore'],['../structqsc__tls__cert__x509__state.html#aaf409b55ec0f9ff4cf97b90074088c7f',1,'qsc_tls_cert_x509_state::truststore'],['../structqsc__x509w__tls__bridge__t.html#ab00168d38b7fa045eb77403b7aec8626',1,'qsc_x509w_tls_bridge_t::truststore']]],
-  ['type_20',['type',['../structqsc__x509__name__attribute__t.html#a2498b3c45cbe9d7f53e1625a43c08bd0',1,'qsc_x509_name_attribute_t::type'],['../structqsc__x509__general__name__t.html#af2104860ce59dd8e9c6c68491eec2f22',1,'qsc_x509_general_name_t::type'],['../structqsc__x509__extension__t.html#a108b27fe5bda1065514f2c2d588683cc',1,'qsc_x509_extension_t::type']]]
+  ['ticketpolicy_14',['ticketpolicy',['../structqsc__tls__socket__context.html#ad3be0063684232ae07e780d1fd671ba6',1,'qsc_tls_socket_context::ticketpolicy'],['../structqsc__tls__socket__connection.html#ad3be0063684232ae07e780d1fd671ba6',1,'qsc_tls_socket_connection::ticketpolicy']]],
+  ['timevalid_15',['timevalid',['../structqsc__x509w__result__t.html#a46fd246647a998533ed4302112f41502',1,'qsc_x509w_result_t']]],
+  ['tlsstatus_16',['tlsstatus',['../structqsc__tls__socket__result.html#a870645e37a47741b36d1447cd9e8e910',1,'qsc_tls_socket_result']]],
+  ['total_17',['total',['../structqsc__sysutils__drive__space__state.html#a91271c136d08958b70aae29b0a0bbcad',1,'qsc_sysutils_drive_space_state']]],
+  ['tpool_18',['tpool',['../structqsc__threadpool__state.html#a2d54237320ee92cdb5b585d69a9aa237',1,'qsc_threadpool_state']]],
+  ['transcript_19',['transcript',['../structqsc__tls__client__state.html#aa461708ebea36405ceefc8de809de8f0',1,'qsc_tls_client_state']]],
+  ['trustanchorpath_20',['trustanchorpath',['../structqsc__x509w__deployment__config__t.html#a67c6fcafe24cb6ce79375b3fc05c6a60',1,'qsc_x509w_deployment_config_t']]],
+  ['truststore_21',['truststore',['../structqsc__tls__qsc__x509__context.html#aaf409b55ec0f9ff4cf97b90074088c7f',1,'qsc_tls_qsc_x509_context::truststore'],['../structqsc__tls__cert__x509__state.html#aaf409b55ec0f9ff4cf97b90074088c7f',1,'qsc_tls_cert_x509_state::truststore'],['../structqsc__tls__socket__context.html#ad2275fc766936c00f398e9b178c83cdb',1,'qsc_tls_socket_context::truststore'],['../structqsc__x509w__tls__bridge__t.html#ab00168d38b7fa045eb77403b7aec8626',1,'qsc_x509w_tls_bridge_t::truststore']]],
+  ['type_22',['type',['../structqsc__x509__name__attribute__t.html#a2498b3c45cbe9d7f53e1625a43c08bd0',1,'qsc_x509_name_attribute_t::type'],['../structqsc__x509__general__name__t.html#af2104860ce59dd8e9c6c68491eec2f22',1,'qsc_x509_general_name_t::type'],['../structqsc__x509__extension__t.html#a108b27fe5bda1065514f2c2d588683cc',1,'qsc_x509_extension_t::type']]]
 ];

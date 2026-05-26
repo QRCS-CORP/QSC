@@ -327,8 +327,8 @@ qsc_tls_status qsc_tls_codec_read_bytes(const uint8_t* input, size_t inplen, siz
 
 qsc_tls_status qsc_tls_codec_read_vector8_span(const uint8_t* input, size_t inplen, size_t* offset, const uint8_t** span, size_t* spanlen)
 {
-	qsc_tls_status status;
 	uint8_t len8;
+	qsc_tls_status status;
 
 	status = qsc_tls_status_success;
 	len8 = 0U;
@@ -363,8 +363,8 @@ qsc_tls_status qsc_tls_codec_read_vector8_span(const uint8_t* input, size_t inpl
 
 qsc_tls_status qsc_tls_codec_read_vector16_span(const uint8_t* input, size_t inplen, size_t* offset, const uint8_t** span, size_t* spanlen)
 {
-	qsc_tls_status status;
 	uint16_t len16;
+	qsc_tls_status status;
 
 	status = qsc_tls_status_success;
 	len16 = 0U;
@@ -399,8 +399,8 @@ qsc_tls_status qsc_tls_codec_read_vector16_span(const uint8_t* input, size_t inp
 
 qsc_tls_status qsc_tls_codec_read_vector24_span(const uint8_t* input, size_t inplen, size_t* offset, const uint8_t** span, size_t* spanlen)
 {
-	qsc_tls_status status;
 	uint32_t len24;
+	qsc_tls_status status;
 
 	status = qsc_tls_status_success;
 	len24 = 0U;
@@ -533,8 +533,8 @@ qsc_tls_status qsc_tls_codec_vector_begin_u24(uint8_t* output, size_t outlen, si
 
 qsc_tls_status qsc_tls_codec_vector_end_u8(uint8_t* output, size_t outlen, const size_t* offset, size_t headerposition)
 {
-	qsc_tls_status status;
 	size_t bodylen;
+	qsc_tls_status status;
 
 	status = qsc_tls_status_success;
 
@@ -565,8 +565,8 @@ qsc_tls_status qsc_tls_codec_vector_end_u8(uint8_t* output, size_t outlen, const
 
 qsc_tls_status qsc_tls_codec_vector_end_u16(uint8_t* output, size_t outlen, const size_t* offset, size_t headerposition)
 {
-	qsc_tls_status status;
 	size_t bodylen;
+	qsc_tls_status status;
 
 	status = qsc_tls_status_success;
 
@@ -597,8 +597,8 @@ qsc_tls_status qsc_tls_codec_vector_end_u16(uint8_t* output, size_t outlen, cons
 
 qsc_tls_status qsc_tls_codec_vector_end_u24(uint8_t* output, size_t outlen, const size_t* offset, size_t headerposition)
 {
-	qsc_tls_status status;
 	size_t bodylen;
+	qsc_tls_status status;
 
 	status = qsc_tls_status_success;
 

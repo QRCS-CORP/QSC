@@ -952,6 +952,7 @@ qsc_asn1_status qsc_x509_spki_initialize_ec(qsc_x509_subject_public_key_info* sp
 
     return status;
 }
+
 qsc_asn1_status qsc_x509_spki_initialize_ml_dsa(qsc_x509_subject_public_key_info* spki, qsc_x509_pqc_parameter_set parameterset, const uint8_t* publickey, size_t publickeylen)
 {
     QSC_ASSERT(spki != NULL);

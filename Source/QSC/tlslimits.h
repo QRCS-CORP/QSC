@@ -126,6 +126,18 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_TLS_MAX_ALPN_SIZE 255U
 
+/*! 
+ * \def QSC_TLS_MAX_ALPN_PROTOCOLS
+ * \brief Maximum number of ALPN identifiers stored in a TLS endpoint policy.
+ */
+#define QSC_TLS_MAX_ALPN_PROTOCOLS 8U
+
+/*! 
+ * \def QSC_TLS_MAX_SERVER_IDENTITIES
+ * \brief Maximum number of SNI-selectable certificate identities stored by a TLS server configuration.
+ */
+#define QSC_TLS_MAX_SERVER_IDENTITIES 4U
+
 /* Certificate and handshake message limits */
 /*! 
  * \def QSC_TLS_CERTIFICATE_REQUEST_CONTEXT_MAX_SIZE
@@ -328,7 +340,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE
  * \brief Maximum encoded ServerHello body size for the current TLS scaffolding.
  */
-#define QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE (42U + QSC_TLS_SERVER_HELLO_EXTENSIONS_MAX_SIZE)
+#define QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE (72U + QSC_TLS_SERVER_HELLO_EXTENSIONS_MAX_SIZE)
 
 /* HKDF label limits */
 /*! 
@@ -340,7 +352,7 @@ QSC_CPLUSPLUS_ENABLED_START
 typedef char qsc_tls_limit_assert_keyshare[(QSC_TLS_MAX_KEYSHARE_SIZE >= QSC_TLS_MAX_HYBRID_CLIENT_KEYSHARE_SIZE) ? 1 : -1];
 typedef char qsc_tls_limit_assert_extension[(QSC_TLS_MAX_EXTENSION_SIZE >= QSC_TLS_CLIENT_HELLO_EXTENSIONS_MAX_SIZE) ? 1 : -1];
 typedef char qsc_tls_limit_assert_client_hello[(QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE >= (43U + QSC_TLS_KEY_SHARE_CLIENT_EXTENSION_MAX_SIZE)) ? 1 : -1];
-typedef char qsc_tls_limit_assert_server_hello[(QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE >= (42U + QSC_TLS_KEY_SHARE_SERVER_EXTENSION_MAX_SIZE)) ? 1 : -1];
+typedef char qsc_tls_limit_assert_server_hello[(QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE >= (72U + QSC_TLS_KEY_SHARE_SERVER_EXTENSION_MAX_SIZE)) ? 1 : -1];
 typedef char qsc_tls_limit_assert_private[(QSC_TLS_MAX_PRIVATE_KEY_SIZE >= (QSC_TLS_MAX_CLASSICAL_PRIVATE_KEY_SIZE + QSC_TLS_MAX_KEM_PRIVATE_KEY_SIZE)) ? 1 : -1];
 typedef char qsc_tls_limit_assert_signature[(QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE >= QSC_DILITHIUM_SIGNATURE_SIZE) ? 1 : -1];
 typedef char qsc_tls_limit_assert_ciphersuites[(QSC_TLS_MAX_CIPHER_SUITES >= 3U) ? 1 : -1];

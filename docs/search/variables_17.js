@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['y_0',['Y',['../structqsc__qmac__state.html#a663fc26ccd425cc70dc4a6727f675b7b',1,'qsc_qmac_state']]],
-  ['year_1',['year',['../structqsc__asn1__time__t.html#a57ca98d8f6d4baf0fe41c583c7dcb0d5',1,'qsc_asn1_time_t']]]
+  ['x509_5fstatus_0',['x509_status',['../structqsc__tls__socket__peer__info.html#a382f9977ba638e55408cf2727f964725',1,'qsc_tls_socket_peer_info']]],
+  ['x509status_1',['x509status',['../structqsc__tls__socket__result.html#a6f92a032d5f699e5c5e3f026409597c0',1,'qsc_tls_socket_result']]]
 ];
