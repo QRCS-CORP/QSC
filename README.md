@@ -328,8 +328,8 @@ The X.509 implementation strictly enforces the requirements of RFC 5280, X.690, 
 
 | Algorithm | Description |
 |---|---|
-| **RCS** | Wide-block Rijndael stream cipher with KMAC/QMAC authentication; 256 and 512-bit keys |
-| **CSX-512** | ChaCha-derived stream cipher with 512-bit keys and KMAC/QMAC authentication |
+| **RCS** | Wide-block Rijndael stream cipher with KMAC authentication; 256 and 512-bit keys |
+| **CSX-512** | ChaCha-derived stream cipher with 512-bit keys and KMAC authentication |
 | **AES-GCM** | AES in GMAC Authentication mode; combines AES-CTR with GMAC |
 | **AES-HBA** | AES in Hash-Based Authentication mode; combines AES-CTR with KMAC |
 
@@ -389,9 +389,9 @@ Each proprietary construction in QSC is accompanied by a full technical specific
 
 | Component | Description | Specification | Formal Analysis |
 |---|---|---|---|
-| **CSX** | ChaCha-based authenticated AEAD stream cipher; 512-bit keys, 64-bit integers, KMAC/QMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/csx_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/csx_formal.pdf) |
+| **CSX** | ChaCha-based authenticated AEAD stream cipher; 512-bit keys, 64-bit integers, KMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/csx_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/csx_formal.pdf) |
 | **QMAC** | Wide-block GF(2²⁵⁶) polynomial MAC function | [Specification](https://qrcs-corp.github.io/QSC/pdf/qmac_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/qmac_formal.pdf) |
-| **RCS** | Rijndael-based authenticated AEAD stream cipher with KMAC/QMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/rcs_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/rcs_formal.pdf) |
+| **RCS** | Rijndael-based authenticated AEAD stream cipher with KMAC authentication | [Specification](https://qrcs-corp.github.io/QSC/pdf/rcs_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/rcs_formal.pdf) |
 | **SCB** | SHAKE Cost-Based KDF; memory-hard passphrase derivation with configurable CPU and memory cost | [Specification](https://qrcs-corp.github.io/QSC/pdf/scb_specification.pdf) | [Formal Analysis](https://qrcs-corp.github.io/QSC/pdf/scb_formal.pdf) |
 
 ---
