@@ -104,13 +104,17 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief The QMAC state.
  *
  * This structure holds the internal state of the QMAC algorithm including the
- * finalization subkey, hash subkey, hash state, a pointer to the nonce, and status flags.
+ * finalization subkey, hash subkey, hash state, partial message block, message
+ * length, and status flags.
  */
 QSC_EXPORT_API typedef struct
 {
 	uint64_t F[QSC_QMAC_STATE_SIZE];	/*!< The finalization subkey */
 	uint64_t H[QSC_QMAC_STATE_SIZE];	/*!< The hash subkey */
 	uint64_t Y[QSC_QMAC_STATE_SIZE];	/*!< The hash state */
+	uint8_t buffer[QSC_QMAC_BLOCK_SIZE];	/*!< The partial message block */
+	uint64_t msglen;				/*!< The processed message length in bytes */
+	size_t position;				/*!< The partial block position */
 	bool initialized;					/*!< The initialized status */
 } qsc_qmac_state;
 

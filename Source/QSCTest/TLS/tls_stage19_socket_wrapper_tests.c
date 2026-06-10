@@ -117,7 +117,7 @@ static bool stage19_context_policy_test(void)
                             {
                                 if ((qsc_tls_socket_context_set_experimental_pqc_policy(ctx) == qsc_tls_socket_status_success))
                                 {
-                                    if ((ctx->groupcount == 4U) && (ctx->groups[1U] == qsc_tls_group_mlkem768) && (ctx->sigschemecount == 6U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa65))
+                                    if ((ctx->groupcount == 5U) && (ctx->groups[2U] == qsc_tls_group_mlkem768) && (ctx->sigschemecount == 6U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa65))
                                     {
                                         suites[0U] = qsc_tls_cipher_suite_tls_aes_128_gcm_sha256;
                                         groups[0U] = qsc_tls_group_secp256r1;

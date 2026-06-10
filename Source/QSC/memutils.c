@@ -954,7 +954,7 @@ static inline void memutils_clmul128(__m128i a, __m128i b, __m128i* low, __m128i
     __m128i p11 = _mm_clmulepi64_si128(a, b, 0x11);
     __m128i p01 = _mm_clmulepi64_si128(a, b, 0x01);
     __m128i p10 = _mm_clmulepi64_si128(a, b, 0x10);
-    __m128i mid = _mm_xor_si128(_mm_xor_si128(p01, p10), _mm_xor_si128(p00, p11));
+    __m128i mid = _mm_xor_si128(p01, p10);
 
     *low = _mm_xor_si128(p00, _mm_slli_si128(mid, 8));
     *high = _mm_xor_si128(p11, _mm_srli_si128(mid, 8));
@@ -1015,8 +1015,8 @@ static inline void memutils_clmul128(uint64_t r[4U], const uint64_t a[2U], const
     memutils_clmulepi64(p10, a[1U], b[0U]);
     memutils_clmulepi64(p01, a[0U], b[1U]);
 
-    t2[0U] = p10[0U] ^ p01[0U] ^ p00[0U] ^ p11[0U];
-    t2[1U] = p10[1U] ^ p01[1U] ^ p00[1U] ^ p11[1U];
+    t2[0U] = p10[0U] ^ p01[0U];
+    t2[1U] = p10[1U] ^ p01[1U];
 
     t2l[0U] = 0U;          t2l[1U] = t2[0U];
     t2r[0U] = t2[1U];      t2r[1U] = 0U;
