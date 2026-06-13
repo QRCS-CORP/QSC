@@ -1429,17 +1429,26 @@ bool qsc_x509_csr_verify(const qsc_x509_csr* csr)
     QSC_ASSERT(csr != NULL);
 
     qsc_x509_verify_state vstate = { 0 };
-    uint8_t buffer[(2U * QSC_X509_CSR_WRITE_MAX) + QSC_X509_SIGNATURE_MAX] = { 0U };
+    uint8_t* buffer;
+    size_t bufferlen;
     bool res;
+
+    buffer = NULL;
+    bufferlen = (2U * QSC_X509_CSR_WRITE_MAX) + QSC_X509_SIGNATURE_MAX;
+    res = false;
 
     if (csr != NULL)
     {
-        qsc_x509_qsc_verify_state_initialize(&vstate, buffer, sizeof(buffer));
-        res = qsc_x509_csr_verify_ex(csr, qsc_x509_qsc_csr_signature_verify, &vstate);
-    }
-    else
-    {
-        res = false;
+        buffer = (uint8_t*)qsc_memutils_malloc(bufferlen);
+
+        if (buffer != NULL)
+        {
+            qsc_memutils_clear(buffer, bufferlen);
+            qsc_x509_qsc_verify_state_initialize(&vstate, buffer, bufferlen);
+            res = qsc_x509_csr_verify_ex(csr, qsc_x509_qsc_csr_signature_verify, &vstate);
+            qsc_memutils_secure_erase(buffer, bufferlen);
+            qsc_memutils_alloc_free(buffer);
+        }
     }
 
     return res;
@@ -1451,41 +1460,69 @@ bool qsc_x509_csr_verify_with_spki(const qsc_x509_csr* csr, const qsc_x509_subje
     QSC_ASSERT(signerspki != NULL);
 
     qsc_x509_verify_state vstate = { 0 };
-    uint8_t buffer[(2U * QSC_X509_CSR_WRITE_MAX) + QSC_X509_SIGNATURE_MAX];
-    uint8_t info[QSC_X509_CSR_WRITE_MAX];
+    uint8_t* buffer;
+    uint8_t* info;
     const uint8_t* infodata = NULL;
+    size_t bufferlen;
     size_t infodatalen = 0U;
     bool res;
 
+    buffer = NULL;
+    info = NULL;
+    bufferlen = (2U * QSC_X509_CSR_WRITE_MAX) + QSC_X509_SIGNATURE_MAX;
     res = false;
 
     if ((csr != NULL) && (signerspki != NULL))
     {
-        qsc_x509_qsc_verify_state_initialize(&vstate, buffer, sizeof(buffer));
+        buffer = (uint8_t*)qsc_memutils_malloc(bufferlen);
+        info = (uint8_t*)qsc_memutils_malloc(QSC_X509_CSR_WRITE_MAX);
 
-        if (x509_csr_validate_signer_spki(csr, signerspki) != QSC_ASN1_STATUS_SUCCESS)
+        if ((buffer != NULL) && (info != NULL))
         {
-            return false;
-        }
+            qsc_memutils_clear(buffer, bufferlen);
+            qsc_memutils_clear(info, QSC_X509_CSR_WRITE_MAX);
+            qsc_x509_qsc_verify_state_initialize(&vstate, buffer, bufferlen);
 
-        infodata = csr->infodata;
-        infodatalen = csr->infodatalen;
-
-        if ((infodata == NULL) || (infodatalen == 0U))
-        {
-            infodatalen = sizeof(info);
-
-            if (qsc_x509_csr_encode_info_der(csr, info, &infodatalen) != QSC_ASN1_STATUS_SUCCESS)
+            if (x509_csr_validate_signer_spki(csr, signerspki) == QSC_ASN1_STATUS_SUCCESS)
             {
-                return false;
-            }
+                infodata = csr->infodata;
+                infodatalen = csr->infodatalen;
 
-            infodata = info;
+                if ((infodata == NULL) || (infodatalen == 0U))
+                {
+                    infodatalen = QSC_X509_CSR_WRITE_MAX;
+
+                    if (qsc_x509_csr_encode_info_der(csr, info, &infodatalen) == QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        infodata = info;
+                    }
+                    else
+                    {
+                        infodata = NULL;
+                        infodatalen = 0U;
+                    }
+                }
+
+                if ((infodata != NULL) && (infodatalen != 0U))
+                {
+                    res = qsc_x509_qsc_verify_signed_data(infodata, infodatalen,
+                        csr->signature, csr->signaturelen, csr->signatureunusedbits,
+                        csr->signaturealgorithm.signature, signerspki, &vstate);
+                }
+            }
         }
 
-        res = qsc_x509_qsc_verify_signed_data(infodata, infodatalen,
-            csr->signature, csr->signaturelen, csr->signatureunusedbits,
-            csr->signaturealgorithm.signature, signerspki, &vstate);
+        if (info != NULL)
+        {
+            qsc_memutils_secure_erase(info, QSC_X509_CSR_WRITE_MAX);
+            qsc_memutils_alloc_free(info);
+        }
+
+        if (buffer != NULL)
+        {
+            qsc_memutils_secure_erase(buffer, bufferlen);
+            qsc_memutils_alloc_free(buffer);
+        }
     }
 
     return res;

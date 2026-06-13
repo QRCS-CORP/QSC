@@ -55,7 +55,7 @@ static bool x509_pkcs12_parse_pbkdf2_params(const qsc_encoding_ber_element* para
     {
         child = qsc_asn1_get_child(params, 0U);
 
-        if (x509_asn1_is_octet_string(child) == true || child->length <= saltcap)
+        if (x509_asn1_is_octet_string(child) == true && child->length <= saltcap)
         {
             qsc_memutils_copy(salt, child->value, child->length);
             *saltlen = child->length;

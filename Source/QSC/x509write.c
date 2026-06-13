@@ -693,8 +693,14 @@ qsc_asn1_status qsc_x509_write_raw(uint8_t tagclass, bool constructed, uint32_t 
 
     taglen = qsc_x509_write_identifier_size(tagnumber);
     len = qsc_x509_write_length_size(contentlen);
-    required = taglen + len + contentlen;
     status = QSC_ASN1_STATUS_SUCCESS;
+
+    if ((taglen > (SIZE_MAX - len)) || ((taglen + len) > (SIZE_MAX - contentlen)))
+    {
+        return QSC_ASN1_STATUS_INVALID_LENGTH;
+    }
+
+    required = taglen + len + contentlen;
 
     if (((content == NULL) && (contentlen != 0U)) || (outputlen == NULL))
     {

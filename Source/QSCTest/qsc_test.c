@@ -76,6 +76,7 @@
 #include "mceliece_test.h"
 #include "netutils_test.h"
 #include "poly1305_test.h"
+#include "pbmac1_test.h"
 #include "qmac_test.h"
 #include "rcs_test.h"
 #include "scb_test.h"
@@ -94,9 +95,9 @@ static void print_title(void)
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
 	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.2.0.0b (B1)                       *");
+	qsctest_print_line("* Release:   v1.2.0.0c (B3)                       *");
 	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      May 01, 2026                         *");
+	qsctest_print_line("* Date:      June 11, 2026                        *");
 	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
 	qsctest_print_line("***************************************************");
 	qsctest_print_line("");
@@ -144,6 +145,7 @@ static void primitives_test(void)
 	qsctest_sha3_run();
 
 	qsctest_poly1305_run();
+	qsctest_pbmac1_run();
 	qsctest_qmac_run();
 
 	qsctest_eddh_run();
@@ -165,7 +167,7 @@ int32_t main(void)
 	bool hfeat;
 #endif
 	bool valid;
-	
+
 #if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
 	qsc_consoleutils_print_line("Loading pre-check...");
 	qsc_folderutils_test();
@@ -188,7 +190,7 @@ int32_t main(void)
 	if (valid == true)
 	{
 		print_title();
-
+		
 		qsctest_print_line("Passed the internal symmetric primitive self-checks.");
 
 #if defined(QSC_HAS_CPUID)
@@ -298,6 +300,10 @@ int32_t main(void)
 
 			qsctest_print_line("*** Test HKDF, HMAC, and SHA2 implementations using the official known answer tests ***");
 			qsctest_sha2_run();
+			qsctest_print_line("");
+
+			qsctest_print_line("*** Test the PBMAC1 implementation using the official RFC 7292 PKCS#12 known answer tests ***");
+			qsctest_pbmac1_run();
 			qsctest_print_line("");
 
 			qsctest_print_line("*** Test SHAKE, cSHAKE, KMAC, and SHA3 implementations using the official known answer tests ***");

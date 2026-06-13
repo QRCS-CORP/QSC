@@ -158,6 +158,23 @@ bool x509_stage3_crl_verify_known_good(void);
  */
 bool x509_stage3_der_certificate_decode_known_good(void);
 
+
+/**
+ * \brief Tests RFC 9879 PKCS #12 PBMAC1 interoperability vectors.
+ *
+ * \details
+ * This test validates PBMAC1-based PKCS #12 MAC verification using the
+ * official RFC 9879 Appendix A vectors. RFC 9879 obsoletes RFC 9579 and
+ * specifies PBMAC1 use inside PKCS #12 syntax; passwords for PBMAC1 are
+ * encoded as UTF-8 without a trailing NULL or BOM.
+ *
+ * Reference: https://www.rfc-editor.org/rfc/rfc9879.html#appendix-A
+ *
+ * \return
+ * true if the valid RFC vectors verify and malformed negative vectors fail; otherwise false.
+ */
+bool x509_stage3_pkcs12_pbmac1_rfc9879_vectors(void);
+
 /**
  * \brief Execute the x.509 stage 3 positive interoperability test.
  *

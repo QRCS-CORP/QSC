@@ -832,7 +832,7 @@ static void aes_ct_ortho(uint32_t* q)
 static void aes_ct_sbox(uint32_t* q)
 {
 	/*
-	 * adapted from bearssl, author Thomas Pourin
+	 * adapted from bearssl, author Thomas Pornin
 	 * This S-box implementation is a straightforward translation of
 	 * the circuit described by Boyar and Peralta in "A new
 	 * combinational logic minimization technique with applications
@@ -1123,7 +1123,7 @@ static uint32_t sub_word(uint32_t x)
 static void aes_ct_isbox(uint32_t* q)
 {
 	/*
-	 * adapted from bearssl, author Thomas Pourin
+	 * adapted from bearssl, author Thomas Pornin
 	 * AES S-box is:
 	 *   S(x) = A(I(x)) ^ 0x63
 	 * where I() is inversion in GF(256), and A() is a linear

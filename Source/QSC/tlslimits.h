@@ -192,7 +192,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_TLS_MAX_CLASSICAL_PUBLIC_KEY_SIZE
  * \brief Maximum classical named-group public-key size exposed by the TLS registry.
  */
-#define QSC_TLS_MAX_CLASSICAL_PUBLIC_KEY_SIZE 97U
+#define QSC_TLS_MAX_CLASSICAL_PUBLIC_KEY_SIZE 133U
 
 /*! 
  * \def QSC_TLS_MAX_CLASSICAL_PRIVATE_KEY_SIZE

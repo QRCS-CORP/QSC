@@ -945,100 +945,100 @@ void qsctest_aes_run()
 {
 	if (qsctest_fips_aes128_cbc() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CBC(AES-128) KAT test. \n");
+		qsctest_print_line("Success! Passed the FIPS 197 CBC(AES-128) KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CBC(AES-128) CBC KAT test. \n");
+		qsctest_print_line("Failure! Failed the FIPS 197 CBC(AES-128) CBC KAT test.");
 	}
 
 	if (qsctest_fips_aes256_cbc() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CBC(AES-256) KAT test. \n");
+		qsctest_print_line("Success! Passed the FIPS 197 CBC(AES-256) KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CBC(AES-256) CBC KAT test. \n");
+		qsctest_print_line("Failure! Failed the FIPS 197 CBC(AES-256) CBC KAT test.");
 	}
 
 	if (qsctest_fips_aes128_ctr() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CTR(AES-128) KAT test. \n");
+		qsctest_print_line("Success! Passed the FIPS 197 CTR(AES-128) KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CTR(AES-128) KAT test. \n");
+		qsctest_print_line("Failure! Failed the FIPS 197 CTR(AES-128) KAT test.");
 	}
 
 	if (qsctest_fips_aes256_ctr() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 CTR(AES-256) KAT test. \n");
+		qsctest_print_line("Success! Passed the FIPS 197 CTR(AES-256) KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 CTR(AES-256) KAT test. \n");
+		qsctest_print_line("Failure! Failed the FIPS 197 CTR(AES-256) KAT test.");
 	}
 
 	if (qsctest_fips_aes128_ecb() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 ECB(AES-128) KAT test. \n");
+		qsctest_print_line("Success! Passed the FIPS 197 ECB(AES-128) KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-128) KAT test. \n");
+		qsctest_print_line("Failure! Failed the FIPS 197 ECB(AES-128) KAT test.");
 	}
 
 	if (qsctest_fips_aes256_ecb() == true)
 	{
-		qsctest_print_safe("Success! Passed the FIPS 197 ECB(AES-256) KAT test. \n");
+		qsctest_print_line("Success! Passed the FIPS 197 ECB(AES-256) KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the FIPS 197 ECB(AES-256) KAT test. \n");
+		qsctest_print_line("Failure! Failed the FIPS 197 ECB(AES-256) KAT test.");
 	}
 
 	if (qsctest_aes128_gcm_kat() == true)
 	{
-		qsctest_print_safe("Success! Passed the GCM-AES-128 AEAD mode KAT test. \n");
+		qsctest_print_line("Success! Passed the GCM-AES-128 AEAD mode KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the GCM-AES-128 AEAD mode KAT test. \n");
+		qsctest_print_line("Failure! Failed the GCM-AES-128 AEAD mode KAT test.");
 	}
 
 	if (qsctest_aes256_gcm_kat() == true)
 	{
-		qsctest_print_safe("Success! Passed the GCM-AES-256 AEAD mode KAT test. \n");
+		qsctest_print_line("Success! Passed the GCM-AES-256 AEAD mode KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the GCM-AES-256 AEAD mode KAT test. \n");
+		qsctest_print_line("Failure! Failed the GCM-AES-256 AEAD mode KAT test.");
 	}
 
 	if (qsctest_aes256_hba_kat() == true)
 	{
-		qsctest_print_safe("Success! Passed the HBA-AES-256 AEAD mode KAT test. \n");
+		qsctest_print_line("Success! Passed the HBA-AES-256 AEAD mode KAT test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the HBA-AES-256 AEAD mode KAT test. \n");
+		qsctest_print_line("Failure! Failed the HBA-AES-256 AEAD mode KAT test.");
 	}
 
 	if (qsctest_aes256_hba_stress() == true)
 	{
-		qsctest_print_safe("Success! Passed the HBA-AES-256 AEAD mode stress test. \n");
+		qsctest_print_line("Success! Passed the HBA-AES-256 AEAD mode stress test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the HBA-AES-256 AEAD mode stress test. \n");
+		qsctest_print_line("Failure! Failed the HBA-AES-256 AEAD mode stress test.");
 	}
 
 	if (qsctest_aes256_padding_test() == true)
 	{
-		qsctest_print_safe("Success! Passed the PKCS7 padding mode stress test. \n");
+		qsctest_print_line("Success! Passed the PKCS7 padding mode stress test.");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed the PKCS7 padding mode stress test. \n");
+		qsctest_print_line("Failure! Failed the PKCS7 padding mode stress test.");
 	}
 }

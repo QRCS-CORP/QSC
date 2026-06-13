@@ -397,15 +397,32 @@ int64_t qsc_stringutils_insert_string(char* dest, size_t dstlen, const char* sou
 	QSC_ASSERT(dest != NULL);
 	QSC_ASSERT(source != NULL);
 
+	size_t dlen;
+	size_t slen;
+	size_t i;
 	int64_t res;
 
 	res = QSC_STRINGUTILS_TOKEN_NOT_FOUND;
 
-	if (dest != NULL && source != NULL &&
-		(strlen(dest) + strlen(source)) <= dstlen && offset < (dstlen - strlen(source)))
+	if (dest != NULL && source != NULL)
 	{
-		qsc_stringutils_concat_strings((dest + offset), dstlen, source);
-		res = (int64_t)strlen(dest);
+		dlen = qsc_stringutils_string_size(dest);
+		slen = qsc_stringutils_string_size(source);
+
+		if (slen != 0U && offset <= dlen && (dlen + slen) < dstlen)
+		{
+			i = dlen + 1U;
+
+			while (i > offset)
+			{
+				dest[i + slen - 1U] = dest[i - 1U];
+				--i;
+			}
+
+			qsc_memutils_copy((dest + offset), source, slen);
+
+			res = (int64_t)(dlen + slen);
+		}
 	}
 
 	return res;

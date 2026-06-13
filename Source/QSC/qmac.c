@@ -358,5 +358,3 @@ void qsc_qmac_update(qsc_qmac_state* ctx, const uint8_t* message, size_t msglen)
         }
     }
 }
-
-

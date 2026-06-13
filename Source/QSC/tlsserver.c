@@ -867,11 +867,13 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
         size_t eoff;
         size_t extblockabsoffset;
         size_t kscount;
+        uint64_t seenextmask;
 
         clientgroupcount = 0U;
         clientsigcount = 0U;
         eoff = 0U;
         kscount = 0U;
+        seenextmask = 0U;
 
         /* Compute offset of extblock within msg: msg starts at legacy_version,
          * so absolute-within-msg offset = (extblock - msg). */
@@ -898,6 +900,27 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
             if (st != qsc_tls_status_success)
             {
                 return st;
+            }
+
+            if (etype < 64U)
+            {
+                uint64_t extbit;
+
+                extbit = (uint64_t)1U << etype;
+
+                if ((seenextmask & extbit) != 0U)
+                {
+                    state->lastalert = qsc_tls_alert_illegal_parameter;
+                    return qsc_tls_status_invalid_message;
+                }
+
+                seenextmask |= extbit;
+            }
+
+            if (etype == (uint16_t)qsc_tls_extension_pre_shared_key && eoff != extblocklen)
+            {
+                state->lastalert = qsc_tls_alert_illegal_parameter;
+                return qsc_tls_status_invalid_message;
             }
 
             if (etype == (uint16_t)qsc_tls_extension_supported_groups)
@@ -1124,6 +1147,11 @@ static qsc_tls_status server_process_client_hello(qsc_tls_server_state* state, c
         if (idcount == 0U) 
         {
             return qsc_tls_status_invalid_message; 
+        }
+
+        if (idcount > 4U)
+        {
+            return qsc_tls_status_invalid_message;
         }
 
         /* Walk each identity; accept first that validates. */

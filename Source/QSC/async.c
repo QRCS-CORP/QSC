@@ -34,7 +34,7 @@ static bool suspended = false;
 
 /*!
  * \struct async_thread_task_t
- * \brief Contains the thread task context state.
+ * \brief Contains the parallel-thread task context state.
  */
 typedef struct
 {
@@ -43,10 +43,95 @@ typedef struct
     size_t index;                               /*!< Index for this thread */
 } async_thread_task_t;
 
-THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void* arg)
+/*!
+ * \struct async_thread_state_t
+ * \brief Contains the single-argument thread task context state.
+ */
+typedef struct
+{
+    void (*func)(void*);    /*!< Function to execute */
+    void* state;            /*!< Function argument */
+} async_thread_state_t;
+
+/*!
+ * \struct async_thread_args_t
+ * \brief Contains the extended thread task context state.
+ */
+typedef struct
+{
+    void (*func)(void**);   /*!< Function to execute */
+    void** args;            /*!< Function arguments */
+} async_thread_args_t;
+
+/*!
+ * \struct async_thread_noargs_t
+ * \brief Contains the no-argument thread task context state.
+ */
+typedef struct
+{
+    void (*func)(void);     /*!< Function to execute */
+} async_thread_noargs_t;
+
+static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void* arg)
 {
     async_thread_task_t* task = (async_thread_task_t*)arg;
-    task->task(task->context, task->index);
+
+    if (task != NULL && task->task != NULL)
+    {
+        task->task(task->context, task->index);
+    }
+
+    return 0;
+}
+
+static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_state_worker(void* arg)
+{
+    async_thread_state_t* task = (async_thread_state_t*)arg;
+
+    if (task != NULL)
+    {
+        if (task->func != NULL)
+        {
+            task->func(task->state);
+        }
+
+        qsc_memutils_alloc_free(task);
+    }
+
+    return 0;
+}
+
+static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_args_worker(void* arg)
+{
+    async_thread_args_t* task = (async_thread_args_t*)arg;
+
+    if (task != NULL)
+    {
+        if (task->func != NULL)
+        {
+            task->func(task->args);
+        }
+
+        qsc_memutils_alloc_free(task);
+    }
+
+    return 0;
+}
+
+static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_noargs_worker(void* arg)
+{
+    async_thread_noargs_t* task = (async_thread_noargs_t*)arg;
+
+    if (task != NULL)
+    {
+        if (task->func != NULL)
+        {
+            task->func();
+        }
+
+        qsc_memutils_alloc_free(task);
+    }
+
     return 0;
 }
 
@@ -493,12 +578,33 @@ qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
 
     if (func != NULL)
     {
+        async_thread_state_t* task;
+
+        task = (async_thread_state_t*)qsc_memutils_malloc(sizeof(async_thread_state_t));
+
+        if (task != NULL)
+        {
+            task->func = func;
+            task->state = state;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        uint32_t id = 0U;
-        res = (HANDLE)_beginthreadex(NULL, 0, (uint32_t(__stdcall*)(void*))func, state, 0, &id);
+            uint32_t id;
+
+            id = 0U;
+            res = (HANDLE)_beginthreadex(NULL, 0, async_thread_state_worker, task, 0, &id);
+
+            if (res == NULL)
+            {
+                qsc_memutils_alloc_free(task);
+            }
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_create(&res, NULL, (void* (*) (void*))func, state);
+            if (pthread_create(&res, NULL, async_thread_state_worker, task) != 0)
+            {
+                qsc_memutils_alloc_free(task);
+                res = 0;
+            }
 #endif
+        }
     }
 
     return res;
@@ -518,14 +624,33 @@ qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
 
     if (func != NULL)
     {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-        uint32_t id;
+        async_thread_args_t* task;
 
-        id = 0U;
-        res = (HANDLE)_beginthreadex(NULL, 0, (uint32_t(__stdcall*)(void*))func, (void*)args, 0, &id);
+        task = (async_thread_args_t*)qsc_memutils_malloc(sizeof(async_thread_args_t));
+
+        if (task != NULL)
+        {
+            task->func = func;
+            task->args = args;
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+            uint32_t id;
+
+            id = 0U;
+            res = (HANDLE)_beginthreadex(NULL, 0, async_thread_args_worker, task, 0, &id);
+
+            if (res == NULL)
+            {
+                qsc_memutils_alloc_free(task);
+            }
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_create(&res, NULL, (void* (*)(void*))func, args);
+            if (pthread_create(&res, NULL, async_thread_args_worker, task) != 0)
+            {
+                qsc_memutils_alloc_free(task);
+                res = 0;
+            }
 #endif
+        }
     }
 
     return res;
@@ -545,12 +670,32 @@ qsc_thread qsc_async_thread_create_noargs(void (*func)(void))
 
     if (func != NULL)
     {
+        async_thread_noargs_t* task;
+
+        task = (async_thread_noargs_t*)qsc_memutils_malloc(sizeof(async_thread_noargs_t));
+
+        if (task != NULL)
+        {
+            task->func = func;
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        uint32_t id = 0;
-        res = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, NULL, 0, (LPDWORD)&id);
+            uint32_t id;
+
+            id = 0U;
+            res = (HANDLE)_beginthreadex(NULL, 0, async_thread_noargs_worker, task, 0, &id);
+
+            if (res == NULL)
+            {
+                qsc_memutils_alloc_free(task);
+            }
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        pthread_create(&res, NULL, (void* (*) (void*))func, NULL);
+            if (pthread_create(&res, NULL, async_thread_noargs_worker, task) != 0)
+            {
+                qsc_memutils_alloc_free(task);
+                res = 0;
+            }
 #endif
+        }
     }
 
     return res;
@@ -563,6 +708,7 @@ int32_t qsc_async_thread_resume(qsc_thread handle)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     res = ResumeThread(handle);
 #elif defined(QSC_SYSTEM_OS_POSIX)
+    (void)handle;
     pthread_mutex_lock(&tsusp);
     suspended = false;
     res = 0;
@@ -600,6 +746,7 @@ int32_t qsc_async_thread_suspend(qsc_thread handle)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
     res = SuspendThread(handle);
 #elif defined(QSC_SYSTEM_OS_POSIX)
+    (void)handle;
     pthread_mutex_lock(&tsusp);
     suspended = true;
     res = 0;

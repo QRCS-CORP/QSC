@@ -84,7 +84,7 @@ int16_t qsc_secrand_next_int16_max(int16_t maximum)
 int16_t qsc_secrand_next_int16_maxmin(int16_t maximum, int16_t minimum)
 {
 	QSC_ASSERT(maximum != 0);
-	QSC_ASSERT(maximum > minimum);
+	QSC_ASSERT(maximum >= minimum);
 
 	const int16_t SMPTHR = (maximum - minimum + 1);
 	const int16_t SMPMAX = (int16_t)(INT16_MAX - (INT16_MAX % SMPTHR));
@@ -135,7 +135,7 @@ uint16_t qsc_secrand_next_uint16_max(uint16_t maximum)
 uint16_t qsc_secrand_next_uint16_maxmin(uint16_t maximum, uint16_t minimum)
 {
 	QSC_ASSERT(maximum != 0U);
-	QSC_ASSERT(maximum > minimum);
+	QSC_ASSERT(maximum >= minimum);
 
 	const uint16_t SMPTHR = (maximum - minimum + 1U);
 	const uint16_t SMPMAX = (uint16_t)(UINT16_MAX - (UINT16_MAX % SMPTHR));
@@ -186,7 +186,7 @@ int32_t qsc_secrand_next_int32_max(int32_t maximum)
 int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum)
 {
 	QSC_ASSERT(maximum != 0);
-	QSC_ASSERT(maximum > minimum);
+	QSC_ASSERT(maximum >= minimum);
 
 	const int32_t SMPTHR = (maximum - minimum + 1);
 	const int32_t SMPMAX = (INT32_MAX - (INT32_MAX % SMPTHR));
@@ -237,7 +237,7 @@ uint32_t qsc_secrand_next_uint32_max(uint32_t maximum)
 uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum)
 {
 	QSC_ASSERT(maximum != 0U);
-	QSC_ASSERT(maximum > minimum);
+	QSC_ASSERT(maximum >= minimum);
 
 	const uint32_t SMPTHR = (maximum - minimum + 1U);
 	const uint32_t SMPMAX = (UINT32_MAX - (UINT32_MAX % SMPTHR));
@@ -288,7 +288,7 @@ int64_t qsc_secrand_next_int64_max(int64_t maximum)
 int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum)
 {
 	QSC_ASSERT(maximum != 0);
-	QSC_ASSERT(maximum > minimum);
+	QSC_ASSERT(maximum >= minimum);
 
 	const int64_t SMPTHR = (maximum - minimum + 1);
 	const int64_t SMPMAX = (INT64_MAX - (INT64_MAX % SMPTHR));
@@ -339,7 +339,7 @@ uint64_t qsc_secrand_next_uint64_max(uint64_t maximum)
 uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum)
 {
 	QSC_ASSERT(maximum != 0U);
-	QSC_ASSERT(maximum > minimum);
+	QSC_ASSERT(maximum >= minimum);
 
 	const uint64_t SMPTHR = (maximum - minimum + 1U);
 	const uint64_t SMPMAX = (UINT64_MAX - (UINT64_MAX % SMPTHR));
@@ -390,7 +390,7 @@ void qsc_secrand_initialize(const uint8_t* seed, size_t seedlen, const uint8_t* 
 
 		qsc_async_mutex_lock(m_secrand_state.opmtx);
 		/* initialize the underlying generator */
-		qsc_csg_initialize(&m_secrand_state.hstate, seed, seedlen, custom, custlen, true);
+		qsc_csg_initialize(&m_secrand_state.hstate, seed, seedlen, custom, custlen, false);
 
 		/* pre-fill the cache */
 		qsc_csg_generate(&m_secrand_state.hstate, m_secrand_state.cache, QSC_SECRAND_CACHE_SIZE);

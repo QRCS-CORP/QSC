@@ -687,8 +687,9 @@ uint32_t qsc_intutils_popcount32(uint32_t v)
 {
 	v = v - ((v >> 1) & 0x55555555UL);
 	v = (v & 0x33333333UL) + ((v >> 2) & 0x33333333UL);
+	v = (v + (v >> 4)) & 0x0F0F0F0FUL;
 
-	return (uint32_t)((v + ((v >> 4) & 0xF0F0F0FUL)) * 0x1010101UL) >> 24;
+	return (uint32_t)((v * 0x01010101UL) >> 24);
 }
 
 #if defined(QSC_SYSTEM_HAS_AVX)

@@ -4,6 +4,7 @@ static const qsc_tls_signature_scheme_descriptor qsc_tls_sigalg_descriptors[] =
 {
 	{ qsc_tls_sig_ecdsa_secp256r1_sha256, "ecdsa_secp256r1_sha256", qsc_tls_hash_sha256, 72U, true, true, false, false },
 	{ qsc_tls_sig_ecdsa_secp384r1_sha384, "ecdsa_secp384r1_sha384", qsc_tls_hash_sha384, 104U, true, true, false, false },
+	{ qsc_tls_sig_ecdsa_secp521r1_sha512, "ecdsa_secp521r1_sha512", qsc_tls_hash_sha512, 141U, true, true, false, false },
 	{ qsc_tls_sig_ed25519, "ed25519", qsc_tls_hash_none, 64U, true, true, false, false },
 	{ qsc_tls_sig_mldsa44, "mldsa44", qsc_tls_hash_none, 2420U, true, true, true, true },
 	{ qsc_tls_sig_mldsa65, "mldsa65", qsc_tls_hash_none, 3309U, true, true, true, true },
@@ -48,6 +49,15 @@ static bool tls_signature_scheme_is_build_compatible(qsc_tls_signature_scheme sc
 		case qsc_tls_sig_ecdsa_secp384r1_sha384:
 		{
 	#if defined(QSC_ECDSA_S3P384)
+			res = true;
+	#else
+			res = false;
+	#endif
+			break;
+		}
+		case qsc_tls_sig_ecdsa_secp521r1_sha512:
+		{
+	#if defined(QSC_ECDSA_S5P521)
 			res = true;
 	#else
 			res = false;
@@ -148,6 +158,10 @@ size_t qsc_tls_signature_scheme_private_key_size(qsc_tls_signature_scheme scheme
 		{
 			return 48U;
 		}
+		case qsc_tls_sig_ecdsa_secp521r1_sha512:
+		{
+			return 66U;
+		}
 		case qsc_tls_sig_ed25519:
 		{
 			return 64U;
@@ -182,6 +196,10 @@ size_t qsc_tls_signature_scheme_public_key_size(qsc_tls_signature_scheme scheme)
 		case qsc_tls_sig_ecdsa_secp384r1_sha384:
 		{
 			return 96U;
+		}
+		case qsc_tls_sig_ecdsa_secp521r1_sha512:
+		{
+			return 132U;
 		}
 		case qsc_tls_sig_ed25519:
 		{
@@ -222,6 +240,11 @@ qsc_x509_signature_algorithm qsc_tls_signature_scheme_x509_algorithm(qsc_tls_sig
 		case qsc_tls_sig_ecdsa_secp384r1_sha384:
 		{
 			res = QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384;
+			break;
+		}
+		case qsc_tls_sig_ecdsa_secp521r1_sha512:
+		{
+			res = QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512;
 			break;
 		}
 		case qsc_tls_sig_ed25519:
@@ -277,7 +300,7 @@ bool qsc_tls_signature_scheme_validate_signature_length(qsc_tls_signature_scheme
 
 	if (expected != 0U)
 	{
-		if ((scheme == qsc_tls_sig_ecdsa_secp256r1_sha256) || (scheme == qsc_tls_sig_ecdsa_secp384r1_sha384))
+		if ((scheme == qsc_tls_sig_ecdsa_secp256r1_sha256) || (scheme == qsc_tls_sig_ecdsa_secp384r1_sha384) || (scheme == qsc_tls_sig_ecdsa_secp521r1_sha512))
 		{
 			res = (signaturelen >= 8U && signaturelen <= expected);
 		}

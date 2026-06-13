@@ -243,6 +243,7 @@
     <ClInclude Include="hqcbase.h" />
     <ClInclude Include="hqcbase_avx2.h" />
     <ClInclude Include="oid.h" />
+    <ClInclude Include="pbmac1.h" />
     <ClInclude Include="qmac.h" />
     <ClInclude Include="qsccommon.h" />
     <ClInclude Include="consoleutils.h" />
@@ -405,6 +406,7 @@
     <ClCompile Include="memutils.c" />
     <ClCompile Include="netutils.c" />
     <ClCompile Include="oid.c" />
+    <ClCompile Include="pbmac1.c" />
     <ClCompile Include="poly1305.c" />
     <ClCompile Include="qmac.c" />
     <ClCompile Include="qsort.c" />

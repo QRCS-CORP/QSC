@@ -249,6 +249,9 @@
     <ClCompile Include="TLS\tls_stage29_negative_x509_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
+    <ClCompile Include="pbmac1_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mceliece_test.h">
@@ -460,6 +463,9 @@
     </ClInclude>
     <ClInclude Include="TLS\tls_stage29_negative_x509_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="pbmac1_test.h">
+      <Filter>Header Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

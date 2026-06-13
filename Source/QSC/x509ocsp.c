@@ -723,10 +723,12 @@ static bool x509_ocsp_parse_single_response(const qsc_encoding_ber_element* sing
             if (status == QSC_ASN1_STATUS_SUCCESS && qsc_asn1_require_sequence(revinfo, 1U, 2U) == QSC_ASN1_STATUS_SUCCESS)
             {
                 revtime = qsc_asn1_get_child(revinfo, 0U);
-                (void)qsc_asn1_decode_time(revtime, &response->revocationtime);
-            }
 
-            res = true;
+                if (qsc_asn1_decode_time(revtime, &response->revocationtime) == QSC_ASN1_STATUS_SUCCESS)
+                {
+                    res = true;
+                }
+            }
         }
     }
 

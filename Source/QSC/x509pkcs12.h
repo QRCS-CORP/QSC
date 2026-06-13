@@ -71,8 +71,8 @@ QSC_CPLUSPLUS_ENABLED_START
  * The public API supports bundle initialization, top-level PKCS #12 parsing,
  * and direct decryption of an EncryptedPrivateKeyInfo object using a supplied
  * password. The parser currently accepts a version 3 PFX container carrying a
- * PKCS #7 data AuthSafe, validates the outer MAC using HMAC-SHA-256, and
- * extracts certificate bags, PKCS #8 key bags, and shrouded key bags. Cipher
+ * PKCS #7 data AuthSafe, validates the outer MAC using either RFC 7292 classic MacData or
+ * RFC 9879 PBMAC1 MacData, and extracts certificate bags, PKCS #8 key bags, and shrouded key bags. Cipher
  * selection for private-key decryption is controlled by the supporting PKCS #12
  * crypto implementation and associated compile-time feature macros.
  */
@@ -145,6 +145,52 @@ QSC_EXPORT_API void qsc_x509_pkcs12_initialize(qsc_x509_pkcs12_bundle* bundle);
  *
  * \return Returns true if parsing completed successfully; otherwise returns false.
  */
+
+/*!
+ * \brief Encode a PKCS #12 MacData object over an AuthSafe OCTET STRING value.
+ *
+ * \details
+ * Computes the PKCS #12 whole-file integrity MAC over the supplied AuthSafe
+ * contents and encodes the resulting MacData object. When \c usepbmac1 is false,
+ * the function emits a classic RFC 7292 MacData object using the PKCS #12
+ * Appendix B MAC KDF with HMAC-SHA2-256. When \c usepbmac1 is true, the
+ * function emits an RFC 9879 PBMAC1 AlgorithmIdentifier using
+ * PBKDF2-HMAC-SHA2-256 and HMAC-SHA2-256.
+ *
+ * \param output: The destination buffer receiving DER encoded MacData.
+ * \param outcap: The capacity of the destination buffer in bytes.
+ * \param outlen: The number of bytes written to the destination buffer.
+ * \param authsafe: [const] The AuthSafe OCTET STRING contents to authenticate.
+ * \param authsafelen: The length of the AuthSafe contents in bytes.
+ * \param password: [const] The PKCS #12 password.
+ * \param salt: [const] The MAC salt.
+ * \param saltlen: The MAC salt length in bytes.
+ * \param iterations: The MAC KDF iteration count.
+ * \param usepbmac1: When true, encode PBMAC1; otherwise encode classic MacData.
+ *
+ * \return Returns true if MacData encoding completed successfully; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_pkcs12_encode_mac_data_der(uint8_t* output, size_t outcap, size_t* outlen, const uint8_t* authsafe,
+    size_t authsafelen, const char* password, const uint8_t* salt, size_t saltlen, uint64_t iterations, bool usepbmac1);
+
+
+/*!
+ * \brief Verify the outer PKCS #12 MacData without extracting bundle contents.
+ *
+ * \details
+ * Decodes the PFX wrapper, locates the AuthSafe OCTET STRING, and verifies the
+ * outer MacData. Both classic RFC 7292 MacData and RFC 9879 PBMAC1 MacData are
+ * supported. This function does not decrypt safe contents or extract certificates
+ * or private keys; use \c qsc_x509_pkcs12_parse for full bundle import.
+ *
+ * \param data: [const] The DER encoded PKCS #12 input buffer.
+ * \param datalen: The length of the input buffer in bytes.
+ * \param password: [const] The PKCS #12 MAC password.
+ *
+ * \return Returns true if the outer PKCS #12 MacData verifies; otherwise returns false.
+ */
+QSC_EXPORT_API bool qsc_x509_pkcs12_verify_mac_data(const uint8_t* data, size_t datalen, const char* password);
+
 QSC_EXPORT_API bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* password, qsc_x509_pkcs12_bundle* bundle);
 
 /*!

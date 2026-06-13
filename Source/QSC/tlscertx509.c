@@ -122,6 +122,17 @@ static bool tls_cert_x509_spki_to_signer_key(const qsc_x509_subject_public_key_i
 
                 break;
             }
+            case qsc_tls_sig_ecdsa_secp521r1_sha512:
+            {
+                if (spki->publickeylen == 133U && spki->publickey[0U] == 0x04U)
+                {
+                    *outkey = spki->publickey + 1U;
+                    *outkeylen = 132U;
+                    res = true;
+                }
+
+                break;
+            }
             case qsc_tls_sig_mldsa44:
             case qsc_tls_sig_mldsa65:
             case qsc_tls_sig_mldsa87:

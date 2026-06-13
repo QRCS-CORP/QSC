@@ -180,6 +180,7 @@ typedef enum qsc_tls_signature_scheme
 	qsc_tls_sig_none = 0,							/*!< No signature scheme selected. */
 	qsc_tls_sig_ecdsa_secp256r1_sha256 = 0x0403,	/*!< ecdsa_secp256r1_sha256 signature scheme. */
 	qsc_tls_sig_ecdsa_secp384r1_sha384 = 0x0503,	/*!< ecdsa_secp384r1_sha384 signature scheme. */
+	qsc_tls_sig_ecdsa_secp521r1_sha512 = 0x0603,	/*!< ecdsa_secp521r1_sha512 signature scheme. */
 	qsc_tls_sig_ed25519 = 0x0807,					/*!< ed25519 signature scheme. */
 	qsc_tls_sig_mldsa44 = 0x0904,					/*!< ML-DSA-44 signature scheme. */
 	qsc_tls_sig_mldsa65 = 0x0905,					/*!< ML-DSA-65 signature scheme. */

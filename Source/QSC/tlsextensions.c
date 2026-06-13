@@ -1415,13 +1415,14 @@ qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_offer(const uint8_t* inp
                             return status;
                         }
 
-                        if (ididx < capacity)
+                        if (ididx >= capacity)
                         {
-                            identities[ididx].identity = id;
-                            identities[ididx].identitylen = idlen;
-                            identities[ididx].obfuscatedticketage = age;
+                            return qsc_tls_status_invalid_length;
                         }
 
+                        identities[ididx].identity = id;
+                        identities[ididx].identitylen = idlen;
+                        identities[ididx].obfuscatedticketage = age;
                         ++ididx;
                     }
 
@@ -1440,12 +1441,13 @@ qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_offer(const uint8_t* inp
                         {
                             return status;
                         }
-                        if (binderidx < capacity)
+                        if (binderidx >= capacity)
                         {
-                            binders[binderidx] = b;
-                            binderlens[binderidx] = blen;
+                            return qsc_tls_status_invalid_length;
                         }
 
+                        binders[binderidx] = b;
+                        binderlens[binderidx] = blen;
                         ++binderidx;
                     }
 

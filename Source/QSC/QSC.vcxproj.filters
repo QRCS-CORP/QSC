@@ -417,6 +417,9 @@
     <ClInclude Include="sphincsplusbase.h">
       <Filter>Header Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
     </ClInclude>
+    <ClInclude Include="pbmac1.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
     <ClInclude Include="qmac.h">
       <Filter>Header Files\MAC</Filter>
     </ClInclude>
@@ -802,6 +805,9 @@
     </ClCompile>
     <ClCompile Include="sphincsplusbase.c">
       <Filter>Source Files\Asymmetric\Signature\SphincsPlus\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="pbmac1.c">
+      <Filter>Source Files\MAC</Filter>
     </ClCompile>
     <ClCompile Include="qmac.c">
       <Filter>Source Files\MAC</Filter>

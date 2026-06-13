@@ -70,6 +70,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *   qsc_tls_sig_ed25519                 -> qsc_eddsa_* (64-byte signature)
  *   qsc_tls_sig_ecdsa_secp256r1_sha256  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 8446 4.2.3)
  *   qsc_tls_sig_ecdsa_secp384r1_sha384  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 8446 4.2.3)
+ *   qsc_tls_sig_ecdsa_secp521r1_sha512  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 8446 4.2.3)
  *   qsc_tls_sig_mldsa44/65/87           -> qsc_dilithium_* (parameter set selected at compile time)
  *
  * QSC sign primitives produce the combined signed_message = signature || message form; the
@@ -90,6 +91,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *   qsc_tls_sig_ed25519                  64  (QSC_EDDSA_PRIVATEKEY_SIZE)
  *   qsc_tls_sig_ecdsa_secp256r1_sha256   QSC_ECDSA_PRIVATEKEY_SIZE
  *   qsc_tls_sig_ecdsa_secp384r1_sha384   QSC_ECDSA_PRIVATEKEY_SIZE
+ *   qsc_tls_sig_ecdsa_secp521r1_sha512   QSC_ECDSA_PRIVATEKEY_SIZE
  *   qsc_tls_sig_mldsa44/65/87            QSC_DILITHIUM_PRIVATEKEY_SIZE
  */
 typedef struct qsc_tls_signer_default_context

@@ -742,6 +742,13 @@ size_t qsc_encoding_ber_decode_tag(const uint8_t* buffer, size_t buflen, uint8_t
 
                 b = buffer[pos];
                 ++pos;
+
+                if (num > (UINT32_MAX >> 7U))
+                {
+                    pos = 0U;
+                    break;
+                }
+
                 num = (num << 7U) | (uint32_t)(b & 0x7FU);
 
                 if ((b & 0x80U) == 0U)

@@ -137,7 +137,6 @@ typedef struct qsc_tls_server_state
     bool earlydatadone;                                 /*!< True after EndOfEarlyData received; switch read key to handshake. */
     uint8_t stashedserverfinhash[QSC_TLS_HASH_MAX_SIZE]; /*!< CH..server_Finished transcript hash; set on 0-RTT accept for app-key derivation. */
     size_t stashedserverfinhashlen;
-    /* TODO: FIELDS ADDED */
     uint8_t legacy_session_id[32U];
     size_t legacy_session_id_len;
 } qsc_tls_server_state;

@@ -170,8 +170,7 @@ static bool tls_signer_default_ecdsa_matches_scheme(qsc_tls_signature_scheme sch
 #elif defined(QSC_ECDSA_S3P384)
     return scheme == qsc_tls_sig_ecdsa_secp384r1_sha384;
 #elif defined(QSC_ECDSA_S5P521)
-    (void)scheme;
-    return false;  /* ecdsa_secp521r1_sha512 scheme enum not in tlstypes.h */
+    return scheme == qsc_tls_sig_ecdsa_secp521r1_sha512;
 #else
     (void)scheme;
     return false;
@@ -330,6 +329,7 @@ bool qsc_tls_signer_default_sign(qsc_tls_signature_scheme scheme, const uint8_t*
                 }
                 case qsc_tls_sig_ecdsa_secp256r1_sha256:
                 case qsc_tls_sig_ecdsa_secp384r1_sha384:
+                case qsc_tls_sig_ecdsa_secp521r1_sha512:
                 {
                     if (tls_signer_default_ecdsa_matches_scheme(scheme) && ctx->privatekeylen == QSC_ECDSA_PRIVATEKEY_SIZE)
                     {
@@ -397,6 +397,7 @@ bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme, const uint8_
             }
             case qsc_tls_sig_ecdsa_secp256r1_sha256:
             case qsc_tls_sig_ecdsa_secp384r1_sha384:
+            case qsc_tls_sig_ecdsa_secp521r1_sha512:
             {
                 if (tls_signer_default_ecdsa_matches_scheme(scheme) && signer->datalen >= QSC_ECDSA_PUBLICKEY_SIZE)
                 {

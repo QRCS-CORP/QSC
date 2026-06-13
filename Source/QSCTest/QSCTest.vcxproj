@@ -282,6 +282,7 @@
     <ClCompile Include="mceliece_test.c" />
     <ClCompile Include="netutils_test.c" />
     <ClCompile Include="nistrng.c" />
+    <ClCompile Include="pbmac1_test.c" />
     <ClCompile Include="poly1305_test.c" />
     <ClCompile Include="qmac_test.c" />
     <ClCompile Include="rcs_test.c" />
@@ -356,6 +357,7 @@
     <ClInclude Include="mceliece_test.h" />
     <ClInclude Include="netutils_test.h" />
     <ClInclude Include="nistrng.h" />
+    <ClInclude Include="pbmac1_test.h" />
     <ClInclude Include="poly1305_test.h" />
     <ClInclude Include="rcs_test.h" />
     <ClInclude Include="scb_test.h" />

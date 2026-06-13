@@ -5,6 +5,7 @@
 #include "kyber.h"
 #include "ecdh.h"
 #include "ecdhp384base.h"
+#include "ecdhp521base.h"
 #include "eddh448base.h"
 
 /* backend dispatch: each supported group maps to either a pure classical ECDH,
@@ -44,6 +45,19 @@ static const qsc_tls_group_descriptor tls_groups_secp384r1 = {
     1U + QSC_ECDHP384_PUBLICKEY_SIZE,
     1U + QSC_ECDHP384_PUBLICKEY_SIZE,
     QSC_ECDHP384_SHAREDSECRET_SIZE,
+    true,
+    false,
+    false,
+    true
+};
+
+static const qsc_tls_group_descriptor tls_groups_secp521r1 = {
+    qsc_tls_group_secp521r1,
+    "secp521r1",
+    QSC_ECDHP521_PRIVATEKEY_SIZE,
+    1U + QSC_ECDHP521_PUBLICKEY_SIZE,
+    1U + QSC_ECDHP521_PUBLICKEY_SIZE,
+    QSC_ECDHP521_SHAREDSECRET_SIZE,
     true,
     false,
     false,
@@ -179,6 +193,11 @@ const qsc_tls_group_descriptor* qsc_tls_groups_descriptor_get(qsc_tls_named_grou
             res = &tls_groups_secp384r1;
             break;
         }
+        case qsc_tls_group_secp521r1:
+        {
+            res = &tls_groups_secp521r1;
+            break;
+        }
     #if defined(QSC_ECDH_S1P256)
         case qsc_tls_group_secp256r1:
         {
@@ -294,6 +313,22 @@ qsc_tls_status qsc_tls_groups_generate_client_keypair(qsc_tls_key_exchange_state
                 qsc_memutils_copy(state->publicshare + 1U, rawpub, QSC_ECDHP384_PUBLICKEY_SIZE);
                 state->privatekeylen = QSC_ECDHP384_PRIVATEKEY_SIZE;
                 state->publicsharelen = 1U + QSC_ECDHP384_PUBLICKEY_SIZE;
+                state->initialized = true;
+                res = true;
+
+                qsc_memutils_secure_erase(rawpub, sizeof(rawpub));
+
+                break;
+            }
+            case qsc_tls_group_secp521r1:
+            {
+                uint8_t rawpub[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+
+                qsc_p521_generate_keypair(rawpub, state->privatekey, qsc_csp_generate);
+                state->publicshare[0] = 0x04U;
+                qsc_memutils_copy(state->publicshare + 1U, rawpub, QSC_ECDHP521_PUBLICKEY_SIZE);
+                state->privatekeylen = QSC_ECDHP521_PRIVATEKEY_SIZE;
+                state->publicsharelen = 1U + QSC_ECDHP521_PUBLICKEY_SIZE;
                 state->initialized = true;
                 res = true;
 
@@ -516,6 +551,24 @@ qsc_tls_status qsc_tls_groups_client_derive_shared_secret(qsc_tls_key_exchange_s
                     if (res == true)
                     {
                         *written = QSC_ECDHP384_SHAREDSECRET_SIZE;
+                    }
+                }
+
+                break;
+            }
+            case qsc_tls_group_secp521r1:
+            {
+                if (serverkeyshare[0] != 0x04U)
+                {
+                    status = qsc_tls_status_invalid_message;
+                }
+                else
+                {
+                    res = qsc_p521_key_exchange(sharedsecret, serverkeyshare + 1U, state->privatekey);
+
+                    if (res == true)
+                    {
+                        *written = QSC_ECDHP521_SHAREDSECRET_SIZE;
                     }
                 }
 
@@ -752,6 +805,37 @@ qsc_tls_status qsc_tls_groups_server_respond(qsc_tls_named_group group, const ui
                     qsc_memutils_copy(serverkeyshare + 1U, serverrawpub, QSC_ECDHP384_PUBLICKEY_SIZE);
                     *serverkeysharewritten = 1U + QSC_ECDHP384_PUBLICKEY_SIZE;
                     *sharedsecretwritten = QSC_ECDHP384_SHAREDSECRET_SIZE;
+                }
+
+                qsc_memutils_secure_erase(serverrawpub, sizeof(serverrawpub));
+
+                break;
+            }
+            case qsc_tls_group_secp521r1:
+            {
+                uint8_t serverrawpub[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+
+                if (clientkeyshare[0] != 0x04U)
+                {
+                    status = qsc_tls_status_invalid_message;
+                }
+                else
+                {
+                    res = true;
+                    qsc_p521_generate_keypair(serverrawpub, serverpriv, qsc_csp_generate);
+                }
+
+                if (res == true)
+                {
+                    res = qsc_p521_key_exchange(sharedsecret, clientkeyshare + 1U, serverpriv);
+                }
+
+                if (res == true)
+                {
+                    serverkeyshare[0] = 0x04U;
+                    qsc_memutils_copy(serverkeyshare + 1U, serverrawpub, QSC_ECDHP521_PUBLICKEY_SIZE);
+                    *serverkeysharewritten = 1U + QSC_ECDHP521_PUBLICKEY_SIZE;
+                    *sharedsecretwritten = QSC_ECDHP521_SHAREDSECRET_SIZE;
                 }
 
                 qsc_memutils_secure_erase(serverrawpub, sizeof(serverrawpub));

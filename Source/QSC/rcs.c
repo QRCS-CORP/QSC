@@ -379,7 +379,7 @@ static void rcs_ct_ortho(uint32_t* q)
 static void rcs_ct_sbox(uint32_t* q)
 {
 	/*
-	 * adapted from bearssl, author Thomas Pourin
+	 * adapted from bearssl, author Thomas Pornin
 	 * This S-box implementation is a straightforward translation of
 	 * the circuit described by Boyar and Peralta in "A new
 	 * combinational logic minimization technique with applications

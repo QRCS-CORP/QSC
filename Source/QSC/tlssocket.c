@@ -1630,16 +1630,18 @@ qsc_tls_socket_status qsc_tls_socket_context_add_server_identity_files(qsc_tls_s
     QSC_ASSERT(certificatechainpath != NULL);
     QSC_ASSERT(privatekeypath != NULL);
 
-    qsc_x509w_server_identity identity;
+    qsc_x509w_server_identity* identity;
     qsc_x509w_status xs;
     qsc_tls_socket_status status;
     size_t hostlen;
 
     status = qsc_tls_socket_status_invalid_input;
+    identity = qsc_memutils_malloc(sizeof(qsc_x509w_server_identity));
 
-    if (context != NULL && hostname != NULL && certificatechainpath != NULL && privatekeypath != NULL && context->sniidentitycount < QSC_TLS_SOCKET_SERVER_IDENTITY_MAX)
+    if (identity != NULL && context != NULL && hostname != NULL && certificatechainpath != NULL && privatekeypath != NULL && context->sniidentitycount < QSC_TLS_SOCKET_SERVER_IDENTITY_MAX)
     {
         hostlen = 0U;
+        qsc_memutils_clear(identity, sizeof(qsc_x509w_server_identity));
 
         while (hostname[hostlen] != '\0' && hostlen <= QSC_TLS_MAX_HOSTNAME_SIZE)
         {
@@ -1648,13 +1650,13 @@ qsc_tls_socket_status qsc_tls_socket_context_add_server_identity_files(qsc_tls_s
 
         if (hostlen != 0U && hostlen <= QSC_TLS_MAX_HOSTNAME_SIZE)
         {
-            qsc_x509w_server_identity_initialize(&identity);
-            xs = qsc_x509w_server_identity_load_files(&identity, certificatechainpath, privatekeypath);
+            qsc_x509w_server_identity_initialize(identity);
+            xs = qsc_x509w_server_identity_load_files(identity, certificatechainpath, privatekeypath);
             status = tls_socket_status_from_x509(xs);
 
             if (status == qsc_tls_socket_status_success)
             {
-                xs = qsc_x509w_tls_local_certificate_from_identity(&identity, verifyscheme, &context->snilocalcerts[context->sniidentitycount]);
+                xs = qsc_x509w_tls_local_certificate_from_identity(identity, verifyscheme, &context->snilocalcerts[context->sniidentitycount]);
                 status = tls_socket_status_from_x509(xs);
             }
 
@@ -1665,8 +1667,13 @@ qsc_tls_socket_status qsc_tls_socket_context_add_server_identity_files(qsc_tls_s
                 ++context->sniidentitycount;
             }
 
-            qsc_x509w_server_identity_clear(&identity);
+            qsc_x509w_server_identity_clear(identity);
         }
+    }
+
+    if (identity != NULL)
+    {
+        qsc_memutils_alloc_free(identity);
     }
 
     return status;

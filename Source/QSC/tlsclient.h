@@ -202,8 +202,7 @@ typedef struct qsc_tls_client_state
  *
  * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
  */
-QSC_EXPORT_API qsc_tls_status qsc_tls_client_config_set_certificate_interface(qsc_tls_client_config* config,
-    const qsc_tls_certificate_interface* iface, const char* hostname);
+QSC_EXPORT_API qsc_tls_status qsc_tls_client_config_set_certificate_interface(qsc_tls_client_config* config, const qsc_tls_certificate_interface* iface, const char* hostname);
 
 QSC_EXPORT_API qsc_tls_status qsc_tls_client_initialize(qsc_tls_client_state* state, const qsc_tls_client_config* config);
 

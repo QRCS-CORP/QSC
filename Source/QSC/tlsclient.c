@@ -18,6 +18,49 @@ static const uint8_t tls_client_hrr_special_random[32U] =
     0x07U, 0x9EU, 0x09U, 0xE2U, 0xC8U, 0xA8U, 0x33U, 0x9CU
 };
 
+static bool client_cipher_suite_offered(const qsc_tls_client_state* state, qsc_tls_cipher_suite suite)
+{
+    bool res;
+
+    res = false;
+
+    if (state != NULL && state->config.ciphersuites != NULL)
+    {
+        size_t i;
+
+        for (i = 0U; i < state->config.ciphersuitecount; ++i)
+        {
+            if (state->config.ciphersuites[i] == suite)
+            {
+                res = true;
+                break;
+            }
+        }
+    }
+
+    return res;
+}
+
+static qsc_tls_status client_validate_selected_cipher_suite(qsc_tls_client_state* state, qsc_tls_cipher_suite suite)
+{
+    qsc_tls_status status;
+
+    status = qsc_tls_status_success;
+
+    if (client_cipher_suite_offered(state, suite) == false || qsc_tls_keyschedule_suite_hash(suite) == qsc_tls_hash_none)
+    {
+        state->lastalert = qsc_tls_alert_illegal_parameter;
+        status = qsc_tls_status_invalid_message;
+    }
+    else if (state->helloretryrequestconsumed == true && state->negotiatedsuite != qsc_tls_cipher_suite_none && state->negotiatedsuite != suite)
+    {
+        state->lastalert = qsc_tls_alert_illegal_parameter;
+        status = qsc_tls_status_invalid_message;
+    }
+
+    return status;
+}
+
 static qsc_tls_status client_build_clienthello(qsc_tls_client_state* state, uint8_t* body, size_t bodycap, size_t* bodylen, size_t* binder_offset_in_body_out, size_t* binder_len_out)
 {
     size_t exthdr;
@@ -302,10 +345,18 @@ static qsc_tls_status client_process_server_hello(qsc_tls_client_state* state, c
 
                 if (status == qsc_tls_status_success)
                 {
-                    state->negotiatedsuite = (qsc_tls_cipher_suite)suiteraw;
+                    status = client_validate_selected_cipher_suite(state, (qsc_tls_cipher_suite)suiteraw);
+
+                    if (status == qsc_tls_status_success)
+                    {
+                        state->negotiatedsuite = (qsc_tls_cipher_suite)suiteraw;
+                    }
 
                     /* legacy_compression_method */
-                    status = qsc_tls_codec_read_u8(msg, msglen, &off, &compmethod);
+                    if (status == qsc_tls_status_success)
+                    {
+                        status = qsc_tls_codec_read_u8(msg, msglen, &off, &compmethod);
+                    }
 
                     if (status == qsc_tls_status_success)
                     {
@@ -543,10 +594,14 @@ static qsc_tls_status client_process_hello_retry_request(qsc_tls_client_state* s
 
                         if (status == qsc_tls_status_success)
                         {
-                            /* lock in the selected suite; it determines the transcript hash going forward. */
-                            state->negotiatedsuite = (qsc_tls_cipher_suite)suiteraw;
+                            status = client_validate_selected_cipher_suite(state, (qsc_tls_cipher_suite)suiteraw);
 
-                            status = qsc_tls_codec_read_u8(hrr_msg, hrr_msglen, &off, &compmethod);
+                            if (status == qsc_tls_status_success)
+                            {
+                                /* lock in the selected suite; it determines the transcript hash going forward. */
+                                state->negotiatedsuite = (qsc_tls_cipher_suite)suiteraw;
+                                status = qsc_tls_codec_read_u8(hrr_msg, hrr_msglen, &off, &compmethod);
+                            }
 
                             if (status == qsc_tls_status_success)
                             {

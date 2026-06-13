@@ -1431,7 +1431,7 @@ bool qsc_p256_verify(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, 
     QSC_ASSERT(signedmsg != NULL);
     QSC_ASSERT(publickey != NULL);
 
-    const size_t MLEN = smsglen - EC_NISTP256_SIGNATURE_SIZE;
+    size_t mlen;
     uint8_t hash[32U] = { 0U };
     uint32_t r[8U] = { 0U };
     uint32_t s[8U] = { 0U };
@@ -1449,9 +1449,11 @@ bool qsc_p256_verify(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, 
     bool res;
 
     res = false;
+    mlen = 0U;
 
     if (smsglen >= EC_NISTP256_SIGNATURE_SIZE)
     {
+        mlen = smsglen - EC_NISTP256_SIGNATURE_SIZE;
         fe256_from_bytes((uint32_t*)Q.X, publickey);
         fe256_from_bytes((uint32_t*)Q.Y, publickey + 32U);
 
@@ -1467,7 +1469,7 @@ bool qsc_p256_verify(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, 
                 !fe256_is_zero(s) &&
                 fe256_cmp(s, P256_N) < 0)
             {
-                qsc_sha256_compute(hash, signedmsg + EC_NISTP256_SIGNATURE_SIZE, MLEN);
+                qsc_sha256_compute(hash, signedmsg + EC_NISTP256_SIGNATURE_SIZE, mlen);
                 sc_from_bytes_reduce(e, hash);
                 sc_inv(w, s);
                 sc_mul(u1, e, w);
@@ -1491,8 +1493,8 @@ bool qsc_p256_verify(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, 
 
                     if (fe256_cmp(xr, r) == 0)
                     {
-                        qsc_memutils_copy(msgout, signedmsg + EC_NISTP256_SIGNATURE_SIZE, MLEN);
-                        *msglen = MLEN;
+                        qsc_memutils_copy(msgout, signedmsg + EC_NISTP256_SIGNATURE_SIZE, mlen);
+                        *msglen = mlen;
                         res = true;
                     }
                 }
