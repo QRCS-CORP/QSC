@@ -319,6 +319,7 @@ static qsc_tls_status client_process_server_hello(qsc_tls_client_state* state, c
     qsc_tls_named_group selgroup;
     qsc_tls_status status;
 
+    compmethod = 0U;
     off = 0U;
     selgroup = qsc_tls_group_none;
     serverkeyshare = NULL;
