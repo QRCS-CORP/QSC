@@ -50,7 +50,6 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 | [QSC Help Documentation](https://qrcs-corp.github.io/QSC/) | Full API reference and usage guide |
 | [QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qsc_specification.pdf) | Detailed algorithmic and design specification |
 | [QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/qsc_summary.pdf) | High-level overview of the library |
-| [QSC Integration Guide](https://qrcs-corp.github.io/QSC/pdf/qsc_integration.pdf) | Practical guide for embedding QSC into your project |
 | [QSC Target Industries](https://qrcs-corp.github.io/QSC/pdf/qsc_library_for_critical_domains.pdf) | Application domains and deployment context |
 
 ## Overview
@@ -78,7 +77,7 @@ Key design goals:
 
 ## Projects
 
-The distribution includes three companion projects alongside the QSC library, all available on the [QRCS-CORP/QSC project page](https://github.com/QRCS-CORP/QSC).
+The distribution includes two companion projects alongside the QSC library, both available on the [QRCS-CORP/QSC project page](https://github.com/QRCS-CORP/QSC).
 
 ### QSCTest
 
@@ -116,20 +115,6 @@ QSCCAVP is the authoritative conformance reference for deployments in regulated 
 
 ---
 
-### QSCNETCW
-
-A managed C++ / C# .NET wrapper that exposes the full QSC API to .NET applications. QSCNETCW provides idiomatic .NET access to every core library component, enabling integration into C# services, enterprise applications, and Windows platform software without sacrificing the performance or security properties of the underlying C implementation.
-
-**Wrapper coverage includes:**
-
-- All asymmetric key encapsulation and digital signature primitives.
-- All symmetric ciphers, hash functions, and MAC functions.
-- DRBGs, entropy providers, and secure memory utilities.
-- Full parity with the C API; no functionality is omitted in the wrapper layer.
-
-The wrapper is written in managed C++ and compiled as a mixed-mode assembly, allowing direct P/Invoke-free consumption from any .NET language (C#, VB.NET, F#).
-
----
 
 ## Library Contents
 
@@ -581,7 +566,7 @@ The default project configuration uses minimal flags with no enhanced instructio
 | **Security Standard** | MISRA C compliant throughout |
 | **Testing** | KAT, NIST ACVP/CAVP, fuzzing, stress tests, OpenSSL TLS interoperability tests, and staged TLS/X.509 regression tests for ALPN, SNI, mTLS authorization, peer-info inspection, session-ticket policy, framed messages, record fragmentation/coalescing, socket policy, concurrent shutdown, and negative X.509 validation |
 | **Platforms** | Windows (MSVC), Linux (GCC), macOS (Clang) |
-| **Language Interop** | C++, and .NET (C#/VB.NET/F#) via the QSCNETCW managed wrapper |
+| **Language Interop** | Native C API and direct C/C++ integration |
 | **Self-Contained** | No external runtime dependencies |
 
 ---
