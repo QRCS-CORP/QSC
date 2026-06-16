@@ -18,8 +18,8 @@ option(QSC_ENABLE_QSCTEST  "Build the QSCTest executable"           OFF)
 option(QSC_STRICT_WARNINGS "Turn on pedantic compiler warnings"     ON)
 
 # --- Build-type default -------------------------------------------------------
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
 # --- Compiler & policy settings ----------------------------------------------
