@@ -322,6 +322,8 @@ static bool x509_pkcs12_kdf_rfc7292(uint8_t* output, size_t outlen, const char* 
     bool res;
 
     res = false;
+    ilen = 0U;
+    mlen = 0U;
     ibuf = (uint8_t*)NULL;
     msg = (uint8_t*)NULL;
 
