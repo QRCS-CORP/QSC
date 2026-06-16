@@ -50,7 +50,6 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 | [QSC Help Documentation](https://qrcs-corp.github.io/QSC/) | Full API reference and usage guide |
 | [QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qsc_specification.pdf) | Detailed algorithmic and design specification |
 | [QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/qsc_summary.pdf) | High-level overview of the library |
-| [QSC Target Industries](https://qrcs-corp.github.io/QSC/pdf/qsc_library_for_critical_domains.pdf) | Application domains and deployment context |
 
 ## Overview
 
