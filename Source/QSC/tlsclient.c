@@ -551,6 +551,8 @@ static qsc_tls_status client_process_hello_retry_request(qsc_tls_client_state* s
     qsc_tls_named_group reqgroup;
     qsc_tls_status status;
 
+    compmethod = 0U;
+
     if (written != NULL)
     {
         *written = 0U;
