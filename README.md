@@ -76,7 +76,7 @@ Key design goals:
 
 ## Projects
 
-The distribution includes two companion projects alongside the QSC library, both available on the [QRCS-CORP/QSC project page](https://github.com/QRCS-CORP/QSC).
+The distribution includes two companion projects alongside the QSC library, both available on the QRCS-CORP/QSC project page, QSCTest and QSCCAVP.
 
 ### QSCTest
 
