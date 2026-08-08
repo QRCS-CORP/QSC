@@ -887,18 +887,37 @@ bool qsc_stringutils_strings_equal(const char* str1, const char* str2)
 	QSC_ASSERT(str1 != NULL);
 	QSC_ASSERT(str2 != NULL);
 
-	size_t slen;
+	size_t i;
+	size_t slen1;
+	size_t slen2;
 	uint8_t acc;
+	bool res;
 
-	slen = qsc_stringutils_string_size(str1);
-	acc = 0U;
+	i = 0U;
+	slen1 = 0U;
+	slen2 = 0U;
+	acc = 1U;
+	res = false;
 
-	for (size_t i = 0U; i < slen; ++i)
+	if (str1 != NULL && str2 != NULL)
 	{
-		acc |= ((uint8_t)str1[i] ^ (uint8_t)str2[i]);
+		slen1 = qsc_stringutils_string_size(str1);
+		slen2 = qsc_stringutils_string_size(str2);
+
+		if (slen1 == slen2)
+		{
+			acc = 0U;
+
+			for (i = 0U; i < slen1; ++i)
+			{
+				acc |= ((uint8_t)str1[i] ^ (uint8_t)str2[i]);
+			}
+
+			res = acc == 0U;
+		}
 	}
 
-	return (acc == 0U);
+	return res;
 }
 
 int32_t qsc_stringutils_string_to_int(const char* source)

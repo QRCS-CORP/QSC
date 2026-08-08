@@ -128,11 +128,24 @@ QSC_EXPORT_API void qsc_memutils_prefetch_l2(uint8_t* address, size_t length);
 QSC_EXPORT_API void qsc_memutils_prefetch_l3(uint8_t* address, size_t length);
 
 /**
+*\brief Allocate and zero - initialize an array of elements.
+*
+* Allocates storage for an array of \c count elements, each \c length bytes
+* in size, and initializes the allocated memory to zero.
+*
+* \param count: [size_t] The number of elements to allocate.
+* \param length: [size_t] The size, in bytes, of each element.
+*
+* \return [void*] Returns a pointer to the zero - initialized memory block, or NULL on failure.
+*/
+QSC_EXPORT_API void* qsc_memutils_calloc(size_t count, size_t length);
+
+/**
  * \brief Allocate a block of memory.
  *
  * \param length: [size_t] The length of the requested block.
  *
- * \return [void*] Returns the aligned array of bytes, or NULL on failure.
+ * \return [void*] Returns the array of bytes, or NULL on failure.
  */
 QSC_EXPORT_API void* qsc_memutils_malloc(size_t length);
 

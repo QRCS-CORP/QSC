@@ -1099,7 +1099,7 @@ qsc_socket_exceptions qsc_socket_shut_down(qsc_socket* sock, qsc_socket_shut_dow
 
 	if (sock != NULL)
 	{
-		if (sock->connection != QSC_UNINITIALIZED_SOCKET && qsc_socket_is_connected(sock) == true)
+		if (sock->connection != QSC_UNINITIALIZED_SOCKET && sock->connection != QSC_SOCKET_RET_ERROR)
 		{
 			res = (qsc_socket_exceptions)shutdown(sock->connection, (int32_t)params);
 		}

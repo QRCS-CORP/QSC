@@ -126,6 +126,23 @@ void qsc_memutils_prefetch_l3(uint8_t* address, size_t length)
     }
 }
 
+void* qsc_memutils_calloc(size_t count, size_t length)
+{
+    QSC_ASSERT(count != 0U);
+    QSC_ASSERT(length != 0U);
+
+    void* ret;
+
+    ret = NULL;
+
+    if (count != 0U && length != 0U)
+    {
+        ret = calloc(count, length);
+    }
+
+    return ret;
+}
+
 void* qsc_memutils_malloc(size_t length)
 {
     QSC_ASSERT(length != 0U);

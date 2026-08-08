@@ -428,6 +428,15 @@ QSC_EXPORT_API bool qsc_fileutils_seekto(FILE* fp, size_t position);
 QSC_EXPORT_API int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, size_t linenum);
 
 /**
+ * \brief Flush and synchronize a file's contents to stable storage.
+ *
+ * \param fp: [FILE*] The file pointer.
+ *
+ * \return [bool] Returns true when both the C stream and operating-system file handle were synchronized.
+ */
+QSC_EXPORT_API bool qsc_fileutils_sync(FILE* fp);
+
+/**
  * \brief Truncate a file to a specified byte size.
  *
  * \param fp: [FILE*] The file pointer.

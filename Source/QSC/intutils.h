@@ -229,7 +229,7 @@ QSC_EXPORT_API void qsc_intutils_be8increment(uint8_t* output, size_t otplen);
  * \param output: [uint8_t*] The pointer to the counter block (length ? 4)
  * \param otplen: [size_t] The total length of the counter buffer in bytes
  */
-void qsc_intutils_be8increment_rfc3686(uint8_t* output, size_t otplen);
+QSC_EXPORT_API void qsc_intutils_be8increment_rfc3686(uint8_t* output, size_t otplen);
 
 /**
  * \brief Reverse the bits of an integer.

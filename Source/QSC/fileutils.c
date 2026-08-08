@@ -1000,6 +1000,38 @@ int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, 
 	return pln;
 }
 
+bool qsc_fileutils_sync(FILE* fp)
+{
+	QSC_ASSERT(fp != NULL);
+
+	int32_t fd;
+	bool res;
+
+	fd = -1;
+	res = false;
+
+	if (fp != NULL && fflush(fp) == 0)
+	{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+		fd = _fileno(fp);
+
+		if (fd >= 0)
+		{
+			res = (_commit(fd) == 0);
+		}
+#else
+		fd = fileno(fp);
+
+		if (fd >= 0)
+		{
+			res = (fsync(fd) == 0);
+		}
+#endif
+	}
+
+	return res;
+}
+
 size_t qsc_fileutils_safe_read(const char* fpath, size_t position, char* output, size_t length)
 {
 	QSC_ASSERT(fpath != NULL);

@@ -624,6 +624,9 @@
     <ClInclude Include="cjp.h">
       <Filter>Header Files\Provider</Filter>
     </ClInclude>
+    <ClInclude Include="etr.h">
+      <Filter>Header Files\Provider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">
@@ -1005,6 +1008,9 @@
       <Filter>Source Files\TLS</Filter>
     </ClCompile>
     <ClCompile Include="cjp.c">
+      <Filter>Source Files\Provider</Filter>
+    </ClCompile>
+    <ClCompile Include="etr.c">
       <Filter>Source Files\Provider</Filter>
     </ClCompile>
   </ItemGroup>

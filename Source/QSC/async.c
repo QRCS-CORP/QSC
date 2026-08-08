@@ -783,7 +783,10 @@ bool qsc_async_thread_terminate(qsc_thread handle)
 void qsc_async_thread_wait(qsc_thread handle)
 {
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    WaitForSingleObject(handle, INFINITE);
+    if (WaitForSingleObject(handle, INFINITE) == WAIT_OBJECT_0)
+    {
+        (void)CloseHandle(handle);
+    }
 #elif defined(QSC_SYSTEM_OS_POSIX)
     void* stg;
     pthread_join(handle, &stg);
