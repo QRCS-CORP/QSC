@@ -1494,13 +1494,13 @@ static bool x509_revext_ocsp_extract_basic_signature(const uint8_t* basicder, si
                     size_t i;
                     bool found;
 
+                    found = false;
                     candidate = qsc_memutils_malloc(sizeof(qsc_x509_certificate));
 
                     if (candidate != NULL)
                     {
                         qsc_memutils_clear(candidate, sizeof(qsc_x509_certificate));
                         responsedata = qsc_asn1_get_child(root, 0U);
-                        found = false;
 
                         for (i = 0U; i < certseq->ccount && found == false; ++i)
                         {
