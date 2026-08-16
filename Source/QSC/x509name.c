@@ -233,6 +233,7 @@ static qsc_asn1_status x509_name_parse_attribute(const qsc_encoding_ber_element*
     const qsc_encoding_ber_element* oidelem;
     const qsc_encoding_ber_element* valelem;
     qsc_asn1_oid oid;
+    size_t i;
     size_t outlen;
     qsc_asn1_status status;
 
@@ -272,6 +273,18 @@ static qsc_asn1_status x509_name_parse_attribute(const qsc_encoding_ber_element*
                     if (status == QSC_ASN1_STATUS_SUCCESS)
                     {
                         attribute->length = outlen;
+
+                        if (attribute->type == QSC_X509_NAME_ATTRIBUTE_COMMON_NAME)
+                        {
+                            for (i = 0U; i < outlen; ++i)
+                            {
+                                if (attribute->value[i] == '\0')
+                                {
+                                    status = QSC_ASN1_STATUS_INVALID_ENCODING;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -441,17 +454,31 @@ static bool x509_name_attribute_equals(const qsc_x509_name_attribute* a, const q
 {
     bool res;
 
-    if (a == NULL || b == NULL)
+    res = false;
+
+    if (a != NULL && b != NULL && a->type == b->type)
     {
-        res = false;
-    }
-    else if (a->oid != b->oid || a->type != b->type)
-    {
-        res = false;
-    }
-    else
-    {
-        res = x509_name_value_equals_canonical(a->value, a->length, b->value, b->length);
+        if (a->type > QSC_X509_NAME_ATTRIBUTE_NONE && a->type < QSC_X509_NAME_ATTRIBUTE_UNKNOWN)
+        {
+            if (a->oid != QSC_OID_ID_NONE && b->oid != QSC_OID_ID_NONE)
+            {
+                res = (a->oid == b->oid);
+            }
+            else
+            {
+                res = true;
+            }
+        }
+        else if (a->type == QSC_X509_NAME_ATTRIBUTE_UNKNOWN &&
+            a->attribute_oid.length != 0U && b->attribute_oid.length != 0U)
+        {
+            res = qsc_asn1_oid_are_equal(&a->attribute_oid, &b->attribute_oid);
+        }
+
+        if (res == true)
+        {
+            res = x509_name_value_equals_canonical(a->value, a->length, b->value, b->length);
+        }
     }
 
     return res;

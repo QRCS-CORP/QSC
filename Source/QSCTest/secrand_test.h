@@ -61,7 +61,7 @@
  * \details
  * This header defines functions for testing the secure random (entropy) providers and key derivation functions.
  * It includes both stress tests and statistical evaluations (wellness tests) for various random generators,
- * such as ACP, CSP, CSG, HCG, RDP, and SCB. The tests compute statistical measures including mean value,
+ * such as CSP, CSG, HCG, RDP, and SCB. The tests compute statistical measures including mean value,
  * chi-square, ordered runs, and successive zeroes on a random sample to assess the quality of the random data.
  *
  * \def QSCTEST_SECRAND_SAMPLE_SIZE
@@ -88,15 +88,6 @@
  * \param length Length of the random sample in bytes.
  */
 void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t length);
-
-/**
- * \brief Evaluates the output of the ACP random provider.
- *
- * \details
- * This function generates a random sample using the ACP entropy provider and then evaluates its statistical
- * properties by calling \c qsctest_secrand_evaluate().
- */
-void qsctest_secrand_acp_evaluate(void);
 
 /**
  * \brief Evaluates the output of the CSG deterministic random bit generator (DRBG).
@@ -161,7 +152,7 @@ bool qsctest_secrand_stress(void);
  * This function executes a comprehensive test suite for secure random number generators and key derivation
  * functions. It first runs a stress test on the PRNG, then evaluates the output of various random providers,
  * including:
- * - ACP and CSP (and optionally RDP if available)
+ * - CSP (and optionally RDP if available)
  * - Deterministic random bit generators (CSG and HCG)
  * - The SCB key derivation function.
  *

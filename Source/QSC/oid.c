@@ -159,11 +159,12 @@ static const qsc_oid_entry OID_REGISTRY[] =
 
 static bool oid_decode_base128(const uint8_t* data, size_t length, qsc_asn1_oid* oid)
 {
-    size_t i;
     size_t arcidx;
+    size_t i;
     uint32_t value;
     bool firstarc;
     bool res;
+    bool subidentifierstart;
 
     res = false;
 
@@ -173,18 +174,25 @@ static bool oid_decode_base128(const uint8_t* data, size_t length, qsc_asn1_oid*
         qsc_memutils_copy(oid->data, data, length);
         oid->length = length;
         firstarc = true;
+        subidentifierstart = true;
         arcidx = 0U;
         value = 0U;
 
         for (i = 0U; i < length; ++i)
         {
+            if (subidentifierstart == true && data[i] == 0x80U)
+            {
+                arcidx = 0U;
+                break;
+            }
+
             if ((value & 0xFE000000U) != 0U)
             {
                 arcidx = 0U;
                 break;
             }
 
-            value = (value << 7) | (uint32_t)(data[i] & 0x7FU);
+            value = (value << 7U) | (uint32_t)(data[i] & 0x7FU);
 
             if ((data[i] & 0x80U) == 0U)
             {
@@ -210,8 +218,8 @@ static bool oid_decode_base128(const uint8_t* data, size_t length, qsc_asn1_oid*
                     }
 
 #if (QSC_ASN1_OID_MAX_ARCS < 2U)
-                        arcidx = 0U;
-                        break;
+                    arcidx = 0U;
+                    break;
 #endif
 
                     oid->arcs[0U] = arc0;
@@ -232,10 +240,15 @@ static bool oid_decode_base128(const uint8_t* data, size_t length, qsc_asn1_oid*
                 }
 
                 value = 0U;
+                subidentifierstart = true;
+            }
+            else
+            {
+                subidentifierstart = false;
             }
         }
 
-        if (arcidx >= 2U && (length == 0U || (data[length - 1U] & 0x80U) == 0U))
+        if (arcidx >= 2U && firstarc == false && subidentifierstart == true)
         {
             oid->arcscount = arcidx;
             res = true;
@@ -300,8 +313,7 @@ qsc_oid_id qsc_oid_identify(const qsc_asn1_oid* oid)
     {
         for (i = 0U; i < qsc_oid_registry_count(); ++i)
         {
-            if (oid->length == OID_REGISTRY[i].length &&
-                qsc_memutils_are_equal(oid->data, OID_REGISTRY[i].data, oid->length) == true)
+            if (oid->length == OID_REGISTRY[i].length && qsc_memutils_are_equal(oid->data, OID_REGISTRY[i].data, oid->length) == true)
             {
                 id = OID_REGISTRY[i].id;
                 break;

@@ -4,7 +4,7 @@
 #include "sha2.h"
 #include "tlstranscript.h"
 
-/* RFC 8446 7.1: HkdfLabel.label is prefixed with the literal "tls13 " (6 bytes) */
+/* RFC 9846 Section 7.1: HkdfLabel.label is prefixed with the literal "tls13 " (6 bytes) */
 static const char TLS13_LABEL_PREFIX[] = "tls13 ";
 
 #define TLS13_LABEL_PREFIX_LEN 6U
@@ -433,7 +433,7 @@ qsc_tls_status qsc_tls_keyschedule_extract_early_secret(qsc_tls_key_schedule_sta
 
     if (state != NULL && state->initialized == true)
     {
-        /* RFC 8446 7.1: salt = 0, IKM = PSK (or 0-length zeros when no PSK) */
+        /* RFC 9846 Section 7.1: salt = 0, IKM = PSK (or 0-length zeros when no PSK) */
         if (psk == NULL || psklen == 0U)
         {
             psk = zeroikm;
@@ -838,7 +838,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_resumption_psk(const qsc_tls_key_sched
 
     qsc_tls_status status;
 
-    /* RFC 8446 4.6.1: PSK = HKDF-Expand-Label(resumption_master_secret, "resumption", ticket_nonce, Hash.length) */
+    /* RFC 9846 Section 4.7.1: PSK = HKDF-Expand-Label(resumption_secret, "resumption", ticket_nonce, Hash.length) */
     if (state != NULL && output != NULL && outlen != 0U && state->initialized == true && state->masterdone == true)
     {
         if ((nonce == NULL) && (noncelen != 0U))
@@ -868,7 +868,7 @@ qsc_tls_status qsc_tls_keyschedule_derive_binder_key(qsc_tls_key_schedule_state*
 
     if (state != NULL && state->initialized == true && state->earlydone == true)
     {
-        /* RFC 8446 7.1: binder_key uses "ext binder" for external PSK and "res binder" for resumption PSK */
+        /* RFC 9846 Section 7.1: binder_key uses "ext binder" for external PSK and "res binder" for resumption PSK */
         if (external)
         {
             label = "ext binder";

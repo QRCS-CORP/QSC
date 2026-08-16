@@ -27,6 +27,15 @@ static const char SCERT_DER_PATH[] = "X509/Vectors/Stage3/interop_server.cert.de
 static const char SCHAIN_PEM_PATH[] = "X509/Vectors/Stage3/openssl_server_chain.pem";
 static const char TROOTS_PEM_PATH[] = "X509/Vectors/Stage3/openssl_trust_roots.pem";
 static const char VALID_CSR_PATH[] = "X509/Vectors/Stage3/interop_valid.csr.pem";
+static const char PKCS12_OPENSSL_PATH[] = "X509/Vectors/Stage3/pkcs12_openssl_ed25519.p12";
+static const char PKCS12_PLAIN_MATCH_PATH[] = "X509/Vectors/Stage3/pkcs12_plain_match.p12";
+static const char PKCS12_PLAIN_MISMATCH_PATH[] = "X509/Vectors/Stage3/pkcs12_plain_mismatch.p12";
+static const char PKCS12_BAD_KEYBAG_PATH[] = "X509/Vectors/Stage3/pkcs12_bad_keybag.p12";
+static const char PKCS12_LOCAL_KEY_ID_MISMATCH_PATH[] = "X509/Vectors/Stage3/pkcs12_localkeyid_mismatch.p12";
+static const char PKCS12_NESTED_SAFE_PATH[] = "X509/Vectors/Stage3/pkcs12_nested_safe.p12";
+static const char PKCS12_ENCRYPTED_PKCS8_PATH[] = "X509/Vectors/Stage3/pkcs12_encrypted_pkcs8.der";
+static const char PKCS12_ENCRYPTED_PKCS8_CORRUPT_PATH[] = "X509/Vectors/Stage3/pkcs12_encrypted_pkcs8_corrupt.der";
+static const char PKCS12_ENCRYPTED_PKCS8_BAD_PRF_PARAMS_PATH[] = "X509/Vectors/Stage3/pkcs12_encrypted_pkcs8_bad_prf_params.der";
 
 #define QSCTEST_X509_RFC9879_A1_DER_SIZE 2702U
 #define QSCTEST_X509_RFC9879_A3_DER_SIZE 2736U
@@ -335,8 +344,7 @@ static const char QSCTEST_X509_RFC9879_A6_B64[] =
     "b0c8OLAuMXMCAggA";
 
 
-static bool load_chain_and_store(const char* chain_path, const char* store_path,
-	qsc_x509_certificate* certs, qsc_x509_chain* chain, qsc_x509_trust_anchor* anchors, qsc_x509_store* store)
+static bool load_chain_and_store(const char* chain_path, const char* store_path, qsc_x509_certificate* certs, qsc_x509_chain* chain, qsc_x509_trust_anchor* anchors, qsc_x509_store* store)
 {
 	char* chain_pem;
 	char* store_pem;
@@ -362,35 +370,57 @@ static bool load_chain_and_store(const char* chain_path, const char* store_path,
 	return res;
 }
 
-static qsc_x509_verify_status run_verify(const char* chain_path, const char* trust_path,
-	qsc_x509_verify_purpose purpose, const char* hostname)
+static qsc_x509_verify_status run_verify(const char* chain_path, const char* trust_path, qsc_x509_verify_purpose purpose, const char* hostname)
 {
-	qsc_x509_certificate certs[MAX_CHAIN_CERTS] = { 0 };
-	qsc_x509_trust_anchor anchors[MAX_ANCHORS] = { 0 };
+	qsc_x509_certificate* certs;
+	qsc_x509_trust_anchor* anchors;
 	qsc_x509_chain chain = { 0 };
 	qsc_x509_store store = { 0 };
 	qsc_x509_verify_state vstate = { 0 };
 	qsc_asn1_time tnow = { 0 };
 	qsc_x509_verify_options options = { 0 };
-	uint8_t verifybuf[TESTBUF] = { 0 };
+	uint8_t verifybuf[TESTBUF] = { 0U };
 	qsc_x509_verify_status st;
 
 	st = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
+	certs = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+	anchors = (qsc_x509_trust_anchor*)qsc_memutils_malloc(sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
 
-	if (load_chain_and_store(chain_path, trust_path, certs, &chain, anchors, &store) == true)
+	if (certs != NULL && anchors != NULL)
 	{
-		qsctest_x509_current_time(&tnow);
-		qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
-		qsc_x509_verify_options_initialize(&options);
-		options.purpose = purpose;
-		options.rejectunsupportedcriticalextensions = true;
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
 
-		st = qsc_x509_chain_verify_ex(&chain, &store, &tnow, qsc_x509_qsc_signature_verify, &vstate, &options);
-
-		if (st == QSC_X509_VERIFY_STATUS_SUCCESS && hostname != NULL)
+		if (load_chain_and_store(chain_path, trust_path, certs, &chain, anchors, &store) == true)
 		{
-			st = qsc_x509_certificate_check_hostname(&chain.certificates[0], hostname);
+			qsctest_x509_current_time(&tnow);
+			qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
+			qsc_x509_verify_options_initialize(&options);
+			options.purpose = purpose;
+			options.rejectunsupportedcriticalextensions = true;
+
+			st = qsc_x509_chain_verify_ex(&chain, &store, &tnow, qsc_x509_qsc_signature_verify, &vstate, &options);
+
+			if (st == QSC_X509_VERIFY_STATUS_SUCCESS && hostname != NULL)
+			{
+				st = qsc_x509_certificate_check_hostname(&chain.certificates[0], hostname);
+			}
 		}
+	}
+
+	qsc_x509_chain_free(&chain);
+	qsc_x509_store_free(&store);
+
+	if (certs != NULL)
+	{
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_alloc_free(certs);
+	}
+
+	if (anchors != NULL)
+	{
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
+		qsc_memutils_alloc_free(anchors);
 	}
 
 	return st;
@@ -398,21 +428,14 @@ static qsc_x509_verify_status run_verify(const char* chain_path, const char* tru
 
 bool x509_stage3_openssl_server_chain_ok(void)
 {
-	qsc_x509_verify_status st = run_verify(SCHAIN_PEM_PATH,
-		TROOTS_PEM_PATH,
-		QSC_X509_VERIFY_PURPOSE_TLS_SERVER,
-		"interop.example.test");
+	qsc_x509_verify_status st = run_verify(SCHAIN_PEM_PATH, TROOTS_PEM_PATH, QSC_X509_VERIFY_PURPOSE_TLS_SERVER, "interop.example.test");
 
 	return (st == QSC_X509_VERIFY_STATUS_SUCCESS);
 }
 
 bool x509_stage3_openssl_client_chain_ok(void)
 {
-	qsc_x509_verify_status st = run_verify(
-		CCHAIN_PEM_PATH,
-		TROOTS_PEM_PATH,
-		QSC_X509_VERIFY_PURPOSE_TLS_CLIENT,
-		"client.interop.example.test");
+	qsc_x509_verify_status st = run_verify(CCHAIN_PEM_PATH, TROOTS_PEM_PATH, QSC_X509_VERIFY_PURPOSE_TLS_CLIENT, "client.interop.example.test");
 
 	return (st == QSC_X509_VERIFY_STATUS_SUCCESS);
 }
@@ -428,8 +451,7 @@ bool x509_stage3_rfc5280_utctime_decode(void)
 
 	if (qsc_x509_time_parse_utctime((const char*)s, sizeof(s) - 1U, &t) == true)
 	{
-		res = (t.year == 2049U && t.month == 12U && t.day == 31U &&
-			t.hour == 23U && t.minute == 59U && t.second == 59U);
+		res = (t.year == 2049U && t.month == 12U && t.day == 31U && t.hour == 23U && t.minute == 59U && t.second == 59U);
 	}
 
 	return res;
@@ -446,8 +468,7 @@ bool x509_stage3_rfc5280_generalizedtime_decode(void)
 
 	if (qsc_x509_time_parse_generalizedtime((const char*)s, sizeof(s) - 1U, &t) == true)
 	{
-		res = (t.year == 2050U && t.month == 1U && t.day == 1U &&
-			t.hour == 0U && t.minute == 0U && t.second == 0U);
+		res = (t.year == 2050U && t.month == 1U && t.day == 1U && t.hour == 0U && t.minute == 0U && t.second == 0U);
 	}
 
 	return res;
@@ -473,12 +494,14 @@ bool x509_stage3_csr_verify_known_good(void)
 		qsc_memutils_alloc_free(pem);
 	}
 
+	qsc_x509_csr_clear(&csr);
+
 	return res;
 }
 
 bool x509_stage3_crl_verify_known_good(void)
 {
-	qsc_x509_crl crl = { 0 };
+	qsc_x509_crl* crl;
 	qsc_x509_certificate issuer = { 0 };
 	qsc_x509_verify_state vstate = { 0 };
 	qsc_asn1_time now = { 0 };
@@ -489,27 +512,46 @@ bool x509_stage3_crl_verify_known_good(void)
 	size_t issuerpemlen;
 	bool res;
 
+	crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 	res = false;
 	crlpem = qsctest_x509_read_text_file(GCRL_PEM_PATH, &crlpemlen);
 	issuerpem = qsctest_x509_read_text_file(IROOT_PEM_PATH, &issuerpemlen);
 
-	if (crlpem != NULL && issuerpem != NULL)
+	if (crl != NULL)
 	{
-		if (qsc_x509_crl_decode_pem(crlpem, crlpemlen, &crl) == QSC_ASN1_STATUS_SUCCESS &&
-			qsc_x509_certificate_decode_pem(issuerpem, issuerpemlen, &issuer) == QSC_ASN1_STATUS_SUCCESS)
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+
+		if (crlpem != NULL && issuerpem != NULL)
 		{
-			qsctest_x509_current_time(&now);
-			qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
+			if (qsc_x509_crl_decode_pem(crlpem, crlpemlen, crl) == QSC_ASN1_STATUS_SUCCESS &&
+				qsc_x509_certificate_decode_pem(issuerpem, issuerpemlen, &issuer) == QSC_ASN1_STATUS_SUCCESS)
+			{
+				qsctest_x509_current_time(&now);
+				qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
 
-			/* NOTE: for the test ONLY, the test certificate could be expired, so we change the date/time to now */
-			crl.nextupdate = now;
+				/* NOTE: for the test ONLY, the test certificate could be expired, so we change the date/time to now */
+				crl->nextupdate = now;
 
-			res = (qsc_x509_crl_verify(&crl, &issuer, &now, qsc_x509_qsc_crl_signature_verify, &vstate) == QSC_X509_CRL_VERIFY_STATUS_SUCCESS);
+				res = (qsc_x509_crl_verify(crl, &issuer, &now, qsc_x509_qsc_crl_signature_verify, &vstate) == QSC_X509_CRL_VERIFY_STATUS_SUCCESS);
+			}
 		}
 
+		qsc_x509_crl_clear(crl);
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl);
+	}
+
+	if (crlpem != NULL)
+	{
 		qsc_memutils_alloc_free(crlpem);
+	}
+
+	if (issuerpem != NULL)
+	{
 		qsc_memutils_alloc_free(issuerpem);
 	}
+
+	qsc_x509_certificate_clear(&issuer);
 
 	return res;
 }
@@ -529,6 +571,8 @@ bool x509_stage3_der_certificate_decode_known_good(void)
 		res = (qsc_x509_certificate_decode_der(der, derlen, &cert) == QSC_ASN1_STATUS_SUCCESS);
 		qsc_memutils_alloc_free(der);
 	}
+
+	qsc_x509_certificate_clear(&cert);
 
 	return res;
 }
@@ -568,6 +612,229 @@ static bool x509_stage3_pkcs12_pbmac1_parse_vector(const char* vector, size_t ve
 	}
 
 	qsc_memutils_clear(data, sizeof(data));
+
+	return res;
+}
+
+bool x509_stage3_pkcs12_bundle_parse_profile(void)
+{
+	qsc_x509_pkcs12_bundle* bundle;
+	uint8_t* data;
+	size_t datalen;
+	bool res;
+
+	bundle = (qsc_x509_pkcs12_bundle*)qsc_memutils_malloc(sizeof(qsc_x509_pkcs12_bundle));
+	data = qsctest_x509_read_binary_file(PKCS12_OPENSSL_PATH, &datalen);
+	res = false;
+
+	if (bundle != NULL)
+	{
+		qsc_x509_pkcs12_initialize(bundle);
+
+		if (data != NULL)
+		{
+			if (qsc_x509_pkcs12_parse(data, datalen, "testpass", bundle) == true &&
+				bundle->certificatecount == 1U && bundle->hasprivatekey == true &&
+				bundle->certificates[0U].derowned == true &&
+				qsc_x509_certificate_key_match(&bundle->certificates[0U], &bundle->privatekey) == true)
+			{
+				res = true;
+			}
+		}
+
+		qsc_x509_pkcs12_clear(bundle);
+		qsc_memutils_secure_erase(bundle, sizeof(qsc_x509_pkcs12_bundle));
+		qsc_memutils_alloc_free(bundle);
+	}
+
+	if (data != NULL)
+	{
+		qsc_memutils_alloc_free(data);
+	}
+
+	return res;
+}
+
+bool x509_stage3_pkcs12_bundle_negative_cases(void)
+{
+	qsc_x509_pkcs12_bundle* bundle;
+	const char* paths[3U] = { PKCS12_PLAIN_MISMATCH_PATH, PKCS12_BAD_KEYBAG_PATH, PKCS12_LOCAL_KEY_ID_MISMATCH_PATH };
+	uint8_t* data;
+	size_t datalen;
+	size_t i;
+	bool res;
+
+	bundle = (qsc_x509_pkcs12_bundle*)qsc_memutils_malloc(sizeof(qsc_x509_pkcs12_bundle));
+	res = (bundle != NULL);
+
+	if (bundle != NULL)
+	{
+		qsc_x509_pkcs12_initialize(bundle);
+
+		for (i = 0U; i < 3U && res == true; ++i)
+		{
+			data = qsctest_x509_read_binary_file(paths[i], &datalen);
+
+			if (data == NULL)
+			{
+				res = false;
+			}
+			else
+			{
+				if (qsc_x509_pkcs12_parse(data, datalen, "testpass", bundle) == true ||
+					bundle->certificatecount != 0U || bundle->hasprivatekey == true)
+				{
+					res = false;
+				}
+
+				qsc_x509_pkcs12_clear(bundle);
+				qsc_memutils_alloc_free(data);
+			}
+		}
+
+		data = qsctest_x509_read_binary_file(PKCS12_OPENSSL_PATH, &datalen);
+
+		if (data == NULL)
+		{
+			res = false;
+		}
+		else
+		{
+			if (qsc_x509_pkcs12_parse(data, datalen, "wrong-password", bundle) == true ||
+				bundle->certificatecount != 0U || bundle->hasprivatekey == true)
+			{
+				res = false;
+			}
+
+			qsc_x509_pkcs12_clear(bundle);
+			qsc_memutils_alloc_free(data);
+		}
+
+		qsc_x509_pkcs12_clear(bundle);
+		qsc_memutils_secure_erase(bundle, sizeof(qsc_x509_pkcs12_bundle));
+		qsc_memutils_alloc_free(bundle);
+	}
+
+	return res;
+}
+
+bool x509_stage3_pkcs12_plain_and_nested_safe_contents(void)
+{
+	qsc_x509_pkcs12_bundle* bundle;
+	const char* paths[2U] = { PKCS12_PLAIN_MATCH_PATH, PKCS12_NESTED_SAFE_PATH };
+	uint8_t* data;
+	size_t datalen;
+	size_t i;
+	bool res;
+
+	bundle = (qsc_x509_pkcs12_bundle*)qsc_memutils_malloc(sizeof(qsc_x509_pkcs12_bundle));
+	res = (bundle != NULL);
+
+	if (bundle != NULL)
+	{
+		qsc_x509_pkcs12_initialize(bundle);
+
+		for (i = 0U; i < 2U && res == true; ++i)
+		{
+			data = qsctest_x509_read_binary_file(paths[i], &datalen);
+
+			if (data == NULL)
+			{
+				res = false;
+			}
+			else
+			{
+				if (qsc_x509_pkcs12_parse(data, datalen, "testpass", bundle) == false ||
+					bundle->certificatecount != 1U || bundle->hasprivatekey == false ||
+					qsc_x509_certificate_key_match(&bundle->certificates[0U], &bundle->privatekey) == false)
+				{
+					res = false;
+				}
+
+				qsc_x509_pkcs12_clear(bundle);
+				qsc_memutils_alloc_free(data);
+			}
+		}
+
+		qsc_x509_pkcs12_clear(bundle);
+		qsc_memutils_secure_erase(bundle, sizeof(qsc_x509_pkcs12_bundle));
+		qsc_memutils_alloc_free(bundle);
+	}
+
+	return res;
+}
+
+bool x509_stage3_pkcs12_encrypted_private_key_cases(void)
+{
+	qsc_x509_private_key key = { 0 };
+	uint8_t output[QSC_X509_PKCS12_DER_MAX] = { 0U };
+	uint8_t* data;
+	size_t datalen;
+	size_t outputlen;
+	bool res;
+
+	res = false;
+	data = qsctest_x509_read_binary_file(PKCS12_ENCRYPTED_PKCS8_PATH, &datalen);
+
+	if (data != NULL)
+	{
+		outputlen = sizeof(output);
+
+		if (qsc_x509_pkcs12_decrypt_encrypted_private_key_info(data, datalen, "testpass", output, sizeof(output), &outputlen) == true &&
+			qsc_x509_private_key_decode_pkcs8_der(output, outputlen, &key) == QSC_ASN1_STATUS_SUCCESS)
+		{
+			outputlen = sizeof(output);
+
+			if (qsc_x509_pkcs12_decrypt_encrypted_private_key_info(data, datalen, "wrong-password", output, sizeof(output), &outputlen) == false &&
+				outputlen == 0U)
+			{
+				res = true;
+			}
+		}
+
+		qsc_memutils_alloc_free(data);
+	}
+
+	data = qsctest_x509_read_binary_file(PKCS12_ENCRYPTED_PKCS8_CORRUPT_PATH, &datalen);
+
+	if (data == NULL)
+	{
+		res = false;
+	}
+	else
+	{
+		outputlen = sizeof(output);
+
+		if (qsc_x509_pkcs12_decrypt_encrypted_private_key_info(data, datalen, "testpass", output, sizeof(output), &outputlen) == true ||
+			outputlen != 0U)
+		{
+			res = false;
+		}
+
+		qsc_memutils_alloc_free(data);
+	}
+
+	data = qsctest_x509_read_binary_file(PKCS12_ENCRYPTED_PKCS8_BAD_PRF_PARAMS_PATH, &datalen);
+
+	if (data == NULL)
+	{
+		res = false;
+	}
+	else
+	{
+		outputlen = sizeof(output);
+
+		if (qsc_x509_pkcs12_decrypt_encrypted_private_key_info(data, datalen, "testpass", output, sizeof(output), &outputlen) == true ||
+			outputlen != 0U)
+		{
+			res = false;
+		}
+
+		qsc_memutils_alloc_free(data);
+	}
+
+	qsc_memutils_secure_erase(output, sizeof(output));
+	qsc_memutils_secure_erase((uint8_t*)&key, sizeof(qsc_x509_private_key));
 
 	return res;
 }
@@ -679,6 +946,46 @@ bool qsctest_x509_stage3_positive_interop_tests(void)
 	else
 	{
 		qsctest_print_line("[FAIL] DER known good validation test.");
+		res = false;
+	}
+
+	if (x509_stage3_pkcs12_bundle_parse_profile() == true)
+	{
+		qsctest_print_line("[PASS] PKCS#12 AuthenticatedSafe encrypted-data and shrouded-key parse tests.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] PKCS#12 AuthenticatedSafe encrypted-data and shrouded-key parse tests.");
+		res = false;
+	}
+
+	if (x509_stage3_pkcs12_plain_and_nested_safe_contents() == true)
+	{
+		qsctest_print_line("[PASS] PKCS#12 plaintext and nested SafeContents tests.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] PKCS#12 plaintext and nested SafeContents tests.");
+		res = false;
+	}
+
+	if (x509_stage3_pkcs12_bundle_negative_cases() == true)
+	{
+		qsctest_print_line("[PASS] PKCS#12 malformed-bag, key-association, and password rejection tests.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] PKCS#12 malformed-bag, key-association, and password rejection tests.");
+		res = false;
+	}
+
+	if (x509_stage3_pkcs12_encrypted_private_key_cases() == true)
+	{
+		qsctest_print_line("[PASS] PKCS#12 encrypted PKCS#8 CBC/PRF/password rejection tests.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] PKCS#12 encrypted PKCS#8 CBC/PRF/password rejection tests.");
 		res = false;
 	}
 

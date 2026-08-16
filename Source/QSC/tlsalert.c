@@ -3,11 +3,6 @@
 #include "tlsrecord.h"
 #include "memutils.h"
 
-static bool tls_alert_level_is_valid(uint8_t level)
-{
-	return ((level == 1U) || (level == 2U));
-}
-
 qsc_tls_status qsc_tls_alert_decode(const uint8_t* input, size_t inlen, qsc_tls_alert_description* description)
 {
 	QSC_ASSERT(input != NULL);
@@ -23,26 +18,16 @@ qsc_tls_status qsc_tls_alert_decode(const uint8_t* input, size_t inlen, qsc_tls_
 	{
 		status = qsc_tls_status_invalid_input;
 	}
-	else if (inlen < QSC_TLS_ALERT_SIZE)
+	else if (inlen != QSC_TLS_ALERT_SIZE)
 	{
 		status = qsc_tls_status_invalid_length;
 	}
-	else if (tls_alert_level_is_valid(input[0]) == false)
-	{
-		status = qsc_tls_status_invalid_input;
-	}
 	else
 	{
-		desc = (qsc_tls_alert_description)input[1];
-
-		if (qsc_tls_alert_is_valid(desc) == false)
-		{
-			status = qsc_tls_status_invalid_message;
-		}
-		else
-		{
-			*description = desc;
-		}
+		/* RFC 9846 6: AlertLevel is a legacy field and is ignored on receipt.
+		 * Unknown AlertDescription values are treated as error alerts by callers. */
+		desc = (qsc_tls_alert_description)input[1U];
+		*description = desc;
 	}
 
 	return status;
@@ -70,7 +55,11 @@ qsc_tls_status qsc_tls_alert_encode(uint8_t* output, size_t outlen, qsc_tls_aler
 	}
 	else
 	{
-		output[0U] = 2U;
+		/* RFC 9846 6: close_notify is warning; user_canceled is a closure alert
+		 * and is normally warning. All error alerts are sent fatal. */
+		output[0U] = (description == qsc_tls_alert_close_notify || description == qsc_tls_alert_user_canceled)
+			? (uint8_t)qsc_tls_alert_level_warning
+			: (uint8_t)qsc_tls_alert_level_fatal;
 		output[1U] = (uint8_t)description;
 	}
 
@@ -137,6 +126,11 @@ qsc_tls_alert_description qsc_tls_alert_from_status(qsc_tls_status status)
 			description = qsc_tls_alert_decrypt_error;
 			break;
 		}
+		case qsc_tls_status_record_overflow:
+		{
+			description = qsc_tls_alert_record_overflow;
+			break;
+		}
 		case qsc_tls_status_buffer_too_small:
 		case qsc_tls_status_failure:
 		default:
@@ -193,6 +187,7 @@ bool qsc_tls_alert_is_valid(qsc_tls_alert_description description)
 		case qsc_tls_alert_bad_certificate_status_response:
 		case qsc_tls_alert_unknown_psk_identity:
 		case qsc_tls_alert_certificate_required:
+		case qsc_tls_alert_general_error:
 		case qsc_tls_alert_no_application_protocol:
 			break;
 		default:
@@ -289,9 +284,24 @@ const char* qsc_tls_alert_to_string(qsc_tls_alert_description description)
 			res = "protocol_version";
 			break;
 		}
+		case qsc_tls_alert_insufficient_security:
+		{
+			res = "insufficient_security";
+			break;
+		}
 		case qsc_tls_alert_internal_error:
 		{
 			res = "internal_error";
+			break;
+		}
+		case qsc_tls_alert_inappropriate_fallback:
+		{
+			res = "inappropriate_fallback";
+			break;
+		}
+		case qsc_tls_alert_user_canceled:
+		{
+			res = "user_canceled";
 			break;
 		}
 		case qsc_tls_alert_missing_extension:
@@ -309,6 +319,11 @@ const char* qsc_tls_alert_to_string(qsc_tls_alert_description description)
 			res = "unrecognized_name";
 			break;
 		}
+		case qsc_tls_alert_bad_certificate_status_response:
+		{
+			res = "bad_certificate_status_response";
+			break;
+		}
 		case qsc_tls_alert_unknown_psk_identity:
 		{
 			res = "unknown_psk_identity";
@@ -317,6 +332,11 @@ const char* qsc_tls_alert_to_string(qsc_tls_alert_description description)
 		case qsc_tls_alert_certificate_required:
 		{
 			res = "certificate_required";
+			break;
+		}
+		case qsc_tls_alert_general_error:
+		{
+			res = "general_error";
 			break;
 		}
 		case qsc_tls_alert_no_application_protocol:

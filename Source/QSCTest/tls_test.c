@@ -29,6 +29,13 @@
 #include "TLS/tls_stage27_socket_options_tests.h"
 #include "TLS/tls_stage28_concurrent_shutdown_tests.h"
 #include "TLS/tls_stage29_negative_x509_tests.h"
+#include "TLS/tls_stage30_post_handshake_dispatch_tests.h"
+#include "TLS/tls_stage31_mtls_handshake_tests.h"
+#include "TLS/tls_stage32_resumption_profile_tests.h"
+#include "TLS/tls_stage33_rfc9846_compliance_tests.h"
+#include "TLS/tls_stage34_rfc10024_hybrid_tests.h"
+#include "TLS/tls_stage35_handshake_deadline_tests.h"
+#include "TLS/tls_stage36_pq_standards_tests.h"
 
 bool qsctest_tls_run(void)
 {
@@ -177,6 +184,41 @@ bool qsctest_tls_run(void)
 	}
 
 	if (qsctest_tls_stage29_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage30_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage31_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage32_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage33_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage34_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage35_tests() == false)
+	{
+		res = false;
+	}
+
+	if (qsctest_tls_stage36_tests() == false)
 	{
 		res = false;
 	}

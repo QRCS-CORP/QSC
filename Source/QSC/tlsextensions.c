@@ -79,7 +79,7 @@ bool qsc_tls_extensions_bitmap_set(qsc_tls_extension_bitmap* bitmap, uint16_t ex
 
 bool qsc_tls_extensions_is_permitted(qsc_tls_handshake_type message, qsc_tls_extension_type extensiontype)
 {
-    /* per RFC 8446 4.2 "Table 4 - Extensions allowed in each message" */
+    /* per RFC 9846 Section 4.3 extension-message applicability table */
     bool res;
 
     res = false;
@@ -111,6 +111,12 @@ bool qsc_tls_extensions_is_permitted(qsc_tls_handshake_type message, qsc_tls_ext
         {
             /* in ClientHello + ServerHello (and HRR which is a pseudo-ServerHello) */
             res = (message == qsc_tls_handshake_type_client_hello || message == qsc_tls_handshake_type_server_hello);
+            break;
+        }
+        case qsc_tls_extension_cookie:
+        {
+            /* ClientHello2 only; HRR is validated by its dedicated parser. */
+            res = (message == qsc_tls_handshake_type_client_hello);
             break;
         }
         case qsc_tls_extension_psk_key_exchange_modes:
@@ -199,6 +205,36 @@ qsc_tls_status qsc_tls_extensions_encode_supported_versions_server(uint8_t* outp
         if (status == qsc_tls_status_success)
         {
             status = qsc_tls_codec_write_u16(output, outlen, offset, QSC_TLS_PROTOCOL_VERSION_13);
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            status = ext_end(output, outlen, offset, hdr);
+        }
+    }
+
+    return status;
+}
+
+qsc_tls_status qsc_tls_extensions_encode_cookie(uint8_t* output, size_t outlen, size_t* offset, const uint8_t* cookie, size_t cookielen)
+{
+    QSC_ASSERT(output != NULL);
+    QSC_ASSERT(offset != NULL);
+    QSC_ASSERT(cookie != NULL);
+
+    size_t hdr;
+    qsc_tls_status status;
+
+    hdr = 0U;
+    status = qsc_tls_status_invalid_input;
+
+    if (output != NULL && offset != NULL && cookie != NULL && cookielen != 0U && cookielen <= UINT16_MAX)
+    {
+        status = ext_begin(output, outlen, offset, (uint16_t)qsc_tls_extension_cookie, &hdr);
+
+        if (status == qsc_tls_status_success)
+        {
+            status = qsc_tls_codec_write_vector16(output, outlen, offset, cookie, cookielen);
         }
 
         if (status == qsc_tls_status_success)
@@ -733,7 +769,7 @@ qsc_tls_status qsc_tls_extensions_decode_supported_versions_client(const uint8_t
     size_t listlen;
     size_t i;
     size_t off;
-    uint16_t v;
+    uint16_t version;
     qsc_tls_status status;
 
     status = qsc_tls_status_invalid_input;
@@ -741,28 +777,30 @@ qsc_tls_status qsc_tls_extensions_decode_supported_versions_client(const uint8_t
     if (input != NULL && acceptstls13 != NULL)
     {
         *acceptstls13 = false;
-
+        list = NULL;
+        listlen = 0U;
         off = 0U;
+
         status = qsc_tls_codec_read_vector8_span(input, inplen, &off, &list, &listlen);
 
         if (status == qsc_tls_status_success)
         {
-            if ((listlen % 2U) == 0U)
+            if (off != inplen || list == NULL || listlen < 2U || listlen > 254U || (listlen % 2U) != 0U)
             {
-                for (i = 0U; i + 2U <= listlen; i += 2U)
+                status = qsc_tls_status_invalid_length;
+            }
+            else
+            {
+                for (i = 0U; i < listlen; i += 2U)
                 {
-                    v = qsc_intutils_be8to16(list + i);
+                    version = qsc_intutils_be8to16(list + i);
 
-                    if (v == QSC_TLS_PROTOCOL_VERSION_13)
+                    if (version == QSC_TLS_PROTOCOL_VERSION_13)
                     {
                         *acceptstls13 = true;
                         break;
                     }
                 }
-            }
-            else
-            {
-                status = qsc_tls_status_invalid_length;
             }
         }
     }
@@ -796,6 +834,37 @@ qsc_tls_status qsc_tls_extensions_decode_supported_versions_server(const uint8_t
     return status;
 }
 
+qsc_tls_status qsc_tls_extensions_decode_cookie(const uint8_t* input, size_t inplen,
+    const uint8_t** cookie, size_t* cookielen)
+{
+    QSC_ASSERT(input != NULL);
+    QSC_ASSERT(cookie != NULL);
+    QSC_ASSERT(cookielen != NULL);
+
+    size_t off;
+    qsc_tls_status status;
+
+    off = 0U;
+    status = qsc_tls_status_invalid_input;
+
+    if (input != NULL && cookie != NULL && cookielen != NULL)
+    {
+        *cookie = NULL;
+        *cookielen = 0U;
+        status = qsc_tls_codec_read_vector16_span(input, inplen, &off, cookie, cookielen);
+
+        if (status == qsc_tls_status_success)
+        {
+            if (off != inplen || *cookie == NULL || *cookielen == 0U)
+            {
+                status = qsc_tls_status_invalid_length;
+            }
+        }
+    }
+
+    return status;
+}
+
 qsc_tls_status qsc_tls_extensions_decode_supported_groups(const uint8_t* input, size_t inplen, qsc_tls_named_group* groups, size_t groupcapacity, size_t* groupcount)
 {
     QSC_ASSERT(input != NULL);
@@ -809,38 +878,43 @@ qsc_tls_status qsc_tls_extensions_decode_supported_groups(const uint8_t* input, 
     size_t off;
     qsc_tls_status status;
 
+    list = NULL;
+    listlen = 0U;
+    i = 0U;
+    n = 0U;
+    off = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (input != NULL && groups != NULL && groupcount != NULL)
     {
         *groupcount = 0U;
-        off = 0U;
         status = qsc_tls_codec_read_vector16_span(input, inplen, &off, &list, &listlen);
 
         if (status == qsc_tls_status_success)
         {
-            if ((listlen % 2U) == 0U)
+            if (off != inplen || list == NULL || listlen < 2U || (listlen % 2U) != 0U)
             {
-                n = 0U;
-
-                for (i = 0U; i + 2U <= listlen; i += 2U)
+                status = qsc_tls_status_invalid_length;
+            }
+            else
+            {
+                for (i = 0U; i < listlen && status == qsc_tls_status_success; i += 2U)
                 {
                     if (n < groupcapacity)
                     {
                         groups[n] = (qsc_tls_named_group)qsc_intutils_be8to16(list + i);
-                        n += 1U;
+                        ++n;
                     }
                     else
                     {
-                        return qsc_tls_status_invalid_length;
+                        status = qsc_tls_status_invalid_length;
                     }
                 }
 
-                *groupcount = n;
-            }
-            else
-            {
-                status = qsc_tls_status_invalid_length;
+                if (status == qsc_tls_status_success)
+                {
+                    *groupcount = n;
+                }
             }
         }
     }
@@ -861,38 +935,43 @@ qsc_tls_status qsc_tls_extensions_decode_signature_algorithms(const uint8_t* inp
     size_t off;
     qsc_tls_status status;
 
+    list = NULL;
+    listlen = 0U;
+    i = 0U;
+    n = 0U;
+    off = 0U;
     status = qsc_tls_status_invalid_input;
 
     if (input != NULL && schemes != NULL && schemecount != NULL)
     {
         *schemecount = 0U;
-        off = 0U;
         status = qsc_tls_codec_read_vector16_span(input, inplen, &off, &list, &listlen);
 
         if (status == qsc_tls_status_success)
         {
-            if ((listlen % 2U) == 0U)
+            if (off != inplen || list == NULL || listlen < 2U || (listlen % 2U) != 0U)
             {
-                n = 0U;
-
-                for (i = 0U; i + 2U <= listlen; i += 2U)
+                status = qsc_tls_status_invalid_length;
+            }
+            else
+            {
+                for (i = 0U; i < listlen && status == qsc_tls_status_success; i += 2U)
                 {
                     if (n < schemecapacity)
                     {
                         schemes[n] = (qsc_tls_signature_scheme)qsc_intutils_be8to16(list + i);
-                        n += 1U;
+                        ++n;
                     }
                     else
                     {
-                        return qsc_tls_status_invalid_length;
+                        status = qsc_tls_status_invalid_length;
                     }
                 }
 
-                *schemecount = n;
-            }
-            else
-            {
-                status = qsc_tls_status_invalid_length;
+                if (status == qsc_tls_status_success)
+                {
+                    *schemecount = n;
+                }
             }
         }
     }
@@ -910,57 +989,95 @@ qsc_tls_status qsc_tls_extensions_decode_key_share_client_hello(const uint8_t* i
 
     const uint8_t* list;
     size_t i;
+    size_t j;
     size_t listlen;
     size_t n;
     size_t off;
     uint16_t gid;
     uint16_t sharelen;
+    bool duplicate;
     qsc_tls_status status;
 
+    list = NULL;
+    i = 0U;
+    j = 0U;
+    listlen = 0U;
+    n = 0U;
+    off = 0U;
+    gid = 0U;
+    sharelen = 0U;
+    duplicate = false;
     status = qsc_tls_status_invalid_input;
 
     if (input != NULL && groups != NULL && shares != NULL && sharelens != NULL && count != NULL)
     {
         *count = 0U;
-
-        off = 0U;
         status = qsc_tls_codec_read_vector16_span(input, inplen, &off, &list, &listlen);
 
-        if (status == qsc_tls_status_success)
+        if (status == qsc_tls_status_success && off != inplen)
         {
-            n = 0U;
-            i = 0U;
+            status = qsc_tls_status_invalid_length;
+        }
 
-            while (i + 4U <= listlen)
-            {
-                gid = qsc_intutils_be8to16(list + i);
-                i += 2U;
+        i = 0U;
 
-                sharelen = qsc_intutils_be8to16(list + i);
-                i += 2U;
-
-                if ((size_t)sharelen > listlen - i)
-                {
-                    return qsc_tls_status_invalid_length;
-                }
-
-                if (n >= capacity)
-                {
-                    return qsc_tls_status_invalid_length;
-                }
-
-                groups[n] = (qsc_tls_named_group)gid;
-                shares[n] = list + i;
-                sharelens[n] = (size_t)sharelen;
-                i += sharelen;
-                n += 1U;
-            }
-
-            if (i != listlen)
+        while (status == qsc_tls_status_success && i < listlen)
+        {
+            if ((listlen - i) < 4U)
             {
                 status = qsc_tls_status_invalid_length;
             }
+            else
+            {
+                gid = qsc_intutils_be8to16(list + i);
+                i += 2U;
+                sharelen = qsc_intutils_be8to16(list + i);
+                i += 2U;
 
+                if (sharelen == 0U || (size_t)sharelen > (listlen - i))
+                {
+                    status = qsc_tls_status_invalid_length;
+                }
+                else if (n >= capacity)
+                {
+                    status = qsc_tls_status_invalid_length;
+                }
+                else
+                {
+                    duplicate = false;
+
+                    for (j = 0U; j < n; ++j)
+                    {
+                        if ((uint16_t)groups[j] == gid)
+                        {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+
+                    if (duplicate == true)
+                    {
+                        status = qsc_tls_status_invalid_message;
+                    }
+                    else
+                    {
+                        groups[n] = (qsc_tls_named_group)gid;
+                        shares[n] = list + i;
+                        sharelens[n] = (size_t)sharelen;
+                        i += (size_t)sharelen;
+                        ++n;
+                    }
+                }
+            }
+        }
+
+        if (status == qsc_tls_status_success && i != listlen)
+        {
+            status = qsc_tls_status_invalid_length;
+        }
+
+        if (status == qsc_tls_status_success)
+        {
             *count = n;
         }
     }
@@ -1044,51 +1161,87 @@ qsc_tls_status qsc_tls_extensions_decode_server_name(const uint8_t* input, size_
     const uint8_t* hostspan;
     const uint8_t* list;
     size_t hostspanlen;
-    size_t inneroft;
+    size_t i;
+    size_t inneroff;
     size_t listlen;
-    size_t oft;
+    size_t off;
     uint8_t nametype;
+    bool foundhost;
     qsc_tls_status status;
 
+    hostspan = NULL;
+    list = NULL;
+    hostspanlen = 0U;
+    i = 0U;
+    inneroff = 0U;
+    listlen = 0U;
+    off = 0U;
+    nametype = 0U;
+    foundhost = false;
     status = qsc_tls_status_invalid_input;
 
     if (input != NULL && hostname != NULL && hostnamelen != NULL)
     {
         *hostname = NULL;
         *hostnamelen = 0U;
-
-        oft = 0U;
-        status = qsc_tls_codec_read_vector16_span(input, inplen, &oft, &list, &listlen);
+        status = qsc_tls_codec_read_vector16_span(input, inplen, &off, &list, &listlen);
 
         if (status == qsc_tls_status_success)
         {
-            inneroft = 0U;
-            status = qsc_tls_codec_read_u8(list, listlen, &inneroft, &nametype);
+            if (off != inplen || list == NULL || listlen == 0U)
+            {
+                status = qsc_tls_status_invalid_length;
+            }
+        }
+
+        while (status == qsc_tls_status_success && inneroff < listlen)
+        {
+            status = qsc_tls_codec_read_u8(list, listlen, &inneroff, &nametype);
 
             if (status == qsc_tls_status_success)
             {
-                if (nametype == 0U)
-                {
-                    status = qsc_tls_codec_read_vector16_span(list, listlen, &inneroft, &hostspan, &hostspanlen);
+                status = qsc_tls_codec_read_vector16_span(list, listlen, &inneroff, &hostspan, &hostspanlen);
+            }
 
-                    if (status == qsc_tls_status_success)
-                    {
-                        if (hostspanlen != 0U && hostspanlen <= QSC_TLS_MAX_HOSTNAME_SIZE)
-                        {
-                            *hostname = (const char*)hostspan;
-                            *hostnamelen = hostspanlen;
-                        }
-                        else
-                        {
-                            status = qsc_tls_status_invalid_length;
-                        }
-                    }
+            if (status == qsc_tls_status_success && nametype == 0U)
+            {
+                if (foundhost == true)
+                {
+                    status = qsc_tls_status_invalid_message;
+                }
+                else if (hostspan == NULL || hostspanlen == 0U || hostspanlen > QSC_TLS_MAX_HOSTNAME_SIZE)
+                {
+                    status = qsc_tls_status_invalid_length;
                 }
                 else
                 {
-                    status = qsc_tls_status_not_supported;
+                    for (i = 0U; i < hostspanlen; ++i)
+                    {
+                        if (hostspan[i] == 0U || hostspan[i] > 0x7FU)
+                        {
+                            status = qsc_tls_status_invalid_message;
+                            break;
+                        }
+                    }
+
+                    if (status == qsc_tls_status_success)
+                    {
+                        *hostname = (const char*)hostspan;
+                        *hostnamelen = hostspanlen;
+                        foundhost = true;
+                    }
                 }
             }
+        }
+
+        if (status == qsc_tls_status_success && inneroff != listlen)
+        {
+            status = qsc_tls_status_invalid_length;
+        }
+
+        if (status == qsc_tls_status_success && foundhost == false)
+        {
+            status = qsc_tls_status_not_supported;
         }
     }
 
@@ -1252,13 +1405,22 @@ qsc_tls_status qsc_tls_extensions_encode_pre_shared_key_offer(uint8_t* output, s
     size_t exthdr;
     size_t idhdr;
     size_t binderhdr;
+    size_t i;
     qsc_tls_status status;
+    bool identitiesvalid;
 
+    i = 0U;
+    identitiesvalid = true;
     status = qsc_tls_status_invalid_input;
 
     if (output != NULL && offset != NULL && identities != NULL && identitycount != 0U && binderoffset != NULL)
     {
-        if (binderlen != 0U && binderlen <= 255U)
+        for (i = 0U; i < identitycount && identitiesvalid == true; ++i)
+        {
+            identitiesvalid = (identities[i].identity != NULL && identities[i].identitylen != 0U && identities[i].identitylen <= UINT16_MAX);
+        }
+
+        if (identitiesvalid == true && binderlen >= 32U && binderlen <= 255U)
         {
             status = ext_begin(output, outlen, offset, (uint16_t)qsc_tls_extension_pre_shared_key, &exthdr);
 
@@ -1266,7 +1428,7 @@ qsc_tls_status qsc_tls_extensions_encode_pre_shared_key_offer(uint8_t* output, s
             {
                 status = qsc_tls_codec_vector_begin_u16(output, outlen, offset, &idhdr);
 
-                for (size_t i = 0; status == qsc_tls_status_success && i < identitycount; ++i)
+                for (i = 0U; status == qsc_tls_status_success && i < identitycount; ++i)
                 {
                     status = qsc_tls_codec_write_vector16(output, outlen, offset, identities[i].identity, identities[i].identitylen);
 
@@ -1291,7 +1453,7 @@ qsc_tls_status qsc_tls_extensions_encode_pre_shared_key_offer(uint8_t* output, s
                         /* record offset of first binder byte Layout: 1-byte length + binderlen bytes */
                         *binderoffset = *offset + 1U;
 
-                        for (size_t i = 0; status == qsc_tls_status_success && i < identitycount; ++i)
+                        for (i = 0U; status == qsc_tls_status_success && i < identitycount; ++i)
                         {
                             if (*offset + 1U + binderlen > outlen)
                             {
@@ -1378,14 +1540,26 @@ qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_offer(const uint8_t* inp
 
     if (input != NULL && identities != NULL && binders != NULL && binderlens != NULL && count != NULL && binderblockoffset != NULL)
     {
+        *count = 0U;
+        *binderblockoffset = 0U;
         oft = 0U;
         status = qsc_tls_codec_read_vector16_span(input, inplen, &oft, &idblock, &idblocklen);
+
+        if (status == qsc_tls_status_success && idblocklen < 7U)
+        {
+            status = qsc_tls_status_invalid_length;
+        }
 
         if (status == qsc_tls_status_success)
         {
             /* record absolute offset of the binder-block length prefix (2 bytes before binders) */
             *binderblockoffset = oft;
             status = qsc_tls_codec_read_vector16_span(input, inplen, &oft, &binderblock, &binderblocklen);
+
+            if (status == qsc_tls_status_success && binderblocklen < 33U)
+            {
+                status = qsc_tls_status_invalid_length;
+            }
 
             if (status == qsc_tls_status_success)
             {
@@ -1406,6 +1580,11 @@ qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_offer(const uint8_t* inp
                         if (status != qsc_tls_status_success)
                         {
                             return status;
+                        }
+
+                        if (id == NULL || idlen == 0U)
+                        {
+                            return qsc_tls_status_invalid_length;
                         }
 
                         status = qsc_tls_codec_read_u32(idblock, idblocklen, &idoft, &age);
@@ -1441,6 +1620,12 @@ qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_offer(const uint8_t* inp
                         {
                             return status;
                         }
+
+                        if (b == NULL || blen < 32U || blen > 255U)
+                        {
+                            return qsc_tls_status_invalid_length;
+                        }
+
                         if (binderidx >= capacity)
                         {
                             return qsc_tls_status_invalid_length;

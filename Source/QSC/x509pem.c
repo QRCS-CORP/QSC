@@ -269,7 +269,9 @@ static qsc_asn1_status x509_encode_pem_label(const char* label, const uint8_t* d
             const size_t linebreaks = (b64len + 63U) / 64U;
             required = (qsc_stringutils_string_size(label) * 2U) + b64len + linebreaks + 68U;
         }
+
         *pemlen = required;
+
         return QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
     }
 
@@ -280,11 +282,13 @@ static qsc_asn1_status x509_encode_pem_label(const char* label, const uint8_t* d
             const size_t linebreaks = (b64len + 63U) / 64U;
             required = (qsc_stringutils_string_size(label) * 2U) + b64len + linebreaks + 68U;
         }
+
         *pemlen = required;
         return QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
     }
 
     *pemlen = qsc_stringutils_string_size(pem) + 1U;
+
     return QSC_ASN1_STATUS_SUCCESS;
 }
 
@@ -399,6 +403,7 @@ qsc_asn1_status qsc_x509_chain_decode_pem_bundle(const char* pem, size_t pemlen,
     }
 
     chain->count = count;
+
     return (count == 0U) ? QSC_ASN1_STATUS_NOT_FOUND : QSC_ASN1_STATUS_SUCCESS;
 }
 
@@ -476,19 +481,11 @@ qsc_asn1_status qsc_x509_crl_decode_pem(const char* pem, size_t pemlen, qsc_x509
     if (status == QSC_ASN1_STATUS_SUCCESS)
     {
         status = qsc_x509_crl_decode_der(der, derlen, crl);
-
-        if (status == QSC_ASN1_STATUS_SUCCESS)
-        {
-            /* Preserve the decoded DER backing store so crl->der and crl->tbsdata
-             * remain valid for later signature verification. */
-            crl->der = der;
-            crl->derlen = derlen;
-            return status;
-        }
     }
 
     qsc_memutils_secure_erase(der, QSC_X509_PEM_DER_MAX);
     qsc_memutils_alloc_free(der);
+
     return status;
 }
 
@@ -573,6 +570,7 @@ qsc_asn1_status qsc_x509_private_key_decode_sec1_pem_from_bundle(const char* pem
 
     qsc_memutils_clear(region, sizeof(region));
     qsc_memutils_copy(region, begin, regionlen);
+
     {
         qsc_asn1_status status;
 
@@ -614,6 +612,7 @@ qsc_asn1_status qsc_x509_private_key_decode_pkcs8_pem_from_bundle(const char* pe
 
         status = qsc_x509_private_key_decode_pkcs8_pem(region, regionlen + 1U, key);
         qsc_memutils_secure_erase((uint8_t*)region, sizeof(region));
+
         return status;
     }
 }
@@ -664,11 +663,13 @@ qsc_asn1_status qsc_x509_private_key_decode_pkcs8_pem_ex_from_bundle(const char*
 
     qsc_memutils_clear(region, sizeof(region));
     qsc_memutils_copy(region, begin, regionlen);
+
     {
         qsc_asn1_status status;
 
         status = qsc_x509_private_key_decode_pkcs8_pem_ex(region, regionlen + 1U, algorithm, privatekey, privatekeycapacity, privatekeylen, publickey, publickeycapacity, publickeylen, publickeypresent);
         qsc_memutils_secure_erase((uint8_t*)region, sizeof(region));
+
         return status;
     }
 }

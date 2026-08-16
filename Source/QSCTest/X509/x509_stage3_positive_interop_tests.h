@@ -173,6 +173,10 @@ bool x509_stage3_der_certificate_decode_known_good(void);
  * \return
  * true if the valid RFC vectors verify and malformed negative vectors fail; otherwise false.
  */
+bool x509_stage3_pkcs12_bundle_parse_profile(void);
+bool x509_stage3_pkcs12_bundle_negative_cases(void);
+bool x509_stage3_pkcs12_plain_and_nested_safe_contents(void);
+bool x509_stage3_pkcs12_encrypted_private_key_cases(void);
 bool x509_stage3_pkcs12_pbmac1_rfc9879_vectors(void);
 
 /**

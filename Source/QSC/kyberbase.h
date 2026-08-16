@@ -185,7 +185,7 @@ QSC_CPLUSPLUS_ENABLED_START
 * \param ct: [const uint8_t*] Pointer to input cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
 * \param sk: [const uint8_t*] Pointer to input private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 * 
-* \return [bool] Returns true for success
+* \return [bool] Returns true after decapsulation; invalid ciphertexts use FIPS 203 implicit rejection.
 */
 bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[QSC_KYBER_CIPHERTEXT_BYTES], const uint8_t sk[QSC_KYBER_SECRETKEY_BYTES]);
 

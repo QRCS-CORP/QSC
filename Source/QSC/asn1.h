@@ -424,6 +424,10 @@ QSC_EXPORT_API qsc_asn1_status qsc_asn1_decode_null(const qsc_encoding_ber_eleme
 /*!
  * \brief Decodes an OBJECT IDENTIFIER value.
  *
+ * \details
+ * Decodes every subidentifier using minimal base-128 form, including a
+ * multi-octet first combined subidentifier for large second arcs under arc 2.
+ *
  * \param element: [const qsc_encoding_ber_element*] The OBJECT IDENTIFIER element.
  * \param oid: [qsc_asn1_oid*] Receives the decoded object identifier.
  *

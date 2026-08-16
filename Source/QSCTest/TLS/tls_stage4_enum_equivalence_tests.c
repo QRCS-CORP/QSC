@@ -3,9 +3,6 @@
 #include "../../QSC/tlstypes.h"
 #include "../../QSC/tlsdefs.h"
 
-/* picotls literal values, inlined so this translation unit does not depend on
- * external headers.
- */
 #define PL_PROTOCOL_VERSION_TLS12 0x0303U
 #define PL_PROTOCOL_VERSION_TLS13 0x0304U
 

@@ -1813,15 +1813,14 @@ bool qsc_dilithium_ref_open(uint8_t* message, size_t* msglen, const uint8_t* con
 
             if (res == true)
             {
-                /* All good, copy msg, return 0 */
+                /* all good, copy msg, return 0 */
                 qsc_memutils_copy(message, sm + DILITHIUM_SIGNATURE_SIZE, *msglen);
             }
         }
     }
 
-    if (res == false && smlen >= DILITHIUM_SIGNATURE_SIZE)
+    if (res == false)
     {
-        qsc_memutils_secure_erase(message, smlen - DILITHIUM_SIGNATURE_SIZE);
         *msglen = 0U;
     }
 

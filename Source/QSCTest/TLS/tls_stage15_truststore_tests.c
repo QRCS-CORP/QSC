@@ -1,12 +1,11 @@
 /* Trust-store integration gate. */
 #include "tls_stage15_truststore_tests.h"
 #include "../testutils.h"
-#include "acp.h"
+#include "csp.h"
 #include "asn1.h"
 #include "eddsa.h"
 #include "memutils.h"
 #include "oid.h"
-#include "secrand.h"
 #include "timestamp.h"
 #include "tlscertx509.h"
 #include "tlslimits.h"
@@ -178,7 +177,7 @@ static size_t build_cert(uint8_t* out, size_t outcap, const char* cn)
     if (status == QSC_ASN1_STATUS_SUCCESS)
     {
         qsc_x509_certificate_builder_add_subject_alt_name_dns(&b, cn, strlen(cn));
-        status = qsc_x509_certificate_builder_apply_profile(&b, QSC_X509_CERT_PROFILE_ROOT_CA);
+        status = qsc_x509_certificate_builder_apply_profile(&b, QSC_X509_CERT_PROFILE_TLS_SERVER);
     }
 
     if (status == QSC_ASN1_STATUS_SUCCESS)
@@ -189,6 +188,7 @@ static size_t build_cert(uint8_t* out, size_t outcap, const char* cn)
     if (status == QSC_ASN1_STATUS_SUCCESS)
     {
         status = qsc_x509_certificate_builder_sign(&b, sign_cb, NULL, out, &outlen);
+
         if (status == QSC_ASN1_STATUS_SUCCESS)
         {
             res = outlen;
@@ -200,11 +200,12 @@ static size_t build_cert(uint8_t* out, size_t outcap, const char* cn)
     return res;
 }
 
-static bool qsctest_tls_stage15_pinned_mode(const qsc_tls_certificate_view* chain, const qsc_tls_certificate_validation_context* ctx)
+static bool qsctest_tls_stage15_no_store_override_rejected(const qsc_tls_certificate_view* chain, const qsc_tls_certificate_validation_context* ctx)
 {
     qsc_tls_cert_x509_state s;
     qsc_tls_certificate_interface iface;
     bool ok;
+    bool res;
 
     qsc_tls_cert_x509_state_initialize(&s, NULL);
     s.allowselfsigned = true;
@@ -213,7 +214,11 @@ static bool qsctest_tls_stage15_pinned_mode(const qsc_tls_certificate_view* chai
     qsc_tls_cert_x509_bind(&iface, &s);
     ok = iface.validatechain(chain, 1U, ctx, iface.state);
 
-    return ok;
+    res = ((ok == false) &&
+        (s.lastverifystatus == QSC_X509_VERIFY_STATUS_TRUST_NOT_FOUND) &&
+        (s.lastalert == qsc_tls_alert_unknown_ca));
+
+    return res;
 }
 
 static bool qsctest_tls_stage15_strict_no_store(const qsc_tls_certificate_view* chain, const qsc_tls_certificate_validation_context* ctx)
@@ -229,6 +234,7 @@ static bool qsctest_tls_stage15_strict_no_store(const qsc_tls_certificate_view* 
     s.enforcevalidityperiod = true;
     qsc_tls_cert_x509_bind(&iface, &s);
     ok = iface.validatechain(chain, 1U, ctx, iface.state);
+
     res = ((ok == false) &&
         (s.lastverifystatus == QSC_X509_VERIFY_STATUS_TRUST_NOT_FOUND) &&
         (s.lastalert == qsc_tls_alert_unknown_ca));
@@ -238,20 +244,29 @@ static bool qsctest_tls_stage15_strict_no_store(const qsc_tls_certificate_view* 
 
 static bool qsctest_tls_stage15_empty_store(const qsc_tls_certificate_view* chain, const qsc_tls_certificate_validation_context* ctx)
 {
-    qsc_x509_trust_anchor anchors[4];
+    qsc_x509_trust_anchor* anchors;
     qsc_x509_store store;
     qsc_tls_cert_x509_state s;
     qsc_tls_certificate_interface iface;
     bool ok;
     bool res;
 
-    qsc_x509_store_initialize(&store, anchors, 4U);
-    qsc_tls_cert_x509_state_initialize(&s, &store);
-    s.enforcehostname = true;
-    s.enforcevalidityperiod = true;
-    qsc_tls_cert_x509_bind(&iface, &s);
-    ok = iface.validatechain(chain, 1U, ctx, iface.state);
-    res = ((ok == false) && (s.lastverifystatus != QSC_X509_VERIFY_STATUS_SUCCESS));
+    anchors = (qsc_x509_trust_anchor*)qsc_memutils_malloc(sizeof(qsc_x509_trust_anchor) * 4U);
+    res = false;
+
+    if (anchors != NULL)
+    {
+        qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * 4U);
+        qsc_x509_store_initialize(&store, anchors, 4U);
+        qsc_tls_cert_x509_state_initialize(&s, &store);
+        s.enforcehostname = true;
+        s.enforcevalidityperiod = true;
+        qsc_tls_cert_x509_bind(&iface, &s);
+        ok = iface.validatechain(chain, 1U, ctx, iface.state);
+        res = ((ok == false) && (s.lastverifystatus != QSC_X509_VERIFY_STATUS_SUCCESS));
+        qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * 4U);
+        qsc_memutils_alloc_free(anchors);
+    }
 
     return res;
 }
@@ -259,7 +274,7 @@ static bool qsctest_tls_stage15_empty_store(const qsc_tls_certificate_view* chai
 static bool qsctest_tls_stage15_anchored(const qsc_tls_certificate_view* chain, const qsc_tls_certificate_validation_context* ctx, const uint8_t* der, size_t derlen)
 {
     qsc_x509_certificate anchor;
-    qsc_x509_trust_anchor anchors[4U] = { 0U };
+    qsc_x509_trust_anchor* anchors;
     qsc_x509_store store;
     qsc_tls_cert_x509_state s;
     qsc_tls_certificate_interface iface;
@@ -267,15 +282,20 @@ static bool qsctest_tls_stage15_anchored(const qsc_tls_certificate_view* chain, 
     bool ok;
     bool res;
 
+    anchors = (qsc_x509_trust_anchor*)qsc_memutils_malloc(sizeof(qsc_x509_trust_anchor) * 4U);
     ok = false;
-    res = true;
+    res = (anchors != NULL);
     qsc_memutils_clear(&anchor, sizeof(anchor));
 
-    status = qsc_x509_certificate_decode_der(der, derlen, &anchor);
-
-    if (status != QSC_ASN1_STATUS_SUCCESS)
+    if (res == true)
     {
-        res = false;
+        qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * 4U);
+        status = qsc_x509_certificate_decode_der(der, derlen, &anchor);
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            res = false;
+        }
     }
 
     if (res == true)
@@ -301,12 +321,17 @@ static bool qsctest_tls_stage15_anchored(const qsc_tls_certificate_view* chain, 
 
     qsc_x509_certificate_clear(&anchor);
 
+    if (anchors != NULL)
+    {
+        qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * 4U);
+        qsc_memutils_alloc_free(anchors);
+    }
+
     return res;
 }
 
 static bool qsctest_tls_stage15_truststore_test(void)
 {
-    uint8_t seed[32U] = { 0U };
     static uint8_t derbuf[4096U] = { 0U };
     size_t derlen;
     qsc_tls_certificate_view chain[1U];
@@ -315,9 +340,7 @@ static bool qsctest_tls_stage15_truststore_test(void)
 
     res = true;
 
-    qsc_acp_generate(seed, sizeof(seed));
-    qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
-    qsc_eddsa_generate_keypair(g_pk, g_sk, qsc_secrand_generate);
+    qsc_eddsa_generate_keypair(g_pk, g_sk, qsc_csp_generate);
 
     derlen = build_cert(derbuf, sizeof(derbuf), "example.com");
 
@@ -334,7 +357,7 @@ static bool qsctest_tls_stage15_truststore_test(void)
         ctx.clientauth = false;
         ctx.requirepeercertificate = true;
 
-        if (qsctest_tls_stage15_pinned_mode(chain, &ctx) == false)
+        if (qsctest_tls_stage15_no_store_override_rejected(chain, &ctx) == false)
         {
             res = false;
         }

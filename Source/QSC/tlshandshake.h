@@ -206,6 +206,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_handshake_encode_key_update(uint8_t* outpu
 /**
  * \brief Decode the body of a KeyUpdate handshake message.
  *
+ * \details
+ * Requires the exact one-byte TLS 1.3 KeyUpdate body and accepts only the
+ * update_not_requested and update_requested values.
+ *
  * \param input: [const uint8_t*] The KeyUpdate message body.
  * \param inlen: [size_t] The body length in bytes.
  * \param requestupdate: [bool*] Receives true when the peer requests a reciprocal key update.

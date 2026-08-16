@@ -7,10 +7,13 @@
 #include "pbmac1.h"
 
 static const uint8_t OID_PKCS7_DATA[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x07U, 0x01U };
+static const uint8_t OID_PKCS7_ENCRYPTED_DATA[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x07U, 0x06U };
 static const uint8_t OID_PKCS12_CERT_BAG[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x0CU, 0x0AU, 0x01U, 0x03U };
 static const uint8_t OID_PKCS12_KEY_BAG[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x0CU, 0x0AU, 0x01U, 0x01U };
 static const uint8_t OID_PKCS12_SHROUDED_KEY_BAG[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x0CU, 0x0AU, 0x01U, 0x02U };
+static const uint8_t OID_PKCS12_SAFE_CONTENTS_BAG[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x0CU, 0x0AU, 0x01U, 0x06U };
 static const uint8_t OID_PKCS9_X509_CERTIFICATE[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x09U, 0x16U, 0x01U };
+static const uint8_t OID_PKCS9_LOCAL_KEY_ID[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x09U, 0x15U };
 
 static const uint8_t OID_SHA256[] = { 0x60U, 0x86U, 0x48U, 0x01U, 0x65U, 0x03U, 0x04U, 0x02U, 0x01U };
 static const uint8_t OID_SHA384[] = { 0x60U, 0x86U, 0x48U, 0x01U, 0x65U, 0x03U, 0x04U, 0x02U, 0x02U };
@@ -25,6 +28,8 @@ static const uint8_t OID_HMAC_SHA512[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x
 #define X509_PKCS12_MAC_ITERATION_MAX 10000000ULL
 #define X509_PKCS12_PASSWORD_BMP_MAX 512U
 #define X509_PKCS12_KDF_SCRATCH_MAX 8192U
+#define X509_PKCS12_LOCAL_KEY_ID_MAX 64U
+#define X509_PKCS12_SAFE_CONTENT_DEPTH_MAX 8U
 
 typedef enum
 {
@@ -33,6 +38,24 @@ typedef enum
     x509_pkcs12_hash_sha384 = 0x02U,
     x509_pkcs12_hash_sha512 = 0x03U
 } x509_pkcs12_hash_type;
+
+typedef enum
+{
+    x509_pkcs12_mac_writer_classic_sha256 = 0x01U,
+    x509_pkcs12_mac_writer_pbmac1_sha256 = 0x02U
+} x509_pkcs12_mac_writer_mode;
+
+typedef struct
+{
+    qsc_x509_pkcs12_bundle* bundle;
+    uint8_t privatekeyid[X509_PKCS12_LOCAL_KEY_ID_MAX];
+    size_t privatekeyidlen;
+    bool privatekeyidpresent;
+    uint8_t certificateids[QSC_X509_PKCS12_MAX_CERTIFICATES][X509_PKCS12_LOCAL_KEY_ID_MAX];
+    size_t certificateidlen[QSC_X509_PKCS12_MAX_CERTIFICATES];
+    bool certificateidpresent[QSC_X509_PKCS12_MAX_CERTIFICATES];
+    size_t privatekeycount;
+} x509_pkcs12_parse_context;
 
 static bool x509_asn1_is_octet_string(const qsc_encoding_ber_element* element)
 {
@@ -409,12 +432,14 @@ static bool x509_pkcs12_kdf_rfc7292(uint8_t* output, size_t outlen, const char* 
 
     if (ibuf != (uint8_t*)NULL)
     {
-        qsc_memutils_secure_free(ibuf, ilen == 0U ? 1U : ilen);
+        qsc_memutils_secure_erase(ibuf, ilen == 0U ? 1U : ilen);
+        qsc_memutils_alloc_free(ibuf);
     }
 
     if (msg != (uint8_t*)NULL)
     {
-        qsc_memutils_secure_free(msg, mlen);
+        qsc_memutils_secure_erase(msg, mlen);
+        qsc_memutils_alloc_free(msg);
     }
 
     qsc_memutils_secure_erase(a, sizeof(a));
@@ -655,13 +680,6 @@ static bool x509_pkcs12_verify_mac(const qsc_encoding_ber_element* root, const q
 
     return res;
 }
-
-
-typedef enum
-{
-    x509_pkcs12_mac_writer_classic_sha256 = 0x01U,
-    x509_pkcs12_mac_writer_pbmac1_sha256 = 0x02U
-} x509_pkcs12_mac_writer_mode;
 
 static size_t x509_der_write_length(uint8_t* output, size_t outcap, size_t len)
 {
@@ -905,6 +923,7 @@ static size_t x509_pkcs12_write_pbmac1_algid(uint8_t* output, size_t outcap, con
 
     qsc_memutils_clear(content, sizeof(content));
     qsc_memutils_clear(params, sizeof(params));
+
     return len;
 }
 
@@ -1019,7 +1038,6 @@ bool qsc_x509_pkcs12_encode_mac_data_der(uint8_t* output, size_t outcap, size_t*
     return x509_pkcs12_encode_mac_data_internal(output, outcap, outlen, authsafe, authsafelen, password, salt, saltlen, iterations, mode);
 }
 
-
 bool qsc_x509_pkcs12_verify_mac_data(const uint8_t* data, size_t datalen, const char* password)
 {
     qsc_asn1_oid oid = { 0 };
@@ -1080,26 +1098,103 @@ void qsc_x509_pkcs12_initialize(qsc_x509_pkcs12_bundle* bundle)
 {
     QSC_ASSERT(bundle != NULL);
 
-    if (bundle != NULL)
+    if (bundle != (qsc_x509_pkcs12_bundle*)NULL)
     {
         qsc_memutils_clear((uint8_t*)bundle, sizeof(qsc_x509_pkcs12_bundle));
     }
 }
 
-static bool x509_pkcs12_add_certificate(qsc_x509_pkcs12_bundle* bundle, const uint8_t* der, size_t derlen)
+void qsc_x509_pkcs12_clear(qsc_x509_pkcs12_bundle* bundle)
 {
+    QSC_ASSERT(bundle != NULL);
+
+    size_t count;
+    size_t i;
+
+    if (bundle != (qsc_x509_pkcs12_bundle*)NULL)
+    {
+        count = (bundle->certificatecount <= QSC_X509_PKCS12_MAX_CERTIFICATES) ? bundle->certificatecount : QSC_X509_PKCS12_MAX_CERTIFICATES;
+
+        for (i = 0U; i < count; ++i)
+        {
+            qsc_x509_certificate_clear(&bundle->certificates[i]);
+        }
+
+        qsc_memutils_secure_erase((uint8_t*)&bundle->privatekey, sizeof(qsc_x509_private_key));
+        qsc_memutils_clear((uint8_t*)bundle, sizeof(qsc_x509_pkcs12_bundle));
+    }
+}
+
+static bool x509_pkcs12_parse_bag_attributes(const qsc_encoding_ber_element* bag, uint8_t* localkeyid, size_t keyidcap, size_t* localkeyidlen, bool* localkeyidpresent)
+{
+    qsc_asn1_oid oid = { 0 };
+    const qsc_encoding_ber_element* attributes;
+    const qsc_encoding_ber_element* attribute;
+    const qsc_encoding_ber_element* values;
+    const qsc_encoding_ber_element* value;
+    size_t i;
     bool res;
 
     res = false;
 
-    if (bundle != (qsc_x509_pkcs12_bundle*)NULL && der != (const uint8_t*)NULL && derlen != 0U)
+    if (bag != (const qsc_encoding_ber_element*)NULL && localkeyid != (uint8_t*)NULL && localkeyidlen != (size_t*)NULL &&
+        localkeyidpresent != (bool*)NULL)
     {
-        if (bundle->certificatecount < QSC_X509_PKCS12_MAX_CERTIFICATES)
+        *localkeyidlen = 0U;
+        *localkeyidpresent = false;
+        res = true;
+
+        if (qsc_asn1_child_count(bag) == 3U)
         {
-            if (qsc_x509_certificate_decode_der(der, derlen, &bundle->certificates[bundle->certificatecount]) == QSC_ASN1_STATUS_SUCCESS)
+            attributes = qsc_asn1_get_child(bag, 2U);
+
+            if (qsc_asn1_require_tag(attributes, QSC_ENCODING_BER_CLASS_UNIVERSAL, true, BER_ASN1_SET) != QSC_ASN1_STATUS_SUCCESS)
             {
-                ++bundle->certificatecount;
-                res = true;
+                res = false;
+            }
+            else
+            {
+                for (i = 0U; i < qsc_asn1_child_count(attributes) && res == true; ++i)
+                {
+                    attribute = qsc_asn1_get_child(attributes, i);
+
+                    if (qsc_asn1_require_sequence(attribute, 2U, 2U) != QSC_ASN1_STATUS_SUCCESS ||
+                        qsc_asn1_decode_oid(qsc_asn1_get_child(attribute, 0U), &oid) != QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        res = false;
+                    }
+                    else
+                    {
+                        values = qsc_asn1_get_child(attribute, 1U);
+
+                        if (qsc_asn1_require_tag(values, QSC_ENCODING_BER_CLASS_UNIVERSAL, true, BER_ASN1_SET) != QSC_ASN1_STATUS_SUCCESS)
+                        {
+                            res = false;
+                        }
+                        else if (x509_pkcs12_oid_equals(&oid, OID_PKCS9_LOCAL_KEY_ID, sizeof(OID_PKCS9_LOCAL_KEY_ID)) == true)
+                        {
+                            if (*localkeyidpresent == true || qsc_asn1_child_count(values) != 1U)
+                            {
+                                res = false;
+                            }
+                            else
+                            {
+                                value = qsc_asn1_get_child(values, 0U);
+
+                                if (x509_asn1_is_octet_string(value) == false || value->length == 0U || value->length > keyidcap)
+                                {
+                                    res = false;
+                                }
+                                else
+                                {
+                                    qsc_memutils_copy(localkeyid, value->value, value->length);
+                                    *localkeyidlen = value->length;
+                                    *localkeyidpresent = true;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -1107,66 +1202,148 @@ static bool x509_pkcs12_add_certificate(qsc_x509_pkcs12_bundle* bundle, const ui
     return res;
 }
 
-static bool x509_pkcs12_parse_safe_bag(const qsc_encoding_ber_element* bag, const char* password, qsc_x509_pkcs12_bundle* bundle)
+static bool x509_pkcs12_add_certificate(qsc_x509_pkcs12_bundle* bundle, const uint8_t* der, size_t derlen, size_t* index)
+{
+    uint8_t* dercopy;
+    size_t certindex;
+    bool res;
+
+    dercopy = (uint8_t*)NULL;
+    certindex = 0U;
+    res = false;
+
+    if (bundle != (qsc_x509_pkcs12_bundle*)NULL && der != (const uint8_t*)NULL && derlen != 0U && index != (size_t*)NULL &&
+        bundle->certificatecount < QSC_X509_PKCS12_MAX_CERTIFICATES)
+    {
+        dercopy = (uint8_t*)qsc_memutils_malloc(derlen);
+
+        if (dercopy != (uint8_t*)NULL)
+        {
+            qsc_memutils_copy(dercopy, der, derlen);
+            certindex = bundle->certificatecount;
+
+            if (qsc_x509_certificate_decode_der(dercopy, derlen, &bundle->certificates[certindex]) == QSC_ASN1_STATUS_SUCCESS)
+            {
+                bundle->certificates[certindex].derowned = true;
+                bundle->certificatecount = certindex + 1U;
+                *index = certindex;
+                res = true;
+            }
+            else
+            {
+                qsc_memutils_secure_erase(dercopy, derlen);
+                qsc_memutils_alloc_free(dercopy);
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool x509_pkcs12_parse_safe_contents_element(const qsc_encoding_ber_element* root, const char* password, x509_pkcs12_parse_context* context, size_t depth);
+
+static bool x509_pkcs12_parse_safe_bag(const qsc_encoding_ber_element* bag, const char* password, x509_pkcs12_parse_context* context, size_t depth)
 {
     qsc_asn1_oid certoid = { 0 };
     qsc_asn1_oid oid = { 0 };
+    qsc_x509_private_key privatekey = { 0 };
     uint8_t der[QSC_X509_PKCS12_DER_MAX] = { 0U };
+    uint8_t localkeyid[X509_PKCS12_LOCAL_KEY_ID_MAX] = { 0U };
     uint8_t pki[QSC_X509_PKCS12_DER_MAX] = { 0U };
-    const qsc_encoding_ber_element* valuectx;
-    const qsc_encoding_ber_element* value;
     const qsc_encoding_ber_element* certseq;
     const qsc_encoding_ber_element* certtype;
     const qsc_encoding_ber_element* certvalue;
+    const qsc_encoding_ber_element* valuectx;
+    const qsc_encoding_ber_element* value;
+    size_t certindex;
     size_t derlen;
+    size_t localkeyidlen;
     size_t pkilen;
+    bool localkeyidpresent;
     bool res;
 
+    certseq = (const qsc_encoding_ber_element*)NULL;
+    certtype = (const qsc_encoding_ber_element*)NULL;
+    certvalue = (const qsc_encoding_ber_element*)NULL;
+    valuectx = (const qsc_encoding_ber_element*)NULL;
+    value = (const qsc_encoding_ber_element*)NULL;
+    certindex = 0U;
+    derlen = 0U;
+    localkeyidlen = 0U;
+    pkilen = 0U;
+    localkeyidpresent = false;
     res = false;
 
-    if (bag != (const qsc_encoding_ber_element*)NULL && password != (const char*)NULL && bundle != (qsc_x509_pkcs12_bundle*)NULL)
+    if (bag != (const qsc_encoding_ber_element*)NULL && password != (const char*)NULL && context != (x509_pkcs12_parse_context*)NULL &&
+        context->bundle != (qsc_x509_pkcs12_bundle*)NULL && depth <= X509_PKCS12_SAFE_CONTENT_DEPTH_MAX)
     {
-        if (qsc_asn1_require_sequence(bag, 2U, 3U) == QSC_ASN1_STATUS_SUCCESS)
+        if (qsc_asn1_require_sequence(bag, 2U, 3U) == QSC_ASN1_STATUS_SUCCESS &&
+            qsc_asn1_decode_oid(qsc_asn1_get_child(bag, 0U), &oid) == QSC_ASN1_STATUS_SUCCESS &&
+            x509_pkcs12_parse_bag_attributes(bag, localkeyid, sizeof(localkeyid), &localkeyidlen, &localkeyidpresent) == true)
         {
-            if (qsc_asn1_decode_oid(qsc_asn1_get_child(bag, 0U), &oid) == QSC_ASN1_STATUS_SUCCESS)
+            valuectx = qsc_asn1_get_child(bag, 1U);
+
+            if (qsc_asn1_get_explicit_child(valuectx, &value) == QSC_ASN1_STATUS_SUCCESS)
             {
-                valuectx = qsc_asn1_get_child(bag, 1U);
-                value = (const qsc_encoding_ber_element*)NULL;
-
-                if (qsc_asn1_get_explicit_child(valuectx, &value) == QSC_ASN1_STATUS_SUCCESS)
+                if (x509_pkcs12_oid_equals(&oid, OID_PKCS12_CERT_BAG, sizeof(OID_PKCS12_CERT_BAG)) == true)
                 {
-                    if (x509_pkcs12_oid_equals(&oid, OID_PKCS12_CERT_BAG, sizeof(OID_PKCS12_CERT_BAG)) == true)
+                    if (qsc_asn1_require_sequence(value, 2U, 2U) == QSC_ASN1_STATUS_SUCCESS)
                     {
-                        if (qsc_asn1_require_sequence(value, 2U, 2U) == QSC_ASN1_STATUS_SUCCESS)
-                        {
-                            certtype = qsc_asn1_get_child(value, 0U);
-                            certvalue = qsc_asn1_get_child(value, 1U);
+                        certtype = qsc_asn1_get_child(value, 0U);
+                        certvalue = qsc_asn1_get_child(value, 1U);
 
-                            if (qsc_asn1_decode_oid(certtype, &certoid) == QSC_ASN1_STATUS_SUCCESS &&
-                                x509_pkcs12_oid_equals(&certoid, OID_PKCS9_X509_CERTIFICATE, sizeof(OID_PKCS9_X509_CERTIFICATE)) == true)
+                        if (qsc_asn1_decode_oid(certtype, &certoid) == QSC_ASN1_STATUS_SUCCESS)
+                        {
+                            if (x509_pkcs12_oid_equals(&certoid, OID_PKCS9_X509_CERTIFICATE, sizeof(OID_PKCS9_X509_CERTIFICATE)) == true)
                             {
                                 if (qsc_asn1_get_explicit_child(certvalue, &certseq) == QSC_ASN1_STATUS_SUCCESS &&
-                                    x509_asn1_is_octet_string(certseq) == true)
+                                    x509_asn1_is_octet_string(certseq) == true &&
+                                    x509_pkcs12_add_certificate(context->bundle, certseq->value, certseq->length, &certindex) == true)
                                 {
-                                    res = x509_pkcs12_add_certificate(bundle, certseq->value, certseq->length);
+                                    if (localkeyidpresent == true)
+                                    {
+                                        qsc_memutils_copy(context->certificateids[certindex], localkeyid, localkeyidlen);
+                                        context->certificateidlen[certindex] = localkeyidlen;
+                                        context->certificateidpresent[certindex] = true;
+                                    }
+
+                                    res = true;
                                 }
                             }
-                        }
-                    }
-                    else if (x509_pkcs12_oid_equals(&oid, OID_PKCS12_KEY_BAG, sizeof(OID_PKCS12_KEY_BAG)) == true)
-                    {
-                        derlen = qsc_encoding_der_encode_element((qsc_encoding_ber_element*)value, der, sizeof(der));
-
-                        if (derlen != 0U)
-                        {
-                            if (qsc_x509_private_key_decode_pkcs8_der(der, derlen, &bundle->privatekey) == QSC_ASN1_STATUS_SUCCESS)
+                            else
                             {
-                                bundle->hasprivatekey = true;
+                                /* unsupported certificate-bag subtypes are syntactically valid but are not retained. */
                                 res = true;
                             }
                         }
                     }
-                    else if (x509_pkcs12_oid_equals(&oid, OID_PKCS12_SHROUDED_KEY_BAG, sizeof(OID_PKCS12_SHROUDED_KEY_BAG)) == true)
+                }
+                else if (x509_pkcs12_oid_equals(&oid, OID_PKCS12_KEY_BAG, sizeof(OID_PKCS12_KEY_BAG)) == true)
+                {
+                    if (context->privatekeycount == 0U)
+                    {
+                        derlen = qsc_encoding_der_encode_element((qsc_encoding_ber_element*)value, der, sizeof(der));
+
+                        if (derlen != 0U && qsc_x509_private_key_decode_pkcs8_der(der, derlen, &privatekey) == QSC_ASN1_STATUS_SUCCESS)
+                        {
+                            qsc_memutils_copy(&context->bundle->privatekey, &privatekey, sizeof(qsc_x509_private_key));
+                            context->bundle->hasprivatekey = true;
+                            context->privatekeycount = 1U;
+
+                            if (localkeyidpresent == true)
+                            {
+                                qsc_memutils_copy(context->privatekeyid, localkeyid, localkeyidlen);
+                                context->privatekeyidlen = localkeyidlen;
+                                context->privatekeyidpresent = true;
+                            }
+
+                            res = true;
+                        }
+                    }
+                }
+                else if (x509_pkcs12_oid_equals(&oid, OID_PKCS12_SHROUDED_KEY_BAG, sizeof(OID_PKCS12_SHROUDED_KEY_BAG)) == true)
+                {
+                    if (context->privatekeycount == 0U)
                     {
                         derlen = qsc_encoding_der_encode_element((qsc_encoding_ber_element*)value, der, sizeof(der));
 
@@ -1174,55 +1351,333 @@ static bool x509_pkcs12_parse_safe_bag(const qsc_encoding_ber_element* bag, cons
                         {
                             pkilen = sizeof(pki);
 
-                            if (qsc_x509_pkcs12_decrypt_encrypted_private_key_info(der, derlen, password, pki, sizeof(pki), &pkilen) == true)
+                            if (qsc_x509_pkcs12_decrypt_encrypted_private_key_info(der, derlen, password, pki, sizeof(pki), &pkilen) == true &&
+                                qsc_x509_private_key_decode_pkcs8_der(pki, pkilen, &privatekey) == QSC_ASN1_STATUS_SUCCESS)
                             {
-                                if (qsc_x509_private_key_decode_pkcs8_der(pki, pkilen, &bundle->privatekey) == QSC_ASN1_STATUS_SUCCESS)
+                                qsc_memutils_copy(&context->bundle->privatekey, &privatekey, sizeof(qsc_x509_private_key));
+                                context->bundle->hasprivatekey = true;
+                                context->privatekeycount = 1U;
+
+                                if (localkeyidpresent == true)
                                 {
-                                    bundle->hasprivatekey = true;
-                                    res = true;
+                                    qsc_memutils_copy(context->privatekeyid, localkeyid, localkeyidlen);
+                                    context->privatekeyidlen = localkeyidlen;
+                                    context->privatekeyidpresent = true;
                                 }
+
+                                res = true;
+                            }
+                        }
+                    }
+                }
+                else if (x509_pkcs12_oid_equals(&oid, OID_PKCS12_SAFE_CONTENTS_BAG, sizeof(OID_PKCS12_SAFE_CONTENTS_BAG)) == true)
+                {
+                    if (depth < X509_PKCS12_SAFE_CONTENT_DEPTH_MAX)
+                    {
+                        res = x509_pkcs12_parse_safe_contents_element(value, password, context, depth + 1U);
+                    }
+                }
+                else
+                {
+                    /* PKCS #12 is extensible. Unknown SafeBag types are ignored after their generic syntax is validated. */
+                    res = true;
+                }
+            }
+        }
+    }
+
+    qsc_memutils_secure_erase((uint8_t*)&privatekey, sizeof(qsc_x509_private_key));
+    qsc_memutils_secure_erase(der, sizeof(der));
+    qsc_memutils_secure_erase(localkeyid, sizeof(localkeyid));
+    qsc_memutils_secure_erase(pki, sizeof(pki));
+
+    return res;
+}
+
+static bool x509_pkcs12_parse_safe_contents_element(const qsc_encoding_ber_element* root, const char* password, x509_pkcs12_parse_context* context, size_t depth)
+{
+    size_t i;
+    bool res;
+
+    res = false;
+
+    if (root != (const qsc_encoding_ber_element*)NULL && password != (const char*)NULL && context != (x509_pkcs12_parse_context*)NULL &&
+        depth <= X509_PKCS12_SAFE_CONTENT_DEPTH_MAX && qsc_asn1_require_sequence(root, 0U, SIZE_MAX) == QSC_ASN1_STATUS_SUCCESS)
+    {
+        res = true;
+
+        for (i = 0U; i < qsc_asn1_child_count(root) && res == true; ++i)
+        {
+            res = x509_pkcs12_parse_safe_bag(qsc_asn1_get_child(root, i), password, context, depth);
+        }
+    }
+
+    return res;
+}
+
+static bool x509_pkcs12_parse_safe_contents(const uint8_t* der, size_t derlen, const char* password, x509_pkcs12_parse_context* context)
+{
+    qsc_encoding_ber_element* root;
+    size_t consumed;
+    bool res;
+
+    root = (qsc_encoding_ber_element*)NULL;
+    consumed = 0U;
+    res = false;
+
+    if (der != (const uint8_t*)NULL && derlen != 0U && password != (const char*)NULL && context != (x509_pkcs12_parse_context*)NULL)
+    {
+        root = qsc_encoding_ber_decode_element(der, derlen, &consumed);
+
+        if (root != (qsc_encoding_ber_element*)NULL)
+        {
+            if (consumed == derlen)
+            {
+                res = x509_pkcs12_parse_safe_contents_element(root, password, context, 0U);
+            }
+
+            qsc_encoding_ber_free_element(root);
+        }
+    }
+
+    return res;
+}
+
+static bool x509_pkcs12_parse_encrypted_data(const qsc_encoding_ber_element* encrypteddata, const char* password, x509_pkcs12_parse_context* context)
+{
+    qsc_asn1_oid oid = { 0 };
+    uint8_t algder[1024U] = { 0U };
+    uint8_t* epki;
+    uint8_t* inner;
+    uint8_t* plaintext;
+    const qsc_encoding_ber_element* algid;
+    const qsc_encoding_ber_element* encryptedcontent;
+    const qsc_encoding_ber_element* eci;
+    uint64_t version;
+    size_t alglen;
+    size_t capacity;
+    size_t epkilen;
+    size_t innerlen;
+    size_t octlen;
+    size_t plaintextlen;
+    bool res;
+
+    epki = (uint8_t*)NULL;
+    inner = (uint8_t*)NULL;
+    plaintext = (uint8_t*)NULL;
+    algid = (const qsc_encoding_ber_element*)NULL;
+    encryptedcontent = (const qsc_encoding_ber_element*)NULL;
+    eci = (const qsc_encoding_ber_element*)NULL;
+    version = 0U;
+    alglen = 0U;
+    capacity = 0U;
+    epkilen = 0U;
+    innerlen = 0U;
+    octlen = 0U;
+    plaintextlen = 0U;
+    res = false;
+
+    if (encrypteddata != (const qsc_encoding_ber_element*)NULL && password != (const char*)NULL && context != (x509_pkcs12_parse_context*)NULL &&
+        qsc_asn1_require_sequence(encrypteddata, 2U, 2U) == QSC_ASN1_STATUS_SUCCESS &&
+        qsc_asn1_decode_integer_u64(qsc_asn1_get_child(encrypteddata, 0U), &version) == QSC_ASN1_STATUS_SUCCESS && version == 0U)
+    {
+        eci = qsc_asn1_get_child(encrypteddata, 1U);
+
+        if (qsc_asn1_require_sequence(eci, 3U, 3U) == QSC_ASN1_STATUS_SUCCESS &&
+            qsc_asn1_decode_oid(qsc_asn1_get_child(eci, 0U), &oid) == QSC_ASN1_STATUS_SUCCESS &&
+            x509_pkcs12_oid_equals(&oid, OID_PKCS7_DATA, sizeof(OID_PKCS7_DATA)) == true)
+        {
+            algid = qsc_asn1_get_child(eci, 1U);
+            encryptedcontent = qsc_asn1_get_child(eci, 2U);
+
+            if (qsc_asn1_require_sequence(algid, 1U, 2U) == QSC_ASN1_STATUS_SUCCESS && encryptedcontent != (const qsc_encoding_ber_element*)NULL &&
+                encryptedcontent->tagclass == QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC && encryptedcontent->constructed == false &&
+                encryptedcontent->tagnumber == 0U && encryptedcontent->length != 0U && encryptedcontent->length <= QSC_X509_PKCS12_DER_MAX)
+            {
+                alglen = qsc_encoding_der_encode_element((qsc_encoding_ber_element*)algid, algder, sizeof(algder));
+                capacity = encryptedcontent->length + alglen + 32U;
+
+                if (alglen != 0U && capacity > encryptedcontent->length)
+                {
+                    inner = (uint8_t*)qsc_memutils_malloc(capacity);
+                    epki = (uint8_t*)qsc_memutils_malloc(capacity);
+                    plaintext = (uint8_t*)qsc_memutils_malloc(QSC_X509_PKCS12_DER_MAX);
+
+                    if (inner != (uint8_t*)NULL && epki != (uint8_t*)NULL && plaintext != (uint8_t*)NULL)
+                    {
+                        qsc_memutils_copy(inner, algder, alglen);
+                        octlen = x509_der_write_octet_string(inner + alglen, capacity - alglen, encryptedcontent->value, encryptedcontent->length);
+
+                        if (octlen != 0U)
+                        {
+                            innerlen = alglen + octlen;
+                            epkilen = x509_der_write_sequence(epki, capacity, inner, innerlen);
+                            plaintextlen = QSC_X509_PKCS12_DER_MAX;
+
+                            if (epkilen != 0U && qsc_x509_pkcs12_decrypt_encrypted_private_key_info(epki, epkilen, password,
+                                plaintext, QSC_X509_PKCS12_DER_MAX, &plaintextlen) == true)
+                            {
+                                res = x509_pkcs12_parse_safe_contents(plaintext, plaintextlen, password, context);
                             }
                         }
                     }
                 }
             }
         }
+    }
 
-        qsc_memutils_secure_erase(der, sizeof(der));
-        qsc_memutils_secure_erase(pki, sizeof(pki));
+    if (inner != (uint8_t*)NULL)
+    {
+        qsc_memutils_secure_erase(inner, capacity);
+        qsc_memutils_alloc_free(inner);
+    }
+
+    if (epki != (uint8_t*)NULL)
+    {
+        qsc_memutils_secure_erase(epki, capacity);
+        qsc_memutils_alloc_free(epki);
+    }
+
+    if (plaintext != (uint8_t*)NULL)
+    {
+        qsc_memutils_secure_erase(plaintext, QSC_X509_PKCS12_DER_MAX);
+        qsc_memutils_alloc_free(plaintext);
+    }
+
+    qsc_memutils_secure_erase(algder, sizeof(algder));
+
+    return res;
+}
+
+static bool x509_pkcs12_parse_content_info(const qsc_encoding_ber_element* contentinfo, const char* password, x509_pkcs12_parse_context* context)
+{
+    qsc_asn1_oid oid = { 0 };
+    const qsc_encoding_ber_element* contentctx;
+    const qsc_encoding_ber_element* content;
+    bool res;
+
+    contentctx = (const qsc_encoding_ber_element*)NULL;
+    content = (const qsc_encoding_ber_element*)NULL;
+    res = false;
+
+    if (contentinfo != (const qsc_encoding_ber_element*)NULL && password != (const char*)NULL && context != (x509_pkcs12_parse_context*)NULL &&
+        qsc_asn1_require_sequence(contentinfo, 2U, 2U) == QSC_ASN1_STATUS_SUCCESS &&
+        qsc_asn1_decode_oid(qsc_asn1_get_child(contentinfo, 0U), &oid) == QSC_ASN1_STATUS_SUCCESS)
+    {
+        contentctx = qsc_asn1_get_child(contentinfo, 1U);
+
+        if (qsc_asn1_get_explicit_child(contentctx, &content) == QSC_ASN1_STATUS_SUCCESS)
+        {
+            if (x509_pkcs12_oid_equals(&oid, OID_PKCS7_DATA, sizeof(OID_PKCS7_DATA)) == true)
+            {
+                if (x509_asn1_is_octet_string(content) == true)
+                {
+                    res = x509_pkcs12_parse_safe_contents(content->value, content->length, password, context);
+                }
+            }
+            else if (x509_pkcs12_oid_equals(&oid, OID_PKCS7_ENCRYPTED_DATA, sizeof(OID_PKCS7_ENCRYPTED_DATA)) == true)
+            {
+                res = x509_pkcs12_parse_encrypted_data(content, password, context);
+            }
+        }
     }
 
     return res;
 }
 
-static bool x509_pkcs12_parse_safe_contents(const uint8_t* der, size_t derlen, const char* password, qsc_x509_pkcs12_bundle* bundle)
+static bool x509_pkcs12_parse_authenticated_safe(const uint8_t* der, size_t derlen, const char* password, x509_pkcs12_parse_context* context)
 {
     qsc_encoding_ber_element* root;
     size_t consumed;
-    bool res;
     size_t i;
+    bool res;
 
-    res = false;
     root = (qsc_encoding_ber_element*)NULL;
+    consumed = 0U;
+    res = false;
 
-    if (der != (const uint8_t*)NULL && derlen != 0U && password != (const char*)NULL && bundle != (qsc_x509_pkcs12_bundle*)NULL)
+    if (der != (const uint8_t*)NULL && derlen != 0U && password != (const char*)NULL && context != (x509_pkcs12_parse_context*)NULL)
     {
-        consumed = 0U;
         root = qsc_encoding_ber_decode_element(der, derlen, &consumed);
 
         if (root != (qsc_encoding_ber_element*)NULL)
         {
-            if (qsc_asn1_require_sequence(root, 0U, SIZE_MAX) == QSC_ASN1_STATUS_SUCCESS)
+            if (consumed == derlen && qsc_asn1_require_sequence(root, 1U, SIZE_MAX) == QSC_ASN1_STATUS_SUCCESS)
             {
-                for (i = 0U; i < qsc_asn1_child_count(root); ++i)
-                {
-                    (void)x509_pkcs12_parse_safe_bag(qsc_asn1_get_child(root, i), password, bundle);
-                }
-
                 res = true;
+
+                for (i = 0U; i < qsc_asn1_child_count(root) && res == true; ++i)
+                {
+                    res = x509_pkcs12_parse_content_info(qsc_asn1_get_child(root, i), password, context);
+                }
             }
 
             qsc_encoding_ber_free_element(root);
+        }
+    }
+
+    return res;
+}
+
+static bool x509_pkcs12_validate_key_association(const x509_pkcs12_parse_context* context)
+{
+    const qsc_x509_pkcs12_bundle* bundle;
+    bool anycertificateid;
+    bool cryptomatch;
+    bool idcryptomatch;
+    bool idmatch;
+    size_t i;
+    bool res;
+
+    bundle = (const qsc_x509_pkcs12_bundle*)NULL;
+    anycertificateid = false;
+    cryptomatch = false;
+    idcryptomatch = false;
+    idmatch = false;
+    res = false;
+
+    if (context != (const x509_pkcs12_parse_context*)NULL && context->bundle != (qsc_x509_pkcs12_bundle*)NULL)
+    {
+        bundle = context->bundle;
+
+        if (bundle->hasprivatekey == false || bundle->certificatecount == 0U)
+        {
+            res = true;
+        }
+        else
+        {
+            for (i = 0U; i < bundle->certificatecount; ++i)
+            {
+                if (qsc_x509_certificate_key_match(&bundle->certificates[i], &bundle->privatekey) == true)
+                {
+                    cryptomatch = true;
+                }
+
+                if (context->certificateidpresent[i] == true)
+                {
+                    anycertificateid = true;
+
+                    if (context->privatekeyidpresent == true && context->certificateidlen[i] == context->privatekeyidlen &&
+                        qsc_memutils_are_equal(context->certificateids[i], context->privatekeyid, context->privatekeyidlen) == true)
+                    {
+                        idmatch = true;
+
+                        if (qsc_x509_certificate_key_match(&bundle->certificates[i], &bundle->privatekey) == true)
+                        {
+                            idcryptomatch = true;
+                        }
+                    }
+                }
+            }
+
+            if (context->privatekeyidpresent == true && anycertificateid == true)
+            {
+                res = (idmatch == true && idcryptomatch == true);
+            }
+            else
+            {
+                res = cryptomatch;
+            }
         }
     }
 
@@ -1236,6 +1691,7 @@ bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* pass
     QSC_ASSERT(bundle != NULL);
 
     qsc_asn1_oid oid = { 0 };
+    x509_pkcs12_parse_context context = { 0 };
     qsc_encoding_ber_element* root;
     const qsc_encoding_ber_element* authsafe;
     const qsc_encoding_ber_element* content;
@@ -1246,10 +1702,15 @@ bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* pass
     bool ok;
     bool res;
 
-    res = false;
-    ok = false;
     root = (qsc_encoding_ber_element*)NULL;
+    authsafe = (const qsc_encoding_ber_element*)NULL;
+    content = (const qsc_encoding_ber_element*)NULL;
+    safes = (const qsc_encoding_ber_element*)NULL;
+    version = 0U;
+    consumed = 0U;
     pwd = "";
+    ok = false;
+    res = false;
 
     if (data != (const uint8_t*)NULL && datalen != 0U && bundle != (qsc_x509_pkcs12_bundle*)NULL)
     {
@@ -1259,14 +1720,13 @@ bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* pass
         }
 
         qsc_x509_pkcs12_initialize(bundle);
-        consumed = 0U;
+        context.bundle = bundle;
         root = qsc_encoding_ber_decode_element(data, datalen, &consumed);
 
         if (root != (qsc_encoding_ber_element*)NULL)
         {
-            if (qsc_asn1_require_sequence(root, 2U, 3U) == QSC_ASN1_STATUS_SUCCESS &&
-                qsc_asn1_decode_integer_u64(qsc_asn1_get_child(root, 0U), &version) == QSC_ASN1_STATUS_SUCCESS &&
-                version == 3U)
+            if (consumed == datalen && qsc_asn1_require_sequence(root, 2U, 3U) == QSC_ASN1_STATUS_SUCCESS &&
+                qsc_asn1_decode_integer_u64(qsc_asn1_get_child(root, 0U), &version) == QSC_ASN1_STATUS_SUCCESS && version == 3U)
             {
                 authsafe = qsc_asn1_get_child(root, 1U);
 
@@ -1278,10 +1738,14 @@ bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* pass
 
                     if (content != (const qsc_encoding_ber_element*)NULL &&
                         qsc_asn1_get_explicit_child(content, &safes) == QSC_ASN1_STATUS_SUCCESS &&
-                        x509_asn1_is_octet_string(safes) == true &&
-                        x509_pkcs12_verify_mac(root, safes, pwd) == true)
+                        x509_asn1_is_octet_string(safes) == true && x509_pkcs12_verify_mac(root, safes, pwd) == true)
                     {
-                        ok = x509_pkcs12_parse_safe_contents(safes->value, safes->length, pwd, bundle);
+                        ok = x509_pkcs12_parse_authenticated_safe(safes->value, safes->length, pwd, &context);
+
+                        if (ok == true)
+                        {
+                            ok = x509_pkcs12_validate_key_association(&context);
+                        }
                     }
                 }
             }
@@ -1290,7 +1754,14 @@ bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* pass
         }
 
         res = (ok == true && (bundle->certificatecount != 0U || bundle->hasprivatekey == true));
+
+        if (res == false)
+        {
+            qsc_x509_pkcs12_clear(bundle);
+        }
     }
+
+    qsc_memutils_secure_erase((uint8_t*)&context, sizeof(context));
 
     return res;
 }

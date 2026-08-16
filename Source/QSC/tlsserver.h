@@ -10,6 +10,7 @@
 #include "tlsgroups.h"
 #include "tlskeyschedule.h"
 #include "tlstranscript.h"
+#include "tlssession.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -33,20 +34,21 @@ typedef enum qsc_tls_server_state_phase
     qsc_tls_server_phase_established = 7,
     qsc_tls_server_phase_closed = 8,
     qsc_tls_server_phase_failed = 9,
-    qsc_tls_server_phase_waiting_end_of_early_data = 10 /*!< 0-RTT accepted; waiting EndOfEarlyData before client Finished. */
+    qsc_tls_server_phase_waiting_end_of_early_data = 10 /*!< Reserved compatibility value; unreachable because QSC does not accept 0-RTT. */
 } qsc_tls_server_state_phase;
 
 /**
- * \brief Server-side PSK lookup callback.
+ * \brief Server-side TLS 1.3 resumption-ticket lookup callback.
  *
  * \details
- * Invoked for each PskIdentity offered by a client. Must fill psk_out with
- * the expected resumption PSK bytes (previously derived server-side at NST
- * emission time and keyed on the ticket opaque bytes) if recognized.
+ * Invoked for each PskIdentity considered for resumption. When the identity is
+ * recognized, the callback copies the complete server-side ticket metadata into
+ * \p ticketout. QSC validates ticket lifetime, KDF-hash compatibility, ticket age,
+ * and the corresponding PSK binder before accepting the identity.
  *
- * \return true when the PSK for this identity was found and returned.
+ * \return true when the ticket identity was found and copied to \p ticketout.
  */
-typedef bool (*qsc_tls_psk_lookup_callback)(const uint8_t* identity, size_t identitylen, uint8_t* psk_out, size_t pskcap, size_t* psk_len_out, qsc_tls_cipher_suite* suite_out, uint32_t* max_early_data_out, void* state);
+typedef bool (*qsc_tls_psk_lookup_callback)(const uint8_t* identity, size_t identitylen, qsc_tls_session_ticket* ticketout, void* state);
 
 /**
  * \struct qsc_tls_server_certificate_identity
@@ -90,7 +92,7 @@ typedef struct qsc_tls_server_config
     bool requireclientauth;                             /*!< Reject empty Certificate when true. */
     qsc_tls_psk_lookup_callback psklookup;              /*!< Optional: enable PSK resumption when non-NULL. */
     void* psklookupstate;                               /*!< Caller-owned state forwarded to psklookup. */
-    bool acceptearlydata;                               /*!< When true and client offers early_data, server may accept it. */
+    bool acceptearlydata;                               /*!< Reserved 0-RTT switch; QSC rejects true because server anti-replay acceptance is not supported. */
 } qsc_tls_server_config;
 
 /**
@@ -100,6 +102,7 @@ typedef struct qsc_tls_server_config
 typedef struct qsc_tls_server_state
 {
     qsc_tls_server_config config;
+    qsc_tls_qsc_x509_context x509context;                    /*!< Connection-owned mutable QSC X.509 validation context when the built-in bridge is used. */
     qsc_tls_server_state_phase phase;
     qsc_tls_cipher_suite negotiatedsuite;
     qsc_tls_hash_algorithm negotiatedhash;
@@ -111,6 +114,8 @@ typedef struct qsc_tls_server_state
     size_t serverkeysharelen;
     uint8_t sharedsecret[QSC_TLS_MAX_SHARED_SECRET_SIZE];
     size_t sharedsecretlen;
+    uint8_t handshakebuffer[QSC_TLS_STREAM_BUFFER_MAX_SIZE];   /*!< Inbound handshake-message reassembly buffer. */
+    size_t handshakebufferlen;                                 /*!< Number of valid bytes in the handshake reassembly buffer. */
     qsc_tls_transcript_state transcript;
     qsc_tls_key_schedule_state keyschedule;
     qsc_tls_record_state readrecord;
@@ -129,13 +134,23 @@ typedef struct qsc_tls_server_state
     bool alpnselected;
     bool helloretryrequestsent;
     qsc_tls_named_group hrrgroup;                       /*!< Group selected for HRR, valid when helloretryrequestsent==true. */
-    bool clientauthenticated;
+    uint8_t hrrcookie[32U];                             /*!< Stateful cookie emitted with HelloRetryRequest. */
+    size_t hrrcookielen;                                /*!< Length of the active HelloRetryRequest cookie. */
+    qsc_tls_transcript_state hrrtranscript;             /*!< Transcript snapshot after message_hash(ClientHello1) + HRR. */
+    uint8_t clientcertificate[QSC_TLS_CERTIFICATE_MAX_SIZE]; /*!< Transient ClientHello1 storage during HRR, then DER client leaf certificate storage for CertificateVerify validation. */
+    size_t clientcertificatelen;                              /*!< Length of the transient ClientHello1 or retained client leaf certificate. */
+    bool clientcertificatevalidationattempted;               /*!< True after the presented client certificate chain has been submitted to the configured validation interface. */
+    bool clientcertificatevalidated;                         /*!< True after the presented client certificate chain has passed validation. */
+    bool clientauthenticated;                                /*!< True only after validated client certificate proof and authorization. */
     bool changecipherspecreceived;
+    bool closenotifyreceived;                             /*!< True after an authenticated peer close_notify has been received. */
     bool pskaccepted;                                   /*!< True if we accepted a client PSK (resumption handshake). */
+    bool pskticketagevalid;                             /*!< True when the selected ticket age matched server elapsed time within policy tolerance. */
+    bool clientpskdhemodeoffered;                       /*!< True if the latest ClientHello advertised psk_dhe_ke for future resumption tickets. */
     uint16_t selectedpskidentity;                       /*!< Index of accepted PSK identity in client's offer list. */
-    bool earlydataaccepted;                             /*!< True if we signaled acceptance of early_data. */
-    bool earlydatadone;                                 /*!< True after EndOfEarlyData received; switch read key to handshake. */
-    uint8_t stashedserverfinhash[QSC_TLS_HASH_MAX_SIZE]; /*!< CH..server_Finished transcript hash; set on 0-RTT accept for app-key derivation. */
+    bool earlydataaccepted;                             /*!< Reserved compatibility field; always false because QSC does not accept 0-RTT. */
+    bool earlydatadone;                                 /*!< Reserved compatibility field; always false because EndOfEarlyData is not accepted. */
+    uint8_t stashedserverfinhash[QSC_TLS_HASH_MAX_SIZE]; /*!< CH..server_Finished transcript hash retained for application-key derivation. */
     size_t stashedserverfinhashlen;
     uint8_t legacy_session_id[32U];
     size_t legacy_session_id_len;
@@ -165,10 +180,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_server_config_set_certificate_interface(qs
  * \brief Configure the server-side mTLS application authorization callback.
  *
  * \details
- * The callback is evaluated only after certificate-chain validation has accepted
- * the client certificate. If required is true, a missing callback or a callback
- * rejection denies the peer. If required is false, a missing callback leaves
- * cryptographic certificate validation as the authorization boundary.
+ * During the TLS handshake the callback is evaluated only after certificate-chain
+ * validation and CertificateVerify possession proof have both succeeded. If required
+ * is true, a missing callback or a callback rejection denies the peer. If required is
+ * false, validated certificate possession remains the authentication boundary.
  *
  * \param config: [struct*] The server configuration to update.
  * \param callback: [function] Optional application authorization callback.
@@ -247,6 +262,12 @@ QSC_EXPORT_API void qsc_tls_server_dispose(qsc_tls_server_state* state);
 
 /**
  * \brief Process an inbound record and optionally produce an outbound flight.
+ *
+ * \details
+ * Processes one complete inbound TLS record and retains incomplete Handshake messages
+ * across record boundaries until the complete message is available. Fragmented
+ * Handshake messages may not be interleaved with another record content type or span
+ * a TLS 1.3 traffic-key transition.
  */
 QSC_EXPORT_API qsc_tls_status qsc_tls_server_process_record(qsc_tls_server_state* state, const uint8_t* input, size_t inlen, size_t* consumed,
     uint8_t* output, size_t outlen, size_t* written);

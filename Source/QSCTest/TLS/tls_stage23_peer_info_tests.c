@@ -37,8 +37,8 @@ static void stage23_copy_text(char* output, size_t outputlen, const char* input)
     }
 }
 
-static void stage23_make_result(qsc_tls_socket_result* result, qsc_tls_socket_status status, qsc_tls_status tlsstatus,
-    qsc_x509w_status x509status, qsc_x509_verify_status verifystatus, qsc_tls_alert_description alert)
+static void stage23_make_result(qsc_tls_socket_result* result, qsc_tls_socket_status status, qsc_tls_status tlsstatus, qsc_x509w_status x509status, 
+    qsc_x509_verify_status verifystatus, qsc_tls_alert_description alert)
 {
     if (result != NULL)
     {
@@ -53,18 +53,25 @@ static void stage23_make_result(qsc_tls_socket_result* result, qsc_tls_socket_st
 
 static bool stage23_negotiated_accessors_initial_state_test(void)
 {
-    qsc_tls_socket_connection connection;
+    qsc_tls_socket_connection* connection;
     qsc_tls_socket_peer_info peer;
     bool res;
 
     res = false;
-    qsc_memutils_clear(&connection, sizeof(connection));
+    connection = (qsc_tls_socket_connection*)qsc_memutils_malloc(sizeof(qsc_tls_socket_connection));
 
-    if ((qsc_tls_socket_negotiated_cipher_suite(&connection) == qsc_tls_cipher_suite_none) &&
-        (qsc_tls_socket_negotiated_group(&connection) == qsc_tls_group_none) &&
-        (qsc_tls_socket_negotiated_signature_scheme(&connection) == qsc_tls_sig_none))
+    if (connection == NULL)
     {
-        if (qsc_tls_socket_get_peer_info(&connection, &peer) == qsc_tls_socket_status_success)
+        return false;
+    }
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+
+    if ((qsc_tls_socket_negotiated_cipher_suite(connection) == qsc_tls_cipher_suite_none) &&
+        (qsc_tls_socket_negotiated_group(connection) == qsc_tls_group_none) &&
+        (qsc_tls_socket_negotiated_signature_scheme(connection) == qsc_tls_sig_none))
+    {
+        if (qsc_tls_socket_get_peer_info(connection, &peer) == qsc_tls_socket_status_success)
         {
             if ((peer.authenticated == false) && (peer.chain_valid == false) && (peer.hostname_checked == false) &&
                 (peer.hostname_matched == false) && (peer.psk_accepted == false) && (peer.early_data_accepted == false) &&
@@ -77,86 +84,116 @@ static bool stage23_negotiated_accessors_initial_state_test(void)
     }
 
 
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    qsc_memutils_alloc_free(connection);
+
     return res;
 }
 
 static bool stage23_client_negotiated_parameter_test(void)
 {
-    qsc_tls_socket_connection connection;
+    qsc_tls_socket_connection* connection;
     bool res;
 
     res = false;
-    qsc_memutils_clear(&connection, sizeof(connection));
-    connection.role = qsc_tls_role_client;
-    connection.handshaked = true;
-    connection.engine.state.client.negotiatedsuite = qsc_tls_cipher_suite_tls_aes_256_gcm_sha384;
-    connection.engine.state.client.negotiatedgroup = qsc_tls_group_x25519_mlkem768;
-    connection.engine.state.client.negotiatedsigscheme = qsc_tls_sig_ecdsa_secp256r1_sha256;
+    connection = (qsc_tls_socket_connection*)qsc_memutils_malloc(sizeof(qsc_tls_socket_connection));
 
-    if ((qsc_tls_socket_negotiated_cipher_suite(&connection) == qsc_tls_cipher_suite_tls_aes_256_gcm_sha384) &&
-        (qsc_tls_socket_negotiated_group(&connection) == qsc_tls_group_x25519_mlkem768) &&
-        (qsc_tls_socket_negotiated_signature_scheme(&connection) == qsc_tls_sig_ecdsa_secp256r1_sha256))
+    if (connection == NULL)
+    {
+        return false;
+    }
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    connection->role = qsc_tls_role_client;
+    connection->handshaked = true;
+    connection->engine.state.client.negotiatedsuite = qsc_tls_cipher_suite_tls_aes_256_gcm_sha384;
+    connection->engine.state.client.negotiatedgroup = qsc_tls_group_x25519_mlkem768;
+    connection->engine.state.client.negotiatedsigscheme = qsc_tls_sig_ecdsa_secp256r1_sha256;
+
+    if ((qsc_tls_socket_negotiated_cipher_suite(connection) == qsc_tls_cipher_suite_tls_aes_256_gcm_sha384) &&
+        (qsc_tls_socket_negotiated_group(connection) == qsc_tls_group_x25519_mlkem768) &&
+        (qsc_tls_socket_negotiated_signature_scheme(connection) == qsc_tls_sig_ecdsa_secp256r1_sha256))
     {
         res = true;
     }
 
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    qsc_memutils_alloc_free(connection);
 
     return res;
 }
 
 static bool stage23_server_negotiated_parameter_test(void)
 {
-    qsc_tls_socket_connection connection;
+    qsc_tls_socket_connection* connection;
     bool res;
 
     res = false;
-    qsc_memutils_clear(&connection, sizeof(connection));
-    connection.role = qsc_tls_role_server;
-    connection.handshaked = true;
-    connection.engine.state.server.negotiatedsuite = qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256;
-    connection.engine.state.server.negotiatedgroup = qsc_tls_group_secp256r1_mlkem768;
-    connection.engine.state.server.negotiatedsigscheme = qsc_tls_sig_mldsa65;
+    connection = (qsc_tls_socket_connection*)qsc_memutils_malloc(sizeof(qsc_tls_socket_connection));
 
-    if ((qsc_tls_socket_negotiated_cipher_suite(&connection) == qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256) &&
-        (qsc_tls_socket_negotiated_group(&connection) == qsc_tls_group_secp256r1_mlkem768) &&
-        (qsc_tls_socket_negotiated_signature_scheme(&connection) == qsc_tls_sig_mldsa65))
+    if (connection == NULL)
+    {
+        return false;
+    }
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    connection->role = qsc_tls_role_server;
+    connection->handshaked = true;
+    connection->engine.state.server.negotiatedsuite = qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256;
+    connection->engine.state.server.negotiatedgroup = qsc_tls_group_secp256r1_mlkem768;
+    connection->engine.state.server.negotiatedsigscheme = qsc_tls_sig_mldsa65;
+
+    if ((qsc_tls_socket_negotiated_cipher_suite(connection) == qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256) &&
+        (qsc_tls_socket_negotiated_group(connection) == qsc_tls_group_secp256r1_mlkem768) &&
+        (qsc_tls_socket_negotiated_signature_scheme(connection) == qsc_tls_sig_mldsa65))
     {
         res = true;
     }
 
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    qsc_memutils_alloc_free(connection);
 
     return res;
 }
 
 static bool stage23_peer_info_copy_test(void)
 {
-    qsc_tls_socket_connection connection;
+    qsc_tls_socket_connection* connection;
     qsc_tls_socket_peer_info peer;
     bool res;
 
     res = false;
-    qsc_memutils_clear(&connection, sizeof(connection));
-    connection.peerinfo.authenticated = true;
-    connection.peerinfo.chain_valid = true;
-    connection.peerinfo.hostname_checked = true;
-    connection.peerinfo.hostname_matched = true;
-    connection.peerinfo.psk_accepted = false;
-    connection.peerinfo.early_data_accepted = false;
-    connection.peerinfo.alpn_selected = true;
-    connection.peerinfo.cipher_suite = qsc_tls_cipher_suite_tls_aes_128_gcm_sha256;
-    connection.peerinfo.named_group = qsc_tls_group_secp384r1_mlkem1024;
-    connection.peerinfo.signature_scheme = qsc_tls_sig_ecdsa_secp384r1_sha384;
-    connection.peerinfo.x509_status = QSC_X509W_STATUS_SUCCESS;
-    connection.peerinfo.verify_status = QSC_X509_VERIFY_STATUS_SUCCESS;
-    stage23_make_result(&connection.peerinfo.result, qsc_tls_socket_status_success, qsc_tls_status_success,
-        QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
-    stage23_copy_text(connection.peerinfo.subject, sizeof(connection.peerinfo.subject), "CN=alpha.example.test");
-    stage23_copy_text(connection.peerinfo.issuer, sizeof(connection.peerinfo.issuer), "CN=QSC Test Root");
-    stage23_copy_text(connection.peerinfo.common_name, sizeof(connection.peerinfo.common_name), "alpha.example.test");
-    stage23_copy_text(connection.peerinfo.dns_name, sizeof(connection.peerinfo.dns_name), "alpha.example.test");
-    stage23_copy_text(connection.peerinfo.selected_alpn, sizeof(connection.peerinfo.selected_alpn), "http/1.1");
+    connection = (qsc_tls_socket_connection*)qsc_memutils_malloc(sizeof(qsc_tls_socket_connection));
 
-    if (qsc_tls_socket_get_peer_info(&connection, &peer) == qsc_tls_socket_status_success)
+    if (connection == NULL)
+    {
+        return false;
+    }
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    connection->peerinfo.authenticated = true;
+    connection->peerinfo.chain_valid = true;
+    connection->peerinfo.hostname_checked = true;
+    connection->peerinfo.hostname_matched = true;
+    connection->peerinfo.psk_accepted = false;
+    connection->peerinfo.early_data_accepted = false;
+    connection->peerinfo.alpn_selected = true;
+    connection->peerinfo.cipher_suite = qsc_tls_cipher_suite_tls_aes_128_gcm_sha256;
+    connection->peerinfo.named_group = qsc_tls_group_secp384r1_mlkem1024;
+    connection->peerinfo.signature_scheme = qsc_tls_sig_ecdsa_secp384r1_sha384;
+    connection->peerinfo.x509_status = QSC_X509W_STATUS_SUCCESS;
+    connection->peerinfo.verify_status = QSC_X509_VERIFY_STATUS_SUCCESS;
+    stage23_make_result(&connection->peerinfo.result, qsc_tls_socket_status_success, qsc_tls_status_success,
+        QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
+    stage23_copy_text(connection->peerinfo.subject, sizeof(connection->peerinfo.subject), "CN=alpha.example.test");
+    stage23_copy_text(connection->peerinfo.issuer, sizeof(connection->peerinfo.issuer), "CN=QSC Test Root");
+    stage23_copy_text(connection->peerinfo.common_name, sizeof(connection->peerinfo.common_name), "alpha.example.test");
+    stage23_copy_text(connection->peerinfo.dns_name, sizeof(connection->peerinfo.dns_name), "alpha.example.test");
+    stage23_copy_text(connection->peerinfo.selected_alpn, sizeof(connection->peerinfo.selected_alpn), "http/1.1");
+
+    if (qsc_tls_socket_get_peer_info(connection, &peer) == qsc_tls_socket_status_success)
     {
         if ((peer.authenticated == true) && (peer.chain_valid == true) && (peer.hostname_checked == true) &&
             (peer.hostname_matched == true) && (peer.alpn_selected == true) &&
@@ -176,30 +213,40 @@ static bool stage23_peer_info_copy_test(void)
     }
 
 
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    qsc_memutils_alloc_free(connection);
+
     return res;
 }
 
 static bool stage23_verification_failure_result_test(void)
 {
-    qsc_tls_socket_connection connection;
+    qsc_tls_socket_connection* connection;
     qsc_tls_socket_peer_info peer;
     bool res;
 
     res = false;
-    qsc_memutils_clear(&connection, sizeof(connection));
-    connection.peerinfo.authenticated = false;
-    connection.peerinfo.chain_valid = false;
-    connection.peerinfo.hostname_checked = true;
-    connection.peerinfo.hostname_matched = false;
-    connection.peerinfo.x509_status = QSC_X509W_STATUS_HOSTNAME_MISMATCH;
-    connection.peerinfo.verify_status = QSC_X509_VERIFY_STATUS_NAME_MISMATCH;
-    stage23_make_result(&connection.peerinfo.result, qsc_tls_socket_status_certificate_verify_failed,
+    connection = (qsc_tls_socket_connection*)qsc_memutils_malloc(sizeof(qsc_tls_socket_connection));
+
+    if (connection == NULL)
+    {
+        return false;
+    }
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    connection->peerinfo.authenticated = false;
+    connection->peerinfo.chain_valid = false;
+    connection->peerinfo.hostname_checked = true;
+    connection->peerinfo.hostname_matched = false;
+    connection->peerinfo.x509_status = QSC_X509W_STATUS_HOSTNAME_MISMATCH;
+    connection->peerinfo.verify_status = QSC_X509_VERIFY_STATUS_NAME_MISMATCH;
+    stage23_make_result(&connection->peerinfo.result, qsc_tls_socket_status_certificate_verify_failed,
         qsc_tls_status_authentication_failure, QSC_X509W_STATUS_HOSTNAME_MISMATCH,
         QSC_X509_VERIFY_STATUS_NAME_MISMATCH, qsc_tls_alert_bad_certificate);
-    stage23_copy_text(connection.peerinfo.subject, sizeof(connection.peerinfo.subject), "CN=wrong.example.test");
-    stage23_copy_text(connection.peerinfo.dns_name, sizeof(connection.peerinfo.dns_name), "wrong.example.test");
+    stage23_copy_text(connection->peerinfo.subject, sizeof(connection->peerinfo.subject), "CN=wrong.example.test");
+    stage23_copy_text(connection->peerinfo.dns_name, sizeof(connection->peerinfo.dns_name), "wrong.example.test");
 
-    if (qsc_tls_socket_get_peer_info(&connection, &peer) == qsc_tls_socket_status_success)
+    if (qsc_tls_socket_get_peer_info(connection, &peer) == qsc_tls_socket_status_success)
     {
         if ((peer.authenticated == false) && (peer.chain_valid == false) && (peer.hostname_checked == true) &&
             (peer.hostname_matched == false) && (peer.x509_status == QSC_X509W_STATUS_HOSTNAME_MISMATCH) &&
@@ -217,31 +264,41 @@ static bool stage23_verification_failure_result_test(void)
     }
 
 
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    qsc_memutils_alloc_free(connection);
+
     return res;
 }
 
 static bool stage23_selected_alpn_inspection_test(void)
 {
-    qsc_tls_socket_connection connection;
+    qsc_tls_socket_connection* connection;
     char protocol[QSC_TLS_SOCKET_ALPN_SIZE_MAX + 1U];
     size_t protocollen;
     bool res;
 
     res = false;
     protocollen = 0U;
-    qsc_memutils_clear(&connection, sizeof(connection));
+    connection = (qsc_tls_socket_connection*)qsc_memutils_malloc(sizeof(qsc_tls_socket_connection));
 
-    if (qsc_tls_socket_get_selected_alpn(&connection, protocol, sizeof(protocol), &protocollen) == qsc_tls_socket_status_not_initialized)
+    if (connection == NULL)
     {
-        connection.peerinfo.alpn_selected = true;
-        stage23_copy_text(connection.peerinfo.selected_alpn, sizeof(connection.peerinfo.selected_alpn), "qsc-test/1");
+        return false;
+    }
 
-        if (qsc_tls_socket_get_selected_alpn(&connection, protocol, sizeof(protocol), &protocollen) == qsc_tls_socket_status_success)
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+
+    if (qsc_tls_socket_get_selected_alpn(connection, protocol, sizeof(protocol), &protocollen) == qsc_tls_socket_status_not_initialized)
+    {
+        connection->peerinfo.alpn_selected = true;
+        stage23_copy_text(connection->peerinfo.selected_alpn, sizeof(connection->peerinfo.selected_alpn), "qsc-test/1");
+
+        if (qsc_tls_socket_get_selected_alpn(connection, protocol, sizeof(protocol), &protocollen) == qsc_tls_socket_status_success)
         {
             if ((protocollen == qsc_stringutils_string_size("qsc-test/1")) &&
                 (stage23_string_equals(protocol, "qsc-test/1") == true))
             {
-                if (qsc_tls_socket_get_selected_alpn(&connection, protocol, 2U, &protocollen) == qsc_tls_socket_status_invalid_input)
+                if (qsc_tls_socket_get_selected_alpn(connection, protocol, 2U, &protocollen) == qsc_tls_socket_status_invalid_input)
                 {
                     res = true;
                 }
@@ -249,6 +306,9 @@ static bool stage23_selected_alpn_inspection_test(void)
         }
     }
 
+
+    qsc_memutils_clear(connection, sizeof(qsc_tls_socket_connection));
+    qsc_memutils_alloc_free(connection);
 
     return res;
 }

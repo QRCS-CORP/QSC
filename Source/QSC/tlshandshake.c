@@ -210,17 +210,28 @@ qsc_tls_status qsc_tls_handshake_decode_key_update(const uint8_t* input, size_t 
 
     if (input != NULL && requestupdate != NULL)
     {
-        status = qsc_tls_codec_read_u8(input, inlen, &oft, &v);
-
-        if (status == qsc_tls_status_success)
+        if (inlen != 1U)
         {
-            if (v > 1U)
+            status = qsc_tls_status_invalid_length;
+        }
+        else
+        {
+            status = qsc_tls_codec_read_u8(input, inlen, &oft, &v);
+
+            if (status == qsc_tls_status_success)
             {
-                status = qsc_tls_status_invalid_message;
-            }
-            else
-            {
-                *requestupdate = (v == 1U);
+                if (v > 1U)
+                {
+                    status = qsc_tls_status_invalid_message;
+                }
+                else if (oft != inlen)
+                {
+                    status = qsc_tls_status_invalid_length;
+                }
+                else
+                {
+                    *requestupdate = (v == 1U);
+                }
             }
         }
     }

@@ -1,11 +1,15 @@
 #include "x509keywrite.h"
 #include "encoding.h"
+#include "kyber.h"
 #include "memutils.h"
+#include "sha3.h"
 #include "stringutils.h"
+#include "x509spki.h"
 #include "x509write.h"
 
 #define QSC_X509_PEM_PKCS8_LABEL "PRIVATE KEY"
 #define QSC_X509_PEM_SEC1_LABEL "EC PRIVATE KEY"
+#define QSC_X509_EC_PUBLIC_KEY_ENCODE_MAX 133U
 
 static size_t x509_keywrite_ml_dsa_private_size(qsc_x509_pqc_parameter_set parameter)
 {
@@ -129,9 +133,17 @@ static qsc_asn1_status x509_keywrite_validate_ml_dsa_material(const qsc_x509_alg
 static qsc_asn1_status x509_keywrite_validate_ml_kem_material(const qsc_x509_algorithm_identifier* algorithm, const uint8_t* privatekey, 
     size_t privatekeylen, const uint8_t* publickey, size_t publickeylen, bool publickeypresent)
 {
+    uint8_t digest[QSC_SHA3_256_HASH_SIZE] = { 0U };
+    const uint8_t* embeddedpublic;
+    const uint8_t* storedhash;
     const size_t expectedpriv = (algorithm == NULL) ? 0U : x509_keywrite_ml_kem_private_size(algorithm->pqcparameter);
     const size_t expectedpub = (algorithm == NULL) ? 0U : x509_keywrite_ml_kem_public_size(algorithm->pqcparameter);
+    size_t privatecomponentlen;
     qsc_asn1_status status;
+
+    embeddedpublic = (const uint8_t*)NULL;
+    storedhash = (const uint8_t*)NULL;
+    privatecomponentlen = 0U;
 
     if ((algorithm == NULL) || (privatekey == NULL))
     {
@@ -149,10 +161,32 @@ static qsc_asn1_status x509_keywrite_validate_ml_kem_material(const qsc_x509_alg
     {
         status = QSC_ASN1_STATUS_INVALID_LENGTH;
     }
+    else if (expectedpriv <= (expectedpub + (2U * QSC_KYBER_SEED_SIZE)))
+    {
+        status = QSC_ASN1_STATUS_INVALID_LENGTH;
+    }
     else
     {
-        status = QSC_ASN1_STATUS_SUCCESS;
+        privatecomponentlen = expectedpriv - expectedpub - (2U * QSC_KYBER_SEED_SIZE);
+        embeddedpublic = privatekey + privatecomponentlen;
+        storedhash = embeddedpublic + expectedpub;
+        qsc_sha3_compute256(digest, embeddedpublic, expectedpub);
+
+        if (qsc_memutils_are_equal(digest, storedhash, sizeof(digest)) == false)
+        {
+            status = QSC_ASN1_STATUS_INVALID_ENCODING;
+        }
+        else if ((publickeypresent == true) && (qsc_memutils_are_equal(publickey, embeddedpublic, expectedpub) == false))
+        {
+            status = QSC_ASN1_STATUS_INVALID_ENCODING;
+        }
+        else
+        {
+            status = QSC_ASN1_STATUS_SUCCESS;
+        }
     }
+
+    qsc_memutils_secure_erase(digest, sizeof(digest));
 
     return status;
 }
@@ -344,6 +378,7 @@ static qsc_asn1_status x509_keywrite_encode_pem_label(const char* label, const u
 static qsc_asn1_status x509_keywrite_encode_ec_private_key_der(const qsc_x509_algorithm_identifier* algorithm, const uint8_t* privatekey, size_t privatekeylen,
     const uint8_t* publickey, size_t publickeylen, bool includeparameters, bool includepublickey, uint8_t* output, size_t* outputlen)
 {
+    uint8_t ecpoint[QSC_X509_EC_PUBLIC_KEY_ENCODE_MAX] = { 0U };
     uint8_t* content;
     uint8_t* tmp;
     qsc_asn1_oid curveoid;
@@ -452,8 +487,10 @@ static qsc_asn1_status x509_keywrite_encode_ec_private_key_der(const qsc_x509_al
 
     if (includepublickey == true)
     {
+        ecpoint[0U] = 0x04U;
+        qsc_memutils_copy(ecpoint + 1U, publickey, publickeylen);
         len = QSC_X509_KEY_WRITE_MAX;
-        status = qsc_x509_write_bit_string(publickey, publickeylen, 0U, tmp, &len);
+        status = qsc_x509_write_bit_string(ecpoint, publickeylen + 1U, 0U, tmp, &len);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -634,7 +671,6 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
     uint8_t algbuf[256U] = { 0U };
     uint8_t version[1U] = { 0x00U };
     uint8_t* content;
-    uint8_t* explicitfield;
     uint8_t* bitstr;
     uint8_t* inner;
     qsc_x509_algorithm_identifier localalg;
@@ -647,7 +683,6 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
 
     qsc_memutils_clear((uint8_t*)&localalg, sizeof(qsc_x509_algorithm_identifier));
     content = (uint8_t*)NULL;
-    explicitfield = (uint8_t*)NULL;
     bitstr = (uint8_t*)NULL;
     inner = (uint8_t*)NULL;
     encalg = algorithm;
@@ -705,6 +740,27 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
                         inner, &innerlen);
                 }
             }
+            else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+            {
+                status = qsc_x509_algorithm_identifier_validate(algorithm);
+
+                if (status == QSC_ASN1_STATUS_SUCCESS && privatekeylen != QSC_X509_EDDSA_SEED_SIZE)
+                {
+                    status = QSC_ASN1_STATUS_INVALID_LENGTH;
+                }
+
+                if (status == QSC_ASN1_STATUS_SUCCESS && publickeypresent == true &&
+                    (publickey == NULL || publickeylen != QSC_X509_EDDSA_PUBLIC_KEY_SIZE))
+                {
+                    status = QSC_ASN1_STATUS_INVALID_LENGTH;
+                }
+
+                if (status == QSC_ASN1_STATUS_SUCCESS)
+                {
+                    innerlen = QSC_X509_KEY_WRITE_MAX;
+                    status = qsc_x509_write_octet_string(privatekey, privatekeylen, inner, &innerlen);
+                }
+            }
             else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA)
             {
                 status = x509_keywrite_validate_ml_dsa_material(algorithm, privatekey, privatekeylen, publickey, publickeylen, publickeypresent);
@@ -716,8 +772,8 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
 
                 if (status == QSC_ASN1_STATUS_SUCCESS)
                 {
-                    qsc_memutils_copy(inner, privatekey, privatekeylen);
-                    innerlen = privatekeylen;
+                    innerlen = QSC_X509_KEY_WRITE_MAX;
+                    status = qsc_x509_write_octet_string(privatekey, privatekeylen, inner, &innerlen);
                 }
             }
             else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_KEM)
@@ -731,8 +787,8 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
 
                 if (status == QSC_ASN1_STATUS_SUCCESS)
                 {
-                    qsc_memutils_copy(inner, privatekey, privatekeylen);
-                    innerlen = privatekeylen;
+                    innerlen = QSC_X509_KEY_WRITE_MAX;
+                    status = qsc_x509_write_octet_string(privatekey, privatekeylen, inner, &innerlen);
                 }
             }
             else
@@ -776,39 +832,24 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
 
             if ((status == QSC_ASN1_STATUS_SUCCESS) && (publickeypresent == true) && (algorithm->publickey != QSC_X509_PUBLIC_KEY_ALGORITHM_EC))
             {
-                size_t bitstrlen;
-                size_t explicitlen;
+                size_t fieldlen;
 
-                bitstr = (uint8_t*)qsc_memutils_malloc(QSC_X509_KEY_WRITE_MAX);
-                explicitfield = (uint8_t*)qsc_memutils_malloc(QSC_X509_KEY_WRITE_MAX);
+                bitstr = (uint8_t*)qsc_memutils_malloc(publickeylen + 1U);
 
-                if ((bitstr == (uint8_t*)NULL) || (explicitfield == (uint8_t*)NULL))
+                if (bitstr == (uint8_t*)NULL)
                 {
                     status = QSC_ASN1_STATUS_FAILURE;
                 }
                 else
                 {
-                    qsc_memutils_clear(bitstr, QSC_X509_KEY_WRITE_MAX);
-                    qsc_memutils_clear(explicitfield, QSC_X509_KEY_WRITE_MAX);
-                    bitstrlen = QSC_X509_KEY_WRITE_MAX;
-                    explicitlen = QSC_X509_KEY_WRITE_MAX;
-
-                    status = qsc_x509_write_bit_string(publickey, publickeylen, 0U, bitstr, &bitstrlen);
+                    bitstr[0U] = 0U;
+                    qsc_memutils_copy(bitstr + 1U, publickey, publickeylen);
+                    fieldlen = QSC_X509_KEY_WRITE_MAX - pos;
+                    status = qsc_x509_write_raw(QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, false, 1U, bitstr, publickeylen + 1U, content + pos, &fieldlen);
 
                     if (status == QSC_ASN1_STATUS_SUCCESS)
                     {
-                        status = qsc_x509_write_explicit(1U, bitstr, bitstrlen, explicitfield, &explicitlen);
-                    }
-
-                    if ((status == QSC_ASN1_STATUS_SUCCESS) && ((QSC_X509_KEY_WRITE_MAX - pos) < explicitlen))
-                    {
-                        status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;
-                    }
-
-                    if (status == QSC_ASN1_STATUS_SUCCESS)
-                    {
-                        qsc_memutils_copy(content + pos, explicitfield, explicitlen);
-                        pos += explicitlen;
+                        pos += fieldlen;
                     }
                 }
             }
@@ -822,14 +863,8 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
 
     if (bitstr != (uint8_t*)NULL)
     {
-        qsc_memutils_secure_erase(bitstr, QSC_X509_KEY_WRITE_MAX);
+        qsc_memutils_secure_erase(bitstr, publickeylen + 1U);
         qsc_memutils_alloc_free(bitstr);
-    }
-
-    if (explicitfield != (uint8_t*)NULL)
-    {
-        qsc_memutils_secure_erase(explicitfield, QSC_X509_KEY_WRITE_MAX);
-        qsc_memutils_alloc_free(explicitfield);
     }
 
     if (inner != (uint8_t*)NULL)

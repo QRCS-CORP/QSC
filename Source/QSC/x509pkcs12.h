@@ -69,12 +69,17 @@ QSC_CPLUSPLUS_ENABLED_START
  * optional decoded private key together with a bounded certificate collection.
  *
  * The public API supports bundle initialization, top-level PKCS #12 parsing,
- * and direct decryption of an EncryptedPrivateKeyInfo object using a supplied
- * password. The parser currently accepts a version 3 PFX container carrying a
- * PKCS #7 data AuthSafe, validates the outer MAC using either RFC 7292 classic MacData or
- * RFC 9879 PBMAC1 MacData, and extracts certificate bags, PKCS #8 key bags, and shrouded key bags. Cipher
- * selection for private-key decryption is controlled by the supporting PKCS #12
- * crypto implementation and associated compile-time feature macros.
+ * explicit bundle cleanup, and direct decryption of an EncryptedPrivateKeyInfo
+ * object using a supplied password. The parser accepts a version 3 PFX container
+ * carrying a PKCS #7 data AuthSafe, validates the outer MAC using either RFC 7292
+ * classic MacData or RFC 9879 PBMAC1 MacData, decodes the AuthenticatedSafe
+ * sequence of ContentInfo values, and supports plaintext data plus password-
+ * protected encryptedData safe contents. The password-encryption profile uses
+ * PBES2/PBKDF2 with an explicit HMAC-SHA2 PRF and AES-128-CBC or AES-256-CBC.
+ * Certificate bags, PKCS #8 key bags, shrouded key bags, and nested safe-contents
+ * bags are processed. Recognized bag
+ * failures are fail-closed, and an imported private key is cryptographically
+ * matched to its associated certificate when certificate material is present.
  */
 
 /*!
@@ -121,7 +126,9 @@ typedef struct qsc_x509_pkcs12_bundle_t
  * \brief Initialize a PKCS #12 bundle container.
  *
  * \details
- * Resets the bundle object to a clean default state before parsing or reuse.
+ * Resets a fresh bundle object to a clean default state before first use. A bundle
+ * populated by \ref qsc_x509_pkcs12_parse owns certificate backing storage and
+ * must be released with \ref qsc_x509_pkcs12_clear rather than reinitialized.
  *
  * \param bundle: [struct] The PKCS #12 bundle container to initialize.
  *
@@ -130,13 +137,35 @@ typedef struct qsc_x509_pkcs12_bundle_t
 QSC_EXPORT_API void qsc_x509_pkcs12_initialize(qsc_x509_pkcs12_bundle* bundle);
 
 /*!
+ * \brief Clear a PKCS #12 bundle and release certificate backing storage.
+ *
+ * \details
+ * Releases all certificate DER storage owned by a successfully parsed bundle,
+ * securely erases the decoded private-key object, and resets the container.
+ * Call this function before reusing or discarding a bundle that has been
+ * populated by \ref qsc_x509_pkcs12_parse.
+ *
+ * \param bundle: [struct] The initialized PKCS #12 bundle to clear.
+ *
+ * \return [void] This function does not return a value.
+ */
+QSC_EXPORT_API void qsc_x509_pkcs12_clear(qsc_x509_pkcs12_bundle* bundle);
+
+/*!
  * \brief Parse a PKCS #12 bundle from DER.
  *
  * \details
- * Decodes a PKCS #12 container, validates the outer MAC, applies password-based
- * decryption where required, extracts the private key when present, and loads
- * any decoded certificates into the destination bundle object. The destination
- * bundle is reinitialized before parsing begins.
+ * Decodes a PKCS #12 container, validates the outer MAC, processes the
+ * AuthenticatedSafe ContentInfo sequence, applies password-based decryption where
+ * required, extracts at most one private key, and loads decoded X.509 certificates
+ * into owned backing storage. Recognized SafeBag parse/decryption failures abort
+ * the import instead of returning a partial bundle. When both a private key and
+ * certificate material are present, the key must cryptographically match a
+ * certificate; localKeyId attributes are used as an additional association check
+ * when both sides provide them.
+ *
+ * The destination is initialized before parsing. A previously populated bundle
+ * must first be released with \ref qsc_x509_pkcs12_clear before reuse.
  *
  * \param data: [const] The DER encoded PKCS #12 input buffer.
  * \param datalen: The length of the input buffer in bytes.
@@ -145,6 +174,7 @@ QSC_EXPORT_API void qsc_x509_pkcs12_initialize(qsc_x509_pkcs12_bundle* bundle);
  *
  * \return Returns true if parsing completed successfully; otherwise returns false.
  */
+QSC_EXPORT_API bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* password, qsc_x509_pkcs12_bundle* bundle);
 
 /*!
  * \brief Encode a PKCS #12 MacData object over an AuthSafe OCTET STRING value.
@@ -190,8 +220,6 @@ QSC_EXPORT_API bool qsc_x509_pkcs12_encode_mac_data_der(uint8_t* output, size_t 
  * \return Returns true if the outer PKCS #12 MacData verifies; otherwise returns false.
  */
 QSC_EXPORT_API bool qsc_x509_pkcs12_verify_mac_data(const uint8_t* data, size_t datalen, const char* password);
-
-QSC_EXPORT_API bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* password, qsc_x509_pkcs12_bundle* bundle);
 
 /*!
  * \brief Decrypt an EncryptedPrivateKeyInfo object.

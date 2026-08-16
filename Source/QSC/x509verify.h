@@ -313,8 +313,10 @@ QSC_EXPORT_API qsc_x509_verify_status qsc_x509_certificate_check_ip_address(cons
  * \brief Check whether one certificate may issue another.
  *
  * \details
- * Evaluates issuer-subject name relationships, key identifiers, CA status,
- * path-length constraints, and related issuer policy requirements.
+ * Evaluates issuer-subject name relationships, CA status, path-length
+ * constraints, and related issuer policy requirements. Authority key
+ * identifiers are path-construction hints and are not treated as independent
+ * certificate-validity requirements by this function.
  *
  * \param issuer: [const][struct] The candidate issuer certificate.
  * \param subject: [const][struct] The candidate subject certificate.

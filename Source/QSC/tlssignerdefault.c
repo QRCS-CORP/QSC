@@ -9,32 +9,53 @@
 
 #define QSC_TLS_SIGNER_ED25519_SIG_LEN 64U
 
-static bool tls_signer_default_sign_ed25519(const uint8_t* input, size_t inputlen, uint8_t* signature, size_t* signaturelen, const uint8_t* privatekey)
+static bool tls_signer_default_sign_ed25519(const uint8_t* input, size_t inputlen, uint8_t* signature, size_t* signaturelen, const uint8_t* privatekey, size_t privatekeylen)
 {
+    uint8_t derivedprivate[QSC_EDDSA_PRIVATEKEY_SIZE] = { 0U };
+    uint8_t derivedpublic[QSC_EDDSA_PUBLICKEY_SIZE] = { 0U };
+    const uint8_t* signingkey;
     uint8_t* signedmsg;
     size_t need;
     size_t smsglen;
     bool res;
 
-    need = QSC_TLS_SIGNER_ED25519_SIG_LEN + inputlen;
-    signedmsg = (uint8_t*)qsc_memutils_malloc(need);
+    signingkey = NULL;
     res = false;
 
-    if (signedmsg != NULL)
+    if (privatekeylen == QSC_EDDSA_PRIVATEKEY_SIZE)
     {
-        smsglen = 0U;
-        qsc_eddsa_sign(signedmsg, &smsglen, input, inputlen, privatekey);
-
-        if (smsglen == need)
-        {
-            qsc_memutils_copy(signature, signedmsg, QSC_TLS_SIGNER_ED25519_SIG_LEN);
-            *signaturelen = QSC_TLS_SIGNER_ED25519_SIG_LEN;
-            res = true;
-        }
-
-        qsc_memutils_secure_erase(signedmsg, need);
-        qsc_memutils_alloc_free(signedmsg);
+        signingkey = privatekey;
     }
+    else if (privatekeylen == QSC_EDDSA_SEED_SIZE)
+    {
+        qsc_eddsa_generate_seeded_keypair(derivedpublic, derivedprivate, privatekey);
+        signingkey = derivedprivate;
+    }
+
+    if (signingkey != NULL)
+    {
+        need = QSC_TLS_SIGNER_ED25519_SIG_LEN + inputlen;
+        signedmsg = (uint8_t*)qsc_memutils_malloc(need);
+
+        if (signedmsg != NULL)
+        {
+            smsglen = 0U;
+            qsc_eddsa_sign(signedmsg, &smsglen, input, inputlen, signingkey);
+
+            if (smsglen == need)
+            {
+                qsc_memutils_copy(signature, signedmsg, QSC_TLS_SIGNER_ED25519_SIG_LEN);
+                *signaturelen = QSC_TLS_SIGNER_ED25519_SIG_LEN;
+                res = true;
+            }
+
+            qsc_memutils_secure_erase(signedmsg, need);
+            qsc_memutils_alloc_free(signedmsg);
+        }
+    }
+
+    qsc_memutils_secure_erase(derivedprivate, sizeof(derivedprivate));
+    qsc_memutils_clear(derivedpublic, sizeof(derivedpublic));
 
     return res;
 }
@@ -100,7 +121,8 @@ static bool tls_signer_default_sign_mldsa(const uint8_t* input, size_t inputlen,
     if (signedmsg != NULL)
     {
         smsglen = 0U;
-        res = qsc_dilithium_sign(signedmsg, &smsglen, input, inputlen, privatekey, qsc_csp_generate);
+        /* TLS ML-DSA uses the pure FIPS 204 variant with an empty context string. */
+        res = qsc_dilithium_sign_ex(signedmsg, &smsglen, input, inputlen, NULL, 0U, privatekey, qsc_csp_generate);
 
         if (res)
         {
@@ -141,7 +163,9 @@ static bool tls_signer_default_verify_mldsa(const uint8_t* input, size_t inputle
             qsc_memutils_copy(signedmsg, signature, signaturelen);
             qsc_memutils_copy(signedmsg + signaturelen, input, inputlen);
             recoveredlen = 0U;
-            res = qsc_dilithium_verify(recovered, &recoveredlen, signedmsg, smsglen, publickey);
+
+            /* TLS ML-DSA uses the pure FIPS 204 variant with an empty context string. */
+            res = qsc_dilithium_verify_ex(recovered, &recoveredlen, NULL, 0U, signedmsg, smsglen, publickey);
 
             if (res && recoveredlen == inputlen)
             {
@@ -324,7 +348,7 @@ bool qsc_tls_signer_default_sign(qsc_tls_signature_scheme scheme, const uint8_t*
             {
                 case qsc_tls_sig_ed25519:
                 {
-                    res = tls_signer_default_sign_ed25519(input, inputlen, signature, signaturelen, ctx->privatekey);
+                    res = tls_signer_default_sign_ed25519(input, inputlen, signature, signaturelen, ctx->privatekey, ctx->privatekeylen);
                     break;
                 }
                 case qsc_tls_sig_ecdsa_secp256r1_sha256:
@@ -375,7 +399,8 @@ bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme, const uint8_
     res = false;
     (void)state;
 
-    if (signer != NULL && signer->data != NULL && signer->datalen != 0U)
+    if (signer != NULL && signer->data != NULL && signer->datalen != 0U &&
+        qsc_tls_signature_scheme_validate_signature_length(scheme, signaturelen) == true)
     {
         /* the public key is assumed to be presented directly via the certificate data.
          * Real integration with X.509 SPKI extraction is performed in Stage 11 (tlscert encode/decode);

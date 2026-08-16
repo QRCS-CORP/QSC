@@ -77,6 +77,25 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /*!
+ * \brief Check whether a CRL can be used to determine the status of a certificate.
+ *
+ * \details
+ * Validates the supported issuingDistributionPoint scope restrictions for the
+ * supplied CRL and target certificate. CRLs using scope forms that are not
+ * implemented by QSC, including named distribution points, reason-partitioned
+ * CRLs, indirect CRLs, and attribute-certificate-only CRLs, are rejected
+ * fail-closed rather than being treated as complete status information.
+ *
+ * \param crl: [const][struct] The CRL whose scope is being evaluated.
+ * \param certificate: [const][struct] The certificate whose status is being checked.
+ * \param issuer: [const][struct] The issuer certificate for the target certificate.
+ *
+ * \return [enum] Returns QSC_X509_CRL_VERIFY_STATUS_SUCCESS only when the CRL
+ * can safely determine status for the supplied certificate.
+ */
+QSC_EXPORT_API qsc_x509_crl_verify_status qsc_x509_crl_check_certificate_scope(const qsc_x509_crl* crl, const qsc_x509_certificate* certificate, const qsc_x509_certificate* issuer);
+
+/*!
  * \brief Apply a delta CRL to a base CRL and produce a merged CRL view.
  *
  * \details

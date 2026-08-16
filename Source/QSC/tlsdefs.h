@@ -61,7 +61,11 @@
 
 /*! 
  * \def QSC_TLS_PROTOCOL_VERSION_12
- * \brief Defines the TLS 1.2 legacy protocol version field value.
+ * \brief Defines the TLS 1.3 legacy compatibility version field value (0x0303).
+ *
+ * QSC is TLS 1.3-only. This value is retained for the ClientHello, ServerHello,
+ * and record-layer compatibility fields required by RFC 9846; it does not
+ * indicate support for negotiating TLS 1.2.
  */
 #define QSC_TLS_PROTOCOL_VERSION_12 0x0303U
 
@@ -241,7 +245,7 @@
 
 /*! 
  * \def QSC_TLS_EXPORTER_MASTER_LABEL
- * \brief Defines the HKDF label used to derive the exporter master secret.
+ * \brief Defines the HKDF label used to derive the RFC 9846 exporter secret.
  */
 #define QSC_TLS_EXPORTER_MASTER_LABEL "exp master"
 

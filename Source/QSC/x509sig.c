@@ -73,6 +73,10 @@ static qsc_asn1_status x509_integer_to_fixed_width(const qsc_encoding_ber_elemen
 	{
 		status = QSC_ASN1_STATUS_INVALID_ENCODING;
 	}
+	else if (element->length > 1U && element->value[0U] == 0x00U && (element->value[1U] & 0x80U) == 0U)
+	{
+		status = QSC_ASN1_STATUS_INVALID_ENCODING;
+	}
 	else
 	{
 		qsc_memutils_clear(output, outlen);

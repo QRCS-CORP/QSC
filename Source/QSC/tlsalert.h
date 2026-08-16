@@ -72,8 +72,10 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief Decode a TLS alert record payload.
  *
  * \details
- * Parses the standard two-byte TLS alert payload and extracts the alert
- * description field.
+ * Parses exactly one standard two-byte TLS alert payload and extracts the alert
+ * description field. In TLS 1.3, AlertLevel is a legacy field and is ignored on
+ * receipt. Unknown alert-description values are returned to the caller so they
+ * can be treated as error alerts as required by RFC 9846.
  *
  * \param input [const uint8_t*] The encoded alert payload.
  * \param inlen [size_t] The length of the encoded input in bytes.
@@ -88,8 +90,8 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_alert_decode(const uint8_t* input, size_t 
  *
  * \details
  * Writes the standard two-byte TLS alert payload to the destination buffer.
- * The severity level is implementation-defined by the encoder and the supplied
- * description is written as the alert description field.
+ * close_notify and user_canceled are encoded with warning level; all defined
+ * error alerts are encoded with fatal level, as required by TLS 1.3.
  *
  * \param output [uint8_t*] The destination buffer receiving the encoded alert payload.
  * \param outlen [size_t] The length of the destination buffer in bytes.

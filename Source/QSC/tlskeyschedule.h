@@ -58,9 +58,9 @@
   * \details
   * This header defines the QSC TLS 1.3 key schedule interface. The functions in
   * this module implement the staged secret derivation chain used by the TLS 1.3
-  * handshake, including the early secret, handshake secret, master secret,
-  * handshake traffic secrets, application traffic secrets, exporter master
-  * secret, resumption master secret, resumption PSK, 0-RTT early traffic secret,
+  * handshake, including the early secret, handshake secret, RFC 9846 Main Secret,
+  * handshake traffic secrets, application traffic secrets, exporter secret,
+  * resumption secret, resumption PSK, 0-RTT early traffic secret,
   * and PSK binder key.
   *
   * The key schedule is parameterized by the negotiated TLS hash algorithm. It
@@ -69,7 +69,10 @@
   * provides utility functions for deriving record protection keys and IVs,
   * advancing application traffic secrets during KeyUpdate, computing and
   * verifying Finished MAC values, and constructing the context-bound input used
-  * by CertificateVerify signatures.
+  * by CertificateVerify signatures. Established QSC field and function identifiers
+  * containing the historical token "master" are retained for source compatibility;
+  * their documentation uses the RFC 9846 Main Secret/exporter secret/resumption
+  * secret terminology, and the protocol-defined HKDF labels remain unchanged.
   *
   * All secret material stored in qsc_tls_key_schedule_state is fixed-size and
   * bounded by QSC_TLS_HASH_MAX_SIZE. Callers shall initialize a state object with
@@ -131,12 +134,12 @@ QSC_CPLUSPLUS_ENABLED_START
     uint8_t clientapplicationtrafficsecret[QSC_TLS_HASH_MAX_SIZE];      /*!< Client application traffic secret, generation 0. */
     uint8_t clientearlytrafficsecret[QSC_TLS_HASH_MAX_SIZE];            /*!< Client early traffic secret used for 0-RTT data. */
     uint8_t clienthandshaketrafficsecret[QSC_TLS_HASH_MAX_SIZE];        /*!< Client handshake traffic secret. */
-    uint8_t earlyexportermastersecret[QSC_TLS_HASH_MAX_SIZE];           /*!< Early exporter master secret. */
-    uint8_t exportermastersecret[QSC_TLS_HASH_MAX_SIZE];                /*!< Exporter master secret. */
+    uint8_t earlyexportermastersecret[QSC_TLS_HASH_MAX_SIZE];           /*!< RFC 9846 early exporter secret. */
+    uint8_t exportermastersecret[QSC_TLS_HASH_MAX_SIZE];                /*!< RFC 9846 exporter secret. */
     uint8_t earlysecret[QSC_TLS_HASH_MAX_SIZE];                         /*!< TLS early_secret value. */
     uint8_t handshakesecret[QSC_TLS_HASH_MAX_SIZE];                     /*!< TLS handshake_secret value. */
     uint8_t mastersecret[QSC_TLS_HASH_MAX_SIZE];                        /*!< TLS master_secret value. */
-    uint8_t resumptionmastersecret[QSC_TLS_HASH_MAX_SIZE];              /*!< Resumption master secret. */
+    uint8_t resumptionmastersecret[QSC_TLS_HASH_MAX_SIZE];              /*!< RFC 9846 resumption secret. */
     uint8_t serverhandshaketrafficsecret[QSC_TLS_HASH_MAX_SIZE];        /*!< Server handshake traffic secret. */
     uint8_t serverapplicationtrafficsecret[QSC_TLS_HASH_MAX_SIZE];      /*!< Server application traffic secret, generation 0. */
     size_t digestsize;                                                  /*!< Digest size, in bytes, for the selected hash algorithm. */
@@ -310,10 +313,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_extract_early_secret(qsc_tls_k
 QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_extract_handshake_secret(qsc_tls_key_schedule_state* state, const uint8_t* dhe, size_t dhelen);
 
 /**
- * \brief Extract the TLS 1.3 master secret.
+ * \brief Extract the TLS 1.3 Main Secret.
  *
  * \details
- * Computes the master secret from the derived handshake-secret boundary value and an all-zero input keying material value. 
+ * Computes the RFC 9846 Main Secret from the derived handshake-secret boundary value and an all-zero input keying material value. 
  * The handshake secret must already have been extracted.
  *
  * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with handshake_secret derived.
@@ -341,10 +344,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_derive_handshake_traffic_secre
  * \brief Derive the client and server application traffic secrets.
  *
  * \details
- * Derives c ap traffic 0 and s ap traffic 0 from master_secret using the transcript hash that includes the server Finished message. 
+ * Derives c ap traffic 0 and s ap traffic 0 from the Main Secret using the transcript hash that includes the server Finished message. 
  * These secrets are used to derive application-data record protection keys.
  *
- * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with master_secret derived.
+ * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with the Main Secret derived.
  * \param transcripthash: [const uint8_t*] Pointer to the application traffic transcript hash.
  * \param transcripthashlen: [size_t] Length, in bytes, of the transcript hash.
  *
@@ -353,13 +356,13 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_derive_handshake_traffic_secre
 QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_derive_application_traffic_secrets(qsc_tls_key_schedule_state* state, const uint8_t* transcripthash, size_t transcripthashlen);
 
 /**
- * \brief Derive the exporter master secret.
+ * \brief Derive the RFC 9846 exporter secret.
  *
  * \details
- * Derives the exporter master secret from master_secret and the supplied transcript hash. 
+ * Derives the RFC 9846 exporter secret from the Main Secret and the supplied transcript hash. 
  * The resulting secret may be used by exporter interfaces that bind external application keys to the TLS session.
  *
- * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with master_secret derived.
+ * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with the Main Secret derived.
  * \param transcripthash: [const uint8_t*] Pointer to the exporter transcript hash.
  * \param transcripthashlen: [size_t] Length, in bytes, of the transcript hash.
  *
@@ -368,13 +371,13 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_derive_application_traffic_sec
 QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_derive_exporter_master_secret(qsc_tls_key_schedule_state* state, const uint8_t* transcripthash, size_t transcripthashlen);
 
 /**
- * \brief Derive the resumption master secret.
+ * \brief Derive the RFC 9846 resumption secret.
  *
  * \details
- * Derives the resumption master secret from master_secret and the supplied transcript hash. 
+ * Derives the RFC 9846 resumption secret from the Main Secret and the supplied transcript hash. 
  * The resulting secret is used with per-ticket nonces to derive session resumption PSKs.
  *
- * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with master_secret derived.
+ * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with the Main Secret derived.
  * \param transcripthash: [const uint8_t*] Pointer to the resumption transcript hash.
  * \param transcripthashlen: [size_t] Length, in bytes, of the transcript hash.
  *
@@ -509,13 +512,13 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_suite_record_sizes(qsc_tls_cip
 QSC_EXPORT_API qsc_tls_hash_algorithm qsc_tls_keyschedule_suite_hash(qsc_tls_cipher_suite suite);
 
 /**
- * \brief Derive a resumption PSK from the resumption master secret.
+ * \brief Derive a resumption PSK from the RFC 9846 resumption secret.
  *
  * \details
- * Computes PSK = HKDF-Expand-Label(resumption_master_secret, "resumption", ticket_nonce, Hash.length). 
- * The caller must derive the resumption master secret before invoking this function.
+ * Computes PSK = HKDF-Expand-Label(resumption_secret, "resumption", ticket_nonce, Hash.length). 
+ * The caller must derive the resumption secret before invoking this function.
  *
- * \param state: [const qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with resumption_master_secret derived.
+ * \param state: [const qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with the resumption secret derived.
  * \param nonce: [const uint8_t*] Pointer to the per-ticket nonce from the NewSessionTicket message.
  * \param noncelen: [size_t] Length, in bytes, of the ticket nonce.
  * \param output: [uint8_t*] Pointer to the destination PSK buffer.
@@ -557,10 +560,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_derive_binder_key(qsc_tls_key_
 QSC_EXPORT_API qsc_tls_status qsc_tls_keyschedule_derive_client_early_traffic_secret(qsc_tls_key_schedule_state* state, const uint8_t* transcripthash, size_t transcripthashlen);
 
 /**
- * \brief Derive the early exporter master secret.
+ * \brief Derive the RFC 9846 early exporter secret.
  *
  * \details
- * Derives early_exporter_master_secret from early_secret using the supplied ClientHello transcript hash. 
+ * Derives the RFC 9846 early exporter secret from early_secret using the supplied ClientHello transcript hash. 
  * This secret is used by exporter interfaces that are valid during early-data processing.
  *
  * \param state: [qsc_tls_key_schedule_state*] Pointer to an initialized key schedule state with early_secret derived.

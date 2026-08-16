@@ -190,6 +190,7 @@ static qsc_asn1_status qsc_x509_certwrite_copy_filtered_extension(qsc_x509_exten
 
     qsc_memutils_copy(&destination->entries[destination->count], extension, sizeof(*extension));
     destination->count++;
+
     return QSC_ASN1_STATUS_SUCCESS;
 }
 
@@ -281,7 +282,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
             builder->extensions.basicconstraints.critical,
             payload,
             payloadlen);
-        if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            return status;
+        }
     }
 
     if (builder->extensions.keyusage.present == true)
@@ -297,7 +302,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
             builder->extensions.keyusage.critical,
             payload,
             payloadlen);
-        if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            return status;
+        }
     }
 
     if (builder->extensions.extendedkeyusage.present == true)
@@ -313,7 +322,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
             builder->extensions.extendedkeyusage.critical,
             payload,
             payloadlen);
-        if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            return status; 
+        }
     }
 
     {
@@ -344,7 +357,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
             ski.critical,
             payload,
             payloadlen);
-        if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            return status;
+        }
 
         if (builder->extensions.authoritykeyidentifier.present == false)
         {
@@ -358,7 +375,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
                 qsc_memutils_copy(aki.keyidentifier, ski.identifier, ski.identifierlen);
                 payloadlen = sizeof(payload);
                 status = qsc_x509_write_authority_key_identifier(&aki, payload, &payloadlen);
-                if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+                if (status != QSC_ASN1_STATUS_SUCCESS)
+                {
+                    return status;
+                }
 
                 status = qsc_x509_certwrite_upsert_extension(
                     extensions,
@@ -367,7 +388,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
                     aki.critical,
                     payload,
                     payloadlen);
-                if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+                if (status != QSC_ASN1_STATUS_SUCCESS)
+                {
+                    return status;
+                }
             }
         }
     }
@@ -385,7 +410,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
             builder->extensions.authoritykeyidentifier.critical,
             payload,
             payloadlen);
-        if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            return status;
+        }
     }
 
     if (builder->extensions.subjectaltname.present == true)
@@ -401,7 +430,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
             builder->extensions.subjectaltname.critical,
             payload,
             payloadlen);
-        if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            return status;
+        }
     }
 
     if (builder->extensions.issueraltname.present == true)
@@ -417,7 +450,11 @@ static qsc_asn1_status qsc_x509_certwrite_prepare_extensions(const qsc_x509_cert
             builder->extensions.issueraltname.critical,
             payload,
             payloadlen);
-        if (status != QSC_ASN1_STATUS_SUCCESS) return status;
+
+        if (status != QSC_ASN1_STATUS_SUCCESS)
+        {
+            return status;
+        }
     }
 
     return QSC_ASN1_STATUS_SUCCESS;
@@ -498,6 +535,7 @@ static qsc_asn1_status qsc_x509_certwrite_derive_key_identifier(const qsc_x509_s
     qsc_sha256_compute(digest, spki->publickey, spki->publickeylen);
     qsc_memutils_copy(keyid, digest, QSC_SHA2_256_HASH_SIZE);
     *keyidlen = QSC_SHA2_256_HASH_SIZE;
+
     return QSC_ASN1_STATUS_SUCCESS;
 }
 
@@ -537,6 +575,7 @@ static qsc_asn1_status qsc_x509_certwrite_build_version(uint32_t version, uint8_
     }
 
     *outputlen = outerlen;
+
     return QSC_ASN1_STATUS_SUCCESS;
 }
 
@@ -971,7 +1010,6 @@ qsc_asn1_status qsc_x509_certificate_builder_encode_tbs_der(const qsc_x509_certi
 
     uint8_t content[QSC_X509_CERTIFICATE_WRITE_MAX] = { 0U };
     uint8_t extensionsseq[QSC_X509_CERTIFICATE_WRITE_MAX] = { 0U };
-    qsc_x509_extensions extensions;
     size_t pos = 0U;
     size_t len = 0U;
     bool hasextensions = false;
@@ -1059,36 +1097,46 @@ qsc_asn1_status qsc_x509_certificate_builder_encode_tbs_der(const qsc_x509_certi
 
         if (hasextensions == true)
         {
-            qsc_memutils_clear(&extensions, sizeof(qsc_x509_extensions));
-            status = qsc_x509_certwrite_prepare_extensions(builder, &extensions);
+            qsc_x509_extensions* extensions;
 
-            if (status != QSC_ASN1_STATUS_SUCCESS)
+            extensions = qsc_memutils_malloc(sizeof(qsc_x509_extensions));
+
+            if (extensions != NULL)
             {
-                return status;
-            }
+                qsc_memutils_clear(extensions, sizeof(qsc_x509_extensions));
 
-            len = sizeof(extensionsseq);
-            status = qsc_x509_write_extensions(&extensions, extensionsseq, &len);
+                status = qsc_x509_certwrite_prepare_extensions(builder, extensions);
 
-            if (status != QSC_ASN1_STATUS_SUCCESS)
-            {
-                return status;
-            }
-
-            {
-                size_t explen = sizeof(content) - pos;
-                status = qsc_x509_write_explicit(3U, extensionsseq, len, content + pos, &explen);
-
-                if (status != QSC_ASN1_STATUS_SUCCESS)
+                if (status == QSC_ASN1_STATUS_SUCCESS)
                 {
-                    return status;
+                    len = sizeof(extensionsseq);
+                    status = qsc_x509_write_extensions(extensions, extensionsseq, &len);
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        {
+                            size_t explen;
+
+                            explen = sizeof(content) - pos;
+                            status = qsc_x509_write_explicit(3U, extensionsseq, len, content + pos, &explen);
+                            pos += explen;
+                        }
+                    }
                 }
 
-                pos += explen;
+                qsc_memutils_secure_erase(extensions, sizeof(qsc_x509_extensions));
+                qsc_memutils_alloc_free(extensions);
+            }
+            else
+            {
+                status = QSC_ASN1_STATUS_FAILURE;
             }
         }
 
-        status = qsc_x509_write_sequence(content, pos, output, outputlen);
+        if (status == QSC_ASN1_STATUS_SUCCESS)
+        {
+            status = qsc_x509_write_sequence(content, pos, output, outputlen);
+        }
     }
 
     return status;
@@ -1279,9 +1327,7 @@ qsc_asn1_status qsc_x509_certificate_builder_apply_generated_identifiers(qsc_x50
                     builder->extensions.authoritykeyidentifier.critical = false;
                     builder->extensions.authoritykeyidentifier.keyidentifierlen = builder->extensions.subjectkeyidentifier.identifierlen;
 
-                    qsc_memutils_copy(builder->extensions.authoritykeyidentifier.keyidentifier,
-                        builder->extensions.subjectkeyidentifier.identifier,
-                        builder->extensions.subjectkeyidentifier.identifierlen);
+                    qsc_memutils_copy(builder->extensions.authoritykeyidentifier.keyidentifier, builder->extensions.subjectkeyidentifier.identifier, builder->extensions.subjectkeyidentifier.identifierlen);
                 }
             }
         }
@@ -1646,8 +1692,7 @@ qsc_asn1_status qsc_x509_cert_issuance_validate_csr(const qsc_x509_csr* csr)
                 case QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_65:
                 case QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_87:
                 {
-                    if ((csr->signaturelen == 0U) ||
-                        ((csr->infodata == NULL) && (csr->infodatalen != 0U)))
+                    if ((csr->signaturelen == 0U) || ((csr->infodata == NULL) && (csr->infodatalen != 0U)))
                     {
                         status = QSC_ASN1_STATUS_INVALID_INPUT;
                     }
@@ -1752,90 +1797,100 @@ qsc_asn1_status qsc_x509_cert_issuance_apply_csr_extensions(qsc_x509_certificate
     QSC_ASSERT(builder != NULL);
     QSC_ASSERT(csr != NULL);
 
-    qsc_x509_extensions filtered;
+    qsc_x509_extensions* filtered;
     qsc_asn1_status status;
     size_t i;
 
-    status = QSC_ASN1_STATUS_SUCCESS;
-    i = 0U;
+    status = QSC_ASN1_STATUS_FAILURE;
+    filtered = qsc_memutils_malloc(sizeof(qsc_x509_extensions));
 
-    if ((builder != NULL) && (csr != NULL))
+    if (filtered != NULL)
     {
-        status = qsc_x509_cert_issuance_filter_requested_extensions(csr, policyflags, &filtered);
+        qsc_memutils_clear(filtered, sizeof(qsc_x509_extensions));
+        status = QSC_ASN1_STATUS_SUCCESS;
+        i = 0U;
 
-        if (status == QSC_ASN1_STATUS_SUCCESS)
+        if (builder != NULL && csr != NULL)
         {
-            if ((filtered.subjectaltname.present == true) && (builder->extensions.subjectaltname.present == false))
+            status = qsc_x509_cert_issuance_filter_requested_extensions(csr, policyflags, filtered);
+
+            if (status == QSC_ASN1_STATUS_SUCCESS)
             {
-                builder->extensions.subjectaltname = filtered.subjectaltname;
-            }
-
-            if ((filtered.extendedkeyusage.present == true) && (builder->extensions.extendedkeyusage.present == false))
-            {
-                builder->extensions.extendedkeyusage = filtered.extendedkeyusage;
-            }
-
-            if ((filtered.subjectkeyidentifier.present == true) && (builder->extensions.subjectkeyidentifier.present == false))
-            {
-                builder->extensions.subjectkeyidentifier = filtered.subjectkeyidentifier;
-            }
-
-            for (i = 0U; i < filtered.count; ++i)
-            {
-                const qsc_x509_extension* extension;
-                bool duplicate = false;
-                size_t j;
-
-                j = 0U;
-                extension = &filtered.entries[i];
-
-                if (extension != NULL)
+                if ((filtered->subjectaltname.present == true) && (builder->extensions.subjectaltname.present == false))
                 {
-                    switch (extension->type)
+                    builder->extensions.subjectaltname = filtered->subjectaltname;
+                }
+
+                if ((filtered->extendedkeyusage.present == true) && (builder->extensions.extendedkeyusage.present == false))
+                {
+                    builder->extensions.extendedkeyusage = filtered->extendedkeyusage;
+                }
+
+                if ((filtered->subjectkeyidentifier.present == true) && (builder->extensions.subjectkeyidentifier.present == false))
+                {
+                    builder->extensions.subjectkeyidentifier = filtered->subjectkeyidentifier;
+                }
+
+                for (i = 0U; i < filtered->count; ++i)
+                {
+                    const qsc_x509_extension* extension;
+                    bool duplicate = false;
+                    size_t j;
+
+                    j = 0U;
+                    extension = &filtered->entries[i];
+
+                    if (extension != NULL)
                     {
+                        switch (extension->type)
+                        {
                         case QSC_X509_EXTENSION_SUBJECT_ALT_NAME:
                         case QSC_X509_EXTENSION_EXTENDED_KEY_USAGE:
                         case QSC_X509_EXTENSION_SUBJECT_KEY_IDENTIFIER:
                             continue;
                         default:
                             break;
-                    }
+                        }
 
-                    for (j = 0U; j < builder->extensions.count; ++j)
-                    {
-                        const qsc_x509_extension* current = &builder->extensions.entries[j];
-
-                        if (((extension->type != QSC_X509_EXTENSION_UNKNOWN) && (current->type == extension->type)) ||
-                            ((extension->extension_oid.length != 0U) &&
-                                (current->extension_oid.length != 0U) &&
-                                (qsc_asn1_oid_compare(&current->extension_oid, &extension->extension_oid) == true)))
+                        for (j = 0U; j < builder->extensions.count; ++j)
                         {
-                            duplicate = true;
-                            break;
+                            const qsc_x509_extension* current = &builder->extensions.entries[j];
+
+                            if (((extension->type != QSC_X509_EXTENSION_UNKNOWN) && (current->type == extension->type)) ||
+                                ((extension->extension_oid.length != 0U) &&
+                                    (current->extension_oid.length != 0U) &&
+                                    (qsc_asn1_oid_compare(&current->extension_oid, &extension->extension_oid) == true)))
+                            {
+                                duplicate = true;
+                                break;
+                            }
+                        }
+
+                        if (duplicate == false)
+                        {
+                            status = qsc_x509_certificate_builder_add_extension(builder, extension);
+
+                            if (status != QSC_ASN1_STATUS_SUCCESS)
+                            {
+                                break;
+                            }
                         }
                     }
-
-                    if (duplicate == false)
+                    else
                     {
-                        status = qsc_x509_certificate_builder_add_extension(builder, extension);
-
-                        if (status != QSC_ASN1_STATUS_SUCCESS)
-                        {
-                            break;
-                        }
+                        status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+                        break;
                     }
-                }
-                else
-                {
-                    status = QSC_ASN1_STATUS_OUT_OF_RANGE;
-                    break;
                 }
             }
         }
-    }
-    else
-    {
-        status = QSC_ASN1_STATUS_INVALID_INPUT;
+        else
+        {
+            status = QSC_ASN1_STATUS_INVALID_INPUT;
+        }
+
+        qsc_memutils_secure_erase(filtered, sizeof(qsc_x509_extensions));
+        qsc_memutils_alloc_free(filtered);
     }
 
     return status;

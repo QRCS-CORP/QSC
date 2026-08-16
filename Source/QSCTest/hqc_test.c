@@ -44,19 +44,20 @@ bool qsctest_hqc_ciphertext_integrity(void)
 	parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, 0);
 	qsctest_nistrng2_prng_initialize(seed, NULL, 0U);
 
-	kpk[1U] += 1U;
-
 	if (qsc_hqc_encapsulate(ss1, ct, kpk, qsctest_nistrng2_prng_generate) == true)
 	{
-		if (qsc_intutils_are_equal8(ct, kct, QSC_HQC_CIPHERTEXT_SIZE) == true)
+		/* alter the ciphertext */
+		ct[0U] ^= 0x01U;
+		res = qsc_hqc_decapsulate(ss1, ct, ksk);
+
+		if (res == true)
 		{
-			qsc_consoleutils_print_line("Failure! hqc_ciphertext_integrity: the shared secrets match! -HCKT1");
-			res = false;
-		}
-		else if (qsc_intutils_are_equal8(ss1, kss, QSC_HQC_SHAREDSECRET_SIZE) == true)
-		{
-			qsc_consoleutils_print_line("Failure! hqc_ciphertext_integrity: the shared secrets match! -HCKT2");
-			res = false;
+			/* shared secrets should not match */
+			if (qsc_intutils_are_equal8(ss1, kss, QSC_HQC_SHAREDSECRET_SIZE) == true)
+			{
+				qsc_consoleutils_print_line("Failure! hqc_ciphertext_integrity: the shared secrets match! -HCKT2");
+				res = false;
+			}
 		}
 	}
 

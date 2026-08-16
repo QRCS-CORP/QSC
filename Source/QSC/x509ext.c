@@ -36,7 +36,7 @@ static bool x509_ext_is_ascii_string(const uint8_t* data, size_t datalen)
 
 		for (i = 0U; i < datalen; ++i)
 		{
-			if (data[i] > 0x7FU)
+			if (data[i] == 0U || data[i] > 0x7FU)
 			{
 				res = false;
 				break;
@@ -304,9 +304,13 @@ static qsc_asn1_status x509_ext_parse_authority_cert_issuer(const qsc_encoding_b
 
 static qsc_asn1_status x509_ext_decode_general_names(const uint8_t* data, size_t datalen, qsc_x509_general_name* entries, size_t* count, size_t capacity)
 {
-    size_t consumed = 0U;
-    qsc_encoding_ber_element* root = NULL;
-    qsc_asn1_status status = QSC_ASN1_STATUS_FAILURE;
+    size_t consumed;
+    qsc_encoding_ber_element* root;
+    qsc_asn1_status status;
+
+	consumed = 0U;
+	root = NULL;
+	status = QSC_ASN1_STATUS_FAILURE;
 
     if ((data == NULL) || (entries == NULL) || (count == NULL))
     {
@@ -323,11 +327,13 @@ static qsc_asn1_status x509_ext_decode_general_names(const uint8_t* data, size_t
     else if (consumed != datalen)
     {
         qsc_encoding_ber_free_element(root);
+
         return QSC_ASN1_STATUS_INVALID_LENGTH;
     }
     else if (root->constructed == false)
     {
         qsc_encoding_ber_free_element(root);
+
         return QSC_ASN1_STATUS_INVALID_TAG;
     }
 
@@ -607,7 +613,7 @@ qsc_asn1_status qsc_x509_extension_decode(const qsc_encoding_ber_element* elemen
 
 						if (status == QSC_ASN1_STATUS_SUCCESS)
 						{
-							ext->rawextnvalue.data = child->value;
+							ext->rawextnvalue.data = ext->value;
 							ext->rawextnvalue.length = ext->valuelen;
 							ext->rawextnvalue.storage = QSC_X509_STORAGE_CLASS_BORROWED;
 							ext->decoded = true;

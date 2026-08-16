@@ -56,6 +56,7 @@
 #include "tlstypes.h"
 #include "tlserrors.h"
 #include "x509types.h"
+#include "x509crl.h"
 #include "x509time.h"
 #include "x509store.h"
 #include "x509verify.h"
@@ -148,7 +149,7 @@ typedef struct qsc_tls_certificate_interface
 {
 	qsc_tls_certificate_chain_validate_callback validatechain;		/*!< Callback used to validate the peer certificate chain. */
 	qsc_tls_certificate_verify_callback verifycertificateverify;	/*!< Callback used to verify the CertificateVerify signature. */
-	void* state;													/*!< Opaque caller state passed to both callbacks. The pointed-to object must outlive every handshake that uses this interface unless the built-in QSC X.509 setter is used, which stores an internal copy of its bridge context. */
+	void* state;													/*!< Opaque caller state passed to both callbacks. Built-in QSC X.509 interfaces are cloned into connection-owned TLS state during client/server initialization. */
 } qsc_tls_certificate_interface;
 
 /**
@@ -166,11 +167,11 @@ typedef struct qsc_tls_peer_certificate_summary
 	char issuer[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];		/*!< The formatted peer certificate issuer name, when available. */
 	char commonname[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];	/*!< The first peer certificate commonName value, when available. */
 	char dnsname[QSC_X509_NAME_ATTRIBUTE_STRING_MAX];		/*!< The matched DNS subjectAltName, or the first DNS subjectAltName when no hostname check was requested. */
-	qsc_x509_verify_status verifystatus;				/*!< The final certificate verification status. */
-	bool populated;									/*!< Indicates that the summary was populated from a decoded peer certificate. */
-	bool chainvalid;									/*!< Indicates that path validation succeeded before hostname evaluation. */
-	bool hostnamechecked;							/*!< Indicates that hostname validation was requested. */
-	bool hostnamevalid;								/*!< Indicates that hostname validation succeeded. */
+	qsc_x509_verify_status verifystatus;					/*!< The final certificate verification status. */
+	bool populated;											/*!< Indicates that the summary was populated from a decoded peer certificate. */
+	bool chainvalid;										/*!< Indicates that path validation succeeded before hostname evaluation. */
+	bool hostnamechecked;									/*!< Indicates that hostname validation was requested. */
+	bool hostnamevalid;										/*!< Indicates that hostname validation succeeded. */
 } qsc_tls_peer_certificate_summary;
 
 /**
@@ -187,9 +188,9 @@ typedef struct qsc_tls_client_authorization_info
 {
 	qsc_tls_peer_certificate_summary summary;				/*!< Bounded peer certificate summary produced by certificate validation. */
 	uint8_t certificatefingerprint[QSC_TLS_CERTIFICATE_FINGERPRINT_SIZE];	/*!< SHA3-256 fingerprint of the leaf certificate DER encoding. */
-	size_t certificatefingerprintlen;					/*!< Length of the certificate fingerprint in bytes. */
-	qsc_x509_verify_status verifystatus;				/*!< X.509 verification status reported by the validation layer. */
-	bool chainvalid;								/*!< Indicates that certificate-chain validation succeeded. */
+	size_t certificatefingerprintlen;						/*!< Length of the certificate fingerprint in bytes. */
+	qsc_x509_verify_status verifystatus;					/*!< X.509 verification status reported by the validation layer. */
+	bool chainvalid;										/*!< Indicates that certificate-chain validation succeeded. */
 } qsc_tls_client_authorization_info;
 
 /**
@@ -207,16 +208,20 @@ typedef bool (*qsc_tls_client_authorization_callback)(const qsc_tls_client_autho
  */
 typedef struct qsc_tls_qsc_x509_context
 {
-	const qsc_x509_store* truststore;			/*!< Trust anchors used to validate peer certificate chains. */
-	const qsc_x509_certificate* intermediates;	/*!< Optional intermediate certificates available during path building. */
-	size_t intermediatecount;					/*!< The number of intermediate certificates supplied. */
-	const qsc_x509_time* validationtime;		/*!< Validation time used during certificate verification. */
-	uint8_t* verifybuffer;						/*!< Scratch buffer used by X.509 verification helpers. */
-	size_t verifybufferlen;						/*!< The length of the scratch verification buffer in bytes. */
-	qsc_tls_peer_certificate_summary peersummary;	/*!< Most recent peer certificate identity and verification summary. */
-	bool rejectunsupportedcriticalextensions;	/*!< Set to true to reject certificates containing unsupported critical extensions. */
-	qsc_x509_verify_status lastverifystatus;	/*!< Most recent X.509 verification result reported by the built-in bridge. */
-	qsc_tls_alert_description lastalert;		/*!< Most recent TLS alert mapped from the built-in bridge verification result. */
+	const qsc_x509_store* truststore;						/*!< Trust anchors used to validate peer certificate chains. */
+	const qsc_x509_certificate* intermediates;				/*!< Optional intermediate certificates available during path building. */
+	size_t intermediatecount;								/*!< The number of intermediate certificates supplied. */
+	const qsc_x509_time* validationtime;					/*!< Validation time used during certificate verification. */
+	const qsc_x509_crl* crls;							/*!< Optional loaded CRLs available for peer revocation checks. */
+	size_t crlcount;									/*!< The number of loaded CRLs supplied to the bridge. */
+	qsc_x509_revocation_mode revocationmode;				/*!< Active CRL revocation policy used by TLS certificate validation. */
+	uint8_t* verifybuffer;									/*!< Scratch buffer used by X.509 verification helpers. */
+	size_t verifybufferlen;									/*!< The length of the scratch verification buffer in bytes. */
+	qsc_tls_peer_certificate_summary peersummary;			/*!< Most recent peer certificate identity and verification summary. */
+	bool rejectunsupportedcriticalextensions;				/*!< Set to true to reject certificates containing unsupported critical extensions. */
+	bool retainresults;									/*!< Set to true when mutable verification results are retained in this connection-owned context. */
+	qsc_x509_verify_status lastverifystatus;				/*!< Most recent X.509 verification result reported by the built-in bridge. */
+	qsc_tls_alert_description lastalert;					/*!< Most recent TLS alert mapped from the built-in bridge verification result. */
 } qsc_tls_qsc_x509_context;
 
 /**
@@ -225,6 +230,8 @@ typedef struct qsc_tls_qsc_x509_context
  * \details
  * Parses a TLS 1.3 Certificate handshake message and extracts the certificate
  * request context and certificate chain entries as spans into the input buffer.
+ * The current QSC profile does not negotiate CertificateEntry extensions, so a
+ * non-empty per-certificate extension vector is rejected as unsupported.
  *
  * \param input: [const uint8_t*] Pointer to encoded message buffer
  * \param inlen: [size_t] Length of input buffer in bytes
@@ -293,6 +300,20 @@ QSC_EXPORT_API bool qsc_tls_certificate_interface_is_valid(const qsc_tls_certifi
 QSC_EXPORT_API qsc_tls_status qsc_tls_x509_context_initialize(qsc_tls_qsc_x509_context* context, const qsc_x509_store* truststore,
 	const qsc_x509_certificate* intermediates, size_t intermediatecount, const qsc_x509_time* validationtime,
 	uint8_t* verifybuffer, size_t verifybufferlen);
+
+/**
+ * \brief Clone a configured QSC X.509 TLS context for one TLS connection.
+ *
+ * \details
+ * Copies borrowed validation configuration from \p source, clears mutable result
+ * state, and deliberately does not share the source verification scratch buffer.
+ *
+ * \param destination: [struct*] Destination connection-owned context.
+ * \param source: [const struct*] Configured source/template context.
+ *
+ * \return [enum] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_x509_context_clone(qsc_tls_qsc_x509_context* destination, const qsc_tls_qsc_x509_context* source);
 
 /**
  * \brief Query the most recent alert reason from a certificate interface.

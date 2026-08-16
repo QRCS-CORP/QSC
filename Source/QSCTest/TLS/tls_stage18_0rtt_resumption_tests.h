@@ -56,10 +56,10 @@
 
 /**
  * \file tls_stage18_0rtt_resumption_tests.h
- * \brief Defines the QSC TLS Stage 18 0-RTT resumption tests.
+ * \brief Defines the QSC TLS Stage 18 resumption-profile tests.
  *
  * \details This header declares the public entry point for the Stage 18
- * 0-RTT resumption test module. The corresponding implementation follows the QSC
+ * 1-RTT resumption and 0-RTT rejection test module. The corresponding implementation follows the QSC
  * test-harness reporting model used by the Stage 14 TLS tests and exposes a
  * boolean test runner instead of a standalone process entry point.
  */

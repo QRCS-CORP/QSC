@@ -30,11 +30,10 @@ typedef struct stage22_mock_authorization_state
     uint8_t expectedfingerprint[QSC_TLS_CERTIFICATE_FINGERPRINT_SIZE];
 } stage22_mock_authorization_state;
 
-static bool stage22_mock_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength,
-    const qsc_tls_certificate_validation_context* context, void* state);
+static bool stage22_mock_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength, const qsc_tls_certificate_validation_context* context, void* state);
 
-static bool stage22_mock_verify_certificate(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen,
-    const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state);
+static bool stage22_mock_verify_certificate(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, 
+    size_t signaturelen, const qsc_tls_certificate_view* signer, void* state);
 
 static bool stage22_mock_authorize_client(const qsc_tls_client_authorization_info* info, void* state);
 
@@ -47,8 +46,7 @@ static void stage22_make_certificate_view(qsc_tls_certificate_view* view, const 
     }
 }
 
-static void stage22_initialize_server_state(qsc_tls_server_state* state, stage22_mock_certificate_state* certstate, bool validateaccept,
-    bool requireclientauth)
+static void stage22_initialize_server_state(qsc_tls_server_state* state, stage22_mock_certificate_state* certstate, bool validateaccept, bool requireclientauth)
 {
     qsc_tls_certificate_interface iface;
 
@@ -62,8 +60,7 @@ static void stage22_initialize_server_state(qsc_tls_server_state* state, stage22
     }
 }
 
-static bool stage22_mock_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength,
-    const qsc_tls_certificate_validation_context* context, void* state)
+static bool stage22_mock_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength, const qsc_tls_certificate_validation_context* context, void* state)
 {
     stage22_mock_certificate_state* mstate;
     bool res;
@@ -93,8 +90,8 @@ static bool stage22_mock_validate_chain(const qsc_tls_certificate_view* chain, s
     return res;
 }
 
-static bool stage22_mock_verify_certificate(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen,
-    const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
+static bool stage22_mock_verify_certificate(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, 
+    size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
 {
     stage22_mock_certificate_state* mstate;
 
@@ -128,8 +125,7 @@ static bool stage22_mock_authorize_client(const qsc_tls_client_authorization_inf
         astate->sawchainvalid = info->chainvalid;
         astate->sawverifysuccess = (info->verifystatus == QSC_X509_VERIFY_STATUS_SUCCESS);
         astate->sawfingerprint = (info->certificatefingerprintlen == QSC_TLS_CERTIFICATE_FINGERPRINT_SIZE);
-        astate->sawexpectedfingerprint = qsc_memutils_are_equal(info->certificatefingerprint, astate->expectedfingerprint,
-            QSC_TLS_CERTIFICATE_FINGERPRINT_SIZE);
+        astate->sawexpectedfingerprint = qsc_memutils_are_equal(info->certificatefingerprint, astate->expectedfingerprint, QSC_TLS_CERTIFICATE_FINGERPRINT_SIZE);
         res = astate->authorizeaccept;
     }
 

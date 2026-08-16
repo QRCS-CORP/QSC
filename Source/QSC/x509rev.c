@@ -1,6 +1,7 @@
 #include "x509rev.h"
 #include "memutils.h"
 #include "x509name.h"
+#include "x509revext.h"
 
 static qsc_x509_revocation_status x509_map_crl_verify_status(qsc_x509_crl_verify_status status)
 {
@@ -104,11 +105,21 @@ qsc_x509_revocation_status qsc_x509_certificate_check_revocation_with_crl(const 
     {
         revstatus = QSC_X509_REVOCATION_STATUS_CRL_NOT_FOUND;
     }
+    else if (verifycallback == (qsc_x509_crl_signature_verify_callback)NULL)
+    {
+        revstatus = QSC_X509_REVOCATION_STATUS_CRL_INVALID;
+    }
     else
     {
         revstatus = x509_check_crl_baseline(crl, issuer, validationtime);
 
-        if (revstatus == QSC_X509_REVOCATION_STATUS_GOOD && verifycallback != (qsc_x509_crl_signature_verify_callback)NULL)
+        if (revstatus == QSC_X509_REVOCATION_STATUS_GOOD)
+        {
+            vstatus = qsc_x509_crl_check_certificate_scope(crl, certificate, issuer);
+            revstatus = x509_map_crl_verify_status(vstatus);
+        }
+
+        if (revstatus == QSC_X509_REVOCATION_STATUS_GOOD)
         {
             vstatus = qsc_x509_crl_verify(crl, issuer, validationtime, verifycallback, verifycontext);
             revstatus = x509_map_crl_verify_status(vstatus);
@@ -184,8 +195,7 @@ qsc_x509_revocation_status qsc_x509_certificate_check_revocation(const qsc_x509_
 
                             if (mstatus == QSC_X509_CRL_VERIFY_STATUS_SUCCESS)
                             {
-                                revstatus = qsc_x509_certificate_check_revocation_with_crl(certificate, issuer, mergedcrl,
-                                    options->verifycallback, options->verifycontext, validationtime);
+                                revstatus = qsc_x509_certificate_check_revocation_with_crl(certificate, issuer, mergedcrl, options->verifycallback, options->verifycontext, validationtime);
                             }
                             else
                             {
@@ -194,8 +204,7 @@ qsc_x509_revocation_status qsc_x509_certificate_check_revocation(const qsc_x509_
                         }
                         else
                         {
-                            revstatus = qsc_x509_certificate_check_revocation_with_crl(certificate, issuer, basecrl,
-                                options->verifycallback, options->verifycontext, validationtime);
+                            revstatus = qsc_x509_certificate_check_revocation_with_crl(certificate, issuer, basecrl, options->verifycallback, options->verifycontext, validationtime);
                         }
                     }
                 }
@@ -211,8 +220,7 @@ qsc_x509_revocation_status qsc_x509_certificate_check_revocation(const qsc_x509_
                 }
                 else
                 {
-                    revstatus = qsc_x509_certificate_check_revocation_with_crl(certificate, issuer, basecrl,
-                        options->verifycallback, options->verifycontext, validationtime);
+                    revstatus = qsc_x509_certificate_check_revocation_with_crl(certificate, issuer, basecrl, options->verifycallback, options->verifycontext, validationtime);
                 }
             }
             else if (revstatus == QSC_X509_REVOCATION_STATUS_ERROR)

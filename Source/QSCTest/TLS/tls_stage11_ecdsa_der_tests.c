@@ -1,11 +1,10 @@
 #include "tls_stage11_ecdsa_der_tests.h"
 #include "../testutils.h"
+#include "csp.h"
 #include "tlsecdsader.h"
 #include "tlskeyschedule.h"
 #include "tlssignerdefault.h"
 #include "memutils.h"
-#include "secrand.h"
-#include "acp.h"
 #include "ecdsa.h"
 
 static bool qsctest_tls_stage11_der_roundtrip_basic(void)
@@ -167,6 +166,77 @@ static bool qsctest_tls_stage11_der_malformed(void)
 	return res;
 }
 
+static bool qsctest_tls_stage11_der_noncanonical_integer_rejected(void)
+{
+	uint8_t redundant_r[] = { 0x30U, 0x07U, 0x02U, 0x02U, 0x00U, 0x01U, 0x02U, 0x01U, 0x01U };
+	uint8_t redundant_s[] = { 0x30U, 0x07U, 0x02U, 0x01U, 0x01U, 0x02U, 0x02U, 0x00U, 0x01U };
+	uint8_t multiple_zero_r[] = { 0x30U, 0x08U, 0x02U, 0x03U, 0x00U, 0x00U, 0x80U, 0x02U, 0x01U, 0x01U };
+	uint8_t negative_r[] = { 0x30U, 0x06U, 0x02U, 0x01U, 0x80U, 0x02U, 0x01U, 0x01U };
+	uint8_t negative_s[] = { 0x30U, 0x06U, 0x02U, 0x01U, 0x01U, 0x02U, 0x01U, 0x80U };
+	uint8_t out[64U] = { 0U };
+	qsc_tls_status st;
+	bool res;
+
+	res = true;
+	st = qsc_tls_ecdsa_der_decode(redundant_r, sizeof(redundant_r), 32U, out, sizeof(out));
+
+	if (st != qsc_tls_status_invalid_message)
+	{
+		res = false;
+	}
+
+	if (res == true)
+	{
+		st = qsc_tls_ecdsa_der_decode(redundant_s, sizeof(redundant_s), 32U, out, sizeof(out));
+		res = (st == qsc_tls_status_invalid_message);
+	}
+
+	if (res == true)
+	{
+		st = qsc_tls_ecdsa_der_decode(multiple_zero_r, sizeof(multiple_zero_r), 32U, out, sizeof(out));
+		res = (st == qsc_tls_status_invalid_message);
+	}
+
+	if (res == true)
+	{
+		st = qsc_tls_ecdsa_der_decode(negative_r, sizeof(negative_r), 32U, out, sizeof(out));
+		res = (st == qsc_tls_status_invalid_message);
+	}
+
+	if (res == true)
+	{
+		st = qsc_tls_ecdsa_der_decode(negative_s, sizeof(negative_s), 32U, out, sizeof(out));
+		res = (st == qsc_tls_status_invalid_message);
+	}
+
+	return res;
+}
+
+static bool qsctest_tls_stage11_der_nonminimal_length_rejected(void)
+{
+	uint8_t long_sequence[] = { 0x30U, 0x81U, 0x06U, 0x02U, 0x01U, 0x01U, 0x02U, 0x01U, 0x01U };
+	uint8_t long_integer[] = { 0x30U, 0x07U, 0x02U, 0x81U, 0x01U, 0x01U, 0x02U, 0x01U, 0x01U };
+	uint8_t out[64U] = { 0U };
+	qsc_tls_status st;
+	bool res;
+
+	res = true;
+	st = qsc_tls_ecdsa_der_decode(long_sequence, sizeof(long_sequence), 32U, out, sizeof(out));
+
+	if (st != qsc_tls_status_invalid_length)
+	{
+		res = false;
+	}
+
+	if (res == true)
+	{
+		st = qsc_tls_ecdsa_der_decode(long_integer, sizeof(long_integer), 32U, out, sizeof(out));
+		res = (st == qsc_tls_status_invalid_length);
+	}
+
+	return res;
+}
+
 static bool qsctest_tls_stage11_ecdsa_signer_roundtrip_via_der(void)
 {
 	qsc_tls_certificate_view view = { 0 };
@@ -174,7 +244,6 @@ static bool qsctest_tls_stage11_ecdsa_signer_roundtrip_via_der(void)
 	qsc_tls_signature_scheme scheme = { 0 };
 	uint8_t cv_input[256U] = { 0U };
 	uint8_t pk[QSC_ECDSA_PUBLICKEY_SIZE] = { 0U };
-	uint8_t seed[32U] = { 0U };
 	uint8_t signature_buf[128U] = { 0U };
 	uint8_t sk[QSC_ECDSA_PRIVATEKEY_SIZE] = { 0U };
 	uint8_t transcript[48U] = { 0U };
@@ -188,9 +257,7 @@ static bool qsctest_tls_stage11_ecdsa_signer_roundtrip_via_der(void)
 	cv_len = 0U;
 	siglen = sizeof(signature_buf);
 
-	qsc_acp_generate(seed, sizeof(seed));
-	qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
-	qsc_ecdsa_generate_keypair(pk, sk, qsc_secrand_generate);
+	qsc_ecdsa_generate_keypair(pk, sk, qsc_csp_generate);
 
 	for (i = 0U; i < sizeof(transcript); ++i)
 	{
@@ -284,6 +351,26 @@ bool qsctest_tls_stage11_tests(void)
 	else
 	{
 		qsctest_print_line("[FAIL] TLS Stage 11 ECDSA DER malformed input test.");
+		res = false;
+	}
+
+	if (qsctest_tls_stage11_der_noncanonical_integer_rejected() == true)
+	{
+		qsctest_print_line("[PASS] TLS Stage 11 ECDSA DER non-canonical INTEGER rejection test.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] TLS Stage 11 ECDSA DER non-canonical INTEGER rejection test.");
+		res = false;
+	}
+
+	if (qsctest_tls_stage11_der_nonminimal_length_rejected() == true)
+	{
+		qsctest_print_line("[PASS] TLS Stage 11 ECDSA DER non-minimal length rejection test.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] TLS Stage 11 ECDSA DER non-minimal length rejection test.");
 		res = false;
 	}
 

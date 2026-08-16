@@ -115,7 +115,7 @@ static bool stage26_plaintext_fragment_span_test(void)
 static bool stage26_plaintext_coalesced_records_test(void)
 {
     uint8_t payload1[5U] = { 0x01U, 0x02U, 0x03U, 0x04U, 0x05U };
-    uint8_t payload2[7U] = { 0xA0U, 0xA1U, 0xA2U, 0xA3U, 0xA4U, 0xA5U, 0xA6U };
+    uint8_t payload2[2U] = { 0x01U, 0x00U };
     uint8_t record1[QSC_TLS_RECORD_HEADER_SIZE + sizeof(payload1)] = { 0U };
     uint8_t record2[QSC_TLS_RECORD_HEADER_SIZE + sizeof(payload2)] = { 0U };
     uint8_t coalesced[sizeof(record1) + sizeof(record2)] = { 0U };
@@ -252,7 +252,7 @@ static bool stage26_malformed_record_length_test(void)
     qsc_intutils_be16to8(header + 1U, QSC_TLS_PROTOCOL_VERSION_12);
     qsc_intutils_be16to8(header + 3U, 0xFFFFU);
 
-    if (qsc_tls_record_try_get_span_length(header, sizeof(header), &recordlen, &complete) == qsc_tls_status_invalid_length)
+    if (qsc_tls_record_try_get_span_length(header, sizeof(header), &recordlen, &complete) == qsc_tls_status_record_overflow)
     {
         if ((recordlen == 0U) && (complete == false))
         {

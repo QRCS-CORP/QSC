@@ -72,28 +72,17 @@ static bool qsctest_tls_stage8_fixed_vectors_rfc8448(void)
 		"020000560303a6af06a4121860dc5e6e60249cd34c95930c8ac5cb1434dac155772ed3e2692800"
 		"130100002e00330024001d0020c9828876112095fe66762bdbf7c672e156d6cc253b833df1dd69b1b04e751f0f"
 		"002b00020304";
-	static const char* dhe_hex =
-		"8bd4054fb55b9d63fdfbacf9f04b9f0d35e6d63f537563efd46272900f89492d";
-	static const char* early_hex =
-		"33ad0a1c607ec03b09e6cd9893680ce210adf300aa1f2660e1b22e10f170f92a";
-	static const char* hs_hex =
-		"1dc826e93606aa6fdc0aadc12f741b01046aa6b99f691ed221a9f0ca043fbeac";
-	static const char* ms_hex =
-		"18df06843d13a08bf2a449844c5f8a478001bc4d4c627984d5a41da8d0402919";
-	static const char* chts_hex =
-		"b3eddb126e067f35a780b3abf45e2d8f3b1a950738f52e9600746a0e27a55a21";
-	static const char* shts_hex =
-		"b67b7d690cc16c4e75e54213cb2d37b4e9c912bcded9105d42befd59d391ad38";
-	static const char* cats_hex =
-		"9e40646ce79a7f9dc05af8889bce6552875afa0b06df0087f792ebb7c17504a5";
-	static const char* sats_hex =
-		"a11af9f05531f856ad47116b45a950328204b4f44bfb6b3a4b4f1f3fcb631643";
-	static const char* ems_hex =
-		"fe22f881176eda18eb8f44529e6792c50c9a3f89452f68d8ae311b4309d3cf50";
-	static const char* hs_hash_hex =
-		"860c06edc07858ee8e78f0e7428c58edd6b43f2ca3e6e95f02ed063cf0e1cad8";
-	static const char* fin_transcript_hex =
-		"9608102a0f1ccc6db6250b7b7e417b1a000eaada3daae4777a7686c9ff83df13";
+	static const char* dhe_hex = "8bd4054fb55b9d63fdfbacf9f04b9f0d35e6d63f537563efd46272900f89492d";
+	static const char* early_hex = "33ad0a1c607ec03b09e6cd9893680ce210adf300aa1f2660e1b22e10f170f92a";
+	static const char* hs_hex = "1dc826e93606aa6fdc0aadc12f741b01046aa6b99f691ed221a9f0ca043fbeac";
+	static const char* ms_hex = "18df06843d13a08bf2a449844c5f8a478001bc4d4c627984d5a41da8d0402919";
+	static const char* chts_hex = "b3eddb126e067f35a780b3abf45e2d8f3b1a950738f52e9600746a0e27a55a21";
+	static const char* shts_hex = "b67b7d690cc16c4e75e54213cb2d37b4e9c912bcded9105d42befd59d391ad38";
+	static const char* cats_hex = "9e40646ce79a7f9dc05af8889bce6552875afa0b06df0087f792ebb7c17504a5";
+	static const char* sats_hex = "a11af9f05531f856ad47116b45a950328204b4f44bfb6b3a4b4f1f3fcb631643";
+	static const char* ems_hex = "fe22f881176eda18eb8f44529e6792c50c9a3f89452f68d8ae311b4309d3cf50";
+	static const char* hs_hash_hex = "860c06edc07858ee8e78f0e7428c58edd6b43f2ca3e6e95f02ed063cf0e1cad8";
+	static const char* fin_transcript_hex = "9608102a0f1ccc6db6250b7b7e417b1a000eaada3daae4777a7686c9ff83df13";
 	static const char* shts_key_hex = "3fce516009c21727d0f2e4e86ee403bc";
 	static const char* shts_iv_hex = "5d313eb2671276ee13000b30";
 	static const char* cv_label = "TLS 1.3, server CertificateVerify";

@@ -1,6 +1,50 @@
 /* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
  * Written by: John G. Underhill
  * Contact: contact@qrcscorp.ca
  */
@@ -49,6 +93,13 @@ QSC_CPLUSPLUS_ENABLED_START
  * - qsc_tls_socket_listener owns the listening socket and references a context supplied by the caller.
  * - qsc_tls_socket_server owns a listener and, in concurrent mode, a fixed pool of connection slots.
  *
+ * QSC implements a TLS 1.3-only profile. TLS 1.2 and earlier versions are not
+ * negotiated; RFC 9846 legacy_version and legacy_record_version compatibility
+ * fields are still emitted and processed as required by TLS 1.3. QSC-specific
+ * ML-KEM and ML-DSA negotiation is an extension/profile layer and is distinct
+ * from the core RFC 9846 protocol requirements. Session resumption is 1-RTT
+ * only; 0-RTT application data is not supported by this profile.
+ *
  * \code
  * // Minimal client usage.
  * qsc_tls_socket_context ctx;
@@ -75,7 +126,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \endcode
  *
  * \section tlssocket_links Reference Links:
- * - <a href="https://www.rfc-editor.org/rfc/rfc8446">RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3</a>
+ * - <a href="https://www.rfc-editor.org/rfc/rfc9846">RFC 9846: The Transport Layer Security (TLS) Protocol Version 1.3</a>
  * - <a href="https://www.rfc-editor.org/rfc/rfc5280">RFC 5280: Internet X.509 Public Key Infrastructure Certificate and CRL Profile</a>
  * - <a href="https://www.rfc-editor.org/rfc/rfc6066">RFC 6066: TLS Extension Definitions</a>
  * - <a href="https://www.rfc-editor.org/rfc/rfc7301">RFC 7301: TLS Application-Layer Protocol Negotiation Extension</a>
@@ -145,7 +196,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_TLS_SOCKET_TICKET_LIFETIME_MAX
  * \brief The maximum accepted TLS session-ticket lifetime in seconds.
  */
-#define QSC_TLS_SOCKET_TICKET_LIFETIME_MAX 604800U
+#define QSC_TLS_SOCKET_TICKET_LIFETIME_MAX QSC_TLS_SESSION_TICKET_LIFETIME_MAX
 
 /**
  * \enum qsc_tls_socket_log_level
@@ -192,7 +243,7 @@ typedef enum qsc_tls_socket_event
 typedef struct qsc_tls_socket_options
 {
     uint32_t connect_timeout_ms;   /*!< The socket connect timeout in milliseconds. */
-    uint32_t handshake_timeout_ms; /*!< The TLS handshake timeout in milliseconds. */
+    uint32_t handshake_timeout_ms; /*!< The cumulative TLS handshake deadline in milliseconds; zero disables it. */
     uint32_t receive_timeout_ms;   /*!< The socket receive timeout in milliseconds. */
     uint32_t send_timeout_ms;      /*!< The socket send timeout in milliseconds. */
     uint32_t idle_timeout_ms;      /*!< The maximum idle timeout in milliseconds. */
@@ -217,7 +268,7 @@ typedef struct qsc_tls_socket_options
 typedef struct qsc_tls_socket_ticket_policy
 {
     bool enabled;                       /*!< Enable session ticket handling when true. */
-    bool allow_early_data;              /*!< Permit early data when the lower TLS layer and peer support it. */
+    bool allow_early_data;              /*!< Reserved; must be false because the QSC TLS socket profile does not support 0-RTT application data. */
     bool auto_send_server_ticket;       /*!< Automatically emit a server ticket after a successful server handshake. */
     uint32_t lifetime_seconds;          /*!< The ticket lifetime hint in seconds. */
     uint32_t renewal_interval_seconds;  /*!< The ticket renewal interval in seconds for long-lived services. */
@@ -245,7 +296,8 @@ typedef enum qsc_tls_socket_status
     qsc_tls_socket_status_policy_rejected = 13,             /*!< The configured TLS policy was rejected or unsupported. */
     qsc_tls_socket_status_io_failed = 14,                   /*!< A TLS or socket I/O operation failed. */
     qsc_tls_socket_status_closed = 15,                      /*!< The connection was closed or cancelled. */
-    qsc_tls_socket_status_internal_error = 16               /*!< An internal wrapper error occurred. */
+    qsc_tls_socket_status_internal_error = 16,              /*!< An internal wrapper error occurred. */
+    qsc_tls_socket_status_timeout = 17                      /*!< A configured TLS socket operation deadline expired. */
 } qsc_tls_socket_status;
 
 /**
@@ -301,7 +353,7 @@ typedef struct qsc_tls_socket_peer_info
     bool hostname_checked;                                /*!< Indicates whether hostname verification was requested. */
     bool chain_valid;                                     /*!< Indicates whether the peer certificate chain validated. */
     bool psk_accepted;                                    /*!< Indicates whether PSK resumption was accepted. */
-    bool early_data_accepted;                             /*!< Indicates whether early data was accepted. */
+    bool early_data_accepted;                             /*!< Reserved 0-RTT status; false for the QSC TLS socket profile. */
     bool alpn_selected;                                    /*!< Indicates whether ALPN selected a mutually supported application protocol. */
     char selected_alpn[QSC_TLS_SOCKET_ALPN_SIZE_MAX + 1U]; /*!< The selected ALPN protocol as a null-terminated string when selected. */
 } qsc_tls_socket_peer_info;
@@ -309,17 +361,20 @@ typedef struct qsc_tls_socket_peer_info
 /**
  * \struct qsc_tls_socket_context
  * \brief A reusable TLS socket policy, trust, identity, and logging context.
+ *
+ * \details
+ * Large X.509 trust, identity, bridge, and local-certificate objects are retained in
+ * private heap-backed storage allocated by qsc_tls_socket_context_initialize(). This
+ * keeps the public context small enough for the automatic-storage usage shown above.
+ * An initialized context owns that storage and must be released with
+ * qsc_tls_socket_context_dispose(); initialized contexts must not be copied by value.
  */
 typedef struct qsc_tls_socket_context
 {
-    qsc_x509w_trust_store truststore;                                           /*!< The X.509 trust store used for peer verification. */
-    qsc_x509w_server_identity identity;                                         /*!< The loaded server identity and private key material. */
-    qsc_x509w_tls_bridge bridge;                                                /*!< The X.509-to-TLS certificate verification bridge. */
-    qsc_x509w_tls_local_certificate localcert;                                  /*!< The TLS-facing local certificate exported from the server identity. */
-    qsc_x509w_tls_local_certificate snilocalcerts[QSC_TLS_SOCKET_SERVER_IDENTITY_MAX]; /*!< TLS-facing local certificates selected by SNI. */
+    struct qsc_tls_socket_context_storage* storage;                              /*!< Private heap-backed trust, identity, bridge, and local-certificate storage. */
     char snihostnames[QSC_TLS_SOCKET_SERVER_IDENTITY_MAX][QSC_TLS_MAX_HOSTNAME_SIZE + 1U]; /*!< Hostname patterns for SNI-selectable identities. */
     size_t sniidentitycount;                                                    /*!< The number of configured SNI-selectable identities. */
-    bool requiresni;                                                           /*!< Reject server handshakes without a recognized SNI name. */
+    bool requiresni;                                                            /*!< Reject server handshakes without a recognized SNI name. */
     qsc_x509w_profile certificateprofile;                                       /*!< The X.509 validation profile. */
     qsc_tls_socket_options socketoptions;                                       /*!< The default socket options for connections derived from this context. */
     qsc_tls_socket_ticket_policy ticketpolicy;                                  /*!< The default session ticket policy. */
@@ -334,10 +389,13 @@ typedef struct qsc_tls_socket_context
     size_t groupcount;                                                          /*!< The number of named groups in the preference list. */
     size_t sigschemecount;                                                      /*!< The number of signature schemes in the preference list. */
     bool hasidentity;                                                           /*!< Indicates that a server identity has been loaded. */
+    bool hasclientidentity;                                                     /*!< Indicates that a client identity has been loaded for mutual TLS. */
     bool hastruststore;                                                         /*!< Indicates that at least one trust anchor has been loaded. */
     qsc_tls_client_authorization_callback clientauthcallback;                   /*!< Optional application authorization callback for validated client certificates. */
-    void* clientauthstate;                                                       /*!< Caller-owned state passed to the client authorization callback. */
-    bool requireclientauthorization;                                             /*!< Require application authorization callback acceptance for mTLS peers. */
+    qsc_tls_psk_lookup_callback psklookup;                                      /*!< Optional server-side callback used to recover issued session tickets for PSK resumption. */
+    void* clientauthstate;                                                      /*!< Caller-owned state passed to the client authorization callback. */
+    void* psklookupstate;                                                       /*!< Caller-owned state passed to the PSK ticket lookup callback. */
+    bool requireclientauthorization;                                            /*!< Require application authorization callback acceptance for mTLS peers. */
     bool requireclientauth;                                                     /*!< Require client certificate authentication in server mode. */
     bool requestclientauth;                                                     /*!< Request client certificate authentication in server mode. */
     bool allowunverified;                                                       /*!< Permit unverified peer certificates in development policy mode. */
@@ -453,11 +511,12 @@ typedef struct qsc_tls_socket_server
     qsc_tls_socket_connection connections[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX];           /*!< The fixed connection pool. */
     qsc_tls_socket_server_worker_state workerstates[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX]; /*!< The fixed worker state pool. */
     qsc_thread workerthreads[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX];                        /*!< The fixed worker thread handle pool. */
-    volatile bool active[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX];                            /*!< The active-state flags for each connection slot. */
-    volatile bool started[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX];                           /*!< The worker-started flags for each connection slot. */
+    volatile bool active[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX];                            /*!< Atomically accessed active-state flags for each connection slot. */
+    volatile bool accepted[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX];                          /*!< Atomically accessed flags indicating that a slot owns an accepted socket safe to cancel. */
+    volatile bool started[QSC_TLS_SOCKET_SERVER_CONNECTIONS_MAX];                           /*!< Atomically accessed worker-started flags for each connection slot. */
     qsc_mutex poolmutex;                                                                    /*!< The fixed pool mutex. */
     size_t maxclients;                                                                      /*!< The configured maximum number of concurrent clients. */
-    volatile bool running;                                                                  /*!< Indicates that the server accept loop is running. */
+    volatile bool running;                                                                  /*!< Atomically accessed indicator that a server accept loop is executing. */
     bool concurrent;                                                                        /*!< Indicates that concurrent server mode is active. */
     bool initialized;                                                                       /*!< Indicates that the server has been initialized. */
 } qsc_tls_socket_server;
@@ -651,6 +710,18 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_load_crl_file(qsc_tl
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_load_server_identity_files(qsc_tls_socket_context* context, const char* certificatechainpath, const char* privatekeypath, qsc_tls_signature_scheme verifyscheme);
 
 /**
+ * \brief Load a client certificate chain and private key into the context for mutual TLS.
+ *
+ * \param context: [struct*] A pointer to the initialized context.
+ * \param certificatechainpath: [const char*] The null-terminated file path to the client certificate chain.
+ * \param privatekeypath: [const char*] The null-terminated file path to the client private key.
+ * \param verifyscheme: [enum] The TLS signature scheme used by the client CertificateVerify operation.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_load_client_identity_files(qsc_tls_socket_context* context, const char* certificatechainpath, const char* privatekeypath, qsc_tls_signature_scheme verifyscheme);
+
+/**
  * \brief Load an additional SNI-selectable server identity from certificate-chain and private-key files.
  *
  * \param context: [struct*] A pointer to the initialized context.
@@ -689,9 +760,9 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_client_auth(qsc_
  * \brief Configure the server-side mTLS application authorization callback.
  *
  * \details
- * The callback is invoked after client-certificate chain validation succeeds.
- * If required is true, the handshake policy rejects a validated client
- * certificate when no callback is configured or when the callback returns false.
+ * The callback is invoked after client-certificate chain validation and
+ * CertificateVerify possession proof succeed. If required is true, the handshake
+ * policy rejects the client when no callback is configured or when the callback returns false.
  *
  * \param context: [struct*] The TLS socket context to update.
  * \param callback: [function] Optional application authorization callback.
@@ -756,11 +827,27 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_log_callback(qsc
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_session_ticket_policy(qsc_tls_socket_context* context, const qsc_tls_socket_ticket_policy* policy);
 
 /**
- * \brief Test whether a session ticket is structurally acceptable for resumption.
+ * \brief Set the server-side PSK session-ticket lookup callback.
+ *
+ * \details
+ * The callback is invoked when a client offers a TLS 1.3 PSK identity. It must recover the complete
+ * server-side qsc_tls_session_ticket metadata associated with that opaque ticket identity. Passing
+ * NULL disables PSK resumption lookup while leaving NewSessionTicket issuance policy unchanged.
+ *
+ * \param context: [struct*] A pointer to the initialized context.
+ * \param callback: [function] The ticket lookup callback, or NULL to disable server-side resumption lookup.
+ * \param state: [void*] Caller-owned state forwarded to callback.
+ *
+ * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_context_set_psk_lookup_callback(qsc_tls_socket_context* context, qsc_tls_psk_lookup_callback callback, void* state);
+
+/**
+ * \brief Test whether a session ticket is valid and unexpired for resumption.
  *
  * \param ticket: [const struct*] A pointer to the session ticket to validate.
  *
- * \return [bool] Returns true when the ticket fields are structurally valid.
+ * \return [bool] Returns true when the ticket metadata, KDF binding, and local lifetime are valid.
  */
 QSC_EXPORT_API bool qsc_tls_socket_session_ticket_is_valid(const qsc_tls_session_ticket* ticket);
 
@@ -815,7 +902,7 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_client_connect_host(qsc_tls_
  * \param hostname: [const char*] The null-terminated DNS hostname used for connection and verification.
  * \param service: [const char*] The null-terminated service or port string.
  * \param ticket: [const struct*] A pointer to the session ticket to offer, or NULL for a full handshake.
- * \param enableearlydata: [bool] Enable early data if the ticket and peer support it.
+ * \param enableearlydata: [bool] Reserved 0-RTT switch; true is rejected by the QSC TLS socket profile.
  *
  * \return [qsc_tls_socket_status] Returns qsc_tls_socket_status_success on success.
  */
@@ -924,6 +1011,11 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_connection_set_log_callback(
 
 /**
  * \brief Request cancellation of a TLS socket connection.
+ *
+ * \details
+ * Cancellation atomically records the request and shuts down the socket to unblock pending I/O.
+ * The thread that owns the connection remains responsible for final TLS and socket disposal.
+ * The connection must not be disposed concurrently with this cancellation request.
  *
  * \param connection: [struct*] A pointer to the TLS socket connection.
  *
@@ -1193,8 +1285,14 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_server_start_concurrent(qsc_
  * \brief Stop a running TLS socket server.
  *
  * \details
- * The stop operation clears the running flag, closes the listener, requests cancellation of active
- * connection slots, and allows worker cleanup to complete through the fixed connection pool.
+ * The stop operation closes the listener, atomically requests cancellation of active connections,
+ * shuts down their sockets to unblock pending I/O, and joins worker threads other than the calling
+ * worker itself. Connection disposal remains owned by the worker or blocking accept loop. The
+ * running flag is cleared by the server start routine when its accept loop has actually exited.
+ *
+ * This function may be called from a server callback. qsc_tls_socket_server_dispose must instead be
+ * called by an external owner after callback execution has returned; disposing the server from one
+ * of its own callbacks is not supported.
  *
  * \param server: [struct*] A pointer to the running server.
  */
@@ -1202,6 +1300,11 @@ QSC_EXPORT_API void qsc_tls_socket_server_stop(qsc_tls_socket_server* server);
 
 /**
  * \brief Dispose of a TLS socket server and clear owned connection state.
+ *
+ * \details
+ * Disposal requests shutdown, waits for the accept loop and connection owners to become quiescent,
+ * reaps remaining worker handles, destroys the pool mutex, and clears the server. It must be called
+ * by an external owner and not from a server callback executing on a worker or blocking server thread.
  *
  * \param server: [struct*] A pointer to the server to dispose.
  */

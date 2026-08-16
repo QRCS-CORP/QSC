@@ -71,7 +71,9 @@ typedef enum qsc_tls_status
 	qsc_tls_status_invalid_length = -5,				/*!< A parsed, derived, or supplied length field was outside the valid range. */
 	qsc_tls_status_not_supported = -6,				/*!< The requested TLS feature, group, suite, or algorithm is not supported. */
 	qsc_tls_status_authentication_failure = -7,		/*!< Authentication failed, or a signature, MAC, or certificate validation step failed. */
-	qsc_tls_status_invalid_message = -8				/*!< The TLS message was malformed, truncated, or semantically invalid. */
+	qsc_tls_status_invalid_message = -8,			/*!< The TLS message was malformed, truncated, or semantically invalid. */
+	qsc_tls_status_record_overflow = -9,			/*!< A TLS record exceeded the RFC 9846 record-layer size limit. */
+	qsc_tls_status_timeout = -10					/*!< The configured cumulative TLS operation deadline expired. */
 } qsc_tls_status;
 
 /**

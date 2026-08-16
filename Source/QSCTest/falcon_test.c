@@ -6,7 +6,7 @@
 #include "../QSC/falcon.h"
 #include "../QSC/intutils.h"
 #include "../QSC/memutils.h"
-#include "../QSC/secrand.h"
+#include "../QSC/csp.h"
 
 bool qsctest_falcon_operations_test()
 {
@@ -271,7 +271,6 @@ bool qsctest_falcon_stress_test()
 
 bool qsctest_falcon_stress_test2()
 {
-	uint8_t srnd[QSC_SECRAND_SEED_SIZE] = { 0 };
 	uint8_t sk[QSC_FALCON_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t pk[QSC_FALCON_PUBLICKEY_SIZE] = { 0 };
 	size_t msglen;
@@ -279,7 +278,7 @@ bool qsctest_falcon_stress_test2()
 	size_t siglen;
 	bool ret;
 
-	qsc_secrand_initialize(srnd, sizeof(srnd), NULL, 0);
+	ret = true;
 
 	for (size_t i = 0; i < 10; ++i)
 	{
@@ -287,58 +286,90 @@ bool qsctest_falcon_stress_test2()
 		uint8_t* mout;
 		uint8_t* sig;
 
-		rndnum = qsc_secrand_next_uint32_maxmin(128, 16);
+		msg = NULL;
+		mout = NULL;
+		sig = NULL;
+		rndnum = 0U;
 
-		ret = true;
+		if (qsc_csp_generate((uint8_t*)&rndnum, sizeof(rndnum)) == false)
+		{
+			ret = false;
+			break;
+		}
+
+		rndnum = 16U + (rndnum % 113U);
 		msglen = rndnum;
 		siglen = (size_t)QSC_FALCON_SIGNATURE_SIZE + rndnum;
 
 		msg = (uint8_t*)qsc_memutils_malloc(rndnum);
-		if (msg == NULL)
-		{
-			ret = false;
-			break;
-		}
-		qsc_secrand_generate(msg, rndnum);
-
 		mout = (uint8_t*)qsc_memutils_malloc((size_t)QSC_FALCON_SIGNATURE_SIZE + rndnum);
-		if (mout == NULL)
-		{
-			ret = false;
-			break;
-		}
-
 		sig = (uint8_t*)qsc_memutils_malloc((size_t)QSC_FALCON_SIGNATURE_SIZE + rndnum);
-		if (sig == NULL)
+
+		if (msg == NULL || mout == NULL || sig == NULL)
 		{
 			ret = false;
-			break;
 		}
-
-		/* generate the key-pair */
-		qsc_falcon_generate_keypair(pk, sk, qsc_secrand_generate);
-
-		/* sign the message and return the signed version in sig */
-		qsc_falcon_sign(sig, &siglen, msg, msglen, sk, qsc_secrand_generate);
-
-		/* verify the signature in sig and copy msg to mout */
-		if (qsc_falcon_verify(mout, &msglen, sig, siglen, pk) != true)
+		else if (qsc_csp_generate(msg, rndnum) == false)
 		{
-			qsctest_print_safe("Failure! falcon stress: message verification has failed -DST2 \n");
 			ret = false;
-			break;
 		}
-
-		if (msglen != rndnum)
+		else
 		{
-			qsctest_print_safe("Failure! falcon stress: message length is incorrect -DST3 \n");
-			ret = false;
-			break;
+			bool signedok;
+
+			signedok = false;
+
+			/* generate the key-pair */
+			if (qsc_falcon_generate_keypair(pk, sk, qsc_csp_generate) == false)
+			{
+				ret = false;
+			}
+			else
+			{
+				/* Falcon signing can reject an oversized compressed signature; retry with fresh signing randomness. */
+				for (size_t j = 0U; j < 16U && signedok == false; ++j)
+				{
+					siglen = (size_t)QSC_FALCON_SIGNATURE_SIZE + rndnum;
+					signedok = qsc_falcon_sign(sig, &siglen, msg, msglen, sk, qsc_csp_generate);
+				}
+
+				if (signedok == false)
+				{
+					qsctest_print_safe("Failure! falcon stress: signature generation has failed -DST1 \n");
+					ret = false;
+				}
+				else if (qsc_falcon_verify(mout, &msglen, sig, siglen, pk) != true)
+				{
+					qsctest_print_safe("Failure! falcon stress: message verification has failed -DST2 \n");
+					ret = false;
+				}
+				else if (msglen != rndnum)
+				{
+					qsctest_print_safe("Failure! falcon stress: message length is incorrect -DST3 \n");
+					ret = false;
+				}
+			}
 		}
 
-		qsc_memutils_alloc_free(mout);
-		qsc_memutils_alloc_free(msg);
-		qsc_memutils_alloc_free(sig);
+		if (mout != NULL)
+		{
+			qsc_memutils_alloc_free(mout);
+		}
+
+		if (msg != NULL)
+		{
+			qsc_memutils_alloc_free(msg);
+		}
+
+		if (sig != NULL)
+		{
+			qsc_memutils_alloc_free(sig);
+		}
+
+		if (ret == false)
+		{
+			break;
+		}
 	}
 
 	return ret;

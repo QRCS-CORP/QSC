@@ -75,17 +75,22 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /*!
- * \brief Match a DNS hostname against a certificate pattern.
+ * \brief Match a DNS hostname against a certificate DNS pattern.
  *
  * \details
- * Compares a hostname against a certificate DNS pattern. The implementation
- * performs ASCII case-insensitive comparison and supports a single wildcard in
- * the left-most label when the pattern is of the form "*.example.com".
+ * Compares a hostname against a DNS identifier using ASCII case-insensitive
+ * comparison. A wildcard is permitted only as the complete left-most label,
+ * in the form "*.example.com", and matches exactly one hostname label.
+ * Partial-label wildcards and multiple wildcards are rejected.
  *
- * \param pattern: [const] The certificate DNS pattern.
- * \param hostname: [const] The hostname to evaluate.
+ * Both inputs to this function are NUL-terminated strings. Certificate
+ * identifiers stored as length-delimited X.509 values are validated through
+ * qsc_x509_certificate_match_dns_name().
  *
- * \return Returns true if the hostname matches the pattern; otherwise returns false.
+ * \param pattern: [const] The NUL-terminated DNS pattern.
+ * \param hostname: [const] The NUL-terminated hostname to evaluate.
+ *
+ * \return Returns true if the hostname matches the DNS pattern; otherwise returns false.
  */
 QSC_EXPORT_API bool qsc_x509_dns_name_match(const char* pattern, const char* hostname);
 
@@ -93,15 +98,21 @@ QSC_EXPORT_API bool qsc_x509_dns_name_match(const char* pattern, const char* hos
  * \brief Match a hostname against certificate DNS identifiers.
  *
  * \details
- * Evaluates the supplied hostname against the DNS names contained in the
- * certificate Subject Alternative Name extension. If no DNS SAN entries are
- * present, the implementation falls back to matching against the subject
- * common name.
+ * Evaluates the supplied hostname against dNSName identifiers contained in the
+ * certificate Subject Alternative Name extension. Certificate DNS identifiers
+ * are processed using their explicit X.509 lengths and are not interpreted as
+ * NUL-terminated strings.
+ *
+ * Matching is ASCII case-insensitive. A wildcard is permitted only as the
+ * complete left-most label and matches exactly one hostname label.
+ *
+ * Subject commonName values are not used as a fallback when no matching
+ * dNSName Subject Alternative Name is present.
  *
  * \param certificate: [const][struct] The certificate to evaluate.
- * \param hostname: [const] The hostname to match.
+ * \param hostname: [const] The NUL-terminated hostname to match.
  *
- * \return Returns true if the hostname matches a certificate DNS identifier; otherwise returns false.
+ * \return Returns true if the hostname matches a dNSName Subject Alternative Name; otherwise returns false.
  */
 QSC_EXPORT_API bool qsc_x509_certificate_match_dns_name(const qsc_x509_certificate* certificate, const char* hostname);
 
@@ -124,13 +135,18 @@ QSC_EXPORT_API bool qsc_x509_certificate_match_ip_address(const qsc_x509_certifi
  * \brief Match a hostname against a certificate.
  *
  * \details
- * Performs hostname validation against a certificate using DNS SAN entries and
- * common-name fallback when no DNS SAN is present.
+ * Performs DNS service-identity validation against the dNSName entries in the
+ * certificate Subject Alternative Name extension. The subject commonName is
+ * not used for hostname validation.
+ *
+ * Certificate DNS identifiers are evaluated using their explicit X.509 lengths
+ * and the DNS matching rules implemented by
+ * qsc_x509_certificate_match_dns_name().
  *
  * \param certificate: [const][struct] The certificate to evaluate.
- * \param hostname: [const] The hostname to match.
+ * \param hostname: [const] The NUL-terminated hostname to match.
  *
- * \return Returns true if the hostname is valid for the certificate; otherwise returns false.
+ * \return Returns true if the hostname matches a dNSName Subject Alternative Name; otherwise returns false.
  */
 QSC_EXPORT_API bool qsc_x509_certificate_match_hostname(const qsc_x509_certificate* certificate, const char* hostname);
 

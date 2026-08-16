@@ -108,9 +108,10 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \details
  * This structure stores the active TLS endpoint state, the endpoint role, and
- * bounded scratch buffers used for inbound handshake reassembly and application
- * record processing. The union member selected by \c role is initialized by
- * either qsc_tls_engine_initialize_client() or qsc_tls_engine_initialize_server().
+ * bounded scratch storage used for application record processing. Handshake
+ * reassembly is retained by the active client or server protocol state. The union
+ * member selected by \c role is initialized by either qsc_tls_engine_initialize_client()
+ * or qsc_tls_engine_initialize_server().
  *
  * The caller must treat this structure as engine-owned after initialization and
  * must not modify internal fields directly. The structure shall be disposed with
@@ -125,10 +126,14 @@ typedef struct qsc_tls_connection
     } state;
 
     qsc_tls_role role;                                          /*!< Active endpoint role. */
-    uint8_t handshakebuffer[QSC_TLS_STREAM_BUFFER_MAX_SIZE];    /*!< Inbound handshake-message reassembly buffer. */
-    size_t handshakebufferlen;                                  /*!< Number of valid bytes in the handshake reassembly buffer. */
+    qsc_tls_session_ticket receivedticket;                      /*!< Most recently received and processed NewSessionTicket. */
     uint8_t applicationbuffer[QSC_TLS_MAX_RECORD_SIZE];         /*!< Inbound application-data scratch buffer. */
     size_t applicationbufferlen;                                /*!< Number of valid bytes in the application scratch buffer. */
+    uint64_t writekeyupdateepoch;                               /*!< Number of outbound KeyUpdate generations installed after the initial application traffic key. */
+    uint64_t sessionticketnonce;                                /*!< Per-connection counter used to generate unique NewSessionTicket ticket_nonce values. */
+    bool hasreceivedticket;                                     /*!< True when receivedticket is available to the caller. */
+    bool keyupdaterequestoutstanding;                           /*!< True after sending update_requested until a subsequent peer KeyUpdate is received. */
+    bool keyupdateresponsepending;                              /*!< True when a peer requested a reciprocal KeyUpdate that must precede the next application record. */
 } qsc_tls_connection;
 
 /**
@@ -237,8 +242,12 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_engine_read_application_data(qsc_tls_conne
  * \brief Decrypt inbound records and process post-handshake messages.
  *
  * \details
- * Consumes inbound TLS records, decrypts application-data records, and dispatches supported post-handshake handshake messages such as KeyUpdate. 
- * If an inbound KeyUpdate requests a reciprocal update, the generated response record is written to \c responseoutput when a response buffer is supplied.
+ * Consumes inbound TLS records, decrypts application-data records, and dispatches supported post-handshake Handshake messages.
+ * KeyUpdate is processed immediately and NewSessionTicket is decoded and retained for client-role connections. Unsupported or role-invalid
+ * post-handshake Handshake messages are rejected with unexpected_message. If an inbound KeyUpdate requests a reciprocal update, the generated
+ * response record is written to \c responseoutput when a response buffer is supplied. When no response buffer is supplied, the reciprocal
+ * KeyUpdate is queued and emitted before the next outbound Application Data record. A retained ticket can be retrieved with
+ * qsc_tls_engine_take_session_ticket().
  *
  * \param connection: [qsc_tls_connection*] Pointer to an established TLS engine connection.
  * \param input: [const uint8_t*] Pointer to inbound TLS record bytes.
@@ -261,7 +270,8 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_engine_read_application_data_ex(qsc_tls_co
  * \brief Initiate a TLS 1.3 KeyUpdate operation.
  *
  * \details
- * Builds and encrypts a KeyUpdate post-handshake record using the active application write traffic keys, advances the local write traffic secret, 
+ * Builds and encrypts a KeyUpdate post-handshake record using the active application write traffic keys, advances the local write traffic secret,
+ * enforces the RFC 9846 outbound KeyUpdate epoch limit, prevents a second update_requested message until a subsequent peer KeyUpdate is received,
  * and writes the resulting record to the caller-supplied output buffer.
  *
  * \param connection: [qsc_tls_connection*] Pointer to an established TLS engine connection.
@@ -300,9 +310,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_engine_emit_session_ticket(qsc_tls_connect
  * \brief Consume a TLS 1.3 NewSessionTicket record.
  *
  * \details
- * Decrypts an inbound post-handshake NewSessionTicket record for a client-role connection, parses the ticket body, 
- * derives the resumption PSK from the client's resumption_master_secret and the ticket nonce, and writes the parsed ticket metadata to \c ticketout. 
- * The caller may retain the populated ticket structure for later 0-RTT or 1-RTT resumption.
+ * Compatibility wrapper over the normal established-connection receive dispatcher. The input record is processed through the same
+ * post-handshake reassembly and dispatch path used by qsc_tls_engine_read_application_data_ex. When a complete NewSessionTicket is
+ * retained by the configured resumption policy, its parsed metadata and derived resumption PSK are returned in \c ticketout.
+ * Fragmented post-handshake messages may require multiple calls before a ticket becomes available.
  *
  * \param connection: [qsc_tls_connection*] Pointer to a client-role TLS engine connection in the established state.
  * \param input: [const uint8_t*] Pointer to the encrypted NewSessionTicket record.
@@ -315,6 +326,21 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_engine_emit_session_ticket(qsc_tls_connect
  */
 QSC_EXPORT_API qsc_tls_status qsc_tls_engine_consume_session_ticket(qsc_tls_connection* connection, const uint8_t* input, size_t inlen,
     size_t* consumed, qsc_tls_session_ticket* ticketout);
+
+/**
+ * \brief Take the most recently received TLS 1.3 session ticket.
+ *
+ * \details
+ * Copies the most recently processed NewSessionTicket metadata to \c ticketout and clears the engine-owned copy.
+ * This function is intended for callers using the normal application-data receive path, where post-handshake
+ * NewSessionTicket messages are dispatched automatically.
+ *
+ * \param connection: [qsc_tls_connection*] Pointer to an established client-role TLS engine connection.
+ * \param ticketout: [qsc_tls_session_ticket*] Pointer receiving the processed session ticket.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success when a ticket was available, or qsc_tls_status_invalid_state otherwise.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_engine_take_session_ticket(qsc_tls_connection* connection, qsc_tls_session_ticket* ticketout);
 
 /**
  * \brief Build an encrypted close_notify alert record.

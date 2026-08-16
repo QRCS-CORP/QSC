@@ -110,8 +110,10 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_store_add_anchor(qsc_x509_store* store, 
  * \brief Find a trust anchor applicable to a certificate.
  *
  * \details
- * Searches the store for a trust anchor that matches the issuer or trust
- * relationship requirements of the supplied certificate.
+ * Searches the store for a trust anchor whose subject matches the certificate
+ * issuer. AuthorityKeyIdentifier selectors are used as a preference when they
+ * can be evaluated; issuer-name matching remains the fallback so that AKI/SKI
+ * metadata is not promoted into an independent path-validation requirement.
  *
  * \param store: [const][struct] The trust store to search.
  * \param certificate: [const][struct] The certificate for which a matching anchor is sought.

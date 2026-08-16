@@ -31,24 +31,62 @@ static bool x509_certificate_equal(const qsc_x509_certificate* left, const qsc_x
         qsc_x509_name_equals(&left->subject, &right->subject) == true);
 }
 
-static bool x509_ski_aki_match(const qsc_x509_certificate* issuer, const qsc_x509_certificate* subject)
+static bool x509_aki_candidate_matches(const qsc_x509_certificate* issuer, const qsc_x509_certificate* subject)
 {
+    const qsc_x509_authority_key_identifier* aki;
+    bool match;
+    bool selectorpresent;
+
+    match = true;
+    selectorpresent = false;
+
     if (issuer == (const qsc_x509_certificate*)NULL || subject == (const qsc_x509_certificate*)NULL)
     {
-        return false;
+        match = false;
     }
-
-    if (subject->extensions.authoritykeyidentifier.present == true &&
-        subject->extensions.authoritykeyidentifier.keyidentifierlen != 0U &&
-        issuer->extensions.subjectkeyidentifier.present == true)
+    else
     {
-        return x509_serial_equal(issuer->extensions.subjectkeyidentifier.identifier,
-            issuer->extensions.subjectkeyidentifier.identifierlen,
-            subject->extensions.authoritykeyidentifier.keyidentifier,
-            subject->extensions.authoritykeyidentifier.keyidentifierlen);
+        aki = &subject->extensions.authoritykeyidentifier;
+
+        if (aki->present == true && aki->keyidentifierlen != 0U)
+        {
+            selectorpresent = true;
+
+            if (issuer->extensions.subjectkeyidentifier.present == false ||
+                x509_serial_equal(issuer->extensions.subjectkeyidentifier.identifier, issuer->extensions.subjectkeyidentifier.identifierlen,
+                    aki->keyidentifier, aki->keyidentifierlen) == false)
+            {
+                match = false;
+            }
+        }
+
+        if (match == true && aki->present == true && aki->issuer_present == true && aki->issuername_present == true)
+        {
+            selectorpresent = true;
+
+            if (qsc_x509_name_equals(&issuer->issuer, &aki->issuername) == false)
+            {
+                match = false;
+            }
+        }
+
+        if (match == true && aki->present == true && aki->serial_present == true)
+        {
+            selectorpresent = true;
+
+            if (x509_serial_equal(issuer->serialnumber, issuer->serialnumberlen, aki->serial, aki->seriallen) == false)
+            {
+                match = false;
+            }
+        }
+
+        if (selectorpresent == false)
+        {
+            match = false;
+        }
     }
 
-    return true;
+    return match;
 }
 
 static bool x509_names_match_issuer_subject(const qsc_x509_certificate* issuer, const qsc_x509_certificate* subject)
@@ -65,8 +103,7 @@ static bool x509_anchor_matches(const qsc_x509_trust_anchor* anchor, const qsc_x
         return false;
     }
 
-    return (x509_names_match_issuer_subject(&anchor->certificate, certificate) == true &&
-        x509_ski_aki_match(&anchor->certificate, certificate) == true);
+    return x509_names_match_issuer_subject(&anchor->certificate, certificate);
 }
 
 void qsc_x509_store_initialize(qsc_x509_store* store, qsc_x509_trust_anchor* anchors, size_t capacity)
@@ -166,35 +203,36 @@ bool qsc_x509_store_contains_anchor(const qsc_x509_store* store, const qsc_x509_
 const qsc_x509_trust_anchor* qsc_x509_store_find_anchor_for_certificate(const qsc_x509_store* store, const qsc_x509_certificate* certificate)
 {
     const qsc_x509_trust_anchor* anchor;
+    size_t i;
 
     anchor = (const qsc_x509_trust_anchor*)NULL;
 
-    if (store == (const qsc_x509_store*)NULL || certificate == (const qsc_x509_certificate*)NULL)
+    if (store != (const qsc_x509_store*)NULL && certificate != (const qsc_x509_certificate*)NULL)
     {
-        return (const qsc_x509_trust_anchor*)NULL;
-    }
-
-    if (certificate->extensions.authoritykeyidentifier.present == true &&
-        certificate->extensions.authoritykeyidentifier.keyidentifierlen != 0U)
-    {
-        anchor = qsc_x509_store_find_anchor_by_subject_key_identifier(store,
-            certificate->extensions.authoritykeyidentifier.keyidentifier,
-            certificate->extensions.authoritykeyidentifier.keyidentifierlen);
-
-        if (anchor != (const qsc_x509_trust_anchor*)NULL && x509_anchor_matches(anchor, certificate) == true)
+        for (i = 0U; i < store->count; ++i)
         {
-            return anchor;
+            if (x509_names_match_issuer_subject(&store->anchors[i].certificate, certificate) == true &&
+                x509_aki_candidate_matches(&store->anchors[i].certificate, certificate) == true)
+            {
+                anchor = &store->anchors[i];
+                break;
+            }
+        }
+
+        if (anchor == (const qsc_x509_trust_anchor*)NULL)
+        {
+            for (i = 0U; i < store->count; ++i)
+            {
+                if (x509_anchor_matches(&store->anchors[i], certificate) == true)
+                {
+                    anchor = &store->anchors[i];
+                    break;
+                }
+            }
         }
     }
 
-    anchor = qsc_x509_store_find_anchor_by_subject(store, &certificate->issuer);
-
-    if (anchor != (const qsc_x509_trust_anchor*)NULL && x509_anchor_matches(anchor, certificate) == true)
-    {
-        return anchor;
-    }
-
-    return (const qsc_x509_trust_anchor*)NULL;
+    return anchor;
 }
 
 const qsc_x509_certificate* qsc_x509_store_find_issuer(const qsc_x509_store* store, const qsc_x509_certificate* certificate)
@@ -232,10 +270,23 @@ qsc_x509_verify_status qsc_x509_chain_build(const qsc_x509_certificate* leaf, co
 
         for (i = 0U; i < intermediatecount; ++i)
         {
-            if (x509_names_match_issuer_subject(&intermediates[i], current) == true && x509_ski_aki_match(&intermediates[i], current) == true)
+            if (x509_names_match_issuer_subject(&intermediates[i], current) == true &&
+                x509_aki_candidate_matches(&intermediates[i], current) == true)
             {
                 issuer = &intermediates[i];
                 break;
+            }
+        }
+
+        if (issuer == (const qsc_x509_certificate*)NULL)
+        {
+            for (i = 0U; i < intermediatecount; ++i)
+            {
+                if (x509_names_match_issuer_subject(&intermediates[i], current) == true)
+                {
+                    issuer = &intermediates[i];
+                    break;
+                }
             }
         }
 

@@ -14,6 +14,7 @@
 #include "x509key.h"
 #include "x509keywrite.h"
 #include "x509pem.h"
+#include "x509sig.h"
 #include "x509sigver.h"
 #include "x509spki.h"
 #include "x509verify.h"
@@ -39,6 +40,42 @@ typedef struct stage4_encoder_sign_context_t
 	size_t captured_tbslen;
 	bool called;
 } stage4_encoder_sign_context;
+
+typedef struct
+{
+	qsc_x509_csr der;
+	qsc_x509_csr pem;
+} stage4a_csr_pair;
+
+typedef struct
+{
+	qsc_x509_certificate der;
+	qsc_x509_certificate pem;
+} stage4a_certificate_pair;
+
+static bool stage4a_csr_pair_result(stage4a_csr_pair* pair, bool result)
+{
+	if (pair != NULL)
+	{
+		qsc_x509_csr_clear(&pair->der);
+		qsc_x509_csr_clear(&pair->pem);
+		qsc_memutils_alloc_free(pair);
+	}
+
+	return result;
+}
+
+static bool stage4a_certificate_pair_result(stage4a_certificate_pair* pair, bool result)
+{
+	if (pair != NULL)
+	{
+		qsc_x509_certificate_clear(&pair->der);
+		qsc_x509_certificate_clear(&pair->pem);
+		qsc_memutils_alloc_free(pair);
+	}
+
+	return result;
+}
 
 static qsc_x509_pqc_parameter_set stage4_encoder_mldsa_parameter(void)
 {
@@ -172,8 +209,7 @@ static void stage4_encoder_fill_pseudorandom(uint8_t* output, size_t outputlen, 
 	}
 }
 
-static qsc_asn1_status stage4_encoder_sign_callback(qsc_x509_signature_algorithm signaturealgorithm,
-	const uint8_t* tbsdata, size_t tbsdatalen, uint8_t* signature, size_t* signaturelen, void* context)
+static qsc_asn1_status stage4_encoder_sign_callback(qsc_x509_signature_algorithm signaturealgorithm, const uint8_t* tbsdata, size_t tbsdatalen, uint8_t* signature, size_t* signaturelen, void* context)
 {
 	stage4_encoder_sign_context* sctx;
 	uint8_t signedmsg[STAGE4_ENCODER_SIGBUF] = { 0U };
@@ -271,8 +307,7 @@ static bool stage4_encoder_spki_decode_der(const uint8_t* der, size_t derlen, qs
 	return res;
 }
 
-static bool stage4_encoder_build_csr(uint8_t* der, size_t* derlen, const uint8_t* publickey,
-	const uint8_t* privatekey, stage4_encoder_sign_context* signctx)
+static bool stage4_encoder_build_csr(uint8_t* der, size_t* derlen, const uint8_t* publickey, const uint8_t* privatekey, stage4_encoder_sign_context* signctx)
 {
 	qsc_x509_csr csr = { 0 };
 	qsc_x509_name subject = { 0 };
@@ -313,8 +348,7 @@ static bool stage4_encoder_build_csr(uint8_t* der, size_t* derlen, const uint8_t
 	return (qsc_x509_csr_sign(&csr, stage4_encoder_sign_callback, signctx, der, derlen) == QSC_ASN1_STATUS_SUCCESS);
 }
 
-static bool stage4_encoder_build_root_certificate(uint8_t* der, size_t* derlen, const uint8_t* publickey,
-	const uint8_t* privatekey, stage4_encoder_sign_context* signctx)
+static bool stage4_encoder_build_root_certificate(uint8_t* der, size_t* derlen, const uint8_t* publickey, const uint8_t* privatekey, stage4_encoder_sign_context* signctx)
 {
 	qsc_x509_certificate_builder builder = { 0 };
 	qsc_x509_name name = { 0 };
@@ -478,8 +512,7 @@ bool x509_stage4a_encoder_pkcs8_roundtrip(void)
 
 bool x509_stage4a_encoder_csr_signature_roundtrip(void)
 {
-	qsc_x509_csr csrder = { 0 };
-	qsc_x509_csr csrpem = { 0 };
+	stage4a_csr_pair* pair;
 	qsc_x509_verify_state derstate = { 0 };
 	qsc_x509_verify_state pemstate = { 0 };
 	stage4_encoder_sign_context signctx = { 0 };
@@ -493,7 +526,16 @@ bool x509_stage4a_encoder_csr_signature_roundtrip(void)
 	uint8_t decodedtbs[32U] = { 0U };
 	size_t derlen;
 	size_t pemlen;
+	bool res;
 
+	pair = (stage4a_csr_pair*)qsc_memutils_malloc(sizeof(stage4a_csr_pair));
+
+	if (pair == NULL)
+	{
+		return stage4a_csr_pair_result(pair, false);
+	}
+
+	qsc_memutils_clear(pair, sizeof(stage4a_csr_pair));
 	qsc_x509_qsc_verify_state_initialize(&derstate, derverifybuf, sizeof(derverifybuf));
 	qsc_x509_qsc_verify_state_initialize(&pemstate, pemverifybuf, sizeof(pemverifybuf));
 
@@ -503,60 +545,61 @@ bool x509_stage4a_encoder_csr_signature_roundtrip(void)
 
 	if (stage4_encoder_build_csr(der, &derlen, publickey, privatekey, &signctx) != true)
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
 	if ((signctx.called != true) || (signctx.captured_signaturelen != QSC_DILITHIUM_SIGNATURE_SIZE))
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
-	if (qsc_x509_csr_decode_der(&csrder, der, derlen) != QSC_ASN1_STATUS_SUCCESS)
+	if (qsc_x509_csr_decode_der(&pair->der, der, derlen) != QSC_ASN1_STATUS_SUCCESS)
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
-	if (qsc_x509_qsc_csr_signature_verify(&csrder, &derstate) != true)
+	if (qsc_x509_qsc_csr_signature_verify(&pair->der, &derstate) != true)
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
-	qsc_sha3_compute256(decodedtbs, csrder.infodata, csrder.infodatalen);
+	qsc_sha3_compute256(decodedtbs, pair->der.infodata, pair->der.infodatalen);
 
-	if ((csrder.signatureunusedbits != 0U) ||
-		(csrder.signaturelen != signctx.captured_signaturelen) ||
-		(qsc_memutils_are_equal(csrder.signature, signctx.captured_signature, signctx.captured_signaturelen) == false) ||
+	if ((pair->der.signatureunusedbits != 0U) ||
+		(pair->der.signaturelen != signctx.captured_signaturelen) ||
+		(qsc_memutils_are_equal(pair->der.signature, signctx.captured_signature, signctx.captured_signaturelen) == false) ||
 		(qsc_memutils_are_equal(decodedtbs, signctx.captured_tbs_hash, sizeof(decodedtbs)) == false))
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
 	pemlen = sizeof(pem);
 
 	if (qsc_x509_csr_encode_pem(der, derlen, pem, &pemlen) != QSC_ASN1_STATUS_SUCCESS)
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
-	if (qsc_x509_csr_decode_pem(&csrpem, pem, pemlen) != QSC_ASN1_STATUS_SUCCESS)
+	if (qsc_x509_csr_decode_pem(&pair->pem, pem, pemlen) != QSC_ASN1_STATUS_SUCCESS)
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
-	if (qsc_x509_qsc_csr_signature_verify(&csrpem, &pemstate) != true)
+	if (qsc_x509_qsc_csr_signature_verify(&pair->pem, &pemstate) != true)
 	{
-		return false;
+		return stage4a_csr_pair_result(pair, false);
 	}
 
-	return (csrpem.signatureunusedbits == 0U) &&
-		(csrpem.signaturelen == signctx.captured_signaturelen) &&
-		(qsc_memutils_are_equal(csrpem.signature, signctx.captured_signature, signctx.captured_signaturelen) == true);
+	res = (pair->pem.signatureunusedbits == 0U) &&
+		(pair->pem.signaturelen == signctx.captured_signaturelen) &&
+		(qsc_memutils_are_equal(pair->pem.signature, signctx.captured_signature, signctx.captured_signaturelen) == true);
+
+	return stage4a_csr_pair_result(pair, res);
 }
 
 bool x509_stage4a_encoder_certificate_signature_roundtrip(void)
 {
-	qsc_x509_certificate certder = { 0 };
-	qsc_x509_certificate certpem = { 0 };
+	stage4a_certificate_pair* pair;
 	qsc_x509_verify_state derstate = { 0 };
 	qsc_x509_verify_state pemstate = { 0 };
 	stage4_encoder_sign_context signctx = { 0 };
@@ -570,7 +613,16 @@ bool x509_stage4a_encoder_certificate_signature_roundtrip(void)
 	uint8_t decodedtbs[32U] = { 0U };
 	size_t derlen;
 	size_t pemlen;
+	bool res;
 
+	pair = (stage4a_certificate_pair*)qsc_memutils_malloc(sizeof(stage4a_certificate_pair));
+
+	if (pair == NULL)
+	{
+		return stage4a_certificate_pair_result(pair, false);
+	}
+
+	qsc_memutils_clear(pair, sizeof(stage4a_certificate_pair));
 	qsc_x509_qsc_verify_state_initialize(&derstate, derverifybuf, sizeof(derverifybuf));
 	qsc_x509_qsc_verify_state_initialize(&pemstate, pemverifybuf, sizeof(pemverifybuf));
 
@@ -580,65 +632,217 @@ bool x509_stage4a_encoder_certificate_signature_roundtrip(void)
 
 	if (stage4_encoder_build_root_certificate(der, &derlen, publickey, privatekey, &signctx) != true)
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
 	if ((signctx.called != true) || (signctx.captured_signaturelen != QSC_DILITHIUM_SIGNATURE_SIZE))
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
-	if (qsc_x509_certificate_decode_der(der, derlen, &certder) != QSC_ASN1_STATUS_SUCCESS)
+	if (qsc_x509_certificate_decode_der(der, derlen, &pair->der) != QSC_ASN1_STATUS_SUCCESS)
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
-	if (qsc_x509_qsc_verify_signed_data(certder.tbsdata, certder.tbsdatalen, certder.signature,
-		certder.signaturelen, certder.signatureunusedbits, certder.signaturealgorithm.signature,
-		&certder.subjectpublickeyinfo, &derstate) != true)
+	if (qsc_x509_qsc_verify_signed_data(pair->der.tbsdata, pair->der.tbsdatalen, pair->der.signature,
+		pair->der.signaturelen, pair->der.signatureunusedbits, pair->der.signaturealgorithm.signature,
+		&pair->der.subjectpublickeyinfo, &derstate) != true)
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
-	qsc_sha3_compute256(decodedtbs, certder.tbsdata, certder.tbsdatalen);
+	qsc_sha3_compute256(decodedtbs, pair->der.tbsdata, pair->der.tbsdatalen);
 
-	if ((certder.signatureunusedbits != 0U) ||
-		(certder.signaturelen != signctx.captured_signaturelen) ||
-		(qsc_memutils_are_equal(certder.signature, signctx.captured_signature, signctx.captured_signaturelen) == false) ||
+	if ((pair->der.signatureunusedbits != 0U) ||
+		(pair->der.signaturelen != signctx.captured_signaturelen) ||
+		(qsc_memutils_are_equal(pair->der.signature, signctx.captured_signature, signctx.captured_signaturelen) == false) ||
 		(qsc_memutils_are_equal(decodedtbs, signctx.captured_tbs_hash, sizeof(decodedtbs)) == false))
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
 	pemlen = sizeof(pem);
 
 	if (qsc_x509_certificate_encode_pem(der, derlen, pem, &pemlen) != QSC_ASN1_STATUS_SUCCESS)
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
-	if (qsc_x509_certificate_decode_pem(pem, pemlen, &certpem) != QSC_ASN1_STATUS_SUCCESS)
+	if (qsc_x509_certificate_decode_pem(pem, pemlen, &pair->pem) != QSC_ASN1_STATUS_SUCCESS)
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
-	if (qsc_x509_qsc_verify_signed_data(certpem.tbsdata, certpem.tbsdatalen, certpem.signature,
-		certpem.signaturelen, certpem.signatureunusedbits, certpem.signaturealgorithm.signature,
-		&certpem.subjectpublickeyinfo, &pemstate) != true)
+	if (qsc_x509_qsc_verify_signed_data(pair->pem.tbsdata, pair->pem.tbsdatalen, pair->pem.signature,
+		pair->pem.signaturelen, pair->pem.signatureunusedbits, pair->pem.signaturealgorithm.signature,
+		&pair->pem.subjectpublickeyinfo, &pemstate) != true)
 	{
-		return false;
+		return stage4a_certificate_pair_result(pair, false);
 	}
 
-	return (certpem.signatureunusedbits == 0U) &&
-		(certpem.signaturelen == signctx.captured_signaturelen) &&
-		(qsc_memutils_are_equal(certpem.signature, signctx.captured_signature, signctx.captured_signaturelen) == true);
+	res = (pair->pem.signatureunusedbits == 0U) &&
+		(pair->pem.signaturelen == signctx.captured_signaturelen) &&
+		(qsc_memutils_are_equal(pair->pem.signature, signctx.captured_signature, signctx.captured_signaturelen) == true);
+
+	return stage4a_certificate_pair_result(pair, res);
 }
+
+static bool x509_stage4a_der_recursive_canonicality(void)
+{
+	const uint8_t valid[] = { 0x30U, 0x03U, 0x02U, 0x01U, 0x01U };
+	const uint8_t validhightag[] = { 0x9FU, 0x81U, 0x00U, 0x00U };
+	const uint8_t nestednonminimal[] = { 0x30U, 0x04U, 0x02U, 0x81U, 0x01U, 0x01U };
+	const uint8_t nestedindefinite[] = { 0x30U, 0x04U, 0x30U, 0x80U, 0x00U, 0x00U };
+	const uint8_t nonminimaltag[] = { 0x3FU, 0x1EU, 0x00U };
+	uint8_t validlonglength[134U] = { 0 };
+	qsc_encoding_ber_element* element;
+	bool res;
+
+	validlonglength[0U] = 0x30U;
+	validlonglength[1U] = 0x81U;
+	validlonglength[2U] = 0x83U;
+	validlonglength[3U] = 0x04U;
+	validlonglength[4U] = 0x81U;
+	validlonglength[5U] = 0x80U;
+	element = NULL;
+	res = (qsc_asn1_der_decode_exact(valid, sizeof(valid), &element) == QSC_ASN1_STATUS_SUCCESS && element != NULL);
+
+	if (element != NULL)
+	{
+		qsc_encoding_ber_free_element(element);
+		element = NULL;
+	}
+
+	res = (qsc_asn1_der_decode_exact(validhightag, sizeof(validhightag), &element) == QSC_ASN1_STATUS_SUCCESS && element != NULL) && res;
+
+	if (element != NULL)
+	{
+		qsc_encoding_ber_free_element(element);
+		element = NULL;
+	}
+
+	res = (qsc_asn1_der_decode_exact(validlonglength, sizeof(validlonglength), &element) == QSC_ASN1_STATUS_SUCCESS && element != NULL) && res;
+
+	if (element != NULL)
+	{
+		qsc_encoding_ber_free_element(element);
+		element = NULL;
+	}
+
+	res = (qsc_asn1_der_decode_exact(nestednonminimal, sizeof(nestednonminimal), &element) != QSC_ASN1_STATUS_SUCCESS) && res;
+
+	if (element != NULL)
+	{
+		qsc_encoding_ber_free_element(element);
+		element = NULL;
+	}
+
+	res = (qsc_asn1_der_decode_exact(nestedindefinite, sizeof(nestedindefinite), &element) != QSC_ASN1_STATUS_SUCCESS) && res;
+
+	if (element != NULL)
+	{
+		qsc_encoding_ber_free_element(element);
+		element = NULL;
+	}
+
+	res = (qsc_asn1_der_decode_exact(nonminimaltag, sizeof(nonminimaltag), &element) != QSC_ASN1_STATUS_SUCCESS) && res;
+
+	if (element != NULL)
+	{
+		qsc_encoding_ber_free_element(element);
+	}
+
+	return res;
+}
+
+static bool x509_stage4a_oid_base128_canonicality(void)
+{
+	uint8_t validdata[] = { 0x88U, 0x37U, 0x03U };
+	uint8_t nonminimalfirst[] = { 0x80U, 0x2AU, 0x03U };
+	uint8_t nonminimallater[] = { 0x2AU, 0x80U, 0x03U };
+	qsc_encoding_ber_element element = { 0 };
+	qsc_asn1_oid oid = { 0 };
+	bool res;
+
+	element.tagclass = QSC_ENCODING_BER_CLASS_UNIVERSAL;
+	element.constructed = false;
+	element.tagnumber = BER_ASN1_OBJECT_IDENTIFIER;
+	element.value = validdata;
+	element.length = sizeof(validdata);
+
+	res = (qsc_asn1_decode_oid(&element, &oid) == QSC_ASN1_STATUS_SUCCESS && oid.arcscount == 3U &&
+		oid.arcs[0U] == 2U && oid.arcs[1U] == 999U && oid.arcs[2U] == 3U);
+
+	element.value = nonminimalfirst;
+	element.length = sizeof(nonminimalfirst);
+	res = (qsc_asn1_decode_oid(&element, &oid) == QSC_ASN1_STATUS_INVALID_ENCODING) && res;
+
+	element.value = nonminimallater;
+	element.length = sizeof(nonminimallater);
+	res = (qsc_asn1_decode_oid(&element, &oid) == QSC_ASN1_STATUS_INVALID_ENCODING) && res;
+
+	return res;
+}
+
+static bool x509_stage4a_ecdsa_integer_canonicality(void)
+{
+	uint8_t valid[] = { 0x00U, 0x30U, 0x06U, 0x02U, 0x01U, 0x01U, 0x02U, 0x01U, 0x01U };
+	uint8_t nonminimal[] = { 0x00U, 0x30U, 0x07U, 0x02U, 0x02U, 0x00U, 0x01U, 0x02U, 0x01U, 0x01U };
+	qsc_encoding_ber_element element = { 0 };
+	qsc_x509_ecdsa_signature signature = { 0 };
+	bool res;
+
+	element.tagclass = QSC_ENCODING_BER_CLASS_UNIVERSAL;
+	element.constructed = false;
+	element.tagnumber = BER_ASN1_BIT_STRING;
+	element.value = valid;
+	element.length = sizeof(valid);
+	res = (qsc_x509_signature_value_decode_ecdsa(&element, QSC_X509_NAMED_CURVE_PRIME256V1, &signature) == QSC_ASN1_STATUS_SUCCESS);
+
+	element.value = nonminimal;
+	element.length = sizeof(nonminimal);
+	res = (qsc_x509_signature_value_decode_ecdsa(&element, QSC_X509_NAMED_CURVE_PRIME256V1, &signature) == QSC_ASN1_STATUS_INVALID_ENCODING) && res;
+
+	return res;
+}
+
 
 bool qsctest_x509_stage4a_encoding_tests(void)
 {
 	bool res;
 
 	res = true;
+
+	if (x509_stage4a_der_recursive_canonicality() == true)
+	{
+		qsctest_print_line("[PASS] Recursive DER canonicality test.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] Recursive DER canonicality test.");
+		res = false;
+	}
+
+	if (x509_stage4a_oid_base128_canonicality() == true)
+	{
+		qsctest_print_line("[PASS] OID base-128 canonicality test.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] OID base-128 canonicality test.");
+		res = false;
+	}
+
+	if (x509_stage4a_ecdsa_integer_canonicality() == true)
+	{
+		qsctest_print_line("[PASS] X.509 ECDSA INTEGER canonicality test.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] X.509 ECDSA INTEGER canonicality test.");
+		res = false;
+	}
 
 	if (x509_stage4a_encoder_bit_string_roundtrip() == true)
 	{

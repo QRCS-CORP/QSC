@@ -571,10 +571,11 @@ QSC_EXPORT_API void qsc_encoding_ber_free_element(qsc_encoding_ber_element* elem
 /*!
  * \brief Decode a single DER element from an octet buffer.
  *
- * Delegates to \c qsc_encoding_ber_decode_element and then enforces the DER
- * constraint (X.690 11.1) that indefinite-length encoding is forbidden.  If
- * the decoded element carries an indefinite length, it is freed and NULL is
- * returned with \p *consumed set to 0.
+ * Validates the complete encoded element recursively before decoding. DER
+ * indefinite lengths, non-minimal length encodings, and non-minimal tag
+ * encodings are rejected at every constructed level. The validated element is
+ * then decoded with the BER element decoder. On failure, NULL is returned with
+ * \p *consumed set to 0.
  *
  * The caller must release the returned element with
  * \c qsc_encoding_ber_free_element.

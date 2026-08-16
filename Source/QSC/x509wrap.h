@@ -1,20 +1,54 @@
-/**
- * \file x509wrap.h
- * \brief High-level offline X.509 wrapper for certificate loading, validation,
- * deployment configuration, trust-store management, provisioning, and TLS
- * bridge integration.
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
  *
- * \details
- * This header defines the public wrapper layer over the QSC X.509
- * implementation. The wrapper is intended to simplify the most common
- * operational uses of X.509 while preserving strict control over ownership,
- * validation policy, diagnostics, and TLS integration boundaries.
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
  *
- * The wrapper is offline-only. Public APIs declared in this header do not
- * perform network I/O, dereference remote URIs, fetch issuer certificates,
- * retrieve CRLs, or issue OCSP requests. Any future network-assisted
- * certificate retrieval is expected to reside in a separate companion layer.
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
  */
+
 #ifndef QSC_X509_WRAP_H
 #define QSC_X509_WRAP_H
 
@@ -35,6 +69,24 @@
 #include "tlslimits.h"
 
 QSC_CPLUSPLUS_ENABLED_START
+
+/**
+ * \file x509wrap.h
+ * \brief High-level offline X.509 wrapper for certificate loading, validation,
+ * deployment configuration, trust-store management, provisioning, and TLS
+ * bridge integration.
+ *
+ * \details
+ * This header defines the public wrapper layer over the QSC X.509
+ * implementation. The wrapper is intended to simplify the most common
+ * operational uses of X.509 while preserving strict control over ownership,
+ * validation policy, diagnostics, and TLS integration boundaries.
+ *
+ * The wrapper is offline-only. Public APIs declared in this header do not
+ * perform network I/O, dereference remote URIs, fetch issuer certificates,
+ * retrieve CRLs, or issue OCSP requests. Any future network-assisted
+ * certificate retrieval is expected to reside in a separate companion layer.
+ */
 
 /**
  * \brief Maximum number of certificates supported by the wrapper chain model.
@@ -286,10 +338,10 @@ typedef struct qsc_x509w_tls_bridge_t
 {
     qsc_x509w_profile profile;                         /*!< Validation profile copied into the bridge at configuration time. */
     const qsc_x509w_trust_store* truststore;          /*!< Borrowed pointer to a trust store that must outlive the bridge. */
-    qsc_tls_qsc_x509_context context;                 /*!< TLS-facing certificate-validation context. */
-    qsc_tls_certificate_interface iface;              /*!< Prepared TLS certificate interface. */
+    qsc_tls_qsc_x509_context context;                 /*!< Read-only TLS certificate-validation template cloned into each TLS connection. */
+    qsc_tls_certificate_interface iface;              /*!< Prepared TLS certificate interface bound to the read-only template. */
     qsc_x509_time currenttime;                        /*!< Embedded current-time storage for TLS verification use. */
-    uint8_t verifybuffer[QSC_X509W_VERIFY_BUFFER_SIZE]; /*!< TLS verification work buffer. */
+    uint8_t verifybuffer[QSC_X509W_VERIFY_BUFFER_SIZE]; /*!< Reserved compatibility storage; connection verification does not share this buffer. */
     bool initialized;                                 /*!< True when the bridge has been configured and is ready for attachment. */
 } qsc_x509w_tls_bridge;
 
@@ -431,6 +483,11 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_current_utc_time(qsc_x509_time* curren
 /**
  * \brief Load a certificate from a file.
  *
+ * \details
+ * The returned certificate preserves an owned copy of its DER backing data.
+ * The caller must release the certificate with \ref qsc_x509_certificate_clear
+ * when it is no longer required.
+ *
  * \param path: The input file path.
  * \param certificate: The destination certificate object.
  * \return Returns the wrapper status code.
@@ -439,6 +496,13 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_certificate_load_file(const char* path
 
 /**
  * \brief Load a certificate from a memory buffer.
+ *
+ * \details
+ * DER input is decoded using the low-level borrowed-buffer model; the caller
+ * must keep the DER input alive while the certificate is in use. PEM input is
+ * decoded into owned DER storage and is released by \ref qsc_x509_certificate_clear.
+ * APIs that retain a certificate, such as the wrapper trust store, make an
+ * independent owned copy before returning.
  *
  * \param data: The input buffer.
  * \param datalen: The length of the input buffer in bytes.
@@ -532,6 +596,11 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_csr_load_memory(const uint8_t* data, s
 /**
  * \brief Add a certificate to the trust store as an anchor.
  *
+ * \details
+ * The wrapper store retains an independent copy of the certificate state. When
+ * preserved DER is available, the store owns a private DER copy and does not
+ * depend on the lifetime of the source certificate or its input buffer.
+ *
  * \param store: The destination trust store.
  * \param certificate: The certificate to add.
  * \param selfsigned: Set true when the anchor is expected to be self-signed.
@@ -583,6 +652,11 @@ QSC_EXPORT_API qsc_x509w_status qsc_x509w_trust_store_add_anchor_memory(qsc_x509
 
 /**
  * \brief Add a decoded CRL to the trust store.
+ *
+ * \details
+ * The wrapper store reparses the source CRL DER into independently owned
+ * backing storage. The source CRL may therefore be cleared after this function
+ * returns successfully.
  *
  * \param store: The destination trust store.
  * \param crl: The CRL to add.
@@ -1008,11 +1082,12 @@ QSC_EXPORT_API bool qsc_x509w_tls_bridge_is_ready(const qsc_x509w_tls_bridge* br
  * \brief Get the prepared TLS certificate interface from a configured bridge.
  *
  * \details
- * The returned interface is a borrowed view into \a bridge. TLS client and server
- * configuration objects should copy this interface using TLS-layer configuration
- * setters. The X.509 wrapper intentionally does not mutate TLS client or server
- * state objects, preserving the dependency boundary between certificate handling
- * and the TLS state machines.
+ * The returned interface is a borrowed view into \a bridge and is intended as a
+ * configuration template. When the built-in QSC X.509 callbacks are installed in
+ * a TLS client or server, TLS initialization clones the validation context into
+ * that connection so mutable peer-summary, alert, and verification state are not
+ * shared across concurrent handshakes. The bridge itself retains only read-only
+ * trust/profile/CRL configuration for callback execution.
  *
  * \param bridge: The configured bridge.
  * \return Returns a pointer to the prepared TLS certificate interface.

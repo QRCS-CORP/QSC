@@ -61,20 +61,20 @@
  * \details This header declares the public entry point for the Stage 28 TLS
  * concurrent server lifecycle test module. The implementation follows the QSC
  * TLS staged test reporting model and validates deterministic cleanup of the
- * fixed concurrent server pool, shutdown state flags, worker state records,
+ * fixed concurrent server pool, synchronized shutdown state, worker state records,
  * listener close state, max-client policy rejection while active slots exist,
- * and repeated stop/dispose behavior.
+ * concurrent repeated-stop behavior, and live loopback accept-stop coordination.
  */
 
 /**
  * \brief Execute the TLS Stage 28 concurrent shutdown and worker cleanup test set.
  *
  * \details This function runs deterministic lifecycle tests that do not require
- * generated certificates or external socket peers. The tests exercise public TLS
- * socket server and listener cleanup semantics by constructing initialized server
- * states with active slots, started-slot markers, and retained worker metadata.
- * Live network accept-loop behavior is covered separately by end-to-end and
- * interoperability stages.
+ * generated certificates or external peers. The tests exercise public TLS socket
+ * server and listener cleanup semantics with initialized server states and local
+ * loopback listeners, including active-slot cancellation, invalid worker-marker
+ * cleanup, idempotent listener close, repeated stop calls, concurrent stop calls,
+ * and synchronization with a live accept loop.
  *
  * \return Returns true if all Stage 28 tests succeed.
  */

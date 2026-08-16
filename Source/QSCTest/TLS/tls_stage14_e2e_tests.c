@@ -1,20 +1,18 @@
 #include "tls_stage14_e2e_tests.h"
 #include "../testutils.h"
+#include "csp.h"
 #include "tlsclient.h"
 #include "tlsserver.h"
 #include "tlscert.h"
 #include "tlssignerdefault.h"
 #include "memutils.h"
-#include "secrand.h"
-#include "acp.h"
 #include "eddsa.h"
 
 static uint8_t qsctest_tls_stage14_server_pk[32U];
 static uint8_t qsctest_tls_stage14_server_sk[64U];
 static uint8_t qsctest_tls_stage14_server_cert_der[32U];
 
-static bool qsctest_tls_stage14_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength,
-	const qsc_tls_certificate_validation_context* context, void* state)
+static bool qsctest_tls_stage14_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength, const qsc_tls_certificate_validation_context* context, void* state)
 {
 	(void)context;
 	(void)state;
@@ -22,8 +20,8 @@ static bool qsctest_tls_stage14_validate_chain(const qsc_tls_certificate_view* c
 	return (chain != NULL) && (chainlength == 1U) && (chain[0].datalen == 32U);
 }
 
-static bool qsctest_tls_stage14_verify_cv(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen,
-	const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
+static bool qsctest_tls_stage14_verify_cv(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, 
+	size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
 {
 	qsc_tls_certificate_view view;
 	(void)signer;
@@ -46,13 +44,12 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 	qsc_tls_signer_default_context signer_ctx = { 0 };
 	qsc_tls_client_config ccfg = { 0 };
 	qsc_tls_server_config scfg = { 0 };
-	qsc_tls_client_state cs = { 0 };
-	qsc_tls_server_state ss = { 0 };
+	qsc_tls_client_state* cs;
+	qsc_tls_server_state* ss;
 	qsc_tls_status st = { 0 };
 	uint8_t c2s_flight2[4096U] = { 0U };
 	uint8_t c2s[4096U] = { 0U };
 	uint8_t s2c[16384U] = { 0U };
-	uint8_t seed[32U] = { 0U };
 	size_t s2c_len;
 	size_t consumed;
 	size_t c2s_len;
@@ -60,15 +57,22 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 	size_t s2c_off;
 	bool res;
 
-	res = true;
+	cs = (qsc_tls_client_state*)qsc_memutils_malloc(sizeof(qsc_tls_client_state));
+	ss = (qsc_tls_server_state*)qsc_memutils_malloc(sizeof(qsc_tls_server_state));
+	res = (cs != NULL && ss != NULL);
+
+	if (res == true)
+	{
+		qsc_memutils_clear(cs, sizeof(qsc_tls_client_state));
+		qsc_memutils_clear(ss, sizeof(qsc_tls_server_state));
+	}
+
 	c2s_len = 0U;
 	s2c_len = 0U;
 	c2s_flight2_len = 0U;
 	s2c_off = 0U;
 
-	qsc_acp_generate(seed, sizeof(seed));
-	qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
-	qsc_eddsa_generate_keypair(qsctest_tls_stage14_server_pk, qsctest_tls_stage14_server_sk, qsc_secrand_generate);
+	qsc_eddsa_generate_keypair(qsctest_tls_stage14_server_pk, qsctest_tls_stage14_server_sk, qsc_csp_generate);
 	qsc_memutils_copy(qsctest_tls_stage14_server_cert_der, qsctest_tls_stage14_server_pk, sizeof(qsctest_tls_stage14_server_cert_der));
 
 	qsc_memutils_clear(&ccfg, sizeof(ccfg));
@@ -104,22 +108,26 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 	scfg.localcert.signcallback = qsc_tls_signer_default_sign;
 	scfg.localcert.signstate = &signer_ctx;
 
-	st = qsc_tls_client_initialize(&cs, &ccfg);
+	st = qsc_tls_client_initialize(cs, &ccfg);
 
 	if (st != qsc_tls_status_success)
 	{
+		qsc_memutils_alloc_free(cs);
+		qsc_memutils_alloc_free(ss);
 		return false;
 	}
 
-	st = qsc_tls_server_initialize(&ss, &scfg);
+	st = qsc_tls_server_initialize(ss, &scfg);
 
 	if (st != qsc_tls_status_success)
 	{
-		qsc_tls_client_dispose(&cs);
+		qsc_tls_client_dispose(cs);
+		qsc_memutils_alloc_free(cs);
+		qsc_memutils_alloc_free(ss);
 		return false;
 	}
 
-	st = qsc_tls_client_send_hello(&cs, c2s, sizeof(c2s), &c2s_len);
+	st = qsc_tls_client_send_hello(cs, c2s, sizeof(c2s), &c2s_len);
 
 	if (st != qsc_tls_status_success)
 	{
@@ -130,7 +138,7 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 
 	if (res == true)
 	{
-		st = qsc_tls_server_process_record(&ss, c2s, c2s_len, &consumed, s2c, sizeof(s2c), &s2c_len);
+		st = qsc_tls_server_process_record(ss, c2s, c2s_len, &consumed, s2c, sizeof(s2c), &s2c_len);
 
 		if ((st != qsc_tls_status_success) || (consumed != c2s_len) || (s2c_len == 0U))
 		{
@@ -138,14 +146,14 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 		}
 	}
 
-	while ((res == true) && (s2c_off < s2c_len) && (cs.phase != qsc_tls_client_phase_established) && (cs.phase != qsc_tls_client_phase_failed))
+	while ((res == true) && (s2c_off < s2c_len) && (cs->phase != qsc_tls_client_phase_established) && (cs->phase != qsc_tls_client_phase_failed))
 	{
 		size_t c;
 		size_t w;
 
 		c = 0U;
 		w = 0U;
-		st = qsc_tls_client_process_record(&cs, s2c + s2c_off, s2c_len - s2c_off, &c, c2s_flight2, sizeof(c2s_flight2), &w);
+		st = qsc_tls_client_process_record(cs, s2c + s2c_off, s2c_len - s2c_off, &c, c2s_flight2, sizeof(c2s_flight2), &w);
 
 		if (st != qsc_tls_status_success)
 		{
@@ -161,7 +169,7 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 		}
 	}
 
-	if ((res == true) && ((cs.phase != qsc_tls_client_phase_established) || (c2s_flight2_len == 0U)))
+	if ((res == true) && ((cs->phase != qsc_tls_client_phase_established) || (c2s_flight2_len == 0U)))
 	{
 		res = false;
 	}
@@ -174,9 +182,9 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 		size_t junk_out;
 
 		junk_out = 0U;
-		st = qsc_tls_server_process_record(&ss, c2s_flight2, c2s_flight2_len, &consumed, junk, sizeof(junk), &junk_out);
+		st = qsc_tls_server_process_record(ss, c2s_flight2, c2s_flight2_len, &consumed, junk, sizeof(junk), &junk_out);
 
-		if ((st != qsc_tls_status_success) || (ss.phase != qsc_tls_server_phase_established))
+		if ((st != qsc_tls_status_success) || (ss->phase != qsc_tls_server_phase_established))
 		{
 			res = false;
 		}
@@ -184,18 +192,20 @@ static bool qsctest_tls_stage14_e2e_handshake(void)
 
 	if (res == true)
 	{
-		if (qsc_tls_client_get_negotiated_cipher_suite(&cs) != qsc_tls_cipher_suite_tls_aes_128_gcm_sha256)
+		if (qsc_tls_client_get_negotiated_cipher_suite(cs) != qsc_tls_cipher_suite_tls_aes_128_gcm_sha256)
 		{
 			res = false;
 		}
-		if (qsc_tls_server_get_negotiated_cipher_suite(&ss) != qsc_tls_cipher_suite_tls_aes_128_gcm_sha256)
+		if (qsc_tls_server_get_negotiated_cipher_suite(ss) != qsc_tls_cipher_suite_tls_aes_128_gcm_sha256)
 		{
 			res = false;
 		}
 	}
 
-	qsc_tls_client_dispose(&cs);
-	qsc_tls_server_dispose(&ss);
+	qsc_tls_client_dispose(cs);
+	qsc_tls_server_dispose(ss);
+	qsc_memutils_alloc_free(cs);
+	qsc_memutils_alloc_free(ss);
 
 	return res;
 }

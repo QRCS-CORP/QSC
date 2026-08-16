@@ -73,10 +73,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t ss[QSC_KYBER_SHAREDSECRET_SIZE];
  *
  * qsc_kyber_generate_keypair(pk, sk, rng_generate);
- * qsc_kyber_encapsulate(ss, ct, pk, rng_generate);
- * if (!qsc_kyber_decapsulate(ss, ct, sk))
+ * if (qsc_kyber_encapsulate(ss, ct, pk, rng_generate))
  * {
- *     // Decapsulation failed.
+ *     qsc_kyber_decapsulate(ss, ct, sk);
  * }
  * \endcode
  *
@@ -207,20 +206,23 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
  * \brief Decapsulates the shared secret for a given ciphertext using a private key.
  *
- * Combines the ciphertext with the private key to derive the shared secret.
+ * Combines the ciphertext with the private key to derive the shared secret. FIPS 203 implicit rejection is used
+ * for invalid ciphertexts; ciphertext validity is not exposed through the return value.
  *
  * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_KYBER_SHAREDSECRET_SIZE).
  * \param ciphertext: [const uint8_t*] Pointer to the ciphertext array (size QSC_KYBER_CIPHERTEXT_SIZE).
  * \param privatekey: [const uint8_t*] Pointer to the secret key array (size QSC_KYBER_PRIVATEKEY_SIZE).
  * 
- * \return [bool] Returns true if decapsulation succeeds.
+ * \return [bool] Returns true when the decapsulation key passes validation and decapsulation completes.
+ * Invalid ciphertexts use implicit rejection and still return true with the rejection shared secret.
  */
 QSC_EXPORT_API bool qsc_kyber_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 
 /**
  * \brief Encapsulates a shared secret key using a public key.
  *
- * Generates ciphertext and a shared secret; used for key encapsulation.
+ * Generates ciphertext and a shared secret; used for key encapsulation. The encapsulation key is validated
+ * according to the FIPS 203 modulus check before encapsulation.
  *
  * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_KYBER_SHAREDSECRET_SIZE).
  * \param ciphertext: [uint8_t*] Pointer to the output ciphertext array (size QSC_KYBER_CIPHERTEXT_SIZE).

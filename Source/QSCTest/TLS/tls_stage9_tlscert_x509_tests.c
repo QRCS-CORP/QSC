@@ -1,15 +1,15 @@
 #include "tls_stage9_tlscert_x509_tests.h"
 #include "../testutils.h"
-#include "../../QSC/tlscertx509.h"
-#include "../../QSC/tlscert.h"
-#include "../../QSC/tlssignerdefault.h"
-#include "../../QSC/tlskeyschedule.h"
-#include "../../QSC/memutils.h"
-#include "../../QSC/secrand.h"
-#include "../../QSC/acp.h"
-#include "../../QSC/eddsa.h"
-#include "../../QSC/ecdsa.h"
-#include "../../QSC/x509types.h"
+#include "csp.h"
+#include "tlscertx509.h"
+#include "tlscert.h"
+#include "tlssignerdefault.h"
+#include "tlskeyschedule.h"
+#include "memutils.h"
+#include "eddsa.h"
+#include "ecdsa.h"
+#include "x509types.h"
+#include "x509store.h"
 
 #define TLS_CERT_X509_EXPOSE_INTERNALS_FOR_TEST 1
 
@@ -195,7 +195,7 @@ static bool qsctest_tls_stage9_state_initialize(void)
 
 	qsc_tls_cert_x509_state_initialize(&st, NULL);
 	res = (st.truststore == NULL);
-	res = (res == true && st.allowselfsigned == true);
+	res = (res == true && st.allowselfsigned == false);
 	res = (res == true && st.enforcehostname == true);
 	res = (res == true && st.enforcevalidityperiod == true);
 
@@ -210,6 +210,8 @@ static bool qsctest_tls_stage9_state_initialize(void)
 
 static bool qsctest_tls_stage9_invalid_der_rejected(void)
 {
+	qsc_x509_trust_anchor anchors[1U] = { 0 };
+	qsc_x509_store store;
 	qsc_tls_cert_x509_state st = { 0 };
 	qsc_tls_certificate_interface iface = { 0 };
 	qsc_tls_certificate_view chain[1U] = { 0 };
@@ -219,7 +221,9 @@ static bool qsctest_tls_stage9_invalid_der_rejected(void)
 	uint8_t input[32U] = { 0U };
 	bool res;
 
-	qsc_tls_cert_x509_state_initialize(&st, NULL);
+	res = false;
+	qsc_x509_store_initialize(&store, anchors, 1U);
+	qsc_tls_cert_x509_state_initialize(&st, &store);
 	qsc_memutils_clear(&iface, sizeof(iface));
 	qsc_tls_cert_x509_bind(&iface, &st);
 
@@ -234,32 +238,30 @@ static bool qsctest_tls_stage9_invalid_der_rejected(void)
 	ctx.clientauth = false;
 	ctx.requirepeercertificate = true;
 
-	res = (iface.validatechain(chain, 1U, &ctx, iface.state) == false);
-	res = (res == true && st.lastverifystatus != QSC_X509_VERIFY_STATUS_SUCCESS);
-	res = (res == true && st.lastalert == qsc_tls_alert_bad_certificate);
-
-	qsc_memutils_clear(signature, sizeof(signature));
-
-	for (size_t i = 0U; i < sizeof(input); ++i)
+	if (iface.validatechain != NULL)
 	{
-		input[i] = (uint8_t)i;
-	}
+		res = (iface.validatechain(chain, 1U, &ctx, iface.state) == false);
+		res = (res == true && st.lastverifystatus != QSC_X509_VERIFY_STATUS_SUCCESS);
+		res = (res == true && st.lastalert == qsc_tls_alert_bad_certificate);
 
-	res = (res == true && iface.verifycertificateverify(qsc_tls_sig_ed25519,
-		input, sizeof(input), signature, sizeof(signature), &chain[0], iface.state) == false);
+		qsc_memutils_clear(signature, sizeof(signature));
+
+		for (size_t i = 0U; i < sizeof(input); ++i)
+		{
+			input[i] = (uint8_t)i;
+		}
+
+		res = (res == true && iface.verifycertificateverify(qsc_tls_sig_ed25519, input, sizeof(input), signature, sizeof(signature), &chain[0], iface.state) == false);
+	}
 
 	return res;
 }
 
 bool qsctest_tls_stage9_tests(void)
 {
-	uint8_t seed[32U] = { 0U };
 	bool res;
 
 	res = true;
-	qsc_acp_generate(seed, sizeof(seed));
-	qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
-
 	if (qsctest_tls_stage9_spki_ed25519() == true)
 	{
 		qsctest_print_line("[PASS] TLS Stage 9 SPKI Ed25519 mapping test.");

@@ -151,7 +151,7 @@ static bool stage29_san_precedence_over_common_name_test(void)
 
     cert.extensions.subjectaltname.present = false;
     cert.extensions.subjectaltname.count = 0U;
-    res = (res == true && qsc_x509_certificate_check_hostname(&cert, "example.com") == QSC_X509_VERIFY_STATUS_SUCCESS);
+    res = (res == true && qsc_x509_certificate_check_hostname(&cert, "example.com") == QSC_X509_VERIFY_STATUS_NAME_MISMATCH);
 
     return res;
 }

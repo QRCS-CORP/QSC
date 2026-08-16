@@ -795,7 +795,10 @@ static qsc_asn1_status x509_parse_general_names(const qsc_x509_extension* extens
 	qsc_oid_id oidid;
 	size_t consumed;
 	size_t ecount;
+	size_t i;
+	size_t j;
 	qsc_asn1_status status;
+	bool valid;
 
 	root = (qsc_encoding_ber_element*)NULL;
 	child = (const qsc_encoding_ber_element*)NULL;
@@ -830,7 +833,7 @@ static qsc_asn1_status x509_parse_general_names(const qsc_x509_extension* extens
 				*critical = extension->critical;
 				*count = 0U;
 
-				for (size_t i = 0U; i < qsc_asn1_child_count(root) && ecount < QSC_X509_SAN_ENTRIES_MAX; ++i)
+				for (i = 0U; i < qsc_asn1_child_count(root) && ecount < QSC_X509_SAN_ENTRIES_MAX; ++i)
 				{
 					child = qsc_asn1_child_at(root, i);
 
@@ -867,6 +870,26 @@ static qsc_asn1_status x509_parse_general_names(const qsc_x509_extension* extens
 					{
 						if (child->length <= QSC_X509_NAME_ATTRIBUTE_STRING_MAX && child->value != (const uint8_t*)NULL)
 						{
+							valid = true;
+
+							if (child->tagnumber == 1U || child->tagnumber == 2U || child->tagnumber == 6U)
+							{
+								for (j = 0U; j < child->length; ++j)
+								{
+									if (child->value[j] == 0U || child->value[j] > 0x7FU)
+									{
+										valid = false;
+										break;
+									}
+								}
+							}
+
+							if (valid == false)
+							{
+								status = QSC_ASN1_STATUS_INVALID_ENCODING;
+								break;
+							}
+
 							entries[ecount].type = (child->tagnumber == 1U) ? QSC_X509_GENERAL_NAME_RFC822_NAME :
 								(child->tagnumber == 2U) ? QSC_X509_GENERAL_NAME_DNS_NAME :
 								(child->tagnumber == 6U) ? QSC_X509_GENERAL_NAME_UNIFORM_RESOURCE_IDENTIFIER :

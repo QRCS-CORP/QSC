@@ -828,6 +828,7 @@ qsc_asn1_status qsc_x509_write_boolean(bool value, uint8_t* output, size_t* outp
     QSC_ASSERT(outputlen != NULL);
 
     const uint8_t content = value == true ? 0xFFU : 0x00U;
+
     return qsc_x509_write_raw(QSC_ENCODING_BER_CLASS_UNIVERSAL, false, BER_ASN1_BOOLEAN, &content, 1U, output, outputlen);
 }
 

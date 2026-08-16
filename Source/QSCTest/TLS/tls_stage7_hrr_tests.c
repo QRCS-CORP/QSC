@@ -1,20 +1,46 @@
 #include "tls_stage7_hrr_tests.h"
 #include "../testutils.h"
+#include "csp.h"
 #include "tlsengine.h"
 #include "tlsclient.h"
 #include "tlsserver.h"
 #include "tlssignerdefault.h"
 #include "memutils.h"
-#include "secrand.h"
-#include "acp.h"
 #include "eddsa.h"
+
+typedef struct
+{
+    qsc_tls_connection client;
+    qsc_tls_connection server;
+} stage7_connection_pair;
+
+static stage7_connection_pair* stage7_connection_pair_allocate(void)
+{
+    stage7_connection_pair* pair;
+
+    pair = (stage7_connection_pair*)qsc_memutils_malloc(sizeof(stage7_connection_pair));
+
+    if (pair != NULL)
+    {
+        qsc_memutils_clear(pair, sizeof(stage7_connection_pair));
+    }
+
+    return pair;
+}
+
+static void stage7_connection_pair_free(stage7_connection_pair* pair)
+{
+    if (pair != NULL)
+    {
+        qsc_memutils_alloc_free(pair);
+    }
+}
 
 static uint8_t qsctest_tls_stage7_server_pk[32U];
 static uint8_t qsctest_tls_stage7_server_sk[64U];
 static uint8_t qsctest_tls_stage7_server_cert[32U];
 
-static bool qsctest_tls_stage7_validate(const qsc_tls_certificate_view* chain, size_t chainlength,
-    const qsc_tls_certificate_validation_context* ctx, void* state)
+static bool qsctest_tls_stage7_validate(const qsc_tls_certificate_view* chain, size_t chainlength, const qsc_tls_certificate_validation_context* ctx, void* state)
 {
     (void)ctx;
     (void)state;
@@ -38,15 +64,13 @@ static bool qsctest_tls_stage7_verify(qsc_tls_signature_scheme scheme, const uin
 
 static bool qsctest_tls_stage7_hrr_handshake(bool* observed_hrr)
 {
-    qsc_tls_connection client = { 0 };
-    qsc_tls_connection server = { 0 };
+    stage7_connection_pair* pair;
     qsc_tls_client_config ccfg = { 0 };
     qsc_tls_server_config scfg = { 0 };
     qsc_tls_signer_default_context signer_ctx = { 0 };
     uint8_t bufc2s[8192U] = { 0U };
     uint8_t bufs2c[32768U] = { 0U };
     uint8_t junk[128U] = { 0U };
-    uint8_t seed[32U] = { 0U };
     const qsc_tls_cipher_suite csuites[1U] = { qsc_tls_cipher_suite_tls_aes_128_gcm_sha256 };
     const qsc_tls_named_group cgroups[2U] = { qsc_tls_group_x25519, qsc_tls_group_secp256r1 };
     const qsc_tls_signature_scheme csigs[1U] = { qsc_tls_sig_ed25519 };
@@ -60,9 +84,14 @@ static bool qsctest_tls_stage7_hrr_handshake(bool* observed_hrr)
     qsc_tls_status st;
     bool res;
 
-    qsc_acp_generate(seed, sizeof(seed));
-    qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
-    qsc_eddsa_generate_keypair(qsctest_tls_stage7_server_pk, qsctest_tls_stage7_server_sk, qsc_secrand_generate);
+    pair = stage7_connection_pair_allocate();
+
+    if (pair == NULL)
+    {
+        return false;
+    }
+
+    qsc_eddsa_generate_keypair(qsctest_tls_stage7_server_pk, qsctest_tls_stage7_server_sk, qsc_csp_generate);
     qsc_memutils_copy(qsctest_tls_stage7_server_cert, qsctest_tls_stage7_server_pk, sizeof(qsctest_tls_stage7_server_cert));
 
     qsc_memutils_clear(&ccfg, sizeof(ccfg));
@@ -96,11 +125,11 @@ static bool qsctest_tls_stage7_hrr_handshake(bool* observed_hrr)
     scfg.localcert.signcallback = qsc_tls_signer_default_sign;
     scfg.localcert.signstate = &signer_ctx;
 
-    qsc_tls_engine_initialize_client(&client, &ccfg);
-    qsc_tls_engine_initialize_server(&server, &scfg);
+    qsc_tls_engine_initialize_client(&pair->client, &ccfg);
+    qsc_tls_engine_initialize_server(&pair->server, &scfg);
 
     c2slen = 0U;
-    st = qsc_tls_engine_handshake(&client, NULL, 0U, &consumed, bufc2s, sizeof(bufc2s), &c2slen);
+    st = qsc_tls_engine_handshake(&pair->client, NULL, 0U, &consumed, bufc2s, sizeof(bufc2s), &c2slen);
     res = (st == qsc_tls_status_success && c2slen != 0U);
 
     if (res == true)
@@ -115,7 +144,7 @@ static bool qsctest_tls_stage7_hrr_handshake(bool* observed_hrr)
         size_t clientfinlen;
 
         s2c_len = 0U;
-        st = qsc_tls_engine_handshake(&server, bufc2s, c2slen, &consumed, bufs2c, sizeof(bufs2c), &s2c_len);
+        st = qsc_tls_engine_handshake(&pair->server, bufc2s, c2slen, &consumed, bufs2c, sizeof(bufs2c), &s2c_len);
         res = (st == qsc_tls_status_success && s2c_len != 0U);
 
         if (res == true)
@@ -133,22 +162,22 @@ static bool qsctest_tls_stage7_hrr_handshake(bool* observed_hrr)
             }
 
             res = (lookslikehrr == true);
-            res = (res == true && server.state.server.helloretryrequestsent == true);
-            res = (res == true && server.state.server.phase == qsc_tls_server_phase_waiting_client_hello_2);
+            res = (res == true && pair->server.state.server.helloretryrequestsent == true);
+            res = (res == true && pair->server.state.server.phase == qsc_tls_server_phase_waiting_client_hello_2);
         }
 
         if (res == true)
         {
             c2slen = 0U;
-            st = qsc_tls_engine_handshake(&client, bufs2c, s2c_len, &consumed, bufc2s, sizeof(bufc2s), &c2slen);
+            st = qsc_tls_engine_handshake(&pair->client, bufs2c, s2c_len, &consumed, bufc2s, sizeof(bufc2s), &c2slen);
             res = (st == qsc_tls_status_success && c2slen != 0U);
-            res = (res == true && client.state.client.helloretryrequestconsumed == true);
+            res = (res == true && pair->client.state.client.helloretryrequestconsumed == true);
         }
 
         if (res == true)
         {
             s2c_len = 0U;
-            st = qsc_tls_engine_handshake(&server, bufc2s, c2slen, &consumed, bufs2c, sizeof(bufs2c), &s2c_len);
+            st = qsc_tls_engine_handshake(&pair->server, bufc2s, c2slen, &consumed, bufs2c, sizeof(bufs2c), &s2c_len);
             res = (st == qsc_tls_status_success && s2c_len != 0U);
         }
 
@@ -157,10 +186,10 @@ static bool qsctest_tls_stage7_hrr_handshake(bool* observed_hrr)
             offset = 0U;
             clientfinlen = 0U;
 
-            while (offset < s2c_len && qsc_tls_engine_is_handshake_complete(&client) == false)
+            while (offset < s2c_len && qsc_tls_engine_is_handshake_complete(&pair->client) == false)
             {
                 size_t w = 0U;
-                st = qsc_tls_engine_handshake(&client, bufs2c + offset, s2c_len - offset, &consumed, bufc2s, sizeof(bufc2s), &w);
+                st = qsc_tls_engine_handshake(&pair->client, bufs2c + offset, s2c_len - offset, &consumed, bufc2s, sizeof(bufc2s), &w);
 
                 if (st != qsc_tls_status_success)
                 {
@@ -176,21 +205,22 @@ static bool qsctest_tls_stage7_hrr_handshake(bool* observed_hrr)
                 }
             }
 
-            res = (res == true && qsc_tls_engine_is_handshake_complete(&client) == true);
+            res = (res == true && qsc_tls_engine_is_handshake_complete(&pair->client) == true);
 
             if (res == true)
             {
-                st = qsc_tls_engine_handshake(&server, bufc2s, clientfinlen, &consumed, junk, sizeof(junk), &written);
+                st = qsc_tls_engine_handshake(&pair->server, bufc2s, clientfinlen, &consumed, junk, sizeof(junk), &written);
                 res = (st == qsc_tls_status_success);
-                res = (res == true && qsc_tls_engine_is_handshake_complete(&server) == true);
-                res = (res == true && client.state.client.negotiatedgroup == qsc_tls_group_secp256r1);
-                res = (res == true && server.state.server.negotiatedgroup == qsc_tls_group_secp256r1);
+                res = (res == true && qsc_tls_engine_is_handshake_complete(&pair->server) == true);
+                res = (res == true && pair->client.state.client.negotiatedgroup == qsc_tls_group_secp256r1);
+                res = (res == true && pair->server.state.server.negotiatedgroup == qsc_tls_group_secp256r1);
             }
         }
     }
 
-    qsc_tls_engine_dispose(&client);
-    qsc_tls_engine_dispose(&server);
+    qsc_tls_engine_dispose(&pair->client);
+    qsc_tls_engine_dispose(&pair->server);
+    stage7_connection_pair_free(pair);
 
     return res;
 }

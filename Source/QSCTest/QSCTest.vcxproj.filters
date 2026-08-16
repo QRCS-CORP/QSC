@@ -249,6 +249,27 @@
     <ClCompile Include="TLS\tls_stage29_negative_x509_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
+    <ClCompile Include="TLS\tls_stage30_post_handshake_dispatch_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage31_mtls_handshake_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage32_resumption_profile_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage33_rfc9846_compliance_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage34_rfc10024_hybrid_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage35_handshake_deadline_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS\tls_stage36_pq_standards_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
     <ClCompile Include="pbmac1_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
@@ -462,6 +483,27 @@
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
     <ClInclude Include="TLS\tls_stage29_negative_x509_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage30_post_handshake_dispatch_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage31_mtls_handshake_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage32_resumption_profile_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage33_rfc9846_compliance_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage34_rfc10024_hybrid_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage35_handshake_deadline_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS\tls_stage36_pq_standards_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
     <ClInclude Include="pbmac1_test.h">

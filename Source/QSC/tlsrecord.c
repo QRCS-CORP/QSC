@@ -111,6 +111,37 @@ static void tls_record_build_nonce(const qsc_tls_record_state* state, uint8_t* n
 	}
 }
 
+static bool tls_record_write_limit_reached(const qsc_tls_record_state* state)
+{
+	bool res;
+
+	res = true;
+
+	if (state != NULL)
+	{
+		switch (state->suite)
+		{
+			case qsc_tls_cipher_suite_tls_aes_128_gcm_sha256:
+			case qsc_tls_cipher_suite_tls_aes_256_gcm_sha384:
+			{
+				res = (state->sequence >= QSC_TLS_AES_GCM_KEY_USAGE_LIMIT);
+				break;
+			}
+			case qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256:
+			{
+				res = (state->sequence == UINT64_MAX);
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+	}
+
+	return res;
+}
+
 static size_t tls_record_suite_key_size(qsc_tls_cipher_suite suite)
 {
 	size_t res;
@@ -287,9 +318,25 @@ qsc_tls_status qsc_tls_record_encode_plaintext(uint8_t* output, size_t outlen, s
 	{
 		status = qsc_tls_status_invalid_input;
 	}
+	else if (tls_record_content_type_is_valid((uint8_t)type) == false)
+	{
+		status = qsc_tls_status_invalid_input;
+	}
 	else if (inlen > QSC_TLS_RECORD_MAX_PLAINTEXT_SIZE)
 	{
 		status = qsc_tls_status_invalid_length;
+	}
+	else if (type == qsc_tls_record_content_handshake && inlen == 0U)
+	{
+		status = qsc_tls_status_invalid_length;
+	}
+	else if (type == qsc_tls_record_content_alert && inlen != QSC_TLS_ALERT_SIZE)
+	{
+		status = qsc_tls_status_invalid_length;
+	}
+	else if (type == qsc_tls_record_content_change_cipher_spec && (inlen != 1U || input == NULL || input[0U] != 0x01U))
+	{
+		status = qsc_tls_status_invalid_message;
 	}
 	else
 	{
@@ -356,7 +403,8 @@ qsc_tls_status qsc_tls_record_decode_plaintext(const uint8_t* input, size_t inle
 
 		if (status == qsc_tls_status_success)
 		{
-			/* Read and discard the legacy version field: RFC 8446 s5.1 says it is ignored on receive. */
+			/* RFC 9846 Section 5.1: read the deprecated legacy version field; plaintext
+			 * processing ignores its value. Protected records authenticate these bytes as AAD. */
 			status = qsc_tls_codec_read_u16(input, inlen, &offset, &version);
 			(void)version;
 		}
@@ -372,10 +420,16 @@ qsc_tls_status qsc_tls_record_decode_plaintext(const uint8_t* input, size_t inle
 			{
 				status = qsc_tls_status_invalid_input;
 			}
-			/* RFC 8446 s5.1: the legacy record version field is ignored on receive.
-			 * Accepting any version byte that accompanied a valid content type is conformant.
-			 * The old special-case for 0x0301 on Handshake records was too permissive and is
-			 * removed; the version field is simply not checked. */
+			else if ((ctype == (uint8_t)qsc_tls_record_content_application_data &&
+				length > QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE) ||
+				(ctype != (uint8_t)qsc_tls_record_content_application_data &&
+				length > QSC_TLS_RECORD_MAX_PLAINTEXT_SIZE))
+			{
+				status = qsc_tls_status_record_overflow;
+			}
+			/* RFC 9846 Sections 5.1 and E.5: TLSPlaintext.legacy_record_version is
+			 * deprecated and ignored on receipt. TLSCiphertext.legacy_record_version
+			 * is authenticated as part of the AEAD additional data by qsc_tls_record_decrypt(). */
 			else if ((inlen - offset) != length)
 			{
 				status = qsc_tls_status_invalid_length;
@@ -427,9 +481,9 @@ qsc_tls_status qsc_tls_record_try_get_span_length(const uint8_t* input, size_t i
 			length = qsc_intutils_be8to16(input + 3U);
 			needed = QSC_TLS_RECORD_HEADER_SIZE + (size_t)length;
 
-			if (needed > QSC_TLS_MAX_RECORD_SIZE)
+			if (length > QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE)
 			{
-				status = qsc_tls_status_invalid_length;
+				status = qsc_tls_status_record_overflow;
 			}
 			else
 			{
@@ -477,6 +531,14 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 	else if (tls_record_inner_content_type_is_valid(inner_type) == false)
 	{
 		status = qsc_tls_status_invalid_input;
+	}
+	else if (inner_type == qsc_tls_record_content_handshake && inlen == 0U)
+	{
+		status = qsc_tls_status_invalid_length;
+	}
+	else if (inner_type == qsc_tls_record_content_alert && inlen != QSC_TLS_ALERT_SIZE)
+	{
+		status = qsc_tls_status_invalid_length;
 	}
 	else if (state->initialized == false)
 	{
@@ -526,10 +588,10 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 
 				if (status == qsc_tls_status_success)
 				{
-					/* RFC 8446 s5.5: sequence overflow MUST be checked BEFORE encryption.
-					 * Encrypting with an exhausted nonce space is prohibited; terminate the
-					 * connection before producing any ciphertext at that sequence number. */
-					if (state->sequence == UINT64_MAX)
+					/* RFC 9846 Section 5.5: a sender MUST close or update keys before
+					 * exceeding the AEAD usage limit. Count every AES-GCM record as
+					 * full size, which is conservative for shorter records. */
+					if (tls_record_write_limit_reached(state) == true)
 					{
 						qsc_tls_record_state_dispose(state);
 						status = qsc_tls_status_authentication_failure;
@@ -692,9 +754,9 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 				{
 					status = qsc_tls_status_invalid_input;
 				}
-				else if (payloadlen > (QSC_TLS_RECORD_MAX_INNER_SIZE + QSC_TLS_GCM_TAG_SIZE))
+				else if (payloadlen > QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE)
 				{
-					status = qsc_tls_status_invalid_length;
+					status = qsc_tls_status_record_overflow;
 				}
 				else
 				{
@@ -779,16 +841,20 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 						{
 							status = qsc_tls_status_invalid_length;
 						}
-						else if (tls_record_inner_content_type_is_valid((qsc_tls_record_content_type)contentbyte) == false)
-						{
-							status = qsc_tls_status_invalid_input;
-						}
 						else
 						{
+							/* Preserve the received ContentType for the protocol layer.
+							 * Sending remains restricted to TLS 1.3 legal protected types,
+							 * while a received protected CCS or unknown type must be mapped
+							 * to unexpected_message by the connection state machine. */
 							*inner_type = (qsc_tls_record_content_type)contentbyte;
 							endpos -= 1U;
 
-							if (endpos > outlen)
+							if (endpos > QSC_TLS_RECORD_MAX_PLAINTEXT_SIZE)
+							{
+								status = qsc_tls_status_record_overflow;
+							}
+							else if (endpos > outlen)
 							{
 								status = qsc_tls_status_buffer_too_small;
 							}

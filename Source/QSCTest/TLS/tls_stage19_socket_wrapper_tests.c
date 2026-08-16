@@ -3,6 +3,7 @@
 #include "intutils.h"
 #include "memutils.h"
 #include "tlssocket.h"
+#include "timestamp.h"
 
 typedef struct stage19_log_state
 {
@@ -106,40 +107,57 @@ static bool stage19_context_policy_test(void)
         {
             if (qsc_tls_socket_context_set_default_client_policy(ctx) == qsc_tls_socket_status_success)
             {
-                if ((ctx->ciphersuitecount == 3U) && (ctx->groupcount == 2U) && (ctx->sigschemecount == 3U))
+                if ((ctx->ciphersuitecount == 3U) && (ctx->groupcount == 2U) && (ctx->sigschemecount == 2U))
                 {
                     if ((ctx->ciphersuites[0U] == qsc_tls_cipher_suite_tls_aes_256_gcm_sha384) && (ctx->groups[0U] == qsc_tls_group_x25519) &&
                         (ctx->sigschemes[0U] == qsc_tls_sig_ecdsa_secp256r1_sha256))
                     {
                         if (qsc_tls_socket_context_set_mlkem_hybrid_policy(ctx) == qsc_tls_socket_status_success)
                         {
-                            if ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_x25519_mlkem768) && (ctx->groups[1U] == qsc_tls_group_x25519))
-                            {
-                                if ((qsc_tls_socket_context_set_experimental_pqc_policy(ctx) == qsc_tls_socket_status_success))
-                                {
-                                    if ((ctx->groupcount == 5U) && (ctx->groups[2U] == qsc_tls_group_mlkem768) && (ctx->sigschemecount == 6U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa65))
-                                    {
-                                        suites[0U] = qsc_tls_cipher_suite_tls_aes_128_gcm_sha256;
-                                        groups[0U] = qsc_tls_group_secp256r1;
-                                        sigs[0U] = qsc_tls_sig_ecdsa_secp256r1_sha256;
+#if defined(QSC_KYBER_S1K2P512)
+                            res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_mlkem512) && (ctx->groups[1U] == qsc_tls_group_x25519));
+#elif defined(QSC_KYBER_S3K3P768)
+                            res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_x25519_mlkem768) && (ctx->groups[1U] == qsc_tls_group_x25519));
+#elif defined(QSC_KYBER_S5K4P1024)
+                            res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_secp384r1_mlkem1024) && (ctx->groups[1U] == qsc_tls_group_x25519));
+#else
+                            res = false;
+#endif
 
-                                        if (qsc_tls_socket_context_set_cipher_suites(ctx, suites, 1U) == qsc_tls_socket_status_success)
+                            if (res == true && qsc_tls_socket_context_set_experimental_pqc_policy(ctx) == qsc_tls_socket_status_success)
+                            {
+#if defined(QSC_KYBER_S1K2P512) && defined(QSC_DILITHIUM_S1P44)
+                                res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_mlkem512) &&
+                                    (ctx->sigschemecount == 3U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa44));
+#elif defined(QSC_KYBER_S3K3P768) && defined(QSC_DILITHIUM_S3P65)
+                                res = ((ctx->groupcount == 5U) && (ctx->groups[2U] == qsc_tls_group_mlkem768) &&
+                                    (ctx->sigschemecount == 3U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa65));
+#elif defined(QSC_KYBER_S5K4P1024) && defined(QSC_DILITHIUM_S5P87)
+                                res = ((ctx->groupcount == 4U) && (ctx->groups[1U] == qsc_tls_group_mlkem1024) &&
+                                    (ctx->sigschemecount == 3U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa87));
+#else
+                                res = false;
+#endif
+
+                                if (res == true)
+                                {
+                                    suites[0U] = qsc_tls_cipher_suite_tls_aes_128_gcm_sha256;
+                                    groups[0U] = qsc_tls_group_secp256r1;
+                                    sigs[0U] = qsc_tls_sig_ecdsa_secp256r1_sha256;
+
+                                    if (qsc_tls_socket_context_set_cipher_suites(ctx, suites, 1U) == qsc_tls_socket_status_success)
+                                    {
+                                        if ((ctx->ciphersuitecount == 1U) && (ctx->ciphersuites[0U] == suites[0U]))
                                         {
-                                            if ((ctx->ciphersuitecount == 1U) && (ctx->ciphersuites[0U] == suites[0U]))
+                                            if (qsc_tls_socket_context_set_named_groups(ctx, groups, 1U) == qsc_tls_socket_status_success)
                                             {
-                                                if (qsc_tls_socket_context_set_named_groups(ctx, groups, 1U) == qsc_tls_socket_status_success)
+                                                if ((ctx->groupcount == 1U) && (ctx->groups[0U] == groups[0U]))
                                                 {
-                                                    if ((ctx->groupcount == 1U) && (ctx->groups[0U] == groups[0U]))
+                                                    if (qsc_tls_socket_context_set_signature_schemes(ctx, sigs, 1U) == qsc_tls_socket_status_success)
                                                     {
-                                                        if (qsc_tls_socket_context_set_signature_schemes(ctx, sigs, 1U) == qsc_tls_socket_status_success)
+                                                        if ((ctx->sigschemecount == 1U) && (ctx->sigschemes[0U] == sigs[0U]))
                                                         {
-                                                            if ((ctx->sigschemecount == 1U) && (ctx->sigschemes[0U] == sigs[0U]))
-                                                            {
-                                                                if (qsc_tls_socket_context_set_cipher_suites(ctx, suites, 0U) == qsc_tls_socket_status_invalid_input)
-                                                                {
-                                                                    res = true;
-                                                                }
-                                                            }
+                                                            res = (qsc_tls_socket_context_set_cipher_suites(ctx, suites, 0U) == qsc_tls_socket_status_invalid_input);
                                                         }
                                                     }
                                                 }
@@ -206,14 +224,14 @@ static bool stage19_options_ticket_log_test(void)
                             if ((policy.enabled == false) && (policy.allow_early_data == false) && (policy.auto_send_server_ticket == false) && (policy.lifetime_seconds == 86400U))
                             {
                                 policy.enabled = true;
-                                policy.allow_early_data = true;
+                                policy.allow_early_data = false;
                                 policy.auto_send_server_ticket = true;
                                 policy.lifetime_seconds = 7200U;
                                 policy.renewal_interval_seconds = 3600U;
 
                                 if (qsc_tls_socket_context_set_session_ticket_policy(ctx, &policy) == qsc_tls_socket_status_success)
                                 {
-                                    if ((ctx->ticketpolicy.enabled == true) && (ctx->ticketpolicy.allow_early_data == true) &&
+                                    if ((ctx->ticketpolicy.enabled == true) && (ctx->ticketpolicy.allow_early_data == false) &&
                                         (ctx->ticketpolicy.auto_send_server_ticket == true) && (ctx->ticketpolicy.lifetime_seconds == 7200U))
                                     {
                                         ticket.ticketlen = 4U;
@@ -224,6 +242,9 @@ static bool stage19_options_ticket_log_test(void)
                                         ticket.resumptionsecretlen = 32U;
                                         ticket.resumptionsecret[0U] = 0xA5U;
                                         ticket.suite = qsc_tls_cipher_suite_tls_aes_128_gcm_sha256;
+                                        ticket.lifetime = 7200U;
+                                        ticket.receipttimems = qsc_timestamp_epochtime_milliseconds();
+                                        ticket.protocolversion = QSC_TLS_PROTOCOL_VERSION_13;
 
                                         if (qsc_tls_socket_context_set_session_ticket(ctx, &ticket) == qsc_tls_socket_status_success)
                                         {
@@ -272,6 +293,96 @@ static bool stage19_options_ticket_log_test(void)
     return res;
 }
 
+static bool stage19_x509_context_isolation_test(void)
+{
+    qsc_tls_client_state* clienta;
+    qsc_tls_client_state* clientb;
+    qsc_x509_store* truststore;
+    qsc_tls_qsc_x509_context templatecontext;
+    qsc_tls_certificate_interface certinterface;
+    qsc_tls_client_config config;
+    qsc_x509_time validationtime;
+    qsc_tls_cipher_suite suites[1U];
+    qsc_tls_signature_scheme sigs[1U];
+    qsc_tls_named_group groups[1U];
+    qsc_tls_status status;
+    bool res;
+
+    res = false;
+    clienta = (qsc_tls_client_state*)qsc_memutils_malloc(sizeof(qsc_tls_client_state));
+    clientb = (qsc_tls_client_state*)qsc_memutils_malloc(sizeof(qsc_tls_client_state));
+    truststore = (qsc_x509_store*)qsc_memutils_malloc(sizeof(qsc_x509_store));
+
+    if (clienta != NULL && clientb != NULL && truststore != NULL)
+    {
+        qsc_memutils_clear(clienta, sizeof(qsc_tls_client_state));
+        qsc_memutils_clear(clientb, sizeof(qsc_tls_client_state));
+        qsc_memutils_clear(truststore, sizeof(qsc_x509_store));
+        qsc_memutils_clear(&templatecontext, sizeof(templatecontext));
+        qsc_memutils_clear(&certinterface, sizeof(certinterface));
+        qsc_memutils_clear(&config, sizeof(config));
+        qsc_memutils_clear(&validationtime, sizeof(validationtime));
+        suites[0U] = qsc_tls_cipher_suite_tls_aes_128_gcm_sha256;
+        groups[0U] = qsc_tls_group_x25519;
+        sigs[0U] = qsc_tls_sig_ecdsa_secp256r1_sha256;
+        status = qsc_tls_x509_context_initialize(&templatecontext, truststore, NULL, 0U, &validationtime, NULL, 0U);
+
+        if (status == qsc_tls_status_success)
+        {
+            templatecontext.retainresults = false;
+            status = qsc_tls_certificate_interface_initialize_qsc_x509(&certinterface, &templatecontext);
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            config.ciphersuites = suites;
+            config.ciphersuitecount = 1U;
+            config.groups = groups;
+            config.groupcount = 1U;
+            config.sigschemes = sigs;
+            config.sigschemecount = 1U;
+            config.certinterface = certinterface;
+            status = qsc_tls_client_initialize(clienta, &config);
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            status = qsc_tls_client_initialize(clientb, &config);
+        }
+
+        if (status == qsc_tls_status_success)
+        {
+            res = (clienta->config.certinterface.state == &clienta->x509context &&
+                clientb->config.certinterface.state == &clientb->x509context &&
+                clienta->config.certinterface.state != clientb->config.certinterface.state &&
+                clienta->config.certinterface.state != certinterface.state &&
+                clientb->config.certinterface.state != certinterface.state &&
+                clienta->x509context.verifybuffer == NULL && clientb->x509context.verifybuffer == NULL &&
+                clienta->x509context.retainresults == true && clientb->x509context.retainresults == true);
+        }
+
+        qsc_tls_client_dispose(clienta);
+        qsc_tls_client_dispose(clientb);
+    }
+
+    if (truststore != NULL)
+    {
+        qsc_memutils_alloc_free(truststore);
+    }
+
+    if (clientb != NULL)
+    {
+        qsc_memutils_alloc_free(clientb);
+    }
+
+    if (clienta != NULL)
+    {
+        qsc_memutils_alloc_free(clienta);
+    }
+
+    return res;
+}
+
 static bool stage19_peer_server_control_test(void)
 {
     qsc_tls_socket_connection* conn;
@@ -315,7 +426,7 @@ static bool stage19_peer_server_control_test(void)
                                         {
                                             if (qsc_tls_socket_server_start_concurrent(server) == qsc_tls_socket_status_not_initialized)
                                             {
-                                                res = true;
+                                                res = stage19_x509_context_isolation_test();
                                             }
                                         }
                                     }
@@ -374,11 +485,11 @@ bool qsctest_tls_stage19_tests(void)
 
     if (stage19_peer_server_control_test() == true)
     {
-        qsctest_print_line("[PASS] TLS Stage 19 socket wrapper peer and server-control test.");
+        qsctest_print_line("[PASS] TLS Stage 19 socket wrapper peer, X.509 isolation, and server-control test.");
     }
     else
     {
-        qsctest_print_line("[FAIL] TLS Stage 19 socket wrapper peer and server-control test.");
+        qsctest_print_line("[FAIL] TLS Stage 19 socket wrapper peer, X.509 isolation, and server-control test.");
         res = false;
     }
 

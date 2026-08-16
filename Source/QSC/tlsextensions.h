@@ -93,10 +93,10 @@ QSC_CPLUSPLUS_ENABLED_START
   */
     typedef struct qsc_tls_extension_bitmap
 {
-    uint64_t lowmask;       /*!< Bits for extension types 0 through 63. */
-    uint64_t highmask;      /*!< Bits for extension types 64 through 127. */
-    uint64_t psk_ke_mask;   /*!< Bits for extension types 128 through 191. */
-    uint64_t tailmask;      /*!< Bits for extension types 192 through 255 and folded higher values. */
+    uint64_t lowmask;           /*!< Bits for extension types 0 through 63. */
+    uint64_t highmask;          /*!< Bits for extension types 64 through 127. */
+    uint64_t psk_ke_mask;       /*!< Bits for extension types 128 through 191. */
+    uint64_t tailmask;          /*!< Bits for extension types 192 through 255 and folded higher values. */
 } qsc_tls_extension_bitmap;
 
 /**
@@ -186,6 +186,20 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_encode_supported_versions_clien
  * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
  */
 QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_encode_supported_versions_server(uint8_t* output, size_t outlen, size_t* offset);
+
+/**
+ * \brief Encode a TLS cookie extension.
+ *
+ * \param output: [uint8_t*] Destination extension block.
+ * \param outlen: [size_t] Destination capacity.
+ * \param offset: [size_t*] In/out write offset.
+ * \param cookie: [const uint8_t*] Cookie bytes.
+ * \param cookielen: [size_t] Cookie length; must be non-zero and at most 65535 bytes.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_encode_cookie(uint8_t* output, size_t outlen, size_t* offset,
+    const uint8_t* cookie, size_t cookielen);
 
 /**
  * \brief Encode the supported_groups extension.
@@ -510,6 +524,19 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_decode_supported_versions_clien
  * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
  */
 QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_decode_supported_versions_server(const uint8_t* input, size_t inplen, uint16_t* selectedversion);
+
+/**
+ * \brief Decode a TLS cookie extension.
+ *
+ * \param input: [const uint8_t*] Extension body.
+ * \param inplen: [size_t] Extension body length.
+ * \param cookie: [const uint8_t**] Receives a borrowed pointer to the cookie bytes.
+ * \param cookielen: [size_t*] Receives the cookie length.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_extensions_decode_cookie(const uint8_t* input, size_t inplen,
+    const uint8_t** cookie, size_t* cookielen);
 
 /**
  * \brief Decode a supported_groups extension body.

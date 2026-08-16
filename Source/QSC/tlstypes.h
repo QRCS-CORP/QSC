@@ -118,6 +118,7 @@ typedef enum qsc_tls_alert_description
 	qsc_tls_alert_bad_certificate_status_response = 113,	/*!< The certificate status response was invalid. */
 	qsc_tls_alert_unknown_psk_identity = 115,				/*!< The offered PSK identity was not recognized. */
 	qsc_tls_alert_certificate_required = 116,				/*!< A certificate was required but not provided. */
+	qsc_tls_alert_general_error = 117,					/*!< A generic error occurred that cannot be mapped to a more specific alert. */
 	qsc_tls_alert_no_application_protocol = 120				/*!< No mutually supported application protocol was found. */
 } qsc_tls_alert_description;
 
@@ -146,6 +147,7 @@ typedef enum qsc_tls_extension_type
 	qsc_tls_extension_signature_algorithms = 13,					/*!< signature_algorithms extension. */
 	qsc_tls_extension_application_layer_protocol_negotiation = 16,	/*!< application_layer_protocol_negotiation extension. */
 	qsc_tls_extension_supported_versions = 43,						/*!< supported_versions extension. */
+	qsc_tls_extension_cookie = 44,									/*!< cookie extension. */
 	qsc_tls_extension_psk_key_exchange_modes = 45,					/*!< psk_key_exchange_modes extension. */
 	qsc_tls_extension_signature_algorithms_cert = 50,				/*!< signature_algorithms_cert extension. */
 	qsc_tls_extension_key_share = 51								/*!< key_share extension. */
@@ -189,7 +191,7 @@ typedef enum qsc_tls_signature_scheme
 
 /**
  * \enum qsc_tls_handshake_type
- * \brief TLS 1.3 handshake message type codes per RFC 8446 section B.3.
+ * \brief TLS 1.3 handshake message type codes per RFC 9846 Appendix B.3.
  */
 typedef enum qsc_tls_handshake_type
 {
@@ -209,7 +211,7 @@ typedef enum qsc_tls_handshake_type
 
 /**
  * \enum qsc_tls_psk_key_exchange_mode
- * \brief psk_key_exchange_modes values per RFC 8446 section 4.2.9.
+ * \brief psk_key_exchange_modes values per RFC 9846 Section 4.3.9.
  */
 typedef enum qsc_tls_psk_key_exchange_mode
 {
@@ -219,7 +221,7 @@ typedef enum qsc_tls_psk_key_exchange_mode
 
 /**
  * \enum qsc_tls_certificate_type
- * \brief Certificate type values per RFC 7250 and RFC 8446.
+ * \brief Certificate type values per RFC 7250 and RFC 9846.
  */
 typedef enum qsc_tls_certificate_type
 {
@@ -229,7 +231,7 @@ typedef enum qsc_tls_certificate_type
 
 /**
  * \enum qsc_tls_alert_level
- * \brief TLS alert severity level per RFC 8446 section 6. In TLS 1.3 the level is advisory;
+ * \brief TLS alert severity level per RFC 9846 Section 6. In TLS 1.3 the level is advisory;
  *        all alerts except close_notify and user_canceled are effectively fatal.
  */
 typedef enum qsc_tls_alert_level

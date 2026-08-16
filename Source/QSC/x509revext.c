@@ -706,6 +706,49 @@ static qsc_x509_crl_verify_status x509_revext_merge_delta_entries(qsc_x509_crl* 
     return status;
 }
 
+static qsc_x509_crl_verify_status x509_revext_copy_crl_backing(qsc_x509_crl* destination, const qsc_x509_crl* source)
+{
+    uint8_t* dercopy;
+    ptrdiff_t tbsoffset;
+    qsc_x509_crl_verify_status status;
+
+    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+    dercopy = (uint8_t*)NULL;
+    tbsoffset = 0;
+
+    if (destination == (qsc_x509_crl*)NULL || source == (const qsc_x509_crl*)NULL ||
+        source->der == (const uint8_t*)NULL || source->derlen == 0U ||
+        source->tbsdata == (const uint8_t*)NULL || source->tbsdatalen == 0U)
+    {
+        status = QSC_X509_CRL_VERIFY_STATUS_INVALID_INPUT;
+    }
+    else
+    {
+        tbsoffset = (ptrdiff_t)(source->tbsdata - source->der);
+
+        if (tbsoffset < 0 || (size_t)tbsoffset >= source->derlen || source->tbsdatalen > (source->derlen - (size_t)tbsoffset))
+        {
+            status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+        }
+        else
+        {
+            dercopy = (uint8_t*)qsc_memutils_malloc(source->derlen);
+
+            if (dercopy != (uint8_t*)NULL)
+            {
+                qsc_memutils_copy(dercopy, source->der, source->derlen);
+                destination->der = dercopy;
+                destination->derlen = source->derlen;
+                destination->tbsdata = dercopy + (size_t)tbsoffset;
+                destination->tbsdatalen = source->tbsdatalen;
+                status = QSC_X509_CRL_VERIFY_STATUS_SUCCESS;
+            }
+        }
+    }
+
+    return status;
+}
+
 static bool x509_revext_current_utc_time(qsc_asn1_time* now)
 {
     time_t tnow;
@@ -748,10 +791,7 @@ static bool x509_revext_current_utc_time(qsc_asn1_time* now)
 
 static void x509_revext_sha1_compute(uint8_t* output, const uint8_t* message, size_t msglen)
 {
-    static const uint32_t iv[5U] =
-    {
-        0x67452301UL, 0xEFCDAB89UL, 0x98BADCFEUL, 0x10325476UL, 0xC3D2E1F0UL
-    };
+    static const uint32_t iv[5U] = { 0x67452301UL, 0xEFCDAB89UL, 0x98BADCFEUL, 0x10325476UL, 0xC3D2E1F0UL };
     uint32_t h[5U] = { 0U };
     uint32_t w[80U] = { 0U };
     uint8_t block[64U] = { 0U };
@@ -1148,9 +1188,17 @@ static bool x509_revext_ocsp_get_basic_response_octets(const uint8_t* der, size_
     const qsc_encoding_ber_element* rb;
     const qsc_encoding_ber_element* rtype;
     const qsc_encoding_ber_element* rocts;
+    const uint8_t* octetregion;
+    const uint8_t* responsebytes;
+    const uint8_t* responsectx;
     size_t consumed;
+    size_t octetheaderlen;
+    size_t octetregionlen;
+    size_t responsebyteslen;
+    size_t responsectxlen;
     uint64_t response_status;
     qsc_asn1_oid oid;
+    qsc_asn1_status status;
     bool res;
 
     root = (qsc_encoding_ber_element*)NULL;
@@ -1158,8 +1206,16 @@ static bool x509_revext_ocsp_get_basic_response_octets(const uint8_t* der, size_
     rb = (const qsc_encoding_ber_element*)NULL;
     rtype = (const qsc_encoding_ber_element*)NULL;
     rocts = (const qsc_encoding_ber_element*)NULL;
+    octetregion = (const uint8_t*)NULL;
+    responsebytes = (const uint8_t*)NULL;
+    responsectx = (const uint8_t*)NULL;
     consumed = 0U;
+    octetheaderlen = 0U;
+    octetregionlen = 0U;
+    responsebyteslen = 0U;
+    responsectxlen = 0U;
     response_status = 0U;
+    status = QSC_ASN1_STATUS_INVALID_ENCODING;
     res = false;
     *octets = (const uint8_t*)NULL;
     *octetlen = 0U;
@@ -1192,9 +1248,30 @@ static bool x509_revext_ocsp_get_basic_response_octets(const uint8_t* der, size_
                     oid.length == 9U && oid.data[0U] == 0x2BU && oid.data[1U] == 0x06U && oid.data[2U] == 0x01U && oid.data[3U] == 0x05U &&
                     oid.data[4U] == 0x05U && oid.data[5U] == 0x07U && oid.data[6U] == 0x30U && oid.data[7U] == 0x01U && oid.data[8U] == 0x01U)
                 {
-                    *octets = rocts->value;
-                    *octetlen = rocts->length;
-                    res = true;
+                    status = qsc_asn1_der_get_child_region(der, derlen, 1U, &responsectx, &responsectxlen);
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        status = qsc_asn1_der_get_child_region(responsectx, responsectxlen, 0U, &responsebytes, &responsebyteslen);
+                    }
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS)
+                    {
+                        status = qsc_asn1_der_get_child_region(responsebytes, responsebyteslen, 1U, &octetregion, &octetregionlen);
+                    }
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS && octetregion != (const uint8_t*)NULL &&
+                        rocts->length != 0U && octetregionlen > rocts->length)
+                    {
+                        octetheaderlen = octetregionlen - rocts->length;
+
+                        if (octetheaderlen != 0U && octetheaderlen <= octetregionlen)
+                        {
+                            *octets = octetregion + octetheaderlen;
+                            *octetlen = rocts->length;
+                            res = true;
+                        }
+                    }
                 }
             }
         }
@@ -1208,25 +1285,137 @@ static bool x509_revext_ocsp_get_basic_response_octets(const uint8_t* der, size_
     return res;
 }
 
+static bool x509_revext_ocsp_extensions_are_acceptable(const qsc_encoding_ber_element* extensions)
+{
+    qsc_x509_extension extension = { 0 };
+    size_t i;
+    bool res;
+
+    res = false;
+
+    if (extensions != (const qsc_encoding_ber_element*)NULL && qsc_asn1_require_sequence(extensions, 1U, SIZE_MAX) == QSC_ASN1_STATUS_SUCCESS)
+    {
+        res = true;
+
+        for (i = 0U; i < extensions->ccount; ++i)
+        {
+            qsc_memutils_clear((uint8_t*)&extension, sizeof(qsc_x509_extension));
+
+            if (qsc_x509_extension_decode(extensions->children[i], &extension) != QSC_ASN1_STATUS_SUCCESS || extension.critical == true)
+            {
+                res = false;
+                break;
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool x509_revext_ocsp_match_responder_id(const qsc_encoding_ber_element* responsedata, const qsc_x509_certificate* responder)
+{
+    const qsc_encoding_ber_element* responderid;
+    const qsc_encoding_ber_element* ridchild;
+    uint8_t expected[1024U] = { 0U };
+    uint8_t actual[1024U] = { 0U };
+    uint8_t keyhash[20U] = { 0U };
+    size_t idx;
+    size_t expectedlen;
+    size_t actuallen;
+    bool res;
+
+    responderid = (const qsc_encoding_ber_element*)NULL;
+    ridchild = (const qsc_encoding_ber_element*)NULL;
+    idx = 0U;
+    expectedlen = 0U;
+    actuallen = 0U;
+    res = false;
+
+    if (responsedata != (const qsc_encoding_ber_element*)NULL && responder != (const qsc_x509_certificate*)NULL)
+    {
+        if (qsc_asn1_child_count(responsedata) >= 1U)
+        {
+            const qsc_encoding_ber_element* first;
+
+            first = qsc_asn1_get_child(responsedata, 0U);
+
+            if (first != (const qsc_encoding_ber_element*)NULL &&
+                first->tagclass == QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC && first->tagnumber == 0U)
+            {
+                idx = 1U;
+            }
+        }
+
+        responderid = qsc_asn1_get_child(responsedata, idx);
+
+        if (responderid != (const qsc_encoding_ber_element*)NULL)
+        {
+            if (responderid->tagclass == QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC && responderid->tagnumber == 1U)
+            {
+                if (qsc_asn1_get_explicit_child(responderid, &ridchild) == QSC_ASN1_STATUS_SUCCESS)
+                {
+                    expectedlen = sizeof(expected);
+                    actuallen = qsc_encoding_der_encode_element((qsc_encoding_ber_element*)ridchild, actual, sizeof(actual));
+
+                    if (actuallen != 0U && x509_revext_extract_cert_name_der(responder, true, expected, sizeof(expected), &expectedlen) == true)
+                    {
+                        res = (expectedlen == actuallen) && qsc_intutils_are_equal8(expected, actual, expectedlen);
+                    }
+                }
+            }
+            else if (responderid->tagclass == QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC && responderid->tagnumber == 2U)
+            {
+                if (qsc_asn1_get_explicit_child(responderid, &ridchild) == QSC_ASN1_STATUS_SUCCESS &&
+                    qsc_asn1_require_tag(ridchild, QSC_ENCODING_BER_CLASS_UNIVERSAL, false, BER_ASN1_OCTET_STRING) == QSC_ASN1_STATUS_SUCCESS)
+                {
+                    x509_revext_sha1_compute(keyhash, responder->subjectpublickeyinfo.publickey, responder->subjectpublickeyinfo.publickeylen);
+                    res = (ridchild->length == sizeof(keyhash)) && qsc_intutils_are_equal8(ridchild->value, keyhash, sizeof(keyhash));
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
 static bool x509_revext_ocsp_extract_basic_signature(const uint8_t* basicder, size_t basiclen, const uint8_t** tbsdata, size_t* tbsdatalen,
     qsc_x509_algorithm_identifier* sigalg, const uint8_t** sigdata, size_t* siglen, uint8_t* sigunused, qsc_x509_certificate* responder)
 {
     qsc_asn1_bit_string sig = { 0 };
-    uint8_t certder[QSC_X509_CERTIFICATE_WRITE_MAX] = { 0U };
     qsc_encoding_ber_element* root;
-    const qsc_encoding_ber_element* child;
     const qsc_encoding_ber_element* certsctx;
     const qsc_encoding_ber_element* certseq;
-    size_t certderlen;
+    const uint8_t* certregion;
+    const uint8_t* certseqregion;
+    const uint8_t* certsregion;
+    const uint8_t* sigregion;
+    const uint8_t* tbsslice;
+    size_t certregionlen;
+    size_t certseqregionlen;
+    size_t certsregionlen;
     size_t consumed;
+    size_t sigheaderlen;
+    size_t sigregionlen;
+    size_t tbsslicelen;
+    qsc_asn1_status status;
     bool res;
 
     root = (qsc_encoding_ber_element*)NULL;
-    child = (const qsc_encoding_ber_element*)NULL;
     certsctx = (const qsc_encoding_ber_element*)NULL;
     certseq = (const qsc_encoding_ber_element*)NULL;
-    certderlen = 0U;
+    certregion = (const uint8_t*)NULL;
+    certseqregion = (const uint8_t*)NULL;
+    certsregion = (const uint8_t*)NULL;
+    sigregion = (const uint8_t*)NULL;
+    tbsslice = (const uint8_t*)NULL;
+    certregionlen = 0U;
+    certseqregionlen = 0U;
+    certsregionlen = 0U;
     consumed = 0U;
+    sigheaderlen = 0U;
+    sigregionlen = 0U;
+    tbsslicelen = 0U;
+    status = QSC_ASN1_STATUS_INVALID_ENCODING;
     res = false;
     *tbsdata = (const uint8_t*)NULL;
     *tbsdatalen = 0U;
@@ -1240,22 +1429,48 @@ static bool x509_revext_ocsp_extract_basic_signature(const uint8_t* basicder, si
 
     if (root != (qsc_encoding_ber_element*)NULL && consumed == basiclen && qsc_asn1_require_sequence(root, 3U, 4U) == QSC_ASN1_STATUS_SUCCESS)
     {
-        child = qsc_asn1_get_child(root, 0U);
+        status = qsc_asn1_der_get_child_region(basicder, basiclen, 0U, &tbsslice, &tbsslicelen);
 
-        if (child != (const qsc_encoding_ber_element*)NULL)
+        if (status == QSC_ASN1_STATUS_SUCCESS && tbsslice != (const uint8_t*)NULL && tbsslicelen != 0U && tbsslicelen <= basiclen)
         {
-            *tbsdatalen = qsc_encoding_der_encode_element((qsc_encoding_ber_element*)child, (uint8_t*)NULL, 0U);
-            *tbsdata = basicder;
+            *tbsdata = tbsslice;
+            *tbsdatalen = tbsslicelen;
+        }
+        else
+        {
+            status = QSC_ASN1_STATUS_INVALID_ENCODING;
         }
 
-        if (*tbsdatalen != 0U && *tbsdatalen <= basiclen &&
-            qsc_x509_signature_algorithm_decode(qsc_asn1_get_child(root, 1U), sigalg) == QSC_ASN1_STATUS_SUCCESS &&
-            qsc_asn1_decode_bit_string(qsc_asn1_get_child(root, 2U), &sig) == QSC_ASN1_STATUS_SUCCESS)
+        if (status == QSC_ASN1_STATUS_SUCCESS)
         {
-            *sigdata = sig.data;
-            *siglen = sig.length;
-            *sigunused = sig.unused;
-            res = true;
+            status = qsc_x509_signature_algorithm_decode(qsc_asn1_get_child(root, 1U), sigalg);
+        }
+
+        if (status == QSC_ASN1_STATUS_SUCCESS)
+        {
+            status = qsc_asn1_decode_bit_string(qsc_asn1_get_child(root, 2U), &sig);
+        }
+
+        if (status == QSC_ASN1_STATUS_SUCCESS)
+        {
+            status = qsc_asn1_der_get_child_region(basicder, basiclen, 2U, &sigregion, &sigregionlen);
+
+            if (status == QSC_ASN1_STATUS_SUCCESS && sigregion != (const uint8_t*)NULL && sig.length < sigregionlen)
+            {
+                sigheaderlen = sigregionlen - sig.length - 1U;
+
+                if (sigheaderlen < sigregionlen && sigregion[sigheaderlen] == sig.unused)
+                {
+                    *sigdata = sigregion + sigheaderlen + 1U;
+                    *siglen = sig.length;
+                    *sigunused = sig.unused;
+                    res = true;
+                }
+                else
+                {
+                    status = QSC_ASN1_STATUS_INVALID_ENCODING;
+                }
+            }
         }
 
         if (res == true)
@@ -1265,13 +1480,58 @@ static bool x509_revext_ocsp_extract_basic_signature(const uint8_t* basicder, si
             if (certsctx != (const qsc_encoding_ber_element*)NULL && qsc_asn1_get_explicit_child(certsctx, &certseq) == QSC_ASN1_STATUS_SUCCESS &&
                 qsc_asn1_require_sequence(certseq, 1U, SIZE_MAX) == QSC_ASN1_STATUS_SUCCESS)
             {
-                certderlen = qsc_encoding_der_encode_element((qsc_encoding_ber_element*)qsc_asn1_get_child(certseq, 0U), certder, sizeof(certder));
+                status = qsc_asn1_der_get_child_region(basicder, basiclen, 3U, &certsregion, &certsregionlen);
 
-                if (certderlen != 0U)
+                if (status == QSC_ASN1_STATUS_SUCCESS)
                 {
-                    if (qsc_x509_certificate_decode_der(certder, certderlen, responder) != QSC_ASN1_STATUS_SUCCESS)
+                    status = qsc_asn1_der_get_child_region(certsregion, certsregionlen, 0U, &certseqregion, &certseqregionlen);
+                }
+
+                if (status == QSC_ASN1_STATUS_SUCCESS)
+                {
+                    const qsc_encoding_ber_element* responsedata;
+                    qsc_x509_certificate* candidate;
+                    size_t i;
+                    bool found;
+
+                    candidate = qsc_memutils_malloc(sizeof(qsc_x509_certificate));
+
+                    if (candidate != NULL)
                     {
-                        qsc_memutils_secure_erase((uint8_t*)responder, sizeof(qsc_x509_certificate));
+                        qsc_memutils_clear(candidate, sizeof(qsc_x509_certificate));
+                        responsedata = qsc_asn1_get_child(root, 0U);
+                        found = false;
+
+                        for (i = 0U; i < certseq->ccount && found == false; ++i)
+                        {
+                            certregion = (const uint8_t*)NULL;
+                            certregionlen = 0U;
+                            status = qsc_asn1_der_get_child_region(certseqregion, certseqregionlen, i, &certregion, &certregionlen);
+
+                            if (status == QSC_ASN1_STATUS_SUCCESS)
+                            {
+                                qsc_memutils_clear((uint8_t*)candidate, sizeof(qsc_x509_certificate));
+                                status = qsc_x509_certificate_decode_der(certregion, certregionlen, candidate);
+
+                                if (status == QSC_ASN1_STATUS_SUCCESS && x509_revext_ocsp_match_responder_id(responsedata, candidate) == true)
+                                {
+                                    qsc_memutils_copy(responder, candidate, sizeof(qsc_x509_certificate));
+                                    found = true;
+                                }
+                            }
+                        }
+
+                        qsc_memutils_secure_erase(candidate, sizeof(qsc_x509_certificate));
+                        qsc_memutils_alloc_free(candidate);
+                    }
+                    else
+                    {
+                        status = QSC_ASN1_STATUS_FAILURE;
+                    }
+
+                    if (status == QSC_ASN1_STATUS_SUCCESS && found == false)
+                    {
+                        qsc_memutils_clear((uint8_t*)responder, sizeof(qsc_x509_certificate));
                     }
                 }
             }
@@ -1289,140 +1549,248 @@ static bool x509_revext_ocsp_extract_basic_signature(const uint8_t* basicder, si
 static bool x509_revext_ocsp_parse_single_response_for_cert(const qsc_encoding_ber_element* single, const qsc_x509_certificate* certificate,
     const qsc_x509_certificate* issuer, const qsc_asn1_time* now, bool* isgood)
 {
-    qsc_asn1_time thisupdate = { 0 };
     qsc_asn1_time nextupdate = { 0 };
+    qsc_asn1_time revocationtime = { 0 };
+    qsc_asn1_time thisupdate = { 0 };
     qsc_x509_algorithm_identifier hashalg = { 0 };
+    const qsc_encoding_ber_element* algel;
     const qsc_encoding_ber_element* certid;
-    const qsc_encoding_ber_element* statusel;
-    const qsc_encoding_ber_element* thisupdateel;
+    const qsc_encoding_ber_element* child;
+    const qsc_encoding_ber_element* extensions;
+    const qsc_encoding_ber_element* keyhashel;
+    const qsc_encoding_ber_element* namehashel;
     const qsc_encoding_ber_element* nextupdatectx;
     const qsc_encoding_ber_element* nextupdateel;
-    const qsc_encoding_ber_element* algel;
-    const qsc_encoding_ber_element* namehashel;
-    const qsc_encoding_ber_element* keyhashel;
+    const qsc_encoding_ber_element* reasonctx;
+    const qsc_encoding_ber_element* reasonel;
+    const qsc_encoding_ber_element* revtime;
     const qsc_encoding_ber_element* serialel;
+    const qsc_encoding_ber_element* singleextensionsctx;
+    const qsc_encoding_ber_element* statusel;
+    const qsc_encoding_ber_element* thisupdateel;
     uint8_t name_der[1024U] = { 0U };
     uint8_t expected_name_hash[64U] = { 0U };
     uint8_t expected_key_hash[64U] = { 0U };
     uint8_t serial[QSC_X509_SERIAL_NUMBER_MAX] = { 0U };
-    size_t name_derlen;
+    size_t childcount;
     size_t expected_key_hash_len;
     size_t expected_name_hash_len;
+    size_t name_derlen;
     size_t seriallen;
+    size_t statuscount;
     bool hasnext;
     bool matched;
+    bool optionalvalid;
+    bool res;
+    bool statusvalid;
 
-    matched = false;
-    hasnext = false;
-    name_derlen = 0U;
-    expected_name_hash_len = 0U;
+    algel = (const qsc_encoding_ber_element*)NULL;
+    certid = (const qsc_encoding_ber_element*)NULL;
+    child = (const qsc_encoding_ber_element*)NULL;
+    extensions = (const qsc_encoding_ber_element*)NULL;
+    keyhashel = (const qsc_encoding_ber_element*)NULL;
+    namehashel = (const qsc_encoding_ber_element*)NULL;
+    nextupdatectx = (const qsc_encoding_ber_element*)NULL;
+    nextupdateel = (const qsc_encoding_ber_element*)NULL;
+    reasonctx = (const qsc_encoding_ber_element*)NULL;
+    reasonel = (const qsc_encoding_ber_element*)NULL;
+    revtime = (const qsc_encoding_ber_element*)NULL;
+    serialel = (const qsc_encoding_ber_element*)NULL;
+    singleextensionsctx = (const qsc_encoding_ber_element*)NULL;
+    statusel = (const qsc_encoding_ber_element*)NULL;
+    thisupdateel = (const qsc_encoding_ber_element*)NULL;
+    childcount = 0U;
     expected_key_hash_len = 0U;
+    expected_name_hash_len = 0U;
+    name_derlen = 0U;
     seriallen = 0U;
-    *isgood = false;
+    statuscount = 0U;
+    hasnext = false;
+    matched = false;
+    optionalvalid = true;
+    res = false;
+    statusvalid = false;
 
-    if (qsc_asn1_require_sequence(single, 3U, 5U) != QSC_ASN1_STATUS_SUCCESS)
-    {
-        return false;
-    }
-
-    certid = qsc_asn1_get_child(single, 0U);
-    statusel = qsc_asn1_get_child(single, 1U);
-    thisupdateel = qsc_asn1_get_child(single, 2U);
-
-    if (certid == (const qsc_encoding_ber_element*)NULL || statusel == (const qsc_encoding_ber_element*)NULL || thisupdateel == (const qsc_encoding_ber_element*)NULL ||
-        qsc_asn1_require_sequence(certid, 4U, 4U) != QSC_ASN1_STATUS_SUCCESS)
-    {
-        return false;
-    }
-
-    algel = qsc_asn1_get_child(certid, 0U);
-    namehashel = qsc_asn1_get_child(certid, 1U);
-    keyhashel = qsc_asn1_get_child(certid, 2U);
-    serialel = qsc_asn1_get_child(certid, 3U);
-
-    if (algel == (const qsc_encoding_ber_element*)NULL || namehashel == (const qsc_encoding_ber_element*)NULL ||
-        keyhashel == (const qsc_encoding_ber_element*)NULL || serialel == (const qsc_encoding_ber_element*)NULL ||
-        qsc_x509_algorithm_identifier_decode(algel, &hashalg) != QSC_ASN1_STATUS_SUCCESS)
-    {
-        return false;
-    }
-
-    if (namehashel->tagclass != QSC_ENCODING_BER_CLASS_UNIVERSAL || namehashel->tagnumber != BER_ASN1_OCTET_STRING ||
-        keyhashel->tagclass != QSC_ENCODING_BER_CLASS_UNIVERSAL || keyhashel->tagnumber != BER_ASN1_OCTET_STRING)
-    {
-        return false;
-    }
-
-    if (x509_revext_copy_positive_integer(serialel, serial, sizeof(serial), &seriallen) == false)
-    {
-        return false;
-    }
-
-    if (x509_revext_extract_cert_name_der(issuer, true, name_der, sizeof(name_der), &name_derlen) == false)
-    {
-        return false;
-    }
-
-    if (x509_revext_hash_octets(&hashalg.algorithm_oid, name_der, name_derlen, expected_name_hash, &expected_name_hash_len) == false ||
-        x509_revext_hash_octets(&hashalg.algorithm_oid, issuer->subjectpublickeyinfo.publickey, issuer->subjectpublickeyinfo.publickeylen,
-            expected_key_hash, &expected_key_hash_len) == false)
-    {
-        return false;
-    }
-
-    matched = (expected_name_hash_len == namehashel->length) &&
-        qsc_intutils_are_equal8(expected_name_hash, namehashel->value, expected_name_hash_len) &&
-        (expected_key_hash_len == keyhashel->length) &&
-        qsc_intutils_are_equal8(expected_key_hash, keyhashel->value, expected_key_hash_len) &&
-        x509_revext_serial_bytes_equal(serial, seriallen, certificate->serialnumber, certificate->serialnumberlen);
-
-    if (matched == false)
-    {
-        return false;
-    }
-
-    if (qsc_asn1_decode_time(thisupdateel, &thisupdate) != QSC_ASN1_STATUS_SUCCESS)
-    {
-        return false;
-    }
-
-    if (qsc_asn1_time_compare(now, &thisupdate) < 0)
-    {
-        return false;
-    }
-
-    nextupdatectx = qsc_asn1_find_context_child(single, 0U);
-
-    if (nextupdatectx != (const qsc_encoding_ber_element*)NULL)
-    {
-        if (qsc_asn1_get_explicit_child(nextupdatectx, &nextupdateel) != QSC_ASN1_STATUS_SUCCESS ||
-            qsc_asn1_decode_time(nextupdateel, &nextupdate) != QSC_ASN1_STATUS_SUCCESS)
-        {
-            return false;
-        }
-
-        hasnext = true;
-    }
-
-    if (hasnext == true && qsc_asn1_time_compare(now, &nextupdate) > 0)
-    {
-        return false;
-    }
-
-    if (qsc_asn1_element_is_tag(statusel, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, false, 0U) == true)
-    {
-        *isgood = true;
-        return true;
-    }
-
-    if (qsc_asn1_element_is_tag(statusel, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 1U) == true ||
-        qsc_asn1_element_is_tag(statusel, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, false, 2U) == true)
+    if (isgood != (bool*)NULL)
     {
         *isgood = false;
-        return true;
     }
 
-    return false;
+    if (single != (const qsc_encoding_ber_element*)NULL &&
+        certificate != (const qsc_x509_certificate*)NULL &&
+        issuer != (const qsc_x509_certificate*)NULL &&
+        now != (const qsc_asn1_time*)NULL &&
+        isgood != (bool*)NULL &&
+        qsc_asn1_require_sequence(single, 3U, 5U) == QSC_ASN1_STATUS_SUCCESS)
+    {
+        childcount = qsc_asn1_child_count(single);
+        certid = qsc_asn1_get_child(single, 0U);
+        statusel = qsc_asn1_get_child(single, 1U);
+        thisupdateel = qsc_asn1_get_child(single, 2U);
+
+        if (certid != (const qsc_encoding_ber_element*)NULL &&
+            statusel != (const qsc_encoding_ber_element*)NULL &&
+            thisupdateel != (const qsc_encoding_ber_element*)NULL &&
+            qsc_asn1_require_sequence(certid, 4U, 4U) == QSC_ASN1_STATUS_SUCCESS &&
+            qsc_asn1_element_is_tag(thisupdateel, QSC_ENCODING_BER_CLASS_UNIVERSAL, false, BER_ASN1_GENERALIZEDTIME) == true)
+        {
+            if (childcount >= 4U)
+            {
+                child = qsc_asn1_get_child(single, 3U);
+
+                if (child != (const qsc_encoding_ber_element*)NULL)
+                {
+                    if (qsc_asn1_element_is_tag(child, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 0U) == true)
+                    {
+                        nextupdatectx = child;
+                        hasnext = true;
+                    }
+                    else if (qsc_asn1_element_is_tag(child, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 1U) == true)
+                    {
+                        singleextensionsctx = child;
+                    }
+                    else
+                    {
+                        optionalvalid = false;
+                    }
+                }
+                else
+                {
+                    optionalvalid = false;
+                }
+            }
+
+            if (optionalvalid == true && childcount == 5U)
+            {
+                child = qsc_asn1_get_child(single, 4U);
+
+                if (child == (const qsc_encoding_ber_element*)NULL ||
+                    hasnext == false ||
+                    singleextensionsctx != (const qsc_encoding_ber_element*)NULL ||
+                    qsc_asn1_element_is_tag(child, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 1U) == false)
+                {
+                    optionalvalid = false;
+                }
+                else
+                {
+                    singleextensionsctx = child;
+                }
+            }
+
+            if (optionalvalid == true && hasnext == true)
+            {
+                if (qsc_asn1_get_explicit_child(nextupdatectx, &nextupdateel) != QSC_ASN1_STATUS_SUCCESS ||
+                    qsc_asn1_element_is_tag(nextupdateel, QSC_ENCODING_BER_CLASS_UNIVERSAL, false, BER_ASN1_GENERALIZEDTIME) == false ||
+                    qsc_asn1_decode_time(nextupdateel, &nextupdate) != QSC_ASN1_STATUS_SUCCESS)
+                {
+                    optionalvalid = false;
+                }
+            }
+
+            if (optionalvalid == true &&
+                singleextensionsctx != (const qsc_encoding_ber_element*)NULL)
+            {
+                if (qsc_asn1_get_explicit_child(singleextensionsctx, &extensions) != QSC_ASN1_STATUS_SUCCESS ||
+                    x509_revext_ocsp_extensions_are_acceptable(extensions) == false)
+                {
+                    optionalvalid = false;
+                }
+            }
+
+            /*
+             * Validate CertStatus independently of nextUpdate.
+             * GOOD and UNKNOWN are IMPLICIT NULL.
+             * REVOKED is IMPLICIT RevokedInfo, so its children are direct
+             * children of statusel.
+             */
+            if (optionalvalid == true)
+            {
+                if (qsc_asn1_element_is_tag(statusel, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, false, 0U) == true &&
+                    statusel->length == 0U)
+                {
+                    *isgood = true;
+                    statusvalid = true;
+                }
+                else if (qsc_asn1_element_is_tag(statusel, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, false, 2U) == true &&
+                    statusel->length == 0U)
+                {
+                    *isgood = false;
+                    statusvalid = true;
+                }
+                else if (qsc_asn1_element_is_tag(statusel, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 1U) == true)
+                {
+                    statuscount = qsc_asn1_child_count(statusel);
+
+                    if (statuscount >= 1U && statuscount <= 2U)
+                    {
+                        revtime = qsc_asn1_get_child(statusel, 0U);
+
+                        if (revtime != (const qsc_encoding_ber_element*)NULL &&
+                            qsc_asn1_element_is_tag(revtime, QSC_ENCODING_BER_CLASS_UNIVERSAL, false, BER_ASN1_GENERALIZEDTIME) == true &&
+                            qsc_asn1_decode_time(revtime, &revocationtime) == QSC_ASN1_STATUS_SUCCESS)
+                        {
+                            statusvalid = true;
+                            *isgood = false;
+
+                            if (statuscount == 2U)
+                            {
+                                reasonctx = qsc_asn1_get_child(statusel, 1U);
+
+                                if (reasonctx == (const qsc_encoding_ber_element*)NULL ||
+                                    qsc_asn1_element_is_tag(reasonctx, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 0U) == false ||
+                                    qsc_asn1_get_explicit_child(reasonctx, &reasonel) != QSC_ASN1_STATUS_SUCCESS ||
+                                    qsc_asn1_require_tag(reasonel, QSC_ENCODING_BER_CLASS_UNIVERSAL, false, X509_ASN1_TAG_ENUMERATED) != QSC_ASN1_STATUS_SUCCESS ||
+                                    reasonel->length == 0U ||
+                                    reasonel->value == (const uint8_t*)NULL || (reasonel->value[0U] & 0x80U) != 0U)
+                                {
+                                    statusvalid = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (optionalvalid == true && statusvalid == true)
+            {
+                algel = qsc_asn1_get_child(certid, 0U);
+                namehashel = qsc_asn1_get_child(certid, 1U);
+                keyhashel = qsc_asn1_get_child(certid, 2U);
+                serialel = qsc_asn1_get_child(certid, 3U);
+
+                if (algel != (const qsc_encoding_ber_element*)NULL &&
+                    namehashel != (const qsc_encoding_ber_element*)NULL &&
+                    keyhashel != (const qsc_encoding_ber_element*)NULL &&
+                    serialel != (const qsc_encoding_ber_element*)NULL &&
+                    qsc_x509_algorithm_identifier_decode(algel, &hashalg) == QSC_ASN1_STATUS_SUCCESS &&
+                    namehashel->tagclass == QSC_ENCODING_BER_CLASS_UNIVERSAL &&
+                    namehashel->tagnumber == BER_ASN1_OCTET_STRING &&
+                    keyhashel->tagclass == QSC_ENCODING_BER_CLASS_UNIVERSAL &&
+                    keyhashel->tagnumber == BER_ASN1_OCTET_STRING &&
+                    x509_revext_copy_positive_integer(serialel, serial, sizeof(serial), &seriallen) == true &&
+                    x509_revext_extract_cert_name_der(issuer, true, name_der, sizeof(name_der), &name_derlen) == true &&
+                    x509_revext_hash_octets(&hashalg.algorithm_oid, name_der, name_derlen, expected_name_hash, &expected_name_hash_len) == true &&
+                    x509_revext_hash_octets(&hashalg.algorithm_oid, issuer->subjectpublickeyinfo.publickey, issuer->subjectpublickeyinfo.publickeylen, expected_key_hash, &expected_key_hash_len) == true)
+                {
+                    matched = (expected_name_hash_len == namehashel->length) &&
+                        qsc_intutils_are_equal8(expected_name_hash, namehashel->value, expected_name_hash_len) &&
+                        (expected_key_hash_len == keyhashel->length) &&
+                        qsc_intutils_are_equal8(expected_key_hash, keyhashel->value, expected_key_hash_len) &&
+                        x509_revext_serial_bytes_equal(serial, seriallen, certificate->serialnumber, certificate->serialnumberlen);
+
+                    if (matched == true &&
+                        qsc_asn1_decode_time(thisupdateel, &thisupdate) == QSC_ASN1_STATUS_SUCCESS &&
+                        qsc_asn1_time_compare(now, &thisupdate) >= 0 &&
+                        (hasnext == false || qsc_asn1_time_compare(now, &nextupdate) <= 0))
+                    {
+                        res = true;
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
 }
 
 static bool x509_revext_ocsp_response_matches_certificate(const uint8_t* basicder, size_t basiclen, const qsc_x509_certificate* certificate,
@@ -1468,7 +1836,25 @@ static bool x509_revext_ocsp_response_matches_certificate(const uint8_t* basicde
 
             if (responses != (const qsc_encoding_ber_element*)NULL && qsc_asn1_require_sequence(responses, 1U, SIZE_MAX) == QSC_ASN1_STATUS_SUCCESS)
             {
-                for (i = 0U; i < qsc_asn1_child_count(responses); ++i)
+                const qsc_encoding_ber_element* responseextensionsctx;
+                const qsc_encoding_ber_element* responseextensions;
+                bool extensionsvalid;
+
+                responseextensionsctx = qsc_asn1_get_child(response_data, idx + 1U);
+                responseextensions = (const qsc_encoding_ber_element*)NULL;
+                extensionsvalid = true;
+
+                if (responseextensionsctx != (const qsc_encoding_ber_element*)NULL)
+                {
+                    if (qsc_asn1_element_is_tag(responseextensionsctx, QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC, true, 1U) == false ||
+                        qsc_asn1_get_explicit_child(responseextensionsctx, &responseextensions) != QSC_ASN1_STATUS_SUCCESS ||
+                        x509_revext_ocsp_extensions_are_acceptable(responseextensions) == false)
+                    {
+                        extensionsvalid = false;
+                    }
+                }
+
+                for (i = 0U; i < qsc_asn1_child_count(responses) && extensionsvalid == true; ++i)
                 {
                     if (x509_revext_ocsp_parse_single_response_for_cert(qsc_asn1_get_child(responses, i), certificate, issuer, now, &good) == true)
                     {
@@ -1489,6 +1875,218 @@ static bool x509_revext_ocsp_response_matches_certificate(const uint8_t* basicde
     return res;
 }
 
+static qsc_asn1_status x509_revext_decode_implicit_boolean(const qsc_encoding_ber_element* element, bool* value)
+{
+    qsc_asn1_status status;
+
+    status = QSC_ASN1_STATUS_INVALID_INPUT;
+
+    if (element != (const qsc_encoding_ber_element*)NULL && value != (bool*)NULL)
+    {
+        if (element->constructed == true || element->length != 1U || element->value == (const uint8_t*)NULL)
+        {
+            status = QSC_ASN1_STATUS_INVALID_ENCODING;
+        }
+        else if (element->value[0U] == 0x00U)
+        {
+            *value = false;
+            status = QSC_ASN1_STATUS_SUCCESS;
+        }
+        else if (element->value[0U] == 0xFFU)
+        {
+            *value = true;
+            status = QSC_ASN1_STATUS_SUCCESS;
+        }
+        else
+        {
+            status = QSC_ASN1_STATUS_INVALID_ENCODING;
+        }
+    }
+
+    return status;
+}
+
+static qsc_x509_crl_verify_status x509_revext_check_idp_scope(const qsc_x509_extension* extension, const qsc_x509_certificate* certificate)
+{
+    qsc_encoding_ber_element* root;
+    const qsc_encoding_ber_element* child;
+    size_t consumed;
+    size_t i;
+    uint8_t seen;
+    bool indirect;
+    bool onlyattr;
+    bool onlyca;
+    bool onlyuser;
+    qsc_asn1_status astatus;
+    qsc_x509_crl_verify_status status;
+
+    root = (qsc_encoding_ber_element*)NULL;
+    consumed = 0U;
+    seen = 0U;
+    indirect = false;
+    onlyattr = false;
+    onlyca = false;
+    onlyuser = false;
+    astatus = QSC_ASN1_STATUS_FAILURE;
+    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+
+    if (extension == (const qsc_x509_extension*)NULL || certificate == (const qsc_x509_certificate*)NULL)
+    {
+        status = QSC_X509_CRL_VERIFY_STATUS_INVALID_INPUT;
+    }
+    else if (extension->critical == false || extension->value == (const uint8_t*)NULL || extension->valuelen == 0U)
+    {
+        status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+    }
+    else
+    {
+        root = qsc_encoding_der_decode_element(extension->value, extension->valuelen, &consumed);
+
+        if (root == (qsc_encoding_ber_element*)NULL || consumed != extension->valuelen ||
+            qsc_asn1_require_sequence(root, 1U, 6U) != QSC_ASN1_STATUS_SUCCESS)
+        {
+            status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+        }
+        else
+        {
+            status = QSC_X509_CRL_VERIFY_STATUS_SUCCESS;
+
+            for (i = 0U; i < root->ccount && status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS; ++i)
+            {
+                child = qsc_asn1_get_child(root, i);
+
+                if (child == (const qsc_encoding_ber_element*)NULL || child->tagclass != QSC_ENCODING_BER_CLASS_CONTEXT_SPECIFIC || child->tagnumber > 5U)
+                {
+                    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                }
+                else if ((seen & (uint8_t)(1U << child->tagnumber)) != 0U)
+                {
+                    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                }
+                else
+                {
+                    seen |= (uint8_t)(1U << child->tagnumber);
+
+                    switch (child->tagnumber)
+                    {
+                        case 0U:
+                        case 3U:
+                        {
+                            /* Named distribution points and reason-partitioned CRLs require the full
+                             * RFC 5280 reasons-mask algorithm. They are intentionally fail-closed until
+                             * that complete algorithm is enabled. */
+                            status = QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED;
+                            break;
+                        }
+                        case 1U:
+                        {
+                            astatus = x509_revext_decode_implicit_boolean(child, &onlyuser);
+                            status = (astatus == QSC_ASN1_STATUS_SUCCESS) ? QSC_X509_CRL_VERIFY_STATUS_SUCCESS : QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                            break;
+                        }
+                        case 2U:
+                        {
+                            astatus = x509_revext_decode_implicit_boolean(child, &onlyca);
+                            status = (astatus == QSC_ASN1_STATUS_SUCCESS) ? QSC_X509_CRL_VERIFY_STATUS_SUCCESS : QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                            break;
+                        }
+                        case 4U:
+                        {
+                            astatus = x509_revext_decode_implicit_boolean(child, &indirect);
+                            status = (astatus == QSC_ASN1_STATUS_SUCCESS) ? QSC_X509_CRL_VERIFY_STATUS_SUCCESS : QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                            break;
+                        }
+                        case 5U:
+                        {
+                            astatus = x509_revext_decode_implicit_boolean(child, &onlyattr);
+                            status = (astatus == QSC_ASN1_STATUS_SUCCESS) ? QSC_X509_CRL_VERIFY_STATUS_SUCCESS : QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                            break;
+                        }
+                        default:
+                        {
+                            status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS)
+            {
+                if ((onlyuser == true && onlyca == true) || (onlyuser == true && onlyattr == true) || (onlyca == true && onlyattr == true))
+                {
+                    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                }
+                else if (indirect == true || onlyattr == true)
+                {
+                    status = QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED;
+                }
+                else if (onlyuser == true && certificate->extensions.basicconstraints.present == true && certificate->extensions.basicconstraints.ca == true)
+                {
+                    status = QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED;
+                }
+                else if (onlyca == true && (certificate->extensions.basicconstraints.present == false || certificate->extensions.basicconstraints.ca == false))
+                {
+                    status = QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED;
+                }
+            }
+        }
+
+        if (root != (qsc_encoding_ber_element*)NULL)
+        {
+            qsc_encoding_ber_free_element(root);
+        }
+    }
+
+    return status;
+}
+
+qsc_x509_crl_verify_status qsc_x509_crl_check_certificate_scope(const qsc_x509_crl* crl, const qsc_x509_certificate* certificate, const qsc_x509_certificate* issuer)
+{
+    const qsc_x509_extension* extension;
+    size_t i;
+    qsc_x509_crl_verify_status status;
+
+    extension = (const qsc_x509_extension*)NULL;
+    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_INPUT;
+
+    if (crl != (const qsc_x509_crl*)NULL && certificate != (const qsc_x509_certificate*)NULL && issuer != (const qsc_x509_certificate*)NULL)
+    {
+        if (qsc_x509_name_equals(&crl->issuer, &issuer->subject) == false)
+        {
+            status = QSC_X509_CRL_VERIFY_STATUS_ISSUER_MISMATCH;
+        }
+        else
+        {
+            status = QSC_X509_CRL_VERIFY_STATUS_SUCCESS;
+
+            for (i = 0U; i < crl->extensions.count && status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS; ++i)
+            {
+                if (x509_revext_oid_equal(&crl->extensions.entries[i].extension_oid, X509_OID_DELTA_CRL_INDICATOR,
+                    sizeof(X509_OID_DELTA_CRL_INDICATOR)) == true)
+                {
+                    /* A delta CRL is not complete status information by itself. It is
+                     * usable only after qsc_x509_apply_delta_crl combines it with its
+                     * matching complete base CRL. */
+                    status = QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED;
+                }
+                else if (x509_revext_oid_equal(&crl->extensions.entries[i].extension_oid, X509_OID_ISSUING_DISTRIBUTION_POINT,
+                    sizeof(X509_OID_ISSUING_DISTRIBUTION_POINT)) == true)
+                {
+                    extension = &crl->extensions.entries[i];
+                }
+            }
+
+            if (status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS && extension != (const qsc_x509_extension*)NULL)
+            {
+                status = x509_revext_check_idp_scope(extension, certificate);
+            }
+        }
+    }
+
+    return status;
+}
+
 qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(qsc_x509_crl* mergedcrl, const qsc_x509_crl* basecrl, const qsc_x509_crl* deltacrl, const qsc_x509_certificate* issuer,
     const qsc_asn1_time* now, qsc_x509_crl_signature_verify_callback callback, void* state)
 {
@@ -1499,6 +2097,7 @@ qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(qsc_x509_crl* mergedcrl, con
     uint64_t referencedbase;
     size_t baseidplen;
     size_t deltaidplen;
+    size_t i;
     qsc_asn1_status astatus;
     qsc_x509_crl_verify_status status;
     bool hasentryext;
@@ -1582,6 +2181,21 @@ qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(qsc_x509_crl* mergedcrl, con
         if (status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS)
         {
             *mergedcrl = *basecrl;
+
+            for (i = 0U; i < mergedcrl->extensions.count; ++i)
+            {
+                if (mergedcrl->extensions.entries[i].rawextnvalue.data != (const uint8_t*)NULL)
+                {
+                    mergedcrl->extensions.entries[i].rawextnvalue.data = mergedcrl->extensions.entries[i].value;
+                    mergedcrl->extensions.entries[i].rawextnvalue.length = mergedcrl->extensions.entries[i].valuelen;
+                    mergedcrl->extensions.entries[i].rawextnvalue.storage = QSC_X509_STORAGE_CLASS_BORROWED;
+                }
+            }
+
+            mergedcrl->tbsdata = (const uint8_t*)NULL;
+            mergedcrl->tbsdatalen = 0U;
+            mergedcrl->der = (const uint8_t*)NULL;
+            mergedcrl->derlen = 0U;
             status = x509_revext_merge_delta_entries(mergedcrl, deltacrl);
         }
 
@@ -1595,11 +2209,8 @@ qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(qsc_x509_crl* mergedcrl, con
             qsc_memutils_copy(mergedcrl->signature, deltacrl->signature, sizeof(mergedcrl->signature));
             mergedcrl->signaturelen = deltacrl->signaturelen;
             mergedcrl->signatureunusedbits = deltacrl->signatureunusedbits;
-            mergedcrl->tbsdata = deltacrl->tbsdata;
-            mergedcrl->tbsdatalen = deltacrl->tbsdatalen;
-            mergedcrl->der = deltacrl->der;
-            mergedcrl->derlen = deltacrl->derlen;
             mergedcrl->version = deltacrl->version;
+            status = x509_revext_copy_crl_backing(mergedcrl, deltacrl);
         }
     }
 
@@ -1609,79 +2220,117 @@ qsc_x509_crl_verify_status qsc_x509_apply_delta_crl(qsc_x509_crl* mergedcrl, con
 bool qsc_x509_ocsp_stapled_verify(const uint8_t* stapled, size_t stapledlen, const qsc_x509_certificate* certificate, const qsc_x509_certificate* issuer)
 {
     qsc_x509_algorithm_identifier sigalg = { 0 };
-    qsc_x509_certificate responder = { 0 };
+    qsc_encoding_ber_element* root;
+    qsc_x509_certificate* responder;
     qsc_x509_verify_state verifystate = { 0 };
-    uint8_t verifybuffer[QSC_X509_SIGNATURE_MAX + (2U * QSC_X509_CERTIFICATE_WRITE_MAX)] = { 0U };
+    uint8_t* verifybuffer;
+    const qsc_encoding_ber_element* responsedata;
+    const qsc_x509_certificate* signercertificate;
     const qsc_x509_subject_public_key_info* verifierspki;
     const uint8_t* basicoctets;
     const uint8_t* sigdata;
     const uint8_t* tbsdata;
     size_t basicoctetslen;
+    size_t consumed;
     size_t siglen;
     uint8_t sigunused;
     size_t tbsdatalen;
     qsc_asn1_time now;
     bool statusgood;
 
+    root = (qsc_encoding_ber_element*)NULL;
+    responder = (qsc_x509_certificate*)NULL;
+    verifybuffer = (uint8_t*)NULL;
+    responsedata = (const qsc_encoding_ber_element*)NULL;
+    signercertificate = (const qsc_x509_certificate*)NULL;
+    verifierspki = (const qsc_x509_subject_public_key_info*)NULL;
     basicoctets = (const uint8_t*)NULL;
     basicoctetslen = 0U;
-    tbsdata = (const uint8_t*)NULL;
-    tbsdatalen = 0U;
+    consumed = 0U;
     sigdata = (const uint8_t*)NULL;
     siglen = 0U;
     sigunused = 0U;
-    verifierspki = (const qsc_x509_subject_public_key_info*)NULL;
+    tbsdata = (const uint8_t*)NULL;
+    tbsdatalen = 0U;
     statusgood = false;
-    qsc_memutils_clear((uint8_t*)&sigalg, sizeof(sigalg));
-    qsc_memutils_clear((uint8_t*)&responder, sizeof(responder));
 
-    if (stapled == (const uint8_t*)NULL || stapledlen == 0U || certificate == (const qsc_x509_certificate*)NULL || issuer == (const qsc_x509_certificate*)NULL)
+    if (stapled != (const uint8_t*)NULL && stapledlen != 0U && certificate != (const qsc_x509_certificate*)NULL && issuer != (const qsc_x509_certificate*)NULL)
     {
-        return false;
-    }
+        responder = qsc_memutils_malloc(sizeof(qsc_x509_certificate));
+        verifybuffer = qsc_memutils_malloc(QSC_X509_SIGNATURE_MAX + (2U * QSC_X509_CERTIFICATE_WRITE_MAX));
 
-    if (x509_revext_current_utc_time(&now) == false ||
-        qsc_x509_certificate_check_validity(certificate, &now) != QSC_X509_VERIFY_STATUS_SUCCESS ||
-        qsc_x509_certificate_check_validity(issuer, &now) != QSC_X509_VERIFY_STATUS_SUCCESS)
-    {
-        return false;
-    }
-
-    if (x509_revext_ocsp_get_basic_response_octets(stapled, stapledlen, &basicoctets, &basicoctetslen) == false ||
-        x509_revext_ocsp_extract_basic_signature(basicoctets, basicoctetslen, &tbsdata, &tbsdatalen, &sigalg, &sigdata, &siglen, &sigunused, &responder) == false)
-    {
-        return false;
-    }
-
-    if (responder.der != (const uint8_t*)NULL && responder.derlen != 0U)
-    {
-        if (qsc_x509_ocsp_verify_responder(&responder, issuer, (const qsc_x509_store*)NULL, &now) == false)
+        if (responder != (qsc_x509_certificate*)NULL)
         {
-            return false;
+            qsc_memutils_clear(responder, sizeof(qsc_x509_certificate));
         }
 
-        if (qsc_x509_certificate_check_validity(&responder, &now) != QSC_X509_VERIFY_STATUS_SUCCESS)
+        if (verifybuffer != (uint8_t*)NULL)
         {
-            return false;
+            qsc_memutils_clear(verifybuffer, QSC_X509_SIGNATURE_MAX + (2U * QSC_X509_CERTIFICATE_WRITE_MAX));
         }
 
-        verifierspki = &responder.subjectpublickeyinfo;
-    }
-    else
-    {
-        verifierspki = &issuer->subjectpublickeyinfo;
+        if (responder != (qsc_x509_certificate*)NULL && verifybuffer != (uint8_t*)NULL)
+        {
+            qsc_memutils_clear((uint8_t*)&sigalg, sizeof(sigalg));
+
+            if (x509_revext_current_utc_time(&now) == true &&
+                qsc_x509_certificate_check_validity(certificate, &now) == QSC_X509_VERIFY_STATUS_SUCCESS &&
+                qsc_x509_certificate_check_validity(issuer, &now) == QSC_X509_VERIFY_STATUS_SUCCESS &&
+                x509_revext_ocsp_get_basic_response_octets(stapled, stapledlen, &basicoctets, &basicoctetslen) == true &&
+                x509_revext_ocsp_extract_basic_signature(basicoctets, basicoctetslen, &tbsdata, &tbsdatalen, &sigalg, &sigdata, &siglen, &sigunused, responder) == true)
+            {
+                if (responder->der != (const uint8_t*)NULL && responder->derlen != 0U)
+                {
+                    if (qsc_x509_ocsp_verify_responder(responder, issuer, (const qsc_x509_store*)NULL, &now) == true &&
+                        qsc_x509_certificate_check_validity(responder, &now) == QSC_X509_VERIFY_STATUS_SUCCESS)
+                    {
+                        verifierspki = &responder->subjectpublickeyinfo;
+                    }
+                }
+                else
+                {
+                    verifierspki = &issuer->subjectpublickeyinfo;
+                }
+
+                if (verifierspki != (const qsc_x509_subject_public_key_info*)NULL)
+                {
+                    qsc_x509_qsc_verify_state_initialize(&verifystate, verifybuffer, QSC_X509_SIGNATURE_MAX + (2U * QSC_X509_CERTIFICATE_WRITE_MAX));
+
+                    if (qsc_x509_qsc_verify_signed_data(tbsdata, tbsdatalen, sigdata, siglen, sigunused, sigalg.signature, verifierspki, &verifystate) == true)
+                    {
+                        signercertificate = (responder->der != (const uint8_t*)NULL && responder->derlen != 0U) ? responder : issuer;
+                        root = qsc_encoding_der_decode_element(basicoctets, basicoctetslen, &consumed);
+
+                        if (root != (qsc_encoding_ber_element*)NULL && consumed == basicoctetslen && qsc_asn1_require_sequence(root, 3U, 4U) == QSC_ASN1_STATUS_SUCCESS)
+                        {
+                            responsedata = qsc_asn1_get_child(root, 0U);
+
+                            if (responsedata != (const qsc_encoding_ber_element*)NULL && x509_revext_ocsp_match_responder_id(responsedata, signercertificate) == true)
+                            {
+                                (void)x509_revext_ocsp_response_matches_certificate(basicoctets, basicoctetslen, certificate, issuer, &now, &statusgood);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    qsc_x509_qsc_verify_state_initialize(&verifystate, verifybuffer, sizeof(verifybuffer));
-
-    if (qsc_x509_qsc_verify_signed_data(tbsdata, tbsdatalen, sigdata, siglen, sigunused, sigalg.signature, verifierspki, &verifystate) == false)
+    if (root != (qsc_encoding_ber_element*)NULL)
     {
-        return false;
+        qsc_encoding_ber_free_element(root);
     }
 
-    if (x509_revext_ocsp_response_matches_certificate(basicoctets, basicoctetslen, certificate, issuer, &now, &statusgood) == false)
+    if (responder != (qsc_x509_certificate*)NULL)
     {
-        return false;
+        qsc_x509_certificate_clear(responder);
+        qsc_memutils_alloc_free(responder);
+    }
+
+    if (verifybuffer != (uint8_t*)NULL)
+    {
+        qsc_memutils_secure_erase(verifybuffer, QSC_X509_SIGNATURE_MAX + (2U * QSC_X509_CERTIFICATE_WRITE_MAX));
+        qsc_memutils_alloc_free(verifybuffer);
     }
 
     return statusgood;

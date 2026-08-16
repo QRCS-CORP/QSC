@@ -102,30 +102,6 @@ static qsc_x509_verify_status x509_check_certificate_minimal(const qsc_x509_cert
     return status;
 }
 
-static bool x509_key_identifier_matches(const qsc_x509_subject_key_identifier* ski, const qsc_x509_authority_key_identifier* aki, bool strict)
-{
-    bool res;
-
-    if (ski == (const qsc_x509_subject_key_identifier*)NULL ||
-        aki == (const qsc_x509_authority_key_identifier*)NULL ||
-        ski->present == false ||
-        aki->present == false ||
-        aki->keyidentifierlen == 0U)
-    {
-        res = (strict == false);
-    }
-    else if (ski->identifierlen != aki->keyidentifierlen)
-    {
-        res = false;
-    }
-    else
-    {
-        res = qsc_memutils_are_equal((uint8_t*)ski->identifier, (uint8_t*)aki->keyidentifier, ski->identifierlen);
-    }
-
-    return res;
-}
-
 static bool x509_name_present(const qsc_x509_name* name)
 {
     bool res;
@@ -307,15 +283,16 @@ static qsc_x509_verify_status x509_check_subject_public_key_usage(const qsc_x509
 
     if (x509_spki_is_kem_only(&certificate->subjectpublickeyinfo) == true)
     {
-        if ((bits & QSC_X509_KEY_USAGE_KEY_ENCIPHERMENT) == 0U ||
-            (bits & (QSC_X509_KEY_USAGE_DIGITAL_SIGNATURE | QSC_X509_KEY_USAGE_KEY_CERT_SIGN | QSC_X509_KEY_USAGE_CRL_SIGN)) != 0U)
+        if (bits != QSC_X509_KEY_USAGE_KEY_ENCIPHERMENT)
         {
             return QSC_X509_VERIFY_STATUS_KEY_USAGE_REJECTED;
         }
     }
     else if (certificate->subjectpublickeyinfo.algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA)
     {
-        if ((bits & (QSC_X509_KEY_USAGE_KEY_ENCIPHERMENT | QSC_X509_KEY_USAGE_DATA_ENCIPHERMENT |
+        if ((bits & (QSC_X509_KEY_USAGE_DIGITAL_SIGNATURE | QSC_X509_KEY_USAGE_NON_REPUDIATION |
+                     QSC_X509_KEY_USAGE_KEY_CERT_SIGN | QSC_X509_KEY_USAGE_CRL_SIGN)) == 0U ||
+            (bits & (QSC_X509_KEY_USAGE_KEY_ENCIPHERMENT | QSC_X509_KEY_USAGE_DATA_ENCIPHERMENT |
                      QSC_X509_KEY_USAGE_KEY_AGREEMENT | QSC_X509_KEY_USAGE_ENCIPHER_ONLY |
                      QSC_X509_KEY_USAGE_DECIPHER_ONLY)) != 0U)
         {
@@ -353,94 +330,6 @@ static qsc_x509_verify_status x509_check_critical_extensions(const qsc_x509_cert
     return status;
 }
 
-static qsc_x509_verify_status x509_authority_cert_issuer_matches(const qsc_x509_certificate* issuer, const qsc_x509_authority_key_identifier* aki)
-{
-    qsc_x509_verify_status status;
-
-    status = QSC_X509_VERIFY_STATUS_SUCCESS;
-
-    if (issuer != (const qsc_x509_certificate*)NULL && aki != (const qsc_x509_authority_key_identifier*)NULL &&
-        aki->present == true && aki->issuer_present == true)
-    {
-        if (aki->issuername_present == false)
-        {
-            status = QSC_X509_VERIFY_STATUS_UNSUPPORTED;
-        }
-        else if (x509_name_present(&issuer->subject) == false || x509_name_present(&aki->issuername) == false)
-        {
-            status = QSC_X509_VERIFY_STATUS_INVALID_CERTIFICATE;
-        }
-        else if (qsc_x509_name_equals(&issuer->subject, &aki->issuername) == false)
-        {
-            status = QSC_X509_VERIFY_STATUS_ISSUER_MISMATCH;
-        }
-    }
-
-    return status;
-}
-
-static bool x509_authority_serial_matches(const qsc_x509_certificate* issuer, const qsc_x509_authority_key_identifier* aki)
-{
-    const uint8_t* serial;
-    size_t seriallen;
-    size_t ofs;
-    bool res;
-
-    res = true;
-    serial = (const uint8_t*)NULL;
-    seriallen = 0U;
-    ofs = 0U;
-
-    if (issuer != (const qsc_x509_certificate*)NULL && aki != (const qsc_x509_authority_key_identifier*)NULL &&
-        aki->present == true && aki->serial_present == true)
-    {
-        if (aki->seriallen == 0U || (aki->serial[0U] & 0x80U) != 0U)
-        {
-            res = false;
-        }
-        else
-        {
-            while (ofs + 1U < aki->seriallen && aki->serial[ofs] == 0x00U)
-            {
-                ofs += 1U;
-            }
-
-            while (seriallen < issuer->serialnumberlen && seriallen + 1U < issuer->serialnumberlen && issuer->serialnumber[seriallen] == 0x00U)
-            {
-                seriallen += 1U;
-            }
-
-            serial = aki->serial + ofs;
-            seriallen = aki->seriallen - ofs;
-
-            if (seriallen == 0U)
-            {
-                res = false;
-            }
-            else
-            {
-                size_t issuerofs = 0U;
-
-                while (issuerofs + 1U < issuer->serialnumberlen && issuer->serialnumber[issuerofs] == 0x00U)
-                {
-                    issuerofs += 1U;
-                }
-
-                if ((issuer->serialnumberlen - issuerofs) != seriallen)
-                {
-                    res = false;
-                }
-                else
-                {
-                    res = qsc_memutils_are_equal((uint8_t*)issuer->serialnumber + issuerofs, (uint8_t*)serial, seriallen);
-                }
-            }
-        }
-    }
-
-    return res;
-}
-
 static qsc_x509_verify_status x509_check_trust_anchor_match(const qsc_x509_trust_anchor* anchor, const qsc_x509_certificate* subject)
 {
     const qsc_x509_certificate* issuer;
@@ -467,19 +356,7 @@ static qsc_x509_verify_status x509_check_trust_anchor_match(const qsc_x509_trust
         }
         else
         {
-            status = x509_authority_cert_issuer_matches(issuer, &subject->extensions.authoritykeyidentifier);
-
-            if (status == QSC_X509_VERIFY_STATUS_SUCCESS &&
-                x509_key_identifier_matches(&issuer->extensions.subjectkeyidentifier, &subject->extensions.authoritykeyidentifier, false) == false)
-            {
-                status = QSC_X509_VERIFY_STATUS_KEY_IDENTIFIER_MISMATCH;
-            }
-
-            if (status == QSC_X509_VERIFY_STATUS_SUCCESS &&
-                x509_authority_serial_matches(issuer, &subject->extensions.authoritykeyidentifier) == false)
-            {
-                status = QSC_X509_VERIFY_STATUS_KEY_IDENTIFIER_MISMATCH;
-            }
+            status = QSC_X509_VERIFY_STATUS_SUCCESS;
         }
     }
 
@@ -1534,11 +1411,7 @@ static qsc_x509_verify_status x509_evaluate_name_constraints(const qsc_x509_cert
             {
                 if (ext->rawextnvalue.data != (const uint8_t*)NULL && ext->rawextnvalue.length > 0U)
                 {
-                    status = x509_check_name_constraints(
-                        ext->rawextnvalue.data,
-                        ext->rawextnvalue.length,
-                        ext->critical,
-                        subject);
+                    status = x509_check_name_constraints(ext->rawextnvalue.data, ext->rawextnvalue.length, ext->critical, subject);
                 }
 
                 /* RFC 5280 4.2 prohibits duplicate extensions */
@@ -1916,20 +1789,6 @@ qsc_x509_verify_status qsc_x509_certificate_check_issuer(const qsc_x509_certific
     }
     else
     {
-        status = x509_authority_cert_issuer_matches(issuer, &subject->extensions.authoritykeyidentifier);
-
-        if (status == QSC_X509_VERIFY_STATUS_SUCCESS &&
-            x509_key_identifier_matches(&issuer->extensions.subjectkeyidentifier, &subject->extensions.authoritykeyidentifier, false) == false)
-        {
-            status = QSC_X509_VERIFY_STATUS_KEY_IDENTIFIER_MISMATCH;
-        }
-
-        if (status == QSC_X509_VERIFY_STATUS_SUCCESS &&
-            x509_authority_serial_matches(issuer, &subject->extensions.authoritykeyidentifier) == false)
-        {
-            status = QSC_X509_VERIFY_STATUS_KEY_IDENTIFIER_MISMATCH;
-        }
-
         if (status == QSC_X509_VERIFY_STATUS_SUCCESS && qsc_x509_certificate_is_ca(issuer) == false)
         {
             status = QSC_X509_VERIFY_STATUS_NOT_CA;
@@ -2006,8 +1865,7 @@ qsc_x509_verify_status qsc_x509_certificate_verify_ex(const qsc_x509_certificate
 
         if (status == QSC_X509_VERIFY_STATUS_SUCCESS)
         {
-            status = x509_check_critical_extensions(issuer,
-                (options == (const qsc_x509_verify_options*)NULL) ? true : options->rejectunsupportedcriticalextensions);
+            status = x509_check_critical_extensions(issuer, (options == (const qsc_x509_verify_options*)NULL) ? true : options->rejectunsupportedcriticalextensions);
         }
 
         if (status == QSC_X509_VERIFY_STATUS_SUCCESS)
@@ -2074,13 +1932,11 @@ qsc_x509_verify_status qsc_x509_chain_verify_ex(const qsc_x509_chain* chain, con
     revstatus = QSC_X509_REVOCATION_STATUS_UNCHECKED;
     status = QSC_X509_VERIFY_STATUS_SUCCESS;
 
-    if (chain == (const qsc_x509_chain*)NULL || store == (const qsc_x509_store*)NULL || now == (const qsc_asn1_time*)NULL ||
-        callback == (qsc_x509_signature_verify_callback)NULL)
+    if (chain == (const qsc_x509_chain*)NULL || store == (const qsc_x509_store*)NULL || now == (const qsc_asn1_time*)NULL || callback == (qsc_x509_signature_verify_callback)NULL)
     {
         status = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
     }
-    else if (chain->certificates == (qsc_x509_certificate*)NULL || chain->count == 0U ||
-        store->anchors == (qsc_x509_trust_anchor*)NULL || store->count == 0U)
+    else if (chain->certificates == (qsc_x509_certificate*)NULL || chain->count == 0U || store->anchors == (qsc_x509_trust_anchor*)NULL || store->count == 0U)
     {
         status = QSC_X509_VERIFY_STATUS_INVALID_INPUT;
     }

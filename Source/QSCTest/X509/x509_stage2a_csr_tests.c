@@ -37,6 +37,8 @@ static bool csr_decode_der_file(const char* path, qsc_x509_csr* csr)
 	size_t derlen;
 	bool res;
 
+	res = false;
+
 	if (csr != NULL)
 	{
 		der = qsctest_x509_read_binary_file(path, &derlen);
@@ -63,6 +65,8 @@ bool x509_stage2a_valid_csr_pem(void)
 		res = qsc_x509_csr_verify(&csr);
 	}
 
+	qsc_x509_csr_clear(&csr);
+
 	return res;
 }
 
@@ -79,6 +83,8 @@ bool x509_stage2a_valid_csr_der(void)
 	{
 		res = qsc_x509_csr_verify(&csr);
 	}
+
+	qsc_x509_csr_clear(&csr);
 
 	return res;
 }
@@ -105,6 +111,8 @@ bool x509_stage2a_tampered_csr_signature(void)
 		qsc_memutils_alloc_free(der);
 	}
 
+	qsc_x509_csr_clear(&csr);
+
 	return res;
 }
 
@@ -120,6 +128,8 @@ bool x509_stage2a_extension_request_present(void)
 	{
 		res = (csr.attributecount != 0U);
 	}
+
+	qsc_x509_csr_clear(&csr);
 
 	return res;
 }

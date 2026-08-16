@@ -59,7 +59,7 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file tlsecdsader.h
- * \brief RFC 8446 section 4.2.3 ECDSA-Sig-Value DER encoding.
+ * \brief RFC 9846 Section 4.3.3 ECDSA-Sig-Value DER encoding.
  *
  * TLS 1.3 ECDSA signatures on the wire are DER-encoded as:
  *   ECDSA-Sig-Value ::= SEQUENCE {

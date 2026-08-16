@@ -68,9 +68,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * signature schemes to QSC primitives as follows:
  *
  *   qsc_tls_sig_ed25519                 -> qsc_eddsa_* (64-byte signature)
- *   qsc_tls_sig_ecdsa_secp256r1_sha256  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 8446 4.2.3)
- *   qsc_tls_sig_ecdsa_secp384r1_sha384  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 8446 4.2.3)
- *   qsc_tls_sig_ecdsa_secp521r1_sha512  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 8446 4.2.3)
+ *   qsc_tls_sig_ecdsa_secp256r1_sha256  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 9846 Section 4.3.3)
+ *   qsc_tls_sig_ecdsa_secp384r1_sha384  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 9846 Section 4.3.3)
+ *   qsc_tls_sig_ecdsa_secp521r1_sha512  -> qsc_ecdsa_* (DER-wrapped r||s per RFC 9846 Section 4.3.3)
  *   qsc_tls_sig_mldsa44/65/87           -> qsc_dilithium_* (parameter set selected at compile time)
  *
  * QSC sign primitives produce the combined signed_message = signature || message form; the
@@ -88,7 +88,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * that uses this signer. Private-key lengths expected:
  *
  *   scheme                               privatekeylen
- *   qsc_tls_sig_ed25519                  64  (QSC_EDDSA_PRIVATEKEY_SIZE)
+ *   qsc_tls_sig_ed25519                  QSC_EDDSA_SEED_SIZE or QSC_EDDSA_PRIVATEKEY_SIZE
  *   qsc_tls_sig_ecdsa_secp256r1_sha256   QSC_ECDSA_PRIVATEKEY_SIZE
  *   qsc_tls_sig_ecdsa_secp384r1_sha384   QSC_ECDSA_PRIVATEKEY_SIZE
  *   qsc_tls_sig_ecdsa_secp521r1_sha512   QSC_ECDSA_PRIVATEKEY_SIZE
@@ -117,8 +117,7 @@ typedef struct qsc_tls_signer_default_context
  *
  * \return [bool] Returns true if the signature was produced successfully.
  */
-QSC_EXPORT_API bool qsc_tls_signer_default_sign(qsc_tls_signature_scheme scheme,
-    const uint8_t* input, size_t inputlen,
+QSC_EXPORT_API bool qsc_tls_signer_default_sign(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen,
     uint8_t* signature, size_t* signaturelen, void* state);
 
 /**
@@ -141,10 +140,8 @@ QSC_EXPORT_API bool qsc_tls_signer_default_sign(qsc_tls_signature_scheme scheme,
  *
  * \return [bool] Returns true if the signature verifies.
  */
-QSC_EXPORT_API bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme,
-    const uint8_t* input, size_t inputlen,
-    const uint8_t* signature, size_t signaturelen,
-    const qsc_tls_certificate_view* signer, void* state);
+QSC_EXPORT_API bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen,
+    const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state);
 
 QSC_CPLUSPLUS_ENABLED_END
 

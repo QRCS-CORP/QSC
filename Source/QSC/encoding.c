@@ -169,10 +169,11 @@ static char* encoding_alloc_chars(size_t len)
 
 static bool encoding_header_labels_check(const char* input, const char* header, const char* footer, const char* separator)
 {
-    char lbla[128U] = { 0U };
-    char lblb[128U] = { 0U };
+    const char* lbla;
+    const char* lblb;
     int64_t posa;
     int64_t posb;
+    size_t lbllen;
     size_t sepl;
     bool res;
 
@@ -188,8 +189,8 @@ static bool encoding_header_labels_check(const char* input, const char* header, 
 
             if (posb > 0)
             {
-                qsc_stringutils_copy_substring(lbla, sizeof(lbla), input + posa, posb);
-
+                lbla = input + posa;
+                lbllen = (size_t)posb;
                 posa = qsc_stringutils_find_string(input, footer);
 
                 if (posa > 0)
@@ -197,10 +198,10 @@ static bool encoding_header_labels_check(const char* input, const char* header, 
                     posa += (int64_t)qsc_stringutils_string_size(footer);
                     posb = qsc_stringutils_find_string(input + posa, separator);
 
-                    if (posb > 0)
+                    if (posb > 0 && (size_t)posb == lbllen)
                     {
-                        qsc_stringutils_copy_substring(lblb, sizeof(lblb), input + posa, posb);
-                        res = qsc_memutils_are_equal((uint8_t*)lbla, (uint8_t*)lblb, (size_t)posb);
+                        lblb = input + posa;
+                        res = qsc_memutils_are_equal((const uint8_t*)lbla, (const uint8_t*)lblb, lbllen);
                     }
                 }
             }
@@ -880,15 +881,19 @@ void qsc_encoding_ber_free_element(qsc_encoding_ber_element* element)
 
 static qsc_encoding_ber_element* encoding_ber_decode_element_depth(const uint8_t* buffer, size_t buflen, size_t* consumed, uint32_t depth)
 {
-    if (depth > QSC_ENCODING_BER_MAX_DECODE_DEPTH)
-    {
-        if (consumed != NULL) { *consumed = 0U; }
-        return NULL;
-    }
-
     QSC_ASSERT(buffer != NULL);
     QSC_ASSERT(buflen != 0U);
     QSC_ASSERT(consumed != NULL);
+
+    if (depth > QSC_ENCODING_BER_MAX_DECODE_DEPTH)
+    {
+        if (consumed != NULL)
+        {
+            *consumed = 0U;
+        }
+
+        return NULL;
+    }
 
     qsc_encoding_ber_element* child;
     qsc_encoding_ber_element* elem;
@@ -952,7 +957,7 @@ static qsc_encoding_ber_element* encoding_ber_decode_element_depth(const uint8_t
 
                             found_eoc = false;
 
-                            while (loop_ok == true && (pos + 2U) <= buflen)
+                            while (loop_ok == true && pos <= buflen && (buflen - pos) >= 2U)
                             {
                                 if (buffer[pos] == 0x00U && buffer[pos + 1U] == 0x00U)
                                 {
@@ -1006,13 +1011,13 @@ static qsc_encoding_ber_element* encoding_ber_decode_element_depth(const uint8_t
                         }
                         else
                         {
-                            /* definite-length constructed: consume exactly [pos, pos+length) bytes as child elements.   */
+                            /* definite-length constructed: consume exactly the declared content bytes. */
                             size_t end;
 
-                            end = pos + length;
-
-                            if (end <= buflen)
+                            if (pos <= buflen && length <= (buflen - pos))
                             {
+                                end = pos + length;
+
                                 while (loop_ok == true && pos < end)
                                 {
                                     chconsumed = 0U;
@@ -1060,7 +1065,6 @@ static qsc_encoding_ber_element* encoding_ber_decode_element_depth(const uint8_t
                             }
                             else
                             {
-                                /* content extends beyond the supplied buffer. */
                                 qsc_encoding_ber_free_element(elem);
                                 elem = NULL;
                             }
@@ -1075,7 +1079,7 @@ static qsc_encoding_ber_element* encoding_ber_decode_element_depth(const uint8_t
                             qsc_encoding_ber_free_element(elem);
                             elem = NULL;
                         }
-                        else if ((pos + length) > buflen)
+                        else if (pos > buflen || length > (buflen - pos))
                         {
                             qsc_encoding_ber_free_element(elem);
                             elem = NULL;
@@ -1255,56 +1259,115 @@ qsc_encoding_ber_element* qsc_encoding_ber_decode_element(const uint8_t* buffer,
     return encoding_ber_decode_element_depth(buffer, buflen, consumed, 0U);
 }
 
-static size_t encoding_der_tag_field_length(const uint8_t* buffer, size_t buflen)
+static bool encoding_der_has_minimal_tag_encoding(const uint8_t* buffer, size_t buflen, size_t taglen, uint8_t tagclass, bool constructed, uint32_t tagnumber)
 {
-    size_t len;
-
-    len = 0U;
-
-    if (buffer != NULL && buflen != 0U)
-    {
-        len = 1U;
-
-        if ((buffer[0U] & 0x1FU) == 0x1FU)
-        {
-            while (len < buflen)
-            {
-                uint8_t octet;
-
-                octet = buffer[len];
-                ++len;
-
-                if ((octet & 0x80U) == 0U)
-                {
-                    break;
-                }
-            }
-        }
-    }
-
-    return len;
-}
-
-static bool encoding_der_has_minimal_length_encoding(const uint8_t* buffer, size_t buflen, size_t contentlen, size_t totalconsumed)
-{
-    uint8_t enc[sizeof(size_t) + 1U];
-    size_t actlen;
+    uint8_t enc[6U];
     size_t enclen;
-    size_t taglen;
     bool res;
 
     qsc_memutils_clear(enc, sizeof(enc));
     res = false;
-    taglen = encoding_der_tag_field_length(buffer, buflen);
 
-    if (taglen != 0U && totalconsumed >= taglen && buflen >= totalconsumed)
+    if (buffer != NULL && taglen != 0U && taglen <= buflen)
     {
-        actlen = totalconsumed - taglen - contentlen;
-        enclen = qsc_encoding_ber_encode_length(contentlen, enc, sizeof(enc));
+        enclen = qsc_encoding_ber_encode_tag(tagclass, constructed, tagnumber, enc, sizeof(enc));
 
-        if (enclen != 0U && actlen == enclen)
+        if (enclen == taglen && qsc_memutils_are_equal(enc, buffer, taglen) == true)
         {
             res = true;
+        }
+    }
+
+    return res;
+}
+
+static bool encoding_der_has_minimal_length_encoding(const uint8_t* buffer, size_t buflen, size_t taglen, size_t contentlen, size_t lengthlen)
+{
+    uint8_t enc[sizeof(size_t) + 1U];
+    size_t enclen;
+    bool res;
+
+    qsc_memutils_clear(enc, sizeof(enc));
+    res = false;
+
+    if (buffer != NULL && taglen <= buflen && lengthlen <= (buflen - taglen))
+    {
+        enclen = qsc_encoding_ber_encode_length(contentlen, enc, sizeof(enc));
+
+        if (enclen == lengthlen && qsc_memutils_are_equal(enc, buffer + taglen, lengthlen) == true)
+        {
+            res = true;
+        }
+    }
+
+    return res;
+}
+
+static bool encoding_der_validate_element(const uint8_t* buffer, size_t buflen, size_t* consumed, size_t depth)
+{
+    size_t childconsumed;
+    size_t contentend;
+    size_t length;
+    size_t lengthlen;
+    size_t pos;
+    size_t taglen;
+    uint8_t tagclass;
+    uint32_t tagnumber;
+    bool constructed;
+    bool indefinite;
+    bool res;
+
+    res = false;
+
+    if (buffer != NULL && buflen >= 2U && consumed != NULL && depth <= QSC_ENCODING_BER_MAX_DECODE_DEPTH)
+    {
+        *consumed = 0U;
+        taglen = qsc_encoding_ber_decode_tag(buffer, buflen, &tagclass, &constructed, &tagnumber);
+
+        if (taglen != 0U && encoding_der_has_minimal_tag_encoding(buffer, buflen, taglen, tagclass, constructed, tagnumber) == true)
+        {
+            lengthlen = qsc_encoding_ber_decode_length(buffer + taglen, buflen - taglen, &length, &indefinite);
+
+            if (lengthlen != 0U && indefinite == false &&
+                encoding_der_has_minimal_length_encoding(buffer, buflen, taglen, length, lengthlen) == true &&
+                (taglen + lengthlen) <= buflen && length <= (buflen - (taglen + lengthlen)))
+            {
+                pos = taglen + lengthlen;
+                contentend = pos + length;
+                res = true;
+
+                if (constructed == true)
+                {
+                    while (pos < contentend && res == true)
+                    {
+                        childconsumed = 0U;
+                        res = encoding_der_validate_element(buffer + pos, contentend - pos, &childconsumed, depth + 1U);
+
+                        if (res == true && childconsumed != 0U && childconsumed <= (contentend - pos))
+                        {
+                            pos += childconsumed;
+                        }
+                        else
+                        {
+                            res = false;
+                        }
+                    }
+
+                    if (res == true && pos != contentend)
+                    {
+                        res = false;
+                    }
+                }
+                else
+                {
+                    pos = contentend;
+                }
+
+                if (res == true)
+                {
+                    *consumed = pos;
+                }
+            }
         }
     }
 
@@ -1318,26 +1381,27 @@ qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer,
     QSC_ASSERT(consumed != NULL);
 
     qsc_encoding_ber_element* elem;
+    size_t validated;
 
     elem = NULL;
+    validated = 0U;
 
     if (buffer != NULL && buflen != 0U && consumed != NULL)
     {
-        elem = qsc_encoding_ber_decode_element(buffer, buflen, consumed);
+        *consumed = 0U;
 
-        if (elem != NULL)
+        if (encoding_der_validate_element(buffer, buflen, &validated, 0U) == true)
         {
-            /* DER (X.690 11.1) forbids indefinite-length encoding. */
-            if (elem->indefinite == true)
+            elem = qsc_encoding_ber_decode_element(buffer, validated, consumed);
+
+            if (elem == NULL || *consumed != validated)
             {
-                qsc_encoding_ber_free_element(elem);
-                elem = NULL;
-                *consumed = 0U;
-            }
-            else if (encoding_der_has_minimal_length_encoding(buffer, buflen, elem->length, *consumed) == false)
-            {
-                qsc_encoding_ber_free_element(elem);
-                elem = NULL;
+                if (elem != NULL)
+                {
+                    qsc_encoding_ber_free_element(elem);
+                    elem = NULL;
+                }
+
                 *consumed = 0U;
             }
         }
@@ -1629,6 +1693,7 @@ bool qsc_encoding_pem_decode(const char* input, size_t inplen, uint8_t* output, 
     const char* lstart;
     const char* ppos;
     char* b64data;
+    char* pemdata;
     size_t b64idx;
     size_t linelen;
     size_t pinplen;
@@ -1637,24 +1702,43 @@ bool qsc_encoding_pem_decode(const char* input, size_t inplen, uint8_t* output, 
 
     res = false;
     b64data = NULL;
+    pemdata = NULL;
 
     if (input != NULL && output != NULL && declen != NULL && otplen != 0U)
     {
         *declen = 0U;
+        pinplen = 0U;
 
-        /* verify that the header and footer carry matching type labels,
-         * and that the Base64 payload length is a multiple of four.    */
-        if (encoding_header_labels_check(input, "-----BEGIN ", "-----END ", "-----") == true &&
-            encoding_base64_length_valid(input, "-----") == true)
+        while (pinplen < inplen && input[pinplen] != '\0')
         {
-            pinplen = inplen;
+            ++pinplen;
+        }
+
+        if (pinplen != 0U && pinplen < QSC_SIZE_MAX)
+        {
+            pemdata = encoding_alloc_chars(pinplen + 1U);
+        }
+
+        if (pemdata != NULL)
+        {
+            qsc_memutils_copy(pemdata, input, pinplen);
+            pemdata[pinplen] = '\0';
+        }
+
+        /* Verify that the header and footer carry matching type labels,
+         * and that the Base64 payload length is a multiple of four. Parsing
+         * is bounded to the caller-supplied input length by pemdata. */
+        if (pemdata != NULL &&
+            encoding_header_labels_check(pemdata, "-----BEGIN ", "-----END ", "-----") == true &&
+            encoding_base64_length_valid(pemdata, "-----") == true)
+        {
             b64data = encoding_alloc_chars(pinplen + 1U);
 
             if (b64data != NULL)
             {
                 b64idx = 0U;
-                lstart = input;
-                ppos = input;
+                lstart = pemdata;
+                ppos = pemdata;
 
                 /* walk the PEM text line by line and accumulate the
                  * Base64 payload, discarding header/footer lines and
@@ -1729,6 +1813,12 @@ bool qsc_encoding_pem_decode(const char* input, size_t inplen, uint8_t* output, 
                 qsc_memutils_alloc_free(b64data);
                 b64data = NULL;
             }
+        }
+
+        if (pemdata != NULL)
+        {
+            qsc_memutils_alloc_free(pemdata);
+            pemdata = NULL;
         }
     }
 
@@ -2035,7 +2125,11 @@ static bool encoding_test_pem_decode(void)
 
                         if (qsc_encoding_pem_decode(invsmout, enclen, small_buf, sizeof(small_buf), &declen) == false)
                         {
-                            res = (declen == 0U);
+                            if (declen == 0U)
+                            {
+                                /* The parser must not read beyond the caller-supplied input length. */
+                                res = encoding_expect_test_pem_fail(valabc, 1U);
+                            }
                         }
                     }
                 }
@@ -2076,18 +2170,21 @@ static bool encoding_test_pem_encode(void)
             {
                 /* Wrapping and alphabet constraints for a larger payload. */
                 qsc_memutils_clear(pem, sizeof(pem));
-                enclen = qsc_stringutils_string_size(pem);
 
                 if (qsc_encoding_pem_encode(lok, pem, sizeof(pem), data2, sizeof(data2)) == true &&
-                    encoding_test_pem_line_wrap(pem, 64U) == true &&
-                    encoding_test_expect_pem_decode(pem, enclen, data2, sizeof(data2)) == true)
+                    encoding_test_pem_line_wrap(pem, 64U) == true)
                 {
-                    /* Output buffer too small must fail. */
-                    qsc_memutils_clear(pemsm, sizeof(pemsm));
+                    enclen = qsc_stringutils_string_size(pem);
 
-                    if (qsc_encoding_pem_encode(lok, pemsm, sizeof(pemsm), data2, sizeof(data2)) == false)
+                    if (encoding_test_expect_pem_decode(pem, enclen, data2, sizeof(data2)) == true)
                     {
-                        res = true;
+                        /* Output buffer too small must fail. */
+                        qsc_memutils_clear(pemsm, sizeof(pemsm));
+
+                        if (qsc_encoding_pem_encode(lok, pemsm, sizeof(pemsm), data2, sizeof(data2)) == false)
+                        {
+                            res = true;
+                        }
                     }
                 }
             }

@@ -61,34 +61,32 @@ QSC_CPLUSPLUS_ENABLED_START
  * \file tlscert_x509.h
  * \brief X.509-backed implementation of the TLS certificate interface.
  *
- * Provides default implementations of qsc_tls_certificate_interface that
- *   - decode each peer certificate from its DER bytes via qsc_x509_certificate_decode_der
- *   - enforce hostname matching against the leaf's Subject Alt Name / CN
- *   - validate the validity period at the current (or caller-supplied) time
- *   - extract the leaf's SubjectPublicKeyInfo for CertificateVerify
- *   - dispatch the extracted public key to qsc_tls_signer_default_verify
+ * Provides a compatibility adapter over the canonical QSC X.509 TLS bridge in
+ * tlscert.c. Certificate path validation and CertificateVerify verification are
+ * therefore implemented in one security-critical backend rather than duplicated
+ * in this module.
  *
- * Intermediate/root trust-store validation is performed when the user provides
- * a qsc_x509_store via qsc_tls_cert_x509_state_initialize_with_store. When the
- * store is NULL, the validator runs in "leaf-only, self-signed acceptable"
- * mode suitable for testing and for pinned-key deployments.
+ * Intermediate certificates carried by the TLS peer are passed through to the
+ * canonical path builder. Trust-anchor validation is performed against the
+ * qsc_x509_store supplied to qsc_tls_cert_x509_state_initialize. A NULL trust
+ * store fails closed; self-signed certificates are accepted only when they are
+ * explicitly configured as trust anchors in the supplied store.
  */
 
 /**
  * \brief Holder for the X.509-backed TLS certificate interface.
  *
- * The state stores a pointer to an optional trust store (NULL for pinned-key
- * or self-signed deployments) plus a scratch buffer used while decoding the
- * peer chain. Decoded certificate objects live on the stack inside the
- * callbacks; the caller must keep the original DER bytes alive for the
- * duration of the handshake.
+ * The state stores the trust store used to authenticate the peer certificate
+ * chain and the validation policy flags used by the callback. The caller must
+ * keep both the state and original DER certificate bytes alive for the duration
+ * of the handshake.
  */
 typedef struct qsc_tls_cert_x509_state
 {
-    const qsc_x509_store* truststore;                               /*!< Optional trust anchors; NULL => self-signed/pinned OK. */
-    bool allowselfsigned;                                           /*!< When truststore is NULL, accept self-signed leaf. */
+    const qsc_x509_store* truststore;                               /*!< Trust anchors; NULL causes certificate validation to fail closed. */
+    bool allowselfsigned;                                           /*!< Legacy compatibility flag; ignored by validation and initialized false. */
     bool enforcehostname;                                           /*!< Fail validation if the leaf doesn't match config.hostname. */
-    bool enforcevalidityperiod;                                     /*!< Fail validation if notBefore/notAfter excludes now. */
+    bool enforcevalidityperiod;                                     /*!< Legacy compatibility flag; the canonical backend always enforces certificate validity periods. */
     qsc_x509_verify_status lastverifystatus;                        /*!< Most recent validation status. */
     qsc_tls_alert_description lastalert;                            /*!< Alert description corresponding to lastverifystatus. */
 } qsc_tls_cert_x509_state;
@@ -97,7 +95,7 @@ typedef struct qsc_tls_cert_x509_state
  * \brief Initialize an X.509 interface state with sensible defaults.
  *
  * \param state: [struct*] Destination state, cleared to zero.
- * \param truststore: [const*] Optional trust anchors; NULL permits self-signed.
+ * \param truststore: [const*] Trust anchors; NULL causes certificate validation to fail closed.
  */
 QSC_EXPORT_API void qsc_tls_cert_x509_state_initialize(qsc_tls_cert_x509_state* state, const qsc_x509_store* truststore);
 

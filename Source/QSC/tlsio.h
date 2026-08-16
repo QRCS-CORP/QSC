@@ -84,6 +84,12 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_TLS_IO_RECV_CHUNK 4096U
 
 /**
+ * \def QSC_TLS_IO_HANDSHAKE_TIMEOUT_DEFAULT
+ * \brief Default cumulative TLS handshake deadline in milliseconds.
+ */
+#define QSC_TLS_IO_HANDSHAKE_TIMEOUT_DEFAULT 30000U
+
+/**
  * \def QSC_TLS_IO_RX_BUFFER_SIZE
  * \brief Persistent inbound TLS stream buffer size used by the socket adapter.
  */
@@ -98,7 +104,10 @@ typedef struct qsc_tls_io_connection
     qsc_tls_connection* engine;                       /*!< The attached TLS engine instance. */
     qsc_socket* socket;                               /*!< The attached blocking socket. */
     uint8_t rxbuffer[QSC_TLS_IO_RX_BUFFER_SIZE];      /*!< Persistent inbound TLS stream buffer. */
+    uint8_t plaintextbuffer[QSC_TLS_RECORD_MAX_PLAINTEXT_SIZE]; /*!< Decrypted application bytes retained across partial reads. */
     size_t rxbufferlen;                               /*!< Number of valid bytes in the inbound stream buffer. */
+    size_t plaintextbufferlen;                        /*!< Number of valid bytes in the retained plaintext buffer. */
+    size_t plaintextbufferoffset;                     /*!< Offset of the next retained plaintext byte to return. */
 } qsc_tls_io_connection;
 
 /**
@@ -118,15 +127,31 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_io_attach(qsc_tls_io_connection* io, qsc_t
  * \details
  * Repeatedly calls the TLS engine handshake function, flushing any produced outbound flight
  * to the socket and receiving additional input whenever the engine requires more record bytes.
- * The call returns when the handshake completes or a fatal error occurs. Any unconsumed bytes
- * received during the handshake remain in the persistent stream buffer for later application or
- * post-handshake processing.
+ * The call enforces QSC_TLS_IO_HANDSHAKE_TIMEOUT_DEFAULT as an independent cumulative wall-clock
+ * deadline. Any unconsumed bytes received during the handshake remain in the persistent stream
+ * buffer for later application or post-handshake processing.
  *
  * \param io: [struct*] The attached I/O adapter.
  *
- * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success or qsc_tls_status_timeout when the deadline expires.
  */
 QSC_EXPORT_API qsc_tls_status qsc_tls_io_handshake(qsc_tls_io_connection* io);
+
+/**
+ * \brief Drive the TLS handshake with an explicit cumulative wall-clock deadline.
+ *
+ * \details
+ * The timeout bounds the entire handshake independently of socket receive/send timeouts. Before
+ * each blocking socket operation, the adapter waits only for the time remaining in this budget.
+ * A timeout value of zero disables the cumulative deadline and preserves transport-level timeout
+ * behavior.
+ *
+ * \param io: [struct*] The attached I/O adapter.
+ * \param timeoutms: [uint32_t] The cumulative handshake deadline in milliseconds; zero disables it.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success or qsc_tls_status_timeout when the deadline expires.
+ */
+QSC_EXPORT_API qsc_tls_status qsc_tls_io_handshake_ex(qsc_tls_io_connection* io, uint32_t timeoutms);
 
 /**
  * \brief Encrypt and send application data over the attached socket.

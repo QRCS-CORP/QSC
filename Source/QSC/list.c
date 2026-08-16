@@ -2,7 +2,34 @@
 #include "csp.h"
 #include "intutils.h"
 #include "memutils.h"
-#include "secrand.h"
+
+static bool list_random_index(uint32_t minimum, uint32_t maximum, uint32_t* index)
+{
+	uint32_t limit;
+	uint32_t range;
+	uint32_t sample;
+	bool res;
+
+	res = false;
+
+	if (index != NULL && maximum >= minimum)
+	{
+		range = maximum - minimum + 1U;
+		limit = UINT32_MAX - (UINT32_MAX % range);
+
+		do
+		{
+			res = qsc_csp_generate((uint8_t*)&sample, sizeof(sample));
+		} while (res == true && sample >= limit);
+
+		if (res == true)
+		{
+			*index = minimum + (sample % range);
+		}
+	}
+
+	return res;
+}
 
 void qsc_list_add(qsc_list_state* ctx, const void* item)
 {
@@ -126,8 +153,6 @@ void qsc_list_dispose(qsc_list_state* ctx)
 	{
 		qsc_async_mutex_lock(ctx->opmtx);
 
-		qsc_secrand_dispose();
-
 		qsc_memutils_secure_erase(ctx->items, ctx->count * ctx->width);
 		qsc_memutils_alloc_free(ctx->items);
 
@@ -187,10 +212,6 @@ void qsc_list_initialize(qsc_list_state* ctx, size_t width)
 
 	if (ctx != NULL && width > 0U)
 	{
-		uint8_t seed[32U] = { 0U };
-
-		qsc_csp_generate(seed, sizeof(seed));
-		qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
 		ctx->items = NULL;
 		ctx->count = 0U;
 		ctx->width = width;
@@ -236,7 +257,10 @@ void qsc_list_rshuffle(qsc_list_state* ctx)
 			for (size_t i = 0U; i < ctx->count; ++i)
 			{
 				/* random index in range current index to max index */
-				idx = (uint32_t)qsc_secrand_next_int32_maxmin((int32_t)ctx->count - 1U, (int32_t)i);
+				if (list_random_index((uint32_t)i, (uint32_t)ctx->count - 1U, &idx) == false)
+				{
+					break;
+				}
 
 				sitm = ctx->items + ((size_t)idx * ctx->width);
 				ditm = ctx->items + (i * ctx->width);

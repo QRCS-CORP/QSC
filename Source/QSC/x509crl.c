@@ -15,6 +15,97 @@
 #define QSC_ASN1_TAG_UTC_TIME 23U
 #define QSC_ASN1_TAG_GENERALIZED_TIME 24U
 
+#define X509_CRL_OID_DELTA_CRL_INDICATOR_LEN 3U
+#define X509_CRL_OID_ISSUING_DISTRIBUTION_POINT_LEN 3U
+
+static const uint8_t X509_CRL_OID_DELTA_CRL_INDICATOR[X509_CRL_OID_DELTA_CRL_INDICATOR_LEN] = { 0x55U, 0x1DU, 0x1BU };
+static const uint8_t X509_CRL_OID_ISSUING_DISTRIBUTION_POINT[X509_CRL_OID_ISSUING_DISTRIBUTION_POINT_LEN] = { 0x55U, 0x1DU, 0x1CU };
+
+static bool x509_crl_oid_equal(const qsc_asn1_oid* oid, const uint8_t* data, size_t datalen)
+{
+    bool res;
+
+    res = false;
+
+    if (oid != (const qsc_asn1_oid*)NULL && data != (const uint8_t*)NULL && oid->length == datalen)
+    {
+        res = qsc_memutils_are_equal(oid->data, data, datalen);
+    }
+
+    return res;
+}
+
+static qsc_x509_crl_verify_status x509_crl_check_critical_extension_support(const qsc_x509_crl* crl)
+{
+    qsc_encoding_ber_element* root;
+    qsc_x509_extension extension;
+    size_t consumed;
+    size_t i;
+    size_t j;
+    qsc_x509_crl_verify_status status;
+
+    root = (qsc_encoding_ber_element*)NULL;
+    consumed = 0U;
+    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_INPUT;
+
+    if (crl != (const qsc_x509_crl*)NULL)
+    {
+        status = QSC_X509_CRL_VERIFY_STATUS_SUCCESS;
+
+        for (i = 0U; i < crl->extensions.count && status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS; ++i)
+        {
+            if (crl->extensions.entries[i].critical == true &&
+                x509_crl_oid_equal(&crl->extensions.entries[i].extension_oid, X509_CRL_OID_ISSUING_DISTRIBUTION_POINT, sizeof(X509_CRL_OID_ISSUING_DISTRIBUTION_POINT)) == false &&
+                x509_crl_oid_equal(&crl->extensions.entries[i].extension_oid, X509_CRL_OID_DELTA_CRL_INDICATOR, sizeof(X509_CRL_OID_DELTA_CRL_INDICATOR)) == false)
+            {
+                status = QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED;
+            }
+        }
+
+        for (i = 0U; i < crl->revokedcount && status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS; ++i)
+        {
+            if (crl->revoked[i].rawextensionslen != 0U)
+            {
+                consumed = 0U;
+                root = qsc_encoding_der_decode_element(crl->revoked[i].rawextensions, crl->revoked[i].rawextensionslen, &consumed);
+
+                if (root == (qsc_encoding_ber_element*)NULL || consumed != crl->revoked[i].rawextensionslen ||
+                    qsc_asn1_require_sequence(root, 1U, QSC_X509_EXTENSIONS_MAX) != QSC_ASN1_STATUS_SUCCESS)
+                {
+                    status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                }
+                else
+                {
+                    for (j = 0U; j < root->ccount && status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS; ++j)
+                    {
+                        qsc_memutils_clear((uint8_t*)&extension, sizeof(qsc_x509_extension));
+
+                        if (qsc_x509_extension_decode(root->children[j], &extension) != QSC_ASN1_STATUS_SUCCESS)
+                        {
+                            status = QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL;
+                        }
+                        else if (extension.critical == true)
+                        {
+                            /* QSC does not currently implement indirect-CRL certificateIssuer
+                             * processing. Any critical CRL-entry extension therefore prevents
+                             * the CRL from being used for status determination. */
+                            status = QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED;
+                        }
+                    }
+                }
+
+                if (root != (qsc_encoding_ber_element*)NULL)
+                {
+                    qsc_encoding_ber_free_element(root);
+                    root = (qsc_encoding_ber_element*)NULL;
+                }
+            }
+        }
+    }
+
+    return status;
+}
+
 static qsc_asn1_status x509_crl_copy_unsigned_integer(const qsc_encoding_ber_element* element, uint8_t* output, size_t otplen, size_t* outlen)
 {
     qsc_asn1_status status;
@@ -723,6 +814,11 @@ qsc_x509_crl_verify_status qsc_x509_crl_verify(const qsc_x509_crl* crl, const qs
     else
     {
         status = qsc_x509_crl_check_algorithms(crl);
+
+        if (status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS)
+        {
+            status = x509_crl_check_critical_extension_support(crl);
+        }
 
         if (status == QSC_X509_CRL_VERIFY_STATUS_SUCCESS)
         {

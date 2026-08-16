@@ -191,8 +191,7 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_raw(const qsc_enc
  *
  * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
  */
-QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_ecdsa(const qsc_encoding_ber_element* element, 
-	qsc_x509_named_curve curve, qsc_x509_ecdsa_signature* signature);
+QSC_EXPORT_API qsc_asn1_status qsc_x509_signature_value_decode_ecdsa(const qsc_encoding_ber_element* element, qsc_x509_named_curve curve, qsc_x509_ecdsa_signature* signature);
 
 /*!
  * \brief Gets the expected maximum signature component size in octets for a

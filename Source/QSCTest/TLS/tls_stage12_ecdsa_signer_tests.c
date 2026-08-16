@@ -54,13 +54,7 @@ static bool qsctest_tls_stage12_build_cv_input(uint8_t* cvinput, size_t cvinputl
 
 	qsctest_tls_stage12_make_transcript(transcript, sizeof(transcript));
 
-	st = qsc_tls_keyschedule_build_certificate_verify_input(
-		"TLS 1.3, server CertificateVerify",
-		transcript,
-		sizeof(transcript),
-		cvinput,
-		cvinputlen,
-		outlen);
+	st = qsc_tls_keyschedule_build_certificate_verify_input("TLS 1.3, server CertificateVerify", transcript, sizeof(transcript), cvinput, cvinputlen, outlen);
 
 	return (st == qsc_tls_status_success);
 }

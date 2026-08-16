@@ -1,43 +1,32 @@
-/* End-to-end 0-RTT resumption gate. */
 #include "tls_stage18_0rtt_resumption_tests.h"
 #include "../testutils.h"
-#include "acp.h"
+#include "csp.h"
 #include "eddsa.h"
 #include "memutils.h"
-#include "secrand.h"
 #include "tlsengine.h"
 #include "tlsclient.h"
 #include "tlsserver.h"
 #include "tlssession.h"
 #include "tlssignerdefault.h"
 
-typedef struct psk_entry
-{
-    uint8_t id[64];
-    size_t idlen;
-    uint8_t psk[64];
-    size_t psklen;
-    qsc_tls_cipher_suite suite;
-} psk_entry;
+static qsc_tls_session_ticket g_store;
 
-static psk_entry g_store;
 static uint8_t g_server_pk[32U];
 static uint8_t g_server_sk[64U];
 static uint8_t g_server_cert[32U];
 
-static bool psk_lookup_cb(const uint8_t* identity, size_t identitylen, uint8_t* psk_out, size_t pskcap, size_t* psk_len_out, qsc_tls_cipher_suite* suite_out, uint32_t* max_early_data_out, void* state)
+static bool psk_lookup_cb(const uint8_t* identity, size_t identitylen, qsc_tls_session_ticket* ticketout, void* state)
 {
+    const qsc_tls_session_ticket* ticket;
     bool res;
 
-    (void)state;
+    ticket = (const qsc_tls_session_ticket*)state;
     res = false;
 
-    if ((identitylen == g_store.idlen) && (qsc_memutils_are_equal(identity, g_store.id, identitylen) == true) && (g_store.psklen <= pskcap))
+    if (ticket != NULL && ticketout != NULL && identity != NULL && identitylen != 0U && identitylen == ticket->ticketlen &&
+        qsc_memutils_are_equal(identity, ticket->ticket, identitylen) == true)
     {
-        qsc_memutils_copy(psk_out, g_store.psk, g_store.psklen);
-        *psk_len_out = g_store.psklen;
-        *suite_out = g_store.suite;
-        *max_early_data_out = 16384U;
+        *ticketout = *ticket;
         res = true;
     }
 
@@ -150,8 +139,8 @@ static bool do_handshake(qsc_tls_connection* c, qsc_tls_connection* s)
     return res;
 }
 
-static void initialize_configs(qsc_tls_client_config* ccfg, qsc_tls_server_config* scfg, const qsc_tls_cipher_suite* suites, 
-    const qsc_tls_named_group* groups, const qsc_tls_signature_scheme* sigs, qsc_tls_signer_default_context* signer_ctx)
+static void initialize_configs(qsc_tls_client_config* ccfg, qsc_tls_server_config* scfg, const qsc_tls_cipher_suite* suites, const qsc_tls_named_group* groups, 
+    const qsc_tls_signature_scheme* sigs, qsc_tls_signer_default_context* signer_ctx)
 {
     qsc_memutils_clear(ccfg, sizeof(*ccfg));
     ccfg->ciphersuites = suites;
@@ -163,6 +152,7 @@ static void initialize_configs(qsc_tls_client_config* ccfg, qsc_tls_server_confi
     ccfg->hostname = "example.com";
     ccfg->certinterface.validatechain = stub_validate;
     ccfg->certinterface.verifycertificateverify = stub_verify;
+    ccfg->enableresumption = true;
 
     qsc_memutils_clear(scfg, sizeof(*scfg));
     scfg->ciphersuitepreference = suites;
@@ -180,299 +170,272 @@ static void initialize_configs(qsc_tls_client_config* ccfg, qsc_tls_server_confi
     scfg->localcert.signstate = signer_ctx;
 }
 
-static bool qsctest_tls_stage18_0rtt_resumption_test(void)
+static bool qsctest_tls_stage18_resumption_profile_test(void)
 {
-    const uint8_t early_payload[] = "ping-0rtt";
-    const uint8_t late_c[] = "late-from-client";
-    const uint8_t late_s[] = "late-from-server";
-    uint8_t c_out[4096U] = { 0U };
-    uint8_t ch_rec[4096U] = { 0U };
-    uint8_t early_rec[256U] = { 0U };
+    const uint8_t clientmsg[] = "resumed-from-client";
+    const uint8_t servermsg[] = "resumed-from-server";
     uint8_t nst[2048U] = { 0U };
     uint8_t plain[512U] = { 0U };
     uint8_t rec[512U] = { 0U };
-    uint8_t rx_payload[256U] = { 0U };
-    uint8_t rx_resp[256U] = { 0U };
-    uint8_t seed[32U] = { 0U };
-    uint8_t sh_flight[32768U] = { 0U };
-    uint8_t srv_junk[256U] = { 0U };
     const qsc_tls_cipher_suite suites[1U] = { qsc_tls_cipher_suite_tls_aes_128_gcm_sha256 };
     const qsc_tls_named_group groups[1U] = { qsc_tls_group_x25519 };
     const qsc_tls_signature_scheme sigs[1U] = { qsc_tls_sig_ed25519 };
-    qsc_tls_signer_default_context signer_ctx;
+    qsc_tls_signer_default_context signerctx;
     qsc_tls_client_config ccfg1;
-    qsc_tls_server_config scfg1;
-    qsc_tls_connection c1;
-    qsc_tls_connection s1;
-    qsc_tls_session_ticket srv_ticket;
-    qsc_tls_session_ticket cli_ticket;
-    size_t c_out_len;
-    size_t ch_rec_len;
-    size_t cons;
-    size_t consumed;
-    size_t dummy;
-    size_t early_rec_len;
-    size_t fin_len;
-    size_t nst_len;
-    size_t off;
-    size_t plen;
-    size_t rlen;
-    size_t rx_consumed;
-    size_t rx_plainlen;
-    size_t rx_resplen;
-    size_t sh_flight_len;
-    size_t srv_junk_len;
-    size_t srv_off;
-    size_t w;
-    qsc_tls_status st;
     qsc_tls_client_config ccfg2;
-    qsc_tls_server_config scfg2;
-    qsc_tls_connection c2;
-    qsc_tls_connection s2;
-    bool c2_initialized;
-    bool s2_initialized;
+    qsc_tls_client_config rejectccfg;
+    qsc_tls_server_config* scfg1;
+    qsc_tls_server_config* scfg2;
+    qsc_tls_server_config* rejectscfg;
+    qsc_tls_connection* c1;
+    qsc_tls_connection* c2;
+    qsc_tls_connection* rejected;
+    qsc_tls_connection* s1;
+    qsc_tls_connection* s2;
+    qsc_tls_session_ticket cliticket;
+    qsc_tls_session_ticket srvticket;
+    size_t consumed;
+    size_t nstlen;
+    size_t plainlen;
+    size_t reclen;
+    qsc_tls_status status;
+    bool c1initialized;
+    bool c2initialized;
     bool res;
-    bool tickets_initialized;
+    bool s1initialized;
+    bool s2initialized;
 
-    nst_len = 0U;
+    c1 = (qsc_tls_connection*)qsc_memutils_malloc(sizeof(qsc_tls_connection));
+    c2 = (qsc_tls_connection*)qsc_memutils_malloc(sizeof(qsc_tls_connection));
+    rejected = (qsc_tls_connection*)qsc_memutils_malloc(sizeof(qsc_tls_connection));
+    s1 = (qsc_tls_connection*)qsc_memutils_malloc(sizeof(qsc_tls_connection));
+    s2 = (qsc_tls_connection*)qsc_memutils_malloc(sizeof(qsc_tls_connection));
+    scfg1 = (qsc_tls_server_config*)qsc_memutils_malloc(sizeof(qsc_tls_server_config));
+    scfg2 = (qsc_tls_server_config*)qsc_memutils_malloc(sizeof(qsc_tls_server_config));
+    rejectscfg = (qsc_tls_server_config*)qsc_memutils_malloc(sizeof(qsc_tls_server_config));
+    c1initialized = false;
+    c2initialized = false;
     consumed = 0U;
-    ch_rec_len = 0U;
-    cons = 0U;
-    early_rec_len = 0U;
-    sh_flight_len = 0U;
-    rx_consumed = 0U;
-    rx_plainlen = 0U;
-    rx_resplen = 0U;
-    c_out_len = 0U;
-    off = 0U;
-    fin_len = 0U;
-    w = 0U;
-    srv_junk_len = 0U;
-    srv_off = 0U;
-    rlen = 0U;
-    plen = 0U;
-    dummy = 0U;
-    tickets_initialized = false;
-    c2_initialized = false;
-    s2_initialized = false;
-    res = true;
+    nstlen = 0U;
+    plainlen = 0U;
+    reclen = 0U;
+    res = (c1 != NULL && c2 != NULL && rejected != NULL && s1 != NULL && s2 != NULL && scfg1 != NULL && scfg2 != NULL && rejectscfg != NULL);
+    s1initialized = false;
+    s2initialized = false;
+    qsc_memutils_clear(&cliticket, sizeof(cliticket));
+    qsc_memutils_clear(&srvticket, sizeof(srvticket));
+    qsc_memutils_clear(&g_store, sizeof(g_store));
 
-    qsc_acp_generate(seed, sizeof(seed));
-    qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
-    qsc_eddsa_generate_keypair(g_server_pk, g_server_sk, qsc_secrand_generate);
-    qsc_memutils_copy(g_server_cert, g_server_pk, 32U);
-
-    signer_ctx.scheme = qsc_tls_sig_ed25519;
-    signer_ctx.privatekey = g_server_sk;
-    signer_ctx.privatekeylen = 64U;
-
-    initialize_configs(&ccfg1, &scfg1, suites, groups, sigs, &signer_ctx);
-
-    qsc_tls_engine_initialize_client(&c1, &ccfg1);
-    qsc_tls_engine_initialize_server(&s1, &scfg1);
-
-    if (do_handshake(&c1, &s1) == false)
+    if (res == true)
     {
-        res = false;
+        qsc_memutils_clear(c1, sizeof(qsc_tls_connection));
+        qsc_memutils_clear(c2, sizeof(qsc_tls_connection));
+        qsc_memutils_clear(rejected, sizeof(qsc_tls_connection));
+        qsc_memutils_clear(s1, sizeof(qsc_tls_connection));
+        qsc_memutils_clear(s2, sizeof(qsc_tls_connection));
+        qsc_memutils_clear(scfg1, sizeof(qsc_tls_server_config));
+        qsc_memutils_clear(scfg2, sizeof(qsc_tls_server_config));
+        qsc_memutils_clear(rejectscfg, sizeof(qsc_tls_server_config));
+        qsc_eddsa_generate_keypair(g_server_pk, g_server_sk, qsc_csp_generate);
+        qsc_memutils_copy(g_server_cert, g_server_pk, sizeof(g_server_cert));
+        signerctx.scheme = qsc_tls_sig_ed25519;
+        signerctx.privatekey = g_server_sk;
+        signerctx.privatekeylen = sizeof(g_server_sk);
+        initialize_configs(&ccfg1, scfg1, suites, groups, sigs, &signerctx);
+
+        status = qsc_tls_engine_initialize_client(c1, &ccfg1);
+        res = (status == qsc_tls_status_success);
+        c1initialized = res;
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_emit_session_ticket(&s1, 7200U, nst, sizeof(nst), &nst_len, &srv_ticket);
-
-        if (st != qsc_tls_status_success)
-        {
-            res = false;
-        }
+        status = qsc_tls_engine_initialize_server(s1, scfg1);
+        res = (status == qsc_tls_status_success);
+        s1initialized = res;
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_consume_session_ticket(&c1, nst, nst_len, &consumed, &cli_ticket);
-
-        if ((st != qsc_tls_status_success) || (qsc_memutils_are_equal(srv_ticket.resumptionsecret, cli_ticket.resumptionsecret, srv_ticket.resumptionsecretlen) != true))
-        {
-            res = false;
-        }
-        else
-        {
-            tickets_initialized = true;
-        }
+        res = do_handshake(c1, s1);
     }
 
     if (res == true)
     {
-        qsc_memutils_clear(&g_store, sizeof(g_store));
-        g_store.idlen = srv_ticket.ticketlen;
-        qsc_memutils_copy(g_store.id, srv_ticket.ticket, srv_ticket.ticketlen);
-        g_store.psklen = srv_ticket.resumptionsecretlen;
-        qsc_memutils_copy(g_store.psk, srv_ticket.resumptionsecret, srv_ticket.resumptionsecretlen);
-        g_store.suite = srv_ticket.suite;
+        status = qsc_tls_engine_emit_session_ticket(s1, 7200U, nst, sizeof(nst), &nstlen, &srvticket);
+        res = (status == qsc_tls_status_success && nstlen != 0U && srvticket.maxearlydatasize == 0U);
     }
 
-    qsc_tls_engine_dispose(&c1);
-    qsc_tls_engine_dispose(&s1);
+    if (res == true)
+    {
+        status = qsc_tls_engine_consume_session_ticket(c1, nst, nstlen, &consumed, &cliticket);
+        res = (status == qsc_tls_status_success && consumed == nstlen && cliticket.maxearlydatasize == 0U &&
+            cliticket.protocolversion == QSC_TLS_PROTOCOL_VERSION_13 && cliticket.receipttimems != 0ULL);
+    }
+
+    if (res == true)
+    {
+        res = (srvticket.resumptionsecretlen != 0U && srvticket.resumptionsecretlen == cliticket.resumptionsecretlen &&
+            qsc_memutils_are_equal(srvticket.resumptionsecret, cliticket.resumptionsecret, srvticket.resumptionsecretlen) == true);
+    }
+
+    if (res == true)
+    {
+        g_store = srvticket;
+    }
+
+    if (c1initialized == true)
+    {
+        qsc_tls_engine_dispose(c1);
+    }
+
+    if (s1initialized == true)
+    {
+        qsc_tls_engine_dispose(s1);
+    }
 
     if (res == true)
     {
         ccfg2 = ccfg1;
-        ccfg2.offeredticket = &cli_ticket;
-        ccfg2.enableearlydata = true;
-
-        scfg2 = scfg1;
-        scfg2.psklookup = psk_lookup_cb;
-        scfg2.psklookupstate = NULL;
-        scfg2.acceptearlydata = true;
-
-        qsc_tls_engine_initialize_client(&c2, &ccfg2);
-        c2_initialized = true;
-        qsc_tls_engine_initialize_server(&s2, &scfg2);
-        s2_initialized = true;
-
-        st = qsc_tls_engine_handshake(&c2, NULL, 0U, &cons, ch_rec, sizeof(ch_rec), &ch_rec_len);
-
-        if ((st != qsc_tls_status_success) || (ch_rec_len == 0U) || (c2.state.client.pskoffered == false) || (c2.state.client.earlydataoffered == false))
-        {
-            res = false;
-        }
+        ccfg2.offeredticket = &cliticket;
+        ccfg2.enableearlydata = false;
+        *scfg2 = *scfg1;
+        scfg2->psklookup = psk_lookup_cb;
+        scfg2->psklookupstate = &g_store;
+        scfg2->acceptearlydata = false;
+        status = qsc_tls_engine_initialize_client(c2, &ccfg2);
+        res = (status == qsc_tls_status_success);
+        c2initialized = res;
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_write_application_data(&c2, early_payload, sizeof(early_payload) - 1U, early_rec, sizeof(early_rec), &early_rec_len);
-        
-        if ((st != qsc_tls_status_success) || (early_rec_len == 0U))
-        {
-            res = false;
-        }
+        status = qsc_tls_engine_initialize_server(s2, scfg2);
+        res = (status == qsc_tls_status_success);
+        s2initialized = res;
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_handshake(&s2, ch_rec, ch_rec_len, &cons, sh_flight, sizeof(sh_flight), &sh_flight_len);
-
-        if ((st != qsc_tls_status_success) || (s2.state.server.pskaccepted == false) || (s2.state.server.earlydataaccepted == false))
-        {
-            res = false;
-        }
+        res = do_handshake(c2, s2);
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_read_application_data_ex(&s2, early_rec, early_rec_len, &rx_consumed, rx_payload, sizeof(rx_payload), &rx_plainlen, rx_resp, sizeof(rx_resp), &rx_resplen);
-
-        if ((st != qsc_tls_status_success) || (rx_plainlen != (sizeof(early_payload) - 1U)) || (qsc_memutils_are_equal(rx_payload, early_payload, rx_plainlen) != true))
-        {
-            res = false;
-        }
-    }
-
-    while ((res == true) && (off < sh_flight_len) && (qsc_tls_engine_is_handshake_complete(&c2) == false))
-    {
-        w = 0U;
-        st = qsc_tls_engine_handshake(&c2, sh_flight + off, sh_flight_len - off, &cons, c_out, sizeof(c_out), &w);
-
-        if (st != qsc_tls_status_success)
-        {
-            res = false;
-        }
-        else
-        {
-            off += cons;
-
-            if (w > 0U)
-            {
-                c_out_len = w;
-                fin_len = w;
-            }
-        }
-    }
-
-    if ((res == true) && ((qsc_tls_engine_is_handshake_complete(&c2) == false) ||
-        (c2.state.client.pskaccepted == false) || (c2.state.client.earlydataaccepted == false) ||
-        (c_out_len == 0U)))
-    {
-        res = false;
-    }
-
-    while ((res == true) && (srv_off < fin_len) && (qsc_tls_engine_is_handshake_complete(&s2) == false))
-    {
-        st = qsc_tls_engine_handshake(&s2, c_out + srv_off, fin_len - srv_off, &cons, srv_junk, sizeof(srv_junk), &srv_junk_len);
-
-        if (st != qsc_tls_status_success)
-        {
-            res = false;
-        }
-        else
-        {
-            srv_off += cons;
-
-            if (cons == 0U)
-            {
-                break;
-            }
-        }
-    }
-
-    if ((res == true) && (qsc_tls_engine_is_handshake_complete(&s2) == false))
-    {
-        res = false;
+        res = (c2->state.client.pskoffered == true && c2->state.client.pskaccepted == true &&
+            c2->state.client.earlydataoffered == false && c2->state.client.earlydataaccepted == false &&
+            s2->state.server.pskaccepted == true && s2->state.server.earlydataaccepted == false);
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_write_application_data(&c2, late_c, sizeof(late_c) - 1U, rec, sizeof(rec), &rlen);
-
-        if (st != qsc_tls_status_success)
-        {
-            res = false;
-        }
+        status = qsc_tls_engine_write_application_data(c2, clientmsg, sizeof(clientmsg) - 1U, rec, sizeof(rec), &reclen);
+        res = (status == qsc_tls_status_success && reclen != 0U);
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_read_application_data_ex(&s2, rec, rlen, &cons, plain, sizeof(plain), &plen, NULL, 0U, &dummy);
-
-        if ((st != qsc_tls_status_success) || (plen != (sizeof(late_c) - 1U)) || (qsc_memutils_are_equal(plain, late_c, plen) != true))
-        {
-            res = false;
-        }
+        consumed = 0U;
+        plainlen = 0U;
+        status = qsc_tls_engine_read_application_data(s2, rec, reclen, &consumed, plain, sizeof(plain), &plainlen);
+        res = (status == qsc_tls_status_success && consumed == reclen && plainlen == (sizeof(clientmsg) - 1U) &&
+            qsc_memutils_are_equal(plain, clientmsg, plainlen) == true);
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_write_application_data(&s2, late_s, sizeof(late_s) - 1U, rec, sizeof(rec), &rlen);
-
-        if (st != qsc_tls_status_success)
-        {
-            res = false;
-        }
+        reclen = 0U;
+        status = qsc_tls_engine_write_application_data(s2, servermsg, sizeof(servermsg) - 1U, rec, sizeof(rec), &reclen);
+        res = (status == qsc_tls_status_success && reclen != 0U);
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_read_application_data_ex(&c2, rec, rlen, &cons, plain, sizeof(plain), &plen, NULL, 0U, &dummy);
-
-        if ((st != qsc_tls_status_success) || (plen != (sizeof(late_s) - 1U)) || (qsc_memutils_are_equal(plain, late_s, plen) != true))
-        {
-            res = false;
-        }
+        consumed = 0U;
+        plainlen = 0U;
+        status = qsc_tls_engine_read_application_data(c2, rec, reclen, &consumed, plain, sizeof(plain), &plainlen);
+        res = (status == qsc_tls_status_success && consumed == reclen && plainlen == (sizeof(servermsg) - 1U) &&
+            qsc_memutils_are_equal(plain, servermsg, plainlen) == true);
     }
 
-    if (tickets_initialized == true)
+    if (c2initialized == true)
     {
-        qsc_tls_session_ticket_dispose(&srv_ticket);
-        qsc_tls_session_ticket_dispose(&cli_ticket);
+        qsc_tls_engine_dispose(c2);
     }
 
-    if (c2_initialized == true)
+    if (s2initialized == true)
     {
-        qsc_tls_engine_dispose(&c2);
+        qsc_tls_engine_dispose(s2);
     }
 
-    if (s2_initialized == true)
+    if (res == true)
     {
-        qsc_tls_engine_dispose(&s2);
+        qsc_memutils_clear(rejected, sizeof(qsc_tls_connection));
+        rejectccfg = ccfg1;
+        rejectccfg.enableearlydata = true;
+        status = qsc_tls_engine_initialize_client(rejected, &rejectccfg);
+        res = (status == qsc_tls_status_not_supported);
+    }
+
+    if (res == true)
+    {
+        qsc_memutils_clear(rejected, sizeof(qsc_tls_connection));
+        *rejectscfg = *scfg1;
+        rejectscfg->acceptearlydata = true;
+        status = qsc_tls_engine_initialize_server(rejected, rejectscfg);
+        res = (status == qsc_tls_status_not_supported);
+    }
+
+    qsc_tls_session_ticket_dispose(&srvticket);
+    qsc_tls_session_ticket_dispose(&cliticket);
+    qsc_tls_session_ticket_dispose(&g_store);
+
+    if (c1 != NULL)
+    {
+        qsc_memutils_secure_erase(c1, sizeof(qsc_tls_connection));
+        qsc_memutils_alloc_free(c1);
+    }
+
+    if (c2 != NULL)
+    {
+        qsc_memutils_secure_erase(c2, sizeof(qsc_tls_connection));
+        qsc_memutils_alloc_free(c2);
+    }
+
+    if (rejected != NULL)
+    {
+        qsc_memutils_secure_erase(rejected, sizeof(qsc_tls_connection));
+        qsc_memutils_alloc_free(rejected);
+    }
+
+    if (s1 != NULL)
+    {
+        qsc_memutils_secure_erase(s1, sizeof(qsc_tls_connection));
+        qsc_memutils_alloc_free(s1);
+    }
+
+    if (s2 != NULL)
+    {
+        qsc_memutils_secure_erase(s2, sizeof(qsc_tls_connection));
+        qsc_memutils_alloc_free(s2);
+    }
+
+    if (scfg1 != NULL)
+    {
+        qsc_memutils_clear(scfg1, sizeof(qsc_tls_server_config));
+        qsc_memutils_alloc_free(scfg1);
+    }
+
+    if (scfg2 != NULL)
+    {
+        qsc_memutils_clear(scfg2, sizeof(qsc_tls_server_config));
+        qsc_memutils_alloc_free(scfg2);
+    }
+
+    if (rejectscfg != NULL)
+    {
+        qsc_memutils_clear(rejectscfg, sizeof(qsc_tls_server_config));
+        qsc_memutils_alloc_free(rejectscfg);
     }
 
     return res;
@@ -482,15 +445,15 @@ bool qsctest_tls_stage18_tests(void)
 {
     bool res;
 
-    res = qsctest_tls_stage18_0rtt_resumption_test();
+    res = qsctest_tls_stage18_resumption_profile_test();
 
     if (res == true)
     {
-        qsctest_print_line("[PASS] TLS Stage 18 0-RTT resumption test.");
+        qsctest_print_line("[PASS] TLS Stage 18 1-RTT resumption and 0-RTT rejection test.");
     }
     else
     {
-        qsctest_print_line("[FAIL] TLS Stage 18 0-RTT resumption test.");
+        qsctest_print_line("[FAIL] TLS Stage 18 1-RTT resumption and 0-RTT rejection test.");
     }
 
     return res;

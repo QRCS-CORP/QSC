@@ -8,6 +8,50 @@
 #include "ecdhp521base.h"
 #include "eddh448base.h"
 
+#if defined(QSC_KYBER_S1K2P512) || defined(QSC_KYBER_S3K3P768) || defined(QSC_KYBER_S5K4P1024)
+#define QSC_TLS_MLKEM_MODULUS 3329U
+#define QSC_TLS_MLKEM_RHO_SIZE 32U
+
+static bool tls_groups_mlkem_encapsulation_key_is_valid(const uint8_t* key, size_t keylen)
+{
+    size_t coeffbytes;
+    size_t i;
+    uint16_t c0;
+    uint16_t c1;
+    bool res;
+
+    coeffbytes = 0U;
+    i = 0U;
+    c0 = 0U;
+    c1 = 0U;
+    res = false;
+
+    if (key != NULL && keylen == QSC_KYBER_PUBLICKEY_SIZE && keylen > QSC_TLS_MLKEM_RHO_SIZE)
+    {
+        coeffbytes = keylen - QSC_TLS_MLKEM_RHO_SIZE;
+
+        if ((coeffbytes % 3U) == 0U)
+        {
+            res = true;
+
+            for (i = 0U; i < coeffbytes; i += 3U)
+            {
+                c0 = (uint16_t)key[i] | ((uint16_t)(key[i + 1U] & 0x0FU) << 8U);
+                c1 = (uint16_t)(key[i + 1U] >> 4U) | ((uint16_t)key[i + 2U] << 4U);
+
+                if (c0 >= QSC_TLS_MLKEM_MODULUS || c1 >= QSC_TLS_MLKEM_MODULUS)
+                {
+                    res = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    return res;
+}
+#endif
+
 /* backend dispatch: each supported group maps to either a pure classical ECDH,
  * a pure KEM, or a hybrid that concatenates both. The descriptor table encodes
  * the wire sizes so encoders can validate peer key shares before invoking the primitive. */
@@ -65,7 +109,7 @@ static const qsc_tls_group_descriptor tls_groups_secp521r1 = {
 };
 
 #if defined(QSC_ECDH_S1P256)
-/* secp256r1 wire format per RFC 8446 4.2.8.2: uncompressed SEC1 point
+/* secp256r1 wire format per RFC 9846 Section 4.3.8.2: uncompressed SEC1 point
  * 0x04 || X(32) || Y(32) = 65 bytes on the wire.
  * QSC's qsc_ecdh stores the raw X||Y (64 bytes); we wrap with the 0x04 prefix
  * when emitting on the wire and strip it on receive. */
@@ -110,7 +154,7 @@ static const qsc_tls_group_descriptor tls_groups_mlkem = {
 };
 
 #   if defined(QSC_KYBER_S3K3P768)
-/* Hybrid x25519 + ML-KEM-768 per OpenSSL/TLS hybrid group encoding.
+/* X25519MLKEM768 wire format per RFC 10024.
  * Client key share: kem_pub || classical_pub.
  * Server key share: kem_ct || classical_pub.
  * Shared secret: kem_ss || classical_ss.
@@ -129,7 +173,7 @@ static const qsc_tls_group_descriptor tls_groups_x25519_mlkem = {
 };
 
 #       if defined(QSC_ECDH_S1P256)
-/* Hybrid secp256r1 + ML-KEM-768 per OpenSSL/TLS hybrid group encoding.
+/* SecP256r1MLKEM768 wire format per RFC 10024.
  * Client key share: uncompressed_sec1_p256_pub || kem_pub.
  * Server key share: uncompressed_sec1_p256_pub || kem_ct.
  * Shared secret: p256_ss || kem_ss.
@@ -150,7 +194,7 @@ static const qsc_tls_group_descriptor tls_groups_secp256r1_mlkem = {
 #   endif
 
 #   if defined(QSC_KYBER_S5K4P1024)
-/* Hybrid secp384r1 + ML-KEM-1024 per OpenSSL/TLS hybrid group encoding.
+/* SecP384r1MLKEM1024 wire format per RFC 10024.
  * Client key share: uncompressed_sec1_p384_pub || kem_pub.
  * Server key share: uncompressed_sec1_p384_pub || kem_ct.
  * Shared secret: p384_ss || kem_ss.
@@ -339,7 +383,7 @@ qsc_tls_status qsc_tls_groups_generate_client_keypair(qsc_tls_key_exchange_state
 #if defined(QSC_ECDH_S1P256)
             case qsc_tls_group_secp256r1:
             {
-                /* qsc_ecdh produces raw X||Y (64 bytes). Wire format per RFC 8446 4.2.8.2
+                /* qsc_ecdh produces raw X||Y (64 bytes). Wire format per RFC 9846 Section 4.3.8.2
                  * is the uncompressed SEC1 point: 0x04 || X || Y = 65 bytes. */
                 uint8_t rawpub[QSC_ECDH_PUBLICKEY_SIZE] = { 0U };
 
@@ -376,14 +420,13 @@ qsc_tls_status qsc_tls_groups_generate_client_keypair(qsc_tls_key_exchange_state
             }
             case qsc_tls_group_x25519_mlkem768:
             {
-                /* OpenSSL-compatible hybrid wire order: KEM public first, then classical public.
+                /* RFC 10024 X25519MLKEM768 order: KEM public first, then X25519 public.
                  * Private storage mirrors that order: KEM private first, then X25519 private. */
                 res = qsc_kyber_generate_keypair(state->publicshare, state->privatekey, qsc_csp_generate);
 
                 if (res == true)
                 {
-                    res = qsc_eddh_generate_keypair(state->publicshare + QSC_KYBER_PUBLICKEY_SIZE,
-                        state->privatekey + QSC_KYBER_PRIVATEKEY_SIZE, qsc_csp_generate);
+                    res = qsc_eddh_generate_keypair(state->publicshare + QSC_KYBER_PUBLICKEY_SIZE, state->privatekey + QSC_KYBER_PRIVATEKEY_SIZE, qsc_csp_generate);
                 }
 
                 if (res == true)
@@ -400,15 +443,14 @@ qsc_tls_status qsc_tls_groups_generate_client_keypair(qsc_tls_key_exchange_state
             {
                 uint8_t rawpub[QSC_ECDH_PUBLICKEY_SIZE] = { 0U };
 
-                /* OpenSSL-compatible hybrid wire order: SEC1 P-256 public first, then KEM public. */
+                /* RFC 10024 SecP256r1MLKEM768 order: SEC1 P-256 public first, then KEM public. */
                 res = qsc_ecdh_generate_keypair(rawpub, state->privatekey, qsc_csp_generate);
 
                 if (res == true)
                 {
                     state->publicshare[0] = 0x04U;
                     qsc_memutils_copy(state->publicshare + 1U, rawpub, QSC_ECDH_PUBLICKEY_SIZE);
-                    res = qsc_kyber_generate_keypair(state->publicshare + 1U + QSC_ECDH_PUBLICKEY_SIZE,
-                        state->privatekey + QSC_ECDH_PRIVATEKEY_SIZE, qsc_csp_generate);
+                    res = qsc_kyber_generate_keypair(state->publicshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, state->privatekey + QSC_ECDH_PRIVATEKEY_SIZE, qsc_csp_generate);
                 }
 
                 if (res == true)
@@ -435,8 +477,7 @@ qsc_tls_status qsc_tls_groups_generate_client_keypair(qsc_tls_key_exchange_state
                 {
                     state->publicshare[0] = 0x04U;
                     qsc_memutils_copy(state->publicshare + 1U, rawpub, QSC_ECDHP384_PUBLICKEY_SIZE);
-                    res = qsc_kyber_generate_keypair(state->publicshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE,
-                        state->privatekey + QSC_ECDHP384_PRIVATEKEY_SIZE, qsc_csp_generate);
+                    res = qsc_kyber_generate_keypair(state->publicshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE, state->privatekey + QSC_ECDHP384_PRIVATEKEY_SIZE, qsc_csp_generate);
                 }
 
                 if (res == true)
@@ -610,14 +651,22 @@ qsc_tls_status qsc_tls_groups_client_derive_shared_secret(qsc_tls_key_exchange_s
             }
             case qsc_tls_group_x25519_mlkem768:
             {
-                /* OpenSSL-compatible order: KEM ciphertext/shared secret first, then X25519. */
+                /* RFC 10024 X25519MLKEM768 order: KEM ciphertext/shared secret first, then X25519. */
                 res = qsc_kyber_decapsulate(sharedsecret, serverkeyshare, state->privatekey);
 
-                if (res == true)
+                if (res == false)
+                {
+                    status = qsc_tls_status_authentication_failure;
+                }
+                else
                 {
                     res = qsc_eddh_key_exchange(sharedsecret + QSC_KYBER_SHAREDSECRET_SIZE, state->privatekey + QSC_KYBER_PRIVATEKEY_SIZE, serverkeyshare + QSC_KYBER_CIPHERTEXT_SIZE);
 
-                    if (res == true)
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_invalid_message;
+                    }
+                    else
                     {
                         *written = QSC_KYBER_SHAREDSECRET_SIZE + 32U;
                     }
@@ -628,7 +677,7 @@ qsc_tls_status qsc_tls_groups_client_derive_shared_secret(qsc_tls_key_exchange_s
 #if defined(QSC_ECDH_S1P256)
             case qsc_tls_group_secp256r1_mlkem768:
             {
-                /* OpenSSL-compatible order: SEC1 P-256 shared secret first, then KEM shared secret. */
+                /* RFC 10024 SecP256r1MLKEM768 order: P-256 shared secret first, then KEM shared secret. */
                 if (serverkeyshare[0] != 0x04U)
                 {
                     status = qsc_tls_status_invalid_message;
@@ -637,12 +686,19 @@ qsc_tls_status qsc_tls_groups_client_derive_shared_secret(qsc_tls_key_exchange_s
                 {
                     res = qsc_ecdh_key_exchange(sharedsecret, state->privatekey, serverkeyshare + 1U);
 
-                    if (res == true)
+                    if (res == false)
                     {
-                        res = qsc_kyber_decapsulate(sharedsecret + QSC_ECDH_SHAREDSECRET_SIZE,
-                            serverkeyshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, state->privatekey + QSC_ECDH_PRIVATEKEY_SIZE);
+                        status = qsc_tls_status_invalid_message;
+                    }
+                    else
+                    {
+                        res = qsc_kyber_decapsulate(sharedsecret + QSC_ECDH_SHAREDSECRET_SIZE, serverkeyshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, state->privatekey + QSC_ECDH_PRIVATEKEY_SIZE);
 
-                        if (res == true)
+                        if (res == false)
+                        {
+                            status = qsc_tls_status_authentication_failure;
+                        }
+                        else
                         {
                             *written = QSC_ECDH_SHAREDSECRET_SIZE + QSC_KYBER_SHAREDSECRET_SIZE;
                         }
@@ -663,12 +719,19 @@ qsc_tls_status qsc_tls_groups_client_derive_shared_secret(qsc_tls_key_exchange_s
                 {
                     res = qsc_p384_key_exchange(sharedsecret, serverkeyshare + 1U, state->privatekey);
 
-                    if (res == true)
+                    if (res == false)
                     {
-                        res = qsc_kyber_decapsulate(sharedsecret + QSC_ECDHP384_SHAREDSECRET_SIZE,
-                            serverkeyshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE, state->privatekey + QSC_ECDHP384_PRIVATEKEY_SIZE);
+                        status = qsc_tls_status_invalid_message;
+                    }
+                    else
+                    {
+                        res = qsc_kyber_decapsulate(sharedsecret + QSC_ECDHP384_SHAREDSECRET_SIZE, serverkeyshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE, state->privatekey + QSC_ECDHP384_PRIVATEKEY_SIZE);
 
-                        if (res == true)
+                        if (res == false)
+                        {
+                            status = qsc_tls_status_authentication_failure;
+                        }
+                        else
                         {
                             *written = QSC_ECDHP384_SHAREDSECRET_SIZE + QSC_KYBER_SHAREDSECRET_SIZE;
                         }
@@ -690,6 +753,12 @@ qsc_tls_status qsc_tls_groups_client_derive_shared_secret(qsc_tls_key_exchange_s
             if (status == qsc_tls_status_success && !res)
             {
                 status = qsc_tls_status_authentication_failure;
+            }
+
+            if (d->iskem == true && status != qsc_tls_status_success)
+            {
+                qsc_memutils_secure_erase(sharedsecret, d->sharedsecretsize);
+                *written = 0U;
             }
         }
     }
@@ -879,10 +948,22 @@ qsc_tls_status qsc_tls_groups_server_respond(qsc_tls_named_group group, const ui
 #if defined(QSC_KYBER_S1K2P512) || defined(QSC_KYBER_S3K3P768) || defined(QSC_KYBER_S5K4P1024)
             case QSC_TLS_ACTIVE_MLKEM_GROUP:
             {
-                /* encapsulate against the client's public key. */
-                res = qsc_kyber_encapsulate(sharedsecret, serverkeyshare, clientkeyshare, qsc_csp_generate);
+                /* The standalone ML-KEM TLS groups require the FIPS 203 encapsulation-key check before encapsulation. */
+                if (tls_groups_mlkem_encapsulation_key_is_valid(clientkeyshare, QSC_KYBER_PUBLICKEY_SIZE) == false)
+                {
+                    status = qsc_tls_status_invalid_message;
+                }
+                else
+                {
+                    res = qsc_kyber_encapsulate(sharedsecret, serverkeyshare, clientkeyshare, qsc_csp_generate);
 
-                if (res == true)
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_authentication_failure;
+                    }
+                }
+
+                if (status == qsc_tls_status_success)
                 {
                     *serverkeysharewritten = QSC_KYBER_CIPHERTEXT_SIZE;
                     *sharedsecretwritten = QSC_KYBER_SHAREDSECRET_SIZE;
@@ -892,21 +973,43 @@ qsc_tls_status qsc_tls_groups_server_respond(qsc_tls_named_group group, const ui
             }
             case qsc_tls_group_x25519_mlkem768:
             {
-                /* OpenSSL-compatible order: encapsulate KEM first, then append X25519. */
-                res = qsc_kyber_encapsulate(sharedsecret, serverkeyshare, clientkeyshare, qsc_csp_generate);
-
-                if (res == true)
+                /* RFC 10024 requires the FIPS 203 encapsulation-key check before ML-KEM encapsulation. */
+                if (tls_groups_mlkem_encapsulation_key_is_valid(clientkeyshare, QSC_KYBER_PUBLICKEY_SIZE) == false)
                 {
-                    res = qsc_eddh_generate_keypair(serverkeyshare + QSC_KYBER_CIPHERTEXT_SIZE, serverpriv, qsc_csp_generate);
+                    status = qsc_tls_status_invalid_message;
+                }
+                else
+                {
+                    res = qsc_kyber_encapsulate(sharedsecret, serverkeyshare, clientkeyshare, qsc_csp_generate);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_authentication_failure;
+                    }
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
+                {
+                    res = qsc_eddh_generate_keypair(serverkeyshare + QSC_KYBER_CIPHERTEXT_SIZE, serverpriv, qsc_csp_generate);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_authentication_failure;
+                    }
+                }
+
+                if (status == qsc_tls_status_success)
                 {
                     res = qsc_eddh_key_exchange(sharedsecret + QSC_KYBER_SHAREDSECRET_SIZE, serverpriv,
                         clientkeyshare + QSC_KYBER_PUBLICKEY_SIZE);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_invalid_message;
+                    }
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
                 {
                     *serverkeysharewritten = QSC_KYBER_CIPHERTEXT_SIZE + 32U;
                     *sharedsecretwritten = QSC_KYBER_SHAREDSECRET_SIZE + 32U;
@@ -919,28 +1022,43 @@ qsc_tls_status qsc_tls_groups_server_respond(qsc_tls_named_group group, const ui
             {
                 uint8_t serverrawpub[QSC_ECDH_PUBLICKEY_SIZE] = { 0U };
 
-                /* OpenSSL-compatible order: SEC1 P-256 first, then KEM. */
-                if (clientkeyshare[0] != 0x04U)
+                /* RFC 10024 SecP256r1MLKEM768 order: SEC1 P-256 public first, then KEM ciphertext. */
+                if (clientkeyshare[0] != 0x04U ||
+                    tls_groups_mlkem_encapsulation_key_is_valid(clientkeyshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, QSC_KYBER_PUBLICKEY_SIZE) == false)
                 {
                     status = qsc_tls_status_invalid_message;
                 }
                 else
                 {
                     res = qsc_ecdh_generate_keypair(serverrawpub, serverpriv, qsc_csp_generate);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_authentication_failure;
+                    }
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
                 {
                     res = qsc_ecdh_key_exchange(sharedsecret, serverpriv, clientkeyshare + 1U);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_invalid_message;
+                    }
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
                 {
-                    res = qsc_kyber_encapsulate(sharedsecret + QSC_ECDH_SHAREDSECRET_SIZE,
-                        serverkeyshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, clientkeyshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, qsc_csp_generate);
+                    res = qsc_kyber_encapsulate(sharedsecret + QSC_ECDH_SHAREDSECRET_SIZE, serverkeyshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, clientkeyshare + 1U + QSC_ECDH_PUBLICKEY_SIZE, qsc_csp_generate);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_authentication_failure;
+                    }
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
                 {
                     serverkeyshare[0] = 0x04U;
                     qsc_memutils_copy(serverkeyshare + 1U, serverrawpub, QSC_ECDH_PUBLICKEY_SIZE);
@@ -958,7 +1076,8 @@ qsc_tls_status qsc_tls_groups_server_respond(qsc_tls_named_group group, const ui
             {
                 uint8_t serverrawpub[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
 
-                if (clientkeyshare[0] != 0x04U)
+                if (clientkeyshare[0] != 0x04U ||
+                    tls_groups_mlkem_encapsulation_key_is_valid(clientkeyshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE, QSC_KYBER_PUBLICKEY_SIZE) == false)
                 {
                     status = qsc_tls_status_invalid_message;
                 }
@@ -968,19 +1087,27 @@ qsc_tls_status qsc_tls_groups_server_respond(qsc_tls_named_group group, const ui
                     qsc_p384_generate_keypair(serverrawpub, serverpriv, qsc_csp_generate);
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
                 {
                     res = qsc_p384_key_exchange(sharedsecret, clientkeyshare + 1U, serverpriv);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_invalid_message;
+                    }
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
                 {
-                    res = qsc_kyber_encapsulate(sharedsecret + QSC_ECDHP384_SHAREDSECRET_SIZE,
-                        serverkeyshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE,
-                        clientkeyshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE, qsc_csp_generate);
+                    res = qsc_kyber_encapsulate(sharedsecret + QSC_ECDHP384_SHAREDSECRET_SIZE, serverkeyshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE, clientkeyshare + 1U + QSC_ECDHP384_PUBLICKEY_SIZE, qsc_csp_generate);
+
+                    if (res == false)
+                    {
+                        status = qsc_tls_status_authentication_failure;
+                    }
                 }
 
-                if (res == true)
+                if (status == qsc_tls_status_success)
                 {
                     serverkeyshare[0] = 0x04U;
                     qsc_memutils_copy(serverkeyshare + 1U, serverrawpub, QSC_ECDHP384_PUBLICKEY_SIZE);
@@ -1004,6 +1131,14 @@ qsc_tls_status qsc_tls_groups_server_respond(qsc_tls_named_group group, const ui
             if (status == qsc_tls_status_success && !res)
             {
                 status = qsc_tls_status_authentication_failure;
+            }
+
+            if (d->iskem == true && status != qsc_tls_status_success)
+            {
+                qsc_memutils_secure_erase(serverkeyshare, d->serverpublicsize);
+                qsc_memutils_secure_erase(sharedsecret, d->sharedsecretsize);
+                *serverkeysharewritten = 0U;
+                *sharedsecretwritten = 0U;
             }
 
             qsc_memutils_secure_erase(serverpriv, sizeof(serverpriv));

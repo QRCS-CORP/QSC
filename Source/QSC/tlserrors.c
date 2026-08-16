@@ -1,6 +1,6 @@
 #include "tlserrors.h"
 
-#define QSC_TLS_ERROR_STRING_DEPTH 9U
+#define QSC_TLS_ERROR_STRING_DEPTH 11U
 #define QSC_TLS_ERROR_STRING_WIDTH 128U
 
 static const char QSC_TLS_ERROR_STRINGS[QSC_TLS_ERROR_STRING_DEPTH][QSC_TLS_ERROR_STRING_WIDTH] =
@@ -13,7 +13,9 @@ static const char QSC_TLS_ERROR_STRINGS[QSC_TLS_ERROR_STRING_DEPTH][QSC_TLS_ERRO
 	"A parsed, derived, or supplied length field was outside the valid range.",
 	"The requested TLS feature, group, suite, or algorithm is not supported.",
 	"Authentication failed, or a signature, MAC, or certificate validation step failed.",
-	"The TLS message was malformed, truncated, or semantically invalid."
+	"The TLS message was malformed, truncated, or semantically invalid.",
+	"A TLS record exceeded the RFC 9846 record-layer size limit.",
+	"The configured cumulative TLS operation deadline expired."
 };
 
 const char* qsc_tls_error_to_string(qsc_tls_status status)
@@ -23,7 +25,7 @@ const char* qsc_tls_error_to_string(qsc_tls_status status)
 
 	ret = "The TLS status code is unknown.";
 
-	if (((int32_t)status <= 0) && ((int32_t)status >= -8))
+	if (((int32_t)status <= 0) && ((int32_t)status >= -10))
 	{
 		idx = (size_t)(0 - (int32_t)status);
 		ret = QSC_TLS_ERROR_STRINGS[idx];

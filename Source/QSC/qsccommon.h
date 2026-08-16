@@ -1117,156 +1117,99 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \def QSC_TLS_SECURITY_CLASS_1
- * \brief Selects the QSC TLS Security Class 1 build profile.
+ * \brief Selects the QSC TLS post-quantum Security Class 1 profile.
  *
  * \details
- * This profile enables the lowest predefined TLS-oriented parameter-set bundle
- * in QSC. When this macro is defined, the header enables the following
- * primitive parameter sets:
- * - QSC_ECDH_S1P256
- * - QSC_EDDH_S1EC25519
+ * This selector controls the post-quantum parameter sets used by TLS and X.509:
  * - QSC_KYBER_S1K2P512
  * - QSC_DILITHIUM_S1P44
- * - QSC_ECDSA_S1P256
- * - QSC_EDDSA_S1EC25519
  *
- * This profile is intended for compact builds that expose the 128-bit-class
- * parameter selections associated with X25519, Ed25519, NIST P-256, ML-KEM-512,
- * and ML-DSA-44.
+ * Classical key-exchange and signature parameter sets are selected independently
+ * by the QSC_ECDH_*, QSC_EDDH_*, QSC_ECDSA_*, and QSC_EDDSA_* macros. This keeps
+ * the widely interoperable classical TLS algorithms independent from the selected
+ * post-quantum security class.
  *
- * Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build.
+ * Only one QSC_TLS_SECURITY_CLASS_X macro may be defined in a build.
  */
 #if !defined(QSC_TLS_NO_DEFAULT_SECURITY_CLASS) && !defined(QSC_TLS_SECURITY_CLASS_1) && !defined(QSC_TLS_SECURITY_CLASS_3) && !defined(QSC_TLS_SECURITY_CLASS_5)
-#   define QSC_TLS_SECURITY_CLASS_1
+#   define QSC_TLS_SECURITY_CLASS_3
 #endif
 
 /*!
  * \def QSC_TLS_SECURITY_CLASS_3
- * \brief Selects the QSC TLS Security Class 3 build profile.
+ * \brief Selects the QSC TLS post-quantum Security Class 3 profile.
  *
  * \details
- * This profile enables the middle predefined TLS-oriented parameter-set bundle
- * in QSC. When this macro is defined, the header enables the following
- * primitive parameter sets:
- * - QSC_ECDH_S3P384
- * - QSC_EDDH_S3EC448
+ * This selector controls the post-quantum parameter sets used by TLS and X.509:
  * - QSC_KYBER_S3K3P768
  * - QSC_DILITHIUM_S3P65
- * - QSC_ECDSA_S3P384
- * - QSC_EDDSA_S3EC448
  *
- * This profile is intended for builds that expose the higher-strength parameter
- * selections associated with X448, Ed448, NIST P-384, ML-KEM-768, and
- * ML-DSA-65.
+ * Classical key-exchange and signature parameter sets are selected independently.
  *
- * Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build.
+ * Only one QSC_TLS_SECURITY_CLASS_X macro may be defined in a build.
  */
 //#define QSC_TLS_SECURITY_CLASS_3
 
- /*!
-  * \def QSC_TLS_SECURITY_CLASS_5
-  * \brief Selects the QSC TLS Security Class 5 build profile.
-  *
-  * \details
-  * This profile enables the highest predefined TLS-oriented parameter-set bundle
-  * currently defined in this header. When this macro is defined, the header
-  * enables the following primitive parameter sets:
-  * - QSC_ECDH_S5P521
-  * - QSC_EDDH_S3EC448
-  * - QSC_KYBER_S5K4P1024
-  * - QSC_DILITHIUM_S5P87
-  * - QSC_ECDSA_S5P521
-  * - QSC_EDDSA_S3EC448
-  *
-  * This profile exposes both the NIST P-521 classical path and the Edwards
-  * X448/Ed448 classical path alongside the highest predefined PQ parameter sets.
-  * The Edwards-family options are intentionally enabled in both the Security
-  * Class 3 and Security Class 5 TLS build profiles so that each higher-strength
-  * profile retains an Edwards-curve option.
-  *
-  * Implementations using this profile shall derive TLS and X.509 capability
-  * strictly from the resulting enabled primitive macros rather than from the
-  * security-class name alone.
-  *
-  * Only one QSC_TLS_SECURITY_CLASS_X macro should be defined in a build.
-  */
+/*!
+ * \def QSC_TLS_SECURITY_CLASS_5
+ * \brief Selects the QSC TLS post-quantum Security Class 5 profile.
+ *
+ * \details
+ * This selector controls the post-quantum parameter sets used by TLS and X.509:
+ * - QSC_KYBER_S5K4P1024
+ * - QSC_DILITHIUM_S5P87
+ *
+ * Classical key-exchange and signature parameter sets are selected independently.
+ * A Class 5 build therefore retains interoperable classical TLS algorithms without
+ * treating those classical algorithms as the determinant of post-quantum strength.
+ *
+ * Only one QSC_TLS_SECURITY_CLASS_X macro may be defined in a build.
+ */
 //#define QSC_TLS_SECURITY_CLASS_5
+
+#if (defined(QSC_TLS_SECURITY_CLASS_1) + defined(QSC_TLS_SECURITY_CLASS_3) + defined(QSC_TLS_SECURITY_CLASS_5)) > 1
+#   error "Only one QSC TLS security class may be enabled"
+#endif
 
 #if defined(QSC_TLS_SECURITY_CLASS_1)
 
    /*!
-    * \def QSC_EDDH_S1EC25519
-    * \brief Enable the EDDH S1EC25519 parameter set.
+    * \def QSC_KYBER_S1K2P512
+    * \brief Enable the ML-KEM-512 parameter set for TLS Security Class 1.
     */
-#   define QSC_EDDH_S1EC25519
-
-    /*!
-    * \def QSC_KYBER_S3K3P768
-    * \brief Enable the Kyber S3K3P768 parameter set.
-    */
-#   define QSC_KYBER_S3K3P768
-
-    /*!
-    * \def QSC_DILITHIUM_S3P65
-    * \brief Enable the Dilithium S3P65 parameter set.
-    */
-#   define QSC_DILITHIUM_S3P65
+#   define QSC_KYBER_S1K2P512
 
    /*!
-    * \def QSC_ECDSA_S1P256
-    * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
+    * \def QSC_DILITHIUM_S1P44
+    * \brief Enable the ML-DSA-44 parameter set for TLS Security Class 1.
     */
-#   define QSC_ECDSA_S1P256
-
-   /*!
-    * \def QSC_EDDSA_S1EC25519
-    * \brief Enable the EDDSA S1EC25519 parameter set.
-    */
-#   define QSC_EDDSA_S1EC25519
+#   define QSC_DILITHIUM_S1P44
 
 #elif defined(QSC_TLS_SECURITY_CLASS_3)
 
    /*!
-    * \def QSC_EDDH_S1EC25519
-    * \brief Enable the EDDH S1EC25519 parameter set.
-    */
-#   define QSC_EDDH_S1EC25519
-
-    /*!
     * \def QSC_KYBER_S3K3P768
-    * \brief Enable the Kyber S3K3P768 parameter set.
+    * \brief Enable the ML-KEM-768 parameter set for TLS Security Class 3.
     */
 #   define QSC_KYBER_S3K3P768
 
-    /*!
+   /*!
     * \def QSC_DILITHIUM_S3P65
-    * \brief Enable the Dilithium S3P65 parameter set.
+    * \brief Enable the ML-DSA-65 parameter set for TLS Security Class 3.
     */
 #   define QSC_DILITHIUM_S3P65
-
-    /*!
-     * \def QSC_ECDSA_S1P256
-     * \brief Enable the ECDSA S1EC256 (NIST P-256) parameter set.
-     */
-#   define QSC_ECDSA_S1P256
-
-     /*!
-      * \def QSC_EDDSA_S1EC25519
-      * \brief Enable the EDDSA S1EC25519 parameter set.
-      */
-#   define QSC_EDDSA_S1EC25519
 
 #elif defined(QSC_TLS_SECURITY_CLASS_5)
 
    /*!
     * \def QSC_KYBER_S5K4P1024
-    * \brief Enable the Kyber S5K4P1024 parameter set.
+    * \brief Enable the ML-KEM-1024 parameter set for TLS Security Class 5.
     */
 #   define QSC_KYBER_S5K4P1024
 
    /*!
     * \def QSC_DILITHIUM_S5P87
-    * \brief Enable the Dilithium S5P87 parameter set.
+    * \brief Enable the ML-DSA-87 parameter set for TLS Security Class 5.
     */
 #   define QSC_DILITHIUM_S5P87
 

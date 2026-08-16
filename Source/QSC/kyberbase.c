@@ -986,7 +986,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 
     kyber_indcpa_dec(buf, ct, sk);
 
-    /* Multitarget countermeasure for coins + contributory KEM */
+    /* multitarget countermeasure for coins + contributory KEM */
     qsc_memutils_copy((buf + QSC_KYBER_SYMBYTES), (sk + QSC_KYBER_SECRETKEY_BYTES - (2U * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
     qsc_sha3_compute512(kr, buf, 2U * QSC_KYBER_SYMBYTES);
 
@@ -1012,12 +1012,9 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 
     qsc_intutils_cmov(ss, kr, QSC_KYBER_SYMBYTES, (uint8_t)!fail);
     qsc_memutils_secure_erase(kr, sizeof(kr));
+    qsc_keccak_dispose(&kctx);
+    qsc_memutils_secure_erase(&fail, sizeof(fail));
 
-    /* Note: in the FIPS specification decapsulate always returns true even on failure,
-    * as a means to guard against a decryption oracle. In the real world however,
-    * that failure will propagate in tunnel failures which will reveal the decapsulation failure,
-    * but without any ability to defend against it or log it administratively. For this reason,
-    * this is an ineffective and unrealistic defense against the oracle,
-    * and implement the decapsulation failure signal. */
-    return (fail == 0);
+    /* FIPS 203 ML-KEM.Decaps uses implicit rejection */
+    return true;
 }

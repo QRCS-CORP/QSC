@@ -1,13 +1,40 @@
 #include "tls_stage17_multi_suite_tests.h"
 #include "../testutils.h"
-#include "acp.h"
+#include "csp.h"
 #include "eddsa.h"
 #include "memutils.h"
-#include "secrand.h"
 #include "tlsclient.h"
 #include "tlsengine.h"
 #include "tlsserver.h"
 #include "tlssignerdefault.h"
+
+typedef struct
+{
+    qsc_tls_connection client;
+    qsc_tls_connection server;
+} stage17_connection_pair;
+
+static stage17_connection_pair* stage17_connection_pair_allocate(void)
+{
+    stage17_connection_pair* pair;
+
+    pair = (stage17_connection_pair*)qsc_memutils_malloc(sizeof(stage17_connection_pair));
+
+    if (pair != NULL)
+    {
+        qsc_memutils_clear(pair, sizeof(stage17_connection_pair));
+    }
+
+    return pair;
+}
+
+static void stage17_connection_pair_free(stage17_connection_pair* pair)
+{
+    if (pair != NULL)
+    {
+        qsc_memutils_alloc_free(pair);
+    }
+}
 
 static uint8_t g_server_pk[32U];
 static uint8_t g_server_sk[64U];
@@ -24,8 +51,7 @@ static bool stub_validate(const qsc_tls_certificate_view* chain, size_t chainlen
     return res;
 }
 
-static bool stub_verify(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, 
-    size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
+static bool stub_verify(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, const uint8_t* signature, size_t signaturelen, const qsc_tls_certificate_view* signer, void* state)
 {
     qsc_tls_certificate_view v;
     bool res;
@@ -47,8 +73,7 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
     qsc_tls_signer_default_context signer_ctx;
     qsc_tls_client_config ccfg;
     qsc_tls_server_config scfg;
-    qsc_tls_connection c;
-    qsc_tls_connection s;
+    stage17_connection_pair* pair;
     const uint8_t c2s_plain[] = "hello-from-client";
     const uint8_t s2c_plain[] = "ack-from-server";
     uint8_t ch[4096U] = { 0U };
@@ -69,6 +94,13 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
     qsc_tls_status st;
     size_t w;
     bool res;
+
+    pair = stage17_connection_pair_allocate();
+
+    if (pair == NULL)
+    {
+        return false;
+    }
 
     (void)suite_name;
     ch_len = 0U;
@@ -113,10 +145,10 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
     scfg.localcert.signcallback = qsc_tls_signer_default_sign;
     scfg.localcert.signstate = &signer_ctx;
 
-    qsc_tls_engine_initialize_client(&c, &ccfg);
-    qsc_tls_engine_initialize_server(&s, &scfg);
+    qsc_tls_engine_initialize_client(&pair->client, &ccfg);
+    qsc_tls_engine_initialize_server(&pair->server, &scfg);
 
-    st = qsc_tls_engine_handshake(&c, NULL, 0U, &cons, ch, sizeof(ch), &ch_len);
+    st = qsc_tls_engine_handshake(&pair->client, NULL, 0U, &cons, ch, sizeof(ch), &ch_len);
 
     if ((st != qsc_tls_status_success) || (ch_len == 0U))
     {
@@ -125,7 +157,7 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
 
     if (res == true)
     {
-        st = qsc_tls_engine_handshake(&s, ch, ch_len, &cons, srv_flight, sizeof(srv_flight), &srv_flight_len);
+        st = qsc_tls_engine_handshake(&pair->server, ch, ch_len, &cons, srv_flight, sizeof(srv_flight), &srv_flight_len);
 
         if ((st != qsc_tls_status_success) || (srv_flight_len == 0U))
         {
@@ -133,10 +165,10 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
         }
     }
 
-    while ((res == true) && (off < srv_flight_len) && (qsc_tls_engine_is_handshake_complete(&c) == false))
+    while ((res == true) && (off < srv_flight_len) && (qsc_tls_engine_is_handshake_complete(&pair->client) == false))
     {
         w = 0U;
-        st = qsc_tls_engine_handshake(&c, srv_flight + off, srv_flight_len - off, &cons, cli_fin, sizeof(cli_fin), &w);
+        st = qsc_tls_engine_handshake(&pair->client, srv_flight + off, srv_flight_len - off, &cons, cli_fin, sizeof(cli_fin), &w);
 
         if (st != qsc_tls_status_success)
         {
@@ -157,16 +189,16 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
         }
     }
 
-    if ((res == true) && ((qsc_tls_engine_is_handshake_complete(&c) == false) || (cli_fin_len == 0U) || (c.state.client.negotiatedsuite != suite)))
+    if ((res == true) && ((qsc_tls_engine_is_handshake_complete(&pair->client) == false) || (cli_fin_len == 0U) || (pair->client.state.client.negotiatedsuite != suite)))
     {
         res = false;
     }
 
     if (res == true)
     {
-        st = qsc_tls_engine_handshake(&s, cli_fin, cli_fin_len, &cons, junk, sizeof(junk), &junk_len);
+        st = qsc_tls_engine_handshake(&pair->server, cli_fin, cli_fin_len, &cons, junk, sizeof(junk), &junk_len);
 
-        if ((st != qsc_tls_status_success) || (qsc_tls_engine_is_handshake_complete(&s) == false) || (s.state.server.negotiatedsuite != suite))
+        if ((st != qsc_tls_status_success) || (qsc_tls_engine_is_handshake_complete(&pair->server) == false) || (pair->server.state.server.negotiatedsuite != suite))
         {
             res = false;
         }
@@ -174,7 +206,7 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
 
     if (res == true)
     {
-        st = qsc_tls_engine_write_application_data(&c, c2s_plain, sizeof(c2s_plain) - 1U, rec, sizeof(rec), &reclen);
+        st = qsc_tls_engine_write_application_data(&pair->client, c2s_plain, sizeof(c2s_plain) - 1U, rec, sizeof(rec), &reclen);
 
         if ((st != qsc_tls_status_success) || (reclen == 0U))
         {
@@ -184,7 +216,7 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
 
     if (res == true)
     {
-        st = qsc_tls_engine_read_application_data_ex(&s, rec, reclen, &cons, plain, sizeof(plain), &plen, NULL, 0U, &dummy);
+        st = qsc_tls_engine_read_application_data_ex(&pair->server, rec, reclen, &cons, plain, sizeof(plain), &plen, NULL, 0U, &dummy);
 
         if ((st != qsc_tls_status_success) || (plen != (sizeof(c2s_plain) - 1U)) || (qsc_memutils_are_equal(plain, c2s_plain, plen) != true))
         {
@@ -194,7 +226,7 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
 
     if (res == true)
     {
-        st = qsc_tls_engine_write_application_data(&s, s2c_plain, sizeof(s2c_plain) - 1U, rec, sizeof(rec), &reclen);
+        st = qsc_tls_engine_write_application_data(&pair->server, s2c_plain, sizeof(s2c_plain) - 1U, rec, sizeof(rec), &reclen);
 
         if ((st != qsc_tls_status_success) || (reclen == 0U))
         {
@@ -204,7 +236,7 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
 
     if (res == true)
     {
-        st = qsc_tls_engine_read_application_data_ex(&c, rec, reclen, &cons, plain, sizeof(plain), &plen, NULL, 0U, &dummy);
+        st = qsc_tls_engine_read_application_data_ex(&pair->client, rec, reclen, &cons, plain, sizeof(plain), &plen, NULL, 0U, &dummy);
 
         if ((st != qsc_tls_status_success) || (plen != (sizeof(s2c_plain) - 1U)) || (qsc_memutils_are_equal(plain, s2c_plain, plen) != true))
         {
@@ -212,22 +244,20 @@ static bool run_handshake_under_suite(qsc_tls_cipher_suite suite, const char* su
         }
     }
 
-    qsc_tls_engine_dispose(&c);
-    qsc_tls_engine_dispose(&s);
+    qsc_tls_engine_dispose(&pair->client);
+    qsc_tls_engine_dispose(&pair->server);
+    stage17_connection_pair_free(pair);
 
     return res;
 }
 
 static bool qsctest_tls_stage17_multi_suite_test(void)
 {
-    uint8_t seed[32U] = { 0U };
     bool res;
 
     res = true;
 
-    qsc_acp_generate(seed, sizeof(seed));
-    qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
-    qsc_eddsa_generate_keypair(g_server_pk, g_server_sk, qsc_secrand_generate);
+    qsc_eddsa_generate_keypair(g_server_pk, g_server_sk, qsc_csp_generate);
     qsc_memutils_copy(g_server_cert, g_server_pk, 32U);
 
     if (run_handshake_under_suite(qsc_tls_cipher_suite_tls_aes_128_gcm_sha256, "TLS_AES_128_GCM_SHA256") == false)

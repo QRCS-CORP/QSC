@@ -121,7 +121,7 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_transcript_snapshot(const qsc_tls_transcri
  *
  * \details
  * Replaces the current transcript contents with the synthetic handshake message defined by
- * RFC 8446 Section 4.4.1, consisting of the message_hash handshake type and the digest of
+ * RFC 9846 Section 4.1, consisting of the message_hash handshake type and the digest of
  * the previous ClientHello.
  *
  * \param state: [struct*] The active transcript state.

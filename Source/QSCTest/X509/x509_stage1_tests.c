@@ -91,7 +91,7 @@ bool x509_stage1_dns_matcher(void)
 	{
 		if (qsc_x509_dns_name_match("*.example.com", "a.b.example.com") == false)
 		{
-			if (qsc_x509_dns_name_match("*.xn--example.com", "www.xn--example.com") == false)
+			if (qsc_x509_dns_name_match("*.xn--example.com", "www.xn--example.com") == true)
 			{
 				res = true;
 			}
@@ -104,8 +104,8 @@ bool x509_stage1_dns_matcher(void)
 bool x509_stage1_server_chain_verify(void)
 {
 	const char* name = "x509_stage1_server_chain_verify";
-	qsc_x509_certificate certs[MAX_CHAIN_CERTS] = { 0 };
-	qsc_x509_trust_anchor anchors[MAX_ANCHORS] = { 0 };
+	qsc_x509_certificate* certs;
+	qsc_x509_trust_anchor* anchors;
 	qsc_x509_chain chain = { 0 };
 	qsc_x509_store store = { 0 };
 	qsc_x509_verify_state vstate = { 0 };
@@ -116,31 +116,54 @@ bool x509_stage1_server_chain_verify(void)
 	bool res;
 
 	res = false;
+	certs = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+	anchors = (qsc_x509_trust_anchor*)qsc_memutils_malloc(sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
 
-	if (load_chain_and_store(SERVER_CHAIN_PATH, SERVER_ROOTS_PATH, certs, &chain, anchors, &store) != 0)
+	if (certs != NULL && anchors != NULL)
 	{
-		qsctest_x509_current_time(&now);
-		qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
-		qsc_x509_verify_options_initialize(&options);
-		options.purpose = QSC_X509_VERIFY_PURPOSE_TLS_SERVER;
-		options.rejectunsupportedcriticalextensions = true;
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
 
-		st = qsc_x509_chain_verify_ex(&chain, &store, &now, qsc_x509_qsc_signature_verify, &vstate, &options);
-
-		if (st == QSC_X509_VERIFY_STATUS_SUCCESS)
+		if (load_chain_and_store(SERVER_CHAIN_PATH, SERVER_ROOTS_PATH, certs, &chain, anchors, &store) != 0)
 		{
-			st = qsc_x509_certificate_check_hostname(&chain.certificates[0], "server.example.test");
+			qsctest_x509_current_time(&now);
+			qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
+			qsc_x509_verify_options_initialize(&options);
+			options.purpose = QSC_X509_VERIFY_PURPOSE_TLS_SERVER;
+			options.rejectunsupportedcriticalextensions = true;
+
+			st = qsc_x509_chain_verify_ex(&chain, &store, &now, qsc_x509_qsc_signature_verify, &vstate, &options);
 
 			if (st == QSC_X509_VERIFY_STATUS_SUCCESS)
 			{
-				st = qsc_x509_certificate_check_hostname(&chain.certificates[0], "wrong.example.test");
+				st = qsc_x509_certificate_check_hostname(&chain.certificates[0], "server.example.test");
 
-				if (st == QSC_X509_VERIFY_STATUS_NAME_MISMATCH)
+				if (st == QSC_X509_VERIFY_STATUS_SUCCESS)
 				{
-					res = true;
+					st = qsc_x509_certificate_check_hostname(&chain.certificates[0], "wrong.example.test");
+
+					if (st == QSC_X509_VERIFY_STATUS_NAME_MISMATCH)
+					{
+						res = true;
+					}
 				}
 			}
 		}
+	}
+
+	qsc_x509_chain_free(&chain);
+	qsc_x509_store_free(&store);
+
+	if (certs != NULL)
+	{
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_alloc_free(certs);
+	}
+
+	if (anchors != NULL)
+	{
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
+		qsc_memutils_alloc_free(anchors);
 	}
 
 	return res;
@@ -149,8 +172,8 @@ bool x509_stage1_server_chain_verify(void)
 bool x509_stage1_client_purpose_rejection(void)
 {
 	const char* name = "x509_stage1_client_purpose_rejection";
-	qsc_x509_certificate certs[MAX_CHAIN_CERTS] = { 0 };
-	qsc_x509_trust_anchor anchors[MAX_ANCHORS] = { 0 };
+	qsc_x509_certificate* certs;
+	qsc_x509_trust_anchor* anchors;
 	qsc_x509_chain chain = { 0 };
 	qsc_x509_store store = { 0 };
 	qsc_x509_verify_state vstate = { 0 };
@@ -161,21 +184,44 @@ bool x509_stage1_client_purpose_rejection(void)
 	bool res;
 
 	res = false;
+	certs = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+	anchors = (qsc_x509_trust_anchor*)qsc_memutils_malloc(sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
 
-	if (load_chain_and_store(CLIENT_CHAIN_PATH, SERVER_ROOTS_PATH, certs, &chain, anchors, &store) != 0)
+	if (certs != NULL && anchors != NULL)
 	{
-		qsctest_x509_current_time(&tnow);
-		qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
-		qsc_x509_verify_options_initialize(&options);
-		options.purpose = QSC_X509_VERIFY_PURPOSE_TLS_SERVER;
-		options.rejectunsupportedcriticalextensions = true;
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
 
-		st = qsc_x509_chain_verify_ex(&chain, &store, &tnow, qsc_x509_qsc_signature_verify, &vstate, &options);
-
-		if (st == QSC_X509_VERIFY_STATUS_PURPOSE_REJECTED)
+		if (load_chain_and_store(CLIENT_CHAIN_PATH, SERVER_ROOTS_PATH, certs, &chain, anchors, &store) != 0)
 		{
-			res = true;
+			qsctest_x509_current_time(&tnow);
+			qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
+			qsc_x509_verify_options_initialize(&options);
+			options.purpose = QSC_X509_VERIFY_PURPOSE_TLS_SERVER;
+			options.rejectunsupportedcriticalextensions = true;
+
+			st = qsc_x509_chain_verify_ex(&chain, &store, &tnow, qsc_x509_qsc_signature_verify, &vstate, &options);
+
+			if (st == QSC_X509_VERIFY_STATUS_PURPOSE_REJECTED)
+			{
+				res = true;
+			}
 		}
+	}
+
+	qsc_x509_chain_free(&chain);
+	qsc_x509_store_free(&store);
+
+	if (certs != NULL)
+	{
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_alloc_free(certs);
+	}
+
+	if (anchors != NULL)
+	{
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
+		qsc_memutils_alloc_free(anchors);
 	}
 
 	return res;
@@ -184,11 +230,11 @@ bool x509_stage1_client_purpose_rejection(void)
 bool x509_stage1_crl_revocation(void)
 {
 	const char* name = "x509_stage1_crl_revocation";
-	qsc_x509_certificate certs[MAX_CHAIN_CERTS] = { 0 };
-	qsc_x509_trust_anchor anchors[MAX_ANCHORS] = { 0 };
+	qsc_x509_certificate* certs;
+	qsc_x509_trust_anchor* anchors;
+	qsc_x509_crl* crl;
 	qsc_x509_chain chain = { 0 };
 	qsc_x509_store store = { 0 };
-	qsc_x509_crl crl = { 0 };
 	qsc_asn1_time tnow = { 0 };
 	qsc_x509_revocation_status rst = { 0 };
 	qsc_x509_verify_state vstate = { 0 };
@@ -196,25 +242,57 @@ bool x509_stage1_crl_revocation(void)
 	bool res;
 
 	res = false;
+	certs = (qsc_x509_certificate*)qsc_memutils_malloc(sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+	anchors = (qsc_x509_trust_anchor*)qsc_memutils_malloc(sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
+	crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 
-	if (load_chain_and_store(RCHAIN_PEM_PATH, SERVER_ROOTS_PATH, certs, &chain, anchors, &store) != 0)
+	if (certs != NULL && anchors != NULL && crl != NULL)
 	{
-		if (load_crl_pem(SERVER_INTMD_PATH, &crl) != 0)
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+
+		if (load_chain_and_store(RCHAIN_PEM_PATH, SERVER_ROOTS_PATH, certs, &chain, anchors, &store) != 0)
 		{
-			qsctest_x509_current_time(&tnow);
-			qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
-
-			if (chain.certificates != NULL)
+			if (load_crl_pem(SERVER_INTMD_PATH, crl) != 0)
 			{
-				rst = qsc_x509_certificate_check_revocation_with_crl(&chain.certificates[0], &chain.certificates[1], &crl,
-					qsc_x509_qsc_crl_signature_verify, &vstate, &tnow);
+				qsctest_x509_current_time(&tnow);
+				qsc_x509_qsc_verify_state_initialize(&vstate, verifybuf, sizeof(verifybuf));
 
-				if (rst == QSC_X509_REVOCATION_STATUS_REVOKED)
+				if (chain.certificates != NULL)
 				{
-					res = true;
+					rst = qsc_x509_certificate_check_revocation_with_crl(&chain.certificates[0], &chain.certificates[1], crl,
+						qsc_x509_qsc_crl_signature_verify, &vstate, &tnow);
+
+					if (rst == QSC_X509_REVOCATION_STATUS_REVOKED)
+					{
+						res = true;
+					}
 				}
 			}
 		}
+	}
+
+	if (crl != NULL)
+	{
+		qsc_x509_crl_clear(crl);
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl);
+	}
+
+	qsc_x509_chain_free(&chain);
+	qsc_x509_store_free(&store);
+
+	if (certs != NULL)
+	{
+		qsc_memutils_clear(certs, sizeof(qsc_x509_certificate) * MAX_CHAIN_CERTS);
+		qsc_memutils_alloc_free(certs);
+	}
+
+	if (anchors != NULL)
+	{
+		qsc_memutils_clear(anchors, sizeof(qsc_x509_trust_anchor) * MAX_ANCHORS);
+		qsc_memutils_alloc_free(anchors);
 	}
 
 	return res;
@@ -255,18 +333,6 @@ bool qsctest_x509_stage1_tests(void)
 		qsctest_print_line("[FAIL] Client rejection test.");
 		res = false;
 	}
-
-	/* Note: tests fails because generated certificate has expired,
-	   the mechanism is tested working properly  */
-	//if (x509_stage1_crl_revocation() == true)
-	//{
-	//	qsctest_print_line("[PASS] CRL revocation test.");
-	//}
-	//else
-	//{
-	//	qsctest_print_line("[FAIL] CRL revocation test.");
-	//	res = false;
-	//}
 
 	return res;
 }

@@ -578,8 +578,7 @@ qsc_asn1_status qsc_x509_crl_builder_validate_issuer(const qsc_x509_crl_builder*
         {
             status = QSC_ASN1_STATUS_INVALID_INPUT;
         }
-        else if ((issuer->extensions.basicconstraints.present == false) ||
-            (issuer->extensions.basicconstraints.ca == false))
+        else if ((issuer->extensions.basicconstraints.present == false) || (issuer->extensions.basicconstraints.ca == false))
         {
             status = QSC_ASN1_STATUS_INVALID_INPUT;
         }

@@ -16,149 +16,104 @@ static int32_t x509_ascii_tolower(int32_t c)
     return res;
 }
 
-static bool x509_ascii_case_equal_n(const char* left, const char* right, size_t length)
+static bool x509_ascii_case_equal_ex(const uint8_t* left, size_t leftlen, const char* right, size_t rightlen)
 {
-    bool res;
     size_t i;
-
-    res = true;
-
-    for (i = 0U; i < length; ++i)
-    {
-        if (left[i] == '\0' || right[i] == '\0')
-        {
-            res = false;
-            break;
-        }
-
-        if (x509_ascii_tolower((uint8_t)left[i]) != x509_ascii_tolower((uint8_t)right[i]))
-        {
-            res = false;
-            break;
-        }
-    }
-
-    return res;
-}
-
-static bool x509_ascii_case_equal(const char* left, const char* right)
-{
-    size_t llen;
-    size_t rlen;
     bool res;
 
     res = false;
 
-    if (left != (const char*)NULL && right != (const char*)NULL)
+    if (left != (const uint8_t*)NULL && right != (const char*)NULL && leftlen == rightlen && leftlen != 0U)
     {
-        llen = qsc_stringutils_string_size(left);
-        rlen = qsc_stringutils_string_size(right);
+        res = true;
 
-        if (llen == rlen)
+        for (i = 0U; i < leftlen; ++i)
         {
-            res = x509_ascii_case_equal_n(left, right, llen);
+            if (left[i] == 0U || left[i] > 0x7FU || right[i] == '\0' || (uint8_t)right[i] > 0x7FU ||
+                x509_ascii_tolower(left[i]) != x509_ascii_tolower((uint8_t)right[i]))
+            {
+                res = false;
+                break;
+            }
         }
     }
 
     return res;
 }
 
-static const char* x509_find_char(const char* s, char c)
+static bool x509_dns_name_is_valid(const uint8_t* name, size_t namelen, bool allowwildcard)
 {
-    const char* res;
+    size_t wildcards;
+    size_t i;
+    bool res;
 
-    res = (const char*)NULL;
+    wildcards = 0U;
+    res = false;
 
-    if (s != (const char*)NULL)
+    if (name != (const uint8_t*)NULL && namelen != 0U && name[0U] != '.' && name[namelen - 1U] != '.')
     {
-        while (*s != '\0')
+        res = true;
+
+        for (i = 0U; i < namelen; ++i)
         {
-            if (*s == c)
+            if (name[i] == 0U || name[i] > 0x7FU || (name[i] == '.' && i != 0U && name[i - 1U] == '.'))
             {
-                res = s;
+                res = false;
                 break;
             }
 
-            ++s;
+            if (name[i] == '*')
+            {
+                ++wildcards;
+            }
+        }
+
+        if (res == true && wildcards != 0U)
+        {
+            if (allowwildcard == false || wildcards != 1U || namelen < 3U || name[0U] != '*' || name[1U] != '.')
+            {
+                res = false;
+            }
         }
     }
 
     return res;
 }
 
-static bool x509_dns_label_has_wildcard(const char* pattern)
+static bool x509_dns_name_match_ex(const uint8_t* pattern, size_t patternlen, const char* hostname, size_t hostnamelen)
 {
-    const char* dot;
-    const char* p;
+    size_t hostdot;
+    size_t i;
+    bool founddot;
     bool res;
 
+    hostdot = 0U;
+    founddot = false;
     res = false;
 
-    if (pattern != (const char*)NULL)
+    if (pattern != (const uint8_t*)NULL && hostname != (const char*)NULL &&
+        x509_dns_name_is_valid(pattern, patternlen, true) == true &&
+        x509_dns_name_is_valid((const uint8_t*)hostname, hostnamelen, false) == true)
     {
-        dot = x509_find_char(pattern, '.');
-        p = pattern;
-
-        while (*p != '\0' && (dot == (const char*)NULL || p < dot))
+        if (pattern[0U] != '*')
         {
-            if (*p == '*')
-            {
-                res = true;
-                break;
-            }
-
-            ++p;
+            res = x509_ascii_case_equal_ex(pattern, patternlen, hostname, hostnamelen);
         }
-    }
-
-    return res;
-}
-
-static bool x509_dns_first_label_is_idna(const char* name)
-{
-    bool res;
-
-    res = false;
-
-    if (name != (const char*)NULL)
-    {
-        res = (x509_ascii_tolower((uint8_t)name[0U]) == 'x' &&
-            x509_ascii_tolower((uint8_t)name[1U]) == 'n' &&
-            name[2U] == '-' && name[3U] == '-');
-    }
-
-    return res;
-}
-
-static bool x509_dns_pattern_is_valid(const char* pattern)
-{
-    const char* dot;
-    size_t plen;
-    bool res;
-
-    res = false;
-
-    if (pattern != (const char*)NULL && pattern[0U] != '\0')
-    {
-        plen = qsc_stringutils_string_size(pattern);
-
-        if (plen != 0U && pattern[0U] != '.' && pattern[plen - 1U] != '.')
+        else
         {
-            if (x509_dns_label_has_wildcard(pattern) == false)
+            for (i = 0U; i < hostnamelen; ++i)
             {
-                res = true;
-            }
-            else
-            {
-                dot = x509_find_char(pattern, '.');
-
-                if (dot != (const char*)NULL)
+                if (hostname[i] == '.')
                 {
-                    if (pattern[0U] == '*' && pattern[1U] == '.' && x509_find_char(dot + 1, '.') != (const char*)NULL)
-                    {
-                        res = true;
-                    }
+                    hostdot = i;
+                    founddot = true;
+                    break;
                 }
+            }
+
+            if (founddot == true && hostdot != 0U && (hostnamelen - hostdot) == (patternlen - 1U))
+            {
+                res = x509_ascii_case_equal_ex(pattern + 1U, patternlen - 1U, hostname + hostdot, hostnamelen - hostdot);
             }
         }
     }
@@ -171,34 +126,17 @@ bool qsc_x509_dns_name_match(const char* pattern, const char* hostname)
     QSC_ASSERT(pattern != NULL);
     QSC_ASSERT(hostname != NULL);
 
-    const char* hdot;
-    const char* suffix;
+    size_t hostnamelen;
+    size_t patternlen;
     bool res;
 
     res = false;
 
     if (pattern != (const char*)NULL && hostname != (const char*)NULL)
     {
-        if (x509_dns_pattern_is_valid(pattern) == true)
-        {
-            if (pattern[0U] != '*')
-            {
-                res = x509_ascii_case_equal(pattern, hostname);
-            }
-            else if (hostname[0U] != '.' && hostname[0U] != '\0')
-            {
-                hdot = x509_find_char(hostname, '.');
-
-                if (hdot != (const char*)NULL && x509_find_char(hdot + 1, '.') != (const char*)NULL)
-                {
-                    if (x509_dns_first_label_is_idna(hostname) == false && x509_dns_first_label_is_idna(pattern + 2) == false)
-                    {
-                        suffix = pattern + 1;
-                        res = x509_ascii_case_equal(suffix, hdot);
-                    }
-                }
-            }
-        }
+        patternlen = qsc_stringutils_string_size(pattern);
+        hostnamelen = qsc_stringutils_string_size(hostname);
+        res = x509_dns_name_match_ex((const uint8_t*)pattern, patternlen, hostname, hostnamelen);
     }
 
     return res;
@@ -209,51 +147,30 @@ bool qsc_x509_certificate_match_dns_name(const qsc_x509_certificate* certificate
     QSC_ASSERT(certificate != NULL);
     QSC_ASSERT(hostname != NULL);
 
+    const qsc_x509_general_name* name;
+    size_t hostnamelen;
     size_t i;
     bool res;
-    bool sawdns;
 
     res = false;
-    sawdns = false;
 
-    if (certificate != (const qsc_x509_certificate*)NULL && hostname != (const char*)NULL)
+    if (certificate != (const qsc_x509_certificate*)NULL && hostname != (const char*)NULL &&
+        certificate->extensions.subjectaltname.present == true)
     {
-        if (certificate->extensions.subjectaltname.present == true)
+        hostnamelen = qsc_stringutils_string_size(hostname);
+
+        if (hostnamelen != 0U)
         {
             for (i = 0U; i < certificate->extensions.subjectaltname.count; ++i)
             {
-                const qsc_x509_general_name* name;
-
                 name = &certificate->extensions.subjectaltname.entries[i];
 
-                if (name->type == QSC_X509_GENERAL_NAME_DNS_NAME)
+                if (name->type == QSC_X509_GENERAL_NAME_DNS_NAME && name->length != 0U &&
+                    name->length <= QSC_X509_NAME_ATTRIBUTE_STRING_MAX &&
+                    x509_dns_name_match_ex(name->data, name->length, hostname, hostnamelen) == true)
                 {
-                    sawdns = true;
-
-                    if (qsc_x509_dns_name_match((const char*)name->data, hostname) == true)
-                    {
-                        res = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (res == false && sawdns == false)
-        {
-            for (i = 0U; i < certificate->subject.count; ++i)
-            {
-                const qsc_x509_name_attribute* attr;
-
-                attr = &certificate->subject.attributes[i];
-
-                if (attr->type == QSC_X509_NAME_ATTRIBUTE_COMMON_NAME)
-                {
-                    if (qsc_x509_dns_name_match(attr->value, hostname) == true)
-                    {
-                        res = true;
-                        break;
-                    }
+                    res = true;
+                    break;
                 }
             }
         }

@@ -144,6 +144,18 @@ bool x509_stage4b_mlkem_ca_reject(void);
 bool x509_stage4b_mlkem_spki_roundtrip(void);
 
 /*!
+ * \brief Test RFC 9881 and RFC 9935 post-quantum key-usage profiles.
+ *
+ * \details
+ * Verifies that ML-KEM certificates with a keyUsage extension permit only
+ * keyEncipherment and that ML-DSA certificates require at least one permitted
+ * signature usage while rejecting encipherment and key-agreement usages.
+ *
+ * \return Returns true if the PQC key-usage profile tests complete successfully; otherwise returns false.
+ */
+bool x509_stage4b_pqc_key_usage_profiles(void);
+
+/*!
  * \brief Test ML-DSA PKCS #8 round-trip decoding and certificate-key matching.
  *
  * \details
@@ -154,6 +166,30 @@ bool x509_stage4b_mlkem_spki_roundtrip(void);
  * \return Returns true if the test completed successfully; otherwise returns false.
  */
 bool x509_stage4b_mldsa_pkcs8_roundtrip_and_match(void);
+
+/*!
+ * \brief Test RFC 9881 ML-DSA private-key encodings.
+ *
+ * \details
+ * Verifies canonical expanded-key output, seed and combined seed/expanded-key
+ * input handling, RFC 5958 public-key tagging, and rejection of inconsistent
+ * combined ML-DSA private-key material.
+ *
+ * \return Returns true if the RFC 9881 private-key tests complete successfully; otherwise returns false.
+ */
+bool x509_stage4b_mldsa_rfc9881_private_key_formats(void);
+
+/*!
+ * \brief Test RFC 9935 ML-KEM private-key encodings.
+ *
+ * \details
+ * Verifies canonical expanded-key output, seed and combined seed/expanded-key
+ * input handling, RFC 5958 public-key tagging, the FIPS 203 expanded-key hash
+ * check, and rejection of inconsistent combined ML-KEM private-key material.
+ *
+ * \return Returns true if the RFC 9935 private-key tests complete successfully; otherwise returns false.
+ */
+bool x509_stage4b_mlkem_rfc9935_private_key_formats(void);
 
 /*!
  * \brief Execute the full Stage 4 X.509 post-quantum test suite.

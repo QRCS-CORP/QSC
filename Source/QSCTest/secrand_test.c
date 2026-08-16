@@ -1,6 +1,5 @@
 #include "secrand_test.h"
 #include "testutils.h"
-#include "acp.h"
 #include "csg.h"
 #include "csp.h"
 #include "hcg.h"
@@ -341,15 +340,6 @@ void qsctest_secrand_evaluate(const char* name, const uint8_t* sample, size_t le
 	}
 }
 
-void qsctest_secrand_acp_evaluate()
-{
-	uint8_t smp[QSCTEST_SECRAND_SAMPLE_SIZE] = { 0U };
-
-	qsc_acp_generate(smp, sizeof(smp));
-
-	qsctest_secrand_evaluate("ACP", smp, sizeof(smp));
-}
-
 void qsctest_secrand_csg_evaluate()
 {
 	uint8_t seed[QSC_CSG_256_SEED_SIZE] = { 0U };
@@ -421,8 +411,12 @@ bool qsctest_secrand_stress()
 
 	res = true;
 
-	qsc_acp_generate(seed, sizeof(seed));
-	qsc_secrand_initialize(seed, 32U, NULL, 0U);
+	if (qsc_csp_generate(seed, sizeof(seed)) == false)
+	{
+		return false;
+	}
+
+	qsc_secrand_initialize(seed, sizeof(seed), NULL, 0U);
 
 	int16_t xs16m = qsc_secrand_next_int16_max(1000);
 
@@ -527,7 +521,6 @@ void qsctest_secrand_run()
 	}
 
 	qsctest_print_safe("*** Testing random entropy providers *** \n");
-	qsctest_secrand_acp_evaluate();
 	qsctest_secrand_csp_evaluate();
 #if defined(QSC_RDRAND_COMPATIBLE)
 	qsctest_secrand_rdp_evaluate();

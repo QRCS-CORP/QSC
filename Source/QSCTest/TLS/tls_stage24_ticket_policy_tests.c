@@ -3,6 +3,7 @@
 #include "memutils.h"
 #include "tlssession.h"
 #include "tlssocket.h"
+#include "timestamp.h"
 
 static void stage24_make_ticket(qsc_tls_session_ticket* ticket)
 {
@@ -15,8 +16,10 @@ static void stage24_make_ticket(qsc_tls_session_ticket* ticket)
         ticket->ageadd = 0x01020304UL;
         ticket->noncelen = 8U;
         ticket->ticketlen = 32U;
-        ticket->resumptionsecretlen = 32U;
+        ticket->resumptionsecretlen = 48U;
         ticket->suite = qsc_tls_cipher_suite_tls_aes_256_gcm_sha384;
+        ticket->receipttimems = qsc_timestamp_epochtime_milliseconds();
+        ticket->protocolversion = QSC_TLS_PROTOCOL_VERSION_13;
 
         for (i = 0U; i < ticket->noncelen; ++i)
         {
@@ -97,28 +100,33 @@ static bool stage24_context_policy_setter_test(void)
     policy.lifetime_seconds = 7200U;
     policy.renewal_interval_seconds = 1800U;
 
-    if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_success)
+    if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_policy_rejected)
     {
-        if ((context.ticketpolicy.enabled == true) &&
-            (context.ticketpolicy.allow_early_data == true) &&
-            (context.ticketpolicy.auto_send_server_ticket == true) &&
-            (context.ticketpolicy.lifetime_seconds == 7200U) &&
-            (context.ticketpolicy.renewal_interval_seconds == 1800U))
-        {
-            policy.lifetime_seconds = 0U;
+        policy.allow_early_data = false;
 
-            if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_policy_rejected)
+        if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_success)
+        {
+            if ((context.ticketpolicy.enabled == true) &&
+                (context.ticketpolicy.allow_early_data == false) &&
+                (context.ticketpolicy.auto_send_server_ticket == true) &&
+                (context.ticketpolicy.lifetime_seconds == 7200U) &&
+                (context.ticketpolicy.renewal_interval_seconds == 1800U))
             {
-                policy.lifetime_seconds = 7200U;
-                policy.renewal_interval_seconds = 7200U;
+                policy.lifetime_seconds = 0U;
 
                 if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_policy_rejected)
                 {
-                    policy.renewal_interval_seconds = 7201U;
+                    policy.lifetime_seconds = 7200U;
+                    policy.renewal_interval_seconds = 7200U;
 
                     if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_policy_rejected)
                     {
-                        res = true;
+                        policy.renewal_interval_seconds = 7201U;
+
+                        if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_policy_rejected)
+                        {
+                            res = true;
+                        }
                     }
                 }
             }
@@ -168,7 +176,7 @@ static bool stage24_context_ticket_store_test(void)
     return res;
 }
 
-static bool stage24_context_ticket_default_lifetime_test(void)
+static bool stage24_context_ticket_zero_lifetime_rejection_test(void)
 {
     static qsc_tls_socket_context context;
     qsc_tls_socket_ticket_policy policy;
@@ -186,12 +194,9 @@ static bool stage24_context_ticket_default_lifetime_test(void)
 
     if (qsc_tls_socket_context_set_session_ticket_policy(&context, &policy) == qsc_tls_socket_status_success)
     {
-        if (qsc_tls_socket_context_set_session_ticket(&context, &ticket) == qsc_tls_socket_status_success)
+        if (qsc_tls_socket_context_set_session_ticket(&context, &ticket) == qsc_tls_socket_status_policy_rejected)
         {
-            if ((context.hassessionticket == true) && (context.sessionticket.lifetime == 1800U))
-            {
-                res = true;
-            }
+            res = (context.hassessionticket == false);
         }
     }
 
@@ -350,13 +355,13 @@ bool qsctest_tls_stage24_tests(void)
         res = false;
     }
 
-    if (stage24_context_ticket_default_lifetime_test() == true)
+    if (stage24_context_ticket_zero_lifetime_rejection_test() == true)
     {
-        qsctest_print_line("[PASS] TLS Stage 24 session ticket default lifetime test.");
+        qsctest_print_line("[PASS] TLS Stage 24 session ticket zero-lifetime rejection test.");
     }
     else
     {
-        qsctest_print_line("[FAIL] TLS Stage 24 session ticket default lifetime test.");
+        qsctest_print_line("[FAIL] TLS Stage 24 session ticket zero-lifetime rejection test.");
         res = false;
     }
 

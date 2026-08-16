@@ -550,7 +550,8 @@ qsc_asn1_status qsc_asn1_require_tag(const qsc_encoding_ber_element* element, ui
     if (element != NULL)
     {
         status = qsc_asn1_element_is_tag(element, tagclass, constructed, tagnumber) ?
-            QSC_ASN1_STATUS_SUCCESS : QSC_ASN1_STATUS_INVALID_TAG;
+            QSC_ASN1_STATUS_SUCCESS : 
+            QSC_ASN1_STATUS_INVALID_TAG;
     }
 
     return status;
@@ -898,9 +899,11 @@ qsc_asn1_status qsc_asn1_decode_oid(const qsc_encoding_ber_element* element, qsc
     QSC_ASSERT(oid != NULL);
 
     qsc_asn1_status status;
-    size_t i;
     size_t acount;
+    size_t i;
     uint32_t value;
+    bool firstsubidentifier;
+    bool subidentifierstart;
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
@@ -910,11 +913,7 @@ qsc_asn1_status qsc_asn1_decode_oid(const qsc_encoding_ber_element* element, qsc
 
         if (status == QSC_ASN1_STATUS_SUCCESS)
         {
-            if (oid == NULL)
-            {
-                status = QSC_ASN1_STATUS_INVALID_INPUT;
-            }
-            else if (element->length == 0U || element->length > QSC_ASN1_OID_MAX_SIZE || element->value == NULL)
+            if (element->length == 0U || element->length > QSC_ASN1_OID_MAX_SIZE || element->value == NULL)
             {
                 status = QSC_ASN1_STATUS_OUT_OF_RANGE;
             }
@@ -923,40 +922,79 @@ qsc_asn1_status qsc_asn1_decode_oid(const qsc_encoding_ber_element* element, qsc
                 qsc_memutils_clear((uint8_t*)oid, sizeof(qsc_asn1_oid));
                 qsc_memutils_copy(oid->data, element->value, element->length);
                 oid->length = element->length;
-                oid->arcs[0U] = element->value[0U] / 40U;
-                oid->arcs[1U] = element->value[0U] % 40U;
-                acount = 2U;
+                acount = 0U;
                 value = 0U;
+                firstsubidentifier = true;
+                subidentifierstart = true;
 
-                for (i = 1U; i < element->length; ++i)
+                for (i = 0U; i < element->length && status == QSC_ASN1_STATUS_SUCCESS; ++i)
                 {
                     const uint8_t b = element->value[i];
 
-                    if ((value & 0xFE000000U) != 0U)
+                    if (subidentifierstart == true && b == 0x80U)
+                    {
+                        status = QSC_ASN1_STATUS_INVALID_ENCODING;
+                    }
+                    else if ((value & 0xFE000000U) != 0U)
                     {
                         status = QSC_ASN1_STATUS_OUT_OF_RANGE;
-                        break;
                     }
-
-                    value = (value << 7) | (uint32_t)(b & 0x7FU);
-
-                    if ((b & 0x80U) == 0U)
+                    else
                     {
-                        if (acount >= QSC_ASN1_OID_MAX_ARCS)
-                        {
-                            status = QSC_ASN1_STATUS_OUT_OF_RANGE;
-                            break;
-                        }
+                        value = (value << 7U) | (uint32_t)(b & 0x7FU);
 
-                        oid->arcs[acount] = value;
-                        ++acount;
-                        value = 0U;
+                        if ((b & 0x80U) == 0U)
+                        {
+                            if (firstsubidentifier == true)
+                            {
+                                if (QSC_ASN1_OID_MAX_ARCS < 2U)
+                                {
+                                    status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+                                }
+                                else if (value < 40U)
+                                {
+                                    oid->arcs[0U] = 0U;
+                                    oid->arcs[1U] = value;
+                                    acount = 2U;
+                                }
+                                else if (value < 80U)
+                                {
+                                    oid->arcs[0U] = 1U;
+                                    oid->arcs[1U] = value - 40U;
+                                    acount = 2U;
+                                }
+                                else
+                                {
+                                    oid->arcs[0U] = 2U;
+                                    oid->arcs[1U] = value - 80U;
+                                    acount = 2U;
+                                }
+
+                                firstsubidentifier = false;
+                            }
+                            else if (acount >= QSC_ASN1_OID_MAX_ARCS)
+                            {
+                                status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+                            }
+                            else
+                            {
+                                oid->arcs[acount] = value;
+                                ++acount;
+                            }
+
+                            value = 0U;
+                            subidentifierstart = true;
+                        }
+                        else
+                        {
+                            subidentifierstart = false;
+                        }
                     }
                 }
 
                 if (status == QSC_ASN1_STATUS_SUCCESS)
                 {
-                    if ((element->value[element->length - 1U] & 0x80U) != 0U)
+                    if (firstsubidentifier == true || subidentifierstart == false)
                     {
                         status = QSC_ASN1_STATUS_INVALID_ENCODING;
                     }
@@ -964,6 +1002,11 @@ qsc_asn1_status qsc_asn1_decode_oid(const qsc_encoding_ber_element* element, qsc
                     {
                         oid->arcscount = acount;
                     }
+                }
+
+                if (status != QSC_ASN1_STATUS_SUCCESS)
+                {
+                    qsc_memutils_clear((uint8_t*)oid, sizeof(qsc_asn1_oid));
                 }
             }
         }
@@ -981,7 +1024,7 @@ bool qsc_asn1_oid_are_equal(const qsc_asn1_oid* a, const qsc_asn1_oid* b)
 
     res = false;
 
-    if (a != NULL && b != NULL && a->length == b->length)
+    if (a != NULL && b != NULL && a->length == b->length && a->length != 0U)
     {
         res = qsc_memutils_are_equal(a->data, b->data, a->length);
     }

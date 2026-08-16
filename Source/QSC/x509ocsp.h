@@ -183,10 +183,11 @@ QSC_EXPORT_API bool qsc_x509_ocsp_validate(const qsc_x509_certificate* certifica
  * signature verification path.
  *
  * When the responder certificate is the issuer certificate itself, the OCSP
- * signing extended key usage is not required. When the responder is delegated,
- * the certificate must include either anyExtendedKeyUsage or
- * id-kp-OCSPSigning. If the KeyUsage extension is present, the
- * digitalSignature bit must be set.
+ * signing extended key usage is not required. An explicitly trusted responder
+ * present in the supplied trust store is accepted under the caller's local
+ * trust policy. Otherwise, a delegated responder must include the explicit
+ * id-kp-OCSPSigning extended key usage. If the KeyUsage extension is present,
+ * the digitalSignature bit must be set.
  *
  * \param responder: [const][struct] The responder certificate extracted from the OCSP response.
  * \param issuer: [const][struct] The issuer certificate for the certificate whose status is being checked.

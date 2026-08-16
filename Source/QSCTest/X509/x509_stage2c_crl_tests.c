@@ -69,42 +69,84 @@ static bool load_cert_pem(const char* path, qsc_x509_certificate* cert)
 
 bool x509_stage2c_crl_pem_decode(void)
 {
-	qsc_x509_crl crl = { 0 };
+	qsc_x509_crl* crl;
 	bool res;
 
-	res = load_crl_pem(RCRL_PEM_PATH, &crl);
+	crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
+	res = false;
+
+	if (crl != NULL)
+	{
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		res = load_crl_pem(RCRL_PEM_PATH, crl);
+		qsc_x509_crl_clear(crl);
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl);
+	}
 
 	return res;
 }
 
 bool x509_stage2c_crl_der_decode(void)
 {
-	qsc_x509_crl crl = { 0 };
+	qsc_x509_crl* crl;
 	bool res;
 
-	res = load_crl_der(RCRL_DER_PATH, &crl);
+	crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
+	res = false;
+
+	if (crl != NULL)
+	{
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		res = load_crl_der(RCRL_DER_PATH, crl);
+		qsc_x509_crl_clear(crl);
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl);
+	}
 
 	return res;
 }
 
 bool x509_stage2c_crl_pem_roundtrip(void)
 {
-	qsc_x509_crl crl1 = { 0 };
-	qsc_x509_crl crl2 = { 0 };
+	qsc_x509_crl* crl1;
+	qsc_x509_crl* crl2;
 	char pem[32768] = { 0 };
 	size_t pemlen;
 	bool res;
 
 	res = false;
+	crl1 = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
+	crl2 = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 
-	if (load_crl_pem(RCRL_PEM_PATH, &crl1) == true)
+	if (crl1 != NULL && crl2 != NULL)
 	{
-		pemlen = sizeof(pem);
+		qsc_memutils_clear(crl1, sizeof(qsc_x509_crl));
+		qsc_memutils_clear(crl2, sizeof(qsc_x509_crl));
 
-		if (qsc_x509_crl_encode_pem(&crl1, pem, &pemlen) == QSC_ASN1_STATUS_SUCCESS)
+		if (load_crl_pem(RCRL_PEM_PATH, crl1) == true)
 		{
-			res = (qsc_x509_crl_decode_pem(pem, pemlen, &crl2) == QSC_ASN1_STATUS_SUCCESS);
+			pemlen = sizeof(pem);
+
+			if (qsc_x509_crl_encode_pem(crl1, pem, &pemlen) == QSC_ASN1_STATUS_SUCCESS)
+			{
+				res = (qsc_x509_crl_decode_pem(pem, pemlen, crl2) == QSC_ASN1_STATUS_SUCCESS);
+			}
 		}
+	}
+
+	if (crl1 != NULL)
+	{
+		qsc_x509_crl_clear(crl1);
+		qsc_memutils_clear(crl1, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl1);
+	}
+
+	if (crl2 != NULL)
+	{
+		qsc_x509_crl_clear(crl2);
+		qsc_memutils_clear(crl2, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl2);
 	}
 
 	return res;
@@ -112,22 +154,44 @@ bool x509_stage2c_crl_pem_roundtrip(void)
 
 bool x509_stage2c_crl_der_roundtrip(void)
 {
-	qsc_x509_crl crl1 = { 0 };
-	qsc_x509_crl crl2 = { 0 };
+	qsc_x509_crl* crl1;
+	qsc_x509_crl* crl2;
 	uint8_t der[32768] = { 0U };
 	size_t derlen;
 	bool res;
 
 	res = false;
+	crl1 = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
+	crl2 = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 
-	if (load_crl_pem(RCRL_PEM_PATH, &crl1) == true)
+	if (crl1 != NULL && crl2 != NULL)
 	{
-		derlen = sizeof(der);
+		qsc_memutils_clear(crl1, sizeof(qsc_x509_crl));
+		qsc_memutils_clear(crl2, sizeof(qsc_x509_crl));
 
-		if (qsc_x509_crl_encode_der(&crl1, der, &derlen) == QSC_ASN1_STATUS_SUCCESS)
+		if (load_crl_pem(RCRL_PEM_PATH, crl1) == true)
 		{
-			res = (qsc_x509_crl_decode_der(der, derlen, &crl2) == QSC_ASN1_STATUS_SUCCESS);
+			derlen = sizeof(der);
+
+			if (qsc_x509_crl_encode_der(crl1, der, &derlen) == QSC_ASN1_STATUS_SUCCESS)
+			{
+				res = (qsc_x509_crl_decode_der(der, derlen, crl2) == QSC_ASN1_STATUS_SUCCESS);
+			}
 		}
+	}
+
+	if (crl1 != NULL)
+	{
+		qsc_x509_crl_clear(crl1);
+		qsc_memutils_clear(crl1, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl1);
+	}
+
+	if (crl2 != NULL)
+	{
+		qsc_x509_crl_clear(crl2);
+		qsc_memutils_clear(crl2, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl2);
 	}
 
 	return res;
@@ -135,38 +199,62 @@ bool x509_stage2c_crl_der_roundtrip(void)
 
 bool x509_stage2c_crl_revoked_lookup(void)
 {
-	qsc_x509_crl crl = { 0 };
+	qsc_x509_crl* crl;
 	qsc_x509_certificate cert = { 0 };
 	bool res;
 
+	crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 	res = false;
 
-	if (load_crl_pem(RCRL_PEM_PATH, &crl) == true)
+	if (crl != NULL)
 	{
-		if (load_cert_pem(RCERT_PEM_PATH, &cert) == true)
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+
+		if (load_crl_pem(RCRL_PEM_PATH, crl) == true)
 		{
-			res = qsc_x509_crl_is_revoked(&crl, &cert);
+			if (load_cert_pem(RCERT_PEM_PATH, &cert) == true)
+			{
+				res = qsc_x509_crl_is_revoked(crl, &cert);
+			}
 		}
+
+		qsc_x509_crl_clear(crl);
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl);
 	}
+
+	qsc_x509_certificate_clear(&cert);
 
 	return res;
 }
 
 bool x509_stage2c_not_revoked_lookup(void)
 {
-	qsc_x509_crl crl = { 0 };
+	qsc_x509_crl* crl;
 	qsc_x509_certificate cert = { 0 };
 	bool res;
 
+	crl = (qsc_x509_crl*)qsc_memutils_malloc(sizeof(qsc_x509_crl));
 	res = false;
 
-	if (load_crl_pem(RCRL_PEM_PATH, &crl) == true)
+	if (crl != NULL)
 	{
-		if (load_cert_pem(GCERT_PEM_PATH, &cert) == true)
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+
+		if (load_crl_pem(RCRL_PEM_PATH, crl) == true)
 		{
-			res = (qsc_x509_crl_is_revoked(&crl, &cert) == false);
+			if (load_cert_pem(GCERT_PEM_PATH, &cert) == true)
+			{
+				res = (qsc_x509_crl_is_revoked(crl, &cert) == false);
+			}
 		}
+
+		qsc_x509_crl_clear(crl);
+		qsc_memutils_clear(crl, sizeof(qsc_x509_crl));
+		qsc_memutils_alloc_free(crl);
 	}
+
+	qsc_x509_certificate_clear(&cert);
 
 	return res;
 }

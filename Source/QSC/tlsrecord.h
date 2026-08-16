@@ -115,6 +115,11 @@ QSC_EXPORT_API uint64_t qsc_tls_record_state_get_sequence(const qsc_tls_record_s
 /**
  * \brief Encode a plaintext TLS record.
  *
+ * \details
+ * Enforces the RFC 9846 Section 5.1 TLSPlaintext 2^14-byte fragment limit.
+ * Handshake records must be non-empty, Alert records must contain exactly one
+ * two-byte Alert message, and compatibility CCS records must contain 0x01.
+ *
  * \param output: [uint8_t*] The destination record buffer.
  * \param outlen: [size_t] The destination buffer length in bytes.
  * \param written: [size_t*] Receives the number of bytes written.
@@ -130,6 +135,11 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_record_encode_plaintext(uint8_t* output, s
 /**
  * \brief Decode a plaintext TLS record.
  *
+ * \details
+ * Applies the RFC 9846 record-layer wire bounds. TLSPlaintext fragments are
+ * limited to 2^14 bytes and protected TLSCiphertext fragments, identified by
+ * the outer application_data type, are limited to 2^14 + 256 bytes.
+ *
  * \param input: [const uint8_t*] The source record buffer.
  * \param inlen: [size_t] The source buffer length in bytes.
  * \param type: [enum] Receives the decoded outer record content type.
@@ -144,6 +154,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_record_decode_plaintext(const uint8_t* inp
 /**
  * \brief Determine the full span length of a TLS record.
  *
+ * \details
+ * Rejects wire fragment lengths above the RFC 9846 TLSCiphertext maximum with
+ * qsc_tls_status_record_overflow before buffering the complete record.
+ *
  * \param input: [const uint8_t*] The source buffer.
  * \param inlen: [size_t] The source buffer length in bytes.
  * \param recordlen: [size_t*] Receives the full record span length in bytes.
@@ -155,6 +169,10 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_record_try_get_span_length(const uint8_t* 
 
 /**
  * \brief Protect a TLSInnerPlaintext payload as a TLSCiphertext record.
+ *
+ * \details
+ * Enforces the per-key outbound AEAD usage limits required by RFC 9846 Section 5.5.
+ * AES-GCM counts every protected record conservatively as a full-size record.
  *
  * \param state: [struct] The active write-side record protection state.
  * \param output: [uint8_t*] The destination record buffer.
@@ -171,6 +189,11 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state
 
 /**
  * \brief Decrypt a protected TLSCiphertext record.
+ *
+ * \details
+ * Accepts RFC 9846 record padding up to the TLSCiphertext wire limit, removes
+ * the inner content-type byte and zero padding, and rejects authenticated
+ * content greater than 2^14 bytes with qsc_tls_status_record_overflow.
  *
  * \param state: [struct] The active read-side record protection state.
  * \param output: [uint8_t*] The destination plaintext buffer.

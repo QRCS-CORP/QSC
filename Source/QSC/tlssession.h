@@ -64,43 +64,49 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief TLS 1.3 session resumption ticket handling.
  *
  * \details
- * MVP stub. Encoders and decoders return qsc_tls_status_not_supported until full resumption support is scheduled in a later milestone.
+ * Implements the RFC 9846 NewSessionTicket message body codec and the local
+ * metadata required to offer a ticket safely in a later TLS 1.3 handshake.
  *
- * NewSessionTicket body layout per RFC 8446 4.6.1:
+ * NewSessionTicket body layout per RFC 9846 Section 4.7.1:
  *   uint32 ticket_lifetime;
  *   uint32 ticket_age_add;
  *   opaque ticket_nonce<0..255>;
  *   opaque ticket<1..2^16-1>;
- *   Extension extensions<0..2^16-2>;
+ *   Extension extensions<0..2^16-1>;
  *
- * This module encodes and decodes the body only (not the 4-byte handshake header).
- * Extensions are written as an empty vector; a full implementation would add early_data (max_early_data_size) for 0-RTT-capable tickets.
- *
- * The qsc_tls_session_ticket struct also carries the resumption PSK bytes derived by the peer after receiving the ticket.
- * Those bytes are never encoded on the wire, they're computed locally from resumption_master_secret
- * and the nonce via qsc_tls_keyschedule_derive_resumption_psk.
+ * This module encodes and decodes the wire message body only. Local metadata
+ * such as receipt time, issuance time, SNI, ALPN, cipher suite, and the derived
+ * resumption PSK is retained in qsc_tls_session_ticket but is not serialized by
+ * qsc_tls_session_ticket_encode().
  */
 
 typedef struct qsc_tls_session_ticket
 {
     uint8_t nonce[QSC_TLS_TICKET_NONCE_MAX_SIZE];        /*!< ticket_nonce. */
-    uint8_t resumptionsecret[QSC_TLS_HASH_MAX_SIZE];     /*!< PSK derived from resumption master secret. */
-    uint8_t ticket[QSC_TLS_TICKET_MAX_SIZE];             /*!< Ticket opaque bytes. */
+    uint8_t resumptionsecret[QSC_TLS_HASH_MAX_SIZE];     /*!< PSK derived from the RFC 9846 resumption secret. */
+    uint8_t ticket[QSC_TLS_TICKET_MAX_SIZE];             /*!< Opaque PSK identity carried in pre_shared_key. */
+    uint8_t servername[QSC_TLS_MAX_HOSTNAME_SIZE];       /*!< SNI name associated with the connection that established the ticket. */
+    uint8_t alpn[QSC_TLS_MAX_ALPN_SIZE];                 /*!< ALPN protocol associated with the ticket, when one was negotiated. */
+    uint64_t issuetimems;                                /*!< Local server wall-clock time in milliseconds when the ticket was issued. */
+    uint64_t receipttimems;                              /*!< Local client wall-clock time in milliseconds when NewSessionTicket was received. */
     uint32_t ageadd;                                     /*!< ticket_age_add. */
     uint32_t lifetime;                                   /*!< ticket_lifetime in seconds. */
+    uint32_t maxearlydatasize;                           /*!< Parsed NewSessionTicket max_early_data_size; engine-managed QSC tickets normalize this to zero. */
     size_t noncelen;                                     /*!< Nonce length. */
-    size_t resumptionsecretlen;                          /*!< Length of resumption secret. */
-    size_t ticketlen;                                    /*!< Ticket length. */
-    qsc_tls_cipher_suite suite;                          /*!< Originating suite. */
+    size_t resumptionsecretlen;                          /*!< Length of the resumption secret. */
+    size_t ticketlen;                                    /*!< Ticket identity length. */
+    size_t servernamelen;                                /*!< Length of servername. */
+    size_t alpnlen;                                      /*!< Length of alpn. */
+    qsc_tls_cipher_suite suite;                          /*!< Originating cipher suite; its KDF hash binds the PSK. */
+    uint16_t protocolversion;                            /*!< TLS version associated with the PSK; QSC tickets use TLS 1.3. */
 } qsc_tls_session_ticket;
 
 /**
  * \brief Encode a TLS session ticket structure.
  *
  * \details
- * Serializes a qsc_tls_session_ticket structure into a compact binary form suitable for storage or transport. 
- * The encoded form contains the ticket identity, nonce, lifetime, age-add value, associated cipher suite, 
- * and the derived resumption secret. All multi-byte fields are encoded in network byte order.
+ * Serializes the RFC 9846 NewSessionTicket message body represented by a qsc_tls_session_ticket.
+ * Only wire fields are encoded; local resumption metadata and PSK bytes are intentionally not serialized.
  *
  * The caller is responsible for providing a buffer of sufficient size. 
  * The function does not perform dynamic allocation and will fail if the output buffer is too small to contain the serialized ticket.
@@ -118,16 +124,17 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_session_ticket_encode(const qsc_tls_sessio
  * \brief Decode a TLS session ticket structure.
  *
  * \details
- * Parses a binary-encoded session ticket and reconstructs the corresponding qsc_tls_session_ticket structure. 
- * The function validates field lengths, ensures internal consistency, and copies all ticket components into the supplied structure.
+ * Parses an RFC 9846 NewSessionTicket message body into a qsc_tls_session_ticket structure.
+ * Local-only fields are cleared and must be populated by the caller from the established connection context.
  *
  * The input buffer must contain a complete and correctly formatted encoded ticket. Partial or malformed input will result in a failure status.
+ * A structurally valid ticket whose opaque identity exceeds QSC_TLS_TICKET_MAX_SIZE is fully validated and returns qsc_tls_status_not_supported without retaining the oversized identity.
  *
  * \param input: [const uint8_t*] Pointer to the encoded session ticket buffer.
  * \param inplen: [size_t] Length, in bytes, of the encoded ticket buffer.
  * \param ticket: [qsc_tls_session_ticket*] Pointer to the structure that will receive the decoded ticket contents.
  *
- * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success, qsc_tls_status_not_supported when a valid ticket exceeds local retention capacity, or an error status for malformed input.
  */
 QSC_EXPORT_API qsc_tls_status qsc_tls_session_ticket_decode(const uint8_t* input, size_t inplen, qsc_tls_session_ticket* ticket);
 

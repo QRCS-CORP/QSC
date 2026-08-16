@@ -239,7 +239,7 @@ static qsc_tls_status ecdsa_der_read_integer(const uint8_t* buf, size_t buflen, 
 
         if (status == qsc_tls_status_success)
         {
-            if (contentlen == 0U || *offset + contentlen > buflen)
+            if (contentlen == 0U || *offset > buflen || contentlen > buflen - *offset)
             {
                 status = qsc_tls_status_invalid_length;
             }
@@ -248,26 +248,34 @@ static qsc_tls_status ecdsa_der_read_integer(const uint8_t* buf, size_t buflen, 
                 content = buf + *offset;
                 *offset += contentlen;
 
-                if (contentlen > 1U && content[0U] == 0x00U && (content[1] & 0x80U) != 0U)
+                if ((content[0U] & 0x80U) != 0U)
                 {
-                    content += 1U;
-                    contentlen -= 1U;
+                    status = qsc_tls_status_invalid_message;
+                }
+                else if (contentlen > 1U && content[0U] == 0x00U)
+                {
+                    if ((content[1U] & 0x80U) == 0U)
+                    {
+                        status = qsc_tls_status_invalid_message;
+                    }
+                    else
+                    {
+                        content += 1U;
+                        contentlen -= 1U;
+                    }
                 }
 
-                while (contentlen > 1U && content[0U] == 0x00U)
+                if (status == qsc_tls_status_success)
                 {
-                    content += 1U;
-                    contentlen -= 1U;
-                }
-
-                if (contentlen > componentsize)
-                {
-                    status = qsc_tls_status_invalid_length;
-                }
-                else
-                {
-                    qsc_memutils_clear(out, componentsize);
-                    qsc_memutils_copy(out + (componentsize - contentlen), content, contentlen);
+                    if (contentlen > componentsize)
+                    {
+                        status = qsc_tls_status_invalid_length;
+                    }
+                    else
+                    {
+                        qsc_memutils_clear(out, componentsize);
+                        qsc_memutils_copy(out + (componentsize - contentlen), content, contentlen);
+                    }
                 }
             }
         }
@@ -302,7 +310,7 @@ qsc_tls_status qsc_tls_ecdsa_der_decode(const uint8_t* der, size_t derlen, size_
 
         if (status == qsc_tls_status_success)
         {
-            if (offset + seqcontentlen != derlen)
+            if (offset > derlen || seqcontentlen != derlen - offset)
             {
                 status = qsc_tls_status_invalid_length;
             }

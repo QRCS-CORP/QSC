@@ -16,11 +16,11 @@ bool qsctest_kyber_ciphertext_integrity()
 	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
 	uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
 	uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk3[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
 	qsctest_hex_to_bin("061550234D158C5EC95595FE04EF7A25767F2E24CC2BC479D09D86DC9ABCFDE7056A8C266F9EF97ED08541DBD2E1FFA1", seed, sizeof(seed));
-	
 	qsctest_nistrng_prng_initialize(seed, NULL, 0);
 
 	/* generate public and secret keys */
@@ -36,17 +36,24 @@ bool qsctest_kyber_ciphertext_integrity()
 		res = false;
 	}
 
-	/* invalid ciphertext, auth should fail */
-	if (qsc_kyber_decapsulate(ssk1, ct, sk) == true)
+	/* FIPS 203 uses implicit rejection; invalid ciphertexts still return a shared secret. */
+	if (qsc_kyber_decapsulate(ssk1, ct, sk) != true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber cipher-text: decapsulation has failed -KCT1");
+		qsc_consoleutils_print_line("Failure! kyber cipher-text: implicit rejection returned an error -KCT1");
 		res = false;
 	}
 
-	/* fail if equal */
+	/* the rejection shared secret must differ from the valid encapsulated secret */
 	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) == true)
 	{
 		qsc_consoleutils_print_line("Failure! kyber cipher-text: invalid shared secret -KCT2");
+		res = false;
+	}
+
+	/* decapsulation of the same invalid ciphertext must produce the same implicit-rejection secret */
+	if (qsc_kyber_decapsulate(ssk3, ct, sk) != true || qsc_intutils_are_equal8(ssk1, ssk3, QSC_KYBER_SHAREDSECRET_SIZE) != true)
+	{
+		qsc_consoleutils_print_line("Failure! kyber cipher-text: implicit rejection is not deterministic -KCT3");
 		res = false;
 	}
 
@@ -183,22 +190,19 @@ bool qsctest_kyber_privatekey_integrity()
 	/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
 	qsc_kyber_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
 
-	/* replace secret key with random values */
-	if (qsc_csp_generate(sk + QSC_KYBER_PUBLICKEY_SIZE, 32) != true)
-	{
-		qsc_consoleutils_print_line("Failure! kyber_test_operations: the shared secrets are not equal -INTEG0");
-		res = false;
-	}
+	/* corrupt the stored H(ek) value in the expanded decapsulation key */
+	sk[QSC_KYBER_PRIVATEKEY_SIZE - (2U * QSC_KYBER_SHAREDSECRET_SIZE)] ^= 0x01U;
 
-	/* invalid secret key, should fail */
+	/* FIPS 203 decapsulation-key input checking must reject the inconsistent key. */
 	if (qsc_kyber_decapsulate(ssk1, ct, sk) == true)
 	{
+		qsc_consoleutils_print_line("Failure! kyber private-key: invalid key was accepted -INTEG0");
 		res = false;
 	}
 
-	/* fail if equal */
 	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) == true)
 	{
+		qsc_consoleutils_print_line("Failure! kyber private-key: invalid key retained the valid shared secret -INTEG1");
 		res = false;
 	}
 
@@ -211,8 +215,7 @@ bool qsctest_kyber_publickey_integrity()
 	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
 	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
 	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ssk1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ssk2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
+	uint8_t ssk[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
 	bool res;
 
 	res = true;
@@ -222,25 +225,13 @@ bool qsctest_kyber_publickey_integrity()
 	/* generate public and secret keys */
 	qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate);
 
-	/* replace public key with random values */
-	if (qsc_csp_generate(pk, 32) != true)
-	{
-		qsc_consoleutils_print_line("Failure! kyber_test_operations: the shared secrets are not equal -INTEG0");
-		res = false;
-	}
+	/* encode the first 12-bit coefficient as q = 3329; FIPS 203 requires the modulus check to reject it */
+	pk[0U] = 0x01U;
+	pk[1U] = (uint8_t)((pk[1U] & 0xF0U) | 0x0DU);
 
-	/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-	qsc_kyber_encapsulate(ssk2, ct, pk, qsctest_nistrng_prng_generate);
-
-	/* invalid secret key, should fail */
-	if (qsc_kyber_decapsulate(ssk1, ct, sk) == true)
+	if (qsc_kyber_encapsulate(ssk, ct, pk, qsctest_nistrng_prng_generate) == true)
 	{
-		res = false;
-	}
-
-	/* fail if equal */
-	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) == true)
-	{
+		qsc_consoleutils_print_line("Failure! kyber public-key: invalid encapsulation key was accepted -INTEG0");
 		res = false;
 	}
 

@@ -29,7 +29,7 @@ static void x509_csr_release_preserved_der(qsc_x509_csr* csr)
 {
     if (csr != NULL)
     {
-        if ((csr->derowned == true) && (csr->der != NULL))
+        if (csr->derowned == true && csr->der != NULL)
         {
             qsc_memutils_alloc_free((void*)csr->der);
         }
@@ -47,7 +47,7 @@ static qsc_asn1_status x509_csr_upsert_extension(qsc_x509_extensions* extensions
     size_t idx;
     qsc_x509_extension* extension;
 
-    if ((extensions == NULL) || ((value == NULL) && (valuelen != 0U)))
+    if (extensions == NULL || (value == NULL && valuelen != 0U))
     {
         return QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -96,7 +96,7 @@ static qsc_asn1_status x509_csr_validate_signer_spki(const qsc_x509_csr* csr, co
 {
     qsc_asn1_status status;
 
-    if ((csr == NULL) || (signerspki == NULL))
+    if (csr == NULL || signerspki == NULL)
     {
         status = QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -146,7 +146,7 @@ static bool x509_csr_oid_is_extension_request(const qsc_asn1_oid* oid)
 
 static qsc_asn1_status x509_csr_decode_attributes(const qsc_encoding_ber_element* element, qsc_x509_csr* csr, qsc_x509_extensions* extensions)
 {
-    if ((element == NULL) || (extensions == NULL))
+    if (element == NULL || extensions == NULL)
     {
         return QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -181,7 +181,7 @@ static qsc_asn1_status x509_csr_decode_attributes(const qsc_encoding_ber_element
         typeel = qsc_asn1_child_at(attr, 0U);
         valuesel = qsc_asn1_child_at(attr, 1U);
 
-        if ((typeel == NULL) || (valuesel == NULL))
+        if (typeel == NULL || valuesel == NULL)
         {
             return QSC_ASN1_STATUS_INVALID_ENCODING;
         }
@@ -256,7 +256,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
     size_t payloadlen;
     qsc_asn1_status status;
 
-    if ((source == NULL) || (prepared == NULL))
+    if (source == NULL || prepared == NULL)
     {
         return QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -273,8 +273,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
             return status;
         }
 
-        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_BASIC_CONSTRAINTS,
-            QSC_OID_ID_BASIC_CONSTRAINTS, source->basicconstraints.critical, payload, payloadlen);
+        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_BASIC_CONSTRAINTS, QSC_OID_ID_BASIC_CONSTRAINTS, source->basicconstraints.critical, payload, payloadlen);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -292,8 +291,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
             return status;
         }
 
-        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_KEY_USAGE,
-            QSC_OID_ID_KEY_USAGE, source->keyusage.critical, payload, payloadlen);
+        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_KEY_USAGE, QSC_OID_ID_KEY_USAGE, source->keyusage.critical, payload, payloadlen);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -311,8 +309,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
             return status;
         }
 
-        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_EXTENDED_KEY_USAGE,
-            QSC_OID_ID_EXTENDED_KEY_USAGE, source->extendedkeyusage.critical, payload, payloadlen);
+        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_EXTENDED_KEY_USAGE, QSC_OID_ID_EXTENDED_KEY_USAGE, source->extendedkeyusage.critical, payload, payloadlen);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -330,8 +327,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
             return status;
         }
 
-        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_SUBJECT_KEY_IDENTIFIER,
-            QSC_OID_ID_SUBJECT_KEY_IDENTIFIER, source->subjectkeyidentifier.critical, payload, payloadlen);
+        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_SUBJECT_KEY_IDENTIFIER, QSC_OID_ID_SUBJECT_KEY_IDENTIFIER, source->subjectkeyidentifier.critical, payload, payloadlen);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -349,8 +345,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
             return status;
         }
 
-        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_AUTHORITY_KEY_IDENTIFIER,
-            QSC_OID_ID_AUTHORITY_KEY_IDENTIFIER, source->authoritykeyidentifier.critical, payload, payloadlen);
+        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_AUTHORITY_KEY_IDENTIFIER, QSC_OID_ID_AUTHORITY_KEY_IDENTIFIER, source->authoritykeyidentifier.critical, payload, payloadlen);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -368,8 +363,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
             return status;
         }
 
-        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_SUBJECT_ALT_NAME,
-            QSC_OID_ID_SUBJECT_ALT_NAME, source->subjectaltname.critical, payload, payloadlen);
+        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_SUBJECT_ALT_NAME, QSC_OID_ID_SUBJECT_ALT_NAME, source->subjectaltname.critical, payload, payloadlen);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -387,8 +381,7 @@ static qsc_asn1_status x509_csr_prepare_extensions(const qsc_x509_extensions* so
             return status;
         }
 
-        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_ISSUER_ALT_NAME,
-            QSC_OID_ID_ISSUER_ALT_NAME, source->issueraltname.critical, payload, payloadlen);
+        status = x509_csr_upsert_extension(prepared, QSC_X509_EXTENSION_ISSUER_ALT_NAME, QSC_OID_ID_ISSUER_ALT_NAME, source->issueraltname.critical, payload, payloadlen);
 
         if (status != QSC_ASN1_STATUS_SUCCESS)
         {
@@ -629,7 +622,7 @@ qsc_asn1_status qsc_x509_csr_set_signature_algorithm(qsc_x509_csr* csr, const qs
 
     qsc_asn1_status status;
 
-    if ((csr == NULL) || (signaturealgorithm == NULL))
+    if (csr == NULL || signaturealgorithm == NULL)
     {
         status = QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -650,7 +643,7 @@ qsc_asn1_status qsc_x509_csr_set_extension_request(qsc_x509_csr* csr, const qsc_
 
     qsc_asn1_status status;
 
-    if ((csr == NULL) || (extensions == NULL))
+    if (csr == NULL || extensions == NULL)
     {
         status = QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -689,7 +682,7 @@ qsc_asn1_status qsc_x509_csr_copy_extension_request(const qsc_x509_csr* csr, qsc
 
     qsc_asn1_status status;
 
-    if ((csr == NULL) || (extensions == NULL))
+    if (csr == NULL || extensions == NULL)
     {
         status = QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -709,7 +702,7 @@ qsc_asn1_status qsc_x509_csr_add_attribute(qsc_x509_csr* csr, const qsc_asn1_oid
 
     qsc_asn1_status status;
 
-    if ((csr == NULL) || (oid == NULL) || ((value == NULL) && (valuelen != 0U)))
+    if (csr == NULL || oid == NULL || (value == NULL && valuelen != 0U))
     {
         status = QSC_ASN1_STATUS_INVALID_INPUT;
     }
@@ -746,7 +739,7 @@ const qsc_x509_csr_attribute* qsc_x509_csr_get_attribute(const qsc_x509_csr* csr
     QSC_ASSERT(csr != NULL);
     QSC_ASSERT(oid != NULL);
 
-    if ((csr == NULL) || (oid == NULL))
+    if (csr == NULL || oid == NULL)
     {
         return NULL;
     }
@@ -771,7 +764,7 @@ qsc_asn1_status qsc_x509_csr_set_subject_alt_name(qsc_x509_csr* csr, const qsc_x
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (subjectaltname != NULL))
+    if (csr != NULL && subjectaltname != NULL)
     {
         x509_csr_release_preserved_der(csr);
         csr->extensions.subjectaltname = *subjectaltname;
@@ -791,7 +784,7 @@ qsc_asn1_status qsc_x509_csr_add_san_dns(qsc_x509_csr* csr, const char* dnsname,
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (dnsname != NULL) && (dnsnamelen != 0U))
+    if (csr != NULL && dnsname != NULL && dnsnamelen != 0U)
     {
         x509_csr_release_preserved_der(csr);
         status = qsc_x509_ext_subject_alt_name_add_dns(&csr->extensions.subjectaltname, dnsname, dnsnamelen);
@@ -814,7 +807,7 @@ qsc_asn1_status qsc_x509_csr_add_san_ip(qsc_x509_csr* csr, const uint8_t* addres
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (address != NULL) && (addresslen != 0U))
+    if (csr != NULL && address != NULL && addresslen != 0U)
     {
         x509_csr_release_preserved_der(csr);
         status = qsc_x509_ext_subject_alt_name_add_ip(&csr->extensions.subjectaltname, address, addresslen);
@@ -837,7 +830,7 @@ qsc_asn1_status qsc_x509_csr_set_extended_key_usage(qsc_x509_csr* csr, const qsc
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (extendedkeyusage != NULL))
+    if (csr != NULL && extendedkeyusage != NULL)
     {
         x509_csr_release_preserved_der(csr);
         csr->extensions.extendedkeyusage = *extendedkeyusage;
@@ -857,7 +850,7 @@ qsc_asn1_status qsc_x509_csr_set_subject_key_identifier(qsc_x509_csr* csr, const
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (subjectkeyidentifier != NULL))
+    if (csr != NULL && subjectkeyidentifier != NULL)
     {
         x509_csr_release_preserved_der(csr);
         csr->extensions.subjectkeyidentifier = *subjectkeyidentifier;
@@ -918,7 +911,7 @@ qsc_asn1_status qsc_x509_csr_set_ml_dsa_spki(qsc_x509_csr* csr, uint32_t level, 
     parameterset = QSC_X509_PQC_PARAMETER_SET_NONE;
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (publickey != NULL))
+    if (csr != NULL && publickey != NULL)
     {
         if (level == 44U)
         {
@@ -958,7 +951,7 @@ qsc_asn1_status qsc_x509_csr_set_ml_kem_spki(qsc_x509_csr* csr, uint32_t level, 
     parameterset = QSC_X509_PQC_PARAMETER_SET_NONE;
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (publickey != NULL))
+    if (csr != NULL && publickey != NULL)
     {
         if (level == 512U)
         {
@@ -1002,7 +995,7 @@ qsc_asn1_status qsc_x509_csr_encode_info_der(const qsc_x509_csr* csr, uint8_t* o
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (outputlen != NULL))
+    if (csr != NULL && outputlen != NULL)
     {
         pos = 0U;
         len = 0U;
@@ -1087,7 +1080,7 @@ qsc_asn1_status qsc_x509_csr_encode_der(const qsc_x509_csr* csr, qsc_x509_certif
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (signcallback != NULL) && (outputlen != NULL))
+    if (csr != NULL && signcallback != NULL && outputlen != NULL)
     {
         pos = 0U;
         len = 0U;
@@ -1166,7 +1159,7 @@ qsc_asn1_status qsc_x509_csr_decode_der(qsc_x509_csr* csr, const uint8_t* input,
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (input != NULL) && (inputlen != 0U))
+    if (csr != NULL && input != NULL && inputlen != 0U)
     {
         info = NULL;
         sigalg = NULL;
@@ -1344,7 +1337,7 @@ qsc_asn1_status qsc_x509_csr_decode_pem(qsc_x509_csr* csr, const char* input, si
 
     status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if ((csr != NULL) && (input != NULL) && (inputlen != 0U))
+    if (csr != NULL && input != NULL && inputlen != 0U)
     {
         derlen = 0U;
         regionlen = 0U;
@@ -1352,13 +1345,13 @@ qsc_asn1_status qsc_x509_csr_decode_pem(qsc_x509_csr* csr, const char* input, si
         begin = qsc_stringutils_sub_string(input, "-----BEGIN CERTIFICATE REQUEST-----");
         end = qsc_stringutils_sub_string(input, "-----END CERTIFICATE REQUEST-----");
 
-        if ((begin == NULL) || (end == NULL) || (end <= begin))
+        if (begin == NULL || end == NULL || end <= begin)
         {
             begin = qsc_stringutils_sub_string(input, "-----BEGIN NEW CERTIFICATE REQUEST-----");
             end = qsc_stringutils_sub_string(input, "-----END NEW CERTIFICATE REQUEST-----");
         }
 
-        if ((begin == NULL) || (end == NULL) || (end <= begin))
+        if (begin == NULL || end == NULL || end <= begin)
         {
             status = QSC_ASN1_STATUS_NOT_FOUND;
         }
@@ -1412,7 +1405,7 @@ bool qsc_x509_csr_verify_ex(const qsc_x509_csr* csr, qsc_x509_csr_signature_veri
 
     bool res;
 
-    if ((csr == NULL) || (verifycallback == (qsc_x509_csr_signature_verify_callback)NULL) || (csr->signaturelen == 0U))
+    if (csr == NULL || verifycallback == (qsc_x509_csr_signature_verify_callback)NULL || csr->signaturelen == 0U)
     {
         res = false;
     }
@@ -1472,12 +1465,12 @@ bool qsc_x509_csr_verify_with_spki(const qsc_x509_csr* csr, const qsc_x509_subje
     bufferlen = (2U * QSC_X509_CSR_WRITE_MAX) + QSC_X509_SIGNATURE_MAX;
     res = false;
 
-    if ((csr != NULL) && (signerspki != NULL))
+    if (csr != NULL && signerspki != NULL)
     {
         buffer = (uint8_t*)qsc_memutils_malloc(bufferlen);
         info = (uint8_t*)qsc_memutils_malloc(QSC_X509_CSR_WRITE_MAX);
 
-        if ((buffer != NULL) && (info != NULL))
+        if (buffer != NULL && info != NULL)
         {
             qsc_memutils_clear(buffer, bufferlen);
             qsc_memutils_clear(info, QSC_X509_CSR_WRITE_MAX);
@@ -1488,7 +1481,7 @@ bool qsc_x509_csr_verify_with_spki(const qsc_x509_csr* csr, const qsc_x509_subje
                 infodata = csr->infodata;
                 infodatalen = csr->infodatalen;
 
-                if ((infodata == NULL) || (infodatalen == 0U))
+                if (infodata == NULL || infodatalen == 0U)
                 {
                     infodatalen = QSC_X509_CSR_WRITE_MAX;
 
@@ -1548,11 +1541,11 @@ qsc_asn1_status qsc_x509_csr_encode_pem(const uint8_t* der, size_t derlen, char*
     uint32_t v;
     qsc_asn1_status status;
 
-    if (((der == NULL) && (derlen != 0U)) || (outputlen == NULL))
+    if ((der == NULL && derlen != 0U) || outputlen == NULL)
     {
         status = QSC_ASN1_STATUS_INVALID_INPUT;
     }
-    else if ((output == NULL) || (*outputlen == 0U))
+    else if (output == NULL || *outputlen == 0U)
     {
         *outputlen = 0U;
         status = QSC_ASN1_STATUS_BUFFER_TOO_SMALL;

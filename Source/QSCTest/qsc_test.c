@@ -46,7 +46,6 @@
 #include "selftest.h"
 #include "stringutils.h"
 #if defined(QSC_DEBUG_MODE)
-#	include "acp.h"
 #	include "csp.h"
 #	include "fileutils.h"
 #	include "folderutils.h"
@@ -125,11 +124,6 @@ static void random_sample_print()
 	qsc_consoleutils_print_line("");
 #endif
 
-	qsc_consoleutils_print_line("ACP sample: ");
-	qsc_acp_generate(smp, sizeof(smp));
-	qsc_consoleutils_print_array(smp, sizeof(smp), 64U);
-	qsc_memutils_clear(smp, sizeof(smp));
-	qsc_consoleutils_print_line("");
 	qsc_consoleutils_print_line("");
 }
 #endif

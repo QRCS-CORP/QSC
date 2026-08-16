@@ -67,7 +67,11 @@ QSC_CPLUSPLUS_ENABLED_START
 /* Record and stream limits */
 /*! 
  * \def QSC_TLS_MAX_RECORD_SIZE
- * \brief Maximum accepted TLS record size in bytes.
+ * \brief Internal TLS record scratch-buffer capacity in bytes.
+ *
+ * This is an implementation buffer ceiling, not a wire-format limit. RFC 9846
+ * wire limits are enforced separately by QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE and
+ * QSC_TLS_RECORD_MAX_PLAINTEXT_SIZE.
  */
 #define QSC_TLS_MAX_RECORD_SIZE 18432U
 
@@ -89,11 +93,60 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_TLS_RECORD_MAX_PLAINTEXT_SIZE QSC_TLS_MAX_PLAINTEXT_SIZE
 
+/*!
+ * \def QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE
+ * \brief Maximum TLSCiphertext.encrypted_record length accepted on the wire.
+ *
+ * RFC 9846 Section 5.2 limits TLSCiphertext.length to 2^14 + 256 bytes.
+ */
+#define QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE (QSC_TLS_MAX_PLAINTEXT_SIZE + 256U)
+
 /*! 
  * \def QSC_TLS_RECORD_MAX_INNER_SIZE
- * \brief Maximum TLSInnerPlaintext size including the content-type trailer.
+ * \brief Maximum decrypted TLSInnerPlaintext size for QSC-supported AEAD suites.
+ *
+ * QSC's TLS 1.3 AEAD suites use a 16-byte authentication tag. The remaining
+ * TLSCiphertext allowance can therefore contain content, the content-type byte,
+ * and RFC 9846 record padding.
  */
-#define QSC_TLS_RECORD_MAX_INNER_SIZE (QSC_TLS_MAX_PLAINTEXT_SIZE + QSC_TLS_INNER_CONTENT_TYPE_SIZE)
+#define QSC_TLS_RECORD_MAX_INNER_SIZE (QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE - QSC_TLS_GCM_TAG_SIZE)
+
+/*!
+ * \def QSC_TLS_RECORD_MAX_WIRE_SIZE
+ * \brief Maximum complete TLSCiphertext record size including the five-byte header.
+ */
+#define QSC_TLS_RECORD_MAX_WIRE_SIZE (QSC_TLS_RECORD_HEADER_SIZE + QSC_TLS_RECORD_MAX_CIPHERTEXT_SIZE)
+
+/*!
+ * \def QSC_TLS_AES_GCM_KEY_USAGE_LIMIT
+ * \brief Conservative per-key AES-GCM protected-record limit from RFC 9846 Section 5.5.
+ *
+ * The RFC permits approximately 2^24.5 full-size records under one AES-GCM
+ * traffic key. QSC counts every protected record as full size and uses the
+ * integer floor of that bound.
+ */
+#define QSC_TLS_AES_GCM_KEY_USAGE_LIMIT 23726566ULL
+
+/*!
+ * \def QSC_TLS_KEY_UPDATE_EPOCH_LIMIT
+ * \brief Maximum outbound TLS 1.3 KeyUpdate epoch defined by RFC 9846 Section 4.7.3.
+ */
+#define QSC_TLS_KEY_UPDATE_EPOCH_LIMIT 281474976710655ULL
+
+/*!
+ * \def QSC_TLS_SESSION_TICKET_LIFETIME_MAX
+ * \brief Maximum TLS 1.3 NewSessionTicket lifetime in seconds defined by RFC 9846 Section 4.7.1.
+ */
+#define QSC_TLS_SESSION_TICKET_LIFETIME_MAX 604800U
+
+/*!
+ * \def QSC_TLS_SESSION_TICKET_AGE_TOLERANCE_MS
+ * \brief Maximum accepted clock/network skew when validating a TLS 1.3 ticket age.
+ *
+ * RFC 9846 requires the server to validate the client-provided ticket age
+ * against the elapsed time since ticket issuance using a small tolerance.
+ */
+#define QSC_TLS_SESSION_TICKET_AGE_TOLERANCE_MS 10000ULL
 
 /* Registry and identifier limits */
 /*! 
