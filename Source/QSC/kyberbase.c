@@ -32,20 +32,12 @@ static const QSC_CACHE_ALIGNED uint16_t kyber_zetas[KYBER_ZETA_SIZE] =
 
 static int16_t kyber_montgomery_reduce(int32_t a)
 {
-    //int16_t t;
+    int16_t t;
 
-    //t = (int16_t)a * KYBER_QINV;
-    //t = (a - (int32_t)t * QSC_KYBER_Q) >> 16;
+    t = (int16_t)a * KYBER_QINV;
+    t = (a - (int32_t)t * QSC_KYBER_Q) >> 16;
 
-    //return (int16_t)t;
-
-    int32_t t;
-
-    t = (int32_t)((int16_t)(a * (int32_t)KYBER_QINV));
-    t = a - t * (int32_t)QSC_KYBER_Q;
-
-    return (int16_t)(t >> 16);
-
+    return (int16_t)t;
 }
 
 static int16_t kyber_barrett_reduce(int16_t a)
@@ -986,7 +978,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 
     kyber_indcpa_dec(buf, ct, sk);
 
-    /* multitarget countermeasure for coins + contributory KEM */
+    /* Multitarget countermeasure for coins + contributory KEM */
     qsc_memutils_copy((buf + QSC_KYBER_SYMBYTES), (sk + QSC_KYBER_SECRETKEY_BYTES - (2U * QSC_KYBER_SYMBYTES)), QSC_KYBER_SYMBYTES);
     qsc_sha3_compute512(kr, buf, 2U * QSC_KYBER_SYMBYTES);
 
@@ -1012,9 +1004,12 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
 
     qsc_intutils_cmov(ss, kr, QSC_KYBER_SYMBYTES, (uint8_t)!fail);
     qsc_memutils_secure_erase(kr, sizeof(kr));
-    qsc_keccak_dispose(&kctx);
-    qsc_memutils_secure_erase(&fail, sizeof(fail));
 
-    /* FIPS 203 ML-KEM.Decaps uses implicit rejection */
-    return true;
+    /* Note: in the FIPS specification decapsulate always returns true even on failure,
+    * as a means to guard against a decryption oracle. In the real world however,
+    * that failure will propagate in tunnel failures which will reveal the decapsulation failure,
+    * but without any ability to defend against it or log it administratively. For this reason,
+    * this is an ineffective and unrealistic defense against the oracle,
+    * and implement the decapsulation failure signal. */
+    return (fail == 0);
 }
