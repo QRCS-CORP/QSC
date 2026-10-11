@@ -473,15 +473,6 @@ QSC_EXPORT_API size_t qsc_socket_peek(const qsc_socket* sock, uint8_t* output, s
 QSC_EXPORT_API size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
-* \brief Receive data from a connected socket asynchronously
-*
-* \param state: [qsc_socket_receive_async_state*] A pointer to the async receive data structure
-*
-* \return [qsc_socket_exceptions] Returns an exception code on failure, or success(0)
-*/
-QSC_EXPORT_API qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive_async_state* state);
-
-/**
 * \brief Receive a block of data from a synchronous connected socket or a bound connection-less socket, and returns when buffer is full
 *
 * \param sock: [const qsc_socket*] The socket instance
@@ -492,6 +483,15 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive
 * \return [size_t] Returns the number of bytes received from the remote host
 */
 QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
+
+/**
+* \brief Receive data from a connected socket asynchronously
+*
+* \param state: [qsc_socket_receive_async_state*] A pointer to the async receive data structure
+*
+* \return [qsc_socket_exceptions] Returns an exception code on failure, or success(0)
+*/
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_receive_async(qsc_socket_receive_async_state* state);
 
 /**
 * \brief Receive data from a synchronous connected socket or a bound connection-less socket
@@ -517,6 +517,24 @@ QSC_EXPORT_API size_t qsc_socket_receive_from(qsc_socket* sock, char* dest, size
 * \return [uint32_t] Returns the number of sockets with data
 */
 QSC_EXPORT_API uint32_t qsc_socket_receive_poll(const qsc_socket_receive_poll_state* state);
+
+/**
+* \brief Receive data from a synchronous connected socket with a temporary receive timeout.
+*
+* The function saves the socket's current receive timeout, applies the specified timeout,
+* performs the receive operation, and restores the original timeout before returning.
+* The timeout value is specified in milliseconds. A timeout value of zero disables the
+* receive timeout and uses normal blocking behavior.
+*
+* \param sock: [const qsc_socket*] The socket instance
+* \param output: [uint8_t*] The output buffer that receives data
+* \param otplen: [size_t] The length of the output buffer
+* \param flag: [qsc_socket_receive_flags] Flags that influence the behavior of the receive function
+* \param timeout: [int32_t] The temporary receive timeout in milliseconds
+*
+* \return [size_t] Returns the number of bytes received from the remote host
+*/
+QSC_EXPORT_API size_t qsc_socket_receive_timeout(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag, int32_t timeout);
 
 /**
 * \brief Sends data on a TCP connected socket.
@@ -567,6 +585,22 @@ QSC_EXPORT_API size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t*
 QSC_EXPORT_API qsc_socket_exceptions qsc_socket_shut_down(qsc_socket* sock, qsc_socket_shut_down_flags params);
 
 /*~~~ Helper Functions ~~~*/
+
+/*!
+ * \brief Get the value of a socket option.
+ *
+ * \details
+ * Retrieves the current value of a socket option from the operating system.
+ * Socket timeout options are returned in milliseconds.
+ *
+ * \param sock: [const] A pointer to the socket structure.
+ * \param level: The socket protocol level.
+ * \param option: The socket option to query.
+ * \param optval: A pointer receiving the option value.
+ *
+ * \return Returns the socket exception status.
+ */
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_get_option(const qsc_socket* sock, qsc_socket_protocols level, qsc_socket_options option, int32_t* optval);
 
 /**
 * \brief Returns the error string associated with the exception code
