@@ -2,13 +2,27 @@
 #include <stdlib.h>
 #include "fileutils.h"
 #include "intutils.h"
+#include "memutils.h"
 #include "stringutils.h"
 
+/**
+ * \brief Read a complete NIST response file as a NUL-terminated text buffer.
+ * \param path Existing response file path.
+ * \param flen Receives the number of bytes read, excluding the terminator.
+ * \return QSC-allocated text buffer, or NULL on failure; caller must release it.
+ * \note Opens and closes the file synchronously; not thread safe when the file changes.
+ */
 static char* file_to_string(const char* path, size_t* flen)
 {
 	FILE* fp;
 	char* fbuf;
+	size_t fsz;
+	size_t nread;
 	errno_t ferr;
+
+	fp = NULL;
+	fbuf = NULL;
+	*flen = 0U;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 	ferr = fopen_s(&fp, path, "r");
@@ -17,17 +31,30 @@ static char* file_to_string(const char* path, size_t* flen)
 	ferr = (fp != NULL) ? 0 : -1;
 #endif
 
-	fbuf = NULL;
-	*flen = qsc_fileutils_get_size(path);
-
-	if (*flen > 0 && ferr == 0 && fp != NULL)
+	if (ferr == 0 && fp != NULL)
 	{
-		fbuf = (char*)malloc(*flen);
+		fsz = qsc_fileutils_get_size(path);
 
-		if (fbuf != NULL)
+		if (fsz > 0U && fsz < SIZE_MAX)
 		{
-			*flen = fread(fbuf, 1, *flen, fp);
+			fbuf = (char*)qsc_memutils_malloc(fsz + 1U);
+
+			if (fbuf != NULL)
+			{
+				nread = fread(fbuf, 1U, fsz, fp);
+				fbuf[nread] = '\0';
+				*flen = nread;
+
+				if (ferror(fp) != 0 || nread == 0U)
+				{
+					qsc_memutils_alloc_free(fbuf);
+					fbuf = NULL;
+					*flen = 0U;
+				}
+			}
 		}
+
+		(void)fclose(fp);
 	}
 
 	return fbuf;
@@ -150,7 +177,7 @@ void parse_nist_signature_kat(const char* path, uint8_t* seed, size_t* seedlen, 
 				}
 			}
 
-			free(pbuf);
+			qsc_memutils_alloc_free(pbuf);
 		}
 	}
 }
@@ -272,7 +299,7 @@ void parse_nist_cipher_kat(const char* path, uint8_t* seed, size_t* seedlen, uin
 				}
 			}
 
-			free(pbuf);
+			qsc_memutils_alloc_free(pbuf);
 		}
 	}
 }

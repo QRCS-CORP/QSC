@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "tlsrecord.h"
 #include "aes.h"
 #include "chacha.h"
@@ -550,53 +601,49 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 	}
 	else
 	{
-		inner = (uint8_t*)qsc_memutils_malloc(QSC_TLS_RECORD_MAX_INNER_SIZE);
+		innerlen = inlen + QSC_TLS_INNER_CONTENT_TYPE_SIZE;
 
-		if (inner == NULL)
+		if (innerlen > QSC_TLS_RECORD_MAX_INNER_SIZE)
 		{
-			status = qsc_tls_status_invalid_state;
+			status = qsc_tls_status_invalid_length;
 		}
 		else
 		{
-			qsc_memutils_clear(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
+			status = tls_record_build_header(aad, sizeof(aad), &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
 
-			if ((inlen + QSC_TLS_INNER_CONTENT_TYPE_SIZE) > QSC_TLS_RECORD_MAX_INNER_SIZE)
+			if (status == qsc_tls_status_success)
 			{
-				status = qsc_tls_status_invalid_length;
+				/* Verify capacity before staging plaintext in caller-owned storage. */
+				if (outlen < QSC_TLS_RECORD_HEADER_SIZE + innerlen + QSC_TLS_GCM_TAG_SIZE)
+				{
+					status = qsc_tls_status_buffer_too_small;
+				}
 			}
-			else
+
+			if (status == qsc_tls_status_success)
 			{
-				qsc_memutils_copy(inner, input, inlen);
+				/* RFC 9846 Section 5.5: enforce the AEAD usage limit. */
+				if (tls_record_write_limit_reached(state) == true)
+				{
+					qsc_tls_record_state_dispose(state);
+					status = qsc_tls_status_authentication_failure;
+				}
+			}
+
+			if (status == qsc_tls_status_success)
+			{
+				/* Stage the complete TLSInnerPlaintext in the ciphertext output area.
+				 * memutils_move supports caller input/output overlap. The AEAD
+				 * encryptors have been checked for exact in-place operation. */
+				inner = output + QSC_TLS_RECORD_HEADER_SIZE;
+
+				if (inlen != 0U && input != inner)
+				{
+					qsc_memutils_move(inner, input, inlen);
+				}
+
 				inner[inlen] = (uint8_t)inner_type;
-				innerlen = inlen + QSC_TLS_INNER_CONTENT_TYPE_SIZE;
-
-				status = tls_record_build_header(aad, sizeof(aad), &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
-
-				if (status == qsc_tls_status_success)
-				{
-					status = tls_record_build_header(output, outlen, &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
-				}
-
-				if (status == qsc_tls_status_success)
-				{
-					/* Guard the full output range before any write: header + ciphertext + tag */
-					if (outlen < QSC_TLS_RECORD_HEADER_SIZE + innerlen + QSC_TLS_GCM_TAG_SIZE)
-					{
-						status = qsc_tls_status_buffer_too_small;
-					}
-				}
-
-				if (status == qsc_tls_status_success)
-				{
-					/* RFC 9846 Section 5.5: a sender MUST close or update keys before
-					 * exceeding the AEAD usage limit. Count every AES-GCM record as
-					 * full size, which is conservative for shorter records. */
-					if (tls_record_write_limit_reached(state) == true)
-					{
-						qsc_tls_record_state_dispose(state);
-						status = qsc_tls_status_authentication_failure;
-					}
-				}
+				status = tls_record_build_header(output, outlen, &hdrlen, qsc_tls_record_content_application_data, innerlen + QSC_TLS_GCM_TAG_SIZE);
 
 				if (status == qsc_tls_status_success)
 				{
@@ -614,9 +661,8 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 							kp.infolen = 0U;
 							qsc_aes_gcm128_initialize(&gcm128, &kp, true);
 							qsc_aes_gcm128_set_associated(&gcm128, aad, sizeof(aad));
-							qsc_aes_gcm128_encrypt(&gcm128, output + QSC_TLS_RECORD_HEADER_SIZE, inner, innerlen);
+							qsc_aes_gcm128_encrypt(&gcm128, inner, inner, innerlen);
 							qsc_aes_gcm128_dispose(&gcm128);
-
 							break;
 						}
 						case qsc_tls_cipher_suite_tls_aes_256_gcm_sha384:
@@ -629,9 +675,8 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 							kp.infolen = 0U;
 							qsc_aes_gcm256_initialize(&gcm256, &kp, true);
 							qsc_aes_gcm256_set_associated(&gcm256, aad, sizeof(aad));
-							qsc_aes_gcm256_encrypt(&gcm256, output + QSC_TLS_RECORD_HEADER_SIZE, inner, innerlen);
+							qsc_aes_gcm256_encrypt(&gcm256, inner, inner, innerlen);
 							qsc_aes_gcm256_dispose(&gcm256);
-
 							break;
 						}
 						case qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256:
@@ -641,9 +686,8 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 							ckp.nonce = nonce;
 							qsc_chacha_poly1305_initialize(&cpoly, &ckp);
 							qsc_chacha_poly1305_set_associated(&cpoly, aad, sizeof(aad));
-							qsc_chacha_poly1305_encrypt(&cpoly, output + QSC_TLS_RECORD_HEADER_SIZE, inner, innerlen);
+							qsc_chacha_poly1305_encrypt(&cpoly, inner, inner, innerlen);
 							qsc_chacha_poly1305_dispose(&cpoly);
-
 							break;
 						}
 						default:
@@ -659,10 +703,6 @@ qsc_tls_status qsc_tls_record_encrypt(qsc_tls_record_state* state, uint8_t* outp
 					}
 				}
 			}
-
-			qsc_memutils_secure_erase(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
-			qsc_memutils_alloc_free(inner);
-			inner = NULL;
 		}
 	}
 
@@ -699,6 +739,7 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 	uint8_t* inner;
 	const uint8_t* payload;
 	size_t payloadlen;
+	size_t innercap;
 	size_t endpos;
 	qsc_tls_record_content_type outer_type;
 	bool decok;
@@ -708,6 +749,7 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 	outer_type = qsc_tls_record_content_invalid;
 	payload = NULL;
 	payloadlen = 0U;
+	innercap = 0U;
 	endpos = 0U;
 	decok = false;
 	inner = NULL;
@@ -736,7 +778,10 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 	}
 	else
 	{
-		inner = (uint8_t*)qsc_memutils_malloc(QSC_TLS_RECORD_MAX_INNER_SIZE);
+		/* Bound allocation even when the incoming record exceeds the wire limit. */
+		innercap = (inlen <= QSC_TLS_RECORD_MAX_WIRE_SIZE) ?
+			(inlen - QSC_TLS_RECORD_HEADER_SIZE - QSC_TLS_GCM_TAG_SIZE) : QSC_TLS_RECORD_MAX_INNER_SIZE;
+		inner = (uint8_t*)qsc_memutils_malloc(innercap);
 
 		if (inner == NULL)
 		{
@@ -744,7 +789,7 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 		}
 		else
 		{
-			qsc_memutils_clear(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
+			qsc_memutils_clear(inner, innercap);
 
 			status = qsc_tls_record_decode_plaintext(input, inlen, &outer_type, &payload, &payloadlen);
 
@@ -870,7 +915,7 @@ qsc_tls_status qsc_tls_record_decrypt(qsc_tls_record_state* state, uint8_t* outp
 				} /* end sequence-check else */
 			}
 
-			qsc_memutils_secure_erase(inner, QSC_TLS_RECORD_MAX_INNER_SIZE);
+			qsc_memutils_secure_erase(inner, innercap);
 			qsc_memutils_alloc_free(inner);
 			inner = NULL;
 		}

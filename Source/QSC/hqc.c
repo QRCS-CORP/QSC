@@ -13,7 +13,7 @@ bool qsc_hqc_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8
 
 	if (secret != NULL && ciphertext != NULL && privatekey != NULL)
 	{
-#if defined(QSC_SYSTEM_HAS_AVX2)
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_PCLMUL)
 		res = qsc_hqc_avx2_decapsulate(secret, ciphertext, privatekey);
 #else
 		res = qsc_hqc_ref_decapsulate(secret, ciphertext, privatekey);
@@ -36,7 +36,7 @@ bool qsc_hqc_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* pu
 
 	if (secret != NULL && ciphertext != NULL && publickey != NULL && rng_generate != NULL)
 	{
-#if defined(QSC_SYSTEM_HAS_AVX2)
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_PCLMUL)
 		res = qsc_hqc_avx2_encapsulate(secret, ciphertext, publickey, rng_generate);
 #else
 		res = qsc_hqc_ref_encapsulate(secret, ciphertext, publickey, rng_generate);
@@ -55,7 +55,7 @@ void qsc_hqc_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint
 
 	if (secret != NULL && ciphertext != NULL && publickey != NULL && seed != NULL)
 	{
-#if defined(QSC_SYSTEM_HAS_AVX2)
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_PCLMUL)
 		qsc_hqc_avx2_seeded_encapsulate(secret, ciphertext, publickey, seed);
 #else
 		qsc_hqc_ref_seeded_encapsulate(secret, ciphertext, publickey, seed);
@@ -75,7 +75,7 @@ bool qsc_hqc_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rn
 
 	if (publickey != NULL && privatekey != NULL && rng_generate != NULL)
 	{
-#if defined(QSC_SYSTEM_HAS_AVX2)
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_PCLMUL)
 		res = qsc_hqc_avx2_generate_keypair(publickey, privatekey, rng_generate);
 #else
 		res = qsc_hqc_ref_generate_keypair(publickey, privatekey, rng_generate);
@@ -87,7 +87,7 @@ bool qsc_hqc_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rn
 
 void qsc_hqc_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed)
 {
-#if defined(QSC_SYSTEM_HAS_AVX2)
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_PCLMUL)
 	qsc_hqc_avx2_generate_seeded_keypair(publickey, privatekey, seed);
 #else
 	qsc_hqc_ref_generate_seeded_keypair(publickey, privatekey, seed);

@@ -6,6 +6,7 @@ static const qsc_tls_signature_scheme_descriptor qsc_tls_sigalg_descriptors[] =
 	{ qsc_tls_sig_ecdsa_secp384r1_sha384, "ecdsa_secp384r1_sha384", qsc_tls_hash_sha384, 104U, true, true, false, false },
 	{ qsc_tls_sig_ecdsa_secp521r1_sha512, "ecdsa_secp521r1_sha512", qsc_tls_hash_sha512, 141U, true, true, false, false },
 	{ qsc_tls_sig_ed25519, "ed25519", qsc_tls_hash_none, 64U, true, true, false, false },
+	{ qsc_tls_sig_ed448, "ed448", qsc_tls_hash_none, 114U, true, true, false, false },
 	{ qsc_tls_sig_mldsa44, "mldsa44", qsc_tls_hash_none, 2420U, true, true, true, true },
 	{ qsc_tls_sig_mldsa65, "mldsa65", qsc_tls_hash_none, 3309U, true, true, true, true },
 	{ qsc_tls_sig_mldsa87, "mldsa87", qsc_tls_hash_none, 4627U, true, true, true, true }
@@ -29,94 +30,13 @@ const qsc_tls_signature_scheme_descriptor* qsc_tls_signature_scheme_descriptor_g
 	return res;
 }
 
-static bool tls_signature_scheme_is_build_compatible(qsc_tls_signature_scheme scheme)
-{
-	bool res;
-
-	res = false;
-
-	switch (scheme)
-	{
-		case qsc_tls_sig_ecdsa_secp256r1_sha256:
-		{
-	#if defined(QSC_ECDSA_S1P256)
-			res = true;
-	#else
-			res = false;
-	#endif
-			break;
-		}
-		case qsc_tls_sig_ecdsa_secp384r1_sha384:
-		{
-	#if defined(QSC_ECDSA_S3P384)
-			res = true;
-	#else
-			res = false;
-	#endif
-			break;
-		}
-		case qsc_tls_sig_ecdsa_secp521r1_sha512:
-		{
-	#if defined(QSC_ECDSA_S5P521)
-			res = true;
-	#else
-			res = false;
-	#endif
-			break;
-		}
-		case qsc_tls_sig_ed25519:
-		{
-	#if defined(QSC_EDDSA_S1EC25519)
-			res = true;
-	#else
-			res = false;
-	#endif
-			break;
-		}
-		case qsc_tls_sig_mldsa44:
-		{
-	#if defined(QSC_DILITHIUM_S1P44)
-			res = true;
-	#else
-			res = false;
-	#endif
-			break;
-		}
-		case qsc_tls_sig_mldsa65:
-		{
-	#if defined(QSC_DILITHIUM_S3P65)
-			res = true;
-	#else
-			res = false;
-	#endif
-			break;
-		}
-		case qsc_tls_sig_mldsa87:
-		{
-	#if defined(QSC_DILITHIUM_S5P87)
-			res = true;
-	#else
-			res = false;
-	#endif
-			break;
-		}
-		default:
-		{
-			res = false;
-			break;
-		}
-	}
-
-	return res;
-}
-
 bool qsc_tls_signature_scheme_is_supported(qsc_tls_signature_scheme scheme)
 {
 	const qsc_tls_signature_scheme_descriptor* desc;
 
 	desc = qsc_tls_signature_scheme_descriptor_get(scheme);
 
-	return (desc != NULL) ? (desc->supported && tls_signature_scheme_is_build_compatible(scheme)) : false;
+	return (desc != NULL) ? desc->supported : false;
 }
 
 bool qsc_tls_signature_scheme_is_certificate_verify_capable(qsc_tls_signature_scheme scheme)
@@ -152,19 +72,23 @@ size_t qsc_tls_signature_scheme_private_key_size(qsc_tls_signature_scheme scheme
 	{
 		case qsc_tls_sig_ecdsa_secp256r1_sha256:
 		{
-			return 32U;
+			return 96U;
 		}
 		case qsc_tls_sig_ecdsa_secp384r1_sha384:
 		{
-			return 48U;
+			return 144U;
 		}
 		case qsc_tls_sig_ecdsa_secp521r1_sha512:
 		{
-			return 66U;
+			return 198U;
 		}
 		case qsc_tls_sig_ed25519:
 		{
 			return 64U;
+		}
+		case qsc_tls_sig_ed448:
+		{
+			return 114U;
 		}
 		case qsc_tls_sig_mldsa44:
 		{
@@ -204,6 +128,10 @@ size_t qsc_tls_signature_scheme_public_key_size(qsc_tls_signature_scheme scheme)
 		case qsc_tls_sig_ed25519:
 		{
 			return 32U;
+		}
+		case qsc_tls_sig_ed448:
+		{
+			return 57U;
 		}
 		case qsc_tls_sig_mldsa44:
 		{
@@ -250,6 +178,11 @@ qsc_x509_signature_algorithm qsc_tls_signature_scheme_x509_algorithm(qsc_tls_sig
 		case qsc_tls_sig_ed25519:
 		{
 			res = QSC_X509_SIGNATURE_ALGORITHM_ED25519;
+			break;
+		}
+		case qsc_tls_sig_ed448:
+		{
+			res = QSC_X509_SIGNATURE_ALGORITHM_ED448;
 			break;
 		}
 		case qsc_tls_sig_mldsa44:

@@ -240,14 +240,6 @@ static inline uint32_t load32_le(const uint8_t* src)
 }
 
 /* Store a 32-bit little-endian integer to a byte array */
-static inline void store32_le(uint8_t* dst, uint32_t v)
-{
-    dst[0U] = (uint8_t)(v);
-    dst[1U] = (uint8_t)(v >> 8);
-    dst[2U] = (uint8_t)(v >> 16);
-    dst[3U] = (uint8_t)(v >> 24);
-}
-
 /* ============================================================
  * Field arithmetic - GF(2^448 - 2^224 - 1)
  *
@@ -401,12 +393,12 @@ void qsc_fe448_to_bytes(uint8_t* s, const qsc_fe448 h)
             for (i = 0; i < 15; ++i)
             {
                 carry = (int64_t)t[i] >> 28;
-                t[i] -= (int32_t)(carry << 28);
+                t[i] = (int32_t)((uint32_t)t[i] & 0x0FFFFFFFU);
                 t[i + 1] += (int32_t)carry;
             }
 
             carry = (int64_t)t[15] >> 28;
-            t[15] -= (int32_t)(carry << 28);
+            t[15] = (int32_t)((uint32_t)t[15] & 0x0FFFFFFFU);
             t[0] += (int32_t)carry;
             t[8] += (int32_t)carry;
         }
@@ -439,12 +431,12 @@ void qsc_fe448_reduce(qsc_fe448 h, const qsc_fe448 f)
     for (int32_t i = 0; i < 15; i++)
     {
         carry  = (int64_t)h[i] >> 28;
-        h[i]  -= (int32_t)(carry << 28);
+        h[i] = (int32_t)((uint32_t)h[i] & 0x0FFFFFFFU);
         h[i + 1U] += (int32_t)carry;
     }
 
     carry  = (int64_t)h[15U] >> 28;
-    h[15U] -= (int32_t)(carry << 28);
+    h[15U] = (int32_t)((uint32_t)h[15U] & 0x0FFFFFFFU);
     h[0U]  += (int32_t)carry;
     h[8U]  += (int32_t)carry;
 }
@@ -493,8 +485,13 @@ void qsc_fe448_mul32(qsc_fe448 h, const qsc_fe448 f, uint32_t n)
     h[8U] += (int32_t)carry;
 }
 
-/*
- * Field multiplication: h = f * g mod (2^448 - 2^224 - 1)
+/**
+ * \brief Multiply signed radix-2^28 Ed448 field elements modulo p.
+ * \param h: Caller-owned 16-limb destination, which may alias f or g.
+ * \param f: Caller-owned 16-limb left operand, not modified.
+ * \param g: Caller-owned 16-limb right operand, not modified.
+ * \details Supports the full signed int32 limb range without int64 overflow.
+ * Fixed loops, no shared mutable state, no secret-dependent branches.
  *
  * Strategy: schoolbook 16x16 -> 31-limb product, then reduce.
  * Reduction identity: 2^448 = 2^224 + 1 (mod p).
@@ -507,15 +504,56 @@ void qsc_fe448_mul32(qsc_fe448 h, const qsc_fe448 f, uint32_t n)
 void qsc_fe448_mul(qsc_fe448 h, const qsc_fe448 f, const qsc_fe448 g)
 {
     int64_t t[31U] = { 0 };
+	int64_t ff[16U] = { 0 };
+	int64_t gg[16U] = { 0 };
+	int64_t low;
+	int32_t pass;
     int32_t i, j;
     int64_t carry;
+
+	/* Normalize each lazy operand to bounded radix-2^28 limbs before the
+	 * 16x16 product. The signed-to-unsigned conversion is defined modulo
+	 * 2^64, including for negative limbs. Fixed-radix division is exact. */
+	for (i = 0; i < 16; ++i)
+	{
+		ff[i] = f[i];
+		gg[i] = g[i];
+	}
+
+	for (pass = 0; pass < 2; ++pass)
+	{
+		for (i = 0; i < 15; ++i)
+		{
+			low = (int64_t)((uint64_t)ff[i] & 0x0FFFFFFFULL);
+			carry = (ff[i] - low) / 268435456LL;
+			ff[i] = low;
+			ff[i + 1] += carry;
+
+			low = (int64_t)((uint64_t)gg[i] & 0x0FFFFFFFULL);
+			carry = (gg[i] - low) / 268435456LL;
+			gg[i] = low;
+			gg[i + 1] += carry;
+		}
+
+		low = (int64_t)((uint64_t)ff[15U] & 0x0FFFFFFFULL);
+		carry = (ff[15U] - low) / 268435456LL;
+		ff[15U] = low;
+		ff[0U] += carry;
+		ff[8U] += carry;
+
+		low = (int64_t)((uint64_t)gg[15U] & 0x0FFFFFFFULL);
+		carry = (gg[15U] - low) / 268435456LL;
+		gg[15U] = low;
+		gg[0U] += carry;
+		gg[8U] += carry;
+	}
 
     /* Schoolbook product */
     for (i = 0; i < 16; i++)
     {
         for (j = 0; j < 16; j++)
         {
-            t[i + j] += (int64_t)f[i] * g[j];
+            t[i + j] += ff[i] * gg[j];
         }
     }
 

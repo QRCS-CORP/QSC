@@ -740,17 +740,22 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_der_ex(const qsc_x509_algorith
                         inner, &innerlen);
                 }
             }
-            else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+            else if ((algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) ||
+                (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED448))
             {
                 status = qsc_x509_algorithm_identifier_validate(algorithm);
 
-                if (status == QSC_ASN1_STATUS_SUCCESS && privatekeylen != QSC_X509_EDDSA_SEED_SIZE)
+                if (status == QSC_ASN1_STATUS_SUCCESS &&
+                    privatekeylen != ((algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) ?
+                        QSC_X509_EDDSA_SEED_SIZE : QSC_X509_ED448_SEED_SIZE))
                 {
                     status = QSC_ASN1_STATUS_INVALID_LENGTH;
                 }
 
                 if (status == QSC_ASN1_STATUS_SUCCESS && publickeypresent == true &&
-                    (publickey == NULL || publickeylen != QSC_X509_EDDSA_PUBLIC_KEY_SIZE))
+                    (publickey == NULL ||
+                        publickeylen != ((algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) ?
+                            QSC_X509_EDDSA_PUBLIC_KEY_SIZE : QSC_X509_ED448_PUBLIC_KEY_SIZE)))
                 {
                     status = QSC_ASN1_STATUS_INVALID_LENGTH;
                 }

@@ -1,7 +1,111 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "consoleutils.h"
 #include "memutils.h"
 #include "stringutils.h"
 #include <stdio.h>
+#include <limits.h>
+#include <limits.h>
 #include <string.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -9,6 +113,9 @@
 	QSC_SYSTEM_CONDITION_IGNORE(5105)
 #if !defined(WIN32_LEAN_AND_MEAN)
 #	define WIN32_LEAN_AND_MEAN
+#endif
+#if !defined(NOMINMAX)
+#	define NOMINMAX
 #endif
 #	include <conio.h>
 #	include <tchar.h>
@@ -47,9 +154,6 @@ static char getch(void)
 			{
 				perror("read()");
 			}
-
-			oldt.c_lflag |= ICANON;
-			oldt.c_lflag |= ECHO;
 
 			if (tcsetattr(STDIN_FILENO, TCSADRAIN, &oldt) != 0)
 			{
@@ -120,31 +224,55 @@ char qsc_consoleutils_get_char(void)
 size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 {
 	QSC_ASSERT(line != NULL);
-	QSC_ASSERT(maxlen != 0U);
 
 	size_t slen;
+	int32_t limit;
+	int32_t next;
+	bool complete;
 
 	slen = 0U;
 
 	if (line != NULL && maxlen != 0U)
 	{
-		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
-		{
-			if (qsc_stringutils_string_contains(line, "\n") == true)
-			{
-				slen = qsc_stringutils_string_size(line);
-				line[slen - 1U] = '\0';
-			}
-			else
-			{
-				int32_t count = (maxlen > INT_MAX) ? INT_MAX : (int32_t)maxlen;
+		line[0] = '\0';
 
-				while (fgets(line, count, stdin) != NULL) 
+		if (maxlen > 1U)
+		{
+			limit = (maxlen > (size_t)INT_MAX) ? INT_MAX : (int32_t)maxlen;
+
+			if (fgets(line, limit, stdin) != NULL)
+			{
+				slen = strlen(line);
+				complete = (slen != 0U && line[slen - 1U] == '\n');
+
+				if (complete == true)
 				{
-					if (qsc_stringutils_string_contains(line, "\n") == true)
+					--slen;
+					line[slen] = '\0';
+				}
+				else if (feof(stdin) == 0)
+				{
+					next = getchar();
+
+					if (next == '\n')
 					{
-						qsc_memutils_clear(line, maxlen);
-						break;
+						complete = true;
+					}
+					else if (next == EOF)
+					{
+						complete = (feof(stdin) != 0);
+					}
+					else
+					{
+						while ((next = getchar()) != EOF && next != '\n')
+						{
+						}
+					}
+
+					if (complete == false)
+					{
+						line[0] = '\0';
+						slen = 0U;
 					}
 				}
 			}
@@ -157,15 +285,17 @@ size_t qsc_consoleutils_get_line(char* line, size_t maxlen)
 size_t qsc_consoleutils_get_formatted_line(char* line, size_t maxlen)
 {
 	QSC_ASSERT(line != NULL);
-	QSC_ASSERT(maxlen != 0U);
 
 	size_t slen;
+	int32_t limit;
 
 	slen = 0U;
 
-	if (line != NULL && maxlen != 0U)
+	if (line != NULL && maxlen > 1U)
 	{
-		if (fgets(line, (int32_t)maxlen, stdin) != NULL)
+		limit = (maxlen > (size_t)INT_MAX) ? INT_MAX : (int32_t)maxlen;
+
+		if (fgets(line, limit, stdin) != NULL)
 		{
 			qsc_stringutils_to_lowercase(line);
 			qsc_stringutils_trim_newline(line);
@@ -180,61 +310,41 @@ size_t qsc_consoleutils_get_quoted_string(char* output, const char* input, size_
 {
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(maxlen != 0U);
 
-	size_t i;
+	const char* first;
+	const char* last;
 	size_t len;
-	size_t pos;
 
 	len = 0U;
-	pos = 0U;
 
 	if (output != NULL && input != NULL && maxlen != 0U)
 	{
-		if (qsc_consoleutils_line_contains(input, "\"") == true)
-		{
-			for (i = 0U; i < maxlen; ++i)
-			{
-				if (input[i] == 34)
-				{
-					pos = i + 1;
-					break;
-				}
-			}
+		output[0] = '\0';
+		first = strchr(input, '"');
 
-			for (i = pos; i < maxlen; ++i)
-			{
-				if (input[i] == 34)
-				{
-					len = i - pos;
-					break;
-				}
-			}
+		if (first != NULL)
+		{
+			last = strchr(first + 1, '"');
 		}
-		else if (qsc_consoleutils_line_contains(input, "\'") == true)
+		else
 		{
-			for (i = 0U; i < maxlen; ++i)
-			{
-				if (input[i] == 39)
-				{
-					pos = i + 1U;
-					break;
-				}
-			}
-
-			for (i = pos; i < maxlen; ++i)
-			{
-				if (input[i] == 39)
-				{
-					len = i - pos;
-					break;
-				}
-			}
+			first = strchr(input, '\'');
+			last = (first != NULL) ? strchr(first + 1, '\'') : NULL;
 		}
 
-		if (len > 0U && len <= maxlen)
+		if (first != NULL && last != NULL)
 		{
-			qsc_memutils_copy(output, input + pos, len);
+			len = (size_t)(last - first - 1);
+
+			if (len < maxlen)
+			{
+				qsc_memutils_copy(output, first + 1, len);
+				output[len] = '\0';
+			}
+			else
+			{
+				len = 0U;
+			}
 		}
 	}
 
@@ -519,34 +629,10 @@ void qsc_consoleutils_print_hex(const uint8_t* input, size_t inplen, size_t line
 void qsc_consoleutils_print_formatted(const char* input, size_t inplen)
 {
 	QSC_ASSERT(input != NULL);
-	QSC_ASSERT(inplen != 0U);
 
 	if (input != NULL && inplen != 0U)
 	{
-		const char flag = '\\';
-		char inp;
-
-		for (size_t i = 0U; i < inplen; ++i)
-		{
-			inp = input[i];
-
-			if (inp != flag)
-			{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-				printf_s("%c", inp);
-#else
-				printf("%c", inp);
-#endif
-			}
-			else
-			{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-				printf_s("%c", flag);
-#else
-				printf("%c", flag);
-#endif
-			}
-		}
+		(void)fwrite(input, sizeof(char), inplen, stdout);
 	}
 }
 
@@ -611,14 +697,14 @@ void qsc_consoleutils_progress_counter(int32_t seconds)
 	const char schr[] = { "-\\|/-\\|/-" };
 	size_t cnt;
 
-	cnt = (size_t)seconds * 10U;
+	cnt = (seconds > 0 && (size_t)seconds <= (SIZE_MAX / 10U)) ? ((size_t)seconds * 10U) : 0U;
 
 	for (size_t i = 0U; i < cnt; ++i)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		printf_s("%c", schr[i % sizeof(schr)]);
+		printf_s("%c", schr[i % (sizeof(schr) - 1U)]);
 #else
-		printf("%c", schr[i % sizeof(schr)]);
+		printf("%c", schr[i % (sizeof(schr) - 1U)]);
 #endif
 
 		qsc_consoleutils_print_safe("\b");
@@ -641,12 +727,12 @@ void qsc_consoleutils_set_window_buffer(size_t width, size_t height)
 	if (width != 0U && height != 0U)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		RECT r;
-
-		HWND con = GetConsoleWindow();
-		GetWindowRect(con, &r);
-		COORD cd = { (SHORT)width, (SHORT)height };
-		SetConsoleScreenBufferSize(con, cd);
+		HANDLE con = GetStdHandle(STD_OUTPUT_HANDLE);
+		if (con != NULL && con != INVALID_HANDLE_VALUE && width <= SHRT_MAX && height <= SHRT_MAX)
+		{
+			COORD cd = { (SHORT)width, (SHORT)height };
+			(void)SetConsoleScreenBufferSize(con, cd);
+		}
 #else
 		fprintf(stdout, "\033[8;%zu;%zut", height, width);
 		fflush(stdout);

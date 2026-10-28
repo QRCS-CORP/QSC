@@ -77,7 +77,7 @@
 #define QSCTEST_ECDH_ITERATIONS 100U
 
 /**
- * \brief Performs the ECDH P-256 NIST known answer tests.
+ * \brief Performs the selected ECDH NIST known answer tests.
  *
  * \details
  * This test uses official NIST ECC CDH Primitive test vectors for curve P-256.
@@ -90,7 +90,7 @@
 bool qsctest_ecdh_kat_test(void);
 
 /**
- * \brief Performs a repeated ECDH P-256 operations test.
+ * \brief Performs a repeated selected ECDH operations test.
  *
  * \details
  * This test repeatedly generates two key pairs and confirms that both parties derive
@@ -101,7 +101,7 @@ bool qsctest_ecdh_kat_test(void);
 bool qsctest_ecdh_operations_test(void);
 
 /**
- * \brief Tests ECDH P-256 private-key integrity.
+ * \brief Tests selected ECDH private-key integrity.
  *
  * \details
  * This test mutates a private key after key generation and confirms that agreement either
@@ -112,7 +112,7 @@ bool qsctest_ecdh_operations_test(void);
 bool qsctest_ecdh_privatekey_integrity(void);
 
 /**
- * \brief Tests ECDH P-256 public-key integrity.
+ * \brief Tests selected ECDH public-key integrity.
  *
  * \details
  * This test mutates a public key after key generation and confirms that agreement either
@@ -123,8 +123,71 @@ bool qsctest_ecdh_privatekey_integrity(void);
 bool qsctest_ecdh_publickey_integrity(void);
 
 /**
- * \brief Runs the complete ECDH P-256 test suite.
+ * \brief Runs the complete selected ECDH facade test suite and all three independent parameter sets.
  */
+/**
+ * \brief Verify ECDH P-256 the NIST known-answer key and secret vector.
+ * \return True when the independent P-256 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p256_kat_test(void);
+
+/**
+ * \brief Verify ECDH P-256 random key agreement and seeded key generation.
+ * \return True when the independent P-256 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p256_agreement_test(void);
+
+/**
+ * \brief Verify ECDH P-256 rejection of invalid public points and the zero scalar.
+ * \return True when the independent P-256 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p256_invalidkey_test(void);
+
+/**
+ * \brief Verify ECDH P-384 the NIST known-answer key and secret vector.
+ * \return True when the independent P-384 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p384_kat_test(void);
+
+/**
+ * \brief Verify ECDH P-384 random key agreement and seeded key generation.
+ * \return True when the independent P-384 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p384_agreement_test(void);
+
+/**
+ * \brief Verify ECDH P-384 rejection of invalid public points and the zero scalar.
+ * \return True when the independent P-384 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p384_invalidkey_test(void);
+
+/**
+ * \brief Verify ECDH P-521 the NIST known-answer key and secret vector.
+ * \return True when the independent P-521 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p521_kat_test(void);
+
+/**
+ * \brief Verify ECDH P-521 random key agreement and seeded key generation.
+ * \return True when the independent P-521 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p521_agreement_test(void);
+
+/**
+ * \brief Verify ECDH P-521 rejection of invalid public points and the zero scalar.
+ * \return True when the independent P-521 test passes.
+ * \note Uses only local buffers; suitable for independent thread invocation.
+ */
+bool qsctest_ecdh_p521_invalidkey_test(void);
+
 void qsctest_ecdh_run(void);
 
 #endif

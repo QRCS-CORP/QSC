@@ -63,12 +63,14 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \details
  * This header defines the public API for the CSX-512 cipher, a wide-block ChaCha-based authenticated
- * stream cipher extension. CSX-512 is a vectorized, 64-bit, 40-round stream cipher that uses a 
+ * stream cipher extension. CSX-512 is a vectorized, 64-bit, 20-round stream cipher by default (40 rounds when extended) that uses a 
  * 512-bit input key, a 16-byte nonce, and an optional tweak (info) parameter. The cipher employs
  * the Keccak cSHAKE-512 extended output function (XOF) to expand the input cipher-key into both
- * the cipher key and the MAC key. It integrates a post-quantum secure MAC function (KMAC) for message authentication, 
+ * the cipher key and the MAC key. It integrates the QSC KMAC-512 extension for message authentication, 
  * operating in an encrypt-then-MAC configuration to provide authenticated encryption with associated data (AEAD).
- * In decryption mode, the MAC code embedded in the ciphertext is verified prior to decryption, ensuring data integrity and authenticity.
+ * The single-call transform verifies the embedded tag before releasing plaintext.
+ * CSX and its cSHAKE-512/KMAC-512 configuration are QSC constructions, not NIST-standardized algorithms.
+ * The 20-round default and optional 40-round profile retain their existing wire formats.
  *
  * \par Example Usage:
  * \code
@@ -103,13 +105,16 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_CSX_AUTHENTICATED
 #endif
 
-/*!
-* \def QSC_CSX_REDUCED_ROUNDS
-* \brief Sets the internal transformation round count from 40 to 20,
-* and the KMAC rounds from 24 to 12.
-* Remove this definition to enable the standard rounds versions of CSX.
-*/
-//#define QSC_CSX_REDUCED_ROUNDS
+/**
+ * \def QSC_CSX_EXTENDED_ROUND_COUNTS
+ * \brief Select the optional 40-round CSX cipher instead of the default 20-round cipher.
+ * \details This macro controls only CSX mixing rounds. Both modes always use
+ * standard 24-round Keccak/KMAC for authentication and key derivation.
+ * Define QSC_CSX_EXTENDED_ROUND_COUNTS consistently in all translation units
+ * participating in the same CSX protocol. Ciphertext and tags produced with
+ * the two profiles are not interchangeable.
+ */
+/* #define QSC_CSX_EXTENDED_ROUND_COUNTS */
 
 /*!
 \def QSC_CSX_BLOCK_SIZE
@@ -119,7 +124,9 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
 \def QSC_CSX_INFO_SIZE
-* \brief The maximum byte length of the info string
+* \brief The size of the raw cipher information string.
+* \details Authenticated CSX uses only the first 14 info bytes as a zero-padded
+* cSHAKE function name; additional bytes are ignored for compatibility.
 */
 #define QSC_CSX_INFO_SIZE 48U
 
@@ -172,7 +179,7 @@ QSC_EXPORT_API typedef struct
 {
 	uint64_t state[QSC_CSX_STATE_SIZE];	/*!< the primary state array */
 	qsc_keccak_state kstate;			/*!< the KMAC state structure */
-	uint64_t counter;					/*!< the processed bytes counter */
+	uint64_t counter;					/*!< Processed bytes; UINT64_MAX marks a disposed or invalid state. */
 	bool encrypt;						/*!< the transformation mode; true for encryption */
 } qsc_csx_state;
 
@@ -182,7 +189,7 @@ QSC_EXPORT_API typedef struct
 * \brief Dispose of the CSX cipher state
 *
 * \warning The dispose function must be called when disposing of the cipher.
-* This function destroys the internal state of the cipher.
+* This function destroys secret state and marks the context invalid until reinitialized.
 *
 * \param ctx: [struct] The cipher state structure
 */
@@ -193,6 +200,11 @@ QSC_EXPORT_API void qsc_csx_dispose(qsc_csx_state* ctx);
  *
  * \warning When using a CTR based construction the nonce must be unique for a given key.
  * Re-using a nonce-key pair on a different plaintext input represents a catastrophic loss of security.
+ * The complete ranges of consumed 128-bit counters must be disjoint for a fixed key and info.
+ * Distinct starting nonces alone are insufficient when their counter ranges overlap.
+ * The key must contain exactly QSC_CSX_KEY_SIZE bytes and nonce must contain QSC_CSX_NONCE_SIZE bytes.
+ * A nonzero infolen requires a non-NULL info pointer. Invalid parameters invalidate the context.
+ * Authenticated mode retains the first 14 info bytes, zero-padded when shorter; zero length selects the default name.
  * 
  * \param ctx: [struct] The cipher state structure
  * \param keyparams: [const struct] The secret input cipher-key and nonce structure
@@ -204,7 +216,9 @@ QSC_EXPORT_API void qsc_csx_initialize(qsc_csx_state* ctx, const qsc_csx_keypara
  * \brief Set the associated data string used in authenticating the message.
  * The associated data may be packet header information, domain specific data, or a secret shared by a group.
  * The associated data must be set after initialization, and before each transformation call.
- * The data is erased after each call to the transform.
+ * Associated data is absorbed into the chained authentication state. A successful
+ * finalized transform clears buffered bytes but retains the authentication history.
+ * Length must not exceed UINT32_MAX; zero length is a no-op. Invalid nonempty data invalidates the context.
  *
  * \warning The cipher must be initialized before this function can be called
  *
@@ -217,7 +231,8 @@ QSC_EXPORT_API void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* da
 /**
  * \brief Retrieves the current nonce from the state
  *
- * \warning If reusing a nonce/key, the nonce must be retrieved after the last finalized transform call.
+ * \warning Retrieve the next nonce only after a successful finalized transform and before disposal.
+ * Reinitializing with the stored nonce starts a new authentication chain; both peers must reinitialize.
  *
  * \param ctx: [struct] The cipher state structure
  * \param nonce: [uint8_t*] The output nonce array
@@ -228,7 +243,12 @@ QSC_EXPORT_API void qsc_csx_store_nonce(const qsc_csx_state* ctx, uint8_t nonce[
  * \brief Transform an array of bytes.
  * In encryption mode, the input plain-text is encrypted and then an authentication MAC code is appended to the cipher-text.
  * In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
- * if the codes to not match, the cipher-text is not decrypted and the call fails.
+ * If the tags do not match, output is unchanged, the state is invalidated, and the call fails.
+ * Exact in-place transformation is supported; other overlapping input/output ranges are unsupported.
+ * Encryption output and decryption input require length + QSC_CSX_MAC_SIZE bytes.
+ * Zero-length payloads are rejected. Byte-count exhaustion and 128-bit nonce wrap are rejected
+ * before processing. A context can process at most UINT64_MAX - 1 payload bytes.
+ * Successful calls retain the state for chained records; failed authentication requires reinitialization.
  *
  * \warning The cipher must be initialized before this function can be called
  *
@@ -249,7 +269,14 @@ QSC_EXPORT_API bool qsc_csx_transform(qsc_csx_state* ctx, uint8_t* output, const
  * or compare to the embedded MAC code and authenticate in decryption mode.
  * In encryption mode, the input plain-text is encrypted, then authenticated, and the MAC code is appended to the cipher-text.
  * In decryption mode, the input cipher-text is authenticated internally and compared to the MAC code appended to the cipher-text,
- * if the codes do not match, the cipher-text is not decrypted and the call fails.
+ * If the final tag does not match, the current output is unchanged and the state is invalidated.
+ * Earlier calls with finalize=false release UNAUTHENTICATED plaintext. The caller must
+ * quarantine all such output until the final call succeeds, and discard it on failure.
+ * Both peers must use identical nonzero chunk lengths and associated-data call sequences.
+ * Each call consumes whole keystream blocks and authenticates its starting nonce;
+ * changing chunk boundaries is not equivalent to a single transform.
+ * The same overlap and counter limits as qsc_csx_transform apply. A tag-sized extension
+ * is required on encryption output or decryption input only when finalize=true.
  *
  * \warning The cipher must be initialized before this function can be called
  *

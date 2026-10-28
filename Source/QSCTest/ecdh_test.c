@@ -1,11 +1,65 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "ecdh_test.h"
 #include "csp.h"
 #include "ecdh.h"
+#include "ecdhp256.h"
+#include "ecdhp384.h"
+#include "ecdhp521.h"
 #include "memutils.h"
 #include "nistrng.h"
 #include "testutils.h"
 
-bool qsctest_ecdh_kat_test()
+bool qsctest_ecdh_kat_test(void)
 {
 	uint8_t kpka[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
 	uint8_t kpeer[QSC_ECDH_PUBLICKEY_SIZE] = { 0 };
@@ -19,48 +73,26 @@ bool qsctest_ecdh_kat_test()
 #if defined(QSC_ECDH_S1P256)
 	/* official NIST P-256 ECC CDH Primitive KAT */
 	qsctest_hex_to_bin("7D7DC5F71EB29DDAF80D6214632EEAE03D9058AF1FB6D22ED80BADB62BC1A534", kska, sizeof(kska));
-	qsctest_hex_to_bin("EAD218590119E8876B29146FF89CA61770C4EDBBF97D38CE385ED281D8A6B230"
-		"28AF61281FD35E2FA7002523ACC85A429CB06EE6648325389F59EDFCE1405141", kpka, sizeof(kpka));
-	qsctest_hex_to_bin("700C48F77F56584C5CC632CA65640DB91B6BACCE3A4DF6B42CE7CC838833D287"
-		"DB71E509E3FD9B060DDB20BA5C51DCC5948D46FBF640DFE0441782CAB85FA4AC", kpeer, sizeof(kpeer));
+	qsctest_hex_to_bin("EAD218590119E8876B29146FF89CA61770C4EDBBF97D38CE385ED281D8A6B230""28AF61281FD35E2FA7002523ACC85A429CB06EE6648325389F59EDFCE1405141", kpka, sizeof(kpka));
+	qsctest_hex_to_bin("700C48F77F56584C5CC632CA65640DB91B6BACCE3A4DF6B42CE7CC838833D287""DB71E509E3FD9B060DDB20BA5C51DCC5948D46FBF640DFE0441782CAB85FA4AC", kpeer, sizeof(kpeer));
 	qsctest_hex_to_bin("46FC62106420FF012E54A434FBDD2D25CCC5852060561E68040DD7778997BD7B", ksec, sizeof(ksec));
 
 #elif defined(QSC_ECDH_S3P384)
 	/* official NIST P-384 ECC CDH Primitive KAT, COUNT = 0 */
-	qsctest_hex_to_bin("3CC3122A68F0D95027AD38C067916BA0EB8C38894D22E1B15618B6818A661774"
-		"AD463B205DA88CF699AB4D43C9CF98A1", kska, sizeof(kska));
-	qsctest_hex_to_bin("9803807F2F6D2FD966CDD0290BD410C0190352FBEC7FF6247DE1302DF86F25D3"
-		"4FE4A97BEF60CFF548355C015DBB3E5F"
-		"BA26CA69EC2F5B5D9DAD20CC9DA711383A9DBE34EA3FA5A2AF75B46502629AD5"
-		"4DD8B7D73A8ABB06A3A3BE47D650CC99", kpka, sizeof(kpka));
-	qsctest_hex_to_bin("A7C76B970C3B5FE8B05D2838AE04AB47697B9EAF52E764592EFDA27FE7513272"
-		"734466B400091ADBF2D68C58E0C50066"
-		"AC68F19F2E1CB879AED43A9969B91A0839C4C38A49749B661EFEDF243451915E"
-		"D0905A32B060992B468C64766FC8437A", kpeer, sizeof(kpeer));
-	qsctest_hex_to_bin("5F9D29DC5E31A163060356213669C8CE132E22F57C9A04F40BA7FCEAD493B457"
-		"E5621E766C40A2E3D4D6A04B25E533F1", ksec, sizeof(ksec));
+	qsctest_hex_to_bin("3CC3122A68F0D95027AD38C067916BA0EB8C38894D22E1B15618B6818A661774""AD463B205DA88CF699AB4D43C9CF98A1", kska, sizeof(kska));
+	qsctest_hex_to_bin("9803807F2F6D2FD966CDD0290BD410C0190352FBEC7FF6247DE1302DF86F25D3""4FE4A97BEF60CFF548355C015DBB3E5F""BA26CA69EC2F5B5D9DAD20CC9DA711383A9DBE34EA3FA5A2AF75B46502629AD5""4DD8B7D73A8ABB06A3A3BE47D650CC99", kpka, sizeof(kpka));
+	qsctest_hex_to_bin("A7C76B970C3B5FE8B05D2838AE04AB47697B9EAF52E764592EFDA27FE7513272""734466B400091ADBF2D68C58E0C50066""AC68F19F2E1CB879AED43A9969B91A0839C4C38A49749B661EFEDF243451915E""D0905A32B060992B468C64766FC8437A", kpeer, sizeof(kpeer));
+	qsctest_hex_to_bin("5F9D29DC5E31A163060356213669C8CE132E22F57C9A04F40BA7FCEAD493B457""E5621E766C40A2E3D4D6A04B25E533F1", ksec, sizeof(ksec));
 
 #elif defined(QSC_ECDH_S5P521)
 	/* official NIST P-521 ECC CDH Primitive KAT */
-	qsctest_hex_to_bin("017EECC07AB4B329068FBA65E56A1F8890AA935E57134AE0FFCCE802735151F4"
-		"EAC6564F6EE9974C5E6887A1FEFEE5743AE2241BFEB95D5CE31DDCB6F9EDB4D6FC47",
-		kska, sizeof(kska));
+	qsctest_hex_to_bin("017EECC07AB4B329068FBA65E56A1F8890AA935E57134AE0FFCCE802735151F4""EAC6564F6EE9974C5E6887A1FEFEE5743AE2241BFEB95D5CE31DDCB6F9EDB4D6FC47", kska, sizeof(kska));
 
-	qsctest_hex_to_bin("00685A48E86C79F0F0875F7BC18D25EB5FC8C0B07E5DA4F4370F3A9490340854"
-		"334B1E1B87FA395464C60626124A4E70D0F785601D37C09870EBF176666877A2046D"
-		"01BA52C56FC8776D9E8F5DB4F0CC27636D0B741BBE05400697942E80B739884A"
-		"83BDE99E0F6716939E632BC8986FA18DCCD443A348B6C3E522497955A4F3C302F676",
-		kpeer, sizeof(kpeer));
+	qsctest_hex_to_bin("00685A48E86C79F0F0875F7BC18D25EB5FC8C0B07E5DA4F4370F3A9490340854""334B1E1B87FA395464C60626124A4E70D0F785601D37C09870EBF176666877A2046D""01BA52C56FC8776D9E8F5DB4F0CC27636D0B741BBE05400697942E80B739884A""83BDE99E0F6716939E632BC8986FA18DCCD443A348B6C3E522497955A4F3C302F676", kpeer, sizeof(kpeer));
 
-	qsctest_hex_to_bin("00602F9D0CF9E526B29E22381C203C48A886C2B0673033366314F1FFBCBA240B"
-		"A42F4EF38A76174635F91E6B4ED34275EB01C8467D05CA80315BF1A7BBD945F550A5"
-		"01B7C85F26F5D4B2D7355CF6B02117659943762B6D1DB5AB4F1DBC44CE7B2946"
-		"EB6C7DE342962893FD387D1B73D7A8672D1F236961170B7EB3579953EE5CDC88CD2D",
-		kpka, sizeof(kpka));
+	qsctest_hex_to_bin("00602F9D0CF9E526B29E22381C203C48A886C2B0673033366314F1FFBCBA240B""A42F4EF38A76174635F91E6B4ED34275EB01C8467D05CA80315BF1A7BBD945F550A5""01B7C85F26F5D4B2D7355CF6B02117659943762B6D1DB5AB4F1DBC44CE7B2946""EB6C7DE342962893FD387D1B73D7A8672D1F236961170B7EB3579953EE5CDC88CD2D", kpka, sizeof(kpka));
 
-	qsctest_hex_to_bin("005FC70477C3E63BC3954BD0DF3EA0D1F41EE21746ED95FC5E1FDF90930D5E13"
-		"6672D72CC770742D1711C3C3A4C334A0AD9759436A4D3C5BF6E74B9578FAC148"
-		"C831", ksec, sizeof(ksec));
+	qsctest_hex_to_bin("005FC70477C3E63BC3954BD0DF3EA0D1F41EE21746ED95FC5E1FDF90930D5E13""6672D72CC770742D1711C3C3A4C334A0AD9759436A4D3C5BF6E74B9578FAC148""C831", ksec, sizeof(ksec));
 #else
 #	error "No ECDH parameter set has been selected!"
 #endif
@@ -236,41 +268,648 @@ bool qsctest_ecdh_publickey_integrity(void)
 	return res;
 }
 
-void qsctest_ecdh_run(void)
+
+/* Parameter-specific ECDH qualification: every curve is exercised in every build. */
+
+/**
+ * \brief Verify the NIST ECDH P-256 known-answer vector without facade selectors.
+ * \return True if public-key derivation and shared-secret computation match NIST.
+ * \note Uses local fixed buffers and is not shared between threads.
+ */
+bool qsctest_ecdh_p256_kat_test(void)
 {
-	if (qsctest_ecdh_kat_test() == true)
+	uint8_t kpka[QSC_ECDHP256_PUBLICKEY_SIZE] = { 0U };
+	uint8_t kpeer[QSC_ECDHP256_PUBLICKEY_SIZE] = { 0U };
+	uint8_t ksec[QSC_ECDHP256_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t kska[QSC_ECDHP256_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t pka[QSC_ECDHP256_PUBLICKEY_SIZE] = { 0U };
+	uint8_t seca[QSC_ECDHP256_SHAREDSECRET_SIZE] = { 0U };
+	bool res;
+
+	res = true;
+
+/* official NIST P-256 ECC CDH Primitive KAT */
+	qsctest_hex_to_bin("7D7DC5F71EB29DDAF80D6214632EEAE03D9058AF1FB6D22ED80BADB62BC1A534", kska, sizeof(kska));
+	qsctest_hex_to_bin("EAD218590119E8876B29146FF89CA61770C4EDBBF97D38CE385ED281D8A6B230""28AF61281FD35E2FA7002523ACC85A429CB06EE6648325389F59EDFCE1405141", kpka, sizeof(kpka));
+	qsctest_hex_to_bin("700C48F77F56584C5CC632CA65640DB91B6BACCE3A4DF6B42CE7CC838833D287""DB71E509E3FD9B060DDB20BA5C51DCC5948D46FBF640DFE0441782CAB85FA4AC", kpeer, sizeof(kpeer));
+	qsctest_hex_to_bin("46FC62106420FF012E54A434FBDD2D25CCC5852060561E68040DD7778997BD7B", ksec, sizeof(ksec));
+
+	qsc_p256_public_from_private(pka, kska);
+
+	if (qsc_memutils_are_equal(pka, kpka, sizeof(pka)) == false)
 	{
-		qsctest_print_safe("Success! Passed ECDH P-256 known answer tests. \n");
+		qsctest_print_safe("Failure! ECDH P-256 KAT: public key mismatch.\n");
+		res = false;
+	}
+
+	if (qsc_p256_key_exchange(seca, kpeer, kska) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-256 KAT: key exchange rejected valid NIST vector.\n");
+		res = false;
+	}
+	else if (qsc_memutils_are_equal(seca, ksec, sizeof(seca)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-256 KAT: shared secret mismatch.\n");
+		res = false;
+	}
+
+	return res;
+}
+
+/**
+ * \brief Check P-256 random exchange symmetry and seeded derivation reproducibility.
+ * \return True if both parties agree and repeated seeds reproduce the same keys.
+ * \note Generates ephemeral local keys; safe for independent thread invocation.
+ */
+bool qsctest_ecdh_p256_agreement_test(void)
+{
+	uint8_t pka[QSC_ECDHP256_PUBLICKEY_SIZE] = { 0U };
+	uint8_t pkb[QSC_ECDHP256_PUBLICKEY_SIZE] = { 0U };
+	uint8_t secal[QSC_ECDHP256_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t secbl[QSC_ECDHP256_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t seed[QSC_ECDHP256_SEED_SIZE] = { 0U };
+	uint8_t ska[QSC_ECDHP256_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t skb[QSC_ECDHP256_PRIVATEKEY_SIZE] = { 0U };
+	size_t i;
+	bool res;
+
+	res = true;
+	qsc_p256_generate_keypair(pka, ska, qsc_csp_generate);
+	qsc_p256_generate_keypair(pkb, skb, qsc_csp_generate);
+
+	if (qsc_memutils_zeroed(pka, sizeof(pka)) == true || qsc_memutils_zeroed(pkb, sizeof(pkb)) == true)
+	{
+		qsctest_print_safe("Failure! ECDH P-256 agreement: random key generation failed.\n");
+		res = false;
+	}
+	else if (qsc_p256_key_exchange(secal, pkb, ska) == false || qsc_p256_key_exchange(secbl, pka, skb) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-256 agreement: valid key exchange failed.\n");
+		res = false;
+	}
+	else if (qsc_memutils_are_equal(secal, secbl, sizeof(secal)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-256 agreement: parties derived unequal secrets.\n");
+		res = false;
+	}
+
+	for (i = 0U; i < sizeof(seed); ++i)
+	{
+		seed[i] = (uint8_t)(i + 1U);
+	}
+
+	qsc_p256_generate_seeded_keypair(pka, ska, seed);
+	qsc_p256_generate_seeded_keypair(pkb, skb, seed);
+
+	if (qsc_memutils_zeroed(pka, sizeof(pka)) == true || qsc_memutils_zeroed(ska, sizeof(ska)) == true ||
+		qsc_memutils_are_equal(pka, pkb, sizeof(pka)) == false || qsc_memutils_are_equal(ska, skb, sizeof(ska)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-256 agreement: seeded key derivation is not reproducible.\n");
+		res = false;
+	}
+
+	qsc_memutils_secure_erase(ska, sizeof(ska));
+	qsc_memutils_secure_erase(skb, sizeof(skb));
+	qsc_memutils_secure_erase(seed, sizeof(seed));
+	qsc_memutils_secure_erase(secal, sizeof(secal));
+	qsc_memutils_secure_erase(secbl, sizeof(secbl));
+
+	return res;
+}
+
+/**
+ * \brief Reject invalid P-256 peer points and the zero private scalar.
+ * \return True if each invalid exchange is rejected.
+ * \note Operates on local test keys and has no shared mutable state.
+ */
+bool qsctest_ecdh_p256_invalidkey_test(void)
+{
+	uint8_t pub[QSC_ECDHP256_PUBLICKEY_SIZE] = { 0U };
+	uint8_t peer[QSC_ECDHP256_PUBLICKEY_SIZE] = { 0U };
+	uint8_t pri[QSC_ECDHP256_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t secret[QSC_ECDHP256_SHAREDSECRET_SIZE] = { 0U };
+	size_t i;
+	bool res;
+
+	res = true;
+	qsc_p256_generate_keypair(pub, pri, qsc_csp_generate);
+
+	if (qsc_memutils_zeroed(pri, sizeof(pri)) == true)
+	{
+		qsctest_print_safe("Failure! ECDH P-256 invalid-key: test key generation failed.\n");
+		res = false;
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH P-256 known answer tests. \n");
+		if (qsc_p256_key_exchange(secret, peer, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-256 invalid-key: all-zero peer point was accepted.\n");
+			res = false;
+		}
+
+		for (i = 0U; i < sizeof(peer); ++i)
+		{
+			peer[i] = 0xFFU;
+		}
+
+		if (qsc_p256_key_exchange(secret, peer, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-256 invalid-key: out-of-field peer point was accepted.\n");
+			res = false;
+		}
+
+		for (i = 0U; i < sizeof(pri); ++i)
+		{
+			pri[i] = 0xFFU;
+		}
+
+		if (qsc_p256_key_exchange(secret, pub, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-256 invalid-key: out-of-range private scalar was accepted.\n");
+			res = false;
+		}
+
+		qsc_memutils_clear(pri, sizeof(pri));
+
+		if (qsc_p256_key_exchange(secret, pub, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-256 invalid-key: zero private scalar was accepted.\n");
+			res = false;
+		}
+	}
+
+	qsc_memutils_secure_erase(pri, sizeof(pri));
+	qsc_memutils_secure_erase(secret, sizeof(secret));
+
+	return res;
+}
+
+/**
+ * \brief Verify the NIST ECDH P-384 known-answer vector without facade selectors.
+ * \return True if public-key derivation and shared-secret computation match NIST.
+ * \note Uses local fixed buffers and is not shared between threads.
+ */
+bool qsctest_ecdh_p384_kat_test(void)
+{
+	uint8_t kpka[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
+	uint8_t kpeer[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
+	uint8_t ksec[QSC_ECDHP384_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t kska[QSC_ECDHP384_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t pka[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
+	uint8_t seca[QSC_ECDHP384_SHAREDSECRET_SIZE] = { 0U };
+	bool res;
+
+	res = true;
+
+/* official NIST P-384 ECC CDH Primitive KAT, COUNT = 0 */
+	qsctest_hex_to_bin("3CC3122A68F0D95027AD38C067916BA0EB8C38894D22E1B15618B6818A661774""AD463B205DA88CF699AB4D43C9CF98A1", kska, sizeof(kska));
+	qsctest_hex_to_bin("9803807F2F6D2FD966CDD0290BD410C0190352FBEC7FF6247DE1302DF86F25D3""4FE4A97BEF60CFF548355C015DBB3E5F""BA26CA69EC2F5B5D9DAD20CC9DA711383A9DBE34EA3FA5A2AF75B46502629AD5""4DD8B7D73A8ABB06A3A3BE47D650CC99", kpka, sizeof(kpka));
+	qsctest_hex_to_bin("A7C76B970C3B5FE8B05D2838AE04AB47697B9EAF52E764592EFDA27FE7513272""734466B400091ADBF2D68C58E0C50066""AC68F19F2E1CB879AED43A9969B91A0839C4C38A49749B661EFEDF243451915E""D0905A32B060992B468C64766FC8437A", kpeer, sizeof(kpeer));
+	qsctest_hex_to_bin("5F9D29DC5E31A163060356213669C8CE132E22F57C9A04F40BA7FCEAD493B457""E5621E766C40A2E3D4D6A04B25E533F1", ksec, sizeof(ksec));
+
+	qsc_p384_public_from_private(pka, kska);
+
+	if (qsc_memutils_are_equal(pka, kpka, sizeof(pka)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 KAT: public key mismatch.\n");
+		res = false;
+	}
+
+	if (qsc_p384_key_exchange(seca, kpeer, kska) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 KAT: key exchange rejected valid NIST vector.\n");
+		res = false;
+	}
+	else if (qsc_memutils_are_equal(seca, ksec, sizeof(seca)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 KAT: shared secret mismatch.\n");
+		res = false;
+	}
+
+	return res;
+}
+
+/**
+ * \brief Check P-384 random exchange symmetry and seeded derivation reproducibility.
+ * \return True if both parties agree and repeated seeds reproduce the same keys.
+ * \note Generates ephemeral local keys; safe for independent thread invocation.
+ */
+bool qsctest_ecdh_p384_agreement_test(void)
+{
+	uint8_t pka[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
+	uint8_t pkb[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
+	uint8_t secal[QSC_ECDHP384_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t secbl[QSC_ECDHP384_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t seed[QSC_ECDHP384_SEED_SIZE] = { 0U };
+	uint8_t ska[QSC_ECDHP384_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t skb[QSC_ECDHP384_PRIVATEKEY_SIZE] = { 0U };
+	size_t i;
+	bool res;
+
+	res = true;
+	qsc_p384_generate_keypair(pka, ska, qsc_csp_generate);
+	qsc_p384_generate_keypair(pkb, skb, qsc_csp_generate);
+
+	if (qsc_memutils_zeroed(pka, sizeof(pka)) == true || qsc_memutils_zeroed(pkb, sizeof(pkb)) == true)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 agreement: random key generation failed.\n");
+		res = false;
+	}
+	else if (qsc_p384_key_exchange(secal, pkb, ska) == false || qsc_p384_key_exchange(secbl, pka, skb) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 agreement: valid key exchange failed.\n");
+		res = false;
+	}
+	else if (qsc_memutils_are_equal(secal, secbl, sizeof(secal)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 agreement: parties derived unequal secrets.\n");
+		res = false;
+	}
+
+	for (i = 0U; i < sizeof(seed); ++i)
+	{
+		seed[i] = (uint8_t)(i + 1U);
+	}
+
+	qsc_p384_generate_seeded_keypair(pka, ska, seed);
+	qsc_p384_generate_seeded_keypair(pkb, skb, seed);
+
+	if (qsc_memutils_zeroed(pka, sizeof(pka)) == true || qsc_memutils_zeroed(ska, sizeof(ska)) == true ||
+		qsc_memutils_are_equal(pka, pkb, sizeof(pka)) == false || qsc_memutils_are_equal(ska, skb, sizeof(ska)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 agreement: seeded key derivation is not reproducible.\n");
+		res = false;
+	}
+
+	qsc_memutils_secure_erase(ska, sizeof(ska));
+	qsc_memutils_secure_erase(skb, sizeof(skb));
+	qsc_memutils_secure_erase(seed, sizeof(seed));
+	qsc_memutils_secure_erase(secal, sizeof(secal));
+	qsc_memutils_secure_erase(secbl, sizeof(secbl));
+
+	return res;
+}
+
+/**
+ * \brief Reject invalid P-384 peer points and the zero private scalar.
+ * \return True if each invalid exchange is rejected.
+ * \note Operates on local test keys and has no shared mutable state.
+ */
+bool qsctest_ecdh_p384_invalidkey_test(void)
+{
+	uint8_t pub[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
+	uint8_t peer[QSC_ECDHP384_PUBLICKEY_SIZE] = { 0U };
+	uint8_t pri[QSC_ECDHP384_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t secret[QSC_ECDHP384_SHAREDSECRET_SIZE] = { 0U };
+	size_t i;
+	bool res;
+
+	res = true;
+	qsc_p384_generate_keypair(pub, pri, qsc_csp_generate);
+
+	if (qsc_memutils_zeroed(pri, sizeof(pri)) == true)
+	{
+		qsctest_print_safe("Failure! ECDH P-384 invalid-key: test key generation failed.\n");
+		res = false;
+	}
+	else
+	{
+		if (qsc_p384_key_exchange(secret, peer, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-384 invalid-key: all-zero peer point was accepted.\n");
+			res = false;
+		}
+
+		for (i = 0U; i < sizeof(peer); ++i)
+		{
+			peer[i] = 0xFFU;
+		}
+
+		if (qsc_p384_key_exchange(secret, peer, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-384 invalid-key: out-of-field peer point was accepted.\n");
+			res = false;
+		}
+
+		for (i = 0U; i < sizeof(pri); ++i)
+		{
+			pri[i] = 0xFFU;
+		}
+
+		if (qsc_p384_key_exchange(secret, pub, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-384 invalid-key: out-of-range private scalar was accepted.\n");
+			res = false;
+		}
+
+		qsc_memutils_clear(pri, sizeof(pri));
+
+		if (qsc_p384_key_exchange(secret, pub, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-384 invalid-key: zero private scalar was accepted.\n");
+			res = false;
+		}
+	}
+
+	qsc_memutils_secure_erase(pri, sizeof(pri));
+	qsc_memutils_secure_erase(secret, sizeof(secret));
+
+	return res;
+}
+
+/**
+ * \brief Verify the NIST ECDH P-521 known-answer vector without facade selectors.
+ * \return True if public-key derivation and shared-secret computation match NIST.
+ * \note Uses local fixed buffers and is not shared between threads.
+ */
+bool qsctest_ecdh_p521_kat_test(void)
+{
+	uint8_t kpka[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+	uint8_t kpeer[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+	uint8_t ksec[QSC_ECDHP521_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t kska[QSC_ECDHP521_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t pka[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+	uint8_t seca[QSC_ECDHP521_SHAREDSECRET_SIZE] = { 0U };
+	bool res;
+
+	res = true;
+
+/* official NIST P-521 ECC CDH Primitive KAT */
+	qsctest_hex_to_bin("017EECC07AB4B329068FBA65E56A1F8890AA935E57134AE0FFCCE802735151F4""EAC6564F6EE9974C5E6887A1FEFEE5743AE2241BFEB95D5CE31DDCB6F9EDB4D6FC47", kska, sizeof(kska));
+
+	qsctest_hex_to_bin("00685A48E86C79F0F0875F7BC18D25EB5FC8C0B07E5DA4F4370F3A9490340854""334B1E1B87FA395464C60626124A4E70D0F785601D37C09870EBF176666877A2046D""01BA52C56FC8776D9E8F5DB4F0CC27636D0B741BBE05400697942E80B739884A""83BDE99E0F6716939E632BC8986FA18DCCD443A348B6C3E522497955A4F3C302F676", kpeer, sizeof(kpeer));
+
+	qsctest_hex_to_bin("00602F9D0CF9E526B29E22381C203C48A886C2B0673033366314F1FFBCBA240B""A42F4EF38A76174635F91E6B4ED34275EB01C8467D05CA80315BF1A7BBD945F550A5""01B7C85F26F5D4B2D7355CF6B02117659943762B6D1DB5AB4F1DBC44CE7B2946""EB6C7DE342962893FD387D1B73D7A8672D1F236961170B7EB3579953EE5CDC88CD2D", kpka, sizeof(kpka));
+
+	qsctest_hex_to_bin("005FC70477C3E63BC3954BD0DF3EA0D1F41EE21746ED95FC5E1FDF90930D5E13""6672D72CC770742D1711C3C3A4C334A0AD9759436A4D3C5BF6E74B9578FAC148""C831", ksec, sizeof(ksec));
+
+	qsc_p521_public_from_private(pka, kska);
+
+	if (qsc_memutils_are_equal(pka, kpka, sizeof(pka)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 KAT: public key mismatch.\n");
+		res = false;
+	}
+
+	if (qsc_p521_key_exchange(seca, kpeer, kska) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 KAT: key exchange rejected valid NIST vector.\n");
+		res = false;
+	}
+	else if (qsc_memutils_are_equal(seca, ksec, sizeof(seca)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 KAT: shared secret mismatch.\n");
+		res = false;
+	}
+
+	return res;
+}
+
+/**
+ * \brief Check P-521 random exchange symmetry and seeded derivation reproducibility.
+ * \return True if both parties agree and repeated seeds reproduce the same keys.
+ * \note Generates ephemeral local keys; safe for independent thread invocation.
+ */
+bool qsctest_ecdh_p521_agreement_test(void)
+{
+	uint8_t pka[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+	uint8_t pkb[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+	uint8_t secal[QSC_ECDHP521_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t secbl[QSC_ECDHP521_SHAREDSECRET_SIZE] = { 0U };
+	uint8_t seed[QSC_ECDHP521_SEED_SIZE] = { 0U };
+	uint8_t ska[QSC_ECDHP521_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t skb[QSC_ECDHP521_PRIVATEKEY_SIZE] = { 0U };
+	size_t i;
+	bool res;
+
+	res = true;
+	qsc_p521_generate_keypair(pka, ska, qsc_csp_generate);
+	qsc_p521_generate_keypair(pkb, skb, qsc_csp_generate);
+
+	if (qsc_memutils_zeroed(pka, sizeof(pka)) == true || qsc_memutils_zeroed(pkb, sizeof(pkb)) == true)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 agreement: random key generation failed.\n");
+		res = false;
+	}
+	else if (qsc_p521_key_exchange(secal, pkb, ska) == false || qsc_p521_key_exchange(secbl, pka, skb) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 agreement: valid key exchange failed.\n");
+		res = false;
+	}
+	else if (qsc_memutils_are_equal(secal, secbl, sizeof(secal)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 agreement: parties derived unequal secrets.\n");
+		res = false;
+	}
+
+	for (i = 0U; i < sizeof(seed); ++i)
+	{
+		seed[i] = (uint8_t)(i + 1U);
+	}
+
+	qsc_p521_generate_seeded_keypair(pka, ska, seed);
+	qsc_p521_generate_seeded_keypair(pkb, skb, seed);
+
+	if (qsc_memutils_zeroed(pka, sizeof(pka)) == true || qsc_memutils_zeroed(ska, sizeof(ska)) == true ||
+		qsc_memutils_are_equal(pka, pkb, sizeof(pka)) == false || qsc_memutils_are_equal(ska, skb, sizeof(ska)) == false)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 agreement: seeded key derivation is not reproducible.\n");
+		res = false;
+	}
+
+	qsc_memutils_secure_erase(ska, sizeof(ska));
+	qsc_memutils_secure_erase(skb, sizeof(skb));
+	qsc_memutils_secure_erase(seed, sizeof(seed));
+	qsc_memutils_secure_erase(secal, sizeof(secal));
+	qsc_memutils_secure_erase(secbl, sizeof(secbl));
+
+	return res;
+}
+
+/**
+ * \brief Reject invalid P-521 peer points and the zero private scalar.
+ * \return True if each invalid exchange is rejected.
+ * \note Operates on local test keys and has no shared mutable state.
+ */
+bool qsctest_ecdh_p521_invalidkey_test(void)
+{
+	uint8_t pub[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+	uint8_t peer[QSC_ECDHP521_PUBLICKEY_SIZE] = { 0U };
+	uint8_t pri[QSC_ECDHP521_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t secret[QSC_ECDHP521_SHAREDSECRET_SIZE] = { 0U };
+	size_t i;
+	bool res;
+
+	res = true;
+	qsc_p521_generate_keypair(pub, pri, qsc_csp_generate);
+
+	if (qsc_memutils_zeroed(pri, sizeof(pri)) == true)
+	{
+		qsctest_print_safe("Failure! ECDH P-521 invalid-key: test key generation failed.\n");
+		res = false;
+	}
+	else
+	{
+		if (qsc_p521_key_exchange(secret, peer, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-521 invalid-key: all-zero peer point was accepted.\n");
+			res = false;
+		}
+
+		for (i = 0U; i < sizeof(peer); ++i)
+		{
+			peer[i] = 0xFFU;
+		}
+
+		if (qsc_p521_key_exchange(secret, peer, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-521 invalid-key: out-of-field peer point was accepted.\n");
+			res = false;
+		}
+
+		for (i = 0U; i < sizeof(pri); ++i)
+		{
+			pri[i] = 0xFFU;
+		}
+
+		if (qsc_p521_key_exchange(secret, pub, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-521 invalid-key: out-of-range private scalar was accepted.\n");
+			res = false;
+		}
+
+		qsc_memutils_clear(pri, sizeof(pri));
+
+		if (qsc_p521_key_exchange(secret, pub, pri) == true)
+		{
+			qsctest_print_safe("Failure! ECDH P-521 invalid-key: zero private scalar was accepted.\n");
+			res = false;
+		}
+	}
+
+	qsc_memutils_secure_erase(pri, sizeof(pri));
+	qsc_memutils_secure_erase(secret, sizeof(secret));
+
+	return res;
+}
+
+void qsctest_ecdh_run(void)
+{
+
+	if (qsctest_ecdh_p256_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-256 NIST KAT.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-256 NIST KAT.\n");
+	}
+
+	if (qsctest_ecdh_p256_agreement_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-256 random and seeded agreement.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-256 random and seeded agreement.\n");
+	}
+
+	if (qsctest_ecdh_p256_invalidkey_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-256 invalid key rejection.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-256 invalid key rejection.\n");
+	}
+
+	if (qsctest_ecdh_p384_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-384 NIST KAT.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-384 NIST KAT.\n");
+	}
+
+	if (qsctest_ecdh_p384_agreement_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-384 random and seeded agreement.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-384 random and seeded agreement.\n");
+	}
+
+	if (qsctest_ecdh_p384_invalidkey_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-384 invalid key rejection.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-384 invalid key rejection.\n");
+	}
+
+	if (qsctest_ecdh_p521_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-521 NIST KAT.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-521 NIST KAT.\n");
+	}
+
+	if (qsctest_ecdh_p521_agreement_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-521 random and seeded agreement.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-521 random and seeded agreement.\n");
+	}
+
+	if (qsctest_ecdh_p521_invalidkey_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH P-521 invalid key rejection.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH P-521 invalid key rejection.\n");
+	}
+
+	if (qsctest_ecdh_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Passed ECDH selected-facade known answer tests. \n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Failed ECDH selected-facade known answer tests. \n");
 	}
 
 	if (qsctest_ecdh_operations_test() == true)
 	{
-		qsctest_print_safe("Success! Passed ECDH P-256 key generation and key exchange stress test. \n");
+		qsctest_print_safe("Success! Passed ECDH selected-facade key generation and key exchange stress test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH P-256 operations stress tests. \n");
+		qsctest_print_safe("Failure! Failed ECDH selected-facade operations stress tests. \n");
 	}
 
 	if (qsctest_ecdh_privatekey_integrity() == true)
 	{
-		qsctest_print_safe("Success! Passed ECDH P-256 private-key tamper test. \n");
+		qsctest_print_safe("Success! Passed ECDH selected-facade private-key tamper test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH P-256 private-key tamper test. \n");
+		qsctest_print_safe("Failure! Failed ECDH selected-facade private-key tamper test. \n");
 	}
 
 	if (qsctest_ecdh_publickey_integrity() == true)
 	{
-		qsctest_print_safe("Success! Passed ECDH P-256 public-key tamper test. \n");
+		qsctest_print_safe("Success! Passed ECDH selected-facade public-key tamper test. \n");
 	}
 	else
 	{
-		qsctest_print_safe("Failure! Failed ECDH P-256 public-key tamper test. \n");
+		qsctest_print_safe("Failure! Failed ECDH selected-facade public-key tamper test. \n");
 	}
 }

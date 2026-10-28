@@ -27,9 +27,6 @@
 #   include <unistd.h>
 #   define THREAD_FUNC_RETURN void*
 #   define THREAD_FUNC_CALL
-static pthread_mutex_t tsusp = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t tcond = PTHREAD_COND_INITIALIZER;
-static bool suspended = false;
 #endif
 
 /*!
@@ -72,67 +69,136 @@ typedef struct
     void (*func)(void);     /*!< Function to execute */
 } async_thread_noargs_t;
 
+/**
+ * \brief Run an indexed parallel task using caller-owned stack state.
+ * \param arg: [void*] Owned task context; indexed tasks use caller-owned state.
+ * \return [THREAD_FUNC_RETURN] Zero or NULL platform thread exit status.
+ * \warning Callback execution occurs outside any internal mutex.
+ */
 static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_worker(void* arg)
 {
-    async_thread_task_t* task = (async_thread_task_t*)arg;
+	async_thread_task_t* task;
 
-    if (task != NULL && task->task != NULL)
-    {
-        task->task(task->context, task->index);
-    }
+	task = (async_thread_task_t*)arg;
 
-    return 0;
+	if (task != NULL && task->task != NULL)
+	{
+		task->task(task->context, task->index);
+	}
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	return 0U;
+#else
+	return NULL;
+#endif
 }
 
+/**
+ * \brief Run a single-argument task and reclaim its heap state on exit or cancellation.
+ * \param arg: [void*] Owned task context; indexed tasks use caller-owned state.
+ * \return [THREAD_FUNC_RETURN] Zero or NULL platform thread exit status.
+ * \warning Callback execution occurs outside any internal mutex.
+ */
 static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_state_worker(void* arg)
 {
-    async_thread_state_t* task = (async_thread_state_t*)arg;
+	async_thread_state_t* task;
 
-    if (task != NULL)
-    {
-        if (task->func != NULL)
-        {
-            task->func(task->state);
-        }
+	task = (async_thread_state_t*)arg;
 
-        qsc_memutils_alloc_free(task);
-    }
+	if (task != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_POSIX)
+		/* Reclaim the task even if the caller cancels the pthread. */
+		pthread_cleanup_push(qsc_memutils_alloc_free, task);
+#endif
+		if (task->func != NULL)
+		{
+			task->func(task->state);
+		}
+#if defined(QSC_SYSTEM_OS_POSIX)
+		pthread_cleanup_pop(1);
+#else
+		qsc_memutils_alloc_free(task);
+#endif
+	}
 
-    return 0;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	return 0U;
+#else
+	return NULL;
+#endif
 }
 
+/**
+ * \brief Run a multi-argument task and reclaim its heap state on exit or cancellation.
+ * \param arg: [void*] Owned task context; indexed tasks use caller-owned state.
+ * \return [THREAD_FUNC_RETURN] Zero or NULL platform thread exit status.
+ * \warning Callback execution occurs outside any internal mutex.
+ */
 static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_args_worker(void* arg)
 {
-    async_thread_args_t* task = (async_thread_args_t*)arg;
+	async_thread_args_t* task;
 
-    if (task != NULL)
-    {
-        if (task->func != NULL)
-        {
-            task->func(task->args);
-        }
+	task = (async_thread_args_t*)arg;
 
-        qsc_memutils_alloc_free(task);
-    }
+	if (task != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_POSIX)
+		/* Reclaim the task even if the caller cancels the pthread. */
+		pthread_cleanup_push(qsc_memutils_alloc_free, task);
+#endif
+		if (task->func != NULL)
+		{
+			task->func(task->args);
+		}
+#if defined(QSC_SYSTEM_OS_POSIX)
+		pthread_cleanup_pop(1);
+#else
+		qsc_memutils_alloc_free(task);
+#endif
+	}
 
-    return 0;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	return 0U;
+#else
+	return NULL;
+#endif
 }
 
+/**
+ * \brief Run a parameterless task and reclaim its heap state on exit or cancellation.
+ * \param arg: [void*] Owned task context; indexed tasks use caller-owned state.
+ * \return [THREAD_FUNC_RETURN] Zero or NULL platform thread exit status.
+ * \warning Callback execution occurs outside any internal mutex.
+ */
 static THREAD_FUNC_RETURN THREAD_FUNC_CALL async_thread_noargs_worker(void* arg)
 {
-    async_thread_noargs_t* task = (async_thread_noargs_t*)arg;
+	async_thread_noargs_t* task;
 
-    if (task != NULL)
-    {
-        if (task->func != NULL)
-        {
-            task->func();
-        }
+	task = (async_thread_noargs_t*)arg;
 
-        qsc_memutils_alloc_free(task);
-    }
+	if (task != NULL)
+	{
+#if defined(QSC_SYSTEM_OS_POSIX)
+		/* Reclaim the task even if the caller cancels the pthread. */
+		pthread_cleanup_push(qsc_memutils_alloc_free, task);
+#endif
+		if (task->func != NULL)
+		{
+			task->func();
+		}
+#if defined(QSC_SYSTEM_OS_POSIX)
+		pthread_cleanup_pop(1);
+#else
+		qsc_memutils_alloc_free(task);
+#endif
+	}
 
-    return 0;
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+	return 0U;
+#else
+	return NULL;
+#endif
 }
 
 bool qsc_async_atomic_bool_load(volatile bool* target)
@@ -296,8 +362,8 @@ int32_t qsc_async_atomic_int32_add(volatile int32_t* target, int32_t value)
     if (target != NULL)
     {
 #if defined(QSC_SYSTEM_COMPILER_MSC)
-        /* _InterlockedExchangeAdd returns the original value; add value to get the new value */
-        res = (int32_t)_InterlockedExchangeAdd((volatile LONG*)target, (LONG)value) + value;
+        /* Use unsigned arithmetic to avoid signed-overflow undefined behavior. */
+        res = (int32_t)((uint32_t)_InterlockedExchangeAdd((volatile LONG*)target, (LONG)value) + (uint32_t)value);
 #else
         res = __atomic_add_fetch(target, value, __ATOMIC_SEQ_CST);
 #endif
@@ -317,8 +383,8 @@ int32_t qsc_async_atomic_int32_subtract(volatile int32_t* target, int32_t value)
     if (target != NULL)
     {
 #if defined(QSC_SYSTEM_COMPILER_MSC)
-        /* Negate value to perform subtraction; original - value = new value */
-        res = (int32_t)_InterlockedExchangeAdd((volatile LONG*)target, -(LONG)value) - value;
+        /* Unsigned negation handles INT32_MIN without signed overflow. */
+        res = (int32_t)((uint32_t)_InterlockedExchangeAdd((volatile LONG*)target, (LONG)(0U - (uint32_t)value)) - (uint32_t)value);
 #else
         res = __atomic_sub_fetch(target, value, __ATOMIC_SEQ_CST);
 #endif
@@ -371,188 +437,219 @@ int32_t qsc_async_atomic_int32_decrement(volatile int32_t* target)
 
 void qsc_async_launch_thread(void (*func)(void*), void* state)
 {
-    QSC_ASSERT(func != NULL);
+	qsc_thread thd;
 
-    qsc_thread thd;
+	QSC_ASSERT(func != NULL);
 
-    if (func != NULL)
-    {
-        thd = qsc_async_thread_create(func, state);
-        qsc_async_thread_wait(thd);
-    }
+	if (func != NULL)
+	{
+		thd = qsc_async_thread_create(func, state);
+
+		if (thd != (qsc_thread)0)
+		{
+			qsc_async_thread_wait(thd);
+		}
+		else
+		{
+			/* Preserve synchronous task completion when thread creation fails. */
+			func(state);
+		}
+	}
 }
 
 void qsc_async_launch_parallel_threads(void (*func)(void*), size_t count, ...)
 {
-    QSC_ASSERT(func != NULL);
-    QSC_ASSERT(count <= QSC_ASYNC_PARALLEL_MAX);
+	qsc_thread thds[QSC_ASYNC_PARALLEL_MAX] = { 0 };
+	va_list args;
+	size_t batch;
+	size_t i;
+	size_t remaining;
+	void* state;
 
-    qsc_thread thds[QSC_ASYNC_PARALLEL_MAX] = { 0 };
-    va_list list;
+	QSC_ASSERT(func != NULL);
 
-    if (func != NULL)
-    {
-        va_start(list, count);
+	if (func != NULL && count != 0U)
+	{
+		va_start(args, count);
+		remaining = count;
 
-        for (size_t i = 0U; i < count; ++i)
-        {
-            thds[i] = qsc_async_thread_create(func, va_arg(list, void*));
-        }
+		while (remaining != 0U)
+		{
+			batch = (remaining < QSC_ASYNC_PARALLEL_MAX) ? remaining : QSC_ASYNC_PARALLEL_MAX;
 
-        qsc_async_thread_wait_all(thds, count);
-        va_end(list);
-    }
+			for (i = 0U; i < batch; ++i)
+			{
+				state = va_arg(args, void*);
+				thds[i] = qsc_async_thread_create(func, state);
+
+				if (thds[i] == (qsc_thread)0)
+				{
+					/* The void API cannot signal failure; run the task locally. */
+					func(state);
+				}
+			}
+
+			qsc_async_thread_wait_all(thds, batch);
+			remaining -= batch;
+		}
+
+		va_end(args);
+	}
 }
 
 qsc_mutex qsc_async_mutex_create(void)
 {
-    qsc_mutex mtx;
+	qsc_mutex mtx;
+
+	mtx = NULL;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    mtx = CreateMutex(NULL, FALSE, NULL);
+	mtx = CreateMutex(NULL, FALSE, NULL);
 #else
-    mtx = (pthread_mutex_t*)qsc_memutils_malloc(sizeof(pthread_mutex_t));
-    if (mtx != NULL)
-    {
-        pthread_mutex_init(mtx, NULL);
-    }
+	mtx = (pthread_mutex_t*)qsc_memutils_malloc(sizeof(pthread_mutex_t));
+
+	if (mtx != NULL)
+	{
+		if (pthread_mutex_init(mtx, NULL) != 0)
+		{
+			qsc_memutils_alloc_free(mtx);
+			mtx = NULL;
+		}
+	}
 #endif
 
-    return mtx;
+	return mtx;
 }
 
 bool qsc_async_mutex_destroy(qsc_mutex mtx)
 {
-    bool res;
-    res = false;
+	bool res;
 
-    if (mtx != NULL)
-    {
+	res = false;
+
+	if (mtx != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        res = (bool)CloseHandle(mtx);
+		res = (CloseHandle(mtx) != 0);
 #else
-        res = (pthread_mutex_destroy(mtx) == 0);
-        qsc_memutils_alloc_free(mtx);
-#endif
-        mtx = NULL;
-    }
+		res = (pthread_mutex_destroy(mtx) == 0);
 
-    return res;
+		if (res == true)
+		{
+			qsc_memutils_alloc_free(mtx);
+		}
+#endif
+	}
+
+	return res;
 }
 
 void qsc_async_mutex_lock(qsc_mutex mtx)
 {
+	QSC_ASSERT(mtx != NULL);
+
+	if (mtx != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    WaitForSingleObject(mtx, INFINITE);
+		(void)WaitForSingleObject(mtx, INFINITE);
 #else
-    pthread_mutex_lock(mtx);
+		(void)pthread_mutex_lock(mtx);
 #endif
+	}
 }
 
 qsc_mutex qsc_async_mutex_lock_ex(void)
 {
-    qsc_mutex mtx;
+	qsc_mutex mtx;
 
-    mtx = qsc_async_mutex_create();
-    qsc_async_mutex_lock(mtx);
+	mtx = qsc_async_mutex_create();
 
-    return mtx;
+	if (mtx != NULL)
+	{
+		qsc_async_mutex_lock(mtx);
+	}
+
+	return mtx;
 }
 
 void qsc_async_mutex_unlock(qsc_mutex mtx)
 {
+	QSC_ASSERT(mtx != NULL);
+
+	if (mtx != NULL)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    ReleaseMutex(mtx);
+		(void)ReleaseMutex(mtx);
 #else
-    pthread_mutex_unlock(mtx);
+		(void)pthread_mutex_unlock(mtx);
 #endif
+	}
 }
 
 void qsc_async_mutex_unlock_ex(qsc_mutex mtx)
 {
-    qsc_async_mutex_unlock(mtx);
-    qsc_async_mutex_destroy(mtx);
+	if (mtx != NULL)
+	{
+		qsc_async_mutex_unlock(mtx);
+		(void)qsc_async_mutex_destroy(mtx);
+	}
 }
 
 bool qsc_async_parallel_for(void (*task)(void* context, size_t index), void* context, size_t nthreads)
 {
-    QSC_ASSERT(task != NULL);
-    QSC_ASSERT(context != NULL);
-    QSC_ASSERT(nthreads != 0U);
+	qsc_thread threads[QSC_ASYNC_PARALLEL_MAX] = { 0 };
+	async_thread_task_t tasks[QSC_ASYNC_PARALLEL_MAX];
+	size_t batch;
+	size_t i;
+	size_t launched;
+	size_t offset;
+	bool res;
 
-    size_t cnt;
-    bool res;
+	QSC_ASSERT(task != NULL);
+	QSC_ASSERT(context != NULL);
 
-    cnt = 0U;
-    res = false;
+	res = false;
 
-    if (task != NULL && context != NULL && nthreads != 0U)
-    {
-        qsc_thread* threads;
-        async_thread_task_t* tasks;
+	if (task != NULL && context != NULL && nthreads != 0U)
+	{
+		res = true;
+		offset = 0U;
 
-        threads = (qsc_thread*)qsc_memutils_malloc(nthreads * sizeof(qsc_thread));
+		while (offset < nthreads && res == true)
+		{
+			batch = ((nthreads - offset) < QSC_ASYNC_PARALLEL_MAX) ? (nthreads - offset) : QSC_ASYNC_PARALLEL_MAX;
+			launched = 0U;
 
-        if (threads != NULL)
-        {
-            tasks = (async_thread_task_t*)qsc_memutils_malloc(nthreads * sizeof(async_thread_task_t));
-
-            if (tasks != NULL)
-            {
-                qsc_memutils_clear(threads, nthreads * sizeof(qsc_thread));
-                qsc_memutils_clear(tasks, nthreads * sizeof(async_thread_task_t));
-                res = true;
-
-                /* process each task on a new thread */
-                for (size_t i = 0U; i < nthreads; ++i)
-                {
-                    tasks[i].task = task;
-                    tasks[i].context = context;
-                    tasks[i].index = i;
+			for (i = 0U; i < batch; ++i)
+			{
+				tasks[i].task = task;
+				tasks[i].context = context;
+				tasks[i].index = offset + i;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-                    threads[i] = (HANDLE)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
+				threads[i] = (qsc_thread)_beginthreadex(NULL, 0, async_thread_worker, &tasks[i], 0, NULL);
 
-                    if (threads[i] == NULL)
-                    {
-                        res = false;
-                        break;
-                    }
+				if (threads[i] == NULL)
+				{
+					res = false;
+					break;
+				}
 #elif defined(QSC_SYSTEM_OS_POSIX)
-                    if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
-                    {
-                        res = false;
-                        break;
-                    }
+				if (pthread_create(&threads[i], NULL, async_thread_worker, &tasks[i]) != 0)
+				{
+					res = false;
+					break;
+				}
 #endif
+				++launched;
+			}
 
-                    ++cnt;
-                }
+			qsc_async_thread_wait_all(threads, launched);
+			offset += batch;
+		}
+	}
 
-                /* wait for all threads to finish */
-                for (size_t i = 0U; i < cnt; ++i)
-                {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-                    if (threads[i] != NULL)
-                    {
-                        WaitForSingleObject(threads[i], INFINITE);
-                        CloseHandle(threads[i]);
-                    }
-#elif defined(QSC_SYSTEM_OS_POSIX)
-                    pthread_join(threads[i], NULL);
-#endif
-                }
-
-                qsc_memutils_alloc_free(tasks);
-                tasks = NULL;
-            }
-
-            qsc_memutils_alloc_free(threads);
-            threads = NULL;
-        }
-    }
-
-    return res;
+	return res;
 }
 
 size_t qsc_async_processor_count(void)
@@ -608,6 +705,38 @@ qsc_thread qsc_async_thread_create(void (*func)(void*), void* state)
     }
 
     return res;
+}
+
+bool qsc_async_thread_create_detached(void (*func)(void*), void* state)
+{
+	qsc_thread handle;
+	bool res;
+
+	QSC_ASSERT(func != NULL);
+
+	res = false;
+
+	if (func != NULL)
+	{
+		handle = qsc_async_thread_create(func, state);
+
+		if (handle != (qsc_thread)0)
+		{
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+			res = (CloseHandle(handle) != 0);
+#elif defined(QSC_SYSTEM_OS_POSIX)
+			res = (pthread_detach(handle) == 0);
+
+			if (res == false)
+			{
+				/* The rare detach failure must not leak a joinable thread. */
+				(void)pthread_join(handle, NULL);
+			}
+#endif
+		}
+	}
+
+	return res;
 }
 
 qsc_thread qsc_async_thread_create_ex(void (*func)(void**), void** args)
@@ -703,142 +832,153 @@ qsc_thread qsc_async_thread_create_noargs(void (*func)(void))
 
 int32_t qsc_async_thread_resume(qsc_thread handle)
 {
-    int32_t res;
+	int32_t res;
+
+	res = -1;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    res = ResumeThread(handle);
+	if (handle != NULL)
+	{
+		res = (int32_t)ResumeThread(handle);
+	}
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    (void)handle;
-    pthread_mutex_lock(&tsusp);
-    suspended = false;
-    res = 0;
-    pthread_cond_signal(&tcond);
-    pthread_mutex_unlock(&tsusp);
+	/* POSIX has no safe, portable mechanism to resume an arbitrary thread. */
+	(void)handle;
 #endif
 
-    return res;
+	return res;
 }
 
 void qsc_async_thread_sleep(uint32_t msec)
 {
-    QSC_ASSERT(msec != 0U);
-
-    if (msec != 0U)
-    {
+	if (msec != 0U)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-        Sleep(msec);
+		Sleep(msec);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-        struct timespec ts;
+		struct timespec request;
+		struct timespec remainder;
 
-        ts.tv_sec = (time_t)(msec / 1000U);
-        ts.tv_nsec = (long)((msec % 1000U) * 1000000L);
-        nanosleep(&ts, NULL);
+		request.tv_sec = (time_t)(msec / 1000U);
+		request.tv_nsec = (long)((msec % 1000U) * 1000000UL);
+
+		while (nanosleep(&request, &remainder) != 0 && errno == EINTR)
+		{
+			request = remainder;
+		}
 #endif
-    }
+	}
 }
 
 int32_t qsc_async_thread_suspend(qsc_thread handle)
 {
-    QSC_ASSERT(handle != 0);
+	int32_t res;
 
-    int32_t res;
+	res = -1;
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    res = SuspendThread(handle);
+	if (handle != NULL)
+	{
+		res = (int32_t)SuspendThread(handle);
+	}
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    (void)handle;
-    pthread_mutex_lock(&tsusp);
-    suspended = true;
-    res = 0;
-
-    while (suspended)
-    {
-        pthread_cond_wait(&tcond, &tsusp);
-    }
-
-    pthread_mutex_unlock(&tsusp);
+	/* Never block the caller on a process-global suspension condition. */
+	(void)handle;
 #endif
 
-    return res;
+	return res;
 }
 
 bool qsc_async_thread_terminate(qsc_thread handle)
 {
-    QSC_ASSERT(handle != 0);
+	bool res;
 
-    bool res;
+	res = false;
 
-    res = false;
-
+	if (handle != (qsc_thread)0)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    res = (TerminateThread(handle, 0U) != 0);
-    CloseHandle(handle);
+		res = (TerminateThread(handle, 0U) != 0);
+		(void)CloseHandle(handle);
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    res = (pthread_cancel(handle) == 0);
+		/* Cancellation is deferred; detach reclaims the joinable thread state. */
+		if (pthread_cancel(handle) == 0)
+		{
+			res = (pthread_detach(handle) == 0);
+		}
 #endif
+	}
 
-    return res;
+	return res;
 }
 
 void qsc_async_thread_wait(qsc_thread handle)
 {
+	if (handle != (qsc_thread)0)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    if (WaitForSingleObject(handle, INFINITE) == WAIT_OBJECT_0)
-    {
-        (void)CloseHandle(handle);
-    }
+		if (WaitForSingleObject(handle, INFINITE) == WAIT_OBJECT_0)
+		{
+			(void)CloseHandle(handle);
+		}
 #elif defined(QSC_SYSTEM_OS_POSIX)
-    void* stg;
-    pthread_join(handle, &stg);
+		(void)pthread_join(handle, NULL);
 #endif
+	}
 }
 
 void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
 {
+	if (handle != (qsc_thread)0)
+	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-    WaitForSingleObject(handle, msec);
-#elif defined(QSC_SYSTEM_OS_POSIX) && defined(QSC_SYSTEM_OS_LINUX)
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    ts.tv_sec += msec / 1000U;
-    ts.tv_nsec += (msec % 1000U) * 1000000L;
+		if (WaitForSingleObject(handle, msec) == WAIT_OBJECT_0)
+		{
+			/* Close only after the worker has exited; timeout keeps the handle valid. */
+			(void)CloseHandle(handle);
+		}
+#elif defined(QSC_SYSTEM_OS_LINUX)
+		struct timespec deadline;
+		int32_t status;
 
-    if (ts.tv_nsec >= 1000000000L)
-    {
-        ts.tv_sec += 1;
-        ts.tv_nsec -= 1000000000L;
-    }
+		if (clock_gettime(CLOCK_REALTIME, &deadline) == 0)
+		{
+			deadline.tv_sec += (time_t)(msec / 1000U);
+			deadline.tv_nsec += (long)((msec % 1000U) * 1000000UL);
 
-    pthread_timedjoin_np(handle, NULL, &ts);
-#else
-    (void)msec;
-    void* stg;
-    pthread_join(handle, &stg);
+			if (deadline.tv_nsec >= 1000000000L)
+			{
+				++deadline.tv_sec;
+				deadline.tv_nsec -= 1000000000L;
+			}
+
+			do
+			{
+				status = pthread_timedjoin_np(handle, NULL, &deadline);
+			} while (status == EINTR);
+		}
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		/* Unsupported timed join: do not silently perform an infinite wait. */
+		(void)msec;
 #endif
+	}
 }
 
 void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)
 {
-    QSC_ASSERT(handles != NULL);
+	size_t i;
 
-    if (handles != NULL && count != 0U)
-    {
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-        size_t i = 0U;
+	QSC_ASSERT(handles != NULL);
 
-        while (i < count) 
-        {
-            DWORD batch = (DWORD)((count - i) < MAXIMUM_WAIT_OBJECTS ? (count - i) : MAXIMUM_WAIT_OBJECTS);
-            WaitForMultipleObjects(batch, handles + i, TRUE, INFINITE);
-            i += batch;
-        }
-#elif defined(QSC_SYSTEM_OS_POSIX)
-        void* stg;
-
-        for (size_t i = 0U; i < count; ++i)
-        {
-            pthread_join(handles[i], &stg);
-        }
-#endif
-    }
+	if (handles != NULL)
+	{
+		for (i = 0U; i < count; ++i)
+		{
+			if (handles[i] != (qsc_thread)0)
+			{
+				qsc_async_thread_wait(handles[i]);
+				handles[i] = (qsc_thread)0;
+			}
+		}
+	}
 }

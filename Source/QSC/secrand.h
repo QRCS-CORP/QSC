@@ -131,7 +131,7 @@ QSC_EXPORT_API int16_t qsc_secrand_next_int16(void);
  * \brief Generate a signed 16-bit random integer of a maximum value.
  *
  * \param maximum: [int16_t] The maximum value of the integer.
- * \return [int16_t] Returns a signed 16-bit random integer in the range [-maximum, maximum].
+ * \return [int16_t] Returns a signed 16-bit random integer in the range [-maximum, maximum]. Returns zero if the generator is not initialized.
  * 
  */
 QSC_EXPORT_API int16_t qsc_secrand_next_int16_max(int16_t maximum);
@@ -142,7 +142,7 @@ QSC_EXPORT_API int16_t qsc_secrand_next_int16_max(int16_t maximum);
  * \param maximum: [int16_t] The maximum value of the integer.
  * \param minimum: [int16_t] The minimum value of the integer.
  * 
- * \return [int16_t] Returns a signed 16-bit random integer in the range [minimum, maximum].
+ * \return [int16_t] Returns a signed 16-bit random integer in the range [minimum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API int16_t qsc_secrand_next_int16_maxmin(int16_t maximum, int16_t minimum);
 
@@ -158,7 +158,7 @@ QSC_EXPORT_API uint16_t qsc_secrand_next_uint16(void);
  *
  * \param maximum: [uint16_t] The maximum value of the integer.
  * 
- * \return [uint16_t] Returns an unsigned 16-bit random integer in the range [0, maximum].
+ * \return [uint16_t] Returns an unsigned 16-bit random integer in the range [0, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API uint16_t qsc_secrand_next_uint16_max(uint16_t maximum);
 
@@ -168,7 +168,7 @@ QSC_EXPORT_API uint16_t qsc_secrand_next_uint16_max(uint16_t maximum);
  * \param maximum: [uint16_t] The maximum value of the integer.
  * \param minimum: [uint16_t] The minimum value of the integer.
  * 
- * \return [uint16_t] Returns an unsigned 16-bit random integer in the range [minimum, maximum].
+ * \return [uint16_t] Returns an unsigned 16-bit random integer in the range [minimum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API uint16_t qsc_secrand_next_uint16_maxmin(uint16_t maximum, uint16_t minimum);
 
@@ -184,7 +184,7 @@ QSC_EXPORT_API int32_t qsc_secrand_next_int32(void);
  *
  * \param maximum: [int32_t] The maximum value of the integer.
  * 
- * \return [int32_t] Returns a signed 32-bit random integer in the range [-minimum, maximum].
+ * \return [int32_t] Returns a signed 32-bit random integer in the range [-maximum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API int32_t qsc_secrand_next_int32_max(int32_t maximum);
 
@@ -194,7 +194,7 @@ QSC_EXPORT_API int32_t qsc_secrand_next_int32_max(int32_t maximum);
  * \param maximum: [int32_t] The maximum value of the integer.
  * \param minimum: [int32_t] The minimum value of the integer.
  * 
- * \return [int32_t] Returns a signed 32-bit random integer in the range [minimum, maximum].
+ * \return [int32_t] Returns a signed 32-bit random integer in the range [minimum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API int32_t qsc_secrand_next_int32_maxmin(int32_t maximum, int32_t minimum);
 
@@ -210,7 +210,7 @@ QSC_EXPORT_API uint32_t qsc_secrand_next_uint32(void);
  *
  * \param maximum: [uint32_t] The maximum value of the integer.
  * 
- * \return [uint32_t] Returns an unsigned 32-bit random integer in the range [0, maximum].
+ * \return [uint32_t] Returns an unsigned 32-bit random integer in the range [0, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API uint32_t qsc_secrand_next_uint32_max(uint32_t maximum);
 
@@ -220,7 +220,7 @@ QSC_EXPORT_API uint32_t qsc_secrand_next_uint32_max(uint32_t maximum);
  * \param maximum: [uint32_t] The maximum value of the integer.
  * \param minimum: [uint32_t] The minimum value of the integer.
  * 
- * \return [uint32_t] Returns an unsigned 32-bit random integer in the range [minimum, maximum].
+ * \return [uint32_t] Returns an unsigned 32-bit random integer in the range [minimum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API uint32_t qsc_secrand_next_uint32_maxmin(uint32_t maximum, uint32_t minimum);
 
@@ -236,7 +236,7 @@ QSC_EXPORT_API int64_t qsc_secrand_next_int64(void);
  *
  * \param maximum: [int64_t] The maximum value of the integer.
  * 
- * \return [int64_t] Returns a signed 64-bit random integer in the range [-minimum, maximum].
+ * \return [int64_t] Returns a signed 64-bit random integer in the range [-maximum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API int64_t qsc_secrand_next_int64_max(int64_t maximum);
 
@@ -246,7 +246,7 @@ QSC_EXPORT_API int64_t qsc_secrand_next_int64_max(int64_t maximum);
  * \param maximum: [int64_t] The maximum value of the integer.
  * \param minimum: [int64_t] The minimum value of the integer.
  * 
- * \return [int64_t] Returns a signed 64-bit random integer in the range [minimum, maximum].
+ * \return [int64_t] Returns a signed 64-bit random integer in the range [minimum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API int64_t qsc_secrand_next_int64_maxmin(int64_t maximum, int64_t minimum);
 
@@ -262,7 +262,7 @@ QSC_EXPORT_API uint64_t qsc_secrand_next_uint64(void);
  *
  * \param maximum: [uint64_t] The maximum value of the integer.
  * 
- * \return [uint64_t] Returns an unsigned 64-bit random integer in the range [0, maximum].
+ * \return [uint64_t] Returns an unsigned 64-bit random integer in the range [0, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API uint64_t qsc_secrand_next_uint64_max(uint64_t maximum);
 
@@ -272,7 +272,7 @@ QSC_EXPORT_API uint64_t qsc_secrand_next_uint64_max(uint64_t maximum);
  * \param maximum: [uint64_t] The maximum value of the integer.
  * \param minimum: [uint64_t] The minimum value of the integer.
  * 
- * \return [uint64_t] Returns an unsigned 64-bit random integer in the range [minimum, maximum].
+ * \return [uint64_t] Returns an unsigned 64-bit random integer in the range [minimum, maximum]. Returns zero if the generator is not initialized.
  */
 QSC_EXPORT_API uint64_t qsc_secrand_next_uint64_maxmin(uint64_t maximum, uint64_t minimum);
 

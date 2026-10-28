@@ -1,9 +1,62 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "eddsa_test.h"
 #include "qsctestcommon.h"
 #include "nistrng.h"
 #include "testutils.h"
 #include "ed25519.h"
 #include "eddsa.h"
+#include "eddsa25519.h"
+#include "eddsa448.h"
 #include "intutils.h"
 #include "sha2.h"
 #include "transpose.h"
@@ -296,8 +349,296 @@ bool qsctest_eddsa_stress_test()
 	return ret;
 }
 
+/**
+ * \brief Qualify Ed25519 independently of the default EdDSA selection.
+ * \return true if the RFC 8032 key, signature, recovery and negative checks all pass.
+ * \details Uses local, caller-owned arrays. No external mutable state.
+ */
+bool qsctest_eddsa25519_kat_test(void)
+{
+	uint8_t seed[QSC_ED25519_SEED_SIZE] = { 0U };
+	uint8_t expectedpk[QSC_ED25519_PUBLICKEY_SIZE] = { 0U };
+	uint8_t expectedsig[QSC_ED25519_SIGNATURE_SIZE + 1U] = { 0U };
+	uint8_t publickey[QSC_ED25519_PUBLICKEY_SIZE] = { 0U };
+	uint8_t privatekey[QSC_ED25519_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t signedmsg[QSC_ED25519_SIGNATURE_SIZE + 1U] = { 0U };
+	uint8_t recovered[1U] = { 0U };
+	uint8_t message[1U] = { 0U };
+	size_t signedlen;
+	size_t recoveredlen;
+	bool res;
+
+	res = true;
+	signedlen = 0U;
+	recoveredlen = 0U;
+	qsctest_hex_to_bin("4CCD089B28FF96DA9DB6C346EC114E0F5B8A319F35ABA624DA8CF6ED4FB8A6FB", seed, sizeof(seed));
+	qsctest_hex_to_bin("3D4017C3E843895A92B70AA74D1B7EBC9C982CCF2EC4968CC0CD55F12AF4660C", expectedpk, sizeof(expectedpk));
+	qsctest_hex_to_bin("92A009A9F0D4CAB8720E820B5F642540A2B27B5416503F8FB3762223EBDB69DA085AC1E43E15996E458F3613D0F11D8C387B2EAEB4302AEEB00D291612BB0C0072", expectedsig, sizeof(expectedsig));
+	qsctest_hex_to_bin("72", message, sizeof(message));
+
+	qsc_ed25519_generate_seeded_keypair(publickey, privatekey, seed);
+
+	if (qsc_intutils_are_equal8(publickey, expectedpk, sizeof(publickey)) != true)
+	{
+		qsctest_print_safe("Failure! Ed25519 independent RFC 8032 public-key vector.\n");
+		res = false;
+	}
+
+	if (qsc_intutils_are_equal8(privatekey, seed, sizeof(seed)) != true || qsc_intutils_are_equal8(privatekey + sizeof(seed), expectedpk, sizeof(expectedpk)) != true)
+	{
+		qsctest_print_safe("Failure! Ed25519 independent secret-key layout.\n");
+		res = false;
+	}
+
+	if (qsc_ed25519_sign(signedmsg, &signedlen, message, sizeof(message), privatekey) != true || signedlen != sizeof(signedmsg))
+	{
+		qsctest_print_safe("Failure! Ed25519 independent signing operation.\n");
+		res = false;
+	}
+
+	if (qsc_intutils_are_equal8(signedmsg, expectedsig, sizeof(signedmsg)) != true)
+	{
+		qsctest_print_safe("Failure! Ed25519 independent RFC 8032 signature vector.\n");
+		res = false;
+	}
+
+	if (qsc_ed25519_verify(recovered, &recoveredlen, expectedsig, sizeof(expectedsig), expectedpk) != true || recoveredlen != sizeof(recovered) || recovered[0U] != message[0U])
+	{
+		qsctest_print_safe("Failure! Ed25519 independent signature verification.\n");
+		res = false;
+	}
+
+	/* Corrupt the signature, not the message, to enforce negative verification. */
+	signedmsg[0U] ^= 1U;
+	recoveredlen = 0U;
+
+	if (qsc_ed25519_verify(recovered, &recoveredlen, signedmsg, sizeof(signedmsg), expectedpk) == true)
+	{
+		qsctest_print_safe("Failure! Ed25519 accepted a modified signature.\n");
+		res = false;
+	}
+
+	return res;
+}
+
+/**
+ * \brief Qualify Ed448 independently of the default EdDSA selection.
+ * \return true if the RFC 8032 key, signature, recovery and negative checks all pass.
+ * \details Uses local, caller-owned arrays. No external mutable state.
+ */
+bool qsctest_eddsa448_kat_test(void)
+{
+	uint8_t seed[QSC_ED448_SEED_SIZE] = { 0U };
+	uint8_t expectedpk[QSC_ED448_PUBLICKEY_SIZE] = { 0U };
+	uint8_t expectedsig[QSC_ED448_SIGNATURE_SIZE + 1U] = { 0U };
+	uint8_t publickey[QSC_ED448_PUBLICKEY_SIZE] = { 0U };
+	uint8_t privatekey[QSC_ED448_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t signedmsg[QSC_ED448_SIGNATURE_SIZE + 1U] = { 0U };
+	uint8_t recovered[1U] = { 0U };
+	uint8_t message[1U] = { 0U };
+	size_t signedlen;
+	size_t recoveredlen;
+	bool res;
+
+	res = true;
+	signedlen = 0U;
+	recoveredlen = 0U;
+	qsctest_hex_to_bin("C4EAB05D357007C632F3DBB48489924D552B08FE0C353A0D4A1F00ACDA2C463AFBEA67C5E8D2877C5E3BC397A659949EF8021E954E0A12274E", seed, sizeof(seed));
+	qsctest_hex_to_bin("43BA28F430CDFF456AE531545F7ECD0AC834A55D9358C0372BFA0C6C6798C0866AEA01EB00742802B8438EA4CB82169C235160627B4C3A9480", expectedpk, sizeof(expectedpk));
+	qsctest_hex_to_bin("26B8F91727BD62897AF15E41EB43C377EFB9C610D48F2335CB0BD0087810F4352541B143C4B981B7E18F62DE8CCDF633FC1BF037AB7CD779805E0DBCC0AAE1CBCEE1AFB2E027DF36BC04DCECBF154336C19F0AF7E0A6472905E799F1953D2A0FF3348AB21AA4ADAFD1D234441CF807C03A0003", expectedsig, sizeof(expectedsig));
+	qsctest_hex_to_bin("03", message, sizeof(message));
+
+	qsc_ed448_generate_seeded_keypair(publickey, privatekey, seed);
+
+	if (qsc_intutils_are_equal8(publickey, expectedpk, sizeof(publickey)) != true)
+	{
+		qsctest_print_safe("Failure! Ed448 independent RFC 8032 public-key vector.\n");
+		res = false;
+	}
+
+	if (qsc_intutils_are_equal8(privatekey, seed, sizeof(seed)) != true || qsc_intutils_are_equal8(privatekey + sizeof(seed), expectedpk, sizeof(expectedpk)) != true)
+	{
+		qsctest_print_safe("Failure! Ed448 independent secret-key layout.\n");
+		res = false;
+	}
+
+	if (qsc_ed448_sign(signedmsg, &signedlen, message, sizeof(message), privatekey) != true || signedlen != sizeof(signedmsg))
+	{
+		qsctest_print_safe("Failure! Ed448 independent signing operation.\n");
+		res = false;
+	}
+
+	if (qsc_intutils_are_equal8(signedmsg, expectedsig, sizeof(signedmsg)) != true)
+	{
+		qsctest_print_safe("Failure! Ed448 independent RFC 8032 signature vector.\n");
+		res = false;
+	}
+
+	if (qsc_ed448_verify(recovered, &recoveredlen, expectedsig, sizeof(expectedsig), expectedpk) != true || recoveredlen != sizeof(recovered) || recovered[0U] != message[0U])
+	{
+		qsctest_print_safe("Failure! Ed448 independent signature verification.\n");
+		res = false;
+	}
+
+	/* Corrupt the signature, not the message, to enforce negative verification. */
+	signedmsg[0U] ^= 1U;
+	recoveredlen = 0U;
+
+	if (qsc_ed448_verify(recovered, &recoveredlen, signedmsg, sizeof(signedmsg), expectedpk) == true)
+	{
+		qsctest_print_safe("Failure! Ed448 accepted a modified signature.\n");
+		res = false;
+	}
+
+	return res;
+}
+
+/**
+ * \brief Verify the RFC 8032 Ed25519 empty-message test vector.
+ * \return true on successful key generation, signing and verification, otherwise false.
+ * \details Uses independent local buffers; no dynamic ownership or shared state.
+ */
+bool qsctest_eddsa25519_empty_kat_test(void)
+{
+	uint8_t seed[QSC_ED25519_SEED_SIZE] = { 0U };
+	uint8_t expectedpk[QSC_ED25519_PUBLICKEY_SIZE] = { 0U };
+	uint8_t expectedsig[QSC_ED25519_SIGNATURE_SIZE] = { 0U };
+	uint8_t publickey[QSC_ED25519_PUBLICKEY_SIZE] = { 0U };
+	uint8_t privatekey[QSC_ED25519_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t signedmsg[QSC_ED25519_SIGNATURE_SIZE] = { 0U };
+	uint8_t recovered[1U] = { 0U };
+	uint8_t empty[1U] = { 0U };
+	size_t signedlen;
+	size_t recoveredlen;
+	bool res;
+
+	res = true;
+	signedlen = 0U;
+	recoveredlen = 1U;
+	qsctest_hex_to_bin("9D61B19DEFFD5A60BA844AF492EC2CC44449C5697B326919703BAC031CAE7F60", seed, sizeof(seed));
+	qsctest_hex_to_bin("D75A980182B10AB7D54BFED3C964073A0EE172F3DAA62325AF021A68F707511A", expectedpk, sizeof(expectedpk));
+	qsctest_hex_to_bin("E5564300C360AC729086E2CC806E828A84877F1EB8E5D974D873E065224901555FB8821590A33BACC61E39701CF9B46BD25BF5F0595BBE24655141438E7A100B", expectedsig, sizeof(expectedsig));
+	qsc_ed25519_generate_seeded_keypair(publickey, privatekey, seed);
+
+	if (qsc_intutils_are_equal8(publickey, expectedpk, sizeof(publickey)) != true)
+	{
+		qsctest_print_safe("Failure! Ed25519 empty-message public-key KAT.\n");
+		res = false;
+	}
+
+	if (qsc_ed25519_sign(signedmsg, &signedlen, empty, 0U, privatekey) != true || signedlen != sizeof(signedmsg))
+	{
+		qsctest_print_safe("Failure! Ed25519 empty-message signing.\n");
+		res = false;
+	}
+
+	if (qsc_intutils_are_equal8(signedmsg, expectedsig, sizeof(expectedsig)) != true)
+	{
+		qsctest_print_safe("Failure! Ed25519 empty-message signature KAT.\n");
+		res = false;
+	}
+
+	if (qsc_ed25519_verify(recovered, &recoveredlen, expectedsig, sizeof(expectedsig), expectedpk) != true || recoveredlen != 0U)
+	{
+		qsctest_print_safe("Failure! Ed25519 empty-message verification.\n");
+		res = false;
+	}
+
+	return res;
+}
+
+/**
+ * \brief Verify the RFC 8032 Ed448 empty-message test vector.
+ * \return true on successful key generation, signing and verification, otherwise false.
+ * \details Uses independent local buffers; no dynamic ownership or shared state.
+ */
+bool qsctest_eddsa448_empty_kat_test(void)
+{
+	uint8_t seed[QSC_ED448_SEED_SIZE] = { 0U };
+	uint8_t expectedpk[QSC_ED448_PUBLICKEY_SIZE] = { 0U };
+	uint8_t expectedsig[QSC_ED448_SIGNATURE_SIZE] = { 0U };
+	uint8_t publickey[QSC_ED448_PUBLICKEY_SIZE] = { 0U };
+	uint8_t privatekey[QSC_ED448_PRIVATEKEY_SIZE] = { 0U };
+	uint8_t signedmsg[QSC_ED448_SIGNATURE_SIZE] = { 0U };
+	uint8_t recovered[1U] = { 0U };
+	uint8_t empty[1U] = { 0U };
+	size_t signedlen;
+	size_t recoveredlen;
+	bool res;
+
+	res = true;
+	signedlen = 0U;
+	recoveredlen = 1U;
+	qsctest_hex_to_bin("6C82A562CB808D10D632BE89C8513EBF6C929F34DDFA8C9F63C9960EF6E348A3528C8A3FCC2F044E39A3FC5B94492F8F032E7549A20098F95B", seed, sizeof(seed));
+	qsctest_hex_to_bin("5FD7449B59B461FD2CE787EC616AD46A1DA1342485A70E1F8A0EA75D80E96778EDF124769B46C7061BD6783DF1E50F6CD1FA1ABEAFE8256180", expectedpk, sizeof(expectedpk));
+	qsctest_hex_to_bin("533A37F6BBE457251F023C0D88F976AE2DFB504A843E34D2074FD823D41A591F2B233F034F628281F2FD7A22DDD47D7828C59BD0A21BFD3980FF0D2028D4B18A9DF63E006C5D1C2D345B925D8DC00B4104852DB99AC5C7CDDA8530A113A0F4DBB61149F05A7363268C71D95808FF2E652600", expectedsig, sizeof(expectedsig));
+	qsc_ed448_generate_seeded_keypair(publickey, privatekey, seed);
+
+	if (qsc_intutils_are_equal8(publickey, expectedpk, sizeof(publickey)) != true)
+	{
+		qsctest_print_safe("Failure! Ed448 empty-message public-key KAT.\n");
+		res = false;
+	}
+
+	if (qsc_ed448_sign(signedmsg, &signedlen, empty, 0U, privatekey) != true || signedlen != sizeof(signedmsg))
+	{
+		qsctest_print_safe("Failure! Ed448 empty-message signing.\n");
+		res = false;
+	}
+
+	if (qsc_intutils_are_equal8(signedmsg, expectedsig, sizeof(expectedsig)) != true)
+	{
+		qsctest_print_safe("Failure! Ed448 empty-message signature KAT.\n");
+		res = false;
+	}
+
+	if (qsc_ed448_verify(recovered, &recoveredlen, expectedsig, sizeof(expectedsig), expectedpk) != true || recoveredlen != 0U)
+	{
+		qsctest_print_safe("Failure! Ed448 empty-message verification.\n");
+		res = false;
+	}
+
+	return res;
+}
+
 void qsctest_eddsa_run()
 {
+	if (qsctest_eddsa25519_empty_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Ed25519 independent empty-message RFC 8032 KAT passed.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Ed25519 independent empty-message RFC 8032 KAT failed.\n");
+	}
+
+	if (qsctest_eddsa448_empty_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Ed448 independent empty-message RFC 8032 KAT passed.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Ed448 independent empty-message RFC 8032 KAT failed.\n");
+	}
+
+	if (qsctest_eddsa25519_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Ed25519 independent RFC 8032 vectors and tamper test passed.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Ed25519 independent RFC 8032 vectors or tamper test failed.\n");
+	}
+
+	if (qsctest_eddsa448_kat_test() == true)
+	{
+		qsctest_print_safe("Success! Ed448 independent RFC 8032 vectors and tamper test passed.\n");
+	}
+	else
+	{
+		qsctest_print_safe("Failure! Ed448 independent RFC 8032 vectors or tamper test failed.\n");
+	}
+
 	if (qsctest_eddsa_kat_test() == true)
 	{
 		qsctest_print_safe("Success! Passed EDDSA known answer tests. \n");

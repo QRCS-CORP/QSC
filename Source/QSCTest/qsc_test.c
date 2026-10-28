@@ -46,6 +46,7 @@
 #include "selftest.h"
 #include "stringutils.h"
 #if defined(QSC_DEBUG_MODE)
+#	include "acp.h"
 #	include "csp.h"
 #	include "fileutils.h"
 #	include "folderutils.h"
@@ -69,6 +70,7 @@
 #include "eddh_test.h"
 #include "eddsa_test.h"
 #include "encoding_test.h"
+#include "encoding_reference_test.h"
 #include "falcon_test.h"
 #include "hqc_test.h"
 #include "kyber_test.h"
@@ -91,15 +93,15 @@
 
 static void print_title(void)
 {
-	qsctest_print_line("***************************************************");
-	qsctest_print_line("* QSC: Quantum Secure Cryptographic library in C  *");
-	qsctest_print_line("*                                                 *");
-	qsctest_print_line("* Release:   v1.2.0.0c (B3)                       *");
-	qsctest_print_line("* License:   QRCS-PL                              *");
-	qsctest_print_line("* Date:      June 11, 2026                        *");
-	qsctest_print_line("* Contact:   contact@qrcscorp.ca                  *");
-	qsctest_print_line("***************************************************");
-	qsctest_print_line("");
+    qsctest_print_line("==============================================================================================================");
+    qsctest_print_line(" QRCS | QSCTest");
+    qsctest_print_line(" CRYPTOGRAPHIC QUALIFICATION AND PERFORMANCE SUITE");
+    qsctest_print_line("--------------------------------------------------------------------------------------------------------------");
+    qsctest_print_line(" Release : v1.2.0.0c (B3)  |  License : QRCS-PL");
+    qsctest_print_line(" Date    : June 11, 2026");
+    qsctest_print_line(" Contact : contact@qrcscorp.ca");
+    qsctest_print_line("==============================================================================================================");
+    qsctest_print_line("");
 }
 
 #if defined(QSC_DEBUG_MODE)
@@ -124,6 +126,11 @@ static void random_sample_print()
 	qsc_consoleutils_print_line("");
 #endif
 
+	qsc_consoleutils_print_line("ACP sample: ");
+	qsc_acp_generate(smp, sizeof(smp));
+	qsc_consoleutils_print_array(smp, sizeof(smp), 64U);
+	qsc_memutils_clear(smp, sizeof(smp));
+	qsc_consoleutils_print_line("");
 	qsc_consoleutils_print_line("");
 }
 #endif
@@ -161,7 +168,7 @@ int32_t main(void)
 	bool hfeat;
 #endif
 	bool valid;
-
+	
 #if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
 	qsc_consoleutils_print_line("Loading pre-check...");
 	qsc_folderutils_test();
@@ -179,13 +186,17 @@ int32_t main(void)
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
 	 * by remming the QSC_SYSTEM_AESNI_ENABLED macro.
 	 */
-	valid = qsc_selftest_symmetric_run();
+	print_title();
+    qsctest_print_section("00.01", "LIBRARY STARTUP SELF-TESTS");
+    qsctest_print_line("[INFO] FIPS and internal known-answer checks follow.");
+    /* QSC library-generated results retain their original direct output. */
+    valid = qsc_selftest_symmetric_run();
+    qsctest_print_line("");
 	
 	if (valid == true)
 	{
-		print_title();
-		
-		qsctest_print_line("Passed the internal symmetric primitive self-checks.");
+		qsctest_print_line("[PASS] Library startup integrity checks");
+        qsctest_print_section("00.02", "SYSTEM CONFIGURATION");
 
 #if defined(QSC_HAS_CPUID)
 		hfeat = qsc_cpuidex_features_set(&cfeat);
@@ -221,7 +232,7 @@ int32_t main(void)
 		else
 		{
 			qsctest_print_line("The AVX intrinsics functions have not been detected or are not enabled.");
-			qsctest_print_line("For best performance, enable the maximum available AVX feature set in the project properties (AVX/AVX2/AVX512).");
+			qsctest_print_line("For best performance, enable AVX/ARM feature set in the project properties (ARM/AVX/AVX2/AVX512).");
 		}
 
 #	if defined(QSC_CSX_REDUCED_ROUNDS)
@@ -242,132 +253,136 @@ int32_t main(void)
 
 #if defined(QSC_CSX_AUTHENTICATED)
 		qsctest_print_line("The CSX authentication flag was detected.");
-		qsctest_print_line("Remove the QSC_CSX_AUTHENTICATED definition from the preprocessor definitions in csx.h to disable CSX authentication.");
+		qsctest_print_line("Remove the QSC_CSX_AUTHENTICATED definition from csx.h to disable CSX authentication.");
 #else
 		qsctest_print_line("The CSX authentication flag was not detected.");
-		qsctest_print_line("Add the QSC_CSX_AUTHENTICATED definition to preprocessor flags to enable the CSX cipher authentication extension.");
+		qsctest_print_line("Add the QSC_CSX_AUTHENTICATED definition to preprocessor flags to enable the CSX cipher authentication.");
 #endif
 
 #if defined(QSC_RCS_AUTHENTICATED)
 		qsctest_print_line("The RCS authentication flag was detected.");
-		qsctest_print_line("Remove the QSC_RCS_AUTHENTICATED definition from the preprocessor definitions in rcs.h to disable RCS authentication.");
+		qsctest_print_line("Remove the QSC_RCS_AUTHENTICATED definition from rcs.h to disable RCS authentication.");
 #else
 		qsctest_print_line("The RCS authentication flag was not detected.");
-		qsctest_print_line("Add the QSC_RCS_AUTHENTICATED definition to preprocessor flags to enable the RCS cipher authentication extension.");
+		qsctest_print_line("Add the QSC_RCS_AUTHENTICATED definition to preprocessor flags to enable the RCS cipher authentication.");
 #endif
 
 		qsctest_print_line("");
 		qsctest_print_line("AVX-512 intrinsics have been integrated into this project.");
-		qsctest_print_line("On an AVX-512 capable CPU, enable AVX-512 in the project properties for best performance on symmetric ciphers.");
+		qsctest_print_line("On an AVX-512 capable CPU, enable AVX-512 in the project properties for best performance.");
 		qsctest_print_line("Enable the maximum available AVX feature set in the project properties (AVX/AVX2/AVX512).");
 		qsctest_print_line("");
 	}
 	else
 	{
-		qsctest_print_line("Failure! Internal self-checks have errored, aborting tests!");
+		qsctest_print_line("[FAIL] Library startup checks; diagnostics aborted.");
 		valid = false;
 	}
 
 	if (valid == true)
 	{
-		if (qsctest_test_confirm("Press 'Y' then Enter to run Diagnostic Tests, any other key to cancel: ") == true)
+		if (qsctest_test_confirm("Run diagnostic qualification? [Y/N]: ") == true)
 		{
-			qsctest_print_line("*** Test the AES cipher and modes with stress tests, and the FIPS known answer tests ***");
+			qsctest_print_section("01.01", "AES CIPHER / FIPS KAT");
 			qsctest_aes_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the AES cipher and modes with stress tests, and the AESAVS known answer tests ***");
+			qsctest_print_section("01.02", "AES CIPHER / AESAVS");
 			qsctest_aesavs_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the ChaCha stream cipher with stress tests, and known answer tests ***");
+			qsctest_print_section("01.03", "CHACHA CIPHER QUALIFICATION");
 			qsctest_chacha_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the CSX-512 stream cipher stress tests, and known answer tests ***");
+			qsctest_print_section("01.04", "CSX-512 CIPHER QUALIFICATION");
 			qsctest_csx_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the RCS stream cipher with stress tests, and known answer tests ***");
+			qsctest_print_section("01.05", "RCS CIPHER QUALIFICATION");
 			qsctest_rcs_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test HKDF, HMAC, and SHA2 implementations using the official known answer tests ***");
+			qsctest_print_section("02.01", "SHA-2 / HMAC / HKDF");
 			qsctest_sha2_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the PBMAC1 implementation using the official RFC 7292 PKCS#12 known answer tests ***");
-			qsctest_pbmac1_run();
-			qsctest_print_line("");
-
-			qsctest_print_line("*** Test SHAKE, cSHAKE, KMAC, and SHA3 implementations using the official known answer tests ***");
+			qsctest_print_section("02.02", "SHA-3 / SHAKE / cSHAKE / KMAC");
 			qsctest_sha3_run();
 			qsctest_print_line("");
 						
-			qsctest_print_line("*** Test the Poly1305 MAC implementation using the official known answer tests ***");
+			qsctest_print_section("02.03", "Poly1305 MAC");
 			qsctest_poly1305_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the QMAC implementation using the official known answer tests ***");
+			qsctest_print_section("02.04", "QMAC");
 			qsctest_qmac_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the Secure Random provider and entropy provider implementations ***");
+			qsctest_print_section("02.05", "RANDOM GENERATOR AND ENTROPY TESTS");
 			qsctest_secrand_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the SHAKE Cost-Based KDF implementation ***");
+			qsctest_print_section("02.06", "SHAKE Cost-Based KDF");
 			qsctest_scb_run();
 			qsctest_print_line("");
 			
-			qsctest_print_line("*** Test the BER, DER, HEX, and PEM encoding schemes ***");
+			qsctest_print_section("03.01", "BER, DER, HEX, and PEM encoding schemes");
 			qsctest_encoding_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the X.509 implementation; certificate parsing, validation, and encoding operations ***");
+			qsctest_print_section("03.02", "ENCODING REFERENCE VECTORS");
+			if (qsctest_encoding_reference_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Encoding reference-vector suite");
+			}
+			qsctest_print_line("");
+
+			qsctest_print_section("05.01", "X.509 CERTIFICATE QUALIFICATION");
 			qsctest_x509_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the TLS 1.3 implementation; key exchange, codecs, resumption, 0-RTT, and end-to-end tests ***");
+			qsctest_print_section("06.01", "TLS 1.3 PROTOCOL QUALIFICATION");
 			qsctest_tls_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the Dilithium implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.01", "Dilithium");
 			qsctest_dilithium_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the NIST ECDSA implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.02", "NIST ECDSA");
 			qsctest_ecdsa_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the Edwards 25519 EDDSA implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.03", "EDDSA SIGNATURE QUALIFICATION");
 			qsctest_eddsa_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the Falcon implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.04", "Falcon");
 			qsctest_falcon_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the SPHINCS+ implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.05", "SPHINCS+");
 			qsctest_sphincsplus_run();
 			qsctest_print_line("");
 			
-			qsctest_print_line("*** Test the Edwards 25519 EDDH implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.06", "EDDH KEY AGREEMENT QUALIFICATION");
 			qsctest_eddh_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the HQC implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.07", "HQC");
 			qsctest_hqc_run();
 			qsctest_print_line("");
 
-			qsctest_print_line("*** Test the Kyber implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.08", "Kyber");
 			qsctest_kyber_run();
 			qsctest_print_line("");
 
 #if defined(QSC_MISRA_FULL_COMPLIANCE)
 			qsctest_print_line("Warning: McEliece uses large static arrays internally, increase maximum stack allocation to 10-20MB.");
 #endif
-			qsctest_print_line("*** Test the McEliece implementation using stress, validity checks, and known answer tests ***");
+			qsctest_print_section("04.09", "McEliece");
 			qsctest_mceliece_run();
 			qsctest_print_line("");
 		}
@@ -376,13 +391,13 @@ int32_t main(void)
 			qsctest_print_line("");
 		}
 
-		if (qsctest_test_confirm("Press 'Y' then Enter to run Symmetric Speed Tests, any other key to cancel: ") == true)
+		if (qsctest_test_confirm("Run performance benchmarks? [Y/N]: ") == true)
 		{
 #if !defined(QSC_SYSTEM_AVX_INTRINSICS)
 			qsctest_print_line("System intrinsics have not been enabled, timings will be significantly slower!");
 			qsctest_print_line("Enable the highest supported instruction set on the library and test project AVX/AVX2/AVX-512.");
 #endif
-			qsctest_print_line("Testing symmetric stream ciphers..");
+			qsctest_print_section("07.01", "SYMMETRIC CIPHER PERFORMANCE");
 			qsctest_benchmark_chacha_run();
 			qsctest_print_line("");
 			qsctest_benchmark_csx_run();
@@ -391,7 +406,7 @@ int32_t main(void)
 			qsctest_print_line("");
 			qsctest_benchmark_rcs_run();
 			qsctest_print_line("");
-			qsctest_print_line("Testing MAC functions..");
+			qsctest_print_section("07.02", "MAC AND HASH PERFORMANCE");
 			qsctest_benchmark_qmac_run();
 			qsctest_print_line("");
 			qsctest_benchmark_kmac_run();
@@ -400,7 +415,9 @@ int32_t main(void)
 			qsctest_print_line("");
 		}
 
-		qsctest_print_line("Completed! Press any key to close..");
+		qsctest_print_section("99.01", "EXECUTION COMPLETE");
+        qsctest_print_line("[INFO] Review reported [FAIL] results above.");
+        qsctest_print_line("Press any key to close.");
 		qsctest_get_wait();
 	}
 	else
@@ -409,5 +426,5 @@ int32_t main(void)
 		qsctest_get_wait();
 	}
 
-    return 0;
+    return (valid == true) ? 0 : 1;
 }

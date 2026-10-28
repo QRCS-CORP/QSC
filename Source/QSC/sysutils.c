@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "sysutils.h"
 #include "cpuidex.h"
 #include "intrinsics.h"
@@ -7,7 +58,12 @@
 #endif
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-#	define WIN32_LEAN_AND_MEAN
+#	if !defined(WIN32_LEAN_AND_MEAN)
+#		define WIN32_LEAN_AND_MEAN
+#	endif
+#	if !defined(NOMINMAX)
+#		define NOMINMAX
+#	endif
 #	define _WINSOCKAPI_
 #	include <Windows.h>
 #	include <iphlpapi.h>
@@ -34,7 +90,10 @@ static void qsc_tc_init(void)
 {
 	mach_timebase_info_data_t tb;
 	mach_timebase_info(&tb);
-	qsc_tc_ratio = (double)tb.numer / (double)tb.denom;
+	if (tb.denom != 0U)
+	{
+		qsc_tc_ratio = ((double)tb.numer / (double)tb.denom) / 1000000.0;
+	}
 }
 
 #elif defined(QSC_SYSTEM_OS_UNIX)
@@ -76,39 +135,50 @@ static void qsc_tc_init(void)
 #	include <unistd.h>
 #endif
 
-size_t qsc_sysutils_computer_name(char* name)
+size_t qsc_sysutils_computer_name_bounded(char* name, size_t namelen)
 {
-	QSC_ASSERT(name != NULL);
-
 	size_t res;
 
-	res = 0;
-
-	if (name != NULL)
+	res = 0U;
+	if (name != NULL && namelen > 0U)
 	{
-
+		name[0U] = '\0';
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		char buf[MAX_COMPUTERNAME_LENGTH + 1U];
-		DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
-		GetComputerName(buf, &bufflen);
-		res = strlen(buf);
-		qsc_memutils_copy(name, (const char*)buf, res);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-		char buf[HOST_NAME_MAX];
+		char buf[MAX_COMPUTERNAME_LENGTH + 1U] = { 0U };
+		DWORD blen;
 
-		if (gethostname(buf, HOST_NAME_MAX) == 0)
+		blen = (DWORD)sizeof(buf);
+		if (GetComputerNameA(buf, &blen) != 0)
 		{
-			res = strlen(buf);
+			res = (size_t)blen;
+			if (res >= namelen)
+			{
+				res = namelen - 1U;
+			}
 			qsc_memutils_copy(name, buf, res);
 		}
-#else
-		res = 0U;
-#endif
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		char buf[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
 
+		if (gethostname(buf, sizeof(buf)) == 0)
+		{
+			buf[sizeof(buf) - 1U] = '\0';
+			res = strlen(buf);
+			if (res >= namelen)
+			{
+				res = namelen - 1U;
+			}
+			qsc_memutils_copy(name, buf, res);
+		}
+#endif
 		name[res] = '\0';
 	}
-
 	return res;
+}
+
+size_t qsc_sysutils_computer_name(char* name)
+{
+	return qsc_sysutils_computer_name_bounded(name, QSC_SYSUTILS_SYSTEM_NAME_MAX);
 }
 
 size_t qsc_sysutils_cpu_count(void)
@@ -121,6 +191,17 @@ size_t qsc_sysutils_cpu_count(void)
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
 	count = (size_t)sysinfo.dwNumberOfProcessors;
+#if defined(ALL_PROCESSOR_GROUPS)
+	{
+		DWORD online;
+
+		online = GetActiveProcessorCount(ALL_PROCESSOR_GROUPS);
+		if (online != 0U)
+		{
+			count = (size_t)online;
+		}
+	}
+#endif
 
 #elif defined(QSC_SYSTEM_OS_MAC)
 	int nm[2U];
@@ -191,7 +272,7 @@ void qsc_sysutils_drive_space(const char* drive, qsc_sysutils_drive_space_state*
 
 		struct statvfs fsinfo;
 
-		if (statvfs("/", &fsinfo) == 0)
+		if (statvfs(drive, &fsinfo) == 0)
 		{
 			state->total = (uint64_t)fsinfo.f_frsize * (uint64_t)fsinfo.f_blocks;
 			state->free = (uint64_t)fsinfo.f_frsize * (uint64_t)fsinfo.f_bfree;
@@ -269,8 +350,8 @@ void qsc_sysutils_memory_statistics(qsc_sysutils_memory_statistics_state* state)
 		{
 			state->phystotal = (uint64_t)memInfo.totalram * (uint64_t)memInfo.mem_unit;
 			state->physavail = (uint64_t)memInfo.freeram * (uint64_t)memInfo.mem_unit;
-			state->virttotal = (uint64_t)(memInfo.totalram + memInfo.totalswap) * (uint64_t)memInfo.mem_unit;
-			state->virtavail = (uint64_t)(memInfo.freeram + memInfo.freeswap) * (uint64_t)memInfo.mem_unit;
+			state->virttotal = ((uint64_t)memInfo.totalram + (uint64_t)memInfo.totalswap) * (uint64_t)memInfo.mem_unit;
+			state->virtavail = ((uint64_t)memInfo.freeram + (uint64_t)memInfo.freeswap) * (uint64_t)memInfo.mem_unit;
 		}
 
 #elif defined(QSC_SYSTEM_OS_BSD)
@@ -364,49 +445,65 @@ bool qsc_sysutils_rdtsc_available(void)
 	return ret;
 }
 
-size_t qsc_sysutils_user_name(char* name)
+size_t qsc_sysutils_user_name_bounded(char* name, size_t namelen)
 {
-	QSC_ASSERT(name != NULL);
-
 	size_t res;
 
-	res = 0;
-
-	if (name != NULL)
+	res = 0U;
+	if (name != NULL && namelen > 0U)
 	{
+		name[0U] = '\0';
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		TCHAR buf[UNLEN + 1U];
-		DWORD bufflen = sizeof(buf) / sizeof(TCHAR);
-		GetUserName(buf, &bufflen);
-		res = strlen(buf);
-		qsc_memutils_copy(name, (char*)buf, res);
-#elif defined(QSC_SYSTEM_OS_POSIX)
-		char buf[LOGIN_NAME_MAX];
+		char buf[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
+		DWORD blen;
 
-		buf[0] = '\0';
-		if (getlogin_r(buf, LOGIN_NAME_MAX) != 0 || buf[0] == '\0')
+		blen = (DWORD)sizeof(buf);
+		if (GetUserNameA(buf, &blen) != 0 && blen > 0U)
 		{
-			struct passwd* pw = getpwuid(getuid());
-			if (pw != NULL)
+			res = (size_t)blen - 1U;
+			if (res >= namelen)
 			{
-				size_t plen = strlen(pw->pw_name);
-				if (plen < LOGIN_NAME_MAX)
+				res = namelen - 1U;
+			}
+			qsc_memutils_copy(name, buf, res);
+		}
+#elif defined(QSC_SYSTEM_OS_POSIX)
+		char buf[QSC_SYSUTILS_SYSTEM_NAME_MAX] = { 0U };
+		char pwbuf[QSC_SYSUTILS_SYSTEM_NAME_MAX * 4U];
+		struct passwd passwdstate;
+		struct passwd* pw;
+
+		if (getlogin_r(buf, sizeof(buf)) != 0 || buf[0U] == '\0')
+		{
+			pw = NULL;
+			if (getpwuid_r(getuid(), &passwdstate, pwbuf, sizeof(pwbuf), &pw) == 0 && pw != NULL)
+			{
+				res = strlen(pw->pw_name);
+				if (res >= namelen)
 				{
-					qsc_memutils_copy(buf, pw->pw_name, plen + 1U);
+					res = namelen - 1U;
 				}
+				qsc_memutils_copy(name, pw->pw_name, res);
 			}
 		}
-		if (buf[0] != '\0')
+		else
 		{
 			res = strlen(buf);
+			if (res >= namelen)
+			{
+				res = namelen - 1U;
+			}
 			qsc_memutils_copy(name, buf, res);
 		}
 #endif
-
 		name[res] = '\0';
 	}
-
 	return res;
+}
+
+size_t qsc_sysutils_user_name(char* name)
+{
+	return qsc_sysutils_user_name_bounded(name, QSC_SYSUTILS_SYSTEM_NAME_MAX);
 }
 
 uint64_t qsc_sysutils_system_uptime(void)
@@ -458,7 +555,8 @@ uint64_t qsc_sysutils_system_timestamp(void)
 
 			if (freq > 0)
 			{
-				rtme = (ctr1 * 1000LL / freq);
+				rtme = ((uint64_t)(ctr1 / freq) * 1000ULL) +
+					((uint64_t)(ctr1 % freq) * 1000ULL / (uint64_t)freq);
 			}
 		}
 		else
@@ -525,52 +623,53 @@ uint64_t qsc_sysutils_system_timestamp(void)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 void qsc_sysutils_user_identity(const char* name, char* id)
 {
-	QSC_ASSERT(name != NULL);
-	QSC_ASSERT(id != NULL);
-
 	if (name != NULL && id != NULL)
 	{
-		LPCSTR accname = TEXT(name);
-		LPTSTR domname = (LPTSTR)GlobalAlloc(GPTR, sizeof(TCHAR) * 1024U);
+		char domain[QSC_SYSUTILS_SYSTEM_NAME_MAX];
+		uint8_t sidbuf[1024U];
+		DWORD cbsid;
+		DWORD cchdomain;
+		SID_NAME_USE use;
+		LPSTR sidstr;
 
-		if (domname != NULL)
+		id[0U] = '\0';
+		cbsid = (DWORD)sizeof(sidbuf);
+		cchdomain = (DWORD)sizeof(domain);
+		sidstr = NULL;
+		if (LookupAccountNameA(NULL, name, sidbuf, &cbsid, domain, &cchdomain, &use) != 0)
 		{
-			DWORD cchdomname = 1024;
-			SID_NAME_USE esidtype;
-			char sidbuf[1024U] = { 0U };
-			DWORD cbsid = 1024;
-			SID* sid = (SID*)sidbuf;
-
-			if (LookupAccountName(NULL, accname, sidbuf, &cbsid, domname, &cchdomname, &esidtype))
+			if (ConvertSidToStringSidA((PSID)sidbuf, &sidstr) != 0 && sidstr != NULL)
 			{
-				ConvertSidToStringSid(sid, (LPSTR*)id);
-			}
+				size_t nlen;
 
-			GlobalFree(domname);
+				nlen = strlen(sidstr);
+				if (nlen < QSC_SYSUTILS_SYSTEM_NAME_MAX)
+				{
+					qsc_memutils_copy(id, sidstr, nlen + 1U);
+				}
+				LocalFree(sidstr);
+			}
 		}
 	}
 }
 #else
 void qsc_sysutils_user_identity(const char* name, char* id)
 {
-	QSC_ASSERT(name != NULL);
-	QSC_ASSERT(id != NULL);
-
 	if (name != NULL && id != NULL)
 	{
-		/* POSIX: resolve numeric UID from the passwd database */
-		struct passwd* pw = getpwnam(name);
+		struct passwd state;
+		struct passwd* pw;
+		char pbuf[QSC_SYSUTILS_SYSTEM_NAME_MAX * 4U];
 
-		if (pw != NULL)
+		id[0U] = '\0';
+		pw = NULL;
+		if (getpwnam_r(name, &state, pbuf, sizeof(pbuf), &pw) == 0 && pw != NULL)
 		{
-			snprintf(id, QSC_SYSUTILS_SYSTEM_NAME_MAX, "%u", (unsigned int)pw->pw_uid);
-		}
-		else
-		{
-			id[0] = '\0';
+			(void)snprintf(id, QSC_SYSUTILS_SYSTEM_NAME_MAX, "%u", (unsigned int)pw->pw_uid);
 		}
 	}
 }
+
 #endif
 
 #if defined(QSC_DEBUG_MODE)

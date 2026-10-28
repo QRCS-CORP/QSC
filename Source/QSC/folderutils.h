@@ -170,9 +170,38 @@ QSC_EXPORT_API bool qsc_folderutils_directory_exists(const char path[QSC_SYSTEM_
  * \param reslen: [size_t] The length of the output string buffer.
  * \param directory: [const char*] The starting directory.
  * 
- * \return [size_t] Returns the length of the output string.
+ * \return [size_t] The number of entry bytes written, excluding the trailing NUL. If an entry
+ * does not fit it is omitted and enumeration stops. Output is NUL terminated when reslen is nonzero.
+ * Operates on the caller's buffer without heap allocation. Entries are in filesystem order.
  */
 QSC_EXPORT_API size_t qsc_folderutils_directory_list(char* result, size_t reslen, const char* directory);
+
+/**
+ * \brief Invoked once for each enumerated directory entry.
+ *
+ * \param name: The entry basename, valid only until the callback returns. Caller must copy it to retain it.
+ * \param is_directory: True when the entry resolves to a directory (symbolic links are followed on POSIX).
+ * \param context: Opaque caller-owned context, passed unchanged.
+ *
+ * \return True to continue, or false to stop enumeration with a false result.
+ * \note Callbacks run synchronously on the invoking thread. The callback must not change directory entry state concurrently.
+ */
+typedef bool (*qsc_folderutils_entry_callback)(const char* name, bool is_directory, void* context);
+
+/**
+ * \brief Enumerate directory entries without creating a concatenated result buffer.
+ *
+ * Skips the dot and dot-dot entries. Entries are reported in operating-system enumeration order.
+ * No user-owned memory is allocated by this function. Multiple independent calls have no shared state.
+ *
+ * \param directory: NUL-terminated directory path; not retained.
+ * \param callback: Non-NULL function receiving each entry name, type, and context.
+ * \param context: Caller-owned context; may be NULL. Ownership is not transferred.
+ *
+ * \return True if enumeration completes, or false on open/enumeration failure or callback cancellation.
+ */
+QSC_EXPORT_API bool qsc_folderutils_enumerate(const char* directory, qsc_folderutils_entry_callback callback, void* context);
+
 
 /**
  * \brief Get the full path to a special system folder.

@@ -164,7 +164,7 @@ typedef enum
  * \param stream: [const char*] The array to write to the file.
  * \param length: [size_t] The stream size.
  * 
- * \return [bool] Returns true if the operation succeeded.
+ * \return [bool] True only when all requested bytes are written, flushed, and the file is closed without error. This is not an fsync/durability guarantee.
  */
 QSC_EXPORT_API bool qsc_fileutils_append_to_file(const char* fpath, const char* stream, size_t length);
 
@@ -197,7 +197,7 @@ QSC_EXPORT_API size_t qsc_fileutils_copy_file_to_stream(const char* fpath, char*
  * \param obj: [const void*] The object to write to the file.
  * \param length: [size_t] The size of the object.
  * 
- * \return [bool] Returns true if the operation succeeded.
+ * \return [bool] True only when all requested bytes are written, flushed, and the file is closed without error. This is not an fsync/durability guarantee.
  */
 QSC_EXPORT_API bool qsc_fileutils_copy_object_to_file(const char* fpath, const void* obj, size_t length);
 
@@ -208,7 +208,7 @@ QSC_EXPORT_API bool qsc_fileutils_copy_object_to_file(const char* fpath, const v
  * \param stream: [const char*] The array to write to the file.
  * \param length: [size_t] The length of the array.
  * 
- * \return [bool] Returns true if the operation succeeded.
+ * \return [bool] True only when all requested bytes are written, flushed, and the file is closed without error. This is not an fsync/durability guarantee.
  */
 QSC_EXPORT_API bool qsc_fileutils_copy_stream_to_file(const char* fpath, const char* stream, size_t length);
 
@@ -252,7 +252,11 @@ QSC_EXPORT_API void qsc_fileutils_flush(FILE* fp);
  * \param inpath: [const char*] The full fpath to the input file.
  * \param outpath: [const char*] The full fpath to the output file.
  * 
- * \return [bool] Returns true if the file was copied.
+ * \return [bool] True if the entire source, including an empty source file, was copied successfully.
+ * Returns false if either file cannot be opened, the output fails to flush or close, or source and destination
+ * identify the same file. The destination is replaced and may be left partial on an I/O failure.
+ * Uses bounded stack storage; does not allocate memory proportional to file size.
+ * Not safe for concurrent writes to the source or destination.
  */
 QSC_EXPORT_API bool qsc_fileutils_file_copy(const char* inpath, const char* outpath);
 
@@ -304,11 +308,12 @@ QSC_EXPORT_API size_t qsc_fileutils_get_name(char* name, size_t namelen, const c
  *
  * \warning The line buffer must be freed after the last call.
  *
- * \param line: [char**] Pointer to the line buffer (dynamically allocated).
- * \param length: [size_t*] Pointer to the buffer size.
- * \param fp: [FILE*] The file stream handle.
- * 
- * \return [int64_t] Returns the number of characters read.
+ * \param line: [char**] Receives a newly allocated NUL-terminated line, without LF; caller frees using qsc_memutils_alloc_free().
+ * \param length: [size_t*] Receives allocated capacity in bytes; set to zero on failure/EOF.
+ * \param fp: [FILE*] Open stream owned by the caller; its current position advances through the line.
+ *
+ * \return [int64_t] The line's byte count, including the consumed LF when present, or -1 on EOF/error.
+ * Output pointers are reset on failure. The input stream must not be used concurrently.
  */
 QSC_EXPORT_API int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp);
 
@@ -327,7 +332,8 @@ QSC_EXPORT_API size_t qsc_fileutils_get_size(const char* fpath);
  * \param fpath: [char*] The output buffer for the current working directory.
  * \param flen: [size_t] The length of the fpath string.
  * 
- * \return [bool] Returns true if the working directory was successfully retrieved.
+ * \return [bool] True only if the complete NUL-terminated working directory fits in the supplied buffer.
+ * The function does not allocate storage and is safe for independent concurrent callers.
  */
 QSC_EXPORT_API bool qsc_fileutils_get_working_directory(char* fpath, size_t flen);
 
@@ -401,7 +407,8 @@ QSC_EXPORT_API size_t qsc_fileutils_safe_read(const char* fpath, size_t position
  * \param input: [const char*] The input character string.
  * \param length: [size_t] The number of bytes to write.
  * 
- * \return [size_t] Returns the number of characters written.
+ * \return [size_t] Number of bytes written, or zero on failure. Existing content outside the requested
+ * range is retained. A missing file is created. Concurrent writes to the same path are not synchronized.
  */
 QSC_EXPORT_API size_t qsc_fileutils_safe_write(const char* fpath, size_t position, const char* input, size_t length);
 
@@ -421,9 +428,11 @@ QSC_EXPORT_API bool qsc_fileutils_seekto(FILE* fp, size_t position);
  * \param fpath: [const char*] The full fpath to the file.
  * \param buffer: [char*] The string buffer.
  * \param buflen: [size_t] The size of the string buffer.
- * \param linenum: [size_t] The line number to read.
- * 
- * \return [int64_t] Returns the length of the line or -1 at EOF.
+ * \param linenum: [size_t] Zero-based line number to read.
+ *
+ * \return [int64_t] Full line length excluding LF, even if the caller's buffer is shorter; -1 on
+ * EOF, I/O error, or an unrepresentable length. Copies at most buflen - 1 bytes and NUL terminates.
+ * Processes the file with bounded stack storage, without allocating the entire file.
  */
 QSC_EXPORT_API int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, size_t linenum);
 

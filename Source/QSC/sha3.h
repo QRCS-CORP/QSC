@@ -53,7 +53,7 @@
 #define QSC_SHA3_H
 
 #include "qsccommon.h"
-#if defined(QSC_SYSTEM_AVX_INTRINSICS)
+#if defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SYSTEM_ARM_INTRINSICS)
 #	include "intrinsics.h"
 #endif
 
@@ -78,7 +78,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t hash[QSC_SHA3_512_HASH_SIZE] = { 0U };
  * qsc_keccak_state ctx;
  *
- * qsc_sha3_initialize(ctx.state);
+ * qsc_sha3_initialize(&ctx);
  * qsc_sha3_update(&ctx, qsc_keccak_rate_512, msg, MSGLEN);
  * qsc_sha3_finalize(&ctx, qsc_keccak_rate_512, hash);
  *
@@ -101,9 +101,19 @@ QSC_CPLUSPLUS_ENABLED_START
  * uint8_t name[...] = { ... };
  * qsc_keccak_state ctx3;
  *
- * qsc_cshake_initialize(&ctx3, key2, sizeof(key2), name, sizeof(name), cust2, sizeof(cust2));
- * qsc_cshake_squeezeblocks(&ctx3, output, 1);
+ * qsc_cshake_initialize(&ctx3, qsc_keccak_rate_512, key2, sizeof(key2), name, sizeof(name), cust2, sizeof(cust2));
+ * qsc_cshake_squeezeblocks(&ctx3, qsc_keccak_rate_512, output, 1);
  * \endcode
+ *
+ * \note SHA3-256, SHA3-512, SHAKE128/256, cSHAKE128/256 and KMAC128/256
+ * follow FIPS 202 and SP 800-185. SHA3-128 and the 512-bit SHAKE/cSHAKE/KMAC
+ * configurations are QSC extensions. Non-24 round counts use QSC's first-round
+ * ordering and are not the FIPS 202 Keccak-p reduced-round definition.
+ * Encoded byte lengths (name, customization, key, and KMAC output) must not
+ * exceed SIZE_MAX / 8. Caller-owned input and output storage must cover all
+ * declared lengths. Invalid runtime parameters are rejected without output;
+ * assertions may terminate a debug build. States require successful initialization.
+ * Buffers remain caller-owned; independent states and disjoint outputs are reentrant.
  *
  * \section sha3_links Reference Links:
  * - <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">NIST: SHA3 FIPS-202</a>
@@ -367,7 +377,7 @@ QSC_EXPORT_API void qsc_keccak_incremental_squeeze(qsc_keccak_state* ctx, size_t
 * Internal function: Permutes the state array, can be used in external constructions.
 *
 * \param ctx: [qsc_keccak_state*] The function state; must be initialized
-* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
+* \param rounds: [size_t] An even count from 0 through 48; 24 selects Keccak-f[1600]. Other counts use QSC round order
 */
 QSC_EXPORT_API void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds);
 
@@ -376,7 +386,7 @@ QSC_EXPORT_API void qsc_keccak_permute(qsc_keccak_state* ctx, size_t rounds);
 * Internal function: Permutes the state array, can be used in external constructions.
 *
 * \param state: [uint64_t*] The state array; must be initialized
-* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
+* \param rounds: [size_t] An even count from 0 through 48; 24 selects Keccak-f[1600]. Other counts use QSC round order
 */
 QSC_EXPORT_API void qsc_keccak_permute_p1600c(uint64_t* state, size_t rounds);
 
@@ -397,7 +407,7 @@ QSC_EXPORT_API void qsc_keccak_permute_p1600u(uint64_t* state);
 * \param output: [uint8_t*] The output byte array
 * \param nblocks: [size_t] The number of blocks to extract
 * \param rate: [qsc_keccak_rate] The rate of absorption in bytes
-* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
+* \param rounds: [size_t] An even count from 0 through 48; 24 selects Keccak-f[1600]. Other counts use QSC round order
 */
 QSC_EXPORT_API void qsc_keccak_squeezeblocks(qsc_keccak_state* ctx, uint8_t* output, size_t nblocks, qsc_keccak_rate rate, size_t rounds);
 
@@ -418,7 +428,7 @@ QSC_EXPORT_API void qsc_keccak_initialize_state(qsc_keccak_state* ctx);
 * \param rate: [qsc_keccak_rate] The rate of absorption in bytes
 * \param message: [const uint8_t*] The input message byte array
 * \param msglen: [size_t] The number of message bytes to process
-* \param rounds: [size_t] The number of permutation rounds, the default and maximum is 24
+* \param rounds: [size_t] An even count from 0 through 48; 24 selects Keccak-f[1600]. Other counts use QSC round order
 */
 QSC_EXPORT_API void qsc_keccak_update(qsc_keccak_state* ctx, qsc_keccak_rate rate, const uint8_t* message, size_t msglen, size_t rounds);
 
@@ -650,7 +660,8 @@ QSC_EXPORT_API void qsc_cshake_squeezeblocks(qsc_keccak_state* ctx, qsc_keccak_r
 /**
 * \brief The cSHAKE update function.
 * Long form api: must be used in conjunction with the initialize and squeezeblocks functions.
-* Finalize an input key directly into the state.
+* XOR an input key into the state and permute after each full or partial block.
+* This QSC direct-state operation is not an incremental SP 800-185 cSHAKE message update.
 *
 * \warning Finalizes the key state, should not be used in consecutive calls.
 * The state must be initialized before calling.
@@ -780,6 +791,7 @@ QSC_EXPORT_API void qsc_kmac_update(qsc_keccak_state* ctx, qsc_keccak_rate rate,
 * Final processing and calculation of the MAC code.
 *
 * \warning The state must be initialized before calling.
+* Call qsc_keccak_dispose when finished; finalization retains the keyed state.
 *
 * \param ctx: [qsc_keccak_state*] A reference to the Keccak state; must be initialized
 * \param rate: [qsc_keccak_rate] The rate of absorption in bytes
@@ -896,7 +908,7 @@ void qsc_keccakx8_squeezeblocks(__m512i state[QSC_KECCAK_STATE_SIZE], qsc_keccak
 * \brief Process 4 SHAKE-128 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX2 instruction set.
+* Uses AVX2 or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -916,7 +928,7 @@ QSC_EXPORT_API void qsc_shake_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \brief Process 4 SHAKE-256 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX2 instruction set.
+* Uses AVX2 or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -936,7 +948,7 @@ QSC_EXPORT_API void qsc_shake_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \brief Process 4 SHAKE-512 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX2 instruction set.
+* Uses AVX2 or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -958,7 +970,7 @@ QSC_EXPORT_API void qsc_shake_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \brief Process 8 SHAKE-128 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX512 instruction set.
+* Uses AVX512, AVX2, or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*]  2nd output array
@@ -988,7 +1000,7 @@ QSC_EXPORT_API void qsc_shake_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \brief Process 8 SHAKE-256 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX512 instruction set.
+* Uses AVX512, AVX2, or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*]  2nd output array
@@ -1018,7 +1030,7 @@ QSC_EXPORT_API void qsc_shake_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \brief Process 8 SHAKE-512 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX512 instruction set.
+* Uses AVX512, AVX2, or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*]  2nd output array
@@ -1050,7 +1062,7 @@ QSC_EXPORT_API void qsc_shake_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2,
 * \brief Process 4 KMAC-128 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX2 instruction set.
+* Uses AVX2 or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -1082,7 +1094,7 @@ QSC_EXPORT_API void qsc_kmac_128x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \brief Process 4 KMAC-256 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX2 instruction set.
+* Uses AVX2 or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -1114,7 +1126,7 @@ QSC_EXPORT_API void qsc_kmac_256x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \brief Process 4 KMAC-512 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX2 instruction set.
+* Uses AVX2 or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -1148,7 +1160,7 @@ QSC_EXPORT_API void qsc_kmac_512x4(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \brief Process 8 KMAC-128 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX512 instruction set.
+* Uses AVX512, AVX2, or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -1200,7 +1212,7 @@ QSC_EXPORT_API void qsc_kmac_128x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \brief Process 8 KMAC-256 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX512 instruction set.
+* Uses AVX512, AVX2, or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array
@@ -1252,7 +1264,7 @@ QSC_EXPORT_API void qsc_kmac_256x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, 
 * \brief Process 8 KMAC-512 instances simultaneously using SIMD instructions.
 *
 * \warning The input and output arrays must be of the same length.
-* This function requires the AVX512 instruction set.
+* Uses AVX512, AVX2, or ARM NEON when enabled; otherwise uses the portable implementation.
 *
 * \param out0: [uint8_t*] The 1st output array
 * \param out1: [uint8_t*] The 2nd output array

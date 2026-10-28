@@ -1,5 +1,57 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "arrayutils.h"
 #include <string.h>
+#include <stdint.h>
 
 size_t qsc_arrayutils_find_string(const char* str, size_t slen, const char* token)
 {
@@ -7,28 +59,173 @@ size_t qsc_arrayutils_find_string(const char* str, size_t slen, const char* toke
 	QSC_ASSERT(token != NULL);
 	QSC_ASSERT(slen != 0U);
 
+	const char* end;
+	const char* pos;
 	size_t res;
+	size_t tlen;
+	size_t remaining;
 
-    res = 0U;
+	res = 0U;
 
-    if (str != NULL && slen > 0U && token != NULL)
-    {
-        size_t tlen;
+	if (str != NULL && token != NULL && slen != 0U)
+	{
+		res = (size_t)QSC_ARRAYUTILS_NPOS;
+		tlen = strlen(token);
 
-        res = (size_t)QSC_ARRAYUTILS_NPOS;
-        tlen = strlen(token);
+		if (tlen == 0U)
+		{
+			res = 1U;
+		}
+		else if (tlen <= slen)
+		{
+			end = str + (slen - tlen + 1U);
+			pos = str;
 
-        for (size_t i = 0U; i + tlen <= slen; ++i)
-        {
-            if (strncmp(&str[i], token, tlen) == 0)
-            {
-                res = i + 1U;
-                break;
-            }
-        }
-    }
+			while (pos < end)
+			{
+				remaining = (size_t)(end - pos);
+				pos = (const char*)memchr(pos, (unsigned char)token[0U], remaining);
+
+				if (pos == NULL)
+				{
+					break;
+				}
+
+				if (memcmp(pos, token, tlen) == 0)
+				{
+					res = (size_t)(pos - str) + 1U;
+					break;
+				}
+
+				++pos;
+			}
+		}
+	}
 
 	return res;
+}
+
+/**
+ * \brief Strictly parse decimal digits with overflow detection.
+ * \param str: Input containing exactly slen digits or a terminal NUL.
+ * \param slen: Input buffer length; embedded NUL bytes are rejected.
+ * \param maximum: Highest accepted value.
+ * \param value: Set only after successful parsing; no ownership transfer.
+ * \return True for a valid in-range value, otherwise false.
+ * \note Stateless and thread safe; never reads beyond slen.
+ */
+static bool arrayutils_try_parse_decimal(const char* str, size_t slen, uint64_t maximum, uint64_t* value)
+{
+	uint64_t acc;
+	uint64_t digit;
+	uint64_t maxdiv;
+	uint64_t maxrem;
+	size_t count;
+	bool res;
+
+	acc = 0U;
+	maxdiv = maximum / 10U;
+	maxrem = maximum % 10U;
+	count = 0U;
+	res = false;
+
+	if (str != NULL && value != NULL && slen != 0U)
+	{
+		for (size_t i = 0U; i < slen; ++i)
+		{
+			if (str[i] == '\0' && i == slen - 1U)
+			{
+				break;
+			}
+
+			if (str[i] < '0' || str[i] > '9')
+			{
+				count = 0U;
+				break;
+			}
+
+			digit = (uint64_t)(str[i] - '0');
+
+			if (acc > maxdiv || (acc == maxdiv && digit > maxrem))
+			{
+				count = 0U;
+				break;
+			}
+
+			acc = (acc * 10U) + digit;
+			++count;
+		}
+
+		if (count != 0U)
+		{
+			*value = acc;
+			res = true;
+		}
+	}
+
+	return res;
+}
+
+bool qsc_arrayutils_try_parse_uint8(const char* str, size_t slen, uint8_t* value)
+{
+	uint64_t tmp;
+	bool res;
+
+	res = arrayutils_try_parse_decimal(str, slen, UINT8_MAX, &tmp);
+
+	if (res == true && value != NULL)
+	{
+		*value = (uint8_t)tmp;
+	}
+	else
+	{
+		res = false;
+	}
+
+	return res;
+}
+
+bool qsc_arrayutils_try_parse_uint16(const char* str, size_t slen, uint16_t* value)
+{
+	uint64_t tmp;
+	bool res;
+
+	res = arrayutils_try_parse_decimal(str, slen, UINT16_MAX, &tmp);
+
+	if (res == true && value != NULL)
+	{
+		*value = (uint16_t)tmp;
+	}
+	else
+	{
+		res = false;
+	}
+
+	return res;
+}
+
+bool qsc_arrayutils_try_parse_uint32(const char* str, size_t slen, uint32_t* value)
+{
+	uint64_t tmp;
+	bool res;
+
+	res = arrayutils_try_parse_decimal(str, slen, UINT32_MAX, &tmp);
+
+	if (res == true && value != NULL)
+	{
+		*value = (uint32_t)tmp;
+	}
+	else
+	{
+		res = false;
+	}
+
+	return res;
+}
+
+bool qsc_arrayutils_try_parse_uint64(const char* str, size_t slen, uint64_t* value)
+{
+	return arrayutils_try_parse_decimal(str, slen, UINT64_MAX, value);
 }
 
 uint8_t qsc_arrayutils_hex_to_uint8(const char* str, size_t slen)
@@ -261,33 +458,36 @@ uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t slen)
 
 uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen)
 {
-    QSC_ASSERT(str != NULL);
-    QSC_ASSERT(slen != 0U);
+	QSC_ASSERT(str != NULL);
+	QSC_ASSERT(slen != 0U);
 
-    uint64_t digit;
-    uint64_t res;
+	uint64_t digit;
+	uint64_t res;
 
-    res = 0U;
+	res = 0U;
 
-    if (str != NULL)
-    {
-        for (size_t i = 0U; (i < slen) && (str[i] != '\0'); ++i)
-        {
-            char c = str[i];
+	if (str != NULL && slen != 0U)
+	{
+		for (size_t i = 0U; i < slen && str[i] != '\0'; ++i)
+		{
+			if (str[i] < '0' || str[i] > '9')
+			{
+				break;
+			}
 
-            digit = c - '0';
+			digit = (uint64_t)(str[i] - '0');
 
-            if (res > (UINT64_MAX - digit) / 10)
-            {
-                res = UINT64_MAX;
-                break;
-            }
+			if (res > (UINT64_MAX - digit) / 10U)
+			{
+				res = UINT64_MAX;
+				break;
+			}
 
-            res = (uint32_t)(res * 10U + digit);
-        }
-    }
+			res = (res * 10U) + digit;
+		}
+	}
 
-    return res;
+	return res;
 }
 
 #if defined(QSC_DEBUG_MODE)

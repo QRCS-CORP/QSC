@@ -1,8 +1,12 @@
 #include "x509sigver.h"
-#include "dilithium.h"
-#include "ecdsa.h"
-#include "eddsa.h"
+#include "mldsa.h"
+#include "ecdsap256.h"
+#include "ecdsap384.h"
+#include "ecdsap521.h"
+#include "eddsa25519.h"
+#include "eddsa448.h"
 #include "memutils.h"
+#include "sha2.h"
 #include "x509sig.h"
 #include "x509spki.h"
 #include "x509verify.h"
@@ -30,41 +34,9 @@ static bool x509_sigver_ct_equal(const uint8_t* left, const uint8_t* right, size
     return res;
 }
 
-static qsc_x509_pqc_parameter_set x509_sigver_active_mldsa_parameter_set(void)
-{
-    qsc_x509_pqc_parameter_set res;
-
-#if defined(QSC_DILITHIUM_S1P44)
-    res = QSC_X509_PQC_PARAMETER_SET_ML_DSA_44;
-#elif defined(QSC_DILITHIUM_S3P65)
-    res = QSC_X509_PQC_PARAMETER_SET_ML_DSA_65;
-#elif defined(QSC_DILITHIUM_S5P87)
-    res = QSC_X509_PQC_PARAMETER_SET_ML_DSA_87;
-#else
-    res = QSC_X509_PQC_PARAMETER_SET_NONE;
-#endif
-
-    return res;
-}
-
 static size_t x509_sigver_expected_mldsa_signature_size(qsc_x509_signature_algorithm sigalg)
 {
     return qsc_x509_signature_expected_size(sigalg, QSC_X509_NAMED_CURVE_NONE);
-}
-
-static bool x509_sigver_mldsa_signature_matches_build(qsc_x509_signature_algorithm sigalg, const qsc_x509_subject_public_key_info* spki)
-{
-    bool res;
-
-    res = false;
-
-    if (spki != NULL)
-    {
-        res = qsc_x509_signature_algorithm_matches_spki(sigalg, spki) &&
-            (spki->algorithm.pqcparameter == x509_sigver_active_mldsa_parameter_set());
-    }
-
-    return res;
 }
 
 static size_t x509_curve_coordinate_size(qsc_x509_named_curve curve)
@@ -72,11 +44,25 @@ static size_t x509_curve_coordinate_size(qsc_x509_named_curve curve)
     return qsc_x509_named_curve_coordinate_size(curve);
 }
 
+/**
+ * \brief Validate an ECDSA signature hash and EC subject-key curve independently.
+ * \param sigalg Certificate signature hash algorithm.
+ * \param curve Issuer EC public-key named curve.
+ * \return True for the supported SHA-2 and NIST curve combinations.
+ * \note No state is modified. TLS CertificateVerify pairings are not affected.
+ */
 static bool x509_qsc_verify_is_supported_ecdsa(qsc_x509_signature_algorithm sigalg, qsc_x509_named_curve curve)
 {
-    return ((sigalg == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA256) && (curve == QSC_X509_NAMED_CURVE_PRIME256V1)) ||
-           ((sigalg == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384) && (curve == QSC_X509_NAMED_CURVE_SECP384R1)) ||
-           ((sigalg == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512) && (curve == QSC_X509_NAMED_CURVE_SECP521R1));
+	bool res;
+
+	res = ((sigalg == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA256) ||
+		(sigalg == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384) ||
+		(sigalg == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512)) &&
+		((curve == QSC_X509_NAMED_CURVE_PRIME256V1) ||
+		(curve == QSC_X509_NAMED_CURVE_SECP384R1) ||
+		(curve == QSC_X509_NAMED_CURVE_SECP521R1));
+
+	return res;
 }
 
 static bool x509_qsc_copy_ecdsa_signature_raw(uint8_t* rawsig, size_t rawsiglen, const qsc_x509_ecdsa_signature* esig)
@@ -95,20 +81,81 @@ static bool x509_qsc_copy_ecdsa_signature_raw(uint8_t* rawsig, size_t rawsiglen,
     return res;
 }
 
-static bool x509_qsc_verify_message(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, qsc_x509_named_curve curve)
+/**
+ * \brief Verify an ECDSA signature against the digest selected by the X.509 OID.
+ * \param msgout Output recovered certificate signed-message bytes.
+ * \param msglen Output length in bytes.
+ * \param signedmsg Raw fixed-width signature followed by the signed DER region.
+ * \param smsglen Signed-message total size in bytes.
+ * \param publickey Issuer raw NIST-curve public key.
+ * \param curve Issuer EC public-key named curve.
+ * \param sigalg ECDSA SHA-2 signature algorithm OID.
+ * \return True if the certificate signature matches the signed region.
+ * \note Scratch digest is erased. No allocations or shared mutable state.
+ */
+static bool x509_qsc_verify_message(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, qsc_x509_named_curve curve, qsc_x509_signature_algorithm sigalg)
 {
-    bool res;
+	uint8_t digest[64U] = { 0U };
+	const uint8_t* message;
+	size_t digestlen;
+	size_t offset;
+	bool res;
 
-    res = false;
+	digestlen = 0U;
+	offset = 2U * qsc_x509_named_curve_coordinate_size(curve);
+	message = NULL;
+	res = false;
 
-    if (curve == QSC_X509_NAMED_CURVE_PRIME256V1 ||
-        curve == QSC_X509_NAMED_CURVE_SECP384R1 ||
-        curve == QSC_X509_NAMED_CURVE_SECP521R1)
-    {
-        res = qsc_ecdsa_verify(msgout, msglen, signedmsg, smsglen, publickey);
-    }
+	if ((signedmsg != NULL) && (publickey != NULL) && (msgout != NULL) && (msglen != NULL) &&
+		(offset != 0U) && (smsglen >= offset))
+	{
+		message = signedmsg + offset;
 
-    return res;
+		switch (sigalg)
+		{
+			case QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA256:
+			{
+				qsc_sha256_compute(digest, message, smsglen - offset);
+				digestlen = 32U;
+				break;
+			}
+			case QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384:
+			{
+				qsc_sha384_compute(digest, message, smsglen - offset);
+				digestlen = 48U;
+				break;
+			}
+			case QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512:
+			{
+				qsc_sha512_compute(digest, message, smsglen - offset);
+				digestlen = 64U;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+
+		if (digestlen != 0U)
+		{
+			if (curve == QSC_X509_NAMED_CURVE_PRIME256V1)
+			{
+				res = qsc_p256_verify_prehashed(msgout, msglen, signedmsg, smsglen, publickey, digest, digestlen);
+			}
+			else if (curve == QSC_X509_NAMED_CURVE_SECP384R1)
+			{
+				res = qsc_p384_verify_prehashed(msgout, msglen, signedmsg, smsglen, publickey, digest, digestlen);
+			}
+			else if (curve == QSC_X509_NAMED_CURVE_SECP521R1)
+			{
+				res = qsc_p521_verify_prehashed(msgout, msglen, signedmsg, smsglen, publickey, digest, digestlen);
+			}
+		}
+	}
+
+	qsc_memutils_secure_erase(digest, sizeof(digest));
+	return res;
 }
 
 static bool x509_sigver_state_is_valid(const qsc_x509_verify_state* state)
@@ -192,7 +239,7 @@ static bool x509_qsc_verify_ecdsa(const uint8_t* data, size_t datalen, const uin
                 qsc_memutils_copy(signedmsg + sigrawlen, data, datalen);
                 qsc_memutils_secure_erase(recovered, datalen);
 
-                res = x509_qsc_verify_message(recovered, &msglen, signedmsg, signedmsglen, pubkey, spki->algorithm.curve);
+                res = x509_qsc_verify_message(recovered, &msglen, signedmsg, signedmsglen, pubkey, spki->algorithm.curve, sigalg);
 
                 if ((res == true) && ((msglen != datalen) || (x509_sigver_ct_equal(recovered, data, datalen) == false)))
                 {
@@ -218,20 +265,21 @@ static bool x509_qsc_verify_mldsa(const uint8_t* data, size_t datalen, const uin
     size_t msglen;
     size_t required;
     bool res;
+    bool verified;
 
     signedmsg = NULL;
     recovered = NULL;
     msglen = 0U;
     required = 0U;
     res = false;
+    verified = false;
 
     if (x509_sigver_signed_region_is_valid(data, datalen) == true &&
         (signature != NULL) && (signaturelen != 0U) &&
         (spki != NULL) && (x509_sigver_state_is_valid(vstate) == true) &&
-        (x509_sigver_mldsa_signature_matches_build(sigalg, spki) == true) &&
+        (qsc_x509_signature_algorithm_matches_spki(sigalg, spki) == true) &&
         (signaturelen == x509_sigver_expected_mldsa_signature_size(sigalg)) &&
-        (spki->publickeylen == qsc_x509_pqc_public_key_size(spki->algorithm.pqcparameter)) &&
-        (spki->publickeylen == QSC_DILITHIUM_PUBLICKEY_SIZE))
+        (spki->publickeylen == qsc_x509_pqc_public_key_size(spki->algorithm.pqcparameter)))
     {
         required = signaturelen + (2U * datalen);
 
@@ -243,7 +291,22 @@ static bool x509_qsc_verify_mldsa(const uint8_t* data, size_t datalen, const uin
             qsc_memutils_copy(signedmsg + signaturelen, data, datalen);
             qsc_memutils_secure_erase(recovered, datalen);
 
-            if (qsc_dilithium_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey) == true)
+            verified = false;
+
+            if (sigalg == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44)
+            {
+                verified = qsc_mldsa44_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey);
+            }
+            else if (sigalg == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_65)
+            {
+                verified = qsc_mldsa65_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey);
+            }
+            else if (sigalg == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_87)
+            {
+                verified = qsc_mldsa87_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey);
+            }
+
+            if (verified == true)
             {
                 res = (msglen == datalen) && (x509_sigver_ct_equal(recovered, data, datalen) == true);
             }
@@ -259,6 +322,7 @@ static bool x509_sigver_algorithm_is_supported(qsc_x509_signature_algorithm sign
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519) ||
+           (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED448) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_65) ||
            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_87);
@@ -319,7 +383,8 @@ bool qsc_x509_qsc_verify_signed_data(const uint8_t* data, size_t datalen, const 
         {
             res = x509_qsc_verify_ecdsa(data, datalen, signature, signaturelen, unusedbits, signaturealgorithm, spki, (qsc_x509_verify_state*)state);
         }
-        else if (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519)
+        else if ((signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519) ||
+            (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED448))
         {
             uint8_t* signedmsg;
             uint8_t* recovered;
@@ -332,8 +397,9 @@ bool qsc_x509_qsc_verify_signed_data(const uint8_t* data, size_t datalen, const 
             recovered = NULL;
 
             if ((unusedbits == 0U) &&
-                (signaturelen == QSC_EDDSA_SIGNATURE_SIZE) &&
-                (spki->publickeylen == QSC_EDDSA_PUBLICKEY_SIZE) &&
+                (signaturelen == qsc_x509_signature_expected_size(signaturealgorithm, QSC_X509_NAMED_CURVE_NONE)) &&
+                (spki->publickeylen == ((signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519) ?
+                    QSC_ED25519_PUBLICKEY_SIZE : QSC_ED448_PUBLICKEY_SIZE)) &&
                 (x509_sigver_state_is_valid((qsc_x509_verify_state*)state) == true))
             {
                 required = signaturelen + (2U * datalen);
@@ -346,7 +412,20 @@ bool qsc_x509_qsc_verify_signed_data(const uint8_t* data, size_t datalen, const 
                     qsc_memutils_copy(signedmsg + signaturelen, data, datalen);
                     qsc_memutils_secure_erase(recovered, datalen);
 
-                    if (qsc_eddsa_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey) == true)
+                    bool verified;
+
+                    verified = false;
+
+                    if (signaturealgorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519)
+                    {
+                        verified = qsc_ed25519_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey);
+                    }
+                    else
+                    {
+                        verified = qsc_ed448_verify(recovered, &msglen, signedmsg, signaturelen + datalen, spki->publickey);
+                    }
+
+                    if (verified == true)
                     {
                         res = (msglen == datalen) && (x509_sigver_ct_equal(recovered, data, datalen) == true);
                     }

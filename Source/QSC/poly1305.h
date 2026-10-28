@@ -126,7 +126,7 @@ QSC_EXPORT_API typedef struct qsc_poly1305_state
 
 /**
 * \brief Update the poly1305 generator with a single block of message input.
-* Absorbs block sized lengths of input message into the ctx.
+* Absorbs exactly 16 bytes in stream order, including any pending partial block.
 *
 * \warning Message length must be a single 16 byte message block. \n
 *
@@ -141,8 +141,8 @@ QSC_EXPORT_API void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint
 * \warning The output array must be at least 16 bytes in length.
 *
 * \param output: The output byte array; receives the MAC code
-* \param message: [const] The message input byte array
-* \param msglen: The number of message bytes to process
+* \param message: [const] Message input; may be NULL when msglen is zero.
+* \param msglen: Number of message bytes to process
 * \param key: [const] The 32 byte key array
 */
 QSC_EXPORT_API void qsc_poly1305_compute(uint8_t* output, const uint8_t* message, size_t msglen, const uint8_t* key);
@@ -155,8 +155,8 @@ QSC_EXPORT_API void qsc_poly1305_compute(uint8_t* output, const uint8_t* message
 QSC_EXPORT_API void qsc_poly1305_dispose(qsc_poly1305_state* ctx);
 
 /**
-* \brief Finalize the message ctx and returns the MAC code.
-* Absorb the last block of message and create the MAC array. \n
+* \brief Finalize the message ctx and return the MAC code.
+* Absorb the last block, write the MAC and securely reset the state. \n
 *
 * \param ctx: [struct] The function ctx; must be initialized
 * \param mac: The MAC byte array; receives the MAC code
@@ -165,6 +165,8 @@ QSC_EXPORT_API void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* mac)
 
 /**
 * \brief Initialize the ctx with the secret key.
+* A key must be used for only one message. Key storage must not overlap ctx.
+* Buffered data is erased; a NULL key erases the previous state in release builds.
 *
 * \param ctx: [struct] The function ctx
 * \param key: [const] The secret key byte array
@@ -172,7 +174,7 @@ QSC_EXPORT_API void qsc_poly1305_finalize(qsc_poly1305_state* ctx, uint8_t* mac)
 QSC_EXPORT_API void qsc_poly1305_initialize(qsc_poly1305_state* ctx, const uint8_t key[QSC_POLY1305_KEY_SIZE]);
 
 /**
-* \brief Reset the ctx values to zero.
+* \brief Erase the accumulator, key, and buffered data, invalidating the context.
 *
 * \param ctx The function ctx
 */
@@ -183,20 +185,20 @@ QSC_EXPORT_API void qsc_poly1305_reset(qsc_poly1305_state* ctx);
 * Absorbs the input message into the ctx.
 *
 * \param ctx: [struct] The function ctx; must be initialized
-* \param message: [const] The input message byte array
-* \param msglen: The number of input message bytes to process
+* \param message: [const] Input message; may be NULL when msglen is zero.
+* \param msglen: Number of input bytes; zero is a no-op.
 */
 QSC_EXPORT_API void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t msglen);
 
 /**
 * \brief Verify a MAC code.
-* Tests the code against the message and returns MQC_STATUS_SUCCESS or MQC_STATUS_FAILURE.
+* Compare the supplied code with the computed tag using QSC constant-time verification.
 *
 * \param code: [const] The MAC code byte array
-* \param message: [const] The message byte array
-* \param msglen: The number of message bytes to process
+* \param message: [const] Message bytes; may be NULL when msglen is zero.
+* \param msglen: Number of message bytes to process
 * \param key: [const] The secret key byte array
-* \return Returns success or failure
+* \return Zero on tag match; nonzero on mismatch or invalid parameters.
 */
 QSC_EXPORT_API int32_t qsc_poly1305_verify(const uint8_t* code, const uint8_t* message, size_t msglen, const uint8_t* key);
 

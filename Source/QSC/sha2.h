@@ -127,7 +127,7 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*!
  * \def QSC_HMAC_384_MAC_SIZE
- * \brief The HMAC-256 mac-code size in bytes.
+ * \brief The HMAC-384 mac-code size in bytes.
  */
 #define QSC_HMAC_384_MAC_SIZE 48U
 
@@ -147,7 +147,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_HMAC_384_RATE
  * \brief The HMAC-384 input rate size in bytes.
  */
-#define QSC_HMAC_384_RATE 96U
+#define QSC_HMAC_384_RATE 128U
 
 /*!
  * \def QSC_HMAC_512_RATE
@@ -480,7 +480,7 @@ QSC_EXPORT_API typedef struct
 /*!
  * \brief Process a message with HMAC(SHA2-384) and return the MAC code in the output byte array.
  *
- * \warning The output array must be at least 64 bytes in length.
+ * \warning The output array must be at least 48 bytes in length.
  *
  * \param output: [uint8_t*] The output byte array; receives the MAC code.
  * \param message: [const uint8_t*] The message input byte array.
@@ -598,10 +598,10 @@ QSC_EXPORT_API void qsc_hmac512_update(qsc_hmac512_state* ctx, const uint8_t* me
  * \brief Initialize an instance of HKDF(HMAC(SHA2-256)) and generate pseudo-random output.
  *
  * \param output: [uint8_t*] The output pseudo-random byte array.
- * \param otplen: [size_t] The output array length.
- * \param key: [const uint8_t*] The HKDF key array.
+ * \param otplen: [size_t] The requested output length; at most 255 * QSC_SHA2_256_HASH_SIZE bytes.
+ * \param key: [const uint8_t*] The pseudorandom key from Extract; RFC 5869 requires at least one hash output.
  * \param keylen: [size_t] The key array length.
- * \param info: [const uint8_t*] The info array.
+ * \param info: [const uint8_t*] The info array; may be NULL only when infolen is zero.
  * \param infolen: [size_t] The info array length.
  */
 QSC_EXPORT_API void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
@@ -609,11 +609,11 @@ QSC_EXPORT_API void qsc_hkdf256_expand(uint8_t* output, size_t otplen, const uin
 /*!
  * \brief Extract a key from a combined key and salt input using HMAC(SHA2-256).
  *
- * \param output: [uint8_t*] The output pseudo-random byte array.
- * \param otplen: [size_t] The output array length.
+ * \param output: [uint8_t*] Receives exactly QSC_SHA2_256_HASH_SIZE pseudorandom key bytes.
+ * \param otplen: [size_t] The output capacity; at least QSC_SHA2_256_HASH_SIZE bytes.
  * \param key: [const uint8_t*] The HKDF key array.
  * \param keylen: [size_t] The key array length.
- * \param salt: [const uint8_t*] The salt array.
+ * \param salt: [const uint8_t*] The salt array; may be NULL only when saltlen is zero.
  * \param saltlen: [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
@@ -622,10 +622,10 @@ QSC_EXPORT_API void qsc_hkdf256_extract(uint8_t* output, size_t otplen, const ui
  * \brief Initialize an instance of HKDF(HMAC(SHA2-384)) and generate pseudo-random output.
  *
  * \param output: [uint8_t*] The output pseudo-random byte array.
- * \param otplen: [size_t] The output array length.
- * \param key: [const uint8_t*] The HKDF key array.
+ * \param otplen: [size_t] The requested output length; at most 255 * QSC_SHA2_384_HASH_SIZE bytes.
+ * \param key: [const uint8_t*] The pseudorandom key from Extract; RFC 5869 requires at least one hash output.
  * \param keylen: [size_t] The key array length.
- * \param info: [const uint8_t*] The info array.
+ * \param info: [const uint8_t*] The info array; may be NULL only when infolen is zero.
  * \param infolen: [size_t] The info array length.
  */
 QSC_EXPORT_API void qsc_hkdf384_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
@@ -633,11 +633,11 @@ QSC_EXPORT_API void qsc_hkdf384_expand(uint8_t* output, size_t otplen, const uin
 /*!
  * \brief Extract a key from a combined key and salt input using HMAC(SHA2-384).
  *
- * \param output: [uint8_t*] The output pseudo-random byte array.
- * \param otplen: [size_t] The output array length.
+ * \param output: [uint8_t*] Receives exactly QSC_SHA2_384_HASH_SIZE pseudorandom key bytes.
+ * \param otplen: [size_t] The output capacity; at least QSC_SHA2_384_HASH_SIZE bytes.
  * \param key: [const uint8_t*] The HKDF key array.
  * \param keylen: [size_t] The key array length.
- * \param salt: [const uint8_t*] The salt array.
+ * \param salt: [const uint8_t*] The salt array; may be NULL only when saltlen is zero.
  * \param saltlen: [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf384_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);
@@ -646,10 +646,10 @@ QSC_EXPORT_API void qsc_hkdf384_extract(uint8_t* output, size_t otplen, const ui
  * \brief Initialize an instance of HKDF(HMAC(SHA2-512)) and generate pseudo-random output.
  *
  * \param output: [uint8_t*] The output pseudo-random byte array.
- * \param otplen: [size_t] The output array length.
- * \param key: [const uint8_t*] The HKDF key array.
+ * \param otplen: [size_t] The requested output length; at most 255 * QSC_SHA2_512_HASH_SIZE bytes.
+ * \param key: [const uint8_t*] The pseudorandom key from Extract; RFC 5869 requires at least one hash output.
  * \param keylen: [size_t] The key array length.
- * \param info: [const uint8_t*] The info array.
+ * \param info: [const uint8_t*] The info array; may be NULL only when infolen is zero.
  * \param infolen: [size_t] The info array length.
  */
 QSC_EXPORT_API void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* info, size_t infolen);
@@ -657,11 +657,11 @@ QSC_EXPORT_API void qsc_hkdf512_expand(uint8_t* output, size_t otplen, const uin
 /*!
  * \brief Extract a key from a combined key and salt input using HMAC(SHA2-512).
  *
- * \param output: [uint8_t*] The output pseudo-random byte array.
- * \param otplen: [size_t] The output array length.
+ * \param output: [uint8_t*] Receives exactly QSC_SHA2_512_HASH_SIZE pseudorandom key bytes.
+ * \param otplen: [size_t] The output capacity; at least QSC_SHA2_512_HASH_SIZE bytes.
  * \param key: [const uint8_t*] The HKDF key array.
  * \param keylen: [size_t] The key array length.
- * \param salt: [const uint8_t*] The salt array.
+ * \param salt: [const uint8_t*] The salt array; may be NULL only when saltlen is zero.
  * \param saltlen: [size_t] The salt array length.
  */
 QSC_EXPORT_API void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, size_t keylen, const uint8_t* salt, size_t saltlen);

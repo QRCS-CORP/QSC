@@ -206,14 +206,14 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_ECDH_ALGNAME "ECDH-P521"
 
 #else
-#   error "No ECDH parameter set defined. Define QSC_ECDH_S1EC25519 or QSC_ECDH_S3EC448."
+#   error "No ECDH parameter set defined. Define QSC_ECDH_S1P256, QSC_ECDH_S3P384, or QSC_ECDH_S5P521."
 #endif
 
  /**
   * \brief Derives a public key from an existing private key.
   *
-  * The private key is interpreted as 32 raw bytes. Scalar clamping is applied
-  * internally during public key derivation, as specified by RFC 7748.
+  * The private key is a big-endian scalar of QSC_ECDH_PRIVATEKEY_SIZE bytes.
+  * The public key is an uncompressed raw Qx || Qy point without a SEC1 tag.
   *
   * This function is intended for use when importing or reconstructing keys from
   * external representations such as PKCS#8 or application-defined storage.
@@ -227,7 +227,7 @@ QSC_CPLUSPLUS_ENABLED_START
 QSC_EXPORT_API void qsc_ecdh_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
 
 /**
- * \brief Generates public and private keys for the ECDH key encapsulation mechanism.
+ * \brief Generates public and private keys for ECDH key agreement.
  *
  * \warning Arrays must be sized to QSC_ECDH_PUBLICKEY_SIZE and QSC_ECDH_PRIVATEKEY_SIZE.
  *

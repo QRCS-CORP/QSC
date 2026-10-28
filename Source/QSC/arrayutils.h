@@ -109,14 +109,14 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief Find the first instance of a token in a string.
  *
  * Searches for the first occurrence of a given token within a string and returns
- * the zero-based character position. If the token is not found, the function returns
+ * the one-based character position (legacy QSC convention). If the token is not found, the function returns
  * QSC_ARRAYUTILS_NPOS.
  *
  * \param str: [const char*] Pointer to the constant character string to be searched.
  * \param slen: [size_t] The length of the string in bytes (excluding the null terminator).
  * \param token: [const char*] Pointer to the constant token string to search for.
  *
- * \return [size_t] The zero-based position of the token if found; otherwise QSC_ARRAYUTILS_NPOS.
+ * \return [size_t] The one-based position of the token if found; otherwise QSC_ARRAYUTILS_NPOS.
  *
  * \sa strstr
  */
@@ -230,6 +230,46 @@ QSC_EXPORT_API uint32_t qsc_arrayutils_string_to_uint32(const char* str, size_t 
  * \return [uint64_t] The parsed 64-bit unsigned integer, or zero if parsing fails.
  */
 QSC_EXPORT_API uint64_t qsc_arrayutils_string_to_uint64(const char* str, size_t slen);
+
+/**
+ * \brief Strictly parse a decimal unsigned integer without overflow or partial acceptance.
+ * \param str: Input data, not necessarily terminated; a single final NUL is permitted.
+ * \param slen: Available input bytes, including an optional final NUL.
+ * \param value: Output on success; unchanged on failure; caller-owned storage.
+ * \return True only when all digits are valid and the result fits the destination.
+ * \note No allocations; thread safe. Failure includes NULL pointers and empty input.
+ */
+QSC_EXPORT_API bool qsc_arrayutils_try_parse_uint8(const char* str, size_t slen, uint8_t* value);
+
+/**
+ * \brief Strict 16-bit decimal conversion.
+ * \param str: Caller-owned input containing decimal digits and optional final NUL.
+ * \param slen: Accessible input byte count.
+ * \param value: Caller-owned output set only on success.
+ * \return True for a complete uint16_t value; false for overflow, invalid or empty input.
+ * \note Allocation-free and thread-safe; does not consume or retain input.
+ */
+QSC_EXPORT_API bool qsc_arrayutils_try_parse_uint16(const char* str, size_t slen, uint16_t* value);
+
+/**
+ * \brief Strict 32-bit decimal conversion.
+ * \param str: Caller-owned input containing decimal digits and optional final NUL.
+ * \param slen: Accessible input byte count.
+ * \param value: Caller-owned output set only on success.
+ * \return True for a complete uint32_t value; false for overflow, invalid or empty input.
+ * \note Allocation-free and thread-safe; does not consume or retain input.
+ */
+QSC_EXPORT_API bool qsc_arrayutils_try_parse_uint32(const char* str, size_t slen, uint32_t* value);
+
+/**
+ * \brief Strict 64-bit decimal conversion.
+ * \param str: Caller-owned input containing decimal digits and optional final NUL.
+ * \param slen: Accessible input byte count.
+ * \param value: Caller-owned output set only on success.
+ * \return True for a complete uint64_t value; false for overflow, invalid or empty input.
+ * \note Allocation-free and thread-safe; does not consume or retain input.
+ */
+QSC_EXPORT_API bool qsc_arrayutils_try_parse_uint64(const char* str, size_t slen, uint64_t* value);
 
 #if defined(QSC_DEBUG_MODE)
 /**

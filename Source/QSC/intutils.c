@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "intutils.h"
 #include "memutils.h"
 #include <string.h>
@@ -525,25 +576,99 @@ void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t outlen)
 	QSC_ASSERT(hexstr != NULL);
 	QSC_ASSERT(output != NULL);
 
-	uint8_t idx0;
-	uint8_t idx1;
-
-	const uint8_t hashmap[] =
+	static const uint8_t HEX_TABLE[32U] =
 	{
 		0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U,
 		0x08U, 0x09U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
 		0x00U, 0x0AU, 0x0BU, 0x0CU, 0x0DU, 0x0EU, 0x0FU, 0x00U,
 		0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
 	};
+	size_t pos;
+	uint8_t high;
+	uint8_t low;
 
-	qsc_memutils_clear(output, outlen);
+	pos = 0U;
 
-	for (size_t pos = 0U; pos < (outlen * 2U); pos += 2U)
+	if (hexstr != NULL && output != NULL && outlen <= (SIZE_MAX / 2U))
 	{
-		idx0 = ((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U;
-		idx1 = ((uint8_t)hexstr[pos + 1U] & 0x1FU) ^ 0x10U;
-		output[pos / 2U] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
+		for (size_t i = 0U; i < outlen; ++i)
+		{
+			high = (uint8_t)(((uint8_t)hexstr[pos] & 0x1FU) ^ 0x10U);
+			low = (uint8_t)(((uint8_t)hexstr[pos + 1U] & 0x1FU) ^ 0x10U);
+			output[i] = (uint8_t)((HEX_TABLE[high] << 4U) | HEX_TABLE[low]);
+			pos += 2U;
+		}
 	}
+}
+
+/**
+ * \brief Parse one hexadecimal digit without reading past its position.
+ * \param value: ASCII character to decode.
+ * \return Value 0 through 15, or 255 for an invalid character.
+ * \note Stateless and thread safe.
+ */
+static uint8_t intutils_hex_nibble(uint8_t value)
+{
+	uint8_t res;
+
+	res = UINT8_MAX;
+
+	if (value >= (uint8_t)'0' && value <= (uint8_t)'9')
+	{
+		res = (uint8_t)(value - (uint8_t)'0');
+	}
+	else if (value >= (uint8_t)'A' && value <= (uint8_t)'F')
+	{
+		res = (uint8_t)(value - (uint8_t)'A' + 10U);
+	}
+	else if (value >= (uint8_t)'a' && value <= (uint8_t)'f')
+	{
+		res = (uint8_t)(value - (uint8_t)'a' + 10U);
+	}
+
+	return res;
+}
+
+bool qsc_intutils_hex_to_bin_checked(const char* hexstr, size_t hexlen, uint8_t* output, size_t outlen)
+{
+	QSC_ASSERT(hexstr != NULL);
+	QSC_ASSERT(output != NULL);
+
+	size_t pos;
+	uint8_t high;
+	uint8_t low;
+	bool res;
+
+	res = false;
+
+	if (hexstr != NULL && output != NULL && outlen <= (SIZE_MAX / 2U) && hexlen == (outlen * 2U))
+	{
+		res = true;
+
+		for (size_t i = 0U; i < hexlen; ++i)
+		{
+			if (intutils_hex_nibble((uint8_t)hexstr[i]) == UINT8_MAX)
+			{
+				res = false;
+				break;
+			}
+		}
+
+		if (res == true)
+		{
+			pos = 0U;
+
+			for (size_t i = 0U; i < outlen; ++i)
+			{
+				high = intutils_hex_nibble((uint8_t)hexstr[pos]);
+				low = intutils_hex_nibble((uint8_t)hexstr[pos + 1U]);
+				output[i] = (uint8_t)((high << 4U) | low);
+				pos += 2U;
+			}
+		}
+	}
+
+	return res;
 }
 
 bool qsc_intutils_is_power_of_two(size_t x)
@@ -557,9 +682,14 @@ size_t qsc_intutils_next_power_of_2(size_t x)
 
 	power = 1U;
 
-	while (power < x)
+	while (power < x && power <= (SIZE_MAX >> 1U))
 	{
 		power <<= 1;
+	}
+
+	if (power < x)
+	{
+		power = 0U;
 	}
 
 	return power;
@@ -586,7 +716,7 @@ void qsc_intutils_le8increment(uint8_t* output, size_t otplen)
 	}
 }
 
-#if defined(QSC_SYSTEM_HAS_AVX)
+#if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_AESNI_ENABLED)
 void qsc_intutils_leincrement_x128(__m128i* counter)
 {
 	QSC_ASSERT(counter != NULL);
@@ -692,7 +822,16 @@ uint32_t qsc_intutils_popcount32(uint32_t v)
 	return (uint32_t)((v * 0x01010101UL) >> 24);
 }
 
-#if defined(QSC_SYSTEM_HAS_AVX)
+uint32_t qsc_intutils_popcount64(uint64_t value)
+{
+	value -= (value >> 1U) & UINT64_C(0x5555555555555555);
+	value = (value & UINT64_C(0x3333333333333333)) + ((value >> 2U) & UINT64_C(0x3333333333333333));
+	value = (value + (value >> 4U)) & UINT64_C(0x0F0F0F0F0F0F0F0F);
+
+	return (uint32_t)((value * UINT64_C(0x0101010101010101)) >> 56U);
+}
+
+#if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_AESNI_ENABLED)
 void qsc_intutils_reverse_bytes_x128(const __m128i* input, __m128i* output)
 {
 	QSC_ASSERT(input != NULL);
@@ -724,28 +863,28 @@ uint32_t qsc_intutils_rotl32(uint32_t value, size_t shift)
 {
 	QSC_ASSERT(shift < 32U);
 
-	return (value << shift) | (value >> ((sizeof(uint32_t) * 8U) - shift));
+	return (value << shift) | (value >> ((32U - shift) & 31U));
 }
 
 uint64_t qsc_intutils_rotl64(uint64_t value, size_t shift)
 {
 	QSC_ASSERT(shift < 64U);
 
-	return (value << shift) | (value >> ((sizeof(uint64_t) * 8U) - shift));
+	return (value << shift) | (value >> ((64U - shift) & 63U));
 }
 
 uint32_t qsc_intutils_rotr32(uint32_t value, size_t shift)
 {
 	QSC_ASSERT(shift < 32U);
 
-	return (value >> shift) | (value << ((sizeof(uint32_t) * 8U) - shift));
+	return (value >> shift) | (value << ((32U - shift) & 31U));
 }
 
 uint64_t qsc_intutils_rotr64(uint64_t value, size_t shift)
 {
 	QSC_ASSERT(shift < 64U);
 
-	return (value >> shift) | (value << ((sizeof(uint64_t) * 8U) - shift));
+	return (value >> shift) | (value << ((64U - shift) & 63U));
 }
 
 int32_t qsc_intutils_verify(const uint8_t* a, const uint8_t* b, size_t length)

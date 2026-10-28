@@ -12,11 +12,20 @@
 
 bool qsc_rdrand_available(void)
 {
+	bool res;
+
+	res = false;
+
 #if defined(QSC_RDRAND_COMPATIBLE)
-	return true;
-#else
-	return false;
+	qsc_cpuidex_cpu_features features;
+
+	if (qsc_cpuidex_features_set(&features))
+	{
+		res = features.rdrand;
+	}
 #endif
+
+	return res;
 }
 
 bool qsc_rdp_generate(uint8_t* output, size_t length)
@@ -42,7 +51,7 @@ bool qsc_rdp_generate(uint8_t* output, size_t length)
 		bool hrand;
 		bool hfeat;
 		hfeat = qsc_cpuidex_features_set(&cfeat);
-		hrand = cfeat.rdrand;
+		hrand = hfeat && cfeat.rdrand;
 
 		if (hrand && hfeat)
 		{

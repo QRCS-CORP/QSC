@@ -54,8 +54,8 @@
 
 #include "qsccommon.h"
 #include "tlsdefs.h"
-#include "kyber.h"
-#include "dilithium.h"
+#include "kyber1024.h"
+#include "mldsa.h"
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -257,25 +257,25 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_TLS_MAX_KEM_PUBLIC_KEY_SIZE
  * \brief Maximum KEM public-key size exposed by the TLS registry.
  */
-#define QSC_TLS_MAX_KEM_PUBLIC_KEY_SIZE QSC_KYBER_PUBLICKEY_SIZE
+#define QSC_TLS_MAX_KEM_PUBLIC_KEY_SIZE QSC_KYBER1024_PUBLICKEY_SIZE
 
 /*! 
  * \def QSC_TLS_MAX_KEM_PRIVATE_KEY_SIZE
  * \brief Maximum KEM private-key size exposed by the TLS registry.
  */
-#define QSC_TLS_MAX_KEM_PRIVATE_KEY_SIZE QSC_KYBER_PRIVATEKEY_SIZE
+#define QSC_TLS_MAX_KEM_PRIVATE_KEY_SIZE QSC_KYBER1024_PRIVATEKEY_SIZE
 
 /*! 
  * \def QSC_TLS_MAX_KEM_CIPHERTEXT_SIZE
  * \brief Maximum KEM ciphertext size exposed by the TLS registry.
  */
-#define QSC_TLS_MAX_KEM_CIPHERTEXT_SIZE QSC_KYBER_CIPHERTEXT_SIZE
+#define QSC_TLS_MAX_KEM_CIPHERTEXT_SIZE QSC_KYBER1024_CIPHERTEXT_SIZE
 
 /*! 
  * \def QSC_TLS_MAX_KEM_SHARED_SECRET_SIZE
  * \brief Maximum KEM shared-secret size exposed by the TLS registry.
  */
-#define QSC_TLS_MAX_KEM_SHARED_SECRET_SIZE QSC_KYBER_SHAREDSECRET_SIZE
+#define QSC_TLS_MAX_KEM_SHARED_SECRET_SIZE QSC_KYBER1024_SHAREDSECRET_SIZE
 
 /*! 
  * \def QSC_TLS_MAX_HYBRID_CLIENT_KEYSHARE_SIZE
@@ -305,7 +305,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE
  * \brief Maximum CertificateVerify signature size in bytes across the registered signature schemes.
  */
-#define QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE QSC_DILITHIUM_SIGNATURE_SIZE
+#define QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE QSC_MLDSA87_SIGNATURE_SIZE
 
 /*!
  * \def QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE
@@ -407,7 +407,7 @@ typedef char qsc_tls_limit_assert_extension[(QSC_TLS_MAX_EXTENSION_SIZE >= QSC_T
 typedef char qsc_tls_limit_assert_client_hello[(QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE >= (43U + QSC_TLS_KEY_SHARE_CLIENT_EXTENSION_MAX_SIZE)) ? 1 : -1];
 typedef char qsc_tls_limit_assert_server_hello[(QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE >= (72U + QSC_TLS_KEY_SHARE_SERVER_EXTENSION_MAX_SIZE)) ? 1 : -1];
 typedef char qsc_tls_limit_assert_private[(QSC_TLS_MAX_PRIVATE_KEY_SIZE >= (QSC_TLS_MAX_CLASSICAL_PRIVATE_KEY_SIZE + QSC_TLS_MAX_KEM_PRIVATE_KEY_SIZE)) ? 1 : -1];
-typedef char qsc_tls_limit_assert_signature[(QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE >= QSC_DILITHIUM_SIGNATURE_SIZE) ? 1 : -1];
+typedef char qsc_tls_limit_assert_signature[(QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE >= QSC_MLDSA87_SIGNATURE_SIZE) ? 1 : -1];
 typedef char qsc_tls_limit_assert_ciphersuites[(QSC_TLS_MAX_CIPHER_SUITES >= 3U) ? 1 : -1];
 
 QSC_CPLUSPLUS_ENABLED_END

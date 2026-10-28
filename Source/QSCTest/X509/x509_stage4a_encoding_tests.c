@@ -808,11 +808,144 @@ static bool x509_stage4a_ecdsa_integer_canonicality(void)
 }
 
 
+/**
+ * \brief Verify that certificate decoding preserves the exact signed TBS region.
+ * \return True if the validated TBS range matches the independent DER slice.
+ * \note The fixture is read into owned memory and freed before returning;
+ * the test operates synchronously without shared mutable state.
+ */
+static bool x509_stage4a_tbs_region_equivalence(void)
+{
+	const char* path = "X509/Vectors/Stage3/interop_server.cert.der";
+	qsc_x509_certificate certificate = { 0 };
+	const uint8_t* expected;
+	uint8_t* der;
+	size_t derlen;
+	size_t expectedlen;
+	bool res;
+
+	derlen = 0U;
+	expectedlen = 0U;
+	expected = (const uint8_t*)NULL;
+	der = qsctest_x509_read_binary_file(path, &derlen);
+	res = false;
+
+	if (der != (uint8_t*)NULL)
+	{
+		if (qsc_asn1_der_get_child_region(der, derlen, 0U, &expected, &expectedlen) == QSC_ASN1_STATUS_SUCCESS)
+		{
+			if (qsc_x509_certificate_decode_der(der, derlen, &certificate) == QSC_ASN1_STATUS_SUCCESS)
+			{
+				res = (certificate.tbsdata == expected) &&
+					(certificate.tbsdatalen == expectedlen) &&
+					(expectedlen > 0U) &&
+					(qsc_memutils_are_equal(certificate.tbsdata, expected, expectedlen) == true);
+			}
+		}
+
+		qsc_x509_certificate_clear(&certificate);
+		qsc_memutils_alloc_free(der);
+	}
+
+	return res;
+}
+
+/**
+ * \brief Reject corrupted DER length encodings and a non-SEQUENCE TBS field.
+ * \return True if all four deliberately malformed variants are rejected.
+ * \note All mutation buffers are owned by this test. The test is synchronous
+ * and shares no mutable state with other tests.
+ */
+static bool x509_stage4a_tbs_region_malformed(void)
+{
+	const char* path = "X509/Vectors/Stage3/interop_server.cert.der";
+	qsc_x509_certificate certificate = { 0 };
+	const uint8_t* tbs;
+	uint8_t* der;
+	uint8_t* corrupt;
+	size_t derlen;
+	size_t tbslen;
+	size_t tbsoffset;
+	bool res;
+
+	derlen = 0U;
+	tbslen = 0U;
+	tbsoffset = 0U;
+	tbs = (const uint8_t*)NULL;
+	der = qsctest_x509_read_binary_file(path, &derlen);
+	corrupt = (uint8_t*)NULL;
+	res = false;
+
+	if (der != (uint8_t*)NULL && derlen >= 8U)
+	{
+		corrupt = (uint8_t*)qsc_memutils_malloc(derlen);
+
+		if (corrupt != (uint8_t*)NULL)
+		{
+			if (qsc_asn1_der_get_child_region(der, derlen, 0U, &tbs, &tbslen) == QSC_ASN1_STATUS_SUCCESS)
+			{
+				tbsoffset = (size_t)(tbs - der);
+
+				if (tbsoffset + 2U < derlen && tbslen > 2U)
+				{
+					qsc_memutils_copy(corrupt, der, derlen);
+					corrupt[1U] = 0x80U;
+					res = (qsc_x509_certificate_decode_der(corrupt, derlen, &certificate) != QSC_ASN1_STATUS_SUCCESS);
+					qsc_x509_certificate_clear(&certificate);
+
+					qsc_memutils_copy(corrupt, der, derlen);
+					corrupt[tbsoffset + 1U] = 0x80U;
+					res = (qsc_x509_certificate_decode_der(corrupt, derlen, &certificate) != QSC_ASN1_STATUS_SUCCESS) && res;
+					qsc_x509_certificate_clear(&certificate);
+
+					qsc_memutils_copy(corrupt, der, derlen);
+					corrupt[tbsoffset] = 0x31U;
+					res = (qsc_x509_certificate_decode_der(corrupt, derlen, &certificate) != QSC_ASN1_STATUS_SUCCESS) && res;
+					qsc_x509_certificate_clear(&certificate);
+
+					res = (qsc_x509_certificate_decode_der(der, derlen - 1U, &certificate) != QSC_ASN1_STATUS_SUCCESS) && res;
+					qsc_x509_certificate_clear(&certificate);
+				}
+			}
+
+			qsc_memutils_secure_erase(corrupt, derlen);
+			qsc_memutils_alloc_free(corrupt);
+		}
+	}
+
+	if (der != (uint8_t*)NULL)
+	{
+		qsc_memutils_alloc_free(der);
+	}
+
+	return res;
+}
+
 bool qsctest_x509_stage4a_encoding_tests(void)
 {
 	bool res;
 
 	res = true;
+
+	if (x509_stage4a_tbs_region_equivalence() == true)
+	{
+		qsctest_print_line("[PASS] X.509 exact TBSCertificate byte-region preservation.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] X.509 exact TBSCertificate byte-region preservation.");
+		res = false;
+	}
+
+	if (x509_stage4a_tbs_region_malformed() == true)
+	{
+		qsctest_print_line("[PASS] X.509 malformed TBSCertificate DER length and tag rejection.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] X.509 malformed TBSCertificate DER length and tag rejection.");
+		res = false;
+	}
 
 	if (x509_stage4a_der_recursive_canonicality() == true)
 	{

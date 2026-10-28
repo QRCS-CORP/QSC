@@ -56,7 +56,7 @@
 
 /**
  * \file ecdsa_test.h
- * \brief ECDSA P-256 test functions.
+ * \brief ECDSA P-256/P-384/P-521 test functions.
  *
  * \details
  * This header defines functions for testing the ECDSA P-256 implementation.
@@ -123,6 +123,48 @@
  * \brief Size in bytes of the fourth test message used in ECDSA tests.
  */
 #define QSCTEST_ECDSA_MSG3_SIZE 128
+
+/**
+ * \brief Run ECDSA P-256 independent RFC 6979 vector tests.
+ * \return true if the individual parameter-set known-answer checks pass.
+ * \details This test is independent of the selected qsc_ecdsa_* facade.
+ */
+bool qsctest_ecdsap256_kat_test(void);
+
+/**
+ * \brief Run ECDSA P-256 independent seeded-key/signature integrity tests.
+ * \return true if the individual parameter-set API and negative checks pass.
+ * \details This test is independent of the selected qsc_ecdsa_* facade.
+ */
+bool qsctest_ecdsap256_api_test(void);
+
+/**
+ * \brief Run ECDSA P-384 independent RFC 6979 vector tests.
+ * \return true if the individual parameter-set known-answer checks pass.
+ * \details This test is independent of the selected qsc_ecdsa_* facade.
+ */
+bool qsctest_ecdsap384_kat_test(void);
+
+/**
+ * \brief Run ECDSA P-384 independent seeded-key/signature integrity tests.
+ * \return true if the individual parameter-set API and negative checks pass.
+ * \details This test is independent of the selected qsc_ecdsa_* facade.
+ */
+bool qsctest_ecdsap384_api_test(void);
+
+/**
+ * \brief Run ECDSA P-521 independent RFC 6979 vector tests.
+ * \return true if the individual parameter-set known-answer checks pass.
+ * \details This test is independent of the selected qsc_ecdsa_* facade.
+ */
+bool qsctest_ecdsap521_kat_test(void);
+
+/**
+ * \brief Run ECDSA P-521 independent seeded-key/signature integrity tests.
+ * \return true if the individual parameter-set API and negative checks pass.
+ * \details This test is independent of the selected qsc_ecdsa_* facade.
+ */
+bool qsctest_ecdsap521_api_test(void);
 
 /**
  * \brief Test the ECDSA known answer vectors.

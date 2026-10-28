@@ -56,8 +56,8 @@
 
 /**
 * \file falcon_test.c
-* \brief Falcon test functions \n
-* Contains the Falcon implementation KAT and wellness test functions.
+* \brief Legacy Falcon-512 and Falcon-1024 qualification entry points.\n*
+* \details Includes independent 100-vector Round 3 KAT suites, scalar/AVX2\n* backend interoperability, oversized legacy-signature verification, RNG\n* failure, truncation, mutation and cross-parameter rejection tests.\n* New internal suites are static and invoked directly by qsctest_falcon_run().
 *
 * \author John Underhill
 * \date June 13, 2019
@@ -67,9 +67,9 @@
 #define QSCTEST_FALCON_MLEN 33
 
 /**
-* \brief Test the public and private keys, cipher-text and shared key
-* for correctness against the NIST PQC Round 3 vectors.
-* tests the second vector in the NIST PQC Round 3, KAT file.
+* \brief Check legacy Falcon keypair and signed-message KAT compatibility.
+* \details Covers the currently configured legacy facade parameter set
+* against the first Round 3 reference vector.
 * \return Returns true for test success
 */
 bool qsctest_falcon_operations_test(void);
@@ -93,15 +93,21 @@ bool qsctest_falcon_publickey_integrity(void);
 bool qsctest_falcon_signature_integrity(void);
 
 /**
-* \brief Stress test the key generation, encryption, and decryption functions in a looping test.
+* \brief Exercise Falcon randomized key generation, signing and verification.
 * \return Returns true for test success
 */
 bool qsctest_falcon_stress_test(void);
 
+/**
+* \brief Exercise randomized Falcon message lengths and repeated sign/verify.
+* \return True if all randomized round trips succeed.
+*/
 bool qsctest_falcon_stress_test2(void);
 
 /**
-* \brief Run the Falcon implementation stress and correctness tests tests
+* \brief Invoke each Falcon KAT, negative and stress test independently.
+* \details Reports distinct PASS/FAIL results for both parameter sets.
+* No test-dispatch loops are used.
 */
 void qsctest_falcon_run(void);
 

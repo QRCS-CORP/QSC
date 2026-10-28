@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "oid.h"
 #include "memutils.h"
 
@@ -157,6 +208,20 @@ static const qsc_oid_entry OID_REGISTRY[] =
     { QSC_OID_ID_CA_ISSUERS, OID_CA_ISSUERS, sizeof(OID_CA_ISSUERS), "1.3.6.1.5.5.7.48.2", "id-ad-caIssuers" }
 };
 
+/** \brief Index registry entries by enum ID without changing public registry ordering. */
+static const uint8_t OID_ID_INDEX[] =
+{
+	UINT8_MAX, 0U, 1U, 2U, 3U, 4U, 5U, 12U,
+	13U, 14U, 15U, 16U, 17U, 18U, 19U, 20U,
+	21U, 22U, 23U, 24U, 25U, 26U, 27U, 28U,
+	29U, 30U, 31U, 32U, 33U, 34U, 35U, 36U,
+	37U, 38U, 39U, 40U, 41U, 42U, 43U, 44U,
+	45U, 46U, 47U, 48U, 49U, 50U, 51U, 52U,
+	53U, 54U, 55U, 56U, 57U, 58U, 59U, 60U,
+	61U, 62U, 63U, 64U, 65U, 66U, 6U, 7U,
+	8U, 9U, 10U, 11U,
+};
+
 static bool oid_decode_base128(const uint8_t* data, size_t length, qsc_asn1_oid* oid)
 {
     size_t arcidx;
@@ -283,21 +348,22 @@ const qsc_oid_entry* qsc_oid_registry_at(size_t index)
 
 const qsc_oid_entry* qsc_oid_get_entry(qsc_oid_id id)
 {
-    const qsc_oid_entry* entry;
-    size_t i;
+	const qsc_oid_entry* entry;
+	size_t index;
 
-    entry = NULL;
+	entry = NULL;
 
-    for (i = 0U; i < qsc_oid_registry_count(); ++i)
-    {
-        if (OID_REGISTRY[i].id == id)
-        {
-            entry = &OID_REGISTRY[i];
-            break;
-        }
-    }
+	if ((size_t)id < sizeof(OID_ID_INDEX) / sizeof(OID_ID_INDEX[0U]))
+	{
+		index = (size_t)OID_ID_INDEX[(size_t)id];
 
-    return entry;
+		if (index < qsc_oid_registry_count() && OID_REGISTRY[index].id == id)
+		{
+			entry = &OID_REGISTRY[index];
+		}
+	}
+
+	return entry;
 }
 
 qsc_oid_id qsc_oid_identify(const qsc_asn1_oid* oid)

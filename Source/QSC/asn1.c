@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "asn1.h"
 #include "encoding.h"
 #include "intutils.h"
@@ -299,85 +350,80 @@ qsc_asn1_status qsc_asn1_der_decode_exact(const uint8_t* der, size_t derlen, qsc
 
 qsc_asn1_status qsc_asn1_der_get_child_region(const uint8_t* der, size_t derlen, size_t index, const uint8_t** child, size_t* childlen)
 {
-    qsc_asn1_status status;
-    qsc_encoding_ber_element* elem;
-    qsc_encoding_ber_element* relem;
-    size_t consumed;
-    size_t contentlen;
-    size_t end;
-    size_t headerlen;
-    size_t i;
-    size_t pos;
+	qsc_asn1_status status;
+	size_t consumed;
+	size_t contentlen;
+	size_t end;
+	size_t headerlen;
+	size_t i;
+	size_t pos;
+	size_t subcontent;
+	size_t subheader;
+	uint8_t tagclass;
+	uint32_t tagnumber;
+	bool constructed;
 
-    status = QSC_ASN1_STATUS_INVALID_INPUT;
+	status = QSC_ASN1_STATUS_INVALID_INPUT;
 
-    if (der != NULL && derlen != 0U && child != NULL && childlen != NULL)
-    {
-        *child = NULL;
-        *childlen = 0U;
-        relem = NULL;
+	if (der != NULL && derlen != 0U && child != NULL && childlen != NULL)
+	{
+		*child = NULL;
+		*childlen = 0U;
+		consumed = 0U;
 
-        status = qsc_asn1_der_decode_exact(der, derlen, &relem);
+		/* Validate the complete element once, without constructing an object tree.
+         * This prevents malformed trailing children from being silently skipped. */
+		if (qsc_encoding_der_validate(der, derlen, &consumed) == false)
+		{
+			status = QSC_ASN1_STATUS_INVALID_ENCODING;
+		}
+		else if (consumed != derlen)
+		{
+			status = QSC_ASN1_STATUS_INVALID_LENGTH;
+		}
+		else if (qsc_encoding_ber_decode_tag(der, derlen, &tagclass, &constructed, &tagnumber) == 0U)
+		{
+			status = QSC_ASN1_STATUS_INVALID_TAG;
+		}
+		else if (constructed == false)
+		{
+			status = QSC_ASN1_STATUS_INVALID_TAG;
+		}
+		else
+		{
+			status = asn1_decode_element_header(der, derlen, &headerlen, &contentlen);
 
-        if (status == QSC_ASN1_STATUS_SUCCESS)
-        {
-            elem = relem;
+			if (status == QSC_ASN1_STATUS_SUCCESS)
+			{
+				pos = headerlen;
+				end = headerlen + contentlen;
+				i = 0U;
+				status = QSC_ASN1_STATUS_NOT_FOUND;
 
-            if (elem->constructed == false)
-            {
-                status = QSC_ASN1_STATUS_INVALID_TAG;
-            }
-            else if (index >= elem->ccount)
-            {
-                status = QSC_ASN1_STATUS_NOT_FOUND;
-            }
-            else
-            {
-                status = asn1_decode_element_header(der, derlen, &headerlen, &contentlen);
+				while (pos < end)
+				{
+					if (asn1_decode_element_header(der + pos, end - pos, &subheader, &subcontent) != QSC_ASN1_STATUS_SUCCESS)
+					{
+						status = QSC_ASN1_STATUS_INVALID_ENCODING;
+						break;
+					}
 
-                if (status == QSC_ASN1_STATUS_SUCCESS)
-                {
-                    pos = headerlen;
-                    end = headerlen + contentlen;
+					if (i == index)
+					{
+						*child = der + pos;
+						*childlen = subheader + subcontent;
+						status = QSC_ASN1_STATUS_SUCCESS;
+						break;
+					}
 
-                    for (i = 0U; i <= index && status == QSC_ASN1_STATUS_SUCCESS; ++i)
-                    {
-                        consumed = 0U;
+					pos += subheader + subcontent;
+					++i;
+				}
+			}
+		}
+	}
 
-                        if (pos >= end)
-                        {
-                            status = QSC_ASN1_STATUS_INVALID_LENGTH;
-                        }
-                        else
-                        {
-                            qsc_encoding_ber_element* childelm;
-                            childelm = qsc_encoding_der_decode_element(der + pos, end - pos, &consumed);
-
-                            if (childelm == NULL || consumed == 0U || (pos + consumed) > end)
-                            {
-                                status = QSC_ASN1_STATUS_INVALID_ENCODING;
-                            }
-                            else
-                            {
-                                if (i == index)
-                                {
-                                    *child = der + pos;
-                                    *childlen = consumed;
-                                }
-
-                                pos += consumed;
-                                qsc_encoding_ber_free_element(childelm);
-                            }
-                        }
-                    }
-                }
-            }
-
-            qsc_encoding_ber_free_element(relem);
-        }
-    }
-
-    return status;
+	return status;
 }
 
 bool qsc_asn1_oid_compare(const qsc_asn1_oid* a, const qsc_asn1_oid* b)
@@ -1369,6 +1415,12 @@ qsc_asn1_status qsc_asn1_der_size(const qsc_encoding_ber_element* element, size_
                         break;
                     }
 
+                    if (childsz > (SIZE_MAX - content))
+                    {
+                        status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+                        break;
+                    }
+
                     content += childsz;
                 }
             }
@@ -1393,7 +1445,16 @@ qsc_asn1_status qsc_asn1_der_size(const qsc_encoding_ber_element* element, size_
                 }
                 else
                 {
-                    *length = taglen + asn1_length_field_size(content) + content;
+                    const size_t lengthfield = asn1_length_field_size(content);
+
+                    if (lengthfield > (SIZE_MAX - taglen) || content > (SIZE_MAX - taglen - lengthfield))
+                    {
+                        status = QSC_ASN1_STATUS_OUT_OF_RANGE;
+                    }
+                    else
+                    {
+                        *length = taglen + lengthfield + content;
+                    }
                 }
             }
         }

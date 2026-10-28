@@ -63,8 +63,9 @@
  * This file contains tests for the Kyber key encapsulation mechanism (KEM) implementation
  * as specified in the NIST FIPS 203 specification. The test suite includes:
  *
- * - A Known Answer Test (KAT) that verifies the generated public and private keys, the ciphertext,
- *   and the derived shared secret against expected test vectors.
+ * - Four parameter-qualified Known Answer Tests (KATs) that verify public and private keys, ciphertexts,
+ *   and shared secrets against their respective parameter-specific response files.
+ *   The QSC Kyber-1280 profile is nonstandard and is not FIPS 203 ML-KEM.
  *
  * - A ciphertext integrity test that ensures that modifying the ciphertext results in an invalid shared secret.
  *
@@ -106,17 +107,23 @@
 bool qsctest_kyber_ciphertext_integrity(void);
 
 /**
- * \brief Performs the Kyber Known Answer Test (KAT).
+ * \brief Tests one independent Kyber parameter set against its stored KAT.
  *
- * \details
- * This function verifies the correctness of the Kyber implementation by comparing the generated public key,
- * secret key, ciphertext, and shared secret with known answer test vectors from the NIST FIPS 203 test files.
- * It parses the test vectors from the appropriate response file based on the active parameter set and compares
- * them against the output produced by the Kyber key encapsulation mechanism.
+ * \details Each function calls the corresponding qsc_kyberNNNN_* API and
+ * checks public/private keys, ciphertext, and shared secrets against its
+ * parameter-specific NIST PQC competition-format response file. Each test
+ * verifies the file lengths before comparing results.
  *
- * \return Returns true if all generated values match the known answer test vectors; otherwise, false.
+ * \return True if keypair generation, encapsulation, decapsulation and all
+ * vector-field comparisons succeed; otherwise false.
+ *
+ * \note Tests share the QSCTest NIST PRNG state; invoke serially. The
+ * Kyber-1280 parameter set is QSC-specific and is not FIPS 203 ML-KEM.
  */
-bool qsctest_kyber_kat_test(void);
+bool qsctest_kyber512_kat_test(void);
+bool qsctest_kyber768_kat_test(void);
+bool qsctest_kyber1024_kat_test(void);
+bool qsctest_kyber1280_kat_test(void);
 
 /**
  * \brief Performs a stress test on Kyber operations.

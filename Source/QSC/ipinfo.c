@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "ipinfo.h"
 #include "memutils.h"
 #include "stringutils.h"
@@ -12,56 +63,73 @@
 #	include <netinet/in.h>
 #endif
 
-static bool ipinfo_hexfield_valid(const char** pp)
+/**
+ * \brief Parse a complete, canonical dotted-decimal IPv4 address.
+ * \param input NUL-terminated IPv4 address string, at most 15 characters.
+ * \param output Four bytes populated only on successful parsing.
+ * \return true for four valid decimal octets with no trailing input.
+ * \note No allocation; callers must supply a valid NUL-terminated string.
+ */
+static bool ipinfo_ipv4_parse(const char* input, uint8_t output[QSC_IPINFO_IPV4_BYTELEN])
 {
-	QSC_ASSERT(pp != NULL);
-
-    uint32_t value;
-    uint32_t digits;
-    const char* p;
+	uint8_t bytes[QSC_IPINFO_IPV4_BYTELEN] = { 0U };
+	const char* cur;
+	uint32_t value;
+	size_t octet;
+	size_t digits;
 	bool res;
 
 	res = false;
 
-	if (pp != NULL)
+	if (input != NULL && output != NULL)
 	{
-		value  = 0U;
-		digits = 0U;
-		p  = *pp;
+		cur = input;
+		res = true;
 
-		if (*pp != NULL)
+		for (octet = 0U; octet < QSC_IPINFO_IPV4_BYTELEN && res == true; ++octet)
 		{
-			while ((digits < 4U) && (p[0U] != '\0') && (p[0U] != ':'))
-			{
-				uint32_t nibble;
+			value = 0U;
+			digits = 0U;
 
-				if ((p[0U] >= '0') && (p[0U] <= '9'))
+			while (cur[0U] >= '0' && cur[0U] <= '9' && digits < 3U)
+			{
+				if (digits == 1U && cur[-1] == '0')
 				{
-					nibble = (uint32_t)(p[0U] - '0');
-				}
-				else if ((p[0U] >= 'A') && (p[0U] <= 'F'))
-				{
-					nibble = (uint32_t)(10U + (p[0U] - 'A'));
-				}
-				else if ((p[0U] >= 'a') && (p[0U] <= 'f'))
-				{
-					nibble = (uint32_t)(10U + (p[0U] - 'a'));
-				}
-				else
-				{
+					res = false;
 					break;
 				}
 
-				value = (value << 4U) | nibble;
+				value = (value * 10U) + (uint32_t)(cur[0U] - '0');
+				++cur;
 				++digits;
-				++p;
 			}
 
-			if (digits > 0U)
+			if (digits == 0U || value > 255U)
 			{
-				*pp = p;
-				res = true;
+				res = false;
 			}
+			else if (octet < (QSC_IPINFO_IPV4_BYTELEN - 1U))
+			{
+				if (cur[0U] != '.')
+				{
+					res = false;
+				}
+				else
+				{
+					++cur;
+				}
+			}
+
+			bytes[octet] = (uint8_t)value;
+		}
+
+		if (res == true && cur[0U] == '\0')
+		{
+			qsc_memutils_copy(output, bytes, sizeof(bytes));
+		}
+		else
+		{
+			res = false;
 		}
 	}
 
@@ -71,38 +139,24 @@ static bool ipinfo_hexfield_valid(const char** pp)
 qsc_ipinfo_address_types qsc_ipinfo_get_address_type(const char* address)
 {
 	QSC_ASSERT(address != NULL);
-	
-	qsc_ipinfo_address_types tadd;
 
-	tadd = qsc_ipinfo_address_type_unknown;
+	qsc_ipinfo_address_types res;
+
+	res = qsc_ipinfo_address_type_unknown;
 
 	if (address != NULL)
 	{
-		if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV4_STRNLEN)
+		if (qsc_ipinfo_ipv4_address_string_is_valid(address) == true)
 		{
-			qsc_ipinfo_ipv4_address ipv4;
-
-			ipv4 = qsc_ipinfo_ipv4_address_from_string(address);
-
-			if (qsc_ipinfo_ipv4_address_is_valid(&ipv4) == true)
-			{
-				tadd = qsc_ipinfo_address_type_ipv4;
-			}
+			res = qsc_ipinfo_address_type_ipv4;
 		}
-		else if (qsc_stringutils_string_size(address) <= QSC_IPINFO_IPV6_STRNLEN)
+		else if (qsc_ipinfo_ipv6_address_string_is_valid(address) == true)
 		{
-			qsc_ipinfo_ipv6_address ipv6;
-
-			ipv6 = qsc_ipinfo_ipv6_address_from_string(address);
-
-			if (qsc_ipinfo_ipv6_address_is_valid(&ipv6) == true)
-			{
-				tadd = qsc_ipinfo_address_type_ipv6;
-			}
+			res = qsc_ipinfo_address_type_ipv6;
 		}
 	}
 
-	return tadd;
+	return res;
 }
 
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_any(void)
@@ -156,85 +210,13 @@ qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_bytes(uint8_t a1, uint8_t a
 
 qsc_ipinfo_ipv4_address qsc_ipinfo_ipv4_address_from_string(const char input[QSC_IPINFO_IPV4_STRNLEN])
 {
-    qsc_ipinfo_ipv4_address res = { 0U };
-    bool bok;
+	QSC_ASSERT(input != NULL);
 
-    QSC_ASSERT(input != NULL);
+	qsc_ipinfo_ipv4_address res = { 0U };
 
-	bok = false;
+	(void)ipinfo_ipv4_parse(input, res.ipv4);
 
-    if (input != NULL)
-    {
-        size_t len = strlen(input);
-
-        /* minimum length: "0.0.0.0" = 7 characters */
-        if (len >= 7U)
-        {
-            const char* p = input;
-            size_t idx;
-            uint8_t tmp[4U] = { 0U };
-
-            bok = true;
-            for (idx = 0U; idx < 4U && bok; ++idx)
-            {
-                size_t digits = 0U;
-                uint32_t val  = 0U;
-
-                /* parse up to three digits */
-                while (*p != '\0' && *p != '.' && digits < 3U)
-                {
-                    char c = *p;
-
-                    if ((c < '0') || (c > '9'))
-                    {
-                        bok = false;
-                        break;
-                    }
-
-                    val = val * 10U + (uint32_t)(c - '0');
-
-                    if (val > 255U)
-                    {
-                        bok = false;
-                        break;
-                    }
-
-                    ++digits;
-                    ++p;
-                }
-
-                if (digits == 0U)
-                {
-                    bok = false;
-                }
-
-                if (bok)
-                {
-                    tmp[idx] = (uint8_t)val;
-                    if (idx < 3U)
-                    {
-                        if (*p != '.')
-                        {
-                            bok = false;
-                        }
-
-                        ++p;
-                    }
-                }
-            }
-
-            if (bok)
-            {
-                /* commit only on full success */
-                for (size_t i = 0U; i < 4U; ++i)
-                {
-                    res.ipv4[i] = tmp[i];
-                }
-            }
-        }
-    }
-
-    return res;
+	return res;
 }
 
 bool qsc_ipinfo_ipv4_address_is_equal(const qsc_ipinfo_ipv4_address* a, const qsc_ipinfo_ipv4_address* b)
@@ -336,11 +318,10 @@ bool qsc_ipinfo_ipv4_address_string_is_valid(const char* address)
 {
 	QSC_ASSERT(address != NULL);
 
+	uint8_t bytes[QSC_IPINFO_IPV4_BYTELEN];
 	bool res;
-	qsc_ipinfo_ipv4_address add = { 0 };
 
-	add = qsc_ipinfo_ipv4_address_from_string(address);
-	res = (address != NULL && (uint8_t)add.ipv4[0] < 224 && (uint8_t)add.ipv4[1] != 255 && (uint8_t)add.ipv4[2] != 255 && (uint8_t)add.ipv4[3] != 255);
+	res = ipinfo_ipv4_parse(address, bytes);
 
 	return res;
 }
@@ -447,76 +428,11 @@ void qsc_ipinfo_ipv4_address_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], con
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(address != NULL);
 
-	if (address != NULL && output != NULL)
+	if (output != NULL && address != NULL)
 	{
-		const char DELIM = '.';
-		size_t pos;
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		bool bok;
-		int32_t ret;
-
-		bok = false;
-		pos = 0U;
-		ret = 0;
-
-        /* first octet */
-        ret = snprintf(output, QSC_IPINFO_IPV4_STRNLEN, "%u", address->ipv4[0U]);
-        if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN)
-        {
-            pos = (size_t)ret;
-            output[pos] = DELIM;
-			++pos;
-
-            /* second octet */
-            ret = snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos, "%u", address->ipv4[1U]);
-
-            if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
-            {
-                pos += (size_t)ret;
-                output[pos] = DELIM;
-				++pos;
-
-                /* third octet */
-                ret = snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos, "%u", address->ipv4[2U]);
-
-                if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
-                {
-                    pos += (size_t)ret;
-                    output[pos] = DELIM;
-					++pos;
-
-                    /* fourth octet */
-                    ret = snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos, "%u", address->ipv4[3U]);
-                    if (ret >= 0 && (size_t)ret < QSC_IPINFO_IPV4_STRNLEN - pos)
-                    {
-                        pos += (size_t)ret;
-                        bok = true;
-                    }
-                }
-            }
-        }
-
-        if (bok)
-        {
-            qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
-        }
-
-#else
-
-		pos = (size_t)snprintf(output, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[0U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[1U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[2U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)snprintf(output + pos, QSC_IPINFO_IPV4_STRNLEN, "%u", (unsigned)address->ipv4[3U]);
-
-#endif
-		qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
+		(void)snprintf(output, QSC_IPINFO_IPV4_STRNLEN, "%u.%u.%u.%u",
+			(unsigned)address->ipv4[0U], (unsigned)address->ipv4[1U],
+			(unsigned)address->ipv4[2U], (unsigned)address->ipv4[3U]);
 	}
 }
 
@@ -525,39 +441,11 @@ void qsc_ipinfo_ipv4_array_to_string(char output[QSC_IPINFO_IPV4_STRNLEN], const
 	QSC_ASSERT(output != NULL);
 	QSC_ASSERT(address != NULL);
 
-	if (address != NULL && output != NULL)
+	if (output != NULL && address != NULL)
 	{
-		const char DELIM = '.';
-		size_t pos;
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-
-		pos = (size_t)sprintf_s(output, QSC_IPINFO_IPV4_STRNLEN, "%d", address[0U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[1U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[2U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += sprintf_s((output + pos), QSC_IPINFO_IPV4_STRNLEN - pos, "%d", address[3U]);
-
-#else
-
-		pos = (size_t)sprintf(output, "%d", address[0U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address[1U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += (size_t)sprintf((output + pos), "%d", address[2U]);
-		output[pos] = DELIM;
-		++pos;
-		pos += sprintf((output + pos), "%d", address[3U]);
-
-#endif
-		qsc_memutils_clear(output + pos, QSC_IPINFO_IPV4_STRNLEN - pos);
+		(void)snprintf(output, QSC_IPINFO_IPV4_STRNLEN, "%u.%u.%u.%u",
+			(unsigned)address[0U], (unsigned)address[1U],
+			(unsigned)address[2U], (unsigned)address[3U]);
 	}
 }
 
@@ -565,39 +453,43 @@ uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_IPV4_MASK_STRNLE
 {
 	QSC_ASSERT(mask != NULL);
 
-	uint32_t ta[4U] = { 0U };
-	const char* tmp = mask;
-	uint32_t bmask;
+	uint8_t octets[QSC_IPINFO_IPV4_BYTELEN];
 	uint8_t bits;
+	size_t i;
+	uint32_t value;
+	bool seenzero;
+	bool valid;
 
 	bits = 0U;
+	seenzero = false;
+	valid = ipinfo_ipv4_parse(mask, octets);
 
-	if (mask != NULL)
+	if (valid == true)
 	{
-		for (size_t i = 0U; i < 4U; ++i)
+		value = qsc_intutils_be8to32(octets);
+
+		for (i = 0U; i < 32U; ++i)
 		{
-			ta[i] = (uint32_t)qsc_stringutils_string_to_int(tmp);
-
-			if (i < 3U)
+			if ((value & (UINT32_C(0x80000000) >> i)) != 0U)
 			{
-				const char* dot = strchr(tmp, '.');
-
-				if (dot != NULL)
+				if (seenzero == true)
 				{
-					tmp = dot + 1;
+					valid = false;
+					break;
 				}
+
+				++bits;
+			}
+			else
+			{
+				seenzero = true;
 			}
 		}
+	}
 
-
+	if (valid == false)
+	{
 		bits = 0U;
-		bmask = ((ta[0U] << 24U) + (ta[1U] << 16U) + (ta[2U] << 8U) + (ta[3U]));
-
-		while (bmask != 0)
-		{
-			bits += bmask & 1U;
-			bmask >>= 1;
-		}
 	}
 
 	return bits;
@@ -607,101 +499,23 @@ void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8
 {
 	QSC_ASSERT(mask != NULL);
 
-	qsc_stringutils_clear_string(mask);
-	uint32_t tmpn;
+	uint8_t bytes[QSC_IPINFO_IPV4_BYTELEN] = { 0U };
+	size_t i;
 
 	if (mask != NULL)
 	{
-		tmpn = 0;
-
-		if (cidr <= 8U)
+		if (cidr > 32U)
 		{
-			const char tail[] = ".0.0.0";
-
-			for (size_t i = 0U; i < 8U; ++i)
-			{
-				if (cidr == 0U)
-				{
-					break;
-				}
-
-				tmpn |= (1U << (7U - i));
-				--cidr;
-			}
-
-			qsc_stringutils_int_to_string(tmpn, mask, QSC_IPINFO_IPV4_MASK_STRNLEN);
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+			cidr = 32U;
 		}
-		else if (cidr <= 16U)
+
+		for (i = 0U; i < (size_t)cidr; ++i)
 		{
-			const char head[] = "255.";
-			const char tail[] = ".0.0";
-			char tmask[4U] = { 0U };
-
-			cidr -= 8U;
-
-			for (size_t i = 0U; i < 8U; ++i)
-			{
-				if (cidr == 0U)
-				{
-					break;
-				}
-
-				tmpn |= (1U << (7U - i));
-				--cidr;
-			}
-
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-			qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
+			bytes[i / 8U] |= (uint8_t)(0x80U >> (i % 8U));
 		}
-		else if (cidr <= 24)
-		{
-			const char head[] = "255.255.";
-			const char tail[] = ".0";
-			char tmask[4U] = { 0U };
 
-			cidr -= 16U;
-
-			for (size_t i = 0U; i < 8U; ++i)
-			{
-				if (cidr == 0U)
-				{
-					break;
-				}
-
-				tmpn |= (1U << (7U - i));
-				--cidr;
-			}
-
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-			qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tail);
-		}
-		else
-		{
-			const char head[] = "255.255.255.";
-			char tmask[4U] = { 0U };
-
-			cidr -= 24U;
-
-			for (size_t i = 0U; i < 8U; ++i)
-			{
-				if (cidr == 0U)
-				{
-					break;
-				}
-
-				tmpn |= (1U << (7 - i));
-				--cidr;
-			}
-
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, head);
-			qsc_stringutils_int_to_string(tmpn, tmask, sizeof(tmask));
-			qsc_stringutils_concat_strings(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, tmask);
-		}
+		(void)snprintf(mask, QSC_IPINFO_IPV4_MASK_STRNLEN, "%u.%u.%u.%u",
+			(unsigned)bytes[0U], (unsigned)bytes[1U], (unsigned)bytes[2U], (unsigned)bytes[3U]);
 	}
 }
 
@@ -802,18 +616,11 @@ bool qsc_ipinfo_ipv6_address_is_equal(const qsc_ipinfo_ipv6_address* a, const qs
 
 	bool res;
 
-	res = true;
+	res = false;
 
 	if (a != NULL && b != NULL)
 	{
-		for (size_t i = 0U; i < sizeof(a->ipv6); ++i)
-		{
-			if (a->ipv6[i] != b->ipv6[i])
-			{
-				res = false;
-				break;
-			}
-		}
+		res = qsc_memutils_are_equal(a->ipv6, b->ipv6, QSC_IPINFO_IPV6_BYTELEN);
 	}
 
 	return res;
@@ -890,73 +697,23 @@ bool qsc_ipinfo_ipv6_address_is_valid(const qsc_ipinfo_ipv6_address* address)
 
 bool qsc_ipinfo_ipv6_address_string_is_valid(const char* address)
 {
-    QSC_ASSERT(address != NULL);
+	QSC_ASSERT(address != NULL);
 
-    bool res;
-    uint32_t fields;
-    bool dblcolon;
-    bool bok;
+	struct in6_addr parsed;
+	bool res;
 
 	res = false;
 
-    if (address != NULL)
-    {
-		fields = 0U;
-		bok = true;
-		dblcolon = false;
-        const char * p = address;
+	if (address != NULL)
+	{
+#if defined(QSC_SYSTEM_SOCKETS_WINDOWS)
+		res = (InetPtonA(AF_INET6, address, &parsed) == 1);
+#else
+		res = (inet_pton(AF_INET6, address, &parsed) == 1);
+#endif
+	}
 
-        if (p[0U] != '\0')
-        {
-            while ((bok == true) && (fields < 8U) && (p[0U] != '\0'))
-            {
-                bok = ipinfo_hexfield_valid(&p);
-
-                if (bok == true)
-                {
-                    ++fields;
-
-                    if (p[0U] == ':')
-                    {
-                        if (p[1U] == ':')
-                        {
-                            if (dblcolon == true)
-                            {
-                                bok = false;
-                            }
-                            else
-                            {
-                                dblcolon = true;
-                                p += 2;
-                            }
-                        }
-                        else
-                        {
-                            ++p;
-                        }
-                    }
-                }
-            }
-
-            if (bok == true)
-            {
-                bool bfcount;
-
-                if (dblcolon == true)
-                {
-                    bfcount = (fields <= 8U);
-                }
-                else
-                {
-                    bfcount = (fields == 8U);
-                }
-
-                res = (bfcount == true) && (p[0U] == '\0');
-            }
-        }
-    }
-
-    return res;
+	return res;
 }
 
 bool qsc_ipinfo_ipv6_address_is_zeroed(const qsc_ipinfo_ipv6_address* address)
@@ -1148,4 +905,86 @@ void qsc_ipinfo_ipv6_array_to_string(char output[QSC_IPINFO_IPV6_STRNLEN], const
 		n = qsc_intutils_be8to16(&address[14U]);
 		qsc_arrayutils_uint16_to_hex(&output[35U], 5U, n);
 	}
+}
+
+/**
+ * \brief Test IPv4 CIDR prefix membership, including /0 and /32.
+ * \param address Address being tested.
+ * \param network Network-prefix address; host bits are ignored.
+ * \param prefix Prefix length in bits, from 0 to 32.
+ * \return true if the address belongs to the prefix; false for invalid inputs.
+ * \note Stateless; no allocations; safe for concurrent callers.
+ */
+bool qsc_ipinfo_ipv4_prefix_contains(const qsc_ipinfo_ipv4_address* address, const qsc_ipinfo_ipv4_address* network, uint8_t prefix)
+{
+	size_t i;
+	uint8_t rem;
+	bool res;
+
+	res = (address != NULL && network != NULL && prefix <= 32U);
+
+	if (res == true)
+	{
+		for (i = 0U; i < (size_t)(prefix / 8U); ++i)
+		{
+			if (address->ipv4[i] != network->ipv4[i])
+			{
+				res = false;
+					break;
+			}
+		}
+
+		rem = (uint8_t)(prefix % 8U);
+
+		if (res == true && rem != 0U)
+		{
+			uint8_t mask;
+
+			mask = (uint8_t)(0xFFU << (8U - rem));
+			res = ((address->ipv4[i] & mask) == (network->ipv4[i] & mask));
+		}
+	}
+
+	return res;
+}
+
+/**
+ * \brief Test IPv6 CIDR prefix membership, including /0 and /128.
+ * \param address Address being tested.
+ * \param network Network-prefix address; host bits are ignored.
+ * \param prefix Prefix length in bits, from 0 to 128.
+ * \return true if the address belongs to the prefix; false for invalid inputs.
+ * \note Stateless; no allocations; safe for concurrent callers.
+ */
+bool qsc_ipinfo_ipv6_prefix_contains(const qsc_ipinfo_ipv6_address* address, const qsc_ipinfo_ipv6_address* network, uint8_t prefix)
+{
+	size_t i;
+	uint8_t rem;
+	bool res;
+
+	res = (address != NULL && network != NULL && prefix <= 128U);
+
+	if (res == true)
+	{
+		for (i = 0U; i < (size_t)(prefix / 8U); ++i)
+		{
+			if (address->ipv6[i] != network->ipv6[i])
+			{
+				res = false;
+					break;
+			}
+		}
+
+		rem = (uint8_t)(prefix % 8U);
+
+		if (res == true && rem != 0U)
+		{
+			uint8_t mask;
+
+			mask = (uint8_t)(0xFFU << (8U - rem));
+			res = ((address->ipv6[i] & mask) == (network->ipv6[i] & mask));
+		}
+	}
+
+	return res;
 }

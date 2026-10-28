@@ -59,13 +59,13 @@
 * 
 * \return Returns the character detected
 */
-char qsctest_get_char();
+char qsctest_get_char(void);
 
 /**
 * \brief Pause the console until user input is detected
 * \return Returns the character detected
 */
-char qsctest_get_wait();
+char qsctest_get_wait(void);
 
 /**
 * \brief Convert a hexadecimal character string to a binary byte array
@@ -98,6 +98,14 @@ void qsctest_print_safe(const char* input);
 * \param input: the character array to print
 */
 void qsctest_print_line(const char* input);
+
+/**
+ * \brief Print a numbered qualification-section header.
+ * \param section: Five-character section identifier in NN.NN format.
+ * \param title: Human-readable section title.
+ * \note Resets the result index. Intended for sequential runner output.
+ */
+void qsctest_print_section(const char* section, const char* title);
 
 /**
 * \brief Print an unsigned 64-bit integer

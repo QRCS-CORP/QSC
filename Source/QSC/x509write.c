@@ -415,6 +415,12 @@ static qsc_asn1_status qsc_x509_write_algorithm_identifier_from_signature(qsc_x5
         case QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512:
             id = QSC_OID_ID_ECDSA_WITH_SHA512;
             break;
+        case QSC_X509_SIGNATURE_ALGORITHM_ED25519:
+            id = QSC_OID_ID_ED25519;
+            break;
+        case QSC_X509_SIGNATURE_ALGORITHM_ED448:
+            id = QSC_OID_ID_ED448;
+            break;
         case QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44:
             id = QSC_OID_ID_ML_DSA_44;
             break;
@@ -476,6 +482,12 @@ static qsc_asn1_status qsc_x509_write_algorithm_identifier_from_public_key(qsc_x
                 default:
                     return QSC_ASN1_STATUS_UNSUPPORTED;
             }
+            break;
+        case QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519:
+            id = QSC_OID_ID_ED25519;
+            break;
+        case QSC_X509_PUBLIC_KEY_ALGORITHM_ED448:
+            id = QSC_OID_ID_ED448;
             break;
         case QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA:
             switch (pqcparameter)

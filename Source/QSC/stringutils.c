@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "stringutils.h"
 #include "memutils.h"
 #include <ctype.h>
@@ -378,16 +429,73 @@ void qsc_stringutils_byte_to_hex(char* hex, uint8_t input)
 {
 	QSC_ASSERT(hex != NULL);
 
-	snprintf(hex, 3U, "%.2x", input);
+	static const char HEX_TABLE[] = "0123456789abcdef";
+
+	if (hex != NULL)
+	{
+		hex[0U] = HEX_TABLE[input >> 4U];
+		hex[1U] = HEX_TABLE[input & 0x0FU];
+		hex[2U] = '\0';
+	}
 }
 
 uint8_t qsc_stringutils_hex_to_byte(const char* hex)
 {
 	QSC_ASSERT(hex != NULL);
 
+	uint8_t high;
+	uint8_t low;
 	uint8_t res;
 
-	res = (uint8_t)strtol(hex, NULL, 16);
+	res = 0U;
+
+	if (hex != NULL)
+	{
+		/* Keep strtol semantics for signed, prefixed, or non-two-digit input. */
+		if (hex[0U] >= '0' && hex[0U] <= '9')
+		{
+			high = (uint8_t)(hex[0U] - '0');
+		}
+		else if (hex[0U] >= 'a' && hex[0U] <= 'f')
+		{
+			high = (uint8_t)(hex[0U] - 'a' + 10U);
+		}
+		else if (hex[0U] >= 'A' && hex[0U] <= 'F')
+		{
+			high = (uint8_t)(hex[0U] - 'A' + 10U);
+		}
+		else
+		{
+			high = UINT8_MAX;
+		}
+
+		low = UINT8_MAX;
+
+		if (high != UINT8_MAX)
+		{
+			if (hex[1U] >= '0' && hex[1U] <= '9')
+			{
+				low = (uint8_t)(hex[1U] - '0');
+			}
+			else if (hex[1U] >= 'a' && hex[1U] <= 'f')
+			{
+				low = (uint8_t)(hex[1U] - 'a' + 10U);
+			}
+			else if (hex[1U] >= 'A' && hex[1U] <= 'F')
+			{
+				low = (uint8_t)(hex[1U] - 'A' + 10U);
+			}
+		}
+
+		if (low != UINT8_MAX && hex[2U] == '\0')
+		{
+			res = (uint8_t)((high << 4U) | low);
+		}
+		else
+		{
+			res = (uint8_t)strtol(hex, NULL, 16);
+		}
+	}
 
 	return res;
 }
@@ -1006,9 +1114,9 @@ void qsc_stringutils_to_lowercase(char* source)
 		slen = qsc_stringutils_string_size(source) + 1U;
 		_strlwr_s(source, slen);
 #else
-		for (size_t i = 0U; i < strlen(source); ++i)
+		for (char* pos = source; *pos != '\0'; ++pos)
 		{
-			source[i] = tolower((unsigned char)source[i]);
+			*pos = (char)tolower((unsigned char)*pos);
 		}
 #endif
 	}
@@ -1064,9 +1172,9 @@ void qsc_stringutils_to_uppercase(char* source)
 		slen = qsc_stringutils_string_size(source) + 1U;
 		_strupr_s(source, slen);
 #else
-		for (size_t i = 0U; i < strlen(source); ++i)
+		for (char* pos = source; *pos != '\0'; ++pos)
 		{
-			source[i] = toupper(source[i]);
+			*pos = (char)toupper((unsigned char)*pos);
 		}
 #endif
 	}

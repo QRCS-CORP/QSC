@@ -101,6 +101,24 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 QSC_EXPORT_API size_t qsc_sysutils_computer_name(char* name);
 
 /**
+ * \brief Retrieve the computer name with an explicit output capacity.
+ * \param name Destination character buffer, NUL terminated on success.
+ * \param namelen Size of the destination in bytes, including the terminator.
+ * \return Characters stored, excluding NUL; zero for invalid input or lookup failure.
+ * \note Truncates output safely. Thread-safe, no caller-owned allocations.
+ */
+QSC_EXPORT_API size_t qsc_sysutils_computer_name_bounded(char* name, size_t namelen);
+
+/**
+ * \brief Retrieve the current user name with an explicit output capacity.
+ * \param name Destination character buffer, NUL terminated on success.
+ * \param namelen Size of the destination in bytes, including the terminator.
+ * \return Characters stored, excluding NUL; zero for invalid input or lookup failure.
+ * \note Truncates output safely. Thread-safe, no caller-owned allocations.
+ */
+QSC_EXPORT_API size_t qsc_sysutils_user_name_bounded(char* name, size_t namelen);
+
+/**
 * \brief Get the CPU count
 *
 * \return Returns the number of cpus on the system

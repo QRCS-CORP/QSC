@@ -65,8 +65,8 @@
  *
  * The test suite includes:
  *
- * - A ciphertext integrity test that ensures a mutated ciphertext fails decapsulation and does not yield
- *   the expected shared secret.
+ * - A ciphertext integrity test that verifies a mutated ciphertext derives an
+ *   implicit-rejection shared secret different from the original.
  *
  * - A known answer test (KAT) that compares the generated public key, private key, ciphertext, and derived
  *   shared secret against expected values from the NIST PQC Round 3 test vectors.
@@ -74,7 +74,9 @@
  * - A stress test that exercises the key generation, encapsulation, and decapsulation operations, including
  *   an alternate encrypt/decrypt API.
  *
- * - A public key integrity test that verifies that altering the public key results in an invalid shared secret.
+ * - A public key integrity test that verifies that altering the public key results in a different shared secret.
+ * - Sixteen independent ISO parameter-set roundtrip tests, four f/pcf framing tests,
+ *   and four reference-vector KATs, all invoked directly in the existing runner.
  * 
  * \section mceliece_test_links Reference Links:
  * - <a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization/round-3-submissions">NIST PQC Round 3 test vectors</a>
@@ -87,10 +89,10 @@
  * This test generates a McEliece key pair and encapsulates a shared secret, then deliberately mutates the
  * ciphertext by replacing some of its bytes with random data. It then attempts to decapsulate the modified
  * ciphertext and checks that:
- * - Decapsulation fails.
- * - The derived shared secret from the failed decapsulation does not match the expected shared secret.
+ * - Decapsulation completes without disclosing secret decoding validity.
+ * - The derived shared secret differs from the encapsulated shared secret.
  *
- * \return Returns true if the mutated ciphertext is correctly detected as invalid; otherwise, false.
+ * \return Returns true if implicit rejection produces a distinct shared secret; otherwise, false.
  */
 bool qsctest_mceliece_ciphertext_integrity(void);
 
@@ -131,10 +133,10 @@ bool qsctest_mceliece_operations_test(void);
  * \details
  * This test generates a McEliece key pair and then alters the public key by replacing a portion of its bytes
  * with random values. It then performs encapsulation using the tampered public key and attempts decapsulation
- * with the valid secret key. The test passes if the derived shared secret is invalid, confirming that the altered
- * public key does not yield the expected result.
+ * with the valid secret key. The test passes if decapsulation derives a different shared secret, confirming
+ * that the altered public key does not yield the expected result.
  *
- * \return Returns true if the tampered public key causes the shared secret to be invalid; otherwise, false.
+ * \return Returns true if implicit-rejection decapsulation succeeds and the shared secrets differ; otherwise, false.
  */
 bool qsctest_mceliece_publickey_integrity(void);
 
@@ -146,11 +148,196 @@ bool qsctest_mceliece_publickey_integrity(void);
  * - The Known Answer Test (KAT) for verifying key generation, encryption (encapsulation), and decryption (decapsulation).
  * - The operations stress test for repeated key generation and shared secret derivation.
  * - The public key integrity test to ensure that altering the public key invalidates the derived shared secret.
- * - The ciphertext integrity test to confirm that tampering with the ciphertext is detected.
+ * - The ciphertext integrity test to confirm that tampering derives a distinct implicit-rejection secret.
  *
  * Results from each test are printed to the console.
  */
 void qsctest_mceliece_run(void);
 
+
+/**
+ * \brief Tests 460896pc key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_460896pc_roundtrip(void);
+
+/**
+ * \brief Tests 6688128pc key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6688128pc_roundtrip(void);
+
+/**
+ * \brief Tests 6960119pc key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6960119pc_roundtrip(void);
+
+/**
+ * \brief Tests 8192128pc key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_8192128pc_roundtrip(void);
+
+/**
+ * \brief Tests 460896 key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_460896_roundtrip(void);
+
+/**
+ * \brief Tests 6688128 key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6688128_roundtrip(void);
+
+/**
+ * \brief Tests 6960119 key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6960119_roundtrip(void);
+
+/**
+ * \brief Tests 8192128 key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_8192128_roundtrip(void);
+
+/**
+ * \brief Tests 460896f key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_460896f_roundtrip(void);
+
+/**
+ * \brief Tests 460896pcf key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_460896pcf_roundtrip(void);
+
+/**
+ * \brief Tests 6688128f key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6688128f_roundtrip(void);
+
+/**
+ * \brief Tests 6688128pcf key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6688128pcf_roundtrip(void);
+
+/**
+ * \brief Tests 6960119f key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6960119f_roundtrip(void);
+
+/**
+ * \brief Tests 6960119pcf key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_6960119pcf_roundtrip(void);
+
+/**
+ * \brief Tests 8192128f key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_8192128f_roundtrip(void);
+
+/**
+ * \brief Tests 8192128pcf key generation, encapsulation, implicit rejection and null input.
+ * \return True on all successful checks, otherwise false.
+ * \note Allocates and securely erases caller-owned buffers. Not thread-safe
+ *       with concurrent uses of the same process RNG state.
+ */
+bool qsctest_mceliece_8192128pcf_roundtrip(void);
+
+/**
+ * \brief Tests deterministic keypair and ciphertext equivalence between 460896f and 460896pcf.
+ * \return True when keypairs and ciphertext syndromes match and session keys roundtrip.
+ * \note Not safe to run concurrently with the global NIST test RNG.
+ */
+bool qsctest_mceliece_460896_framing(void);
+
+/**
+ * \brief Tests deterministic keypair and ciphertext equivalence between 6688128f and 6688128pcf.
+ * \return True when keypairs and ciphertext syndromes match and session keys roundtrip.
+ * \note Not safe to run concurrently with the global NIST test RNG.
+ */
+bool qsctest_mceliece_6688128_framing(void);
+
+/**
+ * \brief Tests deterministic keypair and ciphertext equivalence between 6960119f and 6960119pcf.
+ * \return True when keypairs and ciphertext syndromes match and session keys roundtrip.
+ * \note Not safe to run concurrently with the global NIST test RNG.
+ */
+bool qsctest_mceliece_6960119_framing(void);
+
+/**
+ * \brief Tests deterministic keypair and ciphertext equivalence between 8192128f and 8192128pcf.
+ * \return True when keypairs and ciphertext syndromes match and session keys roundtrip.
+ * \note Not safe to run concurrently with the global NIST test RNG.
+ */
+bool qsctest_mceliece_8192128_framing(void);
+
+
+/**
+ * \brief Executes the candidate-reference KAT for ISO 460896pc.
+ * \return True when reference keypair, ciphertext and session keys agree.
+ * \note Uses the global deterministic NIST test RNG; call sequentially.
+ */
+bool qsctest_mceliece_460896pc_kat(void);
+
+/**
+ * \brief Executes the candidate-reference KAT for ISO 6688128pc.
+ * \return True when reference keypair, ciphertext and session keys agree.
+ * \note Uses the global deterministic NIST test RNG; call sequentially.
+ */
+bool qsctest_mceliece_6688128pc_kat(void);
+
+/**
+ * \brief Executes the candidate-reference KAT for ISO 6960119pc.
+ * \return True when reference keypair, ciphertext and session keys agree.
+ * \note Uses the global deterministic NIST test RNG; call sequentially.
+ */
+bool qsctest_mceliece_6960119pc_kat(void);
+
+/**
+ * \brief Executes the candidate-reference KAT for ISO 8192128pc.
+ * \return True when reference keypair, ciphertext and session keys agree.
+ * \note Uses the global deterministic NIST test RNG; call sequentially.
+ */
+bool qsctest_mceliece_8192128pc_kat(void);
 
 #endif

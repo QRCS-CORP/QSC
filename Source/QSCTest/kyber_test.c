@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "kyber_test.h"
 #include "katparser.h"
 #include "nistrng.h"
@@ -6,6 +57,10 @@
 #include "csp.h"
 #include "intutils.h"
 #include "kyber.h"
+#include "kyber512.h"
+#include "kyber768.h"
+#include "kyber1024.h"
+#include "kyber1280.h"
 #include "memutils.h"
 
 bool qsctest_kyber_ciphertext_integrity()
@@ -32,142 +87,169 @@ bool qsctest_kyber_ciphertext_integrity()
 	/* change some bytes in the ciphertext */
 	if (qsc_csp_generate(ct, 32) != true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber cipher-text: the random generator has failed -KCT0");
+		qsctest_print_line("Failure! kyber cipher-text: the random generator has failed -KCT0");
 		res = false;
 	}
 
 	/* FIPS 203 uses implicit rejection; invalid ciphertexts still return a shared secret. */
 	if (qsc_kyber_decapsulate(ssk1, ct, sk) != true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber cipher-text: implicit rejection returned an error -KCT1");
+		qsctest_print_line("Failure! kyber cipher-text: implicit rejection returned an error -KCT1");
 		res = false;
 	}
 
 	/* the rejection shared secret must differ from the valid encapsulated secret */
 	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) == true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber cipher-text: invalid shared secret -KCT2");
+		qsctest_print_line("Failure! kyber cipher-text: invalid shared secret -KCT2");
 		res = false;
 	}
 
 	/* decapsulation of the same invalid ciphertext must produce the same implicit-rejection secret */
 	if (qsc_kyber_decapsulate(ssk3, ct, sk) != true || qsc_intutils_are_equal8(ssk1, ssk3, QSC_KYBER_SHAREDSECRET_SIZE) != true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber cipher-text: implicit rejection is not deterministic -KCT3");
+		qsctest_print_line("Failure! kyber cipher-text: implicit rejection is not deterministic -KCT3");
 		res = false;
 	}
 
 	return res;
 }
 
-bool qsctest_kyber_kat_test()
+/**
+ * \brief Verify a single parameter-qualified Kyber KAT against its stored response vector.
+ * \param path Path to the parameter-specific NIST competition-format response file.
+ * \param publickey_size Expected number of public-key bytes.
+ * \param privatekey_size Expected number of private-key bytes.
+ * \param ciphertext_size Expected number of ciphertext bytes.
+ * \param generate_keypair Qualified keypair generation routine.
+ * \param encapsulate Qualified encapsulation routine.
+ * \param decapsulate Qualified decapsulation routine.
+ * \return True when vector lengths and all five generated outputs match.
+ * \note Runs synchronously and modifies the QSCTest NIST PRNG state; not thread safe.
+ *       Input files are trusted project test vectors, not untrusted external data.
+ *       All temporary buffers are allocated on the stack and owned by this function.
+ */
+static bool qsctest_kyber_kat_verify(const char* path, size_t publickey_size,
+    size_t privatekey_size, size_t ciphertext_size,
+    bool (*generate_keypair)(uint8_t*, uint8_t*, bool (*)(uint8_t*, size_t)),
+    bool (*encapsulate)(uint8_t*, uint8_t*, const uint8_t*, bool (*)(uint8_t*, size_t)),
+    bool (*decapsulate)(uint8_t*, const uint8_t*, const uint8_t*))
 {
-	/* note: the kat files were generated using the NIST post quantum competition format, 
-	   for the NIST ACVP KAT vector test, run the CAVP project. */
+    uint8_t ct[QSC_KYBER1280_CIPHERTEXT_SIZE] = { 0U };
+    uint8_t kct[QSC_KYBER1280_CIPHERTEXT_SIZE] = { 0U };
+    uint8_t kpk[QSC_KYBER1280_PUBLICKEY_SIZE] = { 0U };
+    uint8_t ksk[QSC_KYBER1280_PRIVATEKEY_SIZE] = { 0U };
+    uint8_t kss[QSC_KYBER1280_SHAREDSECRET_SIZE] = { 0U };
+    uint8_t pk[QSC_KYBER1280_PUBLICKEY_SIZE] = { 0U };
+    uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0U };
+    uint8_t sk[QSC_KYBER1280_PRIVATEKEY_SIZE] = { 0U };
+    uint8_t ss1[QSC_KYBER1280_SHAREDSECRET_SIZE] = { 0U };
+    uint8_t ss2[QSC_KYBER1280_SHAREDSECRET_SIZE] = { 0U };
+    size_t ctlen;
+    size_t pklen;
+    size_t seedlen;
+    size_t sklen;
+    size_t sslen;
+    bool res;
 
-	uint8_t ct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t kct[QSC_KYBER_CIPHERTEXT_SIZE] = { 0 };
-	uint8_t kpk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t ksk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t kss[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t pk[QSC_KYBER_PUBLICKEY_SIZE] = { 0 };
-	uint8_t seed[QSCTEST_NIST_RNG_SEED_SIZE] = { 0 };
-	uint8_t sk[QSC_KYBER_PRIVATEKEY_SIZE] = { 0 };
-	uint8_t ss1[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	uint8_t ss2[QSC_KYBER_SHAREDSECRET_SIZE] = { 0 };
-	size_t ctlen;
-	size_t pklen;
-	size_t seedlen;
-	size_t sklen;
-	size_t sslen;
-	bool ret;
+    ctlen = 0U;
+    pklen = 0U;
+    seedlen = 0U;
+    sklen = 0U;
+    sslen = 0U;
+    res = false;
 
-	ctlen = 0;
-	pklen = 0;
-	seedlen = 0;
-	sklen = 0;
-	sslen = 0;
-	ret = true;
+    /* These files use the NIST PQC competition response format, not ACVP. */
+    parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen,
+        ksk, &sklen, kct, &ctlen, kss, &sslen, 0U);
 
-	/* NIST FIPS 203 KATs */
-#	if defined(QSC_KYBER_S1K2P512)
-	char path[] = "NPQC/kyber-1632.rsp";
-#	elif defined(QSC_KYBER_S3K3P768)
-	char path[] = "NPQC/kyber-2400.rsp";
-#	elif defined(QSC_KYBER_S5K4P1024)
-	char path[] = "NPQC/kyber-3168.rsp";
-#	elif defined(QSC_KYBER_S6K5P1280)
-	/* Note: custom K6 parameter */
-	char path[] = "NPQC/kyber-3936.rsp";
-#	else
-#	error The parameter set is invalid!
-#	endif
+    if (seedlen == sizeof(seed) && pklen == publickey_size &&
+        sklen == privatekey_size && ctlen == ciphertext_size &&
+        sslen == sizeof(kss))
+    {
+        qsctest_nistrng_prng_initialize(seed, NULL, 0U);
 
-	parse_nist_cipher_kat(path, seed, &seedlen, kpk, &pklen, ksk, &sklen, kct, &ctlen, kss, &sslen, 0);
+        if (generate_keypair(pk, sk, qsctest_nistrng_prng_generate) == true)
+        {
+            if (encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate) == true)
+            {
+                if (decapsulate(ss1, ct, sk) == true)
+                {
+                    res = qsc_intutils_are_equal8(pk, kpk, publickey_size);
+                    res = qsc_intutils_are_equal8(sk, ksk, privatekey_size) && res;
+                    res = qsc_intutils_are_equal8(ct, kct, ciphertext_size) && res;
+                    res = qsc_intutils_are_equal8(ss1, ss2, sizeof(ss1)) && res;
+                    res = qsc_intutils_are_equal8(ss1, kss, sizeof(ss1)) && res;
+                }
+            }
+        }
+    }
 
-	qsctest_nistrng_prng_initialize(seed, NULL, 0);
+    return res;
+}
 
-	/* generate public and secret keys */
-	if (qsc_kyber_generate_keypair(pk, sk, qsctest_nistrng_prng_generate))
-	{
-		/* compare the public key to the expected output */
-		if (qsc_intutils_are_equal8(pk, kpk, QSC_KYBER_PUBLICKEY_SIZE) != true)
-		{
-			qsc_consoleutils_print_line("Failure! kyber kat: public-key does not match known answer! -KAT0");
-			ret = false;
-		}
+/** \brief Test Kyber-512 using NPQC/kyber-1632.rsp and the 512 API.
+ * \return True when all response-vector fields match.
+ * \note Calls the shared KAT verifier serially; modifies QSCTest PRNG state.
+ */
+bool qsctest_kyber512_kat_test(void)
+{
+    bool res;
 
-		/* compare the secret key to the expected output */
-		if (qsc_intutils_are_equal8(sk, ksk, QSC_KYBER_PRIVATEKEY_SIZE) != true)
-		{
-			qsc_consoleutils_print_line("Failure! kyber kat: private-key does not match known answer! -KAT1");
-			ret = false;
-		}
+    res = qsctest_kyber_kat_verify("NPQC/kyber-1632.rsp",
+        QSC_KYBER512_PUBLICKEY_SIZE, QSC_KYBER512_PRIVATEKEY_SIZE,
+        QSC_KYBER512_CIPHERTEXT_SIZE, qsc_kyber512_generate_keypair,
+        qsc_kyber512_encapsulate, qsc_kyber512_decapsulate);
 
-		/* derive a shared-secret key and creates a response (in: pk | out: ct and ss2) */
-		if (qsc_kyber_encapsulate(ss2, ct, pk, qsctest_nistrng_prng_generate))
-		{
-			/* compare the cipher-text to the expected output */
-			if (qsc_intutils_are_equal8(ct, kct, QSC_KYBER_CIPHERTEXT_SIZE) != true)
-			{
-				qsc_consoleutils_print_line("Failure! kyber kat: cipher-text does not match known answer! -KAT2");
-				ret = false;
-			}
+    return res;
+}
 
-			/* a uses b's response to get the shared-secret key (in: ct, sk | out: ss1) */
-			if (qsc_kyber_decapsulate(ss1, ct, sk) != true)
-			{
-				qsc_consoleutils_print_line("Failure! kyber kat: decryption authentication failure! -KAT3");
-				ret = false;
-			}
+/** \brief Test Kyber-768 using NPQC/kyber-2400.rsp and the 768 API.
+ * \return True when all response-vector fields match.
+ * \note Calls the shared KAT verifier serially; modifies QSCTest PRNG state.
+ */
+bool qsctest_kyber768_kat_test(void)
+{
+    bool res;
 
-			/* compare the two keys for equality */
-			if (qsc_intutils_are_equal8(ss1, ss2, QSC_KYBER_SHAREDSECRET_SIZE) != true)
-			{
-				qsc_consoleutils_print_line("Failure! kyber kat: shared secrets do not match! -KAT4");
-				ret = false;
-			}
+    res = qsctest_kyber_kat_verify("NPQC/kyber-2400.rsp",
+        QSC_KYBER768_PUBLICKEY_SIZE, QSC_KYBER768_PRIVATEKEY_SIZE,
+        QSC_KYBER768_CIPHERTEXT_SIZE, qsc_kyber768_generate_keypair,
+        qsc_kyber768_encapsulate, qsc_kyber768_decapsulate);
 
-			/* compare the key to the expected output */
-			if (qsc_intutils_are_equal8(ss1, kss, QSC_KYBER_SHAREDSECRET_SIZE) != true)
-			{
-				qsc_consoleutils_print_line("Failure! kyber kat: shared secret does not match known answer! -KAT5");
-				ret = false;
-			}
-		}
-		else
-		{
-			qsc_consoleutils_print_line("Failure! kyber kat: encapsulation has failed! -KAT6");
-			ret = false;
-		}
-	}
-	else
-	{
-		qsc_consoleutils_print_line("Failure! kyber kat: key generation has failed! -KAT7");
-		ret = false;
-	}
+    return res;
+}
 
-	return ret;
+/** \brief Test Kyber-1024 using NPQC/kyber-3168.rsp and the 1024 API.
+ * \return True when all response-vector fields match.
+ * \note Calls the shared KAT verifier serially; modifies QSCTest PRNG state.
+ */
+bool qsctest_kyber1024_kat_test(void)
+{
+    bool res;
+
+    res = qsctest_kyber_kat_verify("NPQC/kyber-3168.rsp",
+        QSC_KYBER1024_PUBLICKEY_SIZE, QSC_KYBER1024_PRIVATEKEY_SIZE,
+        QSC_KYBER1024_CIPHERTEXT_SIZE, qsc_kyber1024_generate_keypair,
+        qsc_kyber1024_encapsulate, qsc_kyber1024_decapsulate);
+
+    return res;
+}
+
+/** \brief Test QSC Kyber-1280 using NPQC/kyber-3936.rsp and the 1280 API.
+ * \return True when all response-vector fields match.
+ * \note QSC-specific nonstandard parameter set; modifies QSCTest PRNG state.
+ */
+bool qsctest_kyber1280_kat_test(void)
+{
+    bool res;
+
+    res = qsctest_kyber_kat_verify("NPQC/kyber-3936.rsp",
+        QSC_KYBER1280_PUBLICKEY_SIZE, QSC_KYBER1280_PRIVATEKEY_SIZE,
+        QSC_KYBER1280_CIPHERTEXT_SIZE, qsc_kyber1280_generate_keypair,
+        qsc_kyber1280_encapsulate, qsc_kyber1280_decapsulate);
+
+    return res;
 }
 
 bool qsctest_kyber_privatekey_integrity()
@@ -196,13 +278,13 @@ bool qsctest_kyber_privatekey_integrity()
 	/* FIPS 203 decapsulation-key input checking must reject the inconsistent key. */
 	if (qsc_kyber_decapsulate(ssk1, ct, sk) == true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber private-key: invalid key was accepted -INTEG0");
+		qsctest_print_line("Failure! kyber private-key: invalid key was accepted -INTEG0");
 		res = false;
 	}
 
 	if (qsc_intutils_are_equal8(ssk1, ssk2, QSC_KYBER_SHAREDSECRET_SIZE) == true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber private-key: invalid key retained the valid shared secret -INTEG1");
+		qsctest_print_line("Failure! kyber private-key: invalid key retained the valid shared secret -INTEG1");
 		res = false;
 	}
 
@@ -231,7 +313,7 @@ bool qsctest_kyber_publickey_integrity()
 
 	if (qsc_kyber_encapsulate(ssk, ct, pk, qsctest_nistrng_prng_generate) == true)
 	{
-		qsc_consoleutils_print_line("Failure! kyber public-key: invalid encapsulation key was accepted -INTEG0");
+		qsctest_print_line("Failure! kyber public-key: invalid encapsulation key was accepted -INTEG0");
 		res = false;
 	}
 
@@ -267,22 +349,22 @@ bool qsctest_kyber_operations_test()
 				}
 				else
 				{
-					qsc_consoleutils_print_line("Failure! kyber operations: the shared secrets are not equal -KOT4");
+					qsctest_print_line("Failure! kyber operations: the shared secrets are not equal -KOT4");
 				}
 			}
 			else
 			{
-				qsc_consoleutils_print_line("Failure! kyber operations: decapsulation failure -KOT3");
+				qsctest_print_line("Failure! kyber operations: decapsulation failure -KOT3");
 			}
 		}
 		else
 		{
-			qsc_consoleutils_print_line("Failure! kyber operations: encasulation failure -KOT2");
+			qsctest_print_line("Failure! kyber operations: encasulation failure -KOT2");
 		}
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! kyber operations: key generation failure -KOT1");
+		qsctest_print_line("Failure! kyber operations: key generation failure -KOT1");
 	}
 
 	return res;
@@ -290,48 +372,76 @@ bool qsctest_kyber_operations_test()
 
 void qsctest_kyber_run()
 {
-	if (qsctest_kyber_kat_test() == true)
+	if (qsctest_kyber512_kat_test() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber encryption, and decryption known answer test.");
+		qsctest_print_line("Success! Passed the Kyber-512 known-answer test");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber encryption, and decryption known answer test.");
+		qsctest_print_line("Failure! Failed the Kyber-512 known-answer test");
+	}
+
+	if (qsctest_kyber768_kat_test() == true)
+	{
+		qsctest_print_line("Success! Passed the Kyber-768 known-answer test");
+	}
+	else
+	{
+		qsctest_print_line("Failure! Failed the Kyber-768 known-answer test");
+	}
+
+	if (qsctest_kyber1024_kat_test() == true)
+	{
+		qsctest_print_line("Success! Passed the Kyber-1024 known-answer test");
+	}
+	else
+	{
+		qsctest_print_line("Failure! Failed the Kyber-1024 known-answer test");
+	}
+
+	if (qsctest_kyber1280_kat_test() == true)
+	{
+		qsctest_print_line("Success! Passed the Kyber-1280 known-answer test");
+	}
+	else
+	{
+		qsctest_print_line("Failure! Failed the Kyber-1280 known-answer test");
 	}
 
 	if (qsctest_kyber_operations_test() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber key generation, encryption, and decryption stress test.");
+		qsctest_print_line("Success! Passed the Kyber key generation, encryption, and decryption stress test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber key generation, encryption, and decryption stress test.");
+		qsctest_print_line("Failure! Failed the Kyber key generation, encryption, and decryption stress test.");
 	}
 
 	if (qsctest_kyber_privatekey_integrity() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber private-key tamper test.");
+		qsctest_print_line("Success! Passed the Kyber private-key tamper test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber private-key tamper test.");
+		qsctest_print_line("Failure! Failed the Kyber private-key tamper test.");
 	}
 
 	if (qsctest_kyber_publickey_integrity() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber public-key tamper test.");
+		qsctest_print_line("Success! Passed the Kyber public-key tamper test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber public-key tamper test.");
+		qsctest_print_line("Failure! Failed the Kyber public-key tamper test.");
 	}
 
 	if (qsctest_kyber_ciphertext_integrity() == true)
 	{
-		qsc_consoleutils_print_line("Success! Passed the Kyber cipher-text tamper test.");
+		qsctest_print_line("Success! Passed the Kyber cipher-text tamper test.");
 	}
 	else
 	{
-		qsc_consoleutils_print_line("Failure! Failed the Kyber cipher-text tamper test.");
+		qsctest_print_line("Failure! Failed the Kyber cipher-text tamper test.");
 	}
+
 }

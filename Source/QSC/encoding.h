@@ -332,6 +332,75 @@ QSC_EXPORT_API typedef struct qsc_encoding_ber_element
     size_t    ccount;       /*!< Number of valid pointers in \c children. */
 } qsc_encoding_ber_element;
 
+/**
+ * \brief Incremental Base64 conversion state (caller-owned).
+ * \note Initialize before starting one encoding or decoding stream. Do not
+ *       use a single instance concurrently or mix encode/decode operations.
+ */
+typedef struct qsc_encoding_base64_stream_state
+{
+	uint8_t pending[4U]; /*!< At most three buffered input bytes/symbols; caller-owned. */
+	size_t used; /*!< Number of buffered bytes or symbols, from zero through three. */
+	bool padded; /*!< True after a decoded terminal padded quartet. */
+	bool finalized; /*!< True after a successful finalization; no further updates allowed. */
+} qsc_encoding_base64_stream_state;
+
+/**
+ * \brief Initialize an incremental Base64 encoding or decoding stream.
+ * \param state: Caller-owned stream state; must not be NULL.
+ * \note Clears prior buffered data, does not allocate, and is not thread safe
+ *       when the same state is shared between threads.
+ */
+QSC_EXPORT_API void qsc_encoding_base64_stream_initialize(qsc_encoding_base64_stream_state* state);
+
+/**
+ * \brief Encode a chunk of bytes to complete Base64 quartets.
+ * \param state: Mutable initialized encoder state, owned by caller.
+ * \param output: Caller-owned destination; NULL is allowed if no output is produced.
+ * \param otplen: Available destination bytes; no null terminator is written.
+ * \param input: Source bytes; may be NULL only when inplen is zero. No overlap with output.
+ * \param inplen: Source byte count.
+ * \param written: Receives output byte count, or zero on failure.
+ * \return True on success. On failure the state and output remain unchanged.
+ * \note Stateful, allocation-free, not safe for concurrent access to one state.
+ */
+QSC_EXPORT_API bool qsc_encoding_base64_stream_encode_update(qsc_encoding_base64_stream_state* state, char* output, size_t otplen, const uint8_t* input, size_t inplen, size_t* written);
+
+/**
+ * \brief Write the remaining padded Base64 quartet and finalize encoding.
+ * \param state: Mutable initialized encoder state.
+ * \param output: Destination for up to four characters; may be NULL when empty.
+ * \param otplen: Destination capacity in bytes.
+ * \param written: Receives zero or four output characters.
+ * \return True on success; false for invalid state or insufficient space.
+ * \note On failure, output and state are unchanged; no null terminator is written.
+ */
+QSC_EXPORT_API bool qsc_encoding_base64_stream_encode_final(qsc_encoding_base64_stream_state* state, char* output, size_t otplen, size_t* written);
+
+/**
+ * \brief Decode a chunk of Base64, emitting only complete quartets.
+ * \param state: Mutable initialized decoder state.
+ * \param output: Caller-owned destination; may be NULL if no bytes are produced.
+ * \param otplen: Available destination capacity.
+ * \param input: Length-bounded Base64 input, may be NULL if inplen is zero.
+ * \param inplen: Number of input characters.
+ * \param written: Receives decoded byte count, or zero on failure.
+ * \return True on success; false on invalid syntax, capacity, or state.
+ * \note Each call validates all new input before writing or advancing state.
+ *       The stream accepts the same padding-bit conventions as the legacy decoder.
+ *       Once a padded quartet arrives, subsequent nonempty updates are rejected.
+ *       Stateless across independent state instances; no allocations.
+ */
+QSC_EXPORT_API bool qsc_encoding_base64_stream_decode_update(qsc_encoding_base64_stream_state* state, uint8_t* output, size_t otplen, const char* input, size_t inplen, size_t* written);
+
+/**
+ * \brief Finalize an incremental Base64 decoding stream.
+ * \param state: Mutable initialized decoder state.
+ * \return True if no incomplete quartet remains, false otherwise.
+ * \note On success pending bytes are cleared and further updates are rejected.
+ */
+QSC_EXPORT_API bool qsc_encoding_base64_stream_decode_final(qsc_encoding_base64_stream_state* state);
+
 /* ========================================================================== */
 /*                            Base64 Functions                                */
 /* ========================================================================== */
@@ -586,6 +655,19 @@ QSC_EXPORT_API void qsc_encoding_ber_free_element(qsc_encoding_ber_element* elem
  *
  * \return [qsc_encoding_ber_element*] Pointer to the decoded element, or NULL on error.
  */
+/**
+ * \brief Validate the first complete DER element without allocating a tree.
+ * \param buffer: Caller-owned, length-bounded DER input (read only).
+ * \param buflen: Number of accessible bytes.
+ * \param consumed: Receives the validated element size, or zero on failure.
+ * \return True for structurally valid definite-length DER with minimally encoded
+ *         tags and lengths; false for malformed input. ASN.1 type-specific
+ *         canonical restrictions and schema validation are not performed.
+ * \note Trailing bytes are not rejected; require *consumed == buflen for an exact
+ *       document. The function performs no allocations and is thread safe.
+ */
+QSC_EXPORT_API bool qsc_encoding_der_validate(const uint8_t* buffer, size_t buflen, size_t* consumed);
+
 QSC_EXPORT_API qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed);
 
 /*!

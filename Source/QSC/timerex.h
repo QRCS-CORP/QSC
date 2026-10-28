@@ -114,18 +114,34 @@ QSC_EXPORT_API void qsc_timerex_get_datetime(char output[QSC_TIMEREX_TIMESTAMP_M
 QSC_EXPORT_API void qsc_timerex_get_time(char output[QSC_TIMEREX_TIMESTAMP_MAX]);
 
 /**
-* \brief Returns the clock time at the start of a timed operation
+* \brief Returns an opaque high-resolution monotonic counter at the start of an operation
 *
 * \return [uint64_t] The starting clock time
 */
 QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_start(void);
 
 /**
-* \brief Returns the time difference between the start and current time in milliseconds
+* \brief Returns the elapsed monotonic wall-clock time in milliseconds
 *
 * \return [uint64_t] The time difference in milliseconds
 */
 QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_elapsed(uint64_t start);
+
+/**
+* \brief Return elapsed monotonic time in microseconds since the provided stopwatch start.
+* \param start Opaque counter returned by qsc_timerex_stopwatch_start; not Unix time.
+* \return Whole elapsed microseconds, or zero on clock failure or backwards time.
+* \note Thread safe; no allocation. Values from previous builds must not be reused.
+*/
+QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_elapsed_microseconds(uint64_t start);
+
+/**
+* \brief Return elapsed monotonic time in nanoseconds since the provided stopwatch start.
+* \param start Opaque counter returned by qsc_timerex_stopwatch_start; not Unix time.
+* \return Whole elapsed nanoseconds, or zero on clock failure or backwards time.
+* \note Thread safe; no allocation. Values from previous builds must not be reused.
+*/
+QSC_EXPORT_API uint64_t qsc_timerex_stopwatch_elapsed_nanoseconds(uint64_t start);
 
 #if defined(QSC_DEBUG_MODE)
 /**

@@ -33,6 +33,10 @@
 #include "memutils.h"
 #include "sha3.h"
 
+#if defined(QSC_SYSTEM_HAS_ARM_NEON)
+#include <arm_neon.h>
+#endif
+
 /*
  * Average and standard deviation for the maximum size (in bits) of
  * coefficients of (f,g), depending on depth. These values are used
@@ -2225,7 +2229,7 @@ static void falcon_prng_refill(falcon_prng_state* pctx)
 	 * State uses local endianness. Only the output bytes must be
 	 * converted to little endian (if used on a big-endian machine).
 	 */
-	cc = *(uint64_t*)(pctx->state + 48U);
+	qsc_memutils_copy(&cc, pctx->state + 48U, sizeof(cc));
 
 	for (u = 0U; u < 8U; ++u)
 	{
@@ -2277,7 +2281,7 @@ static void falcon_prng_refill(falcon_prng_state* pctx)
 		}
 	}
 
-	*(uint64_t*)(pctx->state + 48) = cc;
+	qsc_memutils_copy(pctx->state + 48U, &cc, sizeof(cc));
 	pctx->ptr = 0;
 }
 
@@ -2289,8 +2293,9 @@ static void falcon_prng_init(falcon_prng_state* pctx, qsc_keccak_state* kctx)
 	 * the state words.
 	 */
 	uint8_t tmp[56U] = { 0U };
-	uint64_t th;
-	uint64_t tl;
+	uint32_t th;
+	uint32_t tl;
+	uint64_t ctr;
 
 	qsc_keccak_incremental_squeeze(kctx, QSC_KECCAK_256_RATE, tmp, 56);
 
@@ -2306,14 +2311,15 @@ static void falcon_prng_init(falcon_prng_state* pctx, qsc_keccak_state* kctx)
 			| ((uint32_t)tmp[(i << 2) + 2U] << 16)
 			| ((uint32_t)tmp[(i << 2) + 3U] << 24);
 
-		*(uint32_t*)(pctx->state + (i << 2)) = w;
+		qsc_memutils_copy(pctx->state + (i << 2), &w, sizeof(w));
 	}
 #endif
 
 	qsc_memutils_secure_erase(tmp, sizeof(tmp));
-	tl = *(uint32_t*)(pctx->state + 48U);
-	th = *(uint32_t*)(pctx->state + 52U);
-	*(uint64_t*)(pctx->state + 48U) = tl + (th << 32);
+	qsc_memutils_copy(&tl, pctx->state + 48U, sizeof(tl));
+	qsc_memutils_copy(&th, pctx->state + 52U, sizeof(th));
+	ctr = (uint64_t)tl + ((uint64_t)th << 32U);
+	qsc_memutils_copy(pctx->state + 48U, &ctr, sizeof(ctr));
 	falcon_prng_refill(pctx);
 }
 
@@ -2805,97 +2811,93 @@ static size_t falcon_comp_decode(int16_t* x, uint32_t logn, const void* in, size
 
 /* common.c */
 
+/**
+* \brief Constant-time Falcon hash-to-point using reference-style compaction.
+* \param kctx Initialized SHAKE256 input state.
+* \param x Output polynomial array containing 2^logn coefficients.
+* \param logn Degree selector (9 for Falcon-512 or 10 for Falcon-1024).
+* \param tmp Scratch buffer of at least 4 * 2^logn bytes.
+* \note The oversampling bound and fixed-index compaction match the Falcon
+* reference construction. Uses no secret-dependent indexes or control flow.
+*/
 static void falcon_hash_to_point_ct(qsc_keccak_state* kctx, uint16_t* x, uint32_t logn, uint8_t* tmp)
 {
-	size_t n;
-	size_t n2;
-	size_t u;
-	size_t m;
+	uint16_t extra[1024U] = { 0U };
+	uint32_t n;
+	uint32_t m;
+	uint32_t over;
+	uint32_t u;
+	uint32_t p;
+	uint32_t v;
 
-	n = (size_t)1 << logn;
-	n2 = n << 1;    /* 2n words = 4n bytes of oversampled SHAKE output */
+	n = 1U << logn;
+	over = (logn == 9U) ? 205U : 287U;
+	m = n + over;
 
-	/*
-	 * Step 1 - squeeze a fixed 4n bytes.
-	 * The byte count is invariant; no data-dependent SHAKE consumption.
-	 */
-	qsc_keccak_incremental_squeeze(kctx, QSC_KECCAK_256_RATE, tmp, n2 * 2U);
+	/* A fixed amount of SHAKE output is consumed for each parameter set. */
+	qsc_keccak_incremental_squeeze(kctx, QSC_KECCAK_256_RATE, tmp, (size_t)m * 2U);
 
-	/*
-	 * Step 2 - constant-time conditional-assignment over all 2n words.
-	 *
-	 * Each 16-bit word is decoded BIG-ENDIAN (tmp[2u] is the high byte)
-	 * to match the byte order used by falcon_hash_to_point_vartime:
-	 *     w = ((uint32_t)buf[0] << 8) | (uint32_t)buf[1]
-	 *
-	 * Acceptance threshold: w < 61445  (= 5 * 12289).
-	 * CT reduction: three branchless conditional-subtract steps map any
-	 * accepted w in [0, 61444] onto [0, 12288].
-	 *
-	 * The loop always runs exactly n2 iterations; no early exit.
-	 */
-	m = 0U;
-
-	for (u = 0U; u < n2; u++)
+	for (u = 0U; u < m; ++u)
 	{
-		int32_t  w;
-		int32_t  valid;
-		int32_t  need;
-		int32_t  sel;
 		uint32_t raw;
+		uint32_t wr;
+		uint32_t d;
+		uint32_t invalid;
 
-		/* Big-endian 16-bit decode - MUST match the vartime version */
-		raw = ((uint32_t)tmp[u * 2U] << 8) | (uint32_t)tmp[u * 2U + 1U];
+		raw = ((uint32_t)tmp[2U * u] << 8U) | (uint32_t)tmp[2U * u + 1U];
+		wr = raw;
+		d = wr - 24578U;
+		wr = d + ((0U - (d >> 31U)) & 24578U);
+		d = wr - 24578U;
+		wr = d + ((0U - (d >> 31U)) & 24578U);
+		d = wr - 12289U;
+		wr = d + ((0U - (d >> 31U)) & 12289U);
+		invalid = 1U ^ ((raw - 61445U) >> 31U);
+		wr |= 0U - invalid;
 
-		/*
-		 * CT reduce raw mod 12289.
-		 *
-		 * Pattern:  w -= K;  w += (w >> 31) & K;
-		 * Subtracts K when w >= K, restores when w went negative.
-		 * Three passes with K = 24578, 24578, 12289 cover [0, 61444].
-		 *
-		 * Proof of coverage (worst case raw = 61444 = 4*12289 + 12288):
-		 *   61444 - 24578 = 36866  (>= 0, keep)
-		 *   36866 - 24578 = 12288  (>= 0, keep)
-		 *   12288 - 12289 = -1  (< 0, restore) -> 12288
-		 */
-		w = (int32_t)raw;
-		w -= 24578;
-		w += (w >> 31) & 24578;
-		w -= 24578;
-		w += (w >> 31) & 24578;
-		w -= 12289;
-		w += (w >> 31) & 12289;
-
-		/*
-		 * valid = -1 iff raw < 61445.
-		 *
-		 * raw - 61445 underflows (sets bit 31) when raw < 61445.
-		 * Arithmetic right-shift extends to all-ones (-1).
-		 */
-		valid = (int32_t)(raw - 61445U) >> 31;
-
-		/*
-		 * need = -1 iff m < n.
-		 *
-		 * m - n underflows (sets bit 31) when m < n.
-		 */
-		need = (int32_t)((uint32_t)m - (uint32_t)n) >> 31;
-
-		sel = valid & need;
-
-		/*
-		 * CT write: x[m] = sel ? (uint16_t)w : x[m]
-		 *
-		 * XOR idiom:  val ^ (mask & (val ^ new))
-		 *   = new  when mask = -1 (all ones)
-		 *   = val  when mask =  0
-		 */
-		x[m] = (uint16_t)((int32_t)x[m] ^ (sel & ((int32_t)x[m] ^ w)));
-
-		/* CT increment: advance m only when sel == -1 */
-		m += (size_t)(uint32_t)(sel & 1);
+		if (u < n)
+		{
+			x[u] = (uint16_t)wr;
+		}
+		else
+		{
+			extra[u - n] = (uint16_t)wr;
+		}
 	}
+
+	for (p = 1U; p <= over; p <<= 1U)
+	{
+		v = 0U;
+
+		for (u = 0U; u < m; ++u)
+		{
+			uint16_t* src;
+			uint16_t* dst;
+			uint32_t sv;
+			uint32_t dv;
+			uint32_t jump;
+			uint32_t mask;
+
+			src = (u < n) ? (x + u) : (extra + (u - n));
+			sv = (uint32_t)*src;
+			jump = u - v;
+			mask = (sv >> 15U) - 1U;
+			v -= mask;
+
+			if (u < p)
+			{
+				continue;
+			}
+
+			dst = (u - p < n) ? (x + u - p) : (extra + (u - p - n));
+			dv = (uint32_t)*dst;
+			mask &= 0U - (((jump & p) + 0x1FFU) >> 9U);
+			*src = (uint16_t)(sv ^ (mask & (sv ^ dv)));
+			*dst = (uint16_t)(dv ^ (mask & (sv ^ dv)));
+		}
+	}
+
+	qsc_memutils_secure_erase(extra, sizeof(extra));
 }
 
 static int32_t falcon_is_short(const int16_t* s1, const int16_t* s2, uint32_t logn)
@@ -3264,8 +3266,24 @@ static void falcon_poly_neg(falcon_fpr* a, uint32_t logn)
 	size_t u;
 
 	n = (size_t)1 << logn;
+	u = 0U;
 
-	for (u = 0U; u < n; ++u)
+#if defined(QSC_SYSTEM_HAS_ARM_NEON)
+	/*
+	 * falcon_fpr_neg toggles the IEEE-754 sign bit exactly. NEON XOR
+	 * preserves the same representation without floating-point rounding.
+	 */
+	for (; u + 2U <= n; u += 2U)
+	{
+		uint64x2_t x;
+
+		x = vld1q_u64(a + u);
+		x = veorq_u64(x, vdupq_n_u64(0x8000000000000000ULL));
+		vst1q_u64(a + u, x);
+	}
+#endif
+
+	for (; u < n; ++u)
 	{
 		a[u] = falcon_fpr_neg(a[u]);
 	}
@@ -3277,8 +3295,24 @@ static void falcon_poly_adj_fft(falcon_fpr* a, uint32_t logn)
 	size_t u;
 
 	n = (size_t)1 << logn;
+	u = n >> 1U;
 
-	for (u = (n >> 1); u < n; ++u)
+#if defined(QSC_SYSTEM_HAS_ARM_NEON)
+	/*
+	 * falcon_fpr_neg toggles the IEEE-754 sign bit exactly. NEON XOR
+	 * preserves the same representation without floating-point rounding.
+	 */
+	for (; u + 2U <= n; u += 2U)
+	{
+		uint64x2_t x;
+
+		x = vld1q_u64(a + u);
+		x = veorq_u64(x, vdupq_n_u64(0x8000000000000000ULL));
+		vst1q_u64(a + u, x);
+	}
+#endif
+
+	for (; u < n; ++u)
 	{
 		a[u] = falcon_fpr_neg(a[u]);
 	}
@@ -3701,6 +3735,48 @@ static uint32_t falcon_mq_montymul(uint32_t x, uint32_t y)
 	return z;
 }
 
+#if defined(QSC_SYSTEM_HAS_ARM_NEON)
+/**
+* \brief Reduce four 32-bit Montgomery products modulo Falcon q using NEON.
+* \param z Four products of 16-bit coefficients in the field.
+* \return Four field elements packed as 16-bit lanes.
+* \note Inputs fit 28 bits. Branch-free; no ownership or mutable global state.
+*/
+static uint16x4_t falcon_mq_montyreduce4_neon(uint32x4_t z)
+{
+	uint32x4_t w;
+	uint32x4_t r;
+	uint32x4_t d;
+
+	w = vmulq_n_u32(z, (uint32_t)FALCON_Q0I);
+	w = vandq_u32(w, vdupq_n_u32(65535U));
+	w = vmulq_n_u32(w, (uint32_t)FALCON_Q);
+	r = vshrq_n_u32(vaddq_u32(z, w), 16);
+	d = vsubq_u32(r, vdupq_n_u32((uint32_t)FALCON_Q));
+	d = vaddq_u32(d, vmulq_n_u32(vshrq_n_u32(d, 31), (uint32_t)FALCON_Q));
+
+	return vmovn_u32(d);
+}
+
+/**
+* \brief Multiply eight Falcon modular coefficients in Montgomery form.
+* \param x Eight input coefficients (0..q-1).
+* \param y Eight input coefficients (0..q-1).
+* \return Eight reduced Montgomery products.
+* \note No allocation, mutation, or secret-dependent branching.
+*/
+static uint16x8_t falcon_mq_montymul_neon(uint16x8_t x, uint16x8_t y)
+{
+	uint32x4_t lo;
+	uint32x4_t hi;
+
+	lo = vmull_u16(vget_low_u16(x), vget_low_u16(y));
+	hi = vmull_u16(vget_high_u16(x), vget_high_u16(y));
+
+	return vcombine_u16(falcon_mq_montyreduce4_neon(lo), falcon_mq_montyreduce4_neon(hi));
+}
+#endif
+
 static uint32_t falcon_mq_montysqr(uint32_t x)
 {
 	/*
@@ -3921,8 +3997,19 @@ static void falcon_mq_poly_tomonty(uint16_t* f, uint32_t logn)
 	size_t n;
 
 	n = (size_t)1 << logn;
+	u = 0U;
 
-	for (u = 0U; u < n; ++u)
+#if defined(QSC_SYSTEM_HAS_ARM_NEON)
+	for (; u + 8U <= n; u += 8U)
+	{
+		uint16x8_t x;
+
+		x = vld1q_u16(f + u);
+		vst1q_u16(f + u, falcon_mq_montymul_neon(x, vdupq_n_u16((uint16_t)FALCON_R2)));
+	}
+#endif
+
+	for (; u < n; ++u)
 	{
 		f[u] = (uint16_t)falcon_mq_montymul(f[u], FALCON_R2);
 	}
@@ -3939,8 +4026,21 @@ static void falcon_mq_poly_montymul_ntt(uint16_t* f, const uint16_t* g, uint32_t
 	size_t u;
 
 	n = (size_t)1 << logn;
+	u = 0U;
 
-	for (u = 0U; u < n; ++u)
+#if defined(QSC_SYSTEM_HAS_ARM_NEON)
+	for (; u + 8U <= n; u += 8U)
+	{
+		uint16x8_t x;
+		uint16x8_t y;
+
+		x = vld1q_u16(f + u);
+		y = vld1q_u16(g + u);
+		vst1q_u16(f + u, falcon_mq_montymul_neon(x, y));
+	}
+#endif
+
+	for (; u < n; ++u)
 	{
 		f[u] = (uint16_t)falcon_mq_montymul(f[u], g[u]);
 	}
@@ -3956,8 +4056,31 @@ static void falcon_mq_poly_sub(uint16_t* f, const uint16_t* g, uint32_t logn)
 	size_t u;
 
 	n = (size_t)1 << logn;
+	u = 0U;
 
-	for (u = 0U; u < n; ++u)
+#if defined(QSC_SYSTEM_HAS_ARM_NEON)
+	/*
+	 * Modular subtraction of coefficients in [0, q - 1].
+	 * The 16-bit wrapped difference has bit 15 set precisely when
+	 * the mathematical difference is negative. Add q in that case.
+	 */
+	for (; u + 8U <= n; u += 8U)
+	{
+		uint16x8_t a;
+		uint16x8_t b;
+		uint16x8_t d;
+		uint16x8_t neg;
+
+		a = vld1q_u16(f + u);
+		b = vld1q_u16(g + u);
+		d = vsubq_u16(a, b);
+		neg = vshrq_n_u16(d, 15);
+		d = vaddq_u16(d, vmulq_n_u16(neg, (uint16_t)FALCON_Q));
+		vst1q_u16(f + u, d);
+	}
+#endif
+
+	for (; u < n; ++u)
 	{
 		f[u] = (uint16_t)falcon_mq_sub(f[u], g[u]);
 	}
@@ -8173,7 +8296,7 @@ static void falcon_prng_get_bytes(falcon_prng_state* pctx, void* dst, size_t len
 			clen = len;
 		}
 
-		qsc_memutils_copy(buf, pctx->buf, clen);
+		qsc_memutils_copy(buf, pctx->buf + pctx->ptr, clen);
 		buf += clen;
 		len -= clen;
 		pctx->ptr += clen;
@@ -9148,9 +9271,9 @@ static void falcon_sign_dyn(int16_t* sig, qsc_keccak_state* kctx, const int8_t* 
 	}
 }
 
-#if defined(QSC_FALCON_S3SHAKE256F512)
 
-int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
+
+int32_t qsc_falcon_ref_512_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	uint8_t b[FALCON_KEYGEN_TEMP_9];
 	int8_t f[512U] = { 0U };
@@ -9177,29 +9300,29 @@ int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 		/* encode private key */
 		sk[0U] = 0x50U + 9U;
 		u = 1;
-		v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, f, 9, falcon_max_fg_bits[9]);
+		v = falcon_trim_i8_encode(sk + u, 1281U - u, f, 9, falcon_max_fg_bits[9]);
 
 		if (v != 0U)
 		{
 			u += v;
-			v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, g, 9, falcon_max_fg_bits[9]);
+			v = falcon_trim_i8_encode(sk + u, 1281U - u, g, 9, falcon_max_fg_bits[9]);
 
 			if (v != 0U)
 			{
 				u += v;
-				v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, F, 9, falcon_max_FG_bits[9]);
+				v = falcon_trim_i8_encode(sk + u, 1281U - u, F, 9, falcon_max_FG_bits[9]);
 
 				if (v != 0U)
 				{
 					u += v;
 
-					if (u == FALCON_CRYPTO_SECRETKEYBYTES)
+					if (u == 1281U)
 					{
 						/* encode public key */
 						pk[0] = 0x00 + 9U;
-						v = falcon_modq_encode(pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1, h, 9);
+						v = falcon_modq_encode(pk + 1, 897U - 1, h, 9);
 
-						if (v == FALCON_CRYPTO_PUBLICKEY_BYTES - 1U)
+						if (v == 897U - 1U)
 						{
 							res = 0;
 						}
@@ -9218,7 +9341,7 @@ int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 	return res;
 }
 
-int32_t qsc_falcon_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_falcon_ref_512_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t), size_t maxoverhead)
 {
 	int16_t sig[512] = { 0U };
 	uint8_t b[72U * 512U] = { 0U };
@@ -9229,36 +9352,43 @@ int32_t qsc_falcon_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t
 	uint16_t hm[512] = { 0U };
 	uint8_t seed[48U] = { 0U };
 	uint8_t nonce[FALCON_NONCE_SIZE] = { 0U };
-	uint8_t esig[FALCON_CRYPTO_SIGNATURE_BYTES - 2U - sizeof(nonce)] = { 0U };
+	uint8_t esig[666U - 2U - sizeof(nonce)] = { 0U };
 	qsc_keccak_state kctx = { 0U };
 	size_t u;
 	size_t v;
 	size_t siglen;
+	size_t attempt;
 	int32_t res;
 
 	res = -1;
+	*smlen = 0U;
+
+	if (maxoverhead != 658U && maxoverhead != 666U)
+	{
+		return res;
+	}
 
 	/* decode the private key */
 	if (sk[0U] == 0x50U + 9U)
 	{
 		u = 1;
-		v = falcon_trim_i8_decode(f, 9, falcon_max_fg_bits[9], sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u);
+		v = falcon_trim_i8_decode(f, 9, falcon_max_fg_bits[9], sk + u, 1281U - u);
 
 		if (v != 0U)
 		{
 			u += v;
-			v = falcon_trim_i8_decode(g, 9, falcon_max_fg_bits[9], sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u);
+			v = falcon_trim_i8_decode(g, 9, falcon_max_fg_bits[9], sk + u, 1281U - u);
 
 			if (v != 0U)
 			{
 				u += v;
-				v = falcon_trim_i8_decode(F, 9, falcon_max_FG_bits[9], sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u);
+				v = falcon_trim_i8_decode(F, 9, falcon_max_FG_bits[9], sk + u, 1281U - u);
 
 				if (v != 0U)
 				{
 					u += v;
 
-					if (u == FALCON_CRYPTO_SECRETKEYBYTES)
+					if (u == 1281U)
 					{
 						if (falcon_complete_private(G, f, g, F, 9, b))
 						{
@@ -9273,44 +9403,41 @@ int32_t qsc_falcon_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t
 								falcon_hash_to_point_ct(&kctx, hm, 9, b);
 
 								/* initialize a RNG */
-								if (rng_generate(seed, sizeof(seed)) == true)
+								/* Resample the signature when its encoding exceeds the fixed output size. */
+								siglen = 0U;
+								for (attempt = 0U; attempt < 64U && siglen == 0U; ++attempt)
 								{
+									if (rng_generate(seed, sizeof(seed)) == false)
+									{
+										break;
+									}
+
 									qsc_keccak_initialize_state(&kctx);
 									qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
 									qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-
-									/* compute the signature */
+									qsc_memutils_secure_erase(seed, sizeof(seed));
 									falcon_sign_dyn(sig, &kctx, f, g, F, G, hm, 9, b);
 									qsc_keccak_dispose(&kctx);
 
-									/*
-									 * Encode the signature and bundle it with the message. Format is:
-									 *   signature length     2 bytes, big-endian
-									 *   nonce                40 bytes
-									 *   message              mlen bytes
-									 *   signature            slen bytes
-									 */
 									esig[0U] = 0x20U + 9U;
-									siglen = falcon_comp_encode(esig + 1, (sizeof(esig)) - 1, sig, 9);
+									siglen = falcon_comp_encode(esig + 1U, maxoverhead - 2U - sizeof(nonce) - 1U, sig, 9);
+								}
 
-									if (siglen != 0U)
-									{
-										siglen++;
-										qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
-										sm[0U] = (uint8_t)(siglen >> 8);
-										sm[1U] = (uint8_t)siglen;
-										qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
-										qsc_memutils_copy(sm + 2 + sizeof(nonce) + mlen, esig, siglen);
-										*smlen = 2U + sizeof(nonce) + mlen + siglen;
-										res = 0;
-									}
-								}
-								else
+								if (siglen != 0U)
 								{
-									qsc_keccak_dispose(&kctx);
-									qsc_memutils_secure_erase(hm, sizeof(hm));
-									qsc_memutils_secure_erase(b, sizeof(b));
+									++siglen;
+									qsc_memutils_move(sm + 2U + sizeof(nonce), m, mlen);
+									sm[0U] = (uint8_t)(siglen >> 8);
+									sm[1U] = (uint8_t)siglen;
+									qsc_memutils_copy(sm + 2U, nonce, sizeof(nonce));
+									qsc_memutils_copy(sm + 2U + sizeof(nonce) + mlen, esig, siglen);
+									*smlen = 2U + sizeof(nonce) + mlen + siglen;
+									res = 0;
 								}
+
+								qsc_memutils_secure_erase(seed, sizeof(seed));
+								qsc_memutils_secure_erase(sig, sizeof(sig));
+								qsc_memutils_secure_erase(esig, sizeof(esig));
 							}
 
 							qsc_memutils_secure_erase(b, sizeof(b));
@@ -9337,7 +9464,7 @@ int32_t qsc_falcon_ref_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t
 	return res;
 }
 
-bool qsc_falcon_ref_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk)
+bool qsc_falcon_ref_512_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk)
 {
 	qsc_keccak_state kctx = { 0U };
 	uint16_t h[512U] = { 0U };
@@ -9350,11 +9477,12 @@ bool qsc_falcon_ref_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t sml
 	bool res;
 
 	res = false;
+	*mlen = 0U;
 
 	/* decode public key */
 	if (pk[0U] == 0x00U + 9U)
 	{
-		if (falcon_modq_decode(h, 9, pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1) == FALCON_CRYPTO_PUBLICKEY_BYTES - 1)
+		if (falcon_modq_decode(h, 9, pk + 1, 897U - 1) == 897U - 1)
 		{
 			falcon_to_ntt_monty(h, 9);
 
@@ -9363,14 +9491,14 @@ bool qsc_falcon_ref_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t sml
 			{
 				siglen = ((size_t)sm[0U] << 8) | (size_t)sm[1];
 
-				if (siglen <= (smlen - 2U - FALCON_NONCE_SIZE))
+				if (siglen >= 2U && siglen <= (smlen - 2U - FALCON_NONCE_SIZE))
 				{
 					msglen = smlen - 2U - FALCON_NONCE_SIZE - siglen;
 
 					/* decode signature */
 					esig = sm + 2U + FALCON_NONCE_SIZE + msglen;
 
-					if (siglen > 0U && esig[0U] == 0x20U + 9U)
+					if (siglen >= 2U && esig[0U] == 0x20U + 9U)
 					{
 						if (falcon_comp_decode(sig, 9, esig + 1, siglen - 1) == siglen - 1)
 						{
@@ -9409,9 +9537,9 @@ bool qsc_falcon_ref_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t sml
 }
 
 
-#elif defined(QSC_FALCON_S5SHAKE256F1024)
 
-int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
+
+int32_t qsc_falcon_ref_1024_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
 {
 	qsc_keccak_state kctx = { 0U };
 	uint16_t h[1024U] = { 0U };
@@ -9438,29 +9566,29 @@ int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 		/*encode private key */
 		sk[0U] = 0x50U + 10U;
 		u = 1U;
-		v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, f, 10, falcon_max_fg_bits[10]);
+		v = falcon_trim_i8_encode(sk + u, 2305U - u, f, 10, falcon_max_fg_bits[10]);
 
 		if (v != 0U)
 		{
 			u += v;
-			v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, g, 10, falcon_max_fg_bits[10]);
+			v = falcon_trim_i8_encode(sk + u, 2305U - u, g, 10, falcon_max_fg_bits[10]);
 
 			if (v != 0U)
 			{
 				u += v;
-				v = falcon_trim_i8_encode(sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u, F, 10, falcon_max_FG_bits[10]);
+				v = falcon_trim_i8_encode(sk + u, 2305U - u, F, 10, falcon_max_FG_bits[10]);
 
 				if (v != 0U)
 				{
 					u += v;
 
-					if (u == FALCON_CRYPTO_SECRETKEYBYTES)
+					if (u == 2305U)
 					{
 						/* encode public key */
 						pk[0U] = 0x00 + 10U;
-						v = falcon_modq_encode(pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1, h, 10);
+						v = falcon_modq_encode(pk + 1, 1793U - 1, h, 10);
 
-						if (v == FALCON_CRYPTO_PUBLICKEY_BYTES - 1)
+						if (v == 1793U - 1)
 						{
 							res = 0;
 						}
@@ -9480,7 +9608,7 @@ int32_t qsc_falcon_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gen
 	return res;
 }
 
-int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t))
+int32_t qsc_falcon_ref_1024_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t mlen, const uint8_t* sk, bool (*rng_generate)(uint8_t*, size_t), size_t maxoverhead)
 {
 	qsc_keccak_state kctx = { 0U };
 	int16_t sig[1024U] = { 0U };
@@ -9492,35 +9620,42 @@ int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t
 	uint16_t hm[1024U] = { 0U };
 	uint8_t seed[48U] = { 0U };
 	uint8_t nonce[FALCON_NONCE_SIZE] = { 0U };
-	uint8_t esig[FALCON_CRYPTO_SIGNATURE_BYTES - 2U - sizeof(nonce)] = { 0U };
+	uint8_t esig[1280U - 2U - sizeof(nonce)] = { 0U };
 	size_t u;
 	size_t v;
 	size_t siglen;
+	size_t attempt;
 	int32_t res;
 
 	res = -1;
+	*smlen = 0U;
+
+	if (maxoverhead != 1276U && maxoverhead != 1280U)
+	{
+		return res;
+	}
 
 	/* decode the private key */
 	if (sk[0U] == 0x50U + 10U)
 	{
 		u = 1U;
-		v = falcon_trim_i8_decode(f, 10, falcon_max_fg_bits[10], sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u);
+		v = falcon_trim_i8_decode(f, 10, falcon_max_fg_bits[10], sk + u, 2305U - u);
 
 		if (v != 0U)
 		{
 			u += v;
-			v = falcon_trim_i8_decode(g, 10, falcon_max_fg_bits[10], sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u);
+			v = falcon_trim_i8_decode(g, 10, falcon_max_fg_bits[10], sk + u, 2305U - u);
 
 			if (v != 0U)
 			{
 				u += v;
-				v = falcon_trim_i8_decode(F, 10, falcon_max_FG_bits[10], sk + u, FALCON_CRYPTO_SECRETKEYBYTES - u);
+				v = falcon_trim_i8_decode(F, 10, falcon_max_FG_bits[10], sk + u, 2305U - u);
 
 				if (v != 0U)
 				{
 					u += v;
 
-					if (u == FALCON_CRYPTO_SECRETKEYBYTES)
+					if (u == 2305U)
 					{
 						if (falcon_complete_private(G, f, g, F, 10, b))
 						{
@@ -9535,53 +9670,49 @@ int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t
 								falcon_hash_to_point_ct(&kctx, hm, 10, b);
 
 								/* initialize a RNG */
-								if (rng_generate(seed, sizeof(seed)) == true)
+								/* Resample the signature when its encoding exceeds the fixed output size. */
+								siglen = 0U;
+								for (attempt = 0U; attempt < 64U && siglen == 0U; ++attempt)
 								{
+									if (rng_generate(seed, sizeof(seed)) == false)
+									{
+										break;
+									}
+
 									qsc_keccak_initialize_state(&kctx);
 									qsc_keccak_incremental_absorb(&kctx, QSC_KECCAK_256_RATE, seed, sizeof(seed));
 									qsc_keccak_incremental_finalize(&kctx, QSC_KECCAK_256_RATE, QSC_KECCAK_SHAKE_DOMAIN_ID);
-
-									/* compute the signature */
+									qsc_memutils_secure_erase(seed, sizeof(seed));
 									falcon_sign_dyn(sig, &kctx, f, g, F, G, hm, 10, b);
 									qsc_keccak_dispose(&kctx);
 
-									/*
-									 * Encode the signature and bundle it with the message. Format is:
-									 *   signature length     2 bytes, big-endian
-									 *   nonce                40 bytes
-									 *   message              mlen bytes
-									 *   signature            slen bytes
-									 */
 									esig[0U] = 0x20U + 10U;
-									siglen = falcon_comp_encode(esig + 1, sizeof(esig) - 1, sig, 10);
-
-									if (siglen != 0U)
-									{
-										siglen++;
-										qsc_memutils_move(sm + 2 + sizeof(nonce), m, mlen);
-										sm[0U] = (uint8_t)(siglen >> 8);
-										sm[1U] = (uint8_t)siglen;
-										qsc_memutils_copy(sm + 2, nonce, sizeof(nonce));
-										qsc_memutils_copy(sm + 2 + sizeof(nonce) + mlen, esig, siglen);
-										*smlen = 2U + sizeof(nonce) + mlen + siglen;
-										res = 0;
-									}
-
-									qsc_memutils_secure_erase(hm, sizeof(hm));
-									qsc_memutils_secure_erase(esig, sizeof(esig));
-									qsc_memutils_secure_erase(seed, sizeof(seed));
-									qsc_memutils_secure_erase(sig, sizeof(sig));
+									siglen = falcon_comp_encode(esig + 1U, maxoverhead - 2U - sizeof(nonce) - 1U, sig, 10);
 								}
-								else
+
+								if (siglen != 0U)
 								{
-									qsc_keccak_dispose(&kctx);
-									qsc_memutils_secure_erase(hm, sizeof(hm));
-									qsc_memutils_secure_erase(b, sizeof(b));
+									++siglen;
+									qsc_memutils_move(sm + 2U + sizeof(nonce), m, mlen);
+									sm[0U] = (uint8_t)(siglen >> 8);
+									sm[1U] = (uint8_t)siglen;
+									qsc_memutils_copy(sm + 2U, nonce, sizeof(nonce));
+									qsc_memutils_copy(sm + 2U + sizeof(nonce) + mlen, esig, siglen);
+									*smlen = 2U + sizeof(nonce) + mlen + siglen;
+									res = 0;
 								}
-							}
+
+								qsc_memutils_secure_erase(seed, sizeof(seed));
+								qsc_memutils_secure_erase(sig, sizeof(sig));
+								qsc_memutils_secure_erase(esig, sizeof(esig));
 						}
+					}
 
 						qsc_memutils_secure_erase(b, sizeof(b));
+						qsc_memutils_secure_erase(hm, sizeof(hm));
+						qsc_memutils_secure_erase(esig, sizeof(esig));
+						qsc_memutils_secure_erase(seed, sizeof(seed));
+						qsc_memutils_secure_erase(sig, sizeof(sig));
 						qsc_memutils_secure_erase(G, sizeof(G));
 						qsc_memutils_secure_erase(nonce, sizeof(nonce));
 					}
@@ -9599,7 +9730,7 @@ int32_t qsc_falcon_ref_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, size_t
 	return res;
 }
 
-bool qsc_falcon_ref_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* pk)
+bool qsc_falcon_ref_1024_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t smlen, const uint8_t* pk)
 {
 	qsc_keccak_state kctx = { 0U };
 	uint16_t h[1024U] = { 0U };
@@ -9612,11 +9743,12 @@ bool qsc_falcon_ref_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t sml
 	bool res;
 
 	res = false;
+	*mlen = 0U;
 
 	/* decode public key */
 	if (pk[0U] == 0x00U + 10U)
 	{
-		if (falcon_modq_decode(h, 10, pk + 1, FALCON_CRYPTO_PUBLICKEY_BYTES - 1) == FALCON_CRYPTO_PUBLICKEY_BYTES - 1)
+		if (falcon_modq_decode(h, 10, pk + 1, 1793U - 1) == 1793U - 1)
 		{
 			falcon_to_ntt_monty(h, 10);
 
@@ -9625,14 +9757,14 @@ bool qsc_falcon_ref_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t sml
 			{
 				siglen = ((size_t)sm[0U] << 8) | (size_t)sm[1];
 
-				if (siglen <= (smlen - 2U - FALCON_NONCE_SIZE))
+				if (siglen >= 2U && siglen <= (smlen - 2U - FALCON_NONCE_SIZE))
 				{
 					msglen = smlen - 2U - FALCON_NONCE_SIZE - siglen;
 
 					/* decode signature */
 					esig = sm + 2U + FALCON_NONCE_SIZE + msglen;
 
-					if (siglen > 0U && esig[0U] == 0x20U + 10U)
+					if (siglen >= 2U && esig[0U] == 0x20U + 10U)
 					{
 						if (falcon_comp_decode(sig, 10, esig + 1, siglen - 1) == siglen - 1U)
 						{
@@ -9668,4 +9800,3 @@ bool qsc_falcon_ref_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_t sml
 	return res;
 }
 
-#endif

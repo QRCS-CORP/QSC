@@ -102,86 +102,91 @@
 #endif
 
 #if defined(QSC_HQC_S1N2321)
-/**
- * \def CEIL_DIVIDE(a, b)
- * \brief Computes the ceiling of a divided by b using integer arithmetic.
- */
-#   define CEIL_DIVIDE(a, b) (((a) / (b)) + (((a) % (b)) == 0 ? 0 : 1))
-/**
- * \def BITMASK(a, size)
- * \brief Creates a low-bit mask covering the remainder width of a modulo size.
- */
-#   define BITMASK(a, size)  ((1UL << ((a) % (size))) - 1UL)
+
 /**
  * \def CRYPTO_ALGNAME
  * \brief Formal algorithm name string for the selected HQC parameter set.
  */
 #   define CRYPTO_ALGNAME "HQC-1"
+
 /**
  * \def CRYPTO_SECRETKEYBYTES
- * \brief Encoded secret-key length in bytes.
+ * \brief Compressed HQC-2026 private seed length in bytes.
  */
-#   define CRYPTO_SECRETKEYBYTES 2321U
+#   define CRYPTO_SECRETKEYBYTES 32U
+
 /**
  * \def CRYPTO_PUBLICKEYBYTES
  * \brief Encoded public-key length in bytes.
  */
 #   define CRYPTO_PUBLICKEYBYTES 2241U
+
 /**
  * \def CRYPTO_BYTES
  * \brief Shared-secret length in bytes.
  */
 #   define CRYPTO_BYTES 32U
+
 /**
  * \def CRYPTO_CIPHERTEXTBYTES
  * \brief Encoded ciphertext length in bytes.
  */
 #   define CRYPTO_CIPHERTEXTBYTES 4433U
+
 /**
  * \def PARAM_N
  * \brief Code length in bits.
  */
 #   define PARAM_N 17669U
+
 /**
  * \def PARAM_N1
  * \brief Reed-Muller message block length in bytes.
  */
 #   define PARAM_N1 46U
+
 /**
  * \def PARAM_N2
  * \brief Reed-Muller code expansion factor.
  */
 #   define PARAM_N2 384U
+
 /**
  * \def PARAM_N1N2
  * \brief Product of PARAM_N1 and PARAM_N2.
  */
 #   define PARAM_N1N2 17664U
+
 /**
  * \def PARAM_OMEGA
  * \brief Hamming weight of secret vectors.
  */
-#   define PARAM_OMEGA 66U
+#   define PARAM_OMEGA 67U
+
 /**
  * \def PARAM_OMEGA_E
  * \brief Hamming weight of the encryption error vectors.
  */
-#   define PARAM_OMEGA_E 75U
+#   define PARAM_OMEGA_E 76U
+
 /**
  * \def PARAM_OMEGA_R
  * \brief Hamming weight of the encryption randomness vectors.
  */
-#   define PARAM_OMEGA_R 75U
+#   define PARAM_OMEGA_R 76U
+
 /**
  * \def PARAM_SECURITY
  * \brief Target classical security level in bits.
  */
 #   define PARAM_SECURITY 128U
+
 /**
  * \def PARAM_SECURITY_BYTES
  * \brief Security level expressed in bytes.
  */
 #   define PARAM_SECURITY_BYTES 16U
+
 /**
  * \def PARAM_DFR_EXP
  * \brief Decryption-failure-rate exponent parameter.
@@ -191,66 +196,78 @@
 #   define PUBLIC_KEY_BYTES CRYPTO_PUBLICKEYBYTES
 #   define SHARED_SECRET_BYTES CRYPTO_BYTES
 #   define CIPHERTEXT_BYTES CRYPTO_CIPHERTEXTBYTES
+
 /**
  * \def PARAM_DELTA
  * \brief Reed-Solomon correction capacity parameter.
  */
 #   define PARAM_DELTA 15U
+
 /**
  * \def PARAM_M
  * \brief Galois-field extension degree.
  */
 #   define PARAM_M 8U
+
 /**
  * \def PARAM_GF_POLY
  * \brief Reduction polynomial used for GF(2^m) multiplication.
  */
-#   define PARAM_GF_POLY 0x11DU
+#   define PARAM_GF_POLY 0x11BU
+
 /**
  * \def PARAM_GF_MUL_ORDER
  * \brief Multiplicative group order used by the finite-field arithmetic.
  */
 #   define PARAM_GF_MUL_ORDER 255U
+
 /**
  * \def PARAM_K
  * \brief Reed-Solomon message length in symbols.
  */
 #   define PARAM_K 16U
+
 /**
  * \def PARAM_G
  * \brief Reed-Solomon generator polynomial degree plus one.
  */
 #   define PARAM_G 31U
+
 /**
  * \def PARAM_FFT
  * \brief FFT recursion depth used by the decoder implementation.
  */
 #   define PARAM_FFT 4U
+
 /**
  * \def SEED_BYTES
  * \brief Seed length in bytes used by HQC key derivation and encapsulation paths.
  */
 #   define SEED_BYTES 32U
+
 /**
  * \def SALT_BYTES
  * \brief Ciphertext salt length in bytes.
  */
 #   define SALT_BYTES 16U
+
 /**
  * \def PARAM_N_MU
  * \brief Rejection-sampling constant derived from PARAM_N.
  */
 #   define PARAM_N_MU 243079ULL
+
 /**
  * \def UTILS_REJECTION_THRESHOLD
  * \brief Threshold used by constant-time rejection sampling.
  */
 #   define UTILS_REJECTION_THRESHOLD 16767881U
+
 #elif defined(QSC_HQC_S3N4602)
-#   define CEIL_DIVIDE(a, b) (((a) / (b)) + (((a) % (b)) == 0 ? 0 : 1))
-#   define BITMASK(a, size)  ((1UL << ((a) % (size))) - 1UL)
+
+
 #   define CRYPTO_ALGNAME "HQC-3"
-#   define CRYPTO_SECRETKEYBYTES 4602U
+#   define CRYPTO_SECRETKEYBYTES 32U
 #   define CRYPTO_PUBLICKEYBYTES 4514U
 #   define CRYPTO_BYTES 32U
 #   define CRYPTO_CIPHERTEXTBYTES 8978U
@@ -258,7 +275,7 @@
 #   define PARAM_N1 56U
 #   define PARAM_N2 640U
 #   define PARAM_N1N2 35840U
-#   define PARAM_OMEGA 100U
+#   define PARAM_OMEGA 101U
 #   define PARAM_OMEGA_E 114U
 #   define PARAM_OMEGA_R 114U
 #   define PARAM_SECURITY 192U
@@ -270,7 +287,7 @@
 #   define CIPHERTEXT_BYTES CRYPTO_CIPHERTEXTBYTES
 #   define PARAM_DELTA 16U
 #   define PARAM_M 8U
-#   define PARAM_GF_POLY 0x11DU
+#   define PARAM_GF_POLY 0x11BU
 #   define PARAM_GF_MUL_ORDER 255U
 #   define PARAM_K 24U
 #   define PARAM_G 33U
@@ -280,10 +297,10 @@
 #   define PARAM_N_MU 119800ULL
 #   define UTILS_REJECTION_THRESHOLD 16742417U
 #elif defined(QSC_HQC_S5N7333)
-#   define CEIL_DIVIDE(a, b) (((a) / (b)) + (((a) % (b)) == 0 ? 0 : 1))
-#   define BITMASK(a, size)  ((1ULL << ((a) % (size))) - 1ULL)
+
+
 #   define CRYPTO_ALGNAME "HQC-5"
-#   define CRYPTO_SECRETKEYBYTES 7333U
+#   define CRYPTO_SECRETKEYBYTES 32U
 #   define CRYPTO_PUBLICKEYBYTES 7237U
 #   define CRYPTO_BYTES 32U
 #   define CRYPTO_CIPHERTEXTBYTES 14421U
@@ -291,9 +308,9 @@
 #   define PARAM_N1 90U
 #   define PARAM_N2 640U
 #   define PARAM_N1N2 57600U
-#   define PARAM_OMEGA 131U
-#   define PARAM_OMEGA_E 149U
-#   define PARAM_OMEGA_R 149U
+#   define PARAM_OMEGA 132U
+#   define PARAM_OMEGA_E 150U
+#   define PARAM_OMEGA_R 150U
 #   define PARAM_SECURITY 256U
 #   define PARAM_SECURITY_BYTES 32U
 #   define PARAM_DFR_EXP 256U
@@ -303,7 +320,7 @@
 #   define CIPHERTEXT_BYTES CRYPTO_CIPHERTEXTBYTES
 #   define PARAM_DELTA 29U
 #   define PARAM_M 8U
-#   define PARAM_GF_POLY 0x11DU
+#   define PARAM_GF_POLY 0x11BU
 #   define PARAM_GF_MUL_ORDER 255U
 #   define PARAM_K 32U
 #   define PARAM_G 59U
@@ -319,61 +336,71 @@
  * \def RS_POLY_COEFS
  * \brief Reed-Solomon generator polynomial coefficients for HQC-1.
  */
-#define RS_POLY_COEFS 89, 69, 153, 116, 176, 117, 111, 75, 73, 233, 242, 233, 65, 210, 21, 139, 103, 173, 67, 118, 105, 210, 174, 110, 74, 69, 228, 82, 255, 181, 1
+#define RS_POLY_COEFS 74, 81, 224, 114, 221, 115, 110, 88, 91, 151, 139, 151, 84, 184, 21, 242, 97, 199, 87, 113, 104, 184, 197, 111, 89, 81, 156, 71, 128, 217, 1
+
 #elif defined(QSC_HQC_S3N4602)
 /**
  * \def RS_POLY_COEFS
  * \brief Reed-Solomon generator polynomial coefficients for HQC-3.
  */
-#define RS_POLY_COEFS 45, 216, 239, 24, 253, 104, 27, 40, 107, 50, 163, 210, 227, 134, 224, 158, 119, 13, 158, 1, 238, 164, 82, 43, 15, 232, 246, 142, 50, 189, 29, 232, 1
+#define RS_POLY_COEFS 56, 180, 145, 30, 131, 105, 28, 60, 107, 33, 206, 184, 155, 249, 153, 231, 112, 11, 231, 1, 144, 201, 71, 62, 8, 150, 142, 246, 33, 214, 26, 150, 1
+
 #elif defined(QSC_HQC_S5N7333)
 /**
  * \def RS_POLY_COEFS
  * \brief Reed-Solomon generator polynomial coefficients for HQC-5.
  */
-#define RS_POLY_COEFS 49, 167, 49, 39, 200, 121, 124, 91, 240, 63, 148, 71, 150, 123, 87, 101, 32, 215, 159, 71, 201, 115, 97, 210, 186, 183, 141, 217, 123, 12, 31, 243, 180, 219, 152, 239, 99, 141, 4, 246, 191, 144, 8, 232, 47, 27, 141, 178, 130, 64, 124, 47, 39, 188, 216, 48, 199, 187, 1
+#define RS_POLY_COEFS 35, 203, 35, 52, 165, 121, 125, 73, 136, 42, 235, 82, 232, 122, 67, 98, 51, 188, 230, 82, 164, 117, 103, 184, 209, 218, 244, 181, 122, 10, 25, 138, 216, 182, 225, 145, 100, 244, 5, 142, 213, 238, 15, 150, 59, 28, 244, 222, 252, 85, 125, 59, 52, 215, 180, 34, 173, 208, 1
 #endif
 
 /**
  * \def VEC_N_SIZE_BYTES
  * \brief Byte length of a packed length-n binary vector.
  */
-#define VEC_N_SIZE_BYTES CEIL_DIVIDE(PARAM_N, 8U)
+#define VEC_N_SIZE_BYTES ((PARAM_N + 7U) / 8U)
+
 /**
  * \def VEC_K_SIZE_BYTES
  * \brief Byte length of the Reed-Solomon message vector.
  */
 #define VEC_K_SIZE_BYTES PARAM_K
+
 /**
  * \def VEC_N1_SIZE_BYTES
  * \brief Byte length of the Reed-Muller input vector.
  */
 #define VEC_N1_SIZE_BYTES PARAM_N1
+
 /**
  * \def VEC_N1N2_SIZE_BYTES
  * \brief Byte length of the expanded Reed-Muller codeword vector.
  */
-#define VEC_N1N2_SIZE_BYTES CEIL_DIVIDE(PARAM_N1N2, 8U)
+#define VEC_N1N2_SIZE_BYTES ((PARAM_N1N2 + 7U) / 8U)
+
 /**
  * \def VEC_N_SIZE_64
  * \brief Number of 64-bit words required to store a packed length-n vector.
  */
-#define VEC_N_SIZE_64 CEIL_DIVIDE(PARAM_N, 64U)
+#define VEC_N_SIZE_64 ((PARAM_N + 63U) / 64U)
+
 /**
  * \def VEC_N1_SIZE_64
  * \brief Number of 64-bit words required to store PARAM_N1 bytes.
  */
-#define VEC_N1_SIZE_64 CEIL_DIVIDE(PARAM_N1, 8U)
+#define VEC_N1_SIZE_64 ((PARAM_N1 + 7U) / 8U)
+
 /**
  * \def VEC_N1N2_SIZE_64
  * \brief Number of 64-bit words required to store the expanded codeword vector.
  */
-#define VEC_N1N2_SIZE_64 CEIL_DIVIDE(PARAM_N1N2, 64U)
+#define VEC_N1N2_SIZE_64 ((PARAM_N1N2 + 63U) / 64U)
+
 /**
  * \def QSC_HQC_SEED_SIZE
  * \brief Public constant defining the HQC seed size in bytes.
  */
 #define QSC_HQC_SEED_SIZE 32U
+
 /**
  * \def QSC_HQC_SHAREDSECRET_SIZE
  * \brief Public constant defining the HQC shared-secret size in bytes.
@@ -475,7 +502,7 @@ bool qsc_hqc_ref_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t
 void qsc_hqc_ref_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_HQC_SEED_SIZE]);
 
 /**
- * \brief Generates an HQC key pair using the AVX2 implementation and an external RNG.
+ * \brief Generates a compressed HQC-2026 key pair using the reference implementation and an external RNG.
  *
  * \param[out] publickey A pointer to the output public-key buffer.
  * The buffer must be at least PUBLIC_KEY_BYTES bytes long.

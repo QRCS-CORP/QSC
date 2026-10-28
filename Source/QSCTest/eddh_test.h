@@ -146,4 +146,53 @@ bool qsctest_eddh_publickey_integrity(void);
  */
 void qsctest_eddh_run(void);
 
+/**
+ * \brief Validate X25519 independent API with RFC 7748 known-answer vectors and direct public derivation.
+ * \return True on success, false with diagnostic output on failure.
+ * \details Test data is local; each parameter is evaluated independently.
+ */
+bool qsctest_eddh_x25519_kat_test(void);
+
+/**
+ * \brief Validate X25519 independent API with random agreement and rejection of invalid peer keys.
+ * \return True on success, false with diagnostic output on failure.
+ * \details Test data is local; each parameter is evaluated independently.
+ */
+bool qsctest_eddh_x25519_operations_test(void);
+
+/**
+ * \brief Validate X448 independent API with RFC 7748 known-answer vectors and direct public derivation.
+ * \return True on success, false with diagnostic output on failure.
+ * \details Test data is local; each parameter is evaluated independently.
+ */
+bool qsctest_eddh_x448_kat_test(void);
+
+/**
+ * \brief Validate X448 independent API with random agreement and rejection of invalid peer keys.
+ * \return True on success, false with diagnostic output on failure.
+ * \details Test data is local; each parameter is evaluated independently.
+ */
+bool qsctest_eddh_x448_operations_test(void);
+
+/**
+ * \brief Verify bounded Ed448 multiplication with maximal positive signed input limbs.
+ * \return True on matching modular result and aliasing result; false on a mismatch.
+ * \details Fixed vectors; no dynamic allocation or shared mutable state.
+ */
+bool qsctest_eddh_field_mul_positive_bounds_test(void);
+
+/**
+ * \brief Verify bounded Ed448 multiplication with maximal negative signed input limbs.
+ * \return True on matching modular result; false on a mismatch.
+ * \details Fixed vectors; no dynamic allocation or shared mutable state.
+ */
+bool qsctest_eddh_field_mul_negative_bounds_test(void);
+
+/**
+ * \brief Verify Ed448 reduction and encoding of a negative carry.
+ * \return True on matching canonical p-1 bytes; false on a mismatch.
+ * \details Fixed vectors; no dynamic allocation or shared mutable state.
+ */
+bool qsctest_eddh_field_negative_carry_test(void);
+
 #endif

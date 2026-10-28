@@ -1,11 +1,79 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
+#if !defined(_WIN32) && !defined(_FILE_OFFSET_BITS)
+#   define _FILE_OFFSET_BITS 64
+#endif
+#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
+#   define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "fileutils.h"
 #include "memutils.h"
 #include "stringutils.h"
+#include <errno.h>
+#include <limits.h>
+#include <stdint.h>
+#include <string.h>
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #  include <direct.h>
 #  include <io.h>
 #  include <stdio.h>
+#  if !defined(WIN32_LEAN_AND_MEAN)
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  if !defined(NOMINMAX)
+#    define NOMINMAX
+#  endif
 #  include <windows.h>
 #elif defined(QSC_SYSTEM_OS_MAC)
 #	if !defined(_LARGEFILE_SOURCE)
@@ -123,8 +191,17 @@ bool qsc_fileutils_append_to_file(const char* fpath, const char* stream, size_t 
 
 		if (fp != NULL && err == 0)
 		{
-			res = (fwrite(stream, sizeof(char), length, fp) != 0U);
-			fclose(fp);
+			res = (fwrite(stream, sizeof(char), length, fp) == length);
+
+			if (fflush(fp) != 0)
+			{
+				res = false;
+			}
+
+			if (fclose(fp) != 0)
+			{
+				res = false;
+			}
 		}
 	}
 
@@ -226,8 +303,17 @@ bool qsc_fileutils_copy_object_to_file(const char* fpath, const void* obj, size_
 
 		if (fp != NULL && err == 0)
 		{
-			res = (fwrite(obj, sizeof(char), length, fp) != 0U);
-			fclose(fp);
+			res = (fwrite(obj, sizeof(char), length, fp) == length);
+
+			if (fflush(fp) != 0)
+			{
+				res = false;
+			}
+
+			if (fclose(fp) != 0)
+			{
+				res = false;
+			}
 		}
 	}
 
@@ -257,8 +343,17 @@ bool qsc_fileutils_copy_stream_to_file(const char* fpath, const char* stream, si
 
 		if (fp != NULL && err == 0)
 		{
-			res = (fwrite(stream, sizeof(char), length, fp) != 0U);
-			fclose(fp);
+			res = (fwrite(stream, sizeof(char), length, fp) == length);
+
+			if (fflush(fp) != 0)
+			{
+				res = false;
+			}
+
+			if (fclose(fp) != 0)
+			{
+				res = false;
+			}
 		}
 	}
 
@@ -393,39 +488,105 @@ bool qsc_fileutils_file_copy(const char* inpath, const char* outpath)
 	QSC_ASSERT(inpath != NULL);
 	QSC_ASSERT(outpath != NULL);
 
-	char* pfs;
-	size_t len;
+	FILE* src;
+	FILE* dst;
+	uint8_t buffer[32768U];
+	size_t nread;
+	bool res;
 
-	len = 0U;
+	src = NULL;
+	dst = NULL;
+	res = false;
 
-	if (inpath != NULL && outpath != NULL)
+	if (inpath != NULL && outpath != NULL && strcmp(inpath, outpath) != 0)
 	{
-		len = qsc_fileutils_get_size(inpath);
+		src = qsc_fileutils_open(inpath, qsc_fileutils_mode_read, true);
 
-		if (len > 0U)
+		if (src != NULL)
 		{
-			pfs = (char*)qsc_memutils_malloc(len);
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+			BY_HANDLE_FILE_INFORMATION srcinfo;
+			BY_HANDLE_FILE_INFORMATION dstinfo;
+			HANDLE target;
+			bool distinct;
 
-			if (pfs != NULL)
+			distinct = false;
+			target = CreateFileA(outpath, FILE_READ_ATTRIBUTES,
+				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+				NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+			if (target != INVALID_HANDLE_VALUE)
 			{
-				len = qsc_fileutils_copy_file_to_stream(inpath, pfs, len);
-
-				if (len > 0U)
+				const intptr_t srcfd = _get_osfhandle(_fileno(src));
+				if (srcfd != -1 &&
+					GetFileInformationByHandle((HANDLE)srcfd, &srcinfo) != 0 &&
+					GetFileInformationByHandle(target, &dstinfo) != 0)
 				{
-					if (qsc_fileutils_copy_stream_to_file(outpath, (const char*)pfs, len) == false)
+					distinct = (srcinfo.dwVolumeSerialNumber != dstinfo.dwVolumeSerialNumber ||
+						srcinfo.nFileIndexHigh != dstinfo.nFileIndexHigh ||
+						srcinfo.nFileIndexLow != dstinfo.nFileIndexLow);
+				}
+				CloseHandle(target);
+			}
+			else
+			{
+				const DWORD err = GetLastError();
+				distinct = (err == ERROR_FILE_NOT_FOUND || err == ERROR_PATH_NOT_FOUND);
+			}
+#else
+			struct stat inst;
+			struct stat outst;
+			bool distinct;
+
+			distinct = (fstat(fileno(src), &inst) == 0);
+			if (distinct == true && stat(outpath, &outst) == 0)
+			{
+				distinct = (inst.st_dev != outst.st_dev || inst.st_ino != outst.st_ino);
+			}
+#endif
+
+			if (distinct == true)
+			{
+				dst = qsc_fileutils_open(outpath, qsc_fileutils_mode_write, true);
+
+				if (dst != NULL)
+				{
+					res = true;
+
+					do
 					{
-						len = 0U;
+						nread = fread(buffer, 1U, sizeof(buffer), src);
+
+						if (nread != 0U && fwrite(buffer, 1U, nread, dst) != nread)
+						{
+							res = false;
+							break;
+						}
+					} while (nread == sizeof(buffer));
+
+					if (ferror(src) != 0 || fflush(dst) != 0)
+					{
+						res = false;
+					}
+
+					if (fclose(dst) != 0)
+					{
+						res = false;
 					}
 				}
+			}
 
-				qsc_memutils_alloc_free(pfs);
-				pfs = NULL;
+			if (fclose(src) != 0)
+			{
+				res = false;
 			}
 		}
 	}
 
-	return (len != 0U);
+	return res;
 }
+
+
 
 bool qsc_fileutils_get_access(const char* fpath, qsc_fileutils_access_rights level)
 {
@@ -554,100 +715,134 @@ int64_t qsc_fileutils_get_line(char** line, size_t* length, FILE* fp)
 	QSC_ASSERT(length != NULL);
 	QSC_ASSERT(fp != NULL);
 
-	char chunk[128U + 1U] = { 0U };
-	char* tmpl;
-	size_t llen;
-	int64_t ilen;
-	int64_t cpos;
-	int64_t lpos;
+	char chunk[512U];
+	char* data;
+	char* replacement;
+	size_t capacity;
+	size_t count;
+	size_t nread;
+	size_t need;
+	size_t ncopy;
+	int64_t res;
+	bool found;
 
-	ilen = -1;
-
+	res = -1;
 	if (line != NULL && length != NULL && fp != NULL)
 	{
-		lpos = 0U;
-		llen = sizeof(chunk);
-		*line = qsc_memutils_malloc(llen);
+		*line = NULL;
+		*length = 0U;
+		capacity = sizeof(chunk);
+		data = (char*)qsc_memutils_malloc(capacity);
+		count = 0U;
+		found = false;
 
-		if (*line != NULL)
+		if (data != NULL)
 		{
-			qsc_memutils_clear(*line, llen);
-
-			while (fgets(chunk, sizeof(chunk), fp) != NULL)
+			while (fgets(chunk, (int32_t)sizeof(chunk), fp) != NULL)
 			{
-				cpos = qsc_stringutils_find_char(chunk, '\n');
+				const char* newline;
 
-				if (cpos != QSC_STRINGUTILS_TOKEN_NOT_FOUND)
+				nread = strlen(chunk);
+				newline = (const char*)memchr(chunk, '\n', nread);
+				ncopy = (newline != NULL) ? (size_t)(newline - chunk) : nread;
+
+				if (ncopy > SIZE_MAX - count - 1U || ncopy > (size_t)INT64_MAX - count)
 				{
-					qsc_memutils_copy(*line + lpos, chunk, cpos);
-					lpos += cpos;
-					ilen = lpos + 1U;
-					*length = llen;
 					break;
 				}
-				else
-				{
-					qsc_memutils_copy(*line + lpos, chunk, 128U);
-					lpos += 128U;
-					llen += 128U;
-					tmpl = qsc_memutils_realloc(*line, llen);
 
-					if (tmpl != NULL)
+				need = count + ncopy + 1U;
+				if (need > capacity)
+				{
+					size_t next;
+					next = capacity;
+
+					while (next < need && next <= SIZE_MAX / 2U)
 					{
-						*line = tmpl;
-						qsc_memutils_clear(*line + lpos, llen - lpos);
+						next *= 2U;
 					}
-					else
+
+					if (next < need)
 					{
-						ilen = -1;
+						next = need;
+					}
+
+					replacement = (char*)qsc_memutils_realloc(data, next);
+					if (replacement == NULL)
+					{
 						break;
 					}
+
+					data = replacement;
+					capacity = next;
+				}
+
+				if (ncopy != 0U)
+				{
+					qsc_memutils_copy(data + count, chunk, ncopy);
+					count += ncopy;
+				}
+
+				if (newline != NULL)
+				{
+					found = true;
+					break;
 				}
 			}
+
+			if (found == true || (feof(fp) != 0 && count != 0U))
+			{
+				data[count] = '\0';
+				*line = data;
+				*length = capacity;
+				res = (int64_t)count + (found == true ? 1 : 0);
+			}
+			else
+			{
+				qsc_memutils_alloc_free(data);
+			}
 		}
-		else
-		{
-			ilen = -1;
-		}
-	}
-	else
-	{
-		ilen = -1;
 	}
 
-	return ilen;
+	return res;
 }
+
+
 
 size_t qsc_fileutils_get_size(const char* fpath)
 {
 	QSC_ASSERT(fpath != NULL);
 
 	FILE* fp;
-	errno_t err;
 	size_t res;
 
 	res = 0U;
+	fp = NULL;
 
 	if (fpath != NULL)
 	{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		err = fopen_s(&fp, fpath, "rb");
-#else
-		fp = fopen(fpath, "rb");
-		err = (fp != NULL) ? 0 : -1;
-#endif
+		fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_read, true);
 
-		if (fp != NULL && err == 0)
+		if (fp != NULL)
 		{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-			_fseeki64(fp, 0L, SEEK_END);
-			res = (size_t)_ftelli64(fp);
-#elif defined(QSC_SYSTEM_OS_MAC)
-			fseeko(fp, 0L, SEEK_END);
-			res = (size_t)ftello(fp);
+			if (_fseeki64(fp, 0, SEEK_END) == 0)
+			{
+				const __int64 pos = _ftelli64(fp);
+				if (pos >= 0 && (uint64_t)pos <= (uint64_t)SIZE_MAX)
+				{
+					res = (size_t)pos;
+				}
+			}
 #else
-			fseek(fp, 0L, SEEK_END);
-			res = (size_t)ftell(fp);
+			if (fseeko(fp, (off_t)0, SEEK_END) == 0)
+			{
+				const off_t pos = ftello(fp);
+				if (pos >= (off_t)0 && (uint64_t)pos <= (uint64_t)SIZE_MAX)
+				{
+					res = (size_t)pos;
+				}
+			}
 #endif
 			fclose(fp);
 		}
@@ -656,40 +851,28 @@ size_t qsc_fileutils_get_size(const char* fpath)
 	return res;
 }
 
+
+
 bool qsc_fileutils_get_working_directory(char* fpath, size_t flen)
 {
 	QSC_ASSERT(fpath != NULL);
 
-	char buf[FILENAME_MAX] = { 0U };
-	const char* sdir;
-	size_t len;
 	bool res;
-
 	res = false;
 
-	if (fpath != NULL)
+	if (fpath != NULL && flen != 0U)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		sdir = _getcwd(buf, sizeof(buf));
+		res = (_getcwd(fpath, (int32_t)((flen > (size_t)INT_MAX) ? (size_t)INT_MAX : flen)) != NULL);
 #else
-
-		sdir = getcwd(buf, sizeof(buf));
+		res = (getcwd(fpath, flen) != NULL);
 #endif
-
-		if (sdir != NULL)
-		{
-			len = qsc_stringutils_string_size(buf);
-			res = flen <= len;
-
-			if (res == true)
-			{
-				qsc_memutils_copy(fpath, buf, len);
-			}
-		}
 	}
 
 	return res;
 }
+
+
 
 size_t qsc_fileutils_list_files(char* result, size_t reslen, const char* directory)
 {
@@ -925,80 +1108,99 @@ int64_t qsc_fileutils_read_line(const char* fpath, char* buffer, size_t buflen, 
 	QSC_ASSERT(buffer != NULL);
 	QSC_ASSERT(buflen != 0U);
 
-	int64_t pln;
+	FILE* fp;
+	uint8_t chunk[8192U];
+	const uint8_t* current;
+	const uint8_t* newline;
+	size_t lines;
+	size_t copied;
+	size_t count;
+	size_t offset;
+	size_t nread;
+	size_t avail;
+	size_t take;
+	int64_t result;
+	bool located;
+	bool done;
 
-	pln = 0;
-
+	result = -1;
 	if (fpath != NULL && buffer != NULL && buflen != 0U)
 	{
-		FILE* fp;
-		char* sbuf;
-		errno_t err;
-		size_t ctr;
-		size_t len;
-		size_t pos;
-
-		ctr = 0U;
-		pos = 0U;
-
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-		err = fopen_s(&fp, fpath, "r");
-#else
-		fp = fopen(fpath, "r");
-		err = (fp != NULL) ? 0 : -1;
-#endif
-
-		if (fp != NULL && err == 0)
+		buffer[0] = '\0';
+		fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_read, true);
+		if (fp != NULL)
 		{
-			len = qsc_fileutils_get_size(fpath);
+			lines = 0U;
+			copied = 0U;
+			count = 0U;
+			located = false;
+			done = false;
+			result = -1;
 
-			if (len > 0U)
+			while (done == false && (nread = fread(chunk, 1U, sizeof(chunk), fp)) != 0U)
 			{
-				sbuf = (char*)qsc_memutils_malloc(len);
+				offset = 0U;
 
-				if (sbuf != NULL)
+				while (offset < nread)
 				{
-					qsc_memutils_clear(sbuf, len);
+					current = chunk + offset;
+					newline = (const uint8_t*)memchr(current, '\n', nread - offset);
+					take = (newline != NULL) ? (size_t)(newline - current) : nread - offset;
 
-					len = fread(sbuf, sizeof(char), len, fp);
-
-					if (len > 0U)
+					if (lines == linenum)
 					{
-						while (true)
+						located = true;
+						if (take > (size_t)INT64_MAX - count)
 						{
-							pln = qsc_stringutils_find_string(sbuf + pos, "\n");
+							result = -1;
+							done = true;
+							break;
+						}
 
-							if (pln == QSC_STRINGUTILS_TOKEN_NOT_FOUND || ctr > linenum)
-							{
-								break;
-							}
+						count += take;
+						avail = buflen - 1U - copied;
+						if (avail > take)
+						{
+							avail = take;
+						}
 
-							if (ctr == linenum)
-							{
-								if (pln > 0)
-								{
-									qsc_memutils_copy(buffer, sbuf + pos, (size_t)pln <= buflen ? (size_t)pln : buflen);
-								}
-
-								break;
-							}
-
-							pos += pln + 1U;
-							++ctr;
-						};
+						if (avail != 0U)
+						{
+							qsc_memutils_copy(buffer + copied, current, avail);
+							copied += avail;
+						}
 					}
 
-					qsc_memutils_alloc_free(sbuf);
-					sbuf = NULL;
+					offset += take;
+					if (newline != NULL)
+					{
+						if (lines == linenum)
+						{
+							result = (int64_t)count;
+							done = true;
+							break;
+						}
+
+						++offset;
+						++lines;
+					}
 				}
 			}
 
+			if (done == false && located == true && ferror(fp) == 0)
+			{
+				result = (int64_t)count;
+			}
+
+			buffer[copied] = '\0';
 			fclose(fp);
 		}
 	}
 
-	return pln;
+	return result;
 }
+
+
 
 bool qsc_fileutils_sync(FILE* fp)
 {
@@ -1068,98 +1270,99 @@ size_t qsc_fileutils_safe_write(const char* fpath, size_t position, const char* 
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(length != 0U);
 
+	FILE* fp;
 	size_t res;
 
 	res = 0U;
-
 	if (fpath != NULL && input != NULL && length != 0U)
 	{
-		FILE* fp;
-
-		fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_write, true);
+		fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_read_update, true);
+		if (fp == NULL && errno == ENOENT)
+		{
+			/* Only create if the file genuinely does not exist. */
+			fp = qsc_fileutils_open(fpath, qsc_fileutils_mode_write_update, true);
+		}
 
 		if (fp != NULL)
 		{
 			if (qsc_fileutils_seekto(fp, position) == true)
 			{
-				res = fwrite(input, sizeof(char), length, fp);
-				fflush(fp);
+				res = fwrite(input, 1U, length, fp);
+				if (fflush(fp) != 0)
+				{
+					res = 0U;
+				}
 			}
 
-			fclose(fp);
+			if (fclose(fp) != 0)
+			{
+				res = 0U;
+			}
 		}
 	}
 
 	return res;
 }
+
+
 
 bool qsc_fileutils_seekto(FILE* fp, size_t position)
 {
 	QSC_ASSERT(fp != NULL);
 
 	int32_t res;
-
 	res = -1;
-
 	if (fp != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		res = _fseeki64(fp, (long long)position, SEEK_SET);
-#elif defined(QSC_SYSTEM_OS_MAC)
-		res = fseeko(fp, (off_t)position, SEEK_SET);
+		if (position <= (size_t)INT64_MAX)
+		{
+			res = _fseeki64(fp, (__int64)position, SEEK_SET);
+		}
 #else
-		res = fseek(fp, (off_t)position, SEEK_SET);
+		if ((uint64_t)position <= (uint64_t)INT64_MAX)
+		{
+			res = fseeko(fp, (off_t)position, SEEK_SET);
+		}
 #endif
 	}
 
 	return (res == 0);
 }
 
+
+
 bool qsc_fileutils_truncate_file(FILE* fp, size_t length)
 {
 	QSC_ASSERT(fp != NULL);
 
-	size_t flen;
 	bool res;
-
 	res = false;
-
 	if (fp != NULL)
 	{
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-		_fseeki64(fp, 0L, SEEK_END);
-		flen = (size_t)_ftelli64(fp);
-#elif defined(QSC_SYSTEM_OS_MAC)
-		fseeko(fp, 0L, SEEK_END);
-		flen = (size_t)ftello(fp);
-#else
-		fseek(fp, 0L, SEEK_END);
-		flen = (size_t)ftell(fp);
-#endif
-
-		if (length < flen)
+		if (length <= (size_t)INT64_MAX && _fseeki64(fp, 0, SEEK_END) == 0)
 		{
-#if defined(QSC_SYSTEM_OS_WINDOWS)
-			if (_chsize_s(_fileno(fp), length) == 0)
+			const __int64 oldlen = _ftelli64(fp);
+			if (oldlen >= 0 && length < (uint64_t)oldlen)
 			{
-				res = true;
+				res = (_chsize_s(_fileno(fp), (uint64_t)length) == 0);
 			}
-#elif defined(QSC_SYSTEM_OS_MAC)
-			if (ftruncate(fileno(fp), length) == 0)
-			{
-				res = true;
-			}
-#else
-			if (ftruncate(fileno(fp), length) == 0)
-			{
-				res = true;
-			}
-#endif
 		}
+#else
+		if ((uint64_t)length <= (uint64_t)INT64_MAX && fseeko(fp, (off_t)0, SEEK_END) == 0)
+		{
+			const off_t oldlen = ftello(fp);
+			if (oldlen >= (off_t)0 && length < (uint64_t)oldlen)
+			{
+				res = (ftruncate(fileno(fp), (off_t)length) == 0);
+			}
+		}
+#endif
 	}
-
 	return res;
 }
+
 
 bool qsc_fileutils_valid_path(const char* fpath)
 {

@@ -144,6 +144,48 @@ QSC_EXPORT_API typedef struct
 QSC_EXPORT_API void qsc_list_add(qsc_list_state* ctx, const void* item);
 
 /**
+ * \brief Reserve storage for at least capacity elements without changing count.
+ * \param ctx: Initialized list, owned by the caller.
+ * \param capacity: Required element capacity, up to QSC_LIST_MAX_DEPTH.
+ * \return True on success; false for invalid state, oversized request or allocation failure.
+ * \note Thread-safe for calls using the same initialized state; invalidates cached item pointers if storage moves.
+ */
+QSC_EXPORT_API bool qsc_list_reserve(qsc_list_state* ctx, size_t capacity);
+
+/**
+ * \brief Shrink list allocation to the current count without changing item order.
+ * \param ctx: Initialized list, owned by the caller.
+ * \return True on success; false for invalid state or allocation failure.
+ * \note Thread-safe; may invalidate externally cached item pointers.
+ */
+QSC_EXPORT_API bool qsc_list_trim(qsc_list_state* ctx);
+
+/**
+ * \brief Deserialize a checked complete list image in the existing wire format.
+ * \param ctx: Initialized destination list; replaced only on success.
+ * \param input: Caller-owned serialized data, at least inputlen bytes long.
+ * \param inputlen: Available input byte count, including the eight-byte header.
+ * \return True on success; false for malformed, truncated or unallocatable data.
+ * \note Thread-safe per destination state. No input ownership transfer.
+ */
+QSC_EXPORT_API bool qsc_list_deserialize_sized(qsc_list_state* ctx, const uint8_t* input, size_t inputlen);
+
+/**
+ * \brief Serialize the existing little-endian list format into a sized buffer.
+ * \param output: Caller-owned output, at least outputlen bytes accessible.
+ * \param outputlen: Writable output capacity in bytes.
+ * \param ctx: Initialized source list.
+ * \param written: Receives complete serialized size on success; unchanged on failure.
+ * \return True on success, false for invalid state, size overflow or short buffer.
+ * \note No ownership transfer or allocation; thread-safe per initialized list.
+ */
+QSC_EXPORT_API bool qsc_list_serialize_sized(uint8_t* output, size_t outputlen, const qsc_list_state* ctx, size_t* written);
+
+
+
+
+
+/**
  * \brief Copy an item from the list.
  *
  * \param ctx: [const qsc_list_state*] Pointer to the list state structure.

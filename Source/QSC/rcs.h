@@ -54,7 +54,7 @@
 
 #include "qsccommon.h"
 #include "sha3.h"
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
 #	include "intrinsics.h"
 #	include <immintrin.h>
 #endif
@@ -70,10 +70,12 @@ QSC_CPLUSPLUS_ENABLED_START
  * RCS is a hybrid cipher that combines a wide-block Rijndael-256 rounds function with a cryptographically strong
  * pseudo-random generator (cSHAKE) to expand the round-key array (key-schedule). The cryptographic XOF (cSHAKE)
  * generates the round key array used by the modified Rijndael rounds function, enabling a higher number of mixing rounds:
- *  - RCS-256 uses 22 rounds (compared to 14 in standard AES-256).
- *  - RCS-512 employs 30 rounds with a 512-bit key configuration.
+ *  - RCS-256 uses 14 rounds by default, or 22 with QSC_RCS_EXTENDED_ROUND_COUNTS.
+ *  - RCS-512 uses 21 rounds by default, or 30 with QSC_RCS_EXTENDED_ROUND_COUNTS.
+ * RCS is a QSC construction with a 256-bit block, not the AES algorithm specified by FIPS 197.
+ * KMAC-256 follows SP 800-185; the 512-bit cSHAKE/KMAC configuration is a QSC extension.
  *
- * The cipher supports authenticated encryption with associated data (AEAD) by integrating a keyed MAC function (KMAC or QMAC)
+ * The cipher supports authenticated encryption with associated data (AEAD) by integrating a keyed MAC function (KMAC)
  * that appends an authentication code to the ciphertext. It also supports a tweakable configuration by allowing a
  * user-specified info parameter to customize the cSHAKE output, which can be used as a secondary key or domain separator.
  *
@@ -109,7 +111,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \endcode
  *
  * \section rcs_links Reference Links:
- * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf">Rijndael Specification (NIST FIPS 197)</a>
+ * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf">AES round operations (FIPS 197; 128-bit blocks only)</a>
  * - <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">SHA3 Specification (FIPS 202)</a>
  */
 
@@ -126,13 +128,18 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_RCS_AUTHENTICATED
 #endif
 
-/*!
- * \def QSC_RCS_REDUCED_ROUNDS
- * \brief Sets the internal transformation round counts to: RCS256=14, RCS512=21,
- * and the KMAC rounds from 24 to 12.
- * Remove this definition to enable the standard rounds versions of RCS.
+#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#	define QSC_SYSTEM_RCS_AESNI_ENABLED
+#endif
+
+/*! \def QSC_RCS_EXTENDED_ROUND_COUNTS
+ * \brief Opt-in larger RCS Rijndael-256 round counts (RCS-256: 22; RCS-512: 30).
+ * Default uses RCS-256: 14 and RCS-512: 21 rounds.
+ * Both profiles use full 24-round KMAC, and their ciphertext and tags
+ * are NOT interoperable across profiles. Keep this setting consistent
+ * for all source files and applications in one build.
  */
-//#define QSC_RCS_REDUCED_ROUNDS
+/* #define QSC_RCS_EXTENDED_ROUND_COUNTS */
 
 /***********************************
 *     RCS CONSTANTS AND SIZES      *
@@ -206,9 +213,9 @@ QSC_EXPORT_API typedef struct
 QSC_EXPORT_API typedef struct
 {
 	rcs_cipher_type ctype;				/*!< The cipher type; RCS-256 or RCS-512. */
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
 	__m128i roundkeys[62U];				/*!< The 128-bit integer round-key array. */
-#	if defined(QSC_SYSTEM_HAS_AVX512)
+#	if defined(QSC_SYSTEM_RCS_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
 		__m512i roundkeysw[31U];			/*!< The 512-bit integer round-key array. */
 #	endif
 #else
@@ -237,9 +244,14 @@ QSC_EXPORT_API void qsc_rcs_dispose(qsc_rcs_state* ctx);
  *
  * \warning When using a CTR based construction the nonce must be unique for a given key.
  * Re-using a nonce-key pair on a different plaintext input represents a catastrophic loss of security.
+ * Complete ranges of consumed 256-bit counter values must be disjoint for a fixed key and info;
+ * distinct starting nonces alone do not prevent overlapping counter ranges.
+ * Key length must be 32 or 64 bytes, and the nonce must contain 32 bytes.
+ * A nonzero infolen requires a non-NULL info pointer, and infolen must not exceed SIZE_MAX / 8.
+ * Invalid parameters invalidate the context. Functions require prior successful initialization.
  *
  * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
- * \param keyparams: [const qsc_rcs_state*] A pointer to the secret input cipher-key and nonce structure.
+ * \param keyparams: [const qsc_rcs_keyparams*] A pointer to the secret input cipher-key and nonce structure.
  * \param encryption: [bool] A flag that specifies true for encryption, false for decryption.
  */
 QSC_EXPORT_API void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, bool encryption);
@@ -249,7 +261,9 @@ QSC_EXPORT_API void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keypara
  *
  * The associated data may be packet header information, domain specific data, or a secret shared by a group.
  * The associated data must be set after initialization and before each transformation call.
- * The data is erased after each call to the transform.
+ * Data is absorbed into the chained authentication state. Successful finalization clears
+ * buffered bytes but retains the authentication history. Length must not exceed UINT32_MAX;
+ * zero length is a no-op. Invalid nonempty input invalidates the context.
  *
  * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
  * \param data: [const uint8_t*] A pointer to the associated data array.
@@ -260,7 +274,8 @@ QSC_EXPORT_API void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* da
 /**
 * \brief Retrieves the current nonce from the state
 *
-* \warning If reusing a nonce/key, the nonce must be retrieved after the last finalized transform call.
+* \warning Retrieve the next nonce after successful finalization and before disposal.
+* Reinitializing with that nonce starts a new authentication chain; both peers must reinitialize.
 *
 * \param ctx: [struct] The cipher state structure
 * \param nonce: [uint8_t*] The output nonce array
@@ -272,7 +287,12 @@ QSC_EXPORT_API void qsc_rcs_store_nonce(const qsc_rcs_state* ctx, uint8_t nonce[
  *
  * In encryption mode, the input plain-text is encrypted and an authentication MAC code is appended 
  * to the cipher-text. In decryption mode, the input cipher-text is authenticated and compared to the MAC code.
- * If the codes do not match, the cipher-text is not decrypted and the call fails.
+ * If the tags do not match, output is unchanged, the context is disposed, and the call fails.
+ * Exact in-place transformation is supported; other overlapping ranges are unsupported.
+ * Encryption output and decryption input require length plus the selected MAC size in bytes.
+ * Empty payloads are supported. Counter exhaustion and tag-offset overflow are rejected
+ * before processing. The cumulative payload limit is UINT64_MAX - 41 bytes per initialization.
+ * Successful calls retain the authentication chain; failed authentication requires reinitialization.
  *
  * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
  * \param output: [uint8_t*] A pointer to the output array.
@@ -289,7 +309,14 @@ QSC_EXPORT_API bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const
  * This function can be used to transform and authenticate a very large array of bytes (e.g., >1GB).
  * On the last call in the sequence, set the finalize parameter to true to complete authentication.
  * In encryption mode, the plain-text is encrypted and the MAC code is appended.
- * In decryption mode, the cipher-text is authenticated; if the MAC codes do not match, the call fails.
+ * With finalize=true, a failed tag leaves the current output unchanged and disposes the context.
+ * Calls with finalize=false release UNAUTHENTICATED plaintext. Quarantine all such output
+ * until final authentication succeeds, and discard it on failure.
+ * Both peers must use identical chunk lengths and associated-data call sequences. Each call
+ * authenticates its starting nonce and consumes whole keystream blocks; changing chunk
+ * boundaries is not equivalent to a single transform. An empty final call is supported.
+ * The overlap and counter limits of qsc_rcs_transform apply. Tag space is required only
+ * when finalize=true. State objects must not be shared concurrently between threads.
  *
  * \param ctx: [qsc_rcs_state*] A pointer to the cipher state structure.
  * \param output: [uint8_t*] A pointer to the output array.

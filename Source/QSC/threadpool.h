@@ -89,7 +89,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * qsc_threadpool_remove_task(&pool, 0);
  * 
  * // Clear the thread pool.
- * qsc_threadpool_clear(&pool);
+ * qsc_threadpool_destroy(&pool);
  * \endcode
  *
  * \section threadpool_links Reference Links:
@@ -163,6 +163,50 @@ QSC_EXPORT_API bool qsc_threadpool_thread_active(const qsc_threadpool_state* ctx
 * \param index:	[size_t] The thread index
 */
 QSC_EXPORT_API void qsc_threadpool_remove_task(qsc_threadpool_state* ctx, size_t index);
+
+/**
+ * \brief An opaque, bounded, persistent-worker thread pool.
+ * \details Private storage and synchronization; no changes to qsc_threadpool_state.
+ * Callers own task arguments and must keep them valid until the task completes.
+ * Calls to wait or destroy from a task executing in this pool are not supported.
+ * Concurrent submit/wait is supported; callers must synchronize destroy with
+ * external submit/wait operations. A callback must not terminate its own thread.
+ * \note Thread-safe for task submissions and waiting; non-reentrant destruction.
+ */
+typedef struct qsc_threadpool_worker_state qsc_threadpool_worker_state;
+
+/**
+ * \brief Create a bounded pool of reusable worker threads.
+ * \param worker_count: Number of workers, in [1, QSC_THREADPOOL_THREADS_MAX].
+ * \param queue_capacity: Maximum number of waiting tasks; must be nonzero.
+ * \return An owned pool pointer, or NULL for invalid sizes/allocation/thread failure.
+ * \note No task argument ownership is transferred. Destroy the pool to release resources.
+ */
+QSC_EXPORT_API qsc_threadpool_worker_state* qsc_threadpool_worker_create(size_t worker_count, size_t queue_capacity);
+
+/**
+ * \brief Submit a task without blocking when the bounded queue is full.
+ * \param pool: Valid initialized pool.
+ * \param func: Non-NULL task callback; invoked by a worker outside pool locks.
+ * \param state: Caller-owned callback argument; must remain valid through execution.
+ * \return True if accepted, false for invalid arguments, full queue, or shutdown.
+ * \note Thread-safe across independent and concurrent producers.
+ */
+QSC_EXPORT_API bool qsc_threadpool_worker_submit(qsc_threadpool_worker_state* pool, void (*func)(void*), void* state);
+
+/**
+ * \brief Wait until all previously accepted tasks and currently queued tasks finish.
+ * \param pool: Valid pool, or NULL (no operation).
+ * \note Concurrent submissions can extend the wait. Do not call from a pool callback.
+ */
+QSC_EXPORT_API void qsc_threadpool_worker_wait(qsc_threadpool_worker_state* pool);
+
+/**
+ * \brief Stop accepting new work, execute all accepted tasks, join workers, and free pool.
+ * \param pool: Pool to release, or NULL (no operation). Invalid after return.
+ * \note Not safe concurrently with callers using the same pool; not callable from a worker.
+ */
+QSC_EXPORT_API void qsc_threadpool_worker_destroy(qsc_threadpool_worker_state* pool);
 
 QSC_CPLUSPLUS_ENABLED_END
 

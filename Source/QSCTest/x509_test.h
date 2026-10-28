@@ -225,6 +225,13 @@ bool qsctest_x509_stage4a_run(void);
 bool qsctest_x509_stage4b_run(void);
 
 /**
+ * \brief Run Stage 5 ECDSA signature digest interoperability and tamper regressions.
+ * \return True if all nine OpenSSL certificate fixtures pass positive and negative checks.
+ * \note Stateless test entry point; certificate scratch storage is released after each fixture.
+ */
+bool qsctest_x509_stage5_run(void);
+
+/**
  * \brief Run the complete X.509 test harness.
  *
  * \details

@@ -496,6 +496,26 @@ QSC_EXPORT_API uint8_t qsc_ipinfo_ipv4_mask_to_cidr(const char mask[QSC_IPINFO_I
  */
 QSC_EXPORT_API void qsc_ipinfo_ipv4_cidr_to_mask(char mask[QSC_IPINFO_IPV4_MASK_STRNLEN], uint8_t cidr);
 
+/**
+ * \brief Check whether an IPv4 address belongs to a CIDR network prefix.
+ * \param address Address to test (four bytes in network order).
+ * \param network Network address (host bits are ignored).
+ * \param prefix Prefix length in bits, 0 through 32.
+ * \return true for matching prefixes; false for invalid arguments or prefix.
+ * \note No allocation or shared state; thread-safe.
+ */
+QSC_EXPORT_API bool qsc_ipinfo_ipv4_prefix_contains(const qsc_ipinfo_ipv4_address* address, const qsc_ipinfo_ipv4_address* network, uint8_t prefix);
+
+/**
+ * \brief Check whether an IPv6 address belongs to a CIDR network prefix.
+ * \param address Address to test (16 bytes in network order).
+ * \param network Network address (host bits are ignored).
+ * \param prefix Prefix length in bits, 0 through 128.
+ * \return true for matching prefixes; false for invalid arguments or prefix.
+ * \note No allocation or shared state; thread-safe.
+ */
+QSC_EXPORT_API bool qsc_ipinfo_ipv6_prefix_contains(const qsc_ipinfo_ipv6_address* address, const qsc_ipinfo_ipv6_address* network, uint8_t prefix);
+
 QSC_CPLUSPLUS_ENABLED_END
 
 #endif

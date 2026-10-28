@@ -53,7 +53,7 @@
 #define QSC_HQC_H
 
 #include "qsccommon.h"
-#if defined(QSC_SYSTEM_HAS_AVX2)
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_PCLMUL)
 	#include "hqcbase_avx2.h"
 #else
 	#include "hqcbase.h"
@@ -71,7 +71,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * the shared secret using a private key.
  *
  * This interface supports the HQC parameter sets corresponding to NIST security categories
- * 1, 3, and 5. The active implementation is selected at compile time using one of the
+ * 1, 3, and 5. The October 12, 2026 HQC specification defines a compressed 32-byte private key.
+ * Old expanded private keys and earlier HQC ciphertexts are incompatible with this implementation.
+ * The active implementation is selected at compile time using one of the
  * parameter guard macros QSC_HQC_S1N2321, QSC_HQC_S3N4602, or QSC_HQC_S5N7333.
  *
  * \code
@@ -106,7 +108,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	* \def QSC_HQC_PRIVATEKEY_SIZE
 	* \brief The byte size of the secret private-key array.
 	*/
-#	define QSC_HQC_PRIVATEKEY_SIZE 2321U
+#	define QSC_HQC_PRIVATEKEY_SIZE 32U
 
 	/*!
 	* \def QSC_HQC_CIPHERTEXT_SIZE
@@ -118,7 +120,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	 * \def QSC_HQC_ALGNAME
 	 * \brief The formal algorithm name.
 	 */
-#	define QSC_HQC_ALGNAME "HQC-2321"
+#	define QSC_HQC_ALGNAME "HQC-1"
 
 #elif defined(QSC_HQC_S3N4602)
 
@@ -132,7 +134,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	* \def QSC_HQC_PRIVATEKEY_SIZE
 	* \brief The byte size of the secret private-key array.
 	*/
-#	define QSC_HQC_PRIVATEKEY_SIZE 4602U
+#	define QSC_HQC_PRIVATEKEY_SIZE 32U
 
 	/*!
 	* \def QSC_HQC_CIPHERTEXT_SIZE
@@ -144,7 +146,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	 * \def QSC_HQC_ALGNAME
 	 * \brief The formal algorithm name.
 	 */
-#	define QSC_HQC_ALGNAME "HQC-4602"
+#	define QSC_HQC_ALGNAME "HQC-3"
 
 #elif defined(QSC_HQC_S5N7333)
 
@@ -158,7 +160,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	* \def QSC_HQC_PRIVATEKEY_SIZE
 	* \brief The byte size of the secret private-key array.
 	*/
-#	define QSC_HQC_PRIVATEKEY_SIZE 7333U
+#	define QSC_HQC_PRIVATEKEY_SIZE 32U
 
 	/*!
 	* \def QSC_HQC_CIPHERTEXT_SIZE
@@ -170,7 +172,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	 * \def QSC_HQC_ALGNAME
 	 * \brief The formal algorithm name.
 	 */
-#	define QSC_HQC_ALGNAME "HQC-7333"
+#	define QSC_HQC_ALGNAME "HQC-5"
 
 #else
 #	error "A valid HQC parameter set must be defined: QSC_HQC_S1N2321, QSC_HQC_S3N4602, or QSC_HQC_S5N7333."
@@ -197,7 +199,8 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param ciphertext: [const uint8_t*] Pointer to the ciphertext array (size QSC_HQC_CIPHERTEXT_SIZE).
  * \param privatekey: [const uint8_t*] Pointer to the secret key array (size QSC_HQC_PRIVATEKEY_SIZE).
  * 
- * \return [bool] Returns true if decapsulation succeeds.
+ * \return [bool] Returns true for valid pointers after implicit rejection; for a tampered ciphertext,
+ * the result is a pseudorandom rejection secret. Returns false for null pointers.
  */
 QSC_EXPORT_API bool qsc_hqc_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 
@@ -217,19 +220,19 @@ QSC_EXPORT_API bool qsc_hqc_encapsulate(uint8_t* secret, uint8_t* ciphertext, co
 
 /**
 * \brief Generates cipher text and shared secret for given public key and a random seed.
-* \note Used exclusively for the NIST ACVP KAT tests, use the other call to encapsulate a key.
+* \note Intended for deterministic testing. This does not claim NIST ACVP conformance.
 * 
-* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of HQC_CIPHERTEXT_SIZE bytes)
-* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of HQC_BYTES bytes)
-* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of HQC_PUBLICKEY_SIZE bytes)
+* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of QSC_HQC_CIPHERTEXT_SIZE bytes)
+* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of QSC_HQC_SHAREDSECRET_SIZE bytes)
+* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of QSC_HQC_PUBLICKEY_SIZE bytes)
 * \param seed: [const uint8_t*] Pointer to the random seed (a populated random array of QSC_HQC_SEED_SIZE bytes)
 */
 void qsc_hqc_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_HQC_SEED_SIZE]);
 
 /**
- * \brief Generates a Kyber public/private key pair.
+ * \brief Generates an HQC public/private key pair.
  *
- * Produces a key pair for the Kyber key encapsulation mechanism.
+ * Produces an HQC keypair with a 32-byte seed-based private key (2026-10-12).
  *
  * \param publickey: [uint8_t*] Pointer to the output public key array (size QSC_HQC_PUBLICKEY_SIZE)
  * \param privatekey: [uint8_t*] Pointer to the output private key array (size QSC_HQC_PRIVATEKEY_SIZE)
@@ -240,12 +243,13 @@ void qsc_hqc_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint
 QSC_EXPORT_API bool qsc_hqc_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
-* \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism using input seeds.
-* \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair.
+* \brief Generates a seed-based HQC-2026 keypair deterministically.
+* \note Intended for deterministic testing. This does not claim NIST ACVP conformance.
 *
-* \param publickey:	[uint8_t*] Pointer to output public key (an already allocated array of HQC_PUBLICKEY_SIZE bytes)
-* \param privatekey: [uint8_t*] Pointer to output private key (an already allocated array of HQC_SECRETKEY_SIZE bytes)
-* \param seed: [uint8_t*] Pointer to the random seed
+* \param publickey:	[uint8_t*] Pointer to output public key (an already allocated array of QSC_HQC_PUBLICKEY_SIZE bytes)
+* \param privatekey: [uint8_t*] Pointer to output private key (an already allocated array of QSC_HQC_PRIVATEKEY_SIZE bytes)
+* \param seed: [uint8_t*] Input random seed, QSC_HQC_SEED_SIZE bytes; must not alias the outputs.
+ * \return No return value. Inputs must point to valid nonoverlapping buffers.
 */
 QSC_EXPORT_API void qsc_hqc_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
 

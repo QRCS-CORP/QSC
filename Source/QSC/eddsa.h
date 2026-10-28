@@ -57,12 +57,12 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /**
- * \file ecdsa.h
+ * \file eddsa.h
  * \brief Contains the primary public API for the Edwards Curve EDDSA asymmetric signature scheme implementation.
  *
  * \details
  * This header defines the API for the EDDSA (Elliptic Curve Digital Signature Algorithm) asymmetric signature scheme,
- * operating over the Ed25519 elliptic curve. It provides functions for generating key pairs (either randomly or via a seeded generator),
+ * selecting Ed25519 or Ed448 using the configured compatibility facade. It provides functions for generating key pairs (either randomly or via a seeded generator),
  * signing messages, and verifying signatures.
  *
  * \par Example:
@@ -70,7 +70,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * // An example of key-pair creation, signing, and verification using EDDSA
  * #define MSGLEN 32
  * uint8_t pk[QSC_EDDSA_PUBLICKEY_SIZE];
- * uint8_t sk[QSC_EDDSA_SECRETKEY_SIZE];
+ * uint8_t sk[QSC_EDDSA_PRIVATEKEY_SIZE];
  * uint8_t msg[32];
  * uint8_t smsg[QSC_EDDSA_SIGNATURE_SIZE + MSGLEN];
  * uint8_t rmsg[32];
@@ -90,11 +90,11 @@ QSC_CPLUSPLUS_ENABLED_START
  * \endcode
  *
  * \remarks
- * This EDDSA implementation utilizes the Ed25519 elliptic curve along with its underlying field arithmetic over the prime field defined by 2^255 - 19.
+ * The default EDDSA facade uses Ed25519 or Ed448 according to the selected compile-time parameter macro.
  * It supports standard digital signature operations including key pair generation, signing, and verification.
  * The design emphasizes constant-time execution to mitigate timing attacks and is suitable for secure applications in modern cryptographic protocols.
  *
- * \section ecdsa_links Reference Links
+ * \section eddsa_links Reference Links
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Official Ed25519 Documentation</a>
  *  - <a href="https://cr.yp.to/ecdh.html">Curve25519 ECDH Specification</a>
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 Field Arithmetic Details</a>
@@ -132,7 +132,7 @@ QSC_CPLUSPLUS_ENABLED_START
     */
 #   define QSC_EDDSA_ALGNAME "EDDSA-25519"
 
-#elif defined(QSC_EDDH_S3EC448)
+#elif defined(QSC_EDDSA_S3EC448)
 
     /*!
      * \def QSC_EDDSA_SIGNATURE_SIZE
@@ -171,7 +171,7 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
 * \brief Generates a EDDSA public/private key-pair.
 *
-* \warning Arrays must be sized to QSC_EDDSA_PUBLICKEY_SIZE and QSC_EDDSA_SECRETKEY_SIZE.
+* \warning Arrays must be sized to QSC_EDDSA_PUBLICKEY_SIZE and QSC_EDDSA_PRIVATEKEY_SIZE.
 *
 * \param publickey: [uint8_t*] Pointer to the public verification-key array
 * \param privatekey: [uint8_t*] Pointer to the private signature-key array
@@ -182,11 +182,11 @@ QSC_EXPORT_API void qsc_eddsa_generate_keypair(uint8_t* publickey, uint8_t* priv
 /**
 * \brief Generates a EDDSA public/private key-pair.
 *
-* \warning Arrays must be sized to QSC_EDDSA_PUBLICKEY_SIZE and QSC_EDDSA_SECRETKEY_SIZE.
+* \warning Arrays must be sized to QSC_EDDSA_PUBLICKEY_SIZE and QSC_EDDSA_PRIVATEKEY_SIZE.
 *
 * \param publickey:	[uint8_t*] Pointer to the public verification-key array
 * \param privatekey: [uint8_t*] Pointer to the private signature-key array
-* \param seed: [const uint8_t*] Pointer to the random 32-byte seed array
+* \param seed: [const uint8_t*] Pointer to the random QSC_EDDSA_SEED_SIZE-byte seed array
 */
 QSC_EXPORT_API void qsc_eddsa_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 

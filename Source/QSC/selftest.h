@@ -62,10 +62,16 @@
  * This header provides self-test functions for the cryptographic library's symmetric
  * primitives including AES, ChaCha, CSX, RCS, SHA2, and SHA3 implementations. These tests
  * perform known-answer tests (KATs) to verify correct operation of the implementations.
+ * The authenticated CSX-512 self-test verifies ten frozen vectors for the active
+ * 20-round default or 40-round extended profile. The RCS-256 and RCS-512
+ * self-tests verify ten vectors each for the active 14/21-round default or
+ * 22/30-round extended profile. Both families use full 24-round Keccak/KMAC.
+ * The AES self-test also verifies independent AES-256-GCM vectors, including
+ * multi-block GHASH and authentication-tag rejection.
  */
 
 /*!
- * \brief Tests the AES cipher for correct operation.
+ * \brief Tests AES modes, HBA, NIST GCM and independent multi-block GCM KATs.
  *
  * \return [bool] Returns true if the AES test passes.
  */
@@ -79,14 +85,14 @@ QSC_EXPORT_API bool qsc_selftest_aes_test(void);
 QSC_EXPORT_API bool qsc_selftest_chacha_test(void);
 
 /*!
- * \brief Tests the CSX cipher for correct operation.
+ * \brief Tests ten authenticated CSX-512 reference KATs for the active round profile.
  *
  * \return [bool] Returns true if the CSX test passes.
  */
 QSC_EXPORT_API bool qsc_selftest_csx_test(void);
 
 /*!
- * \brief Tests the RCS cipher for correct operation.
+ * \brief Tests ten authenticated KATs each for RCS-256 and RCS-512.
  *
  * \return [bool] Returns true if the RCS test passes.
  */

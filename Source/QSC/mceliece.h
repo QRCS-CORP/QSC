@@ -54,6 +54,19 @@
 
 #include "qsccommon.h"
 
+/* Classic McEliece 348864 is not part of the maintained ISO implementation.
+ * Discard the legacy selection from older qsccommon.h revisions, and
+ * use 460896pc by default unless another ISO family is selected explicitly.
+ */
+#if defined(QSC_MCELIECE_S1N3488T64)
+# undef QSC_MCELIECE_S1N3488T64
+#endif
+#if !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
+# define QSC_MCELIECE_S3N4608T96
+#endif
+
+#include "mceliece_multi.h"
+
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
@@ -62,7 +75,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \details
  * This header defines the functions and constants for the McEliece Key Encapsulation Mechanism (KEM) implementation.
- * Depending on the defined parameter set (e.g. QSC_MCELIECE_S1N3488T64, QSC_MCELIECE_S3N4608T96, etc.), the sizes of the ciphertext,
+ * Depending on the selected ISO parameter family (e.g. QSC_MCELIECE_S3N4608T96, etc.), the sizes of the ciphertext,
  * private key, and public key vary. The API supports key encapsulation (encryption) and decapsulation (decryption) operations.
  *
  * \code
@@ -96,42 +109,14 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * Key generation allocates a ~1.7 MiB Gaussian-elimination matrix on the
  * stack (matching the NIST round-4 reference implementation).  Callers
- * running on threads with small default stacks (macOS secondary threads:
- * 512 KiB, Windows default: 1 MiB, musl libc: 128 KiB) MUST either set
- * a larger stack size before creating the thread, or use the provided
- * qsc_mceliece_generate_keypair_ex() wrapper which spawns a dedicated
- * thread with the correct stack size.
+ * running on threads with insufficient stack space must configure an
+ * adequately sized thread stack before calling this API. This library
+ * does not provide a separate stack-expanding key-generation wrapper.
  */
 #define QSC_MCELIECE_KEYGEN_STACK_BYTES  (4U * 1024U * 1024U)
 
 /* Parameter definitions for different McEliece parameter sets */
-#if defined(QSC_MCELIECE_S1N3488T64)
-
-	/*!
-	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
-	* \brief The byte size of the ciphertext array.
-	*/
-#	define QSC_MCELIECE_CIPHERTEXT_SIZE 128U
-
-	/*!
-	* \def QSC_MCELIECE_PRIVATEKEY_SIZE
-	* \brief The byte size of the secret private-key array.
-	*/
-#	define QSC_MCELIECE_PRIVATEKEY_SIZE 6492U
-
-	/*!
-	* \def QSC_MCELIECE_PUBLICKEY_SIZE
-	* \brief The byte size of the public-key array.
-	*/
-#	define QSC_MCELIECE_PUBLICKEY_SIZE 261120U
-
-	/*!
-	* \def QSC_MCELIECE_ALGNAME
-	* \brief The formal algorithm name.
-	*/
-#	define QSC_MCELIECE_ALGNAME "MCELIECE-P3488T64"
-
-#elif defined(QSC_MCELIECE_S3N4608T96)
+#if defined(QSC_MCELIECE_S3N4608T96)
 
 	/*!
 	* \def QSC_MCELIECE_CIPHERTEXT_SIZE
@@ -155,7 +140,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	* \def QSC_MCELIECE_ALGNAME
 	* \brief The formal algorithm name.
 	*/
-#	define QSC_MCELIECE_ALGNAME "MCELIECE-P4608T96"
+#	define QSC_MCELIECE_ALGNAME "mceliece460896pc"
 
 #elif defined(QSC_MCELIECE_S5N6688T128)
 
@@ -181,7 +166,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	* \def QSC_MCELIECE_ALGNAME
 	* \brief The formal algorithm name.
 	*/
-#	define QSC_MCELIECE_ALGNAME "MCELIECE-P6688T128"
+#	define QSC_MCELIECE_ALGNAME "mceliece6688128pc"
 
 #elif defined(QSC_MCELIECE_S6N6960T119)
 
@@ -207,7 +192,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	* \def QSC_MCELIECE_ALGNAME
 	* \brief The formal algorithm name.
 	*/
-#	define QSC_MCELIECE_ALGNAME "MCELIECE-P6960T119"
+#	define QSC_MCELIECE_ALGNAME "mceliece6960119pc"
 
 #elif defined(QSC_MCELIECE_S7N8192T128)
 
@@ -233,7 +218,7 @@ QSC_CPLUSPLUS_ENABLED_START
 	* \def QSC_MCELIECE_ALGNAME
 	* \brief The formal algorithm name.
 	*/
-#	define QSC_MCELIECE_ALGNAME "MCELIECE-P8192T128"
+#	define QSC_MCELIECE_ALGNAME "mceliece8192128pc"
 
 #else
 #	error "The McEliece parameter set is invalid!"
@@ -257,7 +242,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \param secret: [uint8_t*] Pointer to the output shared secret key (array of QSC_MCELIECE_SHAREDSECRET_SIZE).
  * \param ciphertext: [const uint8_t*] Pointer to the ciphertext array (size QSC_MCELIECE_CIPHERTEXT_SIZE).
  * \param privatekey: [const uint8_t*] Pointer to the private key array (size QSC_MCELIECE_PRIVATEKEY_SIZE).
- * \return [bool] Returns true if decapsulation succeeds.
+ * \return [bool] Returns true after implicit-rejection decapsulation; the 6960119 profile returns false for invalid public ciphertext padding.
  */
 QSC_EXPORT_API bool qsc_mceliece_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey);
 

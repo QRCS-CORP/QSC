@@ -1,437 +1,984 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "qsort.h"
 
-static int32_t qsort_partition_u8(int8_t* arr, int32_t start, int32_t end)
+/**
+ * \brief Restore the int8_t max-heap property for a selected node.
+ * \param arr Mutable signed integer array; must outlive this call.
+ * \param first Offset of the heap segment.
+ * \param root Index relative to the heap segment.
+ * \param count Number of heap entries.
+ * \details The caller provides an exclusively owned array; not thread-safe with concurrent mutation.
+ */
+static void qsc_qsort_sift_i8(int8_t* arr, size_t first, size_t root, size_t count)
 {
-    int32_t count;
-    int32_t i;
-    int32_t j;
-    int32_t k;
-    int32_t pindex;
-    int8_t pivot;
-    int8_t ntmp;
+	size_t child;
+	size_t pick;
+	int8_t value;
 
-    pindex = -1;
+	value = arr[first + root];
 
-    if (arr != NULL)
-    {
-        count = 0;
-        pivot = arr[start];
+	while (root < (count / 2U))
+	{
+		child = (root * 2U) + 1U;
+		pick = child;
 
-        for (k = start + 1; k <= end; ++k)
-        {
-            if (arr[k] <= pivot)
-            {
-                ++count;
-            }
-        }
+		if (child + 1U < count && arr[first + child] < arr[first + child + 1U])
+		{
+			pick = child + 1U;
+		}
 
-        pindex = start + count;
-        ntmp = arr[pindex];
-        arr[pindex] = arr[start];
-        arr[start] = ntmp;
+		if (value >= arr[first + pick])
+		{
+			break;
+		}
 
-        i = start;
-        j = end;
+		arr[first + root] = arr[first + pick];
+		root = pick;
+	}
 
-        while (i < pindex && j > pindex)
-        {
-
-            while (arr[i] <= pivot)
-            {
-                ++i;
-            }
-
-            while (arr[j] > pivot)
-            {
-                --j;
-            }
-
-            if (i < pindex && j > pindex)
-            {
-                ntmp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = ntmp;
-                ++i;
-                --j;
-            }
-        }
-    }
-
-    return pindex;
+	arr[first + root] = value;
 }
- 
-static int32_t qsort_partition_u16(int16_t* arr, int32_t start, int32_t end)
+
+/**
+ * \brief In-place worst-case O(n log n) fallback for int8_t sorting.
+ * \param arr Mutable array with at least last + 1 elements.
+ * \param first Inclusive first element.
+ * \param last Inclusive final element.
+ * \details No allocations; the caller synchronizes concurrent access.
+ */
+static void qsc_qsort_heap_i8(int8_t* arr, size_t first, size_t last)
 {
-    int32_t count;
-    int32_t i;
-    int32_t j;
-    int32_t k;
-    int32_t pindex;
-    int16_t pivot;
-    int16_t ntmp;
+	size_t count;
+	size_t i;
+	int8_t temp;
 
-    pindex = -1;
+	count = (last - first) + 1U;
+	i = count / 2U;
 
-    if (arr != NULL)
-    {
-        count = 0;
-        pivot = arr[start];
+	while (i != 0U)
+	{
+		--i;
+		qsc_qsort_sift_i8(arr, first, i, count);
+	}
 
-        for (k = start + 1; k <= end; ++k)
-        {
-            if (arr[k] <= pivot)
-            {
-                ++count;
-            }
-        }
-
-        pindex = start + count;
-        ntmp = arr[pindex];
-        arr[pindex] = arr[start];
-        arr[start] = ntmp;
-
-        i = start;
-        j = end;
-
-        while (i < pindex && j > pindex)
-        {
-
-            while (arr[i] <= pivot)
-            {
-                ++i;
-            }
-
-            while (arr[j] > pivot)
-            {
-                --j;
-            }
-
-            if (i < pindex && j > pindex)
-            {
-                ntmp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = ntmp;
-                ++i;
-                --j;
-            }
-        }
-    }
-
-    return pindex;
+	while (count > 1U)
+	{
+		--count;
+		temp = arr[first];
+		arr[first] = arr[first + count];
+		arr[first + count] = temp;
+		qsc_qsort_sift_i8(arr, first, 0U, count);
+	}
 }
- 
-static int32_t qsort_partition_u32(int32_t* arr, int32_t start, int32_t end)
+
+/**
+ * \brief Sort signed integers using bounded-depth three-way partitioning.
+ * \param arr Mutable signed integer array of at least last + 1 elements.
+ * \param first Inclusive beginning of the subrange.
+ * \param last Inclusive end of the subrange.
+ * \param budget Remaining partition-depth allowance.
+ * \details Small ranges use insertion sort; exhausted budgets use heapsort.
+ * \details Does not allocate and is not safe against concurrent mutation.
+ */
+static void qsc_qsort_intro_i8(int8_t* arr, size_t first, size_t last, size_t budget)
 {
-    int32_t count;
-    int32_t i;
-    int32_t j;
-    int32_t k;
-    int32_t pindex;
-    int32_t pivot;
-    int32_t ntmp;
+	size_t lt;
+	size_t mid;
+	size_t i;
+	size_t gt;
+	size_t j;
+	int8_t a;
+	int8_t b;
+	int8_t c;
+	int8_t pivot;
+	int8_t temp;
 
-    pindex = -1;
+	while (first < last)
+	{
+		if (last - first < 24U)
+		{
+			/* Binary-search-free insertion minimizes overhead on tiny partitions. */
+			for (i = first + 1U; i <= last; ++i)
+			{
+				temp = arr[i];
+				j = i;
 
-    if (arr != NULL)
-    {
-        count = 0;
-        pivot = arr[start];
+				while (j > first && arr[j - 1U] > temp)
+				{
+					arr[j] = arr[j - 1U];
+					--j;
+				}
 
-        for (k = start + 1; k <= end; ++k)
-        {
-            if (arr[k] <= pivot)
-            {
-                ++count;
-            }
-        }
+				arr[j] = temp;
+			}
 
-        pindex = start + count;
-        ntmp = arr[pindex];
-        arr[pindex] = arr[start];
-        arr[start] = ntmp;
+			break;
+		}
 
-        i = start;
-        j = end;
+		if (budget == 0U)
+		{
+			qsc_qsort_heap_i8(arr, first, last);
+			break;
+		}
 
-        while (i < pindex && j > pindex)
-        {
+		--budget;
+		mid = first + ((last - first) / 2U);
+		a = arr[first];
+		b = arr[mid];
+		c = arr[last];
 
-            while (arr[i] <= pivot)
-            {
-                ++i;
-            }
+		if (a < b)
+		{
+			pivot = (b < c) ? b : ((a < c) ? c : a);
+		}
+		else
+		{
+			pivot = (a < c) ? a : ((b < c) ? c : b);
+		}
 
-            while (arr[j] > pivot)
-            {
-                --j;
-            }
+		lt = first;
+		i = first;
+		gt = last;
 
-            if (i < pindex && j > pindex)
-            {
-                ntmp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = ntmp;
-                ++i;
-                --j;
-            }
-        }
-    }
+		while (i <= gt)
+		{
+			if (arr[i] < pivot)
+			{
+				temp = arr[lt];
+				arr[lt] = arr[i];
+				arr[i] = temp;
+				++lt;
+				++i;
+			}
+			else if (arr[i] > pivot)
+			{
+				temp = arr[i];
+				arr[i] = arr[gt];
+				arr[gt] = temp;
+				--gt;
+			}
+			else
+			{
+				++i;
+			}
+		}
 
-    return pindex;
+		if (lt - first < last - gt)
+		{
+			if (lt > first + 1U)
+			{
+				qsc_qsort_intro_i8(arr, first, lt - 1U, budget);
+			}
+
+			if (gt == last)
+			{
+				break;
+			}
+
+			first = gt + 1U;
+		}
+		else
+		{
+			if (gt < last - 1U)
+			{
+				qsc_qsort_intro_i8(arr, gt + 1U, last, budget);
+			}
+
+			if (lt == first)
+			{
+				break;
+			}
+
+			last = lt - 1U;
+		}
+	}
 }
- 
-static int64_t qsort_partition_u64(int64_t* arr, int64_t start, int64_t end)
-{
-    int64_t count;
-    int64_t i;
-    int64_t j;
-    int64_t k;
-    int64_t pindex;
-    int64_t pivot;
-    int64_t ntmp;
-    pindex = -1;
 
-    if (arr != NULL)
-    {
-        count = 0;
-        pivot = arr[start];
-
-        for (k = start + 1; k <= end; ++k)
-        {
-            if (arr[k] <= pivot)
-            {
-                ++count;
-            }
-        }
-
-        pindex = start + count;
-        ntmp = arr[pindex];
-        arr[pindex] = arr[start];
-        arr[start] = ntmp;
-
-        i = start;
-        j = end;
-
-        while (i < pindex && j > pindex)
-        {
-
-            while (arr[i] <= pivot)
-            {
-                ++i;
-            }
-
-            while (arr[j] > pivot)
-            {
-                --j;
-            }
-
-            if (i < pindex && j > pindex)
-            {
-                ntmp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = ntmp;
-                ++i;
-                --j;
-            }
-        }
-    }
-
-    return pindex;
-}
-  
+/**
+ * \brief Sort a selected inclusive range of signed int8_t values in ascending order.
+ * \param arr Mutable array owned by the caller.
+ * \param start First index, nonnegative and no greater than end.
+ * \param end Last index, inclusive.
+ * \details Invalid ranges are ignored; no allocation or persistent state.
+ * \details Caller must synchronize concurrent access to arr.
+ */
 void qsc_qsort_sort_i8(int8_t* arr, int32_t start, int32_t end)
 {
-    QSC_ASSERT(arr != NULL);
-    QSC_ASSERT(start >= 0);
-    QSC_ASSERT(start <= end);
+	size_t count;
+	size_t budget;
+	size_t n;
 
-    if (arr != NULL && start >= 0 && start <= end)
-    {
-        while (start < end)
-        {
-            int32_t mid = start + (end - start) / 2;
+	QSC_ASSERT(arr != NULL);
+	QSC_ASSERT(start >= 0);
+	QSC_ASSERT(start <= end);
 
-            /* median-of-three: sort arr[start], arr[mid], arr[end] */
-            if (arr[mid] < arr[start])
-            {
-                int8_t t = arr[mid];
-                arr[mid] = arr[start];
-                arr[start] = t;
-            }
+	if (arr != NULL && start >= 0 && start < end)
+	{
+		count = (size_t)((uint64_t)end - (uint64_t)start) + 1U;
 
-            if (arr[end] < arr[start])
-            {
-                int8_t t = arr[end];
-                arr[end] = arr[start];
-                arr[start] = t;
-            }
+		if (count >= 2048U)
+		{
+			/* Fixed 8-bit domain: counting sort has linear runtime and bounded stack usage. */
+			size_t counts[256U] = { 0U };
+			size_t position;
 
-            if (arr[mid] < arr[end])
-            {
-                int8_t t = arr[mid];
-                arr[mid] = arr[end];
-                arr[end] = t;
-            }
+			for (size_t i = (size_t)start; i <= (size_t)end; ++i)
+			{
+				++counts[(size_t)((int32_t)arr[i] + 128)];
+			}
 
-            int32_t p = qsort_partition_u8(arr, start, end);
+			position = (size_t)start;
 
-            if (p - 1 - start < end - (p + 1))
-            {
-                qsc_qsort_sort_i8(arr, start, p - 1);
-                start = p + 1;
-            }
-            else
-            {
-                qsc_qsort_sort_i8(arr, p + 1, end);
-                end = p - 1;
-            }
-        }
-    }
+			for (size_t i = 0U; i < 256U; ++i)
+			{
+				while (counts[i] != 0U)
+				{
+					arr[position] = (int8_t)((int32_t)i - 128);
+					++position;
+					--counts[i];
+				}
+			}
+		}
+		else
+		{
+			budget = 0U;
+		n = count;
+
+		while (n > 1U)
+		{
+			budget += 2U;
+			n >>= 1U;
+		}
+
+			qsc_qsort_intro_i8(arr, (size_t)start, (size_t)end, budget);
+		}
+	}
 }
- 
+/**
+ * \brief Restore the int16_t max-heap property for a selected node.
+ * \param arr Mutable signed integer array; must outlive this call.
+ * \param first Offset of the heap segment.
+ * \param root Index relative to the heap segment.
+ * \param count Number of heap entries.
+ * \details The caller provides an exclusively owned array; not thread-safe with concurrent mutation.
+ */
+static void qsc_qsort_sift_i16(int16_t* arr, size_t first, size_t root, size_t count)
+{
+	size_t child;
+	size_t pick;
+	int16_t value;
+
+	value = arr[first + root];
+
+	while (root < (count / 2U))
+	{
+		child = (root * 2U) + 1U;
+		pick = child;
+
+		if (child + 1U < count && arr[first + child] < arr[first + child + 1U])
+		{
+			pick = child + 1U;
+		}
+
+		if (value >= arr[first + pick])
+		{
+			break;
+		}
+
+		arr[first + root] = arr[first + pick];
+		root = pick;
+	}
+
+	arr[first + root] = value;
+}
+
+/**
+ * \brief In-place worst-case O(n log n) fallback for int16_t sorting.
+ * \param arr Mutable array with at least last + 1 elements.
+ * \param first Inclusive first element.
+ * \param last Inclusive final element.
+ * \details No allocations; the caller synchronizes concurrent access.
+ */
+static void qsc_qsort_heap_i16(int16_t* arr, size_t first, size_t last)
+{
+	size_t count;
+	size_t i;
+	int16_t temp;
+
+	count = (last - first) + 1U;
+	i = count / 2U;
+
+	while (i != 0U)
+	{
+		--i;
+		qsc_qsort_sift_i16(arr, first, i, count);
+	}
+
+	while (count > 1U)
+	{
+		--count;
+		temp = arr[first];
+		arr[first] = arr[first + count];
+		arr[first + count] = temp;
+		qsc_qsort_sift_i16(arr, first, 0U, count);
+	}
+}
+
+/**
+ * \brief Sort signed integers using bounded-depth three-way partitioning.
+ * \param arr Mutable signed integer array of at least last + 1 elements.
+ * \param first Inclusive beginning of the subrange.
+ * \param last Inclusive end of the subrange.
+ * \param budget Remaining partition-depth allowance.
+ * \details Small ranges use insertion sort; exhausted budgets use heapsort.
+ * \details Does not allocate and is not safe against concurrent mutation.
+ */
+static void qsc_qsort_intro_i16(int16_t* arr, size_t first, size_t last, size_t budget)
+{
+	size_t lt;
+	size_t mid;
+	size_t i;
+	size_t gt;
+	size_t j;
+	int16_t a;
+	int16_t b;
+	int16_t c;
+	int16_t pivot;
+	int16_t temp;
+
+	while (first < last)
+	{
+		if (last - first < 24U)
+		{
+			/* Binary-search-free insertion minimizes overhead on tiny partitions. */
+			for (i = first + 1U; i <= last; ++i)
+			{
+				temp = arr[i];
+				j = i;
+
+				while (j > first && arr[j - 1U] > temp)
+				{
+					arr[j] = arr[j - 1U];
+					--j;
+				}
+
+				arr[j] = temp;
+			}
+
+			break;
+		}
+
+		if (budget == 0U)
+		{
+			qsc_qsort_heap_i16(arr, first, last);
+			break;
+		}
+
+		--budget;
+		mid = first + ((last - first) / 2U);
+		a = arr[first];
+		b = arr[mid];
+		c = arr[last];
+
+		if (a < b)
+		{
+			pivot = (b < c) ? b : ((a < c) ? c : a);
+		}
+		else
+		{
+			pivot = (a < c) ? a : ((b < c) ? c : b);
+		}
+
+		lt = first;
+		i = first;
+		gt = last;
+
+		while (i <= gt)
+		{
+			if (arr[i] < pivot)
+			{
+				temp = arr[lt];
+				arr[lt] = arr[i];
+				arr[i] = temp;
+				++lt;
+				++i;
+			}
+			else if (arr[i] > pivot)
+			{
+				temp = arr[i];
+				arr[i] = arr[gt];
+				arr[gt] = temp;
+				--gt;
+			}
+			else
+			{
+				++i;
+			}
+		}
+
+		if (lt - first < last - gt)
+		{
+			if (lt > first + 1U)
+			{
+				qsc_qsort_intro_i16(arr, first, lt - 1U, budget);
+			}
+
+			if (gt == last)
+			{
+				break;
+			}
+
+			first = gt + 1U;
+		}
+		else
+		{
+			if (gt < last - 1U)
+			{
+				qsc_qsort_intro_i16(arr, gt + 1U, last, budget);
+			}
+
+			if (lt == first)
+			{
+				break;
+			}
+
+			last = lt - 1U;
+		}
+	}
+}
+
+/**
+ * \brief Sort a selected inclusive range of signed int16_t values in ascending order.
+ * \param arr Mutable array owned by the caller.
+ * \param start First index, nonnegative and no greater than end.
+ * \param end Last index, inclusive.
+ * \details Invalid ranges are ignored; no allocation or persistent state.
+ * \details Caller must synchronize concurrent access to arr.
+ */
 void qsc_qsort_sort_i16(int16_t* arr, int32_t start, int32_t end)
 {
-    QSC_ASSERT(arr != NULL);
-    QSC_ASSERT(start >= 0);
-    QSC_ASSERT(start <= end);
+	size_t count;
+	size_t budget;
+	size_t n;
 
-    if (arr != NULL && start >= 0 && start <= end)
-    {
-        while (start < end)
-        {
-            int32_t mid = start + (end - start) / 2;
+	QSC_ASSERT(arr != NULL);
+	QSC_ASSERT(start >= 0);
+	QSC_ASSERT(start <= end);
 
-            if (arr[mid] < arr[start])
-            {
-                int16_t t = arr[mid];
-                arr[mid] = arr[start];
-                arr[start] = t;
-            }
+	if (arr != NULL && start >= 0 && start < end)
+	{
+		count = (size_t)((uint64_t)end - (uint64_t)start) + 1U;
+		budget = 0U;
+		n = count;
 
-            if (arr[end] < arr[start])
-            {
-                int16_t t = arr[end];
-                arr[end] = arr[start];
-                arr[start] = t;
-            }
+		while (n > 1U)
+		{
+			budget += 2U;
+			n >>= 1U;
+		}
 
-            if (arr[mid] < arr[end])
-            {
-                int16_t t = arr[mid];
-                arr[mid] = arr[end];
-                arr[end] = t;
-            }
-
-            int32_t p = qsort_partition_u16(arr, start, end);
-
-            if (p - 1 - start < end - (p + 1))
-            {
-                qsc_qsort_sort_i16(arr, start, p - 1);
-                start = p + 1;
-            }
-            else
-            {
-                qsc_qsort_sort_i16(arr, p + 1, end);
-                end = p - 1;
-            }
-        }
-    }
+		qsc_qsort_intro_i16(arr, (size_t)start, (size_t)end, budget);
+	}
 }
-
-void qsc_qsort_sort_i32(int32_t* arr, int32_t start, int32_t end) 
+/**
+ * \brief Restore the int32_t max-heap property for a selected node.
+ * \param arr Mutable signed integer array; must outlive this call.
+ * \param first Offset of the heap segment.
+ * \param root Index relative to the heap segment.
+ * \param count Number of heap entries.
+ * \details The caller provides an exclusively owned array; not thread-safe with concurrent mutation.
+ */
+static void qsc_qsort_sift_i32(int32_t* arr, size_t first, size_t root, size_t count)
 {
-    QSC_ASSERT(arr != NULL);
-    QSC_ASSERT(start >= 0);
-    QSC_ASSERT(start <= end);
+	size_t child;
+	size_t pick;
+	int32_t value;
 
-    if (arr != NULL && start >= 0 && start <= end)
-    {
-        while (start < end)
-        {
-            int32_t mid = start + (end - start) / 2;
+	value = arr[first + root];
 
-            if (arr[mid] < arr[start])
-            {
-                int32_t t = arr[mid];
-                arr[mid] = arr[start];
-                arr[start] = t;
-            }
+	while (root < (count / 2U))
+	{
+		child = (root * 2U) + 1U;
+		pick = child;
 
-            if (arr[end] < arr[start])
-            {
-                int32_t t = arr[end];
-                arr[end] = arr[start];
-                arr[start] = t;
-            }
+		if (child + 1U < count && arr[first + child] < arr[first + child + 1U])
+		{
+			pick = child + 1U;
+		}
 
-            if (arr[mid] < arr[end])
-            {
-                int32_t t = arr[mid];
-                arr[mid] = arr[end];
-                arr[end] = t;
-            }
+		if (value >= arr[first + pick])
+		{
+			break;
+		}
 
-            int32_t p = qsort_partition_u32(arr, start, end);
+		arr[first + root] = arr[first + pick];
+		root = pick;
+	}
 
-            if (p - 1 - start < end - (p + 1))
-            {
-                qsc_qsort_sort_i32(arr, start, p - 1);
-                start = p + 1;
-            }
-            else
-            {
-                qsc_qsort_sort_i32(arr, p + 1, end);
-                end = p - 1;
-            }
-        }
-    }
+	arr[first + root] = value;
 }
 
+/**
+ * \brief In-place worst-case O(n log n) fallback for int32_t sorting.
+ * \param arr Mutable array with at least last + 1 elements.
+ * \param first Inclusive first element.
+ * \param last Inclusive final element.
+ * \details No allocations; the caller synchronizes concurrent access.
+ */
+static void qsc_qsort_heap_i32(int32_t* arr, size_t first, size_t last)
+{
+	size_t count;
+	size_t i;
+	int32_t temp;
+
+	count = (last - first) + 1U;
+	i = count / 2U;
+
+	while (i != 0U)
+	{
+		--i;
+		qsc_qsort_sift_i32(arr, first, i, count);
+	}
+
+	while (count > 1U)
+	{
+		--count;
+		temp = arr[first];
+		arr[first] = arr[first + count];
+		arr[first + count] = temp;
+		qsc_qsort_sift_i32(arr, first, 0U, count);
+	}
+}
+
+/**
+ * \brief Sort signed integers using bounded-depth three-way partitioning.
+ * \param arr Mutable signed integer array of at least last + 1 elements.
+ * \param first Inclusive beginning of the subrange.
+ * \param last Inclusive end of the subrange.
+ * \param budget Remaining partition-depth allowance.
+ * \details Small ranges use insertion sort; exhausted budgets use heapsort.
+ * \details Does not allocate and is not safe against concurrent mutation.
+ */
+static void qsc_qsort_intro_i32(int32_t* arr, size_t first, size_t last, size_t budget)
+{
+	size_t lt;
+	size_t mid;
+	size_t i;
+	size_t gt;
+	size_t j;
+	int32_t a;
+	int32_t b;
+	int32_t c;
+	int32_t pivot;
+	int32_t temp;
+
+	while (first < last)
+	{
+		if (last - first < 24U)
+		{
+			/* Binary-search-free insertion minimizes overhead on tiny partitions. */
+			for (i = first + 1U; i <= last; ++i)
+			{
+				temp = arr[i];
+				j = i;
+
+				while (j > first && arr[j - 1U] > temp)
+				{
+					arr[j] = arr[j - 1U];
+					--j;
+				}
+
+				arr[j] = temp;
+			}
+
+			break;
+		}
+
+		if (budget == 0U)
+		{
+			qsc_qsort_heap_i32(arr, first, last);
+			break;
+		}
+
+		--budget;
+		mid = first + ((last - first) / 2U);
+		a = arr[first];
+		b = arr[mid];
+		c = arr[last];
+
+		if (a < b)
+		{
+			pivot = (b < c) ? b : ((a < c) ? c : a);
+		}
+		else
+		{
+			pivot = (a < c) ? a : ((b < c) ? c : b);
+		}
+
+		lt = first;
+		i = first;
+		gt = last;
+
+		while (i <= gt)
+		{
+			if (arr[i] < pivot)
+			{
+				temp = arr[lt];
+				arr[lt] = arr[i];
+				arr[i] = temp;
+				++lt;
+				++i;
+			}
+			else if (arr[i] > pivot)
+			{
+				temp = arr[i];
+				arr[i] = arr[gt];
+				arr[gt] = temp;
+				--gt;
+			}
+			else
+			{
+				++i;
+			}
+		}
+
+		if (lt - first < last - gt)
+		{
+			if (lt > first + 1U)
+			{
+				qsc_qsort_intro_i32(arr, first, lt - 1U, budget);
+			}
+
+			if (gt == last)
+			{
+				break;
+			}
+
+			first = gt + 1U;
+		}
+		else
+		{
+			if (gt < last - 1U)
+			{
+				qsc_qsort_intro_i32(arr, gt + 1U, last, budget);
+			}
+
+			if (lt == first)
+			{
+				break;
+			}
+
+			last = lt - 1U;
+		}
+	}
+}
+
+/**
+ * \brief Sort a selected inclusive range of signed int32_t values in ascending order.
+ * \param arr Mutable array owned by the caller.
+ * \param start First index, nonnegative and no greater than end.
+ * \param end Last index, inclusive.
+ * \details Invalid ranges are ignored; no allocation or persistent state.
+ * \details Caller must synchronize concurrent access to arr.
+ */
+void qsc_qsort_sort_i32(int32_t* arr, int32_t start, int32_t end)
+{
+	size_t count;
+	size_t budget;
+	size_t n;
+
+	QSC_ASSERT(arr != NULL);
+	QSC_ASSERT(start >= 0);
+	QSC_ASSERT(start <= end);
+
+	if (arr != NULL && start >= 0 && start < end)
+	{
+		count = (size_t)((uint64_t)end - (uint64_t)start) + 1U;
+		budget = 0U;
+		n = count;
+
+		while (n > 1U)
+		{
+			budget += 2U;
+			n >>= 1U;
+		}
+
+		qsc_qsort_intro_i32(arr, (size_t)start, (size_t)end, budget);
+	}
+}
+/**
+ * \brief Restore the int64_t max-heap property for a selected node.
+ * \param arr Mutable signed integer array; must outlive this call.
+ * \param first Offset of the heap segment.
+ * \param root Index relative to the heap segment.
+ * \param count Number of heap entries.
+ * \details The caller provides an exclusively owned array; not thread-safe with concurrent mutation.
+ */
+static void qsc_qsort_sift_i64(int64_t* arr, size_t first, size_t root, size_t count)
+{
+	size_t child;
+	size_t pick;
+	int64_t value;
+
+	value = arr[first + root];
+
+	while (root < (count / 2U))
+	{
+		child = (root * 2U) + 1U;
+		pick = child;
+
+		if (child + 1U < count && arr[first + child] < arr[first + child + 1U])
+		{
+			pick = child + 1U;
+		}
+
+		if (value >= arr[first + pick])
+		{
+			break;
+		}
+
+		arr[first + root] = arr[first + pick];
+		root = pick;
+	}
+
+	arr[first + root] = value;
+}
+
+/**
+ * \brief In-place worst-case O(n log n) fallback for int64_t sorting.
+ * \param arr Mutable array with at least last + 1 elements.
+ * \param first Inclusive first element.
+ * \param last Inclusive final element.
+ * \details No allocations; the caller synchronizes concurrent access.
+ */
+static void qsc_qsort_heap_i64(int64_t* arr, size_t first, size_t last)
+{
+	size_t count;
+	size_t i;
+	int64_t temp;
+
+	count = (last - first) + 1U;
+	i = count / 2U;
+
+	while (i != 0U)
+	{
+		--i;
+		qsc_qsort_sift_i64(arr, first, i, count);
+	}
+
+	while (count > 1U)
+	{
+		--count;
+		temp = arr[first];
+		arr[first] = arr[first + count];
+		arr[first + count] = temp;
+		qsc_qsort_sift_i64(arr, first, 0U, count);
+	}
+}
+
+/**
+ * \brief Sort signed integers using bounded-depth three-way partitioning.
+ * \param arr Mutable signed integer array of at least last + 1 elements.
+ * \param first Inclusive beginning of the subrange.
+ * \param last Inclusive end of the subrange.
+ * \param budget Remaining partition-depth allowance.
+ * \details Small ranges use insertion sort; exhausted budgets use heapsort.
+ * \details Does not allocate and is not safe against concurrent mutation.
+ */
+static void qsc_qsort_intro_i64(int64_t* arr, size_t first, size_t last, size_t budget)
+{
+	size_t lt;
+	size_t mid;
+	size_t i;
+	size_t gt;
+	size_t j;
+	int64_t a;
+	int64_t b;
+	int64_t c;
+	int64_t pivot;
+	int64_t temp;
+
+	while (first < last)
+	{
+		if (last - first < 24U)
+		{
+			/* Binary-search-free insertion minimizes overhead on tiny partitions. */
+			for (i = first + 1U; i <= last; ++i)
+			{
+				temp = arr[i];
+				j = i;
+
+				while (j > first && arr[j - 1U] > temp)
+				{
+					arr[j] = arr[j - 1U];
+					--j;
+				}
+
+				arr[j] = temp;
+			}
+
+			break;
+		}
+
+		if (budget == 0U)
+		{
+			qsc_qsort_heap_i64(arr, first, last);
+			break;
+		}
+
+		--budget;
+		mid = first + ((last - first) / 2U);
+		a = arr[first];
+		b = arr[mid];
+		c = arr[last];
+
+		if (a < b)
+		{
+			pivot = (b < c) ? b : ((a < c) ? c : a);
+		}
+		else
+		{
+			pivot = (a < c) ? a : ((b < c) ? c : b);
+		}
+
+		lt = first;
+		i = first;
+		gt = last;
+
+		while (i <= gt)
+		{
+			if (arr[i] < pivot)
+			{
+				temp = arr[lt];
+				arr[lt] = arr[i];
+				arr[i] = temp;
+				++lt;
+				++i;
+			}
+			else if (arr[i] > pivot)
+			{
+				temp = arr[i];
+				arr[i] = arr[gt];
+				arr[gt] = temp;
+				--gt;
+			}
+			else
+			{
+				++i;
+			}
+		}
+
+		if (lt - first < last - gt)
+		{
+			if (lt > first + 1U)
+			{
+				qsc_qsort_intro_i64(arr, first, lt - 1U, budget);
+			}
+
+			if (gt == last)
+			{
+				break;
+			}
+
+			first = gt + 1U;
+		}
+		else
+		{
+			if (gt < last - 1U)
+			{
+				qsc_qsort_intro_i64(arr, gt + 1U, last, budget);
+			}
+
+			if (lt == first)
+			{
+				break;
+			}
+
+			last = lt - 1U;
+		}
+	}
+}
+
+/**
+ * \brief Sort a selected inclusive range of signed int64_t values in ascending order.
+ * \param arr Mutable array owned by the caller.
+ * \param start First index, nonnegative and no greater than end.
+ * \param end Last index, inclusive.
+ * \details Invalid ranges are ignored; no allocation or persistent state.
+ * \details Caller must synchronize concurrent access to arr.
+ */
 void qsc_qsort_sort_i64(int64_t* arr, int64_t start, int64_t end)
 {
-    QSC_ASSERT(arr != NULL);
-    QSC_ASSERT(start >= 0);
-    QSC_ASSERT(start <= end);
+	size_t count;
+	size_t budget;
+	size_t n;
 
-    if (arr != NULL && start >= 0 && start <= end)
-    {
-        while (start < end)
-        {
-            int64_t mid = start + (end - start) / 2;
+	QSC_ASSERT(arr != NULL);
+	QSC_ASSERT(start >= 0);
+	QSC_ASSERT(start <= end);
 
-            if (arr[mid] < arr[start])
-            {
-                int64_t t = arr[mid];
-                arr[mid] = arr[start];
-                arr[start] = t;
-            }
+	if (arr != NULL && start >= 0 && start < end)
+	{
+		count = (size_t)((uint64_t)end - (uint64_t)start) + 1U;
+		budget = 0U;
+		n = count;
 
-            if (arr[end] < arr[start])
-            {
-                int64_t t = arr[end];
-                arr[end] = arr[start];
-                arr[start] = t;
-            }
+		while (n > 1U)
+		{
+			budget += 2U;
+			n >>= 1U;
+		}
 
-            if (arr[mid] < arr[end])
-            {
-                int64_t t = arr[mid];
-                arr[mid] = arr[end];
-                arr[end] = t;
-            }
-
-            int64_t p = qsort_partition_u64(arr, start, end);
-
-            if (p - 1 - start < end - (p + 1))
-            {
-                qsc_qsort_sort_i64(arr, start, p - 1);
-                start = p + 1;
-            }
-            else
-            {
-                qsc_qsort_sort_i64(arr, p + 1, end);
-                end = p - 1;
-            }
-        }
-    }
+		qsc_qsort_intro_i64(arr, (size_t)start, (size_t)end, budget);
+	}
 }

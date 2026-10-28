@@ -108,8 +108,14 @@
     <ClCompile Include="scb_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="encoding_reference_test.c">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
     <ClCompile Include="encoding_test.c">
       <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="pbmac1_test.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="poly1305_test.c">
       <Filter>Source Files\Tests</Filter>
@@ -151,6 +157,9 @@
       <Filter>Source Files\Tests\X509</Filter>
     </ClCompile>
     <ClCompile Include="X509\x509_stage4b_pqc_tests.c">
+      <Filter>Source Files\Tests\X509</Filter>
+    </ClCompile>
+    <ClCompile Include="X509\x509_stage5_ecdsa_digest_tests.c">
       <Filter>Source Files\Tests\X509</Filter>
     </ClCompile>
     <ClCompile Include="X509\x509_stage4a_encoding_tests.c">
@@ -270,8 +279,8 @@
     <ClCompile Include="TLS\tls_stage36_pq_standards_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
-    <ClCompile Include="pbmac1_test.c">
-      <Filter>Source Files\Tests</Filter>
+    <ClCompile Include="TLS\tls_stage37_parameter_variants_tests.c">
+      <Filter>Source Files\Tests\TLS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -344,8 +353,14 @@
     <ClInclude Include="scb_test.h">
       <Filter>Header Files\Tests</Filter>
     </ClInclude>
+    <ClInclude Include="encoding_reference_test.h">
+      <Filter>Header Files\Tests</Filter>
+    </ClInclude>
     <ClInclude Include="encoding_test.h">
       <Filter>Header Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="pbmac1_test.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="poly1305_test.h">
       <Filter>Header Files\Tests</Filter>
@@ -387,6 +402,9 @@
       <Filter>Header Files\Tests\X509</Filter>
     </ClInclude>
     <ClInclude Include="X509\x509_stage4b_pqc_tests.h">
+      <Filter>Header Files\Tests\X509</Filter>
+    </ClInclude>
+    <ClInclude Include="X509\x509_stage5_ecdsa_digest_tests.h">
       <Filter>Header Files\Tests\X509</Filter>
     </ClInclude>
     <ClInclude Include="X509\x509_stage4a_encoding_tests.h">
@@ -506,8 +524,8 @@
     <ClInclude Include="TLS\tls_stage36_pq_standards_tests.h">
       <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
-    <ClInclude Include="pbmac1_test.h">
-      <Filter>Header Files\Tests</Filter>
+    <ClInclude Include="TLS\tls_stage37_parameter_variants_tests.h">
+      <Filter>Header Files\Tests\TLS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

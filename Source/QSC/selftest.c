@@ -1,3 +1,55 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
+
 #include "selftest.h"
 #include "aes.h"
 #include "chacha.h"
@@ -537,6 +589,102 @@ static bool aes_gcm256_kat(void)
     return status;
 }
 
+/** \brief Verify an independent AES-256-GCM reference for a complete AEAD record.
+ * \details Expected SHA3-256 fingerprints were computed over ciphertext||tag
+ * produced by a separate OpenSSL-backed AES-GCM implementation, with
+ * deterministic public key, 96-bit nonce, plaintext and 20-byte AAD.
+ * \param length Nonzero plaintext length no greater than 1024 bytes.
+ * \param expected Reference SHA3-256 of ciphertext and tag.
+ * \param label Unique console label for the KAT.
+ * \return True only if ciphertext, full tag, roundtrip, and forgery checks pass.
+ */
+static bool aes_gcm256_reference_case(size_t length, const char* expected, const char* label)
+{
+    uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+    uint8_t iv[QSC_GCM_NONCE_SIZE] = { 0U };
+    uint8_t aad[20U] = { 0U };
+    uint8_t message[1024U] = { 0U };
+    uint8_t output[1024U + QSC_GCM256_MAC_SIZE] = { 0U };
+    uint8_t decoded[1024U] = { 0U };
+    uint8_t digest[QSC_SHA3_256_HASH_SIZE] = { 0U };
+    uint8_t reference[QSC_SHA3_256_HASH_SIZE] = { 0U };
+    qsc_aes_gcm256_state ctx;
+    qsc_aes_keyparams kp;
+    size_t i;
+    bool passed;
+
+    passed = length > 0U && length <= sizeof(message);
+    if (passed)
+    {
+        for (i = 0U; i < sizeof(key); ++i)
+        {
+            key[i] = (uint8_t)i;
+        }
+        for (i = 0U; i < sizeof(iv); ++i)
+        {
+            iv[i] = (uint8_t)(0xA0U + i);
+        }
+        for (i = 0U; i < sizeof(aad); ++i)
+        {
+            aad[i] = (uint8_t)(0x20U + i);
+        }
+        for (i = 0U; i < length; ++i)
+        {
+            message[i] = (uint8_t)(i * 7U + 11U);
+        }
+        kp.key = key;
+        kp.keylen = sizeof(key);
+        kp.info = NULL;
+        kp.infolen = 0U;
+        kp.nonce = iv;
+        kp.noncelen = sizeof(iv);
+        qsc_consoleutils_hex_to_bin(expected, reference, sizeof(reference));
+        qsc_aes_gcm256_initialize(&ctx, &kp, true);
+        qsc_aes_gcm256_set_associated(&ctx, aad, sizeof(aad));
+        qsc_aes_gcm256_encrypt(&ctx, output, message, length);
+        qsc_aes_gcm256_dispose(&ctx);
+        qsc_sha3_compute256(digest, output, length + QSC_GCM256_MAC_SIZE);
+        passed = qsc_memutils_are_equal(digest, reference, sizeof(digest));
+        qsc_aes_gcm256_initialize(&ctx, &kp, false);
+        qsc_aes_gcm256_set_associated(&ctx, aad, sizeof(aad));
+        if (qsc_aes_gcm256_decrypt(&ctx, decoded, output, length + QSC_GCM256_MAC_SIZE) == false)
+        {
+            passed = false;
+        }
+        if (qsc_memutils_are_equal(message, decoded, length) == false)
+        {
+            passed = false;
+        }
+        qsc_aes_gcm256_dispose(&ctx);
+        output[length + QSC_GCM256_MAC_SIZE - 1U] ^= 1U;
+        qsc_aes_gcm256_initialize(&ctx, &kp, false);
+        qsc_aes_gcm256_set_associated(&ctx, aad, sizeof(aad));
+        if (qsc_aes_gcm256_decrypt(&ctx, decoded, output, length + QSC_GCM256_MAC_SIZE) != false)
+        {
+            passed = false;
+        }
+        qsc_aes_gcm256_dispose(&ctx);
+    }
+    qsc_consoleutils_print_safe(passed ? "PASS: " : "FAIL: ");
+    qsc_consoleutils_print_safe(label);
+    qsc_consoleutils_print_safe("\n");
+    return passed;
+}
+
+/** \brief Test independent NIST-compatible AES-256-GCM vectors across GHASH widths. */
+static bool aes_gcm256_multiblock_kat(void)
+{
+    bool passed;
+
+    passed = true;
+    passed = aes_gcm256_reference_case(16U, "9a1507a7cb6562d2151070fb22b4c23ae23d342504a62531330c71045703f080", "AES-256 GCM reference 16 bytes") && passed;
+    passed = aes_gcm256_reference_case(32U, "39cc95f5c6e53596ad2fad8334f8c75056bf3dbdf7b6015ddb9bc4162f1cac63", "AES-256 GCM reference 32 bytes") && passed;
+    passed = aes_gcm256_reference_case(64U, "ef63a3f9f0b7ba4e4929546fdaf7a1ccec56e8ebb7a11e14f4020bbaa9aa8264", "AES-256 GCM reference 64 bytes") && passed;
+    passed = aes_gcm256_reference_case(256U, "90101da4ae5221caae8fc59c414a8253f9c29ba4028feec33ec1954747c12a20", "AES-256 GCM reference 256 bytes") && passed;
+    passed = aes_gcm256_reference_case(1024U, "a10daf74ca50744db6aa6845ebc9a542b63cf08bde2cd84d8ad64b3feed8cad3", "AES-256 GCM reference 1024 bytes") && passed;
+    return passed;
+}
+
 static bool aes256_hba_kat(void)
 {
 	uint8_t aad1[20U] = { 0U };
@@ -800,398 +948,416 @@ static bool chacha256_kat(void)
 
 /*** CSX ***/
 
+/* The frozen CSX and RCS hashes below are SHA3-256 of the complete
+ * ciphertext || authentication tag, generated from the original independent
+ * project reference implementations. Full 24-round Keccak is used in both
+ * profiles. RCS-256/512 use 14/21 rounds by default and 22/30 when extended;
+ * CSX-512 uses 20 by default and 40 when extended. All key/material
+ * generators are deterministic NONSECRET regression fixtures.
+ */
+#define QSC_SELFTEST_CSX_MAX_MESSAGE 4097U
+#define QSC_SELFTEST_RCS_MAX_MESSAGE 4096U
+
+/** \brief Construct a deterministic, public known-answer input. */
+static void selftest_pattern(uint8_t* output, size_t length, size_t index, uint8_t salt)
+{
+    size_t i;
+
+    for (i = 0U; i < length; ++i)
+    {
+        output[i] = (uint8_t)(i * 29U + index * 17U + (size_t)salt);
+    }
+}
+
+/** \brief Compare a SHA3-256 digest to a frozen, independently generated KAT. */
+static bool selftest_digest_equal(const uint8_t* value, size_t length, const char* expected)
+{
+    uint8_t digest[QSC_SHA3_256_HASH_SIZE] = { 0U };
+    uint8_t reference[QSC_SHA3_256_HASH_SIZE] = { 0U };
+    bool result;
+
+    qsc_consoleutils_hex_to_bin(expected, reference, sizeof(reference));
+    qsc_sha3_compute256(digest, value, length);
+    result = qsc_memutils_are_equal(digest, reference, sizeof(reference));
+    return result;
+}
+/** \brief Validate two chained CSX AEAD reference outputs and nonce.
+ * \param length Number of input bytes in the frozen KAT.
+ * \param first_hash SHA3-256 of the first ciphertext and complete tag.
+ * \param second_hash SHA3-256 of the chained ciphertext and complete tag.
+ * \param nonce_hex Expected final 128-bit nonce.
+ * \param label Individually identified console-test name.
+ * \return True if all checks, including decryption and forgery rejection, pass.
+ */
+static bool csx512_kat_case(size_t length, const char* first_hash, const char* second_hash,
+    const char* nonce_hex, const char* label)
+{
+    uint8_t key[QSC_CSX_KEY_SIZE] = { 0U };
+    uint8_t nonce[QSC_CSX_NONCE_SIZE] = { 0U };
+    uint8_t saved[QSC_CSX_NONCE_SIZE] = { 0U };
+    uint8_t expected_nonce[QSC_CSX_NONCE_SIZE] = { 0U };
+    uint8_t ad[20U] = { 0U };
+    uint8_t message[QSC_SELFTEST_CSX_MAX_MESSAGE] = { 0U };
+    uint8_t first[QSC_SELFTEST_CSX_MAX_MESSAGE + QSC_CSX_MAC_SIZE] = { 0U };
+    uint8_t second[QSC_SELFTEST_CSX_MAX_MESSAGE + QSC_CSX_MAC_SIZE] = { 0U };
+    uint8_t decrypted[QSC_SELFTEST_CSX_MAX_MESSAGE] = { 0U };
+    qsc_csx_keyparams kp;
+    qsc_csx_state ctx;
+    size_t i;
+    bool passed;
+
+    passed = length > 0U && length <= sizeof(message);
+    if (passed)
+    {
+        for (i = 0U; i < sizeof(key); ++i)
+        {
+            key[i] = (uint8_t)(i * 13U + 7U);
+        }
+        for (i = 0U; i < sizeof(nonce); ++i)
+        {
+            nonce[i] = (uint8_t)(0xD0U + i);
+        }
+        for (i = 0U; i < sizeof(ad); ++i)
+        {
+            ad[i] = (uint8_t)(i + 1U);
+        }
+        for (i = 0U; i < length; ++i)
+        {
+            message[i] = (uint8_t)(i * 29U + 3U);
+        }
+        qsc_consoleutils_hex_to_bin(nonce_hex, expected_nonce, sizeof(expected_nonce));
+        qsc_memutils_copy(saved, nonce, sizeof(saved));
+        kp.key = key;
+        kp.keylen = sizeof(key);
+        kp.info = NULL;
+        kp.infolen = 0U;
+        kp.nonce = nonce;
+        qsc_csx_initialize(&ctx, &kp, true);
+        qsc_csx_set_associated(&ctx, ad, sizeof(ad));
+        passed = qsc_csx_transform(&ctx, first, message, length);
+        if (passed)
+        {
+            passed = selftest_digest_equal(first, length + QSC_CSX_MAC_SIZE, first_hash);
+        }
+        qsc_csx_set_associated(&ctx, ad, sizeof(ad));
+        if (qsc_csx_transform(&ctx, second, message, length) == false)
+        {
+            passed = false;
+        }
+        if (selftest_digest_equal(second, length + QSC_CSX_MAC_SIZE, second_hash) == false)
+        {
+            passed = false;
+        }
+        if (qsc_memutils_are_equal(nonce, expected_nonce, sizeof(nonce)) == false)
+        {
+            passed = false;
+        }
+        qsc_csx_dispose(&ctx);
+        kp.nonce = saved;
+        qsc_csx_initialize(&ctx, &kp, false);
+        qsc_csx_set_associated(&ctx, ad, sizeof(ad));
+        if (qsc_csx_transform(&ctx, decrypted, first, length) == false)
+        {
+            passed = false;
+        }
+        if (qsc_memutils_are_equal(decrypted, message, length) == false)
+        {
+            passed = false;
+        }
+        qsc_csx_dispose(&ctx);
+        for (i = 0U; i < sizeof(saved); ++i)
+        {
+            saved[i] = (uint8_t)(0xD0U + i);
+        }
+        first[length + QSC_CSX_MAC_SIZE - 1U] ^= 1U;
+        qsc_csx_initialize(&ctx, &kp, false);
+        qsc_csx_set_associated(&ctx, ad, sizeof(ad));
+        if (qsc_csx_transform(&ctx, decrypted, first, length) != false)
+        {
+            passed = false;
+        }
+        qsc_csx_dispose(&ctx);
+    }
+    qsc_consoleutils_print_safe(passed ? "PASS: " : "FAIL: ");
+    qsc_consoleutils_print_safe(label);
+    qsc_consoleutils_print_safe("\n");
+    return passed;
+}
+/** \brief Run a reference RCS-256 or RCS-512 chained AEAD vector. */
+static bool rcs_kat_case(size_t index, size_t length, size_t keylen, const char* first_hash,
+    const char* second_hash, const char* nonce_hex, const char* label)
+{
+    uint8_t key[QSC_RCS512_KEY_SIZE] = { 0U };
+    uint8_t nonce[QSC_RCS_NONCE_SIZE] = { 0U };
+    uint8_t saved[QSC_RCS_NONCE_SIZE] = { 0U };
+    uint8_t final_nonce[QSC_RCS_NONCE_SIZE] = { 0U };
+    uint8_t reference_nonce[QSC_RCS_NONCE_SIZE] = { 0U };
+    uint8_t ad[20U] = { 0U };
+    uint8_t info[13U] = { 0U };
+    uint8_t message[QSC_SELFTEST_RCS_MAX_MESSAGE] = { 0U };
+    uint8_t first[QSC_SELFTEST_RCS_MAX_MESSAGE + QSC_RCS512_MAC_SIZE] = { 0U };
+    uint8_t second[QSC_SELFTEST_RCS_MAX_MESSAGE + QSC_RCS512_MAC_SIZE] = { 0U };
+    uint8_t decrypted[QSC_SELFTEST_RCS_MAX_MESSAGE] = { 0U };
+    qsc_rcs_keyparams kp;
+    qsc_rcs_state ctx;
+    bool passed;
+
+    passed = (keylen == QSC_RCS256_KEY_SIZE || keylen == QSC_RCS512_KEY_SIZE) &&
+        length > 0U && length <= sizeof(message);
+    if (passed)
+    {
+        selftest_pattern(key, keylen, index, 0x11U);
+        selftest_pattern(nonce, sizeof(nonce), index, 0xF7U);
+        selftest_pattern(message, length, index, 0x51U);
+        selftest_pattern(ad, sizeof(ad), index, 0xA3U);
+        selftest_pattern(info, sizeof(info), index, 0xC2U);
+        qsc_memutils_copy(saved, nonce, sizeof(saved));
+        qsc_consoleutils_hex_to_bin(nonce_hex, reference_nonce, sizeof(reference_nonce));
+        kp.key = key;
+        kp.keylen = keylen;
+        kp.nonce = nonce;
+        kp.info = info;
+        kp.infolen = sizeof(info);
+        qsc_rcs_initialize(&ctx, &kp, true);
+        qsc_rcs_set_associated(&ctx, ad, sizeof(ad));
+        passed = qsc_rcs_transform(&ctx, first, message, length);
+        if (passed && selftest_digest_equal(first, length + keylen, first_hash) == false)
+        {
+            passed = false;
+        }
+        if (qsc_rcs_transform(&ctx, second, message, length) == false)
+        {
+            passed = false;
+        }
+        if (selftest_digest_equal(second, length + keylen, second_hash) == false)
+        {
+            passed = false;
+        }
+        qsc_rcs_store_nonce(&ctx, final_nonce);
+        if (qsc_memutils_are_equal(final_nonce, reference_nonce, sizeof(final_nonce)) == false)
+        {
+            passed = false;
+        }
+        qsc_rcs_dispose(&ctx);
+        kp.nonce = saved;
+        qsc_rcs_initialize(&ctx, &kp, false);
+        qsc_rcs_set_associated(&ctx, ad, sizeof(ad));
+        if (qsc_rcs_transform(&ctx, decrypted, first, length) == false)
+        {
+            passed = false;
+        }
+        if (qsc_memutils_are_equal(decrypted, message, length) == false)
+        {
+            passed = false;
+        }
+        qsc_rcs_dispose(&ctx);
+        selftest_pattern(saved, sizeof(saved), index, 0xF7U);
+        first[length + keylen - 1U] ^= 1U;
+        qsc_rcs_initialize(&ctx, &kp, false);
+        qsc_rcs_set_associated(&ctx, ad, sizeof(ad));
+        if (qsc_rcs_transform(&ctx, decrypted, first, length) != false)
+        {
+            passed = false;
+        }
+        qsc_rcs_dispose(&ctx);
+    }
+    qsc_consoleutils_print_safe(passed ? "PASS: " : "FAIL: ");
+    qsc_consoleutils_print_safe(label);
+    qsc_consoleutils_print_safe("\n");
+    return passed;
+}
+/** \brief Test ten frozen CSX KATs for the active round profile. */
 static bool csx512_kat(void)
 {
-	uint8_t ad[20U] = { 0U };
-	uint8_t dec[128U] = { 0U };
-#if defined(QSC_CSX_AUTHENTICATED)
-	uint8_t enc1[128U + QSC_CSX_MAC_SIZE] = { 0U };
-	uint8_t enc2[128U + QSC_CSX_MAC_SIZE] = { 0U };
-	uint8_t exp1[128U + QSC_CSX_MAC_SIZE] = { 0U };
-	uint8_t exp2[128U + QSC_CSX_MAC_SIZE] = { 0U };
+    bool passed;
+
+    passed = true;
+#if defined(QSC_CSX_EXTENDED_ROUND_COUNTS)
+    passed = csx512_kat_case(1U, "05a9e06cbf6af310694b7caa395510cb234668bfd6346ad24c84a3a995f2dec9",
+        "e6420310284d46dd03910557c747127d4103ca4238fdbff5cae9bf60c8438560", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 01 (1 bytes)") && passed;
+    passed = csx512_kat_case(15U, "aec5d5fcb07f8f2ba292d101d12337cea6cf69bba90e2f6d3b04c7eb0768f256",
+        "a32f96e9ff6e99ed42cc5be397df3d8fe59f6d43b5c27e61fb8e76c3e485a196", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 02 (15 bytes)") && passed;
+    passed = csx512_kat_case(32U, "0d4ee83d459c09f2dae94337309b270e3bb64f82424fe3dd3d8a2ff44e51eb50",
+        "646bd72674b4d9e32cc0113225667cbdca2ab49af13b1e5d5e3c903e86d40cfe", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 03 (32 bytes)") && passed;
+    passed = csx512_kat_case(127U, "8b4528e98b29ac8476914142cab67304091c643d708375fa752d415488451fc0",
+        "a62ac50d638462edad51ec6e6301dd97f8cbdbbefcc73b9f7c292c965e9aa25e", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 04 (127 bytes)") && passed;
+    passed = csx512_kat_case(128U, "24c6721c38dca35d87a1cac633dc45c2886764a857c4746fe4d616118f64d674",
+        "92d4da67ad5378d033a26e576990feb9d8fe2e3b384009bea76ee9c56d656f19", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 05 (128 bytes)") && passed;
+    passed = csx512_kat_case(129U, "ce9728b289ea5c58f27ab5b1c3280d3cd8d86889b60c9c7e6b49e49adaa35cad",
+        "7eaa687cbb10be5e1f41588ffc043f2a5ac786e7a7636a679494a9b31186682a", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 06 (129 bytes)") && passed;
+    passed = csx512_kat_case(256U, "8b80702bb0dac056bc4a1e0021ef816a4b3a39432b6effefda22318dcd6d59a2",
+        "eb0b5e5604a4c35473f14687f8414a8ef08e620b9c753558b88646beff3da351", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 07 (256 bytes)") && passed;
+    passed = csx512_kat_case(512U, "1d81421e14731470125cc8f0c04e3739f9f7f3dc7869d3ba3c7689eac84911e0",
+        "52d0aa68e0e466af584f553db10050715778fc202214fdc4e5451dd0fe4d6cf8", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 08 (512 bytes)") && passed;
+    passed = csx512_kat_case(1024U, "28e7f89c50eb5bed0d07197b5e7c1cef523276df302ad49aa29e15a6f12e44c5",
+        "692acdef324210f9a9d7c1d7e9e9be57a7cfa38ea6b2f5b8ac5d217080ec5cd5", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 09 (1024 bytes)") && passed;
+    passed = csx512_kat_case(4097U, "6e921ba4172bbcf586daeda625349af6d51c3819c307cd599a514b685aced0de",
+        "c64a7fbabba6cd284990ba0cc549e9213c23f6ff5f4f598cb62fea7cc8ee7d42", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 extended KAT 10 (4097 bytes)") && passed;
 #else
-	uint8_t enc1[128U] = { 0U };
-	uint8_t enc2[128U] = { 0U };
-	uint8_t exp1[128U] = { 0U };
-	uint8_t exp2[128U] = { 0U };
+    passed = csx512_kat_case(1U, "76fc14e821943795b623e6d5b9663541a1096edfd8d1ab827d639a8cf58ee0d5",
+        "27113d15519a2fc32eedb9c87e3a7004c6afda74d3d51b6fe22c8be3085a23c7", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 01 (1 bytes)") && passed;
+    passed = csx512_kat_case(15U, "1b21938e9b4a37104b24ecd90ada15bea63b14bea2a48d0c929c04b5b9f876d6",
+        "60289816a61555f9a6b9f2a6311d80d7cd321fb98052b6f1575e25fd50e42d3c", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 02 (15 bytes)") && passed;
+    passed = csx512_kat_case(32U, "1f4b0cf34efc6e87791ecf6321782153dd6b55253dfb84e05c49224ef387c285",
+        "11d03bc39cda8fbfcd6664d05aa457bab2adbb21416f1b52bd377a185c7a7ff4", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 03 (32 bytes)") && passed;
+    passed = csx512_kat_case(127U, "7b48b0f1e2afc72b2758976877ae0d7e90b9893e851935d4edeecd2df41a123d",
+        "917990f311e47eeba2699f4160f30c4c158ebd19313bbfb304270117d0f6d812", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 04 (127 bytes)") && passed;
+    passed = csx512_kat_case(128U, "f32bdfd5110e07ecdb957e5db7737a786b834162f73e47fbaf72da7f803f63d6",
+        "cb4525fc4b29c8365a2d705c64b4c035dfed37a3d56c9785d1759e8d633c0fdf", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 05 (128 bytes)") && passed;
+    passed = csx512_kat_case(129U, "9731cc23b1155a58d738b4b9dd4b3d09818402bcc5aa30c8d3b06589ae2a21ca",
+        "fbbde29768a6acc58cdfa1a7fec2ed40d8c3fdf243ea12807aa4eb991bede217", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 06 (129 bytes)") && passed;
+    passed = csx512_kat_case(256U, "1a2a48b9637cc9e87783634a9b7527087113a582118c607d34db01ceb9c99964",
+        "221965f03317d4a1b2e76c9f1be7079add5d77a5f13a49295f2bc93d0a2a2ce5", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 07 (256 bytes)") && passed;
+    passed = csx512_kat_case(512U, "428ff83653fe0645bba0a094bddc852ece0963ccafbcee2e387f2d1c51acc53a",
+        "70bb088fcc6be3a1e524fed9fc0a635e906b4ae282b8f40e3afcf52576453179", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 08 (512 bytes)") && passed;
+    passed = csx512_kat_case(1024U, "63b0efb2d249476417d9cd23c34e1f2ffbbd71a68f344309998f841775a7f930",
+        "89829dadb0699ba2cc269ab5e46beb0ccc647cc9c4f874b3bc02da5c3476f9d0", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 09 (1024 bytes)") && passed;
+    passed = csx512_kat_case(4097U, "0f5b9f5c1214cc3b48f4bf2b91cc00fb18bb993805c3c75f6874b99cc9fbe358",
+        "0570741901ea71304e47d1c574917b953b3998fb9336938edad06cf4746a80ca", "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf", "CSX-512 standard KAT 10 (4097 bytes)") && passed;
 #endif
-	uint8_t key[QSC_CSX_KEY_SIZE] = { 0U };
-	uint8_t msg[128U] = { 0U };
-	uint8_t nce[QSC_CSX_NONCE_SIZE] = { 0U };
-	uint8_t ncpy[QSC_CSX_NONCE_SIZE] = { 0U };
-	bool status;
-	qsc_csx_state state;
-
-#if defined(QSC_CSX_REDUCED_ROUNDS)
-#	if defined(QSC_CSX_AUTHENTICATED)
-	/* csxc512p512 */
-	qsc_consoleutils_hex_to_bin("443D22476DB4267FFEF88BF1E49FD46792EEE75CF7EF13B839817882B6F3941D"
-		"EF1808E1AF3BDD2726693CE4DBF66CC84BACCAFD288557DBAC2CCA1C5CF5F4B2"
-		"CF0F7237A462EDEB45B256AE383FDAEE7170C67CE915FC158F88A196B7BA4919"
-		"BE519C1ECCA65FDC7CD391C3AD92A0776A7D0994A6F299C299EA7882A9F3C654"
-		"7486CF7AFB1D11FEB57A762B30ED704CEE59810D643D69DA9FC8BE4CDC5551C4"
-		"3DFACCAAA2EBD16B062709AE915787777F71610B1E6A512E5D385116FFE477DB", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("E72FD8AF9FCE8CACADFE43B8256786FD8E60C98C0C2E8554472BFE875E27DB5B"
-		"E2087240AC6CA8409B6078128DF02C49176DA411B9E0CE4D6C42448828F8A12D"
-		"B0B88D0583936626FAA156EC6783DC9258980DB450F5B61BB63D07B31450501A"
-		"92F5F03F9261AC1F98D3ED48C5CE076B9C73DAF4DB05F3DBE2F0A527BA189731"
-		"47512D5577D99AA25816B837F55341CD797285C1B5DC161224BFD2597B79F665"
-		"7D642E0F998DBE431252FE855829D601E5AA6E95E6B51108B79054C762A6142F", exp2, sizeof(exp2));
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
-#	else
-	qsc_consoleutils_hex_to_bin("A90D03B57E0F27C6616AA5D5073550ACA3F352A732BDEB7987C5DCE98261318F"
-		"7EF0479A903E1BA907B94C5BA351636D5014CC0DFAB83FD9268C5A42B7C64F08"
-		"9612AAB864CA44B55377F66841F83BDB3C28FA9FEE9B9E49D62E8378C9897B86"
-		"103255D2E37B7EE686EFFD07E0849FDFB77A42D29F5E3F14C8DD3FC1FB23BFA4", exp1, sizeof(exp1));
-
-	qsc_consoleutils_hex_to_bin("C54D34C9444D4DEC55CD31C999E60AC939C1256A74EF683B581512954B7DE015"
-		"4CA42207C94B075EB5B2CEEB916AEA297DF8F594D5B1A7F4B675B6AF8555075E"
-		"38BD96CD559F2C983740019B47F6A96268B92A5936700A7808AB983897F3E8B7"
-		"61A929B326C05FEA9CA8F4D4A17D9C346E80E87F62048D0E88AE6219C292FF05", exp2, sizeof(exp2));
-#	endif
-#else
-#	if defined(QSC_CSX_AUTHENTICATED)
-	/* csxc512p512 */
-	qsc_consoleutils_hex_to_bin("F726CF4BECEBDFDE9275C54B5284D0CDEEF158D8E146C027B731B6EF852C008F"
-		"842B15CD0DCF168F93C9DE6B41DEE964D62777AA999E44C6CFD903E65E0096EF"
-		"A271F75C45FE13CE879973C85934D0B43B49BC0ED71AD1E72A9425D2FCDA45FD"
-		"1A56CE66B25EA602D9F99BDE6909F7D73C68B8A52870577D30F0C0E4D02DE2E5"
-		"2EC8B5F4E79AD2F7A86140499FB479E9BD0EEB065E91E4F7F53953E970AA13DC"
-		"96172F398E598FF7169C41A8D8E51FAF297004B2B1F242706EE34680CF9A9F9A", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("379E86BCE2F0BE6DF0BAA8FEC403C6A7244B21D1D5B9193FCE79510FF2633893"
-		"F58D57DABBEF0424E1E8D5ED7B485EB7381CC7235350220CA03F1D107A102BD3"
-		"5FAB74869AB656D35E0F40950E1564DBDC37ECFD6C50BEE201BFA0F953AEC0A2"
-		"9B063993F5D019CDDE4A8AA02D440C19A4A08AD7A0CD3F2FDFEF61D0383314B5"
-		"FCDFC3F96D8A40E41B35A35D4E2AFB81E0C054BA4DBC7FC183DA37E45ADA60F8"
-		"F77303C276C7E3A33327EB5E481E4A8886E2E76100434D92384943C7D648C0A5", exp2, sizeof(exp2));
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
-#	else
-	qsc_consoleutils_hex_to_bin("E1E27CD3CF085080363AC3903D31C2AE5E51D4CCF8FB9278FEFB24077A72C2AC"
-		"671249C32DED5F96CBC31702CED6B3575F3B562BA9FF9E6467DE7C687AEDA54C"
-		"7043FC912BF57B4892FED02E5F4D67C2404DCF99B6021FDBD1B241DBD8673F96"
-		"D67A15AC380946EBE5287C61F74C8ECD6A34AF7499D145F1B74BED2A5A7CA631", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("026FE8D3D224909030939FF99D7308ACFF9472A3656193CFDA3991C87E955E3F"
-		"E2A1C1983FF3E7D7E6B9E646F161765F70D14E2A52312E60C6EC3C774FDC1985"
-		"9AE0B3C43F93F0A9900693F451D4B7A342CEB9F0BE047AE7D64C16001843B7A8"
-		"0F7EC32CC7A4FF745DBF1700390017B357DF27B1CE2CC44515F2D392AE20E4A8", exp2, sizeof(exp2));
-#	endif
-#endif
-
-	qsc_consoleutils_hex_to_bin("0053A6F94C9FF24598EB3E91E4378ADD3083D6297CCF2275C81B6EC11467BA0D0558ABFE51A4F74A9DF04396E93C8FE23588DB2E81D4277ACD2073C6196CBF12", key, sizeof(key));
-	qsc_consoleutils_hex_to_bin("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-		"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", msg, sizeof(msg));
-	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F", nce, sizeof(nce));
-
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01U);
-
-	/* copy the nonce */
-	qsc_memutils_copy(ncpy, nce, sizeof(nce));
-
-	/* initialize the key parameters struct, info is optional */
-	qsc_csx_keyparams kp = { .key = key, .keylen = QSC_CSX_KEY_SIZE, .info = NULL, .infolen = 0U, .nonce = nce };
-
-	status = true;
-
-	/* initialize the state */
-	qsc_csx_initialize(&state, &kp, true);
-
-#if defined(QSC_CSX_AUTHENTICATED)
-	/* set associated data */
-	qsc_csx_set_associated(&state, ad, sizeof(ad));
-#endif
-
-	/* test encryption */
-	qsc_csx_transform(&state, enc1, msg, sizeof(msg));
-
-	if (qsc_memutils_are_equal(enc1, exp1, sizeof(exp1)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK1 \n");
-		status = false;
-	}
-
-#if defined(QSC_CSX_AUTHENTICATED)
-	/* set associated data */
-	qsc_csx_set_associated(&state, ad, sizeof(ad));
-#endif
-
-	/* test encryption and chaining */
-	qsc_csx_transform(&state, enc2, msg, sizeof(msg));
-
-	if (qsc_memutils_are_equal(enc2, exp2, sizeof(exp2)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK2 \n");
-		status = false;
-	}
-
-	/* reset the nonce */
-	kp.nonce = ncpy;
-
-	/* initialize the state */
-	qsc_csx_initialize(&state, &kp, false);
-
-#if defined(QSC_CSX_AUTHENTICATED)
-	/* set associated data */
-	qsc_csx_set_associated(&state, ad, sizeof(ad));
-#endif
-
-	/* test decryption */
-	if (qsc_csx_transform(&state, dec, enc1, sizeof(dec)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK3 \n");
-		status = false;
-	}
-
-	if (qsc_memutils_are_equal(dec, msg, sizeof(dec)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! csx512_kat: output does not match the expected answer -CK4 \n");
-		status = false;
-	}
-
-	/* erase the round-key array and reset the state */
-	qsc_csx_dispose(&state);
-
-	return status;
+    return passed;
 }
-
-/*** RCS ***/
-
-bool rcs256_kat(void)
+/** \brief Test ten independent, original-source RCS reference vectors. */
+static bool rcs256_kat(void)
 {
-#if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t ad[20U] = { 0U };
-	uint8_t dec[32U] = { 0U };
-	uint8_t enc1[32U + QSC_RCS256_MAC_SIZE] = { 0U };
-	uint8_t enc2[32U + QSC_RCS256_MAC_SIZE] = { 0U };
-	uint8_t exp1[32U + QSC_RCS256_MAC_SIZE] = { 0U };
-	uint8_t exp2[32U + QSC_RCS256_MAC_SIZE] = { 0U };
-	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0U };
+    bool passed;
+
+    passed = true;
+#if defined(QSC_RCS_EXTENDED_ROUND_COUNTS)
+    passed = rcs_kat_case(0U, 1U, QSC_RCS256_KEY_SIZE,
+        "885f767dea155bfd4cc4b9dbc0fc3eadb1dda92047b61947f8667d4428f8f91a", "c9839031aad9f91ff6d85d922b9af7b988f8a4eadb58c30f78256b8230a50721",
+        "f914314e6b88a5c2dffc193653708daac7e4011e3b587592afcce90623405d7a", "RCS-256 extended KAT 01 (1 bytes)") && passed;
+    passed = rcs_kat_case(1U, 15U, QSC_RCS256_KEY_SIZE,
+        "c1917db99bfbca4ada3877b961754e1090b06a13f1626de897f3cf86fb4d6781", "7c4d82de9baa5dc13b1cc39202d787e1e28005e913491683405550113f7554b0",
+        "0a25425f7c99b6d3f00d2a4764819ebbd8f5122f4c6986a3c0ddfa1734516e8b", "RCS-256 extended KAT 02 (15 bytes)") && passed;
+    passed = rcs_kat_case(2U, 31U, QSC_RCS256_KEY_SIZE,
+        "1cbf47d3cf2299c7cc9adc68d99cc52fdb0c07c6c87847af3a65298647aa9bac", "b40b20d59315abc65bc7ef28f241e5e98519bc3683a4cd6d2727257879c51608",
+        "1b3653708daac7e4011e3b587592afcce90623405d7a97b4d1ee0b2845627f9c", "RCS-256 extended KAT 03 (31 bytes)") && passed;
+    passed = rcs_kat_case(3U, 32U, QSC_RCS256_KEY_SIZE,
+        "58ef2905c3c4986f34991bdc8cd3060fac3a61b496057505f106fe39a70a430d", "34ac60a5596631caf8c8d4ffea0753a6ac1a59850523f4d9d3c158dca92d67d8",
+        "2c4764819ebbd8f5122f4c6986a3c0ddfa1734516e8ba8c5e2ff1c39567390ad", "RCS-256 extended KAT 04 (32 bytes)") && passed;
+    passed = rcs_kat_case(4U, 33U, QSC_RCS256_KEY_SIZE,
+        "b878b7b0a55cbeede8f86f7efe13a1b1fc498321a46d0e547f531050e6c30f66", "7849d95711f832d781f432bfbe45322003ecc0e763b21b90f65693b791630c56",
+        "3f587592afcce90623405d7a97b4d1ee0b2845627f9cb9d6f3102d4a6784a1be", "RCS-256 extended KAT 05 (33 bytes)") && passed;
+    passed = rcs_kat_case(5U, 63U, QSC_RCS256_KEY_SIZE,
+        "e3277e4f21c9f12c97517af889cf85c8f535b6c294fdf385843d3cd5cd980cc4", "9e4c757d1ffcb9b5d04f4c1cdb2f6ce81a9f46a55f57676439aacdf4d12ac728",
+        "506986a3c0ddfa1734516e8ba8c5e2ff1c39567390adcae704213e5b7895b2cf", "RCS-256 extended KAT 06 (63 bytes)") && passed;
+    passed = rcs_kat_case(6U, 64U, QSC_RCS256_KEY_SIZE,
+        "199b8d6e4a53993a32b3a5a4e29f3d46702fd6c81a98d270314069a0c904c5a8", "7d76c61fe3a483b2d33e1767f29224f71b6fca2b0f096e25aa39ca4545231866",
+        "617a97b4d1ee0b2845627f9cb9d6f3102d4a6784a1bedbf815324f6c89a6c3e0", "RCS-256 extended KAT 07 (64 bytes)") && passed;
+    passed = rcs_kat_case(7U, 127U, QSC_RCS256_KEY_SIZE,
+        "058bd86f9391d6317b4238ac1695982dc1b38f9b7bb1aeb31c2d4362eac66a5b", "732710afd5af37f1ca13ca83ed89438baa663dd7bb7df7314bd447203b41edcb",
+        "768ba8c5e2ff1c39567390adcae704213e5b7895b2cfec092643607d9ab7d4f1", "RCS-256 extended KAT 08 (127 bytes)") && passed;
+    passed = rcs_kat_case(8U, 128U, QSC_RCS256_KEY_SIZE,
+        "ae86e4054a0f8099944aab49e083d85feff1b2e4d02b12be0197266a69a7389a", "b03557693da56f470fa6c900c80e4634d4cf3b098f78a6d261de2d76d5822957",
+        "879cb9d6f3102d4a6784a1bedbf815324f6c89a6c3e0fd1a3754718eabc8e502", "RCS-256 extended KAT 09 (128 bytes)") && passed;
+    passed = rcs_kat_case(9U, 4096U, QSC_RCS256_KEY_SIZE,
+        "402449f63784b65f271b531d777e713388455d3314194aef538f8d5227461ee7", "204744f77d23455ac757395909b0d33b3b836196955d138d4889267fe7124399",
+        "90aecae704213e5b7895b2cfec092643607d9ab7d4f10e2b4865829fbcd9f613", "RCS-256 extended KAT 10 (4096 bytes)") && passed;
 #else
-	uint8_t enc1[32U] = { 0U };
-	uint8_t exp1[32U] = { 0U };
+    passed = rcs_kat_case(0U, 1U, QSC_RCS256_KEY_SIZE,
+        "9b210536ff22b87655d12478d7aa2d972322c7ff82d2faf06c69168205f455aa", "71177276876e7bcc2d3c8d78167b2cc657aba4c46df8f17deb9e785be1ea28f9",
+        "f914314e6b88a5c2dffc193653708daac7e4011e3b587592afcce90623405d7a", "RCS-256 standard KAT 01 (1 bytes)") && passed;
+    passed = rcs_kat_case(1U, 15U, QSC_RCS256_KEY_SIZE,
+        "e504db7939c580d711c64f48f5e5a99616923d3dc353928cf6876c072567db8e", "b7eabc8cd8df63814976d3d3db1da6db758676416638eaecd22566199cb583cd",
+        "0a25425f7c99b6d3f00d2a4764819ebbd8f5122f4c6986a3c0ddfa1734516e8b", "RCS-256 standard KAT 02 (15 bytes)") && passed;
+    passed = rcs_kat_case(2U, 31U, QSC_RCS256_KEY_SIZE,
+        "41c0d275ca15a5133c0a9e01a689535cdacbba1b4578fb43f1a345d31ce20267", "d9f71e1f730c4e1d4e9d512ecf8f6e5047f7dc590fbcc6ca18d5200a7433e9b5",
+        "1b3653708daac7e4011e3b587592afcce90623405d7a97b4d1ee0b2845627f9c", "RCS-256 standard KAT 03 (31 bytes)") && passed;
+    passed = rcs_kat_case(3U, 32U, QSC_RCS256_KEY_SIZE,
+        "5ed995e2da20cc5b26ccc0f7f7ff3effcce165b89a84db326c2f0996da0cca6a", "f166bc70843429440f9a7217c2a4b965fa867e7d21c68c878fff1e69dc64a1b3",
+        "2c4764819ebbd8f5122f4c6986a3c0ddfa1734516e8ba8c5e2ff1c39567390ad", "RCS-256 standard KAT 04 (32 bytes)") && passed;
+    passed = rcs_kat_case(4U, 33U, QSC_RCS256_KEY_SIZE,
+        "6d012036e4c0eedf513628e27f29a8eaa288d698e5db11f2509b62ee5a5fca60", "879436e87ecd211f2736872e524af89fdcd1499fc49830af7cc66218eec9b6f3",
+        "3f587592afcce90623405d7a97b4d1ee0b2845627f9cb9d6f3102d4a6784a1be", "RCS-256 standard KAT 05 (33 bytes)") && passed;
+    passed = rcs_kat_case(5U, 63U, QSC_RCS256_KEY_SIZE,
+        "3befaa09eff785a639b038e0d2816824d42eb4008aaff318e3bc648d2686b31d", "4c8ecaa337bab191ba112fd74fe01af9309f1bfb5349307a80d7d516e59f6ff8",
+        "506986a3c0ddfa1734516e8ba8c5e2ff1c39567390adcae704213e5b7895b2cf", "RCS-256 standard KAT 06 (63 bytes)") && passed;
+    passed = rcs_kat_case(6U, 64U, QSC_RCS256_KEY_SIZE,
+        "e4a5cd1035d54f33310fa56f1959bfeddeb7711169450c3afcd11cc56a02ccbd", "c21c5e26771c8aa681fe2741536348b70b63465ab8ce2ce80c0bdd790347d9f1",
+        "617a97b4d1ee0b2845627f9cb9d6f3102d4a6784a1bedbf815324f6c89a6c3e0", "RCS-256 standard KAT 07 (64 bytes)") && passed;
+    passed = rcs_kat_case(7U, 127U, QSC_RCS256_KEY_SIZE,
+        "e85dac2936b92e62a2773227c1047e5387f470fb72e25a6c925ca5b1149d500b", "245b4634fb9660e0a127dc619e497a7112b535ed4a34a8858bba7b800b2a4241",
+        "768ba8c5e2ff1c39567390adcae704213e5b7895b2cfec092643607d9ab7d4f1", "RCS-256 standard KAT 08 (127 bytes)") && passed;
+    passed = rcs_kat_case(8U, 128U, QSC_RCS256_KEY_SIZE,
+        "1fde332c0b8b14c55e3470d6e41be404e042ef1f04d18c8d2b9ed3f163ef87cd", "78be2f3b38210c4941da36b0ece5785c20ce6861dce2553b4206971717dc8a39",
+        "879cb9d6f3102d4a6784a1bedbf815324f6c89a6c3e0fd1a3754718eabc8e502", "RCS-256 standard KAT 09 (128 bytes)") && passed;
+    passed = rcs_kat_case(9U, 4096U, QSC_RCS256_KEY_SIZE,
+        "9bd198aed6a86b06f9520cff70786065a13b547c71d5fa4c001b8b9bea0f1d3e", "629fd69b4f4a735cfddf88b5e30ddc2c84068a0c9169f95cdbe402439fc4733e",
+        "90aecae704213e5b7895b2cfec092643607d9ab7d4f10e2b4865829fbcd9f613", "RCS-256 standard KAT 10 (4096 bytes)") && passed;
 #endif
-	uint8_t key[QSC_RCS256_KEY_SIZE] = { 0U };
-	uint8_t msg[32U] = { 0U };
-	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0U };
-
-	bool status;
-	qsc_rcs_state state;
-
-	/* vectors from CEX */
-
-	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F", key, sizeof(key));
-	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F", msg, sizeof(msg));
-	qsc_consoleutils_hex_to_bin("FFFEFDFCFBFAF9F8F7F6F5F4F3F2F1F0DFDEDDDCDBDAD9D8D7D6D5D4D3D2D1D0", nce, sizeof(nce));
-
-#if defined(QSC_RCS_REDUCED_ROUNDS)
-#	if defined(QSC_RCS_AUTHENTICATED)
-	/* rcsc256p256 */
-	qsc_consoleutils_hex_to_bin("8575C8AF71DE9B45731022F94030FF5748D69BFE5EE1F4CC0B9D8323FD13C576"
-		"CC52522B485B9ACE7C07147B4C738AF818661C4145114A7C0FB657DFBDB85779", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("FFB71D5ACB622F3048EAB7E6367C3EF1718D1B90A677BE822EBFC1229C92C641"
-		"E61AB688599C01357E548F4C467BA9816CF206EACC4F3738A2AE46CF34CCDF90", exp2, sizeof(exp2));
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
-	qsc_memutils_copy(ncpy, nce, QSC_RCS_NONCE_SIZE);
-#	else
-	qsc_consoleutils_hex_to_bin("D022C97CEE4BF7669A815525E8B34346A3831E37ADDA8733F84E11F21D7C630E", exp1, sizeof(exp1));
-#	endif
-#else
-#	if defined(QSC_RCS_AUTHENTICATED)
-	/* rcsc256k256 */
-	qsc_consoleutils_hex_to_bin("7940917E9219A31248946F71647B15421535941574F84F79F"
-		"6110C1F2F776D03F38582F301390A6B8807C75914CE0CF410051D73CAE97D1D295CB0420146E179", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("ABF3574126DAA563B423B0EEEE9970FD0C8F060F65CB00CDC"
-		"05BB0DC047DB2ADA2A39BEB441FCD4C5F83F1142F264EEFCBAAA51D7874A0E7DA0A7B285DFD55AA", exp2, sizeof(exp2));
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
-	qsc_memutils_copy(ncpy, nce, QSC_RCS_NONCE_SIZE);
-#	else
-	qsc_consoleutils_hex_to_bin("9EF7D04279C5277366D2DDD3FBB47F0DFCB3994D6F43D7F3A782778838C56DB3", exp1, sizeof(exp1));
-#	endif
-#endif
-
-	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { .key = key, .keylen = QSC_RCS256_KEY_SIZE, .info = NULL, .infolen = 0U, .nonce = nce };
-
-	status = true;
-
-	/* initialize the state and create the round-keys */
-	qsc_rcs_initialize(&state, &kp, true);
-
-#if defined(QSC_RCS_AUTHENTICATED)
-	/* set associated data */
-	qsc_rcs_set_associated(&state, ad, sizeof(ad));
-#endif
-
-	/* test encryption */
-	qsc_rcs_transform(&state, enc1, msg, sizeof(msg));
-
-	if (qsc_memutils_are_equal(enc1, exp1, sizeof(exp1)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs256_kat: cipher output does not match the known answer -RK1 \n");
-		status = false;
-	}
-
-#if defined(QSC_RCS_AUTHENTICATED)
-	/* test encryption and mac chaining */
-	qsc_rcs_transform(&state, enc2, msg, sizeof(msg));
-
-	if (qsc_memutils_are_equal(enc2, exp2, sizeof(exp2)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs256_kat: cipher output does not match the known answer -RK2 \n");
-		status = false;
-	}
-
-	/* reset the nonce */
-	kp.nonce = ncpy;
-
-	/* initialize the state */
-	qsc_rcs_initialize(&state, &kp, false);
-
-	/* set associated data */
-	qsc_rcs_set_associated(&state, ad, sizeof(ad));
-
-	/* test decryption */
-	if (qsc_rcs_transform(&state, dec, enc1, sizeof(dec)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs256_kat: authentication failure -RK3 \n");
-		status = false;
-	}
-
-	if (qsc_memutils_are_equal(dec, msg, sizeof(dec)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs256_kat: cipher output does not match the known answer -RK4 \n");
-		status = false;
-	}
-#endif
-
-	/* erase the round-key array and reset the state */
-	qsc_rcs_dispose(&state);
-
-	return status;
+    return passed;
 }
-
-bool rcs512_kat(void)
+/** \brief Test ten independent, original-source RCS reference vectors. */
+static bool rcs512_kat(void)
 {
-#if defined(QSC_RCS_AUTHENTICATED)
-	uint8_t ad[20U] = { 0U };
-	uint8_t dec[64U] = { 0U };
-	uint8_t enc1[64U + QSC_RCS512_MAC_SIZE] = { 0U };
-	uint8_t enc2[64U + QSC_RCS512_MAC_SIZE] = { 0U };
-	uint8_t exp1[64U + QSC_RCS512_MAC_SIZE] = { 0U };
-	uint8_t exp2[64U + QSC_RCS512_MAC_SIZE] = { 0U };
-	uint8_t ncpy[QSC_RCS_NONCE_SIZE] = { 0U };
+    bool passed;
+
+    passed = true;
+#if defined(QSC_RCS_EXTENDED_ROUND_COUNTS)
+    passed = rcs_kat_case(10U, 1U, QSC_RCS512_KEY_SIZE,
+        "1ad54580dfa5894fcadee89430cd8935f946cc8934a9e0293e6bdd5caed9ae71", "20cf38779cd1afc2aa9423bf87815626c73e936c1f465275ce5bb84e5527140a",
+        "a3bedbf815324f6c89a6c3e0fd1a3754718eabc8e5021f3c597693b0cdea0724", "RCS-512 extended KAT 01 (1 bytes)") && passed;
+    passed = rcs_kat_case(11U, 15U, QSC_RCS512_KEY_SIZE,
+        "ea74fcf4df8745ab7a5f8573d2b34c156a233e626776557bae6a6ce159364113", "f962358f8270b19f2774e776b620e10134ed67d1798df15c1a5f8d21b5f97296",
+        "b4cfec092643607d9ab7d4f10e2b4865829fbcd9f613304d6a87a4c1defb1835", "RCS-512 extended KAT 02 (15 bytes)") && passed;
+    passed = rcs_kat_case(12U, 31U, QSC_RCS512_KEY_SIZE,
+        "f41503ca6d005b8defa8433f42edf5e54d1e63378df7aa2645086f1cebb1e702", "32316538679f71246157081c89ffaa29902c9a02c45aafcbe6cda760ef047f73",
+        "c5e0fd1a3754718eabc8e5021f3c597693b0cdea0724415e7b98b5d2ef0c2946", "RCS-512 extended KAT 03 (31 bytes)") && passed;
+    passed = rcs_kat_case(13U, 32U, QSC_RCS512_KEY_SIZE,
+        "3b35270c3b9e1fe7e8e027f7a714999e9c2825b804e05866b488d49573bd4f49", "20df37f45923051f87f0ff12403f8aa7574174fb27b5b5b22c1ed288f260c6fd",
+        "d6f10e2b4865829fbcd9f613304d6a87a4c1defb1835526f8ca9c6e3001d3a57", "RCS-512 extended KAT 04 (32 bytes)") && passed;
+    passed = rcs_kat_case(14U, 33U, QSC_RCS512_KEY_SIZE,
+        "f2a9c88b7c165df4bc59690eb8738780f174be60e99212ed7a09d6cc33158668", "5ceea71d87000860fbbfa110067400543fb4cf2fe009837edab8b37bff8577ed",
+        "e9021f3c597693b0cdea0724415e7b98b5d2ef0c294663809dbad7f4112e4b68", "RCS-512 extended KAT 05 (33 bytes)") && passed;
+    passed = rcs_kat_case(15U, 63U, QSC_RCS512_KEY_SIZE,
+        "3d07a0f5ea02e5cffa3f41ab77ff7dd5737c6c17b0982fd5015f9c55e19eabb1", "04276b93fc640a32460cc0c78ac86bd7cc3b78ba97ca5f2dd087c22ff10fc7ea",
+        "fa13304d6a87a4c1defb1835526f8ca9c6e3001d3a577491aecbe805223f5c79", "RCS-512 extended KAT 06 (63 bytes)") && passed;
+    passed = rcs_kat_case(16U, 64U, QSC_RCS512_KEY_SIZE,
+        "8300eefc62f8a4c742dfda3279c73bf1cbd20b4aa2c9f6b999fc84598de793e7", "b8ee92cc650454211045f7ff3c68d10a9e4feac67535dc9c65412f362d0d0410",
+        "0b24415e7b98b5d2ef0c294663809dbad7f4112e4b6885a2bfdcf91633506d8a", "RCS-512 extended KAT 07 (64 bytes)") && passed;
+    passed = rcs_kat_case(17U, 127U, QSC_RCS512_KEY_SIZE,
+        "aafdd21e09dd150646c06c40e1deabd50c48694f6943ed74312c8eb4636d36e4", "8d512d1c0946cd54d28f2726c58df7f506af6874fbac5bb24e50293519503651",
+        "2035526f8ca9c6e3001d3a577491aecbe805223f5c7996b3d0ed0a2744617e9b", "RCS-512 extended KAT 08 (127 bytes)") && passed;
+    passed = rcs_kat_case(18U, 128U, QSC_RCS512_KEY_SIZE,
+        "ce85572704d895354682832d25c2aac5089347e93842aae30ca8a20d0903f525", "83db771635a32ad281efdd646f990fc437772d75ef79fe4360fd21242d1d7784",
+        "314663809dbad7f4112e4b6885a2bfdcf91633506d8aa7c4e1fe1b3855728fac", "RCS-512 extended KAT 09 (128 bytes)") && passed;
+    passed = rcs_kat_case(19U, 4096U, QSC_RCS512_KEY_SIZE,
+        "67e0e76c08068e8f61ff39a38c3fd06b2bda5362eb55d26f4eb597a24f3e01c0", "ab7e2fac4a5bb17b69449a6b954241a8a23db57ded059f5c3b39532925fc7cc7",
+        "3a587491aecbe805223f5c7996b3d0ed0a2744617e9bb8d5f20f2c496683a0bd", "RCS-512 extended KAT 10 (4096 bytes)") && passed;
 #else
-	uint8_t enc1[64U] = { 0U };
-	uint8_t exp1[64U] = { 0U };
+    passed = rcs_kat_case(10U, 1U, QSC_RCS512_KEY_SIZE,
+        "6157cc37ccfd6d7b1e067f93c40670624b42e982a1ac23d500e54705b3c61a01", "c071a53b3f7bc87e5441e386eba44bd8f46dc4310609c354ea41576bb6b6a78a",
+        "a3bedbf815324f6c89a6c3e0fd1a3754718eabc8e5021f3c597693b0cdea0724", "RCS-512 standard KAT 01 (1 bytes)") && passed;
+    passed = rcs_kat_case(11U, 15U, QSC_RCS512_KEY_SIZE,
+        "ec7c3049508b0e6d80abff4acaf086298549e20b5fb1c54100685d0cca47f085", "0035d940fabea8d033aff5e70a46209c545528038a20f0dedfe98974d493e835",
+        "b4cfec092643607d9ab7d4f10e2b4865829fbcd9f613304d6a87a4c1defb1835", "RCS-512 standard KAT 02 (15 bytes)") && passed;
+    passed = rcs_kat_case(12U, 31U, QSC_RCS512_KEY_SIZE,
+        "bbe88c0d27847c26e2bd92f29449ee0fbf404bf99377d5eefce88ec64e022fc6", "eae138ddc0e70abcd62a4db0036d0bfa93eecc41b8381e206aab533b7a207d69",
+        "c5e0fd1a3754718eabc8e5021f3c597693b0cdea0724415e7b98b5d2ef0c2946", "RCS-512 standard KAT 03 (31 bytes)") && passed;
+    passed = rcs_kat_case(13U, 32U, QSC_RCS512_KEY_SIZE,
+        "d113b3a1e057a86c9122ab26ab8c2d1379838409ce2e643bce084982d003b766", "0eddcf27a9266bb4c1362097fa5531873dfe2b917b801fbf16ed98755732bf56",
+        "d6f10e2b4865829fbcd9f613304d6a87a4c1defb1835526f8ca9c6e3001d3a57", "RCS-512 standard KAT 04 (32 bytes)") && passed;
+    passed = rcs_kat_case(14U, 33U, QSC_RCS512_KEY_SIZE,
+        "5a455ba10c9cccb989d315880b9bb05789ccfd4d641f9ba741a457d4a7907399", "e92ddf96c0cff8df94997493b0985c115f9c3cf8a20b954e95fbfa021ef2d334",
+        "e9021f3c597693b0cdea0724415e7b98b5d2ef0c294663809dbad7f4112e4b68", "RCS-512 standard KAT 05 (33 bytes)") && passed;
+    passed = rcs_kat_case(15U, 63U, QSC_RCS512_KEY_SIZE,
+        "1d5c5ef2b744a319e311c45994c4a87c42f265487144ec45139bc2309cc5f5bd", "4efd6e15ce727f79f01d6c88da516b9e20a87fb94460332e3b927a2329410f59",
+        "fa13304d6a87a4c1defb1835526f8ca9c6e3001d3a577491aecbe805223f5c79", "RCS-512 standard KAT 06 (63 bytes)") && passed;
+    passed = rcs_kat_case(16U, 64U, QSC_RCS512_KEY_SIZE,
+        "d7375c5e94f7a800e247d008f31d82ecc8ce2af6b9dd78e62109ed3f743893f8", "12d6eb67f74eebb3d47eb2b65fe107677a0b0229f107b8e7932000316b288487",
+        "0b24415e7b98b5d2ef0c294663809dbad7f4112e4b6885a2bfdcf91633506d8a", "RCS-512 standard KAT 07 (64 bytes)") && passed;
+    passed = rcs_kat_case(17U, 127U, QSC_RCS512_KEY_SIZE,
+        "43046cb3d5d59afe385bf327aa4c0f0b38b52de605cb059ce4874803ef285395", "9eb112bc2384638d497381abcab05f70fa108cff407be6c3fcbfedd9d76406ee",
+        "2035526f8ca9c6e3001d3a577491aecbe805223f5c7996b3d0ed0a2744617e9b", "RCS-512 standard KAT 08 (127 bytes)") && passed;
+    passed = rcs_kat_case(18U, 128U, QSC_RCS512_KEY_SIZE,
+        "d2898c83a08fc9db371bfa49e054b8f2901835f65d8d20bd68f18af21f5d83b7", "8f824dc8c197230df342534c652345374d8bc1e462070d15e917d86a9cd95194",
+        "314663809dbad7f4112e4b6885a2bfdcf91633506d8aa7c4e1fe1b3855728fac", "RCS-512 standard KAT 09 (128 bytes)") && passed;
+    passed = rcs_kat_case(19U, 4096U, QSC_RCS512_KEY_SIZE,
+        "0cdbdda160d4b9cc6ab6441b26d349746c60b9e5c8539cbaf1a35e7be076bbe9", "1e12a9aebd09dd52038bcef9121782f1800373f0752c29bb4196e7d0ca93a534",
+        "3a587491aecbe805223f5c7996b3d0ed0a2744617e9bb8d5f20f2c496683a0bd", "RCS-512 standard KAT 10 (4096 bytes)") && passed;
 #endif
-	uint8_t key[QSC_RCS512_KEY_SIZE] = { 0U };
-	uint8_t msg[64U] = { 0U };
-	uint8_t nce[QSC_RCS_NONCE_SIZE] = { 0U };
-	bool status;
-	qsc_rcs_state state;
-
-	/* vectors from CEX */
-
-	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F"
-		"000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F", key, sizeof(key));
-	qsc_consoleutils_hex_to_bin("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F"
-		"101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F", msg, sizeof(msg));
-	qsc_consoleutils_hex_to_bin("FFFEFDFCFBFAF9F8F7F6F5F4F3F2F1F0DFDEDDDCDBDAD9D8D7D6D5D4D3D2D1D0", nce, sizeof(nce));
-
-#if defined(QSC_RCS_REDUCED_ROUNDS)
-#	if defined(QSC_RCS_AUTHENTICATED)
-	/* rcsc512p512 */
-	qsc_consoleutils_hex_to_bin("F3963407AA742C117A833D40949F65D61C36BE1B79947F5EF290BA352A0CF4D2"
-		"956C8723F125FD455C603F0BFDCDC84935213929EDF056FDB98597BF9993EE77"
-		"9FEC9AEEC2CBB0F149B69253E149AE7928F3C9FD03FB65466CFEDC47F2869460"
-		"54FA90C11764640AF8547779F957D1614936E5F0D29C22866C71D6A795C09F8C", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("EEAA4EA87C84B19A79B5360952B11A42DA616589E7D7B4020FBEC082F683E81A"
-		"3362CBFCD71BA7927327D64DE391FAB00C3918B767BCB1E1921DE165BD685E44"
-		"7B37D6696D23B1AD27E87E2DF38018384F87872D7E6D3690744E4D797026BCE0"
-		"1B55D46E619E801894351968D75C80AD9F7105874C8A4953AAD63FFD2875A587", exp2, sizeof(exp2));
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
-	qsc_memutils_copy(ncpy, nce, sizeof(nce));
-#	else
-	qsc_consoleutils_hex_to_bin("D067E415D75CE02B9FDAEA00A873A220CA517104881E1EF8C7D4C2A1D61C93A1"
-		"926DEDA7DF5B9F6522C3C3AA578A00C9AFDBD6DDE60195957E90F10647AA6251", exp1, sizeof(exp1));
-#	endif
-#else
-#	if defined(QSC_RCS_AUTHENTICATED)
-	/* rcsc512k512 */
-	qsc_consoleutils_hex_to_bin("21E97A126E35BE731EF204E48248A2EEB01B692992F73786602F21031FBFB7C8"
-		"A1CF250F2EC948D5985B92667349B72EFA751048AF0B919AE9E16F177F5C97F2"
-		"C40E0D50727DC9528664F656270E99A4857D7A2C28F965EB9956658145AC9868"
-		"F3FDE25C39EC9EEF0C6A7ED955CB3C2F44286CD253C9BE0CF3F389313C47E4B2", exp1, sizeof(exp1));
-	qsc_consoleutils_hex_to_bin("388270BF8DF03483BB287FFA527D81403F0362210FD525657C8541250DFFE3BA"
-		"D1285FAB37A6821DA524F3F7FF7EFCB39C5B59E3897B177E45D6AA7F4BB5BE77"
-		"9CB2429F4693DF70D38DBBCB00EE86172435C117D442171A8485A87BF1D7282F"
-		"2D69032C85F1CD1A1FEE794843E0CED7616722A4B0937210E9023220B085EA18", exp2, sizeof(exp2));
-	qsc_memutils_set_value(ad, sizeof(ad), 0x01);
-	qsc_memutils_copy(ncpy, nce, sizeof(nce));
-#	else
-	qsc_consoleutils_hex_to_bin("8643251F3880261010BF195886C0496CC2EB07BB68D9F13BCBD266890467F47F"
-		"57FA98C08031903D6539AC94B4F17E3A45A741159FF929B0540436FFE7A77E01", exp1, sizeof(exp1));
-#	endif
-#endif
-
-	/* initialize the key parameters struct, info is optional */
-	qsc_rcs_keyparams kp = { key, QSC_RCS512_KEY_SIZE, .info = NULL, .infolen = 0U, .nonce = nce };
-
-	status = true;
-
-	/* initialize the state and create the round-keys */
-	qsc_rcs_initialize(&state, &kp, true);
-
-#if defined(QSC_RCS_AUTHENTICATED)
-	/* set associated data */
-	qsc_rcs_set_associated(&state, ad, sizeof(ad));
-#endif
-
-	/* test encryption */
-	qsc_rcs_transform(&state, enc1, msg, sizeof(msg));
-
-	if (qsc_memutils_are_equal(enc1, exp1, sizeof(exp1)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs512_kat: cipher output does not match the known answer -RK1 \n");
-		status = false;
-	}
-
-#if defined(QSC_RCS_AUTHENTICATED)
-	/* test encryption and mac chaining */
-	qsc_rcs_transform(&state, enc2, msg, sizeof(msg));
-
-	if (qsc_memutils_are_equal(enc2, exp2, sizeof(exp2)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs512_kat: cipher output does not match the known answer -RK2 \n");
-		status = false;
-	}
-
-	/* reset the nonce */
-	kp.nonce = ncpy;
-
-	/* initialize the state */
-	qsc_rcs_initialize(&state, &kp, false);
-
-	/* set associated data */
-	qsc_rcs_set_associated(&state, ad, sizeof(ad));
-
-	/* test decryption */
-	if (qsc_rcs_transform(&state, dec, enc1, sizeof(dec)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs512_kat: authentication failure -RK3 \n");
-		status = false;
-	}
-
-	if (qsc_memutils_are_equal(dec, msg, sizeof(dec)) == false)
-	{
-		qsc_consoleutils_print_safe("Failure! rcs512_kat: cipher output does not match the known answer -RK4 \n");
-		status = false;
-	}
-#endif
-
-	/* erase the round-key array and reset the state */
-	qsc_rcs_dispose(&state);
-
-	return status;
+    return passed;
 }
 
 /*** SHA2 ***/
@@ -2800,42 +2966,90 @@ bool qsc_selftest_aes_test(void)
 {
 	bool res;
 
+	res = true;
+
 	if (fips_aes128_cbc() == false)
 	{
 		res = false;
-	}
-	else if (fips_aes256_cbc() == false)
-	{
-		res = false;
-	}
-	else if (fips_aes128_ctr() == false)
-	{
-		res = false;
-	}
-	else if (fips_aes256_ctr() == false)
-	{
-		res = false;
-	}
-	else if (fips_aes128_ecb() == false)
-	{
-		res = false;
-	}
-	else if (fips_aes256_ecb() == false)
-	{
-		res = false;
-	}
-	else if (aes256_hba_kat() == false)
-	{
-		res = false;
-	}
-	else if (aes_gcm256_kat() == false)
-	{
-		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-128 CBC FIPS KAT\n");
 	}
 	else
 	{
-		res = true;
+		qsc_consoleutils_print_safe("PASS: AES-128 CBC FIPS KAT\n");
 	}
+	if (fips_aes256_cbc() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-256 CBC FIPS KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-256 CBC FIPS KAT\n");
+	}
+	if (fips_aes128_ctr() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-128 CTR FIPS KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-128 CTR FIPS KAT\n");
+	}
+	if (fips_aes256_ctr() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-256 CTR FIPS KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-256 CTR FIPS KAT\n");
+	}
+	if (fips_aes128_ecb() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-128 ECB FIPS KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-128 ECB FIPS KAT\n");
+	}
+	if (fips_aes256_ecb() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-256 ECB FIPS KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-256 ECB FIPS KAT\n");
+	}
+	if (aes256_hba_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-256 HBA KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-256 HBA KAT\n");
+	}
+	if (aes_gcm256_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-256 GCM NIST KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-256 GCM NIST KAT\n");
+	}
+	if (aes_gcm256_multiblock_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES-256 GCM independent multi-block KATs\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: AES-256 GCM independent multi-block KATs\n");
+	}
+
 
 	return res;
 }
@@ -2844,17 +3058,25 @@ bool qsc_selftest_chacha_test(void)
 {
 	bool res;
 
+	res = true;
+
 	if (chacha128_kat() == false)
 	{
 		res = false;
-	}
-	else if (chacha256_kat() == false)
-	{
-		res = false;
+		qsc_consoleutils_print_safe("FAIL: ChaCha-128 KAT\n");
 	}
 	else
 	{
-		res = true;
+		qsc_consoleutils_print_safe("PASS: ChaCha-128 KAT\n");
+	}
+	if (chacha256_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: ChaCha-256 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: ChaCha-256 KAT\n");
 	}
 
 	return res;
@@ -2865,6 +3087,7 @@ bool qsc_selftest_csx_test(void)
 	bool res;
 
 	res = csx512_kat();
+	qsc_consoleutils_print_safe(res ? "PASS: CSX-512 profile KAT suite\n" : "FAIL: CSX-512 profile KAT suite\n");
 
 	return res;
 }
@@ -2873,17 +3096,25 @@ bool qsc_selftest_rcs_test(void)
 {
 	bool res;
 
+	res = true;
+
 	if (rcs256_kat() == false)
 	{
 		res = false;
-	}
-	else if (rcs512_kat() == false)
-	{
-		res = false;
+		qsc_consoleutils_print_safe("FAIL: RCS-256 profile KAT set\n");
 	}
 	else
 	{
-		res = true;
+		qsc_consoleutils_print_safe("PASS: RCS-256 profile KAT set\n");
+	}
+	if (rcs512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: RCS-512 profile KAT set\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: RCS-512 profile KAT set\n");
 	}
 
 	return res;
@@ -2893,33 +3124,61 @@ bool qsc_selftest_sha2_test(void)
 {
 	bool res;
 
+	res = true;
+
 	if (sha2_256_kat() == false)
 	{
 		res = false;
-	}
-	else if (sha2_512_kat() == false)
-	{
-		res = false;
-	}
-	else if (hkdf_256_kat() == false)
-	{
-		res = false;
-	}
-	else if (hkdf_512_kat() == false)
-	{
-		res = false;
-	}
-	else if (hmac_256_kat() == false)
-	{
-		res = false;
-	}
-	else if (hmac_512_kat() == false)
-	{
-		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHA-256 KAT\n");
 	}
 	else
 	{
-		res = true;
+		qsc_consoleutils_print_safe("PASS: SHA-256 KAT\n");
+	}
+	if (sha2_512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHA-512 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: SHA-512 KAT\n");
+	}
+	if (hkdf_256_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: HKDF-256 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: HKDF-256 KAT\n");
+	}
+	if (hkdf_512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: HKDF-512 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: HKDF-512 KAT\n");
+	}
+	if (hmac_256_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: HMAC-256 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: HMAC-256 KAT\n");
+	}
+	if (hmac_512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: HMAC-512 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: HMAC-512 KAT\n");
 	}
 
 	return res;
@@ -2929,53 +3188,106 @@ bool qsc_selftest_sha3_test(void)
 {
 	bool res;
 
+	res = true;
+
 	if (sha3_256_kat() == false)
 	{
 		res = false;
-	}
-	else if (sha3_512_kat() == false)
-	{
-		res = false;
-	}
-	else if (shake_128_kat() == false)
-	{
-		res = false;
-	}
-	else if (shake_256_kat() == false)
-	{
-		res = false;
-	}
-	else if (shake_512_kat() == false)
-	{
-		res = false;
-	}
-	else if (cshake_128_kat() == false)
-	{
-		res = false;
-	}
-	else if (cshake_256_kat() == false)
-	{
-		res = false;
-	}
-	else if (cshake_512_kat() == false)
-	{
-		res = false;
-	}
-	else if (kmac_128_kat() == false)
-	{
-		res = false;
-	}
-	else if (kmac_256_kat() == false)
-	{
-		res = false;
-	}
-	else if (kmac_512_kat() == false)
-	{
-		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHA3-256 KAT\n");
 	}
 	else
 	{
-		res = true;
+		qsc_consoleutils_print_safe("PASS: SHA3-256 KAT\n");
+	}
+	if (sha3_512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHA3-512 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: SHA3-512 KAT\n");
+	}
+	if (shake_128_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHAKE-128 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: SHAKE-128 KAT\n");
+	}
+	if (shake_256_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHAKE-256 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: SHAKE-256 KAT\n");
+	}
+	if (shake_512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHAKE-512 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: SHAKE-512 KAT\n");
+	}
+	if (cshake_128_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: cSHAKE-128 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: cSHAKE-128 KAT\n");
+	}
+	if (cshake_256_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: cSHAKE-256 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: cSHAKE-256 KAT\n");
+	}
+	if (cshake_512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: cSHAKE-512 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: cSHAKE-512 KAT\n");
+	}
+	if (kmac_128_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: KMAC-128 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: KMAC-128 KAT\n");
+	}
+	if (kmac_256_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: KMAC-256 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: KMAC-256 KAT\n");
+	}
+	if (kmac_512_kat() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: KMAC-512 KAT\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: KMAC-512 KAT\n");
 	}
 
 	return res;
@@ -2985,33 +3297,61 @@ bool qsc_selftest_symmetric_run(void)
 {
 	bool res;
 
+	res = true;
+
 	if (qsc_selftest_aes_test() == false)
 	{
 		res = false;
-	}
-	else if (qsc_selftest_chacha_test() == false)
-	{
-		res = false;
-	}
-	else if (qsc_selftest_csx_test() == false)
-	{
-		res = false;
-	}
-	else if (qsc_selftest_rcs_test() == false)
-	{
-		res = false;
-	}
-	else if (qsc_selftest_sha2_test() == false)
-	{
-		res = false;
-	}
-	else if (qsc_selftest_sha3_test() == false)
-	{
-		res = false;
+		qsc_consoleutils_print_safe("FAIL: AES self-test group\n");
 	}
 	else
 	{
-		res = true;
+		qsc_consoleutils_print_safe("PASS: AES self-test group\n");
+	}
+	if (qsc_selftest_chacha_test() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: ChaCha self-test group\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: ChaCha self-test group\n");
+	}
+	if (qsc_selftest_csx_test() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: CSX self-test group\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: CSX self-test group\n");
+	}
+	if (qsc_selftest_rcs_test() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: RCS self-test group\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: RCS self-test group\n");
+	}
+	if (qsc_selftest_sha2_test() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHA2/HMAC/HKDF self-test group\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: SHA2/HMAC/HKDF self-test group\n");
+	}
+	if (qsc_selftest_sha3_test() == false)
+	{
+		res = false;
+		qsc_consoleutils_print_safe("FAIL: SHA3/SHAKE/cSHAKE/KMAC self-test group\n");
+	}
+	else
+	{
+		qsc_consoleutils_print_safe("PASS: SHA3/SHAKE/cSHAKE/KMAC self-test group\n");
 	}
 
 	return res;

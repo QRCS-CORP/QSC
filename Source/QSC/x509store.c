@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "x509store.h"
 #include "memutils.h"
 #include "x509name.h"
@@ -94,16 +145,6 @@ static bool x509_names_match_issuer_subject(const qsc_x509_certificate* issuer, 
     return (issuer != (const qsc_x509_certificate*)NULL &&
         subject != (const qsc_x509_certificate*)NULL &&
         qsc_x509_name_equals(&issuer->subject, &subject->issuer) == true);
-}
-
-static bool x509_anchor_matches(const qsc_x509_trust_anchor* anchor, const qsc_x509_certificate* certificate)
-{
-    if (anchor == (const qsc_x509_trust_anchor*)NULL || certificate == (const qsc_x509_certificate*)NULL)
-    {
-        return false;
-    }
-
-    return x509_names_match_issuer_subject(&anchor->certificate, certificate);
 }
 
 void qsc_x509_store_initialize(qsc_x509_store* store, qsc_x509_trust_anchor* anchors, size_t capacity)
@@ -203,32 +244,34 @@ bool qsc_x509_store_contains_anchor(const qsc_x509_store* store, const qsc_x509_
 const qsc_x509_trust_anchor* qsc_x509_store_find_anchor_for_certificate(const qsc_x509_store* store, const qsc_x509_certificate* certificate)
 {
     const qsc_x509_trust_anchor* anchor;
+    const qsc_x509_trust_anchor* fallback;
     size_t i;
 
     anchor = (const qsc_x509_trust_anchor*)NULL;
+    fallback = (const qsc_x509_trust_anchor*)NULL;
 
     if (store != (const qsc_x509_store*)NULL && certificate != (const qsc_x509_certificate*)NULL)
     {
         for (i = 0U; i < store->count; ++i)
         {
-            if (x509_names_match_issuer_subject(&store->anchors[i].certificate, certificate) == true &&
-                x509_aki_candidate_matches(&store->anchors[i].certificate, certificate) == true)
+            if (x509_names_match_issuer_subject(&store->anchors[i].certificate, certificate) == true)
             {
-                anchor = &store->anchors[i];
-                break;
-            }
-        }
+                if (fallback == (const qsc_x509_trust_anchor*)NULL)
+                {
+                    fallback = &store->anchors[i];
+                }
 
-        if (anchor == (const qsc_x509_trust_anchor*)NULL)
-        {
-            for (i = 0U; i < store->count; ++i)
-            {
-                if (x509_anchor_matches(&store->anchors[i], certificate) == true)
+                if (x509_aki_candidate_matches(&store->anchors[i].certificate, certificate) == true)
                 {
                     anchor = &store->anchors[i];
                     break;
                 }
             }
+        }
+
+        if (anchor == (const qsc_x509_trust_anchor*)NULL)
+        {
+            anchor = fallback;
         }
     }
 
@@ -262,32 +305,34 @@ qsc_x509_verify_status qsc_x509_chain_build(const qsc_x509_certificate* leaf, co
     for (depth = 1U; depth < outputcount; ++depth)
     {
         const qsc_x509_certificate* issuer;
+        const qsc_x509_certificate* fallback;
         size_t i;
         bool seen;
 
         issuer = (const qsc_x509_certificate*)NULL;
+        fallback = (const qsc_x509_certificate*)NULL;
         seen = false;
 
         for (i = 0U; i < intermediatecount; ++i)
         {
-            if (x509_names_match_issuer_subject(&intermediates[i], current) == true &&
-                x509_aki_candidate_matches(&intermediates[i], current) == true)
+            if (x509_names_match_issuer_subject(&intermediates[i], current) == true)
             {
-                issuer = &intermediates[i];
-                break;
-            }
-        }
+                if (fallback == (const qsc_x509_certificate*)NULL)
+                {
+                    fallback = &intermediates[i];
+                }
 
-        if (issuer == (const qsc_x509_certificate*)NULL)
-        {
-            for (i = 0U; i < intermediatecount; ++i)
-            {
-                if (x509_names_match_issuer_subject(&intermediates[i], current) == true)
+                if (x509_aki_candidate_matches(&intermediates[i], current) == true)
                 {
                     issuer = &intermediates[i];
                     break;
                 }
             }
+        }
+
+        if (issuer == (const qsc_x509_certificate*)NULL)
+        {
+            issuer = fallback;
         }
 
         if (issuer == (const qsc_x509_certificate*)NULL && store != (const qsc_x509_store*)NULL)

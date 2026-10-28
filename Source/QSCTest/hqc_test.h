@@ -57,115 +57,80 @@
 
 /**
  * \file hqc_test.h
- * \brief HQC test functions.
+ * \brief HQC tests for the 2026-10-12 specification, all three parameter sets.
  *
  * \details
- * This file contains tests for the HQC key encapsulation mechanism implementation.
- * The test suite includes:
- *
- * - A Known Answer Test (KAT) that verifies the generated public and private keys,
- *   the ciphertext, and the derived shared secret against the official HQC response files.
- *
- * - A ciphertext integrity test that ensures that modifying the ciphertext results in
- *   decapsulation failure or in a mismatched shared secret.
- *
- * - A stress test that repeatedly generates key pairs, encapsulates, and decapsulates
- *   to verify that both parties derive the same shared secret.
- *
- * - Integrity tests that check whether altering the secret key or public key causes the
- *   derived shared secret to differ from the expected result.
+ * Local deterministic output digests test regression consistency and cross-backend
+ * agreement. They are NOT official 2026 upstream Known Answer Tests.
+ * The legacy HQC-2321/4602/7333 response files are incompatible with this version.
+ * The remaining tests cover repeated operations and implicit rejection of altered keys
+ * and ciphertexts. A distinct upstream KAT qualification remains necessary.
  */
 
 #if defined(QSC_DEBUG_MODE)
 	/*!
 	 * \def QSCTEST_HQC_TEST_COUNT
-	 * \brief The number of HQC KAT tests.
+	 * \brief Number of HQC operations test repetitions.
 	 */
 #	define QSCTEST_HQC_TEST_COUNT 10U
 #else
 	/*!
 	 * \def QSCTEST_HQC_TEST_COUNT
-	 * \brief The number of HQC KAT tests.
+	 * \brief Number of HQC operations test repetitions.
 	 */
 #	define QSCTEST_HQC_TEST_COUNT 100U
 #endif
 
- /**
-  * \brief Tests the validity of a mutated ciphertext.
-  *
-  * \details
-  * This function generates a HQC key pair and encapsulates a shared secret, then intentionally mutates the
-  * ciphertext using random data. It attempts to decapsulate the altered ciphertext. The test passes if
-  * decapsulation fails and the derived shared secret does not match the expected shared secret.
-  *
-  * \return Returns true if the mutated ciphertext is correctly detected as invalid; otherwise, false.
-  */
+/**
+ * \brief Verify altered ciphertexts produce a different implicit-rejection secret.
+ * \return True if the rejection secret differs and decapsulation completes.
+ */
 bool qsctest_hqc_ciphertext_integrity(void);
 
 /**
- * \brief Performs the HQC Known Answer Test (KAT).
- *
- * \details
- * This function verifies the correctness of the HQC implementation by comparing the generated public key,
- * secret key, ciphertext, and shared secret with known answer test vectors from the HQC test files, 
- * available at: https://gitlab.com/pqc-hqc/hqc.
- * It parses the test vectors from the appropriate response file based on the active parameter set and compares
- * them against the output produced by the HQC key encapsulation mechanism.
- *
- * \return Returns true if all generated values match the known answer test vectors; otherwise, false.
+ * \brief Verify deterministic HQC-2026 QSC-local regression SHA3-256 digests.
+ * \details This is not an independent or official upstream KAT.
+ * \return True if private-key compression and reference regression digests match.
  */
 bool qsctest_hqc_kat_test(void);
 
 /**
- * \brief Performs a stress test on HQC operations.
- *
- * \details
- * This function tests the key generation, encapsulation, and decapsulation operations of the HQC KEM.
- * It first generates a key pair, then encapsulates a shared secret, and decapsulates it.
- * The test also exercises an alternate encrypt/decrypt API by clearing buffers and using a different interface.
- * The test passes if the shared secrets derived from encapsulation and decapsulation match.
- *
- * \return Returns true if all operations yield the expected shared secret; otherwise, false.
+ * \brief Repeat real key generation, encapsulation, and decapsulation operations.
+ * \return True if every generated shared secret agrees.
  */
 bool qsctest_hqc_operations_test(void);
 
 /**
- * \brief Tests the integrity of an altered HQC secret key.
- *
- * \details
- * This test generates a HQC key pair and encapsulates a shared secret. It then intentionally alters a portion
- * of the secret key with random data and attempts to decapsulate the ciphertext using the modified key.
- * The test is successful if decapsulation fails and the derived shared secret does not match the expected value.
- *
- * \return Returns true if the invalid secret key is correctly detected; otherwise, false.
+ * \brief Verify that a bit-flipped 32-byte private seed changes the shared secret.
+ * \return True if the altered seed cannot recover the original shared secret.
  */
 bool qsctest_hqc_privatekey_integrity(void);
 
 /**
- * \brief Tests the integrity of an altered HQC public key.
- *
- * \details
- * This function generates a HQC key pair and then replaces part of the public key with random values.
- * It then encapsulates a shared secret using the altered public key and attempts decapsulation using the valid secret key.
- * The test passes if decapsulation fails and the derived shared secret does not match the expected result.
- *
- * \return Returns true if the invalid public key is correctly detected; otherwise, false.
+ * \brief Verify public-key modification changes the decapsulated secret.
+ * \return True if encapsulation with the altered key cannot recover the secret.
  */
 bool qsctest_hqc_publickey_integrity(void);
 
 /**
- * \brief Runs all HQC implementation tests.
- *
- * \details
- * This function sequentially executes the following tests:
- * - The Known Answer Test (KAT) to verify key generation and shared secret derivation.
- * - A stress test for key generation, encapsulation, and decapsulation.
- * - The secret key integrity test, ensuring that modifications to the secret key invalidate the shared secret.
- * - The public key integrity test, ensuring that alterations to the public key result in decapsulation failure.
- * - The ciphertext integrity test, confirming that tampered ciphertext leads to an invalid shared secret.
- *
- * The results of each test are printed to the console.
+ * \brief Run each named HQC regression and integrity test sequentially.
+ * \return No return value; the individual test functions report status.
  */
 void qsctest_hqc_run(void);
+
+/** \brief Run named HQC-1 seeded and rejection regression.
+ * \return True when all cases for the parameter pass.
+ */
+bool qsctest_hqc1_parameter_test(void);
+
+/** \brief Run named HQC-3 seeded and rejection regression.
+ * \return True when all cases for the parameter pass.
+ */
+bool qsctest_hqc3_parameter_test(void);
+
+/** \brief Run named HQC-5 seeded and rejection regression.
+ * \return True when all cases for the parameter pass.
+ */
+bool qsctest_hqc5_parameter_test(void);
 
 #endif

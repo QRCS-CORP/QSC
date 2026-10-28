@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "dilithiumbase_avx2.h"
 #include "memutils.h"
 #include "sha3.h"
@@ -251,14 +302,26 @@ static const QSC_ALIGN(32) int32_t dilithium_zetas[DILITHIUM_N] =
 static const QSC_ALIGN(32) int32_t dilithium_q_avx2[8U] = { DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q,
 		DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q, DILITHIUM_Q };
 
-#define _mm256_blendv_epi32(a,b,mask) \
-  _mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(a), \
-                                       _mm256_castsi256_ps(b), \
-                                       _mm256_castsi256_ps(mask)))
+/**
+ * \brief Blend 32-bit AVX2 elements under a sign-bit selection mask.
+ * \param left Selected when the corresponding mask sign bit is clear.
+ * \param right Selected when the corresponding mask sign bit is set.
+ * \param mask Selection mask for each 32-bit lane.
+ * \return Blended vector, preserving the original bitwise selection.
+ */
+static inline __m256i dilithium_avx2_blend_epi32(const __m256i left, const __m256i right, const __m256i mask)
+{
+    __m256i result;
+
+    result = _mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(left), _mm256_castsi256_ps(right), _mm256_castsi256_ps(mask)));
+
+    return result;
+}
 
 /* rounding.c */
 
-static void dilithium_avx2_power2round(int32_t* restrict a1, int32_t* restrict a0, const int32_t* restrict a)
+/* The input may alias a1 during in-place rounding. */
+static void dilithium_avx2_power2round(int32_t* a1, int32_t* a0, const int32_t* a)
 {
     __m256i f;
     __m256i f0;
@@ -279,7 +342,8 @@ static void dilithium_avx2_power2round(int32_t* restrict a1, int32_t* restrict a
 }
 
 #if DILITHIUM_GAMMA2 == (DILITHIUM_Q - 1) / 32
-static void dilithium_avx2_decompose(int32_t* restrict a1, int32_t* restrict a0, const int32_t* restrict a)
+/* The input may alias a1 during signing and hint reconstruction. */
+static void dilithium_avx2_decompose(int32_t* a1, int32_t* a0, const int32_t* a)
 {
     const __m256i q = _mm256_load_si256((__m256i*)&dilithium_q_avx2[0U]);
     const __m256i hq = _mm256_srli_epi32(q, 1);
@@ -310,7 +374,8 @@ static void dilithium_avx2_decompose(int32_t* restrict a1, int32_t* restrict a0,
     }
 }
 #elif DILITHIUM_GAMMA2 == (DILITHIUM_Q - 1) / 88
-static void dilithium_avx2_decompose(int32_t* restrict a1, int32_t* restrict a0, const int32_t* restrict a)
+/* The input may alias a1 during signing and hint reconstruction. */
+static void dilithium_avx2_decompose(int32_t* a1, int32_t* a0, const int32_t* a)
 {
     const __m256i q = _mm256_load_si256((__m256i*)&dilithium_q_avx2[0U]);
     const __m256i hq = _mm256_srli_epi32(q, 1);
@@ -345,6 +410,14 @@ static void dilithium_avx2_decompose(int32_t* restrict a1, int32_t* restrict a0,
 }
 #endif
 
+/** \brief Count hint bits and optionally materialize them at fixed positions.
+ * \param hint Optional caller-owned DILITHIUM_N-byte output; NULL counts only.
+ * \param a0 Low coefficient polynomial, potentially secret-derived before acceptance.
+ * \param a1 High coefficient polynomial, potentially secret-derived before acceptance.
+ * \return Number of hint bits set in the polynomial.
+ * \note Writes to fixed indices; compacting into the public signature is deferred
+ *       until the signature candidate has been accepted.
+ */
 static uint32_t dilithium_avx2_make_hint(uint8_t hint[DILITHIUM_N], const dilithium_poly* restrict a0, const dilithium_poly* restrict a1)
 {
     uint32_t i;
@@ -354,7 +427,6 @@ static uint32_t dilithium_avx2_make_hint(uint8_t hint[DILITHIUM_N], const dilith
     __m256i g0;
     __m256i g1;
     uint32_t bad;
-    uint64_t idx;
     const __m256i low = _mm256_set1_epi32(-DILITHIUM_GAMMA2);
     const __m256i high = _mm256_set1_epi32(DILITHIUM_GAMMA2);
 
@@ -371,9 +443,15 @@ static uint32_t dilithium_avx2_make_hint(uint8_t hint[DILITHIUM_N], const dilith
         g0 = _mm256_or_si256(g0, g1);
 
         bad = _mm256_movemask_ps(_mm256_castsi256_ps(g0));
-        qsc_memutils_copy(&idx, dilithium_rej_avx2[bad], 8);
-        idx += (uint64_t)0x0808080808080808 * i;
-        qsc_memutils_copy(&hint[n], &idx, 8);
+
+        if (hint != NULL)
+        {
+            for (uint32_t j = 0U; j < 8U; ++j)
+            {
+                hint[(i * 8U) + j] = (uint8_t)((bad >> j) & 1U);
+            }
+        }
+
         n += _mm_popcnt_u32(bad);
     }
 
@@ -402,16 +480,16 @@ static void dilithium_avx2_use_hint(int32_t* b, const int32_t* a, const int32_t*
         f = _mm256_load_si256((const __m256i*)&a0[i * 8U]);
         g = _mm256_load_si256((const __m256i*)&b[i * 8U]);
         h = _mm256_load_si256((const __m256i*)&hint[i * 8U]);
-        t = _mm256_blendv_epi32(zero, h, f);
+        t = dilithium_avx2_blend_epi32(zero, h, f);
         t = _mm256_slli_epi32(t, 1);
         h = _mm256_sub_epi32(h, t);
         g = _mm256_add_epi32(g, h);
 #if DILITHIUM_GAMMA2 == (DILITHIUM_Q - 1) / 32
         g = _mm256_and_si256(g, mask);
 #elif DILITHIUM_GAMMA2 == (DILITHIUM_Q - 1) / 88
-        g = _mm256_blendv_epi32(g, max, g);
+        g = dilithium_avx2_blend_epi32(g, max, g);
         f = _mm256_cmpgt_epi32(g, max);
-        g = _mm256_blendv_epi32(g, zero, f);
+        g = dilithium_avx2_blend_epi32(g, zero, f);
 #endif
         _mm256_store_si256((__m256i*)&b[i * 8U], g);
     }
@@ -809,7 +887,7 @@ static void dilithium_avx2_poly_caddq(dilithium_poly* a)
     for (size_t i = 0U; i < DILITHIUM_N / 8U; ++i)
     {
         f = _mm256_load_si256((__m256i*)&a->coeffs[8U * i]);
-        g = _mm256_blendv_epi32(zero, q, f);
+        g = dilithium_avx2_blend_epi32(zero, q, f);
         f = _mm256_add_epi32(f, g);
         _mm256_store_si256((__m256i*)&a->coeffs[8U * i], f);
     }
@@ -941,6 +1019,9 @@ static void dilithium_avx2_poly_uniform_eta_4x(dilithium_poly* a0, dilithium_pol
         ctr2 += dilithium_rej_eta(a2->coeffs + ctr2, DILITHIUM_N - ctr2, buf[2U], QSC_KECCAK_256_RATE);
         ctr3 += dilithium_rej_eta(a3->coeffs + ctr3, DILITHIUM_N - ctr3, buf[3U], QSC_KECCAK_256_RATE);
     }
+
+    qsc_memutils_secure_erase(buf, sizeof(buf));
+    qsc_memutils_secure_erase(ksi, sizeof(ksi));
 }
 
 static void dilithium_polyz_unpack(dilithium_poly* r, const uint8_t* a)
@@ -1000,15 +1081,15 @@ static void dilithium_avx2_poly_uniform_gamma1_4x(dilithium_poly* a0, dilithium_
     __m256i f;
 
     f = _mm256_loadu_si256((__m256i*)seed);
-    _mm256_store_si256((__m256i*)buf[0U], f);
-    _mm256_store_si256((__m256i*)buf[1U], f);
-    _mm256_store_si256((__m256i*)buf[2U], f);
-    _mm256_store_si256((__m256i*)buf[3U], f);
+    _mm256_storeu_si256((__m256i*)buf[0U], f);
+    _mm256_storeu_si256((__m256i*)buf[1U], f);
+    _mm256_storeu_si256((__m256i*)buf[2U], f);
+    _mm256_storeu_si256((__m256i*)buf[3U], f);
     f = _mm256_loadu_si256((__m256i*)&seed[32U]);
-    _mm256_store_si256((__m256i*)&buf[0U][32U], f);
-    _mm256_store_si256((__m256i*)&buf[1U][32U], f);
-    _mm256_store_si256((__m256i*)&buf[2U][32U], f);
-    _mm256_store_si256((__m256i*)&buf[3U][32U], f);
+    _mm256_storeu_si256((__m256i*)&buf[0U][32U], f);
+    _mm256_storeu_si256((__m256i*)&buf[1U][32U], f);
+    _mm256_storeu_si256((__m256i*)&buf[2U][32U], f);
+    _mm256_storeu_si256((__m256i*)&buf[3U][32U], f);
 
     buf[0U][DILITHIUM_CRHBYTES] = (uint8_t)nonce0;
     buf[0U][DILITHIUM_CRHBYTES + 1U] = (uint8_t)(nonce0 >> 8);
@@ -1026,6 +1107,8 @@ static void dilithium_avx2_poly_uniform_gamma1_4x(dilithium_poly* a0, dilithium_
     dilithium_polyz_unpack(a1, buf[1U]);
     dilithium_polyz_unpack(a2, buf[2U]);
     dilithium_polyz_unpack(a3, buf[3U]);
+    qsc_memutils_secure_erase(buf, sizeof(buf));
+    qsc_memutils_secure_erase(ksi, sizeof(ksi));
 }
 
 #if DILITHIUM_GAMMA2 == (DILITHIUM_Q - 1) / 88
@@ -1241,6 +1324,9 @@ static void dilithium_poly_challenge(dilithium_poly* c, const uint8_t seed[DILIT
         c->coeffs[b] = 1 - (2 * (signs & 1));
         signs >>= 1;
     }
+
+    qsc_memutils_secure_erase(buf, sizeof(buf));
+    qsc_keccak_dispose(&kctx);
 }
 
 static void dilithium_polyeta_pack(uint8_t* r, const dilithium_poly* a)
@@ -1472,10 +1558,10 @@ static void dilithium_avx2_poly_uniform_4x(dilithium_poly* a0, dilithium_poly* a
     uint32_t ctr3;
 
     f = _mm256_loadu_si256((__m256i*)seed);
-    _mm256_store_si256((__m256i*)buf[0U], f);
-    _mm256_store_si256((__m256i*)buf[1U], f);
-    _mm256_store_si256((__m256i*)buf[2U], f);
-    _mm256_store_si256((__m256i*)buf[3U], f);
+    _mm256_storeu_si256((__m256i*)buf[0U], f);
+    _mm256_storeu_si256((__m256i*)buf[1U], f);
+    _mm256_storeu_si256((__m256i*)buf[2U], f);
+    _mm256_storeu_si256((__m256i*)buf[3U], f);
 
     buf[0U][DILITHIUM_SEEDBYTES] = (uint8_t)nonce0;
     buf[0U][DILITHIUM_SEEDBYTES + 1U] = (uint8_t)(nonce0 >> 8);
@@ -1838,8 +1924,12 @@ bool qsc_dilithium_avx2_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_ge
 
         /* Compute CRH(rho, t1) and store in secret key */
         qsc_shake256_compute(sk + (2U * DILITHIUM_SEEDBYTES), DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
-        qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
     }
+
+    qsc_memutils_secure_erase(&s1, sizeof(s1));
+    qsc_memutils_secure_erase(&s2, sizeof(s2));
+    qsc_memutils_secure_erase(&t0, sizeof(t0));
+    qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
 
     return res;
 }
@@ -1920,6 +2010,9 @@ void qsc_dilithium_avx2_seeded_generate_keypair(uint8_t* pk, uint8_t* sk, const 
 
     /* Compute CRH(rho, t1) and store in secret key */
     qsc_shake256_compute(sk + (2U * DILITHIUM_SEEDBYTES), DILITHIUM_TRBYTES, pk, DILITHIUM_PUBLICKEY_SIZE);
+    qsc_memutils_secure_erase(&s1, sizeof(s1));
+    qsc_memutils_secure_erase(&s2, sizeof(s2));
+    qsc_memutils_secure_erase(&t0, sizeof(t0));
     qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
 }
 
@@ -1946,9 +2039,10 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     uint8_t* rhoprime;
     uint8_t* tr;
     size_t i;
+    size_t j;
     size_t n;
     size_t pos;
-    uint16_t nonce;
+    uint32_t nonce;
     bool ret;
     bool res;
 
@@ -1971,7 +2065,7 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     qsc_keccak_incremental_squeeze(&kctx, QSC_KECCAK_256_RATE, mu, DILITHIUM_CRHBYTES);
 
 #if defined(QSC_DILITHIUM_RANDOMIZED_SIGNING)
-    res = rng_generate(rnd, DILITHIUM_RNDBYTES);
+    res = (rng_generate != NULL) ? rng_generate(rnd, DILITHIUM_RNDBYTES) : false;
 #else
     res = true;
 #endif
@@ -1990,8 +2084,14 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
     dilithium_polyveck_ntt(&s2);
     dilithium_polyveck_ntt(&t0);
 
-    while (true)
+    while (res == true)
     {
+        if (nonce > (UINT16_MAX - (DILITHIUM_L - 1U)))
+        {
+            res = false;
+            break;
+        }
+
         ret = true;
         /* Sample intermediate vector y */
 #if DILITHIUM_L == 4
@@ -2078,7 +2178,7 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
                 }
 
                 dilithium_avx2_poly_add(&w0.vec[i], &w0.vec[i], &tmph);
-                n = dilithium_avx2_make_hint(hintbuf, &w0.vec[i], &w1.vec[i]);
+                n = dilithium_avx2_make_hint(NULL, &w0.vec[i], &w1.vec[i]);
 
                 if (pos + n > DILITHIUM_OMEGA)
                 {
@@ -2086,10 +2186,7 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
                     break;
                 }
 
-                /* Store hints in signature */
-                qsc_memutils_copy(&hint[pos], hintbuf, n);
                 pos += n;
-                hint[DILITHIUM_OMEGA + i] = (uint8_t)pos;
             }
         }
 
@@ -2098,6 +2195,27 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
             continue;
         }
         
+        /* Rejected candidates never use secret-derived hint indices as memory addresses.
+           Only the accepted hint positions, which are disclosed in the signature,
+           are compacted into the public signature representation. */
+        pos = 0U;
+
+        for (i = 0U; i < DILITHIUM_K; ++i)
+        {
+            (void)dilithium_avx2_make_hint(hintbuf, &w0.vec[i], &w1.vec[i]);
+
+            for (j = 0U; j < DILITHIUM_N; ++j)
+            {
+                if (hintbuf[j] != 0U)
+                {
+                    hint[pos] = (uint8_t)j;
+                    ++pos;
+                }
+            }
+
+            hint[DILITHIUM_OMEGA + i] = (uint8_t)pos;
+        }
+
         /* Pack z into signature */
         for (i = 0U; i < DILITHIUM_L; ++i)
         {
@@ -2107,10 +2225,26 @@ bool qsc_dilithium_avx2_sign_signature(uint8_t* sig, size_t* siglen, const uint8
         break;
     }
     
-    *siglen = DILITHIUM_SIGNATURE_SIZE;
+    if (res == true)
+    {
+        *siglen = DILITHIUM_SIGNATURE_SIZE;
+    }
+    else
+    {
+        qsc_memutils_secure_erase(sig, DILITHIUM_SIGNATURE_SIZE);
+        *siglen = 0U;
+    }
     qsc_memutils_secure_erase(&s1, sizeof(s1));
     qsc_memutils_secure_erase(&s2, sizeof(s2));
     qsc_memutils_secure_erase(&t0, sizeof(t0));
+    qsc_memutils_secure_erase(&y, sizeof(y));
+    qsc_memutils_secure_erase(&z, sizeof(z));
+    qsc_memutils_secure_erase(&w0, sizeof(w0));
+    qsc_memutils_secure_erase(&w1, sizeof(w1));
+    qsc_memutils_secure_erase(&cp, sizeof(cp));
+    qsc_memutils_secure_erase(&tmph, sizeof(tmph));
+    qsc_memutils_secure_erase(hintbuf, sizeof(hintbuf));
+    qsc_memutils_secure_erase(rnd, sizeof(rnd));
     qsc_memutils_secure_erase(seedbuf, sizeof(seedbuf));
     qsc_keccak_dispose(&kctx);
 
@@ -2142,7 +2276,16 @@ bool qsc_dilithium_avx2_sign(uint8_t* sm, size_t* smlen, const uint8_t* message,
         }
 
         res = qsc_dilithium_avx2_sign_signature(sm, smlen, sm + DILITHIUM_SIGNATURE_SIZE, msglen, prec, ctxlen + 2U, sk, rng_generate);
-        *smlen += msglen;
+
+        if (res == true)
+        {
+            *smlen += msglen;
+        }
+        else
+        {
+            qsc_memutils_secure_erase(sm, DILITHIUM_SIGNATURE_SIZE + msglen);
+            *smlen = 0U;
+        }
     }
 
     return res;
@@ -2187,10 +2330,16 @@ bool qsc_dilithium_avx2_verify(const uint8_t* sig, size_t siglen, const uint8_t*
         dilithium_poly_challenge(&cp, sig);
         dilithium_poly_ntt(&cp);
 
-        /* Unpack z; shortness follows from unpacking */
+        /* Unpacking alone does not enforce the stricter signature norm bound. */
         for (i = 0U; i < DILITHIUM_L; i++)
         {
             dilithium_polyz_unpack(&z.vec[i], sig + DILITHIUM_CTILDEBYTES + i * DILITHIUM_POLYZ_PACKEDBYTES);
+
+            if (dilithium_avx2_poly_chknorm(&z.vec[i], DILITHIUM_GAMMA1 - DILITHIUM_BETA) != 0)
+            {
+                return false;
+            }
+
             dilithium_poly_ntt(&z.vec[i]);
         }
 

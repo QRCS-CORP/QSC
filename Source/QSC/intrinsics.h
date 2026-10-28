@@ -98,12 +98,16 @@
  */
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 
-#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED))
+#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED) || defined(QSC_SYSTEM_AESNI_ENABLED) || defined(QSC_SYSTEM_HAS_PCLMUL) || defined(QSC_RDRAND_COMPATIBLE))
 #		include <intrin.h>
 #	endif
 
 #	if defined(QSC_ARM_FAMILY) && defined(QSC_SYSTEM_HAS_ARM_NEON)
-#		include <arm_neon.h>
+#		if defined(_M_ARM64) && !defined(__clang__)
+#			include <arm64_neon.h>
+#		else
+#			include <arm_neon.h>
+#		endif
 #	endif
 
 /*
@@ -114,7 +118,7 @@
  */
 #elif defined(QSC_SYSTEM_COMPILER_INTEL)
 
-#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED))
+#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED) || defined(QSC_SYSTEM_AESNI_ENABLED) || defined(QSC_SYSTEM_HAS_PCLMUL) || defined(QSC_RDRAND_COMPATIBLE))
 #		include <immintrin.h>
 #	endif
 
@@ -130,7 +134,7 @@
  */
 #elif defined(QSC_SYSTEM_COMPILER_GCC) || defined(QSC_SYSTEM_COMPILER_CLANG)
 
-#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED))
+#	if defined(QSC_X86_FAMILY) && (defined(QSC_SYSTEM_AVX_INTRINSICS) || defined(QSC_SHA2_SHANI_ENABLED) || defined(QSC_SYSTEM_AESNI_ENABLED) || defined(QSC_SYSTEM_HAS_PCLMUL) || defined(QSC_RDRAND_COMPATIBLE))
 #		include <x86intrin.h>
 #	endif
 

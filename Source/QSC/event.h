@@ -156,25 +156,32 @@ QSC_EXPORT_API qsc_event_callback qsc_event_get_callback(event_state* ctx, const
  * \brief Destroy all event listeners.
  *
  * Destroys the event handler state and frees all associated resources.
+ * All other threads must stop using this context before disposal.
+ *
+ * \param ctx: Event context initialized by qsc_event_initialize().
+ * \note Not safe to call concurrently with other event operations.
  */
 QSC_EXPORT_API void qsc_event_dispose(event_state* ctx);
 
 /**
  * \brief Initialize the event state.
  *
- * \details Destroys the event handler state and frees all associated resources.
- * 
- * \param ctx: [const] The event handler context.
- * \param name: The event handler string name.
+ * \details Searches the registered listeners using the context mutex.
+ *
+ * \param ctx: The initialized event handler context.
+ * \param name: Zero-terminated or fixed-width listener name.
+ * \return True when the name is registered; false otherwise.
+ * \note Thread-safe except during initialization or disposal.
  */
 QSC_EXPORT_API bool qsc_event_listener_name_exists(const event_state* ctx, const char name[QSC_EVENT_NAME_SIZE]);
 
 /**
  * \brief Initialize the event state.
  *
- * \details Destroys the event handler state and frees all associated resources.
- * 
- * \param ctx: The event handler context.
+ * \details Allocates synchronization resources and resets the event state.
+ *
+ * \param ctx: Uninitialized or previously disposed event context.
+ * \note Check ctx->initialized for allocation failure; do not reinitialize an active context.
  */
 QSC_EXPORT_API void qsc_event_initialize(event_state* ctx);
 
@@ -187,7 +194,8 @@ QSC_EXPORT_API void qsc_event_initialize(event_state* ctx);
  * \param name: [const char[QSC_EVENT_NAME_SIZE]] The name of the event.
  * \param callback: [qsc_event_callback] The callback function.
  * 
- * \return [int32_t] Returns 0 for success.
+ * \return [int32_t] Returns 0 on success, or -1 for duplicate names, full capacity, invalid state, or allocation failure.
+ * \note Individual operations are synchronized; callers must externally synchronize state initialization and disposal.
  *
  * \see qsc_event_clear_listener(), qsc_event_get_callback()
  */

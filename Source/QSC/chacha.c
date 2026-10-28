@@ -2,7 +2,7 @@
 #include "intutils.h"
 #include "memutils.h"
 
-#if defined(QSC_SYSTEM_HAS_AVX)
+#if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_ARM_INTRINSICS)
 #	include "intrinsics.h"
 #endif
 
@@ -22,11 +22,14 @@
 
 static void chacha_increment(qsc_chacha_state* ctx)
 {
-	++ctx->state[12U];
-
-	if (ctx->state[12U] == 0U) 
-	{ 
-		++ctx->state[13U]; 
+	if (ctx->state[12U] == UINT32_MAX)
+	{
+		ctx->state[12U] = 0U;
+		ctx->exhausted = true;
+	}
+	else
+	{
+		++ctx->state[12U];
 	}
 }
 
@@ -155,6 +158,224 @@ static void chacha_permute_p512c(const qsc_chacha_state* ctx, uint8_t* output)
 	qsc_intutils_le32to8(output + 60U, x15 + ctx->state[15U]);
 }
 
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+
+static void chacha_permute_p4x512_arm(const uint32x4_t* state, uint32x4_t* output)
+{
+	/* generate four ChaCha keystream blocks in NEON lanes */
+
+	uint32x4_t x0;
+	uint32x4_t x1;
+	uint32x4_t x2;
+	uint32x4_t x3;
+	uint32x4_t x4;
+	uint32x4_t x5;
+	uint32x4_t x6;
+	uint32x4_t x7;
+	uint32x4_t x8;
+	uint32x4_t x9;
+	uint32x4_t x10;
+	uint32x4_t x11;
+	uint32x4_t x12;
+	uint32x4_t x13;
+	uint32x4_t x14;
+	uint32x4_t x15;
+	size_t ctr;
+
+	/* note: borrows caller storage. Reentrant for independent outputs */
+
+	x0 = state[0U];
+	x1 = state[1U];
+	x2 = state[2U];
+	x3 = state[3U];
+	x4 = state[4U];
+	x5 = state[5U];
+	x6 = state[6U];
+	x7 = state[7U];
+	x8 = state[8U];
+	x9 = state[9U];
+	x10 = state[10U];
+	x11 = state[11U];
+	x12 = state[12U];
+	x13 = state[13U];
+	x14 = state[14U];
+	x15 = state[15U];
+	ctr = QSC_CHACHA_ROUND_COUNT;
+
+	while (ctr != 0U)
+	{
+		x0 = vaddq_u32(x0, x4);
+		x12 = veorq_u32(x12, x0);
+		x12 = vorrq_u32(vshlq_n_u32(x12, 16), vshrq_n_u32(x12, 16));
+		x8 = vaddq_u32(x8, x12);
+		x4 = veorq_u32(x4, x8);
+		x4 = vorrq_u32(vshlq_n_u32(x4, 12), vshrq_n_u32(x4, 20));
+		x0 = vaddq_u32(x0, x4);
+		x12 = veorq_u32(x12, x0);
+		x12 = vorrq_u32(vshlq_n_u32(x12, 8), vshrq_n_u32(x12, 24));
+		x8 = vaddq_u32(x8, x12);
+		x4 = veorq_u32(x4, x8);
+		x4 = vorrq_u32(vshlq_n_u32(x4, 7), vshrq_n_u32(x4, 25));
+		x1 = vaddq_u32(x1, x5);
+		x13 = veorq_u32(x13, x1);
+		x13 = vorrq_u32(vshlq_n_u32(x13, 16), vshrq_n_u32(x13, 16));
+		x9 = vaddq_u32(x9, x13);
+		x5 = veorq_u32(x5, x9);
+		x5 = vorrq_u32(vshlq_n_u32(x5, 12), vshrq_n_u32(x5, 20));
+		x1 = vaddq_u32(x1, x5);
+		x13 = veorq_u32(x13, x1);
+		x13 = vorrq_u32(vshlq_n_u32(x13, 8), vshrq_n_u32(x13, 24));
+		x9 = vaddq_u32(x9, x13);
+		x5 = veorq_u32(x5, x9);
+		x5 = vorrq_u32(vshlq_n_u32(x5, 7), vshrq_n_u32(x5, 25));
+		x2 = vaddq_u32(x2, x6);
+		x14 = veorq_u32(x14, x2);
+		x14 = vorrq_u32(vshlq_n_u32(x14, 16), vshrq_n_u32(x14, 16));
+		x10 = vaddq_u32(x10, x14);
+		x6 = veorq_u32(x6, x10);
+		x6 = vorrq_u32(vshlq_n_u32(x6, 12), vshrq_n_u32(x6, 20));
+		x2 = vaddq_u32(x2, x6);
+		x14 = veorq_u32(x14, x2);
+		x14 = vorrq_u32(vshlq_n_u32(x14, 8), vshrq_n_u32(x14, 24));
+		x10 = vaddq_u32(x10, x14);
+		x6 = veorq_u32(x6, x10);
+		x6 = vorrq_u32(vshlq_n_u32(x6, 7), vshrq_n_u32(x6, 25));
+		x3 = vaddq_u32(x3, x7);
+		x15 = veorq_u32(x15, x3);
+		x15 = vorrq_u32(vshlq_n_u32(x15, 16), vshrq_n_u32(x15, 16));
+		x11 = vaddq_u32(x11, x15);
+		x7 = veorq_u32(x7, x11);
+		x7 = vorrq_u32(vshlq_n_u32(x7, 12), vshrq_n_u32(x7, 20));
+		x3 = vaddq_u32(x3, x7);
+		x15 = veorq_u32(x15, x3);
+		x15 = vorrq_u32(vshlq_n_u32(x15, 8), vshrq_n_u32(x15, 24));
+		x11 = vaddq_u32(x11, x15);
+		x7 = veorq_u32(x7, x11);
+		x7 = vorrq_u32(vshlq_n_u32(x7, 7), vshrq_n_u32(x7, 25));
+		x0 = vaddq_u32(x0, x5);
+		x15 = veorq_u32(x15, x0);
+		x15 = vorrq_u32(vshlq_n_u32(x15, 16), vshrq_n_u32(x15, 16));
+		x10 = vaddq_u32(x10, x15);
+		x5 = veorq_u32(x5, x10);
+		x5 = vorrq_u32(vshlq_n_u32(x5, 12), vshrq_n_u32(x5, 20));
+		x0 = vaddq_u32(x0, x5);
+		x15 = veorq_u32(x15, x0);
+		x15 = vorrq_u32(vshlq_n_u32(x15, 8), vshrq_n_u32(x15, 24));
+		x10 = vaddq_u32(x10, x15);
+		x5 = veorq_u32(x5, x10);
+		x5 = vorrq_u32(vshlq_n_u32(x5, 7), vshrq_n_u32(x5, 25));
+		x1 = vaddq_u32(x1, x6);
+		x12 = veorq_u32(x12, x1);
+		x12 = vorrq_u32(vshlq_n_u32(x12, 16), vshrq_n_u32(x12, 16));
+		x11 = vaddq_u32(x11, x12);
+		x6 = veorq_u32(x6, x11);
+		x6 = vorrq_u32(vshlq_n_u32(x6, 12), vshrq_n_u32(x6, 20));
+		x1 = vaddq_u32(x1, x6);
+		x12 = veorq_u32(x12, x1);
+		x12 = vorrq_u32(vshlq_n_u32(x12, 8), vshrq_n_u32(x12, 24));
+		x11 = vaddq_u32(x11, x12);
+		x6 = veorq_u32(x6, x11);
+		x6 = vorrq_u32(vshlq_n_u32(x6, 7), vshrq_n_u32(x6, 25));
+		x2 = vaddq_u32(x2, x7);
+		x13 = veorq_u32(x13, x2);
+		x13 = vorrq_u32(vshlq_n_u32(x13, 16), vshrq_n_u32(x13, 16));
+		x8 = vaddq_u32(x8, x13);
+		x7 = veorq_u32(x7, x8);
+		x7 = vorrq_u32(vshlq_n_u32(x7, 12), vshrq_n_u32(x7, 20));
+		x2 = vaddq_u32(x2, x7);
+		x13 = veorq_u32(x13, x2);
+		x13 = vorrq_u32(vshlq_n_u32(x13, 8), vshrq_n_u32(x13, 24));
+		x8 = vaddq_u32(x8, x13);
+		x7 = veorq_u32(x7, x8);
+		x7 = vorrq_u32(vshlq_n_u32(x7, 7), vshrq_n_u32(x7, 25));
+		x3 = vaddq_u32(x3, x4);
+		x14 = veorq_u32(x14, x3);
+		x14 = vorrq_u32(vshlq_n_u32(x14, 16), vshrq_n_u32(x14, 16));
+		x9 = vaddq_u32(x9, x14);
+		x4 = veorq_u32(x4, x9);
+		x4 = vorrq_u32(vshlq_n_u32(x4, 12), vshrq_n_u32(x4, 20));
+		x3 = vaddq_u32(x3, x4);
+		x14 = veorq_u32(x14, x3);
+		x14 = vorrq_u32(vshlq_n_u32(x14, 8), vshrq_n_u32(x14, 24));
+		x9 = vaddq_u32(x9, x14);
+		x4 = veorq_u32(x4, x9);
+		x4 = vorrq_u32(vshlq_n_u32(x4, 7), vshrq_n_u32(x4, 25));
+		ctr -= 2U;
+	}
+
+	output[0U] = vaddq_u32(x0, state[0U]);
+	output[1U] = vaddq_u32(x1, state[1U]);
+	output[2U] = vaddq_u32(x2, state[2U]);
+	output[3U] = vaddq_u32(x3, state[3U]);
+	output[4U] = vaddq_u32(x4, state[4U]);
+	output[5U] = vaddq_u32(x5, state[5U]);
+	output[6U] = vaddq_u32(x6, state[6U]);
+	output[7U] = vaddq_u32(x7, state[7U]);
+	output[8U] = vaddq_u32(x8, state[8U]);
+	output[9U] = vaddq_u32(x9, state[9U]);
+	output[10U] = vaddq_u32(x10, state[10U]);
+	output[11U] = vaddq_u32(x11, state[11U]);
+	output[12U] = vaddq_u32(x12, state[12U]);
+	output[13U] = vaddq_u32(x13, state[13U]);
+	output[14U] = vaddq_u32(x14, state[14U]);
+	output[15U] = vaddq_u32(x15, state[15U]);
+}
+
+#endif
+
+#if defined(QSC_SYSTEM_HAS_AVX2)
+
+static void chacha_xor8_avx2(uint8_t* output, const uint8_t* input, const __m256i* words)
+{
+	/* transpose sixteen word vectors into eight contiguous 64-byte ChaCha20 blocks */
+
+	__m256i t[8U];
+	__m256i u[8U];
+	__m256i v[8U];
+	__m256i x;
+	size_t group;
+	size_t i;
+
+	for (group = 0U; group < 2U; ++group)
+	{
+		const size_t base = group * 8U;
+		t[0U] = _mm256_unpacklo_epi32(words[base], words[base + 1U]);
+		t[1U] = _mm256_unpackhi_epi32(words[base], words[base + 1U]);
+		t[2U] = _mm256_unpacklo_epi32(words[base + 2U], words[base + 3U]);
+		t[3U] = _mm256_unpackhi_epi32(words[base + 2U], words[base + 3U]);
+		t[4U] = _mm256_unpacklo_epi32(words[base + 4U], words[base + 5U]);
+		t[5U] = _mm256_unpackhi_epi32(words[base + 4U], words[base + 5U]);
+		t[6U] = _mm256_unpacklo_epi32(words[base + 6U], words[base + 7U]);
+		t[7U] = _mm256_unpackhi_epi32(words[base + 6U], words[base + 7U]);
+		u[0U] = _mm256_unpacklo_epi64(t[0U], t[2U]);
+		u[1U] = _mm256_unpackhi_epi64(t[0U], t[2U]);
+		u[2U] = _mm256_unpacklo_epi64(t[1U], t[3U]);
+		u[3U] = _mm256_unpackhi_epi64(t[1U], t[3U]);
+		u[4U] = _mm256_unpacklo_epi64(t[4U], t[6U]);
+		u[5U] = _mm256_unpackhi_epi64(t[4U], t[6U]);
+		u[6U] = _mm256_unpacklo_epi64(t[5U], t[7U]);
+		u[7U] = _mm256_unpackhi_epi64(t[5U], t[7U]);
+
+		for (i = 0U; i < 4U; ++i)
+		{
+			v[i] = _mm256_permute2x128_si256(u[i], u[i + 4U], 0x20);
+			v[i + 4U] = _mm256_permute2x128_si256(u[i], u[i + 4U], 0x31);
+		}
+
+		for (i = 0U; i < 8U; ++i)
+		{
+			x = _mm256_loadu_si256((const __m256i*)(const void*)(input + i * QSC_CHACHA_BLOCK_SIZE + group * sizeof(__m256i)));
+			x = _mm256_xor_si256(x, v[i]);
+			_mm256_storeu_si256((__m256i*)(void*)(output + i * QSC_CHACHA_BLOCK_SIZE + group * sizeof(__m256i)), x);
+		}
+	}
+
+	qsc_memutils_secure_erase(t, sizeof(t));
+	qsc_memutils_secure_erase(u, sizeof(u));
+	qsc_memutils_secure_erase(v, sizeof(v));
+}
+#endif
+
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
 typedef struct
@@ -166,38 +387,6 @@ typedef struct
 inline static __m512i chacha_rotl512(const __m512i x, uint32_t shift)
 {
 	return _mm512_or_si512(_mm512_slli_epi32(x, shift), _mm512_srli_epi32(x, 32U - shift));
-}
-
-static __m512i chacha_load512(const uint8_t* v)
-{
-	const uint32_t* v32 = (const uint32_t*)v;
-
-	return _mm512_set_epi32(v32[0U], v32[16U], v32[32U], v32[48U], v32[64U], v32[80U], v32[96U], v32[112U], 
-		v32[128U], v32[144U], v32[160U], v32[176U], v32[192U], v32[208U], v32[224U], v32[240U]);
-}
-
-static void chacha_store512(uint8_t* output, const __m512i x)
-{
-	uint32_t tmp[16U];
-
-	_mm512_storeu_si512((__m512i*)tmp, x);
-
-	qsc_intutils_le32to8(output, tmp[15U]);
-	qsc_intutils_le32to8((output + 64U), tmp[14U]);
-	qsc_intutils_le32to8((output + 128U), tmp[13U]);
-	qsc_intutils_le32to8((output + 192U), tmp[12U]);
-	qsc_intutils_le32to8((output + 256U), tmp[11U]);
-	qsc_intutils_le32to8((output + 320U), tmp[10U]);
-	qsc_intutils_le32to8((output + 384U), tmp[9U]);
-	qsc_intutils_le32to8((output + 448U), tmp[8U]);
-	qsc_intutils_le32to8((output + 512U), tmp[7U]);
-	qsc_intutils_le32to8((output + 576U), tmp[6U]);
-	qsc_intutils_le32to8((output + 640U), tmp[5U]);
-	qsc_intutils_le32to8((output + 704U), tmp[4U]);
-	qsc_intutils_le32to8((output + 768U), tmp[3U]);
-	qsc_intutils_le32to8((output + 832U), tmp[2U]);
-	qsc_intutils_le32to8((output + 896U), tmp[1U]);
-	qsc_intutils_le32to8((output + 960U), tmp[0U]);
 }
 
 static void chacha_permute_p16x512h(chacha_avx512_state* ctxw)
@@ -338,29 +527,6 @@ inline static __m256i chacha_rotl256(const __m256i x, uint32_t shift)
 	return _mm256_or_si256(_mm256_slli_epi32(x, shift), _mm256_srli_epi32(x, 32 - shift));
 }
 
-static __m256i chacha_load256(const uint8_t* v)
-{
-	const uint32_t* v32 = (const uint32_t*)v;
-
-	return _mm256_set_epi32(v32[0U], v32[16U], v32[32U], v32[48U], v32[64U], v32[80U], v32[96U], v32[112U]);
-}
-
-static void chacha_store256(uint8_t* output, const __m256i x)
-{
-	uint32_t tmp[8U];
-
-	_mm256_storeu_si256((__m256i*)tmp, x);
-
-	qsc_intutils_le32to8(output, tmp[7U]);
-	qsc_intutils_le32to8((output + 64U), tmp[6U]);
-	qsc_intutils_le32to8((output + 128U), tmp[5U]);
-	qsc_intutils_le32to8((output + 192U), tmp[4U]);
-	qsc_intutils_le32to8((output + 256U), tmp[3U]);
-	qsc_intutils_le32to8((output + 320U), tmp[2U]);
-	qsc_intutils_le32to8((output + 384U), tmp[1U]);
-	qsc_intutils_le32to8((output + 448U), tmp[0U]);
-}
-
 static void chacha_permute_p8x512h(chacha_avx2_state* ctxw)
 {
 	__m256i x0;
@@ -486,7 +652,9 @@ static void chacha_permute_p8x512h(chacha_avx2_state* ctxw)
 	ctxw->outw[15U] = _mm256_add_epi32(x15, ctxw->state[15U]);
 }
 
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#endif
+
+#if defined(QSC_SYSTEM_HAS_AVX)
 
 typedef struct
 {
@@ -499,23 +667,40 @@ inline static __m128i chacha_rotl128(const __m128i x, uint32_t shift)
 	return _mm_or_si128(_mm_slli_epi32(x, shift), _mm_srli_epi32(x, 32 - shift));
 }
 
-static __m128i chacha_load128(const uint8_t* v)
+static void chacha_xor4_avx(uint8_t* output, const uint8_t* input, const __m128i* words)
 {
-	const uint32_t* v32 = (const uint32_t*)v;
+	/* transpose four ChaCha word lanes into four contiguous output blocks */
 
-	return _mm_set_epi32(v32[0U], v32[16U], v32[32U], v32[48U]);
-}
+	__m128i t0;
+	__m128i t1;
+	__m128i t2;
+	__m128i t3;
+	__m128i x;
+	__m128i y;
+	size_t group;
 
-static void chacha_store128(uint8_t* output, const __m128i x)
-{
-	uint32_t tmp[4U];
+	for (group = 0U; group < 4U; ++group)
+	{
+		const size_t k = group * 4U;
 
-	_mm_storeu_si128((__m128i*)tmp, x);
+		t0 = _mm_unpacklo_epi32(words[k], words[k + 1U]);
+		t1 = _mm_unpackhi_epi32(words[k], words[k + 1U]);
+		t2 = _mm_unpacklo_epi32(words[k + 2U], words[k + 3U]);
+		t3 = _mm_unpackhi_epi32(words[k + 2U], words[k + 3U]);
 
-	qsc_intutils_le32to8(output, tmp[3U]);
-	qsc_intutils_le32to8((output + 64U), tmp[2U]);
-	qsc_intutils_le32to8((output + 128U), tmp[1U]);
-	qsc_intutils_le32to8((output + 192U), tmp[0U]);
+		x = _mm_unpacklo_epi64(t0, t2);
+		y = _mm_loadu_si128((const __m128i*)(const void*)(input + group * 16U));
+		_mm_storeu_si128((__m128i*)(void*)(output + group * 16U), _mm_xor_si128(x, y));
+		x = _mm_unpackhi_epi64(t0, t2);
+		y = _mm_loadu_si128((const __m128i*)(const void*)(input + 64U + group * 16U));
+		_mm_storeu_si128((__m128i*)(void*)(output + 64U + group * 16U), _mm_xor_si128(x, y));
+		x = _mm_unpacklo_epi64(t1, t3);
+		y = _mm_loadu_si128((const __m128i*)(const void*)(input + 128U + group * 16U));
+		_mm_storeu_si128((__m128i*)(void*)(output + 128U + group * 16U), _mm_xor_si128(x, y));
+		x = _mm_unpackhi_epi64(t1, t3);
+		y = _mm_loadu_si128((const __m128i*)(const void*)(input + 192U + group * 16U));
+		_mm_storeu_si128((__m128i*)(void*)(output + 192U + group * 16U), _mm_xor_si128(x, y));
+	}
 }
 
 static void chacha_permute_p4x512h(chacha_avx_state* ctxw)
@@ -651,7 +836,7 @@ void qsc_chacha_dispose(qsc_chacha_state* ctx)
 
 	if (ctx != NULL)
 	{
-		qsc_memutils_secure_erase(ctx->state, sizeof(ctx->state));
+		qsc_memutils_secure_erase(ctx, sizeof(qsc_chacha_state));
 	}
 }
 
@@ -659,12 +844,17 @@ void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chacha_keyparams* ke
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(keyparams != NULL);
-	QSC_ASSERT(keyparams->nonce != NULL);
-	QSC_ASSERT(keyparams->key != NULL);
-	QSC_ASSERT(keyparams->keylen == 16U || keyparams->keylen == 32U);
+	QSC_ASSERT(keyparams == NULL || keyparams->nonce != NULL);
+	QSC_ASSERT(keyparams == NULL || keyparams->key != NULL);
+	QSC_ASSERT(keyparams == NULL || (keyparams->keylen == 16U || keyparams->keylen == 32U));
 
-	if (ctx != NULL && keyparams != NULL)
+	if (ctx != NULL && keyparams != NULL && keyparams->key != NULL && keyparams->nonce != NULL &&
+		(keyparams->keylen == 16U || keyparams->keylen == 32U))
 	{
+		qsc_memutils_clear(ctx->stream, sizeof(ctx->stream));
+		ctx->available = 0U;
+		ctx->exhausted = false;
+
 		if (keyparams->keylen == 32U)
 		{
 			ctx->state[0U] = 0x61707865ULL;
@@ -704,9 +894,14 @@ void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chacha_keyparams* ke
 			ctx->state[15U] = qsc_intutils_le8to32(keyparams->nonce + 8U);
 		}
 	}
+	else if (ctx != NULL)
+	{
+		/* invalid parameters must not leave a previous key usable. */
+		qsc_chacha_dispose(ctx);
+	}
 }
 
-void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
+static void chacha_transform_blocks(qsc_chacha_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
@@ -725,7 +920,7 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 		{
 			chacha_avx512_state ctxw;
 			uint32_t ctrblk[16U];
-			__m512i tmpin;
+			__m256i lane[16U];
 
 			for (i = 0U; i < 16U; ++i)
 			{
@@ -734,55 +929,39 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 
 			while (length >= CHACHA_AVX512BLOCK_SIZE)
 			{
-				/* initialize the nonce */
-				ctrblk[0U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[1U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[2U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[3U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[4U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[5U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[6U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[7U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[8U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[9U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[10U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[11U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[12U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[13U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[14U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[15U] = ctx->state[12U];
-				chacha_increment(ctx);
+				/* expand sixteen consecutive RFC 8439 counter values into SIMD lanes. */
+				for (i = 0U; i < 16U; ++i)
+				{
+					ctrblk[i] = ctx->state[12U];
+					chacha_increment(ctx);
+				}
 
-				ctxw.state[12U] = _mm512_set_epi32(ctrblk[0U], ctrblk[1U], ctrblk[2U], ctrblk[3U], ctrblk[4U], ctrblk[5U], ctrblk[6U], ctrblk[7U],
-					ctrblk[8U], ctrblk[9U], ctrblk[10U], ctrblk[11U], ctrblk[12U], ctrblk[13U], ctrblk[14U], ctrblk[15U]);
+				ctxw.state[12U] = _mm512_setr_epi32(ctrblk[0U], ctrblk[1U], ctrblk[2U], ctrblk[3U],
+					ctrblk[4U], ctrblk[5U], ctrblk[6U], ctrblk[7U], ctrblk[8U], ctrblk[9U],
+					ctrblk[10U], ctrblk[11U], ctrblk[12U], ctrblk[13U], ctrblk[14U], ctrblk[15U]);
 
 				chacha_permute_p16x512h(&ctxw);
 
 				for (i = 0U; i < 16U; ++i)
 				{
-					tmpin = chacha_load512(input + oft + (i * sizeof(uint32_t)));
-					ctxw.outw[i] = _mm512_xor_si512(ctxw.outw[i], tmpin);
-					chacha_store512(output + oft + (i * sizeof(uint32_t)), ctxw.outw[i]);
+					lane[i] = _mm512_castsi512_si256(ctxw.outw[i]);
 				}
+
+				chacha_xor8_avx2(output + oft, input + oft, lane);
+
+				for (i = 0U; i < 16U; ++i)
+				{
+					lane[i] = _mm512_extracti64x4_epi64(ctxw.outw[i], 1);
+				}
+
+				chacha_xor8_avx2(output + oft + 8U * QSC_CHACHA_BLOCK_SIZE, input + oft + 8U * QSC_CHACHA_BLOCK_SIZE, lane);
 
 				oft += CHACHA_AVX512BLOCK_SIZE;
 				length -= CHACHA_AVX512BLOCK_SIZE;
 			}
+
+			qsc_memutils_secure_erase(&ctxw, sizeof(ctxw));
+			qsc_memutils_secure_erase(lane, sizeof(lane));
 		}
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
@@ -791,7 +970,6 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 		{
 			chacha_avx2_state ctxw;
 			uint32_t ctrblk[8U];
-			__m256i tmpin;
 
 			for (i = 0U; i < 16U; ++i)
 			{
@@ -800,46 +978,32 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 
 			while (length >= CHACHA_AVX2BLOCK_SIZE)
 			{
-				ctrblk[0U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[1U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[2U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[3U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[4U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[5U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[6U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[7U] = ctx->state[12U];
-				chacha_increment(ctx);
+				for (i = 0U; i < 8U; ++i)
+				{
+					ctrblk[i] = ctx->state[12U];
+					chacha_increment(ctx);
+				}
 
-				ctxw.state[12U] = _mm256_set_epi32(ctrblk[0U], ctrblk[1U], ctrblk[2U], ctrblk[3U], ctrblk[4U], ctrblk[5U], ctrblk[6U], ctrblk[7U]);
+				ctxw.state[12U] = _mm256_setr_epi32(ctrblk[0U], ctrblk[1U], ctrblk[2U], ctrblk[3U], ctrblk[4U], ctrblk[5U], ctrblk[6U], ctrblk[7U]);
 
 				chacha_permute_p8x512h(&ctxw);
-
-				for (i = 0U; i < 16U; ++i)
-				{
-					tmpin = chacha_load256(input + oft + (i * sizeof(uint32_t)));
-					ctxw.outw[i] = _mm256_xor_si256(ctxw.outw[i], tmpin);
-					chacha_store256(output + oft + (i * sizeof(uint32_t)), ctxw.outw[i]);
-				}
+				chacha_xor8_avx2(output + oft, input + oft, ctxw.outw);
 
 				oft += CHACHA_AVX2BLOCK_SIZE;
 				length -= CHACHA_AVX2BLOCK_SIZE;
 			}
+
+			qsc_memutils_secure_erase(&ctxw, sizeof(ctxw));
 		}
 
-#elif defined(QSC_SYSTEM_HAS_AVX)
+#endif
+
+#if defined(QSC_SYSTEM_HAS_AVX)
 
 		if (length >= CHACHA_AVXBLOCK_SIZE)
 		{
 			chacha_avx_state ctxw;
 			uint32_t ctrblk[4U];
-			__m128i tmpin;
 
 			for (i = 0U; i < 16U; ++i)
 			{
@@ -848,28 +1012,74 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 
 			while (length >= CHACHA_AVXBLOCK_SIZE)
 			{
-				ctrblk[0U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[1U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[2U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctrblk[3U] = ctx->state[12U];
-				chacha_increment(ctx);
-				ctxw.state[12U] = _mm_set_epi32(ctrblk[0U], ctrblk[1U], ctrblk[2U], ctrblk[3U]);
+				for (i = 0U; i < 4U; ++i)
+				{
+					ctrblk[i] = ctx->state[12U];
+					chacha_increment(ctx);
+				}
+
+				ctxw.state[12U] = _mm_setr_epi32(ctrblk[0U], ctrblk[1U], ctrblk[2U], ctrblk[3U]);
 
 				chacha_permute_p4x512h(&ctxw);
-
-				for (i = 0U; i < 16U; ++i)
-				{
-					tmpin = chacha_load128(input + oft + (i * sizeof(uint32_t)));
-					ctxw.outw[i] = _mm_xor_si128(ctxw.outw[i], tmpin);
-					chacha_store128(output + oft + (i * sizeof(uint32_t)), ctxw.outw[i]);
-				}
+				chacha_xor4_avx(output + oft, input + oft, ctxw.outw);
 
 				oft += CHACHA_AVXBLOCK_SIZE;
 				length -= CHACHA_AVXBLOCK_SIZE;
 			}
+
+			qsc_memutils_secure_erase(&ctxw, sizeof(ctxw));
+		}
+
+#elif defined(QSC_SYSTEM_ARM_INTRINSICS)
+
+		if (length >= 4U * QSC_CHACHA_BLOCK_SIZE)
+		{
+			uint32x4_t state[CHACHA_STATE_SIZE];
+			uint32x4_t stream[CHACHA_STATE_SIZE];
+			uint32_t low[4U];
+			uint32_t high[4U];
+			uint32_t words[4U];
+
+			for (i = 0U; i < CHACHA_STATE_SIZE; ++i)
+			{
+				state[i] = vdupq_n_u32(ctx->state[i]);
+			}
+
+			while (length >= 4U * QSC_CHACHA_BLOCK_SIZE)
+			{
+				for (size_t j = 0U; j < 4U; ++j)
+				{
+					low[j] = ctx->state[12U];
+					high[j] = ctx->state[13U];
+					chacha_increment(ctx);
+				}
+
+				state[12U] = vld1q_u32(low);
+				state[13U] = vld1q_u32(high);
+				chacha_permute_p4x512_arm(state, stream);
+
+				for (i = 0U; i < CHACHA_STATE_SIZE; ++i)
+				{
+					for (size_t j = 0U; j < 4U; ++j)
+					{
+						words[j] = qsc_intutils_le8to32(input + oft + (j * QSC_CHACHA_BLOCK_SIZE) + (i * 4U));
+					}
+
+					vst1q_u32(words, veorq_u32(vld1q_u32(words), stream[i]));
+
+					for (size_t j = 0U; j < 4U; ++j)
+					{
+						qsc_intutils_le32to8(output + oft + (j * QSC_CHACHA_BLOCK_SIZE) + (i * 4U), words[j]);
+					}
+				}
+
+				oft += 4U * QSC_CHACHA_BLOCK_SIZE;
+				length -= 4U * QSC_CHACHA_BLOCK_SIZE;
+			}
+
+			qsc_memutils_secure_erase(state, sizeof(state));
+			qsc_memutils_secure_erase(stream, sizeof(stream));
+			qsc_memutils_secure_erase(words, sizeof(words));
 		}
 
 #endif
@@ -878,9 +1088,17 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 		{
 			while (length >= QSC_CHACHA_BLOCK_SIZE)
 			{
-				chacha_permute_p512c(ctx, output + oft);
+				uint8_t block[QSC_CHACHA_BLOCK_SIZE];
+
+				chacha_permute_p512c(ctx, block);
 				chacha_increment(ctx);
-				qsc_memutils_xor(output + oft, input + oft, QSC_CHACHA_BLOCK_SIZE);
+
+				for (i = 0U; i < QSC_CHACHA_BLOCK_SIZE; ++i)
+				{
+					output[oft + i] = input[oft + i] ^ block[i];
+				}
+
+				qsc_memutils_secure_erase(block, sizeof(block));
 				oft += QSC_CHACHA_BLOCK_SIZE;
 				length -= QSC_CHACHA_BLOCK_SIZE;
 			}
@@ -897,8 +1115,103 @@ void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t*
 				{
 					output[i] ^= input[i];
 				}
+
+				qsc_memutils_secure_erase(tmp, sizeof(tmp));
 			}
 		}
+	}
+}
+
+static bool chacha_has_capacity(const qsc_chacha_state* ctx, size_t length)
+{
+	/* validate a requested stream length without advancing cipher state */
+	uint64_t blocks;
+	uint64_t needed;
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL &&
+		ctx->state[0U] == UINT32_C(0x61707865) &&
+		((ctx->state[1U] == UINT32_C(0x3320646E) && ctx->state[2U] == UINT32_C(0x79622D32)) ||
+		 (ctx->state[1U] == UINT32_C(0x3120646E) && ctx->state[2U] == UINT32_C(0x79622D36))) &&
+		ctx->state[3U] == UINT32_C(0x6B206574) &&
+		ctx->available <= QSC_CHACHA_BLOCK_SIZE)
+	{
+		needed = (length > ctx->available) ? (uint64_t)(length - ctx->available) : 0U;
+		blocks = (needed / QSC_CHACHA_BLOCK_SIZE) + ((needed % QSC_CHACHA_BLOCK_SIZE) != 0U ? 1U : 0U);
+		res = blocks == 0U || (!ctx->exhausted && blocks <= (uint64_t)UINT32_MAX - (uint64_t)ctx->state[12U] + 1U);
+	}
+
+	return res;
+}
+
+bool qsc_chacha_transform_checked(qsc_chacha_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
+{
+	uint8_t tmp[QSC_CHACHA_BLOCK_SIZE] = { 0U };
+	size_t count;
+	size_t i;
+	size_t offset;
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL && (length == 0U || (output != NULL && input != NULL)))
+	{
+		if (chacha_has_capacity(ctx, length))
+		{
+			res = true;
+			offset = 0U;
+
+			if (ctx->available != 0U && length != 0U)
+			{
+				count = (length < ctx->available) ? length : ctx->available;
+
+				for (i = 0U; i < count; ++i)
+				{
+					output[i] = input[i] ^ ctx->stream[QSC_CHACHA_BLOCK_SIZE - ctx->available + i];
+				}
+
+				qsc_memutils_secure_erase(ctx->stream + QSC_CHACHA_BLOCK_SIZE - ctx->available, count);
+				ctx->available -= count;
+				offset += count;
+			}
+
+			if (length - offset >= QSC_CHACHA_BLOCK_SIZE)
+			{
+				count = (length - offset) & ~(size_t)(QSC_CHACHA_BLOCK_SIZE - 1U);
+				chacha_transform_blocks(ctx, output + offset, input + offset, count);
+				offset += count;
+			}
+
+			if (length != offset)
+			{
+				count = length - offset;
+				chacha_permute_p512c(ctx, tmp);
+				chacha_increment(ctx);
+
+				for (i = 0U; i < count; ++i)
+				{
+					output[offset + i] = input[offset + i] ^ tmp[i];
+				}
+
+				qsc_memutils_copy(ctx->stream, tmp, sizeof(tmp));
+				qsc_memutils_secure_erase(ctx->stream, count);
+				ctx->available = QSC_CHACHA_BLOCK_SIZE - count;
+			}
+		}
+	}
+
+	qsc_memutils_secure_erase(tmp, sizeof(tmp));
+
+	return res;
+}
+
+void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
+{
+	if (!qsc_chacha_transform_checked(ctx, output, input, length) && output != NULL && length != 0U)
+	{
+		qsc_memutils_clear(output, length);
 	}
 }
 
@@ -916,16 +1229,20 @@ static void chacha_poly1305_finalize(qsc_chacha_poly1305_state* ctx, uint8_t* ta
 
 void qsc_chacha_poly1305_set_associated(qsc_chacha_poly1305_state* ctx, const uint8_t* data, size_t datalen)
 {
+	size_t rem;
+
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(data != NULL);
+	QSC_ASSERT(data != NULL || datalen == 0U);
 
-	if (ctx != NULL && data != NULL)
+	if (ctx != NULL && (data != NULL || datalen == 0U) && chacha_has_capacity(&ctx->cstate, 0U))
 	{
-		qsc_poly1305_update(&ctx->pstate, data, datalen);
-		ctx->aadlen = datalen;
+		if (datalen != 0U)
+		{
+			qsc_poly1305_update(&ctx->pstate, data, datalen);
+		}
 
-		/* RFC 8439 2.8: zero-pad AAD to 16-byte boundary */
-		const size_t rem = datalen & 15U;
+		ctx->aadlen = datalen;
+		rem = datalen & (QSC_POLY1305_BLOCK_SIZE - 1U);
 
 		if (rem != 0U)
 		{
@@ -945,7 +1262,8 @@ bool qsc_chacha_poly1305_decrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 
 	res = false;
 
-	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
+	if (ctx != NULL && output != NULL && input != NULL && length >= QSC_POLY1305_MAC_SIZE &&
+		chacha_has_capacity(&ctx->cstate, length - QSC_POLY1305_MAC_SIZE))
 	{
 		uint8_t tag[QSC_POLY1305_MAC_SIZE] = { 0U };
 		const size_t mlen = length - QSC_POLY1305_MAC_SIZE;
@@ -966,9 +1284,11 @@ bool qsc_chacha_poly1305_decrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 
 		if (qsc_intutils_verify(input + mlen, tag, QSC_POLY1305_MAC_SIZE) == 0U)
 		{
-			qsc_chacha_transform(&ctx->cstate, output, input, mlen);
-			res = true;
+			res = qsc_chacha_transform_checked(&ctx->cstate, output, input, mlen);
 		}
+
+		qsc_memutils_secure_erase(tag, sizeof(tag));
+		qsc_chacha_poly1305_dispose(ctx);
 	}
 
 	return res;
@@ -987,16 +1307,29 @@ void qsc_chacha_poly1305_dispose(qsc_chacha_poly1305_state* ctx)
 	}
 }
 
-void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
+bool qsc_chacha_poly1305_encrypt_checked(qsc_chacha_poly1305_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(input != NULL);
+	QSC_ASSERT(input != NULL || length == 0U);
 
-	if (ctx != NULL && output != NULL && input != NULL && length != 0U)
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL && output != NULL && (input != NULL || length == 0U) &&
+		length <= SIZE_MAX - QSC_POLY1305_MAC_SIZE &&
+		chacha_has_capacity(&ctx->cstate, length))
 	{
-		qsc_chacha_transform(&ctx->cstate, output, input, length);
-		qsc_poly1305_update(&ctx->pstate, output, length);
+		res = true;
+		if (length != 0U)
+		{
+			/* process one record in a contiguous cipher/MAC operation.
+			 * This amortizes Poly1305 SIMD setup over the entire record and
+			 * avoids reinitializing its private four-lane powers per 4 KiB. */
+			qsc_chacha_transform(&ctx->cstate, output, input, length);
+			qsc_poly1305_update(&ctx->pstate, output, length);
+		}
 		ctx->msglen = length;
 
 		/* RFC 8439 2.8: zero-pad ciphertext to 16-byte boundary */
@@ -1005,10 +1338,23 @@ void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output
 		if (rem != 0U)
 		{
 			uint8_t pad[QSC_POLY1305_BLOCK_SIZE] = { 0U };
+
 			qsc_poly1305_update(&ctx->pstate, pad, QSC_POLY1305_BLOCK_SIZE - rem);
 		}
 
 		chacha_poly1305_finalize(ctx, output + length);
+		qsc_chacha_poly1305_dispose(ctx);
+	}
+
+	return res;
+}
+
+void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
+{
+	if (!qsc_chacha_poly1305_encrypt_checked(ctx, output, input, length) &&
+		output != NULL && length <= SIZE_MAX - QSC_POLY1305_MAC_SIZE)
+	{
+		qsc_memutils_clear(output, length + QSC_POLY1305_MAC_SIZE);
 	}
 }
 
@@ -1016,17 +1362,26 @@ void qsc_chacha_poly1305_initialize(qsc_chacha_poly1305_state* ctx, const qsc_ch
 {
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(keyparams != NULL);
+	QSC_ASSERT(keyparams == NULL || keyparams->key != NULL);
+	QSC_ASSERT(keyparams == NULL || keyparams->nonce != NULL);
+	QSC_ASSERT(keyparams == NULL || (keyparams->keylen == QSC_CHACHA_KEY128_SIZE || keyparams->keylen == QSC_CHACHA_KEY256_SIZE));
 
-	if (ctx != NULL && keyparams != NULL)
+	if (ctx != NULL)
 	{
-		uint8_t pkey[64U] = { 0U };
-		uint8_t ptxt[64U] = { 0U };
-
 		qsc_chacha_poly1305_dispose(ctx);
-		qsc_chacha_initialize(&ctx->cstate, keyparams);
-		qsc_chacha_transform(&ctx->cstate, pkey, ptxt, sizeof(pkey));
-		qsc_poly1305_initialize(&ctx->pstate, pkey);
-		qsc_memutils_secure_erase(pkey, sizeof(pkey));
+
+		if (keyparams != NULL && keyparams->key != NULL && keyparams->nonce != NULL &&
+			(keyparams->keylen == QSC_CHACHA_KEY128_SIZE || keyparams->keylen == QSC_CHACHA_KEY256_SIZE))
+		{
+			uint8_t pkey[QSC_CHACHA_BLOCK_SIZE] = { 0U };
+
+			qsc_chacha_initialize(&ctx->cstate, keyparams);
+			/* derive the one-time Poly1305 key from ChaCha20 counter zero. */
+			chacha_permute_p512c(&ctx->cstate, pkey);
+			chacha_increment(&ctx->cstate);
+			qsc_poly1305_initialize(&ctx->pstate, pkey);
+			qsc_memutils_secure_erase(pkey, sizeof(pkey));
+		}
 	}
 }
 

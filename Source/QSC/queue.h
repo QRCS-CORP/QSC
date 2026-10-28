@@ -199,6 +199,62 @@ QSC_EXPORT_API uint64_t qsc_queue_pop(qsc_queue_state* ctx, uint8_t* output, siz
  */
 QSC_EXPORT_API void qsc_queue_push(qsc_queue_state* ctx, const uint8_t* input, size_t inplen, uint64_t tag);
 
+/**
+ * \brief Push one item with an explicit success indicator.
+ * \param ctx Initialized queue; must remain alive throughout the operation.
+ * \param input Buffer with at least inlen bytes.
+ * \param inlen Nonzero byte length, at most ctx->width.
+ * \param tag Associated 64-bit value (zero is permitted).
+ * \return True when accepted, false on full queue or invalid arguments.
+ * \details Thread-safe for concurrent operations, not concurrent dispose.
+ */
+QSC_EXPORT_API bool qsc_queue_try_push(qsc_queue_state* ctx, const uint8_t* input, size_t inlen, uint64_t tag);
+
+/**
+ * \brief Pop an item, distinguishing empty state from a valid zero tag.
+ * \param ctx Initialized queue; must remain alive throughout the operation.
+ * \param output Receives otplen bytes on success; unchanged on failure.
+ * \param otplen Nonzero byte length, at most ctx->width.
+ * \param tag Optional output for the associated tag.
+ * \return True if an item was removed; false on empty or invalid arguments.
+ * \details Thread-safe for concurrent operations, not concurrent dispose.
+ */
+QSC_EXPORT_API bool qsc_queue_try_pop(qsc_queue_state* ctx, uint8_t* output, size_t otplen, uint64_t* tag);
+
+/**
+ * \brief Append a packed sequence of items using one mutex acquisition.
+ * \param ctx Initialized queue.
+ * \param input Packed input containing count times inlen bytes.
+ * \param count Number of available input items.
+ * \param inlen Bytes per item; must be between one and queue width.
+ * \param tags Optional array containing count tags, or NULL for zero tags.
+ * \return Number of successfully appended items (can be less than count).
+ * \details Thread-safe for concurrent operations, not concurrent dispose.
+ */
+QSC_EXPORT_API size_t qsc_queue_push_batch(qsc_queue_state* ctx, const uint8_t* input, size_t count, size_t inlen, const uint64_t* tags);
+
+/**
+ * \brief Remove a batch of items in FIFO order with one mutex acquisition.
+ * \param ctx Initialized queue.
+ * \param output Buffer holding capacity times otplen bytes.
+ * \param capacity Number of destination item slots.
+ * \param otplen Number of bytes to copy per item (not exceeding queue width).
+ * \param tags Optional buffer for capacity tags.
+ * \return Actual number removed, or zero on empty queue or invalid input.
+ * \details Thread-safe for concurrent operations, not concurrent dispose.
+ */
+QSC_EXPORT_API size_t qsc_queue_pop_batch(qsc_queue_state* ctx, uint8_t* output, size_t capacity, size_t otplen, uint64_t* tags);
+
+/**
+ * \brief Flush all items only if the destination has sufficient capacity.
+ * \param ctx Initialized queue.
+ * \param output Output byte array.
+ * \param outlen Capacity of output in bytes.
+ * \return Number of removed items; zero if empty or insufficient output capacity.
+ * \details A short destination leaves the queue unchanged. Thread-safe except concurrent dispose.
+ */
+QSC_EXPORT_API size_t qsc_queue_flush_bounded(qsc_queue_state* ctx, uint8_t* output, size_t outlen);
+
 #if defined(QSC_DEBUG_MODE)
 /**
  * \brief Self-test function for the queue operations.

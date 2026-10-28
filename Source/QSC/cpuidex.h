@@ -167,6 +167,21 @@ QSC_EXPORT_API typedef struct
 QSC_EXPORT_API bool qsc_cpuidex_features_set(qsc_cpuidex_cpu_features* const features);
 
 /**
+ * \brief Copy an immutable, thread-safe process-lifetime snapshot of CPU capabilities.
+ *
+ * \details Initializes once and avoids repeated CPUID and topology queries.
+ * This is a startup snapshot and is NOT suitable where CPU hotplug, VM migration,
+ * or dynamic OS processor-feature changes must be detected. In those cases use
+ * qsc_cpuidex_features_set() to query the current capabilities.
+ *
+ * \param features Destination for the fully initialized capabilities structure.
+ * \return True when the snapshot is available; false for NULL, unsupported OS,
+ * or one-time initialization failure. Does not allocate caller-owned memory.
+ * \note Safe to call concurrently; output must not be shared without synchronization.
+ */
+QSC_EXPORT_API bool qsc_cpuidex_features_set_cached(qsc_cpuidex_cpu_features* features);
+
+/**
  * \brief Print the detected CPU features to the console.
  *
  * This function outputs the CPU capabilities (for example, AVX, AESNI, cache size, vendor) to the console.

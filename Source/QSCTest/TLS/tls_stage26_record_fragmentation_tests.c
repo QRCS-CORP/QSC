@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "tls_stage26_record_fragmentation_tests.h"
 #include "../testutils.h"
 #include "intutils.h"
@@ -5,6 +56,7 @@
 #include "tlsdefs.h"
 #include "tlslimits.h"
 #include "tlsrecord.h"
+#include <stdio.h>
 
 static void stage26_fill_sequence(uint8_t* output, size_t outlen, uint8_t seed)
 {
@@ -469,11 +521,171 @@ static bool stage26_protected_coalesced_records_test(void)
     return res;
 }
 
+/**
+ * \brief Verify all record-size boundaries, authentication failure behavior, and sequence handling.
+ * \param suite The supported TLS 1.3 AEAD suite under test.
+ * \param keylen Key size required by the selected suite, in bytes.
+ * \return True when every record size and negative test passes.
+ * \note This test runs synchronously and owns all buffers and record states.
+ */
+static bool stage26_protected_size_matrix(qsc_tls_cipher_suite suite, size_t keylen)
+{
+	const size_t sizes[] = { 0U, 1U, 15U, 16U, 17U, 63U, 64U, 65U, 255U, 256U, 1024U, 4096U, 16383U, 16384U };
+	qsc_tls_record_state rstate;
+	qsc_tls_record_state wstate;
+	uint8_t decoded[QSC_TLS_MAX_PLAINTEXT_SIZE];
+	uint8_t payload[QSC_TLS_MAX_PLAINTEXT_SIZE];
+	uint8_t record[QSC_TLS_RECORD_MAX_WIRE_SIZE];
+	uint8_t key[32U] = { 0U };
+	uint8_t iv[12U] = { 0U };
+	qsc_tls_record_content_type inner;
+	qsc_tls_status status;
+	size_t written;
+	size_t received;
+	size_t i;
+	size_t j;
+	bool res;
+
+	res = true;
+	written = 0U;
+	received = 0U;
+	inner = qsc_tls_record_content_invalid;
+	qsc_memutils_clear(&rstate, sizeof(rstate));
+	qsc_memutils_clear(&wstate, sizeof(wstate));
+
+	for (i = 0U; i < sizeof(payload); ++i)
+	{
+		payload[i] = (uint8_t)(i ^ 0xA5U);
+	}
+
+	for (i = 0U; i < sizeof(sizes) / sizeof(sizes[0]); ++i)
+	{
+		qsc_tls_record_state_initialize(&wstate, suite, key, keylen, iv, sizeof(iv));
+		qsc_tls_record_state_initialize(&rstate, suite, key, keylen, iv, sizeof(iv));
+		written = 0U;
+		received = 0U;
+		status = qsc_tls_record_encrypt(&wstate, record, sizeof(record), &written, qsc_tls_record_content_application_data, payload, sizes[i]);
+
+		if (status == qsc_tls_status_success)
+		{
+			if (written != QSC_TLS_RECORD_HEADER_SIZE + sizes[i] + QSC_TLS_INNER_CONTENT_TYPE_SIZE + QSC_TLS_GCM_TAG_SIZE)
+			{
+				status = qsc_tls_status_invalid_length;
+			}
+		}
+
+		if (status == qsc_tls_status_success)
+		{
+			status = qsc_tls_record_decrypt(&rstate, decoded, sizeof(decoded), &received, &inner, record, written);
+		}
+
+		if (status != qsc_tls_status_success || received != sizes[i] ||
+			inner != qsc_tls_record_content_application_data ||
+			(sizes[i] != 0U && qsc_memutils_are_equal(decoded, payload, sizes[i]) == false) ||
+			qsc_tls_record_state_get_sequence(&wstate) != 1U ||
+			qsc_tls_record_state_get_sequence(&rstate) != 1U)
+		{
+			printf("[FAIL] TLS record size matrix suite=%u length=%zu status=%d received=%zu type=%u write_seq=%llu read_seq=%llu\n", (unsigned int)suite, sizes[i], (int)status, received, (unsigned int)inner, (unsigned long long)qsc_tls_record_state_get_sequence(&wstate), (unsigned long long)qsc_tls_record_state_get_sequence(&rstate));
+			res = false;
+		}
+
+		if (res == true)
+		{
+			qsc_tls_record_state_install_keys(&rstate, suite, key, keylen, iv, sizeof(iv));
+			record[written - 1U] ^= 0x01U;
+			qsc_memutils_clear(decoded, sizeof(decoded));
+			received = 17U;
+			inner = qsc_tls_record_content_handshake;
+			status = qsc_tls_record_decrypt(&rstate, decoded, sizeof(decoded), &received, &inner, record, written);
+
+			if (status != qsc_tls_status_authentication_failure || received != 0U ||
+				inner != qsc_tls_record_content_invalid ||
+				qsc_tls_record_state_get_sequence(&rstate) != 0U)
+			{
+				printf("[FAIL] TLS tampered-tag rejection suite=%u length=%zu status=%d received=%zu\n", (unsigned int)suite, sizes[i], (int)status, received);
+				res = false;
+			}
+
+			for (j = 0U; j < sizeof(decoded) && res == true; ++j)
+			{
+				if (decoded[j] != 0U)
+				{
+					printf("[FAIL] TLS unauthenticated plaintext escaped suite=%u length=%zu index=%zu\n", (unsigned int)suite, sizes[i], j);
+					res = false;
+				}
+			}
+		}
+
+		qsc_tls_record_state_dispose(&rstate);
+		qsc_tls_record_state_dispose(&wstate);
+
+		if (res == false)
+		{
+			break;
+		}
+	}
+
+	qsc_memutils_secure_erase(decoded, sizeof(decoded));
+	qsc_memutils_secure_erase(payload, sizeof(payload));
+	qsc_memutils_secure_erase(record, sizeof(record));
+	qsc_memutils_secure_erase(key, sizeof(key));
+	qsc_memutils_secure_erase(iv, sizeof(iv));
+	return res;
+}
+
+/** \brief Run protected-record boundary tests for AES-128-GCM. \return True on success. */
+static bool stage26_protected_aes128_boundaries_test(void)
+{
+	return stage26_protected_size_matrix(qsc_tls_cipher_suite_tls_aes_128_gcm_sha256, 16U);
+}
+
+/** \brief Run protected-record boundary tests for AES-256-GCM. \return True on success. */
+static bool stage26_protected_aes256_boundaries_test(void)
+{
+	return stage26_protected_size_matrix(qsc_tls_cipher_suite_tls_aes_256_gcm_sha384, 32U);
+}
+
+/** \brief Run protected-record boundary tests for ChaCha20-Poly1305. \return True on success. */
+static bool stage26_protected_chacha_boundaries_test(void)
+{
+	return stage26_protected_size_matrix(qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256, 32U);
+}
+
 bool qsctest_tls_stage26_tests(void)
 {
     bool res;
 
     res = true;
+
+	if (stage26_protected_aes128_boundaries_test() == true)
+	{
+		qsctest_print_line("[PASS] TLS Stage 26 AES-128-GCM record boundary, tag-rejection and plaintext-isolation tests.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] TLS Stage 26 AES-128-GCM record boundary, tag-rejection and plaintext-isolation tests.");
+		res = false;
+	}
+
+	if (stage26_protected_aes256_boundaries_test() == true)
+	{
+		qsctest_print_line("[PASS] TLS Stage 26 AES-256-GCM record boundary, tag-rejection and plaintext-isolation tests.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] TLS Stage 26 AES-256-GCM record boundary, tag-rejection and plaintext-isolation tests.");
+		res = false;
+	}
+
+	if (stage26_protected_chacha_boundaries_test() == true)
+	{
+		qsctest_print_line("[PASS] TLS Stage 26 ChaCha20-Poly1305 record boundary, tag-rejection and plaintext-isolation tests.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] TLS Stage 26 ChaCha20-Poly1305 record boundary, tag-rejection and plaintext-isolation tests.");
+		res = false;
+	}
 
     if (stage26_plaintext_fragment_span_test() == true)
     {

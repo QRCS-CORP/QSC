@@ -63,7 +63,7 @@
  * These tests include known answer tests (KATs) and various integrity and stress tests designed to verify the
  * correctness and robustness of the SPHINCS+ implementation. In particular, the tests verify:
  *
- * - That the generated key pairs (public and secret keys) match the expected values from the NIST FIPS 205 test vectors.
+ * - That legacy key pairs match the historical SPHINCS+ competition-format vectors (not FIPS 205 ACVP KATs).
  * - That the signature produced for a given message is exactly as expected.
  * - That signature verification recovers the original message correctly.
  * - That deliberate modifications to the secret key, public key, or signature result in a failed verification,
@@ -112,7 +112,7 @@ bool qsctest_sphincsplus_extended_test(void);
  *
  * \details
  * This function verifies the basic operations of the SPHINCS+ signature scheme using the second test vector
- * from the NIST FIPS 205 KAT file. It performs the following steps:
+ * from a historical SPHINCS+ competition-format KAT file. It performs the following steps:
  * - Parses the known answer test (KAT) vector to obtain expected values for the message, public key, secret key,
  *   and signature.
  * - Generates a new key pair.
@@ -185,6 +185,13 @@ bool qsctest_sphincsplus_stress_test(void);
 #endif
 
 /**
+ * \brief Verify the legacy SPHINCS+ attached-message API remains functional.
+ * \return True only if keygen, context signing and negative verification pass.
+ * \note Reentrant; uses fixed test seeds and no shared scratch buffers.
+ */
+bool qsctest_sphincsplus_compatibility_test(void);
+
+/**
  * \brief Runs the SPHINCS+ test suite.
  *
  * \details
@@ -194,9 +201,84 @@ bool qsctest_sphincsplus_stress_test(void);
  * - Operation tests (key generation, signing, and verification) against known answer test vectors.
  * - Integrity tests for the secret key, public key, and signature.
  * - A stress test to validate the scheme under repeated use.
+ * - FIPS 205 SHAKE-128s/128f/192s/192f/256s/256f KATs and signature tests.
  *
  * Test results are printed to the console.
  */
 void qsctest_sphincsplus_run(void);
+
+
+/* FIPS 205 SHAKE parameter qualification: available from existing SPHINCS+ test suite. */
+/** \brief Test SLH-DSA-SHAKE-128s deterministic, hedged, prehash, context and negative-signature behavior.
+ * \return True only when this individual SHAKE-128s test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake128s_signature_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-128s external NIST ACVP deterministic key-generation known-answer behavior.
+ * \return True only when this individual SHAKE-128s test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake128s_acvp_keygen_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-128f deterministic, hedged, prehash, context and negative-signature behavior.
+ * \return True only when this individual SHAKE-128f test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake128f_signature_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-128f external NIST ACVP deterministic key-generation known-answer behavior.
+ * \return True only when this individual SHAKE-128f test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake128f_acvp_keygen_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-192s deterministic, hedged, prehash, context and negative-signature behavior.
+ * \return True only when this individual SHAKE-192s test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake192s_signature_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-192s external NIST ACVP deterministic key-generation known-answer behavior.
+ * \return True only when this individual SHAKE-192s test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake192s_acvp_keygen_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-192f deterministic, hedged, prehash, context and negative-signature behavior.
+ * \return True only when this individual SHAKE-192f test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake192f_signature_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-192f external NIST ACVP deterministic key-generation known-answer behavior.
+ * \return True only when this individual SHAKE-192f test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake192f_acvp_keygen_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-256s deterministic, hedged, prehash, context and negative-signature behavior.
+ * \return True only when this individual SHAKE-256s test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake256s_signature_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-256s external NIST ACVP deterministic key-generation known-answer behavior.
+ * \return True only when this individual SHAKE-256s test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake256s_acvp_keygen_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-256f deterministic, hedged, prehash, context and negative-signature behavior.
+ * \return True only when this individual SHAKE-256f test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake256f_signature_test(void);
+
+/** \brief Test SLH-DSA-SHAKE-256f external NIST ACVP deterministic key-generation known-answer behavior.
+ * \return True only when this individual SHAKE-256f test passes.
+ * \note Reentrant, direct invocation; all scratch buffers are caller-owned.
+ */
+bool qsctest_sphincsplus_shake256f_acvp_keygen_test(void);
 
 #endif

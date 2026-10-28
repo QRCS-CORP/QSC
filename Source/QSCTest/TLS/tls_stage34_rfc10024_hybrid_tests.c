@@ -1,9 +1,62 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "tls_stage34_rfc10024_hybrid_tests.h"
 #include "../testutils.h"
 #include "csp.h"
-#include "ecdhp256base.h"
-#include "ecdhp384base.h"
-#include "eddsa.h"
+#include "ecdhp256.h"
+#include "ecdhp384.h"
+#include "eddsa25519.h"
+#include "kyber768.h"
+#include "kyber1024.h"
 #include "memutils.h"
 #include "tlscert.h"
 #include "tlsclient.h"
@@ -11,9 +64,9 @@
 #include "tlssignerdefault.h"
 #include "tlsserver.h"
 
-static uint8_t stage34_server_public_key[QSC_EDDSA_PUBLICKEY_SIZE];
-static uint8_t stage34_server_private_key[QSC_EDDSA_PRIVATEKEY_SIZE];
-static uint8_t stage34_server_certificate[QSC_EDDSA_PUBLICKEY_SIZE];
+static uint8_t stage34_server_public_key[QSC_ED25519_PUBLICKEY_SIZE];
+static uint8_t stage34_server_private_key[QSC_ED25519_PRIVATEKEY_SIZE];
+static uint8_t stage34_server_certificate[QSC_ED25519_PUBLICKEY_SIZE];
 
 static bool stage34_buffer_is_zero(const uint8_t* input, size_t inlen)
 {
@@ -57,16 +110,9 @@ static bool stage34_run_for_supported_groups(bool (*test)(qsc_tls_named_group))
         }
     }
 
-    /* RFC 10024 currently standardizes the ML-KEM-768 and ML-KEM-1024 hybrid groups above.
-     * A Class 1 ML-KEM-512 build therefore has no applicable RFC 10024 hybrid group;
-     * the active ML-KEM-512 primitive and pure TLS named group are covered independently. */
     if (found == false)
     {
-#if defined(QSC_KYBER_S1K2P512)
-        res = (test != NULL);
-#else
         res = false;
-#endif
     }
 
     return res;
@@ -106,6 +152,30 @@ static size_t stage34_client_kem_private_offset(qsc_tls_named_group group)
     }
 
     return offset;
+}
+
+/**
+ * \brief Determine the ML-KEM decapsulation-key size for a hybrid group.
+ * \param group Hybrid TLS named group.
+ * \return KEM private-key length in bytes, or zero for unsupported groups.
+ * \note Pure lookup; no allocation or shared mutable state.
+ */
+static size_t stage34_client_kem_privatekey_size(qsc_tls_named_group group)
+{
+    size_t res;
+
+    res = 0U;
+
+    if ((group == qsc_tls_group_x25519_mlkem768) || (group == qsc_tls_group_secp256r1_mlkem768))
+    {
+        res = QSC_KYBER768_PRIVATEKEY_SIZE;
+    }
+    else if (group == qsc_tls_group_secp384r1_mlkem1024)
+    {
+        res = QSC_KYBER1024_PRIVATEKEY_SIZE;
+    }
+
+    return res;
 }
 
 static bool stage34_validate_chain(const qsc_tls_certificate_view* chain, size_t chainlength, const qsc_tls_certificate_validation_context* context, void* state)
@@ -148,7 +218,7 @@ static bool stage34_initialize_configs(qsc_tls_named_group group, qsc_tls_client
         qsc_memutils_clear(signer, sizeof(*signer));
         client_groups[0U] = group;
         server_groups[0U] = group;
-        qsc_eddsa_generate_keypair(stage34_server_public_key, stage34_server_private_key, qsc_csp_generate);
+        qsc_ed25519_generate_keypair(stage34_server_public_key, stage34_server_private_key, qsc_csp_generate);
         qsc_memutils_copy(stage34_server_certificate, stage34_server_public_key, sizeof(stage34_server_certificate));
 
         clientconfig->ciphersuites = client_suites;
@@ -448,7 +518,7 @@ static bool stage34_failure_zeroization_test(qsc_tls_named_group group)
 
     if (res == true)
     {
-        kemoffset = stage34_client_kem_private_offset(group) + QSC_KYBER_PRIVATEKEY_SIZE - (2U * QSC_KYBER_SHAREDSECRET_SIZE);
+        kemoffset = stage34_client_kem_private_offset(group) + stage34_client_kem_privatekey_size(group) - (2U * QSC_KYBER768_SHAREDSECRET_SIZE);
         client.privatekey[kemoffset] ^= 0x01U;
         qsc_memutils_set_value(clientsecret, descriptor->sharedsecretsize, 0xA5U);
         clientsecretwritten = 23U;
@@ -463,7 +533,7 @@ static bool stage34_failure_zeroization_test(qsc_tls_named_group group)
         uint8_t badclientshare[QSC_TLS_MAX_HYBRID_CLIENT_KEYSHARE_SIZE] = { 0U };
 
         qsc_memutils_copy(badclientshare, client.publicshare, client.publicsharelen);
-        qsc_memutils_clear(badclientshare + QSC_KYBER_PUBLICKEY_SIZE, 32U);
+        qsc_memutils_clear(badclientshare + QSC_KYBER768_PUBLICKEY_SIZE, 32U);
         qsc_memutils_set_value(serverkeyshare, descriptor->serverpublicsize, 0xA5U);
         qsc_memutils_set_value(serversecret, descriptor->sharedsecretsize, 0xA5U);
         serverkeysharewritten = 29U;
@@ -656,7 +726,7 @@ static bool stage34_client_alert_mapping_test(qsc_tls_named_group group)
     if (res == true)
     {
         /* Corrupt the local ML-KEM decapsulation-key hash so Decaps reports an explicit input/key failure. */
-        kemoffset = stage34_client_kem_private_offset(group) + QSC_KYBER_PRIVATEKEY_SIZE - (2U * QSC_KYBER_SHAREDSECRET_SIZE);
+        kemoffset = stage34_client_kem_private_offset(group) + stage34_client_kem_privatekey_size(group) - (2U * QSC_KYBER768_SHAREDSECRET_SIZE);
         client->keyexchange.privatekey[kemoffset] ^= 0x01U;
         consumed = 0U;
         status = qsc_tls_client_process_record(client, serverflight, serverhellolen, &consumed, clientout, sizeof(clientout), &clientoutlen);

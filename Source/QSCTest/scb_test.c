@@ -13,7 +13,7 @@ bool qsctest_scb_256_kat()
 	bool status;
 	qsc_scb_state ctx = { 0 };
 
-	qsctest_hex_to_bin("ED87E9E2D1788399839835CD12B90820A3ED02C9D770ABE1E3D8D38CEEB9E2C5", exp, sizeof(exp));
+	qsctest_hex_to_bin("8DFD94A8F690DD9F7FA9818088050A256FD6B1DEE9F3AF7CC03993683D541824", exp, sizeof(exp));
 	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F", seed, sizeof(seed));
 
 	status = true;
@@ -26,7 +26,7 @@ bool qsctest_scb_256_kat()
 
 	if (qsc_intutils_are_equal8(hash, exp, sizeof(exp)) == false)
 	{
-		qsctest_print_safe("Failure! scb_512_kat: output does not match the expected answer -SK1 \n");
+		qsctest_print_safe("Failure! scb_256_kat: output does not match the expected answer -SK1 \n");
 		status = false;
 	}
 
@@ -44,8 +44,8 @@ bool qsctest_scb_512_kat()
 	bool status;
 	qsc_scb_state ctx = { 0 };
 
-	qsctest_hex_to_bin("273CD4A8634D25FE2F422E12ADEDCDE46FCA4936D46C4970F9EFEA7EE1835269"
-		"75586C168E95D29203BD59007CC1DA59DEB168946EF6113EB8D3174BF2AB73CD", exp, sizeof(exp));
+	qsctest_hex_to_bin("E035E46C1BE6C3BC4F91F2B4B983B191486884EB3EF65A501064FA4016E84E7E"
+		"B7B5AB4BFF88589933377B43AAA2709F2D8491826FECC4DD79110275EF6863A6", exp, sizeof(exp));
 	qsctest_hex_to_bin("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F"
 		"101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F", seed, sizeof(seed));
 

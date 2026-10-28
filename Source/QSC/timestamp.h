@@ -90,9 +90,7 @@ QSC_CPLUSPLUS_ENABLED_START
  *     printf("Current Time: %s\n", time_str);
  *
  *     // Measure elapsed time using the stopwatch functions.
- *     uint64_t start = qsc_timestamp_epochtime_seconds();
- *     // ... perform some operations ...
- *     uint64_t elapsed = qsc_timestamp_stopwatch_elapsed(start);
+ *     // For monotonic elapsed-time measurement use timerex.h.
  *     printf("Elapsed time: %llu ms\n", elapsed);
  *
  *     return 0;
@@ -185,6 +183,15 @@ QSC_EXPORT_API uint64_t qsc_timestamp_epochtime_microseconds(void);
 * \param tstruct: [const struct tm*] The populated time structure
 */
 QSC_EXPORT_API void qsc_timestamp_time_struct_to_string(char output[QSC_TIMESTAMP_STRING_SIZE], const struct tm* tstruct);
+
+/**
+* \brief Parse the fixed-length QSC local date-time representation with validation.
+* \param tstruct Destination structure; cleared on failure. Caller owns storage.
+* \param input NUL-terminated 19-character date-time string. Caller owns storage.
+* \return True if the complete input is canonical and calendar-valid; false otherwise.
+* \note The function performs no allocations and is thread safe. Leap-second value 60 is accepted.
+*/
+QSC_EXPORT_API bool qsc_timestamp_string_to_time_struct_checked(struct tm* tstruct, const char input[QSC_TIMESTAMP_STRING_SIZE]);
 
 /**
 * \brief Convert a date and time string to a time structure.

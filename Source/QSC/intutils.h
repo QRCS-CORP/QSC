@@ -440,7 +440,8 @@ QSC_EXPORT_API bool qsc_intutils_is_power_of_two(size_t x);
  *
  * \param x: [size_t] The base integer.
  *
- * \return [bool] Returns the closest next power of two.
+ * \return [size_t] The smallest power of two greater than or equal to x,
+ * or 0 if that power cannot be represented by size_t.
  */
 QSC_EXPORT_API size_t qsc_intutils_next_power_of_2(size_t x);
 
@@ -452,6 +453,17 @@ QSC_EXPORT_API size_t qsc_intutils_next_power_of_2(size_t x);
  * \param otplen: [size_t] The length of the output array.
  */
 QSC_EXPORT_API void qsc_intutils_hex_to_bin(const char* hexstr, uint8_t* output, size_t otplen);
+
+/**
+ * \brief Strictly decode a bounded hexadecimal string into bytes.
+ * \param hexstr: ASCII input containing exactly hexlen bytes, without ownership transfer.
+ * \param hexlen: Exact accessible input byte count; must equal twice outlen.
+ * \param output: Caller-owned buffer with capacity for outlen bytes; must not overlap hexstr.
+ * \param outlen: Number of output bytes.
+ * \return True when every input character is hexadecimal and lengths match; otherwise false.
+ * \note On failure output is unchanged. Stateless and thread safe.
+ */
+QSC_EXPORT_API bool qsc_intutils_hex_to_bin_checked(const char* hexstr, size_t hexlen, uint8_t* output, size_t outlen);
 
 /**
  * \brief Convert a byte array to a hexadecimal string.
@@ -470,7 +482,7 @@ QSC_EXPORT_API void qsc_intutils_bin_to_hex(const uint8_t* input, char* hexstr, 
  */
 QSC_EXPORT_API void qsc_intutils_le8increment(uint8_t* output, size_t otplen);
 
-#if defined(QSC_SYSTEM_HAS_AVX)
+#if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_AESNI_ENABLED)
 /**
  * \brief Increment the low 64-bit integer of a 128-bit vector (little-endian) by one.
  *
@@ -576,7 +588,15 @@ QSC_EXPORT_API size_t qsc_intutils_min(size_t a, size_t b);
  */
 QSC_EXPORT_API uint32_t qsc_intutils_popcount32(uint32_t v);
 
-#if defined(QSC_SYSTEM_HAS_AVX)
+/**
+ * \brief Count the number of set bits in a 64-bit unsigned integer.
+ * \param value: Value to count; no pointer ownership or allocation.
+ * \return Number of set bits (0 to 64).
+ * \note Stateless and thread safe; portable scalar implementation.
+ */
+QSC_EXPORT_API uint32_t qsc_intutils_popcount64(uint64_t value);
+
+#if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_AESNI_ENABLED)
 /**
  * \brief Reverse the bytes of a 128-bit integer vector.
  *

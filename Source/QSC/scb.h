@@ -167,18 +167,20 @@ QSC_EXPORT_API void qsc_scb_dispose(qsc_scb_state* ctx);
  * \param info: [const uint8_t*] A pointer to the optional personalization string.
  * \param infolen: [size_t] The length of the personalization string in bytes.
  * \param cpucost: [size_t] The number of iterations for the internal cost mechanism.
- * \param memcost: [size_t] The memory cost in mebibytes (minimum 1, maximum 10000).
+ * \param memcost: [size_t] The memory cost in mebibytes (minimum 1, maximum 128).
+ * \note Invalid parameters leave the context disposed; this API has no error return.
  */
 QSC_EXPORT_API void qsc_scb_initialize(qsc_scb_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, size_t cpucost, size_t memcost);
 
 /**
- * \brief [void] Generate pseudo-random bytes using the random provider.
+ * \brief Generate pseudo-random bytes using the random provider.
  *
  * \param ctx: [qsc_scb_state*] A pointer to the function state.
  * \param output: [uint8_t*] A pointer to the pseudo-random output array.
  * \param otplen: [size_t] The number of bytes to generate.
  * 
- * \return [bool] Returns true on success.
+ * \return [bool] Returns true only when the complete configured memory and CPU work succeeds.
+ * \note Returns false for an invalid context or allocation failure without writing output.
  */
 QSC_EXPORT_API bool qsc_scb_generate(qsc_scb_state* ctx, uint8_t* output, size_t otplen);
 

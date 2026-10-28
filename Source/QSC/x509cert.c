@@ -41,6 +41,63 @@ static qsc_asn1_status x509_require_sequence(const qsc_encoding_ber_element* ele
 	return status;
 }
 
+/**
+ * \brief Locate the exact TBSCertificate DER region in a validated certificate.
+ * \details This function is called only after a complete strict-DER tree has
+ * been decoded. The outer certificate and TBS fields are DER SEQUENCEs, so
+ * both tags have the canonical one-byte value 0x30. The returned region is
+ * borrowed from the input and remains valid while the input remains alive.
+ * \param der Complete, previously validated certificate DER buffer.
+ * \param derlen Size of the certificate DER buffer in bytes.
+ * \param tbs Receives a borrowed pointer to the first child DER element.
+ * \param tbslen Receives the full encoded size of that child in bytes.
+ * \return SUCCESS when the child fits exactly within its validated parent;
+ * INVALID_INPUT, INVALID_TAG, or INVALID_LENGTH otherwise.
+ * \note Does not allocate memory or modify the input; no shared state.
+ */
+static qsc_asn1_status x509_get_validated_tbs_region(const uint8_t* der, size_t derlen, const uint8_t** tbs, size_t* tbslen)
+{
+	qsc_asn1_status status;
+	size_t contentlen;
+	size_t lengthlen;
+	size_t pos;
+	bool indefinite;
+
+	status = QSC_ASN1_STATUS_INVALID_INPUT;
+
+	if (der != (const uint8_t*)NULL && derlen >= 4U && tbs != (const uint8_t**)NULL && tbslen != (size_t*)NULL)
+	{
+		*tbs = (const uint8_t*)NULL;
+		*tbslen = 0U;
+		status = QSC_ASN1_STATUS_INVALID_TAG;
+
+		if (der[0U] == 0x30U)
+		{
+			status = QSC_ASN1_STATUS_INVALID_LENGTH;
+			lengthlen = qsc_encoding_ber_decode_length(der + 1U, derlen - 1U, &contentlen, &indefinite);
+
+			if (lengthlen != 0U && indefinite == false && contentlen == (derlen - 1U - lengthlen))
+			{
+				pos = 1U + lengthlen;
+
+				if (contentlen >= 2U && der[pos] == 0x30U)
+				{
+					lengthlen = qsc_encoding_ber_decode_length(der + pos + 1U, derlen - pos - 1U, &contentlen, &indefinite);
+
+					if (lengthlen != 0U && indefinite == false && contentlen <= (derlen - pos - 1U - lengthlen))
+					{
+						*tbs = der + pos;
+						*tbslen = 1U + lengthlen + contentlen;
+						status = QSC_ASN1_STATUS_SUCCESS;
+					}
+				}
+			}
+		}
+	}
+
+	return status;
+}
+
 static qsc_x509_extension_type x509_extension_type_from_oid(qsc_oid_id id)
 {
 	qsc_x509_extension_type type;
@@ -1312,7 +1369,7 @@ qsc_asn1_status qsc_x509_certificate_decode_der(const uint8_t* der, size_t derle
 
 		if (status == QSC_ASN1_STATUS_SUCCESS)
 		{
-			status = qsc_asn1_der_get_child_region(der, derlen, 0U, &tbsraw, &certificate->tbsdatalen);
+			status = x509_get_validated_tbs_region(der, derlen, &tbsraw, &certificate->tbsdatalen);
 		}
 
 		if (status == QSC_ASN1_STATUS_SUCCESS)

@@ -61,7 +61,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief Contains the primary public API for the Edwards Elliptic Curve Diffie-Hellman key exchange.
  *
  * \details
- * This header defines the API for the EDDH key encapsulation mechanism using the Curve25519/Ed25519 elliptic curve.
+ * This header defines the API for the EDDH key encapsulation mechanism using either the RFC 7748 X25519 or X448 Montgomery curve.
  * It provides functions for generating key pairs (either randomly or seeded) and for performing the key exchange operation
  * (decapsulation) to derive a shared secret.
  *
@@ -87,7 +87,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * \endcode
  *
  * \remarks
- * This EDDH implementation uses the Curve25519/Ed25519 elliptic curve for performing key exchange operations.
+ * This EDDH implementation uses the RFC 7748 X25519 or X448 Montgomery curve for performing key exchange operations.
  * It is intended for secure key encapsulation and is suitable for cryptographic protocols requiring robust,
  * constant-time elliptic curve operations.
  *
@@ -167,9 +167,9 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /**
- * \brief Derives an X25519 public key from an existing private key.
+ * \brief Derives the selected X25519 or X448 public key from an existing private key.
  *
- * The private key is interpreted as 32 raw bytes. Scalar clamping is applied
+ * The private key is interpreted as a raw scalar of QSC_EDDH_PRIVATEKEY_SIZE bytes. Scalar clamping is applied
  * internally during public key derivation, as specified by RFC 7748.
  *
  * This function is intended for use when importing or reconstructing keys from

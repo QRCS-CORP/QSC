@@ -62,8 +62,8 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief Contains the public API and documentation for the ChaCha20 implementation.
  *
  * \details
- * This header defines the API for the ChaCha20 stream cipher implementation used by TLS and specified in RFC?7539. 
- * The cipher supports both 128-bit and 256-bit key sizes (16 or 32 bytes respectively) and requires an 12-byte nonce for initialization.
+ * This header defines the API for the ChaCha20 stream cipher implementation used by TLS and specified in RFC 8439. 
+ * The cipher supports a standard 256-bit key and a legacy 128-bit key; the IETF profile uses a 12-byte nonce.
  * The implementation includes support for AVX, AVX2, and AVX512 intrinsics where available, ensuring high-performance
  * encryption on modern processors. ChaCha20 is widely recognized for its security and efficiency in both software
  * and hardware implementations.
@@ -127,7 +127,10 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 QSC_EXPORT_API typedef struct
 {
-    uint32_t state[16U];    /*!< [uint32_t] The internal state array used by the cipher. */
+    uint32_t state[16U];    /*!< [uint32_t] ChaCha words: counter is word 12, nonce is words 13-15. */
+    uint8_t stream[QSC_CHACHA_BLOCK_SIZE]; /*!< [uint8_t] Unconsumed partial-block keystream. */
+    size_t available;       /*!< [size_t] Number of unread keystream bytes in stream. */
+    bool exhausted;         /*!< [bool] True once the final RFC 8439 counter block has been generated. */
 } qsc_chacha_state;
 
 /*!
@@ -135,7 +138,7 @@ QSC_EXPORT_API typedef struct
  * \brief Key parameters for the ChaCha20 cipher.
  *
  * Contains the secret key and nonce used to initialize the cipher.
- * The key must be either 16 or 32 bytes in length, and the nonce must be 12 bytes.
+ * The key must be 16 or 32 bytes; standard RFC 8439 uses 32 bytes and a 12-byte nonce.
  */
 QSC_EXPORT_API typedef struct
 {
@@ -147,7 +150,7 @@ QSC_EXPORT_API typedef struct
 /**
  * \brief Dispose of the ChaCha20 cipher state.
  *
- * Securely clears the internal state array.
+ * Securely clears the internal state, cached keystream, and counter-exhaustion flags.
  *
  * \param ctx: [qsc_chacha_state*] Pointer to the ChaCha20 state structure.
  */
@@ -157,6 +160,7 @@ QSC_EXPORT_API void qsc_chacha_dispose(qsc_chacha_state* ctx);
  * \brief Initialize the ChaCha20 cipher state with the secret key and nonce.
  *
  * \warning The key must be either 16 or 32 bytes in length, and the nonce must be exactly 12 bytes.
+ * Key parameters and their buffers must not overlap ctx.
  *
  * \param ctx: [qsc_chacha_state*] Pointer to the ChaCha20 state structure.
  * \param keyparams: [const qsc_chacha_keyparams*] Pointer to the key parameters structure containing the key and nonce.
@@ -168,6 +172,10 @@ QSC_EXPORT_API void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chach
  *
  * Encrypts (or decrypts) the input data using the ChaCha20 stream cipher.
  * Since ChaCha20 is a stream cipher, the same function is used for both encryption and decryption.
+ * Partial-block keystream is retained between calls. On counter exhaustion this
+ * legacy void function clears the requested output; use the checked form to
+ * preserve output and report failure explicitly. Exact in-place operation is supported;
+ * partially overlapping input/output buffers are not supported.
  *
  * \param ctx: [qsc_chacha_state*] Pointer to the ChaCha20 state structure.
  * \param output: [uint8_t*] Pointer to the output byte array.
@@ -175,6 +183,18 @@ QSC_EXPORT_API void qsc_chacha_initialize(qsc_chacha_state* ctx, const qsc_chach
  * \param length: [size_t] The number of bytes to process.
  */
 QSC_EXPORT_API void qsc_chacha_transform(qsc_chacha_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/**
+ * \brief Transform ChaCha20 bytes with counter-exhaustion reporting.
+ * \param ctx: [qsc_chacha_state*] Initialized cipher state.
+ * \param output: [uint8_t*] Writable output, at least length bytes.
+ * \param input: [const uint8_t*] Readable input, at least length bytes; may equal output.
+ * \param length: [size_t] Number of bytes to transform.
+ * \return [bool] True if all requested bytes were processed; false on invalid parameters or counter exhaustion.
+ * \warning Changing the size of qsc_chacha_state requires rebuilding dependent binaries.
+ * \note A failure leaves input/output and the cipher state unmodified.
+ */
+QSC_EXPORT_API bool qsc_chacha_transform_checked(qsc_chacha_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /* chacha-poly1305*/
 
@@ -189,8 +209,11 @@ QSC_EXPORT_API typedef struct
 /**
  * \brief Set the associated data (AAD) for ChaCha-Poly1305 authenticated encryption.
  *
- * The associated data is used to authenticate additional information (such as headers) that is not encrypted.
- * It must be set after initialization and before each call to qsc_chacha_poly1305_encrypt
+ * The associated data authenticates headers and other data without encrypting them.
+ * Call at most once per initialized record, before encryption or decryption.
+ * The AAD is padded immediately; this is not an incremental AAD update API.
+ * A NULL data pointer is accepted only when datalen is zero. The context is
+ * single-use: initialize afresh for each record and nonce.
  *
  * \param ctx: [struct] Pointer to the qsc_chacha_poly1305_state structure.
  * \param data:	[const uint8_t*] Pointer to the associated data.
@@ -203,13 +226,15 @@ QSC_EXPORT_API void qsc_chacha_poly1305_set_associated(qsc_chacha_poly1305_state
 /**
  * \brief Decrypt data using the ChaCha-Poly1305 authenticated encryption mode.
  *
- * This function decrypts the plaintext using ChaCha in Poly1305 mode, computes a MAC
- * over the ciphertext, and writes the MAC to the tag parameter.
+ * Authenticates the ciphertext and appended 16-byte tag before producing plaintext.
+ * On tag mismatch, no plaintext is written. The state is consumed even on
+ * authentication failure; initialize a new context for the next record. Cipher and MAC
+ * state are erased after each completed authentication attempt; reuse is rejected.
  *
  * \param ctx: [struct] Pointer to an initialized qsc_chacha_poly1305_state structure.
  * \param output: [uint8_t*] Pointer to the plaintext buffer.
  * \param input: [const uint8_t*] Pointer to the ciphertext data with the appended MAC.
- * \param length: [size_t] Length of the input ciphertext in bytes.
+ * \param length: [size_t] Total input length, including the appended 16-byte MAC.
  *
  * \return [bool] Returns \c true if the MAC verification and transformation was successful; otherwise, \c false.
  *
@@ -233,7 +258,11 @@ QSC_EXPORT_API void qsc_chacha_poly1305_dispose(qsc_chacha_poly1305_state* ctx);
 /**
  * \brief Initialize the ChaCha-Poly1305 state for authenticated encryption or decryption.
  *
- * Generates the cipher key and MAC key from the provided key parameters and sets up the internal states.
+ * Initializes the cipher and derives the one-time Poly1305 key from counter zero.
+ * A 32-byte key is required for RFC 8439 interoperability. The existing 16-byte
+ * key mode is retained for legacy compatibility, not as a standard RFC 8439 AEAD.
+ * Each initialized state processes one authenticated record. Key parameters and their
+ * buffers must not overlap ctx. Invalid parameters erase the previous state.
  * 
  * \warning When using a CTR based construction (ChachaP20 or ChachaP20-Poly1305), the nonce must be unique for a given key.
  * Re-using a nonce-key pair on a different plaintext input represents a catastrophic loss of security.
@@ -251,16 +280,30 @@ QSC_EXPORT_API void qsc_chacha_poly1305_initialize(qsc_chacha_poly1305_state* ct
  * \brief Encrypt data using the ChaCha-Poly1305 authenticated encryption mode.
  *
  * In encryption mode, this function encrypts the plaintext using ChaCha20, computes a MAC
- * over the ciphertext, and appends the MAC to the output.
+ * over the ciphertext, and appends the MAC to the output. On success, the entire
+ * record state is erased and further operations require fresh initialization.
  *
  * \param ctx: [struct] Pointer to an initialized qsc_chacha_poly1305_state structure.
  * \param output: [uint8_t*] Pointer to the output buffer, must be large enough to hold ciphertext plus MAC.
- * \param input: [const uint8_t*] Pointer to the input data; ciphertext with appended MAC.
+ * \param input: [const uint8_t*] Pointer to the plaintext; may equal output. A NULL pointer is valid only for an empty plaintext.
  * \param length: [size_t] Length of the input data in bytes (excluding the MAC for decryption).
  *
  * \sa qsc_chacha_poly1305_initialize, qsc_chacha_poly1305_set_associated
  */
 QSC_EXPORT_API void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/**
+ * \brief Encrypt and authenticate with explicit counter-exhaustion reporting.
+ * \param ctx: [qsc_chacha_poly1305_state*] Initialized cipher and authenticator.
+ * \param output: [uint8_t*] Ciphertext plus 16-byte tag buffer.
+ * \param input: [const uint8_t*] Plaintext buffer, may equal output.
+ * \param length: [size_t] Plaintext byte count.
+ * \return [bool] True on complete success, false if the record cannot be processed safely.
+ * \note On error the output and stream counter are not modified. The caller
+ * must provide space for length plus 16 authentication-tag bytes.
+ */
+QSC_EXPORT_API bool qsc_chacha_poly1305_encrypt_checked(qsc_chacha_poly1305_state* ctx, uint8_t* output,
+    const uint8_t* input, size_t length);
 
 QSC_CPLUSPLUS_ENABLED_END
 

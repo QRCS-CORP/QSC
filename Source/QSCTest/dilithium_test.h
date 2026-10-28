@@ -129,6 +129,27 @@
  */
 bool qsctest_dilithium_kat_test(void);
 
+/** \brief Verify ML-DSA-44 keys, signature and message against its competition-format KAT.
+ * \return True if all expected vector results match; false otherwise.
+ * \note Runs sequentially using QSCTest's process-global NIST RNG, not thread-safe.
+ *       The legacy competition vectors are not FIPS 204 final ACVP proof.
+ */
+bool qsctest_mldsa44_kat_test(void);
+
+/** \brief Verify ML-DSA-65 keys, signature and message against its competition-format KAT.
+ * \return True if all expected vector results match; false otherwise.
+ * \note Runs sequentially using QSCTest's process-global NIST RNG, not thread-safe.
+ *       The legacy competition vectors are not FIPS 204 final ACVP proof.
+ */
+bool qsctest_mldsa65_kat_test(void);
+
+/** \brief Verify ML-DSA-87 keys, signature and message against its competition-format KAT.
+ * \return True if all expected vector results match; false otherwise.
+ * \note Runs sequentially using QSCTest's process-global NIST RNG, not thread-safe.
+ *       The legacy competition vectors are not FIPS 204 final ACVP proof.
+ */
+bool qsctest_mldsa87_kat_test(void);
+
 /**
  * \brief Tests the integrity of a mutated secret key.
  *
@@ -194,5 +215,81 @@ bool qsctest_dilithium_stress_test(void);
  * Test results are printed to the console.
  */
 void qsctest_dilithium_run(void);
+
+/** \brief Validate the ML-DSA-44 parameter-specific pointer, length and context contracts.
+ * \return True if the boundary and tamper checks pass.
+ */
+bool qsctest_mldsa44_boundary_test(void);
+
+/** \brief Validate the ML-DSA-65 parameter-specific pointer, length and context contracts.
+ * \return True if the boundary and tamper checks pass.
+ */
+bool qsctest_mldsa65_boundary_test(void);
+
+/** \brief Validate the ML-DSA-87 parameter-specific pointer, length and context contracts.
+ * \return True if the boundary and tamper checks pass.
+ */
+bool qsctest_mldsa87_boundary_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-44 keyGen tcId=1.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa44_acvp_tc1_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-44 keyGen tcId=2.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa44_acvp_tc2_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-44 keyGen tcId=3.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa44_acvp_tc3_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-65 keyGen tcId=26.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa65_acvp_tc26_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-65 keyGen tcId=27.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa65_acvp_tc27_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-65 keyGen tcId=28.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa65_acvp_tc28_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-87 keyGen tcId=51.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa87_acvp_tc51_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-87 keyGen tcId=52.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa87_acvp_tc52_test(void);
+
+/** \brief Run NIST ACVP FIPS 204 ML-DSA-87 keyGen tcId=53.
+ * \return True if official key fingerprints match.
+ */
+bool qsctest_mldsa87_acvp_tc53_test(void);
+
+
+/** \brief Test ML-DSA-44 detached signature length and malformed inputs.
+ * \return True if only canonically framed valid signatures are accepted.
+ */
+bool qsctest_mldsa44_signature_format_test(void);
+
+/** \brief Test ML-DSA-65 detached signature length and malformed inputs.
+ * \return True if only canonically framed valid signatures are accepted.
+ */
+bool qsctest_mldsa65_signature_format_test(void);
+
+/** \brief Test ML-DSA-87 detached signature length and malformed inputs.
+ * \return True if only canonically framed valid signatures are accepted.
+ */
+bool qsctest_mldsa87_signature_format_test(void);
 
 #endif

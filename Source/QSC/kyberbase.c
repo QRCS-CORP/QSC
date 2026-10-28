@@ -1,7 +1,61 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "kyberbase.h"
 #include "intutils.h"
 #include "memutils.h"
 #include "sha3.h"
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+#	include "intrinsics.h"
+#endif
 
 #define KYBER_ZETA_SIZE 128
 #define KYBER_MONT 2285U /* 2^16 mod q */
@@ -50,6 +104,52 @@ static int16_t kyber_barrett_reduce(int16_t a)
 
     return (a - t);
 }
+
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+/**
+ * \brief Multiply eight signed coefficient pairs and apply Montgomery reduction.
+ * \param a: [int16x8_t] First coefficient vector.
+ * \param b: [int16x8_t] Second coefficient vector.
+ * \return Eight products multiplied by 2^-16 modulo 3329, with scalar representatives.
+ * \note Reentrant; owns no storage. Uses the arithmetic of pq-crystals/kyber
+ * ref/reduce.c at commit 3edd5af5991927164edd4aacebfcbee00b8064e7.
+ * https://github.com/pq-crystals/kyber/tree/3edd5af5991927164edd4aacebfcbee00b8064e7/ref
+ */
+static int16x8_t kyber_fqmul_arm(int16x8_t a, int16x8_t b)
+{
+	int32x4_t lo;
+	int32x4_t hi;
+	int16x8_t t;
+
+	lo = vmull_s16(vget_low_s16(a), vget_low_s16(b));
+	hi = vmull_s16(vget_high_s16(a), vget_high_s16(b));
+	t = vmulq_n_s16(vcombine_s16(vmovn_s32(lo), vmovn_s32(hi)), (int16_t)KYBER_QINV);
+	lo = vsubq_s32(lo, vmull_n_s16(vget_low_s16(t), QSC_KYBER_Q));
+	hi = vsubq_s32(hi, vmull_n_s16(vget_high_s16(t), QSC_KYBER_Q));
+
+	return vcombine_s16(vshrn_n_s32(lo, 16), vshrn_n_s32(hi, 16));
+}
+
+/**
+ * \brief Barrett-reduce eight signed coefficients using the scalar rounding rule.
+ * \param a: [int16x8_t] Eight signed 16-bit coefficients.
+ * \return Centered representatives modulo 3329.
+ * \note Reentrant; owns no storage. Follows the same official reference as fqmul.
+ */
+static int16x8_t kyber_barrett_arm(int16x8_t a)
+{
+	const int16_t v = ((1 << 26) + QSC_KYBER_Q / 2) / QSC_KYBER_Q;
+	int32x4_t lo;
+	int32x4_t hi;
+	int16x8_t t;
+
+	lo = vmlal_n_s16(vdupq_n_s32(1 << 25), vget_low_s16(a), v);
+	hi = vmlal_n_s16(vdupq_n_s32(1 << 25), vget_high_s16(a), v);
+	t = vcombine_s16(vmovn_s32(vshrq_n_s32(lo, 26)), vmovn_s32(vshrq_n_s32(hi, 26)));
+
+	return vsubq_s16(a, vmulq_n_s16(t, QSC_KYBER_Q));
+}
+#endif
 
 /* poly.h */
 
@@ -115,7 +215,7 @@ static uint32_t kyber_load24le(const uint8_t x[3U])
     return r;
 }
 
-static void kyber_cbd3(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4U])
+static void kyber_cbd3(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4U])
 {
     size_t i;
     size_t j;
@@ -164,7 +264,22 @@ static void kyber_ntt(int16_t r[QSC_KYBER_N])
             zeta = (int16_t)kyber_zetas[k];
             ++k;
 
-            for (j = start; j < start + len; ++j)
+			j = start;
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+			for (; j + 8U <= start + len; j += 8U)
+			{
+				int16x8_t a;
+				int16x8_t b;
+				int16x8_t c;
+
+				a = vld1q_s16(r + j);
+				b = vld1q_s16(r + j + len);
+				c = kyber_fqmul_arm(vdupq_n_s16(zeta), b);
+				vst1q_s16(r + j + len, vsubq_s16(a, c));
+				vst1q_s16(r + j, vaddq_s16(a, c));
+			}
+#endif
+			for (; j < start + len; ++j)
             {
                 t = kyber_fqmul(zeta, r[j + len]);
                 r[j + len] = r[j] - t;
@@ -191,7 +306,23 @@ static void kyber_invntt(int16_t r[256U])
             zeta = (int16_t)kyber_zetas[k];
             --k;
 
-            for (j = start; j < start + len; ++j)
+			j = start;
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+			for (; j + 8U <= start + len; j += 8U)
+			{
+				int16x8_t a;
+				int16x8_t b;
+				int16x8_t c;
+
+				a = vld1q_s16(r + j);
+				b = vld1q_s16(r + j + len);
+				c = kyber_barrett_arm(vaddq_s16(a, b));
+				b = kyber_fqmul_arm(vdupq_n_s16(zeta), vsubq_s16(b, a));
+				vst1q_s16(r + j, c);
+				vst1q_s16(r + j + len, b);
+			}
+#endif
+			for (; j < start + len; ++j)
             {
                 t = r[j];
                 r[j] = kyber_barrett_reduce(t + r[j + len]);
@@ -201,12 +332,20 @@ static void kyber_invntt(int16_t r[256U])
         }
     }
 
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+	for (j = 0U; j < QSC_KYBER_N; j += 8U)
+	{
+		vst1q_s16(r + j, kyber_fqmul_arm(vld1q_s16(r + j), vdupq_n_s16(F)));
+	}
+#else
     for (j = 0U; j < 256U; ++j)
     {
         r[j] = kyber_fqmul(r[j], F);
     }
+#endif
 }
 
+#if !defined(QSC_SYSTEM_ARM_INTRINSICS)
 static void kyber_basemul(int16_t r[2U], const int16_t a[2U], const int16_t b[2U], int16_t zeta)
 {
     r[0U] = kyber_fqmul(a[1U], b[1U]);
@@ -216,9 +355,11 @@ static void kyber_basemul(int16_t r[2U], const int16_t a[2U], const int16_t b[2U
     r[1U] += kyber_fqmul(a[1U], b[0U]);
 }
 
+#endif
+
 /* poly.c */
 
-static void kyber_poly_cbd_eta1(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA2 * QSC_KYBER_N / 4U])
+static void kyber_poly_cbd_eta1(qsc_kyber_poly* r, const uint8_t buf[QSC_KYBER_ETA1 * QSC_KYBER_N / 4U])
 {
 #if QSC_KYBER_ETA1 == 2
     kyber_cbd2(r, buf);
@@ -415,10 +556,17 @@ static void kyber_poly_get_noise_eta2(qsc_kyber_poly* r, const uint8_t seed[QSC_
 
 static void kyber_poly_reduce(qsc_kyber_poly* r)
 {
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+	for (size_t i = 0U; i < QSC_KYBER_N; i += 8U)
+	{
+		vst1q_s16(r->coeffs + i, kyber_barrett_arm(vld1q_s16(r->coeffs + i)));
+	}
+#else
     for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = kyber_barrett_reduce(r->coeffs[i]);
     }
+#endif
 }
 
 static void kyber_poly_ntt(qsc_kyber_poly* r)
@@ -434,37 +582,83 @@ static void kyber_poly_invntt_to_mont(qsc_kyber_poly* r)
 
 static void kyber_poly_basemul_montgomery(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+	for (size_t i = 0U; i < QSC_KYBER_N; i += 16U)
+	{
+		int16_t zeta[8U];
+		int16x8x2_t av;
+		int16x8x2_t bv;
+		int16x8x2_t rv;
+
+		for (size_t j = 0U; j < 4U; ++j)
+		{
+			zeta[2U * j] = (int16_t)kyber_zetas[64U + (i / 4U) + j];
+			zeta[(2U * j) + 1U] = -zeta[2U * j];
+		}
+
+		av = vld2q_s16(a->coeffs + i);
+		bv = vld2q_s16(b->coeffs + i);
+		rv.val[0U] = kyber_fqmul_arm(kyber_fqmul_arm(av.val[1U], bv.val[1U]), vld1q_s16(zeta));
+		rv.val[0U] = vaddq_s16(rv.val[0U], kyber_fqmul_arm(av.val[0U], bv.val[0U]));
+		rv.val[1U] = vaddq_s16(kyber_fqmul_arm(av.val[0U], bv.val[1U]), kyber_fqmul_arm(av.val[1U], bv.val[0U]));
+		vst2q_s16(r->coeffs + i, rv);
+	}
+#else
     for (size_t i = 0U; i < QSC_KYBER_N / 4U; ++i)
     {
         kyber_basemul(&r->coeffs[4U * i], &a->coeffs[4U * i], &b->coeffs[4U * i], (int16_t)kyber_zetas[64U + i]);
         kyber_basemul(&r->coeffs[(4U * i) + 2U], &a->coeffs[(4U * i) + 2U], &b->coeffs[(4U * i) + 2U], -(int16_t)kyber_zetas[64U + i]);
     }
+#endif
 }
 
 static void kyber_poly_to_mont(qsc_kyber_poly* r)
 {
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+	const int16_t F = (1ULL << 32) % QSC_KYBER_Q;
+
+	for (size_t i = 0U; i < QSC_KYBER_N; i += 8U)
+	{
+		vst1q_s16(r->coeffs + i, kyber_fqmul_arm(vld1q_s16(r->coeffs + i), vdupq_n_s16(F)));
+	}
+#else
     const int16_t F = (1ULL << 32) % QSC_KYBER_Q;
 
     for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = kyber_montgomery_reduce((int32_t)r->coeffs[i] * F);
     }
+#endif
 }
 
 static void kyber_poly_add(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+	for (size_t i = 0U; i < QSC_KYBER_N; i += 8U)
+	{
+		vst1q_s16(r->coeffs + i, vaddq_s16(vld1q_s16(a->coeffs + i), vld1q_s16(b->coeffs + i)));
+	}
+#else
     for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
     }
+#endif
 }
 
 static void kyber_poly_sub(qsc_kyber_poly* r, const qsc_kyber_poly* a, const qsc_kyber_poly* b)
 {
+#if defined(QSC_SYSTEM_ARM_INTRINSICS)
+	for (size_t i = 0U; i < QSC_KYBER_N; i += 8U)
+	{
+		vst1q_s16(r->coeffs + i, vsubq_s16(vld1q_s16(a->coeffs + i), vld1q_s16(b->coeffs + i)));
+	}
+#else
     for (size_t i = 0U; i < QSC_KYBER_N; ++i)
     {
         r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
     }
+#endif
 }
 
 /* polyvec.c */
@@ -989,6 +1183,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
     fail = qsc_intutils_verify(ct, cmp + QSC_KYBER_SYMBYTES, QSC_KYBER_CIPHERTEXT_BYTES);
 
     qsc_memutils_copy(cmp, sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
+    qsc_memutils_copy(cmp + QSC_KYBER_SYMBYTES, ct, QSC_KYBER_CIPHERTEXT_BYTES);
     qsc_keccak_absorb(&kctx, qsc_keccak_rate_256, cmp, sizeof(cmp), QSC_KECCAK_SHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
     qsc_memutils_secure_erase(cmp, sizeof(cmp));
     qsc_keccak_permute(&kctx, QSC_KECCAK_PERMUTATION_ROUNDS);
@@ -1005,11 +1200,7 @@ bool qsc_kyber_ref_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct[
     qsc_intutils_cmov(ss, kr, QSC_KYBER_SYMBYTES, (uint8_t)!fail);
     qsc_memutils_secure_erase(kr, sizeof(kr));
 
-    /* Note: in the FIPS specification decapsulate always returns true even on failure,
-    * as a means to guard against a decryption oracle. In the real world however,
-    * that failure will propagate in tunnel failures which will reveal the decapsulation failure,
-    * but without any ability to defend against it or log it administratively. For this reason,
-    * this is an ineffective and unrealistic defense against the oracle,
-    * and implement the decapsulation failure signal. */
-    return (fail == 0);
+    /* FIPS 203 implicit rejection keeps ciphertext validity private.
+     * Both valid and invalid ciphertexts produce a shared secret. */
+    return true;
 }

@@ -1,22 +1,10 @@
 #include "x509sig.h"
 #include "dilithium.h"
-#include "eddsa.h"
+#include "eddsa25519.h"
+#include "eddsa448.h"
 #include "encoding.h"
 #include "memutils.h"
 #include "x509spki.h"
-
-static qsc_x509_pqc_parameter_set x509_sig_active_mldsa_parameter_set(void)
-{
-#if defined(QSC_DILITHIUM_S1P44)
-    return QSC_X509_PQC_PARAMETER_SET_ML_DSA_44;
-#elif defined(QSC_DILITHIUM_S3P65)
-    return QSC_X509_PQC_PARAMETER_SET_ML_DSA_65;
-#elif defined(QSC_DILITHIUM_S5P87)
-    return QSC_X509_PQC_PARAMETER_SET_ML_DSA_87;
-#else
-    return QSC_X509_PQC_PARAMETER_SET_NONE;
-#endif
-}
 
 static void x509_signature_initialize(qsc_x509_ecdsa_signature* signature)
 {
@@ -187,19 +175,23 @@ bool qsc_x509_signature_algorithm_matches_spki(qsc_x509_signature_algorithm algo
         {
             if (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_EC)
             {
-                res = ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA256) &&
-                    (spki->algorithm.curve == QSC_X509_NAMED_CURVE_PRIME256V1)) ||
-                    ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384) &&
-                    (spki->algorithm.curve == QSC_X509_NAMED_CURVE_SECP384R1)) ||
-                    ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512) &&
+                res = ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA256) ||
+                    (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA384) ||
+                    (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ECDSA_SHA512)) &&
+                    ((spki->algorithm.curve == QSC_X509_NAMED_CURVE_PRIME256V1) ||
+                    (spki->algorithm.curve == QSC_X509_NAMED_CURVE_SECP384R1) ||
                     (spki->algorithm.curve == QSC_X509_NAMED_CURVE_SECP521R1));
             }
         }
-		else if (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519)
-		{
-			res = (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) &&
-				(spki->algorithm.parameters_present == false);
-		}
+		else if ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519) ||
+            (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED448))
+        {
+            res = (((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519) &&
+                (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)) ||
+                ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED448) &&
+                (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED448))) &&
+                (spki->algorithm.parameters_present == false);
+        }
         else if (qsc_x509_signature_algorithm_is_ml_dsa(algorithm) == true)
         {
             if (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA)
@@ -228,24 +220,15 @@ size_t qsc_x509_signature_expected_size(qsc_x509_signature_algorithm algorithm, 
         res = (2U * qsc_x509_signature_component_size(curve));
     }
 	else if (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED25519)
-	{
-		res = QSC_EDDSA_SIGNATURE_SIZE;
-	}
+    {
+        res = QSC_ED25519_SIGNATURE_SIZE;
+    }
+    else if (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ED448)
+    {
+        res = QSC_ED448_SIGNATURE_SIZE;
+    }
     else if (qsc_x509_signature_algorithm_is_ml_dsa(algorithm) == true)
     {
-#if defined(QSC_DILITHIUM_SIGNATURE_SIZE)
-        qsc_x509_pqc_parameter_set active;
-
-        active = x509_sig_active_mldsa_parameter_set();
-
-        if (((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44) && (active == QSC_X509_PQC_PARAMETER_SET_ML_DSA_44)) ||
-            ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_65) && (active == QSC_X509_PQC_PARAMETER_SET_ML_DSA_65)) ||
-            ((algorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_87) && (active == QSC_X509_PQC_PARAMETER_SET_ML_DSA_87)))
-        {
-            res = QSC_DILITHIUM_SIGNATURE_SIZE;
-        }
-        else
-#endif
         if (algorithm == QSC_X509_SIGNATURE_ALGORITHM_ML_DSA_44)
         {
             res = 2420U;

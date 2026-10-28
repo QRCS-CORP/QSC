@@ -99,7 +99,9 @@ QSC_CPLUSPLUS_ENABLED_START
 /**
  * \brief Flush a cache line.
  *
- * \param address: [void*] The memory address.
+ * \param address: [void*] A valid accessible memory address.
+ * \note On ARM64, the operating system must permit user-mode cache maintenance.
+ * Unsupported targets perform no operation. This is not a secure erase operation.
  */
 QSC_EXPORT_API void qsc_memutils_flush_cache_line(void *address);
 
@@ -194,6 +196,20 @@ QSC_EXPORT_API void* qsc_memutils_aligned_alloc(int32_t align, size_t length);
 QSC_EXPORT_API void* qsc_memutils_aligned_realloc(void* block, size_t length);
 
 /**
+ * \brief Resize an aligned allocation with an explicitly supplied old size and alignment.
+ *
+ * \param block: [void*] Original aligned allocation, or NULL to allocate.
+ * \param old_length: [size_t] Readable byte count in block, zero if block is NULL.
+ * \param length: [size_t] Requested allocation size, nonzero.
+ * \param align: [int32_t] Power-of-two alignment not less than sizeof(void*).
+ *
+ * \return [void*] Resized aligned block, or NULL on failure. A successful
+ * allocation releases the original block; a failure leaves it unchanged.
+ * \note This operation is not safe while other threads access block.
+ */
+QSC_EXPORT_API void* qsc_memutils_aligned_resize(void* block, size_t old_length, size_t length, int32_t align);
+
+/**
  * \brief Free an aligned memory block.
  *
  * \param block: [void*] A pointer to the memory block to release.
@@ -278,7 +294,7 @@ QSC_EXPORT_API void qsc_memutils_copy(void* output, const void* input, size_t le
  */
 QSC_EXPORT_API void qsc_memutils_clmulepi64_si128(uint64_t r[2U], const uint64_t a[2U], const uint64_t b[2U], int32_t imm8);
 
-#if defined(QSC_SYSTEM_HAS_AVX) && defined(QSC_SYSTEM_X86)
+#if defined(QSC_SYSTEM_HAS_PCLMUL) && defined(QSC_SYSTEM_X86)
 /**
  * \brief Multiply two 256-bit field elements (each represented as two 128-bit integers) 
  * to produce a 512-bit product.

@@ -50,66 +50,44 @@ static const qsc_tls_named_group TLS_SOCKET_DEFAULT_GROUPS[] =
 
 static const qsc_tls_signature_scheme TLS_SOCKET_DEFAULT_SIGSCHEMES[] =
 {
-#if defined(QSC_ECDSA_S1P256)
     qsc_tls_sig_ecdsa_secp256r1_sha256,
-#elif defined(QSC_ECDSA_S3P384)
     qsc_tls_sig_ecdsa_secp384r1_sha384,
-#elif defined(QSC_ECDSA_S5P521)
     qsc_tls_sig_ecdsa_secp521r1_sha512,
-#endif
-#if defined(QSC_EDDSA_S1EC25519)
     qsc_tls_sig_ed25519,
-#endif
+    qsc_tls_sig_ed448
 };
 
 static const qsc_tls_named_group TLS_SOCKET_MLKEM_HYBRID_GROUPS[] =
 {
-#if defined(QSC_KYBER_S1K2P512)
-    qsc_tls_group_mlkem512,
-#elif defined(QSC_KYBER_S3K3P768)
     qsc_tls_group_x25519_mlkem768,
-#elif defined(QSC_KYBER_S5K4P1024)
+    qsc_tls_group_secp256r1_mlkem768,
     qsc_tls_group_secp384r1_mlkem1024,
-#endif
     qsc_tls_group_x25519,
     qsc_tls_group_secp256r1
 };
 
 static const qsc_tls_named_group TLS_SOCKET_EXPERIMENTAL_PQC_GROUPS[] =
 {
-#if defined(QSC_KYBER_S1K2P512)
-    qsc_tls_group_mlkem512,
-#elif defined(QSC_KYBER_S3K3P768)
     qsc_tls_group_x25519_mlkem768,
     qsc_tls_group_secp256r1_mlkem768,
-    qsc_tls_group_mlkem768,
-#elif defined(QSC_KYBER_S5K4P1024)
     qsc_tls_group_secp384r1_mlkem1024,
+    qsc_tls_group_mlkem512,
+    qsc_tls_group_mlkem768,
     qsc_tls_group_mlkem1024,
-#endif
     qsc_tls_group_x25519,
     qsc_tls_group_secp256r1
 };
 
 static const qsc_tls_signature_scheme TLS_SOCKET_EXPERIMENTAL_PQC_SIGSCHEMES[] =
 {
-#if defined(QSC_DILITHIUM_S1P44)
     qsc_tls_sig_mldsa44,
-#elif defined(QSC_DILITHIUM_S3P65)
     qsc_tls_sig_mldsa65,
-#elif defined(QSC_DILITHIUM_S5P87)
     qsc_tls_sig_mldsa87,
-#endif
-#if defined(QSC_ECDSA_S1P256)
     qsc_tls_sig_ecdsa_secp256r1_sha256,
-#elif defined(QSC_ECDSA_S3P384)
     qsc_tls_sig_ecdsa_secp384r1_sha384,
-#elif defined(QSC_ECDSA_S5P521)
     qsc_tls_sig_ecdsa_secp521r1_sha512,
-#endif
-#if defined(QSC_EDDSA_S1EC25519)
     qsc_tls_sig_ed25519,
-#endif
+    qsc_tls_sig_ed448
 };
 
 static const uint32_t TLS_SOCKET_OPTION_INT32_MAX = 2147483647UL;

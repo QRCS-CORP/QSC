@@ -453,13 +453,18 @@ QSC_CPLUSPLUS_ENABLED_START
         * \brief Also defined for x86 architectures.
         */
 #		define QSC_SYSTEM_ARCH_IX86
-#   elif defined(_M_ARM)
+#   elif defined(_M_ARM) || defined(_M_ARM64)
         /*!
         * \def QSC_SYSTEM_ARCH_ARM
         * \brief Defined when building for ARM architectures.
         */
 #		define QSC_SYSTEM_ARCH_ARM
-#       if defined(_M_ARM_ARMV7VE)
+#       if defined(_M_ARM64)
+            /*! \def QSC_SYSTEM_ARCH_ARM64
+             * \brief Defined when building for Microsoft ARM64.
+             */
+#           define QSC_SYSTEM_ARCH_ARM64
+#       elif defined(_M_ARM_ARMV7VE)
             /*!
             * \def QSC_SYSTEM_ARCH_ARMV7VE
             * \brief Defined when building for ARM V7VE.
@@ -471,12 +476,6 @@ QSC_CPLUSPLUS_ENABLED_START
             * \brief Defined when building for ARM with floating point support.
             */
 #			define QSC_SYSTEM_ARCH_ARMFP
-#       elif defined(_M_ARM64)
-            /*!
-            * \def QSC_SYSTEM_ARCH_ARM64
-            * \brief Defined when building for ARM64.
-            */
-#			define QSC_SYSTEM_ARCH_ARM64
 #       endif
 #   elif defined(_M_IA64)
         /*!
@@ -922,23 +921,6 @@ QSC_CPLUSPLUS_ENABLED_START
 #	    define QSC_SYSTEM_HAS_SSE42
 #   endif
 
-#   if defined(__ARM_NEON) || defined(__ARM_NEON__)
-        /*!
-        * \def QSC_SYSTEM_HAS_ARM_NEON
-        * \brief Defined if the system supports ARM NEON instructions.
-        */
-#       define QSC_SYSTEM_HAS_ARM_NEON
-#   endif
-
-        /*!
-        * \def QSC_SYSTEM_HAS_ARM_SVE
-        * \brief Defined if the system supports ARM SVE
-        * ARMv8.2-A and later; GCC/Clang define __ARM_FEATURE_SVE
-        */
-#   if defined(__ARM_FEATURE_SVE)
-#       define QSC_SYSTEM_HAS_ARM_SVE
-#   endif
-
         /*!
         * \def QSC_SYSTEM_HAS_RVV
         * \brief Defined if the system supports RISC-V RVV 1.0
@@ -986,6 +968,77 @@ QSC_CPLUSPLUS_ENABLED_START
     * \brief Defined if the system supports AVX intrinsics.
     */
 #	define QSC_SYSTEM_AVX_INTRINSICS
+#   endif
+#endif
+
+/*!
+ * \def QSC_SYSTEM_ARM_INTRINSICS_DISABLED
+ * \brief Define to disable QSC ARM intrinsic paths at compile time.
+ *
+ * This switch does not disable compiler auto-vectorization. It selects the
+ * existing portable implementations without changing their public interfaces.
+ */
+/* #define QSC_SYSTEM_ARM_INTRINSICS_DISABLED */
+
+/*!
+ * \def QSC_SYSTEM_ARM_CRYPTO_ENABLED
+ * \brief Explicitly enable AES and SHA-256 instructions for a Microsoft ARM64 target.
+ *
+ * Define only when the deployment CPU supports AES, PMULL, and SHA-256. GCC and Clang
+ * use their target feature macros instead, for example with -march=armv8-a+crypto.
+ * These are compile-time selections; they do not perform runtime dispatch.
+ */
+/* #define QSC_SYSTEM_ARM_CRYPTO_ENABLED */
+
+#if defined(QSC_SYSTEM_ARCH_ARM64) && !defined(QSC_SYSTEM_ARM_INTRINSICS_DISABLED)
+#   if defined(__ARM_NEON) || defined(__ARM_NEON__) || defined(_M_ARM64)
+        /*! \def QSC_SYSTEM_HAS_ARM_NEON
+         * \brief Enables the AArch64 Advanced SIMD implementations.
+         * Existing NEON helpers require AArch64; ARM32 retains portable paths.
+         */
+#       define QSC_SYSTEM_HAS_ARM_NEON
+        /*! \def QSC_SYSTEM_ARM_INTRINSICS
+         * \brief ARM counterpart of QSC_SYSTEM_AVX_INTRINSICS.
+         */
+#       define QSC_SYSTEM_ARM_INTRINSICS
+#   endif
+#   if defined(QSC_SYSTEM_HAS_ARM_NEON) && \
+       (defined(__ARM_FEATURE_SHA2) || defined(__ARM_FEATURE_CRYPTO) || \
+       (defined(_M_ARM64) && defined(QSC_SYSTEM_ARM_CRYPTO_ENABLED)))
+        /*! \def QSC_SYSTEM_ARM_SHA256_ENABLED
+         * \brief Enables ARM SHA-256 instructions for the selected compiler target.
+         * GCC/Clang example: -march=armv8-a+crypto. No runtime dispatch is performed.
+         */
+#       define QSC_SYSTEM_ARM_SHA256_ENABLED
+#   endif
+#   if defined(QSC_SYSTEM_HAS_ARM_NEON) && defined(__ARM_FEATURE_SHA512)
+        /*! \def QSC_SYSTEM_ARM_SHA512_ENABLED
+         * \brief Enables ARM SHA-512 instructions, also used by SHA-384.
+         * GCC/Clang example: -march=armv8.2-a+sha3. Requires FEAT_SHA512.
+         */
+#       define QSC_SYSTEM_ARM_SHA512_ENABLED
+#   endif
+#   if defined(QSC_SYSTEM_HAS_ARM_NEON) && defined(__ARM_FEATURE_SHA3)
+        /*! \def QSC_SYSTEM_ARM_SHA3_ENABLED
+         * \brief Enables SHA3 extension instructions for an explicitly selected target.
+         * GCC/Clang example: -march=armv8.2-a+sha3. No runtime dispatch is performed.
+         */
+#       define QSC_SYSTEM_ARM_SHA3_ENABLED
+#   endif
+#   if defined(__ARM_FEATURE_SVE)
+        /*! \def QSC_SYSTEM_HAS_ARM_SVE
+         * \brief Enables SVE when the compiler target explicitly supports it.
+         */
+#       define QSC_SYSTEM_HAS_ARM_SVE
+#   endif
+#   if defined(QSC_SYSTEM_HAS_ARM_NEON) && \
+       (defined(__ARM_FEATURE_AES) || defined(__ARM_FEATURE_CRYPTO) || \
+       (defined(_M_ARM64) && defined(QSC_SYSTEM_ARM_CRYPTO_ENABLED)))
+        /*! \def QSC_SYSTEM_ARM_AES_ENABLED
+         * \brief Enables ARM AES rounds, key substitution, and PMULL GHASH.
+         * The deployment CPU must support the selected instructions.
+         */
+#       define QSC_SYSTEM_ARM_AES_ENABLED
 #   endif
 #endif
 
@@ -1052,11 +1105,14 @@ QSC_CPLUSPLUS_ENABLED_START
 #  define QSC_SIMD_ALIGN
 #endif
 
-#if defined(QSC_SYSTEM_AVX_INTRINSICS)
-    /*!
-    * \def QSC_RDRAND_COMPATIBLE
-    * \brief Defined if the CPU is RDRAND compatible.
-    */
+/*!
+ * \def QSC_RDRAND_COMPATIBLE
+ * \brief Enables the RDRAND intrinsic for a compile target supporting RDRAND.
+ * \details GCC/Clang expose __RDRND__ with -mrdrnd. MSVC callers must opt in
+ * explicitly for a suitably provisioned deployment; qsc_rdrand_available()
+ * also checks runtime CPUID. AVX does not imply RDRAND.
+ */
+#if !defined(QSC_RDRAND_COMPATIBLE) && defined(QSC_SYSTEM_X86) && defined(__RDRND__)
 #	define QSC_RDRAND_COMPATIBLE
 #endif
 
@@ -1076,14 +1132,65 @@ QSC_CPLUSPLUS_ENABLED_START
     User Modifiable Values and Cryptographic Parameter Sets
 ==============================================================================*/
 
-#if !defined(QSC_SYSTEM_AESNI_ENABLED)
-#	if defined(QSC_SYSTEM_AVX_INTRINSICS)
-        /*!
-        * \def QSC_SYSTEM_AESNI_ENABLED
-        * \brief Enable the use of intrinsics and the AES-NI implementation.
-        */
+/*!
+ * \def QSC_SYSTEM_AESNI_ENABLED
+ * \brief Enables the 128-bit x86 AES-NI implementation.
+ * \details GCC, Clang, and Intel compilers use explicit AES and SSSE3
+ * target feature macros. Native MSVC lacks equivalent AES-NI feature macros,
+ * so an AVX-enabled MSVC target uses the established compatibility fallback.
+ * This fallback assumes the deployment CPU supports AES-NI and SSSE3; AVX
+ * does not guarantee these features. This is not runtime CPU dispatch.
+ */
+#if !defined(QSC_SYSTEM_AESNI_ENABLED) && defined(QSC_SYSTEM_X86)
+#	if defined(__AES__) && defined(__SSSE3__)
+#		define QSC_SYSTEM_AESNI_ENABLED
+#	elif defined(QSC_SYSTEM_COMPILER_MSC) && !defined(QSC_SYSTEM_COMPILER_CLANG) && \
+		!defined(QSC_SYSTEM_COMPILER_INTEL) && !defined(__INTEL_LLVM_COMPILER) && \
+		defined(QSC_SYSTEM_AVX_INTRINSICS)
 #		define QSC_SYSTEM_AESNI_ENABLED
 #	endif
+#endif
+
+/*!
+ * \def QSC_SYSTEM_HAS_PCLMUL
+ * \brief Enables x86 carryless multiplication via PCLMULQDQ.
+ * \details GCC, Clang, and Intel compilers use explicit target feature
+ * macros. Native MSVC uses an AVX-enabled compatibility fallback because it
+ * lacks an equivalent PCLMUL feature macro. This fallback assumes PCLMULQDQ
+ * is available on the deployment CPU; AVX does not guarantee it. This is
+ * not runtime CPU dispatch.
+ */
+#if !defined(QSC_SYSTEM_HAS_PCLMUL) && defined(QSC_SYSTEM_X86)
+#	if defined(__PCLMUL__) || defined(__PCLMULQDQ__)
+#		define QSC_SYSTEM_HAS_PCLMUL
+#	elif defined(QSC_SYSTEM_COMPILER_MSC) && !defined(QSC_SYSTEM_COMPILER_CLANG) && \
+		!defined(QSC_SYSTEM_COMPILER_INTEL) && !defined(__INTEL_LLVM_COMPILER) && \
+		defined(QSC_SYSTEM_AVX_INTRINSICS)
+#		define QSC_SYSTEM_HAS_PCLMUL
+#	endif
+#endif
+
+/*!
+ * \def QSC_SYSTEM_RCS_AESNI_ENABLED
+ * \brief Enables RCS's AES-NI implementation, including SSSE3 and SSE4.1 operations.
+ * \details GCC/Clang targets require AES-NI, SSSE3, and SSE4.1; MSVC
+ * builds may explicitly opt in only when all three features are available.
+ * This controls the qsc_rcs_state round-key representation across clients.
+ */
+#if !defined(QSC_SYSTEM_RCS_AESNI_ENABLED) && defined(QSC_SYSTEM_AESNI_ENABLED) && defined(__SSSE3__) && defined(__SSE4_1__)
+#	define QSC_SYSTEM_RCS_AESNI_ENABLED
+#endif
+
+/*!
+ * \def QSC_SYSTEM_HAS_VAES512
+ * \brief Enables the 512-bit AES and RCS VAES implementations.
+ * \details Requires AES-NI (for key expansion), VAES, AVX-512F, AVX-512BW,
+ * and AVX-512DQ (for shuffles and 128-bit lane insertion). MSVC targets may
+ * explicitly opt in when all are supported. It affects AES/RCS state layouts.
+ */
+#if !defined(QSC_SYSTEM_HAS_VAES512) && defined(QSC_SYSTEM_AESNI_ENABLED) && \
+    defined(QSC_SYSTEM_HAS_AVX512) && defined(__VAES__) && defined(__AVX512BW__) && defined(__AVX512DQ__)
+#	define QSC_SYSTEM_HAS_VAES512
 #endif
 
 /*!
@@ -1323,44 +1430,25 @@ QSC_CPLUSPLUS_ENABLED_START
 
 /*** McEliece ***/
 
-#if !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
-/*!
- * \def QSC_MCELIECE_S1N3488T64
- * \brief Enable the McEliece S1-N3488T64 parameter set.
+/*
+ * ISO/IEC 18033-2:2006/Amd 2:2026 does not select mceliece348864.
+ * Reject the former default explicitly rather than silently changing ABI.
  */
-#define QSC_MCELIECE_S1N3488T64
+#if defined(QSC_MCELIECE_S1N3488T64)
+#	error "The McEliece 348864 parameter set is not supported by the ISO configuration."
 #endif
 
-#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
+#if !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
 /*!
  * \def QSC_MCELIECE_S3N4608T96
- * \brief Enable the McEliece S3-N4608T96 parameter set.
+ * \brief Enable the ISO-selected Classic McEliece 460896 family by default.
  */
 #define QSC_MCELIECE_S3N4608T96
 #endif
 
-#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S6N6960T119) && !defined(QSC_MCELIECE_S7N8192T128)
-/*!
- * \def QSC_MCELIECE_S5N6688T128
- * \brief Enable the McEliece S5-N6688T128 parameter set.
- */
-#define QSC_MCELIECE_S5N6688T128
-#endif
-
-#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S7N8192T128)
-/*!
- * \def QSC_MCELIECE_S6N6960T119
- * \brief Enable the McEliece S6-N6960T119 parameter set.
- */
-#define QSC_MCELIECE_S6N6960T119
-#endif
-
-#if !defined(QSC_MCELIECE_S1N3488T64) && !defined(QSC_MCELIECE_S3N4608T96) && !defined(QSC_MCELIECE_S5N6688T128) && !defined(QSC_MCELIECE_S6N6960T119)
-/*!
- * \def QSC_MCELIECE_S7N8192T128
- * \brief Enable the McEliece S7-N8192T128 parameter set.
- */
-#define QSC_MCELIECE_S7N8192T128
+/* Exactly one Classic McEliece parameter family may be selected. */
+#if (defined(QSC_MCELIECE_S3N4608T96) + defined(QSC_MCELIECE_S5N6688T128) + defined(QSC_MCELIECE_S6N6960T119) + defined(QSC_MCELIECE_S7N8192T128)) != 1
+#	error "Select exactly one ISO Classic McEliece parameter family."
 #endif
 
 /*** Signature Schemes ***/

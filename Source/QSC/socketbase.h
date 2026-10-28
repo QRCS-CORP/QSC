@@ -239,6 +239,31 @@ typedef struct
 	uint32_t count;																/*!< The number of active sockets */
 } qsc_socket_receive_poll_state;
 
+/*! \def QSC_SOCKET_IOV_MAX_BUFFERS
+ * \brief Maximum number of buffers accepted in one vectored operation.
+ */
+#define QSC_SOCKET_IOV_MAX_BUFFERS 16U
+
+/*! \struct qsc_socket_const_buffer
+ * \brief Immutable application-owned byte span for synchronous vectored sending.
+ * \details The caller retains ownership and must keep each span alive until the call returns. Thread safety follows the socket.
+ */
+typedef struct
+{
+	const uint8_t* data; /*!< Pointer to a readable byte buffer; must not be NULL. */
+	size_t length; /*!< Number of readable bytes; at most INT32_MAX per entry. */
+} qsc_socket_const_buffer;
+
+/*! \struct qsc_socket_buffer
+ * \brief Mutable application-owned byte span for synchronous vectored receiving.
+ * \details The caller retains ownership and must keep each span alive until the call returns. Thread safety follows the socket.
+ */
+typedef struct
+{
+	uint8_t* data; /*!< Pointer to a writable byte buffer; must not be NULL. */
+	size_t length; /*!< Number of writable bytes; at most INT32_MAX per entry. */
+} qsc_socket_buffer;
+
 /*** Function Prototypes ***/
 
 ///**
@@ -485,6 +510,30 @@ QSC_EXPORT_API size_t qsc_socket_receive(const qsc_socket* sock, uint8_t* output
 QSC_EXPORT_API size_t qsc_socket_receive_all(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag);
 
 /**
+ * \brief Receive exactly a requested byte count while exposing partial progress on failure.
+ * \param sock Connected socket; must remain valid for the entire operation.
+ * \param output Writable destination of at least otplen bytes.
+ * \param otplen Exact number of bytes to receive.
+ * \param flag Receive flags passed unchanged to the underlying socket API.
+ * \param received Non-NULL output pointer; receives the number of bytes read even on failure.
+ * \return Success when all bytes were received; not_connected on orderly EOF; otherwise an error code.
+ * \details Blocking sockets may wait indefinitely; nonblocking sockets return would_block and progress.
+ * Buffers are caller-owned; simultaneous reads on the same socket require external synchronization.
+ */
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_receive_progress(const qsc_socket* sock, uint8_t* output, size_t otplen, qsc_socket_receive_flags flag, size_t* received);
+
+/**
+ * \brief Receive into multiple caller-owned buffers using one scatter I/O operation.
+ * \param sock Socket receiving data.
+ * \param buffers Array of count writable byte spans (each of at most INT32_MAX bytes).
+ * \param count Number of spans, from 1 to QSC_SOCKET_IOV_MAX_BUFFERS.
+ * \param flag Platform receive flags.
+ * \return Bytes received, or zero for EOF/failure. Inspect qsc_socket_get_last_error on failure.
+ * \details The call may return after a partial transfer. The caller owns all buffers; synchronize concurrent reads.
+ */
+QSC_EXPORT_API size_t qsc_socket_receive_vectored(const qsc_socket* sock, const qsc_socket_buffer* buffers, size_t count, qsc_socket_receive_flags flag);
+
+/**
 * \brief Receive data from a connected socket asynchronously
 *
 * \param state: [qsc_socket_receive_async_state*] A pointer to the async receive data structure
@@ -573,6 +622,30 @@ QSC_EXPORT_API size_t qsc_socket_send_to(const qsc_socket* sock, const uint8_t* 
 * \return [size_t] Returns the number of bytes sent to the remote host
 */
 QSC_EXPORT_API size_t qsc_socket_send_all(const qsc_socket* sock, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag);
+
+/**
+ * \brief Send exactly a requested byte count while exposing partial progress on failure.
+ * \param sock Connected socket; must remain valid for the entire operation.
+ * \param input Readable buffer containing at least inplen bytes.
+ * \param inplen Exact number of bytes to transmit.
+ * \param flag Send flags passed to the platform socket API.
+ * \param sent Non-NULL output pointer; receives the number of bytes sent even on failure.
+ * \return Success when the entire buffer is sent, not_connected for zero-byte send, or the platform error.
+ * \details Blocking sockets may wait indefinitely; nonblocking sockets return would_block with progress.
+ * The caller retains buffer ownership; serialize writes if preserving stream message order matters.
+ */
+QSC_EXPORT_API qsc_socket_exceptions qsc_socket_send_progress(const qsc_socket* sock, const uint8_t* input, size_t inplen, qsc_socket_send_flags flag, size_t* sent);
+
+/**
+ * \brief Send from multiple caller-owned buffers using one gather I/O operation.
+ * \param sock Socket transmitting data.
+ * \param buffers Array of count readable byte spans (each of at most INT32_MAX bytes).
+ * \param count Number of spans, from 1 to QSC_SOCKET_IOV_MAX_BUFFERS.
+ * \param flag Platform send flags.
+ * \return Bytes sent, or zero on failure; inspect qsc_socket_get_last_error on failure.
+ * \details Short writes are possible. The caller owns all buffers; synchronize concurrent writes as needed.
+ */
+QSC_EXPORT_API size_t qsc_socket_send_vectored(const qsc_socket* sock, const qsc_socket_const_buffer* buffers, size_t count, qsc_socket_send_flags flag);
 
 /**
 * \brief Shuts down a socket
@@ -681,6 +754,219 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_set_option(const qsc_socket* soc
 * \return [bool] Returns true on success
 */
 QSC_EXPORT_API bool qsc_socket_start_sockets(void);
+
+/**
+ * \defgroup qsc_socket_event Scalable socket event and completion interfaces
+ * \brief Additive operating-system event backends; legacy socket interfaces are unchanged.
+ * \details Readiness and completion are different contracts. POSIX readiness notifications
+ * do not transfer bytes. Windows IOCP notifications report completed overlapped transfers.
+ * Existing socket handles are borrowed; callers retain ownership of sockets and buffers.
+ * Event loops may be woken from other threads; registration, waiting and destruction must
+ * otherwise be serialized by the caller. Socket shutdown and closure require deregistration.
+ * @{ 
+ */
+
+#if defined(QSC_SYSTEM_OS_POSIX)
+
+/** \brief Socket readiness event bit flags, which may be combined. */
+typedef enum
+{
+	qsc_socket_event_none = 0x00U,     /*!< No notification. */
+	qsc_socket_event_read = 0x01U,     /*!< Reading or accepting may proceed without blocking. */
+	qsc_socket_event_write = 0x02U,    /*!< Writing may proceed without blocking. */
+	qsc_socket_event_error = 0x04U,    /*!< Socket error; inspect the socket error state. */
+	qsc_socket_event_hangup = 0x08U,   /*!< Kernel-reported shutdown or peer closure; platform dependent; pending data may remain. */
+	qsc_socket_event_wakeup = 0x10U    /*!< Explicit cross-thread wake request. */
+} qsc_socket_event_type;
+
+/** \brief One readiness notification; the socket descriptor remains caller-owned. */
+typedef struct
+{
+	socket_t connection;  /*!< Registered socket descriptor, or QSC_UNINITIALIZED_SOCKET for wakeup. */
+	uint32_t events;      /*!< Bitwise OR of qsc_socket_event_type values. */
+} qsc_socket_event;
+
+/** \brief Opaque scalable readiness multiplexer; allocated and owned by the caller. */
+typedef struct qsc_socket_event_loop qsc_socket_event_loop;
+
+/**
+ * \brief Create a socket readiness loop using epoll (Linux), kqueue (BSD/macOS), or poll fallback.
+ * \param capacity Maximum registered socket count; must be nonzero and at most INT32_MAX - 1.
+ * \return Newly allocated loop, or NULL on allocation or operating-system failure.
+ * \details On success release with qsc_socket_event_loop_destroy(). Does not own sockets.
+ * Registration, waiting and destruction must not run concurrently; wakeup is thread-safe.
+ */
+QSC_EXPORT_API qsc_socket_event_loop* qsc_socket_event_loop_create(size_t capacity);
+
+/**
+ * \brief Register a socket for level-triggered readiness events.
+ * \param loop Initialized loop, not NULL.
+ * \param sock Valid caller-owned socket, not NULL.
+ * \param events Interest flags, read and/or write only.
+ * \return true if registered, otherwise false (including duplicate registration or full loop).
+ * \details An active socket must be unregistered before close or descriptor reuse.
+ */
+QSC_EXPORT_API bool qsc_socket_event_loop_register(qsc_socket_event_loop* loop, const qsc_socket* sock, uint32_t events);
+
+/**
+ * \brief Replace the read/write interest mask for a previously registered socket.
+ * \param loop Initialized loop.
+ * \param sock Previously registered caller-owned socket.
+ * \param events New interest mask, read and/or write.
+ * \return true on success, false on invalid state or operating-system failure.
+ */
+QSC_EXPORT_API bool qsc_socket_event_loop_modify(qsc_socket_event_loop* loop, const qsc_socket* sock, uint32_t events);
+
+/**
+ * \brief Remove a socket from the loop without closing it.
+ * \param loop Initialized loop.
+ * \param sock Previously registered socket.
+ * \return true on success, false otherwise.
+ * \details Callers must synchronize this operation with waits and socket destruction.
+ */
+QSC_EXPORT_API bool qsc_socket_event_loop_unregister(qsc_socket_event_loop* loop, const qsc_socket* sock);
+
+/**
+ * \brief Collect available readiness notifications and cross-thread wake requests.
+ * \param loop Initialized loop.
+ * \param output Caller-owned array of at least capacity events.
+ * \param capacity Number of writable output entries, from 1 through INT32_MAX - 1.
+ * \param timeout_ms Wait limit in milliseconds: -1 forever, 0 nonblocking, positive bounded wait.
+ * \return Number of events from 0 to capacity, or -1 on invalid input/operating-system failure.
+ * \details Readiness is level triggered. Handle read/write without blocking until EAGAIN on
+ * nonblocking sockets. EOF may be reported as read readiness without the hangup flag.
+ * Wake events use QSC_UNINITIALIZED_SOCKET and the wakeup flag.
+ * A single waiter is supported per loop. Output remains valid until the caller overwrites it.
+ */
+QSC_EXPORT_API int32_t qsc_socket_event_loop_wait(qsc_socket_event_loop* loop, qsc_socket_event* output, size_t capacity, int32_t timeout_ms);
+
+/**
+ * \brief Wake a blocked waiter from any thread without registering a socket.
+ * \param loop Initialized loop that has not begun destruction.
+ * \return true when a wake signal is queued; false on failure.
+ * \details Consecutive wake requests may coalesce into a single notification.
+ */
+QSC_EXPORT_API bool qsc_socket_event_loop_wake(qsc_socket_event_loop* loop);
+
+/**
+ * \brief Destroy the loop and internal wake resources; never closes registered sockets.
+ * \param loop Loop to free; NULL is allowed.
+ * \details Call only after all active waiters and other users have stopped.
+ */
+QSC_EXPORT_API void qsc_socket_event_loop_destroy(qsc_socket_event_loop* loop);
+
+#endif
+
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+
+/** \brief Native Windows IOCP operation identifiers. */
+typedef enum
+{
+	qsc_socket_iocp_receive = 1, /*!< Overlapped WSARecv completed. */
+	qsc_socket_iocp_send = 2,    /*!< Overlapped WSASend completed. */
+	qsc_socket_iocp_wakeup = 3  /*!< Cross-thread completion-port wakeup. */
+} qsc_socket_iocp_operation;
+
+/** \brief One completed Windows overlapped transfer or explicit wakeup. */
+typedef struct
+{
+	socket_t connection;                 /*!< Borrowed socket handle, or QSC_UNINITIALIZED_SOCKET for wakeup. */
+	uint64_t context;                    /*!< Caller-provided operation context identifier. */
+	size_t transferred;                  /*!< Number of bytes actually transferred, including partial completions. */
+	uint32_t error;                      /*!< Win32 completion error code, 0 on success. */
+	qsc_socket_iocp_operation operation; /*!< Receive, send, or wakeup. */
+} qsc_socket_iocp_result;
+
+/** \brief Opaque Windows completion-port context with bounded in-flight operations. */
+typedef struct qsc_socket_iocp qsc_socket_iocp;
+
+/**
+ * \brief Create a Windows IO completion port.
+ * \param max_pending Maximum simultaneous submitted operations, between 1 and LONG_MAX.
+ * \return Owned IOCP object, or NULL on failure; release with qsc_socket_iocp_destroy().
+ * \details Requires Winsock startup. Supports multiple simultaneous waiting consumer threads.
+ */
+QSC_EXPORT_API qsc_socket_iocp* qsc_socket_iocp_create(uint32_t max_pending);
+
+/**
+ * \brief Associate a caller-owned overlapped Winsock socket with a completion port.
+ * \param port Initialized completion-port context.
+ * \param sock Socket created for overlapped I/O; caller retains its lifetime.
+ * \return true on successful association; false on failure.
+ * \details A socket cannot be reassociated with a different completion port.
+ */
+QSC_EXPORT_API bool qsc_socket_iocp_attach(qsc_socket_iocp* port, const qsc_socket* sock);
+
+/**
+ * \brief Submit a receive that completes through qsc_socket_iocp_wait().
+ * \param port Initialized IOCP context.
+ * \param sock Previously associated socket.
+ * \param buffer Caller-owned writable buffer, at least length bytes.
+ * \param length Maximum receive size, from 1 through ULONG_MAX bytes.
+ * \param context Caller-chosen 64-bit identifier returned on completion.
+ * \return true if submitted (including immediate completion), otherwise false.
+ * \details buffer and sock MUST remain alive until a completion is consumed, even if the
+ * submission completes immediately. No request is pending on a false return.
+ * Do not enable FILE_SKIP_COMPLETION_PORT_ON_SUCCESS on attached sockets.
+ */
+QSC_EXPORT_API bool qsc_socket_iocp_submit_receive(qsc_socket_iocp* port, const qsc_socket* sock, uint8_t* buffer, size_t length, uint64_t context);
+
+/**
+ * \brief Submit a send that completes through qsc_socket_iocp_wait().
+ * \param port Initialized IOCP context.
+ * \param sock Previously associated socket.
+ * \param buffer Caller-owned read-only buffer, at least length bytes.
+ * \param length Maximum send size, from 1 through ULONG_MAX bytes.
+ * \param context Caller-chosen 64-bit completion identifier.
+ * \return true on successful submission (including immediate completion), otherwise false.
+ * \details buffer and sock MUST remain alive until completion. Partial sends are possible.
+ * Do not enable FILE_SKIP_COMPLETION_PORT_ON_SUCCESS on attached sockets.
+ */
+QSC_EXPORT_API bool qsc_socket_iocp_submit_send(qsc_socket_iocp* port, const qsc_socket* sock, const uint8_t* buffer, size_t length, uint64_t context);
+
+/**
+ * \brief Wait for one completed operation and reclaim its private OVERLAPPED state.
+ * \param port Initialized IOCP context.
+ * \param result Writable completion result, not NULL.
+ * \param timeout_ms Milliseconds, -1 for indefinite, or a nonnegative timeout.
+ * \return 1 for completion (including failed transfers), 0 on timeout, -1 on API failure.
+ * \details A completed operation with an error returns 1 and sets result->error.
+ * May be used by multiple consumer threads. The caller must serialize destruction.
+ */
+QSC_EXPORT_API int32_t qsc_socket_iocp_wait(qsc_socket_iocp* port, qsc_socket_iocp_result* result, int32_t timeout_ms);
+
+/**
+ * \brief Enqueue one wakeup completion from another thread.
+ * \param port Initialized completion-port context.
+ * \return true if queued, false on failure.
+ */
+QSC_EXPORT_API bool qsc_socket_iocp_wake(qsc_socket_iocp* port);
+
+/**
+ * \brief Request cancellation of pending I/O on an attached socket.
+ * \param port Valid IOCP context (used for API validation, not ownership).
+ * \param sock Valid socket associated with the port; caller retains ownership.
+ * \return true if cancellation was requested or no pending kernel requests remained.
+ * \details Windows CancelIoEx cancels ALL outstanding I/O issued on this socket,
+ * including operations submitted outside this module. Each cancelled request still
+ * produces a completion that MUST be consumed before buffers or IOCP can be freed.
+ * Do not call concurrently with socket destruction.
+ */
+QSC_EXPORT_API bool qsc_socket_iocp_cancel(qsc_socket_iocp* port, const qsc_socket* sock);
+
+/**
+ * \brief Destroy an idle IOCP; refuses to free live overlapped I/O requests.
+ * \param port Context to destroy, or NULL.
+ * \return true if destroyed or NULL, false if operations remain outstanding.
+ * \details For outstanding requests, call qsc_socket_iocp_cancel() and drain ALL resulting
+ * completions before retrying. Callers must have stopped submissions and waiting threads.
+ * Never closes attached sockets. No automatic cancellation is performed.
+ */
+QSC_EXPORT_API bool qsc_socket_iocp_destroy(qsc_socket_iocp* port);
+
+#endif
+
+/** @} */
 
 QSC_CPLUSPLUS_ENABLED_END
 

@@ -2,55 +2,22 @@
 #include "intutils.h"
 #include "memutils.h"
 
-#if defined(QSC_RCS_REDUCED_ROUNDS)
-	/*!
-	\def RCS256_ROUND_COUNT
-	* The number of Rijndael mixing rounds used by reduced rounds RCS-256.
-	*/
-#	define RCS256_ROUND_COUNT 14U
-
-	/*!
-	\def RCS512_ROUND_COUNT
-	* The number of Rijndael mixing rounds used by reduced rounds RCS-512.
-	*/
-#	define RCS512_ROUND_COUNT 21U
-
-#	if defined(QSC_RCS_AUTHENTICATED)
-		/*!
-		 * \def RCS_AUTH_KMACR24
-		 * \brief Sets the authentication mode to standard KMAC-R24.
-		 * Remove this definition to enable the reduced rounds version using KMAC-R12.
-		 */
-#		define RCS_AUTH_KMACR12
-#	endif
-#else
-	/*!
-	\def RCS256_ROUND_COUNT
-	* The number of Rijndael mixing rounds used by RCS-256.
-	*/
+/* Build profile: 14/21 Rijndael-256 rounds by default, or 22/30 when
+ * QSC_RCS_EXTENDED_ROUND_COUNTS is selected in rcs.h. Both profiles use
+ * the standard 24-round Keccak/KMAC implementation. */
+#if defined(QSC_RCS_EXTENDED_ROUND_COUNTS)
 #	define RCS256_ROUND_COUNT 22U
-
-	/*!
-	\def RCS512_ROUND_COUNT
-	* The number of Rijndael mixing rounds used by RCS-512.
-	*/
 #	define RCS512_ROUND_COUNT 30U
-
-#	if defined(QSC_RCS_AUTHENTICATED)
-		/*!
-		 * \def RCS_AUTH_KMACR24
-		 * \brief Sets the authentication mode to standard KMAC-R24.
-		 * Remove this definition to enable the reduced rounds version using KMAC-R12.
-		 */
-#		define RCS_AUTH_KMACR24
-#	endif
+#else
+#	define RCS256_ROUND_COUNT 14U
+#	define RCS512_ROUND_COUNT 21U
 #endif
 
 /*!
 \def RCS_ROUNDKEY_ELEMENT_SIZE
 * The round key element size in bytes.
 */
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
 #	define RCS_ROUNDKEY_ELEMENT_SIZE 16U
 #	define RCS_AVX512_BLOCK 64U
 #else
@@ -104,20 +71,14 @@
 
 static const uint8_t rcs256_name[RCS_NAME_LENGTH] =
 {
-	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x52U, 0x43U, 0x53U, 0x4BU, 0x32U, 0x35U,
-	0x36U
+	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x52U, 0x43U, 0x53U, 0x4BU, 0x32U, 0x35U, 0x36U
 };
 
 static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 {
-	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x02U, 0x52U, 0x43U, 0x53U, 0x4BU, 0x35U, 0x31U,
-	0x32U
+	0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x02U, 0x52U, 0x43U, 0x53U, 0x4BU, 0x35U, 0x31U, 0x32U
 };
 
-#	if defined(RCS_AUTH_KMACR12)
-#		define RCS_KMACR12_NAME_LENGTH 7UL
-		static const uint8_t rcs_kmacr12_name[RCS_KMACR12_NAME_LENGTH] = { 0x4BU, 0x4DU, 0x41U, 0x43U, 0x52U, 0x31U, 0x32U };
-#	endif
 
 #else
 
@@ -135,11 +96,12 @@ static const uint8_t rcs512_name[RCS_NAME_LENGTH] =
 
 /* aes-ni and table-based fallback functions */
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
 
 static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2U], const __m128i input[2U])
 {
-	const __m128i BLEND_MASK = _mm_set_epi32(0x80000000UL, 0x80800000UL, 0x80800000UL, 0x80808000UL);
+	/* encrypt one 32-byte Rijndael block with the expanded schedule */
+	const __m128i BLEND_MASK = _mm_set_epi32(INT32_MIN, -2139095040, -2139095040, -2139062272);
 	const __m128i SHIFT_MASK = _mm_set_epi8(3, 2, 13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0);
 	const size_t RNDCNT = ctx->roundkeylen - 3U;
 	size_t kctr;
@@ -185,7 +147,61 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2U], cons
 	_mm_storeu_si128(&output[1U], blk2);
 }
 
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#if defined(QSC_RCS_ENABLE_VAES256) && defined(__AVX2__) && defined(__VAES__) && !defined(QSC_SYSTEM_HAS_VAES512)
+
+static inline __m256i rcs_shuffle256_vaes(const __m256i x)
+{
+	/* implement Rijndael-256's 32-byte ShiftRows correspondence with VAES */
+    const __m256i same = _mm256_setr_epi8(
+		(char)0x00, (char)0x80, (char)0x80, (char)0x80, (char)0x04, (char)0x05, (char)0x80, (char)0x80, (char)0x08, (char)0x09, (char)0x0E, (char)0x80, (char)0x0C, (char)0x0D, (char)0x80, (char)0x80,
+		(char)0x00, (char)0x80, (char)0x80, (char)0x80, (char)0x04, (char)0x05, (char)0x80, (char)0x80, (char)0x08, (char)0x09, (char)0x0E, (char)0x80, (char)0x0C, (char)0x0D, (char)0x80, (char)0x80);
+    const __m256i cross = _mm256_setr_epi8(
+		(char)0x80, (char)0x01, (char)0x06, (char)0x07, (char)0x80, (char)0x80, (char)0x0A, (char)0x0B, (char)0x80, (char)0x80, (char)0x80, (char)0x0F, (char)0x80, (char)0x80, (char)0x02, (char)0x03,
+		(char)0x80, (char)0x01, (char)0x06, (char)0x07, (char)0x80, (char)0x80, (char)0x0A, (char)0x0B, (char)0x80, (char)0x80, (char)0x80, (char)0x0F, (char)0x80, (char)0x80, (char)0x02, (char)0x03);
+    __m256i y;
+    __m256i z;
+
+    y = _mm256_shuffle_epi8(x, same);
+    z = _mm256_permute2x128_si256(x, x, 0x01);
+    z = _mm256_shuffle_epi8(z, cross);
+
+    return _mm256_or_si256(y, z);
+}
+
+static void rcs_transform_vaes256x2(const qsc_rcs_state* ctx, __m256i* output0, __m256i* output1, const __m256i input0, const __m256i input1)
+{
+	/* encrypt two independent Rijndael-256 counter blocks concurrently */
+    const size_t RNDCNT = (ctx->roundkeylen / 2U) - 2U;
+    __m256i a;
+    __m256i b;
+    __m256i key;
+    size_t kctr;
+
+    kctr = 0U;
+    key = _mm256_inserti128_si256(_mm256_castsi128_si256(ctx->roundkeys[0U]), ctx->roundkeys[1U], 1);
+    a = _mm256_xor_si256(input0, key);
+    b = _mm256_xor_si256(input1, key);
+
+    while (kctr < RNDCNT)
+    {
+        ++kctr;
+        key = _mm256_inserti128_si256(_mm256_castsi128_si256(ctx->roundkeys[2U * kctr]), ctx->roundkeys[(2U * kctr) + 1U], 1);
+        a = rcs_shuffle256_vaes(a);
+        b = rcs_shuffle256_vaes(b);
+        a = _mm256_aesenc_epi128(a, key);
+        b = _mm256_aesenc_epi128(b, key);
+    }
+
+    ++kctr;
+    key = _mm256_inserti128_si256(_mm256_castsi128_si256(ctx->roundkeys[2U * kctr]), ctx->roundkeys[(2U * kctr) + 1U], 1);
+    a = rcs_shuffle256_vaes(a);
+    b = rcs_shuffle256_vaes(b);
+    *output0 = _mm256_aesenclast_epi128(a, key);
+    *output1 = _mm256_aesenclast_epi128(b, key);
+}
+#endif
+
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
 
 static void rcs_load2x128to512(const __m128i* k1, const __m128i* k2, __m512i* output)
 {
@@ -198,16 +214,35 @@ static void rcs_load2x128to512(const __m128i* k1, const __m128i* k2, __m512i* ou
 
 __m512i rcs_shuffle512(const __m512i* value, const __m512i* k0, const __m512i* k1, const __m512i* mask)
 {
-	return _mm512_or_si512(_mm512_shuffle_epi8(*value, _mm512_add_epi8(*mask, *k0)),
-		_mm512_shuffle_epi8(_mm512_permutex_epi64(*value, 0x4E), _mm512_add_epi8(*mask, *k1)));
+#if defined(__AVX512VBMI__)
+	/* RCS's fixed 32-byte ShiftRows permutation for two adjacent blocks.
+	 * The indices are public, and the permutation remains constant-time. */
+	const __m512i indices = _mm512_set_epi64(
+		0x23223D3C2F3E3938ULL,
+		0x2B2A353427262130ULL,
+		0x33322D2C3F2E2928ULL,
+		0x3B3A252437363120ULL,
+		0x03021D1C0F1E1918ULL,
+		0x0B0A151407060110ULL,
+		0x13120D0C1F0E0908ULL,
+		0x1B1A050417161100ULL);
+
+	(void)k0;
+	(void)k1;
+	(void)mask;
+
+	return _mm512_permutexvar_epi8(indices, *value);
+#else
+	return _mm512_or_si512(_mm512_shuffle_epi8(*value, _mm512_add_epi8(*mask, *k0)), _mm512_shuffle_epi8(_mm512_permutex_epi64(*value, 0x4E), _mm512_add_epi8(*mask, *k1)));
+#endif
 }
 
 static void rcs_transform_512(qsc_rcs_state* ctx, __m512i* output, const __m512i* input)
 {
-	const __m512i NI512K0 = _mm512_set_epi64(17361641481138401520ULL, 17361641481138401520ULL, 8102099357864587376ULL, 8102099357864587376ULL,
-		17361641481138401520ULL, 17361641481138401520ULL, 8102099357864587376ULL, 8102099357864587376ULL);
-	const __m512i NI512K1 = _mm512_set_epi64(8102099357864587376ULL, 8102099357864587376ULL, 17361641481138401520ULL, 17361641481138401520ULL,
-		8102099357864587376ULL, 8102099357864587376ULL, 17361641481138401520ULL, 17361641481138401520ULL);
+	const __m512i NI512K0 = _mm512_set_epi64(-1085102592571150096LL, -1085102592571150096LL, 8102099357864587376ULL, 8102099357864587376ULL,
+		-1085102592571150096LL, -1085102592571150096LL, 8102099357864587376ULL, 8102099357864587376ULL);
+	const __m512i NI512K1 = _mm512_set_epi64(8102099357864587376ULL, 8102099357864587376ULL, -1085102592571150096LL, -1085102592571150096LL,
+		8102099357864587376ULL, 8102099357864587376ULL, -1085102592571150096LL, -1085102592571150096LL);
 	const __m512i SWMASKL = _mm512_set_epi8(3, 2, 29, 28, 15, 30, 25, 24, 11, 10, 21, 20, 7, 6, 1, 16,
 		19, 18, 13, 12, 31, 14, 9, 8, 27, 26, 5, 4, 23, 22, 17, 0,
 		3, 2, 29, 28, 15, 30, 25, 24, 11, 10, 21, 20, 7, 6, 1, 16,
@@ -233,22 +268,117 @@ static void rcs_transform_512(qsc_rcs_state* ctx, __m512i* output, const __m512i
 	*output = _mm512_aesenclast_epi128(x, ctx->roundkeysw[kctr]);
 }
 
+static void rcs_transform_512x2(const qsc_rcs_state* ctx, __m512i* output0, __m512i* output1, const __m512i* input0, const __m512i* input1)
+{
+	/* encrypt four independent RCS counter blocks as two VAES-512 chains */
+	const __m512i NI512K0 = _mm512_set_epi64(-1085102592571150096LL, -1085102592571150096LL, 8102099357864587376ULL, 8102099357864587376ULL,
+		-1085102592571150096LL, -1085102592571150096LL, 8102099357864587376ULL, 8102099357864587376ULL);
+	const __m512i NI512K1 = _mm512_set_epi64(8102099357864587376ULL, 8102099357864587376ULL, -1085102592571150096LL, -1085102592571150096LL,
+		8102099357864587376ULL, 8102099357864587376ULL, -1085102592571150096LL, -1085102592571150096LL);
+	const __m512i SWMASKL = _mm512_set_epi8(3, 2, 29, 28, 15, 30, 25, 24, 11, 10, 21, 20, 7, 6, 1, 16,
+		19, 18, 13, 12, 31, 14, 9, 8, 27, 26, 5, 4, 23, 22, 17, 0,
+		3, 2, 29, 28, 15, 30, 25, 24, 11, 10, 21, 20, 7, 6, 1, 16,
+		19, 18, 13, 12, 31, 14, 9, 8, 27, 26, 5, 4, 23, 22, 17, 0);
+
+	const size_t RNDCNT = (ctx->roundkeylen / 2U) - 2U;
+	size_t kctr;
+	__m512i a;
+	__m512i b;
+
+	kctr = 0U;
+	a = _mm512_xor_si512(*input0, ctx->roundkeysw[kctr]);
+	b = _mm512_xor_si512(*input1, ctx->roundkeysw[kctr]);
+
+	while (kctr < RNDCNT)
+	{
+		++kctr;
+		a = rcs_shuffle512(&a, &NI512K0, &NI512K1, &SWMASKL);
+		b = rcs_shuffle512(&b, &NI512K0, &NI512K1, &SWMASKL);
+		a = _mm512_aesenc_epi128(a, ctx->roundkeysw[kctr]);
+		b = _mm512_aesenc_epi128(b, ctx->roundkeysw[kctr]);
+	}
+
+	++kctr;
+	a = rcs_shuffle512(&a, &NI512K0, &NI512K1, &SWMASKL);
+	b = rcs_shuffle512(&b, &NI512K0, &NI512K1, &SWMASKL);
+	*output0 = _mm512_aesenclast_epi128(a, ctx->roundkeysw[kctr]);
+	*output1 = _mm512_aesenclast_epi128(b, ctx->roundkeysw[kctr]);
+}
+
 #endif
 
 static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
+	/* transform bytes with counter mode; exact input/output aliasing is supported */
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
 	const size_t HLFBLK = QSC_RCS_BLOCK_SIZE / 2U;
+	__m128i tmpn[2U];
+	__m128i tmpo[2U];
+	__m128i tmpi[2U];
+	uint8_t tmpb[QSC_RCS_BLOCK_SIZE];
 	size_t oft;
 
 	oft = 0U;
 
-#if defined(QSC_SYSTEM_HAS_AVX512)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
 
-	if (length >= RCS_AVX512_BLOCK)
+	/* four-block AES-derived pipeline: two independent VAES-512 chains.
+	 * retain the accepted two-block path for smaller remainders. a batch
+	 * is permitted only if the entire request avoids low-64-bit rollover. */
+	if (length >= 4096U &&
+		((uint64_t)(length / QSC_RCS_BLOCK_SIZE) +
+		(uint64_t)((length % QSC_RCS_BLOCK_SIZE) != 0U)) <=
+		(UINT64_MAX - qsc_intutils_le8to64(ctx->nonce)))
+	{
+		QSC_ALIGN(64) uint8_t ctrblk[64U];
+		const __m512i fourstep = _mm512_set_epi64(0, 0, 0, 4, 0, 0, 0, 4);
+		__m512i nce0;
+		__m512i nce1;
+		__m512i out0;
+		__m512i out1;
+		__m512i in0;
+		__m512i in1;
+
+		qsc_memutils_copy(ctrblk, ctx->nonce, QSC_RCS_BLOCK_SIZE);
+		qsc_memutils_copy(ctrblk + QSC_RCS_BLOCK_SIZE, ctx->nonce, QSC_RCS_BLOCK_SIZE);
+		nce0 = _mm512_load_si512((const void*)ctrblk);
+		nce0 = _mm512_add_epi64(nce0, _mm512_set_epi64(0, 0, 0, 1, 0, 0, 0, 0));
+		nce1 = _mm512_add_epi64(nce0, _mm512_set_epi64(0, 0, 0, 2, 0, 0, 0, 2));
+
+		while (length >= 128U)
+		{
+			rcs_transform_512x2(ctx, &out0, &out1, &nce0, &nce1);
+			in0 = _mm512_loadu_si512((const void*)(input + oft));
+			in1 = _mm512_loadu_si512((const void*)(input + oft + 64U));
+			out0 = _mm512_xor_si512(out0, in0);
+			out1 = _mm512_xor_si512(out1, in1);
+			_mm512_storeu_si512((void*)(output + oft), out0);
+			_mm512_storeu_si512((void*)(output + oft + 64U), out1);
+			nce0 = _mm512_add_epi64(nce0, fourstep);
+			nce1 = _mm512_add_epi64(nce1, fourstep);
+			oft += 128U;
+			length -= 128U;
+		}
+
+		_mm512_store_si512((void*)ctrblk, nce0);
+		qsc_memutils_copy(ctx->nonce, ctrblk, QSC_RCS_BLOCK_SIZE);
+		qsc_memutils_secure_erase(ctrblk, sizeof(ctrblk));
+		qsc_memutils_secure_erase(&out0, sizeof(out0));
+		qsc_memutils_secure_erase(&out1, sizeof(out1));
+		qsc_memutils_secure_erase(&in0, sizeof(in0));
+		qsc_memutils_secure_erase(&in1, sizeof(in1));
+	}
+
+	/* AES-compatible rollover guard: the fast 64-bit lane increment is safe
+	 * only when every processed block and the final nonce remain below wrap.
+	 * the rare rollover case uses the existing full-width scalar increment. */
+	if (length >= RCS_AVX512_BLOCK &&
+		((uint64_t)(length / QSC_RCS_BLOCK_SIZE) +
+		(uint64_t)((length % QSC_RCS_BLOCK_SIZE) != 0U)) <=
+		(UINT64_MAX - qsc_intutils_le8to64(ctx->nonce)))
 	{
 		QSC_ALIGN(64) uint8_t ctrblk[64U];
 		__m512i ctrw;
@@ -283,18 +413,64 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 		/* store the last position of the nonce */
 		_mm512_storeu_si512((__m512i*)ctrblk, ctrw);
 		qsc_memutils_copy(ctx->nonce, ctrblk, QSC_RCS_BLOCK_SIZE);
+		qsc_memutils_secure_erase(ctrblk, sizeof(ctrblk));
+		qsc_memutils_secure_erase(&inpw, sizeof(inpw));
+		qsc_memutils_secure_erase(&otpw, sizeof(otpw));
 	}
 
 #endif
 
+#if defined(QSC_RCS_ENABLE_VAES256) && defined(__AVX2__) && defined(__VAES__) && !defined(QSC_SYSTEM_HAS_VAES512)
+    /* two 256-bit Rijndael counter blocks in two independent YMM chains.
+     * the existing AES-NI implementation handles rollover and short tails. */
+    if (length >= 64U &&
+        ((uint64_t)(length / QSC_RCS_BLOCK_SIZE) +
+        (uint64_t)((length % QSC_RCS_BLOCK_SIZE) != 0U)) <=
+        (UINT64_MAX - qsc_intutils_le8to64(ctx->nonce)))
+    {
+        const __m256i increment = _mm256_set_epi64x(0, 0, 0, 2);
+        __m256i counter0;
+        __m256i counter1;
+        __m256i cipher0;
+        __m256i cipher1;
+        __m256i input0;
+        __m256i input1;
+
+        counter0 = _mm256_loadu_si256((const __m256i*)(const void*)ctx->nonce);
+        counter1 = _mm256_add_epi64(counter0, _mm256_set_epi64x(0, 0, 0, 1));
+
+        while (length >= 64U)
+        {
+            rcs_transform_vaes256x2(ctx, &cipher0, &cipher1, counter0, counter1);
+            input0 = _mm256_loadu_si256((const __m256i*)(const void*)(input + oft));
+            input1 = _mm256_loadu_si256((const __m256i*)(const void*)(input + oft + 32U));
+            cipher0 = _mm256_xor_si256(cipher0, input0);
+            cipher1 = _mm256_xor_si256(cipher1, input1);
+            _mm256_storeu_si256((__m256i*)(void*)(output + oft), cipher0);
+            _mm256_storeu_si256((__m256i*)(void*)(output + oft + 32U), cipher1);
+            counter0 = _mm256_add_epi64(counter0, increment);
+            counter1 = _mm256_add_epi64(counter1, increment);
+            oft += 64U;
+            length -= 64U;
+        }
+
+        _mm256_storeu_si256((__m256i*)(void*)ctx->nonce, counter0);
+		qsc_memutils_secure_erase(&cipher0, sizeof(cipher0));
+		qsc_memutils_secure_erase(&cipher1, sizeof(cipher1));
+		qsc_memutils_secure_erase(&input0, sizeof(input0));
+		qsc_memutils_secure_erase(&input1, sizeof(input1));
+    }
+#endif
+
 	while (length >= QSC_RCS_BLOCK_SIZE)
 	{
-		__m128i tmpn[2U] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
-		__m128i tmpo[2U] = { 0U };
+		tmpn[0U] = _mm_loadu_si128((const __m128i*)ctx->nonce);
+		tmpn[1U] = _mm_loadu_si128((const __m128i*)(ctx->nonce + HLFBLK));
 
 		rcs_transform_256(ctx, tmpo, tmpn);
 
-		__m128i tmpi[2U] = { _mm_loadu_si128((const __m128i*)(input + oft)) , _mm_loadu_si128((const __m128i*)(input + HLFBLK + oft)) };
+		tmpi[0U] = _mm_loadu_si128((const __m128i*)(input + oft));
+		tmpi[1U] = _mm_loadu_si128((const __m128i*)(input + HLFBLK + oft));
 
 		tmpo[0U] = _mm_xor_si128(tmpo[0U], tmpi[0U]);
 		tmpo[1U] = _mm_xor_si128(tmpo[1U], tmpi[1U]);
@@ -311,9 +487,8 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 	if (length != 0U)
 	{
-		__m128i tmpn[2U] = { _mm_loadu_si128((const __m128i*)ctx->nonce), _mm_loadu_si128((const __m128i*)((uint8_t*)ctx->nonce + HLFBLK)) };
-		__m128i tmpo[2U] = { 0U };
-		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0U };
+		tmpn[0U] = _mm_loadu_si128((const __m128i*)ctx->nonce);
+		tmpn[1U] = _mm_loadu_si128((const __m128i*)(ctx->nonce + HLFBLK));
 
 		rcs_transform_256(ctx, tmpo, tmpn);
 
@@ -328,9 +503,16 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
 	}
+
+	qsc_memutils_secure_erase(tmpn, sizeof(tmpn));
+	qsc_memutils_secure_erase(tmpo, sizeof(tmpo));
+	qsc_memutils_secure_erase(tmpi, sizeof(tmpi));
+	qsc_memutils_secure_erase(tmpb, sizeof(tmpb));
 }
 
 #else
+
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED)
 
 static inline void rcs_swapn(uint32_t cl, uint32_t ch, uint32_t s, uint32_t* x, uint32_t* y)
 {
@@ -378,16 +560,14 @@ static void rcs_ct_ortho(uint32_t* q)
 
 static void rcs_ct_sbox(uint32_t* q)
 {
-	/*
-	 * adapted from bearssl, author Thomas Pornin
+	/* adapted from bearssl, author Thomas Pornin.
 	 * This S-box implementation is a straightforward translation of
 	 * the circuit described by Boyar and Peralta in "A new
 	 * combinational logic minimization technique with applications
 	 * to cryptology" (https://eprint.iacr.org/2009/191.pdf).
 	 *
 	 * Note that variables x* (input) and s* (output) are numbered
-	 * in "reverse" order (x0 is the high bit, x7 is the low bit).
-	 */
+	 * in "reverse" order (x0 is the high bit, x7 is the low bit). */
 
 	uint32_t s0;
 	uint32_t s1;
@@ -657,6 +837,7 @@ static void rcs_ct_sbox(uint32_t* q)
 
 static void rcs_sub_bytes(uint8_t* ctx)
 {
+	/* apply the constant-operation AES S-box and erase its explicit scratch array */
 	uint32_t q[8U] = { 0U };
 
 	q[0U] = ctx[0U];
@@ -747,6 +928,7 @@ static void rcs_sub_bytes(uint8_t* ctx)
 	ctx[29U] = (uint8_t)q[5U];
 	ctx[30U] = (uint8_t)q[6U];
 	ctx[31U] = (uint8_t)q[7U];
+	qsc_memutils_secure_erase(q, sizeof(q));
 }
 
 static void rcs_add_roundkey(uint8_t* state, const uint32_t *skeys)
@@ -837,6 +1019,7 @@ static void rcs_shift_rows(uint8_t* state)
 
 static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input)
 {
+	/* encrypt one 32-byte Rijndael block with the expanded schedule */
 	uint8_t buf[QSC_RCS_BLOCK_SIZE];
 
 	qsc_memutils_copy(buf, input, QSC_RCS_BLOCK_SIZE);
@@ -854,41 +1037,104 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const u
 	rcs_shift_rows(buf);
 	rcs_add_roundkey(buf, ctx->roundkeys + (ctx->rounds << 3));
 	qsc_memutils_copy(output, buf, QSC_RCS_BLOCK_SIZE);
+	qsc_memutils_secure_erase(buf, sizeof(buf));
 }
+
+#else
+
+static uint8x16_t rcs_load_roundkey_arm(const uint32_t* key)
+{
+	/* load a 16-byte RCS subkey from four big-endian schedule words */
+	uint8x16_t tmp;
+
+	tmp = vreinterpretq_u8_u32(vld1q_u32(key));
+#if defined(__AARCH64EL__) || defined(_M_ARM64) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))
+	tmp = vrev32q_u8(tmp);
+#endif
+
+	return tmp;
+}
+
+static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input)
+{
+	/* encrypt one 32-byte Rijndael block with the expanded schedule */
+	/* transform one Rijndael-256 block using ARM AES rounds */
+	/* first half's public byte indices before AES ShiftRows */
+	static const uint8_t indices0[16U] = { 0U, 17U, 22U, 23U, 4U, 5U, 26U, 27U, 8U, 9U, 14U, 31U, 12U, 13U, 18U, 19U };
+	/* second half's public byte indices before AES ShiftRows */
+	static const uint8_t indices1[16U] = { 16U, 1U, 6U, 7U, 20U, 21U, 10U, 11U, 24U, 25U, 30U, 15U, 28U, 29U, 2U, 3U };
+	const uint8x16_t shuffle0 = vld1q_u8(indices0);
+	const uint8x16_t shuffle1 = vld1q_u8(indices1);
+	const uint8x16_t zero = vdupq_n_u8(0U);
+	uint8x16x2_t block;
+	uint8x16_t first;
+	uint8x16_t second;
+
+	block.val[0U] = veorq_u8(vld1q_u8(input), rcs_load_roundkey_arm(ctx->roundkeys));
+	block.val[1U] = veorq_u8(vld1q_u8(input + 16U), rcs_load_roundkey_arm(ctx->roundkeys + 4U));
+
+	for (size_t i = 1U; i < ctx->rounds; ++i)
+	{
+		first = vaeseq_u8(vqtbl2q_u8(block, shuffle0), zero);
+		second = vaeseq_u8(vqtbl2q_u8(block, shuffle1), zero);
+		block.val[0U] = veorq_u8(vaesmcq_u8(first), rcs_load_roundkey_arm(ctx->roundkeys + (i * 8U)));
+		block.val[1U] = veorq_u8(vaesmcq_u8(second), rcs_load_roundkey_arm(ctx->roundkeys + (i * 8U) + 4U));
+	}
+
+	first = vaeseq_u8(vqtbl2q_u8(block, shuffle0), zero);
+	second = vaeseq_u8(vqtbl2q_u8(block, shuffle1), zero);
+	first = veorq_u8(first, rcs_load_roundkey_arm(ctx->roundkeys + (ctx->rounds * 8U)));
+	second = veorq_u8(second, rcs_load_roundkey_arm(ctx->roundkeys + (ctx->rounds * 8U) + 4U));
+	vst1q_u8(output, first);
+	vst1q_u8(output + 16U, second);
+	qsc_memutils_secure_erase(&block, sizeof(block));
+	qsc_memutils_secure_erase(&first, sizeof(first));
+	qsc_memutils_secure_erase(&second, sizeof(second));
+}
+
+#endif
 
 static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, size_t length)
 {
+	/* transform bytes with counter mode; exact input/output aliasing is supported */
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT(input != NULL);
 	QSC_ASSERT(output != NULL);
 
+	uint8_t stream[QSC_RCS_BLOCK_SIZE] = { 0U };
+	size_t i;
 	size_t oft;
 
 	oft = 0U;
 
 	while (length >= QSC_RCS_BLOCK_SIZE)
 	{
-		rcs_transform_256(ctx, output + oft, ctx->nonce);
-		qsc_memutils_xor(output + oft, input + oft, QSC_RCS_BLOCK_SIZE);
-		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
+		/* Keep the input live until the keystream XOR has completed. */
+		rcs_transform_256(ctx, stream, ctx->nonce);
 
-		length -= QSC_RCS_BLOCK_SIZE;
+		for (i = 0U; i < QSC_RCS_BLOCK_SIZE; ++i)
+		{
+			output[oft + i] = input[oft + i] ^ stream[i];
+		}
+
+		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
 		oft += QSC_RCS_BLOCK_SIZE;
+		length -= QSC_RCS_BLOCK_SIZE;
 	}
 
 	if (length != 0U)
 	{
-		uint8_t tmpb[QSC_RCS_BLOCK_SIZE] = { 0U };
+		rcs_transform_256(ctx, stream, ctx->nonce);
 
-		rcs_transform_256(ctx, tmpb, ctx->nonce);
-
-		for (size_t i = 0U; i < length; ++i)
+		for (i = 0U; i < length; ++i)
 		{
-			output[oft + i] = tmpb[i] ^ input[oft + i];
+			output[oft + i] = input[oft + i] ^ stream[i];
 		}
 
 		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
 	}
+
+	qsc_memutils_secure_erase(stream, sizeof(stream));
 }
 
 #endif
@@ -903,27 +1149,15 @@ static void rcs_mac_finalize(qsc_rcs_state* ctx, uint8_t* output)
 
 	if (ctx->ctype == RCS256)
 	{
-#if defined(RCS_AUTH_KMACR12)
-		/* update the counter */
-		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_256, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-		/* finalize the mac and append code to output */
-		qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_256, output, QSC_RCS256_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(RCS_AUTH_KMACR24)
 		/* update the counter */
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_256, ctr, sizeof(ctr));
 		/* finalize the mac and append code to output */
 		qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_256, output, QSC_RCS256_MAC_SIZE);
-#endif
 	}
 	else
 	{
-#if defined(RCS_AUTH_KMACR12)
-		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr), QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-		qsc_keccak_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_RCS512_MAC_SIZE, QSC_KECCAK_KMAC_DOMAIN_ID, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, ctr, sizeof(ctr));
 		qsc_kmac_finalize(&ctx->kstate, qsc_keccak_rate_512, output, QSC_RCS512_MAC_SIZE);
-#endif
 	}
 }
 #endif
@@ -932,24 +1166,17 @@ static void rcs_mac_update(qsc_rcs_state* ctx, const uint8_t* input, size_t leng
 {
 	if (ctx->ctype == RCS256)
 	{
-#if defined(RCS_AUTH_KMACR12)
-		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_256, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_256, input, length);
-#endif
 	}
 	else
 	{
-#if defined(RCS_AUTH_KMACR12)
-		qsc_keccak_update(&ctx->kstate, qsc_keccak_rate_512, input, length, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_update(&ctx->kstate, qsc_keccak_rate_512, input, length);
-#endif
 	}
 }
 
 static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams)
 {
+	/* expand the validated key and customization into cipher and MAC state */
 	uint8_t sbuf[QSC_KECCAK_STATE_SIZE * sizeof(uint64_t)] = { 0U };
 	qsc_keccak_state kstate;
 	size_t i;
@@ -958,7 +1185,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 
 	if (ctx->ctype == RCS256)
 	{
-		uint8_t tmpr[RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0U };
+		QSC_ALIGN(64) uint8_t tmpr[RCS256_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0U };
 
 		/* initialize an instance of cSHAKE */
 		qsc_cshake_initialize(&kstate, qsc_keccak_rate_256, keyparams->key, keyparams->keylen, rcs256_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
@@ -976,7 +1203,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 			rlen -= BLKLEN;
 		}
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
 		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1U);
 
 		/* copy p-rand bytes to round keys */
@@ -1000,24 +1227,19 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_256, sbuf, 1U);
 		qsc_memutils_copy(mkey, sbuf, RCS256_MKEY_LENGTH);
 
-#	if defined(RCS_AUTH_KMACR12)
-		qsc_keccak_initialize_state(&ctx->kstate);
-		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0U, 
-			rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#	elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_256, mkey, sizeof(mkey), NULL, 0U);
-#	endif
 
 		qsc_memutils_secure_erase(mkey, sizeof(mkey));
 #endif
 
+		qsc_memutils_secure_erase(tmpr, sizeof(tmpr));
 		qsc_memutils_secure_erase(sbuf, sizeof(sbuf));
 		/* clear the shake buffer */
 		qsc_keccak_dispose(&kstate);
 	}
 	else
 	{
-		uint8_t tmpr[RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0U };
+		QSC_ALIGN(64) uint8_t tmpr[RCS512_ROUNDKEY_SIZE * RCS_ROUNDKEY_ELEMENT_SIZE] = { 0U };
 
 		/* initialize an instance of cSHAKE */
 		qsc_cshake_initialize(&kstate, qsc_keccak_rate_512, keyparams->key, keyparams->keylen, rcs512_name, RCS_NAME_LENGTH, keyparams->info, keyparams->infolen);
@@ -1034,7 +1256,7 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 			rlen -= BLKLEN;
 		}
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
 		const size_t RNKLEN = (QSC_RCS_BLOCK_SIZE / sizeof(__m128i)) * (ctx->rounds + 1U);
 
 		/* copy p-rand bytes to round keys */
@@ -1057,24 +1279,19 @@ static void rcs_secure_expand(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keypa
 		qsc_cshake_squeezeblocks(&kstate, qsc_keccak_rate_512, sbuf, 1U);
 		qsc_memutils_copy(mkey, sbuf, RCS512_MKEY_LENGTH);
 
-#	if defined(RCS_AUTH_KMACR12)
-		qsc_keccak_initialize_state(&ctx->kstate);
-		qsc_keccak_absorb_key_custom(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0U, 
-			rcs_kmacr12_name, RCS_KMACR12_NAME_LENGTH, QSC_KECCAK_PERMUTATION_MIN_ROUNDS);
-#	elif defined(RCS_AUTH_KMACR24)
 		qsc_kmac_initialize(&ctx->kstate, qsc_keccak_rate_512, mkey, sizeof(mkey), NULL, 0U);
-#	endif
 
 		qsc_memutils_secure_erase(mkey, sizeof(mkey));
 #endif
 
+		qsc_memutils_secure_erase(tmpr, sizeof(tmpr));
 		qsc_memutils_secure_erase(sbuf, sizeof(sbuf));
 		/* clear the shake buffer */
 		qsc_keccak_dispose(&kstate);
 	}
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
-#	if defined(QSC_SYSTEM_HAS_AVX512)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
+#	if defined(QSC_SYSTEM_RCS_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
 	/* store the avx-512 round keys qsc_keccak_initialize_state*/
 	qsc_memutils_secure_erase(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 
@@ -1098,8 +1315,8 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 		qsc_keccak_dispose(&ctx->kstate);
 #endif
 
-#if defined(QSC_SYSTEM_AESNI_ENABLED)
-#	if defined(QSC_SYSTEM_HAS_AVX512)
+#if defined(QSC_SYSTEM_RCS_AESNI_ENABLED)
+#	if defined(QSC_SYSTEM_RCS_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
 		qsc_memutils_secure_erase(ctx->roundkeysw, sizeof(ctx->roundkeysw));
 #	endif
 #endif
@@ -1114,14 +1331,60 @@ void qsc_rcs_dispose(qsc_rcs_state* ctx)
 	}
 }
 
+static bool rcs_state_valid(const qsc_rcs_state* ctx)
+{
+	/* validate the initialized cipher profile without inspecting secret key bytes */
+	bool res;
+
+	res = (ctx->ctype == RCS256 && ctx->rounds == RCS256_ROUND_COUNT &&
+		ctx->roundkeylen == RCS256_ROUNDKEY_SIZE) ||
+		(ctx->ctype == RCS512 && ctx->rounds == RCS512_ROUND_COUNT &&
+		ctx->roundkeylen == RCS512_ROUNDKEY_SIZE);
+
+	return res;
+}
+
+static bool rcs_transform_valid(const qsc_rcs_state* ctx, size_t length, bool finalize)
+{
+	/* check state, encoded length, tag space and full-width nonce exhaustion */
+	uint64_t blocks;
+	uint64_t high;
+	bool res;
+#if defined(QSC_RCS_AUTHENTICATED)
+	size_t taglen;
+#endif
+
+	res = rcs_state_valid(ctx);
+#if defined(QSC_RCS_AUTHENTICATED)
+	taglen = ctx->ctype == RCS256 ? QSC_RCS256_MAC_SIZE : QSC_RCS512_MAC_SIZE;
+	res = res && ctx->counter <= UINT64_MAX - QSC_RCS_BLOCK_SIZE - sizeof(uint64_t) &&
+		length <= UINT64_MAX - QSC_RCS_BLOCK_SIZE - sizeof(uint64_t) - ctx->counter &&
+		(finalize == false || length <= SIZE_MAX - taglen) &&
+		ctx->kstate.position < (ctx->ctype == RCS256 ? QSC_KECCAK_256_RATE : QSC_KECCAK_512_RATE);
+#else
+	(void)finalize;
+#endif
+	blocks = (uint64_t)(length / QSC_RCS_BLOCK_SIZE) + (uint64_t)(length % QSC_RCS_BLOCK_SIZE != 0U);
+	high = qsc_intutils_le8to64(ctx->nonce + 8U) & qsc_intutils_le8to64(ctx->nonce + 16U) &
+		qsc_intutils_le8to64(ctx->nonce + 24U);
+	res = res && (high != UINT64_MAX || blocks <= UINT64_MAX - qsc_intutils_le8to64(ctx->nonce));
+
+	return res;
+}
+
 void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, bool encryption)
 {
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(keyparams->nonce != NULL);
-	QSC_ASSERT(keyparams->key != NULL);
-	QSC_ASSERT(keyparams->keylen == QSC_RCS256_KEY_SIZE || keyparams->keylen == QSC_RCS512_KEY_SIZE);
+	QSC_ASSERT(keyparams != NULL);
+	QSC_ASSERT(keyparams == NULL || keyparams->nonce != NULL);
+	QSC_ASSERT(keyparams == NULL || keyparams->key != NULL);
+	QSC_ASSERT(keyparams == NULL || keyparams->keylen == QSC_RCS256_KEY_SIZE || keyparams->keylen == QSC_RCS512_KEY_SIZE);
+	QSC_ASSERT(keyparams == NULL || keyparams->info != NULL || keyparams->infolen == 0U);
+	QSC_ASSERT(keyparams == NULL || keyparams->infolen <= SIZE_MAX / 8U);
 
-	if (ctx != NULL && keyparams != NULL)
+	if (ctx != NULL && keyparams != NULL && keyparams->key != NULL && keyparams->nonce != NULL &&
+		(keyparams->keylen == QSC_RCS256_KEY_SIZE || keyparams->keylen == QSC_RCS512_KEY_SIZE) &&
+		(keyparams->info != NULL || keyparams->infolen == 0U) && keyparams->infolen <= SIZE_MAX / 8U)
 	{
 		ctx->ctype = keyparams->keylen == QSC_RCS512_KEY_SIZE ? RCS512 : RCS256;
 		qsc_memutils_secure_erase(ctx->roundkeys, sizeof(ctx->roundkeys));
@@ -1145,15 +1408,20 @@ void qsc_rcs_initialize(qsc_rcs_state* ctx, const qsc_rcs_keyparams* keyparams, 
 		/* generate the cipher and mac keys */
 		rcs_secure_expand(ctx, keyparams);
 	}
+	else if (ctx != NULL)
+	{
+		qsc_rcs_dispose(ctx);
+	}
 }
 
 void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t length)
 {
+#if defined(QSC_RCS_AUTHENTICATED)
 	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(data != NULL);
-	QSC_ASSERT(length != 0U);
+	QSC_ASSERT(data != NULL || length == 0U);
+	QSC_ASSERT(length <= UINT32_MAX);
 
-	if (ctx != NULL && data != NULL && length != 0U)
+	if (ctx != NULL && rcs_state_valid(ctx) && data != NULL && length != 0U && length <= UINT32_MAX)
 	{
 		uint8_t code[sizeof(uint32_t)] = { 0U };
 
@@ -1163,13 +1431,23 @@ void qsc_rcs_set_associated(qsc_rcs_state* ctx, const uint8_t* data, size_t leng
 		qsc_intutils_le32to8(code, (uint32_t)length);
 		rcs_mac_update(ctx, code, sizeof(code));
 	}
+	else if (ctx != NULL && (length > UINT32_MAX || (data == NULL && length != 0U)))
+	{
+		qsc_rcs_dispose(ctx);
+	}
+#else
+	(void)ctx;
+	(void)data;
+	(void)length;
+#endif
 }
 
 void qsc_rcs_store_nonce(const qsc_rcs_state* ctx, uint8_t nonce[QSC_RCS_NONCE_SIZE])
 {
 	QSC_ASSERT(ctx != NULL);
+	QSC_ASSERT(nonce != NULL);
 
-	if (ctx != NULL)
+	if (ctx != NULL && nonce != NULL)
 	{
 		qsc_memutils_copy(nonce, ctx->nonce, QSC_RCS_NONCE_SIZE);
 	}
@@ -1185,7 +1463,7 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 
 	res = false;
 
-	if (ctx != NULL && output != NULL && input != NULL)
+	if (ctx != NULL && output != NULL && input != NULL && rcs_transform_valid(ctx, length, true))
 	{
 #if defined(QSC_RCS_AUTHENTICATED)
 
@@ -1226,6 +1504,10 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 					rcs_ctr_transform(ctx, output, input, length);
 					res = true;
 				}
+				else
+				{
+					qsc_rcs_dispose(ctx);
+				}
 
 				qsc_memutils_secure_erase(code, sizeof(code));
 			}
@@ -1239,6 +1521,10 @@ bool qsc_rcs_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input
 				{
 					rcs_ctr_transform(ctx, output, input, length);
 					res = true;
+				}
+				else
+				{
+					qsc_rcs_dispose(ctx);
 				}
 
 				qsc_memutils_secure_erase(code, sizeof(code));
@@ -1266,7 +1552,7 @@ bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8
 
 	res = false;
 
-	if (ctx != NULL && output != NULL && input != NULL)
+	if (ctx != NULL && output != NULL && input != NULL && rcs_transform_valid(ctx, length, finalize))
 	{
 #if defined(QSC_RCS_AUTHENTICATED)
 
@@ -1313,6 +1599,12 @@ bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8
 						rcs_ctr_transform(ctx, output, input, length);
 						res = true;
 					}
+					else
+					{
+						qsc_rcs_dispose(ctx);
+					}
+
+					qsc_memutils_secure_erase(code, sizeof(code));
 				}
 				else
 				{
@@ -1325,6 +1617,12 @@ bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8
 						rcs_ctr_transform(ctx, output, input, length);
 						res = true;
 					}
+					else
+					{
+						qsc_rcs_dispose(ctx);
+					}
+
+					qsc_memutils_secure_erase(code, sizeof(code));
 				}
 			}
 			else

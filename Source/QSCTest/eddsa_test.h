@@ -128,7 +128,34 @@
  *
  * \return Returns true if all known answer tests pass.
  */
-bool qsctest_ecdsa_kat_test(void);
+bool qsctest_eddsa_kat_test(void);
+
+/**
+ * \brief Test independent Ed25519 RFC 8032 vectors, recovered message and tamper rejection.
+ * \return true when all checks pass; false otherwise. No shared state or dynamic ownership.
+ */
+bool qsctest_eddsa25519_kat_test(void);
+
+/**
+ * \brief Test independent Ed448 RFC 8032 vectors, recovered message and tamper rejection.
+ * \return true when all checks pass; false otherwise. No shared state or dynamic ownership.
+ */
+bool qsctest_eddsa448_kat_test(void);
+
+/**
+ * \brief Run RFC 8032 Ed25519 empty-message key, signature and verification vectors.
+ * \return true if every check passes, false otherwise. Uses no shared state.
+ */
+bool qsctest_eddsa25519_empty_kat_test(void);
+
+/**
+ * \brief Run RFC 8032 Ed448 empty-message key, signature and verification vectors.
+ * \return true if every check passes, false otherwise. Uses no shared state.
+ */
+bool qsctest_eddsa448_empty_kat_test(void);
+
+
+
 
 /**
  * \brief Test the validity of a mutated secret key.
@@ -139,7 +166,7 @@ bool qsctest_ecdsa_kat_test(void);
  *
  * \return Returns true if the test is successful.
  */
-bool qsctest_ecdsa_privatekey_integrity(void);
+bool qsctest_eddsa_privatekey_integrity(void);
 
 /**
  * \brief Test the validity of a mutated public key.
@@ -149,7 +176,7 @@ bool qsctest_ecdsa_privatekey_integrity(void);
  *
  * \return Returns true if the test is successful.
  */
-bool qsctest_ecdsa_publickey_integrity(void);
+bool qsctest_eddsa_publickey_integrity(void);
 
 /**
  * \brief Test the validity of a mutated signature.
@@ -159,7 +186,7 @@ bool qsctest_ecdsa_publickey_integrity(void);
  *
  * \return Returns true if the test is successful.
  */
-bool qsctest_ecdsa_signature_integrity(void);
+bool qsctest_eddsa_signature_integrity(void);
 
 /**
  * \brief Stress test the key generation, signing, and verification operations.
@@ -170,10 +197,10 @@ bool qsctest_ecdsa_signature_integrity(void);
  *
  * \return Returns true if all stress tests pass.
  */
-bool qsctest_ecdsa_stress_test(void);
+bool qsctest_eddsa_stress_test(void);
 
 /**
- * \brief Run the ECDSA implementation stress and correctness tests.
+ * \brief Run the EdDSA implementation stress and correctness tests.
  *
  * This function executes the known answer tests, the integrity tests for keys and signature,
  * and the stress test, printing the result of each test to the console.

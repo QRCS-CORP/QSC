@@ -85,6 +85,17 @@
  */
 #define QSC_X509_EDDSA_PUBLIC_KEY_SIZE 32U
 
+/** \def QSC_X509_ED448_SEED_SIZE
+ * rief RFC 8410 Ed448 private seed size in bytes.
+ */
+#define QSC_X509_ED448_SEED_SIZE 57U
+
+/** \def QSC_X509_ED448_PUBLIC_KEY_SIZE
+ * rief RFC 8410 Ed448 verification key size in bytes.
+ */
+#define QSC_X509_ED448_PUBLIC_KEY_SIZE 57U
+
+
 /*!
  * \def QSC_X509_ML_DSA_44_PRIVATEKEY_SIZE
  * \brief The ML-DSA-44 private key size in bytes.

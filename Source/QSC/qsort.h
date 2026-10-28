@@ -61,11 +61,12 @@ QSC_CPLUSPLUS_ENABLED_START
  * \brief An implementation of the quicksort sorting function.
  *
  * \details
- * This header defines functions for sorting arrays of signed integers of various sizes
- * (8-bit, 16-bit, 32-bit, and 64-bit) using the quicksort algorithm. The implementation
- * utilizes an in-place recursive partitioning method to achieve an average-case time
- * complexity of O(n log n). Quicksort is well-known for its efficiency and simplicity,
- * and it is widely used in numerous software systems.
+ * This header defines in-place ascending sorting for signed 8-, 16-, 32- and 64-bit
+ * integers. Small partitions use insertion sort; larger partitions use median-of-three
+ * three-way partitioning with a bounded recursion depth and a heapsort fallback,
+ * providing O(n log n) worst-case time for the comparison-based paths.
+ * Large signed 8-bit ranges use a bounded 256-bucket counting sort in O(n + 256) time.
+ * The routines allocate no heap memory and require the caller to synchronize mutation.
  *
  * \code
  * // Example usage for sorting an array of 32-bit integers:

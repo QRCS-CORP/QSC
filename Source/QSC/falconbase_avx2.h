@@ -64,17 +64,7 @@
 
 /* api.h */
 
-#if defined(QSC_FALCON_S3SHAKE256F512)
-#	define FALCON_CRYPTO_SECRETKEYBYTES 1281
-#	define FALCON_CRYPTO_PUBLICKEY_BYTES 897
-#	define FALCON_CRYPTO_SIGNATURE_BYTES 658
-#	define CRYPTO_ALGNAME "Falcon-512"
-#elif defined(QSC_FALCON_S5SHAKE256F1024)
-#	define FALCON_CRYPTO_SECRETKEYBYTES 2305
-#	define FALCON_CRYPTO_PUBLICKEY_BYTES 1793
-#	define FALCON_CRYPTO_SIGNATURE_BYTES 1276
-#	define CRYPTO_ALGNAME "Falcon-1024"
-#endif
+/* Both parameter sets use separately named backend entry points. */
 
 /* falcon_fpr.h */
 
@@ -240,14 +230,15 @@ extern const uint16_t falcon_avx2_iGMb[FALCON_GMB_SIZE];
 extern const falcon_small_prime falcon_avx2_small_primes[FALCON_SMALL_PRIME_SIZE];
 
 /**
-* \brief Generates a Dilithium public/private key-pair.
+* \brief Generates a Falcon public/private key-pair.
 * Arrays must be sized to FALCON_PUBLICKEY_SIZE and FALCON_SECRETKEY_SIZE.
 *
 * \param publickey: The public verification key
 * \param secretkey: The private signature key
 * \param rng_generate: The random generator
 */
-int32_t qsc_falcon_avx2_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
+int32_t qsc_falcon_avx2_512_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
+int32_t qsc_falcon_avx2_1024_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
 
 /**
 * \brief Takes the message as input and returns an array containing the signature followed by the message
@@ -258,8 +249,24 @@ int32_t qsc_falcon_avx2_generate_keypair(uint8_t *pk, uint8_t *sk, bool (*rng_ge
 * \param msglen: The message length
 * \param privatekey: The private signature key
 * \param rng_generate: The random generator
+* \param maxoverhead: Maximum signed-message overhead in bytes.
+* \return Zero on success; nonzero on invalid key, encoding or RNG failure.
+* \note Caller owns the buffers; no global mutable state is used.
 */
-int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t));
+int32_t qsc_falcon_avx2_512_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t), size_t maxoverhead);
+/**
+* \brief Sign a message with Falcon-1024 under an explicit encoded-overhead limit.
+* \param sm Output signed-message buffer of mlen + maxoverhead bytes.
+* \param smlen Actual output length, reset to zero on failure.
+* \param m Input message of mlen bytes.
+* \param mlen Input message length.
+* \param sk Secret key containing 2305 bytes.
+* \param rng_generate Random generator callback.
+* \param maxoverhead Maximum signed-message overhead in bytes.
+* \return Zero on success; nonzero on invalid key, encoding or RNG failure.
+* \note The caller owns all buffers and there is no mutable global state.
+*/
+int32_t qsc_falcon_avx2_1024_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk, bool (*rng_generate)(uint8_t*, size_t), size_t maxoverhead);
 
 /**
 * \brief Verifies a signature-message pair with the public key.
@@ -271,8 +278,8 @@ int32_t qsc_falcon_avx2_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_
 * \param publickey: The public verification key
 * \return Returns true for success
 */
-bool qsc_falcon_avx2_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);\
-
+bool qsc_falcon_avx2_512_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
+bool qsc_falcon_avx2_1024_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
 /* \endcond NO_DOCUMENT */
 #endif
 #endif

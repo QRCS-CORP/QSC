@@ -266,6 +266,7 @@ QSC_EXPORT_API int32_t qsc_async_atomic_int32_decrement(volatile int32_t* target
  * \brief Launch a function on a new thread.
  *
  * Spawns a new thread to execute the provided function with a single argument.
+ * Waits for completion. If creation fails, executes the function synchronously.
  *
  * \param func: [void (*)(void*)] Pointer to the function to execute.
  * \param state: [void*] Pointer to the argument to pass to the function.
@@ -276,6 +277,8 @@ QSC_EXPORT_API void qsc_async_launch_thread(void (*func)(void*), void* state);
  * \brief Launch multiple threads in parallel using variadic arguments.
  *
  * Spawns several threads, each executing the provided function with its respective argument.
+ * Thread batches are bounded to QSC_ASYNC_PARALLEL_MAX and fully joined before return.
+ * Tasks run synchronously if thread creation fails.
  *
  * \param func: [void (*)(void*)] Pointer to the function to execute.
  * \param count: [size_t] The number of threads (and corresponding arguments) to launch.
@@ -339,6 +342,25 @@ QSC_EXPORT_API void qsc_async_mutex_unlock(qsc_mutex mtx);
 QSC_EXPORT_API void qsc_async_mutex_unlock_ex(qsc_mutex mtx);
 
 /**
+ * \brief Execute indexed tasks concurrently with a bounded thread count.
+ *
+ * \details
+ * Executes task(context, index) once for each index from zero to nthreads - 1.
+ * Waits for all successfully started threads before returning. This function
+ * creates no heap allocations. Batches use at most QSC_ASYNC_PARALLEL_MAX
+ * workers concurrently; zero count, invalid pointer, or failed creation returns false.
+ *
+ * \param task: [void (*)(void*, size_t)] Callback that processes an index.
+ * \param context: [void*] Application-owned context retained through completion.
+ * \param nthreads: [size_t] Total number of indexed tasks, at least one.
+ *
+ * \return [bool] True when every indexed task was launched and joined.
+ *
+ * \warning The callback must be thread safe. The context remains caller-owned.
+ */
+QSC_EXPORT_API bool qsc_async_parallel_for(void (*task)(void* context, size_t index), void* context, size_t nthreads);
+
+/**
  * \brief Get the number of processor cores available.
  *
  * Retrieves the number of CPU cores (including hyper-threads) available on the system.
@@ -358,6 +380,23 @@ QSC_EXPORT_API size_t qsc_async_processor_count(void);
  * \return [qsc_thread] Returns a handle to the created thread, or NULL on failure.
  */
 QSC_EXPORT_API qsc_thread qsc_async_thread_create(void (*func)(void*), void* state);
+
+/**
+ * \brief Launch a detached thread that automatically releases its thread handle.
+ *
+ * \details
+ * Creates a single-argument thread and immediately releases its join handle.
+ * The callback continues independently. The caller must retain the callback
+ * argument until execution completes and must not attempt to join the worker.
+ * On POSIX, cancellation cleanup frees the private callback wrapper.
+ *
+ * \param func: [void (*)(void*)] Callback to run on the detached thread.
+ * \param state: [void*] Caller-owned state; may be NULL, not automatically freed.
+ *
+ * \return [bool] True when creation and handle release succeed.
+ * \warning A false result after creation may still leave a running worker.
+ */
+QSC_EXPORT_API bool qsc_async_thread_create_detached(void (*func)(void*), void* state);
 
 /**
  * \brief Create a thread with multiple parameters.
@@ -385,7 +424,8 @@ QSC_EXPORT_API qsc_thread qsc_async_thread_create_noargs(void (*func)(void));
 /**
  * \brief Resume a suspended thread.
  *
- * Resumes execution of a thread that has been suspended.
+ * Resumes a suspended Windows thread. POSIX has no portable arbitrary-thread
+ * resumption mechanism, so the POSIX implementation returns -1.
  *
  * \param handle: [qsc_thread] The thread handle to resume.
  * 
@@ -405,7 +445,8 @@ QSC_EXPORT_API void qsc_async_thread_sleep(uint32_t msec);
 /**
  * \brief Suspend a thread.
  *
- * Suspends the execution of the specified thread.
+ * Suspends a Windows thread. POSIX has no safe portable arbitrary-thread
+ * suspension mechanism, so the POSIX implementation returns -1.
  *
  * \param handle: [qsc_thread] The thread handle to suspend.
  * 
@@ -416,7 +457,10 @@ QSC_EXPORT_API int32_t qsc_async_thread_suspend(qsc_thread handle);
 /**
  * \brief Terminate a thread.
  *
- * Terminates the specified thread. On Windows, this may terminate the calling thread.
+ * Terminates the specified thread. Windows uses immediate thread termination
+ * (which may bypass normal resource cleanup). POSIX requests deferred pthread
+ * cancellation and detaches the handle; cancellation requires a cancellation
+ * point and may not be immediate. A terminated/detached handle must not be joined.
  *
  * \param handle: [qsc_thread] The thread handle to terminate.
  * 
@@ -427,7 +471,8 @@ QSC_EXPORT_API bool qsc_async_thread_terminate(qsc_thread handle);
 /**
  * \brief Wait for a thread to complete execution.
  *
- * Blocks until the specified thread has finished executing.
+ * Blocks until the specified thread has finished executing and consumes its
+ * joinable thread handle. Do not reuse a consumed handle.
  *
  * \param handle: [qsc_thread] The thread handle to wait on.
  */
@@ -437,6 +482,9 @@ QSC_EXPORT_API void qsc_async_thread_wait(qsc_thread handle);
  * \brief Wait for a thread to complete execution with a timeout.
  *
  * Blocks until the specified thread has finished executing or the timeout expires.
+ * On successful completion, consumes the joinable thread handle. On timeout,
+ * the handle remains valid and must be joined later. On unsupported POSIX
+ * platforms, this function returns without joining (no portable timed join).
  *
  * \param handle: [qsc_thread] The thread handle to wait on.
  * \param msec: [uint32_t] The maximum number of milliseconds to wait.
@@ -446,7 +494,8 @@ QSC_EXPORT_API void qsc_async_thread_wait_time(qsc_thread handle, uint32_t msec)
 /**
  * \brief Wait for an array of threads to complete execution.
  *
- * Blocks until all threads in the provided array have finished executing.
+ * Blocks until all valid threads in the provided array have finished executing.
+ * Successful waits reclaim the corresponding handles and zero their entries.
  *
  * \param handles: [qsc_thread*] An array of thread handles.
  * \param count: [size_t] The number of threads in the array.

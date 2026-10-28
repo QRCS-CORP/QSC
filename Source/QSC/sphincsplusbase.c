@@ -1,3 +1,54 @@
+/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "sphincsplusbase.h"
 #include "memutils.h"
 #include "sha3.h"
@@ -1041,6 +1092,7 @@ static void sphincsplus_merkle_gen_root(uint8_t* root, const spx_ctx* ctx)
     sphincsplus_set_layer_addr(top_tree_addr, SPX_D - 1U);
     sphincsplus_set_layer_addr(wots_addr, SPX_D - 1U);
     /* ~0 means "don't bother generating an auth path */ 
+    qsc_memutils_clear(root, SPX_N);
     sphincsplus_merkle_sign(auth_path, root, ctx, wots_addr, top_tree_addr, (uint32_t)~0);
 }
 
@@ -1090,6 +1142,7 @@ bool sphincsplus_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gener
         res = sphincsplus_ref_generate_seeded_keypair(pk, sk, seed);
     }
 
+    qsc_memutils_secure_erase(seed, sizeof(seed));
     return res;
 }
 
@@ -1114,6 +1167,7 @@ bool sphincsplus_ref_generate_seeded_keypair(uint8_t* pk, uint8_t* sk, const uin
         res = true;
     }
 
+    qsc_memutils_secure_erase(&ctx, sizeof(ctx));
     return res;
 }
 
@@ -1123,7 +1177,7 @@ bool sphincsplus_ref_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* me
 
     res = false;
 
-    if (ctxlen <= 255U)
+    if (ctxlen <= 255U && signedmsg != NULL && smsglen != NULL && sk != NULL && seed != NULL && (message != NULL || msglen == 0U) && (context != NULL || ctxlen == 0U))
     {
         uint8_t prec[SPHINCSPLUS_CONTEXT_SIZE] = { 0U };
 
@@ -1160,12 +1214,14 @@ bool sphincsplus_ref_sign_signature(uint8_t* signedmsg, size_t* smsglen, const u
     uint32_t idx_leaf;
     bool res;
 
-    const uint8_t* sk_prf = sk + SPX_N;
-    const uint8_t* pk = sk + (2U * SPX_N);
+    const uint8_t* sk_prf;
+    const uint8_t* pk;
     res = false;
 
-    if (signedmsg != NULL && smsglen != NULL && message != NULL && context != NULL && sk != NULL && seed != NULL)
+    if (signedmsg != NULL && smsglen != NULL && (message != NULL || msglen == 0U) && context != NULL && sk != NULL && seed != NULL)
     {
+        sk_prf = sk + SPX_N;
+        pk = sk + (2U * SPX_N);
         qsc_memutils_copy(sctx.sk_seed, sk, SPX_N);
         qsc_memutils_copy(sctx.pub_seed, pk, SPX_N);
 
@@ -1224,11 +1280,12 @@ bool sphincsplus_ref_verify(const uint8_t* signedmsg, size_t smsglen, const uint
     uint32_t idx_leaf;
     bool res;
 
-    const uint8_t* pub_root = pk + SPX_N;
+    const uint8_t* pub_root;
     res = false;
 
-    if (signedmsg != NULL && message != NULL && context != NULL && pk != NULL && smsglen >= SPX_BYTES)
+    if (signedmsg != NULL && (message != NULL || msglen == 0U) && context != NULL && pk != NULL && smsglen == SPX_BYTES)
     {
+        pub_root = pk + SPX_N;
         qsc_memutils_copy(sctx.pub_seed, pk, SPX_N);
 
         sphincsplus_set_type(wots_addr, SPX_ADDR_TYPE_WOTS);
@@ -1287,8 +1344,14 @@ bool sphincsplus_ref_open(uint8_t* message, size_t* msglen, const uint8_t* conte
 {
     bool res;
 
-    *msglen = 0U;
     res = false;
+
+    if (msglen == NULL || signedmsg == NULL || pk == NULL || (message == NULL && smsglen > SPHINCSPLUS_SIGNATURE_SIZE) || (context == NULL && ctxlen != 0U))
+    {
+        return false;
+    }
+
+    *msglen = 0U;
 
     if (ctxlen <= 255U)
     {
@@ -1306,7 +1369,7 @@ bool sphincsplus_ref_open(uint8_t* message, size_t* msglen, const uint8_t* conte
         if (smsglen >= SPHINCSPLUS_SIGNATURE_SIZE)
         {
             *msglen = smsglen - SPHINCSPLUS_SIGNATURE_SIZE;
-            res = sphincsplus_ref_verify(signedmsg, smsglen, signedmsg + SPHINCSPLUS_SIGNATURE_SIZE, *msglen, prec, ctxlen + 2U, pk);
+            res = sphincsplus_ref_verify(signedmsg, SPHINCSPLUS_SIGNATURE_SIZE, signedmsg + SPHINCSPLUS_SIGNATURE_SIZE, *msglen, prec, ctxlen + 2U, pk);
             
             if (res == true)
             {

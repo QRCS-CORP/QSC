@@ -146,6 +146,52 @@ typedef struct
 QSC_EXPORT_API void qsc_collection_add(qsc_collection_state* ctx, const uint8_t* item, const uint8_t* key);
 
 /**
+ * \brief Reserve storage for at least capacity entries without altering count.
+ * \param ctx: Initialized collection; caller retains ownership.
+ * \param capacity: Entry count up to QSC_COLLECTION_MAX_ENTRIES.
+ * \return True on success; false on invalid input, overflow or allocation failure.
+ * \note Thread-safe for initialized state; may invalidate cached item/key pointers.
+ */
+QSC_EXPORT_API bool qsc_collection_reserve(qsc_collection_state* ctx, size_t capacity);
+
+/**
+ * \brief Opt into an indexed lookup accelerator for a collection with stable external key data.
+ * \param ctx: Initialized collection.
+ * \return True if the index was built, false on allocation failure.
+ * \note Caller must not modify ctx->keys directly while indexing is enabled. Duplicate keys resolve to earliest live index. Index lookup is not constant-time. The index is released when the last entry is removed. Thread-safe per state.
+ */
+QSC_EXPORT_API bool qsc_collection_enable_index(qsc_collection_state* ctx);
+
+/**
+ * \brief Disable the optional indexed lookup accelerator.
+ * \param ctx: Initialized collection.
+ * \return True for a valid state, false otherwise.
+ * \note Safe under concurrent collection operations; frees private index memory.
+ */
+QSC_EXPORT_API bool qsc_collection_disable_index(qsc_collection_state* ctx);
+
+/**
+ * \brief Transactionally replace a collection from a size-checked wire image.
+ * \param ctx: Initialized collection. Old contents survive invalid/truncated input or allocation failure.
+ * \param input: Input bytes, caller owned and retained.
+ * \param inputlen: Actual accessible input byte count including eight-byte header.
+ * \return True for valid complete data, false otherwise.
+ * \note Same serialization format and item ordering as the legacy interface; thread-safe per state.
+ */
+QSC_EXPORT_API bool qsc_collection_deserialize_sized(qsc_collection_state* ctx, const uint8_t* input, size_t inputlen);
+
+/**
+ * \brief Serialize a complete collection into a checked caller-owned output buffer.
+ * \param output: Destination at least outputlen bytes long.
+ * \param outputlen: Writable destination size in bytes.
+ * \param ctx: Initialized source collection.
+ * \param written: Receives byte count on success; unchanged on error.
+ * \return True if all bytes fit, false without modifying output for insufficient space.
+ * \note No allocation or ownership transfer; thread-safe per collection.
+ */
+QSC_EXPORT_API bool qsc_collection_serialize_sized(uint8_t* output, size_t outputlen, const qsc_collection_state* ctx, size_t* written);
+
+/**
  * \brief Deserialize a collection.
  *
  * Converts a serialized byte array into a collection state.
@@ -167,7 +213,7 @@ QSC_EXPORT_API void qsc_collection_dispose(qsc_collection_state* ctx);
 /**
  * \brief Erase the collection.
  *
- * Removes all items from the collection without deallocating the underlying storage.
+ * Disposes of the existing items and keys, then initializes an empty collection with the previous item width.
  *
  * \param ctx: [qsc_collection_state*] Pointer to the collection state to erase.
  */

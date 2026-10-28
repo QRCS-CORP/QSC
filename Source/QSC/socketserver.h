@@ -181,11 +181,30 @@ QSC_EXPORT_API qsc_socket_protocols qsc_socket_server_socket_protocol(const qsc_
 QSC_EXPORT_API qsc_socket_transports qsc_socket_server_socket_transport(const qsc_socket* sock);
 
 /**
-* \brief Releases the server mutex, disposes of the listener socket and state
+* \brief Stops the listener and joins its accept worker before freeing resources.
+* \details This call blocks until an in-flight callback completes when called
+* from another thread. From the worker callback itself, cleanup is deferred to
+* worker exit to prevent a self-join. The public state and source socket must
+* remain valid through callback return. Repeated disposal after completion is safe.
+* Concurrent disposals of the same state must be externally serialized.
 *
 * \param state: [qsc_socket_server_async_accept_state*] The asynchronous server state
 */
 QSC_EXPORT_API void qsc_socket_server_async_dispose(qsc_socket_server_async_accept_state* state);
+
+/**
+ * \brief Request nonblocking shutdown of the asynchronous accept loop.
+ * \param state: [qsc_socket_server_async_accept_state*] Previously started listener state.
+ * \return [bool] True if a registered listener was found and stopped.
+ * \details Safe to call from an accept or error callback. Does not wait for
+ * callbacks to complete; the caller must subsequently call async_dispose.
+ * A callback already being dispatched may still execute after this call;
+ * async_dispose waits for that callback when invoked from another thread.
+ * The public state and socket must remain valid until disposal completes.
+ * \note Thread safe for a single caller coordinating shutdown. No ownership
+ * of accepted sockets is transferred to this function.
+ */
+QSC_EXPORT_API bool qsc_socket_server_async_stop(qsc_socket_server_async_accept_state* state);
 
 /**
 * \brief Shut down channels and close the socket
@@ -243,6 +262,10 @@ QSC_EXPORT_API qsc_socket_exceptions qsc_socket_server_listen_ipv6(qsc_socket* s
 
 /**
 * \brief Places the socket in an asynchronous listening state
+* \details At most one accept worker is retained per listener. Accepted sockets
+* are owned by callbacks, which execute without internal locks held. The
+* listening socket is configured nonblocking for bounded shutdown latency.
+* No callback may access the listener state after disposal has completed.
 *
 * \param state: [qsc_socket_server_async_accept_state*] The asynchronous server state
 * \param address: [const char*] The servers address

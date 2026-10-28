@@ -50,6 +50,7 @@
  */
 
 #include "encoding.h"
+#include "intutils.h"
 #include "memutils.h"
 #include "stringutils.h"
 #include <stdio.h>
@@ -101,6 +102,13 @@ static qsc_encoding_ber_element* encoding_ber_alloc_element(void)
     return elem;
 }
 
+/**
+ * \brief Expand a BER element's child pointer storage with checked arithmetic.
+ * \param elem: Mutable parent element owning the child pointer array.
+ * \param pcap: In/out pointer capacity; updated only on success.
+ * \return True when growth succeeds; false on overflow or allocation failure.
+ * \note No internal synchronization; caller owns elem and its child storage.
+ */
 static bool encoding_ber_grow_children(qsc_encoding_ber_element* elem, size_t* pcap)
 {
     qsc_encoding_ber_element** tmp;
@@ -108,9 +116,18 @@ static bool encoding_ber_grow_children(qsc_encoding_ber_element* elem, size_t* p
     bool res;
 
     res = false;
-    newcap = (*pcap == 0U) ? 4U : (*pcap * 2U);
+    newcap = 0U;
 
-    if (elem->children == NULL)
+    if (*pcap <= (SIZE_MAX / sizeof(qsc_encoding_ber_element*)) / 2U)
+    {
+        newcap = (*pcap == 0U) ? 4U : (*pcap * 2U);
+    }
+
+    if (newcap == 0U || newcap > (SIZE_MAX / sizeof(qsc_encoding_ber_element*)))
+    {
+        tmp = NULL;
+    }
+    else if (elem->children == NULL)
     {
         tmp = (qsc_encoding_ber_element**)qsc_memutils_malloc(newcap * sizeof(qsc_encoding_ber_element*));
     }
@@ -265,6 +282,12 @@ static bool encoding_base64_length_valid(const char* input, const char* separato
     return res;
 }
 
+/**
+ * \brief Calculate an encoded DER element size using checked arithmetic.
+ * \param element: Caller-owned read-only element tree.
+ * \return Required byte count, or zero for invalid or overflowing lengths.
+ * \note No allocations; the input tree must be acyclic and owned by the caller.
+ */
 static size_t encoding_der_element_size(const qsc_encoding_ber_element* element)
 {
     uint8_t dummy[10U];
@@ -295,7 +318,7 @@ static size_t encoding_der_element_size(const qsc_encoding_ber_element* element)
 
                     cs = encoding_der_element_size(element->children[i]);
 
-                    if (cs == 0U && element->children[i] != NULL)
+                    if (cs == 0U || cs > (SIZE_MAX - content))
                     {
                         ok = false;
                     }
@@ -311,7 +334,7 @@ static size_t encoding_der_element_size(const qsc_encoding_ber_element* element)
                 {
                     lfield = qsc_encoding_ber_encode_length(content, dummy, sizeof(dummy));
 
-                    if (lfield > 0U)
+                    if (lfield > 0U && taglen <= (SIZE_MAX - lfield) && content <= (SIZE_MAX - taglen - lfield))
                     {
                         total = taglen + lfield + content;
                     }
@@ -321,7 +344,7 @@ static size_t encoding_der_element_size(const qsc_encoding_ber_element* element)
             {
                 lfield = qsc_encoding_ber_encode_length(element->length, dummy, sizeof(dummy));
 
-                if (lfield > 0U)
+                if (lfield > 0U && element->length != QSC_BER_ENCODING_INDEFINITE_LENGTH && taglen <= (SIZE_MAX - lfield) && element->length <= (SIZE_MAX - taglen - lfield))
                 {
                     total = taglen + lfield + element->length;
                 }
@@ -382,25 +405,22 @@ size_t qsc_encoding_base64_decoded_size(const char* input, size_t length)
 
 size_t qsc_encoding_base64_encoded_size(size_t length)
 {
-    QSC_ASSERT(length != 0U);
+	size_t groups;
+	size_t ret;
 
-    size_t ret;
+	ret = 0U;
 
-    ret = 0U;
+	if (length != 0U)
+	{
+		groups = (length / 3U) + (((length % 3U) != 0U) ? 1U : 0U);
 
-    if (length != 0U)
-    {
-        ret = length;
+		if (groups <= (SIZE_MAX / 4U))
+		{
+			ret = groups * 4U;
+		}
+	}
 
-        if (ret % 3U != 0U)
-        {
-            ret += 3U - (ret % 3U);
-        }
-
-        ret = (ret / 3U) * 4U;
-    }
-
-    return ret;
+	return ret;
 }
 
 bool qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* input, size_t inplen)
@@ -443,120 +463,418 @@ bool qsc_encoding_base64_encode(char* output, size_t otplen, const uint8_t* inpu
     return res;
 }
 
+/**
+ * \brief Validate and convert one non-padding Base64 alphabet character.
+ * \param value: An input byte, interpreted as unsigned ASCII.
+ * \return Six-bit value [0,63], or -1 on invalid input.
+ * \note No allocation; stateless and thread safe.
+ */
+static int32_t encoding_base64_value(uint8_t value)
+{
+	int32_t res;
+
+	res = -1;
+
+	if (value >= 43U && value <= 122U)
+	{
+		res = QSC_BASE64_DECODE_TABLE[value - 43U];
+	}
+
+	return res;
+}
+
 bool qsc_encoding_base64_decode(uint8_t* output, size_t otplen, const char* input, size_t inplen)
 {
-    QSC_ASSERT(output != NULL);
-    QSC_ASSERT(input != NULL);
-    QSC_ASSERT(inplen != 0U);
+	size_t decoded;
+	size_t i;
+	size_t j;
+	size_t last;
+	uint32_t val;
+	int32_t c0;
+	int32_t c1;
+	int32_t c2;
+	int32_t c3;
+	bool res;
 
-    size_t i;
-    size_t j;
-    int32_t v;
-    bool res;
+	res = false;
 
-    res = false;
+	if (output != NULL && input != NULL && inplen >= 4U && (inplen % 4U) == 0U)
+	{
+		decoded = qsc_encoding_base64_decoded_size(input, inplen);
 
-    if (output != NULL && input != NULL && inplen != 0U)
-    {
-        /* RFC 4648: encoded length must be a non-zero multiple of four. */
-        if ((inplen % 4U == 0U) && (otplen >= qsc_encoding_base64_decoded_size(input, inplen)))
-        {
-            res = true;
+		if (decoded <= otplen)
+		{
+			res = true;
+			last = inplen - 4U;
 
-            /* pass 1: validate every character is a legal Base64 symbol. */
-            for (i = 0U; (i < inplen) && (res == true); ++i)
-            {
-                if (qsc_encoding_base64_is_valid_char(input[i]) == false)
-                {
-                    res = false;
-                }
-            }
+			/* Fully validate before writing output, including padding placement.
+             * Legacy acceptance of nonzero unused pad bits is preserved. */
+			for (i = 0U; i < inplen && res == true; i += 4U)
+			{
+				c0 = encoding_base64_value((uint8_t)input[i]);
+				c1 = encoding_base64_value((uint8_t)input[i + 1U]);
+				c2 = encoding_base64_value((uint8_t)input[i + 2U]);
+				c3 = encoding_base64_value((uint8_t)input[i + 3U]);
 
-            /* pass 2: validate padding placement per RFC 4648 section 3.5.
-             * '=' may appear only at positions 2 and/or 3 of the final group.
-             * all groups except the last must be free of '='.              */
-            if (res == true && inplen >= 4U)
-            {
-                for (i = 0U; (i < inplen - 4U) && (res == true); ++i)
-                {
-                    if (input[i] == '=')
-                    {
-                        res = false;
-                    }
-                }
+				if (c0 < 0 || c1 < 0)
+				{
+					res = false;
+				}
+				else if (i != last)
+				{
+					res = (c2 >= 0 && c3 >= 0);
+				}
+				else
+				{
+					res = ((c2 >= 0 && c3 >= 0) ||
+						(c2 >= 0 && input[i + 3U] == '=') ||
+						(input[i + 2U] == '=' && input[i + 3U] == '='));
+				}
+			}
 
-                if (res == true)
-                {
-                    size_t last;
+			if (res == true)
+			{
+				i = 0U;
+				j = 0U;
 
-                    last = inplen - 4U;
+				while (i < last)
+				{
+					val = ((uint32_t)encoding_base64_value((uint8_t)input[i]) << 18U) |
+						((uint32_t)encoding_base64_value((uint8_t)input[i + 1U]) << 12U) |
+						((uint32_t)encoding_base64_value((uint8_t)input[i + 2U]) << 6U) |
+						(uint32_t)encoding_base64_value((uint8_t)input[i + 3U]);
+					output[j] = (uint8_t)(val >> 16U);
+					output[j + 1U] = (uint8_t)(val >> 8U);
+					output[j + 2U] = (uint8_t)val;
+					j += 3U;
+					i += 4U;
+				}
 
-                    /* positions 0 and 1 of the last group must not be '='. */
-                    if (input[last] == '=' || input[last + 1U] == '=')
-                    {
-                        res = false;
-                    }
+				c0 = encoding_base64_value((uint8_t)input[last]);
+				c1 = encoding_base64_value((uint8_t)input[last + 1U]);
+				c2 = encoding_base64_value((uint8_t)input[last + 2U]);
+				c3 = encoding_base64_value((uint8_t)input[last + 3U]);
+				val = ((uint32_t)c0 << 18U) | ((uint32_t)c1 << 12U);
 
-                    /* if position 2 is '=', position 3 must also be '='. */
-                    if (res == true && input[last + 2U] == '=' && input[last + 3U] != '=')
-                    {
-                        res = false;
-                    }
-                }
-            }
+				if (c2 >= 0)
+				{
+					val |= ((uint32_t)c2 << 6U);
+				}
 
-            /* pass 3: decode. */
-            if (res == true)
-            {
-                for (i = 0U, j = 0U; (i < inplen) && (res == true); i += 4U, j += 3U)
-                {
-                    char c0;
-                    int32_t idx0;
-                    int32_t idx1;
+				if (c3 >= 0)
+				{
+					val |= (uint32_t)c3;
+				}
 
-                    c0 = input[i];
+				output[j] = (uint8_t)(val >> 16U);
 
-                    /* guard against characters outside the lookup-table range. */
-                    if (c0 < '+' || c0 > 'z')
-                    {
-                        res = false;
-                    }
-                    else
-                    {
-                        idx0 = (int32_t)((uint8_t)c0 - 43U);
-                        idx1 = (int32_t)((uint8_t)input[i + 1U] - 43U);
+				if (c2 >= 0)
+				{
+					output[j + 1U] = (uint8_t)(val >> 8U);
+				}
 
-                        v = QSC_BASE64_DECODE_TABLE[idx0];
-                        v = ((int32_t)((uint32_t)v << 6U)) | QSC_BASE64_DECODE_TABLE[idx1];
+				if (c3 >= 0)
+				{
+					output[j + 2U] = (uint8_t)val;
+				}
+			}
+		}
+	}
 
-                        v = (input[i + 2U] == '=')
-                            ? (int32_t)((uint32_t)v << 6U)
-                            : (int32_t)((uint32_t)v << 6U) |
-                            QSC_BASE64_DECODE_TABLE[(uint8_t)input[i + 2U] - 43U];
+	return res;
+}
 
-                        v = (input[i + 3U] == '=')
-                            ? (int32_t)((uint32_t)v << 6U)
-                            : (int32_t)((uint32_t)v << 6U) |
-                            QSC_BASE64_DECODE_TABLE[(uint8_t)input[i + 3U] - 43U];
 
-                        output[j] = (uint8_t)((v >> 16) & 0xFF);
+void qsc_encoding_base64_stream_initialize(qsc_encoding_base64_stream_state* state)
+{
+	if (state != NULL)
+	{
+		qsc_memutils_clear(state, sizeof(qsc_encoding_base64_stream_state));
+	}
+}
 
-                        if (input[i + 2U] != '=')
-                        {
-                            output[j + 1U] = (uint8_t)((v >> 8) & 0xFF);
-                        }
+bool qsc_encoding_base64_stream_encode_update(qsc_encoding_base64_stream_state* state, char* output, size_t otplen, const uint8_t* input, size_t inplen, size_t* written)
+{
+	qsc_encoding_base64_stream_state work;
+	size_t groups;
+	size_t needed;
+	size_t pos;
+	uint32_t value;
+	bool res;
 
-                        if (input[i + 3U] != '=')
-                        {
-                            output[j + 2U] = (uint8_t)(v & 0xFF);
-                        }
-                    }
-                }
-            }
-        }
-    }
+	res = false;
 
-    return res;
+	if (written != NULL)
+	{
+		*written = 0U;
+	}
+
+	if (state != NULL && written != NULL && state->used <= 2U && state->padded == false && state->finalized == false &&
+		(input != NULL || inplen == 0U) && inplen <= (SIZE_MAX - state->used))
+	{
+		groups = (state->used + inplen) / 3U;
+
+		if (groups <= (SIZE_MAX / 4U))
+		{
+			needed = groups * 4U;
+
+			if (needed <= otplen && (output != NULL || needed == 0U))
+			{
+				work = *state;
+				pos = 0U;
+
+				for (size_t i = 0U; i < inplen; ++i)
+				{
+					work.pending[work.used] = input[i];
+					++work.used;
+
+					if (work.used == 3U)
+					{
+						value = ((uint32_t)work.pending[0U] << 16U) |
+							((uint32_t)work.pending[1U] << 8U) | (uint32_t)work.pending[2U];
+						output[pos] = QSC_BASE64_ENCODE_TABLE[(value >> 18U) & 0x3FU];
+						output[pos + 1U] = QSC_BASE64_ENCODE_TABLE[(value >> 12U) & 0x3FU];
+						output[pos + 2U] = QSC_BASE64_ENCODE_TABLE[(value >> 6U) & 0x3FU];
+						output[pos + 3U] = QSC_BASE64_ENCODE_TABLE[value & 0x3FU];
+						pos += 4U;
+						work.used = 0U;
+						qsc_memutils_clear(work.pending, sizeof(work.pending));
+					}
+				}
+
+				*state = work;
+				*written = pos;
+				res = true;
+			}
+		}
+	}
+
+	return res;
+}
+
+bool qsc_encoding_base64_stream_encode_final(qsc_encoding_base64_stream_state* state, char* output, size_t otplen, size_t* written)
+{
+	uint32_t value;
+	size_t needed;
+	bool res;
+
+	res = false;
+
+	if (written != NULL)
+	{
+		*written = 0U;
+	}
+
+	if (state != NULL && written != NULL && state->used <= 2U && state->padded == false && state->finalized == false)
+	{
+		needed = (state->used != 0U) ? 4U : 0U;
+
+		if (needed <= otplen && (output != NULL || needed == 0U))
+		{
+			if (needed != 0U)
+			{
+				value = (uint32_t)state->pending[0U] << 16U;
+
+				if (state->used == 2U)
+				{
+					value |= (uint32_t)state->pending[1U] << 8U;
+				}
+
+				output[0U] = QSC_BASE64_ENCODE_TABLE[(value >> 18U) & 0x3FU];
+				output[1U] = QSC_BASE64_ENCODE_TABLE[(value >> 12U) & 0x3FU];
+				output[2U] = (state->used == 2U) ? QSC_BASE64_ENCODE_TABLE[(value >> 6U) & 0x3FU] : '=';
+				output[3U] = '=';
+			}
+
+			qsc_memutils_clear(state->pending, sizeof(state->pending));
+			state->used = 0U;
+			state->finalized = true;
+			*written = needed;
+			res = true;
+		}
+	}
+
+	return res;
+}
+
+/**
+ * \brief Validate one complete stream quartet and determine its output length.
+ * \param quartet: Four accessible bytes of Base64 input.
+ * \param count: Receives the number of decoded bytes, from one to three.
+ * \param padded: Receives whether the quartet is terminal.
+ * \return True for valid alphabet and terminal padding placement.
+ * \note Does not enforce unused pad-bit zeroing, matching legacy behavior.
+ */
+static bool encoding_base64_stream_validate_quartet(const uint8_t* quartet, size_t* count, bool* padded)
+{
+	int32_t a;
+	int32_t b;
+	int32_t c;
+	int32_t d;
+	bool res;
+
+	a = encoding_base64_value(quartet[0U]);
+	b = encoding_base64_value(quartet[1U]);
+	c = encoding_base64_value(quartet[2U]);
+	d = encoding_base64_value(quartet[3U]);
+	res = false;
+	*count = 0U;
+	*padded = false;
+
+	if (a >= 0 && b >= 0)
+	{
+		if (c >= 0 && d >= 0)
+		{
+			*count = 3U;
+			res = true;
+		}
+		else if (c >= 0 && quartet[3U] == '=')
+		{
+			*count = 2U;
+			*padded = true;
+			res = true;
+		}
+		else if (quartet[2U] == '=' && quartet[3U] == '=')
+		{
+			*count = 1U;
+			*padded = true;
+			res = true;
+		}
+	}
+
+	return res;
+}
+
+bool qsc_encoding_base64_stream_decode_update(qsc_encoding_base64_stream_state* state, uint8_t* output, size_t otplen, const char* input, size_t inplen, size_t* written)
+{
+	qsc_encoding_base64_stream_state work;
+	size_t count;
+	size_t needed;
+	size_t pos;
+	uint32_t value;
+	bool padded;
+	bool res;
+
+	res = false;
+
+	if (written != NULL)
+	{
+		*written = 0U;
+	}
+
+	if (state != NULL && written != NULL && state->used <= 3U && state->finalized == false &&
+		(input != NULL || inplen == 0U) && (state->padded == false || inplen == 0U))
+	{
+		work = *state;
+		needed = 0U;
+		res = true;
+
+		/* Validate the entire update before emitting any output or altering state. */
+		for (size_t i = 0U; i < inplen && res == true; ++i)
+		{
+			if (work.padded == true)
+			{
+				res = false;
+			}
+			else
+			{
+				work.pending[work.used] = (uint8_t)input[i];
+				++work.used;
+
+				if (work.used == 4U)
+				{
+					res = encoding_base64_stream_validate_quartet(work.pending, &count, &padded);
+
+					if (res == true)
+					{
+						if (count > (SIZE_MAX - needed))
+						{
+							res = false;
+						}
+						else
+						{
+							needed += count;
+							work.used = 0U;
+							work.padded = padded;
+							qsc_memutils_clear(work.pending, sizeof(work.pending));
+						}
+					}
+				}
+			}
+		}
+
+		if (res == true && (needed > otplen || (needed != 0U && output == NULL)))
+		{
+			res = false;
+		}
+
+		if (res == true)
+		{
+			work = *state;
+			pos = 0U;
+
+			for (size_t i = 0U; i < inplen; ++i)
+			{
+				work.pending[work.used] = (uint8_t)input[i];
+				++work.used;
+
+				if (work.used == 4U)
+				{
+					(void)encoding_base64_stream_validate_quartet(work.pending, &count, &padded);
+					value = ((uint32_t)encoding_base64_value(work.pending[0U]) << 18U) |
+						((uint32_t)encoding_base64_value(work.pending[1U]) << 12U);
+
+					if (count >= 2U)
+					{
+						value |= ((uint32_t)encoding_base64_value(work.pending[2U]) << 6U);
+					}
+
+					if (count == 3U)
+					{
+						value |= (uint32_t)encoding_base64_value(work.pending[3U]);
+					}
+
+					output[pos] = (uint8_t)(value >> 16U);
+
+					if (count >= 2U)
+					{
+						output[pos + 1U] = (uint8_t)(value >> 8U);
+					}
+
+					if (count == 3U)
+					{
+						output[pos + 2U] = (uint8_t)value;
+					}
+
+					pos += count;
+					work.used = 0U;
+					work.padded = padded;
+					qsc_memutils_clear(work.pending, sizeof(work.pending));
+				}
+			}
+
+			*state = work;
+			*written = pos;
+		}
+	}
+
+	return res;
+}
+
+bool qsc_encoding_base64_stream_decode_final(qsc_encoding_base64_stream_state* state)
+{
+	bool res;
+
+	res = false;
+
+	if (state != NULL && state->used == 0U && state->finalized == false)
+	{
+		qsc_memutils_clear(state->pending, sizeof(state->pending));
+		state->finalized = true;
+		res = true;
+	}
+
+	return res;
 }
 
 size_t qsc_encoding_ber_encode_tag(uint8_t tagclass, bool construct, uint32_t tagnum, uint8_t* buffer, size_t buflen)
@@ -1303,6 +1621,101 @@ static bool encoding_der_has_minimal_length_encoding(const uint8_t* buffer, size
     return res;
 }
 
+/**
+ * \brief Validate DER canonical requirements for standard universal primitive types.
+ * \param tagclass: ASN.1 tag class.
+ * \param tagnumber: Universal tag number when applicable.
+ * \param constructed: True for a constructed element.
+ * \param value: Content bytes, not including the tag and length fields.
+ * \param length: Number of content bytes.
+ * \return True for a permitted canonical encoding, false otherwise.
+ * \note No allocation, no ownership transfer; independent of global state.
+ */
+static bool encoding_der_validate_universal(uint8_t tagclass, uint32_t tagnumber, bool constructed, const uint8_t* value, size_t length)
+{
+    uint8_t unused;
+    bool res;
+
+    res = true;
+    unused = 0U;
+
+    if (tagclass == QSC_ENCODING_BER_CLASS_UNIVERSAL)
+    {
+        switch (tagnumber)
+        {
+            case 0U: /* End-of-content is prohibited in definite-length DER. */
+            {
+                res = false;
+                break;
+            }
+            case 1U: /* BOOLEAN is exactly 0x00 or 0xFF. */
+            {
+                res = (constructed == false && length == 1U && (value[0U] == 0U || value[0U] == 0xFFU));
+                break;
+            }
+            case 2U: /* INTEGER and ENUMERATED use shortest two's-complement form. */
+            case 10U:
+            {
+                res = (constructed == false && length != 0U);
+
+                if (res == true && length > 1U)
+                {
+                    res = !((value[0U] == 0U && (value[1U] & 0x80U) == 0U) ||
+                        (value[0U] == 0xFFU && (value[1U] & 0x80U) != 0U));
+                }
+
+                break;
+            }
+            case 3U: /* BIT STRING includes its unused-bit count. */
+            {
+                res = (constructed == false && length != 0U);
+
+                if (res == true)
+                {
+                    unused = value[0U];
+                    res = (unused <= 7U);
+
+                    if (res == true && unused != 0U)
+                    {
+                        res = (length > 1U && (value[length - 1U] & (uint8_t)((1U << unused) - 1U)) == 0U);
+                    }
+                }
+
+                break;
+            }
+            case 4U: /* DER OCTET STRING is primitive. */
+            case 6U: /* DER OBJECT IDENTIFIER is primitive. */
+            {
+                res = (constructed == false);
+
+                if (res == true && tagnumber == 6U)
+                {
+                    res = (length != 0U);
+                }
+
+                break;
+            }
+            case 5U: /* NULL must have empty contents. */
+            {
+                res = (constructed == false && length == 0U);
+                break;
+            }
+            case 16U: /* SEQUENCE and SET are constructed. */
+            case 17U:
+            {
+                res = constructed;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    }
+
+    return res;
+}
+
 static bool encoding_der_validate_element(const uint8_t* buffer, size_t buflen, size_t* consumed, size_t depth)
 {
     size_t childconsumed;
@@ -1334,9 +1747,9 @@ static bool encoding_der_validate_element(const uint8_t* buffer, size_t buflen, 
             {
                 pos = taglen + lengthlen;
                 contentend = pos + length;
-                res = true;
+                res = encoding_der_validate_universal(tagclass, tagnumber, constructed, buffer + pos, length);
 
-                if (constructed == true)
+                if (res == true && constructed == true)
                 {
                     while (pos < contentend && res == true)
                     {
@@ -1374,6 +1787,32 @@ static bool encoding_der_validate_element(const uint8_t* buffer, size_t buflen, 
     return res;
 }
 
+bool qsc_encoding_der_validate(const uint8_t* buffer, size_t buflen, size_t* consumed)
+{
+	size_t validated;
+	bool res;
+
+	res = false;
+	validated = 0U;
+
+	if (consumed != NULL)
+	{
+		*consumed = 0U;
+	}
+
+	if (buffer != NULL && buflen != 0U && consumed != NULL)
+	{
+		res = encoding_der_validate_element(buffer, buflen, &validated, 0U);
+
+		if (res == true)
+		{
+			*consumed = validated;
+		}
+	}
+
+	return res;
+}
+
 qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed)
 {
     QSC_ASSERT(buffer != NULL);
@@ -1390,7 +1829,7 @@ qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer,
     {
         *consumed = 0U;
 
-        if (encoding_der_validate_element(buffer, buflen, &validated, 0U) == true)
+        if (qsc_encoding_der_validate(buffer, buflen, &validated) == true)
         {
             elem = qsc_encoding_ber_decode_element(buffer, validated, consumed);
 
@@ -1466,7 +1905,7 @@ size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_
 
                         cs = encoding_der_element_size(element->children[k]);
 
-                        if (cs == 0U && element->children[k] != NULL)
+                        if (cs == 0U || cs > (SIZE_MAX - content))
                         {
                             ok = false;
                             total = 0U;
@@ -1485,7 +1924,7 @@ size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_
 
                         lfield = qsc_encoding_ber_encode_length(content, buffer + total, buflen - total);
 
-                        if (lfield > 0U && (total + lfield + content) <= buflen)
+                        if (lfield > 0U && lfield <= (buflen - total) && content <= (buflen - total - lfield))
                         {
                             total += lfield;
 
@@ -1524,7 +1963,7 @@ size_t qsc_encoding_der_encode_element(qsc_encoding_ber_element* element, uint8_
 
                     lfield = qsc_encoding_ber_encode_length(element->length, buffer + total, buflen - total);
 
-                    if (lfield > 0U && (total + lfield + element->length) <= buflen)
+                    if (element->length != QSC_BER_ENCODING_INDEFINITE_LENGTH && lfield > 0U && lfield <= (buflen - total) && element->length <= (buflen - total - lfield))
                     {
                         total += lfield;
 
@@ -1565,7 +2004,11 @@ bool qsc_encoding_hex_decode(const char* input, size_t inplen, uint8_t* output, 
     bool res;
 
     res = false;
-    *declen = 0U;
+
+    if (declen != NULL)
+    {
+        *declen = 0U;
+    }
 
     if (input != NULL && output != NULL && declen != NULL && otplen != 0U && inplen != 0U)
     {
@@ -1668,7 +2111,7 @@ bool qsc_encoding_hex_encode(const uint8_t* input, size_t inplen, char* output, 
 
     res = false;
 
-    if (output != NULL && input != NULL && inplen != 0U && otplen >= (inplen * 2U) + 1U)
+    if (output != NULL && input != NULL && inplen != 0U && inplen <= ((SIZE_MAX - 1U) / 2U) && otplen >= (inplen * 2U) + 1U)
     {
         for (size_t i = 0U; i < inplen; ++i)
         {

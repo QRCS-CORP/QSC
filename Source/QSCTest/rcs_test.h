@@ -60,18 +60,19 @@
  * \brief RCS Known Answer Tests.
  *
  * \details
- * This header defines functions and macros for testing the RCS (Rijndael wide-block Cryptographic Stream cipher) implementation
- * against known answer test (KAT) vectors. New test vectors have been added for the extended modes
- * RCS-256 and RCS-512, which are sourced from the CEX cryptographic library.
+ * This header exposes the existing QSCTEST RCS-256 and RCS-512 KAT and
+ * stress-test entry points. Each KAT entry point directly executes TEN frozen
+ * original-source vectors. The active profile is selected at compile time:
+ *  - default: RCS-256 14 rounds / RCS-512 21 rounds;
+ *  - QSC_RCS_EXTENDED_ROUND_COUNTS: RCS-256 22 / RCS-512 30 rounds.
+ * Both profiles authenticate using 24-round Keccak/KMAC. Each vector verifies
+ * two chained authenticated ciphertexts/tags, final nonce, decryption and tag
+ * rejection; the frozen fixtures do not depend on files at test runtime.
  *
- * The test suite includes:
- * - KAT tests for both RCS-256 and RCS-512, verifying that the generated ciphertext (and MAC, if applicable)
- *   matches the expected outputs.
- * - Stress tests for RCS-256 and RCS-512 that use random inputs to confirm the correct operation of the cipher.
- * - A test for the extended transform API.
- * - Optionally, if the system supports AVX-512 and AES-NI and RCS is configured without authentication,
- *   wide block tests are enabled to verify that the AVX-accelerated transform produces output identical
- *   to that of sequential processing.
+ * Reference provenance: original QRCS RCS reference source, as documented in
+ * Qualification/RCS/RCS_ROUND_POLICY_AND_KAT_QUALIFICATION.md. The default
+ * vectors required the single documented 12-to-24 Keccak-round selection.
+ * The stress-test APIs and original test runner are retained.
  *
  * \section rcs_kat_links Reference Links
  * - CEX Cryptographic Library: <a href="https://github.com/Steppenwolfe65/CEX">CEX</a>
@@ -95,22 +96,22 @@
 #define QSCTEST_RCS_TEST_CYCLES 100
 
 /**
- * \brief Tests the RCS-256 Known Answer Test (KAT) vectors from the CEX library.
+ * \brief Verifies ten RCS-256 authoritative KAT vectors for the selected round profile.
  *
  * \details
- * This function verifies that the RCS-256 implementation produces the expected ciphertext and MAC
- * when encrypting a known test message using predetermined key and nonce values.
+ * Uses ten frozen original-source ciphertext/tag and nonce expectations with
+ * deterministic keys, messages, AAD, tweak and nonce. Includes decryption and tag rejection.
  *
  * \return Returns true if the RCS-256 KAT test passes; otherwise, false.
  */
 bool qsctest_rcs256_kat(void);
 
 /**
- * \brief Tests the RCS-512 Known Answer Test (KAT) vectors from the CEX library.
+ * \brief Verifies ten RCS-512 authoritative KAT vectors for the selected round profile.
  *
  * \details
- * This function verifies that the RCS-512 implementation produces the expected ciphertext and MAC
- * for a known test message based on test vectors from the CEX cryptographic library.
+ * Uses ten frozen original-source ciphertext/tag and nonce expectations with
+ * deterministic keys, messages, AAD, tweak and nonce. Includes decryption and tag rejection.
  *
  * \return Returns true if the RCS-512 KAT test passes; otherwise, false.
  */
@@ -168,10 +169,9 @@ bool qsctest_rcs_wide_equality(void);
  *
  * \details
  * This function executes the full suite of RCS tests, including:
- * - The Known Answer Tests (KAT) for RCS-256 and RCS-512.
- * - Stress tests for both RCS-256 and RCS-512 using random inputs.
- * - The extended transform API test.
- * - Optionally, wide block equality tests if enabled.
+ * - Ten independent frozen KAT cases for RCS-256.
+ * - Ten independent frozen KAT cases for RCS-512.
+ * - The existing RCS-256 and RCS-512 randomized stress tests.
  *
  * Test results are printed to the console.
  */

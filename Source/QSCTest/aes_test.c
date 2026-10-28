@@ -1,3 +1,54 @@
+﻿/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:
+ * This software and all accompanying materials are the exclusive property of
+ * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
+ * and technical concepts contained herein are proprietary to QRCS and are
+ * protected under applicable Canadian, U.S., and international copyright,
+ * patent, and trade secret laws.
+ *
+ * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
+ * - This software includes implementations of cryptographic primitives and
+ *   algorithms that are standardized or in the public domain, such as AES
+ *   and SHA-3, which are not proprietary to QRCS.
+ * - This software also includes cryptographic primitives, constructions, and
+ *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
+ *   related components, which are proprietary to QRCS.
+ * - All source code, implementations, protocol compositions, optimizations,
+ *   parameter selections, and engineering work contained in this software are
+ *   original works of QRCS and are protected under this license.
+ *
+ * LICENSE AND USE RESTRICTIONS:
+ * - This software is licensed under the Quantum Resistant Cryptographic Solutions
+ *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
+ * - Permission is granted solely for non-commercial evaluation, academic research,
+ *   cryptographic analysis, interoperability testing, and feasibility assessment.
+ * - Commercial use, production deployment, commercial redistribution, or
+ *   integration into products or services is strictly prohibited without a
+ *   separate written license agreement executed with QRCS.
+ * - Licensing and authorized distribution are solely at the discretion of QRCS.
+ *
+ * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
+ * Portions of this software may include experimental, novel, or evolving
+ * cryptographic designs. Use of this software is entirely at the user's risk.
+ *
+ * DISCLAIMER:
+ * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
+ * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
+ *
+ * FULL LICENSE:
+ * This software is subject to the Quantum Resistant Cryptographic Solutions
+ * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
+ * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
+ *
+ * Written by: John G. Underhill
+ * Contact: contact@qrcscorp.ca
+ */
+
 #include "aes_test.h"
 #include "csp.h"
 #include "intutils.h"
@@ -460,6 +511,176 @@ bool qsctest_fips_aes256_ecb()
 	qsctest_hex_to_bin("F69F2445DF4F9B17AD2B417BE66C3710", msg[3], QSC_AES_BLOCK_SIZE);
 
 	return aes256_ecb_monte_carlo(key, msg, exp);
+}
+
+/**
+ * \brief Check the AES-128-GCM four-block GHASH path against an independent
+ * OpenSSL reference tag, including AAD, in-place decryption and rejection.
+ * \param length: [size_t] Plaintext byte count, at most 4096 bytes.
+ * \param ivlen: [size_t] Nonce length, either 12 or 17 bytes.
+ * \param hex_tag: [const char*] Expected 16-byte OpenSSL AES-GCM tag in hex.
+ * \return [bool] True only if encryption, authentication, in-place recovery,
+ * and bad-tag rejection all behave correctly.
+ * \note No ownership transfer, no heap allocation, separate initialization
+ * for each operation. The test ciphertext is deterministic test material only.
+ */
+static bool aes_gcm128_fold_case(size_t length, size_t ivlen, const char* hex_tag)
+{
+	qsc_aes_gcm128_state state = { 0 };
+	uint8_t aad[23U] = { 0U };
+	uint8_t buf[4096U + QSC_GCM128_MAC_SIZE] = { 0U };
+	uint8_t ciphertext[4096U + QSC_GCM128_MAC_SIZE] = { 0U };
+	uint8_t tag[QSC_GCM128_MAC_SIZE] = { 0U };
+	uint8_t iv[17U] = { 0U };
+	uint8_t key[QSC_AES128_KEY_SIZE] = { 0U };
+	qsc_aes_keyparams kp;
+	size_t i;
+	bool result;
+
+	result = length <= 4096U && ivlen <= sizeof(iv);
+	for (i = 0U; i < sizeof(key); ++i)
+	{
+		key[i] = (uint8_t)(i * 7U + 2U);
+	}
+	for (i = 0U; i < sizeof(iv); ++i)
+	{
+		iv[i] = (uint8_t)(i * 11U + 3U);
+	}
+	for (i = 0U; i < sizeof(aad); ++i)
+	{
+		aad[i] = (uint8_t)(i * 5U + 4U);
+	}
+	for (i = 0U; i < length && result; ++i)
+	{
+		buf[i] = (uint8_t)(i * 29U + 1U);
+	}
+	if (result)
+	{
+		qsctest_hex_to_bin(hex_tag, tag, sizeof(tag));
+		kp.key = key;
+		kp.keylen = sizeof(key);
+		kp.nonce = iv;
+		kp.noncelen = ivlen;
+		kp.info = NULL;
+		kp.infolen = 0U;
+		qsc_aes_gcm128_initialize(&state, &kp, true);
+		qsc_aes_gcm128_set_associated(&state, aad, sizeof(aad));
+		qsc_aes_gcm128_encrypt(&state, buf, buf, length);
+		result = qsc_intutils_are_equal8(buf + length, tag, sizeof(tag));
+		qsc_memutils_copy(ciphertext, buf, length + sizeof(tag));
+		qsc_aes_gcm128_dispose(&state);
+	}
+	if (result)
+	{
+		qsc_aes_gcm128_initialize(&state, &kp, false);
+		qsc_aes_gcm128_set_associated(&state, aad, sizeof(aad));
+		result = qsc_aes_gcm128_decrypt(&state, buf, buf, length + sizeof(tag));
+		qsc_aes_gcm128_dispose(&state);
+	}
+	for (i = 0U; i < length && result; ++i)
+	{
+		if (buf[i] != (uint8_t)(i * 29U + 1U))
+		{
+			result = false;
+		}
+	}
+	if (result)
+	{
+		ciphertext[length + sizeof(tag) - 1U] ^= 0x01U;
+		qsc_aes_gcm128_initialize(&state, &kp, false);
+		qsc_aes_gcm128_set_associated(&state, aad, sizeof(aad));
+		result = !qsc_aes_gcm128_decrypt(&state, buf, ciphertext, length + sizeof(tag));
+		qsc_aes_gcm128_dispose(&state);
+	}
+	qsc_memutils_secure_erase(key, sizeof(key));
+	qsc_memutils_secure_erase(buf, sizeof(buf));
+	qsc_memutils_secure_erase(ciphertext, sizeof(ciphertext));
+	return result;
+}
+
+/**
+ * \brief Check the AES-256-GCM four-block GHASH path against an independent
+ * OpenSSL reference tag, including AAD, in-place decryption and rejection.
+ * \param length: [size_t] Plaintext byte count, at most 4096 bytes.
+ * \param ivlen: [size_t] Nonce length, either 12 or 17 bytes.
+ * \param hex_tag: [const char*] Expected 16-byte OpenSSL AES-GCM tag in hex.
+ * \return [bool] True only if encryption, authentication, in-place recovery,
+ * and bad-tag rejection all behave correctly.
+ * \note No ownership transfer, no heap allocation, separate initialization
+ * for each operation. The test ciphertext is deterministic test material only.
+ */
+static bool aes_gcm256_fold_case(size_t length, size_t ivlen, const char* hex_tag)
+{
+	qsc_aes_gcm256_state state = { 0 };
+	uint8_t aad[23U] = { 0U };
+	uint8_t buf[4096U + QSC_GCM256_MAC_SIZE] = { 0U };
+	uint8_t ciphertext[4096U + QSC_GCM256_MAC_SIZE] = { 0U };
+	uint8_t tag[QSC_GCM256_MAC_SIZE] = { 0U };
+	uint8_t iv[17U] = { 0U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	qsc_aes_keyparams kp;
+	size_t i;
+	bool result;
+
+	result = length <= 4096U && ivlen <= sizeof(iv);
+	for (i = 0U; i < sizeof(key); ++i)
+	{
+		key[i] = (uint8_t)(i * 7U + 2U);
+	}
+	for (i = 0U; i < sizeof(iv); ++i)
+	{
+		iv[i] = (uint8_t)(i * 11U + 3U);
+	}
+	for (i = 0U; i < sizeof(aad); ++i)
+	{
+		aad[i] = (uint8_t)(i * 5U + 4U);
+	}
+	for (i = 0U; i < length && result; ++i)
+	{
+		buf[i] = (uint8_t)(i * 29U + 1U);
+	}
+	if (result)
+	{
+		qsctest_hex_to_bin(hex_tag, tag, sizeof(tag));
+		kp.key = key;
+		kp.keylen = sizeof(key);
+		kp.nonce = iv;
+		kp.noncelen = ivlen;
+		kp.info = NULL;
+		kp.infolen = 0U;
+		qsc_aes_gcm256_initialize(&state, &kp, true);
+		qsc_aes_gcm256_set_associated(&state, aad, sizeof(aad));
+		qsc_aes_gcm256_encrypt(&state, buf, buf, length);
+		result = qsc_intutils_are_equal8(buf + length, tag, sizeof(tag));
+		qsc_memutils_copy(ciphertext, buf, length + sizeof(tag));
+		qsc_aes_gcm256_dispose(&state);
+	}
+	if (result)
+	{
+		qsc_aes_gcm256_initialize(&state, &kp, false);
+		qsc_aes_gcm256_set_associated(&state, aad, sizeof(aad));
+		result = qsc_aes_gcm256_decrypt(&state, buf, buf, length + sizeof(tag));
+		qsc_aes_gcm256_dispose(&state);
+	}
+	for (i = 0U; i < length && result; ++i)
+	{
+		if (buf[i] != (uint8_t)(i * 29U + 1U))
+		{
+			result = false;
+		}
+	}
+	if (result)
+	{
+		ciphertext[length + sizeof(tag) - 1U] ^= 0x01U;
+		qsc_aes_gcm256_initialize(&state, &kp, false);
+		qsc_aes_gcm256_set_associated(&state, aad, sizeof(aad));
+		result = !qsc_aes_gcm256_decrypt(&state, buf, ciphertext, length + sizeof(tag));
+		qsc_aes_gcm256_dispose(&state);
+	}
+	qsc_memutils_secure_erase(key, sizeof(key));
+	qsc_memutils_secure_erase(buf, sizeof(buf));
+	qsc_memutils_secure_erase(ciphertext, sizeof(ciphertext));
+	return result;
 }
 
 bool qsctest_aes128_gcm_kat()
@@ -941,8 +1162,365 @@ bool qsctest_aes256_padding_test()
 	return status;
 }
 
+/*!
+ * \brief Verify CTR counter rollover against independent ECB-block expansion.
+ * \details Exercises either endian convention and verifies the complete
+ * 128-bit caller-owned nonce, including carry between 64-bit words. This
+ * check has no OpenSSL build dependency.
+ * \param length: [size_t] Number of input bytes, up to 257.
+ * \param bigendian: [bool] Counter byte order.
+ * \param aes128: [bool] AES-128 when true, otherwise AES-256.
+ * \param rollover: [uint8_t] Zero: ordinary; one: 64-bit carry; two: 128-bit wrap;
+ * three: low word UINT64_MAX-8; four: low word UINT64_MAX-7.
+ * \return [bool] True if output and final counter match independent reference.
+ */
+static bool aes_ctr_boundary_case(size_t length, bool bigendian, bool aes128, uint8_t rollover)
+{
+	const uint8_t key[QSC_AES256_KEY_SIZE] = { 0x10U, 0x21U, 0x32U, 0x43U, 0x54U, 0x65U, 0x76U, 0x87U,
+		0x98U, 0xA9U, 0xBAU, 0xCBU, 0xDCU, 0xEDU, 0xFEU, 0x0FU,
+		0x11U, 0x22U, 0x33U, 0x44U, 0x55U, 0x66U, 0x77U, 0x88U,
+		0x99U, 0xAAU, 0xBBU, 0xCCU, 0xDDU, 0xEEU, 0xFFU, 0x00U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t refnonce[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t input[257U] = { 0U };
+	uint8_t output[257U] = { 0U };
+	uint8_t expected[257U] = { 0U };
+	uint8_t keystream[QSC_AES_BLOCK_SIZE] = { 0U };
+	qsc_aes_state ctx = { 0U };
+	qsc_aes_keyparams kp = { 0U };
+	bool status;
+	size_t i;
+	size_t j;
+	size_t n;
+
+	status = (length > 0U && length <= sizeof(input));
+
+	if (status == true)
+	{
+		for (i = 0U; i < sizeof(nonce); ++i)
+		{
+			nonce[i] = (uint8_t)(0x20U + i);
+		}
+
+		if (rollover != 0U)
+		{
+			if (rollover == 2U)
+			{
+				qsc_memutils_set_value(nonce, sizeof(nonce), 0xFFU);
+			}
+
+			if (bigendian == true)
+			{
+				nonce[8U] = 0xFFU;
+				nonce[9U] = 0xFFU;
+				nonce[10U] = 0xFFU;
+				nonce[11U] = 0xFFU;
+				nonce[12U] = 0xFFU;
+				nonce[13U] = 0xFFU;
+				nonce[14U] = 0xFFU;
+				nonce[15U] = 0xFEU;
+			}
+			else
+			{
+				nonce[0U] = 0xFEU;
+				nonce[1U] = 0xFFU;
+				nonce[2U] = 0xFFU;
+				nonce[3U] = 0xFFU;
+				nonce[4U] = 0xFFU;
+				nonce[5U] = 0xFFU;
+				nonce[6U] = 0xFFU;
+				nonce[7U] = 0xFFU;
+			}
+
+			if (rollover == 3U || rollover == 4U)
+			{
+				/* Exercise both sides of the fast/slow carry threshold. */
+				if (bigendian == true)
+				{
+					nonce[15U] = (rollover == 3U) ? 0xF7U : 0xF8U;
+				}
+				else
+				{
+					nonce[0U] = (rollover == 3U) ? 0xF7U : 0xF8U;
+				}
+			}
+		}
+
+		qsc_memutils_copy(refnonce, nonce, sizeof(nonce));
+
+		for (i = 0U; i < length; ++i)
+		{
+			input[i] = (uint8_t)(i * 17U + 3U);
+		}
+
+		kp.key = key;
+		kp.keylen = (aes128 == true) ? QSC_AES128_KEY_SIZE : QSC_AES256_KEY_SIZE;
+		kp.nonce = nonce;
+		kp.noncelen = sizeof(nonce);
+		qsc_aes_initialize(&ctx, &kp, true, (aes128 == true) ? qsc_aes_cipher_128 : qsc_aes_cipher_256);
+
+		if (bigendian == true)
+		{
+			qsc_aes_ctrbe_transform(&ctx, output, input, length);
+		}
+		else
+		{
+			qsc_aes_ctrle_transform(&ctx, output, input, length);
+		}
+
+		for (i = 0U; i < length; i += QSC_AES_BLOCK_SIZE)
+		{
+			n = ((length - i) < QSC_AES_BLOCK_SIZE) ? (length - i) : QSC_AES_BLOCK_SIZE;
+			qsc_aes_ecb_encrypt_block(&ctx, keystream, refnonce);
+
+			for (j = 0U; j < n; ++j)
+			{
+				expected[i + j] = (uint8_t)(input[i + j] ^ keystream[j]);
+			}
+
+			if (bigendian == true)
+			{
+				qsc_intutils_be8increment(refnonce, sizeof(refnonce));
+			}
+			else
+			{
+				qsc_intutils_le8increment(refnonce, sizeof(refnonce));
+			}
+		}
+
+		status = qsc_intutils_are_equal8(output, expected, length) &&
+			qsc_intutils_are_equal8(nonce, refnonce, sizeof(nonce));
+		qsc_aes_dispose(&ctx);
+		qsc_memutils_secure_erase(keystream, sizeof(keystream));
+	}
+
+	return status;
+}
+
 void qsctest_aes_run()
 {
+	qsctest_print_line("AES-CTR 128-bit carry and four-block regression stage:");
+
+	if (aes_ctr_boundary_case(17U, true, true, 1U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-BE low-64 rollover at 17 bytes.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-BE low-64 rollover at 17 bytes.");
+	}
+
+	if (aes_ctr_boundary_case(64U, true, false, 1U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-BE low-64 rollover across four blocks.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-BE low-64 rollover across four blocks.");
+	}
+
+	if (aes_ctr_boundary_case(257U, true, false, 0U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-BE partial tail and multi-block nonce advancement.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-BE partial tail and multi-block nonce advancement.");
+	}
+
+	if (aes_ctr_boundary_case(17U, false, true, 1U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-LE low-64 rollover at 17 bytes.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-LE low-64 rollover at 17 bytes.");
+	}
+
+	if (aes_ctr_boundary_case(64U, false, false, 1U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-LE low-64 rollover across four blocks.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-LE low-64 rollover across four blocks.");
+	}
+
+	if (aes_ctr_boundary_case(64U, true, false, 2U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-BE complete 128-bit counter wrap.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-BE complete 128-bit counter wrap.");
+	}
+
+	if (aes_ctr_boundary_case(64U, false, false, 2U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-LE complete 128-bit counter wrap.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-LE complete 128-bit counter wrap.");
+	}
+
+	if (aes_ctr_boundary_case(257U, false, false, 0U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-LE partial tail and multi-block nonce advancement.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-LE partial tail and multi-block nonce advancement.");
+	}
+
+	qsctest_print_line("AES-CTR eight-chain fast/rollover carry-threshold regression stage:");
+
+	if (aes_ctr_boundary_case(128U, true, true, 3U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-BE fast-limit threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-BE fast-limit threshold.");
+	}
+
+	if (aes_ctr_boundary_case(129U, true, true, 4U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-BE rollover threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-BE rollover threshold.");
+	}
+
+	if (aes_ctr_boundary_case(128U, true, false, 3U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-BE fast-limit threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-BE fast-limit threshold.");
+	}
+
+	if (aes_ctr_boundary_case(129U, true, false, 4U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-BE rollover threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-BE rollover threshold.");
+	}
+
+	if (aes_ctr_boundary_case(128U, false, true, 3U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-LE fast-limit threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-LE fast-limit threshold.");
+	}
+
+	if (aes_ctr_boundary_case(129U, false, true, 4U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-LE rollover threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-LE rollover threshold.");
+	}
+
+	if (aes_ctr_boundary_case(128U, false, false, 3U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-LE fast-limit threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-LE fast-limit threshold.");
+	}
+
+	if (aes_ctr_boundary_case(129U, false, false, 4U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-LE rollover threshold.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-LE rollover threshold.");
+	}
+
+	qsctest_print_line("AES-CTR eight-chain intrinsic regression stage:");
+
+	if (aes_ctr_boundary_case(128U, true, true, 0U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-BE eight-block exact boundary.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-BE eight-block exact boundary.");
+	}
+
+	if (aes_ctr_boundary_case(129U, true, false, 0U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-BE eight-block plus tail.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-BE eight-block plus tail.");
+	}
+
+	if (aes_ctr_boundary_case(256U, true, false, 1U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-BE carry across two eight-block groups.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-BE carry across two eight-block groups.");
+	}
+
+	if (aes_ctr_boundary_case(257U, true, true, 2U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-BE complete wrap with partial tail.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-BE complete wrap with partial tail.");
+	}
+
+	if (aes_ctr_boundary_case(128U, false, true, 0U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-LE eight-block exact boundary.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-LE eight-block exact boundary.");
+	}
+
+	if (aes_ctr_boundary_case(129U, false, false, 0U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-LE eight-block plus tail.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-LE eight-block plus tail.");
+	}
+
+	if (aes_ctr_boundary_case(256U, false, false, 1U) == true)
+	{
+		qsctest_print_line("PASS: AES-256 CTR-LE carry across two eight-block groups.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256 CTR-LE carry across two eight-block groups.");
+	}
+
+	if (aes_ctr_boundary_case(257U, false, true, 2U) == true)
+	{
+		qsctest_print_line("PASS: AES-128 CTR-LE complete wrap with partial tail.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128 CTR-LE complete wrap with partial tail.");
+	}
+
 	if (qsctest_fips_aes128_cbc() == true)
 	{
 		qsctest_print_line("Success! Passed the FIPS 197 CBC(AES-128) KAT test.");
@@ -1013,6 +1591,97 @@ void qsctest_aes_run()
 	else
 	{
 		qsctest_print_line("Failure! Failed the GCM-AES-256 AEAD mode KAT test.");
+	}
+
+	qsctest_print_line("AES-GCM four-block SHA-independent known-answer regression stage:");
+	if (aes_gcm128_fold_case(255U, 12U, "785802d31601f73d655faaef7935b9aa") == true)
+	{
+		qsctest_print_line("PASS: AES-128-GCM 255-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128-GCM 255-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm128_fold_case(256U, 12U, "ee8c9e75b67f46c5c7170dc5b5fb5244") == true)
+	{
+		qsctest_print_line("PASS: AES-128-GCM 256-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128-GCM 256-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm128_fold_case(257U, 12U, "42a712c252df6410ce1e84015b46e83d") == true)
+	{
+		qsctest_print_line("PASS: AES-128-GCM 257-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128-GCM 257-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm128_fold_case(1024U, 12U, "37c77b0e83f789401bcdef9299ce70bc") == true)
+	{
+		qsctest_print_line("PASS: AES-128-GCM 1024-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128-GCM 1024-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm128_fold_case(4096U, 17U, "ce86e80811974c75b877647e6b96693d") == true)
+	{
+		qsctest_print_line("PASS: AES-128-GCM 4096-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-128-GCM 4096-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm256_fold_case(255U, 12U, "390024927f148803be5adef4a027769f") == true)
+	{
+		qsctest_print_line("PASS: AES-256-GCM 255-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256-GCM 255-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm256_fold_case(256U, 12U, "829f1f27eb973d6e82fd4ca9327d9626") == true)
+	{
+		qsctest_print_line("PASS: AES-256-GCM 256-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256-GCM 256-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm256_fold_case(257U, 12U, "6b2071a63c9f6c05e239265334cfef94") == true)
+	{
+		qsctest_print_line("PASS: AES-256-GCM 257-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256-GCM 257-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm256_fold_case(1024U, 12U, "f2af1f07e35f0289405afa249802b770") == true)
+	{
+		qsctest_print_line("PASS: AES-256-GCM 1024-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256-GCM 1024-byte folded GHASH reference and tamper test.");
+	}
+
+	if (aes_gcm256_fold_case(4096U, 17U, "6b53413828ad1b837cb668822195281e") == true)
+	{
+		qsctest_print_line("PASS: AES-256-GCM 4096-byte folded GHASH reference and tamper test.");
+	}
+	else
+	{
+		qsctest_print_line("FAIL: AES-256-GCM 4096-byte folded GHASH reference and tamper test.");
 	}
 
 	if (qsctest_aes256_hba_kat() == true)

@@ -107,37 +107,33 @@ static bool stage19_context_policy_test(void)
         {
             if (qsc_tls_socket_context_set_default_client_policy(ctx) == qsc_tls_socket_status_success)
             {
-                if ((ctx->ciphersuitecount == 3U) && (ctx->groupcount == 2U) && (ctx->sigschemecount == 2U))
+                if ((ctx->ciphersuitecount == 3U) && (ctx->groupcount == 2U) && (ctx->sigschemecount == 5U))
                 {
                     if ((ctx->ciphersuites[0U] == qsc_tls_cipher_suite_tls_aes_256_gcm_sha384) && (ctx->groups[0U] == qsc_tls_group_x25519) &&
                         (ctx->sigschemes[0U] == qsc_tls_sig_ecdsa_secp256r1_sha256))
                     {
                         if (qsc_tls_socket_context_set_mlkem_hybrid_policy(ctx) == qsc_tls_socket_status_success)
                         {
-#if defined(QSC_KYBER_S1K2P512)
-                            res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_mlkem512) && (ctx->groups[1U] == qsc_tls_group_x25519));
-#elif defined(QSC_KYBER_S3K3P768)
-                            res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_x25519_mlkem768) && (ctx->groups[1U] == qsc_tls_group_x25519));
-#elif defined(QSC_KYBER_S5K4P1024)
-                            res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_secp384r1_mlkem1024) && (ctx->groups[1U] == qsc_tls_group_x25519));
-#else
-                            res = false;
-#endif
+res = ((ctx->groupcount == 5U) &&
+                                (ctx->groups[0U] == qsc_tls_group_x25519_mlkem768) &&
+                                (ctx->groups[1U] == qsc_tls_group_secp256r1_mlkem768) &&
+                                (ctx->groups[2U] == qsc_tls_group_secp384r1_mlkem1024) &&
+                                (ctx->groups[3U] == qsc_tls_group_x25519) &&
+                                (ctx->groups[4U] == qsc_tls_group_secp256r1));
 
                             if (res == true && qsc_tls_socket_context_set_experimental_pqc_policy(ctx) == qsc_tls_socket_status_success)
                             {
-#if defined(QSC_KYBER_S1K2P512) && defined(QSC_DILITHIUM_S1P44)
-                                res = ((ctx->groupcount == 3U) && (ctx->groups[0U] == qsc_tls_group_mlkem512) &&
-                                    (ctx->sigschemecount == 3U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa44));
-#elif defined(QSC_KYBER_S3K3P768) && defined(QSC_DILITHIUM_S3P65)
-                                res = ((ctx->groupcount == 5U) && (ctx->groups[2U] == qsc_tls_group_mlkem768) &&
-                                    (ctx->sigschemecount == 3U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa65));
-#elif defined(QSC_KYBER_S5K4P1024) && defined(QSC_DILITHIUM_S5P87)
-                                res = ((ctx->groupcount == 4U) && (ctx->groups[1U] == qsc_tls_group_mlkem1024) &&
-                                    (ctx->sigschemecount == 3U) && (ctx->sigschemes[0U] == qsc_tls_sig_mldsa87));
-#else
-                                res = false;
-#endif
+res = ((ctx->groupcount == 8U) &&
+                                    (ctx->groups[0U] == qsc_tls_group_x25519_mlkem768) &&
+                                    (ctx->groups[1U] == qsc_tls_group_secp256r1_mlkem768) &&
+                                    (ctx->groups[2U] == qsc_tls_group_secp384r1_mlkem1024) &&
+                                    (ctx->groups[3U] == qsc_tls_group_mlkem512) &&
+                                    (ctx->groups[4U] == qsc_tls_group_mlkem768) &&
+                                    (ctx->groups[5U] == qsc_tls_group_mlkem1024) &&
+                                    (ctx->sigschemecount == 8U) &&
+                                    (ctx->sigschemes[0U] == qsc_tls_sig_mldsa44) &&
+                                    (ctx->sigschemes[1U] == qsc_tls_sig_mldsa65) &&
+                                    (ctx->sigschemes[2U] == qsc_tls_sig_mldsa87));
 
                                 if (res == true)
                                 {

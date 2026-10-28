@@ -151,11 +151,21 @@ static void kyber_cbd3_avx2(qsc_kyber_poly* r, const uint8_t buf[6 * QSC_KYBER_N
     __m256i f1;
     __m256i f2;
     __m256i f3;
+    QSC_SIMD_ALIGN uint8_t tail[32U] = { 0U };
     size_t i;
 
     for (i = 0U; i < QSC_KYBER_N / 32U; ++i)
     {
-        f0 = _mm256_loadu_si256((__m256i*)&buf[24U * i]);
+        if (i == ((QSC_KYBER_N / 32U) - 1U))
+        {
+            qsc_memutils_copy(tail, &buf[24U * i], 24U);
+            f0 = _mm256_load_si256((const __m256i*)tail);
+        }
+        else
+        {
+            f0 = _mm256_loadu_si256((const __m256i*)&buf[24U * i]);
+        }
+
         f0 = _mm256_permute4x64_epi64(f0, 0x94);
         f0 = _mm256_shuffle_epi8(f0, shufbidx);
 
@@ -600,10 +610,21 @@ static void kyber_poly_decompress_avx2(qsc_kyber_poly* restrict r, const uint8_t
     const __m256i shift = _mm256_set_epi16(128, 16, 512, 64, 8, 256, 32, 1024,
         128, 16, 512, 64, 8, 256, 32, 1024);
     __m256i f;
+    QSC_SIMD_ALIGN uint8_t tail[16U] = { 0U };
+    size_t i;
 
-    for (size_t i = 0U; i < QSC_KYBER_N / 16U; ++i) 
+    for (i = 0U; i < QSC_KYBER_N / 16U; ++i)
     {
-        f = _mm256_broadcastsi128_si256(_mm_loadu_si128((const __m128i*)&a[10U * i]));
+        if (i == ((QSC_KYBER_N / 16U) - 1U))
+        {
+            qsc_memutils_copy(tail, &a[10U * i], 10U);
+            f = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*)tail));
+        }
+        else
+        {
+            f = _mm256_broadcastsi128_si256(_mm_loadu_si128((const __m128i*)&a[10U * i]));
+        }
+
         f = _mm256_shuffle_epi8(f, shufbidx);
         f = _mm256_and_si256(f, mask);
         f = _mm256_mullo_epi16(f, shift);
@@ -1752,6 +1773,7 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
     fail = kyber_verify_avx2(ct, cmp + QSC_KYBER_SYMBYTES, QSC_KYBER_CIPHERTEXT_BYTES);
 
     qsc_memutils_copy(cmp, sk + QSC_KYBER_SECRETKEY_BYTES - QSC_KYBER_SYMBYTES, QSC_KYBER_SYMBYTES);
+    qsc_memutils_copy(cmp + QSC_KYBER_SYMBYTES, ct, QSC_KYBER_CIPHERTEXT_BYTES);
     qsc_keccak_absorb(&kctx, qsc_keccak_rate_256, cmp, sizeof(cmp), QSC_KECCAK_SHAKE_DOMAIN_ID, QSC_KECCAK_PERMUTATION_ROUNDS);
     qsc_memutils_secure_erase(cmp, sizeof(cmp));
     qsc_keccak_permute(&kctx, QSC_KECCAK_PERMUTATION_ROUNDS);

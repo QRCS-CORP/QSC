@@ -1,47 +1,10 @@
 #include "x509spki.h"
 #include "dilithium.h"
-#include "eddsa.h"
+#include "eddsa25519.h"
+#include "eddsa448.h"
 #include "kyber.h"
 #include "memutils.h"
 #include "oid.h"
-
-static qsc_x509_pqc_parameter_set x509_spki_active_mldsa_parameter_set(void)
-{
-#if defined(QSC_DILITHIUM_S1P44)
-    return QSC_X509_PQC_PARAMETER_SET_ML_DSA_44;
-#elif defined(QSC_DILITHIUM_S3P65)
-    return QSC_X509_PQC_PARAMETER_SET_ML_DSA_65;
-#elif defined(QSC_DILITHIUM_S5P87)
-    return QSC_X509_PQC_PARAMETER_SET_ML_DSA_87;
-#else
-    return QSC_X509_PQC_PARAMETER_SET_NONE;
-#endif
-}
-
-static qsc_x509_pqc_parameter_set x509_spki_active_mlkem_parameter_set(void)
-{
-#if defined(QSC_KYBER_S1K2P512)
-    return QSC_X509_PQC_PARAMETER_SET_ML_KEM_512;
-#elif defined(QSC_KYBER_S3K3P768)
-    return QSC_X509_PQC_PARAMETER_SET_ML_KEM_768;
-#elif defined(QSC_KYBER_S5K4P1024)
-    return QSC_X509_PQC_PARAMETER_SET_ML_KEM_1024;
-#else
-    return QSC_X509_PQC_PARAMETER_SET_NONE;
-#endif
-}
-
-static bool x509_spki_mldsa_parameter_set_matches_build(qsc_x509_pqc_parameter_set parameterset)
-{
-    qsc_x509_pqc_parameter_set active = x509_spki_active_mldsa_parameter_set();
-    return (active != QSC_X509_PQC_PARAMETER_SET_NONE) && (parameterset == active);
-}
-
-static bool x509_spki_mlkem_parameter_set_matches_build(qsc_x509_pqc_parameter_set parameterset)
-{
-    qsc_x509_pqc_parameter_set active = x509_spki_active_mlkem_parameter_set();
-    return (active != QSC_X509_PQC_PARAMETER_SET_NONE) && (parameterset == active);
-}
 
 static qsc_x509_public_key_algorithm x509_map_public_key_algorithm(qsc_oid_id oid)
 {
@@ -56,6 +19,10 @@ static qsc_x509_public_key_algorithm x509_map_public_key_algorithm(qsc_oid_id oi
     else if (oid == QSC_OID_ID_ED25519)
     {
         return QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519;
+    }
+    else if (oid == QSC_OID_ID_ED448)
+    {
+        return QSC_X509_PUBLIC_KEY_ALGORITHM_ED448;
     }
     else if ((oid == QSC_OID_ID_ML_DSA_44) ||
              (oid == QSC_OID_ID_ML_DSA_65) ||
@@ -114,6 +81,10 @@ static qsc_x509_signature_algorithm x509_map_signature_algorithm(qsc_oid_id oid)
     else if (oid == QSC_OID_ID_ED25519)
     {
         return QSC_X509_SIGNATURE_ALGORITHM_ED25519;
+    }
+    else if (oid == QSC_OID_ID_ED448)
+    {
+        return QSC_X509_SIGNATURE_ALGORITHM_ED448;
     }
     else if (oid == QSC_OID_ID_ML_DSA_44)
     {
@@ -286,10 +257,13 @@ qsc_asn1_status qsc_x509_algorithm_identifier_validate(const qsc_x509_algorithm_
             return (algorithm->curve == QSC_X509_NAMED_CURVE_NONE) ? QSC_ASN1_STATUS_UNSUPPORTED : QSC_ASN1_STATUS_INVALID_ENCODING;
         }
     }
-    else if (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+    else if ((algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) ||
+        (algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED448))
     {
-        if ((algorithm->oid != QSC_OID_ID_ED25519) ||
-            (algorithm->signature != QSC_X509_SIGNATURE_ALGORITHM_ED25519) ||
+        if (((algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) &&
+             ((algorithm->oid != QSC_OID_ID_ED25519) || (algorithm->signature != QSC_X509_SIGNATURE_ALGORITHM_ED25519))) ||
+            ((algorithm->publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED448) &&
+             ((algorithm->oid != QSC_OID_ID_ED448) || (algorithm->signature != QSC_X509_SIGNATURE_ALGORITHM_ED448))) ||
             (algorithm->curve != QSC_X509_NAMED_CURVE_NONE) ||
             (algorithm->hash != QSC_X509_HASH_ALGORITHM_NONE) ||
             (algorithm->pqcparameter != QSC_X509_PQC_PARAMETER_SET_NONE) ||
@@ -705,9 +679,13 @@ qsc_asn1_status qsc_x509_spki_validate(const qsc_x509_subject_public_key_info* s
                     }
                 }
             }
-            else if (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519)
+            else if ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) ||
+                (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED448))
             {
-                if (spki->publickeylen != QSC_EDDSA_PUBLICKEY_SIZE)
+                explen = (spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ED25519) ?
+                    QSC_ED25519_PUBLICKEY_SIZE : QSC_ED448_PUBLICKEY_SIZE;
+
+                if (spki->publickeylen != explen)
                 {
                     status = QSC_ASN1_STATUS_INVALID_LENGTH;
                 }
@@ -733,23 +711,7 @@ qsc_asn1_status qsc_x509_spki_validate(const qsc_x509_subject_public_key_info* s
                 {
                     status = QSC_ASN1_STATUS_INVALID_LENGTH;
                 }
-#if defined(QSC_DILITHIUM_PUBLICKEY_SIZE)
-                else if ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_DSA) &&
-                    (x509_spki_mldsa_parameter_set_matches_build(spki->algorithm.pqcparameter) == true) &&
-                    (spki->publickeylen != QSC_DILITHIUM_PUBLICKEY_SIZE))
-                {
-                    status = QSC_ASN1_STATUS_INVALID_LENGTH;
-                }
-#endif
-#if defined(QSC_KYBER_PUBLICKEY_SIZE)
-                else if ((spki->algorithm.publickey == QSC_X509_PUBLIC_KEY_ALGORITHM_ML_KEM) &&
-                    (x509_spki_mlkem_parameter_set_matches_build(spki->algorithm.pqcparameter) == true) &&
-                    (spki->publickeylen != QSC_KYBER_PUBLICKEY_SIZE))
-                {
-                    status = QSC_ASN1_STATUS_INVALID_LENGTH;
-                }
-#endif
-                else
+else
                 {
                     status = QSC_ASN1_STATUS_SUCCESS;
                 }
@@ -972,21 +934,11 @@ qsc_asn1_status qsc_x509_spki_initialize_ml_dsa(qsc_x509_subject_public_key_info
         {
             status = QSC_ASN1_STATUS_UNSUPPORTED;
         }
-        else if (x509_spki_mldsa_parameter_set_matches_build(parameterset) == false)
-        {
-            status = QSC_ASN1_STATUS_UNSUPPORTED;
-        }
         else if ((publickeylen != expected) || (publickeylen > sizeof(spki->publickey)))
         {
             status = QSC_ASN1_STATUS_INVALID_LENGTH;
         }
-#if defined(QSC_DILITHIUM_PUBLICKEY_SIZE)
-        else if ((publickeylen != QSC_DILITHIUM_PUBLICKEY_SIZE) || (expected != QSC_DILITHIUM_PUBLICKEY_SIZE))
-        {
-            status = QSC_ASN1_STATUS_INVALID_LENGTH;
-        }
-#endif
-        else
+else
         {
             qsc_x509_subject_public_key_info_initialize(spki);
             status = qsc_x509_algorithm_identifier_initialize_mldsa(&spki->algorithm, parameterset);
@@ -1023,21 +975,11 @@ qsc_asn1_status qsc_x509_spki_initialize_ml_kem(qsc_x509_subject_public_key_info
         {
             status = QSC_ASN1_STATUS_UNSUPPORTED;
         }
-        else if (x509_spki_mlkem_parameter_set_matches_build(parameterset) == false)
-        {
-            status = QSC_ASN1_STATUS_UNSUPPORTED;
-        }
         else if ((publickeylen != expected) || (publickeylen > sizeof(spki->publickey)))
         {
             status = QSC_ASN1_STATUS_INVALID_LENGTH;
         }
-#if defined(QSC_KYBER_PUBLICKEY_SIZE)
-        else if ((publickeylen != QSC_KYBER_PUBLICKEY_SIZE) || (expected != QSC_KYBER_PUBLICKEY_SIZE))
-        {
-            status = QSC_ASN1_STATUS_INVALID_LENGTH;
-        }
-#endif
-        else
+else
         {
             qsc_x509_subject_public_key_info_initialize(spki);
             status = qsc_x509_algorithm_identifier_initialize_mlkem(&spki->algorithm, parameterset);
