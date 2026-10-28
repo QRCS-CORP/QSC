@@ -2176,7 +2176,7 @@ bool qsc_mceliece_ref_encapsulate(uint8_t* c, uint8_t* key, const uint8_t* pk, b
 
 #if defined(QSC_MCELIECE_S6N6960T119)
 		/* clear outputs(set to all 0's) if padding bits are not all zero */
-		mask = padding_ok;
+		mask = (uint8_t)padding_ok;
 		mask ^= 0xFF;
 
 #if defined(QSC_MCELIECE_NO_PLAINTEXT_CONFIRMATION)
