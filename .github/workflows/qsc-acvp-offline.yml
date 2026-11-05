@@ -1,0 +1,157 @@
+name: QSC offline CAVP qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      qsc_ref:
+        description: 'QSC branch, tag or commit to qualify'
+        required: false
+        default: master
+        type: string
+  schedule:
+    - cron: '17 3 * * 1'
+  push:
+    paths:
+      - 'Source/ACVP/**'
+      - 'README.md'
+      - 'docs/**'
+      - '.github/workflows/qsc-acvp-offline.yml'
+  pull_request:
+    paths:
+      - 'Source/ACVP/**'
+      - 'README.md'
+      - 'docs/**'
+      - '.github/workflows/qsc-acvp-offline.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-cavp:
+    name: ${{ matrix.os }} - class ${{ matrix.security_class }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 110
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        security_class: ['1', '3', '5']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout QSC dependency (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: QRCS-CORP/QSC
+          ref: ${{ inputs.qsc_ref || 'master' }}
+          path: dependency/QSC
+          persist-credentials: false
+      - name: Record QSC source revision
+        shell: bash
+        run: |
+          sha=$(git -C dependency/QSC rev-parse HEAD)
+          printf 'QSC_DEPENDENCY_SHA=%s\n' "$sha" >> "$GITHUB_ENV"
+          printf 'QSC dependency commit: %s\n' "$sha"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent reference implementation
+        shell: bash
+        run: python -m pip install --disable-pip-version-check cryptography==46.0.4
+      - name: Configure Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: >-
+          cmake -G Ninja -S Source/ACVP -B "$RUNNER_TEMP/qsc-acvp-build"
+          -DCMAKE_BUILD_TYPE=Release
+          -DQSC_ACVP_TLS_CLASS=${{ matrix.security_class }}
+      - name: Configure Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >-
+          cmake -G "Visual Studio 17 2022" -A x64 -S Source/ACVP
+          -B "$env:RUNNER_TEMP/qsc-acvp-build"
+          -DQSC_ACVP_TLS_CLASS=${{ matrix.security_class }}
+      - name: Build independent adapters
+        id: adapters
+        continue-on-error: true
+        shell: bash
+        run: |
+          failure=0
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_hash --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_aes --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_pq --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_ecc_preliminary --parallel 4 || failure=1
+          exit "$failure"
+      - name: Build complete QSC and ECC including P-384
+        id: complete
+        continue-on-error: true
+        shell: bash
+        run: |
+          failure=0
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_cavp --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_ecc --parallel 4 || failure=1
+          exit "$failure"
+      - name: Run all qualification stages consecutively
+        id: qualify
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          state=failed
+          if [ '${{ steps.complete.outcome }}' = 'success' ]; then
+            state=success
+          fi
+          python Source/ACVP/qualify_all.py \
+            --build-dir "$RUNNER_TEMP/qsc-acvp-build" \
+            --output "$RUNNER_TEMP/qsc-acvp-results" \
+            --security-class '${{ matrix.security_class }}' \
+            --full-build "$state"
+      - name: Upload all offline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qsc-offline-${{ matrix.os }}-class-${{ matrix.security_class }}
+          path: ${{ runner.temp }}/qsc-acvp-results/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce complete qualification
+        if: always()
+        shell: bash
+        run: |
+          test '${{ steps.adapters.outcome }}' = 'success'
+          test '${{ steps.complete.outcome }}' = 'success'
+          test '${{ steps.qualify.outcome }}' = 'success'
+
+  consolidate:
+    name: Consolidated qualification report
+    runs-on: ubuntu-24.04
+    needs: offline-cavp
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: qsc-offline-*
+          path: ${{ runner.temp }}/qsc-acvp-evidence
+        continue-on-error: true
+      - name: Generate strict consolidated report
+        id: combine
+        continue-on-error: true
+        shell: bash
+        run: >-
+          python Source/ACVP/combine.py
+          --input "$RUNNER_TEMP/qsc-acvp-evidence"
+          --output "$RUNNER_TEMP/qsc-acvp-consolidated"
+      - name: Upload consolidated evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qsc-offline-consolidated
+          path: ${{ runner.temp }}/qsc-acvp-consolidated/
+          if-no-files-found: error
+      - name: Enforce consolidated verdict
+        if: always()
+        shell: bash
+        run: test '${{ steps.combine.outcome }}' = 'success'

@@ -1,0 +1,11 @@
+# The QSC library is an independently maintained external dependency.
+/dependency/
+
+# Python, test outputs, CMake artifacts
+__pycache__/
+*.py[cod]
+/.venv/
+/build/
+/Testing/
+/CMakeFiles/
+*.log

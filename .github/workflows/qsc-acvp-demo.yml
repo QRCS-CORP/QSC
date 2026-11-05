@@ -1,0 +1,164 @@
+name: QSC NIST ACVTS Demo SHA, AES, PQ and optional ECC sample qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      qsc_ref:
+        description: 'QSC branch, tag or commit to qualify'
+        required: false
+        type: string
+        default: master
+      include_kda_hkdf:
+        description: 'Include SP 800-56C HKDF (requires verified DRBG prerequisite)'
+        required: false
+        type: boolean
+        default: false
+      include_ecc:
+        description: 'Include all ECC modes (requires complete P-384, DRBG qualification and approved RNG integration)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  nist-demo:
+    name: ACVTS Demo SHA, AES and PQ sample session
+    runs-on: ubuntu-24.04
+    environment: acvts-demo
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout QSC dependency (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: QRCS-CORP/QSC
+          ref: ${{ inputs.qsc_ref || 'master' }}
+          path: dependency/QSC
+          persist-credentials: false
+      - name: Record QSC source revision
+        shell: bash
+        run: |
+          sha=$(git -C dependency/QSC rev-parse HEAD)
+          printf 'QSC_DEPENDENCY_SHA=%s\n' "$sha" >> "$GITHUB_ENV"
+          printf 'QSC dependency commit: %s\n' "$sha"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent qualification oracle
+        shell: bash
+        run: python -m pip install --disable-pip-version-check cryptography==46.0.4
+      - name: Build QSC SHA, AES and PQ test implementations
+        shell: bash
+        run: |
+          cmake -G Ninja -S Source/ACVP -B "$RUNNER_TEMP/qsc-acvp-demo-build" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/qsc-acvp-demo-build" --target qsc_acvp_hash qsc_acvp_aes qsc_acvp_pq --parallel 4
+      - name: Build complete ECC library when requested
+        if: inputs.include_ecc
+        shell: bash
+        run: |
+          cmake --build "$RUNNER_TEMP/qsc-acvp-demo-build" --target qsc_acvp_ecc --parallel 4
+      - name: Run transport and vector parser tests
+        shell: bash
+        run: python -m unittest discover -s Source/ACVP/tests -v
+      - name: Run independent native AES qualification
+        shell: bash
+        env:
+          QSC_ACVP_AES_LIBRARY: ${{ runner.temp }}/qsc-acvp-demo-build/libqsc_acvp_aes.so
+        run: python -m unittest discover -s Source/ACVP/tests -p test_aes_native.py -v
+      - name: Run native ML-KEM adapter tests
+        shell: bash
+        run: |
+          python Source/ACVP/mlkem_check.py \
+            --library "$RUNNER_TEMP/qsc-acvp-demo-build/libqsc_acvp_pq.so" \
+            --output "$RUNNER_TEMP/qsc-acvp-demo-preflight"
+      - name: Run native ML-DSA and SLH-DSA adapter tests
+        shell: bash
+        run: |
+          python Source/ACVP/pq_signature_check.py \
+            --library "$RUNNER_TEMP/qsc-acvp-demo-build/libqsc_acvp_pq.so" \
+            --output "$RUNNER_TEMP/qsc-acvp-demo-preflight"
+      - name: Qualify PBKDF ACVP and HKDF primitives before Demo
+        shell: bash
+        run: >-
+          python Source/ACVP/kdf_check.py
+          --library "$RUNNER_TEMP/qsc-acvp-demo-build/libqsc_acvp_hash.so"
+          --output "$RUNNER_TEMP/qsc-acvp-demo-preflight"
+      - name: Materialize protected NIST client identity
+        shell: bash
+        env:
+          DEMO_CERT_B64: ${{ secrets.ACVP_DEMO_CERT_B64 }}
+          DEMO_KEY_B64: ${{ secrets.ACVP_DEMO_KEY_B64 }}
+        run: |
+          set -eu
+          python - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+          out = Path(os.environ['RUNNER_TEMP']) / 'qsc-acvp-identity'
+          out.mkdir(mode=0o700, exist_ok=True)
+          for name, secret in (('client.crt', 'DEMO_CERT_B64'), ('client.key', 'DEMO_KEY_B64')):
+              value = os.environ.get(secret, '')
+              if not value:
+                  raise SystemExit('NIST Demo TLS identity secrets are not configured')
+              target = out / name
+              target.write_bytes(base64.b64decode(value, validate=True))
+              target.chmod(0o600)
+          PY
+      - name: Execute authenticated sample session against NIST Demo
+        shell: bash
+        env:
+          ACVP_TOTP_SEED: ${{ secrets.ACVP_DEMO_TOTP_SEED }}
+          ACVP_ECC_DRBG_VALIDATION: ${{ vars.ACVP_ECC_DRBG_VALIDATION }}
+          ACVP_ECC_RNG_QUALIFIED: ${{ vars.ACVP_ECC_RNG_QUALIFIED }}
+          QSC_DEMO_INCLUDE_ECC: ${{ inputs.include_ecc }}
+          QSC_DEMO_INCLUDE_KDA: ${{ inputs.include_kda_hkdf }}
+          ACVP_KDA_DRBG_VALIDATION: ${{ vars.ACVP_KDA_DRBG_VALIDATION }}
+        run: |
+          set -eu
+          args=()
+          if [ "$QSC_DEMO_INCLUDE_ECC" = 'true' ]; then
+            if [ -z "$ACVP_ECC_DRBG_VALIDATION" ]; then
+              echo 'Verified DRBG prerequisite is required for ECC Demo registration' >&2
+              exit 1
+            fi
+            if [ "$ACVP_ECC_RNG_QUALIFIED" != '1' ]; then
+              echo 'Verified ECC random-source integration is required' >&2
+              exit 1
+            fi
+            args+=(--ecc-library "$RUNNER_TEMP/qsc-acvp-demo-build/libqsc_acvp_ecc.so")
+            args+=(--algorithms SHA2-256 SHA2-384 SHA2-512 SHA3-256 SHA3-512 SHAKE-128 SHAKE-256 HMAC-SHA2-256 HMAC-SHA2-384 HMAC-SHA2-512 ACVP-AES-ECB ACVP-AES-CBC ACVP-AES-CTR ACVP-AES-GCM ML-KEM ML-DSA SLH-DSA PBKDF ECDSA DetECDSA EDDSA XECDH KAS-ECC-SSC)
+          fi
+          if [ "$QSC_DEMO_INCLUDE_KDA" = 'true' ]; then
+            if [ -z "$ACVP_KDA_DRBG_VALIDATION" ]; then
+              echo 'Verified DRBG prerequisite required for SP 800-56C HKDF' >&2
+              exit 1
+            fi
+            if [ "${#args[@]}" -eq 0 ]; then
+              args+=(--algorithms SHA2-256 SHA2-384 SHA2-512 SHA3-256 SHA3-512 SHAKE-128 SHAKE-256 HMAC-SHA2-256 HMAC-SHA2-384 HMAC-SHA2-512 ACVP-AES-ECB ACVP-AES-CBC ACVP-AES-CTR ACVP-AES-GCM ML-KEM ML-DSA SLH-DSA PBKDF)
+            fi
+            args+=(KDA-HKDF)
+          fi
+          python Source/ACVP/demo_client.py \
+            --library "$RUNNER_TEMP/qsc-acvp-demo-build/libqsc_acvp_hash.so" \
+            --aes-library "$RUNNER_TEMP/qsc-acvp-demo-build/libqsc_acvp_aes.so" \
+            --pq-library "$RUNNER_TEMP/qsc-acvp-demo-build/libqsc_acvp_pq.so" \
+            --cert "$RUNNER_TEMP/qsc-acvp-identity/client.crt" \
+            --key "$RUNNER_TEMP/qsc-acvp-identity/client.key" \
+            --output "$RUNNER_TEMP/qsc-acvp-demo-evidence" "${args[@]}"
+      - name: Destroy temporary client credentials
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/qsc-acvp-identity"
+      - name: Upload sanitized server verdict
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qsc-acvts-demo-sha-aes-pq-verdict
+          path: ${{ runner.temp }}/qsc-acvp-demo-evidence/demo-results.json
+          if-no-files-found: warn
+          retention-days: 30
